@@ -221,12 +221,15 @@ def create_fca_warning(packer, idx):
   # Send FCA11 message to prevent "Check Forward Collision-Avoidance Assist" warning
   # This tells the car that FCA system is present but AEB is disabled
   fca11_values = {
-    "CR_FCA_Alive": idx % 4,
-    "SUPPLEMENTAL_COUNTER": idx % 0xFF,
-    "FCA_Status": 1,  # AEB disabled
-    "FCA_DrvSetStatus": 1,  # Driver has AEB turned off
+    "CR_FCA_Alive": idx % 0xF,
     "PAINT1_Status": 1,
+    "FCA_DrvSetStatus": 1,
+    "FCA_Status": 1,  # AEB disabled
   }
+
+  # Create the message first to calculate checksum
+  fca11_dat = packer.make_can_msg("FCA11", 0, fca11_values)[1]
+  fca11_values["CR_FCA_ChkSum"] = hyundai_checksum(fca11_dat[:7])
 
   commands = []
   commands.append(packer.make_can_msg("FCA11", 0, fca11_values))
