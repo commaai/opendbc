@@ -319,7 +319,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
 
       if (hyundai_camera_scc) {
         if (get_hyundai_ccnc()) {
-          SET_TX_MSGS(hyundai_canfd_lfa_steering_camera_scc_ccnc_tx_msgs, ret); // LCOV_EXCL_LINE
+          SET_TX_MSGS(hyundai_canfd_lfa_steering_camera_scc_ccnc_tx_msgs, ret);
         } else {
           SET_TX_MSGS(hyundai_canfd_lfa_steering_camera_scc_tx_msgs, ret);
         }
@@ -388,7 +388,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       };
 
       if (get_hyundai_ccnc()) {
-        SET_TX_MSGS(hyundai_canfd_lfa_steering_camera_scc_ccnc_tx_msgs, ret); // LCOV_EXCL_LINE
+        SET_TX_MSGS(hyundai_canfd_lfa_steering_camera_scc_ccnc_tx_msgs, ret);
       } else {
         SET_TX_MSGS(hyundai_canfd_lfa_steering_camera_scc_tx_msgs, ret);
       }
