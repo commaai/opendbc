@@ -21,6 +21,16 @@
     ],
     "package": "All"
   },
+  "Acura MDX 2025": {
+    "platform": "ACURA_MDX_4G_MMR",
+    "make": "Acura",
+    "brand": "honda",
+    "model": "MDX",
+    "year": [
+      "2025"
+    ],
+    "package": "All except Type S"
+  },
   "Acura RDX 2016-18": {
     "platform": "ACURA_RDX",
     "make": "Acura",
@@ -842,13 +852,15 @@
     ],
     "package": "All"
   },
-  "Honda Accord 2023": {
+  "Honda Accord 2023-25": {
     "platform": "HONDA_ACCORD_11G",
     "make": "Honda",
     "brand": "honda",
     "model": "Accord",
     "year": [
-      "2023"
+      "2023",
+      "2024",
+      "2025"
     ],
     "package": "All"
   },
@@ -863,6 +875,28 @@
       "2020",
       "2021",
       "2022"
+    ],
+    "package": "All"
+  },
+  "Honda Accord Hybrid 2023-25": {
+    "platform": "HONDA_ACCORD_11G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "Accord Hybrid",
+    "year": [
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "package": "All"
+  },
+  "Honda City (Brazil only) 2023": {
+    "platform": "HONDA_CITY_7G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "City (Brazil only)",
+    "year": [
+      "2023"
     ],
     "package": "All"
   },
@@ -902,19 +936,28 @@
     ],
     "package": "All"
   },
-  "Honda Civic Hatchback 2017-21": {
+  "Honda Civic Hatchback 2017-18": {
     "platform": "HONDA_CIVIC_BOSCH",
     "make": "Honda",
     "brand": "honda",
     "model": "Civic Hatchback",
     "year": [
       "2017",
-      "2018",
+      "2018"
+    ],
+    "package": "Honda Sensing"
+  },
+  "Honda Civic Hatchback 2019-21": {
+    "platform": "HONDA_CIVIC_BOSCH",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "Civic Hatchback",
+    "year": [
       "2019",
       "2020",
       "2021"
     ],
-    "package": "Honda Sensing"
+    "package": "All"
   },
   "Honda Civic Hatchback 2022-24": {
     "platform": "HONDA_CIVIC_2022",
@@ -997,6 +1040,18 @@
     ],
     "package": "Honda Sensing"
   },
+  "Honda CR-V 2023-25": {
+    "platform": "HONDA_CRV_6G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "CR-V",
+    "year": [
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "package": "All"
+  },
   "Honda CR-V Hybrid 2017-22": {
     "platform": "HONDA_CRV_HYBRID",
     "make": "Honda",
@@ -1011,6 +1066,18 @@
       "2022"
     ],
     "package": "Honda Sensing"
+  },
+  "Honda CR-V Hybrid 2023-25": {
+    "platform": "HONDA_CRV_6G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "CR-V Hybrid",
+    "year": [
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "package": "All"
   },
   "Honda e 2020": {
     "platform": "HONDA_E",
@@ -1135,6 +1202,18 @@
       "2022"
     ],
     "package": "Honda Sensing"
+  },
+  "Honda Pilot 2023-25": {
+    "platform": "HONDA_PILOT_4G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "Pilot",
+    "year": [
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "package": "All"
   },
   "Honda Ridgeline 2017-25": {
     "platform": "HONDA_RIDGELINE",
@@ -1408,13 +1487,14 @@
     ],
     "package": "Smart Cruise Control (SCC)"
   },
-  "Hyundai Kona 2022": {
+  "Hyundai Kona 2022-23": {
     "platform": "HYUNDAI_KONA_2022",
     "make": "Hyundai",
     "brand": "hyundai",
     "model": "Kona",
     "year": [
-      "2022"
+      "2022",
+      "2023"
     ],
     "package": "Smart Cruise Control (SCC)"
   },
@@ -3505,12 +3585,13 @@
     ],
     "package": "All"
   },
-  "Toyota Yaris (Non-US only) 2023": {
+  "Toyota Yaris (Non-US only) 2020, 2023": {
     "platform": "TOYOTA_YARIS",
     "make": "Toyota",
     "brand": "toyota",
     "model": "Yaris (Non-US only)",
     "year": [
+      "2020",
       "2023"
     ],
     "package": "All"
