@@ -832,13 +832,13 @@ FW_VERSIONS = {
       b'38897-TX6-A010\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
-      b'\x0eVDV9L430384115\x00\x00',
+      b'x0eVDV9L430384115\x00\x00',
       b'36161-TV9-A140\x00\x00',
       b'36161-TV9-C140\x00\x00',
       b'36161-TX6-A030\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
-      b'\x0bC1LZ01RR825\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'x0bC1LZ01RR825\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'77959-TX6-A230\x00\x00',
       b'77959-TX6-C210\x00\x00',
     ],
