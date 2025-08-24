@@ -14,7 +14,7 @@ from opendbc.car.hyundai.hyundaicanfd import hkg_can_fd_checksum
 from opendbc.car.volkswagen.mqbcan import volkswagen_mqb_meb_checksum, xor_checksum
 from opendbc.car.tesla.teslacan import tesla_checksum
 from opendbc.car.body.bodycan import body_checksum
-
+from opendbc.car.psa.psacan import psa_checksum
 
 
 class SignalType:
@@ -30,6 +30,7 @@ class SignalType:
   HKG_CAN_FD_CHECKSUM = 9
   FCA_GIORGIO_CHECKSUM = 10
   TESLA_CHECKSUM = 11
+  PSA_CHECKSUM = 12
 
 
 @dataclass
@@ -45,7 +46,6 @@ class Signal:
   is_little_endian: bool
   type: int = SignalType.DEFAULT
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
-
 
 
 @dataclass
@@ -69,6 +69,7 @@ SG_RE = re.compile(r"^SG_ (\w+) : (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9
 SGM_RE = re.compile(r"^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[[0-9.+\-eE]+\|[0-9.+\-eE]+\] \".*\" .*")
 VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
 VAL_SPLIT_RE = re.compile(r'["]+')
+
 
 @dataclass
 class DBC:
@@ -197,6 +198,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(8, 4, 7, 3, False, SignalType.BODY_CHECKSUM, body_checksum)
   elif dbc_name.startswith("tesla_model3_party"):
     return ChecksumState(8, -1, 0, -1, True, SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
+  elif dbc_name.startswith("psa_"):
+    return ChecksumState(4, 4, 7, 3, False, SignalType.PSA_CHECKSUM, psa_checksum)
   return None
 
 
