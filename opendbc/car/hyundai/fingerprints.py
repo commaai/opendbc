@@ -1156,14 +1156,6 @@ FW_VERSIONS = {
       b'\xf1\x00NX4__               1.01 1.00 99110-K5000         ',
     ],
   },
-  CAR.HYUNDAI_SANTA_CRUZ_2025: {
-    (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N7030 C55',
-    ],
-    (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00NX4__               1.00 1.00 99110K5500          ',
-    ],
-  },
   CAR.KIA_SPORTAGE_5TH_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00NQ5 FR_CMR AT AUS RHD 1.00 1.00 99211-P1040 663',
