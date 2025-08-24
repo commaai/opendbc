@@ -1234,14 +1234,6 @@ FW_VERSIONS = {
       b'\xf1\x00MQ4_ SCC FHCUP      1.00 1.08 99110-P2000         ',
     ],
   },
-  CAR.KIA_SORENTO_2024: {
-    (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00MQ4 MFC  AT AUS RHD 1.01 1.04 99210-P2550 231127',
-    ],
-    (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00MQ4_ RDR -----      1.00 1.01 99110-P2500         ',
-    ],
-  },
   CAR.KIA_SORENTO_HEV_4TH_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00MQ4HMFC  AT KOR LHD 1.00 1.04 99210-P2000 200330',
