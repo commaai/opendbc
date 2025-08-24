@@ -175,6 +175,7 @@ DEFAULT_CAR_PARTS: list[EnumBase] = [Device.threex]
 @dataclass
 class CarParts:
   parts: list[EnumBase] = field(default_factory=list)
+  custom_parts_url: str | None = None
 
   def __call__(self):
     return copy.deepcopy(self)
@@ -304,7 +305,10 @@ class CarDocs:
     # hardware column
     hardware_col = "None"
     if self.car_parts.parts:
-      buy_link = f'<a href="https://comma.ai/shop/comma-3x?harness={self.name}">Buy Here</a>'
+      if self.car_parts.custom_parts_url is not None:
+        buy_link = f'<a href="{self.car_parts.custom_parts_url}">Buy Here</a>'
+      else:
+        buy_link = f'<a href="https://comma.ai/shop/comma-3x?harness={self.name}">Buy Here</a>'
 
       tools_docs = [part for part in self.car_parts.all_parts() if isinstance(part, Tool)]
       parts_docs = [part for part in self.car_parts.all_parts() if not isinstance(part, Tool)]
