@@ -215,3 +215,19 @@ def create_frt_radar_opt(packer):
     "CF_FCA_Equip_Front_Radar": 1,
   }
   return packer.make_can_msg("FRT_RADAR11", 0, frt_radar11_values)
+
+
+def create_fca_warning(packer, idx):
+  # Send FCA11 message to prevent "Check Forward Collision-Avoidance Assist" warning
+  # This tells the car that FCA system is present but AEB is disabled
+  fca11_values = {
+    "CR_FCA_Alive": idx % 4,
+    "SUPPLEMENTAL_COUNTER": idx % 0xFF,
+    "FCA_Status": 1,  # AEB disabled
+    "FCA_DrvSetStatus": 1,  # Driver has AEB turned off
+    "PAINT1_Status": 1,
+  }
+
+  commands = []
+  commands.append(packer.make_can_msg("FCA11", 0, fca11_values))
+  return commands
