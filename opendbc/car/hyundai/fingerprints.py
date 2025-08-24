@@ -1135,16 +1135,6 @@ FW_VERSIONS = {
       b'\xf1\x00NX4__               1.01 1.00 99110-N9100         ',
     ],
   },
-  CAR.HYUNDAI_TUCSON_HEV_2025: {
-    (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N7030 C55',
-      b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 1.00 99211-N7030 C55',
-    ],
-    (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00NX4__               1.00 1.02 99110N7000          ',
-      b'\xf1\x00NX4__               1.00 1.02 99110N7100          ',
-    ],
-  },
   CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-CW000 14M',

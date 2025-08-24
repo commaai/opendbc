@@ -393,11 +393,6 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1630, wheelbase=2.756, steerRatio=13.7, tireStiffnessFactor=0.385),
   )
-  HYUNDAI_TUCSON_HEV_2025 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Tucson Hybrid (without HDA II) 2025", car_parts=CarParts.common([CarHarness.hyundai_n]))],
-    CarSpecs(mass=1630, wheelbase=2.756, steerRatio=13.7, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.CCNC,
-  )
   HYUNDAI_SANTA_CRUZ_1ST_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Hyundai Santa Cruz 2022-24", car_parts=CarParts.common([CarHarness.hyundai_n]))],
     # weight from Limited trim - the only supported trim, steering ratio according to Hyundai News https://www.hyundainews.com/assets/documents/original/48035-2022SantaCruzProductGuideSpecsv2081521.pdf
