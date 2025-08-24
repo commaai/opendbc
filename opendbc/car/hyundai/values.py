@@ -263,11 +263,6 @@ class CAR(Platforms):
     CarSpecs(mass=1590, wheelbase=2.66, steerRatio=13.6, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.CCNC,
   )
-  HYUNDAI_KONA_HEV_2ND_GEN = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Kona Hybrid (without HDA II) 2024", car_parts=CarParts.common([CarHarness.hyundai_l]))],
-    CarSpecs(mass=1590, wheelbase=2.66, steerRatio=13.6, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.CCNC,
-  )
   HYUNDAI_KONA_EV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Electric 2018-21", car_parts=CarParts.common([CarHarness.hyundai_g]))],
     CarSpecs(mass=1685, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
