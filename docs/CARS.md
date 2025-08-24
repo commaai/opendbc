@@ -9,7 +9,7 @@
 |Acura|Integra 2023-25|All|[Community](#community)|
 |Acura|MDX 2015-16|Advance Package|[Community](#community)|
 |Acura|MDX 2017-20|All|[Community](#community)|
-|Acura|MDX 2025|All|[Community](#community)|
+|Acura|MDX 2025|All except Type S|[Upstream](#upstream)|
 |Acura|RDX 2016-18|AcuraWatch Plus or Advance Package|[Upstream](#upstream)|
 |Acura|RDX 2019-21|All|[Upstream](#upstream)|
 |Acura|RDX 2022-25|All|[Community](#community)|
@@ -82,9 +82,9 @@
 |GMC|Yukon 2019-20|Adaptive Cruise Control (ACC) & LKAS|[Dashcam mode](#dashcam)|
 |Honda|Accord 2016-17|Honda Sensing|[Community](#community)|
 |Honda|Accord 2018-22|All|[Upstream](#upstream)|
-|Honda|Accord 2023|All|[Upstream](#upstream)|
-|Honda|Accord 2024-25|All|[Community](#community)|
+|Honda|Accord 2023-25|All|[Upstream](#upstream)|
 |Honda|Accord Hybrid 2018-22|All|[Upstream](#upstream)|
+|Honda|Accord Hybrid 2023-25|All|[Upstream](#upstream)|
 |Honda|Civic 2016-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic 2019-21|All|[Upstream](#upstream)|
 |Honda|Civic 2022-24|All|[Upstream](#upstream)|
@@ -96,9 +96,9 @@
 |Honda|Clarity 2018-21|All|[Community](#community)|
 |Honda|CR-V 2015-16|Touring Trim|[Upstream](#upstream)|
 |Honda|CR-V 2017-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|CR-V 2023-25|All|[Community](#community)|
+|Honda|CR-V 2023-25|All|[Upstream](#upstream)|
 |Honda|CR-V Hybrid 2017-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|CR-V Hybrid 2023-25|All|[Community](#community)|
+|Honda|CR-V Hybrid 2023-25|All|[Upstream](#upstream)|
 |Honda|e 2020|All|[Upstream](#upstream)|
 |Honda|Fit 2018-20|Honda Sensing|[Upstream](#upstream)|
 |Honda|Freed 2020|Honda Sensing|[Upstream](#upstream)|
@@ -111,8 +111,7 @@
 |Honda|Passport 2019-25|All|[Upstream](#upstream)|
 |Honda|Passport 2026|All|[Community](#community)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|Pilot 2023|All|[Dashcam mode](#dashcam)|
-|Honda|Pilot 2023-25|All|[Community](#community)|
+|Honda|Pilot 2023-25|All|[Upstream](#upstream)|
 |Honda|Prologue 2024-25|All|[Not compatible](#can-bus-security)|
 |Honda|Ridgeline 2017-25|Honda Sensing|[Upstream](#upstream)|
 |Hyundai|Azera 2022|All|[Upstream](#upstream)|
@@ -137,7 +136,7 @@
 |Hyundai|Ioniq Plug-in Hybrid 2019|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Ioniq Plug-in Hybrid 2020-22|All|[Upstream](#upstream)|
 |Hyundai|Kona 2020|Smart Cruise Control (SCC)|[Upstream](#upstream)|
-|Hyundai|Kona 2022|Smart Cruise Control (SCC)|[Dashcam mode](#dashcam)|
+|Hyundai|Kona 2022-23|Smart Cruise Control (SCC)|[Dashcam mode](#dashcam)|
 |Hyundai|Kona Electric 2018-21|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Kona Electric 2022-23|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Kona Electric (with HDA II, Korea only) 2023|Smart Cruise Control (SCC)|[Upstream](#upstream)|
@@ -241,6 +240,7 @@
 |Nissan|Leaf 2018-23|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|Rogue 2018-20|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|X-Trail 2017|ProPILOT Assist|[Upstream](#upstream)|
+|Peugeot|208 2019-25|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Ram|1500 2019-24|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |Ram|2500 2020-24|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
 |Ram|3500 2019-22|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
@@ -339,7 +339,7 @@
 |Toyota|Sienna 2024-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|Tundra 2022-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|Venza 2021-25|Any|[Not compatible](#can-bus-security)|
-|Toyota|Yaris (Non-US only) 2023|All|[Community](#community)|
+|Toyota|Yaris (Non-US only) 2020, 2023|All|[Community](#community)|
 |Volkswagen|Arteon 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Arteon eHybrid 2020-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Arteon R 2020-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|

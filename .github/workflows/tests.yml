@@ -17,11 +17,12 @@ jobs:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
-    - uses: commaai/timeout@v1
-      with:
-        timeout: ${{ github.repository == 'commaai/opendbc' && '60' || '999' }}
     - uses: actions/checkout@v4
     - uses: ./.github/workflows/cache
+      id: cache
+    - uses: commaai/timeout@v1
+      with:
+        timeout: ${{ github.repository == 'commaai/opendbc' && (steps.cache.outputs.cache-hit == 'true' && '60' || '90') || '999' }}
     - run: ./test.sh
 
   safety_tests:
@@ -43,7 +44,7 @@ jobs:
   mutation:
     name: Safety mutation tests
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-    timeout-minutes: ${{ github.repository == 'commaai/opendbc' && 20 || 999 }}
+    timeout-minutes: ${{ github.repository == 'commaai/opendbc' && 45 || 999 }}
     env:
       GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
     steps:
@@ -52,7 +53,6 @@ jobs:
           fetch-depth: 0  # need master to get diff
       - uses: ./.github/workflows/cache
       - name: Run mutation tests
-        timeout-minutes: ${{ github.repository == 'commaai/opendbc' && 5 || 999 }}
         run: |
           source setup.sh
           scons -j8

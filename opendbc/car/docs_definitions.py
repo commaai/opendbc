@@ -145,6 +145,7 @@ class CarHarness(EnumBase):
   rivian = BaseCarHarness("Rivian A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
   tesla_a = BaseCarHarness("Tesla A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
   tesla_b = BaseCarHarness("Tesla B connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
+  psa_a = BaseCarHarness("PSA A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
 
   # custom harness
   honda_clarity = BaseCarHarness("Honda Nidec connector + Honda Clarity Proxy Board")

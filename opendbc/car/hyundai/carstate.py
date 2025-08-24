@@ -322,7 +322,8 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState, CarStateExt):
     if not (CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS):
       # TODO: this can be removed once we add dynamic support to vl_all
       msgs += [
-        ("CRUISE_BUTTONS", 50)
+        # this message is 50Hz but the ECU frequently stops transmitting for ~0.5s
+        ("CRUISE_BUTTONS", 1)
       ]
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], msgs, CanBus(CP).ECAN),
