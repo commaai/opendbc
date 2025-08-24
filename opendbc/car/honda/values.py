@@ -126,6 +126,10 @@ class HondaCarDocs(CarDocs):
     else:
       self.car_parts = CarParts.common([harness])
 
+    if CP.carFingerprint in (CAR.HONDA_CLARITY,):
+      self.car_parts = CarParts.common([CarHarness.honda_clarity])
+      self.car_parts.custom_parts_url = "https://shop.retropilot.org/product/honda-clarity-proxy-board-kit"
+
 
 class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(
