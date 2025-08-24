@@ -129,6 +129,9 @@ class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(
     "2019 Honda Civic 1.6L Diesel Sedan does not have ALC below 12mph.",
     Column.FSR_STEERING)
+  MANUAL_MINSPEED = CarFootnote(
+    "Manual transmission models are supported above 25mph.",
+    Column.MODEL)
 
 
 @dataclass
@@ -198,9 +201,11 @@ class CAR(Platforms):
   )
   HONDA_CIVIC_2022 = HondaBoschPlatformConfig(
     [
-      HondaCarDocs("Honda Civic 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
+      HondaCarDocs("Honda Civic 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q",
+                   footnotes=[Footnote.MANUAL_MINSPEED]),
       HondaCarDocs("Honda Civic Hybrid 2025", "All"),
-      HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
+      HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q",
+                   footnotes=[Footnote.MANUAL_MINSPEED]),
       HondaCarDocs("Honda Civic Hatchback Hybrid (Europe only) 2023", "All"),
       # TODO: Confirm 2024
       HondaCarDocs("Honda Civic Hatchback Hybrid 2025", "All"),
