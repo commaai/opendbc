@@ -268,7 +268,6 @@ class CarController(CarControllerBase):
                                                speed=CS.out.vEgo,
                                                feedforward=pcm_accel_cmd,
                                                freeze_integrator=actuators.longControlState != LongCtrlState.pid)
-
         else:
           self.long_pid.reset()
 
