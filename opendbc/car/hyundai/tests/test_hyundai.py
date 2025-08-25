@@ -74,7 +74,8 @@ class TestHyundaiFingerprint:
     assert set.union(*CAN_GEARS.values()) & (HYBRID_CAR | EV_CAR) == set()
 
     # Test CAN FD car not in CAN feature lists
-    can_specific_feature_list = set.union(*CAN_GEARS.values(), *CHECKSUM.values(), LEGACY_SAFETY_MODE_CAR, UNSUPPORTED_LONGITUDINAL_CAR, CAMERA_SCC_CAR)
+    can_specific_feature_list = set.union(*CAN_GEARS.values(), *CHECKSUM.values(), LEGACY_SAFETY_MODE_CAR,
+                                          *UNSUPPORTED_LONGITUDINAL_CAR.values(), CAMERA_SCC_CAR)
     for car_model in CANFD_CAR:
       assert car_model not in can_specific_feature_list, "CAN FD car unexpectedly found in a CAN feature list"
 
