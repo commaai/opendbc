@@ -20,7 +20,6 @@
 *.gcov
 uv.lock
 /dist/
-.vscode/
 __pycache__/
 mull.yml
 *.profraw
