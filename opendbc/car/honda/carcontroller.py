@@ -255,7 +255,7 @@ class CarController(CarControllerBase):
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
-      # dashed lines shows in Honda stock ACC when steerging is required
+      # dashed lines shows in Honda stock ACC when steering is required
       show_dashed_lines = (abs(apply_torque) == self.params.STEER_MAX) or (hud_control.visualAlert == VisualAlert.steerRequired)
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud,
                                                    show_dashed_lines))
