@@ -25,6 +25,8 @@ ACCEL_WINDUP_LIMIT = 2.0 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_PID_UNWIND = 0.03 * DT_CTRL * 3  # m/s^2 / frame
 
+MAX_PITCH_COMPENSATION = 1.5  # m/s^2
+
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
 MAX_STEER_RATE = 100  # deg/s
@@ -252,9 +254,11 @@ class CarController(CarControllerBase):
           error_future = pcm_accel_cmd - a_ego_future
 
           if not stopping:
-            # feedforward compensation for changes in pitch
+            # Toyota's PCM slowly responds to changes in pitch. On change, we amplify our
+            # acceleration request to compensate for the undershoot and following overshoot
             high_pass_pitch = self.pitch.x - self.pitch_slow.x
-            pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY, -1.5, 1.5))
+            pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY,
+                                               -MAX_PITCH_COMPENSATION, MAX_PITCH_COMPENSATION))
             pcm_accel_cmd += pitch_compensation
 
             # laggy response comp
