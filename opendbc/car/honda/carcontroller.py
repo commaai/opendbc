@@ -75,16 +75,19 @@ def brake_pump_hysteresis(apply_brake, apply_brake_last, last_pump_ts, ts):
   return pump_on, last_pump_ts
 
 
-def process_hud_alert(hud_alert):
+def process_hud_alert(hud_alert, silent_steer_warning):
   # initialize to no alert
   fcw_display = 0
   steer_required = 0
   acc_alert = 0
 
-  # priority is: FCW, steer required, all others
+  # priority is: FCW, LDW, steer required (non-silent), all others
   if hud_alert == VisualAlert.fcw:
     fcw_display = VISUAL_HUD[hud_alert.raw]
-  elif hud_alert in (VisualAlert.steerRequired, VisualAlert.ldw):
+  elif hud_alert == VisualAlert.ldw:
+    steer_required = VISUAL_HUD[hud_alert.raw]
+  # steer_required signal is for emergencies, silent steer warning handled via dashed lane lines
+  elif (hud_alert == VisualAlert.steerRequired) and not silent_steer_warning:
     steer_required = VISUAL_HUD[hud_alert.raw]
   else:
     acc_alert = VISUAL_HUD[hud_alert.raw]
@@ -117,6 +120,10 @@ class CarController(CarControllerBase):
     self.brake = 0.0
     self.last_torque = 0.0
 
+    self.steering_unpressed = 0
+    self.silent_steer_warning = True
+    self.no_steer_warning = False
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -142,8 +149,26 @@ class CarController(CarControllerBase):
     # *** rate limit after the enable check ***
     self.brake_last = rate_limit(pre_limit_brake, self.brake_last, -2., DT_CTRL)
 
+    # Handle permanent and temporary steering faults
+    # duplicate silent_steer_warning logic because result is not exposed to opendbc
+    self.steering_unpressed = 0 if CS.steeringPressed else self.steering_unpressed + 1
+    if CS.steerFaultTemporary:
+      if CS.steeringPressed and (not CS_prev.steerFaultTemporary or self.no_steer_warning):
+        self.no_steer_warning = True
+      else:
+        self.no_steer_warning = False
+
+        # if the user overrode recently, show a less harsh alert
+        if self.silent_steer_warning or CS.standstill or self.steering_unpressed < int(1.5 / DT_CTRL):
+          self.silent_steer_warning = True
+    else:
+      self.no_steer_warning = False
+      self.silent_steer_warning = False
+    if CS.steerFaultPermanent:
+      self.silent_steer_warning = False
+    
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
-    fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert)
+    fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert, self.silent_steer_warning)
 
     # **** process the car messages ****
 
@@ -230,7 +255,8 @@ class CarController(CarControllerBase):
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
-      show_dashed_lines = (abs(apply_torque) == self.params.STEER_MAX) or CS.steerFaultTemporary
+      # dashed lines shows in Honda stock ACC when steerging is required
+      show_dashed_lines = (abs(apply_torque) == self.params.STEER_MAX) or (hud_control.visualAlert == VisualAlert.steerRequired)
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud,
                                                    show_dashed_lines))
 
