@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach LLDB to Python",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickMyProcess}",
+      "initCommands": [
+        "script import time; time.sleep(3)"
+      ]
+    },
+    {
+      "name": "Python Launch",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/opendbc/safety/tests/safety_replay/replay_drive.py",
+      "args": [
+        "${input:replayArg}"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "debugOptions": [
+        "RedirectOutput"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "subProcess": true,
+      "stopOnEntry": false
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Python + Native (LLDB)",
+      "configurations": [
+        "Python Launch",
+        "Attach LLDB to Python"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "replayArg",
+      "type": "promptString",
+      "description": "Enter route or segment to replay."
+    }
+  ]
+}
