@@ -145,6 +145,7 @@ class CarHarness(EnumBase):
   rivian = BaseCarHarness("Rivian A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
   tesla_a = BaseCarHarness("Tesla A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
   tesla_b = BaseCarHarness("Tesla B connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
+  psa_a = BaseCarHarness("PSA A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
 
 
 class Device(EnumBase):
@@ -393,7 +394,7 @@ class CarDocs:
       item = star_icon.format(item.value)
     elif column == Column.MODEL and len(self.years):
       item += f" {self.years}"
-    elif column == Column.VIDEO and len(item) > 0:
+    elif column in (Column.VIDEO, Column.SETUP_VIDEO) and len(item) > 0:
       item = video_icon.format(item)
 
     footnotes = get_footnotes(self.footnotes, column)
