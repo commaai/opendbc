@@ -166,7 +166,7 @@ class CarController(CarControllerBase):
       self.silent_steer_warning = False
     if CS.steerFaultPermanent:
       self.silent_steer_warning = False
-    
+
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert, self.silent_steer_warning)
 
