@@ -190,6 +190,11 @@ class CarInterface(CarInterfaceBase):
                                    CAR.KIA_SELTOS_2023_NON_SCC, CAR.GENESIS_G70_2021_NON_SCC):
       stock_cp.dashcamOnly = True
 
+    # Detect smartMDPS, which bypasses EPS low-speed lockout, allowing sunnypilot to send steering commands down to 0
+    if 0x2AA in fingerprint[0]:
+      stock_cp.minSteerSpeed = 0.0
+      stock_cp.flags &= ~HyundaiFlags.MIN_STEER_32_MPH.value
+
     return ret
 
   @staticmethod
