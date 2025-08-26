@@ -1,0 +1,1779 @@
+VERSION "HSCAN2"
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: PDC_Park_Distance_Control FDR FVCM GW Diagnostics SCSABS EPB EPS Tester EHBS Electronic_Park_Brake vector__xxx Stability_Control_System Gateway
+
+
+BO_ 437 APA_HSC2_FrP01: 8 PDC_Park_Distance_Control
+ SG_ APAStsHSC2 : 54|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ APAShifterPosReqdHSC2 : 43|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ APASCSAlvRCHSC2 : 47|4@0+ (1,0) [0|15] ""  SCSABS,EPB
+ SG_ APASCSAcclReqValPVHSC2 : 1|10@0+ (1,0) [0|1023] ""  SCSABS,EPB
+ SG_ APASCSAcclReqValHSC2 : 23|8@0+ (0.1,-12.7) [-12.7|12.8] "m/s2"  SCSABS,EPB
+ SG_ APASCSAcclReqStsHSC2 : 55|1@0+ (1,0) [0|1] ""  SCSABS,EPB
+ SG_ APAReqHSC2 : 7|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ APANRCDAvlblHSC2 : 38|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ APAInfoDispReqHSC2 : 37|6@0+ (1,0) [0|63] "" Vector__XXX
+ SG_ APAEPBReqAlvRCHSC2 : 51|4@0+ (1,0) [0|15] ""  EPB
+ SG_ APAEPBOpReqValPVHSC2 : 63|8@0+ (1,0) [0|255] ""  EPB
+ SG_ APAEPBOPReqHSC2 : 31|2@0+ (1,0) [0|3] ""  EPB
+ SG_ APACrpSpdReqValHSC2 : 29|6@0+ (0.1,0) [0|6.3] "km/h" Vector__XXX
+ SG_ APACrpSpdReqStsHSC2 : 39|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ APAMdHsc2 : 4|3@0+ (1,0) [0|7] "" Vector__XXX
+
+BO_ 433 EPS_HSC2_FrP02: 4 EPS
+ SG_ EPSAPAStsHSC1 : 4|4@0+ (1,0) [0|7] "Reserve"  PDC_Park_Distance_Control
+ SG_ EPSAPAInhHSC1 : 15|8@0+ (1,0) [0|255] ""  PDC_Park_Distance_Control
+ SG_ EPSAPAChksmHSC1 : 31|8@0+ (1,0) [0|255] ""  PDC_Park_Distance_Control
+ SG_ EPSAPAAlvRCHSC1 : 23|8@0+ (1,0) [0|255] ""  PDC_Park_Distance_Control
+
+BO_ 424 APA_HSC2_FrP00: 6 PDC_Park_Distance_Control
+ SG_ APATrgtEPSStrgWhlAngHSC1 : 23|16@0+ (0.0625,-2048) [-2048|2047] ""  EPS
+ SG_ APAFHSC1 : 5|1@0+ (1,0) [0|1] ""  EPS
+ SG_ APACmdEPSStsHSC1 : 7|2@0+ (1,0) [0|3] ""  EPS
+ SG_ APAChksmHSC1 : 47|8@0+ (1,0) [0|255] ""  EPS
+ SG_ APAAlvRCHSC1 : 39|8@0+ (1,0) [0|255] ""  EPS
+
+BO_ 438 EHBS_HSC2_FrP00: 8 EHBS
+ SG_ BrkPdlAppdChksmHSC2 : 63|8@0+ (1,0) [0|255] ""  FVCM
+ SG_ IbstrDiagMdAHSC2 : 55|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ RnotPrsStsHSC2 : 53|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ HydBstrCmpstnReqHSC2 : 54|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ BrkPdlAppdRCHSC2 : 51|4@0+ (1,0) [0|15] ""  FVCM
+ SG_ RnotPrsHSC2 : 47|8@0+ (1,0) [0|250] "bar"  FVCM
+ SG_ BrkPdlAppdHSC2 : 10|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ BrkPdlAppdVHSC2 : 9|2@0+ (1,0) [0|3] ""  FVCM
+
+BO_ 1947 DIAG_DTCInfo_FVCM: 7 FVCM
+ SG_ DTCInfomationFVCMHSC2 : 7|56@0+ (1,0) [0|0] ""  GW
+
+BO_ 1851 DIAG_PhysResp_FVCM: 8 FVCM
+ SG_ DiagnosticRespFVCM : 7|64@0+ (1,0) [0|0] ""  Diagnostics
+
+BO_ 358 FVCM_HSC2_FrP01: 8 FVCM
+ SG_ FVCMBlkdHSC2 : 55|1@0+ (1,0) [0|1] ""  GW
+ SG_ FVCMFltStsHSC2 : 13|2@0+ (1,0) [0|3] ""  GW,EPS
+ SG_ LDWAdoWrnngDspCmdHSC2 : 39|2@0+ (1,0) [0|3] ""  GW
+ SG_ LDWSnstvtLvlHSC2 : 23|2@0+ (1,0) [0|3] ""  GW
+ SG_ LDWSysStsHSC2 : 10|3@0+ (1,0) [0|7] ""  GW
+
+BO_ 359 FVCM_HSC2_FrP02: 8 FVCM
+ SG_ AutoMainBeamLghtReqHSC2 : 15|2@0+ (1,0) [0|3] ""  GW
+ SG_ DistSinceTrgtCamrHSC2 : 7|8@0+ (8.235,-100) [-100|1999.92] "m"  GW
+ SG_ FVCMCalPrgsReqHSC2 : 36|3@0+ (1,0) [0|7] ""  GW
+ SG_ HandOffStrgWhlDetnStaHSC2 : 44|2@0+ (1,0) [0|3] ""  GW
+ SG_ HandOffStrgWhlDetnStaVHSC2 : 45|1@0+ (1,0) [0|1] ""  GW
+ SG_ LDWLKADspCmdHSC2 : 50|3@0+ (1,0) [0|7] ""  GW
+ SG_ LDWLKAHapticWrnngDspCmdHSC2 : 63|2@0+ (1,0) [0|3] ""  GW
+ SG_ LDWLKALVsulznReqHSC2 : 53|3@0+ (1,0) [0|7] ""  GW
+ SG_ LDWLKARVsulznReqHSC2 : 42|3@0+ (1,0) [0|7] ""  GW
+ SG_ LDWSysFltStsHSC2 : 39|3@0+ (1,0) [0|7] ""  GW
+ SG_ SpdAstReqStsCamrHSC2 : 13|2@0+ (1,0) [0|3] ""  GW
+ SG_ TJAICADspCmdHSC2 : 55|2@0+ (1,0) [0|3] ""  GW
+ SG_ TJAICASysFltStsHSC2 : 61|3@0+ (1,0) [0|7] ""  GW,EPS
+ SG_ TJAICASysStsHSC2 : 58|3@0+ (1,0) [0|7] ""  GW,EPS
+ SG_ TrgtSpdReqCamrHSC2 : 22|15@0+ (0.015625,0) [0|511.984] ""  GW
+
+BO_ 509 FVCM_HSC2_FrP03: 8 FVCM
+ SG_ LDWLKAVbnLvlReqHSC2 : 23|2@0+ (1,0) [0|3] ""  GW,EPS
+ SG_ LKAAlvRCHSC2 : 7|4@0+ (1,0) [0|15] ""  EPS
+ SG_ LKADrvrTkovReqHSC2 : 46|1@0+ (1,0) [0|1] ""  GW,EPS
+ SG_ LKAReqToqHSC2 : 2|11@0+ (0.01,-10.24) [-10.24|10.23] "Nm"  EPS
+ SG_ LKAReqToqPVHSC2 : 21|14@0+ (1,0) [0|16383] ""  EPS
+ SG_ LKAReqToqStsHSC2 : 36|2@0+ (1,0) [0|3] ""  EPS
+ SG_ LKAReqToqVHSC2 : 3|1@0+ (1,0) [0|1] ""  EPS
+ SG_ LKASysFltStsHSC2 : 39|3@0+ (1,0) [0|7] ""  GW,EPS
+ SG_ LKASysStsHSC2 : 34|3@0+ (1,0) [0|7] ""  GW,EPS
+
+BO_ 721 GW_HSC2_TCCM_FrP02: 5 GW
+ SG_ TrnsfCaseMdHSC2 : 3|4@0+ (1,0) [0|15] ""  FVCM,FDR
+ SG_ TrnsfCaseMdVHSC2 : 4|1@0+ (1,0) [0|1] ""  FVCM,FDR
+
+BO_ 2015 DIAG_FuncReq_HSC2: 8 Diagnostics
+ SG_ DiagnosticFuncAddrReq_h2 : 7|64@0+ (1,0) [0|0] ""  FVCM,FDR
+
+BO_ 1843 DIAG_PhysReq_FVCM: 8 Diagnostics
+ SG_ DiagnosticReqFVCM_h2 : 7|64@0+ (1,0) [0|0] ""  FVCM
+
+BO_ 492 EPS_HSC2_FrP03: 8 EPS
+ SG_ ChLKAAlvRCHSC2 : 7|4@0+ (1,0) [0|15] ""  FVCM
+ SG_ ChLKACtrlStsHSC2 : 54|3@0+ (1,0) [0|7] ""  FVCM
+ SG_ ChLKARespToqHSC2 : 2|11@0+ (0.01,-10.24) [-10.24|10.23] "Nm"  FVCM
+ SG_ ChLKARespToqPVHSC2 : 22|15@0+ (1,0) [0|32767] ""  FVCM
+ SG_ ChLKARespToqVHSC2 : 3|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ DrvrStrgDlvrdToqHSC2 : 34|11@0+ (0.01,-10.24) [-10.24|10.23] "Nm"  FVCM
+ SG_ DrvrStrgDlvrdToqVHSC2 : 55|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ EPSDMCInhibitHSC1 : 37|1@0+ (1,0) [0|1] ""  Gateway
+ SG_ StrgCustSetngAdjAvlblHSC1 : 38|1@0+ (1,0) [0|1] ""  Gateway
+ SG_ StrgCustSetngDspCmdHSC1 : 36|2@0+ (1,0) [0|3] ""  Gateway
+
+BO_ 1130 BCM_HSC1_FrP04: 8 Body_Controller
+ SG_ DipdBeamLghtOn_HS : 63|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ DircnIndLampSwSts_HS : 60|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ FrtFogLghtOn_H1_HS : 62|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ LDircnIO_HS : 37|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ MainBeamLghtOn_H1_HS : 36|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ RDircnIO_HS : 38|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ RrFogLghtOn_H1_HS : 39|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ VehSideLghtSts_H1_HS : 52|2@0+ (1,0) [0|3] ""  FVCM
+
+BO_ 540 GW_HSC2_BCM_FrP06: 8 GW
+ SG_ ClstrDspdVehSpdHSC2 : 55|8@0+ (1,0) [0|254] "km/h"  FDR,FVCM
+ SG_ FrtWiperSwStsHSC2 : 47|2@0+ (1,0) [0|3] ""  FDR,FVCM
+
+BO_ 498 GW_HSC2_BCM_FrP07: 2 GW
+ SG_ SysBPMHSC2 : 5|2@0+ (1,0) [0|3] ""  FVCM,FDR
+ SG_ SysBPMEnbdHSC2 : 6|1@0+ (1,0) [0|1] ""  FVCM,FDR
+
+BO_ 404 GW_HSC2_ECM_FrP04: 8 GW
+ SG_ TrEstdGearHSC2 : 3|4@0+ (1,0) [0|15] ""  FVCM,FDR
+ SG_ TrEstdGearVHSC2 : 4|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ TrShftLvrPosV_h1HSC2 : 28|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ TrShftLvrPos_h1HSC2 : 27|4@0+ (1,0) [0|15] ""  FVCM,FDR
+
+BO_ 251 GW_HSC2_ECM_FrP27: 8 GW
+ SG_ AccelOvrdHSC2 : 19|1@0+ (1,0) [0|1] ""  FDR
+ SG_ PtACCToqReqRespHSC2 : 4|3@0+ (1,0) [0|7] ""  FDR
+ SG_ PtACCToqReqRespPVHSC2 : 43|4@0+ (1,0) [0|15] ""  FDR
+ SG_ PtADASAlvRCHSC2 : 47|4@0+ (1,0) [0|15] ""  FDR
+ SG_ SpdAstMdECMHSC2 : 52|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ SpdAstSysStsECMHSC2 : 18|3@0+ (1,0) [0|7] ""  FVCM
+ SG_ SpdAstSysTrgtSpdHSC2 : 30|15@0+ (0.015625,0) [0|511.984] ""  FVCM
+ SG_ TrgtSpdSrcStsHSC2 : 23|2@0+ (1,0) [0|3] ""  FVCM
+
+BO_ 886 GW_HSC2_FICM_FrP02: 8 GW
+ SG_ LDWLKASwReqHSC2 : 31|3@0+ (1,0) [0|7] ""  FVCM
+ SG_ RstrFctryDeftsReqHSC2 : 56|1@0+ (1,0) [0|1] ""  FVCM,FDR
+
+BO_ 758 GW_HSC2_FICM_FrP08: 8 GW
+ SG_ LDWAdoWrnngReqHSC2 : 49|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ LDWLKAHapticWrnngReqHSC2 : 35|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ LDWSnstvtLvlReqHSC2 : 47|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ TJAICASwReqHSC2 : 39|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ AEBPedtrnSwReqHSC2 : 57|2@0+ (1,0) [0|3] ""  FDR
+ SG_ AEBSwReqHSC2 : 63|2@0+ (1,0) [0|3] ""  FDR
+ SG_ FCWSnstvtLvlReqHSC2 : 53|3@0+ (1,0) [0|7] ""  FDR
+ SG_ FCWSwReqHSC2 : 55|2@0+ (1,0) [0|3] ""  FDR
+
+BO_ 361 GW_HSC2_FrP00: 6 GW
+ SG_ BCMAvlbly_h2HSC2 : 31|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ ECMAvlbly_h2HSC2 : 7|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ FICMAvlbly_h2HSC2 : 25|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ HCUAvlbly_h2HSC2 : 12|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ IPCAvlbly_h2HSC2 : 30|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ SDMAvlbly_h2HSC2 : 5|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ TBOXAvlbly_h2HSC2 : 26|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ TCMAvlbly_h2HSC2 : 6|1@0+ (1,0) [0|1] ""  FVCM,FDR
+
+BO_ 497 GW_HSC2_FrP01: 8 GW
+ SG_ BPMMstrAvlbly_h2HSC2 : 35|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ PwrMdMstrAccryA_h2HSC2 : 2|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ PwrMdMstrRunCrkA_h2HSC2 : 3|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ SysOpnlMd_h2HSC2 : 6|3@0+ (1,0) [0|7] ""  FVCM,FDR
+ SG_ SysPwrMd_h2HSC2 : 1|2@0+ (1,0) [0|3] ""  FVCM,FDR
+ SG_ SysVolMdV_h2HSC2 : 7|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ SysVolMd_h2HSC2 : 58|2@0+ (1,0) [0|3] ""  FVCM,FDR
+ SG_ SysVolV_h2HSC2 : 32|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ SysVol_h2HSC2 : 47|8@0+ (0.1,3) [3|28.5] "V"  FVCM,FDR
+
+BO_ 1344 GW_HSC2_FrP08: 8 GW
+ SG_ VehOdoV_h2HSC2 : 31|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ VehOdo_h2HSC2 : 7|24@0+ (1,0) [0|16777200] ""  FVCM,FDR
+
+BO_ 795 GW_HSC2_FrP09: 8 GW
+ SG_ VehDrvngMd_h2HSC2 : 29|3@0+ (1,0) [0|7] ""  FVCM,FDR
+
+BO_ 1009 GW_HSC2_FrP10: 8 GW
+ SG_ OtsdAirTemCrValV_h2HSC2 : 48|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ OtsdAirTemCrVal_h2HSC2 : 63|8@0+ (0.5,-40) [-40|87.5] "degC"  FVCM,FDR
+
+BO_ 175 GW_HSC2_HCU_FrP00: 8 GW
+ SG_ EPTAccelActuPosHSC2 : 7|8@0+ (0.392157,0) [0|100] "%"  FDR,FVCM
+ SG_ EPTAccelActuPosPVHSC2 : 40|9@0+ (1,0) [0|511] ""  FDR
+ SG_ EPTAccelActuPosVHSC2 : 43|1@0+ (1,0) [0|1] ""  FDR,FVCM
+ SG_ EPTBrkPdlDscrtInptStsHSC2 : 31|1@0+ (1,0) [0|1] ""  FDR,FVCM
+ SG_ EPTBrkPdlDscrtInptStsPVHSC2 : 21|4@0+ (1,0) [0|15] ""  FDR
+ SG_ EPTBrkPdlDscrtInptStsVHSC2 : 16|1@0+ (1,0) [0|1] ""  FDR,FVCM
+ SG_ EPTStCmdOn_h1HSC2 : 17|1@0+ (1,0) [0|1] ""  FDR,FVCM
+ SG_ HCU_FrP00_RollingCounterHSC2 : 47|4@0+ (1,0) [0|15] ""  FDR
+
+BO_ 406 GW_HSC2_HCU_FrP01: 8 GW
+ SG_ EPTAccelEfctvPosHSC2 : 47|8@0+ (0.392157,0) [0|100] "%"  FVCM,FDR
+ SG_ EPTRdy_h1HSC2 : 38|1@0+ (1,0) [0|1] ""  FVCM,FDR
+
+BO_ 1345 GW_HSC2_IPK_FrP06: 8 GW
+ SG_ CalendarDayHSC2 : 20|5@0+ (1,0) [0|31] "days"  FVCM,FDR
+ SG_ CalendarMonthHSC2 : 11|4@0+ (1,0) [0|15] ""  FVCM,FDR
+ SG_ CalendarYearHSC2 : 7|8@0+ (1,2000) [2000|2255] "year"  FVCM,FDR
+ SG_ HourOfDayHSC2 : 28|5@0+ (1,0) [0|23] ""  FVCM,FDR
+ SG_ MinuteOfHourHSC2 : 37|6@0+ (1,0) [0|59] ""  FVCM,FDR
+ SG_ SecsOfMinuteHSC2 : 45|6@0+ (1,0) [0|59] ""  FVCM,FDR
+
+BO_ 355 GW_HSC2_SDM_FrP00: 8 GW
+ SG_ AirbagDplHSC2 : 11|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ AirbagDplInvsnHSC2 : 10|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ DrvrSbltAtcHSC2 : 12|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ DrvrSbltAtcVHSC2 : 13|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ SDMRCHSC2 : 1|2@0+ (1,0) [0|3] ""  FVCM,FDR
+
+BO_ 485 SAS_HSC2_FrP00: 8 EPS
+ SG_ StrgWhlAngHSC2 : 15|16@0+ (0.0625,-2048) [-2048|2047.88] "degree"  PDC_Park_Distance_Control,FVCM,FDR
+ SG_ StrgWhlAngAlvRCHSC2 : 31|4@0+ (1,0) [0|15] ""  PDC_Park_Distance_Control,FVCM,FDR
+ SG_ StrgWhlAngExtdPVHSC2 : 47|16@0+ (1,0) [0|65535] ""  PDC_Park_Distance_Control,FVCM,FDR
+ SG_ StrgWhlAngGrdHSC2 : 27|12@0+ (1,-2048) [-2048|2046] "degree/s"  PDC_Park_Distance_Control,FVCM,FDR
+ SG_ StrgWhlAngSnsrCalStsHSC2 : 6|2@0+ (1,0) [0|3] ""  PDC_Park_Distance_Control,FVCM,FDR
+ SG_ StrgWhlAngSnsrChksmHSC2 : 63|8@0+ (1,0) [0|255] ""  PDC_Park_Distance_Control,FVCM,FDR
+ SG_ StrgWhlAngSnsrFltHSC2 : 0|1@0+ (1,0) [0|1] ""  PDC_Park_Distance_Control,FVCM,FDR
+ SG_ StrgWhlAngSnsrInidHSC2 : 2|1@0+ (1,0) [0|1] ""  PDC_Park_Distance_Control,FVCM,FDR
+ SG_ StrgWhlAngSnsrMultCapbHSC2 : 1|1@0+ (1,0) [0|1] ""  PDC_Park_Distance_Control,FVCM,FDR
+ SG_ StrgWhlAngVHSC2 : 7|1@0+ (1,0) [0|1] ""  PDC_Park_Distance_Control,FVCM,FDR
+
+BO_ 389 SCS_HSC2_FrP02: 4 SCSABS
+ SG_ VSELatAccHSC2 : 19|12@0- (0.015625,0) [-32|31.9844] "m/s^2"  FVCM,FDR
+ SG_ VSELatAccVHSC2 : 3|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ VSELongtAccHSC2 : 1|10@0- (0.03,0) [-15.36|15.33] "m/s^2"  FVCM,FDR
+ SG_ VSELongtAccVHSC2 : 2|1@0+ (1,0) [0|1] ""  FVCM,FDR
+
+BO_ 455 SCS_HSC2_FrP03: 8 SCSABS
+ SG_ LNonDrvnWhlRotlDircnHSC2 : 33|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ RNonDrvnWhlRotlDircnHSC2 : 35|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ SCSNRCDAvlblHSC2 : 45|1@0+ (1,0) [0|1] "" FVCM
+ SG_ SCSNRCDAlvRCHSC2 : 44|4@0+ (1,0) [0|15] "" FVCM
+ SG_ SCSDclAHSC2 : 40|1@0+ (1,0) [0|1] "" FVCM
+
+
+BO_ 489 SCS_HSC2_FrP05: 8 SCSABS
+ SG_ ABSAHSC2 : 30|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ ABSFHSC2 : 29|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ TCSAHSC2 : 28|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ EnDragToqRducnAHSC2 : 25|1@0+ (1,0) [0|1] ""  FDR
+ SG_ VehDynYawRateHSC2 : 35|12@0- (0.0625,0) [-128|127.938] "deg/s"  FVCM,FDR
+ SG_ VehDynYawRateVHSC2 : 36|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ VSESysAHSC2 : 24|1@0+ (1,0) [0|1] ""  FVCM
+
+BO_ 532 SCS_HSC2_FrP09: 6 SCSABS
+ SG_ BrkPdlDrvrAppdPrsHSC2 : 15|8@0+ (75,0) [0|19125] "kPa"  FVCM
+ SG_ BrkPdlDrvrAppdPrsAlvRCHSC2 : 2|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ BrkPdlDrvrAppdPrsVHSC2 : 0|1@0+ (1,0) [0|1] ""  FVCM
+
+BO_ 840 SCS_HSC2_FrP11: 8 SCSABS
+ SG_ WhlGndVelDrvnChksmHSC2 : 63|8@0+ (1,0) [0|255] ""  FVCM
+ SG_ WhlGndVelDrvnRCHSC2 : 51|4@0+ (1,0) [0|15] ""  FVCM
+ SG_ WhlGndVelLDrvnHSC2 : 5|14@0+ (0.03125,0) [0|511.969] "km/h"  FVCM
+ SG_ WhlGndVelLDrvnVHSC2 : 6|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ WhlGndVelRDrvnHSC2 : 21|14@0+ (0.03125,0) [0|511.969] "km/h"  FVCM
+ SG_ WhlGndVelRDrvnVHSC2 : 22|1@0+ (1,0) [0|1] ""  FVCM
+
+BO_ 842 SCS_HSC2_FrP12: 8 SCSABS
+ SG_ WhlGndVelLNonDrvnHSC2 : 5|14@0+ (0.03125,0) [0|511.969] "km/h"  FVCM
+ SG_ WhlGndVelLNonDrvnVHSC2 : 6|1@0+ (1,0) [0|1] ""  FVCM
+ SG_ WhlGndVelNonDrvnChksmHSC2 : 63|8@0+ (1,0) [0|255] ""  FVCM
+ SG_ WhlGndVelNonDrvnRCHSC2 : 51|4@0+ (1,0) [0|15] ""  FVCM
+ SG_ WhlGndVelRNonDrvnHSC2 : 21|14@0+ (0.03125,0) [0|511.969] "km/h"  FVCM
+ SG_ WhlGndVelRNonDrvnVHSC2 : 22|1@0+ (1,0) [0|1] ""  FVCM
+
+BO_ 381 SCS_HSC2_FrP13: 7 SCSABS
+ SG_ TCSOpngMdHSC2 : 7|3@0+ (1,0) [0|7] ""  FVCM
+ SG_ TCSOpngStsHSC2 : 38|3@0+ (1,0) [0|7] ""  FVCM
+ SG_ VSEMdHSC2 : 15|3@0+ (1,0) [0|7] ""  FVCM
+ SG_ VSEStsHSC2 : 4|3@0+ (1,0) [0|7] ""  FVCM
+
+BO_ 851 SCS_HSC2_FrP15: 8 SCSABS
+ SG_ VehSpdAvgDrvnHSC2 : 6|15@0+ (0.015625,0) [0|511.984] "km/h"  FVCM,FDR
+ SG_ VehSpdAvgDrvnVHSC2 : 7|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ VehSpdAvgNonDrvnHSC2 : 38|15@0+ (0.015625,0) [0|511.984] "km/h"  FVCM,FDR
+ SG_ VehSpdAvgNonDrvnVHSC2 : 39|1@0+ (1,0) [0|1] ""  FVCM,FDR
+
+BO_ 572 SCS_HSC2_FrP19: 8 SCSABS
+ SG_ VehSpdAvgHSC2 : 22|15@0+ (0.015625,0) [0|511.984] "km/h"  FVCM,FDR
+ SG_ VehSpdAvgAlvRCHSC2 : 39|4@0+ (1,0) [0|15] ""  FVCM,FDR
+ SG_ VehSpdAvgPVHSC2 : 7|16@0+ (1,0) [0|65535] ""  FVCM,FDR
+ SG_ VehSpdAvgVHSC2 : 23|1@0+ (1,0) [0|1] ""  FVCM,FDR
+
+BO_ 588 SCS_HSC2_FrP22: 8 SCSABS
+ SG_ BrkDiscTemStsHSC2 : 6|1@0+ (1,0) [0|1] ""  FDR
+ SG_ BrkPdlDrvrAppdPrsAlvRC_RadarHSC2 : 13|2@0+ (1,0) [0|3] ""  FDR
+ SG_ BrkPdlDrvrAppdPrsV_RadarHSC2 : 7|1@0+ (1,0) [0|1] ""  FDR
+ SG_ BrkPdlDrvrAppdPrs_RadarHSC2 : 23|8@0+ (75,0) [0|19125] "kPa"  FDR
+ SG_ LDrvnWhlRotlDircnHSC2 : 15|2@0+ (1,0) [0|3] ""  FDR,FVCM
+ SG_ RDrvnWhlRotlDircnHSC2 : 2|2@0+ (1,0) [0|3] ""  FDR,FVCM
+ SG_ WhlBrkPrsStsHSC2 : 5|1@0+ (1,0) [0|1] ""  FDR
+ SG_ WhlGndVelDrvnChksm_RadarHSC2 : 63|8@0+ (1,0) [0|255] ""  FDR
+ SG_ WhlGndVelDrvnRC_RadarHSC2 : 11|4@0+ (1,0) [0|15] ""  FDR
+ SG_ WhlGndVelLDrvnV_RadarHSC2 : 3|1@0+ (1,0) [0|1] ""  FDR
+ SG_ WhlGndVelLDrvn_RadarHSC2 : 45|14@0+ (0.03125,0) [0|511.969] "km/h"  FDR
+ SG_ WhlGndVelRDrvnV_RadarHSC2 : 4|1@0+ (1,0) [0|1] ""  FDR
+ SG_ WhlGndVelRDrvn_RadarHSC2 : 29|14@0+ (0.03125,0) [0|511.969] "km/h"  FDR
+
+BO_ 201 Tester_HSC2_ECM_FrP00: 8 Tester
+ SG_ AccelActuPosHSC2 : 39|8@0+ (0.392157,0) [0|100] "%"  FVCM,FDR
+ SG_ AccelActuPosVHSC2 : 31|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ En12VoltStrMotCmddOnHSC2 : 53|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ EnRunAHSC2 : 7|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ EnSpdHSC2 : 15|16@0+ (0.25,0) [0|16383.8] "rpm"  FVCM,FDR
+ SG_ PtBrkPdlDscrtInptStsHSC2 : 40|1@0+ (1,0) [0|1] ""  FVCM,FDR
+ SG_ PtBrkPdlDscrtInptStsVHSC2 : 41|1@0+ (1,0) [0|1] ""  FVCM,FDR
+
+BO_ 190 Tester_HSC2_ECM_FrP01: 3 Tester
+ SG_ AccelEfctvPosHSC2 : 23|8@0+ (0.392157,0) [0|100] "%"  FVCM,FDR
+
+BO_ 471 Tester_HSC2_ECM_FrP07: 2 Tester
+ SG_ EnASSStaHSC2 : 1|2@0+ (1,0) [0|3] ""  FVCM,FDR
+
+BO_ 1948 DIAG_DTCInfo_Radar: 7 FDR
+ SG_ DTCInfomationRadarHSC2 : 7|56@0+ (1,0) [0|0] ""  GW
+
+BO_ 1852 DIAG_PhysResp_Radar: 8 FDR
+ SG_ DiagnosticRespRadar : 7|64@0+ (1,0) [0|0] ""  Diagnostics
+
+BO_ 578 RADAR_HSC2_FrP00: 8 FDR
+ SG_ ACCAccReqStsHSC2 : 29|2@0+ (1,0) [0|3] ""  GW,SCSABS
+ SG_ ACCAccReqValHSC2 : 2|11@0+ (0.005,-7.22) [-7.22|3.015] ""  SCSABS
+ SG_ ACCAccReqValTolMaxHSC2 : 22|7@0+ (0.025,0) [0|3.175] ""  SCSABS
+ SG_ ACCAccReqValTolMinHSC2 : 54|7@0+ (0.025,0) [0|3.175] ""  SCSABS
+ SG_ ACCGoReqHSC2 : 30|1@0+ (1,0) [0|1] ""  SCSABS
+ SG_ ACCMinBrkReqStsHSC2 : 7|1@0+ (1,0) [0|1] ""  SCSABS
+ SG_ ACCReqBrkPrfrdHSC2 : 23|1@0+ (1,0) [0|1] ""  SCSABS
+ SG_ ACCSdslReq_RadarHSC2 : 55|1@0+ (1,0) [0|1] ""  SCSABS
+ SG_ ACCSysAlvRlngCtr_SCSHSC2 : 6|4@0+ (1,0) [0|15] ""  SCSABS
+ SG_ ACCSysChksm_SCSHSC2 : 63|8@0+ (1,0) [0|255] ""  SCSABS
+ SG_ ACCSysFltSts_SCSHSC2 : 42|3@0+ (1,0) [0|7] ""  SCSABS
+ SG_ ACCSysSts_RadarHSC2 : 45|3@0+ (1,0) [0|7] ""  GW,SCSABS
+ SG_ ChACCShtdwnMdHSC2 : 47|2@0+ (1,0) [0|3] ""  SCSABS
+
+BO_ 580 RADAR_HSC2_FrP01: 8 FDR
+ SG_ ACCAccReqValGrdMaxHSC2 : 14|7@0+ (0.1,0) [0|12.7] ""  SCSABS
+ SG_ ACCAccReqValGrdMinHSC2 : 54|7@0+ (0.1,-12.7) [-12.7|3.7998E-007] ""  SCSABS
+ SG_ ACCAEBBrkJerkLvlReq_RadarHSC2 : 20|3@0+ (1,0) [0|7] ""  SCSABS
+ SG_ AEBAlvRlngCtr_SCSHSC2 : 35|4@0+ (1,0) [0|15] ""  SCSABS
+ SG_ AEBChksm_SCSHSC2 : 63|8@0+ (1,0) [0|255] ""  SCSABS
+ SG_ AEBDclReqStsHSC2 : 25|2@0+ (1,0) [0|3] ""  GW,SCSABS
+ SG_ AEBDclReqValHSC2 : 7|8@0+ (0.1,-12.7) [-12.7|12.8] "m/s^2"  SCSABS
+ SG_ AEBHydBrkAstLvlReqHSC2 : 31|3@0+ (1,0) [0|7] ""  SCSABS
+ SG_ AEBPedtrnSysFltStsHSC2 : 38|3@0+ (1,0) [0|7] ""  GW
+ SG_ AEBPedtrnSysStsHSC2 : 28|3@0+ (1,0) [0|7] ""  GW
+ SG_ AEBPrflReqHSC2 : 15|1@0+ (1,0) [0|1] ""  SCSABS
+ SG_ AEBSysFltSts_RadarHSC2 : 47|3@0+ (1,0) [0|7] ""  GW,SCSABS
+ SG_ AEBSysSts_RadarHSC2 : 23|3@0+ (1,0) [0|7] ""  GW,SCSABS
+
+BO_ 582 RADAR_HSC2_FrP02: 8 FDR
+ SG_ ACCDetObjDistLvl_RadarHSC2 : 26|3@0+ (1,0) [0|7] ""  GW
+ SG_ ACCDrvrSeldTrgtDistLvl_RadarHSC2 : 29|3@0+ (1,0) [0|7] ""  GW
+ SG_ ACCDrvrSelTrgtSpd_RadarHSC2 : 6|15@0+ (0.015625,0) [0|511.984] ""  GW
+ SG_ ACCDrvrTkovReqHSC2 : 39|1@0+ (1,0) [0|1] ""  GW
+ SG_ ACCGoNotfr_RadarHSC2 : 35|1@0+ (1,0) [0|1] ""  GW
+ SG_ ACCMsgReqHSC2 : 23|4@0+ (1,0) [0|15] ""  GW
+ SG_ ACCObjDet_RadarHSC2 : 7|1@0+ (1,0) [0|1] ""  GW
+ SG_ ACCSysCanclReq_RadarHSC2 : 31|2@0+ (1,0) [0|3] ""  GW
+ SG_ ACCSysFltSts_RadarHSC2 : 38|3@0+ (1,0) [0|7] ""  GW
+ SG_ AEBDspCmd_RadarHSC2 : 55|2@0+ (1,0) [0|3] ""  GW
+ SG_ AEBMsgReqHSC2 : 19|4@0+ (1,0) [0|15] ""  GW
+ SG_ AEBPedtrnDspCmdHSC2 : 47|2@0+ (1,0) [0|3] ""  GW
+ SG_ FCWDspCmd_RadarHSC2 : 53|2@0+ (1,0) [0|3] ""  GW
+ SG_ FCWrnngSts_RadarHSC2 : 51|3@0+ (1,0) [0|7] ""  GW
+ SG_ FCWSnstvtLvl_RadarHSC2 : 45|3@0+ (1,0) [0|7] ""  GW
+ SG_ FCWSysFltSts_RadarHSC2 : 42|3@0+ (1,0) [0|7] ""  GW
+ SG_ RdrCalPrgsReqHSC2 : 34|3@0+ (1,0) [0|7] ""  GW
+
+BO_ 898 RADAR_HSC2_FrP04: 8 FDR
+ SG_ FCWAHSC2 : 47|1@0+ (1,0) [0|1] ""  GW
+ SG_ FCWTimeToColHSC2 : 7|8@0+ (0.1,0) [0|25.5] ""  GW
+ SG_ ObsDataSyncCtrHSC2 : 14|4@0+ (1,0) [0|15] ""  GW
+ SG_ ObsDataTmspHSC2 : 10|27@0+ (0.00097,0) [0|130191] ""  GW
+ SG_ PedtrnColWrnngAHSC2 : 15|1@0+ (1,0) [0|1] ""  GW
+
+BO_ 899 RADAR_HSC2_FrP05: 8 FDR
+ SG_ DngrsObjIdHSC2 : 4|6@0+ (1,0) [0|63] ""  GW
+ SG_ DngrsObjLatRltvDistHSC2 : 14|15@0+ (0.0078,-128) [-128|127.583] ""  GW
+ SG_ DngrsObjLatRltvSpdHSC2 : 31|12@0+ (0.0625,-128) [-128|127.938] ""  GW
+ SG_ DngrsObjLongtRltvDistHSC2 : 35|12@0+ (0.0625,0) [0|255.938] ""  GW
+ SG_ DngrsObjLongtRltvSpdHSC2 : 51|12@0+ (0.0625,-128) [-128|127.938] ""  GW
+ SG_ DngrsObjSyncCtrHSC2 : 55|4@0+ (1,0) [0|15] ""  GW
+
+BO_ 900 RADAR_HSC2_FrP06: 8 FDR
+ SG_ DngrsPedtrnIdHSC2 : 4|6@0+ (1,0) [0|63] ""  GW
+ SG_ DngrsPedtrnLatRltvDistHSC2 : 14|15@0+ (0.0078,-128) [-128|127.583] ""  GW
+ SG_ DngrsPedtrnLatRltvSpdHSC2 : 31|12@0+ (0.0625,-128) [-128|127.938] ""  GW
+ SG_ DngrsPedtrnLongtRltvDistHSC2 : 35|12@0+ (0.0625,0) [0|255.938] ""  GW
+ SG_ DngrsPedtrnLongtRltvSpdHSC2 : 51|12@0+ (0.0625,-128) [-128|127.938] ""  GW
+ SG_ DngrsPedtrnSyncCtrHSC2 : 55|4@0+ (1,0) [0|15] ""  GW
+
+BO_ 901 RADAR_HSC2_FrP07: 8 FDR
+ SG_ ACCDetObjExistPrbltyHSC2 : 15|6@0+ (0.015625,0) [0|0.984375] ""  GW
+ SG_ ACCDetObjIdHSC2 : 9|6@0+ (1,0) [0|63] ""  GW
+ SG_ ACCDetObjLatRltvDistHSC2 : 54|15@0+ (0.0078,-128) [-128|127.583] ""  GW
+ SG_ ACCDetObjLongtRltvDistHSC2 : 35|12@0+ (0.0625,0) [0|255.938] ""  GW
+ SG_ ACCDetObjLongtRltvSpdHSC2 : 19|12@0+ (0.0625,-128) [-128|127.938] ""  GW
+ SG_ ACCDetObjSyncCtrHSC2 : 39|4@0+ (1,0) [0|15] ""  GW
+ SG_ ACCDetObsExistPrbltyHSC2 : 4|5@0+ (0.03125,0) [0|0.96875] ""  GW
+
+BO_ 357 RADAR_HSC2_FVCM_FrP00: 8 FDR
+ SG_ ACCAlvRCHSC2 : 51|4@0+ (1,0) [0|15] ""  GW
+ SG_ ACCToqReqStsHSC2 : 7|2@0+ (1,0) [0|3] ""  GW
+ SG_ ACCToqReqValHSC2 : 19|12@0+ (0.5,-848) [-848|1199.5] "Nm"  GW
+ SG_ ACCToqReqValPVHSC2 : 39|16@0+ (1,0) [0|65535] ""  GW
+
+BO_ 1844 DIAG_PhysReq_Radar: 8 Diagnostics
+ SG_ DiagnosticReqRadar_h2 : 7|64@0+ (1,0) [0|0] ""  FDR
+
+BO_ 560 EPB_HSC2_FrP00: 8 EPB
+ SG_ EPBSwStsHSC2 : 7|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ EPBSwStsVHSC2 : 5|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ EPBCCCanclReqdHSC2 : 28|1@0+ (1,0) [0|1] ""  FDR
+
+BO_ 554 EPB_HSC2_FrP01: 2 EPB
+ SG_ EPBAvlblyStsPVHSC2 : 2|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ EPBAvlblyStsHSC2 : 5|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ EPBAppcnStsHSC2 : 15|2@0+ (1,0) [0|3] ""  FDR
+ SG_ EPBAppcnStsPVHSC2 : 13|2@0+ (1,0) [0|3] ""  FDR
+
+BO_ 481 GW_HSC2_FrP04: 7 GW
+ SG_ CCSwStsAlvRC_h2HSC2 : 17|2@0+ (1,0) [0|3] ""  FDR
+ SG_ CCSwStsCanclSwA_h2HSC2 : 7|1@0+ (1,0) [0|1] ""  FDR
+ SG_ CCSwStsDistDecSwA_h2HSC2 : 18|1@0+ (1,0) [0|1] ""  FDR
+ SG_ CCSwStsDistIncSwA_h2HSC2 : 19|1@0+ (1,0) [0|1] ""  FDR
+ SG_ CCSwStsOnSwA_h2HSC2 : 6|1@0+ (1,0) [0|1] ""  FDR
+ SG_ CCSwStsPV_h2HSC2 : 15|8@0+ (1,0) [0|255] ""  FDR
+ SG_ CCSwStsRsmSwA_h2HSC2 : 5|1@0+ (1,0) [0|1] ""  FDR
+ SG_ CCSwStsSetSwA_h2HSC2 : 4|1@0+ (1,0) [0|1] ""  FDR
+ SG_ CCSwStsSpdDecSwA_h2HSC2 : 2|1@0+ (1,0) [0|1] ""  FDR
+ SG_ CCSwStsSpdIncSwA_h2HSC2 : 3|1@0+ (1,0) [0|1] ""  FDR
+ SG_ CCSwStsSwDataIntgty_h2HSC2 : 1|2@0+ (1,0) [0|3] ""  FDR
+
+BO_ 425 GW_HSC2_FrP13: 8 GW
+ SG_ NRCDSts_h2HSC2 : 39|2@0+ (1,0) [0|3] ""  FDR
+
+BO_ 907 GW_HSC2_HCU_FrP07: 8 GW
+ SG_ EPTDrvngMdSwStsHSC2 : 18|3@0+ (1,0) [0|7] ""  FDR
+
+BO_ 172 GW_HSC2_HCU_FrP08: 8 GW
+ SG_ EPTTrInptShaftMaxAvlblToqHSC2 : 19|12@0+ (0.5,-848) [-848|1199.5] "Nm"  FDR
+ SG_ EPTTrInptShaftMaxAvlblToqVHSC2 : 4|1@0+ (1,0) [0|1] ""  FDR
+ SG_ EPTTrInptShaftMinAvlblToqHSC2 : 3|12@0+ (0.5,-848) [-848|1199.5] "Nm"  FDR
+ SG_ EPTTrInptShaftMinAvlblToqVHSC2 : 5|1@0+ (1,0) [0|1] ""  FDR
+ SG_ EPTTrInptShaftToqAlvRlngCtrHSC2 : 23|4@0+ (1,0) [0|15] "count value"  FDR
+ SG_ EPTTrInptShaftToqChksmHSC2 : 63|8@0+ (1,0) [0|255] ""  FDR
+
+BO_ 412 GW_HSC2_HCU_FrP13: 8 GW
+ SG_ EPTTrInptShaftSpdHSC2 : 39|16@0+ (1,-32767) [-32767|32768] "rpm"  FDR
+ SG_ EPTTrInptShaftSpdVHSC2 : 5|1@0+ (1,0) [0|1] ""  FDR
+ SG_ EPTTrInptShaftToqHSC2 : 19|12@0+ (0.5,-848) [-848|1199.5] "Nm"  FDR
+ SG_ EPTTrInptShaftToqVHSC2 : 6|1@0+ (1,0) [0|1] ""  FDR
+ SG_ VCUNRCDAlvRCHSC2 : 51|4@0+ (1,0) [0|15] ""  FDR
+
+BO_ 223 GW_HSC2_HCU_FrP16: 6 GW
+ SG_ EPTSecyAxleInptShaftSpdHSC2 : 23|16@0+ (1,-32767) [-32767|32768] "rpm"  FDR
+ SG_ EPTSecyAxleInptShaftSpdVHSC2 : 5|1@0+ (1,0) [0|1] ""  FDR
+
+BO_ 431 GW_HSC2_TCM_FrP03: 8 GW
+ SG_ AutocTrGearShftDircnHSC2 : 18|2@0+ (1,0) [0|3] ""  FDR
+ SG_ AutocTrGearShftDircnFHSC2 : 16|1@0+ (1,0) [0|1] ""  FDR
+
+BO_ 1225 GW_HSC2_TCM_FrP09: 7 GW
+ SG_ TrEmsnRltdMalfAHSC2 : 5|1@0+ (1,0) [0|1] ""  FDR
+ SG_ TrNonEmsnRltdMalfAHSC2 : 4|1@0+ (1,0) [0|1] ""  FDR
+
+BO_ 193 SCS_HSC2_FrP00: 8 Stability_Control_System
+ SG_ LDrvnWhlRotlDistPlsCtrHSC2 : 1|10@0+ (1,0) [0|1023] ""  Electronic_Park_Brake
+ SG_ LDrvnWhlRotlDistTmspHSC2 : 23|16@0+ (1,0) [0|65535] ""  Electronic_Park_Brake
+ SG_ LDrvnWhlRotlDistTRCHSC2 : 7|2@0+ (1,0) [0|3] ""  Electronic_Park_Brake
+ SG_ LDrvnWhlRotlDistVHSC2 : 2|1@0+ (1,0) [0|1] ""  Electronic_Park_Brake
+ SG_ LDrvnWhlRotlRstOcdHSC2 : 3|1@0+ (1,0) [0|1] ""  vector__xxx
+ SG_ LDrvnWhlRotlSeqNumHSC2 : 5|2@0+ (1,0) [0|3] ""  Electronic_Park_Brake
+ SG_ RDrvnWhlRotlDistPlsCtrHSC2 : 33|10@0+ (1,0) [0|1023] ""  Electronic_Park_Brake
+ SG_ RDrvnWhlRotlDistTmspHSC2 : 55|16@0+ (1,0) [0|65535] ""  Electronic_Park_Brake
+ SG_ RDrvnWhlRotlDistTRCHSC2 : 39|2@0+ (1,0) [0|3] ""  vector__xxx
+ SG_ RDrvnWhlRotlDistVHSC2 : 34|1@0+ (1,0) [0|1] ""  Electronic_Park_Brake
+ SG_ RDrvnWhlRotlRstOcdHSC2 : 35|1@0+ (1,0) [0|1] ""  Electronic_Park_Brake
+ SG_ RDrvnWhlRotlSeqNumHSC2 : 37|2@0+ (1,0) [0|3] ""  Electronic_Park_Brake
+
+BO_ 197 SCS_HSC2_FrP01: 8 Stability_Control_System
+ SG_ LNonDrvnWhlRotlDistPCHSC2 : 1|10@0+ (1,0) [0|1023] ""  Electronic_Park_Brake,Gateway
+ SG_ LNonDrvnWhlRotlDistTHSC2 : 23|16@0+ (1,0) [0|65535] ""  Electronic_Park_Brake
+ SG_ LNonDrvnWhlRotlDistTRCHSC2 : 7|2@0+ (1,0) [0|3] ""  Electronic_Park_Brake,Gateway
+ SG_ LNonDrvnWhlRotlDistVHSC2 : 2|1@0+ (1,0) [0|1] ""  Electronic_Park_Brake,Gateway
+ SG_ LNonDrvnWhlRotlRstOcdHSC2 : 3|1@0+ (1,0) [0|1] ""  Electronic_Park_Brake,Gateway
+ SG_ LNonDrvnWhlRotlSeqNumHSC2 : 5|2@0+ (1,0) [0|3] ""  Electronic_Park_Brake
+ SG_ RNonDrvnWhlRotlDistPCHSC2 : 33|10@0+ (1,0) [0|1023] ""  Gateway
+ SG_ RNonDrvnWhlRotlDistTHSC2 : 55|16@0+ (1,0) [0|65535] ""  Electronic_Park_Brake
+ SG_ RNonDrvnWhlRotlDistTRCHSC2 : 39|2@0+ (1,0) [0|3] ""  Electronic_Park_Brake
+ SG_ RNonDrvnWhlRotlDistVHSC2 : 34|1@0+ (1,0) [0|1] ""  Electronic_Park_Brake,Gateway
+ SG_ RNonDrvnWhlRotlRstOcdHSC2 : 35|1@0+ (1,0) [0|1] ""  Electronic_Park_Brake,Gateway
+ SG_ RNonDrvnWhlRotlSeqNumHSC2 : 37|2@0+ (1,0) [0|3] ""  Electronic_Park_Brake
+
+BO_ 562 SCS_HSC2_FrP06: 8 SCSABS
+ SG_ HDCSysStsHSC2 : 55|3@0+ (1,0) [0|7] ""  FDR
+
+BO_ 590 SCS_HSC2_FrP23: 8 SCSABS
+ SG_ LNonDrvnWhlRotlDircn_RadarHSC2 : 17|2@0+ (1,0) [0|3] ""  FDR
+ SG_ RNonDrvnWhlRotlDircn_RadarHSC2 : 9|2@0+ (1,0) [0|3] ""  FDR
+ SG_ TCSOpngMd_RadarHSC2 : 20|3@0+ (1,0) [0|7] ""  FDR
+ SG_ TCSOpngSts_RadarHSC2 : 23|3@0+ (1,0) [0|7] ""  FDR
+ SG_ VSEMd_RadarHSC2 : 12|3@0+ (1,0) [0|7] ""  FDR
+ SG_ VSESts_RadarHSC2 : 15|3@0+ (1,0) [0|7] ""  FDR
+ SG_ WhlGndVelLNonDrvnV_RadarHSC2 : 30|1@0+ (1,0) [0|1] ""  FDR
+ SG_ WhlGndVelLNonDrvn_RadarHSC2 : 45|14@0+ (0.03125,0) [0|511.969] "km/h"  FDR
+ SG_ WhlGndVelNonDrvnChksm_RadarHSC2 : 63|8@0+ (1,0) [0|255] ""  FDR
+ SG_ WhlGndVelNonDrvnRC_RadarHSC2 : 7|4@0+ (1,0) [0|15] ""  FDR
+ SG_ WhlGndVelRNonDrvnV_RadarHSC2 : 31|1@0+ (1,0) [0|1] ""  FDR
+ SG_ WhlGndVelRNonDrvn_RadarHSC2 : 29|14@0+ (0.03125,0) [0|511.969] "km/h"  FDR
+
+BO_ 593 SCS_HSC2_FrP24: 8 SCSABS
+ SG_ ChACCAccReqRespHSC2 : 5|3@0+ (1,0) [0|7] ""  FDR
+ SG_ ChACCAEBAlvRlngCtr_RadarHSC2 : 20|4@0+ (1,0) [0|15] ""  FDR
+ SG_ ChACCAEBBrkJerkReqRespHSC2 : 10|3@0+ (1,0) [0|7] ""  FDR
+ SG_ ChACCAEBChksm_RadarHSC2 : 63|8@0+ (1,0) [0|255] ""  FDR
+ SG_ ChACCReqFlrStsHSC2 : 15|2@0+ (1,0) [0|3] ""  FDR
+ SG_ ChAEBDclReqRespHSC2 : 23|3@0+ (1,0) [0|7] ""  FDR
+ SG_ ChAEBHydBrkAstReqRespHSC2 : 2|3@0+ (1,0) [0|7] ""  FDR
+ SG_ ChAEBPrflReqRespHSC2 : 13|3@0+ (1,0) [0|7] ""  FDR
+ SG_ VehSdslStsHSC2 : 7|2@0+ (1,0) [0|3] ""  FDR
+ SG_ VehTrgtLongtAccHSC2 : 31|8@0+ (0.05,-7) [-7|5.75] ""  FDR
+
+BO_ 451 Tester_HSC2_ECM_FrP03: 8 Tester
+ SG_ EnToqActuExtdRngHSC2 : 3|12@0+ (0.5,-848) [-848|1199.5] "Nm"  FDR
+ SG_ EnToqActuExtdRngVHSC2 : 4|1@0+ (1,0) [0|1] ""  FDR
+
+BO_ 707 Tester_HSC2_ECM_FrP09: 8 Tester
+ SG_ EnToqMaxExtdRngHSC2 : 3|12@0+ (0.5,-848) [-848|1199.5] "Nm"  FDR
+ SG_ EnToqMaxExtdRngVHSC2 : 4|1@0+ (1,0) [0|1] ""  FDR
+ SG_ EnToqMinExtdRngHSC2 : 19|12@0+ (0.5,-848) [-848|1199.5] "Nm"  FDR
+ SG_ EnToqMinExtdRngVHSC2 : 20|1@0+ (1,0) [0|1] ""  FDR
+
+BO_ 977 Tester_HSC2_ECM_FrP12: 8 Tester
+ SG_ EnEmsnRltdMalfAHSC2 : 4|1@0+ (1,0) [0|1] ""  FDR
+ SG_ EnNonEmsnRltdMalfAHSC2 : 3|1@0+ (1,0) [0|1] ""  FDR
+
+BO_ 678 Tester_HSC2_TCM_FrP07: 8 Tester
+ SG_ TrCCCanclReqHSC2 : 44|1@0+ (1,0) [0|1] ""  FDR
+
+
+BO_ 516 RDA_HSC1_P02: 8 RDA
+ SG_ LBSDAndLCAWrnng_HS : 7|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ RBSDAndLCAWrnng_HS : 5|2@0+ (1,0) [0|3] ""  FVCM
+ SG_ RDASysSta_HS : 23|5@0+ (1,0) [0|31] ""  FVCM
+
+
+CM_ SG_ 1947 DTCInfomationFVCMHSC2 "DTC Infomation of FVCM
+The length of DTC information signal is 7 bytes.
+Byte 0 is MSB (most significant byte), and Byte 6 is LSB (least significant byte).
+For each byte, Bit 7 is msb (most significant bit), and Bit 0 is lsb (least significant bit).
+
+Byte 0:
+Bit (7-4): DTC Serious Level
+Bit (3-0): Reserved
+
+Byte 1:
+Bit (7-0): Reserved
+
+Byte 2:
+Bit (7-0): DTCHighByte
+
+Byte 3:
+Bit (7-0): DTCLowByte
+
+Byte 4:
+Bit (7-0): DTCFailureTypeByte
+
+Byte 5:
+Bit 7: warningIndicatorRequested
+Bit 6: testNotCompletedThisOperationCycle
+Bit 5: testFailedSinceLastClear
+Bit 4: testNotCompletedSinceLastClear
+Bit 3: confirmedDTC
+Bit 2: pendingDTC
+Bit 1: testFailedThisOperationCycle
+Bit 0: testFailed
+
+Byte 6:
+Bit (7-0): DTC Type
+
+For more detail, please refer to SMTC 2 800 004.
+";
+CM_ SG_ 1851 DiagnosticRespFVCM "Diagnostic response from FVCM";
+CM_ SG_ 358 LDWSnstvtLvlHSC2 "Lane Departure Warning Sensitivity Level";
+CM_ SG_ 359 LDWLKADspCmdHSC2 "Lane Departure Warning Lane Keeping Assist Display Command
+";
+CM_ SG_ 359 LDWLKAHapticWrnngDspCmdHSC2 "Lane Departure Warning Lane Keeping Assist Haptic Warning Display Command";
+CM_ SG_ 359 LDWLKALVsulznReqHSC2 "Lane Departure Warning Lane Keeping Assist Left Visualization Request
+";
+CM_ SG_ 359 LDWLKARVsulznReqHSC2 "Lane Departure Warning Lane Keeping Assist Right Visualization Request
+";
+CM_ SG_ 359 TJAICADspCmdHSC2 "Traffic Jam Assist Integrated Cruise Assist Display Command";
+CM_ SG_ 359 TJAICASysFltStsHSC2 "Traffic Jam Assist Integrated Cruise Assist Fault Status
+";
+CM_ SG_ 359 TJAICASysStsHSC2 "Traffic Jam Assist Integrated Cruise Assist System Status
+";
+CM_ SG_ 721 TrnsfCaseMdHSC2 "Transfer Case Mode";
+CM_ SG_ 721 TrnsfCaseMdVHSC2 "Transfer Case Mode Validity";
+CM_ SG_ 2015 DiagnosticFuncAddrReq_h2 "Diagnostic functional address request";
+CM_ SG_ 1843 DiagnosticReqFVCM_h2 "Diagnostic request to FVCM";
+CM_ SG_ 1130 FrtWiperParkPosAHSC2 "Front Wiper Park Position Active
+Wiper Park Position for the Front wiperFront Wiper Park Position Active
+Wiper Park Position for the Front wiper";
+CM_ SG_ 1130 FrtWshrPumpAHSC2 "Front Washer Pump ActiveFront Washer Pump Active";
+CM_ SG_ 1130 RRDoorOpenStsHSC2 "Rear Right Door Open Status";
+CM_ SG_ 540 FrtWiperSwStsHSC2 "Front Wiper Switch StatusFront Wiper Switch Status";
+CM_ SG_ 886 LDWLKASwReqHSC2 "Lane Departure Warning Lane Keeping Assist Switch Request";
+CM_ SG_ 758 LDWLKAHapticWrnngReqHSC2 "Lane Departure Warning Lane Keeping Assist Haptic Warning Request";
+CM_ SG_ 758 TJAICASwReqHSC2 "Traffic Jam Assist Integrated Cruise Assist Switch Request";
+CM_ SG_ 758 AEBPedtrnSwReqHSC2 "Autonomous Emergency Braking Pedestrian Switch Request";
+CM_ SG_ 361 HCUAvlbly_h2HSC2 "HCU Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 795 VehDrvngMd_h2HSC2 "Vehicle Driving Mode";
+CM_ SG_ 175 EPTAccelActuPosPVHSC2 "Electric Powertrain Accelerator Actual Position Protection Value";
+CM_ SG_ 175 EPTBrkPdlDscrtInptStsPVHSC2 "Electric Powertrain Brake Pedal Discrete Input Status Protection Value";
+CM_ SG_ 175 EPTBrkPdlDscrtInptStsVHSC2 "Electric Powertrain Brake Pedal Discrete Input Status ValidityElectric Powertrain Brake Pedal Discrete Input Status Validity";
+CM_ SG_ 355 AirbagDplInvsnHSC2 "Airbag Deployed Inversion";
+CM_ SG_ 489 EnDragToqRducnAHSC2 "Engine Drag Torque Reduction Active
+";
+CM_ SG_ 840 WhlGndVelLDrvnVHSC2 "Wheel Ground Velocity Left Driven Validity";
+CM_ SG_ 840 WhlGndVelRDrvnVHSC2 "Wheel Ground Velocity Right Driven Validity";
+CM_ SG_ 842 WhlGndVelLNonDrvnVHSC2 "Wheel Ground Velocity Left Non Driven Validity";
+CM_ SG_ 842 WhlGndVelRNonDrvnVHSC2 "Wheel Ground Velocity Right  Non Driven Validity";
+CM_ SG_ 1948 DTCInfomationRadarHSC2 "DTC Infomation of Radar
+
+The length of DTC information signal is 7 bytes.
+Byte 0 is MSB (most significant byte), and Byte 6 is LSB (least significant byte).
+For each byte, Bit 7 is msb (most significant bit), and Bit 0 is lsb (least significant bit).
+
+Byte 0:
+Bit (7-4): DTC Serious Level
+Bit (3-0): Reserved
+
+Byte 1:
+Bit (7-0): Reserved
+
+Byte 2:
+Bit (7-0): DTCHighByte
+
+Byte 3:
+Bit (7-0): DTCLowByte
+
+Byte 4:
+Bit (7-0): DTCFailureTypeByte
+
+Byte 5:
+Bit 7: warningIndicatorRequested
+Bit 6: testNotCompletedThisOperationCycle
+Bit 5: testFailedSinceLastClear
+Bit 4: testNotCompletedSinceLastClear
+Bit 3: confirmedDTC
+Bit 2: pendingDTC
+Bit 1: testFailedThisOperationCycle
+Bit 0: testFailed
+
+Byte 6:
+Bit (7-0): DTC Type
+
+For more detail, please refer to SMTC 2 800 004.
+";
+CM_ SG_ 1852 DiagnosticRespRadar "Diagnostic response from Radar";
+CM_ SG_ 578 ACCAccReqStsHSC2 "Adaptive Cruise Control Acceleration Request Status";
+CM_ SG_ 578 ACCGoReqHSC2 "Adaptive Cruise Control Go Request";
+CM_ SG_ 580 ACCAccReqValGrdMaxHSC2 "2017.05.23:
+ACCAEBBrkJerkReqValMax name changed to ACCAccReqValGrdMax";
+CM_ SG_ 580 ACCAccReqValGrdMinHSC2 "2017.05.23 updated:
+ACCAEBBrkJerkReqValMin name changed to ACCAccReqValGrdMin";
+CM_ SG_ 580 AEBDclReqStsHSC2 "Autonomous Emergency Braking Deceleration Request Status";
+CM_ SG_ 580 AEBDclReqValHSC2 "Autonomous Emergency Braking Deceleration Request Value";
+CM_ SG_ 582 RdrCalPrgsReqHSC2 "Radar Calibration Progress Request";
+CM_ SG_ 898 FCWAHSC2 "Forward Collision Warning Active";
+CM_ SG_ 898 FCWTimeToColHSC2 "Forward Collision Warning Time To Collision";
+CM_ SG_ 898 ObsDataSyncCtrHSC2 "Obstacle Data Synchronize Counter";
+CM_ SG_ 898 ObsDataTmspHSC2 "Obstacle Data Timestamp";
+CM_ SG_ 898 PedtrnColWrnngAHSC2 "Pedestrian Collision Warning Active";
+CM_ SG_ 899 DngrsObjIdHSC2 "Dangerous Object Identifier";
+CM_ SG_ 899 DngrsObjLatRltvDistHSC2 "Dangerous Object Lateral Relative Distance";
+CM_ SG_ 899 DngrsObjLatRltvSpdHSC2 "Dangerous Object Lateral Relative Speed";
+CM_ SG_ 899 DngrsObjLongtRltvDistHSC2 "Dangerous Object Longitudinal Relative Distance";
+CM_ SG_ 899 DngrsObjLongtRltvSpdHSC2 "Dangerous Object Longitudinal Relative Speed";
+CM_ SG_ 899 DngrsObjSyncCtrHSC2 "Dangerous Object Synchronize Counter";
+CM_ SG_ 900 DngrsPedtrnIdHSC2 "Dangerous Pedestrian Identifier";
+CM_ SG_ 900 DngrsPedtrnLatRltvDistHSC2 "Dangerous Pedestrian Lateral Relative Distance";
+CM_ SG_ 900 DngrsPedtrnLatRltvSpdHSC2 "Dangerous Pedestrian Lateral Relative Speed";
+CM_ SG_ 900 DngrsPedtrnLongtRltvDistHSC2 "Dangerous Pedestrian Longitudinal Relative Distance";
+CM_ SG_ 900 DngrsPedtrnLongtRltvSpdHSC2 "Dangerous Pedestrian Longitudinal Relative Speed";
+CM_ SG_ 900 DngrsPedtrnSyncCtrHSC2 "Dangerous Pedestrian Synchronize Counter";
+CM_ SG_ 901 ACCDetObjExistPrbltyHSC2 "Adaptive Cruise Control Detected Object Exist Probability";
+CM_ SG_ 901 ACCDetObjIdHSC2 "Adaptive Cruise Control Detected Object Identifier";
+CM_ SG_ 901 ACCDetObjLatRltvDistHSC2 "Adaptive Cruise Control Detected Object Lateral Relative Distance";
+CM_ SG_ 901 ACCDetObjLongtRltvDistHSC2 "Adaptive Cruise Control Detected Object Longitudinal Relative Distance";
+CM_ SG_ 901 ACCDetObjLongtRltvSpdHSC2 "Adaptive Cruise Control Detected Object Longitudinal Relative Speed";
+CM_ SG_ 901 ACCDetObjSyncCtrHSC2 "Adaptive Cruise Control Detected Object Synchronize Counter";
+CM_ SG_ 901 ACCDetObsExistPrbltyHSC2 "Adaptive Cruise Control Detected Obstacle Exist Probability";
+CM_ SG_ 357 ACCAlvRCHSC2 "2017.05.23 updated:
+ACCAEBAlvRC name changed to ACCAlvRC";
+CM_ SG_ 357 ACCToqReqStsHSC2 "2017.05.23 updated
+ACCAEBToqReqSts name changed to ACCToqReqSts";
+CM_ SG_ 357 ACCToqReqValHSC2 "2017.05.23 updated:
+ACCAEBToqReqVal name changed to ACCToqReqVal";
+CM_ SG_ 357 ACCToqReqValPVHSC2 "2017.05.23 updated:
+ACCAEBToqReqValPV name changed to ACCToqReqValPV";
+CM_ SG_ 492 EPSDMCInhibitHSC1 "Electric Power Steering Driving Mode Control Inhibit
+";
+CM_ SG_ 492 StrgCustSetngAdjAvlblHSC1 "Steering Customization Setting Adjustment Available
+";
+CM_ SG_ 492 StrgCustSetngDspCmdHSC1 "Steering Customization Setting Display Command
+";
+CM_ SG_ 1844 DiagnosticReqRadar_h2 "Diagnostic request from Radar";
+CM_ SG_ 554 EPBAppcnStsHSC2 "Electric Park Brake Application Status";
+CM_ SG_ 554 EPBAppcnStsPVHSC2 "Electric Park Brake Application Status Protection Value";
+CM_ SG_ 172 EPTTrInptShaftToqAlvRlngCtrHSC2 "Electric Powertrain Transmission Input Shaft Torque Alive Rolling Counter";
+CM_ SG_ 172 EPTTrInptShaftToqChksmHSC2 "Electric Powertrain Transmission Input Shaft Torque Checksum";
+CM_ SG_ 223 EPTSecyAxleInptShaftSpdHSC2 "Electric Powertrain Secondary Axle Input Shaft Speed";
+CM_ SG_ 223 EPTSecyAxleInptShaftSpdVHSC2 "Electric Powertrain Secondary Axle Input Shaft Speed Validity";
+CM_ SG_ 593 ChACCAccReqRespHSC2 "2017.05.25
+ChACCAEBAccReqResp name changed to ChACCAccReqResp";
+CM_ SG_ 593 ChAEBDclReqRespHSC2 "2017.05.25
+ChACCAEBDclReqResp_Radar name changed to ChAEBDclReqResp";
+CM_ SG_ 593 ChAEBHydBrkAstReqRespHSC2 "2017.05.25:
+ChACCAEBHydBrkAstReqResp name changed to ChAEBHydBrkAstReqResp";
+CM_ SG_ 593 ChAEBPrflReqRespHSC2 "2017.05.25:
+ChACCAEBPrflReqResp name changed to ChAEBPrflReqResp
+
+,and encode updated
+
+ChAEBPrflReqResp
+
+";
+CM_ SG_ 977 EnEmsnRltdMalfAHSC2 "Engine Emissions Related Malfunction Active";
+CM_ SG_ 977 EnNonEmsnRltdMalfAHSC2 "Engine Non Emissions Related Malfunction Active";
+CM_ SG_ 678 TrCCCanclReqHSC2 "Transmission Cruise Control Cancel Request";
+BA_DEF_  "BaudRate" FLOAT 1000 1000000;
+BA_DEF_ SG_  "GenSigLongName" STRING ;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "cyclic","spontaneous","cyclicIfActive","spontaneousWithDelay","OnChangeWithRepetition","Immediate";
+BA_DEF_ BO_  "GenMsgCycleTime" FLOAT 0 300000;
+BA_DEF_ SG_  "GenSigStartValue" INT -9.22337203685478E+018 1.84467440737096E+019;
+BA_DEF_DEF_  "BaudRate" 1000;
+BA_DEF_DEF_  "GenSigLongName" "";
+BA_DEF_DEF_  "GenMsgSendType" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_ "BaudRate" 500000;
+BA_ "GenMsgSendType" BO_ 437 0;
+BA_ "GenMsgCycleTime" BO_ 437 20;
+BA_ "GenMsgSendType" BO_ 433 0;
+BA_ "GenMsgCycleTime" BO_ 433 20;
+BA_ "GenMsgSendType" BO_ 424 0;
+BA_ "GenMsgCycleTime" BO_ 424 20;
+BA_ "GenMsgSendType" BO_ 438 0;
+BA_ "GenMsgCycleTime" BO_ 438 20;
+BA_ "GenMsgSendType" BO_ 1947 1;
+BA_ "GenMsgCycleTime" BO_ 1947 0;
+BA_ "GenMsgSendType" BO_ 1851 5;
+BA_ "GenMsgCycleTime" BO_ 1851 0;
+BA_ "GenMsgSendType" BO_ 358 0;
+BA_ "GenMsgCycleTime" BO_ 358 20;
+BA_ "GenMsgSendType" BO_ 359 0;
+BA_ "GenMsgCycleTime" BO_ 359 20;
+BA_ "GenMsgSendType" BO_ 509 0;
+BA_ "GenMsgCycleTime" BO_ 509 20;
+BA_ "GenMsgCycleTime" BO_ 721 50;
+BA_ "GenMsgSendType" BO_ 721 0;
+BA_ "GenMsgCycleTime" BO_ 2015 0;
+BA_ "GenMsgSendType" BO_ 2015 5;
+BA_ "GenMsgSendType" BO_ 1843 5;
+BA_ "GenMsgCycleTime" BO_ 1843 0;
+BA_ "GenMsgSendType" BO_ 492 0;
+BA_ "GenMsgCycleTime" BO_ 492 20;
+BA_ "GenMsgCycleTime" BO_ 1130 50;
+BA_ "GenMsgSendType" BO_ 1130 0;
+BA_ "GenMsgCycleTime" BO_ 540 50;
+BA_ "GenMsgSendType" BO_ 540 0;
+BA_ "GenMsgCycleTime" BO_ 498 20;
+BA_ "GenMsgSendType" BO_ 498 0;
+BA_ "GenMsgCycleTime" BO_ 404 20;
+BA_ "GenMsgSendType" BO_ 404 0;
+BA_ "GenMsgCycleTime" BO_ 251 10;
+BA_ "GenMsgSendType" BO_ 251 0;
+BA_ "GenMsgCycleTime" BO_ 886 100;
+BA_ "GenMsgSendType" BO_ 886 0;
+BA_ "GenMsgCycleTime" BO_ 758 50;
+BA_ "GenMsgSendType" BO_ 758 0;
+BA_ "GenMsgCycleTime" BO_ 361 20;
+BA_ "GenMsgSendType" BO_ 361 0;
+BA_ "GenMsgCycleTime" BO_ 497 20;
+BA_ "GenMsgSendType" BO_ 497 0;
+BA_ "GenMsgCycleTime" BO_ 1344 1000;
+BA_ "GenMsgSendType" BO_ 1344 0;
+BA_ "GenMsgCycleTime" BO_ 795 100;
+BA_ "GenMsgSendType" BO_ 795 0;
+BA_ "GenMsgCycleTime" BO_ 1009 250;
+BA_ "GenMsgSendType" BO_ 1009 0;
+BA_ "GenMsgCycleTime" BO_ 175 10;
+BA_ "GenMsgSendType" BO_ 175 0;
+BA_ "GenMsgCycleTime" BO_ 406 20;
+BA_ "GenMsgSendType" BO_ 406 0;
+BA_ "GenMsgCycleTime" BO_ 1345 200;
+BA_ "GenMsgSendType" BO_ 1345 0;
+BA_ "GenMsgCycleTime" BO_ 355 20;
+BA_ "GenMsgSendType" BO_ 355 0;
+BA_ "GenMsgCycleTime" BO_ 485 10;
+BA_ "GenMsgSendType" BO_ 485 0;
+BA_ "GenMsgCycleTime" BO_ 389 20;
+BA_ "GenMsgSendType" BO_ 389 0;
+BA_ "GenMsgSendType" BO_ 455 0;
+BA_ "GenMsgCycleTime" BO_ 455 10;
+BA_ "GenMsgCycleTime" BO_ 489 10;
+BA_ "GenMsgSendType" BO_ 489 0;
+BA_ "GenMsgSendType" BO_ 532 0;
+BA_ "GenMsgCycleTime" BO_ 532 50;
+BA_ "GenMsgSendType" BO_ 840 0;
+BA_ "GenMsgCycleTime" BO_ 840 50;
+BA_ "GenMsgSendType" BO_ 842 0;
+BA_ "GenMsgCycleTime" BO_ 842 50;
+BA_ "GenMsgSendType" BO_ 381 0;
+BA_ "GenMsgCycleTime" BO_ 381 100;
+BA_ "GenMsgCycleTime" BO_ 851 100;
+BA_ "GenMsgSendType" BO_ 851 0;
+BA_ "GenMsgCycleTime" BO_ 572 20;
+BA_ "GenMsgSendType" BO_ 572 0;
+BA_ "GenMsgCycleTime" BO_ 588 20;
+BA_ "GenMsgSendType" BO_ 588 0;
+BA_ "GenMsgCycleTime" BO_ 201 10;
+BA_ "GenMsgSendType" BO_ 201 0;
+BA_ "GenMsgCycleTime" BO_ 190 10;
+BA_ "GenMsgSendType" BO_ 190 0;
+BA_ "GenMsgCycleTime" BO_ 471 25;
+BA_ "GenMsgSendType" BO_ 471 0;
+BA_ "GenMsgCycleTime" BO_ 1948 0;
+BA_ "GenMsgSendType" BO_ 1948 1;
+BA_ "GenMsgCycleTime" BO_ 1852 0;
+BA_ "GenMsgSendType" BO_ 1852 5;
+BA_ "GenMsgCycleTime" BO_ 578 20;
+BA_ "GenMsgSendType" BO_ 578 0;
+BA_ "GenMsgCycleTime" BO_ 580 20;
+BA_ "GenMsgSendType" BO_ 580 0;
+BA_ "GenMsgCycleTime" BO_ 582 20;
+BA_ "GenMsgSendType" BO_ 582 0;
+BA_ "GenMsgCycleTime" BO_ 898 100;
+BA_ "GenMsgSendType" BO_ 898 0;
+BA_ "GenMsgCycleTime" BO_ 899 100;
+BA_ "GenMsgSendType" BO_ 899 0;
+BA_ "GenMsgCycleTime" BO_ 900 100;
+BA_ "GenMsgSendType" BO_ 900 0;
+BA_ "GenMsgCycleTime" BO_ 901 100;
+BA_ "GenMsgSendType" BO_ 901 0;
+BA_ "GenMsgCycleTime" BO_ 357 20;
+BA_ "GenMsgSendType" BO_ 357 0;
+BA_ "GenMsgCycleTime" BO_ 1844 0;
+BA_ "GenMsgSendType" BO_ 1844 5;
+BA_ "GenMsgCycleTime" BO_ 560 20;
+BA_ "GenMsgSendType" BO_ 560 0;
+BA_ "GenMsgCycleTime" BO_ 554 20;
+BA_ "GenMsgSendType" BO_ 554 0;
+BA_ "GenMsgCycleTime" BO_ 481 30;
+BA_ "GenMsgSendType" BO_ 481 0;
+BA_ "GenMsgCycleTime" BO_ 425 50;
+BA_ "GenMsgSendType" BO_ 425 0;
+BA_ "GenMsgCycleTime" BO_ 907 100;
+BA_ "GenMsgSendType" BO_ 907 0;
+BA_ "GenMsgCycleTime" BO_ 172 10;
+BA_ "GenMsgSendType" BO_ 172 0;
+BA_ "GenMsgCycleTime" BO_ 412 10;
+BA_ "GenMsgSendType" BO_ 412 0;
+BA_ "GenMsgCycleTime" BO_ 223 10;
+BA_ "GenMsgSendType" BO_ 223 0;
+BA_ "GenMsgCycleTime" BO_ 431 20;
+BA_ "GenMsgSendType" BO_ 431 0;
+BA_ "GenMsgCycleTime" BO_ 1225 500;
+BA_ "GenMsgSendType" BO_ 1225 0;
+BA_ "GenMsgCycleTime" BO_ 562 10;
+BA_ "GenMsgSendType" BO_ 562 0;
+BA_ "GenMsgCycleTime" BO_ 590 20;
+BA_ "GenMsgSendType" BO_ 590 0;
+BA_ "GenMsgCycleTime" BO_ 593 20;
+BA_ "GenMsgSendType" BO_ 593 0;
+BA_ "GenMsgCycleTime" BO_ 451 25;
+BA_ "GenMsgSendType" BO_ 451 0;
+BA_ "GenMsgCycleTime" BO_ 707 50;
+BA_ "GenMsgSendType" BO_ 707 0;
+BA_ "GenMsgCycleTime" BO_ 977 100;
+BA_ "GenMsgSendType" BO_ 977 0;
+BA_ "GenMsgCycleTime" BO_ 678 50;
+BA_ "GenMsgSendType" BO_ 678 0;
+BA_ "GenSigStartValue" SG_ 433 EPSAPAStsHSC1 0;
+BA_ "GenSigStartValue" SG_ 438 BrkPdlAppdChksmHSC2 0;
+BA_ "GenSigLongName" SG_ 438 IbstrDiagMdAHSC2 "Ibooster Diagnosis Mode Active";
+BA_ "GenSigStartValue" SG_ 438 IbstrDiagMdAHSC2 0;
+BA_ "GenSigLongName" SG_ 438 RnotPrsStsHSC2 "Runout Pressure Status";
+BA_ "GenSigStartValue" SG_ 438 RnotPrsStsHSC2 0;
+BA_ "GenSigLongName" SG_ 438 HydBstrCmpstnReqHSC2 "Hydraulic Booster Compensation Request";
+BA_ "GenSigStartValue" SG_ 438 HydBstrCmpstnReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 438 BrkPdlAppdRCHSC2 0;
+BA_ "GenSigLongName" SG_ 438 RnotPrsHSC2 "Runout Pressure";
+BA_ "GenSigStartValue" SG_ 438 RnotPrsHSC2 0;
+BA_ "GenSigLongName" SG_ 438 BrkPdlAppdHSC2 "Brake Pedal Applied";
+BA_ "GenSigStartValue" SG_ 438 BrkPdlAppdHSC2 0;
+BA_ "GenSigLongName" SG_ 438 BrkPdlAppdVHSC2 "Brake Pedal Applied Validity";
+BA_ "GenSigStartValue" SG_ 438 BrkPdlAppdVHSC2 0;
+BA_ "GenSigStartValue" SG_ 1947 DTCInfomationFVCMHSC2 0;
+BA_ "GenSigStartValue" SG_ 1851 DiagnosticRespFVCM 0;
+BA_ "GenSigStartValue" SG_ 358 FVCMBlkdHSC2 0;
+BA_ "GenSigLongName" SG_ 358 FVCMBlkdHSC2 "Front View Camera Module Blocked";
+BA_ "GenSigStartValue" SG_ 358 FVCMFltStsHSC2 0;
+BA_ "GenSigLongName" SG_ 358 FVCMFltStsHSC2 "Front View Camera Module Fault Status";
+BA_ "GenSigStartValue" SG_ 358 LDWAdoWrnngDspCmdHSC2 2;
+BA_ "GenSigLongName" SG_ 358 LDWAdoWrnngDspCmdHSC2 "Lane Departure Warning Audio Warning Display Command";
+BA_ "GenSigStartValue" SG_ 358 LDWSnstvtLvlHSC2 2;
+BA_ "GenSigStartValue" SG_ 358 LDWSysStsHSC2 0;
+BA_ "GenSigLongName" SG_ 358 LDWSysStsHSC2 "Lane Departure Warning System Status";
+BA_ "GenSigStartValue" SG_ 359 AutoMainBeamLghtReqHSC2 0;
+BA_ "GenSigLongName" SG_ 359 AutoMainBeamLghtReqHSC2 "Auto Main Beam Light Request";
+BA_ "GenSigStartValue" SG_ 359 DistSinceTrgtCamrHSC2 0;
+BA_ "GenSigLongName" SG_ 359 DistSinceTrgtCamrHSC2 "Distance Since Target Camera";
+BA_ "GenSigStartValue" SG_ 359 FVCMCalPrgsReqHSC2 0;
+BA_ "GenSigLongName" SG_ 359 FVCMCalPrgsReqHSC2 "FVCM Calibration Progress Request";
+BA_ "GenSigStartValue" SG_ 359 HandOffStrgWhlDetnStaHSC2 1;
+BA_ "GenSigLongName" SG_ 359 HandOffStrgWhlDetnStaHSC2 "Hand Off Steering Wheel Detection State";
+BA_ "GenSigStartValue" SG_ 359 HandOffStrgWhlDetnStaVHSC2 0;
+BA_ "GenSigLongName" SG_ 359 HandOffStrgWhlDetnStaVHSC2 "Hand Off Steering Wheel Detection State Validity";
+BA_ "GenSigStartValue" SG_ 359 LDWLKADspCmdHSC2 1;
+BA_ "GenSigLongName" SG_ 359 LDWLKADspCmdHSC2 "Lane Departure Warning Lane Keeping Assist Display Command";
+BA_ "GenSigStartValue" SG_ 359 LDWLKAHapticWrnngDspCmdHSC2 2;
+BA_ "GenSigLongName" SG_ 359 LDWLKAHapticWrnngDspCmdHSC2 "Lane Departure Warning Lane Keeping Assist Haptic Warning Display Command";
+BA_ "GenSigStartValue" SG_ 359 LDWLKALVsulznReqHSC2 0;
+BA_ "GenSigLongName" SG_ 359 LDWLKALVsulznReqHSC2 "Lane Departure Warning Lane Keeping Assist Left Visualization Request";
+BA_ "GenSigStartValue" SG_ 359 LDWLKARVsulznReqHSC2 0;
+BA_ "GenSigLongName" SG_ 359 LDWLKARVsulznReqHSC2 "Lane Departure Warning Lane Keeping Assist Right Visualization Request";
+BA_ "GenSigStartValue" SG_ 359 LDWSysFltStsHSC2 0;
+BA_ "GenSigLongName" SG_ 359 LDWSysFltStsHSC2 "Lane Departure Warning System Fault Status";
+BA_ "GenSigStartValue" SG_ 359 SpdAstReqStsCamrHSC2 1;
+BA_ "GenSigLongName" SG_ 359 SpdAstReqStsCamrHSC2 "Speed Assist Request Status Camera";
+BA_ "GenSigStartValue" SG_ 359 TJAICADspCmdHSC2 1;
+BA_ "GenSigLongName" SG_ 359 TJAICADspCmdHSC2 "Traffic Jam Assist Integrated Cruise Assist Display Command";
+BA_ "GenSigStartValue" SG_ 359 TJAICASysFltStsHSC2 0;
+BA_ "GenSigLongName" SG_ 359 TJAICASysFltStsHSC2 "Traffic Jam Assist Integrated Cruise Assist Fault Status";
+BA_ "GenSigStartValue" SG_ 359 TJAICASysStsHSC2 0;
+BA_ "GenSigLongName" SG_ 359 TJAICASysStsHSC2 "Traffic Jam Assist Integrated Cruise Assist System Status";
+BA_ "GenSigStartValue" SG_ 359 TrgtSpdReqCamrHSC2 0;
+BA_ "GenSigLongName" SG_ 359 TrgtSpdReqCamrHSC2 "Target Speed Request Camera";
+BA_ "GenSigStartValue" SG_ 509 LDWLKAVbnLvlReqHSC2 0;
+BA_ "GenSigLongName" SG_ 509 LDWLKAVbnLvlReqHSC2 "Lane Departure Warning Lane Keeping Assist Vibration Level Request";
+BA_ "GenSigStartValue" SG_ 509 LKAAlvRCHSC2 0;
+BA_ "GenSigLongName" SG_ 509 LKAAlvRCHSC2 "Lane Keeping Assist Alive Rolling Count";
+BA_ "GenSigStartValue" SG_ 509 LKADrvrTkovReqHSC2 0;
+BA_ "GenSigLongName" SG_ 509 LKADrvrTkovReqHSC2 "Lane Keeping Assist Driver Takeover Request";
+BA_ "GenSigStartValue" SG_ 509 LKAReqToqHSC2 0;
+BA_ "GenSigLongName" SG_ 509 LKAReqToqHSC2 "Lane Keeping Assist Request Torque";
+BA_ "GenSigStartValue" SG_ 509 LKAReqToqPVHSC2 0;
+BA_ "GenSigLongName" SG_ 509 LKAReqToqPVHSC2 "Lane Keeping Assist Request Torque Protection Value";
+BA_ "GenSigStartValue" SG_ 509 LKAReqToqStsHSC2 0;
+BA_ "GenSigLongName" SG_ 509 LKAReqToqStsHSC2 "Lane Keeping Assist Torque Request Status";
+BA_ "GenSigStartValue" SG_ 509 LKAReqToqVHSC2 0;
+BA_ "GenSigLongName" SG_ 509 LKAReqToqVHSC2 "Lane Keeping Assist Request Torque Validity";
+BA_ "GenSigStartValue" SG_ 509 LKASysFltStsHSC2 0;
+BA_ "GenSigLongName" SG_ 509 LKASysFltStsHSC2 "Lane Keeping Assist System Fault Status";
+BA_ "GenSigStartValue" SG_ 509 LKASysStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 721 TrnsfCaseMdHSC2 0;
+BA_ "GenSigStartValue" SG_ 721 TrnsfCaseMdVHSC2 0;
+BA_ "GenSigStartValue" SG_ 2015 DiagnosticFuncAddrReq_h2 0;
+BA_ "GenSigStartValue" SG_ 1843 DiagnosticReqFVCM_h2 0;
+BA_ "GenSigStartValue" SG_ 492 ChLKAAlvRCHSC2 0;
+BA_ "GenSigLongName" SG_ 492 ChLKAAlvRCHSC2 "Chassis Lane Keeping Assist Alive Rolling Count";
+BA_ "GenSigStartValue" SG_ 492 ChLKACtrlStsHSC2 0;
+BA_ "GenSigLongName" SG_ 492 ChLKACtrlStsHSC2 "Chassis Lane Keeping Assist Control Status";
+BA_ "GenSigStartValue" SG_ 492 ChLKARespToqHSC2 0;
+BA_ "GenSigLongName" SG_ 492 ChLKARespToqHSC2 "Chassis Lane Keeping Assist Response Torque";
+BA_ "GenSigStartValue" SG_ 492 ChLKARespToqPVHSC2 0;
+BA_ "GenSigStartValue" SG_ 492 ChLKARespToqVHSC2 0;
+BA_ "GenSigLongName" SG_ 492 ChLKARespToqVHSC2 "Chassis Lane Keeping Assist Response Torque Validity";
+BA_ "GenSigStartValue" SG_ 492 DrvrStrgDlvrdToqHSC2 0;
+BA_ "GenSigLongName" SG_ 492 DrvrStrgDlvrdToqHSC2 "Driver Steering Delivered Torque";
+BA_ "GenSigStartValue" SG_ 492 DrvrStrgDlvrdToqVHSC2 0;
+BA_ "GenSigLongName" SG_ 492 DrvrStrgDlvrdToqVHSC2 "Driver Steering Delivered Torque Validity";
+BA_ "GenSigLongName" SG_ 1130 BntOpenStsHSC2 "Bonnet Open Status";
+BA_ "GenSigStartValue" SG_ 1130 BntOpenStsHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 DipdBeamLghtOnHSC2 "Dipped Beam Light On";
+BA_ "GenSigStartValue" SG_ 1130 DipdBeamLghtOnHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 DircnIndLampSwStsHSC2 "Direction Indication Lamp Switch Status";
+BA_ "GenSigStartValue" SG_ 1130 DircnIndLampSwStsHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 DrvrDoorOpenStsHSC2 "Driver Door Open Status";
+BA_ "GenSigStartValue" SG_ 1130 DrvrDoorOpenStsHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 DspMeasSysHSC2 "Display Measurement System";
+BA_ "GenSigStartValue" SG_ 1130 DspMeasSysHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 FrtFogLghtOnHSC2 "Front Fog Light On";
+BA_ "GenSigStartValue" SG_ 1130 FrtFogLghtOnHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 FrtPsngDoorOpenStsHSC2 "Front Passenger Door Open Status";
+BA_ "GenSigStartValue" SG_ 1130 FrtPsngDoorOpenStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 1130 FrtWiperParkPosAHSC2 0;
+BA_ "GenSigStartValue" SG_ 1130 FrtWshrPumpAHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 KeyDetIndxHSC2 "Key Detected Index";
+BA_ "GenSigStartValue" SG_ 1130 KeyDetIndxHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 LDircnIndLghtFHSC2 "Left Direction Indication Light Failed";
+BA_ "GenSigStartValue" SG_ 1130 LDircnIndLghtFHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 LDircnIOHSC2 "Left Direction Indication On";
+BA_ "GenSigStartValue" SG_ 1130 LDircnIOHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 LdspcOpenStsHSC2 "Loadspace Open Status";
+BA_ "GenSigStartValue" SG_ 1130 LdspcOpenStsHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 MainBeamLghtOnHSC2 "Main Beam Light On";
+BA_ "GenSigStartValue" SG_ 1130 MainBeamLghtOnHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 RDircnIndLghtFHSC2 "Right Direction Indication Light Failed";
+BA_ "GenSigStartValue" SG_ 1130 RDircnIndLghtFHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 RDircnIOHSC2 "Right Direction Indication On";
+BA_ "GenSigStartValue" SG_ 1130 RDircnIOHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 RLDoorOpenStsHSC2 "Rear Left Door Open Status";
+BA_ "GenSigStartValue" SG_ 1130 RLDoorOpenStsHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 RRDoorOpenStsHSC2 "Rear Right Door Open Status";
+BA_ "GenSigStartValue" SG_ 1130 RRDoorOpenStsHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 RrFogLghtOnHSC2 "Rear Fog Light On";
+BA_ "GenSigStartValue" SG_ 1130 RrFogLghtOnHSC2 0;
+BA_ "GenSigLongName" SG_ 1130 VehSideLghtStsHSC2 "Vehicle Side Light Status";
+BA_ "GenSigStartValue" SG_ 1130 VehSideLghtStsHSC2 0;
+BA_ "GenSigLongName" SG_ 540 ClstrDspdVehSpdHSC2 "Cluster Displayed Vehicle Speed";
+BA_ "GenSigStartValue" SG_ 540 ClstrDspdVehSpdHSC2 0;
+BA_ "GenSigStartValue" SG_ 540 FrtWiperSwStsHSC2 0;
+BA_ "GenSigLongName" SG_ 498 SysBPMHSC2 "System Backup Power Mode";
+BA_ "GenSigStartValue" SG_ 498 SysBPMHSC2 0;
+BA_ "GenSigLongName" SG_ 498 SysBPMEnbdHSC2 "System Backup Power Mode Enabled";
+BA_ "GenSigStartValue" SG_ 498 SysBPMEnbdHSC2 0;
+BA_ "GenSigLongName" SG_ 404 TrEstdGearHSC2 "Transmission Estimated Gear";
+BA_ "GenSigStartValue" SG_ 404 TrEstdGearHSC2 0;
+BA_ "GenSigLongName" SG_ 404 TrEstdGearVHSC2 "Transmission Estimated Gear Validity";
+BA_ "GenSigStartValue" SG_ 404 TrEstdGearVHSC2 0;
+BA_ "GenSigLongName" SG_ 404 TrShftLvrPosV_h1HSC2 "Transmission Shift Lever Position Validity";
+BA_ "GenSigStartValue" SG_ 404 TrShftLvrPosV_h1HSC2 0;
+BA_ "GenSigLongName" SG_ 404 TrShftLvrPos_h1HSC2 "Transmission Shift Lever Position";
+BA_ "GenSigStartValue" SG_ 404 TrShftLvrPos_h1HSC2 0;
+BA_ "GenSigLongName" SG_ 251 AccelOvrdHSC2 "Accelerator Override";
+BA_ "GenSigStartValue" SG_ 251 AccelOvrdHSC2 0;
+BA_ "GenSigLongName" SG_ 251 PtACCToqReqRespHSC2 "Powertrain Adaptive Cruise Control Torque Request Response";
+BA_ "GenSigStartValue" SG_ 251 PtACCToqReqRespHSC2 0;
+BA_ "GenSigLongName" SG_ 251 PtACCToqReqRespPVHSC2 "Powertrain Adaptive Cruise Control Torque Request Response Protection Value";
+BA_ "GenSigStartValue" SG_ 251 PtACCToqReqRespPVHSC2 0;
+BA_ "GenSigLongName" SG_ 251 PtADASAlvRCHSC2 "Powertrain Advance Driver Assist System Alive Rolling Count";
+BA_ "GenSigStartValue" SG_ 251 PtADASAlvRCHSC2 0;
+BA_ "GenSigStartValue" SG_ 251 SpdAstMdECMHSC2 0;
+BA_ "GenSigLongName" SG_ 251 SpdAstMdECMHSC2 "Speed Assist Mode Engine Control Module";
+BA_ "GenSigStartValue" SG_ 251 SpdAstSysStsECMHSC2 0;
+BA_ "GenSigLongName" SG_ 251 SpdAstSysStsECMHSC2 "Speed Assist System Status Engine Control Module";
+BA_ "GenSigStartValue" SG_ 251 SpdAstSysTrgtSpdHSC2 0;
+BA_ "GenSigLongName" SG_ 251 SpdAstSysTrgtSpdHSC2 "Speed Assist System Target Speed";
+BA_ "GenSigStartValue" SG_ 251 TrgtSpdSrcStsHSC2 0;
+BA_ "GenSigLongName" SG_ 251 TrgtSpdSrcStsHSC2 "Target Speed Source Status";
+BA_ "GenSigLongName" SG_ 886 LDWLKASwReqHSC2 "Lane Departure Warning Lane Keeping Assist Switch Request";
+BA_ "GenSigStartValue" SG_ 886 LDWLKASwReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 886 RstrFctryDeftsReqHSC2 0;
+BA_ "GenSigLongName" SG_ 886 RstrFctryDeftsReqHSC2 "Restore Factory Defaults Request";
+BA_ "GenSigStartValue" SG_ 758 LDWAdoWrnngReqHSC2 0;
+BA_ "GenSigLongName" SG_ 758 LDWAdoWrnngReqHSC2 "Lane Departure Warning Audio Warning Request";
+BA_ "GenSigStartValue" SG_ 758 LDWLKAHapticWrnngReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 758 LDWSnstvtLvlReqHSC2 0;
+BA_ "GenSigLongName" SG_ 758 LDWSnstvtLvlReqHSC2 "Lane Departure Warning Sensitivity Level Request";
+BA_ "GenSigStartValue" SG_ 758 TJAICASwReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 758 AEBPedtrnSwReqHSC2 0;
+BA_ "GenSigLongName" SG_ 758 AEBSwReqHSC2 "Autonomous Emergency Braking Switch Request";
+BA_ "GenSigStartValue" SG_ 758 AEBSwReqHSC2 0;
+BA_ "GenSigLongName" SG_ 758 FCWSnstvtLvlReqHSC2 "Forward Collision Warning Sensitivity Level Request";
+BA_ "GenSigStartValue" SG_ 758 FCWSnstvtLvlReqHSC2 0;
+BA_ "GenSigLongName" SG_ 758 FCWSwReqHSC2 "Forward Collision Warning Switch Request";
+BA_ "GenSigStartValue" SG_ 758 FCWSwReqHSC2 0;
+BA_ "GenSigLongName" SG_ 361 BCMAvlbly_h2HSC2 "Body Control Module Availability";
+BA_ "GenSigStartValue" SG_ 361 BCMAvlbly_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 361 ECMAvlbly_h2HSC2 "Engine Control Module Availability";
+BA_ "GenSigStartValue" SG_ 361 ECMAvlbly_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 361 FICMAvlbly_h2HSC2 "Front Infotainment Control Module Availability";
+BA_ "GenSigStartValue" SG_ 361 FICMAvlbly_h2HSC2 0;
+BA_ "GenSigStartValue" SG_ 361 HCUAvlbly_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 361 IPCAvlbly_h2HSC2 "Instrument Cluster Availability";
+BA_ "GenSigStartValue" SG_ 361 IPCAvlbly_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 361 SDMAvlbly_h2HSC2 "Sensing Diagnostic Module Availability";
+BA_ "GenSigStartValue" SG_ 361 SDMAvlbly_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 361 TBOXAvlbly_h2HSC2 "Telematics Box Availability";
+BA_ "GenSigStartValue" SG_ 361 TBOXAvlbly_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 361 TCMAvlbly_h2HSC2 "Transmission Control Module Availability";
+BA_ "GenSigStartValue" SG_ 361 TCMAvlbly_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 497 BPMMstrAvlbly_h2HSC2 "Backup Power Mode Master Availability";
+BA_ "GenSigStartValue" SG_ 497 BPMMstrAvlbly_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 497 PwrMdMstrAccryA_h2HSC2 "Power Mode Master Accessory Active";
+BA_ "GenSigStartValue" SG_ 497 PwrMdMstrAccryA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 497 PwrMdMstrRunCrkA_h2HSC2 "Power Mode Master Run Crank Active";
+BA_ "GenSigStartValue" SG_ 497 PwrMdMstrRunCrkA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 497 SysOpnlMd_h2HSC2 "System Operational Mode";
+BA_ "GenSigStartValue" SG_ 497 SysOpnlMd_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 497 SysPwrMd_h2HSC2 "System Power Mode";
+BA_ "GenSigStartValue" SG_ 497 SysPwrMd_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 497 SysVolMdV_h2HSC2 "System Voltage Mode Validity";
+BA_ "GenSigStartValue" SG_ 497 SysVolMdV_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 497 SysVolMd_h2HSC2 "System Voltage Mode";
+BA_ "GenSigStartValue" SG_ 497 SysVolMd_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 497 SysVolV_h2HSC2 "System Voltage Validity";
+BA_ "GenSigStartValue" SG_ 497 SysVolV_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 497 SysVol_h2HSC2 "System Voltage";
+BA_ "GenSigStartValue" SG_ 497 SysVol_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 1344 VehOdoV_h2HSC2 "Vehicle Odometer Validity";
+BA_ "GenSigStartValue" SG_ 1344 VehOdoV_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 1344 VehOdo_h2HSC2 "Vehicle Odometer";
+BA_ "GenSigStartValue" SG_ 1344 VehOdo_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 795 VehDrvngMd_h2HSC2 "Vehicle Driving Mode";
+BA_ "GenSigStartValue" SG_ 795 VehDrvngMd_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 1009 OtsdAirTemCrValV_h2HSC2 "Outside Air Temperature Corrected Value Validity";
+BA_ "GenSigStartValue" SG_ 1009 OtsdAirTemCrValV_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 1009 OtsdAirTemCrVal_h2HSC2 "Outside Air Temperature Corrected Value";
+BA_ "GenSigStartValue" SG_ 1009 OtsdAirTemCrVal_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 175 EPTAccelActuPosHSC2 "Electric Powertrain Accelerator Actual Position";
+BA_ "GenSigStartValue" SG_ 175 EPTAccelActuPosHSC2 0;
+BA_ "GenSigStartValue" SG_ 175 EPTAccelActuPosPVHSC2 0;
+BA_ "GenSigLongName" SG_ 175 EPTAccelActuPosVHSC2 "Electric Powertrain Accelerator Actual Position Validity";
+BA_ "GenSigStartValue" SG_ 175 EPTAccelActuPosVHSC2 0;
+BA_ "GenSigLongName" SG_ 175 EPTBrkPdlDscrtInptStsHSC2 "Electric Powertrain Brake Pedal Discrete Input Status";
+BA_ "GenSigStartValue" SG_ 175 EPTBrkPdlDscrtInptStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 175 EPTBrkPdlDscrtInptStsPVHSC2 0;
+BA_ "GenSigStartValue" SG_ 175 EPTBrkPdlDscrtInptStsVHSC2 1;
+BA_ "GenSigLongName" SG_ 175 EPTStCmdOn_h1HSC2 "Electric Powertrain Start Command On";
+BA_ "GenSigStartValue" SG_ 175 EPTStCmdOn_h1HSC2 0;
+BA_ "GenSigLongName" SG_ 175 HCU_FrP00_RollingCounterHSC2 "Rolling Counter For Hcu frp00";
+BA_ "GenSigStartValue" SG_ 175 HCU_FrP00_RollingCounterHSC2 0;
+BA_ "GenSigLongName" SG_ 406 EPTAccelEfctvPosHSC2 "Electric Powertrain Accelerator Effective Position";
+BA_ "GenSigStartValue" SG_ 406 EPTAccelEfctvPosHSC2 0;
+BA_ "GenSigLongName" SG_ 406 EPTRdy_h1HSC2 "Electric Powertrain Ready";
+BA_ "GenSigStartValue" SG_ 406 EPTRdy_h1HSC2 0;
+BA_ "GenSigLongName" SG_ 1345 CalendarDayHSC2 "Calendar Day";
+BA_ "GenSigStartValue" SG_ 1345 CalendarDayHSC2 0;
+BA_ "GenSigLongName" SG_ 1345 CalendarMonthHSC2 "Calendar Month";
+BA_ "GenSigStartValue" SG_ 1345 CalendarMonthHSC2 0;
+BA_ "GenSigLongName" SG_ 1345 CalendarYearHSC2 "Calendar Year";
+BA_ "GenSigStartValue" SG_ 1345 CalendarYearHSC2 0;
+BA_ "GenSigLongName" SG_ 1345 HourOfDayHSC2 "Hour Of Day";
+BA_ "GenSigStartValue" SG_ 1345 HourOfDayHSC2 0;
+BA_ "GenSigLongName" SG_ 1345 MinuteOfHourHSC2 "Minute Of Hour";
+BA_ "GenSigStartValue" SG_ 1345 MinuteOfHourHSC2 0;
+BA_ "GenSigLongName" SG_ 1345 SecsOfMinuteHSC2 "Seconds Of Minute";
+BA_ "GenSigStartValue" SG_ 1345 SecsOfMinuteHSC2 0;
+BA_ "GenSigLongName" SG_ 355 AirbagDplHSC2 "Airbag Deployed";
+BA_ "GenSigStartValue" SG_ 355 AirbagDplHSC2 0;
+BA_ "GenSigStartValue" SG_ 355 AirbagDplInvsnHSC2 1;
+BA_ "GenSigLongName" SG_ 355 DrvrSbltAtcHSC2 "Driver Seatbelt Attached";
+BA_ "GenSigStartValue" SG_ 355 DrvrSbltAtcHSC2 0;
+BA_ "GenSigLongName" SG_ 355 DrvrSbltAtcVHSC2 "Driver Seatbelt Attached Validity";
+BA_ "GenSigStartValue" SG_ 355 DrvrSbltAtcVHSC2 0;
+BA_ "GenSigLongName" SG_ 355 SDMRCHSC2 "Sensing Diagnostic Module Rolling Count";
+BA_ "GenSigStartValue" SG_ 355 SDMRCHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngHSC2 "Steering Wheel Angle";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngAlvRCHSC2 "Steering Wheel Angle Alive Rolling Count";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngAlvRCHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngExtdPVHSC2 "Steering Wheel Angle Extended Protection Value";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngExtdPVHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngGrdHSC2 "Steering Wheel Angle Gradient";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngGrdHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngSnsrCalStsHSC2 "Steering Wheel Angle Sensor Calibration Status";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngSnsrCalStsHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngSnsrChksmHSC2 "Steering Wheel Angle Sensor Checksum";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngSnsrChksmHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngSnsrFltHSC2 "Steering Wheel Angle Sensor Fault";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngSnsrFltHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngSnsrInidHSC2 "Steering Wheel Angle Sensor Initialized";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngSnsrInidHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngSnsrMultCapbHSC2 "Steering Wheel Angle Sensor Multiturn Capable";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngSnsrMultCapbHSC2 0;
+BA_ "GenSigLongName" SG_ 485 StrgWhlAngVHSC2 "Steering Wheel Angle Validity";
+BA_ "GenSigStartValue" SG_ 485 StrgWhlAngVHSC2 0;
+BA_ "GenSigLongName" SG_ 389 VSELatAccHSC2 "Vehicle Stability Enhancement Lateral Acceleration";
+BA_ "GenSigStartValue" SG_ 389 VSELatAccHSC2 0;
+BA_ "GenSigLongName" SG_ 389 VSELatAccVHSC2 "Vehicle Stability Enhancement Lateral Acceleration Validity";
+BA_ "GenSigStartValue" SG_ 389 VSELatAccVHSC2 0;
+BA_ "GenSigLongName" SG_ 389 VSELongtAccHSC2 "Vehicle Stability Enhancement Longitudinal Acceleration";
+BA_ "GenSigStartValue" SG_ 389 VSELongtAccHSC2 0;
+BA_ "GenSigLongName" SG_ 389 VSELongtAccVHSC2 "Vehicle Stability Enhancement Longitudinal Acceleration Validity";
+BA_ "GenSigStartValue" SG_ 389 VSELongtAccVHSC2 0;
+BA_ "GenSigStartValue" SG_ 455 LNonDrvnWhlRotlDircnHSC2 3;
+BA_ "GenSigLongName" SG_ 455 LNonDrvnWhlRotlDircnHSC2 "Left Non Driven Wheel Rotational Direction";
+BA_ "GenSigStartValue" SG_ 455 RNonDrvnWhlRotlDircnHSC2 3;
+BA_ "GenSigLongName" SG_ 455 RNonDrvnWhlRotlDircnHSC2 "Right Non Driven Wheel Rotational Direction";
+BA_ "GenSigLongName" SG_ 489 ABSAHSC2 "Antilock Brake System Active";
+BA_ "GenSigStartValue" SG_ 489 ABSAHSC2 0;
+BA_ "GenSigStartValue" SG_ 489 ABSFHSC2 0;
+BA_ "GenSigLongName" SG_ 489 ABSFHSC2 "Antilock Brake System Failed";
+BA_ "GenSigStartValue" SG_ 489 TCSAHSC2 0;
+BA_ "GenSigLongName" SG_ 489 TCSAHSC2 "Traction Control System Active";
+BA_ "GenSigStartValue" SG_ 489 EnDragToqRducnAHSC2 0;
+BA_ "GenSigLongName" SG_ 489 VehDynYawRateHSC2 "Vehicle Dynamics Yaw Rate";
+BA_ "GenSigStartValue" SG_ 489 VehDynYawRateHSC2 0;
+BA_ "GenSigLongName" SG_ 489 VehDynYawRateVHSC2 "Vehicle Dynamics Yaw Rate Validity";
+BA_ "GenSigStartValue" SG_ 489 VehDynYawRateVHSC2 0;
+BA_ "GenSigStartValue" SG_ 489 VSESysAHSC2 0;
+BA_ "GenSigLongName" SG_ 489 VSESysAHSC2 "Vehicle Stability Enhancement System Active";
+BA_ "GenSigStartValue" SG_ 532 BrkPdlDrvrAppdPrsHSC2 0;
+BA_ "GenSigLongName" SG_ 532 BrkPdlDrvrAppdPrsHSC2 "Brake Pedal Driver Applied Pressure";
+BA_ "GenSigStartValue" SG_ 532 BrkPdlDrvrAppdPrsAlvRCHSC2 0;
+BA_ "GenSigLongName" SG_ 532 BrkPdlDrvrAppdPrsAlvRCHSC2 "Brake Pedal Driver Applied Pressure Alive Rolling Count";
+BA_ "GenSigStartValue" SG_ 532 BrkPdlDrvrAppdPrsVHSC2 0;
+BA_ "GenSigLongName" SG_ 532 BrkPdlDrvrAppdPrsVHSC2 "Brake Pedal Driver Applied Pressure Validity";
+BA_ "GenSigStartValue" SG_ 840 WhlGndVelDrvnChksmHSC2 0;
+BA_ "GenSigLongName" SG_ 840 WhlGndVelDrvnChksmHSC2 "Wheel Ground Velocity Driven Checksum";
+BA_ "GenSigStartValue" SG_ 840 WhlGndVelDrvnRCHSC2 0;
+BA_ "GenSigLongName" SG_ 840 WhlGndVelDrvnRCHSC2 "Wheel Ground Velocity Driven Rolling Count";
+BA_ "GenSigStartValue" SG_ 840 WhlGndVelLDrvnHSC2 0;
+BA_ "GenSigLongName" SG_ 840 WhlGndVelLDrvnHSC2 "Wheel Ground Velocity Left Driven";
+BA_ "GenSigStartValue" SG_ 840 WhlGndVelLDrvnVHSC2 1;
+BA_ "GenSigStartValue" SG_ 840 WhlGndVelRDrvnHSC2 0;
+BA_ "GenSigLongName" SG_ 840 WhlGndVelRDrvnHSC2 "Wheel Ground Velocity Right Driven";
+BA_ "GenSigStartValue" SG_ 840 WhlGndVelRDrvnVHSC2 1;
+BA_ "GenSigStartValue" SG_ 842 WhlGndVelLNonDrvnHSC2 0;
+BA_ "GenSigLongName" SG_ 842 WhlGndVelLNonDrvnHSC2 "Wheel Ground Velocity Left Non Driven";
+BA_ "GenSigStartValue" SG_ 842 WhlGndVelLNonDrvnVHSC2 1;
+BA_ "GenSigStartValue" SG_ 842 WhlGndVelNonDrvnChksmHSC2 0;
+BA_ "GenSigLongName" SG_ 842 WhlGndVelNonDrvnChksmHSC2 "Wheel Ground Velocity Non Driven Checksum";
+BA_ "GenSigStartValue" SG_ 842 WhlGndVelNonDrvnRCHSC2 0;
+BA_ "GenSigLongName" SG_ 842 WhlGndVelNonDrvnRCHSC2 "Wheel Ground Velocity Non Driven Rolling Count";
+BA_ "GenSigStartValue" SG_ 842 WhlGndVelRNonDrvnHSC2 0;
+BA_ "GenSigLongName" SG_ 842 WhlGndVelRNonDrvnHSC2 "Wheel Ground Velocity Right Non Driven";
+BA_ "GenSigStartValue" SG_ 842 WhlGndVelRNonDrvnVHSC2 1;
+BA_ "GenSigStartValue" SG_ 381 TCSOpngMdHSC2 0;
+BA_ "GenSigLongName" SG_ 381 TCSOpngMdHSC2 "Traction Control System Operating Mode";
+BA_ "GenSigStartValue" SG_ 381 TCSOpngStsHSC2 0;
+BA_ "GenSigLongName" SG_ 381 TCSOpngStsHSC2 "Traction Control System Operating Status";
+BA_ "GenSigStartValue" SG_ 381 VSEMdHSC2 0;
+BA_ "GenSigLongName" SG_ 381 VSEMdHSC2 "Vehicle Stability Enhancement Mode";
+BA_ "GenSigStartValue" SG_ 381 VSEStsHSC2 0;
+BA_ "GenSigLongName" SG_ 381 VSEStsHSC2 "Vehicle Stability Enhancement Status";
+BA_ "GenSigLongName" SG_ 851 VehSpdAvgDrvnHSC2 "Vehicle Speed Average Driven";
+BA_ "GenSigStartValue" SG_ 851 VehSpdAvgDrvnHSC2 0;
+BA_ "GenSigLongName" SG_ 851 VehSpdAvgDrvnVHSC2 "Vehicle Speed Average Driven Validity";
+BA_ "GenSigStartValue" SG_ 851 VehSpdAvgDrvnVHSC2 0;
+BA_ "GenSigLongName" SG_ 851 VehSpdAvgNonDrvnHSC2 "Vehicle Speed Average Non Driven";
+BA_ "GenSigStartValue" SG_ 851 VehSpdAvgNonDrvnHSC2 0;
+BA_ "GenSigLongName" SG_ 851 VehSpdAvgNonDrvnVHSC2 "Vehicle Speed Average Non Driven Validity";
+BA_ "GenSigStartValue" SG_ 851 VehSpdAvgNonDrvnVHSC2 0;
+BA_ "GenSigLongName" SG_ 572 VehSpdAvgHSC2 "Vehicle Speed Average";
+BA_ "GenSigStartValue" SG_ 572 VehSpdAvgHSC2 0;
+BA_ "GenSigLongName" SG_ 572 VehSpdAvgAlvRCHSC2 "Vehicle Speed Average Alive Rolling Count";
+BA_ "GenSigStartValue" SG_ 572 VehSpdAvgAlvRCHSC2 0;
+BA_ "GenSigLongName" SG_ 572 VehSpdAvgPVHSC2 "Vehicle Speed Average Protection Value";
+BA_ "GenSigStartValue" SG_ 572 VehSpdAvgPVHSC2 0;
+BA_ "GenSigLongName" SG_ 572 VehSpdAvgVHSC2 "Vehicle Speed Average Validiy";
+BA_ "GenSigStartValue" SG_ 572 VehSpdAvgVHSC2 0;
+BA_ "GenSigStartValue" SG_ 588 BrkDiscTemStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 588 BrkPdlDrvrAppdPrsAlvRC_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 588 BrkPdlDrvrAppdPrsV_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 588 BrkPdlDrvrAppdPrs_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 588 LDrvnWhlRotlDircnHSC2 3;
+BA_ "GenSigStartValue" SG_ 588 RDrvnWhlRotlDircnHSC2 3;
+BA_ "GenSigStartValue" SG_ 588 WhlBrkPrsStsHSC2 1;
+BA_ "GenSigLongName" SG_ 588 WhlGndVelDrvnChksm_RadarHSC2 "Wheel Ground Velocity Driven Checksum_radar";
+BA_ "GenSigStartValue" SG_ 588 WhlGndVelDrvnChksm_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 588 WhlGndVelDrvnRC_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 588 WhlGndVelLDrvnV_RadarHSC2 1;
+BA_ "GenSigStartValue" SG_ 588 WhlGndVelLDrvn_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 588 WhlGndVelRDrvnV_RadarHSC2 1;
+BA_ "GenSigStartValue" SG_ 588 WhlGndVelRDrvn_RadarHSC2 0;
+BA_ "GenSigLongName" SG_ 201 AccelActuPosHSC2 "Accelerator Actual Position";
+BA_ "GenSigStartValue" SG_ 201 AccelActuPosHSC2 0;
+BA_ "GenSigLongName" SG_ 201 AccelActuPosVHSC2 "Accelerator Actual Position Validity";
+BA_ "GenSigStartValue" SG_ 201 AccelActuPosVHSC2 0;
+BA_ "GenSigLongName" SG_ 201 En12VoltStrMotCmddOnHSC2 "Engine 12 Volt Starter Motor Commanded On";
+BA_ "GenSigStartValue" SG_ 201 En12VoltStrMotCmddOnHSC2 0;
+BA_ "GenSigLongName" SG_ 201 EnRunAHSC2 "Engine Run Active";
+BA_ "GenSigStartValue" SG_ 201 EnRunAHSC2 0;
+BA_ "GenSigLongName" SG_ 201 EnSpdHSC2 "Engine Speed";
+BA_ "GenSigStartValue" SG_ 201 EnSpdHSC2 0;
+BA_ "GenSigLongName" SG_ 201 PtBrkPdlDscrtInptStsHSC2 "Powertrain Brake Pedal Discrete Input Status";
+BA_ "GenSigStartValue" SG_ 201 PtBrkPdlDscrtInptStsHSC2 0;
+BA_ "GenSigLongName" SG_ 201 PtBrkPdlDscrtInptStsVHSC2 "Powertrain Brake Pedal Discrete Input Status Validity";
+BA_ "GenSigStartValue" SG_ 201 PtBrkPdlDscrtInptStsVHSC2 0;
+BA_ "GenSigLongName" SG_ 190 AccelEfctvPosHSC2 "Accelerator Effective Position";
+BA_ "GenSigStartValue" SG_ 190 AccelEfctvPosHSC2 0;
+BA_ "GenSigLongName" SG_ 471 EnASSStaHSC2 "Engine Auto Stop Start State";
+BA_ "GenSigStartValue" SG_ 471 EnASSStaHSC2 0;
+BA_ "GenSigStartValue" SG_ 1948 DTCInfomationRadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 1852 DiagnosticRespRadar 0;
+BA_ "GenSigStartValue" SG_ 578 ACCAccReqStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCAccReqValHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCAccReqValTolMaxHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCAccReqValTolMinHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCGoReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCMinBrkReqStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCReqBrkPrfrdHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCSdslReq_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCSysAlvRlngCtr_SCSHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCSysChksm_SCSHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCSysFltSts_SCSHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ACCSysSts_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 578 ChACCShtdwnMdHSC2 0;
+BA_ "GenSigLongName" SG_ 580 ACCAccReqValGrdMaxHSC2 "Adaptive Cruise Control Acceleration Allowed Gradient Maximum";
+BA_ "GenSigStartValue" SG_ 580 ACCAccReqValGrdMaxHSC2 0;
+BA_ "GenSigLongName" SG_ 580 ACCAccReqValGrdMinHSC2 "Adaptive Cruise Control Acceleration Allowed Gradient Minimum";
+BA_ "GenSigStartValue" SG_ 580 ACCAccReqValGrdMinHSC2 0;
+BA_ "GenSigStartValue" SG_ 580 ACCAEBBrkJerkLvlReq_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 580 AEBAlvRlngCtr_SCSHSC2 0;
+BA_ "GenSigStartValue" SG_ 580 AEBChksm_SCSHSC2 0;
+BA_ "GenSigStartValue" SG_ 580 AEBDclReqStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 580 AEBDclReqValHSC2 127;
+BA_ "GenSigStartValue" SG_ 580 AEBHydBrkAstLvlReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 580 AEBPedtrnSysFltStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 580 AEBPedtrnSysStsHSC2 1;
+BA_ "GenSigStartValue" SG_ 580 AEBPrflReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 580 AEBSysFltSts_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 580 AEBSysSts_RadarHSC2 1;
+BA_ "GenSigStartValue" SG_ 582 ACCDetObjDistLvl_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 ACCDrvrSeldTrgtDistLvl_RadarHSC2 4;
+BA_ "GenSigStartValue" SG_ 582 ACCDrvrSelTrgtSpd_RadarHSC2 0;
+BA_ "GenSigLongName" SG_ 582 ACCDrvrTkovReqHSC2 "Adaptive Cruise Control Driver Takeover Request";
+BA_ "GenSigStartValue" SG_ 582 ACCDrvrTkovReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 ACCGoNotfr_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 ACCMsgReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 ACCObjDet_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 ACCSysCanclReq_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 ACCSysFltSts_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 AEBDspCmd_RadarHSC2 2;
+BA_ "GenSigStartValue" SG_ 582 AEBMsgReqHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 AEBPedtrnDspCmdHSC2 2;
+BA_ "GenSigStartValue" SG_ 582 FCWDspCmd_RadarHSC2 2;
+BA_ "GenSigStartValue" SG_ 582 FCWrnngSts_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 FCWSnstvtLvl_RadarHSC2 2;
+BA_ "GenSigStartValue" SG_ 582 FCWSysFltSts_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 582 RdrCalPrgsReqHSC2 0;
+BA_ "GenSigLongName" SG_ 898 FCWAHSC2 "Forward Collision Warning Active";
+BA_ "GenSigStartValue" SG_ 898 FCWAHSC2 0;
+BA_ "GenSigLongName" SG_ 898 FCWTimeToColHSC2 "Forward Collision Warning Time To Collision";
+BA_ "GenSigStartValue" SG_ 898 FCWTimeToColHSC2 0;
+BA_ "GenSigLongName" SG_ 898 ObsDataSyncCtrHSC2 "Obstacle Data Synchronize Counter";
+BA_ "GenSigStartValue" SG_ 898 ObsDataSyncCtrHSC2 0;
+BA_ "GenSigLongName" SG_ 898 ObsDataTmspHSC2 "Obstacle Data Timestamp";
+BA_ "GenSigStartValue" SG_ 898 ObsDataTmspHSC2 0;
+BA_ "GenSigLongName" SG_ 898 PedtrnColWrnngAHSC2 "Pedestrian Collision Warning Active";
+BA_ "GenSigStartValue" SG_ 898 PedtrnColWrnngAHSC2 0;
+BA_ "GenSigLongName" SG_ 899 DngrsObjIdHSC2 "Dangerous Object Identifier";
+BA_ "GenSigStartValue" SG_ 899 DngrsObjIdHSC2 0;
+BA_ "GenSigLongName" SG_ 899 DngrsObjLatRltvDistHSC2 "Dangerous Object Lateral Relative Distance";
+BA_ "GenSigStartValue" SG_ 899 DngrsObjLatRltvDistHSC2 0;
+BA_ "GenSigLongName" SG_ 899 DngrsObjLatRltvSpdHSC2 "Dangerous Object Lateral Relative Speed";
+BA_ "GenSigStartValue" SG_ 899 DngrsObjLatRltvSpdHSC2 0;
+BA_ "GenSigLongName" SG_ 899 DngrsObjLongtRltvDistHSC2 "Dangerous Object Longitudinal Relative Distance";
+BA_ "GenSigStartValue" SG_ 899 DngrsObjLongtRltvDistHSC2 0;
+BA_ "GenSigLongName" SG_ 899 DngrsObjLongtRltvSpdHSC2 "Dangerous Object Longitudinal Relative Speed";
+BA_ "GenSigStartValue" SG_ 899 DngrsObjLongtRltvSpdHSC2 0;
+BA_ "GenSigLongName" SG_ 899 DngrsObjSyncCtrHSC2 "Dangerous Object Synchronize Counter";
+BA_ "GenSigStartValue" SG_ 899 DngrsObjSyncCtrHSC2 0;
+BA_ "GenSigLongName" SG_ 900 DngrsPedtrnIdHSC2 "Dangerous Pedestrian Identifier";
+BA_ "GenSigStartValue" SG_ 900 DngrsPedtrnIdHSC2 0;
+BA_ "GenSigLongName" SG_ 900 DngrsPedtrnLatRltvDistHSC2 "Dangerous Pedestrian Lateral Relative Distance";
+BA_ "GenSigStartValue" SG_ 900 DngrsPedtrnLatRltvDistHSC2 0;
+BA_ "GenSigLongName" SG_ 900 DngrsPedtrnLatRltvSpdHSC2 "Dangerous Pedestrian Lateral Relative Speed";
+BA_ "GenSigStartValue" SG_ 900 DngrsPedtrnLatRltvSpdHSC2 0;
+BA_ "GenSigLongName" SG_ 900 DngrsPedtrnLongtRltvDistHSC2 "Dangerous Pedestrian Longitudinal Relative Distance";
+BA_ "GenSigStartValue" SG_ 900 DngrsPedtrnLongtRltvDistHSC2 0;
+BA_ "GenSigLongName" SG_ 900 DngrsPedtrnLongtRltvSpdHSC2 "Dangerous Pedestrian Longitudinal Relative Speed";
+BA_ "GenSigStartValue" SG_ 900 DngrsPedtrnLongtRltvSpdHSC2 0;
+BA_ "GenSigLongName" SG_ 900 DngrsPedtrnSyncCtrHSC2 "Dangerous Pedestrian Synchronize Counter";
+BA_ "GenSigStartValue" SG_ 900 DngrsPedtrnSyncCtrHSC2 0;
+BA_ "GenSigLongName" SG_ 901 ACCDetObjExistPrbltyHSC2 "Adaptive Cruise Control Detected Object Exist Probability";
+BA_ "GenSigStartValue" SG_ 901 ACCDetObjExistPrbltyHSC2 0;
+BA_ "GenSigLongName" SG_ 901 ACCDetObjIdHSC2 "Adaptive Cruise Control Detected Object Identifier";
+BA_ "GenSigStartValue" SG_ 901 ACCDetObjIdHSC2 0;
+BA_ "GenSigLongName" SG_ 901 ACCDetObjLatRltvDistHSC2 "Adaptive Cruise Control Detected Object Lateral Relative Distance";
+BA_ "GenSigStartValue" SG_ 901 ACCDetObjLatRltvDistHSC2 0;
+BA_ "GenSigLongName" SG_ 901 ACCDetObjLongtRltvDistHSC2 "Adaptive Cruise Control Detected Object Longitudinal Relative Distance";
+BA_ "GenSigStartValue" SG_ 901 ACCDetObjLongtRltvDistHSC2 0;
+BA_ "GenSigLongName" SG_ 901 ACCDetObjLongtRltvSpdHSC2 "Adaptive Cruise Control Detected Object Longitudinal Relative Speed";
+BA_ "GenSigStartValue" SG_ 901 ACCDetObjLongtRltvSpdHSC2 0;
+BA_ "GenSigLongName" SG_ 901 ACCDetObjSyncCtrHSC2 "Adaptive Cruise Control Detected Object Synchronize Counter";
+BA_ "GenSigStartValue" SG_ 901 ACCDetObjSyncCtrHSC2 0;
+BA_ "GenSigLongName" SG_ 901 ACCDetObsExistPrbltyHSC2 "Adaptive Cruise Control Detected Obstacle Exist Probability";
+BA_ "GenSigStartValue" SG_ 901 ACCDetObsExistPrbltyHSC2 0;
+BA_ "GenSigLongName" SG_ 357 ACCAlvRCHSC2 "Adaptive Cruise Control Alive Rolling Count";
+BA_ "GenSigStartValue" SG_ 357 ACCAlvRCHSC2 0;
+BA_ "GenSigLongName" SG_ 357 ACCToqReqStsHSC2 "Adaptive Cruise Control Torque Request Status";
+BA_ "GenSigStartValue" SG_ 357 ACCToqReqStsHSC2 0;
+BA_ "GenSigLongName" SG_ 357 ACCToqReqValHSC2 "Adaptive Cruise Contro Torque Request Value";
+BA_ "GenSigStartValue" SG_ 357 ACCToqReqValHSC2 1696;
+BA_ "GenSigLongName" SG_ 357 ACCToqReqValPVHSC2 "Adaptive Cruise Control Torque Request Value Protection Value";
+BA_ "GenSigStartValue" SG_ 357 ACCToqReqValPVHSC2 0;
+BA_ "GenSigStartValue" SG_ 1844 DiagnosticReqRadar_h2 0;
+BA_ "GenSigLongName" SG_ 560 EPBCCCanclReqdHSC2 "Electric Park Brake Cruise Control Cancel Requested";
+BA_ "GenSigStartValue" SG_ 560 EPBCCCanclReqdHSC2 0;
+BA_ "GenSigLongName" SG_ 554 EPBAppcnStsHSC2 "Electric Park Brake Application Status";
+BA_ "GenSigStartValue" SG_ 554 EPBAppcnStsHSC2 0;
+BA_ "GenSigLongName" SG_ 554 EPBAppcnStsPVHSC2 "Electric Park Brake Application Status Protection Value";
+BA_ "GenSigStartValue" SG_ 554 EPBAppcnStsPVHSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsAlvRC_h2HSC2 "Cruise Control Switch Status Alive Rolling Count";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsAlvRC_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsCanclSwA_h2HSC2 "Cruise Control Switch Status Cancel Switch Active";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsCanclSwA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsDistDecSwA_h2HSC2 "Cruise Control Switch Status Distance Decrease Switch Active";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsDistDecSwA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsDistIncSwA_h2HSC2 "Cruise Control Switch Status Distance Increase Switch Active";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsDistIncSwA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsOnSwA_h2HSC2 "Cruise Control Switch Status On Switch Active";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsOnSwA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsPV_h2HSC2 "Cruise Control Switch Status Protection Value";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsPV_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsRsmSwA_h2HSC2 "Cruise Control Switch Status Resume Switch Active";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsRsmSwA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsSetSwA_h2HSC2 "Cruise Control Switch Status Set Switch Active";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsSetSwA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsSpdDecSwA_h2HSC2 "Cruise Control Switch Status Speed Decrease Switch Active";
+BA_ "GenSigStartValue" SG_ 492 EPSDMCInhibitHSC1 1;
+BA_ "GenSigLongName" SG_ 492 EPSDMCInhibitHSC1 "Electric Power Steering Driving Mode Control Inhibit";
+BA_ "GenSigStartValue" SG_ 492 StrgCustSetngAdjAvlblHSC1 1;
+BA_ "GenSigLongName" SG_ 492 StrgCustSetngAdjAvlblHSC1 "Steering Customization Setting Adjustment Available";
+BA_ "GenSigStartValue" SG_ 492 StrgCustSetngDspCmdHSC1 2;
+BA_ "GenSigLongName" SG_ 492 StrgCustSetngDspCmdHSC1 "Steering Customization Setting Display Command";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsSpdDecSwA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsSpdIncSwA_h2HSC2 "Cruise Control Switch Status Speed Increase Switch Active";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsSpdIncSwA_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 481 CCSwStsSwDataIntgty_h2HSC2 "Cruise Control Switch Status Switch Data Integrity";
+BA_ "GenSigStartValue" SG_ 481 CCSwStsSwDataIntgty_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 425 NRCDSts_h2HSC2 "Near Range Control Drive Status";
+BA_ "GenSigStartValue" SG_ 425 NRCDSts_h2HSC2 0;
+BA_ "GenSigLongName" SG_ 907 EPTDrvngMdSwStsHSC2 "Electric Powertrain Driving Mode Switch Status";
+BA_ "GenSigStartValue" SG_ 907 EPTDrvngMdSwStsHSC2 0;
+BA_ "GenSigLongName" SG_ 172 EPTTrInptShaftMaxAvlblToqHSC2 "Electric Powertrain Transmission Input Shaft Maximum Available Torque";
+BA_ "GenSigStartValue" SG_ 172 EPTTrInptShaftMaxAvlblToqHSC2 0;
+BA_ "GenSigLongName" SG_ 172 EPTTrInptShaftMaxAvlblToqVHSC2 "Electric Powertrain Transmission Input Shaft Maximum Available Torque Validity";
+BA_ "GenSigStartValue" SG_ 172 EPTTrInptShaftMaxAvlblToqVHSC2 0;
+BA_ "GenSigLongName" SG_ 172 EPTTrInptShaftMinAvlblToqHSC2 "Electric Powertrain Transmission Input Shaft Minimum Available Torque";
+BA_ "GenSigStartValue" SG_ 172 EPTTrInptShaftMinAvlblToqHSC2 0;
+BA_ "GenSigLongName" SG_ 172 EPTTrInptShaftMinAvlblToqVHSC2 "Electric Powertrain Transmission Input Shaft Minimum Available Torque Validity";
+BA_ "GenSigStartValue" SG_ 172 EPTTrInptShaftMinAvlblToqVHSC2 0;
+BA_ "GenSigStartValue" SG_ 172 EPTTrInptShaftToqAlvRlngCtrHSC2 0;
+BA_ "GenSigStartValue" SG_ 172 EPTTrInptShaftToqChksmHSC2 0;
+BA_ "GenSigLongName" SG_ 412 EPTTrInptShaftSpdHSC2 "Electric Powertrain Transmission Input Shaft Speed";
+BA_ "GenSigStartValue" SG_ 412 EPTTrInptShaftSpdHSC2 32767;
+BA_ "GenSigLongName" SG_ 412 EPTTrInptShaftSpdVHSC2 "Electric Powertrain Transmission Input Shaft Speed Validity";
+BA_ "GenSigStartValue" SG_ 412 EPTTrInptShaftSpdVHSC2 0;
+BA_ "GenSigLongName" SG_ 412 EPTTrInptShaftToqHSC2 "Electric Powertrain Transmission Input Shaft Torque";
+BA_ "GenSigStartValue" SG_ 412 EPTTrInptShaftToqHSC2 1696;
+BA_ "GenSigLongName" SG_ 412 EPTTrInptShaftToqVHSC2 "Electric Powertrain Transmission Input Shaft Torque Validity";
+BA_ "GenSigStartValue" SG_ 412 EPTTrInptShaftToqVHSC2 0;
+BA_ "GenSigLongName" SG_ 412 VCUNRCDAlvRCHSC2 "Vehicle Control Unit Near Range Control Drive Alive Rolling Count";
+BA_ "GenSigStartValue" SG_ 412 VCUNRCDAlvRCHSC2 0;
+BA_ "GenSigStartValue" SG_ 223 EPTSecyAxleInptShaftSpdHSC2 32767;
+BA_ "GenSigStartValue" SG_ 223 EPTSecyAxleInptShaftSpdVHSC2 0;
+BA_ "GenSigLongName" SG_ 431 AutocTrGearShftDircnHSC2 "Automatic Transmission Gear Shift Direction";
+BA_ "GenSigStartValue" SG_ 431 AutocTrGearShftDircnHSC2 0;
+BA_ "GenSigLongName" SG_ 431 AutocTrGearShftDircnFHSC2 "Automatic Transmission Gear Shift Direction Failure";
+BA_ "GenSigStartValue" SG_ 431 AutocTrGearShftDircnFHSC2 0;
+BA_ "GenSigLongName" SG_ 1225 TrEmsnRltdMalfAHSC2 "Transmission Emissions Related Malfunction Active";
+BA_ "GenSigStartValue" SG_ 1225 TrEmsnRltdMalfAHSC2 0;
+BA_ "GenSigLongName" SG_ 1225 TrNonEmsnRltdMalfAHSC2 "Transmission Non Emissions Related Malfunction Active";
+BA_ "GenSigStartValue" SG_ 1225 TrNonEmsnRltdMalfAHSC2 0;
+BA_ "GenSigLongName" SG_ 562 HDCSysStsHSC2 "Hill Descent Control System Status";
+BA_ "GenSigStartValue" SG_ 562 HDCSysStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 590 LNonDrvnWhlRotlDircn_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 590 RNonDrvnWhlRotlDircn_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 590 TCSOpngMd_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 590 TCSOpngSts_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 590 VSEMd_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 590 VSESts_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 590 WhlGndVelLNonDrvnV_RadarHSC2 1;
+BA_ "GenSigStartValue" SG_ 590 WhlGndVelLNonDrvn_RadarHSC2 0;
+BA_ "GenSigLongName" SG_ 590 WhlGndVelNonDrvnChksm_RadarHSC2 "Wheel Ground Velocity Non Driven Checksum_radar";
+BA_ "GenSigStartValue" SG_ 590 WhlGndVelNonDrvnChksm_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 590 WhlGndVelNonDrvnRC_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 590 WhlGndVelRNonDrvnV_RadarHSC2 1;
+BA_ "GenSigStartValue" SG_ 590 WhlGndVelRNonDrvn_RadarHSC2 0;
+BA_ "GenSigLongName" SG_ 593 ChACCAccReqRespHSC2 "Chassis Adaptive Cruise Control Acceleration Request Response";
+BA_ "GenSigStartValue" SG_ 593 ChACCAccReqRespHSC2 0;
+BA_ "GenSigStartValue" SG_ 593 ChACCAEBAlvRlngCtr_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 593 ChACCAEBBrkJerkReqRespHSC2 0;
+BA_ "GenSigStartValue" SG_ 593 ChACCAEBChksm_RadarHSC2 0;
+BA_ "GenSigStartValue" SG_ 593 ChACCReqFlrStsHSC2 0;
+BA_ "GenSigLongName" SG_ 593 ChAEBDclReqRespHSC2 "Chassis Autonomous Emergency Braking Deceleration Request Response";
+BA_ "GenSigStartValue" SG_ 593 ChAEBDclReqRespHSC2 0;
+BA_ "GenSigLongName" SG_ 593 ChAEBHydBrkAstReqRespHSC2 "Chassis Autonomous Emergency Braking Hydraulic Brake Assist Request Response";
+BA_ "GenSigStartValue" SG_ 593 ChAEBHydBrkAstReqRespHSC2 0;
+BA_ "GenSigLongName" SG_ 593 ChAEBPrflReqRespHSC2 "Chassis Autonomous Emergency Braking Prefill Request Response";
+BA_ "GenSigStartValue" SG_ 593 ChAEBPrflReqRespHSC2 0;
+BA_ "GenSigStartValue" SG_ 593 VehSdslStsHSC2 0;
+BA_ "GenSigStartValue" SG_ 593 VehTrgtLongtAccHSC2 0;
+BA_ "GenSigLongName" SG_ 451 EnToqActuExtdRngHSC2 "Engine Torque Actual Extended Range";
+BA_ "GenSigStartValue" SG_ 451 EnToqActuExtdRngHSC2 0;
+BA_ "GenSigLongName" SG_ 451 EnToqActuExtdRngVHSC2 "Engine Torque Actual Extended Range Validity";
+BA_ "GenSigStartValue" SG_ 451 EnToqActuExtdRngVHSC2 0;
+BA_ "GenSigLongName" SG_ 707 EnToqMaxExtdRngHSC2 "Engine Torque Maximum Extended Range";
+BA_ "GenSigStartValue" SG_ 707 EnToqMaxExtdRngHSC2 0;
+BA_ "GenSigLongName" SG_ 707 EnToqMaxExtdRngVHSC2 "Engine Torque Maximum Extended Range Validity";
+BA_ "GenSigStartValue" SG_ 707 EnToqMaxExtdRngVHSC2 0;
+BA_ "GenSigLongName" SG_ 707 EnToqMinExtdRngHSC2 "Engine Torque Minimum Extended Range";
+BA_ "GenSigStartValue" SG_ 707 EnToqMinExtdRngHSC2 0;
+BA_ "GenSigLongName" SG_ 707 EnToqMinExtdRngVHSC2 "Engine Torque Minimum Extended Range Validity";
+BA_ "GenSigStartValue" SG_ 707 EnToqMinExtdRngVHSC2 0;
+BA_ "GenSigStartValue" SG_ 977 EnEmsnRltdMalfAHSC2 0;
+BA_ "GenSigStartValue" SG_ 977 EnNonEmsnRltdMalfAHSC2 0;
+BA_ "GenSigLongName" SG_ 678 TrCCCanclReqHSC2 "Transmission Cruise Control Cancel Request";
+BA_ "GenSigStartValue" SG_ 678 TrCCCanclReqHSC2 0;
+VAL_ 437 APAStsHSC2 4 "Failed" 3 "Fully-APA active" 2 "Semi-APA active" 1 "Standby" 0 "Disable" ;
+VAL_ 437 APAShifterPosReqdHSC2 10 "Error" 9 "Reserved" 8 "P" 7 "R" 6 "N" 5 "D" 3 "Maual Mode" 2 "Winter Mode" 1 "Sport Mode" 0 "Initial" ;
+VAL_ 437 APASCSAcclReqStsHSC2 1 "Deceleration request" 0 "No request" ;
+VAL_ 437 APAReqHSC2 4 "failed" 3 "Fully-APA Mode Request" 2 "semi-APA Mode Request" 1 "standby" 0 "disable" ;
+VAL_ 437 APANRCDAvlblHSC2 1 "Available" 0 "Not available" ;
+VAL_ 437 APAInfoDispReqHSC2 45 "Parking is Ongoing" 34 "Do not touch steering wheel during parking process,APA quit" 23 "Please step bake pedal if you want to use parking manoeuvre" 19 "Please close the door" 6 "Please drive forward" 5 "APA quit" 4 "Parking Slot searching" 2 "Speed is too high, APA abort" 1 "Please select parking mode" 0 "reserved" ;
+VAL_ 437 APAEPBOPReqHSC2 2 "Release" 1 "Apply" 0 "No Request" ;
+VAL_ 437 APACrpSpdReqStsHSC2 1 "Request" 0 "No Request" ;
+VAL_ 437 APAMdHsc2 6 "reserved" 5 "Unknow park in or park out" 4 "Unknow parallel parking or pendicular parking" 3 "Park out" 2 "Perpendicular Parking" 1 "Parallel Parking" 0 "Off" ;
+VAL_ 433 EPSAPAStsHSC1 7 "Failure" 6 "ADAS Active" 5 "NRCD Active" 4 "Reply for control" 3 "Abort" 2 "Active" 1 "Available" 0 "Inhibit" ;
+VAL_ 433 EPSAPAInhHSC1 16 "EPS failure" 8 "Excess Angle Deviation" 4 "Abnormal CAN Input" 2 "Driver Interference" 1 "Over Speed" 0 "Normal Operation" ;
+VAL_ 424 APAFHSC1 1 "APA Failure" 0 "Normal" ;
+VAL_ 424 APACmdEPSStsHSC1 2 "EPS Control" 1 "Control EPS Request" 0 "No Request" ;
+VAL_ 438 IbstrDiagMdAHSC2 1 "Diag active" 0 "Diag inactive" ;
+VAL_ 438 RnotPrsStsHSC2 2 "Faulty" 1 "Normal" 0 "Init" ;
+VAL_ 438 HydBstrCmpstnReqHSC2 1 "HBC active" 0 "HBC inactive" ;
+VAL_ 438 BrkPdlAppdHSC2 1 "brake pedal applied" 0 "brake pedal not applied" ;
+VAL_ 438 BrkPdlAppdVHSC2 2 "Faulty" 1 "Normal" 0 "Init" ;
+VAL_ 358 FVCMBlkdHSC2 1 "True" 0 "False" ;
+VAL_ 358 FVCMFltStsHSC2 3 "Reserved" 2 "Reserved" 1 "Fault" 0 "No Fault" ;
+VAL_ 358 LDWAdoWrnngDspCmdHSC2 3 "reserved" 2 "on" 1 "off" 0 "Unavailable" ;
+VAL_ 358 LDWSnstvtLvlHSC2 3 "High" 2 "Standard" 1 "Low" 0 "unavailable" ;
+VAL_ 358 LDWSysStsHSC2 7 "reserved" 6 "reserved" 5 "system temporary unavailable" 4 "service required" 3 "Override" 2 "Active" 1 "Stand by" 0 "Off" ;
+VAL_ 359 AutoMainBeamLghtReqHSC2 3 "cannot detected the environment" 2 "Request  OFF  from camera" 1 "Request  ON from camera" 0 "No Request" ;
+VAL_ 359 FVCMCalPrgsReqHSC2 7 "reserved" 6 "calibration failed" 5 "100%(Calibration Finished)" 4 "75% (Calibration in progress)" 3 "50% (Calibration in progress)" 2 "25%(Calibration in progress)" 1 "0% (Calibration Started)" 0 "no request" ;
+VAL_ 359 HandOffStrgWhlDetnStaHSC2 3 "Reserved" 2 "unknow" 1 "Hands On" 0 "Hands Off" ;
+VAL_ 359 HandOffStrgWhlDetnStaVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 359 LDWLKADspCmdHSC2 7 "reserved" 6 "reserved" 5 "reserved" 4 "LKA" 3 "LDP(Include LDW warning)" 2 "LDW" 1 "off" 0 "Unavailable" ;
+VAL_ 359 LDWLKAHapticWrnngDspCmdHSC2 3 "reserved" 2 "on" 1 "off" 0 "unavailable" ;
+VAL_ 359 LDWLKALVsulznReqHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "intervention&warning" 3 "warning" 2 "intervention" 1 "line tracking" 0 "no display" ;
+VAL_ 359 LDWLKARVsulznReqHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "intervention&warning" 3 "warning" 2 "intervention" 1 "line tracking" 0 "no display" ;
+VAL_ 359 LDWSysFltStsHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "Reserved" 3 "service required" 2 "system temporary unavailable" 1 "performance degradation" 0 "no error" ;
+VAL_ 359 SpdAstReqStsCamrHSC2 2 "Active" 1 "Undefined" 0 "Fault" ;
+VAL_ 359 TJAICADspCmdHSC2 3 "reserved" 2 "on" 1 "off" 0 "unavailable" ;
+VAL_ 359 TJAICASysFltStsHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "Reserved" 3 "service required" 2 "system temporary unavailable" 1 "performance degradation" 0 "no error" ;
+VAL_ 359 TJAICASysStsHSC2 7 "reserved" 6 "reserved" 5 "reserved" 4 "reserved" 3 "Override" 2 "Active" 1 "Stand by" 0 "Off" ;
+VAL_ 509 LDWLKAVbnLvlReqHSC2 3 "Level 3" 2 "Level 2" 1 "Level 1" 0 "no request" ;
+VAL_ 509 LKADrvrTkovReqHSC2 1 "True" 0 "False" ;
+VAL_ 509 LKAReqToqStsHSC2 3 "reserved" 2 "reserved" 1 "torque request" 0 "no request" ;
+VAL_ 509 LKAReqToqVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 509 LKASysFltStsHSC2 3 "service required" 2 "system temporary unavailable" 1 "performance degradation" 0 "no error" ;
+VAL_ 509 LKASysStsHSC2 3 "Override" 2 "Active" 1 "Stand by" 0 "Off" ;
+VAL_ 721 TrnsfCaseMdHSC2 15 "Neutral" 9 "4 Wheel Drive" 8 "Rear Wheel Drive" 7 "Front Wheel Drive" 6 "4WDLow Locked RrDifferential Lcked" 5 "4 Wheel Drive Low Open" 4 "4 Wheel Drive High Open" 3 "Active All Wheel Drive" 2 "4 Wheel Drive Low Locked" 1 "4 Wheel Drive High Locked" 0 "2 Wheel Drive High" ;
+VAL_ 721 TrnsfCaseMdVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 492 ChLKACtrlStsHSC2 7 "reserved" 6 "reserved" 5 "reserved" 4 "pre-condition not satisfied" 3 "control not allowed for failure" 2 "lost arbitration" 1 "Request honored" 0 "No request" ;
+VAL_ 492 ChLKARespToqVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 492 DrvrStrgDlvrdToqVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 1130 BntOpenStsHSC2 3 "Reserved" 2 "Bonnet Switch Disconnect" 1 "Bonnet Open" 0 "Bonnet Closed" ;
+VAL_ 1130 DipdBeamLghtOnHSC2 1 "True" 0 "False" ;
+VAL_ 1130 DircnIndLampSwStsHSC2 3 "reserve" 2 "Right on" 1 "Left on" 0 "off" ;
+VAL_ 1130 DrvrDoorOpenStsHSC2 3 "Driver Door Full Open" 2 "Driver Door Ajar" 1 "Driver Door Open(For latch switch can't detect door ajar status)" 0 "Driver Door Closed" ;
+VAL_ 1130 DspMeasSysHSC2 1 "mph" 0 "kph" ;
+VAL_ 1130 FrtFogLghtOnHSC2 1 "True" 0 "False" ;
+VAL_ 1130 FrtPsngDoorOpenStsHSC2 3 "Front Passenger Door Full Open" 2 "Front Passenger Door Ajar" 1 "Front Passenger Open(latch switch cann¡®t detect door ajar statu" 0 "Front Passenger Door Closed" ;
+VAL_ 1130 FrtWiperParkPosAHSC2 1 "True" 0 "False" ;
+VAL_ 1130 FrtWshrPumpAHSC2 1 "True" 0 "False" ;
+VAL_ 1130 KeyDetIndxHSC2 7 "error" 6 "key 6 is detected" 5 "key 5 is detected" 4 "key 4 is detected" 3 "key 3 is detected" 2 "key 2 is detected" 1 "key 1 is detected" 0 "non key is detected" ;
+VAL_ 1130 LDircnIndLghtFHSC2 1 "True" 0 "False" ;
+VAL_ 1130 LDircnIOHSC2 1 "True" 0 "False" ;
+VAL_ 1130 LdspcOpenStsHSC2 3 "Reserved" 2 "Reserved" 1 "Load Space Open" 0 "Load Space Closed" ;
+VAL_ 1130 MainBeamLghtOnHSC2 1 "True" 0 "False" ;
+VAL_ 1130 RDircnIndLghtFHSC2 1 "True" 0 "False" ;
+VAL_ 1130 RDircnIOHSC2 1 "True" 0 "False" ;
+VAL_ 1130 RLDoorOpenStsHSC2 3 "Rear Left Door Full Open" 2 "Rear Left Door Ajar" 1 "Rear Left Door Open(latch switch cann't detect door ajar status" 0 "Rear Left Door Closed" ;
+VAL_ 1130 RRDoorOpenStsHSC2 3 "Rear Right Door Full Open" 2 "Rear Right Door Ajar" 1 "Rear Right Door Open(latch switch cann't detect door ajar status" 0 "Rear Right Door Closed" ;
+VAL_ 1130 RrFogLghtOnHSC2 1 "True" 0 "False" ;
+VAL_ 1130 VehSideLghtStsHSC2 3 "All side light and license plate light on" 2 "Right side light on only" 1 "Left side light on only" 0 "No side light on " ;
+VAL_ 540 ClstrDspdVehSpdHSC2 255 "Speed Signal Missing Error of SCS" ;
+VAL_ 540 FrtWiperSwStsHSC2 3 "wipers in fast mode" 2 "wipers in slow mode" 1 "wipers in intermittent mode" 0 "wipers off" ;
+VAL_ 498 SysBPMHSC2 3 "Crank Request" 2 "Run" 1 "ACC" 0 "Off" ;
+VAL_ 498 SysBPMEnbdHSC2 1 "True" 0 "False" ;
+VAL_ 404 TrEstdGearHSC2 15 "Park Gear" 14 "Reverse Gear" 13 "Neutral Gear" 8 "Eighth Gear" 7 "Seventh Gear" 6 "Sixth Gear" 5 "Fifth Gear" 4 "Fourth Gear" 3 "Third Gear" 2 "Second Gear" 1 "First Gear" 0 "Not Supported" ;
+VAL_ 404 TrEstdGearVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 404 TrShftLvrPosV_h1HSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 404 TrShftLvrPos_h1HSC2 15 "Lever Position Unknown" 11 "Forward Range H" 10 "Forward Range G" 9 "Forward Range F" 8 "Forward Range E" 7 "Forward Range D" 6 "Forward Range C" 5 "Forward Range B" 4 "Forward Range A" 3 "Neutral Range" 2 "Reverse Range" 1 "Park Range" 0 "Between Ranges" ;
+VAL_ 251 AccelOvrdHSC2 1 "True" 0 "False" ;
+VAL_ 251 PtACCToqReqRespHSC2 7 "reserved" 6 "reserved" 5 "reserved" 4 "pre-condition not satisfied" 3 "control not allowed for error" 2 "lost arbitration" 1 "request honored" 0 "no request" ;
+VAL_ 251 SpdAstMdECMHSC2 3 "ISA" 2 "MSA" 1 "SLIF" 0 "Off" ;
+VAL_ 251 SpdAstSysStsECMHSC2 7 "Reserved" 6 "Active (Passive)" 5 "Fault" 4 "Overspeed" 3 "Entry Conditions Incorrect" 2 "Standby" 1 "Active (Limiting)" 0 "Off" ;
+VAL_ 251 TrgtSpdSrcStsHSC2 3 "Fault" 2 "Navigation" 1 "Camera" 0 "Undefined" ;
+VAL_ 886 LDWLKASwReqHSC2 4 "LKA" 3 "LDP" 2 "LDW" 1 "off" 0 "no request" ;
+VAL_ 886 RstrFctryDeftsReqHSC2 1 "True" 0 "False" ;
+VAL_ 758 LDWAdoWrnngReqHSC2 3 "reserved" 2 "on" 1 "off" 0 "no request" ;
+VAL_ 758 LDWLKAHapticWrnngReqHSC2 3 "reserved" 2 "on" 1 "off" 0 "no request" ;
+VAL_ 758 LDWSnstvtLvlReqHSC2 3 "High" 2 "Standard" 1 "Low" 0 "no request" ;
+VAL_ 758 TJAICASwReqHSC2 3 "reserved" 2 "on" 1 "off" 0 "no request" ;
+VAL_ 758 AEBPedtrnSwReqHSC2 3 "reserve" 2 "on" 1 "off" 0 "no request" ;
+VAL_ 758 AEBSwReqHSC2 3 "reserved" 2 "on" 1 "off" 0 "no request" ;
+VAL_ 758 FCWSnstvtLvlReqHSC2 7 "reserve" 6 "reserve" 5 "reserve" 4 "reserve" 3 "level3(high)" 2 "level2(middle)" 1 "level1(low)" 0 "no request" ;
+VAL_ 758 FCWSwReqHSC2 3 "reserved" 2 "on" 1 "off" 0 "no request" ;
+VAL_ 361 BCMAvlbly_h2HSC2 1 "True" 0 "False" ;
+VAL_ 361 ECMAvlbly_h2HSC2 1 "True" 0 "False" ;
+VAL_ 361 FICMAvlbly_h2HSC2 1 "True" 0 "False" ;
+VAL_ 361 HCUAvlbly_h2HSC2 1 "True" 0 "False" ;
+VAL_ 361 IPCAvlbly_h2HSC2 1 "True" 0 "False" ;
+VAL_ 361 SDMAvlbly_h2HSC2 1 "True" 0 "False" ;
+VAL_ 361 TBOXAvlbly_h2HSC2 1 "True" 0 "False" ;
+VAL_ 361 TCMAvlbly_h2HSC2 1 "True" 0 "False" ;
+VAL_ 497 BPMMstrAvlbly_h2HSC2 1 "True" 0 "False" ;
+VAL_ 497 PwrMdMstrAccryA_h2HSC2 1 "Active" 0 "Inactive" ;
+VAL_ 497 PwrMdMstrRunCrkA_h2HSC2 1 "Active" 0 "Inactive" ;
+VAL_ 497 SysOpnlMd_h2HSC2 5 "Diagnosic or Reprogramming(Reserve)" 4 "Storage Mode" 3 "Show Room(Reserve)" 2 "Transit Mode" 1 "Manufacturing Mode" 0 "Normal Mode" ;
+VAL_ 497 SysPwrMd_h2HSC2 3 "Crank Request" 2 "Run" 1 "Accessory" 0 "Off" ;
+VAL_ 497 SysVolMdV_h2HSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 497 SysVolMd_h2HSC2 3 "Illegal System  Voltage" 2 "High System Voltage" 1 "Low System Voltage" 0 "Normal" ;
+VAL_ 497 SysVolV_h2HSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 1344 VehOdoV_h2HSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 795 VehDrvngMd_h2HSC2 7 "Customization Mode" 6 "Reserved" 5 "Super Sport" 4 "Sport" 3 "Normal" 2 "ECO" 1 "Super ECO" 0 "No Driving Mode" ;
+VAL_ 1009 OtsdAirTemCrValV_h2HSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 175 EPTAccelActuPosVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 175 EPTBrkPdlDscrtInptStsHSC2 1 "Brake Applied" 0 "Brake Not Applied" ;
+VAL_ 175 EPTBrkPdlDscrtInptStsVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 175 EPTStCmdOn_h1HSC2 1 "True" 0 "False" ;
+VAL_ 406 EPTRdy_h1HSC2 1 "Ready" 0 "Not ready" ;
+VAL_ 1345 CalendarMonthHSC2 12 "December" 11 "November" 10 "October" 9 "September" 8 "August" 7 "July" 6 "June" 5 "May" 4 "April" 3 "March" 2 "February" 1 "January" 0 "Unknown" ;
+VAL_ 355 AirbagDplHSC2 1 "True" 0 "False" ;
+VAL_ 355 AirbagDplInvsnHSC2 1 "No Airbag Deployed" 0 "Airbag Deployed" ;
+VAL_ 355 DrvrSbltAtcHSC2 1 "True" 0 "False" ;
+VAL_ 355 DrvrSbltAtcVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 485 StrgWhlAngHSC2 65535 "error mark" ;
+VAL_ 485 StrgWhlAngGrdHSC2 4095 "error mark" ;
+VAL_ 485 StrgWhlAngSnsrCalStsHSC2 3 "Unknown" 2 "Calibrated" 1 "Estimated" 0 "Unknown" ;
+VAL_ 485 StrgWhlAngSnsrFltHSC2 1 "True" 0 "False" ;
+VAL_ 485 StrgWhlAngSnsrInidHSC2 1 "True" 0 "False" ;
+VAL_ 485 StrgWhlAngSnsrMultCapbHSC2 1 "True" 0 "False" ;
+VAL_ 485 StrgWhlAngVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 389 VSELatAccVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 389 VSELongtAccVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 455 LNonDrvnWhlRotlDircnHSC2 3 "Error/Invalid" 2 "Moving backward" 1 "Moving forward" 0 "No moving" ;
+VAL_ 455 RNonDrvnWhlRotlDircnHSC2 3 "Error/Invalid" 2 "Moving backward" 1 "Moving forward" 0 "No moving" ;
+VAL_ 489 ABSAHSC2 1 "True" 0 "False" ;
+VAL_ 489 ABSFHSC2 1 "True" 0 "False" ;
+VAL_ 489 TCSAHSC2 1 "True" 0 "False" ;
+VAL_ 489 EnDragToqRducnAHSC2 1 "True" 0 "False" ;
+VAL_ 489 VehDynYawRateVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 489 VSESysAHSC2 1 "True" 0 "False" ;
+VAL_ 492 EPSDMCInhibitHSC1 1 "True" 0 "False" ;
+VAL_ 492 StrgCustSetngAdjAvlblHSC1 1 "True" 0 "False" ;
+VAL_ 492 StrgCustSetngDspCmdHSC1 3 "Sport Mode" 2 "Normal Mode" 1 "Comfortable Mode" 0 "Reserved" ;
+VAL_ 532 BrkPdlDrvrAppdPrsVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 840 WhlGndVelLDrvnVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 840 WhlGndVelRDrvnVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 842 WhlGndVelLNonDrvnVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 842 WhlGndVelRNonDrvnVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 381 TCSOpngMdHSC2 2 "Off Road" 1 "Normal" 0 "Off" ;
+VAL_ 381 TCSOpngStsHSC2 2 "Fault" 1 "Active" 0 "Inactive" ;
+VAL_ 381 VSEMdHSC2 2 "Competitive" 1 "Normal" 0 "Off" ;
+VAL_ 381 VSEStsHSC2 4 "Not Ready" 3 "Warming Up" 2 "Fault" 1 "Active" 0 "Inactive" ;
+VAL_ 851 VehSpdAvgDrvnVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 851 VehSpdAvgNonDrvnVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 572 VehSpdAvgVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 588 BrkDiscTemStsHSC2 1 "Temperature too high" 0 "Not high" ;
+VAL_ 588 BrkPdlDrvrAppdPrsV_RadarHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 588 LDrvnWhlRotlDircnHSC2 3 "Initial/Invalid" 2 "Backward" 1 "Forward" 0 "Unknown" ;
+VAL_ 588 RDrvnWhlRotlDircnHSC2 3 "Initial/Invalid" 2 "Backward" 1 "Forward" 0 "Unknown" ;
+VAL_ 588 WhlBrkPrsStsHSC2 1 "No brake force" 0 "Exist brake force" ;
+VAL_ 588 WhlGndVelLDrvnV_RadarHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 588 WhlGndVelRDrvnV_RadarHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 201 AccelActuPosVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 201 En12VoltStrMotCmddOnHSC2 1 "True" 0 "False" ;
+VAL_ 201 EnRunAHSC2 1 "True" 0 "False" ;
+VAL_ 201 PtBrkPdlDscrtInptStsHSC2 1 "Brake Applied" 0 "Brake Not Applied" ;
+VAL_ 201 PtBrkPdlDscrtInptStsVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 471 EnASSStaHSC2 3 "Engine Stopping" 2 "Engine Starting" 1 "Engine Running" 0 "Engine Off" ;
+VAL_ 578 ACCAccReqStsHSC2 1 "ACC Acceleration Request" 0 "No Request" ;
+VAL_ 578 ACCGoReqHSC2 1 "Request" 0 "No Request" ;
+VAL_ 578 ACCMinBrkReqStsHSC2 1 "no demand" 0 "demand" ;
+VAL_ 578 ACCReqBrkPrfrdHSC2 1 "no demand" 0 "demand" ;
+VAL_ 578 ACCSdslReq_RadarHSC2 1 "request" 0 "no request" ;
+VAL_ 578 ACCSysFltSts_SCSHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "Reserved" 3 "Service Required" 2 "System Temporary Unvailable" 1 "Performance Degradation" 0 "No Error" ;
+VAL_ 578 ACCSysSts_RadarHSC2 7 "Reserved" 6 "Standstill Wait" 5 "Standstill Active" 4 "Brake Only" 3 "Override" 2 "Active" 1 "Stand By" 0 "Off" ;
+VAL_ 578 ChACCShtdwnMdHSC2 3 "immediate off" 2 "initial" 1 "fast off" 0 "soft off" ;
+VAL_ 580 ACCAEBBrkJerkLvlReq_RadarHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "Reserved" 3 "Level 3" 2 "Level 2" 1 "Level 1 (Low)" 0 "No Request" ;
+VAL_ 580 AEBDclReqStsHSC2 1 "AEB Deceleration Request" 0 "No Request" ;
+VAL_ 580 AEBHydBrkAstLvlReqHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "Reserved" 3 "level 3" 2 "level 2" 1 "level 1(Low)" 0 "No request" ;
+VAL_ 580 AEBPedtrnSysFltStsHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "Reserved" 3 "service required" 2 "system temperary unavailable" 1 "performance degrade" 0 "no error" ;
+VAL_ 580 AEBPedtrnSysStsHSC2 7 "reserved" 6 "reserved" 4 "Active" 3 "Override" 2 "Disable" 1 "On" 0 "Off" ;
+VAL_ 580 AEBPrflReqHSC2 1 "True" 0 "False" ;
+VAL_ 580 AEBSysFltSts_RadarHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "Reserved" 3 "Service Required" 2 "System Temporary Unvailable" 1 "Performance Degradation" 0 "No Error" ;
+VAL_ 580 AEBSysSts_RadarHSC2 7 "Reserved" 6 "Reserved" 4 "Active" 3 "Override" 2 "Disable" 1 "On" 0 "Off" ;
+VAL_ 582 ACCDetObjDistLvl_RadarHSC2 7 "reserved" 6 "reserved" 5 "distance level5" 4 "distance level4" 3 "distance level3" 2 "distance level2" 1 "distance level1" 0 "no gap set" ;
+VAL_ 582 ACCDrvrSeldTrgtDistLvl_RadarHSC2 7 "reserved" 6 "reserved" 5 "distance level5" 4 "distance level4" 3 "distance level3" 2 "distance level2" 1 "distance level1" 0 "no gap set" ;
+VAL_ 582 ACCDrvrTkovReqHSC2 1 "True" 0 "False" ;
+VAL_ 582 ACCGoNotfr_RadarHSC2 1 "TRUE" 0 "FALSE" ;
+VAL_ 582 ACCMsgReqHSC2 15 "Reserved" 14 "Reserved" 13 "Reserved" 12 "Reserved" 11 "Reserved" 10 "Reserved" 9 "Radar Error" 8 "depress acceleration pedal or press resume switch to go" 7 "Driver Takeover Request" 6 "ACC is switched off" 5 "ACC is switched on" 4 "ACC is in error mode" 3 "Active" 2 "ACC is cancelled" 1 "unable to active ACC" 0 "No display" ;
+VAL_ 582 ACCObjDet_RadarHSC2 1 "TRUE" 0 "FALSE" ;
+VAL_ 582 ACCSysCanclReq_RadarHSC2 3 "Reserved" 2 "ACC Condition Dissatisfy" 1 "Manual Cancel" 0 "No Cancel" ;
+VAL_ 582 ACCSysFltSts_RadarHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "Reserved" 3 "Service Required" 2 "System Temporary Unvailable" 1 "Performance Degradation" 0 "No Error" ;
+VAL_ 582 AEBDspCmd_RadarHSC2 3 "reserved" 2 "on" 1 "off" 0 "unavailable" ;
+VAL_ 582 AEBMsgReqHSC2 7 "reserved" 6 "Radar Error" 5 "AEB is switched off" 4 "AEB is switched on" 3 "AEB is in error mode" 2 "Active" 1 "unable to active AEB" 0 "No display" ;
+VAL_ 582 AEBPedtrnDspCmdHSC2 3 "reserved" 2 "on" 1 "off" 0 "unavailable" ;
+VAL_ 582 FCWDspCmd_RadarHSC2 3 "reserved" 2 "on" 1 "off" 0 "unavailable" ;
+VAL_ 582 FCWrnngSts_RadarHSC2 7 "reserved" 6 "reserved" 5 "reserved" 4 "reserved" 3 "level 3" 2 "level 2" 1 "level 1" 0 "no request" ;
+VAL_ 582 FCWSnstvtLvl_RadarHSC2 7 "reserved" 6 "reserved" 5 "reserved" 4 "reserved" 3 "level3" 2 "level2" 1 "level1" 0 "Unavailable" ;
+VAL_ 582 FCWSysFltSts_RadarHSC2 7 "Reserved" 6 "Reserved" 5 "Reserved" 4 "Reserved" 3 "Service required" 2 "System temporary unvailable" 1 "Performance degradation" 0 "No error" ;
+VAL_ 582 RdrCalPrgsReqHSC2 5 "calibration failure" 4 "Calibration Finished, need Adjust" 3 "Calibration Finished, Succesful" 2 "Calibration in progress" 1 "Calibration Started" 0 "no request" ;
+VAL_ 898 FCWAHSC2 1 "True" 0 "False" ;
+VAL_ 898 PedtrnColWrnngAHSC2 1 "True" 0 "False" ;
+VAL_ 357 ACCToqReqStsHSC2 3 "Reserved" 2 "Reserved" 1 "Torque request request" 0 "No request" ;
+VAL_ 560 EPBSwStsHSC2 2 "Apply" 1 "Release" 0 "Not Active" ;
+VAL_ 560 EPBSwStsVHSC2 1 "Invaild" 0 "valid" ;
+VAL_ 560 EPBCCCanclReqdHSC2 1 "True" 0 "False" ;
+VAL_ 554 EPBAvlblyStsHSC2 4 "Unavailable,failed other" 3 "Unavailable,failed released" 2 "Unavailable,failed applied" 1 "Available,not failed" 0 "Unavailable,not failed" ;
+VAL_ 554 EPBAppcnStsHSC2 3 "Park Brake Application in Progress" 2 "Park Brake Released" 1 "Park Brake Applied" 0 "Unknown" ;
+VAL_ 481 CCSwStsCanclSwA_h2HSC2 1 "True" 0 "False" ;
+VAL_ 481 CCSwStsDistDecSwA_h2HSC2 1 "True" 0 "False" ;
+VAL_ 481 CCSwStsDistIncSwA_h2HSC2 1 "True" 0 "False" ;
+VAL_ 481 CCSwStsOnSwA_h2HSC2 1 "True" 0 "False" ;
+VAL_ 481 CCSwStsRsmSwA_h2HSC2 1 "True" 0 "False" ;
+VAL_ 481 CCSwStsSetSwA_h2HSC2 1 "True" 0 "False" ;
+VAL_ 481 CCSwStsSpdDecSwA_h2HSC2 1 "True" 0 "False" ;
+VAL_ 481 CCSwStsSpdIncSwA_h2HSC2 1 "True" 0 "False" ;
+VAL_ 481 CCSwStsSwDataIntgty_h2HSC2 3 "Illegal Range" 2 "Failure Detected" 1 "Data Invalid" 0 "Data Valid" ;
+VAL_ 425 NRCDSts_h2HSC2 3 "Fully-APA Active" 2 "Semiautomatic Parking Assistant Active" 1 "NRCD Active" 0 "Inactive" ;
+VAL_ 907 EPTDrvngMdSwStsHSC2 7 "Reserved" 6 "Reserved" 5 "E+ - Economy+" 4 "C-Charge" 3 "H-SOC Hold" 2 "M - Mountain" 1 "N - Normal" 0 "E - Economy" ;
+VAL_ 172 EPTTrInptShaftMaxAvlblToqVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 172 EPTTrInptShaftMinAvlblToqVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 412 EPTTrInptShaftSpdVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 412 EPTTrInptShaftToqVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 223 EPTSecyAxleInptShaftSpdVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 431 AutocTrGearShftDircnHSC2 2 "Downshift in Progress" 1 "Upshift in Progress" 0 "No Shift in Progress" ;
+VAL_ 431 AutocTrGearShftDircnFHSC2 1 "True" 0 "False" ;
+VAL_ 1225 TrEmsnRltdMalfAHSC2 1 "True" 0 "False" ;
+VAL_ 1225 TrNonEmsnRltdMalfAHSC2 1 "True" 0 "False" ;
+VAL_ 562 HDCSysStsHSC2 4 "Temporarily Inhibited" 3 "Failed" 2 "Active" 1 "Enabled" 0 "Normal" ;
+VAL_ 590 LNonDrvnWhlRotlDircn_RadarHSC2 3 "Initial/Invalid" 2 "Backward" 1 "Forward" 0 "Unknown" ;
+VAL_ 590 RNonDrvnWhlRotlDircn_RadarHSC2 3 "Initial/Invalid" 2 "Backward" 1 "Forward" 0 "Unknown" ;
+VAL_ 590 TCSOpngMd_RadarHSC2 2 "Off Road" 1 "Normal" 0 "Off" ;
+VAL_ 590 TCSOpngSts_RadarHSC2 2 "Fault" 1 "Active" 0 "Inactive" ;
+VAL_ 590 VSEMd_RadarHSC2 2 "Competitive" 1 "Normal" 0 "Off" ;
+VAL_ 590 VSESts_RadarHSC2 4 "Not Ready" 3 "Warming Up" 2 "Fault" 1 "Active" 0 "Inactive" ;
+VAL_ 590 WhlGndVelLNonDrvnV_RadarHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 590 WhlGndVelRNonDrvnV_RadarHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 593 ChACCAccReqRespHSC2 7 "reserved" 6 "reserved" 4 "pre-condition not satisfied" 3 "control not allowed for error" 2 "lost arbitration" 1 "request honored" 0 "no request" ;
+VAL_ 593 ChACCAEBBrkJerkReqRespHSC2 7 "reserve" 6 "reserve" 4 "pre-condition not satisfied" 3 "control not allowed for error" 2 "lost arbitration" 1 "request honored" 0 "no request" ;
+VAL_ 593 ChACCReqFlrStsHSC2 3 "not defined" 2 "irreversible error" 1 "reversible error" 0 "No error" ;
+VAL_ 593 ChAEBDclReqRespHSC2 7 "reserved" 6 "reserved" 4 "pre-condition not satisfied" 3 "control not allowed for error" 2 "lost arbitration" 1 "request honored" 0 "no request" ;
+VAL_ 593 ChAEBHydBrkAstReqRespHSC2 7 "reserve" 6 "reserve" 4 "pre-condition not satisfied" 3 "control not allowed for error" 2 "lost arbitration" 1 "request honored" 0 "no request" ;
+VAL_ 593 ChAEBPrflReqRespHSC2 7 "reserve" 6 "reserve" 4 "pre-condition not satisfied" 3 "control not allowed for error" 2 "lost arbitration" 1 "request honored" 0 "no request" ;
+VAL_ 593 VehSdslStsHSC2 3 "reserved" 2 "invalid (short unavailability, max 3s)" 1 "standstill" 0 "not standstill" ;
+VAL_ 451 EnToqActuExtdRngVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 707 EnToqMaxExtdRngVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 707 EnToqMinExtdRngVHSC2 1 "Invalid" 0 "Valid" ;
+VAL_ 977 EnEmsnRltdMalfAHSC2 1 "True" 0 "False" ;
+VAL_ 977 EnNonEmsnRltdMalfAHSC2 1 "True" 0 "False" ;
+VAL_ 678 TrCCCanclReqHSC2 1 "True" 0 "False" ;
+
