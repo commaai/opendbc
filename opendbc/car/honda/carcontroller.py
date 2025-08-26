@@ -153,22 +153,22 @@ class CarController(CarControllerBase):
     # Handle permanent and temporary steering faults
     # duplicate silent_steer_warning logic because result is not exposed to opendbc
     self.steering_unpressed = 0 if CS.out.steeringPressed else self.steering_unpressed + 1
-    if CS.steerFaultTemporary:
+    if CS.out.steerFaultTemporary:
       if CS.out.steeringPressed and (not self.CS_prev_steerFaultTemporary or self.no_steer_warning):
         self.no_steer_warning = True
       else:
         self.no_steer_warning = False
 
         # if the user overrode recently, show a less harsh alert
-        if self.silent_steer_warning or CS.standstill or self.steering_unpressed < int(1.5 / DT_CTRL):
+        if self.silent_steer_warning or CS.out.standstill or self.steering_unpressed < int(1.5 / DT_CTRL):
           self.silent_steer_warning = True
     else:
       self.no_steer_warning = False
       self.silent_steer_warning = False
-    if CS.steerFaultPermanent:
+    if CS.out.steerFaultPermanent:
       self.silent_steer_warning = False
 
-    self.CS_prev_steerFaultTemporary = CS.steerFaultTemporary
+    self.CS_prev_steerFaultTemporary = CS.out.steerFaultTemporary
 
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert, self.silent_steer_warning)
