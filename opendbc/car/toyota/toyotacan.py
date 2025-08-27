@@ -103,18 +103,18 @@ def create_fcw_command(packer, fcw):
   return packer.make_can_msg("PCS_HUD", 0, values)
 
 
-def create_ui_command(packer, steer, chime, left_line, right_line, left_lane_depart, right_lane_depart, enabled, stock_lkas_hud):
+def create_ui_command(packer, steer, chime, left_line, right_line, left_lane_depart, right_lane_depart, enabled, stock_lkas_hud, main_enabled):
+  lane_depart = left_lane_depart or right_lane_depart
   values = {
     "TWO_BEEPS": chime,
     "LDA_ALERT": steer,
     "RIGHT_LINE": 3 if right_lane_depart else 1 if right_line else 2,
     "LEFT_LINE": 3 if left_lane_depart else 1 if left_line else 2,
     "BARRIERS": 1 if enabled else 0,
-
+    "LKAS_STATUS": 3 if lane_depart else 2 if enabled else 1 if main_enabled else 0,
     # static signals
     "SET_ME_X02": 2,
     "SET_ME_X01": 1,
-    "LKAS_STATUS": 1,
     "REPEATED_BEEPS": 0,
     "LANE_SWAY_FLD": 7,
     "LANE_SWAY_BUZZER": 0,
