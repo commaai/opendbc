@@ -30,6 +30,10 @@ AddOption('--mutation',
           action='store_true',
           help='generate mutation-ready code')
 
+AddOption('--unoptimized',
+          action='store_true',
+          help='makes unoptimized code special to debug panda line by line')
+
 ccflags_asan = ["-fsanitize=address", "-fno-omit-frame-pointer"] if GetOption('asan') else []
 ldflags_asan = ["-fsanitize=address"] if GetOption('asan') else []
 
