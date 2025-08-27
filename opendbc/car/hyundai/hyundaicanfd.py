@@ -154,8 +154,8 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     #"OBJ_STATUS": 2, # official DBC doesn't have this, it was overlapping with SCC_AccelLimBandLwrVal
     "SCC_ObjSta": 2, # this was on a very different place than the OBJ_STATUS above, its coincidence the values match :D
     "SCC_NSCCOnOffSta": 2, # means ON, not sure why we care about it right now
-    "SCC_ObjRelSpdVal": 0, # set_me_3 formelry was setting this 0x3 but this was overlapping with SCC_ObjRelSpdVal last 3 bits somehow
-    "SET_ME_TMP_64": 0, # on my car is always 0, need to validate against othes
+    "SCC_ObjRelSpdVal": 0, # set_me_3 formerly was setting this 0x3 but this was overlapping with SCC_ObjRelSpdVal last 3 bits somehow
+    "SET_ME_TMP_64": 0, # on my car is always 0, need to validate against others
     "SCC_HeadwayDstSetVal": hud_control.leadDistanceBars,
   }
 
