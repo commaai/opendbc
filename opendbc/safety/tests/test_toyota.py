@@ -108,15 +108,15 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
     for msg in ["trq", "pcm"]:
       self.safety.set_controls_allowed(1)
       if msg == "trq":
-        to_push = self._torque_meas_msg(0)
+        msg = self._torque_meas_msg(0)
       if msg == "pcm":
-        to_push = self._pcm_status_msg(True)
-      self.assertTrue(self._rx(to_push))
-      to_push[0].data[4] = 0
-      to_push[0].data[5] = 0
-      to_push[0].data[6] = 0
-      to_push[0].data[7] = 0
-      self.assertFalse(self._rx(to_push))
+        msg = self._pcm_status_msg(True)
+      self.assertTrue(self._rx(msg))
+      msg[0].data[4] = 0
+      msg[0].data[5] = 0
+      msg[0].data[6] = 0
+      msg[0].data[7] = 0
+      self.assertFalse(self._rx(msg))
       self.assertFalse(self.safety.get_controls_allowed())
 
 
@@ -308,6 +308,7 @@ class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyo
                                  self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.LTA)
     self.safety.init_tests()
 
+
 class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
 
   TX_MSGS = TOYOTA_SECOC_TX_MSGS
@@ -344,6 +345,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
       should_tx = not req and not req2 and angle == 0
       self.assertEqual(should_tx, self._tx(self._lta_2_msg(req, req2, angle)), f"{req=} {req2=} {angle=}")
 
+
 class TestToyotaSecOcSafetyStockLongitudinal(TestToyotaSecOcSafetyBase, TestToyotaStockLongitudinalBase):
 
   def setUp(self):
@@ -352,6 +354,7 @@ class TestToyotaSecOcSafetyStockLongitudinal(TestToyotaSecOcSafetyBase, TestToyo
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
                                  self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
+
 
 class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
 
