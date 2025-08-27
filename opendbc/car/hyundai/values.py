@@ -28,7 +28,7 @@ class CarControllerParams:
       self.STEER_MAX = 270
       self.STEER_DRIVER_ALLOWANCE = 250
       self.STEER_DRIVER_MULTIPLIER = 2
-      self.STEER_THRESHOLD = 250
+      self.STEER_THRESHOLD = 1.245  # Nm (250 - 1) * 0.005
       self.STEER_DELTA_UP = 2
       self.STEER_DELTA_DOWN = 3
 
