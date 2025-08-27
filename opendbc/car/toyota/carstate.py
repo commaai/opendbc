@@ -197,8 +197,8 @@ class CarState(CarStateBase):
         self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
 
         buttonEvents += create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
-    ret.buttonEvents = buttonEvents
 
+    ret.buttonEvents = buttonEvents
     return ret
 
   @staticmethod
