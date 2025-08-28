@@ -57,7 +57,15 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
     return self.packer.make_can_msg_panda(self.STEER_MSG, self.STEER_BUS, values)
 
   def _speed_msg(self, speed):
-    values = {f"WHL_Spd{pos}Val": speed * 0.03125 for pos in ["FL", "FR", "RL", "RR"]}
+    return self._wheel_speed_4wheel_msg(speed, speed, speed, speed)
+
+  def _wheel_speed_4wheel_msg(self, wheel_fl: float, wheel_fr: float, wheel_rl: float, wheel_rr: float):
+    values = {
+      "WHL_SpdFLVal": wheel_fl * 0.03125,
+      "WHL_SpdFRVal": wheel_fr * 0.03125,
+      "WHL_SpdRLVal": wheel_rl * 0.03125,
+      "WHL_SpdRRVal": wheel_rr * 0.03125,
+    }
     return self.packer.make_can_msg_panda("WHEEL_SPEEDS", self.PT_BUS, values)
 
   def _user_brake_msg(self, brake):
