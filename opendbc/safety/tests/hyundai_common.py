@@ -155,7 +155,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
             self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
             # Test initial state
-            self._mads_states_cleanup()
             self.safety.set_mads_params(enable_mads, False, False)
 
             self.assertFalse(self.safety.get_acc_main_on())
@@ -173,7 +172,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
             for _ in range(10):
               self._rx(self._main_cruise_button_msg(1))
               self.assertFalse(self.safety.get_controls_allowed_lat())
-    self._mads_states_cleanup()
     self.safety.set_current_safety_param_sp(default_safety_param_sp)
 
   def test_acc_main_sync_mismatches_reset(self):
@@ -188,7 +186,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self.safety.set_current_safety_param_sp(default_safety_param_sp | main_cruise_toggleable_flag)
         self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
-        self._mads_states_cleanup()
         self.safety.set_mads_params(enable_mads, False, False)
 
         # Initial state
@@ -208,7 +205,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self._tx(self._tx_acc_state_msg(False))  # acc_main_on_tx = False
         self.assertFalse(self.safety.get_acc_main_on())
         self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
-    self._mads_states_cleanup()
     self.safety.set_current_safety_param_sp(default_safety_param_sp)
 
   def test_acc_main_sync_mismatch_counter(self):
@@ -223,7 +219,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self.safety.set_current_safety_param_sp(default_safety_param_sp | main_cruise_toggleable_flag)
         self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
-        self._mads_states_cleanup()
         self.safety.set_mads_params(enable_mads, False, False)
         self.safety.set_controls_allowed_lat(True)
 
@@ -251,7 +246,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         # Counter should reset after disengagement
         self._tx(self._tx_acc_state_msg(False))
         self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
-    self._mads_states_cleanup()
     self.safety.set_current_safety_param_sp(default_safety_param_sp)
 
   def test_acc_main_sync_mismatch_recovery(self):
@@ -266,7 +260,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self.safety.set_current_safety_param_sp(default_safety_param_sp | main_cruise_toggleable_flag)
         self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
-        self._mads_states_cleanup()
         self.safety.set_mads_params(enable_mads, False, False)
 
         # Create initial mismatch
@@ -278,7 +271,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         # Sync states
         self._tx(self._tx_acc_state_msg(True))  # Match acc_main_on_tx to acc_main_on
         self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
-    self._mads_states_cleanup()
     self.safety.set_current_safety_param_sp(default_safety_param_sp)
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):

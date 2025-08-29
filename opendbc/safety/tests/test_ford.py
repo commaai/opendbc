@@ -273,7 +273,6 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
             for path_angle in path_angles:
               for curvature_rate in curvature_rates:
                 for curvature in curvatures:
-                  self._mads_states_cleanup()
                   self.safety.set_controls_allowed(controls_allowed)
                   self._set_prev_desired_angle(curvature)
                   self._reset_curvature_measurement(curvature, speed)
@@ -380,17 +379,13 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         self.assertEqual(enabled, self._tx(self._acc_button_msg(Buttons.CANCEL, bus)))
 
   def test_enable_control_allowed_from_acc_main_on(self):
-    try:
-      for enable_mads in (True, False):
-        with self.subTest("enable_mads", mads_enabled=enable_mads):
-          for main_button_msg_valid in (True, False):
-            with self.subTest("main_button_msg_valid", state_valid=main_button_msg_valid):
-              self._mads_states_cleanup()
-              self.safety.set_mads_params(enable_mads, False, False)
-              self._rx(self._pcm_status_msg(main_button_msg_valid))
-              self.assertEqual(enable_mads and main_button_msg_valid, self.safety.get_controls_allowed_lat())
-    finally:
-      self._mads_states_cleanup()
+    for enable_mads in (True, False):
+      with self.subTest("enable_mads", mads_enabled=enable_mads):
+        for main_button_msg_valid in (True, False):
+          with self.subTest("main_button_msg_valid", state_valid=main_button_msg_valid):
+            self.safety.set_mads_params(enable_mads, False, False)
+            self._rx(self._pcm_status_msg(main_button_msg_valid))
+            self.assertEqual(enable_mads and main_button_msg_valid, self.safety.get_controls_allowed_lat())
 
 
 class TestFordCANFDStockSafety(TestFordSafetyBase):

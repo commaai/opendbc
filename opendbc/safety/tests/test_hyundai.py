@@ -193,7 +193,6 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
               self.safety.set_current_safety_param_sp(has_lda_button)
               self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
-              self._mads_states_cleanup()
               self.safety.set_mads_params(enable_mads, False, False)
               self.assertEqual(enable_mads, self.safety.get_enable_mads())
 
@@ -203,7 +202,6 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
               self._rx(self._speed_msg(0))
               self.assertEqual(enable_mads and has_lda_button_param, self.safety.get_controls_allowed_lat())
     finally:
-      self._mads_states_cleanup()
       self.safety.set_current_safety_param_sp(default_safety_param_sp)
 
 
