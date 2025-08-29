@@ -10,6 +10,8 @@ from opendbc.car.gm.radar_interface import RadarInterface, RADAR_HEADER_MSG, CAM
 from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, ALT_ACCS, CanBus, GMSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, LateralAccelFromTorqueCallbackType
 
+from opendbc.sunnypilot.car.gm.interface_ext import CarInterfaceExt
+
 TransmissionType = structs.CarParams.TransmissionType
 NetworkLocation = structs.CarParams.NetworkLocation
 
@@ -20,10 +22,14 @@ NON_LINEAR_TORQUE_PARAMS = {
 }
 
 
-class CarInterface(CarInterfaceBase):
+class CarInterface(CarInterfaceBase, CarInterfaceExt):
   CarState = CarState
   CarController = CarController
   RadarInterface = RadarInterface
+
+  def __init__(self, CP, CP_SP):
+    CarInterfaceBase.__init__(self, CP, CP_SP)
+    CarInterfaceExt.__init__(self, CP, CarInterfaceBase)
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):

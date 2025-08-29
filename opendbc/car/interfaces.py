@@ -18,6 +18,8 @@ from opendbc.car.values import PLATFORMS
 from opendbc.can import CANParser
 from opendbc.car.carlog import carlog
 
+from opendbc.sunnypilot.car.interfaces import CarInterfaceBaseSP
+
 GearShifter = structs.CarState.GearShifter
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -93,7 +95,7 @@ class RadarInterfaceBase(ABC):
     return None
 
 
-class CarInterfaceBase(ABC):
+class CarInterfaceBase(ABC, CarInterfaceBaseSP):
   CarState: 'CarStateBase'
   CarController: 'CarControllerBase'
   RadarInterface: 'RadarInterfaceBase' = RadarInterfaceBase
