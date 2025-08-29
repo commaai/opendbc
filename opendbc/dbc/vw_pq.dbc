@@ -523,11 +523,28 @@ BO_ 1502 Lenkhilfe_Fehler: 7 XXX
  SG_ Spannung_Kl_30_zu_gro_ : 0|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 976 Lenkhilfe_1: 2 XXX
- SG_ Fehlerspeichereintrag__Lenkhilf : 15|1@1+ (1,0) [0|0] "" XXX
- SG_ Frei_Lenkhilfe_1_2 : 9|6@1+ (1,0) [0|0] "" XXX
- SG_ Fehlerlampe_Lenkhilfe : 8|1@1+ (1,0) [0|0] "" XXX
- SG_ Fehlerstatus_Lastinformation : 7|1@1+ (1,0) [0|0] "" XXX
- SG_ Lastinformation : 0|7@1+ (1,0) [0|127] "A" XXX
+ SG_ LH1_Lastinfo : 0|7@1+ (1,0) [0|127] "A" XXX
+ SG_ LH1_Fehler_LI : 7|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Sicherheitslamp : 8|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Fehlerlampe : 9|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Textbits : 10|3@1+ (1,0) [0|7] "" XXX
+ SG_ LH1_Akustiksign : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_SleepInd : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Fehlereintr : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_EPS_Diagmode : 16|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_gue_ECU_Temp : 19|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Kuehlung : 20|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Mode_Hybrid : 21|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Untersp : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Uebersp : 25|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Uebertemp : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Sensor : 27|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_CAN_SS : 28|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_ECU : 29|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Motor : 30|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_LeistDichte : 31|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_ULeistung : 32|8@1+ (0.5,0) [0|100] "%" XXX
+ SG_ LH1_ECU_Temp : 40|8@1+ (1,-70) [-70|185] "°C" XXX
 
 BO_ 1312 Kombi_3: 8 XXX
  SG_ Frei_Kombi_3_2 : 60|4@1+ (1,0) [0|0] "" XXX
