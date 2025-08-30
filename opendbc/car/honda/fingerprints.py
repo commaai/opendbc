@@ -11,6 +11,22 @@ Ecu = CarParams.Ecu
 
 
 FW_VERSIONS = {
+  CAR.HONDA_ACCORD_9G: {
+    (Ecu.gateway, 0x18DAEFF1, None): [
+      b'38897-T3W-0130\x00\x00',
+    ],
+    (Ecu.vsa, 0x18DA28F1, None): [
+      b'57114-T2F-X840\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18DAB0F1, None): [
+      b'36161-T2F-A140\x00\x00',
+      b'36161-T2F-A140\x00\x00',
+    ],
+    (Ecu.srs, 0x18DA53F1, None): [
+      b'77959-T2F-A030\x00\x00',
+      b'77959-T3Z-A020\x00\x00',
+    ],
+  },
   CAR.HONDA_ACCORD: {
     (Ecu.shiftByWire, 0x18da0bf1, None): [
       b'54008-TVC-A910\x00\x00',
@@ -495,6 +511,44 @@ FW_VERSIONS = {
       b'36161-TDK-J070\x00\x00',
       b'36161-TDK-J080\x00\x00',
       b'36161-TDK-J530\x00\x00',
+    ],
+  },
+  CAR.ACURA_MDX_3G: {
+    (Ecu.programmedFuelInjection, 0x18da10f1, None): [
+      b'37805-5BN-A521\x00\x00',
+      b'37805-5J6-6910\x00\x00',
+      b'37805-5J6-A940\x00\x00',
+    ],
+    (Ecu.vsa, 0x18da28f1, None): [
+      b'57114-TRX-H130\x00\x00',
+      b'57114-TZ6-A810\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36161-TRX-A820\x00\x00',
+      b'36161-TYT-A220\x00\x00',
+      b'36161-TZ6-A340\x00\x00',
+      b'36161-TZ6-A730\x00\x00',
+    ],
+    (Ecu.shiftByWire, 0x18da0bf1, None): [
+      b'77959-TZ5-A110\x00\x00',
+      b'54008-TZ5-A710\x00\x00',
+      b'54008-TZ5-A910\x00\x00',
+      b'54008-TZ5-A911\x00\x00',
+    ],
+    (Ecu.transmission, 0x18da1ef1, None): [
+      b'28101-5DH-A401\x00\x00',
+      b'28101-5NC-A740\x00\x00',
+      b'28103-5NC-B210\x00\x00',
+    ],
+    (Ecu.srs, 0x18da53f1, None): [
+      b'77959-TRX-A011\x00\x00',
+      b'77959-TZ5-A110\x00\x00',
+      b'77959-TZ5-A220\x00\x00',
+    ],
+     (Ecu.gateway, 0x18daeff1, None): [
+      b'38897-TRX-A220\x00\x00',
+      b'38897-TYR-A011\x00\x00',
+      b'38897-TZ5-A110\x00\x00',
     ],
   },
   CAR.ACURA_MDX_4G_MMR: {
@@ -988,6 +1042,35 @@ FW_VERSIONS = {
     ],
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28101-63B-M420\x00\x00',
+    ],
+  },
+  CAR.ACURA_TLX_1G: {
+    (Ecu.gateway, 0x18DAEFF1, None): [
+      b'38897-TZ4-A010\x00\x00',
+    ],
+    (Ecu.programmedFuelInjection, 0x18da10f1, None): [
+      b'37805-5J2-3390\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18DAB0F1, None): [
+      b'36161-TZ4-A120\x00\x00',
+	    b'36161-TZ7-A520\x00\x00',
+    ],
+    (Ecu.vsa, 0x18DA28F1, None): [
+      b'57114-TZ4-A510\x00\x00',
+    ],
+    (Ecu.transmission, 0x18DA1EF1, None): [
+      b'28101-5L9-A690\x00\x00',
+    ],
+    (Ecu.shiftByWire, 0x18DA0BF1, None): [
+      b'54008-TZ3-A820\x00\x00',
+    ],
+    (Ecu.combinationMeter, 0x18DA60F1, None): [
+      b'78109-TZ4-A210\x00\x00',
+	    b'78109-TZ7-A210\x00\x00',
+    ],
+    (Ecu.srs, 0x18DA53F1, None): [
+      b'77959-TZ4-A510\x00\x00',
+	  b'77959-TZ7-A020\x00\x00',
     ],
   },
 }
