@@ -375,25 +375,29 @@ BO_ 896 Motor_3: 8 XXX
  SG_ Uebertemperaturschutz__Motor_3_ : 1|1@1+ (1,0) [0|0] "" XXX
  SG_ Vorgluehmeldung : 0|1@1+ (1,0) [0|0] "" XXX
 
-BO_ 648 Motor_2: 8 XXX
- SG_ Minimales_Motormoment_bei_Zuend : 56|8@1+ (0.39,0) [0|99] "MDI" XXX
- SG_ Begrenzungsmoment : 48|8@1+ (0.39,0) [0|99] "MDI" XXX
- SG_ Leerlaufsolldrehzahl__Motor_2_ : 40|8@1+ (10,0) [0|2540] "U/min" XXX
- SG_ Soll_Geschwindigkeit_bei_GRA_Be : 32|8@1+ (1.28,0) [0|325] "km/h" XXX
- SG_ Fahrzeuggeschwindigkeit : 24|8@1+ (1.28,0) [0|325] "km/h" XXX
- SG_ GRA_Status : 22|2@1+ (1,0) [0|0] "" XXX
- SG_ OBD_2_freeze_frame : 21|1@1+ (1,0) [0|0] "" XXX
- SG_ Status_Normalbetrieb : 20|1@1+ (1,0) [0|0] "" XXX
- SG_ Ansteuerung_Klima__4_1_ : 19|1@1+ (1,0) [0|0] "" XXX
- SG_ Fehlerstatus_Kuhlmitteltempera : 18|1@1+ (1,0) [0|0] "" XXX
- SG_ Bremstestschalter : 17|1@1+ (1,0) [0|0] "" XXX
- SG_ Bremslichtschalter : 16|1@1+ (1,0) [0|0] "" XXX
- SG_ Kuehlmitteltemperatur__Motor_2_ : 8|8@1+ (0.75,-48) [-48|142.5] "" XXX
- SG_ Multiplex_Code_Motor_2 M : 6|2@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Motorcode__4_x_ m1 : 0|6@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Getriebecode m2 : 0|6@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Max_Moment__Norm m3 : 0|6@1+ (10,0) [0|630] "Nm" XXX
- SG_ Multiplex_Info_CAN_Stand m0 : 0|6@1+ (1,0) [0|0] "" XXX
+BO_ 648 Motor_2: 8 Motor
+ SG_ MO2_Mp_Code m : 6|2@1+ (1,0) [0|3] "" Gateway
+ SG_ MO2_Getr_Code m2 : 0|6@1+ (1,0) [0|63] "" Gateway
+ SG_ MO2_max_Mo m3 : 0|6@1+ (10,0) [0|630] "Nm" Gateway
+ SG_ MO2_CAN_Vers m0 : 0|6@1+ (1,0) [0|63] "" Gateway
+ SG_ MO2_Motor_Code m1 : 0|6@1+ (1,0) [0|63] "" Gateway
+ SG_ MO2_Kuehlm_T : 8|8@1+ (0.75,-48) [-47.25|142.5] "°C" Gateway
+ SG_ MO2_BLS : 16|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_BTS : 17|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sta_Kuehlm : 18|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sta_Klima : 19|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sta_No_Bet : 20|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Status_TSK : 21|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sta_GRA : 22|2@1+ (1,0) [0|3] "" ACC,GRA
+ SG_ TSK_Limiter_ausgewaehlt : 25|1@1+ (1,0) [0|1] "" ACC,GRA
+ SG_ MO2_GRAregelt : 26|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sport_Error : 27|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_OffRoad : 28|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_RME_Gehalt : 29|3@1+ (12.5,0) [0|75] "%" Gateway
+ SG_ MO2_GRA_Soll : 32|8@1+ (1.28,0) [0|325.12] "km/h" ACC,GRA
+ SG_ MO2_LL_Solldz : 40|8@1+ (10,0) [0|2540] "1/min" Gateway
+ SG_ MO2_Begr_Mo : 48|8@1+ (0.39,0) [0|99.06] "%" Gateway
+ SG_ MO2_Mo_ZWR : 56|8@1+ (0.39,0) [0|99.06] "%" Gateway
 
 BO_ 640 Motor_1: 8 XXX
  SG_ Fahrerwunschmoment : 56|8@1+ (0.39,0) [0|99] "MDI" XXX
@@ -1514,14 +1518,29 @@ CM_ SG_ 640 inneres_Motor_Moment_ohne_exter "Inner torque without external";
 CM_ SG_ 644 MOB_CHECKSUM "Checksum MOB";
 CM_ SG_ 644 MOB_COUNTER "Counter MOB";
 
-CM_ SG_ 648 Minimales_Motormoment_bei_Zuend "Minimum Torque Adjustment";
-CM_ SG_ 648 Begrenzungsmoment "Maximum Inner Torque";
-CM_ SG_ 648 Bremstestschalter "Brake Test Switch";
-CM_ SG_ 648 Soll_Geschwindigkeit_bei_GRA_Be "Desired Vehicle Speed";
-CM_ SG_ 648 Bremslichtschalter "Brake Light Switch";
-CM_ SG_ 648 Leerlaufsolldrehzahl__Motor_2_ "Target Idle Speed";
-CM_ SG_ 648 Fahrzeuggeschwindigkeit "Vehicle Speed";
-CM_ SG_ 648 Kuehlmitteltemperatur__Motor_2_ "Coolant Temperature";
+CM_ BO_ 648 "Motor message 2 - Contains engine status, temperatures, and torque information";
+CM_ SG_ 648 MO2_Mp_Code "Multiplex code - switches after 4 transmissions";
+CM_ SG_ 648 MO2_Getr_Code "Transmission code (multiplex value when Mp_Code=2)";
+CM_ SG_ 648 MO2_max_Mo "Maximum torque MDI (multiplex value when Mp_Code=3)";
+CM_ SG_ 648 MO2_CAN_Vers "CAN version (multiplex value when Mp_Code=0)";
+CM_ SG_ 648 MO2_Motor_Code "Motor code (multiplex value when Mp_Code=1)";
+CM_ SG_ 648 MO2_Kuehlm_T "Engine coolant temperature or substitute value";
+CM_ SG_ 648 MO2_BLS "Brake light switch - unfiltered raw signal";
+CM_ SG_ 648 MO2_BTS "Brake test switch";
+CM_ SG_ 648 MO2_Sta_Kuehlm "Coolant temperature status - 0=OK, 1=Not OK";
+CM_ SG_ 648 MO2_Sta_Klima "Air conditioning compressor status";
+CM_ SG_ 648 MO2_Sta_No_Bet "Normal operation status (Terminal 15 on, init complete)";
+CM_ SG_ 648 MO2_Status_TSK "Drive train coordinator status";
+CM_ SG_ 648 MO2_Sta_GRA "GRA/ACC status";
+CM_ SG_ 648 TSK_Limiter_ausgewaehlt "Speed limiter selected";
+CM_ SG_ 648 MO2_GRAregelt "GRA regulating to displayed speed";
+CM_ SG_ 648 MO2_Sport_Error "Sport mode error (Porsche Cayenne)";
+CM_ SG_ 648 MO2_OffRoad "OffRoad mode active";
+CM_ SG_ 648 MO2_RME_Gehalt "Rapeseed oil methyl ester content (diesel)";
+CM_ SG_ 648 MO2_GRA_Soll "GRA target speed setpoint";
+CM_ SG_ 648 MO2_LL_Solldz "Idle target speed";
+CM_ SG_ 648 MO2_Begr_Mo "Limiting torque - max possible at speed";
+CM_ SG_ 648 MO2_Mo_ZWR "Minimum engine torque with ignition angle retardation";
 
 CM_ SG_ 896 Drosselklappenpoti "Throttle Position";
 CM_ SG_ 896 Motor_Wunschdrehzahl "Desired engine speed";
@@ -1607,6 +1626,27 @@ CM_ SG_ 1470 XX_DLCORTLC1 "Might be DLC or TLC";
 CM_ SG_ 1470 XX_DLCORTLC2 "Might be DLC or TLC, might have wrong size";
 
 CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
+
+SG_MUL_VAL_ 648 MO2_Getr_Code MO2_Mp_Code 2-2;
+SG_MUL_VAL_ 648 MO2_max_Mo MO2_Mp_Code 3-3;
+SG_MUL_VAL_ 648 MO2_CAN_Vers MO2_Mp_Code 0-0;
+SG_MUL_VAL_ 648 MO2_Motor_Code MO2_Mp_Code 1-1;
+
+VAL_ 648 MO2_Mp_Code 0 "CAN_Stand" 1 "Motor_Kod" 2 "Getriebe_Kod" 3 "MDI_Max";
+
+VAL_ 648 MO2_Getr_Code 0 "_5HP19" 1 "_5HP24" 2 "AG4" 3 "VL300" 4 "VQ250" 5 "VQ35" 6 "AG4_yestco" 7 "AG5_yestco" 8 "autom_Kupplung" 9 "autom_Kupplung_mit_ASG" 10 "AG6_yestco_ZF_6HP_AISIN" 11 "DQ500_DQ250_DQ200" 12 "SQ100_SQ200" 14 "AL1000_AL551_AL951_ZF8HPx" 15 "Handschalter_konv" 16 "DL800" 17 "E_Fahrzeug__Single_Gear";
+
+VAL_ 648 MO2_BLS 0 "no_Bremsen" 1 "Bremse_betaetigt";
+VAL_ 648 MO2_BTS 0 "no_braking" 1 "Brake_activated";
+VAL_ 648 MO2_Sta_Kuehlm 0 "Temperature_ok" 1 "Temperature_not_ok";
+VAL_ 648 MO2_Sta_Klima 0 "Climate_off" 1 "Climate_on";
+VAL_ 648 MO2_Sta_No_Bet 0 "no_Normalbetrieb" 1 "Normalbetrieb";
+VAL_ 648 MO2_Status_TSK 0 "TSK_not_available" 1 "TSK_available";
+VAL_ 648 MO2_Sta_GRA 0 "ADR_GRA_off" 1 "gra_activated_lamp_on" 2 "gra_overdriven_lamp_on" 3 "ADR_gra_faulted";
+VAL_ 648 TSK_Limiter_ausgewaehlt 0 "no_limiter_selected" 1 "Limiter_Selected";
+VAL_ 648 MO2_GRAregelt 0 "no" 1 "yes";
+VAL_ 648 MO2_Sport_Error 0 "no_Failure" 1 "Failure";
+VAL_ 648 MO2_OffRoad 0 "not_active" 1 "active";
 
 VAL_ 870 AWV_Text 0 "kein_Text" 1 "FrontAssist_aus" 2 "FrontAssist_startet" 3 "FrontAssist_Warnung" 4 "FrontAssist_Sens_reinig" 5 "FrontAssist_Failure" 6 "FrontAssist_Demo" 7 "Vorhalt" 8 "Bremsung_wird_gerade_durchgefuehrt" 9 "Sensor_not_verfuegbar" 10 "Sensor_reinigen" 11 "Service_notwendig_Failure" 12 "Funktion_vom_Fahrer_deactivated" 13 "Funktion_vom_Fahrer_activated" 14 "FrontAssist_zur_Zeit_not_verfuegbar__rev_Failure";
 VAL_ 870 AWV_1_Freigabe 0 "nicht_freigegeben" 1 "freigegeben";
