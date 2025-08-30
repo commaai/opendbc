@@ -263,6 +263,16 @@ class CarInterface(CarInterfaceBase):
         stock_cp.lateralParams.torqueBP, stock_cp.lateralParams.torqueV = [[0, 2560, 8000], [0, 2560, 3840]]
         stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.3], [0.1]]
 
+    elif candidate in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL):
+      if ret.flags & HondaFlagsSP.EPS_MODIFIED:
+        stock_cp.lateralParams.torqueBP, stock_cp.lateralParams.torqueV = [[0, 2564, 8000], [0, 2564, 3840]]
+        stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.3], [0.09]]  # 2.5x Modded EPS
+
+    elif candidate == CAR.HONDA_CIVIC_2022:
+      if ret.flags & HondaFlagsSP.EPS_MODIFIED:
+        stock_cp.lateralParams.torqueBP, stock_cp.lateralParams.torqueV = [[0, 2564, 8000], [0, 2564, 3840]]
+        stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.3], [0.09]]  # 2.5x Modded EPS
+
     elif candidate == CAR.HONDA_ACCORD:
       if ret.flags & HondaFlagsSP.EPS_MODIFIED:
         stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.3], [0.09]]
