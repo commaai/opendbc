@@ -307,6 +307,12 @@ class CAR(Platforms):
     radar_dbc_dict('honda_fit_ex_2018_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
+  ACURA_MDX_3G = HondaNidecPlatformConfig(
+    [], # don't add to cardocs since custom steering board # TODO: find remaining fingerprints
+    CarSpecs(mass=4215 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.66, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
+    radar_dbc_dict('acura_ilx_2016_can_generated'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
+  )
   HONDA_ODYSSEY = HondaNidecPlatformConfig(
     [HondaCarDocs("Honda Odyssey 2018-20")],
     CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
@@ -339,6 +345,12 @@ class CAR(Platforms):
     CarSpecs(mass=1326, wheelbase=2.70, centerToFrontRatio=0.4, steerRatio=15.38),  # 10.93 is end-to-end spec
     radar_dbc_dict('honda_civic_touring_2016_can_generated'),
     flags=HondaFlags.HAS_ALL_DOOR_STATES
+  )
+  ACURA_TLX_1G = HondaNidecPlatformConfig(
+    [], # don't add to cardocs since custom steering board # TODO: find remaining fingerprints
+    CarSpecs(mass=3680 * CV.LB_TO_KG, wheelbase=2.78, centerToFrontRatio=0.40, steerRatio=15.1, tireStiffnessFactor=0.8467),  # acura spec, stiff from Accord
+    radar_dbc_dict('acura_ilx_2016_can_generated'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
 
 
