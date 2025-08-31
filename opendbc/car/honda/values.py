@@ -277,6 +277,12 @@ class CAR(Platforms):
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.HAS_ALL_DOOR_STATES,
   )
+  HONDA_ACCORD_9G = HondaNidecPlatformConfig(
+    [], # don't add to cardocs since custom steering board # TODO: find remaining fingerprints
+    CarSpecs(mass=3343 * CV.LB_TO_KG, wheelbase=2.78, steerRatio=13.23, centerToFrontRatio=0.37, tireStiffnessFactor=0.72),  # as spec
+    radar_dbc_dict('acura_ilx_2016_can_generated'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.HAS_ALL_DOOR_STATES,
+  )
   HONDA_CRV = HondaNidecPlatformConfig(
     [HondaCarDocs("Honda CR-V 2015-16", "Touring Trim", min_steer_speed=12. * CV.MPH_TO_MS)],
     CarSpecs(mass=3572 * CV.LB_TO_KG, wheelbase=2.62, steerRatio=16.89, centerToFrontRatio=0.41, tireStiffnessFactor=0.444),  # as spec
@@ -373,6 +379,9 @@ STEER_THRESHOLD = {
   CAR.ACURA_MDX_4G_MMR: 600,
   CAR.HONDA_CRV_6G: 600,
   CAR.HONDA_CITY_7G: 600,
+  CAR.HONDA_ACCORD_9G: 30,
+  CAR.ACURA_MDX_3G: 30,
+  CAR.ACURA_TLX: 30,  
 }
 
 
