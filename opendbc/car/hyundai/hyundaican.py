@@ -217,10 +217,23 @@ def create_frt_radar_opt(packer):
   return packer.make_can_msg("FRT_RADAR11", 0, frt_radar11_values)
 
 
-def create_fca_warning(packer, idx):
+def create_fca_warning(packer, idx, CP):
   # Send FCA messages to prevent "Check Forward Collision-Avoidance Assist" warning
   # This tells the car that FCA system is present but AEB is disabled by the driver
   commands = []
+
+  # Determine which CAN bus to use based on where FCA11 (0x38d) was detected
+  # Interface logic: if 0x38d in fingerprint[0] or 0x38d in fingerprint[2]
+  fca_bus = 0  # Default to bus 0
+  if hasattr(CP, 'carFingerprint') and CP.carFingerprint:
+    if 0x38d in CP.carFingerprint.get(2, {}):
+      fca_bus = 2  # Use bus 2 if FCA11 was found there
+      print(f"DEBUG: FCA11 found on bus 2, sending FCA messages to bus 2")
+    elif 0x38d in CP.carFingerprint.get(0, {}):
+      fca_bus = 0  # Use bus 0 if FCA11 was found there
+      print(f"DEBUG: FCA11 found on bus 0, sending FCA messages to bus 0")
+    else:
+      print(f"DEBUG: FCA11 (0x38d) not found in fingerprint, using default bus 0")
 
   # FCA11 - Forward Collision Avoidance status message
   fca11_values = {
@@ -231,9 +244,9 @@ def create_fca_warning(packer, idx):
   }
 
   # Create the message first to calculate checksum
-  fca11_dat = packer.make_can_msg("FCA11", 0, fca11_values)[1]
+  fca11_dat = packer.make_can_msg("FCA11", fca_bus, fca11_values)[1]
   fca11_values["CR_FCA_ChkSum"] = hyundai_checksum(fca11_dat[:7])
-  commands.append(packer.make_can_msg("FCA11", 0, fca11_values))
+  commands.append(packer.make_can_msg("FCA11", fca_bus, fca11_values))
 
   # FCA12 - Forward Collision Avoidance configuration message
   # This might be the key message that indicates user disabled FCA
@@ -241,6 +254,6 @@ def create_fca_warning(packer, idx):
     "FCA_DrvSetState": 2,  # Driver setting state (user disabled)
     "FCA_USM": 1,  # AEB disabled
   }
-  commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
+  commands.append(packer.make_can_msg("FCA12", fca_bus, fca12_values))
 
   return commands

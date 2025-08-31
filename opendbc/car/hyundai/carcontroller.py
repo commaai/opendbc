@@ -153,7 +153,7 @@ class CarController(CarControllerBase):
     # Send FCA messages for cars that need them even without longitudinal control
     if self.frame % 2 == 0 and not self.CP.openpilotLongitudinalControl and self.CP.flags & HyundaiFlags.USE_FCA.value:
       # Send FCA11 message to prevent "Check Forward Collision-Avoidance Assist" warning
-      can_sends.extend(hyundaican.create_fca_warning(self.packer, int(self.frame / 2)))
+      can_sends.extend(hyundaican.create_fca_warning(self.packer, int(self.frame / 2), self.CP))
 
     # 5 Hz ACC options
     if self.frame % 20 == 0 and self.CP.openpilotLongitudinalControl:
