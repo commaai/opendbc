@@ -159,15 +159,6 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.28], [0.08]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
 
-    elif candidate == CAR.HONDA_ODYSSEY_5G_MMR:
-      if not ret.openpilotLongitudinalControl:
-        ret.minSteerSpeed = 70.0 * CV.KPH_TO_MS # min is 70kph to activate but 60kph to deactivate.  Used 70kph to clarify for warning message
-        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # clipped by radar
-      else:
-        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.06]]
-      CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 2000]
-
     elif candidate == CAR.HONDA_PILOT:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.38], [0.11]]
