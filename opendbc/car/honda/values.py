@@ -265,7 +265,7 @@ class CAR(Platforms):
   ACURA_MDX_4G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura MDX 2022", "All")],
     CarSpecs(mass=4788 * CV.LB_TO_KG, wheelbase=2.89, steerRatio=14.6, centerToFrontRatio=0.428),  # as spec
-    {Bus.pt: 'acura_tlx_2021_can_generated'},
+    {Bus.pt: 'acura_mdx_2022_can_generated'},
     flags=HondaFlags.BOSCH_ALT_RADAR,
   )
   # mid-model refresh
