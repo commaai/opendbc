@@ -2,6 +2,7 @@ import crcmod
 from opendbc.car.hyundai.values import CAR, HyundaiFlags
 
 from opendbc.sunnypilot.car.hyundai.escc import EnhancedSmartCruiseControl
+from opendbc.sunnypilot.car.hyundai.lead_data_ext import CanLeadData
 
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
@@ -130,7 +131,8 @@ def create_lfahda_mfc(packer, enabled, lfa_icon):
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
 
-def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, set_speed, stopping, long_override, use_fca, CP,
+def create_acc_commands(packer, enabled, accel, upper_jerk, idx, lead_data: CanLeadData,
+                        hud_control, set_speed, stopping, long_override, use_fca, CP,
                         main_cruise_enabled, tuning, ESCC: EnhancedSmartCruiseControl = None):
   commands = []
 
@@ -140,11 +142,11 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
       "TauGapSet": hud_control.leadDistanceBars,
       "VSetDis": set_speed if enabled else 0,
       "AliveCounterACC": idx % 0x10,
-      "ObjValid": 1, # close lead makes controls tighter
-      "ACC_ObjStatus": 1, # close lead makes controls tighter
+      "ObjValid": int(lead_data.lead_visible), # close lead makes controls tighter
+      "ACC_ObjStatus": int(lead_data.lead_visible), # close lead makes controls tighter
       "ACC_ObjLatPos": 0,
-      "ACC_ObjRelSpd": 0,
-      "ACC_ObjDist": 1, # close lead makes controls tighter
+      "ACC_ObjRelSpd": lead_data.lead_rel_speed,
+      "ACC_ObjDist": int(lead_data.lead_distance), # close lead makes controls tighter
     }
 
   def get_scc12_values():
@@ -180,7 +182,8 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
       "JerkUpperLimit": tuning.jerk_upper, # stock usually is 1.0 but sometimes uses higher values
       "JerkLowerLimit": tuning.jerk_lower, # stock usually is 0.5 but sometimes uses higher values
       "ACCMode": 2 if enabled and long_override else 1 if enabled else 4, # stock will always be 4 instead of 0 after first disengage
-      "ObjGap": 2 if hud_control.leadVisible else 0, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
+      "ObjGap": lead_data.object_gap, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
+      "ObjDistStat": lead_data.object_rel_gap,
     }
 
   def get_fca11_values():
