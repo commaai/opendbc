@@ -531,7 +531,7 @@ FW_VERSIONS = {
       b'8S302-TYA-A020\x00\x00',
     ],
   },
-      CAR.HONDA_ODYSSEY: {
+  CAR.HONDA_ODYSSEY: {
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-THR-A010\x00\x00',
       b'38897-THR-A020\x00\x00',
