@@ -217,23 +217,13 @@ def create_frt_radar_opt(packer):
   return packer.make_can_msg("FRT_RADAR11", 0, frt_radar11_values)
 
 
-def create_fca_warning(packer, idx, CP):
+def create_fca_warning(packer, idx):
   # Send FCA messages to prevent "Check Forward Collision-Avoidance Assist" warning
   # This tells the car that FCA system is present but AEB is disabled by the driver
   commands = []
 
-  # Determine which CAN bus to use based on where FCA11 (0x38d) was detected
-  # Interface logic: if 0x38d in fingerprint[0] or 0x38d in fingerprint[2]
-  fca_bus = 0  # Default to bus 0
-  if hasattr(CP, 'carFingerprint') and CP.carFingerprint:
-    if 0x38d in CP.carFingerprint.get(2, {}):
-      fca_bus = 2  # Use bus 2 if FCA11 was found there
-      print(f"DEBUG: FCA11 found on bus 2, sending FCA messages to bus 2")
-    elif 0x38d in CP.carFingerprint.get(0, {}):
-      fca_bus = 0  # Use bus 0 if FCA11 was found there
-      print(f"DEBUG: FCA11 found on bus 0, sending FCA messages to bus 0")
-    else:
-      print(f"DEBUG: FCA11 (0x38d) not found in fingerprint, using default bus 0")
+  # For RADAR_SCC cars, FCA messages are sent on bus 0 (same as SCC messages)
+  fca_bus = 0
 
   # FCA11 - Forward Collision Avoidance status message
   fca11_values = {
