@@ -216,34 +216,3 @@ def create_frt_radar_opt(packer):
   }
   return packer.make_can_msg("FRT_RADAR11", 0, frt_radar11_values)
 
-
-def create_fca_warning(packer, idx):
-  # Send FCA messages to prevent "Check Forward Collision-Avoidance Assist" warning
-  # This tells the car that FCA system is present but AEB is disabled by the driver
-  commands = []
-
-  # For RADAR_SCC cars, FCA messages are sent on bus 0 (same as SCC messages)
-  fca_bus = 0
-
-  # FCA11 - Forward Collision Avoidance status message
-  fca11_values = {
-    "CR_FCA_Alive": idx % 0xF,
-    "PAINT1_Status": 1,
-    "FCA_DrvSetStatus": 2,  # Try 2 (user disabled) instead of 1
-    "FCA_Status": 1,  # AEB disabled
-  }
-
-  # Create the message first to calculate checksum
-  fca11_dat = packer.make_can_msg("FCA11", fca_bus, fca11_values)[1]
-  fca11_values["CR_FCA_ChkSum"] = hyundai_checksum(fca11_dat[:7])
-  commands.append(packer.make_can_msg("FCA11", fca_bus, fca11_values))
-
-  # FCA12 - Forward Collision Avoidance configuration message
-  # This might be the key message that indicates user disabled FCA
-  fca12_values = {
-    "FCA_DrvSetState": 2,  # Driver setting state (user disabled)
-    "FCA_USM": 1,  # AEB disabled
-  }
-  commands.append(packer.make_can_msg("FCA12", fca_bus, fca12_values))
-
-  return commands
