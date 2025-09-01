@@ -23,23 +23,15 @@ env = Environment(
     '-Wfatal-errors',
     '-Wno-pointer-to-int-cast',
     '-DCANFD',
+    '-g',
+    '-O0',
+    "-fno-omit-frame-pointer"
   ],
   CPPPATH=["#", "../../board/"],
   tools=["default", "compilation_db"],
 )
 if system == "Darwin":
   env.PrependENVPath('PATH', '/opt/homebrew/bin')
-
-try:
-  if GetOption('unoptimized'):
-    flags = [
-      '-g',
-      '-O0',
-      "-fno-omit-frame-pointer"
-    ]
-    env['CFLAGS'] += flags
-except AttributeError:
-  pass  # if SConstruct doesn't have addOption, it throws an Exception. We ignore it.
 
 if GetOption('mutation'):
   env['CC'] = 'clang-17'
