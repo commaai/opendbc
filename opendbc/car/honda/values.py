@@ -267,6 +267,12 @@ class CAR(Platforms):
     [HondaCarDocs("Acura MDX 2025", "All except Type S")],
     CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=16.2),
   )
+  ACURA_TLX_2G = HondaBoschPlatformConfig(
+    [HondaCarDocs("Acura TLX 2021", "All")],
+    CarSpecs(mass=3982 * CV.LB_TO_KG, wheelbase=2.87, steerRatio=13.6, centerToFrontRatio=0.43),
+    {Bus.pt: 'acura_tlx_2021_can_generated'},
+    flags=HondaFlags.BOSCH_ALT_RADAR,
+  )
 
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
