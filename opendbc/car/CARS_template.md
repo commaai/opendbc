@@ -49,7 +49,6 @@ Some notable works-in-progress:
 * Honda
   * 2025 Acura MDX (CAN-FD), commaai/opendbc#2129
   * 2022-25 Acura RDX, commaai/opendbc#1967
-  * 2021-25 Honda Odyssey, commaai/opendbc#2170
   * Camera ACC stability improvements, commaai/opendbc#2192
   * Alpha longitudinal stability improvements, commaai/opendbc#2347 and commaai/opendbc#2165
 

@@ -267,6 +267,12 @@ class CAR(Platforms):
     [HondaCarDocs("Acura MDX 2025", "All except Type S")],
     CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=16.2),
   )
+  HONDA_ODYSSEY_5G_MMR = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda Odyssey 2021-25", "All", min_steer_speed=70. * CV.KPH_TO_MS)],
+    CarSpecs(mass=4590 * CV.LB_TO_KG, wheelbase=3.00, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=1.02),  # per spec
+    {Bus.pt: 'acura_rdx_2020_can_generated'},
+    flags=HondaFlags.BOSCH_ALT_BRAKE | HondaFlags.BOSCH_ALT_RADAR,
+  )
 
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
@@ -409,7 +415,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
   non_essential_ecus={
     Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_E, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_INSIGHT, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
+              CAR.HONDA_E, CAR.HONDA_INSIGHT, *HONDA_BOSCH_ALT_RADAR, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
