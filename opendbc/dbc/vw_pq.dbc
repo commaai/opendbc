@@ -469,17 +469,17 @@ BO_ 196 Lenkwinkel_1__ITT_: 2 XXX
  SG_ COARSE_CHECK__ITT_ : 0|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 194 Lenkwinkel_1: 8 XXX
- SG_ Checksumme_Lenkwinkel_1 : 56|8@1+ (1,0) [0|0] "" XXX
- SG_ Kodierdaten : 48|8@1+ (1,0) [0|0] "" XXX
- SG_ Zaehler_Lenkwinkel_1 : 44|4@1+ (1,0) [0|15] "" XXX
- SG_ Status_KL30_Ausfall__z_Zt__nur : 43|1@1+ (1,0) [0|0] "" XXX
- SG_ Interner_Status : 41|2@1+ (1,0) [0|0] "" XXX
- SG_ Frei_Lenkwinkel_1_1 : 40|1@1+ (1,0) [0|0] "" XXX
- SG_ Lenkwinkel_ID : 32|8@1+ (1,0) [0|0] "" XXX
- SG_ Lenkradwinkel_Geschwindigkeit_S : 31|1@1+ (1,0) [0|0] "" XXX
- SG_ Lenkradwinkel_Geschwindigkeit : 16|15@1+ (0.04375,0) [0|1433.6] "Grad/Sek" XXX
- SG_ Lenkradwinkel_Sign : 15|1@1+ (1,0) [0|0] "" XXX
- SG_ Lenkradwinkel : 0|15@1+ (0.04375,0) [0|1433.6] "Grad" XXX
+ SG_ LW1_LRW : 0|15@1+ (0.04375,0) [0|1433.55625] "°Grad" Gateway,ESP,ABS
+ SG_ LW1_LRW_Sign : 15|1@1+ (1,0) [0|1] "" Gateway,ESP,ABS
+ SG_ LW1_Lenk_Gesch : 16|15@1+ (0.04375,0) [0|1433.55625] "°Grad/s" Gateway,ESP,ABS
+ SG_ LW1_Gesch_Sign : 31|1@1+ (1,0) [0|1] "" Gateway,ESP,ABS
+ SG_ LW1_ID : 32|8@1+ (1,0) [0|255] "" Gateway,ESP,ABS
+ SG_ LW1_Initquelle : 40|1@1+ (1,0) [0|1] "" Gateway,ESP,ABS
+ SG_ LW1_Status : 41|2@1+ (1,0) [0|3] "" Gateway,ESP,ABS
+ SG_ LW1_Sta_KL30 : 43|1@1+ (1,0) [0|1] "" Gateway,ESP,ABS
+ SG_ LW1_Zaehler : 44|4@1+ (1,0) [0|15] "" Gateway,ESP,ABS
+ SG_ LW1_Kodier : 48|8@1+ (1,0) [0|255] "" Gateway
+ SG_ LW1_CRC : 56|8@1+ (1,0) [0|255] "" Gateway,ESP,ABS
 
 BO_ 1502 Lenkhilfe_Fehler: 7 XXX
  SG_ Werkstattcode : 48|8@1+ (1,0) [0|0] "" XXX
@@ -1245,7 +1245,7 @@ BO_ 870 AWV: 8 XXX
  SG_ ANB_Zielbremsung_Freigabe : 52|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ANB_CM_Anforderung : 53|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ANB_Ziel_Teilbrems_Verz_Anf : 54|10@1+ (0.024,-20.016) [0|1023] "Unit_MeterPerSeconSquar" Vector__XXX
- 
+
 BO_ 1470 LDW_Status: 8 XXX
  SG_ LDW_Lernmodus_rechts : 0|2@1+ (1,0) [0|3] "" XXX
  SG_ LDW_Lernmodus_links : 2|2@1+ (1,0) [0|3] "" XXX
@@ -1516,6 +1516,20 @@ BO_ 2000 Diagnose_1: 8 XXX
 CM_ SG_ 80 Checksumme_Airbag_1 "Checksum Airbag_1";
 CM_ SG_ 80 Zaehler_Airbag_1 "Counter Airbag_1";
 
+CM_ BO_ 194 "Steering wheel angle message 1 - Contains steering angle, speed, and status information";
+
+CM_ SG_ 194 LW1_LRW "Steering wheel angle (0 = straight ahead, 7FFFh = stop)";
+CM_ SG_ 194 LW1_LRW_Sign "Steering angle sign: 0=positive (left), 1=negative (right)";
+CM_ SG_ 194 LW1_Lenk_Gesch "Steering wheel angular velocity (0 = no movement, 7FFFh = max speed)";
+CM_ SG_ 194 LW1_Gesch_Sign "Angular velocity sign: 0=positive, 1=negative";
+CM_ SG_ 194 LW1_ID "Calibration ID - 0=not calibrated, 128=calibrated (PQ35/46/VW32x/VW411)";
+CM_ SG_ 194 LW1_Initquelle "Initialization source";
+CM_ SG_ 194 LW1_Status "Sensor status";
+CM_ SG_ 194 LW1_Sta_KL30 "Terminal 30 status (Kostal sensor)";
+CM_ SG_ 194 LW1_Zaehler "Free running message counter";
+CM_ SG_ 194 LW1_Kodier "Coding data (multiplex output depends on counter)";
+CM_ SG_ 194 LW1_CRC "Checksum - One's complement of 8-bit sum of bytes 1,2,3,4,6";
+
 CM_ SG_ 210 LM_Offset "centiNewton-meters for ease of calculation without FP math in Panda";
 CM_ SG_ 210 Vib_Amp "Steering wheel haptic, amplitude";
 CM_ SG_ 210 Vib_Freq "Steering wheel haptic, frequency";
@@ -1654,6 +1668,13 @@ CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
 
 SG_MUL_VAL_ 416 BR1_ASRMo_fa BR1_MSR_Anf 0-0;
 SG_MUL_VAL_ 416 BR1_MSR_Mo_inv BR1_MSR_Anf 1-1;
+
+VAL_ 194 LW1_LRW_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 194 LW1_Gesch_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 194 LW1_ID 0 "noch_not_kalibriert" 128 "kalibriert_nur_bei_PQ35_46_VW32x_VW411";
+VAL_ 194 LW1_Initquelle 0 "Bremse_3" 1 "EPS_Bit";
+VAL_ 194 LW1_Status 0 "OK" 1 "no_initial" 2 "sporadic_failure" 3 "permanent_failure";
+VAL_ 194 LW1_Sta_KL30 0 "ok" 1 "no_init_s";
 
 VAL_ 416 BR1_ASR_Anf 0 "no_requirement" 1 "ASR_requirement";
 VAL_ 416 BR1_MSR_Anf 0 "no_requirement" 1 "MSR_requirement";
