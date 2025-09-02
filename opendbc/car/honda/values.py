@@ -278,8 +278,8 @@ class CAR(Platforms):
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.HAS_ALL_DOOR_STATES,
   )
   HONDA_ACCORD_9G = HondaNidecPlatformConfig(
-    [], # don't add to cardocs since custom steering board # TODO: find remaining fingerprints
-    CarSpecs(mass=3343 * CV.LB_TO_KG, wheelbase=2.78, steerRatio=13.23, centerToFrontRatio=0.37, tireStiffnessFactor=0.72),  # as spec
+    [], # don't add to cardocs since custom steering board
+    CarSpecs(mass=3343 * CV.LB_TO_KG, wheelbase=2.78, steerRatio=13.23, centerToFrontRatio=0.37),  # as spec
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.HAS_ALL_DOOR_STATES,
   )
@@ -314,7 +314,7 @@ class CAR(Platforms):
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
   ACURA_MDX_3G = HondaNidecPlatformConfig(
-    [], # don't add to cardocs since custom steering board # TODO: find remaining fingerprints
+    [], # don't add to cardocs since custom steering board
     CarSpecs(mass=4215 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=17.22),  # acura spec, learned steerRatio
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
@@ -353,8 +353,8 @@ class CAR(Platforms):
     flags=HondaFlags.HAS_ALL_DOOR_STATES
   )
   ACURA_TLX_1G = HondaNidecPlatformConfig(
-    [], # don't add to cardocs since custom steering board # TODO: find remaining fingerprints
-    CarSpecs(mass=3680 * CV.LB_TO_KG, wheelbase=2.78, centerToFrontRatio=0.40, steerRatio=15.1, tireStiffnessFactor=0.8467),  # acura spec, stiff from Accord
+    [], # don't add to cardocs since custom steering board
+    CarSpecs(mass=3680 * CV.LB_TO_KG, wheelbase=2.78, centerToFrontRatio=0.40, steerRatio=15.1),  # acura spec, stiff from Accord
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
