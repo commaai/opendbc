@@ -513,12 +513,6 @@ FW_VERSIONS = {
     ],
   },
   CAR.ACURA_MDX_3G: {
-    (Ecu.programmedFuelInjection, 0x18da10f1, None): [
-      b'37805-5BN-A520\x00\x00',
-	  b'37805-5BN-A521\x00\x00',
-      b'37805-5J6-6910\x00\x00',
-      b'37805-5J6-A940\x00\x00',
-    ],
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-TRX-H130\x00\x00',
 	  b'57114-TYS-A910\x00\x00',
@@ -1052,9 +1046,6 @@ FW_VERSIONS = {
     (Ecu.gateway, 0x18DAEFF1, None): [
       b'38897-TZ4-A010\x00\x00',
     ],
-    (Ecu.programmedFuelInjection, 0x18da10f1, None): [
-      b'37805-5J2-3390\x00\x00',
-    ],
     (Ecu.fwdRadar, 0x18DAB0F1, None): [
       b'36161-TZ4-A120\x00\x00',
 	    b'36161-TZ7-A520\x00\x00',
@@ -1067,10 +1058,6 @@ FW_VERSIONS = {
     ],
     (Ecu.shiftByWire, 0x18DA0BF1, None): [
       b'54008-TZ3-A820\x00\x00',
-    ],
-    (Ecu.combinationMeter, 0x18DA60F1, None): [
-      b'78109-TZ4-A210\x00\x00',
-	    b'78109-TZ7-A210\x00\x00',
     ],
     (Ecu.srs, 0x18DA53F1, None): [
       b'77959-TZ4-A510\x00\x00',
