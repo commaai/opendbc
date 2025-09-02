@@ -1245,7 +1245,7 @@ BO_ 870 AWV: 8 XXX
  SG_ ANB_Zielbremsung_Freigabe : 52|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ANB_CM_Anforderung : 53|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ANB_Ziel_Teilbrems_Verz_Anf : 54|10@1+ (0.024,-20.016) [0|1023] "Unit_MeterPerSeconSquar" Vector__XXX
- 
+
 BO_ 1470 LDW_Status: 8 XXX
  SG_ LDW_Lernmodus_rechts : 0|2@1+ (1,0) [0|3] "" XXX
  SG_ LDW_Lernmodus_links : 2|2@1+ (1,0) [0|3] "" XXX
@@ -1669,6 +1669,13 @@ CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
 SG_MUL_VAL_ 416 BR1_ASRMo_fa BR1_MSR_Anf 0-0;
 SG_MUL_VAL_ 416 BR1_MSR_Mo_inv BR1_MSR_Anf 1-1;
 
+VAL_ 194 LW1_LRW_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 194 LW1_Gesch_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 194 LW1_ID 0 "noch_not_kalibriert" 128 "kalibriert_nur_bei_PQ35_46_VW32x_VW411";
+VAL_ 194 LW1_Initquelle 0 "Bremse_3" 1 "EPS_Bit";
+VAL_ 194 LW1_Status 0 "OK" 1 "no_initial" 2 "sporadic_failure" 3 "permanent_failure";
+VAL_ 194 LW1_Sta_KL30 0 "ok" 1 "no_init_s";
+
 VAL_ 416 BR1_ASR_Anf 0 "no_requirement" 1 "ASR_requirement";
 VAL_ 416 BR1_MSR_Anf 0 "no_requirement" 1 "MSR_requirement";
 VAL_ 416 BR1_ABS_Brems 0 "no_ABS_control" 1 "ABS_control";
@@ -1689,38 +1696,6 @@ VAL_ 416 BR1_ASR_ESP 0 "ABS_ABS_EDS" 1 "ASR_ESP_MABS";
 VAL_ 416 BR1_ESPASR_passive 0 "ESP_ASR_activated" 1 "ESP_oder_ASR_passive_get_oder_Fktumsch_oder_Rollenmodus";
 VAL_ 416 BR1_Sta_ESP 0 "ok" 1 "Failure";
 VAL_ 416 BR1_Ersatz_Kmh 0 "OK" 1 "Substitute_value";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-VAL_ 194 LW1_LRW_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
-VAL_ 194 LW1_Gesch_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
-VAL_ 194 LW1_ID 0 "noch_not_kalibriert" 128 "kalibriert_nur_bei_PQ35_46_VW32x_VW411";
-VAL_ 194 LW1_Initquelle 0 "Bremse_3" 1 "EPS_Bit";
-VAL_ 194 LW1_Status 0 "OK" 1 "no_initial" 2 "sporadic_failure" 3 "permanent_failure";
-VAL_ 194 LW1_Sta_KL30 0 "ok" 1 "no_init_s";
 
 VAL_ 870 AWV_Text 0 "kein_Text" 1 "FrontAssist_aus" 2 "FrontAssist_startet" 3 "FrontAssist_Warnung" 4 "FrontAssist_Sens_reinig" 5 "FrontAssist_Failure" 6 "FrontAssist_Demo" 7 "Vorhalt" 8 "Bremsung_wird_gerade_durchgefuehrt" 9 "Sensor_not_verfuegbar" 10 "Sensor_reinigen" 11 "Service_notwendig_Failure" 12 "Funktion_vom_Fahrer_deactivated" 13 "Funktion_vom_Fahrer_activated" 14 "FrontAssist_zur_Zeit_not_verfuegbar__rev_Failure";
 VAL_ 870 AWV_1_Freigabe 0 "nicht_freigegeben" 1 "freigegeben";
