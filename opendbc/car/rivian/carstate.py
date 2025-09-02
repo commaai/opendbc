@@ -56,13 +56,17 @@ class CarState(CarStateBase):
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasVehicleHoldStatus"] == 1
 
-    # TODO: log ACM_Unkown2=3 as a fault. need to filter it at the start and end of routes though
-    # ACM_FaultStatus hasn't been seen yet
+    # ACM_Status->ACM_FaultSupervisorState normally 1, appears to go to 3 when either:
+    # 1. car in park/not in drive (normal)
+    # 2. something (message from another ECU) ACM relies on is faulty
+    #  * ACM_FaultStatus will stay 0 since ACM itself isn't faulted. ACM_FaultStatus hasn't been seen high yet
+
     ret.accFaulted = (cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1 or
                       # VDM_AdasFaultStatus=Brk_Intv is the default for some reason
                       # VDM_AdasFaultStatus=Cntr_Fault isn't fully understood, but we've seen it in the wild
                       # VDM_AdasFaultStatus=Imps_Cmd was seen when sending it rapidly changing ACC enable commands
-                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3))  # 2=Cntr_Fault, 3=Imps_Cmd
+                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3) or  # 2=Cntr_Fault, 3=Imps_Cmd
+                      cp.vl["ESP_Status"]["ESP_FaultLamp_VDC" == 1])
 
     # Gear
     ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
