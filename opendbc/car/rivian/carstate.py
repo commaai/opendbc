@@ -65,8 +65,7 @@ class CarState(CarStateBase):
                       # VDM_AdasFaultStatus=Brk_Intv is the default for some reason
                       # VDM_AdasFaultStatus=Cntr_Fault isn't fully understood, but we've seen it in the wild
                       # VDM_AdasFaultStatus=Imps_Cmd was seen when sending it rapidly changing ACC enable commands
-                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3) or  # 2=Cntr_Fault, 3=Imps_Cmd
-                      cp.vl["ESP_Status"]["ESP_FaultLamp_VDC" == 1])
+                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3))  # 2=Cntr_Fault, 3=Imps_Cmd
 
     # Gear
     ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
