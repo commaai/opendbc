@@ -52,4 +52,3 @@ BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 VAL_ 399 STEER_STATUS 5 "tmp_fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
-VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
