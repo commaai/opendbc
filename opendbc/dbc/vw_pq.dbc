@@ -355,25 +355,25 @@ BO_ 1152 Motor_5: 8 XXX
  SG_ Multiplex_Info_Drehzahl_MD_Max m1 : 0|6@1+ (100,0) [0|6300] "U/min" XXX
  SG_ Multiplex_Info_Max_Drehmoment m0 : 0|6@1+ (10,0) [0|630] "Nm" XXX
 
-BO_ 896 Motor_3: 8 XXX
- SG_ Drosselklappenpoti : 56|8@1+ (0.4,0) [0|101.6] "%" XXX
- SG_ Motor_Wunschdrehzahl : 48|8@1+ (25,0) [0|6350] "U/min" XXX
- SG_ Motordrehzahlbeeinflussung : 40|8@1+ (0.392,0) [0|100] "%" XXX
- SG_ Kein_Start_Stop : 39|1@1+ (1,0) [0|0] "" XXX
- SG_ Kein_E_Gas : 38|1@1+ (1,0) [0|0] "" XXX
- SG_ Reserviert_Motor_3_1 : 37|1@1+ (1,0) [0|0] "" XXX
- SG_ Vorzeichen_Rad_Wunschmoment : 36|1@1+ (1,0) [0|0] "" XXX
- SG_ Rad_Wunschmoment : 24|12@1+ (0.39,0) [0|1597] "MDI" XXX
- SG_ Fahrpedal_Rohsignal : 16|8@1+ (0.4,0) [0|101.6] "%" XXX
- SG_ Ansauglufttemperatur : 8|8@1+ (0.75,-48) [-48|142.5] "" XXX
- SG_ Fehlerstatus_Ansauglufttemperat : 7|1@1+ (1,0) [0|0] "" XXX
- SG_ Motorsteuerger_t_gesperrt : 6|1@1+ (1,0) [0|0] "" XXX
- SG_ Drosselklappenwinkel_ungenau : 5|1@1+ (1,0) [0|0] "" XXX
- SG_ Fahrpedalwert_ungenau__Motor_3_ : 4|1@1+ (1,0) [0|0] "" XXX
- SG_ Frei_Motor_3_1 : 3|1@1+ (1,0) [0|0] "" XXX
- SG_ Motor_Wunschdrehzahl_Priorit_t : 2|1@1+ (1,0) [0|0] "" XXX
- SG_ Uebertemperaturschutz__Motor_3_ : 1|1@1+ (1,0) [0|0] "" XXX
- SG_ Vorgluehmeldung : 0|1@1+ (1,0) [0|0] "" XXX
+BO_ 896 Motor_3: 8 Motor
+ SG_ MO3_Vorgluehen : 0|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Prio_Dz : 1|1@1+ (1,0) [0|1] "" Transmission
+ SG_ MO_Schalter_StartStopp : 2|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Winterprg : 3|1@1+ (1,0) [0|1] "" Transmission
+ SG_ MO3_Sta_Pedal : 4|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Sta_FPG M : 5|1@1+ (1,0) [0|1] "" ESP
+ SG_ MO3_Sign_FPG m1 : 6|1@1+ (1,0) [0|1] "" ESP
+ SG_ MO3_Sta_Temp : 7|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Offsentemp : 8|8@1+ (0.75,-48) [-48|142.5] "°C" Gateway
+ SG_ MO3_Pedalwert : 16|8@1+ (0.4,0) [0|101.6] "%" Gateway
+ SG_ MO3_Rad_Wu_Mo : 24|12@1+ (0.39,0) [0|1596.66] "%" Transmission
+ SG_ MO3_Vorz_RadWu : 36|1@1+ (1,0) [0|1] "" Transmission
+ SG_ MO3_Freigabe_Segeln : 37|1@1+ (1,0) [0|1] "" Transmission
+ SG_ MO_StartStopp_StoppVorbereitung : 38|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Dz_Beeinfl : 40|8@1+ (0.39,0) [0|99.45] "%" Transmission
+ SG_ MO3_WunschDz : 48|8@1+ (25,0) [0|6350] "U/min" Transmission
+ SG_ MO3_DKW m0 : 56|8@1+ (0.4,0) [0|101.6] "%" Gateway
+ SG_ MO3_FPGradient m1 : 56|8@1+ (25,0) [0|6350] "%/s" ESP
 
 BO_ 648 Motor_2: 8 Motor
  SG_ MO2_Mp_Code m : 6|2@1+ (1,0) [0|3] "" Gateway
@@ -1600,14 +1600,24 @@ CM_ SG_ 648 MO2_LL_Solldz "Idle target speed";
 CM_ SG_ 648 MO2_Begr_Mo "Limiting torque - max possible at speed";
 CM_ SG_ 648 MO2_Mo_ZWR "Minimum engine torque with ignition angle retardation";
 
-CM_ SG_ 896 Drosselklappenpoti "Throttle Position";
-CM_ SG_ 896 Motor_Wunschdrehzahl "Desired engine speed";
-CM_ SG_ 896 Motordrehzahlbeeinflussung "Shift Target Influence";
-CM_ SG_ 896 Fahrpedal_Rohsignal "Accelerator Pedal Position";
-CM_ SG_ 896 Ansauglufttemperatur "Intake Air Temperature";
-CM_ SG_ 896 Kein_E_Gas "ETB flag";
-CM_ SG_ 896 Kein_Start_Stop "Start/stop flag";
-CM_ SG_ 896 Rad_Wunschmoment "Desired wheel torque";
+CM_ SG_ 896 MO3_Vorgluehen "Pre-glow active (diesel engines)";
+CM_ SG_ 896 MO3_Prio_Dz "Engine speed priority: 0=request, 1=mandatory";
+CM_ SG_ 896 MO_Schalter_StartStopp "Start/stop deactivated by driver (LED on when 0)";
+CM_ SG_ 896 MO3_Winterprg "Winter driving program active";
+CM_ SG_ 896 MO3_Sta_Pedal "Accelerator pedal status: 0=OK, 1=substitute value";
+CM_ SG_ 896 MO3_Sta_FPG "Accelerator pedal gradient control bit (multiplexer for byte 8)";
+CM_ SG_ 896 MO3_Sign_FPG "Accelerator pedal gradient sign (only when MO3_Sta_FPG=1)";
+CM_ SG_ 896 MO3_Sta_Temp "Intake air temperature status: 0=OK, 1=substitute value";
+CM_ SG_ 896 MO3_Offsentemp "Intake air temperature";
+CM_ SG_ 896 MO3_Pedalwert "Accelerator pedal raw signal (0-101.6%)";
+CM_ SG_ 896 MO3_Rad_Wu_Mo "Wheel torque request (12-bit value, 0-1596.66% MDI)";
+CM_ SG_ 896 MO3_Vorz_RadWu "Wheel torque sign: 0=positive, 1=negative";
+CM_ SG_ 896 MO3_Freigabe_Segeln "Sailing operation enable for transmission";
+CM_ SG_ 896 MO_StartStopp_StoppVorbereitung "Engine stop in preparation";
+CM_ SG_ 896 MO3_Dz_Beeinfl "Engine speed influence factor (0-100% interpolation)";
+CM_ SG_ 896 MO3_WunschDz "Desired engine speed (when MO3_Prio_Dz=1)";
+CM_ SG_ 896 MO3_DKW "Throttle valve position when MO3_Sta_FPG=0 (0-101.6%)";
+CM_ SG_ 896 MO3_FPGradient "Accelerator pedal gradient when MO3_Sta_FPG=1 (0-6350%/s)";
 
 CM_ SG_ 912 GK1_Fa_Tuerkont "Status of the driver's door rotary latch";
 CM_ SG_ 912 BSK_HL_geoeffnet "Status of the rear left door rotary latch";
@@ -1687,6 +1697,10 @@ CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
 
 SG_MUL_VAL_ 416 BR1_ASRMo_fa BR1_MSR_Anf 0-0;
 SG_MUL_VAL_ 416 BR1_MSR_Mo_inv BR1_MSR_Anf 1-1;
+
+SG_MUL_VAL_ 896 MO3_DKW MO3_Sta_FPG 0-0;
+SG_MUL_VAL_ 896 MO3_FPGradient MO3_Sta_FPG 1-1;
+SG_MUL_VAL_ 896 MO3_Sign_FPG MO3_Sta_FPG 1-1;
 
 VAL_ 194 LW1_LRW_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
 VAL_ 194 LW1_Gesch_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
@@ -1778,6 +1792,19 @@ VAL_ 872 ACS_Anhaltewunsch 0 "kein_Haltewunsch" 1 "Fzg_haelt_an" ;
 VAL_ 872 ACS_Fehler 1 "Fehlerspeichereintrag" 0 "kein_Fehlerspeichereintrag" ;
 VAL_ 872 ACS_zul_Regelabw 254 "ADR_nicht_aktiv" 255 "Fehler" ;
 VAL_ 872 ACS_max_AendGrad 254 "Neutralwert" 0 "Neutralwert" 255 "Fehler" ;
+
+VAL_ 896 MO3_Vorgluehen 0 "no_Vorgluehen" 1 "Vorgluehen_active";
+VAL_ 896 MO3_Prio_Dz 0 "Wunsch" 1 "Zwang";
+VAL_ 896 MO_Schalter_StartStopp 0 "StartStopp_ueber_Hauptschalter_deactivated_LED_an" 1 "StartStopp_ueber_Hauptschalter_activated_LED_aus";
+VAL_ 896 MO3_Winterprg 0 "not_active" 1 "active";
+VAL_ 896 MO3_Sta_Pedal 0 "Fahrpedal_iO" 1 "Ersatzwert";
+VAL_ 896 MO3_Sta_FPG 0 "Gradient_not_bed" 1 "Gradient_bed";
+VAL_ 896 MO3_Sign_FPG 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 896 MO3_Sta_Temp 0 "Geber_iO" 1 "Ersatzwert";
+VAL_ 896 MO3_Vorz_RadWu 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 896 MO3_Freigabe_Segeln 0 "Segelbetrieb_not_freigegeben" 1 "Segelbetrieb_freigegeben";
+VAL_ 896 MO_StartStopp_StoppVorbereitung 0 "Motorstopp_not_in_Vorbereitung" 1 "Motorstopp_in_Vorbereitung";
+CM_ BO_ 896 "Motor message 3 - Contains accelerator pedal, temperatures, and control signals";
 
 VAL_ 978 LH2_Sta_HCA 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 7 "active";
 VAL_ 1088 Waehlhebelposition__Getriebe_1_ 8 "P" 7 "R" 6 "N" 5 "D" 9 "U" 12 "S" 14 "T" 10 "T" 11 "T";
