@@ -514,7 +514,7 @@ FW_VERSIONS = {
   },
   CAR.ACURA_MDX_3G: {
     (Ecu.vsa, 0x18da28f1, None): [
-      b'57114-TRX-H130\x00\x00',
+	  b'57114-TRX-H130\x00\x00',
 	  b'57114-TYS-A910\x00\x00',
       b'57114-TZ6-A810\x00\x00',
     ],
@@ -1048,7 +1048,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdRadar, 0x18DAB0F1, None): [
       b'36161-TZ4-A120\x00\x00',
-	    b'36161-TZ7-A520\x00\x00',
+	  b'36161-TZ7-A520\x00\x00',
     ],
     (Ecu.vsa, 0x18DA28F1, None): [
       b'57114-TZ4-A510\x00\x00',
