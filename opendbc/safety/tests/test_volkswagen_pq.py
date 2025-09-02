@@ -38,7 +38,7 @@ class TestVolkswagenPqSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueS
 
   # Ego speed (Bremse_1)
   def _speed_msg(self, speed):
-    values = {"Geschwindigkeit_neu__Bremse_1_": speed}
+    values = {"BR1_Rad_kmh": speed}
     return self.packer.make_can_msg_panda("Bremse_1", 0, values)
 
   # Brake light switch (shared message Motor_2)
