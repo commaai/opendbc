@@ -1762,6 +1762,16 @@ SG_MUL_VAL_ 648 MO2_max_Mo MO2_Mp_Code 3-3;
 SG_MUL_VAL_ 648 MO2_CAN_Vers MO2_Mp_Code 0-0;
 SG_MUL_VAL_ 648 MO2_Motor_Code MO2_Mp_Code 1-1;
 
+SG_MUL_VAL_ 1152 MO5_max_Moment MO5_Mp_Code 0-0;
+SG_MUL_VAL_ 1152 MO5_Drehzahl MO5_Mp_Code 1-1;
+SG_MUL_VAL_ 1152 MO5_Motortyp MO5_Mp_Code 2-2;
+SG_MUL_VAL_ 1152 MO5_Abgastyp MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 MO5_Abgastyp2 MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 MO5_Abgastyp3 MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 OBD_Kaltstart_Denominator MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 OBD_Minimum_Trip MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 MO5_DPF_reg MO5_Mp_Code 3-3;
+
 VAL_ 648 MO2_Mp_Code 0 "CAN_Stand" 1 "Motor_Kod" 2 "Getriebe_Kod" 3 "MDI_Max";
 
 VAL_ 648 MO2_Getr_Code 0 "_5HP19" 1 "_5HP24" 2 "AG4" 3 "VL300" 4 "VQ250" 5 "VQ35" 6 "AG4_yestco" 7 "AG5_yestco" 8 "autom_Kupplung" 9 "autom_Kupplung_mit_ASG" 10 "AG6_yestco_ZF_6HP_AISIN" 11 "DQ500_DQ250_DQ200" 12 "SQ100_SQ200" 14 "AL1000_AL551_AL951_ZF8HPx" 15 "Handschalter_konv" 16 "DL800" 17 "E_Fahrzeug__Single_Gear";
