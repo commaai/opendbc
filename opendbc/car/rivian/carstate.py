@@ -59,8 +59,8 @@ class CarState(CarStateBase):
     # ACM_Status->ACM_FaultSupervisorState normally 1, appears to go to 3 when either:
     # 1. car in park/not in drive (normal)
     # 2. something (message from another ECU) ACM relies on is faulty
-    #  * ACM_FaultStatus will stay 0 since ACM itself isn't faulted. ACM_FaultStatus hasn't been seen high yet
-
+    #  * ACM_FaultStatus will stay 0 since ACM itself isn't faulted
+    # TODO: ACM_FaultStatus hasn't been seen high yet, but log anyway
     ret.accFaulted = (cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1 or
                       # VDM_AdasFaultStatus=Brk_Intv is the default for some reason
                       # VDM_AdasFaultStatus=Cntr_Fault isn't fully understood, but we've seen it in the wild
