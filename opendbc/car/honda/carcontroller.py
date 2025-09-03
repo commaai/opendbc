@@ -75,19 +75,19 @@ def brake_pump_hysteresis(apply_brake, apply_brake_last, last_pump_ts, ts):
   return pump_on, last_pump_ts
 
 
-def process_hud_alert(hud_alert, silent_steer_warning):
+def process_hud_alert(hud_alert, no_steer_warning):
   # initialize to no alert
   fcw_display = 0
   steer_required = 0
   acc_alert = 0
 
-  # priority is: FCW, LDW, steer required (non-silent), all others
+  # priority is: FCW, LDW, steer required (except silent or lowspeed), all others
   if hud_alert == VisualAlert.fcw:
     fcw_display = VISUAL_HUD[hud_alert.raw]
   elif hud_alert == VisualAlert.ldw:
     steer_required = VISUAL_HUD[hud_alert.raw]
-  # steer_required signal is for emergencies, silent steer warning handled via dashed lane lines
-  elif (hud_alert == VisualAlert.steerRequired) and not silent_steer_warning:
+  # steer_required signal is for emergencies, silent_steer_warning and lowSpeedAlert handled via dashed lane lines
+  elif (hud_alert == VisualAlert.steerRequired) and not no_steer_warning:
     steer_required = VISUAL_HUD[hud_alert.raw]
   else:
     acc_alert = VISUAL_HUD[hud_alert.raw]
@@ -171,7 +171,7 @@ class CarController(CarControllerBase):
     self.CS_prev_steerFaultTemporary = CS.out.steerFaultTemporary
 
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
-    fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert, self.silent_steer_warning)
+    fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert, self.silent_steer_warning or CS.out.lowSpeedAlert)
 
     # **** process the car messages ****
 
@@ -259,7 +259,7 @@ class CarController(CarControllerBase):
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
       # dashed lines shows in Honda stock ACC when steering is required
-      show_dashed_lines = (abs(apply_torque) == self.params.STEER_MAX) or (hud_control.visualAlert == VisualAlert.steerRequired)
+      show_dashed_lines = (abs(apply_torque) == self.params.STEER_MAX) or (hud_control.visualAlert == VisualAlert.steerRequired) or CS.out.lowSpeedAlert
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud,
                                                    show_dashed_lines))
 
