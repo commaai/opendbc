@@ -984,6 +984,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36161-T14-P050\x00\x00',
+      b'8S102-T14-P020\x00\x00',
     ],
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-T14-B030\x00\x00',
