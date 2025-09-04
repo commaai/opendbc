@@ -162,7 +162,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     }
 
     if (msg->addr == 0x155) {
-      vehicle_moving = GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
+      vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
     }
   }
 
