@@ -204,7 +204,6 @@ class CarState(CarStateBase):
         ButtonEvent(cp.vl["SCM_BUTTONS"]["CRUISE_SETTING"], SETTINGS_BUTTON_MAPS)
       ])
 
-
     return ret
 
   def get_can_parsers(self, CP):
