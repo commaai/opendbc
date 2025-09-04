@@ -48,7 +48,6 @@ class CAR(Platforms):
       CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing"),
       CommunityCarDocs("Honda Clarity 2018-21", "All"),
       CommunityCarDocs("Honda Odyssey 2021-25", "All"),
-      CommunityCarDocs("Honda Passport 2026", "All"),
       GMSecurityCarDocs("Honda Prologue 2024-25", "All"),
     ],
   )
