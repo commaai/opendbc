@@ -25,8 +25,9 @@ BO_ 495 ACC_CONTROL_ON: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 829 LKAS_HUD: 5 ADAS
+ SG_ LKAS_READY : 0|1@0+ (1,0) [0|127] "" BDY
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
+ SG_ LKAS_STATE_CHANGE : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ CAMERA_OVERHEAT : 15|1@0+ (1,0) [0|1] "" BDY
  SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
  SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
@@ -36,12 +37,14 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ LANE_DEPARTURE_ALERT : 9|1@0+ (1,0) [0|1] "" BDY
  SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
  SG_ LDW_ICON : 22|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
  SG_ BEEP : 18|3@0+ (1,0) [0|7] "" BDY
- SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_HUD_2 : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ RDM_OFF : 27|1@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_ON : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ RDM_ON_2 : 28|1@0+ (1,0) [0|1] "" BDY
+ SG_ LANE_ASSIST_BEEP_OFF : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
- SG_ SET_ME_X1 : 30|1@0+ (1,0) [0|1] "" BDY
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
 
