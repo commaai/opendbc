@@ -1,7 +1,9 @@
 CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _nidec_common.dbc";
+CM_ "IMPORT _nidec_scm_group_b.dbc";
 CM_ "IMPORT _steering_sensors_a.dbc";
 CM_ "IMPORT _steering_control_a.dbc";
+CM_ "IMPORT _gearbox_common.dbc";
 
 BO_ 388 BRAKE_ERROR: 8 XXX
  SG_ BRAKE_ERROR_1 : 32|1@0+ (1,0) [0|1] "" EON
@@ -9,23 +11,12 @@ BO_ 388 BRAKE_ERROR: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
-BO_ 419 GEARBOX: 8 PCM
- SG_ GEAR : 7|8@0+ (1,0) [0|256] "" EON
- SG_ GEAR_SHIFTER : 35|4@0+ (1,0) [0|15] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
-
-BO_ 545 ECON_STATUS: 6 XXX
- SG_ ECON_ON_2 : 37|2@0+ (1,0) [0|3] "" EON
- SG_ ECON_ON : 23|1@0+ (1,0) [0|1] "" EON
- SG_ CHECKSUM : 43|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" EON
-
-BO_ 662 SCM_BUTTONS: 4 SCM
- SG_ CRUISE_BUTTONS : 7|3@0+ (1,0) [0|7] "" EON
- SG_ CRUISE_SETTING : 3|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 27|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EON
+BO_ 547 BRAKE_HOLD: 6 XXX
+ SG_ BRAKE_HOLD_FAULT_BIT : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_HOLD_ENABLED : 37|2@0+ (1,0) [0|7] "" XXX
+ SG_ BRAKE_HOLD_ACTIVE : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 768 VEHICLE_STATE: 8 ADAS
  SG_ SET_ME_XF9 : 7|8@0+ (1,0) [0|255] "" Vector__XXX
@@ -43,15 +34,6 @@ BO_ 769 VEHICLE_STATE2: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 806 SCM_FEEDBACK: 8 SCM
- SG_ CMBS_BUTTON : 22|2@0+ (1,0) [0|3] "" EON
- SG_ MAIN_ON : 28|1@0+ (1,0) [0|1] "" EON
- SG_ RIGHT_BLINKER : 27|1@0+ (1,0) [0|1] "" EON
- SG_ LEFT_BLINKER : 26|1@0+ (1,0) [0|1] "" EON
- SG_ REVERSE_LIGHT : 18|1@0+ (1,0) [0|1] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
-
 BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
  SG_ ZEROS_BOH : 7|50@0+ (1,0) [0|127] "" BDY
  SG_ ZEROS_BOH_2 : 48|4@1+ (1,0) [0|15] "" XXX
@@ -59,12 +41,3 @@ BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
  SG_ AUTO_HIGHBEAMS_ACTIVE : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
-
-CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
-CM_ SG_ 806 REVERSE_LIGHT "Might be reverse gear selected and not the lights";
-
-VAL_ 419 GEAR_SHIFTER 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
-VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
-VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
-VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
-VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
