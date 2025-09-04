@@ -78,6 +78,7 @@ class HondaFlags(IntFlag):
   HAS_EPB = 512
   ALLOW_MANUAL_TRANS = 1024
   HYBRID = 2048
+  ALT_BRAKEHOLD = 4096
 
 
 # Car button codes
