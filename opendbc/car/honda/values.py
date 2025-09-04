@@ -74,7 +74,7 @@ class HondaFlags(IntFlag):
   BOSCH_CANFD = 128
 
   HAS_ALL_DOOR_STATES = 256  # Some Hondas have all door states, others only driver door
-  HAS_EPB = 512
+  # 512 is available for future use
   ALLOW_MANUAL_TRANS = 1024
 
 
