@@ -199,10 +199,11 @@ class CarState(CarStateBase):
       # more info here: https://github.com/commaai/openpilot/pull/1867
       ret.leftBlindspot = cp_body.vl["BSM_STATUS_LEFT"]["BSM_ALERT"] == 1
       ret.rightBlindspot = cp_body.vl["BSM_STATUS_RIGHT"]["BSM_ALERT"] == 1
-      create_button_events(ret, [
-        ButtonEvent(cp.vl["SCM_BUTTONS"]["CRUISE_BUTTONS"], BUTTON_MAPS),
-        ButtonEvent(cp.vl["SCM_BUTTONS"]["CRUISE_SETTING"], SETTINGS_BUTTON_MAPS)
-      ])
+
+    create_button_events(ret, [
+      ButtonEvent(cp.vl["SCM_BUTTONS"]["CRUISE_BUTTONS"], BUTTON_MAPS),
+      ButtonEvent(cp.vl["SCM_BUTTONS"]["CRUISE_SETTING"], SETTINGS_BUTTON_MAPS)
+    ])
 
     return ret
 
