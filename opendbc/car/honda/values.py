@@ -55,6 +55,7 @@ class HondaSafetyFlags(IntFlag):
   NIDEC_ALT = 4
   RADARLESS = 8
   BOSCH_CANFD = 16
+  NIDEC_HYBRID = 32
 
 
 class HondaFlags(IntFlag):
@@ -76,6 +77,8 @@ class HondaFlags(IntFlag):
   HAS_ALL_DOOR_STATES = 256  # Some Hondas have all door states, others only driver door
   # 512 is available for future use
   ALLOW_MANUAL_TRANS = 1024
+  HYBRID = 2048
+  ALT_BRAKEHOLD = 4096
 
 
 # Car button codes
