@@ -14,14 +14,6 @@ BO_ 545 ECON_STATUS: 6 XXX
  SG_ CHECKSUM : 43|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" EON
 
-BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
- SG_ ZEROS_BOH : 7|50@0+ (1,0) [0|127] "" BDY
- SG_ ZEROS_BOH_2 : 48|4@1+ (1,0) [0|15] "" XXX
- SG_ HIGHBEAMS_ON : 52|1@0+ (1,0) [0|1] "" XXX
- SG_ AUTO_HIGHBEAMS_ACTIVE : 53|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
-
 CM_ SG_ 806 REVERSE_LIGHT "Might be reverse gear selected and not the lights";
 
 VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
