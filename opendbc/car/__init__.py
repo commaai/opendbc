@@ -3,6 +3,7 @@ import numpy as np
 from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
+from typing import NamedTuple
 
 from opendbc.car import structs, uds
 from opendbc.car.can_definitions import CanData
@@ -25,21 +26,28 @@ def apply_hysteresis(val: float, val_steady: float, hyst_gap: float) -> float:
     val_steady = val + hyst_gap
   return val_steady
 
+class ButtonMap(NamedTuple):
+  event: structs.CarState.ButtonEvent.Type
+  val: int = 1
 
-def create_button_events(cur_btn: int, prev_btn: int, buttons_dict: dict[int, structs.CarState.ButtonEvent.Type],
-                         unpressed_btn: int = 0) -> list[structs.CarState.ButtonEvent]:
-  events: list[structs.CarState.ButtonEvent] = []
+class ButtonEvent(NamedTuple):
+  current_btn: int
+  button_maps: list[ButtonMap]
+  unpressed_btn: int = 0
 
-  if cur_btn == prev_btn:
-    return events
+_prev_btns: dict[int, int] = {}
 
-  # Add events for button presses, multiple when a button switches without going to unpressed
-  for pressed, btn in ((False, prev_btn), (True, cur_btn)):
-    if btn != unpressed_btn:
-      events.append(structs.CarState.ButtonEvent(pressed=pressed,
-                                                 type=buttons_dict.get(btn, ButtonType.unknown)))
-  return events
-
+def create_button_events(ret, button_list):
+  ev = []
+  for cur, maps, up in button_list:
+    k = id(maps); prev = _prev_btns.setdefault(k, cur)
+    if cur == prev: continue
+    for pressed, b in ((False, prev), (True, cur)):
+      if b != up:
+        etype = next((m.event for m in maps if m.val == b), ButtonType.unknown)
+        ev.append(structs.CarState.ButtonEvent(pressed=pressed, type=etype))
+    _prev_btns[k] = cur
+  ret.buttonEvents = ev
 
 def gen_empty_fingerprint():
   return {i: {} for i in range(8)}

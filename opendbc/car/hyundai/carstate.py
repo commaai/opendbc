@@ -3,7 +3,7 @@ import copy
 import math
 
 from opendbc.can import CANDefine, CANParser
-from opendbc.car import Bus, create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs, ButtonEvent, ButtonMap
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, Buttons, CarControllerParams
@@ -17,8 +17,12 @@ STANDSTILL_THRESHOLD = 12 * 0.03125
 
 # Cancel button can sometimes be ACC pause/resume button, main button can also enable on some cars
 ENABLE_BUTTONS = (Buttons.RES_ACCEL, Buttons.SET_DECEL, Buttons.CANCEL)
-BUTTONS_DICT = {Buttons.RES_ACCEL: ButtonType.accelCruise, Buttons.SET_DECEL: ButtonType.decelCruise,
-                Buttons.GAP_DIST: ButtonType.gapAdjustCruise, Buttons.CANCEL: ButtonType.cancel}
+BUTTON_MAPS: list[ButtonMap] = (
+  ButtonMap(ButtonType.accelCruise, Buttons.RES_ACCEL),
+  ButtonMap(ButtonType.decelCruise, Buttons.SET_DECEL),
+  ButtonMap(ButtonType.gapAdjustCruise, Buttons.GAP_DIST),
+  ButtonMap(ButtonType.cancel, Buttons.CANCEL)
+)
 
 
 class CarState(CarStateBase):
@@ -28,6 +32,7 @@ class CarState(CarStateBase):
 
     self.cruise_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
     self.main_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
+    self.main_btn_map = [ButtonMap(ButtonType.mainCruise)]
     self.lda_button = 0
 
     self.gear_msg_canfd = "ACCELERATOR" if CP.flags & HyundaiFlags.EV else \
@@ -181,17 +186,16 @@ class CarState(CarStateBase):
     self.lkas11 = copy.copy(cp_cam.vl["LKAS11"])
     self.clu11 = copy.copy(cp.vl["CLU11"])
     self.steer_state = cp.vl["MDPS12"]["CF_Mdps_ToiActive"]  # 0 NOT ACTIVE, 1 ACTIVE
-    prev_cruise_buttons = self.cruise_buttons[-1]
-    prev_main_buttons = self.main_buttons[-1]
-    prev_lda_button = self.lda_button
     self.cruise_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwState"])
     self.main_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"])
     if self.CP.flags & HyundaiFlags.HAS_LDA_BUTTON:
       self.lda_button = cp.vl["BCM_PO_11"]["LDA_BTN"]
 
-    ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
-                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
-                        *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+    create_button_events(ret, [
+      ButtonEvent(self.cruise_buttons[-1], BUTTON_MAPS),
+      ButtonEvent(self.main_buttons[-1], self.main_btn_map),
+      ButtonEvent(self.lda_button, self.lkas_btn_map)
+    ])
 
     ret.blockPcmEnable = not self.recent_button_interaction()
 
@@ -274,9 +278,6 @@ class CarState(CarStateBase):
     if self.CP.flags & HyundaiFlags.EV:
       ret.cruiseState.nonAdaptive = cp.vl["MANUAL_SPEED_LIMIT_ASSIST"]["MSLA_ENABLED"] == 1
 
-    prev_cruise_buttons = self.cruise_buttons[-1]
-    prev_main_buttons = self.main_buttons[-1]
-    prev_lda_button = self.lda_button
     self.cruise_buttons.extend(cp.vl_all[self.cruise_btns_msg_canfd]["CRUISE_BUTTONS"])
     self.main_buttons.extend(cp.vl_all[self.cruise_btns_msg_canfd]["ADAPTIVE_CRUISE_MAIN_BTN"])
     self.lda_button = cp.vl[self.cruise_btns_msg_canfd]["LDA_BTN"]
@@ -287,9 +288,11 @@ class CarState(CarStateBase):
       self.lfa_block_msg = copy.copy(cp_cam.vl["CAM_0x362"] if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT
                                           else cp_cam.vl["CAM_0x2a4"])
 
-    ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
-                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
-                        *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+    create_button_events(ret, [
+      ButtonEvent(self.cruise_buttons[-1], BUTTON_MAPS),
+      ButtonEvent(self.main_buttons[-1], self.main_btn_map),
+      ButtonEvent(self.lda_button, self.lkas_btn_map)
+    ])
 
     ret.blockPcmEnable = not self.recent_button_interaction()
 

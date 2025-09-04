@@ -1,7 +1,7 @@
 import copy
 
 from opendbc.can import CANDefine, CANParser
-from opendbc.car import Bus, DT_CTRL, create_button_events, structs
+from opendbc.car import Bus, DT_CTRL, create_button_events, structs, ButtonEvent
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
@@ -41,9 +41,6 @@ class CarState(CarStateBase):
     # Need to apply an offset as soon as the steering angle measurements are both received
     self.accurate_steer_angle_seen = False
     self.angle_offset = FirstOrderFilter(None, 60.0, DT_CTRL, initialized=False)
-
-    self.lkas_button = 0
-    self.distance_button = 0
 
     self.pcm_follow_distance = 0
 
@@ -179,24 +176,19 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint not in UNSUPPORTED_DSU_CAR:
       self.pcm_follow_distance = cp.vl["PCM_CRUISE_2"]["PCM_FOLLOW_DISTANCE"]
 
-    buttonEvents = []
     if self.CP.carFingerprint in TSS2_CAR:
+      btns = []
       # lkas button is wired to the camera
       prev_lkas_button = self.lkas_button
       self.lkas_button = cp_cam.vl["LKAS_HUD"]["LDA_ON_MESSAGE"]
-
       # Cycles between 1 and 2 when pressing the button, then rests back at 0 after ~3s
       if self.lkas_button != 0 and self.lkas_button != prev_lkas_button:
-        buttonEvents.extend(create_button_events(1, 0, {1: ButtonType.lkas}) +
-                            create_button_events(0, 1, {1: ButtonType.lkas}))
-
+        btns.append(ButtonEvent(1, self.lkas_btn_map))
+        btns.append(ButtonEvent(0, self.lkas_btn_map))
       if self.CP.carFingerprint not in RADAR_ACC_CAR:
         # distance button is wired to the ACC module (camera or radar)
-        prev_distance_button = self.distance_button
-        self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
-
-        buttonEvents += create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
-    ret.buttonEvents = buttonEvents
+        btns.append(ButtonEvent(cp_acc.vl["ACC_CONTROL"]["DISTANCE"], self.dist_btn_map))
+      create_button_events(ret, btns)
 
     return ret
 

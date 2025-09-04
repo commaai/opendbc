@@ -1,6 +1,6 @@
 import copy
 from opendbc.can import CANDefine, CANParser
-from opendbc.car import Bus, create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs, ButtonEvent, ButtonMap
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.gm.values import DBC, AccState, CruiseButtons, STEER_THRESHOLD, SDGM_CAR, ALT_ACCS
@@ -11,8 +11,12 @@ NetworkLocation = structs.CarParams.NetworkLocation
 
 STANDSTILL_THRESHOLD = 10 * 0.0311
 
-BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.DECEL_SET: ButtonType.decelCruise,
-                CruiseButtons.MAIN: ButtonType.mainCruise, CruiseButtons.CANCEL: ButtonType.cancel}
+BUTTON_MAPS: list[ButtonMap] = (
+  ButtonMap(ButtonType.accelCruise, CruiseButtons.RES_ACCEL),
+  ButtonMap(ButtonType.decelCruise, CruiseButtons.DECEL_SET),
+  ButtonMap(ButtonType.mainCruise, CruiseButtons.MAIN),
+  ButtonMap(ButtonType.cancel, CruiseButtons.CANCEL)
+)
 
 
 class CarState(CarStateBase):
@@ -48,9 +52,7 @@ class CarState(CarStateBase):
     ret = structs.CarState()
 
     prev_cruise_buttons = self.cruise_buttons
-    prev_distance_button = self.distance_button
     self.cruise_buttons = pt_cp.vl["ASCMSteeringButton"]["ACCButtons"]
-    self.distance_button = pt_cp.vl["ASCMSteeringButton"]["DistanceButton"]
     self.buttons_counter = pt_cp.vl["ASCMSteeringButton"]["RollingCounter"]
     self.pscm_status = copy.copy(pt_cp.vl["PSCMStatus"])
 
@@ -148,12 +150,10 @@ class CarState(CarStateBase):
 
     # Don't add event if transitioning from INIT, unless it's to an actual button
     if self.cruise_buttons != CruiseButtons.UNPRESS or prev_cruise_buttons != CruiseButtons.INIT:
-      ret.buttonEvents = [
-        *create_button_events(self.cruise_buttons, prev_cruise_buttons, BUTTONS_DICT,
-                              unpressed_btn=CruiseButtons.UNPRESS),
-        *create_button_events(self.distance_button, prev_distance_button,
-                              {1: ButtonType.gapAdjustCruise})
-      ]
+      create_button_events(ret, [
+        ButtonEvent(self.cruise_buttons, BUTTON_MAPS, CruiseButtons.UNPRESS),
+        ButtonEvent(pt_cp.vl["ASCMSteeringButton"]["DistanceButton"], self.dist_btn_map),
+      ])
 
     if ret.vEgo < self.CP.minSteerSpeed:
       ret.lowSpeedAlert = True

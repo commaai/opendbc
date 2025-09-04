@@ -1,5 +1,5 @@
 from opendbc.can import CANDefine, CANParser
-from opendbc.car import Bus, create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs, ButtonEvent
 from opendbc.car.chrysler.values import DBC, STEER_THRESHOLD, RAM_CARS
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
@@ -22,16 +22,11 @@ class CarState(CarStateBase):
     else:
       self.shifter_values = can_define.dv["GEAR"]["PRNDL"]
 
-    self.distance_button = 0
-
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
 
     ret = structs.CarState()
-
-    prev_distance_button = self.distance_button
-    self.distance_button = cp.vl["CRUISE_BUTTONS"]["ACC_Distance_Dec"]
 
     # lock info
     ret.doorOpen = any([cp.vl["BCM_1"]["DOOR_OPEN_FL"],
@@ -95,7 +90,7 @@ class CarState(CarStateBase):
     self.lkas_car_model = cp_cam.vl["DAS_6"]["CAR_MODEL"]
     self.button_counter = cp.vl["CRUISE_BUTTONS"]["COUNTER"]
 
-    ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+    create_button_events(ret, [ButtonEvent(cp.vl["CRUISE_BUTTONS"]["ACC_Distance_Dec"], self.dist_btn_map)])
 
     return ret
 
