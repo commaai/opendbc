@@ -315,7 +315,7 @@ class CAR(Platforms):
   )
   ACURA_MDX_3G = HondaNidecPlatformConfig(
     [], # don't add to cardocs since custom steering board
-    CarSpecs(mass=4215 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=17.22),  # acura spec, learned steerRatio
+    CarSpecs(mass=4215 * CV.LB_TO_KG, wheelbase=2.82, steerRatio=17.22, centerToFrontRatio=0.428),  # as spec, learned steerRatio
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
@@ -354,7 +354,7 @@ class CAR(Platforms):
   )
   ACURA_TLX_1G = HondaNidecPlatformConfig(
     [], # don't add to cardocs since custom steering board
-    CarSpecs(mass=3680 * CV.LB_TO_KG, wheelbase=2.78, centerToFrontRatio=0.40, steerRatio=15.1),  # acura spec, stiff from Accord
+    CarSpecs(mass=3680 * CV.LB_TO_KG, wheelbase=2.78, steerRatio=15.1, centerToFrontRatio=0.40),  # as spec
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
