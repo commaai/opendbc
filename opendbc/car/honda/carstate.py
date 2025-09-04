@@ -124,7 +124,10 @@ class CarState(CarStateBase):
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(
       250, cp.vl["SCM_FEEDBACK"]["LEFT_BLINKER"], cp.vl["SCM_FEEDBACK"]["RIGHT_BLINKER"])
-    ret.brakeHoldActive = cp.vl["VSA_STATUS"]["BRAKE_HOLD_ACTIVE"] == 1
+    if self.CP.flags & HondaFlags.ALT_BRAKEHOLD:
+      ret.brakeHoldActive = (cp.vl["VSA_STATUS"]["BRAKE_HOLD_ACTIVE"] == 1) or (cp.vl["BRAKE_HOLD_ALT"]["BRAKE_HOLD_ACTIVE"] == 1)
+    else:
+      ret.brakeHoldActive = cp.vl["VSA_STATUS"]["BRAKE_HOLD_ACTIVE"] == 1
 
     if self.CP.flags & HondaFlags.HAS_EPB:
       ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
