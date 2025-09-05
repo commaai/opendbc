@@ -48,7 +48,6 @@ Supported Models' section of each make [on our wiki](https://wiki.comma.ai/).
 Some notable works-in-progress:
 * Honda
   * 2022-24 Acura RDX, commaai/opendbc#1967
-  * 2021-25 Honda Odyssey, commaai/opendbc#2488
   * Camera ACC stability improvements, commaai/opendbc#2192
   * Alpha longitudinal stability improvements, commaai/opendbc#2347 and commaai/opendbc#2165
 

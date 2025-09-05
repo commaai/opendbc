@@ -69,7 +69,8 @@ class TestCanChecksums:
     packer = CANPacker(dbc_file)
 
     values = {
-      'SET_ME_X41': 0x41,
+      'LKAS_READY': 1,
+      'LKAS_STATE_CHANGE': 1,
       'STEERING_REQUIRED': 1,
       'SOLID_LANES': 1,
       'BEEP': 0,
