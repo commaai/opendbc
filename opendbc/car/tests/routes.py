@@ -26,6 +26,7 @@ non_tested_cars = [
   HYUNDAI.GENESIS_G90,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
+  HONDA.HONDA_PASSPORT_4G,  # TODO: get a test route before merging
 ]
 
 
