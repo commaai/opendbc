@@ -161,7 +161,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       pcm_cruise_check(cruise_engaged);
     }
 
-    if (msg->addr == 0x155) {
+    if (msg->addr == 0x155U) {
       vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
     }
   }
