@@ -9,7 +9,7 @@ from collections.abc import Callable
 from functools import cache
 
 from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, STD_CARGO_KG
-from opendbc.car import structs
+from opendbc.car import structs, ButtonMap
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
@@ -271,6 +271,8 @@ class CarStateBase(ABC):
     self.CP = CP
     self.car_fingerprint = CP.carFingerprint
     self.out = structs.CarState()
+    self.dist_btn_map = [ButtonMap(ButtonType.gapAdjustCruise)]
+    self.lkas_btn_map = [ButtonMap(ButtonType.lkas)]
 
     self.cruise_buttons = 0
     self.left_blinker_cnt = 0
