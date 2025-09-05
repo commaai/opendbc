@@ -241,12 +241,6 @@ class CAR(Platforms):
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
     flags=HondaFlags.BOSCH_RADARLESS,
   )
-  HONDA_CITY_7G_MMR = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda City (Brazil only) 2025", "All")],
-    CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.6, steerRatio=19.0, centerToFrontRatio=0.41),
-    {Bus.pt: 'honda_civic_ex_2022_can_generated'},
-    flags=HondaFlags.BOSCH_RADARLESS,
-  )
   ACURA_RDX_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura RDX 2019-21", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=4068 * CV.LB_TO_KG, wheelbase=2.75, steerRatio=11.95, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),  # as spec
@@ -367,7 +361,6 @@ STEER_THRESHOLD = {
   CAR.ACURA_MDX_4G_MMR: 600,
   CAR.HONDA_CRV_6G: 600,
   CAR.HONDA_CITY_7G: 600,
-  CAR.HONDA_CITY_7G_MMR: 600,
 }
 
 
