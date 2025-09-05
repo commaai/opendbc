@@ -1,16 +1,13 @@
 from collections import defaultdict
 import pytest
 
-from opendbc.car.car_helpers import interfaces
-from opendbc.car.docs import get_all_car_docs
 from opendbc.car.docs_definitions import Cable, Column, PartType, Star, SupportType
-from opendbc.car.honda.values import CAR as HONDA
-from opendbc.car.values import PLATFORMS
 
 
 class TestCarDocs:
   @classmethod
   def setup_class(cls):
+    from opendbc.car.docs import get_all_car_docs
     cls.all_cars = get_all_car_docs()
 
   def test_duplicate_years(self, subtests):
@@ -26,6 +23,8 @@ class TestCarDocs:
           make_model_years[make_model].append(year)
 
   def test_missing_car_docs(self, subtests):
+    from opendbc.car.values import PLATFORMS
+    from opendbc.car.car_helpers import interfaces
     all_car_docs_platforms = [name for name, config in PLATFORMS.items()]
     for platform in sorted(interfaces.keys()):
       with subtests.test(platform=platform):
@@ -48,6 +47,7 @@ class TestCarDocs:
             assert "RAV4" in car.model, "Use correct capitalization"
 
   def test_torque_star(self, subtests):
+    from opendbc.car.honda.values import CAR as HONDA
     # Asserts brand-specific assumptions around steering torque star
     for car in self.all_cars:
       with subtests.test(car=car.name):
