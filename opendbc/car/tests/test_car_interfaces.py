@@ -66,8 +66,6 @@ class TestCarInterfaces:
   def test_car_interfaces(self, car_name, data):
     car_interface = get_fuzzy_car_interface(car_name, data.draw)
     car_params = car_interface.CP.as_reader()
-    assert car_params
-    assert car_interface
 
     assert car_params.mass > 1
     assert car_params.wheelbase > 0
