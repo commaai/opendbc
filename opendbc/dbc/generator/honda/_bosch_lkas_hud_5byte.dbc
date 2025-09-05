@@ -19,7 +19,6 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
 
-
 CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnings etc...";
 CM_ SG_ 829 CAM_TEMP_HIGH "Some Driver Assist Systems Cannot Operate: Camera Temperature Too High";
 CM_ SG_ 829 CAMERA_OVERHEAT "Lane Keeping Assist Cannot Operate: Camera Too Hot";
