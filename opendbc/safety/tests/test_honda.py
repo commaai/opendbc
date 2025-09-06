@@ -373,7 +373,7 @@ class TestHondaBoschSafetyBase(HondaBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB)}  # STEERING_CONTROL, BOSCH_SUPPLEMENTAL_1
 
   def setUp(self):
-    self.packer = CANPackerPanda("honda_accord_2018_can_generated")
+    self.packer = CANPackerPanda("honda_civic_hatchback_ex_2017_can_generated")
     self.safety = libsafety_py.libsafety
 
   def _alt_brake_msg(self, brake):
@@ -510,7 +510,7 @@ class TestHondaBoschRadarlessSafetyBase(TestHondaBoschSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x33D)}  # STEERING_CONTROL
 
   def setUp(self):
-    self.packer = CANPackerPanda("honda_civic_ex_2022_can_generated")
+    self.packer = CANPackerPanda("honda_bosch_radarless_generated")
     self.safety = libsafety_py.libsafety
 
 
