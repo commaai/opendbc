@@ -3,13 +3,12 @@ import math
 
 import numpy as np
 
-from opendbc.car.honda.interface import CarInterface
-from opendbc.car.honda.values import CAR
-from opendbc.car.vehicle_model import VehicleModel, dyn_ss_sol, create_dyn_state_matrices
-
 
 class TestVehicleModel:
   def setup_method(self):
+    from opendbc.car.honda.values import CAR
+    from opendbc.car.honda.interface import CarInterface
+    from opendbc.car.vehicle_model import VehicleModel
     CP = CarInterface.get_non_essential_params(CAR.HONDA_CIVIC)
     self.VM = VehicleModel(CP)
 
@@ -27,6 +26,7 @@ class TestVehicleModel:
     """Verify that the yaw_rate helper function matches the results
     from the state space model."""
 
+    from opendbc.car.vehicle_model import dyn_ss_sol
     for roll in np.linspace(math.radians(-20), math.radians(20), num=11):
       for u in np.linspace(1, 30, num=10):
         for sa in np.linspace(math.radians(-20), math.radians(20), num=11):
@@ -41,6 +41,7 @@ class TestVehicleModel:
   def test_syn_ss_sol_simulate(self):
     """Verifies that dyn_ss_sol matches a simulation"""
 
+    from opendbc.car.vehicle_model import dyn_ss_sol, create_dyn_state_matrices
     for roll in np.linspace(math.radians(-20), math.radians(20), num=11):
       for u in np.linspace(1, 30, num=10):
         A, B = create_dyn_state_matrices(u, self.VM)

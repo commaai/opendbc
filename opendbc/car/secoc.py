@@ -1,10 +1,9 @@
 import struct
 
-from Crypto.Hash import CMAC
-from Crypto.Cipher import AES
-
 
 def add_mac(key, trip_cnt, reset_cnt, msg_cnt, msg):
+  from Crypto.Hash import CMAC
+  from Crypto.Cipher import AES
   # TODO: clean up conversion to and from hex
 
   addr, payload, bus = msg
@@ -35,6 +34,8 @@ def add_mac(key, trip_cnt, reset_cnt, msg_cnt, msg):
 
 
 def build_sync_mac(key, trip_cnt, reset_cnt, id_=0xf):
+  from Crypto.Hash import CMAC
+  from Crypto.Cipher import AES
   id_ = struct.pack('>H', id_) # 16
   trip_cnt = struct.pack('>H', trip_cnt) # 16
   reset_cnt = struct.pack('>I', reset_cnt << 12)[:-1] # 20 + 4 padding

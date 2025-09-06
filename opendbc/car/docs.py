@@ -4,9 +4,7 @@ import os
 from typing import get_args
 
 from collections import defaultdict
-import jinja2
 from enum import Enum
-from natsort import natsorted
 
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
@@ -44,6 +42,7 @@ def get_all_footnotes() -> dict[Enum, int]:
 
 
 def build_sorted_car_docs_list(platforms, footnotes=None):
+  from natsort import natsorted
   collected_car_docs: list[CarDocs | ExtraCarDocs] = []
   for platform in platforms.values():
     car_docs = platform.config.car_docs
@@ -80,6 +79,7 @@ def group_by_make(all_car_docs: list[CarDocs]) -> dict[str, list[CarDocs]]:
 
 # CAUTION: This function is imported by shop.comma.ai and comma.ai/vehicles, test changes carefully
 def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str, **kwargs) -> str:
+  import jinja2
   with open(template_fn) as f:
     template = jinja2.Template(f.read(), trim_blocks=True, lstrip_blocks=True)
 
