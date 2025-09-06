@@ -10,6 +10,7 @@ BO_ 228 STEERING_CONTROL: 5 EON
  SG_ SET_ME_X00_2 : 31|8@0+ (1,0) [0|0] "" EPS
  SG_ STEER_TORQUE : 7|16@0- (1,0) [-4096|4096] "" EPS
  SG_ STEER_DOWN_TO_ZERO : 38|1@0+ (1,0) [0|1] "" EPS
+ SG_ RDM : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" EPS
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" EPS
 
@@ -147,16 +148,6 @@ BO_ 806 SCM_FEEDBACK: 8 SCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 862 CAMERA_MESSAGES: 8 CAM
- SG_ ZEROS_BOH : 7|16@0+ (1,0) [0|127] "" BDY
- SG_ SPEED_LIMIT_SIGN : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ ROAD_SIGN : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ ZEROS_BOH_2 : 51|4@0+ (1,0) [0|15] "" XXX
- SG_ HIGHBEAMS_ON : 52|1@0+ (1,0) [0|1] "" XXX
- SG_ AUTO_HIGHBEAMS_ACTIVE : 53|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
-
 BO_ 927 RADAR_HUD: 8 RADAR
  SG_ ZEROS_BOH : 7|10@0+ (1,0) [0|127] "" BDY
  SG_ CMBS_OFF : 12|1@0+ (1,0) [0|1] "" BDY
@@ -175,46 +166,49 @@ BO_ 927 RADAR_HUD: 8 RADAR
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 13274 LKAS_HUD_A: 5 ADAS
+ SG_ LKAS_READY : 0|1@0+ (1,0) [0|127] "" BDY
+ SG_ LKAS_STATE_CHANGE : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
  SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
  SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
  SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
  SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" BDY
  SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" BDY
- SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
- SG_ BOH_2 : 23|2@0+ (1,0) [0|4] "" BDY
- SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
- SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
- SG_ SET_ME_X01 : 20|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
  SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
- SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
+ SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
+ SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_HUD : 9|1@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_HUD_2 : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ RDM_OFF : 27|1@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_ON : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ RDM_ON_2 : 28|1@0+ (1,0) [0|1] "" BDY
+ SG_ LANE_ASSIST_BEEP_OFF : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
+ SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
 
 BO_ 13275 LKAS_HUD_B: 8 ADAS
+ SG_ LKAS_READY : 0|1@0+ (1,0) [0|127] "" BDY
+ SG_ LKAS_STATE_CHANGE : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
  SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
  SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
  SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
  SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" BDY
  SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" BDY
- SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
- SG_ BOH_2 : 23|2@0+ (1,0) [0|4] "" BDY
- SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
- SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
- SG_ SET_ME_X01 : 20|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
  SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
+ SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
+ SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_HUD : 9|1@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_HUD_2 : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ RDM_OFF : 27|1@0+ (1,0) [0|1] "" BDY
+ SG_ RDM_ON : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ RDM_ON_2 : 28|1@0+ (1,0) [0|1] "" BDY
+ SG_ LANE_ASSIST_BEEP_OFF : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ LANE_LINES : 36|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
 
 CM_ SG_ 576 LINE_DISTANCE_VISIBLE "Length of line visible, undecoded";
 CM_ SG_ 577 LINE_FAR_EDGE_POSITION "Appears to be a measure of line thickness, indicates location of the portion of the line furthest from the car, undecoded";
