@@ -322,7 +322,12 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   const float max_angle = get_angle_from_curvature(max_curvature, curvature_factor, params);
   const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
+  // Jerk limits from current angle to avoid sudden changes when engaging
+  const int max_angle_from_current = angle_meas.max + max_angle_delta_can;
+  const int min_angle_from_current = angle_meas.min - max_angle_delta_can;
+
   if (controls_allowed && steer_control_enabled) {
+    violation |= max_limit_check(desired_angle, max_angle_from_current, min_angle_from_current); // Jerk limit from current angle
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle); // Jerk limit
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can); // Lat Accel Limit
 
