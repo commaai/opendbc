@@ -63,7 +63,7 @@ class TestCanChecksums:
   def test_honda_checksum(self):
     """Test checksums for Honda standard and extended CAN ids"""
     # TODO: refactor to use self.verify_checksum()
-    dbc_file = "honda_accord_2018_can_generated"
+    dbc_file = "honda_civic_hatchback_ex_2017_can_generated"
     msgs = [("LKAS_HUD", 0), ("LKAS_HUD_A", 0)]
     parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
