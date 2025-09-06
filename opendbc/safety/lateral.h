@@ -331,11 +331,9 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   }
   desired_angle_last = desired_angle;
 
-  // Angle should either be 0 or same as current angle while not steering
+  // Angle should not exceed max angle when not steering, should be always limited to max angle
   if (!steer_control_enabled) {
-    const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
-    const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
-    violation |= max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
+    violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
   }
 
   // No angle control allowed when controls are not allowed
@@ -345,8 +343,10 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
   // reset to current angle if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
-    desired_angle_last = CLAMP(angle_meas.values[0], -max_angle_can, max_angle_can); // Clamp it to comply with lat accel?
+    desired_angle_last = CLAMP(angle_meas.values[0], -max_angle_can, max_angle_can); // current angle, limited to max angle
   }
 
+  // We should never exceed the hard limits set
+  violation |= max_limit_check(desired_angle, limits.max_angle, -limits.max_angle);
   return violation;
 }
