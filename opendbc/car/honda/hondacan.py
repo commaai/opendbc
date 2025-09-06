@@ -163,7 +163,8 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
     commands.append(packer.make_can_msg("ACC_HUD", CAN.pt, acc_hud_values))
 
   lkas_hud_values = {
-    'SET_ME_X41': 0x41,
+    'LKAS_READY': 1,
+    'LKAS_STATE_CHANGE': 1,
     'STEERING_REQUIRED': hud.steer_required,
     'SOLID_LANES': hud.lanes_visible,
     'BEEP': 0,
@@ -179,8 +180,8 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
       lkas_hud_values['LKAS_PROBLEM'] = lkas_hud['LKAS_PROBLEM']
 
   if not (CP.flags & HondaFlags.BOSCH_EXT_HUD):
-    lkas_hud_values['LDW_OFF'] = 1
-    lkas_hud_values['SET_ME_X1'] = 1
+    lkas_hud_values['RDM_OFF'] = 1
+    lkas_hud_values['LANE_ASSIST_BEEP_OFF'] = 1
 
   if CP.flags & HondaFlags.BOSCH_EXT_HUD and not CP.openpilotLongitudinalControl:
     commands.append(packer.make_can_msg('LKAS_HUD_A', CAN.lkas, lkas_hud_values))
