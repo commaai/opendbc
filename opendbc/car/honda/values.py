@@ -286,7 +286,7 @@ class CAR(Platforms):
   HONDA_CRV_EU = HondaNidecPlatformConfig(
     [],  # Euro version of CRV Touring, don't show in docs
     HONDA_CRV.specs,
-    radar_dbc_dict('honda_crv_executive_2016_can_generated'),
+    radar_dbc_dict('honda_crv_touring_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.HAS_ALL_DOOR_STATES,
   )
   HONDA_FIT = HondaNidecPlatformConfig(
