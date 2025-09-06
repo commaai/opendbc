@@ -15,13 +15,6 @@ BO_ 399 STEER_STATUS: 7 EPS
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|3] "" EON
 
-BO_ 545 ECON_STATUS: 6 XXX
- SG_ ECON_ON_2 : 37|2@0+ (1,0) [0|3] "" EON
- SG_ ECON_ON : 23|1@0+ (1,0) [0|1] "" EON
- SG_ CHECKSUM : 43|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" EON
->>>>>>> a1e60b56 (moved hybrid brake error to honda common)
-
 BO_ 768 VEHICLE_STATE: 8 ADAS
  SG_ SET_ME_XF9 : 7|8@0+ (1,0) [0|255] "" Vector__XXX
  SG_ VEHICLE_SPEED : 15|8@0+ (1,0) [0|255] "kph" Vector__XXX
