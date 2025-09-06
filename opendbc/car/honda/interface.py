@@ -180,6 +180,10 @@ class CarInterface(CarInterfaceBase):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
+    if candidate == CAR.HONDA_ODYSSEY_5G_MMR and not ret.openpilotLongitudinalControl:
+      # When using stock ACC, the radar intercepts and filters steering commands the EPS would otherwise accept
+      ret.minSteerSpeed = 70. * CV.KPH_TO_MS
+
     # These cars use alternate user brake msg (0x1BE)
     if 0x1BE in fingerprint[CAN.pt] and candidate in (CAR.HONDA_ACCORD, CAR.HONDA_HRV_3G, *HONDA_BOSCH_CANFD):
       ret.flags |= HondaFlags.BOSCH_ALT_BRAKE.value

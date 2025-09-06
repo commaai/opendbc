@@ -39,6 +39,7 @@ class CarState(CarStateBase):
 
     self.brake_switch_prev = False
     self.brake_switch_active = False
+    self.low_speed_alert = False
 
     self.dynamic_v_cruise_units = self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_ALT_RADAR | HONDA_BOSCH_CANFD)
     self.cruise_setting = 0
@@ -175,9 +176,14 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = cp.vl["POWERTRAIN_DATA"]["ACC_STATUS"] != 0
     ret.cruiseState.available = bool(cp.vl[self.car_state_scm_msg]["MAIN_ON"])
 
-    if self.CP.carFingerprint in HONDA_BOSCH_ALT_RADAR:
-      ret.lowSpeedAlert = ret.cruiseState.enabled and cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] == 0 and not ret.steerFaultTemporary and \
-                          (ret.lowSpeedAlert or ret.vEgo >= 4 * CV.MPH_TO_MS) # exclude under 4mph but don't create falling edge
+    # Low speed steer alert hysteresis logic
+    # Don't alert under 3mph
+    # TODO: test/cleanup
+    if 3 * CV.MPH_TO_MS < ret.vEgo < (self.CP.minSteerSpeed + 1.):
+      self.low_speed_alert = True
+    elif ret.standstill or ret.vEgo > (self.CP.minSteerSpeed + 2.):
+      self.low_speed_alert = False
+    ret.lowSpeedAlert = self.low_speed_alert
 
     # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):
