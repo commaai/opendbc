@@ -76,6 +76,7 @@ class HondaFlags(IntFlag):
   HAS_ALL_DOOR_STATES = 256  # Some Hondas have all door states, others only driver door
   BOSCH_ALT_RADAR = 512
   ALLOW_MANUAL_TRANS = 1024
+  HYBRID = 2048
 
 
 # Car button codes
