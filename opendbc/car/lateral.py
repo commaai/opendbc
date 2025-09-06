@@ -116,17 +116,16 @@ def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_e
   max_angle_delta = min(max_angle_delta, limits.ANGLE_LIMITS.MAX_ANGLE_RATE)
   new_apply_angle = rate_limit(apply_angle, apply_angle_last, -max_angle_delta, max_angle_delta)
 
-  # *** max lateral accel limit ***
-  max_angle = get_max_angle_vm(v_ego_raw, VM, limits)
-  new_apply_angle = np.clip(new_apply_angle, -max_angle, max_angle)
-
   # angle is current angle when inactive
   if not lat_active:
     new_apply_angle = steering_angle
 
-  # while disengaged, ensure we clip to minimum of allowed angle signal value and lateral accel angle
-  max_final_angle = min(limits.ANGLE_LIMITS.STEER_ANGLE_MAX, max_angle)
-  return float(np.clip(new_apply_angle, -max_final_angle, max_final_angle))
+  # *** max lateral accel limit while disengaged as well ***
+  max_angle = get_max_angle_vm(v_ego_raw, VM, limits)
+  new_apply_angle = np.clip(new_apply_angle, -max_angle, max_angle)
+
+  # clip to max signal value, or to prevent faults (Toyota LTA)
+  return float(np.clip(new_apply_angle, -limits.ANGLE_LIMITS.STEER_ANGLE_MAX, limits.ANGLE_LIMITS.STEER_ANGLE_MAX))
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,
