@@ -345,8 +345,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
   // reset to current angle if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
-    //desired_angle_last = CLAMP(angle_meas.values[0], lowest_desired_angle, highest_desired_angle) // Clamp it to comply with jerk?
-    desired_angle_last = CLAMP(angle_meas.values[0], -max_angle_can, max_angle_can) // Clamp it to comply with lat accel?
+    desired_angle_last = CLAMP(angle_meas.values[0], -max_angle_can, max_angle_can); // Clamp it to comply with lat accel?
   }
 
   return violation;
