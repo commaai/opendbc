@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 from opendbc.car import CanBusBase
 from opendbc.car.crc import CRC16_XMODEM
@@ -37,32 +36,25 @@ class CanBus(CanBusBase):
 
 
 def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque):
-  common_values = {
-    "LKA_MODE": 2,
-    "LKA_ICON": 2 if enabled else 1,
-    "TORQUE_REQUEST": apply_torque,
-    "LKA_ASSIST": 0,
-    "STEER_REQ": 1 if lat_active else 0,
-    "STEER_MODE": 0,
-    "HAS_LANE_SAFETY": 0,  # hide LKAS settings
-    "NEW_SIGNAL_2": 0,
-    "DAMP_FACTOR": 100,  # can potentially tuned for better perf [3, 200]
+  values = {
+    "LKA_OptUsmSta": 2,
+    "LKA_SysIndReq": 2 if enabled else 1,
+    "StrTqReqVal": apply_torque,
+    "LKA_SysWrn": 0,
+    "ActToiSta": 1 if lat_active else 0,
+    "Damping_Gain": 100,  # can potentially tuned for better perf [3, 200]
+    "LKA_UsmMod": 0,  # hide LKAS settings
+    "LKA_RcgSta": 0,  # lane recognition status (0 for "not recognized")
   }
-
-  lkas_values = copy.copy(common_values)
-  lkas_values["LKA_AVAILABLE"] = 0
-
-  lfa_values = copy.copy(common_values)
-  lfa_values["NEW_SIGNAL_1"] = 0
 
   ret = []
   if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
     lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "LKAS"
     if CP.openpilotLongitudinalControl:
-      ret.append(packer.make_can_msg("LFA", CAN.ECAN, lfa_values))
-    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, lkas_values))
+      ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
+    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, values))
   else:
-    ret.append(packer.make_can_msg("LFA", CAN.ECAN, lfa_values))
+    ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
 
   return ret
 
@@ -97,27 +89,27 @@ def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
     values = {s: cruise_info_copy[s] for s in [
       "COUNTER",
       "CHECKSUM",
-      "NEW_SIGNAL_1",
-      "MainMode_ACC",
-      "ACCMode",
-      "ZEROS_9",
-      "CRUISE_STANDSTILL",
-      "ZEROS_5",
-      "DISTANCE_SETTING",
-      "VSetDis",
+      "SCC_SysFlrSta",
+      "SCC_MainOnOffSta",
+      "SCC_OpSta",
+      "SCC_TakeoverReq",
+      "SCC_InfoDis",
+      "SCC_DrvAlrtDis",
+      "SCC_HeadwayDstSetVal",
+      "SCC_TrgtSpdSetVal",
     ]}
   else:
     values = {s: cruise_info_copy[s] for s in [
       "COUNTER",
       "CHECKSUM",
-      "ACCMode",
-      "VSetDis",
-      "CRUISE_STANDSTILL",
+      "SCC_OpSta",
+      "SCC_TrgtSpdSetVal",
+      "SCC_InfoDis",
     ]}
   values.update({
-    "ACCMode": 4,
-    "aReqRaw": 0.0,
-    "aReqValue": 0.0,
+    "SCC_OpSta": 4,
+    "SCC_AccelReqRawVal": 0.0,
+    "SCC_AccelReqVal": 0.0,
   })
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
@@ -140,22 +132,23 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     a_val = np.clip(accel, accel_last - jn, accel_last + jn)
 
   values = {
-    "ACCMode": 0 if not enabled else (2 if gas_override else 1),
-    "MainMode_ACC": 1,
-    "StopReq": 1 if stopping else 0,
-    "aReqValue": a_val,
-    "aReqRaw": a_raw,
-    "VSetDis": set_speed,
-    "JerkLowerLimit": jerk if enabled else 1,
-    "JerkUpperLimit": 3.0,
+    "SCC_OpSta": 0 if not enabled else (2 if gas_override else 1),
+    "SCC_MainOnOffSta": 1,
+    "SCC_VehStpReq": 1 if stopping else 0,
+    "SCC_AccelReqVal": a_val,
+    "SCC_AccelReqRawVal": a_raw,
+    "SCC_TrgtSpdSetVal": set_speed,
+    "SCC_JrkUppLimVal": jerk if enabled else 1,
+    "SCC_JrkLwrLimVal": 3.0,
 
-    "ACC_ObjDist": 1,
-    "ObjValid": 0,
-    "OBJ_STATUS": 2,
-    "SET_ME_2": 0x4,
-    "SET_ME_3": 0x3,
-    "SET_ME_TMP_64": 0x64,
-    "DISTANCE_SETTING": hud_control.leadDistanceBars,
+    "SCC_ObjDstVal": 1,
+    #"ObjValid": 0, # official DBC doesn't have this, it was overlapping with SCC_ObjLatPosVal
+    #"OBJ_STATUS": 2, # official DBC doesn't have this, it was overlapping with SCC_AccelLimBandLwrVal
+    "SCC_ObjSta": 2, # this was on a very different place than the OBJ_STATUS above, its coincidence the values match :D
+    "SCC_NSCCOnOffSta": 2, # means ON, not sure why we care about it right now
+    "SCC_ObjRelSpdVal": 0, # set_me_3 formelry was setting this 0x3 but this was overlapping with SCC_ObjRelSpdVal last 3 bits somehow
+    "SET_ME_TMP_64": 0, # on my car is always 0, need to validate against othes
+    "SCC_HeadwayDstSetVal": hud_control.leadDistanceBars,
   }
 
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
