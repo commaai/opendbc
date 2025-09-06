@@ -178,7 +178,7 @@ class CarState(CarStateBase):
 
     # Low speed steer alert hysteresis logic
     # Don't alert under 3mph
-    # TODO: test/cleanup
+    # TODO: test/cleanup, potentially handle asymmetric enable/disable speeds
     if 3 * CV.MPH_TO_MS < ret.vEgo < (self.CP.minSteerSpeed + 1.):
       self.low_speed_alert = True
     elif ret.standstill or ret.vEgo > (self.CP.minSteerSpeed + 2.):
