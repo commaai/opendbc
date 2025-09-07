@@ -1,5 +1,4 @@
 import numpy as np
-from collections import namedtuple
 
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
@@ -87,10 +86,6 @@ def process_hud_alert(hud_alert):
     alert_steer_required = True
 
   return alert_fcw, alert_steer_required
-
-
-HUDData = namedtuple("HUDData",
-                     ["pcm_accel", "v_cruise"])
 
 
 class CarController(CarControllerBase):
@@ -223,11 +218,10 @@ class CarController(CarControllerBase):
 
     # Send dashboard UI commands.
     if self.frame % 10 == 0:
-      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)))
-
       if self.CP.openpilotLongitudinalControl:
         # On Nidec, this also controls longitudinal positive acceleration
-        can_sends.append(hondacan.create_acc_hud(self.packer, self.CAN.pt, self.CP, CC.enabled, pcm_speed, hud_control, hud, CS.is_metric, CS.acc_hud))
+        can_sends.append(hondacan.create_acc_hud(self.packer, self.CAN.pt, self.CP, CC.enabled, pcm_speed, pcm_accel,
+                                                 hud_control, hud_v_cruise, CS.is_metric, CS.acc_hud))
 
       can_sends.extend(hondacan.create_lkas_hud(self.packer, self.CAN.lkas, self.CP, hud_control, alert_steer_required, CS.lkas_hud))
 
