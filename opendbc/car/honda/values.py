@@ -98,10 +98,6 @@ VISUAL_HUD = {
   VisualAlert.fcw: 1,
   VisualAlert.steerRequired: 1,
   VisualAlert.ldw: 1,
-  VisualAlert.brakePressed: 10,
-  VisualAlert.wrongGear: 6,
-  VisualAlert.seatbeltUnbuckled: 5,
-  VisualAlert.speedTooHigh: 8
 }
 
 
