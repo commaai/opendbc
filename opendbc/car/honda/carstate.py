@@ -180,10 +180,9 @@ class CarState(CarStateBase):
     # All Honda EPS cut off slightly above standstill; don't alert under 3mph
     # TODO: verify actual above-standstill cutoff speed, it's almost certainly metric
     # TODO: handle asymmetric enable/disable speeds
-    # TODO: nerf the HUD steering-required VisualAlert because it's continuous and obnoxious
-    if 3 * CV.MPH_TO_MS < ret.vEgo < (self.CP.minSteerSpeed + 1.):
+    if 3 * CV.MPH_TO_MS < ret.vEgo < (self.CP.minSteerSpeed + 0.5):
       self.low_speed_alert = True
-    elif ret.standstill or ret.vEgo > (self.CP.minSteerSpeed + 2.):
+    elif ret.standstill or ret.vEgo > (self.CP.minSteerSpeed + 1.):
       self.low_speed_alert = False
     ret.lowSpeedAlert = self.low_speed_alert
 
