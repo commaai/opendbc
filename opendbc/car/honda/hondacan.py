@@ -182,7 +182,8 @@ def create_ui_commands(packer, CAN, CP, enabled, lat_active, steering_pressed, p
       lkas_hud_values['LKAS_PROBLEM'] = lkas_hud['LKAS_PROBLEM']
 
   if not (CP.flags & HondaFlags.BOSCH_EXT_HUD):
-    lkas_hud_values['RDM_OFF'] = 1
+    # FIXME: think this is force disabling stock RDM on Odyssey, why are we doing this?
+    # lkas_hud_values['RDM_OFF'] = 1
     lkas_hud_values['LANE_ASSIST_BEEP_OFF'] = 1
 
   if CP.flags & HondaFlags.BOSCH_EXT_HUD and not CP.openpilotLongitudinalControl:
