@@ -1,5 +1,6 @@
 import os
 import math
+import pytest
 from collections.abc import Callable
 from typing import Any
 from functools import lru_cache
@@ -12,27 +13,39 @@ DLC_TO_LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]
 
 MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
+CAR_CHUNK_SIZE = int(os.environ.get('CAR_CHUNK_SIZE', '4'))
+CAR_BATCHES = int(os.environ.get('CAR_BATCHES', '128'))  # overprovisioned
+
 
 @lru_cache(maxsize=1)
 def _get_all_ecus():
-    """Lazy loader for ALL_ECUS"""
-    from opendbc.car.fingerprints import FW_VERSIONS
-    from opendbc.car.fw_versions import FW_QUERY_CONFIGS
+  """Lazy loader for ALL_ECUS"""
+  from opendbc.car.fingerprints import FW_VERSIONS
+  from opendbc.car.fw_versions import FW_QUERY_CONFIGS
 
-    all_ecus = {ecu for ecus in FW_VERSIONS.values() for ecu in ecus.keys()}
-    all_ecus |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra_ecus}
-    return all_ecus
+  all_ecus = {ecu for ecus in FW_VERSIONS.values() for ecu in ecus.keys()}
+  all_ecus |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra_ecus}
+  return all_ecus
 
 
 @lru_cache(maxsize=1)
 def _get_all_requests():
-    """Lazy loader for ALL_REQUESTS"""
-    from opendbc.car.fw_versions import FW_QUERY_CONFIGS
-    return {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r in config.requests}
+  """Lazy loader for ALL_REQUESTS"""
+  from opendbc.car.fw_versions import FW_QUERY_CONFIGS
+  return {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r in config.requests}
+
+
+@pytest.fixture(scope="session")
+def _platform_list():
+  from opendbc.car.values import PLATFORMS
+  return sorted(PLATFORMS)
 
 
 class TestCarInterfaces:
-  def test_car_interfaces(self, subtests):
+  _PARAM_RANGE = range(CAR_BATCHES)
+
+  @pytest.mark.parametrize("car_batch_idx", _PARAM_RANGE)
+  def test_car_interfaces(self, car_batch_idx, _platform_list, subtests):
     import hypothesis.strategies as st
     from hypothesis import Phase, given, settings
     from opendbc.car.interfaces import CarInterfaceBase
@@ -137,8 +150,13 @@ class TestCarInterfaces:
         rr = radar_interface.update(cans)
         assert rr is None or len(rr.errors) > 0
 
-    from opendbc.car.values import PLATFORMS
-    for car_name in sorted(PLATFORMS):
+    start = car_batch_idx * CAR_CHUNK_SIZE
+    end = start + CAR_CHUNK_SIZE
+    car_batch = _platform_list[start:end]
+    if not car_batch:
+      pytest.skip(f"No cars in batch {car_batch_idx}")
+
+    for car_name in car_batch:
       with subtests.test(car_name=car_name):
         run_car_interface_test(car_name=car_name)
 
