@@ -156,6 +156,7 @@ def create_acc_hud(packer, bus, CP, enabled, pcm_speed, hud, is_metric, acc_hud)
     acc_hud_values['FCM_OFF_2'] = acc_hud['FCM_OFF_2']
     acc_hud_values['FCM_PROBLEM'] = acc_hud['FCM_PROBLEM']
     acc_hud_values['ICONS'] = acc_hud['ICONS']
+
   return packer.make_can_msg("ACC_HUD", bus, acc_hud_values)
 
 

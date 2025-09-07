@@ -226,25 +226,24 @@ class CarController(CarControllerBase):
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
     # Send dashboard UI commands.
-    # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
 
       if self.CP.openpilotLongitudinalControl:
+        # On Nidec, this controls longitudinal positive acceleration
         can_sends.append(hondacan.create_acc_hud(self.packer, self.CAN.pt, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud))
 
       can_sends.extend(hondacan.create_lkas_hud(self.packer, self.CAN.lkas, self.CP, hud, CS.lkas_hud))
 
-      if self.CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and self.CP.openpilotLongitudinalControl:
-        can_sends.append(hondacan.create_radar_hud(self.packer, self.CAN.pt))
-
-      if self.CP.carFingerprint == CAR.HONDA_CIVIC_BOSCH:
-        can_sends.append(hondacan.create_legacy_brake_command(self.packer, self.CAN.pt))
-
-      if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
-        self.speed = pcm_speed
-        self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+      if self.CP.openpilotLongitudinalControl:
+        if self.CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS):
+          can_sends.append(hondacan.create_radar_hud(self.packer, self.CAN.pt))
+        if self.CP.carFingerprint == CAR.HONDA_CIVIC_BOSCH:
+          can_sends.append(hondacan.create_legacy_brake_command(self.packer, self.CAN.pt))
+        if self.CP.carFingerprint not in HONDA_BOSCH:
+          self.speed = pcm_speed
+          self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
 
     new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed
