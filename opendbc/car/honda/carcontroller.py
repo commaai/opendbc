@@ -91,7 +91,7 @@ def process_hud_alert(hud_alert):
 
 HUDData = namedtuple("HUDData",
                      ["pcm_accel", "v_cruise", "lead_visible",
-                      "lanes_visible", "fcw", "steer_required", "lead_distance_bars"])
+                      "fcw", "lead_distance_bars"])
 
 
 class CarController(CarControllerBase):
@@ -225,13 +225,13 @@ class CarController(CarControllerBase):
     # Send dashboard UI commands.
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
-                    hud_control.lanesVisible, alert_fcw, alert_steer_required, hud_control.leadDistanceBars)
+                    alert_fcw, hud_control.leadDistanceBars)
 
       if self.CP.openpilotLongitudinalControl:
         # On Nidec, this controls longitudinal positive acceleration
         can_sends.append(hondacan.create_acc_hud(self.packer, self.CAN.pt, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud))
 
-      can_sends.extend(hondacan.create_lkas_hud(self.packer, self.CAN.lkas, self.CP, hud, CS.lkas_hud))
+      can_sends.extend(hondacan.create_lkas_hud(self.packer, self.CAN.lkas, self.CP, hud_control, alert_steer_required, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl:
         # TODO: combining with create_acc_hud block above will change message order and will need replay logs regenerated
