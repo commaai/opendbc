@@ -237,6 +237,7 @@ class CarController(CarControllerBase):
       can_sends.extend(hondacan.create_lkas_hud(self.packer, self.CAN.lkas, self.CP, hud, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl:
+        # TODO: combine with create_acc_hud block above, changes message order and will need replay logs regenerated
         if self.CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS):
           can_sends.append(hondacan.create_radar_hud(self.packer, self.CAN.pt))
         if self.CP.carFingerprint == CAR.HONDA_CIVIC_BOSCH:
