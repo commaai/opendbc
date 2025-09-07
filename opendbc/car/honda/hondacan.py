@@ -163,7 +163,8 @@ def create_ui_commands(packer, CAN, CP, enabled, steering_pressed, pcm_speed, hu
     commands.append(packer.make_can_msg("ACC_HUD", CAN.pt, acc_hud_values))
 
   lkas_hud_values = {
-    'LKAS_READY': not steering_pressed,
+    'LKAS_READY': 1,
+    'LKAS_PROBLEM': enabled and steering_pressed,
     'LKAS_STATE_CHANGE': 1,
     'STEERING_REQUIRED': hud.steer_required,
     'SOLID_LANES': enabled,
