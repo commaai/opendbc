@@ -124,7 +124,7 @@ class CarController(CarControllerBase):
     hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
-    if CS.brakeHoldActive:
+    if CS.out.brakeHoldActive:
       self.brakehold_last = self.frame * DT_CTRL
 
     if CC.longActive:
