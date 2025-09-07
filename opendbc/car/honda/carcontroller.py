@@ -1,10 +1,9 @@
 import numpy as np
-from collections import namedtuple
 
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
-from opendbc.car.honda.values import CruiseButtons, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
+from opendbc.car.honda.values import CAR, CruiseButtons, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
                                      HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
 
@@ -87,11 +86,6 @@ def process_hud_alert(hud_alert):
     alert_steer_required = True
 
   return alert_fcw, alert_steer_required
-
-
-HUDData = namedtuple("HUDData",
-                     ["pcm_accel", "v_cruise", "lead_visible",
-                      "lanes_visible", "fcw", "steer_required", "lead_distance_bars"])
 
 
 class CarController(CarControllerBase):
@@ -223,15 +217,23 @@ class CarController(CarControllerBase):
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
     # Send dashboard UI commands.
-    # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
-      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
-                    hud_control.lanesVisible, alert_fcw, alert_steer_required, hud_control.leadDistanceBars)
-      can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
+      if self.CP.openpilotLongitudinalControl:
+        # On Nidec, this also controls longitudinal positive acceleration
+        can_sends.append(hondacan.create_acc_hud(self.packer, self.CAN.pt, self.CP, CC.enabled, pcm_speed, pcm_accel,
+                                                 hud_control, hud_v_cruise, CS.is_metric, CS.acc_hud))
 
-      if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
-        self.speed = pcm_speed
-        self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+      can_sends.extend(hondacan.create_lkas_hud(self.packer, self.CAN.lkas, self.CP, hud_control, alert_steer_required, CS.lkas_hud))
+
+      if self.CP.openpilotLongitudinalControl:
+        # TODO: combining with create_acc_hud block above will change message order and will need replay logs regenerated
+        if self.CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS):
+          can_sends.append(hondacan.create_radar_hud(self.packer, self.CAN.pt))
+        if self.CP.carFingerprint == CAR.HONDA_CIVIC_BOSCH:
+          can_sends.append(hondacan.create_legacy_brake_command(self.packer, self.CAN.pt))
+        if self.CP.carFingerprint not in HONDA_BOSCH:
+          self.speed = pcm_speed
+          self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
 
     new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed
