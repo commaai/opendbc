@@ -5,7 +5,7 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
-                                     HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
+                                     HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams, HondaFlags
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -110,6 +110,7 @@ class CarController(CarControllerBase):
     self.apply_brake_last = 0
     self.last_pump_ts = 0.
     self.stopping_counter = 0
+    self.brakehold_last_ts = self.frame * DT_CTRL - 5
 
     self.accel = 0.0
     self.speed = 0.0
@@ -123,9 +124,14 @@ class CarController(CarControllerBase):
     hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
+    if CS.brakeHoldActive:
+      self.brakehold_last = self.frame * DT_CTRL
+
     if CC.longActive:
       accel = actuators.accel
-      gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
+      if (CP.flags & HondaFlags.HYBRID_ALT_BRAKEHOLD) and (self.frame * DT_CTRL < self.brakehold_last + 1.0):
+        accel = min (accel, -2.0) # HYBRID_ALT_BRAKEHOLD cars fault if positive accel within 1000ms of brakehold
+      gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
