@@ -4,7 +4,7 @@ from collections import namedtuple
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
-from opendbc.car.honda.values import CAR, CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
+from opendbc.car.honda.values import CAR, CruiseButtons, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
                                      HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
 
@@ -76,25 +76,22 @@ def brake_pump_hysteresis(apply_brake, apply_brake_last, last_pump_ts, ts):
 
 
 def process_hud_alert(hud_alert):
-  # initialize to no alert
-  fcw_display = 0
-  steer_required = 0
-  acc_alert = 0
+  alert_fcw = False
+  alert_steer_required = False
 
-  # priority is: FCW, steer required, all others
+  # Make sure FCW is prioritized over steering required
+  # TODO: implement separate available LDW alert
   if hud_alert == VisualAlert.fcw:
-    fcw_display = VISUAL_HUD[hud_alert.raw]
+    alert_fcw = True
   elif hud_alert in (VisualAlert.steerRequired, VisualAlert.ldw):
-    steer_required = VISUAL_HUD[hud_alert.raw]
-  else:
-    acc_alert = VISUAL_HUD[hud_alert.raw]
+    alert_steer_required = True
 
-  return fcw_display, steer_required, acc_alert
+  return alert_fcw, alert_steer_required
 
 
 HUDData = namedtuple("HUDData",
                      ["pcm_accel", "v_cruise", "lead_visible",
-                      "lanes_visible", "fcw", "acc_alert", "steer_required", "lead_distance_bars"])
+                      "lanes_visible", "fcw", "steer_required", "lead_distance_bars"])
 
 
 class CarController(CarControllerBase):
@@ -143,7 +140,7 @@ class CarController(CarControllerBase):
     self.brake_last = rate_limit(pre_limit_brake, self.brake_last, -2., DT_CTRL)
 
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
-    fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert)
+    alert_fcw, alert_steer_required = process_hud_alert(hud_control.visualAlert)
 
     # **** process the car messages ****
 
@@ -220,7 +217,7 @@ class CarController(CarControllerBase):
 
           pcm_override = True
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
-                                                         pcm_override, pcm_cancel_cmd, fcw_display,
+                                                         pcm_override, pcm_cancel_cmd, alert_fcw,
                                                          self.CP.carFingerprint, CS.stock_brake))
           self.apply_brake_last = apply_brake
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
@@ -228,7 +225,7 @@ class CarController(CarControllerBase):
     # Send dashboard UI commands.
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
-                    hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
+                    hud_control.lanesVisible, alert_fcw, alert_steer_required, hud_control.leadDistanceBars)
 
       if self.CP.openpilotLongitudinalControl:
         # On Nidec, this controls longitudinal positive acceleration
