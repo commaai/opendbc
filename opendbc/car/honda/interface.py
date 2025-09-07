@@ -175,14 +175,18 @@ class CarInterface(CarInterfaceBase):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]] # TODO: can probably use some tuning
 
+    elif candidate == CAR.HONDA_ODYSSEY_5G_MMR:
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # clipped by radar
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.06]]
+      CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 2000]
+      if not ret.openpilotLongitudinalControl:
+        # When using stock ACC, the radar intercepts and filters steering commands the EPS would otherwise accept
+        ret.minSteerSpeed = 70. * CV.KPH_TO_MS
+
     else:
       ret.steerActuatorDelay = 0.15
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-
-    if candidate == CAR.HONDA_ODYSSEY_5G_MMR and not ret.openpilotLongitudinalControl:
-      # When using stock ACC, the radar intercepts and filters steering commands the EPS would otherwise accept
-      ret.minSteerSpeed = 70. * CV.KPH_TO_MS
 
     # These cars use alternate user brake msg (0x1BE)
     if 0x1BE in fingerprint[CAN.pt] and candidate in (CAR.HONDA_ACCORD, CAR.HONDA_HRV_3G, *HONDA_BOSCH_CANFD):
