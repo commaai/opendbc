@@ -75,7 +75,7 @@ class HondaFlags(IntFlag):
   BOSCH_CANFD = 128
 
   HAS_ALL_DOOR_STATES = 256  # Some Hondas have all door states, others only driver door
-  # 512 is available for future use
+  BOSCH_ALT_RADAR = 512
   ALLOW_MANUAL_TRANS = 1024
   HYBRID = 2048
   HYBRID_ALT_BRAKEHOLD = 4096  # Some Nidec Hybrids use a different brakehold
@@ -350,6 +350,7 @@ HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
 HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
+HONDA_BOSCH_ALT_RADAR = CAR.with_flags(HondaFlags.BOSCH_ALT_RADAR)
 
 
 DBC = CAR.create_dbc_map()
