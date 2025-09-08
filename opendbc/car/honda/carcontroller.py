@@ -101,8 +101,6 @@ class CarController(CarControllerBase):
     self.apply_brake_last = 0
     self.last_pump_ts = 0.
     self.stopping_counter = 0
-    self.brakehold_last_ts = 0.
-    self.brakehold_last_ts = self.frame * DT_CTRL - 6.0
 
     self.accel = 0.0
     self.speed = 0.0
@@ -115,10 +113,6 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
     hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
-
-    ts = self.frame * DT_CTRL
-    if CS.out.brakeHoldActive:
-      self.brakehold_last_ts = ts
 
     if CC.longActive:
       accel = actuators.accel
