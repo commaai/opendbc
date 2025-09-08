@@ -132,7 +132,6 @@ class CarState(CarStateBase):
 
     if (self.CP.flags & HondaFlags.NIDEC) and (self.CP.flags & HondaFlags.HYBRID):
       ret.blockPcmEnable = ret.brakeHoldActive # Nidec Hybrids fault if resuming cruise from brake hold
-      ret.lowSpeedAlert = ret.brakeHoldActive # Nidec Hybrids fault if resuming cruise from brake hold
 
     if self.CP.transmissionType == TransmissionType.manual:
       ret.gearShifter = GearShifter.reverse if bool(cp.vl["SCM_FEEDBACK"]["REVERSE_LIGHT"]) else GearShifter.drive
