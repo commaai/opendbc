@@ -110,7 +110,8 @@ class CarController(CarControllerBase):
     self.apply_brake_last = 0
     self.last_pump_ts = 0.
     self.stopping_counter = 0
-    self.brakehold_last_ts = self.frame * DT_CTRL - 5.0
+    self.brakehold_last_ts = 0.
+    self.brakehold_last_ts = self.frame * DT_CTRL - 6.0
 
     self.accel = 0.0
     self.speed = 0.0
@@ -130,7 +131,7 @@ class CarController(CarControllerBase):
 
     if CC.longActive:
       accel = actuators.accel
-      if (not CS.out.brakeHoldActive) and (self.CP.flags & HondaFlags.HYBRID_ALT_BRAKEHOLD) and (ts - self.brakehold_last_ts < 3.0):
+      if (not CS.out.brakeHoldActive) and (self.CP.flags & HondaFlags.HYBRID_ALT_BRAKEHOLD) and (ts - self.brakehold_last_ts < 5.0):
         accel = min(accel, -2.0) # HYBRID_ALT_BRAKEHOLD cars fault if positive accel within 3s of brakehold
       gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
