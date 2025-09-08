@@ -305,7 +305,7 @@ static safety_config hyundai_init(uint16_t param) {
     }
     if (hyundai_camera_scc) {
       if (get_hyundai_lfahda_mfc_alt()) {
-        SET_TX_MSGS(HYUNDAI_LONG_COMMON_LFAHDA_MFC_ALT_TX_MSGS, ret); // LCOV_EXCL_LINE
+        SET_TX_MSGS(HYUNDAI_LONG_COMMON_LFAHDA_MFC_ALT_TX_MSGS, ret);
       } else {
         SET_TX_MSGS(HYUNDAI_CAMERA_SCC_LONG_TX_MSGS, ret);
       }
@@ -321,7 +321,7 @@ static safety_config hyundai_init(uint16_t param) {
 
 
     if (get_hyundai_lfahda_mfc_alt()) {
-      ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_COMMON_LFAHDA_MFC_ALT_TX_MSGS); // LCOV_EXCL_LINE
+      ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_COMMON_LFAHDA_MFC_ALT_TX_MSGS);
     } else {
       ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
     }
