@@ -131,9 +131,7 @@ class CarController(CarControllerBase):
 
     if CC.longActive:
       accel = actuators.accel
-      if (not CS.out.brakeHoldActive) and (self.CP.flags & HondaFlags.HYBRID_ALT_BRAKEHOLD) and (ts - self.brakehold_last_ts < 5.0):
-        accel = min(accel, -2.0) # HYBRID_ALT_BRAKEHOLD cars fault if positive accel within 3s of brakehold
-      gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
+      gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
