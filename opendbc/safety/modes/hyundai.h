@@ -25,16 +25,13 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   .min_accel = -350,  // 1/100 m/s2
 };
 
-#define HYUNDAI_LFAHDA_MFC_TX_MSGS(lfahda_mfc_size) \
-  {0x485, 0, lfahda_mfc_size, .check_relay = true},   /* LFAHDA_MFC Bus 0                  */ \
-
-#define HYUNDAI_COMMON_TX_MSGS(scc_bus, lfahda_mfc_size) \
-  HYUNDAI_LFAHDA_MFC_TX_MSGS(lfahda_mfc_size) \
+#define HYUNDAI_COMMON_TX_MSGS(scc_bus) \
   {0x340, 0,       8, .check_relay = true},   /* LKAS11 Bus 0                              */ \
   {0x4F1, scc_bus, 4, .check_relay = false},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
+  {0x485, 0,       8, .check_relay = true},   /* LFAHDA_MFC Bus 0                          */ \
 
-#define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus, lfahda_mfc_size) \
-  HYUNDAI_COMMON_TX_MSGS(scc_bus, lfahda_mfc_size) \
+#define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
+  HYUNDAI_COMMON_TX_MSGS(scc_bus) \
   {0x420, 0,       8, .check_relay = true},   /* SCC11 Bus 0       */ \
   {0x421, 0,       8, .check_relay = true},   /* SCC12 Bus 0       */ \
   {0x50A, 0,       8, .check_relay = true},   /* SCC13 Bus 0       */ \
@@ -56,15 +53,10 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {.msg = {{0x91,  0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
 static const CanMsg HYUNDAI_TX_MSGS[] = {
-  HYUNDAI_COMMON_TX_MSGS(0, 4)
+  HYUNDAI_COMMON_TX_MSGS(0)
 };
 
 static bool hyundai_legacy = false;
-static bool hyundai_lfahda_mfc_alt = false;
-
-static bool get_hyundai_lfahda_mfc_alt(void) {
-  return hyundai_lfahda_mfc_alt;
-}
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
 
@@ -257,30 +249,19 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config hyundai_init(uint16_t param) {
-  const int HYUNDAI_LFAHDA_MFC_ALT = 1024;
-  hyundai_lfahda_mfc_alt = GET_FLAG(param, HYUNDAI_LFAHDA_MFC_ALT);
-
   static const CanMsg HYUNDAI_LONG_TX_MSGS[] = {
-    HYUNDAI_LONG_COMMON_TX_MSGS(0, 4)
+    HYUNDAI_LONG_COMMON_TX_MSGS(0)
     {0x38D, 0, 8, .check_relay = false}, // FCA11 Bus 0
     {0x483, 0, 8, .check_relay = false}, // FCA12 Bus 0
     {0x7D0, 0, 8, .check_relay = false}, // radar UDS TX addr Bus 0 (for radar disable)
   };
 
   static const CanMsg HYUNDAI_CAMERA_SCC_TX_MSGS[] = {
-    HYUNDAI_COMMON_TX_MSGS(2, 4)
-  };
-
-  static const CanMsg HYUNDAI_COMMON_LFAHDA_MFC_ALT_TX_MSGS[] = {
-    HYUNDAI_COMMON_TX_MSGS(2, 8)
+    HYUNDAI_COMMON_TX_MSGS(2)
   };
 
   static const CanMsg HYUNDAI_CAMERA_SCC_LONG_TX_MSGS[] = {
-    HYUNDAI_LONG_COMMON_TX_MSGS(2, 4)
-  };
-
-  static const CanMsg HYUNDAI_LONG_COMMON_LFAHDA_MFC_ALT_TX_MSGS[] = {
-    HYUNDAI_LONG_COMMON_TX_MSGS(2, 8)
+    HYUNDAI_LONG_COMMON_TX_MSGS(2)
   };
 
   hyundai_common_init(param);
@@ -304,11 +285,7 @@ static safety_config hyundai_init(uint16_t param) {
       SET_RX_CHECKS(hyundai_long_rx_checks, ret);
     }
     if (hyundai_camera_scc) {
-      if (get_hyundai_lfahda_mfc_alt()) {
-        SET_TX_MSGS(HYUNDAI_LONG_COMMON_LFAHDA_MFC_ALT_TX_MSGS, ret);
-      } else {
-        SET_TX_MSGS(HYUNDAI_CAMERA_SCC_LONG_TX_MSGS, ret);
-      }
+      SET_TX_MSGS(HYUNDAI_CAMERA_SCC_LONG_TX_MSGS, ret);
     } else {
       SET_TX_MSGS(HYUNDAI_LONG_TX_MSGS, ret);
     }
@@ -319,12 +296,7 @@ static safety_config hyundai_init(uint16_t param) {
       HYUNDAI_SCC12_ADDR_CHECK(2)
     };
 
-
-    if (get_hyundai_lfahda_mfc_alt()) {
-      ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_COMMON_LFAHDA_MFC_ALT_TX_MSGS);
-    } else {
-      ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
-    }
+    ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
   } else {
     static RxCheck hyundai_rx_checks[] = {
        HYUNDAI_COMMON_RX_CHECKS(false)
@@ -358,7 +330,6 @@ static safety_config hyundai_legacy_init(uint16_t param) {
   hyundai_legacy = true;
   hyundai_longitudinal = false;
   hyundai_camera_scc = false;
-  hyundai_lfahda_mfc_alt = false;
   return BUILD_SAFETY_CFG(hyundai_legacy_rx_checks, HYUNDAI_TX_MSGS);
 }
 
