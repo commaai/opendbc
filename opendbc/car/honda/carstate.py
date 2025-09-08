@@ -131,7 +131,7 @@ class CarState(CarStateBase):
     ret.parkingBrake = bool(cp.vl[self.car_state_scm_msg]["PARKING_BRAKE_ON"])
 
     if (self.CP.flags & HondaFlags.NIDEC) and (self.CP.flags & HondaFlags.HYBRID):
-      ret.BlockPcmEnable = ret.brakeHoldActive # Nidec Hybrids fault if resuming cruise from brake hold
+      ret.blockPcmEnable = ret.brakeHoldActive # Nidec Hybrids fault if resuming cruise from brake hold
       ret.lowSpeedAlert = ret.brakeHoldActive # Nidec Hybrids fault if resuming cruise from brake hold
 
     if self.CP.transmissionType == TransmissionType.manual:
