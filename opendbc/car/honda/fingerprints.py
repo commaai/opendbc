@@ -581,6 +581,7 @@ FW_VERSIONS = {
       b'28101-5EZ-A600\x00\x00',
       b'28101-5EZ-A700\x00\x00',
       b'28103-5EY-A110\x00\x00',
+      b'28103-5EZ-A010\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-TG7-A030\x00\x00',
