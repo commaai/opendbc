@@ -177,7 +177,8 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.HONDA_ODYSSEY_5G_MMR:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # clipped by radar
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.5], [0.06]]
+      ret.steerActuatorDelay = 0.2
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
       CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 2000]
       if not ret.openpilotLongitudinalControl:
         # When using stock ACC, the radar intercepts and filters steering commands the EPS would otherwise accept
