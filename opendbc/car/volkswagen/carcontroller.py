@@ -83,6 +83,18 @@ class CarController(CarControllerBase):
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
         starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
+
+        # reset standstill timer for MQB w/out parking brake
+        if CC.longActive and CS.out.standstill and not (self.CP.flags & VolkswagenFlags.PQ):
+          # send a one-frame pulse every 25 ACC frames (~0.5s at 50Hz) to reset standstill timer
+          # max standstill time before fault is 1s
+          PULSE_EVERY_ACC_FRAMES = 25
+          acc_frame = self.frame // self.CCP.ACC_CONTROL_STEP
+          if (acc_frame % PULSE_EVERY_ACC_FRAMES) == 0:
+            starting = True
+            stopping = False
+            accel = max(accel, 0.05)  # must be > 0
+
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
 
