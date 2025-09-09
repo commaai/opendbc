@@ -226,7 +226,7 @@ class CarInterfaceBase(ABC):
 
     tune.init('torque')
     tune.torque.kf = 1.0
-    tune.torque.kp = 1.0
+    tune.torque.kp = 1.5
     tune.torque.ki = 0.3
     tune.torque.friction = params['FRICTION']
     tune.torque.latAccelFactor = params['LAT_ACCEL_FACTOR']
