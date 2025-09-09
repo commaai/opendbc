@@ -150,10 +150,11 @@ class CarController(CarControllerBase):
                                   self.params.STEER_DELTA_UP * DT_CTRL)
       apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
                                    self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
+      self.last_torque = limited_torque
     else:
       steer_active = False
       apply_torque = 0
-    self.last_torque = apply_torque
+      self.last_torque = 0
 
     # Send CAN commands
     can_sends = []
