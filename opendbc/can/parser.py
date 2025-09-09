@@ -47,7 +47,7 @@ class MessageState:
 
   def rate_limited_log(self, last_update_nanos, msg: str) -> None:
     if (last_update_nanos - self.last_warning_log_nanos) >= 1_000_000_000:
-      carlog.warning(f"CANParser MessageState: {hex(self.address)} {self.name} {msg}")
+      carlog.warning(f"CANParser: {hex(self.address)} {self.name} {msg}")
       self.last_warning_log_nanos = last_update_nanos
 
   def parse(self, nanos: int, dat: bytes) -> bool:
