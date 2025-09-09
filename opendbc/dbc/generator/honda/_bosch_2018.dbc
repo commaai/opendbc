@@ -6,7 +6,7 @@ BO_ 148 KINEMATICS: 8 XXX
 
 BO_ 228 STEERING_CONTROL: 5 EON
  SG_ STEER_TORQUE : 7|16@0- (1,0) [-4096|4096] "" EPS
- SG_ SET_ME_X00 : 22|7@0+ (1,0) [0|127] "" EPS
+ SG_ DRIVER_OVERRIDE : 17|1@0+ (1,0) [0|1] "" XXX
  SG_ STEER_TORQUE_REQUEST : 23|1@0+ (1,0) [0|1] "" EPS
  SG_ CONTROL_STATE : 26|3@0+ (1,0) [0|7] "" XXX
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" EPS
@@ -210,6 +210,7 @@ BO_ 13275 LKAS_HUD_B: 8 ADAS
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
 
+CM_ SG_ 228 DRIVER_OVERRIDE "Appears to acknowledge STEER_STATUS.NO_TORQUE_ALERT_1";
 CM_ SG_ 576 LINE_DISTANCE_VISIBLE "Length of line visible, undecoded";
 CM_ SG_ 577 LINE_FAR_EDGE_POSITION "Appears to be a measure of line thickness, indicates location of the portion of the line furthest from the car, undecoded";
 CM_ SG_ 577 LINE_PARAMETER "Unclear if this is low quality line curvature rate or if this is something else, but it is correlated with line curvature, undecoded";
