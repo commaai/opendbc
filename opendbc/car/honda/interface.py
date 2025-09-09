@@ -181,7 +181,7 @@ class CarInterface(CarInterfaceBase):
       # Stock camera sends up to 2560 during LKA operation and up to 3840 during RDM operation
       # Steer motor torque does rise a little above 2560, but not linearly, RDM also applies one-sided brake drag
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560, 3072], [0, 2560, 3840]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[1.0], [0.10]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.10]]
       ret.steerActuatorDelay = 0.15
       CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 2000]
       if not ret.openpilotLongitudinalControl:
