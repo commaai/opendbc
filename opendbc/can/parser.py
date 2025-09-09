@@ -201,7 +201,6 @@ class CANParser:
     valid = True
     counters_valid = True
     bus_timeout = self.bus_timeout
-
     for state in self.message_states.values():
       if state.counter_fail >= MAX_BAD_COUNTER:
         counters_valid = False
