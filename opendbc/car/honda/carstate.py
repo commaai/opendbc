@@ -5,7 +5,7 @@ from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus
-from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_CANFD, \
+from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_ALT_RADAR, HONDA_BOSCH_CANFD, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
                                                  HondaFlags, CruiseButtons, CruiseSettings, GearShifter
 from opendbc.car.interfaces import CarStateBase
@@ -29,16 +29,19 @@ class CarState(CarStateBase):
         self.gearbox_msg = "GEARBOX_CVT"
       self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
 
-    self.main_on_sig_msg = "SCM_FEEDBACK"
+    self.car_state_scm_msg = "SCM_FEEDBACK"
     if CP.carFingerprint in HONDA_NIDEC_ALT_SCM_MESSAGES:
-      self.main_on_sig_msg = "SCM_BUTTONS"
+      self.car_state_scm_msg = "SCM_BUTTONS"
+
+    self.brake_error_msg = "HYBRID_BRAKE_ERROR" if CP.flags & HondaFlags.HYBRID else "STANDSTILL"
 
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
 
     self.brake_switch_prev = False
     self.brake_switch_active = False
+    self.low_speed_alert = False
 
-    self.dynamic_v_cruise_units = self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD)
+    self.dynamic_v_cruise_units = self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_ALT_RADAR | HONDA_BOSCH_CANFD)
     self.cruise_setting = 0
     self.v_cruise_pcm_prev = 0
 
@@ -87,17 +90,19 @@ class CarState(CarStateBase):
 
     steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
-    # LOW_SPEED_LOCKOUT is not worth a warning
-    # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
-    ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
+    if self.CP.carFingerprint in HONDA_BOSCH_ALT_RADAR:
+      # Other states cause a lockout no-steer period
+      ret.steerFaultTemporary = (steer_status != "NORMAL")
+    else:
+      # LOW_SPEED_LOCKOUT is not worth a warning
+      # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
+      ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
 
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
     else:
-      # On some cars, these two signals are always 1, this flag is masking a bug in release
-      # FIXME: find and set the ACC faulted signals on more platforms
       if self.CP.openpilotLongitudinalControl:
-        ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
+        ret.accFaulted = bool(cp.vl[self.brake_error_msg]["BRAKE_ERROR_1"] or cp.vl[self.brake_error_msg]["BRAKE_ERROR_2"])
 
       # Log non-critical stock ACC/LKAS faults if Nidec (camera)
       if self.CP.carFingerprint not in HONDA_BOSCH:
@@ -122,9 +127,7 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(
       250, cp.vl["SCM_FEEDBACK"]["LEFT_BLINKER"], cp.vl["SCM_FEEDBACK"]["RIGHT_BLINKER"])
     ret.brakeHoldActive = cp.vl["VSA_STATUS"]["BRAKE_HOLD_ACTIVE"] == 1
-
-    if self.CP.flags & HondaFlags.HAS_EPB:
-      ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
+    ret.parkingBrake = bool(cp.vl[self.car_state_scm_msg]["PARKING_BRAKE_ON"])
 
     if self.CP.transmissionType == TransmissionType.manual:
       ret.gearShifter = GearShifter.reverse if bool(cp.vl["SCM_FEEDBACK"]["REVERSE_LIGHT"]) else GearShifter.drive
@@ -171,7 +174,18 @@ class CarState(CarStateBase):
 
     ret.brake = cp.vl["VSA_STATUS"]["USER_BRAKE"]
     ret.cruiseState.enabled = cp.vl["POWERTRAIN_DATA"]["ACC_STATUS"] != 0
-    ret.cruiseState.available = bool(cp.vl[self.main_on_sig_msg]["MAIN_ON"])
+    ret.cruiseState.available = bool(cp.vl[self.car_state_scm_msg]["MAIN_ON"])
+
+    # Low speed steer alert hysteresis logic
+    # All Honda EPS cut off slightly above standstill; don't alert under 3mph
+    # TODO: verify actual above-standstill cutoff speed, it's almost certainly metric
+    # TODO: handle asymmetric enable/disable speeds
+    # TODO: nerf the HUD steering-required VisualAlert because it's continuous and obnoxious
+    if 3 * CV.MPH_TO_MS < ret.vEgo < (self.CP.minSteerSpeed + 1.):
+      self.low_speed_alert = True
+    elif ret.standstill or ret.vEgo > (self.CP.minSteerSpeed + 2.):
+      self.low_speed_alert = False
+    ret.lowSpeedAlert = self.low_speed_alert
 
     # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):

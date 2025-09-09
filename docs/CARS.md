@@ -284,7 +284,7 @@
 |Tesla|Model 3 (with HW4) 2024-25|All|[Upstream](#upstream)|
 |Tesla|Model X (with HW4) 2024|All|[Dashcam mode](#dashcam)|
 |Tesla|Model Y (with HW3) 2020-23|All|[Upstream](#upstream)|
-|Tesla|Model Y (with HW4) 2024|All|[Upstream](#upstream)|
+|Tesla|Model Y (with HW4) 2024-25|All|[Upstream](#upstream)|
 |Toyota|Alphard 2019-20|All|[Upstream](#upstream)|
 |Toyota|Alphard Hybrid 2021|All|[Upstream](#upstream)|
 |Toyota|Avalon 2016|Toyota Safety Sense P|[Upstream](#upstream)|
@@ -422,9 +422,8 @@ Supported Models' section of each make [on our wiki](https://wiki.comma.ai/).
 
 Some notable works-in-progress:
 * Honda
-  * 2025 Acura MDX (CAN-FD), commaai/opendbc#2129
-  * 2022-25 Acura RDX, commaai/opendbc#1967
-  * 2021-25 Honda Odyssey, commaai/opendbc#2170
+  * 2022-24 Acura RDX, commaai/opendbc#1967
+  * 2021-25 Honda Odyssey, commaai/opendbc#2488
   * Camera ACC stability improvements, commaai/opendbc#2192
   * Alpha longitudinal stability improvements, commaai/opendbc#2347 and commaai/opendbc#2165
 
