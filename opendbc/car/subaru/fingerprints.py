@@ -58,6 +58,7 @@ FW_VERSIONS = {
       b'\xa1  \x03\x02',
       b'\xa1  \x03\x03',
       b'\xa1  \x04\x01',
+      b'\xa1  \x04\x02',
     ],
     (Ecu.eps, 0x746, None): [
       b'\x9b\xc0\x11\x00',
@@ -71,6 +72,7 @@ FW_VERSIONS = {
       b'\xde"a0\x07',
       b'\xde,\xa0@\x07',
       b'\xe2"a0\x07',
+      b'\xe2"ap\x07',
       b'\xe2"aq\x07',
       b'\xe2,\xa0@\x07',
     ],
@@ -194,6 +196,7 @@ FW_VERSIONS = {
       b'\xca!`0\x07',
       b'\xca!`p\x07',
       b'\xca!`t\x07',
+      b'\xca!a0\x07',
       b'\xca!ap\x07',
       b'\xca!f@\x07',
       b'\xca!fp\x07',
