@@ -38,6 +38,7 @@ class CarControllerParams:
   STEER_STEP = 1  # 100 Hz
   STEER_DELTA_UP = 3  # min/max in 0.33s for all Honda
   STEER_DELTA_DOWN = 3
+  STEER_GLOBAL_MIN_SPEED = 0.85  # m/s, ~3 km/h, wheel speed sensors drop out at 2 km/h
 
   def __init__(self, CP):
     self.STEER_MAX = CP.lateralParams.torqueBP[-1]

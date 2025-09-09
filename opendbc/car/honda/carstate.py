@@ -7,7 +7,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_ALT_RADAR, HONDA_BOSCH_CANFD, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
-                                                 HondaFlags, CruiseButtons, CruiseSettings, GearShifter
+                                                 HondaFlags, CruiseButtons, CruiseSettings, GearShifter, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -177,10 +177,9 @@ class CarState(CarStateBase):
     ret.cruiseState.available = bool(cp.vl[self.car_state_scm_msg]["MAIN_ON"])
 
     # Low speed steer alert hysteresis logic
-    # All Honda EPS cut off slightly above standstill; don't alert under 3mph
-    # TODO: verify actual above-standstill cutoff speed, it's almost certainly metric
+    # All Honda EPS cut off slightly above standstill, some cut off much higher
     # TODO: handle asymmetric enable/disable speeds
-    if 3 * CV.MPH_TO_MS < ret.vEgo < (self.CP.minSteerSpeed + 0.5):
+    if CarControllerParams.STEER_GLOBAL_MIN_SPEED < ret.vEgo < (self.CP.minSteerSpeed + 0.5):
       self.low_speed_alert = True
     elif ret.standstill or ret.vEgo > (self.CP.minSteerSpeed + 1.):
       self.low_speed_alert = False
