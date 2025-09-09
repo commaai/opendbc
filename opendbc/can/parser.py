@@ -204,7 +204,7 @@ class CANParser:
     for state in self.message_states.values():
       if state.counter_fail >= MAX_BAD_COUNTER:
         counters_valid = False
-        state.rate_limited_log(self._last_update_nanos, f"counter_fail >= {MAX_BAD_COUNTER}")
+        state.rate_limited_log(self._last_update_nanos, f"counter invalid, {state.counter_fail=} {MAX_BAD_COUNTER=}")
       if not state.valid(self._last_update_nanos, bus_timeout):
         valid = False
         state.rate_limited_log(self._last_update_nanos, "not valid (timeout or missing)")
