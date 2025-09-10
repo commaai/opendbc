@@ -182,7 +182,7 @@ class CarInterface(CarInterfaceBase):
       # Steer motor torque does rise a little above 2560, but not linearly, RDM also applies one-sided brake drag
       #ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560, 3072], [0, 2560, 3840]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[1.0], [0.10]]
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
       ret.steerActuatorDelay = 0.15
       CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 2000]
       if not ret.openpilotLongitudinalControl:
