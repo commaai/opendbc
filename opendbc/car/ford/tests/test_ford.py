@@ -1,13 +1,6 @@
 import random
-from collections.abc import Iterable
-
-from hypothesis import settings, given, strategies as st
-from parameterized import parameterized
 
 from opendbc.car.structs import CarParams
-from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes
-from opendbc.car.ford.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
 
@@ -42,39 +35,50 @@ ECU_PART_NUMBER = {
 
 class TestFordFW:
   def test_fw_query_config(self):
+    from opendbc.car.ford.values import FW_QUERY_CONFIG
     for (ecu, addr, subaddr) in FW_QUERY_CONFIG.extra_ecus:
       assert ecu in ECU_ADDRESSES, "Unknown ECU"
       assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
       assert subaddr is None, "Unexpected ECU subaddress"
 
-  @parameterized.expand(FW_VERSIONS.items())
-  def test_fw_versions(self, car_model: str, fw_versions: dict[tuple[int, int, int | None], Iterable[bytes]]):
-    for (ecu, addr, subaddr), fws in fw_versions.items():
-      assert ecu in ECU_PART_NUMBER, "Unexpected ECU"
-      assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
-      assert subaddr is None, "Unexpected ECU subaddress"
+  def test_fw_versions(self):
+    from opendbc.car.ford.values import FW_PATTERN, get_platform_codes
+    from opendbc.car.ford.fingerprints import FW_VERSIONS
 
-      for fw in fws:
-        assert len(fw) == 24, "Expected ECU response to be 24 bytes"
+    for _car_model, fw_versions in FW_VERSIONS.items():
+      for (ecu, addr, subaddr), fws in fw_versions.items():
+        assert ecu in ECU_PART_NUMBER, "Unexpected ECU"
+        assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
+        assert subaddr is None, "Unexpected ECU subaddress"
 
-        match = FW_PATTERN.match(fw)
-        assert match is not None, f"Unable to parse FW: {fw!r}"
-        if match:
-          part_number = match.group("part_number")
-          assert part_number in ECU_PART_NUMBER[ecu], f"Unexpected part number for {fw!r}"
+        for fw in fws:
+          assert len(fw) == 24, "Expected ECU response to be 24 bytes"
 
-        codes = get_platform_codes([fw])
-        assert 1 == len(codes), f"Unable to parse FW: {fw!r}"
+          match = FW_PATTERN.match(fw)
+          assert match is not None, f"Unable to parse FW: {fw!r}"
+          if match:
+            part_number = match.group("part_number")
+            assert part_number in ECU_PART_NUMBER[ecu], f"Unexpected part number for {fw!r}"
 
-  @settings(max_examples=100)
-  @given(data=st.data())
-  def test_platform_codes_fuzzy_fw(self, data):
+          codes = get_platform_codes([fw])
+          assert 1 == len(codes), f"Unable to parse FW: {fw!r}"
+
+  def test_platform_codes_fuzzy_fw(self):
     """Ensure function doesn't raise an exception"""
-    fw_strategy = st.lists(st.binary())
-    fws = data.draw(fw_strategy)
-    get_platform_codes(fws)
+    from hypothesis import settings, given, strategies as st
+
+    @settings(max_examples=100)
+    @given(data=st.data())
+    def _test_impl(data):
+      from opendbc.car.ford.values import get_platform_codes
+      fw_strategy = st.lists(st.binary())
+      fws = data.draw(fw_strategy)
+      get_platform_codes(fws)
+
+    _test_impl()
 
   def test_platform_codes_spot_check(self):
+    from opendbc.car.ford.values import get_platform_codes
     # Asserts basic platform code parsing behavior for a few cases
     results = get_platform_codes([
       b"JX6A-14C204-BPL\x00\x00\x00\x00\x00\x00\x00\x00\x00",
@@ -85,6 +89,10 @@ class TestFordFW:
     assert results == {(b"X6A", b"J"), (b"Z6T", b"N"), (b"J6T", b"P"), (b"B5A", b"L")}
 
   def test_fuzzy_match(self):
+    from opendbc.car.ford.values import FW_QUERY_CONFIG
+    from opendbc.car.fw_versions import build_fw_dict
+    from opendbc.car.ford.fingerprints import FW_VERSIONS
+
     for platform, fw_by_addr in FW_VERSIONS.items():
       # Ensure there's no overlaps in platform codes
       for _ in range(20):
@@ -100,6 +108,7 @@ class TestFordFW:
         assert matches == {platform}
 
   def test_match_fw_fuzzy(self):
+    from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG
     offline_fw = {
       (Ecu.eps, 0x730, None): [
         b"L1MC-14D003-AJ\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",

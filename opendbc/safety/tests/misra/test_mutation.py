@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import glob
-import pytest
 import shutil
 import subprocess
 import tempfile
@@ -16,12 +15,7 @@ IGNORED_PATHS = (
   'opendbc/safety/board/',
 )
 
-mutations = [
-  # no mutation, should pass
-  (None, None, lambda s: s, False),
-]
-
-patterns = [
+PATTERNS = [
   ("misra-c2012-10.3", lambda s: s + "\nvoid test(float len) { for (float j = 0; j < len; j++) {;} }\n"),
   ("misra-c2012-13.3", lambda s: s + "\nvoid test(int tmp) { int tmp2 = tmp++ + 2; if (tmp2) {;}}\n"),
   ("misra-c2012-13.4", lambda s: s + "\nint test(int x, int y) { return (x=2) && (y=2); }\n"),
@@ -34,18 +28,9 @@ patterns = [
   ("misra-c2012-20.5", lambda s: s + "\n#define TEST 1\n#undef TEST\n"),
 ]
 
-all_files = glob.glob('opendbc/safety/**', root_dir=ROOT, recursive=True)
-files = [f for f in all_files if f.endswith(('.c', '.h')) and not f.startswith(IGNORED_PATHS)]
-assert len(files) > 20, files
 
-for p in patterns:
-  mutations.append((random.choice(files), *p, True))
-
-mutations = random.sample(mutations, 2)  # can remove this once cppcheck is faster
-
-
-@pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
-def test_misra_mutation(fn, rule, transform, should_fail):
+def run_misra_test(fn, rule, transform, should_fail):
+  """Helper function to run a single MISRA test mutation."""
   with tempfile.TemporaryDirectory() as tmp:
     shutil.copytree(ROOT, tmp, dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns('.venv', 'cppcheck', '.git', '*.ctu-info', '.hypothesis'))
@@ -65,3 +50,25 @@ def test_misra_mutation(fn, rule, transform, should_fail):
     assert failed == should_fail
     if should_fail:
       assert rule in r.stdout, "MISRA test failed but not for the correct violation"
+
+
+def test_misra_mutation():
+  """Test MISRA violations using mutations."""
+  mutations = [
+    # no mutation, should pass
+    (None, None, lambda s: s, False),
+  ]
+
+  all_files = glob.glob('opendbc/safety/**', root_dir=ROOT, recursive=True)
+  files = [f for f in all_files if f.endswith(('.c', '.h')) and not f.startswith(IGNORED_PATHS)]
+  assert len(files) > 20, files
+
+  for p in PATTERNS:
+    mutations.append((random.choice(files), *p, True))
+
+  # can remove this once cppcheck is faster
+  mutations = random.sample(mutations, 2)
+
+  for fn, rule, transform, should_fail in mutations:
+    print(f"Testing mutation: {rule if rule else 'no mutation'} on file: {fn if fn else 'none'}")
+    run_misra_test(fn, rule, transform, should_fail)

@@ -1,18 +1,12 @@
-from hypothesis import settings, given, strategies as st
-
 import pytest
 
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
-from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
                                          HYBRID_CAR, EV_CAR, FW_QUERY_CONFIG, LEGACY_SAFETY_MODE_CAR, CANFD_FUZZY_WHITELIST, \
                                          UNSUPPORTED_LONGITUDINAL_CAR, PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
                                          HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
-from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
 
@@ -45,6 +39,8 @@ CANFD_EXPECTED_ECUS = {Ecu.fwdCamera, Ecu.fwdRadar}
 
 class TestHyundaiFingerprint:
   def test_feature_detection(self):
+    from opendbc.car.hyundai.interface import CarInterface
+    from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
     # LKA steering
     for lka_steering in (True, False):
       fingerprint = gen_empty_fingerprint()
@@ -63,6 +59,8 @@ class TestHyundaiFingerprint:
       assert CP.radarUnavailable != radar
 
   def test_alternate_limits(self):
+    from opendbc.car.hyundai.interface import CarInterface
+
     # Alternate lateral control limits, for high torque cars, verify Panda safety mode flag is set
     fingerprint = gen_empty_fingerprint()
     for car_model in CAR:
@@ -83,6 +81,8 @@ class TestHyundaiFingerprint:
     assert CANFD_CAR & HYBRID_CAR == set(), "Hard coding CAN FD cars as hybrid is no longer supported"
 
   def test_canfd_ecu_whitelist(self):
+    from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+
     # Asserts only expected Ecus can exist in database for CAN-FD cars
     for car_model in CANFD_CAR:
       ecus = {fw[0] for fw in FW_VERSIONS[car_model].keys()}
@@ -92,6 +92,8 @@ class TestHyundaiFingerprint:
                        f"{car_model}: Car model has unexpected ECUs: {ecu_strings}"
 
   def test_blacklisted_parts(self, subtests):
+    from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+
     # Asserts no ECUs known to be shared across platforms exist in the database.
     # Tucson having Santa Cruz camera and EPS for example
     for car_model, ecus in FW_VERSIONS.items():
@@ -106,6 +108,8 @@ class TestHyundaiFingerprint:
           assert not part.startswith(b'CW'), "Car has bad part number"
 
   def test_correct_ecu_response_database(self, subtests):
+    from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+
     """
     Assert standard responses for certain ECUs, since they can
     respond to multiple queries with different data
@@ -117,15 +121,22 @@ class TestHyundaiFingerprint:
           assert all(fw.startswith(expected_fw_prefix) for fw in fws), \
                           f"FW from unexpected request in database: {(ecu, fws)}"
 
-  @settings(max_examples=100)
-  @given(data=st.data())
-  def test_platform_codes_fuzzy_fw(self, data):
+  def test_platform_codes_fuzzy_fw(self):
+    from hypothesis import settings, given, strategies as st
+
     """Ensure function doesn't raise an exception"""
-    fw_strategy = st.lists(st.binary())
-    fws = data.draw(fw_strategy)
-    get_platform_codes(fws)
+    @settings(max_examples=100)
+    @given(data=st.data())
+    def _test_impl(data):
+      fw_strategy = st.lists(st.binary())
+      fws = data.draw(fw_strategy)
+      get_platform_codes(fws)
+
+    _test_impl()
 
   def test_expected_platform_codes(self, subtests):
+    from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+
     # Ensures we don't accidentally add multiple platform codes for a car unless it is intentional
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
@@ -145,6 +156,8 @@ class TestHyundaiFingerprint:
   # Tests for platform codes, part numbers, and FW dates which Hyundai will use to fuzzy
   # fingerprint in the absence of full FW matches:
   def test_platform_code_ecus_available(self, subtests):
+    from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+
     # TODO: add queries for these non-CAN FD cars to get EPS
     no_eps_platforms = CANFD_CAR | {CAR.KIA_SORENTO, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL, CAR.KIA_OPTIMA_H,
                                     CAR.KIA_OPTIMA_H_G4_FL, CAR.HYUNDAI_SONATA_LF, CAR.HYUNDAI_TUCSON, CAR.GENESIS_G90, CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA}
@@ -160,6 +173,8 @@ class TestHyundaiFingerprint:
           assert platform_code_ecu in [e[0] for e in ecus]
 
   def test_fw_format(self, subtests):
+    from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+
     # Asserts:
     # - every supported ECU FW version returns one platform code
     # - every supported ECU FW version has a part number
@@ -219,6 +234,9 @@ class TestHyundaiFingerprint:
                                (b"ON-S9100", b"190405"), (b"ON-S9100", b"190720")}
 
   def test_fuzzy_excluded_platforms(self):
+    from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+    from opendbc.car.fw_versions import build_fw_dict
+
     # Asserts a list of platforms that will not fuzzy fingerprint with platform codes due to them being shared.
     # This list can be shrunk as we combine platforms and detect features
     excluded_platforms = {
