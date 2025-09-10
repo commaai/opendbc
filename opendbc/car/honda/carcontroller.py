@@ -15,31 +15,29 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 MAX_PITCH_COMPENSATION = 1.5  # m/s^2
 
 
-def compute_gb_honda_bosch(accel, pitch):
-  accel_from_gravity = math.sin(pitch) * ACCELERATION_DUE_TO_GRAVITY
-  pitch_compensation = float(np.clip(accel_from_gravity, -MAX_PITCH_COMPENSATION, MAX_PITCH_COMPENSATION))
+def compute_gb_honda_bosch(accel, pitch_compensation):
   net_accel_for_gas = accel + pitch_compensation
   return net_accel_for_gas, 0.0
 
 
-def compute_gb_honda_nidec(accel, speed):
+def compute_gb_honda_nidec(accel, speed, pitch_compensation):
   creep_brake = 0.0
   creep_speed = 2.3
   creep_brake_value = 0.15
   if speed < creep_speed:
     creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
-  accel_from_gravity = math.sin(pitch) * ACCELERATION_DUE_TO_GRAVITY
-  pitch_compensation = float(np.clip(accel_from_gravity, -MAX_PITCH_COMPENSATION, MAX_PITCH_COMPENSATION))
   net_accel = accel + pitch_compensation
   gb = float(net_accel) / 4.8 - creep_brake
   return np.clip(gb, 0.0, 1.0), np.clip(-gb, 0.0, 1.0)
 
 
 def compute_gas_brake(accel, pitch, speed, fingerprint):
+  accel_from_gravity = math.sin(pitch) * ACCELERATION_DUE_TO_GRAVITY
+  pitch_compensation = float(np.clip(accel_from_gravity, -MAX_PITCH_COMPENSATION, MAX_PITCH_COMPENSATION))
   if fingerprint in HONDA_BOSCH:
-    return compute_gb_honda_bosch(accel, pitch)
+    return compute_gb_honda_bosch(accel, pitch_compensation)
   else:
-    return compute_gb_honda_nidec(accel, speed)
+    return compute_gb_honda_nidec(accel, speed, pitch_compensation)
 
 
 # TODO not clear this does anything useful
