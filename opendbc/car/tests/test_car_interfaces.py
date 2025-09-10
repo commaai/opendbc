@@ -6,11 +6,11 @@ from hypothesis import Phase, given, settings
 from collections.abc import Callable
 from typing import Any
 
-from opendbc.car import DT_CTRL, CanData, gen_empty_fingerprint, structs
+from opendbc.car import DT_CTRL, CanData, structs
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import FW_QUERY_CONFIGS
-from opendbc.car.interfaces import get_interface_attr
+from opendbc.car.interfaces import CarInterfaceBase, get_interface_attr
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.values import PLATFORMS
 
@@ -21,17 +21,23 @@ ALL_ECUS |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra
 
 ALL_REQUESTS = {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r in config.requests}
 
+# From panda/python/__init__.py
+DLC_TO_LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]
+
 MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
 
-def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
+def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
   # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
-  fingerprint_strategy = st.fixed_dictionaries({key: st.dictionaries(st.integers(min_value=0, max_value=0x800),
-                                                                     st.integers(min_value=0, max_value=64)) for key in
-                                                gen_empty_fingerprint()})
+  fingerprint_strategy = st.fixed_dictionaries({0: st.dictionaries(st.integers(min_value=0, max_value=0x800),
+                                                                   st.sampled_from(DLC_TO_LEN))})
 
   # only pick from possible ecus to reduce search space
-  car_fw_strategy = st.lists(st.sampled_from(sorted(ALL_ECUS)))
+  car_fw_strategy = st.lists(st.builds(
+    lambda fw, req: structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0, request=req),
+    st.sampled_from(sorted(ALL_ECUS)),
+    st.sampled_from(sorted(ALL_REQUESTS)),
+  ))
 
   params_strategy = st.fixed_dictionaries({
     'fingerprints': fingerprint_strategy,
@@ -40,10 +46,14 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   })
 
   params: dict = draw(params_strategy)
-  params['car_fw'] = [structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0,
-                                              request=draw(st.sampled_from(sorted(ALL_REQUESTS))))
-                      for fw in params['car_fw']]
-  return params
+  # reduce search space by duplicating CAN fingerprints across all buses
+  params['fingerprints'] |= {key + 1: params['fingerprints'][0] for key in range(6)}
+
+  # initialize car interface
+  CarInterface = interfaces[car_name]
+  car_params = CarInterface.get_params(car_name, params['fingerprints'], params['car_fw'],
+                                       alpha_long=params['alpha_long'], is_release=False, docs=False)
+  return CarInterface(car_params)
 
 
 class TestCarInterfaces:
@@ -54,15 +64,8 @@ class TestCarInterfaces:
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
   def test_car_interfaces(self, car_name, data):
-    CarInterface = interfaces[car_name]
-
-    args = get_fuzzy_car_interface_args(data.draw)
-
-    car_params = CarInterface.get_params(car_name, args['fingerprints'], args['car_fw'],
-                                         alpha_long=args['alpha_long'], docs=False)
-    car_interface = CarInterface(car_params)
-    assert car_params
-    assert car_interface
+    car_interface = get_fuzzy_car_interface(car_name, data.draw)
+    car_params = car_interface.CP.as_reader()
 
     assert car_params.mass > 1
     assert car_params.wheelbase > 0
@@ -107,7 +110,7 @@ class TestCarInterfaces:
       now_nanos += DT_CTRL * 1e9  # 10ms
 
     # Test radar interface
-    radar_interface = CarInterface.RadarInterface(car_params)
+    radar_interface = car_interface.RadarInterface(car_params)
     assert radar_interface
 
     # Run radar interface once
