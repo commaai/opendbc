@@ -50,15 +50,15 @@ class RadarInterface(RadarInterfaceBase):
     for addr in range(RADAR_START_ADDR, RADAR_START_ADDR + RADAR_MSG_COUNT):
       msg = self.rcp.vl[f"RADAR_TRACK_{addr:x}"]
 
-      if addr not in self.pts:
-        self.pts[addr] = structs.RadarData.RadarPoint()
-        self.pts[addr].trackId = self.track_id
-        self.track_id += 1
+      valid_state = msg['STATE'] != 0  # 0: Empty
+      if valid_state:
+        if addr not in self.pts or msg['STATE'] == 1:  # 1: New
+          self.pts[addr] = structs.RadarData.RadarPoint()
+          self.pts[addr].trackId = self.track_id
+          self.track_id += 1
 
-      valid = msg['STATE'] in (3, 4) and msg['STATE_2'] == 1
-      if valid:
         azimuth = math.radians(msg['AZIMUTH'])
-        self.pts[addr].measured = True
+        self.pts[addr].measured = msg['MODE'] in (1, 2, 3)  # 1: SRR 2: LRR 3: SRR_and_LRR
         self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST']
         self.pts[addr].yRel = 0.5 * -math.sin(azimuth) * msg['LONG_DIST']
         self.pts[addr].vRel = msg['REL_SPEED']
@@ -66,7 +66,8 @@ class RadarInterface(RadarInterfaceBase):
         self.pts[addr].yvRel = float('nan')
 
       else:
-        del self.pts[addr]
+        if addr in self.pts:
+          del self.pts[addr]
 
     ret.points = list(self.pts.values())
     return ret
