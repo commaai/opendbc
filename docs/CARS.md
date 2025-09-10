@@ -92,7 +92,7 @@
 |Honda|Civic Hatchback 2017-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2019-21|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2022-24|All|[Upstream](#upstream)|
-|Honda|Civic Hatchback Hybrid 2025|All|[Upstream](#upstream)|
+|Honda|Civic Hatchback Hybrid 2025-26|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback Hybrid (Europe only) 2023|All|[Upstream](#upstream)|
 |Honda|Civic Hybrid 2025|All|[Upstream](#upstream)|
 |Honda|Clarity 2018-21|All|[Community](#community)|
