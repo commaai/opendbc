@@ -96,15 +96,24 @@ class CarState(CarStateBase):
     steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     if self.CP.carFingerprint in HONDA_BOSCH_ALT_RADAR:
-      # TODO: See if this logic works for all cars
-      true_min_steer_speed = max(CarControllerParams.STEER_GLOBAL_MIN_SPEED, self.CP.minSteerSpeed)
-      expected_low_speed_lockout = steer_status == "LOW_SPEED_LOCKOUT" and ret.vEgo < true_min_steer_speed
+      # TODO: See if this logic works for all other Honda
+      min_steer_speed = max(CarControllerParams.STEER_GLOBAL_MIN_SPEED, self.CP.minSteerSpeed)
+      expected_low_speed_lockout = steer_status == "LOW_SPEED_LOCKOUT" and ret.vEgo < min_steer_speed
       ret.steerFaultTemporary = steer_status != "NORMAL" and not expected_low_speed_lockout
     else:
       # LOW_SPEED_LOCKOUT is not worth a warning
       # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
       # FIXME: the stock camera stops steering on NO_TORQUE_ALERT_1
       ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
+
+    # All Honda EPS cut off slightly above standstill, some much higher
+    # Don't alert in the near-standstill range, but alert for per-vehicle configured minimums above that
+    if CarControllerParams.STEER_GLOBAL_MIN_SPEED < ret.vEgo < (self.CP.minSteerSpeed + 0.5):
+      self.low_speed_alert = True
+    elif ret.vEgo > (self.CP.minSteerSpeed + 1.):
+      # TODO: better handle delayed steering enablement on ALT_RADAR cars
+      self.low_speed_alert = False
+    ret.lowSpeedAlert = self.low_speed_alert
 
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
@@ -177,15 +186,6 @@ class CarState(CarStateBase):
     ret.brake = cp.vl["VSA_STATUS"]["USER_BRAKE"]
     ret.cruiseState.enabled = cp.vl["POWERTRAIN_DATA"]["ACC_STATUS"] != 0
     ret.cruiseState.available = bool(cp.vl[self.car_state_scm_msg]["MAIN_ON"])
-
-    # Low speed steer alert hysteresis logic
-    # All Honda EPS cut off slightly above standstill, some cut off much higher
-    # TODO: handle asymmetric enable/disable speeds
-    if CarControllerParams.STEER_GLOBAL_MIN_SPEED < ret.vEgo < (self.CP.minSteerSpeed + 0.5):
-      self.low_speed_alert = True
-    elif ret.standstill or ret.vEgo > (self.CP.minSteerSpeed + 1.):
-      self.low_speed_alert = False
-    ret.lowSpeedAlert = self.low_speed_alert
 
     # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):
