@@ -61,7 +61,7 @@ class CAR(Platforms):
   )
   NISSAN_LEAF = NissanPlatformConfig(
     [NissanCarDocs("Nissan Leaf 2018-23", video="https://youtu.be/vaMbtAh_0cY")],
-    NissanCarSpecs(mass=1610, wheelbase=2.700),
+    NissanCarSpecs(mass=1610, wheelbase=2.700, steer_ratio=17.68),
     {Bus.pt: 'nissan_leaf_2018_generated'},
   )
   # Leaf with ADAS ECU found behind instrument cluster instead of glovebox
