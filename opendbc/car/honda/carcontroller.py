@@ -141,7 +141,7 @@ class CarController(CarControllerBase):
     # duplicate silent_steer_warning logic because result is not exposed to opendbc
     self.steering_unpressed = 0 if CS.steeringPressed else self.steering_unpressed + 1
     if CS.steerFaultTemporary:
-      if CS.out.steeringPressed and (not CS_prev.steerFaultTemporary or self.no_steer_warning):
+      if CS.steeringPressed and (not CS_prev.steerFaultTemporary or self.no_steer_warning):
         self.no_steer_warning = True
       else:
         self.no_steer_warning = False
