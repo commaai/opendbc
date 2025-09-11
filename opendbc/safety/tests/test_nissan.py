@@ -97,6 +97,7 @@ class TestNissanSafetyAltEpsBus(TestNissanSafety):
   CRUISE_BUS = 1
 
   def setUp(self):
+    self.VM = VehicleModel(get_safety_CP("NISSAN_XTRAIL"))
     self.packer = CANPackerPanda("nissan_x_trail_2017_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, NissanSafetyFlags.ALT_EPS_BUS)
@@ -106,6 +107,7 @@ class TestNissanSafetyAltEpsBus(TestNissanSafety):
 class TestNissanLeafSafety(TestNissanSafety):
 
   def setUp(self):
+    self.VM = VehicleModel(get_safety_CP("NISSAN_LEAF"))
     self.packer = CANPackerPanda("nissan_leaf_2018_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
