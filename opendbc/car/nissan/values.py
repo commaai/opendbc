@@ -55,25 +55,42 @@ class NissanPlatformConfig(PlatformConfig):
 
 
 class CAR(Platforms):
+  # Wheelbase validated based off owner's manual, 
+  # Mass based off Nissan spec spreadsheet, averaging MY 2017 4WD curb weight ranges
+  # https://uk.nissannews.com/en-GB/releases/release-576be476b0162b157afef7b4ac01f1be/download
   NISSAN_XTRAIL = NissanPlatformConfig(
     [NissanCarDocs("Nissan X-Trail 2017")],
-    NissanCarSpecs(mass=1610, wheelbase=2.705)
+    NissanCarSpecs(mass=1675, wheelbase=2.705)
   )
+
+  # Wheelbase validated based off owner's manual, mass based off spec sheet for MY 2018
+  # https://www.nissanusa.com/content/dam/Nissan/us/vehicle-brochures/2018/2018-leaf-brochure-en.pdf
   NISSAN_LEAF = NissanPlatformConfig(
     [NissanCarDocs("Nissan Leaf 2018-23", video="https://youtu.be/vaMbtAh_0cY")],
-    NissanCarSpecs(mass=1610, wheelbase=2.700, steer_ratio=17.68),
+    NissanCarSpecs(mass=1594, wheelbase=2.700, steer_ratio=17.68, centerToFrontRatio=0.51),
     {Bus.pt: 'nissan_leaf_2018_generated'},
   )
+
   # Leaf with ADAS ECU found behind instrument cluster instead of glovebox
   # Currently the only known difference between them is the inverted seatbelt signal.
   NISSAN_LEAF_IC = NISSAN_LEAF.override(car_docs=[])
+
+  # Wheelbase validated based off owner's manual
+  # Mass based off Nissan spec sheet, averaging MY 2018 SL FWD and AWD curb weights
+  # centerToFrontRatio calculated from averaged MY 2018 SL FWD and AWD curb front and rear axle weights
+  # https://usa.nissannews.com/en-US/releases/us-2018-nissan-rogue-press-kit
   NISSAN_ROGUE = NissanPlatformConfig(
     [NissanCarDocs("Nissan Rogue 2018-20")],
-    NissanCarSpecs(mass=1610, wheelbase=2.705)
+    NissanCarSpecs(mass=1632, wheelbase=2.706, centerToFrontRatio=0.57)
   )
+
+  # Wheelbase validated based off owner's manual
+  # Mass based off spec sheet for MY 2019
+  # centerToFrontRatio calculated from curb front and rear axle weights
+  # https://usa.nissannews.com/en-US/releases/2019-nissan-altima-specifications
   NISSAN_ALTIMA = NissanPlatformConfig(
     [NissanCarDocs("Nissan Altima 2019-20", car_parts=CarParts.common([CarHarness.nissan_b]))],
-    NissanCarSpecs(mass=1492, wheelbase=2.824)
+    NissanCarSpecs(mass=1558, wheelbase=2.825, centerToFrontRatio=0.61)
   )
 
 
