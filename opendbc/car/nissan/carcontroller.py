@@ -42,7 +42,7 @@ class CarController(CarControllerBase):
 
     # use vehicle model
     self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
-                                                          lat_active, CarControllerParams, self.VM)
+                                                          CC.latActive, CarControllerParams, self.VM)
 
     lkas_max_torque = 0
     if CC.latActive:
