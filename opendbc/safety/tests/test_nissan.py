@@ -1,22 +1,13 @@
 #!/usr/bin/env python3
 import unittest
-import numpy as np
 
-from opendbc.car.lateral import get_max_angle_vm, get_max_angle_delta_vm
 from opendbc.car.nissan.values import CarControllerParams, NissanSafetyFlags
 from opendbc.car.nissan.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda, away_round, round_speed
-
-
-def round_angle(apply_angle, can_offset=0):
-  apply_angle_can = (apply_angle + 1310) / 0.01 + can_offset
-  # 0.49999_ == 0.5
-  rnd_offset = 1e-5 if apply_angle >= 0 else -1e-5
-  return away_round(apply_angle_can + rnd_offset) * 0.01 - 1310
+from opendbc.safety.tests.common import CANPackerPanda
 
 
 class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
