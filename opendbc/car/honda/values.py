@@ -38,6 +38,7 @@ class CarControllerParams:
   STEER_STEP = 1  # 100 Hz
   STEER_DELTA_UP = 3  # min/max in 0.33s for all Honda
   STEER_DELTA_DOWN = 3
+  STEER_GLOBAL_MIN_SPEED = 3 * CV.MPH_TO_MS
 
   def __init__(self, CP):
     self.STEER_MAX = CP.lateralParams.torqueBP[-1]
@@ -396,7 +397,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
   non_essential_ecus={
     Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_E, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_INSIGHT, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
+              CAR.HONDA_E, CAR.HONDA_INSIGHT, *HONDA_BOSCH_ALT_RADAR, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
