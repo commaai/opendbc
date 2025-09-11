@@ -92,19 +92,6 @@ class CruiseSettings:
   LKAS = 1
 
 
-# See dbc files for info on values
-VISUAL_HUD = {
-  VisualAlert.none: 0,
-  VisualAlert.fcw: 1,
-  VisualAlert.steerRequired: 1,
-  VisualAlert.ldw: 1,
-  VisualAlert.brakePressed: 10,
-  VisualAlert.wrongGear: 6,
-  VisualAlert.seatbeltUnbuckled: 5,
-  VisualAlert.speedTooHigh: 8
-}
-
-
 @dataclass
 class HondaCarDocs(CarDocs):
   package: str = "Honda Sensing"
@@ -204,7 +191,7 @@ class CAR(Platforms):
       HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
       HondaCarDocs("Honda Civic Hatchback Hybrid (Europe only) 2023", "All"),
       # TODO: Confirm 2024
-      HondaCarDocs("Honda Civic Hatchback Hybrid 2025", "All"),
+      HondaCarDocs("Honda Civic Hatchback Hybrid 2025-26", "All"),
     ],
     HONDA_CIVIC_BOSCH.specs,
     {Bus.pt: 'honda_bosch_radarless_generated'},
