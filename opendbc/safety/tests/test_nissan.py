@@ -9,7 +9,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda, MAX_SPEED_DELTA, MAX_WRONG_COUNTERS, away_round, round_speed
+from opendbc.safety.tests.common import CANPackerPanda, away_round, round_speed
 
 
 def round_angle(apply_angle, can_offset=0):
@@ -127,7 +127,7 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
         # at low speeds max angle is above 360, so adding 1 has no effect
         should_tx = abs(max_angle_raw) >= self.STEER_ANGLE_MAX
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
-  
+
   def test_lateral_jerk_limit(self):
     for speed in np.linspace(0, 40, 100):
       speed = max(speed, 1)
