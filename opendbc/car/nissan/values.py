@@ -33,6 +33,8 @@ class CarControllerParams:
   LKAS_MAX_TORQUE = 1               # A value of 1 is easy to overpower
   STEER_THRESHOLD = 1.0
 
+  STEER_STEP = 1  # 100hz
+
   def __init__(self, CP):
     pass
 
