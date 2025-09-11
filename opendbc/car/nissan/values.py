@@ -64,7 +64,7 @@ class CAR(Platforms):
   )
 
   # Wheelbase validated based off owner's manual
-  # Mass based off spec sheet for MY 2018
+  # Mass based off Nissan press kit for MY 2018
   # centerToFrontRatio calculated from curb front and rear axle weights
   # https://usa.nissannews.com/en-US/releases/us-2018-nissan-leaf-press-kit -> 2018 Nissan LEAF Press Kit Specs.pdf
   NISSAN_LEAF = NissanPlatformConfig(
@@ -78,7 +78,7 @@ class CAR(Platforms):
   NISSAN_LEAF_IC = NISSAN_LEAF.override(car_docs=[])
 
   # Wheelbase validated based off owner's manual
-  # Mass based off Nissan spec sheet, averaging MY 2018 SL FWD and AWD curb weights
+  # Mass based off Nissan press kit, averaging MY 2018 SL FWD and AWD curb weights
   # centerToFrontRatio calculated from averaged MY 2018 SL FWD and AWD curb front and rear axle weights
   # https://usa.nissannews.com/en-US/releases/us-2018-nissan-rogue-press-kit
   NISSAN_ROGUE = NissanPlatformConfig(
@@ -87,7 +87,7 @@ class CAR(Platforms):
   )
 
   # Wheelbase validated based off owner's manual
-  # Mass based off spec sheet for MY 2019
+  # Mass based off Nissan news release for MY 2019
   # centerToFrontRatio calculated from curb front and rear axle weights
   # https://usa.nissannews.com/en-US/releases/2019-nissan-altima-specifications
   NISSAN_ALTIMA = NissanPlatformConfig(
