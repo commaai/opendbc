@@ -1,22 +1,33 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
-from opendbc.car.lateral import AngleSteeringLimits
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
+# Add extra tolerance for average banked road since safety doesn't have the roll
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
 
 class CarControllerParams:
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     # When output steering Angle not within range -1311 and 1310,
-    #   CANPacker packs wrong angle output to be decoded by panda
+    # CANPacker packs wrong angle output to be decoded by panda
     600,  # deg, reasonable limit
-    ([0., 5., 15.], [5., .8, .15]),
-    ([0., 5., 15.], [5., 3.5, 0.4]),
+    # Nissan uses a vehicle model
+    ([], []),
+    ([], []),
+
+    # Vehicle Model Angle Limits
+    # Add extra tolerance for average banked road since safety doesn't have the roll calculation
+    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
+    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^3
+
+    # Limit Angle Rate to both prevent a openpilot fault and for low speed comfort (~12 mph rate down to 0 mph)
+    MAX_ANGLE_RATE=5,  # deg/20ms frame
   )
 
   LKAS_MAX_TORQUE = 1               # A value of 1 is easy to overpower

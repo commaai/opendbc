@@ -7,11 +7,23 @@ from opendbc.car.nissan.values import CAR, CarControllerParams
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
+def get_safety_CP(fingerprint):
+  from opendbc.car.nissan.interface import CarInterface
+  if fingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
+    model = "NISSAN_LEAF"
+  elif fingerprint == CAR.NISSAN_XTRAIL:
+    model = "NISSAN_XTRAIL"
+  elif fingerprint == CAR.NISSAN_ROGUE:
+    model = "NISSAN_ROGUE"
+  elif fingerprint == CAR.NISSAN_ALTIMA:
+    model = "NISSAN_ALTIMA"
+  return CarInterface.get_non_essential_params(model)
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.car_fingerprint = CP.carFingerprint
+    self.VM = VehicleModel(get_safety_CP(CP.carFingerprint))
 
     self.apply_angle_last = 0
 
@@ -27,9 +39,9 @@ class CarController(CarControllerBase):
     ### STEER ###
     steer_hud_alert = 1 if hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw) else 0
 
-    # windup slower
-    self.apply_angle_last = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                         CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
+    # use vehicle model
+    self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
+                                                          lat_active, CarControllerParams, self.VM)
 
     lkas_max_torque = 0
     if CC.latActive:
