@@ -567,21 +567,26 @@ FW_VERSIONS = {
       b'36802-THR-A220\x00\x00',
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'36161-THR-A220\x00\x00',
       b'36161-THR-A230\x00\x00',
     ],
     (Ecu.shiftByWire, 0x18da0bf1, None): [
       b'54008-THR-A310\x00\x00',
     ],
     (Ecu.transmission, 0x18da1ef1, None): [
+      b'28102-5MX-A100\x00\x00',
       b'28102-5MX-A200\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
+      b'77959-THR-A220\x00\x00',
       b'77959-THR-A230\x00\x00',
     ],
     (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
+      b'46114-THR-A530\x00\x00',
       b'46114-THR-A540\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
+      b'38897-THR-A130\x00\x00',
       b'38897-THR-A410\x00\x00',
     ],
     (Ecu.eps, 0x18da30f1, None): [
