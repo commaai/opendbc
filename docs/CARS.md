@@ -92,7 +92,7 @@
 |Honda|Civic Hatchback 2017-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2019-21|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2022-24|All|[Upstream](#upstream)|
-|Honda|Civic Hatchback Hybrid 2025|All|[Upstream](#upstream)|
+|Honda|Civic Hatchback Hybrid 2025-26|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback Hybrid (Europe only) 2023|All|[Upstream](#upstream)|
 |Honda|Civic Hybrid 2025|All|[Upstream](#upstream)|
 |Honda|Clarity 2018-21|All|[Community](#community)|
@@ -284,7 +284,7 @@
 |Tesla|Model 3 (with HW4) 2024-25|All|[Upstream](#upstream)|
 |Tesla|Model X (with HW4) 2024|All|[Dashcam mode](#dashcam)|
 |Tesla|Model Y (with HW3) 2020-23|All|[Upstream](#upstream)|
-|Tesla|Model Y (with HW4) 2024|All|[Upstream](#upstream)|
+|Tesla|Model Y (with HW4) 2024-25|All|[Upstream](#upstream)|
 |Toyota|Alphard 2019-20|All|[Upstream](#upstream)|
 |Toyota|Alphard Hybrid 2021|All|[Upstream](#upstream)|
 |Toyota|Avalon 2016|Toyota Safety Sense P|[Upstream](#upstream)|
