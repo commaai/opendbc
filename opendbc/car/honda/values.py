@@ -36,8 +36,8 @@ class CarControllerParams:
   BOSCH_GAS_LOOKUP_V = [0, 1600]
 
   STEER_STEP = 1  # 100 Hz
-  STEER_DELTA_UP = 3  # min/max in a spicy moment
-  STEER_DELTA_DOWN = 6
+  STEER_DELTA_UP = 3  # min/max in 0.33s for all Honda
+  STEER_DELTA_DOWN = 3
   STEER_GLOBAL_MIN_SPEED = 0.85  # m/s, ~3 km/h, wheel speed sensors drop out at 2 km/h
 
   def __init__(self, CP):
