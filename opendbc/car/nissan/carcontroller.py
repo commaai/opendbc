@@ -8,6 +8,7 @@ from opendbc.car.vehicle_model import VehicleModel
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
+
 def get_safety_CP(fingerprint):
   from opendbc.car.nissan.interface import CarInterface
   if fingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
@@ -19,6 +20,7 @@ def get_safety_CP(fingerprint):
   elif fingerprint == CAR.NISSAN_ALTIMA:
     model = "NISSAN_ALTIMA"
   return CarInterface.get_non_essential_params(model)
+
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
