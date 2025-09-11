@@ -98,6 +98,10 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
     # TODO: Write lateral accel and jerk tests for Nissan
     pass
 
+  def test_angle_cmd_when_disabled(self):
+    # TODO: Write lateral accel and jerk tests for Nissan
+    pass
+
 
 class TestNissanSafetyAltEpsBus(TestNissanSafety):
   """Altima uses different buses"""
