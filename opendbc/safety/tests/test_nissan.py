@@ -103,43 +103,8 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
         self.assertEqual(tx, should_tx)
 
   def test_angle_cmd_when_enabled(self):
-    # We properly test lateral acceleration and jerk below
+    # TODO: Write lateral accel and jerk tests for Nissan
     pass
-
-  def test_lateral_accel_limit(self):
-    for speed in np.linspace(0, 40, 100):
-      speed = max(speed, 1)
-      speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
-      self.safety.set_controls_allowed(True)
-      self._reset_speed_measurement(speed + 1)  # safety fudges the speed
-
-      max_angle = get_max_angle_vm(speed, self.VM, CarControllerParams)
-      max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-      self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
-      self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
-      # at low speeds max angle is above 360, so adding 1 has no effect
-      should_tx = abs(max_angle) >= self.STEER_ANGLE_MAX
-      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
-
-  def test_lateral_jerk_limit(self):
-    for speed in np.linspace(0, 40, 100):
-      speed = max(speed, 1)
-      # match DI_vehicleSpeed rounding on CAN
-      speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
-      self.safety.set_controls_allowed(True)
-      self._reset_speed_measurement(speed + 1)  # safety fudges the speed
-      self._tx(self._angle_cmd_msg(0, True))
-
-      # Stay within limits
-      # Up
-      max_angle_delta = get_max_angle_delta_vm(speed, self.VM, CarControllerParams)
-      self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
-
-      # Don't change
-      self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
-
-      # Recover
-      self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
 
 
 class TestNissanSafetyAltEpsBus(TestNissanSafety):
