@@ -40,6 +40,8 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
   ANGLE_RATE_UP = None # windup limit
   ANGLE_RATE_DOWN = None  # unwind limit
 
+  cnt_angle_cmd = 0
+
   def _get_steer_cmd_angle_max(self, speed):
     return get_max_angle_vm(max(speed, 1), self.VM, CarControllerParams)
 
@@ -50,8 +52,11 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
     self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
     self.safety.init_tests()
 
-  def _angle_cmd_msg(self, angle: float, enabled: bool):
+  def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     values = {"DESIRED_ANGLE": angle, "LKA_ACTIVE": 1 if enabled else 0}
+    if increment_timer:
+      self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      self.__class__.cnt_angle_cmd += 1
     return self.packer.make_can_msg_panda("LKAS", 0, values)
 
   def _angle_meas_msg(self, angle: float):
