@@ -50,7 +50,7 @@ BO_ 256 ACM_Status: 8 ACM
  SG_ ACM_Unkown1 : 18|1@0+ (1,0) [0|1] "" XXX
  SG_ ACM_FeatureStatus : 23|3@0+ (1,0) [0|7] "" EPAS_P,VDM
  SG_ ACM_FaultStatus : 26|3@0+ (1,0) [0|7] "" EPAS_P,VDM
- SG_ ACM_Unkown2 : 41|2@0+ (1,0) [0|3] "" XXX
+ SG_ ACM_FaultSupervisorState : 42|3@0+ (1,0) [0|7] "" ACMB
 
 BO_ 257 ACM_AebRequest: 8 ACM
  SG_ ACM_AebRequest_Checksum : 7|8@0+ (1,0) [0|255] "" ESP,VDM
@@ -806,6 +806,7 @@ VAL_ 64 SAS_Status_Calibrated 0 "SAS_Status_Calibrated_Not_Calibrated" 1 "SAS_St
 VAL_ 64 SAS_StatusQ 0 "SAS_Status_UndefinedDataACCur" 1 "SAS_Status_TmpUnDefinedData" 2 "SAS_Status_DataACCurrentNotWithinSpecification" 3 "SAS_Status_ACCurrentData";
 VAL_ 256 ACM_FeatureStatus 0 "ACM_FeatureStatus_Standby" 1 "ACM_FeatureStatus_Acc" 2 "ACM_FeatureStatus_Hwp" 3 "ACM_FeatureStatus_Uf" 4 "ACM_FeatureStatus_Faulted";
 VAL_ 256 ACM_FaultStatus 0 "ACM_FaultStatus_NoFault" 1 "ACM_FaultStatus_Faulted" 7 "ACM_FaultStatus_Sna";
+VAL_ 256 ACM_FaultSupervisorState 0 "Nominal_Operation" 1 "SS_1" 2 "SS_2" 3 "SS_3" 4 "SS_4" 5 "SS_5" 6 "SS_6" 7 "Reserved";
 VAL_ 257 ACM_StopRequest 0 "ACM_StopRequest_No_Request" 1 "ACM_StopRequest_Request";
 VAL_ 257 ACM_FailInfo 0 "ACM_FailInfo_Normal" 1 "ACM_FailInfo_Temp_Unav_By_Camera" 2 "ACM_FailInfo_Temp_Unav_By_Radar" 3 "ACM_FailInfo_Service_Required";
 VAL_ 257 ACM_DbsLevel 0 "ACM_DbsLevel_No_Activation" 1 "ACM_DbsLevel_Level_1" 2 "ACM_DbsLevel_Level_2" 3 "ACM_DbsLevel_Level_3";
