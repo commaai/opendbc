@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import unittest
+import numpy as np
 
-from opendbc.car.lateral import get_max_angle_vm
+from opendbc.car.lateral import get_max_angle_vm, get_max_angle_delta_vm
 from opendbc.car.nissan.values import CarControllerParams, NissanSafetyFlags
 from opendbc.car.nissan.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
@@ -165,6 +166,7 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
 
         # Recover
         self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
 
 class TestNissanSafetyAltEpsBus(TestNissanSafety):
   """Altima uses different buses"""
