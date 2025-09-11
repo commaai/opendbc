@@ -293,30 +293,30 @@ BO_ 923 DAS_status: 8 PARTY
  SG_ DAS_autopilotState : 0|4@1+ (1,0) [0|15] ""  aps
 
 BO_ 325 ESP_status: 8 PARTY
- SG_ ESP_absBrakeEvent2: 22|2@1+ (1,0) [0|0] "" X
- SG_ ESP_absFaultLamp: 17|1@1+ (1,0) [0|0] "" X
- SG_ ESP_brakeApply: 31|1@1+ (1,0) [0|0] "" X
- SG_ ESP_brakeDiscWipingActive: 28|1@1+ (1,0) [0|0] "" X
- SG_ ESP_brakeLamp: 21|1@1+ (1,0) [0|0] "" X
- SG_ ESP_brakeTorqueTarget: 51|13@1+ (2,0) [0|0] "Nm" X
- SG_ ESP_btcTargetState: 38|2@1+ (1,0) [0|0] "" X
- SG_ ESP_cdpStatus: 34|2@1+ (1,0) [0|0] "" X
- SG_ ESP_driverBrakeApply: 29|2@1+ (1,0) [0|0] "" X
- SG_ ESP_ebdFaultLamp: 16|1@1+ (1,0) [0|0] "" X
- SG_ ESP_ebrStandstillSkid: 48|1@1+ (1,0) [0|0] "" X
- SG_ ESP_ebrStatus: 49|2@1+ (1,0) [0|0] "" X
- SG_ ESP_espFaultLamp: 18|1@1+ (1,0) [0|0] "" X
- SG_ ESP_espLampFlash: 20|1@1+ (1,0) [0|0] "" X
- SG_ ESP_espModeActive: 12|2@1+ (1,0) [0|0] "" X
- SG_ ESP_hydraulicBoostEnabled: 19|1@1+ (1,0) [0|0] "" X
- SG_ ESP_lateralAccelQF: 25|1@1+ (1,0) [0|0] "" X
- SG_ ESP_longitudinalAccelQF: 24|1@1+ (1,0) [0|0] "" X
- SG_ ESP_ptcTargetState: 36|2@1+ (1,0) [0|0] "" X
- SG_ ESP_stabilityControlSts2: 14|2@1+ (1,0) [0|0] "" X
- SG_ ESP_statusChecksum: 0|8@1+ (1,0) [0|0] "" X
- SG_ ESP_statusCounter: 8|4@1+ (1,0) [0|0] "" X
- SG_ ESP_steeringAngleQF: 27|1@1+ (1,0) [0|0] "" X
- SG_ ESP_yawRateQF: 26|1@1+ (1,0) [0|0] "" X
+ SG_ ESP_absBrakeEvent2 : 22|2@1+ (1,0) [0|0] ""  X
+ SG_ ESP_absFaultLamp : 17|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_brakeApply : 31|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_brakeDiscWipingActive : 28|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_brakeLamp : 21|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_brakeTorqueTarget : 51|13@1+ (2,0) [0|0] "Nm"  X
+ SG_ ESP_btcTargetState : 38|2@1+ (1,0) [0|0] ""  X
+ SG_ ESP_cdpStatus : 34|2@1+ (1,0) [0|0] ""  X
+ SG_ ESP_driverBrakeApply : 29|2@1+ (1,0) [0|0] ""  X
+ SG_ ESP_ebdFaultLamp : 16|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_ebrStandstillSkid : 48|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_ebrStatus : 49|2@1+ (1,0) [0|0] ""  X
+ SG_ ESP_espFaultLamp : 18|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_espLampFlash : 20|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_espModeActive : 12|2@1+ (1,0) [0|0] ""  X
+ SG_ ESP_hydraulicBoostEnabled : 19|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_lateralAccelQF : 25|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_longitudinalAccelQF : 24|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_ptcTargetState : 36|2@1+ (1,0) [0|0] ""  X
+ SG_ ESP_stabilityControlSts2 : 14|2@1+ (1,0) [0|0] ""  X
+ SG_ ESP_statusChecksum : 0|8@1+ (1,0) [0|0] ""  X
+ SG_ ESP_statusCounter : 8|4@1+ (1,0) [0|0] ""  X
+ SG_ ESP_steeringAngleQF : 27|1@1+ (1,0) [0|0] ""  X
+ SG_ ESP_yawRateQF : 26|1@1+ (1,0) [0|0] ""  X
 
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 
