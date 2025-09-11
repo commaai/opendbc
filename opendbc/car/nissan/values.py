@@ -69,7 +69,7 @@ class CAR(Platforms):
   # https://usa.nissannews.com/en-US/releases/us-2018-nissan-leaf-press-kit -> 2018 Nissan LEAF Press Kit Specs.pdf
   NISSAN_LEAF = NissanPlatformConfig(
     [NissanCarDocs("Nissan Leaf 2018-23", video="https://youtu.be/vaMbtAh_0cY")],
-    NissanCarSpecs(mass=1591, wheelbase=2.700, steer_ratio=17.68, centerToFrontRatio=0.58),
+    NissanCarSpecs(mass=1591, wheelbase=2.700, steerRatio=17.68, centerToFrontRatio=0.58),
     {Bus.pt: 'nissan_leaf_2018_generated'},
   )
 
