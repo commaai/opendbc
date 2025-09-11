@@ -57,17 +57,19 @@ class NissanPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   # Wheelbase validated based off owner's manual, 
   # Mass based off Nissan spec spreadsheet, averaging MY 2017 4WD curb weight ranges
-  # https://uk.nissannews.com/en-GB/releases/release-576be476b0162b157afef7b4ac01f1be/download
+  # https://uk.nissannews.com/en-GB/channels/x-trail?selectedTabId=x-trail-specsAndPricing -> 2017/08/01 The new Nissan X-Trail - Technical Specifications
   NISSAN_XTRAIL = NissanPlatformConfig(
     [NissanCarDocs("Nissan X-Trail 2017")],
     NissanCarSpecs(mass=1675, wheelbase=2.705)
   )
 
-  # Wheelbase validated based off owner's manual, mass based off spec sheet for MY 2018
-  # https://www.nissanusa.com/content/dam/Nissan/us/vehicle-brochures/2018/2018-leaf-brochure-en.pdf
+  # Wheelbase validated based off owner's manual
+  # Mass based off spec sheet for MY 2018
+  # centerToFrontRatio calculated from curb front and rear axle weights
+  # https://usa.nissannews.com/en-US/releases/us-2018-nissan-leaf-press-kit -> 2018 Nissan LEAF Press Kit Specs.pdf
   NISSAN_LEAF = NissanPlatformConfig(
     [NissanCarDocs("Nissan Leaf 2018-23", video="https://youtu.be/vaMbtAh_0cY")],
-    NissanCarSpecs(mass=1594, wheelbase=2.700, steer_ratio=17.68, centerToFrontRatio=0.51),
+    NissanCarSpecs(mass=1591, wheelbase=2.700, steer_ratio=17.68, centerToFrontRatio=0.58),
     {Bus.pt: 'nissan_leaf_2018_generated'},
   )
 
