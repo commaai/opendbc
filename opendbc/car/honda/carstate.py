@@ -7,7 +7,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_ALT_RADAR, HONDA_BOSCH_CANFD, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
-                                                 HondaFlags, CruiseButtons, CruiseSettings, GearShifter
+                                                 HondaFlags, CruiseButtons, CruiseSettings, GearShifter, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -72,8 +72,13 @@ class CarState(CarStateBase):
     self.v_cruise_factor = CV.MPH_TO_MS if self.dynamic_v_cruise_units and not self.is_metric else CV.KPH_TO_MS
 
     # ******************* parse out can *******************
+
+    # blend in transmission speed at low speed, since it has more low speed accuracy
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
-    # panda checks if the signal is non-zero
+    v_wheel = sum([cp.vl["WHEEL_SPEEDS"][f"WHEEL_SPEED_{s}"] for s in ("FL", "FR", "RL", "RR")]) / 4.0 * CV.KPH_TO_MS
+    v_weight = float(np.interp(v_wheel, v_weight_bp, v_weight_v))
+    ret.vEgoRaw = (1. - v_weight) * cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] * CV.KPH_TO_MS * self.CP.wheelSpeedFactor + v_weight * v_wheel
+    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 1e-5
 
     # doorOpen is true if we can find any door open, but signal locations vary, and we may only see the driver's door
@@ -91,12 +96,24 @@ class CarState(CarStateBase):
     steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     if self.CP.carFingerprint in HONDA_BOSCH_ALT_RADAR:
-      # Other states cause a lockout no-steer period
-      ret.steerFaultTemporary = (steer_status != "NORMAL")
+      # TODO: See if this logic works for all other Honda
+      min_steer_speed = max(CarControllerParams.STEER_GLOBAL_MIN_SPEED, self.CP.minSteerSpeed)
+      expected_low_speed_lockout = steer_status == "LOW_SPEED_LOCKOUT" and ret.vEgo < min_steer_speed
+      ret.steerFaultTemporary = steer_status != "NORMAL" and not expected_low_speed_lockout
     else:
       # LOW_SPEED_LOCKOUT is not worth a warning
       # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
+      # FIXME: the stock camera stops steering on NO_TORQUE_ALERT_1
       ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
+
+    # All Honda EPS cut off slightly above standstill, some much higher
+    # Don't alert in the near-standstill range, but alert for per-vehicle configured minimums above that
+    if CarControllerParams.STEER_GLOBAL_MIN_SPEED < ret.vEgo < (self.CP.minSteerSpeed + 0.5):
+      self.low_speed_alert = True
+    elif ret.vEgo > (self.CP.minSteerSpeed + 1.):
+      # TODO: better handle delayed steering enablement on ALT_RADAR cars
+      self.low_speed_alert = False
+    ret.lowSpeedAlert = self.low_speed_alert
 
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
@@ -109,12 +126,6 @@ class CarState(CarStateBase):
         ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"] or cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"])
 
     ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
-
-    # blend in transmission speed at low speed, since it has more low speed accuracy
-    v_wheel = sum([cp.vl["WHEEL_SPEEDS"][f"WHEEL_SPEED_{s}"] for s in ("FL", "FR", "RL", "RR")]) / 4.0 * CV.KPH_TO_MS
-    v_weight = float(np.interp(v_wheel, v_weight_bp, v_weight_v))
-    ret.vEgoRaw = (1. - v_weight) * cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] * CV.KPH_TO_MS * self.CP.wheelSpeedFactor + v_weight * v_wheel
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
     self.dash_speed_seen = self.dash_speed_seen or cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] > 1e-3
     if self.dash_speed_seen:
@@ -175,17 +186,6 @@ class CarState(CarStateBase):
     ret.brake = cp.vl["VSA_STATUS"]["USER_BRAKE"]
     ret.cruiseState.enabled = cp.vl["POWERTRAIN_DATA"]["ACC_STATUS"] != 0
     ret.cruiseState.available = bool(cp.vl[self.car_state_scm_msg]["MAIN_ON"])
-
-    # Low speed steer alert hysteresis logic
-    # All Honda EPS cut off slightly above standstill; don't alert under 3mph
-    # TODO: verify actual above-standstill cutoff speed, it's almost certainly metric
-    # TODO: handle asymmetric enable/disable speeds
-    # TODO: nerf the HUD steering-required VisualAlert because it's continuous and obnoxious
-    if 3 * CV.MPH_TO_MS < ret.vEgo < (self.CP.minSteerSpeed + 1.):
-      self.low_speed_alert = True
-    elif ret.standstill or ret.vEgo > (self.CP.minSteerSpeed + 2.):
-      self.low_speed_alert = False
-    ret.lowSpeedAlert = self.low_speed_alert
 
     # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):
