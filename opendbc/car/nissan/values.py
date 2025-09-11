@@ -55,7 +55,7 @@ class NissanPlatformConfig(PlatformConfig):
 
 
 class CAR(Platforms):
-  # Wheelbase validated based off owner's manual, 
+  # Wheelbase validated based off owner's manual,
   # Mass based off Nissan spec spreadsheet, averaging MY 2017 4WD curb weight ranges
   # https://uk.nissannews.com/en-GB/channels/x-trail?selectedTabId=x-trail-specsAndPricing -> 2017/08/01 The new Nissan X-Trail - Technical Specifications
   NISSAN_XTRAIL = NissanPlatformConfig(
