@@ -54,7 +54,7 @@ lefthook run lint                # run the linter
 [`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
 
 ### Project Structure
-* [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC) files
+* [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC_(CAN_Database_Files)) files
 * [`opendbc/can/`](opendbc/can/) is a library for parsing and building CAN messages from DBC files
 * [`opendbc/car/`](opendbc/car/) is a high-level library for interfacing with cars using Python
 * [`opendbc/safety/`](opendbc/safety/) is the functional safety for all the cars supported by `opendbc/car/`
