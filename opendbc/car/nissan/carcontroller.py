@@ -9,8 +9,11 @@ from opendbc.car.vehicle_model import VehicleModel
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
-def get_safety_CP(fingerprint):
+def get_safety_CP(model):
   from opendbc.car.nissan.interface import CarInterface
+  return CarInterface.get_non_essential_params(model)
+
+def get_model(fingerprint):
   if fingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
     model = "NISSAN_LEAF"
   elif fingerprint == CAR.NISSAN_XTRAIL:
@@ -19,14 +22,13 @@ def get_safety_CP(fingerprint):
     model = "NISSAN_ROGUE"
   elif fingerprint == CAR.NISSAN_ALTIMA:
     model = "NISSAN_ALTIMA"
-  return CarInterface.get_non_essential_params(model)
-
+  return model
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.car_fingerprint = CP.carFingerprint
-    self.VM = VehicleModel(get_safety_CP(CP.carFingerprint))
+    self.VM = VehicleModel(get_safety_CP(get_model(self.car_fingerprint)))
 
     self.apply_angle_last = 0
 

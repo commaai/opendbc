@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 
-from opendbc.car.nissan.values import NissanSafetyFlags
+from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
+from opendbc.car.nissan.values import CarControllerParams, NissanSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
@@ -22,11 +23,18 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
   STEER_ANGLE_MAX = 600  # deg, reasonable limit
   DEG_TO_CAN = 100
 
-  ANGLE_RATE_BP = [0., 5., 15.]
-  ANGLE_RATE_UP = [5., .8, .15]  # windup limit
-  ANGLE_RATE_DOWN = [5., 3.5, .4]  # unwind limit
+  # Real time limits
+  LATERAL_FREQUENCY = 100  # Hz
+
+  ANGLE_RATE_BP = None
+  ANGLE_RATE_UP = None # windup limit
+  ANGLE_RATE_DOWN = None  # unwind limit
+
+  def _get_steer_cmd_angle_max(self, speed):
+    return get_max_angle_vm(max(speed, 1), self.VM, CarControllerParams)
 
   def setUp(self):
+    self.VM = VehicleModel(get_safety_CP("NISSAN_XTRAIL"))
     self.packer = CANPackerPanda("nissan_x_trail_2017_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
