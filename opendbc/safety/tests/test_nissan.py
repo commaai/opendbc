@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 
-from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
+from opendbc.car.lateral import get_max_angle_vm
 from opendbc.car.nissan.values import CarControllerParams, NissanSafetyFlags
 from opendbc.car.nissan.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
