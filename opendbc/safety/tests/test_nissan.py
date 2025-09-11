@@ -94,6 +94,32 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
         tx = self._tx(self._acc_button_cmd(**args))
         self.assertEqual(tx, should_tx)
 
+  def test_angle_cmd_when_disabled(self):
+    # Tests that only angles close to the meas are allowed while
+    # steer actuation bit is 0, regardless of controls allowed.
+    # Nissan safety implementation allows a tolerance of ±1 CAN unit around the measured angle.
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+
+      for steer_control_enabled in (True, False):
+        for angle_meas in np.arange(-90, 91, 10):
+          self._reset_angle_measurement(angle_meas)
+
+          for angle_cmd in np.arange(-90, 91, 10):
+            self._set_prev_desired_angle(angle_cmd)
+
+            # When steer_control_enabled is True, controls_allowed is checked
+            # When steer_control_enabled is False, angle must be within tolerance (±1 CAN unit) of measured angle
+            if steer_control_enabled:
+              should_tx = controls_allowed
+            else:
+              # Convert to CAN units and check tolerance
+              angle_meas_can = angle_meas * self.DEG_TO_CAN
+              angle_cmd_can = angle_cmd * self.DEG_TO_CAN
+              # Nissan safety allows ±1 CAN unit tolerance around measured angle when inactive
+              should_tx = abs(angle_cmd_can - angle_meas_can) <= 1
+            self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, steer_control_enabled)))
+
   def test_angle_cmd_when_enabled(self):
     # TODO: Write lateral accel and jerk tests for Nissan
     pass
