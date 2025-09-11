@@ -562,6 +562,7 @@ FW_VERSIONS = {
   CAR.HONDA_ODYSSEY_5G_MMR: {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-THR-A240\x00\x00',
+      b'57114-THR-A520\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36802-THR-A220\x00\x00',
@@ -576,21 +577,26 @@ FW_VERSIONS = {
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28102-5MX-A100\x00\x00',
       b'28102-5MX-A200\x00\x00',
+      b'28102-5MX-A410\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-THR-A220\x00\x00',
       b'77959-THR-A230\x00\x00',
+      b'77959-THR-A320\x00\x00',
     ],
     (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
       b'46114-THR-A530\x00\x00',
       b'46114-THR-A540\x00\x00',
+      b'46114-THR-A720\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-THR-A130\x00\x00',
+      b'38897-THR-A320\x00\x00',
       b'38897-THR-A410\x00\x00',
     ],
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-THR-A050\x00\x00',
+      b'39990-THR-A110\x00\x00',
     ],
   },
   CAR.HONDA_PILOT: {
