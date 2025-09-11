@@ -108,10 +108,6 @@ class CarController(CarControllerBase):
     self.brake = 0.0
     self.last_torque = 0.0
 
-    self.steering_unpressed = 0
-    self.silent_steer_warning = True
-    self.no_steer_warning = False
-
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
