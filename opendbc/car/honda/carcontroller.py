@@ -18,6 +18,7 @@ def compute_gb_honda_bosch(accel, speed):
   # TODO returns 0s, is unused
   return 0.0, 0.0
 
+
 def compute_gb_honda_nidec(accel, speed, pitch_compensation):
   creep_brake = 0.0
   creep_speed = 2.3
@@ -130,6 +131,11 @@ class CarController(CarControllerBase):
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
+
+    # *** rate limit steer ***
+    limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
+                                self.params.STEER_DELTA_UP * DT_CTRL)
+    self.last_torque = limited_torque
 
     # *** apply brake hysteresis ***
     pre_limit_brake, self.braking, self.brake_steady = actuator_hysteresis(brake, self.braking, self.brake_steady,
