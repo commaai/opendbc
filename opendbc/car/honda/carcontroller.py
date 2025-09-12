@@ -12,6 +12,7 @@ from opendbc.car.interfaces import CarControllerBase
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
+
 MAX_PITCH_COMPENSATION = 1.5  # m/s^2
 
 def compute_gb_honda_bosch(accel, speed):
