@@ -56,6 +56,7 @@ class HondaSafetyFlags(IntFlag):
   NIDEC_ALT = 4
   RADARLESS = 8
   BOSCH_CANFD = 16
+  NIDEC_HYBRID = 32
 
 
 class HondaFlags(IntFlag):
@@ -78,6 +79,7 @@ class HondaFlags(IntFlag):
   BOSCH_ALT_RADAR = 512
   ALLOW_MANUAL_TRANS = 1024
   HYBRID = 2048
+  HYBRID_ALT_BRAKEHOLD = 4096  # Some Nidec Hybrids use a different brakehold
 
 
 # Car button codes
@@ -153,6 +155,13 @@ def radar_dbc_dict(pt_dict):
 
 class CAR(Platforms):
   # Bosch Cars
+  HONDA_NBOX_2G = HondaBoschPlatformConfig(
+    [
+      HondaCarDocs("Honda N-Box 2018", "All", min_steer_speed=5.),
+    ],
+    CarSpecs(mass=890., wheelbase=2.520, steerRatio=18.64),
+    {Bus.pt: 'acura_rdx_2020_can_generated'},
+  )
   HONDA_ACCORD = HondaBoschPlatformConfig(
     [
       HondaCarDocs("Honda Accord 2018-22", "All", video="https://www.youtube.com/watch?v=mrUwlj3Mi58", min_steer_speed=3. * CV.MPH_TO_MS),
@@ -375,6 +384,7 @@ STEER_THRESHOLD = {
   CAR.ACURA_MDX_4G_MMR: 600,
   CAR.HONDA_CRV_6G: 600,
   CAR.HONDA_CITY_7G: 600,
+  CAR.HONDA_NBOX_2G: 600,
   CAR.HONDA_ACCORD_9G: 30,
   CAR.ACURA_MDX_3G: 30,
   CAR.ACURA_TLX_1G: 30,
@@ -424,7 +434,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
   non_essential_ecus={
     Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_E, CAR.ACURA_MDX_3G, *HONDA_BOSCH_ALT_RADAR, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_INSIGHT, *HONDA_BOSCH_ALT_RADAR, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
+              CAR.HONDA_E, CAR.HONDA_INSIGHT, CAR.HONDA_NBOX_2G, *HONDA_BOSCH_ALT_RADAR, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
