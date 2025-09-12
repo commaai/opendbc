@@ -26,7 +26,8 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'38897-TTA-J010\x00\x00',
-    ]
+    ],
+  },
   CAR.HONDA_ACCORD_9G: {
     (Ecu.gateway, 0x18DAEFF1, None): [
       b'38897-T3W-0130\x00\x00',
