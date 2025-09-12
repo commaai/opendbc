@@ -149,17 +149,9 @@ class CarController(CarControllerBase):
 
     # **** process the car messages ****
 
-    if CC.latActive and CS.out.vEgo > max(self.params.STEER_GLOBAL_MIN_SPEED, self.CP.minSteerSpeed):
-      steer_active = True
-      limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
-                                  self.params.STEER_DELTA_UP * DT_CTRL)
-      apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
-                                   self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
-      self.last_torque = limited_torque
-    else:
-      steer_active = False
-      apply_torque = 0
-      self.last_torque = 0
+    # steer torque is converted back to CAN reference (positive when steering right)
+    apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
+                                 self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
 
     # Send CAN commands
     can_sends = []
@@ -170,7 +162,7 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.
-    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, steer_active))
+    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive))
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
@@ -217,7 +209,7 @@ class CarController(CarControllerBase):
 
         if self.CP.carFingerprint in HONDA_BOSCH:
           self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
-          self.gas = float(np.interp(gas, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
+          self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
