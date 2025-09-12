@@ -25,6 +25,7 @@ class CarController(CarControllerBase):
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
     self.hca_frame_same_torque = 0
+    self.frames_at_standstill = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -79,11 +80,34 @@ class CarController(CarControllerBase):
 
     if self.CP.openpilotLongitudinalControl:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
-        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
-        stopping = actuators.longControlState == LongCtrlState.stopping
-        starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
+        # sending commands while brake is pressed (i.e. preEnabled at standstill) will cause faults
+        longActive = CC.longActive and not CS.out.brakePressed
+
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, longActive)
+        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if longActive else 0)
+        stopping = longActive and actuators.longControlState == LongCtrlState.stopping
+        starting = longActive and actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
+
+        # reset standstill timer for MQB w/out EPB while braking
+        # max standstill time before fault is around 1s. to reset the timer, we need to:
+        # 1. send a one frame pulse of acceleration
+        # 2. wait for ESP to confirm the request by releasing esp_hold_confirmation
+        # 3. immediately reenable brake hold
+        if longActive and CS.out.standstill and accel < 0 and not (self.CP.flags & VolkswagenFlags.PQ):
+          MAX_STANDSTILL = 25 # 0.5s at 50hz
+          PULSE_INTERVAL = 3
+          self.frames_at_standstill += 1
+          if (self.frames_at_standstill > MAX_STANDSTILL):
+            if CS.esp_hold_confirmation:
+              # if the car fails to acknowledge in a timely manner, keep pulsing until it does
+              if self.frames_at_standstill % PULSE_INTERVAL == 0:
+                starting = True
+                stopping = False
+                accel = 0.01  # must be > 0
+            else:
+              self.frames_at_standstill = 0
+
+        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, longActive, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
 
       #if self.aeb_available:
