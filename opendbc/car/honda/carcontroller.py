@@ -14,7 +14,6 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 MAX_PITCH_COMPENSATION = 1.5  # m/s^2
 
-
 def compute_gb_honda_bosch(accel, speed):
   # TODO returns 0s, is unused
   return 0.0, 0.0
@@ -34,7 +33,7 @@ def compute_gas_brake(accel, pitch, speed, fingerprint):
   accel_from_gravity = math.sin(pitch) * ACCELERATION_DUE_TO_GRAVITY
   pitch_compensation = float(np.clip(accel_from_gravity, -MAX_PITCH_COMPENSATION, MAX_PITCH_COMPENSATION))
   if fingerprint in HONDA_BOSCH:
-    return compute_gb_honda_bosch(accel, pitch_compensation)
+    return compute_gb_honda_bosch(accel, speed)
   else:
     return compute_gb_honda_nidec(accel, speed, pitch_compensation)
 
