@@ -15,10 +15,9 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 MAX_PITCH_COMPENSATION = 1.5  # m/s^2
 
 
-def compute_gb_honda_bosch(accel, pitch_compensation):
-  net_accel_for_gas = accel + pitch_compensation
-  return net_accel_for_gas, 0.0
-
+def compute_gb_honda_bosch(accel, speed):
+  # TODO returns 0s, is unused
+  return 0.0, 0.0
 
 def compute_gb_honda_nidec(accel, speed, pitch_compensation):
   creep_brake = 0.0
