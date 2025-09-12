@@ -118,9 +118,9 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active, car_fingerpr
   values = {
     "STEER_TORQUE": apply_torque if lkas_active else 0,
     "STEER_TORQUE_REQUEST": lkas_active,
-    if car_fingerprint == CAR.ACURA_MDX_4G:
-      "STEER_DOWN_TO_ZERO": lkas_active,
+    "STEER_DOWN_TO_ZERO": lkas_active and (car_fingerprint == CAR.ACURA_MDX_4G),
   }
+
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
 
