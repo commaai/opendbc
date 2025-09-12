@@ -38,7 +38,7 @@ class TestVolkswagenPqSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueS
 
   # Ego speed (Bremse_1)
   def _speed_msg(self, speed):
-    values = {"Geschwindigkeit_neu__Bremse_1_": speed}
+    values = {"BR1_Rad_kmh": speed}
     return self.packer.make_can_msg_panda("Bremse_1", 0, values)
 
   # Brake light switch (shared message Motor_2)
@@ -69,8 +69,8 @@ class TestVolkswagenPqSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueS
   # ACC engagement and brake light switch status
   # Called indirectly for compatibility with common.py tests
   def _motor_2_msg(self, brake_pressed=False, cruise_engaged=False):
-    values = {"Bremslichtschalter": brake_pressed,
-              "GRA_Status": cruise_engaged}
+    values = {"MO2_BLS": brake_pressed,
+              "MO2_Sta_GRA": cruise_engaged}
     return self.packer.make_can_msg_panda("Motor_2", 0, values)
 
   # ACC main switch status
