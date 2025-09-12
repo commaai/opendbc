@@ -32,20 +32,27 @@ class FlexRayCarDocs(ExtraCarDocs):
     self.support_link = "#flexray"
 
 
+@dataclass
+class HondaSerialSteeringCarDocs(ExtraCarDocs):
+  def init_make(self, CP: structs.CarParams):
+    self.support_type = SupportType.CUSTOM
+    self.support_link = "#custom"
+
+
 class CAR(Platforms):
   config: ExtraPlatformConfig
 
   EXTRA_HONDA = ExtraPlatformConfig(
     [
       CommunityCarDocs("Acura Integra 2023-25", "All"),
-      CommunityCarDocs("Acura MDX 2015-16", "Advance Package"),
-      CommunityCarDocs("Acura MDX 2017-20", "All"),
+      HondaSerialSteeringCarDocs("Acura MDX 2014-16", "Advance Package"),
+      HondaSerialSteeringCarDocs("Acura MDX 2017-20", "All"),
       CommunityCarDocs("Acura RDX 2022-25", "All"),
       CommunityCarDocs("Acura RLX 2017", "Advance Package or Technology Package"),
-      CommunityCarDocs("Acura TLX 2015-17", "Advance Package"),
-      CommunityCarDocs("Acura TLX 2018-20", "All"),
+      HondaSerialSteeringCarDocs("Acura TLX 2015-17", "Advance Package"),
+      HondaSerialSteeringCarDocs("Acura TLX 2018-20", "All"),
       GMSecurityCarDocs("Acura ZDX 2024", "All"),
-      CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing"),
+      HondaSerialSteeringCarDocs("Honda Accord 2016-17", "Honda Sensing"),
       CommunityCarDocs("Honda Clarity 2018-21", "All"),
       CommunityCarDocs("Honda Passport 2026", "All"),
       GMSecurityCarDocs("Honda Prologue 2024-25", "All"),
