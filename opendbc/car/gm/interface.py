@@ -111,6 +111,11 @@ class CarInterface(CarInterfaceBase):
       ret.vEgoStopping = 0.25
       ret.vEgoStarting = 0.25
 
+      if candidate in CAMERA_ACC_CAR:~
+        ret.longitudinalTuning.kiV = [0.5] * len(ret.longitudinalTuning.kiBP)
+        ret.stoppingDecelRate = 1.0
+        ret.stopAccel = -0.25
+
       if alpha_long:
         ret.pcmCruise = False
         ret.openpilotLongitudinalControl = True
