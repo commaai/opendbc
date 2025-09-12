@@ -92,6 +92,7 @@ class CarInterface(CarInterfaceBase):
       # default longitudinal tuning for all hondas
       # ret.longitudinalTuning.kiBP = [0., 5., 35.]
       # ret.longitudinalTuning.kiV = [1.2, 0.8, 0.5]
+      pass
 
     # Disable control if EPS mod detected
     for fw in car_fw:
