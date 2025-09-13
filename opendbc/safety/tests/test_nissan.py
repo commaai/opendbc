@@ -11,6 +11,7 @@ from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda, away_round, round_speed
 
+
 class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
 
   TX_MSGS = [[0x169, 0], [0x2b1, 0], [0x4cc, 0], [0x20b, 2], [0x280, 2]]
