@@ -312,7 +312,7 @@ class CAR(Platforms):
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
-  ACURA_RLX_HYBRID = HondaNidecPlatformConfig(
+  ACURA_RLX = HondaNidecPlatformConfig(
     [], # 2017 RLX Hybrid, don't add to cardocs since using complex Red Panda
     CarSpecs(mass=4359 * CV.LB_TO_KG, wheelbase=2.85, centerToFrontRatio=0.39, steerRatio=13.9, tireStiffnessFactor=0.8467),  #spec, stiff/ctf from Accord
     radar_dbc_dict('honda_crv_touring_2016_can_generated'),
