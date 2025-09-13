@@ -55,7 +55,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
 
 static bool nissan_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
-    .max_angle = 6000,  // 600 deg, reasonable limit
+    .max_angle = 60000,  // 600 deg, reasonable limit
     .angle_deg_to_can = 100,
     .frequency = 100U,
   };
