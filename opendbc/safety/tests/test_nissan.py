@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 import unittest
 
-from opendbc.car.lateral import get_max_angle_vm
+from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.nissan.values import CarControllerParams, NissanSafetyFlags
 from opendbc.car.nissan.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerPanda, away_round, round_speed
+
+
+def round_angle(apply_angle, can_offset=0):
+  apply_angle_can = (apply_angle + 1638.35) / 0.1 + can_offset
+  # 0.49999_ == 0.5
+  rnd_offset = 1e-5 if apply_angle >= 0 else -1e-5
+  return away_round(apply_angle_can + rnd_offset) * 0.1 - 1638.35
 
 
 class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
@@ -95,12 +102,76 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
         self.assertEqual(tx, should_tx)
 
   def test_angle_cmd_when_enabled(self):
-    # TODO: Write lateral accel and jerk tests for Nissan
+    # We properly test lateral acceleration and jerk below
     pass
 
-  def test_angle_cmd_when_disabled(self):
-    # TODO: Write lateral accel and jerk tests for Nissan
-    pass
+  def test_lateral_accel_limit(self):
+    for speed in np.linspace(0, 40, 100):
+      speed = max(speed, 1)
+      # match DI_vehicleSpeed rounding on CAN
+      speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
+      for sign in (-1, 1):
+        self.safety.set_controls_allowed(True)
+        self._reset_speed_measurement(speed + 1)  # safety fudges the speed
+
+        # angle signal can't represent 0, so it biases one unit down
+        angle_unit_offset = -1 if sign == -1 else 0
+
+        # at limit (safety tolerance adds 1)
+        max_angle = round_angle(get_max_angle_vm(speed, self.VM, CarControllerParams), angle_unit_offset + 1) * sign
+        max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
+
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
+
+        # 1 unit above limit
+        max_angle_raw = round_angle(get_max_angle_vm(speed, self.VM, CarControllerParams), angle_unit_offset + 2) * sign
+        max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        self._tx(self._angle_cmd_msg(max_angle, True))
+
+        # at low speeds max angle is above 360, so adding 1 has no effect
+        should_tx = abs(max_angle_raw) >= self.STEER_ANGLE_MAX
+        self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
+
+  def test_lateral_jerk_limit(self):
+    for speed in np.linspace(0, 40, 100):
+      speed = max(speed, 1)
+      # match DI_vehicleSpeed rounding on CAN
+      speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
+      for sign in (-1, 1):  # (-1, 1):
+        self.safety.set_controls_allowed(True)
+        self._reset_speed_measurement(speed + 1)  # safety fudges the speed
+        self._tx(self._angle_cmd_msg(0, True))
+
+        # angle signal can't represent 0, so it biases one unit down
+        angle_unit_offset = 1 if sign == -1 else 0
+
+        # Stay within limits
+        # Up
+        max_angle_delta = round_angle(get_max_angle_delta_vm(speed, self.VM, CarControllerParams), angle_unit_offset) * sign
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
+
+        # Don't change
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
+
+        # Down
+        self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+        # Inject too high rates
+        # Up
+        max_angle_delta = round_angle(get_max_angle_delta_vm(speed, self.VM, CarControllerParams), angle_unit_offset + 1) * sign
+        self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
+
+        # Don't change
+        self.safety.set_desired_angle_last(round(max_angle_delta * self.DEG_TO_CAN))
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
+
+        # Down
+        self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
+
+        # Recover
+        self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
 
 
 class TestNissanSafetyAltEpsBus(TestNissanSafety):
