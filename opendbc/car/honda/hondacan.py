@@ -1,6 +1,6 @@
 from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.honda.values import (HondaFlags, HONDA_BOSCH, HONDA_BOSCH_ALT_RADAR, HONDA_BOSCH_RADARLESS,
+from opendbc.car.honda.values import (CAR, HondaFlags, HONDA_BOSCH, HONDA_BOSCH_ALT_RADAR, HONDA_BOSCH_RADARLESS,
                                       HONDA_BOSCH_CANFD, CarControllerParams)
 
 # CAN bus layout with relay
@@ -21,7 +21,7 @@ class CanBus(CanBusBase):
       # normally steering commands are sent to radar, which forwards them to powertrain bus
       # when radar is disabled, steering commands are sent directly to powertrain bus
       self._lkas = self._pt if CP.openpilotLongitudinalControl else self._radar
-    elif CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
+    elif CP.carFingerprint == CAR.ACURA_RLX:
       self._pt, self._radar, self._lkas = self.offset, self.offset + 1, self.offset + 2
     else:
       self._pt, self._radar, self._lkas = self.offset, self.offset + 1, self.offset
