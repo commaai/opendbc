@@ -103,7 +103,7 @@ class CarState(CarStateBase):
 
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
-    steer_status = "Normal" if self.CP.car_fingerprint == CAR.ACURA_RLX else self.steer_status_values[cp_steerstatus.vl["STEER_STATUS"]["STEER_STATUS"]]
+    steer_status = "Normal" if self.CP.carFingerprint == CAR.ACURA_RLX else self.steer_status_values[cp_steerstatus.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     if self.CP.carFingerprint in HONDA_BOSCH_ALT_RADAR:
       # TODO: See if this logic works for all other Honda
