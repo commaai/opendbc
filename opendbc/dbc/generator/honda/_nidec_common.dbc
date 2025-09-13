@@ -71,8 +71,8 @@ BO_ 927 RADAR_HUD: 8 ADAS
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
 
 CM_ SG_ 506 AEB_REQ_1 "set for duration of suspected AEB event";
-CM_ SG_ 506 COMPUTER_BRAKE_ALT "Used by dual-can Nidec";
-CM_ SG_ 506 BRAKE_PUMP_REQUEST_ALT "Used by dual-can Nidec";
+CM_ SG_ 506 COMPUTER_BRAKE_HYBRID "Used by Hybrid Nidec";
+CM_ SG_ 506 BRAKE_PUMP_REQUEST_HYBRID "Used by Hybrid Nidec";
 
 VAL_ 506 FCW 3 "fcw" 2 "fcw" 1 "fcw" 0 "no_fcw";
 VAL_ 506 CHIME 4 "double_chime" 3 "single_chime" 2 "continuous_chime" 1 "repeating_chime" 0 "no_chime";
