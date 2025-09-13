@@ -56,6 +56,8 @@ class HondaSafetyFlags(IntFlag):
   NIDEC_ALT = 4
   RADARLESS = 8
   BOSCH_CANFD = 16
+  NIDEC_HYBRID = 32
+  RLX_STEER = 64
 
 
 class HondaFlags(IntFlag):
@@ -78,6 +80,7 @@ class HondaFlags(IntFlag):
   BOSCH_ALT_RADAR = 512
   ALLOW_MANUAL_TRANS = 1024
   HYBRID = 2048
+  HYBRID_ALT_BRAKEHOLD = 4096  # Some Nidec Hybrids use a different brakehold
 
 
 # Car button codes
@@ -308,6 +311,12 @@ class CAR(Platforms):
     HONDA_HRV_3G.specs,
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
+  )
+  ACURA_RLX = HondaNidecPlatformConfig(
+    [], # 2017 RLX Hybrid, don't add to cardocs since using complex Red Panda
+    CarSpecs(mass=4359 * CV.LB_TO_KG, wheelbase=2.85, centerToFrontRatio=0.39, steerRatio=13.9, tireStiffnessFactor=0.8467),  #spec, stiff/ctf from Accord
+    radar_dbc_dict('honda_crv_touring_2016_can_generated'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.NIDEC_ALT_PCM_ACCEL,
   )
   HONDA_ODYSSEY = HondaNidecPlatformConfig(
     [HondaCarDocs("Honda Odyssey 2018-20")],
