@@ -151,7 +151,7 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.
-    if self.CP.carFingerprint != "CAR.ACURA_RLX_HYBRID":
+    if self.CP.carFingerprint != "CAR.ACURA_RLX":
       can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive))
 
     # wind brake from air resistance decel at high speed
