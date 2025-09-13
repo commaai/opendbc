@@ -81,6 +81,7 @@ class HondaFlags(IntFlag):
   ALLOW_MANUAL_TRANS = 1024
   HYBRID = 2048
   HYBRID_ALT_BRAKEHOLD = 4096  # Some Nidec Hybrids use a different brakehold
+  NO_CARSPEED = 8192 # Some foreign models do not have carspeed
 
 
 # Car button codes
