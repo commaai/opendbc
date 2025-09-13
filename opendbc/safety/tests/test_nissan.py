@@ -107,18 +107,15 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
         self.safety.set_controls_allowed(True)
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
 
-        # angle signal can't represent 0, so it biases one unit down
-        angle_unit_offset = -1 if sign == -1 else 0
-
         # at limit (safety tolerance adds 1)
-        max_angle = get_max_angle_vm(speed, self.VM, CarControllerParams)
+        max_angle = get_max_angle_vm(speed, self.VM, CarControllerParams) * sign
         max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)), f"{max_angle=}")
 
-        # 1 unit above limit
-        max_angle_raw = get_max_angle_vm(speed, self.VM, CarControllerParams)
+        # 2 units above limit
+        max_angle_raw = (get_max_angle_vm(speed, self.VM, CarControllerParams) + 2) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         self._tx(self._angle_cmd_msg(max_angle, True))
 
@@ -136,12 +133,9 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
         self._tx(self._angle_cmd_msg(0, True))
 
-        # angle signal can't represent 0, so it biases one unit down
-        angle_unit_offset = 1 if sign == -1 else 0
-
         # Stay within limits
         # Up
-        max_angle_delta = get_max_angle_delta_vm(speed, self.VM, CarControllerParams)
+        max_angle_delta = get_max_angle_delta_vm(speed, self.VM, CarControllerParams) * sign
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)), f"{max_angle_delta=}")
 
         # Don't change
@@ -152,7 +146,7 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
 
         # Inject too high rates
         # Up
-        max_angle_delta = get_max_angle_delta_vm(speed, self.VM, CarControllerParams)
+        max_angle_delta = (get_max_angle_delta_vm(speed, self.VM, CarControllerParams) + 1) * sign
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)), f"{max_angle_delta=}")
 
         # Don't change
