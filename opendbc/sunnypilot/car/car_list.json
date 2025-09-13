@@ -971,13 +971,14 @@
     ],
     "package": "All"
   },
-  "Honda Civic Hatchback Hybrid 2025": {
+  "Honda Civic Hatchback Hybrid 2025-26": {
     "platform": "HONDA_CIVIC_2022",
     "make": "Honda",
     "brand": "honda",
     "model": "Civic Hatchback Hybrid",
     "year": [
-      "2025"
+      "2025",
+      "2026"
     ],
     "package": "All"
   },
@@ -1159,6 +1160,16 @@
     ],
     "package": "All"
   },
+  "Honda N-Box 2018": {
+    "platform": "HONDA_NBOX_2G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "N-Box",
+    "year": [
+      "2018"
+    ],
+    "package": "All"
+  },
   "Honda Odyssey 2018-20": {
     "platform": "HONDA_ODYSSEY",
     "make": "Honda",
@@ -1170,6 +1181,20 @@
       "2020"
     ],
     "package": "Honda Sensing"
+  },
+  "Honda Odyssey 2021-25": {
+    "platform": "HONDA_ODYSSEY_5G_MMR",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "Odyssey",
+    "year": [
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "package": "All"
   },
   "Honda Passport 2019-25": {
     "platform": "HONDA_PILOT",
@@ -3031,13 +3056,14 @@
     ],
     "package": "All"
   },
-  "Tesla Model Y (with HW4) 2024": {
+  "Tesla Model Y (with HW4) 2024-25": {
     "platform": "TESLA_MODEL_Y",
     "make": "Tesla",
     "brand": "tesla",
     "model": "Model Y (with HW4)",
     "year": [
-      "2024"
+      "2024",
+      "2025"
     ],
     "package": "All"
   },
