@@ -514,7 +514,7 @@ FW_VERSIONS = {
       b'36161-TDK-J530\x00\x00',
     ],
   },
-  CAR.ACURA_RLX_HYBRID: {
+  CAR.ACURA_RLX: {
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36161-TY3-A030\x00\x00',
     ],
