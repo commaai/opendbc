@@ -63,7 +63,7 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringParams NISSAN_STEERING_PARAMS = {
     .slip_factor = -0.000620067421662,  // calc_slip_factor(VM)
     .steer_ratio = 17.,
-    .wheelbase = 2.07,
+    .wheelbase = 2.705,
   };
 
   bool tx = true;
