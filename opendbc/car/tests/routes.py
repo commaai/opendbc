@@ -27,6 +27,7 @@ non_tested_cars = [
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
   HONDA.HONDA_CRV_6G,
+  HONDA.ACURA_MDX_3G # awaiting public testroute
 ]
 
 
@@ -116,7 +117,7 @@ routes = [
   CarTestRoute("f39cf149898833ff/0000002b--54f3fae045", HONDA.HONDA_ACCORD_11G),
   CarTestRoute("ad9840558640c31d/0000001a--d6cd4871c2", HONDA.ACURA_MDX_4G_MMR),  # 2025 MDX
   CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
-  CarTestRoute("ad9840558640c31d/00000018--6d4b733a6a", HONDA.ACURA_MDX_3G), # serial steering - dashcam in upstream
+  CarTestRoute("ad9840558640c31d/00000018--6d4b733a6a", HONDA.ACURA_MDX_3G_MMR), # serial steering - dashcam in upstream
   CarTestRoute("21ea2d289932890b/00000134--3862dfe91d", HONDA.HONDA_ACCORD_9G), # serial steering - dashcam in upstream
 
   CarTestRoute("87d7f06ade479c2e/2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
