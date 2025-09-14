@@ -1094,26 +1094,4 @@ FW_VERSIONS = {
       b'28101-63B-M420\x00\x00',
     ],
   },
-  CAR.ACURA_TLX_1G: {
-    (Ecu.gateway, 0x18DAEFF1, None): [
-      b'38897-TZ4-A010\x00\x00',
-    ],
-    (Ecu.fwdRadar, 0x18DAB0F1, None): [
-      b'36161-TZ4-A120\x00\x00',
-      b'36161-TZ7-A520\x00\x00',
-    ],
-    (Ecu.vsa, 0x18DA28F1, None): [
-      b'57114-TZ4-A510\x00\x00',
-    ],
-    (Ecu.transmission, 0x18DA1EF1, None): [
-      b'28101-5L9-A690\x00\x00',
-    ],
-    (Ecu.shiftByWire, 0x18DA0BF1, None): [
-      b'54008-TZ3-A820\x00\x00',
-    ],
-    (Ecu.srs, 0x18DA53F1, None): [
-      b'77959-TZ4-A510\x00\x00',
-      b'77959-TZ7-A020\x00\x00',
-    ],
-  },
 }
