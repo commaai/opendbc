@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 from opendbc.car import get_safety_config, structs, uds
+from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.honda.hondacan import CanBus
@@ -192,11 +193,26 @@ class CarInterface(CarInterfaceBase):
         # When using stock ACC, the radar intercepts and filters steering commands the EPS would otherwise accept
         ret.minSteerSpeed = 70. * CV.KPH_TO_MS
 
+    elif candidate == CAR.HONDA_ACCORD_9G:
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.,20], [0.,20]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.4,0.3], [0,0]]
+
+    elif candidate == CAR.ACURA_MDX_3G:
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]
+      ret.lateralTuning.pid.kf = 0.000035
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.115], [0.052]]
+
     else:
       ret.steerActuatorDelay = 0.15
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
+    if candidate in (CAR.HONDA_ACCORD_9G, CAR.ACURA_MDX_3G):
+      ret.steerActuatorDelay = 0.3
+      carlog.error('dashcamOnly: serial steering cars are not supported')
+      ret.dashcamOnly = True
+    
     # These cars use alternate user brake msg (0x1BE)
     if 0x1BE in fingerprint[CAN.pt] and candidate in (CAR.HONDA_ACCORD, CAR.HONDA_HRV_3G, *HONDA_BOSCH_CANFD):
       ret.flags |= HondaFlags.BOSCH_ALT_BRAKE.value
@@ -217,7 +233,7 @@ class CarInterface(CarInterfaceBase):
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
     # to a negative value, so it won't matter. Otherwise, add 0.5 mph margin to not
     # conflict with PCM acc
-    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC})
+    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.ACURA_MDX_3G})
     ret.minEnableSpeed = -1. if ret.autoResumeSng else 25.51 * CV.MPH_TO_MS
 
     ret.steerLimitTimer = 0.8
