@@ -125,7 +125,19 @@ class CarControlSP:
   @auto_dataclass
   class Param:
     key: str = auto_field()
-    value: str = auto_field()
+    value: bytes = auto_field()
+    type: 'CarControlSP.ParamType' = field(
+      default_factory=lambda: CarControlSP.ParamType.string
+    )
+
+  class ParamType(StrEnum):
+    string = auto()
+    bool = auto()
+    int = auto()
+    float = auto()
+    time = auto()
+    json = auto()
+    bytes = auto()
 
 
 @auto_dataclass
