@@ -212,7 +212,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.3
       carlog.error('dashcamOnly: serial steering cars are not supported')
       ret.dashcamOnly = True
-    
+
     # These cars use alternate user brake msg (0x1BE)
     if 0x1BE in fingerprint[CAN.pt] and candidate in (CAR.HONDA_ACCORD, CAR.HONDA_HRV_3G, *HONDA_BOSCH_CANFD):
       ret.flags |= HondaFlags.BOSCH_ALT_BRAKE.value
