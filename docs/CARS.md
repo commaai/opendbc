@@ -176,10 +176,7 @@
 |Kia|K5 2021-24|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|K5 Hybrid 2020-22|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|K8 Hybrid (with HDA II) 2023|Highway Driving Assist II|[Upstream](#upstream)|
-|Kia|Niro EV 2019|All|[Upstream](#upstream)|
-|Kia|Niro EV 2020|All|[Upstream](#upstream)|
-|Kia|Niro EV 2021|All|[Upstream](#upstream)|
-|Kia|Niro EV 2022|All|[Upstream](#upstream)|
+|Kia|Niro EV 2019-22|All|[Upstream](#upstream)|
 |Kia|Niro EV (with HDA II) 2025|Highway Driving Assist II|[Upstream](#upstream)|
 |Kia|Niro EV (without HDA II) 2023-25|All|[Upstream](#upstream)|
 |Kia|Niro Hybrid 2018|Smart Cruise Control (SCC)|[Upstream](#upstream)|
