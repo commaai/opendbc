@@ -37,6 +37,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdRadar, 0x18DAB0F1, None): [
       b'36161-T2F-A140\x00\x00',
+      b'36161-T3Z-A830\x00\x00'
     ],
     (Ecu.srs, 0x18DA53F1, None): [
       b'77959-T2F-A030\x00\x00',
