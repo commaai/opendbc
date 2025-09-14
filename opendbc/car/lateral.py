@@ -105,8 +105,19 @@ def get_max_angle_vm(v_ego_raw: float, VM: VehicleModel, limits):
 
 
 def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
-                                lat_active: bool, limits, VM: VehicleModel) -> float:
-  """Apply jerk, accel, and safety limit constraints to steering angle."""
+                                lat_active: bool, limits, VM: VehicleModel) -> float | None:
+  """
+  Apply jerk, lateral acceleration, and safety limit constraints to a steering angle request.
+
+  This function enforces:
+    - Maximum lateral jerk limits (rate of steering change).
+    - Maximum lateral acceleration limits (based on vehicle dynamics).
+    - Safety angle bounds.
+
+  If both the jerk and lateral acceleration constraints cannot be satisfied simultaneously,
+  the function will return None to indicate that no valid steering angle can be chosen
+  without violating safety limits.
+  """
   v_ego_raw = max(v_ego_raw, 1)
 
   # *** max lateral jerk limit ***
@@ -119,6 +130,13 @@ def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_e
   # *** max lateral accel limit ***
   max_angle = get_max_angle_vm(v_ego_raw, VM, limits)
   new_apply_angle = np.clip(new_apply_angle, -max_angle, max_angle)
+
+  # Check if lateral acceleration limits comply with max delta limits
+  safety_violation = lat_active and new_apply_angle != rate_limit(new_apply_angle, apply_angle_last, -max_angle_delta, max_angle_delta)
+
+  # Shouldn't give any angle, since there's no good choice. We are vatiolating either way.
+  if safety_violation:
+    return None
 
   # angle is current angle when inactive
   if not lat_active:
