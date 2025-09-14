@@ -531,6 +531,8 @@ FW_VERSIONS = {
     ],
   },
   CAR.ACURA_MDX_3G: {
+  },
+  CAR.ACURA_MDX_3G_MMR: {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-TRX-H130\x00\x00',
       b'57114-TYS-A910\x00\x00',
