@@ -14,7 +14,7 @@ dependencies = [
   "numpy",
   "crcmod",
   "tqdm",
-  "pycapnp",
+  "pycapnp==2.1.0",
   "pycryptodome",
 ]
 
