@@ -203,7 +203,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
-    if candidate in (CAR.HONDA_ACCORD_9G, CAR.ACURA_MDX_3G, CAR.ACURA_MDX_3G_MMR):
+    if candidate == CAR.ACURA_MDX_3G_MMR:
       ret.steerActuatorDelay = 0.3
       carlog.error('dashcamOnly: serial steering cars are not supported')
       ret.dashcamOnly = True
