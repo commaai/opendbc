@@ -51,7 +51,7 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = alpha_long
       ret.pcmCruise = not ret.openpilotLongitudinalControl
     else:
-      cfgs =  = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
+      cfgs = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
       if candidate == CAR.ACURA_RLX:
         cfgs.insert(1, get_safety_config(structs.CarParams.SafetyModel.noOutput)
       ret.safetyConfigs = cfgs
