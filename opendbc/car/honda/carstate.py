@@ -134,9 +134,9 @@ class CarState(CarStateBase):
 
       # Log non-critical stock ACC/LKAS faults if Nidec (camera)
       if self.CP.carFingerprint not in HONDA_BOSCH:
-        ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"]
-        if not (self.CP.carFingerprint == CAR.ACURA_RLX):
-          ret.carFaultedNonCritical |= cp_lkas.vl["LKAS_HUD"]["LKAS_PROBLEM"])
+        ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"])
+        if self.CP.carFingerprint != CAR.ACURA_RLX:
+          ret.carFaultedNonCritical |= bool(cp_lkas.vl["LKAS_HUD"]["LKAS_PROBLEM"])
 
     ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
 
