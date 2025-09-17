@@ -194,19 +194,17 @@ class CarInterface(CarInterfaceBase):
         ret.minSteerSpeed = 70. * CV.KPH_TO_MS
 
     elif candidate == CAR.ACURA_MDX_3G_MMR:
+      ret.steerActuatorDelay = 0.3
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]
       ret.lateralTuning.pid.kf = 0.000035
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.115], [0.052]]
+      carlog.error('dashcamOnly: serial steering cars are not supported')
+      ret.dashcamOnly = True
 
     else:
       ret.steerActuatorDelay = 0.15
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-
-    if candidate == CAR.ACURA_MDX_3G_MMR:
-      ret.steerActuatorDelay = 0.3
-      carlog.error('dashcamOnly: serial steering cars are not supported')
-      ret.dashcamOnly = True
 
     # These cars use alternate user brake msg (0x1BE)
     if 0x1BE in fingerprint[CAN.pt] and candidate in (CAR.HONDA_ACCORD, CAR.HONDA_HRV_3G, *HONDA_BOSCH_CANFD):
