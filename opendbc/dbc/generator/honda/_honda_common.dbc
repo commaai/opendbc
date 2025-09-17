@@ -156,7 +156,7 @@ BO_ 862 CAMERA_MESSAGES: 8 CAM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 884 STALK_STATUS: 8 XXX
- SG_ SUNLIGHT_BOH : 14|1@0+ (1,0) [0|1] "" EON
+ SG_ LIGHT_SENSOR : 14|1@0+ (1,0) [0|1] "" EON
  SG_ DASHBOARD_ALERT : 39|8@0+ (1,0) [0|255] "" EON
  SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
  SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" EON
@@ -198,7 +198,7 @@ CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 CM_ SG_ 780 PCM_SPEED "Used by Nidec";
 CM_ SG_ 780 PCM_GAS "Used by Nidec";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
-CM_ SG_ 884 SUNLIGHT_BOH "1 when in garage, 0 when outdoors in sunlight"
+CM_ SG_ 884 LIGHT_SENSOR "1 when in garage, 0 when outdoors in sunlight"
 
 
 VAL_ 450 EPB_STATE 3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged" ;
