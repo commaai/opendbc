@@ -2,6 +2,7 @@ BO_ 304 GAS_PEDAL_2: 8 PCM
  SG_ ENGINE_TORQUE_ESTIMATE : 7|16@0- (1,0) [-1000|1000] "Nm" EON
  SG_ ENGINE_TORQUE_REQUEST : 23|16@0- (1,0) [-1000|1000] "Nm" EON
  SG_ CAR_GAS : 39|8@0+ (1,0) [0|255] "" EON
+ SG_ USER_GAS : 44|1@0+ (1,0) [0|1] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
@@ -84,6 +85,7 @@ BO_ 597 ROUGH_WHEEL_SPEED: 8 VSA
  SG_ LONG_COUNTER : 55|8@0+ (1,0) [0|255] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER_2 : 63|2@0+ (1,0) [0|3] "" EON
 
 BO_ 773 SEATBELT_STATUS: 7 BDY
  SG_ SEATBELT_DRIVER_LAMP : 7|1@0+ (1,0) [0|1] "" EON
@@ -154,6 +156,8 @@ BO_ 862 CAMERA_MESSAGES: 8 CAM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 884 STALK_STATUS: 8 XXX
+ SG_ BRIGHTNESS_BOH : 6|7@0+ (1,0) [0|31] "" EON
+ SG_ SUNLIGHT_BOH : 14|1@0+ (1,0) [0|1] "" EON
  SG_ DASHBOARD_ALERT : 39|8@0+ (1,0) [0|255] "" EON
  SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
  SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" EON
@@ -195,9 +199,11 @@ CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 CM_ SG_ 780 PCM_SPEED "Used by Nidec";
 CM_ SG_ 780 PCM_GAS "Used by Nidec";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
+CM_ SG_ 884 SUNLIGHT_BOH "1 when in garage, 0 when outdoors in sunlight"
+
 
 VAL_ 450 EPB_STATE 3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged" ;
 VAL_ 780 CRUISE_SPEED 255 "no_speed" 252 "stopped";
 VAL_ 780 HUD_LEAD 3 "acc_off" 2 "solid_car" 1 "dashed_car" 0 "no_car";
-VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not_detected" 79 "fasten_seatbelt" 111 "lkas_problem" 131 "brake_system_problem" 132 "brake_hold_problem" 139 "tbd" 161 "door_open";
+VAL_ 884 DASHBOARD_ALERT 0 "none" 7 "fuel_low" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not_detected" 79 "fasten_seatbelt" 111 "lkas_problem" 131 "brake_system_problem" 132 "brake_hold_problem" 139 "tbd" 161 "door_open";
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off";
