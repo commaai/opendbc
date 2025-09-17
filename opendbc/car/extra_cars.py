@@ -31,6 +31,12 @@ class FlexRayCarDocs(ExtraCarDocs):
     self.support_type = SupportType.INCOMPATIBLE
     self.support_link = "#flexray"
 
+@dataclass
+class HondaSerialSteeringCarDocs(ExtraCarDocs):
+  def init_make(self, CP: structs.CarParams):
+    self.support_type = SupportType.DASHCAM
+    self.support_link = "#dashcam"
+
 
 class CAR(Platforms):
   config: ExtraPlatformConfig
