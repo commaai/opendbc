@@ -134,7 +134,8 @@ BO_ 780 ACC_HUD: 8 ADAS
  SG_ DTC_MODE : 39|1@0+ (1,0) [0|1] "" BDY
  SG_ BRAKE_SYSTEM_ICON : 38|1@0+ (1,0) [0|1] "" BDY
  SG_ ACC_PROBLEM : 37|1@0+ (1,0) [0|1] "" BDY
- SG_ FCW_DISTANCE : 36|2@0+ (1,0) [0|3] "" XXX
+ SG_ FCM_OFF : 35|1@0+ (1,0) [0|1] "" BDY
+ SG_ FCM_OFF_2 : 36|1@0+ (1,0) [0|1] "" BDY
  SG_ FCM_PROBLEM : 34|1@0+ (1,0) [0|1] "" BDY
  SG_ RADAR_OBSTRUCTED : 33|1@0+ (1,0) [0|1] "" BDY
  SG_ ENABLE_MINI_CAR : 32|1@0+ (1,0) [0|1] "" BDY
