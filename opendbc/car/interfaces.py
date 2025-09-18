@@ -167,6 +167,7 @@ class CarInterfaceBase(ABC, CarInterfaceBaseSP):
 
     platform = PLATFORMS[candidate]
     car_params_sp.flags |= int(platform.config.sp_flags)
+    car_params_sp.pcmCruiseSpeed = True
 
     return cls._get_params_sp(car_params, car_params_sp, candidate, fingerprint, car_fw, alpha_long, docs)
 
