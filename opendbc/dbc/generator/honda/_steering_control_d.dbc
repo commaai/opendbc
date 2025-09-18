@@ -1,0 +1,19 @@
+BO_ 228 STEERING_CONTROL: 5 ADAS
+ SG_ STEER_TORQUE : 7|16@0- (1,0) [-3840|3840] "" EPS
+ SG_ STEER_TORQUE_REQUEST : 23|1@0+ (1,0) [0|1] "" EPS
+ SG_ SET_ME_X00 : 22|7@0+ (1,0) [0|127] "" EPS
+ SG_ SET_ME_X00_2 : 31|8@0+ (1,0) [0|0] "" EPS
+ SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" EPS
+ SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" EPS
+
+BO_ 400 STEER_STATUS: 5 EPS
+ SG_ STEER_TORQUE_SENSOR : 0|9@1- (1,0) [-256|256] "" XXX
+ SG_ LIN_INTERFACE_FATAL_ERROR : 10|1@0+ (1,0) [0|1] "" XXX
+ SG_ LATE_MESSAGE : 11|1@0+ (1,0) [0|1] "" XXX
+ SG_ STEER_STATUS : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 35|4@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" XXX
+ SG_ LKAS_ALLOWED : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ STEER_APPLIED : 23|16@0- (1,0) [0|511] "" XXX
+
+VAL_ 400 STEER_STATUS 7 "permanent_fault" 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 1 "driver_steering" 0 "normal" ;
