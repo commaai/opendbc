@@ -25,7 +25,9 @@ class CarController(CarControllerBase):
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
     self.hca_frame_same_torque = 0
+
     self.frames_at_standstill = 0
+    self.standstill_timer_is_resettable = False
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -83,7 +85,6 @@ class CarController(CarControllerBase):
         # acc is picky about what signals we can send while brake is pressed (e.g. preEnabled at standstill)
         longActive = CC.longActive and not CS.out.brakePressed
 
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, longActive)
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if longActive else 0)
         stopping = longActive and actuators.longControlState == LongCtrlState.stopping
         rollout_in_progress = CS.out.vEgo < self.CP.vEgoStopping and accel > 0
@@ -95,13 +96,23 @@ class CarController(CarControllerBase):
         # but we leave it disabled to reset the timer without actually rolling off
         if longActive and stopping and CS.esp_hold_confirmation and not (self.CP.flags & VolkswagenFlags.PQ) and CS.acc_type == 1:
           self.frames_at_standstill += 1
-          if (self.frames_at_standstill > 25 and self.frames_at_standstill % 5 == 0): # after 0.5s, every 0.1s until reset
+          # sometimes the car will get stuck in a state where it will not listen to start requests
+          # if this is the case, toggle ACC to force the car to drop esp_hold_confirmation then retry
+          # note that although disabling ACC will drop the hold confirmation it does NOT reset the timer
+          if (self.frames_at_standstill >= 20 and self.frames_at_standstill % 10 == 0):
             starting = True
             stopping = False
             accel = 0.01
-        if not CS.esp_hold_confirmation:
+            self.standstill_timer_is_resettable = True
+          if (self.frames_at_standstill >= 20 and self.frames_at_standstill % 10 == 5):
+            starting = False
+            stopping = False
+            longActive = False
+            self.standstill_timer_is_resettable = False
+        if not CS.esp_hold_confirmation and self.standstill_timer_is_resettable:
           self.frames_at_standstill = 0
 
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, longActive)
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, longActive, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
 
