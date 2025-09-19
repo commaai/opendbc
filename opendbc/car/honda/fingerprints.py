@@ -1043,4 +1043,12 @@ FW_VERSIONS = {
       b'28101-63B-M420\x00\x00',
     ],
   },
+  CAR.HONDA_PASSPORT_4G: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S302-3BM-A020\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'8S102-3BM-A020\x00\x00',
+    ],
+  },
 }
