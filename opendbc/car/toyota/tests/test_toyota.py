@@ -1,12 +1,5 @@
-from hypothesis import given, settings, strategies as st
-
 from opendbc.car import Bus
 from opendbc.car.structs import CarParams
-from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car.toyota.fingerprints import FW_VERSIONS
-from opendbc.car.toyota.values import CAR, DBC, TSS2_CAR, ANGLE_CONTROL_CAR, RADAR_ACC_CAR, SECOC_CAR, \
-                                                  FW_QUERY_CONFIG, PLATFORM_CODE_ECUS, FUZZY_EXCLUDED_PLATFORMS, \
-                                                  get_platform_codes
 
 Ecu = CarParams.Ecu
 
@@ -18,22 +11,28 @@ def check_fw_version(fw_version: bytes) -> bool:
 
 class TestToyotaInterfaces:
   def test_car_sets(self):
+    from opendbc.car.toyota.values import TSS2_CAR, ANGLE_CONTROL_CAR, RADAR_ACC_CAR
     assert len(ANGLE_CONTROL_CAR - TSS2_CAR) == 0
     assert len(RADAR_ACC_CAR - TSS2_CAR) == 0
 
   def test_lta_platforms(self):
     # At this time, only RAV4 2023 is expected to use LTA/angle control
+    from opendbc.car.toyota.values import CAR, ANGLE_CONTROL_CAR
     assert ANGLE_CONTROL_CAR == {CAR.TOYOTA_RAV4_TSS2_2023}
 
   def test_tss2_dbc(self):
     # We make some assumptions about TSS2 platforms,
     # like looking up certain signals only in this DBC
+    from opendbc.car.toyota.values import DBC, TSS2_CAR, SECOC_CAR
     for car_model, dbc in DBC.items():
       if car_model in TSS2_CAR and car_model not in SECOC_CAR:
         assert dbc[Bus.pt] == "toyota_nodsu_pt_generated"
 
   def test_essential_ecus(self, subtests):
     # Asserts standard ECUs exist for each platform
+    from opendbc.car.toyota.values import CAR
+    from opendbc.car.toyota.fingerprints import FW_VERSIONS
+
     common_ecus = {Ecu.fwdRadar, Ecu.fwdCamera}
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
@@ -55,6 +54,9 @@ class TestToyotaInterfaces:
 class TestToyotaFingerprint:
   def test_non_essential_ecus(self, subtests):
     # Ensures only the cars that have multiple engine ECUs are in the engine non-essential ECU list
+    from opendbc.car.toyota.fingerprints import FW_VERSIONS
+    from opendbc.car.toyota.values import FW_QUERY_CONFIG
+
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
         engine_ecus = {ecu for ecu in ecus if ecu[0] == Ecu.engine}
@@ -63,6 +65,8 @@ class TestToyotaFingerprint:
 
   def test_valid_fw_versions(self, subtests):
     # Asserts all FW versions are valid
+    from opendbc.car.toyota.fingerprints import FW_VERSIONS
+
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
         for fws in ecus.values():
@@ -71,15 +75,24 @@ class TestToyotaFingerprint:
 
   # Tests for part numbers, platform codes, and sub-versions which Toyota will use to fuzzy
   # fingerprint in the absence of full FW matches:
-  @settings(max_examples=100)
-  @given(data=st.data())
-  def test_platform_codes_fuzzy_fw(self, data):
-    fw_strategy = st.lists(st.binary())
-    fws = data.draw(fw_strategy)
-    get_platform_codes(fws)
+  def test_platform_codes_fuzzy_fw(self):
+    from hypothesis import given, settings, strategies as st
+    from opendbc.car.toyota.values import get_platform_codes
+
+    @settings(max_examples=100)
+    @given(data=st.data())
+    def _test_impl(data):
+      fw_strategy = st.lists(st.binary())
+      fws = data.draw(fw_strategy)
+      get_platform_codes(fws)
+
+    _test_impl()
 
   def test_platform_code_ecus_available(self, subtests):
     # Asserts ECU keys essential for fuzzy fingerprinting are available on all platforms
+    from opendbc.car.toyota.values import CAR, PLATFORM_CODE_ECUS
+    from opendbc.car.toyota.fingerprints import FW_VERSIONS
+
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
         for platform_code_ecu in PLATFORM_CODE_ECUS:
@@ -94,6 +107,8 @@ class TestToyotaFingerprint:
     # - every supported ECU FW version returns one platform code
     # - every supported ECU FW version has a part number
     # - expected parsing of ECU sub-versions
+    from opendbc.car.toyota.values import PLATFORM_CODE_ECUS, get_platform_codes
+    from opendbc.car.toyota.fingerprints import FW_VERSIONS
 
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
@@ -116,6 +131,8 @@ class TestToyotaFingerprint:
 
   def test_platform_codes_spot_check(self):
     # Asserts basic platform code parsing behavior for a few cases
+    from opendbc.car.toyota.values import get_platform_codes
+
     results = get_platform_codes([
       b"F152607140\x00\x00\x00\x00\x00\x00",
       b"F152607171\x00\x00\x00\x00\x00\x00",
@@ -147,6 +164,10 @@ class TestToyotaFingerprint:
 
   def test_fuzzy_excluded_platforms(self):
     # Asserts a list of platforms that will not fuzzy fingerprint with platform codes due to them being shared.
+    from opendbc.car.fw_versions import build_fw_dict
+    from opendbc.car.toyota.fingerprints import FW_VERSIONS
+    from opendbc.car.toyota.values import FW_QUERY_CONFIG, FUZZY_EXCLUDED_PLATFORMS
+
     platforms_with_shared_codes = set()
     for platform, fw_by_addr in FW_VERSIONS.items():
       car_fw = []

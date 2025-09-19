@@ -4,12 +4,7 @@ import time
 from collections import defaultdict
 
 from opendbc.car.can_definitions import CanData
-from opendbc.car.car_helpers import interfaces
 from opendbc.car.structs import CarParams
-from opendbc.car.fingerprints import FW_VERSIONS
-from opendbc.car.fw_versions import FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
-                                    match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
-from opendbc.car.vin import get_vin
 
 CarFw = CarParams.CarFw
 Ecu = CarParams.Ecu
@@ -23,79 +18,90 @@ class TestFwFingerprint:
     assert len(candidates) == 1, f"got more than one candidate: {candidates}"
     assert candidates[0] == expected
 
-  @pytest.mark.parametrize("brand, car_model, ecus, test_non_essential",
-                           [(b, c, e[c], n) for b, e in VERSIONS.items() for c in e for n in (True, False)])
-  def test_exact_match(self, brand, car_model, ecus, test_non_essential):
-    config = FW_QUERY_CONFIGS[brand]
-    CP = CarParams()
-    for _ in range(20):
-      fw = []
-      for ecu, fw_versions in ecus.items():
-        # Assume non-essential ECUs apply to all cars, so we catch cases where Car A with
-        # missing ECUs won't match to Car B where only Car B has labeled non-essential ECUs
-        if ecu[0] in config.non_essential_ecus and test_non_essential:
-          continue
+  def test_exact_match(self):
+    from opendbc.car.fw_versions import FW_QUERY_CONFIGS, VERSIONS, match_fw_to_car
 
-        ecu_name, addr, sub_addr = ecu
-        fw.append(CarFw(ecu=ecu_name, fwVersion=random.choice(fw_versions), brand=brand,
-                        address=addr, subAddress=0 if sub_addr is None else sub_addr))
-      CP.carFw = fw
-      _, matches = match_fw_to_car(CP.carFw, CP.carVin, allow_fuzzy=False)
-      if not test_non_essential:
-        self.assertFingerprints(matches, car_model)
-      else:
-        # if we're removing ECUs we expect some match loss, but it shouldn't mismatch
-        if len(matches) != 0:
-          self.assertFingerprints(matches, car_model)
+    for brand, ecus_dict in VERSIONS.items():
+      for car_model, ecus in ecus_dict.items():
+        for test_non_essential in (True, False):
+          config = FW_QUERY_CONFIGS[brand]
+          CP = CarParams()
+          for _ in range(20):
+            fw = []
+            for ecu, fw_versions in ecus.items():
+              # Assume non-essential ECUs apply to all cars, so we catch cases where Car A with
+              # missing ECUs won't match to Car B where only Car B has labeled non-essential ECUs
+              if ecu[0] in config.non_essential_ecus and test_non_essential:
+                continue
 
-  @pytest.mark.parametrize("brand, car_model, ecus", [(b, c, e[c]) for b, e in VERSIONS.items() for c in e])
-  def test_custom_fuzzy_match(self, brand, car_model, ecus):
-    # Assert brand-specific fuzzy fingerprinting function doesn't disagree with standard fuzzy function
-    config = FW_QUERY_CONFIGS[brand]
-    if config.match_fw_to_car_fuzzy is None:
-      pytest.skip("Brand does not implement custom fuzzy fingerprinting function")
+              ecu_name, addr, sub_addr = ecu
+              fw.append(CarFw(ecu=ecu_name, fwVersion=random.choice(fw_versions), brand=brand,
+                              address=addr, subAddress=0 if sub_addr is None else sub_addr))
+            CP.carFw = fw
+            _, matches = match_fw_to_car(CP.carFw, CP.carVin, allow_fuzzy=False)
+            if not test_non_essential:
+              self.assertFingerprints(matches, car_model)
+            else:
+              # if we're removing ECUs we expect some match loss, but it shouldn't mismatch
+              if len(matches) != 0:
+                self.assertFingerprints(matches, car_model)
 
-    CP = CarParams()
-    for _ in range(5):
-      fw = []
-      for ecu, fw_versions in ecus.items():
-        ecu_name, addr, sub_addr = ecu
-        fw.append(CarFw(ecu=ecu_name, fwVersion=random.choice(fw_versions), brand=brand,
-                        address=addr, subAddress=0 if sub_addr is None else sub_addr))
-      CP.carFw = fw
-      _, matches = match_fw_to_car(CP.carFw, CP.carVin, allow_exact=False, log=False)
-      brand_matches = config.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, VERSIONS[brand])
+  def test_custom_fuzzy_match(self):
+    from opendbc.car.fw_versions import FW_QUERY_CONFIGS, VERSIONS, match_fw_to_car, build_fw_dict
 
-      # If both have matches, they must agree
-      if len(matches) == 1 and len(brand_matches) == 1:
-        assert matches == brand_matches
+    for brand, ecus_dict in VERSIONS.items():
+      for _car_model, ecus in ecus_dict.items():
+        # Assert brand-specific fuzzy fingerprinting function doesn't disagree with standard fuzzy function
+        config = FW_QUERY_CONFIGS[brand]
+        if config.match_fw_to_car_fuzzy is None:
+          continue  # Skip if brand does not implement custom fuzzy fingerprinting function
 
-  @pytest.mark.parametrize("brand, car_model, ecus", [(b, c, e[c]) for b, e in VERSIONS.items() for c in e])
-  def test_fuzzy_match_ecu_count(self, brand, car_model, ecus):
-    # Asserts that fuzzy matching does not count matching FW, but ECU address keys
-    valid_ecus = [e for e in ecus if e[0] not in FUZZY_EXCLUDE_ECUS]
-    if not len(valid_ecus):
-      pytest.skip("Car model has no compatible ECUs for fuzzy matching")
+        CP = CarParams()
+        for _ in range(5):
+          fw = []
+          for ecu, fw_versions in ecus.items():
+            ecu_name, addr, sub_addr = ecu
+            fw.append(CarFw(ecu=ecu_name, fwVersion=random.choice(fw_versions), brand=brand,
+                            address=addr, subAddress=0 if sub_addr is None else sub_addr))
+          CP.carFw = fw
+          _, matches = match_fw_to_car(CP.carFw, CP.carVin, allow_exact=False, log=False)
+          brand_matches = config.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, VERSIONS[brand])
 
-    fw = []
-    for ecu in valid_ecus:
-      ecu_name, addr, sub_addr = ecu
-      for _ in range(5):
-        # Add multiple FW versions to simulate ECU returning to multiple queries in a brand
-        fw.append(CarFw(ecu=ecu_name, fwVersion=random.choice(ecus[ecu]), brand=brand,
-                        address=addr, subAddress=0 if sub_addr is None else sub_addr))
-      CP = CarParams(carFw=fw)
-      _, matches = match_fw_to_car(CP.carFw, CP.carVin, allow_exact=False, log=False)
+          # If both have matches, they must agree
+          if len(matches) == 1 and len(brand_matches) == 1:
+            assert matches == brand_matches
 
-      # Assert no match if there are not enough unique ECUs
-      unique_ecus = {(f.address, f.subAddress) for f in fw}
-      if len(unique_ecus) < 2:
-        assert len(matches) == 0, car_model
-      # There won't always be a match due to shared FW, but if there is it should be correct
-      elif len(matches):
-        self.assertFingerprints(matches, car_model)
+  def test_fuzzy_match_ecu_count(self):
+    from opendbc.car.fw_versions import FUZZY_EXCLUDE_ECUS, VERSIONS, match_fw_to_car
+
+    for brand, ecus_dict in VERSIONS.items():
+      for car_model, ecus in ecus_dict.items():
+        # Asserts that fuzzy matching does not count matching FW, but ECU address keys
+        valid_ecus = [e for e in ecus if e[0] not in FUZZY_EXCLUDE_ECUS]
+        if not len(valid_ecus):
+          continue  # Skip if car model has no compatible ECUs for fuzzy matching
+
+        fw = []
+        for ecu in valid_ecus:
+          ecu_name, addr, sub_addr = ecu
+          for _ in range(5):
+            # Add multiple FW versions to simulate ECU returning to multiple queries in a brand
+            fw.append(CarFw(ecu=ecu_name, fwVersion=random.choice(ecus[ecu]), brand=brand,
+                            address=addr, subAddress=0 if sub_addr is None else sub_addr))
+          CP = CarParams(carFw=fw)
+          _, matches = match_fw_to_car(CP.carFw, CP.carVin, allow_exact=False, log=False)
+
+          # Assert no match if there are not enough unique ECUs
+          unique_ecus = {(f.address, f.subAddress) for f in fw}
+          if len(unique_ecus) < 2:
+            assert len(matches) == 0, car_model
+          # There won't always be a match due to shared FW, but if there is it should be correct
+          elif len(matches):
+            self.assertFingerprints(matches, car_model)
 
   def test_fw_version_lists(self, subtests):
+    from opendbc.car.fingerprints import FW_VERSIONS
+
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
         for ecu, ecu_fw in ecus.items():
@@ -105,6 +111,8 @@ class TestFwFingerprint:
             assert len(ecu_fw) > 0, f'{car_model}: No FW versions: Ecu.{ecu[0]}'
 
   def test_all_addrs_map_to_one_ecu(self):
+    from opendbc.car.fw_versions import VERSIONS
+
     for brand, cars in VERSIONS.items():
       addr_to_ecu = defaultdict(set)
       for ecus in cars.values():
@@ -115,6 +123,8 @@ class TestFwFingerprint:
           assert len(ecus_for_addr) <= 1, f"{brand} has multiple ECUs that map to one address: {ecu_strings} -> ({hex(addr)}, {sub_addr})"
 
   def test_data_collection_ecus(self, subtests):
+    from opendbc.car.fw_versions import FW_QUERY_CONFIGS, VERSIONS
+
     # Asserts no extra ECUs are in the fingerprinting database
     for brand, config in FW_QUERY_CONFIGS.items():
       for car_model, ecus in VERSIONS[brand].items():
@@ -123,6 +133,9 @@ class TestFwFingerprint:
           assert not len(bad_ecus), f'{car_model}: Fingerprints contain ECUs added for data collection: {bad_ecus}'
 
   def test_blacklisted_ecus(self, subtests):
+    from opendbc.car.fingerprints import FW_VERSIONS
+    from opendbc.car.car_helpers import interfaces
+
     blacklisted_addrs = (0x7c4, 0x7d0)  # includes A/C ecu and an unknown ecu
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
@@ -138,6 +151,8 @@ class TestFwFingerprint:
               assert ecu[0] != Ecu.transmission, f"{car_model}: Blacklisted ecu: (Ecu.{ecu[0]}, {hex(ecu[1])})"
 
   def test_missing_versions_and_configs(self, subtests):
+    from opendbc.car.fw_versions import FW_QUERY_CONFIGS, VERSIONS
+
     brand_versions = set(VERSIONS.keys())
     brand_configs = set(FW_QUERY_CONFIGS.keys())
     if len(brand_configs - brand_versions):
@@ -156,6 +171,8 @@ class TestFwFingerprint:
         assert len(config.get_all_ecus(VERSIONS[brand])) > 0
 
   def test_fw_request_ecu_whitelist(self, subtests):
+    from opendbc.car.fw_versions import FW_QUERY_CONFIGS, VERSIONS
+
     for brand, config in FW_QUERY_CONFIGS.items():
       with subtests.test(brand=brand):
         whitelisted_ecus = {ecu for r in config.requests for ecu in r.whitelist_ecus}
@@ -170,6 +187,8 @@ class TestFwFingerprint:
                          f'{brand.title()}: ECUs not in any FW query whitelists: {ecu_strings}'
 
   def test_request_ecus_in_versions(self):
+    from opendbc.car.fw_versions import FW_QUERY_CONFIGS, VERSIONS
+
     # All ECUs in requests should be in the brand's FW versions
     for brand, config in FW_QUERY_CONFIGS.items():
       request_ecus = {ecu for r in config.requests for ecu in r.whitelist_ecus} - {ecu[0] for ecu in config.extra_ecus}
@@ -179,6 +198,8 @@ class TestFwFingerprint:
         assert request_ecu in {e for e, _, _ in version_ecus}, f"Ecu.{ECU_NAME[request_ecu]} not in {brand} FW versions"
 
   def test_brand_ecu_matches(self):
+    from opendbc.car.fw_versions import get_brand_ecu_matches
+
     brand_matches = get_brand_ecu_matches(set())
     assert len(brand_matches) > 0
     assert all(len(e) and not any(e) for e in brand_matches.values())
@@ -217,6 +238,8 @@ class TestFwFingerprintTiming:
     return {}
 
   def _benchmark_brand(self, brand, num_pandas, mocker):
+    from opendbc.car.fw_versions import get_fw_versions
+
     self.total_time = 0
     mocker.patch("opendbc.car.isotp_parallel_query.IsoTpParallelQuery.get_data", self.fake_get_data)
     for _ in range(self.N):
@@ -234,6 +257,9 @@ class TestFwFingerprintTiming:
     assert avg_time > ref_time - self.TOL, "Performance seems to have improved, update test refs."
 
   def test_startup_timing(self, subtests, mocker):
+    from opendbc.car.fw_versions import get_present_ecus
+    from opendbc.car.vin import get_vin
+
     # Tests worse-case VIN query time and typical present ECU query time
     vin_ref_times = {'worst': 1.6, 'best': 0.8}  # best assumes we go through all queries to get a match
     present_ecu_ref_time = 0.45
@@ -260,6 +286,8 @@ class TestFwFingerprintTiming:
         print(f'get_vin {name} case, query time={self.total_time / self.N} seconds')
 
   def test_fw_query_timing(self, subtests, mocker):
+    from opendbc.car.fw_versions import FW_QUERY_CONFIGS
+
     total_ref_time = {1: 7.4, 2: 8.0}
     brand_ref_times = {
       1: {
@@ -307,6 +335,8 @@ class TestFwFingerprintTiming:
         print(f'all brands, total FW query time={total_time} seconds')
 
   def test_get_fw_versions(self, subtests, mocker):
+    from opendbc.car.fw_versions import FW_QUERY_CONFIGS, get_fw_versions
+
     # some coverage on IsoTpParallelQuery and panda UDS library
     # TODO: replace this with full fingerprint simulation testing
     # https://github.com/commaai/panda/pull/1329
