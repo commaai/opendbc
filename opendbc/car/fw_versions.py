@@ -42,7 +42,7 @@ def build_fw_dict(fw_versions: list[CarParams.CarFw], filter_brand: str = None) 
   for fw in fw_versions:
     if is_brand(fw.brand, filter_brand) and not fw.logging:
       sub_addr = fw.subAddress if fw.subAddress != 0 else None
-      fw_versions_dict[(fw.address, sub_addr)].add(fw.fwVersion)
+      fw_versions_dict[(fw.address, sub_addr)].add(fw.fwVersion.tobytes())
   return dict(fw_versions_dict)
 
 
