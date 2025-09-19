@@ -259,7 +259,7 @@ class CAR(Platforms):
   )
   HONDA_PASSPORT_4G = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Honda Passport 2026", "All")],
-    CarSpecs(mass=4620 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=16.5),  # TODO: recheck CTF ratio
+    CarSpecs(mass=4620 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=18.5),
   )
   # mid-model refresh
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
