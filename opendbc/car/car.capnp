@@ -1,5 +1,4 @@
-using Cxx = import "./include/c++.capnp";
-$Cxx.namespace("cereal");
+
 
 @0x8e2af1e708af8b8d;
 
@@ -719,6 +718,7 @@ struct CarParams {
   safetyModelDEPRECATED @9 :SafetyModel;
   safetyModelPassiveDEPRECATED @42 :SafetyModel = silent;
   minSpeedCanDEPRECATED @51 :Float32;
+  radarTimeStepDEPRECATED @45 :Void;  # reserved; was Float32 default 0.05
   communityFeatureDEPRECATED @46: Bool;
   startingAccelRateDEPRECATED @53 :Float32;
   steerMaxBPDEPRECATED @11 :List(Float32);
@@ -731,5 +731,4 @@ struct CarParams {
   maxSteeringAngleDegDEPRECATED @54 :Float32;
   longitudinalActuatorDelayLowerBoundDEPRECATED @61 :Float32;
   stoppingControlDEPRECATED @31 :Bool; # Does the car allow full control even at lows speeds when stopping
-  radarTimeStepDEPRECATED @45: Float32 = 0.05;  # time delta between radar updates, 20Hz is very standard
 }

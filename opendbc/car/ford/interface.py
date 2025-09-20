@@ -67,7 +67,7 @@ class CarInterface(CarInterfaceBase):
       # Lock out if the car does not have needed lateral and longitudinal control APIs.
       # Note that we also check CAN for adaptive cruise, but no known signal for LCA exists
       pscm_config = next((fw for fw in car_fw if fw.ecu == Ecu.eps and b'\x22\xDE\x01' in fw.request), None)
-      if pscm_config:
+      if pscm_config and getattr(pscm_config, 'fwVersion', None) is not None:
         if len(pscm_config.fwVersion) != 24:
           carlog.error('dashcamOnly: Invalid EPS FW version')
           ret.dashcamOnly = True
