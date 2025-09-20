@@ -166,8 +166,11 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
     // sample wheel speed, averaging opposite corners
     if (msg->addr == 0x386U) {
       uint32_t front_left_speed = GET_BYTES(msg, 0, 2) & 0x3FFFU;
+      uint32_t front_right_speed = GET_BYTES(msg, 2, 2) & 0x3FFFU;
+      uint32_t rear_left_speed = GET_BYTES(msg, 4, 2) & 0x3FFFU;
       uint32_t rear_right_speed = GET_BYTES(msg, 6, 2) & 0x3FFFU;
-      vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD);
+      vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD)
+                      || (front_right_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_left_speed > HYUNDAI_STANDSTILL_THRSLD);
     }
 
     if (msg->addr == 0x394U) {

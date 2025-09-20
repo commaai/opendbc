@@ -40,7 +40,16 @@ class TestSubaruPreglobalSafety(common.PandaCarSafetyTest, common.DriverTorqueSt
 
   def _speed_msg(self, speed):
     # subaru safety doesn't use the scaled value, so undo the scaling
-    values = {s: speed*0.0592 for s in ["FR", "FL", "RR", "RL"]}
+    return self._wheel_speed_4wheel_msg(speed, speed, speed, speed)
+
+
+  def _wheel_speed_4wheel_msg(self, wheel_front_left: float, wheel_front_right: float, wheel_rear_left: float, wheel_rear_right: float):
+    values = {
+      "FL": wheel_front_left * 0.0592,
+      "FR": wheel_front_right * 0.0592,
+      "RL": wheel_rear_left * 0.0592,
+      "RR": wheel_rear_right * 0.0592
+    }
     return self.packer.make_can_msg_panda("Wheel_Speeds", 0, values)
 
   def _user_brake_msg(self, brake):
