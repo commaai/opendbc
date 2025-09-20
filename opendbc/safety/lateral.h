@@ -304,39 +304,41 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
   bool violation = false;
 
+  // *** ISO lateral jerk limit ***
+  // calculate maximum angle rate per second
+  const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
+  const float max_angle_rate_sec = get_angle_from_curvature(max_curvature_rate_sec, curvature_factor, params);
+
+  // finally get max angle delta per frame
+  const float max_angle_delta = max_angle_rate_sec / (float)limits.frequency;
+  const int max_angle_delta_can = (max_angle_delta * limits.angle_deg_to_can) + 1.;
+
+  // NOTE: symmetric up and down limits
+  const int highest_desired_angle = desired_angle_last + max_angle_delta_can;
+  const int lowest_desired_angle = desired_angle_last - max_angle_delta_can;
+
+  // *** ISO lateral accel limit ***
+  const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
+  const float max_angle = get_angle_from_curvature(max_curvature, curvature_factor, params);
+  const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
+
+  // Jerk limits from current angle to avoid sudden changes when engaging
+  const int max_angle_from_current = angle_meas.max + max_angle_delta_can;
+  const int min_angle_from_current = angle_meas.min - max_angle_delta_can;
+
   if (controls_allowed && steer_control_enabled) {
-    // *** ISO lateral jerk limit ***
-    // calculate maximum angle rate per second
-    const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
-    const float max_angle_rate_sec = get_angle_from_curvature(max_curvature_rate_sec, curvature_factor, params);
-
-    // finally get max angle delta per frame
-    const float max_angle_delta = max_angle_rate_sec / (float)limits.frequency;
-    const int max_angle_delta_can = (max_angle_delta * limits.angle_deg_to_can) + 1.;
-
-    // NOTE: symmetric up and down limits
-    const int highest_desired_angle = desired_angle_last + max_angle_delta_can;
-    const int lowest_desired_angle = desired_angle_last - max_angle_delta_can;
-
-    violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
-
-    // *** ISO lateral accel limit ***
-    const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
-    const float max_angle = get_angle_from_curvature(max_curvature, curvature_factor, params);
-    const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
-
-    violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
+    violation |= max_limit_check(desired_angle, max_angle_from_current, min_angle_from_current); // Jerk limit from current angle
+    violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle); // Jerk limit
+    violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can); // Lat Accel Limit
 
     // *** angle real time rate limit check ***
     violation |= rt_angle_rate_limit_check(limits);
   }
   desired_angle_last = desired_angle;
 
-  // Angle should either be 0 or same as current angle while not steering
+  // Angle should not exceed max angle when not steering, should be always limited to max angle
   if (!steer_control_enabled) {
-    const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
-    const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
-    violation |= max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
+    violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
   }
 
   // No angle control allowed when controls are not allowed
@@ -346,8 +348,10 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
   // reset to current angle if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
-    desired_angle_last = CLAMP(angle_meas.values[0], -limits.max_angle, limits.max_angle);
+    desired_angle_last = CLAMP(angle_meas.values[0], -max_angle_can, max_angle_can); // current angle, limited to max angle
   }
 
+  // We should never exceed the hard limits set
+  violation |= max_limit_check(desired_angle, limits.max_angle, -limits.max_angle);
   return violation;
 }
