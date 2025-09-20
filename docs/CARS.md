@@ -112,7 +112,7 @@
 |Honda|Odyssey 2018-20|Honda Sensing|[Upstream](#upstream)|
 |Honda|Odyssey 2021-25|All|[Upstream](#upstream)|
 |Honda|Passport 2019-25|All|[Upstream](#upstream)|
-|Honda|Passport 2026|All|[Community](#community)|
+|Honda|Passport 2026|All|[Upstream](#upstream)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
 |Honda|Pilot 2023-25|All|[Upstream](#upstream)|
 |Honda|Prologue 2024-25|All|[Not compatible](#can-bus-security)|
