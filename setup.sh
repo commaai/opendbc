@@ -13,7 +13,7 @@ if ! command -v uv &>/dev/null; then
 fi
 
 export UV_PROJECT_ENVIRONMENT="$BASEDIR/.venv"
-uv sync --all-extras
+uv sync --all-extras --python pypy@3.11
 source "$PYTHONPATH/.venv/bin/activate"
 
 $BASEDIR/opendbc/safety/tests/misra/install.sh
