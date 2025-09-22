@@ -150,20 +150,6 @@ class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
   def _accel_msg(self, accel: float):
     pass
 
-  def _accel_msg_2(self, accel: float):
-    return None
-
-  def _should_tx_1(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
-    if self.LONGITUDINAL:
-      should_tx = controls_allowed and min_accel <= accel <= max_accel
-      should_tx = should_tx or accel == self.INACTIVE_ACCEL
-    else:
-      should_tx = False
-    return should_tx
-
-  def _should_tx_2(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
-    return False
-
   def test_accel_limits_correct(self):
     self.assertGreater(self.MAX_ACCEL, 0)
     self.assertLess(self.MIN_ACCEL, 0)
@@ -179,12 +165,12 @@ class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
         for controls_allowed in [True, False]:
           self.safety.set_controls_allowed(controls_allowed)
           self.safety.set_alternative_experience(alternative_experience)
-          should_tx = self._should_tx_1(controls_allowed, accel, min_accel, max_accel)
+          if self.LONGITUDINAL:
+            should_tx = controls_allowed and min_accel <= accel <= max_accel
+            should_tx = should_tx or accel == self.INACTIVE_ACCEL
+          else:
+            should_tx = False
           self.assertEqual(should_tx, self._tx(self._accel_msg(accel)))
-          accel_msg_2 = self._accel_msg_2(accel)
-          if accel_msg_2 is not None:
-            should_tx_2 = self._should_tx_2(controls_allowed, accel, min_accel, max_accel)
-            self.assertEqual(should_tx_2, self._tx(self._accel_msg_2(accel)))
 
 
 class LongitudinalGasBrakeSafetyTest(PandaSafetyTestBase, abc.ABC):

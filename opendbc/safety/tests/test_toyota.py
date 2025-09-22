@@ -52,9 +52,12 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
     values = {"STEER_REQUEST": req, "STEER_REQUEST_2": req2, "STEER_ANGLE_CMD": angle_cmd, "TORQUE_WIND_DOWN": torque_wind_down}
     return self.packer.make_can_msg_panda("STEERING_LTA", 0, values)
 
-  def _accel_msg(self, accel, cancel_req=0):
+  def _accel_msg_343(self, accel, cancel_req=0):
     values = {"ACCEL_CMD": accel, "CANCEL_REQ": cancel_req}
     return self.packer.make_can_msg_panda("ACC_CONTROL", 0, values)
+
+  def _accel_msg(self, accel, cancel_req=0):
+    return self._accel_msg_343(accel, cancel_req)
 
   def _speed_msg(self, speed):
     values = {("WHEEL_SPEED_%s" % n): speed * 3.6 for n in ["FR", "FL", "RR", "RL"]}
@@ -285,9 +288,9 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
     for controls_allowed in [True, False]:
       self.safety.set_controls_allowed(controls_allowed)
       for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.1):
-        self.assertFalse(self._tx(self._accel_msg(accel)))
-        should_tx = np.isclose(accel, 0, atol=0.0001)
-        self.assertEqual(should_tx, self._tx(self._accel_msg(accel, cancel_req=1)))
+        self.assertFalse(self._tx(self._accel_msg_343(accel)))
+        should_tx = np.isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
+        self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel, cancel_req=1)))
 
 
 class TestToyotaStockLongitudinalTorque(TestToyotaStockLongitudinalBase, TestToyotaSafetyTorque):
@@ -345,6 +348,13 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
       should_tx = not req and not req2 and angle == 0
       self.assertEqual(should_tx, self._tx(self._lta_2_msg(req, req2, angle)), f"{req=} {req2=} {angle=}")
 
+  def _accel_msg_183(self, accel):
+    values = {"ACCEL_CMD": accel}
+    return self.packer.make_can_msg_panda("ACC_CONTROL_2", 0, values)
+
+  def _accel_msg(self, accel, cancel_req=0):
+    return self._accel_msg_183(accel)
+
 
 class TestToyotaSecOcSafetyStockLongitudinal(TestToyotaSecOcSafetyBase, TestToyotaStockLongitudinalBase):
 
@@ -371,17 +381,17 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
   def test_block_aeb(self, stock_longitudinal: bool = False):
     pass
 
-  def _accel_msg_2(self, accel):
-    values = {"ACCEL_CMD": accel}
-    return self.packer.make_can_msg_panda("ACC_CONTROL_2", 0, values)
-
-  # On a SecOC vehicle, we still transmit ACC_CONTROL but the accel value moves to ACC_CONTROL_2
-  # Verify that all non-idle accel values in ACC_CONTROL are rejected, verify ACC_CONTROL_2 accel normally
-  def _should_tx_1(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
-    return accel == self.INACTIVE_ACCEL
-
-  def _should_tx_2(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
-    return (controls_allowed and min_accel <= accel <= max_accel) or accel == self.INACTIVE_ACCEL
+  def test_343_actuation_blocked(self):
+    """
+    For SecOC cars, longitudinal acceleration must be sent in ACC_CONTROL_2, but all other ACC
+    data remains in ACC_CONTROL. Verify no actuation is sent via ACC_CONTROL.
+    """
+    for controls_allowed in [True, False]:
+      self.safety.set_controls_allowed(controls_allowed)
+      for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.1):
+        should_tx = np.isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
+        self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel)))
+        self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel, cancel_req=1)))
 
 
 if __name__ == "__main__":
