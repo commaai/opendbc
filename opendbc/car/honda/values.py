@@ -267,7 +267,7 @@ class CAR(Platforms):
     {Bus.pt: 'acura_mdx_2022_can_generated'},
     flags=HondaFlags.BOSCH_ALT_RADAR,
   )
-    # mid-model refresh
+  # mid-model refresh
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Acura MDX 2025", "All except Type S")],
     CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=16.2),
