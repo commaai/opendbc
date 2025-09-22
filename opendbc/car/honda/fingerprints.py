@@ -514,6 +514,26 @@ FW_VERSIONS = {
       b'36161-TDK-J530\x00\x00',
     ],
   },
+  CAR.ACURA_RLX: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36161-TY3-A030\x00\x00',
+    ],
+#    (Ecu.shiftByWire, 0x18da0bf1, None): [
+#      b'54008-TY3-J010\x00\x00',
+#    ],
+#    (Ecu.srs, 0x18da53f1, None): [
+#      b'77959-TY3-L130\x00\x00',
+#    ],
+#     (Ecu.gateway, 0x18daeff1, None): [
+#      b'38897-TY3-A020\x00\x00',
+#    ],
+#     (Ecu.hud, 0x18da61f1, None): [
+#      b'78209-TY3-A110\x00\x00',
+#    ],
+#    (Ecu.eps, 0x18da30f1, None): [
+#      b'39990-TY3-J030\x00\x00',
+#    ],
+  },
   CAR.ACURA_MDX_4G_MMR: {
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'8S102-TYA-A020\x00\x00',
