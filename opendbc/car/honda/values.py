@@ -257,6 +257,10 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Pilot 2023-25", "All")],
     CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=17.5),
   )
+  HONDA_PASSPORT_4G = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Honda Passport 2026", "All")],
+    CarSpecs(mass=4620 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=18.5),
+  )
   # mid-model refresh
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Acura MDX 2025", "All except Type S")],
@@ -361,6 +365,7 @@ STEER_THRESHOLD = {
   CAR.HONDA_CRV_EU: 400,
   CAR.HONDA_ACCORD_11G: 600,
   CAR.HONDA_PILOT_4G: 600,
+  CAR.HONDA_PASSPORT_4G: 600,
   CAR.ACURA_MDX_4G_MMR: 600,
   CAR.HONDA_CRV_6G: 600,
   CAR.HONDA_CITY_7G: 600,

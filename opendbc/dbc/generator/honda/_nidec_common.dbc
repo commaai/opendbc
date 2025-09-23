@@ -1,14 +1,3 @@
-BO_ 145 KINEMATICS: 8 XXX
- SG_ LAT_ACCEL : 7|10@0+ (0.02,-512) [-20|20] "m/s2" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
-
-BO_ 148 KINEMATICS_ALT: 8 XXX
- SG_ LAT_ACCEL : 7|10@0+ (0.02,-512) [-20|20] "m/s2" EON
- SG_ LONG_ACCEL : 24|9@0- (-0.02,0) [-20|20] "m/s2" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
 BO_ 432 STANDSTILL: 7 VSA
  SG_ CONTROLLED_STANDSTILL : 0|1@0+ (1,0) [0|1] "" EON
  SG_ WHEELS_MOVING : 12|1@0+ (1,0) [0|1] "" EON
@@ -71,8 +60,8 @@ BO_ 927 RADAR_HUD: 8 ADAS
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
 
 CM_ SG_ 506 AEB_REQ_1 "set for duration of suspected AEB event";
-CM_ SG_ 506 COMPUTER_BRAKE_ALT "Used by dual-can Nidec";
-CM_ SG_ 506 BRAKE_PUMP_REQUEST_ALT "Used by dual-can Nidec";
+CM_ SG_ 506 COMPUTER_BRAKE_HYBRID "Used by Hybrid Nidec";
+CM_ SG_ 506 BRAKE_PUMP_REQUEST_HYBRID "Used by Hybrid Nidec";
 
 VAL_ 506 FCW 3 "fcw" 2 "fcw" 1 "fcw" 0 "no_fcw";
 VAL_ 506 CHIME 4 "double_chime" 3 "single_chime" 2 "continuous_chime" 1 "repeating_chime" 0 "no_chime";
