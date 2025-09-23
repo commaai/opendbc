@@ -179,7 +179,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       bool tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
 
       // Only consider rising edges while controls are not allowed
-      if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed && !m_mads_state.system_enabled) {
+      if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !is_lat_active()) {
         tesla_stock_lkas = true;
       }
       if (!tesla_stock_lkas_now) {
