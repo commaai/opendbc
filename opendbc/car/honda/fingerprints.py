@@ -1051,6 +1051,14 @@ FW_VERSIONS = {
       b'8S102-3BM-A020\x00\x00',
     ],
   },
+  CAR.ACURA_TLX_2G: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36802-TGV-A060\x00\x00',
+    ],
+     (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'36161-TGV-A030\x00\x00',
+    ],
+  },
   CAR.ACURA_INTEGRA: {
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-T38-A040\x00\x00',
