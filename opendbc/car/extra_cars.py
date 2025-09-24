@@ -46,7 +46,6 @@ class CAR(Platforms):
       CommunityCarDocs("Acura TLX 2015-17", "Advance Package"),
       CommunityCarDocs("Acura TLX 2018-23", "All"),
       GMSecurityCarDocs("Acura ZDX 2024", "All"),
-      GMSecurityCarDocs("Acura ZDX 2026", "All"),
       CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing"),
       CommunityCarDocs("Honda Clarity 2018-21", "All"),
       GMSecurityCarDocs("Honda Prologue 2024-25", "All"),
