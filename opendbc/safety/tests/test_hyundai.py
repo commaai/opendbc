@@ -91,12 +91,21 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
     return self.packer.make_can_msg_panda("TCS13", 0, values, fix_checksum=checksum)
 
   def _speed_msg(self, speed):
+    return self._wheel_speed_4wheel_msg(speed, speed, speed, speed)
+
+  def _wheel_speed_4wheel_msg(self, wheel_fl: float, wheel_fr: float, wheel_rl: float, wheel_rr: float):
     # panda safety doesn't scale, so undo the scaling
-    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
-    values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
-    values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
+    values = {
+      "WHL_SPD_FL": wheel_fl * 0.03125,
+      "WHL_SPD_FR": wheel_fr * 0.03125,
+      "WHL_SPD_RL": wheel_rl * 0.03125,
+      "WHL_SPD_RR": wheel_rr * 0.03125,
+      "WHL_SPD_AliveCounter_LSB": (self.cnt_speed % 16) & 0x3,
+      "WHL_SPD_AliveCounter_MSB": (self.cnt_speed % 16) >> 2,
+    }
     self.__class__.cnt_speed += 1
     return self.packer.make_can_msg_panda("WHL_SPD11", 0, values, fix_checksum=checksum)
+
 
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": enable, "CR_VSM_Alive": self.cnt_cruise % 16}
