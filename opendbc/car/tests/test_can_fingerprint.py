@@ -1,27 +1,28 @@
-import pytest
 from opendbc.car.can_definitions import CanData
-from opendbc.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint
-from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
 
 
 class TestCanFingerprint:
-  @pytest.mark.parametrize("car_model, fingerprints", FINGERPRINTS.items())
-  def test_can_fingerprint(self, car_model, fingerprints):
+  def test_can_fingerprint(self):
     """Tests online fingerprinting function on offline fingerprints"""
+    from opendbc.car.car_helpers import can_fingerprint
+    from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
 
-    for fingerprint in fingerprints:  # can have multiple fingerprints for each platform
-      can = [CanData(address=address, dat=b'\x00' * length, src=src)
-             for address, length in fingerprint.items() for src in (0, 1)]
+    for car_model, fingerprints in FINGERPRINTS.items():
+      for fingerprint in fingerprints:  # can have multiple fingerprints for each platform
+        can = [CanData(address=address, dat=b'\x00' * length, src=src)
+               for address, length in fingerprint.items() for src in (0, 1)]
 
-      fingerprint_iter = iter([can])
-      car_fingerprint, finger = can_fingerprint(lambda **kwargs: [next(fingerprint_iter, [])])  # noqa: B023
+        fingerprint_iter = iter([can])
+        car_fingerprint, finger = can_fingerprint(lambda **kwargs: [next(fingerprint_iter, [])])  # noqa: B023
 
-      assert car_fingerprint == car_model
-      assert finger[0] == fingerprint
-      assert finger[1] == fingerprint
-      assert finger[2] == {}
+        assert car_fingerprint == car_model
+        assert finger[0] == fingerprint
+        assert finger[1] == fingerprint
+        assert finger[2] == {}
 
   def test_timing(self, subtests):
+    from opendbc.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint
+    from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
     # just pick any CAN fingerprinting car
     car_model = "CHEVROLET_BOLT_EUV"
     fingerprint = FINGERPRINTS[car_model][0]
