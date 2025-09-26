@@ -1,7 +1,6 @@
 import os
 import math
 import hypothesis.strategies as st
-import pytest
 from hypothesis import Phase, given, settings
 from collections.abc import Callable
 from typing import Any
@@ -64,7 +63,6 @@ class TestCarInterfaces:
   @given(data=st.data())
   def test_car_interfaces(self, data, subtests):  # Add subtests parameter
     for car_name in sorted(PLATFORMS):
-      with subtests.test(car=car_name):
         car_interface = get_fuzzy_car_interface(car_name, data.draw)
         car_params = car_interface.CP.as_reader()
 
