@@ -61,7 +61,7 @@ class TestCarInterfaces:
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
-  def test_car_interfaces(self, data, subtests):  # Add subtests parameter
+  def test_car_interfaces(self, data):
     for car_name in sorted(PLATFORMS):
         car_interface = get_fuzzy_car_interface(car_name, data.draw)
         car_params = car_interface.CP.as_reader()
