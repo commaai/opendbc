@@ -59,71 +59,72 @@ def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
 class TestCarInterfaces:
   # FIXME: Due to the lists used in carParams, Phase.target is very slow and will cause
   #  many generated examples to overrun when max_examples > ~20, don't use it
-  @pytest.mark.parametrize("car_name", sorted(PLATFORMS))
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
-  def test_car_interfaces(self, car_name, data):
-    car_interface = get_fuzzy_car_interface(car_name, data.draw)
-    car_params = car_interface.CP.as_reader()
+  def test_car_interfaces(self, data):
+    for car_name in sorted(PLATFORMS):
+      with pytest.subtests(car=car_name):
+        car_interface = get_fuzzy_car_interface(car_name, data.draw)
+        car_params = car_interface.CP.as_reader()
 
-    assert car_params.mass > 1
-    assert car_params.wheelbase > 0
-    # centerToFront is center of gravity to front wheels, assert a reasonable range
-    assert car_params.wheelbase * 0.3 < car_params.centerToFront < car_params.wheelbase * 0.7
-    assert car_params.maxLateralAccel > 0
+        assert car_params.mass > 1
+        assert car_params.wheelbase > 0
+        # centerToFront is center of gravity to front wheels, assert a reasonable range
+        assert car_params.wheelbase * 0.3 < car_params.centerToFront < car_params.wheelbase * 0.7
+        assert car_params.maxLateralAccel > 0
 
-    # Longitudinal sanity checks
-    assert len(car_params.longitudinalTuning.kpV) == len(car_params.longitudinalTuning.kpBP)
-    assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
+        # Longitudinal sanity checks
+        assert len(car_params.longitudinalTuning.kpV) == len(car_params.longitudinalTuning.kpBP)
+        assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
 
-    # Lateral sanity checks
-    if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
-      tune = car_params.lateralTuning
-      if tune.which() == 'pid':
-        if car_name != MOCK.MOCK:
-          assert not math.isnan(tune.pid.kf) and tune.pid.kf > 0
-          assert len(tune.pid.kpV) > 0 and len(tune.pid.kpV) == len(tune.pid.kpBP)
-          assert len(tune.pid.kiV) > 0 and len(tune.pid.kiV) == len(tune.pid.kiBP)
+        # Lateral sanity checks
+        if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
+          tune = car_params.lateralTuning
+          if tune.which() == 'pid':
+            if car_name != MOCK.MOCK:
+              assert not math.isnan(tune.pid.kf) and tune.pid.kf > 0
+              assert len(tune.pid.kpV) > 0 and len(tune.pid.kpV) == len(tune.pid.kpBP)
+              assert len(tune.pid.kiV) > 0 and len(tune.pid.kiV) == len(tune.pid.kiBP)
 
-      elif tune.which() == 'torque':
-        assert not math.isnan(tune.torque.kf) and tune.torque.kf > 0
-        assert not math.isnan(tune.torque.friction) and tune.torque.friction > 0
+          elif tune.which() == 'torque':
+            assert not math.isnan(tune.torque.kf) and tune.torque.kf > 0
+            assert not math.isnan(tune.torque.friction) and tune.torque.friction > 0
 
-    # Run car interface
-    # TODO: use hypothesis to generate random messages
-    now_nanos = 0
-    CC = structs.CarControl().as_reader()
-    for _ in range(10):
-      car_interface.update([])
-      car_interface.apply(CC, now_nanos)
-      now_nanos += DT_CTRL * 1e9  # 10 ms
+        # Run car interface
+        # TODO: use hypothesis to generate random messages
+        now_nanos = 0
+        CC = structs.CarControl().as_reader()
+        for _ in range(10):
+          car_interface.update([])
+          car_interface.apply(CC, now_nanos)
+          now_nanos += DT_CTRL * 1e9  # 10 ms
 
-    CC = structs.CarControl()
-    CC.enabled = True
-    CC.latActive = True
-    CC.longActive = True
-    CC = CC.as_reader()
-    for _ in range(10):
-      car_interface.update([])
-      car_interface.apply(CC, now_nanos)
-      now_nanos += DT_CTRL * 1e9  # 10ms
+        CC = structs.CarControl()
+        CC.enabled = True
+        CC.latActive = True
+        CC.longActive = True
+        CC = CC.as_reader()
+        for _ in range(10):
+          car_interface.update([])
+          car_interface.apply(CC, now_nanos)
+          now_nanos += DT_CTRL * 1e9  # 10ms
 
-    # Test radar interface
-    radar_interface = car_interface.RadarInterface(car_params)
-    assert radar_interface
+        # Test radar interface
+        radar_interface = car_interface.RadarInterface(car_params)
+        assert radar_interface
 
-    # Run radar interface once
-    radar_interface.update([])
-    if not car_params.radarUnavailable and radar_interface.rcp is not None and \
-       hasattr(radar_interface, '_update') and hasattr(radar_interface, 'trigger_msg'):
-      radar_interface._update([radar_interface.trigger_msg])
+        # Run radar interface once
+        radar_interface.update([])
+        if not car_params.radarUnavailable and radar_interface.rcp is not None and \
+           hasattr(radar_interface, '_update') and hasattr(radar_interface, 'trigger_msg'):
+          radar_interface._update([radar_interface.trigger_msg])
 
-    # Test radar fault
-    if not car_params.radarUnavailable and radar_interface.rcp is not None:
-      cans = [(0, [CanData(0, b'', 0) for _ in range(5)])]
-      rr = radar_interface.update(cans)
-      assert rr is None or len(rr.errors) > 0
+        # Test radar fault
+        if not car_params.radarUnavailable and radar_interface.rcp is not None:
+          cans = [(0, [CanData(0, b'', 0) for _ in range(5)])]
+          rr = radar_interface.update(cans)
+          assert rr is None or len(rr.errors) > 0
 
   def test_interface_attrs(self):
     """Asserts basic behavior of interface attribute getter"""
