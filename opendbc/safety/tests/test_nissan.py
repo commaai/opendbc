@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 import unittest
+import numpy as np
 
-from opendbc.car.nissan.values import NissanSafetyFlags
+from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
+from opendbc.car.nissan.values import CarControllerParams, NissanSafetyFlags
+from opendbc.car.nissan.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
+from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerPanda, away_round, round_speed
 
 
 class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
@@ -22,18 +26,30 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
   STEER_ANGLE_MAX = 600  # deg, reasonable limit
   DEG_TO_CAN = 100
 
-  ANGLE_RATE_BP = [0., 5., 15.]
-  ANGLE_RATE_UP = [5., .8, .15]  # windup limit
-  ANGLE_RATE_DOWN = [5., 3.5, .4]  # unwind limit
+  # Real time limits
+  LATERAL_FREQUENCY = 100  # Hz
+
+  ANGLE_RATE_BP = None
+  ANGLE_RATE_UP = None # windup limit
+  ANGLE_RATE_DOWN = None  # unwind limit
+
+  cnt_angle_cmd = 0
+
+  def _get_steer_cmd_angle_max(self, speed):
+    return get_max_angle_vm(max(speed, 1), self.VM, CarControllerParams)
 
   def setUp(self):
+    self.VM = VehicleModel(get_safety_CP("NISSAN_XTRAIL"))
     self.packer = CANPackerPanda("nissan_x_trail_2017_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
     self.safety.init_tests()
 
-  def _angle_cmd_msg(self, angle: float, enabled: bool):
+  def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     values = {"DESIRED_ANGLE": angle, "LKA_ACTIVE": 1 if enabled else 0}
+    if increment_timer:
+      self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      self.__class__.cnt_angle_cmd += 1
     return self.packer.make_can_msg_panda("LKAS", 0, values)
 
   def _angle_meas_msg(self, angle: float):
@@ -79,6 +95,71 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
         tx = self._tx(self._acc_button_cmd(**args))
         self.assertEqual(tx, should_tx)
 
+  def test_angle_cmd_when_enabled(self):
+    # We properly test lateral acceleration and jerk below
+    pass
+
+  def test_lateral_accel_limit(self):
+    for speed in np.linspace(0, 40, 100):
+      speed = max(speed, 1)
+      # match DI_vehicleSpeed rounding on CAN
+      speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
+      for sign in (-1, 1):
+        self.safety.set_controls_allowed(True)
+        self._reset_speed_measurement(speed + 1)  # safety fudges the speed
+
+        # at limit (safety tolerance adds 1)
+        max_angle = get_max_angle_vm(speed, self.VM, CarControllerParams) * sign
+        max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
+
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)), f"{max_angle=}")
+
+        # 2 units above limit
+        max_angle_raw = (get_max_angle_vm(speed, self.VM, CarControllerParams) + 2) * sign
+        max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        self._tx(self._angle_cmd_msg(max_angle, True))
+
+        # at low speeds max angle is above 360, so adding 1 has no effect
+        should_tx = abs(max_angle_raw) >= self.STEER_ANGLE_MAX
+        self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)), f"{max_angle=}")
+
+  def test_lateral_jerk_limit(self):
+    for speed in np.linspace(0, 40, 100):
+      speed = max(speed, 1)
+      # match DI_vehicleSpeed rounding on CAN
+      speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
+      for sign in (-1, 1):  # (-1, 1):
+        self.safety.set_controls_allowed(True)
+        self._reset_speed_measurement(speed + 1)  # safety fudges the speed
+        self._tx(self._angle_cmd_msg(0, True))
+
+        # Stay within limits
+        # Up
+        max_angle_delta = get_max_angle_delta_vm(speed, self.VM, CarControllerParams) * sign
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)), f"{max_angle_delta=}")
+
+        # Don't change
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)), f"{max_angle_delta=}")
+
+        # Down
+        self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+        # Inject too high rates
+        # Up
+        max_angle_delta = (get_max_angle_delta_vm(speed, self.VM, CarControllerParams) + 1) * sign
+        self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)), f"{max_angle_delta=}")
+
+        # Don't change
+        self.safety.set_desired_angle_last(round(max_angle_delta * self.DEG_TO_CAN))
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)), f"{max_angle_delta=}")
+
+        # Down
+        self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
+
+        # Recover
+        self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
 
 class TestNissanSafetyAltEpsBus(TestNissanSafety):
   """Altima uses different buses"""
@@ -87,6 +168,7 @@ class TestNissanSafetyAltEpsBus(TestNissanSafety):
   CRUISE_BUS = 1
 
   def setUp(self):
+    self.VM = VehicleModel(get_safety_CP("NISSAN_XTRAIL"))
     self.packer = CANPackerPanda("nissan_x_trail_2017_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, NissanSafetyFlags.ALT_EPS_BUS)
@@ -96,6 +178,7 @@ class TestNissanSafetyAltEpsBus(TestNissanSafety):
 class TestNissanLeafSafety(TestNissanSafety):
 
   def setUp(self):
+    self.VM = VehicleModel(get_safety_CP("NISSAN_LEAF"))
     self.packer = CANPackerPanda("nissan_leaf_2018_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
