@@ -21,7 +21,8 @@ typedef struct {
   unsigned char data[64];
 } CANPacket_t;
 """, packed=True)
-class CANPacket: pass
+class CANPacket:
+  pass
 
 ffi.cdef("""
 bool safety_rx_hook(CANPacket_t *msg);
@@ -78,7 +79,8 @@ void set_honda_bosch_long(bool c);
 int get_honda_hw(void);
 """)
 
-class LibSafety: pass
+class LibSafety:
+  pass
 libsafety: LibSafety = ffi.dlopen(libsafety_fn)
 
 def make_CANPacket(addr: int, bus: int, dat):
