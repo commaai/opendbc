@@ -90,7 +90,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
   cnt_yaw_rate = 0
 
   packer: CANPackerSafety
-  safety: libsafety_py.Panda
+  safety: libsafety_py.LibSafety
 
   def get_canfd_curvature_limits(self, speed):
     # Round it in accordance with the safety

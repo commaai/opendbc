@@ -1,4 +1,3 @@
-// minimal code to fake a panda for tests
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -7,14 +6,7 @@
 
 #define ALLOW_DEBUG
 
-void print(const char *a) {
-  printf("%s", a);
-}
-
-void puth(unsigned int i) {
-  printf("%u", i);
-}
-
+// TODO: time should just be passed into the hooks we expose
 uint32_t timer_cnt = 0;
 uint32_t microsecond_timer_get(void);
 uint32_t microsecond_timer_get(void) {

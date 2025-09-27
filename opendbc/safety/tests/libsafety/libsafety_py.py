@@ -3,7 +3,7 @@ from cffi import FFI
 from typing import Protocol
 
 from opendbc.safety import LEN_TO_DLC
-from opendbc.safety.tests.libsafety.safety_helpers import PandaSafety, setup_safety_helpers
+from opendbc.safety.tests.libsafety.safety_helpers import SafetyHelpers, setup_safety_helpers
 
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))
 libsafety_fn = os.path.join(libsafety_dir, "libsafety.so")
@@ -45,14 +45,14 @@ class CANPacket:
   data: list[int]
 
 
-class Panda(PandaSafety, Protocol):
+class LibSafety(SafetyHelpers, Protocol):
   def safety_rx_hook(self, msg: CANPacket) -> int: ...
   def safety_tx_hook(self, msg: CANPacket) -> int: ...
   def safety_fwd_hook(self, bus_num: int, addr: int) -> int: ...
   def set_safety_hooks(self, mode: int, param: int) -> int: ...
 
 
-libsafety: Panda = ffi.dlopen(libsafety_fn)
+libsafety: LibSafety = ffi.dlopen(libsafety_fn)
 
 
 # helpers

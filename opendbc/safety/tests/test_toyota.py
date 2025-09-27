@@ -26,7 +26,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   EPS_SCALE = 73
 
   packer: CANPackerSafety
-  safety: libsafety_py.Panda
+  safety: libsafety_py.LibSafety
 
   def _torque_meas_msg(self, torque: int, driver_torque: int | None = None):
     values = {"STEER_TORQUE_EPS": (torque / self.EPS_SCALE) * 100.}

@@ -72,7 +72,7 @@ def add_regen_tests(cls):
 
 
 class SafetyTestBase(unittest.TestCase):
-  safety: libsafety_py.Panda
+  safety: libsafety_py.LibSafety
 
   @classmethod
   def setUpClass(cls):
