@@ -31,10 +31,6 @@ int safety_fwd_hook(int bus_num, int addr);
 int set_safety_hooks(uint16_t mode, uint16_t param);
 """)
 
-ffi.cdef("""
-void can_set_checksum(CANPacket_t *packet);
-""")
-
 setup_safety_helpers(ffi)
 
 
@@ -50,10 +46,6 @@ class CANPacket:
 
 
 class Panda(PandaSafety, Protocol):
-  # CAN
-  def can_set_checksum(self, p: CANPacket) -> None: ...
-
-  # safety
   def safety_rx_hook(self, msg: CANPacket) -> int: ...
   def safety_tx_hook(self, msg: CANPacket) -> int: ...
   def safety_fwd_hook(self, bus_num: int, addr: int) -> int: ...
@@ -72,6 +64,4 @@ def make_CANPacket(addr: int, bus: int, dat):
   ret[0].data_len_code = LEN_TO_DLC[len(dat)]
   ret[0].bus = bus
   ret[0].data = bytes(dat)
-  libsafety.can_set_checksum(ret)
-
   return ret
