@@ -2,9 +2,6 @@
 
 #include "opendbc/safety/board/fake_stm.h"
 #include "opendbc/safety/board/can.h"
-
-//int safety_tx_hook(CANPacket_t *msg) { return 1; }
-
 #include "opendbc/safety/safety.h"
 
 // libsafety stuff
