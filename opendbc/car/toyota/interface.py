@@ -54,6 +54,9 @@ class CarInterface(CarInterfaceBase):
     found_ecus = [fw.ecu for fw in car_fw]
     ret.enableDsu = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
 
+    if ret.enableDsu:
+      ret.safetyConfigs[0].safetyParam |= ToyotaSafetyFlags.ENABLE_DSU.value
+
     if Ecu.hybrid in found_ecus:
       ret.flags |= ToyotaFlags.HYBRID.value
 
