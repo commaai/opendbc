@@ -335,7 +335,6 @@ void safety_tick(const safety_config *cfg) {
 
 static void relay_malfunction_set(void) {
   relay_malfunction = true;
-  fault_occurred(FAULT_RELAY_MALFUNCTION);
 }
 
 static void generic_rx_checks(void) {
@@ -372,7 +371,6 @@ static void stock_ecu_check(bool stock_ecu_detected) {
 
 static void relay_malfunction_reset(void) {
   relay_malfunction = false;
-  fault_recovered(FAULT_RELAY_MALFUNCTION);
 }
 
 // resets values and min/max for sample_t struct
