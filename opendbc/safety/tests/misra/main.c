@@ -2,7 +2,7 @@
 
 // this file is checked by cppcheck
 
-// Ignore misra-c2012-8.7 as these functions are only called from panda and libsafety
+// Ignore misra-c2012-8.7 as these functions are only called from libsafety
 UNUSED(heartbeat_engaged);
 
 UNUSED(safety_rx_hook);

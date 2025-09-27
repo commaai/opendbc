@@ -1,4 +1,3 @@
-# panda safety helpers, from safety_helpers.c
 from typing import Protocol
 
 
