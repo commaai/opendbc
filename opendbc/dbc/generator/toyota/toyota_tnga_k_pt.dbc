@@ -1,3 +1,4 @@
+CM_ "IMPORT _community.dbc";
 CM_ "IMPORT _toyota_2017.dbc";
 CM_ "IMPORT _toyota_adas_standard.dbc";
 
