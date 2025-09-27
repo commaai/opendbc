@@ -31,7 +31,6 @@ int set_safety_hooks(uint16_t mode, uint16_t param);
 """)
 
 
-# merged from safety_helpers.py
 def setup_safety_helpers(ffi):
   ffi.cdef("""
   void set_controls_allowed(bool c);
