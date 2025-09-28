@@ -1,10 +1,18 @@
-#include <stdbool.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-#include "opendbc/safety/board/fake_stm.h"
-#include "opendbc/safety/board/can.h"
+// TODO: time should just be passed into the hooks we expose
+uint32_t timer_cnt = 0;
+uint32_t microsecond_timer_get(void);
+uint32_t microsecond_timer_get(void) {
+  return timer_cnt;
+}
+
+#include "opendbc/safety/can.h"
 #include "opendbc/safety/safety.h"
 
-#include <stdio.h>
+#define ALLOW_DEBUG
 
 void safety_tick_current_safety_config() {
   safety_tick(&current_safety_config);

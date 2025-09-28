@@ -4,7 +4,7 @@
 #include "opendbc/safety/lateral.h"
 #include "opendbc/safety/longitudinal.h"
 #include "opendbc/safety/declarations.h"
-#include "opendbc/safety/board/can.h"
+#include "opendbc/safety/can.h"
 
 // all the safety modes
 #include "opendbc/safety/modes/defaults.h"
