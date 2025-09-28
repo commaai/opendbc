@@ -1,21 +1,21 @@
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define MIN(a, b) ({ \
+#define SAFETY_MIN(a, b) ({ \
   __typeof__(a) _a = (a); \
   __typeof__(b) _b = (b); \
   (_a < _b) ? _a : _b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define MAX(a, b) ({ \
+#define SAFETY_MAX(a, b) ({ \
   __typeof__(a) _a = (a); \
   __typeof__(b) _b = (b); \
   (_a > _b) ? _a : _b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define CLAMP(x, low, high) ({ \
+#define SAFETY_CLAMP(x, low, high) ({ \
   __typeof__(x) __x = (x); \
   __typeof__(low) __low = (low);\
   __typeof__(high) __high = (high);\
@@ -23,29 +23,25 @@
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define ABS(a) ({ \
+#define SAFETY_ABS(a) ({ \
   __typeof__(a) _a = (a); \
   (_a > 0) ? _a : (-_a); \
 })
 
-// STM32 HAL defines this in production; define here for tests if missing
-#ifndef UNUSED
-#define UNUSED(x) ((void)(x))
-#endif
+#define SAFETY_UNUSED(x) ((void)(x))
 
 // compute the time elapsed (in microseconds) from 2 counter samples
 // case where ts < ts_last is ok: overflow is properly re-casted into uint32_t
-static inline uint32_t get_ts_elapsed(uint32_t ts, uint32_t ts_last) {
+static inline uint32_t safety_get_ts_elapsed(uint32_t ts, uint32_t ts_last) {
   return ts - ts_last;
 }
 
-static bool max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {
+static bool safety_max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {
   return (val > MAX_VAL) || (val < MIN_VAL);
 }
 
 // interp function that holds extreme values
-static float interpolate(struct lookup_t xy, float x) {
-
+static float safety_interpolate(struct lookup_t xy, float x) {
   int size = sizeof(xy.x) / sizeof(xy.x[0]);
   float ret = xy.y[size - 1];  // default output is last point
 
@@ -62,7 +58,7 @@ static float interpolate(struct lookup_t xy, float x) {
         float dx = xy.x[i+1] - x0;
         float dy = xy.y[i+1] - y0;
         // dx should not be zero as xy.x is supposed to be monotonic
-        dx = MAX(dx, 0.0001);
+        dx = SAFETY_MAX(dx, 0.0001);
         ret = (dy * (x - x0) / dx) + y0;
         break;
       }
