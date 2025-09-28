@@ -63,7 +63,7 @@ static safety_config volkswagen_pq_init(uint16_t param) {
     {.msg = {{MSG_GRA_NEU, 0, 4, 30U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  unused(param);
+  safety_unused(param);
 
   volkswagen_set_button_prev = false;
   volkswagen_resume_button_prev = false;
