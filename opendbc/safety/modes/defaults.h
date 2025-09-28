@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 // GCOV_EXCL_START
 // Unreachable by design (doesn't define any rx msgs)
