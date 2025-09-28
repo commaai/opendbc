@@ -5,7 +5,6 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 cd $DIR
 
 source $DIR/../../../setup.sh
-$DIR/install_mull.sh
 
 GIT_REF="${GIT_REF:-origin/master}"
 GIT_ROOT=$(git rev-parse --show-toplevel)
