@@ -1,21 +1,21 @@
 #include "opendbc/safety/declarations.h"
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define safety_min(a, b) ({ \
+#define SAFETY_MIN(a, b) ({ \
   __typeof__(a) _a = (a); \
   __typeof__(b) _b = (b); \
   (_a < _b) ? _a : _b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define safety_max(a, b) ({ \
+#define SAFETY_MAX(a, b) ({ \
   __typeof__(a) _a = (a); \
   __typeof__(b) _b = (b); \
   (_a > _b) ? _a : _b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define safety_clamp(x, low, high) ({ \
+#define SAFETY_CLAMP(x, low, high) ({ \
   __typeof__(x) __x = (x); \
   __typeof__(low) __low = (low);\
   __typeof__(high) __high = (high);\
@@ -23,12 +23,12 @@
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define safety_abs(a) ({ \
+#define SAFETY_ABS(a) ({ \
   __typeof__(a) _a = (a); \
   (_a > 0) ? _a : (-_a); \
 })
 
-#define safety_unused(x) ((void)(x))
+#define SAFETY_UNUSED(x) ((void)(x))
 
 // compute the time elapsed (in microseconds) from 2 counter samples
 // case where ts < ts_last is ok: overflow is properly re-casted into uint32_t
@@ -42,7 +42,6 @@ static bool safety_max_limit_check(int val, const int MAX_VAL, const int MIN_VAL
 
 // interp function that holds extreme values
 static float safety_interpolate(struct lookup_t xy, float x) {
-
   int size = sizeof(xy.x) / sizeof(xy.x[0]);
   float ret = xy.y[size - 1];  // default output is last point
 
@@ -59,7 +58,7 @@ static float safety_interpolate(struct lookup_t xy, float x) {
         float dx = xy.x[i+1] - x0;
         float dy = xy.y[i+1] - y0;
         // dx should not be zero as xy.x is supposed to be monotonic
-        dx = safety_max(dx, 0.0001);
+        dx = SAFETY_MAX(dx, 0.0001);
         ret = (dy * (x - x0) / dx) + y0;
         break;
       }

@@ -124,7 +124,7 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config psa_init(uint16_t param) {
-  safety_unused(param);
+  SAFETY_UNUSED(param);
   static const CanMsg PSA_TX_MSGS[] = {
     {PSA_LANE_KEEP_ASSIST, PSA_MAIN_BUS, 8, .check_relay = true}, // EPS steering
   };
