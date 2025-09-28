@@ -2,8 +2,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "opendbc/safety/board/utils.h"
-
 #define ALLOW_DEBUG
 
 // TODO: time should just be passed into the hooks we expose
