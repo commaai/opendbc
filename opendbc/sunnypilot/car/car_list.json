@@ -1914,6 +1914,16 @@
     ],
     "package": "Smart Cruise Control (SCC)"
   },
+  "Kia Forte Non-SCC 2019": {
+    "platform": "KIA_FORTE_2019_NON_SCC",
+    "make": "Kia",
+    "brand": "hyundai",
+    "model": "Forte Non-SCC",
+    "year": [
+      "2019"
+    ],
+    "package": "No Smart Cruise Control (Non-SCC)"
+  },
   "Kia K5 2021-24": {
     "platform": "KIA_K5_2021",
     "make": "Kia",
