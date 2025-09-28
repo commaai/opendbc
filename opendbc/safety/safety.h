@@ -142,7 +142,7 @@ static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
   if (index != -1) {
     uint8_t expected_counter = (addr_list[index].status.last_counter + 1U) % (addr_list[index].msg[addr_list[index].status.index].max_counter + 1U);
     addr_list[index].status.wrong_counters += (expected_counter == counter) ? -1 : 1;
-    addr_list[index].status.wrong_counters = CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
+    addr_list[index].status.wrong_counters = clamp(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
     addr_list[index].status.last_counter = counter;
   }
 }
@@ -318,7 +318,7 @@ void safety_tick(const safety_config *cfg) {
       // Quite conservative to not risk false triggers.
       // 2s of lag is worse case, since the function is called at 1Hz
       uint32_t timestep = 1e6 / cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
-      bool lagging = elapsed_time > MAX(timestep * MAX_MISSED_MSGS, 1e6);
+      bool lagging = elapsed_time > max(timestep * MAX_MISSED_MSGS, 1e6);
       cfg->rx_checks[i].status.lagging = lagging;
       if (lagging) {
         controls_allowed = false;
@@ -479,9 +479,9 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 // convert a trimmed integer to signed 32 bit int
 int to_signed(int d, int bits) {
   int d_signed = d;
-  int max_value = (1 << MAX((bits - 1), 0));
+  int max_value = (1 << max((bits - 1), 0));
   if (d >= max_value) {
-    d_signed = d - (1 << MAX(bits, 0));
+    d_signed = d - (1 << max(bits, 0));
   }
   return d_signed;
 }
@@ -525,7 +525,7 @@ void speed_mismatch_check(const float speed_2) {
   // Disable controls if speeds from two sources are too far apart.
   // For safety modes that use speed to adjust torque or angle limits
   const float MAX_SPEED_DELTA = 2.0;  // m/s
-  bool is_invalid_speed = ABS(speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
+  bool is_invalid_speed = abs(speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
   if (is_invalid_speed) {
     controls_allowed = false;
   }

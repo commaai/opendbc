@@ -32,7 +32,7 @@ static safety_config body_init(uint16_t param) {
   static const CanMsg BODY_TX_MSGS[] = {{0x250, 0, 8, .check_relay = false}, {0x250, 0, 6, .check_relay = false}, {0x251, 0, 5, .check_relay = false},  // body
                                         {0x1, 0, 8, .check_relay = false}};  // CAN flasher
 
-  UNUSED(param);
+  unused(param);
   safety_config ret = BUILD_SAFETY_CFG(body_rx_checks, BODY_TX_MSGS);
   ret.disable_forwarding = true;
   return ret;

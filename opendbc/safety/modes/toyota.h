@@ -271,12 +271,12 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
         }
 
         // check if we should wind down torque
-        int driver_torque = MIN(ABS(torque_driver.min), ABS(torque_driver.max));
+        int driver_torque = min(abs(torque_driver.min), abs(torque_driver.max));
         if ((driver_torque > TOYOTA_LTA_MAX_DRIVER_TORQUE) && (torque_wind_down != 0)) {
           tx = false;
         }
 
-        int eps_torque = MIN(ABS(torque_meas.min), ABS(torque_meas.max));
+        int eps_torque = min(abs(torque_meas.min), abs(torque_meas.max));
         if ((eps_torque > TOYOTA_LTA_MAX_MEAS_TORQUE) && (torque_wind_down != 0)) {
           tx = false;
         }

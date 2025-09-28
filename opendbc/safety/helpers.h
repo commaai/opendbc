@@ -1,21 +1,21 @@
 #include "opendbc/safety/declarations.h"
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define MIN(a, b) ({ \
+#define min(a, b) ({ \
   __typeof__(a) _a = (a); \
   __typeof__(b) _b = (b); \
   (_a < _b) ? _a : _b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define MAX(a, b) ({ \
+#define max(a, b) ({ \
   __typeof__(a) _a = (a); \
   __typeof__(b) _b = (b); \
   (_a > _b) ? _a : _b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define CLAMP(x, low, high) ({ \
+#define clamp(x, low, high) ({ \
   __typeof__(x) __x = (x); \
   __typeof__(low) __low = (low);\
   __typeof__(high) __high = (high);\
@@ -23,15 +23,12 @@
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-#define ABS(a) ({ \
+#define abs(a) ({ \
   __typeof__(a) _a = (a); \
   (_a > 0) ? _a : (-_a); \
 })
 
-// STM32 HAL defines this in production; define here for tests if missing
-#ifndef UNUSED
-#define UNUSED(x) ((void)(x))
-#endif
+#define unused(x) ((void)(x))
 
 // compute the time elapsed (in microseconds) from 2 counter samples
 // case where ts < ts_last is ok: overflow is properly re-casted into uint32_t
@@ -62,7 +59,7 @@ static float interpolate(struct lookup_t xy, float x) {
         float dx = xy.x[i+1] - x0;
         float dy = xy.y[i+1] - y0;
         // dx should not be zero as xy.x is supposed to be monotonic
-        dx = MAX(dx, 0.0001);
+        dx = max(dx, 0.0001);
         ret = (dy * (x - x0) / dx) + y0;
         break;
       }
