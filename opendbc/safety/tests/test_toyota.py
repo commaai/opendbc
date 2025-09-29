@@ -350,7 +350,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
 
   def _accel_msg_183(self, accel):
     values = {"ACCEL_CMD": accel}
-    return self.packer.make_can_msg_panda("ACC_CONTROL_2", 0, values)
+    return self.packer.make_can_msg_safety("ACC_CONTROL_2", 0, values)
 
   def _accel_msg(self, accel, cancel_req=0):
     return self._accel_msg_183(accel)
