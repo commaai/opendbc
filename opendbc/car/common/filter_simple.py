@@ -25,11 +25,10 @@ class FirstOrderFilter:
 
 class HighPassFilter:
   def __init__(self, x0, rc1, rc2, dt, initialized=True):
-    assert rc2 > rc1, "rc2 must be greater than rc1"
-
     self.x = x0
     self._f1 = FirstOrderFilter(x0, rc1, dt, initialized)
     self._f2 = FirstOrderFilter(x0, rc2, dt, initialized)
+    assert rc2 > rc1, "rc2 must be greater than rc1"
 
   def update_dt(self, dt):
     self._f1.update_dt(dt)
