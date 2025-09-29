@@ -87,7 +87,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     if (!acc_main_on) {
       controls_allowed = false;
     }
-  } 
+  }
 
   if ((msg->addr == 0x326U) && (!honda_bosch_scm_alt)) {
     acc_main_on = GET_BIT(msg, 28U);
@@ -95,7 +95,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
       controls_allowed = false;
     }
   }
-  
+
   // enter controls when PCM enters cruise state
   if (pcm_cruise && (msg->addr == 0x17CU)) {
     const bool cruise_engaged = GET_BIT(msg, 38U);
