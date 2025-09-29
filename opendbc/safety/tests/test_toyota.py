@@ -359,7 +359,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
 class TestToyotaSecOcSafetyStockLongitudinal(TestToyotaSecOcSafetyBase, TestToyotaStockLongitudinalBase):
 
   def setUp(self):
-    self.packer = CANPackerPanda("toyota_secoc_pt_generated")
+    self.packer = CANPackerSafety("toyota_secoc_pt_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
                                  self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SECOC)
@@ -372,7 +372,7 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x191, 0x412, 0x131, 0x343, 0x183]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("toyota_secoc_pt_generated")
+    self.packer = CANPackerSafety("toyota_secoc_pt_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
