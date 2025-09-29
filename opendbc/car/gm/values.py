@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
-from enum import IntFlag
+from enum import Enum, IntFlag
 
 from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -65,6 +65,12 @@ class GMSafetyFlags(IntFlag):
   EV = 4
 
 
+class Footnote(Enum):
+  SETUP = CarFootnote(
+    "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/gm\" target=\"_blank\">GM</a>.",
+    Column.MAKE, setup_note=True)
+
+
 @dataclass
 class GMCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC)"
@@ -76,6 +82,7 @@ class GMCarDocs(CarDocs):
       else:
         self.car_parts = CarParts.common([CarHarness.gm])
     else:
+      self.footnotes.insert(0, Footnote.SETUP)
       self.car_parts = CarParts.common([CarHarness.obd_ii])
 
 
@@ -99,6 +106,7 @@ class GMASCMPlatformConfig(GMPlatformConfig):
     # ASCM is supported, but due to a janky install and hardware configuration, we are not showing in the car docs
     self.car_docs = []
 
+
 @dataclass
 class GMSDGMPlatformConfig(GMPlatformConfig):
   def init(self):
@@ -112,7 +120,7 @@ class CAR(Platforms):
     GMCarSpecs(mass=1363, wheelbase=2.662, steerRatio=15.7, centerToFrontRatio=0.4),
   )
   CHEVROLET_VOLT = GMASCMPlatformConfig(
-    [GMCarDocs("Chevrolet Volt 2017-18", min_enable_speed=0, video_link="https://youtu.be/QeMCN_4TFfQ")],
+    [GMCarDocs("Chevrolet Volt 2017-18", min_enable_speed=0, video="https://youtu.be/QeMCN_4TFfQ")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=17.7, centerToFrontRatio=0.45, tireStiffnessFactor=0.469),
   )
   CADILLAC_ATS = GMASCMPlatformConfig(
@@ -124,7 +132,7 @@ class CAR(Platforms):
     GMCarSpecs(mass=1496, wheelbase=2.83, steerRatio=15.8, centerToFrontRatio=0.4),
   )
   GMC_ACADIA = GMASCMPlatformConfig(
-    [GMCarDocs("GMC Acadia 2018", video_link="https://www.youtube.com/watch?v=0ZN6DdsBUZo")],
+    [GMCarDocs("GMC Acadia 2018", video="https://www.youtube.com/watch?v=0ZN6DdsBUZo")],
     GMCarSpecs(mass=1975, wheelbase=2.86, steerRatio=14.4, centerToFrontRatio=0.4),
   )
   BUICK_LACROSSE = GMASCMPlatformConfig(
@@ -149,7 +157,7 @@ class CAR(Platforms):
   )
   CHEVROLET_BOLT_EUV = GMPlatformConfig(
     [
-      GMCarDocs("Chevrolet Bolt EUV 2022-23", "Premier or Premier Redline Trim without Super Cruise Package", video_link="https://youtu.be/xvwzGMUA210"),
+      GMCarDocs("Chevrolet Bolt EUV 2022-23", "Premier or Premier Redline Trim without Super Cruise Package", video="https://youtu.be/xvwzGMUA210"),
       GMCarDocs("Chevrolet Bolt EV 2022-23", "2LT Trim with Adaptive Cruise Control Package"),
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
@@ -157,7 +165,7 @@ class CAR(Platforms):
   CHEVROLET_SILVERADO = GMPlatformConfig(
     [
       GMCarDocs("Chevrolet Silverado 1500 2020-21", "Safety Package II"),
-      GMCarDocs("GMC Sierra 1500 2020-21", "Driver Alert Package II", video_link="https://youtu.be/5HbNoBLzRwE"),
+      GMCarDocs("GMC Sierra 1500 2020-21", "Driver Alert Package II", video="https://youtu.be/5HbNoBLzRwE"),
     ],
     GMCarSpecs(mass=2450, wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
   )
@@ -195,11 +203,13 @@ class CruiseButtons:
   MAIN = 5
   CANCEL = 6
 
+
 class AccState:
   OFF = 0
   ACTIVE = 1
   FAULTED = 3
   STANDSTILL = 4
+
 
 class CanBus:
   POWERTRAIN = 0
