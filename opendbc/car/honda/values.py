@@ -207,7 +207,7 @@ class CAR(Platforms):
   )
   HONDA_ODYSSEY_RC5 = HondaBoschPlatformConfig(
     [
-      HondaCarDocs("Honda Odyssey RC5 for JPN", "All", video_link=""),
+      HondaCarDocs("Honda Odyssey RC5 for JPN", "All"),
     ],
     CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
     {Bus.pt: 'honda_odyssey_rc5_can_generated'},
