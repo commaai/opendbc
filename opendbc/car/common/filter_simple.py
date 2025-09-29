@@ -24,6 +24,7 @@ class FirstOrderFilter:
 
 
 class HighPassFilter:
+  # technically a band-pass filter
   def __init__(self, x0, rc1, rc2, dt, initialized=True):
     self.x = x0
     self._f1 = FirstOrderFilter(x0, rc1, dt, initialized)
