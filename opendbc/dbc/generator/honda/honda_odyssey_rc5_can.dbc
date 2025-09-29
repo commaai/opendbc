@@ -41,5 +41,3 @@ BO_ 882 CRUISE_PARAMS: 8 PCM
 CM_ SG_ 456 IDLESTOP_ALLOW "allows car to turn off engine at a standstill";
 CM_ SG_ 456 STANDSTILL "set to 1 when camera requests -4.0 m/s^2";
 CM_ SG_ 495 SPEED_LIMIT "Defaults to 0xFF if no speed limit found";
-
-VAL_ 477 GEAR_MT 14 "reverse" 6 "6th" 5 "5th" 4 "4th" 3 "3rd" 2 "2nd" 1 "1st" 0 "Clutch";
