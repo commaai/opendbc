@@ -7,6 +7,8 @@ from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
                                                   TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
+from opendbc.sunnypilot.car.toyota.carstate_ext import CarStateExt
+from opendbc.sunnypilot.car.toyota.values import ToyotaFlagsSP
 
 ButtonType = structs.CarState.ButtonEvent.Type
 SteerControlType = structs.CarParams.SteerControlType
@@ -23,9 +25,10 @@ TEMP_STEER_FAULTS = (0, 9, 11, 21, 25)
 PERM_STEER_FAULTS = (3, 17)
 
 
-class CarState(CarStateBase):
+class CarState(CarStateBase, CarStateExt):
   def __init__(self, CP, CP_SP):
-    super().__init__(CP, CP_SP)
+    CarStateBase.__init__(self, CP, CP_SP)
+    CarStateExt.__init__(self, CP, CP_SP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.eps_torque_scale = EPS_SCALE[CP.carFingerprint] / 100.
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
@@ -181,6 +184,7 @@ class CarState(CarStateBase):
       self.pcm_follow_distance = cp.vl["PCM_CRUISE_2"]["PCM_FOLLOW_DISTANCE"]
 
     buttonEvents = []
+    prev_distance_button = self.distance_button
     if self.CP.carFingerprint in TSS2_CAR:
       # lkas button is wired to the camera
       prev_lkas_button = self.lkas_button
@@ -193,11 +197,17 @@ class CarState(CarStateBase):
 
       if self.CP.carFingerprint not in RADAR_ACC_CAR:
         # distance button is wired to the ACC module (camera or radar)
-        prev_distance_button = self.distance_button
         self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
 
         buttonEvents += create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+    elif self.CP_SP.flags & ToyotaFlagsSP.SMART_DSU and not self.CP_SP.flags & ToyotaFlagsSP.RADAR_CAN_FILTER:
+      self.distance_button = cp.vl["SDSU"]["FD_BUTTON"]
+
+      buttonEvents += create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+
     ret.buttonEvents = buttonEvents
+
+    CarStateExt.update(self, ret, can_parsers)
 
     return ret, ret_sp
 
