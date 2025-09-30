@@ -32,6 +32,9 @@ class FlexRayCarDocs(ExtraCarDocs):
     self.support_link = "#flexray"
 
 
+class CAR(Platforms):
+  config: ExtraPlatformConfig
+
   EXTRA_HONDA = ExtraPlatformConfig(
     [
       CommunityCarDocs("Acura Integra 2023-25", "All"),
