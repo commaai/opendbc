@@ -7,7 +7,7 @@ from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerP
                                                   ToyotaSafetyFlags
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.sunnypilot.car.toyota.values import ToyotaFlagsSP, ToyotaSafetyFlagsSP
+from opendbc.sunnypilot.car.toyota.values import ToyotaSafetyFlagsSP
 
 SteerControlType = structs.CarParams.SteerControlType
 
@@ -165,56 +165,11 @@ class CarInterface(CarInterfaceBase):
       stock_cp.lateralTuning.pid.kiV = [0.1]
       stock_cp.lateralTuning.pid.kf = 0.00007818594
 
-    # Detect smartDSU, which intercepts ACC_CMD from the DSU (or radar) allowing openpilot to send it
-    # 0x2AA is sent by a similar device which intercepts the radar instead of DSU on NO_DSU_CARs
-    if 0x2FF in fingerprint[0] or (0x2AA in fingerprint[0] and candidate in NO_DSU_CAR):
-      ret.flags |= ToyotaFlagsSP.SMART_DSU.value
-
-    if 0x2AA in fingerprint[0] and candidate in NO_DSU_CAR:
-      ret.flags |= ToyotaFlagsSP.RADAR_CAN_FILTER.value
-
-    use_sdsu = bool(ret.flags & ToyotaFlagsSP.SMART_DSU)
-    stock_cp.enableDsu = stock_cp.enableDsu and not use_sdsu
-
-    if stock_cp.flags & ToyotaFlags.SNG_WITHOUT_DSU and stock_cp.enableDsu:
-      stock_cp.minEnableSpeed = -1. if use_sdsu else stock_cp.minEnableSpeed
-
-    # reuse logic from _get_params
-    # if the smartDSU is detected, openpilot can send ACC_CONTROL and the smartDSU will block it from the DSU or radar.
-    # since we don't yet parse radar on TSS2/TSS-P radar-based ACC cars, gate longitudinal behind experimental toggle
-    if candidate in (RADAR_ACC_CAR | NO_DSU_CAR):
-      stock_cp.alphaLongitudinalAvailable = use_sdsu or candidate in RADAR_ACC_CAR
-
-      if not use_sdsu:
-        # Disabling radar is only supported on TSS2 radar-ACC cars
-        if alpha_long and candidate in RADAR_ACC_CAR:
-          stock_cp.flags |= ToyotaFlags.DISABLE_RADAR.value
-      else:
-        use_sdsu = use_sdsu and alpha_long
-
-    # openpilot longitudinal enabled by default:
-    #  - non-(TSS2 radar ACC cars) w/ smartDSU installed
-    #  - cars w/ DSU disconnected
-    #  - TSS2 cars with camera sending ACC_CONTROL where we can block it
-    # openpilot longitudinal behind experimental long toggle:
-    #  - TSS2 radar ACC cars w/ smartDSU installed
-    #  - TSS2 radar ACC cars w/o smartDSU installed (disables radar)
-    #  - TSS-P DSU-less cars w/ CAN filter installed (no radar parser yet)
-    stock_cp.openpilotLongitudinalControl = use_sdsu or \
-      stock_cp.enableDsu or \
-      candidate in (TSS2_CAR - RADAR_ACC_CAR) or \
-      bool(stock_cp.flags & ToyotaFlags.DISABLE_RADAR)
-
-    if not stock_cp.openpilotLongitudinalControl:
-      stock_cp.safetyConfigs[0].safetyParam |= ToyotaSafetyFlags.STOCK_LONGITUDINAL.value
-    else:
-      stock_cp.safetyConfigs[0].safetyParam &= ~ToyotaSafetyFlags.STOCK_LONGITUDINAL.value
-
     return ret
 
   @staticmethod
   def init(CP, CP_SP, can_recv, can_send, communication_control=None):
-    # disable radar if alpha longitudinal toggled on radar-ACC car without CAN filter/smartDSU
+    # disable radar if alpha longitudinal toggled on radar-ACC car
     if CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       if communication_control is None:
         communication_control = bytes([uds.SERVICE_TYPE.COMMUNICATION_CONTROL, uds.CONTROL_TYPE.ENABLE_RX_DISABLE_TX, uds.MESSAGE_TYPE.NORMAL])
