@@ -45,6 +45,12 @@ class CarState(CarStateBase):
     self.cruise_setting = 0
     self.v_cruise_pcm_prev = 0
 
+    # default values for radarless leadcar spoofing, replace with latest observed
+    self.voacc_last_target_distance = 20.0
+    self.voacc_last_vEgospeed = 10.0
+    self.voacc_last_target_diff = -6.0
+    self.voacc_last_target_accel = -0.3
+
     # When available we use cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] to populate vEgoCluster
     # However, on cars without a digital speedometer this is not always present (HRV, FIT, CRV 2016, ILX and RDX)
     self.dash_speed_seen = False
@@ -201,12 +207,23 @@ class CarState(CarStateBase):
 
     self.acc_hud = False
     self.lkas_hud = False
+    self.voacc_camera = False
+
     if self.CP.carFingerprint not in HONDA_BOSCH:
       ret.stockFcw = cp_cam.vl["BRAKE_COMMAND"]["FCW"] != 0
       self.acc_hud = cp_cam.vl["ACC_HUD"]
       self.stock_brake = cp_cam.vl["BRAKE_COMMAND"]
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]
+      self.voacc_camera = cp_cam.vl["VOACC_CAMERA"]
+      # recalibrating lead spoofing inputs
+      if self.voacc_camera["LEAD_DISTANCE_OBSERVED"] > 0:
+        if ret.vEgo >= 10:
+          self.voacc_last_target_distance = self.voacc_camera["LEAD_DISTANCE_TARGET"]
+          self.voacc_last_vEgospeed = ret.vEgo
+        if ret.aEgo <= -0.25:
+          self.voacc_last_target_diff = self.voacc_camera["LEAD_DISTANCE_OBSERVED"] - self.voacc_camera["LEAD_DISTANCE_TARGET"]
+          self.voacc_last_target_accel = ret.aEgo
 
     if self.CP.enableBsm:
       # BSM messages are on B-CAN, requires a panda forwarding B-CAN messages to CAN 0

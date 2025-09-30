@@ -70,7 +70,7 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
   return packer.make_can_msg("BRAKE_COMMAND", CAN.pt, values)
 
 
-def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_counter, car_fingerprint):
+def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_counter, car_fingerprint, CS):
   commands = []
   min_gas_accel = CarControllerParams.BOSCH_GAS_LOOKUP_BP[0]
 
@@ -92,6 +92,35 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
       "CONTROL_ON": enabled,
       "IDLESTOP_ALLOW": stopping_counter > 200,  # allow idle stop after 4 seconds (50 Hz)
     })
+
+    if False: # - temp just pass through - enabled and braking and accel < 0.4:
+      # spoof lead car to allow hybrid ACC to brake stronger than -0.5 m/s2
+      standstill_diff = 4.0 # stock target stopping distance
+      new_diff = ((CS.voacc_last_target_diff - standstill_diff) / CS.voacc_last_target_accel * accel) + standstill_diff
+      if CS.RadarHud.LeadOne.vDel is not None:
+        new_observed = CS.RadarHud.LeadOne.vDel
+        new_target = new_observed + new_diff
+      else:
+        new_target = ((CS.voacc_last_target_distance - standstill_diff) / CS.voacc_last_vEgospeed * CS.vEgo) + standstill_diff
+        new_observed = new_target - new_diff
+
+      stock_observed = CS.voacc_camera['LEAD_DISTANCE_OBSERVED']
+      stock_target = CS.voacc_camera['LEAD_DISTANCE_TARGET']
+
+      voacc_camera_values = {
+        'LEAD_DISTANCE_OBSERVED': new_observed if (stock_observed == -1) else min(stock_observed, new_observed),
+        'LEAD_DISTANCE_TARGET': max(stock_target, new_target),
+        'SET_ME_X01': 1,
+        'SET_ME_X01_2': 1,
+        'BOH': CS.voacc_camera['BOH'],
+        'BOH_2': CS.voacc_camera['BOH_2'],
+        'BOH_3': CS.voacc_camera['BOH_3'],
+        'BOH_4': CS.voacc_camera['BOH_4'],
+      }
+    else:
+      voacc_camera_values = CS.voacc_camera
+    commands.append(packer.make_can_msg("VOACC_CAMERA", CAN.pt, voacc_camera_values))
+
   else:
     acc_control_values.update({
       # setting CONTROL_ON causes car to set POWERTRAIN_DATA->ACC_STATUS = 1
