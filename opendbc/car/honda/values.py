@@ -144,6 +144,14 @@ class HondaNidecPlatformConfig(PlatformConfig):
     self.flags |= HondaFlags.NIDEC
 
 
+@dataclass
+class HondaSerialSteeringPlatformConfig(HondaNidecPlatformConfig):
+  def init(self):
+    self.merged = False
+    self.support_type = SupportType.DASHCAM
+    self.support_link = "#dashcam"
+
+
 def radar_dbc_dict(pt_dict):
   return {Bus.pt: pt_dict, Bus.radar: 'acura_ilx_2016_nidec'}
 
@@ -322,8 +330,8 @@ class CAR(Platforms):
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
-  ACURA_MDX_3G_MMR = HondaNidecPlatformConfig(
-    [], # 2018-2020, don't add to cardocs since custom steering board
+  ACURA_MDX_3G_MMR = HondaSerialSteeringPlatformConfig(
+    [HondaCarDocs("Acura MDX 2018-20", "All")],
     CarSpecs(mass=4215 * CV.LB_TO_KG, wheelbase=2.82, steerRatio=17.22, centerToFrontRatio=0.428),  # as spec, learned steerRatio
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
