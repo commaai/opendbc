@@ -301,7 +301,10 @@ class CAR(Platforms):
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.HAS_ALL_DOOR_STATES,
   )
   HONDA_ACCORD_9G = HondaSerialSteeringPlatformConfig(
-    [HondaCarDocs("Honda Accord 2016-17", "Honda Sensing")],
+    [
+      HondaCarDocs("Honda Accord 2016-17", "Honda Sensing"),
+      HondaCarDocs("Honda Accord 2017", "All")
+    ],
     CarSpecs(mass=3343 * CV.LB_TO_KG, wheelbase=2.78, steerRatio=17.5, centerToFrontRatio=0.37),  # as spec
     radar_dbc_dict('honda_accord_2017_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.HAS_ALL_DOOR_STATES,
