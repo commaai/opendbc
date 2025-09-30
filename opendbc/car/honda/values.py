@@ -144,6 +144,14 @@ class HondaNidecPlatformConfig(PlatformConfig):
     self.flags |= HondaFlags.NIDEC
 
 
+@dataclass
+class HondaSerialSteeringPlatformConfig(HondaNidecPlatformConfig):
+  def init(self):
+    self.merged = False
+    self.support_type = SupportType.DASHCAM
+    self.support_link = "#dashcam"
+
+
 def radar_dbc_dict(pt_dict):
   return {Bus.pt: pt_dict, Bus.radar: 'acura_ilx_2016_nidec'}
 
@@ -292,8 +300,8 @@ class CAR(Platforms):
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.HAS_ALL_DOOR_STATES,
   )
-  HONDA_ACCORD_9G = HondaNidecPlatformConfig(
-    [], # don't add to cardocs since custom steering board
+  HONDA_ACCORD_9G = HondaSerialSteeringPlatformConfig(
+    [HondaCarDocs("Honda Accord 2016-17", "Honda Sensing")],
     CarSpecs(mass=3343 * CV.LB_TO_KG, wheelbase=2.78, steerRatio=17.5, centerToFrontRatio=0.37),  # as spec
     radar_dbc_dict('honda_accord_2017_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.HAS_ALL_DOOR_STATES,
