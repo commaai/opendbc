@@ -78,6 +78,7 @@ class HondaFlags(IntFlag):
   BOSCH_ALT_RADAR = 512
   ALLOW_MANUAL_TRANS = 1024
   HYBRID = 2048
+  BOSCH_TJA_CONTROL = 4096
 
 
 # Car button codes
@@ -272,6 +273,12 @@ class CAR(Platforms):
     {Bus.pt: 'acura_rdx_2020_can_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE | HondaFlags.BOSCH_ALT_RADAR,
   )
+  ACURA_TLX_2G = HondaBoschPlatformConfig(
+    [HondaCarDocs("Acura TLX 2021", "All")],
+    CarSpecs(mass=3982 * CV.LB_TO_KG, wheelbase=2.87, steerRatio=14.0, centerToFrontRatio=0.43),
+    {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
+    flags=HondaFlags.BOSCH_ALT_RADAR,
+  )
 
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
@@ -354,6 +361,7 @@ HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
 HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
 HONDA_BOSCH_ALT_RADAR = CAR.with_flags(HondaFlags.BOSCH_ALT_RADAR)
+HONDA_BOSCH_TJA_CONTROL = CAR.with_flags(HondaFlags.BOSCH_TJA_CONTROL)
 
 
 DBC = CAR.create_dbc_map()
