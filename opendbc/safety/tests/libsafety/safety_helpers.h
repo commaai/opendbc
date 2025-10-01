@@ -272,6 +272,10 @@ void set_steering_disengage(bool c){
   steering_disengage = c;
 }
 
+int get_gas_interceptor_prev(void){
+  return gas_interceptor_prev;
+}
+
 //int get_temp_debug(void){
 //  return temp_debug;
 //}

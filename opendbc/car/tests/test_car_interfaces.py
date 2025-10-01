@@ -80,6 +80,10 @@ class TestCarInterfaces:
     assert len(car_params.longitudinalTuning.kpV) == len(car_params.longitudinalTuning.kpBP)
     assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
 
+    # If we're using the interceptor for gasPressed, we should be commanding gas with it
+    if car_params_sp.enableGasInterceptor:
+      assert car_params.openpilotLongitudinalControl
+
     # Lateral sanity checks
     if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
       tune = car_params.lateralTuning

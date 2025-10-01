@@ -15,3 +15,4 @@ class HondaFlagsSP(IntFlag):
 
 class HondaSafetyFlagsSP:
   CLARITY = 1
+  GAS_INTERCEPTOR = 2

@@ -205,6 +205,13 @@ class CarInterface(CarInterfaceBase):
       candidate in (TSS2_CAR - RADAR_ACC_CAR) or \
       bool(stock_cp.flags & ToyotaFlags.DISABLE_RADAR)
 
+    ret.enableGasInterceptor = 0x201 in fingerprint[0] and stock_cp.openpilotLongitudinalControl and \
+                               not stock_cp.flags & ToyotaFlags.SECOC
+
+    if ret.enableGasInterceptor:
+      ret.safetyParam |= ToyotaSafetyFlagsSP.GAS_INTERCEPTOR
+      stock_cp.minEnableSpeed = -1.
+
     if not stock_cp.openpilotLongitudinalControl:
       stock_cp.safetyConfigs[0].safetyParam |= ToyotaSafetyFlags.STOCK_LONGITUDINAL.value
     else:

@@ -11,7 +11,6 @@ from opendbc.car.honda.values import HONDA_BOSCH_RADARLESS
 
 class MadsCarController:
   def __init__(self):
-    super().__init__()
     self.dashed_lanes = False
 
   def update(self, CP: structs.CarParams, CC: structs.CarControl, CC_SP: structs.CarControlSP) -> None:
