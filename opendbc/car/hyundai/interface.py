@@ -161,6 +161,15 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
                      car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
+    # identical logic used in _get_params
+    # "LKA steering" if LKAS or LKAS_ALT messages are seen coming from the camera.
+    # Generally means our LKAS message is forwarded to another ECU (commonly ADAS ECU)
+    # that finally retransmits our steering command in LFA or LFA_ALT to the MDPS.
+    # "LFA steering" if camera directly sends LFA to the MDPS
+    cam_can = CanBus(None, fingerprint).CAM
+    lka_steering = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
+    CAN = CanBus(None, fingerprint, lka_steering)
+
     if not stock_cp.flags & HyundaiFlags.CANFD:
       # TODO-SP: add route with ESCC message for process replay
       if ESCC_MSG in fingerprint[0]:
@@ -190,10 +199,20 @@ class CarInterface(CarInterfaceBase):
                                    CAR.KIA_SELTOS_2023_NON_SCC, CAR.GENESIS_G70_2021_NON_SCC):
       stock_cp.dashcamOnly = True
 
-    # Detect smartMDPS, which bypasses EPS low-speed lockout, allowing sunnypilot to send steering commands down to 0
-    if 0x2AA in fingerprint[0]:
-      stock_cp.minSteerSpeed = 0.0
-      stock_cp.flags &= ~HyundaiFlags.MIN_STEER_32_MPH.value
+    if stock_cp.flags & HyundaiFlags.CANFD:
+      if 0x1fa in fingerprint[CAN.ECAN]:
+        ret.flags |= HyundaiFlagsSP.SPEED_LIMIT_AVAILABLE.value
+    else:
+      # Detect smartMDPS, which bypasses EPS low-speed lockout, allowing sunnypilot to send steering commands down to 0
+      if 0x2AA in fingerprint[0]:
+        stock_cp.minSteerSpeed = 0.0
+        stock_cp.flags &= ~HyundaiFlags.MIN_STEER_32_MPH.value
+
+      if 0x544 in fingerprint[0]:
+        ret.flags |= HyundaiFlagsSP.SPEED_LIMIT_AVAILABLE.value
+
+      if 0x53E in fingerprint[2]:
+        ret.flags |= HyundaiFlagsSP.HAS_LKAS12.value
 
     return ret
 
