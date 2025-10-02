@@ -76,7 +76,7 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
   # ACC main switch status
   def _motor_5_msg(self, main_switch=False):
     values = {"MO5_GRA_Hauptsch": main_switch}
-    return self.packer.make_can_msg_panda("Motor_5", 0, values)
+    return self.packer.make_can_msg_safety("Motor_5", 0, values)
 
   # Driver throttle input (Motor_3)
   def _user_gas_msg(self, gas):
