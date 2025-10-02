@@ -15,6 +15,7 @@ class IntelligentCruiseButtonManagementInterfaceBase:
     self.CC_SP = None
     self.ICBM = None
     self.frame = 0
+    self.button_frame = 0
     self.last_button_frame = 0
 
   @property

@@ -33,7 +33,7 @@ class HyundaiButtonBase:
 
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(Buttons.RESUME, bus=self.BUTTONS_TX_BUS)))
-    self.assertFalse(self._tx(self._button_msg(Buttons.SET, bus=self.BUTTONS_TX_BUS)))
+    self.assertTrue(self._tx(self._button_msg(Buttons.SET, bus=self.BUTTONS_TX_BUS)))
 
     for enabled in (True, False):
       self._rx(self._pcm_status_msg(enabled))
