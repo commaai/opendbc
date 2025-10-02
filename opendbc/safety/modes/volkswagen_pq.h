@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/volkswagen_common.h"
 
 #define MSG_LENKHILFE_3         0x0D0U   // RX from EPS, for steering angle and driver steering torque
@@ -63,7 +63,7 @@ static safety_config volkswagen_pq_init(uint16_t param) {
     {.msg = {{MSG_GRA_NEU, 0, 4, 30U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  UNUSED(param);
+  SAFETY_UNUSED(param);
 
   volkswagen_set_button_prev = false;
   volkswagen_resume_button_prev = false;
