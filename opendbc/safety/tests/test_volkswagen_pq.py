@@ -80,7 +80,7 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
 
   # Driver throttle input (Motor_3)
   def _user_gas_msg(self, gas):
-    values = {"Fahrpedal_Rohsignal": gas}
+    values = {"MO3_Pedalwert": gas}
     return self.packer.make_can_msg_safety("Motor_3", 0, values)
 
   # Cruise control buttons (GRA_Neu)
