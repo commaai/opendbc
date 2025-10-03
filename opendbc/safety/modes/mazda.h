@@ -17,32 +17,30 @@
 
 // track msgs coming from OP so that we know what CAM msgs to drop and what to forward
 static void mazda_rx_hook(const CANPacket_t *msg) {
-  if ((int)msg->bus == MAZDA_MAIN) {
-    if (msg->addr == MAZDA_ENGINE_DATA) {
-      // sample speed: scale by 0.01 to get kph
-      int speed = (msg->data[2] << 8) | msg->data[3];
-      vehicle_moving = speed > 10; // moving when speed > 0.1 kph
-    }
+  if (msg->addr == MAZDA_ENGINE_DATA) {
+    // sample speed: scale by 0.01 to get kph
+    int speed = (msg->data[2] << 8) | msg->data[3];
+    vehicle_moving = speed > 10; // moving when speed > 0.1 kph
+  }
 
-    if (msg->addr == MAZDA_STEER_TORQUE) {
-      int torque_driver_new = msg->data[0] - 127U;
-      // update array of samples
-      update_sample(&torque_driver, torque_driver_new);
-    }
+  if (msg->addr == MAZDA_STEER_TORQUE) {
+    int torque_driver_new = msg->data[0] - 127U;
+    // update array of samples
+    update_sample(&torque_driver, torque_driver_new);
+  }
 
-    // enter controls on rising edge of ACC, exit controls on ACC off
-    if (msg->addr == MAZDA_CRZ_CTRL) {
-      bool cruise_engaged = msg->data[0] & 0x8U;
-      pcm_cruise_check(cruise_engaged);
-    }
+  // enter controls on rising edge of ACC, exit controls on ACC off
+  if (msg->addr == MAZDA_CRZ_CTRL) {
+    bool cruise_engaged = msg->data[0] & 0x8U;
+    pcm_cruise_check(cruise_engaged);
+  }
 
-    if (msg->addr == MAZDA_ENGINE_DATA) {
-      gas_pressed = (msg->data[4] || (msg->data[5] & 0xF0U));
-    }
+  if (msg->addr == MAZDA_ENGINE_DATA) {
+    gas_pressed = (msg->data[4] || (msg->data[5] & 0xF0U));
+  }
 
-    if (msg->addr == MAZDA_PEDALS) {
-      brake_pressed = (msg->data[0] & 0x10U);
-    }
+  if (msg->addr == MAZDA_PEDALS) {
+    brake_pressed = (msg->data[0] & 0x10U);
   }
 }
 
@@ -58,25 +56,22 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  // Check if msg is sent on the main BUS
-  if (msg->bus == (unsigned char)MAZDA_MAIN) {
-    // steer cmd checks
-    if (msg->addr == MAZDA_LKAS) {
-      int desired_torque = (((msg->data[0] & 0x0FU) << 8) | msg->data[1]) - 2048U;
+  // steer cmd checks
+  if (msg->addr == MAZDA_LKAS) {
+    int desired_torque = (((msg->data[0] & 0x0FU) << 8) | msg->data[1]) - 2048U;
 
-      if (steer_torque_cmd_checks(desired_torque, -1, MAZDA_STEERING_LIMITS)) {
-        tx = false;
-      }
+    if (steer_torque_cmd_checks(desired_torque, -1, MAZDA_STEERING_LIMITS)) {
+      tx = false;
     }
+  }
 
-    // cruise buttons check
-    if (msg->addr == MAZDA_CRZ_BTNS) {
-      // allow resume spamming while controls allowed, but
-      // only allow cancel while controls not allowed
-      bool cancel_cmd = (msg->data[0] == 0x1U);
-      if (!controls_allowed && !cancel_cmd) {
-        tx = false;
-      }
+  // cruise buttons check
+  if (msg->addr == MAZDA_CRZ_BTNS) {
+    // allow resume spamming while controls allowed, but
+    // only allow cancel while controls not allowed
+    bool cancel_cmd = (msg->data[0] == 0x1U);
+    if (!controls_allowed && !cancel_cmd) {
+      tx = false;
     }
   }
 
