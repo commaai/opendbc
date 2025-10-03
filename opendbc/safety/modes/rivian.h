@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 static uint8_t rivian_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;
@@ -167,7 +167,7 @@ static safety_config rivian_init(uint16_t param) {
 
   bool rivian_longitudinal = false;
 
-  UNUSED(param);
+  SAFETY_UNUSED(param);
   #ifdef ALLOW_DEBUG
     const int FLAG_RIVIAN_LONG_CONTROL = 1;
     rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/volkswagen_common.h"
 
 static bool volkswagen_mqb_brake_pedal_switch = false;
@@ -26,7 +26,7 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
     {.msg = {{MSG_GRA_ACC_01, 0, 8, 33U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  UNUSED(param);
+  SAFETY_UNUSED(param);
 
   volkswagen_set_button_prev = false;
   volkswagen_resume_button_prev = false;
