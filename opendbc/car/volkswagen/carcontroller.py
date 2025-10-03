@@ -26,6 +26,9 @@ class CarController(CarControllerBase):
     self.hca_frame_timer_running = 0
     self.hca_frame_same_torque = 0
 
+    self.frames_at_standstill = 0
+    self.standstill_timer_is_resettable = False
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -79,11 +82,38 @@ class CarController(CarControllerBase):
 
     if self.CP.openpilotLongitudinalControl:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
-        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
-        stopping = actuators.longControlState == LongCtrlState.stopping
-        starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
+        # acc is picky about what signals we can send while brake is pressed (e.g. preEnabled at standstill)
+        longActive = CC.longActive and not CS.out.brakePressed
+
+        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if longActive else 0)
+        stopping = longActive and actuators.longControlState == LongCtrlState.stopping
+        rollout_in_progress = CS.out.vEgo < self.CP.vEgoStopping and accel > 0
+        starting = longActive and actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or rollout_in_progress)
+
+        # reset standstill timer for MQB w/out EPB while braking
+        # this mimics what would happen if the stock ACC intentionally rolled off after holding for too long
+        # the key difference is that the stock ACC also enables freewheel (ACC_Freilauf_Info) during this time
+        # but we leave it disabled to reset the timer without actually rolling off
+        if longActive and stopping and CS.esp_hold_confirmation and not (self.CP.flags & VolkswagenFlags.PQ) and CS.acc_type == 1:
+          self.frames_at_standstill += 1
+          # sometimes the car will get stuck in a state where it will not listen to start requests
+          # if this is the case, toggle ACC to force the car to drop esp_hold_confirmation then retry
+          # note that although disabling ACC will drop the hold confirmation it does NOT reset the timer
+          if (self.frames_at_standstill >= 20 and self.frames_at_standstill % 10 == 0):
+            starting = True
+            stopping = False
+            accel = 0.01
+            self.standstill_timer_is_resettable = True
+          if (self.frames_at_standstill >= 20 and self.frames_at_standstill % 10 == 5):
+            starting = False
+            stopping = False
+            longActive = False
+            self.standstill_timer_is_resettable = False
+        if not CS.esp_hold_confirmation and self.standstill_timer_is_resettable:
+          self.frames_at_standstill = 0
+
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, longActive)
+        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, longActive, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
 
       #if self.aeb_available:
