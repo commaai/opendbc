@@ -750,6 +750,7 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00SG2_ RDR -----      1.00 1.01 99110-AT000         ',
       b'\xf1\x00SG__ RDR -----      1.00 1.00 99110-AT200         ',
+      b'\xf1\x8b #\x12\x06',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00SG2EMFC  AT EUR LHD 1.00 1.00 99211-AT200 240315',
@@ -757,6 +758,7 @@ FW_VERSIONS = {
       b'\xf1\x00SG2EMFC  AT USA LHD 1.00 1.00 99211-AT100 230216',
       b'\xf1\x00SG2EMFC  AT USA LHD 1.00 1.00 99211-AT200 240401',
       b'\xf1\x00SG2EMFC  AT USA LHD 1.01 1.09 99211-AT000 220801',
+      b'\xf1\x8b #\x12\x04',
     ],
   },
   CAR.KIA_NIRO_PHEV: {
