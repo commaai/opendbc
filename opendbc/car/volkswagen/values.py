@@ -21,25 +21,25 @@ class CanBus(CanBusBase):
   def __init__(self, CP=None, fingerprint=None) -> None:
     super().__init__(CP, fingerprint)
 
-    self._ext = self.offset
-    if CP is not None:
-      self._ext = self.offset + 2 if CP.networkLocation == NetworkLocation.gateway else self.offset
+    self._ext = 0
+    if CP is not None and CP.networkLocation == NetworkLocation.gateway:
+      self._ext = 2
 
   @property
   def pt(self) -> int:
     # ADAS / Extended CAN, gateway side of the relay
-    return self.offset
+    return 0
 
   @property
   def aux(self) -> int:
     # NetworkLocation.fwdCamera: radar-camera object fusion CAN
     # NetworkLocation.gateway: powertrain CAN
-    return self.offset + 1
+    return 1
 
   @property
   def cam(self) -> int:
     # ADAS / Extended CAN, camera side of the relay
-    return self.offset + 2
+    return 2
 
   @property
   def ext(self) -> int:

@@ -115,15 +115,9 @@ def get_safety_config(safety_model: structs.CarParams.SafetyModel, safety_param:
 
 
 class CanBusBase:
-  offset: int
-
-  def __init__(self, CP, fingerprint: dict[int, dict[int, int]] | None) -> None:
-    if CP is None:
-      assert fingerprint is not None
-      num = max([k for k, v in fingerprint.items() if len(v)], default=0) // 4 + 1
-    else:
-      num = len(CP.safetyConfigs)
-    self.offset = 4 * (num - 1)
+  def __init__(self, CP=None, fingerprint: dict[int, dict[int, int]] | None = None) -> None:
+    if CP is None and fingerprint is None:
+      raise ValueError("either CP or fingerprint must be provided")
 
 
 class CanSignalRateCalculator:

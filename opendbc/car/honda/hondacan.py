@@ -16,13 +16,13 @@ class CanBus(CanBusBase):
     super().__init__(CP if fingerprint is None else None, fingerprint)
 
     # powertrain bus is split instead of radar on radarless and CAN FD Bosch
-    if CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS - HONDA_BOSCH_CANFD):
-      self._pt, self._radar = self.offset + 1, self.offset
+    if CP is not None and CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS - HONDA_BOSCH_CANFD):
+      self._pt, self._radar = 1, 0
       # normally steering commands are sent to radar, which forwards them to powertrain bus
       # when radar is disabled, steering commands are sent directly to powertrain bus
       self._lkas = self._pt if CP.openpilotLongitudinalControl else self._radar
     else:
-      self._pt, self._radar, self._lkas = self.offset, self.offset + 1, self.offset
+      self._pt, self._radar, self._lkas = 0, 1, 0
 
   @property
   def pt(self) -> int:
@@ -34,7 +34,7 @@ class CanBus(CanBusBase):
 
   @property
   def camera(self) -> int:
-    return self.offset + 2
+    return 2
 
   @property
   def lkas(self) -> int:
@@ -43,7 +43,7 @@ class CanBus(CanBusBase):
   # B-CAN is forwarded to ACC-CAN radar side (CAN 0 on fake ethernet port)
   @property
   def body(self) -> int:
-    return self.offset
+    return 0
 
 
 def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, car_fingerprint, stock_brake):

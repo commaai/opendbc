@@ -90,8 +90,6 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = ret.minEnableSpeed == -1
 
     CAN = CanBus(fingerprint=fingerprint)
-    if CAN.pt >= 4:
-      safety_configs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
     ret.safetyConfigs = safety_configs
 
     return ret

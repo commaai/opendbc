@@ -45,8 +45,6 @@ class CarInterface(CarInterfaceBase):
 
     CAN = CanBus(fingerprint=fingerprint)
     cfgs = [get_safety_config(structs.CarParams.SafetyModel.ford)]
-    if CAN.main >= 4:
-      cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
     ret.safetyConfigs = cfgs
 
     ret.alphaLongitudinalAvailable = ret.radarUnavailable

@@ -19,9 +19,7 @@ class CanBus(CanBusBase):
     if lka_steering:
       self._a, self._e = 0, 1
 
-    self._a += self.offset
-    self._e += self.offset
-    self._cam = 2 + self.offset
+    self._cam = 2
 
   @property
   def ECAN(self):

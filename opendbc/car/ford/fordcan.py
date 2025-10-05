@@ -9,15 +9,15 @@ class CanBus(CanBusBase):
 
   @property
   def main(self) -> int:
-    return self.offset
+    return 0
 
   @property
   def radar(self) -> int:
-    return self.offset + 1
+    return 1
 
   @property
   def camera(self) -> int:
-    return self.offset + 2
+    return 2
 
 
 def calculate_lat_ctl2_checksum(mode: int, counter: int, dat: bytearray) -> int:
