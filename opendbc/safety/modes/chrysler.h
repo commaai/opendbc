@@ -161,8 +161,10 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   // FORCE CANCEL: only the cancel button press is allowed
   if (msg->addr == chrysler_addrs->CRUISE_BUTTONS) {
     const bool is_cancel = msg->data[0] == 1U;
+    const bool is_accel = msg->data[0] == 0x04U;
+    const bool is_decel = msg->data[0] == 0x08U;
     const bool is_resume = msg->data[0] == 0x10U;
-    const bool allowed = is_cancel || (is_resume && controls_allowed);
+    const bool allowed = is_cancel || ((is_resume || is_accel || is_decel) && controls_allowed);
     if (!allowed) {
       tx = false;
     }

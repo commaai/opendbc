@@ -93,4 +93,6 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= ChryslerFlagsSP.NO_MIN_STEERING_SPEED.value
       stock_cp.minSteerSpeed = 0.
 
+    ret.intelligentCruiseButtonManagementAvailable = True
+
     return ret

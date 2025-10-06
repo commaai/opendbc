@@ -29,8 +29,8 @@ class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSa
     self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, 0)
     self.safety.init_tests()
 
-  def _button_msg(self, cancel=False, resume=False):
-    values = {"ACC_Cancel": cancel, "ACC_Resume": resume}
+  def _button_msg(self, cancel=False, resume=False, accel=False, decel=False):
+    values = {"ACC_Cancel": cancel, "ACC_Resume": resume, "ACC_Accel": accel, "ACC_Decel": decel}
     return self.packer.make_can_msg_panda("CRUISE_BUTTONS", self.DAS_BUS, values)
 
   def _pcm_status_msg(self, enable):
@@ -61,15 +61,37 @@ class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSa
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
 
-      # resume only while controls allowed
+      # resume/accel/decel only while controls allowed
       self.assertEqual(controls_allowed, self._tx(self._button_msg(resume=True)))
+      self.assertEqual(controls_allowed, self._tx(self._button_msg(accel=True)))
+      self.assertEqual(controls_allowed, self._tx(self._button_msg(decel=True)))
 
       # can always cancel
       self.assertTrue(self._tx(self._button_msg(cancel=True)))
 
-      # only one button at a time
-      self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
-      self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
+      # invalid: more than one button pressed
+      combos = [
+        # 2 buttons
+        {"cancel": True, "resume": True},
+        {"cancel": True, "accel": True},
+        {"cancel": True, "decel": True},
+        {"resume": True, "accel": True},
+        {"resume": True, "decel": True},
+        {"accel": True, "decel": True},
+
+        # 3 buttons
+        {"cancel": True, "resume": True, "accel": True},
+        {"cancel": True, "resume": True, "decel": True},
+        {"cancel": True, "accel": True, "decel": True},
+        {"resume": True, "accel": True, "decel": True},
+
+        # all 4 buttons
+        {"cancel": True, "resume": True, "accel": True, "decel": True},
+      ]
+
+      for combo in combos:
+        with self.subTest(combo=combo):
+          self.assertFalse(self._tx(self._button_msg(**combo)))
 
   def _lkas_button_msg(self, enabled):
     values = {"TOGGLE_LKAS": enabled}
