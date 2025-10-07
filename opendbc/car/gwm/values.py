@@ -30,11 +30,12 @@ class PSACarDocs(CarDocs):
 class PSAPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
     Bus.pt: 'psa_aee2010_r3',
+    # Bus.pt: 'gwm_haval_h6_phev_2024.dbc',
   })
 
 
 class CAR(Platforms):
-  PSA_PEUGEOT_208 = PSAPlatformConfig(
+  GWM_HAVAL_H6 = PSAPlatformConfig(
     [PSACarDocs("Peugeot 208 2019-25")],
     CarSpecs(mass=1530, wheelbase=2.54, steerRatio=17.6),
   )

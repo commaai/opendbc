@@ -12,11 +12,11 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
-    ret.brand = 'psa'
+    ret.brand = 'gwm'
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
 
-    ret.dashcamOnly = True
+    ret.dashcamOnly = False
 
     ret.steerActuatorDelay = 0.3
     ret.steerLimitTimer = 0.1
