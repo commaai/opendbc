@@ -121,7 +121,7 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active, car_fingerpr
   }
   if car_fingerprint in HONDA_BOSCH:
     values.update({
-      "STEER_DOWN_TO_ZERO": lkas_active and (car_fingerprint in BOSCH_TJA_CONTROL),
+      "STEER_DOWN_TO_ZERO": lkas_active and (car_fingerprint in HONDA_BOSCH_TJA_CONTROL),
     })
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
