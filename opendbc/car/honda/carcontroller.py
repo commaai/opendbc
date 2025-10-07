@@ -1,7 +1,9 @@
+import math
 import numpy as np
 
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
+from opendbc.car import Bus, DT_CTRL, ACCELERATION_DUE_TO_GRAVITY, rate_limit, make_tester_present_msg, structs
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CAR, CruiseButtons, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
                                      HONDA_BOSCH_TJA_CONTROL, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
@@ -10,27 +12,32 @@ from opendbc.car.interfaces import CarControllerBase
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
+MAX_PITCH_COMPENSATION = 1.5  # m/s^2
+
 
 def compute_gb_honda_bosch(accel, speed):
   # TODO returns 0s, is unused
   return 0.0, 0.0
 
 
-def compute_gb_honda_nidec(accel, speed):
+def compute_gb_honda_nidec(accel, speed, pitch_compensation):
   creep_brake = 0.0
   creep_speed = 2.3
   creep_brake_value = 0.15
   if speed < creep_speed:
     creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
-  gb = float(accel) / 4.8 - creep_brake
+  net_accel = accel + pitch_compensation
+  gb = float(net_accel) / 4.8 - creep_brake
   return np.clip(gb, 0.0, 1.0), np.clip(-gb, 0.0, 1.0)
 
 
-def compute_gas_brake(accel, speed, fingerprint):
+def compute_gas_brake(accel, pitch, speed, fingerprint):
+  accel_from_gravity = math.sin(pitch) * ACCELERATION_DUE_TO_GRAVITY
+  pitch_compensation = float(np.clip(accel_from_gravity, -MAX_PITCH_COMPENSATION, MAX_PITCH_COMPENSATION))
   if fingerprint in HONDA_BOSCH:
     return compute_gb_honda_bosch(accel, speed)
   else:
-    return compute_gb_honda_nidec(accel, speed)
+    return compute_gb_honda_nidec(accel, speed, pitch_compensation)
 
 
 # TODO not clear this does anything useful
@@ -103,6 +110,8 @@ class CarController(CarControllerBase):
     self.last_pump_ts = 0.
     self.stopping_counter = 0
 
+    self.filtered_pitch = FirstOrderFilter(0, 1.5, DT_CTRL)
+
     self.accel = 0.0
     self.speed = 0.0
     self.gas = 0.0
@@ -115,9 +124,12 @@ class CarController(CarControllerBase):
     hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
+    if len(CC.orientationNED) == 3:
+      self.filtered_pitch.update(CC.orientationNED[1])
+
     if CC.longActive:
       accel = actuators.accel
-      gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
+      gas, brake = compute_gas_brake(actuators.accel, self.filtered_pitch.x, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
