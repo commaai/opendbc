@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 #define PSA_STEERING              757U  // RX from XXX, driver torque
 #define PSA_STEERING_ALT          773U  // RX from EPS, steering angle
@@ -124,7 +124,7 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config psa_init(uint16_t param) {
-  UNUSED(param);
+  SAFETY_UNUSED(param);
   static const CanMsg PSA_TX_MSGS[] = {
     {PSA_LANE_KEEP_ASSIST, PSA_MAIN_BUS, 8, .check_relay = true}, // EPS steering
   };
