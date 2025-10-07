@@ -14,6 +14,7 @@ FW_VERSIONS = {
     ],
     (Ecu.engine, 0x7e0, None): [
       b'237109HE2B',
+      b'237106GU3B'
     ],
     (Ecu.gateway, 0x18dad0f1, None): [
       b'284U29HE0A',
