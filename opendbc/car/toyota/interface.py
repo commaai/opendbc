@@ -175,7 +175,7 @@ class CarInterface(CarInterfaceBase):
 
     # Detect ZSS, which allows sunnypilot to utilize an improved angle sensor for some Toyota vehicles
     # https://github.com/zorrobyte/betterToyotaAngleSensorForOP
-    if 0x23 in fingerprint[0]:
+    if 0x23 in fingerprint[0] and not stock_cp.flags & ToyotaFlags.SECOC:
       ret.flags |= ToyotaFlagsSP.ZSS.value
 
     if candidate == CAR.TOYOTA_PRIUS:
