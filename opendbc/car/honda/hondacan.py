@@ -181,7 +181,7 @@ def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available
 
   if CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD):
     lkas_hud_values['LANE_LINES'] = 3
-    lkas_hud_values['DASHED_LANES'] = dashed_lanes
+    lkas_hud_values['DASHED_LANES'] = lat_active
 
     # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
     # TODO: needed for Bosch CAN FD?
@@ -195,7 +195,7 @@ def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available
   # New HUD concept for selected Bosch cars, overwrites some of the above
   # TODO: make global across all Honda if feedback is favorable
   if CP.carFingerprint in HONDA_BOSCH_ALT_RADAR:
-    lkas_hud_values['DASHED_LANES'] = steering_available and dashed_lanes
+    lkas_hud_values['DASHED_LANES'] = steering_available and lat_active
     lkas_hud_values['SOLID_LANES'] = lat_active
     lkas_hud_values['LKAS_PROBLEM'] = lat_active and reduced_steering
 
