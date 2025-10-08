@@ -11,6 +11,7 @@ FW_VERSIONS = {
     ],
     (Ecu.eps, 0x742, None): [
       b'6CA2B\xa9A\x02\x02G8A89P90D6A\x00\x00\x01\x80',
+      b'6CA2C\xa9A\x02\x02G8A89P90D6A\x00\x00\x01\x80'
     ],
     (Ecu.engine, 0x7e0, None): [
       b'237109HE2B',
@@ -18,6 +19,7 @@ FW_VERSIONS = {
     ],
     (Ecu.gateway, 0x18dad0f1, None): [
       b'284U29HE0A',
+      b'284U29HF0A'
     ],
   },
   CAR.NISSAN_LEAF: {
