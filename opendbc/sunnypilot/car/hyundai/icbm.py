@@ -32,7 +32,7 @@ class IntelligentCruiseButtonManagementInterface(IntelligentCruiseButtonManageme
 
   def create_can_mock_button_messages(self, packer, CS, send_button) -> list[CanData]:
     can_sends = []
-    copies_xp = BUTTON_COPIES_TIME_METRIC if self.is_metric else BUTTON_COPIES_TIME_IMPERIAL
+    copies_xp = BUTTON_COPIES_TIME_METRIC if CS.is_metric else BUTTON_COPIES_TIME_IMPERIAL
     copies = int(np.interp(BUTTON_COPIES_TIME, copies_xp, [1, BUTTON_COPIES]))
 
     # send resume at a max freq of 10Hz

@@ -5,7 +5,6 @@ This file is part of sunnypilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
 from opendbc.car import structs
-from opendbc.sunnypilot.car import get_param
 
 
 class IntelligentCruiseButtonManagementInterfaceBase:
@@ -17,7 +16,3 @@ class IntelligentCruiseButtonManagementInterfaceBase:
     self.frame = 0
     self.button_frame = 0
     self.last_button_frame = 0
-
-  @property
-  def is_metric(self) -> bool:
-    return bool(self.CC_SP.params is not None and get_param(self.CC_SP.params, "IsMetric", False))
