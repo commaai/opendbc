@@ -157,14 +157,6 @@ class CarInterface(CarInterfaceBase):
     if candidate in UNSUPPORTED_DSU_CAR:
       ret.safetyParam |= ToyotaSafetyFlagsSP.UNSUPPORTED_DSU
 
-    if candidate in (CAR.TOYOTA_WILDLANDER, ):
-      stock_cp.lateralTuning.init('pid')
-      stock_cp.lateralTuning.pid.kiBP = [0.0]
-      stock_cp.lateralTuning.pid.kpBP = [0.0]
-      stock_cp.lateralTuning.pid.kpV = [0.6]
-      stock_cp.lateralTuning.pid.kiV = [0.1]
-      stock_cp.lateralTuning.pid.kf = 0.00007818594
-
     # Detect smartDSU, which intercepts ACC_CMD from the DSU (or radar) allowing openpilot to send it
     # 0x2AA is sent by a similar device which intercepts the radar instead of DSU on NO_DSU_CARs
     if 0x2FF in fingerprint[0] or (0x2AA in fingerprint[0] and candidate in NO_DSU_CAR):

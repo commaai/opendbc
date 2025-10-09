@@ -3661,16 +3661,6 @@
     ],
     "package": "All"
   },
-  "Toyota Wildlander PHEV 2021": {
-    "platform": "TOYOTA_WILDLANDER",
-    "make": "Toyota",
-    "brand": "toyota",
-    "model": "Wildlander PHEV",
-    "year": [
-      "2021"
-    ],
-    "package": "All"
-  },
   "Toyota Yaris (Non-US only) 2020, 2023": {
     "platform": "TOYOTA_YARIS",
     "make": "Toyota",
