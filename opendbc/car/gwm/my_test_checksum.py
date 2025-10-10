@@ -17,8 +17,8 @@ def gwm_checksum(address: int, sig, d: bytearray) -> int:
             else:
                 crc = (crc << 1)
             crc &= 0xFF  # manter em 8 bits
-
     return crc ^ xor_out
+
 
 # Lista de mensagens
 messages = [
@@ -35,20 +35,20 @@ messages = [
     b'\x9a\x22\xac\x00\x63\x00\x00\x0d',
 ]
 
+
 # Para usar a função, precisamos criar um objeto 'sig' mock
 # Vamos assumir alguns valores comuns para teste
 class MockSig:
     def __init__(self, start_bit=0):
         self.start_bit = start_bit
 
+
 # Teste com diferentes valores de address e start_bit
-# addresses_to_test = [0x452, 0x38D, 0x42D, 0x123]  # incluindo um não mapeado
-# start_bits_to_test = [0, 4, 8, 12]  # diferentes posições
 addresses_to_test = [0xA1]  # incluindo um não mapeado
 start_bits_to_test = [7]  # diferentes posições
 
-print("Calculando checksums para as mensagens:\n")
 
+print("Calculando checksums para as mensagens:\n")
 for i, msg in enumerate(messages):
     original_checksum = msg[0]  # Primeiro byte é o checksum original
     data_without_checksum = msg[1:]  # Restante dos dados
@@ -69,6 +69,6 @@ for i, msg in enumerate(messages):
                 match = "✓" if calculated_checksum == (original_checksum & 0xFF) else "✗"
                 print(f"  Address: 0x{address:02X}, Start_bit: {start_bit:2d} -> Calculado: 0x{calculated_checksum:02X} {match}")
             except Exception as e:
-                print(f"  Address: 0x{address:02X}, Start_bit: {start_bit:2d} -> Erro: {e}")
+                print(f"  Address: 0x{address:02X}, Start_bit: {start_bit:2d} -> Error: {e}")
 
     print()

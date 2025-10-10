@@ -1,8 +1,7 @@
 from opendbc.car import structs, Bus
 from opendbc.can.parser import CANParser
-from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.gwm.values import DBC, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
+from opendbc.car.gwm.values import DBC
 
 GearShifter = structs.CarState.GearShifter
 TransmissionType = structs.CarParams.TransmissionType
@@ -11,8 +10,6 @@ TransmissionType = structs.CarParams.TransmissionType
 class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.main]
-    cp_adas = can_parsers[Bus.adas]
-    cp_cam = can_parsers[Bus.cam]
     ret = structs.CarState()
 
     # car speed
