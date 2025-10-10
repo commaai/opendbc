@@ -152,12 +152,6 @@ class Device(EnumBase):
   threex = BasePart("comma 3X", parts=[Mount.mount, Cable.right_angle_obd_c_cable_1_5ft])
   # variant of comma 3X with angled mounts
   threex_angled_mount = BasePart("comma 3X", parts=[Mount.angled_mount_8_degrees, Cable.right_angle_obd_c_cable_1_5ft])
-  red_panda = BasePart("red panda")
-
-
-class Kit(EnumBase):
-  red_panda_kit = BasePart("CAN FD panda kit", parts=[Device.red_panda, Accessory.harness_box,
-                                                      Cable.usb_a_2_a_cable, Cable.usbc_otg_cable, Cable.obd_c_cable_1_5ft])
 
 
 class PartType(Enum):
@@ -165,7 +159,6 @@ class PartType(Enum):
   cable = Cable
   connector = CarHarness
   device = Device
-  kit = Kit
   mount = Mount
   tool = Tool
 
