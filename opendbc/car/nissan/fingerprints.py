@@ -59,6 +59,7 @@ FW_VERSIONS = {
       b'5SK0ADB\x04\x18\x00\x00\x00\x00\x00_(5\x07\x9aQ\x00\x00\x00\x80',
     ],
     (Ecu.abs, 0x740, None): [
+      b'476605SD2D',
       b'476605SD2E',
       b'476605SH1D',
       b'476605SH7D',
@@ -70,6 +71,7 @@ FW_VERSIONS = {
       b'5SH2A\xb7A\x05\x02N123F\x15\xa3\x00\x00\x00\x00\x00\x00\x00\x80',
       b'5SH2C\xb7A\x05\x02N123F\x15\xa3\x00\x00\x00\x00\x00\x00\x00\x80',
       b'5SH3A\x99A\x05\x02N123F\x15\x81\x00\x00\x00\x00\x00\x00\x00\x80',
+      b'5SH3C\xb7A\x05\x02N123F\x15\xa3\x00\x00\x00\x00\x00\x00\x00\x80',
       b'5SK3A\x99A\x05\x02N123F\x15u\x00\x00\x00\x00\x00\x00\x00\x80',
     ],
     (Ecu.gateway, 0x18dad0f1, None): [
@@ -78,6 +80,7 @@ FW_VERSIONS = {
       b'284U25SH3B',
       b'284U25SK2D',
       b'284U25SR0B',
+      b'284U25SR0C',
     ],
   },
   CAR.NISSAN_XTRAIL: {
