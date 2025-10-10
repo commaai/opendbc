@@ -121,7 +121,7 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active, tja_control)
   }
 
   if tja_control:
-    values["STEER_DOWN_TO_ZERO"] = 1
+    values["STEER_DOWN_TO_ZERO"] = lkas_active
 
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
