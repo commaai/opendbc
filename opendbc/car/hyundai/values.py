@@ -1,11 +1,11 @@
 import re
 from dataclasses import dataclass, field
-from enum import Enum, IntFlag
+from enum import IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
@@ -127,20 +127,9 @@ class HyundaiFlags(IntFlag):
   ALT_LIMITS_2 = 2 ** 26
 
 
-class Footnote(Enum):
-  CANFD = CarFootnote(
-    "Requires a <a href=\"https://comma.ai/shop/can-fd-panda-kit\" target=\"_blank\">CAN FD panda kit</a> if not using " +
-    "comma 3X for this <a href=\"https://en.wikipedia.org/wiki/CAN_FD\" target=\"_blank\">CAN FD car</a>.",
-    Column.MODEL)
-
-
 @dataclass
 class HyundaiCarDocs(CarDocs):
   package: str = "Smart Cruise Control (SCC)"
-
-  def init_make(self, CP: CarParams):
-    if CP.flags & HyundaiFlags.CANFD:
-      self.footnotes.insert(0, Footnote.CANFD)
 
 
 @dataclass
