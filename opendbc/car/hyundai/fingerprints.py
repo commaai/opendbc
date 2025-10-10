@@ -598,9 +598,6 @@ FW_VERSIONS = {
       b'\xf1\x00BDPE_SCC FHCUPC     1.01 1.04 99110-M6500\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'\xf1\x00BD__ SCC H-CUP      1.00 1.02 99110-M6000         ',
     ],
-    (Ecu.cornerRadar, 0x7b7, None): [
-      b'\xf1\x8b $\x05\x01 $\x04\x19',
-    ],
   },
   CAR.KIA_K5_2021: {
     (Ecu.fwdRadar, 0x7d0, None): [
