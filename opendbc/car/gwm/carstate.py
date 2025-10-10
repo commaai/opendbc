@@ -20,10 +20,27 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEEDS"]["REAR_RIGHT_WHEEL_SPEED"]
     )
 
-    ret.standstill = cp.vl["WHEEL_SPEEDS"]["FRONT_LEFT_WHEEL_SPEED"] < 1
-    ret.vEgoRaw = cp.vl["WHEEL_SPEEDS"]["FRONT_LEFT_WHEEL_SPEED"]
-    ret.brakePressed = cp.vl["BRAKE"]["BRAKE_PRESSURE"] > 1
-    ret.gearShifter = GearShifter.drive
+    ret.standstill = abs(ret.vEgoRaw) < 1e-3
+    ret.gasPressed = cp.vl["CAR_OVERALL_SIGNALS2"]["GAS_POSITION"] > 0
+    ret.brake = cp.vl["BRAKE"]["BRAKE_PRESSURE"]
+    ret.brakePressed = cp.vl["BRAKE"]["BRAKE_PRESSURE"] > 0
+    ret.parkingBrake = cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 0
+
+    ret.gearShifter = GearShifter.drive if int(cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"]) == 1 else \
+                      GearShifter.neutral if int(cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"]) == 2 else \
+                      GearShifter.reverse if int(cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"]) == 3 else \
+                      GearShifter.park
+
+    ret.steeringAngleDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_ANGLE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
+    ret.steeringRateDeg = 0 # TODO
+    ret.steeringTorque = cp.vl["STEER_AND_AP_STALK"]["STEERING_TORQUE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1) * 73
+    ret.steeringPressed = abs(ret.steeringTorque) > 10
+
+    ret.doorOpen = any([cp.vl["DOOR_DRIVER"]["DOOR_REAR_RIGHT_OPEN"],
+                        cp.vl["DOOR_DRIVER"]["DOOR_FRONT_RIGHT_OPEN"],
+                        cp.vl["DOOR_DRIVER"]["DOOR_REAR_LEFT_OPEN"],
+                        cp.vl["DOOR_DRIVER"]["DOOR_DRIVER_OPEN"]])
+    ret.seatbeltUnlatched = cp.vl["SEATBELT"]["SEAT_BELT_DRIVER_STATE"] != 1
 
     return ret
 
