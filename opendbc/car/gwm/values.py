@@ -21,22 +21,22 @@ class CarControllerParams:
 
 
 @dataclass
-class PSACarDocs(CarDocs):
+class GWMCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.psa_a]))
 
 
 @dataclass
-class PSAPlatformConfig(PlatformConfig):
+class GWMPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
-    Bus.pt: 'psa_aee2010_r3',
-    # Bus.pt: 'gwm_haval_h6_phev_2024.dbc',
+    Bus.pt: 'gwm_haval_h6_mk3_generated',
+    # Bus.pt: 'psa_aee2010_r3',
   })
 
 
 class CAR(Platforms):
-  GWM_HAVAL_H6 = PSAPlatformConfig(
-    [PSACarDocs("Peugeot 208 2019-25")],
+  GWM_HAVAL_H6 = GWMPlatformConfig(
+    [GWMCarDocs("Peugeot 208 2019-25")],
     CarSpecs(mass=1530, wheelbase=2.54, steerRatio=17.6),
   )
 

@@ -1,7 +1,7 @@
 from opendbc.car import structs, get_safety_config
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.psa.carcontroller import CarController
-from opendbc.car.psa.carstate import CarState
+from opendbc.car.gwm.carcontroller import CarController
+from opendbc.car.gwm.carstate import CarState
 
 TransmissionType = structs.CarParams.TransmissionType
 
@@ -14,8 +14,9 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = 'gwm'
 
-    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
+    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.allOutput)]
 
+    ret.dashcamOnly = True
     ret.dashcamOnly = False
 
     ret.steerActuatorDelay = 0.3
