@@ -81,7 +81,7 @@ class CarControllerParams:
       self.STEER_DELTA_DOWN = 10          # Min HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
 
       if CP.transmissionType == TransmissionType.automatic:
-        self.shifter_values = can_define.dv["Getriebe_1"]["Waehlhebelposition__Getriebe_1_"]
+        self.shifter_values = can_define.dv["Getriebe_1"]["GE1_Wahl_Pos"]
       self.hca_status_values = can_define.dv["Lenkhilfe_2"]["LH2_Sta_HCA"]
 
       self.BUTTONS = [
@@ -90,7 +90,7 @@ class CarControllerParams:
         Button(structs.CarState.ButtonEvent.Type.accelCruise, "GRA_Neu", "GRA_Up_kurz", [1]),
         Button(structs.CarState.ButtonEvent.Type.decelCruise, "GRA_Neu", "GRA_Down_kurz", [1]),
         Button(structs.CarState.ButtonEvent.Type.cancel, "GRA_Neu", "GRA_Abbrechen", [1]),
-        Button(structs.CarState.ButtonEvent.Type.gapAdjustCruise, "GRA_Neu", "GRA_Zeitluecke", [1]),
+        Button(structs.CarState.ButtonEvent.Type.gapAdjustCruise, "GRA_Neu", "GRA_Zeitluecke", [3]),
       ]
 
       self.LDW_MESSAGES = {
