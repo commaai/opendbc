@@ -551,6 +551,7 @@ struct CarParams {
   struct LateralTorqueTuning {
     kp @1 :Float32;
     ki @2 :Float32;
+    kd @8 : Float32;
     friction @3 :Float32;
     kf @4 :Float32;
     steeringAngleDeadzoneDeg @5 :Float32;
