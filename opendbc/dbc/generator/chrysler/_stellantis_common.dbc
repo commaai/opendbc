@@ -63,7 +63,9 @@ BO_ 344 ESP_6: 8 XXX
  SG_ WHEEL_SPEED_FL : 5|14@0+ (0.5,0) [0|8191] "rpm" XXX
  SG_ WHEEL_SPEED_FR : 21|14@0+ (0.5,0) [0|8191] "rpm" XXX
  SG_ WHEEL_SPEED_RL : 37|14@0+ (0.5,0) [0|8191] "rpm" XXX
+ SG_ WHEEL_MOVING_1 : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ WHEEL_SPEED_RR : 53|14@0+ (0.5,0) [0|8191] "rpm" XXX
+ SG_ WHEEL_MOVING_2 : 54|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 368 Transmission_Status: 8 XXX
  SG_ Gear_State : 2|3@1+ (1,0) [0|15] "" XXX
