@@ -19,7 +19,7 @@ class CarControllerParams:
     ([0., 5., 15.], [5., 3.5, 0.4]),
   )
 
-  LKAS_MAX_TORQUE = 1               # A value of 1 is easy to overpower
+  LKAS_MAX_TORQUE = 2.54               # A value of 1 is easy to overpower
   STEER_THRESHOLD = 1.0
 
   def __init__(self, CP):
