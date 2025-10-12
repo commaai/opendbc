@@ -144,16 +144,17 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     msg_161["SOUNDS_4"] = 0
 
   LANE_CHANGE_SPEED_MIN = 8.9408
+  anyBlinker = leftBlinker or rightBlinker
 
   msg_161.update({
     "DAW_ICON": 0,
     "LKA_ICON": 0,
     "LFA_ICON": 2 if enabled else 0,
     "CENTERLINE": 1 if enabled else 0,
-    "LANELINE_LEFT": (0 if not enabled else 1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 6 if leftBlinker or rightBlinker else 2),
-    "LANELINE_RIGHT": (0 if not enabled else 1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 6 if leftBlinker or rightBlinker else 2),
-    "LCA_LEFT_ICON": (0 if not enabled or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.leftBlindspot else 2 if leftBlinker or rightBlinker else 4),
-    "LCA_RIGHT_ICON": (0 if not enabled or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.rightBlindspot else 2 if leftBlinker or rightBlinker else 4),
+    "LANELINE_LEFT": (0 if not enabled else 1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 6 if anyBlinker else 2),
+    "LANELINE_RIGHT": (0 if not enabled else 1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 6 if anyBlinker else 2),
+    "LCA_LEFT_ICON": (0 if not enabled or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.leftBlindspot else 2 if anyBlinker else 4),
+    "LCA_RIGHT_ICON": (0 if not enabled or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.rightBlindspot else 2 if anyBlinker else 4),
     "LCA_LEFT_ARROW": 2 if leftBlinker else 0,
     "LCA_RIGHT_ARROW": 2 if rightBlinker else 0,
   })
