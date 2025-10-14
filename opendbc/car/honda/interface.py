@@ -46,6 +46,7 @@ class CarInterface(CarInterfaceBase):
       # Disable the radar and let openpilot control longitudinal
       # WARNING: THIS DISABLES AEB!
       # If Bosch radarless, this blocks ACC messages from the camera
+      # TODO: get radar disable working on Bosch CANFD
       ret.alphaLongitudinalAvailable = True
       ret.openpilotLongitudinalControl = alpha_long
       ret.pcmCruise = not ret.openpilotLongitudinalControl

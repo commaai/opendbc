@@ -159,14 +159,14 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
 
     # Update gas, brakes, and gearshift.
-    ret.gasPressed = pt_cp.vl["Motor_3"]["Fahrpedal_Rohsignal"] > 0
+    ret.gasPressed = pt_cp.vl["Motor_3"]["MO3_Pedalwert"] > 0
     ret.brake = pt_cp.vl["Bremse_5"]["BR5_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
     ret.brakePressed = bool(pt_cp.vl["Motor_2"]["MO2_BLS"])
     ret.parkingBrake = bool(pt_cp.vl["Kombi_1"]["Bremsinfo"])
 
     # Update gear and/or clutch position data.
     if self.CP.transmissionType == TransmissionType.automatic:
-      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_1"]["Waehlhebelposition__Getriebe_1_"], None))
+      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_1"]["GE1_Wahl_Pos"], None))
     elif self.CP.transmissionType == TransmissionType.manual:
       reverse_light = bool(pt_cp.vl["Gate_Komf_1"]["GK1_Rueckfahr"])
       if reverse_light:
@@ -206,7 +206,7 @@ class CarState(CarStateBase):
 
     # Update ACC radar status.
     self.acc_type = ext_cp.vl["ACC_System"]["ACS_Typ_ACC"]
-    ret.cruiseState.available = bool(pt_cp.vl["Motor_5"]["GRA_Hauptschalter"])
+    ret.cruiseState.available = bool(pt_cp.vl["Motor_5"]["MO5_GRA_Hauptsch"])
     ret.cruiseState.enabled = pt_cp.vl["Motor_2"]["MO2_Sta_GRA"] in (1, 2)
     if self.CP.pcmCruise:
       ret.accFaulted = ext_cp.vl["ACC_GRA_Anzeige"]["ACA_StaACC"] in (6, 7)
