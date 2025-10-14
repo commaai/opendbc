@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/modes/subaru_common.h"
 
 #define SUBARU_STEERING_LIMITS_GENERATOR(steer_max, rate_up, rate_down)               \
   {                                                                                   \
@@ -24,6 +25,7 @@
 #define MSG_SUBARU_Throttle              0x40U
 #define MSG_SUBARU_Steering_Torque       0x119U
 #define MSG_SUBARU_Wheel_Speeds          0x13aU
+#define MSG_SUBARU_Brake_Pedal           0x139U
 
 #define MSG_SUBARU_ES_LKAS               0x122U
 #define MSG_SUBARU_ES_Brake              0x220U
@@ -62,6 +64,10 @@
   {MSG_SUBARU_ES_HighBeamAssist, SUBARU_MAIN_BUS, 8, .check_relay = false}, \
   {MSG_SUBARU_ES_STATIC_1,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
   {MSG_SUBARU_ES_STATIC_2,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
+
+#define SUBARU_STOP_AND_GO_TX_MSGS \
+  {MSG_SUBARU_Throttle,          SUBARU_CAM_BUS,  8, .check_relay = true}, \
+  {MSG_SUBARU_Brake_Pedal,       SUBARU_CAM_BUS,  8, .check_relay = true}, \
 
 #define SUBARU_COMMON_RX_CHECKS(alt_bus)                                                                                                         \
   {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
@@ -234,6 +240,12 @@ static safety_config subaru_init(uint16_t param) {
     SUBARU_GEN2_LONG_ADDITIONAL_TX_MSGS()
   };
 
+  static const CanMsg subaru_stop_and_go_tx_msgs[] = {
+    SUBARU_BASE_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
+    SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS)
+    SUBARU_STOP_AND_GO_TX_MSGS
+  };
+
   static RxCheck subaru_rx_checks[] = {
     SUBARU_COMMON_RX_CHECKS(SUBARU_MAIN_BUS)
   };
@@ -246,6 +258,8 @@ static safety_config subaru_init(uint16_t param) {
 
   subaru_gen2 = GET_FLAG(param, SUBARU_PARAM_GEN2);
 
+  subaru_common_init();
+
 #ifdef ALLOW_DEBUG
   const uint16_t SUBARU_PARAM_LONGITUDINAL = 2;
   subaru_longitudinal = GET_FLAG(param, SUBARU_PARAM_LONGITUDINAL);
@@ -257,6 +271,7 @@ static safety_config subaru_init(uint16_t param) {
                                 BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_TX_MSGS);
   } else {
     ret = subaru_longitudinal ? BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_LONG_TX_MSGS) : \
+          subaru_stop_and_go  ? BUILD_SAFETY_CFG(subaru_rx_checks, subaru_stop_and_go_tx_msgs) : \
                                 BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_TX_MSGS);
   }
   return ret;
