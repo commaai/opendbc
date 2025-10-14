@@ -78,7 +78,7 @@ static safety_config volkswagen_pq_init(uint16_t param) {
 static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
     // Update in-motion state from speed value.
-    // Signal: Bremse_1.Geschwindigkeit_neu__Bremse_1_
+    // Signal: Bremse_1.BR1_Rad_kmh
     if (msg->addr == MSG_BREMSE_1) {
       int speed = ((msg->data[2] & 0xFEU) >> 1) | (msg->data[3] << 7);
       vehicle_moving = speed > 0;
@@ -99,7 +99,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     if (volkswagen_longitudinal) {
       if (msg->addr == MSG_MOTOR_5) {
         // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
-        // Signal: Motor_5.GRA_Hauptschalter
+        // Signal: Motor_5.MO5_GRA_Hauptsch
         acc_main_on = GET_BIT(msg, 50U);
         if (!acc_main_on) {
           controls_allowed = false;
@@ -126,19 +126,19 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     } else {
       if (msg->addr == MSG_MOTOR_2) {
         // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
-        // Signal: Motor_2.GRA_Status
+        // Signal: Motor_2.MO2_Sta_GRA
         int acc_status = (msg->data[2] & 0xC0U) >> 6;
         bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
         pcm_cruise_check(cruise_engaged);
       }
     }
 
-    // Signal: Motor_3.Fahrpedal_Rohsignal
+    // Signal: Motor_3.MO3_Pedalwert
     if (msg->addr == MSG_MOTOR_3) {
       gas_pressed = (msg->data[2]);
     }
 
-    // Signal: Motor_2.Bremslichtschalter
+    // Signal: Motor_2.MO2_BLS
     if (msg->addr == MSG_MOTOR_2) {
       brake_pressed = (msg->data[2] & 0x1U);
     }
