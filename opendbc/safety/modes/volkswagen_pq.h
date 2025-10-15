@@ -149,15 +149,15 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
   // lateral limits
   const TorqueSteeringLimits VOLKSWAGEN_PQ_STEERING_LIMITS = {
     .max_torque = 300,               // 3.0 Nm (EPS side max of 3.0Nm with fault if violated)
-    .max_rt_delta = 113,             // 6 max rate up * 50Hz send rate * 250000 RT interval / 1000000 = 75 ; 125 * 1.5 for safety pad = 113
-    .max_rate_up = 6,                // 3.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
+    .max_rt_delta = 188,             // 10 max rate up * 50Hz send rate * 250000 RT interval / 1000000 = 125 ; 125 * 1.5 for safety pad = 187.5
+    .max_rate_up = 10,                // 5.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
     .max_rate_down = 10,             // 5.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
     .driver_torque_multiplier = 3,
     .driver_torque_allowance = 80,
     .type = TorqueDriverLimited,
   };
 
-  // longitudinal limits
+  // longitudinal limits  
   // acceleration in m/s2 * 1000 to avoid floating point math
   const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
     .max_accel = 2000,
