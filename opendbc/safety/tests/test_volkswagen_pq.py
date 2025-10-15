@@ -24,10 +24,10 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1)}
 
-  MAX_RATE_UP = 10
+  MAX_RATE_UP = 6
   MAX_RATE_DOWN = 10
   MAX_TORQUE_LOOKUP = [0], [300]
-  MAX_RT_DELTA = 188
+  MAX_RT_DELTA = 113
 
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 3
