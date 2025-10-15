@@ -214,20 +214,31 @@ class Footnote(Enum):
     "Model-years 2022 and beyond may have a combined CAN gateway and BCM, which is supported by openpilot " +
     "in software, but doesn't yet have a harness available from the comma store.",
     Column.HARDWARE)
+  VW_J533_HARNESS_CONNECTION_LOCATION = CarFootnote(
+    "The J533 harness used in this model is not a windshield camera harness but one that plugs" +
+    "into the J533 gateway box, usually located in the driver footwell area.",
+    Column.MODEL)
 
 
 @dataclass
 class VWCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
-  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.vw_j533]))
 
   def init_make(self, CP: structs.CarParams):
-    self.footnotes.append(Footnote.VW_EXP_LONG)
-    if "SKODA" in CP.carFingerprint:
-      self.footnotes.append(Footnote.SKODA_HEATED_WINDSHIELD)
+    harness = CarHarness.vw_j533          # Var used in preparation for multi-harness future (e.g. MEB platform)
 
     if CP.carFingerprint in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
-      self.car_parts = CarParts([Device.threex_angled_mount, CarHarness.vw_j533])
+      self.car_parts = CarParts([Device.threex_angled_mount, harness])
+    else:
+      self.car_parts = CarParts([Device.threex, harness])
+
+    self.footnotes.append(Footnote.VW_EXP_LONG)
+
+    if harness == CarHarness.vw_j533:
+      self.footnotes.append(Footnote.VW_J533_HARNESS_CONNECTION_LOCATION)
+
+    if "SKODA" in CP.carFingerprint:
+      self.footnotes.append(Footnote.SKODA_HEATED_WINDSHIELD)
 
     if abs(CP.minSteerSpeed - CarControllerParams.DEFAULT_MIN_STEER_SPEED) < 1e-3:
       self.min_steer_speed = 0
