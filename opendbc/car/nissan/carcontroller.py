@@ -39,8 +39,8 @@ class CarController(CarControllerBase):
       else:
         # Scale max torque based on how much torque the driver is applying to the wheel
         lkas_max_torque = max(
-          # Keep LKAS torque at 1 to allow for steering, values below 1 are unable to steer or extremely slowly
-          1,
+          # Scale max torque down to half LKAX_MAX_TORQUE as a minimum
+          CarControllerParams.LKAS_MAX_TORQUE * 0.5,
           # Start scaling torque at STEER_THRESHOLD
           CarControllerParams.LKAS_MAX_TORQUE - 0.6 * max(0, abs(CS.out.steeringTorque) - CarControllerParams.STEER_THRESHOLD)
         )
