@@ -42,6 +42,10 @@ class CarInterface(CarInterfaceBase):
     else:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
+    # Ensure panda safety mode is configured for LKAS angle platforms
+    if ret.flags & SubaruFlags.LKAS_ANGLE:
+      ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.LKAS_ANGLE.value
+
     if candidate in (CAR.SUBARU_ASCENT, CAR.SUBARU_ASCENT_2023):
       ret.steerActuatorDelay = 0.3  # end-to-end angle controller
       ret.lateralTuning.init('pid')
@@ -65,7 +69,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_CROSSTREK_HYBRID:
       ret.steerActuatorDelay = 0.1
 
-    elif candidate in CAR.SUBARU_CROSSTREK_2025:
+    elif candidate == CAR.SUBARU_CROSSTREK_2025:
       ret.dashcamOnly = False
       ret.steerActuatorDelay = 0.3
 
