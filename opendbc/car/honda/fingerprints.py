@@ -26,7 +26,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'38897-TTA-J010\x00\x00',
-    ]
+    ],
   },
   CAR.HONDA_ACCORD: {
     (Ecu.shiftByWire, 0x18da0bf1, None): [
@@ -331,6 +331,7 @@ FW_VERSIONS = {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-T1W-A230\x00\x00',
       b'57114-T1W-A240\x00\x00',
+      b'57114-TFF-A930\x00\x00',
       b'57114-TFF-A940\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
@@ -1055,7 +1056,7 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36802-TGV-A060\x00\x00',
     ],
-     (Ecu.fwdCamera, 0x18dab5f1, None): [
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'36161-TGV-A030\x00\x00',
     ],
   },
