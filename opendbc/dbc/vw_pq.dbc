@@ -22,6 +22,7 @@ NS_ :
 	SIG_GROUP_
 	SIG_VALTYPE_
 	SIGTYPE_VALTYPE_
+	SG_MUL_VAL_
 
 BS_:
 
@@ -330,70 +331,88 @@ BO_ 1160 Motor_6: 8 XXX
  SG_ Sollmoment_f_r_Getriebe : 8|8@1+ (0.39,0) [0|99] "MDI" XXX
  SG_ Checksumme_Motor_6 : 0|8@1+ (1,0) [0|0] "" XXX
 
-BO_ 1152 Motor_5: 8 XXX
- SG_ CHECKSUM : 56|8@1+ (1,0) [0|0] "" XXX
- SG_ Motortext_Bits__4_1_ : 52|4@1+ (1,0) [0|0] "" XXX
- SG_ Doppelte_Momente : 51|1@1+ (1,0) [0|0] "" XXX
- SG_ GRA_Hauptschalter : 50|1@1+ (1,0) [0|0] "" XXX
- SG_ Anlasser_Ausspuren : 49|1@1+ (1,0) [0|0] "" XXX
- SG_ Anlasser_Freigabe : 48|1@1+ (1,0) [0|0] "" XXX
- SG_ Klimadrucksignal__Motor_5_ : 40|8@1+ (0.2,0) [0|50.8] "bar" XXX
- SG_ K_hlerluefteransteuerung : 32|8@1+ (0.4,0) [0|101.6] "%" XXX
- SG_ Verbrauch_Ueberlauf : 31|1@1+ (1,0) [0|0] "" XXX
- SG_ Kraftstoffverbrauchssignal : 16|15@1+ (1,0) [0|32767] "ul" XXX
- SG_ Klimakompressor_Leistungsreduzi : 15|1@1+ (1,0) [0|0] "" XXX
- SG_ Kennfeldkuehlung : 14|1@1+ (1,0) [0|0] "" XXX
- SG_ Klimakompressor_aus__Motor_5_ : 13|1@1+ (1,0) [0|0] "" XXX
- SG_ CAT_Warnung : 12|1@1+ (1,0) [0|0] "" XXX
- SG_ OBD_2_Lampe : 11|1@1+ (1,0) [0|0] "" XXX
- SG_ E_Gas_Lampe : 10|1@1+ (1,0) [0|0] "" XXX
- SG_ Vorgluehlampe__Motor_5_ : 9|1@1+ (1,0) [0|0] "" XXX
- SG_ Ladekontroll_Lampe : 8|1@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Code M : 6|2@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_norm__Verbrauch m3 : 0|6@1+ (20,0) [0|1260] "l/Zyl" XXX
- SG_ Multiplex_Info_Motortyp m2 : 0|6@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Drehzahl_MD_Max m1 : 0|6@1+ (100,0) [0|6300] "U/min" XXX
- SG_ Multiplex_Info_Max_Drehmoment m0 : 0|6@1+ (10,0) [0|630] "Nm" XXX
+BO_ 1152 Motor_5: 8 Motor
+ SG_ MO5_Mp_Code M : 6|2@1+ (1,0) [0|3] "" Gateway
+ SG_ MO5_max_Moment m0 : 0|6@1+ (10,0) [0|630] "Nm" Gateway
+ SG_ MO5_Drehzahl m1 : 0|6@1+ (100,0) [0|6300] "U/min" Gateway
+ SG_ MO5_Motortyp m2 : 0|6@1+ (1,0) [0|63] "" Gateway
+ SG_ MO5_Abgastyp m3 : 0|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_Abgastyp2 m3 : 1|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_Abgastyp3 m3 : 2|1@1+ (1,0) [0|1] "" Gateway
+ SG_ OBD_Kaltstart_Denominator m3 : 3|1@1+ (1,0) [0|1] "" Gateway
+ SG_ OBD_Minimum_Trip m3 : 4|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_DPF_reg m3 : 5|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_Vorgluehen : 9|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_E_Gas : 10|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_OBD_2 : 11|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_Heissl : 12|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_KlimaKompr : 13|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_Feld_kuehl : 14|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_KliKo_Red : 15|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_Verbrauch : 16|15@1+ (1,0) [0|32767] "µl" KOMBI
+ SG_ MO5_UeberlVerb : 31|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_Luefter : 32|8@1+ (0.4,0) [0|101.6] "%" Gateway
+ SG_ MO5_HLeuchte : 40|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_PartikelLamp : 41|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_Sta_BKU : 42|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_TypStartSteu : 43|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_TDE_Lampe : 44|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_TDE_Text : 45|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_DZM_Daempf : 46|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_Interlock : 47|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_Start : 48|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_Anlasser : 49|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_GRA_Hauptsch : 50|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_Momente : 51|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO5_Motortext1 : 52|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_Motortext2 : 53|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_Motortext3 : 54|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ MO5_Motortext4 : 55|1@1+ (1,0) [0|1] "" KOMBI
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" Gateway
 
-BO_ 896 Motor_3: 8 XXX
- SG_ Drosselklappenpoti : 56|8@1+ (0.4,0) [0|101.6] "%" XXX
- SG_ Motor_Wunschdrehzahl : 48|8@1+ (25,0) [0|6350] "U/min" XXX
- SG_ Motordrehzahlbeeinflussung : 40|8@1+ (0.392,0) [0|100] "%" XXX
- SG_ Kein_Start_Stop : 39|1@1+ (1,0) [0|0] "" XXX
- SG_ Kein_E_Gas : 38|1@1+ (1,0) [0|0] "" XXX
- SG_ Reserviert_Motor_3_1 : 37|1@1+ (1,0) [0|0] "" XXX
- SG_ Vorzeichen_Rad_Wunschmoment : 36|1@1+ (1,0) [0|0] "" XXX
- SG_ Rad_Wunschmoment : 24|12@1+ (0.39,0) [0|1597] "MDI" XXX
- SG_ Fahrpedal_Rohsignal : 16|8@1+ (0.4,0) [0|101.6] "%" XXX
- SG_ Ansauglufttemperatur : 8|8@1+ (0.75,-48) [-48|142.5] "" XXX
- SG_ Fehlerstatus_Ansauglufttemperat : 7|1@1+ (1,0) [0|0] "" XXX
- SG_ Motorsteuerger_t_gesperrt : 6|1@1+ (1,0) [0|0] "" XXX
- SG_ Drosselklappenwinkel_ungenau : 5|1@1+ (1,0) [0|0] "" XXX
- SG_ Fahrpedalwert_ungenau__Motor_3_ : 4|1@1+ (1,0) [0|0] "" XXX
- SG_ Frei_Motor_3_1 : 3|1@1+ (1,0) [0|0] "" XXX
- SG_ Motor_Wunschdrehzahl_Priorit_t : 2|1@1+ (1,0) [0|0] "" XXX
- SG_ Uebertemperaturschutz__Motor_3_ : 1|1@1+ (1,0) [0|0] "" XXX
- SG_ Vorgluehmeldung : 0|1@1+ (1,0) [0|0] "" XXX
+BO_ 896 Motor_3: 8 Motor
+ SG_ MO3_Vorgluehen : 0|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Prio_Dz : 1|1@1+ (1,0) [0|1] "" Transmission
+ SG_ MO_Schalter_StartStopp : 2|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Winterprg : 3|1@1+ (1,0) [0|1] "" Transmission
+ SG_ MO3_Sta_Pedal : 4|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Sta_FPG M : 5|1@1+ (1,0) [0|1] "" ESP
+ SG_ MO3_Sign_FPG m1 : 6|1@1+ (1,0) [0|1] "" ESP
+ SG_ MO3_Sta_Temp : 7|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Offsentemp : 8|8@1+ (0.75,-48) [-48|142.5] "°C" Gateway
+ SG_ MO3_Pedalwert : 16|8@1+ (0.4,0) [0|101.6] "%" Gateway
+ SG_ MO3_Rad_Wu_Mo : 24|12@1+ (0.39,0) [0|1596.66] "%" Transmission
+ SG_ MO3_Vorz_RadWu : 36|1@1+ (1,0) [0|1] "" Transmission
+ SG_ MO3_Freigabe_Segeln : 37|1@1+ (1,0) [0|1] "" Transmission
+ SG_ MO_StartStopp_StoppVorbereitung : 38|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO3_Dz_Beeinfl : 40|8@1+ (0.39,0) [0|99.45] "%" Transmission
+ SG_ MO3_WunschDz : 48|8@1+ (25,0) [0|6350] "U/min" Transmission
+ SG_ MO3_DKW m0 : 56|8@1+ (0.4,0) [0|101.6] "%" Gateway
+ SG_ MO3_FPGradient m1 : 56|8@1+ (25,0) [0|6350] "%/s" ESP
 
-BO_ 648 Motor_2: 8 XXX
- SG_ Minimales_Motormoment_bei_Zuend : 56|8@1+ (0.39,0) [0|99] "MDI" XXX
- SG_ Begrenzungsmoment : 48|8@1+ (0.39,0) [0|99] "MDI" XXX
- SG_ Leerlaufsolldrehzahl__Motor_2_ : 40|8@1+ (10,0) [0|2540] "U/min" XXX
- SG_ Soll_Geschwindigkeit_bei_GRA_Be : 32|8@1+ (1.28,0) [0|325] "km/h" XXX
- SG_ Fahrzeuggeschwindigkeit : 24|8@1+ (1.28,0) [0|325] "km/h" XXX
- SG_ GRA_Status : 22|2@1+ (1,0) [0|0] "" XXX
- SG_ OBD_2_freeze_frame : 21|1@1+ (1,0) [0|0] "" XXX
- SG_ Status_Normalbetrieb : 20|1@1+ (1,0) [0|0] "" XXX
- SG_ Ansteuerung_Klima__4_1_ : 19|1@1+ (1,0) [0|0] "" XXX
- SG_ Fehlerstatus_Kuhlmitteltempera : 18|1@1+ (1,0) [0|0] "" XXX
- SG_ Bremstestschalter : 17|1@1+ (1,0) [0|0] "" XXX
- SG_ Bremslichtschalter : 16|1@1+ (1,0) [0|0] "" XXX
- SG_ Kuehlmitteltemperatur__Motor_2_ : 8|8@1+ (0.75,-48) [-48|142.5] "" XXX
- SG_ Multiplex_Code_Motor_2 M : 6|2@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Motorcode__4_x_ m1 : 0|6@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Getriebecode m2 : 0|6@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Max_Moment__Norm m3 : 0|6@1+ (10,0) [0|630] "Nm" XXX
- SG_ Multiplex_Info_CAN_Stand m0 : 0|6@1+ (1,0) [0|0] "" XXX
+BO_ 648 Motor_2: 8 Motor
+ SG_ MO2_Mp_Code m : 6|2@1+ (1,0) [0|3] "" Gateway
+ SG_ MO2_Getr_Code m2 : 0|6@1+ (1,0) [0|63] "" Gateway
+ SG_ MO2_max_Mo m3 : 0|6@1+ (10,0) [0|630] "Nm" Gateway
+ SG_ MO2_CAN_Vers m0 : 0|6@1+ (1,0) [0|63] "" Gateway
+ SG_ MO2_Motor_Code m1 : 0|6@1+ (1,0) [0|63] "" Gateway
+ SG_ MO2_Kuehlm_T : 8|8@1+ (0.75,-48) [-47.25|142.5] "°C" Gateway
+ SG_ MO2_BLS : 16|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_BTS : 17|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sta_Kuehlm : 18|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sta_Klima : 19|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sta_No_Bet : 20|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Status_TSK : 21|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sta_GRA : 22|2@1+ (1,0) [0|3] "" ACC,GRA
+ SG_ TSK_Limiter_ausgewaehlt : 25|1@1+ (1,0) [0|1] "" ACC,GRA
+ SG_ MO2_GRAregelt : 26|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_Sport_Error : 27|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_OffRoad : 28|1@1+ (1,0) [0|1] "" Gateway
+ SG_ MO2_RME_Gehalt : 29|3@1+ (12.5,0) [0|75] "%" Gateway
+ SG_ MO2_GRA_Soll : 32|8@1+ (1.28,0) [0|325.12] "km/h" ACC,GRA
+ SG_ MO2_LL_Solldz : 40|8@1+ (10,0) [0|2540] "1/min" Gateway
+ SG_ MO2_Begr_Mo : 48|8@1+ (0.39,0) [0|99.06] "%" Gateway
+ SG_ MO2_Mo_ZWR : 56|8@1+ (0.39,0) [0|99.06] "%" Gateway
 
 BO_ 640 Motor_1: 8 XXX
  SG_ Fahrerwunschmoment : 56|8@1+ (0.39,0) [0|99] "MDI" XXX
@@ -469,17 +488,17 @@ BO_ 196 Lenkwinkel_1__ITT_: 2 XXX
  SG_ COARSE_CHECK__ITT_ : 0|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 194 Lenkwinkel_1: 8 XXX
- SG_ Checksumme_Lenkwinkel_1 : 56|8@1+ (1,0) [0|0] "" XXX
- SG_ Kodierdaten : 48|8@1+ (1,0) [0|0] "" XXX
- SG_ Zaehler_Lenkwinkel_1 : 44|4@1+ (1,0) [0|15] "" XXX
- SG_ Status_KL30_Ausfall__z_Zt__nur : 43|1@1+ (1,0) [0|0] "" XXX
- SG_ Interner_Status : 41|2@1+ (1,0) [0|0] "" XXX
- SG_ Frei_Lenkwinkel_1_1 : 40|1@1+ (1,0) [0|0] "" XXX
- SG_ Lenkwinkel_ID : 32|8@1+ (1,0) [0|0] "" XXX
- SG_ Lenkradwinkel_Geschwindigkeit_S : 31|1@1+ (1,0) [0|0] "" XXX
- SG_ Lenkradwinkel_Geschwindigkeit : 16|15@1+ (0.04375,0) [0|1433.6] "Grad/Sek" XXX
- SG_ Lenkradwinkel_Sign : 15|1@1+ (1,0) [0|0] "" XXX
- SG_ Lenkradwinkel : 0|15@1+ (0.04375,0) [0|1433.6] "Grad" XXX
+ SG_ LW1_LRW : 0|15@1+ (0.04375,0) [0|1433.55625] "°Grad" Gateway,ESP,ABS
+ SG_ LW1_LRW_Sign : 15|1@1+ (1,0) [0|1] "" Gateway,ESP,ABS
+ SG_ LW1_Lenk_Gesch : 16|15@1+ (0.04375,0) [0|1433.55625] "°Grad/s" Gateway,ESP,ABS
+ SG_ LW1_Gesch_Sign : 31|1@1+ (1,0) [0|1] "" Gateway,ESP,ABS
+ SG_ LW1_ID : 32|8@1+ (1,0) [0|255] "" Gateway,ESP,ABS
+ SG_ LW1_Initquelle : 40|1@1+ (1,0) [0|1] "" Gateway,ESP,ABS
+ SG_ LW1_Status : 41|2@1+ (1,0) [0|3] "" Gateway,ESP,ABS
+ SG_ LW1_Sta_KL30 : 43|1@1+ (1,0) [0|1] "" Gateway,ESP,ABS
+ SG_ LW1_Zaehler : 44|4@1+ (1,0) [0|15] "" Gateway,ESP,ABS
+ SG_ LW1_Kodier : 48|8@1+ (1,0) [0|255] "" Gateway
+ SG_ LW1_CRC : 56|8@1+ (1,0) [0|255] "" Gateway,ESP,ABS
 
 BO_ 1502 Lenkhilfe_Fehler: 7 XXX
  SG_ Werkstattcode : 48|8@1+ (1,0) [0|0] "" XXX
@@ -523,11 +542,28 @@ BO_ 1502 Lenkhilfe_Fehler: 7 XXX
  SG_ Spannung_Kl_30_zu_gro_ : 0|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 976 Lenkhilfe_1: 2 XXX
- SG_ Fehlerspeichereintrag__Lenkhilf : 15|1@1+ (1,0) [0|0] "" XXX
- SG_ Frei_Lenkhilfe_1_2 : 9|6@1+ (1,0) [0|0] "" XXX
- SG_ Fehlerlampe_Lenkhilfe : 8|1@1+ (1,0) [0|0] "" XXX
- SG_ Fehlerstatus_Lastinformation : 7|1@1+ (1,0) [0|0] "" XXX
- SG_ Lastinformation : 0|7@1+ (1,0) [0|127] "A" XXX
+ SG_ LH1_Lastinfo : 0|7@1+ (1,0) [0|127] "A" XXX
+ SG_ LH1_Fehler_LI : 7|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Sicherheitslamp : 8|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Fehlerlampe : 9|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Textbits : 10|3@1+ (1,0) [0|7] "" XXX
+ SG_ LH1_Akustiksign : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_SleepInd : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Fehlereintr : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_EPS_Diagmode : 16|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_gue_ECU_Temp : 19|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Kuehlung : 20|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_Mode_Hybrid : 21|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Untersp : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Uebersp : 25|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Uebertemp : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Sensor : 27|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_CAN_SS : 28|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_ECU : 29|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_Motor : 30|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_NL_LeistDichte : 31|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH1_ULeistung : 32|8@1+ (0.5,0) [0|100] "%" XXX
+ SG_ LH1_ECU_Temp : 40|8@1+ (1,-70) [-70|185] "°C" XXX
 
 BO_ 1312 Kombi_3: 8 XXX
  SG_ Frei_Kombi_3_2 : 60|4@1+ (1,0) [0|0] "" XXX
@@ -684,28 +720,27 @@ BO_ 1344 Getriebe_2: 8 XXX
  SG_ Schubabschaltunterstuetzung : 1|1@1+ (1,0) [0|0] "" XXX
  SG_ LFR_Adaption_Freigabeflag : 0|1@1+ (1,0) [0|0] "" XXX
 
-BO_ 1088 Getriebe_1: 8 XXX
- SG_ Wandlerverlustmoment : 56|8@1+ (0.39,0) [0|99.06] "MDI" XXX
- SG_ Fehlerspeichereintrag__Getriebe : 55|1@1+ (1,0) [0|0] "" XXX
- SG_ COUNTER : 51|4@1+ (1,0) [0|15] "" XXX
- SG_ Gang_eingelegt : 50|1@1+ (1,0) [0|0] "" XXX
- SG_ Schaltabsicht : 49|1@1+ (1,0) [0|0] "" XXX
- SG_ Motor_aus : 48|1@1+ (1,0) [0|0] "" XXX
- SG_ OBD_Status__Getriebe_1___4_1_ : 46|2@1+ (1,0) [0|0] "" XXX
- SG_ Kuehlleistung : 44|2@1+ (1,0) [0|0] "" XXX
- SG_ Getriebe_Notlauf : 40|4@1+ (1,0) [0|0] "" XXX
- SG_ Fahrwiderstandsindex : 32|8@1+ (0.249,-31.6) [-31.6|31.6] "" XXX
- SG_ inneres_Soll_Motormoment : 24|8@1+ (0.39,0) [0|99.06] "MDI" XXX
- SG_ Uebertragungsfunktion : 16|8@1+ (0.1,0) [0|25.4] "" XXX
- SG_ Waehlhebelposition__Getriebe_1_ : 12|4@1+ (1,0) [0|0] "" XXX
- SG_ Zielgang_oder_eingelegter_Gang : 8|4@1+ (1,0) [0|0] "" XXX
- SG_ EGS_Anforderung : 7|1@1+ (1,0) [0|0] "" XXX
- SG_ Kodierung_im_MSG : 6|1@1+ (1,0) [0|0] "" XXX
- SG_ Leerlaufsolldrehzahlanhebung : 5|1@1+ (1,0) [0|0] "" XXX
- SG_ Wandlerkupplung : 3|2@1+ (1,0) [0|0] "" XXX
- SG_ Klimakompressor_aus__Getriebe_1 : 2|1@1+ (1,0) [0|0] "" XXX
- SG_ Status_Getriebe_und_Wandlerschu : 1|1@1+ (1,0) [0|0] "" XXX
- SG_ Schaltung_aktiv__Getriebe_1_ : 0|1@1+ (1,0) [0|0] "" XXX
+BO_ 1088 Getriebe_1: 8 Transmission
+ SG_ GE1_Schaltung : 0|1@1+ (1,0) [0|1] "" Gateway
+ SG_ GE1_Sta_Schutz : 1|1@1+ (1,0) [0|1] "" Motor
+ SG_ GE1_Klimakompr : 2|1@1+ (1,0) [0|1] "" Motor
+ SG_ GE1_WK : 3|2@1+ (1,0) [0|3] "" Gateway
+ SG_ GE1_StSt_Info : 5|2@1+ (1,0) [0|3] "" Gateway
+ SG_ GE1_EGS_Anf : 7|1@1+ (1,0) [0|1] "" Motor
+ SG_ GE1_Zielgang : 8|4@1+ (1,0) [0|15] "" Gateway
+ SG_ GE1_Wahl_Pos : 12|4@1+ (1,0) [0|15] "" Gateway
+ SG_ GE1_Mrad_Mkurb : 16|8@1+ (0.1,0) [0|25.4] "" Gateway
+ SG_ GE1_Soll_Mo : 24|8@1+ (0.39,0) [0|99.06] "%" Motor
+ SG_ GE1_Fahrwistd : 32|8@1+ (0.249,-31.623) [-31.623|31.623] "" Gateway
+ SG_ GE1_Notlauf : 40|4@1+ (1,0) [0|15] "" Gateway
+ SG_ GE1_Kuehlung : 44|2@1+ (1,0) [0|3] "" Gateway
+ SG_ GE1_Sta_OBD : 47|1@1+ (1,0) [0|1] "" Motor
+ SG_ GE1_LaunchControl : 48|1@1+ (1,0) [0|1] "" ESP
+ SG_ GE1_Infobit : 49|1@1+ (1,0) [0|1] "" Gateway
+ SG_ GE1_SleepInd : 50|1@1+ (1,0) [0|1] "" Gateway
+ SG_ COUNTER : 51|4@1+ (1,0) [0|15] "" Gateway
+ SG_ GE1_Fehlereintr : 55|1@1+ (1,0) [0|1] "" Gateway
+ SG_ GE1_WaVerl_Mo : 56|8@1+ (0.39,0) [0|99.06] "%" Motor
 
 BO_ 912 Gate_Komf_1: 8 XXX
  SG_ GK1_Sta_RDK_Warn : 0|1@1+ (1,0) [0|1] "" XXX
@@ -938,31 +973,33 @@ BO_ 1440 Bremse_2: 8 XXX
  SG_ Timer m1 : 0|8@1+ (0.04,0) [0|10.2] "usec" XXX
  SG_ Querbeschleunigung m0 : 0|8@1+ (0.01,-1.27) [-1.27|1.27] "g" XXX
 
-BO_ 416 Bremse_1: 8 XXX
- SG_ Geschwindigkeitsersatzwert : 63|1@1+ (1,0) [0|0] "" XXX
- SG_ ESP_Systemstatus_4_1 : 62|1@1+ (1,0) [0|0] "" XXX
- SG_ ESP_Passiv_getastet : 61|1@1+ (1,0) [0|0] "" XXX
- SG_ ASR_Steuerger_t : 60|1@1+ (1,0) [0|0] "" XXX
- SG_ COUNTER : 56|4@1+ (1,0) [0|15] "" XXX
- SG_ MSR_Eingriffsmoment : 48|8@1+ (0.39,0) [0|99.06] "MDI" XXX
- SG_ ASR_Eingriffsmoment_schnell : 40|8@1+ (0.39,0) [0|99.06] "MDI" XXX
- SG_ ASR_Eingriffsmoment_langsam : 32|8@1+ (0.39,0) [0|99.06] "MDI" XXX
- SG_ Geschwindigkeit_neu__Bremse_1_ : 17|15@1+ (0.01,0) [0|326.39] "km/h" XXX
- SG_ Aktiver_Bremskraftverstaerker : 16|1@1+ (1,0) [0|0] "" XXX
- SG_ ABS_in_Diagnose : 15|1@1+ (1,0) [0|0] "" XXX
- SG_ Fehlerstatus_Schlechtwegausblen : 14|1@1+ (1,0) [0|0] "" XXX
- SG_ Schlechtwegausblendung : 13|1@1+ (1,0) [0|0] "" XXX
- SG_ Fahrer_bremst__Bremse_1___4_1_ : 11|1@1+ (1,0) [0|0] "" XXX
- SG_ Bremskontroll_Lampe : 10|1@1+ (1,0) [0|0] "" XXX
- SG_ Lampe_ASR___ESP : 9|1@1+ (1,0) [0|0] "" XXX
- SG_ Lampe_ABS : 8|1@1+ (1,0) [0|0] "" XXX
- SG_ EBV_Eingriff : 7|1@1+ (1,0) [0|0] "" XXX
- SG_ ASR_Schaltbeeinflussung : 5|2@1+ (1,0) [0|0] "" XXX
- SG_ ESP_Eingriff : 4|1@1+ (1,0) [0|0] "" XXX
- SG_ EDS_Eingriff : 3|1@1+ (1,0) [0|0] "" XXX
- SG_ ABS_Bremsung__4_1_ : 2|1@1+ (1,0) [0|0] "" XXX
- SG_ MSR_Anforderung : 1|1@1+ (1,0) [0|0] "" XXX
- SG_ ASR_Anforderung : 0|1@1+ (1,0) [0|0] "" XXX
+BO_ 416 Bremse_1: 8 ABS
+ SG_ BR1_ASR_Anf : 0|1@1+ (1,0) [0|1] "" Motor
+ SG_ BR1_MSR_Anf M : 1|1@1+ (1,0) [0|1] "" Motor
+ SG_ BR1_ABS_Brems : 2|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_EDS_Ongr : 3|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_ESP_Ongr : 4|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_ASR_Ongr : 5|2@1+ (1,0) [0|3] "" Transmission
+ SG_ BR1_EBV_Ongr : 7|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_Lampe_ABS : 8|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_Lampe_ASR : 9|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_Lampe_BK : 10|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_Lichtschalt : 11|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_StaDruckschw : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_MAD : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_Sta_MAD : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_Diagnose : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_BKV_active : 16|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_Rad_kmh : 17|15@1+ (0.01,0) [0|326.39] "km/h" XXX
+ SG_ BR1_ASRMo_sl : 32|8@1+ (0.39,0) [0|99.06] "%" Motor
+ SG_ BR1_ASRMo_fa m0 : 40|8@1+ (0.39,0) [0|99.06] "%" Motor
+ SG_ BR1_MSR_Mo_inv m1 : 40|8@1+ (-0.39,99.45) [0|99.06] "%" Motor
+ SG_ BR1_MSR_Mo : 48|8@1+ (0.39,0) [0|99.06] "%" Motor
+ SG_ BR1_Zaehler : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ BR1_ASR_ESP : 60|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_ESPASR_passive : 61|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_Sta_ESP : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ BR1_Ersatz_Kmh : 63|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 680 Bremsbooster_1: 3 XXX
  SG_ Fehlerspeichereintrag_Booster : 23|1@1+ (1,0) [0|0] "" XXX
@@ -1226,7 +1263,7 @@ BO_ 870 AWV: 8 XXX
  SG_ ANB_Zielbremsung_Freigabe : 52|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ANB_CM_Anforderung : 53|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ANB_Ziel_Teilbrems_Verz_Anf : 54|10@1+ (0.024,-20.016) [0|1023] "Unit_MeterPerSeconSquar" Vector__XXX
- 
+
 BO_ 1470 LDW_Status: 8 XXX
  SG_ LDW_Lernmodus_rechts : 0|2@1+ (1,0) [0|3] "" XXX
  SG_ LDW_Lernmodus_links : 2|2@1+ (1,0) [0|3] "" XXX
@@ -1383,6 +1420,8 @@ BO_ 1175 Parkhilfe_01: 8 XXX
  SG_ PH_KD_Fehler : 63|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 1463 Bremse_11: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ B11_HydHalten : 13|1@1+ (1,0) [0|1] "" XXX
  SG_ B11_Br_StSt_Info : 14|2@1+ (1,0) [0|3] "" XXX
  SG_ B11_OBD_Nib_VL : 16|4@1+ (1,0) [0|15] "" XXX
@@ -1497,11 +1536,50 @@ BO_ 2000 Diagnose_1: 8 XXX
 CM_ SG_ 80 Checksumme_Airbag_1 "Checksum Airbag_1";
 CM_ SG_ 80 Zaehler_Airbag_1 "Counter Airbag_1";
 
+CM_ BO_ 194 "Steering wheel angle message 1 - Contains steering angle, speed, and status information";
+
+CM_ SG_ 194 LW1_LRW "Steering wheel angle (0 = straight ahead, 7FFFh = stop)";
+CM_ SG_ 194 LW1_LRW_Sign "Steering angle sign: 0=positive (left), 1=negative (right)";
+CM_ SG_ 194 LW1_Lenk_Gesch "Steering wheel angular velocity (0 = no movement, 7FFFh = max speed)";
+CM_ SG_ 194 LW1_Gesch_Sign "Angular velocity sign: 0=positive, 1=negative";
+CM_ SG_ 194 LW1_ID "Calibration ID - 0=not calibrated, 128=calibrated (PQ35/46/VW32x/VW411)";
+CM_ SG_ 194 LW1_Initquelle "Initialization source";
+CM_ SG_ 194 LW1_Status "Sensor status";
+CM_ SG_ 194 LW1_Sta_KL30 "Terminal 30 status (Kostal sensor)";
+CM_ SG_ 194 LW1_Zaehler "Free running message counter";
+CM_ SG_ 194 LW1_Kodier "Coding data (multiplex output depends on counter)";
+CM_ SG_ 194 LW1_CRC "Checksum - One's complement of 8-bit sum of bytes 1,2,3,4,6";
+
 CM_ SG_ 210 LM_Offset "centiNewton-meters for ease of calculation without FP math in Panda";
 CM_ SG_ 210 Vib_Amp "Steering wheel haptic, amplitude";
 CM_ SG_ 210 Vib_Freq "Steering wheel haptic, frequency";
 
-CM_ SG_ 416 Zaehler_Bremse_1 "Counter Bremse_1";
+CM_ SG_ 416 BR1_ASR_Anf "ASR request to engine - requests in bytes 5 and 6 to be executed";
+CM_ SG_ 416 BR1_MSR_Anf "MSR request - when set, byte 6 contains inverse MSR torque";
+CM_ SG_ 416 BR1_ABS_Brems "ABS control active (including pressure reduction)";
+CM_ SG_ 416 BR1_EDS_Ongr "Electronic differential lock intervention";
+CM_ SG_ 416 BR1_ESP_Ongr "ESP driving dynamics control intervention";
+CM_ SG_ 416 BR1_ASR_Ongr "ASR transmission switching influence";
+CM_ SG_ 416 BR1_EBV_Ongr "Electronic brake force distribution intervention";
+CM_ SG_ 416 BR1_Lampe_ABS "ABS safety warning lamp";
+CM_ SG_ 416 BR1_Lampe_ASR "ASR/ESP lamp (including flashing info)";
+CM_ SG_ 416 BR1_Lampe_BK "Brake control lamp (red)";
+CM_ SG_ 416 BR1_Lichtschalt "Brake light switch / brake pressure threshold exceeded";
+CM_ SG_ 416 BR1_StaDruckschw "Brake test switch / pressure threshold status";
+CM_ SG_ 416 BR1_MAD "OBD rough road suppression";
+CM_ SG_ 416 BR1_Sta_MAD "Rough road suppression status";
+CM_ SG_ 416 BR1_Diagnose "ABS diagnosis mode active";
+CM_ SG_ 416 BR1_BKV_active "Active brake booster installed and not faulty";
+CM_ SG_ 416 BR1_Rad_kmh "Vehicle speed (mean of driven wheels or ABS reference)";
+CM_ SG_ 416 BR1_ASRMo_sl "ASR engagement torque slow (0-99.06%)";
+CM_ SG_ 416 BR1_ASRMo_fa "ASR engagement torque fast when MSR_Anf=0 (0-99.06%)";
+CM_ SG_ 416 BR1_MSR_Mo_inv "Inverse MSR torque when MSR_Anf=1 (99.06-0%)";
+CM_ SG_ 416 BR1_MSR_Mo "MSR engagement torque (0-99.06%)";
+CM_ SG_ 416 BR1_Zaehler "Message counter to mark intervention moment";
+CM_ SG_ 416 BR1_ASR_ESP "Control unit type: 0=ABS/EDS, 1=ASR/ESP/MABS";
+CM_ SG_ 416 BR1_ESPASR_passive "ESP/ASR passive or deactivated by driver";
+CM_ SG_ 416 BR1_Sta_ESP "ESP error status (fault memory entry)";
+CM_ SG_ 416 BR1_Ersatz_Kmh "Speed is substitute value (sensor defect)";
 
 CM_ SG_ 640 inneres_Motor_Moment "Engine Indicated Torque";
 CM_ SG_ 640 Fahrerwunschmoment "Driver Requested Torque";
@@ -1514,23 +1592,48 @@ CM_ SG_ 640 inneres_Motor_Moment_ohne_exter "Inner torque without external";
 CM_ SG_ 644 MOB_CHECKSUM "Checksum MOB";
 CM_ SG_ 644 MOB_COUNTER "Counter MOB";
 
-CM_ SG_ 648 Minimales_Motormoment_bei_Zuend "Minimum Torque Adjustment";
-CM_ SG_ 648 Begrenzungsmoment "Maximum Inner Torque";
-CM_ SG_ 648 Bremstestschalter "Brake Test Switch";
-CM_ SG_ 648 Soll_Geschwindigkeit_bei_GRA_Be "Desired Vehicle Speed";
-CM_ SG_ 648 Bremslichtschalter "Brake Light Switch";
-CM_ SG_ 648 Leerlaufsolldrehzahl__Motor_2_ "Target Idle Speed";
-CM_ SG_ 648 Fahrzeuggeschwindigkeit "Vehicle Speed";
-CM_ SG_ 648 Kuehlmitteltemperatur__Motor_2_ "Coolant Temperature";
+CM_ BO_ 648 "Motor message 2 - Contains engine status, temperatures, and torque information";
+CM_ SG_ 648 MO2_Mp_Code "Multiplex code - switches after 4 transmissions";
+CM_ SG_ 648 MO2_Getr_Code "Transmission code (multiplex value when Mp_Code=2)";
+CM_ SG_ 648 MO2_max_Mo "Maximum torque MDI (multiplex value when Mp_Code=3)";
+CM_ SG_ 648 MO2_CAN_Vers "CAN version (multiplex value when Mp_Code=0)";
+CM_ SG_ 648 MO2_Motor_Code "Motor code (multiplex value when Mp_Code=1)";
+CM_ SG_ 648 MO2_Kuehlm_T "Engine coolant temperature or substitute value";
+CM_ SG_ 648 MO2_BLS "Brake light switch - unfiltered raw signal";
+CM_ SG_ 648 MO2_BTS "Brake test switch";
+CM_ SG_ 648 MO2_Sta_Kuehlm "Coolant temperature status - 0=OK, 1=Not OK";
+CM_ SG_ 648 MO2_Sta_Klima "Air conditioning compressor status";
+CM_ SG_ 648 MO2_Sta_No_Bet "Normal operation status (Terminal 15 on, init complete)";
+CM_ SG_ 648 MO2_Status_TSK "Drive train coordinator status";
+CM_ SG_ 648 MO2_Sta_GRA "GRA/ACC status";
+CM_ SG_ 648 TSK_Limiter_ausgewaehlt "Speed limiter selected";
+CM_ SG_ 648 MO2_GRAregelt "GRA regulating to displayed speed";
+CM_ SG_ 648 MO2_Sport_Error "Sport mode error (Porsche Cayenne)";
+CM_ SG_ 648 MO2_OffRoad "OffRoad mode active";
+CM_ SG_ 648 MO2_RME_Gehalt "Rapeseed oil methyl ester content (diesel)";
+CM_ SG_ 648 MO2_GRA_Soll "GRA target speed setpoint";
+CM_ SG_ 648 MO2_LL_Solldz "Idle target speed";
+CM_ SG_ 648 MO2_Begr_Mo "Limiting torque - max possible at speed";
+CM_ SG_ 648 MO2_Mo_ZWR "Minimum engine torque with ignition angle retardation";
 
-CM_ SG_ 896 Drosselklappenpoti "Throttle Position";
-CM_ SG_ 896 Motor_Wunschdrehzahl "Desired engine speed";
-CM_ SG_ 896 Motordrehzahlbeeinflussung "Shift Target Influence";
-CM_ SG_ 896 Fahrpedal_Rohsignal "Accelerator Pedal Position";
-CM_ SG_ 896 Ansauglufttemperatur "Intake Air Temperature";
-CM_ SG_ 896 Kein_E_Gas "ETB flag";
-CM_ SG_ 896 Kein_Start_Stop "Start/stop flag";
-CM_ SG_ 896 Rad_Wunschmoment "Desired wheel torque";
+CM_ SG_ 896 MO3_Vorgluehen "Pre-glow active (diesel engines)";
+CM_ SG_ 896 MO3_Prio_Dz "Engine speed priority: 0=request, 1=mandatory";
+CM_ SG_ 896 MO_Schalter_StartStopp "Start/stop deactivated by driver (LED on when 0)";
+CM_ SG_ 896 MO3_Winterprg "Winter driving program active";
+CM_ SG_ 896 MO3_Sta_Pedal "Accelerator pedal status: 0=OK, 1=substitute value";
+CM_ SG_ 896 MO3_Sta_FPG "Accelerator pedal gradient control bit (multiplexer for byte 8)";
+CM_ SG_ 896 MO3_Sign_FPG "Accelerator pedal gradient sign (only when MO3_Sta_FPG=1)";
+CM_ SG_ 896 MO3_Sta_Temp "Intake air temperature status: 0=OK, 1=substitute value";
+CM_ SG_ 896 MO3_Offsentemp "Intake air temperature";
+CM_ SG_ 896 MO3_Pedalwert "Accelerator pedal raw signal (0-101.6%)";
+CM_ SG_ 896 MO3_Rad_Wu_Mo "Wheel torque request (12-bit value, 0-1596.66% MDI)";
+CM_ SG_ 896 MO3_Vorz_RadWu "Wheel torque sign: 0=positive, 1=negative";
+CM_ SG_ 896 MO3_Freigabe_Segeln "Sailing operation enable for transmission";
+CM_ SG_ 896 MO_StartStopp_StoppVorbereitung "Engine stop in preparation";
+CM_ SG_ 896 MO3_Dz_Beeinfl "Engine speed influence factor (0-100% interpolation)";
+CM_ SG_ 896 MO3_WunschDz "Desired engine speed (when MO3_Prio_Dz=1)";
+CM_ SG_ 896 MO3_DKW "Throttle valve position when MO3_Sta_FPG=0 (0-101.6%)";
+CM_ SG_ 896 MO3_FPGradient "Accelerator pedal gradient when MO3_Sta_FPG=1 (0-6350%/s)";
 
 CM_ SG_ 912 GK1_Fa_Tuerkont "Status of the driver's door rotary latch";
 CM_ SG_ 912 BSK_HL_geoeffnet "Status of the rear left door rotary latch";
@@ -1538,18 +1641,28 @@ CM_ SG_ 912 BSK_HR_geoeffnet "Status of the rear right door rotary latch";
 CM_ SG_ 912 BSK_BT_geoeffnet "Status of the passenger door rotary latch";
 CM_ SG_ 912 BSK_HD_Hauptraste "Status of trunk lid main detent";
 
-CM_ SG_ 1088 Zaehler_Getriebe_1 "Counter Getriebe_1";
-CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position";
-CM_ SG_ 1088 inneres_Soll_Motormoment "Desired Inner Torque";
-CM_ SG_ 1088 Gang_eingelegt "Gear Engaged";
-CM_ SG_ 1088 Schaltabsicht "Shift Intent";
-CM_ SG_ 1088 Kuehlleistung "Cooling Power";
-CM_ SG_ 1088 Wandlerverlustmoment "Converter Torque Loss";
-CM_ SG_ 1088 Getriebe_Notlauf "Transmission_Notlauf";
-CM_ SG_ 1088 Zielgang_oder_eingelegter_Gang "target_gear_or_gear_in_engagement";
-CM_ SG_ 1088 Uebertragungsfunktion "transfer function";
-CM_ SG_ 1088 EGS_Anforderung "EGS Requirement";
-CM_ SG_ 1088 Schaltung_aktiv__Getriebe_1_ "Shift Activity";
+CM_ BO_ 1088 "Getriebe 1 - Contains gear status, torque requests, and control signals";
+
+CM_ SG_ 1088 GE1_Schaltung "Gear shift active: 0=no shift, 1=shift in progress";
+CM_ SG_ 1088 GE1_Sta_Schutz "Transmission/converter protection request (power reduction or ignition angle)";
+CM_ SG_ 1088 GE1_Klimakompr "AC compressor off request";
+CM_ SG_ 1088 GE1_WK "Torque converter clutch status";
+CM_ SG_ 1088 GE1_StSt_Info "Start/stop coordinator info";
+CM_ SG_ 1088 GE1_EGS_Anf "EGS request - byte 4 becomes valid when set";
+CM_ SG_ 1088 GE1_Zielgang "Target gear when shifting or current gear";
+CM_ SG_ 1088 GE1_Wahl_Pos "Selector lever position / driving program";
+CM_ SG_ 1088 GE1_Mrad_Mkurb "Wheel torque to crankshaft torque ratio (Mrad/Mcrank)";
+CM_ SG_ 1088 GE1_Soll_Mo "Internal target engine torque request (0-99.06%)";
+CM_ SG_ 1088 GE1_Fahrwistd "Driving resistance index (normalized % slope)";
+CM_ SG_ 1088 GE1_Notlauf "Emergency mode status";
+CM_ SG_ 1088 GE1_Kuehlung "Cooling request level";
+CM_ SG_ 1088 GE1_Sta_OBD "OBD status - MIL lamp control";
+CM_ SG_ 1088 GE1_LaunchControl "Launch control active";
+CM_ SG_ 1088 GE1_Infobit "Transmission type: 0=stepped automatic, 1=CVT";
+CM_ SG_ 1088 GE1_SleepInd "Sleep readiness after terminal 15 off";
+CM_ SG_ 1088 GE1_Zaehler "Message counter (synchronized with Getriebe_2)";
+CM_ SG_ 1088 GE1_Fehlereintr "Fault memory entry present";
+CM_ SG_ 1088 GE1_WaVerl_Mo "Transmission torque loss / clutch torque (0-99.06%)";
 
 CM_ SG_ 1056 Fehlerstatus_Aussentemp__4_1 "ambient temp error";
 CM_ SG_ 1056 Fehlerstatus_Oeltemperatur_4_1 "oil temp error";
@@ -1560,19 +1673,45 @@ CM_ SG_ 1056 Kuehlmitteltemp__4_1__Kombi_2_ "kombi coolant temperature";
 
 CM_ SG_ 1096 Zaehler_Waehlhebel_1 "Counter Waehlhebel_1";
 
-CM_ SG_ 1152 CHECKSUM "Checksum Motor_5";
-CM_ SG_ 1152 Anlasser_Ausspuren "Starter Disable";
-CM_ SG_ 1152 Anlasser_Freigabe "Starter Release";
-CM_ SG_ 1152 Klimadrucksignal__Motor_5_ "Air conditioning pressure signal";
-CM_ SG_ 1152 Kraftstoffverbrauchssignal "Fuel consumption signal";
-CM_ SG_ 1152 K_hlerluefteransteuerung "Cooling fan control signal";
-CM_ SG_ 1152 Klimakompressor_Leistungsreduzi "Air conditioning compressor power reduction flag";
-CM_ SG_ 1152 Klimakompressor_aus__Motor_5_ "Air conditioning compressor";
-CM_ SG_ 1152 Anlasser_Freigabe "Starter release";
-CM_ SG_ 1152 OBD_2_Lampe "OBD light";
-CM_ SG_ 1152 E_Gas_Lampe "ETB light";
-CM_ SG_ 1152 Ladekontroll_Lampe "Charge light";
-CM_ SG_ 1152 Vorgluehlampe__Motor_5_ "Glow light";
+CM_ BO_ 1152 "Motor message 5 - Contains engine type, consumption, lamps, and diagnostic info";
+
+CM_ SG_ 1152 MO5_Mp_Code "Multiplex selector - switches every 4 transmissions";
+CM_ SG_ 1152 MO5_max_Moment "Maximum torque when Mp_Code=0 (0-630 Nm)";
+CM_ SG_ 1152 MO5_Drehzahl "Engine speed at max torque when Mp_Code=1 (0-6300 RPM)";
+CM_ SG_ 1152 MO5_Motortyp "Engine type info when Mp_Code=2 (cylinder count, turbo, fuel type)";
+CM_ SG_ 1152 MO5_Abgastyp "Exhaust type EOBD when Mp_Code=3";
+CM_ SG_ 1152 MO5_Abgastyp2 "Exhaust type OBD when Mp_Code=3";
+CM_ SG_ 1152 MO5_Abgastyp3 "DPF installed when Mp_Code=3";
+CM_ SG_ 1152 OBD_Kaltstart_Denominator "Cold start denominator increment when Mp_Code=3";
+CM_ SG_ 1152 OBD_Minimum_Trip "Minimum normalized trip when Mp_Code=3";
+CM_ SG_ 1152 MO5_DPF_reg "DPF regenerating when Mp_Code=3";
+CM_ SG_ 1152 MO5_Vorgluehen "Diesel pre-glow lamp";
+CM_ SG_ 1152 MO5_E_Gas "E-Gas system lamp (petrol only)";
+CM_ SG_ 1152 MO5_OBD_2 "OBD/MIL lamp control";
+CM_ SG_ 1152 MO5_Heissl "Coolant overheat warning lamp";
+CM_ SG_ 1152 MO5_KlimaKompr "AC compressor off request";
+CM_ SG_ 1152 MO5_Feld_kuehl "Map cooling installed and OK";
+CM_ SG_ 1152 MO5_KliKo_Red "AC compressor power reduction";
+CM_ SG_ 1152 MO5_Verbrauch "Fuel consumption counter (15-bit, µl)";
+CM_ SG_ 1152 MO5_UeberlVerb "Consumption counter overflow";
+CM_ SG_ 1152 MO5_Luefter "Cooling fan PWM control (0-101.6%)";
+CM_ SG_ 1152 MO5_HLeuchte "Overheat pre-warning";
+CM_ SG_ 1152 MO5_PartikelLamp "Particle filter lamp";
+CM_ SG_ 1152 MO5_Sta_BKU "Brake vacuum pump status (Porsche only)";
+CM_ SG_ 1152 MO5_TypStartSteu "Starter control type: 0=BSG/BCM, 1=MSG";
+CM_ SG_ 1152 MO5_TDE_Lampe "Fuel cap warning lamp (petrol only)";
+CM_ SG_ 1152 MO5_TDE_Text "Fuel cap text display (petrol only)";
+CM_ SG_ 1152 MO5_DZM_Daempf "RPM gauge damping control";
+CM_ SG_ 1152 MO5_Interlock "Interlock switch for manual transmission start";
+CM_ SG_ 1152 MO5_Start "Automatic start permission";
+CM_ SG_ 1152 MO5_Anlasser "Starter control permission";
+CM_ SG_ 1152 MO5_GRA_Hauptsch "GRA main switch / readiness";
+CM_ SG_ 1152 MO5_Momente "MDI torque values doubled";
+CM_ SG_ 1152 MO5_Motortext1 "Text: Engine workshop";
+CM_ SG_ 1152 MO5_Motortext2 "Text: Exhaust workshop (deprecated)";
+CM_ SG_ 1152 MO5_Motortext3 "Text: Fuel system fault";
+CM_ SG_ 1152 MO5_Motortext4 "Text: Particle filter needs regeneration";
+CM_ SG_ 1152 CHECKSUM "Checksum with final value 0x0";
 
 CM_ SG_ 1160 Zaehler_Motor_6 "Counter Motor_6";
 CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude Correction";
@@ -1607,6 +1746,72 @@ CM_ SG_ 1470 XX_DLCORTLC1 "Might be DLC or TLC";
 CM_ SG_ 1470 XX_DLCORTLC2 "Might be DLC or TLC, might have wrong size";
 
 CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
+
+SG_MUL_VAL_ 416 BR1_ASRMo_fa BR1_MSR_Anf 0-0;
+SG_MUL_VAL_ 416 BR1_MSR_Mo_inv BR1_MSR_Anf 1-1;
+
+SG_MUL_VAL_ 896 MO3_DKW MO3_Sta_FPG 0-0;
+SG_MUL_VAL_ 896 MO3_FPGradient MO3_Sta_FPG 1-1;
+SG_MUL_VAL_ 896 MO3_Sign_FPG MO3_Sta_FPG 1-1;
+
+VAL_ 194 LW1_LRW_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 194 LW1_Gesch_Sign 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 194 LW1_ID 0 "noch_not_kalibriert" 128 "kalibriert_nur_bei_PQ35_46_VW32x_VW411";
+VAL_ 194 LW1_Initquelle 0 "Bremse_3" 1 "EPS_Bit";
+VAL_ 194 LW1_Status 0 "OK" 1 "no_initial" 2 "sporadic_failure" 3 "permanent_failure";
+VAL_ 194 LW1_Sta_KL30 0 "ok" 1 "no_init_s";
+
+VAL_ 416 BR1_ASR_Anf 0 "no_requirement" 1 "ASR_requirement";
+VAL_ 416 BR1_MSR_Anf 0 "no_requirement" 1 "MSR_requirement";
+VAL_ 416 BR1_ABS_Brems 0 "no_ABS_control" 1 "ABS_control";
+VAL_ 416 BR1_EDS_Ongr 0 "no_EDS_intervention" 1 "EDS_intervention";
+VAL_ 416 BR1_ESP_Ongr 0 "no_ESP_intervention" 1 "ESP_intervention";
+VAL_ 416 BR1_ASR_Ongr 0 "no_requirement" 1 "ASR_shift_map" 2 "Downshift" 3 "Switching_ban";
+VAL_ 416 BR1_EBV_Ongr 0 "no_EBV_intervention" 1 "EBV_intervention";
+VAL_ 416 BR1_Lampe_ABS 0 "Lamp_off" 1 "Lamp_on";
+VAL_ 416 BR1_Lampe_ASR 0 "Lamp_off" 1 "Lamp_on";
+VAL_ 416 BR1_Lampe_BK 0 "Lamp_off" 1 "Lamp_on";
+VAL_ 416 BR1_Lichtschalt 0 "no_Bremsen_Schw_unterschr" 1 "Bremse_betaetigt_Schw_ueberschr";
+VAL_ 416 BR1_StaDruckschw 0 "Sta_guel_BKV_n_angest_k_Br" 1 "Sta_n_verf_BKV_angest_Br";
+VAL_ 416 BR1_MAD 0 "no_Offblendung" 1 "Offblendung";
+VAL_ 416 BR1_Sta_MAD 0 "valid" 1 "invalid";
+VAL_ 416 BR1_Diagnose 0 "no" 1 "in_Diagnose";
+VAL_ 416 BR1_BKV_active 0 "BKV_not_installed_or_fault" 1 "BKV_installed_and_not_fault";
+VAL_ 416 BR1_ASR_ESP 0 "ABS_ABS_EDS" 1 "ASR_ESP_MABS";
+VAL_ 416 BR1_ESPASR_passive 0 "ESP_ASR_activated" 1 "ESP_oder_ASR_passive_get_oder_Fktumsch_oder_Rollenmodus";
+VAL_ 416 BR1_Sta_ESP 0 "ok" 1 "Failure";
+VAL_ 416 BR1_Ersatz_Kmh 0 "OK" 1 "Substitute_value";
+
+SG_MUL_VAL_ 648 MO2_Getr_Code MO2_Mp_Code 2-2;
+SG_MUL_VAL_ 648 MO2_max_Mo MO2_Mp_Code 3-3;
+SG_MUL_VAL_ 648 MO2_CAN_Vers MO2_Mp_Code 0-0;
+SG_MUL_VAL_ 648 MO2_Motor_Code MO2_Mp_Code 1-1;
+
+SG_MUL_VAL_ 1152 MO5_max_Moment MO5_Mp_Code 0-0;
+SG_MUL_VAL_ 1152 MO5_Drehzahl MO5_Mp_Code 1-1;
+SG_MUL_VAL_ 1152 MO5_Motortyp MO5_Mp_Code 2-2;
+SG_MUL_VAL_ 1152 MO5_Abgastyp MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 MO5_Abgastyp2 MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 MO5_Abgastyp3 MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 OBD_Kaltstart_Denominator MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 OBD_Minimum_Trip MO5_Mp_Code 3-3;
+SG_MUL_VAL_ 1152 MO5_DPF_reg MO5_Mp_Code 3-3;
+
+VAL_ 648 MO2_Mp_Code 0 "CAN_Stand" 1 "Motor_Kod" 2 "Getriebe_Kod" 3 "MDI_Max";
+
+VAL_ 648 MO2_Getr_Code 0 "_5HP19" 1 "_5HP24" 2 "AG4" 3 "VL300" 4 "VQ250" 5 "VQ35" 6 "AG4_yestco" 7 "AG5_yestco" 8 "autom_Kupplung" 9 "autom_Kupplung_mit_ASG" 10 "AG6_yestco_ZF_6HP_AISIN" 11 "DQ500_DQ250_DQ200" 12 "SQ100_SQ200" 14 "AL1000_AL551_AL951_ZF8HPx" 15 "Handschalter_konv" 16 "DL800" 17 "E_Fahrzeug__Single_Gear";
+
+VAL_ 648 MO2_BLS 0 "no_Bremsen" 1 "Bremse_betaetigt";
+VAL_ 648 MO2_BTS 0 "no_braking" 1 "Brake_activated";
+VAL_ 648 MO2_Sta_Kuehlm 0 "Temperature_ok" 1 "Temperature_not_ok";
+VAL_ 648 MO2_Sta_Klima 0 "Climate_off" 1 "Climate_on";
+VAL_ 648 MO2_Sta_No_Bet 0 "no_Normalbetrieb" 1 "Normalbetrieb";
+VAL_ 648 MO2_Status_TSK 0 "TSK_not_available" 1 "TSK_available";
+VAL_ 648 MO2_Sta_GRA 0 "ADR_GRA_off" 1 "gra_activated_lamp_on" 2 "gra_overdriven_lamp_on" 3 "ADR_gra_faulted";
+VAL_ 648 TSK_Limiter_ausgewaehlt 0 "no_limiter_selected" 1 "Limiter_Selected";
+VAL_ 648 MO2_GRAregelt 0 "no" 1 "yes";
+VAL_ 648 MO2_Sport_Error 0 "no_Failure" 1 "Failure";
+VAL_ 648 MO2_OffRoad 0 "not_active" 1 "active";
 
 VAL_ 870 AWV_Text 0 "kein_Text" 1 "FrontAssist_aus" 2 "FrontAssist_startet" 3 "FrontAssist_Warnung" 4 "FrontAssist_Sens_reinig" 5 "FrontAssist_Failure" 6 "FrontAssist_Demo" 7 "Vorhalt" 8 "Bremsung_wird_gerade_durchgefuehrt" 9 "Sensor_not_verfuegbar" 10 "Sensor_reinigen" 11 "Service_notwendig_Failure" 12 "Funktion_vom_Fahrer_deactivated" 13 "Funktion_vom_Fahrer_activated" 14 "FrontAssist_zur_Zeit_not_verfuegbar__rev_Failure";
 VAL_ 870 AWV_1_Freigabe 0 "nicht_freigegeben" 1 "freigegeben";
@@ -1650,8 +1855,68 @@ VAL_ 872 ACS_Fehler 1 "Fehlerspeichereintrag" 0 "kein_Fehlerspeichereintrag" ;
 VAL_ 872 ACS_zul_Regelabw 254 "ADR_nicht_aktiv" 255 "Fehler" ;
 VAL_ 872 ACS_max_AendGrad 254 "Neutralwert" 0 "Neutralwert" 255 "Fehler" ;
 
+VAL_ 896 MO3_Vorgluehen 0 "no_Vorgluehen" 1 "Vorgluehen_active";
+VAL_ 896 MO3_Prio_Dz 0 "Wunsch" 1 "Zwang";
+VAL_ 896 MO_Schalter_StartStopp 0 "StartStopp_ueber_Hauptschalter_deactivated_LED_an" 1 "StartStopp_ueber_Hauptschalter_activated_LED_aus";
+VAL_ 896 MO3_Winterprg 0 "not_active" 1 "active";
+VAL_ 896 MO3_Sta_Pedal 0 "Fahrpedal_iO" 1 "Ersatzwert";
+VAL_ 896 MO3_Sta_FPG 0 "Gradient_not_bed" 1 "Gradient_bed";
+VAL_ 896 MO3_Sign_FPG 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 896 MO3_Sta_Temp 0 "Geber_iO" 1 "Ersatzwert";
+VAL_ 896 MO3_Vorz_RadWu 0 "positives_Vorzeichen" 1 "negatives_Vorzeichen";
+VAL_ 896 MO3_Freigabe_Segeln 0 "Segelbetrieb_not_freigegeben" 1 "Segelbetrieb_freigegeben";
+VAL_ 896 MO_StartStopp_StoppVorbereitung 0 "Motorstopp_not_in_Vorbereitung" 1 "Motorstopp_in_Vorbereitung";
+CM_ BO_ 896 "Motor message 3 - Contains accelerator pedal, temperatures, and control signals";
+
 VAL_ 978 LH2_Sta_HCA 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 7 "active";
-VAL_ 1088 Waehlhebelposition__Getriebe_1_ 8 "P" 7 "R" 6 "N" 5 "D" 9 "U" 12 "S" 14 "T" 10 "T" 11 "T";
+
+VAL_ 1088 GE1_Schaltung 0 "no_circuit" 1 "circuit_is_running";
+VAL_ 1088 GE1_Sta_Schutz 0 "no_protection" 1 "protection_requested";
+VAL_ 1088 GE1_Klimakompr 0 "no_Anforderung" 1 "Kompressor_aus";
+VAL_ 1088 GE1_WK 0 "WK_open" 1 "WK_regulated" 2 "WK_closed" 3 "Failure";
+VAL_ 1088 GE1_StSt_Info 0 "Engine_running_not_necessary_stop_release" 1 "Motor_start_not_mandatory_necessary_stop_prohibition" 2 "Motor_start_absolute_necessary_start_request" 3 "System_error";
+VAL_ 1088 GE1_EGS_Anf 0 "no_requirement" 1 "EGS_requirement";
+VAL_ 1088 GE1_Zielgang 0 "P (Park) | Disengaged" 1 "Gear 1 | Engaged" 2 "Gear 2 | Engaged" 3 "Gear 3 | Engaged" 4 "Gear 4 | Engaged" 5 "Gear 5 | Engaged" 6 "1m Gear" 7 "Gang_R" 8 "Gear 6 | Engaged" 9 "Gear 7 | Engaged" 10 "Gear 8 | Engaged" 14 "Speed Not Defined" 15 "Failure";
+VAL_ 1088 GE1_Wahl_Pos 0 "Intermediate Position" 1 "Pos_1" 2 "Pos_2" 3 "Pos_3" 4 "Pos_4" 5 "D (Drive)" 6 "Pos_N" 7 "R (Reverse)" 8 "P (Park)" 9 "Tiptronic Override" 10 "Pos_Z1" 11 "Pos_Z2" 12 "S (Sport)" 13 "Pos_L" 14 "Gas Pedal Force Downshift" 15 "Failure";
+VAL_ 1088 GE1_Notlauf 0 "No Emergency" 1 "No Switching" 2 "Switch to Neutral" 3 "50% Shifting Capacity" 4 "Driving Without UK" 5 "No Emeregency" 6 "No Emergency" 7 "No Emergency, Target Shifting Reached" 15 "Failure";
+VAL_ 1088 GE1_Kuehlung 0 "No Additional Cooling Requested" 1 "20% Additional Fan Cooling Requested" 2 "40% Additional Fan Cooling Requested" 3 "Maximum Additional Fan Cooling Requested";
+VAL_ 1088 GE1_Sta_OBD 0 "MIL Off" 1 "MIL On";
+VAL_ 1088 GE1_LaunchControl 0 "Launch Control Not Active" 1 "Launch Control Program Active";
+VAL_ 1088 GE1_Infobit 0 "Standard Automatic" 1 "CVT";
+VAL_ 1088 GE1_SleepInd 0 "CAN is Required" 1 "Sleep Ready";
+VAL_ 1088 GE1_Fehlereintr 0 "No Failure Memory Entry" 1 "Failure Memory Entry";
+
+VAL_ 1152 MO5_Mp_Code 0 "Max_Moment" 1 "Drehzahl" 2 "Motor_Typ" 3 "Abgastyp_od_norm_Verbrauch";
+VAL_ 1152 MO5_Abgastyp 0 "no_EOBD" 1 "EOBD";
+VAL_ 1152 MO5_Abgastyp2 0 "no_OBD" 1 "OBD";
+VAL_ 1152 MO5_Abgastyp3 0 "no_DPF_verbaut" 1 "DPF_verbaut";
+VAL_ 1152 OBD_Kaltstart_Denominator 0 "Denominator_not_hochzaehlen" 1 "Bedingungen_zum_Inkr_des_Kaltstart_Denom_erf";
+VAL_ 1152 OBD_Minimum_Trip 0 "no_Min_Normed_Trip" 1 "Min_Normed_Trip";
+VAL_ 1152 MO5_DPF_reg 0 "DPF_regeneriert_nicht" 1 "DPF_regeneriert";
+VAL_ 1152 MO5_Vorgluehen 0 "Lamp_off" 1 "Lamp_on";
+VAL_ 1152 MO5_E_Gas 0 "Lamp_off" 1 "Lamp_on";
+VAL_ 1152 MO5_OBD_2 0 "Lamp_off" 1 "Lamp_on";
+VAL_ 1152 MO5_Heissl 0 "Lamp_off" 1 "Lamp_on";
+VAL_ 1152 MO5_KlimaKompr 0 "no_Anforderung" 1 "Klimakompr_aus";
+VAL_ 1152 MO5_Feld_kuehl 0 "no" 1 "yes";
+VAL_ 1152 MO5_KliKo_Red 0 "no" 1 "yes";
+VAL_ 1152 MO5_UeberlVerb 0 "no_Ueberlauf" 1 "mindestens_einmal_uebergelaufen";
+VAL_ 1152 MO5_HLeuchte 0 "no_Warnung" 1 "Vorwarnung";
+VAL_ 1152 MO5_PartikelLamp 0 "Lamp_off" 1 "Lamp_on";
+VAL_ 1152 MO5_Sta_BKU 0 "iO_oder_not_verbaut" 1 "n_iO";
+VAL_ 1152 MO5_TypStartSteu 0 "Startersteuerung_BSG_BCM_KessyD1_ZAS" 1 "Startersteuerung_durch_MSG";
+VAL_ 1152 MO5_TDE_Lampe 0 "Lamp_off" 1 "Lamp_on";
+VAL_ 1152 MO5_TDE_Text 0 "no_Text" 1 "Textanzeige_nach_ISO";
+VAL_ 1152 MO5_DZM_Daempf 0 "normale_Daempfung" 1 "dynamische_Daempfung";
+VAL_ 1152 MO5_Interlock 0 "Interlock_not_betaetigt" 1 "Interlock_betaetigt";
+VAL_ 1152 MO5_Start 0 "Start_not_zulaessig" 1 "Startfreigabe";
+VAL_ 1152 MO5_Anlasser 0 "Anlasser_darf_angesteuert_werden" 1 "Anlasser_ausspuren_Ansteuerung_not_moeglich";
+VAL_ 1152 MO5_GRA_Hauptsch 0 "Off" 1 "On";
+VAL_ 1152 MO5_Momente 0 "Einfach" 1 "Doppelt";
+VAL_ 1152 MO5_Motortext1 0 "no_Text" 1 "Text_1";
+VAL_ 1152 MO5_Motortext2 0 "no_Text" 1 "Text_2";
+VAL_ 1152 MO5_Motortext3 0 "no_Text" 1 "Text_3";
+VAL_ 1152 MO5_Motortext4 0 "no_Text" 1 "Text_4";
 
 VAL_ 1386 ACA_StaACC 6 "ACC_rev_aus" 0 "Hauptschalter_aus" 4 "ACC_im_Hintergrund" 3 "ACC_aktiv" 1 "Reserve" 2 "ACC_passiv" 7 "ACC_irrev_aus" 5 "frei" ;
 VAL_ 1386 ACA_ID_StaACC 0 "keine_Anzeige" ;
