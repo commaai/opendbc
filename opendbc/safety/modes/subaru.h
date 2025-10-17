@@ -173,7 +173,6 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
       {0., 15., 15.},
       {5.,  .4,  .4}
     },
-    .inactive_angle_is_zero = true,
   };
 
   const LongitudinalLimits SUBARU_LONG_LIMITS = {
