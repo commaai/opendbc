@@ -60,11 +60,17 @@ class CarState(CarStateBase):
     can_gear = int(cp_transmission.vl["Transmission"]["Gear"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
 
-    ret.steeringAngleDeg = cp.vl["Steering_Torque"]["Steering_Angle"]
+    if self.CP.flags & SubaruFlags.LKAS_ANGLE:
+      ret.steeringAngleDeg = cp.vl["Steering_2"]["Steering_Angle"]
+      counter = cp.vl["Steering_2"]["COUNTER"]
 
-    if not (self.CP.flags & SubaruFlags.PREGLOBAL):
-      # ideally we get this from the car, but unclear if it exists. diagnostic software doesn't even have it
-      ret.steeringRateDeg = self.angle_rate_calulator.update(ret.steeringAngleDeg, cp.vl["Steering_Torque"]["COUNTER"])
+      ret.steeringRateDeg = self.angle_rate_calulator.update(ret.steeringAngleDeg, counter)
+    else:
+      ret.steeringAngleDeg = cp.vl["Steering_Torque"]["Steering_Angle"]
+
+      if not (self.CP.flags & SubaruFlags.PREGLOBAL):
+        # ideally we get this from the car, but unclear if it exists. diagnostic software doesn't even have it
+        ret.steeringRateDeg = self.angle_rate_calulator.update(ret.steeringAngleDeg, cp.vl["Steering_Torque"]["COUNTER"])
 
     ret.steeringTorque = cp.vl["Steering_Torque"]["Steer_Torque_Sensor"]
     ret.steeringTorqueEps = cp.vl["Steering_Torque"]["Steer_Torque_Output"]
@@ -73,7 +79,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > steer_threshold
 
     cp_cruise = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
-    if self.CP.flags & SubaruFlags.HYBRID:
+    if self.CP.flags & SubaruFlags.HYBRID or self.CP.flags & SubaruFlags.LKAS_ANGLE:
       ret.cruiseState.enabled = cp_cam.vl["ES_DashStatus"]['Cruise_Activated'] != 0
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
     else:

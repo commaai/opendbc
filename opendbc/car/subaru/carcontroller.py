@@ -1,7 +1,7 @@
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, make_tester_present_msg
-from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance
+from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance, apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
@@ -16,6 +16,7 @@ class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
+    self.apply_steer_last = 0
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
@@ -32,30 +33,41 @@ class CarController(CarControllerBase):
 
     # *** steering ***
     if (self.frame % self.p.STEER_STEP) == 0:
-      apply_torque = int(round(actuators.torque * self.p.STEER_MAX))
+      apply_steer = 0
+      apply_torque = 0
 
-      # limits due to driver torque
+      if self.CP.flags & SubaruFlags.LKAS_ANGLE:
+        apply_steer = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_steer_last, CS.out.vEgoRaw,
+                                                   CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
 
-      new_torque = int(round(apply_torque))
-      apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.p)
+        if not CC.latActive:
+          apply_steer = CS.out.steeringAngleDeg
 
-      if not CC.latActive:
-        apply_torque = 0
-
-      if self.CP.flags & SubaruFlags.PREGLOBAL:
-        can_sends.append(subarucan.create_preglobal_steering_control(self.packer, self.frame // self.p.STEER_STEP, apply_torque, CC.latActive))
+        can_sends.append(subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive))
+        self.apply_steer_last = apply_steer
       else:
-        apply_steer_req = CC.latActive
+        apply_torque = int(round(actuators.torque * self.p.STEER_MAX))
 
-        if self.CP.flags & SubaruFlags.STEER_RATE_LIMITED:
-          # Steering rate fault prevention
-          self.steer_rate_counter, apply_steer_req = \
-            common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
-                                   self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+        new_torque = int(round(apply_torque))
+        apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.p)
 
-        can_sends.append(subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req))
+        if not CC.latActive:
+          apply_torque = 0
 
-      self.apply_torque_last = apply_torque
+        if self.CP.flags & SubaruFlags.PREGLOBAL:
+          can_sends.append(subarucan.create_preglobal_steering_control(self.packer, self.frame // self.p.STEER_STEP, apply_torque, CC.latActive))
+        else:
+          apply_steer_req = CC.latActive
+
+          if self.CP.flags & SubaruFlags.STEER_RATE_LIMITED:
+            # Steering rate fault prevention
+            self.steer_rate_counter, apply_steer_req = \
+              common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
+                                    self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+
+          can_sends.append(subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req))
+
+        self.apply_torque_last = apply_torque
 
     # *** longitudinal ***
 
@@ -137,8 +149,11 @@ class CarController(CarControllerBase):
           can_sends.append(subarucan.create_es_static_2(self.packer))
 
     new_actuators = actuators.as_builder()
-    new_actuators.torque = self.apply_torque_last / self.p.STEER_MAX
-    new_actuators.torqueOutputCan = self.apply_torque_last
+    if self.CP.flags & SubaruFlags.LKAS_ANGLE:
+      new_actuators.steeringAngleDeg = self.apply_steer_last
+    else:
+      new_actuators.torque = self.apply_torque_last / self.p.STEER_MAX
+      new_actuators.torqueOutputCan = self.apply_torque_last
 
     self.frame += 1
     return new_actuators, can_sends
