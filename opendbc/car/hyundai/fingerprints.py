@@ -1272,4 +1272,40 @@ FW_VERSIONS = {
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
     ],
   },
+CAR.GENESIS_G70: {
+  # Engine ECU (address 2000 = 0x7d0)
+  (Ecu.engine,       0x7d0, None): [
+    b'\x01 39110-3CBK0',  # replace with your exact engine fwVersion if different
+  ],
+
+  # EPS / MDPS (address 2012 = 0x7dc)
+  (Ecu.eps,          0x7dc, None): [
+    b'<<PASTE FULL EPS fwVersion e.g. b\'\\x01 MDPS R 1.00 5.06 57700-G9320 41ZVL506\'>>',
+  ],
+
+  # Forward Radar (address 2008 = 0x7d8)
+  (Ecu.fwdRadar,     0x7d8, None): [
+    b'<<PASTE FULL RADAR fwVersion e.g. b\'\\x01 SCC FHCUP 1.00 1.00 99110-G9100\'>>',
+  ],
+
+  # Forward Camera (address 1996 = 0x7cc)
+  (Ecu.fwdCamera,    0x7cc, None): [
+    b'<<PASTE FULL CAMERA fwVersion e.g. b\'\\x01 MPC AT USA LHD 1.00 1.03 99211-G9000 211012\'>>',
+  ],
+
+  # Transmission (address 2025 = 0x7e9)
+  (Ecu.transmission, 0x7e9, None): [
+    b'<<PASTE FULL TRANSMISSION fwVersion (long bytes string from carFw)>>',
+  ],
+
+  # HVAC (address 1979 = 0x7bb)  — optional but good to include
+  (Ecu.hvac,         0x7bb, None): [
+    b'<<PASTE FULL HVAC fwVersion e.g. b\'\\x01 PE 97255-G9NB CONTROL ASS\'Y-DATC 1.03 IKPE ...\'>>',
+  ],
+
+  # If your carFw shows "combinationMeter" (address 1998 = 0x7ce), you can also add:
+  # (Ecu.combinationMeter, 0x7ce, None): [
+  #   b'<<PASTE FULL COMBINATION METER fwVersion>>',
+  # ],
 }
+
