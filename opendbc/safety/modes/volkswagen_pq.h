@@ -157,7 +157,7 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
     .type = TorqueDriverLimited,
   };
 
-  // longitudinal limits  
+  // longitudinal limits
   // acceleration in m/s2 * 1000 to avoid floating point math
   const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
     .max_accel = 2000,
