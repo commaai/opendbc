@@ -334,10 +334,11 @@ class CarState(CarStateBase):
       ]
 
     blinker_msg = "Blinkmodi_01" if CP.flags & VolkswagenFlags.MLB else "Blinkmodi_02"
+    # FIXME: Blinkmodi_01 on Macan is true on-demand 0hz/20hz - can we get this from another message?
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [
         # the 50->1Hz is currently too much for the CANParser to figure out
-        (blinker_msg, 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
+        (blinker_msg, 0),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
       ], CanBus(CP).pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).cam),
     }
