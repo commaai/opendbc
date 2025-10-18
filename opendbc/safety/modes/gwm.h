@@ -10,7 +10,6 @@
 
 // CAN bus
 #define GWM_MAIN_BUS 0U
-#define GWM_ADAS_BUS 1U
 #define GWM_CAM_BUS  2U
 
 static uint8_t gwm_get_counter(const CANPacket_t *msg) {
@@ -41,7 +40,7 @@ static uint32_t gwm_compute_checksum(const CANPacket_t *msg) {
   uint8_t crc = 0x00;
   const uint8_t poly = 0x1D;
   const uint8_t xor_out = 0x2D;
-  if (msg->addr == GWM_STEERING_AND_CRUISE) {
+  if (msg->addr == GWM_STEERING_AND_CRUISE) { // CRC8 only work for this message
     for (int i = 1; i < len; i++) {
       uint8_t byte = msg->data[i];
       crc ^= byte;
@@ -74,25 +73,18 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
       vehicle_moving = speed > 0;
       UPDATE_VEHICLE_SPEED(speed * 0.01 * KPH_TO_MS);
     }
-  }
-
-  if (msg->bus == GWM_ADAS_BUS) {
-    if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-      pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
+    if (msg->addr == GWM_STEERING_AND_CRUISE) {
+      pcm_cruise_check((msg->data[5] >> 7) & 1U); // AP_ENABLE_COMMAND
     }
-  }
-
-
-  if (msg->bus == PSA_CAM_BUS) {
-    if (msg->addr == PSA_DAT_BSI) {
-      brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
+    if (msg->addr == GWM_BRAKE) {
+      brake_pressed = ((msg->data[25] << 8) | msg->data[26] & 0xF8U) > 0U; // BRAKE_PRESSURE
     }
   }
 }
 
-static bool psa_tx_hook(const CANPacket_t *msg) {
+static bool gwm_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
-  static const AngleSteeringLimits PSA_STEERING_LIMITS = {
+  static const AngleSteeringLimits GWM_STEERING_LIMITS = {
     .max_angle = 3900,
     .angle_deg_to_can = 10,
     .angle_rate_up_lookup = {
@@ -106,23 +98,23 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
   };
 
   // Safety check for LKA
-  if (msg->addr == PSA_LANE_KEEP_ASSIST) {
+  if (msg->addr == GWM_STEERING_AND_CRUISE) {
     // SET_ANGLE
-    int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
+    int desired_angle = ((msg->data[1] & 0x3FU) << 7) | (msg->data[2] & 0xFEU); // STEERING_ANGLE
     // TORQUE_FACTOR
-    bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
+    bool lka_active = (msg->data[4] & 0x3U) != 0U; // EPS_ACTUATING
 
-    if (steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS)) {
+    if (steer_angle_cmd_checks(desired_angle, lka_active, GWM_STEERING_LIMITS)) {
       tx = false;
     }
   }
   return tx;
 }
 
-static safety_config psa_init(uint16_t param) {
+static safety_config gwm_init(uint16_t param) {
   UNUSED(param);
-  static const CanMsg PSA_TX_MSGS[] = {
-    {PSA_LANE_KEEP_ASSIST, PSA_MAIN_BUS, 8, .check_relay = true}, // EPS steering
+  static const CanMsg GWM_TX_MSGS[] = {
+    {GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, .check_relay = true}, // EPS steering
   };
 
   static RxCheck psa_rx_checks[] = {
@@ -134,13 +126,13 @@ static safety_config psa_init(uint16_t param) {
     {.msg = {{PSA_DAT_BSI, PSA_CAM_BUS, 8, 20U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},        // brake
   };
 
-  return BUILD_SAFETY_CFG(psa_rx_checks, PSA_TX_MSGS);
+  return BUILD_SAFETY_CFG(psa_rx_checks, GWM_TX_MSGS);
 }
 
 const safety_hooks psa_hooks = {
   .init = psa_init,
-  .rx = psa_rx_hook,
-  .tx = psa_tx_hook,
+  .rx = gwm_rx_hook,
+  .tx = gwm_tx_hook,
   .get_counter = gwm_get_checksum,
   .get_checksum = gwm_get_checksum,
   .compute_checksum = gwm_compute_checksum,
