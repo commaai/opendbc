@@ -28,11 +28,11 @@ bool volkswagen_resume_button_prev = false;
 #define MSG_MOTOR_14         0x3BEU   // RX from ECU, for brake switch status
 
 // MLB only messages
-#define MSG_ESP_03      0x103   // RX from ABS, for wheel speeds
-#define MSG_LS_01       0x10B   // TX by OP, ACC control buttons for cancel/resume
-#define MSG_MOTOR_03    0x105   // RX from ECU, for driver throttle input and brake switch status
-#define MSG_TSK_02      0x10C   // RX from ECU, for ACC status from drivetrain coordinator
-#define MSG_ACC_05      0x10D   // RX from radar, for ACC status
+#define MSG_ESP_03      0x103U   // RX from ABS, for wheel speeds
+#define MSG_LS_01       0x10BU   // TX by OP, ACC control buttons for cancel/resume
+#define MSG_MOTOR_03    0x105U   // RX from ECU, for driver throttle input and brake switch status
+#define MSG_TSK_02      0x10CU   // RX from ECU, for ACC status from drivetrain coordinator
+#define MSG_ACC_05      0x10DU   // RX from radar, for ACC status
 
 static uint32_t volkswagen_mqb_meb_get_checksum(const CANPacket_t *msg) {
   return (uint8_t)msg->data[0];

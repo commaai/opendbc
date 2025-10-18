@@ -15,15 +15,13 @@ MSG_HCA_01 = 0x126      # TX by OP, Heading Control Assist steering torque
 MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 
 
-class TestVolkswagenMlbSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
-  STANDSTILL_THRESHOLD = 0
+class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02)}
 
   MAX_RATE_UP = 10
   MAX_RATE_DOWN = 10
-  MAX_TORQUE = 300
+  MAX_TORQUE_LOOKUP = [0], [300]
   MAX_RT_DELTA = 188
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 60
   DRIVER_TORQUE_FACTOR = 3
@@ -31,12 +29,12 @@ class TestVolkswagenMlbSafety(common.CarSafetyTest, common.DriverTorqueSteeringS
   # Wheel speeds _esp_03_msg
   def _speed_msg(self, speed):
     values = {"ESP_%s_Radgeschw" % s: speed for s in ["HL", "HR", "VL", "VR"]}
-    return self.packer.make_can_msg_panda("ESP_03", 0, values)
+    return self.packer.make_can_msg_safety("ESP_03", 0, values)
 
   # Driver brake pressure over threshold
   def _esp_05_msg(self, brake):
     values = {"ESP_Fahrer_bremst": brake}
-    return self.packer.make_can_msg_panda("ESP_05", 0, values)
+    return self.packer.make_can_msg_safety("ESP_05", 0, values)
 
   # Brake pedal switch
   def _motor_03_msg(self, brake_signal=False, gas_signal=0):
@@ -44,7 +42,7 @@ class TestVolkswagenMlbSafety(common.CarSafetyTest, common.DriverTorqueSteeringS
       "MO_Fahrer_bremst": brake_signal,
       "MO_Fahrpedalrohwert_01": gas_signal,
     }
-    return self.packer.make_can_msg_panda("Motor_03", 0, values)
+    return self.packer.make_can_msg_safety("Motor_03", 0, values)
 
   def _user_brake_msg(self, brake):
     return self._motor_03_msg(brake_signal=brake)
@@ -55,7 +53,7 @@ class TestVolkswagenMlbSafety(common.CarSafetyTest, common.DriverTorqueSteeringS
   # ACC engagement status
   def _tsk_status_msg(self, enable, main_switch=True):
     values = {"ACC_Status_ACC": 1 if not main_switch else 3 if enable else 2}
-    return self.packer.make_can_msg_panda("ACC_05", 2, values)
+    return self.packer.make_can_msg_safety("ACC_05", 2, values)
 
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
@@ -63,18 +61,18 @@ class TestVolkswagenMlbSafety(common.CarSafetyTest, common.DriverTorqueSteeringS
   # Driver steering input torque
   def _torque_driver_msg(self, torque):
     values = {"EPS_Lenkmoment": abs(torque), "EPS_VZ_Lenkmoment": torque < 0}
-    return self.packer.make_can_msg_panda("LH_EPS_03", 0, values)
+    return self.packer.make_can_msg_safety("LH_EPS_03", 0, values)
 
   # openpilot steering output torque
   def _torque_cmd_msg(self, torque, steer_req=1):
     # FIXME: The HCA enabled signal isn't the high send rate signal
     values = {"HCA_01_LM_Offset": abs(torque), "HCA_01_LM_OffSign": torque < 0, "HCA_01_Sendestatus": steer_req}
-    return self.packer.make_can_msg_panda("HCA_01", 0, values)
+    return self.packer.make_can_msg_safety("HCA_01", 0, values)
 
   # Cruise control buttons
   def _ls_01_msg(self, cancel=0, resume=0, _set=0, bus=2):
     values = {"LS_Abbrechen": cancel, "LS_Tip_Setzen": _set, "LS_Tip_Wiederaufnahme": resume}
-    return self.packer.make_can_msg_panda("LS_01", bus, values)
+    return self.packer.make_can_msg_safety("LS_01", bus, values)
 
   # Verify brake_pressed is true if either the switch or pressure threshold signals are true
   def test_redundant_brake_signals(self):
@@ -109,7 +107,7 @@ class TestVolkswagenMlbSafety(common.CarSafetyTest, common.DriverTorqueSteeringS
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
 
-class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafety):
+class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LS_01, 0], [MSG_LS_01, 2]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_01, MSG_LDW_02]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}

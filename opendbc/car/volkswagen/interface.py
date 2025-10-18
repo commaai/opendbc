@@ -39,7 +39,7 @@ class CarInterface(CarInterfaceBase):
 
     elif ret.flags & VolkswagenFlags.MLB:
       # Set global MLB parameters
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMlb)]
+      safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMlb)]
       ret.enableBsm = 0x30F in fingerprint[0]  # SWA_01
 
       # TODO: trans message/gear position ID
