@@ -966,6 +966,23 @@ FW_VERSIONS = {
       b'\xf1\x872Q0907572T \xf1\x890383',
     ],
   },
+  CAR.PORSCHE_MACAN_MK1: {
+    (Ecu.engine, 0x7e0, None): [
+      b'\xf1\x8795B90652013\xf1\x893485',
+    ],
+    (Ecu.transmission, 0x7e1, None): [
+      b'\xf1\x8795B927156CE\xf1\x890022',
+    ],
+    (Ecu.srs, 0x715, None): [
+      b'\xf1\x8795B959655F \xf1\x890130\xf1\x82\x05065Q033513',
+    ],
+    (Ecu.eps, 0x712, None): [
+      b'\xf1\x8795B909144K \xf1\x891902\xf1\x82\x02\x04#\x04#',
+    ],
+    (Ecu.fwdRadar, 0x757, None): [
+      b'\xf1\x8795B907567B\x00\xf1\x890800\xf1\x82108',
+    ],
+  },
   CAR.SEAT_ATECA_MK1: {
     (Ecu.engine, 0x7e0, None): [
       b'\xf1\x8704E906027KA\xf1\x893749',
