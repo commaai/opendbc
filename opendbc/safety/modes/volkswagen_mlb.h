@@ -20,6 +20,7 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
     {.msg = {{MSG_ESP_05, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_ACC_05, 2, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_MOTOR_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LS_01, 0, 4, 10U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
   SAFETY_UNUSED(param);
@@ -55,7 +56,7 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == MSG_LS_01) {
       // Always exit controls on rising edge of Cancel
       // Signal: LS_01.LS_Abbrechen
-      if (GET_BIT(msg, 13U) == 1U) {
+      if (GET_BIT(msg, 13U)) {
         controls_allowed = false;
       }
     }
