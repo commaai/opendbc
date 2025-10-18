@@ -784,7 +784,7 @@ BO_ 779 Kombi_01: 8 Gateway_D4C7
  SG_ KBI_Lenkung_Lampe : 5|1@1+ (1,0) [0|1] ""  Getriebe_AL551_951_D4_C7
  SG_ KBI_Vorglueh_System_Lampe : 6|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7,Motor_EDC17_D4
  SG_ KBI_NV_in_Anzeige : 7|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Getriebe_AL551_951_D4_C7
+ SG_ XCOUNTER : 8|4@1+ (1,0) [0|15] ""  Getriebe_AL551_951_D4_C7
  SG_ KBI_Anzeigestatus_ACC : 12|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7
  SG_ KBI_Oeldruck_Schalter : 15|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7
  SG_ KBI_Tankwarnung : 16|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
