@@ -14,7 +14,6 @@ bool volkswagen_set_button_prev = false;
 extern bool volkswagen_resume_button_prev;
 bool volkswagen_resume_button_prev = false;
 
-
 #define MSG_LH_EPS_03        0x09FU   // RX from EPS, for driver steering torque
 #define MSG_ESP_19           0x0B2U   // RX from ABS, for wheel speeds
 #define MSG_ESP_05           0x106U   // RX from ABS, for brake switch state
@@ -28,6 +27,12 @@ bool volkswagen_resume_button_prev = false;
 #define MSG_LDW_02           0x397U   // TX by OP, Lane line recognition and text alerts
 #define MSG_MOTOR_14         0x3BEU   // RX from ECU, for brake switch status
 
+// MLB only messages
+#define MSG_ESP_03      0x103   // RX from ABS, for wheel speeds
+#define MSG_LS_01       0x10B   // TX by OP, ACC control buttons for cancel/resume
+#define MSG_MOTOR_03    0x105   // RX from ECU, for driver throttle input and brake switch status
+#define MSG_TSK_02      0x10C   // RX from ECU, for ACC status from drivetrain coordinator
+#define MSG_ACC_05      0x10D   // RX from radar, for ACC status
 
 static uint32_t volkswagen_mqb_meb_get_checksum(const CANPacket_t *msg) {
   return (uint8_t)msg->data[0];
@@ -67,4 +72,21 @@ static uint32_t volkswagen_mqb_meb_compute_crc(const CANPacket_t *msg) {
   crc = volkswagen_crc8_lut_8h2f[crc];
 
   return (uint8_t)(crc ^ 0xFFU);
+}
+
+static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
+  // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
+  // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
+  int torque_driver_new = msg->data[5] | ((msg->data[6] & 0x1FU) << 8);
+  bool sign = GET_BIT(msg, 55U);
+  if (sign) {
+    torque_driver_new *= -1;
+  }
+  return torque_driver_new;
+}
+
+static bool volkswagen_mlb_mqb_brake_pressure_threshold(const CANPacket_t *msg) {
+  // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above threshold)
+  bool brake_pressure_threshold = GET_BIT(msg, 26U);
+  return brake_pressure_threshold;
 }
