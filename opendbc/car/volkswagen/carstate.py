@@ -260,9 +260,8 @@ class CarState(CarStateBase):
     #                    pt_cp.vl["Gateway_05"]["HL_Tuer_geoeffnet"],
     #                    pt_cp.vl["Gateway_05"]["HR_Tuer_geoeffnet"]])
 
-    # TODO: is this the instantaneous or the comfort blink signal?
-    ret.leftBlinker = bool(pt_cp.vl["Blinkmodi_01"]["BM_links"])
-    ret.rightBlinker = bool(pt_cp.vl["Blinkmodi_01"]["BM_rechts"])
+    ret.leftBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_li"])
+    ret.rightBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_re"])
 
     # ACC okay but disabled (1), ACC ready (2), a radar visibility or other fault/disruption (6 or 7)
     # currently regulating speed (3), driver accel override (4), brake only (5)
@@ -326,20 +325,20 @@ class CarState(CarStateBase):
     if CP.flags & VolkswagenFlags.PQ:
       return CarState.get_can_parsers_pq(CP)
 
-    # another case of the 1-50Hz
-    cam_messages = []
+    # manually configure some optional and variable-rate/edge-triggered messages
+    pt_messages, cam_messages = [], []
+
+    if not CP.flags & VolkswagenFlags.MLB:
+      pt_messages += [
+        ("Blinkmodi_02", 1)  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
+      ]
     if CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
       cam_messages += [
-        ("HCA_01", 1),  # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
+        ("HCA_01", 1),       # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
       ]
 
-    blinker_msg = "Blinkmodi_01" if CP.flags & VolkswagenFlags.MLB else "Blinkmodi_02"
-    # FIXME: Blinkmodi_01 on Macan is true on-demand 0hz/20hz - can we get this from another message?
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [
-        # the 50->1Hz is currently too much for the CANParser to figure out
-        (blinker_msg, 0),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
-      ], CanBus(CP).pt),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).cam),
     }
 
