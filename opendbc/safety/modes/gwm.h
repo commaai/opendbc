@@ -14,7 +14,7 @@
 
 static uint8_t gwm_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;
-  if (msg->addr == GWM_SPEED) {
+  if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
     cnt = msg->data[47] & 0xFU;
   } else if (msg->addr == GWM_BRAKE) {
     cnt = msg->data[31] & 0xFU;
@@ -26,7 +26,7 @@ static uint8_t gwm_get_counter(const CANPacket_t *msg) {
 
 static uint32_t gwm_get_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
-  if (msg->addr == GWM_SPEED) {
+  if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
     chksum = msg->data[24] & 0xFFU;
   } else {
     chksum = msg->data[0] & 0xFFU;
@@ -36,21 +36,21 @@ static uint32_t gwm_get_checksum(const CANPacket_t *msg) {
 
 static uint32_t gwm_compute_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
-  int len = GET_LEN(msg);
   uint8_t crc = 0x00;
   const uint8_t poly = 0x1D;
   const uint8_t xor_out = 0x2D;
   if (msg->addr == GWM_STEERING_AND_CRUISE) { // CRC8 only work for this message
+    int len = GET_LEN(msg);
     for (int i = 1; i < len; i++) {
       uint8_t byte = msg->data[i];
       crc ^= byte;
       for (int bit = 0; bit < 8; bit++) {
-        if (crc & 0x80) {
+        if ((crc & 0x80U) != 0U) {
           crc = (crc << 1) ^ poly;
         } else {
           crc <<= 1;
         }
-        crc &= 0xFF;
+        crc &= 0xFFU;
       }
     }
     chksum = crc ^ xor_out;
@@ -64,20 +64,22 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == GWM_GAS) {
       gas_pressed = msg->data[9] > 0U; // GAS_POSITION
     }
-    if (msg->addr == GWM_STEERING_AND_CRUISE) {
-      int angle_meas_new = (((msg->data[1] & 0x3FU) << 7) | msg->data[2] & 0xFEU); // STEERING_ANGLE
+    if ((uint32_t)msg->addr == (uint32_t)GWM_STEERING_AND_CRUISE) {
+      int angle_meas_new = (((msg->data[1] & 0x3FU) << 7) | (msg->data[2] & 0xFEU)); // STEERING_ANGLE
       update_sample(&angle_meas, angle_meas_new);
-    }
-    if (msg->addr == GWM_SPEED) {
-      int speed = ((msg->data[41] & 0x1FU) << 8) | msg->data[42]; // REAR_LEFT_WHEEL_SPEED
-      vehicle_moving = speed > 0;
-      UPDATE_VEHICLE_SPEED(speed * 0.01 * KPH_TO_MS);
-    }
-    if (msg->addr == GWM_STEERING_AND_CRUISE) {
       pcm_cruise_check((msg->data[5] >> 7) & 1U); // AP_ENABLE_COMMAND
     }
-    if (msg->addr == GWM_BRAKE) {
-      brake_pressed = ((msg->data[25] << 8) | msg->data[26] & 0xF8U) > 0U; // BRAKE_PRESSURE
+    if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
+      uint32_t fl = (GET_BYTES(msg, 1, 2)) & 0x1FFFU;
+      uint32_t fr = (GET_BYTES(msg, 3, 2)) & 0x1FFFU;
+      uint32_t rl = (GET_BYTES(msg, 41, 2)) & 0x1FFFU;
+      uint32_t rr = (GET_BYTES(msg, 43, 2)) & 0x1FFFU;
+      float speed = (fr + rr + rl + fl) / 4.0 * 0.00278f * KPH_TO_MS;
+      vehicle_moving = speed > 0;
+      UPDATE_VEHICLE_SPEED(speed);
+    }
+    if ((uint32_t)msg->addr == (uint32_t)GWM_BRAKE) {
+      brake_pressed = ((msg->data[25] << 8) | (msg->data[26] & 0xF8U)) > 0U; // BRAKE_PRESSURE
     }
   }
 }
@@ -114,26 +116,26 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
 static safety_config gwm_init(uint16_t param) {
   UNUSED(param);
   static const CanMsg GWM_TX_MSGS[] = {
-    {GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, .check_relay = true}, // EPS steering
+    {GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, .check_relay = false}, // EPS steering
+    // {GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, .check_relay = true}, // EPS steering
   };
 
   static RxCheck psa_rx_checks[] = {
-    {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                        // cruise state
-    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS, 8, 25U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            // speed
-    {.msg = {{PSA_STEERING_ALT, PSA_MAIN_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // steering angle
-    {.msg = {{PSA_STEERING, PSA_MAIN_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},     // driver torque
-    {.msg = {{PSA_DYN_CMM, PSA_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},      // gas pedal
-    {.msg = {{PSA_DAT_BSI, PSA_CAM_BUS, 8, 20U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},        // brake
+    // {.msg = {{GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // cruise state, steering angle, driver torque
+    {.msg = {{GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // cruise state, steering angle, driver torque
+    {.msg = {{GWM_SPEED, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // speed
+    {.msg = {{GWM_GAS, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // gas pedal
+    {.msg = {{GWM_BRAKE, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // brake
   };
 
   return BUILD_SAFETY_CFG(psa_rx_checks, GWM_TX_MSGS);
 }
 
-const safety_hooks psa_hooks = {
-  .init = psa_init,
+const safety_hooks gwm_hooks = {
+  .init = gwm_init,
   .rx = gwm_rx_hook,
   .tx = gwm_tx_hook,
-  .get_counter = gwm_get_checksum,
+  .get_counter = gwm_get_counter,
   .get_checksum = gwm_get_checksum,
   .compute_checksum = gwm_compute_checksum,
 };
