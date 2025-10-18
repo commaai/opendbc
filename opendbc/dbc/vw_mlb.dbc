@@ -2067,7 +2067,7 @@ VAL_ 258 GE_Uefkt 1023 "Fehler" ;
 VAL_ 258 GE_Zielgang 0 "Gang P/N (ausgekuppelt)" 1 "Gang 1" 2 "Gang 2" 3 "Gang 3" 4 "Gang 4" 5 "Gang 5" 6 "Gang 6" 7 "Gang 7" 8 "Gang R" 11 "Gang 8" 12 "Gang 9" 14 "Istgang nicht definiert" 15 "Fehler" ;
 VAL_ 258 GE_StartStopp_Info 0 "Motorlauf_nicht_notwendig_(Stoppfreigabe)" 1 "Motoranlauf_nicht_zwingend_notwendig_(Stoppverbot,keine_Startanforderung)" 2 "Motoranlauf_zwingend_notwendig_(Startanforderung)" 3 "Systemfehler" ;
 VAL_ 258 GE_Langfr_Schutzmom 1022 "Init" 1023 "Fehler" ;
-VAL_ 258 GE_Waehlhebel 0 "Zwischenstellung (Darf nur f�r Zustandswechsel P/R, R/N, N/D ausgegeben werden, nicht f�r D/S oder D/Tippgasse wegen Abschaltkriterium GRA/ACC)" 1 "Init" 5 "Position P" 6 "Position R" 7 "Position N" 8 "Position D" 9 "Position S" 10 "Effizienz" 13 "Tipp_in_S" 14 "Tipp_in_D" 15 "Fehler" ;
+VAL_ 258 GE_Waehlhebel 0 "UNDEFINED" 1 "INIT" 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 13 "T" 14 "T" ;
 VAL_ 258 GE_Eingangsdrehz 16382 "Init" 16383 "Fehler" ;
 VAL_ 258 GE_Notlauf 0 "kein Notlauf / Init" 1 "Getriebe im Notlauf" ;
 VAL_ 258 GE_Codierung_MSG 0 "Codierung iO / Init" 1 "Codierung niO" ;

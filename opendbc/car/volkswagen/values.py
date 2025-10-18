@@ -113,6 +113,8 @@ class CarControllerParams:
         self.STEER_DELTA_UP = 10  # Max HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
         self.STEER_DELTA_DOWN = 10  # Min HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
 
+        self.shifter_values = can_define.dv["Getriebe_03"]["GE_Waehlhebel"]
+
         self.BUTTONS = [
           Button(structs.CarState.ButtonEvent.Type.setCruise, "LS_01", "LS_Tip_Setzen", [1]),
           Button(structs.CarState.ButtonEvent.Type.resumeCruise, "LS_01", "LS_Tip_Wiederaufnahme", [1]),
@@ -121,9 +123,6 @@ class CarControllerParams:
           Button(structs.CarState.ButtonEvent.Type.cancel, "LS_01", "LS_Abbrechen", [1]),
           Button(structs.CarState.ButtonEvent.Type.gapAdjustCruise, "LS_01", "LS_Verstellung_Zeitluecke", [1]),
         ]
-
-        # TODO: populate shifter enums
-        self.shifter_values = None
 
       else:
         self.STEER_DRIVER_ALLOWANCE = 80    # Driver intervention threshold 0.8 Nm
