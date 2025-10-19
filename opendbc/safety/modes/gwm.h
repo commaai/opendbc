@@ -74,8 +74,8 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
       uint32_t fr = (GET_BYTES(msg, 3, 2)) & 0x1FFFU;
       uint32_t rl = (GET_BYTES(msg, 41, 2)) & 0x1FFFU;
       uint32_t rr = (GET_BYTES(msg, 43, 2)) & 0x1FFFU;
-      float speed = (fr + rr + rl + fl) / 4.0 * 0.00278f * KPH_TO_MS;
-      vehicle_moving = speed > 0;
+      float speed = (float)((fr + rr + rl + fl) / 4.0f * 0.00278f * KPH_TO_MS);
+      vehicle_moving = speed > 0.0f;
       UPDATE_VEHICLE_SPEED(speed);
     }
     if ((uint32_t)msg->addr == (uint32_t)GWM_BRAKE) {
