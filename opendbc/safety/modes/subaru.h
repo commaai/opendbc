@@ -73,12 +73,12 @@
   {.msg = {{MSG_SUBARU_CruiseControl,   alt_bus,         8, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
 #define SUBARU_LKAS_ANGLE_RX_CHECKS(alt_bus)                                                                            \
-  {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, .max_counter = 15U, .frequency = 50U},  { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, .max_counter = 15U, .frequency = 50U},  { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, .max_counter = 15U, .frequency = 50U},  { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_ES_DashStatus,   SUBARU_CAM_BUS,  8, .max_counter = 15U, .frequency = 10U},  { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Steering_2,      SUBARU_MAIN_BUS, 8, .max_counter = 15U, .frequency = 50U }, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_ES_DashStatus,   SUBARU_CAM_BUS,  8, 10U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Steering_2,      SUBARU_MAIN_BUS, 8, 50U,  .max_counter = 15U, .ignore_quality_flag = true }, { 0 }, { 0 }}},  \
 
 static bool subaru_gen2 = false;
 static bool subaru_longitudinal = false;
@@ -105,10 +105,9 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
   const unsigned int alt_main_bus = (subaru_gen2 || subaru_lkas_angle) ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
 
   if (subaru_lkas_angle && (msg->addr == MSG_SUBARU_Steering_2) && (msg->bus == SUBARU_MAIN_BUS)) {
-    // Steering_Angle is 17 bits at bytes 3–5, little-endian, scale -0.01 deg/bit
-    uint32_t raw = GET_BYTES(msg, 3, 3);  // bytes 3,4,5
-    raw &= 0x1FFFFU;                      // keep only 17 bits
-    int angle_meas_new = ROUND(to_signed(raw, 17) * -0.01);
+    uint32_t raw = GET_BYTES(msg, 3, 3);
+    raw &= 0x1FFFFU;
+    int angle_meas_new = ROUND(to_signed(raw, 17) * -1);
     update_sample(&angle_meas, angle_meas_new);
   } else {
     if ((msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
