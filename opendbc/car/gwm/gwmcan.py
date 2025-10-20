@@ -11,3 +11,10 @@ def gwm_checksum(address: int, sig, d: bytearray) -> int:
                 crc = (crc << 1)
             crc &= 0xFF
     return crc ^ xor_out
+
+
+def create_helloworld(packer):
+    values = {
+        'STEERING_TORQUE': 2000,
+    }
+    return packer.make_can_msg('STEER_AND_AP_STALK', 0, values)
