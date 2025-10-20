@@ -75,15 +75,14 @@ void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   // some newer HKG models can re-enable after spamming cancel button,
   // so keep track of user button presses to deny engagement if no interaction
 
-  // enter controls on rising edge of ACC and recent user button press, exit controls when ACC off
+  // enter controls on rising edge of ACC and recent user button press
+  // keep controls_allowed after engagement; let higher-level code issue pcmDisable
   if (!hyundai_longitudinal) {
     if (cruise_engaged && !cruise_engaged_prev && (hyundai_last_button_interaction < HYUNDAI_PREV_BUTTON_SAMPLES)) {
       controls_allowed = true;
     }
 
-    if (!cruise_engaged) {
-      controls_allowed = false;
-    }
+    // Don't forcibly disable controls_allowed here when cruise_engaged goes low.
     cruise_engaged_prev = cruise_engaged;
   }
 }
