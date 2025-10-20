@@ -55,7 +55,7 @@ class IntelligentCruiseButtonManagementInterface(IntelligentCruiseButtonManageme
         button_counter_offset = [1, 1, 0, None][self.button_frame % 4]
         if button_counter_offset is not None:
           for _ in range(20):
-            can_sends.append(hyundaicanfd.create_buttons(packer, self.CP, CAN, (CS.buttons_counter + button_counter_offset) % 0x10, send_button))
+            can_sends.append(hyundaicanfd.create_buttons(packer, self.CP, CAN, (CS.buttons_counter + button_counter_offset) % 0xF, send_button))
           self.last_button_frame = self.frame
 
     return can_sends
