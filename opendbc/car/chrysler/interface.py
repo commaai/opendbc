@@ -83,8 +83,11 @@ class CarInterface(CarInterfaceBase):
   def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
                      car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
     if candidate == CAR.RAM_1500_5TH_GEN:
-      stock_cp.minSteerSpeed = 0.5
+      if stock_cp.minSteerSpeed != 0.:
+        stock_cp.minSteerSpeed = 0.5
       stock_cp.minEnableSpeed = 14.5
+      if any(fw.ecu == 'eps' and fw.fwVersion in (b"68273275AF", b"68273275AG", b"68312176AE", b"68312176AG",) for fw in car_fw):
+        stock_cp.minEnableSpeed = 0.
 
     if candidate == CAR.RAM_HD_5TH_GEN:
       stock_cp.dashcamOnly = False
