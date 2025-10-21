@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
-from opendbc.car.lateral import AngleSteeringLimits
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import ISO_LATERAL_ACCEL, AngleSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -15,6 +15,11 @@ class CarControllerParams:
     100,
     ([0., 15., 15.], [5., .8, .8]),
     ([0., 15., 15.], [5., .4, 0.4]),
+    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * 0.06),  # ~3.6 m/s^2
+    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * 0.06),  # ~3.6 m/s^3
+
+    # limit angle rate to both prevent a fault and for low speed comfort (~12 mph rate down to 0 mph)
+    MAX_ANGLE_RATE=5
   )
 
   def __init__(self, CP):
