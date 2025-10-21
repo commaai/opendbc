@@ -3,7 +3,7 @@ from enum import Enum, IntFlag
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.structs import CarParams, CarState
-from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
+from opendbc.car.docs_definitions import CommonFootnote, CarFootnote, CarDocs, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -25,14 +25,14 @@ class Footnote(Enum):
 class TeslaCarDocsHW3(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_a]))
-  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE, Footnote.SETUP])
+  footnotes: list[Enum] = field(default_factory=lambda: [CommonFootnote.NON_CAMERA_HARNESS, Footnote.HW_TYPE, Footnote.SETUP])
 
 
 @dataclass
 class TeslaCarDocsHW4(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_b]))
-  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE, Footnote.SETUP])
+  footnotes: list[Enum] = field(default_factory=lambda: [CommonFootnote.NON_CAMERA_HARNESS, Footnote.HW_TYPE, Footnote.SETUP])
 
 
 @dataclass
