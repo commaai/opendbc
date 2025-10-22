@@ -3,10 +3,6 @@
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/volkswagen_common.h"
 
-// TODO: consolidate all VW brake pedal/pressure bools into volkswagen_common.h
-static bool volkswagen_mlb_brake_pedal_switch = false;
-static bool volkswagen_mlb_brake_pressure_detected = false;
-
 
 static safety_config volkswagen_mlb_init(uint16_t param) {
   // Transmit of LS_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
@@ -24,14 +20,8 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
   };
 
   SAFETY_UNUSED(param);
+  volkswagen_common_init();
 
-  volkswagen_set_button_prev = false;
-  volkswagen_resume_button_prev = false;
-  // TODO: consolidate all VW brake pedal/pressure bools into volkswagen_common.h
-  volkswagen_mlb_brake_pedal_switch = false;
-  volkswagen_mlb_brake_pressure_detected = false;
-
-  gen_crc_lookup_table_8(0x2F, volkswagen_crc8_lut_8h2f);
   return BUILD_SAFETY_CFG(volkswagen_mlb_rx_checks, VOLKSWAGEN_MLB_STOCK_TX_MSGS);
 }
 
@@ -65,15 +55,14 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
     // Signal: Motor_03.MO_Fahrer_bremst
     if (msg->addr == MSG_MOTOR_03) {
       gas_pressed = msg->data[6] != 0U;
-      volkswagen_mlb_brake_pedal_switch = GET_BIT(msg, 35U);
+      volkswagen_brake_pedal_switch = GET_BIT(msg, 35U);
     }
 
     if (msg->addr == MSG_ESP_05) {
-      volkswagen_mlb_brake_pressure_detected = volkswagen_mlb_mqb_brake_pressure_threshold(msg);
+      volkswagen_brake_pressure_detected = volkswagen_mlb_mqb_brake_pressure_threshold(msg);
     }
 
-    // TODO: cleanup/migrate to volkswagen_common.h
-    brake_pressed = volkswagen_mlb_brake_pedal_switch || volkswagen_mlb_brake_pressure_detected;
+    brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
 
   }
 

@@ -14,6 +14,11 @@ bool volkswagen_set_button_prev = false;
 extern bool volkswagen_resume_button_prev;
 bool volkswagen_resume_button_prev = false;
 
+extern bool volkswagen_brake_pedal_switch;
+extern bool volkswagen_brake_pressure_detected;
+bool volkswagen_brake_pedal_switch = false;
+bool volkswagen_brake_pressure_detected = false;
+
 #define MSG_LH_EPS_03        0x09FU   // RX from EPS, for driver steering torque
 #define MSG_ESP_19           0x0B2U   // RX from ABS, for wheel speeds
 #define MSG_ESP_05           0x106U   // RX from ABS, for brake switch state
@@ -33,6 +38,15 @@ bool volkswagen_resume_button_prev = false;
 #define MSG_MOTOR_03    0x105U   // RX from ECU, for driver throttle input and brake switch status
 #define MSG_TSK_02      0x10CU   // RX from ECU, for ACC status from drivetrain coordinator
 #define MSG_ACC_05      0x10DU   // RX from radar, for ACC status
+
+static void volkswagen_common_init(void) {
+  volkswagen_set_button_prev = false;
+  volkswagen_resume_button_prev = false;
+  volkswagen_brake_pedal_switch = false;
+  volkswagen_brake_pressure_detected = false;
+  gen_crc_lookup_table_8(0x2F, volkswagen_crc8_lut_8h2f);
+  return;
+}
 
 static uint32_t volkswagen_mqb_meb_get_checksum(const CANPacket_t *msg) {
   return (uint8_t)msg->data[0];
