@@ -448,7 +448,7 @@ class CAR(Platforms):
   PORSCHE_MACAN_MK1 = VolkswagenMLBPlatformConfig(
     [VWCarDocs("Porsche Macan 2017-24")],
     VolkswagenCarSpecs(mass=1895, wheelbase=2.81),
-    chassis_codes={"95"},
+    chassis_codes={"95", "A5"},
     wmis={WMI.PORSCHE_SUV},
   )
   SEAT_ATECA_MK1 = VolkswagenMQBPlatformConfig(
