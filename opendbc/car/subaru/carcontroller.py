@@ -5,7 +5,6 @@ from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_a
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
-from opendbc.car.vehicle_model import VehicleModel
 
 # FIXME: These limits aren't exact. The real limit is more than likely over a larger time period and
 # involves the total steering angle change rather than rate, but these limits work well for now
@@ -24,7 +23,6 @@ class CarController(CarControllerBase):
 
     self.p = CarControllerParams(CP)
     self.packer = CANPacker(DBC[CP.carFingerprint][Bus.pt])
-    self.VM = VehicleModel(CP)
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -36,17 +34,11 @@ class CarController(CarControllerBase):
     # *** steering ***
     if (self.frame % self.p.STEER_STEP) == 0:
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
-        # Use current angle as target when inactive
-        target_angle = actuators.steeringAngleDeg if CC.latActive else CS.out.steeringAngleDeg
+        apply_steer = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_steer_last, CS.out.vEgoRaw,
+                                                   CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
 
-        apply_steer = apply_std_steer_angle_limits(
-          target_angle,
-          self.apply_steer_last,
-          CS.out.vEgoRaw,
-          CS.out.steeringAngleDeg,
-          CC.latActive,
-          self.p.ANGLE_LIMITS,
-        )
+        if not CC.latActive:
+          apply_steer = CS.out.steeringAngleDeg
 
         can_sends.append(subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive))
         self.apply_steer_last = apply_steer
