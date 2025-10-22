@@ -202,10 +202,8 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     int desired_angle = GET_BYTES(msg, 5, 3) & 0x1FFFFU;
     desired_angle = -1 * to_signed(desired_angle, 17);
     bool lkas_request = GET_BIT(msg, 12U);
-    steer_angle_cmd_checks(desired_angle, lkas_request, SUBARU_ANGLE_STEERING_LIMITS);
     
-    // DO NOT OPEN A PR WITH THIS. HORRIBLE IDEA. DEBUGGING ONLY
-    violation |= false; 
+    violation |= steer_angle_cmd_checks(desired_angle, lkas_request, SUBARU_ANGLE_STEERING_LIMITS);
   }
 
   // check es_brake brake_pressure limits
