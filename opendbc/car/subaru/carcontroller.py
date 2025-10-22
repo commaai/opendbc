@@ -1,7 +1,7 @@
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, make_tester_present_msg
-from opendbc.car.lateral import apply_driver_steer_torque_limits, apply_steer_angle_limits_vm, common_fault_avoidance
+from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance, apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
@@ -35,21 +35,18 @@ class CarController(CarControllerBase):
 
     # *** steering ***
     if (self.frame % self.p.STEER_STEP) == 0:
-      apply_steer = 0
-      apply_torque = 0
-
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
-        apply_steer = apply_steer_angle_limits_vm(
-          actuators.steeringAngleDeg,
+        # Use current angle as target when inactive
+        target_angle = actuators.steeringAngleDeg if CC.latActive else CS.out.steeringAngleDeg
+
+        apply_steer = apply_std_steer_angle_limits(
+          target_angle,
           self.apply_steer_last,
           CS.out.vEgoRaw,
           CS.out.steeringAngleDeg,
           CC.latActive,
-          self.p,   # holds ANGLE_LIMITS + MAX_LATERAL_ACCEL/JERK/ANGLE_RATE
-          self.VM                # set this in __init__(...), or fetch via interfaces
+          self.p.ANGLE_LIMITS,
         )
-        if not CC.latActive:
-          apply_steer = CS.out.steeringAngleDeg
 
         can_sends.append(subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive))
         self.apply_steer_last = apply_steer
