@@ -34,11 +34,20 @@ class CarController(CarControllerBase):
     # *** steering ***
     if (self.frame % self.p.STEER_STEP) == 0:
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
-        apply_steer = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_steer_last, CS.out.vEgoRaw,
-                                                   CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
+        actual_steering_angle_deg = CS.out.steeringAngleDeg + CS.out.steeringAngleOffsetDeg
+        desired_steering_angle_deg = actuators.steeringAngleDeg + CS.out.steeringAngleOffsetDeg
+
+        apply_steer = apply_std_steer_angle_limits(
+          desired_steering_angle_deg,
+          self.apply_steer_last,
+          CS.out.vEgoRaw,
+          actual_steering_angle_deg,
+          CC.latActive,
+          CarControllerParams.ANGLE_LIMITS
+        )
 
         if not CC.latActive:
-          apply_steer = CS.out.steeringAngleDeg
+          apply_steer = actual_steering_angle_deg
 
         can_sends.append(subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive))
         self.apply_steer_last = apply_steer
