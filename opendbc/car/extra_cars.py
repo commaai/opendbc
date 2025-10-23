@@ -39,7 +39,7 @@ class CAR(Platforms):
     [
       CommunityCarDocs("Acura Integra 2023-25", "All"),
       CommunityCarDocs("Acura MDX 2014-16", "Advance Package"),
-      CommunityCarDocs("Acura MDX 2017-18", "All"),
+      CommunityCarDocs("Acura MDX 2017-19", "All"),
       CommunityCarDocs("Acura MDX 2022-24", "All"),
       CommunityCarDocs("Acura RDX 2022-25", "All"),
       CommunityCarDocs("Acura RLX 2017", "Advance Package or Technology Package"),
