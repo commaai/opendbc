@@ -160,7 +160,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
-                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
+                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, is_release_sp: bool, docs: bool) -> structs.CarParamsSP:
     # identical logic used in _get_params
     # "LKA steering" if LKAS or LKAS_ALT messages are seen coming from the camera.
     # Generally means our LKAS message is forwarded to another ECU (commonly ADAS ECU)

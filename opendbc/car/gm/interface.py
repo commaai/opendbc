@@ -236,7 +236,7 @@ class CarInterface(CarInterfaceBase, CarInterfaceExt):
 
   @staticmethod
   def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
-                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
+                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, is_release_sp: bool, docs: bool) -> structs.CarParamsSP:
     if candidate in (CAR.CHEVROLET_MALIBU_NON_ACC_9TH_GEN, CAR.CHEVROLET_BOLT_NON_ACC, CAR.CHEVROLET_BOLT_NON_ACC_1ST_GEN,
                      CAR.CHEVROLET_BOLT_NON_ACC_2ND_GEN, CAR.CHEVROLET_TRAILBLAZER_NON_ACC_2ND_GEN):
       stock_cp.steerActuatorDelay = 0.2

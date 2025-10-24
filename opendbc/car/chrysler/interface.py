@@ -81,7 +81,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
-                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
+                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, is_release_sp: bool, docs: bool) -> structs.CarParamsSP:
     if candidate == CAR.RAM_1500_5TH_GEN:
       if stock_cp.minSteerSpeed != 0.:
         stock_cp.minSteerSpeed = 0.5

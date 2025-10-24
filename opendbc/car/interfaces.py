@@ -131,7 +131,7 @@ class CarInterfaceBase(ABC, CarInterfaceBaseSP):
 
   @classmethod
   def get_non_essential_params_sp(cls, car_params, candidate: str) -> structs.CarParamsSP:
-    return cls.get_params_sp(car_params, candidate, gen_empty_fingerprint(), list(), False, False)
+    return cls.get_params_sp(car_params, candidate, gen_empty_fingerprint(), list(), False, False, False)
 
   @classmethod
   def get_params(cls, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw],
@@ -162,14 +162,14 @@ class CarInterfaceBase(ABC, CarInterfaceBaseSP):
 
   @classmethod
   def get_params_sp(cls, car_params, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw], alpha_long: bool,
-                    docs: bool) -> structs.CarParamsSP:
+                    is_release_sp: bool, docs: bool) -> structs.CarParamsSP:
     car_params_sp = structs.CarParamsSP()
 
     platform = PLATFORMS[candidate]
     car_params_sp.flags |= int(platform.config.sp_flags)
     car_params_sp.pcmCruiseSpeed = True
 
-    return cls._get_params_sp(car_params, car_params_sp, candidate, fingerprint, car_fw, alpha_long, docs)
+    return cls._get_params_sp(car_params, car_params_sp, candidate, fingerprint, car_fw, alpha_long, is_release_sp, docs)
 
   @staticmethod
   @abstractmethod
@@ -179,7 +179,7 @@ class CarInterfaceBase(ABC, CarInterfaceBaseSP):
 
   @staticmethod
   def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
-                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
+                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, is_release_sp: bool, docs: bool) -> structs.CarParamsSP:
     carlog.debug(f"Car {candidate} does not have a _get_params_sp method, using defaults")
     return ret
 

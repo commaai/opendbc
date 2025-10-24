@@ -24,6 +24,6 @@ class TestHondaEpsMod:
 
     CarInterface = interfaces[car_name]
     CP = CarInterface.get_params(car_name, fingerprint, car_fw, False, False, False)
-    _ = CarInterface.get_params_sp(CP, car_name, fingerprint, car_fw, False, False)
+    _ = CarInterface.get_params_sp(CP, car_name, fingerprint, car_fw, False, False, False)
 
     assert not CP.dashcamOnly
