@@ -297,7 +297,8 @@ class CarInterface(CarInterfaceBase):
 
     stock_cp.autoResumeSng = stock_cp.autoResumeSng or ret.enableGasInterceptor
 
-    ret.intelligentCruiseButtonManagementAvailable = candidate in HONDA_BOSCH
+    ret.intelligentCruiseButtonManagementAvailable = candidate in (HONDA_BOSCH - HONDA_BOSCH_CANFD) or \
+                                                     (candidate in HONDA_BOSCH_CANFD and not is_release_sp)
 
     return ret
 
