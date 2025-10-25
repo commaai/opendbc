@@ -1,7 +1,7 @@
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, make_tester_present_msg
-from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance, apply_std_steer_angle_limits
+from opendbc.car.lateral import AngleSteeringLimits, apply_driver_steer_torque_limits, common_fault_avoidance, apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
@@ -11,6 +11,11 @@ from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarController
 MAX_STEER_RATE = 25  # deg/s
 MAX_STEER_RATE_FRAMES = 7  # tx control frames needed before torque can be cut
 
+ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    100,
+    ([0., 15., 15.], [5., .8, .8]),
+    ([0., 15., 15.], [5., .4, .4]),
+  )
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -43,7 +48,7 @@ class CarController(CarControllerBase):
           CS.out.vEgoRaw,
           actual_steering_angle_deg,
           CC.latActive,
-          CarControllerParams.ANGLE_LIMITS
+          ANGLE_LIMITS
         )
 
         if not CC.latActive:
