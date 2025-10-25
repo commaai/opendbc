@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
-from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -11,12 +10,6 @@ Ecu = CarParams.Ecu
 
 
 class CarControllerParams:
-  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    100,
-    ([0., 15., 15.], [5., .8, .8]),
-    ([0., 15., 15.], [5., .4, .4]),
-  )
-
   def __init__(self, CP):
     self.STEER_STEP = 2                # how often we update the steer cmd
     self.STEER_DELTA_UP = 50           # torque increase per refresh, 0.8s to max
@@ -168,11 +161,6 @@ class CAR(Platforms):
     CarSpecs(mass=1668, wheelbase=2.67, steerRatio=17),
     flags=SubaruFlags.HYBRID,
   )
-  # SUBARU_CROSSTREK_GEN_3 = SubaruPlatformConfig(
-  #   [SubaruCarDocs("Subaru Crosstrek 2024-25", car_parts=CarParts.common([CarHarness.subaru_d]))],
-  #   ,
-  #   flags=SubaruFlags.LKAS_ANGLE,
-  # )
   SUBARU_FORESTER = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Forester 2019-21", "All")],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=17),

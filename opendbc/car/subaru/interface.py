@@ -42,7 +42,6 @@ class CarInterface(CarInterfaceBase):
     else:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
-    # Ensure panda safety mode is configured for LKAS angle platforms
     if ret.flags & SubaruFlags.LKAS_ANGLE:
       ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.LKAS_ANGLE.value
 
