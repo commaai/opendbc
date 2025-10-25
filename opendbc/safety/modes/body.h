@@ -34,7 +34,7 @@ static bool body_tx_hook(const CANPacket_t *msg) {
 
 static safety_config body_init(uint16_t param) {
   static RxCheck body_rx_checks[] = {
-    {.msg = {{0x201, 0, 2, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x201, 2, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
 
     #ifdef PANDA_BODY
     {.msg = {{0x250, 0, 6, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
