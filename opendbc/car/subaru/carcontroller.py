@@ -13,8 +13,8 @@ MAX_STEER_RATE_FRAMES = 7  # tx control frames needed before torque can be cut
 
 ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     100,
-    ([0., 15., 15.], [5., .8, .8]),
-    ([0., 15., 15.], [5., .4, .4]),
+    ([0., 5., 15.], [4., .6, .1,]),
+    ([0., 5., 15.], [4., .3, .1,]),
   )
 
 class CarController(CarControllerBase):
