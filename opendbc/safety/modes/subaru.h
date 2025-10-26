@@ -170,7 +170,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     },
     .angle_rate_down_lookup = {
       {0.0, 5.0, 35.0},
-      {5.0, 0.4, 0.15}
+      {5.0, 0.8, 0.15}
     },
   };
 
