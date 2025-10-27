@@ -5,7 +5,7 @@ from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerSafety
 
 MSG_LENKHILFE_3 = 0x0D0       # RX from EPS, for steering angle and driver steering torque
 MSG_HCA_1 = 0x0D2             # TX by OP, Heading Control Assist steering torque
@@ -19,7 +19,7 @@ MSG_ACC_GRA_ANZEIGE = 0x56A   # TX by OP, ACC HUD
 MSG_LDW_1 = 0x5BE             # TX by OP, Lane line recognition and text alerts
 
 
-class TestVolkswagenPqSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   cruise_engaged = False
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1)}
@@ -38,8 +38,8 @@ class TestVolkswagenPqSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueS
 
   # Ego speed (Bremse_1)
   def _speed_msg(self, speed):
-    values = {"Geschwindigkeit_neu__Bremse_1_": speed}
-    return self.packer.make_can_msg_panda("Bremse_1", 0, values)
+    values = {"BR1_Rad_kmh": speed}
+    return self.packer.make_can_msg_safety("Bremse_1", 0, values)
 
   # Brake light switch (shared message Motor_2)
   def _user_brake_msg(self, brake):
@@ -54,39 +54,39 @@ class TestVolkswagenPqSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueS
   # Acceleration request to drivetrain coordinator
   def _accel_msg(self, accel):
     values = {"ACS_Sollbeschl": accel}
-    return self.packer.make_can_msg_panda("ACC_System", 0, values)
+    return self.packer.make_can_msg_safety("ACC_System", 0, values)
 
   # Driver steering input torque
   def _torque_driver_msg(self, torque):
     values = {"LH3_LM": abs(torque), "LH3_LMSign": torque < 0}
-    return self.packer.make_can_msg_panda("Lenkhilfe_3", 0, values)
+    return self.packer.make_can_msg_safety("Lenkhilfe_3", 0, values)
 
   # openpilot steering output torque
   def _torque_cmd_msg(self, torque, steer_req=1, hca_status=5):
     values = {"LM_Offset": abs(torque), "LM_OffSign": torque < 0, "HCA_Status": hca_status if steer_req else 3}
-    return self.packer.make_can_msg_panda("HCA_1", 0, values)
+    return self.packer.make_can_msg_safety("HCA_1", 0, values)
 
   # ACC engagement and brake light switch status
   # Called indirectly for compatibility with common.py tests
   def _motor_2_msg(self, brake_pressed=False, cruise_engaged=False):
-    values = {"Bremslichtschalter": brake_pressed,
-              "GRA_Status": cruise_engaged}
-    return self.packer.make_can_msg_panda("Motor_2", 0, values)
+    values = {"MO2_BLS": brake_pressed,
+              "MO2_Sta_GRA": cruise_engaged}
+    return self.packer.make_can_msg_safety("Motor_2", 0, values)
 
   # ACC main switch status
   def _motor_5_msg(self, main_switch=False):
-    values = {"GRA_Hauptschalter": main_switch}
-    return self.packer.make_can_msg_panda("Motor_5", 0, values)
+    values = {"MO5_GRA_Hauptsch": main_switch}
+    return self.packer.make_can_msg_safety("Motor_5", 0, values)
 
   # Driver throttle input (Motor_3)
   def _user_gas_msg(self, gas):
-    values = {"Fahrpedal_Rohsignal": gas}
-    return self.packer.make_can_msg_panda("Motor_3", 0, values)
+    values = {"MO3_Pedalwert": gas}
+    return self.packer.make_can_msg_safety("Motor_3", 0, values)
 
   # Cruise control buttons (GRA_Neu)
   def _button_msg(self, _set=False, resume=False, cancel=False, bus=2):
     values = {"GRA_Neu_Setzen": _set, "GRA_Recall": resume, "GRA_Abbrechen": cancel}
-    return self.packer.make_can_msg_panda("GRA_Neu", bus, values)
+    return self.packer.make_can_msg_safety("GRA_Neu", bus, values)
 
   def test_torque_measurements(self):
     # TODO: make this test work with all cars
@@ -115,7 +115,7 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("vw_pq")
+    self.packer = CANPackerSafety("vw_pq")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenPq, 0)
     self.safety.init_tests()
@@ -137,7 +137,7 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):
-    self.packer = CANPackerPanda("vw_pq")
+    self.packer = CANPackerSafety("vw_pq")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenPq, VolkswagenSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
