@@ -133,7 +133,7 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
   TORQUE_MEAS_TOLERANCE = 1  # toyota safety adds one to be conservative for rounding
 
   # Safety around steering req bit
-  MIN_VALID_STEERING_FRAMES = 18
+  MIN_VALID_STEERING_FRAMES = 17
   MAX_INVALID_STEERING_FRAMES = 1
 
   def setUp(self):
