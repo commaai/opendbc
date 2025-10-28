@@ -119,7 +119,7 @@ class CarInterfaceBase(ABC, CarInterfaceBaseSP):
     return self.CC.update(c, c_sp, self.CS, now_nanos)
 
   @staticmethod
-  def get_pid_accel_limits(CP, current_speed, cruise_speed):
+  def get_pid_accel_limits(CP, CP_SP, current_speed, cruise_speed):
     return ACCEL_MIN, ACCEL_MAX
 
   @classmethod

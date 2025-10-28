@@ -40,7 +40,7 @@ class CarInterface(CarInterfaceBase, CarInterfaceExt):
     CarInterfaceExt.__init__(self, CP, CarInterfaceBase)
 
   @staticmethod
-  def get_pid_accel_limits(CP, current_speed, cruise_speed):
+  def get_pid_accel_limits(CP, CP_SP, current_speed, cruise_speed):
     return CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX
 
   # Determined by iteratively plotting and minimizing error for f(angle, speed) = steer.
