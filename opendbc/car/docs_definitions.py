@@ -189,6 +189,10 @@ CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "setup_n
 
 
 class CommonFootnote(Enum):
+  NON_CAMERA_HARNESS = CarFootnote(
+    "The harness used in this model is not a windshield camera harness but one that plugs" +
+    "into a car gateway box, usually located in the driver footwell area.",
+    Column.MODEL)
   EXP_LONG_AVAIL = CarFootnote(
     "openpilot Longitudinal Control (Alpha) is available behind a toggle; " +
     "the toggle is only available in non-release branches such as `devel` or `nightly-dev`.",
