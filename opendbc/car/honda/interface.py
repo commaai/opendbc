@@ -60,6 +60,8 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = True
 
       ret.pcmCruise = True
+      if candidate == CAR.ACURA_RLX_HYBRID:
+        ret.radarUnavailable = True
 
     if candidate == CAR.HONDA_CRV_5G:
       ret.enableBsm = 0x12f8bfa7 in fingerprint[CAN.radar]
