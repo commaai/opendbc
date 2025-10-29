@@ -109,19 +109,20 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
     raw &= 0x1FFFFU;
     int angle_meas_new = ROUND(to_signed(raw, 17) * -1);
     update_sample(&angle_meas, angle_meas_new);
-  } else {
-    if ((msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
-      int torque_driver_new;
-      torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
-      torque_driver_new = -1 * to_signed(torque_driver_new, 11);
-      update_sample(&torque_driver, torque_driver_new);
-
-      int angle_meas_new = (GET_BYTES(msg, 4, 2) & 0xFFFFU);
-      // convert Steering_Torque -> Steering_Angle to centidegrees, to match the ES_LKAS_ANGLE angle request units
-      angle_meas_new = ROUND(to_signed(angle_meas_new, 16) * -2.17);
-      update_sample(&angle_meas, angle_meas_new);
-    }
   }
+
+  if (!subaru_lkas_angle && (msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
+    int torque_driver_new;
+    torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
+    torque_driver_new = -1 * to_signed(torque_driver_new, 11);
+    update_sample(&torque_driver, torque_driver_new);
+
+    int angle_meas_new = (GET_BYTES(msg, 4, 2) & 0xFFFFU);
+    // convert Steering_Torque -> Steering_Angle to centidegrees, to match the ES_LKAS_ANGLE angle request units
+    angle_meas_new = ROUND(to_signed(angle_meas_new, 16) * -2.17);
+    update_sample(&angle_meas, angle_meas_new);
+  }
+  
 
   // enter controls on rising edge of ACC, exit controls on ACC off
   if (subaru_lkas_angle) {
