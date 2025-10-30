@@ -242,7 +242,7 @@
 |Mazda|CX-5 2022-25|All|[Upstream](#upstream)|
 |Mazda|CX-9 2016-20|All|[Dashcam mode](#dashcam)|
 |Mazda|CX-9 2021-23|All|[Upstream](#upstream)|
-|Nissan|Altima 2019-20|ProPILOT Assist|[Upstream](#upstream)|
+|Nissan|Altima 2019-20, 2024|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|Leaf 2018-23|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|Rogue 2018-20|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|X-Trail 2017|ProPILOT Assist|[Upstream](#upstream)|
