@@ -58,6 +58,9 @@ OPTS=" --enable=all --enable=unusedFunction --addon=misra"
 printf "\n${GREEN}** Safety **${NC}\n"
 cppcheck $OPTS $BASEDIR/opendbc/safety/tests/misra/main.c
 
+printf "\n${GREEN}** Safety with CANFD **${NC}\n"
+cppcheck $OPTS -DCANFD $BASEDIR/opendbc/safety/tests/misra/main.c
+
 printf "\n${GREEN}Success!${NC} took $SECONDS seconds\n"
 
 # ensure list of checkers is up to date
