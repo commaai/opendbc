@@ -269,7 +269,8 @@ class CAR(Platforms):
   ACURA_RLX_HYBRID = HondaNidecPlatformConfig(
     [], # 2017 RLX Hybrid, don't add to cardocs since custom panda
     CarSpecs(mass=4359 * CV.LB_TO_KG, wheelbase=2.85, centerToFrontRatio=0.39, steerRatio=13.9, tireStiffnessFactor=0.8467),  #spec, stiff/ctf from Accord
-    {Bus.pt: 'acura_rlx'}, #try no radar
+    # {Bus.pt: 'acura_rlx'}, #try no radar
+    radar_dbc_dict('acura_rlx'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.NIDEC_HYBRID,
   )
   HONDA_ODYSSEY = HondaNidecPlatformConfig(
