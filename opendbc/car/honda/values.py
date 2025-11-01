@@ -170,6 +170,7 @@ class CAR(Platforms):
     # steerRatio: 11.82 is spec end-to-end
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
+    flags=HondaFlags.ALLOW_MANUAL_TRANS,
   )
   HONDA_ACCORD_11G = HondaBoschCANFDPlatformConfig(
     [
