@@ -517,6 +517,12 @@ BO_ 593 RADAR_0x251: 16 FRONT_RADAR
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 687 HOD_FD_01_100ms: 8 XXX
+ SG_ HOD_Dir_Status : 18|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ HOD_Option : 48|2@1+ (1,0) [0|255] "" XXX
+
 BO_ 698 FR_CMR_04_40ms: 32 FR_CMR
  SG_ FR_CMR_Crc4Val : 0|16@1+ (1,0) [0|65535] "" Dummy
  SG_ FR_CMR_AlvCnt4Val : 16|8@1+ (1,0) [0|255] "" Dummy
@@ -687,6 +693,7 @@ CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
 CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
 CM_ SG_ 416 VSetDis "set speed in display units";
 CM_ SG_ 480 NEW_SIGNAL_5 "todo: figure out why always set to 1";
+CM_ SG_ 687 HOD_Dir_Status "This signal indicates the status of hands on/off";
 CM_ SG_ 736 MAX_SPEED "Display units. Restricts car from driving above this speed unless accelerator pedal is depressed beyond pressure point";
 CM_ BO_ 866 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA. Used on cars that use message 272.";
 CM_ SG_ 866 LEFT_LANE_LINE "Left lane line confidence";
@@ -832,6 +839,7 @@ VAL_ 506 ISLA_AutoUsmSta 0 "None Auto Function (Delete Menu)" 1 "Auto Off" 2 "Au
 VAL_ 506 ISLA_Cntry 0 "Europe/Russia/Australia" 1 "Domestic" 2 "China" 3 "USA" 4 "Canada" 5 "Australia" 6 "Reserved" 7 "Reserved" 8 "Reserved" 9 "Reserved" 10 "Reserved" 11 "Reserved" 12 "Reserved" 13 "Reserved" 14 "Reserved" 15 "Initial Value (default)";
 VAL_ 506 ISLA_AddtnlSign 0 "No Recognition (default)" 1 "School Crossing" 16 "Do Not Pass" 17 "Reserved" 18 "Reserved" 19 "Reserved" 20 "Reserved" 21 "Reserved" 22 "Reserved" 23 "Reserved" 24 "Exit" 25 "Roundabout" 26 "Right Curve" 27 "Left Curve" 28 "Winding Road" 29 "Reserved" 30 "Reserved" 31 "Reserved" 2 "Pedestrian Crossing" 3 "Bicycle Crossing" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Reserved" 8 "Stop" 9 "Yield" 10 "Stop Ahead" 11 "Yield Ahead" 12 "Road Construction Ahead" 13 "Lane Reduction" 14 "Reserved" 15 "Reserved";
 VAL_ 506 ISLA_SchoolZone 0 "No School Zone" 1 "School Zone" 2 "Reserved" 3 "Reserved";
+VAL_ 687 HOD_Dir_Status 0 "HANDS OFF" 1 "HAND TOUCH (SOFT)" 2 "HAND TOUCH (STRONG)" 3 "HAND GRIP (SOFT)" 4 "HAND GRIP (STRONG)" 5 "RESERVED" 6 "RESERVED";
 VAL_ 698 IFSref_FR_CMR_Sta 0 "None Option (Default)" 1 "Normal" 2 "Blockage Status" 3 "Error Indicator";
 VAL_ 698 IFSref_VehNumVal 0 "No vehicle" 1 "Number of vehicles" 2 "Number of vehicles" 3 "Number of vehicles" 4 "Number of vehicles" 5 "Number of vehicles" 6 "Number of vehicles" 7 "Number of vehicles" 8 "Number of vehicles" 9 "Number of vehicles" 10 "Number of vehicles" 11 "Over than 10 vehicles" 12 "Reserved" 13 "Reserved" 14 "Default" 15 "Error indicator";
 VAL_ 698 IFSref_ILLAmbtSta 0 "Bright" 1 "Dark" 2 "Not used" 3 "Error indicator";
