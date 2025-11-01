@@ -8,7 +8,6 @@
 |Acura|ILX 2019|All|[Upstream](#upstream)|
 |Acura|Integra 2024|All|[Community](#community)|
 |Acura|RDX 2016-18|AcuraWatch Plus or Advance Package|[Upstream](#upstream)|
-|Acura|MDX 2020|Sport Hybrid|[Custom](#custom)|
 |Acura|RDX 2019-21|All|[Upstream](#upstream)|
 |Audi|A3 2014-19|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|A3 Sportback e-tron 2017-18|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
