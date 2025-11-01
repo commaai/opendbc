@@ -226,11 +226,10 @@ class CarInterfaceBase(ABC):
     return ret
 
   @staticmethod
-  def configure_torque_tune(candidate: str, tune: structs.CarParams.LateralTuning, steering_angle_deadzone_deg: float = 0.0, use_steering_angle: bool = True):
+  def configure_torque_tune(candidate: str, tune: structs.CarParams.LateralTuning, steering_angle_deadzone_deg: float = 0.0):
     params = get_torque_params()[candidate]
 
     tune.init('torque')
-    tune.torque.useSteeringAngle = use_steering_angle
     tune.torque.kp = 1.0
     tune.torque.kf = 1.0
     tune.torque.ki = 0.3
