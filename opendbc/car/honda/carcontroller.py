@@ -20,15 +20,12 @@ def compute_gb_honda_bosch(accel, speed):
 
 
 def compute_gb_honda_nidec(accel, speed):
-
-  scaled_accel = accel
-
   creep_brake = 0.0
   creep_speed = 2.3
   creep_brake_value = 0.15
   if speed < creep_speed:
     creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
-  gb = float(scaled_accel) / 4.8 - creep_brake
+  gb = float(accel) / 4.8 - creep_brake
   return np.clip(gb, 0.0, 1.0), np.clip(-gb, 0.0, 1.0)
 
 
@@ -121,8 +118,6 @@ class CarController(CarControllerBase):
     self.gas = 0.0
     self.brake = 0.0
     self.last_torque = 0.0
-    self.blend_pcm_accel = 0.0
-    self.blend_pcm_speed = 0.0
     self.pitch = 0.0
 
   def update(self, CC, CS, now_nanos):
@@ -137,22 +132,10 @@ class CarController(CarControllerBase):
     hud_v_cruise = hud_control.setSpeed / conversion if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
-    # *** rate limit steer ***
-    limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
-                                self.params.STEER_DELTA_UP * DT_CTRL)
-    self.last_torque = limited_torque
-
-    # steer torque is converted back to CAN reference (positive when steering right)
-    apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
-                                 self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
-
-    # steerfactor = 400 if actuators.torque == 0 else abs ( self.params.STEER_MAX / max ( abs(actuators.torque), abs(apply_torque) ) )
-
     if len(CC.orientationNED) == 3:
       self.pitch = CC.orientationNED[1]
 
     if CC.longActive:
-      # accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 1.0, 4.0 ], [-3.5, 3.5]) ) )
       hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
       accel = actuators.accel + hill_brake
       if accel > max ( 0, CS.out.aEgo) + 0.1:
@@ -163,6 +146,11 @@ class CarController(CarControllerBase):
       gas, brake = 0.0, 0.0
 
     speed_control = 1 if ( (accel <= 0.0) and (CS.out.vEgo == 0) ) else 0
+
+    # *** rate limit steer ***
+    limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
+                                self.params.STEER_DELTA_UP * DT_CTRL)
+    self.last_torque = limited_torque
 
     # *** apply brake hysteresis ***
     pre_limit_brake, self.braking, self.brake_steady = actuator_hysteresis(brake, self.braking, self.brake_steady,
@@ -175,6 +163,10 @@ class CarController(CarControllerBase):
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert)
 
     # **** process the car messages ****
+
+    # steer torque is converted back to CAN reference (positive when steering right)
+    apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
+                                 self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
 
     # Send CAN commands
     can_sends = []
@@ -257,41 +249,6 @@ class CarController(CarControllerBase):
     # Send dashboard UI commands.
     # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
-
-      # ----------------- new test logic start ---------------------
-
-      if CC.longActive:
-        # pcm_speed = float ( np.clip ( ( CS.out.vEgo + 633.0 * ( accel ) - 14.0 ) , 0.0, 100.0 ) ) # convert m/s to kph done in hondacan
-
-        # pcm_speed = float ( np.clip ( CS.out.vEgo + ( 8.0 if accel > 0 elif -8.0 if accel < 0 else 0.0 ), 0.0, 100.0 ) )
-        # pcm_accel = float ( np.clip ( 600.0 * ( accel + 0.2 ) , 0.0, self.params.NIDEC_GAS_MAX )
-
-        # prefer EV mode under 30mph and slower accel
-        # if ( accel <= 0.2 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
-        #  pcm_accel = 54.0
-
-        # blending logic to fastforward, assume engine uses 98% of prior logic each frame
-        PERCENT_BLEND = 0.99
-
-        # pcm_accel = pcm_accel if self.accel <= 0 else float (np.clip ( ( pcm_accel - self.blend_pcm_accel * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), \
-        #                                                               0, self.params.NIDEC_GAS_MAX ) )
-
-        self.blend_pcm_accel =  self.blend_pcm_accel * PERCENT_BLEND + pcm_accel * ( 1 - PERCENT_BLEND )
-
-        # pcm_speed = pcm_speed if self.accel <= 0 else float (np.clip ( ( pcm_speed - self.blend_pcm_speed * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), \
-        #                                                              0, 100.0 ) )
-
-        # reduce speed if above 50% steering max
-        # pcm_speed = float ( np.clip ( pcm_speed, 0, 100 if CS.out.vEgo < 10.0 else steerfactor * 0.50 * CS.out.vEgo ) )
-
-        self.blend_pcm_speed =  self.blend_pcm_speed * PERCENT_BLEND + pcm_speed * ( 1 - PERCENT_BLEND )
-
-        # standstill disengage
-        if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
-          pcm_speed = 25.0 / 3.6
-
-      # ----------------- new test logic end ---------------------
-
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
 
@@ -301,7 +258,6 @@ class CarController(CarControllerBase):
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
         self.speed = pcm_speed * 3.6 # conversion done in hondacan
-        # self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
         self.gas = pcm_accel
 
     new_actuators = actuators.as_builder()
