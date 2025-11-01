@@ -5,7 +5,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.honda.hondacan import CanBus
 from opendbc.car.honda.values import CarControllerParams, HondaFlags, CAR, HONDA_BOSCH, HONDA_BOSCH_CANFD, \
-                                                 HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, HondaSafetyFlags
+                                                 HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, HondaSafetyFlags, \
+                                                 HONDA_NIDEC_HYBRID
 from opendbc.car.honda.carcontroller import CarController
 from opendbc.car.honda.carstate import CarState
 from opendbc.car.honda.radar_interface import RadarInterface
@@ -54,6 +55,7 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
       ret.openpilotLongitudinalControl = True
 
+      ret.stoppingDecelRate = 0.3
       ret.pcmCruise = True
 
     if candidate == CAR.HONDA_CRV_5G:
@@ -182,6 +184,12 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]  # TODO: can probably use some tuning
 
+    elif candidate == CAR.ACURA_RLX_HYBRID: # copying MDX
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]
+      # ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2047], [0, 2047]]
+      ret.lateralTuning.pid.kf = 0.000035
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.115], [0.052]]
+
     elif candidate == CAR.ACURA_RDX:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 1000], [0, 1000]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
@@ -237,6 +245,9 @@ class CarInterface(CarInterfaceBase):
     if ret.openpilotLongitudinalControl and candidate in HONDA_BOSCH:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.BOSCH_LONG.value
 
+    if candidate in HONDA_NIDEC_HYBRID:
+      ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.NIDEC_HYBRID.value
+
     if candidate in HONDA_BOSCH_RADARLESS:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.RADARLESS.value
 
@@ -246,7 +257,7 @@ class CarInterface(CarInterfaceBase):
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
     # to a negative value, so it won't matter. Otherwise, add 0.5 mph margin to not
     # conflict with PCM acc
-    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC})
+    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.ACURA_RLX_HYBRID})
     ret.minEnableSpeed = -1. if ret.autoResumeSng else 25.51 * CV.MPH_TO_MS
 
     ret.steerLimitTimer = 0.8
