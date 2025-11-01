@@ -150,9 +150,9 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
       ret.steeringTorque = 0
-     else
+    else:
       ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
-      
+
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     if self.CP.carFingerprint in HONDA_BOSCH:
