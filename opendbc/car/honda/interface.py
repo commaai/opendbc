@@ -59,8 +59,6 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = True
       ret.stoppingDecelRate = 0.3
       ret.pcmCruise = True
-      # if candidate == CAR.ACURA_RLX_HYBRID:
-      #   ret.radarUnavailable = True
 
     if candidate == CAR.HONDA_CRV_5G:
       ret.enableBsm = 0x12f8bfa7 in fingerprint[CAN.radar]
@@ -95,13 +93,6 @@ class CarInterface(CarInterfaceBase):
       # default longitudinal tuning for all hondas
       ret.longitudinalTuning.kiBP = [0., 5., 35.]
       ret.longitudinalTuning.kiV = [1.2, 0.8, 0.5]
-
-      # override for actuator tuning
-      # ret.longitudinalTuning.kpBP = [0.]
-      # ret.longitudinalTuning.kpV = [0.]
-      # ret.longitudinalTuning.kiBP = [0.]
-      # ret.longitudinalTuning.kiV = [0.]
-      # ret.longitudinalActuatorDelay = 0.0 # s
 
     eps_modified = False
     for fw in car_fw:
@@ -181,11 +172,6 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]  # TODO: can probably use some tuning
 
-    elif candidate == CAR.ACURA_MDX_3G_HYBRID:
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]
-      ret.lateralTuning.pid.kf = 0.000035
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.115], [0.052]]
-
     elif candidate == CAR.ACURA_RLX_HYBRID: # copying MDX
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]
       # ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2047], [0, 2047]]
@@ -250,10 +236,10 @@ class CarInterface(CarInterfaceBase):
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
     # to a negative value, so it won't matter. Otherwise, add 0.5 mph margin to not
     # conflict with PCM acc
-    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.ACURA_MDX_3G_HYBRID, CAR.ACURA_RLX_HYBRID})
+    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.ACURA_RLX_HYBRID})
     ret.minEnableSpeed = -1. if ret.autoResumeSng else 25.51 * CV.MPH_TO_MS
 
-    ret.steerActuatorDelay = 0.3 if candidate == CAR.ACURA_MDX_3G_HYBRID else 0.1
+    ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.8
     ret.radarDelay = 0.1
 
