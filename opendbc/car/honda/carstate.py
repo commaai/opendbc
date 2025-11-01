@@ -35,22 +35,13 @@ def get_can_messages(CP, gearbox_msg):
   if  CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
     messages += [
       ("CAR_SPEED", 0), # missing on RLX
-    ]
-  else:
-    messages += [("CAR_SPEED", 10),]
-
-  if  CP.carFingerprint in SERIAL_STEERING:
-    messages += [
-      ("STEER_STATUS", 0), # initially slow to transmit
-    ]
-  elif  CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
-    messages += [
       ("STEER_STATUS", 0), # temp disable RLX
     ]
   else:
-    messages +=[
+    messages += [
+      ("CAR_SPEED", 10),
       ("STEER_STATUS", 100),
-    ]
+  ]
 
   if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
     messages += [
@@ -89,7 +80,7 @@ def get_can_messages(CP, gearbox_msg):
 
   if CP.carFingerprint not in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
                                CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV, *HONDA_BOSCH_RADARLESS,
-                               *HONDA_BOSCH_CANFD, CAR.ACURA_MDX_3G_HYBRID):
+                               *HONDA_BOSCH_CANFD):
 
     messages.append(("DOORS_STATUS", 3))
 
@@ -161,7 +152,7 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
                                   CAR.ACURA_RDX_3G, CAR.HONDA_E, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD):
       ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
-    elif self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV,CAR.ACURA_MDX_3G_HYBRID):
+    elif self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
       ret.doorOpen = bool(cp.vl["SCM_BUTTONS"]["DRIVERS_DOOR_OPEN"])
     else:
       ret.doorOpen = any([cp.vl["DOORS_STATUS"]["DOOR_OPEN_FL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_FR"],
@@ -326,7 +317,7 @@ class CarState(CarStateBase):
 
     cam_messages = []
 
-    if (CP.carFingerprint in (SERIAL_STEERING)) or (CP.carFingerprint in (CAR.ACURA_RLX_HYBRID)):
+    if CP.carFingerprint in (CAR.ACURA_RLX_HYBRID):
       pt_messages += [
         ("STEERING_CONTROL", 0), # initially slow, prevent timing errors
       ]
