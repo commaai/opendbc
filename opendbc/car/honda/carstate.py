@@ -149,7 +149,7 @@ class CarState(CarStateBase):
     ret.gasPressed = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"] > 1e-5
 
     if self.CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
-      ret.steeringTorque = 0
+      ret.steeringTorque = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
     else:
       ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
 
