@@ -199,7 +199,7 @@
 |Lexus|GS F 2016|All|[Upstream](#upstream)|
 |Lexus|IS 2017-19|All|[Upstream](#upstream)|
 |Lexus|IS 2022-24|All|[Upstream](#upstream)|
-|Lexus|LC 2024|All|[Upstream](#upstream)|
+|Lexus|LC 2024-25|All|[Upstream](#upstream)|
 |Lexus|NS 2022-25|Any|[Not compatible](#can-bus-security)|
 |Lexus|NX 2018-19|All|[Upstream](#upstream)|
 |Lexus|NX 2020-21|All|[Upstream](#upstream)|
