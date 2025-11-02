@@ -8,7 +8,7 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.sunnypilot.car.chrysler.carcontroller_ext import CarControllerExt
 from opendbc.sunnypilot.car.chrysler.icbm import IntelligentCruiseButtonManagementInterface
 from opendbc.sunnypilot.car.chrysler.mads import MadsCarController
-from opendbc.sunnypilot.car.chrysler.values import ChryslerFlagsSP
+from opendbc.sunnypilot.car.chrysler.values_ext import ChryslerFlagsSP
 
 
 class CarController(CarControllerBase, MadsCarController, CarControllerExt, IntelligentCruiseButtonManagementInterface):

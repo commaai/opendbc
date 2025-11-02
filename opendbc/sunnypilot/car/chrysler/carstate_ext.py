@@ -11,7 +11,7 @@ from enum import StrEnum
 from opendbc.car import Bus, structs
 from opendbc.can.parser import CANParser
 from opendbc.car.chrysler.values import RAM_HD
-from opendbc.sunnypilot.car.chrysler.values import BUTTONS
+from opendbc.sunnypilot.car.chrysler.values_ext import BUTTONS
 
 
 class CarStateExt:
