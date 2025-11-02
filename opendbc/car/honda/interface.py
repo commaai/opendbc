@@ -65,6 +65,9 @@ class CarInterface(CarInterfaceBase):
     if any(0x33DA in f for f in fingerprint.values()):
       ret.flags |= HondaFlags.BOSCH_EXT_HUD.value
 
+    if 0x184 in fingerprint[CAN.pt]:
+      ret.flags |= HondaFlags.HYBRID.value
+
     if 0x1C2 in fingerprint[CAN.pt]:
       ret.flags |= HondaFlags.HAS_EPB.value
 
@@ -245,7 +248,7 @@ class CarInterface(CarInterfaceBase):
     if ret.openpilotLongitudinalControl and candidate in HONDA_BOSCH:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.BOSCH_LONG.value
 
-    if candidate in HONDA_NIDEC_HYBRID:
+    if (ret.flags & HondaFlags.NIDEC) and (ret.flags & HondaFlags.HYBRID):
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.NIDEC_HYBRID.value
 
     if candidate in HONDA_BOSCH_RADARLESS:
