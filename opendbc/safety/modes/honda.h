@@ -42,7 +42,7 @@ static bool honda_fwd_brake = false;
 static bool honda_bosch_long = false;
 static bool honda_bosch_radarless = false;
 static bool honda_bosch_canfd = false;
-static bool honda_clarity = false;
+static bool honda_nidec_hybrid = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
 
@@ -198,7 +198,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
       bool honda_stock_aeb = GET_BIT(msg, 29U);
       int honda_stock_brake = (msg->data[0] << 2) | (msg->data[1] >> 6);
 
-      if (honda_clarity) {
+      if (honda_nidec_hybrid) {
         honda_stock_brake = (msg->data[6] << 2) | (msg->data[7] >> 6);
       }
 
@@ -254,7 +254,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   if ((msg->addr == 0x1FAU) && (msg->bus == bus_pt)) {
     honda_brake = (msg->data[0] << 2) + ((msg->data[1] >> 6) & 0x3U);
 
-    if (honda_clarity) {
+    if (honda_nidec_hybrid) {
       honda_brake = (msg->data[6] << 2) + ((msg->data[7] >> 6) & 0x3U);
     }
 
@@ -350,7 +350,7 @@ static safety_config honda_nidec_init(uint16_t param) {
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
 
-  const uint16_t HONDA_PARAM_SP_CLARITY = 1;
+  const uint16_t HONDA_PARAM_SP_NIDEC_HYBRID = 1;
   const uint16_t HONDA_PARAM_GAS_INTERCEPTOR = 2;
 
   honda_hw = HONDA_NIDEC;
@@ -366,7 +366,7 @@ static safety_config honda_nidec_init(uint16_t param) {
 
   bool enable_nidec_alt = GET_FLAG(param, HONDA_PARAM_NIDEC_ALT);
 
-  honda_clarity = GET_FLAG(current_safety_param_sp, HONDA_PARAM_SP_CLARITY);
+  honda_nidec_hybrid = GET_FLAG(current_safety_param_sp, HONDA_PARAM_SP_NIDEC_HYBRID);
   enable_gas_interceptor = GET_FLAG(current_safety_param_sp, HONDA_PARAM_GAS_INTERCEPTOR);
 
   if (enable_nidec_alt) {

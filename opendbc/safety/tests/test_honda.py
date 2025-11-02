@@ -686,14 +686,17 @@ class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDS
     self.safety.init_tests()
 
 
-class TestHondaNidecClaritySafety(TestHondaNidecPcmSafety):
+class TestHondaNidecHybridSafety(TestHondaNidecPcmSafety):
+  """
+    Covers the Honda Nidec safety mode with hybrid brake
+  """
 
   BRAKE_SIG = "COMPUTER_BRAKE_HYBRID"
 
   def setUp(self):
     self.packer = CANPackerPanda("honda_clarity_hybrid_2018_can_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_current_safety_param_sp(HondaSafetyFlagsSP.CLARITY)
+    self.safety.set_current_safety_param_sp(HondaSafetyFlagsSP.NIDEC_HYBRID)
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, 0)
     self.safety.init_tests()
 
