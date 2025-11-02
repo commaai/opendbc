@@ -135,14 +135,14 @@ class CarController(CarControllerBase):
     if CC.longActive:
       hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
       accel = actuators.accel + hill_brake
-      if accel > max ( 0, CS.out.aEgo) + 0.1:
+      if accel > max(0, CS.out.aEgo) + 0.1:
         accel = 10000.0
       gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
 
-    speed_control = 1 if ( (accel <= 0.0) and (CS.out.vEgo == 0) ) else 0
+    speed_control = 1 if((accel <= 0.0) and (CS.out.vEgo == 0)) else 0
 
     # *** rate limit steer ***
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
@@ -236,7 +236,7 @@ class CarController(CarControllerBase):
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
 
           pcm_override = True
-          pump_send = ( apply_brake > 0 ) if self.CP.carFingerprint in HONDA_NIDEC_HYBRID else pump_on
+          pump_send = (apply_brake > 0) if self.CP.carFingerprint in HONDA_NIDEC_HYBRID else pump_on
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_send,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
                                                          self.CP.carFingerprint, CS.stock_brake))
@@ -250,7 +250,7 @@ class CarController(CarControllerBase):
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
 
       # pcm_speed_send = 0.0 if (self.brake_last > wind_brake ) and ( self.CP.carFingerprint in HONDA_NIDEC_HYBRID ) else int ( pcm_speed )
-      can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud, \
+      can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud,
                                                    speed_control))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
