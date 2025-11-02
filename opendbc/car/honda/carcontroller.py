@@ -239,7 +239,7 @@ class CarController(CarControllerBase):
           pump_send = (apply_brake > 0) if self.CP.carFingerprint in HONDA_NIDEC_HYBRID else pump_on
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_send,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
-                                                         self.CP.carFingerprint, CS.stock_brake))
+                                                         self.CP.carFingerprint, CS.stock_brake, self.CP))
           self.apply_brake_last = apply_brake
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
