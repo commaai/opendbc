@@ -9,6 +9,7 @@
 // all the safety modes
 #include "opendbc/safety/modes/defaults.h"
 #include "opendbc/safety/modes/honda.h"
+#include "opendbc/safety/modes/honda_rlx_redpanda.h"
 #include "opendbc/safety/modes/toyota.h"
 #include "opendbc/safety/modes/tesla.h"
 #include "opendbc/safety/modes/gm.h"
