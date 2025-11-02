@@ -6,7 +6,7 @@ from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
-                                     HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams, HONDA_NIDEC_HYBRID, CAR
+                                     HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams, CAR
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.common.conversions import Conversions as CV
 
@@ -236,8 +236,7 @@ class CarController(CarControllerBase):
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
 
           pcm_override = True
-          pump_send = (apply_brake > 0) if self.CP.carFingerprint in HONDA_NIDEC_HYBRID else pump_on
-          can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_send,
+          can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
                                                          self.CP.carFingerprint, CS.stock_brake, self.CP))
           self.apply_brake_last = apply_brake
