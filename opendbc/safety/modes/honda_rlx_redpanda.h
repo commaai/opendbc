@@ -24,6 +24,8 @@ static safety_config rlx_redpanda_init(uint16_t param) {
   SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
   SET_TX_MSGS(RLX_REDPANDA_TX_MSGS, ret);
 
+  UNUSED(param);
+
   return ret;
 }
 
