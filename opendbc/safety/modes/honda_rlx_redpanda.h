@@ -16,7 +16,7 @@ static safety_config rlx_redpanda_init(uint16_t param) {
 
   safety_config ret;
 
-  SET_RX_CHECKS(HONDA_COMMON_RX_CHECKS(0), ret); // common messages are duplicated on red panda bus
+  SET_RX_CHECKS(HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0), ret); // common messages are duplicated on red panda bus
   SET_TX_MSGS(RLX_REDPANDA_TX_MSGS, ret);
 
   return ret;
