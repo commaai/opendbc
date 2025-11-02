@@ -34,8 +34,7 @@ class CarState(CarStateBase):
     if CP.carFingerprint in HONDA_NIDEC_ALT_SCM_MESSAGES:
       self.main_on_sig_msg = "SCM_BUTTONS"
 
-    if CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
-      self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
+    self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
 
     self.brake_switch_prev = False
     self.brake_switch_active = False
