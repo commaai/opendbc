@@ -39,8 +39,6 @@ static bool rlx_redpanda_tx_hook(const CANPacket_t *msg) {
 
   bool tx = true;
 
-  unsigned int bus_pt = honda_get_pt_bus();
-
   // STEER: safety check
   if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
     if (!controls_allowed) {
