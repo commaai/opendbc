@@ -91,6 +91,12 @@ class CarInterface(CarInterfaceBase):
 
     if candidate == CAR.RAM_HD_5TH_GEN:
       stock_cp.dashcamOnly = False
+      # https://github.com/commaai/openpilot/issues/25389
+      stock_cp.tireStiffnessFactor = 1.0
+      stock_cp.tireStiffnessFront = 65155.
+      stock_cp.tireStiffnessRear = 80926.
+      stock_cp.wheelbase = 3.79
+      stock_cp.steerRatio = 19.
 
     if 0x4FF in fingerprint[0]:
       ret.flags |= ChryslerFlagsSP.NO_MIN_STEERING_SPEED.value
