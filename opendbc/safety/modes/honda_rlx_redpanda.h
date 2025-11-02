@@ -15,8 +15,13 @@ static safety_config rlx_redpanda_init(uint16_t param) {
   };
 
   safety_config ret;
+  
+  static RxCheck honda_nidec_alt_rx_checks[] = {
+    HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
+    {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
+  };
 
-  SET_RX_CHECKS(HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0), ret); // common messages are duplicated on red panda bus
+  SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
   SET_TX_MSGS(RLX_REDPANDA_TX_MSGS, ret);
 
   return ret;
