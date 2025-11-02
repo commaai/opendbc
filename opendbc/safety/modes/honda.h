@@ -251,10 +251,9 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
     if (!controls_allowed) {
       bool steer_applied = msg->data[0] | msg->data[1];
-      if (steer_applied) {
-        // temp allow steer
-        tx = tx;
-        // tx = false;
+      if (false) {
+      // if (steer_applied) {   - temp allow steer
+        tx = false;
       }
     }
   }
