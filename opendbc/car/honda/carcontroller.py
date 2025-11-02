@@ -6,7 +6,7 @@ from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
-                                     HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams, HONDA_NIDEC_HYBRID, CAR
+                                     HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams, CAR
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.common.conversions import Conversions as CV
 
