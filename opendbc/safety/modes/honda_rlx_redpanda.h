@@ -24,8 +24,6 @@ static safety_config rlx_redpanda_init(uint16_t param) {
   SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
   SET_TX_MSGS(RLX_REDPANDA_TX_MSGS, ret);
 
-  uint16_t unused = param;
-
   return ret;
 }
 
@@ -45,7 +43,6 @@ static bool rlx_redpanda_fwd_hook(int bus_num, int addr) {
 static void rlx_redpanda_rx_hook(const CANPacket_t *msg) {
   // common RX only
   // controls allowed from internal panda per include
-  bool unused = msg->data[0];
 }
 
 static bool rlx_redpanda_tx_hook(const CANPacket_t *msg) {
