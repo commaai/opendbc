@@ -1,6 +1,4 @@
-Import("env")
-
-SConscript(['opendbc/dbc/SConscript'], exports={'env': env})
+SConscript(['opendbc/dbc/SConscript'])
 
 # test files
 if GetOption('extras'):

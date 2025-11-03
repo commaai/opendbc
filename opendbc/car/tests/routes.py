@@ -15,6 +15,7 @@ from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.values import Platform
 from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
 from opendbc.car.body.values import CAR as COMMA
+from opendbc.car.psa.values import CAR as PSA
 
 # FIXME: add routes for these cars
 non_tested_cars = [
@@ -26,6 +27,7 @@ non_tested_cars = [
   HONDA.ACURA_RLX_HYBRID,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
+  HONDA.ACURA_TLX_2G,  # FIXME: replace expired route
 ]
 
 
@@ -90,6 +92,7 @@ routes = [
   CarTestRoute("320098ff6c5e4730/2023-04-13--17-47-46", HONDA.HONDA_HRV_3G),
   CarTestRoute("147613502316e718/00000001--dd141a3140", HONDA.HONDA_HRV_3G),  # Brazilian model
   CarTestRoute("1e4baee1aa2687a0/00000001--74c4cc0b23", HONDA.HONDA_HRV_3G),  # Thailand model use ALT_GEAR
+  CarTestRoute("414af83891dbf72c/00000006--51fa6d99cd", HONDA.HONDA_NBOX_2G),
   CarTestRoute("917b074700869333/2021-05-24--20-40-20", HONDA.ACURA_ILX),
   CarTestRoute("08a3deb07573f157/2020-03-06--16-11-19", HONDA.HONDA_ACCORD),  # 1.5T
   CarTestRoute("1da5847ac2488106/2021-05-24--19-31-50", HONDA.HONDA_ACCORD),  # 2.0T
@@ -98,6 +101,7 @@ routes = [
   CarTestRoute("f29e2b57a55e7ad5/2021-03-24--20-52-38", HONDA.HONDA_ACCORD),  # hybrid, 2021 with new style HUD msgs
   CarTestRoute("1ad763dd22ef1a0e/2020-02-29--18-37-03", HONDA.HONDA_CRV_5G),
   CarTestRoute("0a96f86fcfe35964/2020-02-05--07-25-51", HONDA.HONDA_ODYSSEY),
+  CarTestRoute("d7233a428eb7d0b5/00000001--9b99b04d43", HONDA.HONDA_ODYSSEY_5G_MMR),
   CarTestRoute("d83f36766f8012a5/2020-02-05--18-42-21", HONDA.HONDA_CIVIC_BOSCH_DIESEL),
   CarTestRoute("f0890d16a07a236b/2021-05-25--17-27-22", HONDA.HONDA_INSIGHT),
   CarTestRoute("07d37d27996096b6/2020-03-04--21-57-27", HONDA.HONDA_PILOT),
@@ -112,7 +116,9 @@ routes = [
   CarTestRoute("f9c43864cf057d05/2024-01-15--23-01-20", HONDA.HONDA_PILOT_4G),  # TODO: Replace with a newer route
   CarTestRoute("f39cf149898833ff/0000002b--54f3fae045", HONDA.HONDA_ACCORD_11G),
   CarTestRoute("ad9840558640c31d/0000001a--d6cd4871c2", HONDA.ACURA_MDX_4G_MMR),  # 2025 MDX
-  CarTestRoute("63568e3e2f56c8ad/0000000a--a254e90429", HONDA.HONDA_CRV_6G),
+  CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
+  CarTestRoute("2dc4489d7e1410ca/00000001--bbec3f5117", HONDA.HONDA_CRV_6G),
+  CarTestRoute("a703d058f4e05aeb/00000008--f169423024", HONDA.HONDA_PASSPORT_4G),
 
   CarTestRoute("87d7f06ade479c2e/2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
   CarTestRoute("66189dd8ec7b50e6/2023-09-20--07-02-12", HYUNDAI.HYUNDAI_AZERA_HEV_6TH_GEN),
@@ -219,6 +225,7 @@ routes = [
   CarTestRoute("7e34a988419b5307/2019-12-18--19-13-30", TOYOTA.TOYOTA_RAV4_TSS2),  # hybrid
   CarTestRoute("2475fb3eb2ffcc2e/2022-04-29--12-46-23", TOYOTA.TOYOTA_RAV4_TSS2_2022),  # hybrid
   CarTestRoute("20ba9ade056a8c7b/2021-02-08--21-57-35", TOYOTA.TOYOTA_RAV4_PRIME),  # SecOC
+  CarTestRoute("41ba5b181f29435d/00000001--e3ae76382f", TOYOTA.TOYOTA_RAV4_PRIME),  # SecOC longitudinal
   CarTestRoute("8bfb000e03b2a257/00000004--f9eee5f52e", TOYOTA.TOYOTA_SIENNA_4TH_GEN),  # SecOC
   CarTestRoute("0b54d0594d924cd9/00000057--b6206a3205", TOYOTA.TOYOTA_YARIS),  # SecOC
   CarTestRoute("7a31f030957b9c85/2023-04-01--14-12-51", TOYOTA.LEXUS_ES),
@@ -315,10 +322,12 @@ routes = [
   CarTestRoute("f6d5b1a9d7a1c92e/2021-07-08--06-56-59", MAZDA.MAZDA_CX9_2021),
   CarTestRoute("a4af1602d8e668ac/2022-02-03--12-17-07", MAZDA.MAZDA_CX5_2022),
 
+  CarTestRoute("6a7075a4fdd765ee/0000004e--1f612006dd", PSA.PSA_PEUGEOT_208),
+
   CarTestRoute("bc095dc92e101734/000000db--ee9fe46e57", RIVIAN.RIVIAN_R1_GEN1),
 
   CarTestRoute("7dc058789994da80/00000112--adb970f6a8", TESLA.TESLA_MODEL_3),
-  CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
+  CarTestRoute("c8a98e58647765ad/00000002--84e4746136", TESLA.TESLA_MODEL_Y),
   CarTestRoute("2c912ca5de3b1ee9/0000025d--6eb6bcbca4", TESLA.TESLA_MODEL_Y, segment=4),
   CarTestRoute("bdda168c0c35fad7/00000001--5c5a36ec06", TESLA.TESLA_MODEL_X), # openpilot longitudinal
 
