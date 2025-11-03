@@ -117,16 +117,6 @@ class CarState(CarStateBase):
       # TODO: better handle delayed steering enablement on ALT_RADAR cars
       self.low_speed_alert = False
     ret.lowSpeedAlert = self.low_speed_alert
-    if self.CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
-      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
-      # removing perm faults
-      # ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
-      ret.steerFaultTemporary = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
-      # LOW_SPEED_LOCKOUT is not worth a warning
-      # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
-      ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
-    else:
-      ret.steerFaultTemporary = False
 
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
