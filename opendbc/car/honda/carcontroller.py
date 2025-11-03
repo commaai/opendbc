@@ -120,9 +120,6 @@ class CarController(CarControllerBase):
       hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
-    if len(CC.orientationNED) == 3:
-      self.pitch = CC.orientationNED[1]
-
     if CC.longActive:
       hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
       accel = actuators.accel + hill_brake
