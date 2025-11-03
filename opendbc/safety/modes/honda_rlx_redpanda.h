@@ -45,7 +45,7 @@ static bool rlx_redpanda_fwd_hook(int bus_num, int addr) {
 static void rlx_redpanda_rx_hook(const CANPacket_t *msg) {
   // common RX only
   // controls allowed from internal panda per include
-  UNUSED(msg);
+  bool unused = msg->data[0];
 }
 
 static bool rlx_redpanda_tx_hook(const CANPacket_t *msg) {
