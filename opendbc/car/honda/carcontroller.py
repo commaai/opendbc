@@ -166,7 +166,7 @@ class CarController(CarControllerBase):
     pcm_speed_BP = [-wind_brake,
                     -wind_brake * (3 / 4),
                     0.0,
-                    2.00]
+                    0.5]
     # The Honda ODYSSEY seems to have different PCM_ACCEL
     # msgs, is it other cars too?
     if not CC.longActive:
