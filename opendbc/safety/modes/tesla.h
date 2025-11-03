@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
@@ -158,8 +158,11 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
                             (cruise_state == 7);    // PRE_CANCEL
       cruise_engaged = cruise_engaged && !tesla_autopark;
 
-      vehicle_moving = cruise_state != 3; // STANDSTILL
       pcm_cruise_check(cruise_engaged);
+    }
+
+    if (msg->addr == 0x155U) {
+      vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
     }
   }
 
@@ -325,7 +328,7 @@ static safety_config tesla_init(uint16_t param) {
     {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},  // APS_eacMonitor
   };
 
-  UNUSED(param);
+  SAFETY_UNUSED(param);
 #ifdef ALLOW_DEBUG
   const int TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
   tesla_longitudinal = GET_FLAG(param, TESLA_FLAG_LONGITUDINAL_CONTROL);

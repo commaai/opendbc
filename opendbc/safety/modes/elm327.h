@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/defaults.h"
 
 static bool elm327_tx_hook(const CANPacket_t *msg) {
