@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/honda.h"
 
 // Minimal safety mode for external panda controlling steering and lkas hud on separate bus
