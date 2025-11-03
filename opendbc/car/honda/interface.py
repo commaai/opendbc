@@ -59,7 +59,6 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs = cfgs
       ret.openpilotLongitudinalControl = True
 
-      ret.stoppingDecelRate = 0.3
       ret.pcmCruise = True
 
     if candidate == CAR.HONDA_CRV_5G:
