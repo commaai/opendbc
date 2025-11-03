@@ -120,11 +120,8 @@ class CarController(CarControllerBase):
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
     if CC.longActive:
-      hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
-      accel = actuators.accel + hill_brake
-      if accel > max(0, CS.out.aEgo) + 0.1:
-        accel = 10000.0
-      gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
+      accel = actuators.accel
+      gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
