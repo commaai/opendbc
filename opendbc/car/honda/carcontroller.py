@@ -126,8 +126,6 @@ class CarController(CarControllerBase):
       accel = 0.0
       gas, brake = 0.0, 0.0
 
-    speed_control = 1 if ((accel <= 0.0) and (CS.out.vEgo == 0)) else 0
-
     # *** rate limit steer ***
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                 self.params.STEER_DELTA_UP * DT_CTRL)
