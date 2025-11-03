@@ -123,7 +123,8 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active, tja_control)
   if tja_control:
     values["STEER_DOWN_TO_ZERO"] = lkas_active
 
-  return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
+#  return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
+  return packer.make_can_msg("STEERING_CONTROL", 4, values)
 
 
 def create_bosch_supplemental_1(packer, CAN):
@@ -200,7 +201,8 @@ def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available
     commands.append(packer.make_can_msg('LKAS_HUD_A', bus, lkas_hud_values))
     commands.append(packer.make_can_msg('LKAS_HUD_B', bus, lkas_hud_values))
   else:
-    commands.append(packer.make_can_msg('LKAS_HUD', bus, lkas_hud_values))
+    commands.append(packer.make_can_msg('LKAS_HUD', 4, lkas_hud_values))
+
 
   return commands
 

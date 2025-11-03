@@ -1,11 +1,14 @@
 import numpy as np
+from collections import namedtuple
+import math
 
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CAR, CruiseButtons, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
                                      HONDA_BOSCH_TJA_CONTROL, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.common.conversions import Conversions as CV
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -108,19 +111,31 @@ class CarController(CarControllerBase):
     self.gas = 0.0
     self.brake = 0.0
     self.last_torque = 0.0
+    self.pitch = 0.0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
-    hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
+    if self.CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
+      hud_v_cruise = hud_control.setSpeed / CV.MPH_TO_MS if hud_control.speedVisible else 255
+    else:
+      hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
+    if len(CC.orientationNED) == 3:
+      self.pitch = CC.orientationNED[1]
+
     if CC.longActive:
-      accel = actuators.accel
-      gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
+      hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
+      accel = actuators.accel + hill_brake
+      if accel > max ( 0, CS.out.aEgo) + 0.1:
+        accel = 10000.0
+      gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
+
+    speed_control = 1 if ( (accel <= 0.0) and (CS.out.vEgo == 0) ) else 0
 
     # *** rate limit steer ***
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
@@ -162,7 +177,7 @@ class CarController(CarControllerBase):
     pcm_speed_BP = [-wind_brake,
                     -wind_brake * (3 / 4),
                     0.0,
-                    0.5]
+                    2.00]
     # The Honda ODYSSEY seems to have different PCM_ACCEL
     # msgs, is it other cars too?
     if not CC.longActive:
@@ -172,16 +187,19 @@ class CarController(CarControllerBase):
       pcm_speed_V = [0.0,
                      np.clip(CS.out.vEgo - 3.0, 0.0, 100.0),
                      np.clip(CS.out.vEgo + 0.0, 0.0, 100.0),
-                     np.clip(CS.out.vEgo + 5.0, 0.0, 100.0)]
+                     np.clip(CS.out.vEgo + 20.0, 0.0, 100.0)]
       pcm_speed = float(np.interp(gas - brake, pcm_speed_BP, pcm_speed_V))
       pcm_accel = int(1.0 * self.params.NIDEC_GAS_MAX)
     else:
       pcm_speed_V = [0.0,
                      np.clip(CS.out.vEgo - 2.0, 0.0, 100.0),
                      np.clip(CS.out.vEgo + 2.0, 0.0, 100.0),
-                     np.clip(CS.out.vEgo + 5.0, 0.0, 100.0)]
+                     np.clip(CS.out.vEgo + 20.0, 0.0, 100.0)]
       pcm_speed = float(np.interp(gas - brake, pcm_speed_BP, pcm_speed_V))
-      pcm_accel = int(np.clip((accel / 1.44) / max_accel, 0.0, 1.0) * self.params.NIDEC_GAS_MAX)
+      pcm_accel = int(np.clip((accel / 1.44) / max_accel, 10.0 / self.params.NIDEC_GAS_MAX, 1.0) * self.params.NIDEC_GAS_MAX)
+
+      if speed_control == 1 and CC.longActive:
+        pcm_accel = 198
 
     if not self.CP.openpilotLongitudinalControl:
       if self.frame % 2 == 0 and self.CP.carFingerprint not in HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD:

@@ -114,16 +114,34 @@ class CarState(CarStateBase):
       # TODO: better handle delayed steering enablement on ALT_RADAR cars
       self.low_speed_alert = False
     ret.lowSpeedAlert = self.low_speed_alert
+    if self.CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
+      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
+      # removing perm faults
+      # ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
+      ret.steerFaultTemporary = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
+      # LOW_SPEED_LOCKOUT is not worth a warning
+      # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
+      ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
+    else:
+      ret.steerFaultTemporary = False
 
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
     else:
       if self.CP.openpilotLongitudinalControl:
         ret.accFaulted = bool(cp.vl[self.brake_error_msg]["BRAKE_ERROR_1"] or cp.vl[self.brake_error_msg]["BRAKE_ERROR_2"])
+        if self.CP.carFingerprint in HONDA_NIDEC_HYBRID:
+          ret.carFaultedNonCritical = bool(cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_1"] or cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_2"])
+          # remove per faults ret.accFaulted = bool(cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_1"] or cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_2"])
+        else:
+          ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
 
       # Log non-critical stock ACC/LKAS faults if Nidec (camera)
       if self.CP.carFingerprint not in HONDA_BOSCH:
-        ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"] or cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"])
+        if self.CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
+          ret.carFaultedNonCritical = False
+        else:
+          ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"] or cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"])
 
     ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
 
@@ -148,7 +166,11 @@ class CarState(CarStateBase):
 
     ret.gasPressed = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"] > 1e-5
 
-    ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
+    if self.CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
+      ret.steeringTorque = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
+    else:
+      ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
+
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     if self.CP.carFingerprint in HONDA_BOSCH:

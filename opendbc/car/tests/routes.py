@@ -24,6 +24,7 @@ non_tested_cars = [
   GM.HOLDEN_ASTRA,
   GM.CHEVROLET_MALIBU,
   HYUNDAI.GENESIS_G90,
+  HONDA.ACURA_RLX_HYBRID,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
   HONDA.ACURA_TLX_2G,  # FIXME: replace expired route
