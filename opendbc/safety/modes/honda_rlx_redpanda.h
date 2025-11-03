@@ -14,6 +14,8 @@ static safety_config rlx_redpanda_init(uint16_t param) {
     {0x33D, 0, 5, .check_relay = false},  // lkas_hud
   };
 
+  (void) param; // ignore param
+  
   safety_config ret;
   
   static RxCheck honda_nidec_alt_rx_checks[] = {
@@ -43,6 +45,7 @@ static bool rlx_redpanda_fwd_hook(int bus_num, int addr) {
 static void rlx_redpanda_rx_hook(const CANPacket_t *msg) {
   // common RX only
   // controls allowed from internal panda per include
+  (void) msg; // ignore msg
 }
 
 static bool rlx_redpanda_tx_hook(const CANPacket_t *msg) {
