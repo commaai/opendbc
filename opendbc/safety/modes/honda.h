@@ -278,6 +278,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   }
 
   // Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
+  
   if (msg->addr == 0x18DAB0F1U) {
     if ((GET_BYTES(msg, 0, 4) != 0x00803E02U) || (GET_BYTES(msg, 4, 4) != 0x0U)) {
       tx = false;
