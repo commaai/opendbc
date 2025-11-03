@@ -29,6 +29,19 @@ static safety_config rlx_redpanda_init(uint16_t param) {
   return ret;
 }
 
+static bool rlx_redpanda_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
+
+  // Block LKAS_HUD and STEERING_CONTROL signals from bus 0↔2 forwarding on external panda
+  // This prevents stock messages from camera (bus 6/physical 2) reaching powertrain (bus 4/physical 0)
+  if (((bus_num == 0) || (bus_num == 2)) &&
+      ((addr == 0x33D) || (addr == 0x194) )) {
+    block_msg = true;
+  }
+
+  return block_msg;
+}
+
 static void rlx_redpanda_rx_hook(const CANPacket_t *msg) {
   // common RX only
   // controls allowed from internal panda per include
