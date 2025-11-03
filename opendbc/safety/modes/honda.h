@@ -254,7 +254,9 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
       // temp allow steer
       // bool steer_applied = msg->data[0] | msg->data[1];
       if (steer_applied) {
-        tx = false;
+        // temp allow steer
+        tx = tx;
+        // tx = false;
       }
     }
   }
@@ -289,10 +291,10 @@ static safety_config honda_nidec_init(uint16_t param) {
   // 0x1FA is dynamically forwarded based on stock AEB
   // 0xE4 is steering on all cars except CRV and RDX, 0x194 for CRV and RDX,
   // 0x1FA is brake control, 0x30C is acc hud, 0x33D is lkas hud
-  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = false},
-                                     {0x194, 0, 4, .check_relay = false}, {0x194, 4, 4, .check_relay = false},
-                                     {0x1FA, 0, 8, .check_relay = false}, {0x30C, 0, 8, .check_relay = false},
-                                     {0x33D, 0, 5, .check_relay = false}, {0x33D, 4, 5, .check_relay = false}};
+  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true},
+                                     {0x194, 0, 4, .check_relay = true},
+                                     {0x1FA, 0, 8, .check_relay = false}, {0x30C, 0, 8, .check_relay = true},
+                                     {0x33D, 0, 5, .check_relay = true}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
   const uint16_t HONDA_PARAM_NIDEC_HYBRID = 32;

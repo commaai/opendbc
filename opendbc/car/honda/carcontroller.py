@@ -128,14 +128,14 @@ class CarController(CarControllerBase):
     if CC.longActive:
       hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
       accel = actuators.accel + hill_brake
-      if accel > max ( 0, CS.out.aEgo) + 0.1:
+      if accel > max(0, CS.out.aEgo) + 0.1:
         accel = 10000.0
       gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
 
-    speed_control = 1 if ( (accel <= 0.0) and (CS.out.vEgo == 0) ) else 0
+    speed_control = 1 if ((accel <= 0.0) and (CS.out.vEgo == 0)) else 0
 
     # *** rate limit steer ***
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
@@ -230,8 +230,8 @@ class CarController(CarControllerBase):
 
           pcm_override = True
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
-                                                         pcm_override, pcm_cancel_cmd, alert_fcw,
-                                                         self.CP.carFingerprint, CS.stock_brake))
+                                                         pcm_override, pcm_cancel_cmd, fcw_display,
+                                                         self.CP.carFingerprint, CS.stock_brake, self.CP))
           self.apply_brake_last = apply_brake
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
