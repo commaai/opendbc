@@ -271,15 +271,16 @@ class CarState(CarStateBase):
     ret.parkingBrake = bool(pt_cp.vl["Kombi_01"]["KBI_Handbremse"])  # FIXME: need to include an EPB check as well
     ret.espDisabled = pt_cp.vl["ESP_01"]["ESP_Tastung_passiv"] != 0
 
-    ret.leftBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_li"])
-    ret.rightBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_re"])
+    ret.leftBlinker = bool(pt_cp.vl["Blinkmodi_01"]["BM_links"])
+    ret.rightBlinker = bool(pt_cp.vl["Blinkmodi_01"]["BM_rechts"])
 
-    ret.seatbeltUnlatched = False  # FIXME: find a seatbelt signal on Macan
+    # Update seatbelt fastened status.
+    ret.seatbeltUnlatched = pt_cp.vl["Gateway_06"]["AB_Gurtschloss_FA"] != 3
     # TODO: this is only present on powertrain
-    #ret.doorOpen = any([pt_cp.vl["Gateway_05"]["FT_Tuer_geoeffnet"],
-    #                    pt_cp.vl["Gateway_05"]["BT_Tuer_geoeffnet"],
-    #                    pt_cp.vl["Gateway_05"]["HL_Tuer_geoeffnet"],
-    #                    pt_cp.vl["Gateway_05"]["HR_Tuer_geoeffnet"]])
+    ret.doorOpen = any([pt_cp.vl["Gateway_05"]["FT_Tuer_geoeffnet"],
+                        pt_cp.vl["Gateway_05"]["BT_Tuer_geoeffnet"],
+                        pt_cp.vl["Gateway_05"]["HL_Tuer_geoeffnet"],
+                        pt_cp.vl["Gateway_05"]["HR_Tuer_geoeffnet"]])
 
     # Consume blind-spot monitoring info/warning LED states, if available.
     # Infostufe: BSM LED on, Warnung: BSM LED flashing

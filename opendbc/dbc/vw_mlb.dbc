@@ -523,6 +523,9 @@ BO_ 924 Gateway_05: 8 Gateway_D4C7
  SG_ ESP_Offroad_Modus : 56|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ MO_Freig_Reku : 57|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
 
+BO_ 927 Gateway_06: 8 XXX
+ SG_ AB_Gurtschloss_FA : 30|2@1+ (1,0) [0|3] "" XXX
+
 BO_ 1604 Gateway_11: 8 Gateway_D4C7
  SG_ SMLS_01_alt : 0|1@1+ (1.0,0.0) [0.0|1] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ HUD_01_alt : 1|1@1+ (1,0) [0|1] ""  Vector__XXX
