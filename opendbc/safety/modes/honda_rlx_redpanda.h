@@ -1,7 +1,7 @@
 #pragma once
 
 #include "opendbc/safety/declarations.h"
-#include "opendbc/safety/modes/honda.h"
+// #include "opendbc/safety/modes/honda.h"
 
 // Minimal safety mode for external panda controlling steering and lkas hud on separate bus
 // This mode only validates essential RX messages and allows TX of steering message
@@ -51,6 +51,7 @@ static void rlx_redpanda_rx_hook(const CANPacket_t *msg) {
 static bool rlx_redpanda_tx_hook(const CANPacket_t *msg) {
 
   bool tx = true;
+  bool controls_allowed = true;
 
   // STEER: safety check
   if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
