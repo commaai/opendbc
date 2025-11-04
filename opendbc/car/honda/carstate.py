@@ -96,7 +96,7 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
       steer_status = "NORMAL"
     else:
-      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
+      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     if self.CP.carFingerprint in HONDA_BOSCH_ALT_RADAR:
       # TODO: See if this logic works for all other Honda
