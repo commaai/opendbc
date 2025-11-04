@@ -211,7 +211,6 @@ def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available
   else:
     commands.append(packer.make_can_msg('LKAS_HUD', 4, lkas_hud_values))
 
-
   return commands
 
 
