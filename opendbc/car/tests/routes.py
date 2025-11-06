@@ -27,6 +27,7 @@ non_tested_cars = [
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
   HONDA.ACURA_TLX_2G,  # FIXME: replace expired route
+  HONDA.ACURA_ADX # TODO: add testroute
 ]
 
 
