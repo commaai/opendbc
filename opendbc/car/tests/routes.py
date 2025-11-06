@@ -26,6 +26,8 @@ non_tested_cars = [
   HYUNDAI.GENESIS_G90,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
+  HONDA.ACURA_TLX_2G,  # FIXME: replace expired route
+  HONDA.HONDA_NBOX_2G,  # FIXME: replace expired route
 ]
 
 
@@ -90,7 +92,6 @@ routes = [
   CarTestRoute("320098ff6c5e4730/2023-04-13--17-47-46", HONDA.HONDA_HRV_3G),
   CarTestRoute("147613502316e718/00000001--dd141a3140", HONDA.HONDA_HRV_3G),  # Brazilian model
   CarTestRoute("1e4baee1aa2687a0/00000001--74c4cc0b23", HONDA.HONDA_HRV_3G),  # Thailand model use ALT_GEAR
-  CarTestRoute("414af83891dbf72c/00000006--51fa6d99cd", HONDA.HONDA_NBOX_2G),
   CarTestRoute("917b074700869333/2021-05-24--20-40-20", HONDA.ACURA_ILX),
   CarTestRoute("08a3deb07573f157/2020-03-06--16-11-19", HONDA.HONDA_ACCORD),  # 1.5T
   CarTestRoute("1da5847ac2488106/2021-05-24--19-31-50", HONDA.HONDA_ACCORD),  # 2.0T
@@ -117,7 +118,6 @@ routes = [
   CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
   CarTestRoute("2dc4489d7e1410ca/00000001--bbec3f5117", HONDA.HONDA_CRV_6G),
   CarTestRoute("a703d058f4e05aeb/00000008--f169423024", HONDA.HONDA_PASSPORT_4G),
-  CarTestRoute("58c4a49c7e193080/00000008--aed64b5ba8", HONDA.ACURA_TLX_2G),
 
   CarTestRoute("87d7f06ade479c2e/2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
   CarTestRoute("66189dd8ec7b50e6/2023-09-20--07-02-12", HYUNDAI.HYUNDAI_AZERA_HEV_6TH_GEN),
