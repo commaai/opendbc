@@ -29,16 +29,20 @@ class TestToyotaCarController:
     def _create_mock_car_state(self):
         """Create a mock CarState object."""
         CS = Mock()
-        CS.out = Mock()
-        CS.out.steeringTorque = 0.0
-        CS.out.steeringTorqueEps = 0.0
-        CS.out.steeringRateDeg = 0.0
-        CS.out.steeringAngleOffsetDeg = 0.0
-        CS.out.steeringAngleDeg = 0.0
-        CS.out.vEgoRaw = 0.0
-        CS.out.vEgo = 0.0
-        CS.out.aEgo = 0.0
-        CS.out.standstill = False
+        
+        # Create a simple object to hold the out values with actual values
+        class MockOut:
+            steeringTorque = 0.0
+            steeringTorqueEps = 0.0
+            steeringRateDeg = 0.0
+            steeringAngleOffsetDeg = 0.0
+            steeringAngleDeg = 0.0
+            vEgoRaw = 0.0
+            vEgo = 0.0
+            aEgo = 0.0
+            standstill = False
+        
+        CS.out = MockOut()
         CS.pcm_acc_status = 0
         CS.acc_type = 0
         CS.lkas_hud = b'\x00' * 8
@@ -64,11 +68,15 @@ class TestToyotaCarController:
         CC.hudControl.rightLaneDepart = False
         CC.hudControl.visualAlert = VisualAlert.none
         CC.orientationNED = [0.0, 0.0, 0.0]
-        CC.actuators = Mock()
-        CC.actuators.torque = 0.5
-        CC.actuators.steeringAngleDeg = 0.0
-        CC.actuators.longControlState = 1  # pid state
-        CC.actuators.accel = 0.0
+        
+        # Create a simple object to hold the actuators values with actual float values
+        class MockActuators:
+            torque = 0.5
+            steeringAngleDeg = 0.0
+            longControlState = 1  # pid state
+            accel = 0.0
+        
+        CC.actuators = MockActuators()
         return CC
 
     def test_update_method_delegates_to_submethods(self):
