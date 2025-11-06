@@ -1060,4 +1060,9 @@ FW_VERSIONS = {
       b'36161-TGV-A030\x00\x00',
     ],
   },
+  CAR.ACURA_ADX: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S102-3BH-A020\x00\x00',
+    ],
+  },
 }
