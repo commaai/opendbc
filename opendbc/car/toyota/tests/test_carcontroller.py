@@ -29,7 +29,7 @@ class TestToyotaCarController:
     def _create_mock_car_state(self):
         """Create a mock CarState object."""
         CS = Mock()
-        
+
         # Create a simple object to hold the out values with actual values
         class MockOut:
             steeringTorque = 0.0
@@ -41,7 +41,12 @@ class TestToyotaCarController:
             vEgo = 0.0
             aEgo = 0.0
             standstill = False
-        
+
+            # Add cruiseState object with enabled attribute to match the real CarState structure
+            class MockCruiseState:
+                enabled = True  # Default to True to allow the longitudinal control to run
+            cruiseState = MockCruiseState()
+
         CS.out = MockOut()
         CS.pcm_acc_status = 0
         CS.acc_type = 0
@@ -68,14 +73,14 @@ class TestToyotaCarController:
         CC.hudControl.rightLaneDepart = False
         CC.hudControl.visualAlert = VisualAlert.none
         CC.orientationNED = [0.0, 0.0, 0.0]
-        
+
         # Create a simple object to hold the actuators values with actual float values
         class MockActuators:
             torque = 0.5
             steeringAngleDeg = 0.0
             longControlState = 1  # pid state
             accel = 0.0
-        
+
         CC.actuators = MockActuators()
         return CC
 
