@@ -50,7 +50,7 @@ class TestToyotaCarController:
         CS.out = MockOut()
         CS.pcm_acc_status = 0
         CS.acc_type = 0
-        CS.lkas_hud = b'\x00' * 8
+        CS.lkas_hud = []
         CS.secoc_synchronization = {'RESET_CNT': 0, 'TRIP_CNT': 0, 'AUTHENTICATOR': 0}
         CS.pcm_follow_distance = 3
         CS.gvc = 0.0
@@ -72,16 +72,19 @@ class TestToyotaCarController:
         CC.hudControl.leftLaneDepart = False
         CC.hudControl.rightLaneDepart = False
         CC.hudControl.visualAlert = VisualAlert.none
+        CC.hudControl.leadVisible = False
         CC.orientationNED = [0.0, 0.0, 0.0]
 
-        # Create a simple object to hold the actuators values with actual float values
-        class MockActuators:
-            torque = 0.5
-            steeringAngleDeg = 0.0
-            longControlState = 1  # pid state
-            accel = 0.0
+        actuators = Mock()
+        actuators.torque = 0.5
+        actuators.steeringAngleDeg = 0.0
+        actuators.longControlState = 1  # pid state
+        actuators.accel = 0.0
 
-        CC.actuators = MockActuators()
+        builder = Mock()
+        actuators.as_builder.return_value = builder
+
+        CC.actuators = actuators
         return CC
 
     def test_update_method_delegates_to_submethods(self):
