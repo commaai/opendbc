@@ -3,12 +3,12 @@ from unittest.mock import Mock
 from opendbc.car.structs import CarParams
 from opendbc.car.toyota.carcontroller import CarController
 from opendbc.car.toyota.values import CAR
-from opendbc.car.structs import VisualAlert
 
 
-# Import SteerControlType from the correct location
+# Import SteerControlType and VisualAlert from the correct location
 from opendbc.car import structs
 SteerControlType = structs.CarParams.SteerControlType
+VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
 class TestToyotaCarController:
