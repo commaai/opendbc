@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
@@ -328,7 +328,7 @@ static safety_config tesla_init(uint16_t param) {
     {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},  // APS_eacMonitor
   };
 
-  UNUSED(param);
+  SAFETY_UNUSED(param);
 #ifdef ALLOW_DEBUG
   const int TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
   tesla_longitudinal = GET_FLAG(param, TESLA_FLAG_LONGITUDINAL_CONTROL);
