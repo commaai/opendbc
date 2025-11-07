@@ -271,8 +271,8 @@ class CarState(CarStateBase):
     ret.parkingBrake = bool(pt_cp.vl["Kombi_01"]["KBI_Handbremse"])  # FIXME: need to include an EPB check as well
     ret.espDisabled = pt_cp.vl["ESP_01"]["ESP_Tastung_passiv"] != 0
 
-    ret.leftBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_li"])
-    ret.rightBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_re"])
+    ret.leftBlinker = bool(pt_cp.vl["Blinkmodi_01"]["BM_links"])
+    ret.rightBlinker = bool(pt_cp.vl["Blinkmodi_01"]["BM_rechts"])
 
     ret.seatbeltUnlatched = False  # FIXME: find a seatbelt signal on Macan
     # TODO: this is only present on powertrain
