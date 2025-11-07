@@ -27,7 +27,7 @@ class CarState(CarStateBase):
     self.frame = 0
     self.acc_buttons_counter = 0
 
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])  # noqa: F841  (can be removed after adding gear signal)
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])  # noqa: F841
     # self.shifter_values = can_define.dv["TRANSMISSION"]["GEAR_POSITION"]
 
   def create_button_events(self, pt_cp, buttons):
