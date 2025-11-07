@@ -94,6 +94,11 @@ class CarInterface(CarInterfaceBase):
       if ret.transmissionType == TransmissionType.manual:
         ret.minEnableSpeed = 4.5
 
+    # Per-vehicle overrides
+
+    if candidate == CAR.PORSCHE_MACAN_MK1:
+      ret.steerActuatorDelay = 0.7
+
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     ret.stopAccel = -0.55
     ret.vEgoStarting = 0.1
