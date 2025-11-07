@@ -110,7 +110,7 @@ class CarControllerParams:
 
       if CP.flags & VolkswagenFlags.MLB:
         self.STEER_DRIVER_ALLOWANCE = 60  # Driver intervention threshold 0.6 Nm
-        self.STEER_DELTA_UP = 10  # Max HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
+        self.STEER_DELTA_UP = 9  # Max HCA reached in 0.66s (STEER_MAX / (50Hz * 0.66))
         self.STEER_DELTA_DOWN = 10  # Min HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
 
         self.shifter_values = can_define.dv["Getriebe_03"]["GE_Waehlhebel"]
