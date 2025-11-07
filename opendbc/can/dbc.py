@@ -2,6 +2,7 @@ import re
 import os
 from dataclasses import dataclass
 from collections.abc import Callable
+from typing import ClassVar
 
 from opendbc import DBC_PATH
 
@@ -79,12 +80,41 @@ class DBC:
   name_to_msg: dict[str, Msg]
   vals: list[Val]
 
-  def __init__(self, name: str):
+  _CACHE: ClassVar[dict[str, "DBC"]] = {}
+
+  def __new__(cls, name: str):
     dbc_path = name
     if not os.path.exists(dbc_path):
-      dbc_path = os.path.join(DBC_PATH, name + ".dbc")
+      candidate = os.path.join(DBC_PATH, name + ".dbc")
+      if os.path.exists(candidate):
+        dbc_path = candidate
+      else:
+        raise FileNotFoundError(f"DBC file not found: {name}")
+    dbc_path = os.path.abspath(dbc_path)
+
+    cached = cls._CACHE.get(dbc_path)
+    if cached is not None:
+      return cached
+
+    self = super().__new__(cls)
+    self._dbc_path = dbc_path
+    return self
+
+  def __init__(self, name: str):
+    if getattr(self, "_initialized", False):
+      return
+
+    dbc_path = getattr(self, "_dbc_path", None)
+    if dbc_path is None:
+      dbc_path = name
+      if not os.path.exists(dbc_path):
+        dbc_path = os.path.join(DBC_PATH, name + ".dbc")
+      dbc_path = os.path.abspath(dbc_path)
+      self._dbc_path = dbc_path
 
     self._parse(dbc_path)
+    self._initialized = True
+    type(self)._CACHE[dbc_path] = self
 
   def _parse(self, path: str):
     self.name = os.path.basename(path).replace(".dbc", "")

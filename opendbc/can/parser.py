@@ -214,6 +214,9 @@ class CANParser:
     return self.can_invalid_cnt < CAN_INVALID_CNT and counters_valid
 
   def update(self, strings, sendcan: bool = False):
+    if not strings:
+      return set()
+
     if strings and not isinstance(strings[0], list | tuple):
       strings = [strings]
 
