@@ -55,8 +55,8 @@ class CarState(CarStateBase):
 
     """
 
-    # pt_cp = can_parsers[Bus.pt]
-    # cam_cp = can_parsers[Bus.cam]
+    pt_cp = can_parsers[Bus.pt]  # noqa: F841
+    cam_cp = can_parsers[Bus.cam]  # noqa: F841
     ret = structs.CarState()
 
     # **** Signals required for a minimum viable car port ******************* #
