@@ -111,7 +111,7 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
     }
 
     int steer_status = msg->data[4] & 0xFU;
-    bool steer_req = (steer_status == 5);
+    bool steer_req = (steer_status == 7);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_MLB_STEERING_LIMITS)) {
       tx = false;

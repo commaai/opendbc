@@ -68,7 +68,7 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     values = {"HCA_01_LM_Offset": abs(torque),
               "HCA_01_LM_OffSign": torque < 0,
               "HCA_01_Sendestatus": steer_req,
-              "HCA_01_Status_HCA": 5 if steer_req else 3}
+              "HCA_01_Status_HCA": 7 if steer_req else 3}
     return self.packer.make_can_msg_safety("HCA_01", 0, values)
 
   # Cruise control buttons
