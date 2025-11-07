@@ -16,8 +16,10 @@ class CarInterface(CarInterfaceBase):
     ret.radarUnavailable = True
     # ret.dashcamOnly = True
 
-    # NOTE: The allOutput safety mode is for active development only, add a brand specific safety mode ASAP
+    # FIXME: The allOutput safety mode is for very early development only
     safety_configs = [get_safety_config(structs.CarParams.SafetyModel.allOutput, 1)]
+    # TODO: just always use the demo mode and set it up for initial bidirectional forwarding
+    # safety_configs = [get_safety_config(structs.CarParams.SafetyModel.demo)]
 
     # NOTE: Identify the BSM CAN message ID, if applicable, and set it here
     #  ret.enableBsm = 0x30F in fingerprint[0]
