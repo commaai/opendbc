@@ -26,8 +26,11 @@ non_tested_cars = [
   HYUNDAI.GENESIS_G90,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
-  HONDA.ACURA_TLX_2G,  # FIXME: replace expired route
-  HONDA.HONDA_NBOX_2G,  # FIXME: replace expired route
+  # Honda/Acura test routes below expired, replace when CI bucket sync is fixed
+  HONDA.ACURA_TLX_2G,
+  HONDA.HONDA_NBOX_2G,
+  HONDA.HONDA_HRV_3G,
+  HONDA.ACURA_MDX_4G_MMR,
 ]
 
 
