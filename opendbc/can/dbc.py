@@ -6,6 +6,7 @@ from collections.abc import Callable
 from opendbc import DBC_PATH
 
 # TODO: these should just be passed in along with the DBC file
+from opendbc.car.demo.democan import demo_checksum
 from opendbc.car.honda.hondacan import honda_checksum
 from opendbc.car.toyota.toyotacan import toyota_checksum
 from opendbc.car.subaru.subarucan import subaru_checksum
@@ -31,6 +32,7 @@ class SignalType:
   FCA_GIORGIO_CHECKSUM = 10
   TESLA_CHECKSUM = 11
   PSA_CHECKSUM = 12
+  DEMO_CHECKSUM = 13
 
 
 @dataclass
@@ -200,6 +202,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(8, -1, 0, -1, True, SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
   elif dbc_name.startswith("psa_"):
     return ChecksumState(4, 4, 7, 3, False, SignalType.PSA_CHECKSUM, psa_checksum)
+  elif dbc_name.startswith("demo"):
+    return ChecksumState(8, 4, 0, 0, False, SignalType.DEMO_CHECKSUM, demo_checksum)
   return None
 
 
