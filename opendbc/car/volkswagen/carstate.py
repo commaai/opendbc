@@ -327,7 +327,7 @@ class CarState(CarStateBase):
       ]
     if CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
       cam_messages += [
-        ("HCA_01", 1),       # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
+        ("HCA_01", 1),  # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
       ]
 
     return {
