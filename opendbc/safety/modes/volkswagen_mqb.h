@@ -104,7 +104,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
 
     // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
     if (msg->addr == MSG_ESP_05) {
-      volkswagen_brake_pressure_detected = (msg->data[3] & 0x4U) >> 2;
+      volkswagen_brake_pressure_detected = volkswagen_mlb_mqb_brake_pressure_threshold(msg);
     }
 
     brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
