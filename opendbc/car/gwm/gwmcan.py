@@ -2,7 +2,8 @@ def gwm_checksum(address: int, sig, d: bytearray) -> int:
     crc = 0x00
     poly = 0x1D
     xor_out = 0x2D
-    for byte in d:
+
+    for byte in d[1:]:
         crc ^= byte
         for _ in range(8):
             if crc & 0x80:
