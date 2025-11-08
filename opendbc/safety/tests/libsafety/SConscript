@@ -23,7 +23,6 @@ env = Environment(
     '-std=gnu11',
     '-Wfatal-errors',
     '-Wno-pointer-to-int-cast',
-    '-DCANFD',
     '-g',
     '-O0',
     '-fno-omit-frame-pointer',
