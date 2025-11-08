@@ -41,11 +41,6 @@ class CarInterface(CarInterfaceBase):
       # Set global MLB parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMlb)]
       ret.enableBsm = 0x30F in fingerprint[0]  # SWA_01
-
-      # TODO: trans message/gear position ID
-      ret.transmissionType = TransmissionType.automatic
-
-      # TODO: network location detection, not working on Macan, possibly due to powertrain CAN bringup delay
       ret.networkLocation = NetworkLocation.gateway
 
     else:
