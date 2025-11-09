@@ -97,11 +97,11 @@
 |Honda|Civic Hatchback 2022-24|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback Hybrid 2025-26|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback Hybrid (Europe only) 2023|All|[Upstream](#upstream)|
-|Honda|Civic Hybrid 2025|All|[Upstream](#upstream)|
+|Honda|Civic Hybrid 2025-26|All|[Upstream](#upstream)|
 |Honda|Clarity 2018-21|All|[Community](#community)|
 |Honda|CR-V 2015-16|Touring Trim|[Upstream](#upstream)|
 |Honda|CR-V 2017-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|CR-V 2023-25|All|[Upstream](#upstream)|
+|Honda|CR-V 2023-26|All|[Upstream](#upstream)|
 |Honda|CR-V Hybrid 2017-22|Honda Sensing|[Upstream](#upstream)|
 |Honda|CR-V Hybrid 2023-25|All|[Upstream](#upstream)|
 |Honda|e 2020|All|[Upstream](#upstream)|
@@ -113,7 +113,7 @@
 |Honda|Inspire 2018|All|[Upstream](#upstream)|
 |Honda|N-Box 2018|All|[Upstream](#upstream)|
 |Honda|Odyssey 2018-20|Honda Sensing|[Upstream](#upstream)|
-|Honda|Odyssey 2021-25|All|[Upstream](#upstream)|
+|Honda|Odyssey 2021-26|All|[Upstream](#upstream)|
 |Honda|Passport 2019-25|All|[Upstream](#upstream)|
 |Honda|Passport 2026|All|[Upstream](#upstream)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
