@@ -1,6 +1,7 @@
 import re
 import os
 from dataclasses import dataclass
+from typing import ClassVar
 from collections.abc import Callable
 
 from opendbc import DBC_PATH
@@ -79,12 +80,20 @@ class DBC:
   name_to_msg: dict[str, Msg]
   vals: list[Val]
 
+  _CACHE: ClassVar[dict[str, tuple[str, dict[int, Msg], dict[int, Msg], dict[str, Msg], list[Val]]]] = {}
+
   def __init__(self, name: str):
     dbc_path = name
     if not os.path.exists(dbc_path):
       dbc_path = os.path.join(DBC_PATH, name + ".dbc")
 
+    cached = self._CACHE.get(dbc_path)
+    if cached is not None:
+      self.name, self.msgs, self.addr_to_msg, self.name_to_msg, self.vals = cached
+      return
+
     self._parse(dbc_path)
+    self._CACHE[dbc_path] = (self.name, self.msgs, self.addr_to_msg, self.name_to_msg, self.vals)
 
   def _parse(self, path: str):
     self.name = os.path.basename(path).replace(".dbc", "")
