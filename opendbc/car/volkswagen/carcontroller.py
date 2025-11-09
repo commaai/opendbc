@@ -5,6 +5,7 @@ from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mqbcan, pqcan
+from opendbc.car.volkswagen.mqbcan import ResetSignal
 from opendbc.car.volkswagen.values import CanBus, CarControllerParams, VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -25,6 +26,59 @@ class CarController(CarControllerBase):
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
     self.hca_frame_same_torque = 0
+
+    self.frames_at_standstill = 0
+
+  def _compute_mqb_standstill_reset_signal(self, CS, longActive):
+    # standstill reset state machine
+    # counts up at 50hz in sync with acc control messages when esp hold is confirmed
+    # - gentle at frames 5 and 10
+    # - extended from 20 until DISABLE_AT (60)
+    # - pre-disable for the next PRE_DISABLE_DURATION frames, then post-disable
+    # - counter resets if hold drops before DISABLE_AT or if esp-confirmed speed > 0
+    GENTLE_TICKS = (5, 10)
+    EXTENDED_START = 20
+    DISABLE_AT = 60
+    PRE_DISABLE_DURATION = 3
+    PRE_DISABLE_END = DISABLE_AT + PRE_DISABLE_DURATION - 1
+
+    reset_signal = ResetSignal.NONE
+    resettable_car = not (self.CP.flags & VolkswagenFlags.PQ) and CS.acc_type == 1
+    in_window = longActive and resettable_car and (CS.esp_hold_confirmation or CS.out.standstill)
+
+    if in_window:
+      self.frames_at_standstill = min(self.frames_at_standstill + 1, PRE_DISABLE_END + 1)
+      frames = self.frames_at_standstill
+
+      # attempt gentle reset twice
+      # this is the most comfortable but may fail on hills
+      if frames in GENTLE_TICKS:
+        reset_signal = ResetSignal.GENTLE_RESET
+
+      # if it does fail, attempt an extended reset until we hit our timer limit
+      elif EXTENDED_START <= frames < DISABLE_AT:
+        reset_signal = ResetSignal.EXTENDED_RESET
+
+      # FAULT PREVENTION
+      # we are on a particularly steep hill, send a pre-disable message, then stop braking entirely
+      # the car has other measures to prevent rollback, so we'll probably remain stopped regardless
+      # if we do see any motion in either direction, the timer was reset and we will resume braking commands
+      # on an unusually steep hill we could see some rollback and may want to send a 'press brake' advisory
+      # FIXME: tune the interaction/alert on steep hills
+      if frames < DISABLE_AT and not CS.esp_hold_confirmation:
+        self.frames_at_standstill = 0
+      else:
+        if DISABLE_AT <= frames <= PRE_DISABLE_END:
+          reset_signal = ResetSignal.PRE_DISABLE
+        elif frames > PRE_DISABLE_END:
+          reset_signal = ResetSignal.POST_DISABLE
+
+    # if the car moves reset the standstill timer
+    # note that esp-confirmed vehicle speed may not match our vEgo
+    if CS.esp_vEgo_confirmation > 0 and not CS.esp_hold_confirmation:
+      self.frames_at_standstill = 0
+
+    return reset_signal
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -79,12 +133,20 @@ class CarController(CarControllerBase):
 
     if self.CP.openpilotLongitudinalControl:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
-        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
-        stopping = actuators.longControlState == LongCtrlState.stopping
-        starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
-                                                           acc_control, stopping, starting, CS.esp_hold_confirmation))
+        # acc is picky about what signals we can send while brake is pressed (e.g. preEnabled at standstill)
+        longActive = CC.longActive and not CS.out.brakePressed
+
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, longActive)
+        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if longActive else 0)
+        stopping = longActive and actuators.longControlState == LongCtrlState.stopping
+        rollout_in_progress = CS.out.vEgo < self.CP.vEgoStopping and accel > 0
+        starting = longActive and actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or rollout_in_progress)
+
+        # mqb standstill reset: compute ResetSignal for acc hold timer logic
+        reset_signal = self._compute_mqb_standstill_reset_signal(CS, longActive)
+
+        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, longActive, accel,
+                                                           acc_control, stopping, starting, CS.esp_hold_confirmation, reset_signal))
 
       #if self.aeb_available:
       #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:

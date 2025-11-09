@@ -16,6 +16,7 @@ class CarState(CarStateBase):
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
+    self.esp_vEgo_confirmation = 0.0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
 
@@ -100,6 +101,7 @@ class CarState(CarStateBase):
 
       self.acc_type = ext_cp.vl["ACC_06"]["ACC_Typ"]
       self.esp_hold_confirmation = bool(pt_cp.vl["ESP_21"]["ESP_Haltebestaetigung"])
+      self.esp_vEgo_confirmation = pt_cp.vl["ESP_21"]["ESP_v_Signal"] * CV.KPH_TO_MS
       acc_limiter_mode = ext_cp.vl["ACC_02"]["ACC_Gesetzte_Zeitluecke"] == 0
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
 
