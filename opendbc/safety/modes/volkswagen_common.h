@@ -91,9 +91,3 @@ static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
   }
   return torque_driver_new;
 }
-
-static bool volkswagen_mlb_mqb_brake_pressure_threshold(const CANPacket_t *msg) {
-  // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above threshold)
-  bool brake_pressure_threshold = GET_BIT(msg, 26U);
-  return brake_pressure_threshold;
-}
