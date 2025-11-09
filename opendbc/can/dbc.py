@@ -2,7 +2,6 @@ import re
 import os
 from dataclasses import dataclass
 from collections.abc import Callable
-from typing import ClassVar
 
 from opendbc import DBC_PATH
 
@@ -72,6 +71,37 @@ VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
 VAL_SPLIT_RE = re.compile(r'["]+')
 
 
+# Module-level cache for parsed DBC files
+_DBC_CACHE: dict[str, "DBC"] = {}
+
+
+def _resolve_dbc_path(name: str) -> str:
+  """Resolve a DBC name or path to an absolute path."""
+  dbc_path = name
+  if not os.path.exists(dbc_path):
+    candidate = os.path.join(DBC_PATH, name + ".dbc")
+    if os.path.exists(candidate):
+      dbc_path = candidate
+    else:
+      raise FileNotFoundError(f"DBC file not found: {name}")
+  return os.path.abspath(dbc_path)
+
+
+def get_dbc(name: str) -> "DBC":
+  """Get or create a cached DBC instance.
+
+  Args:
+    name: DBC file name (without .dbc extension) or full path to DBC file
+
+  Returns:
+    Cached DBC instance for the resolved path
+  """
+  dbc_path = _resolve_dbc_path(name)
+  if dbc_path not in _DBC_CACHE:
+    _DBC_CACHE[dbc_path] = DBC._from_file(dbc_path)
+  return _DBC_CACHE[dbc_path]
+
+
 @dataclass
 class DBC:
   name: str
@@ -80,41 +110,18 @@ class DBC:
   name_to_msg: dict[str, Msg]
   vals: list[Val]
 
-  _CACHE: ClassVar[dict[str, "DBC"]] = {}
-
-  def __new__(cls, name: str):
-    dbc_path = name
-    if not os.path.exists(dbc_path):
-      candidate = os.path.join(DBC_PATH, name + ".dbc")
-      if os.path.exists(candidate):
-        dbc_path = candidate
-      else:
-        raise FileNotFoundError(f"DBC file not found: {name}")
-    dbc_path = os.path.abspath(dbc_path)
-
-    cached = cls._CACHE.get(dbc_path)
-    if cached is not None:
-      return cached
-
-    self = super().__new__(cls)
-    self._dbc_path = dbc_path
-    return self
-
-  def __init__(self, name: str):
-    if getattr(self, "_initialized", False):
-      return
-
-    dbc_path = getattr(self, "_dbc_path", None)
-    if dbc_path is None:
-      dbc_path = name
-      if not os.path.exists(dbc_path):
-        dbc_path = os.path.join(DBC_PATH, name + ".dbc")
-      dbc_path = os.path.abspath(dbc_path)
-      self._dbc_path = dbc_path
-
-    self._parse(dbc_path)
-    self._initialized = True
-    type(self)._CACHE[dbc_path] = self
+  @classmethod
+  def _from_file(cls, path: str) -> "DBC":
+    """Internal method to create a DBC instance from a file path."""
+    dbc = cls(
+      name="",
+      msgs={},
+      addr_to_msg={},
+      name_to_msg={},
+      vals=[]
+    )
+    dbc._parse(path)
+    return dbc
 
   def _parse(self, path: str):
     self.name = os.path.basename(path).replace(".dbc", "")
