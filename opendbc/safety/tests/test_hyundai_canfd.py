@@ -6,7 +6,7 @@ from opendbc.car.hyundai.values import HyundaiSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
 
 # All combinations of radar/camera-SCC and gas/hybrid/EV cars
@@ -22,7 +22,7 @@ ALL_GAS_EV_HYBRID_COMBOS = [
 ]
 
 
-class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
 
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   STANDSTILL_THRESHOLD = 12  # 0.375 kph
@@ -50,27 +50,27 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
 
   def _torque_driver_msg(self, torque):
     values = {"STEERING_COL_TORQUE": torque}
-    return self.packer.make_can_msg_panda("MDPS", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("MDPS", self.PT_BUS, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"TORQUE_REQUEST": torque, "STEER_REQ": steer_req}
-    return self.packer.make_can_msg_panda(self.STEER_MSG, self.STEER_BUS, values)
+    return self.packer.make_can_msg_safety(self.STEER_MSG, self.STEER_BUS, values)
 
   def _speed_msg(self, speed):
     values = {f"WHL_Spd{pos}Val": speed * 0.03125 for pos in ["FL", "FR", "RL", "RR"]}
-    return self.packer.make_can_msg_panda("WHEEL_SPEEDS", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values)
 
   def _user_brake_msg(self, brake):
     values = {"DriverBraking": brake}
-    return self.packer.make_can_msg_panda("TCS", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("TCS", self.PT_BUS, values)
 
   def _user_gas_msg(self, gas):
     values = {self.GAS_MSG[1]: gas}
-    return self.packer.make_can_msg_panda(self.GAS_MSG[0], self.PT_BUS, values)
+    return self.packer.make_can_msg_safety(self.GAS_MSG[0], self.PT_BUS, values)
 
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": 1 if enable else 0}
-    return self.packer.make_can_msg_panda("SCC_CONTROL", self.SCC_BUS, values)
+    return self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values)
 
   def _button_msg(self, buttons, main_button=0, bus=None):
     if bus is None:
@@ -79,7 +79,7 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
       "CRUISE_BUTTONS": buttons,
       "ADAPTIVE_CRUISE_MAIN_BTN": main_button,
     }
-    return self.packer.make_can_msg_panda("CRUISE_BUTTONS", bus, values)
+    return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
 
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
@@ -101,7 +101,7 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
       raise unittest.SkipTest
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
     self.safety.init_tests()
@@ -117,7 +117,7 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
   SAFETY_PARAM: int
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_ALT_BUTTONS | self.SAFETY_PARAM)
     self.safety.init_tests()
@@ -127,11 +127,11 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
       "CRUISE_BUTTONS": buttons,
       "ADAPTIVE_CRUISE_MAIN_BTN": main_button,
     }
-    return self.packer.make_can_msg_panda("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
 
   def _acc_cancel_msg(self, cancel, accel=0):
     values = {"ACCMode": 4 if cancel else 0, "aReqRaw": accel, "aReqValue": accel}
-    return self.packer.make_can_msg_panda("SCC_CONTROL", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
 
   def test_button_sends(self):
     """
@@ -168,7 +168,7 @@ class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
   GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS)
     self.safety.init_tests()
@@ -187,7 +187,7 @@ class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
   GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS |
                                  HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT)
@@ -209,7 +209,7 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
   STEER_BUS = 1
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING |
                                  HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.EV_GAS)
@@ -220,7 +220,7 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
       "aReqRaw": accel,
       "aReqValue": accel,
     }
-    return self.packer.make_can_msg_panda("SCC_CONTROL", 1, values)
+    return self.packer.make_can_msg_safety("SCC_CONTROL", 1, values)
 
 
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
@@ -240,7 +240,7 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
       raise unittest.SkipTest
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.LONG | self.SAFETY_PARAM)
     self.safety.init_tests()
@@ -250,7 +250,7 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
       "aReqRaw": accel,
       "aReqValue": accel,
     }
-    return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
+    return self.packer.make_can_msg_safety("SCC_CONTROL", 0, values)
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
@@ -274,7 +274,7 @@ class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongB
       raise unittest.SkipTest
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CANFD_ALT_BUTTONS | self.SAFETY_PARAM)
     self.safety.init_tests()
