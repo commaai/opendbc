@@ -1,9 +1,4 @@
-CM_ "IMPORT _honda_common.dbc";
-CM_ "IMPORT _nidec_common.dbc";
-CM_ "IMPORT _nidec_scm_group_a.dbc";
 CM_ "IMPORT _lkas_hud_5byte.dbc";
-CM_ "IMPORT _steering_sensors_b.dbc";
-CM_ "IMPORT _gearbox_common.dbc";
 
 BO_ 404 STEERING_CONTROL: 4 EON
  SG_ STEER_TORQUE : 7|12@0- (1,0) [-768|768] "" EPS
