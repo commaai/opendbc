@@ -22,7 +22,7 @@ dependencies = [
 testing = [
   "cffi",
   "gcovr",
-  "pytest",
+  "pytest==8.4.2",
   "pytest-coverage",
   "pytest-mock",
   "pytest-randomly",
