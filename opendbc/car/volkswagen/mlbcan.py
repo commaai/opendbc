@@ -27,7 +27,12 @@ def create_lka_hud_control(packer, bus, ldw_stock_values, enabled, steering_pres
 
 
 def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resume=False):
-  values = gra_stock_values.copy()
+  values = {s: gra_stock_values[s] for s in [
+    "LS_Hauptschalter",
+    "LS_Typ_Hauptschalter",
+    "LS_Codierung",
+    "LS_Tip_Stufe_2",
+  ]}
 
   values.update({
     "COUNTER": (gra_stock_values["COUNTER"] + 1) % 16,
