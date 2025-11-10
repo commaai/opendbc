@@ -99,7 +99,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
 
     // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
     if (msg->addr == MSG_MOTOR_14) {
-      volkswagen_brake_pedal_switch = (msg->data[3] & 0x10U) >> 4;
+      volkswagen_brake_pedal_switch = GET_BIT(msg, 28U);
     }
 
     // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
