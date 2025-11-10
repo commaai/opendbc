@@ -1,3 +1,6 @@
+from opendbc.car.volkswagen.mqbcan import volkswagen_mqb_meb_checksum, xor_checksum
+
+
 def create_steering_control(packer, bus, apply_steer, lkas_enabled):
   values = {
     "HCA_01_Status_HCA": 7 if lkas_enabled else 3,
@@ -51,3 +54,19 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
 def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance, distance):
   values = {}
   return packer.make_can_msg("ACC_02", bus, values)
+
+def volkswagen_mlb_checksum(address: int, sig, d: bytearray) -> int:
+  xor_starting_value = {
+    0x109: 0x08, # ACC_01
+    0x30C: 0x0F, # ACC_02
+    0x324: 0x27, # ACC_04
+    0x10D: 0x0C, # ACC_05
+    0x10F: 0x0E, # ACC_0x10F
+    0x311: 0x12, # ACC_0x311
+    0x397: 0x94, # LDW_02
+    0x10C: 0x0D, # TSK_02
+  }
+  if address in xor_starting_value:
+    return xor_checksum(address, sig, d, xor_starting_value[address])
+  else:
+    return volkswagen_mqb_meb_checksum(address, sig, d)
