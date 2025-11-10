@@ -1,6 +1,6 @@
 from opendbc.car.volkswagen.mqbcan import volkswagen_mqb_meb_checksum, xor_checksum
 
-
+# TODO: Parameterize the hca control type (5 vs 7) and consolidate with MQB (and PQ?)
 def create_steering_control(packer, bus, apply_steer, lkas_enabled):
   values = {
     "HCA_01_Status_HCA": 7 if lkas_enabled else 3,
