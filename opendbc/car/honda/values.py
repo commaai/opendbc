@@ -304,7 +304,7 @@ class CAR(Platforms):
   HONDA_ACCORD_9G = HondaSerialSteeringPlatformConfig(
     [
       HondaCarDocs("Honda Accord 2016-17", "Honda Sensing"),
-      HondaCarDocs("Honda Accord 2017", "All")
+      HondaCarDocs("Honda Accord Hybrid 2017", "All")
     ],
     CarSpecs(mass=3343 * CV.LB_TO_KG, wheelbase=2.78, steerRatio=17.5, centerToFrontRatio=0.37),  # as spec
     radar_dbc_dict('honda_accord_2017_can_generated'),
