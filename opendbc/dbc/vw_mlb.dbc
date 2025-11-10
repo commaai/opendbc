@@ -1705,8 +1705,8 @@ BO_ 270 TSK_04: 8 Motor_EDC17_D4
  SG_ TSK_Status_GRA_ACC_02 : 62|2@1+ (1.0,0.0) [0.0|3] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
 
 BO_ 273 TSK_05: 8 Motor_EDC17_D4
- SG_ TSK_05_CHK : 0|8@1+ (1,0) [0|255] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
- SG_ TSK_05_BZ : 8|4@1+ (1,0) [0|15] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ TSK_QBit_Steigung : 12|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ TSK_Status_GRA_ACC_01 : 16|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7
  SG_ TSK_Fahrzeugmasse : 18|5@1+ (200,500) [500|6500] "Unit_KiloGram"  Gateway_D4C7
