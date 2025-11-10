@@ -203,7 +203,7 @@ class Footnote(Enum):
     "Refers only to the MQB-based European B8 Passat, not the NMS Passat in the USA/China/Mideast markets.",
     Column.MODEL)
   SKODA_HEATED_WINDSHIELD = CarFootnote(
-    "Some Škoda vehicles are equipped with heated windshields, which are known " +
+    "Some Skoda vehicles are equipped with heated windshields, which are known " +
     "to block GPS signal needed for some comma 3X functionality.",
     Column.MODEL)
   VW_EXP_LONG = CarFootnote(
@@ -425,44 +425,44 @@ class CAR(Platforms):
     wmis={WMI.SEAT},
   )
   SKODA_FABIA_MK4 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Škoda Fabia 2022-23", footnotes=[Footnote.VW_MQB_A0])],
+    [VWCarDocs("Skoda Fabia 2022-23", footnotes=[Footnote.VW_MQB_A0])],
     VolkswagenCarSpecs(mass=1266, wheelbase=2.56),
     chassis_codes={"PJ"},
     wmis={WMI.SKODA},
   )
   SKODA_KAMIQ_MK1 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Škoda Kamiq 2021-23", footnotes=[Footnote.VW_MQB_A0, Footnote.KAMIQ]),
-      VWCarDocs("Škoda Scala 2020-23", footnotes=[Footnote.VW_MQB_A0]),
+      VWCarDocs("Skoda Kamiq 2021-23", footnotes=[Footnote.VW_MQB_A0, Footnote.KAMIQ]),
+      VWCarDocs("Skoda Scala 2020-23", footnotes=[Footnote.VW_MQB_A0]),
     ],
     VolkswagenCarSpecs(mass=1230, wheelbase=2.66),
     chassis_codes={"NW"},
     wmis={WMI.SKODA},
   )
   SKODA_KAROQ_MK1 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Škoda Karoq 2019-23")],
+    [VWCarDocs("Skoda Karoq 2019-23")],
     VolkswagenCarSpecs(mass=1278, wheelbase=2.66),
     chassis_codes={"NU"},
     wmis={WMI.SKODA},
   )
   SKODA_KODIAQ_MK1 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Škoda Kodiaq 2017-23")],
+    [VWCarDocs("Skoda Kodiaq 2017-23")],
     VolkswagenCarSpecs(mass=1569, wheelbase=2.79),
     chassis_codes={"NS"},
     wmis={WMI.SKODA, WMI.VOLKSWAGEN_GROUP_RUS},
   )
   SKODA_OCTAVIA_MK3 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Škoda Octavia 2015-19"),
-      VWCarDocs("Škoda Octavia RS 2016"),
-      VWCarDocs("Škoda Octavia Scout 2017-19"),
+      VWCarDocs("Skoda Octavia 2015-19"),
+      VWCarDocs("Skoda Octavia RS 2016"),
+      VWCarDocs("Skoda Octavia Scout 2017-19"),
     ],
     VolkswagenCarSpecs(mass=1388, wheelbase=2.68),
     chassis_codes={"NE"},
     wmis={WMI.SKODA},
   )
   SKODA_SUPERB_MK3 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Škoda Superb 2015-22")],
+    [VWCarDocs("Skoda Superb 2015-22")],
     VolkswagenCarSpecs(mass=1505, wheelbase=2.84),
     chassis_codes={"3V", "NP"},
     wmis={WMI.SKODA},
