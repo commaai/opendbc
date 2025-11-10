@@ -929,7 +929,7 @@ BO_ 1137 Licht_hinten_01: 8 Gateway_D4C7
  SG_ LH_Bremsl_re_ges_def : 55|1@1+ (1.0,0.0) [0.0|1] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
 
 BO_ 267 LS_01: 4 Gateway_D4C7
- SG_ LS_01_CHK : 0|8@1+ (1,0) [0|255] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ LS_Hauptschalter : 12|1@1+ (1.0,0.0) [0.0|1] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ LS_Abbrechen : 13|1@1+ (1.0,0.0) [0.0|1] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
