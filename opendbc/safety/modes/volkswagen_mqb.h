@@ -134,15 +134,8 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
   // Safety check for HCA_01 Heading Control Assist torque
-  // Signal: HCA_01.HCA_01_LM_Offset (absolute torque)
-  // Signal: HCA_01.HCA_01_LM_OffSign (direction)
   if (msg->addr == MSG_HCA_01) {
-    int desired_torque = msg->data[2] | ((msg->data[3] & 0x1U) << 8);
-    bool sign = GET_BIT(msg, 31U);
-    if (sign) {
-      desired_torque *= -1;
-    }
-
+    int desired_torque = volkswagen_mlb_mqb_steering_control_torque(msg);
     bool steer_req = GET_BIT(msg, 30U);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_MQB_STEERING_LIMITS)) {

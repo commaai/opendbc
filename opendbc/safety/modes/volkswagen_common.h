@@ -91,3 +91,14 @@ static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
   }
   return torque_driver_new;
 }
+
+static int volkswagen_mlb_mqb_steering_control_torque(const CANPacket_t *msg) {
+  // Signal: HCA_01.HCA_01_LM_Offset (absolute torque)
+  // Signal: HCA_01.HCA_01_LM_OffSign (direction)
+  int desired_torque = msg->data[2] | ((msg->data[3] & 0x1U) << 8);
+  bool sign = GET_BIT(msg, 31U);
+  if (sign) {
+    desired_torque *= -1;
+  }
+  return desired_torque;
+}
