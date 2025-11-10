@@ -59,7 +59,7 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
     }
 
     if (msg->addr == MSG_ESP_05) {
-      volkswagen_brake_pressure_detected = volkswagen_mlb_mqb_brake_pressure_threshold(msg);
+      volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
     }
 
     brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
@@ -100,18 +100,11 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
   // Safety check for HCA_01 Heading Control Assist torque
-  // Signal: HCA_01.Assist_Torque (absolute torque)
-  // Signal: HCA_01.Assist_VZ (direction)
-  // TODO: combine with MQB version in volkswagen_common.h
   if (msg->addr == MSG_HCA_01) {
-    int desired_torque = msg->data[2] | (msg->data[3] & 0x3FU) << 8;
-    int sign = (msg->data[3] & 0x80U) >> 7;
-    if (sign == 1) {
-      desired_torque *= -1;
-    }
+    int desired_torque = volkswagen_mlb_mqb_steering_control_torque(msg);
 
     int steer_status = msg->data[4] & 0xFU;
-    bool steer_req = (steer_status == 7);
+    bool steer_req = (steer_status == 5) || (steer_status == 7);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_MLB_STEERING_LIMITS)) {
       tx = false;

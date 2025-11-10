@@ -99,12 +99,12 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
 
     // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
     if (msg->addr == MSG_MOTOR_14) {
-      volkswagen_brake_pedal_switch = (msg->data[3] & 0x10U) >> 4;
+      volkswagen_brake_pedal_switch = GET_BIT(msg, 28U);
     }
 
     // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
     if (msg->addr == MSG_ESP_05) {
-      volkswagen_brake_pressure_detected = (msg->data[3] & 0x4U) >> 2;
+      volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
     }
 
     brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
@@ -134,15 +134,8 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
   // Safety check for HCA_01 Heading Control Assist torque
-  // Signal: HCA_01.HCA_01_LM_Offset (absolute torque)
-  // Signal: HCA_01.HCA_01_LM_OffSign (direction)
   if (msg->addr == MSG_HCA_01) {
-    int desired_torque = msg->data[2] | ((msg->data[3] & 0x1U) << 8);
-    bool sign = GET_BIT(msg, 31U);
-    if (sign) {
-      desired_torque *= -1;
-    }
-
+    int desired_torque = volkswagen_mlb_mqb_steering_control_torque(msg);
     bool steer_req = GET_BIT(msg, 30U);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_MQB_STEERING_LIMITS)) {
