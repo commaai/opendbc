@@ -37,6 +37,13 @@ class CarInterface(CarInterfaceBase):
       # Panda ALLOW_DEBUG firmware required.
       ret.dashcamOnly = True
 
+    elif ret.flags & VolkswagenFlags.MLB:
+      # Set global MLB parameters
+      safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMlb)]
+      ret.enableBsm = 0x30F in fingerprint[0]  # SWA_01
+      ret.networkLocation = NetworkLocation.gateway
+      ret.dashcamOnly = True  # Pending HCA timeout fix, safety validation, harness termination, install procedure
+
     else:
       # Set global MQB parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagen)]
@@ -62,7 +69,7 @@ class CarInterface(CarInterfaceBase):
     # Global lateral tuning defaults, can be overridden per-vehicle
 
     ret.steerLimitTimer = 0.4
-    if ret.flags & VolkswagenFlags.PQ:
+    if ret.flags & VolkswagenFlags.PQ or ret.flags & VolkswagenFlags.MLB:
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     else:
@@ -82,6 +89,11 @@ class CarInterface(CarInterfaceBase):
       safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
       if ret.transmissionType == TransmissionType.manual:
         ret.minEnableSpeed = 4.5
+
+    # Per-vehicle overrides
+
+    if candidate == CAR.PORSCHE_MACAN_MK1:
+      ret.steerActuatorDelay = 0.07
 
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     ret.stopAccel = -0.55
