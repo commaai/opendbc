@@ -262,6 +262,7 @@ class CarDocs:
   def init(self, CP: CarParams, all_footnotes=None):
     self.brand = CP.brand
     self.car_fingerprint = CP.carFingerprint
+    self.longitudinal_control = CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable
 
     if self.merged and CP.dashcamOnly:
       if self.support_type != SupportType.REVIEW:
