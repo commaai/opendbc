@@ -79,7 +79,6 @@ class Cable(EnumBase):
   usb_a_2_a_cable = BasePart("USB A-A cable")
   usbc_otg_cable = BasePart("USB C OTG cable")
   usbc_coupler = BasePart("USB-C coupler")
-  obd_c_cable_1_5ft = BasePart("OBD-C cable (1.5 ft)")
   obd_c_cable_2ft = BasePart("OBD-C cable (2 ft)")
 
 
