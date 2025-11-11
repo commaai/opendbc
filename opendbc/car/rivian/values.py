@@ -27,7 +27,7 @@ class ModelYear(StrEnum):
 @dataclass
 class RivianCarDocs(CarDocs):
   package: str = "All"
-  car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian]))
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.rivian]))
   setup_video: str = "https://youtu.be/uaISd1j7Z4U"
 
 
