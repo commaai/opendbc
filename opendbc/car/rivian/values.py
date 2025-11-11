@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 from opendbc.car.vin import Vin
 
