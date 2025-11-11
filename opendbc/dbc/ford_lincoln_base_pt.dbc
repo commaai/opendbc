@@ -163,7 +163,7 @@ VAL_TABLE_ EngExhMdeQuiet_D2_Stat 7 "Faulty" 6 "NotUsed_2" 5 "NotUsed_1" 4 "Trac
 VAL_TABLE_ GasPrtc_D_RqDsply 7 "NotUsed_5" 6 "NotUsed_4" 5 "NotUsed_3" 4 "NotUsed_2" 3 "NotUsed_1" 2 "GpfOverLimit" 1 "GpfAtLimit" 0 "NormalOperation";
 VAL_TABLE_ TjaWarn_D_Rq 7 "NotUsed_4" 6 "NotUsed_3" 5 "NotUsed_2" 4 "NotUsed_1" 3 "HardTakeOverLevel2" 2 "HardTakeOverLevel1" 1 "TrafficJamAssistCancel" 0 "NoWarning";
 VAL_TABLE_ Faulty_7FF 2047 "Faulty";
-VAL_TABLE_ Tja_D_Stat 7 "NotUsed_1" 6 "ActiveWarningRight" 5 "ActiveWarningLeft" 4 "ActiveInterventionRight" 3 "ActiveInterventionLeft" 2 "Active" 1 "Standby" 0 "Off";
+VAL_TABLE_ Tja_D_Stat 7 "HandsFreeActive" 6 "ActiveWarningRight" 5 "ActiveWarningLeft" 4 "ActiveInterventionRight" 3 "ActiveInterventionLeft" 2 "Active" 1 "Standby" 0 "Off";
 VAL_TABLE_ TjaMsgTxt_D_Dsply 7 "NotUsed_4" 6 "NotUsed_3" 5 "NotUsed_2" 4 "NotUsed_1" 3 "TurnOnAdaptCruiseControl" 2 "TrafficJamAssistSelected" 1 "TrafficJamAssistUnavailabl" 0 "NoMessage";
 VAL_TABLE_ PwSrcULowMde_D_Actl 3 "NotUsed_1" 2 "ReverseBoost" 1 "ForwardBuck" 0 "Standby";
 VAL_TABLE_ ApaTrgtDist_D_Stat 15 "Step15" 14 "Step14" 13 "Step13" 12 "Step12" 11 "Step11" 10 "Step10" 9 "Step9" 8 "Step8" 7 "Step7" 6 "Step6" 5 "Step5" 4 "Step4" 3 "Step3" 2 "Step2" 1 "Step1" 0 "Off";
