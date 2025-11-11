@@ -75,7 +75,7 @@ class FordCarDocs(CarDocs):
 
   def init_make(self, CP: CarParams):
     harness = CarHarness.ford_q4 if CP.flags & FordFlags.CANFD else CarHarness.ford_q3
-    self.car_parts = CarParts.common([CarHarness.ford_q4 if CP.flags & FordFlags.CANFD else CarHarness.ford_q3])
+    self.car_parts = CarParts.common([harness])
 
     if harness == CarHarness.ford_q4:
       self.setup_video = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
