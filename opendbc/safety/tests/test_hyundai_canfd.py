@@ -37,7 +37,7 @@ def round_angle(angle_deg: float, can_offset=0):
 class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
 
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
-  STANDSTILL_THRESHOLD = 0.375 * 0.03125  # kph
+  STANDSTILL_THRESHOLD = 12 # 0.375 kph
   FWD_BLACKLISTED_ADDRS = {2: [0x50, 0x2a4]}
 
   MAX_RATE_UP = 2
