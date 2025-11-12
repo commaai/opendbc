@@ -13,6 +13,7 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ RDM_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
  SG_ RDM_HUD : 9|1@0+ (1,0) [0|1] "" BDY
  SG_ RDM_HUD_2 : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ RDM_SETTING : 25|2@0+ (1,0) [0|3] "" XXX
  SG_ RDM_OFF : 27|1@0+ (1,0) [0|1] "" BDY
  SG_ RDM_ON : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ RDM_ON_2 : 28|1@0+ (1,0) [0|1] "" BDY
@@ -26,3 +27,4 @@ CM_ SG_ 829 CAM_TEMP_HIGH "Some Driver Assist Systems Cannot Operate: Camera Tem
 CM_ SG_ 829 CAMERA_OVERHEAT "Lane Keeping Assist Cannot Operate: Camera Too Hot";
 
 VAL_ 829 BEEP 5 "solid_beep" 4 "double_beep" 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep";
+VAL_ 829 RDM_SETTING 0 "normal" 1 "wide" 2 "warning_only";
