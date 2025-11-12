@@ -43,6 +43,12 @@ class MessageState:
   counter: int = 0
   counter_fail: int = 0
   first_seen_nanos: int = 0
+  last_warning_log_nanos: int = 0
+
+  def rate_limited_log(self, last_update_nanos: int, msg: str) -> None:
+    if (last_update_nanos - self.last_warning_log_nanos) >= 1_000_000_000:
+      carlog.warning(f"CANParser: {hex(self.address)} {self.name} {msg}")
+      self.last_warning_log_nanos = last_update_nanos
 
   def parse(self, nanos: int, dat: bytes) -> bool:
     tmp_vals: list[float] = [0.0] * len(self.signals)
@@ -58,8 +64,10 @@ class MessageState:
         tmp -= ((tmp >> (sig.size - 1)) & 0x1) * (1 << sig.size)
 
       if not self.ignore_checksum and sig.calc_checksum is not None:
-        if sig.calc_checksum(self.address, sig, bytearray(dat)) != tmp:
+        expected_checksum = sig.calc_checksum(self.address, sig, bytearray(dat))
+        if tmp != expected_checksum:
           checksum_failed = True
+          self.rate_limited_log(nanos, f"checksum failed: received {hex(tmp)}, calculated {hex(expected_checksum)}")
 
       if not self.ignore_counter and sig.type == 1:  # COUNTER
         if not self.update_counter(tmp, sig.size):
@@ -69,7 +77,6 @@ class MessageState:
 
     # must have good counter and checksum to update data
     if checksum_failed or counter_failed:
-      carlog.warning(f"{hex(self.address)} {self.name} checks failed, {checksum_failed=} {counter_failed=}")
       return False
 
     if not self.vals:
@@ -142,10 +149,9 @@ class CANParser:
 
       self._add_message(name_or_addr, freq)
 
-    self.can_valid: bool = False
-    self.bus_timeout: bool = False
     self.can_invalid_cnt: int = CAN_INVALID_CNT
     self.last_nonempty_nanos: int = 0
+    self._last_update_nanos: int = 0
 
   def _add_message(self, name_or_addr: str | int, freq: int = None) -> None:
     if isinstance(name_or_addr, numbers.Number):
@@ -181,17 +187,31 @@ class CANParser:
 
     self.message_states[msg.address] = state
 
-  def update_valid(self, nanos: int) -> None:
+  @property
+  def bus_timeout(self) -> bool:
+    ignore_alive = all(s.ignore_alive for s in self.message_states.values())
+    bus_timeout_threshold = 500 * 1_000_000
+    for st in self.message_states.values():
+      if st.timeout_threshold > 0:
+        bus_timeout_threshold = min(bus_timeout_threshold, st.timeout_threshold)
+    return ((self._last_update_nanos - self.last_nonempty_nanos) > bus_timeout_threshold) and not ignore_alive
+
+  @property
+  def can_valid(self) -> bool:
     valid = True
     counters_valid = True
+    bus_timeout = self.bus_timeout
     for state in self.message_states.values():
       if state.counter_fail >= MAX_BAD_COUNTER:
         counters_valid = False
-      if not state.valid(nanos, self.bus_timeout):
+        state.rate_limited_log(self._last_update_nanos, f"counter invalid, {state.counter_fail=} {MAX_BAD_COUNTER=}")
+      if not state.valid(self._last_update_nanos, bus_timeout):
         valid = False
+        state.rate_limited_log(self._last_update_nanos, "not valid (timeout or missing)")
 
+    # TODO: probably only want to increment this once per update() call
     self.can_invalid_cnt = 0 if valid else min(self.can_invalid_cnt + 1, CAN_INVALID_CNT)
-    self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT and counters_valid
+    return self.can_invalid_cnt < CAN_INVALID_CNT and counters_valid
 
   def update(self, strings, sendcan: bool = False):
     if strings and not isinstance(strings[0], list | tuple):
@@ -228,13 +248,7 @@ class CANParser:
       if not bus_empty:
         self.last_nonempty_nanos = t
 
-      ignore_alive = all(s.ignore_alive for s in self.message_states.values())
-      bus_timeout_threshold = 500 * 1_000_000
-      for st in self.message_states.values():
-        if st.timeout_threshold > 0:
-          bus_timeout_threshold = min(bus_timeout_threshold, st.timeout_threshold)
-      self.bus_timeout = ((t - self.last_nonempty_nanos) > bus_timeout_threshold) and not ignore_alive
-      self.update_valid(t)
+      self._last_update_nanos = t
 
     return updated_addrs
 

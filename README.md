@@ -54,7 +54,7 @@ lefthook run lint                # run the linter
 [`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
 
 ### Project Structure
-* [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC) files
+* [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC_(CAN_Database_Files)) files
 * [`opendbc/can/`](opendbc/can/) is a library for parsing and building CAN messages from DBC files
 * [`opendbc/car/`](opendbc/car/) is a high-level library for interfacing with cars using Python
 * [`opendbc/safety/`](opendbc/safety/) is the functional safety for all the cars supported by `opendbc/car/`
@@ -67,7 +67,7 @@ At its most basic, a car port will control the steering on a car. A "complete" c
 
 ### Connect to the Car
 
-The first step is to get connected to the car with a comma 3X and a car harness.
+The first step is to get connected to the car with a comma four and a car harness.
 The car harness gets you connected to two different CAN buses and splits one of those buses to send our own actuation messages.
 
 If you're lucky, a harness compatible with your car will already be designed and sold on comma.ai/shop.
@@ -151,7 +151,7 @@ In addition to the standard bounties, we also offer higher value bounties for mo
 
 ## FAQ
 
-***How do I use this?*** A [comma 3X](https://comma.ai/shop/comma-3x) is custom-designed to be the best way to run and develop opendbc and openpilot.
+***How do I use this?*** A [comma four](https://comma.ai/shop/comma-four) is custom-designed to be the best way to run and develop opendbc and openpilot.
 
 ***Which cars are supported?*** See the [supported cars list](docs/CARS.md).
 
@@ -179,7 +179,7 @@ In addition to the standard bounties, we also offer higher value bounties for mo
 * **[DBC file](https://en.wikipedia.org/wiki/CAN_bus#DBC)**: contains definitions for messages on a CAN bus
 * **[openpilot](https://github.com/commaai/openpilot)**: an ADAS system for cars supported by opendbc
 * **[comma](https://github.com/commaai)**: the company behind opendbc
-* **[comma 3X](https://comma.ai/shop/comma-3x)**: the hardware used to run openpilot
+* **[comma four](https://comma.ai/shop/comma-four)**: the hardware used to run openpilot
 
 ### More resources
 

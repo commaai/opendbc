@@ -2,7 +2,7 @@ import numpy as np
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs
-from opendbc.car.lateral import apply_vm_steer_angle_limits, apply_driver_steer_torque_limits, common_fault_avoidance
+from opendbc.car.lateral import apply_steer_angle_limits_vm, apply_driver_steer_torque_limits, common_fault_avoidance
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.hyundaicanfd import CanBus
@@ -95,8 +95,8 @@ class CarController(CarControllerBase):
 
     # angle control
     else:
-      self.apply_angle_last = apply_vm_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
-                                                          CC.latActive, self.params, self.VM, MAX_ANGLE_RATE=5)
+      self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
+                                                          CC.latActive, self.params, self.VM)
 
       target_torque_reduction_gain = 1. if CC.latActive else 0
       apply_torque = calculate_angle_torque_reduction_gain(self.params, CS, self.apply_torque_last, target_torque_reduction_gain)

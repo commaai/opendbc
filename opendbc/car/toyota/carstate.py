@@ -6,7 +6,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
-                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
+                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR, \
+                                                  SECOC_CAR
 
 ButtonType = structs.CarState.ButtonEvent.Type
 SteerControlType = structs.CarParams.SteerControlType
@@ -42,6 +43,7 @@ class CarState(CarStateBase):
     self.accurate_steer_angle_seen = False
     self.angle_offset = FirstOrderFilter(None, 60.0, DT_CTRL, initialized=False)
 
+    self.lkas_button = 0
     self.distance_button = 0
 
     self.pcm_follow_distance = 0
@@ -178,13 +180,25 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint not in UNSUPPORTED_DSU_CAR:
       self.pcm_follow_distance = cp.vl["PCM_CRUISE_2"]["PCM_FOLLOW_DISTANCE"]
 
-    if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
-      # distance button is wired to the ACC module (camera or radar)
-      prev_distance_button = self.distance_button
-      self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
+    buttonEvents = []
+    if self.CP.carFingerprint in TSS2_CAR:
+      # lkas button is wired to the camera
+      prev_lkas_button = self.lkas_button
+      self.lkas_button = cp_cam.vl["LKAS_HUD"]["LDA_ON_MESSAGE"]
 
-      ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+      # Cycles between 1 and 2 when pressing the button, then rests back at 0 after ~3s
+      if self.lkas_button != 0 and self.lkas_button != prev_lkas_button:
+        buttonEvents.extend(create_button_events(1, 0, {1: ButtonType.lkas}) +
+                            create_button_events(0, 1, {1: ButtonType.lkas}))
 
+      if self.CP.carFingerprint not in (RADAR_ACC_CAR | SECOC_CAR):
+        # distance button is wired to the ACC module (camera or radar)
+        prev_distance_button = self.distance_button
+        self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
+
+        buttonEvents += create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+
+    ret.buttonEvents = buttonEvents
     return ret
 
   @staticmethod

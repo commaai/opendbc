@@ -14,7 +14,7 @@ dependencies = [
   "numpy",
   "crcmod",
   "tqdm",
-  "pycapnp",
+  "pycapnp==2.1.0",
   "pycryptodome",
 ]
 
@@ -22,7 +22,8 @@ dependencies = [
 testing = [
   "cffi",
   "gcovr",
-  "pytest",
+  # FIXME: pytest 9.0.0 doesn't support unittest.SkipTest
+  "pytest==8.4.2",
   "pytest-coverage",
   "pytest-mock",
   "pytest-randomly",
@@ -98,6 +99,7 @@ select = [
   "INP001",
 ]
 ignore = [
+  "E302", "E305",  # too restrictive
   "W292",
   "E741",
   "E402",

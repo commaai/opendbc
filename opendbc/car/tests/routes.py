@@ -15,6 +15,7 @@ from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.values import Platform
 from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
 from opendbc.car.body.values import CAR as COMMA
+from opendbc.car.psa.values import CAR as PSA
 
 # FIXME: add routes for these cars
 non_tested_cars = [
@@ -25,6 +26,10 @@ non_tested_cars = [
   HYUNDAI.GENESIS_G90,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
+  # Honda/Acura test routes below expired, replace when CI bucket sync is fixed
+  HONDA.ACURA_TLX_2G,
+  HONDA.HONDA_NBOX_2G,
+  HONDA.ACURA_MDX_4G_MMR,
 ]
 
 
@@ -97,6 +102,7 @@ routes = [
   CarTestRoute("f29e2b57a55e7ad5/2021-03-24--20-52-38", HONDA.HONDA_ACCORD),  # hybrid, 2021 with new style HUD msgs
   CarTestRoute("1ad763dd22ef1a0e/2020-02-29--18-37-03", HONDA.HONDA_CRV_5G),
   CarTestRoute("0a96f86fcfe35964/2020-02-05--07-25-51", HONDA.HONDA_ODYSSEY),
+  CarTestRoute("d7233a428eb7d0b5/00000001--9b99b04d43", HONDA.HONDA_ODYSSEY_5G_MMR),
   CarTestRoute("d83f36766f8012a5/2020-02-05--18-42-21", HONDA.HONDA_CIVIC_BOSCH_DIESEL),
   CarTestRoute("f0890d16a07a236b/2021-05-25--17-27-22", HONDA.HONDA_INSIGHT),
   CarTestRoute("07d37d27996096b6/2020-03-04--21-57-27", HONDA.HONDA_PILOT),
@@ -109,6 +115,10 @@ routes = [
   CarTestRoute("1f032f5173c8ad99/00000006--573b3fcaf5", HONDA.HONDA_CIVIC_2022),  # Civic Type R with manual transmission
   CarTestRoute("b1c832ad56b6bc9d/00000010--debfcf5867", HONDA.HONDA_CIVIC_2022),  # 2025 Civic Hatch Hybrid with new eCVT transmission
   CarTestRoute("f9c43864cf057d05/2024-01-15--23-01-20", HONDA.HONDA_PILOT_4G),  # TODO: Replace with a newer route
+  CarTestRoute("f39cf149898833ff/0000002b--54f3fae045", HONDA.HONDA_ACCORD_11G),
+  CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
+  CarTestRoute("2dc4489d7e1410ca/00000001--bbec3f5117", HONDA.HONDA_CRV_6G),
+  CarTestRoute("a703d058f4e05aeb/00000008--f169423024", HONDA.HONDA_PASSPORT_4G),
 
   CarTestRoute("87d7f06ade479c2e/2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
   CarTestRoute("66189dd8ec7b50e6/2023-09-20--07-02-12", HYUNDAI.HYUNDAI_AZERA_HEV_6TH_GEN),
@@ -182,7 +192,7 @@ routes = [
   CarTestRoute("db04d2c63990e3ba/2023-02-08--16-52-39", HYUNDAI.KIA_NIRO_HEV_2ND_GEN),
   CarTestRoute("50a2212c41f65c7b/2021-05-24--16-22-06", HYUNDAI.KIA_FORTE),
   CarTestRoute("192283cdbb7a58c2/2022-10-15--01-43-18", HYUNDAI.KIA_SPORTAGE_5TH_GEN),
-  CarTestRoute("09559f1fcaed4704/2023-11-16--02-24-57", HYUNDAI.KIA_SPORTAGE_5TH_GEN),  # openpilot longitudinal
+  CarTestRoute("09559f1fcaed4704/2023-11-16--02-24-57", HYUNDAI.KIA_SPORTAGE_5TH_GEN, segment=0),  # openpilot longitudinal
   CarTestRoute("b3537035ffe6a7d6/2022-10-17--15-23-49", HYUNDAI.KIA_SPORTAGE_5TH_GEN),  # hybrid
   CarTestRoute("c5ac319aa9583f83/2021-06-01--18-18-31", HYUNDAI.HYUNDAI_ELANTRA),
   CarTestRoute("734ef96182ddf940/2022-10-02--16-41-44", HYUNDAI.HYUNDAI_ELANTRA_GT_I30),
@@ -216,6 +226,7 @@ routes = [
   CarTestRoute("7e34a988419b5307/2019-12-18--19-13-30", TOYOTA.TOYOTA_RAV4_TSS2),  # hybrid
   CarTestRoute("2475fb3eb2ffcc2e/2022-04-29--12-46-23", TOYOTA.TOYOTA_RAV4_TSS2_2022),  # hybrid
   CarTestRoute("20ba9ade056a8c7b/2021-02-08--21-57-35", TOYOTA.TOYOTA_RAV4_PRIME),  # SecOC
+  CarTestRoute("41ba5b181f29435d/00000001--e3ae76382f", TOYOTA.TOYOTA_RAV4_PRIME),  # SecOC longitudinal
   CarTestRoute("8bfb000e03b2a257/00000004--f9eee5f52e", TOYOTA.TOYOTA_SIENNA_4TH_GEN),  # SecOC
   CarTestRoute("0b54d0594d924cd9/00000057--b6206a3205", TOYOTA.TOYOTA_YARIS),  # SecOC
   CarTestRoute("7a31f030957b9c85/2023-04-01--14-12-51", TOYOTA.LEXUS_ES),
@@ -280,6 +291,7 @@ routes = [
   CarTestRoute("66e5edc3a16459c5/2021-05-25--19-00-29", VOLKSWAGEN.SKODA_OCTAVIA_MK3),
   CarTestRoute("026b6d18fba6417f/2021-03-26--09-17-04", VOLKSWAGEN.SKODA_KAMIQ_MK1),  # Scala
   CarTestRoute("b2e9858e29db492b/2021-03-26--16-58-42", VOLKSWAGEN.SKODA_SUPERB_MK3),
+  CarTestRoute("e8dac44d3a3458a5/0000008d--c3e9496f1c", VOLKSWAGEN.PORSCHE_MACAN_MK1),  # placeholder, replace after merge
 
   CarTestRoute("3c8f0c502e119c1c/2020-06-30--12-58-02", SUBARU.SUBARU_ASCENT),
   CarTestRoute("c321c6b697c5a5ff/2020-06-23--11-04-33", SUBARU.SUBARU_FORESTER),
@@ -312,10 +324,12 @@ routes = [
   CarTestRoute("f6d5b1a9d7a1c92e/2021-07-08--06-56-59", MAZDA.MAZDA_CX9_2021),
   CarTestRoute("a4af1602d8e668ac/2022-02-03--12-17-07", MAZDA.MAZDA_CX5_2022),
 
+  CarTestRoute("6a7075a4fdd765ee/0000004e--1f612006dd", PSA.PSA_PEUGEOT_208),
+
   CarTestRoute("bc095dc92e101734/000000db--ee9fe46e57", RIVIAN.RIVIAN_R1_GEN1),
 
   CarTestRoute("7dc058789994da80/00000112--adb970f6a8", TESLA.TESLA_MODEL_3),
-  CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
+  CarTestRoute("c8a98e58647765ad/00000002--84e4746136", TESLA.TESLA_MODEL_Y),
   CarTestRoute("2c912ca5de3b1ee9/0000025d--6eb6bcbca4", TESLA.TESLA_MODEL_Y, segment=4),
   CarTestRoute("bdda168c0c35fad7/00000001--5c5a36ec06", TESLA.TESLA_MODEL_X), # openpilot longitudinal
 
