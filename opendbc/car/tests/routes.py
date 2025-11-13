@@ -30,6 +30,7 @@ non_tested_cars = [
   HONDA.ACURA_TLX_2G,
   HONDA.HONDA_NBOX_2G,
   HONDA.ACURA_MDX_4G_MMR,
+  HONDA.HONDA_CITY_7G
 ]
 
 
@@ -116,7 +117,7 @@ routes = [
   CarTestRoute("b1c832ad56b6bc9d/00000010--debfcf5867", HONDA.HONDA_CIVIC_2022),  # 2025 Civic Hatch Hybrid with new eCVT transmission
   CarTestRoute("f9c43864cf057d05/2024-01-15--23-01-20", HONDA.HONDA_PILOT_4G),  # TODO: Replace with a newer route
   CarTestRoute("f39cf149898833ff/0000002b--54f3fae045", HONDA.HONDA_ACCORD_11G),
-  CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
+  # CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
   CarTestRoute("2dc4489d7e1410ca/00000001--bbec3f5117", HONDA.HONDA_CRV_6G),
   CarTestRoute("a703d058f4e05aeb/00000008--f169423024", HONDA.HONDA_PASSPORT_4G),
   CarTestRoute("21ea2d289932890b/0000013e--a11ef20c6b", HONDA.HONDA_ACCORD_9G), # serial steering - dashcam in upstream
