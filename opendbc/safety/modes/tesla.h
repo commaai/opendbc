@@ -9,14 +9,18 @@ static bool tesla_stock_aeb = false;
 
 // Car-initiated steering outside of autopilot:
 // Lane Departure Avoidance, Emergency Lane Departure Avoidance, Autopark
-static bool tesla_stock_steering_control = false;
-static bool tesla_stock_steering_control_prev = false;
+static bool tesla_stock_lkas = false;
+static bool tesla_stock_lkas_prev = false;
 
 // Summon (includes Smart Summon)
 // Only works while car is off-road when activated
 // TODO: Fix when car is on-road
 static bool tesla_summon = false;
 static bool tesla_summon_prev = false;
+
+// Autopark
+static bool tesla_autopark = false;
+static bool tesla_autopark_prev = false;
 
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
 
@@ -136,6 +140,23 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       brake_pressed = (msg->data[2] & 0x03U) == 2U;
     }
 
+    // Autopark state
+    if (msg->addr == 0x39bU) {
+      // DAS_autopilotState
+      uint8_t autopilot_state = msg->data[0] & 0x0FU;  // value 0–15
+
+      bool tesla_autopark_now = autopilot_state == 6; // ACTIVE_AUTOPARK
+
+      // Only consider rising edges while controls are not allowed
+      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
+        tesla_autopark = true;
+      }
+      if (!tesla_autopark_now) {
+        tesla_autopark = false;
+      }
+      tesla_autopark_prev = tesla_autopark_now;
+    }
+
     // Cruise and Summon state
     if (msg->addr == 0x286U) {
       // Summon state
@@ -160,7 +181,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
                             (cruise_state == 4) ||  // OVERRIDE
                             (cruise_state == 6) ||  // PRE_FAULT
                             (cruise_state == 7);    // PRE_CANCEL
-      cruise_engaged = cruise_engaged && !tesla_summon;
+      cruise_engaged = cruise_engaged && !tesla_summon && !tesla_autopark;
 
       pcm_cruise_check(cruise_engaged);
     }
@@ -180,16 +201,16 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     // DAS_steeringControl
     if (msg->addr == 0x488U) {
       int steering_control_type = msg->data[2] >> 6;
-      bool tesla_stock_steering_control_now = steering_control_type != 0;  // "NONE"
+      bool tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
 
       // Only consider rising edges while controls are not allowed
-      if (tesla_stock_steering_control_now && !tesla_stock_steering_control_prev && !controls_allowed) {
-        tesla_stock_steering_control = true;
+      if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed) {
+        tesla_stock_lkas = true;
       }
-      if (!tesla_stock_steering_control_now) {
-        tesla_stock_steering_control = false;
+      if (!tesla_stock_lkas_now) {
+        tesla_stock_lkas = false;
       }
-      tesla_stock_steering_control_prev = tesla_stock_steering_control_now;
+      tesla_stock_lkas_prev = tesla_stock_lkas_now;
     }
   }
 }
@@ -218,8 +239,8 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
   bool violation = false;
 
-  // Don't send any messages when Summon is active
-  if (tesla_summon) {
+  // Don't send any messages when Summon/Autopark is active
+  if (tesla_summon || tesla_autopark) {
     violation = true;
   }
 
@@ -241,8 +262,8 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
       violation = true;
     }
 
-    if (tesla_stock_steering_control) {
-      // Don't allow any steering commands when stock steering control is active
+    if (tesla_stock_lkas) {
+      // Don't allow any steering commands when stock LKAS is active
       violation = true;
     }
   }
@@ -297,14 +318,14 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2) {
-    if (!tesla_summon) {
+    if (!tesla_summon && !tesla_autopark) {
       // APS_eacMonitor
       if (addr == 0x27d) {
         block_msg = true;
       }
 
       // DAS_steeringControl
-      if ((addr == 0x488) && !tesla_stock_steering_control) {
+      if ((addr == 0x488) && !tesla_stock_lkas) {
         block_msg = true;
       }
 
@@ -339,8 +360,8 @@ static safety_config tesla_init(uint16_t param) {
 #endif
 
   tesla_stock_aeb = false;
-  tesla_stock_steering_control = false;
-  tesla_stock_steering_control_prev = false;
+  tesla_stock_lkas = false;
+  tesla_stock_lkas_prev = false;
   // we need to assume Summon on startup since DI_state is a low freq msg.
   // this is so that we don't fault if starting while these systems are active
   tesla_summon = true;

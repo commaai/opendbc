@@ -32,8 +32,8 @@ class CarState(CarStateBase):
     self.summon_prev = summon_now
     self.cruise_enabled_prev = cruise_enabled
 
-  def update_autopark_state(self, autopark_state: str):
-    autopark_now = autopark_state == "ACTIVE_AUTOPARK"
+  def update_autopark_state(self, autopilot_state: str):
+    autopark_now = autopilot_state == "ACTIVE_AUTOPARK"
     if autopark_now and not self.autopark_prev:
       self.autopark = True
     if not autopark_now:
@@ -85,8 +85,8 @@ class CarState(CarStateBase):
     self.update_summon_state(summon_state, cruise_enabled)
 
     # Autopark state
-    autopark_state = self.can_define.dv["DAS_status"]["DAS_autopilotState"].get(int(cp_ap_party.vl["DAS_status"]["DAS_autopilotState"]), None)
-    self.update_autopark_state(autopark_state)
+    autopilot_state = self.can_define.dv["DAS_status"]["DAS_autopilotState"].get(int(cp_ap_party.vl["DAS_status"]["DAS_autopilotState"]), None)
+    self.update_autopark_state(autopilot_state)
 
     # Match panda safety cruise engaged logic
     ret.cruiseState.enabled = cruise_enabled and not self.summon and not self.autopark
