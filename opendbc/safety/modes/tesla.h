@@ -341,7 +341,7 @@ static safety_config tesla_init(uint16_t param) {
   tesla_stock_aeb = false;
   tesla_stock_steering_control = false;
   tesla_stock_steering_control_prev = false;
-  // we need to assume Autopark/Summon on startup since DI_state is a low freq msg.
+  // we need to assume Summon on startup since DI_state is a low freq msg.
   // this is so that we don't fault if starting while these systems are active
   tesla_summon = true;
   tesla_summon_prev = false;
