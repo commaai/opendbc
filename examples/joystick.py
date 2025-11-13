@@ -86,7 +86,7 @@ def main(joystick):
     CC = CarControl(enabled=False)
     while True:
       CC.actuators.accel = float(4.0*np.clip(joystick.axes_values['gb'], -1, 1))
-      CC.actuators.torque = float(np.clip(joystick.axes_values['steer'], -1, 1))
+      CC.actuators.torque = float(np.clip(joystick.axes_values['steer'], -1, 1) ** 2)
       pprint(CC)
 
       p.read()
