@@ -311,8 +311,8 @@ class TestHyundaiCanfdLFASteeringCCNC(TestHyundaiCanfdLFASteeringBase):
     self.safety.init_tests()
 
   def test_ccnc(self):
-    self.assertTrue(self._tx(self.packer.make_can_msg_panda("CCNC_0x161", self.STEER_BUS, {})))
-    self.assertTrue(self._tx(self.packer.make_can_msg_panda("CCNC_0x162", self.STEER_BUS, {})))
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("CCNC_0x161", self.STEER_BUS, {})))
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("CCNC_0x162", self.STEER_BUS, {})))
 
   def test_tx_hook_on_wrong_safety_mode(self):
     from opendbc.safety.tests.common import make_msg
@@ -345,8 +345,8 @@ class TestHyundaiCanfdLFASteeringLongCCNC(TestHyundaiCanfdLFASteeringLongBase):
     self.safety.init_tests()
 
   def test_ccnc(self):
-    self.assertTrue(self._tx(self.packer.make_can_msg_panda("CCNC_0x161", self.STEER_BUS, {})))
-    self.assertTrue(self._tx(self.packer.make_can_msg_panda("CCNC_0x162", self.STEER_BUS, {})))
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("CCNC_0x161", self.STEER_BUS, {})))
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("CCNC_0x162", self.STEER_BUS, {})))
 
   def test_tx_hook_on_wrong_safety_mode(self):
     from opendbc.safety.tests.common import make_msg
