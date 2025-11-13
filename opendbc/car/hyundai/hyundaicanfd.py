@@ -147,23 +147,21 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
   anyBlinker = leftBlinker or rightBlinker
   curvature = {i: (31 if i == -1 else 13 - abs(i + 15)) if i < 0 else 15 + i for i in range(-15, 16)}
 
-  lfa_icon = enabled
-
   msg_161.update({
     "DAW_ICON": 0,
     "LKA_ICON": 0,
-    "LFA_ICON": 2 if lfa_icon else 0,
-    "CENTERLINE": 1 if lfa_icon else 0,
-    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(out.steeringAngleDeg / 4.5), 15)), 14) if lfa_icon and not anyBlinker else 15,
-    "LANELINE_LEFT": (0 if not lfa_icon else 1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 6 if anyBlinker else 2),
-    "LANELINE_RIGHT": (0 if not lfa_icon else 1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 6 if anyBlinker else 2),
-    "LCA_LEFT_ICON": (0 if not lfa_icon or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.leftBlindspot else 2 if anyBlinker else 4),
-    "LCA_RIGHT_ICON": (0 if not lfa_icon or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.rightBlindspot else 2 if anyBlinker else 4),
+    "LFA_ICON": 2 if enabled else 0,
+    "CENTERLINE": 1 if enabled else 0,
+    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(out.steeringAngleDeg / 4.5), 15)), 14) if enabled and not anyBlinker else 15,
+    "LANELINE_LEFT": (0 if not enabled else 1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 6 if anyBlinker else 2),
+    "LANELINE_RIGHT": (0 if not enabled else 1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 6 if anyBlinker else 2),
+    "LCA_LEFT_ICON": (0 if not enabled or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.leftBlindspot else 2 if anyBlinker else 4),
+    "LCA_RIGHT_ICON": (0 if not enabled or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.rightBlindspot else 2 if anyBlinker else 4),
     "LCA_LEFT_ARROW": 2 if leftBlinker else 0,
     "LCA_RIGHT_ARROW": 2 if rightBlinker else 0,
   })
 
-  if lfa_icon and (leftBlinker or rightBlinker):
+  if enabled and (leftBlinker or rightBlinker):
     leftlaneraw, rightlaneraw = msg_1b5["Info_LftLnPosVal"], msg_1b5["Info_RtLnPosVal"]
 
     scale_per_m = 15 / 1.7
