@@ -6,9 +6,7 @@ static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
 
 // Only rising edges while controls are not allowed are considered for these systems:
-
-// Car-initiated steering outside of autopilot:
-// Lane Departure Avoidance, Emergency Lane Departure Avoidance, Autopark
+// TODO: Only LKAS (non-emergency) is currently supported since we've only seen it
 static bool tesla_stock_lkas = false;
 static bool tesla_stock_lkas_prev = false;
 
@@ -140,23 +138,6 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       brake_pressed = (msg->data[2] & 0x03U) == 2U;
     }
 
-    // Autopark state
-    if (msg->addr == 0x39bU) {
-      // DAS_autopilotState
-      uint8_t autopilot_state = msg->data[0] & 0x0FU;  // value 0–15
-
-      bool tesla_autopark_now = autopilot_state == 6; // ACTIVE_AUTOPARK
-
-      // Only consider rising edges while controls are not allowed
-      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
-        tesla_autopark = true;
-      }
-      if (!tesla_autopark_now) {
-        tesla_autopark = false;
-      }
-      tesla_autopark_prev = tesla_autopark_now;
-    }
-
     // Cruise and Summon state
     if (msg->addr == 0x286U) {
       // Summon state
@@ -183,6 +164,26 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
                             (cruise_state == 7);    // PRE_CANCEL
       cruise_engaged = cruise_engaged && !tesla_summon && !tesla_autopark;
 
+      pcm_cruise_check(cruise_engaged);
+    }
+
+    // Autopark state
+    if (msg->addr == 0x39bU) {
+      // DAS_autopilotState
+      uint8_t autopilot_state = msg->data[0] & 0x0FU;  // value 0–15
+
+      bool tesla_autopark_now = autopilot_state == 6; // ACTIVE_AUTOPARK
+
+      // Only consider rising edges while controls are not allowed
+      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
+        tesla_autopark = true;
+      }
+      if (!tesla_autopark_now) {
+        tesla_autopark = false;
+      }
+      tesla_autopark_prev = tesla_autopark_now;
+
+      bool cruise_engaged = cruise_engaged_prev && !tesla_summon && !tesla_autopark;
       pcm_cruise_check(cruise_engaged);
     }
 
