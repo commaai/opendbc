@@ -169,9 +169,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
 
     // Autopark state
     if (msg->addr == 0x39bU) {
-      // DAS_autopilotState
-      uint8_t autopilot_state = msg->data[0] & 0x0FU;  // value 0–15
-
+      uint8_t autopilot_state = msg->data[0] & 0x0FU; // DAS_autopilotState
       bool tesla_autopark_now = autopilot_state == 6; // ACTIVE_AUTOPARK
 
       // Only consider rising edges while controls are not allowed
