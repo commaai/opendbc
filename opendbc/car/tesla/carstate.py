@@ -34,7 +34,7 @@ class CarState(CarStateBase):
 
   def update_autopark_state(self, autopilot_state: str):
     autopark_now = autopilot_state == "ACTIVE_AUTOPARK"
-    if autopark_now and not self.autopark_prev:
+    if autopark_now and not self.autopark_prev and not self.cruise_enabled_prev:
       self.autopark = True
     if not autopark_now:
       self.autopark = False
