@@ -322,7 +322,7 @@ static safety_config honda_bosch_init(uint16_t param) {
                                          {0x33D, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = true}, {0x33DA, 0, 5, .check_relay = true}, {0x33DB, 0, 8, .check_relay = true}};  // Bosch
 
   static CanMsg HONDA_BOSCH_LONG_TX_MSGS[] = {{0xE4, 1, 5, .check_relay = true}, {0x1DF, 1, 8, .check_relay = true}, {0x1EF, 1, 8, .check_relay = false},
-                                              {0x1FA, 1, 8, .check_relay = false}, {0x30C, 1, 8, .check_relay = false}, {0x33D, 1, 5, .check_relay = true},
+                                              {0x1FA, 1, 8, .check_relay = false}, {0x30C, 1, 8, .check_relay = false}, {0x33D, 1, 5, .check_relay = true}, {0x33D, 1, 8, .check_relay = true},
                                               {0x33DA, 1, 5, .check_relay = true}, {0x33DB, 1, 8, .check_relay = true}, {0x39F, 1, 8, .check_relay = false},
                                               {0x18DAB0F1, 1, 8, .check_relay = false}};  // Bosch w/ gas and brakes
 
