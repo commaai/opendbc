@@ -218,7 +218,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
   bool violation = false;
 
-  // Don't send any messages when Autopark is active
+  // Don't send any messages when Summon is active
   if (tesla_summon) {
     violation = true;
   }
@@ -242,7 +242,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
     }
 
     if (tesla_stock_steering_control) {
-      // Don't allow any steering commands when stock LKAS is active
+      // Don't allow any steering commands when stock steering control is active
       violation = true;
     }
   }
