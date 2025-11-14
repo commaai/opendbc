@@ -36,11 +36,6 @@
   {0x343, 0, 8, .check_relay = true}, \
   {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */ \
 
-#define TOYOTA_COMMON_SECOC_LONG_TX_MSGS                    \
-  TOYOTA_COMMON_SECOC_TX_MSGS                               \
-  {0x343, 0, 8, .check_relay = true},  /* ACC */            \
-  {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */  \
-
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
   {.msg = {{ 0xaa, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
   {.msg = {{0x260, 0, 8, 50U, .ignore_counter = true, .ignore_quality_flag=!(lta)}, { 0 }, { 0 }}},                           \
@@ -97,13 +92,6 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
     valid = !GET_BIT(msg, 3U);  // STEER_ANGLE_INITIALIZING
   }
   return valid;
-}
-
-static int toyota_get_longitudinal_desired_accel_tx(const CANPacket_t *msg) {
-  int desired_accel = (msg->data[0] << 8) | msg->data[1];
-  desired_accel = to_signed(desired_accel, 16);
-
-  return desired_accel;
 }
 
 static int TOYOTA_GET_INTERCEPTOR(const CANPacket_t *msg) {
@@ -262,7 +250,8 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
     // ACCEL: safety check on byte 1-2
     if (msg->addr == 0x343U) {
-      int desired_accel = toyota_get_longitudinal_desired_accel_tx(msg);
+      int desired_accel = (msg->data[0] << 8) | msg->data[1];
+      desired_accel = to_signed(desired_accel, 16);
 
       bool violation = false;
       if (toyota_secoc) {
@@ -277,26 +266,10 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
         if (!cancel_req) {
           violation = true;
         }
-      }
-
-      // block ACC messages when openpilot is not controlling longitudinal or is a SecOC car
-      if (toyota_stock_longitudinal || toyota_secoc) {
         if (desired_accel != TOYOTA_LONG_LIMITS.inactive_accel) {
           violation = true;
         }
       }
-
-      if (violation) {
-        tx = false;
-      }
-    }
-
-    // ACCEL: safety check on byte 1-2 for SecOC car
-    if (msg->addr == 0x183U) {
-      int desired_accel = toyota_get_longitudinal_desired_accel_tx(msg);
-
-      bool violation = false;
-      violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
 
       if (violation) {
         tx = false;
@@ -438,10 +411,6 @@ static safety_config toyota_init(uint16_t param) {
   static const CanMsg TOYOTA_INTERCEPTOR_TX_MSGS[] = {
     TOYOTA_COMMON_LONG_TX_MSGS
     {0x200, 0, 6, .check_relay = false},  // gas interceptor
-  };
-
-  static const CanMsg TOYOTA_SECOC_LONG_TX_MSGS[] = {
-    TOYOTA_COMMON_SECOC_LONG_TX_MSGS
   };
 
   // safety param flags
