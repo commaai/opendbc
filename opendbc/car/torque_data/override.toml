@@ -92,6 +92,7 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "HONDA_NBOX_2G" = [1.2, 1.2, 0.2]
 "ACURA_TLX_2G" = [1.2, 1.2, 0.15]
 "PORSCHE_MACAN_MK1" = [1.6, 1.6, 0.14]
+"AUDI_Q5_MK1" = [1.6, 1.6, 0.14]
 
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]
