@@ -48,7 +48,7 @@ BO_ 265 ACC_01: 8 Gateway_B8
  SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] ""  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
 
 BO_ 780 ACC_02: 8 Gateway_D4C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  HUD_C7,Kombi_D4
+ SG_ ACC_02_CHK : 0|8@1+ (1,0) [0|255] ""  HUD_C7,Kombi_D4
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  HUD_C7,Kombi_D4
  SG_ ACC_Wunschgeschw_02 : 12|10@1+ (0.32,0) [0.00|326.72] "Unit_KiloMeterPerHour"  HUD_C7,Kombi_D4
  SG_ ACC_Status_Prim_Anz : 22|2@1+ (1.0,0.0) [0.0|3] ""  HUD_C7,Kombi_D4

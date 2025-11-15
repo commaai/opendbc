@@ -442,6 +442,12 @@ class CAR(Platforms):
     chassis_codes={"8U", "F3", "FS"},
     wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR, WMI.VOLKSWAGEN_CHINA_FAW},
   )
+  AUDI_Q5_MK1 = VolkswagenMLBPlatformConfig(
+    [VWCarDocs("Audi Q5 2013-17")],
+    VolkswagenCarSpecs(mass=1895, wheelbase=2.81),
+    chassis_codes={"8R"},
+    wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR},
+  )
   PORSCHE_MACAN_MK1 = VolkswagenMLBPlatformConfig(
     [VWCarDocs("Porsche Macan 2017-24")],
     VolkswagenCarSpecs(mass=1895, wheelbase=2.81, steerRatio=16.2),
