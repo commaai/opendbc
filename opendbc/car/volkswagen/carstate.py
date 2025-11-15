@@ -1,8 +1,9 @@
+import math
 from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.volkswagen.values import DBC, CanBus, NetworkLocation, TransmissionType, GearShifter, \
+from opendbc.car.volkswagen.values import CAR, DBC, CanBus, NetworkLocation, TransmissionType, GearShifter, \
                                                       CarControllerParams, VolkswagenFlags
 
 ButtonType = structs.CarState.ButtonEvent.Type
@@ -245,10 +246,15 @@ class CarState(CarStateBase):
 
     # ACC okay but disabled (1), ACC ready (2), a radar visibility or other fault/disruption (6 or 7)
     # currently regulating speed (3), driver accel override (4), brake only (5)
-    # TODO: get this from the drivetrain side instead, for openpilot long support later
-    ret.cruiseState.available = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (2, 3, 4, 5)
-    ret.cruiseState.enabled = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (3, 4, 5)
-    ret.accFaulted = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (6, 7)
+    if self.CP.carFingerprint == CAR.PORSCHE_MACAN_MK1:
+      ret.cruiseState.available = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (2, 3, 4, 5)
+      ret.cruiseState.enabled = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (3, 4, 5)
+      ret.accFaulted = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (6, 7)
+    else:
+      ret.cruiseState.available = pt_cp.vl["TSK_02"]["TSK_Status"] in (0, 1, 2)
+      ret.cruiseState.enabled = pt_cp.vl["TSK_02"]["TSK_Status"] in (1, 2)
+      ret.cruiseState.speed = ext_cp.vl["ACC_02"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
+      ret.accFaulted = pt_cp.vl["TSK_02"]["TSK_Status"] in (3,)
 
     self.parse_mlb_mqb_steering_state(ret, pt_cp)
 
@@ -259,8 +265,12 @@ class CarState(CarStateBase):
     ret.parkingBrake = bool(pt_cp.vl["Kombi_01"]["KBI_Handbremse"])
     ret.espDisabled = pt_cp.vl["ESP_01"]["ESP_Tastung_passiv"] != 0
 
-    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(300, pt_cp.vl["Gateway_11"]["BH_Blinker_li"],
-                                                                            pt_cp.vl["Gateway_11"]["BH_Blinker_re"])
+    if self.CP.carFingerprint == CAR.PORSCHE_MACAN_MK1:
+      ret.leftBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_li"])
+      ret.rightBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_re"])
+    else:
+      ret.leftBlinker = bool(pt_cp.vl["Blinkmodi_01"]["BM_links"])
+      ret.rightBlinker = bool(pt_cp.vl["Blinkmodi_01"]["BM_rechts"])
 
     ret.seatbeltUnlatched = pt_cp.vl["Gateway_06"]["AB_Gurtschloss_FA"] != 3
     ret.doorOpen = any([pt_cp.vl["Gateway_05"]["FT_Tuer_geoeffnet"],
@@ -322,6 +332,10 @@ class CarState(CarStateBase):
     if not CP.flags & VolkswagenFlags.MLB:
       pt_messages += [
         ("Blinkmodi_02", 1)  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
+      ]
+    if CP.flags & VolkswagenFlags.MLB:
+        pt_messages += [
+        ("Blinkmodi_01", math.nan)  # From J519 BCM (is inactive when no lights active, 50Hz when active)
       ]
     if CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
       cam_messages += [

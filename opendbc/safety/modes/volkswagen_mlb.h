@@ -14,7 +14,7 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
     {.msg = {{MSG_ESP_03, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_ESP_05, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ACC_05, 2, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_ACC_05, 2, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, {MSG_TSK_02, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }}},
     {.msg = {{MSG_MOTOR_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_LS_01, 0, 4, 10U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
@@ -64,6 +64,21 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
 
     brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
 
+    if (msg->addr == MSG_TSK_02) {
+      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
+      // Always exit controls on main switch off
+      // Signal: TSK_02.TSK_Status
+      int acc_status = (msg->data[2] & 0x3U);
+      bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
+      acc_main_on = cruise_engaged || (acc_status == 0);
+
+      pcm_cruise_check(cruise_engaged);
+
+      if (!acc_main_on) {
+         controls_allowed = false;
+      }
+    }
+
   }
 
   if (msg->bus == 2U) {
@@ -83,6 +98,7 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
       }
     }
   }
+
 }
 
 static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
