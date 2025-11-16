@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/subaru_common.h"
 
 // Preglobal platform

@@ -6,7 +6,7 @@ from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class MadsSafetyTestBase(unittest.TestCase):
-  safety: libsafety_py.Panda
+  safety: libsafety_py.LibSafety
 
   @abc.abstractmethod
   def _lkas_button_msg(self, enabled):
@@ -17,6 +17,7 @@ class MadsSafetyTestBase(unittest.TestCase):
     raise NotImplementedError
 
   def teardown_method(self, method):
+    self.safety = libsafety_py.libsafety
     self.safety.set_mads_button_press(-1)
     self.safety.set_controls_allowed_lat(False)
     self.safety.set_controls_requested_lat(False)

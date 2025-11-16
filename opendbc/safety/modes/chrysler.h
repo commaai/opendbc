@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 typedef struct {
   const unsigned int EPS_2;

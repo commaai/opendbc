@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 #define NISSAN_COMMON_RX_CHECKS                                                                                                                 \
   {.msg = {{0x2, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},                                     \
