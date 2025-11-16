@@ -274,7 +274,7 @@ class CarState(CarStateBase):
     ret.leftBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_li"])
     ret.rightBlinker = bool(pt_cp.vl["Gateway_11"]["BH_Blinker_re"])
 
-    ret.seatbeltUnlatched = False  # FIXME: find a seatbelt signal on Macan
+    ret.seatbeltUnlatched = pt_cp.vl["Airbag_02"]["AB_Gurtschloss_FA"] != 3
     # TODO: this is only present on powertrain
     #ret.doorOpen = any([pt_cp.vl["Gateway_05"]["FT_Tuer_geoeffnet"],
     #                    pt_cp.vl["Gateway_05"]["BT_Tuer_geoeffnet"],
