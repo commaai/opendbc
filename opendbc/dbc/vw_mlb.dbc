@@ -34,6 +34,18 @@ BS_:
 
 BU_: Airbag_D4 EPB_D4 ESP_D4 Gateway_D4C7 Getriebe_AL551_951_D4_C7 Getriebe_DL501_C7 Getriebe_VL381_C7 LWS_D4 Motor_EDC17_D4 Motor_ME17_BY Motor_MED17_SIMOS8_D4 Motor_Slave_D4 QSP_D4 SAK_C7 SCR_C7 SCU_D4
 
+BO_ 265 ACC_01: 8 Gateway_B8
+ SG_ ACC_01_CHK : 0|8@1+ (1,0) [0|255] ""  Magnetic_Ride_LB,Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Magnetic_Ride_LB,Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_zul_Regelabw_unten : 16|6@1+ (0.024,0) [0|1.512] "Unit_MeterPerSeconSquar"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_Sollbeschleunigung : 24|11@1+ (0.005,-7.22) [-7.22|3.01] "Unit_MeterPerSeconSquar"  Magnetic_Ride_LB,Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_zul_Regelabw_oben : 35|5@1+ (0.0625,0) [0|1.9375] "Unit_MeterPerSeconSquar"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_neg_Sollbeschl_Grad : 40|8@1+ (0.05,0) [0|12.7] "Unit_MeterPerCubicSecon"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_pos_Sollbeschl_Grad : 48|8@1+ (0.05,0) [0|12.7] "Unit_MeterPerCubicSecon"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_Dynamik : 58|2@1+ (1,0) [0|3] ""  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_Anhalten : 56|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] ""  XXX
+ SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] ""  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
 
 BO_ 780 ACC_02: 8 Gateway_D4C7
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  HUD_C7,Kombi_D4
