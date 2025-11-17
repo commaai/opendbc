@@ -358,6 +358,12 @@ class CAR(Platforms):
     chassis_codes={"A3"},
     wmis={WMI.VOLKSWAGEN_USA_CAR},
   )
+  AUDI_A4_MK4 = VolkswagenMLBPlatformConfig(
+    [VWCarDocs("Audi A4 B8.5 2012-15")],
+    VolkswagenCarSpecs(mass=1650, wheelbase=2.81),
+    chassis_codes={"8K"},
+    wmis={WMI.AUDI_GERMANY_CAR},
+  )
   VOLKSWAGEN_POLO_MK6 = VolkswagenMQBPlatformConfig(
     [
       VWCarDocs("Volkswagen Polo 2018-23", footnotes=[Footnote.VW_MQB_A0]),
