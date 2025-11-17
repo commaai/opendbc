@@ -69,7 +69,7 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     return self.packer.make_can_msg_safety(self.GAS_MSG[0], self.PT_BUS, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"ACCMode": 1 if enable else 0}
+    values = {"SCC_OpSta": 1 if enable else 0}
     return self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values)
 
   def _button_msg(self, buttons, main_button=0, bus=None):
@@ -130,7 +130,7 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
 
   def _acc_cancel_msg(self, cancel, accel=0):
-    values = {"ACCMode": 4 if cancel else 0, "aReqRaw": accel, "aReqValue": accel}
+    values = {"SCC_OpSta": 4 if cancel else 0, "SCC_AccelReqRawVal": accel, "SCC_AccelReqVal": accel}
     return self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
 
   def test_button_sends(self):
@@ -217,8 +217,8 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
     values = {
-      "aReqRaw": accel,
-      "aReqValue": accel,
+      "SCC_AccelReqRawVal": accel,
+      "SCC_AccelReqVal": accel,
     }
     return self.packer.make_can_msg_safety("SCC_CONTROL", 1, values)
 
@@ -247,8 +247,8 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
     values = {
-      "aReqRaw": accel,
-      "aReqValue": accel,
+      "SCC_AccelReqRawVal": accel,
+      "SCC_AccelReqVal": accel,
     }
     return self.packer.make_can_msg_safety("SCC_CONTROL", 0, values)
 
