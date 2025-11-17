@@ -906,26 +906,6 @@ FW_VERSIONS = {
       b'\xf1\x875Q0907572P \xf1\x890682',
     ],
   },
-  CAR.AUDI_A4_MK4: {
-    (Ecu.engine, 0x7e0, None): [
-      b'\xf1\x878K5907551G \xf1\x890007',
-      b'\xf1\x8703L906018HT\xf1\x899977',
-    ],
-    (Ecu.transmission, 0x7e1, None): [
-      b'\xf1\x878K5927156D \xf1\x890003',
-      b'\xf1\x878K9927155A \xf1\x890003',
-    ],
-    (Ecu.srs, 0x715, None): [
-      b'\xf1\x878K0959655N \xf1\x890610\xf1\x82\x040R0D0506',
-    ],
-    (Ecu.eps, 0x712, None): [
-      b'\xf1\x878K0909144J \xf1\x890509\xf1\x82\x01\n\x1a',
-      b'\xf1\x878K0909144F \xf1\x890507\xf1\x82\x01\x09\xea',
-    ],
-    (Ecu.fwdRadar, 0x757, None): [
-      b'\xf1\x872Q0907572M \xf1\x890233',
-    ],
-  },
   CAR.AUDI_Q2_MK1: {
     (Ecu.engine, 0x7e0, None): [
       b'\xf1\x8704E906027JT\xf1\x894145',
