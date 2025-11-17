@@ -253,8 +253,9 @@ class CarState(CarStateBase):
     else:
       ret.cruiseState.available = pt_cp.vl["TSK_02"]["TSK_Status"] in (0, 1, 2)
       ret.cruiseState.enabled = pt_cp.vl["TSK_02"]["TSK_Status"] in (1, 2)
-      ret.cruiseState.speed = ext_cp.vl["ACC_02"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
       ret.accFaulted = pt_cp.vl["TSK_02"]["TSK_Status"] in (3,)
+
+    ret.cruiseState.speed = ext_cp.vl["ACC_02"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
 
     self.parse_mlb_mqb_steering_state(ret, pt_cp)
 
