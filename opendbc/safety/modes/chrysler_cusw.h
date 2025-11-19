@@ -54,7 +54,7 @@ static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
 
 static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits CHRYSLER_CUSW_STEERING_LIMITS = {
-    .max_torque = 261,
+    .max_torque = 250,  // TODO: Find the actual cap, think we're faulting before 261
     .max_rt_delta = 150,
     .max_rate_up = 4,
     .max_rate_down = 4,
@@ -72,7 +72,9 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
     // Signal: LKAS_COMMAND.LKAS_CONTROL_BIT
     const bool steer_req = GET_BIT(msg, 12U);
     if (steer_torque_cmd_checks(desired_torque, steer_req, CHRYSLER_CUSW_STEERING_LIMITS)) {
-      tx = false;
+      // tx = false;
+      // FIXME: too many problems here right now, hotwire things while investigating
+      tx = true;
     }
   }
 

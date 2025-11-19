@@ -116,7 +116,7 @@ class CarControllerParams:
     elif CP.carFingerprint in CUSW_CARS:
       self.STEER_DELTA_UP = 4
       self.STEER_DELTA_DOWN = 4
-      self.STEER_MAX = 261
+      self.STEER_MAX = 250  # TODP: Might have capped out short of 261, need to experiment
     else:
       self.STEER_DELTA_UP = 3
       self.STEER_DELTA_DOWN = 3
