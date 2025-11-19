@@ -3,7 +3,7 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.chrysler.carcontroller import CarController
 from opendbc.car.chrysler.carstate import CarState
 from opendbc.car.chrysler.radar_interface import RadarInterface
-from opendbc.car.chrysler.values import CAR, RAM_HD, RAM_DT, RAM_CARS, ChryslerFlags, ChryslerSafetyFlags
+from opendbc.car.chrysler.values import CAR, CUSW_CARS, RAM_HD, RAM_DT, RAM_CARS, ChryslerFlags, ChryslerSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
 
 
@@ -23,14 +23,17 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.4
 
     # safety config
-    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chrysler)]
-    if candidate in RAM_HD:
-      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_HD.value
-    elif candidate in RAM_DT:
-      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_DT.value
+    if candidate in CUSW_CARS:
+      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chryslerCusw)]
+    else:
+      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chrysler)]
+      if candidate in RAM_HD:
+        ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_HD.value
+      elif candidate in RAM_DT:
+        ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_DT.value
 
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-    if candidate not in RAM_CARS:
+    if candidate not in (RAM_CARS, CUSW_CARS):
       # Newer FW versions standard on the following platforms, or flashed by a dealer onto older platforms have a higher minimum steering speed.
       new_eps_platform = candidate in (CAR.CHRYSLER_PACIFICA_2019_HYBRID, CAR.CHRYSLER_PACIFICA_2020, CAR.JEEP_GRAND_CHEROKEE_2019, CAR.DODGE_DURANGO)
       new_eps_firmware = any(fw.ecu == 'eps' and fw.fwVersion[:4] >= b"6841" for fw in car_fw)
@@ -46,6 +49,13 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.00006
 
     # Jeep
+    elif candidate == CAR.JEEP_CHEROKEE_5TH_GEN:
+      ret.steerActuatorDelay = 0.15
+      ret.lateralTuning.init('pid')
+      ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15, 0.30], [0.03, 0.05]]
+      ret.lateralTuning.pid.kf = 0.0002
+
     elif candidate in (CAR.JEEP_GRAND_CHEROKEE, CAR.JEEP_GRAND_CHEROKEE_2019):
       ret.steerActuatorDelay = 0.2
 
@@ -74,6 +84,6 @@ class CarInterface(CarInterfaceBase):
       ret.minSteerSpeed = 17.5  # m/s 17 on the way up, 13 on the way down once engaged.
 
     ret.centerToFront = ret.wheelbase * 0.44
-    ret.enableBsm = 720 in fingerprint[0]
+    ret.enableBsm = (0x62cc033 if candidate in CUSW_CARS else 0x2d0) in fingerprint[0]
 
     return ret
