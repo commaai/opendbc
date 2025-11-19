@@ -10,8 +10,14 @@
 static bool honda_alt_brake_msg = false;
 static bool honda_fwd_brake = false;
 static bool honda_bosch_long = false;
+static bool honda_bosch_radarless = false;
+static bool honda_bosch_canfd = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
+
+static unsigned int honda_get_pt_bus(void) {
+  return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless && !honda_bosch_canfd) ? 1U : 0U;
+}
 
 static safety_config rlx_internal_init(uint16_t param) {
   // TX messages for internal panda: gas and brake only
@@ -55,9 +61,32 @@ static void rlx_internal_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool rlx_internal_tx_hook(const CANPacket_t *msg) {
-  // common RX only
-  // controls allowed from internal panda per include
-  (void) msg; // ignore msg
+
+    const LongitudinalLimits HONDA_NIDEC_LONG_LIMITS = {
+    .max_gas = 198,  // 0xc6
+    .max_brake = 255,
+
+    .inactive_speed = 0,
+  };
+
+  bool tx = true;
+
+  unsigned int bus_pt = honda_get_pt_bus();
+
+  // ACC_HUD: safety check (nidec w/o pedal)
+  if ((msg->addr == 0x30CU) && (msg->bus == bus_pt)) {
+    int pcm_speed = (msg->data[0] << 8) | msg->data[1];
+    int pcm_gas = msg->data[2];
+
+    bool violation = true;
+    violation |= longitudinal_speed_checks(pcm_speed, HONDA_NIDEC_LONG_LIMITS);
+    violation |= longitudinal_gas_checks(pcm_gas, HONDA_NIDEC_LONG_LIMITS);
+    if (violation) {
+      tx = true;
+    }
+  }
+
+  
   return true;
 }
 
