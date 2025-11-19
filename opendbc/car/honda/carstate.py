@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs
-# from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_ALT_RADAR, HONDA_BOSCH_CANFD, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
@@ -137,7 +137,7 @@ class CarState(CarStateBase):
     # self.dash_speed_seen = self.dash_speed_seen or cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] > 1e-3
     self.dash_speed_seen = False
     if self.dash_speed_seen:
-      conversion = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
+      pass # conversion = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
       # ret.vEgoCluster = cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] * conversion
 
     ret.steeringAngleDeg = cp.vl["STEERING_SENSORS"]["STEER_ANGLE"]
