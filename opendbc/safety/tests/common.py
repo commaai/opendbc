@@ -550,7 +550,7 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
           else:
             send = torque == 0
 
-          self.assertEqual(send, self._tx(self._torque_cmd_msg(torque)), f"{controls_allowed=} {torque=} {send=}")
+          self.assertEqual(send, self._tx(self._torque_cmd_msg(torque)))
 
   def test_non_realtime_limit_down(self):
     self.safety.set_controls_allowed(True)
