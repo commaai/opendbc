@@ -116,7 +116,7 @@ class CarControllerParams:
     elif CP.carFingerprint in CUSW_CARS:
       self.STEER_DELTA_UP = 4
       self.STEER_DELTA_DOWN = 4
-      self.STEER_MAX = 250  # TODO: re-validate this, Panda is at 261
+      self.STEER_MAX = 261
     else:
       self.STEER_DELTA_UP = 3
       self.STEER_DELTA_DOWN = 3
