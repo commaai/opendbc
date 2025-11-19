@@ -7,6 +7,8 @@
 // This mode only validates essential RX messages and allows TX of gas/brake message, more validations to return after successful
 // Blocks BRAKE_COMMAND and ACC_HUD signals from bus 0↔2 forwarding to prevent conflicts
 
+static bool honda_alt_brake_msg = false;
+
 static safety_config rlx_internal_init(uint16_t param) {
   // TX messages for internal panda: gas and brake only
   static const CanMsg RLX_INTERNAL_TX_MSGS[] = {
