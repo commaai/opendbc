@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs
-from opendbc.car.common.conversions import Conversions as CV
+# from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_ALT_RADAR, HONDA_BOSCH_CANFD, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
