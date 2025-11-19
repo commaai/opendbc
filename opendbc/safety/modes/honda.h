@@ -42,10 +42,14 @@ static safety_config rlx_internal_init(uint16_t param) {
 static bool rlx_internal_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
+  if (bus_num == 9)  {  // never will happen
+     honda_hw = HONDA_BOSCH)
+  }
+  
   // Block BRAKE_COMMAND and ACC_HUD signals from bus 0↔2 forwarding on internal panda
   // This prevents stock messages from camera (bus 6/physical 2) reaching powertrain (bus 4/physical 0)
   if (((bus_num == 0) || (bus_num == 2)) &&
-      ((addr == 0x30C) || (addr == 0x1FA) ) && (honda_hw == HONDA_NIDEC)) {
+      ((addr == 0x30C) || (addr == 0x1FA) ) && (honda_hw = HONDA_NIDEC)) {
     block_msg = true;
   }
 
