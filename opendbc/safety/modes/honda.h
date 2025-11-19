@@ -45,7 +45,7 @@ static bool rlx_internal_fwd_hook(int bus_num, int addr) {
   // Block BRAKE_COMMAND and ACC_HUD signals from bus 0↔2 forwarding on internal panda
   // This prevents stock messages from camera (bus 6/physical 2) reaching powertrain (bus 4/physical 0)
   if (((bus_num == 0) || (bus_num == 2)) &&
-      ((addr == 0x30C) || (addr == 0x1FA) )) {
+      ((addr == 0x30C) || (addr == 0x1FA) ) && (honda_hw == HONDA_NIDEC)) {
     block_msg = true;
   }
 
