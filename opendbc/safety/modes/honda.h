@@ -11,7 +11,7 @@ static bool honda_alt_brake_msg = false;
 static bool honda_bosch_long = false;
 static bool honda_fwd_brake = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
-static HondaHw honda_hw = HONDA_NIDEC;
+// static HondaHw honda_hw = HONDA_NIDEC;
 
 static unsigned int honda_get_pt_bus(void) {
   return 0U;
@@ -25,7 +25,6 @@ static safety_config rlx_internal_init(uint16_t param) {
   };
 
   (void) param; // ignore param
-  (void) honda_hw; // ignore param
   
   safety_config ret;
   
