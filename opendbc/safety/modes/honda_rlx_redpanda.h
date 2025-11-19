@@ -101,5 +101,5 @@ const safety_hooks honda_rlx_redpanda_hooks = {
   .fwd = rlx_redpanda_fwd_hook,
   .get_counter = honda_get_rlxpanda_counter,
   .get_checksum =  honda_get_rlxpanda_checksum,
-  .compute_rlxchecksum =  honda_compute_panda_checksum,
+  .compute_checksum =  honda_compute_rlxpanda_checksum,
 };
