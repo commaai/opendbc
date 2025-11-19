@@ -7,6 +7,7 @@
 // This mode only validates essential RX messages and allows TX of gas/brake message, more validations to return after successful
 // Blocks BRAKE_COMMAND and ACC_HUD signals from bus 0↔2 forwarding to prevent conflicts
 
+static bool honda_alt_brake_msg = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
 
