@@ -48,6 +48,12 @@ static void rlx_redpanda_rx_hook(const CANPacket_t *msg) {
   (void) msg; // ignore msg
 }
 
+static bool rlx_redpanda_tx_hook(const CANPacket_t *msg) {
+  // controls allowed from internal panda per include
+  (void) msg; // ignore msg
+  return true;
+}
+
 static uint32_t honda_get_rlxpanda_checksum(const CANPacket_t *msg) {
   int checksum_byte = GET_LEN(msg) - 1U;
   return (uint8_t)(msg->data[checksum_byte]) & 0xFU;
@@ -79,6 +85,7 @@ static uint8_t honda_get_rlxpanda_counter(const CANPacket_t *msg) {
 const safety_hooks honda_rlx_redpanda_hooks = {
   .init = rlx_redpanda_init,
   .rx = rlx_redpanda_rx_hook,
+  .tx = rlx_redpanda_rx_hook,
   .fwd = rlx_redpanda_fwd_hook,
   .get_counter = honda_get_rlxpanda_counter,
   .get_checksum =  honda_get_rlxpanda_checksum,
