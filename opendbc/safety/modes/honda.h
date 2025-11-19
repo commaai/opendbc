@@ -9,6 +9,8 @@
 
 static bool honda_alt_brake_msg = false;
 static bool honda_bosch_long = false;
+typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
+static HondaHw honda_hw = HONDA_NIDEC;
 
 static safety_config rlx_internal_init(uint16_t param) {
   // TX messages for internal panda: gas and brake only
