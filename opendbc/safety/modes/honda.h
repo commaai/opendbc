@@ -85,9 +85,8 @@ static bool rlx_internal_tx_hook(const CANPacket_t *msg) {
       tx = true;
     }
   }
-
   
-  return true;
+  return tx;
 }
 
 static uint32_t honda_get_panda_checksum(const CANPacket_t *msg) {
