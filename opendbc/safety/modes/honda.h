@@ -19,7 +19,7 @@ static safety_config rlx_internal_init(uint16_t param) {
   safety_config ret;
   
   static RxCheck honda_nidec_alt_rx_checks[] = {
-    HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
+    // HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
     {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
   };
 
