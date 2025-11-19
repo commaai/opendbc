@@ -10,7 +10,6 @@ static safety_config chrysler_cusw_init(uint16_t param) {
     {0x2FAU, 0, 3, .check_relay = false},
   };
 
-  // FIXME: counter processing is broken
   static RxCheck chrysler_cusw_rx_checks[] = {
     {.msg = {{0x1E4U, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{0x2E2U, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
