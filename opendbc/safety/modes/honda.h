@@ -7,16 +7,11 @@
 // This mode only validates essential RX messages and allows TX of gas/brake message, more validations to return after successful
 // Blocks BRAKE_COMMAND and ACC_HUD signals from bus 0↔2 forwarding to prevent conflicts
 
-static bool honda_alt_brake_msg = false;
-static bool honda_fwd_brake = false;
-static bool honda_bosch_long = false;
-static bool honda_bosch_radarless = false;
-static bool honda_bosch_canfd = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
 
 static unsigned int honda_get_pt_bus(void) {
-  return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless && !honda_bosch_canfd) ? 1U : 0U;
+  return 0U;
 }
 
 static safety_config rlx_internal_init(uint16_t param) {
