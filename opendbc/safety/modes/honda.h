@@ -10,8 +10,6 @@
 static bool honda_alt_brake_msg = false;
 static bool honda_bosch_long = false;
 static bool honda_fwd_brake = false;
-typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
-static HondaHw honda_hw = HONDA_NIDEC;
 
 static unsigned int honda_get_pt_bus(void) {
   return 0U;
