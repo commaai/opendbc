@@ -54,10 +54,11 @@ static void rlx_internal_rx_hook(const CANPacket_t *msg) {
   (void) msg; // ignore msg
 }
 
-static void rlx_internal_tx_hook(const CANPacket_t *msg) {
+static bool rlx_internal_tx_hook(const CANPacket_t *msg) {
   // common RX only
   // controls allowed from internal panda per include
   (void) msg; // ignore msg
+  return true;
 }
 
 static uint32_t honda_get_panda_checksum(const CANPacket_t *msg) {
