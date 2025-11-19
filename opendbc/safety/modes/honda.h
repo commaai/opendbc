@@ -8,6 +8,7 @@
 // Blocks BRAKE_COMMAND and ACC_HUD signals from bus 0↔2 forwarding to prevent conflicts
 
 static bool honda_alt_brake_msg = false;
+static bool honda_bosch_long = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
 
