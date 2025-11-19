@@ -66,12 +66,12 @@ static bool rlx_redpanda_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-static uint32_t honda_get_panda_checksum(const CANPacket_t *msg) {
+static uint32_t honda_get_rlxpanda_checksum(const CANPacket_t *msg) {
   int checksum_byte = GET_LEN(msg) - 1U;
   return (uint8_t)(msg->data[checksum_byte]) & 0xFU;
 }
 
-static uint32_t honda_compute_panda_checksum(const CANPacket_t *msg) {
+static uint32_t honda_compute_rlxpanda_checksum(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
   uint8_t checksum = 0U;
   unsigned int addr = msg->addr;
@@ -88,7 +88,7 @@ static uint32_t honda_compute_panda_checksum(const CANPacket_t *msg) {
   return (uint8_t)((8U - checksum) & 0xFU);
 }
 
-static uint8_t honda_get_panda_counter(const CANPacket_t *msg) {
+static uint8_t honda_get_rlxpanda_counter(const CANPacket_t *msg) {
   int counter_byte = GET_LEN(msg) - 1U;
   return (msg->data[counter_byte] >> 4U) & 0x3U;
 }
@@ -99,7 +99,7 @@ const safety_hooks honda_rlx_redpanda_hooks = {
   .rx = rlx_redpanda_rx_hook,
   .tx = rlx_redpanda_tx_hook,
   .fwd = rlx_redpanda_fwd_hook,
-  .get_counter = honda_get_panda_counter,
-  .get_checksum =  honda_get_panda_checksum,
-  .compute_checksum =  honda_compute_panda_checksum,
+  .get_counter = honda_get_rlxpanda_counter,
+  .get_checksum =  honda_get_rlxpanda_checksum,
+  .compute_rlxchecksum =  honda_compute_panda_checksum,
 };
