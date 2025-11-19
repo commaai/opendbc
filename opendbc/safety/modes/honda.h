@@ -43,7 +43,7 @@ static bool rlx_internal_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 9)  {  // never will happen
-     honda_hw = HONDA_BOSCH)
+     honda_hw = HONDA_BOSCH;
   }
   
   // Block BRAKE_COMMAND and ACC_HUD signals from bus 0↔2 forwarding on internal panda
