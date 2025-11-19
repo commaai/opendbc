@@ -11,7 +11,7 @@ static bool honda_alt_brake_msg = false;
 static bool honda_bosch_long = false;
 static bool honda_fwd_brake = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
-// static HondaHw honda_hw = HONDA_NIDEC;
+static HondaHw honda_hw = HONDA_NIDEC;
 
 static unsigned int honda_get_pt_bus(void) {
   return 0U;
@@ -73,7 +73,7 @@ static bool rlx_internal_tx_hook(const CANPacket_t *msg) {
   unsigned int bus_pt = honda_get_pt_bus();
 
   // ACC_HUD: safety check (nidec w/o pedal)
-  if ((msg->addr == 0x30CU) && (msg->bus == bus_pt)) {
+  if ((msg->addr == 0x30CU) && (msg->bus == bus_pt) && (honda_hw == HONDA_NIDEC)) {
     int pcm_speed = (msg->data[0] << 8) | msg->data[1];
     int pcm_gas = msg->data[2];
 
