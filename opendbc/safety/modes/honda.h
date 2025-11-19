@@ -104,7 +104,19 @@ static uint8_t honda_get_panda_counter(const CANPacket_t *msg) {
 }
 
 
-const safety_hooks honda_rlx_internal_hooks = {
+
+const safety_hooks honda_nidec_hooks = {
+  .init = rlx_internal_init,
+  .rx = rlx_internal_rx_hook,
+  .tx = rlx_internal_tx_hook,
+  .fwd = rlx_internal_fwd_hook,
+  .get_counter = honda_get_panda_counter,
+  .get_checksum =  honda_get_panda_checksum,
+  .compute_checksum =  honda_compute_panda_checksum,
+};
+
+
+const safety_hooks honda_bosch_hooks = {
   .init = rlx_internal_init,
   .rx = rlx_internal_rx_hook,
   .tx = rlx_internal_tx_hook,
