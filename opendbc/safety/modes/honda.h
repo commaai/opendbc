@@ -57,17 +57,6 @@ static void rlx_internal_rx_hook(const CANPacket_t *msg) {
 static bool rlx_internal_tx_hook(const CANPacket_t *msg) {
 
   bool tx = true;
-  bool controls_allowed = true;
-
-  // STEER: safety check
-  if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
-    if (!controls_allowed) {
-      bool steer_applied = msg->data[0] | msg->data[1];
-      if (steer_applied) {
-        tx = false;
-      }
-    }
-  }
 
   return tx;
 }
