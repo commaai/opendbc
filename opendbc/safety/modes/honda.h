@@ -56,6 +56,7 @@ static void rlx_internal_rx_hook(const CANPacket_t *msg) {
   // common RX only
   // controls allowed from internal panda per include
   (void) msg; // ignore msg
+  (void) alternative_experience;
 }
 
 static bool rlx_internal_tx_hook(const CANPacket_t *msg) {
