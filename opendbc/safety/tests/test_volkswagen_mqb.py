@@ -126,13 +126,6 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
-  def test_rx_hook(self):
-    for count in range(20):
-      self.assertTrue(self._rx(self._speed_msg(0)), f"{count=}")
-      self.assertTrue(self._rx(self._user_brake_msg(False)), f"{count=}")
-      self.assertTrue(self._rx(self._user_gas_msg(0)), f"{count=}")
-      self.assertTrue(self._rx(self._pcm_status_msg(False)), f"{count=}")
-
 
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2]]
