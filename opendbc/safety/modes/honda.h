@@ -44,6 +44,15 @@ static bool rlx_internal_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 9)  {  // never will happen
      honda_hw = HONDA_BOSCH;
+     honda_alt_brake_msg = true;
+     honda_bosch_long = true;
+     honda_fwd_brake = true;
+  }
+
+  if (honda_alt_brake_msg || honda_bosch_long || honda_fwd_brake) {
+     honda_alt_brake_msg = false;
+     honda_bosch_long = false;
+     honda_fwd_brake = false;
   }
   
   // Block BRAKE_COMMAND and ACC_HUD signals from bus 0↔2 forwarding on internal panda
@@ -88,7 +97,13 @@ static bool rlx_internal_tx_hook(const CANPacket_t *msg) {
       tx = true;
     }
   }
-  
+
+  if (honda_alt_brake_msg || honda_bosch_long || honda_fwd_brake) {
+     honda_alt_brake_msg = false;
+     honda_bosch_long = false;
+     honda_fwd_brake = false;
+  }
+
   return tx;
 }
 
