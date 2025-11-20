@@ -16,7 +16,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
 from opendbc.car.values import PLATFORMS
 from opendbc.can import CANParser
-from opendbc.car.carlog import carlog
+# from opendbc.car.carlog import carlog
 
 GearShifter = structs.CarState.GearShifter
 ButtonType = structs.CarState.ButtonEvent.Type
