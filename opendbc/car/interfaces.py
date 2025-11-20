@@ -245,7 +245,7 @@ class CarInterfaceBase(ABC):
     if not ret.canValid:
        for cp in self.can_parsers.values():
         if not cp.can_valid:
-          carlog.error({"invalidCan": "InvalidCan", "bus": cp.bus, "messages": cp.message_states.values() })
+          carlog.error({"invalidCan": "InvalidCan", "bus": cp.bus, "messages": cp.message_states.values()})
 
     if ret.vEgoCluster == 0.0 and not self.v_ego_cluster_seen:
       ret.vEgoCluster = ret.vEgo
