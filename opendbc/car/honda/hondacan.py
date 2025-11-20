@@ -22,7 +22,8 @@ class CanBus(CanBusBase):
       # when radar is disabled, steering commands are sent directly to powertrain bus
       self._lkas = self._pt if CP.openpilotLongitudinalControl else self._radar
     else:
-      self._pt, self._radar, self._lkas = self.offset, self.offset + 1, self.offset
+      # self._pt, self._radar, self._lkas = self.offset, self.offset + 1, self.offset
+      self._pt, self._radar, self._lkas = 0, 1, 0
 
   @property
   def pt(self) -> int:
@@ -34,7 +35,8 @@ class CanBus(CanBusBase):
 
   @property
   def camera(self) -> int:
-    return self.offset + 2
+    # return self.offset + 2
+    return 2
 
   @property
   def lkas(self) -> int:
@@ -43,7 +45,8 @@ class CanBus(CanBusBase):
   # B-CAN is forwarded to ACC-CAN radar side (CAN 0 on fake ethernet port)
   @property
   def body(self) -> int:
-    return self.offset
+    # return self.offset
+    return 0
 
 
 def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, car_fingerprint, stock_brake, CP):
