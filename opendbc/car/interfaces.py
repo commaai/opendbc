@@ -242,9 +242,9 @@ class CarInterfaceBase(ABC):
     ret.canValid = all(cp.can_valid for cp in self.can_parsers.values())
     ret.canTimeout = any(cp.bus_timeout for cp in self.can_parsers.values())
 
-    if !canValid:
+    if not canValid:
        for cp in self.can_parsers.values()):
-        if !cp.can_valid:
+        if not cp.can_valid:
           carlog.error({"invalidCan": cp})
 
     if ret.vEgoCluster == 0.0 and not self.v_ego_cluster_seen:
