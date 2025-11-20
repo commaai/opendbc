@@ -243,7 +243,7 @@ class CarInterfaceBase(ABC):
     ret.canTimeout = any(cp.bus_timeout for cp in self.can_parsers.values())
 
     if not canValid:
-       for cp in self.can_parsers.values()):
+       for cp in self.can_parsers.values():
         if not cp.can_valid:
           carlog.error({"invalidCan": cp})
 
