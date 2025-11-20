@@ -75,7 +75,7 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
       "COMPUTER_BRAKE": apply_brake,
       "BRAKE_PUMP_REQUEST": pump_on,
     })
-  return packer.make_can_msg("BRAKE_COMMAND", CAN.pt, values)
+  return packer.make_can_msg("BRAKE_COMMAND", 0, values)
 
 
 def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_counter, car_fingerprint):
@@ -171,7 +171,7 @@ def create_acc_hud(packer, bus, CP, enabled, pcm_speed, pcm_accel, hud_control, 
     acc_hud_values['FCM_PROBLEM'] = acc_hud['FCM_PROBLEM']
     acc_hud_values['ICONS'] = acc_hud['ICONS']
 
-  return packer.make_can_msg("ACC_HUD", bus, acc_hud_values)
+  return packer.make_can_msg("ACC_HUD", 0, acc_hud_values)
 
 
 def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available, reduced_steering, alert_steer_required, lkas_hud):
