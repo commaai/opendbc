@@ -57,6 +57,7 @@ jobs:
           source setup.sh
           scons -j8
           cd opendbc/safety/tests && ./mutation.sh
+          pytest opendbc/safety/tests/misra/test_mutation.py
 
   # TODO: this needs to move to opendbc
   test_models:
