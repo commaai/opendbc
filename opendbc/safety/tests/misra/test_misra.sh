@@ -53,10 +53,10 @@ cppcheck() {
   fi
 }
 
-PANDA_OPTS=" --enable=all --enable=unusedFunction --addon=misra"
+OPTS=" --enable=all --enable=unusedFunction --addon=misra"
 
 printf "\n${GREEN}** Safety **${NC}\n"
-cppcheck $PANDA_OPTS $BASEDIR/opendbc/safety/tests/misra/main.c
+cppcheck $OPTS $BASEDIR/opendbc/safety/tests/misra/main.c
 
 printf "\n${GREEN}Success!${NC} took $SECONDS seconds\n"
 
