@@ -75,7 +75,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: 'sunnypilot/sunnypilot'
-        ref: '5cad6b07e591b5b503176ab108b60230ca2d0153'  # FIXME-SP: revert back to master once sunnypilot/sunnypilot#1470 is merged
+        ref: 'master'
         submodules: true
     - run: rm -rf opendbc_repo/
     - uses: actions/checkout@v4
