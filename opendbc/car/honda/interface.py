@@ -61,7 +61,7 @@ class CarInterface(CarInterfaceBase):
 
       ret.pcmCruise = True
       if candidate == CAR.ACURA_RLX_HYBRID:
-        ret.radarUnavailable = True
+        ret.stoppingDecelRate = 0.3
 
     if candidate == CAR.HONDA_CRV_5G:
       ret.enableBsm = 0x12f8bfa7 in fingerprint[CAN.radar]
