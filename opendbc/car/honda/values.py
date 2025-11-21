@@ -79,6 +79,8 @@ class HondaFlags(IntFlag):
   ALLOW_MANUAL_TRANS = 1024
   HYBRID = 2048
   BOSCH_TJA_CONTROL = 4096
+  # reserving 8192 for hybrid brakehold
+  NO_CARSPEED = 16384 # Some foreign models do not have carspeed
 
 
 # Car button codes
@@ -323,6 +325,12 @@ class CAR(Platforms):
     CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
     radar_dbc_dict('honda_odyssey_exl_2018_generated'),
     flags=HondaFlags.NIDEC_ALT_PCM_ACCEL | HondaFlags.HAS_ALL_DOOR_STATES,
+  )
+  HONDA_ODYSSEY_SINGAPORE = HondaNidecPlatformConfig(
+    [HondaCarDocs("Honda Odyssey (Singapore) 2021")],
+    CarSpecs(mass=1798, wheelbase=2.9, steerRatio=17.6, centerToFrontRatio=0.41),
+    radar_dbc_dict('honda_odyssey_singapore_2021_can_generated'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
   ACURA_RDX = HondaNidecPlatformConfig(
     [HondaCarDocs("Acura RDX 2016-18", "AcuraWatch Plus or Advance Package", min_steer_speed=12. * CV.MPH_TO_MS)],
