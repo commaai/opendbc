@@ -14,7 +14,7 @@ from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallabl
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
-from opendbc.car.values import PLATFORMS
+from opendbc.car.values import PLATFORMS, BRANDS
 from opendbc.can import CANParser
 
 GearShifter = structs.CarState.GearShifter
@@ -382,9 +382,9 @@ def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: boo
   # - keys are all the car models or brand names
   # - values are attr values from all car folders
   result = {}
-  for car_folder in sorted([x[0] for x in os.walk(BASEDIR)]):
+  for brand in BRANDS:
+    brand_name = brand.__module__.split('.')[-2]
     try:
-      brand_name = car_folder.split('/')[-1]
       brand_values = __import__(f'opendbc.car.{brand_name}.{INTERFACE_ATTR_FILE.get(attr, "values")}', fromlist=[attr])
       if hasattr(brand_values, attr) or not ignore_none:
         attr_data = getattr(brand_values, attr, None)

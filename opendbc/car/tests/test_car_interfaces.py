@@ -7,27 +7,33 @@ from collections.abc import Callable
 from typing import Any
 
 from opendbc.car import DT_CTRL, CanData, structs
-from opendbc.car.car_helpers import interfaces
-from opendbc.car.fingerprints import FW_VERSIONS
-from opendbc.car.fw_versions import FW_QUERY_CONFIGS
 from opendbc.car.interfaces import CarInterfaceBase, get_interface_attr
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.values import PLATFORMS
+from functools import cache
 
 DrawType = Callable[[st.SearchStrategy], Any]
 
-ALL_ECUS = {ecu for ecus in FW_VERSIONS.values() for ecu in ecus.keys()}
-ALL_ECUS |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra_ecus}
-
-ALL_REQUESTS = {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r in config.requests}
 
 # From panda/python/__init__.py
 DLC_TO_LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]
 
 MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
+@cache
+def get_fw_data():
+  from opendbc.car.fingerprints import FW_VERSIONS
+  from opendbc.car.fw_versions import FW_QUERY_CONFIGS
+
+  all_ecus = {ecu for ecus in FW_VERSIONS.values() for ecu in ecus.keys()}
+  all_ecus |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra_ecus}
+
+  all_requests = {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r in config.requests}
+
+  return all_ecus, all_requests
 
 def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
+  ALL_ECUS, ALL_REQUESTS = get_fw_data()
   # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
   fingerprint_strategy = st.fixed_dictionaries({0: st.dictionaries(st.integers(min_value=0, max_value=0x800),
                                                                    st.sampled_from(DLC_TO_LEN))})
@@ -50,7 +56,9 @@ def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
   params['fingerprints'] |= {key + 1: params['fingerprints'][0] for key in range(6)}
 
   # initialize car interface
-  CarInterface = interfaces[car_name]
+  platform = PLATFORMS[car_name]
+  brand_name = platform.__class__.__module__.split('.')[-2]
+  CarInterface = __import__(f'opendbc.car.{brand_name}.interface', fromlist=['CarInterface']).CarInterface
   car_params = CarInterface.get_params(car_name, params['fingerprints'], params['car_fw'],
                                        alpha_long=params['alpha_long'], is_release=False, docs=False)
   return CarInterface(car_params)
