@@ -348,14 +348,19 @@ class CarDocs:
 
   def get_detail_sentence(self, CP):
     if not CP.notCar:
-      sentence_builder = "openpilot is compatible with <strong>{car_model}</strong>."
+      sentence_builder = f"openpilot is compatible with <strong>{self.name}</strong>"
+
+      if self.package != "All":
+        sentence_builder += f" if it is equipped with <strong>{self.package}</strong>."
+      else:
+        sentence_builder += "."
 
       # experimental mode
       exp_link = "<a href='https://blog.comma.ai/090release/#experimental-mode' target='_blank' class='highlight'>Experimental mode</a>"
       if CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable:
-        sentence_builder += f" Traffic light and stop sign handling is also available with {exp_link}."
+        sentence_builder += f" Traffic light and stop sign handling is available with {exp_link}."
 
-      return sentence_builder.format(car_model=f"{self.make} {self.model}", alc=alc, acc=acc)
+      return sentence_builder
     else:
       if CP.carFingerprint == "COMMA_BODY":
         return "The body is a robotics dev kit that can run openpilot. <a href='https://www.commabody.com' target='_blank' class='highlight'>Learn more.</a>"
