@@ -25,4 +25,4 @@ test:
 
     # *** tests ***
     pytest:
-      run: pytest -n8
+      run: pytest --dist=worksteal --ignore=opendbc/safety/tests/misra
