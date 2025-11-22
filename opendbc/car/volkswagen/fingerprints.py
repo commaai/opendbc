@@ -970,24 +970,28 @@ FW_VERSIONS = {
   },
   CAR.PORSCHE_MACAN_MK1: {
     (Ecu.engine, 0x7e0, None): [
+      b'\xf1\x8795B906259  \xf1\x890005',
       b'\xf1\x8795B906259BJ\xf1\x890001',
       b'\xf1\x8795B90652013\xf1\x893485',
       b'\xf1\x8795B90654002\xf1\x893495',
       b'\xf1\x8795B907551D \xf1\x890006',
     ],
     (Ecu.transmission, 0x7e1, None): [
+      b'\xf1\x8795B927156AH\xf1\x890014',
       b'\xf1\x8795B927156CE\xf1\x890022',
       b'\xf1\x8795B927156JH\xf1\x890001',
       b'\xf1\x8795B927156KK\xf1\x890001',
       b'\xf1\x8795B927156R \xf1\x890021',
     ],
     (Ecu.srs, 0x715, None): [
+      b'\xf1\x8795B959655D \xf1\x890110\xf1\x82\x05064702D312',
       b'\xf1\x8795B959655F \xf1\x890130\xf1\x82\x05065Q033513',
       b'\xf1\x8795B959655F \xf1\x890130\xf1\x82\x050682033514',
       b'\xf1\x8795B959655G \xf1\x890150\xf1\x82\x0506B1033514',
       b'\xf1\x8795B959655G \xf1\x890150\xf1\x82\x0506CJ02D417',
     ],
     (Ecu.eps, 0x712, None): [
+      b'\xf1\x8795B909144B \xf1\x890902\xf1\x82\x01m`',
       b'\xf1\x8795B909144K \xf1\x891902\xf1\x82\x02\x04#\x04#',
       b'\xf1\x8795B909144K \xf1\x891902\xf1\x82\x02\x04/\x04/',
     ],
