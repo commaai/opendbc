@@ -348,30 +348,19 @@ class CarDocs:
 
   def get_detail_sentence(self, CP):
     if not CP.notCar:
-      sentence_builder = "openpilot upgrades your <strong>{car_model}</strong> with automated lane centering{alc} and adaptive cruise control{acc}."
+      sentence_builder = f"openpilot is compatible with <strong>{self.name}</strong>"
 
-      if self.min_steer_speed > self.min_enable_speed:
-        alc = f" <strong>above {self.min_steer_speed * CV.MS_TO_MPH:.0f} mph</strong>," if self.min_steer_speed > 0 else " <strong>at all speeds</strong>,"
+      if self.package != "All":
+        sentence_builder += f" if it is equipped with <strong>{self.package}</strong>."
       else:
-        alc = ""
-
-      # Exception for cars which do not auto-resume yet
-      acc = ""
-      if self.min_enable_speed > 0:
-        acc = f" <strong>while driving above {self.min_enable_speed * CV.MS_TO_MPH:.0f} mph</strong>"
-      elif self.auto_resume:
-        acc = " <strong>that automatically resumes from a stop</strong>"
-
-      if self.row[Column.STEERING_TORQUE] != Star.FULL:
-        sentence_builder += " This car may not be able to take tight turns on its own."
+        sentence_builder += "."
 
       # experimental mode
       exp_link = "<a href='https://blog.comma.ai/090release/#experimental-mode' target='_blank' class='highlight'>Experimental mode</a>"
       if CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable:
-        sentence_builder += f" Traffic light and stop sign handling is also available in {exp_link}."
+        sentence_builder += f" Traffic light and stop sign handling is available with {exp_link}."
 
-      return sentence_builder.format(car_model=f"{self.make} {self.model}", alc=alc, acc=acc)
-
+      return sentence_builder
     else:
       if CP.carFingerprint == "COMMA_BODY":
         return "The body is a robotics dev kit that can run openpilot. <a href='https://www.commabody.com' target='_blank' class='highlight'>Learn more.</a>"
