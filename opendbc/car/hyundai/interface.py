@@ -50,7 +50,8 @@ class CarInterface(CarInterfaceBase):
       if lka_steering:
         # detect LKA steering
         ret.flags |= HyundaiFlags.CANFD_LKA_STEERING.value
-        if 0x110 in fingerprint[CAN.CAM]:
+        # we only have validated ALT messages for angle steering cars
+        if 0x110 in fingerprint[CAN.CAM] or ret.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
           ret.flags |= HyundaiFlags.CANFD_LKA_STEERING_ALT.value
       else:
         # no LKA steering
@@ -80,6 +81,9 @@ class CarInterface(CarInterfaceBase):
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_ALT_BUTTONS.value
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
+      if ret.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+        ret.steerControlType = structs.CarParams.SteerControlType.angle
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_ANGLE_STEERING.value
 
     else:
       # Shared configuration for non CAN-FD cars
@@ -112,7 +116,9 @@ class CarInterface(CarInterfaceBase):
     ret.centerToFront = ret.wheelbase * 0.4
     ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.4
-    CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+
+    if not ret.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     if ret.flags & HyundaiFlags.ALT_LIMITS:
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.ALT_LIMITS.value
