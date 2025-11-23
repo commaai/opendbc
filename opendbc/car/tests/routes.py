@@ -26,6 +26,7 @@ non_tested_cars = [
   HYUNDAI.GENESIS_G90,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
+  VOLKSWAGEN.PORSCHE_MACAN_MK1,
   # Honda/Acura test routes below expired, replace when CI bucket sync is fixed
   HONDA.ACURA_TLX_2G,
   HONDA.HONDA_NBOX_2G,
@@ -292,7 +293,6 @@ routes = [
   CarTestRoute("66e5edc3a16459c5/2021-05-25--19-00-29", VOLKSWAGEN.SKODA_OCTAVIA_MK3),
   CarTestRoute("026b6d18fba6417f/2021-03-26--09-17-04", VOLKSWAGEN.SKODA_KAMIQ_MK1),  # Scala
   CarTestRoute("b2e9858e29db492b/2021-03-26--16-58-42", VOLKSWAGEN.SKODA_SUPERB_MK3),
-  CarTestRoute("e8dac44d3a3458a5/0000008d--c3e9496f1c", VOLKSWAGEN.PORSCHE_MACAN_MK1),  # placeholder, replace after merge
 
   CarTestRoute("3c8f0c502e119c1c/2020-06-30--12-58-02", SUBARU.SUBARU_ASCENT),
   CarTestRoute("c321c6b697c5a5ff/2020-06-23--11-04-33", SUBARU.SUBARU_FORESTER),
