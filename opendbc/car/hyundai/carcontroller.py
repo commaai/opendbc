@@ -1,7 +1,8 @@
 import numpy as np
+from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs
-from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance
+from opendbc.car.lateral import apply_steer_angle_limits_vm, apply_driver_steer_torque_limits, common_fault_avoidance
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.hyundaicanfd import CanBus
@@ -16,6 +17,25 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
+
+
+def calculate_angle_torque_reduction_gain(params, CS, apply_torque_last, target_torque_reduction_gain):
+  """ Calculate the angle torque reduction gain based on the current steering state. """
+  if CS.out.steeringPressed:  # User is overriding
+    torque_delta = apply_torque_last - params.ANGLE_MIN_TORQUE_REDUCTION_GAIN
+    adaptive_ramp_rate = max(torque_delta / params.ANGLE_TORQUE_OVERRIDE_CYCLES, 0.004) # the minimum rate of change we've seen
+    return max(apply_torque_last - adaptive_ramp_rate, params.ANGLE_MIN_TORQUE_REDUCTION_GAIN)
+  else:
+    # EU vehicles have been seen to "idle" at 0.384, while US vehicles have been seen idling at "0.92" for LFA.
+    target_torque = max(target_torque_reduction_gain, 0.5) # at 0.5 under normal conditions
+    target_torque = max(target_torque, params.ANGLE_MIN_TORQUE_REDUCTION_GAIN)
+
+    if apply_torque_last > target_torque:
+      reduced_torque = max(apply_torque_last - params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE, target_torque)
+    else:
+      reduced_torque = min(apply_torque_last + params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE, target_torque)
+
+  return float(np.clip(reduced_torque, params.ANGLE_MIN_TORQUE_REDUCTION_GAIN, params.ANGLE_MAX_TORQUE_REDUCTION_GAIN))
 
 
 def process_hud_alert(enabled, fingerprint, hud_control):
@@ -50,23 +70,37 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
 
+    # Vehicle model used for lateral limiting
+    self.VM = VehicleModel(CP)
+
     self.accel_last = 0
     self.apply_torque_last = 0
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
+
+    self.apply_angle_last = 0
+    self.angle_torque_reduction_gain = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
     # steering torque
-    new_torque = int(round(actuators.torque * self.params.STEER_MAX))
-    apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
+    if not self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+      self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
+                                                                         self.angle_limit_counter, MAX_ANGLE_FRAMES,
+                                                                         MAX_ANGLE_CONSECUTIVE_FRAMES)
+      new_torque = int(round(actuators.torque * self.params.STEER_MAX))
+      apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
-    # >90 degree steering fault prevention
-    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
-                                                                       self.angle_limit_counter, MAX_ANGLE_FRAMES,
-                                                                       MAX_ANGLE_CONSECUTIVE_FRAMES)
+    # angle control
+    else:
+      self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
+                                                          CC.latActive, self.params, self.VM)
+
+      target_torque_reduction_gain = 1. if CC.latActive else 0
+      apply_torque = calculate_angle_torque_reduction_gain(self.params, CS, self.apply_torque_last, target_torque_reduction_gain)
+      apply_steer_req = CC.latActive and apply_torque != 0 # apply_steer_req is True when we are actively attempting to steer
 
     if not CC.latActive:
       apply_torque = 0
@@ -109,6 +143,7 @@ class CarController(CarControllerBase):
     new_actuators = actuators.as_builder()
     new_actuators.torque = apply_torque / self.params.STEER_MAX
     new_actuators.torqueOutputCan = apply_torque
+    new_actuators.steeringAngleDeg = self.apply_angle_last
     new_actuators.accel = accel
 
     self.frame += 1
@@ -167,7 +202,7 @@ class CarController(CarControllerBase):
     lka_steering_long = lka_steering and self.CP.openpilotLongitudinalControl
 
     # steering control
-    can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_torque))
+    can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_torque, self.apply_angle_last))
 
     # prevent LFA from activating on LKA steering cars by sending "no lane lines detected" to ADAS ECU
     if self.frame % 5 == 0 and lka_steering:
