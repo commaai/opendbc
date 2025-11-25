@@ -518,27 +518,37 @@ FW_VERSIONS = {
   CAR.ACURA_MDX_4G: {
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-TYB-A010\x00\x00',
+      b'38897-TYC-A010\x00\x00',
     ],
     (Ecu.eps, 0x18da30f1, None): [
+      b'39990-TYA-A080\x00\x00',
       b'39990-TYB-A020\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-TYB-A020\x00\x00',
+      b'77959-TYC-A050\x00\x00',
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'36161-TYA-A050\x00\x00',
       b'36161-TYB-A030\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36802-TYA-A040\x00\x00',
       b'36802-TYB-A040\x00\x00',
     ],
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28102-61E-A010\x00\x00',
+      b'28102-61F-A010\x00\x00',
     ],
     (Ecu.vsa, 0x18da28f1, None): [
+      b'57114-TYA-A070\x00\x00',
       b'57114-TYB-A150\x00\x00',
     ],
     (Ecu.shiftByWire, 0x18da0bf1, None): [
       b'54008-TGV-A810\x00\x00',
+    ],
+    (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
+      b'46114-TYA-A060\x00\x00',
     ],
   },
   CAR.ACURA_MDX_4G_MMR: {
