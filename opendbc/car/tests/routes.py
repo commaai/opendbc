@@ -26,10 +26,12 @@ non_tested_cars = [
   HYUNDAI.GENESIS_G90,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
+  VOLKSWAGEN.PORSCHE_MACAN_MK1,
   # Honda/Acura test routes below expired, replace when CI bucket sync is fixed
   HONDA.ACURA_TLX_2G,
   HONDA.HONDA_NBOX_2G,
   HONDA.ACURA_MDX_4G_MMR,
+  HONDA.HONDA_CITY_7G
 ]
 
 
@@ -116,7 +118,7 @@ routes = [
   CarTestRoute("b1c832ad56b6bc9d/00000010--debfcf5867", HONDA.HONDA_CIVIC_2022),  # 2025 Civic Hatch Hybrid with new eCVT transmission
   CarTestRoute("f9c43864cf057d05/2024-01-15--23-01-20", HONDA.HONDA_PILOT_4G),  # TODO: Replace with a newer route
   CarTestRoute("f39cf149898833ff/0000002b--54f3fae045", HONDA.HONDA_ACCORD_11G),
-  CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
+  # CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
   CarTestRoute("2dc4489d7e1410ca/00000001--bbec3f5117", HONDA.HONDA_CRV_6G),
   CarTestRoute("a703d058f4e05aeb/00000008--f169423024", HONDA.HONDA_PASSPORT_4G),
   CarTestRoute("3f8ae015ce70365f/00000003--a22590d0e4", HONDA.ACURA_INTEGRA),
@@ -291,7 +293,6 @@ routes = [
   CarTestRoute("66e5edc3a16459c5/2021-05-25--19-00-29", VOLKSWAGEN.SKODA_OCTAVIA_MK3),
   CarTestRoute("026b6d18fba6417f/2021-03-26--09-17-04", VOLKSWAGEN.SKODA_KAMIQ_MK1),  # Scala
   CarTestRoute("b2e9858e29db492b/2021-03-26--16-58-42", VOLKSWAGEN.SKODA_SUPERB_MK3),
-  CarTestRoute("e8dac44d3a3458a5/0000008d--c3e9496f1c", VOLKSWAGEN.PORSCHE_MACAN_MK1),  # placeholder, replace after merge
 
   CarTestRoute("3c8f0c502e119c1c/2020-06-30--12-58-02", SUBARU.SUBARU_ASCENT),
   CarTestRoute("c321c6b697c5a5ff/2020-06-23--11-04-33", SUBARU.SUBARU_FORESTER),
