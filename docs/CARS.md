@@ -247,7 +247,7 @@
 |Nissan|Rogue 2018-20|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|X-Trail 2017|ProPILOT Assist|[Upstream](#upstream)|
 |Peugeot|208 2019-25|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
-|Porsche|Macan 2017-24|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
+|Porsche|Macan 2017-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Ram|1500 2019-24|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |Ram|2500 2020-24|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
 |Ram|3500 2019-22|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
