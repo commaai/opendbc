@@ -64,13 +64,18 @@ class Footnote(Enum):
     "North and South America/Southeast Asia.",
     Column.MODEL,
   )
+  GLOBAL = CarFootnote(
+    "Co-Pilot360 and Co-Pilot360 Assist are not compatible with openpilot",
+    Column.PACKAGE,
+  )
 
 
 @dataclass
 class FordCarDocs(CarDocs):
-  package: str = "Co-Pilot360 Assist+"
+  package: str = "Co-Pilot360 Assist+ or Co-Pilot360 Assist 2.0 or Co-Pilot360 Active"
   hybrid: bool = False
   plug_in_hybrid: bool = False
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.GLOBAL])
 
   def init_make(self, CP: CarParams):
     harness = CarHarness.ford_q4 if CP.flags & FordFlags.CANFD else CarHarness.ford_q3
