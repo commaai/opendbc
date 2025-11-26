@@ -41,7 +41,7 @@ class CarState(CarStateBase):
     self.brake_switch_active = False
     self.low_speed_alert = False
 
-    self.dynamic_v_cruise_units = self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_ALT_RADAR | \
+    self.dynamic_v_cruise_units = self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_ALT_RADAR |
                                                              HONDA_BOSCH_TJA_CONTROL | HONDA_BOSCH_CANFD)
     self.cruise_setting = 0
     self.v_cruise_pcm_prev = 0
