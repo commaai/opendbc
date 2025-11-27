@@ -113,10 +113,7 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
-    if self.CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
-      hud_v_cruise = hud_control.setSpeed / CV.MPH_TO_MS if hud_control.speedVisible else 255
-    else:
-      hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
+    hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
     if CC.longActive:
