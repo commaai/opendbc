@@ -156,8 +156,6 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.
-    if self.CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
-      pass # apply_torque *= -1 # RLX has negative steering
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive, self.tja_control))
 
     # wind brake from air resistance decel at high speed
