@@ -137,9 +137,7 @@ class CarState(CarStateBase):
 
     ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
 
-    
     self.dash_speed_seen = self.dash_speed_seen or car_speed_source["ROUGH_CAR_SPEED_2"] > 1e-3
-    self.dash_speed_seen = False
     if self.dash_speed_seen:
       conversion = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
       ret.vEgoCluster = car_speed_source["ROUGH_CAR_SPEED_2"] * conversion
