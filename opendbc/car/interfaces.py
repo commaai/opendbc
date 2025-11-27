@@ -16,7 +16,6 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
 from opendbc.car.values import PLATFORMS
 from opendbc.can import CANParser
-# from opendbc.car.carlog import carlog
 
 GearShifter = structs.CarState.GearShifter
 ButtonType = structs.CarState.ButtonEvent.Type
@@ -241,11 +240,6 @@ class CarInterfaceBase(ABC):
 
     ret.canValid = all(cp.can_valid for cp in self.can_parsers.values())
     ret.canTimeout = any(cp.bus_timeout for cp in self.can_parsers.values())
-
-    if not ret.canValid:
-       for cp in self.can_parsers.values():
-        if not cp.can_valid:
-          pass #  - carlog.error({"invalidCan": "InvalidCan", "bus": cp.bus, "messages": cp.message_states.values()})
 
     if ret.vEgoCluster == 0.0 and not self.v_ego_cluster_seen:
       ret.vEgoCluster = ret.vEgo
