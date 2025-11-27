@@ -57,7 +57,7 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
       cp_steer = can_parsers[Bus.alt]
       cp_steer_cam = can_parsers[Bus.adas]
-    
+
     ret = structs.CarState()
 
     # car params
