@@ -250,7 +250,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   }
 
   // STEER: safety check
-  if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
+  if ((msg->addr == 0xE4U)) {
     if (!controls_allowed) {
       bool steer_applied = msg->data[0] | msg->data[1];
       if (steer_applied) {
@@ -289,8 +289,8 @@ static safety_config honda_nidec_init(uint16_t param) {
   // 0x1FA is dynamically forwarded based on stock AEB
   // 0xE4 is steering on all cars except CRV and RDX, 0x194 for CRV and RDX,
   // 0x1FA is brake control, 0x30C is acc hud, 0x33D is lkas hud
-  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x194, 0, 4, .check_relay = true}, {0x1FA, 0, 8, .check_relay = false},
-                                     {0x30C, 0, 8, .check_relay = true}, {0x33D, 0, 5, .check_relay = true}};
+  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x1FA, 0, 8, .check_relay = false},
+                                     {0x30C, 0, 8, .check_relay = true}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
   const uint16_t HONDA_PARAM_NIDEC_HYBRID = 32;
@@ -442,7 +442,7 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2)  {
-    bool is_lkas_msg = (addr == 0xE4) || (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);
+    bool is_lkas_msg = (addr == 0xE4) || (addr == 0xE5) || (addr == 0x33DA) || (addr == 0x33DB);
     block_msg = is_lkas_msg && !honda_bosch_radarless;
   }
 
