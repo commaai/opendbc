@@ -51,7 +51,7 @@ class CarControllerParams:
 
 
 class HondaSafetyFlags(IntFlag):
-  ALT_BRAKE = 1
+  ELECTRIC_BRAKE_BOOSTER = 1
   BOSCH_LONG = 2
   NIDEC_ALT = 4
   RADARLESS = 8
@@ -62,7 +62,7 @@ class HondaFlags(IntFlag):
   # Detected flags
   # Bosch models with alternate set of LKAS_HUD messages
   BOSCH_EXT_HUD = 1
-  BOSCH_ALT_BRAKE = 2
+  BOSCH_ELECTRIC_BRAKE_BOOSTER = 2
 
   # Static flags
   BOSCH = 4
@@ -209,7 +209,6 @@ class CAR(Platforms):
     # steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=3410 * CV.LB_TO_KG, wheelbase=2.66, steerRatio=16.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated', Bus.body: 'honda_crv_ex_2017_body_generated'},
-    flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_CRV_6G = HondaBoschCANFDPlatformConfig(
     [
@@ -240,7 +239,6 @@ class CAR(Platforms):
     [HondaCarDocs("Acura RDX 2019-21", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=4068 * CV.LB_TO_KG, wheelbase=2.75, steerRatio=11.95, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),  # as spec
     {Bus.pt: 'acura_rdx_2020_can_generated'},
-    flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_INSIGHT = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Insight 2019-22", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
@@ -269,7 +267,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Odyssey 2021-26", "All", min_steer_speed=70. * CV.KPH_TO_MS)],
     CarSpecs(mass=4590 * CV.LB_TO_KG, wheelbase=3.00, steerRatio=19.4, centerToFrontRatio=0.41),
     {Bus.pt: 'acura_rdx_2020_can_generated'},
-    flags=HondaFlags.BOSCH_ALT_BRAKE | HondaFlags.BOSCH_ALT_RADAR,
+    flags=HondaFlags.BOSCH_ALT_RADAR,
   )
   ACURA_TLX_2G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura TLX 2021", "All")],
