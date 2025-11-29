@@ -168,7 +168,7 @@ class CarState(CarStateBase):
     else:
       ret.cruiseState.speed = cp.vl["CRUISE"]["CRUISE_SPEED_PCM"] * CV.KPH_TO_MS
 
-    if self.CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
+    if self.CP.flags & HondaFlags.BOSCH_ELECTRIC_BRAKE_BOOSTER:
       ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     else:
       # brake switch has shown some single time step noise, so only considered when
