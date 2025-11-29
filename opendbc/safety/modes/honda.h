@@ -438,6 +438,12 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
     block_msg = is_brake_msg && !honda_fwd_brake;
   }
 
+  // Block ACC_HUD signals - somthing wrong with double send with TX override above
+  if (((bus_num == 0) || (bus_num == 2)) &&
+      ((addr == 0x30C)) && (honda_hw == HONDA_NIDEC)) {
+    block_msg = true;
+  }
+
   return block_msg;
 }
 
