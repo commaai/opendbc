@@ -21,7 +21,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 # The up limit allows the brakes/gas to unwind quickly leaving a stop,
 # the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
-ACCEL_WINDUP_LIMIT = 4.0 * DT_CTRL * 3  # m/s^2 / frame
+ACCEL_WINDUP_LIMIT = 2.0 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_PID_UNWIND = 0.03 * DT_CTRL * 3  # m/s^2 / frame
 
@@ -67,6 +67,14 @@ class CarController(CarControllerBase):
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
     self.pitch_hp = HighPassFilter(0.0, 0.25, 1.5, DT_CTRL)
+
+    self.pcm_accel_cmd = FirstOrderFilter(0, 0.1, DT_CTRL)
+    self.pcm_accel_cmd_slow = FirstOrderFilter(0, 0.2, DT_CTRL)
+    self.pcm_accel_cmd_slower = FirstOrderFilter(0, 0.4, DT_CTRL)
+    self.pcm_accel_cmd_slowest = FirstOrderFilter(0, 0.6, DT_CTRL)
+
+    self.f1 = FirstOrderFilter(0, 0.5, DT_CTRL)
+    self.f2 = FirstOrderFilter(0, 0.1, DT_CTRL)
 
     self.accel = 0
     self.prev_accel = 0
@@ -185,6 +193,26 @@ class CarController(CarControllerBase):
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
     lead = hud_control.leadVisible or CS.out.vEgo < 12.  # at low speed we always assume the lead is present so ACC can be engaged
 
+    self.pcm_accel_cmd.update(actuators.accel)
+    self.pcm_accel_cmd_slow.update(actuators.accel)
+    self.pcm_accel_cmd_slower.update(actuators.accel)
+    self.pcm_accel_cmd_slowest.update(actuators.accel)
+
+    # laggy response comp
+    jerk = (self.pcm_accel_cmd.x - self.pcm_accel_cmd_slow.x)
+    jerk_slow = self.f1.update(jerk)
+    snap = (jerk - jerk_slow)
+    snap_slow = self.f2.update(snap)
+    crackle = snap - snap_slow
+    # hp2 = self.pcm_accel_cmd_slow.x - self.pcm_accel_cmd_slower.x
+    # hp3 = self.pcm_accel_cmd_slower.x - self.pcm_accel_cmd_slowest.x
+
+    # high_pass_accel_cmd = self.pcm_accel_cmd.x - self.pcm_accel_cmd_slow.x
+    # high_pass_accel_cmd = jerk - hp2 - hp3
+    high_pass_accel_cmd = snap * 10
+    self.debug1 = jerk * 10
+    self.debug2 = snap * 10
+
     if self.CP.openpilotLongitudinalControl:
       if self.frame % 3 == 0:
         # Press distance button until we are at the correct bar length. Only change while enabled to avoid skipping startup popup
@@ -233,6 +261,9 @@ class CarController(CarControllerBase):
             pitch_compensation = float(np.clip(math.sin(self.pitch_hp.x) * ACCELERATION_DUE_TO_GRAVITY,
                                                -MAX_PITCH_COMPENSATION, MAX_PITCH_COMPENSATION))
             pcm_accel_cmd += pitch_compensation
+
+            # laggy response comp
+            pcm_accel_cmd += high_pass_accel_cmd
 
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
@@ -311,6 +342,8 @@ class CarController(CarControllerBase):
     new_actuators.torqueOutputCan = apply_torque
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+    new_actuators.debug1 = self.debug1
+    new_actuators.debug2 = self.debug2
 
     self.frame += 1
     return new_actuators, can_sends
