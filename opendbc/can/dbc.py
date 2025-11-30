@@ -1,7 +1,8 @@
 import re
 import os
-from dataclasses import dataclass
 from collections.abc import Callable
+from dataclasses import dataclass
+from functools import cache
 
 from opendbc import DBC_PATH
 
@@ -73,14 +74,8 @@ VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
 VAL_SPLIT_RE = re.compile(r'["]+')
 
 
-@dataclass
+@cache
 class DBC:
-  name: str
-  msgs: dict[int, Msg]
-  addr_to_msg: dict[int, Msg]
-  name_to_msg: dict[str, Msg]
-  vals: list[Val]
-
   def __init__(self, name: str):
     dbc_path = name
     if not os.path.exists(dbc_path):
