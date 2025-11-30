@@ -1,12 +1,12 @@
 import math
 
 from opendbc.car.carlog import carlog
-from opendbc.can.dbc import get_dbc, Signal, SignalType
+from opendbc.can.dbc import DBC, Signal, SignalType
 
 
 class CANPacker:
   def __init__(self, dbc_name: str):
-    self.dbc = get_dbc(dbc_name)
+    self.dbc = DBC(dbc_name)
     self.counters: dict[int, int] = {}
 
   def pack(self, address: int, values: dict[str, float]) -> bytearray:

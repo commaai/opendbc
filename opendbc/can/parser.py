@@ -4,7 +4,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 
 from opendbc.car.carlog import carlog
-from opendbc.can.dbc import get_dbc, Signal
+from opendbc.can.dbc import DBC, Signal
 
 
 MAX_BAD_COUNTER = 5
@@ -129,7 +129,7 @@ class CANParser:
   def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int):
     self.dbc_name: str = dbc_name
     self.bus: int = bus
-    self.dbc = get_dbc(dbc_name)
+    self.dbc: DBC = DBC(dbc_name)
 
     self.vl: dict[int | str, dict[str, float]] = VLDict(self)
     self.vl_all: dict[int | str, dict[str, list[float]]] = {}
@@ -214,9 +214,6 @@ class CANParser:
     return self.can_invalid_cnt < CAN_INVALID_CNT and counters_valid
 
   def update(self, strings, sendcan: bool = False):
-    if not strings:
-      return set()
-
     if strings and not isinstance(strings[0], list | tuple):
       strings = [strings]
 
@@ -258,7 +255,7 @@ class CANParser:
 
 class CANDefine:
   def __init__(self, dbc_name: str):
-    dbc = get_dbc(dbc_name)
+    dbc = DBC(dbc_name)
 
     dv = defaultdict(dict)
     for val in dbc.vals:

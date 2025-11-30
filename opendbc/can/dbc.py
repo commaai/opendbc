@@ -73,37 +73,6 @@ VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
 VAL_SPLIT_RE = re.compile(r'["]+')
 
 
-# Module-level cache for parsed DBC files
-_DBC_CACHE: dict[str, "DBC"] = {}
-
-
-def _resolve_dbc_path(name: str) -> str:
-  """Resolve a DBC name or path to an absolute path."""
-  dbc_path = name
-  if not os.path.exists(dbc_path):
-    candidate = os.path.join(DBC_PATH, name + ".dbc")
-    if os.path.exists(candidate):
-      dbc_path = candidate
-    else:
-      raise FileNotFoundError(f"DBC file not found: {name}")
-  return os.path.abspath(dbc_path)
-
-
-def get_dbc(name: str) -> "DBC":
-  """Get or create a cached DBC instance.
-
-  Args:
-    name: DBC file name (without .dbc extension) or full path to DBC file
-
-  Returns:
-    Cached DBC instance for the resolved path
-  """
-  dbc_path = _resolve_dbc_path(name)
-  if dbc_path not in _DBC_CACHE:
-    _DBC_CACHE[dbc_path] = DBC._from_file(dbc_path)
-  return _DBC_CACHE[dbc_path]
-
-
 @dataclass
 class DBC:
   name: str
@@ -112,18 +81,12 @@ class DBC:
   name_to_msg: dict[str, Msg]
   vals: list[Val]
 
-  @classmethod
-  def _from_file(cls, path: str) -> "DBC":
-    """Internal method to create a DBC instance from a file path."""
-    dbc = cls(
-      name="",
-      msgs={},
-      addr_to_msg={},
-      name_to_msg={},
-      vals=[]
-    )
-    dbc._parse(path)
-    return dbc
+  def __init__(self, name: str):
+    dbc_path = name
+    if not os.path.exists(dbc_path):
+      dbc_path = os.path.join(DBC_PATH, name + ".dbc")
+
+    self._parse(dbc_path)
 
   def _parse(self, path: str):
     self.name = os.path.basename(path).replace(".dbc", "")
