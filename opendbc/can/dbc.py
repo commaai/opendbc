@@ -1,8 +1,8 @@
 import re
 import os
-from dataclasses import dataclass
-from typing import ClassVar
 from collections.abc import Callable
+from dataclasses import dataclass
+from functools import cache
 
 from opendbc import DBC_PATH
 
@@ -74,29 +74,9 @@ VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
 VAL_SPLIT_RE = re.compile(r'["]+')
 
 
-@dataclass
+@cache
 class DBC:
-  name: str
-  msgs: dict[int, Msg]
-  addr_to_msg: dict[int, Msg]
-  name_to_msg: dict[str, Msg]
-  vals: list[Val]
-
-  # Cache for parsed DBC instances
-  _dbc_cache: ClassVar[dict[str, 'DBC']] = {}
-
-  def __new__(cls, name: str):
-    if name in cls._dbc_cache:
-      return cls._dbc_cache[name]
-
-    instance = super(DBC, cls).__new__(cls)
-    cls._dbc_cache[name] = instance
-    return instance
-
   def __init__(self, name: str):
-    # Skip initialization if this instance is already cached and initialized
-    if hasattr(self, 'name') and self.name:
-      return
     dbc_path = name
     if not os.path.exists(dbc_path):
       dbc_path = os.path.join(DBC_PATH, name + ".dbc")
