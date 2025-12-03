@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
+from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, p16
 
 Ecu = CarParams.Ecu
 
@@ -130,6 +130,54 @@ CHRYSLER_SOFTWARE_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTI
 
 CHRYSLER_RX_OFFSET = -0x280
 
+
+# Chrysler FW responses encode a part number + two-character revision. Treat the
+# part number (everything but the trailing revision) as the platform code so new
+# revisions can still be matched.
+def get_part_numbers(fw_versions: list[bytes] | set[bytes]) -> set[bytes]:
+  parts = set()
+  for fw in fw_versions:
+    clean_fw = fw.rstrip(b"\x00").strip()
+    if len(clean_fw) <= 2:
+      continue
+    parts.add(clean_fw[:-2])
+  return parts
+
+
+# These ECUs consistently report the platform part numbers used for fuzzy fingerprinting
+PLATFORM_CODE_ECUS = (Ecu.combinationMeter, Ecu.abs, Ecu.fwdRadar, Ecu.eps)
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw_versions: OfflineFwVersions) -> set[str]:
+  candidates: set[str] = set()
+
+  for candidate, fws in offline_fw_versions.items():
+    valid_found_ecus = set()
+    valid_expected_ecus = {ecu[1:] for ecu in fws if ecu[0] in PLATFORM_CODE_ECUS}
+
+    for ecu, expected_versions in fws.items():
+      if ecu[0] not in PLATFORM_CODE_ECUS:
+        continue
+
+      addr = ecu[1:]
+      expected_parts = get_part_numbers(expected_versions)
+      found_parts = get_part_numbers(live_fw_versions.get(addr, set()))
+
+      # Require a platform part number match for every ECU we depend on
+      if not expected_parts or not found_parts:
+        break
+
+      if not any(found_part in expected_parts for found_part in found_parts):
+        break
+
+      valid_found_ecus.add(addr)
+
+    if valid_expected_ecus.issubset(valid_found_ecus):
+      candidates.add(candidate)
+
+  return candidates
+
+
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
@@ -155,6 +203,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
   extra_ecus=[
     (Ecu.abs, 0x7e4, None),  # alt address for abs on hybrids, NOTE: not on all hybrid platforms
   ],
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 DBC = CAR.create_dbc_map()
