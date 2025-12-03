@@ -66,6 +66,7 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_LKA_STEERING_ALT = 128
   FCEV_GAS = 256
   ALT_LIMITS_2 = 512
+  CCNC = 1024
 
 
 class HyundaiFlags(IntFlag):
@@ -125,6 +126,8 @@ class HyundaiFlags(IntFlag):
   FCEV = 2 ** 25
 
   ALT_LIMITS_2 = 2 ** 26
+
+  CCNC = 2 ** 27
 
 
 @dataclass
@@ -332,6 +335,11 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Sonata Hybrid 2020-23", "All", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     HYUNDAI_SONATA.specs,
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
+  )
+  HYUNDAI_SONATA_HEV_2024 = HyundaiCanFDPlatformConfig(
+    [HyundaiCarDocs("Hyundai Sonata Hybrid (without HDA II) 2024-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
+    CarSpecs(mass=1616, wheelbase=2.84, steerRatio=13.27),
+    flags=HyundaiFlags.CCNC,
   )
   HYUNDAI_IONIQ_5 = HyundaiCanFDPlatformConfig(
     [
