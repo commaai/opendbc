@@ -23,6 +23,7 @@ class AngleSteeringLimits:
   MAX_LATERAL_JERK: float = 0
   MAX_ANGLE_RATE: float = math.inf
 
+
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int = None):
   # some safety modes utilize a dynamic max steer
   if steer_max is None:

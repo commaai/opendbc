@@ -104,14 +104,17 @@ static uint32_t subaru_compute_checksum(const CANPacket_t *msg) {
 static void subaru_rx_hook(const CANPacket_t *msg) {
   const unsigned int alt_main_bus = (subaru_gen2 || subaru_lkas_angle) ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
 
+  #ifdef ALLOW_DEBUG
   if (subaru_lkas_angle && (msg->addr == MSG_SUBARU_Steering_2) && (msg->bus == SUBARU_MAIN_BUS)) {
     uint32_t raw = GET_BYTES(msg, 3, 3);
     raw &= 0x1FFFFU;
     int angle_meas_new = ROUND(to_signed(raw, 17) * -1);
     update_sample(&angle_meas, angle_meas_new);
   }
-
-  if (!subaru_lkas_angle && (msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
+  
+  if (!subaru_lkas_angle) {
+  #endif // I don't like this, but I want to leave the following block completely unchanged until the comma team can get ahold of a subaru with LKAS_ANGLE
+  if ((msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
     int torque_driver_new;
     torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
     torque_driver_new = -1 * to_signed(torque_driver_new, 11);
@@ -122,6 +125,9 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
     angle_meas_new = ROUND(to_signed(angle_meas_new, 16) * -2.17);
     update_sample(&angle_meas, angle_meas_new);
   }
+  #ifdef ALLOW_DEBUG
+  }
+  #endif
   
 
   // enter controls on rising edge of ACC, exit controls on ACC off
@@ -162,6 +168,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits SUBARU_STEERING_LIMITS      = SUBARU_STEERING_LIMITS_GENERATOR(2047, 50, 70);
   const TorqueSteeringLimits SUBARU_GEN2_STEERING_LIMITS = SUBARU_STEERING_LIMITS_GENERATOR(1000, 40, 40);
 
+  #ifdef ALLOW_DEBUG
   const AngleSteeringLimits SUBARU_ANGLE_STEERING_LIMITS = {
     .max_angle = 545*100,
     .angle_deg_to_can = 100.,
@@ -174,6 +181,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
       {5.0, 0.8, 0.15}
     },
   };
+  #endif
 
   const LongitudinalLimits SUBARU_LONG_LIMITS = {
     .min_gas = 808,       // appears to be engine braking
@@ -199,6 +207,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     violation |= steer_torque_cmd_checks(desired_torque, steer_req, limits);
   }
 
+  #ifdef ALLOW_DEBUG
   if (msg->addr == MSG_SUBARU_ES_LKAS_ANGLE) {
     int desired_angle = GET_BYTES(msg, 5, 3) & 0x1FFFFU;
     desired_angle = -1 * to_signed(desired_angle, 17);
@@ -206,6 +215,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     
     violation |= steer_angle_cmd_checks(desired_angle, lkas_request, SUBARU_ANGLE_STEERING_LIMITS);
   }
+  #endif
 
   // check es_brake brake_pressure limits
   if (msg->addr == MSG_SUBARU_ES_Brake) {
