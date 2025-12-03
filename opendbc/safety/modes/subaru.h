@@ -130,18 +130,22 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
   #endif
   
 
-  // enter controls on rising edge of ACC, exit controls on ACC off
+  #ifdef ALLOW_DEBUG
   if (subaru_lkas_angle) {
     if ((msg->addr == MSG_SUBARU_ES_DashStatus) && (msg->bus == SUBARU_CAM_BUS)) {
       bool cruise_engaged = (msg->data[4] >> 4) & 1U;
       pcm_cruise_check(cruise_engaged);
     }
   } else {
-    if ((msg->addr == MSG_SUBARU_CruiseControl) && (msg->bus == alt_main_bus)) {
-      bool cruise_engaged = (msg->data[5] >> 1) & 1U;
-      pcm_cruise_check(cruise_engaged);
-    }
+    #endif
+  // enter controls on rising edge of ACC, exit controls on ACC off
+  if ((msg->addr == MSG_SUBARU_CruiseControl) && (msg->bus == alt_main_bus)) {
+    bool cruise_engaged = (msg->data[5] >> 1) & 1U;
+    pcm_cruise_check(cruise_engaged);
   }
+  #ifdef ALLOW_DEBUG
+  }
+  #endif
 
   // update vehicle moving with any non-zero wheel speed
   if ((msg->addr == MSG_SUBARU_Wheel_Speeds) && (msg->bus == alt_main_bus)) {
@@ -307,14 +311,14 @@ static safety_config subaru_init(uint16_t param) {
   };
 
   const uint16_t SUBARU_PARAM_GEN2 = 1;
-  const uint16_t SUBARU_PARAM_LKAS_ANGLE = 8;
-
   subaru_gen2 = GET_FLAG(param, SUBARU_PARAM_GEN2);
-  subaru_lkas_angle = GET_FLAG(param, SUBARU_PARAM_LKAS_ANGLE);
-
+  
 #ifdef ALLOW_DEBUG
   const uint16_t SUBARU_PARAM_LONGITUDINAL = 2;
   subaru_longitudinal = GET_FLAG(param, SUBARU_PARAM_LONGITUDINAL);
+
+  const uint16_t SUBARU_PARAM_LKAS_ANGLE = 8;
+  subaru_lkas_angle = GET_FLAG(param, SUBARU_PARAM_LKAS_ANGLE);
 #endif
 
   safety_config ret;
