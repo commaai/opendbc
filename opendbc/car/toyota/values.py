@@ -66,6 +66,7 @@ class ToyotaFlags(IntFlag):
   # Static flags
   TSS2 = 8
   NO_DSU = 16
+  UNSUPPORTED_DSU = 32
   RADAR_ACC = 64
   # these cars use the Lane Tracing Assist (LTA) message for lateral control
   ANGLE_CONTROL = 128
@@ -77,8 +78,6 @@ class ToyotaFlags(IntFlag):
   # deprecated flags
   # these cars are speculated to allow stop and go when the DSU is unplugged
   SNG_WITHOUT_DSU_DEPRECATED = 512
-  # the DSU uses the AEB message for longitudinal on these cars
-  UNSUPPORTED_DSU_DEPRECATED = 32
 
 
 def dbc_dict(pt, radar):
@@ -337,6 +336,7 @@ class CAR(Platforms):
     [ToyotaCarDocs("Lexus IS 2017-19")],
     CarSpecs(mass=3736.8 * CV.LB_TO_KG, wheelbase=2.79908, steerRatio=13.3, tireStiffnessFactor=0.444),
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
+    flags=ToyotaFlags.UNSUPPORTED_DSU,
   )
   LEXUS_IS_TSS2 = ToyotaTSS2PlatformConfig(
     [ToyotaCarDocs("Lexus IS 2022-24")],
@@ -365,6 +365,7 @@ class CAR(Platforms):
     [ToyotaCarDocs("Lexus RC 2018-20")],
     LEXUS_IS.specs,
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
+    flags=ToyotaFlags.UNSUPPORTED_DSU,
   )
   LEXUS_RC_TSS2 = ToyotaTSS2PlatformConfig(
     [
@@ -394,6 +395,7 @@ class CAR(Platforms):
     [ToyotaCarDocs("Lexus GS F 2016")],
     CarSpecs(mass=4034. * CV.LB_TO_KG, wheelbase=2.84988, steerRatio=13.3, tireStiffnessFactor=0.444),
     dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
+    flags=ToyotaFlags.UNSUPPORTED_DSU,
   )
 
 
@@ -618,6 +620,9 @@ EPS_SCALE = defaultdict(lambda: 73,
 TSS2_CAR = CAR.with_flags(ToyotaFlags.TSS2)
 
 NO_DSU_CAR = CAR.with_flags(ToyotaFlags.NO_DSU)
+
+# the DSU uses the AEB message for longitudinal on these cars
+UNSUPPORTED_DSU_CAR = CAR.with_flags(ToyotaFlags.UNSUPPORTED_DSU)
 
 # these cars have a radar which sends ACC messages instead of the camera
 RADAR_ACC_CAR = CAR.with_flags(ToyotaFlags.RADAR_ACC)
