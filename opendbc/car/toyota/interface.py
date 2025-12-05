@@ -52,7 +52,6 @@ class CarInterface(CarInterfaceBase):
 
     # In TSS2 cars, the camera does long control
     found_ecus = [fw.ecu for fw in car_fw]
-    # ret.enableDsu = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
 
     if Ecu.hybrid in found_ecus:
       ret.flags |= ToyotaFlags.HYBRID.value
@@ -92,13 +91,8 @@ class CarInterface(CarInterfaceBase):
           break
 
     elif candidate in (CAR.TOYOTA_CHR, CAR.TOYOTA_CAMRY, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_NX):
-      # TODO: Some of these platforms are not advertised to have full range ACC, are they similar to SNG_WITHOUT_DSU cars?
+      # TODO: Some of these platforms are not advertised to have full range ACC, do they really all have sng?
       stop_and_go = True
-
-    # # TODO: these models can do stop and go, but unclear if it requires sDSU or unplugging DSU.
-    # #  For now, don't list stop and go functionality in the docs
-    # if ret.flags & ToyotaFlags.SNG_WITHOUT_DSU:
-    #   stop_and_go = stop_and_go or (ret.enableDsu and not docs)
 
     ret.centerToFront = ret.wheelbase * 0.44
 
