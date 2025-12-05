@@ -49,10 +49,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerLimitTimer = 0.4
 
     stop_and_go = candidate in TSS2_CAR
-
-    # on older TSS-P, the driver support unit (DSU) does long. if it's unplugged, openpilot can do long.
     found_ecus = [fw.ecu for fw in car_fw]
-    ret.enableDsu = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
 
     if Ecu.hybrid in found_ecus:
       ret.flags |= ToyotaFlags.HYBRID.value
@@ -95,10 +92,13 @@ class CarInterface(CarInterfaceBase):
       # TODO: Some of these platforms are not advertised to have full range ACC, are they similar to SNG_WITHOUT_DSU cars?
       stop_and_go = True
 
+    # ret.enableDsu = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
+    dsu_unplugged = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
+
     # TODO: these models can do stop and go, but unclear if it requires sDSU or unplugging DSU.
     #  For now, don't list stop and go functionality in the docs
     if ret.flags & ToyotaFlags.SNG_WITHOUT_DSU:
-      stop_and_go = stop_and_go or (ret.enableDsu and not docs)
+      stop_and_go = stop_and_go or (dsu_unplugged and not docs)
 
     ret.centerToFront = ret.wheelbase * 0.44
 
@@ -117,6 +117,9 @@ class CarInterface(CarInterfaceBase):
       # Disabling radar is only supported on TSS2 radar-ACC cars
       if alpha_long and candidate in RADAR_ACC_CAR:
         ret.flags |= ToyotaFlags.DISABLE_RADAR.value
+    else:
+      ret.alphaLongitudinalAvailable = dsu_unplugged
+      ret.enableDsu = dsu_unplugged and alpha_long
 
     # openpilot longitudinal enabled by default:
     #  - cars w/ DSU disconnected
