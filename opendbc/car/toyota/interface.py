@@ -50,7 +50,7 @@ class CarInterface(CarInterfaceBase):
 
     stop_and_go = candidate in TSS2_CAR
 
-    # In TSS2 cars, the camera does long control
+    # on older TSS-P, the driver support unit (DSU) does long. if it's unplugged, openpilot can do long.
     found_ecus = [fw.ecu for fw in car_fw]
     ret.enableDsu = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
 
@@ -124,6 +124,7 @@ class CarInterface(CarInterfaceBase):
     # openpilot longitudinal behind experimental long toggle:
     #  - TSS2 radar ACC cars (disables radar)
 
+    # In TSS2 cars, the camera does long control.
     ret.openpilotLongitudinalControl = ret.enableDsu or \
       candidate in (TSS2_CAR - RADAR_ACC_CAR) or \
       bool(ret.flags & ToyotaFlags.DISABLE_RADAR.value)
