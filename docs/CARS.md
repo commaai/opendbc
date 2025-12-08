@@ -134,6 +134,7 @@
 |Hyundai|Ioniq 5 (Southeast Asia and Europe only) 2022-24|All|[Upstream](#upstream)|
 |Hyundai|Ioniq 5 (with HDA II) 2022-24|Highway Driving Assist II|[Upstream](#upstream)|
 |Hyundai|Ioniq 5 (without HDA II) 2022-24|Highway Driving Assist|[Upstream](#upstream)|
+|Hyundai|Ioniq 5 PE (with HDA II & LFA2) 2025|Highway Driving Assist II & Lane Follow Assist 2|[Upstream](#upstream)|
 |Hyundai|Ioniq 6 (with HDA II) 2023-24|Highway Driving Assist II|[Upstream](#upstream)|
 |Hyundai|Ioniq Electric 2019|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Ioniq Electric 2020|All|[Upstream](#upstream)|

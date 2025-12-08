@@ -99,3 +99,6 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 # Manually checked
 "HONDA_CIVIC_2022" = [2.5, 1.2, 0.15]
 "HONDA_HRV_3G" = [2.5, 1.2, 0.2]
+
+# Hyundai/Kia/Genesis angle control
+"HYUNDAI_IONIQ_5_PE" = [3.172929, 3.5, 0.096019]

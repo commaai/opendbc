@@ -36,7 +36,7 @@ class CanBus(CanBusBase):
     return self._cam
 
 
-def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque):
+def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque, apply_angle):
   common_values = {
     "LKA_MODE": 2,
     "LKA_ICON": 2 if enabled else 1,
@@ -52,9 +52,25 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque)
   lkas_values = copy.copy(common_values)
   lkas_values["LKA_AVAILABLE"] = 0
 
+  # Angle control doesn't support using LFA yet
+  if CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+    # TODO: HAS_LANE_SAFETY isn't used by the stock system
+    lkas_values |= {
+      "LKA_MODE": 0,  # TODO: not used by the stock system
+      "TORQUE_REQUEST": 0,  # we don't use torque
+      "STEER_REQ": 0,  # we don't use torque
+      # this goes 0 when LFA lane changes, 3 when LKA_ICON is >=green
+      "LKA_AVAILABLE": 3 if lat_active else 0,
+      "ADAS_StrAnglReqVal": apply_angle,
+      "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
+      "ADAS_ACIAnglTqRedcGainVal": apply_torque if lat_active else 0,
+    }
+
   lfa_values = copy.copy(common_values)
   lfa_values["NEW_SIGNAL_1"] = 0
 
+  # For cars with an ADAS ECU (commonly HDA2), by sending LKAS actuation messages we're
+  # telling the ADAS ECU to forward our steering and disable stock LFA lane centering.
   ret = []
   if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
     lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "LKAS"

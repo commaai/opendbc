@@ -60,7 +60,10 @@ def get_steer_value(mode, param, msg):
   elif mode in (CarParams.SafetyModel.hyundai, CarParams.SafetyModel.hyundaiLegacy):
     torque = (((msg.data[3] & 0x7) << 8) | msg.data[2]) - 1024
   elif mode == CarParams.SafetyModel.hyundaiCanfd:
-    torque = ((msg.data[5] >> 1) | (msg.data[6] & 0xF) << 7) - 1024
+    if param & HyundaiSafetyFlags.CANFD_ANGLE_STEERING:
+      angle = (msg.data[11] << 6) | (msg.data[10] >> 2)
+    else:
+      torque = ((msg.data[5] >> 1) | (msg.data[6] & 0xF) << 7) - 1024
   elif mode == CarParams.SafetyModel.chrysler:
     torque = (((msg.data[0] & 0x7) << 8) | msg.data[1]) - 1024
   elif mode == CarParams.SafetyModel.subaru:
