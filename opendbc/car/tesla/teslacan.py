@@ -7,10 +7,14 @@ class TeslaCAN:
     self.packer = packer
 
   def create_steering_control(self, angle, enabled):
+    # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
+    # with openpilot, after overriding w/ ANGLE_CONTROL the wheel snaps back to the original angle abruptly
+    # so we now use LANE_KEEP_ASSIST to match stock FSD.
+    # see carstate.py for more details
     values = {
       "DAS_steeringAngleRequest": -angle,
       "DAS_steeringHapticRequest": 0,
-      "DAS_steeringControlType": 1 if enabled else 0,
+      "DAS_steeringControlType": 2 if enabled else 0,  # LANE_KEEP_ASSIST
     }
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
