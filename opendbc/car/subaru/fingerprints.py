@@ -244,7 +244,7 @@ FW_VERSIONS = {
       b'\xf4!`0\x07',
     ],
   },
-    CAR.SUBARU_CROSSTREK_2025: {
+  CAR.SUBARU_CROSSTREK_2025: {
     (Ecu.abs, 0x7b0, None): [
       b'\xa2 $\x17\x06',
     ],

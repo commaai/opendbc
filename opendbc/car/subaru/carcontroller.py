@@ -16,7 +16,7 @@ class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
-    self.apply_steer_last = 0
+    self.apply_angle_last = 0
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
@@ -34,23 +34,20 @@ class CarController(CarControllerBase):
     # *** steering ***
     if (self.frame % self.p.STEER_STEP) == 0:
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
-        actual_steering_angle_deg = CS.out.steeringAngleDeg
-        desired_steering_angle_deg = actuators.steeringAngleDeg
-
         apply_steer = apply_std_steer_angle_limits(
-          desired_steering_angle_deg,
-          self.apply_steer_last,
+          actuators.steeringAngleDeg,
+          self.apply_angle_last,
           CS.out.vEgoRaw,
-          actual_steering_angle_deg,
+          CS.out.steeringAngleDeg,
           CC.latActive,
           self.p.ANGLE_LIMITS
         )
 
         if not CC.latActive:
-          apply_steer = actual_steering_angle_deg
+          apply_steer = CS.out.steeringAngleDeg
 
         can_sends.append(subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive))
-        self.apply_steer_last = apply_steer
+        self.apply_angle_last = apply_steer
       else:
         apply_torque = int(round(actuators.torque * self.p.STEER_MAX))
 
@@ -155,11 +152,9 @@ class CarController(CarControllerBase):
           can_sends.append(subarucan.create_es_static_2(self.packer))
 
     new_actuators = actuators.as_builder()
-    if self.CP.flags & SubaruFlags.LKAS_ANGLE:
-      new_actuators.steeringAngleDeg = self.apply_steer_last
-    else:
-      new_actuators.torque = self.apply_torque_last / self.p.STEER_MAX
-      new_actuators.torqueOutputCan = self.apply_torque_last
+    new_actuators.steeringAngleDeg = self.apply_angle_last
+    new_actuators.torque = self.apply_torque_last / self.p.STEER_MAX
+    new_actuators.torqueOutputCan = self.apply_torque_last
 
     self.frame += 1
     return new_actuators, can_sends

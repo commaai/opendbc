@@ -20,9 +20,9 @@ class CarControllerParams:
     self.STEER_DRIVER_FACTOR = 1       # from dbc
 
     self.ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-        545,
-        ([0., 5., 35.], [5., .8, .15,]),
-        ([0., 5., 35.], [5., .8, .15,]),
+      545,
+      ([0., 5., 35.], [5., .8, .15,]),
+      ([0., 5., 35.], [5., .8, .15,]),
     )
 
     if CP.flags & SubaruFlags.GLOBAL_GEN2:

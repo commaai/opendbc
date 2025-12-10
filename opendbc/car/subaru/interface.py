@@ -46,7 +46,6 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.3
       ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.LKAS_ANGLE.value
       ret.dashcamOnly = is_release
-      
 
     if candidate in (CAR.SUBARU_ASCENT, CAR.SUBARU_ASCENT_2023):
       ret.steerActuatorDelay = 0.3  # end-to-end angle controller
@@ -87,7 +86,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_LEGACY_PREGLOBAL:
       ret.steerActuatorDelay = 0.15
 
-    elif candidate == CAR.SUBARU_OUTBACK_PREGLOBAL:
+    elif candidate in (CAR.SUBARU_OUTBACK_PREGLOBAL, CAR.SUBARU_CROSSTREK_2025):
       pass
     else:
       raise ValueError(f"unknown car: {candidate}")
