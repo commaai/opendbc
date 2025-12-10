@@ -260,7 +260,7 @@
 |Subaru|Ascent 2023|All|[Dashcam mode](#dashcam)|
 |Subaru|Crosstrek 2018-19|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|Crosstrek 2020-23|EyeSight Driver Assistance|[Upstream](#upstream)|
-|Subaru|Crosstrek 2025|All|[Upstream](#upstream)|
+|Subaru|Crosstrek 2025|All|[Dashcam mode](#dashcam)|
 |Subaru|Crosstrek Hybrid 2020|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Forester 2017-18|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Forester 2019-21|All|[Upstream](#upstream)|
