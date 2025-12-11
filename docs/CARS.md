@@ -257,14 +257,14 @@
 |SEAT|Ateca 2016-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |SEAT|Leon 2014-20|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Subaru|Ascent 2019-21|All|[Upstream](#upstream)|
-|Subaru|Ascent 2023|All|[Dashcam mode](#dashcam)|
+|Subaru|Ascent 2023|All|[Upstream](#upstream)|
 |Subaru|Crosstrek 2018-19|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|Crosstrek 2020-23|EyeSight Driver Assistance|[Upstream](#upstream)|
-|Subaru|Crosstrek 2025|All|[Dashcam mode](#dashcam)|
+|Subaru|Crosstrek 2025|All|[Upstream](#upstream)|
 |Subaru|Crosstrek Hybrid 2020|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Forester 2017-18|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Forester 2019-21|All|[Upstream](#upstream)|
-|Subaru|Forester 2022-24|All|[Dashcam mode](#dashcam)|
+|Subaru|Forester 2022-24|All|[Upstream](#upstream)|
 |Subaru|Forester Hybrid 2020|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Impreza 2017-19|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|Impreza 2020-22|EyeSight Driver Assistance|[Upstream](#upstream)|
@@ -273,7 +273,7 @@
 |Subaru|Outback 2015-17|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Outback 2018-19|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Outback 2020-22|All|[Upstream](#upstream)|
-|Subaru|Outback 2023|All|[Dashcam mode](#dashcam)|
+|Subaru|Outback 2023|All|[Upstream](#upstream)|
 |Subaru|Solterra 2023-25|Any|[Not compatible](#can-bus-security)|
 |Subaru|XV 2018-19|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|XV 2020-21|EyeSight Driver Assistance|[Upstream](#upstream)|
