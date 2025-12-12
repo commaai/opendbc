@@ -36,7 +36,7 @@ class CarControllerParams:
     # If the max stock LKAS request is <384, add your car to this list.
     elif CP.carFingerprint in (CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA, CAR.HYUNDAI_ELANTRA_GT_I30, CAR.HYUNDAI_IONIQ,
                                CAR.HYUNDAI_IONIQ_EV_LTD, CAR.HYUNDAI_SANTA_FE_PHEV_2022, CAR.HYUNDAI_SONATA_LF, CAR.KIA_FORTE, CAR.KIA_NIRO_PHEV,
-                               CAR.KIA_OPTIMA_H, CAR.KIA_OPTIMA_H_G4_FL, CAR.KIA_SORENTO):
+                               CAR.KIA_OPTIMA_H, CAR.KIA_OPTIMA_H_G4_FL, CAR.KIA_SORENTO, CAR.HYUNDAI_SONATA_LF_HYBRID):
       self.STEER_MAX = 255
 
     # these cars have significantly more torque than most HKG; limit to 70% of max
@@ -365,6 +365,11 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Custin 2023", "All", car_parts=CarParts.common([CarHarness.hyundai_k]))],
     CarSpecs(mass=1690, wheelbase=3.055, steerRatio=17),  # mass: from https://www.hyundai-motor.com.tw/clicktobuy/custin#spec_0, steerRatio: from learner
     flags=HyundaiFlags.CHECKSUM_CRC8,
+  )
+  HYUNDAI_SONATA_LF_HYBRID = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Sonata Hybrid 2018-19", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
+    CarSpecs(mass=1585, wheelbase=2.805, steerRatio=14.3 * 1.15),  # 15% higher at the center seems reasonable,
+    flags=HyundaiFlags.HYBRID | HyundaiFlags.LEGACY,
   )
 
   # Kia
