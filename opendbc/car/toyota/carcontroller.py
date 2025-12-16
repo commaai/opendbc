@@ -179,6 +179,9 @@ class CarController(CarControllerBase):
         self.standstill_req = False
 
     else:
+      # if user engages at a stop with foot on brake, PCM starts in a special cruise standstill mode. on resume press,
+      # brakes can take a while to ramp up causing a lurch forward. prevent resume press until planner wants to move.
+      # TODO: hybrids do not have this issue and can stay stopped after resume press, whitelist them
       #should_resume = CC.cruiseControl.resume or actuators.accel > 0
       should_resume = actuators.accel > 0
       if should_resume:
@@ -265,11 +268,7 @@ class CarController(CarControllerBase):
 
         main_accel_cmd = 0. if self.CP.flags & ToyotaFlags.SECOC.value else pcm_accel_cmd
 
-        # if user engages at a stop with foot on brake, PCM starts in a special cruise standstill mode. on resume press,
-        # brakes can take a while to ramp up causing a lurch forward. prevent resume press until planner wants to move.
-        # TODO: hybrids do not have this issue and can stay stopped after resume press, whitelist them
-        standstill_req = self.standstill_req or (CS.out.cruiseState.standstill and not CC.cruiseControl.resume)
-        can_sends.append(toyotacan.create_accel_command(self.packer, main_accel_cmd, pcm_cancel_cmd, self.permit_braking, standstill_req, lead,
+        can_sends.append(toyotacan.create_accel_command(self.packer, main_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
                                                         CS.acc_type, fcw_alert, self.distance_button))
         if self.CP.flags & ToyotaFlags.SECOC.value:
           acc_cmd_2 = toyotacan.create_accel_command_2(self.packer, pcm_accel_cmd)
