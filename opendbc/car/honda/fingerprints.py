@@ -1068,6 +1068,7 @@ FW_VERSIONS = {
   CAR.ACURA_ADX: {
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'8S102-3BH-A020\x00\x00',
+      b'8S102-3BH-A030\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-3BH-A320\x00\x00',
