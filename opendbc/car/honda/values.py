@@ -281,7 +281,7 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_ALT_RADAR,
   )
   ACURA_ADX = HondaBoschPlatformConfig(
-    [HondaCarDocs("Acura ADX 2025", "All")],
+    [HondaCarDocs("Acura ADX 2025-26", "All")],
     CarSpecs(mass=3578 * CV.LB_TO_KG, wheelbase=2.65, steerRatio=16.6, centerToFrontRatio=0.43),
     {Bus.pt: 'honda_bosch_radarless_generated'},
     flags=HondaFlags.BOSCH_RADARLESS
