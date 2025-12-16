@@ -3,7 +3,7 @@ from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
 Ecu = structs.CarParams.Ecu
@@ -109,10 +109,7 @@ class HondaCarDocs(CarDocs):
     else:
       harness = CarHarness.nidec
 
-    if CP.carFingerprint in (CAR.HONDA_PILOT_4G, CAR.HONDA_PASSPORT_4G):
-      self.car_parts = CarParts([Device.threex_angled_mount, harness])
-    else:
-      self.car_parts = CarParts.common([harness])
+    self.car_parts = CarParts.common([harness])
 
 
 class Footnote(Enum):
@@ -281,7 +278,7 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_ALT_RADAR,
   )
   ACURA_ADX = HondaBoschPlatformConfig(
-    [HondaCarDocs("Acura ADX 2025", "All")],
+    [HondaCarDocs("Acura ADX 2025-26", "All")],
     CarSpecs(mass=3578 * CV.LB_TO_KG, wheelbase=2.65, steerRatio=16.6, centerToFrontRatio=0.43),
     {Bus.pt: 'honda_bosch_radarless_generated'},
     flags=HondaFlags.BOSCH_RADARLESS
