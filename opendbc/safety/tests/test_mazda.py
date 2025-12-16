@@ -80,6 +80,25 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
+  def test_gas_pressed_alternates(self):
+    # Byte 4 is non-zero
+    to_send = common.make_msg(0, 0x202, 8)
+    to_send[0].data = bytes([0, 0, 0, 0, 1, 0, 0, 0])
+    self.safety.safety_rx_hook(to_send)
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
+    # Byte 5 is non-zero (masked)
+    to_send = common.make_msg(0, 0x202, 8)
+    to_send[0].data = bytes([0, 0, 0, 0, 0, 0xF0, 0, 0])
+    self.safety.safety_rx_hook(to_send)
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
+    # Both 0
+    to_send = common.make_msg(0, 0x202, 8)
+    to_send[0].data = bytes([0, 0, 0, 0, 0, 0, 0, 0])
+    self.safety.safety_rx_hook(to_send)
+    self.assertFalse(self.safety.get_gas_pressed_prev())
+
 
 if __name__ == "__main__":
   unittest.main()
