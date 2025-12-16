@@ -170,12 +170,25 @@ class CarController(CarControllerBase):
 
     # *** gas and brake ***
 
-    # on entering standstill, send standstill request
-    if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
-      self.standstill_req = True
-    if CS.pcm_acc_status != 8:
-      # pcm entered standstill or it's disabled
-      self.standstill_req = False
+    # on entering standstill, send standstill request for older TSS-P cars that aren't designed to stay engaged at a stop
+    if self.CP.carFingerprint not in NO_STOP_TIMER_CAR:
+      if CS.out.standstill and not self.last_standstill:
+        self.standstill_req = True
+      if CS.pcm_acc_status != 8:
+        # pcm entered standstill or it's disabled
+        self.standstill_req = False
+
+    else:
+      # if user engages at a stop with foot on brake, PCM starts in a special cruise standstill mode. on resume press,
+      # brakes can take a while to ramp up causing a lurch forward. prevent resume press until planner wants to move.
+      # don't use CC.cruiseControl.resume since it is gated on CS.cruiseState.standstill which goes false for 3s after resume press
+      # TODO: hybrids do not have this issue and can stay stopped after resume press, whitelist them
+      should_resume = actuators.accel > 0
+      if should_resume:
+        self.standstill_req = False
+
+      if not should_resume and CS.out.cruiseState.standstill:
+        self.standstill_req = True
 
     self.last_standstill = CS.out.standstill
 
