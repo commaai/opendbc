@@ -1,0 +1,40 @@
+VERSION ""
+
+NS_ :
+BS_:
+
+BU_: Vector__XXX
+
+#################################
+# STEERING / CAMERA
+#################################
+
+BO_ 0x1AB ADAS_CAM_STEER: 32 Vector__XXX
+ SG_ STEER_ANGLE : 16|16@1- (0.1,0) [-3276.8|3276.7] "deg" Vector__XXX
+ SG_ STEER_RATE  : 32|16@1- (0.01,0) [-327.68|327.67] "deg/s" Vector__XXX
+
+#################################
+# VEHICLE SPEED
+#################################
+
+BO_ 0x226 ADAS_CAM_SPEED: 32 Vector__XXX
+ SG_ VEHICLE_SPEED : 0|16@1+ (0.01,0) [0|655.35] "m/s" Vector__XXX
+ SG_ WHEEL_SPEED_FL : 16|16@1+ (0.01,0) [0|655.35] "m/s" Vector__XXX
+ SG_ WHEEL_SPEED_FR : 32|16@1+ (0.01,0) [0|655.35] "m/s" Vector__XXX
+
+#################################
+# BRAKE / ACC STATE
+#################################
+
+BO_ 0x5C3 ADAS_CAM_STATE: 16 Vector__XXX
+ SG_ BRAKE_PRESSED : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ACC_ACTIVE    : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+
+#################################
+# MISC STATE
+#################################
+
+BO_ 0x5C7 ADAS_CAM_MISC: 16 Vector__XXX
+ SG_ STANDSTILL : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+CM_ "Renault Megane E-Tech 23/24 - PR2 decoded signals from CAN-FD camera bus";
