@@ -63,6 +63,20 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", 0, values)
 
+  def test_rx_hook_wrong_bus(self):
+    values = {s: 10 for s in ["FR", "FL", "RR", "RL"]}
+    msg = self.packer.make_can_msg_safety("Wheel_Speeds", 2, values)
+    self._rx(msg)
+
+    self.assertFalse(self.safety.get_vehicle_moving())
+
+  def test_vehicle_moving_partial(self):
+    self._rx(self._wheel_speed_msg({"FR": 0, "FL": 0, "RR": 0, "RL": 0}))
+    self.assertFalse(self.safety.get_vehicle_moving())
+
+    self._rx(self._wheel_speed_msg({"FR": 0, "FL": 0, "RR": 100, "RL": 100}))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
 
 class TestSubaruPreglobalReversedDriverTorqueSafety(TestSubaruPreglobalSafety):
   FLAGS = SubaruSafetyFlags.PREGLOBAL_REVERSED_DRIVER_TORQUE
