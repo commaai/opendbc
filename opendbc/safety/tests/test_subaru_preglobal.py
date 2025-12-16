@@ -38,10 +38,14 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {"Steer_Torque_Sensor": torque}
     return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
-  def _speed_msg(self, speed):
+  def _wheel_speed_msg(self, values):
     # subaru safety doesn't use the scaled value, so undo the scaling
-    values = {s: speed*0.0592 for s in ["FR", "FL", "RR", "RL"]}
+    values = {k: v * 0.0592 for k, v in values.items()}
     return self.packer.make_can_msg_safety("Wheel_Speeds", 0, values)
+
+  def _speed_msg(self, speed):
+    values = {s: speed for s in ["FR", "FL", "RR", "RL"]}
+    return self._wheel_speed_msg(values)
 
   def _user_brake_msg(self, brake):
     values = {"Brake_Pedal": brake}
