@@ -76,16 +76,16 @@ void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   // so keep track of user button presses to deny engagement if no interaction
 
   // enter controls on rising edge of ACC and recent user button press, exit controls when ACC off
-  if (!hyundai_longitudinal) {
-    if (cruise_engaged && !cruise_engaged_prev && (hyundai_last_button_interaction < HYUNDAI_PREV_BUTTON_SAMPLES)) {
+  if (cruise_engaged && !cruise_engaged_prev) {
+    if (hyundai_last_button_interaction < HYUNDAI_PREV_BUTTON_SAMPLES) {
       controls_allowed = true;
     }
-
-    if (!cruise_engaged) {
-      controls_allowed = false;
-    }
-    cruise_engaged_prev = cruise_engaged;
   }
+
+  if (!cruise_engaged) {
+    controls_allowed = false;
+  }
+  cruise_engaged_prev = cruise_engaged;
 }
 
 void hyundai_common_cruise_buttons_check(const int cruise_button, const bool main_button) {
@@ -128,10 +128,9 @@ uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
 
   if (len == 24) {
     crc ^= 0x819dU;
-  } else if (len == 32) {
+  }
+  if (len == 32) {
     crc ^= 0x9f5bU;
-  } else {
-
   }
 
   return crc;
