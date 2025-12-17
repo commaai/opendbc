@@ -319,7 +319,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Hyundai Tucson Diesel 2019", car_parts=CarParts.common([CarHarness.hyundai_l])),
     ],
     CarSpecs(mass=3520 * CV.LB_TO_KG, wheelbase=2.67, steerRatio=16.1, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.TCU_GEARS | HyundaiFlags.HEAVY,
+    flags=HyundaiFlags.TCU_GEARS,
   )
   HYUNDAI_PALISADE = HyundaiPlatformConfig(
     [
