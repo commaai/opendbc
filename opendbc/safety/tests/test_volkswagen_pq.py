@@ -129,6 +129,18 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
+  def test_acc_status_values(self):
+    for status in [1, 2]:
+      self.safety.set_controls_allowed(0)
+      # Reset previous state (assume 0)
+      values = {"MO2_Sta_GRA": 0}
+      self._rx(self.packer.make_can_msg_safety("Motor_2", 0, values))
+
+      # Rising edge to status
+      values = {"MO2_Sta_GRA": status}
+      self._rx(self.packer.make_can_msg_safety("Motor_2", 0, values))
+      self.assertTrue(self.safety.get_controls_allowed())
+
 
 class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.LongitudinalAccelSafetyTest):
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_LDW_1, 0], [MSG_ACC_SYSTEM, 0], [MSG_ACC_GRA_ANZEIGE, 0]]
@@ -165,6 +177,18 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
+
+  def test_set_resume_simultaneous(self):
+    # Cover (set_falling || resume_falling) branch where logic requires simultaneous event coverage
+    self._rx(self._motor_5_msg(main_switch=True))
+    self.safety.set_controls_allowed(0)
+    # Ensure Set and Resume are both High (Rising)
+    self._rx(self._button_msg(_set=True, resume=True, bus=0))
+    # Ensure Set and Resume are both High (Holding - covers T && !T)
+    self._rx(self._button_msg(_set=True, resume=True, bus=0))
+    # Falling edge both -> Enable
+    self._rx(self._button_msg(_set=False, resume=False, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
 
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
