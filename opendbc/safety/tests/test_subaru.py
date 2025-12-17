@@ -111,6 +111,17 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
+  def test_wheel_speeds(self):
+    for wheel in ["FL", "FR", "RL", "RR"]:
+      values = {s: 0 for s in ["FR", "FL", "RR", "RL"]}
+      values[wheel] = 100
+      self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values))
+      self.assertTrue(self.safety.get_vehicle_moving())
+
+    values = {s: 0 for s in ["FR", "FL", "RR", "RL"]}
+    self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values))
+    self.assertFalse(self.safety.get_vehicle_moving())
+
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
@@ -226,10 +237,18 @@ class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSub
     # Non-Tester present is not allowed
     self.assertFalse(self._tx(self._es_uds_msg(not_tester_present)))
 
+    # Tester present with non-zero suffix (bytes 4-7) is BLOCK
+    tester_present_garbage = b'\x02\x3E\x80\x00\xFF\x00\x00\x00'
+    self.assertFalse(self._tx(self._es_uds_msg(tester_present_garbage)))
+
     # Only button_did is allowed to be read via UDS
     for did in range(0xFFFF):
       should_tx = (did == button_did)
       self.assertEqual(self._tx(self._es_uds_msg(self._rdbi_msg(did))), should_tx)
+
+    # Button RDBI with non-zero suffix is BLOCK
+    button_rdbi_garbage = b'\x03\x22\x11\x30\xFF\x00\x00\x00'
+    self.assertFalse(self._tx(self._es_uds_msg(button_rdbi_garbage)))
 
     # any other msg is not allowed
     for sid in range(0xFF):
