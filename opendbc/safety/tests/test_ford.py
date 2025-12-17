@@ -197,6 +197,27 @@ class TestFordSafetyBase(common.CarSafetyTest):
     }
     return self.packer.make_can_msg_safety("Steering_Data_FD1", bus, values)
 
+  def test_cruise_engaged(self):
+    for state in range(8):
+      self.safety.set_controls_allowed(True)
+      self._rx(self._pcm_status_msg(state in (4, 5)))
+      self.assertEqual(state in (4, 5), self.safety.get_controls_allowed())
+
+    # Ensure we test the boolean OR conditions for state 4 and 5 explicitly
+    self.safety.set_controls_allowed(True)
+    self._rx(self._pcm_status_msg(True)) # Sets state 5 (default in helper)
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # Manually send state 4
+    values = {"CcStat_D_Actl": 4}
+    self._rx(self.packer.make_can_msg_safety("EngBrakeData", 0, values))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # Manually send state 5
+    values = {"CcStat_D_Actl": 5}
+    self._rx(self.packer.make_can_msg_safety("EngBrakeData", 0, values))
+    self.assertTrue(self.safety.get_controls_allowed())
+
   def test_rx_hook(self):
     # checksum, counter, and quality flag checks
     for quality_flag in [True, False]:
@@ -379,6 +400,26 @@ class TestFordSafetyBase(common.CarSafetyTest):
         self.assertEqual(enabled, self._tx(self._acc_button_msg(Buttons.CANCEL, bus)))
 
 
+class TestFordStockSafety(TestFordSafetyBase):
+  STEER_MESSAGE = MSG_LateralMotionControl
+  TX_MSGS = [[MSG_LateralMotionControl, 0], [MSG_Steering_Data_FD1, 0], [MSG_Steering_Data_FD1, 2], [MSG_ACCDATA_3, 0], [MSG_Lane_Assist_Data1, 0],
+             [MSG_IPMA_Data, 0]]
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_LateralMotionControl, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_IPMA_Data)}
+  FWD_BLACKLISTED_ADDRS = {2: [MSG_LateralMotionControl, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_IPMA_Data]}
+  ANGLE_IS_CURVATURE = False
+  MAX_CURVATURE = 0.02
+
+  def setUp(self):
+    self.packer = CANPackerSafety("ford_lincoln_base_pt")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, 0)
+    self.safety.init_tests()
+
+  def test_max_lateral_acceleration(self):
+    # CAN does not limit curvature from lateral acceleration
+    pass
+
+
 class TestFordCANFDStockSafety(TestFordSafetyBase):
   STEER_MESSAGE = MSG_LateralMotionControl2
 
@@ -414,8 +455,8 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
       "AccPrpl_A_Rq": gas,                              # [-5|5.23] m/s^2
       "AccPrpl_A_Pred": gas,                            # [-5|5.23] m/s^2
       "AccBrkTot_A_Rq": brake,                          # [-20|11.9449] m/s^2
-      "AccBrkPrchg_B_Rq": 1 if brake_actuation else 0,  # Pre-charge brake request: 0=No, 1=Yes
-      "AccBrkDecel_B_Rq": 1 if brake_actuation else 0,  # Deceleration request: 0=Inactive, 1=Active
+      "AccBrkPrchg_B_Rq": 1 if brake_actuation == 1 or brake_actuation == 3 else 0,  # Pre-charge
+      "AccBrkDecel_B_Rq": 1 if brake_actuation == 2 or brake_actuation == 3 else 0,  # Decel
       "CmbbDeny_B_Actl": 1 if cmbb_deny else 0,         # [0|1] deny AEB actuation
     }
     return self.packer.make_can_msg_safety("ACCDATA", 0, values)
@@ -441,11 +482,16 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   def test_brake_safety_check(self):
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
-      for brake_actuation in (True, False):
+      for brake_actuation in (0, 1, 2, 3):
+        # 0: Inactive
+        # 1: Pre-charge only
+        # 2: Decel only
+        # 3: Both
+        brake_active = brake_actuation > 0
         for brake in np.arange(self.MIN_ACCEL - 2, self.MAX_ACCEL + 2, 0.05):
           brake = round(brake, 2)  # floats might not hit exact boundary conditions without rounding
           should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
-          should_tx = should_tx and (controls_allowed or not brake_actuation)
+          should_tx = should_tx and (controls_allowed or not brake_active)
           self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, brake_actuation)))
 
 
@@ -465,8 +511,7 @@ class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):
   def setUp(self):
     self.packer = CANPackerSafety("ford_lincoln_base_pt")
     self.safety = libsafety_py.libsafety
-    # Make sure we enforce long safety even without long flag for CAN
-    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
 
   def test_max_lateral_acceleration(self):
