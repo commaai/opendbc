@@ -76,6 +76,16 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     msg[0].data[6] = 0xAB
     self.assertTrue(self._rx(msg))
 
+    # brake
+    self.safety.set_controls_allowed(1)
+    self.assertTrue(self._rx(self._user_brake_msg(1)))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._user_brake_msg(0)))
+
+    # gas
+    self.assertTrue(self._rx(self._user_gas_msg(1)))
+    self.assertTrue(self._rx(self._user_gas_msg(0)))
+
 
 class TestPsaStockSafety(TestPsaSafetyBase):
 
