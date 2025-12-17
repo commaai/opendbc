@@ -109,6 +109,12 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
         self.assertFalse(self._rx(msg))
         self.assertFalse(self.safety.get_controls_allowed())
 
+    # PCM cruise
+    self.assertTrue(self._rx(self._pcm_status_msg(1)))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._pcm_status_msg(0)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
 
 class TestRivianStockSafety(TestRivianSafetyBase):
 
