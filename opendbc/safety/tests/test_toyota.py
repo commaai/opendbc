@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import numpy as np
-import random
 import unittest
 import itertools
 
@@ -79,20 +78,36 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
+                           (False, b"\x0F\x02\x3E\x00\x00\x00\x00\x01"),  # wrong suffix
                            (True, b"\x0F\x02\x3E\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
       self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
 
   def test_block_aeb(self, stock_longitudinal: bool = False):
     for controls_allowed in (True, False):
-      for bad in (True, False):
-        for _ in range(10):
-          self.safety.set_controls_allowed(controls_allowed)
-          dat = [random.randint(1, 255) for _ in range(7)]
-          if not bad:
-            dat = [0]*6 + dat[-1:]
-          msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
-          self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
+      self.safety.set_controls_allowed(controls_allowed)
+
+      # Clean message (all zeros) -> Should Pass (if not stock long)
+      dat = [0] * 7
+      msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
+      self.assertEqual(not stock_longitudinal, self._tx(msg))
+
+      # Byte 0-3 mismatch
+      for i in range(4):
+        dat = [0] * 7
+        dat[i] = 1
+        msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
+        self.assertFalse(self._tx(msg))
+
+      # Byte 4 mismatch
+      dat = [0, 0, 0, 0, 1, 0, 0]
+      msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
+      self.assertFalse(self._tx(msg))
+
+      # Byte 5 mismatch
+      dat = [0, 0, 0, 0, 0, 1, 0]
+      msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
+      self.assertFalse(self._tx(msg))
 
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
@@ -141,6 +156,17 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE)
     self.safety.init_tests()
+
+  def test_rx_hook_steer_init_non_lta(self):
+    # Init=True, LTA=False (default for this class) -> Should block sample update
+    angle = 100
+    self._rx(self._angle_meas_msg(angle, steer_angle_initializing=True))
+    self.assertEqual(0, self.safety.get_angle_meas_max())
+    self.assertEqual(0, self.safety.get_angle_meas_min())
+
+    # Init=False -> Should update
+    self._rx(self._angle_meas_msg(angle, steer_angle_initializing=False))
+    self.assertNotEqual(0, self.safety.get_angle_meas_max())
 
 
 class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest):
