@@ -108,6 +108,28 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
+  def test_acc_statuses(self):
+    # Verify ACC engaged status for 3, 4, 5
+    for status in [3, 4, 5]:
+      self.safety.set_controls_allowed(0)
+      # Reset cruise state to allow rising edge detection
+      values_reset = {"ACC_Status_ACC": 0}
+      self._rx(self.packer.make_can_msg_safety("ACC_05", 2, values_reset))
+
+      values = {"ACC_Status_ACC": status}
+      self._rx(self.packer.make_can_msg_safety("ACC_05", 2, values))
+      self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_steer_statuses(self):
+    # Verify steer request for status 5 and 7
+    for status in [5, 7]:
+      values = {"HCA_01_Sendestatus": status, "HCA_01_Status_HCA": status} # Both used effectively
+      self.assertTrue(self._tx(self.packer.make_can_msg_safety("HCA_01", 0, values)))
+
+    # Verify block when not requesting but torque present
+    values = {"HCA_01_Sendestatus": 0, "HCA_01_Status_HCA": 0, "HCA_01_LM_Offset": 50}
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("HCA_01", 0, values)))
+
 
 class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LS_01, 0], [MSG_LS_01, 2]]
@@ -133,8 +155,21 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False, main_switch=True))
     self.safety.set_controls_allowed(1)
+    # LS_Abbrechen matches GET_BIT(msg, 13U) logic
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
+
+    # Verify bit 13 specifically
+    self.safety.set_controls_allowed(1)
+    values = {"LS_Abbrechen": 1}
+    self._rx(self.packer.make_can_msg_safety("LS_01", 0, values))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # Verify False branch (bit 13 = 0)
+    self.safety.set_controls_allowed(1)
+    values = {"LS_Abbrechen": 0}
+    self._rx(self.packer.make_can_msg_safety("LS_01", 0, values))
+    self.assertTrue(self.safety.get_controls_allowed())
 
 
 if __name__ == "__main__":
