@@ -81,6 +81,36 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
 
+  def test_cruise_override(self):
+    if self.safety.get_current_safety_param() & HyundaiSafetyFlags.LONG:
+      return
+
+    # Reset cruise state to ensure rising edge detection works
+    self.safety.set_cruise_engaged_prev(False)
+
+    values = {"ACCMode": 2}
+    self._rx(self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values))
+    self.safety.set_controls_allowed(0)
+    self._rx(self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values))
+
+  def test_wheel_speeds_asymmetric(self):
+    for wheel in ["FL", "FR", "RL", "RR"]:
+      self.safety.set_controls_allowed(1)
+      values = {f"WHL_Spd{pos}Val": 0 for pos in ["FL", "FR", "RL", "RR"]}
+      values[f"WHL_Spd{wheel}Val"] = (self.STANDSTILL_THRESHOLD + 1) * 0.03125
+      self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
+      self.assertTrue(self.safety.get_vehicle_moving())
+
+      values[f"WHL_Spd{wheel}Val"] = (self.STANDSTILL_THRESHOLD - 1) * 0.03125
+      self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
+      self.assertFalse(self.safety.get_vehicle_moving())
+
+    speed_kph = 100
+    values = {f"WHL_Spd{pos}Val": speed_kph for pos in ["FL", "FR", "RL", "RR"]}
+    for _ in range(10):
+      self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
+    self.assertAlmostEqual(self.safety.get_vehicle_speed_min(), speed_kph / 3.6, delta=1.0)
+
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
@@ -149,6 +179,22 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
       self.assertTrue(self._tx(self._acc_cancel_msg(True)))
       self.assertFalse(self._tx(self._acc_cancel_msg(True, accel=1)))
       self.assertFalse(self._tx(self._acc_cancel_msg(False)))
+
+  def test_accel_raw_val_mismatch(self):
+    if self.safety.get_current_safety_param() & HyundaiSafetyFlags.LONG:
+      return
+
+    self.safety.set_controls_allowed(1)
+
+    # Both 0 -> Allowed (cancel)
+    msg = self._acc_cancel_msg(True, accel=0)
+    self.assertTrue(self._tx(msg))
+
+    # Mismatch -> Blocked
+    for raw, val in [(1, 0), (0, 1)]:
+      values = {"ACCMode": 4, "aReqRaw": raw, "aReqValue": val}
+      msg = self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
+      self.assertFalse(self._tx(msg))
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
