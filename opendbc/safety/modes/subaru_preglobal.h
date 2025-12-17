@@ -108,7 +108,7 @@ static safety_config subaru_preglobal_init(uint16_t param) {
 
   subaru_common_init();
 
-  const int SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE = 4;
+  const uint16_t SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE = 4;
 
   subaru_pg_reversed_driver_torque = GET_FLAG(param, SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE);
 
