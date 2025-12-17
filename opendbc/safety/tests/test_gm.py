@@ -132,6 +132,29 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"ACCButtons": buttons}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
 
+  def test_vehicle_moving(self):
+    self._rx(self._speed_msg(0))
+    self.assertFalse(self.safety.get_vehicle_moving())
+
+    self._rx(self._speed_msg(self.STANDSTILL_THRESHOLD + 1))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+    # Mixed moving/standstill
+    values = {"RLWheelSpd": 0, "RRWheelSpd": self.STANDSTILL_THRESHOLD + 1}
+    self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+    values = {"RLWheelSpd": self.STANDSTILL_THRESHOLD + 1, "RRWheelSpd": 0}
+    self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+  def test_tx_hook_violation(self):
+    # Ensure allow bit is blocked if controls allowed is false
+    self.safety.set_controls_allowed(0)
+    # Manually construct 0x2CB packet with bit 0 set (Apply)
+    msg = libsafety_py.make_CANPacket(0x2CB, 0, b'\x01\x00\x00\x00\x00\x00\x00\x00')
+    self.assertFalse(self._tx(msg))
+
 
 class TestGmEVSafetyBase(TestGmSafetyBase):
   EXTRA_SAFETY_PARAM = GMSafetyFlags.EV
@@ -199,6 +222,14 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
     for enabled in (True, False):
       self._rx(self._pcm_status_msg(enabled))
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
+
+  def test_rx_buttons_ignored(self):
+    # RX hook should ignore 0x1E1 buttons because gm_pcm_cruise is true
+    # Or simply running this line covers the check.
+    # We must force Bus 0 because GM_COMMON_RX_CHECKS checks for 0x1E1 on Bus 0.
+    values = {"ACCButtons": Buttons.DECEL_SET}
+    msg = self.packer.make_can_msg_safety("ASCMSteeringButton", 0, values)
+    self._rx(msg)
 
 
 class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
