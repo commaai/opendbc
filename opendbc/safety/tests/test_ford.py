@@ -455,8 +455,8 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
       "AccPrpl_A_Rq": gas,                              # [-5|5.23] m/s^2
       "AccPrpl_A_Pred": gas,                            # [-5|5.23] m/s^2
       "AccBrkTot_A_Rq": brake,                          # [-20|11.9449] m/s^2
-      "AccBrkPrchg_B_Rq": 1 if brake_actuation == 1 or brake_actuation == 3 else 0,  # Pre-charge
-      "AccBrkDecel_B_Rq": 1 if brake_actuation == 2 or brake_actuation == 3 else 0,  # Decel
+      "AccBrkPrchg_B_Rq": 1 if brake_actuation in (1, 3) else 0,  # Pre-charge
+      "AccBrkDecel_B_Rq": 1 if brake_actuation in (2, 3) else 0,  # Decel
       "CmbbDeny_B_Actl": 1 if cmbb_deny else 0,         # [0|1] deny AEB actuation
     }
     return self.packer.make_can_msg_safety("ACCDATA", 0, values)
