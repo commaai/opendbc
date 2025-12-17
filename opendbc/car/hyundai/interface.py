@@ -120,6 +120,9 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & HyundaiFlags.ALT_LIMITS_2:
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.ALT_LIMITS_2.value
 
+    if ret.flags & HyundaiFlags.HEAVY:
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.HEAVY.value
+
       # see https://github.com/commaai/opendbc/pull/1137/
       ret.dashcamOnly = True
 
