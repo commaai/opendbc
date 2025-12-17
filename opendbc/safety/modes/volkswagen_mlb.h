@@ -68,19 +68,17 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == 2U) {
     // TODO: See if there's a bus-agnostic TSK message we can use instead
-    if (msg->addr == MSG_ACC_05) {
-      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
-      // Always exit controls on main switch off
-      // Signal: ACC_05.ACC_Status_ACC
-      int acc_status = (msg->data[7] & 0xEU) >> 1;
-      bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-      acc_main_on = cruise_engaged || (acc_status == 2);
+    // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
+    // Always exit controls on main switch off
+    // Signal: ACC_05.ACC_Status_ACC
+    int acc_status = (msg->data[7] & 0xEU) >> 1;
+    bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
+    acc_main_on = cruise_engaged || (acc_status == 2);
 
-      pcm_cruise_check(cruise_engaged);
+    pcm_cruise_check(cruise_engaged);
 
-      if (!acc_main_on) {
-        controls_allowed = false;
-      }
+    if (!acc_main_on) {
+      controls_allowed = false;
     }
   }
 }
