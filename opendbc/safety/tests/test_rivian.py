@@ -134,7 +134,6 @@ class TestRivianStockSafety(TestRivianSafetyBase):
         values = {"VDM_AdasInterfaceStatus": interface_status}
         self.assertTrue(self._tx(self.packer.make_can_msg_safety("VDM_AdasSts", 2, values)))
 
-
   def test_fuzz_hooks(self):
     # ensure default branches are covered
     msg = libsafety_py.ffi.new("CANPacket_t *")
