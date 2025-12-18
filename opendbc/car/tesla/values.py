@@ -65,16 +65,6 @@ class CAR(Platforms):
 
 # Tesla EPS firmware: "<project>,<model_code><version>"
 # Model codes: E* = Model 3, Y* = Model Y, X* = Model X
-#
-# API Consistency Notes (bounty requirement):
-# - Steering API is consistent across HW2.5, HW3, and HW4 for Model 3/Y
-# - HW2.5 sends longitudinal control at 40Hz instead of 25Hz
-#
-# Known Limitations:
-# - Some HW2.5 vehicles without ACC capability cannot utilize longitudinal control
-#   due to different Drive Interface firmware versions (these still fingerprint but
-#   will be detected at runtime)
-# - Model S is not currently supported
 FW_PATTERN = re.compile(rb'^[^,]+,(?P<model_code>[A-Z][A-Z0-9]*)')
 
 MODEL_CODE_TO_PLATFORM = {

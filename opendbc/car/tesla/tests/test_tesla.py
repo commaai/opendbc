@@ -9,12 +9,6 @@ from opendbc.car.tesla.fingerprints import FW_VERSIONS
 Ecu = CarParams.Ecu
 
 
-# Known ECU address for Tesla EPS
-ECU_ADDRESSES = {
-  Ecu.eps: 0x730,
-}
-
-
 class TestTeslaFW:
   def test_fw_pattern_model3(self):
     """Test that Model 3 firmware patterns are correctly parsed."""
@@ -87,7 +81,6 @@ class TestTeslaFW:
     ]
     for fw in invalid_fws:
       model_code = get_model_code(fw)
-      # Empty model code after comma should still fail platform mapping
       if model_code:
         platform = get_platform_from_model_code(model_code)
         if platform:
