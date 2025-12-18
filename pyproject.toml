@@ -5,7 +5,7 @@ description = "CAN bus databases and tools"
 license = { file = "LICENSE" }
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
 readme = "README.md"
-requires-python = ">=3.9,<3.13"  # pycapnp doesn't work with 3.13
+requires-python = ">=3.11,<3.13"  # pycapnp doesn't work with 3.13
 
 urls = { "homepage" = "https://github.com/commaai/opendbc" }
 

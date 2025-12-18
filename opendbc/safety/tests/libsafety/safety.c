@@ -223,11 +223,11 @@ void set_acc_main_on(bool c){
   acc_main_on = c;
 }
 
-void set_current_safety_param_sp(int param){
+void set_current_safety_param_sp(uint16_t param){
   current_safety_param_sp = param;
 }
 
-int get_current_safety_param_sp(void){
+uint16_t get_current_safety_param_sp(void){
   return current_safety_param_sp;
 }
 

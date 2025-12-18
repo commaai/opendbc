@@ -193,11 +193,6 @@ class CommonFootnote(Enum):
     "openpilot Longitudinal Control (Alpha) is available behind a toggle; " +
     "the toggle is only available in non-release branches such as `devel` or `nightly-dev`.",
     Column.LONGITUDINAL, docs_only=True)
-  EXP_LONG_DSU = CarFootnote(
-    "By default, this car will use the stock Adaptive Cruise Control (ACC) for longitudinal control. " +
-    "If the Driver Support Unit (DSU) is disconnected, openpilot ACC will replace " +
-    "stock ACC. <b><i>NOTE: disconnecting the DSU disables Automatic Emergency Braking (AEB).</i></b>",
-    Column.LONGITUDINAL)
 
 
 def get_footnotes(footnotes: list[Enum], column: Column) -> list[Enum]:
@@ -273,13 +268,10 @@ class CarDocs:
 
     # longitudinal column
     op_long = "Stock"
-    if CP.alphaLongitudinalAvailable or CP.enableDsu:
+    if CP.alphaLongitudinalAvailable:
       op_long = "openpilot available"
-      if CP.enableDsu:
-        self.footnotes.append(CommonFootnote.EXP_LONG_DSU)
-      else:
-        self.footnotes.append(CommonFootnote.EXP_LONG_AVAIL)
-    elif CP.openpilotLongitudinalControl and not CP.enableDsu:
+      self.footnotes.append(CommonFootnote.EXP_LONG_AVAIL)
+    elif CP.openpilotLongitudinalControl:
       op_long = "openpilot"
 
     # min steer & enable speed columns
