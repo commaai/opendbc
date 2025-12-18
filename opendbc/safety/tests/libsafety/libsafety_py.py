@@ -77,6 +77,14 @@ bool get_honda_fwd_brake(void);
 void set_honda_alt_brake_msg(bool c);
 void set_honda_bosch_long(bool c);
 int get_honda_hw(void);
+
+uint8_t TEST_get_counter(CANPacket_t *msg);
+uint32_t TEST_get_checksum(CANPacket_t *msg);
+uint32_t TEST_compute_checksum(CANPacket_t *msg);
+bool TEST_get_quality_flag_valid(CANPacket_t *msg);
+
+void TEST_rx_hook(CANPacket_t *msg);
+bool TEST_tx_hook(CANPacket_t *msg);
 """)
 
 class LibSafety:

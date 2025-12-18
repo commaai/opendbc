@@ -202,3 +202,29 @@ void init_tests(void){
   // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
   tesla_autopark = false;
 }
+
+uint8_t TEST_get_counter(const CANPacket_t *msg) {
+  return current_hooks->get_counter ? current_hooks->get_counter(msg) : 0;
+}
+uint32_t TEST_get_checksum(const CANPacket_t *msg) {
+  return current_hooks->get_checksum ? current_hooks->get_checksum(msg) : 0;
+}
+uint32_t TEST_compute_checksum(const CANPacket_t *msg) {
+  return current_hooks->compute_checksum ? current_hooks->compute_checksum(msg) : 0;
+}
+bool TEST_get_quality_flag_valid(const CANPacket_t *msg) {
+  return current_hooks->get_quality_flag_valid ? current_hooks->get_quality_flag_valid(msg) : true;
+}
+
+void TEST_rx_hook(const CANPacket_t *msg) {
+  if (current_hooks->rx) {
+    current_hooks->rx(msg);
+  }
+}
+
+bool TEST_tx_hook(const CANPacket_t *msg) {
+  if (current_hooks->tx) {
+    return current_hooks->tx(msg);
+  }
+  return false;
+}
