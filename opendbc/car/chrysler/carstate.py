@@ -1,6 +1,6 @@
 from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs
-from opendbc.car.chrysler.values import DBC, STEER_THRESHOLD, RAM_CARS
+from opendbc.car.chrysler.values import CUSW_CARS, DBC, STEER_THRESHOLD, RAM_CARS
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 
@@ -27,6 +27,9 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
+
+    if self.CP.carFingerprint in CUSW_CARS:
+      return self.update_cusw(cp, cp_cam)
 
     ret = structs.CarState()
 
@@ -96,6 +99,52 @@ class CarState(CarStateBase):
     self.button_counter = cp.vl["CRUISE_BUTTONS"]["COUNTER"]
 
     ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+
+    return ret
+
+  def update_cusw(self, cp, cp_cam):
+    ret = structs.CarState()
+
+    ret.doorOpen = any([cp.vl["DOORS"]["DOOR_OPEN_FL"],
+                        cp.vl["DOORS"]["DOOR_OPEN_FR"],
+                        cp.vl["DOORS"]["DOOR_OPEN_RL"],
+                        cp.vl["DOORS"]["DOOR_OPEN_RR"]])
+    ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_UNLATCHED"])
+
+    ret.brakePressed = bool(cp.vl["BRAKE_2"]["BRAKE_HUMAN"])
+    ret.brake = cp.vl["BRAKE_1"]["BRAKE_PSI"]
+    ret.gasPressed = cp.vl["ACCEL_GAS"]["GAS_HUMAN"] > 0
+
+    ret.espDisabled = bool(cp.vl["TRACTION_BUTTON"]["TRACTION_OFF"])
+
+    ret.vEgoRaw = cp.vl["BRAKE_1"]["VEHICLE_SPEED"]
+    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
+    ret.standstill = not ret.vEgoRaw > 0.001
+    self.parse_wheel_speeds(ret,
+      cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FL"],
+      cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"],
+      cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"],
+      cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FR"],
+      unit=1,
+    )
+
+    ret.leftBlinker = cp.vl["STEERING_LEVERS"]["TURN_SIGNALS"] == 1
+    ret.rightBlinker = cp.vl["STEERING_LEVERS"]["TURN_SIGNALS"] == 2
+    ret.steeringAngleDeg = cp.vl["STEERING"]["STEER_ANGLE"]
+    ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(cp.vl["GEAR"]["PRNDL"], None))
+
+    ret.cruiseState.speed = cp.vl["ACC_HUD"]["ACC_SET_SPEED_KMH"] * CV.KPH_TO_MS
+    ret.cruiseState.available = bool(cp.vl["ACC_CONTROL"]["ACC_MAIN_ON"])
+    ret.cruiseState.enabled = bool(cp.vl["ACC_CONTROL"]["ACC_ACTIVE"])
+
+    ret.steeringTorque = cp.vl["EPS_STATUS"]["TORQUE_DRIVER"]
+    ret.steeringTorqueEps = cp.vl["EPS_STATUS"]["TORQUE_MOTOR"]
+    ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
+    ret.steerFaultPermanent = bool(cp.vl["EPS_STATUS"]["LKAS_FAULT"])
+
+    if self.CP.enableBsm:
+      ret.leftBlindspot = bool(cp.vl["BSM_LEFT"]["LEFT_DETECTED"])
+      ret.rightBlindspot = bool(cp.vl["BSM_RIGHT"]["RIGHT_DETECTED"])
 
     return ret
 

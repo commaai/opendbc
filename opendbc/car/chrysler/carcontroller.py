@@ -2,7 +2,7 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL
 from opendbc.car.lateral import apply_meas_steer_torque_limits
 from opendbc.car.chrysler import chryslercan
-from opendbc.car.chrysler.values import RAM_CARS, CarControllerParams, ChryslerFlags
+from opendbc.car.chrysler.values import CUSW_CARS, RAM_CARS, CarControllerParams, ChryslerFlags
 from opendbc.car.interfaces import CarControllerBase
 
 
@@ -40,7 +40,7 @@ class CarController(CarControllerBase):
 
     # HUD alerts
     if self.frame % 25 == 0:
-      if CS.lkas_car_model != -1:
+      if self.CP.carFingerprint in CUSW_CARS or CS.lkas_car_model != -1:
         can_sends.append(chryslercan.create_lkas_hud(self.packer, self.CP, lkas_active, CC.hudControl.visualAlert,
                                                      self.hud_count, CS.lkas_car_model, CS.auto_high_beam))
         self.hud_count += 1
@@ -58,6 +58,11 @@ class CarController(CarControllerBase):
       elif self.CP.carFingerprint in RAM_CARS:
         if CS.out.vEgo < (self.CP.minSteerSpeed - 0.5):
           lkas_control_bit = False
+      elif self.CP.carFingerprint in CUSW_CARS:
+        # TODO: Chrysler 200 appears to support asymmetric down to mid-13s, Cherokee not verified yet, model-year variances likely
+        # TODO: Consolidate with HIGHER_MIN_STEERING_SPEED cars if we can make engage consistently work at 17.5 m/s
+        if CS.out.vEgo < 16.5:
+          lkas_control_bit = False
 
       # EPS faults if LKAS re-enables too quickly
       lkas_control_bit = lkas_control_bit and (self.frame - self.last_lkas_falling_edge > 200)
@@ -69,7 +74,8 @@ class CarController(CarControllerBase):
       # steer torque
       new_torque = int(round(CC.actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
-      if not lkas_active or not lkas_control_bit:
+      # CUSW doesn't like being slammed down to zero on disengage, allow torque to fall at MAX_RATE_DOWN
+      if (self.CP.carFingerprint not in CUSW_CARS and not lkas_active) or not lkas_control_bit:
         apply_torque = 0
       self.apply_torque_last = apply_torque
 

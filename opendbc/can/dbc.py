@@ -189,6 +189,9 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(8, 4, 0, -1, True, SignalType.XOR_CHECKSUM, xor_checksum)
   elif dbc_name.startswith("subaru_global_"):
     return ChecksumState(8, -1, 0, -1, True, SignalType.SUBARU_CHECKSUM, subaru_checksum)
+  # TODO: make this counter change less janky
+  elif dbc_name.startswith("chrysler_cusw"):
+    return ChecksumState(8, 4, 7, -1, False, SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
   elif dbc_name.startswith("chrysler_"):
     return ChecksumState(8, -1, 7, -1, False, SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
   elif dbc_name.startswith("fca_giorgio"):
