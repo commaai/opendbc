@@ -68,6 +68,11 @@ bool get_vehicle_moving(void);
 void set_timer(uint32_t t);
 
 void safety_tick_current_safety_config();
+
+uint8_t TEST_get_counter(CANPacket_t *msg);
+uint32_t TEST_get_checksum(CANPacket_t *msg);
+uint32_t TEST_compute_checksum(CANPacket_t *msg);
+bool TEST_get_quality_flag_valid(CANPacket_t *msg);
 bool safety_config_valid();
 
 void init_tests(void);
