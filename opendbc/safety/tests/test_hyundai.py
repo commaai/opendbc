@@ -86,7 +86,12 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
 
     # Loop specific addresses to cover conditional checks in rx_hook
     # 0x371 (EV/Hybrid), 0x91 (FCEV), 0x260 (ICE)
-    for addr in [0x371, 0x91, 0x260]:
+    # Plus TX messages: 0x340 (LKAS11), 0x4F1 (CLU11), 0x485 (LFAHDA_MFC), 0x2AB (SCC12)
+    expectations = {
+      0x371: True, 0x91: True, 0x260: True,
+      0x340: False, 0x4F1: False, 0x485: True, 0x2AB: True
+    }
+    for addr, expected in expectations.items():
       msg.addr = addr
       # Param 1: EV, 2: Hybrid, 0: ICE (default) - simplified check
       # HYUNDAI_PARAM_EV_GAS = 1, HYUNDAI_PARAM_HYBRID_GAS = 2, HYUNDAI_PARAM_FCEV_GAS = 32 (actually bit 5)
@@ -95,7 +100,10 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
         self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, param)
         for bus in range(3):
           msg.bus = bus
-          self.safety.safety_rx_hook(msg)
+          self.safety.set_controls_allowed(0)
+          self.safety.TEST_rx_hook(msg)
+          self.assertFalse(self.safety.get_controls_allowed())
+          self.assertEqual(expected, self.safety.TEST_tx_hook(msg), f"addr {hex(addr)} expected {expected}")
 
   def _button_msg(self, buttons, main_button=0, bus=0):
     values = {"CF_Clu_CruiseSwState": buttons, "CF_Clu_CruiseSwMain": main_button, "CF_Clu_AliveCnt1": self.cnt_button}

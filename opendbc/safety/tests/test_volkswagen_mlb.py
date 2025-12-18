@@ -26,6 +26,24 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
   DRIVER_TORQUE_ALLOWANCE = 60
   DRIVER_TORQUE_FACTOR = 3
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertIsNotNone(self.safety.TEST_compute_checksum(msg))
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
   # Wheel speeds _esp_03_msg
   def _speed_msg(self, speed):
     values = {"ESP_%s_Radgeschw" % s: speed for s in ["HL", "HR", "VL", "VR"]}
@@ -107,6 +125,19 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     self._rx(self._torque_driver_msg(0))
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
+
+  def test_rx_coverage(self):
+    # VW MLB Line 71: if (msg->addr == MSG_ACC_05) nested in if (msg->bus == 2U)
+    # 1. Bus 2, Addr MSG_ACC_05 (True)
+    values = {"ACC_Status_ACC": 0}
+    self._rx(self.packer.make_can_msg_safety("ACC_05", 2, values))
+
+    # 2. Bus 2, Addr Wrong (False)
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 2
+    msg.data_len_code = 8
+    self.safety.TEST_rx_hook(msg)
 
   def test_acc_statuses(self):
     # Verify ACC engaged status for 3, 4, 5

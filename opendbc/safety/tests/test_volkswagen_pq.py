@@ -108,9 +108,20 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
+  def test_rx_coverage(self):
+    # VW PQ Line 78: if (msg->bus == 0U)
+    # 1. Bus 0 (True)
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = common.MSG_BREMSE_1 if hasattr(common, 'MSG_BREMSE_1') else 0x1A0
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.safety.TEST_rx_hook(msg)
+    # 2. Bus 1 (False)
+    msg.bus = 1
+    self.safety.TEST_rx_hook(msg)
+
 
 class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
-  # Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_GRA_NEU, 0], [MSG_GRA_NEU, 2], [MSG_LDW_1, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1]}
 
@@ -138,6 +149,14 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
     self.assertEqual(0, self.safety.TEST_get_counter(msg))
     self.assertEqual(0, self.safety.TEST_get_checksum(msg))
     self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
 
   def test_acc_status_values(self):
     for status in [1, 2]:

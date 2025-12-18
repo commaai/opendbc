@@ -111,11 +111,29 @@ class TestFordSafetyBase(common.CarSafetyTest):
     self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
     self.assertFalse(self.safety.TEST_get_quality_flag_valid(msg))
 
-    self.assertFalse(self.safety.TEST_get_quality_flag_valid(msg))
-
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    # Random messages should not enable controls
+    self.safety.set_controls_allowed(0)
     for bus in range(3):
       msg.bus = bus
-      self.safety.safety_rx_hook(msg)
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
+    # Loop specific addresses to cover logic inside address checks
+    addrs = {
+      MSG_EngBrakeData: True, MSG_EngVehicleSpThrottle: True, MSG_BrakeSysFeatures: True,
+      MSG_EngVehicleSpThrottle2: True, MSG_Yaw_Data_FD1: True, MSG_Steering_Data_FD1: True,
+      MSG_ACCDATA: False, MSG_ACCDATA_3: True, MSG_Lane_Assist_Data1: True,
+      MSG_LateralMotionControl: False, MSG_LateralMotionControl2: False, MSG_IPMA_Data: True,
+    }
+    for addr, expected in addrs.items():
+      msg.addr = addr
+      for bus in range(3):
+        msg.bus = bus
+        self.safety.TEST_rx_hook(msg)
+        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertEqual(expected, self.safety.TEST_tx_hook(msg), f"addr {hex(addr)} expected {expected}")
 
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)

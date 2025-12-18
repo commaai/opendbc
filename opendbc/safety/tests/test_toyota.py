@@ -27,6 +27,21 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   packer: CANPackerSafety
   safety: libsafety_py.LibSafety
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
   def _torque_meas_msg(self, torque: int, driver_torque: int | None = None):
     values = {"STEER_TORQUE_EPS": (torque / self.EPS_SCALE) * 100.}
     if driver_torque is not None:
@@ -237,7 +252,11 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
           for eps_torque, driver_torque in cases:
             for sign in (-1, 1):
               for _ in range(6):
-                self._rx(self._torque_meas_msg(sign * eps_torque, sign * driver_torque))
+                msg = self._torque_meas_msg(sign * eps_torque, sign * driver_torque)
+                # Pattern coverage for rx_hook: iterate all buses for random address
+                for bus in range(3):
+                  msg[0].bus = bus
+                  self.safety.TEST_rx_hook(libsafety_py.ffi.addressof(msg[0]))
 
               # Toyota adds 1 to EPS torque since it is rounded after EPS factor
               should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE

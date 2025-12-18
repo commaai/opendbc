@@ -146,6 +146,14 @@ class TestRivianStockSafety(TestRivianSafetyBase):
     self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
     self.assertFalse(self.safety.TEST_get_quality_flag_valid(msg))
 
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
 
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x160, 0]]

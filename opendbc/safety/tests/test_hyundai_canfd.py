@@ -90,7 +90,7 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     self.assertEqual(0, self.safety.TEST_get_counter(msg))
     self.assertEqual(0, self.safety.TEST_get_checksum(msg))
     self.assertEqual(0, self.safety.TEST_get_checksum(msg))
-    self.safety.TEST_compute_checksum(msg)
+    self.assertIsNotNone(self.safety.TEST_compute_checksum(msg))
 
     # Loop specific addresses to cover conditional checks in rx_hook
     # 0x35 (EV), 0x105 (Hybrid), 0x100 (ICE)
@@ -103,7 +103,9 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
         self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, param)
         for bus in range(3):
           msg.bus = bus
-          self.safety.safety_rx_hook(msg)
+          self.safety.set_controls_allowed(0)
+          self.safety.TEST_rx_hook(msg)
+          self.assertFalse(self.safety.get_controls_allowed())
 
   def test_cruise_override(self):
     if self.safety.get_current_safety_param() & HyundaiSafetyFlags.LONG:

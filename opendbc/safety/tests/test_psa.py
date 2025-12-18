@@ -105,6 +105,24 @@ class TestPsaStockSafety(TestPsaSafetyBase):
     self.assertEqual(0, self.safety.TEST_get_checksum(msg))
     self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
 
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    # Random messages should not enable controls
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
+    # Pattern coverage for tx_hook: iterate for specific TX address
+    # PSA_LANE_KEEP_ASSIST = 1010
+    msg.addr = 1010
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
 
 if __name__ == "__main__":
     unittest.main()
