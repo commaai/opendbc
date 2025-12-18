@@ -215,3 +215,16 @@ uint32_t TEST_compute_checksum(const CANPacket_t *msg) {
 bool TEST_get_quality_flag_valid(const CANPacket_t *msg) {
   return current_hooks->get_quality_flag_valid ? current_hooks->get_quality_flag_valid(msg) : true;
 }
+
+void TEST_rx_hook(const CANPacket_t *msg) {
+  if (current_hooks->rx) {
+    current_hooks->rx(msg);
+  }
+}
+
+bool TEST_tx_hook(const CANPacket_t *msg) {
+  if (current_hooks->tx) {
+    return current_hooks->tx(msg);
+  }
+  return false;
+}
