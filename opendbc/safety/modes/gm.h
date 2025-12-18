@@ -200,9 +200,9 @@ static safety_config gm_init(uint16_t param) {
 
   if (gm_hw == GM_ASCM) {
     gm_long_limits = &GM_ASCM_LONG_LIMITS;
-  }
-  if (gm_hw == GM_CAM) {
+  } else if (gm_hw == GM_CAM) {
     gm_long_limits = &GM_CAM_LONG_LIMITS;
+  } else {
   }
 
   bool gm_cam_long = false;
