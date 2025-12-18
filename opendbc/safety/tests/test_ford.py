@@ -99,6 +99,24 @@ class TestFordSafetyBase(common.CarSafetyTest):
     curvature_accel_limit_upper = int(curvature_accel_limit * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN
     return curvature_accel_limit_lower, curvature_accel_limit_upper
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+    self.assertFalse(self.safety.TEST_get_quality_flag_valid(msg))
+
+    self.assertFalse(self.safety.TEST_get_quality_flag_valid(msg))
+
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.safety_rx_hook(msg)
+
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)
     self.safety.set_desired_angle_last(t)

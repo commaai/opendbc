@@ -258,6 +258,24 @@ class TestHondaNidecSafetyBase(HondaBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, 0)
     self.safety.init_tests()
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.safety.TEST_compute_checksum(msg)
+
+    # Loop for specific addresses that have conditional logic (0x1A6 vs 0x296)
+    # 0x1A6 (ILX), 0x296 (Civic)
+    for addr in [0x1A6, 0x296]:
+      msg.addr = addr
+      for bus in range(3):
+        msg.bus = bus
+        self.safety.safety_rx_hook(msg)
+
   def _send_brake_msg(self, brake, aeb_req=0, bus=0):
     values = {"COMPUTER_BRAKE": brake, "AEB_REQ_1": aeb_req}
     return self.packer.make_can_msg_safety("BRAKE_COMMAND", bus, values)

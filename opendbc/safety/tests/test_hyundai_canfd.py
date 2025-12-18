@@ -81,6 +81,30 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.safety.TEST_compute_checksum(msg)
+
+    # Loop specific addresses to cover conditional checks in rx_hook
+    # 0x35 (EV), 0x105 (Hybrid), 0x100 (ICE)
+    for addr in [0x35, 0x105, 0x100]:
+      msg.addr = addr
+      # Param 1: EV, 2: Hybrid, 0: ICE (default) - simplified check, actual flags are bitmasks
+      # HYUNDAI_PARAM_EV_GAS = 1, HYUNDAI_PARAM_HYBRID_GAS = 2
+      # We need to set the safety param to trigger the different branches
+      for param in [0, 1, 2]:
+        self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, param)
+        for bus in range(3):
+          msg.bus = bus
+          self.safety.safety_rx_hook(msg)
+
   def test_cruise_override(self):
     if self.safety.get_current_safety_param() & HyundaiSafetyFlags.LONG:
       return

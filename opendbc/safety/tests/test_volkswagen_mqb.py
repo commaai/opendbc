@@ -171,6 +171,21 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._gra_acc_01_msg(resume=1)))
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.safety.TEST_compute_checksum(msg)
+
+    # MSG_LH_EPS_03=0x9F, MSG_ESP_05=0x106, MSG_TSK_06=0x120, MSG_MOTOR_20=0x121, MSG_GRA_ACC_01=0x12B
+    for addr in [0x9F, 0x106, 0x120, 0x121, 0x12B]:
+      msg.addr = addr
+      self.safety.TEST_compute_checksum(msg)
+
 
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_ACC_02, 0], [MSG_ACC_06, 0], [MSG_ACC_07, 0]]

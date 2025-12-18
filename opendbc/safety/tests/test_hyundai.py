@@ -74,6 +74,29 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
     self.safety.init_tests()
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+
+    # Loop specific addresses to cover conditional checks in rx_hook
+    # 0x371 (EV/Hybrid), 0x91 (FCEV), 0x260 (ICE)
+    for addr in [0x371, 0x91, 0x260]:
+      msg.addr = addr
+      # Param 1: EV, 2: Hybrid, 0: ICE (default) - simplified check
+      # HYUNDAI_PARAM_EV_GAS = 1, HYUNDAI_PARAM_HYBRID_GAS = 2, HYUNDAI_PARAM_FCEV_GAS = 32 (actually bit 5)
+      # Real flags: EV=1, HYBRID=2, FCEV=32 (1<<5)
+      for param in [0, 1, 2, 32]:
+        self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, param)
+        for bus in range(3):
+          msg.bus = bus
+          self.safety.safety_rx_hook(msg)
+
   def _button_msg(self, buttons, main_button=0, bus=0):
     values = {"CF_Clu_CruiseSwState": buttons, "CF_Clu_CruiseSwMain": main_button, "CF_Clu_AliveCnt1": self.cnt_button}
     self.__class__.cnt_button += 1
