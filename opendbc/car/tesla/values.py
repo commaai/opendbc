@@ -1,10 +1,11 @@
+import re
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
@@ -62,6 +63,64 @@ class CAR(Platforms):
   )
 
 
+# Tesla EPS firmware: "<project>,<model_code><version>"
+# Model codes: E* = Model 3, Y* = Model Y, X* = Model X
+#
+# API Consistency Notes (bounty requirement):
+# - Steering API is consistent across HW2.5, HW3, and HW4 for Model 3/Y
+# - HW2.5 sends longitudinal control at 40Hz instead of 25Hz
+#
+# Known Limitations:
+# - Some HW2.5 vehicles without ACC capability cannot utilize longitudinal control
+#   due to different Drive Interface firmware versions (these still fingerprint but
+#   will be detected at runtime)
+# - Model S is not currently supported
+FW_PATTERN = re.compile(rb'^[^,]+,(?P<model_code>[A-Z][A-Z0-9]*)')
+
+MODEL_CODE_TO_PLATFORM = {
+  'E': CAR.TESLA_MODEL_3,
+  'Y': CAR.TESLA_MODEL_Y,
+  'X': CAR.TESLA_MODEL_X,
+}
+
+EPS_ADDR = (0x730, None)
+
+
+def get_model_code(fw: bytes) -> str | None:
+  match = FW_PATTERN.match(fw)
+  if match:
+    return match.group('model_code').decode('ascii', errors='ignore')
+  return None
+
+
+def get_platform_from_model_code(model_code: str) -> str | None:
+  if not model_code:
+    return None
+  platform = MODEL_CODE_TO_PLATFORM.get(model_code[0])
+  return str(platform) if platform else None
+
+
+def _get_live_platform(live_fw_versions: LiveFwVersions) -> str | None:
+  for fw in live_fw_versions.get(EPS_ADDR, set()):
+    model_code = get_model_code(fw)
+    if model_code:
+      platform = get_platform_from_model_code(model_code)
+      if platform:
+        return platform
+  return None
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw_versions: OfflineFwVersions) -> set[str]:
+  live_platform = _get_live_platform(live_fw_versions)
+  if not live_platform:
+    return set()
+
+  if live_platform in offline_fw_versions:
+    return {live_platform}
+
+  return set()
+
+
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
@@ -69,7 +128,9 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
       bus=0,
     )
-  ]
+  ],
+  # Custom fuzzy fingerprinting function using Tesla model codes
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 
