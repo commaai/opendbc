@@ -122,7 +122,7 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
         self.safety.TEST_rx_hook(msg)
         self.assertFalse(self.safety.get_controls_allowed())
         ret = self.safety.TEST_tx_hook(msg)
-        self.assertIn(ret, allowed, f"addr {hex(addr)} expected {allowed}")
+        assert ret in allowed, f"addr {hex(addr)} expected {allowed}"
 
   def setUp(self):
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
@@ -182,7 +182,6 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"RLWheelSpd": self.STANDSTILL_THRESHOLD + 1, "RRWheelSpd": 0}
     self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
     self.assertTrue(self.safety.get_vehicle_moving())
-
 
   def test_tx_hook_violation(self):
     # Ensure allow bit is blocked if controls allowed is false

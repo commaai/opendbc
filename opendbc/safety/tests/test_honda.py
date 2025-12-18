@@ -300,7 +300,7 @@ class TestHondaNidecSafetyBase(HondaBase):
         self.safety.TEST_rx_hook(msg)
         self.assertFalse(self.safety.get_controls_allowed())
         ret = self.safety.TEST_tx_hook(msg)
-        self.assertIn(ret, allowed, f"addr {hex(addr)} bus {bus} returned {ret}, expected one of {allowed}")
+        assert ret in allowed, f"addr {hex(addr)} bus {bus} returned {ret}, expected one of {allowed}"
 
   def _send_brake_msg(self, brake, aeb_req=0, bus=0):
     values = {"COMPUTER_BRAKE": brake, "AEB_REQ_1": aeb_req}
