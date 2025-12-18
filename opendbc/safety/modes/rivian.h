@@ -34,9 +34,9 @@ static uint32_t rivian_compute_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
   if (msg->addr == 0x208U) {
     chksum = _rivian_compute_checksum(msg, 0x1D, 0xB1);
-  }
-  if (msg->addr == 0x150U) {
+  } else if (msg->addr == 0x150U) {
     chksum = _rivian_compute_checksum(msg, 0x1D, 0x9A);
+  } else {
   }
   return chksum;
 }
@@ -45,9 +45,9 @@ static bool rivian_get_quality_flag_valid(const CANPacket_t *msg) {
   bool valid = false;
   if (msg->addr == 0x208U) {
     valid = ((msg->data[3] >> 3) & 0x3U) == 0x1U;  // ESP_Vehicle_Speed_Q
-  }
-  if (msg->addr == 0x150U) {
+  } else if (msg->addr == 0x150U) {
     valid = (msg->data[1] >> 6) == 0x1U;  // VDM_VehicleSpeedQ
+  } else {
   }
   return valid;
 }
