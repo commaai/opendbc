@@ -3,8 +3,9 @@
 #include "opendbc/safety/declarations.h"
 
 static void body_rx_hook(const CANPacket_t *msg) {
-  SAFETY_UNUSED(msg);
-  controls_allowed = true;
+  if (msg->addr == 0x201U) {
+    controls_allowed = true;
+  }
 }
 
 static bool body_tx_hook(const CANPacket_t *msg) {

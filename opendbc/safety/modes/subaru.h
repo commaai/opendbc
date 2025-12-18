@@ -91,7 +91,9 @@ static uint32_t subaru_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void subaru_rx_hook(const CANPacket_t *msg) {
-  if (msg->addr == MSG_SUBARU_Steering_Torque) {
+  const unsigned int alt_main_bus = subaru_gen2 ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
+
+  if ((msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
     int torque_driver_new;
     torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
     torque_driver_new = -1 * to_signed(torque_driver_new, 11);
@@ -104,13 +106,13 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
-  if (msg->addr == MSG_SUBARU_CruiseControl) {
+  if ((msg->addr == MSG_SUBARU_CruiseControl) && (msg->bus == alt_main_bus)) {
     bool cruise_engaged = (msg->data[5] >> 1) & 1U;
     pcm_cruise_check(cruise_engaged);
   }
 
   // update vehicle moving with any non-zero wheel speed
-  if (msg->addr == MSG_SUBARU_Wheel_Speeds) {
+  if ((msg->addr == MSG_SUBARU_Wheel_Speeds) && (msg->bus == alt_main_bus)) {
     uint32_t fr = (GET_BYTES(msg, 1, 3) >> 4) & 0x1FFFU;
     uint32_t rr = (GET_BYTES(msg, 3, 3) >> 1) & 0x1FFFU;
     uint32_t rl = (GET_BYTES(msg, 4, 3) >> 6) & 0x1FFFU;
@@ -121,11 +123,11 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
     UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 * KPH_TO_MS);
   }
 
-  if (msg->addr == MSG_SUBARU_Brake_Status) {
+  if ((msg->addr == MSG_SUBARU_Brake_Status) && (msg->bus == alt_main_bus)) {
     brake_pressed = (msg->data[7] >> 6) & 1U;
   }
 
-  if (msg->addr == MSG_SUBARU_Throttle) {
+  if ((msg->addr == MSG_SUBARU_Throttle) && (msg->bus == SUBARU_MAIN_BUS)) {
     gas_pressed = msg->data[4] != 0U;
   }
 }

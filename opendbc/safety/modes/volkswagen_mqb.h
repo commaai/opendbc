@@ -35,78 +35,80 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
 }
 
 static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
-  // Update in-motion state by sampling wheel speeds
-  if (msg->addr == MSG_ESP_19) {
-    // sum 4 wheel speeds
-    int speed = 0;
-    for (uint8_t i = 0U; i < 8U; i += 2U) {
-      int wheel_speed = msg->data[i] | (msg->data[i + 1U] << 8);
-      speed += wheel_speed;
-    }
-    // Check all wheel speeds for any movement
-    vehicle_moving = speed > 0;
-  }
-
-  // Update driver input torque samples
-  // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
-  // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
-  if (msg->addr == MSG_LH_EPS_03) {
-    update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
-  }
-
-  if (msg->addr == MSG_TSK_06) {
-    // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
-    // Always exit controls on main switch off
-    // Signal: TSK_06.TSK_Status
-    int acc_status = (msg->data[3] & 0x7U);
-    bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-    acc_main_on = cruise_engaged || (acc_status == 2);
-
-    if (!volkswagen_longitudinal) {
-      pcm_cruise_check(cruise_engaged);
-    }
-
-    if (!acc_main_on) {
-      controls_allowed = false;
-    }
-  }
-
-  if (msg->addr == MSG_GRA_ACC_01) {
-    // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
-    // Signal: GRA_ACC_01.GRA_Tip_Setzen
-    // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-    if (volkswagen_longitudinal) {
-      bool set_button = GET_BIT(msg, 16U);
-      bool resume_button = GET_BIT(msg, 19U);
-      if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-        controls_allowed = acc_main_on;
+  if (msg->bus == 0U) {
+    // Update in-motion state by sampling wheel speeds
+    if (msg->addr == MSG_ESP_19) {
+      // sum 4 wheel speeds
+      int speed = 0;
+      for (uint8_t i = 0U; i < 8U; i += 2U) {
+        int wheel_speed = msg->data[i] | (msg->data[i + 1U] << 8);
+        speed += wheel_speed;
       }
-      volkswagen_set_button_prev = set_button;
-      volkswagen_resume_button_prev = resume_button;
+      // Check all wheel speeds for any movement
+      vehicle_moving = speed > 0;
     }
-    // Always exit controls on rising edge of Cancel
-    // Signal: GRA_ACC_01.GRA_Abbrechen
-    if (GET_BIT(msg, 13U)) {
-      controls_allowed = false;
+
+    // Update driver input torque samples
+    // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
+    // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
+    if (msg->addr == MSG_LH_EPS_03) {
+      update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
     }
-  }
 
-  // Signal: Motor_20.MO_Fahrpedalrohwert_01
-  if (msg->addr == MSG_MOTOR_20) {
-    gas_pressed = ((GET_BYTES(msg, 0, 4) >> 12) & 0xFFU) != 0U;
-  }
+    if (msg->addr == MSG_TSK_06) {
+      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
+      // Always exit controls on main switch off
+      // Signal: TSK_06.TSK_Status
+      int acc_status = (msg->data[3] & 0x7U);
+      bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
+      acc_main_on = cruise_engaged || (acc_status == 2);
 
-  // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
-  if (msg->addr == MSG_MOTOR_14) {
-    volkswagen_brake_pedal_switch = GET_BIT(msg, 28U);
-  }
+      if (!volkswagen_longitudinal) {
+        pcm_cruise_check(cruise_engaged);
+      }
 
-  // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
-  if (msg->addr == MSG_ESP_05) {
-    volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
-  }
+      if (!acc_main_on) {
+        controls_allowed = false;
+      }
+    }
 
-  brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
+    if (msg->addr == MSG_GRA_ACC_01) {
+      // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
+      // Signal: GRA_ACC_01.GRA_Tip_Setzen
+      // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
+      if (volkswagen_longitudinal) {
+        bool set_button = GET_BIT(msg, 16U);
+        bool resume_button = GET_BIT(msg, 19U);
+        if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
+          controls_allowed = acc_main_on;
+        }
+        volkswagen_set_button_prev = set_button;
+        volkswagen_resume_button_prev = resume_button;
+      }
+      // Always exit controls on rising edge of Cancel
+      // Signal: GRA_ACC_01.GRA_Abbrechen
+      if (GET_BIT(msg, 13U)) {
+        controls_allowed = false;
+      }
+    }
+
+    // Signal: Motor_20.MO_Fahrpedalrohwert_01
+    if (msg->addr == MSG_MOTOR_20) {
+      gas_pressed = ((GET_BYTES(msg, 0, 4) >> 12) & 0xFFU) != 0U;
+    }
+
+    // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
+    if (msg->addr == MSG_MOTOR_14) {
+      volkswagen_brake_pedal_switch = GET_BIT(msg, 28U);
+    }
+
+    // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
+    if (msg->addr == MSG_ESP_05) {
+      volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
+    }
+
+    brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
+  }
 }
 
 static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
