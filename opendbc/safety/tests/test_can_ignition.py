@@ -7,6 +7,8 @@ from opendbc.safety.tests.common import make_msg
 
 
 class TestCANIgnition(unittest.TestCase):
+  # Not a safety mode test, so no TX_MSGS
+  TX_MSGS = None
 
   @classmethod
   def setUpClass(cls):
