@@ -32,7 +32,7 @@ static void ignition_can_hook(const CANPacket_t *to_push) {
     prev_rivian_cnt = cnt;
   }
 
-  // Tesla: 0x221 overlaps Rivian, use counter to distinguish
+  // Tesla: 0x221 may overlap with other OEMs, use counter to distinguish
   if ((addr == 0x221) && (len == 8)) {
     int cnt = to_push->data[6] >> 4;
     if ((cnt == ((prev_tesla_cnt + 1) % 16)) && (prev_tesla_cnt != -1)) {
