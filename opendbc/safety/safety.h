@@ -5,6 +5,7 @@
 #include "opendbc/safety/longitudinal.h"
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/can.h"
+#include "opendbc/safety/ignition.h"
 
 // all the safety modes
 #include "opendbc/safety/modes/defaults.h"
@@ -210,6 +211,9 @@ bool safety_rx_hook(const CANPacket_t *msg) {
   if (controls_allowed && !controls_allowed_prev) {
     heartbeat_engaged_mismatches = 0;
   }
+
+  // check for CAN ignition regardless of safety mode
+  ignition_can_hook(msg);
 
   return valid;
 }
@@ -442,6 +446,9 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   reset_sample(&torque_meas);
   reset_sample(&torque_driver);
   reset_sample(&angle_meas);
+
+  // reset CAN ignition state
+  ignition_can_init();
 
   controls_allowed = false;
   relay_malfunction_reset();

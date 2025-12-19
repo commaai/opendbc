@@ -306,6 +306,10 @@ extern int alternative_experience;
 // time since safety mode has been changed
 extern uint32_t safety_mode_cnt;
 
+// CAN ignition state
+extern bool ignition_can;
+extern uint32_t ignition_can_cnt;
+
 typedef struct {
   uint16_t id;
   const safety_hooks *hooks;
