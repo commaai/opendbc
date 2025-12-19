@@ -9,10 +9,11 @@ static int prev_rivian_cnt = -1;
 static int prev_tesla_cnt = -1;
 
 static void ignition_can_hook(const CANPacket_t *to_push) {
-  int addr = to_push->addr;
   int len = GET_LEN(to_push);
 
   if ((to_push->bus == 0U) && (len == 8)) {
+    int addr = to_push->addr;
+
     // GM: SystemPowerMode 2=Run, 3=Crank
     if (addr == 0x1F1) {
       ignition_can = (to_push->data[0] & 0x2U) != 0U;
