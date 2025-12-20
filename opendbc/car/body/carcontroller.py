@@ -81,7 +81,7 @@ class CarController(CarControllerBase):
       else:
         avg_speed = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
         turn_gain = np.interp(abs(avg_speed), TURN_GAIN_BP, TURN_GAIN_V)
-        speed_diff_desired = - CC.actuators.torque / 2. * turn_gain
+        speed_diff_desired = CC.actuators.torque / 2. * turn_gain
         speed_diff_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fr - CS.out.wheelSpeeds.fl)
         turn_error = speed_diff_desired - speed_diff_measured
         freeze_integrator = ((turn_error < 0 and self.turn_pid.error_integral <= -MAX_TURN_INTEGRATOR) or
@@ -101,8 +101,8 @@ class CarController(CarControllerBase):
         torque_diff = np.clip(self._torque_diff_ramped, -MAX_TORQUE, MAX_TORQUE)
 
       # Combine base torque with steering differential
-      torque_r = torque + torque_diff
-      torque_l = torque - torque_diff
+      torque_r = torque - torque_diff
+      torque_l = torque + torque_diff
 
       # Torque rate limits
       self.torque_r_filtered = np.clip(self.deadband_filter(torque_r, 10),
