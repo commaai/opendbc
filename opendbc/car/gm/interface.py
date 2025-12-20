@@ -12,6 +12,7 @@ from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallb
 
 TransmissionType = structs.CarParams.TransmissionType
 NetworkLocation = structs.CarParams.NetworkLocation
+GearShifter = structs.CarState.GearShifter
 
 NON_LINEAR_TORQUE_PARAMS = {
   CAR.CHEVROLET_BOLT_EUV: [2.6531724862969748, 1.0, 0.1919764879840985, 0.009054123646805178],
@@ -24,6 +25,8 @@ class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
   RadarInterface = RadarInterface
+
+  DRIVABLE_GEARS = (GearShifter.sport, GearShifter.low, GearShifter.eco, GearShifter.manumatic)
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
