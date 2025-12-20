@@ -12,7 +12,6 @@ from opendbc.car.honda.radar_interface import RadarInterface
 from opendbc.car.interfaces import CarInterfaceBase
 
 TransmissionType = structs.CarParams.TransmissionType
-GearShifter = structs.CarState.GearShifter
 
 
 class CarInterface(CarInterfaceBase):
@@ -20,7 +19,7 @@ class CarInterface(CarInterfaceBase):
   CarController = CarController
   RadarInterface = RadarInterface
 
-  DRIVABLE_GEARS = (GearShifter.sport,)
+  DRIVABLE_GEARS = (structs.CarState.GearShifter.sport,)
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):

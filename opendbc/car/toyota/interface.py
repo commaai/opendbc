@@ -9,7 +9,6 @@ from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
 
 SteerControlType = structs.CarParams.SteerControlType
-GearShifter = structs.CarState.GearShifter
 
 
 class CarInterface(CarInterfaceBase):
@@ -17,7 +16,7 @@ class CarInterface(CarInterfaceBase):
   CarController = CarController
   RadarInterface = RadarInterface
 
-  DRIVABLE_GEARS = (GearShifter.sport,)
+  DRIVABLE_GEARS = (structs.CarState.GearShifter.sport,)
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):

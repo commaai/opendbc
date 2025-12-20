@@ -7,15 +7,12 @@ from opendbc.car.chrysler.values import CAR, RAM_HD, RAM_DT, RAM_CARS, ChryslerF
 from opendbc.car.interfaces import CarInterfaceBase
 
 
-GearShifter = structs.CarState.GearShifter
-
-
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
   RadarInterface = RadarInterface
 
-  DRIVABLE_GEARS = (GearShifter.low,)
+  DRIVABLE_GEARS = (structs.CarState.GearShifter.low,)
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:

@@ -12,15 +12,12 @@ from opendbc.car.interfaces import CarInterfaceBase
 TransmissionType = structs.CarParams.TransmissionType
 
 
-GearShifter = structs.CarState.GearShifter
-
-
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
   RadarInterface = RadarInterface
 
-  DRIVABLE_GEARS = (GearShifter.low, GearShifter.manumatic)
+  DRIVABLE_GEARS = (structs.CarState.GearShifter.low, structs.CarState.GearShifter.manumatic)
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
