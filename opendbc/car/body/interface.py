@@ -27,7 +27,7 @@ class CarInterface(CarInterfaceBase):
     ret.openpilotLongitudinalControl = True
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     return ret
-  
+
   def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.CarState:
     ret = super().update(can_packets)
     ret.canValid = True

@@ -4,12 +4,12 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL
 from opendbc.car.common.pid import PIDController
 from opendbc.car.body import bodycan
-from opendbc. car.body.values import SPEED_FROM_RPM
-from opendbc. car.interfaces import CarControllerBase
+from opendbc.car.body.values import SPEED_FROM_RPM
+from opendbc.car.interfaces import CarControllerBase
 
 MAX_TORQUE = 2000
 MAX_TORQUE_RATE = 50
-MAX_ANGLE_ERROR = np. radians(7)
+MAX_ANGLE_ERROR = np.radians(7)
 ACCEL_INPUT_MAX = 4.0      # expected acceleration command range (m/s^2)
 TORQUE_SLEW_ACCEL = 1000.0  # torque units per second when ramping up
 TORQUE_SLEW_DECEL = 10000000000000.0  # torque units per second when ramping down
@@ -25,7 +25,7 @@ TURN_TORQUE_SLEW_DECEL = 10000000000.0  # torque units per second when unwinding
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
-    self.packer = CANPacker(dbc_names[Bus. main])
+    self.packer = CANPacker(dbc_names[Bus.main])
 
     self.turn_pid = PIDController(110, k_i=11.5, rate=1 / DT_CTRL)
 
@@ -64,7 +64,7 @@ class CarController(CarControllerBase):
           max_delta = TORQUE_SLEW_ACCEL * DT_CTRL
         else:
           max_delta = TORQUE_SLEW_DECEL * DT_CTRL
-      else: 
+      else:
         # Crossing zero or reversing direction: drop torque quickly
         max_delta = TORQUE_SLEW_ZERO * DT_CTRL
 
@@ -76,15 +76,15 @@ class CarController(CarControllerBase):
       # Reset differential torque and PID when steering command is zero
       if np.isclose(CC.actuators.torque, 0.0, atol=1e-3):
         self._torque_diff_ramped = 0.0
-        self. turn_pid.reset()
+        self.turn_pid.reset()
         torque_diff = 0.0
       else:
-        avg_speed = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS. out.wheelSpeeds.fr) / 2.
+        avg_speed = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
         turn_gain = np.interp(abs(avg_speed), TURN_GAIN_BP, TURN_GAIN_V)
         speed_diff_desired = - CC.actuators.torque / 2. * turn_gain
-        speed_diff_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds. fr - CS.out.wheelSpeeds.fl)
+        speed_diff_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fr - CS.out.wheelSpeeds.fl)
         turn_error = speed_diff_desired - speed_diff_measured
-        freeze_integrator = ((turn_error < 0 and self. turn_pid.error_integral <= -MAX_TURN_INTEGRATOR) or
+        freeze_integrator = ((turn_error < 0 and self.turn_pid.error_integral <= -MAX_TURN_INTEGRATOR) or
                              (turn_error > 0 and self.turn_pid.error_integral >= MAX_TURN_INTEGRATOR))
         torque_diff_target = self.turn_pid.update(turn_error, freeze_integrator=freeze_integrator)
         if np.isclose(torque_diff_target, 0.0, atol=1e-3):
@@ -105,7 +105,7 @@ class CarController(CarControllerBase):
       torque_l = torque - torque_diff
 
       # Torque rate limits
-      self.torque_r_filtered = np.clip(self. deadband_filter(torque_r, 10),
+      self.torque_r_filtered = np.clip(self.deadband_filter(torque_r, 10),
                                        self.torque_r_filtered - MAX_TORQUE_RATE,
                                        self.torque_r_filtered + MAX_TORQUE_RATE)
       self.torque_l_filtered = np.clip(self.deadband_filter(torque_l, 10),
@@ -115,7 +115,7 @@ class CarController(CarControllerBase):
       torque_l = int(np.clip(self.torque_l_filtered, -MAX_TORQUE, MAX_TORQUE))
     else:
       self._torque_desired_ramped = 0.
-      self. torque_r_filtered = 0.
+      self.torque_r_filtered = 0.
       self.torque_l_filtered = 0.
       self._torque_diff_ramped = 0.
       self.turn_pid.reset()
