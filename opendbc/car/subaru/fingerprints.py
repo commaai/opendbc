@@ -143,6 +143,7 @@ FW_VERSIONS = {
       b'\xc5!ap\x07',
       b'\xc5!ar\x07',
       b'\xc5!as\x07',
+      b'\xc5!au\x07',
       b'\xc5!dr\x07',
       b'\xc5!ds\x07',
     ],
