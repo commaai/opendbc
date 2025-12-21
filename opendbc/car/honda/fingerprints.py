@@ -334,14 +334,30 @@ FW_VERSIONS = {
     ],
   },
   CAR.HONDA_CIVIC_TYPE_R_FK8: {
-    (Ecu.gateway, 0x18DAF1EF, 0): [b'38897-TBA-A020\x00\x00'],          # Gateway
-    (Ecu.abs,     0x18DAF128, 0): [b'57114-TGH-A130\x00\x00'],          # VSA / ABS / ESP
-    (Ecu.eps,     0x18DAF130, 0): [b'39990-TGH-J020\x00\x00'],          # Electric Power Steering
-    (Ecu.fwdCamera, 0x18DAF1B5, 0): [b'36161-TGH-A020\x00\x00'],        # Forward Camera
-    (Ecu.engine,  0x18DAF110, 0): [b'37805-5BF-E030\x00\x00'],          # Programmed Fuel Injection / ECM
-    (Ecu.combinationMeter, 0x18DAF160, 0): [b'78109-TGH-E310\x00\x00'],# Combination Meter
-    (Ecu.fwdRadar, 0x18DAF1B0, 0): [b'36802-TGH-A030\x00\x00'],        # Forward Radar
-    (Ecu.srs,     0x18DAF153, 0): [b'77959-TGH-E220\x00\x00'],         # SRS / Airbag
+    (Ecu.gateway, 0x18daeff1, None): [
+      b'38897-TBA-A020\x00\x00',
+    ], # Gateway
+    (Ecu.abs, 0x18daf128, None): [
+      b'57114-TGH-A130\x00\x00',
+    ], # VSA / ABS / ESP
+    (Ecu.eps, 0x18daf130, None): [
+      b'39990-TGH-J020\x00\x00',
+    ], # Electric Power Steering
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'36161-TGH-A020\x00\x00',
+    ], # Forward Camera
+    (Ecu.engine, 0x18daf110, None): [
+      b'37805-5BF-E030\x00\x00',
+    ], # Programmed Fuel Injection / ECM
+    (Ecu.combinationMeter, 0x18daf160, None): [
+      b'78109-TGH-E310\x00\x00',
+    ], # Combination Meter
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36802-TGH-A030\x00\x00',
+    ], # Forward Radar
+    (Ecu.srs, 0x18daf153, None): [
+      b'77959-TGH-E220\x00\x00',
+    ], # SRS / Airbag
   },
   CAR.HONDA_CRV: {
     (Ecu.vsa, 0x18da28f1, None): [
