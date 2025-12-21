@@ -77,6 +77,9 @@ bool get_honda_fwd_brake(void);
 void set_honda_alt_brake_msg(bool c);
 void set_honda_bosch_long(bool c);
 int get_honda_hw(void);
+
+bool get_ignition_can(void);
+void set_ignition_can(bool c);
 """)
 
 class LibSafety:
