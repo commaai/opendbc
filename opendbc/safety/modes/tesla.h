@@ -330,7 +330,7 @@ static safety_config tesla_init(uint16_t param) {
 
   SAFETY_UNUSED(param);
 #ifdef ALLOW_DEBUG
-  const int TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
+  const uint16_t TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
   tesla_longitudinal = GET_FLAG(param, TESLA_FLAG_LONGITUDINAL_CONTROL);
 #endif
 
