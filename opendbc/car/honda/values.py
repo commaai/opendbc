@@ -200,7 +200,9 @@ class CAR(Platforms):
       steerRatio=15.1,  # Tuned via test drives (started at ~15.38 from stock Civic)
       centerToFrontRatio=0.4,  # Recommended: matches standard Civic Bosch – helps lateral tuning
     ),
-    {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},  # Same DBC as other FK8-era Civics
+    {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
+    flags=HondaFlags.ALLOW_MANUAL_TRANS,
+    # Same DBC as other FK8-era Civics
   )
   
   HONDA_CIVIC_BOSCH_DIESEL = HondaBoschPlatformConfig(
