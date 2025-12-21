@@ -1153,6 +1153,7 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00NX4__               1.00 1.02 99110N7000          ',
       b'\xf1\x00NX4__               1.00 1.02 99110N7100          ',
+      b'\xf1\x00NX4__               1.00 1.03 99110N7100          ',
     ],
   },
   CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN: {
