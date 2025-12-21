@@ -187,18 +187,20 @@ class CAR(Platforms):
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
   )
   HONDA_CIVIC_TYPE_R_FK8 = HondaBoschPlatformConfig(
-  [
-  HondaCarDocs(
-  "Honda Civic Type R 2017-21",
-  "EU Manual",
-  min_steer_speed=12.0 * CV.MPH_TO_MS
-  )
-  ],
-  CarSpecs(
-  mass=1380,
-  wheelbase=2.7,
-  steerRatio=15.1  # Tuned via test drives (started at ~15.38 from stock Civic values)
-  )
+    [
+      HondaCarDocs(
+        "Honda Civic Type R 2017-21",
+        "EU Manual",
+        min_steer_speed=12.0 * CV.MPH_TO_MS,
+      ),
+    ],
+    CarSpecs(
+      mass=1380,
+      wheelbase=2.7,
+      steerRatio=15.1,  # Tuned via test drives (started at ~15.38 from stock Civic)
+      centerToFrontRatio=0.4,  # Recommended: matches standard Civic Bosch – helps lateral tuning
+    ),
+    {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},  # Same DBC as other FK8-era Civics
   )
   
   HONDA_CIVIC_BOSCH_DIESEL = HondaBoschPlatformConfig(
