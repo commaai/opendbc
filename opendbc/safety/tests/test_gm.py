@@ -89,6 +89,41 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
 
   EXTRA_SAFETY_PARAM = 0
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    # Random messages should not enable controls
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
+    # Loop specific addresses to cover logic inside address checks
+    # 0x180 (LKA), 0x409/0x40A (Unknown?), 0x2CB (Gas), 0x370 (Unknown?), 0x315 (Brake), 0x1E1 (Buttons)
+    # 0x1E1 depends on gm_pcm_cruise (True for ASCM, False for Camera with zero data blocking non-cancel)
+    expectations = {
+      0x180: [True], 0x409: [True], 0x40A: [True], 0x2CB: [False],
+      0x370: [True], 0x315: [True], 0x1E1: [True, False]
+    }
+    for addr, allowed in expectations.items():
+      msg.addr = addr
+      for bus in range(3):
+        msg.bus = bus
+        self.safety.TEST_rx_hook(msg)
+        self.assertFalse(self.safety.get_controls_allowed())
+        ret = self.safety.TEST_tx_hook(msg)
+        assert ret in allowed, f"addr {hex(addr)} expected {allowed}"
+
   def setUp(self):
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerSafety("gm_global_a_chassis")
@@ -131,6 +166,29 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
   def _button_msg(self, buttons):
     values = {"ACCButtons": buttons}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
+
+  def test_vehicle_moving(self):
+    self._rx(self._speed_msg(0))
+    self.assertFalse(self.safety.get_vehicle_moving())
+
+    self._rx(self._speed_msg(self.STANDSTILL_THRESHOLD + 1))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+    # Mixed moving/standstill
+    values = {"RLWheelSpd": 0, "RRWheelSpd": self.STANDSTILL_THRESHOLD + 1}
+    self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+    values = {"RLWheelSpd": self.STANDSTILL_THRESHOLD + 1, "RRWheelSpd": 0}
+    self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+  def test_tx_hook_violation(self):
+    # Ensure allow bit is blocked if controls allowed is false
+    self.safety.set_controls_allowed(0)
+    # Manually construct 0x2CB packet with bit 0 set (Apply)
+    msg = libsafety_py.make_CANPacket(0x2CB, 0, b'\x01\x00\x00\x00\x00\x00\x00\x00')
+    self.assertFalse(self._tx(msg))
 
 
 class TestGmEVSafetyBase(TestGmSafetyBase):
