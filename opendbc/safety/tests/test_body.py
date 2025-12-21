@@ -55,6 +55,27 @@ class TestBody(common.SafetyTest):
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
     self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
 
+  def test_fuzz_hooks(self):
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+
+    # Body doesn't implement these, so they return defaults of 0/True
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+    self.assertTrue(self.safety.TEST_get_quality_flag_valid(msg))
+
+    # Pattern coverage for rx_hook
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      # Tx hook logic: 0x555 is not 0x1, so expected False when controls disabled
+      self.assertFalse(self.safety.TEST_tx_hook(msg))
+
 
 if __name__ == "__main__":
   unittest.main()
