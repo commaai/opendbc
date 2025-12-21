@@ -79,6 +79,15 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         tx = self._tx(self._acc_button_cmd(**args))
         self.assertEqual(tx, should_tx)
 
+  def test_rx_hook_wrong_bus(self):
+    wrong_bus = (self.CRUISE_BUS + 1) % 3
+    values = {"CRUISE_ENABLED": 1}
+
+    msg = self.packer.make_can_msg_safety("CRUISE_STATE", wrong_bus, values)
+    self.safety.safety_rx_hook(msg)
+
+    self.assertFalse(self.safety.get_controls_allowed())
+
 
 class TestNissanSafetyAltEpsBus(TestNissanSafety):
   """Altima uses different buses"""

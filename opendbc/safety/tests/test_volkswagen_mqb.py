@@ -126,6 +126,26 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
+  def test_acc_status_values(self):
+    # Test all values that result in active ACC
+    # 3: ACC_Status_active
+    # 4: ACC_Status_active_brake_only
+    # 5: ACC_Status_override
+    for status in [3, 4, 5]:
+      self.safety.set_controls_allowed(1)
+      values = {"TSK_Status": status}
+      self._rx(self.packer.make_can_msg_safety("TSK_06", 0, values))
+      self.assertTrue(self.safety.get_controls_allowed())
+
+    # 2: ACC_Status_standby
+    # Stock: Result in controls disallowed (pcm_cruise_check)
+    # Long: Result in controls allowed (derived from main switch)
+    self.safety.set_controls_allowed(1)
+    values = {"TSK_Status": 2}
+    self._rx(self.packer.make_can_msg_safety("TSK_06", 0, values))
+    controls_allowed = isinstance(self, TestVolkswagenMqbLongSafety)
+    self.assertEqual(self.safety.get_controls_allowed(), controls_allowed)
+
 
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2]]
@@ -137,6 +157,11 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagen, 0)
     self.safety.init_tests()
 
+  def test_rx_gra_acc_01_on_bus_0(self):
+    self.safety.set_controls_allowed(1)
+    self._rx(self._gra_acc_01_msg(bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
+
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._gra_acc_01_msg(cancel=1)))
@@ -145,6 +170,29 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
     # do not block resume if we are engaged already
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._gra_acc_01_msg(resume=1)))
+
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertIsNotNone(self.safety.TEST_compute_checksum(msg))
+
+    # MSG_LH_EPS_03=0x9F, MSG_ESP_05=0x106, MSG_TSK_06=0x120, MSG_MOTOR_20=0x121, MSG_GRA_ACC_01=0x12B
+    for addr in [0x9F, 0x106, 0x120, 0x121, 0x12B]:
+      msg.addr = addr
+      self.assertIsNotNone(self.safety.TEST_compute_checksum(msg))
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
 
 
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):

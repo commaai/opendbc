@@ -32,6 +32,25 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.safety.set_safety_hooks(CarParams.SafetyModel.mazda, 0)
     self.safety.init_tests()
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
   def _torque_meas_msg(self, torque):
     values = {"STEER_TORQUE_MOTOR": torque}
     return self.packer.make_can_msg_safety("STEER_TORQUE", 0, values)
@@ -79,6 +98,25 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
+
+  def test_gas_pressed_alternates(self):
+    # Byte 4 is non-zero
+    to_send = common.make_msg(0, 0x202, 8)
+    to_send[0].data = bytes([0, 0, 0, 0, 1, 0, 0, 0])
+    self.safety.safety_rx_hook(to_send)
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
+    # Byte 5 is non-zero (masked)
+    to_send = common.make_msg(0, 0x202, 8)
+    to_send[0].data = bytes([0, 0, 0, 0, 0, 0xF0, 0, 0])
+    self.safety.safety_rx_hook(to_send)
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
+    # Both 0
+    to_send = common.make_msg(0, 0x202, 8)
+    to_send[0].data = bytes([0, 0, 0, 0, 0, 0, 0, 0])
+    self.safety.safety_rx_hook(to_send)
+    self.assertFalse(self.safety.get_gas_pressed_prev())
 
 
 if __name__ == "__main__":

@@ -108,9 +108,20 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
+  def test_rx_coverage(self):
+    # VW PQ Line 78: if (msg->bus == 0U)
+    # 1. Bus 0 (True)
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = common.MSG_BREMSE_1 if hasattr(common, 'MSG_BREMSE_1') else 0x1A0
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.safety.TEST_rx_hook(msg)
+    # 2. Bus 1 (False)
+    msg.bus = 1
+    self.safety.TEST_rx_hook(msg)
+
 
 class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
-  # Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_GRA_NEU, 0], [MSG_GRA_NEU, 2], [MSG_LDW_1, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1]}
 
@@ -128,6 +139,36 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
     # do not block resume if we are engaged already
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=True)))
+
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
+  def test_acc_status_values(self):
+    for status in [1, 2]:
+      self.safety.set_controls_allowed(0)
+      # Reset previous state (assume 0)
+      values = {"MO2_Sta_GRA": 0}
+      self._rx(self.packer.make_can_msg_safety("Motor_2", 0, values))
+
+      # Rising edge to status
+      values = {"MO2_Sta_GRA": status}
+      self._rx(self.packer.make_can_msg_safety("Motor_2", 0, values))
+      self.assertTrue(self.safety.get_controls_allowed())
 
 
 class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.LongitudinalAccelSafetyTest):
@@ -165,6 +206,18 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
+
+  def test_set_resume_simultaneous(self):
+    # Cover (set_falling || resume_falling) branch where logic requires simultaneous event coverage
+    self._rx(self._motor_5_msg(main_switch=True))
+    self.safety.set_controls_allowed(0)
+    # Ensure Set and Resume are both High (Rising)
+    self._rx(self._button_msg(_set=True, resume=True, bus=0))
+    # Ensure Set and Resume are both High (Holding - covers T && !T)
+    self._rx(self._button_msg(_set=True, resume=True, bus=0))
+    # Falling edge both -> Enable
+    self._rx(self._button_msg(_set=False, resume=False, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
 
   def test_cancel_button(self):
     # Disable on rising edge of cancel button

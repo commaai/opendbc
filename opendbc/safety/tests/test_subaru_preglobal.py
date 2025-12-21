@@ -30,6 +30,25 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     self.safety.set_safety_hooks(CarParams.SafetyModel.subaruPreglobal, self.FLAGS)
     self.safety.init_tests()
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+
+    # Pattern coverage for rx_hook
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
   def _set_prev_torque(self, t):
     self.safety.set_desired_torque_last(t)
     self.safety.set_rt_torque_last(t)
@@ -38,10 +57,14 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {"Steer_Torque_Sensor": torque}
     return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
-  def _speed_msg(self, speed):
+  def _wheel_speed_msg(self, values):
     # subaru safety doesn't use the scaled value, so undo the scaling
-    values = {s: speed*0.0592 for s in ["FR", "FL", "RR", "RL"]}
+    values = {k: v * 0.0592 for k, v in values.items()}
     return self.packer.make_can_msg_safety("Wheel_Speeds", 0, values)
+
+  def _speed_msg(self, speed):
+    values = {s: speed for s in ["FR", "FL", "RR", "RL"]}
+    return self._wheel_speed_msg(values)
 
   def _user_brake_msg(self, brake):
     values = {"Brake_Pedal": brake}
@@ -58,6 +81,20 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", 0, values)
+
+  def test_rx_hook_wrong_bus(self):
+    values = {s: 10 for s in ["FR", "FL", "RR", "RL"]}
+    msg = self.packer.make_can_msg_safety("Wheel_Speeds", 2, values)
+    self._rx(msg)
+
+    self.assertFalse(self.safety.get_vehicle_moving())
+
+  def test_vehicle_moving_partial(self):
+    self._rx(self._wheel_speed_msg({"FR": 0, "FL": 0, "RR": 0, "RL": 0}))
+    self.assertFalse(self.safety.get_vehicle_moving())
+
+    self._rx(self._wheel_speed_msg({"FR": 0, "FL": 0, "RR": 100, "RL": 100}))
+    self.assertTrue(self.safety.get_vehicle_moving())
 
 
 class TestSubaruPreglobalReversedDriverTorqueSafety(TestSubaruPreglobalSafety):
