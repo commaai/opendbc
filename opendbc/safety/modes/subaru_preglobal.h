@@ -92,7 +92,7 @@ static safety_config subaru_preglobal_init(uint16_t param) {
     {.msg = {{MSG_SUBARU_PG_Brake_Pedal,     SUBARU_PG_MAIN_BUS, 4, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  const int SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE = 4;
+  const uint16_t SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE = 4;
 
   subaru_pg_reversed_driver_torque = GET_FLAG(param, SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE);
   return BUILD_SAFETY_CFG(subaru_preglobal_rx_checks, SUBARU_PG_TX_MSGS);
