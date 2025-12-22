@@ -31,6 +31,7 @@ static bool honda_alt_brake_msg = false;
 static bool honda_fwd_brake = false;
 static bool honda_bosch_long = false;
 static bool honda_bosch_radarless = false;
+static bool honda_bosch_scm_alt = false;
 static bool honda_bosch_canfd = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
@@ -78,8 +79,18 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 
   // check ACC main state
   // 0x326 for all Bosch and some Nidec, 0x1A6 for some Nidec
-  if ((msg->addr == 0x326U) || (msg->addr == 0x1A6U)) {
-    acc_main_on = GET_BIT(msg, ((msg->addr == 0x326U) ? 28U : 47U));
+  // Odyssey RC5 japanese type use 0x1a6 for scm_buttons and main_on signal
+  // But 0x326 also exist. So we need to ignore it.
+  if (msg->addr == 0x1A6U) {
+    honda_bosch_scm_alt = true;
+    acc_main_on = GET_BIT(msg, 47U);
+    if (!acc_main_on) {
+      controls_allowed = false;
+    }
+  }
+
+  if ((msg->addr == 0x326U) && (!honda_bosch_scm_alt)) {
+    acc_main_on = GET_BIT(msg, 28U);
     if (!acc_main_on) {
       controls_allowed = false;
     }
@@ -118,6 +129,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
       controls_allowed = false;
     }
     cruise_button_prev = button;
+
   }
 
   // user brake signal on 0x17C reports applied brake from computer brake on accord
@@ -183,6 +195,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   unsigned int bus_pt = honda_get_pt_bus();
   unsigned int bus_buttons = (honda_bosch_radarless) ? 2U : bus_pt;  // the camera controls ACC on radarless Bosch cars
+
 
   // ACC_HUD: safety check (nidec w/o pedal)
   if ((msg->addr == 0x30CU) && (msg->bus == bus_pt)) {
@@ -256,7 +269,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   // FORCE CANCEL: safety check only relevant when spamming the cancel button in Bosch HW
   // ensuring that only the cancel button press is sent (VAL 2) when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((msg->addr == 0x296U) && !controls_allowed && (msg->bus == bus_buttons)) {
+  if (((msg->addr == 0x296U) || (msg->addr == 0x1A6U)) && !controls_allowed && (msg->bus == bus_buttons)) {
     if (((msg->data[0] >> 5) & 0x7U) != 2U) {
       tx = false;
     }
@@ -288,6 +301,7 @@ static safety_config honda_nidec_init(uint16_t param) {
   honda_alt_brake_msg = false;
   honda_bosch_long = false;
   honda_bosch_radarless = false;
+  honda_bosch_scm_alt = false;
   honda_bosch_canfd = false;
 
   safety_config ret;
@@ -326,7 +340,7 @@ static safety_config honda_bosch_init(uint16_t param) {
                                               {0x33DA, 1, 5, .check_relay = true}, {0x33DB, 1, 8, .check_relay = true}, {0x39F, 1, 8, .check_relay = false},
                                               {0x18DAB0F1, 1, 8, .check_relay = false}};  // Bosch w/ gas and brakes
 
-  static CanMsg HONDA_RADARLESS_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x296, 2, 4, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}};  // Bosch radarless
+  static CanMsg HONDA_RADARLESS_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x296, 2, 4, .check_relay = false}, {0x1A6, 2, 8, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}};  // Bosch radarless
 
   static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = true}, {0x1C8, 0, 8, .check_relay = true},
                                                   {0x30C, 0, 8, .check_relay = true}};  // Bosch radarless w/ gas and brakes
@@ -364,6 +378,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   honda_bosch_canfd = GET_FLAG(param, HONDA_PARAM_BOSCH_CANFD);
   // Checking for alternate brake override from safety parameter
   honda_alt_brake_msg = GET_FLAG(param, HONDA_PARAM_ALT_BRAKE);
+  honda_bosch_scm_alt = false;
 
   // radar disabled so allow gas/brakes
 #ifdef ALLOW_DEBUG
