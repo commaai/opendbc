@@ -201,7 +201,7 @@ class CAR(Platforms):
       centerToFrontRatio=0.4,  # Recommended: matches standard Civic Bosch – helps lateral tuning
     ),
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
-    flags=HondaFlags.ALLOW_MANUAL_TRANS,
+    flags=HondaFlags.BOSCH | HondaFlags.ALLOW_MANUAL_TRANS,
     # Same DBC as other FK8-era Civics
   )
   
