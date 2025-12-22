@@ -335,31 +335,23 @@ FW_VERSIONS = {
   },
   CAR.HONDA_CIVIC_TYPE_R_FK8: {
     (Ecu.gateway, 0x18daeff1, None): [
-      b'38897-TBA-A020\x00\x00',
-    ],
+      b'38897-TBA-A020\x00\x00'],
     (Ecu.vsa, 0x18da28f1, None): [
-      b'57114-TGH-A130\x00\x00',
-    ],
+      b'57114-TGH-A130\x00\x00'],
     (Ecu.eps, 0x18da30f1, None): [
-      b'39990-TGH-J020\x00\x00',
-    ],
+      b'39990-TGH-J020\x00\x00'],
     (Ecu.programmedFuelInjection, 0x18da10f1, None): [
-      b'37805-5BF-E030\x00\x00',
-    ],
+      b'37805-5BF-E030\x00\x00'],
     (Ecu.combinationMeter, 0x18da60f1, None): [
-      b'78109-TGH-E310\x00\x00',
-    ],
+      b'78109-TGH-E310\x00\x00'],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
-      b'36802-TGH-A030\x00\x00',
-    ],
+      b'36802-TGH-A030\x00\x00'],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
-      b'36161-TGH-A020\x00\x00',
-    ],
+      b'36161-TGH-A020\x00\x00'],
     (Ecu.srs, 0x18da53f1, None): [
-      b'77959-TGH-E220\x00\x00',
-    ],
+      b'77959-TGH-E220\x00\x00'],
   },
-
+  
   CAR.HONDA_CRV: {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-T1W-A230\x00\x00',
