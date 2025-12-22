@@ -34,6 +34,7 @@ class PIDController:
 
   @property
   def k_d(self):
+    assert not isinstance(self._k_d, float)
     return np.interp(self.speed, self._k_d[0], self._k_d[1])
 
   @property
