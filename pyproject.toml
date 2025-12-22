@@ -66,19 +66,12 @@ ignore-words-list = "alo,ba,bu,deque,hda,grey,arange"
 builtin = "clear,rare,informal,code,names,en-GB_to_en-US"
 check-hidden = true
 
-[tool.mypy]
-# helpful warnings
-warn_redundant_casts=true
-warn_unreachable=true
-warn_unused_ignores=true
+[tool.ty]
+# https://docs.astral.sh/ty/
 
-# restrict dynamic typing
-warn_return_any=true
-
-# allow implicit optionals for default args
-implicit_optional = true
-
-explicit_package_bases=true
+[tool.ty.rules]
+# Enable common helpful warnings
+# Rule severity can be: "error", "warn", or "ignore"
 
 # https://beta.ruff.rs/docs/configuration/#using-pyprojecttoml
 [tool.ruff]
