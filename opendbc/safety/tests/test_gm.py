@@ -96,6 +96,41 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     self.safety.set_safety_hooks(CarParams.SafetyModel.gm, 0)
     self.safety.init_tests()
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    # Random messages should not enable controls
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
+    # Loop specific addresses to cover logic inside address checks
+    # 0x180 (LKA), 0x409/0x40A (Unknown?), 0x2CB (Gas), 0x370 (Unknown?), 0x315 (Brake), 0x1E1 (Buttons)
+    # 0x1E1 depends on gm_pcm_cruise (True for ASCM, False for Camera with zero data blocking non-cancel)
+    expectations = {
+      0x180: [True], 0x409: [True], 0x40A: [True], 0x2CB: [False],
+      0x370: [True], 0x315: [True], 0x1E1: [True, False]
+    }
+    for addr, allowed in expectations.items():
+      msg.addr = addr
+      for bus in range(3):
+        msg.bus = bus
+        self.safety.TEST_rx_hook(msg)
+        self.assertFalse(self.safety.get_controls_allowed())
+        ret = self.safety.TEST_tx_hook(msg)
+        assert ret in allowed, f"addr {hex(addr)} expected {allowed}"
+
   def _pcm_status_msg(self, enable):
     if self.PCM_CRUISE:
       values = {"CruiseState": enable}
