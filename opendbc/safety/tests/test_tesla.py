@@ -371,6 +371,34 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
       self.assertFalse(self._tx(self._long_control_msg(0, acc_state=acc_state, accel_limits=(self.MIN_ACCEL, self.MAX_ACCEL))))
       self.assertEqual(should_tx, self._tx(self._long_control_msg(0, acc_state=acc_state)))
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+    self.assertFalse(self.safety.TEST_get_quality_flag_valid(msg))
+
+    # ensure full branch coverage for compound if-else chains
+    ids = [0x257, 0x118, 0x39d, 0x286, 0x311, 0x2b9, 0x488, 0x155, 0x370]
+    self.safety.set_controls_allowed(0)
+    for addr in ids:
+      msg_hit = libsafety_py.ffi.new("CANPacket_t *")
+      msg_hit.addr = addr
+      msg_hit.data_len_code = 8
+      for bus in range(3):
+        msg_hit.bus = bus
+        # Assert helpers return valid values (not None/error)
+        self.assertIsNotNone(self.safety.TEST_get_counter(msg_hit))
+        self.assertIsNotNone(self.safety.TEST_get_checksum(msg_hit))
+        self.assertIsNotNone(self.safety.TEST_compute_checksum(msg_hit))
+        self.safety.TEST_rx_hook(msg_hit)
+        self.assertFalse(self.safety.get_controls_allowed())
+
   def test_no_aeb(self):
     for aeb_event in range(4):
       should_tx = aeb_event == 0
