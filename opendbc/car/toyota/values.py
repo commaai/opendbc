@@ -407,6 +407,7 @@ class CAR(Platforms):
     flags=ToyotaFlags.UNSUPPORTED_DSU,
   )
 
+
 def get_platform_codes(fw_versions: list[bytes]) -> dict[bytes, set[bytes]]:
   # Returns sub versions in a dict so comparisons can be made within part-platform-major_version combos
   codes = defaultdict(set)  # Optional[part]-platform-major_version: set of sub_version
