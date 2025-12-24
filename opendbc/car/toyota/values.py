@@ -397,6 +397,15 @@ class CAR(Platforms):
     dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.UNSUPPORTED_DSU,
   )
+  LEXUS_GS450H = PlatformConfig(
+    [
+      ToyotaCarDocs("Lexus GS 450H 2016"),
+      ToyotaCarDocs("Lexus GS 450H F Sport 2016")
+    ],
+    CarSpecs(mass=4112. * CV.LB_TO_KG, wheelbase=2.84988, steerRatio=13.2, tireStiffnessFactor=0.55),
+    dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
+    flags=ToyotaFlags.UNSUPPORTED_DSU,
+  )
 
 
 def get_platform_codes(fw_versions: list[bytes]) -> dict[bytes, set[bytes]]:
