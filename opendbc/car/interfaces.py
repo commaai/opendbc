@@ -92,9 +92,9 @@ class RadarInterfaceBase(ABC):
 
 
 class CarInterfaceBase(ABC):
-  CarState: 'CarStateBase'
-  CarController: 'CarControllerBase'
-  RadarInterface: 'RadarInterfaceBase' = RadarInterfaceBase
+  CarState: type['CarStateBase']
+  CarController: type['CarControllerBase']
+  RadarInterface: type['RadarInterfaceBase'] = RadarInterfaceBase
 
   DRIVABLE_GEARS: tuple[structs.CarState.GearShifter, ...] = ()
 

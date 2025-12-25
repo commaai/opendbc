@@ -170,7 +170,7 @@ class CarParts:
     return copy.deepcopy(self)
 
   @classmethod
-  def common(cls, add: list[EnumBase] = None, remove: list[EnumBase] = None):
+  def common(cls, add: list[EnumBase] | None = None, remove: list[EnumBase] | None = None):
     p = [part for part in (add or []) + DEFAULT_CAR_PARTS if part not in (remove or [])]
     return cls(p)
 
@@ -342,6 +342,7 @@ class CarDocs:
     if not CP.notCar:
       sentence_builder = "openpilot upgrades your <strong>{car_model}</strong> with automated lane centering{alc} and adaptive cruise control{acc}."
 
+      assert self.min_steer_speed is not None and self.min_enable_speed is not None
       if self.min_steer_speed > self.min_enable_speed:
         alc = f" <strong>above {self.min_steer_speed * CV.MS_TO_MPH:.0f} mph</strong>," if self.min_steer_speed > 0 else " <strong>at all speeds</strong>,"
       else:
@@ -380,7 +381,7 @@ class CarDocs:
       item = video_icon.format(item)
 
     footnotes = get_footnotes(self.footnotes, column)
-    if len(footnotes):
+    if len(footnotes) and self.all_footnotes is not None:
       sups = sorted([self.all_footnotes[fn] for fn in footnotes])
       item += footnote_tag.format(f'{",".join(map(str, sups))}')
 

@@ -138,7 +138,7 @@ The above tests are themselves tested by:
 * a [mutation test](opendbc/safety/tests/misra/test_mutation.py) on the MISRA coverage
 * 100% line coverage enforced on the safety unit tests
 
-In addition, we run the [ruff linter](https://github.com/astral-sh/ruff) and [mypy](https://mypy-lang.org/) on the car interface library.
+In addition, we run the [ruff linter](https://github.com/astral-sh/ruff) and [ty](https://github.com/astral-sh/ty) on the car interface library.
 
 ### Bounties
 

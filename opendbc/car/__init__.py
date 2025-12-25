@@ -106,7 +106,7 @@ def make_tester_present_msg(addr, bus, subaddr=None, suppress_response=False):
   return CanData(addr, bytes(dat), bus)
 
 
-def get_safety_config(safety_model: structs.CarParams.SafetyModel, safety_param: int = None) -> structs.CarParams.SafetyConfig:
+def get_safety_config(safety_model: structs.CarParams.SafetyModel, safety_param: int | None = None) -> structs.CarParams.SafetyConfig:
   ret = structs.CarParams.SafetyConfig()
   ret.safetyModel = safety_model
   if safety_param is not None:
