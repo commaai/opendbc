@@ -71,7 +71,7 @@ class TestHyundaiFingerprint:
 
   def test_can_features(self):
     # Test no EV/HEV in any gear lists (should all use ELECT_GEAR)
-    assert set.union(*CAN_GEARS.values()) & (HYBRID_CAR | EV_CAR) == set()
+    assert set().union(*CAN_GEARS.values()) & (HYBRID_CAR | EV_CAR) == set()
 
     # Test CAN FD car not in CAN feature lists
     can_specific_feature_list = set.union(*CAN_GEARS.values(), *CHECKSUM.values(), LEGACY_SAFETY_MODE_CAR, UNSUPPORTED_LONGITUDINAL_CAR, CAMERA_SCC_CAR)

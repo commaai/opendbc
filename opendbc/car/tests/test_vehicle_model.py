@@ -49,7 +49,7 @@ class TestVehicleModel:
         dt = 0.01
         top = np.hstack((A, B))
         full = np.vstack((top, np.zeros_like(top))) * dt
-        Md = sum([np.linalg.matrix_power(full, k) / math.factorial(k) for k in range(25)])
+        Md = sum([np.linalg.matrix_power(full, k) / math.factorial(k) for k in range(25)], np.zeros_like(full))
         Ad = Md[:A.shape[0], :A.shape[1]]
         Bd = Md[:A.shape[0], A.shape[1]:]
 
