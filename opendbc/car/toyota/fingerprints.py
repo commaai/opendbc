@@ -4,7 +4,6 @@ from opendbc.car.toyota.values import CAR
 
 Ecu = CarParams.Ecu
 
-
 FW_VERSIONS = {
   CAR.TOYOTA_AVALON: {
     (Ecu.abs, 0x7b0, None): [

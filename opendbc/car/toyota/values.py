@@ -14,7 +14,6 @@ Ecu = CarParams.Ecu
 MIN_ACC_SPEED = 19. * CV.MPH_TO_MS
 PEDAL_TRANSITION = 10. * CV.MPH_TO_MS
 
-
 class CarControllerParams:
   STEER_STEP = 1
   STEER_MAX = 1500
