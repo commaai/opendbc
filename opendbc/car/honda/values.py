@@ -260,6 +260,16 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Passport 2026", "All")],
     CarSpecs(mass=4620 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=18.5),
   )
+  ACURA_MDX_4G = HondaBoschPlatformConfig(
+    [
+      HondaCarDocs("Acura MDX 2022", "All"),
+      # todo: find 2023 fingerprints
+      HondaCarDocs("Acura MDX 2024", "All"),
+    ],
+    CarSpecs(mass=4788 * CV.LB_TO_KG, wheelbase=2.89, steerRatio=16.3, centerToFrontRatio=0.428),  # as spec
+    {Bus.pt: 'acura_mdx_2022_can_generated'},
+    flags=HondaFlags.BOSCH_TJA_CONTROL,
+  )
   # mid-model refresh
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Acura MDX 2025", "All except Type S")],
