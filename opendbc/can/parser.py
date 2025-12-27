@@ -204,10 +204,12 @@ class CANParser:
     for state in self.message_states.values():
       if state.counter_fail >= MAX_BAD_COUNTER:
         counters_valid = False
-        state.rate_limited_log(self._last_update_nanos, f"counter invalid, {state.counter_fail=} {MAX_BAD_COUNTER=}")
+        carlog.error({"counter invalid - message": state, "bus": self.bus})
+        # state.rate_limited_log(self._last_update_nanos, f"counter invalid, {state.counter_fail=} {MAX_BAD_COUNTER=}")
       if not state.valid(self._last_update_nanos, bus_timeout):
         valid = False
-        state.rate_limited_log(self._last_update_nanos, "not valid (timeout or missing)")
+        carlog.error({"can invalid - message": state, "bus": self.bus})
+        # state.rate_limited_log(self._last_update_nanos, "not valid (timeout or missing)")
 
     # TODO: probably only want to increment this once per update() call
     self.can_invalid_cnt = 0 if valid else min(self.can_invalid_cnt + 1, CAN_INVALID_CNT)
