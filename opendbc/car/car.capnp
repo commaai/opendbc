@@ -360,10 +360,12 @@ struct CarControl {
   hudControl @5 :HUDControl;
 
   struct Actuators {
-    # lateral commands, mutually exclusive
-    torque @2: Float32;  # [0.0, 1.0]
-    steeringAngleDeg @3: Float32;
-    curvature @7: Float32;
+    # lateral commands
+    union {
+      torque @9 :Float32;  # [0.0, 1.0]
+      steeringAngleDeg @10 :Float32;
+      curvature @11 :Float32;
+    }
 
     # longitudinal commands
     accel @4: Float32;  # m/s^2
@@ -381,6 +383,10 @@ struct CarControl {
       stopping @2;
       starting @3;
     }
+
+    torqueDEPRECATED @2: Float32;
+    steeringAngleDegDEPRECATED @3: Float32;
+    curvatureDEPRECATED @7: Float32;
   }
 
   struct CruiseControl {
