@@ -126,6 +126,46 @@ flake8-implicit-str-concat.allow-multiline=false
 # TODO: re-enable when all tests are converted to pytest
 #"unittest".msg = "Use pytest"
 
+[tool.ty.rules]
+# Ignore rules that produce false positives due to:
+# - Dynamic attributes on LibSafety (loaded from compiled C library)
+# - External dependencies not installed (panda, cereal, openpilot)
+# - capnp dynamically generated types
+possibly-missing-attribute = "ignore"
+unresolved-attribute = "ignore"
+unresolved-import = "ignore"
+
+# Project uses mypy's implicit_optional = true style
+invalid-parameter-default = "ignore"
+
+# Intentional LSP violations in subclass method signatures
+invalid-method-override = "ignore"
+
+# Optional callables called without None checks in test code
+call-non-callable = "ignore"
+
+# Complex type narrowing ty doesn't handle well (isinstance with abstract types)
+invalid-argument-type = "ignore"
+
+# Class vs instance type assignments and test base class patterns
+invalid-assignment = "ignore"
+
+# Dynamic type patterns (e.g., values converted from Number to list in __init__)
+non-subscriptable = "ignore"
+unsupported-operator = "ignore"
+
+# Return types with complex callable signatures
+invalid-return-type = "ignore"
+
+# Test class optional attributes (TX_MSGS, etc.)
+not-iterable = "ignore"
+
+# Test assertions with optional types
+no-matching-overload = "ignore"
+
+# Test class method signature differences
+too-many-positional-arguments = "ignore"
+
 [tool.setuptools]
 include-package-data = true
 

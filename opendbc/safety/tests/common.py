@@ -182,7 +182,7 @@ class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
   MIN_GAS: int = 0
   MAX_GAS: int | None = None
   INACTIVE_GAS = 0
-  MIN_POSSIBLE_GAS: int = 0.
+  MIN_POSSIBLE_GAS: int = 0
   MAX_POSSIBLE_GAS: int | None = None
 
   def test_gas_brake_limits_correct(self):
