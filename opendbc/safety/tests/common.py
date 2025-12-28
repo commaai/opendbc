@@ -809,7 +809,7 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
 
 class SafetyTest(SafetyTestBase):
-  TX_MSGS: list[list[int]] | None = None
+  TX_MSGS: list[list[int]] = []
   SCANNED_ADDRS = [*range(0x800),                      # Entire 11-bit CAN address space
                    *range(0x18DA00F1, 0x18DB00F1, 0x100),   # 29-bit UDS physical addressing
                    *range(0x18DB00F1, 0x18DC00F1, 0x100),   # 29-bit UDS functional addressing

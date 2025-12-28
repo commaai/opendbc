@@ -151,9 +151,6 @@ unsupported-operator = "ignore"
 # Return types with complex callable signatures
 invalid-return-type = "ignore"
 
-# Test class optional attributes (TX_MSGS, etc.)
-not-iterable = "ignore"
-
 # Test class method signature differences
 too-many-positional-arguments = "ignore"
 
