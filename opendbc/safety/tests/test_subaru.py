@@ -83,6 +83,36 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     self.safety.set_safety_hooks(CarParams.SafetyModel.subaru, self.FLAGS)
     self.safety.init_tests()
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    # Random messages should not enable controls
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
+    # Loop specific addresses to cover logic inside address checks
+    # ES_LKAS=0x122, ES_Brake=0x220, ES_Distance=0x221, ES_Status=0x222, ES_DashStatus=0x321, ES_UDS=0x787
+    addrs = {
+      SubaruMsg.ES_LKAS: True, SubaruMsg.ES_Brake: True, SubaruMsg.ES_Distance: False,
+      SubaruMsg.ES_Status: True, SubaruMsg.ES_DashStatus: True, SubaruMsg.ES_UDS_Request: False
+    }
+    for addr, expected in addrs.items():
+      msg.addr = addr
+      for bus in range(3):
+        msg.bus = bus
+        self.safety.TEST_rx_hook(msg)
+        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertEqual(expected, self.safety.TEST_tx_hook(msg), f"addr {hex(addr)} expected {expected}")
+
   def _set_prev_torque(self, t):
     self.safety.set_desired_torque_last(t)
     self.safety.set_rt_torque_last(t)
@@ -110,6 +140,17 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
+
+  def test_wheel_speeds(self):
+    for wheel in ["FL", "FR", "RL", "RR"]:
+      values = {s: 0 for s in ["FR", "FL", "RR", "RL"]}
+      values[wheel] = 100
+      self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values))
+      self.assertTrue(self.safety.get_vehicle_moving())
+
+    values = {s: 0 for s in ["FR", "FL", "RR", "RL"]}
+    self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values))
+    self.assertFalse(self.safety.get_vehicle_moving())
 
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
@@ -226,10 +267,18 @@ class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSub
     # Non-Tester present is not allowed
     self.assertFalse(self._tx(self._es_uds_msg(not_tester_present)))
 
+    # Tester present with non-zero suffix (bytes 4-7) is BLOCK
+    tester_present_garbage = b'\x02\x3E\x80\x00\xFF\x00\x00\x00'
+    self.assertFalse(self._tx(self._es_uds_msg(tester_present_garbage)))
+
     # Only button_did is allowed to be read via UDS
     for did in range(0xFFFF):
       should_tx = (did == button_did)
       self.assertEqual(self._tx(self._es_uds_msg(self._rdbi_msg(did))), should_tx)
+
+    # Button RDBI with non-zero suffix is BLOCK
+    button_rdbi_garbage = b'\x03\x22\x11\x30\xFF\x00\x00\x00'
+    self.assertFalse(self._tx(self._es_uds_msg(button_rdbi_garbage)))
 
     # any other msg is not allowed
     for sid in range(0xFF):

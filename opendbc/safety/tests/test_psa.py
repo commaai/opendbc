@@ -76,6 +76,16 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     msg[0].data[6] = 0xAB
     self.assertTrue(self._rx(msg))
 
+    # brake
+    self.safety.set_controls_allowed(1)
+    self.assertTrue(self._rx(self._user_brake_msg(1)))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._user_brake_msg(0)))
+
+    # gas
+    self.assertTrue(self._rx(self._user_gas_msg(1)))
+    self.assertTrue(self._rx(self._user_gas_msg(0)))
+
 
 class TestPsaStockSafety(TestPsaSafetyBase):
 
@@ -84,6 +94,34 @@ class TestPsaStockSafety(TestPsaSafetyBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
     self.safety.init_tests()
+
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    # Random messages should not enable controls
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
+    # Pattern coverage for tx_hook: iterate for specific TX address
+    # PSA_LANE_KEEP_ASSIST = 1010
+    msg.addr = 1010
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
 
 
 if __name__ == "__main__":

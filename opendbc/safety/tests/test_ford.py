@@ -99,6 +99,42 @@ class TestFordSafetyBase(common.CarSafetyTest):
     curvature_accel_limit_upper = int(curvature_accel_limit * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN
     return curvature_accel_limit_lower, curvature_accel_limit_upper
 
+  def test_fuzz_hooks(self):
+    # ensure default branches are covered
+    msg = libsafety_py.ffi.new("CANPacket_t *")
+    msg.addr = 0x555
+    msg.bus = 0
+    msg.data_len_code = 8
+
+    self.assertEqual(0, self.safety.TEST_get_counter(msg))
+    self.assertEqual(0, self.safety.TEST_get_checksum(msg))
+    self.assertEqual(0, self.safety.TEST_compute_checksum(msg))
+    self.assertFalse(self.safety.TEST_get_quality_flag_valid(msg))
+
+    # Pattern coverage for rx_hook: iterate all buses for random address
+    # Random messages should not enable controls
+    self.safety.set_controls_allowed(0)
+    for bus in range(3):
+      msg.bus = bus
+      self.safety.TEST_rx_hook(msg)
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.TEST_tx_hook(msg))
+
+    # Loop specific addresses to cover logic inside address checks
+    addrs = {
+      MSG_EngBrakeData: True, MSG_EngVehicleSpThrottle: True, MSG_BrakeSysFeatures: True,
+      MSG_EngVehicleSpThrottle2: True, MSG_Yaw_Data_FD1: True, MSG_Steering_Data_FD1: True,
+      MSG_ACCDATA: False, MSG_ACCDATA_3: True, MSG_Lane_Assist_Data1: True,
+      MSG_LateralMotionControl: False, MSG_LateralMotionControl2: False, MSG_IPMA_Data: True,
+    }
+    for addr, expected in addrs.items():
+      msg.addr = addr
+      for bus in range(3):
+        msg.bus = bus
+        self.safety.TEST_rx_hook(msg)
+        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertEqual(expected, self.safety.TEST_tx_hook(msg), f"addr {hex(addr)} expected {expected}")
+
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)
     self.safety.set_desired_angle_last(t)
