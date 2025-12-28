@@ -189,6 +189,7 @@ class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
     self.assertIsNotNone(self.MAX_POSSIBLE_BRAKE)
     self.assertIsNotNone(self.MAX_POSSIBLE_GAS)
 
+    assert self.MAX_BRAKE is not None and self.MAX_GAS is not None
     self.assertGreater(self.MAX_BRAKE, self.MIN_BRAKE)
     self.assertGreater(self.MAX_GAS, self.MIN_GAS)
 

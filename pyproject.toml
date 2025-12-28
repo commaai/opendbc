@@ -135,9 +135,6 @@ possibly-missing-attribute = "ignore"
 unresolved-attribute = "ignore"
 unresolved-import = "ignore"
 
-# Project uses mypy's implicit_optional = true style
-invalid-parameter-default = "ignore"
-
 # Intentional LSP violations in subclass method signatures
 invalid-method-override = "ignore"
 
@@ -159,9 +156,6 @@ invalid-return-type = "ignore"
 
 # Test class optional attributes (TX_MSGS, etc.)
 not-iterable = "ignore"
-
-# Test assertions with optional types
-no-matching-overload = "ignore"
 
 # Test class method signature differences
 too-many-positional-arguments = "ignore"
