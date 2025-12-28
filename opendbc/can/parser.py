@@ -153,7 +153,7 @@ class CANParser:
     self.last_nonempty_nanos: int = 0
     self._last_update_nanos: int = 0
 
-  def _add_message(self, name_or_addr: str | int, freq: int = None) -> None:
+  def _add_message(self, name_or_addr: str | int, freq: int | None = None) -> None:
     if isinstance(name_or_addr, numbers.Number):
       msg = self.dbc.addr_to_msg.get(int(name_or_addr))
     else:
