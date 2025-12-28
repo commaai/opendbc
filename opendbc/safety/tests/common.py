@@ -72,7 +72,7 @@ def add_regen_tests(cls):
 
 
 class SafetyTestBase(unittest.TestCase):
-  safety: libsafety_py.LibSafety
+  safety: libsafety_py.LibSafety | None
 
   @classmethod
   def setUpClass(cls):
@@ -660,7 +660,7 @@ class VehicleSpeedSafetyTest(SafetyTestBase):
 class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   STEER_ANGLE_MAX: float = 300
-  STEER_ANGLE_TEST_MAX: float = None
+  STEER_ANGLE_TEST_MAX: float | None = None
   DEG_TO_CAN: float
   ANGLE_RATE_BP: list[float]
   ANGLE_RATE_UP: list[float]  # windup limit
