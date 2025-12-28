@@ -66,20 +66,6 @@ ignore-words-list = "alo,ba,bu,deque,hda,grey,arange"
 builtin = "clear,rare,informal,code,names,en-GB_to_en-US"
 check-hidden = true
 
-[tool.mypy]
-# helpful warnings
-warn_redundant_casts=true
-warn_unreachable=true
-warn_unused_ignores=true
-
-# restrict dynamic typing
-warn_return_any=true
-
-# allow implicit optionals for default args
-implicit_optional = true
-
-explicit_package_bases=true
-
 # https://beta.ruff.rs/docs/configuration/#using-pyprojecttoml
 [tool.ruff]
 line-length = 160
@@ -135,7 +121,6 @@ possibly-missing-attribute = "ignore"
 unresolved-attribute = "ignore"
 unresolved-import = "ignore"
 
-# Project uses mypy's implicit_optional = true style
 invalid-parameter-default = "ignore"
 
 # Intentional LSP violations in subclass method signatures
