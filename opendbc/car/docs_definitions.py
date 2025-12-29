@@ -170,7 +170,7 @@ class CarParts:
     return copy.deepcopy(self)
 
   @classmethod
-  def common(cls, add: list[EnumBase] = None, remove: list[EnumBase] = None):
+  def common(cls, add: list[EnumBase] | None = None, remove: list[EnumBase] | None = None):
     p = [part for part in (add or []) + DEFAULT_CAR_PARTS if part not in (remove or [])]
     return cls(p)
 

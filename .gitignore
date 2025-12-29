@@ -1,6 +1,5 @@
 .cache/
 /build/
-.mypy_cache/
 *.pyc
 *.os
 *.o
