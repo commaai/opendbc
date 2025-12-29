@@ -18,13 +18,12 @@ elif [ "$(uname -s)" = "Darwin" ]; then
     brew install llvm@17
   fi
   if [ ! -f "$BASEDIR/.mull/bin/mull-runner-17" ]; then
-    MULL_VERSION="0.27.1"
-    MULL_ZIP="Mull-17-${MULL_VERSION}-LLVM-17.0.6-macOS-aarch64-15.6.1.zip"
+    MULL_VERSION="0.26.1"
+    MULL_ZIP="Mull-17-${MULL_VERSION}-LLVM-17.0-macOS-arm64-14.7.4.zip"
+    MULL_DIR="Mull-17-${MULL_VERSION}-LLVM-17.0-macOS-arm64-14.7.4"
     curl -LO "https://github.com/mull-project/mull/releases/download/${MULL_VERSION}/${MULL_ZIP}"
-    mkdir -p "$BASEDIR/.mull"
-    unzip -o "$MULL_ZIP" -d "$BASEDIR/.mull"
-    mv "$BASEDIR/.mull/usr/local/"* "$BASEDIR/.mull/"
-    rm -rf "$BASEDIR/.mull/usr"
+    unzip -o "$MULL_ZIP"
+    mv "$MULL_DIR" "$BASEDIR/.mull"
     rm "$MULL_ZIP"
   fi
   export PATH="$BASEDIR/.mull/bin:$PATH"
