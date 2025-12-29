@@ -131,7 +131,7 @@ call-non-callable = "ignore"
 invalid-argument-type = "ignore"
 
 # Dynamic type patterns (e.g., values converted from Number to list in __init__)
-non-subscriptable = "ignore"
+not-subscriptable = "ignore"
 unsupported-operator = "ignore"
 
 # Return types with complex callable signatures
