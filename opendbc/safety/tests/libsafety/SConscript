@@ -48,11 +48,11 @@ if GetOption('ubsan'):
 # mutation env
 menv = env.Clone()
 if system == "Darwin":
-  menv['CC'] = '/opt/homebrew/opt/llvm@17/bin/clang'
+  menv.PrependENVPath('PATH', '/opt/homebrew/opt/llvm@17/bin')
   mull_plugin = Dir('#').abspath + '/.mull/lib/mull-ir-frontend-17'
 else:
-  menv['CC'] = 'clang-17'
   mull_plugin = '/usr/lib/mull-ir-frontend-17'
+menv['CC'] = 'clang-17'
 flags = [
   '-fprofile-instr-generate',
   '-fcoverage-mapping',
