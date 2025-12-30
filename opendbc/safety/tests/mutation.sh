@@ -22,5 +22,5 @@ mull-runner-17 \
   --ld-search-path /lib/x86_64-linux-gnu/ \
   ./libsafety/libsafety_mutation.so \
   --workers 16 \
-  --test-program=mutation_runner.sh
+  --test-program=./mutation_runner.sh
   #--test-program=pytest -- -n8 --ignore-glob=misra/*
