@@ -34,6 +34,7 @@ env = Environment(
     '-fprofile-arcs',
     '-ftest-coverage',
   ],
+  CPPPATH=["#"],
   tools=["default", "compilation_db"],
 )
 if system == "Darwin":
