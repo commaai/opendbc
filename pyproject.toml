@@ -2,7 +2,7 @@
 name = "opendbc"
 version = "0.2.1"
 description = "CAN bus databases and tools"
-license = { file = "LICENSE" }
+license = "MIT"
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
 readme = "README.md"
 requires-python = ">=3.11,<3.13"  # pycapnp doesn't work with 3.13
