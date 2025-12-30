@@ -33,17 +33,14 @@ env = Environment(
   LINKFLAGS=[
     '-fprofile-arcs',
     '-ftest-coverage',
+    '-fsanitize=undefined',
+    '-fno-sanitize-recover=undefined',
   ],
   CPPPATH=["#"],
   tools=["default", "compilation_db"],
 )
 if system == "Darwin":
   env.PrependENVPath('PATH', '/opt/homebrew/bin')
-if GetOption('ubsan'):
-  env.Prepend(LINKFLAGS=[
-    "-fsanitize=undefined",
-    "-fno-sanitize-recover=undefined",
-  ])
 
 # mutation env
 menv = env.Clone()
