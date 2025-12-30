@@ -11,11 +11,17 @@ GIT_ROOT=$(git rev-parse --show-toplevel)
 cat > $GIT_ROOT/mull.yml <<EOF
 mutators: [cxx_increment, cxx_decrement, cxx_comparison, cxx_boundary, cxx_bitwise_assignment, cxx_bitwise, cxx_arithmetic_assignment, cxx_arithmetic, cxx_remove_negation]
 timeout: 1000000
-gitDiffRef: $GIT_REF
 gitProjectRoot: $GIT_ROOT
 EOF
+#gitDiffRef: $GIT_REF
 
 scons -j4 -D
 
 export MUTATION=1
-mull-runner-17 --debug --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety_mutation.so -test-program=pytest -- -n8 --ignore-glob=misra/*
+mull-runner-17 \
+  --debug \
+  --ld-search-path /lib/x86_64-linux-gnu/ \
+  ./libsafety/libsafety_mutation.so \
+  --workers 8 \
+  --test-program=./test_toyota.py -- -f
+  #--test-program=pytest -- -n8 --ignore-glob=misra/*

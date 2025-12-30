@@ -24,7 +24,7 @@ ALL_REQUESTS = {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r i
 # From panda/python/__init__.py
 DLC_TO_LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]
 
-MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
+MAX_EXAMPLES = it(os.environ.get('MAX_EXAMPLES', '15'))
 
 
 def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
