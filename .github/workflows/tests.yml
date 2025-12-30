@@ -95,8 +95,6 @@ jobs:
       with:
         path: .ci_cache/comma_download_cache
         key: car_models-${{ hashFiles('selfdrive/car/tests/test_models.py', 'opendbc/car/tests/routes.py') }}-${{ matrix.job }}
-    - name: opendbc setup
-      run: ${{ env.RUN }} "cd opendbc_repo/ && VIRTUAL_ENV= ./setup.sh"
     - name: Build openpilot
       run: ${{ env.RUN }} "VIRTUAL_ENV= opendbc_repo/setup.sh && scons -j$(nproc) common/ cereal/ selfdrive/pandad/ msgq_repo/ opendbc_repo"
     - name: Test car models
