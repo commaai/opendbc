@@ -1,20 +1,11 @@
 import platform
 
-CC = 'gcc'
-system = platform.system()
-mac_ver = platform.mac_ver()
-
-# gcc installed by homebrew has version suffix (e.g. gcc-12) in order to be
-# distinguishable from system one - which acts as a symlink to clang
-# clang works on macOS 15 and greater but has issues on earlier macOS versions.
-# see: https://github.com/commaai/openpilot/issues/35093
-if system == 'Darwin' and mac_ver[0] and mac_ver[0] < '15':
-  CC += '-13'
-
-CC = 'clang'
 # standard env
 env = Environment(
-  CC=CC,
+  # use clang as GCC has a bit less coverage, seemingly
+  # due to optimizing out dead branches before coverage analysis
+  # see https://github.com/commaai/opendbc/pull/3002
+  CC='clang',
   CFLAGS=[
     '-Wall',
     "-Wextra",
@@ -38,7 +29,7 @@ env = Environment(
   CPPPATH=["#", "../../board/"],
   tools=["default", "compilation_db"],
 )
-if system == "Darwin":
+if platform.system() == "Darwin":
   env.PrependENVPath('PATH', '/opt/homebrew/bin')
 if GetOption('ubsan'):
   env.Prepend(LINKFLAGS=[
@@ -48,7 +39,7 @@ if GetOption('ubsan'):
 
 # mutation env
 menv = env.Clone()
-if system == "Darwin":
+if platform.system() == "Darwin":
   menv.PrependENVPath('PATH', '/opt/homebrew/opt/llvm@17/bin')
   mull_plugin = Dir('#').abspath + '/.mull/lib/mull-ir-frontend-17'
 else:

@@ -32,24 +32,15 @@
 #define CHRYSLER_RAM_HD_LKAS_COMMAND     0x276
 #define CHRYSLER_RAM_HD_CRUISE_BUTTONS   0x23A
 
-typedef struct {
-  const unsigned int EPS_2;
-  const unsigned int ESP_1;
-  const unsigned int ESP_8;
-  const unsigned int ECM_5;
-  const unsigned int DAS_3;
-  const unsigned int DAS_6;
-  const unsigned int LKAS_COMMAND;
-  const unsigned int CRUISE_BUTTONS;
-} ChryslerAddrs;
-
 typedef enum {
   CHRYSLER_RAM_DT,
   CHRYSLER_RAM_HD,
   CHRYSLER_PACIFICA,  // plus Jeep
 } ChryslerPlatform;
 static ChryslerPlatform chrysler_platform;
-static const ChryslerAddrs *chrysler_addrs;
+
+#define CHRYSLER_ADDR(name) (chrysler_platform == CHRYSLER_RAM_DT ? CHRYSLER_RAM_DT_##name : \
+                             chrysler_platform == CHRYSLER_RAM_HD ? CHRYSLER_RAM_HD_##name : CHRYSLER_##name)
 
 static uint32_t chrysler_get_checksum(const CANPacket_t *msg) {
   int checksum_byte = GET_LEN(msg) - 1U;
@@ -95,21 +86,21 @@ static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
 
 static void chrysler_rx_hook(const CANPacket_t *msg) {
   // Measured EPS torque
-  if ((msg->bus == 0U) && (msg->addr == chrysler_addrs->EPS_2)) {
+  if ((msg->bus == 0U) && (msg->addr == CHRYSLER_ADDR(EPS_2))) {
     int torque_meas_new = ((msg->data[4] & 0x7U) << 8) + msg->data[5] - 1024U;
     update_sample(&torque_meas, torque_meas_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
   const unsigned int das_3_bus = (chrysler_platform == CHRYSLER_PACIFICA) ? 0U : 2U;
-  if ((msg->bus == das_3_bus) && (msg->addr == chrysler_addrs->DAS_3)) {
+  if ((msg->bus == das_3_bus) && (msg->addr == CHRYSLER_ADDR(DAS_3))) {
     bool cruise_engaged = GET_BIT(msg, 21U);
     pcm_cruise_check(cruise_engaged);
   }
 
   // TODO: use the same message for both
   // update vehicle moving
-  if ((chrysler_platform != CHRYSLER_PACIFICA) && (msg->bus == 0U) && (msg->addr == chrysler_addrs->ESP_8)) {
+  if ((chrysler_platform != CHRYSLER_PACIFICA) && (msg->bus == 0U) && (msg->addr == CHRYSLER_ADDR(ESP_8))) {
     vehicle_moving = ((msg->data[4] << 8) + msg->data[5]) != 0U;
   }
   if ((chrysler_platform == CHRYSLER_PACIFICA) && (msg->bus == 0U) && (msg->addr == 514U)) {
@@ -119,12 +110,12 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
   }
 
   // exit controls on rising edge of gas press
-  if ((msg->bus == 0U) && (msg->addr == chrysler_addrs->ECM_5)) {
+  if ((msg->bus == 0U) && (msg->addr == CHRYSLER_ADDR(ECM_5))) {
     gas_pressed = msg->data[0U] != 0U;
   }
 
   // exit controls on rising edge of brake press
-  if ((msg->bus == 0U) && (msg->addr == chrysler_addrs->ESP_1)) {
+  if ((msg->bus == 0U) && (msg->addr == CHRYSLER_ADDR(ESP_1))) {
     brake_pressed = ((msg->data[0U] & 0xFU) >> 2U) == 1U;
   }
 }
@@ -160,7 +151,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
   // STEERING
-  if (msg->addr == chrysler_addrs->LKAS_COMMAND) {
+  if (msg->addr == CHRYSLER_ADDR(LKAS_COMMAND)) {
     int start_byte = (chrysler_platform == CHRYSLER_PACIFICA) ? 0 : 1;
     int desired_torque = ((msg->data[start_byte] & 0x7U) << 8) | msg->data[start_byte + 1];
     desired_torque -= 1024;
@@ -175,7 +166,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   }
 
   // FORCE CANCEL: only the cancel button press is allowed
-  if (msg->addr == chrysler_addrs->CRUISE_BUTTONS) {
+  if (msg->addr == CHRYSLER_ADDR(CRUISE_BUTTONS)) {
     const bool is_cancel = msg->data[0] == 1U;
     const bool is_resume = msg->data[0] == 0x10U;
     const bool allowed = is_cancel || (is_resume && controls_allowed);
@@ -188,30 +179,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config chrysler_init(uint16_t param) {
-
   const uint32_t CHRYSLER_PARAM_RAM_DT = 1U;  // set for Ram DT platform
-
-  static const ChryslerAddrs CHRYSLER_ADDRS = {
-    .EPS_2          = CHRYSLER_EPS_2,
-    .ESP_1          = CHRYSLER_ESP_1,
-    .ESP_8          = CHRYSLER_ESP_8,
-    .ECM_5          = CHRYSLER_ECM_5,
-    .DAS_3          = CHRYSLER_DAS_3,
-    .DAS_6          = CHRYSLER_DAS_6,
-    .LKAS_COMMAND   = CHRYSLER_LKAS_COMMAND,
-    .CRUISE_BUTTONS = CHRYSLER_CRUISE_BUTTONS,
-  };
-
-  static const ChryslerAddrs CHRYSLER_RAM_DT_ADDRS = {
-    .EPS_2          = CHRYSLER_RAM_DT_EPS_2,
-    .ESP_1          = CHRYSLER_RAM_DT_ESP_1,
-    .ESP_8          = CHRYSLER_RAM_DT_ESP_8,
-    .ECM_5          = CHRYSLER_RAM_DT_ECM_5,
-    .DAS_3          = CHRYSLER_RAM_DT_DAS_3,
-    .DAS_6          = CHRYSLER_RAM_DT_DAS_6,
-    .LKAS_COMMAND   = CHRYSLER_RAM_DT_LKAS_COMMAND,
-    .CRUISE_BUTTONS = CHRYSLER_RAM_DT_CRUISE_BUTTONS,
-  };
 
   static RxCheck chrysler_ram_dt_rx_checks[] = {
     {.msg = {{CHRYSLER_RAM_DT_EPS_2, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -242,17 +210,6 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
 #ifdef ALLOW_DEBUG
-  static const ChryslerAddrs CHRYSLER_RAM_HD_ADDRS = {
-    .EPS_2          = CHRYSLER_RAM_HD_EPS_2,
-    .ESP_1          = CHRYSLER_RAM_HD_ESP_1,
-    .ESP_8          = CHRYSLER_RAM_HD_ESP_8,
-    .ECM_5          = CHRYSLER_RAM_HD_ECM_5,
-    .DAS_3          = CHRYSLER_RAM_HD_DAS_3,
-    .DAS_6          = CHRYSLER_RAM_HD_DAS_6,
-    .LKAS_COMMAND   = CHRYSLER_RAM_HD_LKAS_COMMAND,
-    .CRUISE_BUTTONS = CHRYSLER_RAM_HD_CRUISE_BUTTONS,
-  };
-
   static RxCheck chrysler_ram_hd_rx_checks[] = {
     {.msg = {{CHRYSLER_RAM_HD_EPS_2, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_RAM_HD_ESP_1, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -277,17 +234,14 @@ static safety_config chrysler_init(uint16_t param) {
 
   if (enable_ram_dt) {
     chrysler_platform = CHRYSLER_RAM_DT;
-    chrysler_addrs = &CHRYSLER_RAM_DT_ADDRS;
     ret = BUILD_SAFETY_CFG(chrysler_ram_dt_rx_checks, CHRYSLER_RAM_DT_TX_MSGS);
 #ifdef ALLOW_DEBUG
   } else if (enable_ram_hd) {
     chrysler_platform = CHRYSLER_RAM_HD;
-    chrysler_addrs = &CHRYSLER_RAM_HD_ADDRS;
     ret = BUILD_SAFETY_CFG(chrysler_ram_hd_rx_checks, CHRYSLER_RAM_HD_TX_MSGS);
 #endif
   } else {
     chrysler_platform = CHRYSLER_PACIFICA;
-    chrysler_addrs = &CHRYSLER_ADDRS;
     ret = BUILD_SAFETY_CFG(chrysler_rx_checks, CHRYSLER_TX_MSGS);
   }
   return ret;
