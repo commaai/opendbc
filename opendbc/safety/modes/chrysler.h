@@ -2,6 +2,36 @@
 
 #include "opendbc/safety/declarations.h"
 
+// Chrysler Pacifica/Jeep addresses
+#define CHRYSLER_EPS_2            0x220  // EPS driver input torque
+#define CHRYSLER_ESP_1            0x140  // Brake pedal and vehicle speed
+#define CHRYSLER_ESP_8            0x11C  // Brake pedal and vehicle speed
+#define CHRYSLER_ECM_5            0x22F  // Throttle position sensor
+#define CHRYSLER_DAS_3            0x1F4  // ACC engagement states from DASM
+#define CHRYSLER_DAS_6            0x2A6  // LKAS HUD and auto headlight control from DASM
+#define CHRYSLER_LKAS_COMMAND     0x292  // LKAS controls from DASM
+#define CHRYSLER_CRUISE_BUTTONS   0x23B  // Cruise control buttons
+
+// RAM DT addresses
+#define CHRYSLER_RAM_DT_EPS_2            0x31
+#define CHRYSLER_RAM_DT_ESP_1            0x83
+#define CHRYSLER_RAM_DT_ESP_8            0x79
+#define CHRYSLER_RAM_DT_ECM_5            0x9D
+#define CHRYSLER_RAM_DT_DAS_3            0x99
+#define CHRYSLER_RAM_DT_DAS_6            0xFA
+#define CHRYSLER_RAM_DT_LKAS_COMMAND     0xA6
+#define CHRYSLER_RAM_DT_CRUISE_BUTTONS   0xB1
+
+// RAM HD addresses
+#define CHRYSLER_RAM_HD_EPS_2            0x220
+#define CHRYSLER_RAM_HD_ESP_1            0x140
+#define CHRYSLER_RAM_HD_ESP_8            0x11C
+#define CHRYSLER_RAM_HD_ECM_5            0x22F
+#define CHRYSLER_RAM_HD_DAS_3            0x1F4
+#define CHRYSLER_RAM_HD_DAS_6            0x275
+#define CHRYSLER_RAM_HD_LKAS_COMMAND     0x276
+#define CHRYSLER_RAM_HD_CRUISE_BUTTONS   0x23A
+
 typedef struct {
   const unsigned int EPS_2;
   const unsigned int ESP_1;
@@ -161,84 +191,80 @@ static safety_config chrysler_init(uint16_t param) {
 
   const uint32_t CHRYSLER_PARAM_RAM_DT = 1U;  // set for Ram DT platform
 
-  // CAN messages for Chrysler/Jeep platforms
   static const ChryslerAddrs CHRYSLER_ADDRS = {
-    .EPS_2            = 0x220,  // EPS driver input torque
-    .ESP_1            = 0x140,  // Brake pedal and vehicle speed
-    .ESP_8            = 0x11C,  // Brake pedal and vehicle speed
-    .ECM_5            = 0x22F,  // Throttle position sensor
-    .DAS_3            = 0x1F4,  // ACC engagement states from DASM
-    .DAS_6            = 0x2A6,  // LKAS HUD and auto headlight control from DASM
-    .LKAS_COMMAND     = 0x292,  // LKAS controls from DASM
-    .CRUISE_BUTTONS   = 0x23B,  // Cruise control buttons
+    .EPS_2          = CHRYSLER_EPS_2,
+    .ESP_1          = CHRYSLER_ESP_1,
+    .ESP_8          = CHRYSLER_ESP_8,
+    .ECM_5          = CHRYSLER_ECM_5,
+    .DAS_3          = CHRYSLER_DAS_3,
+    .DAS_6          = CHRYSLER_DAS_6,
+    .LKAS_COMMAND   = CHRYSLER_LKAS_COMMAND,
+    .CRUISE_BUTTONS = CHRYSLER_CRUISE_BUTTONS,
   };
 
-  // CAN messages for the 5th gen RAM DT platform
   static const ChryslerAddrs CHRYSLER_RAM_DT_ADDRS = {
-    .EPS_2            = 0x31,   // EPS driver input torque
-    .ESP_1            = 0x83,   // Brake pedal and vehicle speed
-    .ESP_8            = 0x79,   // Brake pedal and vehicle speed
-    .ECM_5            = 0x9D,   // Throttle position sensor
-    .DAS_3            = 0x99,   // ACC engagement states from DASM
-    .DAS_6            = 0xFA,   // LKAS HUD and auto headlight control from DASM
-    .LKAS_COMMAND     = 0xA6,   // LKAS controls from DASM
-    .CRUISE_BUTTONS   = 0xB1,   // Cruise control buttons
+    .EPS_2          = CHRYSLER_RAM_DT_EPS_2,
+    .ESP_1          = CHRYSLER_RAM_DT_ESP_1,
+    .ESP_8          = CHRYSLER_RAM_DT_ESP_8,
+    .ECM_5          = CHRYSLER_RAM_DT_ECM_5,
+    .DAS_3          = CHRYSLER_RAM_DT_DAS_3,
+    .DAS_6          = CHRYSLER_RAM_DT_DAS_6,
+    .LKAS_COMMAND   = CHRYSLER_RAM_DT_LKAS_COMMAND,
+    .CRUISE_BUTTONS = CHRYSLER_RAM_DT_CRUISE_BUTTONS,
   };
 
   static RxCheck chrysler_ram_dt_rx_checks[] = {
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.EPS_2, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.ESP_1, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.ESP_8, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.ECM_5, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.DAS_3, 2, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_EPS_2, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_ESP_1, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_ESP_8, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_ECM_5, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_DAS_3, 2, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
   static RxCheck chrysler_rx_checks[] = {
-    {.msg = {{CHRYSLER_ADDRS.EPS_2, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_ADDRS.ESP_1, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    //{.msg = {{ESP_8, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 50U}}},
+    {.msg = {{CHRYSLER_EPS_2, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_ESP_1, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{514, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_ADDRS.ECM_5, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_ADDRS.DAS_3, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_ECM_5, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_DAS_3, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
   static const CanMsg CHRYSLER_TX_MSGS[] = {
-    {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3, .check_relay = false},
-    {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6, .check_relay = true},
-    {CHRYSLER_ADDRS.DAS_6, 0, 8, .check_relay = true},
+    {CHRYSLER_CRUISE_BUTTONS, 0, 3, .check_relay = false},
+    {CHRYSLER_LKAS_COMMAND, 0, 6, .check_relay = true},
+    {CHRYSLER_DAS_6, 0, 8, .check_relay = true},
   };
 
   static const CanMsg CHRYSLER_RAM_DT_TX_MSGS[] = {
-    {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3, .check_relay = false},
-    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8, .check_relay = true},
-    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8, .check_relay = true},
+    {CHRYSLER_RAM_DT_CRUISE_BUTTONS, 2, 3, .check_relay = false},
+    {CHRYSLER_RAM_DT_LKAS_COMMAND, 0, 8, .check_relay = true},
+    {CHRYSLER_RAM_DT_DAS_6, 0, 8, .check_relay = true},
   };
 
 #ifdef ALLOW_DEBUG
-  // CAN messages for the 5th gen RAM HD platform
   static const ChryslerAddrs CHRYSLER_RAM_HD_ADDRS = {
-    .EPS_2            = 0x220,  // EPS driver input torque
-    .ESP_1            = 0x140,  // Brake pedal and vehicle speed
-    .ESP_8            = 0x11C,  // Brake pedal and vehicle speed
-    .ECM_5            = 0x22F,  // Throttle position sensor
-    .DAS_3            = 0x1F4,  // ACC engagement states from DASM
-    .DAS_6            = 0x275,  // LKAS HUD and auto headlight control from DASM
-    .LKAS_COMMAND     = 0x276,  // LKAS controls from DASM
-    .CRUISE_BUTTONS   = 0x23A,  // Cruise control buttons
+    .EPS_2          = CHRYSLER_RAM_HD_EPS_2,
+    .ESP_1          = CHRYSLER_RAM_HD_ESP_1,
+    .ESP_8          = CHRYSLER_RAM_HD_ESP_8,
+    .ECM_5          = CHRYSLER_RAM_HD_ECM_5,
+    .DAS_3          = CHRYSLER_RAM_HD_DAS_3,
+    .DAS_6          = CHRYSLER_RAM_HD_DAS_6,
+    .LKAS_COMMAND   = CHRYSLER_RAM_HD_LKAS_COMMAND,
+    .CRUISE_BUTTONS = CHRYSLER_RAM_HD_CRUISE_BUTTONS,
   };
 
   static RxCheck chrysler_ram_hd_rx_checks[] = {
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.EPS_2, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.ESP_1, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.ESP_8, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.ECM_5, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.DAS_3, 2, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_EPS_2, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ESP_1, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ESP_8, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ECM_5, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_DAS_3, 2, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
   static const CanMsg CHRYSLER_RAM_HD_TX_MSGS[] = {
-    {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3, .check_relay = false},
-    {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, .check_relay = true},
-    {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, .check_relay = true},
+    {CHRYSLER_RAM_HD_CRUISE_BUTTONS, 2, 3, .check_relay = false},
+    {CHRYSLER_RAM_HD_LKAS_COMMAND, 0, 8, .check_relay = true},
+    {CHRYSLER_RAM_HD_DAS_6, 0, 8, .check_relay = true},
   };
 
   const uint32_t CHRYSLER_PARAM_RAM_HD = 2U;  // set for Ram HD platform
