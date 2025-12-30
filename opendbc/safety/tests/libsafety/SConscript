@@ -56,7 +56,7 @@ flags = [
   '-grecord-command-line',
 ]
 menv['CFLAGS'] += flags
-menv['LINKFLAGS'] += flags
+menv['LINKFLAGS'] = flags
 
 for build_env, suffix in ((env, ""), (menv, "_mutation")):
   # TODO: add macOS support
