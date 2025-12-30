@@ -10,7 +10,7 @@ export PYTHONPATH=$BASEDIR
 if [ "$(uname -s)" = "Linux" ]; then
   if ! command -v "mull-runner-17" > /dev/null 2>&1; then
     curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | sudo -E bash
-    sudo apt-get update && sudo apt-get install -y clang-17 mull-17 libclang-rt-17-dev
+    sudo apt-get update && sudo apt-get install -y clang-17 mull-17
   fi
 elif [ "$(uname -s)" = "Darwin" ]; then
   if ! brew list llvm@17 &>/dev/null; then
