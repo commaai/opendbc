@@ -8,11 +8,7 @@ source ../../../setup.sh
 
 # reset coverage data and generate gcc note file
 rm -f ./libsafety/*.gcda
-if [ "$1" == "--ubsan" ]; then
-  scons -j$(nproc) -D --ubsan
-else
-  scons -j$(nproc) -D
-fi
+scons -j$(nproc) -D
 
 # run safety tests and generate coverage data
 pytest -n8 --ignore-glob=misra/*

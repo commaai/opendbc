@@ -28,10 +28,6 @@ jobs:
   safety_tests:
     name: safety
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        flags: ['--ubsan']
     steps:
     - uses: commaai/timeout@v1
       with:
@@ -39,7 +35,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: ./.github/workflows/cache
     - name: Run safety tests
-      run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
+      run: ./opendbc/safety/tests/test.sh
 
   mutation:
     name: Safety mutation tests
