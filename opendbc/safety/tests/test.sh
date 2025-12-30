@@ -23,7 +23,7 @@ gcovr -r ../ --html-nested coverage-out/index.html
 echo "View the coverage report at: coverage-out/index.html"
 
 # test coverage
-GCOV="gcovr -s -r $DIR/../ -d --fail-under-line=100 -e ^tests/libsafety/safety.c"
+GCOV="gcovr -s -r $DIR/../ -d --fail-under-line=100 -e ^libsafety"
 if ! GCOV_OUTPUT="$($GCOV)"; then
   echo "$GCOV_OUTPUT"
   echo -e "FAILED: coverage check!"
