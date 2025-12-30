@@ -11,6 +11,7 @@ mac_ver = platform.mac_ver()
 if system == 'Darwin' and mac_ver[0] and mac_ver[0] < '15':
   CC += '-13'
 
+CC = 'clang'
 # standard env
 env = Environment(
   CC=CC,
