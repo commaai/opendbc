@@ -57,6 +57,8 @@ flags = [
 ]
 menv['CFLAGS'] += flags
 menv['LINKFLAGS'] = flags
+menv['CFLAGS'].remove('-fprofile-arcs')
+menv['CFLAGS'].remove('-ftest-coverage')
 
 for build_env, suffix in ((env, ""), (menv, "_mutation")):
   # TODO: add macOS support
