@@ -17,12 +17,10 @@ fi
 # run safety tests and generate coverage data
 pytest -n8 --ignore-glob=misra/*
 
-# generate and open report
-if [ "$1" == "--report" ]; then
-  mkdir -p coverage-out
-  gcovr -r ../ --html-nested coverage-out/index.html
-  sensible-browser coverage-out/index.html
-fi
+# generate a nice HTML report
+mkdir -p coverage-out/
+gcovr -r ../ --html-nested coverage-out/index.html
+echo "View the coverage report at: coverage-out/index.html"
 
 # test coverage
 GCOV="gcovr -r $DIR/../ -d --fail-under-line=100 -e ^libsafety -e ^../board"
