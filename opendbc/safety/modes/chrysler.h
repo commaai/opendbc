@@ -39,8 +39,8 @@ typedef enum {
 } ChryslerPlatform;
 static ChryslerPlatform chrysler_platform;
 
-#define CHRYSLER_ADDR(name) (chrysler_platform == CHRYSLER_RAM_DT ? CHRYSLER_RAM_DT_##name : \
-                             chrysler_platform == CHRYSLER_RAM_HD ? CHRYSLER_RAM_HD_##name : CHRYSLER_##name)
+#define CHRYSLER_ADDR(name) ((uint32_t)((chrysler_platform == CHRYSLER_RAM_DT) ? CHRYSLER_RAM_DT_##name : \
+                                        ((chrysler_platform == CHRYSLER_RAM_HD) ? CHRYSLER_RAM_HD_##name : CHRYSLER_##name)))
 
 static uint32_t chrysler_get_checksum(const CANPacket_t *msg) {
   int checksum_byte = GET_LEN(msg) - 1U;
