@@ -15,29 +15,37 @@ static inline float safety_clamp_f(float x, float low, float high) {
   return (x > high) ? high : ((x < low) ? low : x);
 }
 
-static inline double safety_max_d(double a, double b) { return (a > b) ? a : b; }
-static inline double safety_min_d(double a, double b) { return (a < b) ? a : b; }
+static inline unsigned safety_max_u(unsigned a, unsigned b) { return (a > b) ? a : b; }
+static inline unsigned safety_min_u(unsigned a, unsigned b) { return (a < b) ? a : b; }
+static inline unsigned safety_clamp_u(unsigned x, unsigned low, unsigned high) {
+  return (x > high) ? high : ((x < low) ? low : x);
+}
 
-// C11 _Generic type-safe macros
+// C11 _Generic type-safe macros (allows type promotion)
 #define SAFETY_MAX(a, b) _Generic((a) + (b), \
+    unsigned: safety_max_u, \
     float: safety_max_f, \
-    double: safety_max_d, \
+    double: safety_max_f, \
     default: safety_max_i \
 )((a), (b))
 
 #define SAFETY_MIN(a, b) _Generic((a) + (b), \
+    unsigned: safety_min_u, \
     float: safety_min_f, \
-    double: safety_min_d, \
+    double: safety_min_f, \
     default: safety_min_i \
 )((a), (b))
 
 #define SAFETY_ABS(a) _Generic((a), \
     float: safety_abs_f, \
+    double: safety_abs_f, \
     default: safety_abs_i \
 )((a))
 
 #define SAFETY_CLAMP(x, low, high) _Generic((x) + (low) + (high), \
+    unsigned: safety_clamp_u, \
     float: safety_clamp_f, \
+    double: safety_clamp_f, \
     default: safety_clamp_i \
 )((x), (low), (high))
 
@@ -71,7 +79,7 @@ static float safety_interpolate(struct lookup_t xy, float x) {
         float dx = xy.x[i+1] - x0;
         float dy = xy.y[i+1] - y0;
         // dx should not be zero as xy.x is supposed to be monotonic
-        dx = SAFETY_MAX(dx, 0.0001);
+        dx = SAFETY_MAX(dx, 0.0001f);
         ret = (dy * (x - x0) / dx) + y0;
         break;
       }
