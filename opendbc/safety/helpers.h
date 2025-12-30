@@ -1,36 +1,45 @@
 #include "opendbc/safety/declarations.h"
 
-// cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_MIN(a, b) ({ \
-  __typeof__(a) _a = (a); \
-  __typeof__(b) _b = (b); \
-  (_a < _b) ? _a : _b; \
-})
+// Type-safe inline functions (no double-evaluation)
+static inline int safety_max_i(int a, int b) { return (a > b) ? a : b; }
+static inline int safety_min_i(int a, int b) { return (a < b) ? a : b; }
+static inline int safety_abs_i(int a) { return (a > 0) ? a : -a; }
+static inline int safety_clamp_i(int x, int low, int high) {
+  return (x > high) ? high : ((x < low) ? low : x);
+}
 
-// cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_MAX(a, b) ({ \
-  __typeof__(a) _a = (a); \
-  __typeof__(b) _b = (b); \
-  (_a > _b) ? _a : _b; \
-})
+static inline float safety_max_f(float a, float b) { return (a > b) ? a : b; }
+static inline float safety_min_f(float a, float b) { return (a < b) ? a : b; }
+static inline float safety_abs_f(float a) { return (a > 0.0f) ? a : -a; }
+static inline float safety_clamp_f(float x, float low, float high) {
+  return (x > high) ? high : ((x < low) ? low : x);
+}
 
-// cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_CLAMP(x, low, high) ({ \
-  __typeof__(x) __x = (x); \
-  __typeof__(low) __low = (low);\
-  __typeof__(high) __high = (high);\
-  (__x > __high) ? __high : ((__x < __low) ? __low : __x); \
-})
+static inline double safety_max_d(double a, double b) { return (a > b) ? a : b; }
+static inline double safety_min_d(double a, double b) { return (a < b) ? a : b; }
 
-// cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_ABS(a) ({ \
-  __typeof__(a) _a = (a); \
-  (_a > 0) ? _a : (-_a); \
-})
+// C11 _Generic type-safe macros
+#define SAFETY_MAX(a, b) _Generic((a) + (b), \
+    float: safety_max_f, \
+    double: safety_max_d, \
+    default: safety_max_i \
+)((a), (b))
+
+#define SAFETY_MIN(a, b) _Generic((a) + (b), \
+    float: safety_min_f, \
+    double: safety_min_d, \
+    default: safety_min_i \
+)((a), (b))
+
+#define SAFETY_ABS(a) _Generic((a), \
+    float: safety_abs_f, \
+    default: safety_abs_i \
+)((a))
+
+#define SAFETY_CLAMP(x, low, high) _Generic((x) + (low) + (high), \
+    float: safety_clamp_f, \
+    default: safety_clamp_i \
+)((x), (low), (high))
 
 #define SAFETY_UNUSED(x) ((void)(x))
 

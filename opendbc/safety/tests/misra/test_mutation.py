@@ -13,6 +13,7 @@ ROOT = os.path.join(HERE, "../../../../")
 IGNORED_PATHS = (
   'opendbc/safety/main.c',
   'opendbc/safety/tests/',
+  'opendbc/safety/board/',
 )
 
 mutations = [
