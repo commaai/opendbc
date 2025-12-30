@@ -10,15 +10,19 @@ export PYTHONPATH=$BASEDIR
 if [ "$(uname -s)" = "Linux" ]; then
   # TODO: add macOS support
   if ! command -v "mull-runner-17" > /dev/null 2>&1; then
-    sudo apt-get update && sudo apt-get install -y curl clang-17
     curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | sudo -E bash
-    sudo apt-get update && sudo apt-get install -y mull-17
+    sudo apt-get update && sudo apt-get install -y clang-17 mull-17
   fi
 fi
 
 if ! command -v uv &>/dev/null; then
   echo "'uv' is not installed. Installing 'uv'..."
   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+  # must source this after install on some platforms
+  if [ -f $HOME/.local/bin/env ]; then
+    source $HOME/.local/bin/env
+  fi
 fi
 
 export UV_PROJECT_ENVIRONMENT="$BASEDIR/.venv"
