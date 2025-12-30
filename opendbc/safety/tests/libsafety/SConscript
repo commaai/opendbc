@@ -61,7 +61,9 @@ flags = [
   '-grecord-command-line',
 ]
 menv['CFLAGS'] += flags
-menv['LINKFLAGS'] += flags
+menv['LINKFLAGS'] = flags
+menv['CFLAGS'].remove('-fprofile-arcs')
+menv['CFLAGS'].remove('-ftest-coverage')
 
 for build_env, suffix in ((env, ""), (menv, "_mutation")):
   safety = build_env.SharedObject(f"safety{suffix}.os", "safety.c")

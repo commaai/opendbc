@@ -31,7 +31,11 @@ fi
 if ! command -v uv &>/dev/null; then
   echo "'uv' is not installed. Installing 'uv'..."
   curl -LsSf https://astral.sh/uv/install.sh | sh
-  source $HOME/.local/bin/env
+
+  # must source this after install on some platforms
+  if [ -f $HOME/.local/bin/env ]; then
+    source $HOME/.local/bin/env
+  fi
 fi
 
 export UV_PROJECT_ENVIRONMENT="$BASEDIR/.venv"
