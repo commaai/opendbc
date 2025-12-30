@@ -13,7 +13,6 @@ mutators: [cxx_increment, cxx_decrement, cxx_comparison, cxx_boundary, cxx_bitwi
 timeout: 1000000
 gitProjectRoot: $GIT_ROOT
 EOF
-#gitDiffRef: $GIT_REF
 
 scons -j4 -D
 
@@ -22,6 +21,6 @@ mull-runner-17 \
   --debug \
   --ld-search-path /lib/x86_64-linux-gnu/ \
   ./libsafety/libsafety_mutation.so \
-  --workers 8 \
-  --test-program=./test_toyota.py -- -f
+  --workers 16 \
+  --test-program=pytest -- -n0 test_toyota.py -x
   #--test-program=pytest -- -n8 --ignore-glob=misra/*
