@@ -17,10 +17,26 @@ EOF
 scons -j4 -D
 
 export MUTATION=1
+
+# Create temporary test runner script
+TEST_RUNNER=$(mktemp)
+chmod +x $TEST_RUNNER
+cat > $TEST_RUNNER <<EOF
+#!/usr/bin/env bash
+set -e
+
+# run with unittest first since it has way less overhead than pytest
+# toyota should catch ~75% of it
+./test_toyota.py -f
+
+# last resort, run full test suite
+pytest -n8 --ignore-glob=misra/*
+EOF
+
 mull-runner-17 \
-  --debug \
+  --include-not-covered \
   --ld-search-path /lib/x86_64-linux-gnu/ \
   ./libsafety/libsafety_mutation.so \
-  --workers 16 \
-  --test-program=./mutation_runner.sh
-  #--test-program=pytest -- -n8 --ignore-glob=misra/*
+  --workers=16 \
+  --test-program=$TEST_RUNNER
+  #--test-program=pytest -- -h
