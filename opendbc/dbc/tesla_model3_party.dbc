@@ -36,6 +36,287 @@ BS_:
 BU_: CH DIPF DIPR ETH FC HVI HVS PARTY SDCV VEH VIRT
 
 
+BO_ 50 MCU_THCHumanInterfaceRequest: 7 ETH
+ SG_ MCU_AconBtnState_Flag: 31|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_AconMnl_Flag: 19|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_AmbientRecircOff: 23|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_AutoBtnState_Flag: 24|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_BioWeaponBtnState_Flag: 37|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_BlowerMotorMnlSet_Seg: 40|4@1+ (1,0) [0|0] "" X
+ SG_ MCU_BlowerMotorMnl_Flag: 17|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_ControlModeSet_Flag: 32|3@1+ (1,0) [0|0] "" X
+ SG_ MCU_DefogBtnState_Flag: 26|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_DualBtnState_Flag: 25|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_FaultCodeRequest_Flag: 35|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_HtronBtnState_Flag: 21|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_HtronMnl_Flag: 22|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_IntakeActMnl_Flag: 18|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_IntakeBtnState_Flag: 29|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_IonizerOn: 20|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_LeftTempSetpoint_DegC: 0|8@1+ (0.5,0) [0|0] "degC" X
+ SG_ MCU_ModeActMnlSet_Flag: 44|4@1+ (1,0) [0|0] "" X
+ SG_ MCU_ModeActMnl_Flag: 16|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_OffBtnState_Flag: 28|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_RightTempSetpoint_DegC: 8|8@1+ (0.5,0) [0|0] "degC" X
+ SG_ MCU_TestModeSet_Flag: 48|8@1+ (1,0) [0|0] "" X
+ SG_ MCU_passengerSeatOccupied_Flag: 38|1@1+ (1,0) [0|0] "" X
+ SG_ MCU_rearJumpSeatsOccupied_Flag: 36|1@1+ (1,0) [0|0] "" X
+
+BO_ 294 ID126RearHVStatus: 7 ETH
+ SG_ RearHighVoltage126 : 0|10@1+ (0.5,0) [0|500] "V"  Receiver
+ SG_ RearMotorCurrent126 : 11|11@1+ (1,0) [0|2047] "A"  Receiver
+ SG_ DIR_switchingFrequency : 40|11@1+ (0.01,0) [0|20] "kHz"  Receiver
+ SG_ DIR_dcCableCurrentEst : 24|16@1- (0.1,0) [-3276.8|3276.7] "A"  Receiver
+ SG_ DIR_vBatQF : 10|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ DIR_targetFluxMode : 51|2@1+ (1,0) [0|0] ""  Receiver
+
+BO_ 421 ID1A5FrontHVStatus: 7 ETH
+ SG_ FrontHighVoltage1A5 : 0|10@1+ (0.5,0) [0|500] "V"  Receiver
+ SG_ FrontMotorCurrent1A5 : 11|11@1+ (1,0) [0|2047] "A"  Receiver
+ SG_ DIF_switchingFrequency : 40|11@1+ (0.01,0) [0|20] "kHz"  Receiver
+ SG_ DIF_dcCableCurrentEst : 24|16@1- (0.1,0) [-3276.8|3276.7] "A"  Receiver
+ SG_ DIF_vBatQF : 10|1@1+ (1,0) [0|0] ""  Receiver
+ SG_ DIF_targetFluxMode : 51|2@1+ (1,0) [0|0] ""  Receiver
+
+BO_ 524 ID20CVCRIGHT_hvacRequest: 8 ETH
+ SG_ VCRIGHT_conditioningRequest : 12|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCRIGHT_evapPerformanceLow : 43|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCRIGHT_hvacBlowerSpeedRPMReq : 32|10@1+ (5,0) [0|5115] "RPM"  Receiver
+ SG_ VCRIGHT_hvacEvapEnabled : 11|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCRIGHT_hvacHeatingEnabledLeft : 52|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCRIGHT_hvacHeatingEnabledRight : 53|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCRIGHT_hvacPerfTestRunning : 42|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCRIGHT_hvacPerfTestState : 54|2@1+ (1,0) [0|2] ""  Receiver
+ SG_ VCRIGHT_hvacUnavailable : 56|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCRIGHT_tempAmbientRaw : 44|8@1+ (0.5,-40) [-40|80] "C"  Receiver
+ SG_ VCRIGHT_tempEvaporator : 13|11@1+ (0.1,-40) [-40|105] "C"  Receiver
+ SG_ VCRIGHT_tempEvaporatorTarget : 24|8@1+ (0.2,0) [0|50] "C"  Receiver
+ SG_ VCRIGHT_wattsDemandEvap : 0|11@1+ (5,0) [0|10000] "W"  Receiver
+
+BO_ 526 ID20EPARK_sdiFront: 8 ETH
+ SG_ PARK_sdiFrontChecksum : 56|8@1+ (1,0) [0|255] ""  Receiver
+ SG_ PARK_sdiFrontCounter : 54|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ PARK_sdiSensor1RawDistData : 0|9@1+ (1,0) [0|511] "cm"  Receiver
+ SG_ PARK_sdiSensor2RawDistData : 9|9@1+ (1,0) [0|511] "cm"  Receiver
+ SG_ PARK_sdiSensor3RawDistData : 18|9@1+ (1,0) [0|511] "cm"  Receiver
+ SG_ PARK_sdiSensor4RawDistData : 27|9@1+ (1,0) [0|511] "cm"  Receiver
+ SG_ PARK_sdiSensor5RawDistData : 36|9@1+ (1,0) [0|511] "cm"  Receiver
+ SG_ PARK_sdiSensor6RawDistData : 45|9@1+ (1,0) [0|511] "cm"  Receiver
+
+BO_ 529 RCM_status: 6 VEH
+ SG_ RCM_airbagCutoffStatus: 18|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_alrSwitchStatus: 20|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_armStatus: 12|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_driverOrientationInitStatus: 40|3@1+ (1,0) [0|0] "" X
+ SG_ RCM_edr1State: 28|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_edr2State: 30|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_imuOffsetLearnState: 36|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_keepPowerReason: 32|3@1+ (1,0) [0|0] "" X
+ SG_ RCM_passAirbagIndicatorRequest: 16|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_seatTrackPositionDrvr: 24|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_seatTrackPositionPass: 26|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_statusChecksum: 0|8@1+ (1,0) [0|0] "" X
+ SG_ RCM_statusCounter: 8|4@1+ (1,0) [0|0] "" X
+ SG_ RCM_vinLearnFlag: 22|2@1+ (1,0) [0|0] "" X
+ SG_ RCM_warningIndicatorState: 14|2@1+ (1,0) [0|0] "" X
+
+BO_ 584 MCU_commands: 8 ETH
+ SG_ MCU_commandsKey: 40|16@1+ (1,0) [0|0] "" X
+ SG_ MCU_foldMirrors: 30|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_frontHoodCommand: 0|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_frontWiperDefrostReq: 12|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_headlightLevel: 32|8@1+ (1,0) [0|0] "" X
+ SG_ MCU_liftgateSwitch: 2|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_lockRequest: 16|3@1+ (1,0) [0|0] "" X
+ SG_ MCU_panicCommand: 5|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_rearDefrostRequest: 14|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_remoteClosureRequest: 56|5@1+ (1,0) [0|0] "" X
+ SG_ MCU_remoteStartRequest: 22|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_stwLedBrightness: 24|5@1+ (1,0) [0|0] "" X
+ SG_ MCU_summonState: 20|2@1+ (1,0) [0|0] "" X
+ SG_ MCU_wiperMode: 8|3@1+ (1,0) [0|0] "" X
+ SG_ UI_PINToDrivePassed: 4|1@1+ (1,0) [0|0] "" X
+
+BO_ 932 PCS_alertMatrix: 8 VEH
+ SG_ PCS_matrixIndex M: 0|4@1+ (1,0) [0|0] "" X
+ SG_ PCS_a001_chgHwInputOc m0: 4|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a002_chgHwOutputOc m0: 5|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a003_chgHwInputOv m0: 6|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a004_chgHwIntBusOv m0: 7|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a005_chgOutputOv m0: 8|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a006_chgPrechargeFailedScr m0: 9|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a007_chgPhaseTempHot m0: 10|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a008_chgPhaseOverTemp m0: 11|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a009_chgPfcCurrentRegulation m0: 12|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a010_chgIntBusVRegulation m0: 13|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a011_chgLlcCurrentRegulation m0: 14|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a012_chgPfcIBandTracerFault m0: 15|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a013_chgPrechargeFailedBoost m0: 16|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a014_chgTempRationality m0: 17|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a015_chg12vUv m0: 18|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a016_chgAllPhasesFaulted m0: 19|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a017_chgWallPowerRemoval m0: 20|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a018_chgUnknownGridConfig m0: 21|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a019_acChargePowerLimited m0: 22|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a020_chgEnableLineMismatch m0: 23|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a021_hvpMia m0: 24|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a022_bmsMia m0: 25|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a023_cpMia m0: 26|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a024_vcfrontMia m0: 27|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a025_cpu2Malfunction m0: 28|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a026_watchdogAlarmed m0: 29|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a027_chgInsufficientCooling m0: 30|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a028_chgOutputUv m0: 31|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a029_chgPowerRationality m0: 32|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a030_canRationality m0: 33|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a031_uiMia m0: 34|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a032_gtwMia m0: 35|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a033_hvBusUv m0: 36|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a034_hvBusOv m0: 37|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a035_lvBusUv m0: 38|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a036_lvBusOv m0: 39|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a037_resonantTankOc m0: 40|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a038_claFaulted m0: 41|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a039_sdModuleClkFault m0: 42|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a040_dcdcMaxPowerReached m0: 43|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a041_dcdcOverTemp m0: 44|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a042_dcdcEnableLineMismatch m0: 45|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a043_hvBusPrechargeFailure m0: 46|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a044_12vSupportRegulation m0: 47|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a045_hvBusLowImpedance m0: 48|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a046_hvBusHighImpedence m0: 49|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a047_lvBusLowImpedance m0: 50|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a048_lvBusHighImpedance m0: 51|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a049_dcdcTempRationality m0: 52|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a050_dcdc12VsupportFaulted m0: 53|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a051_chgIntBusUv m0: 54|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a052_acVoltageNotPresent m0: 55|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a053_chgInputVDropHigh m0: 56|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a054_chgInputVDropTooHigh m0: 57|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a055_chgLineImedanceHigh m0: 58|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a056_chgLineImedanceTooHigh m0: 59|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a057_chgInputOverFreq m0: 60|1@1+ (1,0) [0|0] "" X
+ SG_ PCS_a058_chgInputUnderFreq m0: 61|1@1+ (1,0) [0|0] "" X
+
+BO_ 933 DIS_alertMatrix1: 8 VEH
+ SG_ DIS_a001_hwPhaseAgateDrive: 0|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a002_hwPhaseBgateDrive: 1|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a003_hwPhaseCgateDrive: 2|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a004_hwPhaseApeak: 3|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a005_hwPhaseBpeak: 4|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a006_hwPhaseCpeak: 5|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a007_hwHvilNotPresent: 6|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a008_hwEncoderA: 7|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a009_hwEncoderB: 8|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a011_swPowerStageNotReady: 10|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a014_activeDamping: 13|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a016_safeStateApplied: 15|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a017_hwPedalMonitor: 16|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a018_hw12vSupplyUV: 17|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a019_hwAccelPedalPower: 18|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a020_hwMotorEncoder: 19|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a021_hwBusOV: 20|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a022_hw5vSupplyUV: 21|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a024_selfTest: 23|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a025_phaseApeak: 24|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a026_phaseBpeak: 25|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a027_phaseCpeak: 26|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a028_phaseArms: 27|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a029_phaseBrms: 28|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a030_phaseCrms: 29|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a031_phaseAcurrentOffset: 30|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a032_phaseBcurrentOffset: 31|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a033_phaseAcurrentSensor: 32|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a034_phaseBcurrentSensor: 33|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a035_phaseCurrentBalance: 34|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a036_busOV: 35|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a037_busUV: 36|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a038_busVsensor: 37|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a040_disMIA: 39|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a042_inletSensor: 41|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a043_outletOT: 42|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a044_outletUT: 43|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a045_outletSensor: 44|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a046_statorOT: 45|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a047_statorSensor1: 46|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a050_noStatorSensor: 49|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a054_driveInverterOT: 53|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a055_trqCrossCheck: 54|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a056_ambientOT: 55|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a057_ambientUT: 56|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a058_ambientSensor: 57|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a059_heatsinkOT: 58|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a060_heatsinkUT: 59|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a061_heatsinkSensor: 60|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a062_systemLimpMode: 61|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_a064_torqueIntervention: 63|1@1+ (1,0) [0|0] "" X
+
+BO_ 934 DIS_alertMatrix1: 8 ETH
+ SG_ DIS_f001_hwPhaseAgateDrive: 0|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f002_hwPhaseBgateDrive: 1|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f003_hwPhaseCgateDrive: 2|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f004_hwPhaseApeak: 3|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f005_hwPhaseBpeak: 4|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f006_hwPhaseCpeak: 5|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f007_hwHvilNotPresent: 6|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f008_hwEncoderA: 7|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f009_hwEncoderB: 8|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f010_hwPedalMonitorReset: 9|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f011_swPowerStageNotReady: 10|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f012_accel5VSupply: 11|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f013_powerPcbSensor: 12|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f014_activeDamping: 13|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f015_immobilizer: 14|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f016_safeStateApplied: 15|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f017_hwPedalMonitor: 16|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f018_hw12vSupplyUV: 17|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f019_hwAccelPedalPower: 18|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f020_hwMotorEncoder: 19|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f021_hwBusOV: 20|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f022_hw5vSupplyUV: 21|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f023_carNotParked: 22|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f024_selfTest: 23|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f025_phaseApeak: 24|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f026_phaseBpeak: 25|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f027_phaseCpeak: 26|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f028_phaseArms: 27|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f029_phaseBrms: 28|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f030_phaseCrms: 29|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f031_phaseAcurrentOffset: 30|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f032_phaseBcurrentOffset: 31|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f033_phaseAcurrentSensor: 32|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f034_phaseBcurrentSensor: 33|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f035_phaseCurrentBalance: 34|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f036_busOV: 35|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f037_busUV: 36|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f038_busVsensor: 37|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f039_regenLimited: 38|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f040_disMIA: 39|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f041_hwFloodDetection: 40|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f042_inletSensor: 41|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f043_outletOT: 42|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f044_outletUT: 43|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f045_outletSensor: 44|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f046_statorOT: 45|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f047_statorSensor1: 46|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f048_statorSensor2: 47|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f049_statorSensorDiff: 48|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f050_noStatorSensor: 49|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f051_batteryOvercurrent: 50|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f052_rotorBrazeFail: 51|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f053_externalAlert: 52|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f054_driveInverterOT: 53|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f055_trqCrossCheck: 54|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f056_ambientOT: 55|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f057_ambientUT: 56|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f058_ambientSensor: 57|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f059_heatsinkOT: 58|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f060_heatsinkUT: 59|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f061_heatsinkSensor: 60|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f062_systemLimpMode: 61|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f063_tempModeAlert: 62|1@1+ (1,0) [0|0] "" X
+ SG_ DIS_f064_torqueIntervention: 63|1@1+ (1,0) [0|0] "" X
+
 BO_ 905 DAS_status2: 8 PARTY
  SG_ DAS_status2Checksum : 56|8@1+ (1,0) [0|255] ""  aps
  SG_ DAS_status2Counter : 52|4@1+ (1,0) [0|15] ""  aps
@@ -319,6 +600,14 @@ BO_ 325 ESP_status: 8 PARTY
  SG_ ESP_yawRateQF : 26|1@1+ (1,0) [0|0] ""  X
 
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
+CM_ BO_ 50 "Observed on one route as 8 bytes, but external DBCs define this message as 7 bytes";
+CM_ BO_ 294 "Observed on one route as 5 bytes, but external DBCs define this message as 7 bytes";
+CM_ BO_ 421 "Observed on one route as 5 bytes, but external DBCs define this message as 7 bytes";
+CM_ BO_ 524 "Observed on one route as 2 bytes, but external DBCs define this message as 8 bytes";
+CM_ BO_ 526 "Observed on one route as 3 bytes, but external DBCs define this message as 8 bytes";
+CM_ BO_ 584 "Observed on one route as 3 bytes, but external DBCs define this message as 8 bytes";
+CM_ BO_ 933 "Observed on one route as 6 bytes, but external DBCs define this message as 8 bytes";
+CM_ BO_ 934 "Observed on one route as 6 bytes, but external DBCs define this message as 8 bytes; note: some DBCs define DIS_alertMatrix1 at 0x3A5 (933) instead";
 
 CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
 CM_ SG_ 785 leftBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
