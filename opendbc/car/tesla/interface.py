@@ -17,14 +17,63 @@ class CarInterface(CarInterfaceBase):
     Comparing:
     - FSD 13: 2c912ca5de3b1ee9/000002f7--e9a4e26504
     - FSD 14: 0f79c454f812791a/000000b6--8c7866d3bf
-    Differences between FSD 13 and 14:
-      - 0x51: 13 is 3 bytes, 14 is 8 bytes
-      - 0x20E: doesn't exist on 13
-      - 0x248: doesn't exist on 13
-      - 0x3E9: doesn't exist on 13
-      - 0x40C: doesn't exist on 13
-      - 0x489: doesn't exist on 13
-      - EPAS3S_sysStatus: bit 52 is 0 on 13, 1 on 14
+      Differences between FSD 13 and 14:
+      New messages in FSD 14:
+      - 0x032 - length: 8
+      - 0x054 - length: 7
+      - 0x126 - length: 5
+      - 0x1A5 - length: 5
+      - 0x20E - length: 3
+      - 0x237 - length: 8
+      - 0x248 - length: 3
+      - DAS_bodyControls (0x3E9) - length: 8
+      - 0x40C - length: 2
+      - 0x489 - length: 8
+      - 0x7B5 - length: 3
+      - 0x7B7 - length: 1
+      - 0x7B8 - length: 8
+      Missing messages in FSD 14:
+      - 0x20C - length: 2
+      - 0x211 - length: 6
+      - 0x3A3 - length: 8
+      - 0x3A4 - length: 8
+      - 0x3A5 - length: 6
+      - 0x3A6 - length: 6
+      Message length changes:
+      - 0x031 - FSD 13: 3, FSD 14: 8
+      - 0x051 - FSD 13: 3, FSD 14: 8
+      - 0x34F - FSD 13: 6, FSD 14: 7
+      - 0x4F6 - FSD 13: 7, FSD 14: 8
+      Signal differences:
+      - DAS_bodyControls.DAS_accActive - FSD 13: [0.0], FSD 14: [0.0, 1.0]
+      - DAS_bodyControls.DAS_autopilotActive - FSD 13: [0.0], FSD 14: [0.0, 1.0]
+      - DAS_bodyControls.DAS_headlightRequest - FSD 13: [0.0], FSD 14: [0.0, 1.0]
+      - DAS_bodyControls.DAS_heaterRequest - FSD 13: [0.0], FSD 14: [0.0, 1.0]
+      - DAS_bodyControls.DAS_highLowBeamDecision - FSD 13: [0.0], FSD 14: [0.0, 2.0]
+      - DAS_bodyControls.DAS_turnIndicatorRequestReason - FSD 13: [0.0], FSD 14: [0.0, 1.0]
+      - DAS_bodyControls.DAS_turnIndicatorRequest - FSD 13: [0.0], FSD 14: [0.0, 1.0, 2.0, 3.0]
+      - DAS_control.DAS_jerkMax - FSD 13: [0.0, 4.896000000000001], FSD 14: [0.0, 8.636000000000001]
+      - DAS_control.DAS_jerkMin - FSD 13: [-5.068, 0.0], FSD 14: [-9.1, 0.0]
+      - DAS_status.DAS_autopilotHandsOnState - FSD 13: [0.0, 1.0, 2.0], FSD 14: [0.0, 1.0, 2.0, 3.0]
+      - DAS_status2.DAS_lssState - FSD 13: [0.0, 2.0, 3.0], FSD 14: [0.0, 3.0, 5.0, 7.0]
+      - DI_state.DI_aebState - FSD 13: [0.0, 2.0, 6.0], FSD 14: [0.0, 2.0, 4.0]
+      - DI_state.DI_cruiseState - FSD 13: [0.0, 2.0, 3.0], FSD 14: [0.0, 2.0]
+      - DI_state.DI_vehicleHoldState - FSD 13: [0.0, 2.0, 3.0, 6.0, 7.0], FSD 14: [0.0, 2.0, 3.0, 4.0, 7.0]
+      - UI_warning.leftBlinkerBlinking - FSD 13: [0.0], FSD 14: [0.0, 1.0, 2.0]
+      - UI_warning.rightBlinkerBlinking - FSD 13: [0.0], FSD 14: [0.0, 1.0, 2.0]
+      - UI_warning.scrollWheelPressed - FSD 13: [0.0], FSD 14: [0.0, 1.0]
+      - VCLEFT_doorStatus.VCLEFT_frontHandlePWM - FSD 13: [0.0, 8.0], FSD 14: [72.0]
+      - VCLEFT_doorStatus.VCLEFT_frontLatchStatus - FSD 13: [0.0, 2.0], FSD 14: [2.0]
+      - VCLEFT_doorStatus.VCLEFT_frontLatchSwitch - FSD 13: [0.0, 1.0], FSD 14: [1.0]
+      - VCLEFT_doorStatus.VCLEFT_frontRelActuatorSwitch - FSD 13: [0.0, 1.0], FSD 14: [1.0]
+      - VCLEFT_doorStatus.VCLEFT_mirrorFoldState - FSD 13: [0.0, 2.0], FSD 14: [2.0]
+      - VCLEFT_doorStatus.VCLEFT_mirrorHeatState - FSD 13: [0.0, 2.0], FSD 14: [2.0]
+      - VCLEFT_doorStatus.VCLEFT_mirrorRecallState - FSD 13: [0.0, 3.0], FSD 14: [3.0]
+      - VCLEFT_doorStatus.VCLEFT_rearHandlePWM - FSD 13: [0.0, 4.0], FSD 14: [4.0]
+      - VCLEFT_doorStatus.VCLEFT_rearLatchStatus - FSD 13: [0.0, 2.0], FSD 14: [2.0]
+      - VCLEFT_doorStatus.VCLEFT_rearLatchSwitch - FSD 13: [0.0, 1.0], FSD 14: [1.0]
+      - VCLEFT_doorStatus.VCLEFT_rearRelActuatorSwitch - FSD 13: [0.0, 1.0], FSD 14: [1.0]
+      - VCRIGHT_doorStatus.VCRIGHT_rearHandlePWM - FSD 13: [0.0, 34.0], FSD 14: [0.0, 36.0]
     """
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
