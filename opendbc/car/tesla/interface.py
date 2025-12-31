@@ -19,13 +19,13 @@ class CarInterface(CarInterfaceBase):
     - FSD 14: 0f79c454f812791a/000000b6--8c7866d3bf
       Differences between FSD 13 and 14:
       New messages in FSD 14:
-      - 0x032 - length: 8
+      - MCU_THCHumanInterfaceRequest (0x032) - length: 8 (DBC (DBCTools tesla_models.dbc): 7)
       - 0x054 - length: 7
-      - 0x126 - length: 5
-      - 0x1A5 - length: 5
-      - 0x20E - length: 3
+      - ID126RearHVStatus (0x126) - length: 5 (DBC shows 7 bytes, may have changed)
+      - ID1A5FrontHVStatus (0x1A5) - length: 5 (DBC shows 7 bytes, may have changed)
+      - ID20EPARK_sdiFront (0x20E) - length: 3 (DBC shows 8 bytes, may have changed)
       - 0x237 - length: 8
-      - 0x248 - length: 3
+      - MCU_commands (0x248) - length: 3 (DBC (DBCTools tesla_models.dbc): 8)
       - DAS_bodyControls (0x3E9) - length: 8
       - 0x40C - length: 2
       - 0x489 - length: 8
@@ -33,18 +33,19 @@ class CarInterface(CarInterfaceBase):
       - 0x7B7 - length: 1
       - 0x7B8 - length: 8
       Missing messages in FSD 14:
-      - 0x20C - length: 2
-      - 0x211 - length: 6
+      - ID20CVCRIGHT_hvacRequest (0x20C) - length: 2 (DBC shows 8 bytes, may have changed)
+      - RCM_status (0x211) - length: 6
       - 0x3A3 - length: 8
-      - 0x3A4 - length: 8
-      - 0x3A5 - length: 6
-      - 0x3A6 - length: 6
+      - PCS_alertMatrix (0x3A4) - length: 8
+      - DIS_alertMatrix1 (0x3A5) - length: 6 (DBC shows 8 bytes, may have changed)
+      - DIS_alertMatrix1 (0x3A6) - length: 6 (DBC (DBCTools tesla_models.dbc): 8; note: other DBCs define DIS_alertMatrix1 at 0x3A5)
       Message length changes:
-      - 0x031 - FSD 13: 3, FSD 14: 8
+      - GTW_gatewayStatus (0x031) - FSD 13: 3, FSD 14: 8 (DBC (DBCTools tesla_models.dbc): 8)
       - 0x051 - FSD 13: 3, FSD 14: 8
-      - 0x34F - FSD 13: 6, FSD 14: 7
-      - 0x4F6 - FSD 13: 7, FSD 14: 8
+      - OCS1 (0x34F) - FSD 13: 6, FSD 14: 7 (DBC (DBCTools tesla_models.dbc): 2)
+      - DI_locStatus2 (0x4F6) - FSD 13: 7, FSD 14: 8 (DBC (DBCTools tesla_models.dbc): 4)
       Signal differences:
+      - EPAS3S_sysStatus: bit 52 is 0 on FSD 13, 1 on FSD 14
       - DAS_bodyControls.DAS_accActive - FSD 13: [0.0], FSD 14: [0.0, 1.0]
       - DAS_bodyControls.DAS_autopilotActive - FSD 13: [0.0], FSD 14: [0.0, 1.0]
       - DAS_bodyControls.DAS_headlightRequest - FSD 13: [0.0], FSD 14: [0.0, 1.0]
@@ -74,6 +75,15 @@ class CarInterface(CarInterfaceBase):
       - VCLEFT_doorStatus.VCLEFT_rearLatchSwitch - FSD 13: [0.0, 1.0], FSD 14: [1.0]
       - VCLEFT_doorStatus.VCLEFT_rearRelActuatorSwitch - FSD 13: [0.0, 1.0], FSD 14: [1.0]
       - VCRIGHT_doorStatus.VCRIGHT_rearHandlePWM - FSD 13: [0.0, 34.0], FSD 14: [0.0, 36.0]
+
+    External DBC resources searched:
+    - joshwardell/model3dbc (GitHub) - Found: 0x126 (ID126RearHVStatus), 0x1A5 (ID1A5FrontHVStatus), 0x20C (ID20CVCRIGHT_hvacRequest), 0x20E (ID20EPARK_sdiFront)
+    - onyx-m2/onyx-m2-dbc (GitHub) - Found: 0x211 (RCM_status), 0x3A4 (PCS_alertMatrix), 0x3A5 (DIS_alertMatrix1)
+    - brianman/DBCTools (Azure DevOps) - Found: 0x031 (GTW_gatewayStatus), 0x032 (MCU_THCHumanInterfaceRequest), 0x248 (MCU_commands), 0x34F (OCS1), 0x3A6 (DIS_alertMatrix1), 0x4F6 (DI_locStatus2)
+    - CSS Electronics Tesla DBC files and EV data pack
+    - tes•LAX CAN Bus Explorer - Tesla CAN bus visualization tool
+    - Scan My Tesla community DBC files
+    Note: Messages 0x051, 0x054, 0x237, 0x3A3, 0x40C, 0x489, 0x7B5, 0x7B7, 0x7B8 not found in external DBC files searched.
     """
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
