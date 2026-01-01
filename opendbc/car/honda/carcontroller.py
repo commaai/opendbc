@@ -1,11 +1,13 @@
 import numpy as np
+import math
 
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CAR, CruiseButtons, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_RADARLESS, \
                                      HONDA_BOSCH_TJA_CONTROL, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.common.conversions import Conversions as CV
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -109,11 +111,20 @@ class CarController(CarControllerBase):
     self.brake = 0.0
     self.last_torque = 0.0
 
+    self.gasfactor = 1.0
+    self.windfactor = 1.0
+    self.windfactor_before_brake = 0.0
+    self.pitch = 0.0
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
     hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
+
+    if len(CC.orientationNED) == 3:
+      self.pitch = CC.orientationNED[1]
+    hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
 
     if CC.longActive:
       accel = actuators.accel
@@ -155,7 +166,9 @@ class CarController(CarControllerBase):
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive, self.tja_control))
 
     # wind brake from air resistance decel at high speed
-    wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
+    wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15]) # not in m/s2 units
+    wind_brake_ms2 = np.interp(CS.out.vEgo, [0.0, 13.4, 22.4, 31.3, 40.2], [0.000, 0.049, 0.136, 0.267, 0.441]) # in m/s2 units
+
     # all of this is only relevant for HONDA NIDEC
     max_accel = np.interp(CS.out.vEgo, self.params.NIDEC_MAX_ACCEL_BP, self.params.NIDEC_MAX_ACCEL_V)
     # TODO this 1.44 is just to maintain previous behavior
@@ -199,12 +212,27 @@ class CarController(CarControllerBase):
 
         if self.CP.carFingerprint in HONDA_BOSCH:
           self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
-          self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
+          gas_pedal_force = self.accel + wind_brake_ms2 * self.windfactor + hill_brake
+
+          # live-learn gas pedal adjustments when openpilot is controlling gas
+          if (actuators.longControlState == LongCtrlState.pid) and (not CS.out.gasPressed):
+            gas_error = self.accel - CS.out.aEgo
+            if gas_error != 0.0 and gas_pedal_force > 0.0:
+              self.gasfactor = np.clip(self.gasfactor + gas_error / 50 * gas_pedal_force, 0.1, 3.0)
+            if gas_error != 0.0 and (not CS.out.brakePressed) and (CS.out.vEgo > 0.0):
+              wind_adjust = 1 + wind_brake_ms2 / 1000
+              self.windfactor = np.clip(self.windfactor * (wind_adjust if (gas_error > 0) else 1.0/wind_adjust), 0.1, 3.0)
+            if gas_pedal_force <= 0.0: # don't reduce windfactor while braking, allow increases
+              self.windfactor = max(self.windfactor, self.windfactor_before_brake)
+            else:
+              self.windfactor_before_brake = self.windfactor
+
+          self.gas = float(np.interp(gas_pedal_force * self.gasfactor, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
-                                                        self.stopping_counter, self.CP.carFingerprint))
+                                                        self.stopping_counter, self.CP.carFingerprint, gas_pedal_force))
         else:
           apply_brake = np.clip(self.brake_last - wind_brake, 0.0, 1.0)
           apply_brake = int(np.clip(apply_brake * self.params.NIDEC_BRAKE_MAX, 0, self.params.NIDEC_BRAKE_MAX - 1))
