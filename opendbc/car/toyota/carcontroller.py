@@ -183,13 +183,13 @@ class CarController(CarControllerBase):
       # brakes can take a while to ramp up causing a lurch forward. prevent resume press until planner wants to move.
       # don't use CC.cruiseControl.resume since it is gated on CS.cruiseState.standstill which goes false for 3s after resume press
       # whitelist hybrids as they do not have this issue and can stay stopped after resume press
-      if not (self.CP.flags & ToyotaFlags.HYBRID):
-        should_resume = actuators.accel > 0
-        if should_resume:
-          self.standstill_req = False
+      toyota_hybrid = self.CP.flags & ToyotaFlags.HYBRID
+      should_resume = actuators.accel > 0
+      if should_resume or toyota_hybrid:
+        self.standstill_req = False
 
-        if not should_resume and CS.out.cruiseState.standstill:
-          self.standstill_req = True
+      if not should_resume and CS.out.cruiseState.standstill and not toyota_hybrid:
+        self.standstill_req = True
 
     self.last_standstill = CS.out.standstill
 
