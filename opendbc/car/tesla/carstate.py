@@ -108,7 +108,7 @@ class CarState(CarStateBase):
     # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
     # FSD switched from using ANGLE_CONTROL to LANE_KEEP_ASSIST to likely keep the old steering override disengage logic.
     # LKAS switched from LANE_KEEP_ASSIST to ANGLE_CONTROL to likely allow overriding LKAS events smoothly
-    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] in (1, 2)  # ANGLE_CONTROL, LANE_KEEP_ASSIST
+    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 1  # ANGLE_CONTROL
 
     # Stock Autosteer should be off (includes FSD)
     if self.CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
