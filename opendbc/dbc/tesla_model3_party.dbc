@@ -36,6 +36,38 @@ BS_:
 BU_: CH DIPF DIPR ETH FC HVI HVS PARTY SDCV VEH VIRT
 
 
+BO_ 49 GTW_gatewayStatus: 8 ETH
+ SG_ GTW_accGoingDown: 0|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_accRailRequest: 4|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_bdyBusAsleep: 9|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_bftBusAsleep: 11|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_busesActive: 28|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_chBusAsleep: 13|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_charging: 7|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_diagBusAsleep: 8|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_diagDriveState: 29|3@1+ (1,0) [0|0] "" X
+ SG_ GTW_driveRailRequest: 3|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_driverIsLeaving: 18|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_ethBusAsleep: 14|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_gsmPwrGood: 19|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_hvacGoingDown: 1|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_hvacRailRequest: 2|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_icWillBePoweredOff: 20|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_leftSeatHeaterOn: 15|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_mcuGoingDown: 17|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_preconditioningCabin: 5|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_preconditioningPack: 6|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_ptBusAsleep: 10|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_rearCenterSeatHeaterOn: 22|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_rearLeftSeatHeaterOn: 21|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_rearRightSeatHeaterOn: 23|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_rightSeatHeaterOn: 16|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_startingSleepAck: 26|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_statusChecksum: 56|8@1+ (1,0) [0|0] "" X
+ SG_ GTW_statusCounter: 52|4@1+ (1,0) [0|0] "" X
+ SG_ GTW_touchPower: 27|1@1+ (1,0) [0|0] "" X
+ SG_ GTW_willBeGoingToSleep: 24|2@1+ (1,0) [0|0] "" X
+
 BO_ 50 MCU_THCHumanInterfaceRequest: 7 ETH
  SG_ MCU_AconBtnState_Flag: 31|1@1+ (1,0) [0|0] "" X
  SG_ MCU_AconMnl_Flag: 19|1@1+ (1,0) [0|0] "" X
@@ -136,6 +168,11 @@ BO_ 584 MCU_commands: 8 ETH
  SG_ MCU_summonState: 20|2@1+ (1,0) [0|0] "" X
  SG_ MCU_wiperMode: 8|3@1+ (1,0) [0|0] "" X
  SG_ UI_PINToDrivePassed: 4|1@1+ (1,0) [0|0] "" X
+
+BO_ 847 OCS1: 2 ETH
+ SG_ OCS_calibID: 8|8@1+ (1,0) [0|0] "" X
+ SG_ OCS_occupantClass: 0|3@1+ (1,0) [0|0] "" X
+ SG_ OCS_sdmSerialNoReceived: 4|1@1+ (1,0) [0|0] "" X
 
 BO_ 932 PCS_alertMatrix: 8 VEH
  SG_ PCS_matrixIndex M: 0|4@1+ (1,0) [0|0] "" X
@@ -599,6 +636,74 @@ BO_ 325 ESP_status: 8 PARTY
  SG_ ESP_steeringAngleQF : 27|1@1+ (1,0) [0|0] ""  X
  SG_ ESP_yawRateQF : 26|1@1+ (1,0) [0|0] ""  X
 
+BO_ 1270 DI_locStatus2: 4 ETH
+ SG_ DI_crsSetSpeed: 19|9@1+ (0.5,0) [0|0] "kph" X
+ SG_ DI_crsState: 12|3@1+ (1,0) [0|0] "" X
+ SG_ DI_locState: 16|3@1+ (1,0) [0|0] "" X
+ SG_ DI_locStatus2Checksum: 0|8@1+ (1,0) [0|0] "" X
+ SG_ DI_locStatus2Counter: 8|4@1+ (1,0) [0|0] "" X
+
+BO_ 1316 BCFALCP_info: 8 ETH
+ SG_ BCFALCP_infoIndex M: 0|8@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoBuildType m10: 8|8@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoBuildConfigID m10: 16|16@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoHardwareID m10: 32|16@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoComponentID m10: 48|16@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoPcbaID m11: 16|8@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoAssemblyID m11: 24|8@1+ (1,0) [0|0] "INTEGRAL" X
+ SG_ BCFALCP_infoUsageID m11: 32|16@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoSubUsageID m11: 48|16@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoApplicationCRC m13: 32|32@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoBootSvnRev m14: 8|24@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoAppGitHashBytes m17: 10|54@1+ (4,0) [0|0] "" X
+ SG_ BCFALCP_infoBootGitHashBytes m18: 10|54@1+ (4,0) [0|0] "" X
+ SG_ BCFALCP_infoPlatformType m19: 8|8@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoBootUdsProtoVersion m20: 8|8@1+ (1,0) [0|0] "" X
+ SG_ BCFALCP_infoBootloaderCRC m20: 32|32@1+ (1,0) [0|0] "" X
+
+BO_ 1320 SNSCUR1_info: 8 ETH
+ SG_ SNSCUR1_infoIndex M: 0|8@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoBuildType m10: 8|8@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoBuildConfigID m10: 16|16@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoHardwareID m10: 32|16@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoComponentID m10: 48|16@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoPcbaID m11: 16|8@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoAssemblyID m11: 24|8@1+ (1,0) [0|0] "INTEGRAL" X
+ SG_ SNSCUR1_infoUsageID m11: 32|16@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoSubUsageID m11: 48|16@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoApplicationCRC m13: 32|32@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoBootSvnRev m14: 8|24@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoAppGitHashBytes m17: 10|54@1+ (4,0) [0|0] "" X
+ SG_ SNSCUR1_infoBootGitHashBytes m18: 10|54@1+ (4,0) [0|0] "" X
+ SG_ SNSCUR1_infoPlatformType m19: 8|8@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoBootUdsProtoVersion m20: 8|8@1+ (1,0) [0|0] "" X
+ SG_ SNSCUR1_infoBootloaderCRC m20: 32|32@1+ (1,0) [0|0] "" X
+
+BO_ 1622 DI_info: 8 ETH
+ SG_ DI_infoIndex M: 0|8@1+ (1,0) [0|0] "" X
+ SG_ DI_buildType m10: 8|8@1+ (1,0) [0|0] "" X
+ SG_ DI_buildConfigurationId m10: 16|16@1+ (1,0) [0|0] "" X
+ SG_ DI_hardwareId m10: 32|16@1+ (1,0) [0|0] "" X
+ SG_ DI_componentId m10: 48|16@1+ (1,0) [0|0] "" X
+ SG_ DI_pcbaId m11: 16|8@1+ (1,0) [0|0] "" X
+ SG_ DI_assemblyId m11: 24|8@1+ (1,0) [0|0] "" X
+ SG_ DI_usageId m11: 32|16@1+ (1,0) [0|0] "" X
+ SG_ DI_subUsageId m11: 48|16@1+ (1,0) [0|0] "" X
+ SG_ DI_applicationSvnRevision m12: 8|24@1+ (1,0) [0|0] "" X
+ SG_ DI_applicationSvnUrlHash m12: 32|32@1+ (1,0) [0|0] "" X
+ SG_ DI_applicationCrc m13: 32|32@1+ (1,0) [0|0] "" X
+ SG_ DI_bootloaderSvnRevision m14: 8|24@1+ (1,0) [0|0] "" X
+ SG_ DI_bootloaderSvnUrlHash m14: 32|32@1+ (1,0) [0|0] "" X
+ SG_ DI_FPGA_version m16: 16|8@1+ (1,0) [0|0] "" X
+ SG_ DI_appGitHash m17: 10|54@1+ (4,0) [0|0] "" X
+ SG_ DI_bootGitHash m18: 10|54@1+ (4,0) [0|0] "" X
+ SG_ DI_platformTyp m19: 8|8@1+ (1,0) [0|0] "" X
+ SG_ DI_infoBootLdUdsProtocolVersion m20: 8|8@1+ (1,0) [0|0] "" X
+ SG_ DI_bootloaderCrc m20: 32|32@1+ (1,0) [0|0] "" X
+
+BO_ 2038 GTW_sleepDebug3: 4 ETH
+ SG_ GTW_wakeupReason: 0|32@0+ (1,0) [0|0] "" X
+
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 CM_ BO_ 50 "Observed on one route as 8 bytes, but external DBCs define this message as 7 bytes";
 CM_ BO_ 294 "Observed on one route as 5 bytes, but external DBCs define this message as 7 bytes";
@@ -608,6 +713,8 @@ CM_ BO_ 526 "Observed on one route as 3 bytes, but external DBCs define this mes
 CM_ BO_ 584 "Observed on one route as 3 bytes, but external DBCs define this message as 8 bytes";
 CM_ BO_ 933 "Observed on one route as 6 bytes, but external DBCs define this message as 8 bytes";
 CM_ BO_ 934 "Observed on one route as 6 bytes, but external DBCs define this message as 8 bytes; note: some DBCs define DIS_alertMatrix1 at 0x3A5 (933) instead";
+CM_ BO_ 1320 "Also seen as UTC_unixTime: 4 VEH in some DBCs (onyx-m2); DBCTools defines SNSCUR1_info: 8 ETH";
+CM_ BO_ 600 "Also seen as APB_status: 8 CH in some DBCs (onyx-m2); DBCTools defines MCU_mirrorCommands: 2 ETH";
 
 CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
 CM_ SG_ 785 leftBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
