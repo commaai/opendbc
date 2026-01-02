@@ -84,6 +84,26 @@ class CarInterface(CarInterfaceBase):
     - tes•LAX CAN Bus Explorer - Tesla CAN bus visualization tool
     - Scan My Tesla community DBC files
     Note: Messages 0x051, 0x054, 0x237, 0x3A3, 0x40C, 0x489, 0x7B5, 0x7B7, 0x7B8 not found in external DBC files searched.
+
+    Fleet-wide union diff (from `opendbc_repo/fsd14.py`, ignoring bus>=128, focusing on buses 0/2):
+    - No entirely new CAN IDs in FSD14 vs FSD13 (bus 0/2), but several IDs disappear and some change length.
+    - Missing in FSD14 (present in FSD13 on bus 0/2):
+      - RCM_nearDeploy (0x121)
+      - ID20CVCRIGHT_hvacRequest (0x20C)
+      - DI_frontOilPump / ID396FrontOilPump (0x396)
+      - PCS_alertMatrix (0x3A4), DIS_alertMatrix1 (0x3A5), DIS_alertMatrix1 (0x3A6), Unknown_0x3A3 (0x3A3)
+      - UI_driverAssistControl / EPBR_alertMatrix (0x3E8) (naming conflicts across DBCs)
+      - BCFALCP_info (0x524), SNSCUR1_info / UTC_unixTime (0x528), DI_info (0x656), GTW_sleepDebug3 (0x7F6)
+      - Unknown_0x12B (0x12B), Unknown_0x1CF (0x1CF), Unknown_0x255 (0x255), Unknown_0x258 (0x258), Unknown_0x276 (0x276), Unknown_0x2FA (0x2FA), Unknown_0x2FB (0x2FB),
+        Unknown_0x3D6 (0x3D6), Unknown_0x3FF (0x3FF), Unknown_0x554 (0x554), Unknown_0x7AE (0x7AE)
+    - Length changes in FSD14 (bus 0/2):
+      - GTW_gatewayStatus (0x031): {3}->{3,8} (bus 2 changes 3->8; external DBC defines 8)
+      - Unknown_0x051 (0x051): {3}->{3,8} (still no DBC)
+      - ID20EPARK_sdiFront / PARK_sdiFront (0x20E): {2}->{3} (external DBC defines 8)
+      - OCS1 (0x34F): {6}->{6,7} (external DBC defines 2)
+      - DI_locStatus2 (0x4F6): {7}->{8} (external DBC defines 4)
+      - Unknown_0x7B7 (0x7B7): {1,4,8}->{1}
+      - Unknown_0x7D0 (0x7D0): {6,8}->{8}
     """
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
@@ -105,5 +125,7 @@ class CarInterface(CarInterfaceBase):
       ret.stoppingDecelRate = 0.3
 
     ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X) # dashcam only, pending find invalidLkasSetting signal
+
+
 
     return ret
