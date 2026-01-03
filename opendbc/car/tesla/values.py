@@ -1,10 +1,11 @@
+import re
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
@@ -62,6 +63,75 @@ class CAR(Platforms):
   )
 
 
+# Tesla EPS firmware format: "<project>,<model_code><version>"
+# Model codes start with: E = Model 3, Y = Model Y, X = Model X
+# Examples:
+#   b'TeM3_E014p10_0.0.0 (16),E014.17.00' -> Model 3 (E prefix)
+#   b'TeMYG4_DCS_Update_0.0.0 (13),Y4002.27.1' -> Model Y (Y prefix)
+#   b'TeM3_SP_XP002p2_0.0.0 (23),XPR003.6.0' -> Model X (X prefix)
+FW_PATTERN = re.compile(rb'^[^,]+,(?P<model_code>[A-Z][A-Z0-9]*)')
+
+# Map first character of model code to platform
+MODEL_CODE_TO_PLATFORM: dict[str, "CAR"] = {}  # Populated after CAR class is defined
+
+# EPS ECU address used for fingerprinting
+EPS_ADDR = (0x730, None)
+
+
+def _init_model_code_mapping() -> None:
+  """Initialize the model code to platform mapping after CAR class is available."""
+  global MODEL_CODE_TO_PLATFORM
+  MODEL_CODE_TO_PLATFORM = {
+    'E': CAR.TESLA_MODEL_3,
+    'Y': CAR.TESLA_MODEL_Y,
+    'X': CAR.TESLA_MODEL_X,
+  }
+
+
+def get_model_code(fw: bytes) -> str | None:
+  """Extract model code from Tesla EPS firmware string."""
+  match = FW_PATTERN.match(fw)
+  if match:
+    return match.group('model_code').decode('ascii', errors='ignore')
+  return None
+
+
+def get_platform_from_model_code(model_code: str) -> str | None:
+  """Map a model code to its platform string."""
+  if not model_code or not MODEL_CODE_TO_PLATFORM:
+    return None
+  platform = MODEL_CODE_TO_PLATFORM.get(model_code[0])
+  return str(platform) if platform else None
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str,
+                          offline_fw_versions: OfflineFwVersions) -> set[str]:
+  """
+  Tesla fuzzy fingerprinting using EPS firmware model codes.
+
+  Extracts the model code from EPS firmware (e.g., 'E014' for Model 3,
+  'Y4002' for Model Y) and maps the first character to the platform.
+
+  This allows fingerprinting of unseen firmware versions as long as they
+  follow Tesla's standard firmware format.
+  """
+  # Ensure mapping is initialized
+  if not MODEL_CODE_TO_PLATFORM:
+    _init_model_code_mapping()
+
+  # Look for EPS firmware at the expected address
+  eps_fw_versions = live_fw_versions.get(EPS_ADDR, set())
+  for fw in eps_fw_versions:
+    model_code = get_model_code(fw)
+    if model_code:
+      platform = get_platform_from_model_code(model_code)
+      # Only return if this platform exists in our database
+      if platform and platform in offline_fw_versions:
+        return {platform}
+
+  return set()
+
+
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
@@ -69,7 +139,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
       bus=0,
     )
-  ]
+  ],
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 
