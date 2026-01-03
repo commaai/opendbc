@@ -74,6 +74,16 @@ def get_torque_params():
 
   return torque_params
 
+
+@cache
+def _get_kalman_gain_cached():
+  """Cache the Kalman gain computation since it's always called with the same parameters."""
+  Q = np.array([[0.0, 0.0], [0.0, 100.0]])
+  R = 0.3
+  A = np.array([[1.0, DT_CTRL], [0.0, 1.0]])
+  C = np.array([[1.0, 0.0]])
+  return get_kalman_gain(DT_CTRL, A, C, Q, R)
+
 # generic car and radar interfaces
 
 
@@ -279,12 +289,11 @@ class CarStateBase(ABC):
     self.cluster_min_speed = 0.0  # min speed before dropping to 0
     self.secoc_key: bytes = b"00" * 16
 
-    Q = [[0.0, 0.0], [0.0, 100.0]]
-    R = 0.3
+    # Use cached Kalman gain computation
     A = [[1.0, DT_CTRL], [0.0, 1.0]]
     C = [[1.0, 0.0]]
-    x0=[[0.0], [0.0]]
-    K = get_kalman_gain(DT_CTRL, np.array(A), np.array(C), np.array(Q), R)
+    x0 = [[0.0], [0.0]]
+    K = _get_kalman_gain_cached()
     self.v_ego_kf = KF1D(x0=x0, A=A, C=C[0], K=K)
 
   @abstractmethod

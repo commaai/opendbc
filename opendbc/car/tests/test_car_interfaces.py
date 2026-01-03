@@ -2,6 +2,7 @@ import os
 import math
 import hypothesis.strategies as st
 import pytest
+from functools import cache
 from hypothesis import Phase, given, settings
 from collections.abc import Callable
 from typing import Any
@@ -27,25 +28,30 @@ DLC_TO_LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]
 MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
 
-def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
-  # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
+# Cache strategy objects to avoid recreating them on every test
+@cache
+def _get_params_strategy():
+  """Returns cached Hypothesis strategy for car interface parameters."""
   fingerprint_strategy = st.fixed_dictionaries({0: st.dictionaries(st.integers(min_value=0, max_value=0x800),
-                                                                   st.sampled_from(DLC_TO_LEN))})
+                                                                   st.sampled_from(DLC_TO_LEN), max_size=5)})
 
   # only pick from possible ecus to reduce search space
   car_fw_strategy = st.lists(st.builds(
     lambda fw, req: structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0, request=req),
     st.sampled_from(sorted(ALL_ECUS)),
     st.sampled_from(sorted(ALL_REQUESTS)),
-  ))
+  ), max_size=5)
 
-  params_strategy = st.fixed_dictionaries({
+  return st.fixed_dictionaries({
     'fingerprints': fingerprint_strategy,
     'car_fw': car_fw_strategy,
     'alpha_long': st.booleans(),
   })
 
-  params: dict = draw(params_strategy)
+
+def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
+  # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
+  params: dict = draw(_get_params_strategy())
   # reduce search space by duplicating CAN fingerprints across all buses
   params['fingerprints'] |= {key + 1: params['fingerprints'][0] for key in range(6)}
 
