@@ -398,7 +398,7 @@ class CAR(Platforms):
     flags=ToyotaFlags.UNSUPPORTED_DSU,
   )
   LEXUS_LS = PlatformConfig(
-    [ToyotaCarDocs("Lexus LS 2018")],
+    [ToyotaCarDocs("Lexus LS 2018", "All except Lexus Safety System+ A)],
     CarSpecs(mass=4905. * CV.LB_TO_KG, wheelbase=3.125, steerRatio=15.0, tireStiffnessFactor=0.444),
     dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
   )
