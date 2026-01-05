@@ -256,11 +256,9 @@ class CarDocs:
     self.longitudinal_control = CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable
 
     if self.merged and CP.dashcamOnly:
-      if self.support_type != SupportType.REVIEW:
+      if self.support_type not in (SupportType.CUSTOM, SupportType.REVIEW):
         self.support_type = SupportType.DASHCAM
         self.support_link = "#dashcam"
-      else:
-        self.support_link = "#under-review"
 
     # longitudinal column
     op_long = "Stock"
