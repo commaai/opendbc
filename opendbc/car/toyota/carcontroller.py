@@ -2,14 +2,13 @@ import math
 import numpy as np
 from opendbc.car import Bus, make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.lateral import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance
-from opendbc.car.can_definitions import CanData
 from opendbc.car.carlog import carlog
-from opendbc.car.common.filter_simple import FirstOrderFilter
+from opendbc.car.common.filter_simple import FirstOrderFilter, HighPassFilter
 from opendbc.car.common.pid import PIDController
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
-from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
+from opendbc.car.toyota.values import CAR, NO_STOP_TIMER_CAR, TSS2_CAR, \
                                         CarControllerParams, ToyotaFlags, \
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can import CANPacker
@@ -65,8 +64,8 @@ class CarController(CarControllerBase):
     # *** start long control state ***
     self.long_pid = get_long_tune(self.CP, self.params)
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
-    self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
-    self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
+    self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
+    self.pitch_hp = HighPassFilter(0.0, 0.25, 1.5, DT_CTRL)
 
     self.accel = 0
     self.prev_accel = 0
@@ -76,6 +75,7 @@ class CarController(CarControllerBase):
 
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
+    self.secoc_acc_message_counter = 0
     self.secoc_prev_reset_counter = 0
 
   def update(self, CC, CS, now_nanos):
@@ -87,7 +87,7 @@ class CarController(CarControllerBase):
 
     if len(CC.orientationNED) == 3:
       self.pitch.update(CC.orientationNED[1])
-      self.pitch_slow.update(CC.orientationNED[1])
+      self.pitch_hp.update(CC.orientationNED[1])
 
     # *** control msgs ***
     can_sends = []
@@ -97,6 +97,7 @@ class CarController(CarControllerBase):
       if CS.secoc_synchronization['RESET_CNT'] != self.secoc_prev_reset_counter:
         self.secoc_lka_message_counter = 0
         self.secoc_lta_message_counter = 0
+        self.secoc_acc_message_counter = 0
         self.secoc_prev_reset_counter = CS.secoc_synchronization['RESET_CNT']
 
         expected_mac = build_sync_mac(self.secoc_key, int(CS.secoc_synchronization['TRIP_CNT']), int(CS.secoc_synchronization['RESET_CNT']))
@@ -169,12 +170,25 @@ class CarController(CarControllerBase):
 
     # *** gas and brake ***
 
-    # on entering standstill, send standstill request
-    if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
-      self.standstill_req = True
-    if CS.pcm_acc_status != 8:
-      # pcm entered standstill or it's disabled
-      self.standstill_req = False
+    # on entering standstill, send standstill request for older TSS-P cars that aren't designed to stay engaged at a stop
+    if self.CP.carFingerprint not in NO_STOP_TIMER_CAR:
+      if CS.out.standstill and not self.last_standstill:
+        self.standstill_req = True
+      if CS.pcm_acc_status != 8:
+        # pcm entered standstill or it's disabled
+        self.standstill_req = False
+
+    else:
+      # if user engages at a stop with foot on brake, PCM starts in a special cruise standstill mode. on resume press,
+      # brakes can take a while to ramp up causing a lurch forward. prevent resume press until planner wants to move.
+      # don't use CC.cruiseControl.resume since it is gated on CS.cruiseState.standstill which goes false for 3s after resume press
+      # TODO: hybrids do not have this issue and can stay stopped after resume press, whitelist them
+      should_resume = actuators.accel > 0
+      if should_resume:
+        self.standstill_req = False
+
+      if not should_resume and CS.out.cruiseState.standstill:
+        self.standstill_req = True
 
     self.last_standstill = CS.out.standstill
 
@@ -228,8 +242,7 @@ class CarController(CarControllerBase):
           if not stopping:
             # Toyota's PCM slowly responds to changes in pitch. On change, we amplify our
             # acceleration request to compensate for the undershoot and following overshoot
-            high_pass_pitch = self.pitch.x - self.pitch_slow.x
-            pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY,
+            pitch_compensation = float(np.clip(math.sin(self.pitch_hp.x) * ACCELERATION_DUE_TO_GRAVITY,
                                                -MAX_PITCH_COMPENSATION, MAX_PITCH_COMPENSATION))
             pcm_accel_cmd += pitch_compensation
 
@@ -250,8 +263,19 @@ class CarController(CarControllerBase):
 
         pcm_accel_cmd = float(np.clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX))
 
-        can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
+        main_accel_cmd = 0. if self.CP.flags & ToyotaFlags.SECOC.value else pcm_accel_cmd
+        can_sends.append(toyotacan.create_accel_command(self.packer, main_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
                                                         CS.acc_type, fcw_alert, self.distance_button))
+        if self.CP.flags & ToyotaFlags.SECOC.value:
+          acc_cmd_2 = toyotacan.create_accel_command_2(self.packer, pcm_accel_cmd)
+          acc_cmd_2 = add_mac(self.secoc_key,
+                              int(CS.secoc_synchronization['TRIP_CNT']),
+                              int(CS.secoc_synchronization['RESET_CNT']),
+                              self.secoc_acc_message_counter,
+                              acc_cmd_2)
+          self.secoc_acc_message_counter += 1
+          can_sends.append(acc_cmd_2)
+
         self.accel = pcm_accel_cmd
 
     else:
@@ -281,14 +305,8 @@ class CarController(CarControllerBase):
                                                      hud_control.rightLaneVisible, hud_control.leftLaneDepart,
                                                      hud_control.rightLaneDepart, CC.enabled, CS.lkas_hud))
 
-      if (self.frame % 100 == 0 or send_ui) and (self.CP.enableDsu or self.CP.flags & ToyotaFlags.DISABLE_RADAR.value):
+      if (self.frame % 100 == 0 or send_ui) and self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
         can_sends.append(toyotacan.create_fcw_command(self.packer, fcw_alert))
-
-    # *** static msgs ***
-    if self.CP.enableDsu:
-      for addr, cars, bus, fr_step, vl in STATIC_DSU_MSGS:
-        if self.frame % fr_step == 0 and self.CP.carFingerprint in cars:
-          can_sends.append(CanData(addr, vl, bus))
 
     # keep radar disabled
     if self.frame % 20 == 0 and self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:

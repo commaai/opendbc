@@ -52,7 +52,7 @@ class CAR(Platforms):
   TESLA_MODEL_Y = TeslaPlatformConfig(
     [
       TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-23"),
-      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024"),
+      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024-25"),
      ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
   )

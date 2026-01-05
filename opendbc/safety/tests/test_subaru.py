@@ -6,7 +6,7 @@ from opendbc.car.subaru.values import SubaruSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerSafety
 from functools import partial
 
 
@@ -59,7 +59,7 @@ def fwd_blacklisted_addr(lkas_msg=SubaruMsg.ES_LKAS):
   return {SUBARU_CAM_BUS: [lkas_msg, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State, SubaruMsg.ES_Infotainment]}
 
 
-class TestSubaruSafetyBase(common.PandaCarSafetyTest):
+class TestSubaruSafetyBase(common.CarSafetyTest):
   FLAGS = 0
   RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
                                                SubaruMsg.ES_Infotainment)}
@@ -78,7 +78,7 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
   INACTIVE_GAS = 1818
 
   def setUp(self):
-    self.packer = CANPackerPanda("subaru_global_2017_generated")
+    self.packer = CANPackerSafety("subaru_global_2017_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.subaru, self.FLAGS)
     self.safety.init_tests()
@@ -89,33 +89,33 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
 
   def _torque_driver_msg(self, torque):
     values = {"Steer_Torque_Sensor": torque}
-    return self.packer.make_can_msg_panda("Steering_Torque", 0, values)
+    return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
   def _speed_msg(self, speed):
     values = {s: speed for s in ["FR", "FL", "RR", "RL"]}
-    return self.packer.make_can_msg_panda("Wheel_Speeds", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
 
   def _angle_meas_msg(self, angle):
     values = {"Steering_Angle": angle}
-    return self.packer.make_can_msg_panda("Steering_Torque", 0, values)
+    return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
   def _user_brake_msg(self, brake):
     values = {"Brake": brake}
-    return self.packer.make_can_msg_panda("Brake_Status", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("Brake_Status", self.ALT_MAIN_BUS, values)
 
   def _user_gas_msg(self, gas):
     values = {"Throttle_Pedal": gas}
-    return self.packer.make_can_msg_panda("Throttle", 0, values)
+    return self.packer.make_can_msg_safety("Throttle", 0, values)
 
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_panda("CruiseControl", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
     values = {"Cruise_Cancel": cancel, "Cruise_Throttle": cruise_throttle}
-    return self.packer.make_can_msg_panda("ES_Distance", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Distance", self.ALT_MAIN_BUS, values)
 
   def test_cancel_message(self):
     # test that we can only send the cancel message (ES_Distance) with inactive throttle (1818) and Cruise_Cancel=1
@@ -146,15 +146,15 @@ class TestSubaruLongitudinalSafetyBase(TestSubaruSafetyBase, common.Longitudinal
 
   def _send_brake_msg(self, brake):
     values = {"Brake_Pressure": brake}
-    return self.packer.make_can_msg_panda("ES_Brake", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Brake", self.ALT_MAIN_BUS, values)
 
   def _send_gas_msg(self, gas):
     values = {"Cruise_Throttle": gas}
-    return self.packer.make_can_msg_panda("ES_Distance", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Distance", self.ALT_MAIN_BUS, values)
 
   def _send_rpm_msg(self, rpm):
     values = {"Cruise_RPM": rpm}
-    return self.packer.make_can_msg_panda("ES_Status", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Status", self.ALT_MAIN_BUS, values)
 
 
 class TestSubaruTorqueSafetyBase(TestSubaruSafetyBase, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
@@ -169,7 +169,7 @@ class TestSubaruTorqueSafetyBase(TestSubaruSafetyBase, common.DriverTorqueSteeri
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"LKAS_Output": torque, "LKAS_Request": steer_req}
-    return self.packer.make_can_msg_panda("ES_LKAS", SUBARU_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_LKAS", SUBARU_MAIN_BUS, values)
 
 
 class TestSubaruGen1TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):

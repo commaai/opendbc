@@ -72,7 +72,6 @@ class EnumBase(Enum):
 
 class Mount(EnumBase):
   mount = BasePart("mount")
-  angled_mount_8_degrees = BasePart("angled mount (8 degrees)")
 
 
 class Cable(EnumBase):
@@ -80,8 +79,7 @@ class Cable(EnumBase):
   usb_a_2_a_cable = BasePart("USB A-A cable")
   usbc_otg_cable = BasePart("USB C OTG cable")
   usbc_coupler = BasePart("USB-C coupler")
-  obd_c_cable_1_5ft = BasePart("OBD-C cable (1.5 ft)")
-  right_angle_obd_c_cable_1_5ft = BasePart("right angle OBD-C cable (1.5 ft)")
+  obd_c_cable_2ft = BasePart("OBD-C cable (2 ft)")
 
 
 class Accessory(EnumBase):
@@ -143,21 +141,13 @@ class CarHarness(EnumBase):
   ford_q3 = BaseCarHarness("Ford Q3 connector")
   ford_q4 = BaseCarHarness("Ford Q4 connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
   rivian = BaseCarHarness("Rivian A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
-  tesla_a = BaseCarHarness("Tesla A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
-  tesla_b = BaseCarHarness("Tesla B connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
+  tesla_a = BaseCarHarness("Tesla A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
+  tesla_b = BaseCarHarness("Tesla B connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
   psa_a = BaseCarHarness("PSA A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
 
 
 class Device(EnumBase):
-  threex = BasePart("comma 3X", parts=[Mount.mount, Cable.right_angle_obd_c_cable_1_5ft])
-  # variant of comma 3X with angled mounts
-  threex_angled_mount = BasePart("comma 3X", parts=[Mount.angled_mount_8_degrees, Cable.right_angle_obd_c_cable_1_5ft])
-  red_panda = BasePart("red panda")
-
-
-class Kit(EnumBase):
-  red_panda_kit = BasePart("CAN FD panda kit", parts=[Device.red_panda, Accessory.harness_box,
-                                                      Cable.usb_a_2_a_cable, Cable.usbc_otg_cable, Cable.obd_c_cable_1_5ft])
+  four = BasePart("comma four", parts=[Mount.mount, Cable.obd_c_cable_2ft])
 
 
 class PartType(Enum):
@@ -165,12 +155,11 @@ class PartType(Enum):
   cable = Cable
   connector = CarHarness
   device = Device
-  kit = Kit
   mount = Mount
   tool = Tool
 
 
-DEFAULT_CAR_PARTS: list[EnumBase] = [Device.threex]
+DEFAULT_CAR_PARTS: list[EnumBase] = [Device.four]
 
 
 @dataclass
@@ -181,7 +170,7 @@ class CarParts:
     return copy.deepcopy(self)
 
   @classmethod
-  def common(cls, add: list[EnumBase] = None, remove: list[EnumBase] = None):
+  def common(cls, add: list[EnumBase] | None = None, remove: list[EnumBase] | None = None):
     p = [part for part in (add or []) + DEFAULT_CAR_PARTS if part not in (remove or [])]
     return cls(p)
 
@@ -200,11 +189,6 @@ class CommonFootnote(Enum):
     "openpilot Longitudinal Control (Alpha) is available behind a toggle; " +
     "the toggle is only available in non-release branches such as `devel` or `nightly-dev`.",
     Column.LONGITUDINAL, docs_only=True)
-  EXP_LONG_DSU = CarFootnote(
-    "By default, this car will use the stock Adaptive Cruise Control (ACC) for longitudinal control. " +
-    "If the Driver Support Unit (DSU) is disconnected, openpilot ACC will replace " +
-    "stock ACC. <b><i>NOTE: disconnecting the DSU disables Automatic Emergency Braking (AEB).</i></b>",
-    Column.LONGITUDINAL)
 
 
 def get_footnotes(footnotes: list[Enum], column: Column) -> list[Enum]:
@@ -269,23 +253,19 @@ class CarDocs:
   def init(self, CP: CarParams, all_footnotes=None):
     self.brand = CP.brand
     self.car_fingerprint = CP.carFingerprint
+    self.longitudinal_control = CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable
 
     if self.merged and CP.dashcamOnly:
-      if self.support_type != SupportType.REVIEW:
+      if self.support_type not in (SupportType.CUSTOM, SupportType.REVIEW):
         self.support_type = SupportType.DASHCAM
         self.support_link = "#dashcam"
-      else:
-        self.support_link = "#under-review"
 
     # longitudinal column
     op_long = "Stock"
-    if CP.alphaLongitudinalAvailable or CP.enableDsu:
+    if CP.alphaLongitudinalAvailable:
       op_long = "openpilot available"
-      if CP.enableDsu:
-        self.footnotes.append(CommonFootnote.EXP_LONG_DSU)
-      else:
-        self.footnotes.append(CommonFootnote.EXP_LONG_AVAIL)
-    elif CP.openpilotLongitudinalControl and not CP.enableDsu:
+      self.footnotes.append(CommonFootnote.EXP_LONG_AVAIL)
+    elif CP.openpilotLongitudinalControl:
       op_long = "openpilot"
 
     # min steer & enable speed columns

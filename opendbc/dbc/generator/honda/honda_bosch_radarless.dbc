@@ -1,5 +1,6 @@
 CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _bosch_2018.dbc";
+CM_ "IMPORT _lkas_hud_8byte.dbc";
 CM_ "IMPORT _bosch_standstill.dbc";
 CM_ "IMPORT _steering_sensors_a.dbc";
 CM_ "IMPORT _gearbox_common.dbc";
@@ -30,27 +31,6 @@ BO_ 477 GEARBOX_ALT_2: 8 XXX
 
 BO_ 495 SPEED_LIMIT_DASH_DISPLAY: 8 ADAS
  SG_ SPEED_LIMIT : 47|8@0+ (1,0) [0|255] "mph" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
-
-BO_ 829 LKAS_HUD: 8 XXX
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" XXX
- SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" XXX
- SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" XXX
- SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" XXX
- SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ DTC : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" XXX
- SG_ BEEP : 17|2@0+ (1,0) [0|1] "" XXX
- SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" XXX
- SG_ BOH_2 : 23|2@0+ (1,0) [0|4] "" XXX
- SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" XXX
- SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" XXX
- SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_X1 : 30|1@0+ (1,0) [0|1] "" XXX
- SG_ LANE_LINES : 36|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 

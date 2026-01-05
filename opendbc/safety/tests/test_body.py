@@ -4,31 +4,31 @@ import unittest
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerSafety
 
 
-class TestBody(common.PandaSafetyTest):
+class TestBody(common.SafetyTest):
   TX_MSGS = [[0x250, 0], [0x251, 0],
              [0x1, 0], [0x1, 1], [0x1, 2], [0x1, 3]]
   FWD_BUS_LOOKUP = {}
 
   def setUp(self):
-    self.packer = CANPackerPanda("comma_body")
+    self.packer = CANPackerSafety("comma_body")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.body, 0)
     self.safety.init_tests()
 
   def _motors_data_msg(self, speed_l, speed_r):
     values = {"SPEED_L": speed_l, "SPEED_R": speed_r}
-    return self.packer.make_can_msg_panda("MOTORS_DATA", 0, values)
+    return self.packer.make_can_msg_safety("MOTORS_DATA", 0, values)
 
   def _torque_cmd_msg(self, torque_l, torque_r):
     values = {"TORQUE_L": torque_l, "TORQUE_R": torque_r}
-    return self.packer.make_can_msg_panda("TORQUE_CMD", 0, values)
+    return self.packer.make_can_msg_safety("TORQUE_CMD", 0, values)
 
   def _max_motor_rpm_cmd_msg(self, max_rpm_l, max_rpm_r):
     values = {"MAX_RPM_L": max_rpm_l, "MAX_RPM_R": max_rpm_r}
-    return self.packer.make_can_msg_panda("MAX_MOTOR_RPM_CMD", 0, values)
+    return self.packer.make_can_msg_safety("MAX_MOTOR_RPM_CMD", 0, values)
 
   def test_rx_hook(self):
     self.assertFalse(self.safety.get_controls_allowed())
