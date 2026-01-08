@@ -165,6 +165,20 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         self.assertEqual(should_rx, self._rx(msg))
         self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
+  def test_checksum(self):
+    msgs = [
+      self._speed_msg(0),
+      self._user_gas_msg(0),
+      self._user_brake_msg(False),
+      self._pcm_status_msg(False),
+      self.packer.make_can_msg_safety("UI_warning", 0, {}),
+    ]
+    for msg in msgs:
+      self.assertTrue(self._rx(msg))
+      # invalidate checksum
+      msg[0].data[0] = (msg[0].data[0] + 1) & 0xFF
+      self.assertFalse(self._rx(msg))
+
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,
