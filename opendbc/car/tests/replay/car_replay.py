@@ -20,7 +20,9 @@ def get_changed_platforms(cwd, database):
       brands.add(m.group(1))
     if m := re.search(r"opendbc/dbc/(\w+?)_", line):
       brands.add(m.group(1).lower())
-  return [p for p in database if any(b.upper() in p for b in brands)]
+    if m := re.search(r"opendbc/safety/modes/(\w+?)[_.]", line):
+      brands.add(m.group(1).lower())
+  return [p for p in interfaces if any(b.upper() in p for b in brands) and p in database]
 
 
 def download_refs(ref_path, platforms, segments):
@@ -57,12 +59,13 @@ def run_replay(platforms, segments, ref_path, update, workers=8):
 
 
 def main(platform=None, segments_per_platform=10, update_refs=False):
+  from opendbc.car.car_helpers import interfaces
   from openpilot.tools.lib.comma_car_segments import get_comma_car_segments_database
 
   cwd = Path(__file__).resolve().parents[4]
   ref_path = tempfile.mkdtemp(prefix="car_ref_")
   database = get_comma_car_segments_database()
-  platforms = [platform] if platform else get_changed_platforms(cwd, database)
+  platforms = [platform] if platform and platform in interfaces else get_changed_platforms(cwd, database)
 
   if not platforms:
     print("No platforms detected from changes")
@@ -77,6 +80,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False):
     errors = [e for _, _, _, e in results if e]
     assert len(errors) == 0, f"Segment failures: {errors}"
     upload_refs(ref_path, platforms, segments)
+    print(f"Uploaded {n_segments} refs")
     return 0
 
   download_refs(ref_path, platforms, segments)

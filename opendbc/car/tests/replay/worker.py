@@ -2,6 +2,8 @@ import pickle
 import zstandard as zstd
 from pathlib import Path
 
+TOLERANCE = 1e-3
+
 CARSTATE_FIELDS = [
   "vEgo", "aEgo", "vEgoRaw", "yawRate", "standstill",
   "gasPressed", "brake", "brakePressed", "regenBraking", "parkingBrake", "brakeHoldActive",
@@ -24,7 +26,7 @@ def get_value(obj, field):
 
 def differs(v1, v2):
   if isinstance(v1, float) and isinstance(v2, float):
-    return abs(v1 - v2) > 1e-3
+    return abs(v1 - v2) > TOLERANCE
   return v1 != v2
 
 
@@ -40,17 +42,17 @@ def load_ref(path):
 def load_can_messages(seg):
   from opendbc.car.can_definitions import CanData
   from openpilot.selfdrive.pandad import can_capnp_to_list
-  from openpilot.tools.lib.logreader import _LogFileReader
+  from openpilot.tools.lib.logreader import LogReader
   from openpilot.tools.lib.comma_car_segments import get_url
 
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
 
   can_msgs = []
-  for msg in _LogFileReader(url):
+  for msg in LogReader(url):
     if msg.which() == "can":
-      ts, data = can_capnp_to_list((msg.as_builder().to_bytes(),))[0]
-      can_msgs.append((ts, [CanData(*x) for x in data]))
+      can = can_capnp_to_list((msg.as_builder().to_bytes(),))[0]
+      can_msgs.append((can[0], [CanData(*c) for c in can[1]]))
   return can_msgs
 
 
