@@ -73,7 +73,9 @@ def main(platform=None, segments_per_platform=10, update_refs=False):
   print(f"{'Generating' if update_refs else 'Testing'} {n_segments} segments for: {', '.join(platforms)}")
 
   if update_refs:
-    run_replay(platforms, segments, ref_path, update=True)
+    results = run_replay(platforms, segments, ref_path, update=True)
+    errors = [e for _, _, _, e in results if e]
+    assert len(errors) == 0, f"Segment failures: {errors}"
     upload_refs(ref_path, platforms, segments)
     return 0
 
