@@ -10,7 +10,7 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 
-def get_changed_platforms(cwd, database):
+def get_changed_platforms(cwd, database, interfaces):
   from openpilot.common.utils import run_cmd
   git_ref = os.environ.get("GIT_REF", "origin/master")
   changed = run_cmd(["git", "diff", "--name-only", f"{git_ref}...HEAD"], cwd=cwd)
@@ -69,7 +69,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False):
   cwd = Path(__file__).resolve().parents[4]
   ref_path = tempfile.mkdtemp(prefix="car_ref_")
   database = get_comma_car_segments_database()
-  platforms = [platform] if platform and platform in interfaces else get_changed_platforms(cwd, database)
+  platforms = [platform] if platform and platform in interfaces else get_changed_platforms(cwd, database, interfaces)
 
   if not platforms:
     print("No platforms detected from changes")
