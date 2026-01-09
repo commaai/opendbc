@@ -86,12 +86,12 @@ jobs:
       run: ${{ env.RUN }} "scons -j$(nproc) selfdrive/pandad/ opendbc_repo/opendbc/car opendbc_repo/opendbc/dbc"
     - name: Test
       if: github.event_name == 'pull_request'
-      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/replay/car_replay.py 2>/dev/null"
+      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/replay/car_replay.py"
     - name: Update refs
       if: github.ref == 'refs/heads/master'
       env:
         AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
-      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/replay/car_replay.py --update-refs 2>/dev/null"
+      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/replay/car_replay.py --update-refs"
 
   # TODO: this needs to move to opendbc
   test_models:
