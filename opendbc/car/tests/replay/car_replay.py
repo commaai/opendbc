@@ -98,12 +98,14 @@ def main(platform=None, segments_per_platform=10, update_refs=False):
   for plat, seg, diffs in with_diffs:
     print(f"\n{plat} - {seg}")
     by_field = defaultdict(list)
-    for d in diffs:
+    for d in diffs[:100]:
       by_field[d[0]].append(d)
     for field, fd in sorted(by_field.items()):
       print(f"  {field} (frame: master → PR)")
       for line in format_diff(fd):
         print(line)
+    if len(diffs) > 100:
+      print(f"    ... ({len(diffs) - 100} more)")
 
   return 0
 
