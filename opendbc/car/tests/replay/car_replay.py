@@ -9,6 +9,7 @@ from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
+os.environ['LOGPRINT'] = 'ERROR'
 
 def get_changed_platforms(cwd, database, interfaces):
   from openpilot.common.utils import run_cmd
