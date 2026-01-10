@@ -915,7 +915,7 @@ class SafetyTest(SafetyTestBase):
             if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestHondaBoschRadarless'):
               tx = list(filter(lambda m: m[0] not in [0x30c, ], tx))
 
-            # Volkswagen MQB and Honda Bosch Canfd ACC HUD messages overlap
+            # Volkswagen MQB and Honda Bosch CAN-FD ACC HUD messages overlap
             if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestHondaBoschCANFD'):
               tx = list(filter(lambda m: m[0] not in [0x30c, ], tx))
 
