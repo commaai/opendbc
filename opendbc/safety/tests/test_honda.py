@@ -26,8 +26,8 @@ class Btn:
 #    * Bosch with Longitudinal Support
 #  * Bosch Radarless
 #    * Bosch Radarless with Longitudinal Support
-#  * Bosch CANFD
-#    * Bosch CANFD with Longitudinal Support
+#  * Bosch CAN-FD
+#    * Bosch CAN-FD with Longitudinal Support
 
 
 class HondaButtonEnableBase(common.CarSafetyTest):
@@ -564,7 +564,7 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
 
 
 class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
-  """Base class for CANFD Honda Bosch"""
+  """Base class for CAN-FD Honda Bosch"""
   PT_BUS = 0
   STEER_BUS = 0
   BUTTONS_BUS = 0
@@ -580,7 +580,7 @@ class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
 
 class TestHondaBoschCANFDSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBase):
   """
-    Covers the Honda Bosch CANFD safety mode with stock longitudinal
+    Covers the Honda Bosch CAN-FD safety mode with stock longitudinal
   """
 
   def setUp(self):
@@ -591,7 +591,7 @@ class TestHondaBoschCANFDSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBas
 
 class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBase, TestHondaBoschAltBrakeSafetyBase):
   """
-    Covers the Honda Bosch CANFD safety mode with stock longitudinal and an alternate brake message
+    Covers the Honda Bosch CAN-FD safety mode with stock longitudinal and an alternate brake message
   """
 
   def setUp(self):
@@ -602,7 +602,7 @@ class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDS
 
 class TestHondaBoschCANFDLongSafety(TestHondaBoschLongSafety, TestHondaBoschCANFDSafetyBase):
   """
-    Covers the Honda Bosch CANFD safety mode with longitudinal control
+    Covers the Honda Bosch CAN-FD safety mode with longitudinal control
   """
 
   PT_BUS = 0
