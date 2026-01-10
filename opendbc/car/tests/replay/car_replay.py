@@ -113,7 +113,7 @@ def format_diff(diffs):
     init_m = not first[2] and first[3]
     for label, vals, init in [("master", b_vals, init_b), ("PR", m_vals, init_m)]:
       line = f"  {label}:".ljust(pad)
-      for i, v in enumerate(vals):
+      for i, v in enumerate(vals[:100]):
         pv = vals[i - 1] if i > 0 else init
         if v and not pv:
           line += "/"
@@ -231,7 +231,7 @@ def plot_diff(field, diffs, output_dir):
     p_vals = [diff_map[f][1] for f in frames]
     pad = max(10, (max(frames) - min(frames)) // 10)
     ax.plot(frames, m_vals, '-', label='master', color='#1f77b4', linewidth=1.5)
-    ax.plot(frames, p_vals, '-', label='PR', color='#ff7f0e', linewidth=1.5)
+    ax.plot(frames, p_vals, '--', label='PR', color='#ff7f0e', linewidth=1.5)
     ax.set_xlim(min(frames) - pad, max(frames) + pad)
     ax.set_title(field, fontsize=10)
     ax.legend(loc='upper right', fontsize=8)
@@ -313,10 +313,8 @@ def main(platform=None, segments_per_platform=10, update_refs=False, plot=False)
 
     for field, fd in sorted(by_field.items()):
       print(f"  {field} (frame: master → PR)")
-      for line in format_diff(fd[:100]):
+      for line in format_diff(fd):
         print(line)
-      if len(fd) > 100:
-        print(f"    ... ({len(fd) - 100} more)")
       if plot_dir:
         plot_path = plot_diff(field, fd, seg_dir)
         if plot_path and upload:
