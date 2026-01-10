@@ -92,7 +92,7 @@ jobs:
       if: github.event_name == 'pull_request' && always()
       env:
         GH_TOKEN: ${{ github.token }}
-      run: gh pr comment ${{ github.event.pull_request.number }} --body "$(cat output.txt)"
+      run: gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$(cat output.txt)"
     - name: Update refs
       if: github.ref == 'refs/heads/master'
       env:
