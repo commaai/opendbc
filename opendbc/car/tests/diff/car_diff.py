@@ -240,7 +240,7 @@ def plot_diff(field, diffs, output_dir):
 
 
 def run_replay(platforms, segments, ref_path, update, workers=8):
-  from opendbc.car.tests.replay.replay import process_segment
+  from opendbc.car.tests.diff.replay import process_segment
   work = [(platform, seg, ref_path, update)
           for platform in platforms for seg in segments.get(platform, [])]
   with ProcessPoolExecutor(max_workers=workers) as pool:

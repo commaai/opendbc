@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from opendbc.car.tests.replay.compare import CARSTATE_FIELDS, get_value, differs
-from opendbc.car.tests.replay.loader import load_can_messages, load_ref, save_ref
+from opendbc.car.tests.diff.compare import CARSTATE_FIELDS, get_value, differs
+from opendbc.car.tests.diff.loader import load_can_messages, load_ref, save_ref
 
 
 def replay_segment(platform, can_msgs):

@@ -60,8 +60,8 @@ jobs:
           scons -j8
           cd opendbc/safety/tests && ./mutation.sh
 
-  car_replay:
-    name: car replay
+  car_diff:
+    name: car diff
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
     env:
       BASE_IMAGE: openpilot-base
@@ -89,7 +89,7 @@ jobs:
       env:
         AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
       run: |
-        ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/replay/car_replay.py --plot" 2>&1 | tee output.txt
+        ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/diff/car_diff.py" 2>&1 | tee output.txt
     - name: Comment PR
       if: github.event_name == 'pull_request' && always()
       env:
@@ -99,7 +99,7 @@ jobs:
       if: github.ref == 'refs/heads/master'
       env:
         AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
-      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/replay/car_replay.py --update-refs"
+      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/diff/car_diff.py --update-refs"
 
   # TODO: this needs to move to opendbc
   test_models:
