@@ -21,9 +21,9 @@ def get_changed_platforms(cwd, database, interfaces):
   for line in changed.splitlines():
     if m := re.search(r"opendbc/car/(\w+)/", line):
       brands.add(m.group(1))
-    if m := re.search(r"opendbc/dbc/(\w+?)_", line):
+    if m := re.search(r"opendbc/dbc/(\w+)_", line):
       brands.add(m.group(1).lower())
-    if m := re.search(r"opendbc/safety/modes/(\w+?)[_.]", line):
+    if m := re.search(r"opendbc/safety/modes/(\w+)[_.]", line):
       brands.add(m.group(1).lower())
   return [p for p in interfaces if any(b.upper() in p for b in brands) and p in database]
 
