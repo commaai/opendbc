@@ -17,5 +17,4 @@ EOF
 
 scons -j4 -D
 
-export MUTATION=1
-mull-runner-17 --debug --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety_mutation.so -test-program=pytest -- -n8 --ignore-glob=misra/*
+mull-runner-17 --debug --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety.so -test-program=pytest -- -n8 --ignore-glob=misra/*
