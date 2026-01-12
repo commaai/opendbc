@@ -29,28 +29,23 @@ def get_changed_platforms(cwd, database, interfaces):
 
 
 def download_refs(ref_path, platforms, segments):
-  from concurrent.futures import ThreadPoolExecutor
-  BASE_URL = "https://elkoled.blob.core.windows.net/openpilotci/"
-  def fetch(item):
-    platform, seg = item
-    filename = f"{platform}_{seg.replace('/', '_')}.zst"
-    resp = requests.get(f"{BASE_URL}car_replay/{filename}")
-    if resp.status_code == 200:
-      (Path(ref_path) / filename).write_bytes(resp.content)
-  work = [(p, s) for p in platforms for s in segments.get(p, [])]
-  with ThreadPoolExecutor(max_workers=8) as pool:
-    list(pool.map(fetch, work))
+  from openpilot.tools.lib.openpilotci import BASE_URL
+  for platform in platforms:
+    for seg in segments.get(platform, []):
+      filename = f"{platform}_{seg.replace('/', '_')}.zst"
+      resp = requests.get(f"{BASE_URL}car_replay/{filename}")
+      if resp.status_code == 200:
+        (Path(ref_path) / filename).write_bytes(resp.content)
 
 
 def upload_refs(ref_path, platforms, segments):
-  from openpilot.tools.lib.azure_container import AzureContainer
-  container = AzureContainer("elkoled", "openpilotci")
+  from openpilot.tools.lib.openpilotci import upload_file
   for platform in platforms:
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
       local_path = Path(ref_path) / filename
       if local_path.exists():
-        container.upload_file(str(local_path), f"car_replay/{filename}", overwrite=True)
+        upload_file(str(local_path), f"car_replay/{filename}")
 
 
 def format_diff(diffs):

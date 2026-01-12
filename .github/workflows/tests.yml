@@ -80,8 +80,6 @@ jobs:
         fetch-depth: 0
     - run: cd opendbc_repo && git fetch origin master
     - uses: ./.github/workflows/setup-with-retry
-    - name: Build docker
-      run: selfdrive/test/docker_build.sh base
     - name: Build
       run: ${{ env.RUN }} "scons -j$(nproc) selfdrive/pandad/ opendbc_repo/opendbc/car opendbc_repo/opendbc/dbc"
     - name: Test
