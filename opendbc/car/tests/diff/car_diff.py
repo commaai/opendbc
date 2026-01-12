@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 
 os.environ['LOGPRINT'] = 'ERROR'
 
+DIFF_BUCKET = "car_diff"
+
+
 def get_changed_platforms(cwd, database, interfaces):
   from openpilot.common.utils import run_cmd
   git_ref = os.environ.get("GIT_REF", "origin/master")
@@ -29,23 +32,28 @@ def get_changed_platforms(cwd, database, interfaces):
 
 
 def download_refs(ref_path, platforms, segments):
-  from openpilot.tools.lib.openpilotci import BASE_URL
+  from openpilot.tools.lib.github_utils import GithubUtils
+  gh = GithubUtils(None, None)
+  base_url = gh.get_bucket_link(DIFF_BUCKET)
   for platform in platforms:
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
-      resp = requests.get(f"{BASE_URL}car_replay/{filename}")
+      resp = requests.get(f"{base_url}/{filename}")
       if resp.status_code == 200:
         (Path(ref_path) / filename).write_bytes(resp.content)
 
 
 def upload_refs(ref_path, platforms, segments):
-  from openpilot.tools.lib.openpilotci import upload_file
+  from openpilot.tools.lib.github_utils import GithubUtils
+  gh = GithubUtils(None, os.environ.get("GITHUB_TOKEN"))
+  files = []
   for platform in platforms:
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
       local_path = Path(ref_path) / filename
       if local_path.exists():
-        upload_file(str(local_path), f"car_replay/{filename}")
+        files.append((filename, str(local_path)))
+  gh.upload_files(DIFF_BUCKET, files)
 
 
 def format_diff(diffs):

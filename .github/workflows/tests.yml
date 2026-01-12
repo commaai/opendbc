@@ -66,7 +66,7 @@ jobs:
     env:
       BASE_IMAGE: openpilot-base
       GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
-      RUN: docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONPATH=/tmp/openpilot -e AZURE_TOKEN=$AZURE_TOKEN -e GIT_REF=$GIT_REF -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache $BASE_IMAGE /bin/bash -c
+      RUN: docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONPATH=/tmp/openpilot -e GIT_REF -e GITHUB_TOKEN -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache $BASE_IMAGE /bin/bash -c
     steps:
     - uses: actions/checkout@v4
       with:
@@ -98,7 +98,7 @@ jobs:
     - name: Update refs
       if: github.ref == 'refs/heads/master'
       env:
-        AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.CI_ARTIFACTS_TOKEN }}
       run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/diff/car_diff.py --update-refs"
 
   # TODO: this needs to move to opendbc
