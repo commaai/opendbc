@@ -79,7 +79,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
     # If FSD 14, translate steer control type to new flipped definition
     if self.safety.get_current_safety_param() & TeslaSafetyFlags.FSD_14:
-      print('before', int(state), 'after', get_steer_ctrl_type(TeslaFlags.FSD_14, int(state)))
       state = get_steer_ctrl_type(TeslaFlags.FSD_14, int(state))
 
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
@@ -280,11 +279,9 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
   def test_stock_lkas_passthrough(self):
     # TODO: make these generic passthrough tests
-    print('wtf')
     no_lkas_msg = self._angle_cmd_msg(0, state=False)
     no_lkas_msg_cam = self._angle_cmd_msg(0, state=True, bus=2)
     lkas_msg_cam = self._angle_cmd_msg(0, state=self.steer_control_types['LANE_KEEP_ASSIST'], bus=2)
-    print('current safety param', self.safety.get_current_safety_param())
 
     # stock system sends no LKAS -> no forwarding, and OP is allowed to TX
     self.assertEqual(1, self._rx(no_lkas_msg_cam))
