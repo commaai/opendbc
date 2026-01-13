@@ -6,8 +6,16 @@
 #define TOYOTA_BASE_TX_MSGS \
   {0x191, 0, 8, .check_relay = true}, {0x412, 0, 8, .check_relay = true}, {0x1D2, 0, 8, .check_relay = false},  /* LKAS + LTA + PCM cancel cmd */  \
 
+#define TOYOTA_BASE_SHORT_PCM_TX_MSGS \
+  {0x191, 0, 8, .check_relay = true}, {0x412, 0, 8, .check_relay = true}, {0x1D2, 0, 7, .check_relay = false},  /* LKAS + LTA + PCM cancel cmd (7-byte) */  \
+
 #define TOYOTA_COMMON_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
+  {0x2E4, 0, 5, .check_relay = true}, \
+  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */  \
+
+#define TOYOTA_COMMON_SHORT_PCM_TX_MSGS \
+  TOYOTA_BASE_SHORT_PCM_TX_MSGS \
   {0x2E4, 0, 5, .check_relay = true}, \
   {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */  \
 
@@ -49,6 +57,11 @@
   TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                             \
   {.msg = {{0x1D2, 0, 8, 33U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                           \
   {.msg = {{0x224, 0, 8, 40U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
+
+#define TOYOTA_SHORT_PCM_RX_CHECKS(lta)                                                                                                    \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                             \
+  {.msg = {{0x1D2, 0, 7, 33U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                           \
+  {.msg = {{0x226, 0, 8, 40U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
 
 #define TOYOTA_SECOC_RX_CHECKS                                                                                                             \
   TOYOTA_COMMON_RX_CHECKS(false)                                                                                                           \
@@ -339,8 +352,14 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config toyota_init(uint16_t param) {
+  static bool toyota_short_pcm_cruise = false;
+
   static const CanMsg TOYOTA_TX_MSGS[] = {
     TOYOTA_COMMON_TX_MSGS
+  };
+
+  static const CanMsg TOYOTA_SHORT_PCM_TX_MSGS[] = {
+    TOYOTA_COMMON_SHORT_PCM_TX_MSGS
   };
 
   static const CanMsg TOYOTA_SECOC_TX_MSGS[] = {
@@ -362,6 +381,7 @@ static safety_config toyota_init(uint16_t param) {
   const uint32_t TOYOTA_PARAM_ALT_BRAKE = 1UL << TOYOTA_PARAM_OFFSET;
   const uint32_t TOYOTA_PARAM_STOCK_LONGITUDINAL = 2UL << TOYOTA_PARAM_OFFSET;
   const uint32_t TOYOTA_PARAM_LTA = 4UL << TOYOTA_PARAM_OFFSET;
+  const uint32_t TOYOTA_PARAM_SHORT_PCM_CRUISE = 16UL << TOYOTA_PARAM_OFFSET;
 
 #ifdef ALLOW_DEBUG
   const uint32_t TOYOTA_PARAM_SECOC = 8UL << TOYOTA_PARAM_OFFSET;
@@ -371,6 +391,7 @@ static safety_config toyota_init(uint16_t param) {
   toyota_alt_brake = GET_FLAG(param, TOYOTA_PARAM_ALT_BRAKE);
   toyota_stock_longitudinal = GET_FLAG(param, TOYOTA_PARAM_STOCK_LONGITUDINAL);
   toyota_lta = GET_FLAG(param, TOYOTA_PARAM_LTA);
+  toyota_short_pcm_cruise = GET_FLAG(param, TOYOTA_PARAM_SHORT_PCM_CRUISE);
   toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
 
   safety_config ret;
@@ -380,6 +401,9 @@ static safety_config toyota_init(uint16_t param) {
     } else {
       SET_TX_MSGS(TOYOTA_SECOC_LONG_TX_MSGS, ret);
     }
+  } else if (toyota_short_pcm_cruise) {
+    // 7-byte PCM_CRUISE cars (e.g., 2017 Lexus RC) - stock longitudinal only
+    SET_TX_MSGS(TOYOTA_SHORT_PCM_TX_MSGS, ret);
   } else {
     if (toyota_stock_longitudinal) {
       SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
@@ -408,8 +432,13 @@ static safety_config toyota_init(uint16_t param) {
     static RxCheck toyota_lka_alt_brake_rx_checks[] = {
       TOYOTA_ALT_BRAKE_RX_CHECKS(false)
     };
+    static RxCheck toyota_lka_short_pcm_rx_checks[] = {
+      TOYOTA_SHORT_PCM_RX_CHECKS(false)
+    };
 
-    if (!toyota_alt_brake) {
+    if (toyota_short_pcm_cruise) {
+      SET_RX_CHECKS(toyota_lka_short_pcm_rx_checks, ret);
+    } else if (!toyota_alt_brake) {
       SET_RX_CHECKS(toyota_lka_rx_checks, ret);
     } else {
       SET_RX_CHECKS(toyota_lka_alt_brake_rx_checks, ret);
