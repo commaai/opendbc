@@ -27,6 +27,8 @@ def round_angle(apply_angle, can_offset=0):
 
 
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
+  SAFETY_PARAM = 0
+
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor)}
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor]}
   TX_MSGS = [[MSG_DAS_steeringControl, 0], [MSG_APS_eacMonitor, 0], [MSG_DAS_Control, 0]]
@@ -69,6 +71,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.active_autopark_states = [self.autopark_states[s] for s in ('ACTIVE', 'COMPLETE', 'SELFPARK_STARTED')]
 
     self.steer_control_types = {d: v for v, d in self.define.dv["DAS_steeringControl"]["DAS_steeringControlType"].items()}
+
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, self.SAFETY_PARAM)
+    self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
     # If FSD 14, translate steer control type to new flipped definition
@@ -269,13 +275,14 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     for steer_control_type in range(4):
       should_tx = steer_control_type in (self.steer_control_types["NONE"],
                                          self.steer_control_types["ANGLE_CONTROL"])
-      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)), (steer_control_type))
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)))
 
   def test_stock_lkas_passthrough(self):
     # TODO: make these generic passthrough tests
     no_lkas_msg = self._angle_cmd_msg(0, state=False)
     no_lkas_msg_cam = self._angle_cmd_msg(0, state=True, bus=2)
     lkas_msg_cam = self._angle_cmd_msg(0, state=self.steer_control_types['LANE_KEEP_ASSIST'], bus=2)
+    print('current safety param', self.safety.get_current_safety_param())
 
     # stock system sends no LKAS -> no forwarding, and OP is allowed to TX
     self.assertEqual(1, self._rx(no_lkas_msg_cam))
@@ -363,12 +370,6 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 
   LONGITUDINAL = False
 
-  def setUp(self):
-    super().setUp()
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, 0)
-    self.safety.init_tests()
-
   def test_cancel(self):
     for acc_state in range(16):
       self.safety.set_controls_allowed(True)
@@ -401,22 +402,14 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 
 
 class TestTeslaFSD14StockSafety(TestTeslaStockSafety):
-  def setUp(self):
-    super().setUp()
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.FSD_14)
-    self.safety.init_tests()
+  SAFETY_PARAM = TeslaSafetyFlags.FSD_14
 
 
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
+  SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL
+
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor, MSG_DAS_Control)}
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor, MSG_DAS_Control]}
-
-  def setUp(self):
-    super().setUp()
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.LONG_CONTROL)
-    self.safety.init_tests()
 
   def test_no_aeb(self):
     for aeb_event in range(4):
@@ -458,6 +451,10 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
     self.assertFalse(self._tx(self._long_control_msg(set_speed=10, accel_limits=(-1.1, -0.6))))
     self.assertFalse(self._tx(self._long_control_msg(set_speed=0, accel_limits=(-0.6, -1.1))))
     self.assertFalse(self._tx(self._long_control_msg(set_speed=0, accel_limits=(-0.1, -0.1))))
+
+
+class TestTeslaFSD14LongitudinalSafety(TestTeslaLongitudinalSafety):
+  SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL | TeslaSafetyFlags.FSD_14
 
 
 if __name__ == "__main__":
