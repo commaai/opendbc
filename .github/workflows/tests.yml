@@ -65,6 +65,7 @@ jobs:
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
     env:
       BASE_IMAGE: openpilot-base
+      BUILD: selfdrive/test/docker_build.sh base
       GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
       RUN: docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONPATH=/tmp/openpilot -e GIT_REF -e GITHUB_TOKEN -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache $BASE_IMAGE /bin/bash -c
     steps:
@@ -80,11 +81,9 @@ jobs:
         fetch-depth: 0
     - run: cd opendbc_repo && git fetch origin master
     - uses: ./.github/workflows/setup-with-retry
-    - name: Build docker
-      run: selfdrive/test/docker_build.sh base
-    - name: Build
+    - name: Build openpilot
       run: ${{ env.RUN }} "scons -j$(nproc) selfdrive/pandad/ opendbc_repo/opendbc/car opendbc_repo/opendbc/dbc"
-    - name: Test
+    - name: Test car diff
       if: github.event_name == 'pull_request'
       run: |
         ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/diff/car_diff.py" 2>&1 | tee output.txt
