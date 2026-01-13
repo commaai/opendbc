@@ -85,13 +85,12 @@ jobs:
       run: ${{ env.RUN }} "scons -j$(nproc) selfdrive/pandad/ opendbc_repo/opendbc/car opendbc_repo/opendbc/dbc"
     - name: Test car diff
       if: github.event_name == 'pull_request'
-      run: |
-        ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/diff/car_diff.py" 2>&1 | tee output.txt
+      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/diff/car_diff.py"
     - name: Comment PR
       if: github.event_name == 'pull_request' && always()
       env:
         GH_TOKEN: ${{ github.token }}
-      run: gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$(cat output.txt)"
+      run: '[ -f output.txt ] && gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -F output.txt || true'
     - name: Update refs
       if: github.ref == 'refs/heads/master'
       env:
