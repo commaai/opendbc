@@ -93,7 +93,7 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
 }
 
 static int tesla_get_steer_ctrl_type(const int ctrl_type) {
-  // Returns ANGLE_CONTROL-equivalent control type on FSD 14 and below
+  // Returns ANGLE_CONTROL-equivalent control type for FSD 14
   int steer_ctrl_type = ctrl_type;
   if (tesla_fsd_14) {
     if (ctrl_type == 1) {
