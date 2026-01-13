@@ -2,12 +2,12 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
 
 
-def get_steer_ctrl_type(CP) -> int:
-  # These two signal values exhibit the same EPAS behavior on the different FSD versions
-  if CP.flags & TeslaFlags.FSD_14:
-    return 2  # LANE_KEEP_ASSIST (functionally ANGLE_CONTROL)
+def get_steer_ctrl_type(flags: int, ctrl_type: int) -> int:
+  # Returns the flipped signal value for DAS_steeringControlType on FSD 14
+  if flags & TeslaFlags.FSD_14:
+    return {1: 2, 2: 1}.get(ctrl_type, ctrl_type)
   else:
-    return 1  # ANGLE_CONTROL
+    return ctrl_type
 
 
 class TeslaCAN:
@@ -23,7 +23,7 @@ class TeslaCAN:
     values = {
       "DAS_steeringAngleRequest": -angle,
       "DAS_steeringHapticRequest": 0,
-      "DAS_steeringControlType": get_steer_ctrl_type(self.CP) if enabled else 0,
+      "DAS_steeringControlType": get_steer_ctrl_type(self.CP.flags, 1 if enabled else 0),
     }
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
