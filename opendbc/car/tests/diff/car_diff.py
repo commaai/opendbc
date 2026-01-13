@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-import os
-os.environ['LOGPRINT'] = 'CRITICAL'
-
 import argparse
+import os
 import re
 import requests
 import sys
