@@ -82,8 +82,7 @@ def replay_segment(platform, can_msgs):
   car_interface = CarInterface(CarInterface.get_params(platform, fingerprint, [], False, False, False))
   car_control = structs.CarControl().as_reader()
 
-  states = []
-  timestamps = []
+  states, timestamps = [], []
   for ts, frames in can_msgs:
     states.append(car_interface.update([(ts, frames)]))
     car_interface.apply(car_control, ts)
@@ -174,7 +173,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False):
   from opendbc.car.car_helpers import interfaces
   from openpilot.tools.lib.comma_car_segments import get_comma_car_segments_database
 
-  cwd = Path(__file__).resolve().parents[4]
+  cwd = Path(__file__).resolve().parents[3]
   ref_path = tempfile.mkdtemp(prefix="car_ref_")
   database = get_comma_car_segments_database()
 
