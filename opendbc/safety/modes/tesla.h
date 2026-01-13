@@ -236,7 +236,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
     int raw_angle_can = ((msg->data[0] & 0x7FU) << 8) | msg->data[1];
     int desired_angle = raw_angle_can - 16384;
     int steer_control_type = msg->data[2] >> 6;
-    const int angle_ctrl_type = tesla_get_steer_ctrl_type()
+    const int angle_ctrl_type = tesla_get_steer_ctrl_type();
     bool steer_control_enabled = steer_control_type == angle_ctrl_type;  // ANGLE_CONTROL
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS, TESLA_STEERING_PARAMS)) {
