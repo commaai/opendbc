@@ -1,5 +1,5 @@
 import os
-os.environ['LOGPRINT'] = 'ERROR'
+os.environ['LOGPRINT'] = 'CRITICAL'
 
 from pathlib import Path
 

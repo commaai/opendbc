@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-os.environ['LOGPRINT'] = 'ERROR'
+os.environ['LOGPRINT'] = 'CRITICAL'
 
 import argparse
 import re
@@ -126,7 +126,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False):
       for line in format_diff(fd):
         print(line)
     if len(diffs) > 100:
-      print(f"    ... ({len(diffs) - 100} more)")
+      print(f"    ... ({len(set(d[1] for d in diffs))} more)")
 
   return 0
 
