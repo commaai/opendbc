@@ -26,6 +26,8 @@ def round_angle(apply_angle, can_offset=0):
 
 
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
+  SAFETY_PARAM = 0
+
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor)}
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor]}
   TX_MSGS = [[MSG_DAS_steeringControl, 0], [MSG_APS_eacMonitor, 0], [MSG_DAS_Control, 0]]
@@ -68,6 +70,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.active_autopark_states = [self.autopark_states[s] for s in ('ACTIVE', 'COMPLETE', 'SELFPARK_STARTED')]
 
     self.steer_control_types = {d: v for v, d in self.define.dv["DAS_steeringControl"]["DAS_steeringControlType"].items()}
+
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, self.SAFETY_PARAM)
+    self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
@@ -358,12 +364,6 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 
   LONGITUDINAL = False
 
-  def setUp(self):
-    super().setUp()
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, 0)
-    self.safety.init_tests()
-
   def test_cancel(self):
     for acc_state in range(16):
       self.safety.set_controls_allowed(True)
@@ -396,14 +396,10 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 
 
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
+  SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL
+
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor, MSG_DAS_Control)}
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor, MSG_DAS_Control]}
-
-  def setUp(self):
-    super().setUp()
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.LONG_CONTROL)
-    self.safety.init_tests()
 
   def test_no_aeb(self):
     for aeb_event in range(4):
