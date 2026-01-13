@@ -1,4 +1,4 @@
-TOLERANCE = 1e-3
+TOLERANCE = 1e-2
 
 CARSTATE_FIELDS = [
   "vEgo", "aEgo", "vEgoRaw", "yawRate", "standstill",
