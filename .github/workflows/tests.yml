@@ -85,7 +85,7 @@ jobs:
       run: ${{ env.RUN }} "scons -j$(nproc) selfdrive/pandad/ opendbc_repo/opendbc/car opendbc_repo/opendbc/dbc"
     - name: Test car diff
       if: github.event_name == 'pull_request'
-      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/diff/car_diff.py" | tee diff.txt
+      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/car_diff.py" | tee diff.txt
     - name: Comment PR
       if: github.event_name == 'pull_request'
       env:
@@ -95,7 +95,7 @@ jobs:
       if: github.ref == 'refs/heads/master'
       env:
         GITHUB_TOKEN: ${{ secrets.CI_ARTIFACTS_TOKEN }}
-      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/diff/car_diff.py --update-refs"
+      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/car_diff.py --update-refs"
 
   # TODO: this needs to move to opendbc
   test_models:
