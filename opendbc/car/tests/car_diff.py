@@ -89,7 +89,7 @@ def process_segment(args):
     ref_file = Path(ref_path) / f"{platform}_{seg.replace('/', '_')}.zst"
 
     if update:
-      data = list(zip(timestamps, states))
+      data = list(zip(timestamps, states, strict=True))
       ref_file.write_bytes(zstd.compress(pickle.dumps(data)))
       return (platform, seg, [], None)
 
@@ -98,7 +98,7 @@ def process_segment(args):
 
     ref = pickle.loads(zstd.decompress(ref_file.read_bytes()))
     diffs = [(field, i, get_value(ref_state, field), get_value(state, field), ts)
-             for i, ((ts, ref_state), state) in enumerate(zip(ref, states))
+             for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True))
              for field in CARSTATE_FIELDS
              if differs(get_value(state, field), get_value(ref_state, field))]
     return (platform, seg, diffs, None)
