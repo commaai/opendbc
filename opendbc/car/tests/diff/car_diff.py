@@ -117,7 +117,7 @@ def process_segment(args):
 
 def bucket_is_empty():
   from openpilot.tools.lib.github_utils import GithubUtils
-  return requests.head(GithubUtils(None, None, "elkoled").get_bucket_link(DIFF_BUCKET)).status_code != 200
+  return requests.head(GithubUtils(None, None).get_bucket_link(DIFF_BUCKET)).status_code != 200
 
 
 def get_changed_platforms(cwd, database, interfaces):
@@ -137,7 +137,7 @@ def get_changed_platforms(cwd, database, interfaces):
 
 def download_refs(ref_path, platforms, segments):
   from openpilot.tools.lib.github_utils import GithubUtils
-  gh = GithubUtils(None, None, "elkoled")
+  gh = GithubUtils(None, None)
   base_url = gh.get_bucket_link(DIFF_BUCKET)
   for platform in platforms:
     for seg in segments.get(platform, []):
@@ -149,7 +149,7 @@ def download_refs(ref_path, platforms, segments):
 
 def upload_refs(ref_path, platforms, segments):
   from openpilot.tools.lib.github_utils import GithubUtils
-  gh = GithubUtils(None, os.environ.get("GITHUB_TOKEN"), "elkoled")
+  gh = GithubUtils(None, os.environ.get("GITHUB_TOKEN"))
   files = []
   for platform in platforms:
     for seg in segments.get(platform, []):
