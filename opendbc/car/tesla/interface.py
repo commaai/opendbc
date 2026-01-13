@@ -31,6 +31,6 @@ class CarInterface(CarInterfaceBase):
       ret.vEgoStarting = 0.1
       ret.stoppingDecelRate = 0.3
 
-    ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X) # dashcam only, pending find invalidLkasSetting signal
+    ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
 
     return ret
