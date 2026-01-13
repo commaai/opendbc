@@ -45,7 +45,7 @@ class CarInterface(CarInterfaceBase):
     else:
       return CarInterfaceBase.get_steer_feedforward_default
 
-  def get_lataccel_torque_siglin(self) -> float:
+  def get_lataccel_torque_siglin(self) -> tuple[list[float], np.ndarray]:
 
     def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
       # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
