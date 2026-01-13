@@ -4,7 +4,8 @@ import unittest
 import numpy as np
 
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
-from opendbc.car.tesla.values import CarControllerParams, TeslaSafetyFlags
+from opendbc.car.tesla.teslacan import get_steer_ctrl_type
+from opendbc.car.tesla.values import CarControllerParams, TeslaSafetyFlags, TeslaFlags
 from opendbc.car.tesla.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
@@ -70,6 +71,15 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.steer_control_types = {d: v for v, d in self.define.dv["DAS_steeringControl"]["DAS_steeringControlType"].items()}
 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
+    if self.safety.get_current_safety_param() & TeslaSafetyFlags.FSD_14:
+      if isinstance(state, bool):
+        state = get_steer_ctrl_type(TeslaFlags.FSD_14) if state else state
+      else:
+        angle_ctrl_type = get_steer_ctrl_type(TeslaFlags.FSD_14)
+        print('before', state)
+        state = (3 - angle_ctrl_type) if state in (1, 2) else state
+        print('after', state)
+
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
@@ -264,7 +274,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     for steer_control_type in range(4):
       should_tx = steer_control_type in (self.steer_control_types["NONE"],
                                          self.steer_control_types["ANGLE_CONTROL"])
-      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)))
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)), (steer_control_type))
 
   def test_stock_lkas_passthrough(self):
     # TODO: make these generic passthrough tests
@@ -393,6 +403,14 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
     self.assertEqual(1, self._rx(aeb_msg_cam))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, aeb_msg_cam.addr))
     self.assertFalse(self._tx(no_aeb_msg))
+
+
+class TestTeslaFSD14StockSafety(TestTeslaStockSafety):
+  def setUp(self):
+    super().setUp()
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.FSD_14)
+    self.safety.init_tests()
 
 
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
