@@ -71,14 +71,9 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.steer_control_types = {d: v for v, d in self.define.dv["DAS_steeringControl"]["DAS_steeringControlType"].items()}
 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
+    # If FSD 14, translate steer control type to new flipped definition
     if self.safety.get_current_safety_param() & TeslaSafetyFlags.FSD_14:
-      if isinstance(state, bool):
-        state = get_steer_ctrl_type(TeslaFlags.FSD_14) if state else state
-      else:
-        angle_ctrl_type = get_steer_ctrl_type(TeslaFlags.FSD_14)
-        print('before', state)
-        state = (3 - angle_ctrl_type) if state in (1, 2) else state
-        print('after', state)
+      state = get_steer_ctrl_type(TeslaFlags.FSD_14, int(state))
 
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
     if increment_timer:
