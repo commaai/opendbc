@@ -137,8 +137,7 @@ def get_changed_platforms(cwd, database, interfaces):
 
 def download_refs(ref_path, platforms, segments):
   from openpilot.tools.lib.github_utils import GithubUtils
-  gh = GithubUtils(None, None, "elkoled")
-  base_url = gh.get_bucket_link(DIFF_BUCKET)
+  base_url = GithubUtils(None, None, "elkoled").get_bucket_link(DIFF_BUCKET)
   for platform in platforms:
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
@@ -160,15 +159,15 @@ def upload_refs(ref_path, platforms, segments):
   gh.upload_files(DIFF_BUCKET, files)
 
 
-def format_diff(diffs):
-  return [f"    {d[1]}: {d[2]} → {d[3]}" for d in diffs]
-
-
 def run_replay(platforms, segments, ref_path, update, workers=8):
   work = [(platform, seg, ref_path, update)
           for platform in platforms for seg in segments.get(platform, [])]
   with ProcessPoolExecutor(max_workers=workers) as pool:
     return list(pool.map(process_segment, work))
+
+
+def format_diff(diffs):
+  return [f"    {d[1]}: {d[2]} -> {d[3]}" for d in diffs]
 
 
 def main(platform=None, segments_per_platform=10, update_refs=False):
