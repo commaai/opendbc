@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-import argparse
 import os
+os.environ['LOGPRINT'] = 'ERROR'
+
+import argparse
 import re
 import requests
 import sys
@@ -8,8 +10,6 @@ import tempfile
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-
-os.environ['LOGPRINT'] = 'ERROR'
 
 DIFF_BUCKET = "car_diff"
 

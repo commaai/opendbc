@@ -1,3 +1,6 @@
+import os
+os.environ['LOGPRINT'] = 'ERROR'
+
 from pathlib import Path
 
 from opendbc.car.tests.diff.compare import CARSTATE_FIELDS, get_value, differs
