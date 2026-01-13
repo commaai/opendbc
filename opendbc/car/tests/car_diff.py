@@ -33,22 +33,13 @@ CARSTATE_FIELDS = [
 def get_value(obj, field):
   for p in field.split("."):
     obj = getattr(obj, p, None)
-  return obj.raw if hasattr(obj, "raw") else obj
+  return getattr(obj, "raw", obj)
 
 
 def differs(v1, v2):
   if isinstance(v1, float) and isinstance(v2, float):
     return abs(v1 - v2) > TOLERANCE
   return v1 != v2
-
-
-def save_ref(path, states, timestamps):
-  data = list(zip(timestamps, states, strict=True))
-  Path(path).write_bytes(zstd.compress(pickle.dumps(data)))
-
-
-def load_ref(path):
-  return pickle.loads(zstd.decompress(Path(path).read_bytes()))
 
 
 def load_can_messages(seg):
@@ -98,15 +89,16 @@ def process_segment(args):
     ref_file = Path(ref_path) / f"{platform}_{seg.replace('/', '_')}.zst"
 
     if update:
-      save_ref(ref_file, states, timestamps)
+      data = list(zip(timestamps, states))
+      ref_file.write_bytes(zstd.compress(pickle.dumps(data)))
       return (platform, seg, [], None)
 
     if not ref_file.exists():
       return (platform, seg, [], "no ref")
 
-    ref = load_ref(ref_file)
+    ref = pickle.loads(zstd.decompress(ref_file.read_bytes()))
     diffs = [(field, i, get_value(ref_state, field), get_value(state, field), ts)
-             for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True))
+             for i, ((ts, ref_state), state) in enumerate(zip(ref, states))
              for field in CARSTATE_FIELDS
              if differs(get_value(state, field), get_value(ref_state, field))]
     return (platform, seg, diffs, None)
@@ -124,14 +116,13 @@ def get_changed_platforms(cwd, database, interfaces):
   git_ref = os.environ.get("GIT_REF", "origin/master")
   changed = run_cmd(["git", "diff", "--name-only", f"{git_ref}...HEAD"], cwd=cwd)
   brands = set()
+  patterns = [r"opendbc/car/(\w+)/", r"opendbc/dbc/(\w+)_", r"opendbc/safety/modes/(\w+)[_.]"]
   for line in changed.splitlines():
-    if m := re.search(r"opendbc/car/(\w+)/", line):
-      brands.add(m.group(1))
-    if m := re.search(r"opendbc/dbc/(\w+)_", line):
-      brands.add(m.group(1).lower())
-    if m := re.search(r"opendbc/safety/modes/(\w+)[_.]", line):
-      brands.add(m.group(1).lower())
-  return [p for p in interfaces if any(b.upper() in p for b in brands) and p in database]
+    for pattern in patterns:
+      m = re.search(pattern, line)
+      if m:
+        brands.add(m.group(1).lower())
+  return [p for p in interfaces if any(b in p.lower() for b in brands) and p in database]
 
 
 def download_refs(ref_path, platforms, segments):
@@ -163,10 +154,6 @@ def run_replay(platforms, segments, ref_path, update, workers=8):
           for platform in platforms for seg in segments.get(platform, [])]
   with ProcessPoolExecutor(max_workers=workers) as pool:
     return list(pool.map(process_segment, work))
-
-
-def format_diff(diffs):
-  return [f"    {d[1]}: {d[2]} -> {d[3]}" for d in diffs]
 
 
 def main(platform=None, segments_per_platform=10, update_refs=False):
@@ -221,8 +208,8 @@ def main(platform=None, segments_per_platform=10, update_refs=False):
       by_field[d[0]].append(d)
     for field, fd in sorted(by_field.items()):
       print(f"  {field} ({len(fd)} diffs)")
-      for line in format_diff(fd[:10]):
-        print(line)
+      for d in fd[:10]:
+        print(f"    {d[1]}: {d[2]} -> {d[3]}")
       if len(fd) > 10:
         print(f"    ... ({len(fd) - 10} more)")
 
