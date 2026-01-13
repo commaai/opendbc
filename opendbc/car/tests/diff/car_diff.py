@@ -16,6 +16,11 @@ os.environ['LOGPRINT'] = 'ERROR'
 DIFF_BUCKET = "car_diff"
 
 
+def bucket_is_empty():
+  from openpilot.tools.lib.github_utils import GithubUtils
+  return requests.head(GithubUtils(None, None).get_bucket_link(DIFF_BUCKET)).status_code != 200
+
+
 def get_changed_platforms(cwd, database, interfaces):
   from openpilot.common.utils import run_cmd
   git_ref = os.environ.get("GIT_REF", "origin/master")
@@ -262,7 +267,15 @@ def main(platform=None, segments_per_platform=10, update_refs=False, plot=False)
   cwd = Path(__file__).resolve().parents[4]
   ref_path = tempfile.mkdtemp(prefix="car_ref_")
   database = get_comma_car_segments_database()
-  platforms = [platform] if platform and platform in interfaces else get_changed_platforms(cwd, database, interfaces)
+
+  if update_refs and bucket_is_empty():
+    print("Bootstrapping all platforms...")
+    platforms = [p for p in interfaces if p in database]
+  elif platform and platform in interfaces:
+    platforms = [platform]
+  else:
+    # auto detect platform changes by default
+    platforms = get_changed_platforms(cwd, database, interfaces)
 
   if not platforms:
     print("No platforms detected from changes")
@@ -342,9 +355,8 @@ def main(platform=None, segments_per_platform=10, update_refs=False, plot=False)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("--platform")
-  parser.add_argument("--segments-per-platform", type=int, default=10)
-  parser.add_argument("--update-refs", action="store_true")
-  parser.add_argument("--plot", action="store_true")
+  parser.add_argument("--platform", help="run diff on a single platform only")
+  parser.add_argument("--segments-per-platform", type=int, default=10, help="number of segments to test per platform")
+  parser.add_argument("--update-refs", action="store_true", help="update refs to the current commit")
   args = parser.parse_args()
   sys.exit(main(args.platform, args.segments_per_platform, args.update_refs, args.plot))
