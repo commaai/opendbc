@@ -9,8 +9,6 @@ from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-
 os.environ['LOGPRINT'] = 'ERROR'
 
 DIFF_BUCKET = "car_diff"
@@ -154,104 +152,6 @@ def format_diff(diffs):
   return lines
 
 
-def plot_diff(field, diffs, output_dir):
-  if not diffs:
-    return None
-
-  diff_map = {d[1]: (d[2], d[3]) for d in diffs}
-  frames = sorted(diff_map.keys())
-  is_bool = all(isinstance(d[2], bool) and isinstance(d[3], bool) for d in diffs)
-
-  # group into edge regions (gaps > 15 frames = new region)
-  regions, cur = [], [frames[0]]
-  for f in frames[1:]:
-    if f - cur[-1] > 15:
-      regions.append(cur)
-      cur = [f]
-    else:
-      cur.append(f)
-  regions.append(cur)
-
-  if is_bool:
-    n_regions = min(len(regions), 6)
-    fig, axes = plt.subplots(n_regions, 1, figsize=(8, 1.5 * n_regions), squeeze=False)
-
-    for idx in range(n_regions):
-      region_frames = regions[idx]
-      ax = axes[idx, 0]
-      f_min, f_max = min(region_frames) - 5, max(region_frames) + 5
-      x_vals = list(range(f_min, f_max + 1))
-
-      first_m, first_p = diff_map[region_frames[0]]
-      if first_m and not first_p:
-        m_state, p_state = False, False
-      elif not first_m and first_p:
-        m_state, p_state = True, True
-      else:
-        m_state, p_state = False, False
-
-      last_frame = region_frames[-1]
-      converge_val = diff_map[last_frame][0]
-
-      m_vals, p_vals = [], []
-      for x in x_vals:
-        if x in diff_map:
-          m_state, p_state = diff_map[x]
-        elif x > last_frame:
-          m_state = p_state = converge_val
-        m_vals.append(int(m_state))
-        p_vals.append(int(p_state))
-
-      ax.step(x_vals, m_vals, where='post', label='master', color='#1f77b4', linewidth=2)
-      ax.step(x_vals, p_vals, where='post', label='PR', color='#ff7f0e', linewidth=2)
-
-      m_rises = [i for i, v in enumerate(m_vals) if v and (i == 0 or not m_vals[i - 1])]
-      p_rises = [i for i, v in enumerate(p_vals) if v and (i == 0 or not p_vals[i - 1])]
-      m_falls = [i for i, v in enumerate(m_vals) if not v and i > 0 and m_vals[i - 1]]
-      p_falls = [i for i, v in enumerate(p_vals) if not v and i > 0 and p_vals[i - 1]]
-
-      ts_list = [(d[1], d[4]) for d in diffs if d[1] in region_frames and len(d) > 4]
-      frame_ms = 10
-      if len(ts_list) >= 2:
-        ts_list.sort()
-        frame_ms = (ts_list[-1][1] - ts_list[0][1]) / 1e6 / (ts_list[-1][0] - ts_list[0][0])
-
-      annotation = ""
-      if m_rises and p_rises and (delta := p_rises[0] - m_rises[0]):
-        annotation = f"PR {'lags' if delta > 0 else 'leads'} by {int(abs(delta) * frame_ms)} ms"
-      if m_falls and p_falls and (delta := p_falls[0] - m_falls[0]):
-        annotation = f"PR {'lags' if delta > 0 else 'leads'} by {int(abs(delta) * frame_ms)} ms"
-
-      ax.set_yticks([0, 1])
-      ax.set_yticklabels(['F', 'T'])
-      ax.set_ylim(-0.1, 1.1)
-      ax.set_xlim(f_min, f_max)
-      ax.tick_params(axis='x', labelsize=8)
-      if annotation:
-        ax.text(0.02, 0.5, annotation, transform=ax.transAxes, fontsize=9, ha='left', va='center')
-      if idx == 0:
-        ax.legend(loc='upper right', fontsize=8)
-    axes[0, 0].set_title(field, fontsize=10)
-
-  else:
-    fig, ax = plt.subplots(figsize=(8, 2.5))
-    m_vals = [diff_map[f][0] for f in frames]
-    p_vals = [diff_map[f][1] for f in frames]
-    pad = max(10, (max(frames) - min(frames)) // 10)
-    ax.plot(frames, m_vals, '-', label='master', color='#1f77b4', linewidth=1.5)
-    ax.plot(frames, p_vals, '-', label='PR', color='#ff7f0e', linewidth=1.5)
-    ax.set_xlim(min(frames) - pad, max(frames) + pad)
-    ax.set_title(field, fontsize=10)
-    ax.legend(loc='upper right', fontsize=8)
-    ax.tick_params(axis='x', labelsize=8)
-
-  plt.tight_layout()
-  plot_path = output_dir / f'{field.replace(".", "_")}.png'
-  plt.savefig(plot_path, dpi=120, facecolor='white')
-  plt.close()
-  return plot_path
-
-
 def run_replay(platforms, segments, ref_path, update, workers=8):
   from opendbc.car.tests.diff.replay import process_segment
   work = [(platform, seg, ref_path, update)
@@ -260,7 +160,7 @@ def run_replay(platforms, segments, ref_path, update, workers=8):
     return list(pool.map(process_segment, work))
 
 
-def main(platform=None, segments_per_platform=10, update_refs=False, plot=False):
+def main(platform=None, segments_per_platform=10, update_refs=False):
   from opendbc.car.car_helpers import interfaces
   from openpilot.tools.lib.comma_car_segments import get_comma_car_segments_database
 
@@ -305,52 +205,17 @@ def main(platform=None, segments_per_platform=10, update_refs=False, plot=False)
   for plat, seg, err in errors:
     print(f"\nERROR {plat} - {seg}: {err}")
 
-  plot_dir = Path(tempfile.mkdtemp(prefix="car_replay_plots_")) if plot else None
-  upload = plot and os.environ.get("AZURE_TOKEN")
-  if upload:
-    from azure.storage.blob import BlobClient, ContentSettings
-    from openpilot.tools.lib.azure_container import get_azure_credential
-    account_url = "https://elkoled.blob.core.windows.net"
-    container_name = "openpilotci"
-  image_urls = []
-
-  if with_diffs:
-    print("```")  # open code block for ASCII output
-
   for plat, seg, diffs in with_diffs:
     print(f"\n{plat} - {seg}")
     by_field = defaultdict(list)
-    for d in diffs:
+    for d in diffs[:100]:
       by_field[d[0]].append(d)
-
-    if plot_dir:
-      seg_dir = plot_dir / f"{plat}_{seg.replace('/', '_')}"
-      seg_dir.mkdir(exist_ok=True)
-
     for field, fd in sorted(by_field.items()):
       print(f"  {field} (frame: master → PR)")
-      for line in format_diff(fd[:100]):
+      for line in format_diff(fd):
         print(line)
-      if len(fd) > 100:
-        print(f"    ... ({len(fd) - 100} more)")
-      if plot_dir:
-        plot_path = plot_diff(field, fd, seg_dir)
-        if plot_path and upload:
-          blob_name = f"car_replay_plots/{seg_dir.name}/{plot_path.name}"
-          blob = BlobClient(account_url, container_name, blob_name, credential=get_azure_credential())
-          with open(plot_path, "rb") as f:
-            blob.upload_blob(f, overwrite=True, content_settings=ContentSettings(content_type="image/png"))
-          image_urls.append((plat, seg, field, f"{account_url}/{container_name}/{blob_name}"))
-
-  if with_diffs:
-    print("```")  # close code block
-
-  # print images outside code block so markdown renders them
-  if image_urls:
-    print("\n**Plots:**")
-    for plat, seg, field, url in image_urls:
-      print(f"\n{plat} - {field}")
-      print(f"![{field}]({url})")
+    if len(diffs) > 100:
+      print(f"    ... ({len(diffs) - 100} more)")
 
   return 0
 
@@ -361,4 +226,4 @@ if __name__ == "__main__":
   parser.add_argument("--segments-per-platform", type=int, default=10, help="number of segments to diff per platform")
   parser.add_argument("--update-refs", action="store_true", help="update refs based on current commit")
   args = parser.parse_args()
-  sys.exit(main(args.platform, args.segments_per_platform, args.update_refs, args.plot))
+  sys.exit(main(args.platform, args.segments_per_platform, args.update_refs))
