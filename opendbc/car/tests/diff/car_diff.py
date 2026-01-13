@@ -355,8 +355,8 @@ def main(platform=None, segments_per_platform=10, update_refs=False, plot=False)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("--platform", help="run diff on a single platform only")
-  parser.add_argument("--segments-per-platform", type=int, default=10, help="number of segments to test per platform")
-  parser.add_argument("--update-refs", action="store_true", help="update refs to the current commit")
+  parser.add_argument("--platform", help="diff single platform")
+  parser.add_argument("--segments-per-platform", type=int, default=10, help="number of segments to diff per platform")
+  parser.add_argument("--update-refs", action="store_true", help="update refs based on current commit")
   args = parser.parse_args()
   sys.exit(main(args.platform, args.segments_per_platform, args.update_refs, args.plot))
