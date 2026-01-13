@@ -4,7 +4,8 @@ import unittest
 import numpy as np
 
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
-from opendbc.car.tesla.values import CarControllerParams, TeslaSafetyFlags
+from opendbc.car.tesla.teslacan import get_steer_ctrl_type
+from opendbc.car.tesla.values import CarControllerParams, TeslaSafetyFlags, TeslaFlags
 from opendbc.car.tesla.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
@@ -76,6 +77,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
+    # If FSD 14, translate steer control type to new flipped definition
+    if self.safety.get_current_safety_param() & TeslaSafetyFlags.FSD_14:
+      state = get_steer_ctrl_type(TeslaFlags.FSD_14, int(state))
+
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
@@ -395,6 +400,10 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
     self.assertFalse(self._tx(no_aeb_msg))
 
 
+class TestTeslaFSD14StockSafety(TestTeslaStockSafety):
+  SAFETY_PARAM = TeslaSafetyFlags.FSD_14
+
+
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
   SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL
 
@@ -441,6 +450,10 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
     self.assertFalse(self._tx(self._long_control_msg(set_speed=10, accel_limits=(-1.1, -0.6))))
     self.assertFalse(self._tx(self._long_control_msg(set_speed=0, accel_limits=(-0.6, -1.1))))
     self.assertFalse(self._tx(self._long_control_msg(set_speed=0, accel_limits=(-0.1, -0.1))))
+
+
+class TestTeslaFSD14LongitudinalSafety(TestTeslaLongitudinalSafety):
+  SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL | TeslaSafetyFlags.FSD_14
 
 
 if __name__ == "__main__":
