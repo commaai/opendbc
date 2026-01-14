@@ -95,7 +95,7 @@ def zstd_compress(data):
 def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
   ignore = ignore or []
   diffs = []
-  for key in set(list(d1.keys()) + list(d2.keys())):
+  for key in d1.keys() | d2.keys():
     if key in ignore:
       continue
     full_path = f"{path}.{key}" if path else key
