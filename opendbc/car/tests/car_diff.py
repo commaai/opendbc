@@ -218,11 +218,6 @@ def format_diff(diffs):
       b_vals.append(b_st)
       m_vals.append(m_st)
 
-    ts_start = ts_map.get(t0, rdiffs[0][4] if len(rdiffs[0]) > 4 else 0)
-    ts_end = ts_map.get(t1 - 1, rdiffs[-1][4] if len(rdiffs[-1]) > 4 else 0)
-    t0_sec = ts_start / 1e9
-    t1_sec = ts_end / 1e9
-
     # ms per frame from timestamps
     if len(ts_map) >= 2:
       ts_vals = sorted(ts_map.items())
