@@ -9,37 +9,14 @@ import requests
 import sys
 import tempfile
 import zstandard as zstd
+import dictdiffer
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 DIFF_BUCKET = "car_diff"
 TOLERANCE = 1e-2
-
-CARSTATE_FIELDS = [
-  "vEgo", "aEgo", "vEgoRaw", "yawRate", "standstill",
-  "gasPressed", "brake", "brakePressed", "regenBraking", "parkingBrake", "brakeHoldActive",
-  "steeringAngleDeg", "steeringAngleOffsetDeg", "steeringRateDeg", "steeringTorque", "steeringTorqueEps",
-  "steeringPressed", "steerFaultTemporary", "steerFaultPermanent",
-  "stockAeb", "stockFcw", "stockLkas", "espDisabled", "espActive", "accFaulted",
-  "cruiseState.enabled", "cruiseState.available", "cruiseState.speed", "cruiseState.standstill",
-  "cruiseState.nonAdaptive", "cruiseState.speedCluster",
-  "gearShifter", "leftBlinker", "rightBlinker", "genericToggle",
-  "doorOpen", "seatbeltUnlatched", "leftBlindspot", "rightBlindspot",
-  "canValid", "canTimeout",
-]
-
-
-def get_value(obj, field):
-  for p in field.split("."):
-    obj = getattr(obj, p, None)
-  return getattr(obj, "raw", obj)
-
-
-def differs(v1, v2):
-  if isinstance(v1, float) and isinstance(v2, float):
-    return abs(v1 - v2) > TOLERANCE
-  return v1 != v2
+IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 
 
 def load_can_messages(seg):
@@ -97,10 +74,11 @@ def process_segment(args):
       return (platform, seg, [], "no ref")
 
     ref = pickle.loads(zstd.decompress(ref_file.read_bytes()))
-    diffs = [(field, i, get_value(ref_state, field), get_value(state, field), ts)
-             for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True))
-             for field in CARSTATE_FIELDS
-             if differs(get_value(state, field), get_value(ref_state, field))]
+    diffs = []
+    for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
+      for diff in dictdiffer.diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
+        if diff[0] == "change":  # ignore add/remove from schema changes
+          diffs.append((str(diff[1]), i, diff[2], ts))
     return (platform, seg, diffs, None)
   except Exception as e:
     return (platform, seg, [], str(e))
@@ -209,7 +187,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False):
     for field, fd in sorted(by_field.items()):
       print(f"  {field} ({len(fd)} diffs)")
       for d in fd[:10]:
-        print(f"    {d[1]}: {d[2]} -> {d[3]}")
+        print(f"    {d[1]}: {d[2][0]} -> {d[2][1]}")
       if len(fd) > 10:
         print(f"    ... ({len(fd) - 10} more)")
 
