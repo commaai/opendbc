@@ -83,14 +83,17 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: '[ -s diff.txt ] && gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -F diff.txt || true'
     - name: Update refs
-      run: source setup.sh && python opendbc/car/tests/car_diff.py --update-refs --all
+      if: github.ref == 'refs/heads/master'
+      run: source setup.sh && python opendbc/car/tests/car_diff.py --update-refs
     - name: Checkout ci-artifacts
+      if: github.ref == 'refs/heads/master'
       uses: actions/checkout@v4
       with:
         repository: commaai/ci-artifacts
         ssh-key: ${{ secrets.CI_ARTIFACTS_DEPLOY_KEY }}
         path: ${{ github.workspace }}/ci-artifacts
     - name: Push refs
+      if: github.ref == 'refs/heads/master'
       working-directory: ${{ github.workspace }}/ci-artifacts
       run: |
         git config user.name "GitHub Actions Bot"
