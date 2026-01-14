@@ -92,10 +92,10 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: '[ -s diff.txt ] && gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -F diff.txt || true'
     - name: Update refs
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master' || github.head_ref == 'opendbc_replay'
       env:
         GITHUB_TOKEN: ${{ secrets.CI_ARTIFACTS_TOKEN }}
-      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/car_diff.py --update-refs"
+      run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/car_diff.py --update-refs --all"
 
   # TODO: this needs to move to opendbc
   test_models:
