@@ -96,6 +96,7 @@ jobs:
       if: github.ref == 'refs/heads/master'
       working-directory: ${{ github.workspace }}/ci-artifacts
       run: |
+        ls ${{ github.workspace }}/car_diff/*.zst 2>/dev/null || exit 0
         git config user.name "GitHub Actions Bot"
         git config user.email "<>"
         git fetch origin car_diff || true
