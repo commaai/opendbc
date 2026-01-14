@@ -138,16 +138,10 @@ def format_diff(diffs):
     diff_map = {d[1]: d for d in rdiffs}
 
     b_vals, m_vals, ts_map = [], [], {}
-    first, last = rdiffs[0], rdiffs[-1]
-    if first[2] and not first[3]:
-      b_st, m_st = False, False
-    elif not first[2] and first[3]:
-      b_st, m_st = True, True
-    else:
-      b_st, m_st = False, False
-
+    last = rdiffs[-1]
     converge_frame = last[1] + 1
     converge_val = last[2]
+    b_st = m_st = not converge_val  # before divergence, both had opposite of converge value
 
     for f in range(t0, t1):
       if f in diff_map:
@@ -173,9 +167,9 @@ def format_diff(diffs):
 
     lines.append(f"\n  frames {t0}-{t1-1}")
     pad = 12
-    init_b = not (first[2] and not first[3])
-    init_m = not first[2] and first[3]
-    for label, vals, init in [("master", b_vals, init_b), ("PR", m_vals, init_m)]:
+    max_width = 60
+    init_val = not converge_val
+    for label, vals, init in [("master", b_vals, init_val), ("PR", m_vals, init_val)]:
       line = f"  {label}:".ljust(pad)
       for i, v in enumerate(vals):
         pv = vals[i - 1] if i > 0 else init
@@ -187,6 +181,8 @@ def format_diff(diffs):
           line += "‾"
         else:
           line += "_"
+      if len(line) > pad + max_width:
+        line = line[:pad + max_width] + "..."
       lines.append(line)
 
     b_rises = [i for i, v in enumerate(b_vals) if v and (i == 0 or not b_vals[i - 1])]
@@ -256,15 +252,18 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
   for plat, seg, err in errors:
     print(f"\nERROR {plat} - {seg}: {err}")
 
-  for plat, seg, diffs in with_diffs:
-    print(f"\n{plat} - {seg}")
-    by_field = defaultdict(list)
-    for d in diffs:
-      by_field[d[0]].append(d)
-    for field, fd in sorted(by_field.items()):
-      print(f"  {field} ({len(fd)} diffs)")
-      for line in format_diff(fd):
-        print(line)
+  if with_diffs:
+    print("```")
+    for plat, seg, diffs in with_diffs:
+      print(f"\n{plat} - {seg}")
+      by_field = defaultdict(list)
+      for d in diffs:
+        by_field[d[0]].append(d)
+      for field, fd in sorted(by_field.items()):
+        print(f"  {field} ({len(fd)} diffs)")
+        for line in format_diff(fd):
+          print(line)
+    print("```")
 
   return 0
 
