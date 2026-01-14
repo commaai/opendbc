@@ -6,6 +6,7 @@ import argparse
 import pickle
 import re
 import requests
+import subprocess
 import sys
 import tempfile
 import zstandard as zstd
@@ -85,9 +86,8 @@ def process_segment(args):
 
 
 def get_changed_platforms(cwd, database, interfaces):
-  from openpilot.common.utils import run_cmd
   git_ref = os.environ.get("GIT_REF", "origin/master")
-  changed = run_cmd(["git", "diff", "--name-only", f"{git_ref}...HEAD"], cwd=cwd)
+  changed = subprocess.check_output(["git", "diff", "--name-only", f"{git_ref}...HEAD"], cwd=cwd, encoding='utf8').strip()
   brands = set()
   patterns = [r"opendbc/car/(\w+)/", r"opendbc/dbc/(\w+)_", r"opendbc/safety/modes/(\w+)[_.]"]
   for line in changed.splitlines():
