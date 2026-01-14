@@ -48,23 +48,22 @@ os.register_at_fork(after_in_child=_reset_connections)
 def _request(method, url, headers=None, body=None):
   parsed = urllib.parse.urlparse(url)
   path = parsed.path + ("?" + parsed.query if parsed.query else "")
-  conn = _get_connection(parsed.hostname, parsed.port or 443)
+  key = (parsed.hostname, parsed.port or 443)
 
   for attempt in range(5):
     try:
+      conn = _get_connection(*key)
       conn.request(method, path, body=body, headers=headers or {})
       resp = conn.getresponse()
       data = resp.read()
-      if resp.status in RETRY_STATUS and attempt < 4:
-        time.sleep(0.5 * (2 ** attempt))
-        continue
-      return data, resp.status, dict(resp.getheaders())
-    except (http.client.HTTPException, OSError):
-      conn.close()
-      _connections.pop((parsed.hostname, parsed.port or 443), None)
-      conn = _get_connection(parsed.hostname, parsed.port or 443)
+      if resp.status not in RETRY_STATUS:
+        return data, resp.status, dict(resp.getheaders())
+      raise OSError(f"HTTP {resp.status}")
+    except (http.client.HTTPException, OSError) as e:
+      _connections.pop(key, None)
       if attempt == 4:
-        raise
+        raise OSError(f"{method} {url}: {e}") from None
+      time.sleep(1.0 * (2 ** attempt))
 
 
 def http_get(url, headers=None):
@@ -278,7 +277,7 @@ def download_refs(ref_path, platforms, segments):
         pass
 
 
-def run_replay(platforms, segments, ref_path, update, workers=8):
+def run_replay(platforms, segments, ref_path, update, workers=4):
   work = [(platform, seg, ref_path, update)
           for platform in platforms for seg in segments.get(platform, [])]
   with ProcessPoolExecutor(max_workers=workers) as pool:
