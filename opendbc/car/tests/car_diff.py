@@ -9,8 +9,9 @@ import re
 import subprocess
 import sys
 import tempfile
-import urllib.error
-import urllib.request
+import http.client
+import time
+import urllib.parse
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -18,28 +19,68 @@ from pathlib import Path
 DIFF_BUCKET = "car_diff"
 TOLERANCE = 1e-2
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
+RETRY_STATUS = (409, 429, 503, 504)
 
 COMMA_CAR_SEGMENTS_REPO = os.environ.get("COMMA_CAR_SEGMENTS_REPO", "https://huggingface.co/datasets/commaai/commaCarSegments")
 COMMA_CAR_SEGMENTS_BRANCH = os.environ.get("COMMA_CAR_SEGMENTS_BRANCH", "main")
 COMMA_CAR_SEGMENTS_LFS_INSTANCE = os.environ.get("COMMA_CAR_SEGMENTS_LFS_INSTANCE", COMMA_CAR_SEGMENTS_REPO)
 
+_connections = {}
+
+
+def _reset_connections():
+  global _connections
+  for conn in _connections.values():
+    conn.close()
+  _connections = {}
+
+
+def _get_connection(host, port=443):
+  key = (host, port)
+  if key not in _connections:
+    _connections[key] = http.client.HTTPSConnection(host, port)
+  return _connections[key]
+
+
+os.register_at_fork(after_in_child=_reset_connections)
+
+
+def _request(method, url, headers=None, body=None):
+  parsed = urllib.parse.urlparse(url)
+  path = parsed.path + ("?" + parsed.query if parsed.query else "")
+  conn = _get_connection(parsed.hostname, parsed.port or 443)
+
+  for attempt in range(5):
+    try:
+      conn.request(method, path, body=body, headers=headers or {})
+      resp = conn.getresponse()
+      data = resp.read()
+      if resp.status in RETRY_STATUS and attempt < 4:
+        time.sleep(0.5 * (2 ** attempt))
+        continue
+      return data, resp.status, dict(resp.getheaders())
+    except (http.client.HTTPException, OSError):
+      conn.close()
+      _connections.pop((parsed.hostname, parsed.port or 443), None)
+      conn = _get_connection(parsed.hostname, parsed.port or 443)
+      if attempt == 4:
+        raise
+
 
 def http_get(url, headers=None):
-  req = urllib.request.Request(url, headers=headers or {})
-  with urllib.request.urlopen(req) as resp:
-    return resp.read(), resp.status, dict(resp.headers)
+  return _request("GET", url, headers)
 
 
 def http_post_json(url, data, headers=None):
-  req = urllib.request.Request(url, data=json.dumps(data).encode(), headers=headers or {}, method='POST')
-  with urllib.request.urlopen(req) as resp:
-    return json.load(resp), resp.status
+  hdrs = {"Content-Type": "application/json", **(headers or {})}
+  body = json.dumps(data).encode()
+  data, status, resp_headers = _request("POST", url, hdrs, body)
+  return json.loads(data), status
 
 
 def http_head(url):
-  req = urllib.request.Request(url, method='HEAD')
-  with urllib.request.urlopen(req) as resp:
-    return resp.status, dict(resp.headers)
+  _, status, headers = _request("HEAD", url)
+  return status, headers
 
 
 def zstd_decompress(data):
@@ -233,7 +274,7 @@ def download_refs(ref_path, platforms, segments):
         content, status, _ = http_get(f"{base_url}/{filename}")
         if status == 200:
           (Path(ref_path) / filename).write_bytes(content)
-      except urllib.error.HTTPError:
+      except Exception:
         pass
 
 
