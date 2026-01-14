@@ -76,7 +76,7 @@ jobs:
         scons -j8
     - name: Test car diff
       if: github.event_name == 'pull_request'
-      run: python opendbc/car/tests/car_diff.py | tee diff.txt
+      run: source setup.sh && python opendbc/car/tests/car_diff.py | tee diff.txt
     - name: Comment PR
       if: github.event_name == 'pull_request'
       env:
@@ -84,7 +84,7 @@ jobs:
       run: '[ -s diff.txt ] && gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -F diff.txt || true'
     - name: Update refs
       if: github.ref == 'refs/heads/master'
-      run: python opendbc/car/tests/car_diff.py --update-refs
+      run: source setup.sh && python opendbc/car/tests/car_diff.py --update-refs
     - name: Checkout ci-artifacts
       if: github.ref == 'refs/heads/master'
       uses: actions/checkout@v4
