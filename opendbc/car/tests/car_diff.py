@@ -287,8 +287,9 @@ def run_replay(platforms, segments, ref_path, update, workers=4):
 def format_diff(diffs):
   if not diffs:
     return []
-  if not all(isinstance(d[2], bool) and isinstance(d[3], bool) for d in diffs):
-    return [f"    frame {d[1]}: {d[2]} -> {d[3]}" for d in diffs[:10]]
+  old, new = diffs[0][2]
+  if not (isinstance(old, bool) and isinstance(new, bool)):
+    return [f"    frame {d[1]}: {d[2][0]} -> {d[2][1]}" for d in diffs[:10]]
 
   lines = []
   ranges, cur = [], [diffs[0]]
@@ -307,14 +308,13 @@ def format_diff(diffs):
     b_vals, m_vals, ts_map = [], [], {}
     last = rdiffs[-1]
     converge_frame = last[1] + 1
-    converge_val = last[2]
+    converge_val = last[2][1]
     b_st = m_st = not converge_val
 
     for f in range(t0, t1):
       if f in diff_map:
-        b_st, m_st = diff_map[f][2], diff_map[f][3]
-        if len(diff_map[f]) > 4:
-          ts_map[f] = diff_map[f][4]
+        b_st, m_st = diff_map[f][2]
+        ts_map[f] = diff_map[f][3]
       elif f >= converge_frame:
         b_st = m_st = converge_val
       b_vals.append(b_st)
