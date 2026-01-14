@@ -84,11 +84,6 @@ def process_segment(args):
     return (platform, seg, [], str(e))
 
 
-def bucket_is_empty():
-  from openpilot.tools.lib.github_utils import GithubUtils
-  return requests.head(GithubUtils(None, None).get_bucket_link(DIFF_BUCKET)).status_code != 200
-
-
 def get_changed_platforms(cwd, database, interfaces):
   from openpilot.common.utils import run_cmd
   git_ref = os.environ.get("GIT_REF", "origin/master")
@@ -134,7 +129,7 @@ def run_replay(platforms, segments, ref_path, update, workers=8):
     return list(pool.map(process_segment, work))
 
 
-def main(platform=None, segments_per_platform=10, update_refs=False):
+def main(platform=None, segments_per_platform=10, update_refs=False, all_platforms=False):
   from opendbc.car.car_helpers import interfaces
   from openpilot.tools.lib.comma_car_segments import get_comma_car_segments_database
 
@@ -142,13 +137,12 @@ def main(platform=None, segments_per_platform=10, update_refs=False):
   ref_path = tempfile.mkdtemp(prefix="car_ref_")
   database = get_comma_car_segments_database()
 
-  if update_refs and bucket_is_empty():
-    print("Bootstrapping all platforms...")
+  if all_platforms:
+    print("Running all platforms...")
     platforms = [p for p in interfaces if p in database]
   elif platform and platform in interfaces:
     platforms = [platform]
   else:
-    # auto detect platform changes by default
     platforms = get_changed_platforms(cwd, database, interfaces)
 
   if not platforms:
@@ -199,5 +193,6 @@ if __name__ == "__main__":
   parser.add_argument("--platform", help="diff single platform")
   parser.add_argument("--segments-per-platform", type=int, default=10, help="number of segments to diff per platform")
   parser.add_argument("--update-refs", action="store_true", help="update refs based on current commit")
+  parser.add_argument("--all", action="store_true", help="run diff on all platforms")
   args = parser.parse_args()
-  sys.exit(main(args.platform, args.segments_per_platform, args.update_refs))
+  sys.exit(main(args.platform, args.segments_per_platform, args.update_refs, args.all))
