@@ -32,3 +32,4 @@ cppcheck-addon-ctu-file-list
 opendbc/safety/tests/coverage-out
 
 compile_commands.json
+.mull/

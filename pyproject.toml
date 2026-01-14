@@ -2,7 +2,7 @@
 name = "opendbc"
 version = "0.2.1"
 description = "CAN bus databases and tools"
-license = { file = "LICENSE" }
+license = "MIT"
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
 readme = "README.md"
 requires-python = ">=3.11,<3.13"  # pycapnp doesn't work with 3.13
@@ -12,7 +12,7 @@ urls = { "homepage" = "https://github.com/commaai/opendbc" }
 dependencies = [
   "scons",
   "numpy",
-  "crcmod",
+  "crcmod-plus",
   "tqdm",
   "pycapnp==2.1.0",
   "pycryptodome",
@@ -131,7 +131,7 @@ call-non-callable = "ignore"
 invalid-argument-type = "ignore"
 
 # Dynamic type patterns (e.g., values converted from Number to list in __init__)
-non-subscriptable = "ignore"
+not-subscriptable = "ignore"
 unsupported-operator = "ignore"
 
 # Return types with complex callable signatures
