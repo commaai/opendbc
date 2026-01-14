@@ -88,19 +88,33 @@ def get_comma_car_segments_database():
   return ret
 
 
+def logreader_from_url(url):
+  import capnp
+
+  response = requests.get(url)
+  assert response.status_code == 200, f"Failed to download {url}: {response.status_code}"
+
+  data = response.content
+  if data.startswith(b'\x28\xB5\x2F\xFD'): # zstd magic
+    data = zstd.decompress(data)
+
+  rlog = capnp.load(str(Path(__file__).parent / "rlog.capnp"))
+  return rlog.Event.read_multiple_bytes(data)
+
+
 def load_can_messages(seg):
   from opendbc.car.can_definitions import CanData
-  from openpilot.selfdrive.pandad import can_capnp_to_list
-  from openpilot.tools.lib.logreader import LogReader
 
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
 
   can_msgs = []
-  for msg in LogReader(url):
-    if msg.which() == "can":
-      can = can_capnp_to_list((msg.as_builder().to_bytes(),))[0]
-      can_msgs.append((can[0], [CanData(*c) for c in can[1]]))
+  for evt in logreader_from_url(url):
+    try:
+      if evt.which() == "can":
+        can_msgs.append((evt.logMonoTime, [CanData(c.address, c.dat, c.src) for c in evt.can]))
+    except Exception:
+      pass
   return can_msgs
 
 
