@@ -99,8 +99,7 @@ def get_changed_platforms(cwd, database, interfaces):
 
 
 def download_refs(ref_path, platforms, segments):
-  from openpilot.tools.lib.github_utils import GithubUtils
-  base_url = GithubUtils(None, None).get_bucket_link(DIFF_BUCKET)
+  base_url = f"https://raw.githubusercontent.com/commaai/ci-artifacts/refs/heads/{DIFF_BUCKET}"
   for platform in platforms:
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
@@ -109,17 +108,6 @@ def download_refs(ref_path, platforms, segments):
         (Path(ref_path) / filename).write_bytes(resp.content)
 
 
-def upload_refs(ref_path, platforms, segments):
-  from openpilot.tools.lib.github_utils import GithubUtils
-  gh = GithubUtils(None, os.environ.get("GITHUB_TOKEN"))
-  files = []
-  for platform in platforms:
-    for seg in segments.get(platform, []):
-      filename = f"{platform}_{seg.replace('/', '_')}.zst"
-      local_path = Path(ref_path) / filename
-      if local_path.exists():
-        files.append((filename, str(local_path)))
-  gh.upload_files(DIFF_BUCKET, files)
 
 
 def run_replay(platforms, segments, ref_path, update, workers=8):
@@ -227,7 +215,10 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
   from openpilot.tools.lib.comma_car_segments import get_comma_car_segments_database
 
   cwd = Path(__file__).resolve().parents[3]
-  ref_path = tempfile.mkdtemp(prefix="car_ref_")
+  ref_path = cwd / DIFF_BUCKET
+  if not update_refs:
+    ref_path = Path(tempfile.mkdtemp())
+  ref_path.mkdir(exist_ok=True)
   database = get_comma_car_segments_database()
 
   if all_platforms:
@@ -250,8 +241,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
     results = run_replay(platforms, segments, ref_path, update=True)
     errors = [e for _, _, _, e in results if e]
     assert len(errors) == 0, f"Segment failures: {errors}"
-    upload_refs(ref_path, platforms, segments)
-    print(f"Uploaded {n_segments} refs")
+    print(f"Generated {n_segments} refs to {ref_path}")
     return 0
 
   download_refs(ref_path, platforms, segments)

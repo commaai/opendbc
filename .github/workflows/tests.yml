@@ -93,9 +93,26 @@ jobs:
       run: '[ -s diff.txt ] && gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -F diff.txt || true'
     - name: Update refs
       if: github.ref == 'refs/heads/master'
-      env:
-        GITHUB_TOKEN: ${{ secrets.CI_ARTIFACTS_TOKEN }}
       run: ${{ env.RUN }} "git config --global --add safe.directory '*' && python opendbc_repo/opendbc/car/tests/car_diff.py --update-refs"
+    - name: Checkout ci-artifacts
+      if: github.ref == 'refs/heads/master'
+      uses: actions/checkout@v4
+      with:
+        repository: commaai/ci-artifacts
+        ssh-key: ${{ secrets.CI_ARTIFACTS_DEPLOY_KEY }}
+        path: ${{ github.workspace }}/ci-artifacts
+    - name: Push refs
+      if: github.ref == 'refs/heads/master'
+      working-directory: ${{ github.workspace }}/ci-artifacts
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+        git fetch origin car_diff
+        git checkout car_diff
+        cp ${{ github.workspace }}/opendbc_repo/car_diff/*.zst .
+        git add *.zst
+        git commit -m "car_diff refs for ${{ github.sha }}" || echo "No changes to commit"
+        git push origin car_diff
 
   # TODO: this needs to move to opendbc
   test_models:
