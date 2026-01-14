@@ -255,7 +255,7 @@ def get_changed_platforms(cwd, database, interfaces):
   git_ref = os.environ.get("GIT_REF", "origin/master")
   changed = subprocess.check_output(["git", "diff", "--name-only", f"{git_ref}...HEAD"], cwd=cwd, encoding='utf8').strip()
   brands = set()
-  patterns = [r"opendbc/car/(\w+)/", r"opendbc/dbc/(\w+)_", r"opendbc/safety/modes/(\w+)[_.]"]
+  patterns = [r"opendbc/car/(\w+)/", r"opendbc/dbc/(\w+?)_", r"opendbc/dbc/generator/(\w+)", r"opendbc/safety/modes/(\w+?)[_.]"]
   for line in changed.splitlines():
     for pattern in patterns:
       m = re.search(pattern, line)
