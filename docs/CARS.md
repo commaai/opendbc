@@ -29,7 +29,7 @@
 |Audi|Q5 2017-24|All|[Not compatible](#flexray)|
 |Audi|RS3 2018|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|S3 2015-17|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Chevrolet|Bolt EUV 2022-23|Premier or Premier Redline Trim without Super Cruise Package|[Upstream](#upstream)|
+|Chevrolet|Bolt EUV 2022-23|Premier or Premier Redline Trim, without Super Cruise Package|[Upstream](#upstream)|
 |Chevrolet|Bolt EV 2022-23|2LT Trim with Adaptive Cruise Control Package|[Upstream](#upstream)|
 |Chevrolet|Equinox 2019-22|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |Chevrolet|Silverado 1500 2020-21|Safety Package II|[Upstream](#upstream)|
@@ -338,15 +338,15 @@
 |Toyota|RAV4 Hybrid 2019-21|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2022|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2023-25|All|[Upstream](#upstream)|
-|Toyota|RAV4 Prime 2021-23|All|[Community](#community)|
+|Toyota|RAV4 Prime 2021-23|All|[Custom](#secoc-cars-with-recoverable-keys)|
 |Toyota|RAV4 Prime 2024-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|Sequoia 2023-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|Sienna 2018-20|All|[Upstream](#upstream)|
-|Toyota|Sienna 2021-23|All|[Community](#community)|
+|Toyota|Sienna 2021-23|All|[Custom](#secoc-cars-with-recoverable-keys)|
 |Toyota|Sienna 2024-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|Tundra 2022-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|Venza 2021-25|Any|[Not compatible](#can-bus-security)|
-|Toyota|Yaris (Non-US only) 2020, 2023|All|[Community](#community)|
+|Toyota|Yaris (Non-US only) 2020, 2023|All|[Custom](#secoc-cars-with-recoverable-keys)|
 |Volkswagen|Arteon 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Arteon eHybrid 2020-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Arteon R 2020-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -370,7 +370,7 @@
 |Volkswagen|Golf SportsVan 2015-20|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Grand California 2019-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Jetta 2015-18|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
-|Volkswagen|Jetta 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Volkswagen|Jetta 2019-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Jetta GLI 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Passat 2015-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Passat Alltrack 2015-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -412,7 +412,14 @@ openpilot is installed, but custom forks may allow their use.
 
 Vehicles in this category are not considered plug-and-play. Software support is included in upstream openpilot, but
 these vehicles might not have a harness in the comma store, or the physical install might be at an unusual or cumbersome
-location, or they might need unusual configuration after install.
+location, or they might need unusual configuration after install. These vehicles will not work with release builds of
+openpilot, but depending on the situation, development builds or custom forks may allow their use.
+
+### SecOC cars with recoverable keys
+
+For a small subset of SecOC-protected vehicles, tools may be available in the community to recover the SecOC keys. These
+tools, and the recovery process, are not part of openpilot. If supplied with a valid SecOC key, development builds or
+custom forks may work with these vehicles. Release builds of openpilot don't support SecOC.
 
 ## Dashcam
 

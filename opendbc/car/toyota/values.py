@@ -71,11 +71,13 @@ class ToyotaFlags(IntFlag):
   # these cars use the Lane Tracing Assist (LTA) message for lateral control
   ANGLE_CONTROL = 128
   NO_STOP_TIMER = 256
-  # these cars are speculated to allow stop and go when the DSU is unplugged
-  SNG_WITHOUT_DSU = 512
   # these cars can utilize 2.0 m/s^2
   RAISED_ACCEL_LIMIT = 1024
   SECOC = 2048
+
+  # deprecated flags
+  # these cars are speculated to allow stop and go when the DSU is unplugged
+  SNG_WITHOUT_DSU_DEPRECATED = 512
 
 
 def dbc_dict(pt, radar):
@@ -95,9 +97,9 @@ class ToyotaCarDocs(CarDocs):
 
 
 @dataclass
-class ToyotaCommunityCarDocs(ToyotaCarDocs):
-  support_type: SupportType = SupportType.COMMUNITY
-  support_link: str = "#community"
+class ToyotaSecOcCarDocs(ToyotaCarDocs):
+  support_type: SupportType = SupportType.CUSTOM
+  support_link: str = "#secoc-cars-with-recoverable-keys"
 
 
 @dataclass
@@ -213,7 +215,7 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=4516. * CV.LB_TO_KG, wheelbase=2.8194, steerRatio=16.0, tireStiffnessFactor=0.8),
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
-    flags=ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.SNG_WITHOUT_DSU,
+    flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_HIGHLANDER_TSS2 = ToyotaTSS2PlatformConfig(
     [
@@ -235,7 +237,7 @@ class CAR(Platforms):
     [ToyotaCarDocs("Toyota Prius v 2017", "Toyota Safety Sense P", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=3340. * CV.LB_TO_KG, wheelbase=2.78, steerRatio=17.4, tireStiffnessFactor=0.5533),
     dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
-    flags=ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.SNG_WITHOUT_DSU,
+    flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_PRIUS_TSS2 = ToyotaTSS2PlatformConfig(
     [
@@ -260,7 +262,7 @@ class CAR(Platforms):
     TOYOTA_RAV4.specs,
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
     # Note that the ICE RAV4 does not respect positive acceleration commands under 19 mph
-    flags=ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.SNG_WITHOUT_DSU,
+    flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_RAV4_TSS2 = ToyotaTSS2PlatformConfig(
     [
@@ -286,11 +288,11 @@ class CAR(Platforms):
     flags=ToyotaFlags.RADAR_ACC | ToyotaFlags.ANGLE_CONTROL,
   )
   TOYOTA_RAV4_PRIME = ToyotaSecOCPlatformConfig(
-    [ToyotaCommunityCarDocs("Toyota RAV4 Prime 2021-23", min_enable_speed=MIN_ACC_SPEED)],
+    [ToyotaSecOcCarDocs("Toyota RAV4 Prime 2021-23", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=4372. * CV.LB_TO_KG, wheelbase=2.68, steerRatio=16.88, tireStiffnessFactor=0.5533),
   )
   TOYOTA_YARIS = ToyotaSecOCPlatformConfig(
-    [ToyotaCommunityCarDocs("Toyota Yaris (Non-US only) 2020, 2023", min_enable_speed=MIN_ACC_SPEED)],
+    [ToyotaSecOcCarDocs("Toyota Yaris (Non-US only) 2020, 2023", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=1170, wheelbase=2.55, steerRatio=14.80, tireStiffnessFactor=0.5533),
     flags=ToyotaFlags.RADAR_ACC,
   )
@@ -305,7 +307,7 @@ class CAR(Platforms):
     flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_SIENNA_4TH_GEN = ToyotaSecOCPlatformConfig(
-    [ToyotaCommunityCarDocs("Toyota Sienna 2021-23", min_enable_speed=MIN_ACC_SPEED)],
+    [ToyotaSecOcCarDocs("Toyota Sienna 2021-23", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=4625. * CV.LB_TO_KG, wheelbase=3.06, steerRatio=17.8, tireStiffnessFactor=0.444),
   )
 
@@ -395,38 +397,11 @@ class CAR(Platforms):
     dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.UNSUPPORTED_DSU,
   )
-
-
-# (addr, cars, bus, 1/freq*100, vl)
-STATIC_DSU_MSGS = [
-  (0x128, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_AVALON),
-                                                                                                                      1, 3, b'\xf4\x01\x90\x83\x00\x37'),
-  (0x128, (CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES), 1,   3, b'\x03\x00\x20\x00\x00\x52'),
-  (0x141, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_AVALON,
-           CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES, CAR.TOYOTA_PRIUS_V), 1,   2, b'\x00\x00\x00\x46'),
-  (0x160, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_AVALON,
-           CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES, CAR.TOYOTA_PRIUS_V), 1,   7, b'\x00\x00\x08\x12\x01\x31\x9c\x51'),
-  (0x161, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_AVALON, CAR.TOYOTA_PRIUS_V),
-                                                                                               1,   7, b'\x00\x1e\x00\x00\x00\x80\x07'),
-  (0X161, (CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES), 1,  7, b'\x00\x1e\x00\xd4\x00\x00\x5b'),
-  (0x283, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_AVALON,
-           CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES, CAR.TOYOTA_PRIUS_V), 0,   3, b'\x00\x00\x00\x00\x00\x00\x8c'),
-  (0x2E6, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX), 0,   3, b'\xff\xf8\x00\x08\x7f\xe0\x00\x4e'),
-  (0x2E7, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX), 0,   3, b'\xa8\x9c\x31\x9c\x00\x00\x00\x02'),
-  (0x33E, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX), 0,  20, b'\x0f\xff\x26\x40\x00\x1f\x00'),
-  (0x344, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_AVALON,
-           CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES, CAR.TOYOTA_PRIUS_V), 0,   5, b'\x00\x00\x01\x00\x00\x00\x00\x50'),
-  (0x365, (CAR.TOYOTA_PRIUS, CAR.LEXUS_NX, CAR.TOYOTA_HIGHLANDER), 0,  20, b'\x00\x00\x00\x80\x03\x00\x08'),
-  (0x365, (CAR.TOYOTA_RAV4, CAR.TOYOTA_RAV4H, CAR.TOYOTA_COROLLA, CAR.TOYOTA_AVALON, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES, CAR.LEXUS_RX,
-           CAR.TOYOTA_PRIUS_V), 0,  20, b'\x00\x00\x00\x80\xfc\x00\x08'),
-  (0x366, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_HIGHLANDER), 0,  20, b'\x00\x00\x4d\x82\x40\x02\x00'),
-  (0x366, (CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_AVALON, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES, CAR.TOYOTA_PRIUS_V),
-          0,  20, b'\x00\x72\x07\xff\x09\xfe\x00'),
-  (0x470, (CAR.TOYOTA_PRIUS, CAR.LEXUS_RX), 1, 100, b'\x00\x00\x02\x7a'),
-  (0x470, (CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_RAV4H, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES, CAR.TOYOTA_PRIUS_V), 1,  100, b'\x00\x00\x01\x79'),
-  (0x4CB, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_AVALON,
-           CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES, CAR.TOYOTA_PRIUS_V), 0, 100, b'\x0c\x00\x00\x00\x00\x00\x00\x00'),
-]
+  LEXUS_LS = PlatformConfig(
+    [ToyotaCarDocs("Lexus LS 2018", "All except Lexus Safety System+ A")],
+    CarSpecs(mass=4905. * CV.LB_TO_KG, wheelbase=3.125, steerRatio=15.0, tireStiffnessFactor=0.444),
+    dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
+  )
 
 
 def get_platform_codes(fw_versions: list[bytes]) -> dict[bytes, set[bytes]]:
