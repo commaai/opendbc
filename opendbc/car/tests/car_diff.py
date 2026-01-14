@@ -265,7 +265,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
           print(line)
     print("```")
 
-  return 0
+  return 1 if errors else 0
 
 
 if __name__ == "__main__":
