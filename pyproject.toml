@@ -44,6 +44,11 @@ docs = [
   "Jinja2",
   "natsort",
 ]
+car_diff = [
+  "requests",
+  "zstandard",
+  "dictdiffer",
+]
 examples = [
   "inputs",
   "matplotlib",
