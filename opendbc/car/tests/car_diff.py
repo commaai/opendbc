@@ -3,14 +3,14 @@ import os
 os.environ['LOGPRINT'] = 'CRITICAL'
 
 import argparse
+import json
 import pickle
 import re
-import requests
 import subprocess
 import sys
 import tempfile
-import zstandard as zstd
-import dictdiffer
+import urllib.error
+import urllib.request
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -19,10 +19,55 @@ DIFF_BUCKET = "car_diff"
 TOLERANCE = 1e-2
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 
-# commaCarSegments helpers
 COMMA_CAR_SEGMENTS_REPO = os.environ.get("COMMA_CAR_SEGMENTS_REPO", "https://huggingface.co/datasets/commaai/commaCarSegments")
 COMMA_CAR_SEGMENTS_BRANCH = os.environ.get("COMMA_CAR_SEGMENTS_BRANCH", "main")
 COMMA_CAR_SEGMENTS_LFS_INSTANCE = os.environ.get("COMMA_CAR_SEGMENTS_LFS_INSTANCE", COMMA_CAR_SEGMENTS_REPO)
+
+
+def http_get(url, headers=None):
+  req = urllib.request.Request(url, headers=headers or {})
+  with urllib.request.urlopen(req) as resp:
+    return resp.read(), resp.status, dict(resp.headers)
+
+
+def http_post_json(url, data, headers=None):
+  req = urllib.request.Request(url, data=json.dumps(data).encode(), headers=headers or {}, method='POST')
+  with urllib.request.urlopen(req) as resp:
+    return json.load(resp), resp.status
+
+
+def http_head(url):
+  req = urllib.request.Request(url, method='HEAD')
+  with urllib.request.urlopen(req) as resp:
+    return resp.status, dict(resp.headers)
+
+
+def zstd_decompress(data):
+  proc = subprocess.run(['zstd', '-d'], input=data, capture_output=True, check=True)
+  return proc.stdout
+
+
+def zstd_compress(data):
+  proc = subprocess.run(['zstd', '-c'], input=data, capture_output=True, check=True)
+  return proc.stdout
+
+
+def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
+  ignore = ignore or []
+  diffs = []
+  for key in set(list(d1.keys()) + list(d2.keys())):
+    if key in ignore:
+      continue
+    full_path = f"{path}.{key}" if path else key
+    v1, v2 = d1.get(key), d2.get(key)
+    if isinstance(v1, dict) and isinstance(v2, dict):
+      diffs.extend(dict_diff(v1, v2, full_path, ignore, tolerance))
+    elif isinstance(v1, (int, float)) and isinstance(v2, (int, float)):
+      if abs(v1 - v2) > tolerance:
+        diffs.append(("change", full_path, (v1, v2)))
+    elif v1 != v2:
+      diffs.append(("change", full_path, (v1, v2)))
+  return diffs
 
 
 def get_repo_raw_url(path):
@@ -57,19 +102,19 @@ def get_lfs_file_url(oid, size):
     "Accept": "application/vnd.git-lfs+json",
     "Content-Type": "application/vnd.git-lfs+json"
   }
-  response = requests.post(f"{COMMA_CAR_SEGMENTS_LFS_INSTANCE}.git/info/lfs/objects/batch", json=data, headers=headers)
-  assert response.ok
-  obj = response.json()["objects"][0]
+  resp, status = http_post_json(f"{COMMA_CAR_SEGMENTS_LFS_INSTANCE}.git/info/lfs/objects/batch", data, headers)
+  assert status == 200
+  obj = resp["objects"][0]
   assert "error" not in obj, obj
   return obj["actions"]["download"]["href"]
 
 
 def get_repo_url(path):
-  response = requests.head(get_repo_raw_url(path))
-  if "text/plain" in response.headers.get("content-type"):
-    response = requests.get(get_repo_raw_url(path))
-    assert response.status_code == 200
-    oid, size = parse_lfs_pointer(response.text)
+  status, headers = http_head(get_repo_raw_url(path))
+  if "text/plain" in headers.get("Content-Type", ""):
+    content, status, _ = http_get(get_repo_raw_url(path))
+    assert status == 200
+    oid, size = parse_lfs_pointer(content.decode())
     return get_lfs_file_url(oid, size)
   else:
     return get_repo_raw_url(path)
@@ -81,7 +126,9 @@ def get_url(route, segment, file="rlog.zst"):
 
 def get_comma_car_segments_database():
   from opendbc.car.fingerprints import MIGRATION
-  database = requests.get(get_repo_raw_url("database.json")).json()
+  content, status, _ = http_get(get_repo_raw_url("database.json"))
+  assert status == 200
+  database = json.loads(content)
   ret = {}
   for platform in database:
     ret[MIGRATION.get(platform, platform)] = [s.rstrip('/s') for s in database[platform]]
@@ -91,12 +138,11 @@ def get_comma_car_segments_database():
 def logreader_from_url(url):
   import capnp
 
-  response = requests.get(url)
-  assert response.status_code == 200, f"Failed to download {url}: {response.status_code}"
+  data, status, _ = http_get(url)
+  assert status == 200, f"Failed to download {url}: {status}"
 
-  data = response.content
-  if data.startswith(b'\x28\xB5\x2F\xFD'): # zstd magic
-    data = zstd.decompress(data)
+  if data.startswith(b'\x28\xB5\x2F\xFD'):  # zstd magic
+    data = zstd_decompress(data)
 
   rlog = capnp.load(str(Path(__file__).parent / "rlog.capnp"))
   return rlog.Event.read_multiple_bytes(data)
@@ -149,18 +195,17 @@ def process_segment(args):
 
     if update:
       data = list(zip(timestamps, states, strict=True))
-      ref_file.write_bytes(zstd.compress(pickle.dumps(data)))
+      ref_file.write_bytes(zstd_compress(pickle.dumps(data)))
       return (platform, seg, [], None)
 
     if not ref_file.exists():
       return (platform, seg, [], "no ref")
 
-    ref = pickle.loads(zstd.decompress(ref_file.read_bytes()))
+    ref = pickle.loads(zstd_decompress(ref_file.read_bytes()))
     diffs = []
     for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
-      for diff in dictdiffer.diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
-        if diff[0] == "change":  # ignore add/remove from schema changes
-          diffs.append((str(diff[1]), i, diff[2], ts))
+      for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
+        diffs.append((diff[1], i, diff[2], ts))
     return (platform, seg, diffs, None)
   except Exception as e:
     return (platform, seg, [], str(e))
@@ -184,9 +229,12 @@ def download_refs(ref_path, platforms, segments):
   for platform in platforms:
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
-      resp = requests.get(f"{base_url}/{filename}")
-      if resp.status_code == 200:
-        (Path(ref_path) / filename).write_bytes(resp.content)
+      try:
+        content, status, _ = http_get(f"{base_url}/{filename}")
+        if status == 200:
+          (Path(ref_path) / filename).write_bytes(content)
+      except urllib.error.HTTPError:
+        pass
 
 
 def run_replay(platforms, segments, ref_path, update, workers=8):
