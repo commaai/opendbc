@@ -17,7 +17,7 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 DIFF_BUCKET = "car_diff"
-TOLERANCE = 1e-2
+TOLERANCE = 1e-4
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 RETRY_STATUS = (409, 429, 503, 504)
 
