@@ -174,11 +174,15 @@ def format_diff(diffs):
       cur = [d]
   ranges.append(cur)
 
+  # ms per frame from timestamps, fallback to 10ms on single diff
+  frame_diff = diffs[-1][1] - diffs[0][1]
+  frame_ms = (diffs[-1][3] - diffs[0][3]) / 1e6 / frame_diff if frame_diff else 10
+
   for rdiffs in ranges:
     t0, t1 = max(0, rdiffs[0][1] - 5), rdiffs[-1][1] + 6
     diff_map = {d[1]: d for d in rdiffs}
 
-    b_vals, m_vals, ts_map = [], [], {}
+    b_vals, m_vals = [], []
     last = rdiffs[-1]
     converge_frame = last[1] + 1
     converge_val = last[2][1]
@@ -187,14 +191,10 @@ def format_diff(diffs):
     for f in range(t0, t1):
       if f in diff_map:
         b_st, m_st = diff_map[f][2]
-        ts_map[f] = diff_map[f][3]
       elif f >= converge_frame:
         b_st = m_st = converge_val
       b_vals.append(b_st)
       m_vals.append(m_st)
-
-    # ms per frame from timestamps
-    frame_ms = (rdiffs[-1][3] - rdiffs[0][3]) / 1e6 / max(1, rdiffs[-1][1] - rdiffs[0][1]) 
 
     lines.append(f"\n  frames {t0}-{t1-1}")
     pad = 12
