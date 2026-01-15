@@ -8,7 +8,7 @@ import re
 import subprocess
 import sys
 import tempfile
-import requests
+from urllib.request import urlopen
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -132,9 +132,8 @@ def download_refs(ref_path, platforms, segments):
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
       try:
-        resp = requests.get(f"{base_url}/{filename}")
-        if resp.status_code == 200:
-          (Path(ref_path) / filename).write_bytes(resp.content)
+        with urlopen(f"{base_url}/{filename}") as resp:
+          (Path(ref_path) / filename).write_bytes(resp.read())
       except Exception:
         pass
 
