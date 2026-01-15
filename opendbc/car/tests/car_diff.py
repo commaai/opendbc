@@ -16,7 +16,7 @@ from pathlib import Path
 
 from comma_car_segments import get_comma_car_segments_database, get_url
 
-from opendbc.car.logreader import LogReader
+from opendbc.car.logreader import LogReader, decompress_stream
 
 
 TOLERANCE = 1e-4
@@ -97,7 +97,7 @@ def process_segment(args):
     if not ref_file.exists():
       return (platform, seg, [], "no ref")
 
-    ref = pickle.loads(zstd.decompress(ref_file.read_bytes()))
+    ref = pickle.loads(decompress_stream(ref_file.read_bytes()))
     diffs = []
     for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
       for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
