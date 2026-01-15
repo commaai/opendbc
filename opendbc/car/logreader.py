@@ -1,34 +1,52 @@
 #!/usr/bin/env python3
+import os
 import subprocess
-from pathlib import Path
+import urllib.parse
+import warnings
 from urllib.request import urlopen
+
 import capnp
 
+from opendbc.car.common.basedir import BASEDIR
 
-def _zstd_decompress(dat):
-  proc = subprocess.run(['zstd', '-d'], input=dat, capture_output=True, check=True)
+capnp_log = capnp.load(os.path.join(BASEDIR, "rlog.capnp"))
+
+
+def decompress_stream(data: bytes) -> bytes:
+  proc = subprocess.run(['zstd', '-d'], input=data, capture_output=True, check=True)
   return proc.stdout
 
 
 class LogReader:
-  def __init__(self, fn, sort_by_time=False):
+  def __init__(self, fn: str, sort_by_time: bool = False):
+    _, ext = os.path.splitext(urllib.parse.urlparse(fn).path)
+
     if fn.startswith("http"):
       with urlopen(fn) as f:
         dat = f.read()
     else:
-      dat = Path(fn).read_bytes()
+      with open(fn, "rb") as f:
+        dat = f.read()
 
-    if dat.startswith(b'\x28\xB5\x2F\xFD'):
-      dat = _zstd_decompress(dat)
+    if ext == ".zst" or dat.startswith(b'\x28\xB5\x2F\xFD'):
+      # https://github.com/facebook/zstd/blob/dev/doc/zstd_compression_format.md#zstandard-frames
+      dat = decompress_stream(dat)
 
-    rlog = capnp.load(str(Path(__file__).parent / "rlog.capnp"))
-    self._ents = list(rlog.Event.read_multiple_bytes(dat))
+    ents = capnp_log.Event.read_multiple_bytes(dat)
+
+    self._ents = []
+    try:
+      for e in ents:
+        self._ents.append(e)
+    except capnp.KjException:
+      warnings.warn("Corrupted events detected", RuntimeWarning, stacklevel=1)
 
     if sort_by_time:
       self._ents.sort(key=lambda x: x.logMonoTime)
 
   def __iter__(self):
-    yield from self._ents
+    for ent in self._ents:
+      yield ent
 
   def filter(self, msg_type: str):
     return (getattr(m, m.which()) for m in filter(lambda m: m.which() == msg_type, self))
