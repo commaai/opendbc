@@ -393,7 +393,7 @@ class CarDocs:
 
 @dataclass
 class ExtraCarDocs(CarDocs):
-  package: str = "Any"
+  package: str = "All"
   merged: bool = False
   support_type: SupportType = SupportType.INCOMPATIBLE
   support_link: str | None = "#incompatible"
