@@ -12,13 +12,13 @@ from opendbc.car.common.basedir import BASEDIR
 capnp_log = capnp.load(os.path.join(BASEDIR, "rlog.capnp"))
 
 
-def decompress_stream(data: bytes) -> bytes:
+def decompress_stream(data: bytes):
   proc = subprocess.run(['zstd', '-d'], input=data, capture_output=True, check=True)
   return proc.stdout
 
 
 class LogReader:
-  def __init__(self, fn: str, sort_by_time: bool = False):
+  def __init__(self, fn, sort_by_time=False):
     _, ext = os.path.splitext(urllib.parse.urlparse(fn).path)
 
     if fn.startswith("http"):
