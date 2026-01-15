@@ -186,7 +186,7 @@ def format_diff(diffs):
 
     lines.append(f"\n  frames {t0}-{t1-1}")
     pad = 12
-    max_width = 60
+    max_width = 80
     init_val = not converge_val
     for label, vals, init in [("master", b_vals, init_val), ("PR", m_vals, init_val)]:
       line = f"  {label}:".ljust(pad)
