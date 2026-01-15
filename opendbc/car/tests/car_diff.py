@@ -70,13 +70,14 @@ def replay_segment(platform, can_msgs):
         fingerprint[msg.src][msg.address] = len(msg.dat)
 
   CarInterface = interfaces[platform]
-  car_interface = CarInterface(CarInterface.get_params(platform, fingerprint, [], False, False, False))
-  car_control = structs.CarControl().as_reader()
+  CP = CarInterface.get_params(platform, fingerprint, [], False, False, False)
+  CI = CarInterface(CP)
+  CC = structs.CarControl().as_reader()
 
   states, timestamps = [], []
   for ts, frames in can_msgs:
-    states.append(car_interface.update([(ts, frames)]))
-    car_interface.apply(car_control, ts)
+    states.append(CI.update([(ts, frames)]))
+    CI.apply(CC, ts)
     timestamps.append(ts)
   return states, timestamps
 
@@ -260,13 +261,13 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
 
   print(f"\nResults: {n_passed} passed, {len(with_diffs)} with diffs, {len(errors)} errors")
 
-  for plat, seg, err in errors:
-    print(f"\nERROR {plat} - {seg}: {err}")
+  for platform, seg, err in errors:
+    print(f"\nERROR {platform} - {seg}: {err}")
 
   if with_diffs:
     print("```")
-    for plat, seg, diffs in with_diffs:
-      print(f"\n{plat} - {seg}")
+    for platform, seg, diffs in with_diffs:
+      print(f"\n{platform} - {seg}")
       by_field = defaultdict(list)
       for d in diffs:
         by_field[d[0]].append(d)
