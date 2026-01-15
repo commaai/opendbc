@@ -15,21 +15,31 @@ class CarState(CarStateBase):
     self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.party])
     self.shifter_values = self.can_define.dv["DI_systemStatus"]["DI_gear"]
 
+    self.summon = False
+    self.summon_prev = False
+    self.cruise_enabled_prev = False
     self.autopark = False
     self.autopark_prev = False
-    self.cruise_enabled_prev = False
 
     self.hands_on_level = 0
     self.das_control = None
 
-  def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
-    autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
+  def update_summon_state(self, summon_state: str, cruise_enabled: bool):
+    summon_now = summon_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
+    if summon_now and not self.summon_prev and not self.cruise_enabled_prev:
+      self.summon = True
+    if not summon_now:
+      self.summon = False
+    self.summon_prev = summon_now
+    self.cruise_enabled_prev = cruise_enabled
+
+  def update_autopark_state(self, autopilot_state: str):
+    autopark_now = autopilot_state == "ACTIVE_AUTOPARK"
     if autopark_now and not self.autopark_prev and not self.cruise_enabled_prev:
       self.autopark = True
     if not autopark_now:
       self.autopark = False
     self.autopark_prev = autopark_now
-    self.cruise_enabled_prev = cruise_enabled
 
   def update(self, can_parsers) -> structs.CarState:
     cp_party = can_parsers[Bus.party]
@@ -70,12 +80,17 @@ class CarState(CarStateBase):
     cruise_state = self.can_define.dv["DI_state"]["DI_cruiseState"].get(int(cp_party.vl["DI_state"]["DI_cruiseState"]), None)
     speed_units = self.can_define.dv["DI_state"]["DI_speedUnits"].get(int(cp_party.vl["DI_state"]["DI_speedUnits"]), None)
 
-    autopark_state = self.can_define.dv["DI_state"]["DI_autoparkState"].get(int(cp_party.vl["DI_state"]["DI_autoparkState"]), None)
+    # DI_autoparkState is used by Summon, not autopark (which uses DAS_autopilotState = ACTIVE_AUTOPARK)
+    summon_state = self.can_define.dv["DI_state"]["DI_autoparkState"].get(int(cp_party.vl["DI_state"]["DI_autoparkState"]), None)
     cruise_enabled = cruise_state in ("ENABLED", "STANDSTILL", "OVERRIDE", "PRE_FAULT", "PRE_CANCEL")
-    self.update_autopark_state(autopark_state, cruise_enabled)
+    self.update_summon_state(summon_state, cruise_enabled)
+
+    # Autopark state
+    autopilot_state = self.can_define.dv["DAS_status"]["DAS_autopilotState"].get(int(cp_ap_party.vl["DAS_status"]["DAS_autopilotState"]), None)
+    self.update_autopark_state(autopilot_state)
 
     # Match panda safety cruise engaged logic
-    ret.cruiseState.enabled = cruise_enabled and not self.autopark
+    ret.cruiseState.enabled = cruise_enabled and not self.summon and not self.autopark
     if speed_units == "KPH":
       ret.cruiseState.speed = max(cp_party.vl["DI_state"]["DI_digitalSpeed"] * CV.KPH_TO_MS, 1e-3)
     elif speed_units == "MPH":

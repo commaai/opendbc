@@ -199,6 +199,6 @@ void init_tests(void){
   valid_steer_req_count = 0;
   invalid_steer_req_count = 0;
 
-  // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
-  tesla_autopark = false;
+  // assumes summon on safety mode init to avoid a fault. get rid of that for testing
+  tesla_summon = false;
 }

@@ -11,9 +11,16 @@ static bool tesla_stock_aeb = false;
 static bool tesla_stock_lkas = false;
 static bool tesla_stock_lkas_prev = false;
 
-// Only Summon is currently supported due to Autopark not setting Autopark state properly
+// Summon (includes Smart Summon)
+// Only works while car is off-road when activated
+// TODO: Fix when car is on-road
+static bool tesla_summon = false;
+static bool tesla_summon_prev = false;
+
+// Autopark
 static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
+static bool tesla_autopark_blocked = false;
 
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
 
@@ -33,6 +40,9 @@ static uint8_t tesla_get_counter(const CANPacket_t *msg) {
   } else if (msg->addr == 0x370U) {
     // Signal: EPAS3S_sysStatusCounter
     cnt = msg->data[6] & 0x0FU;
+  } else if (msg->addr == 0x39bU) {
+    // Signal: DAS_statusCounter
+    cnt = msg->data[6] >> 4;
   } else {
   }
   return cnt;
@@ -46,6 +56,9 @@ static int _tesla_get_checksum_byte(const int addr) {
   } else if (addr == 0x488) {
     // Signal: DAS_steeringControlChecksum
     checksum_byte = 3;
+  } else if (addr == 0x39b) {
+    // Signal: DAS_statusChecksum
+    checksum_byte = 7;
   } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
     // Signal: DI_speedChecksum, DI_systemStatusChecksum, IBST_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
     checksum_byte = 0;
@@ -147,32 +160,65 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       brake_pressed = (msg->data[2] & 0x03U) == 2U;
     }
 
-    // Cruise and Autopark/Summon state
+    // Cruise and Summon state
     if (msg->addr == 0x286U) {
-      // Autopark state
-      int autopark_state = (msg->data[3] >> 1) & 0x0FU;  // DI_autoparkState
-      bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
+      // Summon state
+      int autopark_state = (msg->data[3] >> 1) & 0x0FU;  // DI_autoparkState (used by Summon, not actually used by autopark)
+      bool tesla_summon_now = (autopark_state == 3) ||  // ACTIVE
                                 (autopark_state == 4) ||  // COMPLETE
                                 (autopark_state == 9);    // SELFPARK_STARTED
 
       // Only consider rising edges while controls are not allowed
-      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
-        tesla_autopark = true;
+      if (tesla_summon_now && !tesla_summon_prev && !cruise_engaged_prev) {
+        tesla_summon = true;
       }
-      if (!tesla_autopark_now) {
-        tesla_autopark = false;
+      if (!tesla_summon_now) {
+        tesla_summon = false;
       }
-      tesla_autopark_prev = tesla_autopark_now;
+      tesla_summon_prev = tesla_summon_now;
 
       // Cruise state
       int cruise_state = (msg->data[1] >> 4) & 0x07U;
-      bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
-                            (cruise_state == 3) ||  // STANDSTILL
-                            (cruise_state == 4) ||  // OVERRIDE
-                            (cruise_state == 6) ||  // PRE_FAULT
-                            (cruise_state == 7);    // PRE_CANCEL
-      cruise_engaged = cruise_engaged && !tesla_autopark;
 
+      // Clear Autopark once cruise attempts to re-engage; Autopark shouldn't persist past this point
+      bool cruise_state_engaged = (cruise_state == 2) ||  // ENABLED
+                                  (cruise_state == 3) ||  // STANDSTILL
+                                  (cruise_state == 4) ||  // OVERRIDE
+                                  (cruise_state == 6) ||  // PRE_FAULT
+                                  (cruise_state == 7);    // PRE_CANCEL
+      if (tesla_autopark && cruise_state_engaged) {
+        if (tesla_autopark_blocked) {
+          tesla_autopark = false;
+          tesla_autopark_prev = false;
+          tesla_autopark_blocked = false;
+        } else {
+          tesla_autopark_blocked = true;
+        }
+      }
+
+      bool cruise_engaged = cruise_state_engaged;
+      cruise_engaged = cruise_engaged && !tesla_summon && !tesla_autopark;
+
+      pcm_cruise_check(cruise_engaged);
+    }
+
+    // Autopark state
+    if (msg->addr == 0x39bU) {
+      uint8_t autopilot_state = msg->data[0] & 0x0FU; // DAS_autopilotState
+      bool tesla_autopark_now = autopilot_state == 6; // ACTIVE_AUTOPARK
+
+      // Only consider rising edges while controls are not allowed
+      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
+        tesla_autopark = true;
+        tesla_autopark_blocked = false;
+      }
+      if (!tesla_autopark_now) {
+        tesla_autopark = false;
+        tesla_autopark_blocked = false;
+      }
+      tesla_autopark_prev = tesla_autopark_now;
+
+      bool cruise_engaged = cruise_engaged_prev && !tesla_summon && !tesla_autopark;
       pcm_cruise_check(cruise_engaged);
     }
 
@@ -229,8 +275,8 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
   bool violation = false;
 
-  // Don't send any messages when Autopark is active
-  if (tesla_autopark) {
+  // Don't send any messages when Summon/Autopark is active
+  if (tesla_summon || tesla_autopark) {
     violation = true;
   }
 
@@ -309,7 +355,7 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2) {
-    if (!tesla_autopark) {
+    if (!tesla_summon && !tesla_autopark) {
       // APS_eacMonitor
       if (addr == 0x27d) {
         block_msg = true;
@@ -355,10 +401,13 @@ static safety_config tesla_init(uint16_t param) {
   tesla_stock_aeb = false;
   tesla_stock_lkas = false;
   tesla_stock_lkas_prev = false;
-  // we need to assume Autopark/Summon on startup since DI_state is a low freq msg.
+  // we need to assume Summon on startup since DI_state is a low freq msg.
   // this is so that we don't fault if starting while these systems are active
-  tesla_autopark = true;
+  tesla_summon = true;
+  tesla_summon_prev = false;
+  tesla_autopark = false;
   tesla_autopark_prev = false;
+  tesla_autopark_blocked = false;
 
   static RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, 25U, .max_counter = 7U, .ignore_quality_flag = true}, { 0 }, { 0 }}},    // DAS_control
@@ -369,6 +418,7 @@ static safety_config tesla_init(uint16_t param) {
     {.msg = {{0x118, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
     {.msg = {{0x39d, 0, 5, 25U, .max_counter = 15U}, { 0 }, { 0 }}},                                // IBST_status (brakes)
     {.msg = {{0x286, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // DI_state (acc state)
+    {.msg = {{0x39b, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // DAS_status (autopilot state)
     {.msg = {{0x311, 0, 7, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
   };
 

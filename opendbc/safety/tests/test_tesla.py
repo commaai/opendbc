@@ -68,6 +68,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.define = CANDefine("tesla_model3_party")
     self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
     self.autopark_states = {d: v for v, d in self.define.dv["DI_state"]["DI_autoparkState"].items()}
+    self.autopilot_states = {d: v for v, d in self.define.dv["DAS_status"]["DAS_autopilotState"].items()}
     self.active_autopark_states = [self.autopark_states[s] for s in ('ACTIVE', 'COMPLETE', 'SELFPARK_STARTED')]
 
     self.steer_control_types = {d: v for v, d in self.define.dv["DAS_steeringControl"]["DAS_steeringControlType"].items()}
@@ -123,6 +124,12 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       "DI_autoparkState": autopark_state,
     }
     return self.packer.make_can_msg_safety("DI_state", 0, values)
+
+  def _status_msg(self, autopilot_state=0):
+    values = {
+      "DAS_autopilotState": autopilot_state,
+    }
+    return self.packer.make_can_msg_safety("DAS_status", 0, values)
 
   def _long_control_msg(self, set_speed, acc_state=0, jerk_limits=(0, 0), accel_limits=(0, 0), aeb_event=0, bus=0):
     values = {
@@ -230,8 +237,8 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
           self.assertFalse(self.safety.get_steering_disengage_prev())
 
-  def test_autopark_summon_while_enabled(self):
-    # We should not respect Autopark that activates while controls are allowed
+  def test_summon_while_enabled(self):
+    # We should not respect Summon that activates while controls are allowed
     self._rx(self._pcm_status_msg(True, 0))
 
     self._rx(self._pcm_status_msg(True, self.autopark_states["SELFPARK_STARTED"]))
@@ -239,22 +246,60 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
     self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
 
-    # We should still not respect Autopark if we disengage cruise
+    # We should still not respect Summon if we disengage cruise
     self._rx(self._pcm_status_msg(False, self.autopark_states["SELFPARK_STARTED"]))
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
     self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
 
-  def test_autopark_summon_behavior(self):
+  def test_summon_behavior(self):
     for autopark_state in range(16):
       self._rx(self._pcm_status_msg(False, 0))
 
-      # We shouldn't allow controls if Autopark is an active state
-      autopark_active = autopark_state in self.active_autopark_states
+      # We shouldn't allow controls if Summon is an active state
+      summon_active = autopark_state in self.active_autopark_states
       self._rx(self._pcm_status_msg(False, autopark_state))
       self._rx(self._pcm_status_msg(True, autopark_state))
-      self.assertNotEqual(autopark_active, self.safety.get_controls_allowed())
+      self.assertNotEqual(summon_active, self.safety.get_controls_allowed())
+      # We should also start blocking all inactive/active openpilot msgs
+      self.assertNotEqual(summon_active, self._tx(self._angle_cmd_msg(0, False)))
+      self.assertNotEqual(summon_active, self._tx(self._angle_cmd_msg(0, True)))
+      self.assertNotEqual(summon_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+      self.assertNotEqual(summon_active or not self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
 
+      # Regain controls when Summon disables
+      self._rx(self._pcm_status_msg(True, 0))
+      self.assertTrue(self.safety.get_controls_allowed())
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+      self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+      self.assertEqual(self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
+
+  def test_autopark_while_enabled(self):
+    # We should not respect Autopark that activates while controls are allowed
+    self._rx(self._pcm_status_msg(True, 0))
+
+    self._rx(self._status_msg(self.autopilot_states["ACTIVE_AUTOPARK"]))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+    self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+
+    # We should still not respect Autopark if we disengage cruise
+    self._rx(self._pcm_status_msg(False, 0))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+    self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+
+  def test_autopark_behavior(self):
+    for autopilot_state in range(16):
+      self._rx(self._pcm_status_msg(False, 0))
+
+      # We shouldn't allow controls if Autopark is an active state
+      autopark_active = autopilot_state == self.autopilot_states["ACTIVE_AUTOPARK"]
+      self._rx(self._status_msg(autopilot_state))
+      self._rx(self._pcm_status_msg(False))
+      self._rx(self._pcm_status_msg(True))
+      self.assertNotEqual(autopark_active, self.safety.get_controls_allowed())
       # We should also start blocking all inactive/active openpilot msgs
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, False)))
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, True)))
