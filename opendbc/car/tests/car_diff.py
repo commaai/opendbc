@@ -8,27 +8,20 @@ import re
 import subprocess
 import sys
 import tempfile
+import zstandard as zstd
 from urllib.request import urlopen
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from opendbc.car.logreader import LogReader
 
 from comma_car_segments import get_comma_car_segments_database, get_url
+
+from opendbc.car.logreader import LogReader
+
 
 TOLERANCE = 1e-4
 DIFF_BUCKET = "car_diff"
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
-
-
-def zstd_decompress(data):
-  proc = subprocess.run(['zstd', '-d'], input=data, capture_output=True, check=True)
-  return proc.stdout
-
-
-def zstd_compress(data):
-  proc = subprocess.run(['zstd', '-c'], input=data, capture_output=True, check=True)
-  return proc.stdout
 
 
 def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
@@ -97,13 +90,13 @@ def process_segment(args):
 
     if update:
       data = list(zip(timestamps, states, strict=True))
-      ref_file.write_bytes(zstd_compress(pickle.dumps(data)))
+      ref_file.write_bytes(zstd.compress(pickle.dumps(data), 10))
       return (platform, seg, [], None)
 
     if not ref_file.exists():
       return (platform, seg, [], "no ref")
 
-    ref = pickle.loads(zstd_decompress(ref_file.read_bytes()))
+    ref = pickle.loads(zstd.decompress(ref_file.read_bytes()))
     diffs = []
     for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
       for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):

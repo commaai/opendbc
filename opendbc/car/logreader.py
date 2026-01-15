@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 import os
-import subprocess
+import capnp
 import urllib.parse
 import warnings
 from urllib.request import urlopen
-
-import capnp
+import zstandard as zstd
 
 from opendbc.car.common.basedir import BASEDIR
 
@@ -13,8 +12,13 @@ capnp_log = capnp.load(os.path.join(BASEDIR, "rlog.capnp"))
 
 
 def decompress_stream(data: bytes):
-  proc = subprocess.run(['zstd', '-d'], input=data, capture_output=True, check=True)
-  return proc.stdout
+  dctx = zstd.ZstdDecompressor()
+  decompressed_data = b""
+
+  with dctx.stream_reader(data) as reader:
+    decompressed_data = reader.read()
+
+  return decompressed_data
 
 
 class LogReader:
