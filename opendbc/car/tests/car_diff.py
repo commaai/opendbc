@@ -12,6 +12,8 @@ import requests
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from opendbc.car.logreader import LogReader
+
 from comma_car_segments import get_comma_car_segments_database, get_url
 
 TOLERANCE = 1e-4
@@ -47,28 +49,15 @@ def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
   return diffs
 
 
-def logreader_from_url(url):
-  import capnp
-
-  resp = requests.get(url)
-  assert resp.status_code == 200, f"Failed to download {url}: {resp.status_code}"
-  data = resp.content
-
-  if data.startswith(b'\x28\xB5\x2F\xFD'):  # zstd magic
-    data = zstd_decompress(data)
-
-  rlog = capnp.load(str(Path(__file__).parent / "rlog.capnp"))
-  return rlog.Event.read_multiple_bytes(data)
-
-
 def load_can_messages(seg):
   from opendbc.car.can_definitions import CanData
 
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
 
+  lr = LogReader(url)
   can_msgs = []
-  for evt in logreader_from_url(url):
+  for evt in lr:
     try:
       if evt.which() == "can":
         can_msgs.append((evt.logMonoTime, [CanData(c.address, c.dat, c.src) for c in evt.can]))
