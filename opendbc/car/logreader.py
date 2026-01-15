@@ -45,8 +45,7 @@ class LogReader:
       self._ents.sort(key=lambda x: x.logMonoTime)
 
   def __iter__(self):
-    for ent in self._ents:
-      yield ent
+    yield from self._ents
 
   def filter(self, msg_type: str):
     return (getattr(m, m.which()) for m in filter(lambda m: m.which() == msg_type, self))
