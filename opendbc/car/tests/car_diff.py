@@ -142,79 +142,81 @@ def run_replay(platforms, segments, ref_path, update, workers=4):
 def format_diff(diffs):
   if not diffs:
     return []
+
+  frame_group = 15
+  frame_pad = 5
+  graph_pad = 12
+  graph_width = 80
+  wave = {(False, True): "/", (True, False): "\\", (True, True): "‾", (False, False): "_"}
+
   old, new = diffs[0][2]
   if not (isinstance(old, bool) and isinstance(new, bool)):
-    return [f"    frame {d[1]}: {d[2][0]} -> {d[2][1]}" for d in diffs[:10]]
+    lines = [f"    frame {diff[1]}: {diff[2][0]} -> {diff[2][1]}" for diff in diffs[:10]]
+    if len(diffs) > 10:
+      lines.append(f"    (... {len(diffs) - 10} more)")
+    return lines
 
-  lines = []
-  ranges, cur = [], [diffs[0]]
-  for d in diffs[1:]:
-    if d[1] <= cur[-1][1] + 15:
-      cur.append(d)
+  ranges, current = [], [diffs[0]]
+  for diff in diffs[1:]:
+    if diff[1] <= current[-1][1] + frame_group:
+      current.append(diff)
     else:
-      ranges.append(cur)
-      cur = [d]
-  ranges.append(cur)
+      ranges.append(current)
+      current = [diff]
+  ranges.append(current)
 
   # ms per frame from timestamps, fallback to 10ms on single diff
   frame_diff = diffs[-1][1] - diffs[0][1]
   frame_ms = (diffs[-1][3] - diffs[0][3]) / 1e6 / frame_diff if frame_diff else 10
 
-  for rdiffs in ranges:
-    t0, t1 = max(0, rdiffs[0][1] - 5), rdiffs[-1][1] + 6
-    diff_map = {d[1]: d for d in rdiffs}
+  lines = []
+  for range_diffs in ranges:
+    start, end = max(0, range_diffs[0][1] - frame_pad), range_diffs[-1][1] + frame_pad + 1
+    diff_map = {diff[1]: diff for diff in range_diffs}
 
-    b_vals, m_vals = [], []
-    last = rdiffs[-1]
+    last = range_diffs[-1]
     converge_frame = last[1] + 1
-    converge_val = last[2][1]
-    b_st = m_st = not converge_val
+    converge_val   = last[2][1]
+    m_st = pr_st = not converge_val
 
-    for f in range(t0, t1):
-      if f in diff_map:
-        b_st, m_st = diff_map[f][2]
-      elif f >= converge_frame:
-        b_st = m_st = converge_val
-      b_vals.append(b_st)
+    m_vals, pr_vals = [], []
+    for frame in range(start, end):
+      if frame in diff_map:
+        m_st, pr_st = diff_map[frame][2]
+      elif frame >= converge_frame:
+        m_st = pr_st = converge_val
       m_vals.append(m_st)
+      pr_vals.append(pr_st)
 
-    lines.append(f"\n  frames {t0}-{t1-1}")
-    pad = 12
-    max_width = 80
+    lines.append(f"\n  frames {start}-{end - 1}")
     init_val = not converge_val
-    for label, vals, init in [("master", b_vals, init_val), ("PR", m_vals, init_val)]:
-      line = f"  {label}:".ljust(pad)
-      for i, v in enumerate(vals):
-        pv = vals[i - 1] if i > 0 else init
-        if v and not pv:
-          line += "/"
-        elif not v and pv:
-          line += "\\"
-        elif v:
-          line += "‾"
-        else:
-          line += "_"
-      if len(line) > pad + max_width:
-        line = line[:pad + max_width] + "..."
+    for label, vals in [("master", m_vals), ("PR", pr_vals)]:
+      line = f"  {label}:".ljust(graph_pad)
+      for i, val in enumerate(vals):
+        prev = vals[i - 1] if i else init_val
+        line += wave[(prev, val)]
+      if len(line) > graph_pad + graph_width:
+        line = line[:graph_pad + graph_width] + "..."
       lines.append(line)
 
-    b_rises = [i for i, v in enumerate(b_vals) if v and (i == 0 or not b_vals[i - 1])]
-    m_rises = [i for i, v in enumerate(m_vals) if v and (i == 0 or not m_vals[i - 1])]
-    b_falls = [i for i, v in enumerate(b_vals) if not v and i > 0 and b_vals[i - 1]]
-    m_falls = [i for i, v in enumerate(m_vals) if not v and i > 0 and m_vals[i - 1]]
+    m_rises  = [i for i, v in enumerate(m_vals) if v and (i == 0 or not m_vals[i - 1])]
+    pr_rises = [i for i, v in enumerate(pr_vals) if v and (i == 0 or not pr_vals[i - 1])]
+    m_falls  = [i for i, v in enumerate(m_vals) if not v and i > 0 and m_vals[i - 1]]
+    pr_falls = [i for i, v in enumerate(pr_vals) if not v and i > 0 and pr_vals[i - 1]]
 
-    if b_rises and m_rises:
-      delta = m_rises[0] - b_rises[0]
+    if m_rises and pr_rises:
+      delta = pr_rises[0] - m_rises[0]
       if delta:
         ms = int(abs(delta) * frame_ms)
         direction = "lags" if delta > 0 else "leads"
-        lines.append(" " * pad + f"rise: PR {direction} by {abs(delta)} frames ({ms}ms)")
-    if b_falls and m_falls:
-      delta = m_falls[0] - b_falls[0]
+        lines.append(" " * graph_pad + f"rise: PR {direction} by {abs(delta)} frames ({ms}ms)")
+
+    if m_falls and pr_falls:
+      delta = pr_falls[0] - m_falls[0]
       if delta:
         ms = int(abs(delta) * frame_ms)
         direction = "lags" if delta > 0 else "leads"
-        lines.append(" " * pad + f"fall: PR {direction} by {abs(delta)} frames ({ms}ms)")
+        lines.append(" " * graph_pad + f"fall: PR {direction} by {abs(delta)} frames ({ms}ms)")
 
   return lines
 
