@@ -1,4 +1,4 @@
-@0xe3aae94257cf750f;
+@0xce500edaaae36b0e;
 
 # Minimal schema for parsing rlog CAN messages
 # Subset of cereal/log.capnp
