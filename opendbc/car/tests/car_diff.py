@@ -194,11 +194,7 @@ def format_diff(diffs):
       m_vals.append(m_st)
 
     # ms per frame from timestamps
-    if len(ts_map) >= 2:
-      ts_vals = sorted(ts_map.items())
-      frame_ms = (ts_vals[-1][1] - ts_vals[0][1]) / 1e6 / (ts_vals[-1][0] - ts_vals[0][0])
-    else:
-      frame_ms = 10
+    frame_ms = (rdiffs[-1][3] - rdiffs[0][3]) / 1e6 / max(1, rdiffs[-1][1] - rdiffs[0][1]) 
 
     lines.append(f"\n  frames {t0}-{t1-1}")
     pad = 12
