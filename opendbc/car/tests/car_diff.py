@@ -263,13 +263,13 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
 
   print(f"\nResults: {n_passed} passed, {len(with_diffs)} with diffs, {len(errors)} errors")
 
-  for platform, seg, err in errors:
-    print(f"\nERROR {platform} - {seg}: {err}")
+  for plat, seg, err in errors:
+    print(f"\nERROR {plat} - {seg}: {err}")
 
   if with_diffs:
     print("```")
-    for platform, seg, diffs in with_diffs:
-      print(f"\n{platform} - {seg}")
+    for plat, seg, diffs in with_diffs:
+      print(f"\n{plat} - {seg}")
       by_field = defaultdict(list)
       for d in diffs:
         by_field[d[0]].append(d)
