@@ -50,8 +50,9 @@ def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
 def logreader_from_url(url):
   import capnp
 
-  data, status, _ = http_get(url)
-  assert status == 200, f"Failed to download {url}: {status}"
+  resp = requests.get(url)
+  assert resp.status_code == 200, f"Failed to download {url}: {resp.status_code}"
+  data = resp.content
 
   if data.startswith(b'\x28\xB5\x2F\xFD'):  # zstd magic
     data = zstd_decompress(data)
@@ -142,9 +143,9 @@ def download_refs(ref_path, platforms, segments):
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
       try:
-        content, status, _ = http_get(f"{base_url}/{filename}")
-        if status == 200:
-          (Path(ref_path) / filename).write_bytes(content)
+        resp = requests.get(f"{base_url}/{filename}")
+        if resp.status_code == 200:
+          (Path(ref_path) / filename).write_bytes(resp.content)
       except Exception:
         pass
 
