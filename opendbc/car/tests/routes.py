@@ -29,6 +29,7 @@ non_tested_cars = [
   VOLKSWAGEN.PORSCHE_MACAN_MK1,
   # Honda/Acura test routes below expired, replace when CI bucket sync is fixed
   HONDA.ACURA_TLX_2G,
+  HONDA.ACURA_TLX_2G_MMR, # temporary until testdrive
   HONDA.HONDA_NBOX_2G,
   HONDA.ACURA_MDX_4G_MMR,
   HONDA.HONDA_CITY_7G,
