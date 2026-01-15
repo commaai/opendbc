@@ -3,83 +3,20 @@ import os
 os.environ['LOGPRINT'] = 'CRITICAL'
 
 import argparse
-import json
 import pickle
 import re
 import subprocess
 import sys
 import tempfile
-import http.client
-import time
-import urllib.parse
+import requests
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from comma_car_segments import get_comma_car_segments_database, get_url
 
-DIFF_BUCKET = "car_diff"
 TOLERANCE = 1e-4
+DIFF_BUCKET = "car_diff"
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
-RETRY_STATUS = (409, 429, 503, 504)
-
-COMMA_CAR_SEGMENTS_REPO = os.environ.get("COMMA_CAR_SEGMENTS_REPO", "https://huggingface.co/datasets/commaai/commaCarSegments")
-COMMA_CAR_SEGMENTS_BRANCH = os.environ.get("COMMA_CAR_SEGMENTS_BRANCH", "main")
-COMMA_CAR_SEGMENTS_LFS_INSTANCE = os.environ.get("COMMA_CAR_SEGMENTS_LFS_INSTANCE", COMMA_CAR_SEGMENTS_REPO)
-
-_connections = {}
-
-
-def _reset_connections():
-  global _connections
-  for conn in _connections.values():
-    conn.close()
-  _connections = {}
-
-
-def _get_connection(host, port=443):
-  key = (host, port)
-  if key not in _connections:
-    _connections[key] = http.client.HTTPSConnection(host, port)
-  return _connections[key]
-
-
-os.register_at_fork(after_in_child=_reset_connections)
-
-
-def _request(method, url, headers=None, body=None):
-  parsed = urllib.parse.urlparse(url)
-  path = parsed.path + ("?" + parsed.query if parsed.query else "")
-  key = (parsed.hostname, parsed.port or 443)
-
-  for attempt in range(5):
-    try:
-      conn = _get_connection(*key)
-      conn.request(method, path, body=body, headers=headers or {})
-      resp = conn.getresponse()
-      data = resp.read()
-      if resp.status not in RETRY_STATUS:
-        return data, resp.status, dict(resp.getheaders())
-      raise OSError(f"HTTP {resp.status}")
-    except (http.client.HTTPException, OSError) as e:
-      _connections.pop(key, None)
-      if attempt == 4:
-        raise OSError(f"{method} {url}: {e}") from None
-      time.sleep(1.0 * (2 ** attempt))
-
-
-def http_get(url, headers=None):
-  return _request("GET", url, headers)
-
-
-def http_post_json(url, data, headers=None):
-  hdrs = {"Content-Type": "application/json", **(headers or {})}
-  body = json.dumps(data).encode()
-  data, status, resp_headers = _request("POST", url, hdrs, body)
-  return json.loads(data), status
-
-
-def http_head(url):
-  _, status, headers = _request("HEAD", url)
-  return status, headers
 
 
 def zstd_decompress(data):
