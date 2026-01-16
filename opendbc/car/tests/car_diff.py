@@ -157,6 +157,17 @@ def render_waveform(label, vals, init):
   return line
 
 
+def format_timing(edge_type, master_edges, pr_edges, ms_per_frame):
+  if not master_edges or not pr_edges:
+    return None
+  delta = pr_edges[0] - master_edges[0]
+  if delta == 0:
+    return None
+  direction = "lags" if delta > 0 else "leads"
+  ms = int(abs(delta) * ms_per_frame)
+  return " " * 12 + f"{edge_type}: PR {direction} by {abs(delta)} frames ({ms}ms)"
+
+
 def group_frames(diffs, max_gap=15):
   groups = []
   current = [diffs[0]]
@@ -177,7 +188,6 @@ def format_diff(diffs):
     return []
 
   frame_pad = 5
-  graph_pad = 12
 
   old, new = diffs[0][2]
   if not (isinstance(old, bool) and isinstance(new, bool)):
@@ -219,19 +229,10 @@ def format_diff(diffs):
     m_rises, m_falls = find_edges(m_vals, init_val)
     pr_rises, pr_falls = find_edges(pr_vals, init_val)
 
-    if m_rises and pr_rises:
-      delta = pr_rises[0] - m_rises[0]
-      if delta:
-        ms = int(abs(delta) * frame_ms)
-        direction = "lags" if delta > 0 else "leads"
-        lines.append(" " * graph_pad + f"rise: PR {direction} by {abs(delta)} frames ({ms}ms)")
-
-    if m_falls and pr_falls:
-      delta = pr_falls[0] - m_falls[0]
-      if delta:
-        ms = int(abs(delta) * frame_ms)
-        direction = "lags" if delta > 0 else "leads"
-        lines.append(" " * graph_pad + f"fall: PR {direction} by {abs(delta)} frames ({ms}ms)")
+    for edge_type, master_edges, pr_edges in [("rise", m_rises, pr_rises), ("fall", m_falls, pr_falls)]:
+      msg = format_timing(edge_type, master_edges, pr_edges, frame_ms)
+      if msg:
+        lines.append(msg)
 
   return lines
 
