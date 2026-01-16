@@ -213,37 +213,35 @@ def format_numeric_diffs(diffs):
   return lines
 
 
-def format_diff(diffs):
-  if not diffs:
-    return []
-
-  _, _, (old, new), _ = diffs[0]
-  if not (isinstance(old, bool) and isinstance(new, bool)):
-    return format_numeric_diffs(diffs)
-
-  ranges = group_frames(diffs)
-
-  # ms per frame from timestamps, fallback to 10ms on single diff
-  frame_diff = diffs[-1][1] - diffs[0][1]
-  frame_ms = (diffs[-1][3] - diffs[0][3]) / 1e6 / frame_diff if frame_diff else 10
-
+def format_boolean_diffs(diffs):
+  _, first_frame, _, first_ts = diffs[0]
+  _, last_frame, _, last_ts = diffs[-1]
+  frame_time = last_frame - first_frame
+  time_ms = (last_ts - first_ts) / 1e6
+  ms = time_ms / frame_time if frame_time else 10.0
   lines = []
-  for group in ranges:
+  for group in group_frames(diffs):
     master_vals, pr_vals, init, start, end = build_signals(group)
-
     lines.append(f"\n  frames {start}-{end - 1}")
     lines.append(render_waveform("master", master_vals, init))
     lines.append(render_waveform("PR", pr_vals, init))
-
-    m_rises, m_falls = find_edges(master_vals, init)
+    master_rises, master_falls = find_edges(master_vals, init)
     pr_rises, pr_falls = find_edges(pr_vals, init)
-
-    for edge_type, master_edges, pr_edges in [("rise", m_rises, pr_rises), ("fall", m_falls, pr_falls)]:
-      msg = format_timing(edge_type, master_edges, pr_edges, frame_ms)
+    for edge_type, master_edges, pr_edges in [("rise", master_rises, pr_rises), ("fall", master_falls, pr_falls)]:
+      msg = format_timing(edge_type, master_edges, pr_edges, ms)
       if msg:
         lines.append(msg)
-
   return lines
+
+
+def format_diff(diffs):
+  if not diffs:
+    return []
+  _, _, (old, new), _ = diffs[0]
+  is_bool = isinstance(old, bool) and isinstance(new, bool)
+  if is_bool:
+    return format_boolean_diffs(diffs)
+  return format_numeric_diffs(diffs)
 
 
 def main(platform=None, segments_per_platform=10, update_refs=False, all_platforms=False):
