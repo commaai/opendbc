@@ -145,6 +145,18 @@ def find_edges(vals, init):
   return rises, falls
 
 
+def render_waveform(label, vals, init):
+  wave = {(False, False): "_", (True, True): "‾", (False, True): "/", (True, False): "\\"}
+  line = f"  {label}:".ljust(12)
+  prev = init
+  for val in vals:
+    line += wave[(prev, val)]
+    prev = val
+  if len(line) > 80:
+    line = line[:80] + "..."
+  return line
+
+
 def group_frames(diffs, max_gap=15):
   groups = []
   current = [diffs[0]]
@@ -166,8 +178,6 @@ def format_diff(diffs):
 
   frame_pad = 5
   graph_pad = 12
-  graph_width = 80
-  wave = {(False, True): "/", (True, False): "\\", (True, True): "‾", (False, False): "_"}
 
   old, new = diffs[0][2]
   if not (isinstance(old, bool) and isinstance(new, bool)):
@@ -203,14 +213,8 @@ def format_diff(diffs):
 
     lines.append(f"\n  frames {start}-{end - 1}")
     init_val = not converge_val
-    for label, vals in [("master", m_vals), ("PR", pr_vals)]:
-      line = f"  {label}:".ljust(graph_pad)
-      for i, val in enumerate(vals):
-        prev = vals[i - 1] if i else init_val
-        line += wave[(prev, val)]
-      if len(line) > graph_pad + graph_width:
-        line = line[:graph_pad + graph_width] + "..."
-      lines.append(line)
+    lines.append(render_waveform("master", m_vals, init_val))
+    lines.append(render_waveform("PR", pr_vals, init_val))
 
     m_rises, m_falls = find_edges(m_vals, init_val)
     pr_rises, pr_falls = find_edges(pr_vals, init_val)
