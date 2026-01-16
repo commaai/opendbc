@@ -204,16 +204,22 @@ def build_signals(group):
   return master_vals, pr_vals, init, start, end
 
 
+def format_numeric_diffs(diffs):
+  lines = []
+  for _, frame, (old_val, new_val), _ in diffs[:10]:
+    lines.append(f"    frame {frame}: {old_val} -> {new_val}")
+  if len(diffs) > 10:
+    lines.append(f"    (... {len(diffs) - 10} more)")
+  return lines
+
+
 def format_diff(diffs):
   if not diffs:
     return []
 
-  old, new = diffs[0][2]
+  _, _, (old, new), _ = diffs[0]
   if not (isinstance(old, bool) and isinstance(new, bool)):
-    lines = [f"    frame {diff[1]}: {diff[2][0]} -> {diff[2][1]}" for diff in diffs[:10]]
-    if len(diffs) > 10:
-      lines.append(f"    (... {len(diffs) - 10} more)")
-    return lines
+    return format_numeric_diffs(diffs)
 
   ranges = group_frames(diffs)
 
