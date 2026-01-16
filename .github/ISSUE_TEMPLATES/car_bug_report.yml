@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: >
-        Before creating a **bug report**, please check the following:
+        Before creating a **car bug report**, please check the following:
           * If the issue likely is not specific to your car model or make, go back and open an **openpilot bug report** instead.
           * If the issue is related to the driving or driver monitoring models, you should open a [discussion](https://github.com/commaai/openpilot/discussions/categories/model-feedback) instead.
           * Ensure you're running the latest openpilot release.
