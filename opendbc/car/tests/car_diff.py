@@ -145,11 +145,25 @@ def find_edges(vals, init):
   return rises, falls
 
 
+def group_frames(diffs, max_gap=15):
+  groups = []
+  current = [diffs[0]]
+  for diff in diffs[1:]:
+    _, frame, _, _ = diff
+    _, prev_frame, _, _ = current[-1]
+    if frame <= prev_frame + max_gap:
+      current.append(diff)
+    else:
+      groups.append(current)
+      current = [diff]
+  groups.append(current)
+  return groups
+
+
 def format_diff(diffs):
   if not diffs:
     return []
 
-  frame_group = 15
   frame_pad = 5
   graph_pad = 12
   graph_width = 80
@@ -162,14 +176,7 @@ def format_diff(diffs):
       lines.append(f"    (... {len(diffs) - 10} more)")
     return lines
 
-  ranges, current = [], [diffs[0]]
-  for diff in diffs[1:]:
-    if diff[1] <= current[-1][1] + frame_group:
-      current.append(diff)
-    else:
-      ranges.append(current)
-      current = [diff]
-  ranges.append(current)
+  ranges = group_frames(diffs)
 
   # ms per frame from timestamps, fallback to 10ms on single diff
   frame_diff = diffs[-1][1] - diffs[0][1]
