@@ -10,7 +10,7 @@ body:
           * If the issue likely is not specific to your car model or make, go back and open an **openpilot bug report** instead.
           * If the issue is related to the driving or driver monitoring models, you should open a [discussion](https://github.com/commaai/openpilot/discussions/categories/model-feedback) instead.
           * If you are fingerprinting your car, refer to the [fingerprinting guide](https://github.com/commaai/openpilot/wiki/Fingerprinting) or visit the [community Discord server](https://discord.comma.ai) to request help.
-          * If you are inquiring about future car support, check the [community Discord server](https://discord.comma.ai) to check progress on your vehicle and help contribute. Issues simply requesting support for new vehicles will be closed.
+          * If you are inquiring about future car support, check the [community Discord server](https://discord.comma.ai) for progress on your vehicle and help contribute. Issues simply requesting support for new vehicles will be closed.
           * Ensure you're running the latest openpilot release.
           * Ensure you're using officially supported hardware.
           * Ensure there isn't an existing issue for your bug. If there is, leave a comment on the existing issue.
