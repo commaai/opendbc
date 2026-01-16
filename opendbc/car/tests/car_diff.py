@@ -183,11 +183,30 @@ def group_frames(diffs, max_gap=15):
   return groups
 
 
+def build_signals(group):
+  _, first_frame, _, _ = group[0]
+  _, last_frame, (final_master, _), _ = group[-1]
+  start = max(0, first_frame - 5)
+  end = last_frame + 6
+  init = not final_master
+  diff_at = {frame: (m, p) for _, frame, (m, p), _ in group}
+  master_vals = []
+  pr_vals = []
+  master = init
+  pr = init
+  for frame in range(start, end):
+    if frame in diff_at:
+      master, pr = diff_at[frame]
+    elif frame > last_frame:
+      master = pr = final_master
+    master_vals.append(master)
+    pr_vals.append(pr)
+  return master_vals, pr_vals, init, start, end
+
+
 def format_diff(diffs):
   if not diffs:
     return []
-
-  frame_pad = 5
 
   old, new = diffs[0][2]
   if not (isinstance(old, bool) and isinstance(new, bool)):
@@ -203,31 +222,15 @@ def format_diff(diffs):
   frame_ms = (diffs[-1][3] - diffs[0][3]) / 1e6 / frame_diff if frame_diff else 10
 
   lines = []
-  for range_diffs in ranges:
-    start, end = max(0, range_diffs[0][1] - frame_pad), range_diffs[-1][1] + frame_pad + 1
-    diff_map = {diff[1]: diff for diff in range_diffs}
-
-    last = range_diffs[-1]
-    converge_frame = last[1] + 1
-    converge_val   = last[2][0]
-    m_st = pr_st = not converge_val
-
-    m_vals, pr_vals = [], []
-    for frame in range(start, end):
-      if frame in diff_map:
-        m_st, pr_st = diff_map[frame][2]
-      elif frame >= converge_frame:
-        m_st = pr_st = converge_val
-      m_vals.append(m_st)
-      pr_vals.append(pr_st)
+  for group in ranges:
+    master_vals, pr_vals, init, start, end = build_signals(group)
 
     lines.append(f"\n  frames {start}-{end - 1}")
-    init_val = not converge_val
-    lines.append(render_waveform("master", m_vals, init_val))
-    lines.append(render_waveform("PR", pr_vals, init_val))
+    lines.append(render_waveform("master", master_vals, init))
+    lines.append(render_waveform("PR", pr_vals, init))
 
-    m_rises, m_falls = find_edges(m_vals, init_val)
-    pr_rises, pr_falls = find_edges(pr_vals, init_val)
+    m_rises, m_falls = find_edges(master_vals, init)
+    pr_rises, pr_falls = find_edges(pr_vals, init)
 
     for edge_type, master_edges, pr_edges in [("rise", m_rises, pr_rises), ("fall", m_falls, pr_falls)]:
       msg = format_timing(edge_type, master_edges, pr_edges, frame_ms)
