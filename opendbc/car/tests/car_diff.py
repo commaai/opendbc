@@ -45,7 +45,7 @@ def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
 def load_can_messages(seg):
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
-  lr = LogReader(url)
+  lr = LogReader(url, only_union_types=True)
   return list(lr.filter('can'))
 
 

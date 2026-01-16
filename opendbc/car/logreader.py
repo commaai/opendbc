@@ -22,7 +22,8 @@ def decompress_stream(data: bytes):
 
 
 class LogReader:
-  def __init__(self, fn, sort_by_time=False):
+  def __init__(self, fn, only_union_types=False, sort_by_time=False):
+    self._only_union_types = only_union_types
     _, ext = os.path.splitext(urllib.parse.urlparse(fn).path)
 
     if fn.startswith("http"):
@@ -49,7 +50,15 @@ class LogReader:
       self._ents.sort(key=lambda x: x.logMonoTime)
 
   def __iter__(self):
-    yield from self._ents
+    for ent in self._ents:
+      if self._only_union_types:
+        try:
+          ent.which()
+          yield ent
+        except capnp.lib.capnp.KjException:
+          pass
+      else:
+        yield ent
 
   def filter(self, msg_type: str):
     return (getattr(m, m.which()) for m in filter(lambda m: m.which() == msg_type, self))
