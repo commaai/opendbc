@@ -176,7 +176,7 @@ def format_diff(diffs):
 
     last = range_diffs[-1]
     converge_frame = last[1] + 1
-    converge_val   = last[2][1]
+    converge_val   = last[2][0]
     m_st = pr_st = not converge_val
 
     m_vals, pr_vals = [], []
