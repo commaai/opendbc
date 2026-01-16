@@ -132,6 +132,19 @@ def run_replay(platforms, segments, ref_path, update, workers=4):
     return list(pool.map(process_segment, work))
 
 
+def find_edges(vals, init):
+  rises = []
+  falls = []
+  prev = init
+  for i, val in enumerate(vals):
+    if val and not prev:
+      rises.append(i)
+    if not val and prev:
+      falls.append(i)
+    prev = val
+  return rises, falls
+
+
 def format_diff(diffs):
   if not diffs:
     return []
@@ -192,10 +205,8 @@ def format_diff(diffs):
         line = line[:graph_pad + graph_width] + "..."
       lines.append(line)
 
-    m_rises  = [i for i, v in enumerate(m_vals) if v and (i == 0 or not m_vals[i - 1])]
-    pr_rises = [i for i, v in enumerate(pr_vals) if v and (i == 0 or not pr_vals[i - 1])]
-    m_falls  = [i for i, v in enumerate(m_vals) if not v and i > 0 and m_vals[i - 1]]
-    pr_falls = [i for i, v in enumerate(pr_vals) if not v and i > 0 and pr_vals[i - 1]]
+    m_rises, m_falls = find_edges(m_vals, init_val)
+    pr_rises, pr_falls = find_edges(pr_vals, init_val)
 
     if m_rises and pr_rises:
       delta = pr_rises[0] - m_rises[0]
