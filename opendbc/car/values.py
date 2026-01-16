@@ -1,21 +1,29 @@
 from typing import get_args
-from opendbc.car.body.values import CAR as BODY
-from opendbc.car.chrysler.values import CAR as CHRYSLER
-from opendbc.car.ford.values import CAR as FORD
-from opendbc.car.gm.values import CAR as GM
-from opendbc.car.honda.values import CAR as HONDA
-from opendbc.car.hyundai.values import CAR as HYUNDAI
-from opendbc.car.mazda.values import CAR as MAZDA
-from opendbc.car.mock.values import CAR as MOCK
-from opendbc.car.nissan.values import CAR as NISSAN
-from opendbc.car.psa.values import CAR as PSA
-from opendbc.car.rivian.values import CAR as RIVIAN
-from opendbc.car.subaru.values import CAR as SUBARU
-from opendbc.car.tesla.values import CAR as TESLA
-from opendbc.car.toyota.values import CAR as TOYOTA
-from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
 
-Platform = BODY | CHRYSLER | FORD | GM | HONDA | HYUNDAI | MAZDA | MOCK | NISSAN | PSA | RIVIAN | SUBARU | TESLA | TOYOTA | VOLKSWAGEN
-BRANDS = get_args(Platform)
+def __getattr__(name):
+  if name in (n := {
+    'BODY': 'body', 'CHRYSLER': 'chrysler', 'FORD': 'ford', 'GM': 'gm', 'HONDA': 'honda',
+    'HYUNDAI': 'hyundai', 'MAZDA': 'mazda', 'MOCK': 'mock', 'NISSAN': 'nissan',
+    'PSA': 'psa', 'RIVIAN': 'rivian', 'SUBARU': 'subaru', 'TESLA': 'tesla',
+    'TOYOTA': 'toyota', 'VOLKSWAGEN': 'volkswagen'
+  }):
+    val = __import__(f'opendbc.car.{n[name]}.values', fromlist=['CAR']).CAR
+  elif name == 'Platform':
+    from opendbc.car.values import BODY, CHRYSLER, FORD, GM, HONDA, HYUNDAI, MAZDA, MOCK, NISSAN, PSA, RIVIAN, SUBARU, TESLA, TOYOTA, VOLKSWAGEN
+    val = BODY | CHRYSLER | FORD | GM | HONDA | HYUNDAI | MAZDA | MOCK | NISSAN | PSA | RIVIAN | SUBARU | TESLA | TOYOTA | VOLKSWAGEN
+  elif name == 'BRANDS':
+    from opendbc.car.values import Platform
+    val = get_args(Platform)
+  elif name == 'PLATFORMS':
+    from opendbc.car.values import BRANDS
+    val = {str(platform): platform for brand in BRANDS for platform in brand}
+  else:
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-PLATFORMS: dict[str, Platform] = {str(platform): platform for brand in BRANDS for platform in brand}
+  globals()[name] = val
+  return val
+
+def __dir__():
+  return sorted(list(globals().keys()) + ['Platform', 'BRANDS', 'PLATFORMS',
+    'BODY', 'CHRYSLER', 'FORD', 'GM', 'HONDA', 'HYUNDAI', 'MAZDA', 'MOCK', 'NISSAN',
+    'PSA', 'RIVIAN', 'SUBARU', 'TESLA', 'TOYOTA', 'VOLKSWAGEN'])

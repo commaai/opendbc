@@ -1,19 +1,16 @@
 from collections import defaultdict
 import pytest
 
-from opendbc.car.car_helpers import interfaces
-from opendbc.car.docs import get_all_car_docs
-from opendbc.car.docs_definitions import Cable, Column, PartType, Star, SupportType
-from opendbc.car.honda.values import CAR as HONDA
-from opendbc.car.values import PLATFORMS
-
 
 class TestCarDocs:
   @classmethod
   def setup_class(cls):
+    from opendbc.car.docs import get_all_car_docs
     cls.all_cars = get_all_car_docs()
 
   def test_duplicate_years(self, subtests):
+    from opendbc.car.docs_definitions import SupportType
+
     make_model_years = defaultdict(list)
     for car in self.all_cars:
       with subtests.test(car_docs_name=car.name):
@@ -26,8 +23,11 @@ class TestCarDocs:
           make_model_years[make_model].append(year)
 
   def test_missing_car_docs(self, subtests):
+    from opendbc.car.car_helpers import interfaces
+    from opendbc.car.values import PLATFORMS
+
     all_car_docs_platforms = [name for name, config in PLATFORMS.items()]
-    for platform in sorted(interfaces.keys()):
+    for platform in sorted(interfaces.keys(), key=str):
       with subtests.test(platform=platform):
         assert platform in all_car_docs_platforms, f"Platform: {platform} doesn't have a CarDocs entry"
 
@@ -48,6 +48,9 @@ class TestCarDocs:
             assert "RAV4" in car.model, "Use correct capitalization"
 
   def test_torque_star(self, subtests):
+    from opendbc.car.docs_definitions import Column, Star
+    from opendbc.car.honda.values import CAR as HONDA
+
     # Asserts brand-specific assumptions around steering torque star
     for car in self.all_cars:
       with subtests.test(car=car.name):
@@ -66,6 +69,8 @@ class TestCarDocs:
         assert car.years and car.year_list, f"Format years correctly: {car.name}"
 
   def test_harnesses(self, subtests):
+    from opendbc.car.docs_definitions import Cable, PartType, SupportType
+
     for car in self.all_cars:
       with subtests.test(car=car.name):
         if car.name == "comma body" or car.support_type != SupportType.UPSTREAM:

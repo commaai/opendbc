@@ -62,7 +62,7 @@ class CarInterface(CarInterfaceBase):
       stop_and_go = True
       # Only give steer angle deadzone to for bad angle sensor prius
       for fw in car_fw:
-        if fw.ecu == "eps" and not fw.fwVersion == b'8965B47060\x00\x00\x00\x00\x00\x00':
+        if fw.ecu == "eps" and not bytes(fw.fwVersion) == b'8965B47060\x00\x00\x00\x00\x00\x00':
           ret.steerActuatorDelay = 0.25
           CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning, steering_angle_deadzone_deg=0.2)
 
@@ -86,7 +86,7 @@ class CarInterface(CarInterfaceBase):
       # 2019+ RAV4 TSS2 uses two different steering racks and specific tuning seems to be necessary.
       # See https://github.com/commaai/openpilot/pull/21429#issuecomment-873652891
       for fw in car_fw:
-        if fw.ecu == "eps" and (fw.fwVersion.startswith(b'\x02') or fw.fwVersion in [b'8965B42181\x00\x00\x00\x00\x00\x00']):
+        if fw.ecu == "eps" and (bytes(fw.fwVersion).startswith(b'\x02') or bytes(fw.fwVersion) in [b'8965B42181\x00\x00\x00\x00\x00\x00']):
           ret.lateralTuning.pid.kpV = [0.15]
           ret.lateralTuning.pid.kiV = [0.05]
           ret.lateralTuning.pid.kf = 0.00004
