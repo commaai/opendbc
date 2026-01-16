@@ -1,16 +1,16 @@
-name: Bug report
-description: For issues with running openpilot on your comma device
-labels: ["bug"]
+name: Car bug report
+description: For issues with a particular car make or model
+labels: ["car", "bug"]
 body:
 
   - type: markdown
     attributes:
       value: >
         Before creating a **bug report**, please check the following:
-          * If the issue likely only affects your car model or make, go back and open a **car bug report** instead.
+          * If the issue likely is not specific to your car model or make, go back and open an **openpilot bug report** instead.
           * If the issue is related to the driving or driver monitoring models, you should open a [discussion](https://github.com/commaai/openpilot/discussions/categories/model-feedback) instead.
           * Ensure you're running the latest openpilot release.
-          * Ensure you're using officially supported hardware. Issues running on PCs have a different issue template.
+          * Ensure you're using officially supported hardware.
           * Ensure there isn't an existing issue for your bug. If there is, leave a comment on the existing issue.
           * Ensure you're running stock openpilot. We cannot look into bug reports from forks.
 
@@ -18,7 +18,7 @@ body:
 
   - type: textarea
     attributes:
-      label: Describe the bug
+      label: Describe the car bug
       description: Also include a description of how to reproduce the bug
     validations:
       required: true
