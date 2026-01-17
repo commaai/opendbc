@@ -45,8 +45,8 @@ def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
 def load_can_messages(seg):
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
-  lr = LogReader(url, only_union_types=True)
-  return list(lr.filter('can'))
+  msgs = LogReader(url, only_union_types=True)
+  return [m for m in msgs if m.which() == 'can']
 
 
 def replay_segment(platform, can_msgs):
@@ -55,8 +55,8 @@ def replay_segment(platform, can_msgs):
   from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
 
   fingerprint = gen_empty_fingerprint()
-  for can in can_msgs[:FRAME_FINGERPRINT]:
-    for m in can:
+  for msg in can_msgs[:FRAME_FINGERPRINT]:
+    for m in msg.can:
       if m.src < 64:
         fingerprint[m.src][m.address] = len(m.dat)
 
@@ -66,12 +66,11 @@ def replay_segment(platform, can_msgs):
   CC = structs.CarControl().as_reader()
 
   states, timestamps = [], []
-  for i, can in enumerate(can_msgs):
-    t = int(0.01 * i * 1e9)
-    frames = [CanData(m.address, m.dat, m.src) for m in can]
-    states.append(CI.update([(t, frames)]))
-    CI.apply(CC, t)
-    timestamps.append(t)
+  for msg in can_msgs:
+    frames = [CanData(c.address, c.dat, c.src) for c in msg.can]
+    states.append(CI.update([(msg.logMonoTime, frames)]))
+    CI.apply(CC, msg.logMonoTime)
+    timestamps.append(msg.logMonoTime)
   return states, timestamps
 
 
