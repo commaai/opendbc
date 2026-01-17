@@ -3,6 +3,7 @@
 #include "opendbc/safety/declarations.h"
 
 static bool tesla_longitudinal = false;
+static bool tesla_fsd_14 = false;
 static bool tesla_stock_aeb = false;
 
 // Only rising edges while controls are not allowed are considered for these systems:
@@ -91,6 +92,20 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
   return valid;
 }
 
+static int tesla_get_steer_ctrl_type(const int ctrl_type) {
+  // Returns ANGLE_CONTROL-equivalent control type for FSD 14
+  int steer_ctrl_type = ctrl_type;
+  if (tesla_fsd_14) {
+    if (ctrl_type == 1) {
+      steer_ctrl_type = 2;
+    } else if (ctrl_type == 2) {
+      steer_ctrl_type = 1;
+    } else {
+    }
+  }
+  return steer_ctrl_type;
+}
+
 static void tesla_rx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == 0U) {
@@ -176,7 +191,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     // DAS_steeringControl
     if (msg->addr == 0x488U) {
       int steering_control_type = msg->data[2] >> 6;
-      bool tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
+      bool tesla_stock_lkas_now = steering_control_type == tesla_get_steer_ctrl_type(2);  // "LANE_KEEP_ASSIST"
 
       // Only consider rising edges while controls are not allowed
       if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed) {
@@ -225,14 +240,15 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
     int raw_angle_can = ((msg->data[0] & 0x7FU) << 8) | msg->data[1];
     int desired_angle = raw_angle_can - 16384;
     int steer_control_type = msg->data[2] >> 6;
-    bool steer_control_enabled = steer_control_type == 1;  // ANGLE_CONTROL
+    const int angle_ctrl_type = tesla_get_steer_ctrl_type(1);
+    bool steer_control_enabled = steer_control_type == angle_ctrl_type;  // ANGLE_CONTROL
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS, TESLA_STEERING_PARAMS)) {
       violation = true;
     }
 
     bool valid_steer_control_type = (steer_control_type == 0) ||  // NONE
-                                    (steer_control_type == 1);    // ANGLE_CONTROL
+                                    (steer_control_type == angle_ctrl_type);    // ANGLE_CONTROL
     if (!valid_steer_control_type) {
       violation = true;
     }
@@ -328,7 +344,9 @@ static safety_config tesla_init(uint16_t param) {
     {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},  // APS_eacMonitor
   };
 
-  SAFETY_UNUSED(param);
+  const uint16_t TESLA_FLAG_FSD_14 = 2;
+  tesla_fsd_14 = GET_FLAG(param, TESLA_FLAG_FSD_14);
+
 #ifdef ALLOW_DEBUG
   const uint16_t TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
   tesla_longitudinal = GET_FLAG(param, TESLA_FLAG_LONGITUDINAL_CONTROL);
