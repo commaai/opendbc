@@ -221,11 +221,13 @@ def format_boolean_diffs(diffs):
   lines = []
   for group in group_frames(diffs):
     master_vals, pr_vals, init, start, end = build_signals(group)
+    master_rises, master_falls = find_edges(master_vals, init)
+    pr_rises, pr_falls = find_edges(pr_vals, init)
+    if bool(master_rises) != bool(pr_rises):
+      continue
     lines.append(f"\n  frames {start}-{end - 1}")
     lines.append(render_waveform("master", master_vals, init))
     lines.append(render_waveform("PR", pr_vals, init))
-    master_rises, master_falls = find_edges(master_vals, init)
-    pr_rises, pr_falls = find_edges(pr_vals, init)
     for edge_type, master_edges, pr_edges in [("rise", master_rises, pr_rises), ("fall", master_falls, pr_falls)]:
       msg = format_timing(edge_type, master_edges, pr_edges, ms)
       if msg:
