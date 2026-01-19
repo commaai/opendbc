@@ -131,6 +131,7 @@ def run_replay(platforms, segments, ref_path, update, workers=4):
     return list(pool.map(process_segment, work))
 
 
+# ASCII waveforms helpers
 def find_edges(vals, init):
   rises = []
   falls = []
