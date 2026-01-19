@@ -1,8 +1,5 @@
-#!/usr/bin/env python3
-import os
-os.environ['LOGPRINT'] = 'CRITICAL'
-
 import argparse
+import os
 import pickle
 import re
 import subprocess

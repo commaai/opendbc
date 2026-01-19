@@ -76,12 +76,7 @@ jobs:
         scons -j8
     - name: Test car diff
       if: github.event_name == 'pull_request'
-      run: |
-        source setup.sh
-        ret=0
-        python opendbc/car/tests/car_diff.py > diff.txt || ret=$?
-        cat diff.txt
-        exit $ret
+      run: source setup.sh && python opendbc/car/tests/car_diff.py | tee diff.txt
     - name: Comment PR
       if: always() && github.event_name == 'pull_request'
       env:
