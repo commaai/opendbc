@@ -3,13 +3,6 @@ import platform
 
 system = platform.system()
 
-# Use clang-18 for both normal tests and mutation testing
-# The Mull plugin injects mutations that are dormant unless run with mull-runner
-if system == "Darwin":
-  mull_plugin = Dir('#').abspath + '/.mull/lib/mull-ir-frontend-18'
-else:
-  mull_plugin = '/usr/lib/mull-ir-frontend-18'
-
 env = Environment(
   CC='clang-18',
   CFLAGS=[
@@ -39,12 +32,17 @@ env = Environment(
   tools=["default", "compilation_db"],
 )
 
-# Only use mull plugin if it exists
-if os.path.exists(mull_plugin):
-  env.Append(CFLAGS=[f'-fpass-plugin={mull_plugin}'])
-
+# The Mull plugin injects mutations that are dormant unless run with mull-runner
 if system == "Darwin":
-  env.PrependENVPath('PATH', '/opt/homebrew/opt/llvm@18/bin')
+  mull_plugin = Dir('#').abspath + '/.mull/lib/mull-ir-frontend-18'
+else:
+  mull_plugin = '/usr/lib/mull-ir-frontend-18'
+if os.path.exists(mull_plugin):
+  # Only use mull plugin if it exists
+  env['CC'] = 'clang-18'
+  env.Append(CFLAGS=[f'-fpass-plugin={mull_plugin}'])
+  if system == "Darwin":
+    env.PrependENVPath('PATH', '/opt/homebrew/opt/llvm@18/bin')
 
 safety = env.SharedObject("safety.os", "safety.c")
 libsafety = env.SharedLibrary("libsafety.so", [safety])
