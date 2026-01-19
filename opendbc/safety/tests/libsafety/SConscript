@@ -17,14 +17,10 @@ env = Environment(
     '-g',
     '-O0',
     '-fno-omit-frame-pointer',
-    '-fprofile-arcs',
-    '-ftest-coverage',
     '-grecord-command-line',
     '-DALLOW_DEBUG',
   ],
   LINKFLAGS=[
-    '-fprofile-arcs',
-    '-ftest-coverage',
     '-fsanitize=undefined',
     '-fno-sanitize-recover=undefined',
   ],
@@ -40,7 +36,8 @@ else:
 if os.path.exists(mull_plugin):
   # Only use mull plugin if it exists
   env['CC'] = 'clang-18'
-  env.Append(CFLAGS=[f'-fpass-plugin={mull_plugin}'])
+  env.Append(CFLAGS=['-fprofile-arcs', '-ftest-coverage', f'-fpass-plugin={mull_plugin}'])
+  env.Append(LINKFLAGS=['-fprofile-arcs', '-ftest-coverage'])
   if system == "Darwin":
     env.PrependENVPath('PATH', '/opt/homebrew/opt/llvm@18/bin')
 
