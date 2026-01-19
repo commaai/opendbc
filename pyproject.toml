@@ -20,6 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 testing = [
+  "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
   "cffi",
   "gcovr",
   # FIXME: pytest 9.0.0 doesn't support unittest.SkipTest
@@ -32,6 +33,7 @@ testing = [
   "pytest-subtests",
   "hypothesis==6.47.*",
   "parameterized>=0.8,<0.9",
+  "zstandard",
 
   # static analysis
   "ruff",
