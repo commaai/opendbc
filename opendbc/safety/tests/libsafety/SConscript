@@ -4,7 +4,7 @@ import platform
 system = platform.system()
 
 env = Environment(
-  CC='clang-18',
+  CC='clang',
   CFLAGS=[
     '-Wall',
     "-Wextra",
