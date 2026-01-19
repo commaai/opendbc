@@ -83,7 +83,7 @@ jobs:
         cat diff.txt
         exit $ret
     - name: Comment PR
-      if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+      if: always() && github.event_name == 'pull_request'
       env:
         GH_TOKEN: ${{ github.token }}
       run: '[ -s diff.txt ] && gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -F diff.txt || true'
