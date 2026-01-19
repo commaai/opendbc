@@ -20,7 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 testing = [
-  "comma-car-segments-test @ https://test-files.pythonhosted.org/packages/13/58/1a458fb78d2f9fde9f57b26ad7e0a86b9f2371d33436ef0df9512a5ba8b2/comma_car_segments_test-0.1.0-py3-none-any.whl",
+  "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
   "cffi",
   "gcovr",
   # FIXME: pytest 9.0.0 doesn't support unittest.SkipTest
