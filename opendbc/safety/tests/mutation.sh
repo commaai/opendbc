@@ -17,4 +17,4 @@ EOF
 
 scons -j4 -D
 
-mull-runner-17 --debug --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety.so -test-program=pytest -- -n8 --ignore-glob=misra/*
+mull-runner-18 --debug --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety.so -test-program=pytest -- -n8 --ignore-glob=misra/*
