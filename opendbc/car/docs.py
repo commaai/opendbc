@@ -32,11 +32,11 @@ def get_params_for_docs(platform) -> tuple[CarParams, CarParamsSP]:
   cp_platform = platform if platform in interfaces else MOCK.MOCK
   CP: CarParams = interfaces[cp_platform].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
                                                      car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
-                                                     alpha_long=True, is_release=False, docs=True)
+                                                     alpha_long=True, is_release=True, docs=True)
 
   CP_SP: CarParamsSP = interfaces[cp_platform].get_params_sp(CP, cp_platform, fingerprint=gen_empty_fingerprint(),
                                                              car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
-                                                             alpha_long=True, is_release_sp=False, docs=True)
+                                                             alpha_long=True, is_release_sp=True, docs=True)
   return CP, CP_SP
 
 

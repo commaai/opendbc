@@ -218,7 +218,7 @@ class CAR(Platforms):
   HONDA_CRV_6G = HondaBoschCANFDPlatformConfig(
     [
       HondaCarDocs("Honda CR-V 2023-26", "All"),
-      HondaCarDocs("Honda CR-V Hybrid 2023-25", "All"),
+      HondaCarDocs("Honda CR-V Hybrid 2023-26", "All"),
     ],
     CarSpecs(mass=1703, wheelbase=2.7, steerRatio=16.2, centerToFrontRatio=0.42),
   )
@@ -266,7 +266,7 @@ class CAR(Platforms):
   )
   # mid-model refresh
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
-    [HondaCarDocs("Acura MDX 2025", "All except Type S")],
+    [HondaCarDocs("Acura MDX 2025-26", "All except Type S")],
     CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=16.2),
   )
   HONDA_ODYSSEY_5G_MMR = HondaBoschPlatformConfig(

@@ -86,12 +86,7 @@ static uint32_t toyota_get_checksum(const CANPacket_t *msg) {
 }
 
 static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
-
-  bool valid = false;
-  if (msg->addr == 0x260U) {
-    valid = !GET_BIT(msg, 3U);  // STEER_ANGLE_INITIALIZING
-  }
-  return valid;
+  return !GET_BIT(msg, 3U);  // STEER_ANGLE_INITIALIZING
 }
 
 static int TOYOTA_GET_INTERCEPTOR(const CANPacket_t *msg) {
