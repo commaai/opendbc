@@ -2,7 +2,7 @@
 name = "opendbc"
 version = "0.2.1"
 description = "CAN bus databases and tools"
-license = { file = "LICENSE" }
+license = "MIT"
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
 readme = "README.md"
 requires-python = ">=3.11,<3.13"  # pycapnp doesn't work with 3.13
@@ -12,7 +12,7 @@ urls = { "homepage" = "https://github.com/commaai/opendbc" }
 dependencies = [
   "scons",
   "numpy",
-  "crcmod",
+  "crcmod-plus",
   "tqdm",
   "pycapnp==2.1.0",
   "pycryptodome",
@@ -20,6 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 testing = [
+  "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
   "cffi",
   "gcovr",
   # FIXME: pytest 9.0.0 doesn't support unittest.SkipTest
@@ -32,6 +33,7 @@ testing = [
   "pytest-subtests",
   "hypothesis==6.47.*",
   "parameterized>=0.8,<0.9",
+  "zstandard",
 
   # static analysis
   "ruff",
@@ -131,7 +133,7 @@ call-non-callable = "ignore"
 invalid-argument-type = "ignore"
 
 # Dynamic type patterns (e.g., values converted from Number to list in __init__)
-non-subscriptable = "ignore"
+not-subscriptable = "ignore"
 unsupported-operator = "ignore"
 
 # Return types with complex callable signatures
