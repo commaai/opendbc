@@ -1009,6 +1009,7 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'8S102-30A-A050\x00\x00',
       b'8S102-30A-A060\x00\x00',
+      b'8S102-30A-A070\x00\x00',
     ],
   },
   CAR.HONDA_CRV_6G: {
