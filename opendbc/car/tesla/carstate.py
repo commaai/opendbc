@@ -3,6 +3,7 @@ from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
+from opendbc.car.tesla.teslacan import get_steer_ctrl_type
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, CAR
 
 from opendbc.sunnypilot.car.tesla.carstate_ext import CarStateExt
@@ -48,7 +49,7 @@ class CarState(CarStateBase, CarStateExt):
 
     # Brake pedal
     ret.brake = 0
-    ret.brakePressed = cp_party.vl["IBST_status"]["IBST_driverBrakeApply"] == 2
+    ret.brakePressed = cp_party.vl["ESP_status"]["ESP_driverBrakeApply"] == 2
 
     # Steering wheel
     epas_status = cp_party.vl["EPAS3S_sysStatus"]
@@ -109,7 +110,11 @@ class CarState(CarStateBase, CarStateExt):
     ret.stockAeb = cp_ap_party.vl["DAS_control"]["DAS_aebEvent"] == 1
 
     # LKAS
-    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
+    # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
+    # FSD switched from using ANGLE_CONTROL to LANE_KEEP_ASSIST to likely keep the old steering override disengage logic.
+    # LKAS switched from LANE_KEEP_ASSIST to ANGLE_CONTROL to likely allow overriding LKAS events smoothly
+    lkas_ctrl_type = get_steer_ctrl_type(self.CP.flags, 2)
+    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == lkas_ctrl_type  # LANE_KEEP_ASSIST
 
     # Stock Autosteer should be off (includes FSD)
     if self.CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):

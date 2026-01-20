@@ -35,6 +35,9 @@ class CarInterface(CarInterfaceBase, CarInterfaceExt):
   CarController = CarController
   RadarInterface = RadarInterface
 
+  DRIVABLE_GEARS = (structs.CarState.GearShifter.sport, structs.CarState.GearShifter.low,
+                    structs.CarState.GearShifter.eco, structs.CarState.GearShifter.manumatic)
+
   def __init__(self, CP, CP_SP):
     CarInterfaceBase.__init__(self, CP, CP_SP)
     CarInterfaceExt.__init__(self, CP, CarInterfaceBase)
@@ -56,7 +59,7 @@ class CarInterface(CarInterfaceBase, CarInterfaceExt):
     else:
       return CarInterfaceBase.get_steer_feedforward_default
 
-  def get_lataccel_torque_siglin(self) -> float:
+  def get_lataccel_torque_siglin(self) -> tuple[list[float], np.ndarray]:
 
     def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
       # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves

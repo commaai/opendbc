@@ -21,6 +21,8 @@ class CarInterface(CarInterfaceBase):
   CarController = CarController
   RadarInterface = RadarInterface
 
+  DRIVABLE_GEARS = (structs.CarState.GearShifter.sport,)
+
   @staticmethod
   def get_pid_accel_limits(CP, CP_SP, current_speed, cruise_speed):
     if CP.carFingerprint in HONDA_BOSCH:

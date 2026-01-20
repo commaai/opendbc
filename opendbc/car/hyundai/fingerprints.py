@@ -863,9 +863,11 @@ FW_VERSIONS = {
   CAR.KIA_OPTIMA_H_G4_FL: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JFhe SCC FHCUP      1.00 1.01 99110-A8500         ',
+      b'\xf1\x00JFhe SCC FHCUP      1.00 1.03 99110-A8500         ',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00JFH MFC  AT KOR LHD 1.00 1.01 95895-A8200 180323',
+      b'\xf1\x00JFH MFC  AT KOR LHD 1.00 1.04 95895-A8200 181217',
     ],
   },
   CAR.HYUNDAI_ELANTRA: {
@@ -1114,6 +1116,7 @@ FW_VERSIONS = {
       b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.00 99211-P1040 663',
       b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.00 99211-P1060 665',
       b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.00 99211-P1070 690',
+      b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.01 99211-P1060 680',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00NQ5__               1.00 1.02 99110-P1000         ',

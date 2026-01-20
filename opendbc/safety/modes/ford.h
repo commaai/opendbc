@@ -322,11 +322,6 @@ static safety_config ford_init(uint16_t param) {
     {FORD_LateralMotionControl2, 0, 8, .check_relay = true},
   };
 
-  static const CanMsg FORD_STOCK_TX_MSGS[] = {
-    FORD_COMMON_TX_MSGS
-    {FORD_LateralMotionControl, 0, 8, .check_relay = true},
-  };
-
   static const CanMsg FORD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
     {FORD_ACCDATA, 0, 8, .check_relay = true},
@@ -351,8 +346,7 @@ static safety_config ford_init(uint16_t param) {
     ret = ford_longitudinal ? BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_LONG_TX_MSGS) : \
                               BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_STOCK_TX_MSGS);
   } else {
-    ret = ford_longitudinal ? BUILD_SAFETY_CFG(ford_rx_checks, FORD_LONG_TX_MSGS) : \
-                              BUILD_SAFETY_CFG(ford_rx_checks, FORD_STOCK_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(ford_rx_checks, FORD_LONG_TX_MSGS);
   }
   return ret;
 }
