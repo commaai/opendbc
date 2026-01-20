@@ -2,7 +2,7 @@
 name = "opendbc"
 version = "0.2.1"
 description = "CAN bus databases and tools"
-license = { file = "LICENSE" }
+license = "MIT"
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
 readme = "README.md"
 requires-python = ">=3.11,<3.13"  # pycapnp doesn't work with 3.13
@@ -12,7 +12,7 @@ urls = { "homepage" = "https://github.com/commaai/opendbc" }
 dependencies = [
   "scons",
   "numpy",
-  "crcmod",
+  "crcmod-plus",
   "tqdm",
   "pycapnp==2.1.0",
   "pycryptodome",
@@ -20,6 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 testing = [
+  "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
   "cffi",
   "gcovr",
   # FIXME: pytest 9.0.0 doesn't support unittest.SkipTest
@@ -32,6 +33,7 @@ testing = [
   "pytest-subtests",
   "hypothesis==6.47.*",
   "parameterized>=0.8,<0.9",
+  "zstandard",
 
   # static analysis
   "ruff",
@@ -65,20 +67,6 @@ quiet-level = 3
 ignore-words-list = "alo,ba,bu,deque,hda,grey,arange"
 builtin = "clear,rare,informal,code,names,en-GB_to_en-US"
 check-hidden = true
-
-[tool.mypy]
-# helpful warnings
-warn_redundant_casts=true
-warn_unreachable=true
-warn_unused_ignores=true
-
-# restrict dynamic typing
-warn_return_any=true
-
-# allow implicit optionals for default args
-implicit_optional = true
-
-explicit_package_bases=true
 
 # https://beta.ruff.rs/docs/configuration/#using-pyprojecttoml
 [tool.ruff]
@@ -125,6 +113,34 @@ flake8-implicit-str-concat.allow-multiline=false
 "numpy.mean".msg = "Sum and divide. np.mean is slow"
 # TODO: re-enable when all tests are converted to pytest
 #"unittest".msg = "Use pytest"
+
+[tool.ty.rules]
+# Ignore rules that produce false positives due to:
+# - Dynamic attributes on LibSafety (loaded from compiled C library)
+# - External dependencies not installed (panda, cereal, openpilot)
+# - capnp dynamically generated types
+possibly-missing-attribute = "ignore"
+unresolved-attribute = "ignore"
+unresolved-import = "ignore"
+
+# Intentional LSP violations in subclass method signatures
+invalid-method-override = "ignore"
+
+# Optional callables called without None checks in test code
+call-non-callable = "ignore"
+
+# Complex type narrowing ty doesn't handle well (isinstance with abstract types)
+invalid-argument-type = "ignore"
+
+# Dynamic type patterns (e.g., values converted from Number to list in __init__)
+not-subscriptable = "ignore"
+unsupported-operator = "ignore"
+
+# Return types with complex callable signatures
+invalid-return-type = "ignore"
+
+# Test class method signature differences
+too-many-positional-arguments = "ignore"
 
 [tool.setuptools]
 include-package-data = true
