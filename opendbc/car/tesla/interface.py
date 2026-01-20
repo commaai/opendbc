@@ -2,7 +2,7 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.tesla.carcontroller import CarController
 from opendbc.car.tesla.carstate import CarState
-from opendbc.car.tesla.values import TeslaSafetyFlags, CAR
+from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CAR, FSD_14_FW, Ecu
 
 
 class CarInterface(CarInterfaceBase):
@@ -31,6 +31,11 @@ class CarInterface(CarInterfaceBase):
       ret.vEgoStarting = 0.1
       ret.stoppingDecelRate = 0.3
 
-    ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X) # dashcam only, pending find invalidLkasSetting signal
+    fsd_14 = any(fw.ecu == Ecu.eps and fw.fwVersion in FSD_14_FW.get(candidate, []) for fw in car_fw)
+    if fsd_14:
+      ret.flags |= TeslaFlags.FSD_14.value
+      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FSD_14.value
+
+    ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
 
     return ret
