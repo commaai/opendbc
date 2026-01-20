@@ -335,7 +335,7 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_JETTA_MK7 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Jetta 2018-23"),
+      VWCarDocs("Volkswagen Jetta 2019-23"),
       VWCarDocs("Volkswagen Jetta GLI 2021-23"),
     ],
     VolkswagenCarSpecs(mass=1328, wheelbase=2.71),
