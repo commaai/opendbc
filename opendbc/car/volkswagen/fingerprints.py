@@ -971,6 +971,7 @@ FW_VERSIONS = {
   CAR.PORSCHE_MACAN_MK1: {
     (Ecu.engine, 0x7e0, None): [
       b'\xf1\x8795B906259BJ\xf1\x890001',
+      b'\xf1\x8795B906259BM\xf1\x890001',
       b'\xf1\x8795B90652013\xf1\x893485',
       b'\xf1\x8795B90654002\xf1\x893495',
       b'\xf1\x8795B907551D \xf1\x890006',
@@ -979,6 +980,7 @@ FW_VERSIONS = {
       b'\xf1\x8795B927156CE\xf1\x890022',
       b'\xf1\x8795B927156JH\xf1\x890001',
       b'\xf1\x8795B927156KK\xf1\x890001',
+      b'\xf1\x8795B927156KP\xf1\x890001',
       b'\xf1\x8795B927156R \xf1\x890021',
     ],
     (Ecu.srs, 0x715, None): [
