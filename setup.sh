@@ -8,18 +8,18 @@ export PYTHONPATH=$BASEDIR
 
 # *** dependencies install ***
 if [ "$(uname -s)" = "Linux" ]; then
-  if ! command -v "mull-runner-17" > /dev/null 2>&1; then
+  if ! command -v "mull-runner-18" > /dev/null 2>&1; then
     curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | sudo -E bash
-    sudo apt-get update && sudo apt-get install -y clang-17 mull-17
+    sudo apt-get update && sudo apt-get install -y clang-18 mull-18
   fi
 elif [ "$(uname -s)" = "Darwin" ]; then
-  if ! brew list llvm@17 &>/dev/null; then
-    brew install llvm@17
+  if ! brew list llvm@18 &>/dev/null; then
+    brew install llvm@18
   fi
-  if [ ! -f "$BASEDIR/.mull/bin/mull-runner-17" ]; then
+  if [ ! -f "$BASEDIR/.mull/bin/mull-runner-18" ]; then
     MULL_VERSION="0.26.1"
-    MULL_ZIP="Mull-17-${MULL_VERSION}-LLVM-17.0-macOS-arm64-14.7.4.zip"
-    MULL_DIR="Mull-17-${MULL_VERSION}-LLVM-17.0-macOS-arm64-14.7.4"
+    MULL_ZIP="Mull-18-${MULL_VERSION}-LLVM-18.1-macOS-arm64-14.7.4.zip"
+    MULL_DIR="Mull-18-${MULL_VERSION}-LLVM-18.1-macOS-arm64-14.7.4"
     curl -LO "https://github.com/mull-project/mull/releases/download/${MULL_VERSION}/${MULL_ZIP}"
     unzip -o "$MULL_ZIP"
     mv "$MULL_DIR" "$BASEDIR/.mull"

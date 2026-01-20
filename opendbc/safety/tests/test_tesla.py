@@ -95,10 +95,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     return self.packer.make_can_msg_safety("EPAS3S_sysStatus", 0, values)
 
   def _user_brake_msg(self, brake, quality_flag: bool = True):
-    values = {"IBST_driverBrakeApply": 2 if brake else 1}
+    values = {"ESP_driverBrakeApply": 2 if brake else 1}
     if not quality_flag:
-      values["IBST_driverBrakeApply"] = random.choice((0, 3))  # NOT_INIT_OR_OFF, FAULT
-    return self.packer.make_can_msg_safety("IBST_status", 0, values)
+      values["ESP_driverBrakeApply"] = random.choice((0, 3))  # NotInit_orOff, Faulty_SNA
+    return self.packer.make_can_msg_safety("ESP_status", 0, values)
 
   def _speed_msg(self, speed):
     values = {"DI_vehicleSpeed": speed * 3.6}
