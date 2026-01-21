@@ -1087,13 +1087,24 @@ FW_VERSIONS = {
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N9260 14Y',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.01 99211-N9100 14A',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.01 99211-N9240 14T',
+      b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 1.00 99211-N9240 14Q',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00NX4__               1.00 1.00 99110-N9100         ',
       b'\xf1\x00NX4__               1.00 1.01 99110-N9000         ',
       b'\xf1\x00NX4__               1.00 1.02 99110-N9000         ',
       b'\xf1\x00NX4__               1.01 1.00 99110-N9100         ',
+      b'\xf1\x00NX4__               1.01 1.02 99110-N9000         ',
     ],
+    (Ecu.hvac, 0x7b3, None): [
+      b"\xf1\x00NX4e  97255-CZ021CONTROL ASS'Y-HEV   1.04 NX4e HEV DATC(-)0.7 ",
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00NX4 MDPS R 1.00 1.01 57700-R2000\x00\x00\x00\x00\x00\x00\x00\x00\x00',      
+    ],
+    (Ecu.transmission, 0x7e1, None): [
+      b'\xf1\x00PSBG2441  G15\x00\x00\x00\x00\x00\x00\x00SNX4T16XXHG15YB2\xe5\xe3\xad\xd0',
+    ],   
   },
   CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
