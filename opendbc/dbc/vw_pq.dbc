@@ -1877,7 +1877,7 @@ VAL_ 1088 GE1_WK 0 "WK_open" 1 "WK_regulated" 2 "WK_closed" 3 "Failure";
 VAL_ 1088 GE1_StSt_Info 0 "Engine_running_not_necessary_stop_release" 1 "Motor_start_not_mandatory_necessary_stop_prohibition" 2 "Motor_start_absolute_necessary_start_request" 3 "System_error";
 VAL_ 1088 GE1_EGS_Anf 0 "no_requirement" 1 "EGS_requirement";
 VAL_ 1088 GE1_Zielgang 0 "P (Park) | Disengaged" 1 "Gear 1 | Engaged" 2 "Gear 2 | Engaged" 3 "Gear 3 | Engaged" 4 "Gear 4 | Engaged" 5 "Gear 5 | Engaged" 6 "1m Gear" 7 "Gang_R" 8 "Gear 6 | Engaged" 9 "Gear 7 | Engaged" 10 "Gear 8 | Engaged" 14 "Speed Not Defined" 15 "Failure";
-VAL_ 1088 GE1_Wahl_Pos 0 "Intermediate Position" 1 "Pos_1" 2 "Pos_2" 3 "Pos_3" 4 "Pos_4" 5 "D (Drive)" 6 "Pos_N" 7 "R (Reverse)" 8 "P (Park)" 9 "Tiptronic Override" 10 "Pos_Z1" 11 "Pos_Z2" 12 "S (Sport)" 13 "Pos_L" 14 "Gas Pedal Force Downshift" 15 "Failure";
+VAL_ 1088 GE1_Wahl_Pos 8 "P" 7 "R" 6 "N" 5 "D" 9 "U" 12 "S" 14 "T" 10 "T" 11 "T";
 VAL_ 1088 GE1_Notlauf 0 "No Emergency" 1 "No Switching" 2 "Switch to Neutral" 3 "50% Shifting Capacity" 4 "Driving Without UK" 5 "No Emeregency" 6 "No Emergency" 7 "No Emergency, Target Shifting Reached" 15 "Failure";
 VAL_ 1088 GE1_Kuehlung 0 "No Additional Cooling Requested" 1 "20% Additional Fan Cooling Requested" 2 "40% Additional Fan Cooling Requested" 3 "Maximum Additional Fan Cooling Requested";
 VAL_ 1088 GE1_Sta_OBD 0 "MIL Off" 1 "MIL On";
