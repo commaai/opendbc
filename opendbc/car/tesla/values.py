@@ -53,7 +53,7 @@ class CAR(Platforms):
     [
       TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-23"),
       TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024-25"),
-     ],
+    ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
   )
   TESLA_MODEL_X = TeslaPlatformConfig(
@@ -71,6 +71,14 @@ FW_QUERY_CONFIG = FwQueryConfig(
     )
   ]
 )
+
+# Cars with this EPS FW have FSD 14 and use TeslaFlags.FSD_14
+FSD_14_FW = {
+  CAR.TESLA_MODEL_Y: [
+    b'TeMYG4_Legacy3Y_0.0.0 (6),Y4003.04.0',
+    b'TeMYG4_Main_0.0.0 (77),Y4003.05.4',
+  ]
+}
 
 
 class CANBUS:
@@ -119,10 +127,12 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
+  FSD_14 = 2
 
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
+  FSD_14 = 2
 
 
 DBC = CAR.create_dbc_map()
