@@ -9,8 +9,10 @@ MAX_LAT_JERK_UP, MAX_LAT_JERK_DOWN, MAX_LAT_JERK_UP_TOLERANCE = 2.5, 5.0, 0.5
 JERK_MEAS_T = 0.5
 
 
-def get_platforms(lib):
-  return lib.get_all_car_names()
+def get_platforms():
+  # Use optimized method that doesn't import modules
+  from opendbc.car.car_helpers import interfaces
+  return interfaces.get_all_car_names()
 
 
 def calculate_0_5s_jerk(control_params, torque_params, car_lib):
@@ -31,7 +33,7 @@ def car_data(request, car_lib):
   return car_model, mod.CarControllerParams(CP), car_lib.interfaces_module.get_torque_params()[car_model]
 
 
-@pytest.mark.parametrize("car_data", get_platforms(__import__('opendbc.car_discovery', fromlist=['get_all_car_names'])), indirect=True)
+@pytest.mark.parametrize("car_data", get_platforms(), indirect=True)
 class TestLateralLimits:
   def test_jerk_limits(self, car_data, car_lib):
     up, down = calculate_0_5s_jerk(car_data[1], car_data[2], car_lib)

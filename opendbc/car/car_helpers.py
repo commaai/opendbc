@@ -8,17 +8,50 @@ FRAME_FINGERPRINT = 100  # 1s
 # Lazy loading wrapper to defer interface imports until first access
 class _LazyInterfaces(Mapping):
   _cache: dict | None = None
+  _brand_cache: dict | None = None
 
-  def _load(self):
-    if not self._cache:
+  def _load_brands(self):
+    if not self._brand_cache:
       from opendbc.car.values import BRANDS
-      self._cache = {m.value: __import__(f'opendbc.car.{b.__module__.split(".")[-2]}.interface', fromlist=['CarInterface']).CarInterface
-                     for b in BRANDS for m in b}
-    return self._cache
+      self._brand_cache = {b.__module__.split(".")[-2]: list(b) for b in BRANDS}
+    return self._brand_cache
 
-  def __getitem__(self, key): return self._load()[key]
-  def __iter__(self): return iter(self._load())
-  def __len__(self): return len(self._load())
+  def _load_interface(self, brand, car_model):
+    module_name = f'opendbc.car.{brand}.interface'
+    module = __import__(module_name, fromlist=['CarInterface'])
+    return module.CarInterface
+
+  def __getitem__(self, key):
+    if self._cache and key in self._cache:
+      return self._cache[key]
+    
+    if self._cache is None:
+      self._cache = {}
+    
+    # Load only the specific interface requested
+    for brand, models in self._load_brands().items():
+      if key in models:
+        self._cache[key] = self._load_interface(brand, key)
+        return self._cache[key]
+    
+    raise KeyError(f"Car interface {key} not found")
+
+  def __iter__(self):
+    if not self._cache:
+      # Don't load all interfaces during iteration, just return model names
+      for models in self._load_brands().values():
+        yield from models
+    else:
+      return iter(self._cache)
+
+  def __len__(self):
+    if not self._cache:
+      return sum(len(models) for models in self._load_brands().values())
+    return len(self._cache)
+
+  def get_all_car_names(self):
+    """Returns all car model names without loading interfaces"""
+    return [model for models in self._load_brands().values() for model in models]
 
 # Lazy interface loading
 interfaces = _LazyInterfaces()

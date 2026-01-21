@@ -36,4 +36,5 @@ def car_lib():
     CarParams=struct.CarParams,
     interfaces=car_helpers.interfaces,
     FW_VERSIONS=fingerprints.FW_VERSIONS,
+    get_all_car_names=car_helpers.interfaces.get_all_car_names,
   )

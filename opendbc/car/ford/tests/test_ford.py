@@ -2,7 +2,7 @@ import random
 from collections.abc import Iterable
 
 from hypothesis import settings, given, strategies as st
-from parameterized import parameterized
+import pytest
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
@@ -47,7 +47,7 @@ class TestFordFW:
       assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
       assert subaddr is None, "Unexpected ECU subaddress"
 
-  @parameterized.expand(FW_VERSIONS.items())
+  @pytest.mark.parametrize("car_model, fw_versions", FW_VERSIONS.items())
   def test_fw_versions(self, car_model: str, fw_versions: dict[tuple[int, int, int | None], Iterable[bytes]]):
     for (ecu, addr, subaddr), fws in fw_versions.items():
       assert ecu in ECU_PART_NUMBER, "Unexpected ECU"

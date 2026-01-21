@@ -1,4 +1,4 @@
-from parameterized import parameterized
+import pytest
 
 from opendbc.car.gm.fingerprints import FINGERPRINTS
 from opendbc.car.gm.values import CAMERA_ACC_CAR, GM_RX_OFFSET
@@ -7,7 +7,7 @@ CAMERA_DIAGNOSTIC_ADDRESS = 0x24b
 
 
 class TestGMFingerprint:
-  @parameterized.expand(FINGERPRINTS.items())
+  @pytest.mark.parametrize("car_model, fingerprints", FINGERPRINTS.items())
   def test_can_fingerprints(self, car_model, fingerprints):
     assert len(fingerprints) > 0
 
