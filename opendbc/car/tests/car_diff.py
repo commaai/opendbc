@@ -262,7 +262,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
     platforms = get_changed_platforms(cwd, database, interfaces)
 
   if not platforms:
-    print("No car changes detected", file=sys.stderr)
+    print("No car changes detected")
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
