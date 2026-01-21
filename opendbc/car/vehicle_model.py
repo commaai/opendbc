@@ -219,7 +219,7 @@ def dyn_ss_sol(sa: float, u: float, roll: float, VM: VehicleModel) -> np.ndarray
   """
   A, B = create_dyn_state_matrices(u, VM)
   inp = np.array([[sa], [roll]])
-  return -solve(A, B) @ inp  # type: ignore
+  return -solve(A, B) @ inp
 
 
 def calc_slip_factor(VM: VehicleModel) -> float:
