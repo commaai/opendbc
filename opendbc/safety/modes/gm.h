@@ -198,13 +198,12 @@ static safety_config gm_init(uint16_t param) {
   static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4, .check_relay = true},  // pt bus
                                           {0x1E1, 2, 7, .check_relay = false}, {0x184, 2, 8, .check_relay = true}};  // camera bus
 
-  gm_hw = GET_FLAG(param, GM_PARAM_HW_CAM) ? GM_CAM : GM_ASCM;
-
-  if (gm_hw == GM_ASCM) {
-    gm_long_limits = &GM_ASCM_LONG_LIMITS;
-  } else if (gm_hw == GM_CAM) {
+  if (GET_FLAG(param, GM_PARAM_HW_CAM)) {
+    gm_hw = GM_CAM;
     gm_long_limits = &GM_CAM_LONG_LIMITS;
   } else {
+    gm_hw = GM_ASCM;
+    gm_long_limits = &GM_ASCM_LONG_LIMITS;
   }
 
   bool gm_cam_long = false;

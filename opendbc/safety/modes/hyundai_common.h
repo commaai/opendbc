@@ -45,13 +45,13 @@ bool hyundai_alt_limits_2 = false;
 static uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 
 void hyundai_common_init(uint16_t param) {
-  const int HYUNDAI_PARAM_EV_GAS = 1;
-  const int HYUNDAI_PARAM_HYBRID_GAS = 2;
-  const int HYUNDAI_PARAM_CAMERA_SCC = 8;
-  const int HYUNDAI_PARAM_CANFD_LKA_STEERING = 16;
-  const int HYUNDAI_PARAM_ALT_LIMITS = 64; // TODO: shift this down with the rest of the common flags
-  const int HYUNDAI_PARAM_FCEV_GAS = 256;
-  const int HYUNDAI_PARAM_ALT_LIMITS_2 = 512;
+  const uint16_t HYUNDAI_PARAM_EV_GAS = 1;
+  const uint16_t HYUNDAI_PARAM_HYBRID_GAS = 2;
+  const uint16_t HYUNDAI_PARAM_CAMERA_SCC = 8;
+  const uint16_t HYUNDAI_PARAM_CANFD_LKA_STEERING = 16;
+  const uint16_t HYUNDAI_PARAM_ALT_LIMITS = 64; // TODO: shift this down with the rest of the common flags
+  const uint16_t HYUNDAI_PARAM_FCEV_GAS = 256;
+  const uint16_t HYUNDAI_PARAM_ALT_LIMITS_2 = 512;
 
   hyundai_ev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_EV_GAS);
   hyundai_hybrid_gas_signal = !hyundai_ev_gas_signal && GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
@@ -64,7 +64,7 @@ void hyundai_common_init(uint16_t param) {
   hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
 
 #ifdef ALLOW_DEBUG
-  const int HYUNDAI_PARAM_LONGITUDINAL = 4;
+  const uint16_t HYUNDAI_PARAM_LONGITUDINAL = 4;
   hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
 #else
   hyundai_longitudinal = false;
