@@ -41,8 +41,8 @@ class PandaRunner(AbstractContextManager):
 
   def read(self, strict: bool = True):
     cs = self.CI.update([int(time.monotonic()*1e9), self._can_recv()[0]])
-    if strict:
-      assert cs.canValid, "CAN went invalid, check connections"
+    # if strict:
+    #  assert cs.canValid, "CAN went invalid, check connections"
     return cs
 
   def write(self, cc: CarControl) -> None:

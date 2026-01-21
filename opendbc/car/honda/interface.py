@@ -53,10 +53,17 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = alpha_long and (candidate not in HONDA_BOSCH_CANFD)
       ret.pcmCruise = not ret.openpilotLongitudinalControl
     else:
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
+      # ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
+      cfgs = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
+      if candidate == CAR.ACURA_RLX_HYBRID:
+        cfgs.insert(1, get_safety_config(structs.CarParams.SafetyModel.rlxRedPanda))
+        # cfgs.insert(1, get_safety_config(structs.CarParams.SafetyModel.noOutput))
+      ret.safetyConfigs = cfgs
       ret.openpilotLongitudinalControl = True
 
       ret.pcmCruise = True
+      if candidate == CAR.ACURA_RLX_HYBRID:
+        ret.stoppingDecelRate = 0.3
 
     if candidate == CAR.HONDA_CRV_5G:
       ret.enableBsm = 0x12f8bfa7 in fingerprint[CAN.radar]
@@ -151,6 +158,11 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]  # TODO: can probably use some tuning
 
+    elif candidate == CAR.ACURA_RLX_HYBRID:
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2047], [0, -2047]] # RLX steering is negative from other Hondas
+      ret.lateralTuning.pid.kf = 0.000035
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.115], [0.052]]
+
     elif candidate == CAR.ACURA_RDX:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 1000], [0, 1000]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
@@ -206,6 +218,10 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.NIDEC_ALT.value
     if ret.openpilotLongitudinalControl and candidate in HONDA_BOSCH:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.BOSCH_LONG.value
+
+    if (ret.flags & HondaFlags.NIDEC) and (ret.flags & HondaFlags.HYBRID):
+      ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.NIDEC_HYBRID.value
+
     if candidate in HONDA_BOSCH_RADARLESS:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.RADARLESS.value
     if candidate in HONDA_BOSCH_CANFD:
@@ -214,7 +230,7 @@ class CarInterface(CarInterfaceBase):
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
     # to a negative value, so it won't matter. Otherwise, add 0.5 mph margin to not
     # conflict with PCM acc
-    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC})
+    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.ACURA_RLX_HYBRID})
     ret.minEnableSpeed = -1. if ret.autoResumeSng else 25.51 * CV.MPH_TO_MS
 
     ret.steerLimitTimer = 0.8

@@ -22,7 +22,8 @@ class CanBus(CanBusBase):
       # when radar is disabled, steering commands are sent directly to powertrain bus
       self._lkas = self._pt if CP.openpilotLongitudinalControl else self._radar
     else:
-      self._pt, self._radar, self._lkas = self.offset, self.offset + 1, self.offset
+      # self._pt, self._radar, self._lkas = self.offset, self.offset + 1, self.offset
+      self._pt, self._radar, self._lkas = 0, 1, 0
 
   @property
   def pt(self) -> int:
@@ -34,7 +35,8 @@ class CanBus(CanBusBase):
 
   @property
   def camera(self) -> int:
-    return self.offset + 2
+    # return self.offset + 2
+    return 2
 
   @property
   def lkas(self) -> int:
@@ -43,18 +45,17 @@ class CanBus(CanBusBase):
   # B-CAN is forwarded to ACC-CAN radar side (CAN 0 on fake ethernet port)
   @property
   def body(self) -> int:
-    return self.offset
+    # return self.offset
+    return 0
 
 
-def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, car_fingerprint, stock_brake):
+def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, car_fingerprint, stock_brake, CP):
   # TODO: do we loose pressure if we keep pump off for long?
   brakelights = apply_brake > 0
   brake_rq = apply_brake > 0
   pcm_fault_cmd = False
 
   values = {
-    "COMPUTER_BRAKE": apply_brake,
-    "BRAKE_PUMP_REQUEST": pump_on,
     "CRUISE_OVERRIDE": pcm_override,
     "CRUISE_FAULT_CMD": pcm_fault_cmd,
     "CRUISE_CANCEL_CMD": pcm_cancel_cmd,
@@ -67,7 +68,17 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
     "AEB_REQ_2": 0,
     "AEB_STATUS": 0,
   }
-  return packer.make_can_msg("BRAKE_COMMAND", CAN.pt, values)
+  if (CP.flags & HondaFlags.HYBRID):
+    values.update({
+      "COMPUTER_BRAKE_HYBRID": apply_brake,
+      "BRAKE_PUMP_REQUEST_HYBRID": (apply_brake > 0),
+    })
+  else:
+    values.update({
+      "COMPUTER_BRAKE": apply_brake,
+      "BRAKE_PUMP_REQUEST": pump_on,
+    })
+  return packer.make_can_msg("BRAKE_COMMAND", 0, values)
 
 
 def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_counter, car_fingerprint):
@@ -123,7 +134,8 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active, tja_control)
   if tja_control:
     values["STEER_DOWN_TO_ZERO"] = lkas_active
 
-  return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
+#  return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
+  return packer.make_can_msg("STEERING_CONTROL", 4, values)
 
 
 def create_bosch_supplemental_1(packer, CAN):
@@ -162,7 +174,7 @@ def create_acc_hud(packer, bus, CP, enabled, pcm_speed, pcm_accel, hud_control, 
     acc_hud_values['FCM_PROBLEM'] = acc_hud['FCM_PROBLEM']
     acc_hud_values['ICONS'] = acc_hud['ICONS']
 
-  return packer.make_can_msg("ACC_HUD", bus, acc_hud_values)
+  return packer.make_can_msg("ACC_HUD", 0, acc_hud_values)
 
 
 def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available, reduced_steering, alert_steer_required, lkas_hud):
@@ -200,7 +212,7 @@ def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available
     commands.append(packer.make_can_msg('LKAS_HUD_A', bus, lkas_hud_values))
     commands.append(packer.make_can_msg('LKAS_HUD_B', bus, lkas_hud_values))
   else:
-    commands.append(packer.make_can_msg('LKAS_HUD', bus, lkas_hud_values))
+    commands.append(packer.make_can_msg('LKAS_HUD', 4, lkas_hud_values))
 
   return commands
 

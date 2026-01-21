@@ -132,7 +132,7 @@ class CarController(CarControllerBase):
                                                                            CS.out.vEgo, self.CP.carFingerprint)
 
     # *** rate limit after the enable check ***
-    self.brake_last = rate_limit(pre_limit_brake, self.brake_last, -2., DT_CTRL)
+    self.brake_last = rate_limit(pre_limit_brake, self.brake_last, -2., 3 * DT_CTRL)
 
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
     alert_fcw, alert_steer_required = process_hud_alert(hud_control.visualAlert)
@@ -213,7 +213,7 @@ class CarController(CarControllerBase):
           pcm_override = True
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
                                                          pcm_override, pcm_cancel_cmd, alert_fcw,
-                                                         self.CP.carFingerprint, CS.stock_brake))
+                                                         self.CP.carFingerprint, CS.stock_brake, self.CP))
           self.apply_brake_last = apply_brake
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
