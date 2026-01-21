@@ -1,0 +1,42 @@
+name: car diff
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  comment:
+    name: comment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: read
+    steps:
+    - name: Wait for car diff
+      uses: lewagon/wait-on-check-action@v1.3.4
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        check-name: car diff
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        allowed-conclusions: success
+        wait-interval: 20
+    - name: Download car diff
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: tests.yml
+        workflow_conclusion: ''
+        pr: ${{ github.event.number }}
+        name: car_diff_${{ github.event.number }}
+        path: .
+        allow_forks: true
+    - name: Comment car diff on PR
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        filePath: diff.txt
+        comment_tag: car_diff
+        pr_number: ${{ github.event.number }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
