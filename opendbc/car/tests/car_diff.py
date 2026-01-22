@@ -15,6 +15,9 @@ from pathlib import Path
 
 from comma_car_segments import get_comma_car_segments_database, get_url
 
+from opendbc.car import structs
+from opendbc.car.can_definitions import CanData
+from opendbc.car.car_helpers import can_fingerprint, interfaces
 from opendbc.car.logreader import LogReader, decompress_stream
 
 
@@ -49,10 +52,6 @@ def load_can_messages(seg):
 
 
 def replay_segment(platform, can_msgs):
-  from opendbc.car import structs
-  from opendbc.car.can_definitions import CanData
-  from opendbc.car.car_helpers import interfaces, can_fingerprint
-
   _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
 
   def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
@@ -246,8 +245,6 @@ def format_diff(diffs):
 
 
 def main(platform=None, segments_per_platform=10, update_refs=False, all_platforms=False):
-  from opendbc.car.car_helpers import interfaces
-
   cwd = Path(__file__).resolve().parents[3]
   ref_path = cwd / DIFF_BUCKET
   if not update_refs:
