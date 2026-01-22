@@ -43,25 +43,23 @@ def load_can_messages(seg):
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
   msgs = LogReader(url, only_union_types=True)
-  car_fw = next((m.carParams.carFw for m in msgs if m.which() == "carParams"), [])
-  return [m for m in msgs if m.which() == 'can'], car_fw
+  return [m for m in msgs if m.which() == 'can']
 
 
-def replay_segment(platform, can_msgs, car_fw):
-  from opendbc.car import gen_empty_fingerprint, structs
+def replay_segment(platform, can_msgs):
+  from opendbc.car import structs
   from opendbc.car.can_definitions import CanData
-  from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
+  from opendbc.car.car_helpers import interfaces, can_fingerprint
 
-  fingerprint = gen_empty_fingerprint()
-  for msg in can_msgs[:FRAME_FINGERPRINT]:
-    for m in msg.can:
-      if m.src < 64:
-        fingerprint[m.src][m.address] = len(m.dat)
+  _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
+
+  def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
+    return [next(_can_msgs, [])]
+
+  _, fingerprint = can_fingerprint(can_recv)
 
   CarInterface = interfaces[platform]
-  print(car_fw)
-  raise Exception
-  CP = CarInterface.get_params(platform, fingerprint, car_fw, False, False, False)
+  CP = CarInterface.get_params(platform, fingerprint, [], False, False, False)
   CI = CarInterface(CP)
   CC = structs.CarControl().as_reader()
 
@@ -77,8 +75,8 @@ def replay_segment(platform, can_msgs, car_fw):
 def process_segment(args):
   platform, seg, ref_path, update = args
   try:
-    can_msgs, car_fw = load_can_messages(seg)
-    states, timestamps = replay_segment(platform, can_msgs, car_fw)
+    can_msgs = load_can_messages(seg)
+    states, timestamps = replay_segment(platform, can_msgs)
     ref_file = Path(ref_path) / f"{platform}_{seg.replace('/', '_')}.zst"
 
     if update:
