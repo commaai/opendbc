@@ -6,10 +6,10 @@ import subprocess
 import sys
 import tempfile
 import zstandard as zstd
+from tqdm import tqdm
 from tqdm.contrib.concurrent import process_map
 from urllib.request import urlopen
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from comma_car_segments import get_comma_car_segments_database, get_url
@@ -43,7 +43,7 @@ def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
 def load_can_messages(seg):
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
-  msgs = LogReader(url, only_union_types=True)
+  msgs = LogReader(url, only_union_types=True, sort_by_time=True)
   return [m for m in msgs if m.which() == 'can']
 
 
@@ -113,7 +113,7 @@ def get_changed_platforms(cwd, database, interfaces):
 
 def download_refs(ref_path, platforms, segments):
   base_url = f"https://raw.githubusercontent.com/commaai/ci-artifacts/refs/heads/{DIFF_BUCKET}"
-  for platform in platforms:
+  for platform in tqdm(platforms):
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
       try:
