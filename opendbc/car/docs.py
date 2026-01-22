@@ -13,7 +13,7 @@ from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import BaseCarHarness, CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType, SupportType
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.interfaces import get_interface_attr
+from opendbc.car_discovery import get_interface_attr
 from opendbc.car.values import Platform
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.extra_cars import CAR as EXTRA
@@ -30,9 +30,9 @@ EXTRA_PLATFORMS: dict[str, ExtraPlatform] = {str(platform): platform for brand i
 
 def get_params_for_docs(platform) -> CarParams:
   cp_platform = platform if platform in interfaces else MOCK.MOCK
-  CP: CarParams = interfaces[cp_platform].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
-                                                     car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
-                                                     alpha_long=True, is_release=True, docs=True)
+  CP: CarParams = interfaces[cp_platform].get_params(
+    cp_platform, fingerprint=gen_empty_fingerprint(), car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)], alpha_long=True, is_release=True, docs=True
+  )
   return CP
 
 
@@ -84,22 +84,30 @@ def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str, **kwargs) ->
     template = jinja2.Template(f.read(), trim_blocks=True, lstrip_blocks=True)
 
   footnotes = [fn.value.text for fn in get_all_footnotes()]
-  cars_md: str = template.render(all_car_docs=all_car_docs, PartType=PartType,
-                                 group_by_make=group_by_make, footnotes=footnotes,
-                                 Device=Device, Column=Column, ExtraCarsColumn=ExtraCarsColumn,
-                                 BaseCarHarness=BaseCarHarness, SupportType=SupportType,
-                                 **kwargs)
+  cars_md: str = template.render(
+    all_car_docs=all_car_docs,
+    PartType=PartType,
+    group_by_make=group_by_make,
+    footnotes=footnotes,
+    Device=Device,
+    Column=Column,
+    ExtraCarsColumn=ExtraCarsColumn,
+    BaseCarHarness=BaseCarHarness,
+    SupportType=SupportType,
+    **kwargs,
+  )
   return cars_md
 
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description="Auto generates supportability info docs for all known cars",
-                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser = argparse.ArgumentParser(
+    description="Auto generates supportability info docs for all known cars", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+  )
 
   parser.add_argument("--template", default=EXTRA_CARS_MD_TEMPLATE, help="Override default template filename")
   parser.add_argument("--out", default=EXTRA_CARS_MD_OUT, help="Override default generated filename")
   args = parser.parse_args()
 
-  with open(args.out, 'w') as f:
+  with open(args.out, "w") as f:
     f.write(generate_cars_md(get_all_car_docs(), args.template))
   print(f"Generated and written to {args.out}")
