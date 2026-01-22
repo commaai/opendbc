@@ -5,7 +5,7 @@ from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.tesla.teslacan import get_steer_ctrl_type
-from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, CAR
+from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, CAR, TeslaFlags
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -20,6 +20,7 @@ class CarState(CarStateBase):
     self.autopark_prev = False
     self.cruise_enabled_prev = False
     self.fsd14_error_logged = False
+    self.suspected_fsd14 = False
 
     self.hands_on_level = 0
     self.das_control = None
@@ -115,20 +116,23 @@ class CarState(CarStateBase):
     ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == lkas_ctrl_type  # LANE_KEEP_ASSIST
 
     # Stock Autosteer should be off (includes FSD)
+    # TODO: find for TESLA_MODEL_X
     if self.CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
 
       # Because we don't have FSD 14 detection outside of a set of FW, we should check if this FW is accidentally missing from FSD_14_FW
-      # This is only valid when Autopilot is enabled
-      active_fsd = cp_ap_party.vl["DAS_status"]["DAS_autopilotState"] == 6  # ACTIVE_FSD
-      lane_keep_assist = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
-      if active_fsd and lane_keep_assist:
+      # 1. If in Autosteer or FSD, already caught by invalidLkasSetting
+      # 2. If in TACC and DAS ever sends ANGLE_CONTROL (1), we can infer it's trying to do LKAS on FSD 14+
+      angle_control = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 1  # ANGLE_CONTROL
+      if angle_control and not self.CP.flags & TeslaFlags.FSD_14:
+        self.suspected_fsd14 = True
+
+      if self.suspected_fsd14:
         ret.invalidLkasSetting = True
         if not self.fsd14_error_logged:
           carlog.error("FSD 14 detected, but FW not in FSD_14_FW set")
           self.fsd14_error_logged = True
-    else:
-      pass
+
     # Buttons # ToDo: add Gap adjust button
 
     # Messages needed by carcontroller
