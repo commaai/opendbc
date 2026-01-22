@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import os
 import pickle
@@ -267,7 +268,6 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
-
   n_segments = sum(len(s) for s in segments.values())
   print(f"{'Generating' if update_refs else 'Testing'} {n_segments} segments for: {', '.join(platforms)}")
 
