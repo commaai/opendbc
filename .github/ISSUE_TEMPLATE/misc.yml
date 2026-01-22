@@ -21,7 +21,7 @@ body:
     id: route
     attributes:
       label: Provide a route where the issue occurs if applicable
-      description: Ensure the route is fully uploaded at https://useradmin.comma.ai. We cannot look into issues without routes, or at least a Dongle ID.
+      description: Ensure the route is fully uploaded at https://useradmin.comma.ai
       placeholder: 77611a1fac303767|2020-05-11--16-37-07
 
   - type: input
