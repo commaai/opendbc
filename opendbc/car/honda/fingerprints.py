@@ -855,6 +855,7 @@ FW_VERSIONS = {
       b'77959-3V0-A910\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S102-3M1-T050\x00\x00',
       b'8S102-3M3-T050\x00\x00',
       b'8S102-3M6-P030\x00\x00',
       b'8S102-3M6-PA20\x00\x00',
@@ -1065,6 +1066,14 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'36161-TGV-A030\x00\x00',
+    ],
+  },
+  CAR.ACURA_TLX_2G_MMR: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S302-TGV-A030\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'8S102-TGV-A030\x00\x00',
     ],
   },
 }
