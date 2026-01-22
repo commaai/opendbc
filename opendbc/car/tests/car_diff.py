@@ -91,9 +91,19 @@ def process_segment(args):
 
     ref = pickle.loads(decompress_stream(ref_file.read_bytes()))
     diffs = []
+    seen_fields = set()
+    prev_ref_dict = None
     for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
-      for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
-        diffs.append((diff[1], i, diff[2], ts))
+      ref_dict = ref_state.to_dict()
+      for diff in dict_diff(ref_dict, state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
+        _, field, (master_val, pr_val) = diff
+        if field not in seen_fields:
+          seen_fields.add(field)
+          init_val = prev_ref_dict.get(field) if prev_ref_dict else None
+        else:
+          init_val = None
+        diffs.append((field, i, (master_val, pr_val), ts, init_val))
+      prev_ref_dict = ref_dict
     return (platform, seg, diffs, None)
   except Exception:
     return (platform, seg, [], traceback.format_exc())
