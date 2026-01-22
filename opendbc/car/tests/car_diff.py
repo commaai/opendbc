@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import zstandard as zstd
+from tqdm.contrib.concurrent import process_map
 from urllib.request import urlopen
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
@@ -125,8 +126,7 @@ def download_refs(ref_path, platforms, segments):
 def run_replay(platforms, segments, ref_path, update, workers=4):
   work = [(platform, seg, ref_path, update)
           for platform in platforms for seg in segments.get(platform, [])]
-  with ProcessPoolExecutor(max_workers=workers) as pool:
-    return list(pool.map(process_segment, work))
+  return process_map(process_segment, work, max_workers=workers)
 
 
 # ASCII waveforms helpers
