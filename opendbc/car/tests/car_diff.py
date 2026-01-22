@@ -43,26 +43,27 @@ def load_can_messages(seg):
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
   msgs = LogReader(url, only_union_types=True)
-  return [m for m in msgs if m.which() == 'can']
+  car_fw = next((m.carParams.carFw for m in msgs if m.which() == "carParams"), [])
+  return [m for m in msgs if m.which() == 'can'], car_fw
 
 
-def replay_segment(platform, can_msgs):
+def replay_segment(platform, can_msgs, car_fw):
   from opendbc.car import gen_empty_fingerprint, structs
   from opendbc.car.can_definitions import CanData
-  from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces, can_fingerprint
+  from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
 
-  _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs if m.which() == 'can')
-  def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
-    return [next(_can_msgs, [])]
-
-  fingerprint, _ = can_fingerprint(can_recv)
+  fingerprint = gen_empty_fingerprint()
+  for msg in can_msgs[:FRAME_FINGERPRINT]:
+    for m in msg.can:
+      if m.src < 64:
+        fingerprint[m.src][m.address] = len(m.dat)
 
   CarInterface = interfaces[platform]
-  CP = CarInterface.get_params(platform, fingerprint, [], False, False, False)
+  print(car_fw)
+  raise Exception
+  CP = CarInterface.get_params(platform, fingerprint, car_fw, False, False, False)
   CI = CarInterface(CP)
   CC = structs.CarControl().as_reader()
-
-  last_ts = 0
 
   states, timestamps = [], []
   for msg in can_msgs:
@@ -70,18 +71,14 @@ def replay_segment(platform, can_msgs):
     states.append(CI.update([(msg.logMonoTime, frames)]))
     CI.apply(CC, msg.logMonoTime)
     timestamps.append(msg.logMonoTime)
-    # print(msg.logMonoTime)
-    if msg.logMonoTime <= last_ts:
-      print(f"Timestamp error: {msg.logMonoTime} <= {last_ts}")
-    last_ts = msg.logMonoTime
   return states, timestamps
 
 
 def process_segment(args):
   platform, seg, ref_path, update = args
   try:
-    can_msgs = load_can_messages(seg)
-    states, timestamps = replay_segment(platform, can_msgs)
+    can_msgs, car_fw = load_can_messages(seg)
+    states, timestamps = replay_segment(platform, can_msgs, car_fw)
     ref_file = Path(ref_path) / f"{platform}_{seg.replace('/', '_')}.zst"
 
     if update:
@@ -272,7 +269,8 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
-  segments = {'TESLA_MODEL_Y': ['1d7097acc16c1927/00000002--96eeb0ec9e/2', '2c912ca5de3b1ee9/000002ca--b6db903149/16']}
+  segments = {'TESLA_MODEL_Y': ['2c912ca5de3b1ee9/000002ca--b6db903149/16']}
+
   n_segments = sum(len(s) for s in segments.values())
   print(f"{'Generating' if update_refs else 'Testing'} {n_segments} segments for: {', '.join(platforms)}")
 
@@ -285,7 +283,6 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
 
   download_refs(ref_path, platforms, segments)
   results = run_replay(platforms, segments, ref_path, update=False)
-  print(results)
 
   with_diffs = [(p, s, d) for p, s, d, e in results if d]
   errors = [(p, s, e) for p, s, d, e in results if e]
