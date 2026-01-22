@@ -1,6 +1,7 @@
 import copy
 from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, structs
+from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.tesla.teslacan import get_steer_ctrl_type
@@ -18,6 +19,7 @@ class CarState(CarStateBase):
     self.autopark = False
     self.autopark_prev = False
     self.cruise_enabled_prev = False
+    self.fsd14_error_logged = False
 
     self.hands_on_level = 0
     self.das_control = None
@@ -115,6 +117,16 @@ class CarState(CarStateBase):
     # Stock Autosteer should be off (includes FSD)
     if self.CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
+
+      # Because we don't have FSD 14 detection outside of a set of FW, we should check if this FW is accidentally missing from FSD_14_FW
+      # This is only valid when Autopilot is enabled
+      active_fsd = cp_ap_party.vl["DAS_status"]["DAS_autopilotState"] == 6  # ACTIVE_FSD
+      lane_keep_assist = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
+      if active_fsd and lane_keep_assist:
+        ret.invalidLkasSetting = True
+        if not self.fsd14_error_logged:
+          carlog.error("FSD 14 detected, but FW not in FSD_14_FW set")
+          self.fsd14_error_logged = True
     else:
       pass
     # Buttons # ToDo: add Gap adjust button
