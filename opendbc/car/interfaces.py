@@ -4,7 +4,6 @@ import time
 import tomllib
 from abc import abstractmethod, ABC
 from enum import StrEnum
-from typing import Any
 from collections.abc import Callable
 from functools import cache
 
@@ -369,6 +368,3 @@ class CarControllerBase(ABC):
   @abstractmethod
   def update(self, CC: structs.CarControl, CS: CarStateBase, now_nanos: int) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     pass
-
-
-from opendbc.car_discovery import get_interface_attr

@@ -36,6 +36,7 @@ class TestVehicleModel:
         for sa in car_lib.np.linspace(math.radians(-20), math.radians(20), num=11):
           inp = car_lib.np.array([[sa], [roll]])
           x1 = car_lib.np.zeros((2, 1))
-          for _ in range(100): x1 = Ad @ x1 + Bd @ inp
+          for _ in range(100):
+            x1 = Ad @ x1 + Bd @ inp
           x2 = car_lib.vehicle_model.dyn_ss_sol(sa, u, roll, self.VM)
           car_lib.np.testing.assert_almost_equal(x1, x2, decimal=3)

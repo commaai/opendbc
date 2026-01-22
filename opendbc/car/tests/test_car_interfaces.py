@@ -15,7 +15,12 @@ def get_fuzzy_car_interface(car_name, draw):
   from opendbc.car.fingerprints import FW_VERSIONS
   from opendbc.car import fw_versions
   # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
-  fingerprint_strategy = st.fixed_dictionaries({0: st.dictionaries(st.integers(0, 0x800), st.sampled_from([0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]))})
+  fingerprint_strategy = st.fixed_dictionaries({
+    0: st.dictionaries(
+      st.integers(0, 0x800),
+      st.sampled_from([0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64])
+    )
+  })
 
   ALL_ECUS = {ecu for ecus in FW_VERSIONS.values() for ecu in ecus.keys()}
   ALL_ECUS |= {ecu for config in fw_versions.FW_QUERY_CONFIGS.values() for ecu in config.extra_ecus}

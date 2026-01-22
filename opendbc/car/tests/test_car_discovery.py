@@ -1,5 +1,3 @@
-import pytest
-import os
 from opendbc.car_discovery import get_all_car_names
 
 class TestCarDiscovery:

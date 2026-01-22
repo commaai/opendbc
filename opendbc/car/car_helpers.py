@@ -24,16 +24,16 @@ class _LazyInterfaces(Mapping):
   def __getitem__(self, key):
     if self._cache and key in self._cache:
       return self._cache[key]
-    
+
     if self._cache is None:
       self._cache = {}
-    
+
     # Load only the specific interface requested
     for brand, models in self._load_brands().items():
       if key in models:
         self._cache[key] = self._load_interface(brand, key)
         return self._cache[key]
-    
+
     raise KeyError(f"Car interface {key} not found")
 
   def __iter__(self):
@@ -42,7 +42,7 @@ class _LazyInterfaces(Mapping):
       for models in self._load_brands().values():
         yield from models
     else:
-      return iter(self._cache)
+      yield from self._cache
 
   def __len__(self):
     if not self._cache:
@@ -98,7 +98,6 @@ def can_fingerprint(can_recv):
 
 # **** for use live only ****
 def fingerprint(can_recv, can_send, set_obd_multiplexing, num_pandas: int, cached_params=None):
-  from opendbc.car.carlog import carlog
   from opendbc.car.structs import CarParams
   from opendbc.car.fw_versions import get_fw_versions_ordered, get_present_ecus, match_fw_to_car
   from opendbc.car.vin import get_vin, is_valid_vin, VIN_UNKNOWN
@@ -151,6 +150,9 @@ def fingerprint(can_recv, can_send, set_obd_multiplexing, num_pandas: int, cache
   return car_fingerprint, finger, vin, car_fw, source, exact_match
 
 
+def load_interface_from_fingerprint(can_recv, can_send, set_obd_multiplexing=None, num_pandas=1, cached_params=None):
+  from opendbc.car.carlog import carlog
+
   candidate, fingerprints, vin, car_fw, source, exact_match = fingerprint(can_recv, can_send, set_obd_multiplexing, num_pandas, cached_params)
 
   if candidate is None:
@@ -158,7 +160,7 @@ def fingerprint(can_recv, can_send, set_obd_multiplexing, num_pandas: int, cache
     return None
 
   CarInterface = interfaces[candidate]
-  CP = CarInterface.get_params(candidate, fingerprints, car_fw, alpha_long_allowed, is_release, vin=vin, any_fw=not exact_match)
+  CP = CarInterface.get_params(candidate, fingerprints, car_fw, experimental_long=False, docs=False, vin=vin, any_fw=not exact_match)
   CP.carVin = vin
   CP.carFw = car_fw
   CP.fingerprintSource = source
@@ -168,7 +170,6 @@ def fingerprint(can_recv, can_send, set_obd_multiplexing, num_pandas: int, cache
 
 def get_demo_car_params():
   from opendbc.car.mock.values import CAR as MOCK
-  from opendbc.car.structs import CarParams
 
   platform = MOCK.MOCK
   CarInterface = interfaces[platform]

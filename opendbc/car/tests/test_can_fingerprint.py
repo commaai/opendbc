@@ -1,4 +1,3 @@
-import pytest
 
 
 class TestCanFingerprint:
@@ -13,7 +12,10 @@ class TestCanFingerprint:
                  for address, length in fingerprint.items() for src in (0, 1)]
 
           fingerprint_iter = iter([can])
-          car_fingerprint, finger = car_lib.car_helpers.can_fingerprint(lambda **kwargs: [next(fingerprint_iter, [])])
+
+          def can_recv(fingerprint_iter=fingerprint_iter, **kwargs):
+            return [next(fingerprint_iter, [])]
+          car_fingerprint, finger = car_lib.car_helpers.can_fingerprint(can_recv)
           assert car_fingerprint == car_model
           assert finger[0] == fingerprint
           assert finger[1] == fingerprint

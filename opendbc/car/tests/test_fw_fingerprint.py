@@ -1,6 +1,5 @@
 import pytest
 import random
-import time
 from collections import defaultdict
 
 
@@ -167,6 +166,7 @@ class TestFwFingerprintTiming:
 
   def _benchmark_brand(self, brand, num_pandas, mocker, car_lib):
     self.total_time = 0
+
     def fake_get_data(timeout):
       self.total_time += timeout
       return {}
@@ -174,7 +174,13 @@ class TestFwFingerprintTiming:
 
     for _ in range(self.N):
       self.current_obd_multiplexing = True
-      car_lib.fw_versions.get_fw_versions(lambda **kw: self.fake_can_recv(car_lib, **kw), lambda _: None, self.fake_set_obd_multiplexing, brand, num_pandas=num_pandas)
+      car_lib.fw_versions.get_fw_versions(
+        lambda **kw: self.fake_can_recv(car_lib, **kw),
+        lambda _: None,
+        self.fake_set_obd_multiplexing,
+        brand,
+        num_pandas=num_pandas
+      )
     return self.total_time / self.N
 
   def test_startup_timing(self, subtests, mocker, car_lib):
@@ -191,6 +197,7 @@ class TestFwFingerprintTiming:
     for name, args in (('worst', {}), ('best', {'retry': 1})):
       with subtests.test(name=name):
         self.total_time = 0.0
+
         def fake_get_data(timeout):
           self.total_time += timeout
           return {}

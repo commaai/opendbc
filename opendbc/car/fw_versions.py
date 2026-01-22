@@ -1,25 +1,27 @@
 from collections import defaultdict
 from collections.abc import Callable, Iterator
-from typing import Protocol, TypeVar, Any
+from typing import Protocol, TypeVar
 
 from opendbc.car import uds
 from opendbc.car.can_definitions import CanRecvCallable, CanSendCallable
 from opendbc.car.carlog import carlog
 from opendbc.car.structs import CarParams
 from opendbc.car.ecu_addrs import get_ecu_addrs
-from opendbc.car.fw_query_definitions import ESSENTIAL_ECUS, AddrType, EcuAddrBusType, FwQueryConfig, LiveFwVersions, OfflineFwVersions
+from opendbc.car.fw_query_definitions import ESSENTIAL_ECUS, AddrType, EcuAddrBusType, LiveFwVersions, OfflineFwVersions
 from opendbc.car_discovery import get_interface_attr
 
 Ecu = CarParams.Ecu
 FUZZY_EXCLUDE_ECUS = [Ecu.fwdCamera, Ecu.fwdRadar, Ecu.eps, Ecu.debug]
 
 T = TypeVar('T')
+ObdCallback = Callable[[bool], None]
 
 def chunks(l: list[T], n: int = 128) -> Iterator[list[T]]:
   for i in range(0, len(l), n):
     yield l[i:i + n]
 
 def is_brand(brand: str, filter_brand: str | None) -> bool:
+  """Returns if brand matches filter_brand or no brand filter is specified"""
   return filter_brand is None or brand == filter_brand
 
 def __getattr__(name):
@@ -28,9 +30,11 @@ def __getattr__(name):
   elif name == 'FW_QUERY_CONFIGS':
     val = get_interface_attr('FW_QUERY_CONFIG', ignore_none=True)
   elif name == 'MODEL_TO_BRAND':
-    val = {c: b for b, e in VERSIONS.items() for c in e}
+    val = __getattr__('VERSIONS')
+    val = {c: b for b, val in val.items() for c in val}
   elif name == 'REQUESTS':
-    val = [(brand, config, r) for brand, config in FW_QUERY_CONFIGS.items() for r in config.requests]
+    configs = __getattr__('FW_QUERY_CONFIGS')
+    val = [(brand, config, r) for brand, config in configs.items() for r in config.requests]
   else:
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
   globals()[name] = val
@@ -38,20 +42,6 @@ def __getattr__(name):
 
 def __dir__():
   return sorted(list(globals().keys()) + ['FW_QUERY_CONFIGS', 'VERSIONS', 'MODEL_TO_BRAND', 'REQUESTS'])
-
-
-T = TypeVar('T')
-ObdCallback = Callable[[bool], None]
-
-
-def chunks(l: list[T], n: int = 128) -> Iterator[list[T]]:
-  for i in range(0, len(l), n):
-    yield l[i:i + n]
-
-
-def is_brand(brand: str, filter_brand: str | None) -> bool:
-  """Returns if brand matches filter_brand or no brand filter is specified"""
-  return filter_brand is None or brand == filter_brand
 
 
 def build_fw_dict(fw_versions: list[CarParams.CarFw], filter_brand: str | None = None) -> dict[AddrType, set[bytes]]:
@@ -68,11 +58,6 @@ class MatchFwToCar(Protocol):
     ...
 
 
-def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, match_brand: str | None = None, log: bool = True, exclude: str | None = None) -> set[str]:
-  from opendbc.car.fingerprints import FW_VERSIONS
-
-  # Build lookup table (addr, sub_addr, fw) -> list of candidate cars
-  all_fw_versions = defaultdict(list)
 def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, match_brand: str | None = None, log: bool = True, exclude: str | None = None) -> set[str]:
   from opendbc.car.fingerprints import FW_VERSIONS
   from opendbc.car.fw_versions import MODEL_TO_BRAND
@@ -112,7 +97,6 @@ def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, match_brand: str | N
 
 def match_fw_to_car_exact(live_fw_versions: LiveFwVersions, match_brand: str | None = None,
                           log: bool = True, extra_fw_versions: dict | None = None) -> set[str]:
-  from opendbc.car.fingerprints import FW_VERSIONS
   from opendbc.car.fw_versions import FW_QUERY_CONFIGS, VERSIONS
 
   if extra_fw_versions is None:

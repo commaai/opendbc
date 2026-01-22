@@ -17,6 +17,7 @@ def get_platforms():
 
 def calculate_0_5s_jerk(control_params, torque_params, car_lib):
   step, max_lat = control_params.STEER_STEP, torque_params['MAX_LAT_ACCEL_MEASURED']
+
   def get_jerk(delta):
     return min(delta / control_params.STEER_MAX / step * JERK_MEAS_T / 0.01, 1.0) * max_lat / JERK_MEAS_T
   return get_jerk(control_params.STEER_DELTA_UP), get_jerk(control_params.STEER_DELTA_DOWN)
@@ -25,9 +26,11 @@ def calculate_0_5s_jerk(control_params, torque_params, car_lib):
 @pytest.fixture(scope="module")
 def car_data(request, car_lib):
   car_model = request.param
-  if car_model == 'MOCK': pytest.skip('Mock')
+  if car_model == 'MOCK':
+    pytest.skip('Mock')
   CP = car_lib.interfaces[car_model].get_non_essential_params(car_model)
-  if CP.steerControlType != 'torque' or CP.notCar: pytest.skip()
+  if CP.steerControlType != 'torque' or CP.notCar:
+    pytest.skip()
 
   mod = importlib.import_module(f'opendbc.car.{CP.brand}.values')
   return car_model, mod.CarControllerParams(CP), car_lib.interfaces_module.get_torque_params()[car_model]

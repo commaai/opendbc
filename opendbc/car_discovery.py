@@ -1,6 +1,6 @@
 import re
 import os
-from functools import lru_cache
+from functools import cache
 from typing import Any
 from enum import StrEnum
 
@@ -13,7 +13,7 @@ INTERFACE_ATTR_FILE = {
   "FW_QUERY_CONFIG": "values",
 }
 
-@lru_cache(maxsize=None)
+@cache
 def get_all_car_names():
   """
   Scans the opendbc/car directory and used regex to find all
@@ -38,7 +38,7 @@ def get_all_car_names():
       continue
 
     try:
-      with open(values_path, 'r') as f:
+      with open(values_path) as f:
         in_car_class = False
         for line in f:
           if line.lstrip().startswith('class CAR'):
@@ -57,7 +57,7 @@ def get_all_car_names():
     except OSError:
       pass
 
-  return sorted(list(car_names))
+  return sorted(car_names)
 
 
 def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: bool = False) -> dict[str | StrEnum, Any]:
