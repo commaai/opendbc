@@ -116,11 +116,8 @@ def download_refs(ref_path, platforms, segments):
   for platform in tqdm(platforms):
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
-      try:
-        with urlopen(f"{base_url}/{filename}") as resp:
-          (Path(ref_path) / filename).write_bytes(resp.read())
-      except Exception:
-        pass
+      with urlopen(f"{base_url}/{filename}") as resp:
+        (Path(ref_path) / filename).write_bytes(resp.read())
 
 
 def run_replay(platforms, segments, ref_path, update, workers=4):
