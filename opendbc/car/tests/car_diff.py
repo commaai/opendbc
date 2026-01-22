@@ -267,7 +267,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
-  segments = {'TESLA_MODEL_Y': ['2c912ca5de3b1ee9/000002ca--b6db903149/16']}
+  # segments = {'TESLA_MODEL_Y': ['2c912ca5de3b1ee9/000002ca--b6db903149/16']}
 
   n_segments = sum(len(s) for s in segments.values())
   print(f"{'Generating' if update_refs else 'Testing'} {n_segments} segments for: {', '.join(platforms)}")
