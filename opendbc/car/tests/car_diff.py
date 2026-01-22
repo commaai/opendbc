@@ -178,8 +178,8 @@ def group_frames(diffs, max_gap=15):
   groups = []
   current = [diffs[0]]
   for diff in diffs[1:]:
-    _, frame, _, _ = diff
-    _, prev_frame, _, _ = current[-1]
+    _, frame, _, _, _ = diff
+    _, prev_frame, _, _, _ = current[-1]
     if frame <= prev_frame + max_gap:
       current.append(diff)
     else:
@@ -189,17 +189,16 @@ def group_frames(diffs, max_gap=15):
   return groups
 
 
-def build_signals(group):
-  _, first_frame, _, _ = group[0]
-  _, last_frame, (final_master, _), _ = group[-1]
+def build_signals(group, init_val):
+  _, first_frame, _, _, _ = group[0]
+  _, last_frame, (final_master, _), _, _ = group[-1]
   start = max(0, first_frame - 5)
   end = last_frame + 6
-  init = not final_master
-  diff_at = {frame: (m, p) for _, frame, (m, p), _ in group}
+  diff_at = {frame: (m, p) for _, frame, (m, p), _, _ in group}
   master_vals = []
   pr_vals = []
-  master = init
-  pr = init
+  master = init_val
+  pr = init_val
   for frame in range(start, end):
     if frame in diff_at:
       master, pr = diff_at[frame]
@@ -207,12 +206,12 @@ def build_signals(group):
       master = pr = final_master
     master_vals.append(master)
     pr_vals.append(pr)
-  return master_vals, pr_vals, init, start, end
+  return master_vals, pr_vals, init_val, start, end
 
 
 def format_numeric_diffs(diffs):
   lines = []
-  for _, frame, (old_val, new_val), _ in diffs[:10]:
+  for _, frame, (old_val, new_val), _, _ in diffs[:10]:
     lines.append(f"    frame {frame}: {old_val} -> {new_val}")
   if len(diffs) > 10:
     lines.append(f"    (... {len(diffs) - 10} more)")
