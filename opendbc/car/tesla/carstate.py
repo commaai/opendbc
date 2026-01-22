@@ -115,9 +115,6 @@ class CarState(CarStateBase):
     # Stock Autosteer should be off (includes FSD)
     if self.CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
-      # print(ret.invalidLkasSetting)  # why does this flicker??
-      # print(cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"])
-      # print(cp_ap_party.vl["DAS_settings"]["DAS_settingCounter"])
     else:
       pass
     # Buttons # ToDo: add Gap adjust button
