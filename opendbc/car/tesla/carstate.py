@@ -124,7 +124,7 @@ class CarState(CarStateBase):
       # 1. If in Autosteer or FSD, already caught by invalidLkasSetting
       # 2. If in TACC and DAS ever sends ANGLE_CONTROL (1), we can infer it's trying to do LKAS on FSD 14+
       angle_control = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 1  # ANGLE_CONTROL
-      if angle_control and not self.CP.flags & TeslaFlags.FSD_14:
+      if not ret.invalidLkasSetting and angle_control and not self.CP.flags & TeslaFlags.FSD_14:
         self.suspected_fsd14 = True
 
       if self.suspected_fsd14:
