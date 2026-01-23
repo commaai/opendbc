@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import os
 import pickle
@@ -6,9 +7,10 @@ import subprocess
 import sys
 import tempfile
 import zstandard as zstd
+from tqdm import tqdm
+from tqdm.contrib.concurrent import process_map
 from urllib.request import urlopen
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from comma_car_segments import get_comma_car_segments_database, get_url
@@ -42,20 +44,21 @@ def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
 def load_can_messages(seg):
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
-  msgs = LogReader(url, only_union_types=True)
+  msgs = LogReader(url, only_union_types=True, sort_by_time=True)
   return [m for m in msgs if m.which() == 'can']
 
 
 def replay_segment(platform, can_msgs):
-  from opendbc.car import gen_empty_fingerprint, structs
+  from opendbc.car import structs
   from opendbc.car.can_definitions import CanData
-  from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
+  from opendbc.car.car_helpers import interfaces, can_fingerprint
 
-  fingerprint = gen_empty_fingerprint()
-  for msg in can_msgs[:FRAME_FINGERPRINT]:
-    for m in msg.can:
-      if m.src < 64:
-        fingerprint[m.src][m.address] = len(m.dat)
+  _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
+
+  def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
+    return [next(_can_msgs, [])]
+
+  _, fingerprint = can_fingerprint(can_recv)
 
   CarInterface = interfaces[platform]
   CP = CarInterface.get_params(platform, fingerprint, [], False, False, False)
@@ -111,7 +114,7 @@ def get_changed_platforms(cwd, database, interfaces):
 
 def download_refs(ref_path, platforms, segments):
   base_url = f"https://raw.githubusercontent.com/commaai/ci-artifacts/refs/heads/{DIFF_BUCKET}"
-  for platform in platforms:
+  for platform in tqdm(platforms):
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
       try:
@@ -124,8 +127,7 @@ def download_refs(ref_path, platforms, segments):
 def run_replay(platforms, segments, ref_path, update, workers=4):
   work = [(platform, seg, ref_path, update)
           for platform in platforms for seg in segments.get(platform, [])]
-  with ProcessPoolExecutor(max_workers=workers) as pool:
-    return list(pool.map(process_segment, work))
+  return process_map(process_segment, work, max_workers=workers)
 
 
 # ASCII waveforms helpers
