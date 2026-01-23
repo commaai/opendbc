@@ -179,25 +179,22 @@ def group_frames(diffs, max_gap=15):
   return groups
 
 
-def build_signals(group):
+def build_signals(group, ref, field):
   _, first_frame, _, _ = group[0]
-  _, last_frame, (final_master, _), _ = group[-1]
-  start = max(0, first_frame - 5)
-  end = last_frame + 6
-  init = not final_master
+  _, last_frame, _, _ = group[-1]
+  start = max(0, first_frame - PADDING)
+  end = min(last_frame + PADDING + 1, len(ref))
   diff_at = {frame: (m, p) for _, frame, (m, p), _ in group}
   master_vals = []
   pr_vals = []
-  master = init
-  pr = init
   for frame in range(start, end):
     if frame in diff_at:
       master, pr = diff_at[frame]
-    elif frame > last_frame:
-      master = pr = final_master
+    else:
+      master = pr = ref[frame][1].to_dict().get(field)
     master_vals.append(master)
     pr_vals.append(pr)
-  return master_vals, pr_vals, init, start, end
+  return master_vals, pr_vals, start, end
 
 
 def format_numeric_diffs(diffs):
@@ -217,14 +214,14 @@ def format_boolean_diffs(diffs):
   ms = time_ms / frame_time if frame_time else 10.0
   lines = []
   for group in group_frames(diffs):
-    master_vals, pr_vals, init, start, end = build_signals(group)
-    master_rises, master_falls = find_edges(master_vals, init)
-    pr_rises, pr_falls = find_edges(pr_vals, init)
+    master_vals, pr_vals, start, end = build_signals(group, ref, field)
+    master_rises, master_falls = find_edges(master_vals, master_vals[0])
+    pr_rises, pr_falls = find_edges(pr_vals, pr_vals[0])
     if bool(master_rises) != bool(pr_rises) or bool(master_falls) != bool(pr_falls):
       continue
     lines.append(f"\n  frames {start}-{end - 1}")
-    lines.append(render_waveform("master", master_vals, init))
-    lines.append(render_waveform("PR", pr_vals, init))
+    lines.append(render_waveform("master", master_vals, master_vals[0]))
+    lines.append(render_waveform("PR", pr_vals, pr_vals[0]))
     for edge_type, master_edges, pr_edges in [("rise", master_rises, pr_rises), ("fall", master_falls, pr_falls)]:
       msg = format_timing(edge_type, master_edges, pr_edges, ms)
       if msg:
