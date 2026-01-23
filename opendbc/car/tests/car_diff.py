@@ -191,7 +191,10 @@ def build_signals(group, ref, field):
     if frame in diff_at:
       master, pr = diff_at[frame]
     else:
-      master = pr = ref[frame][1].to_dict().get(field)
+      val = ref[frame][1].to_dict()
+      for k in field.split("."):
+        val = val.get(k) if isinstance(val, dict) else None
+      master = pr = val
     master_vals.append(master)
     pr_vals.append(pr)
   return master_vals, pr_vals, start, end
