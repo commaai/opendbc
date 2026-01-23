@@ -128,10 +128,10 @@ def run_replay(platforms, segments, ref_path, update, workers=4):
 
 
 # ASCII waveforms helpers
-def find_edges(vals, init):
+def find_edges(vals):
   rises = []
   falls = []
-  prev = init
+  prev = vals[0]
   for i, val in enumerate(vals):
     if val and not prev:
       rises.append(i)
@@ -141,10 +141,10 @@ def find_edges(vals, init):
   return rises, falls
 
 
-def render_waveform(label, vals, init):
+def render_waveform(label, vals):
   wave = {(False, False): "_", (True, True): "‾", (False, True): "/", (True, False): "\\"}
   line = f"  {label}:".ljust(12)
-  prev = init
+  prev = vals[0]
   for val in vals:
     line += wave[(prev, val)]
     prev = val
@@ -215,13 +215,13 @@ def format_boolean_diffs(diffs):
   lines = []
   for group in group_frames(diffs):
     master_vals, pr_vals, start, end = build_signals(group, ref, field)
-    master_rises, master_falls = find_edges(master_vals, master_vals[0])
-    pr_rises, pr_falls = find_edges(pr_vals, pr_vals[0])
+    master_rises, master_falls = find_edges(master_vals)
+    pr_rises, pr_falls = find_edges(pr_vals)
     if bool(master_rises) != bool(pr_rises) or bool(master_falls) != bool(pr_falls):
       continue
     lines.append(f"\n  frames {start}-{end - 1}")
-    lines.append(render_waveform("master", master_vals, master_vals[0]))
-    lines.append(render_waveform("PR", pr_vals, pr_vals[0]))
+    lines.append(render_waveform("master", master_vals))
+    lines.append(render_waveform("PR", pr_vals))
     for edge_type, master_edges, pr_edges in [("rise", master_rises, pr_rises), ("fall", master_falls, pr_falls)]:
       msg = format_timing(edge_type, master_edges, pr_edges, ms)
       if msg:
