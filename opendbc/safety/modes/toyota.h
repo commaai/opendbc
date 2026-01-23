@@ -158,6 +158,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool toyota_tx_hook(const CANPacket_t *msg) {
+  /*
   const TorqueSteeringLimits TOYOTA_TORQUE_STEERING_LIMITS = {
     .max_torque = 1500,
     .max_rate_up = 15,          // ramp up slow
@@ -172,7 +173,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     .max_invalid_request_frames = 1,
     .min_valid_request_rt_interval = 171000,  // 171ms; a ~10% buffer on cutting every 19 frames
     .has_steer_req_tolerance = true,
-  };
+  }; */
 
   static const AngleSteeringLimits TOYOTA_ANGLE_STEERING_LIMITS = {
     // LTA angle limits
