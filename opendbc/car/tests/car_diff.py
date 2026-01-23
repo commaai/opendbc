@@ -25,6 +25,7 @@ from opendbc.car.logreader import LogReader, decompress_stream
 TOLERANCE = 1e-4
 DIFF_BUCKET = "car_diff"
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
+PADDING = 5
 
 
 def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
@@ -182,8 +183,8 @@ def group_frames(diffs, max_gap=15):
 def build_signals(group):
   _, first_frame, _, _ = group[0]
   _, last_frame, (final_master, _), _ = group[-1]
-  start = max(0, first_frame - 5)
-  end = last_frame + 6
+  start = max(0, first_frame - PADDING)
+  end = last_frame + PADDING + 1
   init = not final_master
   diff_at = {frame: (m, p) for _, frame, (m, p), _ in group}
   master_vals = []
