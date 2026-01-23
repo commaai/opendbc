@@ -217,8 +217,6 @@ def format_boolean_diffs(diffs):
     master_vals, pr_vals, start, end = build_signals(group, ref, field)
     master_rises, master_falls = find_edges(master_vals)
     pr_rises, pr_falls = find_edges(pr_vals)
-    if bool(master_rises) != bool(pr_rises) or bool(master_falls) != bool(pr_falls):
-      continue
     lines.append(f"\n  frames {start}-{end - 1}")
     lines.append(render_waveform("master", master_vals))
     lines.append(render_waveform("PR", pr_vals))
