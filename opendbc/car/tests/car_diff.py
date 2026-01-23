@@ -99,10 +99,10 @@ def process_segment(args):
         _, field, (master_val, pr_val) = diff
         if field not in seen_fields:
           seen_fields.add(field)
-          init_val = prev_ref_dict.get(field) if prev_ref_dict else None
+          init = prev_ref_dict.get(field) if prev_ref_dict else None
         else:
-          init_val = None
-        diffs.append((field, i, (master_val, pr_val), ts, init_val))
+          init = None
+        diffs.append((field, i, (master_val, pr_val), ts, init))
       prev_ref_dict = ref_dict
     return (platform, seg, diffs, None)
   except Exception:
@@ -189,7 +189,7 @@ def group_frames(diffs, max_gap=15):
   return groups
 
 
-def build_signals(group, init_val):
+def build_signals(group, init):
   _, first_frame, _, _, _ = group[0]
   _, last_frame, (final_master, _), _, _ = group[-1]
   start = max(0, first_frame - 5)
@@ -197,8 +197,8 @@ def build_signals(group, init_val):
   diff_at = {frame: (m, p) for _, frame, (m, p), _, _ in group}
   master_vals = []
   pr_vals = []
-  master = init_val
-  pr = init_val
+  master = init
+  pr = init
   for frame in range(start, end):
     if frame in diff_at:
       master, pr = diff_at[frame]
@@ -206,7 +206,7 @@ def build_signals(group, init_val):
       master = pr = final_master
     master_vals.append(master)
     pr_vals.append(pr)
-  return master_vals, pr_vals, init_val, start, end
+  return master_vals, pr_vals, init, start, end
 
 
 def format_numeric_diffs(diffs):
@@ -219,16 +219,16 @@ def format_numeric_diffs(diffs):
 
 
 def format_boolean_diffs(diffs):
-  _, first_frame, _, first_ts, init_val = diffs[0]
+  _, first_frame, _, first_ts, init = diffs[0]
   _, last_frame, _, last_ts, _ = diffs[-1]
-  if init_val is None:
+  if init is None:
     return []
   frame_time = last_frame - first_frame
   time_ms = (last_ts - first_ts) / 1e6
   ms = time_ms / frame_time if frame_time else 10.0
   lines = []
   for group in group_frames(diffs):
-    master_vals, pr_vals, init, start, end = build_signals(group, init_val)
+    master_vals, pr_vals, init, start, end = build_signals(group, init)
     master_rises, master_falls = find_edges(master_vals, init)
     pr_rises, pr_falls = find_edges(pr_vals, init)
     lines.append(f"\n  frames {start}-{end - 1}")
