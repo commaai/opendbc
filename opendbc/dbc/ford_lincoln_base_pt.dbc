@@ -163,7 +163,7 @@ VAL_TABLE_ EngExhMdeQuiet_D2_Stat 7 "Faulty" 6 "NotUsed_2" 5 "NotUsed_1" 4 "Trac
 VAL_TABLE_ GasPrtc_D_RqDsply 7 "NotUsed_5" 6 "NotUsed_4" 5 "NotUsed_3" 4 "NotUsed_2" 3 "NotUsed_1" 2 "GpfOverLimit" 1 "GpfAtLimit" 0 "NormalOperation";
 VAL_TABLE_ TjaWarn_D_Rq 7 "NotUsed_4" 6 "NotUsed_3" 5 "NotUsed_2" 4 "NotUsed_1" 3 "HardTakeOverLevel2" 2 "HardTakeOverLevel1" 1 "TrafficJamAssistCancel" 0 "NoWarning";
 VAL_TABLE_ Faulty_7FF 2047 "Faulty";
-VAL_TABLE_ Tja_D_Stat 7 "NotUsed_1" 6 "ActiveWarningRight" 5 "ActiveWarningLeft" 4 "ActiveInterventionRight" 3 "ActiveInterventionLeft" 2 "Active" 1 "Standby" 0 "Off";
+VAL_TABLE_ Tja_D_Stat 7 "HandsFreeActive" 6 "ActiveWarningRight" 5 "ActiveWarningLeft" 4 "ActiveInterventionRight" 3 "ActiveInterventionLeft" 2 "Active" 1 "Standby" 0 "Off";
 VAL_TABLE_ TjaMsgTxt_D_Dsply 7 "NotUsed_4" 6 "NotUsed_3" 5 "NotUsed_2" 4 "NotUsed_1" 3 "TurnOnAdaptCruiseControl" 2 "TrafficJamAssistSelected" 1 "TrafficJamAssistUnavailabl" 0 "NoMessage";
 VAL_TABLE_ PwSrcULowMde_D_Actl 3 "NotUsed_1" 2 "ReverseBoost" 1 "ForwardBuck" 0 "Standby";
 VAL_TABLE_ ApaTrgtDist_D_Stat 15 "Step15" 14 "Step14" 13 "Step13" 12 "Step12" 11 "Step11" 10 "Step10" 9 "Step9" 8 "Step8" 7 "Step7" 6 "Step6" 5 "Step5" 4 "Step4" 3 "Step3" 2 "Step2" 1 "Step1" 0 "Off";
@@ -12615,7 +12615,7 @@ VAL_ 394 AccStopStat_D_Dsply 3 "PressResume" 2 "Stopped" 1 "ResumeReady" 0 "NoDi
 VAL_ 394 AccTrgDist2_D_Dsply 15 "DIST_ACTIVE_13_Farthest" 14 "DIST_ACTIVE_12" 13 "DIST_ACTIVE_11" 12 "DIST_ACTIVE_10" 11 "DIST_ACTIVE_9" 10 "DIST_ACTIVE_8" 9 "DIST_ACTIVE_7" 8 "DIST_ACTIVE_6" 7 "DIST_ACTIVE_5" 6 "DIST_ACTIVE_4" 5 "DIST_ACTIVE_3" 4 "DIST_ACTIVE_2" 3 "DIST_ACTIVE_1_Closest" 2 "DIST_ACTIVE_No_Target" 1 "DIST_STANDBY" 0 "DIST_OFF";
 VAL_ 394 AccStopRes_B_Dsply 1 "Yes" 0 "No";
 VAL_ 394 TjaWarn_D_Rq 7 "NotUsed_4" 6 "NotUsed_3" 5 "NotUsed_2" 4 "NotUsed_1" 3 "HardTakeOverLevel2" 2 "HardTakeOverLevel1" 1 "TrafficJamAssistCancel" 0 "NoWarning";
-VAL_ 394 Tja_D_Stat 7 "NotUsed_1" 6 "ActiveWarningRight" 5 "ActiveWarningLeft" 4 "ActiveInterventionRight" 3 "ActiveInterventionLeft" 2 "Active" 1 "Standby" 0 "Off";
+VAL_ 394 Tja_D_Stat 7 "HandsFreeActive" 6 "ActiveWarningRight" 5 "ActiveWarningLeft" 4 "ActiveInterventionRight" 3 "ActiveInterventionLeft" 2 "Active" 1 "Standby" 0 "Off";
 VAL_ 394 TjaMsgTxt_D_Dsply 7 "NotUsed_4" 6 "NotUsed_3" 5 "NotUsed_2" 4 "NotUsed_1" 3 "TurnOnAdaptCruiseControl" 2 "TrafficJamAssistSelected" 1 "TrafficJamAssistUnavailabl" 0 "NoMessage";
 VAL_ 394 IaccLamp_D_Rq 3 "NotUsed_2" 2 "NotUsed_1" 1 "DisplayIaccIcon" 0 "DoNotDisplayIaccIcon";
 VAL_ 394 AccMsgTxt_D2_Rq 15 "NotUsed_1" 14 "NCC_Enabled_Warning" 13 "IACC_TJA_Selected" 12 "ACC_TJA_Selected" 11 "IACC_Selected" 10 "Press_Brake_To_Hold" 9 "Only_Following_In_Low_Spd" 8 "TJA_Unavailable" 7 "Shift_Down" 6 "IACC_Unavailable" 5 "ACC_Selected" 4 "ACC_Overridden" 3 "Brake_Capacity_Warning" 2 "ACC_Cancelled" 1 "ACC_Unavailable" 0 "No_Text";
