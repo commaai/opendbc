@@ -31,5 +31,6 @@ class TestGwm(common.PandaSafetyTest):
   def test_rx_hook(self):
     self.assertTrue(self._rx(self._speed_msg(0)))
 
+
 if __name__ == "__main__":
   unittest.main()

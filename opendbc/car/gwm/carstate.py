@@ -1,4 +1,4 @@
-from opendbc.car import structs, Bus
+from opendbc.car import structs, Bus, CanBusBase
 from opendbc.can.parser import CANParser
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.gwm.values import DBC
@@ -47,8 +47,15 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
+    # Compute bus offset from number of safetyConfigs so multipanda setups
+    # (internal + external pandas) map DBCs to the correct physical bus.
+    can_base = CanBusBase(CP, None)
+    main_bus = can_base.offset
+    adas_bus = can_base.offset + 1
+    cam_bus = can_base.offset + 2
+
     return {
-      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 1),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
+      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.pt], [], main_bus),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], adas_bus),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], cam_bus),
     }

@@ -14,8 +14,8 @@ def gwm_checksum(address: int, sig, d: bytearray) -> int:
     return crc ^ xor_out
 
 
-def create_helloworld(packer):
+def create_helloworld(packer, bus=0):
     values = {
         'STEERING_TORQUE': 2000,
     }
-    return packer.make_can_msg('STEER_AND_AP_STALK', 0, values)
+    return packer.make_can_msg('STEER_AND_AP_STALK', bus, values)
