@@ -14,9 +14,9 @@ scons -j$(nproc) -D
 pytest -n8 --ignore-glob=misra/*
 
 if [ "$(uname)" = "Darwin" ]; then
-  GCOV_EXEC="/opt/homebrew/opt/llvm@17/bin/llvm-cov gcov"
+  GCOV_EXEC="/opt/homebrew/opt/llvm@18/bin/llvm-cov gcov"
 else
-  GCOV_EXEC="llvm-cov-17 gcov"
+  GCOV_EXEC="llvm-cov-18 gcov"
 fi
 
 # generate and open report
