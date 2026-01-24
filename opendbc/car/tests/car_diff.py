@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import traceback
 import zstandard as zstd
 from tqdm import tqdm
 from tqdm.contrib.concurrent import process_map
@@ -94,8 +95,8 @@ def process_segment(args):
       for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
         diffs.append((diff[1], i, diff[2], ts))
     return (platform, seg, diffs, None)
-  except Exception as e:
-    return (platform, seg, [], str(e))
+  except Exception:
+    return (platform, seg, [], traceback.format_exc())
 
 
 def get_changed_platforms(cwd, database, interfaces):
