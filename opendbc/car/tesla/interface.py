@@ -22,6 +22,12 @@ class CarInterface(CarInterfaceBase):
     ret.steerAtStandstill = True
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
+
+    # Radar support is intended to work for:
+    # - Tesla Model 3 vehicles built approximately mid-2017 through early-2021
+    # - Tesla Model Y vehicles built approximately mid-2020 through early-2021
+    # - Vehicles equipped with the Continental ARS4-B radar (used on HW2 / HW2.5 / early HW3)
+    # - Radar CAN lines must be tapped and connected to CAN bus 1 (normally not used for tesla vehicles)
     ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[candidate]
 
     ret.alphaLongitudinalAvailable = True
