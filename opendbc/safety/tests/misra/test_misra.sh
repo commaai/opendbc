@@ -36,8 +36,6 @@ cppcheck() {
   echo -e ""${@//$BASEDIR/}"\n\n" >> $CHECKLIST # (absolute path removed)
 
   OPENDBC_ROOT=${OPENDBC_ROOT:-$BASEDIR}
-
-  # cppcheck doesn't need system headers for MISRA analysis - it handles standard types via --platform
   $CPPCHECK_DIR/cppcheck --inline-suppr -I $OPENDBC_ROOT \
           --suppress=missingIncludeSystem \
           --suppressions-list=$DIR/suppressions.txt  \
