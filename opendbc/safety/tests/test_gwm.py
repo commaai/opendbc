@@ -9,6 +9,7 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 class TestGwm(common.PandaSafetyTest):
   TX_MSGS = [[0xA1, 0]]
+  FWD_BLACKLISTED_ADDRS = {2: [0xA1]}
 
   def setUp(self):
     self.packer = CANPackerPanda("gwm_haval_h6_mk3_generated")

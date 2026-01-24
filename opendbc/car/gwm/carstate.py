@@ -2,15 +2,24 @@ from opendbc.car import structs, Bus, CanBusBase
 from opendbc.can.parser import CANParser
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.gwm.values import DBC
+import copy
 
 GearShifter = structs.CarState.GearShifter
 TransmissionType = structs.CarParams.TransmissionType
 
 
 class CarState(CarStateBase):
+  def __init__(self, CP):
+    super().__init__(CP)
+    # Store original message to copy it later in carcontroller
+    self.steer_and_ap_stalk_msg = {}
+
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.main]
     ret = structs.CarState()
+
+    # Store the original message to reuse in carcontroller
+    self.steer_and_ap_stalk_msg = copy.copy(cp.vl["STEER_AND_AP_STALK"])
 
     # car speed
     self.parse_wheel_speeds(ret,

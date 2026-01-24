@@ -116,8 +116,8 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
 static safety_config gwm_init(uint16_t param) {
   UNUSED(param);
   static const CanMsg GWM_TX_MSGS[] = {
-    {GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, .check_relay = false}, // EPS steering
-    // {GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, .check_relay = true}, // EPS steering
+    // {GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, .check_relay = false}, // EPS steering
+    {GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, .check_relay = true}, // EPS steering
   };
 
   static RxCheck psa_rx_checks[] = {
