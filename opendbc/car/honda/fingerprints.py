@@ -220,10 +220,12 @@ FW_VERSIONS = {
       b'57114-TBG-A340\x00\x00',
       b'57114-TBG-A350\x00\x00',
       b'57114-TGG-A340\x00\x00',
+      b'57114-TGG-C120\x00\x00',
       b'57114-TGG-C320\x00\x00',
       b'57114-TGG-G320\x00\x00',
       b'57114-TGG-L320\x00\x00',
       b'57114-TGG-L330\x00\x00',
+      b'57114-TGH-A130\x00\x00',
       b'57114-TGH-L130\x00\x00',
       b'57114-TGJ-Q330\x00\x00',
       b'57114-TGK-T320\x00\x00',
@@ -238,6 +240,7 @@ FW_VERSIONS = {
       b'39990-TGG-A020\x00\x00',
       b'39990-TGG-A120\x00\x00',
       b'39990-TGG-J510\x00\x00',
+      b'39990-TGH-J020\x00\x00',
       b'39990-TGH-J530\x00\x00',
       b'39990-TGL-E130\x00\x00',
       b'39990-TGN-E120\x00\x00',
@@ -254,6 +257,7 @@ FW_VERSIONS = {
       b'77959-TGG-J320\x00\x00',
       b'77959-TGG-Q810\x00\x00',
       b'77959-TGG-Z820\x00\x00',
+      b'77959-TGH-E220\x00\x00',
       b'77959-TGH-J110\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
@@ -266,6 +270,7 @@ FW_VERSIONS = {
       b'36802-TGG-A130\x00\x00',
       b'36802-TGG-G040\x00\x00',
       b'36802-TGG-G130\x00\x00',
+      b'36802-TGH-A030\x00\x00',
       b'36802-TGH-A140\x00\x00',
       b'36802-TGK-Q030\x00\x00',
       b'36802-TGK-Q120\x00\x00',
@@ -282,6 +287,7 @@ FW_VERSIONS = {
       b'36161-TGG-G070\x00\x00',
       b'36161-TGG-G130\x00\x00',
       b'36161-TGG-G140\x00\x00',
+      b'36161-TGH-A020\x00\x00',
       b'36161-TGH-A140\x00\x00',
       b'36161-TGK-Q040\x00\x00',
       b'36161-TGK-Q120\x00\x00',
@@ -855,6 +861,7 @@ FW_VERSIONS = {
       b'77959-3V0-A910\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S102-3M1-T050\x00\x00',
       b'8S102-3M3-T050\x00\x00',
       b'8S102-3M6-P030\x00\x00',
       b'8S102-3M6-PA20\x00\x00',
@@ -1009,6 +1016,7 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'8S102-30A-A050\x00\x00',
       b'8S102-30A-A060\x00\x00',
+      b'8S102-30A-A070\x00\x00',
     ],
   },
   CAR.HONDA_CRV_6G: {
@@ -1064,6 +1072,14 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'36161-TGV-A030\x00\x00',
+    ],
+  },
+  CAR.ACURA_TLX_2G_MMR: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S302-TGV-A030\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'8S102-TGV-A030\x00\x00',
     ],
   },
 }
