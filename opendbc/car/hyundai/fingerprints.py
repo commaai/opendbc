@@ -698,6 +698,7 @@ FW_VERSIONS = {
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310-K4271 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4271 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4970 4OEPC102',
+      b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4971 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310K4260\x00 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310K4261\x00 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310K4971\x00 4OEPC102',
@@ -1084,12 +1085,14 @@ FW_VERSIONS = {
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N9260 14Y',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.01 99211-N9100 14A',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.01 99211-N9240 14T',
+      b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 1.00 99211-N9240 14Q',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00NX4__               1.00 1.00 99110-N9100         ',
       b'\xf1\x00NX4__               1.00 1.01 99110-N9000         ',
       b'\xf1\x00NX4__               1.00 1.02 99110-N9000         ',
       b'\xf1\x00NX4__               1.01 1.00 99110-N9100         ',
+      b'\xf1\x00NX4__               1.01 1.02 99110-N9000         ',
     ],
   },
   CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN: {

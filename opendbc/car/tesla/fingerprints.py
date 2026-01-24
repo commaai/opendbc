@@ -18,6 +18,7 @@ FW_VERSIONS = {
       b'TeMYG4_Main_0.0.0 (59),E4H014.29.0',
       b'TeMYG4_Main_0.0.0 (65),E4H015.01.0',
       b'TeMYG4_Main_0.0.0 (67),E4H015.02.1',
+      b'TeMYG4_Main_0.0.0 (77),E4H015.04.5',
       b'TeMYG4_SingleECU_0.0.0 (33),E4S014.27',
     ],
   },
