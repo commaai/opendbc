@@ -56,6 +56,7 @@ class HondaSafetyFlags(IntFlag):
   NIDEC_ALT = 4
   RADARLESS = 8
   BOSCH_CANFD = 16
+  NIDEC_HYBRID = 32
 
 
 class HondaFlags(IntFlag):
@@ -79,6 +80,7 @@ class HondaFlags(IntFlag):
   ALLOW_MANUAL_TRANS = 1024
   HYBRID = 2048
   BOSCH_TJA_CONTROL = 4096
+  HYBRID_ALT_BRAKEHOLD = 8192  # Some Nidec Hybrids use a different brakehold
 
 
 # Car button codes
