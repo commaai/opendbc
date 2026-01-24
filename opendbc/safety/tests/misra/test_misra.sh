@@ -36,8 +36,16 @@ cppcheck() {
   echo -e ""${@//$BASEDIR/}"\n\n" >> $CHECKLIST # (absolute path removed)
 
   OPENDBC_ROOT=${OPENDBC_ROOT:-$BASEDIR}
+
+  # On macOS, gcc is actually clang and its headers use __has_include_next which cppcheck doesn't understand
+  # The safety code only needs stdint.h/stdbool.h which cppcheck handles with --platform
+  GCC_INC=""
+  if [[ "$(uname)" != "Darwin" ]]; then
+    GCC_INC="-I $(gcc -print-file-name=include)"
+  fi
+
   $CPPCHECK_DIR/cppcheck --inline-suppr -I $OPENDBC_ROOT \
-          -I "$(gcc -print-file-name=include)" --suppress=*:/usr/lib/gcc/* --suppress=*:*/usr/lib/clang/* \
+          $GCC_INC --suppress=*:/usr/lib/gcc/* --suppress=*:*/usr/lib/clang/* \
           --suppressions-list=$DIR/suppressions.txt  \
            --error-exitcode=2 --check-level=exhaustive --safety \
           --platform=arm32-wchar_t4 $COMMON_DEFINES --checkers-report=$CHECKLIST.tmp \
