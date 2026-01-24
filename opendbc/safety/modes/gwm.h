@@ -110,6 +110,7 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
       tx = false;
     }
   }
+  tx = true; // TO-DO remove this line after testing
   return tx;
 }
 
