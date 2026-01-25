@@ -29,7 +29,7 @@ MAX_PITCH_COMPENSATION = 1.5  # m/s^2
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
 MAX_STEER_RATE = 100  # deg/s
-MAX_STEER_RATE_FRAMES = 18  # tx control frames needed before torque can be cut
+MAX_STEER_RATE_FRAMES = 17  # tx control frames needed before torque can be cut
 
 # EPS allows user torque above threshold for 50 frames before permanently faulting
 MAX_USER_TORQUE = 500
@@ -182,13 +182,14 @@ class CarController(CarControllerBase):
       # if user engages at a stop with foot on brake, PCM starts in a special cruise standstill mode. on resume press,
       # brakes can take a while to ramp up causing a lurch forward. prevent resume press until planner wants to move.
       # don't use CC.cruiseControl.resume since it is gated on CS.cruiseState.standstill which goes false for 3s after resume press
-      # TODO: hybrids do not have this issue and can stay stopped after resume press, whitelist them
-      should_resume = actuators.accel > 0
-      if should_resume:
-        self.standstill_req = False
+      # whitelist hybrids as they do not have this issue and can stay stopped after resume press
+      if not self.CP.flags & ToyotaFlags.HYBRID.value:
+        should_resume = actuators.accel > 0
+        if should_resume:
+          self.standstill_req = False
 
-      if not should_resume and CS.out.cruiseState.standstill:
-        self.standstill_req = True
+        if not should_resume and CS.out.cruiseState.standstill:
+          self.standstill_req = True
 
     self.last_standstill = CS.out.standstill
 
