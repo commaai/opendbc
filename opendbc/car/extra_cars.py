@@ -55,8 +55,8 @@ class CAR(Platforms):
 
   EXTRA_HYUNDAI = ExtraPlatformConfig(
     [
-      CommunityCarDocs("Hyundai Palisade 2023-24", package="HDA2"),
-      CommunityCarDocs("Kia Telluride 2023-24", package="HDA2"),
+      CommunityCarDocs("Hyundai Palisade 2023-24", "Highway Driving Assist II"),
+      CommunityCarDocs("Kia Telluride 2023-24", "Highway Driving Assist II"),
     ],
   )
 

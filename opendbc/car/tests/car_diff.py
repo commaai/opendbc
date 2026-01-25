@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import os
 import pickle
@@ -5,14 +6,19 @@ import re
 import subprocess
 import sys
 import tempfile
+import traceback
 import zstandard as zstd
+from tqdm import tqdm
+from tqdm.contrib.concurrent import process_map
 from urllib.request import urlopen
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from comma_car_segments import get_comma_car_segments_database, get_url
 
+from opendbc.car import structs
+from opendbc.car.can_definitions import CanData
+from opendbc.car.car_helpers import can_fingerprint, interfaces
 from opendbc.car.logreader import LogReader, decompress_stream
 
 
@@ -42,20 +48,17 @@ def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
 def load_can_messages(seg):
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
-  msgs = LogReader(url, only_union_types=True)
+  msgs = LogReader(url, only_union_types=True, sort_by_time=True)
   return [m for m in msgs if m.which() == 'can']
 
 
 def replay_segment(platform, can_msgs):
-  from opendbc.car import gen_empty_fingerprint, structs
-  from opendbc.car.can_definitions import CanData
-  from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
+  _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
 
-  fingerprint = gen_empty_fingerprint()
-  for msg in can_msgs[:FRAME_FINGERPRINT]:
-    for m in msg.can:
-      if m.src < 64:
-        fingerprint[m.src][m.address] = len(m.dat)
+  def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
+    return [next(_can_msgs, [])]
+
+  _, fingerprint = can_fingerprint(can_recv)
 
   CarInterface = interfaces[platform]
   CP = CarInterface.get_params(platform, fingerprint, [], False, False, False)
@@ -92,8 +95,8 @@ def process_segment(args):
       for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
         diffs.append((diff[1], i, diff[2], ts))
     return (platform, seg, diffs, None)
-  except Exception as e:
-    return (platform, seg, [], str(e))
+  except Exception:
+    return (platform, seg, [], traceback.format_exc())
 
 
 def get_changed_platforms(cwd, database, interfaces):
@@ -111,21 +114,17 @@ def get_changed_platforms(cwd, database, interfaces):
 
 def download_refs(ref_path, platforms, segments):
   base_url = f"https://raw.githubusercontent.com/commaai/ci-artifacts/refs/heads/{DIFF_BUCKET}"
-  for platform in platforms:
+  for platform in tqdm(platforms):
     for seg in segments.get(platform, []):
       filename = f"{platform}_{seg.replace('/', '_')}.zst"
-      try:
-        with urlopen(f"{base_url}/{filename}") as resp:
-          (Path(ref_path) / filename).write_bytes(resp.read())
-      except Exception:
-        pass
+      with urlopen(f"{base_url}/{filename}") as resp:
+        (Path(ref_path) / filename).write_bytes(resp.read())
 
 
 def run_replay(platforms, segments, ref_path, update, workers=4):
   work = [(platform, seg, ref_path, update)
           for platform in platforms for seg in segments.get(platform, [])]
-  with ProcessPoolExecutor(max_workers=workers) as pool:
-    return list(pool.map(process_segment, work))
+  return process_map(process_segment, work, max_workers=workers)
 
 
 # ASCII waveforms helpers
@@ -244,8 +243,6 @@ def format_diff(diffs):
 
 
 def main(platform=None, segments_per_platform=10, update_refs=False, all_platforms=False):
-  from opendbc.car.car_helpers import interfaces
-
   cwd = Path(__file__).resolve().parents[3]
   ref_path = cwd / DIFF_BUCKET
   if not update_refs:
@@ -262,7 +259,7 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
     platforms = get_changed_platforms(cwd, database, interfaces)
 
   if not platforms:
-    print("No car changes detected", file=sys.stderr)
+    print("No car changes detected")
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
