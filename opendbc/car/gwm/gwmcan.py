@@ -14,7 +14,7 @@ def gwm_checksum(address: int, sig, d: bytearray) -> int:
     return crc ^ xor_out
 
 
-def create_steer_and_ap_stalk(packer, steer_msg, bus=0):
+def create_steer_and_ap_stalk(packer, steer_msg, apply_torque, bus=0):
     """
     Copy STEER_AND_AP_STALK message from bus 0 and forward to bus 2,
     copying all signals unchanged. If the DBC generator renames the checksum
@@ -31,7 +31,8 @@ def create_steer_and_ap_stalk(packer, steer_msg, bus=0):
     values.update({
         'STEERING_ANGLE': steer_msg['STEERING_ANGLE'],
         'STEERING_DIRECTION': steer_msg['STEERING_DIRECTION'],
-        'STEERING_TORQUE': steer_msg['STEERING_TORQUE'],
+        # 'STEERING_TORQUE': steer_msg['STEERING_TORQUE'],
+        'STEERING_TORQUE': apply_torque,
         'EPS_ACTUATING': steer_msg['EPS_ACTUATING'],
         'AP_REDUCE_DISTANCE_COMMAND': steer_msg['AP_REDUCE_DISTANCE_COMMAND'],
         'AP_INCREASE_DISTANCE_COMMAND': steer_msg['AP_INCREASE_DISTANCE_COMMAND'],

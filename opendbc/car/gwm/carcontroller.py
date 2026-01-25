@@ -20,10 +20,13 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     can_sends = []
     actuators = CC.actuators
-    # Forward STEER_AND_AP_STALK to bus 2, copying all signals unchanged
+    # Forward STEER_AND_AP_STALK to bus 2, modifying only STEERING_TORQUE
+    # TODO: apply_torque will be adjusted once openpilot integration is finalized
+    apply_torque = int(CS.steer_and_ap_stalk_msg.get('STEERING_TORQUE', 0) * 100)
     can_sends.append(create_steer_and_ap_stalk(
       self.packer,
       CS.steer_and_ap_stalk_msg,
+      apply_torque,
       bus=self.bus_cam
     ))
 
