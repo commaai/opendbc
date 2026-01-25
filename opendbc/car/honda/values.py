@@ -289,7 +289,7 @@ class CAR(Platforms):
     {Bus.pt: 'honda_bosch_radarless_generated'},
     flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.ALLOW_MANUAL_TRANS,
   )
-  
+
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
     [
