@@ -60,7 +60,54 @@ jobs:
           scons -j8
           cd opendbc/safety/tests && ./mutation.sh
 
-  # TODO: this test needs to move to opendbc
+  car_diff:
+    name: car diff
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    env:
+      GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: ./.github/workflows/cache
+    - name: Build opendbc
+      run: |
+        source setup.sh
+        scons -j8
+    - name: Test car diff
+      if: github.event_name == 'pull_request'
+      run: source setup.sh && python opendbc/car/tests/car_diff.py | tee diff.txt
+    - name: Upload diff
+      if: always() && github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: car_diff_${{ github.event.number }}
+        path: diff.txt
+    - name: Update refs
+      if: github.repository == 'commaai/opendbc' && github.ref == 'refs/heads/master'
+      run: source setup.sh && python opendbc/car/tests/car_diff.py --update-refs
+    - name: Checkout ci-artifacts
+      if: github.repository == 'commaai/opendbc' && github.ref == 'refs/heads/master'
+      uses: actions/checkout@v4
+      with:
+        repository: commaai/ci-artifacts
+        ssh-key: ${{ secrets.CI_ARTIFACTS_DEPLOY_KEY }}
+        path: ${{ github.workspace }}/ci-artifacts
+    - name: Push refs
+      if: github.repository == 'commaai/opendbc' && github.ref == 'refs/heads/master'
+      working-directory: ${{ github.workspace }}/ci-artifacts
+      run: |
+        ls ${{ github.workspace }}/car_diff/*.zst 2>/dev/null || exit 0
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+        git fetch origin car_diff || true
+        git checkout car_diff 2>/dev/null || git checkout --orphan car_diff
+        cp ${{ github.workspace }}/car_diff/*.zst .
+        git add *.zst
+        git commit -m "car_diff refs for ${{ github.sha }}" || echo "No changes to commit"
+        git push origin car_diff
+
+  # TODO: this needs to move to opendbc
   test_models:
     name: test models
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
@@ -92,7 +139,7 @@ jobs:
         path: .ci_cache/comma_download_cache
         key: car_models-${{ hashFiles('selfdrive/car/tests/test_models.py', 'opendbc/car/tests/routes.py') }}-${{ matrix.job }}
     - name: Build openpilot
-      run: ${{ env.RUN }} "VIRTUAL_ENV= opendbc_repo/setup.sh && scons -j$(nproc) common/ cereal/ selfdrive/pandad/ msgq_repo/ opendbc_repo"
+      run: ${{ env.RUN }} "scons -j$(nproc) common/ cereal/ selfdrive/pandad/ msgq_repo/ opendbc_repo"
     - name: Test car models
       timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.routes-cache.outputs.cache-hit == 'true') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 6 }}
       run: |
