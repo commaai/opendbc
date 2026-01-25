@@ -1114,6 +1114,6 @@ FW_VERSIONS = {
     ],
     (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
       b'39494-T20-A010\x00\x00',
-    ],    
+    ],
   },
 }
