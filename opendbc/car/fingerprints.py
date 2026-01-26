@@ -1,35 +1,6 @@
 from opendbc.car_discovery import get_interface_attr
 
 
-def __getattr__(name):
-  if name == "FW_VERSIONS":
-    val = get_interface_attr("FW_VERSIONS", combine_brands=True, ignore_none=True)
-  elif name == "_FINGERPRINTS":
-    val = get_interface_attr("FINGERPRINTS", combine_brands=True, ignore_none=True)
-  elif name in (
-    n := {
-      "BODY": "body",
-      "CHRYSLER": "chrysler",
-      "FORD": "ford",
-      "GM": "gm",
-      "HONDA": "honda",
-      "HYUNDAI": "hyundai",
-      "MAZDA": "mazda",
-      "MOCK": "mock",
-      "NISSAN": "nissan",
-      "SUBARU": "subaru",
-      "TOYOTA": "toyota",
-      "VW": "volkswagen",
-    }
-  ):
-    val = __import__(f"opendbc.car.{n[name]}.values", fromlist=["CAR"]).CAR
-  else:
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-  globals()[name] = val
-  return val
-
-
 def __dir__():
   return sorted(
     list(globals().keys())
