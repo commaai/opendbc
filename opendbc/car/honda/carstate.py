@@ -70,7 +70,7 @@ class CarState(CarStateBase):
     self.cruise_buttons = cp.vl["SCM_BUTTONS"]["CRUISE_BUTTONS"]
 
     # used for car hud message
-    self.is_metric = True if self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_TWN) else not cp.vl["CAR_SPEED"]["IMPERIAL_UNIT"]
+    self.is_metric = self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_TWN,) or not cp.vl["CAR_SPEED"]["IMPERIAL_UNIT"]
     self.v_cruise_factor = CV.MPH_TO_MS if self.dynamic_v_cruise_units and not self.is_metric else CV.KPH_TO_MS
 
     # ******************* parse out can *******************
@@ -129,8 +129,7 @@ class CarState(CarStateBase):
 
     ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
 
-
-    if self.CP.carFingerprint not in (CAR.HONDA_ODYSSEY_TWN):
+    if self.CP.carFingerprint not in (CAR.HONDA_ODYSSEY_TWN,):
       self.dash_speed_seen = self.dash_speed_seen or cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] > 1e-3
       if self.dash_speed_seen:
         conversion = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS

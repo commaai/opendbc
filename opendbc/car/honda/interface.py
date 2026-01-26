@@ -219,7 +219,12 @@ class CarInterface(CarInterfaceBase):
     # to a negative value, so it won't matter. Otherwise, add 0.5 mph margin to not
     # conflict with PCM acc
     ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC})
-    ret.minEnableSpeed = -1. if ret.autoResumeSng else (19. if candidate == CAR.HONDA_ODYSSEY_TWN else 25.51) * CV.MPH_TO_MS
+    if candidate == CAR.HONDA_ODYSSEY_TWN:
+      ret.minEnableSpeed = 19. * CV.MPH_TO_MS
+    elif ret.autoResumeSng:
+      ret.minEnableSpeed = -1.
+    else:
+      ret.minEnableSpeed = 25.51 * CV.MPH_TO_MS
 
     ret.steerLimitTimer = 0.8
     ret.radarDelay = 0.1
