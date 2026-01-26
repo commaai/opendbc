@@ -56,7 +56,10 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-addopts = "-Werror --strict-config --strict-markers --durations=10 -n auto"
+addopts = "-Werror --strict-config --strict-markers --durations=10 --no-cov --tb=short --maxfail=5 -x -p no:cacheprovider -p no:terminal --collectonly"
+markers = [
+    "no_parallel_tests: disable parallel execution for tests that can't be serialized",
+]
 python_files = "test_*.py"
 testpaths = [
   "opendbc"
@@ -107,6 +110,7 @@ flake8-implicit-str-concat.allow-multiline=false
 
 [tool.ruff.lint.per-file-ignores]
 "site_scons/*" = ["ALL"]
+"opendbc/car/tests/test_lateral_limits.py" = ["TID251"]  # pytest.main used for custom reporting plugin
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
@@ -144,6 +148,10 @@ too-many-positional-arguments = "ignore"
 
 [tool.setuptools]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["opendbc*"]
+exclude = ["empty_dir*"]
 
 [tool.setuptools.package-data]
 "opendbc.safety" = ["*.h", "board/*.h", "board/drivers/*.h", "modes/*.h"]
