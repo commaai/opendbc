@@ -2,10 +2,14 @@ from collections import defaultdict
 import pytest
 
 
+pytestmark = pytest.mark.no_parallel_tests
+
+
 class TestCarDocs:
   @classmethod
   def setup_class(cls):
     from opendbc.car.docs import get_all_car_docs
+
     cls.all_cars = get_all_car_docs()
 
   def test_duplicate_years(self, subtests):
@@ -28,7 +32,9 @@ class TestCarDocs:
 
     all_car_docs_platforms = [name for name, config in PLATFORMS.items()]
     for platform in sorted(interfaces.keys(), key=str):
-      with subtests.test(platform=platform):
+      # Convert enum to string for serialization in parallel execution
+      platform_str = str(platform)
+      with subtests.test(platform=platform_str):
         assert platform in all_car_docs_platforms, f"Platform: {platform} doesn't have a CarDocs entry"
 
   def test_naming_conventions(self, subtests):
