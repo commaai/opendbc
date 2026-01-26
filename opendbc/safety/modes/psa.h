@@ -6,9 +6,9 @@
 #define PSA_STEERING_ALT          773U  // RX from EPS, steering angle
 #define PSA_DYN_CMM               520U  // RX from CMM, gas pedal
 #define PSA_HS2_DYN_ABR_38D       909U  // RX from UC_FREIN, speed
-#define PSA_HS2_DAT_MDD_CMD_452   1106U // RX from BSI, cruise state
-#define PSA_DAT_BSI               1042U // RX from BSI, brake
-#define PSA_LANE_KEEP_ASSIST      1010U // TX from OP,  EPS
+#define PSA_HS2_DAT_MDD_CMD_452   1106U  // RX from BSI, cruise state
+#define PSA_DAT_BSI               1042U  // RX from BSI, brake
+#define PSA_LANE_KEEP_ASSIST      1010U  // TX from OP, EPS
 
 // CAN bus
 #define PSA_MAIN_BUS 0U
