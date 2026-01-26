@@ -34,7 +34,7 @@ class CarInterface(CarInterfaceBase):
     # - Radar CAN lines must be tapped and connected to CAN bus 1 (normally not used for tesla vehicles)
     ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[candidate]
 
-    ret.alphaLongitudinalAvailable = True
+    ret.alphaLongitudinalAvailable = False
     if alpha_long:
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LONG_CONTROL.value

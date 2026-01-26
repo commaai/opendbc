@@ -8,7 +8,12 @@ FW_VERSIONS = {
   CAR.RIVIAN_R1_GEN1: {
     (Ecu.eps, 0x733, None): [
       b'R1TS_v3.4.1(51),3.4.1\x00',
-      b'R1TS_v4.4.1(63),4.4.1\x00',
+      # b'R1TS_v4.4.1(63),4.4.1\x00',  # shared with GEN2, use VIN matching instead
+    ],
+  },
+  CAR.RIVIAN_R1_GEN2: {
+    (Ecu.eps, 0x733, None): [
+      # b'R1TS_v4.4.1(63),4.4.1\x00',  # shared with GEN1, use VIN matching instead
     ],
   },
 }

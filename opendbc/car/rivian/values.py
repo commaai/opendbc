@@ -41,7 +41,6 @@ class RivianPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   RIVIAN_R1_GEN1 = RivianPlatformConfig(
-    # TODO: verify this
     [
       RivianCarDocs("Rivian R1S 2022-24"),
       RivianCarDocs("Rivian R1T 2022-24"),
@@ -50,6 +49,16 @@ class CAR(Platforms):
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
     lines={ModelLine.R1T, ModelLine.R1S},
     years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024},
+  )
+  RIVIAN_R1_GEN2 = RivianPlatformConfig(
+    [
+      RivianCarDocs("Rivian R1S 2025"),
+      RivianCarDocs("Rivian R1T 2025"),
+    ],
+    CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
+    wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
+    lines={ModelLine.R1T, ModelLine.R1S},
+    years={ModelYear.S_2025},
   )
 
 
