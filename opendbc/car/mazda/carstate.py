@@ -28,13 +28,6 @@ class CarState(CarStateBase):
 
     ret = structs.CarState()
 
-    prev_distance_button = self.distance_button
-    prev_accel_button = self.accel_button
-    prev_decel_button = self.decel_button
-    self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]
-    self.accel_button = cp.vl["CRZ_BTNS"]["RES"]
-    self.decel_button = cp.vl["CRZ_BTNS"]["SET_M"]
-
     self.parse_wheel_speeds(ret,
       cp.vl["WHEEL_SPEEDS"]["FL"],
       cp.vl["WHEEL_SPEEDS"]["FR"],
@@ -119,6 +112,13 @@ class CarState(CarStateBase):
     ret.steerFaultPermanent = cp_cam.vl["CAM_LKAS"]["ERR_BIT_1"] == 1
 
     # cruise control button events: distance, inc, and dec
+    prev_distance_button = self.distance_button
+    prev_accel_button = self.accel_button
+    prev_decel_button = self.decel_button
+    self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]
+    self.accel_button = cp.vl["CRZ_BTNS"]["RES"]
+    self.decel_button = cp.vl["CRZ_BTNS"]["SET_M"]
+
     ret.buttonEvents = [
       *create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}),
       *create_button_events(self.accel_button, prev_accel_button, {1: ButtonType.accelCruise}),
