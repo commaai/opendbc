@@ -28,7 +28,7 @@ IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 PADDING = 5
 
 
-def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
+def dict_diff(d1, d2, path="", ignore=None, tolerance=0) -> list:
   ignore = ignore or []
   diffs = []
   for key in d1.keys() | d2.keys():
@@ -129,7 +129,7 @@ def run_replay(platforms, segments, ref_path, update, workers=4):
 
 
 # ASCII waveforms helpers
-def find_edges(vals):
+def find_edges(vals: list[bool]) -> tuple[list[int], list[int]]:
   rises = []
   falls = []
   prev = vals[0]
@@ -142,7 +142,7 @@ def find_edges(vals):
   return rises, falls
 
 
-def render_waveform(label, vals):
+def render_waveform(label: str, vals: list[bool]) -> str:
   wave = {(False, False): "_", (True, True): "‾", (False, True): "/", (True, False): "\\"}
   line = f"  {label}:".ljust(12)
   prev = vals[0]
@@ -198,7 +198,7 @@ def build_signals(group, ref, states, field):
   return master_vals, pr_vals, start, end
 
 
-def format_numeric_diffs(diffs):
+def format_numeric_diffs(diffs) -> list[str]:
   lines = []
   for _, frame, (old_val, new_val), _ in diffs[:10]:
     lines.append(f"    frame {frame}: {old_val} -> {new_val}")
@@ -207,7 +207,7 @@ def format_numeric_diffs(diffs):
   return lines
 
 
-def format_boolean_diffs(diffs, ref, states, field):
+def format_boolean_diffs(diffs, ref, states, field: str) -> list[str]:
   _, first_frame, _, first_ts = diffs[0]
   _, last_frame, _, last_ts = diffs[-1]
   frame_time = last_frame - first_frame
@@ -228,7 +228,7 @@ def format_boolean_diffs(diffs, ref, states, field):
   return lines
 
 
-def format_diff(diffs, ref, states, field):
+def format_diff(diffs, ref, states, field: str) -> list[str]:
   if not diffs:
     return []
   _, _, (old, new), _ = diffs[0]
@@ -238,7 +238,7 @@ def format_diff(diffs, ref, states, field):
   return format_numeric_diffs(diffs)
 
 
-def main(platform=None, segments_per_platform=10, update_refs=False, all_platforms=False):
+def main(platform=None, segments_per_platform=10, update_refs=False, all_platforms=False) -> int:
   cwd = Path(__file__).resolve().parents[3]
   ref_path = cwd / DIFF_BUCKET
   if not update_refs:
