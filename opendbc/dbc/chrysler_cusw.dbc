@@ -172,6 +172,12 @@ BO_ 496 CLUSTER_1: 8 XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|1] "" XXX
 
+BO_ 103596083 BSM_LEFT: 8 XXX
+ SG_ LEFT_DETECTED : 21|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 103596084 BSM_RIGHT: 7 XXX
+ SG_ RIGHT_DETECTED : 21|1@0+ (1,0) [0|1] "" XXX
+
 
 CM_ SG_ 1250 TRUNK "1 = open, 0 = closed";
 CM_ SG_ 1250 DOOR_OPEN_FL "1 = open, 0 = closed";
