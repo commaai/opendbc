@@ -271,9 +271,9 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
 
   download_refs(ref_path, platforms, segments)
   results = run_replay(platforms, segments, ref_path, update=False)
-  # platform, segment, diffs, ref (master), states (pr), error
-  with_diffs = [(platform, seg, diffs, ref, states) for p, s, d, r, st, e in results if d]
-  errors = [(p, s, e) for p, s, d, r, st, e in results if e]
+  with_diffs = [(platform, seg, diffs, ref, states)
+                for platform, seg, diffs, ref, states, err in results if diffs]
+  errors = [(platform, seg, err) for platform, seg, diffs, ref, states, err in results if err]
   n_passed = len(results) - len(with_diffs) - len(errors)
 
   print(f"\nResults: {n_passed} passed, {len(with_diffs)} with diffs, {len(errors)} errors")
