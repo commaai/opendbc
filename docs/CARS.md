@@ -150,7 +150,7 @@
 |Hyundai|Kona Hybrid 2020|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Nexo 2021|All|[Upstream](#upstream)|
 |Hyundai|Palisade 2020-22|All|[Upstream](#upstream)|
-|Hyundai|Palisade 2023-24|HDA2|[Community](#community)|
+|Hyundai|Palisade 2023-24|Highway Driving Assist II|[Community](#community)|
 |Hyundai|Santa Cruz 2022-24|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Santa Fe 2019-20|All|[Upstream](#upstream)|
 |Hyundai|Santa Fe 2021-23|All|[Upstream](#upstream)|
@@ -209,7 +209,7 @@
 |Kia|Stinger 2018-20|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Stinger 2022-23|All|[Upstream](#upstream)|
 |Kia|Telluride 2020-22|All|[Upstream](#upstream)|
-|Kia|Telluride 2023-24|HDA2|[Community](#community)|
+|Kia|Telluride 2023-24|Highway Driving Assist II|[Community](#community)|
 |Lexus|CT Hybrid 2017-18|Lexus Safety System+|[Upstream](#upstream)|
 |Lexus|ES 2017-18|All|[Upstream](#upstream)|
 |Lexus|ES 2019-25|All|[Upstream](#upstream)|

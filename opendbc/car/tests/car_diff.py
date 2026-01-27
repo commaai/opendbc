@@ -25,6 +25,7 @@ from opendbc.car.logreader import LogReader, decompress_stream
 TOLERANCE = 1e-4
 DIFF_BUCKET = "car_diff"
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
+PADDING = 5
 
 
 def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
