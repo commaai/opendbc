@@ -37,7 +37,7 @@ cppcheck() {
 
   OPENDBC_ROOT=${OPENDBC_ROOT:-$BASEDIR}
   $CPPCHECK_DIR/cppcheck --inline-suppr -I $OPENDBC_ROOT \
-          -I "$(gcc -print-file-name=include)" --suppress=*:/usr/lib/gcc/* --suppress=*:*/usr/lib/clang/* \
+          --suppress=missingIncludeSystem \
           --suppressions-list=$DIR/suppressions.txt  \
            --error-exitcode=2 --check-level=exhaustive --safety \
           --platform=arm32-wchar_t4 $COMMON_DEFINES --checkers-report=$CHECKLIST.tmp \
