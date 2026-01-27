@@ -85,19 +85,19 @@ def process_segment(args):
     if update:
       data = list(zip(timestamps, states, strict=True))
       ref_file.write_bytes(zstd.compress(pickle.dumps(data), 10))
-      return (platform, seg, [], None, None)
+      return (platform, seg, [], None, None, None)
 
     if not ref_file.exists():
-      return (platform, seg, [], None, "no ref")
+      return (platform, seg, [], None, None, "no ref")
 
     ref = pickle.loads(decompress_stream(ref_file.read_bytes()))
     diffs = []
     for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
       for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
         diffs.append((diff[1], i, diff[2], ts))
-    return (platform, seg, diffs, ref, None)
+    return (platform, seg, diffs, ref, states, None)
   except Exception:
-    return (platform, seg, [], None, traceback.format_exc())
+    return (platform, seg, [], None, None, traceback.format_exc())
 
 
 def get_changed_platforms(cwd, database, interfaces):
@@ -180,24 +180,21 @@ def group_frames(diffs, max_gap=15):
   return groups
 
 
-def build_signals(group, ref, field):
+def build_signals(group, ref, states, field):
   _, first_frame, _, _ = group[0]
   _, last_frame, _, _ = group[-1]
   start = max(0, first_frame - PADDING)
   end = min(last_frame + PADDING + 1, len(ref))
-  diff_at = {frame: (m, p) for _, frame, (m, p), _ in group}
   master_vals = []
   pr_vals = []
   for frame in range(start, end):
-    if frame in diff_at:
-      master, pr = diff_at[frame]
-    else:
-      val = ref[frame][1].to_dict()
-      for k in field.split("."):
-        val = val.get(k) if isinstance(val, dict) else None
-      master = pr = val
-    master_vals.append(master)
-    pr_vals.append(pr)
+    mval = ref[frame][1].to_dict()
+    pval = states[frame].to_dict()
+    for k in field.split("."):
+      mval = mval.get(k) if isinstance(mval, dict) else None
+      pval = pval.get(k) if isinstance(pval, dict) else None
+    master_vals.append(mval)
+    pr_vals.append(pval)
   return master_vals, pr_vals, start, end
 
 
@@ -210,7 +207,7 @@ def format_numeric_diffs(diffs):
   return lines
 
 
-def format_boolean_diffs(diffs, ref, field):
+def format_boolean_diffs(diffs, ref, states, field):
   _, first_frame, _, first_ts = diffs[0]
   _, last_frame, _, last_ts = diffs[-1]
   frame_time = last_frame - first_frame
@@ -218,7 +215,7 @@ def format_boolean_diffs(diffs, ref, field):
   ms = time_ms / frame_time if frame_time else 10.0
   lines = []
   for group in group_frames(diffs):
-    master_vals, pr_vals, start, end = build_signals(group, ref, field)
+    master_vals, pr_vals, start, end = build_signals(group, ref, states, field)
     master_rises, master_falls = find_edges(master_vals)
     pr_rises, pr_falls = find_edges(pr_vals)
     lines.append(f"\n  frames {start}-{end - 1}")
@@ -231,13 +228,13 @@ def format_boolean_diffs(diffs, ref, field):
   return lines
 
 
-def format_diff(diffs, ref, field):
+def format_diff(diffs, ref, states, field):
   if not diffs:
     return []
   _, _, (old, new), _ = diffs[0]
   is_bool = isinstance(old, bool) and isinstance(new, bool)
   if is_bool:
-    return format_boolean_diffs(diffs, ref, field)
+    return format_boolean_diffs(diffs, ref, states, field)
   return format_numeric_diffs(diffs)
 
 
@@ -267,16 +264,16 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
 
   if update_refs:
     results = run_replay(platforms, segments, ref_path, update=True)
-    errors = [e for _, _, _, _, e in results if e]
+    errors = [e for _, _, _, _, _, e in results if e]
     assert len(errors) == 0, f"Segment failures: {errors}"
     print(f"Generated {n_segments} refs to {ref_path}")
     return 0
 
   download_refs(ref_path, platforms, segments)
   results = run_replay(platforms, segments, ref_path, update=False)
-
-  with_diffs = [(p, s, d, r) for p, s, d, r, e in results if d]
-  errors = [(p, s, e) for p, s, d, r, e in results if e]
+  # platform, segment, diffs, ref (master), states (pr), error
+  with_diffs = [(p, s, d, r, st) for p, s, d, r, st, e in results if d]
+  errors = [(p, s, e) for p, s, d, r, st, e in results if e]
   n_passed = len(results) - len(with_diffs) - len(errors)
 
   print(f"\nResults: {n_passed} passed, {len(with_diffs)} with diffs, {len(errors)} errors")
@@ -286,14 +283,14 @@ def main(platform=None, segments_per_platform=10, update_refs=False, all_platfor
 
   if with_diffs:
     print("```")
-    for plat, seg, diffs, ref in with_diffs:
+    for plat, seg, diffs, ref, states in with_diffs:
       print(f"\n{plat} - {seg}")
       by_field = defaultdict(list)
       for d in diffs:
         by_field[d[0]].append(d)
       for field, fd in sorted(by_field.items()):
         print(f"  {field} ({len(fd)} diffs)")
-        for line in format_diff(fd, ref, field):
+        for line in format_diff(fd, ref, states, field):
           print(line)
     print("```")
 
