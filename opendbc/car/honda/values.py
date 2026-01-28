@@ -185,6 +185,7 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1326, wheelbase=2.7, steerRatio=15.38, centerToFrontRatio=0.4),  # steerRatio: 10.93 is end-to-end spec
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
+    flags=HondaFlags.ALLOW_MANUAL_TRANS,
   )
   HONDA_CIVIC_BOSCH_DIESEL = HondaBoschPlatformConfig(
     [],  # don't show in docs
@@ -276,6 +277,11 @@ class CAR(Platforms):
     CarSpecs(mass=3982 * CV.LB_TO_KG, wheelbase=2.87, steerRatio=14.0, centerToFrontRatio=0.43),
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
     flags=HondaFlags.BOSCH_ALT_RADAR,
+  )
+  # mid-model refresh
+  ACURA_TLX_2G_MMR = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Acura TLX 2025", "All")],
+    CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.87, centerToFrontRatio=0.43, steerRatio=13.7),
   )
 
   # Nidec Cars
