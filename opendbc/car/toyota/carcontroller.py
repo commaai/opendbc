@@ -169,36 +169,35 @@ class CarController(CarControllerBase):
         can_sends.append(lta_steer_2)
 
     # *** gas and brake ***
-
-    # on entering standstill, send standstill request for older TSS-P cars that aren't designed to stay engaged at a stop
-    if self.CP.carFingerprint not in NO_STOP_TIMER_CAR:
-      if CS.out.standstill and not self.last_standstill:
-        self.standstill_req = True
-      if CS.pcm_acc_status != 8:
-        # pcm entered standstill or it's disabled
-        self.standstill_req = False
-
-    else:
-      # if user engages at a stop with foot on brake, PCM starts in a special cruise standstill mode. on resume press,
-      # brakes can take a while to ramp up causing a lurch forward. prevent resume press until planner wants to move.
-      # don't use CC.cruiseControl.resume since it is gated on CS.cruiseState.standstill which goes false for 3s after resume press
-      # whitelist hybrids as they do not have this issue and can stay stopped after resume press
-      if not self.CP.flags & ToyotaFlags.HYBRID.value:
-        should_resume = actuators.accel > 0
-        if should_resume:
-          self.standstill_req = False
-
-        if not should_resume and CS.out.cruiseState.standstill:
-          self.standstill_req = True
-
-    self.last_standstill = CS.out.standstill
-
     # handle UI messages
     fcw_alert = hud_control.visualAlert == VisualAlert.fcw
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
     lead = hud_control.leadVisible or CS.out.vEgo < 12.  # at low speed we always assume the lead is present so ACC can be engaged
 
     if self.CP.openpilotLongitudinalControl:
+      # on entering standstill, send standstill request for older TSS-P cars that aren't designed to stay engaged at a stop
+      if self.CP.carFingerprint not in NO_STOP_TIMER_CAR:
+        if CS.out.standstill and not self.last_standstill:
+          self.standstill_req = True
+        if CS.pcm_acc_status != 8:
+          # pcm entered standstill or it's disabled
+          self.standstill_req = False
+
+      else:
+        # if user engages at a stop with foot on brake, PCM starts in a special cruise standstill mode. on resume press,
+        # brakes can take a while to ramp up causing a lurch forward. prevent resume press until planner wants to move.
+        # don't use CC.cruiseControl.resume since it is gated on CS.cruiseState.standstill which goes false for 3s after resume press
+        # whitelist hybrids as they do not have this issue and can stay stopped after resume press
+        if not self.CP.flags & ToyotaFlags.HYBRID.value:
+          should_resume = actuators.accel > 0
+          if should_resume:
+            self.standstill_req = False
+
+          if not should_resume and CS.out.cruiseState.standstill:
+            self.standstill_req = True
+
+      self.last_standstill = CS.out.standstill
+
       if self.frame % 3 == 0:
         # Press distance button until we are at the correct bar length. Only change while enabled to avoid skipping startup popup
         if self.frame % 6 == 0 and self.CP.openpilotLongitudinalControl:
