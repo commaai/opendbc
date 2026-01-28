@@ -156,7 +156,7 @@ class CAR(Platforms):
     ],
     TOYOTA_AVALON.specs,
   )
-  # TODO: determine why NO_DSU cars do not work with toyota_adas radar DBC (if that's accurate) and re-enable
+  # TODO: determine if TSS-P NO_DSU cars can work with toyota_adas radar DBC and re-enable
   TOYOTA_CAMRY = PlatformConfig(
     [
       ToyotaCarDocs("Toyota Camry 2018-20", video="https://www.youtube.com/watch?v=fkcjviZY9CM", footnotes=[Footnote.CAMRY]),
