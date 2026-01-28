@@ -177,6 +177,7 @@ class CarController(CarControllerBase):
     if self.CP.openpilotLongitudinalControl:
       # on entering standstill, send standstill request for older TSS-P cars that aren't designed to stay engaged at a stop
       if self.CP.carFingerprint not in NO_STOP_TIMER_CAR:
+        raise Exception("NO_STOP_TIMER_CAR is deprecated, all TSS2 cars should use stop timer logic")
         if CS.out.standstill and not self.last_standstill:
           self.standstill_req = True
         if CS.pcm_acc_status != 8:
