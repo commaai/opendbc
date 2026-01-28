@@ -81,5 +81,29 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
 
+class TestMazdaIgnition(unittest.TestCase):
+  @classmethod
+  def setUpClass(cls):
+    cls.safety = libsafety_py.libsafety
+
+  def setUp(self):
+    self.safety.set_safety_hooks(CarParams.SafetyModel.mazda, 0)
+    self.safety.init_tests()
+
+  def _ignition_msg(self, value):
+    return common.make_msg(0, 0x9E, 8, bytes([value, 0, 0, 0, 0, 0, 0, 0]))
+
+  def test_ignition_on(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0xC0))
+    self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    self.safety.safety_rx_hook(self._ignition_msg(0xC0))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0x00))
+    self.assertFalse(self.safety.get_ignition_can())
+
+
 if __name__ == "__main__":
   unittest.main()
