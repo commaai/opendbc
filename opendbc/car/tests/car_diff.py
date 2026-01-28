@@ -134,7 +134,7 @@ def run_replay(platforms: list[str], segments: dict[str, list[str]], ref_path: P
 
 
 # ASCII waveforms helpers
-def find_edges(vals: list[bool], init: bool) -> tuple[list[int], list[int]]:
+def find_edges(vals: list[bool]) -> tuple[list[int], list[int]]:
   rises = []
   falls = []
   prev = vals[0]
@@ -147,7 +147,7 @@ def find_edges(vals: list[bool], init: bool) -> tuple[list[int], list[int]]:
   return rises, falls
 
 
-def render_waveform(label: str, vals: list[bool], init: bool) -> str:
+def render_waveform(label: str, vals: list[bool]) -> str:
   wave = {(False, False): "_", (True, True): "‾", (False, True): "/", (True, False): "\\"}
   line = f"  {label}:".ljust(12)
   prev = vals[0]
