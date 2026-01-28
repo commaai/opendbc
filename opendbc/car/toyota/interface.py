@@ -2,9 +2,8 @@ from opendbc.car import Bus, structs, get_safety_config, uds
 from opendbc.car.toyota.carstate import CarState
 from opendbc.car.toyota.carcontroller import CarController
 from opendbc.car.toyota.radar_interface import RadarInterface
-from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, TSS2_CAR, RADAR_ACC_CAR, NO_DSU_CAR, \
-                                                  MIN_ACC_SPEED, EPS_SCALE, NO_STOP_TIMER_CAR, ANGLE_CONTROL_CAR, \
-                                                  ToyotaSafetyFlags
+from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, TSS2_CAR, RADAR_ACC_CAR, MIN_ACC_SPEED, \
+                                                  EPS_SCALE, NO_STOP_TIMER_CAR, ANGLE_CONTROL_CAR, ToyotaSafetyFlags
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
 
@@ -102,10 +101,7 @@ class CarInterface(CarInterfaceBase):
     # Detect flipped signals and enable for C-HR and others
     ret.enableBsm = 0x3F6 in fingerprint[0] and candidate in TSS2_CAR
 
-    # No radar dbc for cars without DSU which are not TSS 2.0
-    # TODO: make an adas dbc file for dsu-less models
-    ret.radarUnavailable = True  # Bus.radar not in DBC[candidate] or candidate in (NO_DSU_CAR - TSS2_CAR)
-    # print('\n\nradarUnavailable', ret.carFingerprint, Bus.radar not in DBC[candidate], candidate in (NO_DSU_CAR - TSS2_CAR), '\n\n')
+    ret.radarUnavailable = Bus.radar not in DBC[candidate]
 
     # since we don't yet parse radar on TSS2 radar-based ACC cars, gate longitudinal behind experimental toggle
     if candidate in RADAR_ACC_CAR:
