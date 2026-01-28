@@ -70,7 +70,10 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_CROSSTREK_HYBRID:
       ret.steerActuatorDelay = 0.1
 
-    elif candidate in (CAR.SUBARU_FORESTER, CAR.SUBARU_FORESTER_2022, CAR.SUBARU_FORESTER_HYBRID):
+    elif candidate == CAR.SUBARU_FORESTER_2022:
+      ret.dashcamOnly = True
+
+    elif candidate in (CAR.SUBARU_FORESTER, CAR.SUBARU_FORESTER_HYBRID):
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kf = 0.000038
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 14., 23.], [0., 14., 23.]]
@@ -89,8 +92,6 @@ class CarInterface(CarInterfaceBase):
     elif candidate in (CAR.SUBARU_OUTBACK_PREGLOBAL, CAR.SUBARU_CROSSTREK_2025):
       pass
 
-    elif candidate == CAR.SUBARU_FORESTER_2022:
-      ret.dashcamOnly = True
     else:
       raise ValueError(f"unknown car: {candidate}")
 
