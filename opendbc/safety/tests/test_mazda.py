@@ -106,6 +106,13 @@ class TestMazdaIgnition(unittest.TestCase):
     self.safety.safety_rx_hook(self._ignition_msg(0x00))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_value_check(self):
+    # only value 6 (0xC0 >> 5 = 6) triggers ignition
+    self.safety.safety_rx_hook(self._ignition_msg(0xA0))  # 5
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0xE0))  # 7
+    self.assertFalse(self.safety.get_ignition_can())
+
 
 if __name__ == "__main__":
   unittest.main()

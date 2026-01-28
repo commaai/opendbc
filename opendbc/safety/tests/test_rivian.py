@@ -170,6 +170,23 @@ class TestRivianIgnition(unittest.TestCase):
     self.safety.safety_rx_hook(self._ignition_msg(2, 0x00))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_bad_counter_no_ignition(self):
+    self.safety.safety_rx_hook(self._ignition_msg(0, 0x10))
+    self.safety.safety_rx_hook(self._ignition_msg(5, 0x10))  # skip counters
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_counter_wrap(self):
+    self.safety.safety_rx_hook(self._ignition_msg(13, 0x10))
+    self.safety.safety_rx_hook(self._ignition_msg(14, 0x10))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0, 0x10))  # wraps at 15
+    self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_value_check(self):
+    self.safety.safety_rx_hook(self._ignition_msg(0, 0x10))
+    self.safety.safety_rx_hook(self._ignition_msg(1, 0x20))  # wrong value
+    self.assertFalse(self.safety.get_ignition_can())
+
 
 if __name__ == "__main__":
   unittest.main()

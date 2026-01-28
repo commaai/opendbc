@@ -247,10 +247,32 @@ class TestGmIgnition(unittest.TestCase):
     self.safety.safety_rx_hook(self._ignition_msg(0x02))
     self.assertTrue(self.safety.get_ignition_can())
 
+  def test_ignition_crank(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0x03))
+    self.assertTrue(self.safety.get_ignition_can())
+
   def test_ignition_off(self):
     self.safety.safety_rx_hook(self._ignition_msg(0x02))
     self.assertTrue(self.safety.get_ignition_can())
     self.safety.safety_rx_hook(self._ignition_msg(0x00))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_bit_check(self):
+    # only bit 1 (0x02) matters
+    self.safety.safety_rx_hook(self._ignition_msg(0x01))
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0x04))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_wrong_bus(self):
+    msg = common.make_msg(1, 0x1F1, 8, bytes([0x02, 0, 0, 0, 0, 0, 0, 0]))
+    self.safety.safety_rx_hook(msg)
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_wrong_length(self):
+    msg = common.make_msg(0, 0x1F1, 4, bytes([0x02, 0, 0, 0]))
+    self.safety.safety_rx_hook(msg)
     self.assertFalse(self.safety.get_ignition_can())
 
 
