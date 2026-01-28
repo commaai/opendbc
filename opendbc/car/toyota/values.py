@@ -70,7 +70,6 @@ class ToyotaFlags(IntFlag):
   RADAR_ACC = 64
   # these cars use the Lane Tracing Assist (LTA) message for lateral control
   ANGLE_CONTROL = 128
-  NO_STOP_TIMER = 256
   # these cars can utilize 2.0 m/s^2
   RAISED_ACCEL_LIMIT = 1024
   SECOC = 2048
@@ -78,6 +77,8 @@ class ToyotaFlags(IntFlag):
   # deprecated flags
   # these cars are speculated to allow stop and go when the DSU is unplugged
   SNG_WITHOUT_DSU_DEPRECATED = 512
+  # no resume button press required
+  NO_STOP_TIMER_DEPRECATED = 256
 
 
 def dbc_dict(pt, radar):
@@ -107,7 +108,7 @@ class ToyotaTSS2PlatformConfig(PlatformConfig):
   dbc_dict: dict = field(default_factory=lambda: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'))
 
   def init(self):
-    self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU
+    self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_DSU
 
     if self.flags & ToyotaFlags.RADAR_ACC:
       self.dbc_dict = {Bus.pt: 'toyota_nodsu_pt_generated'}
@@ -118,7 +119,7 @@ class ToyotaSecOCPlatformConfig(PlatformConfig):
   dbc_dict: dict = field(default_factory=lambda: dbc_dict('toyota_secoc_pt_generated', 'toyota_tss2_adas'))
 
   def init(self):
-    self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC
+    self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC
 
     if self.flags & ToyotaFlags.RADAR_ACC:
       self.dbc_dict = {Bus.pt: 'toyota_secoc_pt_generated'}
@@ -216,7 +217,6 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=4516. * CV.LB_TO_KG, wheelbase=2.8194, steerRatio=16.0, tireStiffnessFactor=0.8),
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
-    flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_HIGHLANDER_TSS2 = ToyotaTSS2PlatformConfig(
     [
@@ -238,7 +238,6 @@ class CAR(Platforms):
     [ToyotaCarDocs("Toyota Prius v 2017", "Toyota Safety Sense P", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=3340. * CV.LB_TO_KG, wheelbase=2.78, steerRatio=17.4, tireStiffnessFactor=0.5533),
     dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
-    flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_PRIUS_TSS2 = ToyotaTSS2PlatformConfig(
     [
@@ -262,8 +261,6 @@ class CAR(Platforms):
     ],
     TOYOTA_RAV4.specs,
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
-    # Note that the ICE RAV4 does not respect positive acceleration commands under 19 mph
-    flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_RAV4_TSS2 = ToyotaTSS2PlatformConfig(
     [
@@ -305,7 +302,6 @@ class CAR(Platforms):
     [ToyotaCarDocs("Toyota Sienna 2018-20", video="https://www.youtube.com/watch?v=q1UPOo4Sh68", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=4590. * CV.LB_TO_KG, wheelbase=3.03, steerRatio=15.5, tireStiffnessFactor=0.444),
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
-    flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_SIENNA_4TH_GEN = ToyotaSecOCPlatformConfig(
     [ToyotaSecOcCarDocs("Toyota Sienna 2021-23", min_enable_speed=MIN_ACC_SPEED)],
@@ -604,8 +600,5 @@ RADAR_ACC_CAR = CAR.with_flags(ToyotaFlags.RADAR_ACC)
 ANGLE_CONTROL_CAR = CAR.with_flags(ToyotaFlags.ANGLE_CONTROL)
 
 SECOC_CAR = CAR.with_flags(ToyotaFlags.SECOC)
-
-# no resume button press required
-NO_STOP_TIMER_CAR = CAR.with_flags(ToyotaFlags.NO_STOP_TIMER)
 
 DBC = CAR.create_dbc_map()
