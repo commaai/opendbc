@@ -1,4 +1,3 @@
-// CAN ignition detection ported from panda/board/drivers/can_common.h
 #pragma once
 
 #include "opendbc/safety/declarations.h"

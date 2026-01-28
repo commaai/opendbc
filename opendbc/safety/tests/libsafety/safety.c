@@ -191,15 +191,6 @@ bool get_honda_fwd_brake(void){
   return honda_fwd_brake;
 }
 
-// CAN ignition helpers
-bool get_ignition_can(void){
-  return ignition_can;
-}
-
-void set_ignition_can(bool c){
-  ignition_can = c;
-}
-
 void init_tests(void){
   safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
   alternative_experience = 0;
