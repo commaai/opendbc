@@ -3,7 +3,7 @@ from opendbc.car.toyota.carstate import CarState
 from opendbc.car.toyota.carcontroller import CarController
 from opendbc.car.toyota.radar_interface import RadarInterface
 from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, TSS2_CAR, RADAR_ACC_CAR, MIN_ACC_SPEED, \
-                                                  EPS_SCALE, NO_STOP_TIMER_CAR, ANGLE_CONTROL_CAR, ToyotaSafetyFlags
+                                                  EPS_SCALE, ANGLE_CONTROL_CAR, ToyotaSafetyFlags
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
 
@@ -118,7 +118,7 @@ class CarInterface(CarInterfaceBase):
     ret.openpilotLongitudinalControl = (candidate in (TSS2_CAR - RADAR_ACC_CAR) or
                                         bool(ret.flags & ToyotaFlags.DISABLE_RADAR.value))
 
-    ret.autoResumeSng = ret.openpilotLongitudinalControl and candidate in NO_STOP_TIMER_CAR
+    ret.autoResumeSng = ret.openpilotLongitudinalControl
 
     if not ret.openpilotLongitudinalControl:
       ret.safetyConfigs[0].safetyParam |= ToyotaSafetyFlags.STOCK_LONGITUDINAL.value

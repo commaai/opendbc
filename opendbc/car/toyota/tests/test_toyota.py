@@ -4,9 +4,8 @@ from opendbc.car import Bus
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.toyota.fingerprints import FW_VERSIONS
-from opendbc.car.toyota.values import CAR, DBC, TSS2_CAR, ANGLE_CONTROL_CAR, RADAR_ACC_CAR, SECOC_CAR, \
-                                                  FW_QUERY_CONFIG, PLATFORM_CODE_ECUS, FUZZY_EXCLUDED_PLATFORMS, \
-                                                  get_platform_codes
+from opendbc.car.toyota.values import CAR, DBC, TSS2_CAR, ANGLE_CONTROL_CAR, RADAR_ACC_CAR, SECOC_CAR, FW_QUERY_CONFIG, \
+                                                  PLATFORM_CODE_ECUS, FUZZY_EXCLUDED_PLATFORMS, get_platform_codes
 
 Ecu = CarParams.Ecu
 
