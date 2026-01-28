@@ -58,7 +58,7 @@ def load_can_messages(seg: str) -> list[Any]:
   return [m for m in msgs if m.which() == 'can']
 
 
-def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[list[structs.CarState], list[int]]:
+def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[structs.CarParams, list[structs.CarState], list[int]]:
   _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
 
   def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
@@ -77,26 +77,30 @@ def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[list[structs.Car
     states.append(CI.update([(msg.logMonoTime, frames)]))
     CI.apply(CC, msg.logMonoTime)
     timestamps.append(msg.logMonoTime)
-  return states, timestamps
+  return CP, states, timestamps
 
 
 def process_segment(args: tuple) -> Result:
   platform, seg, ref_path, update = args
   try:
     can_msgs = load_can_messages(seg)
-    states, timestamps = replay_segment(platform, can_msgs)
+    CP, states, timestamps = replay_segment(platform, can_msgs)
     ref_file = Path(ref_path) / f"{platform}_{seg.replace('/', '_')}.zst"
 
     if update:
-      data = list(zip(timestamps, states, strict=True))
+      data = {"cp": CP.to_dict(), "frames": list(zip(timestamps, states, strict=True))}
       ref_file.write_bytes(zstd.compress(pickle.dumps(data), 10))
       return (platform, seg, [], None, None, None)
 
     if not ref_file.exists():
       return (platform, seg, [], None, None, "no ref")
 
-    ref: list[Ref] = pickle.loads(decompress_stream(ref_file.read_bytes()))
+    ref_data = pickle.loads(decompress_stream(ref_file.read_bytes()))
+    cp: dict[str, Any] = ref_data["cp"]
+    ref: list[Ref] = ref_data["frames"]
     diffs = []
+    for diff in dict_diff(cp, CP.to_dict(), path="carParams", ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
+      diffs.append((diff[1], -1, diff[2], 0))
     for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
       for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
         diffs.append((diff[1], i, diff[2], ts))
