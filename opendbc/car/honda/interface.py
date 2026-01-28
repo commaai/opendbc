@@ -68,6 +68,9 @@ class CarInterface(CarInterfaceBase):
     if 0x184 in fingerprint[CAN.pt]:
       ret.flags |= HondaFlags.HYBRID.value
 
+    if 0x309 not in fingerprint[CAN.pt]:
+      ret.flags |= HondaFlags.NO_CARSPEED.value
+
     if ret.flags & HondaFlags.ALLOW_MANUAL_TRANS and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
       # Manual transmission support for allowlisted cars only, to prevent silent fall-through on auto-detection failures
       ret.transmissionType = TransmissionType.manual
@@ -194,6 +197,11 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.ACURA_TLX_2G_MMR:
       ret.steerActuatorDelay = 0.15
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+
+    elif candidate == CAR.HONDA_ODYSSEY_SINGAPORE:
+      ret.steerActuatorDelay = 0.15
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 1365], [0, 1365]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     else:
