@@ -28,7 +28,7 @@ IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 PADDING = 5
 
 
-def dict_diff(d1: dict, d2: dict, path: str = "", ignore: list[str] | None = None, tolerance: float = 0) -> list[tuple]:
+def dict_diff(d1: dict, d2: dict, path: str = "", ignore: list | None = None, tolerance: float = 0) -> list:
   ignore = ignore or []
   diffs = []
   for key in d1.keys() | d2.keys():
@@ -53,7 +53,7 @@ def load_can_messages(seg: str) -> list:
   return [m for m in msgs if m.which() == 'can']
 
 
-def replay_segment(platform: str, can_msgs: list) -> tuple[list, list]:
+def replay_segment(platform: str, can_msgs: list) -> tuple:
   _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
 
   def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
@@ -100,7 +100,7 @@ def process_segment(args: tuple) -> tuple:
     return (platform, seg, [], None, None, traceback.format_exc())
 
 
-def get_changed_platforms(cwd: Path, database: dict, interfaces: dict) -> list[str]:
+def get_changed_platforms(cwd: Path, database: dict, interfaces: dict) -> list:
   git_ref = os.environ.get("GIT_REF", "origin/master")
   changed = subprocess.check_output(["git", "diff", "--name-only", f"{git_ref}...HEAD"], cwd=cwd, encoding='utf8').strip()
   brands = set()
@@ -113,7 +113,7 @@ def get_changed_platforms(cwd: Path, database: dict, interfaces: dict) -> list[s
   return [p for p in interfaces if any(b in p.lower() for b in brands) and p in database]
 
 
-def download_refs(ref_path: Path, platforms: list[str], segments: dict) -> None:
+def download_refs(ref_path: Path, platforms: list, segments: dict) -> None:
   base_url = f"https://raw.githubusercontent.com/commaai/ci-artifacts/refs/heads/{DIFF_BUCKET}"
   for platform in tqdm(platforms):
     for seg in segments.get(platform, []):
@@ -122,7 +122,7 @@ def download_refs(ref_path: Path, platforms: list[str], segments: dict) -> None:
         (Path(ref_path) / filename).write_bytes(resp.read())
 
 
-def run_replay(platforms: list[str], segments: dict, ref_path: Path, update: bool, workers: int = 4) -> list:
+def run_replay(platforms: list, segments: dict, ref_path: Path, update: bool, workers: int = 4) -> list:
   work = [(platform, seg, ref_path, update)
           for platform in platforms for seg in segments.get(platform, [])]
   return process_map(process_segment, work, max_workers=workers)
@@ -154,7 +154,7 @@ def render_waveform(label: str, vals: list[bool]) -> str:
   return line
 
 
-def format_timing(edge_type: str, master_edges: list[int], pr_edges: list[int], ms_per_frame: float) -> str | None:
+def format_timing(edge_type: str, master_edges: list, pr_edges: list, ms_per_frame: float) -> str | None:
   if not master_edges or not pr_edges:
     return None
   delta = pr_edges[0] - master_edges[0]
@@ -165,7 +165,7 @@ def format_timing(edge_type: str, master_edges: list[int], pr_edges: list[int], 
   return " " * 12 + f"{edge_type}: PR {direction} by {abs(delta)} frames ({ms}ms)"
 
 
-def group_frames(diffs: list, max_gap: int = 15) -> list[list]:
+def group_frames(diffs: list, max_gap: int = 15) -> list:
   groups = []
   current = [diffs[0]]
   for diff in diffs[1:]:
@@ -180,7 +180,7 @@ def group_frames(diffs: list, max_gap: int = 15) -> list[list]:
   return groups
 
 
-def build_signals(group: list, ref: list, states: list, field: str) -> tuple[list, list, int, int]:
+def build_signals(group: list, ref: list, states: list, field: str) -> tuple:
   _, first_frame, _, _ = group[0]
   _, last_frame, _, _ = group[-1]
   start = max(0, first_frame - PADDING)
