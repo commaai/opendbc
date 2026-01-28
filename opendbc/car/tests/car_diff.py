@@ -28,7 +28,7 @@ IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 PADDING = 5
 
 
-def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
+def dict_diff(d1: dict, d2: dict, path: str = "", ignore: list[str] | None = None, tolerance: float = 0) -> list:
   ignore = ignore or []
   diffs = []
   for key in d1.keys() | d2.keys():
@@ -46,14 +46,14 @@ def dict_diff(d1, d2, path="", ignore=None, tolerance=0):
   return diffs
 
 
-def load_can_messages(seg):
+def load_can_messages(seg: str) -> list:
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
   msgs = LogReader(url, only_union_types=True, sort_by_time=True)
   return [m for m in msgs if m.which() == 'can']
 
 
-def replay_segment(platform, can_msgs):
+def replay_segment(platform: str, can_msgs: list) -> tuple[list[structs.CarState], list[int]]:
   _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
 
   def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
@@ -75,7 +75,7 @@ def replay_segment(platform, can_msgs):
   return states, timestamps
 
 
-def process_segment(args):
+def process_segment(args: tuple) -> tuple[str, str, list, str | None]:
   platform, seg, ref_path, update = args
   try:
     can_msgs = load_can_messages(seg)
@@ -100,7 +100,7 @@ def process_segment(args):
     return (platform, seg, [], traceback.format_exc())
 
 
-def get_changed_platforms(cwd, database, interfaces):
+def get_changed_platforms(cwd: Path, database: dict, interfaces: dict) -> list[str]:
   git_ref = os.environ.get("GIT_REF", "origin/master")
   changed = subprocess.check_output(["git", "diff", "--name-only", f"{git_ref}...HEAD"], cwd=cwd, encoding='utf8').strip()
   brands = set()
@@ -113,7 +113,7 @@ def get_changed_platforms(cwd, database, interfaces):
   return [p for p in interfaces if any(b in p.lower() for b in brands) and p in database]
 
 
-def download_refs(ref_path, platforms, segments):
+def download_refs(ref_path: Path, platforms: list[str], segments: dict) -> None:
   base_url = f"https://raw.githubusercontent.com/commaai/ci-artifacts/refs/heads/{DIFF_BUCKET}"
   for platform in tqdm(platforms):
     for seg in segments.get(platform, []):
@@ -122,14 +122,14 @@ def download_refs(ref_path, platforms, segments):
         (Path(ref_path) / filename).write_bytes(resp.read())
 
 
-def run_replay(platforms, segments, ref_path, update, workers=4):
+def run_replay(platforms: list[str], segments: dict, ref_path: Path, update: bool, workers: int = 4) -> list:
   work = [(platform, seg, ref_path, update)
           for platform in platforms for seg in segments.get(platform, [])]
   return process_map(process_segment, work, max_workers=workers)
 
 
 # ASCII waveforms helpers
-def find_edges(vals, init):
+def find_edges(vals: list[bool], init: bool) -> tuple[list[int], list[int]]:
   rises = []
   falls = []
   prev = init
@@ -142,7 +142,7 @@ def find_edges(vals, init):
   return rises, falls
 
 
-def render_waveform(label, vals, init):
+def render_waveform(label: str, vals: list[bool], init: bool) -> str:
   wave = {(False, False): "_", (True, True): "‾", (False, True): "/", (True, False): "\\"}
   line = f"  {label}:".ljust(12)
   prev = init
@@ -154,7 +154,7 @@ def render_waveform(label, vals, init):
   return line
 
 
-def format_timing(edge_type, master_edges, pr_edges, ms_per_frame):
+def format_timing(edge_type: str, master_edges: list[int], pr_edges: list[int], ms_per_frame: float) -> str | None:
   if not master_edges or not pr_edges:
     return None
   delta = pr_edges[0] - master_edges[0]
@@ -165,7 +165,7 @@ def format_timing(edge_type, master_edges, pr_edges, ms_per_frame):
   return " " * 12 + f"{edge_type}: PR {direction} by {abs(delta)} frames ({ms}ms)"
 
 
-def group_frames(diffs, max_gap=15):
+def group_frames(diffs: list, max_gap: int = 15) -> list[list]:
   groups = []
   current = [diffs[0]]
   for diff in diffs[1:]:
@@ -180,7 +180,7 @@ def group_frames(diffs, max_gap=15):
   return groups
 
 
-def build_signals(group):
+def build_signals(group: list) -> tuple[list[bool], list[bool], bool, int, int]:
   _, first_frame, _, _ = group[0]
   _, last_frame, (final_master, _), _ = group[-1]
   start = max(0, first_frame - PADDING)
@@ -201,7 +201,7 @@ def build_signals(group):
   return master_vals, pr_vals, init, start, end
 
 
-def format_numeric_diffs(diffs):
+def format_numeric_diffs(diffs: list) -> list[str]:
   lines = []
   for _, frame, (old_val, new_val), _ in diffs[:10]:
     lines.append(f"    frame {frame}: {old_val} -> {new_val}")
@@ -210,7 +210,7 @@ def format_numeric_diffs(diffs):
   return lines
 
 
-def format_boolean_diffs(diffs):
+def format_boolean_diffs(diffs: list) -> list[str]:
   _, first_frame, _, first_ts = diffs[0]
   _, last_frame, _, last_ts = diffs[-1]
   frame_time = last_frame - first_frame
@@ -233,7 +233,7 @@ def format_boolean_diffs(diffs):
   return lines
 
 
-def format_diff(diffs):
+def format_diff(diffs: list) -> list[str]:
   if not diffs:
     return []
   _, _, (old, new), _ = diffs[0]
@@ -243,7 +243,7 @@ def format_diff(diffs):
   return format_numeric_diffs(diffs)
 
 
-def main(platform=None, segments_per_platform=10, update_refs=False, all_platforms=False):
+def main(platform: str | None = None, segments_per_platform: int = 10, update_refs: bool = False, all_platforms: bool = False) -> int:
   cwd = Path(__file__).resolve().parents[3]
   ref_path = cwd / DIFF_BUCKET
   if not update_refs:
