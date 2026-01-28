@@ -156,13 +156,14 @@ class CAR(Platforms):
     ],
     TOYOTA_AVALON.specs,
   )
+  # TODO: determine if TSS-P NO_DSU cars can work with toyota_adas radar DBC and re-enable
   TOYOTA_CAMRY = PlatformConfig(
     [
       ToyotaCarDocs("Toyota Camry 2018-20", video="https://www.youtube.com/watch?v=fkcjviZY9CM", footnotes=[Footnote.CAMRY]),
       ToyotaCarDocs("Toyota Camry Hybrid 2018-20", video="https://www.youtube.com/watch?v=Q2DYY0AWKgk"),
     ],
     CarSpecs(mass=3400. * CV.LB_TO_KG, wheelbase=2.82448, steerRatio=13.7, tireStiffnessFactor=0.7933),
-    dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
+    {Bus.pt: 'toyota_nodsu_pt_generated'},
     flags=ToyotaFlags.NO_DSU,
   )
   TOYOTA_CAMRY_TSS2 = ToyotaTSS2PlatformConfig( # TSS 2.5
@@ -178,7 +179,7 @@ class CAR(Platforms):
       ToyotaCarDocs("Toyota C-HR Hybrid 2017-20"),
     ],
     CarSpecs(mass=3300. * CV.LB_TO_KG, wheelbase=2.63906, steerRatio=13.6, tireStiffnessFactor=0.7933),
-    dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
+    {Bus.pt: 'toyota_nodsu_pt_generated'},
     flags=ToyotaFlags.NO_DSU,
   )
   TOYOTA_CHR_TSS2 = ToyotaTSS2PlatformConfig(

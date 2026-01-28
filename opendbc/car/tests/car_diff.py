@@ -95,7 +95,7 @@ def process_segment(args: tuple) -> Result:
     if not ref_file.exists():
       return (platform, seg, [], None, None, "no ref")
 
-    ref = pickle.loads(decompress_stream(ref_file.read_bytes()))
+    ref: list[Ref] = pickle.loads(decompress_stream(ref_file.read_bytes()))
     diffs = []
     for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
       for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
@@ -134,7 +134,7 @@ def run_replay(platforms: list[str], segments: dict[str, list[str]], ref_path: P
 
 
 # ASCII waveforms helpers
-def find_edges(vals: list[Any]) -> tuple[list[int], list[int]]:
+def find_edges(vals: list[bool], init: bool) -> tuple[list[int], list[int]]:
   rises = []
   falls = []
   prev = vals[0]
@@ -147,7 +147,7 @@ def find_edges(vals: list[Any]) -> tuple[list[int], list[int]]:
   return rises, falls
 
 
-def render_waveform(label: str, vals: list[Any]) -> str:
+def render_waveform(label: str, vals: list[bool], init: bool) -> str:
   wave = {(False, False): "_", (True, True): "‾", (False, True): "/", (True, False): "\\"}
   line = f"  {label}:".ljust(12)
   prev = vals[0]
