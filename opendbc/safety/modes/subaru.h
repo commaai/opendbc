@@ -108,7 +108,7 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
     if ((msg->addr == MSG_SUBARU_Steering_2) && (msg->bus == SUBARU_MAIN_BUS)) {
       uint32_t raw = GET_BYTES(msg, 3, 3);
       raw &= 0x1FFFFU;
-      int angle_meas_new = to_signed(raw, 17) * -1;
+      int angle_meas_new = -to_signed(raw, 17);
       update_sample(&angle_meas, angle_meas_new);
     }
   } else {

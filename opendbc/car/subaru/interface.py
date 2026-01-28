@@ -88,6 +88,9 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate in (CAR.SUBARU_OUTBACK_PREGLOBAL, CAR.SUBARU_CROSSTREK_2025):
       pass
+
+    elif candidate == CAR.SUBARU_FORESTER_2022:
+      ret.dashcamOnly = True
     else:
       raise ValueError(f"unknown car: {candidate}")
 
