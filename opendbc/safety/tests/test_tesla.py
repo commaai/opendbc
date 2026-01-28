@@ -457,6 +457,8 @@ class TestTeslaFSD14LongitudinalSafety(TestTeslaLongitudinalSafety):
 
 
 class TestTeslaIgnition(unittest.TestCase):
+  TX_MSGS = None
+
   @classmethod
   def setUpClass(cls):
     cls.safety = libsafety_py.libsafety
