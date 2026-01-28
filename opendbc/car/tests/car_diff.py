@@ -13,6 +13,7 @@ from tqdm.contrib.concurrent import process_map
 from urllib.request import urlopen
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
 
 from comma_car_segments import get_comma_car_segments_database, get_url
 
@@ -27,8 +28,12 @@ DIFF_BUCKET = "car_diff"
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 PADDING = 5
 
+Diff = tuple[str, int, tuple[Any, Any], int]
+Ref = tuple[int, structs.CarState]
+Result = tuple[str, str, list[Diff], str | None]
 
-def dict_diff(d1: dict, d2: dict, path: str = "", ignore: list[str] | None = None, tolerance: float = 0) -> list:
+
+def dict_diff(d1: dict[str, Any], d2: dict[str, Any], path: str = "", ignore: list[str] | None = None, tolerance: float = 0) -> list[tuple]:
   ignore = ignore or []
   diffs = []
   for key in d1.keys() | d2.keys():
@@ -46,14 +51,14 @@ def dict_diff(d1: dict, d2: dict, path: str = "", ignore: list[str] | None = Non
   return diffs
 
 
-def load_can_messages(seg: str) -> list:
+def load_can_messages(seg: str) -> list[Any]:
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
   msgs = LogReader(url, only_union_types=True, sort_by_time=True)
   return [m for m in msgs if m.which() == 'can']
 
 
-def replay_segment(platform: str, can_msgs: list) -> tuple[list[structs.CarState], list[int]]:
+def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[list[structs.CarState], list[int]]:
   _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
 
   def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
@@ -75,7 +80,7 @@ def replay_segment(platform: str, can_msgs: list) -> tuple[list[structs.CarState
   return states, timestamps
 
 
-def process_segment(args: tuple) -> tuple[str, str, list, str | None]:
+def process_segment(args: tuple) -> Result:
   platform, seg, ref_path, update = args
   try:
     can_msgs = load_can_messages(seg)
@@ -90,7 +95,7 @@ def process_segment(args: tuple) -> tuple[str, str, list, str | None]:
     if not ref_file.exists():
       return (platform, seg, [], "no ref")
 
-    ref = pickle.loads(decompress_stream(ref_file.read_bytes()))
+    ref: list[Ref] = pickle.loads(decompress_stream(ref_file.read_bytes()))
     diffs = []
     for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
       for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
@@ -100,7 +105,7 @@ def process_segment(args: tuple) -> tuple[str, str, list, str | None]:
     return (platform, seg, [], traceback.format_exc())
 
 
-def get_changed_platforms(cwd: Path, database: dict, interfaces: dict) -> list[str]:
+def get_changed_platforms(cwd: Path, database: dict[str, Any], interfaces: dict[str, Any]) -> list[str]:
   git_ref = os.environ.get("GIT_REF", "origin/master")
   changed = subprocess.check_output(["git", "diff", "--name-only", f"{git_ref}...HEAD"], cwd=cwd, encoding='utf8').strip()
   brands = set()
@@ -113,7 +118,7 @@ def get_changed_platforms(cwd: Path, database: dict, interfaces: dict) -> list[s
   return [p for p in interfaces if any(b in p.lower() for b in brands) and p in database]
 
 
-def download_refs(ref_path: Path, platforms: list[str], segments: dict) -> None:
+def download_refs(ref_path: Path, platforms: list[str], segments: dict[str, list[str]]) -> None:
   base_url = f"https://raw.githubusercontent.com/commaai/ci-artifacts/refs/heads/{DIFF_BUCKET}"
   for platform in tqdm(platforms):
     for seg in segments.get(platform, []):
@@ -122,7 +127,7 @@ def download_refs(ref_path: Path, platforms: list[str], segments: dict) -> None:
         (Path(ref_path) / filename).write_bytes(resp.read())
 
 
-def run_replay(platforms: list[str], segments: dict, ref_path: Path, update: bool, workers: int = 4) -> list:
+def run_replay(platforms: list[str], segments: dict[str, list[str]], ref_path: Path, update: bool, workers: int = 4) -> list[Result]:
   work = [(platform, seg, ref_path, update)
           for platform in platforms for seg in segments.get(platform, [])]
   return process_map(process_segment, work, max_workers=workers)
@@ -165,7 +170,7 @@ def format_timing(edge_type: str, master_edges: list[int], pr_edges: list[int], 
   return " " * 12 + f"{edge_type}: PR {direction} by {abs(delta)} frames ({ms}ms)"
 
 
-def group_frames(diffs: list, max_gap: int = 15) -> list[list]:
+def group_frames(diffs: list[Diff], max_gap: int = 15) -> list[list[Diff]]:
   groups = []
   current = [diffs[0]]
   for diff in diffs[1:]:
@@ -180,7 +185,7 @@ def group_frames(diffs: list, max_gap: int = 15) -> list[list]:
   return groups
 
 
-def build_signals(group: list) -> tuple[list[bool], list[bool], bool, int, int]:
+def build_signals(group: list[Diff]) -> tuple[list[bool], list[bool], bool, int, int]:
   _, first_frame, _, _ = group[0]
   _, last_frame, (final_master, _), _ = group[-1]
   start = max(0, first_frame - PADDING)
@@ -201,7 +206,7 @@ def build_signals(group: list) -> tuple[list[bool], list[bool], bool, int, int]:
   return master_vals, pr_vals, init, start, end
 
 
-def format_numeric_diffs(diffs: list) -> list[str]:
+def format_numeric_diffs(diffs: list[Diff]) -> list[str]:
   lines = []
   for _, frame, (old_val, new_val), _ in diffs[:10]:
     lines.append(f"    frame {frame}: {old_val} -> {new_val}")
@@ -210,7 +215,7 @@ def format_numeric_diffs(diffs: list) -> list[str]:
   return lines
 
 
-def format_boolean_diffs(diffs: list) -> list[str]:
+def format_boolean_diffs(diffs: list[Diff]) -> list[str]:
   _, first_frame, _, first_ts = diffs[0]
   _, last_frame, _, last_ts = diffs[-1]
   frame_time = last_frame - first_frame
@@ -233,7 +238,7 @@ def format_boolean_diffs(diffs: list) -> list[str]:
   return lines
 
 
-def format_diff(diffs: list) -> list[str]:
+def format_diff(diffs: list[Diff]) -> list[str]:
   if not diffs:
     return []
   _, _, (old, new), _ = diffs[0]
