@@ -106,11 +106,10 @@ class CarInterface(CarInterfaceBase):
     # TODO: make an adas dbc file for dsu-less models
     ret.radarUnavailable = Bus.radar not in DBC[candidate] or candidate in (NO_DSU_CAR - TSS2_CAR)
 
-    # since we don't yet parse radar on TSS2/TSS-P radar-based ACC cars, gate longitudinal behind experimental toggle
+    # since we don't yet parse radar on TSS2 radar-based ACC cars, gate longitudinal behind experimental toggle
     if candidate in RADAR_ACC_CAR:
       ret.alphaLongitudinalAvailable = True
 
-      # Disabling radar is only supported on TSS2 radar-ACC cars
       if alpha_long:
         ret.flags |= ToyotaFlags.DISABLE_RADAR.value
 
