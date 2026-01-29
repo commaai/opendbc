@@ -58,7 +58,7 @@ def load_can_messages(seg: str) -> list[Any]:
   return [m for m in msgs if m.which() == 'can']
 
 
-def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[list[structs.CarState], list[int]]:
+def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[list[Any], list[int]]:
   _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
 
   def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
@@ -215,7 +215,7 @@ def format_numeric_diffs(diffs: list[Diff]) -> list[str]:
   return lines
 
 
-def format_boolean_diffs(diffs: list[Diff], ref: list[Ref], states: list[structs.CarState], field: str) -> list[str]:
+def format_boolean_diffs(diffs: list[Diff], ref: list[Ref], states: list[Any], field: str) -> list[str]:
   _, first_frame, _, first_ts = diffs[0]
   _, last_frame, _, last_ts = diffs[-1]
   frame_time = last_frame - first_frame
@@ -238,7 +238,7 @@ def format_boolean_diffs(diffs: list[Diff], ref: list[Ref], states: list[structs
   return lines
 
 
-def format_diff(diffs: list[Diff], ref: list[Ref], states: list[structs.CarState], field: str) -> list[str]:
+def format_diff(diffs: list[Diff], ref: list[Ref], states: list[Any], field: str) -> list[str]:
   if not diffs:
     return []
   _, _, (old, new), _ = diffs[0]
