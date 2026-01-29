@@ -58,15 +58,6 @@ def gen2_long_additional_tx_msgs():
 def fwd_blacklisted_addr(lkas_msg=SubaruMsg.ES_LKAS):
   return {SUBARU_CAM_BUS: [lkas_msg, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State, SubaruMsg.ES_Infotainment]}
 
-def get_raw16_from_canpacket(msg) -> int:
-  # msg is cdata 'CANPacket_t *'
-  b4 = int(msg[0].data[4])
-  b5 = int(msg[0].data[5])
-  return b4 | (b5 << 8)
-
-def to_signed16(x: int) -> int:
-  x &= 0xFFFF
-  return (x ^ 0x8000) - 0x8000
 
 class TestSubaruSafetyBase(common.CarSafetyTest):
   FLAGS = 0
