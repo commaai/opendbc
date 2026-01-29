@@ -1,6 +1,7 @@
 from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_BOSCH_CANFD, CarControllerParams
+from opendbc.car.honda.values import (HondaFlags, HONDA_BOSCH, HONDA_BOSCH_ALT_RADAR, HONDA_BOSCH_RADARLESS,
+                                      HONDA_BOSCH_CANFD, CarControllerParams)
 
 # CAN bus layout with relay
 # 0 = ACC-CAN - radar side
@@ -113,11 +114,15 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
   return commands
 
 
-def create_steering_control(packer, CAN, apply_torque, lkas_active):
+def create_steering_control(packer, CAN, apply_torque, lkas_active, tja_control):
   values = {
     "STEER_TORQUE": apply_torque if lkas_active else 0,
     "STEER_TORQUE_REQUEST": lkas_active,
   }
+
+  if tja_control:
+    values["STEER_DOWN_TO_ZERO"] = lkas_active
+
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
 
@@ -160,7 +165,7 @@ def create_acc_hud(packer, bus, CP, enabled, pcm_speed, pcm_accel, hud_control, 
   return packer.make_can_msg("ACC_HUD", bus, acc_hud_values)
 
 
-def create_lkas_hud(packer, bus, CP, hud_control, alert_steer_required, lkas_hud):
+def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available, reduced_steering, alert_steer_required, lkas_hud):
   commands = []
 
   lkas_hud_values = {
@@ -183,6 +188,13 @@ def create_lkas_hud(packer, bus, CP, hud_control, alert_steer_required, lkas_hud
   if not (CP.flags & HondaFlags.BOSCH_EXT_HUD):
     lkas_hud_values['RDM_OFF'] = 1
     lkas_hud_values['LANE_ASSIST_BEEP_OFF'] = 1
+
+  # New HUD concept for selected Bosch cars, overwrites some of the above
+  # TODO: make global across all Honda if feedback is favorable
+  if CP.carFingerprint in HONDA_BOSCH_ALT_RADAR:
+    lkas_hud_values['DASHED_LANES'] = steering_available
+    lkas_hud_values['SOLID_LANES'] = lat_active
+    lkas_hud_values['LKAS_PROBLEM'] = lat_active and reduced_steering
 
   if CP.flags & HondaFlags.BOSCH_EXT_HUD and not CP.openpilotLongitudinalControl:
     commands.append(packer.make_can_msg('LKAS_HUD_A', bus, lkas_hud_values))
