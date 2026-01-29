@@ -62,7 +62,7 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
     return self.packer.make_can_msg_safety("Lenkhilfe_3", 0, values)
 
   # openpilot steering output torque
-  def _torque_cmd_msg(self, torque, steer_req=1, hca_status=5):
+  def _torque_cmd_msg(self, torque, steer_req=1, hca_status=7):
     values = {"LM_Offset": abs(torque), "LM_OffSign": torque < 0, "HCA_Status": hca_status if steer_req else 3}
     return self.packer.make_can_msg_safety("HCA_1", 0, values)
 
