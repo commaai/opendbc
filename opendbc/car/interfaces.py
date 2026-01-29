@@ -99,22 +99,16 @@ class CarInterfaceBase(ABC):
   DRIVABLE_GEARS: tuple[structs.CarState.GearShifter, ...] = ()
 
   def __init__(self, CP: structs.CarParams):
-    print('CarInterfaceBase init', CP.carFingerprint)
     self.CP = CP
-    print('1')
 
     self.frame = 0
     self.v_ego_cluster_seen = False
 
     self.CS: CarStateBase = self.CarState(CP)
-    print('2')
     self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
-    print('3')
 
     dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
-    print('4', dbc_names)
     self.CC: CarControllerBase = self.CarController(dbc_names, CP)
-    print('CarInterfaceBase init done')
 
   def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     if now_nanos is None:
@@ -136,7 +130,6 @@ class CarInterfaceBase(ABC):
   def get_params(cls, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw],
                  alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
     ret = CarInterfaceBase.get_std_params(candidate)
-    print('get_params', fingerprint)
 
     platform = PLATFORMS[candidate]
     ret.mass = platform.config.specs.mass

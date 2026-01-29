@@ -24,9 +24,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerControlType = structs.CarParams.SteerControlType.angle
 
     # Model X and HW 2.5 vehicles are missing DAS_settings
-    print('tesla', fingerprint)
     if 0x293 not in fingerprint[CANBUS.autopilot_party]:
-      print('MISSING DAS_SETTINGS')
       ret.flags |= TeslaFlags.MISSING_DAS_SETTINGS.value
 
     # Radar support is intended to work for:
