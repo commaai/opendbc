@@ -228,5 +228,53 @@ class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVS
   pass
 
 
+class TestGmIgnition(unittest.TestCase):
+  TX_MSGS = None
+
+  @classmethod
+  def setUpClass(cls):
+    cls.safety = libsafety_py.libsafety
+
+  def setUp(self):
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, 0)
+    self.safety.init_tests()
+
+  def _ignition_msg(self, value):
+    return common.make_msg(0, 0x1F1, 8, bytes([value, 0, 0, 0, 0, 0, 0, 0]))
+
+  def test_ignition_on(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0x02))
+    self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_crank(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0x03))
+    self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    self.safety.safety_rx_hook(self._ignition_msg(0x02))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0x00))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_bit_check(self):
+    # only bit 1 (0x02) matters
+    self.safety.safety_rx_hook(self._ignition_msg(0x01))
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.safety_rx_hook(self._ignition_msg(0x04))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_wrong_bus(self):
+    msg = common.make_msg(1, 0x1F1, 8, bytes([0x02, 0, 0, 0, 0, 0, 0, 0]))
+    self.safety.safety_rx_hook(msg)
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_wrong_length(self):
+    msg = common.make_msg(0, 0x1F1, 4, bytes([0x02, 0, 0, 0]))
+    self.safety.safety_rx_hook(msg)
+    self.assertFalse(self.safety.get_ignition_can())
+
+
 if __name__ == "__main__":
   unittest.main()

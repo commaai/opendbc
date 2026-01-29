@@ -191,6 +191,10 @@ bool get_honda_fwd_brake(void){
   return honda_fwd_brake;
 }
 
+bool get_ignition_can(void){
+  return ignition_can;
+}
+
 void init_tests(void){
   safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
   alternative_experience = 0;
@@ -198,6 +202,7 @@ void init_tests(void){
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;
   invalid_steer_req_count = 0;
+  ignition_can_init();
 
   // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
   tesla_autopark = false;
