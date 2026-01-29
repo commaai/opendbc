@@ -27,6 +27,7 @@ TOLERANCE = 1e-4
 DIFF_BUCKET = "car_diff"
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 PADDING = 5
+CACHE_DIR = Path("/tmp/comma_download_cache")
 
 Diff = tuple[str, int, tuple[Any, Any], int]
 Ref = tuple[int, structs.CarState]
@@ -52,10 +53,16 @@ def dict_diff(d1: dict[str, Any], d2: dict[str, Any], path: str = "", ignore: li
 
 
 def load_can_messages(seg: str) -> list[Any]:
+  cache_path = CACHE_DIR / seg.replace('/', '_')
+  if cache_path.exists():
+    return pickle.loads(cache_path.read_bytes())
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
   msgs = LogReader(url, only_union_types=True, sort_by_time=True)
-  return [m for m in msgs if m.which() == 'can']
+  result = [m for m in msgs if m.which() == 'can']
+  cache_path.parent.mkdir(parents=True, exist_ok=True)
+  cache_path.write_bytes(pickle.dumps(result))
+  return result
 
 
 def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[list[structs.CarState], list[int]]:

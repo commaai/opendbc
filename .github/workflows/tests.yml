@@ -70,6 +70,11 @@ jobs:
       with:
         fetch-depth: 0
     - uses: ./.github/workflows/cache
+    - name: Cache segments
+      uses: actions/cache@v4
+      with:
+        path: /tmp/comma_download_cache
+        key: car_diff-${{ hashFiles('opendbc/car/tests/car_diff.py') }}
     - name: Build opendbc
       run: |
         source setup.sh
