@@ -85,7 +85,9 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
   DEG_TO_CAN = 100
 
   INACTIVE_GAS = 1818
-  ANGLE_MEAS_SCALE = -2.17
+
+  # About maxed out in one direction
+  STEER_ANGLE_MAX = 545
 
   def setUp(self):
     self.packer = CANPackerSafety("subaru_global_2017_generated")
@@ -121,20 +123,9 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
-  def test_angle_meas_scaling(self):
-    for angle in [0, 1, 10, 50, 90, 100, 180, 500]:
-      msg = None
-      # Fill the 6-sample buffer with nearly identical samples
-      for _ in range(6):
-        msg = self._angle_meas_msg(angle)
-        self._rx(msg)
-
-      raw16 = get_raw16_from_canpacket(msg)
-      signed = to_signed16(raw16)
-      expected = int(round(self.ANGLE_MEAS_SCALE * signed))
-
-      self.assertEqual(self.safety.get_angle_meas_min(), expected)
-      self.assertEqual(self.safety.get_angle_meas_max(), expected)
+  def test_steering_angle_measurements(self):
+    self._common_measurement_test(self._angle_meas_msg, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, self.DEG_TO_CAN,
+                                  self.safety.get_angle_meas_min, self.safety.get_angle_meas_max)
 
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
