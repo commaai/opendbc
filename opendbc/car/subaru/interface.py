@@ -18,7 +18,7 @@ class CarInterface(CarInterfaceBase):
     # - replacement for ES_Distance so we can cancel the cruise control
     # - to find the Cruise_Activated bit from the car
     # - proper panda safety setup (use the correct cruise_activated bit, throttle from Throttle_Hybrid, etc)
-    ret.dashcamOnly = bool(ret.flags & (SubaruFlags.PREGLOBAL | SubaruFlags.LKAS_ANGLE | SubaruFlags.HYBRID))
+    ret.dashcamOnly = bool(ret.flags & (SubaruFlags.PREGLOBAL | SubaruFlags.HYBRID))
     ret.autoResumeSng = False
 
     # Detect infotainment message sent from the camera
@@ -41,6 +41,11 @@ class CarInterface(CarInterfaceBase):
       ret.steerControlType = structs.CarParams.SteerControlType.angle
     else:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+
+    if ret.flags & SubaruFlags.LKAS_ANGLE:
+      ret.steerActuatorDelay = 0.3
+      ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.LKAS_ANGLE.value
+      ret.dashcamOnly = is_release
 
     if candidate in (CAR.SUBARU_ASCENT, CAR.SUBARU_ASCENT_2023):
       ret.steerActuatorDelay = 0.3  # end-to-end angle controller
@@ -65,7 +70,10 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_CROSSTREK_HYBRID:
       ret.steerActuatorDelay = 0.1
 
-    elif candidate in (CAR.SUBARU_FORESTER, CAR.SUBARU_FORESTER_2022, CAR.SUBARU_FORESTER_HYBRID):
+    elif candidate == CAR.SUBARU_FORESTER_2022:
+      ret.dashcamOnly = True
+
+    elif candidate in (CAR.SUBARU_FORESTER, CAR.SUBARU_FORESTER_HYBRID):
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kf = 0.000038
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 14., 23.], [0., 14., 23.]]
@@ -81,8 +89,9 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_LEGACY_PREGLOBAL:
       ret.steerActuatorDelay = 0.15
 
-    elif candidate == CAR.SUBARU_OUTBACK_PREGLOBAL:
+    elif candidate in (CAR.SUBARU_OUTBACK_PREGLOBAL, CAR.SUBARU_CROSSTREK_2025):
       pass
+
     else:
       raise ValueError(f"unknown car: {candidate}")
 
