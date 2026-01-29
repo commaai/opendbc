@@ -91,7 +91,7 @@ class CarInterface(CarInterfaceBase):
           ret.lateralTuning.pid.kf = 0.00004
           break
 
-    elif candidate in (CAR.TOYOTA_CHR, CAR.TOYOTA_CAMRY, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_NX):
+    elif candidate in (CAR.TOYOTA_CHR, CAR.TOYOTA_CAMRY, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_LS, CAR.LEXUS_NX):
       # TODO: Some of these platforms are not advertised to have full range ACC, do they really all have sng?
       stop_and_go = True
 
