@@ -17,13 +17,17 @@ def get_safety_CP():
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
+    print('tesla carcontroller init')
     super().__init__(dbc_names, CP)
+    print('tesla carcontroller super init done')
     self.apply_angle_last = 0
     self.packer = CANPacker(dbc_names[Bus.party])
     self.tesla_can = TeslaCAN(CP, self.packer)
+    print('tesla carcontroller tesla can init done')
 
     # Vehicle model used for lateral limiting
     self.VM = VehicleModel(get_safety_CP())
+    print('tesla carcontroller vehicle model init done')
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators

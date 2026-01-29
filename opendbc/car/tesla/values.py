@@ -135,6 +135,8 @@ class TeslaSafetyFlags(IntFlag):
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
   FSD_14 = 2
+  # TODO: find missing DAS_autosteerEnabled signal for HW 2.5
+  MISSING_DAS_SETTINGS = 4
 
 
 DBC = CAR.create_dbc_map()
