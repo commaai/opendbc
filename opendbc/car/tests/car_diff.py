@@ -247,6 +247,11 @@ def format_diff(diffs: list[Diff], ref: list[Ref], states: list[structs.CarState
   return format_numeric_diffs(diffs)
 
 
+def print_header(status: str):
+  print(f"### car diff: {status}")
+  print("Replays real driving segments through your PR code and compares the behavior to master")
+
+
 def main(platform: str | None = None, segments_per_platform: int = 10, update_refs: bool = False, all_platforms: bool = False) -> int:
   cwd = Path(__file__).resolve().parents[3]
   ref_path = cwd / DIFF_BUCKET
@@ -264,7 +269,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
     platforms = get_changed_platforms(cwd, database, interfaces)
 
   if not platforms:
-    print("No car changes detected")
+    print_header("no changes detected")
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
@@ -285,8 +290,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
   errors = [(platform, seg, err) for platform, seg, diffs, ref, states, err in results if err]
   n_passed = len(results) - len(with_diffs) - len(errors)
 
-  print(f"### car diff: {len(with_diffs)} changed, {n_passed} passed, {len(errors)} errors")
-  print("Replays real driving segments through your PR code and compares the behavior to master")
+  print_header(f"{len(with_diffs)} changed, {n_passed} passed, {len(errors)} errors")
 
   for plat, seg, err in errors:
     print(f"\nERROR {plat} - {seg}: {err}")
