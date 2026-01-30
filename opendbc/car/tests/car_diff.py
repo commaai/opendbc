@@ -264,7 +264,8 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
     platforms = get_changed_platforms(cwd, database, interfaces)
 
   print("## Car behavior report")
-  print("Replays driving segments through this PR and compares the behavior to master.\nPlease review any changes carefully to ensure they are expected and safe.\n")
+  print("Replays driving segments through this PR and compares the behavior to master.")
+  print("Please review any changes carefully to ensure they are expected.\n")
 
   if not platforms:
     print("\u2705 no changes detected")
