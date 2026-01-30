@@ -289,7 +289,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
   errors = [(platform, seg, err) for platform, seg, diffs, ref, states, err in results if err]
   n_passed = len(results) - len(with_diffs) - len(errors)
 
-  icon = "\u26A0\uFE0F" if with_diffs else "\u2705"
+  icon = "⚠️" if with_diffs else "✅"
   print(f"\n{icon}  {len(with_diffs)} changed, {n_passed} passed, {len(errors)} errors")
 
   for plat, seg, err in errors:
