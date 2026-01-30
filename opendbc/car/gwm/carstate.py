@@ -2,6 +2,7 @@ from opendbc.car import structs, Bus, CanBusBase
 from opendbc.can.parser import CANParser
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.gwm.values import DBC
+from openpilot.common.params import Params
 import copy
 
 GearShifter = structs.CarState.GearShifter
@@ -52,6 +53,8 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = cp.vl["SEATBELT"]["SEAT_BELT_DRIVER_STATE"] != 1
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["LIGHTS"]["LEFT_TURN_SIGNAL"],
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
+
+    ret.cruiseState.available = ret.cruiseState.enabled = Params().get_bool("AleSato_DebugButton1")
     return ret
 
   @staticmethod
