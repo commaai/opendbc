@@ -37,7 +37,7 @@ def is_brand(brand: str, filter_brand: str | None) -> bool:
   return filter_brand is None or brand == filter_brand
 
 
-def build_fw_dict(fw_versions: list[CarParams.CarFw], filter_brand: str = None) -> dict[AddrType, set[bytes]]:
+def build_fw_dict(fw_versions: list[CarParams.CarFw], filter_brand: str | None = None) -> dict[AddrType, set[bytes]]:
   fw_versions_dict: defaultdict[AddrType, set[bytes]] = defaultdict(set)
   for fw in fw_versions:
     if is_brand(fw.brand, filter_brand) and not fw.logging:
@@ -47,11 +47,11 @@ def build_fw_dict(fw_versions: list[CarParams.CarFw], filter_brand: str = None) 
 
 
 class MatchFwToCar(Protocol):
-  def __call__(self, live_fw_versions: LiveFwVersions, match_brand: str = None, log: bool = True) -> set[str]:
+  def __call__(self, live_fw_versions: LiveFwVersions, match_brand: str | None = None, log: bool = True) -> set[str]:
     ...
 
 
-def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, match_brand: str = None, log: bool = True, exclude: str = None) -> set[str]:
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, match_brand: str | None = None, log: bool = True, exclude: str | None = None) -> set[str]:
   """Do a fuzzy FW match. This function will return a match, and the number of firmware version
   that were matched uniquely to that specific car. If multiple ECUs uniquely match to different cars
   the match is rejected."""
@@ -101,7 +101,8 @@ def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, match_brand: str = N
     return set()
 
 
-def match_fw_to_car_exact(live_fw_versions: LiveFwVersions, match_brand: str = None, log: bool = True, extra_fw_versions: dict = None) -> set[str]:
+def match_fw_to_car_exact(live_fw_versions: LiveFwVersions, match_brand: str | None = None,
+                          log: bool = True, extra_fw_versions: dict | None = None) -> set[str]:
   """Do an exact FW match. Returns all cars that match the given
   FW versions for a list of "essential" ECUs. If an ECU is not considered
   essential the FW version can be missing to get a fingerprint, but if it's present it
@@ -252,8 +253,8 @@ def get_fw_versions_ordered(can_recv: CanRecvCallable, can_send: CanSendCallable
   return all_car_fw
 
 
-def get_fw_versions(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback, query_brand: str = None,
-                    extra: OfflineFwVersions = None, timeout: float = 0.1, num_pandas: int = 1, progress: bool = False) -> list[CarParams.CarFw]:
+def get_fw_versions(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback, query_brand: str | None = None,
+                    extra: OfflineFwVersions | None = None, timeout: float = 0.1, num_pandas: int = 1, progress: bool = False) -> list[CarParams.CarFw]:
   versions = VERSIONS.copy()
 
   if query_brand is not None:
