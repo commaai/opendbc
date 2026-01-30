@@ -267,7 +267,7 @@ class CAR(Platforms):
       ToyotaCarDocs("Toyota RAV4 2019-21", video="https://www.youtube.com/watch?v=wJxjDd42gGA"),
       ToyotaCarDocs("Toyota RAV4 Hybrid 2019-21"),
     ],
-    CarSpecs(mass=3585. * CV.LB_TO_KG, wheelbase=2.68986, steerRatio=14.3, tireStiffnessFactor=0.7933),
+    CarSpecs(mass=3585. * CV.LB_TO_KG, wheelbase=2.68986, steerRatio=15.0, tireStiffnessFactor=0.7933),
   )
   TOYOTA_RAV4_TSS2_2022 = ToyotaTSS2PlatformConfig(
     [
