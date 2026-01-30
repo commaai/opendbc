@@ -268,7 +268,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
   print("Please review any changes carefully to ensure they are expected.\n")
 
   if not platforms:
-    print("\u2705 no changes detected")
+    print("\u2705 No changes detected")
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
