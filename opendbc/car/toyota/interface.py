@@ -56,7 +56,6 @@ class CarInterface(CarInterfaceBase):
 
     if Ecu.hybrid in found_ecus:
       ret.flags |= ToyotaFlags.HYBRID.value
-    ret.flags |= ToyotaFlags.RADAR_ACC.value
 
     if candidate == CAR.TOYOTA_PRIUS:
       stop_and_go = True
