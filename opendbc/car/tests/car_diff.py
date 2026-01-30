@@ -285,7 +285,8 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
   errors = [(platform, seg, err) for platform, seg, diffs, ref, states, err in results if err]
   n_passed = len(results) - len(with_diffs) - len(errors)
 
-  print(f"\nResults: {n_passed} passed, {len(with_diffs)} with diffs, {len(errors)} errors")
+  print(f"### car diff: {len(with_diffs)} changed, {n_passed} passed, {len(errors)} errors")
+  print("Replays real driving segments through your PR code and compares the behavior to master")
 
   for plat, seg, err in errors:
     print(f"\nERROR {plat} - {seg}: {err}")
@@ -298,7 +299,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
       for d in diffs:
         by_field[d[0]].append(d)
       for field, fd in sorted(by_field.items()):
-        print(f"  {field} ({len(fd)} diffs)")
+        print(f"\n  {field} ({len(fd)} diffs)")
         for line in format_diff(fd, ref, states, field):
           print(line)
     print("```")
