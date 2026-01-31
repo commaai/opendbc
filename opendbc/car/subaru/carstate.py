@@ -81,10 +81,12 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > steer_threshold
 
     cp_cruise = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
-    # ES_DashStatus->Cruise_Activated_Dash is likely intended for the dash display only, as it falls
-    # during user gas override and at standstill. ES_Status is missing on hybrid, so we use ES_Brake instead
-    if self.CP.flags & SubaruFlags.HYBRID:
-      ret.cruiseState.enabled = cp_cam.vl["ES_Brake"]['Cruise_Activated'] != 0
+    cp_es_brake = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp_cam
+
+    if self.CP.flags & (SubaruFlags.HYBRID | SubaruFlags.LKAS_ANGLE):
+      # ES_DashStatus->Cruise_Activated_Dash is likely intended for the dash display only, as it falls
+      # during user gas override and at standstill. ES_Status is missing on hybrid, so we use ES_Brake instead
+      ret.cruiseState.enabled = cp_es_brake.vl["ES_Brake"]['Cruise_Activated'] != 0
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
     else:
       ret.cruiseState.enabled = cp_cruise.vl["CruiseControl"]["Cruise_Activated"] != 0
@@ -113,9 +115,7 @@ class CarState(CarStateBase):
                      (cp_cam.vl["ES_LKAS_State"]["LKAS_Alert"] == 2)
 
       self.es_lkas_state_msg = copy.copy(cp_cam.vl["ES_LKAS_State"])
-      cp_es_brake = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp_cam
       self.es_brake_msg = copy.copy(cp_es_brake.vl["ES_Brake"])
-      cp_es_status = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp_cam
 
       # TODO: Hybrid cars don't have ES_Distance, need a replacement
       if not (self.CP.flags & SubaruFlags.HYBRID):
@@ -123,7 +123,7 @@ class CarState(CarStateBase):
         ret.stockAeb = (cp_es_distance.vl["ES_Brake"]["AEB_Status"] == 8) and \
                        (cp_es_distance.vl["ES_Brake"]["Brake_Pressure"] != 0)
 
-        self.es_status_msg = copy.copy(cp_es_status.vl["ES_Status"])
+        self.es_status_msg = copy.copy(cp_es_brake.vl["ES_Status"])
         self.cruise_control_msg = copy.copy(cp_cruise.vl["CruiseControl"])
 
     if not (self.CP.flags & SubaruFlags.HYBRID):
