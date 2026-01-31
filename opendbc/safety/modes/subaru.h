@@ -117,14 +117,9 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
       torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
       torque_driver_new = -1 * to_signed(torque_driver_new, 11);
       update_sample(&torque_driver, torque_driver_new);
-
-      int angle_meas_new = (GET_BYTES(msg, 4, 2) & 0xFFFFU);
-      // convert Steering_Torque -> Steering_Angle to centidegrees, to match the ES_LKAS_ANGLE angle request units
-      angle_meas_new = ROUND(to_signed(angle_meas_new, 16) * -2.17);
-      update_sample(&angle_meas, angle_meas_new);
     }
   }
-  
+
 
   if (subaru_lkas_angle) {
     if ((msg->addr == MSG_SUBARU_ES_DashStatus) && (msg->bus == SUBARU_CAM_BUS)) {
@@ -205,7 +200,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
       int desired_angle = GET_BYTES(msg, 5, 3) & 0x1FFFFU;
       desired_angle = -1 * to_signed(desired_angle, 17);
       bool lkas_request = GET_BIT(msg, 12U);
-      
+
       violation |= steer_angle_cmd_checks(desired_angle, lkas_request, SUBARU_ANGLE_STEERING_LIMITS);
     }
   }
@@ -301,7 +296,7 @@ static safety_config subaru_init(uint16_t param) {
 
   const uint16_t SUBARU_PARAM_GEN2 = 1;
   subaru_gen2 = GET_FLAG(param, SUBARU_PARAM_GEN2);
-  
+
 #ifdef ALLOW_DEBUG
   const uint16_t SUBARU_PARAM_LONGITUDINAL = 2;
   subaru_longitudinal = GET_FLAG(param, SUBARU_PARAM_LONGITUDINAL);
