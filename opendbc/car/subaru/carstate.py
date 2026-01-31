@@ -81,7 +81,8 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > steer_threshold
 
     cp_cruise = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
-    if self.CP.flags & SubaruFlags.HYBRID or self.CP.flags & SubaruFlags.LKAS_ANGLE:
+    if self.CP.flags & (SubaruFlags.HYBRID | self.CP.flags & SubaruFlags.LKAS_ANGLE):
+      # These cars may have CruiseControl, but is always zeroed out
       ret.cruiseState.enabled = cp_cam.vl["ES_DashStatus"]['Cruise_Activated'] != 0
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
     else:
