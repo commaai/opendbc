@@ -213,7 +213,7 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Signal4 : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ Conventional_Cruise : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal5 : 33|2@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Not_Actuating : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Disengaged_Dash : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Activated_Dash : 36|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal6 : 37|3@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
