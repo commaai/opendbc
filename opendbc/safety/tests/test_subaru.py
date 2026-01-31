@@ -59,7 +59,7 @@ def fwd_blacklisted_addr(lkas_msg=SubaruMsg.ES_LKAS):
   return {SUBARU_CAM_BUS: [lkas_msg, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State, SubaruMsg.ES_Infotainment]}
 
 
-class TestSubaruSafetyBase(common.CarSafetyTest):
+class TestSubaruSafetyBase(common.CarSafetyTest, common.AngleScalingSafetyTest):
   FLAGS = 0
   RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
                                                SubaruMsg.ES_Infotainment)}
@@ -76,9 +76,6 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
   DEG_TO_CAN = 100
 
   INACTIVE_GAS = 1818
-
-  # About maxed out in one direction
-  STEER_ANGLE_MAX = 545
 
   def setUp(self):
     self.packer = CANPackerSafety("subaru_global_2017_generated")
@@ -113,11 +110,6 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
-
-  def test_steering_angle_measurements(self):
-    self._common_measurement_test(self._angle_meas_msg, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, self.DEG_TO_CAN,
-                                  self.safety.get_angle_meas_min, self.safety.get_angle_meas_max)
-
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):

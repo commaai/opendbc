@@ -656,10 +656,14 @@ class VehicleSpeedSafetyTest(SafetyTestBase):
     # TODO: lower tolerance on these tests
     self._common_measurement_test(self._speed_msg, 0, 80, 1, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
-
-class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
-
+class AngleScalingSafetyTest(SafetyTestBase):
   STEER_ANGLE_MAX: float = 300
+
+  def test_steering_angle_measurements(self):
+    self._common_measurement_test(self._angle_meas_msg, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, self.DEG_TO_CAN,
+                                  self.safety.get_angle_meas_min, self.safety.get_angle_meas_max)
+
+class AngleSteeringSafetyTest(VehicleSpeedSafetyTest, AngleScalingSafetyTest):
   STEER_ANGLE_TEST_MAX: float | None = None
   DEG_TO_CAN: float
   ANGLE_RATE_BP: list[float]
@@ -697,10 +701,6 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
   def _reset_speed_measurement(self, speed):
     for _ in range(MAX_SAMPLE_VALS):
       self._rx(self._speed_msg(speed))
-
-  def test_steering_angle_measurements(self):
-    self._common_measurement_test(self._angle_meas_msg, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, self.DEG_TO_CAN,
-                                  self.safety.get_angle_meas_min, self.safety.get_angle_meas_max)
 
   def test_angle_cmd_when_enabled(self):
     # when controls are allowed, angle cmd rate limit is enforced
