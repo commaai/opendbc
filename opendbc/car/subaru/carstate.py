@@ -41,11 +41,11 @@ class CarState(CarStateBase):
 
     cp_wheels = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
     self.parse_wheel_speeds(ret,
-                            cp_wheels.vl["Wheel_Speeds"]["FL"],
-                            cp_wheels.vl["Wheel_Speeds"]["FR"],
-                            cp_wheels.vl["Wheel_Speeds"]["RL"],
-                            cp_wheels.vl["Wheel_Speeds"]["RR"],
-                            )
+      cp_wheels.vl["Wheel_Speeds"]["FL"],
+      cp_wheels.vl["Wheel_Speeds"]["FR"],
+      cp_wheels.vl["Wheel_Speeds"]["RL"],
+      cp_wheels.vl["Wheel_Speeds"]["RR"],
+    )
     ret.standstill = ret.vEgoRaw == 0
 
     # continuous blinker signals for assisted lane change
@@ -92,7 +92,7 @@ class CarState(CarStateBase):
     ret.cruiseState.speed = cp_cam.vl["ES_DashStatus"]["Cruise_Set_Speed"] * CV.KPH_TO_MS
 
     if (self.CP.flags & SubaruFlags.PREGLOBAL and cp.vl["Dash_State2"]["UNITS"] == 1) or \
-      (not (self.CP.flags & SubaruFlags.PREGLOBAL) and cp.vl["Dashlights"]["UNITS"] == 1):
+       (not (self.CP.flags & SubaruFlags.PREGLOBAL) and cp.vl["Dashlights"]["UNITS"] == 1):
       ret.cruiseState.speed *= CV.MPH_TO_KPH
 
     ret.seatbeltUnlatched = cp.vl["Dashlights"]["SEATBELT_FL"] == 1
