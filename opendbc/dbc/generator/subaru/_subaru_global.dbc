@@ -285,7 +285,7 @@ CM_ SG_ 544 Cruise_Brake_Lights "1 = switch on brake lights";
 CM_ SG_ 544 Brake_Pressure "Winds down after cruise disabled. Also can be non-zero when likely preparing for AEB";
 CM_ SG_ 544 Signal3 "Usually goes to 2 if AEB_Status is 4";
 CM_ SG_ 544 AEB_Status "Occasionally is 4 instead of 8 while Brake_Pressure is non-zero, unsure why";
-CM_ SG_ 801 Cruise_Activated_Dash "Falls during user gas or standstill. This is only if ACC is actually actuating";
+CM_ SG_ 801 Cruise_Activated_Dash "Falls during user gas or standstill. This is likely only a UI signal to the dash to show if ACC is actually actuating";
 CM_ SG_ 801 PCB_Off "Pre-Collision Braking off";
 CM_ SG_ 801 Brake_Lights "Driver or Cruise brake on";
 CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";
