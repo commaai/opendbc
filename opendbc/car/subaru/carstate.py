@@ -60,16 +60,15 @@ class CarState(CarStateBase):
     can_gear = int(cp_transmission.vl["Transmission"]["Gear"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
 
-    if self.CP.flags & SubaruFlags.PREGLOBAL:
-      ret.steeringAngleDeg = cp.vl["Steering_Torque"]["Steering_Angle"]
-    else:
+    if not (self.CP.flags & SubaruFlags.PREGLOBAL):
       # Previous Steering_Torque->Steering_Angle was 0 on some newer LKAS_ANGLE platforms.
       # It is identical to previous signal
       ret.steeringAngleDeg = cp.vl["Steering_2"]["Steering_Angle"]
 
-    if not (self.CP.flags & SubaruFlags.PREGLOBAL):
       # ideally we get this from the car, but unclear if it exists. diagnostic software doesn't even have it
       ret.steeringRateDeg = self.angle_rate_calulator.update(ret.steeringAngleDeg, cp.vl["Steering_Torque"]["COUNTER"])
+    else:
+      ret.steeringAngleDeg = cp.vl["Steering_Torque"]["Steering_Angle"]
 
     ret.steeringTorque = cp.vl["Steering_Torque"]["Steer_Torque_Sensor"]
     ret.steeringTorqueEps = cp.vl["Steering_Torque"]["Steer_Torque_Output"]
