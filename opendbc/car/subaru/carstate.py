@@ -62,15 +62,17 @@ class CarState(CarStateBase):
 
     if not (self.CP.flags & SubaruFlags.LKAS_ANGLE):
       ret.steeringAngleDeg = cp.vl["Steering_Torque"]["Steering_Angle"]
+      steering_updated = len(cp.vl_all["Steering_Torque"]["Steering_Angle"]) > 0
     else:
       # Steering_Torque->Steering_Angle exists on SUBARU_FORESTER_2022, SUBARU_OUTBACK_2023, SUBARU_ASCENT_2023 where
       # it is identical to Steering_2's signal. However, it is always zero on newer LKAS_ANGLE cars
       # such as 2024+ Crosstrek, 2023+ Ascent, etc. Use a universal signal for LKAS_ANGLE cars.
       ret.steeringAngleDeg = cp.vl["Steering_2"]["Steering_Angle"]
+      steering_updated = len(cp.vl_all["Steering_2"]["Steering_Angle"]) > 0
 
     if not (self.CP.flags & SubaruFlags.PREGLOBAL):
       # ideally we get this from the car, but unclear if it exists. diagnostic software doesn't even have it
-      ret.steeringRateDeg = self.angle_rate_calulator.update(ret.steeringAngleDeg, cp.vl["Steering_Torque"]["COUNTER"])
+      ret.steeringRateDeg = self.angle_rate_calulator.update(ret.steeringAngleDeg, steering_updated)
 
     ret.steeringTorque = cp.vl["Steering_Torque"]["Steer_Torque_Sensor"]
     ret.steeringTorqueEps = cp.vl["Steering_Torque"]["Steer_Torque_Output"]
