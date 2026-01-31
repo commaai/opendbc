@@ -78,7 +78,7 @@
   {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_ES_Brake,        alt_bus,         8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_ES_DashStatus,   alt_bus,         8, 10U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_ES_DashStatus,   SUBARU_CAM_BUS,  8, 10U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_Steering_2,      SUBARU_MAIN_BUS, 8, 50U,  .max_counter = 15U, .ignore_quality_flag = true }, { 0 }, { 0 }}},  \
 
 static bool subaru_gen2 = false;
