@@ -25,9 +25,9 @@ class SubaruMsg(enum.IntEnum):
   ES_LKAS_State     = 0x322
   ES_Infotainment   = 0x323
   ES_UDS_Request    = 0x787
-  ES_HighBeamAssist = 0x121
-  ES_STATIC_1       = 0x22a
-  ES_STATIC_2       = 0x325
+  ES_HighBeamAssist = 0x22A
+  ES_STATIC_1       = 0x325
+  ES_STATIC_2       = 0x121
 
 
 SUBARU_MAIN_BUS = 0
@@ -170,6 +170,7 @@ class TestSubaruTorqueSafetyBase(TestSubaruSafetyBase, common.DriverTorqueSteeri
 
 class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafetyTest):
   ALT_MAIN_BUS = SUBARU_ALT_BUS
+  ALT_CAM_BUS = SUBARU_ALT_BUS
 
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS, SubaruMsg.ES_LKAS_ANGLE)
   RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS_ANGLE, SubaruMsg.ES_DashStatus,
@@ -198,10 +199,10 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
     values = {s: speed * 3.6 for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
 
-  # need to use ES_DashStatus Message
+  # need to use ES_Brake Message
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_safety("ES_DashStatus", self.ALT_CAM_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Brake", self.ALT_CAM_BUS, values)
 
 
 class TestSubaruGen1TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):

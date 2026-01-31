@@ -37,9 +37,9 @@
 
 #define MSG_SUBARU_ES_UDS_Request        0x787U
 
-#define MSG_SUBARU_ES_HighBeamAssist     0x121U
-#define MSG_SUBARU_ES_STATIC_1           0x22aU
-#define MSG_SUBARU_ES_STATIC_2           0x325U
+#define MSG_SUBARU_ES_HighBeamAssist     0x22AU
+#define MSG_SUBARU_ES_STATIC_1           0x325U
+#define MSG_SUBARU_ES_STATIC_2           0x121U
 
 #define SUBARU_MAIN_BUS 0U
 #define SUBARU_ALT_BUS  1U
@@ -77,7 +77,8 @@
   {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_ES_DashStatus,   SUBARU_CAM_BUS,  8, 10U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_ES_Brake,        alt_bus,         8, 50U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_ES_DashStatus,   alt_bus,         8, 10U,  .max_counter = 15U, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_Steering_2,      SUBARU_MAIN_BUS, 8, 50U,  .max_counter = 15U, .ignore_quality_flag = true }, { 0 }, { 0 }}},  \
 
 static bool subaru_gen2 = false;
@@ -111,19 +112,19 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
       int angle_meas_new = -to_signed(raw, 17);
       update_sample(&angle_meas, angle_meas_new);
     }
-  } else {
-    if ((msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
-      int torque_driver_new;
-      torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
-      torque_driver_new = -1 * to_signed(torque_driver_new, 11);
-      update_sample(&torque_driver, torque_driver_new);
-    }
+  } 
+  
+  // non-zero, even for Angle-LKAS cars
+  if ((msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
+    int torque_driver_new;
+    torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
+    torque_driver_new = -1 * to_signed(torque_driver_new, 11);
+    update_sample(&torque_driver, torque_driver_new);
   }
 
-
   if (subaru_lkas_angle) {
-    if ((msg->addr == MSG_SUBARU_ES_DashStatus) && (msg->bus == SUBARU_CAM_BUS)) {
-      bool cruise_engaged = (msg->data[4] >> 4) & 1U;
+    if ((msg->addr == MSG_SUBARU_ES_Brake) && (msg->bus == SUBARU_ALT_BUS)) {
+      bool cruise_engaged = (msg->data[4] >> 7) & 1U;
       pcm_cruise_check(cruise_engaged);
     }
   } else {
