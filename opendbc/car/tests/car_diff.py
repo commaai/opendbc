@@ -297,7 +297,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
     print(f"\nERROR {plat} - {seg}: {err}")
 
   if with_diffs:
-    print("```")
+    print("<details><summary><b>Show changes</b></summary>\n\n```")
     for plat, seg, diffs, ref, states in with_diffs:
       print(f"\n{plat} - {seg}")
       by_field = defaultdict(list)
@@ -307,7 +307,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
         print(f"\n  {field} ({len(fd)} diffs)")
         for line in format_diff(fd, ref, states, field):
           print(line)
-    print("```")
+    print("```\n</details>")
 
   return 1 if errors else 0
 
