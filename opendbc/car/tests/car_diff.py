@@ -263,8 +263,12 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
   else:
     platforms = get_changed_platforms(cwd, database, interfaces)
 
+  print("## Car behavior report")
+  print("Replays driving segments through this PR and compares the behavior to master.")
+  print("Please review any changes carefully to ensure they are expected.\n")
+
   if not platforms:
-    print("No car changes detected")
+    print("✅ No changes detected")
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
@@ -285,7 +289,8 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
   errors = [(platform, seg, err) for platform, seg, diffs, ref, states, err in results if err]
   n_passed = len(results) - len(with_diffs) - len(errors)
 
-  print(f"\nResults: {n_passed} passed, {len(with_diffs)} with diffs, {len(errors)} errors")
+  icon = "⚠️" if with_diffs else "✅"
+  print(f"\n{icon}  {len(with_diffs)} changed, {n_passed} passed, {len(errors)} errors")
 
   for plat, seg, err in errors:
     print(f"\nERROR {plat} - {seg}: {err}")
@@ -298,7 +303,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
       for d in diffs:
         by_field[d[0]].append(d)
       for field, fd in sorted(by_field.items()):
-        print(f"  {field} ({len(fd)} diffs)")
+        print(f"\n  {field} ({len(fd)} diffs)")
         for line in format_diff(fd, ref, states, field):
           print(line)
     print("```")
