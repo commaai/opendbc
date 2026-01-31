@@ -41,7 +41,6 @@ class CarInterface(CarInterfaceBase):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     if ret.flags & SubaruFlags.LKAS_ANGLE:
-      ret.steerActuatorDelay = 0.3
       ret.steerControlType = structs.CarParams.SteerControlType.angle
 
     elif candidate == CAR.SUBARU_ASCENT:
