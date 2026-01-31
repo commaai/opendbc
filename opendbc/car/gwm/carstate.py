@@ -50,7 +50,7 @@ class CarState(CarStateBase):
                         cp.vl["DOOR_DRIVER"]["DOOR_FRONT_RIGHT_OPEN"],
                         cp.vl["DOOR_DRIVER"]["DOOR_REAR_LEFT_OPEN"],
                         cp.vl["DOOR_DRIVER"]["DOOR_DRIVER_OPEN"]])
-    ret.seatbeltUnlatched = cp.vl["SEATBELT"]["SEAT_BELT_DRIVER_STATE"] != 1
+    ret.seatbeltUnlatched = bool(cp.vl["SEATBELT"]["SEAT_BELT_DRIVER_STATE"])
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["LIGHTS"]["LEFT_TURN_SIGNAL"],
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
 
