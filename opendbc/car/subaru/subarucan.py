@@ -166,7 +166,7 @@ def create_es_dashstatus(packer, frame, dashstatus_msg, enabled, long_enabled, l
   if long_enabled:
     values["Cruise_State"] = 0
     # TODO: Cruise_Activated should respect gas pressed and standstill stock behavior
-    values["Cruise_Actuating"] = enabled
+    values["Cruise_Activated_Dash"] = enabled
     values["Cruise_Not_Actuating"] = 0
     values["Car_Follow"] = int(lead_visible)
 
