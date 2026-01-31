@@ -18,7 +18,15 @@ class CarInterface(CarInterfaceBase):
     # - replacement for ES_Distance so we can cancel the cruise control
     # - to find the Cruise_Activated bit from the car
     # - proper panda safety setup (use the correct cruise_activated bit, throttle from Throttle_Hybrid, etc)
-    ret.dashcamOnly = bool(ret.flags & (SubaruFlags.PREGLOBAL | SubaruFlags.HYBRID))
+    # for LKAS_ANGLE CARS to be upstreamed, we need:
+    # - validate angle safety
+    ret.dashcamOnly = ((ret.flags & (SubaruFlags.PREGLOBAL | SubaruFlags.HYBRID)) or
+                       ((ret.flags & SubaruFlags.LKAS_ANGLE) and is_release))
+
+    if candidate == CAR.SUBARU_FORESTER_2022:
+      # Gen 1 LKAS angle not tested, can undashcam if not release once we see a test route
+      ret.dashcamOnly = True
+
     ret.autoResumeSng = False
 
     # Detect infotainment message sent from the camera
@@ -37,17 +45,15 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.1
 
-    if ret.flags & SubaruFlags.LKAS_ANGLE:
-      ret.steerControlType = structs.CarParams.SteerControlType.angle
-    else:
+    if not (ret.flags & SubaruFlags.LKAS_ANGLE):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     if ret.flags & SubaruFlags.LKAS_ANGLE:
       ret.steerActuatorDelay = 0.3
+      ret.steerControlType = structs.CarParams.SteerControlType.angle
       ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.LKAS_ANGLE.value
-      ret.dashcamOnly = is_release
 
-    if candidate in (CAR.SUBARU_ASCENT, CAR.SUBARU_ASCENT_2023):
+    elif candidate in (CAR.SUBARU_ASCENT,):
       ret.steerActuatorDelay = 0.3  # end-to-end angle controller
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kf = 0.00003
@@ -70,16 +76,13 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_CROSSTREK_HYBRID:
       ret.steerActuatorDelay = 0.1
 
-    elif candidate == CAR.SUBARU_FORESTER_2022:
-      ret.dashcamOnly = True
-
     elif candidate in (CAR.SUBARU_FORESTER, CAR.SUBARU_FORESTER_HYBRID):
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kf = 0.000038
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 14., 23.], [0., 14., 23.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.01, 0.065, 0.2], [0.001, 0.015, 0.025]]
 
-    elif candidate in (CAR.SUBARU_OUTBACK, CAR.SUBARU_LEGACY, CAR.SUBARU_OUTBACK_2023):
+    elif candidate in (CAR.SUBARU_OUTBACK, CAR.SUBARU_LEGACY,):
       ret.steerActuatorDelay = 0.1
 
     elif candidate in (CAR.SUBARU_FORESTER_PREGLOBAL, CAR.SUBARU_OUTBACK_PREGLOBAL_2018):
@@ -89,7 +92,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_LEGACY_PREGLOBAL:
       ret.steerActuatorDelay = 0.15
 
-    elif candidate in (CAR.SUBARU_OUTBACK_PREGLOBAL, CAR.SUBARU_CROSSTREK_2025):
+    elif candidate in (CAR.SUBARU_OUTBACK_PREGLOBAL,):
       pass
 
     else:
