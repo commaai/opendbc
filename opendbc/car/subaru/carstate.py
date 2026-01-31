@@ -81,8 +81,10 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > steer_threshold
 
     cp_cruise = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
+    # ES_DashStatus->Cruise_Activated_Dash is likely intended for the dash display only, as it falls
+    # during user gas override and at standstill. ES_Status is missing on hybrid, so we use ES_Brake instead
     if self.CP.flags & SubaruFlags.HYBRID:
-      ret.cruiseState.enabled = cp_cam.vl["ES_DashStatus"]['Cruise_Activated'] != 0
+      ret.cruiseState.enabled = cp_cam.vl["ES_Brake"]['Cruise_Activated'] != 0
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
     else:
       ret.cruiseState.enabled = cp_cruise.vl["CruiseControl"]["Cruise_Activated"] != 0
