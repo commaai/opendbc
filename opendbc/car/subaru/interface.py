@@ -91,9 +91,8 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_LEGACY_PREGLOBAL:
       ret.steerActuatorDelay = 0.15
 
-    elif candidate in (CAR.SUBARU_OUTBACK_PREGLOBAL,):
+    elif candidate == CAR.SUBARU_OUTBACK_PREGLOBAL:
       pass
-
     else:
       raise ValueError(f"unknown car: {candidate}")
 
