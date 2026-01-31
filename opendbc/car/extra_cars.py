@@ -42,7 +42,7 @@ class CAR(Platforms):
       CommunityCarDocs("Acura MDX 2015-16", "Advance Package"),
       CommunityCarDocs("Acura MDX 2017-20"),
       CommunityCarDocs("Acura MDX Hybrid 2017-20"),
-      CommunityCarDocs("Acura MDX 2022-24"),
+      CommunityCarDocs("Acura MDX 2023"),
       CommunityCarDocs("Acura RDX 2022-25"),
       CommunityCarDocs("Acura RLX 2017", "Advance Package or Technology Package"),
       CommunityCarDocs("Acura TLX 2015-17", "Advance Package"),
