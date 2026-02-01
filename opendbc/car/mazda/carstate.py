@@ -87,7 +87,7 @@ class CarState(CarStateBase):
     ret.cruiseState.speed = cp.vl["CRZ_EVENTS"]["CRZ_SPEED"] * CV.KPH_TO_MS
 
     # stock lkas should be on
-    # TODO: is this needed?
+    # LKAS requires detected lane lines; block engagement if none are present
     ret.invalidLkasSetting = cp_cam.vl["CAM_LANEINFO"]["LANE_LINES"] == 0
 
     if ret.cruiseState.enabled:
