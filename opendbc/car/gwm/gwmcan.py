@@ -13,27 +13,16 @@ def gwm_checksum(address: int, sig, d: bytearray) -> int:
   return crc ^ xor_out
 
 
-# CRC-8 0x2F OEM-style for GWM 0x12B message
-def gwm_crc8_2f_for_0x12B(address: int, sig, d: bytearray) -> int:
-  crc = 0xFF
-  poly = 0x2F
-  # bytes 9..14
-  for byte in d[9:15]:
+def gwm_crc_for_0x12B(address: int, sig, d: bytearray) -> int:
+  crc = 0x00
+  poly = 0x1D
+  xor_out = 0x9B
+  for byte in d[9:16]:
     crc ^= byte
     for _ in range(8):
-      if crc & 0x80:
-        crc = ((crc << 1) ^ poly) & 0xFF
-      else:
-        crc = (crc << 1) & 0xFF
-  # byte 15: only data bits 4..7
-  b15 = d[15] & 0xF0
-  crc ^= b15
-  for _ in range(8):
-    if crc & 0x80:
-      crc = ((crc << 1) ^ poly) & 0xFF
-    else:
-      crc = (crc << 1) & 0xFF
-  return crc
+      crc = ((crc << 1) ^ poly) if (crc & 0x80) else (crc << 1)
+      crc &= 0xFF
+  return crc ^ xor_out
 
 
 def create_steer_and_ap_stalk(packer, steer_msg, fake_torque=False, bus=0):
