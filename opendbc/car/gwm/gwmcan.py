@@ -25,6 +25,18 @@ def gwm_crc_for_0x12B(address: int, sig, d: bytearray) -> int:
   return crc ^ xor_out
 
 
+def gwm_crc_for_0x147(address: int, sig, d: bytearray) -> int:
+  crc = 0x00
+  poly = 0x1D
+  xor_out = 0x61
+  for byte in d[9:16]:
+    crc ^= byte
+    for _ in range(8):
+      crc = ((crc << 1) ^ poly) if (crc & 0x80) else (crc << 1)
+      crc &= 0xFF
+  return crc ^ xor_out
+
+
 def create_steer_and_ap_stalk(packer, steer_msg, fake_torque=False, bus=0):
   """
   Copy STEER_AND_AP_STALK message from bus 0 and forward to bus 2,
