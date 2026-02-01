@@ -35,9 +35,9 @@
 
 #define MSG_SUBARU_ES_UDS_Request        0x787U
 
-#define MSG_SUBARU_ES_HighBeamAssist     0x121U
-#define MSG_SUBARU_ES_STATIC_1           0x22aU
-#define MSG_SUBARU_ES_STATIC_2           0x325U
+#define MSG_SUBARU_ES_HighBeamAssist     0x22AU
+#define MSG_SUBARU_ES_STATIC_1           0x325U
+#define MSG_SUBARU_ES_STATIC_2           0x121U
 
 #define SUBARU_MAIN_BUS 0U
 #define SUBARU_ALT_BUS  1U
