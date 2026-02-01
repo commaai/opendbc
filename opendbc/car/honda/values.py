@@ -116,6 +116,9 @@ class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(
     "2019 Honda Civic 1.6L Diesel Sedan does not have ALC below 12mph.",
     Column.FSR_STEERING)
+  TRAFFIC_JAM_ASSIST = CarFootnote(
+    "ALC is supported below 45mph only when following a lead car.",
+    Column.FSR_STEERING)
 
 
 @dataclass
@@ -263,9 +266,9 @@ class CAR(Platforms):
   )
   ACURA_MDX_4G = HondaBoschPlatformConfig(
     [
-      HondaCarDocs("Acura MDX 2022", "All"),
+      HondaCarDocs("Acura MDX 2022", "All", footnotes=[Footnote.TRAFFIC_JAM_ASSIST]),
       # todo: find 2023 fingerprints
-      HondaCarDocs("Acura MDX 2024", "All"),
+      HondaCarDocs("Acura MDX 2024", "All", footnotes=[Footnote.TRAFFIC_JAM_ASSIST]),
     ],
     CarSpecs(mass=4788 * CV.LB_TO_KG, wheelbase=2.89, steerRatio=16.3, centerToFrontRatio=0.428),  # as spec
     {Bus.pt: 'acura_mdx_2022_can_generated'},
