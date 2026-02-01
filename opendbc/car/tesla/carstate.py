@@ -43,6 +43,13 @@ class CarState(CarStateBase):
     ret.vEgoRaw = cp_party.vl["DI_speed"]["DI_vehicleSpeed"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
+    # Displayed speed
+    ui_speed_units = self.can_define.dv["DI_speed"]["DI_uiSpeedUnits"].get(int(cp_party.vl["DI_speed"]["DI_uiSpeedUnits"]), None)
+    if ui_speed_units == "DI_SPEED_KPH":
+      ret.vEgoCluster = cp_party.vl["DI_speed"]["DI_uiSpeed"] * CV.KPH_TO_MS
+    elif ui_speed_units == "DI_SPEED_MPH":
+      ret.vEgoCluster = cp_party.vl["DI_speed"]["DI_uiSpeed"] * CV.MPH_TO_MS
+
     # Gas pedal
     ret.gasPressed = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"] > 0
 
