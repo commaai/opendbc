@@ -205,6 +205,14 @@ class CAR(Platforms):
     {Bus.pt: 'honda_bosch_radarless_generated'},
     flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.ALLOW_MANUAL_TRANS
   )
+  HONDA_ODYSSEY_RC5 = HondaBoschPlatformConfig(
+    [
+      HondaCarDocs("Honda Odyssey RC5 JPN 2023-25", "All"),
+    ],
+    CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
+    {Bus.pt: 'honda_odyssey_rc5_can_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.NIDEC_ALT_SCM_MESSAGES,
+  )
   HONDA_CRV_5G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V 2017-22", min_steer_speed=15. * CV.MPH_TO_MS)],
     # steerRatio: 12.3 is spec end-to-end
