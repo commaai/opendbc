@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-import argparse
+import re
 import os
+import jinja2
+import argparse
+import unicodedata
 from typing import get_args
 
-from collections import defaultdict
-import jinja2
 from enum import Enum
-import re
-import unicodedata
+from collections import defaultdict
 
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
