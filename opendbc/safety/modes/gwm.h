@@ -14,6 +14,8 @@
 #define GWM_CAMERA_BUS  2U
 
 static uint8_t gwm_get_counter(const CANPacket_t *msg) {
+  // TO-DO: Each message has a different position; after finishing the port,
+  // handle them one by one for each address
   uint8_t cnt = 0;
   if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
     cnt = msg->data[47] & 0xFU;
@@ -26,6 +28,8 @@ static uint8_t gwm_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t gwm_get_checksum(const CANPacket_t *msg) {
+  // TO-DO: Each message has a different position; after finishing the port,
+  // handle them one by one for each address
   uint8_t chksum = 0;
   if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
     chksum = msg->data[24] & 0xFFU;
@@ -74,11 +78,11 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
       pcm_cruise_check((msg->data[5] >> 7) & 1U); // AP_ENABLE_COMMAND
     }
     if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
-      uint32_t fl = (GET_BYTES(msg, 1, 2)) & 0x1FFFU;
-      uint32_t fr = (GET_BYTES(msg, 3, 2)) & 0x1FFFU;
-      uint32_t rl = (GET_BYTES(msg, 41, 2)) & 0x1FFFU;
-      uint32_t rr = (GET_BYTES(msg, 43, 2)) & 0x1FFFU;
-      float speed = (float)((fr + rr + rl + fl) / 4.0f * KPH_TO_MS);
+      uint32_t fl = (((uint16_t)msg->data[1] << 8) | msg->data[2]) & 0x1FFF;
+      uint32_t fr = (((uint16_t)msg->data[3] << 8) | msg->data[4]) & 0x1FFF;
+      uint32_t rl = (((uint16_t)msg->data[41] << 8) | msg->data[42]) & 0x1FFF;
+      uint32_t rr = (((uint16_t)msg->data[43] << 8) | msg->data[44]) & 0x1FFF;
+      float speed = (float)((fr + rr + rl + fl) / 4.0f * 0.05924739 * KPH_TO_MS);
       vehicle_moving = speed > 0.0f;
       UPDATE_VEHICLE_SPEED(speed);
     }
