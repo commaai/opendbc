@@ -281,6 +281,21 @@ def create_es_static_2(packer):
   return packer.make_can_msg("ES_STATIC_2", CanBus.main, values)
 
 
+def create_brake_status(packer, brake_status_msg, es_brake_msg):
+  values = {s: brake_status_msg[s] for s in [
+    "CHECKSUM",
+    "Signal1",
+    "ES_Brake",
+    "Signal2",
+    "Brake",
+    "Signal3",
+  ]}
+
+  values["ES_Brake"] = es_brake_msg["Brake_Pressure"] > 0
+
+  return packer.make_can_msg("Brake_Status", CanBus.camera, values)
+
+
 # *** Subaru Pre-global ***
 
 def subaru_preglobal_checksum(packer, values, addr, checksum_byte=7):
