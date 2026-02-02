@@ -26,13 +26,13 @@ class CarController(CarControllerBase):
 
   def handle_angle_lateral(self, CC, CS):
     apply_steer = apply_std_steer_angle_limits(
-          CC.actuators.steeringAngleDeg,
-          self.apply_angle_last,
-          CS.out.vEgoRaw,
-          CS.out.steeringAngleDeg,
-          CC.latActive,
-          self.p.ANGLE_LIMITS
-        )
+      CC.actuators.steeringAngleDeg,
+      self.apply_angle_last,
+      CS.out.vEgoRaw,
+      CS.out.steeringAngleDeg,
+      CC.latActive,
+      self.p.ANGLE_LIMITS
+    )
 
     if not CC.latActive:
       apply_steer = CS.out.steeringAngleDeg
@@ -59,7 +59,7 @@ class CarController(CarControllerBase):
         # Steering rate fault prevention
         self.steer_rate_counter, apply_steer_req = \
           common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
-                                self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+                                 self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
 
       msg = subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req)
 
