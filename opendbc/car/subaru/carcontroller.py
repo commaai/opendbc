@@ -25,20 +25,9 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(DBC[CP.carFingerprint][Bus.pt])
 
   def handle_angle_lateral(self, CC, CS):
-    apply_steer = apply_std_steer_angle_limits(
-      CC.actuators.steeringAngleDeg,
-      self.apply_angle_last,
-      CS.out.vEgoRaw,
-      CS.out.steeringAngleDeg,
-      CC.latActive,
-      self.p.ANGLE_LIMITS
-    )
-
-    if not CC.latActive:
-      apply_steer = CS.out.steeringAngleDeg
-
-    self.apply_angle_last = apply_steer
-    return subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive)
+    self.apply_angle_last = apply_std_steer_angle_limits(CC.actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
+                                                         CS.out.steeringAngleDeg, CC.latActive, self.p.ANGLE_LIMITS)
+    return subarucan.create_steering_control_angle(self.packer, self.apply_angle_last, CC.latActive)
 
   def handle_torque_lateral(self, CC, CS):
     apply_torque = int(round(CC.actuators.torque * self.p.STEER_MAX))
@@ -81,7 +70,6 @@ class CarController(CarControllerBase):
         can_sends.append(self.handle_torque_lateral(CC, CS))
 
     # *** longitudinal ***
-
     if CC.longActive:
       apply_throttle = int(round(np.interp(actuators.accel, CarControllerParams.THROTTLE_LOOKUP_BP, CarControllerParams.THROTTLE_LOOKUP_V)))
       apply_rpm = int(round(np.interp(actuators.accel, CarControllerParams.RPM_LOOKUP_BP, CarControllerParams.RPM_LOOKUP_V)))
