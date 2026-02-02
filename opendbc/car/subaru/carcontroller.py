@@ -33,8 +33,7 @@ class CarController(CarControllerBase):
     apply_torque = int(round(CC.actuators.torque * self.p.STEER_MAX))
 
     # limits due to driver torque
-    new_torque = int(round(apply_torque))
-    apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.p)
+    apply_torque = apply_driver_steer_torque_limits(apply_torque, self.apply_torque_last, CS.out.steeringTorque, self.p)
 
     if not CC.latActive:
       apply_torque = 0
