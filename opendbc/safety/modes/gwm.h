@@ -39,7 +39,7 @@ static uint32_t gwm_compute_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
   uint8_t crc = 0x00;
   const uint8_t poly = 0x1D;
-  uint8_t xor_out;
+  uint8_t xor_out = 0x00;
   int len = GET_LEN(msg);
   for (int i = 1; i < len; i++) {
     uint8_t byte = msg->data[i];
