@@ -32,15 +32,15 @@ class CarController(CarControllerBase):
   def handle_torque_lateral(self, CC, CS):
     apply_torque = int(round(CC.actuators.torque * self.p.STEER_MAX))
 
+    # limits due to driver torque
     new_torque = int(round(apply_torque))
     apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.p)
 
     if not CC.latActive:
       apply_torque = 0
 
-    msg = None
     if self.CP.flags & SubaruFlags.PREGLOBAL:
-      msg = subarucan.create_preglobal_steering_control(self.packer, self.frame // self.p.STEER_STEP, apply_torque, CC.latActive)
+      can_send = subarucan.create_preglobal_steering_control(self.packer, self.frame // self.p.STEER_STEP, apply_torque, CC.latActive)
     else:
       apply_steer_req = CC.latActive
 
@@ -50,10 +50,10 @@ class CarController(CarControllerBase):
           common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
                                  self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
 
-      msg = subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req)
+      can_send = subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req)
 
     self.apply_torque_last = apply_torque
-    return msg
+    return can_send
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
