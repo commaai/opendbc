@@ -8,9 +8,9 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 
 class TestGwm(common.PandaSafetyTest):
-  TX_MSGS = [[0xA1, 2]]
-  RELAY_MALFUNCTION_ADDRS = {2: (0xA1,)}
-  FWD_BLACKLISTED_ADDRS = {0: [0xA1]}
+  TX_MSGS = [[0xA1, 2], [0x147, 2]]
+  RELAY_MALFUNCTION_ADDRS = {2: (0xA1, 0x147)}
+  FWD_BLACKLISTED_ADDRS = {0: [0xA1, 0x147]}
 
   def setUp(self):
     self.packer = CANPackerPanda("gwm_haval_h6_mk3_generated")

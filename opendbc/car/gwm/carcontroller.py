@@ -1,8 +1,10 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, CanBusBase
+from opendbc.car import Bus
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.gwm.gwmcan import create_steer_and_ap_stalk
+from opendbc.car.gwm import gwmcan
+# DEBUG
 from openpilot.common.params import Params
+# DEBUG
 
 
 class CarController(CarControllerBase):
@@ -11,23 +13,34 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.main])
     self.apply_angle_last = 0
     self.status = 2
-
-    # Compute panda multipanda offset based on safetyConfigs length. This let's us
-    # add the offset to all bus numbers when an external panda is present.
-    can_base = CanBusBase(self.CP, None)
-    self.bus_main = can_base.offset
-    self.bus_cam = can_base.offset + 2  # Bus to forward the messages
+    self.CAN = gwmcan.CanBus(CP)
+    self.fake_torque = False
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
     actuators = CC.actuators
+
     # Try to satisfy steer nudge requests
-    fake_torque = Params().get_bool("AleSato_DebugButton2")
-    can_sends.append(create_steer_and_ap_stalk(
+    # DEBUG
+    self.fake_torque = Params().get_bool("AleSato_DebugButton2")
+    # DEBUG
+
+    # can_sends.append(gwmcan.create_steer_and_ap_stalk(
+    #   self.packer,
+    #   self.CAN,
+    #   CS.steer_and_ap_stalk_msg,
+    #   self.fake_torque,
+    # ))
+
+    # Test to try understand EPS communication
+    ea_simulated_torque = CS.out.steeringTorque
+    if self.fake_torque and abs(ea_simulated_torque) < 50:
+      ea_simulated_torque = 50.0 * (1 if ea_simulated_torque >= 0 else -1)
+    can_sends.append(gwmcan.create_eps_update(
       self.packer,
-      CS.steer_and_ap_stalk_msg,
-      fake_torque,
-      bus=self.bus_cam
+      self.CAN,
+      eps_stock_values=CS.eps_stock_values,
+      ea_simulated_torque=ea_simulated_torque,
     ))
 
     new_actuators = actuators.as_builder()

@@ -2,15 +2,16 @@
 
 #include "opendbc/safety/safety_declarations.h"
 
-#define GWM_STEERING_AND_CRUISE 0xA1U // RX from STEER_AND_AP_STALK
-#define GWM_GAS                 0x60U // RX from CAR_OVERALL_SIGNALS
+#define GWM_STEERING_AND_CRUISE 0xA1U  // RX from STEER_AND_AP_STALK
+#define GWM_GAS                 0x60U  // RX from CAR_OVERALL_SIGNALS
 #define GWM_BRAKE               0x137U // RX from BRAKE
-#define GWM_SPEED               0x13B // RX from WHEEL_SPEEDS
-#define GWM_LANE_KEEP_ASSIST    0xA1U // TX from OP,  EPS
+#define GWM_SPEED               0x13B  // RX from WHEEL_SPEEDS
+#define GWM_LANE_KEEP_ASSIST    0xA1U  // TX from OP,  EPS
+#define GWM_RX_STEER_RELATED    0x147U // TX from OP to CAMERA
 
 // CAN bus
 #define GWM_MAIN_BUS 0U
-#define GWM_CAM_BUS  2U
+#define GWM_CAMERA_BUS  2U
 
 static uint8_t gwm_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;
@@ -38,24 +39,27 @@ static uint32_t gwm_compute_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
   uint8_t crc = 0x00;
   const uint8_t poly = 0x1D;
-  const uint8_t xor_out = 0x2D;
-  if (msg->addr == GWM_STEERING_AND_CRUISE) { // CRC8 only work for this message
-    int len = GET_LEN(msg);
-    for (int i = 1; i < len; i++) {
-      uint8_t byte = msg->data[i];
-      crc ^= byte;
-      for (int bit = 0; bit < 8; bit++) {
-        if ((crc & 0x80U) != 0U) {
-          crc = (crc << 1) ^ poly;
-        } else {
-          crc <<= 1;
-        }
-        crc &= 0xFFU;
+  uint8_t xor_out;
+  int len = GET_LEN(msg);
+  for (int i = 1; i < len; i++) {
+    uint8_t byte = msg->data[i];
+    crc ^= byte;
+    for (int bit = 0; bit < 8; bit++) {
+      if ((crc & 0x80U) != 0U) {
+        crc = (crc << 1) ^ poly;
+      } else {
+        crc <<= 1;
       }
+      crc &= 0xFFU;
     }
-    chksum = crc ^ xor_out;
+  }
+  if (msg->addr == GWM_STEERING_AND_CRUISE) {
+    xor_out = 0x2D;
+  } else if (msg->addr == GWM_RX_STEER_RELATED) {
+    xor_out = 0x61;
   } else {
   }
+  chksum = crc ^ xor_out;
   return chksum;
 }
 
@@ -74,7 +78,7 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
       uint32_t fr = (GET_BYTES(msg, 3, 2)) & 0x1FFFU;
       uint32_t rl = (GET_BYTES(msg, 41, 2)) & 0x1FFFU;
       uint32_t rr = (GET_BYTES(msg, 43, 2)) & 0x1FFFU;
-      float speed = (float)((fr + rr + rl + fl) / 4.0f * 0.00278f * KPH_TO_MS);
+      float speed = (float)((fr + rr + rl + fl) / 4.0f * KPH_TO_MS);
       vehicle_moving = speed > 0.0f;
       UPDATE_VEHICLE_SPEED(speed);
     }
@@ -118,7 +122,8 @@ static safety_config gwm_init(uint16_t param) {
   UNUSED(param);
   static const CanMsg GWM_TX_MSGS[] = {
     // {GWM_LANE_KEEP_ASSIST, GWM_MAIN_BUS, 8, .check_relay = false}, // EPS steering
-    {GWM_LANE_KEEP_ASSIST, GWM_CAM_BUS, 8, .check_relay = true}, // EPS steering
+    {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = true}, // EPS steering
+    {GWM_RX_STEER_RELATED, GWM_CAMERA_BUS, 64, .check_relay = true}, // EPS steering feedback to camera
   };
 
   static RxCheck psa_rx_checks[] = {
@@ -127,6 +132,7 @@ static safety_config gwm_init(uint16_t param) {
     {.msg = {{GWM_SPEED, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // speed
     {.msg = {{GWM_GAS, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // gas pedal
     {.msg = {{GWM_BRAKE, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // brake
+    {.msg = {{GWM_RX_STEER_RELATED, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // eps feedback to camera
   };
 
   return BUILD_SAFETY_CFG(psa_rx_checks, GWM_TX_MSGS);

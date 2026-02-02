@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-import sys, csv
+import sys
+import csv
+
 
 def gwm_crc_for_0x12B(address: int, sig, d: bytearray) -> int:
   crc = 0x00
@@ -25,7 +27,7 @@ def main():
   end_timestamp = float(sys.argv[-1])
   print(f"Reading from {input_csv_file} can-ID 0x{can_id:03X} with CRC byte index {crc_byte_index} between {init_timestamp} and {end_timestamp}")
   print("-" * 120 + "\n")
-  with open(input_csv_file, 'r') as csvfile:
+  with open(input_csv_file) as csvfile:
     reader = csv.DictReader(csvfile)
     skipone = True
     for row in reader:
@@ -38,7 +40,7 @@ def main():
         skipone = False
         continue  # skip first line to avoid partial data
       hex_data = row['data']
-      if hex_data.startswith('0x') or hex_data.startswith('0X'):
+      if hex_data.startswith(('0x', '0X')):
         hex_data = hex_data[2:]
       data_bytes = bytes.fromhex(hex_data)
       crc = data_bytes[crc_byte_index]
@@ -46,6 +48,7 @@ def main():
       match = "✓" if crc == computed_crc else "✗"
       print(f"Timestamp: {timestamp:.3f} | Data: {data_bytes.hex()} | Original CRC: 0x{crc:02X} | Computed CRC: 0x{computed_crc:02X} | Match: {match}")
       skipone = True
+
 
 if __name__ == "__main__":
   main()

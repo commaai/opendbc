@@ -1,3 +1,23 @@
+from opendbc.car import CanBusBase
+
+
+class CanBus(CanBusBase):
+  def __init__(self, CP=None, fingerprint=None) -> None:
+    super().__init__(CP, fingerprint)
+
+  @property
+  def main(self) -> int:
+    return self.offset
+
+  @property
+  def radar(self) -> int:
+    return self.offset + 1
+
+  @property
+  def camera(self) -> int:
+    return self.offset + 2
+
+
 def gwm_checksum(address: int, sig, d: bytearray) -> int:
   crc = 0x00
   poly = 0x1D
@@ -37,7 +57,37 @@ def gwm_crc_for_0x147(address: int, sig, d: bytearray) -> int:
   return crc ^ xor_out
 
 
-def create_steer_and_ap_stalk(packer, steer_msg, fake_torque=False, bus=0):
+def create_eps_update(packer, CAN: CanBus, eps_stock_values, ea_simulated_torque: float):
+  values = {s: eps_stock_values[s] for s in [
+    "A_CRC_X61",
+    "A_RX_STEER_REQUESTED",
+    "A_SET_ME_X50",
+    "A_SET_ME_X01",
+    "A_COUNTER",
+    "B_CRC_X61",
+    "B_SET_ME_X01",
+    "B_SET_ME_X0C",
+    "B_SET_ME_X05",
+    "B_SET_ME_XDC",
+    "B_RX_EPS_ANGLE",
+    "B_SET_ME__X01",
+    "B_BYPASS_ME",
+    "B_SET_ME_X03",
+  ]}
+
+  values.update({
+    "B_RX_DRIVER_TORQUE": ea_simulated_torque,
+    "B_COUNTER": (eps_stock_values["B_COUNTER"] + 1) % 16,
+  })
+
+  # calculate checksum
+  dat = packer.make_can_msg("RX_STEER_RELATED", 0, values)[1]
+  values["B_CRC_X61"] = gwm_crc_for_0x147(0, 0, dat)
+
+  return packer.make_can_msg("RX_STEER_RELATED", CAN.camera, values)
+
+
+def create_steer_and_ap_stalk(packer, CAN: CanBus, steer_msg, fake_torque=False):
   """
   Copy STEER_AND_AP_STALK message from bus 0 and forward to bus 2,
   copying all signals unchanged. If the DBC generator renames the checksum
@@ -64,4 +114,4 @@ def create_steer_and_ap_stalk(packer, steer_msg, fake_torque=False, bus=0):
     'AP_INCREASE_SPEED_COMMAND': steer_msg['AP_INCREASE_SPEED_COMMAND'],
     'COUNTER': (steer_msg['COUNTER'] + 1) % 16,
   })
-  return packer.make_can_msg('STEER_AND_AP_STALK', bus, values)
+  return packer.make_can_msg('STEER_AND_AP_STALK', CAN.camera, values)

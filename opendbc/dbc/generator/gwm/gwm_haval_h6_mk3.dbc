@@ -117,13 +117,13 @@ BO_ 323 SPEED2: 64 XXX
  SG_ CRC2 : 135|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 327 RX_STEER_RELATED: 64 XXX
- SG_ A_CRC_2F : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ A_CRC_X61 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ A_RX_STEER_REQUESTED : 10|2@0+ (1,0) [0|3] "" XXX
  SG_ A_SET_ME_X50 : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ A_SET_ME_X01 : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ A_COUNTER : 59|4@0+ (1,0) [0|15] "" XXX
- SG_ B_CRC_2F : 71|8@0+ (1,0) [0|255] "" XXX
- SG_ B_RX_DRIVER_TORQUE : 78|11@0- (1,0) [0|4095] "" XXX
+ SG_ B_CRC_X61 : 71|8@0+ (1,0) [0|255] "" XXX
+ SG_ B_RX_DRIVER_TORQUE : 78|11@0- (1,35) [0|4095] "" XXX
  SG_ B_SET_ME_X01 : 79|1@0+ (1,0) [0|1] "" XXX
  SG_ B_SET_ME_X0C : 83|4@0+ (1,0) [0|15] "" XXX
  SG_ B_SET_ME_X05 : 95|8@0+ (1,0) [0|255] "" XXX

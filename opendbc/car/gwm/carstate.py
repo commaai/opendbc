@@ -2,7 +2,9 @@ from opendbc.car import structs, Bus, CanBusBase
 from opendbc.can.parser import CANParser
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.gwm.values import DBC
-from openpilot.common.params import Params
+# DEBUG
+# from openpilot.common.params import Params
+# DEBUG
 import copy
 
 GearShifter = structs.CarState.GearShifter
@@ -14,6 +16,7 @@ class CarState(CarStateBase):
     super().__init__(CP)
     # Store original message to copy it later in carcontroller
     self.steer_and_ap_stalk_msg = {}
+    self.eps_stock_values = {}
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.main]
@@ -21,6 +24,7 @@ class CarState(CarStateBase):
 
     # Store the original message to reuse in carcontroller
     self.steer_and_ap_stalk_msg = copy.copy(cp.vl["STEER_AND_AP_STALK"])
+    self.eps_stock_values = copy.copy(cp.vl["RX_STEER_RELATED"])
 
     # car speed
     self.parse_wheel_speeds(ret,
@@ -43,8 +47,8 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_ANGLE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
     ret.steeringRateDeg = 0 # TODO
-    ret.steeringTorque = cp.vl["STEER_AND_AP_STALK"]["STEERING_TORQUE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1) * 73
-    ret.steeringPressed = abs(ret.steeringTorque) > 10
+    ret.steeringTorque = cp.vl["RX_STEER_RELATED"]["B_RX_DRIVER_TORQUE"]
+    ret.steeringPressed = abs(ret.steeringTorque) > 50
 
     ret.doorOpen = any([cp.vl["DOOR_DRIVER"]["DOOR_REAR_RIGHT_OPEN"],
                         cp.vl["DOOR_DRIVER"]["DOOR_FRONT_RIGHT_OPEN"],
@@ -53,8 +57,9 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT"]["SEAT_BELT_DRIVER_STATE"])
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["LIGHTS"]["LEFT_TURN_SIGNAL"],
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
-
-    ret.cruiseState.available = ret.cruiseState.enabled = Params().get_bool("AleSato_DebugButton1")
+    # DEBUG
+    # ret.cruiseState.available = ret.cruiseState.enabled = Params().get_bool("AleSato_DebugButton1")
+    # DEBUG
     return ret
 
   @staticmethod
