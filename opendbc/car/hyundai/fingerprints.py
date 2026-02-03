@@ -154,6 +154,7 @@ FW_VERSIONS = {
       b'\xf1\x00AEhe SCC FHCUP      1.00 1.02 99110-G2100         ',
     ],
     (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00AE  MDPS C 1.00 1.01 56310-XX000 4APHC101',
       b'\xf1\x00AE  MDPS C 1.00 1.01 56310/G2510 4APHC101',
       b'\xf1\x00AE  MDPS C 1.00 1.01 56310G2510\x00 4APHC101',
     ],
@@ -697,6 +698,7 @@ FW_VERSIONS = {
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310-K4271 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4271 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4970 4OEPC102',
+      b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4971 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310K4260\x00 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310K4261\x00 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310K4971\x00 4OEPC102',
@@ -859,9 +861,11 @@ FW_VERSIONS = {
   CAR.KIA_OPTIMA_H_G4_FL: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JFhe SCC FHCUP      1.00 1.01 99110-A8500         ',
+      b'\xf1\x00JFhe SCC FHCUP      1.00 1.03 99110-A8500         ',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00JFH MFC  AT KOR LHD 1.00 1.01 95895-A8200 180323',
+      b'\xf1\x00JFH MFC  AT KOR LHD 1.00 1.04 95895-A8200 181217',
     ],
   },
   CAR.HYUNDAI_ELANTRA: {
@@ -1081,12 +1085,14 @@ FW_VERSIONS = {
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N9260 14Y',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.01 99211-N9100 14A',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.01 99211-N9240 14T',
+      b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 1.00 99211-N9240 14Q',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00NX4__               1.00 1.00 99110-N9100         ',
       b'\xf1\x00NX4__               1.00 1.01 99110-N9000         ',
       b'\xf1\x00NX4__               1.00 1.02 99110-N9000         ',
       b'\xf1\x00NX4__               1.01 1.00 99110-N9100         ',
+      b'\xf1\x00NX4__               1.01 1.02 99110-N9000         ',
     ],
   },
   CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN: {
@@ -1110,6 +1116,7 @@ FW_VERSIONS = {
       b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.00 99211-P1040 663',
       b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.00 99211-P1060 665',
       b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.00 99211-P1070 690',
+      b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.01 99211-P1060 680',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00NQ5__               1.00 1.02 99110-P1000         ',

@@ -968,6 +968,41 @@ FW_VERSIONS = {
       b'\xf1\x872Q0907572T \xf1\x890383',
     ],
   },
+  CAR.PORSCHE_MACAN_MK1: {
+    (Ecu.engine, 0x7e0, None): [
+      b'\xf1\x8795B906259BJ\xf1\x890001',
+      b'\xf1\x8795B906259BM\xf1\x890001',
+      b'\xf1\x8795B90652013\xf1\x893485',
+      b'\xf1\x8795B90654002\xf1\x893495',
+      b'\xf1\x8795B907551AD\xf1\x890001',
+      b'\xf1\x8795B907551D \xf1\x890006',
+    ],
+    (Ecu.transmission, 0x7e1, None): [
+      b'\xf1\x8795B927156CE\xf1\x890022',
+      b'\xf1\x8795B927156JH\xf1\x890001',
+      b'\xf1\x8795B927156KD\xf1\x890001',
+      b'\xf1\x8795B927156KK\xf1\x890001',
+      b'\xf1\x8795B927156KP\xf1\x890001',
+      b'\xf1\x8795B927156R \xf1\x890021',
+    ],
+    (Ecu.srs, 0x715, None): [
+      b'\xf1\x8795B959655F \xf1\x890130\xf1\x82\x05065Q033513',
+      b'\xf1\x8795B959655F \xf1\x890130\xf1\x82\x050682033514',
+      b'\xf1\x8795B959655G \xf1\x890150\xf1\x82\x0506B1033514',
+      b'\xf1\x8795B959655G \xf1\x890150\xf1\x82\x0506CG033517',
+      b'\xf1\x8795B959655G \xf1\x890150\xf1\x82\x0506CJ02D417',
+    ],
+    (Ecu.eps, 0x712, None): [
+      b'\xf1\x8795B909144K \xf1\x891902\xf1\x82\x02\x04#\x04#',
+      b'\xf1\x8795B909144K \xf1\x891902\xf1\x82\x02\x04/\x04/',
+    ],
+    (Ecu.fwdRadar, 0x757, None): [
+      b'\xf1\x8795B907567B\x00\xf1\x890800\xf1\x82108',
+      b'\xf1\x8795B907567G\x00\xf1\x890410\xf1\x82104',
+      b'\xf1\x8795B907567H\x00\xf1\x890430\xf1\x82104',
+      b'\xf1\x8795B907567J \xf1\x890440\xf1\x82104',
+    ],
+  },
   CAR.SEAT_ATECA_MK1: {
     (Ecu.engine, 0x7e0, None): [
       b'\xf1\x8704E906027KA\xf1\x893749',
