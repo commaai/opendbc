@@ -67,9 +67,13 @@ class CarInterface(CarInterfaceBase):
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
     if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
       torque_values, lataccel_values = self.get_lataccel_torque_siglin()
+      offline_latAccelFactor = self.CP.lateralTuning.torque.latAccelFactor
 
       def torque_from_lateral_accel_siglin(lateral_acceleration: float, torque_params: structs.CarParams.LateralTorqueTuning):
-        return np.interp(lateral_acceleration, lataccel_values, torque_values)
+        # Scale the non-linear shape by the ratio of offline to learned latAccelFactor,
+        # so torqued's learned gain adjusts the curve magnitude while preserving the shape
+        scale = offline_latAccelFactor / float(torque_params.latAccelFactor)
+        return np.interp(lateral_acceleration, lataccel_values, torque_values) * scale
       return torque_from_lateral_accel_siglin
     else:
       return self.torque_from_lateral_accel_linear
@@ -77,9 +81,11 @@ class CarInterface(CarInterfaceBase):
   def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
     if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
       torque_values, lataccel_values = self.get_lataccel_torque_siglin()
+      offline_latAccelFactor = self.CP.lateralTuning.torque.latAccelFactor
 
       def lateral_accel_from_torque_siglin(torque: float, torque_params: structs.CarParams.LateralTorqueTuning):
-        return np.interp(torque, torque_values, lataccel_values)
+        scale = offline_latAccelFactor / float(torque_params.latAccelFactor)
+        return np.interp(torque / scale, torque_values, lataccel_values)
       return lateral_accel_from_torque_siglin
     else:
       return self.lateral_accel_from_torque_linear
