@@ -75,7 +75,7 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS)) {
     int torque_driver_new;
-    torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
+    torque_driver_new = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0x7FFU);
     torque_driver_new = -1 * to_signed(torque_driver_new, 11);
     update_sample(&torque_driver, torque_driver_new);
   }
@@ -88,10 +88,10 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
 
   // update vehicle moving with any non-zero wheel speed
   if (msg_matches(msg, MSG_SUBARU_Wheel_Speeds, alt_main_bus)) {
-    uint32_t fr = (GET_BYTES(msg, 1, 3) >> 4) & 0x1FFFU;
-    uint32_t rr = (GET_BYTES(msg, 3, 3) >> 1) & 0x1FFFU;
-    uint32_t rl = (GET_BYTES(msg, 4, 3) >> 6) & 0x1FFFU;
-    uint32_t fl = (GET_BYTES(msg, 6, 2) >> 3) & 0x1FFFU;
+    uint32_t fr = (GET_BYTES_LE(msg, 1, 3) >> 4) & 0x1FFFU;
+    uint32_t rr = (GET_BYTES_LE(msg, 3, 3) >> 1) & 0x1FFFU;
+    uint32_t rl = (GET_BYTES_LE(msg, 4, 3) >> 6) & 0x1FFFU;
+    uint32_t fl = (GET_BYTES_LE(msg, 6, 2) >> 3) & 0x1FFFU;
 
     vehicle_moving = (fr | rr | rl | fl) != 0U;
 
@@ -126,7 +126,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
   // steer cmd checks
   if (msg->addr == MSG_SUBARU_ES_LKAS) {
-    int desired_torque = ((GET_BYTES(msg, 0, 4) >> 16) & 0x1FFFU);
+    int desired_torque = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0x1FFFU);
     desired_torque = -1 * to_signed(desired_torque, 13);
 
     bool steer_req = (msg->data[3] >> 5) & 1U;
@@ -137,7 +137,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
   // check es_distance cruise_throttle limits
   if (msg->addr == MSG_SUBARU_ES_Distance) {
-    int cruise_throttle = (GET_BYTES(msg, 2, 2) & 0x1FFFU);
+    int cruise_throttle = (GET_BYTES_LE(msg, 2, 2) & 0x1FFFU);
     bool cruise_cancel = (msg->data[7] >> 0) & 1U;
 
     // If openpilot is not controlling long, only allow ES_Distance for cruise cancel requests,

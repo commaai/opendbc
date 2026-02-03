@@ -136,12 +136,12 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
   if (msg_matches(msg, 0x421U, hyundai_camera_scc ? 2U : 0U)) {
     // 2 bits: 13-14
-    int cruise_engaged = (GET_BYTES(msg, 0, 4) >> 13) & 0x3U;
+    int cruise_engaged = (GET_BYTES_LE(msg, 0, 4) >> 13) & 0x3U;
     hyundai_common_cruise_state_check(cruise_engaged);
   }
 
   if (msg_matches(msg, 0x251U, 0U)) {
-    int torque_driver_new = (GET_BYTES(msg, 0, 2) & 0x7ffU) - 1024U;
+    int torque_driver_new = (GET_BYTES_LE(msg, 0, 2) & 0x7ffU) - 1024U;
     // update array of samples
     update_sample(&torque_driver, torque_driver_new);
   }
@@ -167,8 +167,8 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
 
   // sample wheel speed, averaging opposite corners
   if (msg_matches(msg, 0x386U, 0U)) {
-    uint32_t front_left_speed = GET_BYTES(msg, 0, 2) & 0x3FFFU;
-    uint32_t rear_right_speed = GET_BYTES(msg, 6, 2) & 0x3FFFU;
+    uint32_t front_left_speed = GET_BYTES_LE(msg, 0, 2) & 0x3FFFU;
+    uint32_t rear_right_speed = GET_BYTES_LE(msg, 6, 2) & 0x3FFFU;
     vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD);
   }
 
@@ -219,7 +219,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // LKA STEER: safety check
   if (msg->addr == 0x340U) {
-    int desired_torque = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7ffU) - 1024U;
+    int desired_torque = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0x7ffU) - 1024U;
     bool steer_req = GET_BIT(msg, 27U);
 
     const TorqueSteeringLimits limits = hyundai_alt_limits_2 ? HYUNDAI_STEERING_LIMITS_ALT_2 :
@@ -232,7 +232,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // UDS: Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
   if (msg->addr == 0x7D0U) {
-    if (GET_BYTES_64(msg, 0, 8) != 0x0000000000803E02ULL) {
+    if (GET_BYTES_64_LE(msg, 0, 8) != 0x0000000000803E02ULL) {
       tx = false;
     }
   }

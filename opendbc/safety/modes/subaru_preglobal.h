@@ -36,11 +36,11 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
 
   // update vehicle moving with any non-zero wheel speed
   if (msg_matches(msg, MSG_SUBARU_PG_Wheel_Speeds, SUBARU_PG_MAIN_BUS)) {
-    vehicle_moving = ((GET_BYTES(msg, 0, 4) >> 12) | GET_BYTES(msg, 4, 4)) != 0U;
+    vehicle_moving = ((GET_BYTES_LE(msg, 0, 4) >> 12) | GET_BYTES_LE(msg, 4, 4)) != 0U;
   }
 
   if (msg_matches(msg, MSG_SUBARU_PG_Brake_Pedal, SUBARU_PG_MAIN_BUS)) {
-    brake_pressed = ((GET_BYTES(msg, 0, 4) >> 16) & 0xFFU) > 0U;
+    brake_pressed = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0xFFU) > 0U;
   }
 
   if (msg_matches(msg, MSG_SUBARU_PG_Throttle, SUBARU_PG_MAIN_BUS)) {
@@ -63,7 +63,7 @@ static bool subaru_preglobal_tx_hook(const CANPacket_t *msg) {
 
   // steer cmd checks
   if (msg->addr == MSG_SUBARU_PG_ES_LKAS) {
-    int desired_torque = ((GET_BYTES(msg, 0, 4) >> 8) & 0x1FFFU);
+    int desired_torque = ((GET_BYTES_LE(msg, 0, 4) >> 8) & 0x1FFFU);
     desired_torque = -1 * to_signed(desired_torque, 13);
 
     bool steer_req = (msg->data[3] >> 0) & 1U;

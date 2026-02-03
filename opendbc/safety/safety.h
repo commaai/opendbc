@@ -31,7 +31,7 @@
 #include "opendbc/safety/modes/psa.h"
 #include "opendbc/safety/modes/hyundai_canfd.h"
 
-uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
+uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
   for (int i = 0; i < len; i++) {
     const uint32_t shift = i * 8;
@@ -41,7 +41,7 @@ uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
 }
 
 // Read up to eight bytes in little-endian order, without alignment assumptions.
-uint64_t GET_BYTES_64(const CANPacket_t *msg, int start, int len) {
+uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
   uint64_t ret = 0U;
   for (int i = 0; i < len; i++) {
     const uint32_t shift = i * 8;
