@@ -45,6 +45,13 @@ def gwm_crc_for_0x12B(address: int, sig, d: bytearray) -> int:
   return crc ^ xor_out
 
 
+def gwm_basic_chksum_for_0x12B(address: int, sig, d: bytearray) -> int:
+  invert_direction = d[12] >> 7 & 0x1
+  counter = d[15] & 0xF
+  steer_requested = d[15] >> 5 & 0x1
+  return (28 - (steer_requested * 8) - counter - invert_direction) & 0x1F
+
+
 def gwm_crc_for_0x147(address: int, sig, d: bytearray) -> int:
   crc = 0x00
   poly = 0x1D
