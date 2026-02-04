@@ -44,7 +44,6 @@ testing = [
 ]
 docs = [
   "Jinja2",
-  "natsort",
 ]
 examples = [
   "inputs",
