@@ -78,7 +78,8 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
     if ((uint32_t)msg->addr == (uint32_t)GWM_STEERING_AND_CRUISE) {
       int angle_meas_new = (((msg->data[1] & 0x3FU) << 7) | (msg->data[2] & 0xFEU)); // STEERING_ANGLE
       update_sample(&angle_meas, angle_meas_new);
-      pcm_cruise_check((msg->data[5] >> 7) & 1U); // AP_ENABLE_COMMAND
+      // pcm_cruise_check((msg->data[5] >> 7) & 1U); // AP_ENABLE_COMMAND
+      pcm_cruise_check(true); // TO-DO: remove this line after testing  (nuke to test joystick in steer cmd)
     }
     if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
       uint32_t fl = (((uint16_t)msg->data[1] << 8) | msg->data[2]) & 0x1FFFU;
