@@ -18,6 +18,57 @@ class CanBus(CanBusBase):
     return self.offset + 2
 
 
+def create_steer_command(packer, CAN: CanBus, camera_stock_values, steer: float, steer_req: bool):
+  steer = int(steer)
+  values = {
+    "STEER_REQUEST": 1 if steer_req else 0,
+    "TORQUE_CMD": steer,
+    "TORQUE_REFLECTED": -steer,
+    "INVERT_DIRECTION": 1 if (steer > 0 and steer_req) else 0,
+    "COUNTER": (camera_stock_values["COUNTER"] + 1) % 16,
+    "BYPASS_ME": camera_stock_values["BYPASS_ME"],
+  }
+
+  # calculate and insert basic checksum
+  dat = packer.make_can_msg("STEER_CMD", 0, values)[1]
+  values["BASIC_CHECKSUM"] = gwm_basic_chksum_for_0x12B(0, 0, dat)
+  # calculate and insert CRC
+  dat = packer.make_can_msg("STEER_CMD", 0, values)[1]
+  values["CRC_X9B"] = gwm_crc_for_0x12B(0, 0, dat)
+
+  return packer.make_can_msg("STEER_CMD", CAN.main, values)
+
+
+def create_eps_update(packer, CAN: CanBus, eps_stock_values, ea_simulated_torque: float):
+  values = {s: eps_stock_values[s] for s in [
+    "A_CRC_X61",
+    "A_RX_STEER_REQUESTED",
+    "A_SET_ME_X50",
+    "A_SET_ME_X01",
+    "A_COUNTER",
+    "B_CRC_X61",
+    "B_SET_ME_X01",
+    "B_SET_ME_X0C",
+    "B_SET_ME_X05",
+    "B_SET_ME_XDC",
+    "B_RX_EPS_ANGLE",
+    "B_SET_ME__X01",
+    "B_BYPASS_ME",
+    "B_SET_ME_X03",
+  ]}
+
+  values.update({
+    "B_RX_DRIVER_TORQUE": ea_simulated_torque,
+    "B_COUNTER": (eps_stock_values["B_COUNTER"] + 1) % 16,
+  })
+
+  # calculate checksum
+  dat = packer.make_can_msg("RX_STEER_RELATED", 0, values)[1]
+  values["B_CRC_X61"] = gwm_crc_for_0x147(0, 0, dat)
+
+  return packer.make_can_msg("RX_STEER_RELATED", CAN.camera, values)
+
+
 def gwm_checksum(address: int, sig, d: bytearray) -> int:
   crc = 0x00
   poly = 0x1D
@@ -62,36 +113,6 @@ def gwm_crc_for_0x147(address: int, sig, d: bytearray) -> int:
       crc = ((crc << 1) ^ poly) if (crc & 0x80) else (crc << 1)
       crc &= 0xFF
   return crc ^ xor_out
-
-
-def create_eps_update(packer, CAN: CanBus, eps_stock_values, ea_simulated_torque: float):
-  values = {s: eps_stock_values[s] for s in [
-    "A_CRC_X61",
-    "A_RX_STEER_REQUESTED",
-    "A_SET_ME_X50",
-    "A_SET_ME_X01",
-    "A_COUNTER",
-    "B_CRC_X61",
-    "B_SET_ME_X01",
-    "B_SET_ME_X0C",
-    "B_SET_ME_X05",
-    "B_SET_ME_XDC",
-    "B_RX_EPS_ANGLE",
-    "B_SET_ME__X01",
-    "B_BYPASS_ME",
-    "B_SET_ME_X03",
-  ]}
-
-  values.update({
-    "B_RX_DRIVER_TORQUE": ea_simulated_torque,
-    "B_COUNTER": (eps_stock_values["B_COUNTER"] + 1) % 16,
-  })
-
-  # calculate checksum
-  dat = packer.make_can_msg("RX_STEER_RELATED", 0, values)[1]
-  values["B_CRC_X61"] = gwm_crc_for_0x147(0, 0, dat)
-
-  return packer.make_can_msg("RX_STEER_RELATED", CAN.camera, values)
 
 
 def create_steer_and_ap_stalk(packer, CAN: CanBus, steer_msg, fake_torque=False):

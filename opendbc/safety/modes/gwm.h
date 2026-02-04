@@ -8,6 +8,7 @@
 #define GWM_SPEED               0x13B  // RX from WHEEL_SPEEDS
 #define GWM_LANE_KEEP_ASSIST    0xA1U  // TX from OP,  EPS
 #define GWM_RX_STEER_RELATED    0x147U // TX from OP to CAMERA
+#define STEER_CMD               0x12BU // TX from OP, CAMERA to EPS
 
 // CAN bus
 #define GWM_MAIN_BUS 0U
@@ -61,6 +62,8 @@ static uint32_t gwm_compute_checksum(const CANPacket_t *msg) {
     xor_out = 0x2D;
   } else if (msg->addr == GWM_RX_STEER_RELATED) {
     xor_out = 0x61;
+  } else if (msg->addr == STEER_CMD) {
+    xor_out = 0x9B;
   } else {
   }
   chksum = crc ^ xor_out;
@@ -128,6 +131,7 @@ static safety_config gwm_init(uint16_t param) {
     // {GWM_LANE_KEEP_ASSIST, GWM_MAIN_BUS, 8, .check_relay = false}, // EPS steering
     {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = true}, // EPS steering
     {GWM_RX_STEER_RELATED, GWM_CAMERA_BUS, 64, .check_relay = true}, // EPS steering feedback to camera
+    {STEER_CMD, GWM_MAIN_BUS, 64, .check_relay = true}, // Steering command
   };
 
   static RxCheck psa_rx_checks[] = {
@@ -137,6 +141,7 @@ static safety_config gwm_init(uint16_t param) {
     {.msg = {{GWM_GAS, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // gas pedal
     {.msg = {{GWM_BRAKE, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // brake
     {.msg = {{GWM_RX_STEER_RELATED, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // eps feedback to camera
+    {.msg = {{STEER_CMD, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // copy stock steering cmd
   };
 
   return BUILD_SAFETY_CFG(psa_rx_checks, GWM_TX_MSGS);

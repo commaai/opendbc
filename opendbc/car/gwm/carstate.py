@@ -17,6 +17,7 @@ class CarState(CarStateBase):
     # Store original message to copy it later in carcontroller
     self.steer_and_ap_stalk_msg = {}
     self.eps_stock_values = {}
+    self.camera_stock_values = {}
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.main]
@@ -25,6 +26,7 @@ class CarState(CarStateBase):
     # Store the original message to reuse in carcontroller
     self.steer_and_ap_stalk_msg = copy.copy(cp.vl["STEER_AND_AP_STALK"])
     self.eps_stock_values = copy.copy(cp.vl["RX_STEER_RELATED"])
+    self.camera_stock_values = copy.copy(cp.vl["STEER_CMD"])
 
     # car speed
     self.parse_wheel_speeds(ret,

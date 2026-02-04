@@ -11,13 +11,22 @@ Ecu = CarParams.Ecu
 
 class CarControllerParams:
   STEER_STEP = 1
+  STEER_MAX = 200
 
+  # TO-DO Cleanup this later
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     390, # deg
     ([0., 5., 25.], [2.5, 1.5, .2]),
     ([0., 5., 25.], [5., 2., .3]),
   )
   STEER_DRIVER_ALLOWANCE = 5  # Driver intervention threshold, 0.5 Nm
+  # TO-DO Cleanup this later
+
+  def __init__(self, CP: CarParams):
+    self.ACCEL_MAX = 1
+    self.ACCEL_MIN = -3.5
+    self.STEER_DELTA_UP = 3.25
+    self.STEER_DELTA_DOWN = 5.0
 
 
 @dataclass

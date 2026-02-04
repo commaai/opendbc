@@ -9,7 +9,6 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 
 # PSA angle based controllers
 "PSA_PEUGEOT_208" = [nan, 2.0, nan]
-"GWM_HAVAL_H6" = [nan, 2.0, nan]
 
 # New subarus angle based controllers
 "SUBARU_FORESTER_2022" = [nan, 3.0, nan]
