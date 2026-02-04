@@ -78,10 +78,10 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
       pcm_cruise_check((msg->data[5] >> 7) & 1U); // AP_ENABLE_COMMAND
     }
     if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
-      uint32_t fl = (((uint16_t)msg->data[1] << 8) | msg->data[2]) & 0x1FFF;
-      uint32_t fr = (((uint16_t)msg->data[3] << 8) | msg->data[4]) & 0x1FFF;
-      uint32_t rl = (((uint16_t)msg->data[41] << 8) | msg->data[42]) & 0x1FFF;
-      uint32_t rr = (((uint16_t)msg->data[43] << 8) | msg->data[44]) & 0x1FFF;
+      uint32_t fl = (((uint16_t)msg->data[1] << 8) | msg->data[2]) & 0x1FFFU;
+      uint32_t fr = (((uint16_t)msg->data[3] << 8) | msg->data[4]) & 0x1FFFU;
+      uint32_t rl = (((uint16_t)msg->data[41] << 8) | msg->data[42]) & 0x1FFFU;
+      uint32_t rr = (((uint16_t)msg->data[43] << 8) | msg->data[44]) & 0x1FFFU;
       float speed = (float)((fr + rr + rl + fl) / 4.0f * 0.05924739 * KPH_TO_MS);
       vehicle_moving = speed > 0.0f;
       UPDATE_VEHICLE_SPEED(speed);

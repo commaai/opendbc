@@ -57,13 +57,7 @@ def main():
       match = "✓" if frame_chk == computed_chk else "✗"
 
       print(
-        f"Timestamp: {timestamp:.3f} | "
-        f"Data: {data_bytes.hex()} | "
-        f"Frame BASIC_CHECKSUM: 0x{frame_chk:02X} | "
-        f"Computed: 0x{computed_chk:02X} | "
-        f"Match: {match}"
-      )
-
+        f"Timestamp: {timestamp:.3f} Data: {data_bytes.hex()} | Frame BASIC_CHECKSUM: 0x{frame_chk:02X} | Computed: 0x{computed_chk:02X} | Match: {match}")
       skipone = True
 
 
