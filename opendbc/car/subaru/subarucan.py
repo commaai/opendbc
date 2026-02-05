@@ -147,8 +147,8 @@ def create_es_dashstatus(packer, frame, dashstatus_msg, enabled, long_enabled, l
     "Signal4",
     "Conventional_Cruise",
     "Signal5",
-    "Cruise_Disengaged",
-    "Cruise_Activated",
+    "Cruise_Disengaged_Dash",
+    "Cruise_Activated_Dash",
     "Signal6",
     "Cruise_Set_Speed",
     "Cruise_Fault",
@@ -165,8 +165,9 @@ def create_es_dashstatus(packer, frame, dashstatus_msg, enabled, long_enabled, l
 
   if long_enabled:
     values["Cruise_State"] = 0
-    values["Cruise_Activated"] = enabled
-    values["Cruise_Disengaged"] = 0
+    # TODO: Cruise_Activated_dash should respect gas pressed and standstill stock behavior
+    values["Cruise_Activated_Dash"] = enabled
+    values["Cruise_Disengaged_Dash"] = 0
     values["Car_Follow"] = int(lead_visible)
 
     values["PCB_Off"] = 1 # AEB is not presevered, so show the PCB_Off on dash

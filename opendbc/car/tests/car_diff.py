@@ -15,7 +15,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from comma_car_segments import get_comma_car_segments_database, get_url
 
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
@@ -30,7 +29,7 @@ PADDING = 5
 
 Diff = tuple[str, int, tuple[Any, Any], int]
 Ref = tuple[int, structs.CarState]
-Result = tuple[str, str, list[Diff], str | None]
+Result = tuple[str, str, list[Diff], list[Ref] | None, list[structs.CarState] | None, str | None]
 
 
 def dict_diff(d1: dict[str, Any], d2: dict[str, Any], path: str = "", ignore: list[str] | None = None, tolerance: float = 0) -> list[tuple]:
@@ -52,13 +51,14 @@ def dict_diff(d1: dict[str, Any], d2: dict[str, Any], path: str = "", ignore: li
 
 
 def load_can_messages(seg: str) -> list[Any]:
+  from comma_car_segments import get_url
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
   msgs = LogReader(url, only_union_types=True, sort_by_time=True)
   return [m for m in msgs if m.which() == 'can']
 
 
-def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[list[structs.CarState], list[int]]:
+def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[structs.CarParams, list[structs.CarState], list[int]]:
   _can_msgs = ([CanData(can.address, can.dat, can.src) for can in m.can] for m in can_msgs)
 
   def can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
@@ -77,32 +77,36 @@ def replay_segment(platform: str, can_msgs: list[Any]) -> tuple[list[structs.Car
     states.append(CI.update([(msg.logMonoTime, frames)]))
     CI.apply(CC, msg.logMonoTime)
     timestamps.append(msg.logMonoTime)
-  return states, timestamps
+  return CP, states, timestamps
 
 
 def process_segment(args: tuple) -> Result:
   platform, seg, ref_path, update = args
   try:
     can_msgs = load_can_messages(seg)
-    states, timestamps = replay_segment(platform, can_msgs)
+    CP, states, timestamps = replay_segment(platform, can_msgs)
     ref_file = Path(ref_path) / f"{platform}_{seg.replace('/', '_')}.zst"
 
     if update:
-      data = list(zip(timestamps, states, strict=True))
+      data = {"cp": CP.to_dict(), "frames": list(zip(timestamps, states, strict=True))}
       ref_file.write_bytes(zstd.compress(pickle.dumps(data), 10))
-      return (platform, seg, [], None)
+      return (platform, seg, [], None, None, None)
 
     if not ref_file.exists():
-      return (platform, seg, [], "no ref")
+      return (platform, seg, [], None, None, "no ref")
 
-    ref: list[Ref] = pickle.loads(decompress_stream(ref_file.read_bytes()))
+    ref_data = pickle.loads(decompress_stream(ref_file.read_bytes()))
+    cp: dict[str, Any] = ref_data["cp"]
+    ref: list[Ref] = ref_data["frames"]
     diffs = []
+    for diff in dict_diff(cp, CP.to_dict(), path="carParams", ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
+      diffs.append((diff[1], -1, diff[2], 0))
     for i, ((ts, ref_state), state) in enumerate(zip(ref, states, strict=True)):
       for diff in dict_diff(ref_state.to_dict(), state.to_dict(), ignore=IGNORE_FIELDS, tolerance=TOLERANCE):
         diffs.append((diff[1], i, diff[2], ts))
-    return (platform, seg, diffs, None)
+    return (platform, seg, diffs, ref, states, None)
   except Exception:
-    return (platform, seg, [], traceback.format_exc())
+    return (platform, seg, [], None, None, traceback.format_exc())
 
 
 def get_changed_platforms(cwd: Path, database: dict[str, Any], interfaces: dict[str, Any]) -> list[str]:
@@ -134,10 +138,10 @@ def run_replay(platforms: list[str], segments: dict[str, list[str]], ref_path: P
 
 
 # ASCII waveforms helpers
-def find_edges(vals: list[bool], init: bool) -> tuple[list[int], list[int]]:
+def find_edges(vals: list[bool]) -> tuple[list[int], list[int]]:
   rises = []
   falls = []
-  prev = init
+  prev = vals[0]
   for i, val in enumerate(vals):
     if val and not prev:
       rises.append(i)
@@ -147,10 +151,10 @@ def find_edges(vals: list[bool], init: bool) -> tuple[list[int], list[int]]:
   return rises, falls
 
 
-def render_waveform(label: str, vals: list[bool], init: bool) -> str:
+def render_waveform(label: str, vals: list[bool]) -> str:
   wave = {(False, False): "_", (True, True): "‾", (False, True): "/", (True, False): "\\"}
   line = f"  {label}:".ljust(12)
-  prev = init
+  prev = vals[0]
   for val in vals:
     line += wave[(prev, val)]
     prev = val
@@ -185,25 +189,22 @@ def group_frames(diffs: list[Diff], max_gap: int = 15) -> list[list[Diff]]:
   return groups
 
 
-def build_signals(group: list[Diff]) -> tuple[list[bool], list[bool], bool, int, int]:
+def build_signals(group: list[Diff], ref: list[Ref], states: list[structs.CarState], field: str) -> tuple[list[Any], list[Any], int, int]:
   _, first_frame, _, _ = group[0]
-  _, last_frame, (final_master, _), _ = group[-1]
+  _, last_frame, _, _ = group[-1]
   start = max(0, first_frame - PADDING)
-  end = last_frame + PADDING + 1
-  init = not final_master
-  diff_at = {frame: (m, p) for _, frame, (m, p), _ in group}
+  end = min(last_frame + PADDING + 1, len(ref))
   master_vals = []
   pr_vals = []
-  master = init
-  pr = init
   for frame in range(start, end):
-    if frame in diff_at:
-      master, pr = diff_at[frame]
-    elif frame > last_frame:
-      master = pr = final_master
-    master_vals.append(master)
-    pr_vals.append(pr)
-  return master_vals, pr_vals, init, start, end
+    mval = ref[frame][1].to_dict()
+    pval = states[frame].to_dict()
+    for k in field.split("."):
+      mval = mval.get(k) if isinstance(mval, dict) else None
+      pval = pval.get(k) if isinstance(pval, dict) else None
+    master_vals.append(mval)
+    pr_vals.append(pval)
+  return master_vals, pr_vals, start, end
 
 
 def format_numeric_diffs(diffs: list[Diff]) -> list[str]:
@@ -215,7 +216,7 @@ def format_numeric_diffs(diffs: list[Diff]) -> list[str]:
   return lines
 
 
-def format_boolean_diffs(diffs: list[Diff]) -> list[str]:
+def format_boolean_diffs(diffs: list[Diff], ref: list[Ref], states: list[structs.CarState], field: str) -> list[str]:
   _, first_frame, _, first_ts = diffs[0]
   _, last_frame, _, last_ts = diffs[-1]
   frame_time = last_frame - first_frame
@@ -223,14 +224,12 @@ def format_boolean_diffs(diffs: list[Diff]) -> list[str]:
   ms = time_ms / frame_time if frame_time else 10.0
   lines = []
   for group in group_frames(diffs):
-    master_vals, pr_vals, init, start, end = build_signals(group)
-    master_rises, master_falls = find_edges(master_vals, init)
-    pr_rises, pr_falls = find_edges(pr_vals, init)
-    if bool(master_rises) != bool(pr_rises) or bool(master_falls) != bool(pr_falls):
-      continue
+    master_vals, pr_vals, start, end = build_signals(group, ref, states, field)
+    master_rises, master_falls = find_edges(master_vals)
+    pr_rises, pr_falls = find_edges(pr_vals)
     lines.append(f"\n  frames {start}-{end - 1}")
-    lines.append(render_waveform("master", master_vals, init))
-    lines.append(render_waveform("PR", pr_vals, init))
+    lines.append(render_waveform("master", master_vals))
+    lines.append(render_waveform("PR", pr_vals))
     for edge_type, master_edges, pr_edges in [("rise", master_rises, pr_rises), ("fall", master_falls, pr_falls)]:
       msg = format_timing(edge_type, master_edges, pr_edges, ms)
       if msg:
@@ -238,17 +237,18 @@ def format_boolean_diffs(diffs: list[Diff]) -> list[str]:
   return lines
 
 
-def format_diff(diffs: list[Diff]) -> list[str]:
+def format_diff(diffs: list[Diff], ref: list[Ref], states: list[structs.CarState], field: str) -> list[str]:
   if not diffs:
     return []
   _, _, (old, new), _ = diffs[0]
   is_bool = isinstance(old, bool) and isinstance(new, bool)
   if is_bool:
-    return format_boolean_diffs(diffs)
+    return format_boolean_diffs(diffs, ref, states, field)
   return format_numeric_diffs(diffs)
 
 
 def main(platform: str | None = None, segments_per_platform: int = 10, update_refs: bool = False, all_platforms: bool = False) -> int:
+  from comma_car_segments import get_comma_car_segments_database
   cwd = Path(__file__).resolve().parents[3]
   ref_path = cwd / DIFF_BUCKET
   if not update_refs:
@@ -264,8 +264,12 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
   else:
     platforms = get_changed_platforms(cwd, database, interfaces)
 
+  print("## Car behavior report")
+  print("Replays driving segments through this PR and compares the behavior to master.")
+  print("Please review any changes carefully to ensure they are expected.\n")
+
   if not platforms:
-    print("No car changes detected")
+    print("✅ No changes detected")
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
@@ -274,35 +278,36 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
 
   if update_refs:
     results = run_replay(platforms, segments, ref_path, update=True)
-    errors = [e for _, _, _, e in results if e]
+    errors = [e for _, _, _, _, _, e in results if e]
     assert len(errors) == 0, f"Segment failures: {errors}"
     print(f"Generated {n_segments} refs to {ref_path}")
     return 0
 
   download_refs(ref_path, platforms, segments)
   results = run_replay(platforms, segments, ref_path, update=False)
-
-  with_diffs = [(p, s, d) for p, s, d, e in results if d]
-  errors = [(p, s, e) for p, s, d, e in results if e]
+  with_diffs = [(platform, seg, diffs, ref, states)
+                for platform, seg, diffs, ref, states, err in results if diffs]
+  errors = [(platform, seg, err) for platform, seg, diffs, ref, states, err in results if err]
   n_passed = len(results) - len(with_diffs) - len(errors)
 
-  print(f"\nResults: {n_passed} passed, {len(with_diffs)} with diffs, {len(errors)} errors")
+  icon = "⚠️" if with_diffs else "✅"
+  print(f"\n{icon}  {len(with_diffs)} changed, {n_passed} passed, {len(errors)} errors")
 
   for plat, seg, err in errors:
     print(f"\nERROR {plat} - {seg}: {err}")
 
   if with_diffs:
-    print("```")
-    for plat, seg, diffs in with_diffs:
+    print("<details><summary><b>Show changes</b></summary>\n\n```")
+    for plat, seg, diffs, ref, states in with_diffs:
       print(f"\n{plat} - {seg}")
       by_field = defaultdict(list)
       for d in diffs:
         by_field[d[0]].append(d)
       for field, fd in sorted(by_field.items()):
-        print(f"  {field} ({len(fd)} diffs)")
-        for line in format_diff(fd):
+        print(f"\n  {field} ({len(fd)} diffs)")
+        for line in format_diff(fd, ref, states, field):
           print(line)
-    print("```")
+    print("```\n</details>")
 
   return 1 if errors else 0
 
