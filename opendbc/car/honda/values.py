@@ -290,7 +290,6 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_RADARLESS,
   )
 
-
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
     [
