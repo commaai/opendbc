@@ -211,7 +211,7 @@ class CAR(Platforms):
     # steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=3410 * CV.LB_TO_KG, wheelbase=2.66, steerRatio=16.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated', Bus.body: 'honda_crv_ex_2017_body_generated'},
-    flags=HondaFlags.BOSCH_ALT_BRAKE,
+    flags=HondaFlags.BOSCH_ALT_BRAKE | HondaFlags.MINSPEED_CUTOFF
   )
   HONDA_CRV_6G = HondaBoschCANFDPlatformConfig(
     [
@@ -236,7 +236,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda City (Brazil only) 2023", "All")],
     CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.6, steerRatio=19.0, centerToFrontRatio=0.41, minSteerSpeed=23. * CV.KPH_TO_MS),
     {Bus.pt: 'honda_bosch_radarless_generated'},
-    flags=HondaFlags.BOSCH_RADARLESS,
+    flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.MINSPEED_CUTOFF
   )
   ACURA_RDX_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura RDX 2019-21", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
