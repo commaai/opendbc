@@ -283,6 +283,13 @@ class CAR(Platforms):
     [HondaCarDocs("Acura TLX 2025", "All")],
     CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.87, centerToFrontRatio=0.43, steerRatio=13.7),
   )
+  HONDA_FIT_4G = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda Fit (Taiwan) 2025", "All")],
+    CarSpecs(mass=1229, wheelbase=2.53, steerRatio=15.2, centerToFrontRatio=0.39),
+    {Bus.pt: 'honda_bosch_radarless_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS,
+  )
+
 
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
