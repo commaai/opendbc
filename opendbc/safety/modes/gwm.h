@@ -130,7 +130,7 @@ static safety_config gwm_init(uint16_t param) {
   UNUSED(param);
   static const CanMsg GWM_TX_MSGS[] = {
     // {GWM_LANE_KEEP_ASSIST, GWM_MAIN_BUS, 8, .check_relay = false}, // EPS steering
-    {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = true}, // EPS steering
+    // {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = true}, // EPS steering
     {GWM_RX_STEER_RELATED, GWM_CAMERA_BUS, 64, .check_relay = true}, // EPS steering feedback to camera
     {STEER_CMD, GWM_MAIN_BUS, 64, .check_relay = true}, // Steering command
   };
