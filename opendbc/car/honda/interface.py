@@ -223,11 +223,16 @@ class CarInterface(CarInterfaceBase):
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
     # to a negative value, so it won't matter. Otherwise, add 0.5 mph margin to not
     # conflict with PCM acc
-    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC})
+    if (candidate == CAR.HONDA_FIT_4G) and (not ret.openpilotLongitudinalControl):
+      ret.autoResumeSng = False
+    else:
+      ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC})
     if ret.autoResumeSng:
       ret.minEnableSpeed = -1.
     elif candidate == CAR.HONDA_ODYSSEY_TWN:
       ret.minEnableSpeed = 19. * CV.MPH_TO_MS
+    elif candidate == CAR.HONDA_FIT_4G:
+      ret.minEnableSpeed = 30. * CV.KPH_TO_MS
     else:
       ret.minEnableSpeed = 25.51 * CV.MPH_TO_MS
 
