@@ -22,6 +22,7 @@ def create_steer_command(packer, CAN: CanBus, camera_stock_values, steer: float,
   steer = int(steer)
   values = {
     "STEER_REQUEST": 1 if steer_req else 0,
+    "SET_ME_X01": 1,
     "TORQUE_CMD": steer,
     "TORQUE_REFLECTED": -steer,
     "INVERT_DIRECTION": 1 if (steer > 0 and steer_req) else 0,
