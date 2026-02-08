@@ -10,6 +10,7 @@ import numpy as np
 
 MAX_USER_TORQUE = 100  # 1.0 Nm
 EPS_MAX_TORQUE = 120
+HELLO = 10
 
 
 class CarController(CarControllerBase):
@@ -43,8 +44,8 @@ class CarController(CarControllerBase):
     if self.frame % 2 == 0: # 50 Hz
       # Try to satisfy steer nudge requests
       ea_simulated_torque = CS.out.steeringTorque
-      if self.fake_torque and abs(ea_simulated_torque) < 50:
-        ea_simulated_torque = 50.0 * (1 if ea_simulated_torque >= 0 else -1)
+      if self.fake_torque and abs(ea_simulated_torque) < HELLO:
+        ea_simulated_torque = ea_simulated_torque + (HELLO if ea_simulated_torque >= 0 else -HELLO)
       can_sends.append(gwmcan.create_eps_update(
         self.packer,
         self.CAN,

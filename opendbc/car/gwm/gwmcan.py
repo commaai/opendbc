@@ -43,24 +43,20 @@ def create_steer_command(packer, CAN: CanBus, camera_stock_values, steer: float,
 def create_eps_update(packer, CAN: CanBus, eps_stock_values, ea_simulated_torque: float):
   values = {s: eps_stock_values[s] for s in [
     "A_CRC_X61",
+    "A_BYPASSME_2",
     "A_RX_STEER_REQUESTED",
-    "A_SET_ME_X50",
-    "A_SET_ME_X01",
+    "A_BYPASSME_1",
     "A_COUNTER",
     "B_CRC_X61",
-    "B_SET_ME_X01",
-    "B_SET_ME_X0C",
-    "B_SET_ME_X05",
-    "B_SET_ME_XDC",
-    "B_RX_EPS_ANGLE",
-    "B_SET_ME__X01",
-    "B_BYPASS_ME",
-    "B_SET_ME_X03",
+    "B_RX_DRIVER_TORQUE",
+    "B_BYPASSME_1",
+    "B_BYPASSME_2",
+    "B_COUNTER",
+    "B_BYPASSME_3",
   ]}
 
   values.update({
     "B_RX_DRIVER_TORQUE": ea_simulated_torque,
-    "B_COUNTER": (eps_stock_values["B_COUNTER"] + 1) % 16,
   })
 
   # calculate checksum
