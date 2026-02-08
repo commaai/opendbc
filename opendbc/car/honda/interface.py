@@ -195,7 +195,7 @@ class CarInterface(CarInterfaceBase):
         # When using stock ACC, the radar intercepts and filters steering commands the EPS would otherwise accept
         ret.minSteerSpeed = 70. * CV.KPH_TO_MS
 
-    elif candidate == CAR.ACURA_TLX_2G_MMR:
+    elif candidate in (CAR.ACURA_TLX_2G_MMR, CAR.HONDA_FIT_4G):
       ret.steerActuatorDelay = 0.15
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
