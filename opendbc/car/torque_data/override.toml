@@ -96,6 +96,7 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "LEXUS_LS" = [1.35, 1.7, 0.17]
 "TOYOTA_RAV4_PRIME" = [1.7, 2.0, 0.14]
 "TOYOTA_RAV4_TSS2_2022" = [1.9, 1.9304407208090029, 0.112174]
+"HONDA_ACCORD_9G" = [2.1, 2.1, 0.19]
 
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]
