@@ -79,7 +79,6 @@ class HondaFlags(IntFlag):
   ALLOW_MANUAL_TRANS = 1024
   HYBRID = 2048
   BOSCH_TJA_CONTROL = 4096
-  MINSPEED_CUTOFF = 8192
 
 
 # Car button codes
@@ -373,7 +372,6 @@ HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
 HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
 HONDA_BOSCH_ALT_RADAR = CAR.with_flags(HondaFlags.BOSCH_ALT_RADAR)
 HONDA_BOSCH_TJA_CONTROL = CAR.with_flags(HondaFlags.BOSCH_TJA_CONTROL)
-HONDA_MINSPEED_CUTOFF = CAR.with_flags(HondaFlags.MINSPEED_CUTOFF)
 
 
 DBC = CAR.create_dbc_map()
