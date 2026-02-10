@@ -5,6 +5,7 @@ from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.vin import ModelYear, Vin
 
 Ecu = CarParams.Ecu
 
@@ -58,6 +59,35 @@ class CarControllerParams:
     self.BRAKE_LOOKUP_BP = [self.ACCEL_MIN, max_regen_acceleration]
     self.BRAKE_LOOKUP_V = [self.MAX_BRAKE, 0.]
 
+class WMI:
+  # See the following documentation:
+  # 2018 revision: https://vpic.nhtsa.dot.gov/mid/home/displayfile/90db3ee9-5d95-4511-b030-922603c559d6
+  # 2020 revision: https://vpic.nhtsa.dot.gov/mid/home/displayfile/eba5f29d-7f26-499f-a697-a82440511c6d
+  # 2021 revision: https://vpic.nhtsa.dot.gov/mid/home/displayfile/7c659360-416a-4e96-ae38-0b69d916c106
+  class BUICK:
+    UNITED_STATES_CAR = "1G4"
+    GERMANY_CAR = "W04"
+
+  class CADILLAC:
+    UNITED_STATES_CAR = "1G6"
+    UNITED_STATES_MPV = "1GY"
+
+  class CHEVROLET:
+    UNITED_STATES_CAR = "1G1"
+    CANADA_CAR = "2G1"
+    MEXICO_CAR = "3G1"
+    UNITED_STATES_MPV = "1GN"
+    CANADA_MPV = "2GN"
+    MEXICO_MPV = "3GN"
+    KOREA_MPV = "KL7"
+    UNITED_STATES_TRUCK = "1GC"
+    MEXICO_TRUCK = "3GC"
+
+  class GMC:
+    UNITED_STATES_MPV = "1GK"
+    UNITED_STATES_TRUCK = "1GT"
+    MEXICO_TRUCK = "3GT"
+
 
 class GMSafetyFlags(IntFlag):
   HW_CAM = 1
@@ -98,6 +128,11 @@ class GMPlatformConfig(PlatformConfig):
     Bus.radar: 'gm_global_a_object',
     Bus.chassis: 'gm_global_a_chassis',
   })
+  wmis: set[str] = field(default_factory=set)
+  # Some GM cars have a single-digit body style code preceding the vehicle code
+  has_body_style_code: bool = False
+  vehicle_code: set[str] = field(default_factory=set)  # may be called "chassis code" or "vehicle line"
+  years: set[str] = field(default_factory=set)
 
 
 @dataclass
@@ -122,26 +157,45 @@ class CAR(Platforms):
   CHEVROLET_VOLT = GMASCMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2017-18", min_enable_speed=0, video="https://youtu.be/QeMCN_4TFfQ")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=17.7, centerToFrontRatio=0.45, tireStiffnessFactor=0.469),
+    wmis={WMI.CHEVROLET.UNITED_STATES_CAR},
+    vehicle_code={"R"},
+    years={ModelYear.H_2017, ModelYear.J_2018},
   )
   CADILLAC_ATS = GMASCMPlatformConfig(
     [GMCarDocs("Cadillac ATS Premium Performance 2018")],
     GMCarSpecs(mass=1601, wheelbase=2.78, steerRatio=15.3),
+    wmis={WMI.CADILLAC.UNITED_STATES_CAR},
+    vehicle_code={"A"},
+    years={ModelYear.J_2018, ModelYear.K_2019},
   )
   CHEVROLET_MALIBU = GMASCMPlatformConfig(
     [GMCarDocs("Chevrolet Malibu Premier 2017")],
     GMCarSpecs(mass=1496, wheelbase=2.83, steerRatio=15.8, centerToFrontRatio=0.4),
+    wmis={WMI.CHEVROLET.UNITED_STATES_CAR},
+    vehicle_code={"Z"},
+    years={ModelYear.H_2017, ModelYear.J_2018},
   )
   GMC_ACADIA = GMASCMPlatformConfig(
     [GMCarDocs("GMC Acadia 2018", video="https://www.youtube.com/watch?v=0ZN6DdsBUZo")],
     GMCarSpecs(mass=1975, wheelbase=2.86, steerRatio=14.4, centerToFrontRatio=0.4),
+    wmis={WMI.GMC.UNITED_STATES_MPV},
+    has_body_style_code=True,
+    vehicle_code={"N"},
+    years={ModelYear.J_2018, ModelYear.K_2019},
   )
   BUICK_LACROSSE = GMASCMPlatformConfig(
     [GMCarDocs("Buick LaCrosse 2017-19", "Driver Confidence Package 2")],
     GMCarSpecs(mass=1712, wheelbase=2.91, steerRatio=15.8, centerToFrontRatio=0.4),
+    wmis={WMI.BUICK.UNITED_STATES_CAR},
+    vehicle_code={"Z"},
+    years={ModelYear.H_2017, ModelYear.J_2018, ModelYear.K_2019},
   )
   BUICK_REGAL = GMASCMPlatformConfig(
     [GMCarDocs("Buick Regal Essence 2018")],
     GMCarSpecs(mass=1714, wheelbase=2.83, steerRatio=14.4, centerToFrontRatio=0.4),
+    wmis={WMI.BUICK.GERMANY_CAR},
+    vehicle_code={"G"},
+    years={ModelYear.H_2017, ModelYear.J_2018},
   )
   CADILLAC_ESCALADE = GMASCMPlatformConfig(
     [GMCarDocs("Cadillac Escalade 2017", "Driver Assist Package")],
@@ -161,6 +215,9 @@ class CAR(Platforms):
       GMCarDocs("Chevrolet Bolt EV 2022-23", "2LT Trim with Adaptive Cruise Control Package"),
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
+    wmis={WMI.CHEVROLET.UNITED_STATES_CAR},
+    vehicle_code={"F"},
+    years={ModelYear.N_2022, ModelYear.P_2023},
   )
   CHEVROLET_SILVERADO = GMPlatformConfig(
     [
@@ -168,31 +225,77 @@ class CAR(Platforms):
       GMCarDocs("GMC Sierra 1500 2020-21", "Driver Alert Package II", video="https://youtu.be/5HbNoBLzRwE"),
     ],
     GMCarSpecs(mass=2450, wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
+    wmis={WMI.CHEVROLET.UNITED_STATES_TRUCK, WMI.CHEVROLET.MEXICO_TRUCK, WMI.GMC.UNITED_STATES_TRUCK, WMI.GMC.MEXICO_TRUCK},
+    has_body_style_code=True,
+    vehicle_code={"W", "Y", "8", "9"},
+    years={ModelYear.L_2020, ModelYear.M_2021},
   )
   CHEVROLET_EQUINOX = GMPlatformConfig(
     [GMCarDocs("Chevrolet Equinox 2019-22")],
     GMCarSpecs(mass=1588, wheelbase=2.72, steerRatio=14.4, centerToFrontRatio=0.4),
+    wmis={WMI.CHEVROLET.CANADA_MPV, WMI.CHEVROLET.MEXICO_MPV},
+    has_body_style_code=True,
+    vehicle_code={"X"},
+    years={ModelYear.K_2019, ModelYear.L_2020, ModelYear.M_2021, ModelYear.N_2022},
   )
   CHEVROLET_TRAILBLAZER = GMPlatformConfig(
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
     GMCarSpecs(mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
+    wmis={WMI.CHEVROLET.KOREA_MPV},
+    has_body_style_code=True,
+    vehicle_code={"M"},
+    years={ModelYear.M_2021, ModelYear.N_2022},
   )
   CADILLAC_XT4 = GMSDGMPlatformConfig(
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
     GMCarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
+    wmis={WMI.CADILLAC.UNITED_STATES_MPV},
+    vehicle_code={"Z"},
+    has_body_style_code=True,
+    years={ModelYear.P_2023},
   )
   CHEVROLET_VOLT_2019 = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
+    wmis={WMI.CHEVROLET.UNITED_STATES_CAR},
+    vehicle_code={"R"},
+    years={ModelYear.K_2019},
   )
   CHEVROLET_TRAVERSE = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Traverse 2022-23", "RS, Premier, or High Country Trim")],
     GMCarSpecs(mass=1955, wheelbase=3.07, steerRatio=17.9, centerToFrontRatio=0.4),
+    wmis={WMI.CHEVROLET.UNITED_STATES_MPV},
+    has_body_style_code=True,
+    vehicle_code={"R", "V"},
+    years={ModelYear.N_2022, ModelYear.P_2023},
   )
   GMC_YUKON = GMPlatformConfig(
     [GMCarDocs("GMC Yukon 2019-20", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=2490, wheelbase=2.94, steerRatio=17.3, centerToFrontRatio=0.5, tireStiffnessFactor=1.0),
+    wmis={WMI.GMC.UNITED_STATES_MPV},
+    has_body_style_code=True,
+    vehicle_code={"1", "2"},
+    years={ModelYear.K_2019, ModelYear.L_2020},
   )
+
+
+def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str]:
+  candidates = set()
+  # Check the WMI and chassis code to determine the platform
+  vin_obj = Vin(vin)
+  for platform in CAR:
+    # Some GM cars have a single-digit body style code preceding the two-digit vehicle code
+    if platform.config.has_body_style_code:
+      vehicle_code = vin_obj.vds[1:2]
+    else:
+      vehicle_code = vin_obj.vds[:1]
+    if (
+      vin_obj.wmi in platform.config.wmis and
+      vin_obj.model_year in platform.config.years and
+      vehicle_code in platform.config.vehicle_code
+    ):
+      candidates.add(platform)
+  return {str(c) for c in candidates}
 
 
 class CruiseButtons:
@@ -267,6 +370,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
     ),
   ]],
   extra_ecus=[(Ecu.fwdCamera, 0x24b, None)],
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 # TODO: detect most of these sets live
