@@ -440,7 +440,7 @@ class CAR(Platforms):
     [VWCarDocs("Audi Q3 2019-24")],
     VolkswagenCarSpecs(mass=1623, wheelbase=2.68),
     chassis_codes={"8U", "F3", "FS"},
-    wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR},
+    wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR, WMI.VOLKSWAGEN_CHINA_FAW},
   )
   PORSCHE_MACAN_MK1 = VolkswagenMLBPlatformConfig(
     [VWCarDocs("Porsche Macan 2017-24")],
