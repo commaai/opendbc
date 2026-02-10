@@ -15,8 +15,8 @@ test:
     # *** static analysis
     ruff:
       run: ruff check .
-    cython-lint:
-      run: cython-lint opendbc/
+    ty:
+      run: ty check
     codespell:
       run: codespell {files} -L tge,stdio -S *.dbc
       files: git ls-tree -r HEAD --name-only

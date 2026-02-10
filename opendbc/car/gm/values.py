@@ -142,6 +142,7 @@ class GMASCMPlatformConfig(GMPlatformConfig):
     # ASCM is supported, but due to a janky install and hardware configuration, we are not showing in the car docs
     self.car_docs = []
 
+
 @dataclass
 class GMSDGMPlatformConfig(GMPlatformConfig):
   def init(self):
@@ -211,7 +212,7 @@ class CAR(Platforms):
   )
   CHEVROLET_BOLT_EUV = GMPlatformConfig(
     [
-      GMCarDocs("Chevrolet Bolt EUV 2022-23", "Premier or Premier Redline Trim without Super Cruise Package", video="https://youtu.be/xvwzGMUA210"),
+      GMCarDocs("Chevrolet Bolt EUV 2022-23", "Premier or Premier Redline Trim, without Super Cruise Package", video="https://youtu.be/xvwzGMUA210"),
       GMCarDocs("Chevrolet Bolt EV 2022-23", "2LT Trim with Adaptive Cruise Control Package"),
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
@@ -306,11 +307,13 @@ class CruiseButtons:
   MAIN = 5
   CANCEL = 6
 
+
 class AccState:
   OFF = 0
   ACTIVE = 1
   FAULTED = 3
   STANDSTILL = 4
+
 
 class CanBus:
   POWERTRAIN = 0

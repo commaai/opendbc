@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -47,13 +48,19 @@ class CAR(Platforms):
       TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024-25"),
     ],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
+    {Bus.party: 'tesla_model3_party', Bus.radar: 'tesla_radar_continental_generated'},
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
     [
       TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-23"),
-      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024"),
-     ],
+      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024-25"),
+    ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
+    {Bus.party: 'tesla_model3_party', Bus.radar: 'tesla_radar_continental_generated'},
+  )
+  TESLA_MODEL_X = TeslaPlatformConfig(
+    [TeslaCarDocsHW4("Tesla Model X (with HW4) 2024")],
+    CarSpecs(mass=2495., wheelbase=2.960, steerRatio=12.0),
   )
 
 
@@ -66,6 +73,14 @@ FW_QUERY_CONFIG = FwQueryConfig(
     )
   ]
 )
+
+# Cars with this EPS FW have FSD 14 and use TeslaFlags.FSD_14
+FSD_14_FW = {
+  CAR.TESLA_MODEL_Y: [
+    b'TeMYG4_Legacy3Y_0.0.0 (6),Y4003.04.0',
+    b'TeMYG4_Main_0.0.0 (77),Y4003.05.4',
+  ]
+}
 
 
 class CANBUS:
@@ -84,6 +99,10 @@ GEAR_MAP = {
 }
 
 
+# Add extra tolerance for average banked road since safety doesn't have the roll
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
+
+
 class CarControllerParams:
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     # EPAS faults above this angle
@@ -91,6 +110,14 @@ class CarControllerParams:
     # Tesla uses a vehicle model instead, check carcontroller.py for details
     ([], []),
     ([], []),
+
+    # Vehicle model angle limits
+    # Add extra tolerance for average banked road since safety doesn't have the roll
+    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
+    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^3
+
+    # limit angle rate to both prevent a fault and for low speed comfort (~12 mph rate down to 0 mph)
+    MAX_ANGLE_RATE=5,  # deg/20ms frame, EPS faults at 12 at a standstill
   )
 
   STEER_STEP = 2  # Angle command is sent at 50 Hz
@@ -102,10 +129,13 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
+  FSD_14 = 2
 
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
+  FSD_14 = 2
+  MISSING_DAS_SETTINGS = 4
 
 
 DBC = CAR.create_dbc_map()

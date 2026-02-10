@@ -2,7 +2,7 @@ def create_steering_control(packer, bus, apply_torque, lkas_enabled):
   values = {
     "LM_Offset": abs(apply_torque),
     "LM_OffSign": 1 if apply_torque < 0 else 0,
-    "HCA_Status": 5 if (lkas_enabled and apply_torque != 0) else 3,
+    "HCA_Status": 7 if (lkas_enabled and apply_torque != 0) else 3,
     "Vib_Freq": 16,
   }
 
@@ -21,6 +21,7 @@ def create_lka_hud_control(packer, bus, ldw_stock_values, lat_active, steering_p
     ]}
 
   values.update({
+    "LDW_Kameratyp": 1,
     "LDW_Lampe_gelb": 1 if lat_active and steering_pressed else 0,
     "LDW_Lampe_gruen": 1 if lat_active and not steering_pressed else 0,
     "LDW_Lernmodus_links": 3 if hud_control.leftLaneDepart else 1 + hud_control.leftLaneVisible,

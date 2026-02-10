@@ -13,7 +13,6 @@ ROOT = os.path.join(HERE, "../../../../")
 IGNORED_PATHS = (
   'opendbc/safety/main.c',
   'opendbc/safety/tests/',
-  'opendbc/safety/board/',
 )
 
 mutations = [
@@ -43,11 +42,12 @@ for p in patterns:
 
 mutations = random.sample(mutations, 2)  # can remove this once cppcheck is faster
 
+
 @pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
 def test_misra_mutation(fn, rule, transform, should_fail):
   with tempfile.TemporaryDirectory() as tmp:
     shutil.copytree(ROOT, tmp, dirs_exist_ok=True,
-                    ignore=shutil.ignore_patterns('.venv', 'cppcheck', '.git', '*.ctu-info'))
+                    ignore=shutil.ignore_patterns('.venv', 'cppcheck', '.git', '*.ctu-info', '.hypothesis'))
 
     # apply patch
     if fn is not None:
