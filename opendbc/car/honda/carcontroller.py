@@ -153,10 +153,9 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.
-    send_lkas = CC.latActive
-    if CS.out.vEgo <= self.CP.minSteerSpeed and self.CP.carFingerprint in (HONDA_LKAS_MINSPEED_CUTOFF):
-      send_lkas = False
-    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, send_lkas, self.tja_control))
+    lkas_active = CC.latActive and CS.out.vEgo >= self.CP.minSteerSpeed
+
+    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, lkas_active, self.tja_control))
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
