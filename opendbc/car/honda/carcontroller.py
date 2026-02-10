@@ -154,7 +154,6 @@ class CarController(CarControllerBase):
 
     # Send steering command.
     lkas_active = CC.latActive and CS.out.vEgo >= self.CP.minSteerSpeed
-
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, lkas_active, self.tja_control))
 
     # wind brake from air resistance decel at high speed
