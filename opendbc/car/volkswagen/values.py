@@ -162,6 +162,7 @@ class WMI(StrEnum):
   VOLKSWAGEN_MEXICO_CAR = "3VW"
   VOLKSWAGEN_ARGENTINA = "8AW"
   VOLKSWAGEN_BRASIL = "9BW"
+  VOLKSWAGEN_CHINA_FAW = "LFV"
   SAIC_VOLKSWAGEN = "LSV"
   SKODA = "TMB"
   SEAT = "VSS"
@@ -427,19 +428,19 @@ class CAR(Platforms):
     ],
     VolkswagenCarSpecs(mass=1335, wheelbase=2.61),
     chassis_codes={"8V", "FF"},
-    wmis={WMI.AUDI_GERMANY_CAR, WMI.AUDI_SPORT},
+    wmis={WMI.AUDI_GERMANY_CAR, WMI.AUDI_SPORT, WMI.VOLKSWAGEN_CHINA_FAW},
   )
   AUDI_Q2_MK1 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Audi Q2 2018")],
     VolkswagenCarSpecs(mass=1205, wheelbase=2.61),
     chassis_codes={"GA"},
-    wmis={WMI.AUDI_GERMANY_CAR},
+    wmis={WMI.AUDI_GERMANY_CAR, WMI.VOLKSWAGEN_CHINA_FAW},
   )
   AUDI_Q3_MK2 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Audi Q3 2019-24")],
     VolkswagenCarSpecs(mass=1623, wheelbase=2.68),
     chassis_codes={"8U", "F3", "FS"},
-    wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR},
+    wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR, WMI.VOLKSWAGEN_CHINA_FAW},
   )
   PORSCHE_MACAN_MK1 = VolkswagenMLBPlatformConfig(
     [VWCarDocs("Porsche Macan 2017-24")],
