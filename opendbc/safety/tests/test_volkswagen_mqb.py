@@ -26,12 +26,12 @@ MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02), 2: (MSG_LH_EPS_03,)}
 
-  MAX_RATE_UP = 4
+  MAX_RATE_UP = 10
   MAX_RATE_DOWN = 10
   MAX_TORQUE_LOOKUP = [0], [300]
-  MAX_RT_DELTA = 75
+  MAX_RT_DELTA = 188
 
-  DRIVER_TORQUE_ALLOWANCE = 80
+  DRIVER_TORQUE_ALLOWANCE = 60
   DRIVER_TORQUE_FACTOR = 3
 
   # Wheel speeds _esp_19_msg
