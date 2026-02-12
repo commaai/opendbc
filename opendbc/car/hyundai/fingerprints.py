@@ -1235,9 +1235,6 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00YG__ SCC FNCUP      1.01 1.01 96400-F6000         ',
     ],
-    (Ecu.eps, 0x7d4, None): [
-      b'\xf1\x00YG  MDPS C 1.01 1.00 56310F6350\x00 4YG7C100',
-    ],
   },
   CAR.KIA_K8_HEV_1ST_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
