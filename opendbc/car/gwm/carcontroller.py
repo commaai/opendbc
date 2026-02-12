@@ -59,14 +59,15 @@ class CarController(CarControllerBase):
       if not lat_active:
         apply_steer = 0
       if not Params().get_bool("AleSato_DebugButton1"):
-        apply_steer = CS.camera_stock_values["TORQUE_CMD"]
-      can_sends.append(gwmcan.create_steer_command(
-        self.packer,
-        self.CAN,
-        camera_stock_values=CS.camera_stock_values,
-        steer=apply_steer,
-        steer_req=lat_active,
-      ))
+        can_sends.append(gwmcan.bypass_steer_command(self.packer, self.CAN, camera_stock_values=CS.camera_stock_values,))
+      else:
+        can_sends.append(gwmcan.create_steer_command(
+          self.packer,
+          self.CAN,
+          camera_stock_values=CS.camera_stock_values,
+          steer=apply_steer,
+          steer_req=lat_active,
+        ))
 
     new_actuators = actuators.as_builder()
     self.frame += 1

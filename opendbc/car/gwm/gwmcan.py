@@ -66,6 +66,22 @@ def create_eps_update(packer, CAN: CanBus, eps_stock_values, ea_simulated_torque
   return packer.make_can_msg("RX_STEER_RELATED", CAN.camera, values)
 
 
+def bypass_steer_command(packer, CAN: CanBus, camera_stock_values):
+  values = {s: camera_stock_values[s] for s in [
+    "STEER_REQUEST",
+    "SET_ME_X01",
+    "TORQUE_CMD",
+    "TORQUE_REFLECTED",
+    "INVERT_DIRECTION",
+    "COUNTER",
+    "BYPASS_ME",
+    "BASIC_CHECKSUM",
+    "CRC_X9B",
+  ]}
+
+  return packer.make_can_msg("STEER_CMD", CAN.main, values)
+
+
 def gwm_checksum(address: int, sig, d: bytearray) -> int:
   crc = 0x00
   poly = 0x1D
