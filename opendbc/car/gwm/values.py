@@ -10,7 +10,7 @@ Ecu = CarParams.Ecu
 
 
 class CarControllerParams:
-  STEER_STEP = 1
+  STEER_STEP = 2
   STEER_MAX = 200
 
   # TO-DO Cleanup this later
@@ -25,8 +25,8 @@ class CarControllerParams:
   def __init__(self, CP: CarParams):
     self.ACCEL_MAX = 1
     self.ACCEL_MIN = -3.5
-    self.STEER_DELTA_UP = 3.25
-    self.STEER_DELTA_DOWN = 5.0
+    self.STEER_DELTA_UP = 6
+    self.STEER_DELTA_DOWN = 10
 
 
 @dataclass

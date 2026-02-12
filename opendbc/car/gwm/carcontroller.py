@@ -9,7 +9,7 @@ from openpilot.common.params import Params
 # DEBUG
 
 MAX_USER_TORQUE = 100  # 1.0 Nm
-EPS_MAX_TORQUE = 120
+EPS_MAX_TORQUE = 200
 HELLO = 20
 
 
@@ -59,15 +59,15 @@ class CarController(CarControllerBase):
       if not lat_active:
         apply_steer = 0
       if not Params().get_bool("AleSato_DebugButton1"):
-        can_sends.append(gwmcan.bypass_steer_command(self.packer, self.CAN, camera_stock_values=CS.camera_stock_values,))
-      else:
-        can_sends.append(gwmcan.create_steer_command(
-          self.packer,
-          self.CAN,
-          camera_stock_values=CS.camera_stock_values,
-          steer=apply_steer,
-          steer_req=lat_active,
-        ))
+        apply_steer = CS.camera_stock_values["TORQUE_CMD"]
+        lat_active = CS.camera_stock_values["STEER_REQUEST"]
+      can_sends.append(gwmcan.create_steer_command(
+        self.packer,
+        self.CAN,
+        camera_stock_values=CS.camera_stock_values,
+        steer=apply_steer,
+        steer_req=lat_active,
+      ))
 
     new_actuators = actuators.as_builder()
     self.frame += 1
