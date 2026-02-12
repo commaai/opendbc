@@ -136,7 +136,7 @@ static safety_config gwm_init(uint16_t param) {
     // {GWM_LANE_KEEP_ASSIST, GWM_MAIN_BUS, 8, .check_relay = false}, // EPS steering
     // {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = true}, // EPS steering
     {GWM_RX_STEER_RELATED, GWM_CAMERA_BUS, 64, .check_relay = true}, // EPS steering feedback to camera
-    {STEER_CMD, GWM_MAIN_BUS, 64, .check_relay = true}, // Steering command
+    // {STEER_CMD, GWM_MAIN_BUS, 64, .check_relay = true}, // Steering command
   };
 
   static RxCheck psa_rx_checks[] = {
