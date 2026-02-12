@@ -78,7 +78,6 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
     if ((uint32_t)msg->addr == (uint32_t)GWM_STEERING_AND_CRUISE) {
       int angle_meas_new = (((msg->data[1] & 0x3FU) << 7) | (msg->data[2] & 0xFEU)); // STEERING_ANGLE
       update_sample(&angle_meas, angle_meas_new);
-      pcm_cruise_check((msg->data[5] >> 7) & 1U); // AP_ENABLE_COMMAND
     }
     if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
       uint32_t fl = (((uint16_t)msg->data[1] << 8) | msg->data[2]) & 0x1FFFU;
@@ -91,6 +90,12 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
     }
     if ((uint32_t)msg->addr == (uint32_t)GWM_BRAKE) {
       brake_pressed = ((msg->data[25] << 8) | (msg->data[26] & 0xF8U)) > 0U; // BRAKE_PRESSURE
+    }
+  }
+
+  if (msg->bus == 2U) {
+    if (msg->addr == 0x23DU) {
+      pcm_cruise_check((msg->data[17] >> 3) & 7U);
     }
   }
 }

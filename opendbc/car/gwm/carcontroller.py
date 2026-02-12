@@ -5,7 +5,7 @@ from opendbc.car.gwm import gwmcan
 from opendbc.car.gwm.values import CarControllerParams
 import numpy as np
 # DEBUG
-# from openpilot.common.params import Params
+from openpilot.common.params import Params
 # DEBUG
 
 MAX_USER_TORQUE = 100  # 1.0 Nm
@@ -30,7 +30,7 @@ class CarController(CarControllerBase):
 
     # Try to satisfy steer nudge requests
     # DEBUG
-    # self.fake_torque = Params().get_bool("AleSato_DebugButton2")
+    self.fake_torque = Params().get_bool("AleSato_DebugButton2")
     # DEBUG
 
     # can_sends.append(gwmcan.create_steer_and_ap_stalk(
@@ -58,6 +58,8 @@ class CarController(CarControllerBase):
       apply_steer = np.clip(new_torque, -EPS_MAX_TORQUE, EPS_MAX_TORQUE)
       if not lat_active:
         apply_steer = 0
+      if not Params().get_bool("AleSato_DebugButton1"):
+        apply_steer = CS.camera_stock_values["TORQUE_CMD"]
       can_sends.append(gwmcan.create_steer_command(
         self.packer,
         self.CAN,

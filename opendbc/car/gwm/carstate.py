@@ -3,7 +3,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.gwm.values import DBC
 # DEBUG
-# from openpilot.common.params import Params
+from openpilot.common.params import Params
 # DEBUG
 import copy
 
@@ -61,6 +61,9 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT"]["SEAT_BELT_DRIVER_STATE"])
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["LIGHTS"]["LEFT_TURN_SIGNAL"],
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
+
+    ret.cruiseState.available = bool(cp.vl["ACC_CMD"]["CRUISE_STATE"] > 0)
+    ret.cruiseState.enabled = bool(cp.vl["ACC_CMD"]["CRUISE_STATE"] == 5) and Params().get_bool("AleSato_DebugButton1")
     # DEBUG
     # ret.cruiseState.available = ret.cruiseState.enabled = Params().get_bool("AleSato_DebugButton1")
     # DEBUG
