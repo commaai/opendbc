@@ -6,8 +6,9 @@ from opendbc.car.subaru.values import SubaruSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerSafety
 from functools import partial
+
 
 class SubaruMsg(enum.IntEnum):
   Brake_Status      = 0x13c
@@ -24,9 +25,9 @@ class SubaruMsg(enum.IntEnum):
   ES_LKAS_State     = 0x322
   ES_Infotainment   = 0x323
   ES_UDS_Request    = 0x787
-  ES_HighBeamAssist = 0x121
-  ES_STATIC_1       = 0x22a
-  ES_STATIC_2       = 0x325
+  ES_HighBeamAssist = 0x22A
+  ES_STATIC_1       = 0x325
+  ES_STATIC_2       = 0x121
 
 
 SUBARU_MAIN_BUS = 0
@@ -41,9 +42,11 @@ def lkas_tx_msgs(alt_bus, lkas_msg=SubaruMsg.ES_LKAS):
           [SubaruMsg.ES_LKAS_State,     SUBARU_MAIN_BUS],
           [SubaruMsg.ES_Infotainment,   SUBARU_MAIN_BUS]]
 
+
 def long_tx_msgs(alt_bus):
   return [[SubaruMsg.ES_Brake,          alt_bus],
           [SubaruMsg.ES_Status,         alt_bus]]
+
 
 def gen2_long_additional_tx_msgs():
   return [[SubaruMsg.ES_UDS_Request,    SUBARU_CAM_BUS],
@@ -51,16 +54,18 @@ def gen2_long_additional_tx_msgs():
           [SubaruMsg.ES_STATIC_1,       SUBARU_MAIN_BUS],
           [SubaruMsg.ES_STATIC_2,       SUBARU_MAIN_BUS]]
 
+
 def fwd_blacklisted_addr(lkas_msg=SubaruMsg.ES_LKAS):
   return {SUBARU_CAM_BUS: [lkas_msg, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State, SubaruMsg.ES_Infotainment]}
 
-class TestSubaruSafetyBase(common.PandaCarSafetyTest):
+
+class TestSubaruSafetyBase(common.CarSafetyTest):
   FLAGS = 0
-  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS,)}
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                                               SubaruMsg.ES_Infotainment)}
   FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr()
 
   MAX_RT_DELTA = 940
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 60
   DRIVER_TORQUE_FACTOR = 50
@@ -73,7 +78,7 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
   INACTIVE_GAS = 1818
 
   def setUp(self):
-    self.packer = CANPackerPanda("subaru_global_2017_generated")
+    self.packer = CANPackerSafety("subaru_global_2017_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.subaru, self.FLAGS)
     self.safety.init_tests()
@@ -84,33 +89,29 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
 
   def _torque_driver_msg(self, torque):
     values = {"Steer_Torque_Sensor": torque}
-    return self.packer.make_can_msg_panda("Steering_Torque", 0, values)
+    return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
   def _speed_msg(self, speed):
     values = {s: speed for s in ["FR", "FL", "RR", "RL"]}
-    return self.packer.make_can_msg_panda("Wheel_Speeds", self.ALT_MAIN_BUS, values)
-
-  def _angle_meas_msg(self, angle):
-    values = {"Steering_Angle": angle}
-    return self.packer.make_can_msg_panda("Steering_Torque", 0, values)
+    return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
 
   def _user_brake_msg(self, brake):
     values = {"Brake": brake}
-    return self.packer.make_can_msg_panda("Brake_Status", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("Brake_Status", self.ALT_MAIN_BUS, values)
 
   def _user_gas_msg(self, gas):
     values = {"Throttle_Pedal": gas}
-    return self.packer.make_can_msg_panda("Throttle", 0, values)
+    return self.packer.make_can_msg_safety("Throttle", 0, values)
 
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_panda("CruiseControl", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
     values = {"Cruise_Cancel": cancel, "Cruise_Throttle": cruise_throttle}
-    return self.packer.make_can_msg_panda("ES_Distance", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Distance", self.ALT_MAIN_BUS, values)
 
   def test_cancel_message(self):
     # test that we can only send the cancel message (ES_Distance) with inactive throttle (1818) and Cruise_Cancel=1
@@ -141,30 +142,30 @@ class TestSubaruLongitudinalSafetyBase(TestSubaruSafetyBase, common.Longitudinal
 
   def _send_brake_msg(self, brake):
     values = {"Brake_Pressure": brake}
-    return self.packer.make_can_msg_panda("ES_Brake", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Brake", self.ALT_MAIN_BUS, values)
 
   def _send_gas_msg(self, gas):
     values = {"Cruise_Throttle": gas}
-    return self.packer.make_can_msg_panda("ES_Distance", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Distance", self.ALT_MAIN_BUS, values)
 
   def _send_rpm_msg(self, rpm):
     values = {"Cruise_RPM": rpm}
-    return self.packer.make_can_msg_panda("ES_Status", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Status", self.ALT_MAIN_BUS, values)
 
 
 class TestSubaruTorqueSafetyBase(TestSubaruSafetyBase, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
   MAX_RATE_UP = 50
   MAX_RATE_DOWN = 70
-  MAX_TORQUE = 2047
+  MAX_TORQUE_LOOKUP = [0], [2047]
 
   # Safety around steering req bit
   MIN_VALID_STEERING_FRAMES = 7
   MAX_INVALID_STEERING_FRAMES = 1
-  MIN_VALID_STEERING_RT_INTERVAL = 144000
+  STEER_STEP = 2
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"LKAS_Output": torque, "LKAS_Request": steer_req}
-    return self.packer.make_can_msg_panda("ES_LKAS", SUBARU_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_LKAS", SUBARU_MAIN_BUS, values)
 
 
 class TestSubaruGen1TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
@@ -178,7 +179,7 @@ class TestSubaruGen2TorqueSafetyBase(TestSubaruTorqueSafetyBase):
 
   MAX_RATE_UP = 40
   MAX_RATE_DOWN = 40
-  MAX_TORQUE = 1000
+  MAX_TORQUE_LOOKUP = [0], [1000]
 
 
 class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
@@ -189,11 +190,19 @@ class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSaf
 class TestSubaruGen1LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
   FLAGS = SubaruSafetyFlags.LONG
   TX_MSGS = lkas_tx_msgs(SUBARU_MAIN_BUS) + long_tx_msgs(SUBARU_MAIN_BUS)
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                                               SubaruMsg.ES_Infotainment, SubaruMsg.ES_Brake, SubaruMsg.ES_Status,
+                                               SubaruMsg.ES_Distance)}
 
 
 class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
   FLAGS = SubaruSafetyFlags.LONG | SubaruSafetyFlags.GEN2
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS) + long_tx_msgs(SUBARU_ALT_BUS) + gen2_long_additional_tx_msgs()
+  FWD_BLACKLISTED_ADDRS = {2: [SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                               SubaruMsg.ES_Infotainment]}
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                                               SubaruMsg.ES_Infotainment),
+                             SUBARU_ALT_BUS: (SubaruMsg.ES_Brake, SubaruMsg.ES_Status, SubaruMsg.ES_Distance)}
 
   def _rdbi_msg(self, did: int):
     return b'\x03\x22' + did.to_bytes(2) + b'\x00\x00\x00\x00'

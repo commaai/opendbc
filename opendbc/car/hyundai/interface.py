@@ -1,4 +1,4 @@
-from opendbc.car import Bus, get_safety_config, structs
+from opendbc.car import Bus, get_safety_config, structs, uds
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, \
                                                    CANFD_UNSUPPORTED_LONGITUDINAL_CAR, \
@@ -6,6 +6,9 @@ from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, \
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
+from opendbc.car.hyundai.carcontroller import CarController
+from opendbc.car.hyundai.carstate import CarState
+from opendbc.car.hyundai.radar_interface import RadarInterface
 
 ButtonType = structs.CarState.ButtonEvent.Type
 Ecu = structs.CarParams.Ecu
@@ -15,24 +18,35 @@ ENABLE_BUTTONS = (ButtonType.accelCruise, ButtonType.decelCruise, ButtonType.can
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
+  RadarInterface = RadarInterface
+
+  DRIVABLE_GEARS = (structs.CarState.GearShifter.sport, structs.CarState.GearShifter.manumatic)
+
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "hyundai"
 
+    # "LKA steering" if LKAS or LKAS_ALT messages are seen coming from the camera.
+    # Generally means our LKAS message is forwarded to another ECU (commonly ADAS ECU)
+    # that finally retransmits our steering command in LFA or LFA_ALT to the MDPS.
+    # "LFA steering" if camera directly sends LFA to the MDPS
     cam_can = CanBus(None, fingerprint).CAM
     lka_steering = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
     CAN = CanBus(None, fingerprint, lka_steering)
 
     if ret.flags & HyundaiFlags.CANFD:
       # Shared configuration for CAN-FD cars
-      ret.experimentalLongitudinalAvailable = candidate not in CANFD_UNSUPPORTED_LONGITUDINAL_CAR
+      ret.alphaLongitudinalAvailable = candidate not in CANFD_UNSUPPORTED_LONGITUDINAL_CAR
       if lka_steering and Ecu.adas not in [fw.ecu for fw in car_fw]:
         # this needs to be figured out for cars without an ADAS ECU
-        ret.experimentalLongitudinalAvailable = False
+        ret.alphaLongitudinalAvailable = False
 
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
-      if 0x105 in fingerprint[CAN.ECAN]:
+      # Check if the car is hybrid. Only HEV/PHEV cars have 0xFA on E-CAN.
+      if 0xFA in fingerprint[CAN.ECAN]:
         ret.flags |= HyundaiFlags.HYBRID.value
 
       if lka_steering:
@@ -71,7 +85,7 @@ class CarInterface(CarInterfaceBase):
 
     else:
       # Shared configuration for non CAN-FD cars
-      ret.experimentalLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
+      ret.alphaLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
       ret.enableBsm = 0x58b in fingerprint[0]
 
       # Send LFA message on cars with HDA
@@ -114,7 +128,7 @@ class CarInterface(CarInterfaceBase):
     # Common longitudinal control setup
 
     ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[ret.carFingerprint]
-    ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
+    ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     ret.startingState = True
     ret.vEgoStarting = 0.1
@@ -137,18 +151,28 @@ class CarInterface(CarInterfaceBase):
 
     # Dashcam cars are missing a test route, or otherwise need validation
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
-    ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, }
+    if candidate in (CAR.KIA_OPTIMA_H,):
+      ret.dashcamOnly = True
 
     return ret
 
   @staticmethod
-  def init(CP, can_recv, can_send):
+  def init(CP, can_recv, can_send, communication_control=None):
+    # 0x80 silences response
+    if communication_control is None:
+      communication_control = bytes([uds.SERVICE_TYPE.COMMUNICATION_CONTROL, 0x80 | uds.CONTROL_TYPE.DISABLE_RX_DISABLE_TX, uds.MESSAGE_TYPE.NORMAL])
+
     if CP.openpilotLongitudinalControl and not (CP.flags & (HyundaiFlags.CANFD_CAMERA_SCC | HyundaiFlags.CAMERA_SCC)):
       addr, bus = 0x7d0, CanBus(CP).ECAN if CP.flags & HyundaiFlags.CANFD else 0
       if CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value:
         addr, bus = 0x730, CanBus(CP).ECAN
-      disable_ecu(can_recv, can_send, bus=bus, addr=addr, com_cont_req=b'\x28\x83\x01')
+      disable_ecu(can_recv, can_send, bus=bus, addr=addr, com_cont_req=communication_control)
 
     # for blinkers
     if CP.flags & HyundaiFlags.ENABLE_BLINKERS:
-      disable_ecu(can_recv, can_send, bus=CanBus(CP).ECAN, addr=0x7B1, com_cont_req=b'\x28\x83\x01')
+      disable_ecu(can_recv, can_send, bus=CanBus(CP).ECAN, addr=0x7B1, com_cont_req=communication_control)
+
+  @staticmethod
+  def deinit(CP, can_recv, can_send):
+    communication_control = bytes([uds.SERVICE_TYPE.COMMUNICATION_CONTROL, 0x80 | uds.CONTROL_TYPE.ENABLE_RX_ENABLE_TX, uds.MESSAGE_TYPE.NORMAL])
+    CarInterface.init(CP, can_recv, can_send, communication_control)

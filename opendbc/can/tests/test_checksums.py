@@ -1,6 +1,5 @@
 import copy
-from opendbc.can.parser import CANParser
-from opendbc.can.packer import CANPacker
+from opendbc.can import CANPacker, CANParser
 
 
 class TestCanChecksums:
@@ -16,14 +15,14 @@ class TestCanChecksums:
 
     for data in test_messages:
       expected_msg = (msg_addr, data, 0)
-      parser.update_strings([0, [expected_msg]])
+      parser.update([0, [expected_msg]])
       expected = copy.deepcopy(parser.vl[msg_name])
 
       modified = copy.deepcopy(expected)
       modified.pop(checksum_field, None)
       modified_msg = packer.make_can_msg(msg_name, 0, modified)
 
-      parser.update_strings([0, [modified_msg]])
+      parser.update([0, [modified_msg]])
       tested = parser.vl[msg_name]
       with subtests.test(counter=expected[counter_field]):
         assert tested[checksum_field] == expected[checksum_field]
@@ -64,13 +63,14 @@ class TestCanChecksums:
   def test_honda_checksum(self):
     """Test checksums for Honda standard and extended CAN ids"""
     # TODO: refactor to use self.verify_checksum()
-    dbc_file = "honda_accord_2018_can_generated"
+    dbc_file = "honda_civic_hatchback_ex_2017_can_generated"
     msgs = [("LKAS_HUD", 0), ("LKAS_HUD_A", 0)]
     parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     values = {
-      'SET_ME_X41': 0x41,
+      'LKAS_READY': 1,
+      'LKAS_STATE_CHANGE': 1,
       'STEERING_REQUIRED': 1,
       'SOLID_LANES': 1,
       'BEEP': 0,
@@ -85,7 +85,7 @@ class TestCanChecksums:
         packer.make_can_msg("LKAS_HUD", 0, values),
         packer.make_can_msg("LKAS_HUD_A", 0, values),
       ]
-      parser.update_strings([0, msgs])
+      parser.update([0, msgs])
 
       assert parser.vl['LKAS_HUD']['CHECKSUM'] == std
       assert parser.vl['LKAS_HUD_A']['CHECKSUM'] == ext
@@ -93,7 +93,7 @@ class TestCanChecksums:
   def verify_volkswagen_mqb_crc(self, subtests, msg_name: str, msg_addr: int, test_messages: list[bytes], counter_field: str = 'COUNTER'):
     """Test AUTOSAR E2E Profile 2 CRCs"""
     assert len(test_messages) == 16  # All counter values must be tested
-    self.verify_checksum(subtests, "vw_mqb_2010", msg_name, msg_addr, test_messages, counter_field=counter_field)
+    self.verify_checksum(subtests, "vw_mqb", msg_name, msg_addr, test_messages, counter_field=counter_field)
 
   def test_volkswagen_mqb_crc_lwi_01(self, subtests):
     self.verify_volkswagen_mqb_crc(subtests, "LWI_01", 0x86, [

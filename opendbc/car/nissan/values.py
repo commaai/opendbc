@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
-from enum import IntFlag
+from enum import Enum, IntFlag
 
-from opendbc.car import AngleSteeringLimits, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
+from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -29,10 +30,17 @@ class NissanSafetyFlags(IntFlag):
   ALT_EPS_BUS = 1
 
 
+class Footnote(Enum):
+  SETUP = CarFootnote(
+    "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/nissan\" target=\"_blank\">Nissan</a>.",
+    Column.MAKE, setup_note=True)
+
+
 @dataclass
 class NissanCarDocs(CarDocs):
   package: str = "ProPILOT Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.nissan_a]))
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.SETUP])
 
 
 @dataclass(frozen=True)
@@ -52,7 +60,7 @@ class CAR(Platforms):
     NissanCarSpecs(mass=1610, wheelbase=2.705)
   )
   NISSAN_LEAF = NissanPlatformConfig(
-    [NissanCarDocs("Nissan Leaf 2018-23", video_link="https://youtu.be/vaMbtAh_0cY")],
+    [NissanCarDocs("Nissan Leaf 2018-23", video="https://youtu.be/vaMbtAh_0cY")],
     NissanCarSpecs(mass=1610, wheelbase=2.705),
     {Bus.pt: 'nissan_leaf_2018_generated'},
   )
@@ -64,7 +72,7 @@ class CAR(Platforms):
     NissanCarSpecs(mass=1610, wheelbase=2.705)
   )
   NISSAN_ALTIMA = NissanPlatformConfig(
-    [NissanCarDocs("Nissan Altima 2019-20", car_parts=CarParts.common([CarHarness.nissan_b]))],
+    [NissanCarDocs("Nissan Altima 2019-20, 2024", car_parts=CarParts.common([CarHarness.nissan_b]))],
     NissanCarSpecs(mass=1492, wheelbase=2.824)
   )
 

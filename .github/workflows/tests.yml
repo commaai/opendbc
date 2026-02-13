@@ -17,89 +17,134 @@ jobs:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
-    - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
+    - uses: ./.github/workflows/cache
+      id: cache
+    - uses: commaai/timeout@v1
+      with:
+        timeout: ${{ github.repository == 'commaai/opendbc' && (steps.cache.outputs.cache-hit == 'true' && '60' || '90') || '999' }}
     - run: ./test.sh
 
   safety_tests:
     name: safety
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        flags: ['', '--ubsan']
     steps:
     - uses: commaai/timeout@v1
+      with:
+        timeout: ${{ github.repository == 'commaai/opendbc' && '60' || '999' }}
     - uses: actions/checkout@v4
+    - uses: ./.github/workflows/cache
     - name: Run safety tests
-      run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
-
-  misra_linter:
-    name: MISRA C:2012 Linter
-    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-    timeout-minutes: 20
-    steps:
-      - name: Set up
-        run: sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - uses: actions/checkout@v4
-      - name: Restore cached cppcheck
-        uses: actions/cache@v4
-        with:
-          path: opendbc/safety/tests/misra/cppcheck/
-          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
-          restore-keys: |
-            cppcheck-cache-${{ runner.os }}-${{ github.ref }}
-            cppcheck-cache-${{ runner.os }}-
-      - name: Run MISRA C:2012 analysis
-        timeout-minutes: ${{ ((steps.restore-scons-cache.outputs.cache-hit == 'true') && 1 || 2) }}
-        run: cd opendbc/safety/tests/misra && ./test_misra.sh
-      - name: Save cppcheck cache
-        uses: actions/cache@v4
-        with:
-          path: opendbc/safety/tests/misra/cppcheck/
-          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
-
-  misra_mutation:
-    name: MISRA C:2012 Mutation
-    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-    timeout-minutes: 20
-    steps:
-      - name: Set up
-        run: sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - uses: actions/checkout@v4
-      - name: Restore cached cppcheck
-        uses: actions/cache@v4
-        with:
-          path: opendbc/safety/tests/misra/cppcheck/
-          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
-          restore-keys: |
-            cppcheck-cache-${{ runner.os }}-${{ github.ref }}
-            cppcheck-cache-${{ runner.os }}-
-      - name: MISRA mutation tests
-        timeout-minutes: 1
-        run: |
-          source setup.sh
-          scons -j8
-          cd opendbc/safety/tests/misra
-          ./install.sh  # cppcheck
-          pytest -s -n8 --randomly-seed $RANDOM test_mutation.py
-      - name: Save cppcheck cache
-        uses: actions/cache@v4
-        with:
-          path: opendbc/safety/tests/misra/cppcheck/
-          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
+      run: ./opendbc/safety/tests/test.sh
 
   mutation:
     name: Safety mutation tests
-    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-    timeout-minutes: 20
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+    env:
+      GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # need master to get diff
+      - uses: ./.github/workflows/cache
       - name: Run mutation tests
-        timeout-minutes: 5
         run: |
           source setup.sh
           scons -j8
-          GIT_REF=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.event.before || 'origin/master' }} cd opendbc/safety/tests && ./mutation.sh
+          cd opendbc/safety/tests && ./mutation.sh
+
+  car_diff:
+    name: car diff
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    env:
+      GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: ./.github/workflows/cache
+    - name: Build opendbc
+      run: |
+        source setup.sh
+        scons -j8
+    - name: Test car diff
+      if: github.event_name == 'pull_request'
+      run: source setup.sh && python opendbc/car/tests/car_diff.py | tee diff.txt
+    - name: Upload diff
+      if: always() && github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: car_diff_${{ github.event.number }}
+        path: diff.txt
+    - name: Update refs
+      if: github.repository == 'commaai/opendbc' && github.ref == 'refs/heads/master'
+      run: source setup.sh && python opendbc/car/tests/car_diff.py --update-refs
+    - name: Checkout ci-artifacts
+      if: github.repository == 'commaai/opendbc' && github.ref == 'refs/heads/master'
+      uses: actions/checkout@v4
+      with:
+        repository: commaai/ci-artifacts
+        ssh-key: ${{ secrets.CI_ARTIFACTS_DEPLOY_KEY }}
+        path: ${{ github.workspace }}/ci-artifacts
+    - name: Push refs
+      if: github.repository == 'commaai/opendbc' && github.ref == 'refs/heads/master'
+      working-directory: ${{ github.workspace }}/ci-artifacts
+      run: |
+        ls ${{ github.workspace }}/car_diff/*.zst 2>/dev/null || exit 0
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+        git fetch origin car_diff || true
+        git checkout car_diff 2>/dev/null || git checkout --orphan car_diff
+        cp ${{ github.workspace }}/car_diff/*.zst .
+        git add *.zst
+        git commit -m "car_diff refs for ${{ github.sha }}" || echo "No changes to commit"
+        git push origin car_diff
+
+  # TODO: this needs to move to opendbc
+  test_models:
+    name: test models
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        job: [0, 1, 2, 3]
+    env:
+      BASE_IMAGE: openpilot-base
+      BUILD: selfdrive/test/docker_build.sh base
+      RUN: docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=default -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
+      PYTEST: pytest --continue-on-collection-errors --durations=0 --durations-min=5 -n logical
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: 'commaai/openpilot'
+        ref: 'master'
+        submodules: true
+    - run: rm -rf opendbc_repo/
+    - uses: actions/checkout@v4
+      with:
+        path: opendbc_repo
+    - uses: ./.github/workflows/setup-with-retry
+      id: setup-step
+    - name: Cache test routes
+      id: routes-cache
+      uses: actions/cache@v4
+      with:
+        path: .ci_cache/comma_download_cache
+        key: car_models-${{ hashFiles('selfdrive/car/tests/test_models.py', 'opendbc/car/tests/routes.py') }}-${{ matrix.job }}
+    - name: Build openpilot
+      run: ${{ env.RUN }} "scons -j$(nproc) common/ cereal/ selfdrive/pandad/ msgq_repo/ opendbc_repo"
+    - name: Test car models
+      timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.routes-cache.outputs.cache-hit == 'true') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 6 }}
+      run: |
+        ${{ env.RUN }} "MAX_EXAMPLES=1 $PYTEST selfdrive/car/tests/test_models.py && \
+                        chmod -R 777 /tmp/comma_download_cache"
+      env:
+        NUM_JOBS: 4
+        JOB_ID: ${{ matrix.job }}

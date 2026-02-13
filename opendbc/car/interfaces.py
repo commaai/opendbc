@@ -1,22 +1,21 @@
-import json
 import os
 import numpy as np
 import time
 import tomllib
 from abc import abstractmethod, ABC
 from enum import StrEnum
-from typing import Any, NamedTuple
+from typing import Any
 from collections.abc import Callable
 from functools import cache
 
-from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, get_friction, STD_CARGO_KG
+from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, STD_CARGO_KG
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
 from opendbc.car.values import PLATFORMS
-from opendbc.can.parser import CANParser
+from opendbc.can import CANParser
 
 GearShifter = structs.CarState.GearShifter
 ButtonType = structs.CarState.ButtonEvent.Type
@@ -25,7 +24,6 @@ V_CRUISE_MAX = 145
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS
 ACCEL_MAX = 2.0
 ACCEL_MIN = -3.5
-FRICTION_THRESHOLD = 0.3
 
 TORQUE_PARAMS_PATH = os.path.join(BASEDIR, 'torque_data/params.toml')
 TORQUE_OVERRIDE_PATH = os.path.join(BASEDIR, 'torque_data/override.toml')
@@ -43,15 +41,8 @@ GEAR_SHIFTER_MAP: dict[str, structs.CarState.GearShifter] = {
   'B': GearShifter.brake, 'BRAKE': GearShifter.brake,
 }
 
-
-class LatControlInputs(NamedTuple):
-  lateral_acceleration: float
-  roll_compensation: float
-  vego: float
-  aego: float
-
-
-TorqueFromLateralAccelCallbackType = Callable[[LatControlInputs, structs.CarParams.LateralTorqueTuning, float, float, bool, bool], float]
+TorqueFromLateralAccelCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning, bool], float]
+LateralAccelFromTorqueCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning, bool], float]
 
 
 @cache
@@ -85,18 +76,39 @@ def get_torque_params():
 
 # generic car and radar interfaces
 
+
+class RadarInterfaceBase(ABC):
+  def __init__(self, CP: structs.CarParams):
+    self.CP = CP
+    self.rcp = None
+    self.pts: dict[int, structs.RadarData.RadarPoint] = {}
+    self.frame = 0
+
+  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
+    self.frame += 1
+    if (self.frame % 5) == 0:  # 20 Hz is very standard
+      return structs.RadarData()
+    return None
+
+
 class CarInterfaceBase(ABC):
-  def __init__(self, CP: structs.CarParams, CarController, CarState):
+  CarState: type['CarStateBase']
+  CarController: type['CarControllerBase']
+  RadarInterface: type['RadarInterfaceBase'] = RadarInterfaceBase
+
+  DRIVABLE_GEARS: tuple[structs.CarState.GearShifter, ...] = ()
+
+  def __init__(self, CP: structs.CarParams):
     self.CP = CP
 
     self.frame = 0
     self.v_ego_cluster_seen = False
 
-    self.CS: CarStateBase = CarState(CP)
+    self.CS: CarStateBase = self.CarState(CP)
     self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
 
     dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
-    self.CC: CarControllerBase = CarController(dbc_names, CP)
+    self.CC: CarControllerBase = self.CarController(dbc_names, CP)
 
   def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     if now_nanos is None:
@@ -112,11 +124,11 @@ class CarInterfaceBase(ABC):
     """
     Parameters essential to controlling the car may be incomplete or wrong without FW versions or fingerprints.
     """
-    return cls.get_params(candidate, gen_empty_fingerprint(), list(), False, False)
+    return cls.get_params(candidate, gen_empty_fingerprint(), list(), False, False, False)
 
   @classmethod
   def get_params(cls, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw],
-                 experimental_long: bool, docs: bool) -> structs.CarParams:
+                 alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
     ret = CarInterfaceBase.get_std_params(candidate)
 
     platform = PLATFORMS[candidate]
@@ -129,7 +141,7 @@ class CarInterfaceBase(ABC):
     ret.tireStiffnessFactor = platform.config.specs.tireStiffnessFactor
     ret.flags |= int(platform.config.flags)
 
-    ret = cls._get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs)
+    ret = cls._get_params(ret, candidate, fingerprint, car_fw, alpha_long, is_release, docs)
 
     # Vehicle mass is published curb weight plus assumed payload such as a human driver; notCars have no assumed payload
     if not ret.notCar:
@@ -144,12 +156,16 @@ class CarInterfaceBase(ABC):
   @staticmethod
   @abstractmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint: dict[int, dict[int, int]],
-                  car_fw: list[structs.CarParams.CarFw], experimental_long: bool, docs: bool) -> structs.CarParams:
+                  car_fw: list[structs.CarParams.CarFw], alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
     raise NotImplementedError
 
   @staticmethod
   def init(CP: structs.CarParams, can_recv: CanRecvCallable, can_send: CanSendCallable):
-    pass
+    """Used to disable longitudinal ECUs as needed"""
+
+  @staticmethod
+  def deinit(CP: structs.CarParams, can_recv: CanRecvCallable, can_send: CanSendCallable):
+    """Used to re-enable longitudinal ECUs as needed"""
 
   @staticmethod
   def get_steer_feedforward_default(desired_angle, v_ego):
@@ -159,14 +175,18 @@ class CarInterfaceBase(ABC):
   def get_steer_feedforward_function(self):
     return self.get_steer_feedforward_default
 
-  def torque_from_lateral_accel_linear(self, latcontrol_inputs: LatControlInputs, torque_params: structs.CarParams.LateralTorqueTuning,
-                                       lateral_accel_error: float, lateral_accel_deadzone: float, friction_compensation: bool, gravity_adjusted: bool) -> float:
+  def torque_from_lateral_accel_linear(self, lateral_acceleration: float, torque_params: structs.CarParams.LateralTorqueTuning) -> float:
     # The default is a linear relationship between torque and lateral acceleration (accounting for road roll and steering friction)
-    friction = get_friction(lateral_accel_error, lateral_accel_deadzone, FRICTION_THRESHOLD, torque_params, friction_compensation)
-    return (latcontrol_inputs.lateral_acceleration / float(torque_params.latAccelFactor)) + friction
+    return lateral_acceleration / float(torque_params.latAccelFactor)
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
     return self.torque_from_lateral_accel_linear
+
+  def lateral_accel_from_torque_linear(self, torque: float, torque_params: structs.CarParams.LateralTorqueTuning) -> float:
+    return torque * float(torque_params.latAccelFactor)
+
+  def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
+    return self.lateral_accel_from_torque_linear
 
   # returns a set of default params to avoid repetition in car specific params
   @staticmethod
@@ -192,7 +212,6 @@ class CarInterfaceBase(ABC):
     ret.stoppingDecelRate = 0.8 # brake_travel/s while trying to stop
     ret.vEgoStopping = 0.5
     ret.vEgoStarting = 0.5
-    ret.longitudinalTuning.kf = 1.
     ret.longitudinalTuning.kpBP = [0.]
     ret.longitudinalTuning.kpV = [0.]
     ret.longitudinalTuning.kiBP = [0.]
@@ -203,30 +222,23 @@ class CarInterfaceBase(ABC):
     return ret
 
   @staticmethod
-  def configure_torque_tune(candidate: str, tune: structs.CarParams.LateralTuning, steering_angle_deadzone_deg: float = 0.0, use_steering_angle: bool = True):
+  def configure_torque_tune(candidate: str, tune: structs.CarParams.LateralTuning, steering_angle_deadzone_deg: float = 0.0):
     params = get_torque_params()[candidate]
 
     tune.init('torque')
-    tune.torque.useSteeringAngle = use_steering_angle
-    tune.torque.kp = 1.0
-    tune.torque.kf = 1.0
-    tune.torque.ki = 0.1
     tune.torque.friction = params['FRICTION']
     tune.torque.latAccelFactor = params['LAT_ACCEL_FACTOR']
     tune.torque.latAccelOffset = 0.0
     tune.torque.steeringAngleDeadzoneDeg = steering_angle_deadzone_deg
 
-  def _update(self) -> structs.CarState:
-    return self.CS.update(self.can_parsers)
-
   def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.CarState:
     # parse can
     for cp in self.can_parsers.values():
       if cp is not None:
-        cp.update_strings(can_packets)
+        cp.update(can_packets)
 
     # get CarState
-    ret = self._update()
+    ret = self.CS.update(self.can_parsers)
 
     ret.canValid = all(cp.can_valid for cp in self.can_parsers.values())
     ret.canTimeout = any(cp.bus_timeout for cp in self.can_parsers.values())
@@ -252,20 +264,6 @@ class CarInterfaceBase(ABC):
     return ret
 
 
-class RadarInterfaceBase(ABC):
-  def __init__(self, CP: structs.CarParams):
-    self.CP = CP
-    self.rcp = None
-    self.pts: dict[int, structs.RadarData.RadarPoint] = {}
-    self.frame = 0
-
-  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
-    self.frame += 1
-    if (self.frame % 5) == 0:  # 20 Hz is very standard
-      return structs.RadarData()
-    return None
-
-
 class CarStateBase(ABC):
   def __init__(self, CP: structs.CarParams):
     self.CP = CP
@@ -278,6 +276,7 @@ class CarStateBase(ABC):
     self.steering_pressed_cnt = 0
     self.left_blinker_prev = False
     self.right_blinker_prev = False
+    self.low_speed_alert = False
     self.cluster_speed_hyst_gap = 0.0
     self.cluster_min_speed = 0.0  # min speed before dropping to 0
     self.secoc_key: bytes = b"00" * 16
@@ -294,22 +293,16 @@ class CarStateBase(ABC):
   def update(self, can_parsers) -> structs.CarState:
     pass
 
+  def parse_wheel_speeds(self, cs, fl, fr, rl, rr, unit=CV.KPH_TO_MS):
+    cs.vEgoRaw = sum((fl, fr, rl, rr)) / 4 * unit * self.CP.wheelSpeedFactor
+    cs.vEgo, cs.aEgo = self.update_speed_kf(cs.vEgoRaw)
+
   def update_speed_kf(self, v_ego_raw):
     if abs(v_ego_raw - self.v_ego_kf.x[0][0]) > 2.0:  # Prevent large accelerations when car starts at non zero speed
       self.v_ego_kf.set_x([[v_ego_raw], [0.0]])
 
     v_ego_x = self.v_ego_kf.update(v_ego_raw)
     return float(v_ego_x[0]), float(v_ego_x[1])
-
-  def get_wheel_speeds(self, fl, fr, rl, rr, unit=CV.KPH_TO_MS):
-    factor = unit * self.CP.wheelSpeedFactor
-
-    wheelSpeeds = structs.CarState.WheelSpeeds()
-    wheelSpeeds.fl = fl * factor
-    wheelSpeeds.fr = fr * factor
-    wheelSpeeds.rl = rl * factor
-    wheelSpeeds.rr = rr * factor
-    return wheelSpeeds
 
   def update_blinker_from_lamp(self, blinker_time: int, left_blinker_lamp: bool, right_blinker_lamp: bool):
     """Update blinkers from lights. Enable output when light was seen within the last `blinker_time`
@@ -321,8 +314,8 @@ class CarStateBase(ABC):
 
   def update_steering_pressed(self, steering_pressed, steering_pressed_min_count):
     """Applies filtering on steering pressed for noisy driver torque signals."""
-    self.steering_pressed_cnt = self.steering_pressed_cnt + 1 if steering_pressed else 0
-    self.steering_pressed_cnt = min(self.steering_pressed_cnt, steering_pressed_min_count + 1)
+    self.steering_pressed_cnt += 1 if steering_pressed else -1
+    self.steering_pressed_cnt = int(np.clip(self.steering_pressed_cnt, 0, steering_pressed_min_count * 2 + 1))
     return self.steering_pressed_cnt > steering_pressed_min_count
 
   def update_blinker_from_stalk(self, blinker_time: int, left_blinker_stalk: bool, right_blinker_stalk: bool):
@@ -385,6 +378,7 @@ INTERFACE_ATTR_FILE = {
 
 # interface-specific helpers
 
+
 def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: bool = False) -> dict[str | StrEnum, Any]:
   # read all the folders in opendbc/car and return a dict where:
   # - keys are all the car models or brand names
@@ -409,35 +403,3 @@ def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: boo
       pass
 
   return result
-
-
-class NanoFFModel:
-  def __init__(self, weights_loc: str, platform: str):
-    self.weights_loc = weights_loc
-    self.platform = platform
-    self.load_weights(platform)
-
-  def load_weights(self, platform: str):
-    with open(self.weights_loc) as fob:
-      self.weights = {k: np.array(v) for k, v in json.load(fob)[platform].items()}
-
-  def relu(self, x: np.ndarray):
-    return np.maximum(0.0, x)
-
-  def forward(self, x: np.ndarray):
-    assert x.ndim == 1
-    x = (x - self.weights['input_norm_mat'][:, 0]) / (self.weights['input_norm_mat'][:, 1] - self.weights['input_norm_mat'][:, 0])
-    x = self.relu(np.dot(x, self.weights['w_1']) + self.weights['b_1'])
-    x = self.relu(np.dot(x, self.weights['w_2']) + self.weights['b_2'])
-    x = self.relu(np.dot(x, self.weights['w_3']) + self.weights['b_3'])
-    x = np.dot(x, self.weights['w_4']) + self.weights['b_4']
-    return x
-
-  def predict(self, x: list[float], do_sample: bool = False):
-    x = self.forward(np.array(x))
-    if do_sample:
-      pred = np.random.laplace(x[0], np.exp(x[1]) / self.weights['temperature'])
-    else:
-      pred = x[0]
-    pred = pred * (self.weights['output_norm_mat'][1] - self.weights['output_norm_mat'][0]) + self.weights['output_norm_mat'][0]
-    return pred

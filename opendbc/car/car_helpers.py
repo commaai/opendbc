@@ -19,11 +19,8 @@ def load_interfaces(brand_names):
   for brand_name in brand_names:
     path = f'opendbc.car.{brand_name}'
     CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
-    CarState = __import__(path + '.carstate', fromlist=['CarState']).CarState
-    CarController = __import__(path + '.carcontroller', fromlist=['CarController']).CarController
-    RadarInterface = __import__(path + '.radar_interface', fromlist=['RadarInterface']).RadarInterface
     for model_name in brand_names[brand_name]:
-      ret[model_name] = (CarInterface, CarController, CarState, RadarInterface)
+      ret[model_name] = CarInterface
   return ret
 
 
@@ -151,36 +148,26 @@ def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_mu
   return car_fingerprint, finger, vin, car_fw, source, exact_match
 
 
-def get_car_interface(CP: CarParams):
-  CarInterface, CarController, CarState, _ = interfaces[CP.carFingerprint]
-  return CarInterface(CP, CarController, CarState)
-
-
-def get_radar_interface(CP: CarParams):
-  _, _, _, RadarInterface = interfaces[CP.carFingerprint]
-  return RadarInterface(CP)
-
-
-def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback, experimental_long_allowed: bool,
-            num_pandas: int = 1, cached_params: CarParamsT | None = None):
+def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback, alpha_long_allowed: bool,
+            is_release: bool, num_pandas: int = 1, cached_params: CarParamsT | None = None):
   candidate, fingerprints, vin, car_fw, source, exact_match = fingerprint(can_recv, can_send, set_obd_multiplexing, num_pandas, cached_params)
 
   if candidate is None:
     carlog.error({"event": "car doesn't match any fingerprints", "fingerprints": repr(fingerprints)})
     candidate = "MOCK"
 
-  CarInterface, _, _, _ = interfaces[candidate]
-  CP: CarParams = CarInterface.get_params(candidate, fingerprints, car_fw, experimental_long_allowed, docs=False)
+  CarInterface = interfaces[candidate]
+  CP: CarParams = CarInterface.get_params(candidate, fingerprints, car_fw, alpha_long_allowed, is_release, docs=False)
   CP.carVin = vin
   CP.carFw = car_fw
   CP.fingerprintSource = source
   CP.fuzzyFingerprint = not exact_match
 
-  return get_car_interface(CP)
+  return interfaces[CP.carFingerprint](CP)
 
 
 def get_demo_car_params():
   platform = MOCK.MOCK
-  CarInterface, _, _, _ = interfaces[platform]
+  CarInterface = interfaces[platform]
   CP = CarInterface.get_non_essential_params(platform)
   return CP

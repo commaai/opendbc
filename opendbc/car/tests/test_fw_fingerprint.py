@@ -126,7 +126,7 @@ class TestFwFingerprint:
     blacklisted_addrs = (0x7c4, 0x7d0)  # includes A/C ecu and an unknown ecu
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
-        CP = interfaces[car_model][0].get_non_essential_params(car_model)
+        CP = interfaces[car_model].get_non_essential_params(car_model)
         if CP.brand == 'subaru':
           for ecu in ecus.keys():
             assert ecu[1] not in blacklisted_addrs, f'{car_model}: Blacklisted ecu: (Ecu.{ecu[0]}, {hex(ecu[1])})'
@@ -260,7 +260,7 @@ class TestFwFingerprintTiming:
         print(f'get_vin {name} case, query time={self.total_time / self.N} seconds')
 
   def test_fw_query_timing(self, subtests, mocker):
-    total_ref_time = {1: 7.1, 2: 7.7}
+    total_ref_time = {1: 7.4, 2: 8.0}
     brand_ref_times = {
       1: {
         'gm': 1.0,
@@ -275,7 +275,8 @@ class TestFwFingerprintTiming:
         'tesla': 0.1,
         'toyota': 0.7,
         'volkswagen': 0.65,
-        'rivian': 0.1,
+        'rivian': 0.3,
+        'psa': 0.1,
       },
       2: {
         'ford': 1.6,

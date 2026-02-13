@@ -8,10 +8,10 @@ import sys
 from opendbc.car import DT_CTRL
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.interfaces import get_torque_params
+from opendbc.car.lateral import ISO_LATERAL_ACCEL
 from opendbc.car.values import PLATFORMS
 
 # ISO 11270 - allowed up jerk is strictly lower than recommended limits
-MAX_LAT_ACCEL = 3.0              # m/s^2
 MAX_LAT_JERK_UP = 2.5            # m/s^3
 MAX_LAT_JERK_DOWN = 5.0          # m/s^3
 MAX_LAT_JERK_UP_TOLERANCE = 0.5  # m/s^3
@@ -26,7 +26,7 @@ class TestLateralLimits:
 
   @classmethod
   def setup_class(cls):
-    CarInterface, _, _, _ = interfaces[cls.car_model]
+    CarInterface = interfaces[cls.car_model]
     CP = CarInterface.get_non_essential_params(cls.car_model)
 
     if cls.car_model == 'MOCK':
@@ -65,7 +65,7 @@ class TestLateralLimits:
     assert down_jerk <= MAX_LAT_JERK_DOWN
 
   def test_max_lateral_accel(self):
-    assert self.torque_params["MAX_LAT_ACCEL_MEASURED"] <= MAX_LAT_ACCEL
+    assert self.torque_params["MAX_LAT_ACCEL_MEASURED"] <= ISO_LATERAL_ACCEL
 
 
 class LatAccelReport:

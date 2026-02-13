@@ -17,8 +17,7 @@ import numpy as np
 from numpy.linalg import solve
 
 from opendbc.car.structs import CarParams
-
-ACCELERATION_DUE_TO_GRAVITY = 9.8
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY
 
 
 class VehicleModel:
@@ -180,7 +179,7 @@ def create_dyn_state_matrices(u: float, VM: VehicleModel) -> tuple[np.ndarray, n
 
   Parameters in the vehicle model:
     cF: Tire stiffness Front [N/rad]
-    cR: Tire stiffness Front [N/rad]
+    cR: Tire stiffness Rear [N/rad]
     aF: Distance from CG to front wheels [m]
     aR: Distance from CG to rear wheels [m]
     m: Mass [kg]
@@ -220,7 +219,7 @@ def dyn_ss_sol(sa: float, u: float, roll: float, VM: VehicleModel) -> np.ndarray
   """
   A, B = create_dyn_state_matrices(u, VM)
   inp = np.array([[sa], [roll]])
-  return -solve(A, B) @ inp  # type: ignore
+  return -solve(A, B) @ inp
 
 
 def calc_slip_factor(VM: VehicleModel) -> float:
