@@ -1,8 +1,6 @@
 from opendbc.car import Bus, get_safety_config, structs, uds
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, \
-                                                   CANFD_UNSUPPORTED_LONGITUDINAL_CAR, \
-                                                   UNSUPPORTED_LONGITUDINAL_CAR, HyundaiSafetyFlags
+from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, HyundaiSafetyFlags
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
@@ -38,7 +36,7 @@ class CarInterface(CarInterfaceBase):
 
     if ret.flags & HyundaiFlags.CANFD:
       # Shared configuration for CAN-FD cars
-      ret.alphaLongitudinalAvailable = candidate not in CANFD_UNSUPPORTED_LONGITUDINAL_CAR
+      ret.alphaLongitudinalAvailable = not (ret.flags & HyundaiFlags.CANFD_NO_RADAR_DISABLE)
       if lka_steering and Ecu.adas not in [fw.ecu for fw in car_fw]:
         # this needs to be figured out for cars without an ADAS ECU
         ret.alphaLongitudinalAvailable = False
@@ -85,7 +83,7 @@ class CarInterface(CarInterfaceBase):
 
     else:
       # Shared configuration for non CAN-FD cars
-      ret.alphaLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
+      ret.alphaLongitudinalAvailable = not (ret.flags & (HyundaiFlags.LEGACY | HyundaiFlags.UNSUPPORTED_LONGITUDINAL))
       ret.enableBsm = 0x58b in fingerprint[0]
 
       # Send LFA message on cars with HDA
