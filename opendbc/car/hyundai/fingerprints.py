@@ -1279,4 +1279,12 @@ FW_VERSIONS = {
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
     ],
   },
+  CAR.HYUNDAI_SONATA_LF_HYBRID: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00LFhe SCC FNCUP      1.00 1.02 96400-E6500         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00LFH MFC  AT KOR LHD 1.00 1.01 95740-E6000 171107',
+    ],
+  },
 }
