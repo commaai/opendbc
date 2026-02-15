@@ -80,6 +80,7 @@ DbcDict = dict[StrEnum, str]
 
 class Bus(StrEnum):
   pt = auto()
+  aux = auto()
   cam = auto()
   radar = auto()
   adas = auto()
