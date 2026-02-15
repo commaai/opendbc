@@ -12,3 +12,7 @@ SAFETY_UNUSED(safety_tx_hook);
 SAFETY_UNUSED(safety_fwd_hook);
 SAFETY_UNUSED(safety_tick);
 SAFETY_UNUSED(set_safety_hooks);
+
+// Called by panda and via libsafety tests (FFI)
+SAFETY_UNUSED(ignition_can_reset);
+SAFETY_UNUSED(ignition_can_hook);
