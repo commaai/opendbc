@@ -70,12 +70,19 @@ void set_timer(uint32_t t);
 void safety_tick_current_safety_config();
 bool safety_config_valid();
 
-void init_tests(void);
+  void init_tests(void);
 
-void set_honda_fwd_brake(bool c);
-bool get_honda_fwd_brake(void);
-void set_honda_alt_brake_msg(bool c);
-void set_honda_bosch_long(bool c);
+  void ignition_can_reset(void);
+  void ignition_can_hook(CANPacket_t *msg);
+  void set_ignition_can(bool c);
+  bool get_ignition_can(void);
+  void set_ignition_can_cnt(uint32_t c);
+  uint32_t get_ignition_can_cnt(void);
+
+  void set_honda_fwd_brake(bool c);
+  bool get_honda_fwd_brake(void);
+  void set_honda_alt_brake_msg(bool c);
+  void set_honda_bosch_long(bool c);
 int get_honda_hw(void);
 """)
 

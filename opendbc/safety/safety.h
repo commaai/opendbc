@@ -57,6 +57,65 @@ bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
 bool safety_rx_checks_invalid = false;
 
+// Ignition detected from CAN (used by panda)
+bool ignition_can = false;
+uint32_t ignition_can_cnt = 0U;
+static int ignition_prev_counter_rivian = -1;
+static int ignition_prev_counter_tesla = -1;
+
+void ignition_can_reset(void) {
+  ignition_can = false;
+  ignition_can_cnt = 0U;
+  ignition_prev_counter_rivian = -1;
+  ignition_prev_counter_tesla = -1;
+}
+
+void ignition_can_hook(const CANPacket_t *msg) {
+  if (msg->bus == 0U) {
+    const int len = GET_LEN(msg);
+
+    // GM exception
+    if ((msg->addr == 0x1F1U) && (len == 8)) {
+      // SystemPowerMode (2=Run, 3=Crank Request)
+      ignition_can = (msg->data[0] & 0x2U) != 0U;
+      ignition_can_cnt = 0U;
+    }
+
+    // Rivian R1S/T GEN1 exception
+    if ((msg->addr == 0x152U) && (len == 8)) {
+      // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
+      const int counter = msg->data[1] & 0xFU;  // max is only 14
+
+      if ((counter == ((ignition_prev_counter_rivian + 1) % 15)) && (ignition_prev_counter_rivian != -1)) {
+        // VDM_OutputSignals->VDM_EpasPowerMode
+        ignition_can = ((msg->data[7] >> 4U) & 0x3U) == 1U;  // VDM_EpasPowerMode_Drive_On=1
+        ignition_can_cnt = 0U;
+      }
+      ignition_prev_counter_rivian = counter;
+    }
+
+    // Tesla Model 3/Y exception
+    if ((msg->addr == 0x221U) && (len == 8)) {
+      // 0x221 overlaps with Rivian which has random data on byte 0
+      const int counter = msg->data[6] >> 4;
+
+      if ((counter == ((ignition_prev_counter_tesla + 1) % 16)) && (ignition_prev_counter_tesla != -1)) {
+        // VCFRONT_LVPowerState->VCFRONT_vehiclePowerState
+        const int power_state = (msg->data[0] >> 5U) & 0x3U;
+        ignition_can = power_state == 0x3;  // VEHICLE_POWER_STATE_DRIVE=3
+        ignition_can_cnt = 0U;
+      }
+      ignition_prev_counter_tesla = counter;
+    }
+
+    // Mazda exception
+    if ((msg->addr == 0x9EU) && (len == 8)) {
+      ignition_can = (msg->data[0] >> 5) == 0x6U;
+      ignition_can_cnt = 0U;
+    }
+  }
+}
+
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
 int rt_torque_last = 0;            // last desired torque for real time check
