@@ -5,6 +5,10 @@ from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class TestIgnitionCan(unittest.TestCase):
+  # Required by SafetyTest.test_tx_hook_on_wrong_safety_mode, which imports all
+  # test_*.py modules and expects any `Test*` class to define TX_MSGS.
+  TX_MSGS = None
+
   def setUp(self):
     self.safety = libsafety_py.libsafety
     self.safety.init_tests()
@@ -114,4 +118,3 @@ class TestIgnitionCan(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
-
