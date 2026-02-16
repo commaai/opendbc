@@ -6,6 +6,7 @@ our goal is to write a mutation tester that is super fast
 * all surviving mutants must be true positives.
 * once all the goals are met, red team the tool to make sure all killed and surviving mutants are correct
 * do not stop until all objectives are met!
+* i suggest you use the bash timeout tool to prevent long-running experiments that can just be killed
 
 note that we expect some surviving mutants at this point.
 your goal is not to fix those at all, but only to make the test run fast and correctly identify them.
