@@ -15,6 +15,7 @@ class CarInterface(CarInterfaceBase):
     ret.brand = "nissan"
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.nissan)]
     ret.autoResumeSng = False
+    ret.steerAtStandstill = True
 
     ret.steerLimitTimer = 1.0
 
