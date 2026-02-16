@@ -75,6 +75,8 @@ EXPANDED_TEST_IDS_BY_TEST: dict[str, tuple[str, ...]] = {
     "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_allow_engage_with_gas_pressed",
     "opendbc.safety.tests.test_chrysler.TestChryslerRamHDSafety.test_allow_engage_with_gas_pressed",
     "opendbc.safety.tests.test_chrysler.TestChryslerSafety.test_allow_engage_with_gas_pressed",
+    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_steer_safety_check",
+    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_realtime_limit_up",
   ),
   "test_defaults.py": (
     "opendbc.safety.tests.test_defaults.TestAllOutput.test_default_controls_not_allowed",
@@ -88,23 +90,44 @@ EXPANDED_TEST_IDS_BY_TEST: dict[str, tuple[str, ...]] = {
     "opendbc.safety.tests.test_ford.TestFordCANFDLongitudinalSafety.test_curvature_rate_limits",
     "opendbc.safety.tests.test_ford.TestFordCANFDStockSafety.test_acc_buttons",
     "opendbc.safety.tests.test_ford.TestFordLongitudinalSafety.test_acc_buttons",
+    "opendbc.safety.tests.test_ford.TestFordCANFDLongitudinalSafety.test_steer_allowed",
   ),
   "test_gm.py": (
     "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_against_torque_driver",
     "opendbc.safety.tests.test_gm.GmLongitudinalBase.test_allow_engage_with_gas_pressed",
     "opendbc.safety.tests.test_gm.TestGmCameraEVSafety.test_against_torque_driver",
+    "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_steer_safety_check",
+    "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_realtime_limits",
   ),
   "test_honda.py": (
     "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_steer_safety_check",
     "opendbc.safety.tests.test_honda.HondaBase.test_allow_engage_with_gas_pressed",
     "opendbc.safety.tests.test_honda.HondaButtonEnableBase.test_allow_engage_with_gas_pressed",
     "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_allow_engage_with_gas_pressed",
+    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_allow_user_brake_at_zero_speed",
+    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_brake_safety_check",
+    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_acc_hud_safety_check",
+    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_gas_safety_check",
+    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_brake_safety_check",
+    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_buttons",
+    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_rx_hook",
+    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_set_resume_buttons",
+    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_not_allow_user_brake_when_moving",
+    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_buttons_with_main_off",
+    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_enable_control_allowed_from_cruise",
+    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_disable_control_allowed_from_cruise",
+    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_buttons",
+    "opendbc.safety.tests.test_honda.TestHondaBoschCANFDSafety.test_allow_user_brake_at_zero_speed",
+    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_no_disengage_on_gas",
+    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_honda_fwd_brake_latching",
   ),
   "test_hyundai.py": (
     "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_req_bit_frames",
     "opendbc.safety.tests.hyundai_common.HyundaiLongitudinalBase.test_accel_actuation_limits",
     "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_against_torque_driver",
     "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafetyEV.test_against_torque_driver",
+    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_safety_check",
+    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_realtime_limits",
   ),
   "test_hyundai_canfd.py": (
     "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering_0.test_steer_req_bit_frames",
@@ -119,6 +142,8 @@ EXPANDED_TEST_IDS_BY_TEST: dict[str, tuple[str, ...]] = {
     "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_cmd_when_disabled",
     "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_acc_buttons",
     "opendbc.safety.tests.test_nissan.TestNissanSafety.test_acc_buttons",
+    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_cmd_when_enabled",
+    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_violation",
   ),
   "test_psa.py": (
     "opendbc.safety.tests.test_psa.TestPsaStockSafety.test_angle_cmd_when_disabled",
@@ -128,6 +153,8 @@ EXPANDED_TEST_IDS_BY_TEST: dict[str, tuple[str, ...]] = {
     "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_against_torque_driver",
     "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_accel_actuation_limits",
     "opendbc.safety.tests.test_rivian.TestRivianSafetyBase.test_accel_actuation_limits",
+    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_steer_safety_check",
+    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_realtime_limits",
   ),
   "test_subaru.py": (
     "opendbc.safety.tests.test_subaru.TestSubaruGen1LongitudinalSafety.test_steer_req_bit_frames",
@@ -143,6 +170,11 @@ EXPANDED_TEST_IDS_BY_TEST: dict[str, tuple[str, ...]] = {
     "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_disabled",
     "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_accel_actuation_limits",
     "opendbc.safety.tests.test_tesla.TestTeslaFSD14StockSafety.test_accel_actuation_limits",
+    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_enabled",
+    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_steering_angle_measurements",
+    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_lateral_jerk_limit",
+    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_violation",
+    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_rt_limits",
   ),
   "test_toyota.py": (
     "opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_exceed_torque_sensor",
@@ -692,7 +724,7 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
   return out, counts
 
 
-def build_priority_tests(site: MutationSite) -> list[str]:
+def build_priority_tests(site: MutationSite, *, full_module: bool = False) -> list[str]:
   ordered_names: list[str] = []
   use_expanded = False
 
@@ -703,7 +735,7 @@ def build_priority_tests(site: MutationSite) -> list[str]:
   except ValueError:
     rel_parts = ()
 
-  if len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes"):
+  if len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes") and src.stem != "defaults":
     use_expanded = True
     mode_stem = src.stem
     if mode_stem == "hyundai_common":
@@ -715,11 +747,12 @@ def build_priority_tests(site: MutationSite) -> list[str]:
     else:
       ordered_names.append(f"test_{mode_stem}.py")
   elif len(rel_parts) >= 3 and rel_parts[:2] == ("opendbc", "safety"):
+    use_expanded = True
     ordered_names.extend(CORE_KILLER_TESTS)
   else:
     ordered_names.extend(SMOKE_TESTS)
 
-  return _test_targets_from_names(ordered_names, use_expanded=use_expanded)
+  return _test_targets_from_names(ordered_names, use_expanded=use_expanded, full_module=full_module)
 
 
 
@@ -728,7 +761,7 @@ def _test_module_name(test_file: Path) -> str:
   return ".".join(rel.with_suffix("").parts)
 
 
-def _test_targets_from_names(ordered_names: list[str], *, use_expanded: bool = False) -> list[str]:
+def _test_targets_from_names(ordered_names: list[str], *, use_expanded: bool = False, full_module: bool = False) -> list[str]:
   tests_by_name = _tests_by_name()
   id_source = EXPANDED_TEST_IDS_BY_TEST if use_expanded else FAST_TEST_IDS_BY_TEST
 
@@ -744,17 +777,23 @@ def _test_targets_from_names(ordered_names: list[str], *, use_expanded: bool = F
     if test_file is None:
       continue
 
-    targets = id_source.get(name)
-    if targets is not None:
-      for t in targets:
-        if t not in seen_ids:
-          seen_ids.add(t)
-          out.append(t)
-    else:
+    if full_module:
       mod = _test_module_name(test_file)
       if mod not in seen_ids:
         seen_ids.add(mod)
         out.append(mod)
+    else:
+      targets = id_source.get(name)
+      if targets is not None:
+        for t in targets:
+          if t not in seen_ids:
+            seen_ids.add(t)
+            out.append(t)
+      else:
+        mod = _test_module_name(test_file)
+        if mod not in seen_ids:
+          seen_ids.add(mod)
+          out.append(mod)
   return out
 
 
@@ -1016,8 +1055,8 @@ int mutation_get_active_mutant(void) { return __mutation_active_id; }
   return duration
 
 
-def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResult:
-  priority_tests = build_priority_tests(site)
+def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool, full_module: bool = False) -> MutantResult:
+  priority_tests = build_priority_tests(site, full_module=full_module)
   if not priority_tests:
     priority_tests = list(_ordered_all_tests())
 
@@ -1168,7 +1207,7 @@ def main() -> int:
       else:
         infra += 1
 
-    with ProcessPoolExecutor(max_workers=args.j) as pool:
+    with ProcessPoolExecutor(max_workers=args.j, max_tasks_per_child=1) as pool:
       future_map: dict[Future[MutantResult], MutationSite] = {pool.submit(eval_mutant, site, mutation_lib, args.verbose): site for site in sites}
       print_live_status(render_progress(0, len(sites), 0, 0, 0, 0.0))
       try:
@@ -1187,6 +1226,42 @@ def main() -> int:
         for site in sites:
           if site.site_id not in completed_ids:
             _record(MutantResult(site, "killed", "tests", "worker-crash", 0.0, "pool broken"))
+        elapsed_now = time.perf_counter() - start
+        print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=True)
+
+    # Verification pass: re-run survivors to detect flaky mutants
+    initial_survivors = [r for r in results if r.outcome == "survived"]
+    if initial_survivors:
+      print(f"\nVerifying {len(initial_survivors)} survivors...", flush=True)
+      verified_results: list[MutantResult] = []
+      with ProcessPoolExecutor(max_workers=args.j, max_tasks_per_child=1) as pool:
+        verify_futures = {pool.submit(eval_mutant, r.site, mutation_lib, args.verbose): r for r in initial_survivors}
+        try:
+          for fut in as_completed(verify_futures):
+            try:
+              vres = fut.result()
+            except Exception:
+              orig = verify_futures[fut]
+              vres = MutantResult(orig.site, "killed", "tests", "worker-crash", 0.0, "verification crash")
+            verified_results.append(vres)
+        except Exception:
+          for fut, orig in verify_futures.items():
+            if not any(v.site.site_id == orig.site.site_id for v in verified_results):
+              verified_results.append(MutantResult(orig.site, "killed", "tests", "worker-crash", 0.0, "pool broken"))
+      # Update results: replace survivors that were killed in verification
+      newly_killed = {v.site.site_id: v for v in verified_results if v.outcome == "killed"}
+      if newly_killed:
+        print(f"  {len(newly_killed)} flaky mutants reclassified as killed", flush=True)
+        new_results: list[MutantResult] = []
+        for r in results:
+          if r.site.site_id in newly_killed:
+            new_results.append(newly_killed[r.site.site_id])
+          else:
+            new_results.append(r)
+        results = new_results
+        killed = sum(1 for r in results if r.outcome == "killed")
+        survived = sum(1 for r in results if r.outcome == "survived")
+        infra = sum(1 for r in results if r.outcome == "infra_error")
         elapsed_now = time.perf_counter() - start
         print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=True)
 
