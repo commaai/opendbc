@@ -125,7 +125,7 @@ class CarController(CarControllerBase):
     # *** rate limit steer ***
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                 self.params.STEER_DELTA_UP * DT_CTRL)
-    self.last_torque = limited_torque if cc.latActive else 0
+    self.last_torque = limited_torque if CC.latActive else 0
 
     # *** apply brake hysteresis ***
     pre_limit_brake, self.braking, self.brake_steady = actuator_hysteresis(brake, self.braking, self.brake_steady,
