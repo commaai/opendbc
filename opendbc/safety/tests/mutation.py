@@ -822,45 +822,77 @@ def run_unittest(targets: list[Path | str], lib_path: Path, mutant_id: int, verb
   )
 
 
+def _instrument_source(source: str, sites: list[MutationSite]) -> str:
+  """Single-pass instrumentation that handles nested mutations correctly."""
+  if not sites:
+    return source
+
+  # Sort by start ascending, end descending (outermost first when same start)
+  sorted_sites = sorted(sites, key=lambda s: (s.expr_start, -s.expr_end))
+
+  # Build containment forest using a stack
+  roots: list[list] = []
+  stack: list[list] = []
+  for site in sorted_sites:
+    while stack and stack[-1][0].expr_end <= site.expr_start:
+      stack.pop()
+    node: list = [site, []]
+    if stack:
+      stack[-1][1].append(node)
+    else:
+      roots.append(node)
+    stack.append(node)
+
+  def build_replacement(site: MutationSite, children: list[list]) -> str:
+    parts: list[str] = []
+    pos = site.expr_start
+    op_rel: int | None = None
+    running_len = 0
+
+    for child_site, child_children in children:
+      seg = source[pos:child_site.expr_start]
+      if op_rel is None and site.op_start >= pos and site.op_start < child_site.expr_start:
+        op_rel = running_len + (site.op_start - pos)
+      parts.append(seg)
+      running_len += len(seg)
+
+      child_repl = build_replacement(child_site, child_children)
+      parts.append(child_repl)
+      running_len += len(child_repl)
+      pos = child_site.expr_end
+
+    seg = source[pos:site.expr_end]
+    if op_rel is None and site.op_start >= pos:
+      op_rel = running_len + (site.op_start - pos)
+    parts.append(seg)
+
+    expr_text = ''.join(parts)
+    op_len = site.op_end - site.op_start
+    assert op_rel is not None and expr_text[op_rel:op_rel + op_len] == site.original_op, \
+      f"Operator mismatch (site_id={site.site_id}): expected {site.original_op!r} at offset {op_rel}"
+    mutated_expr = f"{expr_text[:op_rel]}{site.mutated_op}{expr_text[op_rel + op_len:]}"
+    return f"((__mutation_active_id == {site.site_id}) ? ({mutated_expr}) : ({expr_text}))"
+
+  result_parts: list[str] = []
+  pos = 0
+  for site, children in roots:
+    result_parts.append(source[pos:site.expr_start])
+    result_parts.append(build_replacement(site, children))
+    pos = site.expr_end
+  result_parts.append(source[pos:])
+  return ''.join(result_parts)
+
+
 def compile_mutated_library(clang_bin: str, preprocessed_file: Path, sites: list[MutationSite], output_so: Path) -> float:
-  instrumented = preprocessed_file.read_text()
-  applied_edits: list[tuple[int, int, int]] = []
-
-  def map_index(original_index: int) -> int:
-    shift = 0
-    for _edit_start, edit_end, delta in applied_edits:
-      if edit_end <= original_index:
-        shift += delta
-    return original_index + shift
-
-  for site in sorted(sites, key=lambda s: (s.expr_start, -s.expr_end, s.op_start), reverse=True):
-    expr_start = map_index(site.expr_start)
-    expr_end = map_index(site.expr_end)
-    op_start = map_index(site.op_start)
-    op_end = map_index(site.op_end)
-
-    if expr_start < 0 or expr_end > len(instrumented) or expr_end < expr_start:
-      raise RuntimeError(f"Mutation expression range drifted (site_id={site.site_id}): {format_path(site.source_file)}:{site.line}:{site.col}")
-    if op_start < expr_start or op_end > expr_end:
-      raise RuntimeError(f"Mutation operator range drifted (site_id={site.site_id}): {format_path(site.source_file)}:{site.line}:{site.col}")
-    if instrumented[op_start:op_end] != site.original_op:
-      raise RuntimeError(f"Mutation operator token drifted (site_id={site.site_id}): {format_path(site.source_file)}:{site.line}:{site.col}")
-
-    expr_text = instrumented[expr_start:expr_end]
-    rel_op_start = op_start - expr_start
-    rel_op_end = op_end - expr_start
-    mutated_expr = f"{expr_text[:rel_op_start]}{site.mutated_op}{expr_text[rel_op_end:]}"
-    replacement = f"((__mutation_active_id == {site.site_id}) ? ({mutated_expr}) : ({expr_text}))"
-    instrumented = f"{instrumented[:expr_start]}{replacement}{instrumented[expr_end:]}"
-    applied_edits.append((site.expr_start, site.expr_end, len(replacement) - (site.expr_end - site.expr_start)))
+  source = preprocessed_file.read_text()
+  instrumented = _instrument_source(source, sites)
 
   prelude = """static int __mutation_active_id = -1;
 void mutation_set_active_mutant(int id) { __mutation_active_id = id; }
 int mutation_get_active_mutant(void) { return __mutation_active_id; }
 """
-  marker_re = re.compile(r'^\s*#\s+\d+\s+"')
-  instrumented_lines = [line for line in instrumented.splitlines() if not marker_re.match(line)]
-  instrumented = prelude + "\n".join(instrumented_lines) + "\n"
+  marker_re = re.compile(r'^\s*#\s+\d+\s+"[^\n]*\n?', re.MULTILINE)
+  instrumented = prelude + marker_re.sub('', instrumented)
 
   mutation_source = output_so.with_suffix(".c")
   mutation_source.write_text(instrumented)
@@ -869,13 +901,10 @@ int mutation_get_active_mutant(void) { return __mutation_active_id; }
     clang_bin,
     "-shared",
     "-fPIC",
-    "-Wall",
-    "-Wextra",
-    "-Wno-error",
+    "-w",
     "-nostdlib",
     "-fno-builtin",
     "-std=gnu11",
-    "-Wno-pointer-to-int-cast",
     "-g0",
     "-O0",
     "-DALLOW_DEBUG",
