@@ -77,6 +77,9 @@ bool get_honda_fwd_brake(void);
 void set_honda_alt_brake_msg(bool c);
 void set_honda_bosch_long(bool c);
 int get_honda_hw(void);
+
+bool fast_safety_rx_hook(uint32_t addr, uint8_t bus, uint8_t dlc, const char *data, uint8_t data_len);
+bool fast_safety_tx_hook(uint32_t addr, uint8_t bus, uint8_t dlc, const char *data, uint8_t data_len);
 """)
 
 class LibSafety:

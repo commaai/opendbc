@@ -202,3 +202,28 @@ void init_tests(void){
   // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
   tesla_autopark = false;
 }
+
+// Fast hooks that take raw parameters, avoiding CFFI struct allocation overhead
+bool fast_safety_rx_hook(uint32_t addr, uint8_t bus, uint8_t dlc, const char *data, uint8_t data_len) {
+  CANPacket_t pkt = {0};
+  pkt.bus = bus;
+  pkt.data_len_code = dlc;
+  pkt.extended = (addr >= 0x800U) ? 1U : 0U;
+  pkt.addr = addr;
+  for (uint8_t i = 0; i < data_len && i < 64; i++) {
+    pkt.data[i] = (uint8_t)data[i];
+  }
+  return safety_rx_hook(&pkt);
+}
+
+bool fast_safety_tx_hook(uint32_t addr, uint8_t bus, uint8_t dlc, const char *data, uint8_t data_len) {
+  CANPacket_t pkt = {0};
+  pkt.bus = bus;
+  pkt.data_len_code = dlc;
+  pkt.extended = (addr >= 0x800U) ? 1U : 0U;
+  pkt.addr = addr;
+  for (uint8_t i = 0; i < data_len && i < 64; i++) {
+    pkt.data[i] = (uint8_t)data[i];
+  }
+  return safety_tx_hook(&pkt);
+}

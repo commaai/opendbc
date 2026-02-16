@@ -49,6 +49,10 @@ class Signal:
   is_little_endian: bool
   type: int = SignalType.DEFAULT
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
+  # Pre-computed for fast packing (populated by Msg._precompute)
+  _pack_ops: tuple = ()
+  _size_mask: int = 0
+  is_counter: bool = False
 
 
 @dataclass
@@ -57,6 +61,30 @@ class Msg:
   address: int
   size: int
   sigs: dict[str, Signal]
+  sig_counter: 'Signal | None' = None
+  sig_checksum: 'Signal | None' = None
+
+  def _precompute(self):
+    """Pre-compute signal packing operations for fast packing."""
+    for sig in self.sigs.values():
+      sig._size_mask = (1 << sig.size) - 1 if sig.size < 64 else (1 << 64) - 1
+      sig.is_counter = sig.type == SignalType.COUNTER or sig.name == "COUNTER"
+      # Pre-compute byte operations for set_value
+      ops = []
+      i = sig.lsb // 8
+      bits = sig.size
+      first_byte = i
+      while bits > 0 and 0 <= i < self.size:
+        shift = sig.lsb % 8 if i == first_byte else 0
+        n_bits = min(bits, 8 - shift)
+        val_mask = (1 << n_bits) - 1
+        clear_mask = ~(val_mask << shift) & 0xFF
+        ops.append((i, clear_mask, shift, val_mask, n_bits))
+        bits -= n_bits
+        i = i + 1 if sig.is_little_endian else i - 1
+      sig._pack_ops = tuple(ops)
+    self.sig_counter = next((s for s in self.sigs.values() if s.is_counter), None)
+    self.sig_checksum = next((s for s in self.sigs.values() if s.type > SignalType.COUNTER), None)
 
 
 @dataclass
@@ -150,6 +178,7 @@ class DBC:
         self.vals.append(Val(sgname, val_addr, val_def))
     for addr, sigs in signals_temp.items():
       self.msgs[addr].sigs = sigs
+      self.msgs[addr]._precompute()
 
 
 # ***** checksum functions *****

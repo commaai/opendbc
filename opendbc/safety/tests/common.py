@@ -7,7 +7,7 @@ import numpy as np
 from collections.abc import Callable
 
 from opendbc.can import CANPacker
-from opendbc.safety import ALTERNATIVE_EXPERIENCE
+from opendbc.safety import ALTERNATIVE_EXPERIENCE, LEN_TO_DLC
 from opendbc.safety.tests.libsafety import libsafety_py
 
 MAX_WRONG_COUNTERS = 5
@@ -34,19 +34,52 @@ def round_speed(v):
   return round(v * VEHICLE_SPEED_FACTOR) / VEHICLE_SPEED_FACTOR
 
 
+_ZERO_DAT = b'\x00' * 8
+_LEN_TO_DLC = LEN_TO_DLC
+_fast_rx = libsafety_py.libsafety.fast_safety_rx_hook
+_fast_tx = libsafety_py.libsafety.fast_safety_tx_hook
+
+
+class CANMsg:
+  """Lightweight CAN packet that avoids CFFI struct allocation.
+  Supports msg[0].data[N] access for backwards compatibility with tests."""
+  __slots__ = ('addr', 'bus', 'dlc', 'data')
+
+  def __init__(self, addr, bus, dlc, data):
+    self.addr = addr
+    self.bus = bus
+    self.dlc = dlc
+    self.data = data if isinstance(data, bytes) else bytes(data)
+
+  def __getitem__(self, i):
+    # Lazily convert to mutable bytearray, padded to 64 bytes to match CFFI CANPacket_t
+    if isinstance(self.data, bytes):
+      d = bytearray(64)
+      d[:len(self.data)] = self.data
+      self.data = d
+    return self
+
+
 def make_msg(bus, addr, length=8, dat=None):
   if dat is None:
-    dat = b'\x00' * length
-  return libsafety_py.make_CANPacket(addr, bus, dat)
+    dat = _ZERO_DAT if length == 8 else b'\x00' * length
+  return CANMsg(addr, bus, _LEN_TO_DLC[len(dat)], dat)
 
 
 class CANPackerSafety(CANPacker):
   def make_can_msg_safety(self, name_or_addr, bus, values, fix_checksum=None):
-    msg = self.make_can_msg(name_or_addr, bus, values)
     if fix_checksum is not None:
+      msg = self.make_can_msg(name_or_addr, bus, values)
       msg = fix_checksum(msg)
-    addr, dat, bus = msg
-    return libsafety_py.make_CANPacket(addr, bus, dat)
+      addr, dat, bus = msg
+      return CANMsg(addr, bus, _LEN_TO_DLC[len(dat)], dat)
+    # Fast path: avoid make_can_msg overhead
+    if isinstance(name_or_addr, str):
+      addr = self.dbc.name_to_msg[name_or_addr].address
+    else:
+      addr = name_or_addr
+    dat = self.pack(addr, values)
+    return CANMsg(addr, bus, _LEN_TO_DLC[len(dat)], dat)
 
 
 def add_regen_tests(cls):
@@ -85,9 +118,19 @@ class SafetyTestBase(unittest.TestCase):
                                  self.safety.get_current_safety_param())
 
   def _rx(self, msg):
+    if isinstance(msg, CANMsg):
+      d = msg.data
+      if not isinstance(d, bytes):
+        d = bytes(d)
+      return _fast_rx(msg.addr, msg.bus, msg.dlc, d, len(d))
     return self.safety.safety_rx_hook(msg)
 
   def _tx(self, msg):
+    if isinstance(msg, CANMsg):
+      d = msg.data
+      if not isinstance(d, bytes):
+        d = bytes(d)
+      return _fast_tx(msg.addr, msg.bus, msg.dlc, d, len(d))
     return self.safety.safety_tx_hook(msg)
 
   def _generic_limit_safety_check(self, msg_function: MessageFunction, min_allowed_value: float, max_allowed_value: float,

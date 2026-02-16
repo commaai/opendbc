@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 import os
 import glob
-import pytest
 import shutil
 import subprocess
 import tempfile
 import random
+from concurrent.futures import ThreadPoolExecutor
+
+random.seed(0)
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 ROOT = os.path.join(HERE, "../../../../")
@@ -44,8 +46,8 @@ for p in patterns:
 mutations = random.sample(mutations, 2)  # can remove this once cppcheck is faster
 
 
-@pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
-def test_misra_mutation(fn, rule, transform, should_fail):
+def _run_single_mutation(args):
+  fn, rule, transform, should_fail = args
   with tempfile.TemporaryDirectory() as tmp:
     shutil.copytree(ROOT, tmp, dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns('.venv', 'cppcheck', '.git', '*.ctu-info', '.hypothesis'))
@@ -60,8 +62,16 @@ def test_misra_mutation(fn, rule, transform, should_fail):
     # run test
     r = subprocess.run(f"OPENDBC_ROOT={tmp} opendbc/safety/tests/misra/test_misra.sh",
                        stdout=subprocess.PIPE, cwd=ROOT, shell=True, encoding='utf8')
-    print(r.stdout) # helpful for debugging failures
     failed = r.returncode != 0
-    assert failed == should_fail
+    return fn, rule, should_fail, failed, r.stdout
+
+
+def test_misra_mutation():
+  """Run all sampled mutations concurrently."""
+  with ThreadPoolExecutor(max_workers=len(mutations)) as pool:
+    results = list(pool.map(_run_single_mutation, mutations))
+  for fn, rule, should_fail, failed, stdout in results:
+    print(stdout)
+    assert failed == should_fail, f"Mutation {fn} {rule}: expected fail={should_fail}, got {failed}"
     if should_fail:
-      assert rule in r.stdout, "MISRA test failed but not for the correct violation"
+      assert rule in stdout, f"MISRA test failed but not for the correct violation: {rule}"
