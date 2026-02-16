@@ -68,15 +68,15 @@ TEST_IDS: dict[str, tuple[str, ...]] = {
   ),
   "test_gm.py": (
     "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_gm.GmLongitudinalBase.test_allow_engage_with_gas_pressed",
+    "opendbc.safety.tests.test_gm.TestGmAscmSafety.test_allow_engage_with_gas_pressed",
     "opendbc.safety.tests.test_gm.TestGmCameraEVSafety.test_against_torque_driver",
     "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_steer_safety_check",
     "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_realtime_limits",
   ),
   "test_honda.py": (
     "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_honda.HondaBase.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_honda.HondaButtonEnableBase.test_allow_engage_with_gas_pressed",
+    "opendbc.safety.tests.test_honda.TestHondaNidecPcmSafety.test_allow_engage_with_gas_pressed",
+    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_allow_engage_with_gas_pressed",
     "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_allow_engage_with_gas_pressed",
     "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_allow_user_brake_at_zero_speed",
     "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_brake_safety_check",
@@ -97,7 +97,7 @@ TEST_IDS: dict[str, tuple[str, ...]] = {
   ),
   "test_hyundai.py": (
     "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_req_bit_frames",
-    "opendbc.safety.tests.hyundai_common.HyundaiLongitudinalBase.test_accel_actuation_limits",
+    "opendbc.safety.tests.test_hyundai.TestHyundaiLongitudinalSafety.test_accel_actuation_limits",
     "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_against_torque_driver",
     "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafetyEV.test_against_torque_driver",
     "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_safety_check",
@@ -105,7 +105,7 @@ TEST_IDS: dict[str, tuple[str, ...]] = {
   ),
   "test_hyundai_canfd.py": (
     "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering_0.test_steer_req_bit_frames",
-    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdBase.test_against_torque_driver",
+    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLKASteeringEV.test_against_torque_driver",
     "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering.test_against_torque_driver",
     "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteeringAltButtons.test_acc_cancel",
   ),
@@ -121,12 +121,12 @@ TEST_IDS: dict[str, tuple[str, ...]] = {
   ),
   "test_psa.py": (
     "opendbc.safety.tests.test_psa.TestPsaStockSafety.test_angle_cmd_when_disabled",
-    "opendbc.safety.tests.test_psa.TestPsaSafetyBase.test_allow_engage_with_gas_pressed",
+    "opendbc.safety.tests.test_psa.TestPsaStockSafety.test_allow_engage_with_gas_pressed",
   ),
   "test_rivian.py": (
     "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_against_torque_driver",
     "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_rivian.TestRivianSafetyBase.test_accel_actuation_limits",
+    "opendbc.safety.tests.test_rivian.TestRivianStockSafety.test_accel_actuation_limits",
     "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_steer_safety_check",
     "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_realtime_limits",
   ),
@@ -159,7 +159,7 @@ TEST_IDS: dict[str, tuple[str, ...]] = {
   ),
   "test_volkswagen_mlb.py": (
     "opendbc.safety.tests.test_volkswagen_mlb.TestVolkswagenMlbStockSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_volkswagen_mlb.TestVolkswagenMlbSafetyBase.test_against_torque_driver",
+    "opendbc.safety.tests.test_volkswagen_mlb.TestVolkswagenMlbStockSafety.test_against_torque_driver",
   ),
   "test_volkswagen_mqb.py": (
     "opendbc.safety.tests.test_volkswagen_mqb.TestVolkswagenMqbLongSafety.test_against_torque_driver",
@@ -169,7 +169,7 @@ TEST_IDS: dict[str, tuple[str, ...]] = {
   "test_volkswagen_pq.py": (
     "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqLongSafety.test_torque_cmd_enable_variants",
     "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqLongSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqSafetyBase.test_against_torque_driver",
+    "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqStockSafety.test_against_torque_driver",
   ),
 }
 
@@ -996,8 +996,13 @@ def main() -> int:
         )
 
     if pruned_compile_sites > 0:
-      sites = [replace(s, site_id=i) for i, s in enumerate(compile_sites)]
+      sites = compile_sites
       print(f"Pruned {pruned_compile_sites} build-incompatible mutants for single-library mode", flush=True)
+
+    compiled_source = mutation_lib.with_suffix(".c").read_text()
+    compiled_ids = _parse_compile_error_site_ids(compiled_source)
+    runtime_ids = {s.site_id for s in sites}
+    assert compiled_ids == runtime_ids, f"Compiled IDs don't match runtime IDs: compiled={compiled_ids} runtime={runtime_ids}"
 
     smoke_targets = [SAFETY_TESTS_DIR / name for name in SMOKE_TESTS]
     baseline_result = run_unittest(smoke_targets, mutation_lib, mutant_id=-1, verbose=args.verbose)
