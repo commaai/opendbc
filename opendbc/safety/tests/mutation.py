@@ -41,31 +41,7 @@ CORE_KILLER_TESTS = [
   "test_nissan.py",
 ]
 
-FAST_TEST_IDS_BY_TEST: dict[str, tuple[str, ...]] = {
-  "test_body.py": ("opendbc.safety.tests.test_body.TestBody.test_manually_enable_controls_allowed",),
-  "test_chrysler.py": ("opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_exceed_torque_sensor",),
-  "test_defaults.py": ("opendbc.safety.tests.test_defaults.TestAllOutput.test_default_controls_not_allowed",),
-  "test_elm327.py": ("opendbc.safety.tests.test_elm327.TestElm327.test_default_controls_not_allowed",),
-  "test_ford.py": ("opendbc.safety.tests.test_ford.TestFordCANFDLongitudinalSafety.test_curvature_rate_limits",),
-  "test_gm.py": ("opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_against_torque_driver",),
-  "test_honda.py": ("opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_steer_safety_check",),
-  "test_hyundai.py": ("opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_req_bit_frames",),
-  "test_hyundai_canfd.py": ("opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering_0.test_steer_req_bit_frames",),
-  "test_mazda.py": ("opendbc.safety.tests.test_mazda.TestMazdaSafety.test_against_torque_driver",),
-  "test_nissan.py": ("opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_cmd_when_disabled",),
-  "test_psa.py": ("opendbc.safety.tests.test_psa.TestPsaStockSafety.test_angle_cmd_when_disabled",),
-  "test_rivian.py": ("opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_against_torque_driver",),
-  "test_subaru.py": ("opendbc.safety.tests.test_subaru.TestSubaruGen1LongitudinalSafety.test_steer_req_bit_frames",),
-  "test_subaru_preglobal.py": ("opendbc.safety.tests.test_subaru_preglobal.TestSubaruPreglobalReversedDriverTorqueSafety.test_steer_safety_check",),
-  "test_tesla.py": ("opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_disabled",),
-  "test_toyota.py": ("opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_exceed_torque_sensor",),
-  "test_volkswagen_mlb.py": ("opendbc.safety.tests.test_volkswagen_mlb.TestVolkswagenMlbStockSafety.test_against_torque_driver",),
-  "test_volkswagen_mqb.py": ("opendbc.safety.tests.test_volkswagen_mqb.TestVolkswagenMqbLongSafety.test_against_torque_driver",),
-  "test_volkswagen_pq.py": ("opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqLongSafety.test_torque_cmd_enable_variants",),
-}
-
-# Expanded test IDs: multiple tests per module from different test classes for thorough mode-specific testing
-EXPANDED_TEST_IDS_BY_TEST: dict[str, tuple[str, ...]] = {
+TEST_IDS: dict[str, tuple[str, ...]] = {
   "test_body.py": (
     "opendbc.safety.tests.test_body.TestBody.test_manually_enable_controls_allowed",
     "opendbc.safety.tests.test_body.TestBody.test_can_flasher",
@@ -208,69 +184,17 @@ COMPARISON_OPERATOR_MAP = {
   "<=": ">",
 }
 
-ARITHMETIC_OPERATOR_MAP = {
-  "+": "-",
-  "-": "+",
-  "*": "/",
-  "/": "*",
-  "%": "*",
-}
-
-BITWISE_OPERATOR_MAP = {
-  "&": "|",
-  "|": "&",
-  "^": "&",
-}
-
-ARITHMETIC_ASSIGNMENT_OPERATOR_MAP = {
-  "+=": "-=",
-  "-=": "+=",
-  "*=": "/=",
-  "/=": "*=",
-  "%=": "*=",
-}
-
-BITWISE_ASSIGNMENT_OPERATOR_MAP = {
-  "&=": "|=",
-  "|=": "&=",
-  "^=": "&=",
-}
-
-INCREMENT_OPERATOR_MAP = {
-  "++": "--",
-}
-
-DECREMENT_OPERATOR_MAP = {
-  "--": "++",
-}
-
-REMOVE_NEGATION_OPERATOR_MAP = {
-  "!": "",
-}
-
 MUTATOR_FAMILIES = {
+  "increment": ("UnaryOperator", {"++": "--"}),
+  "decrement": ("UnaryOperator", {"--": "++"}),
   "comparison": ("BinaryOperator", COMPARISON_OPERATOR_MAP),
-  "arithmetic": ("BinaryOperator", ARITHMETIC_OPERATOR_MAP),
-  "bitwise": ("BinaryOperator", BITWISE_OPERATOR_MAP),
-  "arithmetic_assignment": ("CompoundAssignOperator", ARITHMETIC_ASSIGNMENT_OPERATOR_MAP),
-  "bitwise_assignment": ("CompoundAssignOperator", BITWISE_ASSIGNMENT_OPERATOR_MAP),
-  "increment": ("UnaryOperator", INCREMENT_OPERATOR_MAP),
-  "decrement": ("UnaryOperator", DECREMENT_OPERATOR_MAP),
-  "remove_negation": ("UnaryOperator", REMOVE_NEGATION_OPERATOR_MAP),
   "boundary": ("IntegerLiteral", {}),
+  "bitwise_assignment": ("CompoundAssignOperator", {"&=": "|=", "|=": "&=", "^=": "&="}),
+  "bitwise": ("BinaryOperator", {"&": "|", "|": "&", "^": "&"}),
+  "arithmetic_assignment": ("CompoundAssignOperator", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
+  "arithmetic": ("BinaryOperator", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
+  "remove_negation": ("UnaryOperator", {"!": ""}),
 }
-
-MULL_MUTATOR_FAMILIES = (
-  "increment",
-  "decrement",
-  "comparison",
-  "boundary",
-  "bitwise_assignment",
-  "bitwise",
-  "arithmetic_assignment",
-  "arithmetic",
-  "remove_negation",
-)
 
 
 @dataclass(frozen=True)
@@ -322,7 +246,7 @@ def parse_args() -> argparse.Namespace:
   parser.add_argument(
     "--mutator",
     default="all",
-    choices=["all", *MULL_MUTATOR_FAMILIES],
+    choices=["all", *MUTATOR_FAMILIES],
     help="mutator family to run, or 'all' for full Mull-like set",
   )
   parser.add_argument(
@@ -345,14 +269,14 @@ def find_clang() -> str:
   raise RuntimeError("clang is required (tried clang-17 and clang)")
 
 
-def run_command(cmd: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None, capture: bool = False) -> subprocess.CompletedProcess[str]:
+def run_command(cmd: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
   return subprocess.run(
     cmd,
     cwd=cwd,
     env=env,
     check=False,
     text=True,
-    capture_output=capture,
+    capture_output=True,
   )
 
 
@@ -409,7 +333,7 @@ def build_preprocessed_line_map(preprocessed_file: Path) -> dict[int, tuple[Path
 
 
 def resolve_rules(selected_mutator: str, operator_filter: str) -> list[MutationRule]:
-  mutators = list(MULL_MUTATOR_FAMILIES) if selected_mutator == "all" else [selected_mutator]
+  mutators = list(MUTATOR_FAMILIES) if selected_mutator == "all" else [selected_mutator]
   rules: list[MutationRule] = []
 
   for mutator in mutators:
@@ -642,7 +566,7 @@ def preprocess_source(clang_bin: str, input_source: Path, preprocessed_source: P
     "-o",
     str(preprocessed_source),
   ]
-  proc = run_command(cmd, cwd=ROOT, capture=True)
+  proc = run_command(cmd, cwd=ROOT)
   if proc.returncode != 0:
     raise RuntimeError(f"Failed to preprocess source:\n{proc.stderr}")
 
@@ -658,7 +582,7 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
     "-fsyntax-only",
     str(preprocessed_file),
   ]
-  proc = run_command(cmd, cwd=ROOT, capture=True)
+  proc = run_command(cmd, cwd=ROOT)
   if proc.returncode != 0:
     raise RuntimeError(f"Failed to parse AST:\n{proc.stderr}")
 
@@ -724,10 +648,14 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
   return out, counts
 
 
-def build_priority_tests(site: MutationSite, *, full_module: bool = False) -> list[str]:
-  ordered_names: list[str] = []
-  use_expanded = False
+MODE_TEST_MAP = {
+  "hyundai_common": ["test_hyundai.py", "test_hyundai_canfd.py"],
+  "volkswagen_common": ["test_volkswagen_mqb.py", "test_volkswagen_pq.py", "test_volkswagen_mlb.py"],
+  "subaru_preglobal": ["test_subaru_preglobal.py", "test_subaru.py"],
+}
 
+
+def build_priority_tests(site: MutationSite) -> list[str]:
   rel_parts: tuple[str, ...] = ()
   src = display_file(site)
   try:
@@ -736,24 +664,13 @@ def build_priority_tests(site: MutationSite, *, full_module: bool = False) -> li
     rel_parts = ()
 
   if len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes") and src.stem != "defaults":
-    use_expanded = True
-    mode_stem = src.stem
-    if mode_stem == "hyundai_common":
-      ordered_names.extend(["test_hyundai.py", "test_hyundai_canfd.py"])
-    elif mode_stem == "volkswagen_common":
-      ordered_names.extend(["test_volkswagen_mqb.py", "test_volkswagen_pq.py", "test_volkswagen_mlb.py"])
-    elif mode_stem == "subaru_preglobal":
-      ordered_names.extend(["test_subaru_preglobal.py", "test_subaru.py"])
-    else:
-      ordered_names.append(f"test_{mode_stem}.py")
+    ordered_names = MODE_TEST_MAP.get(src.stem, [f"test_{src.stem}.py"])
   elif len(rel_parts) >= 3 and rel_parts[:2] == ("opendbc", "safety"):
-    use_expanded = True
-    ordered_names.extend(CORE_KILLER_TESTS)
+    ordered_names = list(CORE_KILLER_TESTS)
   else:
-    ordered_names.extend(SMOKE_TESTS)
+    ordered_names = list(SMOKE_TESTS)
 
-  return _test_targets_from_names(ordered_names, use_expanded=use_expanded, full_module=full_module)
-
+  return _test_targets_from_names(ordered_names)
 
 
 def _test_module_name(test_file: Path) -> str:
@@ -761,10 +678,8 @@ def _test_module_name(test_file: Path) -> str:
   return ".".join(rel.with_suffix("").parts)
 
 
-def _test_targets_from_names(ordered_names: list[str], *, use_expanded: bool = False, full_module: bool = False) -> list[str]:
+def _test_targets_from_names(ordered_names: list[str]) -> list[str]:
   tests_by_name = _tests_by_name()
-  id_source = EXPANDED_TEST_IDS_BY_TEST if use_expanded else FAST_TEST_IDS_BY_TEST
-
   out: list[str] = []
   seen_names: set[str] = set()
   seen_ids: set[str] = set()
@@ -777,23 +692,17 @@ def _test_targets_from_names(ordered_names: list[str], *, use_expanded: bool = F
     if test_file is None:
       continue
 
-    if full_module:
+    targets = TEST_IDS.get(name)
+    if targets is not None:
+      for t in targets:
+        if t not in seen_ids:
+          seen_ids.add(t)
+          out.append(t)
+    else:
       mod = _test_module_name(test_file)
       if mod not in seen_ids:
         seen_ids.add(mod)
         out.append(mod)
-    else:
-      targets = id_source.get(name)
-      if targets is not None:
-        for t in targets:
-          if t not in seen_ids:
-            seen_ids.add(t)
-            out.append(t)
-      else:
-        mod = _test_module_name(test_file)
-        if mod not in seen_ids:
-          seen_ids.add(mod)
-          out.append(mod)
   return out
 
 
@@ -801,25 +710,6 @@ def _test_targets_from_names(ordered_names: list[str], *, use_expanded: bool = F
 def _tests_by_name() -> dict[str, Path]:
   return {p.name: p for p in sorted(SAFETY_TESTS_DIR.glob("test_*.py"))}
 
-
-@functools.cache
-def _ordered_all_tests() -> tuple[str, ...]:
-  tests_by_name = _tests_by_name()
-  ordered_names: list[str] = []
-  seen: set[str] = set()
-
-  for name in [*CORE_KILLER_TESTS, *SMOKE_TESTS]:
-    if name not in tests_by_name or name in seen:
-      continue
-    seen.add(name)
-    ordered_names.append(name)
-
-  for name in sorted(tests_by_name):
-    if name in seen:
-      continue
-    ordered_names.append(name)
-
-  return tuple(_test_targets_from_names(ordered_names))
 
 
 def parse_failed_unittest(stdout: str) -> str | None:
@@ -1048,18 +938,15 @@ int mutation_get_active_mutant(void) { return __mutation_active_id; }
   ]
 
   t0 = time.perf_counter()
-  proc = run_command(cmd, cwd=ROOT, capture=True)
+  proc = run_command(cmd, cwd=ROOT)
   duration = time.perf_counter() - t0
   if proc.returncode != 0:
     raise RuntimeError(proc.stderr.strip() or "unknown compile failure")
   return duration
 
 
-def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool, full_module: bool = False) -> MutantResult:
-  priority_tests = build_priority_tests(site, full_module=full_module)
-  if not priority_tests:
-    priority_tests = list(_ordered_all_tests())
-
+def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResult:
+  priority_tests = build_priority_tests(site)
   try:
     test_result = run_unittest(priority_tests, lib_path, mutant_id=site.site_id, verbose=verbose)
     if test_result.returncode != 0 and test_result.failed_test is not None:
@@ -1073,9 +960,7 @@ def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool, full_module: 
 
 
 def baseline_smoke_test(lib_path: Path, verbose: bool) -> TestRunResult:
-  smoke_files = [SAFETY_TESTS_DIR / name for name in SMOKE_TESTS if (SAFETY_TESTS_DIR / name).exists()]
-  if not smoke_files:
-    smoke_files = sorted(SAFETY_TESTS_DIR.glob("test_*.py"))
+  smoke_files = [SAFETY_TESTS_DIR / name for name in SMOKE_TESTS]
   return run_unittest(smoke_files, lib_path, mutant_id=-1, verbose=verbose)
 
 
@@ -1106,7 +991,7 @@ def main() -> int:
     if args.max_mutants > 0:
       sites = sites[: args.max_mutants]
 
-    mutator_summary = ", ".join(f"{name} ({mutator_counts.get(name, 0)})" for name in MULL_MUTATOR_FAMILIES if mutator_counts.get(name, 0) > 0)
+    mutator_summary = ", ".join(f"{name} ({mutator_counts.get(name, 0)})" for name in MUTATOR_FAMILIES if mutator_counts.get(name, 0) > 0)
     print(f"Found {len(sites)} unique candidates: {mutator_summary}", flush=True)
     if args.list_only:
       for site in sites:
@@ -1233,32 +1118,20 @@ def main() -> int:
     initial_survivors = [r for r in results if r.outcome == "survived"]
     if initial_survivors:
       print(f"\nVerifying {len(initial_survivors)} survivors...", flush=True)
-      verified_results: list[MutantResult] = []
       with ProcessPoolExecutor(max_workers=args.j, max_tasks_per_child=1) as pool:
         verify_futures = {pool.submit(eval_mutant, r.site, mutation_lib, args.verbose): r for r in initial_survivors}
-        try:
-          for fut in as_completed(verify_futures):
-            try:
-              vres = fut.result()
-            except Exception:
-              orig = verify_futures[fut]
-              vres = MutantResult(orig.site, "killed", "tests", "worker-crash", 0.0, "verification crash")
-            verified_results.append(vres)
-        except Exception:
-          for fut, orig in verify_futures.items():
-            if not any(v.site.site_id == orig.site.site_id for v in verified_results):
-              verified_results.append(MutantResult(orig.site, "killed", "tests", "worker-crash", 0.0, "pool broken"))
-      # Update results: replace survivors that were killed in verification
-      newly_killed = {v.site.site_id: v for v in verified_results if v.outcome == "killed"}
+        verified: dict[int, MutantResult] = {}
+        for fut in as_completed(verify_futures):
+          try:
+            vres = fut.result()
+          except Exception:
+            orig = verify_futures[fut]
+            vres = MutantResult(orig.site, "survived", "tests", None, 0.0, "verification crash")
+          verified[vres.site.site_id] = vres
+      newly_killed = {sid: v for sid, v in verified.items() if v.outcome == "killed"}
       if newly_killed:
         print(f"  {len(newly_killed)} flaky mutants reclassified as killed", flush=True)
-        new_results: list[MutantResult] = []
-        for r in results:
-          if r.site.site_id in newly_killed:
-            new_results.append(newly_killed[r.site.site_id])
-          else:
-            new_results.append(r)
-        results = new_results
+        results = [newly_killed.get(r.site.site_id, r) if r.outcome == "survived" else r for r in results]
         killed = sum(1 for r in results if r.outcome == "killed")
         survived = sum(1 for r in results if r.outcome == "survived")
         infra = sum(1 for r in results if r.outcome == "infra_error")
