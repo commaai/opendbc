@@ -125,7 +125,8 @@ class CarController(CarControllerBase):
     # *** rate limit steer ***
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                 self.params.STEER_DELTA_UP * DT_CTRL)
-    self.last_torque = limited_torque
+    lkas_active = CC.latActive and CS.out.vEgo >= self.CP.minSteerSpeed
+    self.last_torque = limited_torque if lkas_active else 0
 
     # *** apply brake hysteresis ***
     pre_limit_brake, self.braking, self.brake_steady = actuator_hysteresis(brake, self.braking, self.brake_steady,
@@ -152,7 +153,6 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.
-    lkas_active = CC.latActive and CS.out.vEgo >= self.CP.minSteerSpeed
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, lkas_active, self.tja_control))
 
     # wind brake from air resistance decel at high speed
