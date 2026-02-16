@@ -1,14 +1,16 @@
 import os
+from typing import cast
 from cffi import FFI
 
 from opendbc.safety import LEN_TO_DLC
 
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))
-libsafety_fn = os.path.join(libsafety_dir, "libsafety.so")
+libsafety_fn = os.environ.get("LIBSAFETY_PATH", os.path.join(libsafety_dir, "libsafety.so"))
 
 ffi = FFI()
 
-ffi.cdef("""
+ffi.cdef(
+  """
 typedef struct {
   unsigned char fd : 1;
   unsigned char bus : 3;
@@ -20,9 +22,14 @@ typedef struct {
   unsigned char checksum;
   unsigned char data[64];
 } CANPacket_t;
-""", packed=True)
+""",
+  packed=True,
+)
+
+
 class CANPacket:
   pass
+
 
 ffi.cdef("""
 bool safety_rx_hook(CANPacket_t *msg);
@@ -77,14 +84,27 @@ bool get_honda_fwd_brake(void);
 void set_honda_alt_brake_msg(bool c);
 void set_honda_bosch_long(bool c);
 int get_honda_hw(void);
+
+void mutation_set_active_mutant(int id);
+int mutation_get_active_mutant(void);
 """)
+
 
 class LibSafety:
   pass
-libsafety: LibSafety = ffi.dlopen(libsafety_fn)
+
+
+libsafety = cast(LibSafety, ffi.dlopen(libsafety_fn))
+
+active_mutant = os.environ.get("MUTATION_ACTIVE_ID")
+if active_mutant is not None:
+  set_active_mutant = getattr(libsafety, "mutation_set_active_mutant", None)
+  if callable(set_active_mutant):
+    set_active_mutant(int(active_mutant))
+
 
 def make_CANPacket(addr: int, bus: int, dat):
-  ret = ffi.new('CANPacket_t *')
+  ret = ffi.new("CANPacket_t *")
   ret[0].extended = 1 if addr >= 0x800 else 0
   ret[0].addr = addr
   ret[0].data_len_code = LEN_TO_DLC[len(dat)]
