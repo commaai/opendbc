@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import io
 import json
 import os
@@ -12,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections.abc import Sequence
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -28,6 +30,39 @@ SMOKE_TESTS = [
   "test_elm327.py",
   "test_body.py",
 ]
+
+CORE_KILLER_TESTS = [
+  "test_chrysler.py",
+  "test_ford.py",
+  "test_gm.py",
+  "test_hyundai.py",
+  "test_rivian.py",
+  "test_tesla.py",
+  "test_nissan.py",
+]
+
+FAST_TEST_IDS_BY_TEST: dict[str, tuple[str, ...]] = {
+  "test_body.py": ("opendbc.safety.tests.test_body.TestBody.test_manually_enable_controls_allowed",),
+  "test_chrysler.py": ("opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_exceed_torque_sensor",),
+  "test_defaults.py": ("opendbc.safety.tests.test_defaults.TestAllOutput.test_default_controls_not_allowed",),
+  "test_elm327.py": ("opendbc.safety.tests.test_elm327.TestElm327.test_default_controls_not_allowed",),
+  "test_ford.py": ("opendbc.safety.tests.test_ford.TestFordCANFDLongitudinalSafety.test_curvature_rate_limits",),
+  "test_gm.py": ("opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_against_torque_driver",),
+  "test_honda.py": ("opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_steer_safety_check",),
+  "test_hyundai.py": ("opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_req_bit_frames",),
+  "test_hyundai_canfd.py": ("opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering_0.test_steer_req_bit_frames",),
+  "test_mazda.py": ("opendbc.safety.tests.test_mazda.TestMazdaSafety.test_against_torque_driver",),
+  "test_nissan.py": ("opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_cmd_when_disabled",),
+  "test_psa.py": ("opendbc.safety.tests.test_psa.TestPsaStockSafety.test_angle_cmd_when_disabled",),
+  "test_rivian.py": ("opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_against_torque_driver",),
+  "test_subaru.py": ("opendbc.safety.tests.test_subaru.TestSubaruGen1LongitudinalSafety.test_steer_req_bit_frames",),
+  "test_subaru_preglobal.py": ("opendbc.safety.tests.test_subaru_preglobal.TestSubaruPreglobalReversedDriverTorqueSafety.test_steer_safety_check",),
+  "test_tesla.py": ("opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_disabled",),
+  "test_toyota.py": ("opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_exceed_torque_sensor",),
+  "test_volkswagen_mlb.py": ("opendbc.safety.tests.test_volkswagen_mlb.TestVolkswagenMlbStockSafety.test_against_torque_driver",),
+  "test_volkswagen_mqb.py": ("opendbc.safety.tests.test_volkswagen_mqb.TestVolkswagenMqbLongSafety.test_against_torque_driver",),
+  "test_volkswagen_pq.py": ("opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqLongSafety.test_torque_cmd_enable_variants",),
+}
 
 COMPARISON_OPERATOR_MAP = {
   "==": "!=",
@@ -554,10 +589,8 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
   return out, counts
 
 
-def build_priority_tests(site: MutationSite) -> list[Path]:
-  tests_by_name = {p.name: p for p in sorted(SAFETY_TESTS_DIR.glob("test_*.py"))}
+def build_priority_tests(site: MutationSite) -> list[str]:
   ordered_names: list[str] = []
-  ordered_names.extend(SMOKE_TESTS)
 
   rel_parts: tuple[str, ...] = ()
   src = display_file(site)
@@ -576,17 +609,64 @@ def build_priority_tests(site: MutationSite) -> list[Path]:
       ordered_names.extend(["test_subaru_preglobal.py", "test_subaru.py"])
     else:
       ordered_names.append(f"test_{mode_stem}.py")
+  elif len(rel_parts) >= 3 and rel_parts[:2] == ("opendbc", "safety"):
+    ordered_names.extend(CORE_KILLER_TESTS)
+  else:
+    ordered_names.extend(SMOKE_TESTS)
 
-  out: list[Path] = []
+  return _test_targets_from_names(ordered_names)
+
+
+def _test_module_name(test_file: Path) -> str:
+  rel = test_file.relative_to(ROOT)
+  return ".".join(rel.with_suffix("").parts)
+
+
+def _test_targets_from_names(ordered_names: list[str]) -> list[str]:
+  tests_by_name = _tests_by_name()
+
+  out: list[str] = []
   seen: set[str] = set()
   for name in ordered_names:
     if name in seen:
       continue
     seen.add(name)
+
     test_file = tests_by_name.get(name)
-    if test_file is not None:
-      out.append(test_file)
+    if test_file is None:
+      continue
+
+    fast_targets = FAST_TEST_IDS_BY_TEST.get(name)
+    if fast_targets is not None:
+      out.extend(fast_targets)
+    else:
+      out.append(_test_module_name(test_file))
   return out
+
+
+@functools.cache
+def _tests_by_name() -> dict[str, Path]:
+  return {p.name: p for p in sorted(SAFETY_TESTS_DIR.glob("test_*.py"))}
+
+
+@functools.cache
+def _ordered_all_tests() -> tuple[str, ...]:
+  tests_by_name = _tests_by_name()
+  ordered_names: list[str] = []
+  seen: set[str] = set()
+
+  for name in [*CORE_KILLER_TESTS, *SMOKE_TESTS]:
+    if name not in tests_by_name or name in seen:
+      continue
+    seen.add(name)
+    ordered_names.append(name)
+
+  for name in sorted(tests_by_name):
+    if name in seen:
+      continue
+    ordered_names.append(name)
+
+  return tuple(_test_targets_from_names(ordered_names))
 
 
 def parse_failed_unittest(stdout: str) -> str | None:
@@ -692,19 +772,16 @@ def _parse_internal_site_ids(error_text: str) -> set[int]:
   return {int(v) for v in re.findall(r"site_id=(\d+)", error_text)}
 
 
-def run_unittest(files: list[Path], lib_path: Path, mutant_id: int, verbose: bool) -> TestRunResult:
+def run_unittest(targets: Sequence[Path | str], lib_path: Path, mutant_id: int, verbose: bool) -> TestRunResult:
   os.environ["MUTATION"] = "1"
   os.environ["LIBSAFETY_PATH"] = str(lib_path)
   os.environ["MUTATION_ACTIVE_ID"] = str(mutant_id)
 
-  to_clear: list[str] = []
-  for name in list(sys.modules):
-    if name.startswith("opendbc.safety.tests.test_"):
-      to_clear.append(name)
-  for name in to_clear:
-    sys.modules.pop(name, None)
-
   from opendbc.safety.tests.libsafety.libsafety_py import libsafety
+
+  init_tests = getattr(libsafety, "init_tests", None)
+  if callable(init_tests):
+    init_tests()
 
   set_mutant = getattr(libsafety, "mutation_set_active_mutant", None)
   if callable(set_mutant):
@@ -712,15 +789,17 @@ def run_unittest(files: list[Path], lib_path: Path, mutant_id: int, verbose: boo
 
   loader = unittest.TestLoader()
   suite = unittest.TestSuite()
-  module_names: list[str] = []
-  for file_path in files:
-    rel = file_path.relative_to(ROOT)
-    module_name = ".".join(rel.with_suffix("").parts)
-    module_names.append(module_name)
-    suite.addTests(loader.loadTestsFromName(module_name))
+  target_names: list[str] = []
+  for target in targets:
+    if isinstance(target, Path):
+      target_name = _test_module_name(target)
+    else:
+      target_name = target
+    target_names.append(target_name)
+    suite.addTests(loader.loadTestsFromName(target_name))
 
   if verbose:
-    print("Running unittest modules:", ", ".join(module_names), flush=True)
+    print("Running unittest targets:", ", ".join(target_names), flush=True)
 
   stream = io.StringIO()
   runner = unittest.TextTestRunner(stream=stream, verbosity=0, failfast=True)
@@ -732,8 +811,13 @@ def run_unittest(files: list[Path], lib_path: Path, mutant_id: int, verbose: boo
   stderr = ""
   returncode = 0 if result.wasSuccessful() else 1
 
-  combined = stdout
-  failed_test = parse_failed_unittest(combined)
+  failed_test: str | None = None
+  if result.failures:
+    failed_test = result.failures[0][0].id()
+  elif result.errors:
+    failed_test = result.errors[0][0].id()
+  if failed_test is None:
+    failed_test = parse_failed_unittest(stdout)
   if failed_test is None and not result.wasSuccessful():
     failed_test = "unittest-failure"
 
@@ -819,10 +903,9 @@ int mutation_get_active_mutant(void) { return __mutation_active_id; }
 
 
 def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResult:
-  all_tests = sorted(SAFETY_TESTS_DIR.glob("test_*.py"))
   priority_tests = build_priority_tests(site)
   if not priority_tests:
-    priority_tests = all_tests
+    priority_tests = list(_ordered_all_tests())
 
   try:
     test_sec = 0.0
@@ -833,18 +916,6 @@ def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResu
     if test_result.returncode != 0:
       details = (test_result.stderr or test_result.stdout).strip()
       return MutantResult(site, "infra_error", "tests", None, test_sec, details)
-
-    priority_names = {p.name for p in priority_tests}
-    all_names = {p.name for p in all_tests}
-    if priority_names != all_names:
-      full_result = run_unittest(all_tests, lib_path, mutant_id=site.site_id, verbose=verbose)
-      test_sec += full_result.duration_sec
-      if full_result.returncode != 0 and full_result.failed_test is not None:
-        return MutantResult(site, "killed", "tests", full_result.failed_test, test_sec, "")
-      if full_result.returncode != 0:
-        details = (full_result.stderr or full_result.stdout).strip()
-        return MutantResult(site, "infra_error", "tests", None, test_sec, details)
-
     return MutantResult(site, "survived", "tests", None, test_sec, "")
   except Exception as exc:
     return MutantResult(site, "infra_error", "build", None, 0.0, str(exc))
