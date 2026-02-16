@@ -18,19 +18,26 @@ env = Environment(
     '-O0',
     '-fno-omit-frame-pointer',
     '-grecord-command-line',
-    '-fprofile-arcs',
-    '-ftest-coverage',
     '-DALLOW_DEBUG',
   ],
   LINKFLAGS=[
     '-fsanitize=undefined',
     '-fno-sanitize-recover=undefined',
-    '-fprofile-arcs',
-    '-ftest-coverage',
   ],
   CPPPATH=["#"],
   tools=["default", "compilation_db"],
 )
+
+# add coverage if available
+conf = Configure(env, log_file=None)
+prev = env['LINKFLAGS'][:]
+env.Append(LINKFLAGS=['-fprofile-arcs'])
+has_coverage = conf.TryLink('int main() { return 0; }\n', '.c')
+env['LINKFLAGS'] = prev
+if has_coverage:
+  env.Append(CFLAGS=['-fprofile-arcs', '-ftest-coverage'])
+  env.Append(LINKFLAGS=['-fprofile-arcs', '-ftest-coverage'])
+env = conf.Finish()
 
 safety = env.SharedObject("safety.os", "safety.c")
 libsafety = env.SharedLibrary("libsafety.so", [safety])
