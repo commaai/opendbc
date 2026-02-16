@@ -96,12 +96,6 @@ class LibSafety:
 
 libsafety = cast(LibSafety, ffi.dlopen(libsafety_fn))
 
-active_mutant = os.environ.get("MUTATION_ACTIVE_ID")
-if active_mutant is not None:
-  set_active_mutant = getattr(libsafety, "mutation_set_active_mutant", None)
-  if callable(set_active_mutant):
-    set_active_mutant(int(active_mutant))
-
 
 def make_CANPacket(addr: int, bus: int, dat):
   ret = ffi.new("CANPacket_t *")

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import functools
 import io
 import json
 import os
@@ -224,11 +223,9 @@ class MutationRule:
 
 @dataclass(frozen=True)
 class TestRunResult:
-  returncode: int
   duration_sec: float
   failed_test: str | None
   stdout: str
-  stderr: str
 
 
 @dataclass(frozen=True)
@@ -236,7 +233,6 @@ class MutantResult:
   site: MutationSite
   outcome: str  # killed | survived | infra_error
   stage: str  # tests | build
-  killer_test: str | None
   test_sec: float
   details: str
 
@@ -267,17 +263,6 @@ def find_clang() -> str:
     if shutil.which(clang_bin):
       return clang_bin
   raise RuntimeError("clang is required (tried clang-17 and clang)")
-
-
-def run_command(cmd: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
-  return subprocess.run(
-    cmd,
-    cwd=cwd,
-    env=env,
-    check=False,
-    text=True,
-    capture_output=True,
-  )
 
 
 def format_path(path: Path) -> str:
@@ -566,7 +551,7 @@ def preprocess_source(clang_bin: str, input_source: Path, preprocessed_source: P
     "-o",
     str(preprocessed_source),
   ]
-  proc = run_command(cmd, cwd=ROOT)
+  proc = subprocess.run(cmd, cwd=ROOT, check=False, text=True, capture_output=True)
   if proc.returncode != 0:
     raise RuntimeError(f"Failed to preprocess source:\n{proc.stderr}")
 
@@ -582,7 +567,7 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
     "-fsyntax-only",
     str(preprocessed_file),
   ]
-  proc = run_command(cmd, cwd=ROOT)
+  proc = subprocess.run(cmd, cwd=ROOT, check=False, text=True, capture_output=True)
   if proc.returncode != 0:
     raise RuntimeError(f"Failed to parse AST:\n{proc.stderr}")
 
@@ -616,7 +601,7 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
         if site is not None:
           deduped[(site.source_file, site.op_start, site.op_end, site.mutator)] = site
 
-      for rule in rule_map.get((str(kind), str(opcode)), []):
+      for rule in rule_map.get((kind, opcode), []):
         site = None
         if rule.node_kind in ("BinaryOperator", "CompoundAssignOperator"):
           site = _binary_like_site(node, preprocessed_file, source_cache, rule)
@@ -656,12 +641,11 @@ MODE_TEST_MAP = {
 
 
 def build_priority_tests(site: MutationSite) -> list[str]:
-  rel_parts: tuple[str, ...] = ()
   src = display_file(site)
   try:
     rel_parts = src.relative_to(ROOT).parts
   except ValueError:
-    rel_parts = ()
+    rel_parts: tuple[str, ...] = ()
 
   if len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes") and src.stem != "defaults":
     ordered_names = MODE_TEST_MAP.get(src.stem, [f"test_{src.stem}.py"])
@@ -706,18 +690,8 @@ def _test_targets_from_names(ordered_names: list[str]) -> list[str]:
   return out
 
 
-@functools.cache
 def _tests_by_name() -> dict[str, Path]:
   return {p.name: p for p in sorted(SAFETY_TESTS_DIR.glob("test_*.py"))}
-
-
-
-def parse_failed_unittest(stdout: str) -> str | None:
-  for line in stdout.splitlines():
-    match = re.match(r"^(FAIL|ERROR):\s+.+\(([^)]+)\)$", line)
-    if match:
-      return match.group(2)
-  return None
 
 
 def format_site_snippet(site: MutationSite, context_lines: int = 2) -> str:
@@ -732,19 +706,11 @@ def format_site_snippet(site: MutationSite, context_lines: int = 2) -> str:
   start = max(0, line_idx - context_lines)
   end = min(len(lines), line_idx + context_lines + 1)
 
-  if source == site.source_file:
-    line_start_offset = text.rfind("\n", 0, site.op_start) + 1
-    line_end_offset = text.find("\n", site.op_start)
-    if line_end_offset < 0:
-      line_end_offset = len(text)
-    rel_start = max(0, site.op_start - line_start_offset)
-    rel_end = max(rel_start, min(site.op_end - line_start_offset, line_end_offset - line_start_offset))
-  else:
-    line_text = lines[line_idx]
-    rel_start = line_text.find(site.original_op)
-    if rel_start < 0:
-      rel_start = 0
-    rel_end = rel_start + len(site.original_op)
+  line_text = lines[line_idx]
+  rel_start = line_text.find(site.original_op)
+  if rel_start < 0:
+    rel_start = 0
+  rel_end = rel_start + len(site.original_op)
 
   snippet_lines: list[str] = []
   width = len(str(end))
@@ -816,15 +782,9 @@ def _parse_internal_site_ids(error_text: str) -> set[int]:
 
 
 def run_unittest(targets: Sequence[Path | str], lib_path: Path, mutant_id: int, verbose: bool) -> TestRunResult:
-  os.environ["MUTATION"] = "1"
   os.environ["LIBSAFETY_PATH"] = str(lib_path)
-  os.environ["MUTATION_ACTIVE_ID"] = str(mutant_id)
 
   from opendbc.safety.tests.libsafety.libsafety_py import libsafety
-
-  init_tests = getattr(libsafety, "init_tests", None)
-  if callable(init_tests):
-    init_tests()
 
   set_mutant = getattr(libsafety, "mutation_set_active_mutant", None)
   if callable(set_mutant):
@@ -851,25 +811,17 @@ def run_unittest(targets: Sequence[Path | str], lib_path: Path, mutant_id: int, 
   duration = time.perf_counter() - t0
 
   stdout = stream.getvalue()
-  stderr = ""
-  returncode = 0 if result.wasSuccessful() else 1
 
   failed_test: str | None = None
   if result.failures:
     failed_test = result.failures[0][0].id()
   elif result.errors:
     failed_test = result.errors[0][0].id()
-  if failed_test is None:
-    failed_test = parse_failed_unittest(stdout)
-  if failed_test is None and not result.wasSuccessful():
-    failed_test = "unittest-failure"
 
   return TestRunResult(
-    returncode=returncode,
     duration_sec=duration,
     failed_test=failed_test,
     stdout=stdout,
-    stderr=stderr,
   )
 
 
@@ -938,7 +890,7 @@ int mutation_get_active_mutant(void) { return __mutation_active_id; }
   ]
 
   t0 = time.perf_counter()
-  proc = run_command(cmd, cwd=ROOT)
+  proc = subprocess.run(cmd, cwd=ROOT, check=False, text=True, capture_output=True)
   duration = time.perf_counter() - t0
   if proc.returncode != 0:
     raise RuntimeError(proc.stderr.strip() or "unknown compile failure")
@@ -949,19 +901,11 @@ def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResu
   priority_tests = build_priority_tests(site)
   try:
     test_result = run_unittest(priority_tests, lib_path, mutant_id=site.site_id, verbose=verbose)
-    if test_result.returncode != 0 and test_result.failed_test is not None:
-      return MutantResult(site, "killed", "tests", test_result.failed_test, test_result.duration_sec, "")
-    if test_result.returncode != 0:
-      details = (test_result.stderr or test_result.stdout).strip()
-      return MutantResult(site, "infra_error", "tests", None, test_result.duration_sec, details)
-    return MutantResult(site, "survived", "tests", None, test_result.duration_sec, "")
+    if test_result.failed_test is not None:
+      return MutantResult(site, "killed", "tests", test_result.duration_sec, "")
+    return MutantResult(site, "survived", "tests", test_result.duration_sec, "")
   except Exception as exc:
-    return MutantResult(site, "infra_error", "build", None, 0.0, str(exc))
-
-
-def baseline_smoke_test(lib_path: Path, verbose: bool) -> TestRunResult:
-  smoke_files = [SAFETY_TESTS_DIR / name for name in SMOKE_TESTS]
-  return run_unittest(smoke_files, lib_path, mutant_id=-1, verbose=verbose)
+    return MutantResult(site, "infra_error", "build", 0.0, str(exc))
 
 
 def main() -> int:
@@ -1065,11 +1009,11 @@ def main() -> int:
     else:
       sites = compile_sites
 
-    baseline_result = baseline_smoke_test(mutation_lib, args.verbose)
-    if baseline_result.returncode != 0:
+    smoke_targets = [SAFETY_TESTS_DIR / name for name in SMOKE_TESTS]
+    baseline_result = run_unittest(smoke_targets, mutation_lib, mutant_id=-1, verbose=args.verbose)
+    if baseline_result.failed_test is not None:
       print("Baseline smoke failed with mutant_id=-1; aborting to avoid false kill signals.", flush=True)
-      if baseline_result.failed_test is not None:
-        print(f"  failed_test: {baseline_result.failed_test}", flush=True)
+      print(f"  failed_test: {baseline_result.failed_test}", flush=True)
       details = baseline_result.stdout.strip()
       if details:
         print(details, flush=True)
@@ -1101,7 +1045,7 @@ def main() -> int:
             res = fut.result()
           except Exception:
             site = future_map[fut]
-            res = MutantResult(site, "killed", "tests", "worker-crash", 0.0, "worker process crashed")
+            res = MutantResult(site, "killed", "tests", 0.0, "worker process crashed")
           _record(res)
           elapsed_now = time.perf_counter() - start
           print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=(completed == len(sites)))
@@ -1110,7 +1054,7 @@ def main() -> int:
         completed_ids = {r.site.site_id for r in results}
         for site in sites:
           if site.site_id not in completed_ids:
-            _record(MutantResult(site, "killed", "tests", "worker-crash", 0.0, "pool broken"))
+            _record(MutantResult(site, "killed", "tests", 0.0, "pool broken"))
         elapsed_now = time.perf_counter() - start
         print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=True)
 
@@ -1126,7 +1070,7 @@ def main() -> int:
             vres = fut.result()
           except Exception:
             orig = verify_futures[fut]
-            vres = MutantResult(orig.site, "survived", "tests", None, 0.0, "verification crash")
+            vres = MutantResult(orig.site, "survived", "tests", 0.0, "verification crash")
           verified[vres.site.site_id] = vres
       newly_killed = {sid: v for sid, v in verified.items() if v.outcome == "killed"}
       if newly_killed:
@@ -1157,9 +1101,7 @@ def main() -> int:
         print(f"- #{res.site.site_id} {loc} ({res.stage}): {detail}", flush=True)
 
     elapsed = time.perf_counter() - start
-    total_build_sec = compile_once_sec
     total_test_sec = sum(r.test_sec for r in results)
-    killed_by_tests = sum(1 for r in results if r.outcome == "killed" and r.stage == "tests")
     print("", flush=True)
     print("Mutation summary", flush=True)
     print(f"  mutator: {mutator_label}", flush=True)
@@ -1167,11 +1109,9 @@ def main() -> int:
     print(f"  pruned_build_incompatible: {pruned_compile_sites}", flush=True)
     print(f"  total: {len(sites)}", flush=True)
     print(f"  killed: {killed}", flush=True)
-    print(f"  killed_by_tests: {killed_by_tests}", flush=True)
     print(f"  survived: {survived}", flush=True)
     print(f"  infra_error: {infra}", flush=True)
-    print(f"  build_time_sum: {total_build_sec:.2f}s", flush=True)
-    print(f"  build_once: {compile_once_sec:.2f}s", flush=True)
+    print(f"  build_time: {compile_once_sec:.2f}s", flush=True)
     print(f"  test_time_sum: {total_test_sec:.2f}s", flush=True)
     if len(results) > 0:
       print(f"  avg_test_per_mutant: {total_test_sec / len(results):.3f}s", flush=True)
