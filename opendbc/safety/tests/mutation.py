@@ -12,11 +12,10 @@ import subprocess
 import sys
 import tempfile
 import time
-from collections.abc import Sequence
+import unittest
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, replace
 from pathlib import Path
-import unittest
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -411,6 +410,8 @@ def _binary_like_site(node: dict, preprocessed_file: Path, source_cache: dict[Pa
 
   expr_start = begin_offset if isinstance(begin_offset, int) else None
   expr_end = (end_offset + end_tok_len) if isinstance(end_offset, int) and isinstance(end_tok_len, int) else None
+  if expr_start is None or expr_end is None:
+    return None
 
   txt = _source_text(preprocessed_file, source_cache)
   seen: set[tuple[int, int]] = set()
@@ -425,8 +426,6 @@ def _binary_like_site(node: dict, preprocessed_file: Path, source_cache: dict[Pa
       continue
     op_start = span_start + idx
     op_end = op_start + len(rule.original_op)
-    if expr_start is None or expr_end is None:
-      continue
     site = _make_site(preprocessed_file, source_cache, rule, expr_start, expr_end, op_start, op_end, begin.get("line"), begin.get("col"))
     if site is not None:
       return site
@@ -435,7 +434,7 @@ def _binary_like_site(node: dict, preprocessed_file: Path, source_cache: dict[Pa
 
 def _unary_site(node: dict, preprocessed_file: Path, source_cache: dict[Path, str], rule: MutationRule) -> MutationSite | None:
   inner = node.get("inner", [])
-  if len(inner) < 1:
+  if not inner:
     return None
 
   begin = _spelling_loc(node.get("range", {}).get("begin", {}))
@@ -454,7 +453,7 @@ def _unary_site(node: dict, preprocessed_file: Path, source_cache: dict[Path, st
   expr_end = end_offset + end_tok_len
 
   spans: list[tuple[int, int]] = []
-  postfix = bool(node.get("isPostfix", False))
+  postfix = node.get("isPostfix", False)
   if postfix and isinstance(operand_end, dict):
     op_end_offset = operand_end.get("offset")
     op_end_tok = operand_end.get("tokLen")
@@ -629,7 +628,7 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
       continue
     site = replace(s, site_id=len(out), origin_file=origin_file, origin_line=origin_line)
     out.append(site)
-    counts[site.mutator] = counts.get(site.mutator, 0) + 1
+    counts[site.mutator] += 1
   return out, counts
 
 
@@ -761,9 +760,9 @@ def print_live_status(text: str, *, final: bool = False) -> None:
 
 
 def _parse_compile_error_locations(error_text: str) -> set[tuple[Path, int]]:
-  matches = re.findall(r"([^\s:]+\.(?:h|c)):(\d+):(\d+):", error_text)
+  matches = re.findall(r"([^\s:]+\.(?:h|c)):(\d+):\d+:", error_text)
   out: set[tuple[Path, int]] = set()
-  for file_str, line_str, _ in matches:
+  for file_str, line_str in matches:
     file_path = Path(file_str)
     if not file_path.is_absolute():
       file_path = (ROOT / file_path).resolve()
@@ -781,14 +780,12 @@ def _parse_internal_site_ids(error_text: str) -> set[int]:
   return {int(v) for v in re.findall(r"site_id=(\d+)", error_text)}
 
 
-def run_unittest(targets: Sequence[Path | str], lib_path: Path, mutant_id: int, verbose: bool) -> TestRunResult:
+def run_unittest(targets: list[Path | str], lib_path: Path, mutant_id: int, verbose: bool) -> TestRunResult:
   os.environ["LIBSAFETY_PATH"] = str(lib_path)
 
   from opendbc.safety.tests.libsafety.libsafety_py import libsafety
 
-  set_mutant = getattr(libsafety, "mutation_set_active_mutant", None)
-  if callable(set_mutant):
-    set_mutant(mutant_id)
+  libsafety.mutation_set_active_mutant(mutant_id)
 
   loader = unittest.TestLoader()
   suite = unittest.TestSuite()
@@ -826,9 +823,7 @@ def run_unittest(targets: Sequence[Path | str], lib_path: Path, mutant_id: int, 
 
 
 def compile_mutated_library(clang_bin: str, preprocessed_file: Path, sites: list[MutationSite], output_so: Path) -> float:
-  source_text = preprocessed_file.read_text()
-
-  instrumented = source_text
+  instrumented = preprocessed_file.read_text()
   applied_edits: list[tuple[int, int, int]] = []
 
   def map_index(original_index: int) -> int:
@@ -935,17 +930,14 @@ def main() -> int:
     if args.max_mutants > 0:
       sites = sites[: args.max_mutants]
 
-    mutator_summary = ", ".join(f"{name} ({mutator_counts.get(name, 0)})" for name in MUTATOR_FAMILIES if mutator_counts.get(name, 0) > 0)
+    mutator_summary = ", ".join(f"{name} ({c})" for name in MUTATOR_FAMILIES if (c := mutator_counts.get(name, 0)) > 0)
     print(f"Found {len(sites)} unique candidates: {mutator_summary}", flush=True)
     if args.list_only:
       for site in sites:
         print(f"  #{site.site_id:03d} {format_path(display_file(site))}:{display_line(site)} [{site.mutator}] {site.original_op}->{site.mutated_op}")
       return 0
 
-    print(
-      f"Running {len(sites)} mutants with {args.j} workers",
-      flush=True,
-    )
+    print(f"Running {len(sites)} mutants with {args.j} workers", flush=True)
 
     discovered_count = len(sites)
     mutation_lib = Path(run_tmp_dir) / "libsafety_mutation.so"
@@ -1006,8 +998,6 @@ def main() -> int:
     if pruned_compile_sites > 0:
       sites = [replace(s, site_id=i) for i, s in enumerate(compile_sites)]
       print(f"Pruned {pruned_compile_sites} build-incompatible mutants for single-library mode", flush=True)
-    else:
-      sites = compile_sites
 
     smoke_targets = [SAFETY_TESTS_DIR / name for name in SMOKE_TESTS]
     baseline_result = run_unittest(smoke_targets, mutation_lib, mutant_id=-1, verbose=args.verbose)
@@ -1113,7 +1103,7 @@ def main() -> int:
     print(f"  infra_error: {infra}", flush=True)
     print(f"  build_time: {compile_once_sec:.2f}s", flush=True)
     print(f"  test_time_sum: {total_test_sec:.2f}s", flush=True)
-    if len(results) > 0:
+    if results:
       print(f"  avg_test_per_mutant: {total_test_sec / len(results):.3f}s", flush=True)
     if elapsed > 0:
       print(f"  mutants_per_second: {len(sites) / elapsed:.2f}", flush=True)
