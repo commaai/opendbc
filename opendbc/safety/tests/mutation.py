@@ -897,7 +897,6 @@ int mutation_get_active_mutant(void) { return __mutation_active_id; }
     "-shared",
     "-fPIC",
     "-w",
-    "-nostdlib",
     "-fno-builtin",
     "-std=gnu11",
     "-g0",
