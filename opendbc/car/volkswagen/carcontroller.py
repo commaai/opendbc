@@ -29,7 +29,7 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.accel_last = 0
     self.accel_diff = 0
-    self.long_deviation = 0 
+    self.long_deviation = 0
     self.long_jerklimit = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
