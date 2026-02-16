@@ -1,508 +1,282 @@
 #!/usr/bin/env python3
-
 from __future__ import annotations
 
-import argparse
-import functools
-import io
-import json
-import os
-import re
-import shutil
-import subprocess
-import sys
-import tempfile
-import time
-from collections.abc import Sequence
+import argparse, io, json, os, re, shutil, subprocess, sys, tempfile, time, unittest
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, replace
 from pathlib import Path
-import unittest
-
 
 ROOT = Path(__file__).resolve().parents[3]
 SAFETY_DIR = ROOT / "opendbc" / "safety"
-SAFETY_TESTS_DIR = ROOT / "opendbc" / "safety" / "tests"
-SAFETY_C_REL = Path("opendbc/safety/tests/libsafety/safety.c")
+TESTS_DIR = SAFETY_DIR / "tests"
+SAFETY_C = Path("opendbc/safety/tests/libsafety/safety.c")
 
-SMOKE_TESTS = [
-  "test_defaults.py",
-  "test_elm327.py",
-  "test_body.py",
-]
+CMP_OPS = {"==": "!=", "!=": "==", ">": "<=", ">=": "<", "<": ">=", "<=": ">"}
 
-CORE_KILLER_TESTS = [
-  "test_chrysler.py",
-  "test_ford.py",
-  "test_gm.py",
-  "test_hyundai.py",
-  "test_rivian.py",
-  "test_tesla.py",
-  "test_nissan.py",
-]
-
-TEST_IDS: dict[str, tuple[str, ...]] = {
-  "test_body.py": (
-    "opendbc.safety.tests.test_body.TestBody.test_manually_enable_controls_allowed",
-    "opendbc.safety.tests.test_body.TestBody.test_can_flasher",
-  ),
-  "test_chrysler.py": (
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_exceed_torque_sensor",
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamHDSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_chrysler.TestChryslerSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_realtime_limit_up",
-  ),
-  "test_defaults.py": (
-    "opendbc.safety.tests.test_defaults.TestAllOutput.test_default_controls_not_allowed",
-    "opendbc.safety.tests.test_defaults.TestNoOutput.test_default_controls_not_allowed",
-    "opendbc.safety.tests.test_defaults.TestSilent.test_default_controls_not_allowed",
-  ),
-  "test_elm327.py": (
-    "opendbc.safety.tests.test_elm327.TestElm327.test_default_controls_not_allowed",
-  ),
-  "test_ford.py": (
-    "opendbc.safety.tests.test_ford.TestFordCANFDLongitudinalSafety.test_curvature_rate_limits",
-    "opendbc.safety.tests.test_ford.TestFordCANFDStockSafety.test_acc_buttons",
-    "opendbc.safety.tests.test_ford.TestFordLongitudinalSafety.test_acc_buttons",
-    "opendbc.safety.tests.test_ford.TestFordCANFDLongitudinalSafety.test_steer_allowed",
-  ),
-  "test_gm.py": (
-    "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_gm.GmLongitudinalBase.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_gm.TestGmCameraEVSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_realtime_limits",
-  ),
-  "test_honda.py": (
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_honda.HondaBase.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_honda.HondaButtonEnableBase.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_allow_user_brake_at_zero_speed",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_brake_safety_check",
-    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_acc_hud_safety_check",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_gas_safety_check",
-    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_brake_safety_check",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_buttons",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_rx_hook",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_set_resume_buttons",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_not_allow_user_brake_when_moving",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_buttons_with_main_off",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_enable_control_allowed_from_cruise",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_disable_control_allowed_from_cruise",
-    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_buttons",
-    "opendbc.safety.tests.test_honda.TestHondaBoschCANFDSafety.test_allow_user_brake_at_zero_speed",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_no_disengage_on_gas",
-    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_honda_fwd_brake_latching",
-  ),
-  "test_hyundai.py": (
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_req_bit_frames",
-    "opendbc.safety.tests.hyundai_common.HyundaiLongitudinalBase.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafetyEV.test_against_torque_driver",
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_realtime_limits",
-  ),
-  "test_hyundai_canfd.py": (
-    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering_0.test_steer_req_bit_frames",
-    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdBase.test_against_torque_driver",
-    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering.test_against_torque_driver",
-    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteeringAltButtons.test_acc_cancel",
-  ),
-  "test_mazda.py": (
-    "opendbc.safety.tests.test_mazda.TestMazdaSafety.test_against_torque_driver",
-  ),
-  "test_nissan.py": (
-    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_cmd_when_disabled",
-    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_acc_buttons",
-    "opendbc.safety.tests.test_nissan.TestNissanSafety.test_acc_buttons",
-    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_cmd_when_enabled",
-    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_violation",
-  ),
-  "test_psa.py": (
-    "opendbc.safety.tests.test_psa.TestPsaStockSafety.test_angle_cmd_when_disabled",
-    "opendbc.safety.tests.test_psa.TestPsaSafetyBase.test_allow_engage_with_gas_pressed",
-  ),
-  "test_rivian.py": (
-    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_rivian.TestRivianSafetyBase.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_realtime_limits",
-  ),
-  "test_subaru.py": (
-    "opendbc.safety.tests.test_subaru.TestSubaruGen1LongitudinalSafety.test_steer_req_bit_frames",
-    "opendbc.safety.tests.test_subaru.TestSubaruGen1LongitudinalSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_subaru.TestSubaruGen2LongitudinalSafety.test_against_torque_driver",
-  ),
-  "test_subaru_preglobal.py": (
-    "opendbc.safety.tests.test_subaru_preglobal.TestSubaruPreglobalReversedDriverTorqueSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_subaru_preglobal.TestSubaruPreglobalReversedDriverTorqueSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_subaru_preglobal.TestSubaruPreglobalSafety.test_against_torque_driver",
-  ),
-  "test_tesla.py": (
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_disabled",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14StockSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_enabled",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_steering_angle_measurements",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_lateral_jerk_limit",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_violation",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_rt_limits",
-  ),
-  "test_toyota.py": (
-    "opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_exceed_torque_sensor",
-    "opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_toyota.TestToyotaSafetyAngle.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_realtime_limit_up",
-    "opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_steer_safety_check",
-  ),
-  "test_volkswagen_mlb.py": (
-    "opendbc.safety.tests.test_volkswagen_mlb.TestVolkswagenMlbStockSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_volkswagen_mlb.TestVolkswagenMlbSafetyBase.test_against_torque_driver",
-  ),
-  "test_volkswagen_mqb.py": (
-    "opendbc.safety.tests.test_volkswagen_mqb.TestVolkswagenMqbLongSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_volkswagen_mqb.TestVolkswagenMqbLongSafety.test_accel_safety_check",
-    "opendbc.safety.tests.test_volkswagen_mqb.TestVolkswagenMqbStockSafety.test_against_torque_driver",
-  ),
-  "test_volkswagen_pq.py": (
-    "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqLongSafety.test_torque_cmd_enable_variants",
-    "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqLongSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqSafetyBase.test_against_torque_driver",
-  ),
-}
-
-COMPARISON_OPERATOR_MAP = {
-  "==": "!=",
-  "!=": "==",
-  ">": "<=",
-  ">=": "<",
-  "<": ">=",
-  "<=": ">",
-}
-
-MUTATOR_FAMILIES = {
-  "increment": ("UnaryOperator", {"++": "--"}),
-  "decrement": ("UnaryOperator", {"--": "++"}),
-  "comparison": ("BinaryOperator", COMPARISON_OPERATOR_MAP),
-  "boundary": ("IntegerLiteral", {}),
-  "bitwise_assignment": ("CompoundAssignOperator", {"&=": "|=", "|=": "&=", "^=": "&="}),
-  "bitwise": ("BinaryOperator", {"&": "|", "|": "&", "^": "&"}),
+MUTATORS: dict[str, tuple[str, dict[str, str]]] = {
+  "increment":             ("UnaryOperator",          {"++": "--"}),
+  "decrement":             ("UnaryOperator",          {"--": "++"}),
+  "comparison":            ("BinaryOperator",         CMP_OPS),
+  "boundary":              ("IntegerLiteral",         {}),
+  "bitwise_assignment":    ("CompoundAssignOperator", {"&=": "|=", "|=": "&=", "^=": "&="}),
+  "bitwise":               ("BinaryOperator",         {"&": "|", "|": "&", "^": "&"}),
   "arithmetic_assignment": ("CompoundAssignOperator", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
-  "arithmetic": ("BinaryOperator", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
-  "remove_negation": ("UnaryOperator", {"!": ""}),
+  "arithmetic":            ("BinaryOperator",         {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
+  "remove_negation":       ("UnaryOperator",          {"!": ""}),
 }
+
+# Map mode file stem -> test files; default is test_{stem}.py
+MODE_TESTS: dict[str, list[str]] = {
+  "hyundai_common": ["test_hyundai.py", "test_hyundai_canfd.py"],
+  "volkswagen_common": ["test_volkswagen_mqb.py", "test_volkswagen_pq.py", "test_volkswagen_mlb.py"],
+  "subaru_preglobal": ["test_subaru_preglobal.py", "test_subaru.py"],
+}
+
+CORE_TESTS = ["test_chrysler.py", "test_ford.py", "test_gm.py", "test_hyundai.py",
+              "test_rivian.py", "test_tesla.py", "test_nissan.py"]
+SMOKE_TESTS = ["test_defaults.py", "test_elm327.py", "test_body.py"]
+
+# Compact killer tests: "Class.method" auto-expands with test file module prefix.
+# Use "module::Class.method" for cross-module references.
+_KILLER_TESTS: dict[str, tuple[str, ...]] = {
+  "test_body.py": ("TestBody.test_manually_enable_controls_allowed", "TestBody.test_can_flasher"),
+  "test_chrysler.py": (
+    "TestChryslerRamDTSafety.test_exceed_torque_sensor", "TestChryslerRamDTSafety.test_allow_engage_with_gas_pressed",
+    "TestChryslerRamHDSafety.test_allow_engage_with_gas_pressed", "TestChryslerSafety.test_allow_engage_with_gas_pressed",
+    "TestChryslerRamDTSafety.test_steer_safety_check", "TestChryslerRamDTSafety.test_realtime_limit_up"),
+  "test_defaults.py": (
+    "TestAllOutput.test_default_controls_not_allowed", "TestNoOutput.test_default_controls_not_allowed",
+    "TestSilent.test_default_controls_not_allowed"),
+  "test_elm327.py": ("TestElm327.test_default_controls_not_allowed",),
+  "test_ford.py": (
+    "TestFordCANFDLongitudinalSafety.test_curvature_rate_limits", "TestFordCANFDStockSafety.test_acc_buttons",
+    "TestFordLongitudinalSafety.test_acc_buttons", "TestFordCANFDLongitudinalSafety.test_steer_allowed"),
+  "test_gm.py": (
+    "TestGmAscmEVSafety.test_against_torque_driver", "GmLongitudinalBase.test_allow_engage_with_gas_pressed",
+    "TestGmCameraEVSafety.test_against_torque_driver", "TestGmAscmEVSafety.test_steer_safety_check",
+    "TestGmAscmEVSafety.test_realtime_limits"),
+  "test_honda.py": (
+    "TestHondaBoschAltBrakeSafety.test_steer_safety_check", "HondaBase.test_allow_engage_with_gas_pressed",
+    "HondaButtonEnableBase.test_allow_engage_with_gas_pressed", "TestHondaBoschAltBrakeSafety.test_allow_engage_with_gas_pressed",
+    "TestHondaBoschAltBrakeSafety.test_allow_user_brake_at_zero_speed", "TestHondaBoschLongSafety.test_brake_safety_check",
+    "TestHondaNidecPcmAltSafety.test_acc_hud_safety_check", "TestHondaBoschLongSafety.test_gas_safety_check",
+    "TestHondaNidecPcmAltSafety.test_brake_safety_check", "TestHondaBoschAltBrakeSafety.test_buttons",
+    "TestHondaBoschLongSafety.test_rx_hook", "TestHondaBoschLongSafety.test_set_resume_buttons",
+    "TestHondaBoschAltBrakeSafety.test_not_allow_user_brake_when_moving", "TestHondaBoschLongSafety.test_buttons_with_main_off",
+    "TestHondaBoschAltBrakeSafety.test_enable_control_allowed_from_cruise",
+    "TestHondaBoschAltBrakeSafety.test_disable_control_allowed_from_cruise",
+    "TestHondaNidecPcmAltSafety.test_buttons", "TestHondaBoschCANFDSafety.test_allow_user_brake_at_zero_speed",
+    "TestHondaBoschAltBrakeSafety.test_no_disengage_on_gas", "TestHondaNidecPcmAltSafety.test_honda_fwd_brake_latching"),
+  "test_hyundai.py": (
+    "TestHyundaiLegacySafety.test_steer_req_bit_frames",
+    "hyundai_common::HyundaiLongitudinalBase.test_accel_actuation_limits",
+    "TestHyundaiLegacySafety.test_against_torque_driver", "TestHyundaiLegacySafetyEV.test_against_torque_driver",
+    "TestHyundaiLegacySafety.test_steer_safety_check", "TestHyundaiLegacySafety.test_realtime_limits"),
+  "test_hyundai_canfd.py": (
+    "TestHyundaiCanfdLFASteering_0.test_steer_req_bit_frames", "TestHyundaiCanfdBase.test_against_torque_driver",
+    "TestHyundaiCanfdLFASteering.test_against_torque_driver", "TestHyundaiCanfdLFASteeringAltButtons.test_acc_cancel"),
+  "test_mazda.py": ("TestMazdaSafety.test_against_torque_driver",),
+  "test_nissan.py": (
+    "TestNissanLeafSafety.test_angle_cmd_when_disabled", "TestNissanLeafSafety.test_acc_buttons",
+    "TestNissanSafety.test_acc_buttons", "TestNissanLeafSafety.test_angle_cmd_when_enabled",
+    "TestNissanLeafSafety.test_angle_violation"),
+  "test_psa.py": ("TestPsaStockSafety.test_angle_cmd_when_disabled", "TestPsaSafetyBase.test_allow_engage_with_gas_pressed"),
+  "test_rivian.py": (
+    "TestRivianLongitudinalSafety.test_against_torque_driver", "TestRivianLongitudinalSafety.test_accel_actuation_limits",
+    "TestRivianSafetyBase.test_accel_actuation_limits", "TestRivianLongitudinalSafety.test_steer_safety_check",
+    "TestRivianLongitudinalSafety.test_realtime_limits"),
+  "test_subaru.py": (
+    "TestSubaruGen1LongitudinalSafety.test_steer_req_bit_frames",
+    "TestSubaruGen1LongitudinalSafety.test_against_torque_driver",
+    "TestSubaruGen2LongitudinalSafety.test_against_torque_driver"),
+  "test_subaru_preglobal.py": (
+    "TestSubaruPreglobalReversedDriverTorqueSafety.test_steer_safety_check",
+    "TestSubaruPreglobalReversedDriverTorqueSafety.test_against_torque_driver",
+    "TestSubaruPreglobalSafety.test_against_torque_driver"),
+  "test_tesla.py": (
+    "TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_disabled",
+    "TestTeslaFSD14LongitudinalSafety.test_accel_actuation_limits",
+    "TestTeslaFSD14StockSafety.test_accel_actuation_limits",
+    "TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_enabled",
+    "TestTeslaFSD14LongitudinalSafety.test_steering_angle_measurements",
+    "TestTeslaFSD14LongitudinalSafety.test_lateral_jerk_limit",
+    "TestTeslaFSD14LongitudinalSafety.test_angle_violation", "TestTeslaFSD14LongitudinalSafety.test_rt_limits"),
+  "test_toyota.py": (
+    "TestToyotaAltBrakeSafety.test_exceed_torque_sensor", "TestToyotaAltBrakeSafety.test_accel_actuation_limits",
+    "TestToyotaSafetyAngle.test_accel_actuation_limits", "TestToyotaAltBrakeSafety.test_realtime_limit_up",
+    "TestToyotaAltBrakeSafety.test_steer_safety_check"),
+  "test_volkswagen_mlb.py": (
+    "TestVolkswagenMlbStockSafety.test_against_torque_driver",
+    "TestVolkswagenMlbSafetyBase.test_against_torque_driver"),
+  "test_volkswagen_mqb.py": (
+    "TestVolkswagenMqbLongSafety.test_against_torque_driver", "TestVolkswagenMqbLongSafety.test_accel_safety_check",
+    "TestVolkswagenMqbStockSafety.test_against_torque_driver"),
+  "test_volkswagen_pq.py": (
+    "TestVolkswagenPqLongSafety.test_torque_cmd_enable_variants", "TestVolkswagenPqLongSafety.test_accel_actuation_limits",
+    "TestVolkswagenPqSafetyBase.test_against_torque_driver"),
+}
+
+
+def _expand_test_id(file_stem: str, compact: str) -> str:
+  if "::" in compact:
+    module, rest = compact.split("::", 1)
+    return f"opendbc.safety.tests.{module}.{rest}"
+  return f"opendbc.safety.tests.{file_stem}.{compact}"
 
 
 @dataclass(frozen=True)
-class MutationSite:
-  site_id: int
-  source_file: Path
+class Site:
+  id: int
+  source: Path
   expr_start: int
   expr_end: int
   op_start: int
   op_end: int
   line: int
   col: int
-  original_op: str
-  mutated_op: str
+  original: str
+  replacement: str
   mutator: str
-  origin_file: Path | None
-  origin_line: int | None
+  origin_file: Path | None = None
+  origin_line: int | None = None
 
 
 @dataclass(frozen=True)
-class MutationRule:
-  mutator: str
-  node_kind: str
-  original_op: str
-  mutated_op: str
-
-
-@dataclass(frozen=True)
-class TestRunResult:
-  returncode: int
-  duration_sec: float
-  failed_test: str | None
-  stdout: str
-  stderr: str
-
-
-@dataclass(frozen=True)
-class MutantResult:
-  site: MutationSite
-  outcome: str  # killed | survived | infra_error
-  stage: str  # tests | build
-  killer_test: str | None
+class Result:
+  site: Site
+  outcome: str       # killed | survived | infra_error
+  stage: str         # tests | build
+  killer: str | None
   test_sec: float
-  details: str
+  details: str = ""
 
 
-def parse_args() -> argparse.Namespace:
-  parser = argparse.ArgumentParser(description="Run strict safety mutation")
-  parser.add_argument(
-    "--mutator",
-    default="all",
-    choices=["all", *MUTATOR_FAMILIES],
-    help="mutator family to run, or 'all' for full Mull-like set",
-  )
-  parser.add_argument(
-    "--operator",
-    default="all",
-    choices=["all", *sorted(COMPARISON_OPERATOR_MAP.keys())],
-    help="comparison operator filter (used only with --mutator comparison)",
-  )
-  parser.add_argument("-j", type=int, default=max((os.cpu_count() or 1) - 1, 1), help="parallel mutants to run")
-  parser.add_argument("--max-mutants", type=int, default=0, help="optional limit for debugging (0 means all)")
-  parser.add_argument("--list-only", action="store_true", help="list discovered candidates and exit")
-  parser.add_argument("--verbose", action="store_true", help="print extra debug output")
-  return parser.parse_args()
+def preprocess(clang: str, src: Path, out: Path) -> None:
+  r = subprocess.run(
+    [clang, "-E", "-std=gnu11", "-nostdlib", "-fno-builtin", "-DALLOW_DEBUG",
+     f"-I{ROOT}", f"-I{ROOT / 'opendbc/safety/board'}", str(src), "-o", str(out)],
+    cwd=ROOT, capture_output=True, text=True, check=False)
+  if r.returncode:
+    raise RuntimeError(f"Preprocessing failed:\n{r.stderr}")
 
 
-def find_clang() -> str:
-  for clang_bin in ("clang-17", "clang"):
-    if shutil.which(clang_bin):
-      return clang_bin
-  raise RuntimeError("clang is required (tried clang-17 and clang)")
-
-
-def run_command(cmd: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
-  return subprocess.run(
-    cmd,
-    cwd=cwd,
-    env=env,
-    check=False,
-    text=True,
-    capture_output=True,
-  )
-
-
-def format_path(path: Path) -> str:
-  try:
-    return str(path.relative_to(ROOT))
-  except ValueError:
-    return str(path)
-
-
-def display_file(site: MutationSite) -> Path:
-  return site.origin_file if site.origin_file is not None else site.source_file
-
-
-def display_line(site: MutationSite) -> int:
-  return site.origin_line if site.origin_line is not None else site.line
-
-
-def _spelling_loc(loc: object) -> dict | None:
-  if not isinstance(loc, dict):
-    return None
-  spelling = loc.get("spellingLoc")
-  if isinstance(spelling, dict):
-    return spelling
-  return loc
-
-
-def _offset_to_line_col(text: str, offset: int) -> tuple[int, int]:
-  line = text.count("\n", 0, offset) + 1
-  line_start = text.rfind("\n", 0, offset) + 1
-  col = (offset - line_start) + 1
-  return line, col
-
-
-def build_preprocessed_line_map(preprocessed_file: Path) -> dict[int, tuple[Path, int]]:
+def build_line_map(pp_file: Path) -> dict[int, tuple[Path, int]]:
   mapping: dict[int, tuple[Path, int]] = {}
-  current_file: Path | None = None
-  current_line: int | None = None
-
-  directive_re = re.compile(r'^\s*#\s*(\d+)\s+"([^"]+)"')
-  with preprocessed_file.open() as f:
-    for pp_line_num, line in enumerate(f, start=1):
-      m = directive_re.match(line)
+  cur_file: Path | None = None
+  cur_line: int | None = None
+  directive = re.compile(r'^\s*#\s*(\d+)\s+"([^"]+)"')
+  with pp_file.open() as f:
+    for pp_num, line in enumerate(f, 1):
+      m = directive.match(line)
       if m:
-        current_line = int(m.group(1))
-        current_file = Path(m.group(2)).resolve()
-        continue
-
-      if current_file is not None and current_line is not None:
-        mapping[pp_line_num] = (current_file, current_line)
-        current_line += 1
-
+        cur_line, cur_file = int(m.group(1)), Path(m.group(2)).resolve()
+      elif cur_file is not None and cur_line is not None:
+        mapping[pp_num] = (cur_file, cur_line)
+        cur_line += 1
   return mapping
 
 
-def resolve_rules(selected_mutator: str, operator_filter: str) -> list[MutationRule]:
-  mutators = list(MUTATOR_FAMILIES) if selected_mutator == "all" else [selected_mutator]
-  rules: list[MutationRule] = []
-
-  for mutator in mutators:
-    node_kind, op_map = MUTATOR_FAMILIES[mutator]
-    if mutator == "boundary":
-      rules.append(MutationRule(mutator=mutator, node_kind=node_kind, original_op="", mutated_op=""))
-      continue
-
-    for original_op, mutated_op in op_map.items():
-      if mutator == "comparison" and operator_filter != "all" and original_op != operator_filter:
-        continue
-      rules.append(MutationRule(mutator=mutator, node_kind=node_kind, original_op=original_op, mutated_op=mutated_op))
-
-  return rules
-
-
-def _source_text(preprocessed_file: Path, source_cache: dict[Path, str]) -> str:
-  txt = source_cache.get(preprocessed_file)
-  if txt is None:
-    txt = preprocessed_file.read_text()
-    source_cache[preprocessed_file] = txt
-  return txt
-
-
-def _make_site(
-  preprocessed_file: Path,
-  source_cache: dict[Path, str],
-  rule: MutationRule,
-  expr_start: int,
-  expr_end: int,
-  op_start: int,
-  op_end: int,
-  line: int | None,
-  col: int | None,
-) -> MutationSite | None:
-  txt = _source_text(preprocessed_file, source_cache)
-  if expr_start < 0 or expr_end < expr_start or expr_end > len(txt):
+def _spelling(loc: object) -> dict | None:
+  if not isinstance(loc, dict):
     return None
-  if op_start < 0 or op_end < op_start or op_end > len(txt):
-    return None
-  if op_start < expr_start or op_end > expr_end:
-    return None
-  if txt[op_start:op_end] != rule.original_op:
-    return None
+  return loc.get("spellingLoc") if isinstance(loc.get("spellingLoc"), dict) else loc
 
+
+def _range_locs(node: dict) -> tuple[dict, dict] | None:
+  begin = _spelling(node.get("range", {}).get("begin"))
+  end = _spelling(node.get("range", {}).get("end"))
+  return (begin, end) if isinstance(begin, dict) and isinstance(end, dict) else None
+
+
+def _read_cached(pp_file: Path, cache: dict[Path, str]) -> str:
+  if pp_file not in cache:
+    cache[pp_file] = pp_file.read_text()
+  return cache[pp_file]
+
+
+def _make_site(pp_file: Path, cache: dict[Path, str], mutator: str,
+               es: int, ee: int, os_: int, oe: int,
+               orig: str, repl: str, line: int | None, col: int | None) -> Site | None:
+  txt = _read_cached(pp_file, cache)
+  if es < 0 or ee > len(txt) or os_ < es or oe > ee or txt[os_:oe] != orig:
+    return None
   if not isinstance(line, int) or not isinstance(col, int):
-    line, col = _offset_to_line_col(txt, op_start)
-
-  return MutationSite(
-    site_id=-1,
-    source_file=preprocessed_file,
-    expr_start=expr_start,
-    expr_end=expr_end,
-    op_start=op_start,
-    op_end=op_end,
-    line=line,
-    col=col,
-    original_op=rule.original_op,
-    mutated_op=rule.mutated_op,
-    mutator=rule.mutator,
-    origin_file=None,
-    origin_line=None,
-  )
+    line = txt.count("\n", 0, os_) + 1
+    col = os_ - txt.rfind("\n", 0, os_)
+  return Site(-1, pp_file, es, ee, os_, oe, line, col, orig, repl, mutator)
 
 
-def _binary_like_site(node: dict, preprocessed_file: Path, source_cache: dict[Path, str], rule: MutationRule) -> MutationSite | None:
+def _extract_site(node: dict, pp_file: Path, cache: dict[Path, str],
+                  mutator: str, orig_op: str, repl_op: str) -> Site | None:
+  rng = _range_locs(node)
+  if rng is None:
+    return None
+  begin, end = rng
+  bo, eo, etl = begin.get("offset"), end.get("offset"), end.get("tokLen")
+  if not all(isinstance(v, int) for v in (bo, eo, etl)):
+    return None
+
   inner = node.get("inner", [])
-  if len(inner) < 2:
-    return None
-
-  begin = _spelling_loc(node.get("range", {}).get("begin", {}))
-  end = _spelling_loc(node.get("range", {}).get("end", {}))
-  lhs_end = _spelling_loc(inner[0].get("range", {}).get("end", {}))
-  rhs_begin = _spelling_loc(inner[1].get("range", {}).get("begin", {}))
-  if not isinstance(begin, dict) or not isinstance(end, dict) or not isinstance(lhs_end, dict) or not isinstance(rhs_begin, dict):
-    return None
-
+  kind = node.get("kind", "")
   spans: list[tuple[int, int]] = []
-  lhs_end_offset = lhs_end.get("offset")
-  lhs_end_tok_len = lhs_end.get("tokLen")
-  rhs_begin_offset = rhs_begin.get("offset")
-  if isinstance(lhs_end_offset, int) and isinstance(lhs_end_tok_len, int) and isinstance(rhs_begin_offset, int):
-    spans.append((lhs_end_offset + lhs_end_tok_len, rhs_begin_offset))
+  postfix = False
 
-  begin_offset = begin.get("offset")
-  end_offset = end.get("offset")
-  end_tok_len = end.get("tokLen")
-  if isinstance(begin_offset, int) and isinstance(end_offset, int) and isinstance(end_tok_len, int):
-    spans.append((begin_offset, end_offset + end_tok_len))
+  if kind in ("BinaryOperator", "CompoundAssignOperator"):
+    if len(inner) < 2:
+      return None
+    lhs_end = _spelling(inner[0].get("range", {}).get("end"))
+    rhs_begin = _spelling(inner[1].get("range", {}).get("begin"))
+    if not isinstance(lhs_end, dict) or not isinstance(rhs_begin, dict):
+      return None
+    le, letl, rb = lhs_end.get("offset"), lhs_end.get("tokLen"), rhs_begin.get("offset")
+    if not all(isinstance(v, int) for v in (le, letl, rb)):
+      return None
+    spans = [(le + letl, rb), (bo, eo + etl)]
+  elif kind == "UnaryOperator":
+    if not inner:
+      return None
+    postfix = bool(node.get("isPostfix"))
+    if postfix:
+      loc = _spelling(inner[0].get("range", {}).get("end"))
+      if isinstance(loc, dict):
+        o, t = loc.get("offset"), loc.get("tokLen")
+        if isinstance(o, int) and isinstance(t, int):
+          spans.append((o + t, eo + etl))
+    else:
+      loc = _spelling(inner[0].get("range", {}).get("begin"))
+      if isinstance(loc, dict) and isinstance(loc.get("offset"), int):
+        spans.append((bo, loc["offset"]))
+    spans.append((bo, eo + etl))
 
-  expr_start = begin_offset if isinstance(begin_offset, int) else None
-  expr_end = (end_offset + end_tok_len) if isinstance(end_offset, int) and isinstance(end_tok_len, int) else None
-
-  txt = _source_text(preprocessed_file, source_cache)
-  seen: set[tuple[int, int]] = set()
-  for span_start, span_end in spans:
-    key = (span_start, span_end)
-    if key in seen or span_end < span_start or span_start < 0 or span_end > len(txt):
+  txt = _read_cached(pp_file, cache)
+  pos = None
+  for start, end_ in spans:
+    if start < 0 or end_ > len(txt) or end_ < start:
       continue
-    seen.add(key)
-
-    idx = txt[span_start:span_end].find(rule.original_op)
-    if idx < 0:
-      continue
-    op_start = span_start + idx
-    op_end = op_start + len(rule.original_op)
-    if expr_start is None or expr_end is None:
-      continue
-    site = _make_site(preprocessed_file, source_cache, rule, expr_start, expr_end, op_start, op_end, begin.get("line"), begin.get("col"))
-    if site is not None:
-      return site
-  return None
-
-
-def _unary_site(node: dict, preprocessed_file: Path, source_cache: dict[Path, str], rule: MutationRule) -> MutationSite | None:
-  inner = node.get("inner", [])
-  if len(inner) < 1:
+    seg = txt[start:end_]
+    idx = seg.rfind(orig_op) if postfix else seg.find(orig_op)
+    if idx >= 0:
+      pos = start + idx
+      break
+  if pos is None:
     return None
+  return _make_site(pp_file, cache, mutator, bo, eo + etl, pos, pos + len(orig_op),
+                    orig_op, repl_op, begin.get("line"), begin.get("col"))
 
-  begin = _spelling_loc(node.get("range", {}).get("begin", {}))
-  end = _spelling_loc(node.get("range", {}).get("end", {}))
-  operand_begin = _spelling_loc(inner[0].get("range", {}).get("begin", {}))
-  operand_end = _spelling_loc(inner[0].get("range", {}).get("end", {}))
-  if not isinstance(begin, dict) or not isinstance(end, dict):
+
+def _boundary_site(node: dict, parent: dict | None, pp_file: Path,
+                   cache: dict[Path, str]) -> Site | None:
+  if not parent or parent.get("kind") != "BinaryOperator" or parent.get("opcode") not in CMP_OPS:
     return None
-
-  begin_offset = begin.get("offset")
-  end_offset = end.get("offset")
-  end_tok_len = end.get("tokLen")
-  if not isinstance(begin_offset, int) or not isinstance(end_offset, int) or not isinstance(end_tok_len, int):
+  rng = _range_locs(node)
+  if rng is None:
     return None
-  expr_start = begin_offset
-  expr_end = end_offset + end_tok_len
-
-  spans: list[tuple[int, int]] = []
-  postfix = bool(node.get("isPostfix", False))
-  if postfix and isinstance(operand_end, dict):
-    op_end_offset = operand_end.get("offset")
-    op_end_tok = operand_end.get("tokLen")
-    if isinstance(op_end_offset, int) and isinstance(op_end_tok, int):
-      spans.append((op_end_offset + op_end_tok, end_offset + end_tok_len))
-  elif not postfix and isinstance(operand_begin, dict):
-    op_begin = operand_begin.get("offset")
-    if isinstance(op_begin, int):
-      spans.append((begin_offset, op_begin))
-
-  spans.append((begin_offset, end_offset + end_tok_len))
-
-  txt = _source_text(preprocessed_file, source_cache)
-  seen: set[tuple[int, int]] = set()
-  for span_start, span_end in spans:
-    key = (span_start, span_end)
-    if key in seen or span_end < span_start or span_start < 0 or span_end > len(txt):
-      continue
-    seen.add(key)
-
-    seg = txt[span_start:span_end]
-    idx = seg.rfind(rule.original_op) if postfix else seg.find(rule.original_op)
-    if idx < 0:
-      continue
-    op_start = span_start + idx
-    op_end = op_start + len(rule.original_op)
-    site = _make_site(preprocessed_file, source_cache, rule, expr_start, expr_end, op_start, op_end, begin.get("line"), begin.get("col"))
-    if site is not None:
-      return site
-  return None
-
-
-def _parse_int_literal(token: str) -> tuple[int, str, str] | None:
+  begin, end = rng
+  bo, eo, etl = begin.get("offset"), end.get("offset"), end.get("tokLen")
+  if not all(isinstance(v, int) for v in (bo, eo, etl)):
+    return None
+  txt = _read_cached(pp_file, cache)
+  token = txt[bo:eo + etl]
   m = re.fullmatch(r"([0-9][0-9a-fA-FxX]*)([uUlL]*)", token)
   if m is None:
     return None
@@ -511,130 +285,59 @@ def _parse_int_literal(token: str) -> tuple[int, str, str] | None:
     value = int(body, 0)
   except ValueError:
     return None
-  base = "hex" if body.lower().startswith("0x") else "dec"
-  return value, base, suffix
+  mutated = f"0x{value + 1:X}{suffix}" if body.lower().startswith("0x") else f"{value + 1}{suffix}"
+  return _make_site(pp_file, cache, "boundary", bo, eo + etl, bo, eo + etl,
+                    token, mutated, begin.get("line"), begin.get("col"))
 
 
-def _boundary_site(node: dict, parent: dict | None, preprocessed_file: Path, source_cache: dict[Path, str]) -> MutationSite | None:
-  if parent is None:
-    return None
-  if parent.get("kind") != "BinaryOperator" or parent.get("opcode") not in COMPARISON_OPERATOR_MAP:
-    return None
+def discover_sites(clang: str, pp_file: Path, mutator_filter: str) -> tuple[list[Site], dict[str, int]]:
+  r = subprocess.run(
+    [clang, "-std=gnu11", "-nostdlib", "-fno-builtin", "-Xclang",
+     "-ast-dump=json", "-fsyntax-only", str(pp_file)],
+    cwd=ROOT, capture_output=True, text=True, check=False)
+  if r.returncode:
+    raise RuntimeError(f"AST parse failed:\n{r.stderr}")
 
-  begin = _spelling_loc(node.get("range", {}).get("begin", {}))
-  end = _spelling_loc(node.get("range", {}).get("end", {}))
-  if not isinstance(begin, dict) or not isinstance(end, dict):
-    return None
-  begin_offset = begin.get("offset")
-  end_offset = end.get("offset")
-  end_tok_len = end.get("tokLen")
-  if not isinstance(begin_offset, int) or not isinstance(end_offset, int) or not isinstance(end_tok_len, int):
-    return None
+  ast = json.loads(r.stdout)
+  cache: dict[Path, str] = {}
+  deduped: dict[tuple[Path, int, int, str], Site] = {}
+  line_map = build_line_map(pp_file)
 
-  txt = _source_text(preprocessed_file, source_cache)
-  op_start = begin_offset
-  op_end = end_offset + end_tok_len
-  if op_start < 0 or op_end > len(txt) or op_end <= op_start:
-    return None
-
-  token = txt[op_start:op_end]
-  parsed = _parse_int_literal(token)
-  if parsed is None:
-    return None
-  value, base, suffix = parsed
-  new_value = value + 1
-  if base == "hex":
-    mutated = f"0x{new_value:X}{suffix}"
-  else:
-    mutated = f"{new_value}{suffix}"
-
-  rule = MutationRule(mutator="boundary", node_kind="IntegerLiteral", original_op=token, mutated_op=mutated)
-  return _make_site(preprocessed_file, source_cache, rule, op_start, op_end, op_start, op_end, begin.get("line"), begin.get("col"))
-
-
-def preprocess_source(clang_bin: str, input_source: Path, preprocessed_source: Path) -> None:
-  cmd = [
-    clang_bin,
-    "-E",
-    "-std=gnu11",
-    "-nostdlib",
-    "-fno-builtin",
-    "-DALLOW_DEBUG",
-    f"-I{ROOT}",
-    f"-I{ROOT / 'opendbc/safety/board'}",
-    str(input_source),
-    "-o",
-    str(preprocessed_source),
-  ]
-  proc = run_command(cmd, cwd=ROOT)
-  if proc.returncode != 0:
-    raise RuntimeError(f"Failed to preprocess source:\n{proc.stderr}")
-
-
-def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file: Path) -> tuple[list[MutationSite], dict[str, int]]:
-  cmd = [
-    clang_bin,
-    "-std=gnu11",
-    "-nostdlib",
-    "-fno-builtin",
-    "-Xclang",
-    "-ast-dump=json",
-    "-fsyntax-only",
-    str(preprocessed_file),
-  ]
-  proc = run_command(cmd, cwd=ROOT)
-  if proc.returncode != 0:
-    raise RuntimeError(f"Failed to parse AST:\n{proc.stderr}")
-
-  ast = json.loads(proc.stdout)
-  source_cache: dict[Path, str] = {}
-  deduped: dict[tuple[Path, int, int, str], MutationSite] = {}
-  line_map = build_preprocessed_line_map(preprocessed_file)
-  rule_map: dict[tuple[str, str], list[MutationRule]] = {}
-  boundary_enabled = False
-  counts: dict[str, int] = {}
-
-  for rule in rules:
-    counts[rule.mutator] = 0
-    if rule.mutator == "boundary":
-      boundary_enabled = True
+  active = list(MUTATORS) if mutator_filter == "all" else [mutator_filter]
+  rules: dict[tuple[str, str], list[tuple[str, str, str]]] = {}
+  has_boundary = False
+  counts: dict[str, int] = {m: 0 for m in active}
+  for name in active:
+    kind, ops = MUTATORS[name]
+    if name == "boundary":
+      has_boundary = True
       continue
-    key = (rule.node_kind, rule.original_op)
-    rule_map.setdefault(key, []).append(rule)
+    for orig, repl in ops.items():
+      rules.setdefault((kind, orig), []).append((name, orig, repl))
 
   stack: list[tuple[object, dict | None]] = [(ast, None)]
   while stack:
     node, parent = stack.pop()
     if isinstance(node, dict):
-      kind_obj = node.get("kind")
-      opcode_obj = node.get("opcode")
-      kind = kind_obj if isinstance(kind_obj, str) else ""
-      opcode = opcode_obj if isinstance(opcode_obj, str) else ""
-
-      if boundary_enabled and kind == "IntegerLiteral":
-        site = _boundary_site(node, parent, preprocessed_file, source_cache)
-        if site is not None:
-          deduped[(site.source_file, site.op_start, site.op_end, site.mutator)] = site
-
-      for rule in rule_map.get((str(kind), str(opcode)), []):
-        site = None
-        if rule.node_kind in ("BinaryOperator", "CompoundAssignOperator"):
-          site = _binary_like_site(node, preprocessed_file, source_cache, rule)
-        elif rule.node_kind == "UnaryOperator":
-          site = _unary_site(node, preprocessed_file, source_cache, rule)
-        if site is not None:
-          deduped[(site.source_file, site.op_start, site.op_end, site.mutator)] = site
-
-      for value in node.values():
-        if isinstance(value, (dict, list)):
-          stack.append((value, node))
+      kind = node.get("kind", "")
+      opcode = node.get("opcode", "")
+      if has_boundary and kind == "IntegerLiteral":
+        s = _boundary_site(node, parent, pp_file, cache)
+        if s:
+          deduped[(s.source, s.op_start, s.op_end, s.mutator)] = s
+      for name, orig, repl in rules.get((kind, opcode), []):
+        s = _extract_site(node, pp_file, cache, name, orig, repl)
+        if s:
+          deduped[(s.source, s.op_start, s.op_end, s.mutator)] = s
+      for v in node.values():
+        if isinstance(v, (dict, list)):
+          stack.append((v, node))
     elif isinstance(node, list):
       for item in node:
         stack.append((item, parent))
 
-  sites = list(deduped.values())
-  sites.sort(key=lambda s: (s.line, s.col, s.op_start, s.mutator))
-  out: list[MutationSite] = []
+  sites = sorted(deduped.values(), key=lambda s: (s.line, s.col, s.op_start, s.mutator))
+  out: list[Site] = []
   for s in sites:
     mapped = line_map.get(s.line)
     if mapped is None:
@@ -642,546 +345,279 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
     origin_file, origin_line = mapped
     if SAFETY_DIR not in origin_file.parents and origin_file != SAFETY_DIR:
       continue
-    site = replace(s, site_id=len(out), origin_file=origin_file, origin_line=origin_line)
+    site = replace(s, id=len(out), origin_file=origin_file, origin_line=origin_line)
     out.append(site)
     counts[site.mutator] = counts.get(site.mutator, 0) + 1
   return out, counts
 
 
-MODE_TEST_MAP = {
-  "hyundai_common": ["test_hyundai.py", "test_hyundai_canfd.py"],
-  "volkswagen_common": ["test_volkswagen_mqb.py", "test_volkswagen_pq.py", "test_volkswagen_mlb.py"],
-  "subaru_preglobal": ["test_subaru_preglobal.py", "test_subaru.py"],
-}
+def compile_library(clang: str, pp_file: Path, sites: list[Site], output: Path) -> float:
+  source = pp_file.read_text()
+  instrumented = source
+  edits: list[tuple[int, int, int]] = []
+
+  def shift(idx: int) -> int:
+    return idx + sum(d for _, e, d in edits if e <= idx)
+
+  for site in sorted(sites, key=lambda s: (s.expr_start, -s.expr_end, s.op_start), reverse=True):
+    es, ee = shift(site.expr_start), shift(site.expr_end)
+    os_, oe = shift(site.op_start), shift(site.op_end)
+    if es < 0 or ee > len(instrumented) or os_ < es or oe > ee:
+      raise RuntimeError(f"Range drifted (site_id={site.id})")
+    if instrumented[os_:oe] != site.original:
+      raise RuntimeError(f"Token drifted (site_id={site.id})")
+    expr = instrumented[es:ee]
+    ro = os_ - es
+    mutated = f"{expr[:ro]}{site.replacement}{expr[ro + (oe - os_):]}"
+    repl = f"((__mutation_active_id == {site.id}) ? ({mutated}) : ({expr}))"
+    instrumented = f"{instrumented[:es]}{repl}{instrumented[ee:]}"
+    edits.append((site.expr_start, site.expr_end, len(repl) - (site.expr_end - site.expr_start)))
+
+  prelude = ("static int __mutation_active_id = -1;\n"
+             "void mutation_set_active_mutant(int id) { __mutation_active_id = id; }\n"
+             "int mutation_get_active_mutant(void) { return __mutation_active_id; }\n")
+  marker = re.compile(r'^\s*#\s+\d+\s+"')
+  instrumented = prelude + "\n".join(l for l in instrumented.splitlines() if not marker.match(l)) + "\n"
+
+  src_file = output.with_suffix(".c")
+  src_file.write_text(instrumented)
+  t0 = time.perf_counter()
+  r = subprocess.run(
+    [clang, "-shared", "-fPIC", "-Wall", "-Wextra", "-Wno-error", "-nostdlib",
+     "-fno-builtin", "-std=gnu11", "-Wno-pointer-to-int-cast", "-g0", "-O0",
+     "-DALLOW_DEBUG", str(src_file), "-o", str(output)],
+    cwd=ROOT, capture_output=True, text=True, check=False)
+  dur = time.perf_counter() - t0
+  if r.returncode:
+    raise RuntimeError(r.stderr.strip() or "compile failed")
+  return dur
 
 
-def build_priority_tests(site: MutationSite) -> list[str]:
-  rel_parts: tuple[str, ...] = ()
-  src = display_file(site)
+def _test_module(path: Path) -> str:
+  return ".".join(path.relative_to(ROOT).with_suffix("").parts)
+
+
+def test_targets(site: Site) -> list[str]:
+  src = site.origin_file or site.source
   try:
-    rel_parts = src.relative_to(ROOT).parts
+    rel = src.relative_to(ROOT)
   except ValueError:
-    rel_parts = ()
+    return [_test_module(p) for p in sorted(TESTS_DIR.glob("test_*.py"))]
 
-  if len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes") and src.stem != "defaults":
-    ordered_names = MODE_TEST_MAP.get(src.stem, [f"test_{src.stem}.py"])
-  elif len(rel_parts) >= 3 and rel_parts[:2] == ("opendbc", "safety"):
-    ordered_names = list(CORE_KILLER_TESTS)
+  parts = rel.parts
+  if len(parts) >= 4 and parts[:3] == ("opendbc", "safety", "modes") and rel.stem != "defaults":
+    names = MODE_TESTS.get(rel.stem, [f"test_{rel.stem}.py"])
+  elif len(parts) >= 3 and parts[:2] == ("opendbc", "safety"):
+    names = list(CORE_TESTS)
   else:
-    ordered_names = list(SMOKE_TESTS)
+    names = list(SMOKE_TESTS)
 
-  return _test_targets_from_names(ordered_names)
-
-
-def _test_module_name(test_file: Path) -> str:
-  rel = test_file.relative_to(ROOT)
-  return ".".join(rel.with_suffix("").parts)
-
-
-def _test_targets_from_names(ordered_names: list[str]) -> list[str]:
-  tests_by_name = _tests_by_name()
   out: list[str] = []
-  seen_names: set[str] = set()
-  seen_ids: set[str] = set()
-  for name in ordered_names:
-    if name in seen_names:
+  for name in names:
+    if not (TESTS_DIR / name).exists():
       continue
-    seen_names.add(name)
-
-    test_file = tests_by_name.get(name)
-    if test_file is None:
-      continue
-
-    targets = TEST_IDS.get(name)
-    if targets is not None:
-      for t in targets:
-        if t not in seen_ids:
-          seen_ids.add(t)
-          out.append(t)
+    targets = _KILLER_TESTS.get(name)
+    if targets:
+      stem = name.removesuffix(".py")
+      out.extend(_expand_test_id(stem, t) for t in targets)
     else:
-      mod = _test_module_name(test_file)
-      if mod not in seen_ids:
-        seen_ids.add(mod)
-        out.append(mod)
+      out.append(_test_module(TESTS_DIR / name))
   return out
 
 
-@functools.cache
-def _tests_by_name() -> dict[str, Path]:
-  return {p.name: p for p in sorted(SAFETY_TESTS_DIR.glob("test_*.py"))}
-
-
-
-def parse_failed_unittest(stdout: str) -> str | None:
-  for line in stdout.splitlines():
-    match = re.match(r"^(FAIL|ERROR):\s+.+\(([^)]+)\)$", line)
-    if match:
-      return match.group(2)
-  return None
-
-
-def format_site_snippet(site: MutationSite, context_lines: int = 2) -> str:
-  source = display_file(site)
-  text = source.read_text()
-  lines = text.splitlines()
-  if not lines:
-    return ""
-
-  display_ln = display_line(site)
-  line_idx = max(0, min(display_ln - 1, len(lines) - 1))
-  start = max(0, line_idx - context_lines)
-  end = min(len(lines), line_idx + context_lines + 1)
-
-  if source == site.source_file:
-    line_start_offset = text.rfind("\n", 0, site.op_start) + 1
-    line_end_offset = text.find("\n", site.op_start)
-    if line_end_offset < 0:
-      line_end_offset = len(text)
-    rel_start = max(0, site.op_start - line_start_offset)
-    rel_end = max(rel_start, min(site.op_end - line_start_offset, line_end_offset - line_start_offset))
-  else:
-    line_text = lines[line_idx]
-    rel_start = line_text.find(site.original_op)
-    if rel_start < 0:
-      rel_start = 0
-    rel_end = rel_start + len(site.original_op)
-
-  snippet_lines: list[str] = []
-  width = len(str(end))
-  for idx in range(start, end):
-    num = idx + 1
-    prefix = ">" if idx == line_idx else " "
-    line = lines[idx]
-    if idx == line_idx and rel_start <= len(line):
-      line = f"{line[:rel_start]}[[{site.original_op}->{site.mutated_op}]]{line[rel_end:]}"
-    snippet_lines.append(f"{prefix} {num:>{width}} | {line}")
-  return "\n".join(snippet_lines)
-
-
-def render_progress(completed: int, total: int, killed: int, survived: int, infra: int, elapsed_sec: float) -> str:
-  bar_width = 30
-  filled = int((completed / total) * bar_width) if total > 0 else 0
-  filled = max(0, min(bar_width, filled))
-  bar = "#" * filled + "-" * (bar_width - filled)
-
-  rate = completed / elapsed_sec if elapsed_sec > 0 else 0.0
-  remaining = total - completed
-  eta = (remaining / rate) if rate > 0 else 0.0
-
-  return f"[{bar}] {completed}/{total} k:{killed} s:{survived} i:{infra} mps:{rate:.2f} elapsed:{elapsed_sec:.1f}s eta:{eta:.1f}s"
-
-
-def render_build_progress(attempt: int, pruned: int, remaining: int, discovered: int, elapsed_sec: float, *, done: bool = False) -> str:
-  bar_width = 20
-  resolved = discovered - remaining
-  if discovered > 0:
-    pct = min(max(resolved / discovered, 0.0), 1.0)
-  else:
-    pct = 1.0
-  if done:
-    pct = 1.0
-  filled = int(bar_width * pct)
-  bar = "#" * filled + "-" * (bar_width - filled)
-  rate = resolved / elapsed_sec if elapsed_sec > 0 else 0.0
-  eta = (remaining / rate) if rate > 0 else 0.0
-  return f"[build {bar}] attempts:{attempt} pruned:{pruned}/{discovered} remaining:{remaining} rps:{rate:.2f} elapsed:{elapsed_sec:.1f}s eta:{eta:.1f}s"
-
-
-def print_live_status(text: str, *, final: bool = False) -> None:
-  if sys.stdout.isatty():
-    print("\r" + text, end="\n" if final else "", flush=True)
-  else:
-    print(text, flush=True)
-
-
-def _parse_compile_error_locations(error_text: str) -> set[tuple[Path, int]]:
-  matches = re.findall(r"([^\s:]+\.(?:h|c)):(\d+):(\d+):", error_text)
-  out: set[tuple[Path, int]] = set()
-  for file_str, line_str, _ in matches:
-    file_path = Path(file_str)
-    if not file_path.is_absolute():
-      file_path = (ROOT / file_path).resolve()
-    else:
-      file_path = file_path.resolve()
-    out.add((file_path, int(line_str)))
-  return out
-
-
-def _parse_compile_error_site_ids(error_text: str) -> set[int]:
-  return {int(v) for v in re.findall(r"__mutation_active_id\s*==\s*(\d+)", error_text)}
-
-
-def _parse_internal_site_ids(error_text: str) -> set[int]:
-  return {int(v) for v in re.findall(r"site_id=(\d+)", error_text)}
-
-
-def run_unittest(targets: Sequence[Path | str], lib_path: Path, mutant_id: int, verbose: bool) -> TestRunResult:
+def run_tests(targets: list[str], lib: Path, mutant_id: int) -> tuple[bool, str | None, float]:
   os.environ["MUTATION"] = "1"
-  os.environ["LIBSAFETY_PATH"] = str(lib_path)
+  os.environ["LIBSAFETY_PATH"] = str(lib)
   os.environ["MUTATION_ACTIVE_ID"] = str(mutant_id)
 
   from opendbc.safety.tests.libsafety.libsafety_py import libsafety
-
-  init_tests = getattr(libsafety, "init_tests", None)
-  if callable(init_tests):
-    init_tests()
-
-  set_mutant = getattr(libsafety, "mutation_set_active_mutant", None)
-  if callable(set_mutant):
-    set_mutant(mutant_id)
+  libsafety.init_tests()
+  libsafety.mutation_set_active_mutant(mutant_id)
 
   loader = unittest.TestLoader()
   suite = unittest.TestSuite()
-  target_names: list[str] = []
-  for target in targets:
-    if isinstance(target, Path):
-      target_name = _test_module_name(target)
-    else:
-      target_name = target
-    target_names.append(target_name)
-    suite.addTests(loader.loadTestsFromName(target_name))
-
-  if verbose:
-    print("Running unittest targets:", ", ".join(target_names), flush=True)
+  for t in targets:
+    suite.addTests(loader.loadTestsFromName(t))
 
   stream = io.StringIO()
   runner = unittest.TextTestRunner(stream=stream, verbosity=0, failfast=True)
   t0 = time.perf_counter()
   result = runner.run(suite)
-  duration = time.perf_counter() - t0
+  dur = time.perf_counter() - t0
 
-  stdout = stream.getvalue()
-  stderr = ""
-  returncode = 0 if result.wasSuccessful() else 1
-
-  failed_test: str | None = None
-  if result.failures:
-    failed_test = result.failures[0][0].id()
-  elif result.errors:
-    failed_test = result.errors[0][0].id()
-  if failed_test is None:
-    failed_test = parse_failed_unittest(stdout)
-  if failed_test is None and not result.wasSuccessful():
-    failed_test = "unittest-failure"
-
-  return TestRunResult(
-    returncode=returncode,
-    duration_sec=duration,
-    failed_test=failed_test,
-    stdout=stdout,
-    stderr=stderr,
-  )
+  if result.wasSuccessful():
+    return False, None, dur
+  failed = result.failures[0][0].id() if result.failures else \
+           result.errors[0][0].id() if result.errors else "unknown"
+  return True, failed, dur
 
 
-def compile_mutated_library(clang_bin: str, preprocessed_file: Path, sites: list[MutationSite], output_so: Path) -> float:
-  source_text = preprocessed_file.read_text()
-
-  instrumented = source_text
-  applied_edits: list[tuple[int, int, int]] = []
-
-  def map_index(original_index: int) -> int:
-    shift = 0
-    for _edit_start, edit_end, delta in applied_edits:
-      if edit_end <= original_index:
-        shift += delta
-    return original_index + shift
-
-  for site in sorted(sites, key=lambda s: (s.expr_start, -s.expr_end, s.op_start), reverse=True):
-    expr_start = map_index(site.expr_start)
-    expr_end = map_index(site.expr_end)
-    op_start = map_index(site.op_start)
-    op_end = map_index(site.op_end)
-
-    if expr_start < 0 or expr_end > len(instrumented) or expr_end < expr_start:
-      raise RuntimeError(f"Mutation expression range drifted (site_id={site.site_id}): {format_path(site.source_file)}:{site.line}:{site.col}")
-    if op_start < expr_start or op_end > expr_end:
-      raise RuntimeError(f"Mutation operator range drifted (site_id={site.site_id}): {format_path(site.source_file)}:{site.line}:{site.col}")
-    if instrumented[op_start:op_end] != site.original_op:
-      raise RuntimeError(f"Mutation operator token drifted (site_id={site.site_id}): {format_path(site.source_file)}:{site.line}:{site.col}")
-
-    expr_text = instrumented[expr_start:expr_end]
-    rel_op_start = op_start - expr_start
-    rel_op_end = op_end - expr_start
-    mutated_expr = f"{expr_text[:rel_op_start]}{site.mutated_op}{expr_text[rel_op_end:]}"
-    replacement = f"((__mutation_active_id == {site.site_id}) ? ({mutated_expr}) : ({expr_text}))"
-    instrumented = f"{instrumented[:expr_start]}{replacement}{instrumented[expr_end:]}"
-    applied_edits.append((site.expr_start, site.expr_end, len(replacement) - (site.expr_end - site.expr_start)))
-
-  prelude = """static int __mutation_active_id = -1;
-void mutation_set_active_mutant(int id) { __mutation_active_id = id; }
-int mutation_get_active_mutant(void) { return __mutation_active_id; }
-"""
-  marker_re = re.compile(r'^\s*#\s+\d+\s+"')
-  instrumented_lines = [line for line in instrumented.splitlines() if not marker_re.match(line)]
-  instrumented = prelude + "\n".join(instrumented_lines) + "\n"
-
-  mutation_source = output_so.with_suffix(".c")
-  mutation_source.write_text(instrumented)
-
-  cmd = [
-    clang_bin,
-    "-shared",
-    "-fPIC",
-    "-Wall",
-    "-Wextra",
-    "-Wno-error",
-    "-nostdlib",
-    "-fno-builtin",
-    "-std=gnu11",
-    "-Wno-pointer-to-int-cast",
-    "-g0",
-    "-O0",
-    "-DALLOW_DEBUG",
-    str(mutation_source),
-    "-o",
-    str(output_so),
-  ]
-
-  t0 = time.perf_counter()
-  proc = run_command(cmd, cwd=ROOT)
-  duration = time.perf_counter() - t0
-  if proc.returncode != 0:
-    raise RuntimeError(proc.stderr.strip() or "unknown compile failure")
-  return duration
-
-
-def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResult:
-  priority_tests = build_priority_tests(site)
+def eval_mutant(site: Site, lib: Path) -> Result:
   try:
-    test_result = run_unittest(priority_tests, lib_path, mutant_id=site.site_id, verbose=verbose)
-    if test_result.returncode != 0 and test_result.failed_test is not None:
-      return MutantResult(site, "killed", "tests", test_result.failed_test, test_result.duration_sec, "")
-    if test_result.returncode != 0:
-      details = (test_result.stderr or test_result.stdout).strip()
-      return MutantResult(site, "infra_error", "tests", None, test_result.duration_sec, details)
-    return MutantResult(site, "survived", "tests", None, test_result.duration_sec, "")
-  except Exception as exc:
-    return MutantResult(site, "infra_error", "build", None, 0.0, str(exc))
+    killed, killer, dur = run_tests(test_targets(site), lib, site.id)
+    return Result(site, "killed" if killed else "survived", "tests", killer, dur)
+  except Exception as e:
+    return Result(site, "infra_error", "build", None, 0.0, str(e))
 
 
-def baseline_smoke_test(lib_path: Path, verbose: bool) -> TestRunResult:
-  smoke_files = [SAFETY_TESTS_DIR / name for name in SMOKE_TESTS]
-  return run_unittest(smoke_files, lib_path, mutant_id=-1, verbose=verbose)
+def _site_loc(site: Site) -> str:
+  return f"{(site.origin_file or site.source).relative_to(ROOT)}:{site.origin_line or site.line}"
+
+
+def snippet(site: Site, ctx: int = 2) -> str:
+  src = site.origin_file or site.source
+  ln = site.origin_line or site.line
+  if not src.exists(): return ""
+  lines = src.read_text().splitlines()
+  idx = max(0, min(ln - 1, len(lines) - 1))
+  start, end = max(0, idx - ctx), min(len(lines), idx + ctx + 1)
+  w = len(str(end))
+  out = []
+  for i in range(start, end):
+    pfx = ">" if i == idx else " "
+    line = lines[i]
+    if i == idx and (p := line.find(site.original)) >= 0:
+      line = f"{line[:p]}[[{site.original}->{site.replacement}]]{line[p + len(site.original):]}"
+    out.append(f"{pfx} {i + 1:>{w}} | {line}")
+  return "\n".join(out)
+
+
+def progress(done: int, total: int, k: int, s: int, i: int, elapsed: float) -> str:
+  filled = int(done / total * 30) if total else 0
+  bar = "#" * filled + "-" * (30 - filled)
+  rate = done / elapsed if elapsed > 0 else 0
+  eta = (total - done) / rate if rate > 0 else 0
+  return f"[{bar}] {done}/{total} k:{k} s:{s} i:{i} {rate:.1f}mps {elapsed:.0f}s eta:{eta:.0f}s"
+
+
+def _parse_errors(text: str) -> tuple[set[int], set[tuple[Path, int]]]:
+  ids = ({int(v) for v in re.findall(r"__mutation_active_id\s*==\s*(\d+)", text)} |
+         {int(v) for v in re.findall(r"site_id=(\d+)", text)})
+  locs: set[tuple[Path, int]] = set()
+  if not ids:
+    for f, ln, _ in re.findall(r"([^\s:]+\.(?:h|c)):(\d+):(\d+):", text):
+      locs.add(((Path(f) if Path(f).is_absolute() else (ROOT / f)).resolve(), int(ln)))
+  return ids, locs
 
 
 def main() -> int:
-  args = parse_args()
-  if args.j < 1:
-    raise SystemExit("-j must be >= 1")
-  if args.max_mutants < 0:
-    raise SystemExit("--max-mutants must be >= 0")
+  ap = argparse.ArgumentParser()
+  ap.add_argument("--mutator", default="all", choices=["all", *MUTATORS])
+  ap.add_argument("-j", type=int, default=max((os.cpu_count() or 1) - 1, 1))
+  ap.add_argument("--max-mutants", type=int, default=0)
+  ap.add_argument("--list-only", action="store_true")
+  args = ap.parse_args()
 
-  start = time.perf_counter()
-  clang_bin = find_clang()
+  clang = next((n for n in ("clang-17", "clang") if shutil.which(n)), None)
+  if not clang:
+    raise RuntimeError("clang not found")
 
-  with tempfile.TemporaryDirectory(prefix="mutation-op-run-") as run_tmp_dir:
-    preprocessed_file = Path(run_tmp_dir) / "safety_preprocessed.c"
-    print("Preprocessing safety translation unit...", flush=True)
-    preprocess_source(clang_bin, ROOT / SAFETY_C_REL, preprocessed_file)
+  t_start = time.perf_counter()
+  with tempfile.TemporaryDirectory(prefix="mutation-") as tmp:
+    pp_file = Path(tmp) / "safety.i"
+    print("Preprocessing...", flush=True)
+    preprocess(clang, ROOT / SAFETY_C, pp_file)
 
-    selected_rules = resolve_rules(args.mutator, args.operator)
-    mutator_label = args.mutator if args.mutator != "all" else "all Mull-like mutators"
-    print(f"Discovering mutation sites for: {mutator_label}", flush=True)
-
-    sites, mutator_counts = enumerate_sites(clang_bin, selected_rules, preprocessed_file)
+    label = args.mutator if args.mutator != "all" else "all mutators"
+    print(f"Discovering mutation sites for: {label}", flush=True)
+    sites, counts = discover_sites(clang, pp_file, args.mutator)
     if not sites:
-      print("No mutation candidates found for selected mutator configuration.", flush=True)
+      print("No mutation candidates found.", flush=True)
       return 2
-
     if args.max_mutants > 0:
-      sites = sites[: args.max_mutants]
+      sites = sites[:args.max_mutants]
 
-    mutator_summary = ", ".join(f"{name} ({mutator_counts.get(name, 0)})" for name in MUTATOR_FAMILIES if mutator_counts.get(name, 0) > 0)
-    print(f"Found {len(sites)} unique candidates: {mutator_summary}", flush=True)
+    summary = ", ".join(f"{m} ({counts[m]})" for m in MUTATORS if counts.get(m, 0))
+    print(f"Found {len(sites)} candidates: {summary}", flush=True)
     if args.list_only:
-      for site in sites:
-        print(f"  #{site.site_id:03d} {format_path(display_file(site))}:{display_line(site)} [{site.mutator}] {site.original_op}->{site.mutated_op}")
+      for s in sites:
+        print(f"  #{s.id:03d} {_site_loc(s)} [{s.mutator}] {s.original}->{s.replacement}")
       return 0
 
-    print(
-      f"Running {len(sites)} mutants with {args.j} workers",
-      flush=True,
-    )
-
-    discovered_count = len(sites)
-    mutation_lib = Path(run_tmp_dir) / "libsafety_mutation.so"
-    compile_sites = sites
-    pruned_compile_sites = 0
-    compile_attempt = 0
-    compile_phase_start = time.perf_counter()
-    print_live_status(render_build_progress(compile_attempt, pruned_compile_sites, len(compile_sites), discovered_count, 0.0))
+    # Compile with iterative error pruning
+    discovered = len(sites)
+    lib = Path(tmp) / "libsafety_mutation.so"
+    compile_sites, pruned = sites, 0
+    print(f"Compiling {len(sites)} mutants into single library...", flush=True)
     while True:
-      compile_attempt += 1
       try:
-        compile_once_sec = compile_mutated_library(clang_bin, preprocessed_file, compile_sites, mutation_lib)
-        print_live_status(
-          render_build_progress(
-            compile_attempt,
-            pruned_compile_sites,
-            len(compile_sites),
-            discovered_count,
-            time.perf_counter() - compile_phase_start,
-            done=True,
-          ),
-          final=True,
-        )
+        build_sec = compile_library(clang, pp_file, compile_sites, lib)
         break
       except RuntimeError as exc:
-        err_text = str(exc)
-        bad_site_ids = _parse_internal_site_ids(err_text) | _parse_compile_error_site_ids(err_text)
+        err = str(exc)
         before = len(compile_sites)
-        if bad_site_ids:
-          compile_sites = [s for s in compile_sites if s.site_id not in bad_site_ids]
-        else:
-          bad_locations = _parse_compile_error_locations(err_text)
-          if not bad_locations:
-            print("Failed to build mutation library:", flush=True)
-            print(err_text, flush=True)
-            return 2
-          compile_sites = [s for s in compile_sites if (display_file(s), display_line(s)) not in bad_locations]
-        removed = before - len(compile_sites)
-        if removed <= 0:
-          print("Failed to build mutation library:", flush=True)
-          print(err_text, flush=True)
+        bad_ids, bad_locs = _parse_errors(err)
+        compile_sites = [s for s in compile_sites if s.id not in bad_ids and
+                         ((s.origin_file or s.source), (s.origin_line or s.line)) not in bad_locs]
+        if len(compile_sites) >= before or not compile_sites:
+          print(f"Build failed:\n{err}", flush=True)
           return 2
+        pruned += before - len(compile_sites)
 
-        pruned_compile_sites += removed
-        if not compile_sites:
-          print("Failed to build mutation library: all sites were pruned as build-incompatible", flush=True)
-          return 2
-        print_live_status(
-          render_build_progress(
-            compile_attempt,
-            pruned_compile_sites,
-            len(compile_sites),
-            discovered_count,
-            time.perf_counter() - compile_phase_start,
-          )
-        )
-
-    if pruned_compile_sites > 0:
-      sites = [replace(s, site_id=i) for i, s in enumerate(compile_sites)]
-      print(f"Pruned {pruned_compile_sites} build-incompatible mutants for single-library mode", flush=True)
+    if pruned:
+      sites = [replace(s, id=i) for i, s in enumerate(compile_sites)]
+      print(f"Pruned {pruned} build-incompatible mutants", flush=True)
     else:
       sites = compile_sites
 
-    baseline_result = baseline_smoke_test(mutation_lib, args.verbose)
-    if baseline_result.returncode != 0:
-      print("Baseline smoke failed with mutant_id=-1; aborting to avoid false kill signals.", flush=True)
-      if baseline_result.failed_test is not None:
-        print(f"  failed_test: {baseline_result.failed_test}", flush=True)
-      details = baseline_result.stdout.strip()
-      if details:
-        print(details, flush=True)
+    # Baseline smoke test
+    smoke = [_test_module(TESTS_DIR / n) for n in SMOKE_TESTS]
+    killed, killer, _ = run_tests(smoke, lib, -1)
+    if killed:
+      print(f"Baseline smoke failed: {killer}", flush=True)
       return 2
 
-    results: list[MutantResult] = []
-    completed = 0
-    killed = 0
-    survived = 0
-    infra = 0
-
-    def _record(res: MutantResult) -> None:
-      nonlocal completed, killed, survived, infra
-      results.append(res)
-      completed += 1
-      if res.outcome == "killed":
-        killed += 1
-      elif res.outcome == "survived":
-        survived += 1
-      else:
-        infra += 1
+    # Run all mutants in parallel
+    print(f"Running {len(sites)} mutants with {args.j} workers", flush=True)
+    results: list[Result] = []
+    k = s = i = 0
+    is_tty = sys.stdout.isatty()
+    def show(text: str, final: bool = False) -> None:
+      print(("\r" + text if is_tty else text), end="\n" if (final or not is_tty) else "", flush=True)
 
     with ProcessPoolExecutor(max_workers=args.j, max_tasks_per_child=1) as pool:
-      future_map: dict[Future[MutantResult], MutationSite] = {pool.submit(eval_mutant, site, mutation_lib, args.verbose): site for site in sites}
-      print_live_status(render_progress(0, len(sites), 0, 0, 0, 0.0))
-      try:
-        for fut in as_completed(future_map):
-          try:
-            res = fut.result()
-          except Exception:
-            site = future_map[fut]
-            res = MutantResult(site, "killed", "tests", "worker-crash", 0.0, "worker process crashed")
-          _record(res)
-          elapsed_now = time.perf_counter() - start
-          print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=(completed == len(sites)))
-      except Exception:
-        # Pool broken — mark all unfinished mutants as killed (crash = behavioral change detected)
-        completed_ids = {r.site.site_id for r in results}
-        for site in sites:
-          if site.site_id not in completed_ids:
-            _record(MutantResult(site, "killed", "tests", "worker-crash", 0.0, "pool broken"))
-        elapsed_now = time.perf_counter() - start
-        print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=True)
+      futures: dict[Future[Result], Site] = {pool.submit(eval_mutant, st, lib): st for st in sites}
+      show(progress(0, len(sites), 0, 0, 0, 0))
+      for fut in as_completed(futures):
+        try:
+          res = fut.result()
+        except Exception:
+          res = Result(futures[fut], "killed", "tests", "worker-crash", 0.0)
+        results.append(res)
+        if res.outcome == "killed": k += 1
+        elif res.outcome == "survived": s += 1
+        else: i += 1
+        elapsed = time.perf_counter() - t_start
+        show(progress(len(results), len(sites), k, s, i, elapsed), final=(len(results) == len(sites)))
 
-    # Verification pass: re-run survivors to detect flaky mutants
-    initial_survivors = [r for r in results if r.outcome == "survived"]
-    if initial_survivors:
-      print(f"\nVerifying {len(initial_survivors)} survivors...", flush=True)
-      with ProcessPoolExecutor(max_workers=args.j, max_tasks_per_child=1) as pool:
-        verify_futures = {pool.submit(eval_mutant, r.site, mutation_lib, args.verbose): r for r in initial_survivors}
-        verified: dict[int, MutantResult] = {}
-        for fut in as_completed(verify_futures):
-          try:
-            vres = fut.result()
-          except Exception:
-            orig = verify_futures[fut]
-            vres = MutantResult(orig.site, "survived", "tests", None, 0.0, "verification crash")
-          verified[vres.site.site_id] = vres
-      newly_killed = {sid: v for sid, v in verified.items() if v.outcome == "killed"}
-      if newly_killed:
-        print(f"  {len(newly_killed)} flaky mutants reclassified as killed", flush=True)
-        results = [newly_killed.get(r.site.site_id, r) if r.outcome == "survived" else r for r in results]
-        killed = sum(1 for r in results if r.outcome == "killed")
-        survived = sum(1 for r in results if r.outcome == "survived")
-        infra = sum(1 for r in results if r.outcome == "infra_error")
-        elapsed_now = time.perf_counter() - start
-        print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=True)
-
-    survivors = sorted((r for r in results if r.outcome == "survived"), key=lambda r: r.site.site_id)
+    # Report survivors
+    survivors = sorted((r for r in results if r.outcome == "survived"), key=lambda r: r.site.id)
     if survivors:
-      print("", flush=True)
-      print("Surviving mutants", flush=True)
-      for res in survivors:
-        loc = f"{format_path(display_file(res.site))}:{display_line(res.site)}"
-        print(f"- #{res.site.site_id} {loc} [{res.site.mutator}] {res.site.original_op}->{res.site.mutated_op}", flush=True)
-        print(format_site_snippet(res.site), flush=True)
+      print("\nSurviving mutants", flush=True)
+      for r in survivors:
+        print(f"- #{r.site.id} {_site_loc(r.site)} [{r.site.mutator}] {r.site.original}->{r.site.replacement}", flush=True)
+        print(snippet(r.site), flush=True)
 
-    infra_results = sorted((r for r in results if r.outcome == "infra_error"), key=lambda r: r.site.site_id)
+    infra_results = sorted((r for r in results if r.outcome == "infra_error"), key=lambda r: r.site.id)
     if infra_results:
-      print("", flush=True)
-      print("Infra errors", flush=True)
-      for res in infra_results:
-        loc = f"{format_path(display_file(res.site))}:{display_line(res.site)}"
-        detail = res.details.splitlines()[0] if res.details else "unknown error"
-        print(f"- #{res.site.site_id} {loc} ({res.stage}): {detail}", flush=True)
+      print("\nInfra errors", flush=True)
+      for r in infra_results:
+        detail = r.details.splitlines()[0] if r.details else "unknown"
+        print(f"- #{r.site.id} {_site_loc(r.site)} ({r.stage}): {detail}", flush=True)
 
-    elapsed = time.perf_counter() - start
-    total_build_sec = compile_once_sec
-    total_test_sec = sum(r.test_sec for r in results)
-    killed_by_tests = sum(1 for r in results if r.outcome == "killed" and r.stage == "tests")
-    print("", flush=True)
-    print("Mutation summary", flush=True)
-    print(f"  mutator: {mutator_label}", flush=True)
-    print(f"  discovered: {discovered_count}", flush=True)
-    print(f"  pruned_build_incompatible: {pruned_compile_sites}", flush=True)
-    print(f"  total: {len(sites)}", flush=True)
-    print(f"  killed: {killed}", flush=True)
-    print(f"  killed_by_tests: {killed_by_tests}", flush=True)
-    print(f"  survived: {survived}", flush=True)
-    print(f"  infra_error: {infra}", flush=True)
-    print(f"  build_time_sum: {total_build_sec:.2f}s", flush=True)
-    print(f"  build_once: {compile_once_sec:.2f}s", flush=True)
-    print(f"  test_time_sum: {total_test_sec:.2f}s", flush=True)
-    if len(results) > 0:
-      print(f"  avg_test_per_mutant: {total_test_sec / len(results):.3f}s", flush=True)
-    if elapsed > 0:
-      print(f"  mutants_per_second: {len(sites) / elapsed:.2f}", flush=True)
-    print(f"  elapsed: {elapsed:.2f}s", flush=True)
+    elapsed = time.perf_counter() - t_start
+    test_sum = sum(r.test_sec for r in results)
+    print(f"""
+Mutation summary
+  mutator: {label}
+  discovered: {discovered}, pruned: {pruned}, total: {len(sites)}
+  killed: {k}, survived: {s}, infra_error: {i}
+  build: {build_sec:.2f}s, test_time: {test_sum:.2f}s, elapsed: {elapsed:.2f}s
+  mutants_per_second: {len(sites) / max(elapsed, 0.01):.2f}""", flush=True)
 
-    if infra > 0:
+    if i:
       return 2
-    if survived > 0:
+    if s:
       return 1
     return 0
 
