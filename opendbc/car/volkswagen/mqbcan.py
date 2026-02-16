@@ -85,7 +85,7 @@ def acc_control_value(main_switch_on, long_active, cruiseOverride, acc_faulted):
 def acc_hud_status_value(main_switch_on, acc_faulted, longActive, longOverride):
   if longOverride:
     hud_status = 4
-  elif not longOverride and longActive:
+  elif longActive:
     hud_status = 3
   elif acc_faulted:
     hud_status = 6
