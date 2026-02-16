@@ -13,6 +13,7 @@ import sys
 import tempfile
 import time
 import unittest
+from collections.abc import Sequence
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -57,9 +58,7 @@ TEST_IDS: dict[str, tuple[str, ...]] = {
     "opendbc.safety.tests.test_defaults.TestNoOutput.test_default_controls_not_allowed",
     "opendbc.safety.tests.test_defaults.TestSilent.test_default_controls_not_allowed",
   ),
-  "test_elm327.py": (
-    "opendbc.safety.tests.test_elm327.TestElm327.test_default_controls_not_allowed",
-  ),
+  "test_elm327.py": ("opendbc.safety.tests.test_elm327.TestElm327.test_default_controls_not_allowed",),
   "test_ford.py": (
     "opendbc.safety.tests.test_ford.TestFordCANFDLongitudinalSafety.test_curvature_rate_limits",
     "opendbc.safety.tests.test_ford.TestFordCANFDStockSafety.test_acc_buttons",
@@ -109,9 +108,7 @@ TEST_IDS: dict[str, tuple[str, ...]] = {
     "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering.test_against_torque_driver",
     "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteeringAltButtons.test_acc_cancel",
   ),
-  "test_mazda.py": (
-    "opendbc.safety.tests.test_mazda.TestMazdaSafety.test_against_torque_driver",
-  ),
+  "test_mazda.py": ("opendbc.safety.tests.test_mazda.TestMazdaSafety.test_against_torque_driver",),
   "test_nissan.py": (
     "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_cmd_when_disabled",
     "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_acc_buttons",
@@ -555,7 +552,25 @@ def preprocess_source(clang_bin: str, input_source: Path, preprocessed_source: P
     raise RuntimeError(f"Failed to preprocess source:\n{proc.stderr}")
 
 
-def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file: Path) -> tuple[list[MutationSite], dict[str, int]]:
+def _site_key(site: MutationSite) -> tuple[Path, int, int, str]:
+  return (site.source_file, site.op_start, site.op_end, site.mutator)
+
+
+def _var_decl_requires_constant_initializer(node: dict, parent: dict | None) -> bool:
+  if node.get("kind") != "VarDecl":
+    return False
+  if "init" not in node:
+    return False
+
+  storage = node.get("storageClass")
+  if storage == "static":
+    return True
+
+  parent_kind = parent.get("kind") if isinstance(parent, dict) else None
+  return parent_kind == "TranslationUnitDecl"
+
+
+def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file: Path) -> tuple[list[MutationSite], dict[str, int], set[int]]:
   cmd = [
     clang_bin,
     "-std=gnu11",
@@ -573,6 +588,7 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
   ast = json.loads(proc.stdout)
   source_cache: dict[Path, str] = {}
   deduped: dict[tuple[Path, int, int, str], MutationSite] = {}
+  build_incompatible_keys: set[tuple[Path, int, int, str]] = set()
   line_map = build_preprocessed_line_map(preprocessed_file)
   rule_map: dict[tuple[str, str], list[MutationRule]] = {}
   boundary_enabled = False
@@ -586,9 +602,9 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
     key = (rule.node_kind, rule.original_op)
     rule_map.setdefault(key, []).append(rule)
 
-  stack: list[tuple[object, dict | None]] = [(ast, None)]
+  stack: list[tuple[object, dict | None, bool]] = [(ast, None, False)]
   while stack:
-    node, parent = stack.pop()
+    node, parent, in_constexpr_context = stack.pop()
     if isinstance(node, dict):
       kind_obj = node.get("kind")
       opcode_obj = node.get("opcode")
@@ -598,7 +614,10 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
       if boundary_enabled and kind == "IntegerLiteral":
         site = _boundary_site(node, parent, preprocessed_file, source_cache)
         if site is not None:
-          deduped[(site.source_file, site.op_start, site.op_end, site.mutator)] = site
+          key = _site_key(site)
+          deduped[key] = site
+          if in_constexpr_context:
+            build_incompatible_keys.add(key)
 
       for rule in rule_map.get((kind, opcode), []):
         site = None
@@ -607,18 +626,24 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
         elif rule.node_kind == "UnaryOperator":
           site = _unary_site(node, preprocessed_file, source_cache, rule)
         if site is not None:
-          deduped[(site.source_file, site.op_start, site.op_end, site.mutator)] = site
+          key = _site_key(site)
+          deduped[key] = site
+          if in_constexpr_context:
+            build_incompatible_keys.add(key)
+
+      child_constexpr = in_constexpr_context or _var_decl_requires_constant_initializer(node, parent)
 
       for value in node.values():
         if isinstance(value, (dict, list)):
-          stack.append((value, node))
+          stack.append((value, node, child_constexpr))
     elif isinstance(node, list):
       for item in node:
-        stack.append((item, parent))
+        stack.append((item, parent, in_constexpr_context))
 
   sites = list(deduped.values())
   sites.sort(key=lambda s: (s.line, s.col, s.op_start, s.mutator))
   out: list[MutationSite] = []
+  build_incompatible_site_ids: set[int] = set()
   for s in sites:
     mapped = line_map.get(s.line)
     if mapped is None:
@@ -627,9 +652,11 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
     if SAFETY_DIR not in origin_file.parents and origin_file != SAFETY_DIR:
       continue
     site = replace(s, site_id=len(out), origin_file=origin_file, origin_line=origin_line)
+    if _site_key(site) in build_incompatible_keys:
+      build_incompatible_site_ids.add(site.site_id)
     out.append(site)
     counts[site.mutator] += 1
-  return out, counts
+  return out, counts, build_incompatible_site_ids
 
 
 MODE_TEST_MAP = {
@@ -736,22 +763,6 @@ def render_progress(completed: int, total: int, killed: int, survived: int, infr
   return f"[{bar}] {completed}/{total} k:{killed} s:{survived} i:{infra} mps:{rate:.2f} elapsed:{elapsed_sec:.1f}s eta:{eta:.1f}s"
 
 
-def render_build_progress(attempt: int, pruned: int, remaining: int, discovered: int, elapsed_sec: float, *, done: bool = False) -> str:
-  bar_width = 20
-  resolved = discovered - remaining
-  if discovered > 0:
-    pct = min(max(resolved / discovered, 0.0), 1.0)
-  else:
-    pct = 1.0
-  if done:
-    pct = 1.0
-  filled = int(bar_width * pct)
-  bar = "#" * filled + "-" * (bar_width - filled)
-  rate = resolved / elapsed_sec if elapsed_sec > 0 else 0.0
-  eta = (remaining / rate) if rate > 0 else 0.0
-  return f"[build {bar}] attempts:{attempt} pruned:{pruned}/{discovered} remaining:{remaining} rps:{rate:.2f} elapsed:{elapsed_sec:.1f}s eta:{eta:.1f}s"
-
-
 def print_live_status(text: str, *, final: bool = False) -> None:
   if sys.stdout.isatty():
     print("\r" + text, end="\n" if final else "", flush=True)
@@ -759,28 +770,11 @@ def print_live_status(text: str, *, final: bool = False) -> None:
     print(text, flush=True)
 
 
-def _parse_compile_error_locations(error_text: str) -> set[tuple[Path, int]]:
-  matches = re.findall(r"([^\s:]+\.(?:h|c)):(\d+):\d+:", error_text)
-  out: set[tuple[Path, int]] = set()
-  for file_str, line_str in matches:
-    file_path = Path(file_str)
-    if not file_path.is_absolute():
-      file_path = (ROOT / file_path).resolve()
-    else:
-      file_path = file_path.resolve()
-    out.add((file_path, int(line_str)))
-  return out
-
-
 def _parse_compile_error_site_ids(error_text: str) -> set[int]:
   return {int(v) for v in re.findall(r"__mutation_active_id\s*==\s*(\d+)", error_text)}
 
 
-def _parse_internal_site_ids(error_text: str) -> set[int]:
-  return {int(v) for v in re.findall(r"site_id=(\d+)", error_text)}
-
-
-def run_unittest(targets: list[Path | str], lib_path: Path, mutant_id: int, verbose: bool) -> TestRunResult:
+def run_unittest(targets: Sequence[Path | str], lib_path: Path, mutant_id: int, verbose: bool) -> TestRunResult:
   os.environ["LIBSAFETY_PATH"] = str(lib_path)
 
   from opendbc.safety.tests.libsafety.libsafety_py import libsafety
@@ -850,7 +844,7 @@ def _instrument_source(source: str, sites: list[MutationSite]) -> str:
     running_len = 0
 
     for child_site, child_children in children:
-      seg = source[pos:child_site.expr_start]
+      seg = source[pos : child_site.expr_start]
       if op_rel is None and site.op_start >= pos and site.op_start < child_site.expr_start:
         op_rel = running_len + (site.op_start - pos)
       parts.append(seg)
@@ -861,26 +855,27 @@ def _instrument_source(source: str, sites: list[MutationSite]) -> str:
       running_len += len(child_repl)
       pos = child_site.expr_end
 
-    seg = source[pos:site.expr_end]
+    seg = source[pos : site.expr_end]
     if op_rel is None and site.op_start >= pos:
       op_rel = running_len + (site.op_start - pos)
     parts.append(seg)
 
-    expr_text = ''.join(parts)
+    expr_text = "".join(parts)
     op_len = site.op_end - site.op_start
-    assert op_rel is not None and expr_text[op_rel:op_rel + op_len] == site.original_op, \
+    assert op_rel is not None and expr_text[op_rel : op_rel + op_len] == site.original_op, (
       f"Operator mismatch (site_id={site.site_id}): expected {site.original_op!r} at offset {op_rel}"
-    mutated_expr = f"{expr_text[:op_rel]}{site.mutated_op}{expr_text[op_rel + op_len:]}"
+    )
+    mutated_expr = f"{expr_text[:op_rel]}{site.mutated_op}{expr_text[op_rel + op_len :]}"
     return f"((__mutation_active_id == {site.site_id}) ? ({mutated_expr}) : ({expr_text}))"
 
   result_parts: list[str] = []
   pos = 0
   for site, children in roots:
-    result_parts.append(source[pos:site.expr_start])
+    result_parts.append(source[pos : site.expr_start])
     result_parts.append(build_replacement(site, children))
     pos = site.expr_end
   result_parts.append(source[pos:])
-  return ''.join(result_parts)
+  return "".join(result_parts)
 
 
 def compile_mutated_library(clang_bin: str, preprocessed_file: Path, sites: list[MutationSite], output_so: Path) -> float:
@@ -892,7 +887,7 @@ void mutation_set_active_mutant(int id) { __mutation_active_id = id; }
 int mutation_get_active_mutant(void) { return __mutation_active_id; }
 """
   marker_re = re.compile(r'^\s*#\s+\d+\s+"[^\n]*\n?', re.MULTILINE)
-  instrumented = prelude + marker_re.sub('', instrumented)
+  instrumented = prelude + marker_re.sub("", instrumented)
 
   mutation_source = output_so.with_suffix(".c")
   mutation_source.write_text(instrumented)
@@ -951,7 +946,7 @@ def main() -> int:
     mutator_label = args.mutator if args.mutator != "all" else "all Mull-like mutators"
     print(f"Discovering mutation sites for: {mutator_label}", flush=True)
 
-    sites, mutator_counts = enumerate_sites(clang_bin, selected_rules, preprocessed_file)
+    sites, mutator_counts, build_incompatible_ids = enumerate_sites(clang_bin, selected_rules, preprocessed_file)
     if not sites:
       print("No mutation candidates found for selected mutator configuration.", flush=True)
       return 2
@@ -969,64 +964,24 @@ def main() -> int:
     print(f"Running {len(sites)} mutants with {args.j} workers", flush=True)
 
     discovered_count = len(sites)
-    mutation_lib = Path(run_tmp_dir) / "libsafety_mutation.so"
-    compile_sites = sites
-    pruned_compile_sites = 0
-    compile_attempt = 0
-    compile_phase_start = time.perf_counter()
-    print_live_status(render_build_progress(compile_attempt, pruned_compile_sites, len(compile_sites), discovered_count, 0.0))
-    while True:
-      compile_attempt += 1
-      try:
-        compile_once_sec = compile_mutated_library(clang_bin, preprocessed_file, compile_sites, mutation_lib)
-        print_live_status(
-          render_build_progress(
-            compile_attempt,
-            pruned_compile_sites,
-            len(compile_sites),
-            discovered_count,
-            time.perf_counter() - compile_phase_start,
-            done=True,
-          ),
-          final=True,
-        )
-        break
-      except RuntimeError as exc:
-        err_text = str(exc)
-        bad_site_ids = _parse_internal_site_ids(err_text) | _parse_compile_error_site_ids(err_text)
-        before = len(compile_sites)
-        if bad_site_ids:
-          compile_sites = [s for s in compile_sites if s.site_id not in bad_site_ids]
-        else:
-          bad_locations = _parse_compile_error_locations(err_text)
-          if not bad_locations:
-            print("Failed to build mutation library:", flush=True)
-            print(err_text, flush=True)
-            return 2
-          compile_sites = [s for s in compile_sites if (display_file(s), display_line(s)) not in bad_locations]
-        removed = before - len(compile_sites)
-        if removed <= 0:
-          print("Failed to build mutation library:", flush=True)
-          print(err_text, flush=True)
-          return 2
-
-        pruned_compile_sites += removed
-        if not compile_sites:
-          print("Failed to build mutation library: all sites were pruned as build-incompatible", flush=True)
-          return 2
-        print_live_status(
-          render_build_progress(
-            compile_attempt,
-            pruned_compile_sites,
-            len(compile_sites),
-            discovered_count,
-            time.perf_counter() - compile_phase_start,
-          )
-        )
-
+    selected_site_ids = {s.site_id for s in sites}
+    build_incompatible_ids &= selected_site_ids
+    pruned_compile_sites = len(build_incompatible_ids)
     if pruned_compile_sites > 0:
-      sites = compile_sites
-      print(f"Pruned {pruned_compile_sites} build-incompatible mutants for single-library mode", flush=True)
+      sites = [s for s in sites if s.site_id not in build_incompatible_ids]
+      print(f"Pruned {pruned_compile_sites} build-incompatible mutants from constant-expression initializers", flush=True)
+    if not sites:
+      print("Failed to build mutation library: all sites were pruned as build-incompatible", flush=True)
+      return 2
+
+    mutation_lib = Path(run_tmp_dir) / "libsafety_mutation.so"
+    print("Building mutation library in a single pass...", flush=True)
+    try:
+      compile_once_sec = compile_mutated_library(clang_bin, preprocessed_file, sites, mutation_lib)
+    except RuntimeError as exc:
+      print("Failed to build mutation library:", flush=True)
+      print(str(exc), flush=True)
+      return 2
 
     compiled_source = mutation_lib.with_suffix(".c").read_text()
     compiled_ids = _parse_compile_error_site_ids(compiled_source)
