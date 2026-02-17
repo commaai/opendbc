@@ -1102,4 +1102,28 @@ FW_VERSIONS = {
       b'8S102-TGV-A030\x00\x00',
     ],
   },
+  CAR.ACURA_ADX: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S102-3BH-A020\x00\x00',
+      b'8S102-3BH-A030\x00\x00',
+    ],
+    (Ecu.gateway, 0x18daeff1, None): [
+      b'38897-3BH-A320\x00\x00',
+    ],
+    (Ecu.transmission, 0x18da1ef1, None): [
+      b'28101-6VM-A020\x00\x00',
+    ],
+    (Ecu.vsa, 0x18da28f1, None): [
+      b'57114-3BH-A020\x00\x00',
+    ],
+    (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
+      b'46114-3BH-A020\x00\x00',
+    ],
+    (Ecu.eps, 0x18da30f1, None): [
+      b'39990-3BH-A020\x00\x00',
+    ],
+    (Ecu.srs, 0x18da53f1, None): [
+      b'77959-3BH-A830\x00\x00',
+    ],
+  },
 }
