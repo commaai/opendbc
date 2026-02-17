@@ -432,37 +432,12 @@ def _test_module_name(test_file: Path) -> str:
   return ".".join(rel.with_suffix("").parts)
 
 
-def _build_reverse_includes() -> dict[str, list[str]]:
-  """Map each mode stem to the list of mode stems that include it."""
-  reverse: dict[str, list[str]] = {}
-  include_re = re.compile(r'#include\s+"opendbc/safety/modes/(\w+)\.h"')
-  for mode_file in sorted((SAFETY_DIR / "modes").glob("*.h")):
-    for m in include_re.finditer(mode_file.read_text()):
-      included_stem = m.group(1)
-      reverse.setdefault(included_stem, []).append(mode_file.stem)
-  return reverse
-
-
-_REVERSE_INCLUDES = _build_reverse_includes()
-
-
 def _tests_for_mode(stem: str) -> list[str]:
-  """Return test file names for a mode stem, using naming convention + include graph."""
-  names: list[str] = []
-  seen: set[str] = set()
-
+  """Return test file names for a mode stem."""
   direct = f"test_{stem}.py"
   if (SAFETY_TESTS_DIR / direct).exists():
-    names.append(direct)
-    seen.add(direct)
-
-  for includer in _REVERSE_INCLUDES.get(stem, []):
-    name = f"test_{includer}.py"
-    if name not in seen and (SAFETY_TESTS_DIR / name).exists():
-      names.append(name)
-      seen.add(name)
-
-  return names
+    return [direct]
+  return []
 
 
 def build_priority_tests(site: MutationSite, catalog: dict[str, list[tuple[str, list[str]]]]) -> list[str]:
@@ -833,7 +808,7 @@ def main() -> int:
       else:
         infra += 1
 
-    with ProcessPoolExecutor(max_workers=args.j, max_tasks_per_child=1) as pool:
+    with ProcessPoolExecutor(max_workers=args.j) as pool:
       future_map: dict[Future[MutantResult], MutationSite] = {
         pool.submit(eval_mutant, site, site_targets[site.site_id], mutation_lib, args.verbose): site for site in sites
       }
