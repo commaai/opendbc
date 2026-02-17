@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
-
-from __future__ import annotations
-
 import argparse
 import io
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -235,30 +231,11 @@ class MutantResult:
 
 def parse_args() -> argparse.Namespace:
   parser = argparse.ArgumentParser(description="Run strict safety mutation")
-  parser.add_argument(
-    "--mutator",
-    default="all",
-    choices=["all", *MUTATOR_FAMILIES],
-    help="mutator family to run, or 'all' for full Mull-like set",
-  )
-  parser.add_argument(
-    "--operator",
-    default="all",
-    choices=["all", *sorted(COMPARISON_OPERATOR_MAP.keys())],
-    help="comparison operator filter (used only with --mutator comparison)",
-  )
   parser.add_argument("-j", type=int, default=max((os.cpu_count() or 1) - 1, 1), help="parallel mutants to run")
   parser.add_argument("--max-mutants", type=int, default=0, help="optional limit for debugging (0 means all)")
   parser.add_argument("--list-only", action="store_true", help="list discovered candidates and exit")
   parser.add_argument("--verbose", action="store_true", help="print extra debug output")
   return parser.parse_args()
-
-
-def find_clang() -> str:
-  for clang_bin in ("clang-17", "clang"):
-    if shutil.which(clang_bin):
-      return clang_bin
-  raise RuntimeError("clang is required (tried clang-17 and clang)")
 
 
 def format_path(path: Path) -> str:
@@ -313,19 +290,15 @@ def build_preprocessed_line_map(preprocessed_file: Path) -> dict[int, tuple[Path
   return mapping
 
 
-def resolve_rules(selected_mutator: str, operator_filter: str) -> list[MutationRule]:
-  mutators = list(MUTATOR_FAMILIES) if selected_mutator == "all" else [selected_mutator]
+def resolve_rules() -> list[MutationRule]:
   rules: list[MutationRule] = []
 
-  for mutator in mutators:
-    node_kind, op_map = MUTATOR_FAMILIES[mutator]
+  for mutator, (node_kind, op_map) in MUTATOR_FAMILIES.items():
     if mutator == "boundary":
       rules.append(MutationRule(mutator=mutator, node_kind=node_kind, original_op="", mutated_op=""))
       continue
 
     for original_op, mutated_op in op_map.items():
-      if mutator == "comparison" and operator_filter != "all" and original_op != operator_filter:
-        continue
       rules.append(MutationRule(mutator=mutator, node_kind=node_kind, original_op=original_op, mutated_op=mutated_op))
 
   return rules
@@ -339,17 +312,9 @@ def _source_text(preprocessed_file: Path, source_cache: dict[Path, str]) -> str:
   return txt
 
 
-def _make_site(
-  preprocessed_file: Path,
-  source_cache: dict[Path, str],
-  rule: MutationRule,
-  expr_start: int,
-  expr_end: int,
-  op_start: int,
-  op_end: int,
-  line: int | None,
-  col: int | None,
-) -> MutationSite | None:
+def _make_site(preprocessed_file: Path, source_cache: dict[Path, str], rule: MutationRule,
+               expr_start: int, expr_end: int, op_start: int, op_end: int,line: int | None,
+               col: int | None) -> MutationSite | None:
   txt = _source_text(preprocessed_file, source_cache)
   if expr_start < 0 or expr_end < expr_start or expr_end > len(txt):
     return None
@@ -533,9 +498,9 @@ def _boundary_site(node: dict, parent: dict | None, preprocessed_file: Path, sou
   return _make_site(preprocessed_file, source_cache, rule, op_start, op_end, op_start, op_end, begin.get("line"), begin.get("col"))
 
 
-def preprocess_source(clang_bin: str, input_source: Path, preprocessed_source: Path) -> None:
-  cmd = [
-    clang_bin,
+def preprocess_source(input_source: Path, preprocessed_source: Path) -> None:
+  subprocess.run([
+    "clang",
     "-E",
     "-std=gnu11",
     "-nostdlib",
@@ -546,10 +511,7 @@ def preprocess_source(clang_bin: str, input_source: Path, preprocessed_source: P
     str(input_source),
     "-o",
     str(preprocessed_source),
-  ]
-  proc = subprocess.run(cmd, cwd=ROOT, check=False, text=True, capture_output=True)
-  if proc.returncode != 0:
-    raise RuntimeError(f"Failed to preprocess source:\n{proc.stderr}")
+  ], cwd=ROOT, capture_output=True, check=True)
 
 
 def _site_key(site: MutationSite) -> tuple[Path, int, int, str]:
@@ -570,9 +532,9 @@ def _var_decl_requires_constant_initializer(node: dict, parent: dict | None) -> 
   return parent_kind == "TranslationUnitDecl"
 
 
-def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file: Path) -> tuple[list[MutationSite], dict[str, int], set[int]]:
-  cmd = [
-    clang_bin,
+def enumerate_sites(rules: list[MutationRule], preprocessed_file: Path) -> tuple[list[MutationSite], dict[str, int], set[int]]:
+  proc = subprocess.run([
+    "clang",
     "-std=gnu11",
     "-nostdlib",
     "-fno-builtin",
@@ -580,10 +542,7 @@ def enumerate_sites(clang_bin: str, rules: list[MutationRule], preprocessed_file
     "-ast-dump=json",
     "-fsyntax-only",
     str(preprocessed_file),
-  ]
-  proc = subprocess.run(cmd, cwd=ROOT, check=False, text=True, capture_output=True)
-  if proc.returncode != 0:
-    raise RuntimeError(f"Failed to parse AST:\n{proc.stderr}")
+  ], cwd=ROOT, check=True, text=True, capture_output=True)
 
   ast = json.loads(proc.stdout)
   source_cache: dict[Path, str] = {}
@@ -878,7 +837,7 @@ def _instrument_source(source: str, sites: list[MutationSite]) -> str:
   return "".join(result_parts)
 
 
-def compile_mutated_library(clang_bin: str, preprocessed_file: Path, sites: list[MutationSite], output_so: Path) -> float:
+def compile_mutated_library(preprocessed_file: Path, sites: list[MutationSite], output_so: Path) -> None:
   source = preprocessed_file.read_text()
   instrumented = _instrument_source(source, sites)
 
@@ -892,8 +851,8 @@ int mutation_get_active_mutant(void) { return __mutation_active_id; }
   mutation_source = output_so.with_suffix(".c")
   mutation_source.write_text(instrumented)
 
-  cmd = [
-    clang_bin,
+  subprocess.run([
+    "clang",
     "-shared",
     "-fPIC",
     "-w",
@@ -905,14 +864,7 @@ int mutation_get_active_mutant(void) { return __mutation_active_id; }
     str(mutation_source),
     "-o",
     str(output_so),
-  ]
-
-  t0 = time.perf_counter()
-  proc = subprocess.run(cmd, cwd=ROOT, check=False, text=True, capture_output=True)
-  duration = time.perf_counter() - t0
-  if proc.returncode != 0:
-    raise RuntimeError(proc.stderr.strip() or "unknown compile failure")
-  return duration
+  ], cwd=ROOT, check=True)
 
 
 def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResult:
@@ -934,20 +886,17 @@ def main() -> int:
     raise SystemExit("--max-mutants must be >= 0")
 
   start = time.perf_counter()
-  clang_bin = find_clang()
 
   with tempfile.TemporaryDirectory(prefix="mutation-op-run-") as run_tmp_dir:
     preprocessed_file = Path(run_tmp_dir) / "safety_preprocessed.c"
-    print("Preprocessing safety translation unit...", flush=True)
-    preprocess_source(clang_bin, ROOT / SAFETY_C_REL, preprocessed_file)
+    preprocess_source(ROOT / SAFETY_C_REL, preprocessed_file)
 
-    selected_rules = resolve_rules(args.mutator, args.operator)
-    mutator_label = args.mutator if args.mutator != "all" else "all Mull-like mutators"
-    print(f"Discovering mutation sites for: {mutator_label}", flush=True)
+    selected_rules = resolve_rules()
+    print("Discovering mutation sites...", flush=True)
 
-    sites, mutator_counts, build_incompatible_ids = enumerate_sites(clang_bin, selected_rules, preprocessed_file)
+    sites, mutator_counts, build_incompatible_ids = enumerate_sites(selected_rules, preprocessed_file)
     if not sites:
-      print("No mutation candidates found for selected mutator configuration.", flush=True)
+      print("No mutation candidates found.", flush=True)
       return 2
 
     if args.max_mutants > 0:
@@ -976,7 +925,7 @@ def main() -> int:
     mutation_lib = Path(run_tmp_dir) / "libsafety_mutation.so"
     print("Building mutation library in a single pass...", flush=True)
     try:
-      compile_once_sec = compile_mutated_library(clang_bin, preprocessed_file, sites, mutation_lib)
+      compile_mutated_library(preprocessed_file, sites, mutation_lib)
     except RuntimeError as exc:
       print("Failed to build mutation library:", flush=True)
       print(str(exc), flush=True)
@@ -1082,14 +1031,12 @@ def main() -> int:
     total_test_sec = sum(r.test_sec for r in results)
     print("", flush=True)
     print("Mutation summary", flush=True)
-    print(f"  mutator: {mutator_label}", flush=True)
     print(f"  discovered: {discovered_count}", flush=True)
     print(f"  pruned_build_incompatible: {pruned_compile_sites}", flush=True)
     print(f"  total: {len(sites)}", flush=True)
     print(f"  killed: {killed}", flush=True)
     print(f"  survived: {survived}", flush=True)
     print(f"  infra_error: {infra}", flush=True)
-    print(f"  build_time: {compile_once_sec:.2f}s", flush=True)
     print(f"  test_time_sum: {total_test_sec:.2f}s", flush=True)
     if results:
       print(f"  avg_test_per_mutant: {total_test_sec / len(results):.3f}s", flush=True)
