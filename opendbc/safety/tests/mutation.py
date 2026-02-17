@@ -217,15 +217,6 @@ class MutantResult:
   details: str
 
 
-def parse_args() -> argparse.Namespace:
-  parser = argparse.ArgumentParser(description="Run strict safety mutation")
-  parser.add_argument("-j", type=int, default=max((os.cpu_count() or 1) - 1, 1), help="parallel mutants to run")
-  parser.add_argument("--max-mutants", type=int, default=0, help="optional limit for debugging (0 means all)")
-  parser.add_argument("--list-only", action="store_true", help="list discovered candidates and exit")
-  parser.add_argument("--verbose", action="store_true", help="print extra debug output")
-  return parser.parse_args()
-
-
 def format_path(path: Path) -> str:
   try:
     return str(path.relative_to(ROOT))
@@ -698,10 +689,6 @@ def run_unittest(targets: list[str], lib_path: Path, mutant_id: int, verbose: bo
 
 
 def _instrument_source(source: str, sites: list[MutationSite]) -> str:
-  """Single-pass instrumentation that handles nested mutations correctly."""
-  if not sites:
-    return source
-
   # Sort by start ascending, end descending (outermost first when same start)
   sorted_sites = sorted(sites, key=lambda s: (s.expr_start, -s.expr_end))
 
@@ -763,10 +750,11 @@ def compile_mutated_library(preprocessed_file: Path, sites: list[MutationSite], 
   source = preprocessed_file.read_text()
   instrumented = _instrument_source(source, sites)
 
-  prelude = """static int __mutation_active_id = -1;
-void mutation_set_active_mutant(int id) { __mutation_active_id = id; }
-int mutation_get_active_mutant(void) { return __mutation_active_id; }
-"""
+  prelude = """
+    static int __mutation_active_id = -1;
+    void mutation_set_active_mutant(int id) { __mutation_active_id = id; }
+    int mutation_get_active_mutant(void) { return __mutation_active_id; }
+  """
   marker_re = re.compile(r'^\s*#\s+\d+\s+"[^\n]*\n?', re.MULTILINE)
   instrumented = prelude + marker_re.sub("", instrumented)
 
@@ -803,7 +791,13 @@ def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResu
 
 
 def main() -> int:
-  args = parse_args()
+  parser = argparse.ArgumentParser(description="Run strict safety mutation")
+  parser.add_argument("-j", type=int, default=max((os.cpu_count() or 1) - 1, 1), help="parallel mutants to run")
+  parser.add_argument("--max-mutants", type=int, default=0, help="optional limit for debugging (0 means all)")
+  parser.add_argument("--list-only", action="store_true", help="list discovered candidates and exit")
+  parser.add_argument("--verbose", action="store_true", help="print extra debug output")
+  args = parser.parse_args()
+
   if args.j < 1:
     raise SystemExit("-j must be >= 1")
   if args.max_mutants < 0:
@@ -813,12 +807,8 @@ def main() -> int:
 
   with tempfile.TemporaryDirectory(prefix="mutation-op-run-") as run_tmp_dir:
     preprocessed_file = Path(run_tmp_dir) / "safety_preprocessed.c"
-    print("Discovering mutation sites...", flush=True)
-
     sites, mutator_counts, build_incompatible_ids = enumerate_sites(ROOT / SAFETY_C_REL, preprocessed_file)
-    if not sites:
-      print("No mutation candidates found.", flush=True)
-      return 2
+    assert len(sites) > 0
 
     if args.max_mutants > 0:
       sites = sites[: args.max_mutants]
@@ -844,11 +834,10 @@ def main() -> int:
       return 2
 
     mutation_lib = Path(run_tmp_dir) / "libsafety_mutation.so"
-    print("Building mutation library in a single pass...", flush=True)
     compile_mutated_library(preprocessed_file, sites, mutation_lib)
 
     compiled_ids = {int(v) for v in re.findall(r"__mutation_active_id\s*==\s*(\d+)", mutation_lib.with_suffix(".c").read_text())}
-    assert compiled_ids == {s.site_id for s in sites}, f"Compiled IDs don't match runtime IDs"
+    assert compiled_ids == {s.site_id for s in sites}, "Compiled IDs don't match runtime IDs"
 
     smoke_targets = [_test_module_name(SAFETY_TESTS_DIR / name) for name in SMOKE_TESTS]
     baseline_failed = run_unittest(smoke_targets, mutation_lib, mutant_id=-1, verbose=args.verbose)
@@ -893,30 +882,6 @@ def main() -> int:
         for site in sites:
           if site.site_id not in completed_ids:
             _record(MutantResult(site, "killed", 0.0, "pool broken"))
-        elapsed_now = time.perf_counter() - start
-        print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=True)
-
-    # Verification pass: re-run survivors to detect flaky mutants
-    initial_survivors = [r for r in results if r.outcome == "survived"]
-    if initial_survivors:
-      print(f"\nVerifying {len(initial_survivors)} survivors...", flush=True)
-      with ProcessPoolExecutor(max_workers=args.j, max_tasks_per_child=1) as pool:
-        verify_futures = {pool.submit(eval_mutant, r.site, mutation_lib, args.verbose): r for r in initial_survivors}
-        verified: dict[int, MutantResult] = {}
-        for fut in as_completed(verify_futures):
-          try:
-            vres = fut.result()
-          except Exception:
-            orig = verify_futures[fut]
-            vres = MutantResult(orig.site, "survived", 0.0, "verification crash")
-          verified[vres.site.site_id] = vres
-      newly_killed = {sid: v for sid, v in verified.items() if v.outcome == "killed"}
-      if newly_killed:
-        print(f"  {len(newly_killed)} flaky mutants reclassified as killed", flush=True)
-        results = [newly_killed.get(r.site.site_id, r) if r.outcome == "survived" else r for r in results]
-        killed = sum(1 for r in results if r.outcome == "killed")
-        survived = sum(1 for r in results if r.outcome == "survived")
-        infra = sum(1 for r in results if r.outcome == "infra_error")
         elapsed_now = time.perf_counter() - start
         print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=True)
 
