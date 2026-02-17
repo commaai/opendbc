@@ -9,7 +9,6 @@ import sys
 import tempfile
 import time
 import unittest
-from collections.abc import Sequence
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -214,17 +213,9 @@ class MutationRule:
 
 
 @dataclass(frozen=True)
-class TestRunResult:
-  duration_sec: float
-  failed_test: str | None
-  stdout: str
-
-
-@dataclass(frozen=True)
 class MutantResult:
   site: MutationSite
   outcome: str  # killed | survived | infra_error
-  stage: str  # tests | build
   test_sec: float
   details: str
 
@@ -269,53 +260,9 @@ def _offset_to_line_col(text: str, offset: int) -> tuple[int, int]:
   return line, col
 
 
-def build_preprocessed_line_map(preprocessed_file: Path) -> dict[int, tuple[Path, int]]:
-  mapping: dict[int, tuple[Path, int]] = {}
-  current_file: Path | None = None
-  current_line: int | None = None
-
-  directive_re = re.compile(r'^\s*#\s*(\d+)\s+"([^"]+)"')
-  with preprocessed_file.open() as f:
-    for pp_line_num, line in enumerate(f, start=1):
-      m = directive_re.match(line)
-      if m:
-        current_line = int(m.group(1))
-        current_file = Path(m.group(2)).resolve()
-        continue
-
-      if current_file is not None and current_line is not None:
-        mapping[pp_line_num] = (current_file, current_line)
-        current_line += 1
-
-  return mapping
-
-
-def resolve_rules() -> list[MutationRule]:
-  rules: list[MutationRule] = []
-
-  for mutator, (node_kind, op_map) in MUTATOR_FAMILIES.items():
-    if mutator == "boundary":
-      rules.append(MutationRule(mutator=mutator, node_kind=node_kind, original_op="", mutated_op=""))
-      continue
-
-    for original_op, mutated_op in op_map.items():
-      rules.append(MutationRule(mutator=mutator, node_kind=node_kind, original_op=original_op, mutated_op=mutated_op))
-
-  return rules
-
-
-def _source_text(preprocessed_file: Path, source_cache: dict[Path, str]) -> str:
-  txt = source_cache.get(preprocessed_file)
-  if txt is None:
-    txt = preprocessed_file.read_text()
-    source_cache[preprocessed_file] = txt
-  return txt
-
-
-def _make_site(preprocessed_file: Path, source_cache: dict[Path, str], rule: MutationRule,
-               expr_start: int, expr_end: int, op_start: int, op_end: int,line: int | None,
-               col: int | None) -> MutationSite | None:
-  txt = _source_text(preprocessed_file, source_cache)
+def _make_site(preprocessed_file: Path, txt: str, rule: MutationRule,
+               expr_start: int, expr_end: int, op_start: int, op_end: int,
+               line: int | None, col: int | None) -> MutationSite | None:
   if expr_start < 0 or expr_end < expr_start or expr_end > len(txt):
     return None
   if op_start < 0 or op_end < op_start or op_end > len(txt):
@@ -345,7 +292,7 @@ def _make_site(preprocessed_file: Path, source_cache: dict[Path, str], rule: Mut
   )
 
 
-def _binary_like_site(node: dict, preprocessed_file: Path, source_cache: dict[Path, str], rule: MutationRule) -> MutationSite | None:
+def _binary_like_site(node: dict, preprocessed_file: Path, txt: str, rule: MutationRule) -> MutationSite | None:
   inner = node.get("inner", [])
   if len(inner) < 2:
     return None
@@ -375,7 +322,6 @@ def _binary_like_site(node: dict, preprocessed_file: Path, source_cache: dict[Pa
   if expr_start is None or expr_end is None:
     return None
 
-  txt = _source_text(preprocessed_file, source_cache)
   seen: set[tuple[int, int]] = set()
   for span_start, span_end in spans:
     key = (span_start, span_end)
@@ -388,13 +334,13 @@ def _binary_like_site(node: dict, preprocessed_file: Path, source_cache: dict[Pa
       continue
     op_start = span_start + idx
     op_end = op_start + len(rule.original_op)
-    site = _make_site(preprocessed_file, source_cache, rule, expr_start, expr_end, op_start, op_end, begin.get("line"), begin.get("col"))
+    site = _make_site(preprocessed_file, txt, rule, expr_start, expr_end, op_start, op_end, begin.get("line"), begin.get("col"))
     if site is not None:
       return site
   return None
 
 
-def _unary_site(node: dict, preprocessed_file: Path, source_cache: dict[Path, str], rule: MutationRule) -> MutationSite | None:
+def _unary_site(node: dict, preprocessed_file: Path, txt: str, rule: MutationRule) -> MutationSite | None:
   inner = node.get("inner", [])
   if not inner:
     return None
@@ -428,7 +374,6 @@ def _unary_site(node: dict, preprocessed_file: Path, source_cache: dict[Path, st
 
   spans.append((begin_offset, end_offset + end_tok_len))
 
-  txt = _source_text(preprocessed_file, source_cache)
   seen: set[tuple[int, int]] = set()
   for span_start, span_end in spans:
     key = (span_start, span_end)
@@ -442,7 +387,7 @@ def _unary_site(node: dict, preprocessed_file: Path, source_cache: dict[Path, st
       continue
     op_start = span_start + idx
     op_end = op_start + len(rule.original_op)
-    site = _make_site(preprocessed_file, source_cache, rule, expr_start, expr_end, op_start, op_end, begin.get("line"), begin.get("col"))
+    site = _make_site(preprocessed_file, txt, rule, expr_start, expr_end, op_start, op_end, begin.get("line"), begin.get("col"))
     if site is not None:
       return site
   return None
@@ -461,7 +406,7 @@ def _parse_int_literal(token: str) -> tuple[int, str, str] | None:
   return value, base, suffix
 
 
-def _boundary_site(node: dict, parent: dict | None, preprocessed_file: Path, source_cache: dict[Path, str]) -> MutationSite | None:
+def _boundary_site(node: dict, parent: dict | None, preprocessed_file: Path, txt: str) -> MutationSite | None:
   if parent is None:
     return None
   if parent.get("kind") != "BinaryOperator" or parent.get("opcode") not in COMPARISON_OPERATOR_MAP:
@@ -477,7 +422,6 @@ def _boundary_site(node: dict, parent: dict | None, preprocessed_file: Path, sou
   if not isinstance(begin_offset, int) or not isinstance(end_offset, int) or not isinstance(end_tok_len, int):
     return None
 
-  txt = _source_text(preprocessed_file, source_cache)
   op_start = begin_offset
   op_end = end_offset + end_tok_len
   if op_start < 0 or op_end > len(txt) or op_end <= op_start:
@@ -495,23 +439,7 @@ def _boundary_site(node: dict, parent: dict | None, preprocessed_file: Path, sou
     mutated = f"{new_value}{suffix}"
 
   rule = MutationRule(mutator="boundary", node_kind="IntegerLiteral", original_op=token, mutated_op=mutated)
-  return _make_site(preprocessed_file, source_cache, rule, op_start, op_end, op_start, op_end, begin.get("line"), begin.get("col"))
-
-
-def preprocess_source(input_source: Path, preprocessed_source: Path) -> None:
-  subprocess.run([
-    "clang",
-    "-E",
-    "-std=gnu11",
-    "-nostdlib",
-    "-fno-builtin",
-    "-DALLOW_DEBUG",
-    f"-I{ROOT}",
-    f"-I{ROOT / 'opendbc/safety/board'}",
-    str(input_source),
-    "-o",
-    str(preprocessed_source),
-  ], cwd=ROOT, capture_output=True, check=True)
+  return _make_site(preprocessed_file, txt, rule, op_start, op_end, op_start, op_end, begin.get("line"), begin.get("col"))
 
 
 def _site_key(site: MutationSite) -> tuple[Path, int, int, str]:
@@ -532,7 +460,21 @@ def _var_decl_requires_constant_initializer(node: dict, parent: dict | None) -> 
   return parent_kind == "TranslationUnitDecl"
 
 
-def enumerate_sites(rules: list[MutationRule], preprocessed_file: Path) -> tuple[list[MutationSite], dict[str, int], set[int]]:
+def enumerate_sites(input_source: Path, preprocessed_file: Path) -> tuple[list[MutationSite], dict[str, int], set[int]]:
+  subprocess.run([
+    "clang",
+    "-E",
+    "-std=gnu11",
+    "-nostdlib",
+    "-fno-builtin",
+    "-DALLOW_DEBUG",
+    f"-I{ROOT}",
+    f"-I{ROOT / 'opendbc/safety/board'}",
+    str(input_source),
+    "-o",
+    str(preprocessed_file),
+  ], cwd=ROOT, capture_output=True, check=True)
+
   proc = subprocess.run([
     "clang",
     "-std=gnu11",
@@ -545,21 +487,35 @@ def enumerate_sites(rules: list[MutationRule], preprocessed_file: Path) -> tuple
   ], cwd=ROOT, check=True, text=True, capture_output=True)
 
   ast = json.loads(proc.stdout)
-  source_cache: dict[Path, str] = {}
+  txt = preprocessed_file.read_text()
   deduped: dict[tuple[Path, int, int, str], MutationSite] = {}
   build_incompatible_keys: set[tuple[Path, int, int, str]] = set()
-  line_map = build_preprocessed_line_map(preprocessed_file)
   rule_map: dict[tuple[str, str], list[MutationRule]] = {}
-  boundary_enabled = False
   counts: dict[str, int] = {}
 
-  for rule in rules:
-    counts[rule.mutator] = 0
-    if rule.mutator == "boundary":
-      boundary_enabled = True
+  for mutator, (node_kind, op_map) in MUTATOR_FAMILIES.items():
+    counts[mutator] = 0
+    if mutator == "boundary":
       continue
-    key = (rule.node_kind, rule.original_op)
-    rule_map.setdefault(key, []).append(rule)
+    for original_op, mutated_op in op_map.items():
+      rule = MutationRule(mutator=mutator, node_kind=node_kind, original_op=original_op, mutated_op=mutated_op)
+      rule_map.setdefault((node_kind, original_op), []).append(rule)
+
+  # Build preprocessed line map
+  line_map: dict[int, tuple[Path, int]] = {}
+  current_map_file: Path | None = None
+  current_map_line: int | None = None
+  directive_re = re.compile(r'^\s*#\s*(\d+)\s+"([^"]+)"')
+  with preprocessed_file.open() as f:
+    for pp_line_num, pp_line in enumerate(f, start=1):
+      m = directive_re.match(pp_line)
+      if m:
+        current_map_line = int(m.group(1))
+        current_map_file = Path(m.group(2)).resolve()
+        continue
+      if current_map_file is not None and current_map_line is not None:
+        line_map[pp_line_num] = (current_map_file, current_map_line)
+        current_map_line += 1
 
   stack: list[tuple[object, dict | None, bool]] = [(ast, None, False)]
   while stack:
@@ -570,8 +526,8 @@ def enumerate_sites(rules: list[MutationRule], preprocessed_file: Path) -> tuple
       kind = kind_obj if isinstance(kind_obj, str) else ""
       opcode = opcode_obj if isinstance(opcode_obj, str) else ""
 
-      if boundary_enabled and kind == "IntegerLiteral":
-        site = _boundary_site(node, parent, preprocessed_file, source_cache)
+      if kind == "IntegerLiteral":
+        site = _boundary_site(node, parent, preprocessed_file, txt)
         if site is not None:
           key = _site_key(site)
           deduped[key] = site
@@ -581,9 +537,9 @@ def enumerate_sites(rules: list[MutationRule], preprocessed_file: Path) -> tuple
       for rule in rule_map.get((kind, opcode), []):
         site = None
         if rule.node_kind in ("BinaryOperator", "CompoundAssignOperator"):
-          site = _binary_like_site(node, preprocessed_file, source_cache, rule)
+          site = _binary_like_site(node, preprocessed_file, txt, rule)
         elif rule.node_kind == "UnaryOperator":
-          site = _unary_site(node, preprocessed_file, source_cache, rule)
+          site = _unary_site(node, preprocessed_file, txt, rule)
         if site is not None:
           key = _site_key(site)
           deduped[key] = site
@@ -648,7 +604,7 @@ def _test_module_name(test_file: Path) -> str:
 
 
 def _test_targets_from_names(ordered_names: list[str]) -> list[str]:
-  tests_by_name = _tests_by_name()
+  tests_by_name = {p.name: p for p in sorted(SAFETY_TESTS_DIR.glob("test_*.py"))}
   out: list[str] = []
   seen_names: set[str] = set()
   seen_ids: set[str] = set()
@@ -673,10 +629,6 @@ def _test_targets_from_names(ordered_names: list[str]) -> list[str]:
         seen_ids.add(mod)
         out.append(mod)
   return out
-
-
-def _tests_by_name() -> dict[str, Path]:
-  return {p.name: p for p in sorted(SAFETY_TESTS_DIR.glob("test_*.py"))}
 
 
 def format_site_snippet(site: MutationSite, context_lines: int = 2) -> str:
@@ -733,7 +685,7 @@ def _parse_compile_error_site_ids(error_text: str) -> set[int]:
   return {int(v) for v in re.findall(r"__mutation_active_id\s*==\s*(\d+)", error_text)}
 
 
-def run_unittest(targets: Sequence[Path | str], lib_path: Path, mutant_id: int, verbose: bool) -> TestRunResult:
+def run_unittest(targets: list[str], lib_path: Path, mutant_id: int, verbose: bool) -> str | None:
   os.environ["LIBSAFETY_PATH"] = str(lib_path)
 
   from opendbc.safety.tests.libsafety.libsafety_py import libsafety
@@ -742,37 +694,21 @@ def run_unittest(targets: Sequence[Path | str], lib_path: Path, mutant_id: int, 
 
   loader = unittest.TestLoader()
   suite = unittest.TestSuite()
-  target_names: list[str] = []
   for target in targets:
-    if isinstance(target, Path):
-      target_name = _test_module_name(target)
-    else:
-      target_name = target
-    target_names.append(target_name)
-    suite.addTests(loader.loadTestsFromName(target_name))
+    suite.addTests(loader.loadTestsFromName(target))
 
   if verbose:
-    print("Running unittest targets:", ", ".join(target_names), flush=True)
+    print("Running unittest targets:", ", ".join(targets), flush=True)
 
   stream = io.StringIO()
   runner = unittest.TextTestRunner(stream=stream, verbosity=0, failfast=True)
-  t0 = time.perf_counter()
   result = runner.run(suite)
-  duration = time.perf_counter() - t0
 
-  stdout = stream.getvalue()
-
-  failed_test: str | None = None
   if result.failures:
-    failed_test = result.failures[0][0].id()
-  elif result.errors:
-    failed_test = result.errors[0][0].id()
-
-  return TestRunResult(
-    duration_sec=duration,
-    failed_test=failed_test,
-    stdout=stdout,
-  )
+    return result.failures[0][0].id()
+  if result.errors:
+    return result.errors[0][0].id()
+  return None
 
 
 def _instrument_source(source: str, sites: list[MutationSite]) -> str:
@@ -870,12 +806,14 @@ int mutation_get_active_mutant(void) { return __mutation_active_id; }
 def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResult:
   priority_tests = build_priority_tests(site)
   try:
-    test_result = run_unittest(priority_tests, lib_path, mutant_id=site.site_id, verbose=verbose)
-    if test_result.failed_test is not None:
-      return MutantResult(site, "killed", "tests", test_result.duration_sec, "")
-    return MutantResult(site, "survived", "tests", test_result.duration_sec, "")
+    t0 = time.perf_counter()
+    failed_test = run_unittest(priority_tests, lib_path, mutant_id=site.site_id, verbose=verbose)
+    duration = time.perf_counter() - t0
+    if failed_test is not None:
+      return MutantResult(site, "killed", duration, "")
+    return MutantResult(site, "survived", duration, "")
   except Exception as exc:
-    return MutantResult(site, "infra_error", "build", 0.0, str(exc))
+    return MutantResult(site, "infra_error", 0.0, str(exc))
 
 
 def main() -> int:
@@ -889,12 +827,9 @@ def main() -> int:
 
   with tempfile.TemporaryDirectory(prefix="mutation-op-run-") as run_tmp_dir:
     preprocessed_file = Path(run_tmp_dir) / "safety_preprocessed.c"
-    preprocess_source(ROOT / SAFETY_C_REL, preprocessed_file)
-
-    selected_rules = resolve_rules()
     print("Discovering mutation sites...", flush=True)
 
-    sites, mutator_counts, build_incompatible_ids = enumerate_sites(selected_rules, preprocessed_file)
+    sites, mutator_counts, build_incompatible_ids = enumerate_sites(ROOT / SAFETY_C_REL, preprocessed_file)
     if not sites:
       print("No mutation candidates found.", flush=True)
       return 2
@@ -924,26 +859,18 @@ def main() -> int:
 
     mutation_lib = Path(run_tmp_dir) / "libsafety_mutation.so"
     print("Building mutation library in a single pass...", flush=True)
-    try:
-      compile_mutated_library(preprocessed_file, sites, mutation_lib)
-    except RuntimeError as exc:
-      print("Failed to build mutation library:", flush=True)
-      print(str(exc), flush=True)
-      return 2
+    compile_mutated_library(preprocessed_file, sites, mutation_lib)
 
     compiled_source = mutation_lib.with_suffix(".c").read_text()
     compiled_ids = _parse_compile_error_site_ids(compiled_source)
     runtime_ids = {s.site_id for s in sites}
     assert compiled_ids == runtime_ids, f"Compiled IDs don't match runtime IDs: compiled={compiled_ids} runtime={runtime_ids}"
 
-    smoke_targets = [SAFETY_TESTS_DIR / name for name in SMOKE_TESTS]
-    baseline_result = run_unittest(smoke_targets, mutation_lib, mutant_id=-1, verbose=args.verbose)
-    if baseline_result.failed_test is not None:
+    smoke_targets = [_test_module_name(SAFETY_TESTS_DIR / name) for name in SMOKE_TESTS]
+    baseline_failed = run_unittest(smoke_targets, mutation_lib, mutant_id=-1, verbose=args.verbose)
+    if baseline_failed is not None:
       print("Baseline smoke failed with mutant_id=-1; aborting to avoid false kill signals.", flush=True)
-      print(f"  failed_test: {baseline_result.failed_test}", flush=True)
-      details = baseline_result.stdout.strip()
-      if details:
-        print(details, flush=True)
+      print(f"  failed_test: {baseline_failed}", flush=True)
       return 2
 
     results: list[MutantResult] = []
@@ -972,7 +899,7 @@ def main() -> int:
             res = fut.result()
           except Exception:
             site = future_map[fut]
-            res = MutantResult(site, "killed", "tests", 0.0, "worker process crashed")
+            res = MutantResult(site, "killed", 0.0, "worker process crashed")
           _record(res)
           elapsed_now = time.perf_counter() - start
           print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=(completed == len(sites)))
@@ -981,7 +908,7 @@ def main() -> int:
         completed_ids = {r.site.site_id for r in results}
         for site in sites:
           if site.site_id not in completed_ids:
-            _record(MutantResult(site, "killed", "tests", 0.0, "pool broken"))
+            _record(MutantResult(site, "killed", 0.0, "pool broken"))
         elapsed_now = time.perf_counter() - start
         print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=True)
 
@@ -997,7 +924,7 @@ def main() -> int:
             vres = fut.result()
           except Exception:
             orig = verify_futures[fut]
-            vres = MutantResult(orig.site, "survived", "tests", 0.0, "verification crash")
+            vres = MutantResult(orig.site, "survived", 0.0, "verification crash")
           verified[vres.site.site_id] = vres
       newly_killed = {sid: v for sid, v in verified.items() if v.outcome == "killed"}
       if newly_killed:
@@ -1025,7 +952,7 @@ def main() -> int:
       for res in infra_results:
         loc = f"{format_path(display_file(res.site))}:{display_line(res.site)}"
         detail = res.details.splitlines()[0] if res.details else "unknown error"
-        print(f"- #{res.site.site_id} {loc} ({res.stage}): {detail}", flush=True)
+        print(f"- #{res.site.site_id} {loc}: {detail}", flush=True)
 
     elapsed = time.perf_counter() - start
     total_test_sec = sum(r.test_sec for r in results)
