@@ -29,7 +29,8 @@ env = Environment(
 )
 
 # add coverage if available
-conf = Configure(env, log_file=None)
+# Avoid writing a repo log file, but keep SCons' stream plumbing valid.
+conf = Configure(env, log_file=os.devnull)
 prev = env['LINKFLAGS'][:]
 env.Append(LINKFLAGS=['-fprofile-arcs'])
 has_coverage = conf.TryLink('int main() { return 0; }\n', '.c')

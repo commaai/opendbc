@@ -190,13 +190,11 @@ MUTATOR_FAMILIES = {
 @dataclass(frozen=True)
 class MutationSite:
   site_id: int
-  source_file: Path
   expr_start: int
   expr_end: int
   op_start: int
   op_end: int
   line: int
-  col: int
   original_op: str
   mutated_op: str
   mutator: str
@@ -207,7 +205,6 @@ class MutationSite:
 @dataclass(frozen=True)
 class MutationRule:
   mutator: str
-  node_kind: str
   original_op: str
   mutated_op: str
 
@@ -237,11 +234,13 @@ def format_path(path: Path) -> str:
 
 
 def display_file(site: MutationSite) -> Path:
-  return site.origin_file if site.origin_file is not None else site.source_file
+  assert site.origin_file is not None
+  return site.origin_file
 
 
 def display_line(site: MutationSite) -> int:
-  return site.origin_line if site.origin_line is not None else site.line
+  assert site.origin_line is not None
+  return site.origin_line
 
 
 def _spelling_loc(loc: object) -> dict | None:
@@ -253,16 +252,9 @@ def _spelling_loc(loc: object) -> dict | None:
   return loc
 
 
-def _offset_to_line_col(text: str, offset: int) -> tuple[int, int]:
-  line = text.count("\n", 0, offset) + 1
-  line_start = text.rfind("\n", 0, offset) + 1
-  col = (offset - line_start) + 1
-  return line, col
-
-
-def _make_site(preprocessed_file: Path, txt: str, rule: MutationRule,
+def _make_site(txt: str, rule: MutationRule,
                expr_start: int, expr_end: int, op_start: int, op_end: int,
-               line: int | None, col: int | None) -> MutationSite | None:
+               line: int | None) -> MutationSite | None:
   if expr_start < 0 or expr_end < expr_start or expr_end > len(txt):
     return None
   if op_start < 0 or op_end < op_start or op_end > len(txt):
@@ -272,18 +264,16 @@ def _make_site(preprocessed_file: Path, txt: str, rule: MutationRule,
   if txt[op_start:op_end] != rule.original_op:
     return None
 
-  if not isinstance(line, int) or not isinstance(col, int):
-    line, col = _offset_to_line_col(txt, op_start)
+  if not isinstance(line, int):
+    line = txt.count("\n", 0, op_start) + 1
 
   return MutationSite(
     site_id=-1,
-    source_file=preprocessed_file,
     expr_start=expr_start,
     expr_end=expr_end,
     op_start=op_start,
     op_end=op_end,
     line=line,
-    col=col,
     original_op=rule.original_op,
     mutated_op=rule.mutated_op,
     mutator=rule.mutator,
@@ -292,7 +282,7 @@ def _make_site(preprocessed_file: Path, txt: str, rule: MutationRule,
   )
 
 
-def _binary_like_site(node: dict, preprocessed_file: Path, txt: str, rule: MutationRule) -> MutationSite | None:
+def _binary_like_site(node: dict, txt: str, rule: MutationRule) -> MutationSite | None:
   inner = node.get("inner", [])
   if len(inner) < 2:
     return None
@@ -334,13 +324,13 @@ def _binary_like_site(node: dict, preprocessed_file: Path, txt: str, rule: Mutat
       continue
     op_start = span_start + idx
     op_end = op_start + len(rule.original_op)
-    site = _make_site(preprocessed_file, txt, rule, expr_start, expr_end, op_start, op_end, begin.get("line"), begin.get("col"))
+    site = _make_site(txt, rule, expr_start, expr_end, op_start, op_end, begin.get("line"))
     if site is not None:
       return site
   return None
 
 
-def _unary_site(node: dict, preprocessed_file: Path, txt: str, rule: MutationRule) -> MutationSite | None:
+def _unary_site(node: dict, txt: str, rule: MutationRule) -> MutationSite | None:
   inner = node.get("inner", [])
   if not inner:
     return None
@@ -387,7 +377,7 @@ def _unary_site(node: dict, preprocessed_file: Path, txt: str, rule: MutationRul
       continue
     op_start = span_start + idx
     op_end = op_start + len(rule.original_op)
-    site = _make_site(preprocessed_file, txt, rule, expr_start, expr_end, op_start, op_end, begin.get("line"), begin.get("col"))
+    site = _make_site(txt, rule, expr_start, expr_end, op_start, op_end, begin.get("line"))
     if site is not None:
       return site
   return None
@@ -406,7 +396,7 @@ def _parse_int_literal(token: str) -> tuple[int, str, str] | None:
   return value, base, suffix
 
 
-def _boundary_site(node: dict, parent: dict | None, preprocessed_file: Path, txt: str) -> MutationSite | None:
+def _boundary_site(node: dict, parent: dict | None, txt: str) -> MutationSite | None:
   if parent is None:
     return None
   if parent.get("kind") != "BinaryOperator" or parent.get("opcode") not in COMPARISON_OPERATOR_MAP:
@@ -438,12 +428,12 @@ def _boundary_site(node: dict, parent: dict | None, preprocessed_file: Path, txt
   else:
     mutated = f"{new_value}{suffix}"
 
-  rule = MutationRule(mutator="boundary", node_kind="IntegerLiteral", original_op=token, mutated_op=mutated)
-  return _make_site(preprocessed_file, txt, rule, op_start, op_end, op_start, op_end, begin.get("line"), begin.get("col"))
+  rule = MutationRule(mutator="boundary", original_op=token, mutated_op=mutated)
+  return _make_site(txt, rule, op_start, op_end, op_start, op_end, begin.get("line"))
 
 
-def _site_key(site: MutationSite) -> tuple[Path, int, int, str]:
-  return (site.source_file, site.op_start, site.op_end, site.mutator)
+def _site_key(site: MutationSite) -> tuple[int, int, str]:
+  return (site.op_start, site.op_end, site.mutator)
 
 
 def _var_decl_requires_constant_initializer(node: dict, parent: dict | None) -> bool:
@@ -488,8 +478,8 @@ def enumerate_sites(input_source: Path, preprocessed_file: Path) -> tuple[list[M
 
   ast = json.loads(proc.stdout)
   txt = preprocessed_file.read_text()
-  deduped: dict[tuple[Path, int, int, str], MutationSite] = {}
-  build_incompatible_keys: set[tuple[Path, int, int, str]] = set()
+  deduped: dict[tuple[int, int, str], MutationSite] = {}
+  build_incompatible_keys: set[tuple[int, int, str]] = set()
   rule_map: dict[tuple[str, str], list[MutationRule]] = {}
   counts: dict[str, int] = {}
 
@@ -498,7 +488,7 @@ def enumerate_sites(input_source: Path, preprocessed_file: Path) -> tuple[list[M
     if mutator == "boundary":
       continue
     for original_op, mutated_op in op_map.items():
-      rule = MutationRule(mutator=mutator, node_kind=node_kind, original_op=original_op, mutated_op=mutated_op)
+      rule = MutationRule(mutator=mutator, original_op=original_op, mutated_op=mutated_op)
       rule_map.setdefault((node_kind, original_op), []).append(rule)
 
   # Build preprocessed line map
@@ -527,7 +517,7 @@ def enumerate_sites(input_source: Path, preprocessed_file: Path) -> tuple[list[M
       opcode = opcode_obj if isinstance(opcode_obj, str) else ""
 
       if kind == "IntegerLiteral":
-        site = _boundary_site(node, parent, preprocessed_file, txt)
+        site = _boundary_site(node, parent, txt)
         if site is not None:
           key = _site_key(site)
           deduped[key] = site
@@ -536,10 +526,10 @@ def enumerate_sites(input_source: Path, preprocessed_file: Path) -> tuple[list[M
 
       for rule in rule_map.get((kind, opcode), []):
         site = None
-        if rule.node_kind in ("BinaryOperator", "CompoundAssignOperator"):
-          site = _binary_like_site(node, preprocessed_file, txt, rule)
-        elif rule.node_kind == "UnaryOperator":
-          site = _unary_site(node, preprocessed_file, txt, rule)
+        if kind in ("BinaryOperator", "CompoundAssignOperator"):
+          site = _binary_like_site(node, txt, rule)
+        elif kind == "UnaryOperator":
+          site = _unary_site(node, txt, rule)
         if site is not None:
           key = _site_key(site)
           deduped[key] = site
@@ -556,7 +546,7 @@ def enumerate_sites(input_source: Path, preprocessed_file: Path) -> tuple[list[M
         stack.append((item, parent, in_constexpr_context))
 
   sites = list(deduped.values())
-  sites.sort(key=lambda s: (s.line, s.col, s.op_start, s.mutator))
+  sites.sort(key=lambda s: (s.op_start, s.mutator))
   out: list[MutationSite] = []
   build_incompatible_site_ids: set[int] = set()
   for s in sites:
@@ -679,10 +669,6 @@ def print_live_status(text: str, *, final: bool = False) -> None:
     print("\r" + text, end="\n" if final else "", flush=True)
   else:
     print(text, flush=True)
-
-
-def _parse_compile_error_site_ids(error_text: str) -> set[int]:
-  return {int(v) for v in re.findall(r"__mutation_active_id\s*==\s*(\d+)", error_text)}
 
 
 def run_unittest(targets: list[str], lib_path: Path, mutant_id: int, verbose: bool) -> str | None:
@@ -861,10 +847,8 @@ def main() -> int:
     print("Building mutation library in a single pass...", flush=True)
     compile_mutated_library(preprocessed_file, sites, mutation_lib)
 
-    compiled_source = mutation_lib.with_suffix(".c").read_text()
-    compiled_ids = _parse_compile_error_site_ids(compiled_source)
-    runtime_ids = {s.site_id for s in sites}
-    assert compiled_ids == runtime_ids, f"Compiled IDs don't match runtime IDs: compiled={compiled_ids} runtime={runtime_ids}"
+    compiled_ids = {int(v) for v in re.findall(r"__mutation_active_id\s*==\s*(\d+)", mutation_lib.with_suffix(".c").read_text())}
+    assert compiled_ids == {s.site_id for s in sites}, f"Compiled IDs don't match runtime IDs"
 
     smoke_targets = [_test_module_name(SAFETY_TESTS_DIR / name) for name in SMOKE_TESTS]
     baseline_failed = run_unittest(smoke_targets, mutation_lib, mutant_id=-1, verbose=args.verbose)
