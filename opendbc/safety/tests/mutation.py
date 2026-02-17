@@ -579,9 +579,9 @@ def _discover_test_catalog(lib_path: Path) -> dict[str, list[tuple[str, list[str
 
   Returns: {test_file_name: [(class_name, [test_id, ...]), ...]}
   """
-  os.environ["LIBSAFETY_PATH"] = str(lib_path)
-  from opendbc.safety.tests.libsafety.libsafety_py import libsafety
-  libsafety.mutation_set_active_mutant(-1)
+  from opendbc.safety.tests.libsafety import libsafety_py
+  libsafety_py.load(lib_path)
+  libsafety_py.libsafety.mutation_set_active_mutant(-1)
 
   loader = unittest.TestLoader()
   catalog: dict[str, list[tuple[str, list[str]]]] = {}
@@ -601,11 +601,9 @@ def _discover_test_catalog(lib_path: Path) -> dict[str, list[tuple[str, list[str
 
 
 def run_unittest(targets: list[str], lib_path: Path, mutant_id: int, verbose: bool) -> str | None:
-  os.environ["LIBSAFETY_PATH"] = str(lib_path)
-
-  from opendbc.safety.tests.libsafety.libsafety_py import libsafety
-
-  libsafety.mutation_set_active_mutant(mutant_id)
+  from opendbc.safety.tests.libsafety import libsafety_py
+  libsafety_py.load(lib_path)
+  libsafety_py.libsafety.mutation_set_active_mutant(mutant_id)
 
   if verbose:
     print("Running unittest targets:", ", ".join(targets), flush=True)

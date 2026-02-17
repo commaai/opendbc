@@ -4,7 +4,6 @@ from cffi import FFI
 from opendbc.safety import LEN_TO_DLC
 
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))
-libsafety_fn = os.environ.get("LIBSAFETY_PATH", os.path.join(libsafety_dir, "libsafety.so"))
 
 ffi = FFI()
 
@@ -84,7 +83,11 @@ int mutation_get_active_mutant(void);
 
 class LibSafety:
   pass
-libsafety: LibSafety = ffi.dlopen(libsafety_fn)
+libsafety: LibSafety = ffi.dlopen(os.path.join(libsafety_dir, "libsafety.so"))
+
+def load(path):
+  global libsafety
+  libsafety = ffi.dlopen(str(path))
 
 def make_CANPacket(addr: int, bus: int, dat):
   ret = ffi.new('CANPacket_t *')
