@@ -19,151 +19,12 @@ SAFETY_DIR = ROOT / "opendbc" / "safety"
 SAFETY_TESTS_DIR = ROOT / "opendbc" / "safety" / "tests"
 SAFETY_C_REL = Path("opendbc/safety/tests/libsafety/safety.c")
 
-SMOKE_TESTS = [
-  "test_defaults.py",
-  "test_elm327.py",
-  "test_body.py",
-]
+ANSI_RESET = "\033[0m"
+ANSI_BOLD = "\033[1m"
+ANSI_RED = "\033[31m"
+ANSI_GREEN = "\033[32m"
+ANSI_YELLOW = "\033[33m"
 
-CORE_KILLER_TESTS = [
-  "test_chrysler.py",
-  "test_ford.py",
-  "test_gm.py",
-  "test_hyundai.py",
-  "test_rivian.py",
-  "test_tesla.py",
-  "test_nissan.py",
-]
-
-TEST_IDS: dict[str, tuple[str, ...]] = {
-  "test_body.py": (
-    "opendbc.safety.tests.test_body.TestBody.test_manually_enable_controls_allowed",
-    "opendbc.safety.tests.test_body.TestBody.test_can_flasher",
-  ),
-  "test_chrysler.py": (
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_exceed_torque_sensor",
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamHDSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_chrysler.TestChryslerSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_chrysler.TestChryslerRamDTSafety.test_realtime_limit_up",
-  ),
-  "test_defaults.py": (
-    "opendbc.safety.tests.test_defaults.TestAllOutput.test_default_controls_not_allowed",
-    "opendbc.safety.tests.test_defaults.TestNoOutput.test_default_controls_not_allowed",
-    "opendbc.safety.tests.test_defaults.TestSilent.test_default_controls_not_allowed",
-  ),
-  "test_elm327.py": ("opendbc.safety.tests.test_elm327.TestElm327.test_default_controls_not_allowed",),
-  "test_ford.py": (
-    "opendbc.safety.tests.test_ford.TestFordCANFDLongitudinalSafety.test_curvature_rate_limits",
-    "opendbc.safety.tests.test_ford.TestFordCANFDStockSafety.test_acc_buttons",
-    "opendbc.safety.tests.test_ford.TestFordLongitudinalSafety.test_acc_buttons",
-    "opendbc.safety.tests.test_ford.TestFordCANFDLongitudinalSafety.test_steer_allowed",
-  ),
-  "test_gm.py": (
-    "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_gm.TestGmAscmSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_gm.TestGmCameraEVSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_gm.TestGmAscmEVSafety.test_realtime_limits",
-  ),
-  "test_honda.py": (
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_honda.TestHondaNidecPcmSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_allow_engage_with_gas_pressed",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_allow_user_brake_at_zero_speed",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_brake_safety_check",
-    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_acc_hud_safety_check",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_gas_safety_check",
-    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_brake_safety_check",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_buttons",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_rx_hook",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_set_resume_buttons",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_not_allow_user_brake_when_moving",
-    "opendbc.safety.tests.test_honda.TestHondaBoschLongSafety.test_buttons_with_main_off",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_enable_control_allowed_from_cruise",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_disable_control_allowed_from_cruise",
-    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_buttons",
-    "opendbc.safety.tests.test_honda.TestHondaBoschCANFDSafety.test_allow_user_brake_at_zero_speed",
-    "opendbc.safety.tests.test_honda.TestHondaBoschAltBrakeSafety.test_no_disengage_on_gas",
-    "opendbc.safety.tests.test_honda.TestHondaNidecPcmAltSafety.test_honda_fwd_brake_latching",
-  ),
-  "test_hyundai.py": (
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_req_bit_frames",
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLongitudinalSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafetyEV.test_against_torque_driver",
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_hyundai.TestHyundaiLegacySafety.test_realtime_limits",
-  ),
-  "test_hyundai_canfd.py": (
-    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering_0.test_steer_req_bit_frames",
-    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLKASteeringEV.test_against_torque_driver",
-    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteering.test_against_torque_driver",
-    "opendbc.safety.tests.test_hyundai_canfd.TestHyundaiCanfdLFASteeringAltButtons.test_acc_cancel",
-  ),
-  "test_mazda.py": ("opendbc.safety.tests.test_mazda.TestMazdaSafety.test_against_torque_driver",),
-  "test_nissan.py": (
-    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_cmd_when_disabled",
-    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_acc_buttons",
-    "opendbc.safety.tests.test_nissan.TestNissanSafety.test_acc_buttons",
-    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_cmd_when_enabled",
-    "opendbc.safety.tests.test_nissan.TestNissanLeafSafety.test_angle_violation",
-  ),
-  "test_psa.py": (
-    "opendbc.safety.tests.test_psa.TestPsaStockSafety.test_angle_cmd_when_disabled",
-    "opendbc.safety.tests.test_psa.TestPsaStockSafety.test_allow_engage_with_gas_pressed",
-  ),
-  "test_rivian.py": (
-    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_rivian.TestRivianStockSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_rivian.TestRivianLongitudinalSafety.test_realtime_limits",
-  ),
-  "test_subaru.py": (
-    "opendbc.safety.tests.test_subaru.TestSubaruGen1LongitudinalSafety.test_steer_req_bit_frames",
-    "opendbc.safety.tests.test_subaru.TestSubaruGen1LongitudinalSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_subaru.TestSubaruGen2LongitudinalSafety.test_against_torque_driver",
-  ),
-  "test_subaru_preglobal.py": (
-    "opendbc.safety.tests.test_subaru_preglobal.TestSubaruPreglobalReversedDriverTorqueSafety.test_steer_safety_check",
-    "opendbc.safety.tests.test_subaru_preglobal.TestSubaruPreglobalReversedDriverTorqueSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_subaru_preglobal.TestSubaruPreglobalSafety.test_against_torque_driver",
-  ),
-  "test_tesla.py": (
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_disabled",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14StockSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_cmd_when_enabled",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_steering_angle_measurements",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_lateral_jerk_limit",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_angle_violation",
-    "opendbc.safety.tests.test_tesla.TestTeslaFSD14LongitudinalSafety.test_rt_limits",
-  ),
-  "test_toyota.py": (
-    "opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_exceed_torque_sensor",
-    "opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_toyota.TestToyotaSafetyAngle.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_realtime_limit_up",
-    "opendbc.safety.tests.test_toyota.TestToyotaAltBrakeSafety.test_steer_safety_check",
-  ),
-  "test_volkswagen_mlb.py": (
-    "opendbc.safety.tests.test_volkswagen_mlb.TestVolkswagenMlbStockSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_volkswagen_mlb.TestVolkswagenMlbStockSafety.test_against_torque_driver",
-  ),
-  "test_volkswagen_mqb.py": (
-    "opendbc.safety.tests.test_volkswagen_mqb.TestVolkswagenMqbLongSafety.test_against_torque_driver",
-    "opendbc.safety.tests.test_volkswagen_mqb.TestVolkswagenMqbLongSafety.test_accel_safety_check",
-    "opendbc.safety.tests.test_volkswagen_mqb.TestVolkswagenMqbStockSafety.test_against_torque_driver",
-  ),
-  "test_volkswagen_pq.py": (
-    "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqLongSafety.test_torque_cmd_enable_variants",
-    "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqLongSafety.test_accel_actuation_limits",
-    "opendbc.safety.tests.test_volkswagen_pq.TestVolkswagenPqStockSafety.test_against_torque_driver",
-  ),
-}
 
 COMPARISON_OPERATOR_MAP = {
   "==": "!=",
@@ -215,6 +76,17 @@ class MutantResult:
   outcome: str  # killed | survived | infra_error
   test_sec: float
   details: str
+
+
+def colorize(text: str, color: str) -> str:
+  term = os.environ.get("TERM", "")
+  if not sys.stdout.isatty() or term in ("", "dumb") or "NO_COLOR" in os.environ:
+    return text
+  return f"{color}{text}{ANSI_RESET}"
+
+
+def format_mutation(original_op: str, mutated_op: str) -> str:
+  return colorize(f"{original_op}->{mutated_op}", ANSI_RED)
 
 
 def format_path(path: Path) -> str:
@@ -555,61 +427,107 @@ def enumerate_sites(input_source: Path, preprocessed_file: Path) -> tuple[list[M
   return out, counts, build_incompatible_site_ids
 
 
-MODE_TEST_MAP = {
-  "hyundai_common": ["test_hyundai.py", "test_hyundai_canfd.py"],
-  "volkswagen_common": ["test_volkswagen_mqb.py", "test_volkswagen_pq.py", "test_volkswagen_mlb.py"],
-  "subaru_preglobal": ["test_subaru_preglobal.py", "test_subaru.py"],
-}
+def _test_module_name(test_file: Path) -> str:
+  rel = test_file.relative_to(ROOT)
+  return ".".join(rel.with_suffix("").parts)
 
 
-def build_priority_tests(site: MutationSite) -> list[str]:
+def _build_reverse_includes() -> dict[str, list[str]]:
+  """Map each mode stem to the list of mode stems that include it."""
+  reverse: dict[str, list[str]] = {}
+  include_re = re.compile(r'#include\s+"opendbc/safety/modes/(\w+)\.h"')
+  for mode_file in sorted((SAFETY_DIR / "modes").glob("*.h")):
+    for m in include_re.finditer(mode_file.read_text()):
+      included_stem = m.group(1)
+      reverse.setdefault(included_stem, []).append(mode_file.stem)
+  return reverse
+
+
+_REVERSE_INCLUDES = _build_reverse_includes()
+
+
+def _tests_for_mode(stem: str) -> list[str]:
+  """Return test file names for a mode stem, using naming convention + include graph."""
+  names: list[str] = []
+  seen: set[str] = set()
+
+  direct = f"test_{stem}.py"
+  if (SAFETY_TESTS_DIR / direct).exists():
+    names.append(direct)
+    seen.add(direct)
+
+  for includer in _REVERSE_INCLUDES.get(stem, []):
+    name = f"test_{includer}.py"
+    if name not in seen and (SAFETY_TESTS_DIR / name).exists():
+      names.append(name)
+      seen.add(name)
+
+  return names
+
+
+def build_priority_tests(site: MutationSite, catalog: dict[str, list[tuple[str, list[str]]]]) -> list[str]:
+  """Build an ordered list of test IDs for a mutation site.
+
+  For mode files: all tests from matching module(s), round-robin across
+  classes so the first few tests give diverse coverage with failfast.
+
+  For core files: one test per unique method name from across all modules,
+  ordered by how widely each method is shared. Methods inherited by many
+  classes exercise the most fundamental safety logic and run first.
+  """
   src = display_file(site)
   try:
     rel_parts = src.relative_to(ROOT).parts
   except ValueError:
     rel_parts: tuple[str, ...] = ()
 
-  if len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes") and src.stem != "defaults":
-    ordered_names = MODE_TEST_MAP.get(src.stem, [f"test_{src.stem}.py"])
-  elif len(rel_parts) >= 3 and rel_parts[:2] == ("opendbc", "safety"):
-    ordered_names = list(CORE_KILLER_TESTS)
+  is_mode = len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes")
+  names = _tests_for_mode(src.stem) if is_mode else sorted(catalog.keys())
+
+  if is_mode:
+    # Run all tests from matching module(s) in natural order
+    ordered: list[str] = []
+    for name in names:
+      for _cls, ids in catalog.get(name, []):
+        ordered.extend(ids)
+    return ordered
   else:
-    ordered_names = list(SMOKE_TESTS)
-
-  return _test_targets_from_names(ordered_names)
-
-
-def _test_module_name(test_file: Path) -> str:
-  rel = test_file.relative_to(ROOT)
-  return ".".join(rel.with_suffix("").parts)
-
-
-def _test_targets_from_names(ordered_names: list[str]) -> list[str]:
-  tests_by_name = {p.name: p for p in sorted(SAFETY_TESTS_DIR.glob("test_*.py"))}
-  out: list[str] = []
-  seen_names: set[str] = set()
-  seen_ids: set[str] = set()
-  for name in ordered_names:
-    if name in seen_names:
-      continue
-    seen_names.add(name)
-
-    test_file = tests_by_name.get(name)
-    if test_file is None:
-      continue
-
-    targets = TEST_IDS.get(name)
-    if targets is not None:
-      for t in targets:
-        if t not in seen_ids:
-          seen_ids.add(t)
-          out.append(t)
-    else:
-      mod = _test_module_name(test_file)
-      if mod not in seen_ids:
-        seen_ids.add(mod)
-        out.append(mod)
-  return out
+    # Core file: multiple tests per unique method from evenly-spaced modules,
+    # ordered by frequency. Different test modules initialize different safety
+    # modes (torque vs angle steering, dynamic max torque, etc.), so spreading
+    # across modules catches mutations that only affect certain configurations.
+    MAX_PER_METHOD = 5
+    method_freq: dict[str, int] = {}
+    method_by_module: dict[str, dict[str, str]] = {}
+    for name in names:
+      for _cls, ids in catalog.get(name, []):
+        for test_id in ids:
+          method = test_id.rsplit(".", 1)[-1]
+          method_freq[method] = method_freq.get(method, 0) + 1
+          if method not in method_by_module:
+            method_by_module[method] = {}
+          if name not in method_by_module[method]:
+            method_by_module[method][name] = test_id
+    # Pick evenly-spaced modules for each method to maximize configuration diversity
+    method_ids: dict[str, list[str]] = {}
+    for method, module_map in method_by_module.items():
+      modules = sorted(module_map.keys())
+      n = len(modules)
+      if n <= MAX_PER_METHOD:
+        method_ids[method] = [module_map[m] for m in modules]
+      else:
+        step = n / MAX_PER_METHOD
+        method_ids[method] = [module_map[modules[int(i * step)]] for i in range(MAX_PER_METHOD)]
+    # Round-robin: first instance of each method (by freq), then second, etc.
+    # This ensures diverse early coverage with failfast.
+    sorted_methods = sorted(method_freq, key=lambda m: -method_freq[m])
+    ordered: list[str] = []
+    for round_idx in range(MAX_PER_METHOD):
+      for m in sorted_methods:
+        ids = method_ids.get(m, [])
+        if round_idx < len(ids):
+          ordered.append(ids[round_idx])
+    return ordered
 
 
 def format_site_snippet(site: MutationSite, context_lines: int = 2) -> str:
@@ -637,7 +555,8 @@ def format_site_snippet(site: MutationSite, context_lines: int = 2) -> str:
     prefix = ">" if idx == line_idx else " "
     line = lines[idx]
     if idx == line_idx and rel_start <= len(line):
-      line = f"{line[:rel_start]}[[{site.original_op}->{site.mutated_op}]]{line[rel_end:]}"
+      marker = colorize(f"[[{site.original_op}->{site.mutated_op}]]", ANSI_RED)
+      line = f"{line[:rel_start]}{marker}{line[rel_end:]}"
     snippet_lines.append(f"{prefix} {num:>{width}} | {line}")
   return "\n".join(snippet_lines)
 
@@ -652,7 +571,11 @@ def render_progress(completed: int, total: int, killed: int, survived: int, infr
   remaining = total - completed
   eta = (remaining / rate) if rate > 0 else 0.0
 
-  return f"[{bar}] {completed}/{total} k:{killed} s:{survived} i:{infra} mps:{rate:.2f} elapsed:{elapsed_sec:.1f}s eta:{eta:.1f}s"
+  killed_text = colorize(f"k:{killed}", ANSI_GREEN)
+  survived_text = colorize(f"s:{survived}", ANSI_RED)
+  infra_text = colorize(f"i:{infra}", ANSI_YELLOW)
+
+  return f"[{bar}] {completed}/{total} {killed_text} {survived_text} {infra_text} mps:{rate:.2f} elapsed:{elapsed_sec:.1f}s eta:{eta:.1f}s"
 
 
 def print_live_status(text: str, *, final: bool = False) -> None:
@@ -662,6 +585,46 @@ def print_live_status(text: str, *, final: bool = False) -> None:
     print(text, flush=True)
 
 
+def _flatten_suite(suite: unittest.TestSuite) -> list[unittest.TestCase]:
+  """Recursively extract all TestCase instances from a suite."""
+  tests: list[unittest.TestCase] = []
+  for item in suite:
+    if isinstance(item, unittest.TestSuite):
+      tests.extend(_flatten_suite(item))
+    else:
+      tests.append(item)
+  return tests
+
+
+def _discover_test_catalog(lib_path: Path) -> dict[str, list[tuple[str, list[str]]]]:
+  """Discover all test IDs grouped by class for each test file.
+
+  Must be called in the main process before creating the worker pool so that
+  forked workers inherit all imported modules (zero per-worker import cost).
+
+  Returns: {test_file_name: [(class_name, [test_id, ...]), ...]}
+  """
+  os.environ["LIBSAFETY_PATH"] = str(lib_path)
+  from opendbc.safety.tests.libsafety.libsafety_py import libsafety
+  libsafety.mutation_set_active_mutant(-1)
+
+  loader = unittest.TestLoader()
+  catalog: dict[str, list[tuple[str, list[str]]]] = {}
+
+  for test_file in sorted(SAFETY_TESTS_DIR.glob("test_*.py")):
+    module_name = _test_module_name(test_file)
+    suite = loader.loadTestsFromName(module_name)
+    tests = _flatten_suite(suite)
+
+    by_class: dict[str, list[str]] = {}
+    for t in tests:
+      by_class.setdefault(type(t).__name__, []).append(t.id())
+
+    catalog[test_file.name] = list(by_class.items())
+
+  return catalog
+
+
 def run_unittest(targets: list[str], lib_path: Path, mutant_id: int, verbose: bool) -> str | None:
   os.environ["LIBSAFETY_PATH"] = str(lib_path)
 
@@ -669,18 +632,17 @@ def run_unittest(targets: list[str], lib_path: Path, mutant_id: int, verbose: bo
 
   libsafety.mutation_set_active_mutant(mutant_id)
 
-  loader = unittest.TestLoader()
-  suite = unittest.TestSuite()
-  for target in targets:
-    suite.addTests(loader.loadTestsFromName(target))
-
   if verbose:
     print("Running unittest targets:", ", ".join(targets), flush=True)
 
+  loader = unittest.TestLoader()
   stream = io.StringIO()
   runner = unittest.TextTestRunner(stream=stream, verbosity=0, failfast=True)
-  result = runner.run(suite)
 
+  suite = unittest.TestSuite()
+  for target in targets:
+    suite.addTests(loader.loadTestsFromName(target))
+  result = runner.run(suite)
   if result.failures:
     return result.failures[0][0].id()
   if result.errors:
@@ -777,11 +739,10 @@ def compile_mutated_library(preprocessed_file: Path, sites: list[MutationSite], 
   ], cwd=ROOT, check=True)
 
 
-def eval_mutant(site: MutationSite, lib_path: Path, verbose: bool) -> MutantResult:
-  priority_tests = build_priority_tests(site)
+def eval_mutant(site: MutationSite, targets: list[str], lib_path: Path, verbose: bool) -> MutantResult:
   try:
     t0 = time.perf_counter()
-    failed_test = run_unittest(priority_tests, lib_path, mutant_id=site.site_id, verbose=verbose)
+    failed_test = run_unittest(targets, lib_path, mutant_id=site.site_id, verbose=verbose)
     duration = time.perf_counter() - t0
     if failed_test is not None:
       return MutantResult(site, "killed", duration, "")
@@ -817,7 +778,8 @@ def main() -> int:
     print(f"Found {len(sites)} unique candidates: {mutator_summary}", flush=True)
     if args.list_only:
       for site in sites:
-        print(f"  #{site.site_id:03d} {format_path(display_file(site))}:{display_line(site)} [{site.mutator}] {site.original_op}->{site.mutated_op}")
+        mutation = format_mutation(site.original_op, site.mutated_op)
+        print(f"  #{site.site_id:03d} {format_path(display_file(site))}:{display_line(site)} [{site.mutator}] {mutation}")
       return 0
 
     print(f"Running {len(sites)} mutants with {args.j} workers", flush=True)
@@ -839,12 +801,20 @@ def main() -> int:
     compiled_ids = {int(v) for v in re.findall(r"__mutation_active_id\s*==\s*(\d+)", mutation_lib.with_suffix(".c").read_text())}
     assert compiled_ids == {s.site_id for s in sites}, "Compiled IDs don't match runtime IDs"
 
-    smoke_targets = [_test_module_name(SAFETY_TESTS_DIR / name) for name in SMOKE_TESTS]
-    baseline_failed = run_unittest(smoke_targets, mutation_lib, mutant_id=-1, verbose=args.verbose)
+    # Discover all tests by importing modules in the main process.
+    # Forked workers inherit these imports, eliminating per-worker import cost.
+    catalog = _discover_test_catalog(mutation_lib)
+
+    # Baseline smoke check
+    baseline_ids = [ids[0] for _cls, ids in catalog.get("test_defaults.py", []) if ids]
+    baseline_failed = run_unittest(baseline_ids, mutation_lib, mutant_id=-1, verbose=args.verbose)
     if baseline_failed is not None:
       print("Baseline smoke failed with mutant_id=-1; aborting to avoid false kill signals.", flush=True)
       print(f"  failed_test: {baseline_failed}", flush=True)
       return 2
+
+    # Pre-compute test targets per mutation site
+    site_targets = {site.site_id: build_priority_tests(site, catalog) for site in sites}
 
     results: list[MutantResult] = []
     completed = 0
@@ -864,7 +834,9 @@ def main() -> int:
         infra += 1
 
     with ProcessPoolExecutor(max_workers=args.j, max_tasks_per_child=1) as pool:
-      future_map: dict[Future[MutantResult], MutationSite] = {pool.submit(eval_mutant, site, mutation_lib, args.verbose): site for site in sites}
+      future_map: dict[Future[MutantResult], MutationSite] = {
+        pool.submit(eval_mutant, site, site_targets[site.site_id], mutation_lib, args.verbose): site for site in sites
+      }
       print_live_status(render_progress(0, len(sites), 0, 0, 0, 0.0))
       try:
         for fut in as_completed(future_map):
@@ -888,16 +860,17 @@ def main() -> int:
     survivors = sorted((r for r in results if r.outcome == "survived"), key=lambda r: r.site.site_id)
     if survivors:
       print("", flush=True)
-      print("Surviving mutants", flush=True)
+      print(colorize("Surviving mutants", ANSI_RED), flush=True)
       for res in survivors:
         loc = f"{format_path(display_file(res.site))}:{display_line(res.site)}"
-        print(f"- #{res.site.site_id} {loc} [{res.site.mutator}] {res.site.original_op}->{res.site.mutated_op}", flush=True)
+        mutation = format_mutation(res.site.original_op, res.site.mutated_op)
+        print(f"- #{res.site.site_id} {loc} [{res.site.mutator}] {mutation}", flush=True)
         print(format_site_snippet(res.site), flush=True)
 
     infra_results = sorted((r for r in results if r.outcome == "infra_error"), key=lambda r: r.site.site_id)
     if infra_results:
       print("", flush=True)
-      print("Infra errors", flush=True)
+      print(colorize("Infra errors", ANSI_YELLOW), flush=True)
       for res in infra_results:
         loc = f"{format_path(display_file(res.site))}:{display_line(res.site)}"
         detail = res.details.splitlines()[0] if res.details else "unknown error"
@@ -906,13 +879,13 @@ def main() -> int:
     elapsed = time.perf_counter() - start
     total_test_sec = sum(r.test_sec for r in results)
     print("", flush=True)
-    print("Mutation summary", flush=True)
+    print(colorize("Mutation summary", ANSI_BOLD), flush=True)
     print(f"  discovered: {discovered_count}", flush=True)
     print(f"  pruned_build_incompatible: {pruned_compile_sites}", flush=True)
     print(f"  total: {len(sites)}", flush=True)
-    print(f"  killed: {killed}", flush=True)
-    print(f"  survived: {survived}", flush=True)
-    print(f"  infra_error: {infra}", flush=True)
+    print(f"  killed: {colorize(str(killed), ANSI_GREEN)}", flush=True)
+    print(f"  survived: {colorize(str(survived), ANSI_RED)}", flush=True)
+    print(f"  infra_error: {colorize(str(infra), ANSI_YELLOW)}", flush=True)
     print(f"  test_time_sum: {total_test_sec:.2f}s", flush=True)
     if results:
       print(f"  avg_test_per_mutant: {total_test_sec / len(results):.3f}s", flush=True)
