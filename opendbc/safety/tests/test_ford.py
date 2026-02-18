@@ -398,6 +398,13 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.CANFD)
     self.safety.init_tests()
 
+  def test_curvature_sign_branch_at_one_can_unit(self):
+    speed = 150.0
+    self.safety.set_controls_allowed(True)
+    self._reset_curvature_measurement(1 / self.DEG_TO_CAN, speed)
+    self._set_prev_desired_angle(1 / self.DEG_TO_CAN)
+    self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 5 / self.DEG_TO_CAN, 0)))
+
 
 class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   MAX_ACCEL = 2.0  # accel is used for brakes, but openpilot can set positive values
