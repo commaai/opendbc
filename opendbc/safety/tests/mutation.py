@@ -254,8 +254,6 @@ def _boundary_site(node, parent, txt):
 
   op_start = begin_offset
   op_end = end_offset + end_tok_len
-  if op_start < 0 or op_end > len(txt) or op_end <= op_start:
-    return None
 
   token = txt[op_start:op_end]
   parsed = _parse_int_literal(token)
@@ -414,11 +412,7 @@ def build_priority_tests(site, catalog):
   classes exercise the most fundamental safety logic and run first.
   """
   src = site.origin_file
-  try:
-    rel_parts = src.relative_to(ROOT).parts
-  except ValueError:
-    rel_parts = ()
-
+  rel_parts = src.relative_to(ROOT).parts
   is_mode = len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes")
 
   if is_mode:
@@ -466,11 +460,8 @@ def format_site_snippet(site, context_lines=2):
   source = site.origin_file
   text = source.read_text()
   lines = text.splitlines()
-  if not lines:
-    return ""
-
   display_ln = site.origin_line
-  line_idx = max(0, min(display_ln - 1, len(lines) - 1))
+  line_idx = display_ln - 1
   start = max(0, line_idx - context_lines)
   end = min(len(lines), line_idx + context_lines + 1)
 
@@ -486,7 +477,7 @@ def format_site_snippet(site, context_lines=2):
     num = idx + 1
     prefix = ">" if idx == line_idx else " "
     line = lines[idx]
-    if idx == line_idx and rel_start <= len(line):
+    if idx == line_idx:
       marker = colorize(f"[[{site.original_op}->{site.mutated_op}]]", ANSI_RED)
       line = f"{line[:rel_start]}{marker}{line[rel_end:]}"
     snippet_lines.append(f"{prefix} {num:>{width}} | {line}")
@@ -495,8 +486,7 @@ def format_site_snippet(site, context_lines=2):
 
 def render_progress(completed, total, killed, survived, infra, elapsed_sec):
   bar_width = 30
-  filled = int((completed / total) * bar_width) if total > 0 else 0
-  filled = max(0, min(bar_width, filled))
+  filled = int((completed / total) * bar_width)
   bar = "#" * filled + "-" * (bar_width - filled)
 
   rate = completed / elapsed_sec if elapsed_sec > 0 else 0.0
@@ -672,11 +662,6 @@ def main():
   parser.add_argument("--verbose", action="store_true", help="print extra debug output")
   args = parser.parse_args()
 
-  if args.j < 1:
-    raise SystemExit("-j must be >= 1")
-  if args.max_mutants < 0:
-    raise SystemExit("--max-mutants must be >= 0")
-
   start = time.perf_counter()
 
   with tempfile.TemporaryDirectory(prefix="mutation-op-run-") as run_tmp_dir:
@@ -800,10 +785,8 @@ def main():
     print(f"  survived: {colorize(str(survived), ANSI_RED)}", flush=True)
     print(f"  infra_error: {colorize(str(infra), ANSI_YELLOW)}", flush=True)
     print(f"  test_time_sum: {total_test_sec:.2f}s", flush=True)
-    if results:
-      print(f"  avg_test_per_mutant: {total_test_sec / len(results):.3f}s", flush=True)
-    if elapsed > 0:
-      print(f"  mutants_per_second: {len(sites) / elapsed:.2f}", flush=True)
+    print(f"  avg_test_per_mutant: {total_test_sec / len(results):.3f}s", flush=True)
+    print(f"  mutants_per_second: {len(sites) / elapsed:.2f}", flush=True)
     print(f"  elapsed: {elapsed:.2f}s", flush=True)
 
     if infra > 0:
