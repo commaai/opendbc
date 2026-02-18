@@ -63,11 +63,7 @@ class MutationSite:
   origin_line: int | None
 
 
-@dataclass(frozen=True)
-class MutationRule:
-  mutator: str
-  original_op: str
-  mutated_op: str
+MutationRule = tuple[str, str, str]  # (mutator, original_op, mutated_op)
 
 
 @dataclass(frozen=True)
@@ -89,23 +85,6 @@ def format_mutation(original_op: str, mutated_op: str) -> str:
   return colorize(f"{original_op}->{mutated_op}", ANSI_RED)
 
 
-def format_path(path: Path) -> str:
-  try:
-    return str(path.relative_to(ROOT))
-  except ValueError:
-    return str(path)
-
-
-def display_file(site: MutationSite) -> Path:
-  assert site.origin_file is not None
-  return site.origin_file
-
-
-def display_line(site: MutationSite) -> int:
-  assert site.origin_line is not None
-  return site.origin_line
-
-
 def _spelling_loc(loc: object) -> dict | None:
   if not isinstance(loc, dict):
     return None
@@ -118,13 +97,14 @@ def _spelling_loc(loc: object) -> dict | None:
 def _make_site(txt: str, rule: MutationRule,
                expr_start: int, expr_end: int, op_start: int, op_end: int,
                line: int | None) -> MutationSite | None:
+  mutator, original_op, mutated_op = rule
   if expr_start < 0 or expr_end < expr_start or expr_end > len(txt):
     return None
   if op_start < 0 or op_end < op_start or op_end > len(txt):
     return None
   if op_start < expr_start or op_end > expr_end:
     return None
-  if txt[op_start:op_end] != rule.original_op:
+  if txt[op_start:op_end] != original_op:
     return None
 
   if not isinstance(line, int):
@@ -137,15 +117,16 @@ def _make_site(txt: str, rule: MutationRule,
     op_start=op_start,
     op_end=op_end,
     line=line,
-    original_op=rule.original_op,
-    mutated_op=rule.mutated_op,
-    mutator=rule.mutator,
+    original_op=original_op,
+    mutated_op=mutated_op,
+    mutator=mutator,
     origin_file=None,
     origin_line=None,
   )
 
 
 def _binary_like_site(node: dict, txt: str, rule: MutationRule) -> MutationSite | None:
+  _mutator, original_op, _mutated_op = rule
   inner = node.get("inner", [])
   if len(inner) < 2:
     return None
@@ -182,11 +163,11 @@ def _binary_like_site(node: dict, txt: str, rule: MutationRule) -> MutationSite 
       continue
     seen.add(key)
 
-    idx = txt[span_start:span_end].find(rule.original_op)
+    idx = txt[span_start:span_end].find(original_op)
     if idx < 0:
       continue
     op_start = span_start + idx
-    op_end = op_start + len(rule.original_op)
+    op_end = op_start + len(original_op)
     site = _make_site(txt, rule, expr_start, expr_end, op_start, op_end, begin.get("line"))
     if site is not None:
       return site
@@ -194,6 +175,7 @@ def _binary_like_site(node: dict, txt: str, rule: MutationRule) -> MutationSite 
 
 
 def _unary_site(node: dict, txt: str, rule: MutationRule) -> MutationSite | None:
+  _mutator, original_op, _mutated_op = rule
   inner = node.get("inner", [])
   if not inner:
     return None
@@ -235,11 +217,11 @@ def _unary_site(node: dict, txt: str, rule: MutationRule) -> MutationSite | None
     seen.add(key)
 
     seg = txt[span_start:span_end]
-    idx = seg.rfind(rule.original_op) if postfix else seg.find(rule.original_op)
+    idx = seg.rfind(original_op) if postfix else seg.find(original_op)
     if idx < 0:
       continue
     op_start = span_start + idx
-    op_end = op_start + len(rule.original_op)
+    op_end = op_start + len(original_op)
     site = _make_site(txt, rule, expr_start, expr_end, op_start, op_end, begin.get("line"))
     if site is not None:
       return site
@@ -291,7 +273,7 @@ def _boundary_site(node: dict, parent: dict | None, txt: str) -> MutationSite | 
   else:
     mutated = f"{new_value}{suffix}"
 
-  rule = MutationRule(mutator="boundary", original_op=token, mutated_op=mutated)
+  rule = ("boundary", token, mutated)
   return _make_site(txt, rule, op_start, op_end, op_start, op_end, begin.get("line"))
 
 
@@ -351,7 +333,7 @@ def enumerate_sites(input_source: Path, preprocessed_file: Path) -> tuple[list[M
     if mutator == "boundary":
       continue
     for original_op, mutated_op in op_map.items():
-      rule = MutationRule(mutator=mutator, original_op=original_op, mutated_op=mutated_op)
+      rule = (mutator, original_op, mutated_op)
       rule_map.setdefault((node_kind, original_op), []).append(rule)
 
   # Build preprocessed line map
@@ -450,7 +432,7 @@ def build_priority_tests(site: MutationSite, catalog: dict[str, list[tuple[str, 
   ordered by how widely each method is shared. Methods inherited by many
   classes exercise the most fundamental safety logic and run first.
   """
-  src = display_file(site)
+  src = site.origin_file
   try:
     rel_parts = src.relative_to(ROOT).parts
   except ValueError:
@@ -506,13 +488,13 @@ def build_priority_tests(site: MutationSite, catalog: dict[str, list[tuple[str, 
 
 
 def format_site_snippet(site: MutationSite, context_lines: int = 2) -> str:
-  source = display_file(site)
+  source = site.origin_file
   text = source.read_text()
   lines = text.splitlines()
   if not lines:
     return ""
 
-  display_ln = display_line(site)
+  display_ln = site.origin_line
   line_idx = max(0, min(display_ln - 1, len(lines) - 1))
   start = max(0, line_idx - context_lines)
   end = min(len(lines), line_idx + context_lines + 1)
@@ -752,7 +734,7 @@ def main() -> int:
     if args.list_only:
       for site in sites:
         mutation = format_mutation(site.original_op, site.mutated_op)
-        print(f"  #{site.site_id:03d} {format_path(display_file(site))}:{display_line(site)} [{site.mutator}] {mutation}")
+        print(f"  #{site.site_id:03d} {site.origin_file.relative_to(ROOT)}:{site.origin_line} [{site.mutator}] {mutation}")
       return 0
 
     print(f"Running {len(sites)} mutants with {args.j} workers", flush=True)
@@ -835,7 +817,7 @@ def main() -> int:
       print("", flush=True)
       print(colorize("Surviving mutants", ANSI_RED), flush=True)
       for res in survivors:
-        loc = f"{format_path(display_file(res.site))}:{display_line(res.site)}"
+        loc = f"{res.site.origin_file.relative_to(ROOT)}:{res.site.origin_line}"
         mutation = format_mutation(res.site.original_op, res.site.mutated_op)
         print(f"- #{res.site.site_id} {loc} [{res.site.mutator}] {mutation}", flush=True)
         print(format_site_snippet(res.site), flush=True)
@@ -845,7 +827,7 @@ def main() -> int:
       print("", flush=True)
       print(colorize("Infra errors", ANSI_YELLOW), flush=True)
       for res in infra_results:
-        loc = f"{format_path(display_file(res.site))}:{display_line(res.site)}"
+        loc = f"{res.site.origin_file.relative_to(ROOT)}:{res.site.origin_line}"
         detail = res.details.splitlines()[0] if res.details else "unknown error"
         print(f"- #{res.site.site_id} {loc}: {detail}", flush=True)
 
