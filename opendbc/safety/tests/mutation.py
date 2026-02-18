@@ -10,7 +10,8 @@ import tempfile
 import time
 import unittest
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from dataclasses import dataclass, replace
+from collections import Counter, namedtuple
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -48,6 +49,9 @@ MUTATOR_FAMILIES = {
 }
 
 
+_RawSite = namedtuple('_RawSite', 'expr_start expr_end op_start op_end line original_op mutated_op mutator')
+
+
 @dataclass(frozen=True)
 class MutationSite:
   site_id: int
@@ -59,8 +63,8 @@ class MutationSite:
   original_op: str
   mutated_op: str
   mutator: str
-  origin_file: Path | None
-  origin_line: int | None
+  origin_file: Path
+  origin_line: int
 
 
 @dataclass(frozen=True)
@@ -105,19 +109,7 @@ def _make_site(txt, rule, expr_start, expr_end, op_start, op_end, line):
   if not isinstance(line, int):
     line = txt.count("\n", 0, op_start) + 1
 
-  return MutationSite(
-    site_id=-1,
-    expr_start=expr_start,
-    expr_end=expr_end,
-    op_start=op_start,
-    op_end=op_end,
-    line=line,
-    original_op=original_op,
-    mutated_op=mutated_op,
-    mutator=mutator,
-    origin_file=None,
-    origin_line=None,
-  )
+  return _RawSite(expr_start, expr_end, op_start, op_end, line, original_op, mutated_op, mutator)
 
 
 def _binary_like_site(node, txt, rule):
@@ -394,11 +386,17 @@ def enumerate_sites(input_source, preprocessed_file):
     origin_file, origin_line = mapped
     if SAFETY_DIR not in origin_file.parents and origin_file != SAFETY_DIR:
       continue
-    site = replace(s, site_id=len(out), origin_file=origin_file, origin_line=origin_line)
-    if _site_key(site) in build_incompatible_keys:
-      build_incompatible_site_ids.add(site.site_id)
+    site_id = len(out)
+    site = MutationSite(
+      site_id=site_id, expr_start=s.expr_start, expr_end=s.expr_end,
+      op_start=s.op_start, op_end=s.op_end, line=s.line,
+      original_op=s.original_op, mutated_op=s.mutated_op, mutator=s.mutator,
+      origin_file=origin_file, origin_line=origin_line,
+    )
+    if _site_key(s) in build_incompatible_keys:
+      build_incompatible_site_ids.add(site_id)
     out.append(site)
-    counts[site.mutator] += 1
+    counts[s.mutator] += 1
   return out, counts, build_incompatible_site_ids
 
 
@@ -508,25 +506,12 @@ def print_live_status(text, *, final=False):
 
 
 def _discover_test_catalog(lib_path):
-  """Discover all test IDs for each test file.
-
-  Must be called in the main process before creating the worker pool so that
-  forked workers inherit all imported modules (zero per-worker import cost).
-
-  Returns: {test_file_name: [test_id, ...]}
-  """
-  from opendbc.safety.tests.libsafety import libsafety_py
-  libsafety_py.load(lib_path)
-  libsafety_py.libsafety.mutation_set_active_mutant(-1)
-
   loader = unittest.TestLoader()
   catalog = {}
-
   for test_file in sorted(SAFETY_TESTS_DIR.glob("test_*.py")):
     module_name = ".".join(test_file.relative_to(ROOT).with_suffix("").parts)
     suite = loader.loadTestsFromName(module_name)
     catalog[test_file.name] = [t.id() for group in suite for t in group]
-
   return catalog
 
 
@@ -715,21 +700,7 @@ def main():
     site_targets = {site.site_id: build_priority_tests(site, catalog) for site in sites}
 
     results = []
-    completed = 0
-    killed = 0
-    survived = 0
-    infra = 0
-
-    def _record(res):
-      nonlocal completed, killed, survived, infra
-      results.append(res)
-      completed += 1
-      if res.outcome == "killed":
-        killed += 1
-      elif res.outcome == "survived":
-        survived += 1
-      else:
-        infra += 1
+    counts = Counter()
 
     with ProcessPoolExecutor(max_workers=args.j) as pool:
       future_map = {
@@ -743,17 +714,21 @@ def main():
           except Exception:
             site = future_map[fut]
             res = MutantResult(site, "killed", 0.0, "worker process crashed")
-          _record(res)
+          results.append(res)
+          counts[res.outcome] += 1
           elapsed_now = time.perf_counter() - start
-          print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=(completed == len(sites)))
+          done = len(results) == len(sites)
+          print_live_status(render_progress(len(results), len(sites), counts["killed"], counts["survived"],
+                                            counts["infra_error"], elapsed_now), final=done)
       except Exception:
         # Pool broken — mark all unfinished mutants as killed (crash = behavioral change detected)
         completed_ids = {r.site.site_id for r in results}
         for site in sites:
           if site.site_id not in completed_ids:
-            _record(MutantResult(site, "killed", 0.0, "pool broken"))
+            results.append(MutantResult(site, "killed", 0.0, "pool broken"))
+            counts["killed"] += 1
         elapsed_now = time.perf_counter() - start
-        print_live_status(render_progress(completed, len(sites), killed, survived, infra, elapsed_now), final=True)
+        print_live_status(render_progress(len(results), len(sites), counts["killed"], counts["survived"], counts["infra_error"], elapsed_now), final=True)
 
     survivors = sorted((r for r in results if r.outcome == "survived"), key=lambda r: r.site.site_id)
     if survivors:
@@ -781,17 +756,17 @@ def main():
     print(f"  discovered: {discovered_count}", flush=True)
     print(f"  pruned_build_incompatible: {pruned_compile_sites}", flush=True)
     print(f"  total: {len(sites)}", flush=True)
-    print(f"  killed: {colorize(str(killed), ANSI_GREEN)}", flush=True)
-    print(f"  survived: {colorize(str(survived), ANSI_RED)}", flush=True)
-    print(f"  infra_error: {colorize(str(infra), ANSI_YELLOW)}", flush=True)
+    print(f"  killed: {colorize(str(counts['killed']), ANSI_GREEN)}", flush=True)
+    print(f"  survived: {colorize(str(counts['survived']), ANSI_RED)}", flush=True)
+    print(f"  infra_error: {colorize(str(counts['infra_error']), ANSI_YELLOW)}", flush=True)
     print(f"  test_time_sum: {total_test_sec:.2f}s", flush=True)
     print(f"  avg_test_per_mutant: {total_test_sec / len(results):.3f}s", flush=True)
     print(f"  mutants_per_second: {len(sites) / elapsed:.2f}", flush=True)
     print(f"  elapsed: {elapsed:.2f}s", flush=True)
 
-    if infra > 0:
+    if counts["infra_error"] > 0:
       return 2
-    if survived > 0:
+    if counts["survived"] > 0:
       return 1
     return 0
 
