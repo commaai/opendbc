@@ -51,6 +51,7 @@ def create_eps_update(packer, CAN: CanBus, eps_stock_values, ea_simulated_torque
     "B_RX_DRIVER_TORQUE",
     "B_BYPASSME_1",
     "B_BYPASSME_2",
+    "B_RX_EPS_TORQUE",
     "B_COUNTER",
     "B_BYPASSME_3",
   ]}
