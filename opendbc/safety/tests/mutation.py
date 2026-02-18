@@ -404,26 +404,12 @@ def enumerate_sites(input_source, preprocessed_file):
   return out, counts, build_incompatible_site_ids
 
 
-def _test_module_name(test_file):
-  rel = test_file.relative_to(ROOT)
-  return ".".join(rel.with_suffix("").parts)
-
-
-def _tests_for_mode(stem):
-  """Return test file names for a mode stem."""
-  direct = f"test_{stem}.py"
-  if (SAFETY_TESTS_DIR / direct).exists():
-    return [direct]
-  return []
-
-
 def build_priority_tests(site, catalog):
   """Build an ordered list of test IDs for a mutation site.
 
-  For mode files: all tests from matching module(s), round-robin across
-  classes so the first few tests give diverse coverage with failfast.
+  For mode files: all tests from the matching test_<mode>.py module.
 
-  For core files: one test per unique method name from across all modules,
+  For core files: one test per unique method name from evenly-spaced modules,
   ordered by how widely each method is shared. Methods inherited by many
   classes exercise the most fundamental safety logic and run first.
   """
@@ -434,15 +420,10 @@ def build_priority_tests(site, catalog):
     rel_parts = ()
 
   is_mode = len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes")
-  names = _tests_for_mode(src.stem) if is_mode else sorted(catalog.keys())
 
   if is_mode:
-    # Run all tests from matching module(s) in natural order
-    ordered = []
-    for name in names:
-      for _cls, ids in catalog.get(name, []):
-        ordered.extend(ids)
-    return ordered
+    mode_file = f"test_{src.stem}.py"
+    return list(catalog.get(mode_file, []))
   else:
     # Core file: multiple tests per unique method from evenly-spaced modules,
     # ordered by frequency. Different test modules initialize different safety
@@ -451,15 +432,14 @@ def build_priority_tests(site, catalog):
     MAX_PER_METHOD = 5
     method_freq = {}
     method_by_module = {}
-    for name in names:
-      for _cls, ids in catalog.get(name, []):
-        for test_id in ids:
-          method = test_id.rsplit(".", 1)[-1]
-          method_freq[method] = method_freq.get(method, 0) + 1
-          if method not in method_by_module:
-            method_by_module[method] = {}
-          if name not in method_by_module[method]:
-            method_by_module[method][name] = test_id
+    for name in sorted(catalog.keys()):
+      for test_id in catalog[name]:
+        method = test_id.rsplit(".", 1)[-1]
+        method_freq[method] = method_freq.get(method, 0) + 1
+        if method not in method_by_module:
+          method_by_module[method] = {}
+        if name not in method_by_module[method]:
+          method_by_module[method][name] = test_id
     # Pick evenly-spaced modules for each method to maximize configuration diversity
     method_ids = {}
     for method, module_map in method_by_module.items():
@@ -537,24 +517,13 @@ def print_live_status(text, *, final=False):
     print(text, flush=True)
 
 
-def _flatten_suite(suite):
-  """Recursively extract all TestCase instances from a suite."""
-  tests = []
-  for item in suite:
-    if isinstance(item, unittest.TestSuite):
-      tests.extend(_flatten_suite(item))
-    else:
-      tests.append(item)
-  return tests
-
-
 def _discover_test_catalog(lib_path):
-  """Discover all test IDs grouped by class for each test file.
+  """Discover all test IDs for each test file.
 
   Must be called in the main process before creating the worker pool so that
   forked workers inherit all imported modules (zero per-worker import cost).
 
-  Returns: {test_file_name: [(class_name, [test_id, ...]), ...]}
+  Returns: {test_file_name: [test_id, ...]}
   """
   from opendbc.safety.tests.libsafety import libsafety_py
   libsafety_py.load(lib_path)
@@ -564,15 +533,9 @@ def _discover_test_catalog(lib_path):
   catalog = {}
 
   for test_file in sorted(SAFETY_TESTS_DIR.glob("test_*.py")):
-    module_name = _test_module_name(test_file)
+    module_name = ".".join(test_file.relative_to(ROOT).with_suffix("").parts)
     suite = loader.loadTestsFromName(module_name)
-    tests = _flatten_suite(suite)
-
-    by_class = {}
-    for t in tests:
-      by_class.setdefault(type(t).__name__, []).append(t.id())
-
-    catalog[test_file.name] = list(by_class.items())
+    catalog[test_file.name] = [t.id() for group in suite for t in group]
 
   return catalog
 
@@ -756,7 +719,7 @@ def main():
     catalog = _discover_test_catalog(mutation_lib)
 
     # Baseline smoke check
-    baseline_ids = [ids[0] for _cls, ids in catalog.get("test_defaults.py", []) if ids]
+    baseline_ids = catalog.get("test_defaults.py", [])[:5]
     baseline_failed = run_unittest(baseline_ids, mutation_lib, mutant_id=-1, verbose=args.verbose)
     if baseline_failed is not None:
       print("Baseline smoke failed with mutant_id=-1; aborting to avoid false kill signals.", flush=True)
