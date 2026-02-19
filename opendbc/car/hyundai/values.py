@@ -387,7 +387,7 @@ class CAR(Platforms):
   )
   KIA_K7_2017 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia K7 2017", car_parts=CarParts.common([CarHarness.hyundai_c]))],
-    CarSpecs(mass=1648, wheelbase=2.86, steerRatio=14.4),
+    CarSpecs(mass=1648, wheelbase=2.86, steerRatio=16.8),
   )
   KIA_K8_HEV_1ST_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Kia K8 Hybrid (with HDA II) 2023", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q]))],
