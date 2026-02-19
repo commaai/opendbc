@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 
 from opendbc.car.structs import CarParams
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
-from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
@@ -13,20 +12,12 @@ class CarControllerParams:
   STEER_STEP = 2
   STEER_MAX = 200
 
-  # TO-DO Cleanup this later
-  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    390, # deg
-    ([0., 5., 25.], [2.5, 1.5, .2]),
-    ([0., 5., 25.], [5., 2., .3]),
-  )
-  STEER_DRIVER_ALLOWANCE = 5  # Driver intervention threshold, 0.5 Nm
-  # TO-DO Cleanup this later
-
   def __init__(self, CP: CarParams):
     self.ACCEL_MAX = 1
     self.ACCEL_MIN = -3.5
-    self.STEER_DELTA_UP = 6
-    self.STEER_DELTA_DOWN = 10
+    self.STEER_DELTA_UP = 3
+    self.STEER_DELTA_DOWN = 5
+    self.STEER_ERROR_MAX = 70
 
 
 @dataclass

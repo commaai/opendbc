@@ -5,7 +5,7 @@
 #define GWM_STEERING_AND_CRUISE 0xA1U  // RX from STEER_AND_AP_STALK
 #define GWM_GAS                 0x60U  // RX from CAR_OVERALL_SIGNALS
 #define GWM_BRAKE               0x137U // RX from BRAKE
-#define GWM_SPEED               0x13B  // RX from WHEEL_SPEEDS
+#define GWM_SPEED               0x13BU  // RX from WHEEL_SPEEDS
 #define GWM_LANE_KEEP_ASSIST    0xA1U  // TX from OP,  EPS
 #define GWM_RX_STEER_RELATED    0x147U // TX from OP to CAMERA
 #define STEER_CMD               0x12BU // TX from OP, CAMERA to EPS
@@ -71,25 +71,30 @@ static uint32_t gwm_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void gwm_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == GWM_MAIN_BUS) {
+  if (msg->bus == 0U) {
+    // GAS_POSITION
     if (msg->addr == GWM_GAS) {
-      gas_pressed = msg->data[9] > 0U; // GAS_POSITION
+      gas_pressed = msg->data[9] > 0U;
     }
-    if ((uint32_t)msg->addr == (uint32_t)GWM_STEERING_AND_CRUISE) {
-      int angle_meas_new = (((msg->data[1] & 0x3FU) << 7) | (msg->data[2] & 0xFEU)); // STEERING_ANGLE
-      update_sample(&angle_meas, angle_meas_new);
-    }
-    if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
-      uint32_t fl = (((uint16_t)msg->data[1] << 8) | msg->data[2]) & 0x1FFFU;
-      uint32_t fr = (((uint16_t)msg->data[3] << 8) | msg->data[4]) & 0x1FFFU;
-      uint32_t rl = (((uint16_t)msg->data[41] << 8) | msg->data[42]) & 0x1FFFU;
-      uint32_t rr = (((uint16_t)msg->data[43] << 8) | msg->data[44]) & 0x1FFFU;
+
+    if (msg->addr == GWM_SPEED) {
+      uint32_t fl = ((msg->data[1] << 8) | msg->data[2]) & 0x1FFFU;
+      uint32_t fr = ((msg->data[3] << 8) | msg->data[4]) & 0x1FFFU;
+      uint32_t rl = ((msg->data[41] << 8) | msg->data[42]) & 0x1FFFU;
+      uint32_t rr = ((msg->data[43] << 8) | msg->data[44]) & 0x1FFFU;
       float speed = (float)((fr + rr + rl + fl) / 4.0f * 0.05924739 * KPH_TO_MS);
       vehicle_moving = speed > 0.0f;
       UPDATE_VEHICLE_SPEED(speed);
     }
-    if ((uint32_t)msg->addr == (uint32_t)GWM_BRAKE) {
-      brake_pressed = ((msg->data[25] << 8) | (msg->data[26] & 0xF8U)) > 0U; // BRAKE_PRESSURE
+
+    if (msg->addr == GWM_BRAKE) {
+      brake_pressed = ((msg->data[25] << 8) | (msg->data[26] & 0xF8U)) > 0U;
+    }
+
+    if (msg->addr == 0x147U) {
+      int torque_meas_new = ((msg->data[13] & 0x7U) << 8) | (msg->data[14]);
+      torque_meas_new = to_signed(torque_meas_new, 11) + 548;
+      update_sample(&torque_meas, torque_meas_new);
     }
   }
 
@@ -101,32 +106,28 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool gwm_tx_hook(const CANPacket_t *msg) {
-  bool tx = true;
-  static const AngleSteeringLimits GWM_STEERING_LIMITS = {
-    .max_angle = 3900,
-    .angle_deg_to_can = 10,
-    .angle_rate_up_lookup = {
-      {0., 5., 25.},
-      {2.5, 1.5, .2},
-    },
-    .angle_rate_down_lookup = {
-      {0., 5., 25.},
-      {5., 2., .3},
-    },
+  const TorqueSteeringLimits GWM_TORQUE_STEERING_LIMITS = {
+    .max_torque = 200,
+    .max_rate_up = 3,
+    .max_rate_down = 5,
+    .max_torque_error = 70,
+    .max_rt_delta = 100,
+    .type = TorqueMotorLimited,
   };
 
-  // Safety check for LKA
-  if (msg->addr == GWM_STEERING_AND_CRUISE) {
-    // SET_ANGLE
-    int desired_angle = ((msg->data[1] & 0x3FU) << 7) | (msg->data[2] & 0xFEU); // STEERING_ANGLE
-    // TORQUE_FACTOR
-    bool lka_active = (msg->data[4] & 0x3U) != 0U; // EPS_ACTUATING
+  bool tx = true;
 
-    if (steer_angle_cmd_checks(desired_angle, lka_active, GWM_STEERING_LIMITS)) {
-      tx = false;
+  if (msg->bus == 0U) {
+    if (msg->addr == STEER_CMD) {
+      int desired_torque = (((msg->data[12] & 0x7FU) << 3) | ((msg->data[13] & 0xE0U) >> 5)) + 1U;
+      desired_torque = to_signed(desired_torque, 10);
+      bool steer_req = GET_BIT(msg, 125U);
+      if (steer_torque_cmd_checks(desired_torque, steer_req, GWM_TORQUE_STEERING_LIMITS)) {
+        tx = false;
+      }
     }
   }
-  tx = true; // TO-DO remove this line after testing
+
   return tx;
 }
 

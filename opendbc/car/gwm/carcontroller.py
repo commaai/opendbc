@@ -1,15 +1,14 @@
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus
+from opendbc.car.lateral import apply_meas_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.gwm import gwmcan
 from opendbc.car.gwm.values import CarControllerParams
-import numpy as np
 # DEBUG
 from openpilot.common.params import Params
 # DEBUG
 
 MAX_USER_TORQUE = 100  # 1.0 Nm
-EPS_MAX_TORQUE = 200
 HELLO = 20
 
 
@@ -18,8 +17,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.params = CarControllerParams(self.CP)
     self.packer = CANPacker(dbc_names[Bus.main])
-    self.apply_angle_last = 0
-    self.status = 2
+    self.apply_torque_last = 0
     self.CAN = gwmcan.CanBus(CP)
     self.fake_torque = False
 
@@ -55,20 +53,23 @@ class CarController(CarControllerBase):
 
       # Steer command
       new_torque = int(round(actuators.torque * self.params.STEER_MAX))
-      apply_steer = np.clip(new_torque, -EPS_MAX_TORQUE, EPS_MAX_TORQUE)
+      apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
       if not lat_active:
-        apply_steer = 0
+        apply_torque = 0
+      self.apply_torque_last = apply_torque
       if not Params().get_bool("AleSato_DebugButton1"):
-        apply_steer = CS.camera_stock_values["TORQUE_CMD"]
+        apply_torque = CS.camera_stock_values["TORQUE_CMD"]
         lat_active = CS.camera_stock_values["STEER_REQUEST"]
       can_sends.append(gwmcan.create_steer_command(
         self.packer,
         self.CAN,
         camera_stock_values=CS.camera_stock_values,
-        steer=apply_steer,
+        steer=apply_torque,
         steer_req=lat_active,
       ))
 
     new_actuators = actuators.as_builder()
+    new_actuators.torque = self.apply_torque_last / self.params.STEER_MAX
+    new_actuators.torqueOutputCan = self.apply_torque_last
     self.frame += 1
     return new_actuators, can_sends

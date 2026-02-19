@@ -52,6 +52,7 @@ class CarState(CarStateBase):
     ret.steeringRateDeg = 0 # TODO
     ret.steerFaultTemporary = bool(cp_cam.vl["STEER_CMD"]["STEER_REQUEST"]) and bool(cp.vl["RX_STEER_RELATED"]["A_RX_STEER_REQUESTED"] != 1)
     ret.steeringTorque = cp.vl["RX_STEER_RELATED"]["B_RX_DRIVER_TORQUE"]
+    ret.steeringTorqueEps = cp.vl["RX_STEER_RELATED"]["B_RX_EPS_TORQUE"]
     ret.steeringPressed = abs(ret.steeringTorque) > 50
 
     ret.doorOpen = any([cp.vl["DOOR_DRIVER"]["DOOR_REAR_RIGHT_OPEN"],
