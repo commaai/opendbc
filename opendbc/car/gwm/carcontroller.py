@@ -53,21 +53,21 @@ class CarController(CarControllerBase):
         ea_simulated_torque=ea_simulated_torque,
       ))
 
-      # # Steer command
-      # new_torque = int(round(actuators.torque * self.params.STEER_MAX))
-      # apply_steer = np.clip(new_torque, -EPS_MAX_TORQUE, EPS_MAX_TORQUE)
-      # if not lat_active:
-      #   apply_steer = 0
-      # if not Params().get_bool("AleSato_DebugButton1"):
-      #   apply_steer = CS.camera_stock_values["TORQUE_CMD"]
-      #   lat_active = CS.camera_stock_values["STEER_REQUEST"]
-      # can_sends.append(gwmcan.create_steer_command(
-      #   self.packer,
-      #   self.CAN,
-      #   camera_stock_values=CS.camera_stock_values,
-      #   steer=apply_steer,
-      #   steer_req=lat_active,
-      # ))
+      # Steer command
+      new_torque = int(round(actuators.torque * self.params.STEER_MAX))
+      apply_steer = np.clip(new_torque, -EPS_MAX_TORQUE, EPS_MAX_TORQUE)
+      if not lat_active:
+        apply_steer = 0
+      if not Params().get_bool("AleSato_DebugButton1"):
+        apply_steer = CS.camera_stock_values["TORQUE_CMD"]
+        lat_active = CS.camera_stock_values["STEER_REQUEST"]
+      can_sends.append(gwmcan.create_steer_command(
+        self.packer,
+        self.CAN,
+        camera_stock_values=CS.camera_stock_values,
+        steer=apply_steer,
+        steer_req=lat_active,
+      ))
 
     new_actuators = actuators.as_builder()
     self.frame += 1

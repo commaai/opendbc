@@ -27,7 +27,7 @@ class TestGwm(common.PandaSafetyTest):
     return self.packer.make_can_msg_panda("WHEEL_SPEEDS", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"CRUISE_STATE": 5 if enable else 0}
+    values = {"CRUISE_STATE": 3 if enable else 0}
     return self.packer.make_can_msg_panda("ACC_CMD", 0, values)
 
   def test_rx_hook(self):

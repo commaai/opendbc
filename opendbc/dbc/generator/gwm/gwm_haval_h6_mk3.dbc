@@ -147,7 +147,8 @@ BO_ 412 LIGHTS: 16 XXX
 BO_ 415 NEW_MSG_19F: 64 XXX
 
 BO_ 573 ACC_CMD: 64 XXX
- SG_ CRUISE_STATE : 141|3@0+ (1,0) [0|3] "" XXX
+ SG_ LKAS_STATE : 141|3@0+ (1,0) [0|3] "" XXX
+ SG_ CRUISE_STATE : 148|2@0+ (1,0) [0|7] "" XXX
 
 BO_ 581 STEER_SENSOR: 8 XXX
  SG_ _CHECKSUM : 7|8@0+ (1,0) [0|255] "" XXX
@@ -266,4 +267,4 @@ CM_ SG_ 837 DOOR_LOCK_STATE "0 = LOCKED / 1 = UNLOCKED";
 CM_ SG_ 837 DOOR_LOCK_STATE2 "0 = LOCKED / 1 = UNLOCKED";
 CM_ SG_ 849 SEAT_BELT_DRIVER_STATE "0 = Fastened / 1 = Released";
 CM_ SG_ 849 SEAT_BELT_DRIVER_STATE2 "0 = Fastened / 1 = Released";
-VAL_ 573 CRUISE_STATE 5 "active" 2 "require_hands_on_steer" 3 "drift_out_left" 4 "drift_out_right";
+VAL_ 573 LKAS_STATE 5 "active" 2 "require_hands_on_steer" 3 "drift_out_left" 4 "drift_out_right";

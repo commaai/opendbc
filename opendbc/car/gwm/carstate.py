@@ -63,7 +63,7 @@ class CarState(CarStateBase):
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
 
     ret.cruiseState.available = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] > 0)
-    ret.cruiseState.enabled = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] == 5) and Params().get_bool("AleSato_DebugButton1")
+    ret.cruiseState.enabled = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] == 3) and Params().get_bool("AleSato_DebugButton1")
     # DEBUG
     # ret.cruiseState.available = ret.cruiseState.enabled = Params().get_bool("AleSato_DebugButton1")
     # DEBUG
