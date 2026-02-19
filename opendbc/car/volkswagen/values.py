@@ -30,7 +30,7 @@ class CanBus(CanBusBase):
     return self.offset
 
   @property
-  def aux(self) -> int:
+  def alt(self) -> int:
     # NetworkLocation.fwdCamera: radar-camera object fusion CAN
     # NetworkLocation.gateway: powertrain CAN
     return self.offset + 1
