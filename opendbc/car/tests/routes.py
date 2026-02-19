@@ -28,7 +28,6 @@ non_tested_cars = [
   SUBARU.SUBARU_FORESTER_HYBRID,
   VOLKSWAGEN.PORSCHE_MACAN_MK1,
   # Honda/Acura test routes below expired, replace when CI bucket sync is fixed
-  HONDA.ACURA_MDX_4G_MMR,
   HONDA.HONDA_CITY_7G,
 
   # These had their DSUs unplugged, need new routes
@@ -127,6 +126,7 @@ routes = [
   CarTestRoute("2dc4489d7e1410ca/00000001--bbec3f5117", HONDA.HONDA_CRV_6G),
   CarTestRoute("a703d058f4e05aeb/00000008--f169423024", HONDA.HONDA_PASSPORT_4G),
   CarTestRoute("414af83891dbf72c/00000006--51fa6d99cd", HONDA.HONDA_NBOX_2G),
+  CarTestRoute("ad9840558640c31d/0000001a--d6cd4871c2", HONDA.ACURA_MDX_4G_MMR),  # 2025 MDX
   CarTestRoute("58c4a49c7e193080/00000008--aed64b5ba8", HONDA.ACURA_TLX_2G),
   CarTestRoute("ad9840558640c31d/000001f2--026c4f6275", HONDA.ACURA_TLX_2G_MMR),
 
