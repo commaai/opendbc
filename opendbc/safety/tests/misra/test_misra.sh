@@ -37,7 +37,7 @@ cppcheck() {
 
   OPENDBC_ROOT=${OPENDBC_ROOT:-$BASEDIR}
   $CPPCHECK_DIR/cppcheck --inline-suppr -I $OPENDBC_ROOT \
-          -I "$(gcc -print-file-name=include)" --suppress=*:*gcc*include/* --suppress=*:*clang*include/* \
+          --suppress=missingIncludeSystem \
           --suppressions-list=$DIR/suppressions.txt  \
            --error-exitcode=2 --check-level=exhaustive --safety \
           --platform=arm32-wchar_t4 $COMMON_DEFINES --checkers-report=$CHECKLIST.tmp \
@@ -53,10 +53,10 @@ cppcheck() {
   fi
 }
 
-PANDA_OPTS=" --enable=all --enable=unusedFunction --addon=misra"
+OPTS=" --enable=all --enable=unusedFunction --addon=misra"
 
-printf "\n${GREEN}** Safety with CANFD **${NC}\n"
-cppcheck $PANDA_OPTS -DCANFD $BASEDIR/opendbc/safety/tests/misra/main.c
+printf "\n${GREEN}** Safety **${NC}\n"
+cppcheck $OPTS $BASEDIR/opendbc/safety/tests/misra/main.c
 
 printf "\n${GREEN}Success!${NC} took $SECONDS seconds\n"
 

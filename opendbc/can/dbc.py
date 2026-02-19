@@ -1,7 +1,8 @@
 import re
 import os
-from dataclasses import dataclass
 from collections.abc import Callable
+from dataclasses import dataclass
+from functools import cache
 
 from opendbc import DBC_PATH
 
@@ -11,9 +12,11 @@ from opendbc.car.toyota.toyotacan import toyota_checksum
 from opendbc.car.subaru.subarucan import subaru_checksum
 from opendbc.car.chrysler.chryslercan import chrysler_checksum, fca_giorgio_checksum
 from opendbc.car.hyundai.hyundaicanfd import hkg_can_fd_checksum
+from opendbc.car.volkswagen.mlbcan import volkswagen_mlb_checksum
 from opendbc.car.volkswagen.mqbcan import volkswagen_mqb_meb_checksum, xor_checksum
 from opendbc.car.tesla.teslacan import tesla_checksum
 from opendbc.car.body.bodycan import body_checksum
+from opendbc.car.psa.psacan import psa_checksum
 
 
 class SignalType:
@@ -29,6 +32,8 @@ class SignalType:
   HKG_CAN_FD_CHECKSUM = 9
   FCA_GIORGIO_CHECKSUM = 10
   TESLA_CHECKSUM = 11
+  PSA_CHECKSUM = 12
+  VOLKSWAGEN_MLB_CHECKSUM = 13
 
 
 @dataclass
@@ -69,14 +74,8 @@ VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
 VAL_SPLIT_RE = re.compile(r'["]+')
 
 
-@dataclass
+@cache
 class DBC:
-  name: str
-  msgs: dict[int, Msg]
-  addr_to_msg: dict[int, Msg]
-  name_to_msg: dict[str, Msg]
-  vals: list[Val]
-
   def __init__(self, name: str):
     dbc_path = name
     if not os.path.exists(dbc_path):
@@ -184,6 +183,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(16, -1, 0, -1, True, SignalType.HKG_CAN_FD_CHECKSUM, hkg_can_fd_checksum)
   elif dbc_name.startswith(("vw_mqb", "vw_mqbevo", "vw_meb")):
     return ChecksumState(8, 4, 0, 0, True, SignalType.VOLKSWAGEN_MQB_MEB_CHECKSUM, volkswagen_mqb_meb_checksum)
+  elif dbc_name.startswith("vw_mlb"):
+    return ChecksumState(8, 4, 0, 0, True, SignalType.VOLKSWAGEN_MLB_CHECKSUM, volkswagen_mlb_checksum)
   elif dbc_name.startswith("vw_pq"):
     return ChecksumState(8, 4, 0, -1, True, SignalType.XOR_CHECKSUM, xor_checksum)
   elif dbc_name.startswith("subaru_global_"):
@@ -196,6 +197,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(8, 4, 7, 3, False, SignalType.BODY_CHECKSUM, body_checksum)
   elif dbc_name.startswith("tesla_model3_party"):
     return ChecksumState(8, -1, 0, -1, True, SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
+  elif dbc_name.startswith("psa_"):
+    return ChecksumState(4, 4, 7, 3, False, SignalType.PSA_CHECKSUM, psa_checksum)
   return None
 
 

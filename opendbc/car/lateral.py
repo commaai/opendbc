@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from opendbc.car import structs, rate_limit, DT_CTRL
 from opendbc.car.vehicle_model import VehicleModel
 
-FRICTION_THRESHOLD = 0.3
+FRICTION_THRESHOLD = 0.2
 
 # ISO 11270
 ISO_LATERAL_ACCEL = 3.0  # m/s^2
@@ -24,7 +24,7 @@ class AngleSteeringLimits:
   MAX_ANGLE_RATE: float = math.inf
 
 
-def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int = None):
+def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int | None = None):
   # some safety modes utilize a dynamic max steer
   if steer_max is None:
     steer_max = LIMITS.STEER_MAX
@@ -160,9 +160,10 @@ def apply_center_deadzone(error, deadzone):
 
 def get_friction(lateral_accel_error: float, lateral_accel_deadzone: float, friction_threshold: float,
                  torque_params: structs.CarParams.LateralTorqueTuning) -> float:
+  # TODO torque params' friction should be in lataxel space, not torque space
   friction_interp = np.interp(
     apply_center_deadzone(lateral_accel_error, lateral_accel_deadzone),
     [-friction_threshold, friction_threshold],
-    [-torque_params.friction, torque_params.friction]
+    [-torque_params.friction * torque_params.latAccelFactor, torque_params.friction * torque_params.latAccelFactor]
   )
   return float(friction_interp)
