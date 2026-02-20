@@ -49,7 +49,7 @@ class CarState(CarStateBase):
                       GearShifter.park
 
     ret.steeringAngleDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_ANGLE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
-    ret.steeringRateDeg = 0 # TODO
+    ret.steeringRateDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_RATE"] * (-1 if (cp.vl["STEER_AND_AP_STALK"]["RATE_DIRECTION"] > 0) else 1)
     ret.steerFaultTemporary = bool(cp_cam.vl["STEER_CMD"]["STEER_REQUEST"]) and bool(cp.vl["RX_STEER_RELATED"]["A_RX_STEER_REQUESTED"] != 1)
     ret.steeringTorque = cp.vl["RX_STEER_RELATED"]["B_RX_DRIVER_TORQUE"]
     ret.steeringTorqueEps = cp.vl["RX_STEER_RELATED"]["B_RX_EPS_TORQUE"]
@@ -64,7 +64,7 @@ class CarState(CarStateBase):
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
 
     ret.cruiseState.available = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] > 0)
-    ret.cruiseState.enabled = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] == 3) and Params().get_bool("AleSato_DebugButton1")
+    ret.cruiseState.enabled = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] > 4) and Params().get_bool("AleSato_DebugButton1")
     # DEBUG
     # ret.cruiseState.available = ret.cruiseState.enabled = Params().get_bool("AleSato_DebugButton1")
     # DEBUG

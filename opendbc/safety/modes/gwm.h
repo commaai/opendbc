@@ -100,14 +100,16 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == 2U) {
     if (msg->addr == 0x23DU) {
-      pcm_cruise_check(((msg->data[18] >> 3) & 3U) == 3U);
+      int cruise_state = (msg->data[18] >> 3) & 0x1FU;
+      bool cruise_engaged = cruise_state > 4;
+      pcm_cruise_check(cruise_engaged);
     }
   }
 }
 
 static bool gwm_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits GWM_TORQUE_STEERING_LIMITS = {
-    .max_torque = 200,
+    .max_torque = 254,
     .max_rate_up = 3,
     .max_rate_down = 5,
     .max_torque_error = 70,

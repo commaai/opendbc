@@ -14,7 +14,7 @@ class TestGwm(common.PandaSafetyTest):
 
   MAX_RATE_UP = 3
   MAX_RATE_DOWN = 5
-  MAX_TORQUE_LOOKUP = [0], [200]
+  MAX_TORQUE_LOOKUP = [0], [254]
   MAX_RT_DELTA = 100
   MAX_TORQUE_ERROR = 70
 
@@ -33,7 +33,7 @@ class TestGwm(common.PandaSafetyTest):
     return self.packer.make_can_msg_panda("WHEEL_SPEEDS", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"CRUISE_STATE": 3 if enable else 0}
+    values = {"CRUISE_STATE": 5 if enable else 4}
     return self.packer.make_can_msg_panda("ACC_CMD", 0, values)
 
   def test_rx_hook(self):
