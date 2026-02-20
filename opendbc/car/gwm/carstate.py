@@ -2,9 +2,6 @@ from opendbc.car import structs, Bus, CanBusBase
 from opendbc.can.parser import CANParser
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.gwm.values import DBC
-# DEBUG
-from openpilot.common.params import Params
-# DEBUG
 import copy
 
 GearShifter = structs.CarState.GearShifter
@@ -64,10 +61,7 @@ class CarState(CarStateBase):
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
 
     ret.cruiseState.available = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] > 0)
-    ret.cruiseState.enabled = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] > 4) and Params().get_bool("AleSato_DebugButton1")
-    # DEBUG
-    # ret.cruiseState.available = ret.cruiseState.enabled = Params().get_bool("AleSato_DebugButton1")
-    # DEBUG
+    ret.cruiseState.enabled = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] > 4)
     return ret
 
   @staticmethod
