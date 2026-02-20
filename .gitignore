@@ -20,7 +20,6 @@
 /dist/
 .vscode/
 __pycache__/
-mull.yml
 *.profraw
 
 opendbc/can/build/
@@ -31,4 +30,8 @@ cppcheck-addon-ctu-file-list
 opendbc/safety/tests/coverage-out
 
 compile_commands.json
+.context/
+.claude/
+PLAN.md
+TASK.md
 .mull/
