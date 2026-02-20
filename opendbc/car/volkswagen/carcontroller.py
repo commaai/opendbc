@@ -27,6 +27,10 @@ class CarController(CarControllerBase):
       self.CCS = mqbcan
 
     self.apply_torque_last = 0
+    self.accel_last = 0
+    self.accel_diff = 0
+    self.long_deviation = 0
+    self.long_jerklimit = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
@@ -89,8 +93,12 @@ class CarController(CarControllerBase):
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
         starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
+        self.accel_diff = (0.0019 * (accel - self.accel_last)) + (1 - 0.0019) * self.accel_diff
+        self.long_jerklimit = (0.01 * (np.clip(abs(accel), 0.7, 2))) + (1 - 0.01) * self.long_jerklimit
+        self.long_deviation = np.interp(abs(accel - self.accel_diff), [0, 0.3, 1.0], [0.02, 0.04, 0.08])  # 0.1 -> 0.2 -> 0.4 m/s²
+        self.accel_last = accel
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
-                                                           acc_control, stopping, starting, CS.esp_hold_confirmation))
+                                                           acc_control, stopping, starting, CS.esp_hold_confirmation, self.long_deviation, self.long_jerklimit))
 
       #if self.aeb_available:
       #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:
