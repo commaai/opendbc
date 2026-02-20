@@ -109,6 +109,7 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
       lead_distance = 0
+      fcw_alert = hud_control.visualAlert == VisualAlert.fcw
       if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:  # Don't display lead until we know the scaling factor
         lead_distance = 512 if CS.upscale_lead_car_signal else 8
       acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
@@ -116,7 +117,7 @@ class CarController(CarControllerBase):
       # FIXME: Detect clusters with vEgoCluster offsets and apply an identical vCruiseCluster offset
       set_speed = hud_control.setSpeed * CV.MS_TO_KPH
       can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_hud_status, set_speed,
-                                                       lead_distance, hud_control.leadDistanceBars))
+                                                       lead_distance, hud_control.leadDistanceBars, fcw_alert))
 
     # **** Stock ACC Button Controls **************************************** #
 
