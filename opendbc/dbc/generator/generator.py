@@ -46,7 +46,7 @@ def create_all(output_path: str):
 
   # run python generator scripts first
   for f in glob.glob(f"{generator_path}/*/*.py"):
-    subprocess.check_call(f)
+    subprocess.check_call(['python3', f])
 
   for src_dir, _, filenames in os.walk(generator_path):
     if src_dir == generator_path:
