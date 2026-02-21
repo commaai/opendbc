@@ -12,7 +12,7 @@ from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety, MAX_SPEED_DELTA, MAX_WRONG_COUNTERS, away_round, round_speed
+from opendbc.safety.tests.common import CANPackerSafety, MAX_SPEED_DELTA, MAX_WRONG_COUNTERS, RT_INTERVAL, away_round, round_speed
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
@@ -296,6 +296,29 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
     pass
+
+  def test_angle_cmd_when_disabled_one_unit_tolerance(self):
+    self.safety.set_controls_allowed(True)
+
+    angle_meas_can = 10
+    angle_meas = angle_meas_can / self.DEG_TO_CAN
+    self._reset_angle_measurement(angle_meas)
+
+    for delta_can, should_tx in ((1, True), (-1, True), (2, False), (-2, False)):
+      angle_cmd = (angle_meas_can + delta_can) / self.DEG_TO_CAN
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, False)))
+
+  def test_rt_limits_timer_wraparound(self):
+    self.safety.set_controls_allowed(True)
+    max_rt_msgs = int(self.LATERAL_FREQUENCY * RT_INTERVAL / 1e6 * 1.2 + 1)
+
+    self.safety.set_timer((2**32) - 100)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
+
+    self.safety.set_timer(50)
+    for i in range(max_rt_msgs + 2):
+      should_tx = i <= max_rt_msgs
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
   def test_lateral_accel_limit(self):
     for speed in np.linspace(0, 40, 100):
