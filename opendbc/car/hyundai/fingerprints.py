@@ -1228,6 +1228,14 @@ FW_VERSIONS = {
       b'\xf1\x00KA4c SCC FHCUP      1.00 1.01 99110-I4000         ',
     ],
   },
+  CAR.KIA_K7_2017: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00YG  MFC  AT KOR LHD 1.00 1.01 95740-F6100 161129',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00YG__ SCC FNCUP      1.01 1.01 96400-F6000         ',
+    ],
+  },
   CAR.KIA_K8_HEV_1ST_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00GL3HMFC  AT KOR LHD 1.00 1.03 99211-L8000 210907',
