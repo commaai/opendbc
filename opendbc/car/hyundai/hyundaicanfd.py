@@ -66,6 +66,41 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque)
 
   return ret
 
+def create_steering_messages_angle(packer, CP, CAN, enabled, lat_active, apply_angle):
+  """
+  Angle control 전용 조향 메시지 (IONIQ 9용)
+  """
+  angle_values = {
+    "LKA_MODE": 0,
+    "LKAS_ANGLE_CMD": -apply_angle,         # 부호 반전
+    "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
+    "LKAS_ANGLE_MAX_TORQUE": 250 if lat_active else 0,
+    "DampingGain": 15,                      # 떨림 방지 (기본 9 → 15)
+    "LKA_ICON": 2 if enabled else 1,
+    "STEER_REQ": 1 if lat_active else 0,
+  }
+  
+  ret = []
+  if CP.flags & HyundaiFlags.CANFD_HDA2:
+    # HDA2 차량은 LKAS_ALT 메시지 사용
+    lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING else "LKAS"
+    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, angle_values))
+    
+    # LFA 메시지도 필요할 수 있음
+    if CP.openpilotLongitudinalControl:
+      lfa_values = {
+        "LKA_MODE": 2,
+        "LKA_ICON": 2 if enabled else 1,
+        "TORQUE_REQUEST": 0,
+        "LKA_ASSIST": 0,
+        "STEER_REQ": 0,
+        "STEER_MODE": 0,
+        "NEW_SIGNAL_1": 0,
+      }
+      ret.append(packer.make_can_msg("LFA", CAN.ECAN, lfa_values))
+  
+  return ret
+
 
 def create_suppress_lfa(packer, CAN, lfa_block_msg, lka_steering_alt):
   suppress_msg = "CAM_0x362" if lka_steering_alt else "CAM_0x2a4"

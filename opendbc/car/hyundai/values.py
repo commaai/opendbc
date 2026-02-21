@@ -126,6 +126,13 @@ class HyundaiFlags(IntFlag):
 
   ALT_LIMITS_2 = 2 ** 26
 
+  # HDA2 related flags (added for IONIQ 9)
+  CANFD_HDA2 = 2 ** 27                    # HDA2 차량 식별
+  CANFD_HDA2_ALT_STEERING = 2 ** 28       # 대체 조향 메시지 (LKAS_ALT)
+  
+  # Angle-based steering control for HDA2 vehicles (uses LKAS_ANGLE_CMD)
+  ANGLE_CONTROL = 2 ** 29                 # 각도 기반 조향 제어
+
 
 @dataclass
 class HyundaiCarDocs(CarDocs):
@@ -346,6 +353,11 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Ioniq 6 (with HDA II) 2023-24", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_p]))],
     HYUNDAI_IONIQ_5.specs,
     flags=HyundaiFlags.EV | HyundaiFlags.CANFD_NO_RADAR_DISABLE,
+  )
+  HYUNDAI_IONIQ_9 = HyundaiCanFDPlatformConfig(
+    [HyundaiCarDocs("Hyundai Ioniq 9 (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_m]))],
+    CarSpecs(mass=2700, wheelbase=3.13, steerRatio=16.02, tireStiffnessFactor=0.65),
+    flags=HyundaiFlags.EV | HyundaiFlags.CANFD_HDA2 | HyundaiFlags.ANGLE_CONTROL,  
   )
   HYUNDAI_TUCSON_4TH_GEN = HyundaiCanFDPlatformConfig(
     [

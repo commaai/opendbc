@@ -18,6 +18,44 @@ MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 
+def apply_steer_angle_limits(apply_angle, apply_angle_last, v_ego, CP):
+  """
+  각도 기반 조향 제한 (IONIQ 9용)
+  물리 법칙 기반으로 안전한 조향 각도 계산
+  """
+  import math
+  
+  # 파라미터 (떨림 방지 최적화)
+  max_lat_accel = 5.0              # m/s^2
+  max_lat_jerk = 5.0               # m/s^3 (떨림 방지: 4.0 → 5.0)
+  max_sw_rate = 3.0                # deg/0.01s (떨림 방지: 2.0 → 3.0)
+  
+  wheelbase_m = CP.wheelbase
+  steer_ratio = CP.steerRatio
+  v_ego = max(v_ego, 0.1)          # 최소 속도
+  
+  # 1. 횡가속도 기반 최대 각도 계산
+  max_angle_rad = math.atan(max_lat_accel * wheelbase_m / (v_ego ** 2))
+  max_angle_deg = math.degrees(max_angle_rad) * steer_ratio
+  
+  # 2. Jerk 기반 최대 변화율 계산
+  DT_CTRL = 0.01  # 100Hz
+  max_drw_rad = (max_lat_jerk * wheelbase_m * DT_CTRL) / (v_ego ** 2)
+  max_drw_deg = math.degrees(max_drw_rad) * steer_ratio
+  
+  # 3. EPS 보호 (최소값 선택)
+  max_drw_deg = min(max_drw_deg, max_sw_rate)
+  
+  # 4. Rate limit 적용
+  diff = apply_angle - apply_angle_last
+  if abs(diff) > max_drw_deg:
+    apply_angle = apply_angle_last + max_drw_deg * (1 if diff > 0 else -1)
+  
+  # 5. 최대 각도 제한
+  apply_angle = max(min(apply_angle, max_angle_deg), -max_angle_deg)
+  
+  return apply_angle
+
 def process_hud_alert(enabled, fingerprint, hud_control):
   sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
 
@@ -50,6 +88,10 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
 
+    # Angle control for IONIQ 9
+    self.apply_angle_last = 0.0
+    self.angle_control = CP.flags & HyundaiFlags.ANGLE_CONTROL
+
     self.accel_last = 0
     self.apply_torque_last = 0
     self.car_fingerprint = CP.carFingerprint
@@ -77,6 +119,19 @@ class CarController(CarControllerBase):
 
     self.apply_torque_last = apply_torque
 
+    # Angle control for IONIQ 9
+    apply_angle = 0.0
+    if self.angle_control and CC.latActive:
+      apply_angle = apply_steer_angle_limits(
+        actuators.steeringAngleDeg,
+        self.apply_angle_last,
+        CS.out.vEgo,
+        self.CP
+      )
+      self.apply_angle_last = apply_angle
+    else:
+      self.apply_angle_last = 0.0
+
     # accel + longitudinal
     accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
     stopping = actuators.longControlState == LongCtrlState.stopping
@@ -100,7 +155,7 @@ class CarController(CarControllerBase):
 
     # *** CAN/CAN FD specific ***
     if self.CP.flags & HyundaiFlags.CANFD:
-      can_sends.extend(self.create_canfd_msgs(apply_steer_req, apply_torque, set_speed_in_units, accel,
+      can_sends.extend(self.create_canfd_msgs(apply_steer_req, apply_torque, apply_angle, set_speed_in_units, accel,
                                               stopping, hud_control, CS, CC))
     else:
       can_sends.extend(self.create_can_msgs(apply_steer_req, apply_torque, torque_fault, set_speed_in_units, accel,
@@ -160,14 +215,23 @@ class CarController(CarControllerBase):
 
     return can_sends
 
-  def create_canfd_msgs(self, apply_steer_req, apply_torque, set_speed_in_units, accel, stopping, hud_control, CS, CC):
+  def create_canfd_msgs(self, apply_steer_req, apply_torque, apply_angle, set_speed_in_units, accel, stopping, hud_control, CS, CC):
     can_sends = []
 
     lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING
     lka_steering_long = lka_steering and self.CP.openpilotLongitudinalControl
 
     # steering control
-    can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_torque))
+    if self.angle_control:
+      # Angle control mode for IONIQ 9
+      can_sends.extend(hyundaicanfd.create_steering_messages_angle(
+        self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_angle
+      ))
+    else:
+      # Torque control mode (기존)
+      can_sends.extend(hyundaicanfd.create_steering_messages(
+        self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_torque
+      ))
 
     # prevent LFA from activating on LKA steering cars by sending "no lane lines detected" to ADAS ECU
     if self.frame % 5 == 0 and lka_steering:
