@@ -145,5 +145,7 @@ too-many-positional-arguments = "ignore"
 include-package-data = true
 
 [tool.setuptools.package-data]
-"opendbc.safety" = ["*.h", "board/*.h", "board/drivers/*.h", "modes/*.h"]
+"opendbc.safety" = ["*.h", "*.c", "board/*.h", "board/drivers/*.h", "modes/*.h"]
+"opendbc.safety.tests" = ["*.h", "*.c"]
+"opendbc.safety.tests.libsafety" = ["*.h", "*.c"]
 "opendbc.dbc" = ["*.dbc", "generator/**/*.dbc", "generator/**/*.py"]
