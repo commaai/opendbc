@@ -146,3 +146,4 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 "opendbc.safety" = ["*.h", "board/*.h", "board/drivers/*.h", "modes/*.h"]
+"opendbc.dbc" = ["*.dbc", "generator/**/*.dbc", "generator/**/*.py"]
