@@ -29,6 +29,7 @@
 |Audi|A5 2016-24|All|[Not compatible](#flexray)|
 |Audi|Q2 2018|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|Q3 2019-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Audi|Q5 2013-17|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Audi|Q5 2017-24|All|[Not compatible](#flexray)|
 |Audi|RS3 2018|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|S3 2015-17|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
