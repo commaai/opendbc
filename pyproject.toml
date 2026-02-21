@@ -149,3 +149,6 @@ include-package-data = true
 "opendbc.safety.tests" = ["*.h", "*.c"]
 "opendbc.safety.tests.libsafety" = ["*.h", "*.c"]
 "opendbc.dbc" = ["*.dbc", "generator/**/*.dbc", "generator/**/*.py"]
+"opendbc.car" = ["*.capnp", "include/*.capnp"]
+"opendbc.car.torque_data" = ["*.toml"]
+"opendbc.can.tests" = ["*.dbc"]
