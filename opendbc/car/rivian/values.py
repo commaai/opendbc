@@ -4,7 +4,7 @@ from enum import StrEnum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
-from opendbc.car.vin import Vin
+from opendbc.car.vin import Vin, ModelYear
 
 
 class WMI(StrEnum):
@@ -15,13 +15,6 @@ class WMI(StrEnum):
 class ModelLine(StrEnum):
   R1T = "T"  # R1T 4-door Pickup Truck
   R1S = "S"  # R1S 4-door MPV
-
-
-class ModelYear(StrEnum):
-  N_2022 = "N"
-  P_2023 = "P"
-  R_2024 = "R"
-  S_2025 = "S"
 
 
 @dataclass
