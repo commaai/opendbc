@@ -4,6 +4,8 @@ from opendbc.car.toyota.values import CAR
 
 Ecu = CarParams.Ecu
 
+FINGERPRINTS = {}
+
 FW_VERSIONS = {
   CAR.ALPHARD_H_2016: {
     (Ecu.engine, 0x7e0, None): [
