@@ -131,7 +131,6 @@ class CAR(Platforms):
     [ToyotaCarDocs("Toyota Alphard Hybrid 2016")],
     CarSpecs(mass=2136., wheelbase=3.00, steerRatio=15.6),
     dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
-    flags=ToyotaFlags.SMART_DSU,
   )
   TOYOTA_ALPHARD_TSS2 = ToyotaTSS2PlatformConfig(
     [
