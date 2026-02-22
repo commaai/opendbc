@@ -144,6 +144,11 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
       self._rx(self._tsk_status_msg(True, tsk_status=tsk_status))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed for TSK_Status={tsk_status}")
 
+  def test_cancel_button_rx(self):
+    self.safety.set_controls_allowed(True)
+    self._rx(self._gra_acc_01_msg(cancel=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._gra_acc_01_msg(cancel=1)))

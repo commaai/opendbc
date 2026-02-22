@@ -234,6 +234,25 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
             should_tx = not (req or req2) and torque_wind_down == 0
             self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)))
 
+  def test_lta_driver_torque_wind_down_asymmetric(self):
+    self.safety.set_controls_allowed(True)
+    angle = 0.0
+    self._reset_angle_measurement(angle)
+    self._set_prev_desired_angle(angle)
+    threshold = self.MAX_LTA_DRIVER_TORQUE
+
+    # Asymmetric samples where |min| > |max|, both above threshold
+    for _ in range(6):
+      self._rx(self._torque_meas_msg(0, -(threshold + 50)))
+    self._rx(self._torque_meas_msg(0, threshold + 10))
+    self.assertFalse(self._tx(self._lta_msg(1, 1, angle, 100)))
+
+    # Asymmetric samples where |max| > |min|, both above threshold
+    for _ in range(6):
+      self._rx(self._torque_meas_msg(0, threshold + 50))
+    self._rx(self._torque_meas_msg(0, -(threshold + 10)))
+    self.assertFalse(self._tx(self._lta_msg(1, 1, angle, 100)))
+
   def test_angle_measurements(self):
     """
     * Tests angle meas quality flag dictates whether angle measurement is parsed, and if rx is valid

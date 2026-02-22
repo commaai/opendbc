@@ -150,6 +150,11 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
+  def test_cancel_button_not_pressed(self):
+    self.safety.set_controls_allowed(True)
+    self._rx(self._ls_01_msg(cancel=False, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
+
 
 if __name__ == "__main__":
   unittest.main()

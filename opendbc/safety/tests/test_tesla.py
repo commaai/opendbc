@@ -300,6 +300,23 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
     self.assertFalse(self._tx(no_lkas_msg))
 
+  def test_stock_lkas_ignored_with_controls(self):
+    no_lkas_msg_cam = self._angle_cmd_msg(0, state=self.steer_control_types['NONE'], bus=2)
+    lkas_msg_cam = self._angle_cmd_msg(0, state=self.steer_control_types['LANE_KEEP_ASSIST'], bus=2)
+
+    # Reset: no LKAS active
+    self._rx(no_lkas_msg_cam)
+
+    # LKAS rising edge while controls are allowed should not activate passthrough
+    self.safety.set_controls_allowed(True)
+    self._rx(lkas_msg_cam)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, state=self.steer_control_types['NONE'])))
+
+    # Consecutive LKAS messages (not a rising edge) should also not activate passthrough
+    self.safety.set_controls_allowed(False)
+    self._rx(lkas_msg_cam)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, state=self.steer_control_types['NONE'])))
+
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
     pass

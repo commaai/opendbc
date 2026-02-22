@@ -232,6 +232,22 @@ class HondaBase(common.CarSafetyTest):
     self._rx(self._user_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_brake_switch_prev(self):
+    # Two consecutive messages with BRAKE_SWITCH=1 and BRAKE_PRESSED=0 should still detect brake
+    self._rx(self._powertrain_data_msg(brake_pressed=False))
+    self.assertFalse(self.safety.get_brake_pressed_prev())
+    for i in range(2):
+      values = {
+        "ACC_STATUS": self.safety.get_controls_allowed(),
+        "BRAKE_PRESSED": 0,
+        "BRAKE_SWITCH": 1,
+        "PEDAL_GAS": 0,
+        "COUNTER": self.cnt_powertrain_data % 4,
+      }
+      self.__class__.cnt_powertrain_data += 1
+      self._rx(self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, values))
+    self.assertTrue(self.safety.get_brake_pressed_prev())
+
   def test_steer_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
@@ -405,6 +421,9 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
 
   def _user_brake_msg(self, brake):
     return self._alt_brake_msg(brake)
+
+  def test_brake_switch_prev(self):
+    pass
 
   def test_alt_brake_rx_hook(self):
     self.safety.set_honda_alt_brake_msg(1)
