@@ -361,6 +361,13 @@ class TestFordSafetyBase(common.CarSafetyTest):
     self.safety.set_controls_allowed(0)
     self.assertFalse(self._tx(self._lkas_command_msg(1)))
 
+  def test_cruise_engaged_all_states(self):
+    for cruise_state in (4, 5):
+      self._rx(self._pcm_status_msg(False))
+      values = {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": cruise_state}
+      self._rx(self.packer.make_can_msg_safety("EngBrakeData", 0, values))
+      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed for CcStat_D_Actl={cruise_state}")
+
   def test_acc_buttons(self):
     for allowed in (0, 1):
       self.safety.set_controls_allowed(allowed)

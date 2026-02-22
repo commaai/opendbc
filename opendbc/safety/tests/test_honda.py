@@ -436,6 +436,19 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, 0)
     self.safety.init_tests()
 
+  def test_bosch_supplemental_check(self):
+    # Valid supplemental message
+    valid = libsafety_py.make_CANPacket(0xE5, 0, b"\x04\x00\x80\x10\x00\x00\x00\x00")
+    self.assertTrue(self._tx(valid))
+
+    # Invalid first 4 bytes
+    invalid_first = libsafety_py.make_CANPacket(0xE5, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00")
+    self.assertFalse(self._tx(invalid_first))
+
+    # Valid first 4 bytes but invalid last 4 bytes
+    invalid_last = libsafety_py.make_CANPacket(0xE5, 0, b"\x04\x00\x80\x10\x01\x00\x00\x00")
+    self.assertFalse(self._tx(invalid_last))
+
 
 class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):
   """
@@ -481,6 +494,10 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
     not_tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")
     self.assertFalse(self._tx(not_tester_present))
+
+    # First 4 bytes valid but last 4 non-zero
+    partial_match = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x02\x3E\x80\x00\x01\x00\x00\x00")
+    self.assertFalse(self._tx(partial_match))
 
   def test_gas_safety_check(self):
     for controls_allowed in [True, False]:
