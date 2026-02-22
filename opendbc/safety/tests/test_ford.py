@@ -354,6 +354,14 @@ class TestFordSafetyBase(common.CarSafetyTest):
             self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
             self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)))
 
+  def test_angle_error_clamp_beyond_max(self):
+    speed = 15.0
+    self.safety.set_controls_allowed(True)
+    for sign in (-1, 1):
+      self._reset_curvature_measurement(sign * 0.023, speed)
+      self._set_prev_desired_angle(sign * 0.021)
+      self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0)))
+
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)
     self.assertFalse(self._tx(self._lkas_command_msg(1)))
