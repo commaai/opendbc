@@ -236,7 +236,7 @@ class HondaBase(common.CarSafetyTest):
     # Two consecutive messages with BRAKE_SWITCH=1 and BRAKE_PRESSED=0 should still detect brake
     self._rx(self._powertrain_data_msg(brake_pressed=False))
     self.assertFalse(self.safety.get_brake_pressed_prev())
-    for i in range(2):
+    for _i in range(2):
       values = {
         "ACC_STATUS": self.safety.get_controls_allowed(),
         "BRAKE_PRESSED": 0,
