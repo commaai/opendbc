@@ -698,6 +698,7 @@ FW_VERSIONS = {
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310-K4271 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4271 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4970 4OEPC102',
+      b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4971 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310K4260\x00 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310K4261\x00 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310K4971\x00 4OEPC102',
@@ -1225,6 +1226,14 @@ FW_VERSIONS = {
       b'\xf1\x00KA4_ SCC FHCUP      1.00 1.02 99110-R0000         ',
       b'\xf1\x00KA4_ SCC FHCUP      1.00 1.03 99110-R0000         ',
       b'\xf1\x00KA4c SCC FHCUP      1.00 1.01 99110-I4000         ',
+    ],
+  },
+  CAR.KIA_K7_2017: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00YG  MFC  AT KOR LHD 1.00 1.01 95740-F6100 161129',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00YG__ SCC FNCUP      1.01 1.01 96400-F6000         ',
     ],
   },
   CAR.KIA_K8_HEV_1ST_GEN: {

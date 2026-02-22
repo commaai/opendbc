@@ -15,7 +15,7 @@ fi
 
 cd $CPPCHECK_DIR
 
-VERS="2.18.3"
+VERS="2.19.1"
 if [ "$(git describe --tags --always)" != "$VERS" ]; then
   git fetch --all --tags --force
   git checkout $VERS

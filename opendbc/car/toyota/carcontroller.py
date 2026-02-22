@@ -8,9 +8,7 @@ from opendbc.car.common.pid import PIDController
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
-from opendbc.car.toyota.values import CAR, NO_STOP_TIMER_CAR, TSS2_CAR, \
-                                        CarControllerParams, ToyotaFlags, \
-                                        UNSUPPORTED_DSU_CAR
+from opendbc.car.toyota.values import CAR, TSS2_CAR, UNSUPPORTED_DSU_CAR, CarControllerParams, ToyotaFlags
 from opendbc.can import CANPacker
 
 Ecu = structs.CarParams.Ecu
@@ -55,7 +53,6 @@ class CarController(CarControllerBase):
     self.last_torque = 0
     self.last_angle = 0
     self.alert_active = False
-    self.last_standstill = False
     self.standstill_req = False
     self.permit_braking = True
     self.steer_rate_counter = 0
@@ -168,17 +165,13 @@ class CarController(CarControllerBase):
         self.secoc_lta_message_counter += 1
         can_sends.append(lta_steer_2)
 
+    # handle UI messages
+    fcw_alert = hud_control.visualAlert == VisualAlert.fcw
+    steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
+    lead = hud_control.leadVisible or CS.out.vEgo < 12.  # at low speed we always assume the lead is present so ACC can be engaged
+
     # *** gas and brake ***
-
-    # on entering standstill, send standstill request for older TSS-P cars that aren't designed to stay engaged at a stop
-    if self.CP.carFingerprint not in NO_STOP_TIMER_CAR:
-      if CS.out.standstill and not self.last_standstill:
-        self.standstill_req = True
-      if CS.pcm_acc_status != 8:
-        # pcm entered standstill or it's disabled
-        self.standstill_req = False
-
-    else:
+    if self.CP.openpilotLongitudinalControl:
       # if user engages at a stop with foot on brake, PCM starts in a special cruise standstill mode. on resume press,
       # brakes can take a while to ramp up causing a lurch forward. prevent resume press until planner wants to move.
       # don't use CC.cruiseControl.resume since it is gated on CS.cruiseState.standstill which goes false for 3s after resume press
@@ -191,14 +184,6 @@ class CarController(CarControllerBase):
         if not should_resume and CS.out.cruiseState.standstill:
           self.standstill_req = True
 
-    self.last_standstill = CS.out.standstill
-
-    # handle UI messages
-    fcw_alert = hud_control.visualAlert == VisualAlert.fcw
-    steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
-    lead = hud_control.leadVisible or CS.out.vEgo < 12.  # at low speed we always assume the lead is present so ACC can be engaged
-
-    if self.CP.openpilotLongitudinalControl:
       if self.frame % 3 == 0:
         # Press distance button until we are at the correct bar length. Only change while enabled to avoid skipping startup popup
         if self.frame % 6 == 0 and self.CP.openpilotLongitudinalControl:
