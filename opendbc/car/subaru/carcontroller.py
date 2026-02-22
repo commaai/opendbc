@@ -1,4 +1,5 @@
 import numpy as np
+from collections import deque
 from opendbc.can import CANPacker
 from opendbc.car import Bus, make_tester_present_msg
 from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance
@@ -6,16 +7,19 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
 
-# FIXME: These limits aren't exact. The real limit is more than likely over a larger time period and
-# involves the total steering angle change rather than rate, but these limits work well for now
-MAX_STEER_RATE = 25  # deg/s
-MAX_STEER_RATE_FRAMES = 6  # tx control frames needed before torque can be cut
+
+# EPS faults when the integral of (|torque_output| - |driver_torque|) over ~3s exceeds ~3900
+TORQUE_MISMATCH_WINDOW = 75       # 3 seconds at 25Hz (STEER_STEP=2, so 50Hz/2)
+TORQUE_MISMATCH_SOFT_LIMIT = 2500 # start scaling torque down
+TORQUE_MISMATCH_HARD_LIMIT = 3500 # backup: cut steer request
+MAX_STEER_RATE_FRAMES = 6         # kept for backup common_fault_avoidance
 
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
+    self.torque_mismatch_deque = deque([0.0] * TORQUE_MISMATCH_WINDOW, maxlen=TORQUE_MISMATCH_WINDOW)
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
@@ -48,9 +52,21 @@ class CarController(CarControllerBase):
         apply_steer_req = CC.latActive
 
         if self.CP.flags & SubaruFlags.STEER_RATE_LIMITED:
-          # Steering rate fault prevention
+          # EPS fault prevention: the EPS tracks the integral of torque mismatch
+          # (|EPS output| - |driver torque|) over ~3s and faults at ~3900
+          mismatch = max(0, abs(CS.out.steeringTorqueEps) - abs(CS.out.steeringTorque))
+          self.torque_mismatch_deque.append(mismatch)
+          mismatch_integral = sum(self.torque_mismatch_deque) / 25.0
+
+          # Scale torque as integral approaches limit
+          if mismatch_integral > TORQUE_MISMATCH_SOFT_LIMIT:
+            scale = max(0.0, 1.0 - (mismatch_integral - TORQUE_MISMATCH_SOFT_LIMIT) /
+                                     (TORQUE_MISMATCH_HARD_LIMIT - TORQUE_MISMATCH_SOFT_LIMIT))
+            apply_torque = int(round(apply_torque * scale))
+
+          # Backup: cut steer request if integral exceeds hard limit
           self.steer_rate_counter, apply_steer_req = \
-            common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
+            common_fault_avoidance(mismatch_integral > TORQUE_MISMATCH_HARD_LIMIT, apply_steer_req,
                                    self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
 
         can_sends.append(subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req))
