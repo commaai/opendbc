@@ -305,6 +305,18 @@ class TestHondaNidecSafetyBase(HondaBase):
     self.safety.set_honda_fwd_brake(True)
     super().test_fwd_hook()
 
+  def test_stock_aeb_disabled(self):
+    # With DISABLE_STOCK_AEB flag, AEB forwarding should be skipped entirely
+    self.safety.set_alternative_experience(common.ALTERNATIVE_EXPERIENCE.DISABLE_STOCK_AEB)
+    self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=1)))
+    self.assertFalse(self.safety.get_honda_fwd_brake())
+
+  def test_steer_safety_check_alt_addr(self):
+    # Steering safety check also applies to address 0x194 (CRV/RDX)
+    self.safety.set_controls_allowed(0)
+    self.assertTrue(self._tx(common.make_msg(self.STEER_BUS, 0x194, 4)))
+    self.assertFalse(self._tx(common.make_msg(self.STEER_BUS, 0x194, dat=b'\x10\x00\x00\x00')))
+
   def test_honda_fwd_brake_latching(self):
     # Shouldn't fwd stock Honda requesting brake without AEB
     self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=0)))
