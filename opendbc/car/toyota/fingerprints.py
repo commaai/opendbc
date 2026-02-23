@@ -4,8 +4,6 @@ from opendbc.car.toyota.values import CAR
 
 Ecu = CarParams.Ecu
 
-FINGERPRINTS = {}
-
 FW_VERSIONS = {
   CAR.ALPHARD_H_2016: {
     (Ecu.engine, 0x7e0, None): [
@@ -19,13 +17,10 @@ FW_VERSIONS = {
       b'\x01898844815303\x00\x00\x00\x00',
     ],
     (Ecu.eps, 0x7a1, None): [
-      b'8965B58011\x00\x00\x00\x00\x00\x00',
       b'\x018965B58011\x00\x00\x00\x00\x00',
     ],
     (Ecu.abs, 0x7b0, None): [
-      b'F152658031\x00\x00\x00\x00\x00\x00',
       b'\x01F152658031\x00\x00\x00\x00\x00',
-      b'F152658061\x00\x00\x00\x00\x00\x00',
       b'\x01F152658061\x00\x00\x00\x00\x00',
     ],
     (Ecu.fwdRadar, 0x750, 0xf): [
