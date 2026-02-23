@@ -224,6 +224,11 @@ toml = [
 ]
 
 [[package]]
+name = "cppcheck"
+version = "2.16.0"
+source = { git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=releases#2f738421b9b6af97bf242319a1bea68e161d9b82" }
+
+[[package]]
 name = "cpplint"
 version = "2.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -586,6 +591,7 @@ testing = [
     { name = "cffi" },
     { name = "codespell" },
     { name = "comma-car-segments" },
+    { name = "cppcheck" },
     { name = "cpplint" },
     { name = "gcovr" },
     { name = "hypothesis" },
@@ -607,6 +613,7 @@ requires-dist = [
     { name = "cffi", marker = "extra == 'testing'" },
     { name = "codespell", marker = "extra == 'testing'" },
     { name = "comma-car-segments", marker = "extra == 'testing'", url = "https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl" },
+    { name = "cppcheck", marker = "extra == 'testing'", git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=releases" },
     { name = "cpplint", marker = "extra == 'testing'" },
     { name = "crcmod-plus" },
     { name = "gcovr", marker = "extra == 'testing'" },
