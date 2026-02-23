@@ -32,6 +32,10 @@ class CarController(CarControllerBase):
     self.hca_frame_timer_running = 0
     self.hca_frame_same_torque = 0
 
+    self.hold_counter = 0
+    self.previous_resettable = False
+    self.previous_impulse_count = 0
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -85,12 +89,62 @@ class CarController(CarControllerBase):
 
     if self.CP.openpilotLongitudinalControl:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
-        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
+        esp_starting_override = None
+        esp_stopping_override = None
+        allow_indefinite_hold = CS.tsk_grade < 0.5
+        long_active = (
+          # acc type 1 is sensitive to control signals when brake pressed (i.e. preEnabled)
+          False if CS.acc_type == 1 and CS.out.brakePressed else
+          # stop regulating if needed to prevent a cruise fault (TSK prevents rollback)
+          False if CS.acc_type == 1 and self.hold_counter > self.CCP.MAX_HOLD_FRAMES and not allow_indefinite_hold else
+          CC.longActive
+        )
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, long_active)
+        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
         starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
-                                                           acc_control, stopping, starting, CS.esp_hold_confirmation))
+
+        if self.CCS == mqbcan and CS.acc_type == 1 and long_active:
+          if CS.esp_hold_confirmation:
+            self.hold_counter += 1
+
+          # attempts to release the hold confirmation, but retains braking force
+          if CS.esp_standstill_confirmation:
+            esp_starting_override = True
+            esp_stopping_override = False
+            # if we can't hold forever, we'll need to restart the ESP hold
+            # our timer was likely reset, so it's fine to do so
+            if not allow_indefinite_hold and not CS.esp_hold_confirmation:
+              esp_starting_override = False
+              esp_stopping_override = True
+
+          # in order to cycle the ESP, the ESP must not be afraid of rollback
+          # make some torque to help ESP feel comfortable cycling
+          if not allow_indefinite_hold and long_active and CS.esp_standstill_confirmation:
+            accel = 0
+
+          # our standstill timer resets when either:
+          # - wheels move while a hold is not confirmed
+          # - we release hold confirmation during active control + release request
+          if CS.wheel_impulse_count != self.previous_impulse_count and not CS.esp_hold_confirmation:
+            # wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
+            self.hold_counter = 0
+          elif (
+            # regulation is active
+            CC.longActive and self.previous_resettable
+            # we're requesting hold release
+            and esp_starting_override if esp_starting_override is not None else starting
+            # the hold is released
+            and not CS.esp_hold_confirmation
+          ):
+            self.hold_counter = 0
+
+          # we must be careful not to accidentally reset the timer in unrelated conditions (e.g. when disabling)
+          self.previous_resettable = CC.longActive and CS.esp_hold_confirmation
+          self.previous_impulse_count = CS.wheel_impulse_count
+
+        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, long_active, accel,
+                                                           acc_control, stopping, starting, CS.esp_hold_confirmation, esp_starting_override, esp_stopping_override))
 
       #if self.aeb_available:
       #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:
