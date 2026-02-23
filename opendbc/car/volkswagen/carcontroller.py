@@ -137,8 +137,8 @@ class CarController(CarControllerBase):
 
           # in order to cycle the ESP, the ESP must not be afraid of rollback
           # make some torque to help ESP feel comfortable cycling
-          if not allow_indefinite_hold and long_active and CS.esp_standstill_confirmation:
-            accel = 0
+          if not allow_indefinite_hold and CS.esp_standstill_confirmation:
+            accel = max(0, accel)
 
           # our standstill timer resets when either:
           # - wheels move while a hold is not confirmed
@@ -146,19 +146,13 @@ class CarController(CarControllerBase):
           if CS.wheel_impulse_count != self.previous_impulse_count and not CS.esp_hold_confirmation:
             # wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
             self.hold_counter = 0
-          elif (
-            # regulation is active
-            CC.longActive and self.previous_resettable
-            # we're requesting hold release
-            and esp_starting_override if esp_starting_override is not None else starting
-            # the hold is released
-            and not CS.esp_hold_confirmation
-          ):
+          elif self.previous_resettable and not CS.esp_hold_confirmation:
             self.hold_counter = 0
 
-          # we must be careful not to accidentally reset the timer in unrelated conditions (e.g. when disabling)
-          self.previous_resettable = CC.longActive and CS.esp_hold_confirmation
-          self.previous_impulse_count = CS.wheel_impulse_count
+        # we must be careful not to accidentally reset the timer in unrelated conditions (e.g. when disabling)
+        # so track if we're in a state where the next frame is capable of resetting the timer (active + holding + requesting release)
+        self.previous_resettable = long_active and CS.esp_hold_confirmation and (esp_starting_override if esp_starting_override is not None else starting)
+        self.previous_impulse_count = CS.wheel_impulse_count
 
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, long_active, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation, esp_starting_override, esp_stopping_override))
