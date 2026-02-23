@@ -35,6 +35,7 @@ class CarController(CarControllerBase):
     self.hold_counter = 0
     self.previous_resettable = False
     self.previous_impulse_count = 0
+    self.distance_button_was_stopped = None
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -103,6 +104,22 @@ class CarController(CarControllerBase):
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
         starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
+
+        # distance button debug helper, force stop or start when distance button is pressed
+        if CS.distance_button_pressed:
+          if self.distance_button_was_stopped is None:
+            self.distance_button_was_stopped = CS.esp_standstill_confirmation
+          if long_active:
+            if self.distance_button_was_stopped:
+              accel = max(1.5, accel)
+              stopping = False
+              starting = CS.out.vEgo < self.CP.vEgoStopping if long_active else False
+            else:
+              accel = min(-1.5, accel)
+              stopping = CS.out.vEgo < self.CP.vEgoStopping if long_active else False
+              starting = False
+        else:
+          self.distance_button_was_stopped = None
 
         if self.CCS == mqbcan and CS.acc_type == 1 and long_active:
           if CS.esp_hold_confirmation:

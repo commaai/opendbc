@@ -22,6 +22,7 @@ class CarState(CarStateBase):
     self.eps_stock_values = False
     self.acc_type = 0
     self.wheel_impulse_count = 0
+    self.distance_button_pressed = False
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -143,6 +144,7 @@ class CarState(CarStateBase):
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
     self.gra_stock_values = pt_cp.vl["GRA_ACC_01"]
+    self.distance_button_pressed = self.gra_stock_values["GRA_Verstellung_Zeitluecke"] in (1, 2, 3)
 
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
