@@ -28,18 +28,17 @@ env = Environment(
   tools=["default", "compilation_db"],
 )
 
-# The Mull plugin injects mutations that are dormant unless run with mull-runner
-if system == "Darwin":
-  mull_plugin = Dir('#').abspath + '/.mull/lib/mull-ir-frontend-18'
-else:
-  mull_plugin = '/usr/lib/mull-ir-frontend-18'
-if os.path.exists(mull_plugin):
-  # Only use mull plugin if it exists
-  env['CC'] = 'clang-18'
-  env.Append(CFLAGS=['-fprofile-arcs', '-ftest-coverage', f'-fpass-plugin={mull_plugin}'])
+# add coverage if available
+# Avoid writing a repo log file, but keep SCons' stream plumbing valid.
+conf = Configure(env, log_file=os.devnull)
+prev = env['LINKFLAGS'][:]
+env.Append(LINKFLAGS=['-fprofile-arcs'])
+has_coverage = conf.TryLink('int main() { return 0; }\n', '.c')
+env['LINKFLAGS'] = prev
+if has_coverage:
+  env.Append(CFLAGS=['-fprofile-arcs', '-ftest-coverage'])
   env.Append(LINKFLAGS=['-fprofile-arcs', '-ftest-coverage'])
-  if system == "Darwin":
-    env.PrependENVPath('PATH', '/opt/homebrew/opt/llvm@18/bin')
+env = conf.Finish()
 
 safety = env.SharedObject("safety.os", "safety.c")
 libsafety = env.SharedLibrary("libsafety.so", [safety])
