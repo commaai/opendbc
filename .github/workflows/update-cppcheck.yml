@@ -14,6 +14,9 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: commaai/dependencies
+          ssh-key: ${{ secrets.DEPENDENCIES_DEPLOY_KEY }}
       - name: Get latest cppcheck version
         id: version
         run: |
@@ -23,10 +26,12 @@ jobs:
             grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' | \
             head -n 1)
           echo "vers=$LATEST" >> "$GITHUB_OUTPUT"
-      - name: Update VERS in install.sh
+      - name: Update version in build.sh and pyproject.toml
         run: |
-          sed -i "s/^VERS=\".*\"/VERS=\"${{ steps.version.outputs.vers }}\"/" opendbc/safety/tests/misra/install.sh
-          grep VERS opendbc/safety/tests/misra/install.sh
+          sed -i "s/^VERSION=\".*\"/VERSION=\"${{ steps.version.outputs.vers }}\"/" cppcheck/build.sh
+          sed -i "s/^version = \".*\"/version = \"${{ steps.version.outputs.vers }}\"/" cppcheck/pyproject.toml
+          grep VERSION cppcheck/build.sh
+          grep version cppcheck/pyproject.toml
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@9153d834b60caba6d51c9b9510b087acf9f33f83
         with:

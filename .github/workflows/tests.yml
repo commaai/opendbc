@@ -18,11 +18,9 @@ jobs:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
     - uses: actions/checkout@v4
-    - uses: ./.github/workflows/cache
-      id: cache
     - uses: commaai/timeout@v1
       with:
-        timeout: ${{ github.repository == 'commaai/opendbc' && (steps.cache.outputs.cache-hit == 'true' && '60' || '90') || '999' }}
+        timeout: ${{ github.repository == 'commaai/opendbc' && '90' || '999' }}
     - run: ./test.sh
 
   safety_tests:
@@ -33,7 +31,6 @@ jobs:
       with:
         timeout: ${{ github.repository == 'commaai/opendbc' && '60' || '999' }}
     - uses: actions/checkout@v4
-    - uses: ./.github/workflows/cache
     - name: Run safety tests
       run: ./opendbc/safety/tests/test.sh
 
@@ -53,7 +50,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # need master to get diff
-      - uses: ./.github/workflows/cache
       - name: Run mutation tests
         run: |
           source setup.sh
@@ -69,7 +65,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - uses: ./.github/workflows/cache
     - name: Build opendbc
       run: |
         source setup.sh
