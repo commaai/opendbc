@@ -3,10 +3,10 @@
 #include "opendbc/safety/helpers.h"
 #include "opendbc/safety/lateral.h"
 #include "opendbc/safety/longitudinal.h"
-#include "opendbc/safety/safety_declarations.h"
-#include "opendbc/safety/board/can.h"
+#include "opendbc/safety/declarations.h"
+#include "opendbc/safety/can.h"
 
-// include the safety policies.
+// all the safety modes
 #include "opendbc/safety/modes/defaults.h"
 #include "opendbc/safety/modes/honda.h"
 #include "opendbc/safety/modes/toyota.h"
@@ -20,16 +20,14 @@
 #include "opendbc/safety/modes/subaru_preglobal.h"
 #include "opendbc/safety/modes/mazda.h"
 #include "opendbc/safety/modes/nissan.h"
+#include "opendbc/safety/modes/volkswagen_mlb.h"
 #include "opendbc/safety/modes/volkswagen_mqb.h"
 #include "opendbc/safety/modes/volkswagen_pq.h"
 #include "opendbc/safety/modes/elm327.h"
 #include "opendbc/safety/modes/body.h"
 #include "opendbc/safety/modes/landrover.h"
-
-// CAN-FD only safety modes
-#ifdef CANFD
+#include "opendbc/safety/modes/psa.h"
 #include "opendbc/safety/modes/hyundai_canfd.h"
-#endif
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
@@ -105,17 +103,16 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
   return valid;
 }
 
-static int get_addr_check_index(const CANPacket_t *to_push, RxCheck addr_list[], const int len) {
-  int bus = GET_BUS(to_push);
-  int addr = GET_ADDR(to_push);
-  int length = GET_LEN(to_push);
+static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], const int len) {
+  int addr = msg->addr;
+  int length = GET_LEN(msg);
 
   int index = -1;
   for (int i = 0; i < len; i++) {
     // if multiple msgs are allowed, determine which one is present on the bus
     if (!addr_list[i].status.msg_seen) {
       for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (addr_list[i].msg[j].addr != 0); j++) {
-        if ((addr == addr_list[i].msg[j].addr) && (bus == addr_list[i].msg[j].bus) &&
+        if ((addr == addr_list[i].msg[j].addr) && (msg->bus == addr_list[i].msg[j].bus) &&
               (length == addr_list[i].msg[j].len)) {
           addr_list[i].status.index = j;
           addr_list[i].status.msg_seen = true;
@@ -126,7 +123,7 @@ static int get_addr_check_index(const CANPacket_t *to_push, RxCheck addr_list[],
 
     if (addr_list[i].status.msg_seen) {
       int idx = addr_list[i].status.index;
-      if ((addr == addr_list[i].msg[idx].addr) && (bus == addr_list[i].msg[idx].bus) &&
+      if ((addr == addr_list[i].msg[idx].addr) && (msg->bus == addr_list[i].msg[idx].bus) &&
           (length == addr_list[i].msg[idx].len)) {
         index = i;
         break;
@@ -147,23 +144,23 @@ static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
   if (index != -1) {
     uint8_t expected_counter = (addr_list[index].status.last_counter + 1U) % (addr_list[index].msg[addr_list[index].status.index].max_counter + 1U);
     addr_list[index].status.wrong_counters += (expected_counter == counter) ? -1 : 1;
-    addr_list[index].status.wrong_counters = CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
+    addr_list[index].status.wrong_counters = SAFETY_CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
     addr_list[index].status.last_counter = counter;
   }
 }
 
-static bool rx_msg_safety_check(const CANPacket_t *to_push,
+static bool rx_msg_safety_check(const CANPacket_t *msg,
                                 const safety_config *cfg,
                                 const safety_hooks *safety_hooks) {
 
-  int index = get_addr_check_index(to_push, cfg->rx_checks, cfg->rx_checks_len);
+  int index = get_addr_check_index(msg, cfg->rx_checks, cfg->rx_checks_len);
   update_addr_timestamp(cfg->rx_checks, index);
 
   if (index != -1) {
     // checksum check
     if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
-      uint32_t checksum = safety_hooks->get_checksum(to_push);
-      uint32_t checksum_comp = safety_hooks->compute_checksum(to_push);
+      uint32_t checksum = safety_hooks->get_checksum(msg);
+      uint32_t checksum_comp = safety_hooks->compute_checksum(msg);
       cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
     } else {
       cfg->rx_checks[index].status.valid_checksum = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum;
@@ -171,7 +168,7 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
 
     // counter check
     if ((safety_hooks->get_counter != NULL) && (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U)) {
-      uint8_t counter = safety_hooks->get_counter(to_push);
+      uint8_t counter = safety_hooks->get_counter(msg);
       update_counter(cfg->rx_checks, index, counter);
     } else {
       cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : MAX_WRONG_COUNTERS;
@@ -179,7 +176,7 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
 
     // quality flag check
     if ((safety_hooks->get_quality_flag_valid != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_quality_flag) {
-      cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(to_push);
+      cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(msg);
     } else {
       cfg->rx_checks[index].status.valid_quality_flag = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_quality_flag;
     }
@@ -187,13 +184,13 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
   return is_msg_valid(cfg->rx_checks, index);
 }
 
-bool safety_rx_hook(const CANPacket_t *to_push) {
+bool safety_rx_hook(const CANPacket_t *msg) {
   bool controls_allowed_prev = controls_allowed;
 
-  bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
-  bool whitelisted = get_addr_check_index(to_push, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
+  bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
+  bool whitelisted = get_addr_check_index(msg, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
   if (valid && whitelisted) {
-    current_hooks->rx(to_push);
+    current_hooks->rx(msg);
   }
 
   // Handles gas, brake, and regen paddle
@@ -202,12 +199,11 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   // the relay malfunction hook runs on all incoming rx messages.
   // check all applicable tx msgs for liveness on sending bus.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
-  const int bus = GET_BUS(to_push);
-  const int addr = GET_ADDR(to_push);
+  const int addr = msg->addr;
   for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &current_safety_config.tx_msgs[i];
     if (m->check_relay) {
-      stock_ecu_check((m->addr == addr) && (m->bus == bus));
+      stock_ecu_check((m->addr == addr) && (m->bus == msg->bus));
     }
   }
 
@@ -219,14 +215,13 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   return valid;
 }
 
-static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_list[], int len) {
-  int addr = GET_ADDR(to_send);
-  int bus = GET_BUS(to_send);
-  int length = GET_LEN(to_send);
+static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[], int len) {
+  int addr = msg->addr;
+  int length = GET_LEN(msg);
 
   bool whitelisted = false;
   for (int i = 0; i < len; i++) {
-    if ((addr == msg_list[i].addr) && (bus == msg_list[i].bus) && (length == msg_list[i].len)) {
+    if ((addr == msg_list[i].addr) && (msg->bus == msg_list[i].bus) && (length == msg_list[i].len)) {
       whitelisted = true;
       break;
     }
@@ -234,15 +229,15 @@ static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_lis
   return whitelisted;
 }
 
-bool safety_tx_hook(CANPacket_t *to_send) {
-  bool whitelisted = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+bool safety_tx_hook(CANPacket_t *msg) {
+  bool whitelisted = tx_msg_safety_check(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
     whitelisted = true;
   }
 
   bool safety_allowed = false;
   if (whitelisted) {
-    safety_allowed = current_hooks->tx(to_send);
+    safety_allowed = current_hooks->tx(msg);
   }
 
   return !relay_malfunction && whitelisted && safety_allowed;
@@ -269,7 +264,7 @@ int safety_fwd_hook(int bus_num, int addr) {
   if (!blocked) {
     for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
       const CanMsg *m = &current_safety_config.tx_msgs[i];
-      if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == destination_bus)) {
+      if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == (unsigned int)destination_bus)) {
         blocked = true;
         break;
       }
@@ -299,7 +294,6 @@ void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]) {
   }
 }
 
-#ifdef CANFD
 void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
   for (uint16_t i = 0; i < 256U; i++) {
     uint16_t crc = i << 8U;
@@ -313,7 +307,6 @@ void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
     crc_lut[i] = crc;
   }
 }
-#endif
 
 // 1Hz safety function called by main. Now just a check for lagging safety messages
 void safety_tick(const safety_config *cfg) {
@@ -322,12 +315,12 @@ void safety_tick(const safety_config *cfg) {
   uint32_t ts = microsecond_timer_get();
   if (cfg != NULL) {
     for (int i=0; i < cfg->rx_checks_len; i++) {
-      uint32_t elapsed_time = get_ts_elapsed(ts, cfg->rx_checks[i].status.last_timestamp);
+      uint32_t elapsed_time = safety_get_ts_elapsed(ts, cfg->rx_checks[i].status.last_timestamp);
       // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
       // Quite conservative to not risk false triggers.
       // 2s of lag is worse case, since the function is called at 1Hz
       uint32_t timestep = 1e6 / cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
-      bool lagging = elapsed_time > MAX(timestep * MAX_MISSED_MSGS, 1e6);
+      bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
       cfg->rx_checks[i].status.lagging = lagging;
       if (lagging) {
         controls_allowed = false;
@@ -344,7 +337,6 @@ void safety_tick(const safety_config *cfg) {
 
 static void relay_malfunction_set(void) {
   relay_malfunction = true;
-  fault_occurred(FAULT_RELAY_MALFUNCTION);
 }
 
 static void generic_rx_checks(void) {
@@ -381,7 +373,6 @@ static void stock_ecu_check(bool stock_ecu_detected) {
 
 static void relay_malfunction_reset(void) {
   relay_malfunction = false;
-  fault_recovered(FAULT_RELAY_MALFUNCTION);
 }
 
 // resets values and min/max for sample_t struct
@@ -412,12 +403,16 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_FORD, &ford_hooks},
     {SAFETY_RIVIAN, &rivian_hooks},
     {SAFETY_TESLA, &tesla_hooks},
+<<<<<<< HEAD
     {SAFETY_LANDROVER, &landrover_hooks},
 #ifdef CANFD
+=======
+>>>>>>> master
     {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
-#endif
 #ifdef ALLOW_DEBUG
+    {SAFETY_PSA, &psa_hooks},
     {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
+    {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
     {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
     {SAFETY_ALLOUTPUT, &alloutput_hooks},
 #endif
@@ -492,9 +487,9 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 // convert a trimmed integer to signed 32 bit int
 int to_signed(int d, int bits) {
   int d_signed = d;
-  int max_value = (1 << MAX((bits - 1), 0));
+  int max_value = (1 << SAFETY_MAX((bits - 1), 0));
   if (d >= max_value) {
-    d_signed = d - (1 << MAX(bits, 0));
+    d_signed = d - (1 << SAFETY_MAX(bits, 0));
   }
   return d_signed;
 }
@@ -538,7 +533,7 @@ void speed_mismatch_check(const float speed_2) {
   // Disable controls if speeds from two sources are too far apart.
   // For safety modes that use speed to adjust torque or angle limits
   const float MAX_SPEED_DELTA = 2.0;  // m/s
-  bool is_invalid_speed = ABS(speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
+  bool is_invalid_speed = SAFETY_ABS(speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
   if (is_invalid_speed) {
     controls_allowed = false;
   }

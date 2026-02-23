@@ -277,6 +277,7 @@ class TestFwFingerprintTiming:
         'volkswagen': 0.65,
         'rivian': 0.3,
         'landrover': 0.1,
+        'psa': 0.1,
       },
       2: {
         'ford': 1.6,

@@ -6,7 +6,7 @@ import importlib
 import numpy as np
 from collections.abc import Callable
 
-from opendbc.can.packer import CANPacker
+from opendbc.can import CANPacker
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
 
@@ -40,8 +40,8 @@ def make_msg(bus, addr, length=8, dat=None):
   return libsafety_py.make_CANPacket(addr, bus, dat)
 
 
-class CANPackerPanda(CANPacker):
-  def make_can_msg_panda(self, name_or_addr, bus, values, fix_checksum=None):
+class CANPackerSafety(CANPacker):
+  def make_can_msg_safety(self, name_or_addr, bus, values, fix_checksum=None):
     msg = self.make_can_msg(name_or_addr, bus, values)
     if fix_checksum is not None:
       msg = fix_checksum(msg)
@@ -71,12 +71,12 @@ def add_regen_tests(cls):
   return cls
 
 
-class PandaSafetyTestBase(unittest.TestCase):
-  safety: libsafety_py.Panda
+class SafetyTestBase(unittest.TestCase):
+  safety: libsafety_py.LibSafety | None
 
   @classmethod
   def setUpClass(cls):
-    if cls.__name__ == "PandaSafetyTestBase":
+    if cls.__name__ == "SafetyTestBase":
       cls.safety = None
       raise unittest.SkipTest
 
@@ -133,7 +133,7 @@ class PandaSafetyTestBase(unittest.TestCase):
       self.assertEqual(meas_max_func(), 0)
 
 
-class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
+class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
 
   LONGITUDINAL = True
   MAX_ACCEL: float = 2.0
@@ -173,7 +173,7 @@ class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
           self.assertEqual(should_tx, self._tx(self._accel_msg(accel)))
 
 
-class LongitudinalGasBrakeSafetyTest(PandaSafetyTestBase, abc.ABC):
+class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
 
   MIN_BRAKE: int = 0
   MAX_BRAKE: int | None = None
@@ -182,13 +182,14 @@ class LongitudinalGasBrakeSafetyTest(PandaSafetyTestBase, abc.ABC):
   MIN_GAS: int = 0
   MAX_GAS: int | None = None
   INACTIVE_GAS = 0
-  MIN_POSSIBLE_GAS: int = 0.
+  MIN_POSSIBLE_GAS: int = 0
   MAX_POSSIBLE_GAS: int | None = None
 
   def test_gas_brake_limits_correct(self):
     self.assertIsNotNone(self.MAX_POSSIBLE_BRAKE)
     self.assertIsNotNone(self.MAX_POSSIBLE_GAS)
 
+    assert self.MAX_BRAKE is not None and self.MAX_GAS is not None
     self.assertGreater(self.MAX_BRAKE, self.MIN_BRAKE)
     self.assertGreater(self.MAX_GAS, self.MIN_GAS)
 
@@ -207,7 +208,7 @@ class LongitudinalGasBrakeSafetyTest(PandaSafetyTestBase, abc.ABC):
     self._generic_limit_safety_check(self._send_gas_msg, self.MIN_GAS, self.MAX_GAS, self.MIN_POSSIBLE_GAS, self.MAX_POSSIBLE_GAS, 1, self.INACTIVE_GAS)
 
 
-class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
+class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
 
   MAX_RATE_UP = 0
   MAX_RATE_DOWN = 0
@@ -640,7 +641,7 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
     self.assertEqual(self.safety.get_torque_meas_max(), 0)
 
 
-class VehicleSpeedSafetyTest(PandaSafetyTestBase):
+class VehicleSpeedSafetyTest(SafetyTestBase):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "VehicleSpeedSafetyTest":
@@ -659,6 +660,7 @@ class VehicleSpeedSafetyTest(PandaSafetyTestBase):
 class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   STEER_ANGLE_MAX: float = 300
+  STEER_ANGLE_TEST_MAX: float | None = None
   DEG_TO_CAN: float
   ANGLE_RATE_BP: list[float]
   ANGLE_RATE_UP: list[float]  # windup limit
@@ -703,7 +705,10 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
   def test_angle_cmd_when_enabled(self):
     # when controls are allowed, angle cmd rate limit is enforced
     speeds = [0., 1., 5., 10., 15., 50.]
-    angles = np.concatenate((np.arange(-self.STEER_ANGLE_MAX * 2, self.STEER_ANGLE_MAX * 2, 5), [0]))
+    # TODO: what should CANPacker do here? we should also have good coverage checks on this
+    if self.STEER_ANGLE_TEST_MAX is None:
+        self.STEER_ANGLE_TEST_MAX = self.STEER_ANGLE_MAX * 2
+    angles = np.concatenate((np.arange(-self.STEER_ANGLE_TEST_MAX, self.STEER_ANGLE_TEST_MAX, 5), [0]))
     for a in angles:
       for s in speeds:
         max_delta_up = np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
@@ -803,8 +808,8 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
 
-class PandaSafetyTest(PandaSafetyTestBase):
-  TX_MSGS: list[list[int]] | None = None
+class SafetyTest(SafetyTestBase):
+  TX_MSGS: list[list[int]] = []
   SCANNED_ADDRS = [*range(0x800),                      # Entire 11-bit CAN address space
                    *range(0x18DA00F1, 0x18DB00F1, 0x100),   # 29-bit UDS physical addressing
                    *range(0x18DB00F1, 0x18DC00F1, 0x100),   # 29-bit UDS functional addressing
@@ -814,7 +819,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
   @classmethod
   def setUpClass(cls):
-    if cls.__name__ == "PandaSafetyTest" or cls.__name__.endswith('Base'):
+    if cls.__name__ == "SafetyTest" or cls.__name__.endswith('Base'):
       cls.safety = None
       raise unittest.SkipTest
 
@@ -890,7 +895,8 @@ class PandaSafetyTest(PandaSafetyTestBase):
               continue
             if {attr, current_test}.issubset({'TestHyundaiLongitudinalSafety', 'TestHyundaiLongitudinalSafetyCameraSCC', 'TestHyundaiSafetyFCEVLong'}):
               continue
-            if {attr, current_test}.issubset({'TestVolkswagenMqbSafety', 'TestVolkswagenMqbStockSafety', 'TestVolkswagenMqbLongSafety'}):
+            volkswagen_shared = ('TestVolkswagenMqb', 'TestVolkswagenMlb')
+            if attr.startswith(volkswagen_shared) and current_test.startswith(volkswagen_shared):
               continue
 
             # overlapping TX addrs, but they're not actuating messages for either car
@@ -933,14 +939,14 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
 
 @add_regen_tests
-class PandaCarSafetyTest(PandaSafetyTest):
+class CarSafetyTest(SafetyTest):
   STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
 
   @classmethod
   def setUpClass(cls):
-    if cls.__name__ == "PandaCarSafetyTest" or cls.__name__.endswith('Base'):
+    if cls.__name__ == "CarSafetyTest" or cls.__name__.endswith('Base'):
       cls.safety = None
       raise unittest.SkipTest
 

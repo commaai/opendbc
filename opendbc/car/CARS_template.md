@@ -32,7 +32,14 @@ openpilot is installed, but custom forks may allow their use.
 
 Vehicles in this category are not considered plug-and-play. Software support is included in upstream openpilot, but
 these vehicles might not have a harness in the comma store, or the physical install might be at an unusual or cumbersome
-location, or they might need unusual configuration after install.
+location, or they might need unusual configuration after install. These vehicles will not work with release builds of
+openpilot, but depending on the situation, development builds or custom forks may allow their use.
+
+### SecOC cars with recoverable keys
+
+For a small subset of SecOC-protected vehicles, tools may be available in the community to recover the SecOC keys. These
+tools, and the recovery process, are not part of openpilot. If supplied with a valid SecOC key, development builds or
+custom forks may work with these vehicles. Release builds of openpilot don't support SecOC.
 
 ## Dashcam
 
@@ -47,20 +54,9 @@ Supported Models' section of each make [on our wiki](https://wiki.comma.ai/).
 
 Some notable works-in-progress:
 * Honda
-  * 2024 Acura Integra, commaai/openpilot#32056
-  * 2023-24 Honda Accord (CAN-FD), commaai/openpilot#32229
-  * 2024 Honda CR-V (CAN-FD), commaai/openpilot#32806
-  * 2024 Honda CR-V Hybrid (CAN-FD), commaai/openpilot#31527
-    * Depends on commaai/opendbc#1100
-  * 2021-25 Honda Odyssey, commaai/opendbc#1330
-  * 2023-24 Honda Pilot (CAN-FD), commaai/openpilot#30324
-  * Camera ACC stability improvements, commaai/openpilot#31022
-    * Depends on commaai/panda#1814
-    * Depends on commaai/opendbc#998
-    * These are being reworked for full-time proxy through openpilot
-  * Manual transmission support (Civic, Integra)
-    * Depends on commaai/opendbc#1034 (merged)
-    * Car port support PR not yet filed
+  * 2022-24 Acura RDX, commaai/opendbc#1967
+  * Camera ACC stability improvements, commaai/opendbc#2192
+  * Alpha longitudinal stability improvements, commaai/opendbc#2347 and commaai/opendbc#2165
 
 ## Incompatible
 

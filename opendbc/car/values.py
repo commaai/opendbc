@@ -9,6 +9,7 @@ from opendbc.car.landrover.values import CAR as LANDROVER
 from opendbc.car.mazda.values import CAR as MAZDA
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.nissan.values import CAR as NISSAN
+from opendbc.car.psa.values import CAR as PSA
 from opendbc.car.rivian.values import CAR as RIVIAN
 from opendbc.car.subaru.values import CAR as SUBARU
 from opendbc.car.tesla.values import CAR as TESLA

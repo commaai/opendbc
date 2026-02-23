@@ -1,4 +1,4 @@
-from opendbc.can.can_define import CANDefine
+from opendbc.can import CANDefine
 from opendbc.can.tests import ALL_DBCS
 
 
@@ -16,6 +16,7 @@ class TestCANDefine:
                              4: 'NO_TORQUE_ALERT_2',
                              3: 'LOW_SPEED_LOCKOUT',
                              2: 'NO_TORQUE_ALERT_1',
+                             1: 'DRIVER_STEERING',
                              0: 'NORMAL'}
                             }
 

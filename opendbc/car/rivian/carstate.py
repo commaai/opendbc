@@ -1,5 +1,5 @@
 import copy
-from opendbc.can.parser import CANParser
+from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.rivian.values import DBC, GEAR_MAP
@@ -27,11 +27,11 @@ class CarState(CarStateBase):
     ret.vEgoRaw = cp.vl["ESP_Status"]["ESP_Vehicle_Speed"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = abs(ret.vEgoRaw) < 0.01
+    conversion = CV.KPH_TO_MS if cp_adas.vl["Cluster"]["Cluster_Unit"] == 0 else CV.MPH_TO_MS
+    ret.vEgoCluster = cp_adas.vl["Cluster"]["Cluster_VehicleSpeed"] * conversion
 
     # Gas pedal
-    pedal_status = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"]
-    ret.gas = pedal_status / 100.0
-    ret.gasPressed = pedal_status > 0
+    ret.gasPressed = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"] > 0
 
     # Brake pedal
     ret.brake = cp.vl["ESPiB3"]["ESPiB3_pMC1"] / 250.0  # pressure in Bar
@@ -56,13 +56,16 @@ class CarState(CarStateBase):
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasVehicleHoldStatus"] == 1
 
-    # TODO: log ACM_Unkown2=3 as a fault. need to filter it at the start and end of routes though
-    # ACM_FaultStatus hasn't been seen yet
+    # ACM_Status->ACM_FaultSupervisorState normally 1, appears to go to 3 when either:
+    # 1. car in park/not in drive (normal)
+    # 2. something (message from another ECU) ACM relies on is faulty
+    #  * ACM_FaultStatus will stay 0 since ACM itself isn't faulted
+    # TODO: ACM_FaultStatus hasn't been seen high yet, but log anyway
     ret.accFaulted = (cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1 or
                       # VDM_AdasFaultStatus=Brk_Intv is the default for some reason
-                      # VDM_AdasFaultStatus=Imps_Cmd was seen when sending it rapidly changing ACC enable commands
                       # VDM_AdasFaultStatus=Cntr_Fault isn't fully understood, but we've seen it in the wild
-                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (3,))  # 3=Imps_Cmd
+                      # VDM_AdasFaultStatus=Imps_Cmd was seen when sending it rapidly changing ACC enable commands, or when ACC command drops out
+                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3))  # 2=Cntr_Fault, 3=Imps_Cmd
 
     # Gear
     ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
@@ -93,33 +96,8 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    pt_messages = [
-      # sig_address, frequency
-      ("ESP_Status", 50),
-      ("VDM_PropStatus", 50),
-      ("iBESP2", 50),
-      ("ESPiB3", 50),
-      ("EPAS_AdasStatus", 100),
-      ("EPAS_SystemStatus", 100),
-      ("RCM_Status", 8),
-      ("VDM_AdasSts", 100),
-      ("SCCM_WheelTouch", 20),
-    ]
-
-    cam_messages = [
-      ("ACM_longitudinalRequest", 100),
-      ("ACM_AebRequest", 100),
-      ("ACM_Status", 100),
-      ("ACM_lkaHbaCmd", 100)
-    ]
-
-    adas_messages = [
-      ("IndicatorLights", 10),
-      ("ACM_tsrCmd", 10),
-    ]
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], adas_messages, 1),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 1),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
     }
