@@ -17,6 +17,7 @@ class CarState(CarStateBase):
     self.crz_btns_counter = 0
     self.acc_active_last = False
     self.lkas_allowed_speed = False
+    self.lkas_init_complete = False
 
     self.distance_button = 0
     self.accel_button = 0
@@ -78,6 +79,12 @@ class CarState(CarStateBase):
         self.lkas_allowed_speed = False
     else:
       self.lkas_allowed_speed = True
+      # CX-5 2022: EPS asserts LKAS_BLOCK at standstill (low-speed lockout).
+      # Track when it clears for the first time — after that, treat it as a real fault.
+      if ret.standstill:
+        self.lkas_init_complete = False
+      elif not lkas_blocked:
+        self.lkas_init_complete = True
 
     # TODO: the signal used for available seems to be the adaptive cruise signal, instead of the main on
     #       it should be used for carState.cruiseState.nonAdaptive instead
@@ -98,9 +105,13 @@ class CarState(CarStateBase):
     ret.lowSpeedAlert = self.low_speed_alert
 
     # Check if LKAS is disabled due to lack of driver torque when all other states indicate
-    # it should be enabled (steer lockout). Don't warn until we actually get lkas active
-    # and lose it again, i.e, after initial lkas activation
-    ret.steerFaultTemporary = self.lkas_allowed_speed and lkas_blocked
+    # it should be enabled (steer lockout).
+    if self.CP.minSteerSpeed > 0:
+      ret.steerFaultTemporary = self.lkas_allowed_speed and lkas_blocked
+    else:
+      # lkas_init_complete gates this so the fault can only fire after LKAS_BLOCK
+      # has cleared at least once, filtering the EPS low-speed lockout at standstill.
+      ret.steerFaultTemporary = self.lkas_init_complete and lkas_blocked
 
     self.acc_active_last = ret.cruiseState.enabled
 
