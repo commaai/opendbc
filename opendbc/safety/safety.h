@@ -403,11 +403,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_FORD, &ford_hooks},
     {SAFETY_RIVIAN, &rivian_hooks},
     {SAFETY_TESLA, &tesla_hooks},
-<<<<<<< HEAD
     {SAFETY_LANDROVER, &landrover_hooks},
-#ifdef CANFD
-=======
->>>>>>> master
     {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
 #ifdef ALLOW_DEBUG
     {SAFETY_PSA, &psa_hooks},

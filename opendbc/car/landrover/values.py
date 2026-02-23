@@ -1,13 +1,15 @@
 from dataclasses import dataclass, field
 from enum import Enum, StrEnum, IntFlag
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig , Request, StdQueries
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 from opendbc.car.vin import Vin
 
 Ecu = CarParams.Ecu
+
 
 class Buttons:
   NONE = 0
@@ -34,12 +36,24 @@ class CarControllerParams:
     self.STEER_DRIVER_FACTOR = 1
     self.STEER_THRESHOLD = 150
     self.STEER_STEP = 1  # 100 Hz
+    self.STEER_MAX = 500
 
     if CP.carFingerprint in (CAR.LANDROVER_DEFENDER_2023):
       self.STEER_DRIVER_ALLOWANCE = 200
       self.STEER_DRIVER_MULTIPLIER = 2
-      self.STEER_THRESHOLD = 20
+      self.STEER_THRESHOLD = 50
       self.STEER_STEP = 2  # 50 Hz
+
+    elif CP.carFingerprint in (CAR.RANGEROVER_VOGUE_2017):
+      self.STEER_MAX = 500
+      self.STEER_DELTA_UP = 2
+      self.STEER_DELTA_DOWN = 3
+      self.STEER_DRIVER_ALLOWANCE = 20
+      self.STEER_DRIVER_MULTIPLIER = 2
+      self.STEER_DRIVER_FACTOR = 1
+      self.STEER_THRESHOLD = 150
+      self.STEER_STEP = 4  # 25 Hz
+
 
 class CanBus:
   UNDERBODY = 0
@@ -51,7 +65,6 @@ class LandroverFlags(IntFlag):
   FLEXRAY_HARNESS = 1
 
 
-
 class Footnote(Enum):
   FLEXRAY = CarFootnote(
     "Requires a " +
@@ -59,14 +72,15 @@ class Footnote(Enum):
     "flexray <a href=\"https://en.wikipedia.org/wiki/FlexRay\" target=\"_blank\">FexRay car</a>.",
     Column.MODEL)
 
+
 @dataclass
-class LandroverCarDocsDefender(CarDocs):
+class LandroverCarDocs(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
-  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.FLEXRAY])
 
-
-
+  def init_make(self, CP: CarParams):
+    if CP.flags & LandroverFlags.FLEXRAY_HARNESS:
+      self.footnotes.insert(0, Footnote.FLEXRAY)
 
 
 """
@@ -75,6 +89,7 @@ class LandroverCarDocsDefender(CarDocs):
  01234567890123456
  SALEA7AX8L2XXXXXX  : L663 2020 Defender 110
  SALEA8BW6P2XXXXXX  : L663 2023 Defender 130
+ SALGA2FE0HAXXXXXX  : L405 2017 RangeRover Vogue
 
  0~2 : WMI
  3~8 : VDS
@@ -93,37 +108,63 @@ class LandroverCarDocsDefender(CarDocs):
  11~16  : Serial Number
 """
 
+
 class WMI(StrEnum):
   LANDROVER = "SAL"
 
 
 class ModelLine(StrEnum):
   L663 = "EA"  # Defender L663
+  L405 = "GA"  # RangeRover Vogue L405
 
 
 class ModelYear(StrEnum):
+  H_2017 = "H"
   L_2020 = "L"
   P_2023 = "P"
+
 
 @dataclass
 class LandroverPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
-    Bus.pt: "landrover_defender_2023" })
+    Bus.pt: "landrover_rangerover_2017"})
   wmis: set[WMI] = field(default_factory=set)
   lines: set[ModelLine] = field(default_factory=set)
   years: set[ModelYear] = field(default_factory=set)
 
 
+@dataclass
+class LandroverFlexrayPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {
+    Bus.pt: "landrover_defender_2023"})
+  wmis: set[WMI] = field(default_factory=set)
+  lines: set[ModelLine] = field(default_factory=set)
+  years: set[ModelYear] = field(default_factory=set)
+
+  def init(self):
+    self.flags |= LandroverFlags.FLEXRAY_HARNESS
+
+
 class CAR(Platforms):
-  LANDROVER_DEFENDER_2023 = LandroverPlatformConfig(
+  LANDROVER_DEFENDER_2023 = LandroverFlexrayPlatformConfig(
     [
-      LandroverCarDocsDefender("LANDROVER DEFENDER 2023"),
+      LandroverCarDocs("LANDROVER DEFENDER 2023"),
     ],
     CarSpecs(mass=2550, wheelbase=3.022, steerRatio=19.0, minSteerSpeed=50*CV.KPH_TO_MS),
     wmis=(WMI.LANDROVER),
     lines={ModelLine.L663},
     years={ModelYear.L_2020, ModelYear.P_2023},
   )
+  RANGEROVER_VOGUE_2017 = LandroverPlatformConfig(
+    [
+      LandroverCarDocs("RANGEROVER VOGUE 2017"),
+    ],
+    CarSpecs(mass=2500, wheelbase=2.922, steerRatio=16.5),
+    wmis=(WMI.LANDROVER),
+    lines={ModelLine.L405},
+    years={ModelYear.H_2017},
+  )
+
 
 def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str]:
   vin_obj = Vin(vin)
@@ -149,6 +190,18 @@ FW_QUERY_CONFIG = FwQueryConfig(
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
+
+# addr: (bus, 1/freq*100, vl)
+# 1D8 4694050000000582
+# 1D8#46950500000008BC
+# 3D4 800d0141e73ded00
+STATIC_MSGS = [
+ (0x1D8, 0, 10, b'\x46\x95\x05\x05\x00\x00\x08\xbc'),
+]
+
+
+FLEXRAY_CAR = CAR.with_flags(LandroverFlags.FLEXRAY_HARNESS)
+EVA2_CARS = {CAR.LANDROVER_DEFENDER_2023, }
 
 DBC = CAR.create_dbc_map()
 
