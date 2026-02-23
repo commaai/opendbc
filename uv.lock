@@ -225,8 +225,8 @@ toml = [
 
 [[package]]
 name = "cppcheck"
-version = "2.19.1"
-source = { git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=cppcheck#a2dc8c9e303bd74d5b9c4edfed75b1ff23e53a74" }
+version = "2.16.0"
+source = { git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=releases#2f738421b9b6af97bf242319a1bea68e161d9b82" }
 
 [[package]]
 name = "cpplint"
@@ -613,7 +613,7 @@ requires-dist = [
     { name = "cffi", marker = "extra == 'testing'" },
     { name = "codespell", marker = "extra == 'testing'" },
     { name = "comma-car-segments", marker = "extra == 'testing'", url = "https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl" },
-    { name = "cppcheck", marker = "extra == 'testing'", git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=cppcheck" },
+    { name = "cppcheck", marker = "extra == 'testing'", git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=releases" },
     { name = "cpplint", marker = "extra == 'testing'" },
     { name = "crcmod-plus" },
     { name = "gcovr", marker = "extra == 'testing'" },
