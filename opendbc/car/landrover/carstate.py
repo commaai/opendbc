@@ -90,7 +90,7 @@ class CarState(CarStateBase):
 
     return ret
 
-  def update_can_defender(self, can_parsers) -> tuple[structs.CarState, structs.CarStateSP]:
+  def update_can_defender(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
 
     ret = structs.CarState()
