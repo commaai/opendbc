@@ -141,15 +141,17 @@ class CarController(CarControllerBase):
             # the TSK and ESP will work together to prevent rollback
             if not allow_indefinite_hold:
               accel = max(0, accel)
+              starting = True
+              stopping = False
 
-          # our standstill timer resets when either:
-          # - wheels move while a hold is not confirmed
-          # - we release hold confirmation during active control + release request
-          if CS.wheel_impulse_count != self.previous_impulse_count and not CS.esp_hold_confirmation:
-            # wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
-            self.hold_counter = 0
-          elif self.previous_resettable and not CS.esp_hold_confirmation:
-            self.hold_counter = 0
+        # our standstill timer resets when either:
+        # - wheels move while a hold is not confirmed
+        # - we release hold confirmation during active control + release request
+        if CS.wheel_impulse_count != self.previous_impulse_count and not CS.esp_hold_confirmation:
+          # wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
+          self.hold_counter = 0
+        elif self.previous_resettable and not CS.esp_hold_confirmation:
+          self.hold_counter = 0
 
         # we must be careful not to accidentally reset the timer in unrelated conditions (e.g. when disabling)
         # so track if we're in a state where the next frame is capable of resetting the timer (active + holding + requesting release)
