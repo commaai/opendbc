@@ -94,7 +94,6 @@ class CarState(CarStateBase):
     cp = can_parsers[Bus.pt]
 
     ret = structs.CarState()
-    ret_sp = structs.CarStateSP()
 
     self.is_metric = True
     speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
@@ -162,7 +161,7 @@ class CarState(CarStateBase):
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus.UNDERBODY),
     }
 
-  def get_can_parsers(self, CP, CP_SP):
+  def get_can_parsers(self, CP):
     if CP.flags & LandroverFlags.FLEXRAY_HARNESS:
       return self.get_can_parser_defender(CP)
 

@@ -2,8 +2,10 @@
 
 #include "opendbc/safety/declarations.h"
 
-#define FLEXRAY_MAX_ANGLE   1170  // angle * deg_to_can
-#define FLEXRAY_DEG_TO_CAN 13.009 //  1/factor, 1/0.07687
+//#define FLEXRAY_MAX_ANGLE   1170  // angle * deg_to_can
+//#define FLEXRAY_DEG_TO_CAN 13.009 //  1/factor, 1/0.07687
+#define FLEXRAY_MAX_ANGLE   1125  // angle * deg_to_can
+#define FLEXRAY_DEG_TO_CAN 12.5   //  1/factor, 1/0.08
 #define FLEXRAY_USE_PSCM_OUT 1
 
 static bool landrover_flexray_harness = true;

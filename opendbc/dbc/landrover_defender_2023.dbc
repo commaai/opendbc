@@ -62,7 +62,7 @@ BO_ 46 SWM_Torque: 4 pt
 BO_ 50 PSCM_Out: 8 pt
  SG_ CheckSum : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ Counter : 11|4@0+ (1,0) [0|15] "" XXX
- SG_ AngleTorque : 21|14@0+ (0.07687,-691.83) [-500|500] "deg" XXX
+ SG_ AngleTorque : 21|14@0+ (0.08,-720) [-500|500] "deg" XXX
 
 BO_ 54 GasPedal: 8 pt
  SG_ CheckSum : 7|8@0+ (1,0) [0|255] "" XXX
@@ -70,7 +70,7 @@ BO_ 54 GasPedal: 8 pt
  SG_ GasPedalPos : 22|7@0+ (1,0) [0|63] "" XXX
 
 BO_ 58 PSCM_Out2: 8 pt
- SG_ AngleTorque : 21|14@0+ (0.07687,-691.83) [-500|500] "deg" XXX
+ SG_ AngleTorque : 21|14@0+ (0.08,-720) [-500|500] "deg" XXX
 ]
 BO_ 62 SWM_Torque02: 8 pt
  SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
@@ -153,7 +153,7 @@ BO_ 399 BlindSpot: 8 pt
 BO_ 496 LKAS_OP_TO_FLEXRAY: 8 comma
  SG_ Lkas_checksum : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ counter : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ ReqAngleTorque : 29|14@0+ (0.07687,-691.83) [-500|500] "deg" XXX
+ SG_ ReqAngleTorque : 29|14@0+ (0.08,-720) [-500|500] "deg" XXX
  SG_ EnAngle : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ Engaged : 55|1@0+ (1,0) [0|1] "" XXX
 
@@ -211,7 +211,7 @@ BO_ 7936 FLEXRAY_LKAS_RUN: 31 dadc
  SG_ Above5KmHCruiseOnLkasH_Under5KmLCruiseOffLkasL : 73|1@0+ (1,0) [0|1] "" XXX
  SG_ Lkas_checksum_3_1D_B0 : 127|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER00 : 131|4@0+ (1,0) [0|15] "" XXX
- SG_ Lkas_ReqAngle : 141|14@0+ (0.07687,-691.83) [0|2047] "" XXX
+ SG_ Lkas_ReqAngle : 141|14@0+ (0.08,-720) [0|2047] "" XXX
  SG_ LKAS_enTroq : 143|1@0+ (1,0) [0|1] "" XXX
  SG_ Payload_CRC : 231|24@0+ (1,0) [0|16777215] "" XXX
 
