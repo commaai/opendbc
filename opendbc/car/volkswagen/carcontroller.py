@@ -96,7 +96,7 @@ class CarController(CarControllerBase):
         long_active = (
           # acc type 1 is sensitive to control signals when brake pressed (i.e. preEnabled)
           False if CS.acc_type == 1 and CS.out.brakePressed else
-          # stop regulating if needed to prevent a cruise fault (TSK prevents rollback)
+          # stop regulating if needed to prevent a cruise fault
           False if CS.acc_type == 1 and self.hold_counter > self.CCP.MAX_HOLD_FRAMES and not allow_indefinite_hold else
           CC.longActive
         )
@@ -121,6 +121,8 @@ class CarController(CarControllerBase):
         else:
           self.distance_button_was_stopped = None
 
+        # standstill handling for MQB w/ ACC type 1
+        # these vehicles don't have a parking brake, so we need to carefully manage the ESP to prevent faults
         if self.CCS == mqbcan and CS.acc_type == 1 and long_active:
           if CS.esp_hold_confirmation:
             self.hold_counter += 1
@@ -129,16 +131,16 @@ class CarController(CarControllerBase):
           if CS.esp_standstill_confirmation:
             esp_starting_override = True
             esp_stopping_override = False
-            # if we can't hold forever, we'll need to restart the ESP hold
-            # our timer was likely reset, so it's fine to do so
+            # if we can't hold indefinitely, we'll need to restart the ESP hold
+            # if we keep braking in this case we will temp fault the TSK
             if not allow_indefinite_hold and not CS.esp_hold_confirmation:
               esp_starting_override = False
               esp_stopping_override = True
-
-          # in order to cycle the ESP, the ESP must not be afraid of rollback
-          # make some torque to help ESP feel comfortable cycling
-          if not allow_indefinite_hold and CS.esp_standstill_confirmation:
-            accel = max(0, accel)
+            # in order to cycle the ESP, the ESP must not be afraid of rollback
+            # make some torque to help ESP feel comfortable cycling
+            # the TSK and ESP will work together to prevent rollback
+            if not allow_indefinite_hold:
+              accel = max(0, accel)
 
           # our standstill timer resets when either:
           # - wheels move while a hold is not confirmed
