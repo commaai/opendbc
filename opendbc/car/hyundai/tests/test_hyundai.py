@@ -11,7 +11,7 @@ from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
                                          HYBRID_CAR, EV_CAR, FW_QUERY_CONFIG, LEGACY_SAFETY_MODE_CAR, CANFD_FUZZY_WHITELIST, \
                                          UNSUPPORTED_LONGITUDINAL_CAR, PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
-                                         HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
+                                         HyundaiFlags, get_platform_codes, HyundaiSafetyFlags, disambiguate_car_by_vin
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
@@ -90,6 +90,13 @@ class TestHyundaiFingerprint:
       ecu_strings = ", ".join([f"Ecu.{ecu}" for ecu in ecus_not_in_whitelist])
       assert len(ecus_not_in_whitelist) == 0, \
                        f"{car_model}: Car model has unexpected ECUs: {ecu_strings}"
+
+  def test_vin_disambiguation(self):
+    candidates = {str(CAR.HYUNDAI_TUCSON_4TH_GEN),str(CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN)}
+    assert disambiguate_car_by_vin(candidates, "KM8J0000000000000") == {str(CAR.HYUNDAI_TUCSON_4TH_GEN)}
+    assert disambiguate_car_by_vin(candidates, "5NMJ0000000000000") == {str(CAR.HYUNDAI_TUCSON_4TH_GEN)}
+    assert disambiguate_car_by_vin(candidates, "5NTJ0000000000000") == {str(CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN)}
+    assert disambiguate_car_by_vin(candidates, "ABCD0000000000000") == candidates
 
   def test_correct_ecu_response_database(self, subtests):
     """
