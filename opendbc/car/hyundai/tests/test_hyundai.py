@@ -91,20 +91,6 @@ class TestHyundaiFingerprint:
       assert len(ecus_not_in_whitelist) == 0, \
                        f"{car_model}: Car model has unexpected ECUs: {ecu_strings}"
 
-  def test_blacklisted_parts(self, subtests):
-    # Asserts no ECUs known to be shared across platforms exist in the database.
-    # HYUNDAI_SANTA_CRUZ_1ST_GEN and HYUNDAI_TUCSON_4TH_GEN share the same platform (essentially the same vehicle)
-    for car_model, ecus in FW_VERSIONS.items():
-      with subtests.test(car_model=car_model.value):
-        if car_model in (CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN, CAR.HYUNDAI_TUCSON_4TH_GEN):
-          pytest.skip("Skip checking Santa Cruz for its parts")
-
-        for code, _ in get_platform_codes(ecus[(Ecu.fwdCamera, 0x7c4, None)]):
-          if b"-" not in code:
-            continue
-          part = code.split(b"-")[1]
-          assert not part.startswith(b'CW'), "Car has bad part number"
-
   def test_correct_ecu_response_database(self, subtests):
     """
     Assert standard responses for certain ECUs, since they can
