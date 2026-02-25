@@ -44,6 +44,7 @@ class CarControllerParams:
       self.STEER_THRESHOLD = 50
       self.STEER_STEP = 2  # 50 Hz
 
+    """
     elif CP.carFingerprint in (CAR.RANGEROVER_VOGUE_2017):
       self.STEER_MAX = 500
       self.STEER_DELTA_UP = 2
@@ -53,6 +54,7 @@ class CarControllerParams:
       self.STEER_DRIVER_FACTOR = 1
       self.STEER_THRESHOLD = 150
       self.STEER_STEP = 4  # 25 Hz
+    """
 
 
 class CanBus:
@@ -155,6 +157,7 @@ class CAR(Platforms):
     lines={ModelLine.L663},
     years={ModelYear.L_2020, ModelYear.P_2023},
   )
+  """
   RANGEROVER_VOGUE_2017 = LandroverPlatformConfig(
     [
       LandroverCarDocs("RANGEROVER VOGUE 2017"),
@@ -164,6 +167,7 @@ class CAR(Platforms):
     lines={ModelLine.L405},
     years={ModelYear.H_2017},
   )
+  """
 
 
 def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str]:

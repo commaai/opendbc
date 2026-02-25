@@ -1,5 +1,5 @@
 import math
-from opendbc.car.common.conversions import Conversions as CV
+#from opendbc.car.common.conversions import Conversions as CV
 from opendbc.can import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs, create_button_events
@@ -96,7 +96,7 @@ class CarState(CarStateBase):
     ret = structs.CarState()
 
     self.is_metric = True
-    speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
+    #speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
 
     ret.seatbeltUnlatched = (cp.vl["SeatBelt"]["SeatBelt_Driver"]  == 0)
     ret.doorOpen = not any([cp.vl["DoorStatus"]["FrontLeftDoor"],

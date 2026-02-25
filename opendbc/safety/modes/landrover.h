@@ -19,7 +19,7 @@ static void landrover_rx_hook(const CANPacket_t *msg) {
         // Store it 1/10 deg to match steering request
         int angle_raw = (((msg->data[3] & 0x3FU) << 8) | msg->data[4]);
 
-        int angle_meas_new = (angle_raw - 7800U ) * 0.1 * FLEXRAY_DEG_TO_CAN;
+        int angle_meas_new = (angle_raw - 7800U) * 0.1 * FLEXRAY_DEG_TO_CAN;
         update_sample(&angle_meas, angle_meas_new);
       }
       #else
@@ -125,7 +125,7 @@ static bool landrover_tx_hook(const CANPacket_t *msg) {
 
 
 static safety_config landrover_init(uint16_t param) {
-  const int LANDROVER_PARAM_FLEXRAY_HARNESS = 1;
+  const uint16_t LANDROVER_PARAM_FLEXRAY_HARNESS = 1;
 
 #ifdef _RR_2017_
   // CAN messages for RANGE ROVER 2017 camera

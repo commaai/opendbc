@@ -27,16 +27,17 @@ class CarInterface(CarInterfaceBase):
     if ret.centerToFront == 0:
       ret.centerToFront = ret.wheelbase * 0.4
 
+    """
     if candidate in (CAR.RANGEROVER_VOGUE_2017):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
       ret.steerActuatorDelay = 0.11
       ret.enableBsm = True
+    """
 
-    elif candidate in (CAR.LANDROVER_DEFENDER_2023):
+    if candidate in (CAR.LANDROVER_DEFENDER_2023):
       ret.steerControlType = structs.CarParams.SteerControlType.angle
       ret.enableBsm = True
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.landrover, ret.flags)]
 
     return ret
-

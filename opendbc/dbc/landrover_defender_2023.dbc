@@ -138,6 +138,14 @@ BO_ 240 WheelSpeedRear: 8 XXX
  SG_ SpeedLeft : 22|15@0+ (0.01,0) [0|8191] "" XXX
  SG_ SpeedRight : 38|15@0+ (0.01,0) [0|8191] "" XXX
 
+BO_ 258 CRUISE02: 8 pt
+ SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_4 : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ GasPedalPos : 19|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_1 : 20|3@1+ (1,0) [0|7] "" XXX
+ SG_ CRUISE_On_Or_Standstill : 34|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 264 GearPRND: 8 pt
  SG_ PRND_POS : 26|3@0+ (1,0) [0|7] "" XXX
  SG_ PRND : 41|2@0+ (1,0) [0|3] "" XXX

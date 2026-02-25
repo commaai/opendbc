@@ -20,31 +20,30 @@ def defender_crc(data):
 def create_lkas_command_defender(packer, enable, latActive, apply_angle, cnt):
 
   values = {
-    "Lkas_checksum" : 0,
-    "counter"       : cnt,
+    "Lkas_checksum": 0,
+    "counter": cnt,
     "ReqAngleTorque": apply_angle,  # todo check
-    "EnAngle"       : latActive,
-    "Engaged"       : enable,
+    "EnAngle": latActive,
+    "Engaged": enable,
   }
 
   dat = packer.make_can_msg("LKAS_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)[1]
-  values["Lkas_checksum"] =  defender_crc(dat[1:5])
+  values["Lkas_checksum"] = defender_crc(dat[1:5])
 
   return packer.make_can_msg("LKAS_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)
 
 def create_hud_command_defender(packer, enable, latActive, cnt, left_lane, right_lane):
 
   values = {
-    "Lkas_checksum" : 0,
-    "counter"       : cnt,
-    "EnAngle"       : latActive,
-    "lane_left"     : left_lane,
-    "lane_right"    : right_lane,
-    "Engaged"       : enable,
+    "Lkas_checksum": 0,
+    "counter": cnt,
+    "EnAngle": latActive,
+    "lane_left": left_lane,
+    "lane_right": right_lane,
+    "Engaged": enable,
   }
 
   dat = packer.make_can_msg("HUD_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)[1]
-  values["Lkas_checksum"] =  defender_crc(dat[1:5])
+  values["Lkas_checksum"] = defender_crc(dat[1:5])
 
   return packer.make_can_msg("HUD_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)
-
