@@ -96,7 +96,7 @@ class TestHyundaiFingerprint:
     # Tucson having Santa Cruz camera and EPS for example
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
-        if car_model == CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN:
+        if car_model in (CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN, CAR.HYUNDAI_TUCSON_4TH_GEN):
           pytest.skip("Skip checking Santa Cruz for its parts")
 
         for code, _ in get_platform_codes(ecus[(Ecu.fwdCamera, 0x7c4, None)]):
