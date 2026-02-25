@@ -136,13 +136,13 @@ class CarController(CarControllerBase):
             if not allow_indefinite_hold and not CS.esp_hold_confirmation:
               esp_starting_override = False
               esp_stopping_override = True
-            # in order to cycle the ESP, the ESP must not be afraid of rollback
-            # make some torque to help ESP feel comfortable cycling
-            # the TSK and ESP will work together to prevent rollback
-            if not allow_indefinite_hold:
-              accel = max(0, accel)
-              starting = True
-              stopping = False
+          # make some engine torque to help ESP feel comfortable cycling
+          # the ESP doesn't actually care about our acceleration request, only stopping & stopping distance
+          # the engine torque prevents rollback if the ESP is unable to engage again
+          if not allow_indefinite_hold and (CS.esp_standstill_confirmation or CS.esp_hold_confirmation):
+            accel = max(0, accel)
+            starting = True
+            stopping = False
 
         # our standstill timer resets when either:
         # - wheels move while a hold is not confirmed
@@ -150,7 +150,7 @@ class CarController(CarControllerBase):
         if CS.wheel_impulse_count != self.previous_impulse_count and not CS.esp_hold_confirmation:
           # wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
           self.hold_counter = 0
-        elif self.previous_resettable and not CS.esp_hold_confirmation:
+        elif self.previous_resettable and long_active and not CS.esp_hold_confirmation:
           self.hold_counter = 0
 
         # we must be careful not to accidentally reset the timer in unrelated conditions (e.g. when disabling)
