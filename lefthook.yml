@@ -21,7 +21,7 @@ test:
       run: codespell {files} -L tge,stdio -S *.dbc
       files: git ls-tree -r HEAD --name-only
     cpplint:
-      run: cpplint --exclude=opendbc/safety/tests/misra/cppcheck/ --exclude=opendbc/can/*_pyx.cpp --recursive --quiet --counting=detailed --linelength=240 --filter=-build,-legal,-readability,-runtime,-whitespace,+build/include_subdir,+build/forward_decl,+build/include_what_you_use,+build/deprecated,+whitespace/comma,+whitespace/line_length,+whitespace/empty_if_body,+whitespace/empty_loop_body,+whitespace/empty_conditional_body,+whitespace/forcolon,+whitespace/parens,+whitespace/semicolon,+whitespace/tab,+readability/braces opendbc/
+      run: cpplint --exclude=opendbc/can/*_pyx.cpp --recursive --quiet --counting=detailed --linelength=240 --filter=-build,-legal,-readability,-runtime,-whitespace,+build/include_subdir,+build/forward_decl,+build/include_what_you_use,+build/deprecated,+whitespace/comma,+whitespace/line_length,+whitespace/empty_if_body,+whitespace/empty_loop_body,+whitespace/empty_conditional_body,+whitespace/forcolon,+whitespace/parens,+whitespace/semicolon,+whitespace/tab,+readability/braces opendbc/
     misra:
       run: opendbc/safety/tests/misra/test_misra.sh
 
