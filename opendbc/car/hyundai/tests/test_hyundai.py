@@ -93,7 +93,7 @@ class TestHyundaiFingerprint:
 
   def test_blacklisted_parts(self, subtests):
     # Asserts no ECUs known to be shared across platforms exist in the database.
-    # Tucson having Santa Cruz camera and EPS for example
+    # HYUNDAI_SANTA_CRUZ_1ST_GEN and HYUNDAI_TUCSON_4TH_GEN share the same platform (essentially the same vehicle)
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
         if car_model in (CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN, CAR.HYUNDAI_TUCSON_4TH_GEN):
