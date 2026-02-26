@@ -20,10 +20,9 @@ class TestVWHCAMitigation:
 
   def test_same_torque_mitigation(self):
     """Same-torque nudge fires at the threshold, in the correct direction, and resets cleanly."""
-    actuator_max = CarControllerParams.STEER_MAX
     hca_mitigation = HCAMitigation(self.STEER_STEP)
 
-    for actuator_value in (-actuator_max, 0, actuator_max):
+    for actuator_value in (-CarControllerParams.STEER_MAX, 0, CarControllerParams.STEER_MAX):
       for frame in range(self.STUCK_TORQUE_FRAMES + 2):
         should_nudge = actuator_value != 0 and frame == self.STUCK_TORQUE_FRAMES
         expected_value = actuator_value - (1, -1)[actuator_value < 0] if should_nudge else actuator_value
