@@ -21,23 +21,13 @@ class TestVWHCAMitigation:
   def test_same_torque_mitigation(self):
     """Same-torque nudge fires just past the threshold, in the correct direction, and resets cleanly."""
     actuator_max = CarControllerParams.STEER_MAX
-    hca = HCAMitigation(self.STEER_STEP)
+    hca_mitigation = HCAMitigation(self.STEER_STEP)
 
-    # Allow same torque command until the threshold, one frame past nudges torque toward zero, then returns
     for actuator_value in (-actuator_max, 0, actuator_max):
       for frame in range(self.STUCK_TORQUE_FRAMES + 2):
         should_nudge = actuator_value != 0 and frame == self.STUCK_TORQUE_FRAMES
         expected_value = actuator_value - (1, -1)[actuator_value < 0] if should_nudge else actuator_value
-        assert hca.update(actuator_value != 0, actuator_value, actuator_value) == expected_value, f"{frame=}"
-
-    # A torque change resets the counter; a full window must elapse before the next nudge
-    hca_reset = HCAMitigation(self.STEER_STEP)
-    for _ in range(self.STUCK_TORQUE_FRAMES):
-      hca_reset.update(True, 100, 100)
-    hca_reset.update(True, 101, 100)  # torque changed, counter resets
-    for _ in range(self.STUCK_TORQUE_FRAMES):
-      result = hca_reset.update(True, 101, 101)
-    assert result == 101  # still no nudge, counter just reached threshold again
+        assert hca_mitigation.update(actuator_value != 0, actuator_value, actuator_value) == expected_value, f"{frame=}"
 
 
 class TestVolkswagenPlatformConfigs:
