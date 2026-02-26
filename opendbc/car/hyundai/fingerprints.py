@@ -936,6 +936,21 @@ FW_VERSIONS = {
       b'\xf1\x00CN ESC \t 105 \x10\x03 58910-AA800',
     ],
   },
+  CAR.HYUNDAI_ELANTRA_2024: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00CN7_ RDR -----      1.00 1.01 99110-AA500         ',
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00CN7 MDPS C 1.00 1.02 56300AA670\x00 4CSDC102',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00CN7 MFC  AT USA LHD 1.00 1.02 99210-AA500 230420',
+      b'\xf1\x00CN7 MFC  AT USA LHD 1.00 1.03 99210-AA500 230918',
+    ],
+    (Ecu.abs, 0x7d1, None): [
+      b'\xf1\x00CN ESC \t 104#\x07\x03 58910-AA850',
+    ],
+  },
   CAR.HYUNDAI_ELANTRA_HEV_2021: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00CN7HMFC  AT USA LHD 1.00 1.03 99210-AA000 200819',
@@ -953,6 +968,20 @@ FW_VERSIONS = {
       b'\xf1\x00CN7 MDPS C 1.00 1.03 56310BY050\x00 4CNHC103',
       b'\xf1\x00CN7 MDPS C 1.00 1.03 56310BY0500 4CNHC103',
       b'\xf1\x00CN7 MDPS C 1.00 1.04 56310BY050\x00 4CNHC104',
+    ],
+  },
+  CAR.HYUNDAI_ELANTRA_HEV_2024: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00CN7_ RDR -----      1.00 1.01 99110-AA500         ',
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00CN7 MDPS C 1.00 1.00 56300BY670\x00 4CSHC100',
+      b'\xf1\x00CN7 MDPS C 1.00 1.00 56300BY680\x00 4CSHC100',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00CN7HMFC  AT AUS RHD 1.00 1.02 99210-AA500 230420',
+      b'\xf1\x00CN7HMFC  AT CAN LHD 1.00 1.05 99210-AA510 240509',
+      b'\xf1\x00CN7HMFC  AT USA LHD 1.00 1.03 99210-AA500 230918',
     ],
   },
   CAR.HYUNDAI_KONA_HEV: {
