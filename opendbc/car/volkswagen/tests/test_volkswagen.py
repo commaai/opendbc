@@ -16,78 +16,64 @@ SPARE_PART_FW_PATTERN = re.compile(b'\xf1\x87(?P<gateway>[0-9][0-9A-Z]{2})(?P<un
 
 class TestVWHCAMitigation:
   # HCA runs at 50Hz (STEER_STEP=2 at DT_CTRL=0.01s), so 1 HCA frame = DT_CTRL * 2 seconds.
-  # Threshold values derived from HCAMitigation class constants.
   STUCK_TORQUE_FRAMES = round(HCAMitigation.STEER_TIME_STUCK_TORQUE / (DT_CTRL * 2))
-  ALERT_FRAMES = round(HCAMitigation.STEER_TIME_ALERT / (DT_CTRL * 2))
 
-  def test_same_torque_nudge_fires(self):
+  def test_steer_duration_timer(self):
+    """The HCA engaged timer resets whenever commanded torque is zero."""
     hca = HCAMitigation()
-    # One frame short of the threshold: no nudge
+
+    # Timer counts up each active HCA frame with nonzero torque
+    for i in range(1, 11):
+      hca.update(True, 100, 50)
+      assert hca.hca_frames_active == i
+
+    # Timer resets when lat becomes inactive
+    hca.update(False, 0, 100)
+    assert hca.hca_frames_active == 0
+
+    # Timer resets when lat is still active but torque reaches zero
+    # (MQB mitigation: one frame of zero torque resets the EPS timer)
+    for _ in range(10):
+      hca.update(True, 100, 50)
+    hca.update(True, 0, 100)
+    assert hca.hca_frames_active == 0
+
+  def test_same_torque_mitigation(self):
+    """Same-torque nudge fires just past the threshold, in the correct direction, and resets cleanly."""
+    hca = HCAMitigation()
+
+    # Boundary: exactly at STUCK_TORQUE_FRAMES does not nudge (condition is >, not >=)
     for _ in range(self.STUCK_TORQUE_FRAMES):
       result = hca.update(True, 100, 100)
     assert result == 100
 
-    # One more frame tips over the threshold
+    # One frame past the threshold nudges positive torque toward zero
     result = hca.update(True, 100, 100)
     assert result == 99
 
-  def test_same_torque_nudge_direction_negative(self):
-    hca = HCAMitigation()
-    for _ in range(self.STUCK_TORQUE_FRAMES):
-      hca.update(True, -100, -100)
-    result = hca.update(True, -100, -100)
+    # Negative torque is also nudged toward zero
+    hca_neg = HCAMitigation()
+    for _ in range(self.STUCK_TORQUE_FRAMES + 1):
+      result = hca_neg.update(True, -100, -100)
     assert result == -99
 
-  def test_torque_change_resets_same_torque_counter(self):
-    hca = HCAMitigation()
-    # Run to one frame short of the threshold
+    # A torque change resets the counter; a full window must elapse before the next nudge
+    hca_reset = HCAMitigation()
     for _ in range(self.STUCK_TORQUE_FRAMES):
-      hca.update(True, 100, 100)
-
-    # A torque change resets the counter; the next STUCK_TORQUE_FRAMES frames should not nudge
-    hca.update(True, 101, 100)
+      hca_reset.update(True, 100, 100)
+    hca_reset.update(True, 101, 100)  # torque changed, counter resets
     for _ in range(self.STUCK_TORQUE_FRAMES):
-      result = hca.update(True, 101, 101)
-    assert result == 101
+      result = hca_reset.update(True, 101, 101)
+    assert result == 101  # still no nudge, counter just reached threshold again
 
-  def test_same_torque_counter_not_reset_on_inactive(self):
-    # hca_frames_same_torque persists across inactive periods (matches original carcontroller behavior)
-    hca = HCAMitigation()
+    # Same-torque counter persists across inactive periods (lat_active=False does NOT reset it)
+    hca_persist = HCAMitigation()
     for _ in range(self.STUCK_TORQUE_FRAMES):
-      hca.update(True, 100, 100)
-
-    hca.update(False, 0, 100)
-
-    result = hca.update(True, 100, 100)
+      hca_persist.update(True, 100, 100)
+    hca_persist.update(False, 0, 100)  # go inactive
+    result = hca_persist.update(True, 100, 100)  # one more tips past the threshold
     assert result == 99
 
-  def test_active_timer_resets_on_inactive(self):
-    hca = HCAMitigation()
-    for _ in range(10):
-      hca.update(True, 100, 50)
-    assert hca.hca_frames_active == 10
-
-    hca.update(False, 0, 100)
-    assert hca.hca_frames_active == 0
-
-  def test_active_timer_resets_on_zero_torque(self):
-    hca = HCAMitigation()
-    for _ in range(10):
-      hca.update(True, 100, 50)
-    assert hca.hca_frames_active == 10
-
-    hca.update(True, 0, 100)
-    assert hca.hca_frames_active == 0
-
-  def test_eps_timer_alert_not_set_before_threshold(self):
-    hca = HCAMitigation()
-    hca.hca_frames_active = self.ALERT_FRAMES
-    assert not hca.eps_timer_soft_disable_alert()
-
-  def test_eps_timer_alert_sets_past_threshold(self):
-    hca = HCAMitigation()
-    hca.hca_frames_active = self.ALERT_FRAMES + 1
-    assert hca.eps_timer_soft_disable_alert()
 
 
 class TestVolkswagenPlatformConfigs:

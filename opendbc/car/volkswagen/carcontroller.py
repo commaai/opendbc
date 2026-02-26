@@ -16,24 +16,18 @@ class HCAMitigation:
   Manages HCA fault mitigations for VW/Audi EPS racks:
     * Nudges torque by 1 after commanding the same value for too long,
       preventing HCA state 4 ("refused") due to stuck torque.
-    * Tracks total active steering time so callers can soft-disengage
-      before the EPS uninterrupted-steering timer expires.
+    * Tracks total active steering time so the EPS uninterrupted-steering
+      timer can be reset before it expires.
   MQB racks reset their engaged timer after a single frame with HCA disabled,
   which occurs naturally whenever commanded torque is zero.
   Counters are in units of HCA frames (50Hz, STEER_STEP=2 at DT_CTRL=0.01s).
   """
 
-  STEER_TIME_MAX = 360                     # seconds, EPS uninterrupted steering limit
-  STEER_TIME_ALERT = STEER_TIME_MAX - 10   # seconds, soft-disengage before EPS timeout if mitigation fails
   STEER_TIME_STUCK_TORQUE = 1.9            # seconds, EPS limits same torque to ~6s; reset the timer 3x within that window
 
   def __init__(self):
     self.hca_frames_active = 0
     self.hca_frames_same_torque = 0
-
-  def eps_timer_soft_disable_alert(self) -> bool:
-    # DT_CTRL * 2 converts HCA frame count to seconds (50Hz = 2 control frames per HCA frame)
-    return self.hca_frames_active > self.STEER_TIME_ALERT / (DT_CTRL * 2)
 
   def update(self, lat_active, apply_torque, apply_torque_last):
     if lat_active:
