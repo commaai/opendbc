@@ -14,24 +14,16 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 class HCAMitigation:
   """
   Manages HCA fault mitigations for VW/Audi EPS racks:
-    * Nudges torque by 1 after commanding the same value for too long,
-      preventing HCA state 4 ("refused") due to stuck torque.
-    * Tracks total active steering time so the EPS uninterrupted-steering
-      timer can be reset before it expires.
-  MQB racks reset their engaged timer after a single frame with HCA disabled,
-  which occurs naturally whenever commanded torque is zero.
-  Counters are in units of HCA frames (50Hz, STEER_STEP=2 at DT_CTRL=0.01s).
+    * Nudges torque by 1 after commanding the same value for too long
   """
 
-  STEER_TIME_STUCK_TORQUE = 1.9            # seconds, EPS limits same torque to ~6s; reset the timer 3x within that window
+  STEER_TIME_STUCK_TORQUE = 1.9  # seconds, EPS limits same torque to ~6s; reset the timer 3x within that window
 
   def __init__(self):
-    self.hca_frames_active = 0
     self.hca_frames_same_torque = 0
 
   def update(self, lat_active, apply_torque, apply_torque_last):
     if lat_active:
-      self.hca_frames_active += 1
       if apply_torque_last == apply_torque:
         self.hca_frames_same_torque += 1
         if self.hca_frames_same_torque > self.STEER_TIME_STUCK_TORQUE / (DT_CTRL * 2):
@@ -39,9 +31,6 @@ class HCAMitigation:
           self.hca_frames_same_torque = 0
       else:
         self.hca_frames_same_torque = 0
-
-    if abs(apply_torque) == 0:
-      self.hca_frames_active = 0
 
     return apply_torque
 
