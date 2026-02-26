@@ -26,10 +26,7 @@ class TestVolkswagenHCAMitigation:
       for frame in range(self.STUCK_TORQUE_FRAMES + 2):
         should_nudge = actuator_value != 0 and frame == self.STUCK_TORQUE_FRAMES
         expected_torque = actuator_value - (1, -1)[actuator_value < 0] if should_nudge else actuator_value
-        expected_hca_enabled = expected_torque != 0
-        hca_enabled, apply_torque = hca_mitigation.update(actuator_value, actuator_value)
-        assert hca_enabled == expected_hca_enabled, f"{frame=} {actuator_value=} {expected_torque=}"
-        assert apply_torque == expected_torque, f"{frame=} {hca_enabled=} {expected_hca_enabled=}"
+        assert hca_mitigation.update(actuator_value, actuator_value) == expected_torque, f"{frame=}"
 
 class TestVolkswagenPlatformConfigs:
   def test_spare_part_fw_pattern(self, subtests):
