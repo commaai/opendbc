@@ -21,12 +21,15 @@ class TestVolkswagenHCAMitigation:
     """Same-torque nudge fires at the threshold, in the correct direction, and resets cleanly."""
     hca_mitigation = HCAMitigation(CCP)
 
-    for actuator_value in (-CCP.STEER_MAX, 0, CCP.STEER_MAX):
+    for actuator_value in (-CCP.STEER_MAX, -1, 0, 1, CCP.STEER_MAX):
+      hca_mitigation.update(0, 0)  # Reset mitigation state
       for frame in range(self.STUCK_TORQUE_FRAMES + 2):
         should_nudge = actuator_value != 0 and frame == self.STUCK_TORQUE_FRAMES
-        expected_value = actuator_value - (1, -1)[actuator_value < 0] if should_nudge else actuator_value
-        assert hca_mitigation.update(actuator_value != 0, actuator_value, actuator_value) == expected_value, f"{frame=}"
-
+        expected_torque = actuator_value - (1, -1)[actuator_value < 0] if should_nudge else actuator_value
+        expected_hca_enabled = expected_torque != 0
+        hca_enabled, apply_torque = hca_mitigation.update(actuator_value, actuator_value)
+        assert hca_enabled == expected_hca_enabled, f"{frame=} {actuator_value=} {expected_torque=}"
+        assert apply_torque == expected_torque, f"{frame=} {hca_enabled=} {expected_hca_enabled=}"
 
 class TestVolkswagenPlatformConfigs:
   def test_spare_part_fw_pattern(self, subtests):

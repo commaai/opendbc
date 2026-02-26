@@ -21,8 +21,8 @@ class HCAMitigation:
     self._hca_frames_same_torque = 0
     self._stuck_torque_threshold = CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP)
 
-  def update(self, lat_active, apply_torque, apply_torque_last):
-    if lat_active and apply_torque_last == apply_torque:
+  def update(self, apply_torque, apply_torque_last):
+    if apply_torque != 0 and apply_torque_last == apply_torque:
       self._hca_frames_same_torque += 1
       if self._hca_frames_same_torque > self._stuck_torque_threshold:
         apply_torque -= (1, -1)[apply_torque < 0]
@@ -30,7 +30,8 @@ class HCAMitigation:
     else:
       self._hca_frames_same_torque = 0
 
-    return apply_torque
+    hca_enabled = apply_torque != 0
+    return hca_enabled, apply_torque
 
 
 class CarController(CarControllerBase):
@@ -65,8 +66,7 @@ class CarController(CarControllerBase):
         new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
 
-      apply_torque = self.hca_mitigation.update(CC.latActive, apply_torque, self.apply_torque_last)
-      hca_enabled = abs(apply_torque) > 0
+      hca_enabled, apply_torque = self.hca_mitigation.update(CC.latActive, apply_torque, self.apply_torque_last)
       self.apply_torque_last = apply_torque
       can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_torque, hca_enabled))
 
