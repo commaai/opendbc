@@ -19,7 +19,7 @@ class TestVWHCAMitigation:
   STUCK_TORQUE_FRAMES = round(HCAMitigation.STEER_TIME_STUCK_TORQUE / (DT_CTRL * STEER_STEP))
 
   def test_same_torque_mitigation(self):
-    """Same-torque nudge fires just past the threshold, in the correct direction, and resets cleanly."""
+    """Same-torque nudge fires at the threshold, in the correct direction, and resets cleanly."""
     actuator_max = CarControllerParams.STEER_MAX
     hca_mitigation = HCAMitigation(self.STEER_STEP)
 
