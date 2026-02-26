@@ -1,7 +1,9 @@
 import random
 import re
 
+from opendbc.car import DT_CTRL
 from opendbc.car.structs import CarParams
+from opendbc.car.volkswagen.carcontroller import HCAMitigation
 from opendbc.car.volkswagen.values import CAR, FW_QUERY_CONFIG, WMI
 from opendbc.car.volkswagen.fingerprints import FW_VERSIONS
 
@@ -10,6 +12,82 @@ Ecu = CarParams.Ecu
 CHASSIS_CODE_PATTERN = re.compile('[A-Z0-9]{2}')
 # TODO: determine the unknown groups
 SPARE_PART_FW_PATTERN = re.compile(b'\xf1\x87(?P<gateway>[0-9][0-9A-Z]{2})(?P<unknown>[0-9][0-9A-Z][0-9])(?P<unknown2>[0-9A-Z]{2}[0-9])([A-Z0-9]| )')
+
+
+class TestVWHCAMitigation:
+  # HCA runs at 50Hz (STEER_STEP=2 at DT_CTRL=0.01s), so 1 HCA frame = DT_CTRL * 2 seconds.
+  # Threshold values derived from HCAMitigation class constants.
+  STUCK_TORQUE_FRAMES = round(HCAMitigation.STEER_TIME_STUCK_TORQUE / (DT_CTRL * 2))
+  ALERT_FRAMES = round(HCAMitigation.STEER_TIME_ALERT / (DT_CTRL * 2))
+
+  def test_same_torque_nudge_fires(self):
+    hca = HCAMitigation()
+    # One frame short of the threshold: no nudge
+    for _ in range(self.STUCK_TORQUE_FRAMES):
+      result = hca.update(True, 100, 100)
+    assert result == 100
+
+    # One more frame tips over the threshold
+    result = hca.update(True, 100, 100)
+    assert result == 99
+
+  def test_same_torque_nudge_direction_negative(self):
+    hca = HCAMitigation()
+    for _ in range(self.STUCK_TORQUE_FRAMES):
+      hca.update(True, -100, -100)
+    result = hca.update(True, -100, -100)
+    assert result == -99
+
+  def test_torque_change_resets_same_torque_counter(self):
+    hca = HCAMitigation()
+    # Run to one frame short of the threshold
+    for _ in range(self.STUCK_TORQUE_FRAMES):
+      hca.update(True, 100, 100)
+
+    # A torque change resets the counter; the next STUCK_TORQUE_FRAMES frames should not nudge
+    hca.update(True, 101, 100)
+    for _ in range(self.STUCK_TORQUE_FRAMES):
+      result = hca.update(True, 101, 101)
+    assert result == 101
+
+  def test_same_torque_counter_not_reset_on_inactive(self):
+    # hca_frames_same_torque persists across inactive periods (matches original carcontroller behavior)
+    hca = HCAMitigation()
+    for _ in range(self.STUCK_TORQUE_FRAMES):
+      hca.update(True, 100, 100)
+
+    hca.update(False, 0, 100)
+
+    result = hca.update(True, 100, 100)
+    assert result == 99
+
+  def test_active_timer_resets_on_inactive(self):
+    hca = HCAMitigation()
+    for _ in range(10):
+      hca.update(True, 100, 50)
+    assert hca.hca_frames_active == 10
+
+    hca.update(False, 0, 100)
+    assert hca.hca_frames_active == 0
+
+  def test_active_timer_resets_on_zero_torque(self):
+    hca = HCAMitigation()
+    for _ in range(10):
+      hca.update(True, 100, 50)
+    assert hca.hca_frames_active == 10
+
+    hca.update(True, 0, 100)
+    assert hca.hca_frames_active == 0
+
+  def test_eps_timer_alert_not_set_before_threshold(self):
+    hca = HCAMitigation()
+    hca.hca_frames_active = self.ALERT_FRAMES
+    assert not hca.eps_timer_soft_disable_alert()
+
+  def test_eps_timer_alert_sets_past_threshold(self):
+    hca = HCAMitigation()
+    hca.hca_frames_active = self.ALERT_FRAMES + 1
+    assert hca.eps_timer_soft_disable_alert()
 
 
 class TestVolkswagenPlatformConfigs:
