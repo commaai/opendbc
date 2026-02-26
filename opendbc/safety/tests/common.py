@@ -1126,3 +1126,10 @@ class CarSafetyTest(SafetyTest):
     self.safety.safety_tick_current_safety_config()
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertFalse(self.safety.safety_config_valid())
+
+  def test_safety_tick_not_lagging(self):
+    # safety_tick with timer at 0 exercises the not-lagging path
+    self.safety.set_timer(0)
+    self.safety.safety_tick_current_safety_config()
+    # No valid messages received yet, so config is still invalid
+    self.assertFalse(self.safety.safety_config_valid())

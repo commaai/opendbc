@@ -237,6 +237,17 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
     self.assertFalse(self._tx(self._accel_msg(0, aeb_req=True)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_decel=1.0)))
 
+  def test_button_msg_passthrough(self):
+    # In longitudinal mode, button messages are forwarded without validation
+    self.assertTrue(self._tx(self._button_msg(0, bus=0)))
+
+  def test_tester_present_partial_match(self):
+    tester_present_ok = libsafety_py.make_CANPacket(0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00")
+    self.assertTrue(self._tx(tester_present_ok))
+
+    partial_match = libsafety_py.make_CANPacket(0x7D0, 0, b"\x02\x3E\x80\x00\x01\x00\x00\x00")
+    self.assertFalse(self._tx(partial_match))
+
 
 class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyundaiSafety):
   TX_MSGS = [[0x340, 0], [0x4F1, 2], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0]]

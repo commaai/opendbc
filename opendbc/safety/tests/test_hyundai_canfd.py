@@ -81,6 +81,13 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
 
+  def test_individual_wheel_speeds(self):
+    for pos in ["FL", "FR", "RL", "RR"]:
+      values = {f"WHL_Spd{p}Val": 0 for p in ["FL", "FR", "RL", "RR"]}
+      values[f"WHL_Spd{pos}Val"] = 1
+      self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
+      self.assertTrue(self.safety.get_vehicle_moving(), f"vehicle not moving with {pos} speed")
+
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
@@ -254,6 +261,13 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
+
+  def test_tester_present_partial_match(self):
+    if self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
+      return
+    addr, bus = self.DISABLED_ECU_UDS_MSG
+    partial_match = libsafety_py.make_CANPacket(addr, bus, b"\x02\x3E\x80\x00\x01\x00\x00\x00")
+    self.assertFalse(self._tx(partial_match))
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)

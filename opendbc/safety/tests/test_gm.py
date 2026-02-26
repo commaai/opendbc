@@ -200,6 +200,13 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
       self._rx(self._pcm_status_msg(enabled))
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
 
+  def test_buttons_rx_pcm_cruise(self):
+    # With PCM cruise, button state changes on bus 0 should not enable controls
+    self.safety.set_controls_allowed(False)
+    self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": Buttons.DECEL_SET}))
+    self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": Buttons.UNPRESS}))
+    self.assertFalse(self.safety.get_controls_allowed())
+
 
 class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
   pass
