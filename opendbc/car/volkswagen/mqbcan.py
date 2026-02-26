@@ -128,13 +128,14 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   return commands
 
 
-def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance, distance):
+def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance, distance, fcw_alert):
   values = {
     "ACC_Status_Anzeige": acc_hud_status,
     "ACC_Wunschgeschw_02": set_speed if set_speed < 250 else 327.36,
     "ACC_Gesetzte_Zeitluecke": distance + 2,
     "ACC_Display_Prio": 3,
     "ACC_Abstandsindex": lead_distance,
+    "ACC_Akustik_02": fcw_alert,
   }
 
   return packer.make_can_msg("ACC_02", bus, values)
