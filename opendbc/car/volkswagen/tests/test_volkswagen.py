@@ -14,7 +14,7 @@ CHASSIS_CODE_PATTERN = re.compile('[A-Z0-9]{2}')
 SPARE_PART_FW_PATTERN = re.compile(b'\xf1\x87(?P<gateway>[0-9][0-9A-Z]{2})(?P<unknown>[0-9][0-9A-Z][0-9])(?P<unknown2>[0-9A-Z]{2}[0-9])([A-Z0-9]| )')
 
 
-class TestVWHCAMitigation:
+class TestVolkswagenHCAMitigation:
   STUCK_TORQUE_FRAMES = round(CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP))
 
   def test_same_torque_mitigation(self):
