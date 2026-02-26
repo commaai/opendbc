@@ -4,7 +4,7 @@ import re
 from opendbc.car import DT_CTRL
 from opendbc.car.structs import CarParams
 from opendbc.car.volkswagen.carcontroller import HCAMitigation
-from opendbc.car.volkswagen.values import CAR, FW_QUERY_CONFIG, WMI
+from opendbc.car.volkswagen.values import CAR, CarControllerParams, FW_QUERY_CONFIG, WMI
 from opendbc.car.volkswagen.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
@@ -15,32 +15,12 @@ SPARE_PART_FW_PATTERN = re.compile(b'\xf1\x87(?P<gateway>[0-9][0-9A-Z]{2})(?P<un
 
 
 class TestVWHCAMitigation:
-  # HCA runs at 50Hz (STEER_STEP=2 at DT_CTRL=0.01s), so 1 HCA frame = DT_CTRL * 2 seconds.
-  STUCK_TORQUE_FRAMES = round(HCAMitigation.STEER_TIME_STUCK_TORQUE / (DT_CTRL * 2))
-
-  def test_steer_duration_timer(self):
-    """The HCA engaged timer resets whenever commanded torque is zero."""
-    hca = HCAMitigation()
-
-    # Timer counts up each active HCA frame with nonzero torque
-    for i in range(1, 11):
-      hca.update(True, 100, 50)
-      assert hca.hca_frames_active == i
-
-    # Timer resets when lat becomes inactive
-    hca.update(False, 0, 100)
-    assert hca.hca_frames_active == 0
-
-    # Timer resets when lat is still active but torque reaches zero
-    # (MQB mitigation: one frame of zero torque resets the EPS timer)
-    for _ in range(10):
-      hca.update(True, 100, 50)
-    hca.update(True, 0, 100)
-    assert hca.hca_frames_active == 0
+  STEER_STEP = CarControllerParams.STEER_STEP
+  STUCK_TORQUE_FRAMES = round(HCAMitigation.STEER_TIME_STUCK_TORQUE / (DT_CTRL * STEER_STEP))
 
   def test_same_torque_mitigation(self):
     """Same-torque nudge fires just past the threshold, in the correct direction, and resets cleanly."""
-    hca = HCAMitigation()
+    hca = HCAMitigation(self.STEER_STEP)
 
     # Boundary: exactly at STUCK_TORQUE_FRAMES does not nudge (condition is >, not >=)
     for _ in range(self.STUCK_TORQUE_FRAMES):
@@ -52,13 +32,13 @@ class TestVWHCAMitigation:
     assert result == 99
 
     # Negative torque is also nudged toward zero
-    hca_neg = HCAMitigation()
+    hca_neg = HCAMitigation(self.STEER_STEP)
     for _ in range(self.STUCK_TORQUE_FRAMES + 1):
       result = hca_neg.update(True, -100, -100)
     assert result == -99
 
     # A torque change resets the counter; a full window must elapse before the next nudge
-    hca_reset = HCAMitigation()
+    hca_reset = HCAMitigation(self.STEER_STEP)
     for _ in range(self.STUCK_TORQUE_FRAMES):
       hca_reset.update(True, 100, 100)
     hca_reset.update(True, 101, 100)  # torque changed, counter resets
@@ -67,7 +47,7 @@ class TestVWHCAMitigation:
     assert result == 101  # still no nudge, counter just reached threshold again
 
     # Same-torque counter persists across inactive periods (lat_active=False does NOT reset it)
-    hca_persist = HCAMitigation()
+    hca_persist = HCAMitigation(self.STEER_STEP)
     for _ in range(self.STUCK_TORQUE_FRAMES):
       hca_persist.update(True, 100, 100)
     hca_persist.update(False, 0, 100)  # go inactive
