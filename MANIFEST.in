@@ -1,3 +1,6 @@
 include opendbc/car/car.capnp
+include opendbc/car/rlog.capnp
 include opendbc/car/include/c++.capnp
-recursive-include opendbc/safety *.h
+recursive-include opendbc/safety *.h *.c
+recursive-include opendbc/car/torque_data *.toml
+include opendbc/can/tests/test.dbc
