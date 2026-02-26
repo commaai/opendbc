@@ -36,18 +36,34 @@ class CanBus(CanBusBase):
     return self._cam
 
 
-def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque):
-  common_values = {
-    "LKA_MODE": 2,
-    "LKA_ICON": 2 if enabled else 1,
-    "TORQUE_REQUEST": apply_torque,
-    "LKA_ASSIST": 0,
-    "STEER_REQ": 1 if lat_active else 0,
-    "STEER_MODE": 0,
-    "HAS_LANE_SAFETY": 0,  # hide LKAS settings
-    "NEW_SIGNAL_2": 0,
-    "DAMP_FACTOR": 100,  # can potentially tuned for better perf [3, 200]
-  }
+def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque, apply_angle, max_torque, angle_control):
+
+  if angle_control:
+    common_values = {
+      "LKA_MODE": 0,
+      "LKA_ICON": 2 if enabled else 1,
+      "TORQUE_REQUEST": 0,  # apply_steer,
+      "VALUE63": 0, # LKA_ASSIST
+      "STEER_REQ": 0,  # 1 if lat_active else 0,
+      "HAS_LANE_SAFETY": 0,  # hide LKAS settings
+      "LKA_ACTIVE": 3 if lat_active else 0,  # this changes sometimes, 3 seems to indicate engaged
+      "VALUE64": 0,  #STEER_MODE, NEW_SIGNAL_2
+      "LKAS_ANGLE_CMD": -apply_angle,
+      "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
+      "LKAS_ANGLE_MAX_TORQUE": max_torque if lat_active else 0,
+    }
+  else:
+    common_values = {
+      "LKA_MODE": 2,
+      "LKA_ICON": 2 if enabled else 1,
+      "TORQUE_REQUEST": apply_torque,
+      "DampingGain": 3 if enabled else 100,
+      "STEER_REQ": 1 if lat_active else 0,
+      #"STEER_MODE": 0,
+      "HAS_LANE_SAFETY": 0,  # hide LKAS settings
+      "VALUE63": 0,
+      "VALUE64": 0,
+    }
 
   lkas_values = copy.copy(common_values)
   lkas_values["LKA_AVAILABLE"] = 0
