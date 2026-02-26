@@ -17,11 +17,9 @@ class HCAMitigation:
     * Nudges torque by 1 after commanding the same value for too long
   """
 
-  STEER_TIME_STUCK_TORQUE = 1.9  # seconds, EPS limits same torque to ~6s; reset the timer 3x within that window
-
   def __init__(self, CCP):
     self.hca_frames_same_torque = 0
-    self._stuck_torque_threshold = self.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP)
+    self._stuck_torque_threshold = CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP)
 
   def update(self, lat_active, apply_torque, apply_torque_last):
     if lat_active and apply_torque_last == apply_torque:
