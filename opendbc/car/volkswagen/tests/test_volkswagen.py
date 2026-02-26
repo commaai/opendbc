@@ -15,11 +15,11 @@ SPARE_PART_FW_PATTERN = re.compile(b'\xf1\x87(?P<gateway>[0-9][0-9A-Z]{2})(?P<un
 
 
 class TestVWHCAMitigation:
-  STUCK_TORQUE_FRAMES = round(HCAMitigation.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP))
+  STUCK_TORQUE_FRAMES = round(CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP))
 
   def test_same_torque_mitigation(self):
     """Same-torque nudge fires at the threshold, in the correct direction, and resets cleanly."""
-    hca_mitigation = HCAMitigation(CCP.STEER_STEP)
+    hca_mitigation = HCAMitigation(CCP)
 
     for actuator_value in (-CCP.STEER_MAX, 0, CCP.STEER_MAX):
       for frame in range(self.STUCK_TORQUE_FRAMES + 2):

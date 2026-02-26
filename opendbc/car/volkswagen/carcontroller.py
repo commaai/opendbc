@@ -19,9 +19,9 @@ class HCAMitigation:
 
   STEER_TIME_STUCK_TORQUE = 1.9  # seconds, EPS limits same torque to ~6s; reset the timer 3x within that window
 
-  def __init__(self, steer_step):
+  def __init__(self, CCP):
     self.hca_frames_same_torque = 0
-    self._stuck_torque_threshold = self.STEER_TIME_STUCK_TORQUE / (DT_CTRL * steer_step)
+    self._stuck_torque_threshold = self.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP)
 
   def update(self, lat_active, apply_torque, apply_torque_last):
     if lat_active and apply_torque_last == apply_torque:
@@ -52,7 +52,7 @@ class CarController(CarControllerBase):
 
     self.apply_torque_last = 0
     self.gra_acc_counter_last = None
-    self.hca_mitigation = HCAMitigation(self.CCP.STEER_STEP)
+    self.hca_mitigation = HCAMitigation(self.CCP)
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
