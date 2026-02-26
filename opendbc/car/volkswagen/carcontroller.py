@@ -52,7 +52,7 @@ class CarController(CarControllerBase):
 
     self.apply_torque_last = 0
     self.gra_acc_counter_last = None
-    self.hca = HCAMitigation()
+    self.hca_mitigation = HCAMitigation()
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -67,7 +67,7 @@ class CarController(CarControllerBase):
         new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
 
-      apply_torque = self.hca.update(CC.latActive, apply_torque, self.apply_torque_last)
+      apply_torque = self.hca_mitigation.update(CC.latActive, apply_torque, self.apply_torque_last)
       hca_enabled = abs(apply_torque) > 0
       self.apply_torque_last = apply_torque
       can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_torque, hca_enabled))
