@@ -18,17 +18,17 @@ class HCAMitigation:
   """
 
   def __init__(self, CCP):
-    self.hca_frames_same_torque = 0
+    self._hca_frames_same_torque = 0
     self._stuck_torque_threshold = CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP)
 
   def update(self, lat_active, apply_torque, apply_torque_last):
     if lat_active and apply_torque_last == apply_torque:
-      self.hca_frames_same_torque += 1
-      if self.hca_frames_same_torque > self._stuck_torque_threshold:
+      self._hca_frames_same_torque += 1
+      if self._hca_frames_same_torque > self._stuck_torque_threshold:
         apply_torque -= (1, -1)[apply_torque < 0]
-        self.hca_frames_same_torque = 0
+        self._hca_frames_same_torque = 0
     else:
-      self.hca_frames_same_torque = 0
+      self._hca_frames_same_torque = 0
 
     return apply_torque
 
