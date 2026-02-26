@@ -75,7 +75,6 @@ class TestVWHCAMitigation:
     assert result == 99
 
 
-
 class TestVolkswagenPlatformConfigs:
   def test_spare_part_fw_pattern(self, subtests):
     # Relied on for determining if a FW is likely VW
