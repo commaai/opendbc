@@ -14,7 +14,7 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 class HCAMitigation:
   """
   Manages HCA fault mitigations for VW/Audi EPS racks:
-    * Nudges torque by 1 after commanding the same value for too long
+    * Reduces torque by 1 for a single frame after commanding the same torque value for too long
   """
 
   def __init__(self, CCP):
