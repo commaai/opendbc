@@ -206,9 +206,9 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.ALLOW_MANUAL_TRANS
   )
   HONDA_CRV_5G = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda CR-V 2017-22", min_steer_speed=15. * CV.MPH_TO_MS)],
+    [HondaCarDocs("Honda CR-V 2017-22")],
     # steerRatio: 12.3 is spec end-to-end
-    CarSpecs(mass=3410 * CV.LB_TO_KG, wheelbase=2.66, steerRatio=16.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
+    CarSpecs(mass=3410 * CV.LB_TO_KG, wheelbase=2.66, steerRatio=16.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.677, minSteerSpeed=15. * CV.MPH_TO_MS),
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated', Bus.body: 'honda_crv_ex_2017_body_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
