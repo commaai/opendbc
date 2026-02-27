@@ -18,6 +18,7 @@ class CarState(CarStateBase):
     self.acc_active_last = False
     self.lkas_allowed_speed = False
     self.lkas_init_complete = False
+    self.lkas_init_frames = 0
 
     self.distance_button = 0
     self.accel_button = 0
@@ -81,10 +82,15 @@ class CarState(CarStateBase):
       self.lkas_allowed_speed = True
       # CX-5 2022: EPS asserts LKAS_BLOCK at standstill (low-speed lockout).
       # Track when it clears for the first time — after that, treat it as a real fault.
+      # Timeout after 5s (500 frames) so a persistent fault from startup is never hidden.
+      # VW uses the same pattern (eps_init_complete, frame > 600).
       if ret.standstill:
         self.lkas_init_complete = False
-      elif not lkas_blocked:
+        self.lkas_init_frames = 0
+      elif not lkas_blocked or self.lkas_init_frames > 500:
         self.lkas_init_complete = True
+      else:
+        self.lkas_init_frames += 1
 
     # TODO: the signal used for available seems to be the adaptive cruise signal, instead of the main on
     #       it should be used for carState.cruiseState.nonAdaptive instead
