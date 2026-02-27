@@ -299,6 +299,15 @@ BO_ 325 ESP_status: 8 PARTY
  SG_ ESP_steeringAngleQF : 27|1@1+ (1,0) [0|0] ""  X
  SG_ ESP_yawRateQF : 26|1@1+ (1,0) [0|0] ""  X
 
+BO_ 389 ESP_brakeTorque: 8 CH
+ SG_ ESP_brakeTorqueFL : 0|12@1+ (2,0) [0|8190] "Nm"  Receiver
+ SG_ ESP_brakeTorqueFR : 12|12@1+ (2,0) [0|8190] "Nm"  Receiver
+ SG_ ESP_brakeTorqueRL : 24|12@1+ (2,0) [0|8190] "Nm"  Receiver
+ SG_ ESP_brakeTorqueRR : 36|12@1+ (2,0) [0|8190] "Nm"  Receiver
+ SG_ ESP_brakeTorqueQF : 50|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ ESP_brakeTorqueCounter : 52|4@1+ (1,0) [0|15] ""  Receiver
+ SG_ ESP_brakeTorqueChecksum : 56|8@1+ (1,0) [0|255] ""  Receiver
+
 BO_ 259 VCRIGHT_doorStatus: 8 VEH
  SG_ VCRIGHT_reservedForBackCompat : 28|2@1+ (1,0) [0|3] "" X
  SG_ VCRIGHT_trunkLatchStatus : 56|4@1+ (1,0) [0|8] "" di
@@ -343,6 +352,16 @@ BO_ 258 VCLEFT_doorStatus: 8 VEH
  SG_ VCLEFT_mirrorTiltYPosition : 41|8@1+ (0.02,0) [0|5] "V" gtw
  SG_ VCLEFT_frontLatchStatus : 0|4@1+ (1,0) [0|8] "" aps
  SG_ VCLEFT_mirrorFoldState : 52|3@1+ (1,0) [0|4] "" gtw
+
+BO_ 273 RCM_inertial2: 8 CH
+ SG_ RCM_inertial2Checksum : 56|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ RCM_inertial2Counter : 52|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ RCM_lateralAccel : 16|16@1- (0.00125,0) [-40.9575|40.9575] "m/s^2" Vector__XXX
+ SG_ RCM_lateralAccelQF : 49|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RCM_longitudinalAccel : 0|16@1- (0.00125,0) [-40.9575|40.9575] "m/s^2" Vector__XXX
+ SG_ RCM_longitudinalAccelQF : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RCM_verticalAccel : 32|16@1- (0.00125,0) [-40.9575|40.9575] "m/s^2" Vector__XXX
+ SG_ RCM_verticalAccelQF : 50|1@1+ (1,0) [0|1] "" Vector__XXX
 
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 
@@ -502,6 +521,11 @@ VAL_ 325 ESP_ptcTargetState 0 "FAULT" 1 "BACKUP" 2 "ON" 3 "SNA";
 VAL_ 325 ESP_stabilityControlSts2 0 "INIT" 1 "ON" 2 "ENGAGED" 3 "FAULTED";
 VAL_ 325 ESP_steeringAngleQF 0 "UNDEFINABLE_ACCURACY" 1 "IN_SPEC";
 VAL_ 325 ESP_yawRateQF 0 "UNDEFINABLE_ACCURACY" 1 "IN_SPEC";
+VAL_ 389 ESP_brakeTorqueFL 4095 "SNA" ;
+VAL_ 389 ESP_brakeTorqueFR 4095 "SNA" ;
+VAL_ 389 ESP_brakeTorqueRL 4095 "SNA" ;
+VAL_ 389 ESP_brakeTorqueRR 4095 "SNA" ;
+VAL_ 389 ESP_brakeTorqueQF 1 "IN_SPEC" 0 "UNDEFINABLE_ACCURACY" ;
 
 VAL_ 259 VCRIGHT_trunkLatchStatus 8 "LATCH_FAULT" 2 "LATCH_CLOSED" 1 "LATCH_OPENED" 3 "LATCH_CLOSING" 7 "LATCH_DEFAULT" 4 "LATCH_OPENING" 5 "LATCH_AJAR" 6 "LATCH_TIMEOUT" 0 "LATCH_SNA";
 VAL_ 259 VCRIGHT_mirrorFoldState 4 "MIRROR_FOLD_STATE_UNFOLDING" 1 "MIRROR_FOLD_STATE_FOLDED" 3 "MIRROR_FOLD_STATE_FOLDING" 0 "MIRROR_FOLD_STATE_UNKNOWN" 2 "MIRROR_FOLD_STATE_UNFOLDED";
@@ -515,3 +539,10 @@ VAL_ 258 VCLEFT_mirrorState 3 "MIRROR_STATE_FOLD_UNFOLD" 1 "MIRROR_STATE_TILT_X"
 VAL_ 258 VCLEFT_mirrorHeatState 2 "HEATER_STATE_OFF" 4 "HEATER_STATE_FAULT" 1 "HEATER_STATE_ON" 0 "HEATER_STATE_SNA" 3 "HEATER_STATE_OFF_UNAVAILABLE";
 VAL_ 258 VCLEFT_frontLatchStatus 8 "LATCH_FAULT" 2 "LATCH_CLOSED" 1 "LATCH_OPENED" 3 "LATCH_CLOSING" 7 "LATCH_DEFAULT" 4 "LATCH_OPENING" 5 "LATCH_AJAR" 6 "LATCH_TIMEOUT" 0 "LATCH_SNA";
 VAL_ 258 VCLEFT_mirrorFoldState 4 "MIRROR_FOLD_STATE_UNFOLDING" 1 "MIRROR_FOLD_STATE_FOLDED" 3 "MIRROR_FOLD_STATE_FOLDING" 0 "MIRROR_FOLD_STATE_UNKNOWN" 2 "MIRROR_FOLD_STATE_UNFOLDED";
+
+VAL_ 273 RCM_lateralAccel 32768 "SNA" ;
+VAL_ 273 RCM_lateralAccelQF 0 "FAULTED" 1 "NOT_FAULTED" ;
+VAL_ 273 RCM_longitudinalAccel 32768 "SNA" ;
+VAL_ 273 RCM_longitudinalAccelQF 0 "FAULTED" 1 "NOT_FAULTED" ;
+VAL_ 273 RCM_verticalAccel 32768 "SNA" ;
+VAL_ 273 RCM_verticalAccelQF 0 "FAULTED" 1 "NOT_FAULTED" ;
