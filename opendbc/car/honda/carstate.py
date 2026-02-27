@@ -2,7 +2,7 @@ import numpy as np
 from collections import defaultdict
 
 from opendbc.can import CANDefine, CANParser
-from opendbc.car import Bus, create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs, DT_CTRL
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_ALT_RADAR, HONDA_BOSCH_CANFD, \
@@ -50,6 +50,9 @@ class CarState(CarStateBase):
     self.dash_speed_seen = False
     self.is_metric = False
     self.v_cruise_factor = 1.
+
+    self.initial_accFault_cleared = False
+    self.initial_accFault_cleared_timer = int(10 / DT_CTRL) # 10 seconds after startup for initial faults to clear
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -190,6 +193,18 @@ class CarState(CarStateBase):
     ret.brake = cp.vl["VSA_STATUS"]["USER_BRAKE"]
     ret.cruiseState.enabled = cp.vl["POWERTRAIN_DATA"]["ACC_STATUS"] != 0
     ret.cruiseState.available = bool(cp.vl[self.car_state_scm_msg]["MAIN_ON"])
+
+    # Bosch cars take a few minutes after startup to clear prior faults
+    if ret.accFaulted:
+      if (self.CP.carFingerprint in HONDA_BOSCH) and not self.initial_accFault_cleared:
+        # block via cruiseState since accFaulted is not reversible until offroad
+        ret.accFaulted = False
+        ret.cruiseState.available = False
+    elif self.initial_accFault_cleared_timer == 0:
+      self.initial_accFault_cleared = True
+
+    if self.initial_accFault_cleared_timer > 0:
+      self.initial_accFault_cleared_timer -= 1
 
     # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):
