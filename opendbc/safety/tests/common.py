@@ -282,9 +282,22 @@ class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
 
     self._set_prev_torque(0)
     self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_RATE_UP + 1)))
-    self.safety.set_controls_allowed(True)
     self._set_prev_torque(0)
     self.assertFalse(self._tx(self._torque_cmd_msg(-self.MAX_RATE_UP - 1)))
+
+  def test_non_realtime_limit_down(self):
+    self.safety.set_controls_allowed(True)
+    max_torque = self.MAX_TORQUE
+
+    self._set_prev_torque(max_torque)
+    self.assertTrue(self._tx(self._torque_cmd_msg(max_torque - self.MAX_RATE_DOWN)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(0)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(max_torque - self.MAX_RATE_DOWN - 1)))
+
+    self._set_prev_torque(-max_torque)
+    self.assertTrue(self._tx(self._torque_cmd_msg(-max_torque + self.MAX_RATE_DOWN)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(0)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(-max_torque + self.MAX_RATE_DOWN + 1)))
 
   def test_steer_req_bit(self):
     """Asserts all torque safety modes check the steering request bit"""
@@ -554,6 +567,8 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
           self.assertEqual(send, self._tx(self._torque_cmd_msg(torque)))
 
   def test_non_realtime_limit_down(self):
+    super().test_non_realtime_limit_down()
+
     self.safety.set_controls_allowed(True)
 
     for speed in self._torque_speed_range:
