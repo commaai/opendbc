@@ -8,8 +8,7 @@ from opendbc.safety.tests.common import CANPackerSafety
 
 
 class TestBody(common.SafetyTest):
-  TX_MSGS = [[0x250, 0], [0x251, 0],
-             [0x1, 0], [0x1, 1], [0x1, 2], [0x1, 3]]
+  TX_MSGS = [[0x250, 2], [0x251, 2], [0x1, 2]]
   FWD_BUS_LOOKUP = {}
 
   def setUp(self):
@@ -20,15 +19,15 @@ class TestBody(common.SafetyTest):
 
   def _motors_data_msg(self, speed_l, speed_r):
     values = {"SPEED_L": speed_l, "SPEED_R": speed_r}
-    return self.packer.make_can_msg_safety("MOTORS_DATA", 0, values)
+    return self.packer.make_can_msg_safety("MOTORS_DATA", 2, values)
 
   def _torque_cmd_msg(self, torque_l, torque_r):
     values = {"TORQUE_L": torque_l, "TORQUE_R": torque_r}
-    return self.packer.make_can_msg_safety("TORQUE_CMD", 0, values)
+    return self.packer.make_can_msg_safety("TORQUE_CMD", 2, values)
 
   def _max_motor_rpm_cmd_msg(self, max_rpm_l, max_rpm_r):
     values = {"MAX_RPM_L": max_rpm_l, "MAX_RPM_R": max_rpm_r}
-    return self.packer.make_can_msg_safety("MAX_MOTOR_RPM_CMD", 0, values)
+    return self.packer.make_can_msg_safety("MAX_MOTOR_RPM_CMD", 2, values)
 
   def test_rx_hook(self):
     self.assertFalse(self.safety.get_controls_allowed())
@@ -48,12 +47,12 @@ class TestBody(common.SafetyTest):
   def test_can_flasher(self):
     # CAN flasher always allowed
     self.safety.set_controls_allowed(False)
-    self.assertTrue(self._tx(common.make_msg(0, 0x1, 8)))
+    self.assertTrue(self._tx(common.make_msg(2, 0x1, 8)))
 
     # 0xdeadfaceU allowed for CAN flashing mode
-    self.assertTrue(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
-    self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
-    self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
+    self.assertTrue(self._tx(common.make_msg(2, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
+    self.assertFalse(self._tx(common.make_msg(2, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
+    self.assertFalse(self._tx(common.make_msg(2, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
 
 
 if __name__ == "__main__":
