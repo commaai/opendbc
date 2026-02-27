@@ -168,6 +168,43 @@ class TestSubaruTorqueSafetyBase(TestSubaruSafetyBase, common.DriverTorqueSteeri
     return self.packer.make_can_msg_safety("ES_LKAS", SUBARU_MAIN_BUS, values)
 
 
+class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafetyTest):
+  ALT_MAIN_BUS = SUBARU_ALT_BUS
+  ALT_CAM_BUS = SUBARU_ALT_BUS
+
+  TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS, SubaruMsg.ES_LKAS_ANGLE)
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS_ANGLE, SubaruMsg.ES_DashStatus,
+                                               SubaruMsg.ES_LKAS_State, SubaruMsg.ES_Infotainment)}
+  FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr(SubaruMsg.ES_LKAS_ANGLE)
+
+  FLAGS = SubaruSafetyFlags.LKAS_ANGLE | SubaruSafetyFlags.GEN2
+
+  STEER_ANGLE_MAX = 545
+  # Avoid overflow of ES_LKAS_ANGLE's 17-bit signed field (0.01 deg resolution): limit test angles
+  STEER_ANGLE_TEST_MAX = 545
+  ANGLE_RATE_BP = [0, 5, 35]
+  ANGLE_RATE_UP = [5, 0.8, 0.15]
+  ANGLE_RATE_DOWN = [5, 0.8, 0.15]
+
+  def _angle_cmd_msg(self, angle, enabled=1):
+    values = {"LKAS_Output": angle, "LKAS_Request": enabled, "SET_3": 3}
+    return self.packer.make_can_msg_safety("ES_LKAS_ANGLE", SUBARU_MAIN_BUS, values)
+
+  def _angle_meas_msg(self, angle):
+    values = {"Steering_Angle": angle}
+    return self.packer.make_can_msg_safety("Steering_2", SUBARU_MAIN_BUS, values)
+
+  def _speed_msg(self, speed):
+    # convert meters-per-second to kilometers per hour for message
+    values = {s: speed * 3.6 for s in ["FR", "FL", "RR", "RL"]}
+    return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
+
+  # need to use ES_Brake Message
+  def _pcm_status_msg(self, enable):
+    values = {"Cruise_Activated": enable}
+    return self.packer.make_can_msg_safety("ES_Brake", self.ALT_CAM_BUS, values)
+
+
 class TestSubaruGen1TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
   FLAGS = 0
   TX_MSGS = lkas_tx_msgs(SUBARU_MAIN_BUS)
@@ -193,6 +230,11 @@ class TestSubaruGen1LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSub
   RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
                                                SubaruMsg.ES_Infotainment, SubaruMsg.ES_Brake, SubaruMsg.ES_Status,
                                                SubaruMsg.ES_Distance)}
+
+
+class TestSubaruGen2AngleStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruAngleSafetyBase):
+  ALT_MAIN_BUS = SUBARU_ALT_BUS
+  FLAGS = SubaruSafetyFlags.GEN2 | SubaruSafetyFlags.LKAS_ANGLE
 
 
 class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):

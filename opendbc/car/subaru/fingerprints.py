@@ -253,6 +253,20 @@ FW_VERSIONS = {
       b'\xf4!`0\x07',
     ],
   },
+  CAR.SUBARU_CROSSTREK_2025: {
+    (Ecu.abs, 0x7b0, None): [
+      b'\xa2 $\x17\x06',
+    ],
+    (Ecu.eps, 0x746, None): [
+      b'\xc2 $\x00\x01',
+    ],
+    (Ecu.fwdCamera, 0x787, None): [
+      b'\x1d!\x08\x00F\x14!\x08\x00=',
+    ],
+    (Ecu.engine, 0x7a2, None): [
+      b'\x04"cP\x07',
+    ],
+  },
   CAR.SUBARU_FORESTER: {
     (Ecu.abs, 0x7b0, None): [
       b'\xa3 \x18\x14\x00',
