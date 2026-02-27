@@ -34,6 +34,8 @@ non_tested_cars = [
   TOYOTA.TOYOTA_COROLLA,
   TOYOTA.TOYOTA_RAV4H,
 
+  # Community ports without test routes
+  TOYOTA.LEXUS_RC_2017,
 ]
 
 

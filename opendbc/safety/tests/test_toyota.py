@@ -394,5 +394,20 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel, cancel_req=1)))
 
 
+class TestToyotaShortPcmCruiseSafety(TestToyotaStockLongitudinalBase, TestToyotaSafetyTorque):
+  """Test for cars with 7-byte PCM_CRUISE (e.g., 2017 Lexus RC)"""
+
+  def setUp(self):
+    self.packer = CANPackerSafety("toyota_lexus_rc_2017_pt_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
+                                 self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SHORT_PCM_CRUISE)
+    self.safety.init_tests()
+
+  # No LTA message in the DBC
+  def test_lta_steer_cmd(self):
+    pass
+
+
 if __name__ == "__main__":
   unittest.main()

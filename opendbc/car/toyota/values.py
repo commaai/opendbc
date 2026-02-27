@@ -56,6 +56,7 @@ class ToyotaSafetyFlags(IntFlag):
   STOCK_LONGITUDINAL = (2 << 8)
   LTA = (4 << 8)
   SECOC = (8 << 8)
+  SHORT_PCM_CRUISE = (16 << 8)  # 7-byte PCM_CRUISE instead of 8-byte
 
 
 class ToyotaFlags(IntFlag):
@@ -73,6 +74,8 @@ class ToyotaFlags(IntFlag):
   # these cars can utilize 2.0 m/s^2
   RAISED_ACCEL_LIMIT = 1024
   SECOC = 2048
+  # these cars have a 7-byte PCM_CRUISE message instead of 8-byte
+  SHORT_PCM_CRUISE = 4096
 
   # deprecated flags
   # these cars are speculated to allow stop and go when the DSU is unplugged
@@ -364,6 +367,12 @@ class CAR(Platforms):
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.UNSUPPORTED_DSU,
   )
+  LEXUS_RC_2017 = PlatformConfig(
+    [ToyotaCarDocs("Lexus RC 2017")],
+    LEXUS_IS.specs,
+    dbc_dict('toyota_lexus_rc_2017_pt_generated', 'toyota_adas'),
+    flags=ToyotaFlags.UNSUPPORTED_DSU | ToyotaFlags.SHORT_PCM_CRUISE,
+  )
   LEXUS_RC_TSS2 = ToyotaTSS2PlatformConfig(
     [
       ToyotaCarDocs("Lexus RC 2023"),
@@ -510,7 +519,7 @@ FW_CHUNK_LEN = 16
 PLATFORM_CODE_ECUS = (Ecu.fwdCamera, Ecu.fwdRadar, Ecu.eps)
 
 # These platforms have at least one platform code for all ECUs shared with another platform.
-FUZZY_EXCLUDED_PLATFORMS: set[CAR] = set()
+FUZZY_EXCLUDED_PLATFORMS: set[CAR] = {CAR.LEXUS_RC, CAR.LEXUS_RC_2017}
 
 # Some ECUs that use KWP2000 have their FW versions on non-standard data identifiers.
 # Toyota diagnostic software first gets the supported data ids, then queries them one by one.
@@ -583,8 +592,10 @@ FW_QUERY_CONFIG = FwQueryConfig(
 STEER_THRESHOLD = 100
 
 # These cars have non-standard EPS torque scale factors. All others are 73
-EPS_SCALE = defaultdict(lambda: 73,
-                        {CAR.TOYOTA_PRIUS: 66, CAR.TOYOTA_COROLLA: 88, CAR.LEXUS_IS: 77, CAR.LEXUS_RC: 77, CAR.LEXUS_CTH: 100, CAR.TOYOTA_PRIUS_V: 100})
+EPS_SCALE = defaultdict(lambda: 73, {
+  CAR.TOYOTA_PRIUS: 66, CAR.TOYOTA_COROLLA: 88, CAR.LEXUS_IS: 77, CAR.LEXUS_RC: 77,
+  CAR.LEXUS_RC_2017: 77, CAR.LEXUS_CTH: 100, CAR.TOYOTA_PRIUS_V: 100,
+})
 
 # Toyota/Lexus Safety Sense 2.0 and 2.5
 TSS2_CAR = CAR.with_flags(ToyotaFlags.TSS2)
