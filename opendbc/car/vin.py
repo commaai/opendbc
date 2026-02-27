@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass, field
+from enum import StrEnum
 
 from opendbc.car import uds
 from opendbc.car.carlog import carlog
@@ -10,12 +11,26 @@ VIN_UNKNOWN = "0" * 17
 VIN_RE = "[A-HJ-NPR-Z0-9]{17}"
 
 
+class ModelYear(StrEnum):
+  G_2016 = "G"
+  H_2017 = "H"
+  J_2018 = "J"
+  K_2019 = "K"
+  L_2020 = "L"
+  M_2021 = "M"
+  N_2022 = "N"
+  P_2023 = "P"
+  R_2024 = "R"
+  S_2025 = "S"
+
+
 @dataclass
 class Vin:
   vin: str
   wmi: str = field(init=False)
   vds: str = field(init=False)
   vis: str = field(init=False)
+  model_year: str = field(init=False)
 
   def __post_init__(self):
     # parses VIN in accordance with North America standard >2000 vehicles:
@@ -23,6 +38,7 @@ class Vin:
     self.wmi = self.vin[:3]  # World Manufacturer Identifier
     self.vds = self.vin[3:9]  # Vehicle Descriptor Section
     self.vis = self.vin[9:17]  # Vehicle Identifier Section
+    self.model_year = self.vis[:1]  # Model Year, North America standard
 
 
 def is_valid_vin(vin: str):
