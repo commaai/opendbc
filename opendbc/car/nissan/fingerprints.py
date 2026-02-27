@@ -105,4 +105,24 @@ FW_VERSIONS = {
       b'284U26FR0E',
     ],
   },
+  CAR.NISSAN_ROGUE: {
+    (Ecu.fwdCamera, 0x707, None): [
+      b'284N87FW1A',
+    ],
+    (Ecu.abs, 0x740, None): [
+      b'7FW5CD\x11\x02\x00\x02e\x95e\x80iW#\x01\x00\x00\x00\x00\x00\x80',
+    ],
+    (Ecu.eps, 0x742, None): [
+      b'7FR2A\x99A\x05\x02N123F\x18\x12\x00\x00\x00\x00\x00\x00\x00\x80',
+    ],
+    (Ecu.combinationMeter, 0x743, None): [
+      b'7FW1A\x18B\x05\x17\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80',
+    ],
+    (Ecu.engine, 0x7e0, None): [
+      b'7FW5A\x00A\x06\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80',
+    ],
+    (Ecu.gateway, 0x18dad0f1, None): [
+      b'284U27FW0A',
+    ],
+  },
 }
