@@ -4,11 +4,12 @@
 
 #define GWM_STEERING_AND_CRUISE 0xA1U  // RX from STEER_AND_AP_STALK
 #define GWM_GAS                 0x60U  // RX from CAR_OVERALL_SIGNALS
-#define GWM_BRAKE               0x137U // RX from BRAKE
+#define GWM_BRAKE               0x120U
 #define GWM_SPEED               0x13BU  // RX from WHEEL_SPEEDS
 #define GWM_LANE_KEEP_ASSIST    0xA1U  // TX from OP,  EPS
 #define GWM_RX_STEER_RELATED    0x147U // TX from OP to CAMERA
 #define STEER_CMD               0x12BU // TX from OP, CAMERA to EPS
+#define GWM_CRUISE              0x2ABU
 
 // CAN bus
 #define GWM_MAIN_BUS 0U
@@ -32,7 +33,7 @@ static uint32_t gwm_get_checksum(const CANPacket_t *msg) {
   // TO-DO: Each message has a different position; after finishing the port,
   // handle them one by one for each address
   uint8_t chksum = 0;
-  if ((uint32_t)msg->addr == (uint32_t)GWM_SPEED) {
+  if (msg->addr == GWM_SPEED) {
     chksum = msg->data[24] & 0xFFU;
   } else {
     chksum = msg->data[0] & 0xFFU;
@@ -88,7 +89,7 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
     }
 
     if (msg->addr == GWM_BRAKE) {
-      brake_pressed = ((msg->data[25] << 8) | (msg->data[26] & 0xF8U)) > 0U;
+      brake_pressed = GET_BIT(msg, 11U);
     }
 
     if (msg->addr == 0x147U) {
@@ -99,9 +100,9 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->bus == 2U) {
-    if (msg->addr == 0x23DU) {
-      int cruise_state = (msg->data[18] >> 3) & 0x1FU;
-      bool cruise_engaged = cruise_state > 4;
+    if (msg->addr == GWM_CRUISE) {
+      int cruise_state = (msg->data[18] >> 3) & 0x7U;
+      bool cruise_engaged = cruise_state > 2;
       pcm_cruise_check(cruise_engaged);
     }
   }
@@ -147,10 +148,10 @@ static safety_config gwm_init(uint16_t param) {
     {.msg = {{GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // cruise state, steering angle, driver torque
     {.msg = {{GWM_SPEED, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // speed
     {.msg = {{GWM_GAS, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // gas pedal
-    {.msg = {{GWM_BRAKE, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // brake
+    {.msg = {{GWM_BRAKE, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // brake2
     {.msg = {{GWM_RX_STEER_RELATED, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // eps feedback to camera
     {.msg = {{STEER_CMD, GWM_CAMERA_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // copy stock steering cmd
-    {.msg = {{0x23DU, 2U, 64, 20U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // CRUISE_STATE, ACC_CMD
+    {.msg = {{GWM_CRUISE, 2U, 64, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // CRUISE_STATE, ACC
   };
 
   return BUILD_SAFETY_CFG(psa_rx_checks, GWM_TX_MSGS);

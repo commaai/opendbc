@@ -25,16 +25,16 @@ class TestGwm(common.PandaSafetyTest):
     self.safety.init_tests()
 
   def _user_brake_msg(self, brake):
-    values = {"BRAKE_PRESSURE": brake}
-    return self.packer.make_can_msg_panda("BRAKE", 0, values)
+    values = {"PEDAL_BRAKE_PRESSED": 1 if brake else 0}
+    return self.packer.make_can_msg_panda("BRAKE2", 0, values)
 
   def _speed_msg(self, speed):
     values = {f"{pos}_WHEEL_SPEED": speed * 1.0 for pos in ["FRONT_LEFT", "FRONT_RIGHT", "REAR_LEFT", "REAR_RIGHT"]}
     return self.packer.make_can_msg_panda("WHEEL_SPEEDS", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"CRUISE_STATE": 5 if enable else 4}
-    return self.packer.make_can_msg_panda("ACC_CMD", 0, values)
+    values = {"CRUISE_STATE_2": 3 if enable else 2}
+    return self.packer.make_can_msg_panda("ACC", 0, values)
 
   def test_rx_hook(self):
     self.assertTrue(self._rx(self._speed_msg(0)))

@@ -35,9 +35,9 @@ class CarState(CarStateBase):
     )
 
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
-    ret.gasPressed = cp.vl["CAR_OVERALL_SIGNALS2"]["GAS_POSITION"] > 10
-    ret.brake = cp.vl["BRAKE"]["BRAKE_PRESSURE"]
-    ret.brakePressed = cp.vl["BRAKE"]["BRAKE_PRESSURE"] > 40
+    ret.gasPressed = cp.vl["CAR_OVERALL_SIGNALS2"]["GAS_POSITION"] > 0
+    # ret.brake = cp.vl["BRAKE"]["BRAKE_PRESSURE"]
+    ret.brakePressed = cp.vl["BRAKE2"]["PEDAL_BRAKE_PRESSED"] == 1
     ret.parkingBrake = cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 0
 
     ret.gearShifter = GearShifter.drive if int(cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"]) == 1 else \
@@ -61,8 +61,8 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["LIGHTS"]["LEFT_TURN_SIGNAL"],
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
 
-    ret.cruiseState.available = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] > 0)
-    ret.cruiseState.enabled = bool(cp_cam.vl["ACC_CMD"]["CRUISE_STATE"] > 4)
+    ret.cruiseState.available = bool(cp_cam.vl["ACC"]["CRUISE_STATE_2"] > 2)
+    ret.cruiseState.enabled = bool(cp_cam.vl["ACC"]["CRUISE_STATE_2"] > 2)
     return ret
 
   @staticmethod
