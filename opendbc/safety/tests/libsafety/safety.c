@@ -12,11 +12,11 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/can.h"
 #include "opendbc/safety/safety.h"
 
-void safety_tick_current_safety_config() {
+void safety_tick_current_safety_config(void) {
   safety_tick(&current_safety_config);
 }
 
-bool safety_config_valid() {
+bool safety_config_valid(void) {
   if (current_safety_config.rx_checks_len <= 0) {
     printf("missing RX checks\n");
     return false;
