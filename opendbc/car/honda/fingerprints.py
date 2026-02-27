@@ -445,6 +445,14 @@ FW_VERSIONS = {
       b'77959-T1G-G940\x00\x00',
     ],
   },
+  CAR.HONDA_CRV_SA: {
+    (Ecu.vsa, 0x18da28f1, None): [
+      b'57114-T0N-Q820\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36161-T0N-S530\x00\x00',
+    ],
+  },
   CAR.HONDA_CRV_HYBRID: {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-TMB-H030\x00\x00',
