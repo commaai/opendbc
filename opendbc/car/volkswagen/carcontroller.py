@@ -11,6 +11,28 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
+class HCAMitigation:
+  """
+  Manages HCA fault mitigations for VW/Audi EPS racks:
+    * Reduces torque by 1 for a single frame after commanding the same torque value for too long
+  """
+
+  def __init__(self, CCP):
+    self._max_same_torque_frames = CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP)
+    self._same_torque_frames = 0
+
+  def update(self, apply_torque, apply_torque_last):
+    if apply_torque != 0 and apply_torque_last == apply_torque:
+      self._same_torque_frames += 1
+      if self._same_torque_frames > self._max_same_torque_frames:
+        apply_torque -= (1, -1)[apply_torque < 0]
+        self._same_torque_frames = 0
+    else:
+      self._same_torque_frames = 0
+
+    return apply_torque
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -28,9 +50,7 @@ class CarController(CarControllerBase):
 
     self.apply_torque_last = 0
     self.gra_acc_counter_last = None
-    self.eps_timer_soft_disable_alert = False
-    self.hca_frame_timer_running = 0
-    self.hca_frame_same_torque = 0
+    self.hca_mitigation = HCAMitigation(self.CCP)
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -40,35 +60,13 @@ class CarController(CarControllerBase):
     # **** Steering Controls ************************************************ #
 
     if self.frame % self.CCP.STEER_STEP == 0:
-      # Logic to avoid HCA state 4 "refused":
-      #   * Don't steer unless HCA is in state 3 "ready" or 5 "active"
-      #   * Don't steer at standstill
-      #   * Don't send > 3.00 Newton-meters torque
-      #   * Don't send the same torque for > 6 seconds
-      #   * Don't send uninterrupted steering for > 360 seconds
-      # MQB racks reset the uninterrupted steering timer after a single frame
-      # of HCA disabled; this is done whenever output happens to be zero.
-
+      apply_torque = 0
       if CC.latActive:
         new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
-        self.hca_frame_timer_running += self.CCP.STEER_STEP
-        if self.apply_torque_last == apply_torque:
-          self.hca_frame_same_torque += self.CCP.STEER_STEP
-          if self.hca_frame_same_torque > self.CCP.STEER_TIME_STUCK_TORQUE / DT_CTRL:
-            apply_torque -= (1, -1)[apply_torque < 0]
-            self.hca_frame_same_torque = 0
-        else:
-          self.hca_frame_same_torque = 0
-        hca_enabled = abs(apply_torque) > 0
-      else:
-        hca_enabled = False
-        apply_torque = 0
 
-      if not hca_enabled:
-        self.hca_frame_timer_running = 0
-
-      self.eps_timer_soft_disable_alert = self.hca_frame_timer_running > self.CCP.STEER_TIME_ALERT / DT_CTRL
+      apply_torque = self.hca_mitigation.update(apply_torque, self.apply_torque_last)
+      hca_enabled = apply_torque != 0
       self.apply_torque_last = apply_torque
       can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_torque, hca_enabled))
 
