@@ -25,10 +25,9 @@ class CarInterface(CarInterfaceBase):
 
     ret.safetyConfigs = cfgs
 
-    ret.dashcamOnly = True
     ret.dashcamOnly = False
 
-    ret.steerActuatorDelay = 0.2
+    ret.steerActuatorDelay = 0.3
     ret.steerLimitTimer = 0.4
     ret.steerAtStandstill = True
 

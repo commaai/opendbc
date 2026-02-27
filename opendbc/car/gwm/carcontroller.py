@@ -6,7 +6,7 @@ from opendbc.car.gwm import gwmcan
 from opendbc.car.gwm.values import CarControllerParams
 
 MAX_USER_TORQUE = 100  # 1.0 Nm
-HELLO = 20
+HELLO = 25
 
 
 class CarController(CarControllerBase):
