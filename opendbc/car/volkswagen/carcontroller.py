@@ -10,6 +10,9 @@ from opendbc.car.volkswagen.values import CanBus, CarControllerParams, Volkswage
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
+HOLD_TORQUE_DEADBAND_NM = 20   # stop integrating when this close to ESP_Haltemoment (Nm at wheel)
+HOLD_ACCEL_KI = 0.00002        # I-controller gain: m/s² per Nm of torque error per ACC_CONTROL_STEP
+
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -36,6 +39,7 @@ class CarController(CarControllerBase):
     self.previous_resettable = False
     self.previous_impulse_count = 0
     self.distance_button_was_stopped = None
+    self.hold_accel = 0.0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -92,7 +96,7 @@ class CarController(CarControllerBase):
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         esp_starting_override = None
         esp_stopping_override = None
-        allow_indefinite_hold = CS.tsk_grade < 0.5
+        allow_indefinite_hold = not CS.esp_hold_uphill
         long_active = (
           # acc type 1 is sensitive to control signals when brake pressed (i.e. preEnabled)
           False if CS.acc_type == 1 and CS.out.brakePressed else
@@ -100,6 +104,8 @@ class CarController(CarControllerBase):
           False if CS.acc_type == 1 and self.hold_counter > self.CCP.MAX_HOLD_FRAMES and not allow_indefinite_hold else
           CC.longActive
         )
+        if CS.esp_hold_confirmation:
+          self.hold_counter += 1
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, long_active)
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
@@ -121,41 +127,47 @@ class CarController(CarControllerBase):
         else:
           self.distance_button_was_stopped = None
 
-        # standstill handling for MQB w/ ACC type 1
-        # these vehicles don't have a parking brake, so we need to carefully manage the ESP to prevent faults
+        # Standstill handling for MQB w/ ACC type 1.
+        # When hold is confirmed, TSK stops sending brake requests — the ESP manages braking
+        # autonomously, responding only to starting/stopping signals on ACC_07.
+        # On flat/downhill the ESP can hold indefinitely; we just drop the hold and prevent
+        # re-engagement. On uphill it can't, so we use ACC_06 to build engine torque as a rollback
+        # prevention measure so that the ESP will willingly cycle its own hold timer when we ask
+        # while keeping ACC_07 in stopping mode so ESP holds the brake.
         if self.CCS == mqbcan and CS.acc_type == 1 and long_active:
-          if CS.esp_hold_confirmation:
-            self.hold_counter += 1
-
-          # attempts to release the hold confirmation, but retains braking force
-          if CS.esp_standstill_confirmation:
-            esp_starting_override = True
+          # flat/downhill: drop hold, prevent re-engagement
+          if allow_indefinite_hold and CS.esp_standstill_confirmation:
+            esp_starting_override = not CS.esp_hold_confirmation
             esp_stopping_override = False
-            # if we can't hold indefinitely, we'll need to restart the ESP hold
-            # if we keep braking in this case we will temp fault the TSK
-            if not allow_indefinite_hold and not CS.esp_hold_confirmation:
-              esp_starting_override = False
-              esp_stopping_override = True
-          # make some engine torque to help ESP feel comfortable cycling
-          # the ESP doesn't actually care about our acceleration request, only stopping & stopping distance
-          # the engine torque prevents rollback if the ESP is unable to engage again
-          if not allow_indefinite_hold and (CS.esp_standstill_confirmation or CS.esp_hold_confirmation):
-            accel = max(0, accel)
+
+          # uphill: build engine torque via ACC_06, ESP braking held via ACC_07
+          elif not allow_indefinite_hold and (CS.esp_hold_confirmation or CS.esp_standstill_confirmation):
+            # esp_hold_torque_nm is 0 when invalid; error goes negative and the integrator naturally holds.
+            error_nm = CS.esp_hold_torque_nm - CS.actual_torque_nm
+            if error_nm > HOLD_TORQUE_DEADBAND_NM:
+              self.hold_accel = float(np.clip(self.hold_accel + HOLD_ACCEL_KI * error_nm, 0, self.CCP.ACCEL_MAX))
+            accel = float(np.clip(max(accel, self.hold_accel), 0, self.CCP.ACCEL_MAX))
             starting = True
             stopping = False
+            # near counter limit: attempt hold release to cycle the ESP hold;
+            # if torque management worked, hold_confirmation drops and the counter resets
+            near_limit = self.hold_counter >= self.CCP.MAX_HOLD_FRAMES - 10
+            esp_starting_override = near_limit
+            esp_stopping_override = not near_limit
+          else:
+            self.hold_accel = 0.0
 
         # our standstill timer resets when either:
         # - wheels move while a hold is not confirmed
-        # - we release hold confirmation during active control + release request
+        # wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
+        # - we drop a hold confirmation after a frame where we were actively starting with hold confirmed
+        # (previous_resettable captures is_starting AND hold_confirmation from the prior frame, which is sufficient)
+        is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
         if CS.wheel_impulse_count != self.previous_impulse_count and not CS.esp_hold_confirmation:
-          # wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
           self.hold_counter = 0
-        elif self.previous_resettable and long_active and not CS.esp_hold_confirmation:
+        elif self.previous_resettable and not CS.esp_hold_confirmation:
           self.hold_counter = 0
-
-        # we must be careful not to accidentally reset the timer in unrelated conditions (e.g. when disabling)
-        # so track if we're in a state where the next frame is capable of resetting the timer (active + holding + requesting release)
-        self.previous_resettable = long_active and CS.esp_hold_confirmation and (esp_starting_override if esp_starting_override is not None else starting)
+        self.previous_resettable = is_starting and CS.esp_hold_confirmation
         self.previous_impulse_count = CS.wheel_impulse_count
 
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, long_active, accel,

@@ -18,6 +18,9 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = False
     self.esp_standstill_confirmation = False
     self.tsk_grade = 0
+    self.esp_hold_torque_nm = 0.0
+    self.esp_hold_uphill = False
+    self.actual_torque_nm = 0.0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
@@ -114,6 +117,16 @@ class CarState(CarStateBase):
       self.esp_hold_confirmation = bool(pt_cp.vl["ESP_21"]["ESP_Haltebestaetigung"])
       self.esp_standstill_confirmation = pt_cp.vl["ESP_21"]["ESP_v_Signal"] == 0
       self.tsk_grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
+      # ESP_15: minimum total wheel torque to hold at current slope when index=Antriebsmoment and raw < 10220
+      esp_hold_raw = pt_cp.vl["ESP_15"]["ESP_Haltemoment"]
+      self.esp_hold_uphill = pt_cp.vl["ESP_15"]["ESP_Index_Haltemoment"] == 1
+      self.esp_hold_torque_nm = esp_hold_raw if self.esp_hold_uphill and esp_hold_raw < 10220 else 0.0
+      # Motor_11: MO_Mom_Ist_Summe is unitless — multiply by MO_Faktor_Momente_02 (1/2/3 Nm/unit) for crank Nm,
+      # then by GE_Uefkt (crank→wheel ratio) to get wheel Nm comparable to ESP_Haltemoment.
+      _motor_torque_raw = pt_cp.vl["Motor_11"]["MO_Mom_Ist_Summe"]
+      _motor_torque_factor = int(pt_cp.vl["Motor_Code_01"]["MO_Faktor_Momente_02"])
+      _gear_ratio = pt_cp.vl["Getriebe_11"]["GE_Uefkt"]
+      self.actual_torque_nm = _motor_torque_raw * _motor_torque_factor * _gear_ratio
       acc_limiter_mode = ext_cp.vl["ACC_02"]["ACC_Gesetzte_Zeitluecke"] == 0
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
 
