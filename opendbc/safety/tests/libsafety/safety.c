@@ -89,6 +89,22 @@ bool get_vehicle_moving(void){
   return vehicle_moving;
 }
 
+void set_ignition_can(bool c) {
+  ignition_can = c;
+}
+
+bool get_ignition_can(void) {
+  return ignition_can;
+}
+
+void set_ignition_can_cnt(uint32_t c) {
+  ignition_can_cnt = c;
+}
+
+uint32_t get_ignition_can_cnt(void) {
+  return ignition_can_cnt;
+}
+
 bool get_acc_main_on(void){
   return acc_main_on;
 }
@@ -198,6 +214,7 @@ void init_tests(void){
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;
   invalid_steer_req_count = 0;
+  ignition_can_reset();
 
   // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
   tesla_autopark = false;
