@@ -37,7 +37,7 @@ class GWMPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   GWM_HAVAL_H6 = GWMPlatformConfig(
     [GWMCarDocs("Peugeot 208 2019-25")],
-    CarSpecs(mass=1530, wheelbase=2.54, steerRatio=17.6),
+    CarSpecs(mass=1530, wheelbase=2.54, steerRatio=17.416),
   )
 
 
