@@ -289,6 +289,11 @@ static float get_angle_from_curvature(const float curvature, const float curvatu
   return curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 }
 
+// ISO 11270 moving average jerk window (0.5s)
+#define JERK_HISTORY_MAX 50
+static int jerk_history[JERK_HISTORY_MAX];
+static int jerk_idx;
+
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params) {
   // This check uses a simple vehicle model to allow for constant lateral acceleration and jerk limits across all speeds.
@@ -296,8 +301,8 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
   static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
-  // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
-  static const float MAX_LATERAL_JERK = 3.0 + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
+  // ISO 11270 lateral jerk limit, accounting for worst-case road roll contribution
+  static const float MAX_LATERAL_JERK = 5.0 - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~4.4 m/s^3, total with roll: 5.0
 
   const float fudged_speed = SAFETY_MAX((vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0, 1.0);
   const float curvature_factor = get_curvature_factor(fudged_speed, params);
@@ -305,20 +310,13 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   bool violation = false;
 
   if (controls_allowed && steer_control_enabled) {
-    // *** ISO lateral jerk limit ***
-    // calculate maximum angle rate per second
-    const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
-    const float max_angle_rate_sec = get_angle_from_curvature(max_curvature_rate_sec, curvature_factor, params);
-
-    // finally get max angle delta per frame
-    const float max_angle_delta = max_angle_rate_sec / (float)limits.frequency;
-    const int max_angle_delta_can = (max_angle_delta * limits.angle_deg_to_can) + 1.;
-
-    // NOTE: symmetric up and down limits
-    const int highest_desired_angle = desired_angle_last + max_angle_delta_can;
-    const int lowest_desired_angle = desired_angle_last - max_angle_delta_can;
-
-    violation |= safety_max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+    // *** ISO 11270: lateral jerk limit, moving average over 0.5s ***
+    const int jerk_window = SAFETY_MIN((int)(0.5f * (float)limits.frequency), JERK_HISTORY_MAX);
+    const int max_delta = (int)(get_angle_from_curvature(MAX_LATERAL_JERK * 0.5f / (fudged_speed * fudged_speed),
+                                                         curvature_factor, params) * limits.angle_deg_to_can) + 1;
+    violation |= safety_max_limit_check(desired_angle, jerk_history[jerk_idx] + max_delta, jerk_history[jerk_idx] - max_delta);
+    jerk_history[jerk_idx] = desired_angle;
+    jerk_idx = (jerk_idx + 1) % jerk_window;
 
     // *** ISO lateral accel limit ***
     const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
@@ -347,6 +345,8 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   // reset to current angle if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
     desired_angle_last = SAFETY_CLAMP(angle_meas.values[0], -limits.max_angle, limits.max_angle);
+    for (int i = 0; i < JERK_HISTORY_MAX; i++) jerk_history[i] = desired_angle_last;
+    jerk_idx = 0;
   }
 
   return violation;
