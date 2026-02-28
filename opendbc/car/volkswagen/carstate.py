@@ -52,6 +52,7 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     pt_cp = can_parsers[Bus.pt]
     cam_cp = can_parsers[Bus.cam]
+    alt_cp = can_parsers[Bus.alt]
     ext_cp = pt_cp if self.CP.networkLocation == NetworkLocation.fwdCamera else cam_cp
 
     if self.CP.flags & VolkswagenFlags.PQ:
@@ -123,7 +124,7 @@ class CarState(CarStateBase):
       self.esp_hold_torque_nm = esp_hold_raw if self.esp_hold_uphill and esp_hold_raw < 10220 else 0.0
       # Motor_11: MO_Mom_Ist_Summe is unitless — multiply by MO_Faktor_Momente_02 (1/2/3 Nm/unit) for crank Nm,
       # then by GE_Uefkt (crank→wheel ratio) to get wheel Nm comparable to ESP_Haltemoment.
-      _motor_torque_raw = pt_cp.vl["Motor_11"]["MO_Mom_Ist_Summe"]
+      _motor_torque_raw = alt_cp.vl["Motor_11"]["MO_Mom_Ist_Summe"]
       _motor_torque_factor = int(pt_cp.vl["Motor_Code_01"]["MO_Faktor_Momente_02"])
       _gear_ratio = pt_cp.vl["Getriebe_11"]["GE_Uefkt"]
       self.actual_torque_nm = _motor_torque_raw * _motor_torque_factor * _gear_ratio
@@ -357,6 +358,7 @@ class CarState(CarStateBase):
 
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
+      Bus.alt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).alt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).cam),
     }
 
