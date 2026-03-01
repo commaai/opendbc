@@ -107,6 +107,13 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
+  def test_individual_wheel_speeds(self):
+    for wheel in ["FR", "RR", "RL", "FL"]:
+      values = {s: 0 for s in ["FR", "FL", "RR", "RL"]}
+      values[wheel] = 1
+      self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values))
+      self.assertTrue(self.safety.get_vehicle_moving(), f"vehicle not moving with {wheel} speed")
+
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):

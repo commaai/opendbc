@@ -354,12 +354,27 @@ class TestFordSafetyBase(common.CarSafetyTest):
             self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
             self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)))
 
+  def test_angle_error_clamp_beyond_max(self):
+    speed = 15.0
+    self.safety.set_controls_allowed(True)
+    for sign in (-1, 1):
+      self._reset_curvature_measurement(sign * 0.023, speed)
+      self._set_prev_desired_angle(sign * 0.021)
+      self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0)))
+
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)
     self.assertFalse(self._tx(self._lkas_command_msg(1)))
 
     self.safety.set_controls_allowed(0)
     self.assertFalse(self._tx(self._lkas_command_msg(1)))
+
+  def test_cruise_engaged_all_states(self):
+    for cruise_state in (4, 5):
+      self._rx(self._pcm_status_msg(False))
+      values = {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": cruise_state}
+      self._rx(self.packer.make_can_msg_safety("EngBrakeData", 0, values))
+      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed for CcStat_D_Actl={cruise_state}")
 
   def test_acc_buttons(self):
     for allowed in (0, 1):

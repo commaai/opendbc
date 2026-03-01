@@ -232,6 +232,22 @@ class HondaBase(common.CarSafetyTest):
     self._rx(self._user_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_brake_switch_prev(self):
+    # Two consecutive messages with BRAKE_SWITCH=1 and BRAKE_PRESSED=0 should still detect brake
+    self._rx(self._powertrain_data_msg(brake_pressed=False))
+    self.assertFalse(self.safety.get_brake_pressed_prev())
+    for _ in range(2):
+      values = {
+        "ACC_STATUS": self.safety.get_controls_allowed(),
+        "BRAKE_PRESSED": 0,
+        "BRAKE_SWITCH": 1,
+        "PEDAL_GAS": 0,
+        "COUNTER": self.cnt_powertrain_data % 4,
+      }
+      self.__class__.cnt_powertrain_data += 1
+      self._rx(self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, values))
+    self.assertTrue(self.safety.get_brake_pressed_prev())
+
   def test_steer_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
@@ -288,6 +304,18 @@ class TestHondaNidecSafetyBase(HondaBase):
     self.FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
     self.safety.set_honda_fwd_brake(True)
     super().test_fwd_hook()
+
+  def test_stock_aeb_disabled(self):
+    # With DISABLE_STOCK_AEB flag, AEB forwarding should be skipped entirely
+    self.safety.set_alternative_experience(common.ALTERNATIVE_EXPERIENCE.DISABLE_STOCK_AEB)
+    self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=1)))
+    self.assertFalse(self.safety.get_honda_fwd_brake())
+
+  def test_steer_safety_check_alt_addr(self):
+    # Steering safety check also applies to address 0x194 (CRV/RDX)
+    self.safety.set_controls_allowed(0)
+    self.assertTrue(self._tx(common.make_msg(self.STEER_BUS, 0x194, 4)))
+    self.assertFalse(self._tx(common.make_msg(self.STEER_BUS, 0x194, dat=b'\x10\x00\x00\x00')))
 
   def test_honda_fwd_brake_latching(self):
     # Shouldn't fwd stock Honda requesting brake without AEB
@@ -406,6 +434,9 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
   def _user_brake_msg(self, brake):
     return self._alt_brake_msg(brake)
 
+  def test_brake_switch_prev(self):
+    pass
+
   def test_alt_brake_rx_hook(self):
     self.safety.set_honda_alt_brake_msg(1)
     self.safety.set_controls_allowed(1)
@@ -435,6 +466,19 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
     super().setUp()
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, 0)
     self.safety.init_tests()
+
+  def test_bosch_supplemental_check(self):
+    # Valid supplemental message
+    valid = libsafety_py.make_CANPacket(0xE5, 0, b"\x04\x00\x80\x10\x00\x00\x00\x00")
+    self.assertTrue(self._tx(valid))
+
+    # Invalid first 4 bytes
+    invalid_first = libsafety_py.make_CANPacket(0xE5, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00")
+    self.assertFalse(self._tx(invalid_first))
+
+    # Valid first 4 bytes but invalid last 4 bytes
+    invalid_last = libsafety_py.make_CANPacket(0xE5, 0, b"\x04\x00\x80\x10\x01\x00\x00\x00")
+    self.assertFalse(self._tx(invalid_last))
 
 
 class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):
@@ -481,6 +525,10 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
     not_tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")
     self.assertFalse(self._tx(not_tester_present))
+
+    # First 4 bytes valid but last 4 non-zero
+    partial_match = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x02\x3E\x80\x00\x01\x00\x00\x00")
+    self.assertFalse(self._tx(partial_match))
 
   def test_gas_safety_check(self):
     for controls_allowed in [True, False]:

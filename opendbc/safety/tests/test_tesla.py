@@ -230,6 +230,23 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
           self.assertFalse(self.safety.get_steering_disengage_prev())
 
+  def test_steering_wheel_disengage_sustained(self):
+    # Sustained steering override across consecutive messages should keep controls disallowed
+    self.safety.set_controls_allowed(True)
+    self._rx(self._angle_meas_msg(0, hands_on_level=3))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # Second message still overriding — no rising edge, controls stay disallowed
+    self._rx(self._angle_meas_msg(0, hands_on_level=3))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_cruise_engaged_all_states(self):
+    for cruise_state in (2, 3, 4, 6, 7):
+      self._rx(self._pcm_status_msg(False))
+      values = {"DI_cruiseState": cruise_state, "DI_autoparkState": 0}
+      self._rx(self.packer.make_can_msg_safety("DI_state", 0, values))
+      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed for DI_cruiseState={cruise_state}")
+
   def test_autopark_summon_while_enabled(self):
     # We should not respect Autopark that activates while controls are allowed
     self._rx(self._pcm_status_msg(True, 0))
@@ -292,6 +309,39 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.assertEqual(1, self._rx(lkas_msg_cam))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
     self.assertFalse(self._tx(no_lkas_msg))
+
+  def test_stock_lkas_ignored_with_controls(self):
+    no_lkas_msg_cam = self._angle_cmd_msg(0, state=self.steer_control_types['NONE'], bus=2)
+    lkas_msg_cam = self._angle_cmd_msg(0, state=self.steer_control_types['LANE_KEEP_ASSIST'], bus=2)
+
+    # Reset: no LKAS active
+    self._rx(no_lkas_msg_cam)
+
+    # LKAS rising edge while controls are allowed should not activate passthrough
+    self.safety.set_controls_allowed(True)
+    self._rx(lkas_msg_cam)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, state=self.steer_control_types['NONE'])))
+
+    # Consecutive LKAS messages (not a rising edge) should also not activate passthrough
+    self.safety.set_controls_allowed(False)
+    self._rx(lkas_msg_cam)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, state=self.steer_control_types['NONE'])))
+
+  def test_angle_meas_beyond_max_angle(self):
+    # Angle measurement beyond max_angle should be clamped in inactive and reset paths
+    extreme_angle = self.STEER_ANGLE_MAX + 50
+
+    # Fill angle_meas samples with extreme positive angle
+    for _ in range(6):
+      self._rx(self._angle_meas_msg(extreme_angle))
+
+    # Inactive steering path: clamp fires on angle_meas exceeding max_angle
+    self.assertFalse(self._tx(self._angle_cmd_msg(0, state=False)))
+
+    # Same for extreme negative angle
+    for _ in range(6):
+      self._rx(self._angle_meas_msg(-extreme_angle))
+    self.assertFalse(self._tx(self._angle_cmd_msg(0, state=False)))
 
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below

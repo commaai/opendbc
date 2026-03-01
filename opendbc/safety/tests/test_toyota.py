@@ -94,6 +94,13 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
           msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
           self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
 
+  def test_block_aeb_short_circuit(self, stock_longitudinal: bool = False):
+    # Non-zero bytes in different positions should all be blocked
+    msg = libsafety_py.make_CANPacket(0x283, 0, b"\x00\x00\x00\x00\x01\x00\x00")
+    self.assertFalse(self._tx(msg))
+    msg = libsafety_py.make_CANPacket(0x283, 0, b"\x00\x00\x00\x00\x00\x01\x00")
+    self.assertFalse(self._tx(msg))
+
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
     for engaged, req, req2, torque_wind_down, angle in itertools.product([True, False],
@@ -141,6 +148,9 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE)
     self.safety.init_tests()
+
+  def test_steer_angle_initializing(self):
+    self._rx(self._angle_meas_msg(10.0, steer_angle_initializing=True))
 
 
 class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest):
@@ -224,6 +234,25 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
             should_tx = not (req or req2) and torque_wind_down == 0
             self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)))
 
+  def test_lta_driver_torque_wind_down_asymmetric(self):
+    self.safety.set_controls_allowed(True)
+    angle = 0.0
+    self._reset_angle_measurement(angle)
+    self._set_prev_desired_angle(angle)
+    threshold = self.MAX_LTA_DRIVER_TORQUE
+
+    # Asymmetric samples where |min| > |max|, both above threshold
+    for _ in range(6):
+      self._rx(self._torque_meas_msg(0, -(threshold + 50)))
+    self._rx(self._torque_meas_msg(0, threshold + 10))
+    self.assertFalse(self._tx(self._lta_msg(1, 1, angle, 100)))
+
+    # Asymmetric samples where |max| > |min|, both above threshold
+    for _ in range(6):
+      self._rx(self._torque_meas_msg(0, threshold + 50))
+    self._rx(self._torque_meas_msg(0, -(threshold + 10)))
+    self.assertFalse(self._tx(self._lta_msg(1, 1, angle, 100)))
+
   def test_angle_measurements(self):
     """
     * Tests angle meas quality flag dictates whether angle measurement is parsed, and if rx is valid
@@ -280,6 +309,9 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
 
   def test_block_aeb(self, stock_longitudinal: bool = True):
     super().test_block_aeb(stock_longitudinal=stock_longitudinal)
+
+  def test_block_aeb_short_circuit(self, stock_longitudinal: bool = True):
+    super().test_block_aeb_short_circuit(stock_longitudinal=stock_longitudinal)
 
   def test_acc_cancel(self):
     """
@@ -379,6 +411,10 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
 
   @unittest.skip("test not applicable for cars without a DSU")
   def test_block_aeb(self, stock_longitudinal: bool = False):
+    pass
+
+  @unittest.skip("test not applicable for cars without a DSU")
+  def test_block_aeb_short_circuit(self, stock_longitudinal: bool = False):
     pass
 
   def test_343_actuation_blocked(self):
