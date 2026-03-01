@@ -142,11 +142,11 @@ class CarController(CarControllerBase):
 
           # uphill: build engine torque via ACC_06, ESP braking held via ACC_07
           elif not allow_indefinite_hold and (CS.esp_hold_confirmation or CS.esp_standstill_confirmation):
-            # esp_hold_torque_nm is 0 when invalid; error goes negative and the integrator naturally holds.
+            # esp_hold_torque_nm is 0 when invalid; error goes negative and the integrator backs off.
             error_nm = CS.esp_hold_torque_nm - CS.actual_torque_nm
-            if error_nm > HOLD_TORQUE_DEADBAND_NM:
-              self.hold_accel = float(np.clip(self.hold_accel + HOLD_ACCEL_KI * error_nm, 0, self.CCP.ACCEL_MAX))
-            accel = float(np.clip(max(accel, self.hold_accel), 0, self.CCP.ACCEL_MAX))
+            if abs(error_nm) > HOLD_TORQUE_DEADBAND_NM:
+              self.hold_accel = float(np.clip(self.hold_accel + HOLD_ACCEL_KI * error_nm, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
+            accel = max(accel, self.hold_accel)
             starting = True
             stopping = False
             # near counter limit: attempt hold release to cycle the ESP hold;
