@@ -5,6 +5,34 @@ from opendbc.car.toyota.values import CAR
 Ecu = CarParams.Ecu
 
 FW_VERSIONS = {
+  CAR.ALPHARD_H_2016: {
+    (Ecu.engine, 0x7e0, None): [
+      b'\x0235852000\x00\x00\x00\x00\x00\x00\x00\x00A4701000\x00\x00\x00\x00\x00\x00\x00\x00',
+    ],
+    (Ecu.engine, 0x7e2, None): [
+      b'\x01898844813303\x00\x00\x00\x00',
+      b'\x01898844814303\x00\x00\x00\x00',
+      b'\x01898844815303\x00\x00\x00\x00',
+      b'\x01899835815100\x00\x00\x00\x00',
+      b'\x01899857801000\x00\x00\x00\x00',
+    ],
+    (Ecu.eps, 0x7a1, None): [
+      b'\x018965B58011\x00\x00\x00\x00\x00',
+    ],
+    (Ecu.abs, 0x7b0, None): [
+      b'\x01F152658031\x00\x00\x00\x00\x00',
+      b'\x01F152658061\x00\x00\x00\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x750, 0xf): [
+      b'\x01881515802100\x00\x00\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x750, 0x6d): [
+      b'\x028646F58010B0\x00\x00\x00\x008646G2601003\x00\x00\x00\x00',
+      b'\x028646F58010C0\x00\x00\x00\x008646G26011A0\x00\x00\x00\x00',
+      b'\x028646F5803200\x00\x00\x00\x008646G2601400\x00\x00\x00\x00',
+      b'\x028646FV201000\x00\x00\x00\x008646G2601400\x00\x00\x00\x00',
+    ],
+  },
   CAR.TOYOTA_AVALON: {
     (Ecu.abs, 0x7b0, None): [
       b'F152607060\x00\x00\x00\x00\x00\x00',
