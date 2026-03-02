@@ -119,8 +119,9 @@ class CarState(CarStateBase):
       self.esp_standstill_confirmation = pt_cp.vl["ESP_21"]["ESP_v_Signal"] == 0
       self.tsk_grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
       # ESP_15: minimum total wheel torque to hold at current slope when index=Antriebsmoment and raw < 10220
+      # 600 Nm is the observed signal floor; at or below that the grade is low and the ESP can hold indefinitely
       esp_hold_raw = pt_cp.vl["ESP_15"]["ESP_Haltemoment"]
-      self.esp_hold_uphill = pt_cp.vl["ESP_15"]["ESP_Index_Haltemoment"] == 1
+      self.esp_hold_uphill = pt_cp.vl["ESP_15"]["ESP_Index_Haltemoment"] == 1 and esp_hold_raw > 600
       self.esp_hold_torque_nm = esp_hold_raw if self.esp_hold_uphill and esp_hold_raw < 10220 else 0.0
       # Motor_11: MO_Mom_Ist_Summe is unitless — multiply by MO_Faktor_Momente_02 (1/2/3 Nm/unit) for crank Nm,
       # then by GE_Uefkt (crank→wheel ratio) to get wheel Nm comparable to ESP_Haltemoment.

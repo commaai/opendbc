@@ -134,7 +134,7 @@ class CarController(CarControllerBase):
         # re-engagement. On uphill it can't, so we use ACC_06 to build engine torque as a rollback
         # prevention measure so that the ESP will willingly cycle its own hold timer when we ask
         # while keeping ACC_07 in stopping mode so ESP holds the brake.
-        if self.CCS == mqbcan and CS.acc_type == 1 and long_active:
+        if self.CCS == mqbcan and CS.acc_type == 1 and long_active and accel <= 0:
           # flat/downhill: drop hold, prevent re-engagement
           if allow_indefinite_hold and CS.esp_standstill_confirmation:
             esp_starting_override = not CS.esp_hold_confirmation
