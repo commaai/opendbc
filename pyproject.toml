@@ -41,10 +41,10 @@ testing = [
   "lefthook",
   "cpplint",
   "codespell",
+  "cppcheck @ git+https://github.com/commaai/dependencies.git@releases#subdirectory=cppcheck",
 ]
 docs = [
   "Jinja2",
-  "natsort",
 ]
 examples = [
   "inputs",
