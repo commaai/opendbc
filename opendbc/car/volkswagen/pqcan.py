@@ -73,7 +73,7 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active):
   return hud_status
 
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold, comfortBand, jerkLimit):
   commands = []
 
   values = {
@@ -83,8 +83,8 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACS_Anhaltewunsch": acc_type == 1 and stopping,
     "ACS_FreigSollB": acc_enabled,
     "ACS_Sollbeschl": accel if acc_enabled else 3.01,
-    "ACS_zul_Regelabw": 0.2 if acc_enabled else 1.27,
-    "ACS_max_AendGrad": 3.0 if acc_enabled else 5.08,
+    "ACS_zul_Regelabw": comfortBand if acc_enabled else 1.27,
+    "ACS_max_AendGrad": jerkLimit if acc_enabled else 5.08,
   }
 
   commands.append(packer.make_can_msg("ACC_System", bus, values))
