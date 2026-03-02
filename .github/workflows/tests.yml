@@ -122,8 +122,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: opendbc_repo
-    - uses: ./.github/workflows/setup-with-retry
-      id: setup-step
+    - run: ./tools/op.sh setup
     - name: Cache test routes
       id: routes-cache
       uses: actions/cache@v4
@@ -133,7 +132,7 @@ jobs:
     - name: Build openpilot
       run: scons -j$(nproc) common/ cereal/ selfdrive/pandad/ msgq_repo/ opendbc_repo
     - name: Test car models
-      timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.routes-cache.outputs.cache-hit == 'true') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 6 }}
+      timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.routes-cache.outputs.cache-hit == 'true') && 2 || 6 }}
       run: MAX_EXAMPLES=1 pytest --continue-on-collection-errors --durations=0 --durations-min=5 -n logical selfdrive/car/tests/test_models.py
       env:
         NUM_JOBS: 4
