@@ -15,7 +15,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from comma_car_segments import get_comma_car_segments_database, get_url
 
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
@@ -52,6 +51,7 @@ def dict_diff(d1: dict[str, Any], d2: dict[str, Any], path: str = "", ignore: li
 
 
 def load_can_messages(seg: str) -> list[Any]:
+  from comma_car_segments import get_url
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
   msgs = LogReader(url, only_union_types=True, sort_by_time=True)
@@ -248,6 +248,7 @@ def format_diff(diffs: list[Diff], ref: list[Ref], states: list[structs.CarState
 
 
 def main(platform: str | None = None, segments_per_platform: int = 10, update_refs: bool = False, all_platforms: bool = False) -> int:
+  from comma_car_segments import get_comma_car_segments_database
   cwd = Path(__file__).resolve().parents[3]
   ref_path = cwd / DIFF_BUCKET
   if not update_refs:
@@ -296,7 +297,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
     print(f"\nERROR {plat} - {seg}: {err}")
 
   if with_diffs:
-    print("```")
+    print("<details><summary><b>Show changes</b></summary>\n\n```")
     for plat, seg, diffs, ref, states in with_diffs:
       print(f"\n{plat} - {seg}")
       by_field = defaultdict(list)
@@ -306,7 +307,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
         print(f"\n  {field} ({len(fd)} diffs)")
         for line in format_diff(fd, ref, states, field):
           print(line)
-    print("```")
+    print("```\n</details>")
 
   return 1 if errors else 0
 

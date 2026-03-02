@@ -1,8 +1,10 @@
 import random
 import re
 
+from opendbc.car import DT_CTRL
 from opendbc.car.structs import CarParams
-from opendbc.car.volkswagen.values import CAR, FW_QUERY_CONFIG, WMI
+from opendbc.car.volkswagen.carcontroller import HCAMitigation
+from opendbc.car.volkswagen.values import CAR, CarControllerParams as CCP, FW_QUERY_CONFIG, WMI
 from opendbc.car.volkswagen.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
@@ -11,6 +13,20 @@ CHASSIS_CODE_PATTERN = re.compile('[A-Z0-9]{2}')
 # TODO: determine the unknown groups
 SPARE_PART_FW_PATTERN = re.compile(b'\xf1\x87(?P<gateway>[0-9][0-9A-Z]{2})(?P<unknown>[0-9][0-9A-Z][0-9])(?P<unknown2>[0-9A-Z]{2}[0-9])([A-Z0-9]| )')
 
+
+class TestVolkswagenHCAMitigation:
+  STUCK_TORQUE_FRAMES = round(CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP))
+
+  def test_same_torque_mitigation(self):
+    """Same-torque nudge fires at the threshold, in the correct direction, and resets cleanly."""
+    hca_mitigation = HCAMitigation(CCP)
+
+    for actuator_value in (-CCP.STEER_MAX, -1, 0, 1, CCP.STEER_MAX):
+      hca_mitigation.update(0, 0)  # Reset mitigation state
+      for frame in range(self.STUCK_TORQUE_FRAMES + 2):
+        should_nudge = actuator_value != 0 and frame == self.STUCK_TORQUE_FRAMES
+        expected_torque = actuator_value - (1, -1)[actuator_value < 0] if should_nudge else actuator_value
+        assert hca_mitigation.update(actuator_value, actuator_value) == expected_torque, f"{frame=}"
 
 class TestVolkswagenPlatformConfigs:
   def test_spare_part_fw_pattern(self, subtests):
