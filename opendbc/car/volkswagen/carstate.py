@@ -52,7 +52,6 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     pt_cp = can_parsers[Bus.pt]
     cam_cp = can_parsers[Bus.cam]
-    alt_cp = can_parsers[Bus.alt]
     ext_cp = pt_cp if self.CP.networkLocation == NetworkLocation.fwdCamera else cam_cp
 
     if self.CP.flags & VolkswagenFlags.PQ:
@@ -61,6 +60,7 @@ class CarState(CarStateBase):
       return self.update_mlb(pt_cp, cam_cp, ext_cp)
 
     ret = structs.CarState()
+    alt_cp = can_parsers[Bus.alt]
 
     if self.CP.transmissionType == TransmissionType.direct:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Motor_EV_01"]["MO_Waehlpos"], None))
