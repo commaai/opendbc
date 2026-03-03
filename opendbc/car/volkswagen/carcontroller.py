@@ -53,10 +53,10 @@ class CarController(CarControllerBase):
     self.hca_mitigation = HCAMitigation(self.CCP)
 
     self.esp_hold_frames = 0
-    self.prev_starting_hold = False
-    self.previous_impulse_count = 0
     self.hill_hold_accel = 0.0
     self.detected_uphill = False
+    self.prev_impulse_count = 0
+    self.prev_starting_hold = False
     self.prev_starting_no_hold = False
 
   def update(self, CC, CS, now_nanos):
@@ -128,8 +128,8 @@ class CarController(CarControllerBase):
               if abs(error_nm) > HOLD_TORQUE_DEADBAND_NM:
                 self.hill_hold_accel = float(np.clip(self.hill_hold_accel + HOLD_ACCEL_KI * error_nm, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
               accel = max(accel, self.hill_hold_accel)
-            starting = True
-            stopping = False
+              starting = True
+              stopping = False
             # near counter limit: attempt hold release to cycle the ESP hold;
             # if torque management worked, hold_confirmation will drop and the counter resets to zero
             near_limit = self.esp_hold_frames >= HOLD_MAX_FRAMES - 10
@@ -143,13 +143,13 @@ class CarController(CarControllerBase):
         #   wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
         # - we drop a hold confirmation after a frame where we were actively starting with hold confirmed
         is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
-        if CS.wheel_impulse_count != self.previous_impulse_count and not CS.esp_hold_confirmation:
+        if CS.wheel_impulse_count != self.prev_impulse_count and not CS.esp_hold_confirmation:
           self.esp_hold_frames = 0
           self.detected_uphill = False
         elif self.prev_starting_hold and not CS.esp_hold_confirmation:
           self.esp_hold_frames = 0
         self.prev_starting_hold = is_starting and CS.esp_hold_confirmation
-        self.previous_impulse_count = CS.wheel_impulse_count
+        self.prev_impulse_count = CS.wheel_impulse_count
         # rarely, the ESP reacquires a hold while we're in flat mode actively requesting a start
         # this is a warning sign that the ESP will fault the TSK soon, and we must switch to hill mode
         if (self.prev_starting_no_hold and CS.esp_hold_confirmation):
