@@ -49,7 +49,7 @@ class CanBus(CanBusBase):
 # MQB ACC type 1 standstill hold tuning
 HOLD_MAX_FRAMES = 60                       # frames to hold before disabling long control to avoid a fault
 HOLD_TORQUE_DEADBAND_NM = 20               # stop integrating when this close to ESP_Haltemoment (Nm at wheel)
-HOLD_ACCEL_KI = 0.00002                    # I-controller gain: m/s² per Nm of torque error per ACC_CONTROL_STEP
+HOLD_ACCEL_KI = 0.00002                    # I-controller gain: m/s² per Nm of torque error per ACC_CONTROL_STEP (initial guess, not tuned)
 
 class CarControllerParams:
   STEER_STEP = 2                           # HCA_01/HCA_1 message frequency 50Hz
