@@ -40,6 +40,8 @@ class CarController(CarControllerBase):
     self.previous_impulse_count = 0
     self.distance_button_was_stopped = None
     self.hold_accel = 0.0
+    self.force_uphill_standstill = False
+    self.flat_starting_prev = False
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -96,7 +98,7 @@ class CarController(CarControllerBase):
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         esp_starting_override = None
         esp_stopping_override = None
-        allow_indefinite_hold = not CS.esp_hold_uphill
+        allow_indefinite_hold = not CS.esp_hold_uphill and not self.force_uphill_standstill
         long_active = (
           # acc type 1 is sensitive to control signals when brake pressed (i.e. preEnabled)
           False if CS.acc_type == 1 and CS.out.brakePressed else
@@ -167,10 +169,16 @@ class CarController(CarControllerBase):
         is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
         if CS.wheel_impulse_count != self.previous_impulse_count and not CS.esp_hold_confirmation:
           self.hold_counter = 0
+          self.force_uphill_standstill = False
         elif self.previous_resettable and not CS.esp_hold_confirmation:
           self.hold_counter = 0
         self.previous_resettable = is_starting and CS.esp_hold_confirmation
         self.previous_impulse_count = CS.wheel_impulse_count
+        # rarely, the ESP reacquires a hold while we're in flat mode actively requesting a start
+        # this is a warning sign that the ESP will fault the TSK soon, and we must switch to hill mode
+        if (self.flat_starting_prev and CS.esp_hold_confirmation):
+          self.force_uphill_standstill = True
+        self.flat_starting_prev = long_active and allow_indefinite_hold and starting and CS.esp_standstill_confirmation and not CS.esp_hold_confirmation
 
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, long_active, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation, esp_starting_override, esp_stopping_override))
