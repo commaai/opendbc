@@ -27,4 +27,5 @@ def _gen_crc16_table(poly: int) -> list[int]:
 
 CRC8H2F = _gen_crc8_table(0x2F)
 CRC8J1850 = _gen_crc8_table(0x1D)
+CRC8BODY = _gen_crc8_table(0xD5)
 CRC16_XMODEM = _gen_crc16_table(0x1021)

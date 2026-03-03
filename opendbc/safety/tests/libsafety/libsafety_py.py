@@ -4,7 +4,7 @@ from cffi import FFI
 from opendbc.safety import LEN_TO_DLC
 
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))
-libsafety_fn = os.path.join(libsafety_dir, "libsafety_mutation.so" if "MUTATION" in os.environ else "libsafety.so")
+libsafety_fn = os.path.join(libsafety_dir, "libsafety.so")
 
 ffi = FFI()
 

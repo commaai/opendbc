@@ -52,7 +52,7 @@ class TestCarDocs:
     for car in self.all_cars:
       with subtests.test(car=car.name):
         # honda sanity check, it's the definition of a no torque star
-        if car.car_fingerprint in (HONDA.HONDA_ACCORD, HONDA.HONDA_CIVIC, HONDA.HONDA_CRV, HONDA.HONDA_ODYSSEY, HONDA.HONDA_PILOT):
+        if car.car_fingerprint in (HONDA.HONDA_ACCORD, HONDA.HONDA_CIVIC, HONDA.HONDA_CRV, HONDA.HONDA_ODYSSEY, HONDA.HONDA_ODYSSEY_TWN, HONDA.HONDA_PILOT):
           assert car.row[Column.STEERING_TORQUE] == Star.EMPTY, f"{car.name} has full torque star"
         elif car.brand in ("toyota", "hyundai"):
           assert car.row[Column.STEERING_TORQUE] != Star.EMPTY, f"{car.name} has no torque star"
@@ -76,4 +76,4 @@ class TestCarDocs:
         assert len(car_parts) > 0, f"Need to specify car parts: {car.name}"
         assert car_part_type.count(PartType.connector) == 1, f"Need to specify one harness connector: {car.name}"
         assert car_part_type.count(PartType.mount) == 1, f"Need to specify one mount: {car.name}"
-        assert Cable.right_angle_obd_c_cable_1_5ft in car_parts, f"Need to specify a right angle OBD-C cable (1.5ft): {car.name}"
+        assert Cable.obd_c_cable_2ft in car_parts, f"Need to specify an OBD-C cable (2ft): {car.name}"

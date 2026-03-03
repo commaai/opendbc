@@ -1,6 +1,7 @@
 #include "opendbc/safety/declarations.h"
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
+// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_MIN(a, b) ({ \
   __typeof__(a) _a = (a); \
   __typeof__(b) _b = (b); \
@@ -8,6 +9,7 @@
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
+// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_MAX(a, b) ({ \
   __typeof__(a) _a = (a); \
   __typeof__(b) _b = (b); \
@@ -15,6 +17,7 @@
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
+// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_CLAMP(x, low, high) ({ \
   __typeof__(x) __x = (x); \
   __typeof__(low) __low = (low);\
@@ -23,6 +26,7 @@
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
+// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_ABS(a) ({ \
   __typeof__(a) _a = (a); \
   (_a > 0) ? _a : (-_a); \

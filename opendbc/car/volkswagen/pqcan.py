@@ -2,7 +2,7 @@ def create_steering_control(packer, bus, apply_torque, lkas_enabled):
   values = {
     "LM_Offset": abs(apply_torque),
     "LM_OffSign": 1 if apply_torque < 0 else 0,
-    "HCA_Status": 5 if (lkas_enabled and apply_torque != 0) else 3,
+    "HCA_Status": 7 if (lkas_enabled and apply_torque != 0) else 3,
     "Vib_Freq": 16,
   }
 
@@ -73,7 +73,7 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active):
   return hud_status
 
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold, reset_signal):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold, esp_starting_override, esp_stopping_override):
   commands = []
 
   values = {

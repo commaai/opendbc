@@ -1514,6 +1514,8 @@ BO_ 427 ESP_33: 8 Gateway_MQB
 BO_ 418 ESP_15: 8 XXX
  SG_ ESP_15_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ ESP_15_BZ : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ ESP_Index_Haltemoment : 53|1@1+ (1,0) [0|1] "" XXX
+ SG_ ESP_Haltemoment : 54|10@1+ (10,0) [0|10210] "Unit_NewtoMeter" XXX
 
 BO_ 1122 PSD_04: 8 XXX
  SG_ PSD_Object_Index : 0|6@1+ (1,0) [0|63] "" XXX
@@ -1705,6 +1707,8 @@ VAL_ 346 TSK_erhoehter_Fahrwiderstand 0 "kein_erhoehter_Fahrwiderstand" 1 "erhoe
 VAL_ 346 TSK_Anf_Antriebsmoment 0 "keine_Anforderung" 1 "Anforderung_aktiv" ;
 VAL_ 346 TSK_Status_ARA 0 "Aus" 1 "Init_oder_nicht_verbaut" 2 "aktivierbar" 3 "aktiv" 5 "abschaltung_laeuft" 6 "reversibel_aus" 7 "Fehler" ;
 VAL_ 346 TSK_Status_IPA 0 "Aus_Funktionsbereit" 1 "Init_oder_nicht_verbaut" 2 "aktivierbar" 3 "aktiv" 5 "Abschaltung_laueft" 6 "reversibel_aus" 7 "Fehler" ;
+VAL_ 418 ESP_Index_Haltemoment 0 "Bremsmoment" 1 "Antriebsmoment" ;
+VAL_ 418 ESP_Haltemoment 1022 "Init" 1023 "Fehler" ;
 VAL_ 798 TSK_Wunschgeschw 1022 "keine_Anzeige" 1023 "kein_Wert_im_Speicher" ;
 VAL_ 798 TSK_Texte 0 "kein_Text" 1 "GRA_Modus_ausgewaehlt" 2 "ACC_Modus_ausgewaehlt" 3 "Lim_Modus_ausgewaehlt" 4 "Lim_nicht_verfuegbar_ESC_passiv" 5 "GRA_nicht_verfuegbar_ESC_passiv" 6 "Lim_nicht_verfuegbar_Charisma" 7 "GRA_nicht_verfuegbar_Charisma" 8 "Lim_nicht_verfuegbar_HDC" 9 "GRA_nicht_verfuegbar_HDC" ;
 VAL_ 798 TSK_Akustik 0 "keine_Akustik" 1 "einzelner_Warnton" 2 "dauerhafter_Warnton" ;

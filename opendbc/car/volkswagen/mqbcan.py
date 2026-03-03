@@ -1,4 +1,3 @@
-from enum import IntEnum
 from opendbc.car.crc import CRC8H2F
 
 
@@ -89,36 +88,10 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active):
   return acc_control_value(main_switch_on, acc_faulted, long_active)
 
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold, reset_signal):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold, esp_starting_override, esp_stopping_override):
   commands = []
 
-  # standstill timer reset for ACC type 1 cars
-  # - gentle: mimic a short roll request to reset timer (only works on ~flat ground)
-  # - extended: send accel=0 to reset timer without torquing the engine when we don't intend to move (can cause RPM to increase but works better on hills)
-  # - pre/post-disable: send the exact messages the car would when disabling due to standstill timer expiration
-  #                     this releases the hold without resetting the timer to avoid a fault
-  needs_reset = (
-    (reset_signal != ResetSignal.NONE) and
-    # don't reset if we're accelerating (it would decrease our acceleration strength)
-    # always reset if we're pre-disabling (fault prevention measure)
-    ((accel <= 0.01) or (reset_signal == ResetSignal.PRE_DISABLE))
-  )
-  extended_reset = reset_signal == ResetSignal.EXTENDED_RESET
-  pre_disable = reset_signal == ResetSignal.PRE_DISABLE
-  post_disable = reset_signal == ResetSignal.POST_DISABLE
-
   acc_06_values = {
-    "ACC_Typ": acc_type,
-    "ACC_Status_ACC": 2 if pre_disable or post_disable else 3,
-    "ACC_StartStopp_Info": 0 if post_disable else acc_enabled,
-    "ACC_Sollbeschleunigung_02": 0 if extended_reset else 3.01 if pre_disable or post_disable else 0.01,
-    "ACC_zul_Regelabw_unten": 0,
-    "ACC_zul_Regelabw_oben": 0,
-    "ACC_neg_Sollbeschl_Grad_02": 0 if post_disable else 1.5,
-    "ACC_pos_Sollbeschl_Grad_02": 0 if post_disable else 1.5,
-    "ACC_Anfahren": 0 if post_disable else 1,
-    "ACC_Anhalten": 0,
-  } if needs_reset else {
     "ACC_Typ": acc_type,
     "ACC_Status_ACC": acc_control,
     "ACC_StartStopp_Info": acc_enabled,
@@ -127,36 +100,32 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_zul_Regelabw_oben": 0.2,  # TODO: dynamic adjustment of comfort-band
     "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
     "ACC_pos_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
-    "ACC_Anfahren": starting,
-    "ACC_Anhalten": stopping,
+    "ACC_Anfahren": starting if acc_enabled else False,
+    "ACC_Anhalten": stopping if acc_enabled else False,
   }
   commands.append(packer.make_can_msg("ACC_06", bus, acc_06_values))
 
   if starting:
     acc_hold_type = 4  # hold release / startup
   elif esp_hold:
-    acc_hold_type = 1  # hold request
-  elif stopping:
     acc_hold_type = 3  # hold standby
+  elif stopping:
+    acc_hold_type = 1  # hold request
   else:
     acc_hold_type = 0
 
+  # acc 7 is forwarded to ESP
+  acc07_stopping = esp_stopping_override if esp_stopping_override is not None else stopping
+  acc07_starting = esp_starting_override if esp_starting_override is not None else starting
+
   acc_07_values = {
-    "ACC_Anhalteweg": 20.46,
-    "ACC_Freilauf_Info": 0 if extended_reset else 2,
-    "ACC_Folgebeschl": 3.02,
-    "ACC_Sollbeschleunigung_02": 0 if extended_reset else 3.01 if pre_disable or post_disable else 0.01,
-    "ACC_Anforderung_HMS": 0,
-    "ACC_Anfahren": 0 if post_disable else 1,
-    "ACC_Anhalten": 0,
-  } if needs_reset else {
-    "ACC_Anhalteweg": 0.3 if stopping else 20.46,  # Distance to stop (stopping coordinator handles terminal roll-out)
+    "ACC_Anhalteweg": 0.3 if acc07_stopping and acc_enabled else 20.46,  # Distance to stop (stopping coordinator handles terminal roll-out)
     "ACC_Freilauf_Info": 2 if acc_enabled else 0,
     "ACC_Folgebeschl": 3.02,  # Not using secondary controller accel unless and until we understand its impact
     "ACC_Sollbeschleunigung_02": accel if acc_enabled else 3.01,
     "ACC_Anforderung_HMS": acc_hold_type,
-    "ACC_Anfahren": starting,
-    "ACC_Anhalten": stopping,
+    "ACC_Anfahren": acc07_starting if acc_enabled else False,
+    "ACC_Anhalten": acc07_stopping if acc_enabled else False,
   }
   commands.append(packer.make_can_msg("ACC_07", bus, acc_07_values))
 
@@ -220,20 +189,14 @@ def volkswagen_mqb_meb_checksum(address: int, sig, d: bytearray) -> int:
   return crc ^ 0xFF
 
 
-def xor_checksum(address: int, sig, d: bytearray) -> int:
-  checksum = 0
+def xor_checksum(address: int, sig, d: bytearray, initial_value: int = 0) -> int:
+  checksum = initial_value
   checksum_byte = sig.start_bit // 8
   for i in range(len(d)):
     if i != checksum_byte:
       checksum ^= d[i]
   return checksum
 
-class ResetSignal(IntEnum):
-  NONE = 0
-  GENTLE_RESET = 1
-  EXTENDED_RESET = 2
-  PRE_DISABLE = 3
-  POST_DISABLE = 4
 
 VOLKSWAGEN_MQB_MEB_CONSTANTS: dict[int, list[int]] = {
     0x40:  [0x40] * 16,  # Airbag_01

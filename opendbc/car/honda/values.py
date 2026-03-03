@@ -3,7 +3,7 @@ from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
 Ecu = structs.CarParams.Ecu
@@ -109,10 +109,7 @@ class HondaCarDocs(CarDocs):
     else:
       harness = CarHarness.nidec
 
-    if CP.carFingerprint in (CAR.HONDA_PILOT_4G, CAR.HONDA_PASSPORT_4G):
-      self.car_parts = CarParts([Device.threex_angled_mount, harness])
-    else:
-      self.car_parts = CarParts.common([harness])
+    self.car_parts = CarParts.common([harness])
 
 
 class Footnote(Enum):
@@ -188,6 +185,7 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1326, wheelbase=2.7, steerRatio=15.38, centerToFrontRatio=0.4),  # steerRatio: 10.93 is end-to-end spec
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
+    flags=HondaFlags.ALLOW_MANUAL_TRANS,
   )
   HONDA_CIVIC_BOSCH_DIESEL = HondaBoschPlatformConfig(
     [],  # don't show in docs
@@ -217,7 +215,7 @@ class CAR(Platforms):
   HONDA_CRV_6G = HondaBoschCANFDPlatformConfig(
     [
       HondaCarDocs("Honda CR-V 2023-26", "All"),
-      HondaCarDocs("Honda CR-V Hybrid 2023-25", "All"),
+      HondaCarDocs("Honda CR-V Hybrid 2023-26", "All"),
     ],
     CarSpecs(mass=1703, wheelbase=2.7, steerRatio=16.2, centerToFrontRatio=0.42),
   )
@@ -265,7 +263,7 @@ class CAR(Platforms):
   )
   # mid-model refresh
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
-    [HondaCarDocs("Acura MDX 2025", "All except Type S")],
+    [HondaCarDocs("Acura MDX 2025-26", "All except Type S")],
     CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=16.2),
   )
   HONDA_ODYSSEY_5G_MMR = HondaBoschPlatformConfig(
@@ -279,6 +277,11 @@ class CAR(Platforms):
     CarSpecs(mass=3982 * CV.LB_TO_KG, wheelbase=2.87, steerRatio=14.0, centerToFrontRatio=0.43),
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
     flags=HondaFlags.BOSCH_ALT_RADAR,
+  )
+  # mid-model refresh
+  ACURA_TLX_2G_MMR = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Acura TLX 2025", "All")],
+    CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.87, centerToFrontRatio=0.43, steerRatio=13.7),
   )
 
   # Nidec Cars
@@ -326,6 +329,12 @@ class CAR(Platforms):
     CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
     radar_dbc_dict('honda_odyssey_exl_2018_generated'),
     flags=HondaFlags.NIDEC_ALT_PCM_ACCEL | HondaFlags.HAS_ALL_DOOR_STATES,
+  )
+  HONDA_ODYSSEY_TWN = HondaNidecPlatformConfig(
+    [HondaCarDocs("Honda Odyssey (Taiwan) 2018-19")],
+    CarSpecs(mass=1865, wheelbase=2.9, steerRatio=14.35, centerToFrontRatio=0.44, tireStiffnessFactor=0.82),
+    radar_dbc_dict('honda_odyssey_twn_2018_generated'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
   ACURA_RDX = HondaNidecPlatformConfig(
     [HondaCarDocs("Acura RDX 2016-18", "AcuraWatch Plus or Advance Package", min_steer_speed=12. * CV.MPH_TO_MS)],

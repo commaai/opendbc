@@ -63,13 +63,12 @@ static safety_config volkswagen_pq_init(uint16_t param) {
     {.msg = {{MSG_GRA_NEU, 0, 4, 30U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  SAFETY_UNUSED(param);
-
-  volkswagen_set_button_prev = false;
-  volkswagen_resume_button_prev = false;
+  volkswagen_common_init();
 
 #ifdef ALLOW_DEBUG
   volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
+#else
+  SAFETY_UNUSED(param);
 #endif
   return volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_LONG_TX_MSGS) : \
                                    BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_STOCK_TX_MSGS);

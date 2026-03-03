@@ -44,16 +44,21 @@ BS_:
 BU_: XXX
     """)
 
-    # note: 0x501/0x502 seem to be special in 0x5XX range
     for a in range(0x500, 0x500 + 32):
         f.write(f"""
 BO_ {a} RADAR_TRACK_{a:x}: 8 RADAR
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ UNKNOWN_1 : 23|8@0- (1,0) [-128|127] "" XXX
- SG_ AZIMUTH : 28|10@0- (0.1,0) [-61.2|62.1] "" XXX
+ SG_ AZIMUTH : 28|10@0- (0.1,0) [-51.2|51.1] "" XXX
  SG_ STATE : 31|3@0+ (1,0) [0|7] "" XXX
  SG_ LONG_DIST : 34|11@0+ (0.1,0) [0|204.7] "" XXX
- SG_ STATE_2 : 55|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 53|14@0- (0.01,0) [-81.92|81.92] "" XXX
+ SG_ MODE : 55|2@0+ (1,0) [0|3] "" XXX
+ SG_ REL_SPEED : 53|14@0- (0.01,0) [-81.92|81.92] "m/s" XXX
+    """)
+
+    for a in range(0x500, 0x500 + 32):
+        f.write(f"""
+VAL_ {a} STATE 0 "Empty" 1 "New" 2 "New_updated" 3 "Updated" 4 "Coasting" 7 "New_coasting" ;
+VAL_ {a} MODE 0 "None" 1 "SRR" 2 "LRR" 3 "SRR_and_LRR" ;
     """)

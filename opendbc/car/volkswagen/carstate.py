@@ -16,9 +16,16 @@ class CarState(CarStateBase):
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
-    self.esp_vEgo_confirmation = 0.0
+    self.esp_standstill_confirmation = False
+    self.tsk_grade = 0
+    self.esp_hold_torque_nm = 0.0
+    self.esp_hold_uphill = False
+    self.actual_torque_nm = 0.0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
+    self.acc_type = 0
+    self.wheel_impulse_count = 0
+    self.distance_button_pressed = False
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -45,10 +52,13 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     pt_cp = can_parsers[Bus.pt]
     cam_cp = can_parsers[Bus.cam]
+    alt_cp = can_parsers[Bus.alt]
     ext_cp = pt_cp if self.CP.networkLocation == NetworkLocation.fwdCamera else cam_cp
 
     if self.CP.flags & VolkswagenFlags.PQ:
       return self.update_pq(pt_cp, cam_cp, ext_cp)
+    elif self.CP.flags & VolkswagenFlags.MLB:
+      return self.update_mlb(pt_cp, cam_cp, ext_cp)
 
     ret = structs.CarState()
 
@@ -74,11 +84,16 @@ class CarState(CarStateBase):
         pt_cp.vl["ESP_19"]["ESP_HR_Radgeschw_02"],
       )
 
-      hca_status = self.CCP.hca_status_values.get(pt_cp.vl["LH_EPS_03"]["EPS_HCA_Status"])
+      self.wheel_impulse_count = (
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_VL"]
+        + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_VR"]
+        + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"]
+        + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"]
+      )
+
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
         ret.carFaultedNonCritical = bool(cam_cp.vl["HCA_01"]["EA_Ruckfreigabe"]) or cam_cp.vl["HCA_01"]["EA_ACC_Sollstatus"] > 0  # EA
 
-      drive_mode = True
       ret.brake = pt_cp.vl["ESP_05"]["ESP_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
       brake_pedal_pressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
       brake_pressure_detected = bool(pt_cp.vl["ESP_05"]["ESP_Fahrer_bremst"])
@@ -101,7 +116,20 @@ class CarState(CarStateBase):
 
       self.acc_type = ext_cp.vl["ACC_06"]["ACC_Typ"]
       self.esp_hold_confirmation = bool(pt_cp.vl["ESP_21"]["ESP_Haltebestaetigung"])
-      self.esp_vEgo_confirmation = pt_cp.vl["ESP_21"]["ESP_v_Signal"] * CV.KPH_TO_MS
+      self.esp_standstill_confirmation = pt_cp.vl["ESP_21"]["ESP_v_Signal"] == 0
+      self.tsk_grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
+      # ESP_15: minimum total wheel torque to hold at current slope when index=Antriebsmoment and raw < 10220
+      # 600 Nm is the observed signal floor; at or below that the grade is low and the ESP can hold indefinitely
+      esp_hold_raw = pt_cp.vl["ESP_15"]["ESP_Haltemoment"]
+      haltemoment_antrieb = pt_cp.vl["ESP_15"]["ESP_Index_Haltemoment"] == 1
+      self.esp_hold_uphill = haltemoment_antrieb and esp_hold_raw > 600
+      self.esp_hold_torque_nm = esp_hold_raw if haltemoment_antrieb and esp_hold_raw < 10220 else 0.0
+      # Motor_11: MO_Mom_Ist_Summe is unitless — multiply by MO_Faktor_Momente_02 (1/2/3 Nm/unit) for crank Nm,
+      # then by GE_Uefkt (crank→wheel ratio) to get wheel Nm comparable to ESP_Haltemoment.
+      _motor_torque_raw = alt_cp.vl["Motor_11"]["MO_Mom_Ist_Summe"]
+      _motor_torque_factor = int(pt_cp.vl["Motor_Code_01"]["MO_Faktor_Momente_02"])
+      _gear_ratio = pt_cp.vl["Getriebe_11"]["GE_Uefkt"]
+      self.actual_torque_nm = _motor_torque_raw * _motor_torque_factor * _gear_ratio
       acc_limiter_mode = ext_cp.vl["ACC_02"]["ACC_Gesetzte_Zeitluecke"] == 0
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
 
@@ -116,11 +144,7 @@ class CarState(CarStateBase):
     # Shared logic
     ret.vEgoCluster = pt_cp.vl["Kombi_01"]["KBI_angez_Geschw"] * CV.KPH_TO_MS
 
-    ret.steeringAngleDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradwinkel"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradwinkel"])]
-    ret.steeringRateDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradw_Geschw"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradw_Geschw"])]
-    ret.steeringTorque = pt_cp.vl["LH_EPS_03"]["EPS_Lenkmoment"] * (1, -1)[int(pt_cp.vl["LH_EPS_03"]["EPS_VZ_Lenkmoment"])]
-    ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
-    ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status, drive_mode)
+    self.parse_mlb_mqb_steering_state(ret, pt_cp)
 
     ret.gasPressed = pt_cp.vl["Motor_20"]["MO_Fahrpedalrohwert_01"] > 0
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
@@ -136,6 +160,7 @@ class CarState(CarStateBase):
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
     self.gra_stock_values = pt_cp.vl["GRA_ACC_01"]
+    self.distance_button_pressed = self.gra_stock_values["GRA_Verstellung_Zeitluecke"] in (1, 2, 3)
 
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
@@ -235,6 +260,61 @@ class CarState(CarStateBase):
     self.frame += 1
     return ret
 
+  def update_mlb(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
+    ret = structs.CarState()
+
+    self.parse_wheel_speeds(ret,
+      pt_cp.vl["ESP_03"]["ESP_VL_Radgeschw"],
+      pt_cp.vl["ESP_03"]["ESP_VR_Radgeschw"],
+      pt_cp.vl["ESP_03"]["ESP_HL_Radgeschw"],
+      pt_cp.vl["ESP_03"]["ESP_HR_Radgeschw"],
+    )
+
+    ret.gasPressed = pt_cp.vl["Motor_03"]["MO_Fahrpedalrohwert_01"] > 0
+    ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_03"]["GE_Waehlhebel"], None))
+
+    # ACC okay but disabled (1), ACC ready (2), a radar visibility or other fault/disruption (6 or 7)
+    # currently regulating speed (3), driver accel override (4), brake only (5)
+    # TODO: get this from the drivetrain side instead, for openpilot long support later
+    ret.cruiseState.available = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (2, 3, 4, 5)
+    ret.cruiseState.enabled = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (3, 4, 5)
+    ret.accFaulted = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (6, 7)
+
+    self.parse_mlb_mqb_steering_state(ret, pt_cp)
+
+    ret.brake = pt_cp.vl["ESP_05"]["ESP_Bremsdruck"] / 250.0
+    brake_pedal_pressed = bool(pt_cp.vl["Motor_03"]["MO_Fahrer_bremst"])
+    brake_pressure_detected = bool(pt_cp.vl["ESP_05"]["ESP_Fahrer_bremst"])
+    ret.brakePressed = brake_pedal_pressed or brake_pressure_detected
+    ret.parkingBrake = bool(pt_cp.vl["Kombi_01"]["KBI_Handbremse"])
+    ret.espDisabled = pt_cp.vl["ESP_01"]["ESP_Tastung_passiv"] != 0
+
+    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(300, pt_cp.vl["Gateway_11"]["BH_Blinker_li"],
+                                                                            pt_cp.vl["Gateway_11"]["BH_Blinker_re"])
+
+    ret.seatbeltUnlatched = pt_cp.vl["Gateway_06"]["AB_Gurtschloss_FA"] != 3
+    ret.doorOpen = any([pt_cp.vl["Gateway_05"]["FT_Tuer_geoeffnet"],
+                        pt_cp.vl["Gateway_05"]["BT_Tuer_geoeffnet"],
+                        pt_cp.vl["Gateway_05"]["HL_Tuer_geoeffnet"],
+                        pt_cp.vl["Gateway_05"]["HR_Tuer_geoeffnet"]])
+
+    # Consume blind-spot monitoring info/warning LED states, if available.
+    # Infostufe: BSM LED on, Warnung: BSM LED flashing
+    if self.CP.enableBsm:
+      ret.leftBlindspot = bool(ext_cp.vl["SWA_01"]["SWA_Infostufe_SWA_li"]) or bool(ext_cp.vl["SWA_01"]["SWA_Warnung_SWA_li"])
+      ret.rightBlindspot = bool(ext_cp.vl["SWA_01"]["SWA_Infostufe_SWA_re"]) or bool(ext_cp.vl["SWA_01"]["SWA_Warnung_SWA_re"])
+
+    self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
+    self.gra_stock_values = pt_cp.vl["LS_01"]
+
+    ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
+
+    ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
+    ret.standstill = ret.vEgoRaw == 0
+
+    self.frame += 1
+    return ret
+
   def update_low_speed_alert(self, v_ego: float) -> bool:
     # Low speed steer alert hysteresis logic
     if (self.CP.minSteerSpeed - 1e-3) > CarControllerParams.DEFAULT_MIN_STEER_SPEED and v_ego < (self.CP.minSteerSpeed + 1.):
@@ -242,6 +322,16 @@ class CarState(CarStateBase):
     elif v_ego > (self.CP.minSteerSpeed + 2.):
       self.low_speed_alert = False
     return self.low_speed_alert
+
+  def parse_mlb_mqb_steering_state(self, ret, pt_cp, drive_mode=True):
+    ret.steeringAngleDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradwinkel"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradwinkel"])]
+    ret.steeringRateDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradw_Geschw"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradw_Geschw"])]
+    ret.steeringTorque = pt_cp.vl["LH_EPS_03"]["EPS_Lenkmoment"] * (1, -1)[int(pt_cp.vl["LH_EPS_03"]["EPS_VZ_Lenkmoment"])]
+    ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
+
+    hca_status = self.CCP.hca_status_values.get(pt_cp.vl["LH_EPS_03"]["EPS_HCA_Status"])
+    ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status, drive_mode)
+    return
 
   def update_hca_state(self, hca_status, drive_mode=True):
     # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
@@ -256,18 +346,21 @@ class CarState(CarStateBase):
     if CP.flags & VolkswagenFlags.PQ:
       return CarState.get_can_parsers_pq(CP)
 
-    # another case of the 1-50Hz
-    cam_messages = []
+    # manually configure some optional and variable-rate/edge-triggered messages
+    pt_messages, cam_messages = [], []
+
+    if not CP.flags & VolkswagenFlags.MLB:
+      pt_messages += [
+        ("Blinkmodi_02", 1)  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
+      ]
     if CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
       cam_messages += [
         ("HCA_01", 1),  # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
       ]
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [
-        # the 50->1Hz is currently too much for the CANParser to figure out
-        ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
-      ], CanBus(CP).pt),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
+      Bus.alt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).alt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).cam),
     }
 
