@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from collections import defaultdict
 import importlib
-from parameterized import parameterized_class
 import pytest
 import sys
 
@@ -20,29 +19,7 @@ MAX_LAT_JERK_UP_TOLERANCE = 0.5  # m/s^3
 JERK_MEAS_T = 0.5
 
 
-@parameterized_class('car_model', [(c,) for c in sorted(PLATFORMS)])
 class TestLateralLimits:
-  car_model: str
-
-  @classmethod
-  def setup_class(cls):
-    CarInterface = interfaces[cls.car_model]
-    CP = CarInterface.get_non_essential_params(cls.car_model)
-
-    if cls.car_model == 'MOCK':
-      pytest.skip('Mock car')
-
-    # TODO: test all platforms
-    if CP.steerControlType != 'torque':
-      pytest.skip()
-
-    if CP.notCar:
-      pytest.skip()
-
-    CarControllerParams = importlib.import_module(f'opendbc.car.{CP.brand}.values').CarControllerParams
-    cls.control_params = CarControllerParams(CP)
-    cls.torque_params = get_torque_params()[cls.car_model]
-
   @staticmethod
   def calculate_0_5s_jerk(control_params, torque_params):
     steer_step = control_params.STEER_STEP
@@ -59,13 +36,37 @@ class TestLateralLimits:
     # Convert to m/s^3
     return accel_up_0_5_sec / JERK_MEAS_T, accel_down_0_5_sec / JERK_MEAS_T
 
-  def test_jerk_limits(self):
-    up_jerk, down_jerk = self.calculate_0_5s_jerk(self.control_params, self.torque_params)
+  @staticmethod
+  def _get_car_params(car_model):
+    CarInterface = interfaces[car_model]
+    CP = CarInterface.get_non_essential_params(car_model)
+
+    if car_model == 'MOCK':
+      pytest.skip('Mock car')
+
+    # TODO: test all platforms
+    if CP.steerControlType != 'torque':
+      pytest.skip()
+
+    if CP.notCar:
+      pytest.skip()
+
+    CarControllerParams = importlib.import_module(f'opendbc.car.{CP.brand}.values').CarControllerParams
+    control_params = CarControllerParams(CP)
+    torque_params = get_torque_params()[car_model]
+    return control_params, torque_params
+
+  @pytest.mark.parametrize("car_model", sorted(PLATFORMS))
+  def test_jerk_limits(self, car_model):
+    control_params, torque_params = self._get_car_params(car_model)
+    up_jerk, down_jerk = self.calculate_0_5s_jerk(control_params, torque_params)
     assert up_jerk <= MAX_LAT_JERK_UP + MAX_LAT_JERK_UP_TOLERANCE
     assert down_jerk <= MAX_LAT_JERK_DOWN
 
-  def test_max_lateral_accel(self):
-    assert self.torque_params["MAX_LAT_ACCEL_MEASURED"] <= ISO_LATERAL_ACCEL
+  @pytest.mark.parametrize("car_model", sorted(PLATFORMS))
+  def test_max_lateral_accel(self, car_model):
+    _, torque_params = self._get_car_params(car_model)
+    assert torque_params["MAX_LAT_ACCEL_MEASURED"] <= ISO_LATERAL_ACCEL
 
 
 class LatAccelReport:
@@ -83,13 +84,18 @@ class LatAccelReport:
       print(f"{car_model:{max_car_model_len}} - up jerk: {round(_jerks['up_jerk'], 2):5} " +
             f"m/s^3, down jerk: {round(_jerks['down_jerk'], 2):5} m/s^3{violation_str}")
 
-  @pytest.fixture(scope="class", autouse=True)
-  def class_setup(self, request):
+  @pytest.fixture(autouse=True)
+  def record_jerk(self, request):
     yield
-    cls = request.cls
-    if hasattr(cls, "control_params"):
-      up_jerk, down_jerk = TestLateralLimits.calculate_0_5s_jerk(cls.control_params, cls.torque_params)
-      self.car_model_jerks[cls.car_model] = {"up_jerk": up_jerk, "down_jerk": down_jerk}
+    car_model = request.node.callspec.params.get('car_model') if hasattr(request.node, 'callspec') else None
+    if car_model is None or request.node.name.startswith('test_max_lateral_accel'):
+      return
+    try:
+      control_params, torque_params = TestLateralLimits._get_car_params(car_model)
+      up_jerk, down_jerk = TestLateralLimits.calculate_0_5s_jerk(control_params, torque_params)
+      self.car_model_jerks[car_model] = {"up_jerk": up_jerk, "down_jerk": down_jerk}
+    except Exception:
+      pass
 
 
 if __name__ == '__main__':
