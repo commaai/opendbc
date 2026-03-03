@@ -145,7 +145,7 @@ class CarState(CarStateBase):
     ret.parkingBrake = bool(cp.vl[self.car_state_scm_msg]["PARKING_BRAKE_ON"])
 
     if self.CP.transmissionType == TransmissionType.manual:
-      if self.CP.carfingerprint == CAR.HONDA_FIT:
+      if self.CP.carFingerprint == CAR.HONDA_FIT:
         ret.gearShifter = GearShifter.drive # temp override until message found for Nidec
       else:
         ret.gearShifter = GearShifter.reverse if bool(cp.vl["SCM_FEEDBACK"]["REVERSE_LIGHT"]) else GearShifter.drive
