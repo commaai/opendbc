@@ -53,11 +53,11 @@ class CarController(CarControllerBase):
     self.hca_mitigation = HCAMitigation(self.CCP)
 
     self.esp_hold_frames = 0
-    self.was_starting_hold = False
+    self.prev_starting_hold = False
     self.previous_impulse_count = 0
     self.hill_hold_accel = 0.0
     self.detected_uphill = False
-    self.was_starting_no_hold = False
+    self.prev_starting_no_hold = False
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -120,9 +120,8 @@ class CarController(CarControllerBase):
             esp_starting_override = not CS.esp_hold_confirmation
             esp_stopping_override = False
 
-          # uphill: build engine torque via ACC_06, ESP braking held via ACC_07
+          # uphill: build engine torque via ACC_06 as rollback prevention, ESP braking held via ACC_07
           elif is_uphill and (CS.esp_hold_confirmation or CS.out.standstill):
-            # esp_hold_torque_nm is 0 when invalid; error goes negative and the integrator backs off.
             # skip torque management for the first frame to avoid check engine light from extended accel w/ no movement
             if self.esp_hold_frames > 1:
               error_nm = CS.esp_hold_torque_nm - CS.actual_torque_nm
@@ -132,7 +131,7 @@ class CarController(CarControllerBase):
             starting = True
             stopping = False
             # near counter limit: attempt hold release to cycle the ESP hold;
-            # if torque management worked, hold_confirmation drops and the counter resets
+            # if torque management worked, hold_confirmation will drop and the counter resets to zero
             near_limit = self.esp_hold_frames >= HOLD_MAX_FRAMES - 10
             esp_starting_override = near_limit
             esp_stopping_override = not near_limit
@@ -141,22 +140,21 @@ class CarController(CarControllerBase):
 
         # our standstill timer resets when either:
         # - wheels move while a hold is not confirmed
-        # wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
+        #   wheel impulses update earlier than vEgo, so we can reset the timer faster by watching them directly
         # - we drop a hold confirmation after a frame where we were actively starting with hold confirmed
-        # (previous_resettable captures is_starting AND hold_confirmation from the prior frame, which is sufficient)
         is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
         if CS.wheel_impulse_count != self.previous_impulse_count and not CS.esp_hold_confirmation:
           self.esp_hold_frames = 0
           self.detected_uphill = False
-        elif self.was_starting_hold and not CS.esp_hold_confirmation:
+        elif self.prev_starting_hold and not CS.esp_hold_confirmation:
           self.esp_hold_frames = 0
-        self.was_starting_hold = is_starting and CS.esp_hold_confirmation
+        self.prev_starting_hold = is_starting and CS.esp_hold_confirmation
         self.previous_impulse_count = CS.wheel_impulse_count
         # rarely, the ESP reacquires a hold while we're in flat mode actively requesting a start
         # this is a warning sign that the ESP will fault the TSK soon, and we must switch to hill mode
-        if (self.was_starting_no_hold and CS.esp_hold_confirmation):
+        if (self.prev_starting_no_hold and CS.esp_hold_confirmation):
           self.detected_uphill = True
-        self.was_starting_no_hold = long_active and not is_uphill and starting and CS.out.standstill and not CS.esp_hold_confirmation
+        self.prev_starting_no_hold = long_active and not is_uphill and starting and CS.out.standstill and not CS.esp_hold_confirmation
 
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, long_active, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation,
