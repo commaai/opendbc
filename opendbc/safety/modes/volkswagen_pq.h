@@ -162,6 +162,7 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
     .max_accel = 2000,
     .min_accel = -3500,
     .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
+    .zero_accel = 0,
   };
 
   bool tx = true;
