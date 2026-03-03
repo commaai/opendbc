@@ -5,13 +5,10 @@ from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mlbcan, mqbcan, pqcan
-from opendbc.car.volkswagen.values import CanBus, CarControllerParams, VolkswagenFlags
+from opendbc.car.volkswagen.values import CanBus, CarControllerParams, HOLD_ACCEL_KI, HOLD_TORQUE_DEADBAND_NM, HOLD_MAX_FRAMES, VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
-
-HOLD_TORQUE_DEADBAND_NM = 20   # stop integrating when this close to ESP_Haltemoment (Nm at wheel)
-HOLD_ACCEL_KI = 0.00002        # I-controller gain: m/s² per Nm of torque error per ACC_CONTROL_STEP
 
 
 class HCAMitigation:
@@ -58,7 +55,6 @@ class CarController(CarControllerBase):
     self.hold_counter = 0
     self.previous_resettable = False
     self.previous_impulse_count = 0
-    self.distance_button_was_stopped = None
     self.hold_accel = 0.0
     self.force_uphill_standstill = False
     self.flat_starting_prev = False
@@ -97,35 +93,19 @@ class CarController(CarControllerBase):
         esp_starting_override = None
         esp_stopping_override = None
         allow_indefinite_hold = not CS.esp_hold_uphill and not self.force_uphill_standstill
-        long_active = (
-          # acc type 1 is sensitive to control signals when brake pressed (i.e. preEnabled)
-          False if CS.acc_type == 1 and CS.out.brakePressed else
-          # stop regulating if needed to prevent a cruise fault
-          False if CS.acc_type == 1 and self.hold_counter > self.CCP.MAX_HOLD_FRAMES and not allow_indefinite_hold else
-          CC.longActive
-        )
+        long_active = CC.longActive
+        # acc type 1 is sensitive to control signals when brake pressed (i.e. preEnabled)
+        if CS.acc_type == 1 and CS.out.brakePressed:
+          long_active = False
+        # stop regulating if needed to prevent a cruise fault
+        elif CS.acc_type == 1 and self.hold_counter > HOLD_MAX_FRAMES and not allow_indefinite_hold:
+          long_active = False
         if CS.esp_hold_confirmation:
           self.hold_counter += 1
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, long_active)
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
         starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-
-        # distance button debug helper, force stop or start when distance button is pressed
-        if CS.distance_button_pressed:
-          if self.distance_button_was_stopped is None:
-            self.distance_button_was_stopped = CS.esp_standstill_confirmation
-          if long_active:
-            if self.distance_button_was_stopped:
-              accel = max(1.5, accel)
-              stopping = False
-              starting = CS.out.vEgo < self.CP.vEgoStopping if long_active else False
-            else:
-              accel = min(-1.5, accel)
-              stopping = CS.out.vEgo < self.CP.vEgoStopping if long_active else False
-              starting = False
-        else:
-          self.distance_button_was_stopped = None
 
         # Standstill handling for MQB w/ ACC type 1.
         # When hold is confirmed, TSK stops sending brake requests — the ESP manages braking
@@ -136,12 +116,12 @@ class CarController(CarControllerBase):
         # while keeping ACC_07 in stopping mode so ESP holds the brake.
         if self.CCS == mqbcan and CS.acc_type == 1 and long_active and accel <= 0:
           # flat/downhill: drop hold, prevent re-engagement
-          if allow_indefinite_hold and CS.esp_standstill_confirmation:
+          if allow_indefinite_hold and CS.out.standstill:
             esp_starting_override = not CS.esp_hold_confirmation
             esp_stopping_override = False
 
           # uphill: build engine torque via ACC_06, ESP braking held via ACC_07
-          elif not allow_indefinite_hold and (CS.esp_hold_confirmation or CS.esp_standstill_confirmation):
+          elif not allow_indefinite_hold and (CS.esp_hold_confirmation or CS.out.standstill):
             # esp_hold_torque_nm is 0 when invalid; error goes negative and the integrator backs off.
             # skip torque management for the first frame to avoid check engine light from extended accel w/ no movement
             if self.hold_counter > 1:
@@ -153,7 +133,7 @@ class CarController(CarControllerBase):
             stopping = False
             # near counter limit: attempt hold release to cycle the ESP hold;
             # if torque management worked, hold_confirmation drops and the counter resets
-            near_limit = self.hold_counter >= self.CCP.MAX_HOLD_FRAMES - 10
+            near_limit = self.hold_counter >= HOLD_MAX_FRAMES - 10
             esp_starting_override = near_limit
             esp_stopping_override = not near_limit
           else:
@@ -176,7 +156,7 @@ class CarController(CarControllerBase):
         # this is a warning sign that the ESP will fault the TSK soon, and we must switch to hill mode
         if (self.flat_starting_prev and CS.esp_hold_confirmation):
           self.force_uphill_standstill = True
-        self.flat_starting_prev = long_active and allow_indefinite_hold and starting and CS.esp_standstill_confirmation and not CS.esp_hold_confirmation
+        self.flat_starting_prev = long_active and allow_indefinite_hold and starting and CS.out.standstill and not CS.esp_hold_confirmation
 
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, long_active, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation,

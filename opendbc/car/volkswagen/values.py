@@ -46,6 +46,11 @@ class CanBus(CanBusBase):
     return self._ext
 
 
+# MQB ACC type 1 standstill hold tuning
+HOLD_MAX_FRAMES = 60                       # frames to hold before disabling long control to avoid a fault
+HOLD_TORQUE_DEADBAND_NM = 20               # stop integrating when this close to ESP_Haltemoment (Nm at wheel)
+HOLD_ACCEL_KI = 0.00002                    # I-controller gain: m/s² per Nm of torque error per ACC_CONTROL_STEP
+
 class CarControllerParams:
   STEER_STEP = 2                           # HCA_01/HCA_1 message frequency 50Hz
   ACC_CONTROL_STEP = 2                     # ACC_06/ACC_07/ACC_System frequency 50Hz
@@ -66,8 +71,6 @@ class CarControllerParams:
 
   ACCEL_MAX = 2.0                          # 2.0 m/s max acceleration
   ACCEL_MIN = -3.5                         # 3.5 m/s max deceleration
-
-  MAX_HOLD_FRAMES = 60                     # if ESP restricts standstill, how many frames should we hold before risking a fault?
 
   def __init__(self, CP):
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])

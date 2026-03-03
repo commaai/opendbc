@@ -16,8 +16,6 @@ class CarState(CarStateBase):
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
-    self.esp_standstill_confirmation = False
-    self.tsk_grade = 0
     self.esp_hold_torque_nm = 0.0
     self.esp_hold_uphill = False
     self.actual_torque_nm = 0.0
@@ -25,7 +23,6 @@ class CarState(CarStateBase):
     self.eps_stock_values = False
     self.acc_type = 0
     self.wheel_impulse_count = 0
-    self.distance_button_pressed = False
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -116,8 +113,6 @@ class CarState(CarStateBase):
 
       self.acc_type = ext_cp.vl["ACC_06"]["ACC_Typ"]
       self.esp_hold_confirmation = bool(pt_cp.vl["ESP_21"]["ESP_Haltebestaetigung"])
-      self.esp_standstill_confirmation = pt_cp.vl["ESP_21"]["ESP_v_Signal"] == 0
-      self.tsk_grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
       # ESP_15: minimum total wheel torque to hold at current slope when index=Antriebsmoment and raw < 10220
       # 600 Nm is the observed signal floor; at or below that the grade is low and the ESP can hold indefinitely
       esp_hold_raw = pt_cp.vl["ESP_15"]["ESP_Haltemoment"]
@@ -160,7 +155,6 @@ class CarState(CarStateBase):
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
     self.gra_stock_values = pt_cp.vl["GRA_ACC_01"]
-    self.distance_button_pressed = self.gra_stock_values["GRA_Verstellung_Zeitluecke"] in (1, 2, 3)
 
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
