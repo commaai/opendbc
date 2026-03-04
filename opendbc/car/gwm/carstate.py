@@ -50,16 +50,16 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_ANGLE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
     ret.steeringRateDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_RATE"] * (-1 if (cp.vl["STEER_AND_AP_STALK"]["RATE_DIRECTION"] > 0) else 1)
-    if bool(cp_cam.vl["STEER_CMD"]["STEER_REQUEST"]) and bool(cp.vl["RX_STEER_RELATED"]["A_RX_STEER_REQUESTED"] != 1):
+    if bool(cp.vl["STEER_CMD"]["STEER_REQUEST"]) and bool(cp.vl["RX_STEER_RELATED"]["A_RX_STEER_REQUESTED"] != 1):
       self.steer_fault_temporary_counter += 1
     else:
       self.steer_fault_temporary_counter = 0
-    ret.steerFaultTemporary = self.steer_fault_temporary_counter > 125
+    ret.steerFaultTemporary = self.steer_fault_temporary_counter > 200
     if cp.vl["RX_STEER_RELATED"]["EPS_FAULT_PERMANENT"] == 1:
       self.steer_fault_permanent_counter += 1
     else:
       self.steer_fault_permanent_counter = 0
-    ret.steerFaultPermanent = self.steer_fault_permanent_counter > 125
+    ret.steerFaultPermanent = self.steer_fault_permanent_counter > 150
     ret.steeringTorque = cp.vl["RX_STEER_RELATED"]["B_RX_DRIVER_TORQUE"]
     ret.steeringTorqueEps = cp.vl["RX_STEER_RELATED"]["B_RX_EPS_TORQUE"]
     ret.steeringPressed = abs(ret.steeringTorque) > 50
