@@ -913,6 +913,17 @@
     ],
     "package": "All"
   },
+  "Genesis GV80 (Middle East only) 2021-22": {
+    "platform": "GENESIS_GV80",
+    "make": "Genesis",
+    "brand": "hyundai",
+    "model": "GV80 (Middle East only)",
+    "year": [
+      "2021",
+      "2022"
+    ],
+    "package": "All"
+  },
   "GMC Acadia 2018": {
     "platform": "GMC_ACADIA",
     "make": "GMC",
