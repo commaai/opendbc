@@ -58,7 +58,9 @@ def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
   CarInterface = interfaces[car_name]
   car_params = CarInterface.get_params(car_name, params['fingerprints'], params['car_fw'],
                                        alpha_long=params['alpha_long'], is_release=False, docs=False)
-  return CarInterface(car_params)
+  car_params_sp = CarInterface.get_params_sp(car_params, car_name, params['fingerprints'], params['car_fw'],
+                                             alpha_long=params['alpha_long'], is_release_sp=False, docs=False)
+  return CarInterface(car_params, car_params_sp)
 
 
 class TestCarInterfaces:
@@ -71,6 +73,7 @@ class TestCarInterfaces:
   def test_car_interfaces(self, car_name, data):
     car_interface = get_fuzzy_car_interface(car_name, data.draw)
     car_params = car_interface.CP.as_reader()
+    car_params_sp = car_interface.CP_SP
 
     assert car_params.mass > 1
     assert car_params.wheelbase > 0
@@ -81,6 +84,10 @@ class TestCarInterfaces:
     # Longitudinal sanity checks
     assert len(car_params.longitudinalTuning.kpV) == len(car_params.longitudinalTuning.kpBP)
     assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
+
+    # If we're using the interceptor for gasPressed, we should be commanding gas with it
+    if car_params_sp.enableGasInterceptor:
+      assert car_params.openpilotLongitudinalControl
 
     # Lateral sanity checks
     if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
@@ -99,9 +106,10 @@ class TestCarInterfaces:
     # TODO: use hypothesis to generate random messages
     now_nanos = 0
     CC = structs.CarControl().as_reader()
+    CC_SP = structs.CarControlSP()
     for _ in range(10):
       car_interface.update([])
-      car_interface.apply(CC, now_nanos)
+      car_interface.apply(CC, CC_SP, now_nanos)
       now_nanos += DT_CTRL * 1e9  # 10 ms
 
     CC = structs.CarControl()
@@ -111,11 +119,11 @@ class TestCarInterfaces:
     CC = CC.as_reader()
     for _ in range(10):
       car_interface.update([])
-      car_interface.apply(CC, now_nanos)
+      car_interface.apply(CC, CC_SP, now_nanos)
       now_nanos += DT_CTRL * 1e9  # 10ms
 
     # Test radar interface
-    radar_interface = car_interface.RadarInterface(car_params)
+    radar_interface = car_interface.RadarInterface(car_params, car_params_sp)
     assert radar_interface
 
     # Run radar interface once

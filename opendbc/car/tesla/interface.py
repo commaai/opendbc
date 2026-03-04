@@ -5,6 +5,8 @@ from opendbc.car.tesla.carstate import CarState
 from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CANBUS, CAR, DBC, FSD_14_FW, Ecu
 from opendbc.car.tesla.radar_interface import RadarInterface, RADAR_START_ADDR
 
+from opendbc.sunnypilot.car.tesla.values import TeslaFlagsSP, TeslaSafetyFlagsSP
+
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
@@ -49,5 +51,20 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FSD_14.value
 
     ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
+
+    return ret
+
+  @staticmethod
+  def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
+                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, is_release_sp: bool, docs: bool) -> structs.CarParamsSP:
+
+    stock_cp.enableBsm = True
+
+    if candidate == CAR.TESLA_MODEL_X:
+      stock_cp.dashcamOnly = False
+
+    if 0x3DF in fingerprint[1]:
+      ret.flags |= TeslaFlagsSP.HAS_VEHICLE_BUS.value
+      ret.safetyParam |= TeslaSafetyFlagsSP.HAS_VEHICLE_BUS
 
     return ret

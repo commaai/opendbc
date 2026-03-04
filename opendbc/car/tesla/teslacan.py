@@ -15,7 +15,7 @@ class TeslaCAN:
     self.CP = CP
     self.packer = packer
 
-  def create_steering_control(self, angle, enabled):
+  def create_steering_control(self, angle, enabled, control_type):
     # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
     # with openpilot, after overriding w/ ANGLE_CONTROL the wheel snaps back to the original angle abruptly
     # so we now use LANE_KEEP_ASSIST to match stock FSD.
@@ -23,7 +23,7 @@ class TeslaCAN:
     values = {
       "DAS_steeringAngleRequest": -angle,
       "DAS_steeringHapticRequest": 0,
-      "DAS_steeringControlType": get_steer_ctrl_type(self.CP.flags, 1 if enabled else 0),
+      "DAS_steeringControlType": get_steer_ctrl_type(self.CP.flags, control_type if enabled else 0),
     }
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)

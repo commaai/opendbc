@@ -28,6 +28,7 @@ class TestLateralLimits:
   def setup_class(cls):
     CarInterface = interfaces[cls.car_model]
     CP = CarInterface.get_non_essential_params(cls.car_model)
+    _ = CarInterface.get_non_essential_params_sp(CP, cls.car_model)
 
     if cls.car_model == 'MOCK':
       pytest.skip('Mock car')

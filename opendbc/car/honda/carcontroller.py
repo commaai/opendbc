@@ -7,6 +7,10 @@ from opendbc.car.honda.values import CAR, CruiseButtons, HONDA_BOSCH, HONDA_BOSC
                                      HONDA_BOSCH_TJA_CONTROL, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
 
+from opendbc.sunnypilot.car.honda.mads import MadsCarController
+from opendbc.sunnypilot.car.honda.gas_interceptor import GasInterceptorCarController
+from opendbc.sunnypilot.car.honda.icbm import IntelligentCruiseButtonManagementInterface
+
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
@@ -88,9 +92,12 @@ def process_hud_alert(hud_alert):
   return alert_fcw, alert_steer_required
 
 
-class CarController(CarControllerBase):
-  def __init__(self, dbc_names, CP):
-    super().__init__(dbc_names, CP)
+class CarController(CarControllerBase, MadsCarController, GasInterceptorCarController, IntelligentCruiseButtonManagementInterface):
+  def __init__(self, dbc_names, CP, CP_SP):
+    CarControllerBase.__init__(self, dbc_names, CP, CP_SP)
+    MadsCarController.__init__(self)
+    GasInterceptorCarController.__init__(self, CP, CP_SP)
+    IntelligentCruiseButtonManagementInterface.__init__(self, CP, CP_SP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.params = CarControllerParams(CP)
     self.CAN = hondacan.CanBus(CP)
@@ -109,7 +116,8 @@ class CarController(CarControllerBase):
     self.brake = 0.0
     self.last_torque = 0.0
 
-  def update(self, CC, CS, now_nanos):
+  def update(self, CC, CC_SP, CS, now_nanos):
+    MadsCarController.update(self, self.CP, CC, CC_SP)
     actuators = CC.actuators
     hud_control = CC.hudControl
     hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
@@ -165,7 +173,7 @@ class CarController(CarControllerBase):
                     0.5]
     # The Honda ODYSSEY seems to have different PCM_ACCEL
     # msgs, is it other cars too?
-    if not CC.longActive:
+    if self.CP_SP.enableGasInterceptor or not CC.longActive:
       pcm_speed = 0.0
       pcm_accel = int(0.0)
     elif self.CP.carFingerprint in HONDA_NIDEC_ALT_PCM_ACCEL:
@@ -213,9 +221,11 @@ class CarController(CarControllerBase):
           pcm_override = True
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
                                                          pcm_override, pcm_cancel_cmd, alert_fcw,
-                                                         self.CP.carFingerprint, CS.stock_brake))
+                                                         self.CP.carFingerprint, CS.stock_brake, self.CP_SP))
           self.apply_brake_last = apply_brake
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
+
+          can_sends.extend(GasInterceptorCarController.update(self, CC, CS, gas, brake, wind_brake, self.packer, self.frame))
 
     # Send dashboard UI commands.
     if self.frame % 10 == 0:
@@ -227,7 +237,7 @@ class CarController(CarControllerBase):
       steering_available = CS.out.cruiseState.available and CS.out.vEgo > self.CP.minSteerSpeed
       reduced_steering = CS.out.steeringPressed
       can_sends.extend(hondacan.create_lkas_hud(self.packer, self.CAN.lkas, self.CP, hud_control, CC.latActive,
-                                                steering_available, reduced_steering, alert_steer_required, CS.lkas_hud))
+                                                steering_available, reduced_steering, alert_steer_required, CS.lkas_hud, self.dashed_lanes))
 
       if self.CP.openpilotLongitudinalControl:
         # TODO: combining with create_acc_hud block above will change message order and will need replay logs regenerated
@@ -237,7 +247,12 @@ class CarController(CarControllerBase):
           can_sends.append(hondacan.create_legacy_brake_command(self.packer, self.CAN.pt))
         if self.CP.carFingerprint not in HONDA_BOSCH:
           self.speed = pcm_speed
-          self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+          if not self.CP_SP.enableGasInterceptor:
+            self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+
+    # Intelligent Cruise Button Management
+    can_sends.extend(IntelligentCruiseButtonManagementInterface.update(self, CC_SP, self.packer, self.frame,
+                                                                       self.last_button_frame, self.CAN))
 
     new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed

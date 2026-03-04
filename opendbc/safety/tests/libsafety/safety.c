@@ -191,9 +191,106 @@ bool get_honda_fwd_brake(void){
   return honda_fwd_brake;
 }
 
+static MADSState *get_mads_state(void) {
+  return &m_mads_state;
+}
+
+bool get_lat_active(void){
+  return is_lat_active();
+}
+
+bool get_controls_allowed_lat(void){
+  return mads_is_lateral_control_allowed_by_mads();
+}
+
+bool get_controls_requested_lat(void){
+  return get_mads_state()->controls_requested_lat;
+}
+
+bool get_enable_mads(void){
+  return get_mads_state()->system_enabled;
+}
+
+bool get_disengage_lateral_on_brake(void){
+  return get_mads_state()->disengage_lateral_on_brake;
+}
+
+bool get_pause_lateral_on_brake(void){
+  return get_mads_state()->pause_lateral_on_brake;
+}
+
+void set_acc_main_on(bool c){
+  acc_main_on = c;
+}
+
+void set_current_safety_param_sp(uint16_t param){
+  current_safety_param_sp = param;
+}
+
+uint16_t get_current_safety_param_sp(void){
+  return current_safety_param_sp;
+}
+
+void set_mads_button_press(int c){
+  mads_button_press = c;
+}
+
+int get_mads_button_press(void){
+  return mads_button_press;
+}
+
+void set_controls_allowed_lat(bool c){
+  m_mads_state.controls_allowed_lat = c;
+}
+
+bool get_mads_acc_main(void){
+  return m_mads_state.acc_main.current;
+}
+
+int mads_get_current_disengage_reason(void) {
+  return get_mads_state()->current_disengage.active_reason;
+}
+
+void mads_set_current_disengage_reason(int reason) {
+  m_mads_state.current_disengage.active_reason = reason;
+}
+
+void set_controls_requested_lat(bool c){
+  m_mads_state.controls_requested_lat = c;
+}
+
+void set_mads_params(bool enable_mads, bool disengage_lateral_on_brake, bool pause_lateral_on_brake){
+  alternative_experience = 0;
+  if (enable_mads) {
+    alternative_experience |= ALT_EXP_ENABLE_MADS;
+
+    if (disengage_lateral_on_brake) {
+      alternative_experience |= ALT_EXP_MADS_DISENGAGE_LATERAL_ON_BRAKE;
+    } else if (pause_lateral_on_brake) {
+      alternative_experience |= ALT_EXP_MADS_PAUSE_LATERAL_ON_BRAKE;
+    } else {
+    }
+  }
+
+  mads_set_alternative_experience(&alternative_experience);
+}
+
+void set_heartbeat_engaged_mads(bool c){
+  heartbeat_engaged_mads = c;
+}
+
+void set_steering_disengage(bool c){
+  steering_disengage = c;
+}
+
+int get_gas_interceptor_prev(void){
+  return gas_interceptor_prev;
+}
+
 void init_tests(void){
   safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
   alternative_experience = 0;
+  current_safety_param_sp = 0;
   set_timer(0);
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;

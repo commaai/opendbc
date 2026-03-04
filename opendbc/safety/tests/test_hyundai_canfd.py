@@ -81,6 +81,17 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
 
+  def _acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values)
+
+  def _lkas_button_msg(self, enabled):
+    values = {"LDA_BTN": enabled}
+    return self.packer.make_can_msg_safety("CRUISE_BUTTONS", self.PT_BUS, values)
+
+  def _main_cruise_button_msg(self, enabled):
+    return self._button_msg(0, enabled)
+
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
@@ -127,6 +138,10 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
       "CRUISE_BUTTONS": buttons,
       "ADAPTIVE_CRUISE_MAIN_BTN": main_button,
     }
+    return self.packer.make_can_msg_safety("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
+
+  def _lkas_button_msg(self, enabled):
+    values = {"LDA_BTN": enabled}
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
 
   def _acc_cancel_msg(self, cancel, accel=0):
@@ -220,7 +235,11 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
       "aReqRaw": accel,
       "aReqValue": accel,
     }
-    return self.packer.make_can_msg_safety("SCC_CONTROL", 1, values)
+    return self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
+
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
 
 
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
@@ -250,10 +269,15 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
       "aReqRaw": accel,
       "aReqValue": accel,
     }
-    return self.packer.make_can_msg_safety("SCC_CONTROL", 0, values)
+    return self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
 
-  def test_tester_present_allowed(self, ecu_disable: bool = True):
-    super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
+
+  # no knockout
+  def test_tester_present_allowed(self):
+    pass
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
