@@ -71,12 +71,14 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
 
 
 def acc_control_value(main_switch_on, long_active, cruiseOverride, acc_faulted):
-  if long_active or cruiseOverride:
-    acc_control = 1
+  if long_active and cruiseOverride:
+    acc_control = 4
+  elif long_active:
+    acc_control = 3
   elif main_switch_on:
     acc_control = 2
   elif acc_faulted:
-    acc_control = 3
+    acc_control = 6
   else:
     acc_control = 0
 
