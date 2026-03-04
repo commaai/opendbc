@@ -22,14 +22,17 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
 
-    # can_sends.append(gwmcan.create_steer_and_ap_stalk(
-    #   self.packer,
-    #   self.CAN,
-    #   CS.steer_and_ap_stalk_msg,
-    #   self.fake_torque,
-    # ))
+    # Increment counter so cancel is prioritized even without openpilot longitudinal
+    if CC.cruiseControl.cancel:
+      counter = (CS.steer_and_ap_stalk_msg['COUNTER'] + 1) % 16
+      can_sends.append(gwmcan.create_steer_and_ap_stalk(
+        self.packer,
+        self.CAN,
+        counter,
+        CS.steer_and_ap_stalk_msg,
+        cancel_command=True,
+      ))
 
-    # Test to try understand EPS communication
     if self.frame % 2 == 0: # 50 Hz
       # Try to satisfy steer nudge requests
       ea_simulated_torque = CS.out.steeringTorque

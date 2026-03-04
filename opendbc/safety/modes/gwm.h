@@ -137,15 +137,15 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
 static safety_config gwm_init(uint16_t param) {
   UNUSED(param);
   static const CanMsg GWM_TX_MSGS[] = {
-    // {GWM_LANE_KEEP_ASSIST, GWM_MAIN_BUS, 8, .check_relay = false}, // EPS steering
+    {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = false}, // Cancel command
     // {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = true}, // EPS steering
     {GWM_RX_STEER_RELATED, GWM_CAMERA_BUS, 64, .check_relay = true}, // EPS steering feedback to camera
     {STEER_CMD, GWM_MAIN_BUS, 64, .check_relay = true}, // Steering command
   };
 
-  static RxCheck psa_rx_checks[] = {
+  static RxCheck gwm_rx_checks[] = {
     // {.msg = {{GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // cruise state, steering angle, driver torque
-    {.msg = {{GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // cruise state, steering angle, driver torque
+    {.msg = {{GWM_STEERING_AND_CRUISE, GWM_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // cruise state, steering angle, steer rate
     {.msg = {{GWM_SPEED, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // speed
     {.msg = {{GWM_GAS, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // gas pedal
     {.msg = {{GWM_BRAKE, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // brake2
@@ -154,7 +154,7 @@ static safety_config gwm_init(uint16_t param) {
     {.msg = {{GWM_CRUISE, 2U, 64, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // CRUISE_STATE, ACC
   };
 
-  return BUILD_SAFETY_CFG(psa_rx_checks, GWM_TX_MSGS);
+  return BUILD_SAFETY_CFG(gwm_rx_checks, GWM_TX_MSGS);
 }
 
 const safety_hooks gwm_hooks = {
