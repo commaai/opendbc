@@ -17,6 +17,13 @@ enum {
   HYUNDAI_BTN_CANCEL = 4,
 };
 
+enum {
+  HYUNDAI_PARAM_SP_ESCC = 1,
+  HYUNDAI_PARAM_SP_LONGITUDINAL_MAIN_CRUISE_TOGGLEABLE = 2,
+  HYUNDAI_PARAM_SP_HAS_LDA_BUTTON = 4,
+  HYUNDAI_PARAM_SP_NON_SCC = 8,
+};
+
 // common state
 extern bool hyundai_ev_gas_signal;
 bool hyundai_ev_gas_signal = false;
@@ -42,7 +49,25 @@ bool hyundai_fcev_gas_signal = false;
 extern bool hyundai_alt_limits_2;
 bool hyundai_alt_limits_2 = false;
 
+// ESCC
+extern bool hyundai_escc;
+bool hyundai_escc = false;
+
+extern bool hyundai_longitudinal_main_cruise_toggleable;
+bool hyundai_longitudinal_main_cruise_toggleable = false;
+
+extern bool hyundai_has_lda_button;
+bool hyundai_has_lda_button = false;
+
+extern bool hyundai_non_scc;
+bool hyundai_non_scc = false;
+
 static uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
+
+static bool main_button_prev;
+static bool acc_main_on_prev;
+static bool acc_main_on_tx;
+static uint32_t acc_main_on_mismatches;
 
 void hyundai_common_init(uint16_t param) {
   const uint16_t HYUNDAI_PARAM_EV_GAS = 1;
@@ -61,7 +86,17 @@ void hyundai_common_init(uint16_t param) {
   hyundai_fcev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_FCEV_GAS);
   hyundai_alt_limits_2 = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS_2);
 
+  hyundai_escc = GET_FLAG(current_safety_param_sp, HYUNDAI_PARAM_SP_ESCC);
+  hyundai_longitudinal_main_cruise_toggleable = GET_FLAG(current_safety_param_sp, HYUNDAI_PARAM_SP_LONGITUDINAL_MAIN_CRUISE_TOGGLEABLE);
+  hyundai_has_lda_button = GET_FLAG(current_safety_param_sp, HYUNDAI_PARAM_SP_HAS_LDA_BUTTON);
+  hyundai_non_scc = GET_FLAG(current_safety_param_sp, HYUNDAI_PARAM_SP_NON_SCC);
+
   hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
+
+  main_button_prev = false;
+  acc_main_on_prev = false;
+  acc_main_on_tx = false;
+  acc_main_on_mismatches = 0U;
 
 #ifdef ALLOW_DEBUG
   const uint16_t HYUNDAI_PARAM_LONGITUDINAL = 4;
@@ -108,7 +143,13 @@ void hyundai_common_cruise_buttons_check(const int cruise_button, const bool mai
       controls_allowed = false;
     }
 
+    // toggle main cruise state on rising edge of main cruise button
+    if (main_button && !main_button_prev && hyundai_longitudinal_main_cruise_toggleable) {
+      acc_main_on = !acc_main_on;
+    }
+
     cruise_button_prev = cruise_button;
+    main_button_prev = main_button;
   }
 }
 
@@ -135,4 +176,31 @@ uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
   }
 
   return crc;
+}
+
+// reset mismatches on rising edge of acc_main_on to avoid rare race conditions when using non-PCM main cruise state
+void hyundai_common_reset_acc_main_on_mismatches(void) {
+  if (acc_main_on && !acc_main_on_prev) {
+    acc_main_on_mismatches = 0U;
+  }
+
+  acc_main_on_prev = acc_main_on;
+}
+
+// exit lateral controls allowed if sunnypilot and panda main cruise states are desynced
+void hyundai_common_acc_main_on_sync(void) {
+  if (acc_main_on && !acc_main_on_tx) {
+    acc_main_on_mismatches += 1U;
+
+    if (acc_main_on_mismatches >= 3U) {  // desync by 3 frames
+      acc_main_on = false;
+      mads_exit_controls(MADS_DISENGAGE_REASON_NON_PCM_ACC_MAIN_DESYNC);
+    }
+  } else {
+    acc_main_on_mismatches = 0U;
+  }
+}
+
+uint32_t get_acc_main_on_mismatches(void) {
+  return acc_main_on_mismatches;
 }

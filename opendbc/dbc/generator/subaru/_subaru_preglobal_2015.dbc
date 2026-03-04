@@ -49,6 +49,7 @@ BO_ 208 G_Sensor: 8 XXX
 BO_ 209 Brake_Pedal: 4 XXX
  SG_ Speed : 0|16@1+ (0.05625,0) [0|255] "KPH" XXX
  SG_ Brake_Pedal : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ Signal1 : 24|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 210 Brake_2: 8 XXX
  SG_ Brake_Light : 35|1@1+ (1,0) [0|1] "" XXX

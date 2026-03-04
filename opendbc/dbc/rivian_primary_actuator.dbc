@@ -881,6 +881,7 @@ VAL_ 354 VDM_AdasFaultStatus 0 "VDM_AdasFlaultStatus_No_Fault" 1 "VDM_AdasFaultS
 VAL_ 354 VDM_AdasDriverModeStatus 0 "VDM_AdasDriverModeStatus_Human" 1 "VDM_AdasDriverModeStatus_Adas" 2 "VDM_AdasDriverModeStatus_Reserved" 3 "VDM_AdasDriverModeStatus_Sna";
 VAL_ 354 VDM_AdasInterfaceStatus 0 "VDM_AdasInterfaceStatus_Unavailable" 1 "VDM_AdasInterfaceStatus_Available" 2 "VDM_AdasInterfaceStatus_Enabled" 3 "VDM_AdasInterfaceStatus_Faulted";
 VAL_ 354 VDM_AdasVehicleHoldStatus 0 "VDM_AdasVehicleHoldStatus_NotHold" 1 "VDM_AdasVehicleHoldStatus_Hold";
+VAL_ 354 VDM_UserAdasRequest 0 "IDLE" 1 "UP_1" 2 "UP_2" 3 "DOWN_1" 4 "DOWN_2";
 VAL_ 357 VDM_AdasStalkGapAdjust 0 "VDM_AdasStalkGapAdjust_No_Required" 1 "VDM_AdasStalkGapAdjust_GapDecrement" 2 "VDM_AdasStalkGapAdjust_GapIncrement";
 VAL_ 357 VDM_AdasStalkAccCancelRes 0 "VDM_AdasStalkAccCancelRes_NoRequired" 1 "VDM_AdasStalkAccCancelRes_Cancel" 2 "VDM_AdasStalkAccCancelRes_Resume";
 VAL_ 357 VDM_AdasStalkAutonomyButton 0 "VDM_AdasStalkAutonomyButton_No_Required" 1 "VDM_AdasStalkAutonomyButton_Pressed";

@@ -6,7 +6,7 @@ GearShifter = structs.CarState.GearShifter
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
-def create_lkas_hud(packer, CP, lkas_active, hud_alert, hud_count, car_model, auto_high_beam):
+def create_lkas_hud(packer, CP, lkas_active, hud_alert, hud_count, car_model, auto_high_beam, mads):
   # LKAS_HUD - Controls what lane-keeping icon is displayed
 
   # == Color ==
@@ -29,7 +29,10 @@ def create_lkas_hud(packer, CP, lkas_active, hud_alert, hud_count, car_model, au
   # 7 Normal
   # 6 lane departure place hands on wheel
 
-  color = 2 if lkas_active else 1
+  if mads.enable_mads:
+    color = 2 if lkas_active else 1 if mads.paused else 0
+  else:
+    color = 2 if lkas_active else 1
   lines = 3 if lkas_active else 0
   alerts = 7 if lkas_active else 0
 
@@ -64,10 +67,12 @@ def create_lkas_command(packer, CP, apply_torque, lkas_control_bit):
   return packer.make_can_msg("LKAS_COMMAND", 0, values)
 
 
-def create_cruise_buttons(packer, frame, bus, cancel=False, resume=False):
+def create_cruise_buttons(packer, frame, bus, cancel=False, resume=False, accel=False, decel=False):
   values = {
     "ACC_Cancel": cancel,
     "ACC_Resume": resume,
+    "ACC_Accel": accel,
+    "ACC_Decel": decel,
     "COUNTER": frame % 0x10,
   }
   return packer.make_can_msg("CRUISE_BUTTONS", bus, values)

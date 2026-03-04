@@ -3,7 +3,7 @@ import re
 from opendbc.car.honda.fingerprints import FW_VERSIONS
 from opendbc.car.honda.values import HONDA_BOSCH, HONDA_BOSCH_TJA_CONTROL
 
-HONDA_FW_VERSION_RE = br"[A-Z0-9]{5}-[A-Z0-9]{3}(-|,)[A-Z0-9]{4}(\x00){2}$"
+HONDA_FW_VERSION_RE = br"[A-Z0-9]{5}(-|,)[A-Z0-9]{3}(-|,)[A-Z0-9]{4}(\x00){2}$"
 
 
 class TestHondaFingerprint:
