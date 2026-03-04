@@ -5,7 +5,8 @@ from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mlbcan, mqbcan, pqcan
-from opendbc.car.volkswagen.values import CanBus, CarControllerParams, HOLD_ACCEL_KI, HOLD_TORQUE_DEADBAND_NM, HOLD_TORQUE_TARGET_RATIO, HOLD_MAX_FRAMES, VolkswagenFlags
+from opendbc.car.volkswagen.values import CanBus, CarControllerParams, HOLD_ACCEL_KI, HOLD_TORQUE_DEADBAND_NM, HOLD_TORQUE_TARGET_RATIO, HOLD_MAX_FRAMES, \
+                                          VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -58,6 +59,7 @@ class CarController(CarControllerBase):
     self.prev_impulse_count = 0
     self.prev_starting_hold = False
     self.prev_starting_no_hold = False
+    self.distance_button_was_stopped = None
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -106,6 +108,22 @@ class CarController(CarControllerBase):
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
         starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
+
+        # distance button debug helper, force stop or start when distance button is pressed
+        if self.CCS == mqbcan and CS.distance_button_pressed:
+          if self.distance_button_was_stopped is None:
+            self.distance_button_was_stopped = CS.out.standstill
+          if long_active:
+            if self.distance_button_was_stopped:
+              accel = max(1.5, accel)
+              stopping = False
+              starting = CS.out.vEgo < self.CP.vEgoStopping if long_active else False
+            else:
+              accel = min(-1.5, accel)
+              stopping = CS.out.vEgo < self.CP.vEgoStopping if long_active else False
+              starting = False
+        else:
+          self.distance_button_was_stopped = None
 
         # Standstill handling for MQB w/ ACC type 1.
         # When hold is confirmed, TSK stops sending brake requests — the ESP manages braking
