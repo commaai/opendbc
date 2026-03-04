@@ -5,7 +5,7 @@ from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mlbcan, mqbcan, pqcan
-from opendbc.car.volkswagen.values import CanBus, CarControllerParams, HOLD_ACCEL_KI, HOLD_TORQUE_DEADBAND_NM, HOLD_MAX_FRAMES, VolkswagenFlags
+from opendbc.car.volkswagen.values import CanBus, CarControllerParams, HOLD_ACCEL_KI, HOLD_TORQUE_DEADBAND_NM, HOLD_TORQUE_TARGET_RATIO, HOLD_MAX_FRAMES, VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -124,7 +124,7 @@ class CarController(CarControllerBase):
           elif is_uphill and (CS.esp_hold_confirmation or CS.out.standstill):
             # skip torque management for the first frame to avoid check engine light from extended accel w/ no movement
             if self.esp_hold_frames > 1:
-              error_nm = CS.esp_hold_torque_nm - CS.actual_torque_nm
+              error_nm = CS.esp_hold_torque_nm * HOLD_TORQUE_TARGET_RATIO - CS.actual_torque_nm
               if abs(error_nm) > HOLD_TORQUE_DEADBAND_NM:
                 self.hill_hold_accel = float(np.clip(self.hill_hold_accel + HOLD_ACCEL_KI * error_nm, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
               accel = max(accel, self.hill_hold_accel)
