@@ -57,7 +57,7 @@ class MQBStandstillManager:
     Update standstill state for one ACC_CONTROL_STEP frame.
 
     Args:
-      CS:          CarState (must have acc_type, esp_hold_confirmation, road_grade (TSK_Steigung, percent),
+      CS:          CarState (must have acc_type, esp_hold_confirmation, road_grade (Motor_16/TSK_Steigung, percent),
                    esp_hold_torque_nm, actual_torque_nm, wheel_impulse_count,
                    out.standstill, out.brakePressed)
       long_active: CC.longActive (may be overridden internally)

@@ -117,8 +117,8 @@ class CarState(CarStateBase):
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
 
       if self.CP.openpilotLongitudinalControl:
-        # Motor_12: TSK_Steigung is road grade in percent
-        self.road_grade = pt_cp.vl["Motor_12"]["TSK_Steigung"]
+        # Motor_16: TSK_Steigung is road grade in percent
+        self.road_grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
         # ESP_15: minimum total wheel torque to hold at current slope when index=Antriebsmoment
         esp_hold_raw = pt_cp.vl["ESP_15"]["ESP_Haltemoment"]
         haltemoment_antrieb = pt_cp.vl["ESP_15"]["ESP_Index_Haltemoment"] == 1
