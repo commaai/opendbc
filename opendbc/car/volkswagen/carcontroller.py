@@ -84,6 +84,10 @@ class MQBStandstillManager:
     if CS.esp_hold_confirmation:
       self.esp_hold_frames += 1
 
+    # uphill launch: TSK rarely commands enough torque to move from a hill hold, so floor accel at 1 m/s²
+    if long_active and accel > 0 and is_uphill and CS.out.standstill:
+      accel = max(accel, 1.0)
+
     if long_active and accel <= 0:
       # flat/downhill: drop hold, prevent re-engagement
       if not is_uphill and CS.out.standstill:
