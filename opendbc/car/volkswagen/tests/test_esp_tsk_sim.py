@@ -274,7 +274,7 @@ def _make_cs(sim_state: dict, brake_pressed: bool = False):
   """Build a minimal CS-like SimpleNamespace from sim.car_state() output."""
   cs = types.SimpleNamespace()
   cs.esp_hold_confirmation = sim_state["esp_hold_confirmation"]
-  cs.esp_hold_uphill = sim_state["esp_hold_uphill"]
+  cs.road_grade = sim_state["road_grade"]
   cs.esp_hold_torque_nm = sim_state["esp_hold_torque_nm"]
   cs.actual_torque_nm = sim_state["actual_torque_nm"]
   cs.wheel_impulse_count = sim_state["wheel_impulse_count"]
@@ -386,26 +386,6 @@ class TestMQBStandstillManagerIntegration:
       cs_after, la_out = _mgr_step(sim, mgr, True, 0.0, True, False)
       assert not cs_after["_faulted"], f"fault at frame {frame}"
       assert la_out, f"long_active dropped unexpectedly at frame {frame}"
-
-  def test_spontaneous_reacquisition_detected_as_uphill(self):
-    """When ESP spontaneously reacquires hold while manager is in flat starting mode,
-    detected_uphill is set on the following frame so hill strategy takes over."""
-    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=0.0)
-    mgr = MQBStandstillManager(CCP)
-    # Enter flat starting mode: long_active, not uphill, starting=True, standstill, no hold
-    for _ in range(5):
-      _mgr_step(sim, mgr, True, 0.0, False, True)
-    assert not mgr.detected_uphill
-    # ESP spontaneously reacquires on the next sim.step()
-    sim.trigger_spontaneous_reacquisition = True
-    _mgr_step(sim, mgr, True, 0.0, False, True)  # hold acquires at end of this step
-    assert not mgr.detected_uphill                 # not yet — detected one frame later
-    _mgr_step(sim, mgr, True, 0.0, False, True)   # manager reads hold_confirmed=True → detects
-    assert mgr.detected_uphill, "spontaneous reacquisition should trigger detected_uphill"
-    # Continue without fault
-    for frame in range(100):
-      cs_after, la_out = _mgr_step(sim, mgr, True, 0.0, False, True)
-      assert not cs_after["_faulted"], f"fault at frame {frame}"
 
   def test_disable_and_reenable_long_active_on_hill(self):
     """Briefly disabling long_active pauses the hold timer; re-enabling continues safely."""

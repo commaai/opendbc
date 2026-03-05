@@ -207,7 +207,7 @@ class ESPTSKSimulator:
     return {
       "esp_hold_confirmation": self.esp.hold_confirmed,
       "esp_hold_torque_nm": self.esp_hold_torque_nm if is_uphill else 0.0,
-      "esp_hold_uphill": is_uphill,
+      "road_grade": 5.0 if is_uphill else 0.0,
       "actual_torque_nm": self.actual_torque_nm,
       "wheel_impulse_count": self.wheel_impulse_count,
       "out.standstill": self.speed_ms == 0.0,

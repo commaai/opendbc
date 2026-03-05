@@ -48,10 +48,8 @@ class MQBStandstillManager:
     self._CCP = CCP
     self.esp_hold_frames = 0
     self.hill_hold_accel = 0.0
-    self.detected_uphill = False
     self._prev_impulse_count = 0
     self._prev_starting_hold = False
-    self._prev_starting_no_hold = False
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
              ) -> tuple[bool, float, bool, bool, bool | None, bool | None]:
@@ -59,7 +57,7 @@ class MQBStandstillManager:
     Update standstill state for one ACC_CONTROL_STEP frame.
 
     Args:
-      CS:          CarState (must have acc_type, esp_hold_confirmation, esp_hold_uphill,
+      CS:          CarState (must have acc_type, esp_hold_confirmation, road_grade (TSK_Steigung, percent),
                    esp_hold_torque_nm, actual_torque_nm, wheel_impulse_count,
                    out.standstill, out.brakePressed)
       long_active: CC.longActive (may be overridden internally)
@@ -72,7 +70,7 @@ class MQBStandstillManager:
     """
     esp_starting_override: bool | None = None
     esp_stopping_override: bool | None = None
-    is_uphill = CS.esp_hold_uphill or self.detected_uphill
+    is_uphill = CS.road_grade > 2.0
 
     # acc type 1 is sensitive to control signals when brake is pressed (preEnabled)
     if CS.out.brakePressed:
@@ -114,17 +112,10 @@ class MQBStandstillManager:
     is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
     if CS.wheel_impulse_count != self._prev_impulse_count and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-      self.detected_uphill = False
     elif self._prev_starting_hold and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
     self._prev_starting_hold = is_starting and CS.esp_hold_confirmation
     self._prev_impulse_count = CS.wheel_impulse_count
-
-    # spontaneous ESP reacquisition while in flat starting mode: treat as uphill from now on
-    if self._prev_starting_no_hold and CS.esp_hold_confirmation:
-      self.detected_uphill = True
-    self._prev_starting_no_hold = (long_active and not is_uphill and starting
-                                   and CS.out.standstill and not CS.esp_hold_confirmation)
 
     return long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override
 
