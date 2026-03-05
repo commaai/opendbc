@@ -15,13 +15,12 @@ class CarState(CarStateBase):
     self.steer_and_ap_stalk_msg = {}
     self.eps_stock_values = {}
     self.camera_stock_values = {}
-
-    self.steer_fault_temporary_counter = 0
     self.steer_fault_permanent_counter = 0
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.main]
     cp_cam = can_parsers[Bus.cam]
+    cp_loopback = can_parsers[Bus.loopback]
     ret = structs.CarState()
 
     # Store the original message to reuse in carcontroller
@@ -50,11 +49,7 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_ANGLE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
     ret.steeringRateDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_RATE"] * (-1 if (cp.vl["STEER_AND_AP_STALK"]["RATE_DIRECTION"] > 0) else 1)
-    if bool(cp.vl["STEER_CMD"]["STEER_REQUEST"]) and bool(cp.vl["RX_STEER_RELATED"]["A_RX_STEER_REQUESTED"] != 1):
-      self.steer_fault_temporary_counter += 1
-    else:
-      self.steer_fault_temporary_counter = 0
-    ret.steerFaultTemporary = self.steer_fault_temporary_counter > 200
+    ret.steerFaultTemporary = bool(cp_loopback.vl["STEER_CMD"]["STEER_REQUEST"]) and bool(cp.vl["RX_STEER_RELATED"]["A_RX_STEER_REQUESTED"] != 1)
     if cp.vl["RX_STEER_RELATED"]["EPS_FAULT_PERMANENT"] == 1:
       self.steer_fault_permanent_counter += 1
     else:
@@ -84,9 +79,15 @@ class CarState(CarStateBase):
     main_bus = can_base.offset
     adas_bus = can_base.offset + 1
     cam_bus = can_base.offset + 2
+    loop_back_bus = can_base.offset + 128
+
+    loopback_messages = [
+      ("STEER_CMD", float('nan')),
+    ]
 
     return {
       Bus.main: CANParser(DBC[CP.carFingerprint][Bus.pt], [], main_bus),
       Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], adas_bus),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], cam_bus),
+      Bus.loopback: CANParser(DBC[CP.carFingerprint][Bus.pt], loopback_messages, loop_back_bus),
     }
