@@ -116,10 +116,9 @@ class CarState(CarStateBase):
       acc_limiter_mode = ext_cp.vl["ACC_02"]["ACC_Gesetzte_Zeitluecke"] == 0
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
 
-      if self.CP.openpilotLongitudinalControl:
-        # Motor_16: TSK_Steigung is road grade in percent
+      # extended standstill values for acc type 1
+      if self.CP.openpilotLongitudinalControl and self.acc_type == 1:
         self.road_grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
-        # ESP_15: minimum total wheel torque to hold at current slope when index=Antriebsmoment
         esp_hold_raw = pt_cp.vl["ESP_15"]["ESP_Haltemoment"]
         haltemoment_antrieb = pt_cp.vl["ESP_15"]["ESP_Index_Haltemoment"] == 1
         self.esp_hold_torque_nm = esp_hold_raw if haltemoment_antrieb and esp_hold_raw < 10220 else 0.0
