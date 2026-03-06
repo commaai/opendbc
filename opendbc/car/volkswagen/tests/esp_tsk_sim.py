@@ -42,6 +42,8 @@ class ESPState:
   # only PAUSES on disablement
   hold_timer_frames: int = 0
   hill_decel_frames: int = 0
+  # set when ESP spontaneously reacquires hold without stopping=True
+  spontaneous_uphill: bool = False
 
 @dataclass
 class SimInputs:
@@ -52,24 +54,28 @@ class SimInputs:
 
 class ESPTSKSimulator:
   """
-  Callers set `speed_ms`, `road_grade`, and `esp_hold_torque_nm` to reflect the
-  physical scenario before each step().  `wheel_impulse_count` is updated internally
-  when the simulator determines the car has moved.
+  Callers set `speed_ms` and `esp_hold_torque_nm` to reflect the physical scenario
+  before each step().  `wheel_impulse_count` is updated internally when the simulator
+  determines the car has moved.  Set `trigger_spontaneous_reacquisition = True` to
+  simulate the rare ESP behavior of reacquiring hold without a stopping=True request.
   """
 
-  def __init__(self, speed_ms: float = 0.0, road_grade: float = 0.0, esp_hold_torque_nm: float = 0.0,
+  def __init__(self, speed_ms: float = 0.0, esp_hold_torque_nm: float = 0.0,
                accel_to_torque_nm: float = ENGINE_ACCEL_TO_WHEEL_TORQUE_NM,
                torque_tau_s: float = ENGINE_TORQUE_TAU_S):
     self.esp = ESPState()
     self.speed_ms = speed_ms
-    self.road_grade = road_grade
     # Torque the ESP requires at the wheel to release a hold (from ESP_15).
+    # 600 Nm is the observed signal floor; values > 600 indicate uphill.
     self.esp_hold_torque_nm = esp_hold_torque_nm
     self.actual_torque_nm: float = 0.0
     self.wheel_impulse_count: int = 0
     self._prev_speed_ms = speed_ms
     self._accel_to_torque_nm = accel_to_torque_nm
     self._torque_alpha = STEP_DT / torque_tau_s
+    # Set to True to trigger a spontaneous hold reacquisition on the next eligible frame.
+    # Cleared automatically after firing.
+    self.trigger_spontaneous_reacquisition: bool = False
 
   def _check_faults(self, inp: SimInputs) -> bool:
     """Return True if this frame's inputs would cause an immediate ESP/TSK fault."""
@@ -105,9 +111,9 @@ class ESPTSKSimulator:
     moved = self._update_wheel_impulses()
 
     # --- Hill decel timeout ---
-    # TSK commands radbremsmom whenever hold is not confirmed. On a hill,
-    # sustained radbremsmom while stopped faults the ESP.
-    if not self.esp.hold_confirmed and self.speed_ms == 0.0 and self.road_grade > 2.0:
+    # TSK commands radbremsmom whenever hold is not confirmed. On a hill
+    # (or after spontaneous reacquisition), sustained radbremsmom while stopped faults the ESP.
+    if not self.esp.hold_confirmed and self.speed_ms == 0.0 and (self.esp_hold_torque_nm > 600 or self.esp.spontaneous_uphill):
       self.esp.hill_decel_frames += 1
       if self.esp.hill_decel_frames > HILL_DECEL_TIMEOUT_FRAMES:
         self.esp.faulted = True
@@ -122,8 +128,9 @@ class ESPTSKSimulator:
         self.esp.faulted = True
         return
     elif moved:
-      # Wheels moved while hold not confirmed: reset hold timer.
+      # Wheels moved while hold not confirmed: reset hold timer and clear spontaneous_uphill.
       self.esp.hold_timer_frames = 0
+      self.esp.spontaneous_uphill = False
 
     # --- Hold release ---
     if not inp.acc_anfahren and not inp.acc_anhalten:
@@ -141,6 +148,14 @@ class ESPTSKSimulator:
     elif inp.acc_anhalten and not inp.acc_anfahren and self.speed_ms < ESP_HOLD_ACQUIRE_SPEED_MS:
       self.esp.hold_confirmed = True
 
+    # --- Spontaneous hold reacquisition ---
+    # Rare ESP behavior: reacquires hold without a stopping=True request.
+    # Sets spontaneous_uphill so the hill decel timeout applies on subsequent radbremsmom phases.
+    if self.trigger_spontaneous_reacquisition and not self.esp.hold_confirmed and self.speed_ms == 0.0:
+      self.esp.hold_confirmed = True
+      self.esp.spontaneous_uphill = True
+      self.trigger_spontaneous_reacquisition = False
+
     self._prev_speed_ms = self.speed_ms
 
   def car_state(self) -> dict:
@@ -148,7 +163,6 @@ class ESPTSKSimulator:
     return {
       "esp_hold_confirmation": self.esp.hold_confirmed,
       "esp_hold_torque_nm": self.esp_hold_torque_nm,
-      "road_grade": self.road_grade,
       "actual_torque_nm": self.actual_torque_nm,
       "wheel_impulse_count": self.wheel_impulse_count,
       "out.standstill": self.speed_ms == 0.0,
@@ -158,6 +172,7 @@ class ESPTSKSimulator:
       "_faulted": self.esp.faulted,
       "_hold_timer_frames": self.esp.hold_timer_frames,
       "_hill_decel_frames": self.esp.hill_decel_frames,
+      "_spontaneous_uphill": self.esp.spontaneous_uphill,
     }
 
 
@@ -313,13 +328,13 @@ class TestTimers:
 
   def test_hill_decel_timer_counts_while_stopped_on_hill(self):
     """TSK radbremsmom (no hold, hill) increments the hill decel timer."""
-    sim = ESPTSKSimulator(speed_ms=0.0, road_grade=5.0, esp_hold_torque_nm=790.0)
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=790.0)
     for _ in range(10):
       sim.step(SimInputs())
     assert sim.car_state()["_hill_decel_frames"] == 10
 
   def test_hill_decel_timer_faults_at_limit(self):
-    sim = ESPTSKSimulator(speed_ms=0.0, road_grade=5.0, esp_hold_torque_nm=790.0)
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=790.0)
     for _ in range(HILL_DECEL_TIMEOUT_FRAMES):
       sim.step(SimInputs())
     assert not sim.car_state()["_faulted"]
@@ -328,7 +343,7 @@ class TestTimers:
 
   def test_hill_decel_timer_resets_when_hold_confirms(self):
     """Hold confirmation stops radbremsmom; timer resets on second stopping step."""
-    sim = ESPTSKSimulator(speed_ms=0.0, road_grade=5.0, esp_hold_torque_nm=790.0)
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=790.0)
     for _ in range(10):
       sim.step(SimInputs())
     assert sim.car_state()["_hill_decel_frames"] == 10
@@ -369,3 +384,40 @@ class TestFlatStrategy:
     for _ in range(100):
       starting(sim, 1)
     assert not sim.car_state()["_faulted"]
+
+
+class TestSpontaneousReacquisition:
+  def test_spontaneous_reacquisition_sets_flag(self):
+    sim = ESPTSKSimulator(speed_ms=0.0)
+    sim.trigger_spontaneous_reacquisition = True
+    neutral(sim, 1)
+    cs = sim.car_state()
+    assert cs["esp_hold_confirmation"]
+    assert cs["_spontaneous_uphill"]
+
+  def test_spontaneous_reacquisition_triggers_hill_decel_timeout(self):
+    """After spontaneous reacquisition, hill decel timeout applies even on flat grade."""
+    sim = ESPTSKSimulator(speed_ms=0.0)  # flat: esp_hold_torque_nm=0 (< 600)
+    sim.trigger_spontaneous_reacquisition = True
+    neutral(sim, 1)   # hold acquires with spontaneous_uphill=True
+    neutral(sim, 1)   # unconditional release; spontaneous_uphill flag persists
+    assert not sim.car_state()["esp_hold_confirmation"]
+    faulted = False
+    for _ in range(HILL_DECEL_TIMEOUT_FRAMES + 2):
+      sim.step(SimInputs())
+      if sim.car_state()["_faulted"]:
+        faulted = True
+        break
+    assert faulted
+
+  def test_spontaneous_uphill_clears_on_wheel_movement(self):
+    """spontaneous_uphill flag clears once wheels move without a hold."""
+    sim = ESPTSKSimulator(speed_ms=0.0)
+    sim.trigger_spontaneous_reacquisition = True
+    neutral(sim, 1)   # acquires with spontaneous_uphill=True
+    neutral(sim, 1)   # releases
+    assert sim.car_state()["_spontaneous_uphill"]
+    sim.speed_ms = 0.5
+    neutral(sim, 1)   # wheel movement, no hold → clears flag
+    sim.speed_ms = 0.0
+    assert not sim.car_state()["_spontaneous_uphill"]

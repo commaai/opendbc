@@ -17,7 +17,6 @@ class CarState(CarStateBase):
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
     self.esp_hold_torque_nm = 0.0
-    self.road_grade = 0.0
     self.actual_torque_nm = 0.0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
@@ -118,7 +117,6 @@ class CarState(CarStateBase):
 
       # extended standstill values for acc type 1
       if self.CP.openpilotLongitudinalControl and self.acc_type == 1:
-        self.road_grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
         esp_hold_raw = pt_cp.vl["ESP_15"]["ESP_Haltemoment"]
         haltemoment_antrieb = pt_cp.vl["ESP_15"]["ESP_Index_Haltemoment"] == 1
         self.esp_hold_torque_nm = esp_hold_raw if haltemoment_antrieb and esp_hold_raw < 10220 else 0.0

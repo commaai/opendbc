@@ -53,17 +53,19 @@ class MQBStandstillManager:
   HOLD_ACCEL_KI = 0.0001
 
   def __init__(self, CCP):
-    self._CCP = CCP
+    self.CCP = CCP
     self.esp_hold_frames = 0
     self.hill_hold_accel = 0.0
-    self._prev_impulse_count = 0
-    self._prev_starting_hold = False
+    self.prev_impulse_count = 0
+    self.prev_starting_hold = False
+    self.prev_starting_no_hold = False
+    self.detected_uphill = False
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
              ) -> tuple[bool, float, bool, bool, bool | None, bool | None]:
     esp_starting_override: bool | None = None
     esp_stopping_override: bool | None = None
-    is_uphill = CS.road_grade > 2.0
+    is_uphill = CS.esp_hold_torque_nm > 600 or self.detected_uphill  # 600 Nm is the signal floor; above it means hill
 
     if CS.esp_hold_confirmation:
       self.esp_hold_frames += 1
@@ -92,7 +94,7 @@ class MQBStandstillManager:
           error_nm = CS.esp_hold_torque_nm * self.HOLD_TORQUE_TARGET_RATIO - CS.actual_torque_nm
           if abs(error_nm) > self.HOLD_TORQUE_DEADBAND_NM:
             self.hill_hold_accel = float(np.clip(self.hill_hold_accel + self.HOLD_ACCEL_KI * error_nm,
-                                                 self._CCP.ACCEL_MIN, self._CCP.ACCEL_MAX))
+                                                 self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
           accel = max(accel, self.hill_hold_accel)
           starting = True
           stopping = False
@@ -107,12 +109,19 @@ class MQBStandstillManager:
     # - wheels move while hold is not confirmed
     # - we drop a hold confirmation after a frame where we were actively starting with hold confirmed
     is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
-    if CS.wheel_impulse_count != self._prev_impulse_count and not CS.esp_hold_confirmation:
+    if CS.wheel_impulse_count != self.prev_impulse_count and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-    elif self._prev_starting_hold and not CS.esp_hold_confirmation:
+      self.detected_uphill = False
+    elif self.prev_starting_hold and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-    self._prev_starting_hold = is_starting and CS.esp_hold_confirmation
-    self._prev_impulse_count = CS.wheel_impulse_count
+    self.prev_starting_hold = is_starting and CS.esp_hold_confirmation
+    self.prev_impulse_count = CS.wheel_impulse_count
+
+    # spontaneous ESP reacquisition while in flat starting mode: treat as uphill from now on
+    if self.prev_starting_no_hold and CS.esp_hold_confirmation:
+      self.detected_uphill = True
+    self.prev_starting_no_hold = (long_active and not is_uphill and starting
+                                   and CS.out.standstill and not CS.esp_hold_confirmation)
 
     return long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override
 
