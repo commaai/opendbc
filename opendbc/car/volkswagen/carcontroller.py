@@ -36,12 +36,14 @@ class HCAMitigation:
 
 class MQBStandstillManager:
   """
-  Manages MQB ACC type 1 standstill hold cycling.
+  Standstill handling for MQB w/ ACC type 1.
 
-  When a hold is confirmed the ESP brakes autonomously; the TSK just sends
-  starting/stopping signals on ACC_07.  On flat/downhill we drop the hold and
-  prevent re-engagement.  On uphill we build engine torque via ACC_06 so the
-  ESP will release its hold timer on request, then re-acquire cleanly.
+  When hold is confirmed, TSK stops sending brake requests and the ESP manages braking
+  autonomously, responding only to starting/stopping signals on ACC_07.
+  On flat/downhill the ESP can hold indefinitely; we just force starting state.
+  On uphill it can't, so we use ACC_06 to build engine torque as a rollback
+  prevention measure so that the ESP will willingly cycle its own hold timer when we ask
+  it to while keeping ACC_07 in stopping mode so ESP holds the brake.
   """
 
   def __init__(self, CCP):
@@ -53,24 +55,12 @@ class MQBStandstillManager:
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
              ) -> tuple[bool, float, bool, bool, bool | None, bool | None]:
-    """
-    Update standstill state for one ACC_CONTROL_STEP frame.
-
-    Args:
-      CS:          CarState (must have acc_type, esp_hold_confirmation, road_grade (Motor_16/TSK_Steigung, percent),
-                   esp_hold_torque_nm, actual_torque_nm, wheel_impulse_count,
-                   out.standstill, out.brakePressed)
-      long_active: CC.longActive (may be overridden internally)
-      accel:       clipped target acceleration
-      stopping:    longControlState == stopping
-      starting:    longControlState == pid and (hold confirmed or low speed)
-
-    Returns:
-      (long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override)
-    """
     esp_starting_override: bool | None = None
     esp_stopping_override: bool | None = None
     is_uphill = CS.road_grade > 2.0
+
+    if CS.esp_hold_confirmation:
+      self.esp_hold_frames += 1
 
     # acc type 1 is sensitive to control signals when brake is pressed (preEnabled)
     if CS.out.brakePressed:
@@ -79,22 +69,19 @@ class MQBStandstillManager:
     elif self.esp_hold_frames > HOLD_MAX_FRAMES and is_uphill:
       long_active = False
 
-    if CS.esp_hold_confirmation:
-      self.esp_hold_frames += 1
-
-    # uphill launch: TSK rarely commands enough torque to move from a hill hold, so floor accel at 1 m/s²
+    # uphill launch: TSK rarely commands enough torque to move from a hill hold, so keep accel > 1 m/s²
     if long_active and accel > 0 and is_uphill and CS.out.standstill:
       accel = max(accel, 1.0)
 
     if long_active and accel <= 0:
-      # flat/downhill: drop hold, prevent re-engagement
+      # flat/downhill: drop hold, force starting state
       if not is_uphill and CS.out.standstill:
         esp_starting_override = not CS.esp_hold_confirmation
         esp_stopping_override = False
 
       # uphill: build engine torque via ACC_06 as rollback prevention, ESP braking held via ACC_07
       elif is_uphill and (CS.esp_hold_confirmation or CS.out.standstill):
-        # skip torque management for the first frame to avoid check engine light
+        # skip torque management for one frame each cycle to avoid check engine light
         if self.esp_hold_frames > 1:
           error_nm = CS.esp_hold_torque_nm * HOLD_TORQUE_TARGET_RATIO - CS.actual_torque_nm
           if abs(error_nm) > HOLD_TORQUE_DEADBAND_NM:
@@ -103,7 +90,7 @@ class MQBStandstillManager:
           accel = max(accel, self.hill_hold_accel)
           starting = True
           stopping = False
-        # near counter limit: attempt hold release to cycle the ESP hold
+        # near counter limit: attempt release to cycle the ESP hold
         near_limit = self.esp_hold_frames >= HOLD_MAX_FRAMES - 10
         esp_starting_override = near_limit
         esp_stopping_override = not near_limit

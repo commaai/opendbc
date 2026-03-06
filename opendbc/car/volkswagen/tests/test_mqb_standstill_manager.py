@@ -90,6 +90,52 @@ class TestMQBStandstillManagerIntegration:
       cs_after, _ = _mgr_step(sim, mgr, True, 0.0, True, False)
       assert not cs_after["_faulted"], f"fault after approach at frame {frame}"
 
+  def test_flat_hold_released_unconditionally_with_nontrivial_haltemoment(self):
+    """On flat ground, hold must be released unconditionally (neutral).
+
+    In real longControlState=pid at standstill, starting=True. If esp_starting_override were
+    not forced to False when hold is confirmed, we'd send a conditional release with no torque
+    that may fail, the hold persists, and the hold timer faults.
+    """
+    sim = ESPTSKSimulator(speed_ms=0.0, road_grade=0.0, esp_hold_torque_nm=790.0)
+    mgr = MQBStandstillManager(CCP)
+    # Approach at low speed to acquire hold (stopping phase, longControlState=stopping)
+    sim.speed_ms = 0.05
+    for _ in range(3):
+      _mgr_step(sim, mgr, True, -1.0, True, False)
+    sim.speed_ms = 0.0
+    # At standstill with hold, starting=True reflects real longControlState=pid
+    for frame in range(200):
+      cs_after, _ = _mgr_step(sim, mgr, True, 0.0, False, True)
+      assert not cs_after["_faulted"], f"fault at frame {frame}"
+    assert not sim.car_state()["esp_hold_confirmation"], "hold should not persist on flat"
+
+  def test_no_override_while_moving(self):
+    """While the vehicle is moving the manager must not set any ESP overrides regardless of grade."""
+    for road_grade in (0.0, 5.0):
+      sim = ESPTSKSimulator(speed_ms=1.0, road_grade=road_grade)
+      mgr = MQBStandstillManager(CCP)
+      cs = _make_cs(sim.car_state())
+      _, _, _, _, esp_starting_override, esp_stopping_override = mgr.update(cs, True, -1.0, True, False)
+      assert esp_starting_override is None, f"unexpected override at road_grade={road_grade}"
+      assert esp_stopping_override is None, f"unexpected override at road_grade={road_grade}"
+
+  def test_hill_logic_does_not_fire_on_flat_with_hold_at_low_speed(self):
+    """Hold can be confirmed at speeds up to 0.33 km/h while standstill is still False.
+    Hill logic must not fire in this window, it would start requesting engine torque on flat ground
+    and ruin our stop.
+    """
+    sim = ESPTSKSimulator(speed_ms=0.05, road_grade=0.0, esp_hold_torque_nm=790.0)
+    sim.step(SimInputs(acc_anhalten=True, acc_anhalteweg=0.3))
+    assert sim.car_state()["esp_hold_confirmation"]
+    assert not sim.car_state()["out.standstill"]  # key: hold confirmed but not yet at standstill
+
+    mgr = MQBStandstillManager(CCP)
+    cs = _make_cs(sim.car_state())
+    _, _, _, _, esp_starting_override, esp_stopping_override = mgr.update(cs, True, 0.0, True, False)
+
+    assert esp_stopping_override is not True, "hill mode must not activate on flat ground"
+
   def test_brake_press_disables_long_active(self):
     """When driver brakes, manager returns long_active=False so no signals are sent to the ESP."""
     # Only test flat ground here: on a hill with no hold signals the hill decel timer
@@ -108,7 +154,7 @@ class TestMQBStandstillManagerIntegration:
     After the manager disables we stop; the caller (openpilot) is responsible for not sending
     further signals that would trip the hill decel timer.
     """
-    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=9999.0)
+    sim = ESPTSKSimulator(speed_ms=0.0, road_grade=5.0, esp_hold_torque_nm=9999.0)
     mgr = MQBStandstillManager(CCP)
     disabled_at = None
     for frame in range(200):
@@ -127,7 +173,7 @@ class TestMQBStandstillManagerIntegration:
   def test_hill_cycling_no_fault(self):
     """On a normal hill the I-controller builds enough torque for conditional release before the
     timer limit; the hold cycles and long_active stays True indefinitely."""
-    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=790.0)
+    sim = ESPTSKSimulator(speed_ms=0.0, road_grade=5.0, esp_hold_torque_nm=790.0)
     mgr = MQBStandstillManager(CCP)
     for frame in range(400):
       cs_after, la_out = _mgr_step(sim, mgr, True, 0.0, True, False)
@@ -136,7 +182,7 @@ class TestMQBStandstillManagerIntegration:
 
   def test_disable_and_reenable_long_active_on_hill(self):
     """Briefly disabling long_active pauses the hold timer; re-enabling continues safely."""
-    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=790.0)
+    sim = ESPTSKSimulator(speed_ms=0.0, road_grade=5.0, esp_hold_torque_nm=790.0)
     mgr = MQBStandstillManager(CCP)
     # Run for a few frames to acquire and hold
     for _ in range(5):
