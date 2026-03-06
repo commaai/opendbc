@@ -201,7 +201,6 @@ class ESPTSKSimulator:
 
     self._prev_speed_ms = self.speed_ms
 
-
   def car_state(self) -> dict:
     """Return a dict of CS fields consumed by the CarController standstill logic."""
     is_uphill = self.esp_hold_torque_nm > 600
