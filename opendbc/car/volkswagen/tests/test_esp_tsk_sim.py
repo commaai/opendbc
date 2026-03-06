@@ -11,7 +11,7 @@ from opendbc.car.volkswagen.values import CarControllerParams as CCP, HOLD_MAX_F
 from opendbc.car.volkswagen.tests.esp_tsk_sim import (
   ESPTSKSimulator, SimInputs,
   ACC_ANHALTEWEG_NEUTRAL, ESP_HOLD_TIMER_LIMIT_FRAMES, HILL_DECEL_TIMEOUT_FRAMES,
-  TORQUE_RELEASE_RATIO, ENGINE_ACCEL_TO_WHEEL_TORQUE_NM,
+  TORQUE_RELEASE_RATIO,
 )
 
 STEP_DT = DT_CTRL * CCP.ACC_CONTROL_STEP  # 0.02 s per ACC_CONTROL_STEP frame
@@ -366,8 +366,7 @@ class TestMQBStandstillManagerIntegration:
     for frame in range(200):
       cs_after, la_out = _mgr_step(sim, mgr, True, 0.0, True, False)
       assert not cs_after["_faulted"], (
-        f"ESP faulted at frame {frame} before manager disabled "
-        f"(hold_timer={cs_after['_hold_timer_frames']})"
+        f"ESP faulted at frame {frame} before manager disabled (hold_timer={cs_after['_hold_timer_frames']})"
       )
       if not la_out:
         disabled_at = frame
