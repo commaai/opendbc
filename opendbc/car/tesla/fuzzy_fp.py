@@ -10,14 +10,14 @@ Ecu = CarParams.Ecu
 # TeMYG4_Main_0.0.0 (77),Y4003.05.4          -> Model Y Gen4
 # TeMX_SP_XP002p2_0.0.0 (23),XPR003.6.0      -> Model X
 
+# Tesla FW regex: ^Te<Platform>_<Variant>_<Version>(<Build>),<FinalVer>
+# Platform: M3, MYG4, MX | Variant: E014p10, Main, SP
 FW_PATTERN = re.compile(
-    (
-        r'^Te'                           # Tesla prefix
-        r'(?P<platform>[A-Z0-9]+?)_'     # Platform: M3, MYG4, MX
-        r'(?P<variant>[A-Za-z0-9_]+)_'   # Variant: E014p10, Main, SP
-        r'[\d.]+\s*\(\d+\),'             # Version with build
-        r'(?P<ver>[A-Z][A-Z0-9.]+)$'     # Final version: E014.17.00, Y4003.05.4
-    )
+    r'^Te' +
+    r'(?P<platform>[A-Z0-9]+?)_' +
+    r'(?P<variant>[A-Za-z0-9_]+)_' +
+    r'[\d.]+\s*\(\d+\),' +
+    r'(?P<ver>[A-Z][A-Z0-9.]+)$'
 )
 
 def _parse_fw(fw: bytes) -> tuple[str | None, str | None]:
