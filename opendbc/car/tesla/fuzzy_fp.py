@@ -27,7 +27,7 @@ def _parse_fw(fw: bytes) -> tuple[str | None, str | None]:
     m = FW_PATTERN.match(s)
     if m:
       return m.group('platform'), m.group('ver')[0] if m.group('ver') else None
-  except:
+  except Exception:
     pass
   return None, None
 
@@ -38,14 +38,14 @@ def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str,
   for candidate, fws in offline_fw_versions.items():
     expected_platforms: set[str] = set()
     expected_prefixes: set[str] = set()
-    for ecu, versions in fws.items():
+    for _ecu, versions in fws.items():
       for v in versions:
         plat, pref = _parse_fw(v)
         if plat:
           expected_platforms.add(plat)
         if pref:
           expected_prefixes.add(pref)
-    for addr, live_versions in live_fw_versions.items():
+    for _addr, live_versions in live_fw_versions.items():
       for lv in live_versions:
         live_plat, live_pref = _parse_fw(lv)
         if live_plat and live_plat in expected_platforms:
