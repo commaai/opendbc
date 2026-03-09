@@ -943,6 +943,13 @@ FW_VERSIONS = {
       b'57114-TYF-E030\x00\x00',
     ],
   },
+  CAR.HONDA_E_ADVANCE: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36161-TYF-E020\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'36802-TYF-E050\x00\x00',
+  },
   CAR.HONDA_CIVIC_2022: {
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-T24-T120\x00\x00',
