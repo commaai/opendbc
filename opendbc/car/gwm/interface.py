@@ -1,4 +1,4 @@
-from opendbc.car import structs, get_safety_config, CanBusBase
+from opendbc.car import structs, get_safety_config, CanBusBase, Bus
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.gwm.carcontroller import CarController
 from opendbc.car.gwm.carstate import CarState
@@ -9,6 +9,25 @@ TransmissionType = structs.CarParams.TransmissionType
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+
+  def __init__(self, CP):
+      super().__init__(CP)
+      self.lat_active = False
+      self.isEPSobeying = True
+      self.steer_fault_temporary_counter = 0
+
+  def apply(self, CC, now_nanos):
+    self.lat_active = CC.latActive
+    return super().apply(CC, now_nanos)
+
+  def update(self, can_packets):
+    cp = self.can_parsers[Bus.main]
+    self.isEPSobeying = cp.vl["RX_STEER_RELATED"]["A_RX_STEER_REQUESTED"] == 1
+    self.steer_fault_temporary_counter = (self.steer_fault_temporary_counter + 1) if (self.lat_active and not self.isEPSobeying) \
+                                          else 0
+    ret = super().update(can_packets)
+    ret.steerFaultTemporary = True if self.steer_fault_temporary_counter > 300 else False
+    return ret
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
