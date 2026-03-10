@@ -57,6 +57,10 @@ bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
 bool safety_rx_checks_invalid = false;
 
+// Ignition detected from CAN messages
+bool ignition_can = false;
+uint32_t ignition_can_cnt = 0U;
+
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
 int rt_torque_last = 0;            // last desired torque for real time check
@@ -184,6 +188,9 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 }
 
 bool safety_rx_hook(const CANPacket_t *msg) {
+  // Check for CAN ignition signal
+  ignition_can_hook(msg);
+
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
@@ -240,6 +247,55 @@ bool safety_tx_hook(CANPacket_t *msg) {
   }
 
   return !relay_malfunction && whitelisted && safety_allowed;
+}
+
+void ignition_can_hook(const CANPacket_t *msg) {
+  if (msg->bus == 0U) {
+    int len = GET_LEN(msg);
+
+    // GM exception
+    if ((msg->addr == 0x1F1U) && (len == 8)) {
+      // SystemPowerMode (2=Run, 3=Crank Request)
+      ignition_can = (msg->data[0] & 0x2U) != 0U;
+      ignition_can_cnt = 0U;
+    }
+
+    // Rivian R1S/T GEN1 exception
+    if ((msg->addr == 0x152U) && (len == 8)) {
+      // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
+      int counter = msg->data[1] & 0xFU;  // max is only 14
+
+      static int prev_counter_rivian = -1;
+      if ((counter == ((prev_counter_rivian + 1) % 15)) && (prev_counter_rivian != -1)) {
+        // VDM_OutputSignals->VDM_EpasPowerMode
+        ignition_can = ((msg->data[7] >> 4U) & 0x3U) == 1U;  // VDM_EpasPowerMode_Drive_On=1
+        ignition_can_cnt = 0U;
+      }
+      prev_counter_rivian = counter;
+    }
+
+    // Tesla Model 3/Y exception
+    if ((msg->addr == 0x221U) && (len == 8)) {
+      // 0x221 overlaps with Rivian which has random data on byte 0
+      int counter = msg->data[6] >> 4;
+
+      static int prev_counter_tesla = -1;
+      if ((counter == ((prev_counter_tesla + 1) % 16)) && (prev_counter_tesla != -1)) {
+        // VCFRONT_LVPowerState->VCFRONT_vehiclePowerState
+        int power_state = (msg->data[0] >> 5U) & 0x3U;
+        ignition_can = power_state == 0x3;  // VEHICLE_POWER_STATE_DRIVE=3
+        ignition_can_cnt = 0U;
+      }
+      prev_counter_tesla = counter;
+    }
+
+    // Mazda exception
+    if ((msg->addr == 0x9EU) && (len == 8)) {
+      ignition_can = (msg->data[0] >> 5) == 0x6U;
+      ignition_can_cnt = 0U;
+    }
+
+  }
 }
 
 static int get_fwd_bus(int bus_num) {

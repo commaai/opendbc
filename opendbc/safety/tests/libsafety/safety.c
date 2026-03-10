@@ -202,3 +202,11 @@ void init_tests(void){
   // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
   tesla_autopark = false;
 }
+
+bool get_ignition_can(void) {
+  return ignition_can;
+}
+
+uint32_t get_ignition_can_cnt(void) {
+  return ignition_can_cnt;
+}
