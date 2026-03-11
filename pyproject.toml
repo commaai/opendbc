@@ -50,7 +50,6 @@ docs = [
 ]
 examples = [
   "inputs",
-  "matplotlib",
 ]
 
 [build-system]
