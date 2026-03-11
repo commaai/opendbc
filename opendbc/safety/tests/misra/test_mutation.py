@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import glob
-import pytest
+import unittest
 import shutil
 import subprocess
 import tempfile
@@ -46,24 +46,26 @@ for p in patterns:
 mutations = [mutations[0]] + rng.sample(mutations[1:], min(2, len(mutations) - 1))
 
 
-@pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
-def test_misra_mutation(fn, rule, transform, should_fail):
-  with tempfile.TemporaryDirectory() as tmp:
-    shutil.copytree(ROOT, tmp, dirs_exist_ok=True,
-                    ignore=shutil.ignore_patterns('.venv', '.git', '*.ctu-info', '.hypothesis'))
+class TestMisraMutation(unittest.TestCase):
+  def test_misra_mutation(self):
+    for fn, rule, transform, should_fail in mutations:
+      with self.subTest(fn=fn, rule=rule, should_fail=should_fail):
+        with tempfile.TemporaryDirectory() as tmp:
+          shutil.copytree(ROOT, tmp, dirs_exist_ok=True,
+                          ignore=shutil.ignore_patterns('.venv', '.git', '*.ctu-info', '.hypothesis'))
 
-    # apply patch
-    if fn is not None:
-      with open(os.path.join(tmp, fn), 'r+') as f:
-        content = f.read()
-        f.seek(0)
-        f.write(transform(content))
+          # apply patch
+          if fn is not None:
+            with open(os.path.join(tmp, fn), 'r+') as f:
+              content = f.read()
+              f.seek(0)
+              f.write(transform(content))
 
-    # run test
-    r = subprocess.run(f"OPENDBC_ROOT={tmp} opendbc/safety/tests/misra/test_misra.sh",
-                       stdout=subprocess.PIPE, cwd=ROOT, shell=True, encoding='utf8')
-    print(r.stdout) # helpful for debugging failures
-    failed = r.returncode != 0
-    assert failed == should_fail
-    if should_fail:
-      assert rule in r.stdout, "MISRA test failed but not for the correct violation"
+          # run test
+          r = subprocess.run(f"OPENDBC_ROOT={tmp} opendbc/safety/tests/misra/test_misra.sh",
+                             stdout=subprocess.PIPE, cwd=ROOT, shell=True, encoding='utf8')
+          print(r.stdout) # helpful for debugging failures
+          failed = r.returncode != 0
+          assert failed == should_fail
+          if should_fail:
+            assert rule in r.stdout, "MISRA test failed but not for the correct violation"

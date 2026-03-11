@@ -11,7 +11,7 @@ rm -f ./libsafety/*.gcda
 scons -j$(nproc) -D
 
 # run safety tests and generate coverage data
-pytest -n8 --ignore-glob=misra/*
+python -m unittest discover -s . -p 'test_*.py' -t ../../../
 
 # NOTE: we accept that these tools will have slight differences,
 # and in return, we get to use the stock toolchain instead of

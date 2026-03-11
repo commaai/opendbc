@@ -1,13 +1,13 @@
 import random
-from collections.abc import Iterable
+import unittest
 
 from hypothesis import settings, given, strategies as st
-import pytest
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes
 from opendbc.car.ford.fingerprints import FW_VERSIONS
+from opendbc.testing import parameterized
 
 Ecu = CarParams.Ecu
 
@@ -40,15 +40,15 @@ ECU_PART_NUMBER = {
 }
 
 
-class TestFordFW:
+class TestFordFW(unittest.TestCase):
   def test_fw_query_config(self):
     for (ecu, addr, subaddr) in FW_QUERY_CONFIG.extra_ecus:
       assert ecu in ECU_ADDRESSES, "Unknown ECU"
       assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
       assert subaddr is None, "Unexpected ECU subaddress"
 
-  @pytest.mark.parametrize("car_model,fw_versions", FW_VERSIONS.items())
-  def test_fw_versions(self, car_model: str, fw_versions: dict[tuple[int, int, int | None], Iterable[bytes]]):
+  @parameterized("car_model, fw_versions", FW_VERSIONS.items())
+  def test_fw_versions(self, car_model, fw_versions):
     for (ecu, addr, subaddr), fws in fw_versions.items():
       assert ecu in ECU_PART_NUMBER, "Unexpected ECU"
       assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"

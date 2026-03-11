@@ -1,13 +1,14 @@
-import pytest
+import unittest
 
 from opendbc.car.gm.fingerprints import FINGERPRINTS
 from opendbc.car.gm.values import CAMERA_ACC_CAR, GM_RX_OFFSET
+from opendbc.testing import parameterized
 
 CAMERA_DIAGNOSTIC_ADDRESS = 0x24b
 
 
-class TestGMFingerprint:
-  @pytest.mark.parametrize("car_model,fingerprints", FINGERPRINTS.items())
+class TestGMFingerprint(unittest.TestCase):
+  @parameterized("car_model, fingerprints", FINGERPRINTS.items())
   def test_can_fingerprints(self, car_model, fingerprints):
     assert len(fingerprints) > 0
 
