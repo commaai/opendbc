@@ -1,8 +1,7 @@
 import random
-from collections.abc import Iterable
+import unittest
 
 from hypothesis import settings, given, strategies as st
-import pytest
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
@@ -40,31 +39,32 @@ ECU_PART_NUMBER = {
 }
 
 
-class TestFordFW:
+class TestFordFW(unittest.TestCase):
   def test_fw_query_config(self):
     for (ecu, addr, subaddr) in FW_QUERY_CONFIG.extra_ecus:
       assert ecu in ECU_ADDRESSES, "Unknown ECU"
       assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
       assert subaddr is None, "Unexpected ECU subaddress"
 
-  @pytest.mark.parametrize("car_model,fw_versions", FW_VERSIONS.items())
-  def test_fw_versions(self, car_model: str, fw_versions: dict[tuple[int, int, int | None], Iterable[bytes]]):
-    for (ecu, addr, subaddr), fws in fw_versions.items():
-      assert ecu in ECU_PART_NUMBER, "Unexpected ECU"
-      assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
-      assert subaddr is None, "Unexpected ECU subaddress"
+  def test_fw_versions(self):
+    for car_model, fw_versions in FW_VERSIONS.items():
+      with self.subTest(car_model=car_model):
+        for (ecu, addr, subaddr), fws in fw_versions.items():
+          assert ecu in ECU_PART_NUMBER, "Unexpected ECU"
+          assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
+          assert subaddr is None, "Unexpected ECU subaddress"
 
-      for fw in fws:
-        assert len(fw) == 24, "Expected ECU response to be 24 bytes"
+          for fw in fws:
+            assert len(fw) == 24, "Expected ECU response to be 24 bytes"
 
-        match = FW_PATTERN.match(fw)
-        assert match is not None, f"Unable to parse FW: {fw!r}"
-        if match:
-          part_number = match.group("part_number")
-          assert part_number in ECU_PART_NUMBER[ecu], f"Unexpected part number for {fw!r}"
+            match = FW_PATTERN.match(fw)
+            assert match is not None, f"Unable to parse FW: {fw!r}"
+            if match:
+              part_number = match.group("part_number")
+              assert part_number in ECU_PART_NUMBER[ecu], f"Unexpected part number for {fw!r}"
 
-        codes = get_platform_codes([fw])
-        assert 1 == len(codes), f"Unable to parse FW: {fw!r}"
+            codes = get_platform_codes([fw])
+            assert 1 == len(codes), f"Unable to parse FW: {fw!r}"
 
   @settings(max_examples=100)
   @given(data=st.data())
