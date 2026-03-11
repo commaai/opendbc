@@ -34,13 +34,16 @@ patterns = [
 ]
 
 all_files = glob.glob('opendbc/safety/**', root_dir=ROOT, recursive=True)
-files = [f for f in all_files if f.endswith(('.c', '.h')) and not f.startswith(IGNORED_PATHS)]
+files = sorted(f for f in all_files if f.endswith(('.c', '.h')) and not f.startswith(IGNORED_PATHS))
 assert len(files) > 20, files
 
+# fixed seed so every xdist worker collects the same test params
+rng = random.Random(len(files))
 for p in patterns:
-  mutations.append((random.choice(files), *p, True))
+  mutations.append((rng.choice(files), *p, True))
 
-mutations = random.sample(mutations, 2)  # can remove this once cppcheck is faster
+# sample to keep CI fast, but always include the no-mutation case
+mutations = [mutations[0]] + rng.sample(mutations[1:], min(2, len(mutations) - 1))
 
 
 @pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
