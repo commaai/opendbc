@@ -10,13 +10,13 @@ Ecu = CarParams.Ecu
 
 class CarControllerParams:
   STEER_STEP = 2
-  STEER_MAX = 254
+  STEER_MAX = 300
 
   def __init__(self, CP: CarParams):
     self.ACCEL_MAX = 1
     self.ACCEL_MIN = -3.5
-    self.STEER_DELTA_UP = 4
-    self.STEER_DELTA_DOWN = 5
+    self.STEER_DELTA_UP = 8
+    self.STEER_DELTA_DOWN = 10
     self.STEER_ERROR_MAX = 70
 
 
@@ -37,7 +37,7 @@ class GWMPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   GWM_HAVAL_H6 = GWMPlatformConfig(
     [GWMCarDocs("Peugeot 208 2019-25")],
-    CarSpecs(mass=1530, wheelbase=2.54, steerRatio=17.416),
+    CarSpecs(mass=2040, wheelbase=2.738, steerRatio=17.416),
   )
 
 
