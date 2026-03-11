@@ -21,7 +21,9 @@ def parameterized_class(attrs, values=None):
       new_cls = type(name, (cls,), param_set)
       new_cls.__qualname__ = name
       new_cls.__module__ = cls.__module__
+      new_cls.__test__ = True
       setattr(module, name, new_cls)
+    cls.__test__ = False
     return cls
 
   return decorator
