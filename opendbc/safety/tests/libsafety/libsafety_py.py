@@ -113,6 +113,7 @@ int mutation_get_active_mutant(void);
 
 class LibSafety:
   pass
+libsafety: LibSafety
 
 def load(path):
   global libsafety
