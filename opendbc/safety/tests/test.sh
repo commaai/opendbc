@@ -6,9 +6,8 @@ cd $DIR
 
 source ../../../setup.sh
 
-# reset coverage data and generate gcc note file
+# reset coverage data
 rm -f ./libsafety/*.gcda
-scons -j$(nproc) -D
 
 # run safety tests and generate coverage data
 python -m unittest discover -s . -p 'test_*.py' -t ../../../
