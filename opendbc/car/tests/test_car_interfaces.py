@@ -62,6 +62,8 @@ def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
 
 
 def _make_car_test(car_name):
+  # FIXME: Due to the lists used in carParams, Phase.target is very slow and will cause
+  #  many generated examples to overrun when max_examples > ~20, don't use it
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
