@@ -1,7 +1,6 @@
+import os
 import random
 import unittest
-
-from hypothesis import settings, given, strategies as st
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
@@ -66,13 +65,11 @@ class TestFordFW(unittest.TestCase):
         codes = get_platform_codes([fw])
         assert 1 == len(codes), f"Unable to parse FW: {fw!r}"
 
-  @settings(max_examples=100)
-  @given(data=st.data())
-  def test_platform_codes_fuzzy_fw(self, data):
+  def test_platform_codes_fuzzy_fw(self):
     """Ensure function doesn't raise an exception"""
-    fw_strategy = st.lists(st.binary())
-    fws = data.draw(fw_strategy)
-    get_platform_codes(fws)
+    for _ in range(int(os.environ.get('MAX_EXAMPLES', '100'))):
+      fws = [os.urandom(random.randint(0, 64)) for _ in range(random.randint(0, 10))]
+      get_platform_codes(fws)
 
   def test_platform_codes_spot_check(self):
     # Asserts basic platform code parsing behavior for a few cases
