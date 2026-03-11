@@ -1,8 +1,9 @@
 import os
 import math
-import random
 import unittest
+from functools import cache
 
+from opendbc.testing import Phase, given, settings, strategies as st
 from opendbc.car import DT_CTRL, CanData, structs
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.fingerprints import FW_VERSIONS
@@ -18,94 +19,131 @@ ALL_REQUESTS = {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r i
 
 # From panda/python/__init__.py
 DLC_TO_LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]
+PRIORITY_ECUS = (
+  structs.CarParams.Ecu.shiftByWire,
+  structs.CarParams.Ecu.hybrid,
+  structs.CarParams.Ecu.eps,
+  structs.CarParams.Ecu.abs,
+  structs.CarParams.Ecu.fwdRadar,
+)
+PRIORITY_REQUEST = (b'>\x00', b'"\xde\x01')
 
-ALL_ECUS_LIST = sorted(ALL_ECUS)
-ALL_REQUESTS_LIST = sorted(ALL_REQUESTS)
+
+def _sort_ecu(ecu):
+  return (ecu[0] not in PRIORITY_ECUS, PRIORITY_ECUS.index(ecu[0]) if ecu[0] in PRIORITY_ECUS else len(PRIORITY_ECUS), ecu)
+
+
+def _get_prioritized_ecus():
+  remaining = sorted(ALL_ECUS)
+  prioritized = []
+  for ecu_name in PRIORITY_ECUS:
+    match = next((ecu for ecu in remaining if ecu[0] == ecu_name), None)
+    if match is not None:
+      prioritized.append(match)
+      remaining.remove(match)
+  return prioritized + sorted(remaining, key=_sort_ecu)
+
+
+ALL_ECUS_LIST = _get_prioritized_ecus()
+ALL_REQUESTS_LIST = sorted(ALL_REQUESTS, key=lambda request: (request != PRIORITY_REQUEST, request))
 
 MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
 
-def get_random_car_interface(car_name: str) -> CarInterfaceBase:
+@cache
+def get_fuzzy_strategy():
   # Fuzzy CAN fingerprints to test more states of the CarInterface
-  fingerprint = {addr: random.choice(DLC_TO_LEN) for addr in random.sample(range(0x801), random.randint(0, 20))}
-  fingerprints = {bus: fingerprint for bus in range(7)}
+  fingerprint_strategy = st.fixed_dictionaries({0: st.dictionaries(st.integers(min_value=0, max_value=0x800),
+                                                                   st.sampled_from(DLC_TO_LEN))})
 
-  # Random FW versions from possible ECUs
-  car_fw = []
-  for _ in range(random.randint(0, 10)):
-    ecu = random.choice(ALL_ECUS_LIST)
-    req = random.choice(ALL_REQUESTS_LIST)
-    car_fw.append(structs.CarParams.CarFw(ecu=ecu[0], address=ecu[1], subAddress=ecu[2] or 0, request=req))
+  # only pick from possible ecus to reduce search space
+  car_fw_strategy = st.lists(st.builds(
+    lambda fw, req: structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0, request=req),
+    st.sampled_from(ALL_ECUS_LIST),
+    st.sampled_from(ALL_REQUESTS_LIST),
+  ))
+
+  return st.fixed_dictionaries({
+    'fingerprints': fingerprint_strategy,
+    'car_fw': car_fw_strategy,
+    'alpha_long': st.booleans(),
+  })
+
+
+def get_fuzzy_car_interface(car_name: str, params: dict) -> CarInterfaceBase:
+  params = dict(params)
+  fingerprints = {bus: params['fingerprints'][0] for bus in range(7)}
 
   CarInterface = interfaces[car_name]
-  car_params = CarInterface.get_params(car_name, fingerprints, car_fw,
-                                       alpha_long=random.choice([True, False]), is_release=False, docs=False)
+  car_params = CarInterface.get_params(car_name, fingerprints, params['car_fw'],
+                                       alpha_long=params['alpha_long'], is_release=False, docs=False)
   return CarInterface(car_params)
 
 
 def _make_car_test(car_name):
+  @settings(max_examples=MAX_EXAMPLES, deadline=None,
+            phases=(Phase.reuse, Phase.generate, Phase.shrink))
+  @given(params=get_fuzzy_strategy())
+  def test(self, params):
+    car_interface = get_fuzzy_car_interface(car_name, params)
+    car_params = car_interface.CP.as_reader()
 
-  def test(self):
-    for _ in range(MAX_EXAMPLES):
-      car_interface = get_random_car_interface(car_name)
-      car_params = car_interface.CP.as_reader()
+    assert car_params.mass > 1
+    assert car_params.wheelbase > 0
+    # centerToFront is center of gravity to front wheels, assert a reasonable range
+    assert car_params.wheelbase * 0.3 < car_params.centerToFront < car_params.wheelbase * 0.7
+    assert car_params.maxLateralAccel > 0
 
-      assert car_params.mass > 1
-      assert car_params.wheelbase > 0
-      # centerToFront is center of gravity to front wheels, assert a reasonable range
-      assert car_params.wheelbase * 0.3 < car_params.centerToFront < car_params.wheelbase * 0.7
-      assert car_params.maxLateralAccel > 0
+    # Longitudinal sanity checks
+    assert len(car_params.longitudinalTuning.kpV) == len(car_params.longitudinalTuning.kpBP)
+    assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
 
-      # Longitudinal sanity checks
-      assert len(car_params.longitudinalTuning.kpV) == len(car_params.longitudinalTuning.kpBP)
-      assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
+    # Lateral sanity checks
+    if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
+      tune = car_params.lateralTuning
+      if tune.which() == 'pid':
+        if car_name != MOCK.MOCK:
+          assert not math.isnan(tune.pid.kf) and tune.pid.kf > 0
+          assert len(tune.pid.kpV) > 0 and len(tune.pid.kpV) == len(tune.pid.kpBP)
+          assert len(tune.pid.kiV) > 0 and len(tune.pid.kiV) == len(tune.pid.kiBP)
 
-      # Lateral sanity checks
-      if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
-        tune = car_params.lateralTuning
-        if tune.which() == 'pid':
-          if car_name != MOCK.MOCK:
-            assert not math.isnan(tune.pid.kf) and tune.pid.kf > 0
-            assert len(tune.pid.kpV) > 0 and len(tune.pid.kpV) == len(tune.pid.kpBP)
-            assert len(tune.pid.kiV) > 0 and len(tune.pid.kiV) == len(tune.pid.kiBP)
+      elif tune.which() == 'torque':
+        assert not math.isnan(tune.torque.latAccelFactor) and tune.torque.latAccelFactor > 0
+        assert not math.isnan(tune.torque.friction) and tune.torque.friction > 0
 
-        elif tune.which() == 'torque':
-          assert not math.isnan(tune.torque.latAccelFactor) and tune.torque.latAccelFactor > 0
-          assert not math.isnan(tune.torque.friction) and tune.torque.friction > 0
+    # Run car interface
+    now_nanos = 0
+    CC = structs.CarControl().as_reader()
+    for _ in range(10):
+      car_interface.update([])
+      car_interface.apply(CC, now_nanos)
+      now_nanos += DT_CTRL * 1e9  # 10 ms
 
-      # Run car interface
-      now_nanos = 0
-      CC = structs.CarControl().as_reader()
-      for _ in range(10):
-        car_interface.update([])
-        car_interface.apply(CC, now_nanos)
-        now_nanos += DT_CTRL * 1e9  # 10 ms
+    CC = structs.CarControl()
+    CC.enabled = True
+    CC.latActive = True
+    CC.longActive = True
+    CC = CC.as_reader()
+    for _ in range(10):
+      car_interface.update([])
+      car_interface.apply(CC, now_nanos)
+      now_nanos += DT_CTRL * 1e9  # 10ms
 
-      CC = structs.CarControl()
-      CC.enabled = True
-      CC.latActive = True
-      CC.longActive = True
-      CC = CC.as_reader()
-      for _ in range(10):
-        car_interface.update([])
-        car_interface.apply(CC, now_nanos)
-        now_nanos += DT_CTRL * 1e9  # 10ms
+    # Test radar interface
+    radar_interface = car_interface.RadarInterface(car_params)
+    assert radar_interface
 
-      # Test radar interface
-      radar_interface = car_interface.RadarInterface(car_params)
-      assert radar_interface
+    # Run radar interface once
+    radar_interface.update([])
+    if not car_params.radarUnavailable and radar_interface.rcp is not None and \
+       hasattr(radar_interface, '_update') and hasattr(radar_interface, 'trigger_msg'):
+      radar_interface._update([radar_interface.trigger_msg])
 
-      # Run radar interface once
-      radar_interface.update([])
-      if not car_params.radarUnavailable and radar_interface.rcp is not None and \
-         hasattr(radar_interface, '_update') and hasattr(radar_interface, 'trigger_msg'):
-        radar_interface._update([radar_interface.trigger_msg])
-
-      # Test radar fault
-      if not car_params.radarUnavailable and radar_interface.rcp is not None:
-        cans = [(0, [CanData(0, b'', 0) for _ in range(5)])]
-        rr = radar_interface.update(cans)
-        assert rr is None or len(rr.errors) > 0
+    # Test radar fault
+    if not car_params.radarUnavailable and radar_interface.rcp is not None:
+      cans = [(0, [CanData(0, b'', 0) for _ in range(5)])]
+      rr = radar_interface.update(cans)
+      assert rr is None or len(rr.errors) > 0
 
   return test
 
