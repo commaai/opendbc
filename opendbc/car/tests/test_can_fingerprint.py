@@ -2,24 +2,25 @@ import unittest
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint
 from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
+from opendbc.testing import parameterized
 
 
 class TestCanFingerprint(unittest.TestCase):
-  def test_can_fingerprint(self):
+  @parameterized("car_model, fingerprints", FINGERPRINTS.items())
+  def test_can_fingerprint(self, car_model, fingerprints):
     """Tests online fingerprinting function on offline fingerprints"""
-    for car_model, fingerprints in FINGERPRINTS.items():
-      with self.subTest(car_model=car_model):
-        for fingerprint in fingerprints:  # can have multiple fingerprints for each platform
-          can = [CanData(address=address, dat=b'\x00' * length, src=src)
-                 for address, length in fingerprint.items() for src in (0, 1)]
 
-          fingerprint_iter = iter([can])
-          car_fingerprint, finger = can_fingerprint(lambda **kwargs: [next(fingerprint_iter, [])])  # noqa: B023
+    for fingerprint in fingerprints:  # can have multiple fingerprints for each platform
+      can = [CanData(address=address, dat=b'\x00' * length, src=src)
+             for address, length in fingerprint.items() for src in (0, 1)]
 
-          assert car_fingerprint == car_model
-          assert finger[0] == fingerprint
-          assert finger[1] == fingerprint
-          assert finger[2] == {}
+      fingerprint_iter = iter([can])
+      car_fingerprint, finger = can_fingerprint(lambda **kwargs: [next(fingerprint_iter, [])])  # noqa: B023
+
+      assert car_fingerprint == car_model
+      assert finger[0] == fingerprint
+      assert finger[1] == fingerprint
+      assert finger[2] == {}
 
   def test_timing(self):
     # just pick any CAN fingerprinting car

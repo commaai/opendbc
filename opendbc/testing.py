@@ -1,4 +1,34 @@
+import functools
 import sys
+
+
+def parameterized(argnames, argvalues):
+  """Method decorator that runs a test once per parameter set using subTest.
+
+  Usage:
+    @parameterized("x, y", [(1, 2), (3, 4)])
+    def test_add(self, x, y): ...
+
+    @parameterized("car_model, fingerprints", FINGERPRINTS.items())
+    def test_fw(self, car_model, fingerprints): ...
+  """
+  if isinstance(argnames, str):
+    argnames = [a.strip() for a in argnames.split(',')]
+
+  def decorator(func):
+
+    @functools.wraps(func)
+    def wrapper(self):
+      for values in argvalues:
+        if not isinstance(values, (tuple, list)):
+          values = (values,)
+        kwargs = dict(zip(argnames, values, strict=True))
+        with self.subTest(**kwargs):
+          func(self, **kwargs)
+
+    return wrapper
+
+  return decorator
 
 
 def parameterized_class(attrs, values=None):

@@ -7,6 +7,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes
 from opendbc.car.ford.fingerprints import FW_VERSIONS
+from opendbc.testing import parameterized
 
 Ecu = CarParams.Ecu
 
@@ -46,25 +47,24 @@ class TestFordFW(unittest.TestCase):
       assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
       assert subaddr is None, "Unexpected ECU subaddress"
 
-  def test_fw_versions(self):
-    for car_model, fw_versions in FW_VERSIONS.items():
-      with self.subTest(car_model=car_model):
-        for (ecu, addr, subaddr), fws in fw_versions.items():
-          assert ecu in ECU_PART_NUMBER, "Unexpected ECU"
-          assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
-          assert subaddr is None, "Unexpected ECU subaddress"
+  @parameterized("car_model, fw_versions", FW_VERSIONS.items())
+  def test_fw_versions(self, car_model, fw_versions):
+    for (ecu, addr, subaddr), fws in fw_versions.items():
+      assert ecu in ECU_PART_NUMBER, "Unexpected ECU"
+      assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
+      assert subaddr is None, "Unexpected ECU subaddress"
 
-          for fw in fws:
-            assert len(fw) == 24, "Expected ECU response to be 24 bytes"
+      for fw in fws:
+        assert len(fw) == 24, "Expected ECU response to be 24 bytes"
 
-            match = FW_PATTERN.match(fw)
-            assert match is not None, f"Unable to parse FW: {fw!r}"
-            if match:
-              part_number = match.group("part_number")
-              assert part_number in ECU_PART_NUMBER[ecu], f"Unexpected part number for {fw!r}"
+        match = FW_PATTERN.match(fw)
+        assert match is not None, f"Unable to parse FW: {fw!r}"
+        if match:
+          part_number = match.group("part_number")
+          assert part_number in ECU_PART_NUMBER[ecu], f"Unexpected part number for {fw!r}"
 
-            codes = get_platform_codes([fw])
-            assert 1 == len(codes), f"Unable to parse FW: {fw!r}"
+        codes = get_platform_codes([fw])
+        assert 1 == len(codes), f"Unable to parse FW: {fw!r}"
 
   @settings(max_examples=100)
   @given(data=st.data())
