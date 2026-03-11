@@ -27,7 +27,6 @@ testing = [
   "gcovr",
   # FIXME: pytest 9.0.0 doesn't support unittest.SkipTest
   "pytest==8.4.2",
-  "pytest-coverage",
   "pytest-mock",
   "pytest-randomly",
   # https://github.com/pytest-dev/pytest-xdist/pull/1229
