@@ -676,6 +676,7 @@ FW_VERSIONS = {
       b'\xf1\x00OS  MDPS C 1.00 1.05 56310K4000\x00 4OEDC105',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00CDph SCC F-CUP      1.00 1.01 99110-CR000         ',
       b'\xf1\x00OSev SCC F-CUP      1.00 1.00 99110-K4000         ',
       b'\xf1\x00OSev SCC F-CUP      1.00 1.00 99110-K4100         ',
       b'\xf1\x00OSev SCC F-CUP      1.00 1.01 99110-K4000         ',
