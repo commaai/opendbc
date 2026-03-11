@@ -14,8 +14,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
-          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+          - os: ubuntu-24.04
+          - os: macos-latest
     steps:
     - uses: actions/checkout@v4
     - uses: commaai/timeout@v1
@@ -25,7 +25,7 @@ jobs:
 
   safety_tests:
     name: safety
-    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
     - uses: commaai/timeout@v1
       with:
@@ -42,8 +42,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+          - os: ubuntu-latest
+          - os: macos-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run mutation tests
