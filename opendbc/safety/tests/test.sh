@@ -6,9 +6,8 @@ cd $DIR
 
 source ../../../setup.sh
 
-# reset coverage data and rebuild libsafety
-rm -f ./libsafety/*.gcda
-python $DIR/../../../build.py libsafety
+# reset coverage data and force rebuild of libsafety.so
+rm -f ./libsafety/*.gcda ./libsafety/*.so ./libsafety/*.os
 
 # run safety tests and generate coverage data
 pytest -n8 --ignore-glob=misra/*

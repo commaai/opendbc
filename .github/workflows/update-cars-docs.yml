@@ -15,7 +15,6 @@ jobs:
       - name: Generate Car Docs
         run: |
           pip install -e .
-          python build.py
           python -m pip install jinja2==3.1.4
           python opendbc/car/docs.py
       - uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842
