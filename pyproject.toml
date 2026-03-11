@@ -1,7 +1,7 @@
 [project]
 name = "opendbc"
 version = "0.2.1"
-description = "a Python API for your car"
+description = "CAN bus databases and tools"
 license = "MIT"
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
 readme = "README.md"
@@ -31,7 +31,6 @@ testing = [
   "pytest-xdist @ git+https://github.com/sshane/pytest-xdist@2b4372bd62699fb412c4fe2f95bf9f01bd2018da",
   "pytest-subtests",
   "hypothesis==6.47.*",
-  "parameterized>=0.8,<0.9",
   "zstandard",
 
   # static analysis
