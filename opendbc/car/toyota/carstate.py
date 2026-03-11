@@ -5,9 +5,8 @@ from opendbc.car import Bus, DT_CTRL, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
-                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR, \
-                                                  SECOC_CAR
+from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, TSS2_CAR, RADAR_ACC_CAR, \
+                                                  EPS_SCALE, UNSUPPORTED_DSU_CAR, SECOC_CAR
 
 ButtonType = structs.CarState.ButtonEvent.Type
 SteerControlType = structs.CarParams.SteerControlType
@@ -160,12 +159,10 @@ class CarState(CarStateBase):
       if self.CP.openpilotLongitudinalControl:
         ret.accFaulted = ret.accFaulted or cp.vl["PCM_CRUISE_2"]["LOW_SPEED_LOCKOUT"] == 2
 
-    self.pcm_acc_status = cp.vl["PCM_CRUISE"]["CRUISE_STATE"]
-    if self.CP.carFingerprint not in (NO_STOP_TIMER_CAR - TSS2_CAR):
-      # ignore standstill state in certain vehicles, since pcm allows to restart with just an acceleration request
-      ret.cruiseState.standstill = self.pcm_acc_status == 7
+    pcm_acc_status = cp.vl["PCM_CRUISE"]["CRUISE_STATE"]
+    ret.cruiseState.standstill = pcm_acc_status == 7
     ret.cruiseState.enabled = bool(cp.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
-    ret.cruiseState.nonAdaptive = self.pcm_acc_status in (1, 2, 3, 4, 5, 6)
+    ret.cruiseState.nonAdaptive = pcm_acc_status in (1, 2, 3, 4, 5, 6)
 
     ret.genericToggle = bool(cp.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
     ret.espDisabled = cp.vl["ESP_CONTROL"]["TC_DISABLED"] != 0

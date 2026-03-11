@@ -17,7 +17,6 @@
 *.gcno
 *.dump
 *.gcov
-uv.lock
 /dist/
 .vscode/
 __pycache__/
