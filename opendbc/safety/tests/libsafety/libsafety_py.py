@@ -1,5 +1,6 @@
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 from cffi import FFI
@@ -9,27 +10,8 @@ from opendbc.safety import LEN_TO_DLC
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-def _needs_rebuild():
-  """Check if libsafety.so needs to be (re)built by comparing mtimes against source files."""
-  libsafety_so = os.path.join(libsafety_dir, "libsafety.so")
-  if not os.path.exists(libsafety_so):
-    return True
-
-  so_mtime = os.path.getmtime(libsafety_so)
-  safety_dir = str(Path(libsafety_dir).parents[1])
-  source_files = [os.path.join(libsafety_dir, "safety.c")]
-  for dirpath, _, filenames in os.walk(safety_dir):
-    for f in filenames:
-      if f.endswith('.h'):
-        source_files.append(os.path.join(dirpath, f))
-  return any(os.path.getmtime(f) > so_mtime for f in source_files)
-
-
-def _build_libsafety():
-  """Compile libsafety.so on demand if sources have changed."""
-  if not _needs_rebuild():
-    return
-
+def _build_libsafety() -> str:
+  """Compile libsafety.so to a temp file and return its path."""
   root = str(Path(libsafety_dir).parents[3])
   safety_c = os.path.join(libsafety_dir, "safety.c")
   safety_os = os.path.join(libsafety_dir, "safety.os")
@@ -45,12 +27,13 @@ def _build_libsafety():
     '-fprofile-arcs', '-ftest-coverage',
   ]
 
+  fd, libsafety_so = tempfile.mkstemp(suffix='.so')
+  os.close(fd)
+
   subprocess.check_call(['cc', '-fPIC', *cflags, '-I', root, '-c', safety_c, '-o', safety_os])
-  libsafety_so = os.path.join(libsafety_dir, "libsafety.so")
   subprocess.check_call(['cc', '-shared', safety_os, '-o', libsafety_so, *ldflags])
+  return libsafety_so
 
-
-_build_libsafety()
 
 ffi = FFI()
 
@@ -130,11 +113,16 @@ int mutation_get_active_mutant(void);
 
 class LibSafety:
   pass
-libsafety: LibSafety = ffi.dlopen(os.path.join(libsafety_dir, "libsafety.so"))
 
 def load(path):
   global libsafety
   libsafety = ffi.dlopen(str(path))
+
+def __getattr__(name):
+  if name == "libsafety":
+    load(_build_libsafety())
+    return libsafety
+  raise AttributeError(name)
 
 def make_CANPacket(addr: int, bus: int, dat):
   ret = ffi.new('CANPacket_t *')
