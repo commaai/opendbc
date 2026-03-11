@@ -22,6 +22,8 @@ dependencies = [
 testing = [
   "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
   "cffi",
+  "tree-sitter",
+  "tree-sitter-c",
   "gcovr",
   # FIXME: pytest 9.0.0 doesn't support unittest.SkipTest
   "pytest==8.4.2",
@@ -138,6 +140,9 @@ unsupported-operator = "ignore"
 
 # Return types with complex callable signatures
 invalid-return-type = "ignore"
+
+# unittest TestSuite iteration (TestCase | TestSuite is always iterable in practice)
+not-iterable = "ignore"
 
 # Test class method signature differences
 too-many-positional-arguments = "ignore"
