@@ -4,7 +4,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from functools import cache
 
-from opendbc import DBC_PATH
+from opendbc import DBC_PATH, ensure_dbc_generated
 
 # TODO: these should just be passed in along with the DBC file
 from opendbc.car.honda.hondacan import honda_checksum
@@ -77,6 +77,7 @@ VAL_SPLIT_RE = re.compile(r'["]+')
 @cache
 class DBC:
   def __init__(self, name: str):
+    ensure_dbc_generated()
     dbc_path = name
     if not os.path.exists(dbc_path):
       dbc_path = os.path.join(DBC_PATH, name + ".dbc")

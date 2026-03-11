@@ -1,9 +1,40 @@
 import os
+import subprocess
+from pathlib import Path
+
 from cffi import FFI
 
 from opendbc.safety import LEN_TO_DLC
 
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+def _build_libsafety():
+  """Compile libsafety.so on demand if it doesn't exist."""
+  libsafety_so = os.path.join(libsafety_dir, "libsafety.so")
+  if os.path.exists(libsafety_so):
+    return
+
+  root = str(Path(libsafety_dir).parents[3])
+  safety_c = os.path.join(libsafety_dir, "safety.c")
+  safety_os = os.path.join(libsafety_dir, "safety.os")
+
+  cflags = [
+    '-Wall', '-Wextra', '-Werror', '-nostdlib', '-fno-builtin',
+    '-std=gnu11', '-Wfatal-errors', '-Wno-pointer-to-int-cast',
+    '-g', '-O0', '-fno-omit-frame-pointer', '-DALLOW_DEBUG',
+    '-fprofile-arcs', '-ftest-coverage',
+  ]
+  ldflags = [
+    '-fsanitize=undefined', '-fno-sanitize-recover=undefined',
+    '-fprofile-arcs', '-ftest-coverage',
+  ]
+
+  subprocess.check_call(['cc', '-fPIC', *cflags, '-I', root, '-c', safety_c, '-o', safety_os])
+  subprocess.check_call(['cc', '-shared', safety_os, '-o', libsafety_so, *ldflags])
+
+
+_build_libsafety()
 
 ffi = FFI()
 

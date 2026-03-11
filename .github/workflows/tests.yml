@@ -49,7 +49,7 @@ jobs:
       - name: Run mutation tests
         run: |
           source setup.sh
-          scons -j8
+          python build.py
           python opendbc/safety/tests/mutation.py
 
   car_diff:
@@ -64,7 +64,7 @@ jobs:
     - name: Build opendbc
       run: |
         source setup.sh
-        scons -j8
+        python build.py
     - name: Test car diff
       if: github.event_name == 'pull_request'
       run: source setup.sh && python opendbc/car/tests/car_diff.py | tee diff.txt

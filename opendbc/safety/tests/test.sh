@@ -6,9 +6,9 @@ cd $DIR
 
 source ../../../setup.sh
 
-# reset coverage data and generate gcc note file
+# reset coverage data and rebuild libsafety
 rm -f ./libsafety/*.gcda
-scons -j$(nproc) -D
+python $DIR/../../../build.py libsafety
 
 # run safety tests and generate coverage data
 pytest -n8 --ignore-glob=misra/*

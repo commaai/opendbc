@@ -10,7 +10,6 @@ requires-python = ">=3.11,<3.13"  # pycapnp doesn't work with 3.13
 urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
 dependencies = [
-  "scons",
   "numpy",
   "tqdm",
   "pycapnp==2.1.0",
@@ -102,9 +101,6 @@ ignore = [
   "E262", "C419",
 ]
 flake8-implicit-str-concat.allow-multiline=false
-
-[tool.ruff.lint.per-file-ignores]
-"site_scons/*" = ["ALL"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"

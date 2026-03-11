@@ -10,7 +10,7 @@ source ./setup.sh
 uv lock --check
 
 # *** build ***
-scons -j8
+python build.py
 
 # *** lint + test ***
 lefthook run test
