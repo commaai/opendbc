@@ -1,99 +1,185 @@
+import ctypes
 import os
-from cffi import FFI
 
 from opendbc.safety import LEN_TO_DLC
 
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))
+libsafety_fn = os.path.join(libsafety_dir, "libsafety.so")
 
-ffi = FFI()
 
-ffi.cdef("""
-typedef struct {
-  unsigned char fd : 1;
-  unsigned char bus : 3;
-  unsigned char data_len_code : 4;
-  unsigned char rejected : 1;
-  unsigned char returned : 1;
-  unsigned char extended : 1;
-  unsigned int addr : 29;
-  unsigned char checksum;
-  unsigned char data[64];
-} CANPacket_t;
-""", packed=True)
-class CANPacket:
-  pass
+class CANPacket(ctypes.Structure):
+  _pack_ = 1
+  _fields_ = [
+    ("fd_bus_dlc", ctypes.c_uint8),
+    ("flags_addr", ctypes.c_uint32),
+    ("checksum", ctypes.c_uint8),
+    ("data", ctypes.c_uint8 * 64),
+    ("_padding", ctypes.c_uint8 * 2),
+  ]
 
-ffi.cdef("""
-bool safety_rx_hook(CANPacket_t *msg);
-bool safety_tx_hook(CANPacket_t *msg);
-int safety_fwd_hook(int bus_num, int addr);
-int set_safety_hooks(uint16_t mode, uint16_t param);
+  @property
+  def fd(self) -> int:
+    return self.fd_bus_dlc & 0x1
 
-void set_controls_allowed(bool c);
-bool get_controls_allowed(void);
-bool get_longitudinal_allowed(void);
-void set_alternative_experience(int mode);
-int get_alternative_experience(void);
-void set_relay_malfunction(bool c);
-bool get_relay_malfunction(void);
-bool get_gas_pressed_prev(void);
-void set_gas_pressed_prev(bool);
-bool get_brake_pressed_prev(void);
-bool get_regen_braking_prev(void);
-bool get_steering_disengage_prev(void);
-bool get_acc_main_on(void);
-float get_vehicle_speed_min(void);
-float get_vehicle_speed_max(void);
-int get_current_safety_mode(void);
-int get_current_safety_param(void);
+  @fd.setter
+  def fd(self, value: int) -> None:
+    self.fd_bus_dlc = (self.fd_bus_dlc & ~0x1) | (value & 0x1)
 
-void set_torque_meas(int min, int max);
-int get_torque_meas_min(void);
-int get_torque_meas_max(void);
-void set_torque_driver(int min, int max);
-int get_torque_driver_min(void);
-int get_torque_driver_max(void);
-void set_desired_torque_last(int t);
-void set_rt_torque_last(int t);
-void set_desired_angle_last(int t);
-int get_desired_angle_last();
-void set_angle_meas(int min, int max);
-int get_angle_meas_min(void);
-int get_angle_meas_max(void);
+  @property
+  def bus(self) -> int:
+    return (self.fd_bus_dlc >> 1) & 0x7
 
-bool get_cruise_engaged_prev(void);
-void set_cruise_engaged_prev(bool engaged);
-bool get_vehicle_moving(void);
-void set_timer(uint32_t t);
+  @bus.setter
+  def bus(self, value: int) -> None:
+    self.fd_bus_dlc = (self.fd_bus_dlc & ~0xE) | ((value & 0x7) << 1)
 
-void safety_tick_current_safety_config();
-bool safety_config_valid();
+  @property
+  def data_len_code(self) -> int:
+    return (self.fd_bus_dlc >> 4) & 0xF
 
-void init_tests(void);
+  @data_len_code.setter
+  def data_len_code(self, value: int) -> None:
+    self.fd_bus_dlc = (self.fd_bus_dlc & ~0xF0) | ((value & 0xF) << 4)
 
-void set_honda_fwd_brake(bool c);
-bool get_honda_fwd_brake(void);
-void set_honda_alt_brake_msg(bool c);
-void set_honda_bosch_long(bool c);
-int get_honda_hw(void);
+  @property
+  def rejected(self) -> int:
+    return self.flags_addr & 0x1
 
-void mutation_set_active_mutant(int id);
-int mutation_get_active_mutant(void);
-""")
+  @rejected.setter
+  def rejected(self, value: int) -> None:
+    self.flags_addr = (self.flags_addr & ~0x1) | (value & 0x1)
+
+  @property
+  def returned(self) -> int:
+    return (self.flags_addr >> 1) & 0x1
+
+  @returned.setter
+  def returned(self, value: int) -> None:
+    self.flags_addr = (self.flags_addr & ~0x2) | ((value & 0x1) << 1)
+
+  @property
+  def extended(self) -> int:
+    return (self.flags_addr >> 2) & 0x1
+
+  @extended.setter
+  def extended(self, value: int) -> None:
+    self.flags_addr = (self.flags_addr & ~0x4) | ((value & 0x1) << 2)
+
+  @property
+  def addr(self) -> int:
+    return (self.flags_addr >> 3) & 0x1FFFFFFF
+
+  @addr.setter
+  def addr(self, value: int) -> None:
+    self.flags_addr = (self.flags_addr & 0x7) | ((value & 0x1FFFFFFF) << 3)
+
+
+class CANPacketHandle:
+  def __init__(self):
+    self._packet = CANPacket()
+    self._pointer = ctypes.pointer(self._packet)
+
+  @property
+  def _as_parameter_(self):
+    return self._pointer
+
+  def __getitem__(self, index: int) -> CANPacket:
+    return self._pointer[index]
+
+  def __getattr__(self, name: str):
+    return getattr(self._packet, name)
+
+
+CANPacketPtr = ctypes.POINTER(CANPacket)
+
 
 class LibSafety:
   pass
-libsafety: LibSafety = ffi.dlopen(os.path.join(libsafety_dir, "libsafety.so"))
+
+
+def _set_sig(libsafety, name: str, argtypes, restype) -> None:
+  fn = getattr(libsafety, name)
+  fn.argtypes = argtypes
+  fn.restype = restype
+
+
+def _set_sig_if_present(libsafety, name: str, argtypes, restype) -> None:
+  if hasattr(libsafety, name):
+    _set_sig(libsafety, name, argtypes, restype)
+
+
+def _configure(libsafety):
+  _set_sig(libsafety, "safety_rx_hook", [CANPacketPtr], ctypes.c_bool)
+  _set_sig(libsafety, "safety_tx_hook", [CANPacketPtr], ctypes.c_bool)
+  _set_sig(libsafety, "safety_fwd_hook", [ctypes.c_int, ctypes.c_int], ctypes.c_int)
+  _set_sig(libsafety, "set_safety_hooks", [ctypes.c_uint16, ctypes.c_uint16], ctypes.c_int)
+
+  _set_sig(libsafety, "set_controls_allowed", [ctypes.c_bool], None)
+  _set_sig(libsafety, "get_controls_allowed", [], ctypes.c_bool)
+  _set_sig(libsafety, "get_longitudinal_allowed", [], ctypes.c_bool)
+  _set_sig(libsafety, "set_alternative_experience", [ctypes.c_int], None)
+  _set_sig(libsafety, "get_alternative_experience", [], ctypes.c_int)
+  _set_sig(libsafety, "set_relay_malfunction", [ctypes.c_bool], None)
+  _set_sig(libsafety, "get_relay_malfunction", [], ctypes.c_bool)
+  _set_sig(libsafety, "get_gas_pressed_prev", [], ctypes.c_bool)
+  _set_sig(libsafety, "set_gas_pressed_prev", [ctypes.c_bool], None)
+  _set_sig(libsafety, "get_brake_pressed_prev", [], ctypes.c_bool)
+  _set_sig(libsafety, "get_regen_braking_prev", [], ctypes.c_bool)
+  _set_sig(libsafety, "get_steering_disengage_prev", [], ctypes.c_bool)
+  _set_sig(libsafety, "get_acc_main_on", [], ctypes.c_bool)
+  _set_sig(libsafety, "get_vehicle_speed_min", [], ctypes.c_float)
+  _set_sig(libsafety, "get_vehicle_speed_max", [], ctypes.c_float)
+  _set_sig(libsafety, "get_current_safety_mode", [], ctypes.c_int)
+  _set_sig(libsafety, "get_current_safety_param", [], ctypes.c_int)
+
+  _set_sig(libsafety, "set_torque_meas", [ctypes.c_int, ctypes.c_int], None)
+  _set_sig(libsafety, "get_torque_meas_min", [], ctypes.c_int)
+  _set_sig(libsafety, "get_torque_meas_max", [], ctypes.c_int)
+  _set_sig(libsafety, "set_torque_driver", [ctypes.c_int, ctypes.c_int], None)
+  _set_sig(libsafety, "get_torque_driver_min", [], ctypes.c_int)
+  _set_sig(libsafety, "get_torque_driver_max", [], ctypes.c_int)
+  _set_sig(libsafety, "set_desired_torque_last", [ctypes.c_int], None)
+  _set_sig(libsafety, "set_rt_torque_last", [ctypes.c_int], None)
+  _set_sig(libsafety, "set_desired_angle_last", [ctypes.c_int], None)
+  _set_sig(libsafety, "get_desired_angle_last", [], ctypes.c_int)
+  _set_sig(libsafety, "set_angle_meas", [ctypes.c_int, ctypes.c_int], None)
+  _set_sig(libsafety, "get_angle_meas_min", [], ctypes.c_int)
+  _set_sig(libsafety, "get_angle_meas_max", [], ctypes.c_int)
+
+  _set_sig(libsafety, "get_cruise_engaged_prev", [], ctypes.c_bool)
+  _set_sig(libsafety, "set_cruise_engaged_prev", [ctypes.c_bool], None)
+  _set_sig(libsafety, "get_vehicle_moving", [], ctypes.c_bool)
+  _set_sig(libsafety, "set_timer", [ctypes.c_uint32], None)
+
+  _set_sig(libsafety, "safety_tick_current_safety_config", [], None)
+  _set_sig(libsafety, "safety_config_valid", [], ctypes.c_bool)
+  _set_sig(libsafety, "init_tests", [], None)
+
+  _set_sig(libsafety, "set_honda_fwd_brake", [ctypes.c_bool], None)
+  _set_sig(libsafety, "get_honda_fwd_brake", [], ctypes.c_bool)
+  _set_sig(libsafety, "set_honda_alt_brake_msg", [ctypes.c_bool], None)
+  _set_sig(libsafety, "set_honda_bosch_long", [ctypes.c_bool], None)
+  _set_sig(libsafety, "get_honda_hw", [], ctypes.c_int)
+
+  _set_sig_if_present(libsafety, "mutation_set_active_mutant", [ctypes.c_int], None)
+  _set_sig_if_present(libsafety, "mutation_get_active_mutant", [], ctypes.c_int)
+
+  return libsafety
+
+
+libsafety: LibSafety = _configure(ctypes.CDLL(libsafety_fn))
+
 
 def load(path):
   global libsafety
-  libsafety = ffi.dlopen(str(path))
+  libsafety = _configure(ctypes.CDLL(str(path)))
+
 
 def make_CANPacket(addr: int, bus: int, dat):
-  ret = ffi.new('CANPacket_t *')
+  ret = CANPacketHandle()
   ret[0].extended = 1 if addr >= 0x800 else 0
   ret[0].addr = addr
   ret[0].data_len_code = LEN_TO_DLC[len(dat)]
   ret[0].bus = bus
-  ret[0].data = bytes(dat)
+  ret[0].data[:len(dat)] = dat
   return ret
