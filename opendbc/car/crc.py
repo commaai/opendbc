@@ -32,8 +32,9 @@ CRC16_XMODEM = _gen_crc16_table(0x1021)
 
 
 def mk_crc8_fun(table: list[int], init_crc: int = 0x00, xor_out: int = 0x00):
+  init_reg = init_crc ^ xor_out
   def crc(data: bytes) -> int:
-    crc = init_crc
+    crc = init_reg
     for b in data:
       crc = table[crc ^ b]
     return crc ^ xor_out
