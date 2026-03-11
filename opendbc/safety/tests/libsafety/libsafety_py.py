@@ -9,10 +9,25 @@ from opendbc.safety import LEN_TO_DLC
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-def _build_libsafety():
-  """Compile libsafety.so on demand if it doesn't exist."""
+def _needs_rebuild():
+  """Check if libsafety.so needs to be (re)built by comparing mtimes against source files."""
   libsafety_so = os.path.join(libsafety_dir, "libsafety.so")
-  if os.path.exists(libsafety_so):
+  if not os.path.exists(libsafety_so):
+    return True
+
+  so_mtime = os.path.getmtime(libsafety_so)
+  safety_dir = str(Path(libsafety_dir).parents[1])
+  source_files = [os.path.join(libsafety_dir, "safety.c")]
+  for dirpath, _, filenames in os.walk(safety_dir):
+    for f in filenames:
+      if f.endswith('.h'):
+        source_files.append(os.path.join(dirpath, f))
+  return any(os.path.getmtime(f) > so_mtime for f in source_files)
+
+
+def _build_libsafety():
+  """Compile libsafety.so on demand if sources have changed."""
+  if not _needs_rebuild():
     return
 
   root = str(Path(libsafety_dir).parents[3])
@@ -31,6 +46,7 @@ def _build_libsafety():
   ]
 
   subprocess.check_call(['cc', '-fPIC', *cflags, '-I', root, '-c', safety_c, '-o', safety_os])
+  libsafety_so = os.path.join(libsafety_dir, "libsafety.so")
   subprocess.check_call(['cc', '-shared', safety_os, '-o', libsafety_so, *ldflags])
 
 
