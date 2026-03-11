@@ -27,4 +27,4 @@ test:
 
     # *** tests ***
     unittest:
-      run: unittest-parallel -j8 -s opendbc -p 'test_*.py' -t . -v
+      run: unittest-parallel -j8 -s opendbc -p 'test_*.py' -t .
