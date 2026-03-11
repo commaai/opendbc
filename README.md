@@ -19,6 +19,13 @@
 [![X Follow](https://img.shields.io/twitter/follow/comma_ai)](https://x.com/comma_ai)
 [![Discord](https://img.shields.io/discord/469524606043160576)](https://discord.comma.ai)
 
+<br>
+<a href="https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s">
+  <img src="https://img.youtube.com/vi/XxPS5TpTUnI/maxresdefault.jpg" alt="How to Port a Car - Jason Young, COMMA_CON 2023" width="800">
+</a>
+<br>
+<em>How to Port a Car — Jason Young, COMMA_CON 2023</em>
+
 </div>
 
 ---
