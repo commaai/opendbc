@@ -122,4 +122,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       logging=logging,
     ),
   ]],
+  non_essential_ecus={
+    Ecu.engine: [CAR.NISSAN_ALTIMA],
+  },
 )
