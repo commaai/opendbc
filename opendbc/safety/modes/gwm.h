@@ -110,9 +110,9 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
 
 static bool gwm_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits GWM_TORQUE_STEERING_LIMITS = {
-    .max_torque = 300,
-    .max_rate_up = 4,
-    .max_rate_down = 5,
+    .max_torque = 255,
+    .max_rate_up = 1,
+    .max_rate_down = 2,
     .max_torque_error = 70,
     .max_rt_delta = 100,
     .type = TorqueMotorLimited,
