@@ -92,10 +92,7 @@ class SafetyTestBase(unittest.TestCase):
 
   @staticmethod
   def _boundary_values(boundaries, min_val, max_val, step=1, width=5, sparse_count=100):
-    """Generate test values dense around boundaries and sparse across the full range.
-
-    For threshold-style safety checks, exhaustively testing every value is wasteful.
-    This generates values ±width*step around each boundary, plus sparse sampling."""
+    """Generate test values dense around boundaries and sparse across the full range."""
     values = set()
     for b in boundaries:
       for offset in range(-width, width + 1):
@@ -112,7 +109,6 @@ class SafetyTestBase(unittest.TestCase):
                                   msg_allowed = True, additional_setup: Callable[[float], None] | None = None):
     """
       Enforces that a signal within a message is only allowed to be sent within a specific range, min_allowed_value -> max_allowed_value.
-      Tests boundary values around min_allowed_value and max_allowed_value, plus sparse sampling of the full range.
       Message is also only allowed to be sent when controls_allowed is true, unless the value is equal to inactive_value.
       Message is never allowed if msg_allowed is false, for example when stock longitudinal is enabled and you are sending acceleration requests.
       additional_setup is used for extra setup before each _tx, ex: for setting the previous torque for rate limits
