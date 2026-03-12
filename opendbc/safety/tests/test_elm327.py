@@ -24,9 +24,10 @@ class TestElm327(TestDefaultRxHookBase):
 
   def test_tx_hook(self):
     # ensure we can transmit arbitrary data on allowed addresses
+    tx_msgs_set = {(addr, bus) for addr, bus in self.TX_MSGS}
     for bus in range(4):
       for addr in self.SCANNED_ADDRS:
-        should_tx = [addr, bus] in self.TX_MSGS
+        should_tx = (addr, bus) in tx_msgs_set
         self.assertEqual(should_tx, self._tx(common.make_msg(bus, addr, 8)))
 
     # ELM only allows 8 byte UDS/KWP messages under ISO 15765-4

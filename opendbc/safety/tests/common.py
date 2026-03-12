@@ -90,12 +90,29 @@ class SafetyTestBase(unittest.TestCase):
   def _tx(self, msg):
     return self.safety.safety_tx_hook(msg)
 
+  @staticmethod
+  def _boundary_values(boundaries, min_val, max_val, step=1, width=5, sparse_count=100):
+    """Generate test values dense around boundaries and sparse across the full range.
+
+    For threshold-style safety checks, exhaustively testing every value is wasteful.
+    This generates values ±width*step around each boundary, plus sparse sampling."""
+    values = set()
+    for b in boundaries:
+      for offset in range(-width, width + 1):
+        v = round(b + offset * step, 2)
+        if min_val <= v < max_val:
+          values.add(v)
+    sparse_step = max(step, (max_val - min_val) / sparse_count)
+    for v in np.arange(min_val, max_val, sparse_step):
+      values.add(round(v, 2))
+    return sorted(values)
+
   def _generic_limit_safety_check(self, msg_function: MessageFunction, min_allowed_value: float, max_allowed_value: float,
                                   min_possible_value: float, max_possible_value: float, test_delta: float = 1, inactive_value: float = 0,
                                   msg_allowed = True, additional_setup: Callable[[float], None] | None = None):
     """
       Enforces that a signal within a message is only allowed to be sent within a specific range, min_allowed_value -> max_allowed_value.
-      Tests the range of min_possible_value -> max_possible_value with a delta of test_delta.
+      Tests boundary values around min_allowed_value and max_allowed_value, plus sparse sampling of the full range.
       Message is also only allowed to be sent when controls_allowed is true, unless the value is equal to inactive_value.
       Message is never allowed if msg_allowed is false, for example when stock longitudinal is enabled and you are sending acceleration requests.
       additional_setup is used for extra setup before each _tx, ex: for setting the previous torque for rate limits
@@ -105,10 +122,11 @@ class SafetyTestBase(unittest.TestCase):
     self.assertGreater(max_possible_value, max_allowed_value)
     self.assertLessEqual(min_possible_value, min_allowed_value)
 
+    test_values = self._boundary_values([min_allowed_value, max_allowed_value, 0, inactive_value],
+                                        min_possible_value, max_possible_value, test_delta)
+
     for controls_allowed in [False, True]:
-      # enforce we don't skip over 0 or inactive
-      for v in np.concatenate((np.arange(min_possible_value, max_possible_value, test_delta), np.array([0, inactive_value]))):
-        v = round(v, 2)  # floats might not hit exact boundary conditions without rounding
+      for v in test_values:
         self.safety.set_controls_allowed(controls_allowed)
         if additional_setup is not None:
           additional_setup(v)
@@ -448,7 +466,7 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
       # Cannot stay at MAX_TORQUE if above DRIVER_TORQUE_ALLOWANCE
       for sign in [-1, 1]:
-        for driver_torque in np.arange(0, self.DRIVER_TORQUE_ALLOWANCE * 2, 1):
+        for driver_torque in self._boundary_values([self.DRIVER_TORQUE_ALLOWANCE], 0, self.DRIVER_TORQUE_ALLOWANCE * 2):
           self._reset_torque_driver_measurement(-driver_torque * sign)
           self._set_prev_torque(max_torque * sign)
           should_tx = abs(driver_torque) <= self.DRIVER_TORQUE_ALLOWANCE

@@ -46,9 +46,10 @@ class TestAllOutput(TestDefaultRxHookBase):
 
   def test_spam_can_buses(self):
     # asserts tx allowed for all scanned addrs
+    tx_msgs_set = {(addr, bus) for addr, bus in self.TX_MSGS}
     for bus in range(4):
       for addr in self.SCANNED_ADDRS:
-        should_tx = [addr, bus] in self.TX_MSGS
+        should_tx = (addr, bus) in tx_msgs_set
         self.assertEqual(should_tx, self._tx(common.make_msg(bus, addr, 8)), f"allowed TX {addr=} {bus=}")
 
   def test_default_controls_not_allowed(self):
