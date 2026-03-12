@@ -9,7 +9,6 @@
 *.dylib
 .*.swp
 .DS_Store
-.sconsign.dblite
 .hypothesis
 *.egg-info/
 *.html
@@ -21,14 +20,10 @@
 .vscode/
 __pycache__/
 *.profraw
-.sconf_temp/
-
 opendbc/can/build/
 opendbc/can/obj/
-opendbc/dbc/*_generated.dbc
 
 cppcheck-addon-ctu-file-list
 opendbc/safety/tests/coverage-out
 
-compile_commands.json
 .mull/

@@ -6,12 +6,11 @@ cd $DIR
 
 source ../../../setup.sh
 
-# reset coverage data and generate gcc note file
+# reset coverage data
 rm -f ./libsafety/*.gcda
-scons -j$(nproc) -D
 
 # run safety tests and generate coverage data
-pytest -n8 --ignore-glob=misra/*
+python -m unittest discover -s .
 
 # NOTE: we accept that these tools will have slight differences,
 # and in return, we get to use the stock toolchain instead of

@@ -10,7 +10,6 @@ requires-python = ">=3.11,<3.13"  # pycapnp doesn't work with 3.13
 urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
 dependencies = [
-  "scons",
   "numpy",
   "tqdm",
   "pycapnp==2.1.0",
@@ -24,14 +23,8 @@ testing = [
   "tree-sitter",
   "tree-sitter-c",
   "gcovr",
-  # FIXME: pytest 9.0.0 doesn't support unittest.SkipTest
-  "pytest==8.4.2",
-  "pytest-mock",
-  # https://github.com/pytest-dev/pytest-xdist/pull/1229
-  "pytest-xdist @ git+https://github.com/sshane/pytest-xdist@2b4372bd62699fb412c4fe2f95bf9f01bd2018da",
-  "pytest-subtests",
+  "unittest-parallel",
   "hypothesis==6.47.*",
-  "parameterized>=0.8,<0.9",
   "zstandard",
 
   # static analysis
@@ -52,13 +45,6 @@ examples = [
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
-
-[tool.pytest.ini_options]
-addopts = "-Werror --strict-config --strict-markers --durations=10 -n auto --ignore-glob=opendbc/safety/tests/misra/*.sh"
-python_files = "test_*.py"
-testpaths = [
-  "opendbc"
-]
 
 [tool.codespell]
 quiet-level = 3
@@ -103,14 +89,8 @@ ignore = [
 ]
 flake8-implicit-str-concat.allow-multiline=false
 
-[tool.ruff.lint.per-file-ignores]
-"site_scons/*" = ["ALL"]
-
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
-"pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
 "numpy.mean".msg = "Sum and divide. np.mean is slow"
-# TODO: re-enable when all tests are converted to pytest
-#"unittest".msg = "Use pytest"
 
 [tool.ty.rules]
 # Ignore rules that produce false positives due to:
