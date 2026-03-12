@@ -4,7 +4,6 @@ from typing import Any
 
 from opendbc.car.carlog import carlog
 from opendbc.can._types import Signal, SignalType
-from opendbc.can._checksums import calc_checksum
 from opendbc.can._vldict import VLDict
 
 
@@ -104,8 +103,8 @@ class MessageState:
       if sig.is_signed:
         tmp -= ((tmp >> (sig.size - 1)) & 0x1) * (1 << sig.size)
 
-      if not self.ignore_checksum and sig.type > SignalType.COUNTER:
-        expected_checksum: int = calc_checksum(sig.type, self.address, sig.start_bit, bytearray(dat))
+      if not self.ignore_checksum and sig.calc_checksum is not None:
+        expected_checksum: int = sig.calc_checksum(self.address, sig, bytearray(dat))
         if tmp != expected_checksum:
           checksum_failed = True
           self.rate_limited_log(nanos, f"checksum failed: received {hex(tmp)}, calculated {hex(expected_checksum)}")

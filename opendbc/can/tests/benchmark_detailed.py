@@ -11,10 +11,9 @@ from opendbc.can._types import Signal, SignalType
 
 def check_compiled():
   """Check which modules are mypyc-compiled vs interpreted."""
-  from opendbc.can import _types, _checksums, packer, parser, _vldict
+  from opendbc.can import _types, packer, parser, _vldict
   modules = {
     '_types': _types,
-    '_checksums': _checksums,
     'packer': packer,
     'parser': parser,
     '_vldict': _vldict,
