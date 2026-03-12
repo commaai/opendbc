@@ -20,3 +20,7 @@ fi
 export UV_PROJECT_ENVIRONMENT="$BASEDIR/.venv"
 uv sync --all-extras --inexact
 source "$PYTHONPATH/.venv/bin/activate"
+
+# *** mypyc compilation ***
+uv pip install mypy setuptools
+(cd "$BASEDIR" && MYPYC=1 python setup.py build_ext --inplace)
