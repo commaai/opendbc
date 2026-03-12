@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Detailed benchmark breaking down mypyc vs Python paths."""
 import time
-import sys
 
 from opendbc.can import CANPacker, CANParser
 from opendbc.can.packer import set_value
 from opendbc.can.parser import get_raw_value, MessageState
-from opendbc.can._types import Signal, SignalType
+from opendbc.can._types import Signal
 
 
 def check_compiled():
@@ -19,9 +18,6 @@ def check_compiled():
     '_vldict': _vldict,
   }
   for name, mod in modules.items():
-    so = hasattr(mod, '__loader__') and 'extension' in type(mod.__loader__).__name__.lower()
-    # mypyc-compiled modules have a __mypyc_attrs__ or similar marker
-    # simplest check: see if the .so file is loaded
     origin = getattr(mod, '__file__', '') or ''
     compiled = origin.endswith('.so')
     print(f"  {name:12s}: {'COMPILED (C)' if compiled else 'INTERPRETED (Python)'}  ({origin.split('/')[-1]})")
