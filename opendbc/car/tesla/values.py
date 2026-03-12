@@ -25,6 +25,7 @@ class Footnote(Enum):
 class TeslaCarDocsHW3(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_a]))
+  # pyrefly: ignore[bad-assignment] - Enum subclass list invariance
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE, Footnote.SETUP])
 
 
@@ -32,6 +33,7 @@ class TeslaCarDocsHW3(CarDocs):
 class TeslaCarDocsHW4(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_b]))
+  # pyrefly: ignore[bad-assignment] - Enum subclass list invariance
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE, Footnote.SETUP])
 
 

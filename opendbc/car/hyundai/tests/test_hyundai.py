@@ -50,7 +50,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
       fingerprint = gen_empty_fingerprint()
       if lka_steering:
         cam_can = CanBus(None, fingerprint).CAM
-        fingerprint[cam_can] = [0x50, 0x110]  # LKA steering messages
+        fingerprint[cam_can] = {0x50: 0, 0x110: 0}  # LKA steering messages
       CP = CarInterface.get_params(CAR.KIA_EV6, fingerprint, [], False, False, False)
       assert bool(CP.flags & HyundaiFlags.CANFD_LKA_STEERING) == lka_steering
 
@@ -85,7 +85,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
   def test_canfd_ecu_whitelist(self):
     # Asserts only expected Ecus can exist in database for CAN-FD cars
     for car_model in CANFD_CAR:
-      ecus = {fw[0] for fw in FW_VERSIONS[car_model].keys()}
+      ecus = {fw[0] for fw in FW_VERSIONS[car_model].keys()}  # pyrefly: ignore[bad-index] - car_model is CAR (StrEnum), valid dict key
       ecus_not_in_whitelist = ecus - CANFD_EXPECTED_ECUS
       ecu_strings = ", ".join([f"Ecu.{ecu}" for ecu in ecus_not_in_whitelist])
       assert len(ecus_not_in_whitelist) == 0, \
@@ -219,6 +219,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
                                (b"ON-S9100", b"190405"), (b"ON-S9100", b"190720")}
 
   def test_fuzzy_excluded_platforms(self):
+    assert FW_QUERY_CONFIG.match_fw_to_car_fuzzy is not None
     # Asserts a list of platforms that will not fuzzy fingerprint with platform codes due to them being shared.
     # This list can be shrunk as we combine platforms and detect features
     excluded_platforms = {
@@ -238,6 +239,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
                                         subAddress=0 if sub_addr is None else sub_addr))
 
       CP = CarParams(carFw=car_fw)
+      # pyrefly: ignore[bad-argument-type] - dict invariance
       matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, FW_VERSIONS)
       if len(matches) == 1:
         assert list(matches)[0] == platform

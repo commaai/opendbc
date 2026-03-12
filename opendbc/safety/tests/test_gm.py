@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import unittest
+from typing import TYPE_CHECKING, Any
 
 from opendbc.car.gm.values import GMSafetyFlags
 from opendbc.car.structs import CarParams
@@ -18,6 +19,12 @@ class Buttons:
 class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafetyTest):
 
   RELAY_MALFUNCTION_ADDRS = {0: (0x180, 0x2CB), 2: (0x184,)}  # ASCMLKASteeringCmd, ASCMGasRegenCmd, PSCMStatus
+  packer: CANPackerSafety
+  packer_chassis: CANPackerSafety
+  BRAKE_BUS: int
+
+  if TYPE_CHECKING:
+    def _button_msg(self, buttons: Any) -> Any: ...
 
   MAX_POSSIBLE_BRAKE = 2 ** 12
   MAX_BRAKE = 400
@@ -36,9 +43,6 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     return self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)
 
   # override these tests from CarSafetyTest, GM longitudinal uses button enable
-  def _pcm_status_msg(self, enable):
-    raise NotImplementedError
-
   def test_disable_control_allowed_from_cruise(self):
     pass
 

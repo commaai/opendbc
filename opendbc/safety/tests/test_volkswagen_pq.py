@@ -23,6 +23,7 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
   cruise_engaged = False
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1)}
+  packer: CANPackerSafety
 
   MAX_RATE_UP = 6
   MAX_RATE_DOWN = 10

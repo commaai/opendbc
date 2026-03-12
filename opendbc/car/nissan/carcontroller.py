@@ -13,7 +13,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.car_fingerprint = CP.carFingerprint
 
-    self.apply_angle_last = 0
+    self.apply_angle_last = 0.0
 
     self.packer = CANPacker(dbc_names[Bus.pt])
 

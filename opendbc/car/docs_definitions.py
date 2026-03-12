@@ -93,6 +93,7 @@ class Tool(EnumBase):
 
 @dataclass
 class BaseCarHarness(BasePart):
+  # pyrefly: ignore[bad-assignment] - Accessory is Enum; list covariance
   parts: list[Enum] = field(default_factory=lambda: [Accessory.harness_box, Accessory.comma_power])
   has_connector: bool = True  # without are hidden on the harness connector page
 
@@ -337,6 +338,7 @@ class CarDocs:
 
   def get_detail_sentence(self, CP):
     if not CP.notCar:
+      assert self.min_steer_speed is not None and self.min_enable_speed is not None
       sentence_builder = "openpilot upgrades your <strong>{car_model}</strong> with automated lane centering{alc} and adaptive cruise control{acc}."
 
       if self.min_steer_speed > self.min_enable_speed:
@@ -378,6 +380,7 @@ class CarDocs:
 
     footnotes = get_footnotes(self.footnotes, column)
     if len(footnotes):
+      assert self.all_footnotes is not None
       sups = sorted([self.all_footnotes[fn] for fn in footnotes])
       item += footnote_tag.format(f'{",".join(map(str, sups))}')
 

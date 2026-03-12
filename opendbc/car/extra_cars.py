@@ -33,7 +33,7 @@ class FlexRayCarDocs(ExtraCarDocs):
 
 
 class CAR(Platforms):
-  config: ExtraPlatformConfig
+  config: ExtraPlatformConfig  # pyrefly: ignore[bad-override] intentional narrowing for extra car platforms
 
   EXTRA_HONDA = ExtraPlatformConfig(
     [

@@ -264,7 +264,7 @@ class VWCarDocs(CarDocs):
 # FW_VERSIONS for that existing CAR.
 
 class CAR(Platforms):
-  config: VolkswagenMQBPlatformConfig | VolkswagenPQPlatformConfig
+  config: VolkswagenMQBPlatformConfig | VolkswagenPQPlatformConfig  # pyrefly: ignore[bad-override] intentional narrowing for VW platforms
 
   VOLKSWAGEN_ARTEON_MK1 = VolkswagenMQBPlatformConfig(
     [

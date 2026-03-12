@@ -1,4 +1,5 @@
 import unittest
+from typing import TYPE_CHECKING, Any
 
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -15,10 +16,21 @@ class Buttons:
 PREV_BUTTON_SAMPLES = 8
 ENABLE_BUTTONS = (Buttons.RESUME, Buttons.SET, Buttons.CANCEL)
 
+# HyundaiButtonBase is a mixin: always used via multiple inheritance with SafetyTestBase.
+# TYPE_CHECKING parent gives pyrefly visibility into inherited methods without changing runtime MRO.
+if TYPE_CHECKING:
+  _HyundaiButtonMixin = common.SafetyTestBase
+else:
+  _HyundaiButtonMixin = object
 
-class HyundaiButtonBase:
+
+class HyundaiButtonBase(_HyundaiButtonMixin):
   BUTTONS_TX_BUS = 0  # tx on this bus, rx on 0
   SCC_BUS = 0  # rx on this bus
+
+  if TYPE_CHECKING:
+    def _button_msg(self, buttons: Any, main_button: int = 0, bus: Any = None) -> Any: ...
+    def _pcm_status_msg(self, enable: Any) -> Any: ...
 
   def test_button_sends(self):
     """
@@ -77,10 +89,12 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
   DISABLED_ECU_UDS_MSG: tuple[int, int]
   DISABLED_ECU_ACTUATION_MSG: tuple[int, int]
 
+  if TYPE_CHECKING:
+    def _button_msg(self, buttons: Any, main_button: int = 0, bus: Any = None) -> Any: ...
+
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "HyundaiLongitudinalBase":
-      cls.safety = None
       raise unittest.SkipTest
 
   # override these tests from CarSafetyTest, hyundai longitudinal uses button enable

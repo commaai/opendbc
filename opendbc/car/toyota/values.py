@@ -100,7 +100,7 @@ class ToyotaCarDocs(CarDocs):
 @dataclass
 class ToyotaSecOcCarDocs(ToyotaCarDocs):
   support_type: SupportType = SupportType.CUSTOM
-  support_link: str = "#secoc-cars-with-recoverable-keys"
+  support_link: str = "#secoc-cars-with-recoverable-keys"  # pyrefly: ignore[bad-override] narrowing str|None to str is intentional
 
 
 @dataclass

@@ -114,11 +114,11 @@ class RadarInterface(RadarInterfaceBase):
     else:
       raise ValueError(f"Unsupported radar: {self.radar}")
 
-  def update(self, can_strings):
+  def update(self, can_packets):
     if self.rcp is None:
       return super().update(None)
 
-    vls = self.rcp.update(can_strings)
+    vls = self.rcp.update(can_packets)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
@@ -140,6 +140,7 @@ class RadarInterface(RadarInterfaceBase):
     return ret
 
   def _update_delphi_esr(self):
+    assert self.rcp is not None
     for ii in sorted(self.updated_messages):
       cpt = self.rcp.vl[ii]
 
@@ -169,6 +170,7 @@ class RadarInterface(RadarInterfaceBase):
           del self.pts[ii]
 
   def _update_delphi_mrr(self, ret: structs.RadarData):
+    assert self.rcp is not None
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
     # In reverse, the radar continually sends the last messages. Mark this as invalid

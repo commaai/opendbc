@@ -195,7 +195,8 @@ def get_present_ecus(can_recv: CanRecvCallable, can_send: CanSendCallable, set_o
 
         # Build set of expected responses to filter
         response_addr = uds.get_rx_addr_for_tx_addr(addr, r.rx_offset)
-        responses.add((response_addr, sub_addr, r.bus))
+        if response_addr is not None:
+          responses.add((response_addr, sub_addr, r.bus))
 
   for obd_multiplexing in queries:
     queries[obd_multiplexing].insert(0, parallel_queries[obd_multiplexing])

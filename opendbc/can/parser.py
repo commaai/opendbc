@@ -1,6 +1,6 @@
 import math
-import numbers
 from collections import defaultdict, deque
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 from opendbc.car.carlog import carlog
@@ -126,7 +126,7 @@ class VLDict(dict):
 
 
 class CANParser:
-  def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int):
+  def __init__(self, dbc_name: str, messages: Sequence[tuple[str | int, int | float]], bus: int):
     self.dbc_name: str = dbc_name
     self.bus: int = bus
     self.dbc: DBC = DBC(dbc_name)
@@ -138,8 +138,8 @@ class CANParser:
     self.message_states: dict[int, MessageState] = {}
 
     for name_or_addr, freq in messages:
-      if isinstance(name_or_addr, numbers.Number):
-        msg = self.dbc.addr_to_msg.get(int(name_or_addr))
+      if isinstance(name_or_addr, int):
+        msg = self.dbc.addr_to_msg.get(name_or_addr)
       else:
         msg = self.dbc.name_to_msg.get(name_or_addr)
       if msg is None:
@@ -153,9 +153,9 @@ class CANParser:
     self.last_nonempty_nanos: int = 0
     self._last_update_nanos: int = 0
 
-  def _add_message(self, name_or_addr: str | int, freq: int | None = None) -> None:
-    if isinstance(name_or_addr, numbers.Number):
-      msg = self.dbc.addr_to_msg.get(int(name_or_addr))
+  def _add_message(self, name_or_addr: str | int, freq: int | float | None = None) -> None:
+    if isinstance(name_or_addr, int):
+      msg = self.dbc.addr_to_msg.get(name_or_addr)
     else:
       msg = self.dbc.name_to_msg.get(name_or_addr)
     assert msg is not None
@@ -257,7 +257,7 @@ class CANDefine:
   def __init__(self, dbc_name: str):
     dbc = DBC(dbc_name)
 
-    dv = defaultdict(dict)
+    dv: defaultdict[int | str, dict[str, dict[int, str]]] = defaultdict(dict)
     for val in dbc.vals:
       sgname = val.name
       address = val.address

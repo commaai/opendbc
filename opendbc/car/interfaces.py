@@ -8,7 +8,7 @@ from typing import Any
 from collections.abc import Callable
 from functools import cache
 
-from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, STD_CARGO_KG
+from opendbc.car import Bus, DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, STD_CARGO_KG
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.common.basedir import BASEDIR
@@ -41,8 +41,8 @@ GEAR_SHIFTER_MAP: dict[str, structs.CarState.GearShifter] = {
   'B': GearShifter.brake, 'BRAKE': GearShifter.brake,
 }
 
-TorqueFromLateralAccelCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning, bool], float]
-LateralAccelFromTorqueCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning, bool], float]
+TorqueFromLateralAccelCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning], float]
+LateralAccelFromTorqueCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning], float]
 
 
 @cache
@@ -84,7 +84,7 @@ class RadarInterfaceBase(ABC):
     self.pts: dict[int, structs.RadarData.RadarPoint] = {}
     self.frame = 0
 
-  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
+  def update(self, can_packets: list[tuple[int, list[CanData]]] | None) -> structs.RadarDataT | None:
     self.frame += 1
     if (self.frame % 5) == 0:  # 20 Hz is very standard
       return structs.RadarData()
@@ -105,7 +105,7 @@ class CarInterfaceBase(ABC):
     self.v_ego_cluster_seen = False
 
     self.CS: CarStateBase = self.CarState(CP)
-    self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
+    self.can_parsers: dict[Bus, CANParser] = self.CS.get_can_parsers(CP)
 
     dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
     self.CC: CarControllerBase = self.CarController(dbc_names, CP)
@@ -356,12 +356,12 @@ class CarStateBase(ABC):
     return GEAR_SHIFTER_MAP.get(gear.upper(), GearShifter.unknown)
 
   @staticmethod
-  def get_can_parsers(CP) -> dict[StrEnum, CANParser]:
+  def get_can_parsers(CP) -> dict[Bus, CANParser]:
     return {}
 
 
 class CarControllerBase(ABC):
-  def __init__(self, dbc_names: dict[StrEnum, str], CP: structs.CarParams):
+  def __init__(self, dbc_names: dict[Bus, str], CP: structs.CarParams):
     self.CP = CP
     self.frame = 0
     self.secoc_key: bytes = b"00" * 16

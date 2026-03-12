@@ -42,9 +42,9 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
   # Tesla uses get_max_angle_delta_vm and get_max_angle_vm for real lateral accel and jerk limits
   # TODO: integrate this into AngleSteeringSafetyTest
-  ANGLE_RATE_BP = None
-  ANGLE_RATE_UP = None
-  ANGLE_RATE_DOWN = None
+  ANGLE_RATE_BP: list[float] | None = None  # pyrefly: ignore[bad-override] - Tesla uses vehicle model-based limits instead
+  ANGLE_RATE_UP: list[float] | None = None  # pyrefly: ignore[bad-override] - Tesla uses vehicle model-based limits instead
+  ANGLE_RATE_DOWN: list[float] | None = None  # pyrefly: ignore[bad-override] - Tesla uses vehicle model-based limits instead
 
   # Real time limits
   LATERAL_FREQUENCY = 50  # Hz
@@ -76,6 +76,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, self.SAFETY_PARAM)
     self.safety.init_tests()
 
+  # pyrefly: ignore[bad-override] - Tesla extends parent signature
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
     # If FSD 14, translate steer control type to new flipped definition
     if self.safety.get_current_safety_param() & TeslaSafetyFlags.FSD_14:
@@ -151,7 +152,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           msg = self._long_control_msg(0, bus=2)
         elif msg_type == "speed":
           msg = self._speed_msg(0)
-        elif msg_type == "speed_2":
+        else:
           msg = self._speed_msg_2(0)
 
         should_rx = i >= 5

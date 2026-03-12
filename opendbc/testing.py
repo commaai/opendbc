@@ -40,6 +40,7 @@ def parameterized_class(attrs, values=None):
   """
   if isinstance(attrs, str):
     attrs = [attrs]
+    assert values is not None
     params = [dict(zip(attrs, v, strict=True)) for v in values]
   else:
     params = attrs
@@ -51,7 +52,7 @@ def parameterized_class(attrs, values=None):
       new_cls = type(name, (cls,), param_set)
       new_cls.__qualname__ = name
       new_cls.__module__ = cls.__module__
-      new_cls.__test__ = True
+      new_cls.__test__ = True  # pyrefly: ignore[missing-attribute] - dynamic test discovery attribute
       setattr(module, name, new_cls)
     cls.__test__ = False
     return cls

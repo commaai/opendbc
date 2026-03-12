@@ -1,3 +1,4 @@
+import types
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, structs
@@ -41,12 +42,14 @@ class CarController(CarControllerBase):
     self.packer_pt = CANPacker(dbc_names[Bus.pt])
     self.aeb_available = not CP.flags & VolkswagenFlags.PQ
 
+    CCS: types.ModuleType
     if CP.flags & VolkswagenFlags.PQ:
-      self.CCS = pqcan
+      CCS = pqcan
     elif CP.flags & VolkswagenFlags.MLB:
-      self.CCS = mlbcan
+      CCS = mlbcan
     else:
-      self.CCS = mqbcan
+      CCS = mqbcan
+    self.CCS = CCS
 
     self.apply_torque_last = 0
     self.gra_acc_counter_last = None
@@ -77,6 +80,7 @@ class CarController(CarControllerBase):
         ea_simulated_torque = float(np.clip(apply_torque * 2, -self.CCP.STEER_MAX, self.CCP.STEER_MAX))
         if abs(CS.out.steeringTorque) > abs(ea_simulated_torque):
           ea_simulated_torque = CS.out.steeringTorque
+        # pyrefly: ignore[missing-attribute] - only called for MQB platform
         can_sends.append(self.CCS.create_eps_update(self.packer_pt, self.CAN.cam, CS.eps_stock_values, ea_simulated_torque))
 
     # **** Acceleration Controls ******************************************** #

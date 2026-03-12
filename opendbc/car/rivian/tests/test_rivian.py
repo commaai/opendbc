@@ -4,6 +4,7 @@ from opendbc.car.rivian.values import CAR, FW_QUERY_CONFIG, WMI, ModelLine, Mode
 
 class TestRivian:
   def test_custom_fuzzy_fingerprinting(self, subtests):
+    assert FW_QUERY_CONFIG.match_fw_to_car_fuzzy is not None
     for platform in CAR:
       with subtests.test(platform=platform.name):
         for wmi in WMI:
@@ -18,6 +19,6 @@ class TestRivian:
                   vin[3] = "Z"
                 vin = "".join(vin)
 
-                matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy({}, vin, FW_VERSIONS)
+                matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy({}, vin, FW_VERSIONS)  # pyrefly: ignore[bad-argument-type] - dict invariance: CAR is str
                 should_match = year != ModelYear.S_2025 and not bad
                 assert (matches == {platform}) == should_match, "Bad match"

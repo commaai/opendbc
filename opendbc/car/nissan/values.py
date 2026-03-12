@@ -40,7 +40,7 @@ class Footnote(Enum):
 class NissanCarDocs(CarDocs):
   package: str = "ProPILOT Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.nissan_a]))
-  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.SETUP])
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.SETUP])  # pyrefly: ignore[bad-assignment] - Footnote is Enum subclass, list invariance
 
 
 @dataclass(frozen=True)

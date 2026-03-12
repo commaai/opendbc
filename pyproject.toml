@@ -30,6 +30,7 @@ testing = [
   # static analysis
   "ruff",
   "ty",
+  "pyrefly",
   "lefthook",
   "cpplint",
   "codespell",
@@ -122,6 +123,14 @@ not-iterable = "ignore"
 
 # Test class method signature differences
 too-many-positional-arguments = "ignore"
+
+# CFFI library stubs use `...` body with non-None return types
+empty-body = "ignore"
+
+[tool.pyrefly]
+python-version = "3.11"
+untyped-def-behavior = "check-and-infer-return-type"
+strict-callable-subtyping = true
 
 [tool.setuptools]
 include-package-data = true

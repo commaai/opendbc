@@ -215,6 +215,7 @@ class CarState(CarStateBase):
     if self.CP.enableBsm:
       # BSM messages are on B-CAN, requires a panda forwarding B-CAN messages to CAN 0
       # more info here: https://github.com/commaai/openpilot/pull/1867
+      cp_body = can_parsers[Bus.body]
       ret.leftBlindspot = cp_body.vl["BSM_STATUS_LEFT"]["BSM_ALERT"] == 1
       ret.rightBlindspot = cp_body.vl["BSM_STATUS_RIGHT"]["BSM_ALERT"] == 1
 

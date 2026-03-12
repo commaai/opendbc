@@ -65,6 +65,7 @@ class IsoTpParallelQuery:
     self.msg_buffer = defaultdict(list)
 
   def _create_isotp_msg(self, tx_addr: int, sub_addr: int | None, rx_addr: int):
+    # pyrefly: ignore[bad-argument-type] - partial type inference limitation
     can_client = uds.CanClient(self._can_tx, partial(self._can_rx, rx_addr, sub_addr=sub_addr), tx_addr, rx_addr,
                                self.bus, sub_addr=sub_addr)
 
@@ -81,7 +82,7 @@ class IsoTpParallelQuery:
     request_counter = {}
     request_done = {}
     for tx_addr, rx_addr in self.msg_addrs.items():
-      msgs[tx_addr] = self._create_isotp_msg(*tx_addr, rx_addr)
+      msgs[tx_addr] = self._create_isotp_msg(*tx_addr, rx_addr)  # pyrefly: ignore[bad-argument-type] - rx_addr is always int here (non-functional addrs)
       request_counter[tx_addr] = 0
       request_done[tx_addr] = False
 

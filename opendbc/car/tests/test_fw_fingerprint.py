@@ -99,7 +99,7 @@ class TestFwFingerprint(unittest.TestCase):
 
   def test_fw_version_lists(self):
     for car_model, ecus in FW_VERSIONS.items():
-      with self.subTest(car_model=car_model.value):
+      with self.subTest(car_model=str(car_model)):
         for ecu, ecu_fw in ecus.items():
           with self.subTest(ecu):
             duplicates = {fw for fw in ecu_fw if ecu_fw.count(fw) > 1}
@@ -127,7 +127,7 @@ class TestFwFingerprint(unittest.TestCase):
   def test_blacklisted_ecus(self):
     blacklisted_addrs = (0x7c4, 0x7d0)  # includes A/C ecu and an unknown ecu
     for car_model, ecus in FW_VERSIONS.items():
-      with self.subTest(car_model=car_model.value):
+      with self.subTest(car_model=str(car_model)):
         CP = interfaces[car_model].get_non_essential_params(car_model)
         if CP.brand == 'subaru':
           for ecu in ecus.keys():

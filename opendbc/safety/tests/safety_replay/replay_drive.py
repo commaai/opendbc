@@ -88,6 +88,7 @@ if __name__ == "__main__":
 
   if None in (args.mode, args.param, args.alternative_experience):
     CP = lr.first('carParams')
+    assert CP is not None
     if args.mode is None:
       args.mode = CP.safetyConfigs[-1].safetyModel.raw
     if args.param is None:

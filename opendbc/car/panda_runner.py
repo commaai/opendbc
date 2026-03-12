@@ -27,7 +27,7 @@ class PandaRunner(AbstractContextManager):
   def __exit__(self, exc_type, exc_value, traceback):
     self.p.set_safety_mode(CarParams.SafetyModel.noOutput)
     self.p.reset()  # avoid siren
-    return super().__exit__(exc_type, exc_value, traceback)
+    return False
 
   @property
   def panda(self) -> Panda:

@@ -50,8 +50,8 @@ class TestVehicleModel(unittest.TestCase):
         top = np.hstack((A, B))
         full = np.vstack((top, np.zeros_like(top))) * dt
         Md = sum([np.linalg.matrix_power(full, k) / math.factorial(k) for k in range(25)])
-        Ad = Md[:A.shape[0], :A.shape[1]]
-        Bd = Md[:A.shape[0], A.shape[1]:]
+        Ad = Md[:A.shape[0], :A.shape[1]]  # pyrefly: ignore[unsupported-operation] - valid numpy slicing
+        Bd = Md[:A.shape[0], A.shape[1]:]  # pyrefly: ignore[unsupported-operation] - valid numpy slicing
 
         for sa in np.linspace(math.radians(-20), math.radians(20), num=11):
           inp = np.array([[sa], [roll]])

@@ -3,6 +3,7 @@ import os
 import glob
 import unittest
 import shutil
+from typing import Any
 import subprocess
 import tempfile
 import random
@@ -15,7 +16,7 @@ IGNORED_PATHS = (
   'opendbc/safety/tests/',
 )
 
-mutations = [
+mutations: list[tuple[Any, Any, Any, bool]] = [
   # no mutation, should pass
   (None, None, lambda s: s, False),
 ]

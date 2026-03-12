@@ -11,7 +11,7 @@ class TestPlatformConfigs(unittest.TestCase):
 
         if platform != "MOCK":
           assert len(platform.config.dbc_dict) > 0
-        assert len(platform.config.platform_str) > 0
+        assert platform.config.platform_str is not None and len(platform.config.platform_str) > 0
 
         assert name == platform.config.platform_str
 

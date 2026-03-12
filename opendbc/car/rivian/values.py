@@ -28,7 +28,7 @@ class ModelYear(StrEnum):
 class RivianCarDocs(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.rivian]))
-  setup_video: str = "https://youtu.be/uaISd1j7Z4U"
+  setup_video: str = "https://youtu.be/uaISd1j7Z4U"  # pyrefly: ignore[bad-override] narrowing str|None to str is intentional
 
 
 @dataclass
@@ -61,7 +61,9 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 
   candidates = set()
   for platform in CAR:
-    if vin_obj.wmi in platform.config.wmis and line in platform.config.lines and year in platform.config.years:
+    config = platform.config
+    assert isinstance(config, RivianPlatformConfig)
+    if vin_obj.wmi in config.wmis and line in config.lines and year in config.years:
       candidates.add(platform)
 
   return {str(c) for c in candidates}

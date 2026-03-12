@@ -8,7 +8,7 @@ import zstandard as zstd
 
 from opendbc.car.common.basedir import BASEDIR
 
-capnp_log = capnp.load(os.path.join(BASEDIR, "rlog.capnp"))
+capnp_log = capnp.load(os.path.join(BASEDIR, "rlog.capnp"))  # pyrefly: ignore[missing-attribute] - capnp dynamic module loading
 
 
 def decompress_stream(data: bytes):
@@ -43,7 +43,7 @@ class LogReader:
     try:
       for e in ents:
         self._ents.append(e)
-    except capnp.KjException:
+    except capnp.KjException:  # pyrefly: ignore[missing-attribute] - capnp C extension attribute
       warnings.warn("Corrupted events detected", RuntimeWarning, stacklevel=1)
 
     if sort_by_time:
@@ -55,7 +55,7 @@ class LogReader:
         try:
           ent.which()
           yield ent
-        except capnp.lib.capnp.KjException:
+        except capnp.lib.capnp.KjException:  # pyrefly: ignore[missing-attribute] - capnp C extension attribute
           pass
       else:
         yield ent

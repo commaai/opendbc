@@ -28,6 +28,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,), 2: (0x321, 0x162)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321, 0x162], 2: [0x120]}
+  packer: CANPackerSafety
 
   MAX_TORQUE_LOOKUP = [9, 17], [350, 250]
   DYNAMIC_MAX_TORQUE = True
@@ -98,7 +99,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
         for _ in range(10):
           if msg_type == "speed":
             msg = self._speed_msg(0, quality_flag=quality_flag)
-          elif msg_type == "speed_2":
+          else:
             msg = self._speed_msg_2(0, quality_flag=quality_flag)
 
           self.assertEqual(quality_flag, self._rx(msg))

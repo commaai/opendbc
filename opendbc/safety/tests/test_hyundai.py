@@ -264,7 +264,7 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
     self.assertFalse(self._tx(self._accel_msg(0, aeb_req=True)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_decel=1.0)))
 
-  def test_tester_present_allowed(self):
+  def test_tester_present_allowed(self):  # pyrefly: ignore[bad-override] - intentionally disabling parent test
     pass
 
   def test_disabled_ecu_alive(self):

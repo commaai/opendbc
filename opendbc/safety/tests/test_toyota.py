@@ -108,11 +108,11 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
 
   def test_rx_hook(self):
     # checksum checks
-    for msg in ["trq", "pcm"]:
+    for msg_type in ["trq", "pcm"]:
       self.safety.set_controls_allowed(1)
-      if msg == "trq":
+      if msg_type == "trq":
         msg = self._torque_meas_msg(0)
-      if msg == "pcm":
+      else:
         msg = self._pcm_status_msg(True)
       self.assertTrue(self._rx(msg))
       msg[0].data[4] = 0
@@ -330,7 +330,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
                                  self.EPS_SCALE | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
 
-  def test_diagnostics(self, ecu_disabled: bool = False):
+  def test_diagnostics(self, ecu_disabled: bool = False):  # pyrefly: ignore[bad-override] - narrows default value for subclass
     super().test_diagnostics(ecu_disabled=ecu_disabled)
 
   # This platform also has alternate brake and PCM messages, but same naming in the DBC, so same packers work
@@ -361,6 +361,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
     return self._accel_msg_183(accel)
 
 
+# pyrefly: ignore[inconsistent-inheritance] - intentional MRO override
 class TestToyotaSecOcSafetyStockLongitudinal(TestToyotaSecOcSafetyBase, TestToyotaStockLongitudinalBase):
 
   def setUp(self):

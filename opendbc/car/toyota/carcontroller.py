@@ -51,7 +51,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.params = CarControllerParams(self.CP)
     self.last_torque = 0
-    self.last_angle = 0
+    self.last_angle = 0.0
     self.alert_active = False
     self.standstill_req = False
     self.permit_braking = True
@@ -64,8 +64,8 @@ class CarController(CarControllerBase):
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
     self.pitch_hp = HighPassFilter(0.0, 0.25, 1.5, DT_CTRL)
 
-    self.accel = 0
-    self.prev_accel = 0
+    self.accel = 0.0
+    self.prev_accel = 0.0
     # *** end long control state ***
 
     self.packer = CANPacker(dbc_names[Bus.pt])

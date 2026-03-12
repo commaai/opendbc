@@ -147,6 +147,7 @@ class TestToyotaFingerprint:
     assert results == {b"F1526-07-1": {b"10", b"40"}, b"8646F-41-04": {b"100"}, b"58-79": {b"000"}}
 
   def test_fuzzy_excluded_platforms(self):
+    assert FW_QUERY_CONFIG.match_fw_to_car_fuzzy is not None
     # Asserts a list of platforms that will not fuzzy fingerprint with platform codes due to them being shared.
     platforms_with_shared_codes = set()
     for platform, fw_by_addr in FW_VERSIONS.items():
@@ -158,6 +159,7 @@ class TestToyotaFingerprint:
                                         subAddress=0 if sub_addr is None else sub_addr))
 
       CP = CarParams(carFw=car_fw)
+      # pyrefly: ignore[bad-argument-type] - dict invariance
       matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, FW_VERSIONS)
       if len(matches) == 1:
         assert list(matches)[0] == platform

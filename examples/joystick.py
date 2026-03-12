@@ -6,7 +6,7 @@ import numpy as np
 from pprint import pprint
 from inputs import get_gamepad
 
-from kbhit import KBHit
+from kbhit import KBHit  # pyrefly: ignore[missing-import] - third-party module not typed
 
 from opendbc.car.structs import CarControl
 from opendbc.car.panda_runner import PandaRunner

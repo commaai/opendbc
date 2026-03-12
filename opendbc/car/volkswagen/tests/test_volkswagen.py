@@ -54,6 +54,7 @@ class TestVolkswagenPlatformConfigs(unittest.TestCase):
                            f"Shared chassis codes: {comp}"
 
   def test_custom_fuzzy_fingerprinting(self):
+    assert FW_QUERY_CONFIG.match_fw_to_car_fuzzy is not None
     all_radar_fw = list({fw for ecus in FW_VERSIONS.values() for fw in ecus[Ecu.fwdRadar, 0x757, None]})
 
     for platform in CAR:
@@ -71,7 +72,7 @@ class TestVolkswagenPlatformConfigs(unittest.TestCase):
                               radar_fw in all_radar_fw)
 
               live_fws = {(0x757, None): [radar_fw]}
-              matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fws, vin, FW_VERSIONS)
+              matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fws, vin, FW_VERSIONS)  # pyrefly: ignore[bad-argument-type] - dict/tuple invariance
 
               expected_matches = {platform} if should_match else set()
               assert expected_matches == matches, "Bad match"

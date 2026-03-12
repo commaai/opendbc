@@ -31,7 +31,7 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
     self.safety.init_tests()
 
-  def _angle_cmd_msg(self, angle: float, enabled: bool):
+  def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     values = {"SET_ANGLE": angle, "TORQUE_FACTOR": 100 if enabled else 0}
     return self.packer.make_can_msg_safety("LANE_KEEP_ASSIST", self.MAIN_BUS, values)
 

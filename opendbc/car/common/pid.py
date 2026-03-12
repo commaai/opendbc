@@ -34,7 +34,7 @@ class PIDController:
 
   @property
   def k_d(self):
-    return np.interp(self.speed, self._k_d[0], self._k_d[1])
+    return np.interp(self.speed, self._k_d[0], self._k_d[1])  # pyrefly: ignore[bad-index] - _k_d is list after __init__
 
   @property
   def error_integral(self):

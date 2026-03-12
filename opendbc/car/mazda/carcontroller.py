@@ -15,7 +15,7 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.brake_counter = 0
 
-  def update(self, CC, CS, now_nanos):
+  def update(self, CC, CS, now_nanos):  # pyrefly: ignore[bad-override] return type mismatch due to mazdacan functions that may return None
     can_sends = []
 
     apply_torque = 0

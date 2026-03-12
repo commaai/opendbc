@@ -98,7 +98,7 @@ class Footnote(Enum):
 class SubaruCarDocs(CarDocs):
   package: str = "EyeSight Driver Assistance"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.subaru_a]))
-  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.GLOBAL])
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.GLOBAL])  # pyrefly: ignore[bad-assignment] - Footnote is Enum subclass, list invariance
 
   def init_make(self, CP: CarParams):
     if CP.alphaLongitudinalAvailable:

@@ -51,7 +51,7 @@ def dict_diff(d1: dict[str, Any], d2: dict[str, Any], path: str = "", ignore: li
 
 
 def load_can_messages(seg: str) -> list[Any]:
-  from comma_car_segments import get_url
+  from comma_car_segments import get_url  # pyrefly: ignore[missing-import] - optional external dependency
   parts = seg.split("/")
   url = get_url(f"{parts[0]}/{parts[1]}", parts[2])
   msgs = LogReader(url, only_union_types=True, sort_by_time=True)
@@ -248,7 +248,7 @@ def format_diff(diffs: list[Diff], ref: list[Ref], states: list[structs.CarState
 
 
 def main(platform: str | None = None, segments_per_platform: int = 10, update_refs: bool = False, all_platforms: bool = False) -> int:
-  from comma_car_segments import get_comma_car_segments_database
+  from comma_car_segments import get_comma_car_segments_database  # pyrefly: ignore[missing-import] - optional external dependency
   cwd = Path(__file__).resolve().parents[3]
   ref_path = cwd / DIFF_BUCKET
   if not update_refs:
@@ -303,6 +303,7 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
       by_field = defaultdict(list)
       for d in diffs:
         by_field[d[0]].append(d)
+      assert ref is not None and states is not None
       for field, fd in sorted(by_field.items()):
         print(f"\n  {field} ({len(fd)} diffs)")
         for line in format_diff(fd, ref, states, field):

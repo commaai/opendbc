@@ -6,6 +6,7 @@ import importlib
 import numpy as np
 from collections.abc import Callable
 
+from typing import Any
 from opendbc.can import CANPacker
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -18,7 +19,7 @@ RT_INTERVAL = 250000  # 250ms
 # Max allowed delta between car speeds
 MAX_SPEED_DELTA = 2.0  # m/s
 
-MessageFunction = Callable[[float], libsafety_py.CANPacket]
+MessageFunction = Callable[[Any], Any]
 
 
 def sign_of(a):
@@ -72,12 +73,11 @@ def add_regen_tests(cls):
 
 
 class SafetyTestBase(unittest.TestCase):
-  safety: libsafety_py.LibSafety | None
+  safety: libsafety_py.LibSafety
 
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "SafetyTestBase":
-      cls.safety = None
       raise unittest.SkipTest
 
   def _reset_safety_hooks(self):
@@ -104,9 +104,10 @@ class SafetyTestBase(unittest.TestCase):
       values.add(round(v, 2))
     return sorted(values)
 
-  def _generic_limit_safety_check(self, msg_function: MessageFunction, min_allowed_value: float, max_allowed_value: float,
-                                  min_possible_value: float, max_possible_value: float, test_delta: float = 1, inactive_value: float = 0,
-                                  msg_allowed = True, additional_setup: Callable[[float], None] | None = None):
+  def _generic_limit_safety_check(self, msg_function: MessageFunction, min_allowed_value: float | int | None, max_allowed_value: float | int | None,
+                                  min_possible_value: float | int | None, max_possible_value: float | int | None, test_delta: float = 1,
+                                  inactive_value: float | int = 0, msg_allowed: bool = True,
+                                  additional_setup: Callable[[float], None] | None = None):
     """
       Enforces that a signal within a message is only allowed to be sent within a specific range, min_allowed_value -> max_allowed_value.
       Message is also only allowed to be sent when controls_allowed is true, unless the value is equal to inactive_value.
@@ -115,6 +116,8 @@ class SafetyTestBase(unittest.TestCase):
     """
 
     # Ensure that we at least test the allowed_value range
+    assert min_possible_value is not None and max_possible_value is not None
+    assert min_allowed_value is not None and max_allowed_value is not None
     self.assertGreater(max_possible_value, max_allowed_value)
     self.assertLessEqual(min_possible_value, min_allowed_value)
 
@@ -131,7 +134,7 @@ class SafetyTestBase(unittest.TestCase):
         self.assertEqual(self._tx(msg_function(v)), should_tx, (controls_allowed, should_tx, v))
 
   def _common_measurement_test(self, msg_func: Callable, min_value: float, max_value: float, factor: float,
-                               meas_min_func: Callable[[], int], meas_max_func: Callable[[], int]):
+                               meas_min_func: Callable[[], float | int], meas_max_func: Callable[[], float | int]):
     """Tests accurate measurement parsing, and that the struct is reset on safety mode init"""
     for val in np.arange(min_value, max_value, 0.5):
       for i in range(MAX_SAMPLE_VALS):
@@ -157,7 +160,6 @@ class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "LongitudinalAccelSafetyTest":
-      cls.safety = None
       raise unittest.SkipTest
 
   @abc.abstractmethod
@@ -235,7 +237,6 @@ class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "TorqueSteeringSafetyTestBase":
-      cls.safety = None
       raise unittest.SkipTest
 
   @property
@@ -322,7 +323,6 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "SteerRequestCutSafetyTest":
-      cls.safety = None
       raise unittest.SkipTest
 
   # Safety around steering request bit mismatch tolerance
@@ -437,7 +437,6 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "DriverTorqueSteeringSafetyTest":
-      cls.safety = None
       raise unittest.SkipTest
 
   @abc.abstractmethod
@@ -538,7 +537,6 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "MotorTorqueSteeringSafetyTest":
-      cls.safety = None
       raise unittest.SkipTest
 
   @abc.abstractmethod
@@ -659,7 +657,6 @@ class VehicleSpeedSafetyTest(SafetyTestBase):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "VehicleSpeedSafetyTest":
-      cls.safety = None
       raise unittest.SkipTest
 
   @abc.abstractmethod
@@ -686,7 +683,6 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "AngleSteeringSafetyTest":
-      cls.safety = None
       raise unittest.SkipTest
 
   @abc.abstractmethod
@@ -834,7 +830,6 @@ class SafetyTest(SafetyTestBase):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "SafetyTest" or cls.__name__.endswith('Base'):
-      cls.safety = None
       raise unittest.SkipTest
 
   # ***** standard tests for all safety modes *****
@@ -956,12 +951,11 @@ class SafetyTest(SafetyTestBase):
 class CarSafetyTest(SafetyTest):
   STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
-  RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
+  RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] = {}
 
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "CarSafetyTest" or cls.__name__.endswith('Base'):
-      cls.safety = None
       raise unittest.SkipTest
 
   @abc.abstractmethod
@@ -1041,6 +1035,7 @@ class CarSafetyTest(SafetyTest):
     if _user_brake_msg is None:
       _user_brake_msg = self._user_brake_msg
       get_brake_pressed_prev = self.safety.get_brake_pressed_prev
+    assert get_brake_pressed_prev is not None
 
     self.assertFalse(get_brake_pressed_prev())
     for pressed in [True, False]:

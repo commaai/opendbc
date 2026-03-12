@@ -25,6 +25,7 @@ MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 
 class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02), 2: (MSG_LH_EPS_03,)}
+  packer: CANPackerSafety
 
   MAX_RATE_UP = 4
   MAX_RATE_DOWN = 10

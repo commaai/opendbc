@@ -27,6 +27,7 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   STANDSTILL_THRESHOLD = 12  # 0.375 kph
   FWD_BLACKLISTED_ADDRS = {2: [0x50, 0x2a4]}
+  packer: CANPackerSafety
 
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
@@ -96,8 +97,6 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
   def setUpClass(cls):
     super().setUpClass()
     if cls.__name__ in ("TestHyundaiCanfdLFASteering", "TestHyundaiCanfdLFASteeringAltButtons"):
-      cls.packer = None
-      cls.safety = None
       raise unittest.SkipTest
 
   def setUp(self):
@@ -165,7 +164,7 @@ class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
   PT_BUS = 1
   SCC_BUS = 1
   STEER_MSG = "LKAS"
-  GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
+  GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")  # pyrefly: ignore[bad-override] - same tuple[str, str] type, pyrefly literal narrowing
 
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
@@ -184,7 +183,7 @@ class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
   PT_BUS = 1
   SCC_BUS = 1
   STEER_MSG = "LKAS_ALT"
-  GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
+  GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")  # pyrefly: ignore[bad-override] - same tuple[str, str] type, pyrefly literal narrowing
 
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
@@ -236,7 +235,6 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "TestHyundaiCanfdLFASteeringLongBase":
-      cls.safety = None
       raise unittest.SkipTest
 
   def setUp(self):
@@ -261,7 +259,6 @@ class TestHyundaiCanfdLFASteeringLong(TestHyundaiCanfdLFASteeringLongBase):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "TestHyundaiCanfdLFASteeringLong":
-      cls.safety = None
       raise unittest.SkipTest
 
 
@@ -270,7 +267,6 @@ class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongB
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "TestHyundaiCanfdLFASteeringLongAltButtons":
-      cls.safety = None
       raise unittest.SkipTest
 
   def setUp(self):

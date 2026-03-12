@@ -208,7 +208,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
             msg = self._speed_msg(0, quality_flag=quality_flag)
           elif msg_type == "speed_2":
             msg = self._speed_msg_2(0, quality_flag=quality_flag)
-          elif msg_type == "yaw":
+          else:
             msg = self._yaw_rate_msg(0, 0, quality_flag=quality_flag)
 
           self.assertEqual(quality_flag, self._rx(msg))

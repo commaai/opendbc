@@ -1,4 +1,5 @@
 import math
+from collections.abc import Mapping
 
 from opendbc.car.carlog import carlog
 from opendbc.can.dbc import DBC, Signal, SignalType
@@ -9,7 +10,7 @@ class CANPacker:
     self.dbc = DBC(dbc_name)
     self.counters: dict[int, int] = {}
 
-  def pack(self, address: int, values: dict[str, float]) -> bytearray:
+  def pack(self, address: int, values: Mapping[str, float | int]) -> bytearray:
     msg = self.dbc.addr_to_msg.get(address)
     if msg is None:
       carlog.error(f"msg not found for {address=}")
@@ -40,7 +41,7 @@ class CANPacker:
       set_value(dat, sig_checksum, checksum)
     return dat
 
-  def make_can_msg(self, name_or_addr, bus: int, values: dict[str, float]):
+  def make_can_msg(self, name_or_addr, bus: int, values: Mapping[str, float | int]):
     if isinstance(name_or_addr, int):
       addr = name_or_addr
     else:

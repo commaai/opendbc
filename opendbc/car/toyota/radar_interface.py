@@ -39,11 +39,11 @@ class RadarInterface(RadarInterfaceBase):
     self.trigger_msg = self.RADAR_B_MSGS[-1]
     self.updated_messages = set()
 
-  def update(self, can_strings):
+  def update(self, can_packets):
     if self.rcp is None:
       return super().update(None)
 
-    vls = self.rcp.update(can_strings)
+    vls = self.rcp.update(can_packets)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
@@ -56,6 +56,7 @@ class RadarInterface(RadarInterfaceBase):
 
   def _update(self, updated_messages):
     ret = RadarData()
+    assert self.rcp is not None
     if not self.rcp.can_valid:
       ret.errors.canError = True
 

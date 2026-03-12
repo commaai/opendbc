@@ -32,7 +32,7 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
     self.safety.init_tests()
 
-  def _angle_cmd_msg(self, angle: float, enabled: bool):
+  def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     values = {"DESIRED_ANGLE": angle, "LKA_ACTIVE": 1 if enabled else 0}
     return self.packer.make_can_msg_safety("LKAS", 0, values)
 

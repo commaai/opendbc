@@ -53,7 +53,7 @@ def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_c
 
 def apply_creep_compensation(accel: float, v_ego: float) -> float:
   creep_accel = np.interp(v_ego, [1., 3.], [0.6, 0.])
-  creep_accel = np.interp(accel, [0., 0.2], [creep_accel, 0.])
+  creep_accel = np.interp(accel, [0., 0.2], [float(creep_accel), 0.])
   accel -= creep_accel
   return float(accel)
 
@@ -64,8 +64,8 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.CAN = fordcan.CanBus(CP)
 
-    self.apply_curvature_last = 0
-    self.anti_overshoot_curvature_last = 0
+    self.apply_curvature_last = 0.0
+    self.anti_overshoot_curvature_last = 0.0
     self.accel = 0.0
     self.gas = 0.0
     self.brake_request = False

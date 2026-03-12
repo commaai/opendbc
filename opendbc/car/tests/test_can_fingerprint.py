@@ -15,7 +15,7 @@ class TestCanFingerprint(unittest.TestCase):
              for address, length in fingerprint.items() for src in (0, 1)]
 
       fingerprint_iter = iter([can])
-      car_fingerprint, finger = can_fingerprint(lambda **kwargs: [next(fingerprint_iter, [])])  # noqa: B023
+      car_fingerprint, finger = can_fingerprint(lambda **kwargs: [next(fingerprint_iter, [])])  # noqa: B023  # pyrefly: ignore[bad-argument-type] - lambda is valid CanRecvCallable
 
       assert car_fingerprint == car_model
       assert finger[0] == fingerprint
@@ -27,7 +27,7 @@ class TestCanFingerprint(unittest.TestCase):
     car_model = "CHEVROLET_BOLT_EUV"
     fingerprint = FINGERPRINTS[car_model][0]
 
-    cases = []
+    cases: list[tuple[int, str | None, list[CanData]]] = []
 
     # case 1 - one match, make sure we keep going for 100 frames
     can = [CanData(address=address, dat=b'\x00' * length, src=src)
@@ -51,6 +51,6 @@ class TestCanFingerprint(unittest.TestCase):
           frames += 1
           return [can]  # noqa: B023
 
-        car_fingerprint, _ = can_fingerprint(can_recv)
+        car_fingerprint, _ = can_fingerprint(can_recv)  # pyrefly: ignore[bad-argument-type] - can_recv is valid CanRecvCallable
         assert car_fingerprint == car_model
         assert frames == expected_frames + 2  # TODO: fix extra frames

@@ -435,7 +435,7 @@ class IsoTpMessage:
     self.flow_control_msg = bytes([
       0x30,  # flow control
       0x01 if self.single_frame_mode else 0x00,  # block size
-      separation_time,
+      int(separation_time),
     ]).ljust(self.max_len, b"\x00")
 
   def send(self, dat: bytes, setup_only: bool = False) -> None:
@@ -617,6 +617,7 @@ class UdsClient:
     self.sub_addr = sub_addr
     self.timeout = timeout
     can_send_with_timeout = partial(panda.can_send, timeout=int(tx_timeout*1000))
+    # pyrefly: ignore[bad-argument-type] - rx_addr narrowed from int | None to int above
     self._can_client = CanClient(can_send_with_timeout, panda.can_recv, self.tx_addr, self.rx_addr, self.bus, self.sub_addr, rx_sub_addr)
     self.response_pending_timeout = response_pending_timeout
 

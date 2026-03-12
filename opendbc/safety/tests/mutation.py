@@ -178,14 +178,14 @@ def enumerate_sites(input_source, preprocessed_file):
   tree = parser.parse(_prepare_for_parsing(txt).encode())
 
   # Build rule map
-  rule_map = {}
+  rule_map: dict[tuple[str, str], list[tuple[str, str, str]]] = {}
   counts = {}
   for mutator, (node_kind, op_map) in MUTATOR_FAMILIES.items():
     counts[mutator] = 0
     if mutator == "boundary":
       continue
     for original_op, mutated_op in op_map.items():
-      rule_map.setdefault((node_kind, original_op), []).append((mutator, original_op, mutated_op))
+      rule_map.setdefault((node_kind, original_op), []).append((mutator, original_op, mutated_op))  # pyrefly: ignore[missing-attribute]
 
   # Walk tree to find mutation sites
   deduped = {}
@@ -370,7 +370,7 @@ def _discover_test_catalog():
   for test_file in sorted(SAFETY_TESTS_DIR.glob("test_*.py")):
     module_name = ".".join(test_file.relative_to(ROOT).with_suffix("").parts)
     suite = loader.loadTestsFromName(module_name)
-    catalog[test_file.name] = [t.id() for group in suite for t in group]
+    catalog[test_file.name] = [t.id() for group in suite for t in group]  # pyrefly: ignore[missing-attribute, not-iterable]
   return catalog
 
 
@@ -450,7 +450,7 @@ def _instrument_source(source, sites):
   for site, children in roots:
     result_parts.append(source[pos : site.expr_start])
     result_parts.append(build_replacement(site, children))
-    pos = site.expr_end
+    pos = site.expr_end  # pyrefly: ignore[missing-attribute]
   result_parts.append(source[pos:])
   return "".join(result_parts)
 

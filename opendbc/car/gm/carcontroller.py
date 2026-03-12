@@ -22,7 +22,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.start_time = 0.
     self.apply_torque_last = 0
-    self.apply_gas = 0
+    self.apply_gas = 0.0
     self.apply_brake = 0
     self.last_steer_frame = 0
     self.last_button_frame = 0

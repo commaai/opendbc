@@ -75,9 +75,6 @@ def scale_tire_stiffness(mass, wheelbase, center_to_front, tire_stiffness_factor
   return tire_stiffness_front, tire_stiffness_rear
 
 
-DbcDict = dict[StrEnum, str]
-
-
 class Bus(StrEnum):
   pt = auto()
   cam = auto()
@@ -90,6 +87,8 @@ class Bus(StrEnum):
   main = auto()
   party = auto()
   ap_party = auto()
+
+DbcDict = dict[Bus, str]
 
 
 def rate_limit(new_value, last_value, dw_step, up_step):
@@ -133,8 +132,8 @@ class CanSignalRateCalculator:
   """
   def __init__(self, frequency: int):
     self.frequency = frequency
-    self.previous_value = 0
-    self.rate = 0
+    self.previous_value: float = 0.0
+    self.rate: float = 0.0
 
   def update(self, current_value: float, updated: bool):
     if updated:
@@ -198,14 +197,14 @@ class PlatformConfigBase(Freezable):
 
 @dataclass(order=True)
 class PlatformConfig(PlatformConfigBase):
-  car_docs: list[CarDocs]
+  car_docs: list[CarDocs]  # pyrefly: ignore[bad-override] intentional narrowing from parent union type
   specs: CarSpecs
   dbc_dict: DbcDict
 
 
 @dataclass(order=True)
 class ExtraPlatformConfig(PlatformConfigBase):
-  car_docs: list[ExtraCarDocs]
+  car_docs: list[ExtraCarDocs]  # pyrefly: ignore[bad-override] intentional narrowing from parent union type
   specs: CarSpecs = CarSpecs(mass=0., wheelbase=0., steerRatio=0.)
   dbc_dict: DbcDict = field(default_factory=lambda: dict())
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import unittest
+from typing import TYPE_CHECKING, Any
+
 import numpy as np
 
 from opendbc.car.honda.values import HondaSafetyFlags
@@ -29,6 +31,14 @@ class Btn:
 
 
 class HondaButtonEnableBase(common.CarSafetyTest):
+
+  cnt_speed: int
+  cnt_button: int
+  cnt_powertrain_data: int
+
+  if TYPE_CHECKING:
+    def _button_msg(self, buttons: Any, main_on: bool = False, bus: Any = None) -> Any: ...
+    def _acc_state_msg(self, main_on: Any) -> Any: ...
 
   # override these inherited tests since we're using button enable
   def test_disable_control_allowed_from_cruise(self):
@@ -94,16 +104,16 @@ class HondaButtonEnableBase(common.CarSafetyTest):
       self.safety.set_controls_allowed(1)
       if msg_type == "btn":
         msg = self._button_msg(Btn.SET)
-      if msg_type == "gas":
+      elif msg_type == "gas":
         msg = self._user_gas_msg(0)
-      if msg_type == "speed":
+      else:
         msg = self._speed_msg(0)
       self.assertTrue(self._rx(msg))
       if msg_type != "btn":
-        msg[0].data[4] = 0  # invalidate checksum
-        msg[0].data[5] = 0
-        msg[0].data[6] = 0
-        msg[0].data[7] = 0
+        msg[0].data[4] = 0  # invalidate checksum  # pyrefly: ignore[bad-index, unsupported-operation] - msg is CFFI CANPacket_t pointer
+        msg[0].data[5] = 0  # pyrefly: ignore[bad-index, unsupported-operation]
+        msg[0].data[6] = 0  # pyrefly: ignore[bad-index, unsupported-operation]
+        msg[0].data[7] = 0  # pyrefly: ignore[bad-index, unsupported-operation]
         self.assertFalse(self._rx(msg))
         self.assertFalse(self.safety.get_controls_allowed())
 
@@ -136,6 +146,10 @@ class HondaButtonEnableBase(common.CarSafetyTest):
 
 class HondaPcmEnableBase(common.CarSafetyTest):
 
+  if TYPE_CHECKING:
+    def _button_msg(self, buttons: Any, main_on: bool = False, bus: Any = None) -> Any: ...
+    def _acc_state_msg(self, main_on: Any) -> Any: ...
+
   def test_buttons(self):
     """
       Buttons should only cancel in this configuration,
@@ -166,6 +180,8 @@ class HondaBase(common.CarSafetyTest):
   PT_BUS: int | None = None  # must be set when inherited
   STEER_BUS: int | None = None  # must be set when inherited
   BUTTONS_BUS: int | None = None  # must be set when inherited, tx on this bus, rx on PT_BUS
+
+  packer: CANPackerSafety
 
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194)}  # STEERING_CONTROL
 
@@ -476,6 +492,7 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
     pass
 
   def test_diagnostics(self):
+    assert self.PT_BUS is not None
     tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x02\x3E\x80\x00\x00\x00\x00\x00")
     self.assertTrue(self._tx(tester_present))
 
