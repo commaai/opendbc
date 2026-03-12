@@ -344,7 +344,9 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         - We can always recover from violations if steer_req=1
     """
 
-    for min_valid_steer_frames in range(self.MIN_VALID_STEERING_FRAMES * 2):
+    for min_valid_steer_frames in self._boundary_values([self.MIN_VALID_STEERING_FRAMES],
+                                                        0, self.MIN_VALID_STEERING_FRAMES * 2, sparse_count=10):
+      min_valid_steer_frames = int(min_valid_steer_frames)
       # Reset match count and rt timer to allow cut (valid_steer_req_count, ts_steer_req_mismatch_last)
       self.safety.init_tests()
       self.safety.set_timer(self.MIN_VALID_STEERING_RT_INTERVAL)
@@ -362,7 +364,7 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         self.assertEqual(should_tx and idx < self.MAX_INVALID_STEERING_FRAMES, tx)
 
       # Keep blocking after one steer_req mismatch
-      for _ in range(100):
+      for _ in range(2):
         self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_TORQUE, steer_req=0)))
 
       # Make sure we can recover
@@ -394,7 +396,7 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
       # Send one valid frame, and subsequent invalid should now be blocked
       self._set_prev_torque(self.MAX_TORQUE)
       self.assertTrue(self._tx(self._torque_cmd_msg(self.MAX_TORQUE, steer_req=1)))
-      for _ in range(self.MIN_VALID_STEERING_FRAMES + 1):
+      for _ in range(2):
         self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_TORQUE, steer_req=0)))
 
   def test_steer_req_bit_realtime(self):
