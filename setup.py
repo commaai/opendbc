@@ -10,6 +10,7 @@ if os.environ.get('MYPYC') == '1' and 'build_ext' in sys.argv:
   from mypyc.build import mypycify
   ext_modules = mypycify([
     'opendbc/can/_types.py',
+    'opendbc/can/_checksums.py',
     'opendbc/can/packer.py',
     'opendbc/can/parser.py',
   ], opt_level='3')

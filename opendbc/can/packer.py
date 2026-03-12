@@ -4,6 +4,7 @@ from mypy_extensions import mypyc_attr
 
 from opendbc.car.carlog import carlog
 from opendbc.can._types import Signal, SignalType
+from opendbc.can._checksums import calc_checksum
 
 
 def set_value(msg: bytearray, sig: Signal, ival: int) -> None:
@@ -52,15 +53,21 @@ class CANPacker:
       if sig.type == SignalType.COUNTER or sig.name == "COUNTER":
         self.counters[address] = int(value)
         counter_set = True
-    sig_counter: Signal | None = next((s for s in msg.sigs.values() if s.type == SignalType.COUNTER or s.name == "COUNTER"), None)
+    sig_counter: Signal | None = None
+    sig_checksum: Signal | None = None
+    for s_val in msg.sigs.values():
+      s_type: int = s_val.type
+      if s_type == SignalType.COUNTER or s_val.name == "COUNTER":
+        sig_counter = s_val
+      elif s_type > SignalType.COUNTER:
+        sig_checksum = s_val
     if sig_counter is not None and not counter_set:
       if address not in self.counters:
         self.counters[address] = 0
       set_value(dat, sig_counter, self.counters[address])
       self.counters[address] = (self.counters[address] + 1) % (1 << sig_counter.size)
-    sig_checksum: Signal | None = next((s for s in msg.sigs.values() if s.type > SignalType.COUNTER), None)
-    if sig_checksum is not None and sig_checksum.calc_checksum is not None:
-      checksum: int = sig_checksum.calc_checksum(address, sig_checksum, dat)
+    if sig_checksum is not None:
+      checksum: int = calc_checksum(sig_checksum.type, address, sig_checksum.start_bit, dat)
       set_value(dat, sig_checksum, checksum)
     return dat
 

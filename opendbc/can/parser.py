@@ -4,6 +4,7 @@ from typing import Any
 
 from opendbc.car.carlog import carlog
 from opendbc.can._types import Signal, SignalType
+from opendbc.can._checksums import calc_checksum
 from opendbc.can._vldict import VLDict
 
 
@@ -103,8 +104,8 @@ class MessageState:
       if sig.is_signed:
         tmp -= ((tmp >> (sig.size - 1)) & 0x1) * (1 << sig.size)
 
-      if not self.ignore_checksum and sig.calc_checksum is not None:
-        expected_checksum: int = sig.calc_checksum(self.address, sig, bytearray(dat))
+      if not self.ignore_checksum and sig.type > SignalType.COUNTER:
+        expected_checksum: int = calc_checksum(sig.type, self.address, sig.start_bit, bytearray(dat))
         if tmp != expected_checksum:
           checksum_failed = True
           self.rate_limited_log(nanos, f"checksum failed: received {hex(tmp)}, calculated {hex(expected_checksum)}")
@@ -168,6 +169,7 @@ class CANParser:
     self.ts_nanos: dict[int | str, dict[str, int]] = {}
     self.addresses: set[int] = set()
     self.message_states: dict[int, MessageState] = {}
+    self._vl_fast: dict[int, dict[str, float]] = {}
 
     for m in messages:
       name_or_addr = m[0]
@@ -200,6 +202,7 @@ class CANParser:
     signals_dict: dict[str, float] = {s: 0.0 for s in signal_names}
     dict.__setitem__(self.vl, msg.address, signals_dict)
     dict.__setitem__(self.vl, msg.name, signals_dict)
+    self._vl_fast[msg.address] = signals_dict
     self.vl_all[msg.address] = defaultdict(list)
     self.vl_all[msg.name] = self.vl_all[msg.address]
     self.ts_nanos[msg.address] = {s: 0 for s in signal_names}
@@ -274,7 +277,7 @@ class CANParser:
         if state.parse(t, dat):
           updated_addrs.add(address)
 
-          vl_addr = self.vl[address]
+          vl_addr = self._vl_fast[address]
           vl_all_addr = self.vl_all[address]
           ts_addr = self.ts_nanos[address]
 
