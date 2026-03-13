@@ -89,6 +89,7 @@ class CarState(CarStateBase):
     ret.standstill = cp_party.vl["ESP_B"]["ESP_vehicleStandstillSts"] == 1
     ret.accFaulted = cruise_state == "FAULT"
 
+    # needed for stalkless vehicles, steering button cancel request routes through AP computer
     acc_state = cp_ap_party.vl["DAS_control"]["DAS_accState"]
     ret.buttonEvents = [
       *create_button_events(
