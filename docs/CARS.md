@@ -119,6 +119,7 @@
 |Honda|Odyssey 2018-20|Honda Sensing|[Upstream](#upstream)|
 |Honda|Odyssey 2021-26|All|[Upstream](#upstream)|
 |Honda|Odyssey (Taiwan) 2018-19|Honda Sensing|[Upstream](#upstream)|
+|Honda|Odyssey RC5 JPN 2023-25|All|[Upstream](#upstream)|
 |Honda|Passport 2019-25|All|[Upstream](#upstream)|
 |Honda|Passport 2026|All|[Upstream](#upstream)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
