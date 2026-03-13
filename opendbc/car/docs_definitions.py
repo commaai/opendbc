@@ -356,7 +356,7 @@ class CarDocs:
 
       # experimental mode
       exp_link = "<a href='https://blog.comma.ai/090release/#experimental-mode' target='_blank' class='highlight'>Experimental mode</a>"
-      if CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable:
+      if CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable and CP.autoResumeSng:
         sentence_builder += f" Traffic light and stop sign handling is also available in {exp_link}."
 
       return sentence_builder.format(car_model=f"{self.make} {self.model}", alc=alc, acc=acc)
