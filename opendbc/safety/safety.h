@@ -28,6 +28,7 @@
 #include "opendbc/safety/modes/psa.h"
 #include "opendbc/safety/modes/hyundai_canfd.h"
 
+// Little-endian only
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
   for (int i = 0; i < len; i++) {
