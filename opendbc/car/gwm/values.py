@@ -10,7 +10,7 @@ Ecu = CarParams.Ecu
 
 class CarControllerParams:
   STEER_STEP = 2
-  STEER_MAX = 255
+  STEER_MAX = 253
 
   def __init__(self, CP: CarParams):
     self.ACCEL_MAX = 1
