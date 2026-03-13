@@ -70,6 +70,13 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_gas_apply_bit_without_controls(self):
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      # apply bit set with inactive gas value
+      msg = libsafety_py.make_CANPacket(0x2CB, 0, b"\x01\x02\xC0\x30\x00\x00\x00\x00")
+      self.assertEqual(controls_allowed, self._tx(msg))
+
 
 class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   STANDSTILL_THRESHOLD = 10 * 0.0311

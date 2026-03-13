@@ -211,6 +211,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       msg = self._user_brake_msg(True, quality_flag=quality_flag)
       self.assertEqual(quality_flag, self._rx(msg))
 
+    # explicitly test both invalid brake status values
+    for brake_status in (0, 3):  # NotInit_orOff and Faulty_SNA
+      msg = self.packer.make_can_msg_safety("ESP_status", 0, {"ESP_driverBrakeApply": brake_status})
+      self.assertFalse(self._rx(msg))
+
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
     # Either when the hands on level is high, or if there is a high angle rate fault
@@ -413,6 +418,18 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
         # Recover
         self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+
+  def test_fwd_hook_autopark_active(self):
+    self.safety.set_controls_allowed(False)
+    self._rx(self._pcm_status_msg(False, autopark_state=self.autopark_states["ACTIVE"]))
+
+    # autopark active: steering and eac messages should be forwarded, not blocked
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, MSG_APS_eacMonitor))
+
+    self._rx(self._pcm_status_msg(False, autopark_state=0))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_APS_eacMonitor))
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):

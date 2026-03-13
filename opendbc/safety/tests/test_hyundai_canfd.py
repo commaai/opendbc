@@ -130,6 +130,18 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
     self.safety.init_tests()
 
+  def test_scc_accel_short_circuit(self):
+    # desired_accel_raw=0 but desired_accel_val!=0 should be rejected
+    if isinstance(self, HyundaiLongitudinalBase):
+      return
+    dat = bytearray(32)
+    dat[8] = 0x40   # acc_mode = 4
+    dat[16] = 0xFF
+    dat[17] = 0x03   # desired_accel_raw = 0
+    dat[18] = 0x40   # desired_accel_val = 1
+    self.safety.set_controls_allowed(True)
+    self.assertFalse(self._tx(libsafety_py.make_CANPacket(0x1A0, 0, bytes(dat))))
+
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
 class TestHyundaiCanfdLFASteering(TestHyundaiCanfdLFASteeringBase):
