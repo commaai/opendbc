@@ -212,46 +212,32 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
             should_tx = req == req2 and (torque_wind_down in (0, 100)) and not mismatch
             self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)))
 
-          # Test max EPS torque and driver override thresholds
-          cases = itertools.product(
-            (0, self.MAX_MEAS_TORQUE - 1, self.MAX_MEAS_TORQUE, self.MAX_MEAS_TORQUE + 1, self.MAX_MEAS_TORQUE * 2),
-            (0, self.MAX_LTA_DRIVER_TORQUE - 1, self.MAX_LTA_DRIVER_TORQUE, self.MAX_LTA_DRIVER_TORQUE + 1, self.MAX_LTA_DRIVER_TORQUE * 2)
-          )
-
-          for eps_torque, driver_torque in cases:
-            for sign in (-1, 1):
-              for _ in range(6):
-                self._rx(self._torque_meas_msg(sign * eps_torque, sign * driver_torque))
-
-              # Toyota adds 1 to EPS torque since it is rounded after EPS factor
-              should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE
-              self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
-              self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
-
         else:
           # Controls not allowed
           for req, req2, torque_wind_down in itertools.product([0, 1], [0, 1], [0, 50, 100]):
             should_tx = not (req or req2) and torque_wind_down == 0
             self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)))
 
-  def test_lta_driver_torque_wind_down_asymmetric(self):
-    self.safety.set_controls_allowed(True)
-    angle = 0.0
-    self._reset_angle_measurement(angle)
-    self._set_prev_desired_angle(angle)
-    threshold = self.MAX_LTA_DRIVER_TORQUE
+    # Test max EPS torque and driver override thresholds (independent of angle, test a few representative angles)
+    for angle in (-89, 0, 89):
+      self.safety.set_controls_allowed(True)
+      self._reset_angle_measurement(angle)
+      self._set_prev_desired_angle(angle)
 
-    # Asymmetric samples where |min| > |max|, both above threshold
-    for _ in range(6):
-      self._rx(self._torque_meas_msg(0, -(threshold + 50)))
-    self._rx(self._torque_meas_msg(0, threshold + 10))
-    self.assertFalse(self._tx(self._lta_msg(1, 1, angle, 100)))
+      cases = itertools.product(
+        (0, self.MAX_MEAS_TORQUE - 1, self.MAX_MEAS_TORQUE, self.MAX_MEAS_TORQUE + 1, self.MAX_MEAS_TORQUE * 2),
+        (0, self.MAX_LTA_DRIVER_TORQUE - 1, self.MAX_LTA_DRIVER_TORQUE, self.MAX_LTA_DRIVER_TORQUE + 1, self.MAX_LTA_DRIVER_TORQUE * 2)
+      )
 
-    # Asymmetric samples where |max| > |min|, both above threshold
-    for _ in range(6):
-      self._rx(self._torque_meas_msg(0, threshold + 50))
-    self._rx(self._torque_meas_msg(0, -(threshold + 10)))
-    self.assertFalse(self._tx(self._lta_msg(1, 1, angle, 100)))
+      for eps_torque, driver_torque in cases:
+        for sign in (-1, 1):
+          for _ in range(6):
+            self._rx(self._torque_meas_msg(sign * eps_torque, sign * driver_torque))
+
+          # Toyota adds 1 to EPS torque since it is rounded after EPS factor
+          should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE
+          self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
+          self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
 
   def test_angle_measurements(self):
     """

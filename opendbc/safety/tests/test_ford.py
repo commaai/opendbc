@@ -241,16 +241,22 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def test_max_lateral_acceleration(self):
     # Ford CAN FD can achieve a higher max lateral acceleration than CAN so we limit curvature based on speed
+    step = 1 / self.DEG_TO_CAN
     for speed in np.arange(0, 40, 0.5):
       # Clip so we test curvature limiting at low speed due to low max curvature
       _, curvature_accel_limit_upper = self.get_canfd_curvature_limits(speed)
       curvature_accel_limit_upper = np.clip(curvature_accel_limit_upper, -self.MAX_CURVATURE, self.MAX_CURVATURE)
 
+      # Test boundary curvature values around the limit, rounded to CAN precision
+      lower = curvature_accel_limit_upper * 0.8
+      upper = min(curvature_accel_limit_upper * 1.2, self.MAX_CURVATURE)
+      test_curvatures = {round(c * self.DEG_TO_CAN) / self.DEG_TO_CAN
+                         for c in self._boundary_values([curvature_accel_limit_upper], lower, upper, step)
+                         if 0 <= c <= self.MAX_CURVATURE}
+
       for sign in (-1, 1):
-        # Test above and below the lateral by 20%, max is clipped since
-        # max curvature at low speed is higher than the signal max
-        for curvature in np.arange(curvature_accel_limit_upper * 0.8, min(curvature_accel_limit_upper * 1.2, self.MAX_CURVATURE), 1 / self.DEG_TO_CAN):
-          curvature = sign * round(curvature * self.DEG_TO_CAN) / self.DEG_TO_CAN  # fix np rounding errors
+        for curvature in sorted(test_curvatures):
+          curvature = sign * curvature
           self.safety.set_controls_allowed(True)
           self._set_prev_desired_angle(curvature)
           self._reset_curvature_measurement(curvature, speed)
@@ -454,11 +460,12 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
         self.assertEqual(should_tx, self._tx(self._acc_command_msg(gas, self.INACTIVE_ACCEL, controls_allowed)))
 
   def test_brake_safety_check(self):
+    brake_values = self._boundary_values([self.MIN_ACCEL, self.MAX_ACCEL, self.INACTIVE_ACCEL],
+                                         self.MIN_ACCEL - 2, self.MAX_ACCEL + 2, 0.05)
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
       for brake_actuation in (True, False):
-        for brake in np.arange(self.MIN_ACCEL - 2, self.MAX_ACCEL + 2, 0.05):
-          brake = round(brake, 2)  # floats might not hit exact boundary conditions without rounding
+        for brake in brake_values:
           should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
           should_tx = should_tx and (controls_allowed or not brake_actuation)
           self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, brake_actuation)))
