@@ -139,7 +139,6 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"ACCButtons": buttons}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
 
-
   def test_individual_wheel_speeds(self):
     for wheel in ["RL", "RR"]:
       values = {"RLWheelSpd": 0, "RRWheelSpd": 0}

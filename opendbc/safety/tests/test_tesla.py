@@ -419,7 +419,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         # Recover
         self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
 
-
   def test_fwd_hook_autopark_active(self):
     self.safety.set_controls_allowed(False)
     self._rx(self._pcm_status_msg(False, autopark_state=self.autopark_states["ACTIVE"]))
