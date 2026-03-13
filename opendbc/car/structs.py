@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, TypeAlias
 import capnp
 from opendbc.car.common.basedir import BASEDIR
 
@@ -16,7 +16,7 @@ CarControl: Any = car.CarControl
 CarParams: Any = car.CarParams
 
 # capnp struct module types, accessed via capnp.lib.capnp._StructModule
-CarStateT: type = Any  # pyrefly: ignore[bad-assignment]
-RadarDataT: type = Any  # pyrefly: ignore[bad-assignment]
-CarControlT: type = Any  # pyrefly: ignore[bad-assignment]
-CarParamsT: type = Any  # pyrefly: ignore[bad-assignment]
+CarStateT: TypeAlias = Any
+RadarDataT: TypeAlias = Any
+CarControlT: TypeAlias = Any
+CarParamsT: TypeAlias = Any
