@@ -73,17 +73,12 @@ static void psa_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if (msg->bus == PSA_ADAS_BUS) {
-    if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-      pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
-    }
+  if (ADDR_BUS_MATCH(msg, PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS)) {
+    pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
   }
 
-
-  if (msg->bus == PSA_CAM_BUS) {
-    if (msg->addr == PSA_DAT_BSI) {
-      brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
-    }
+  if (ADDR_BUS_MATCH(msg, PSA_DAT_BSI, PSA_CAM_BUS)) {
+    brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
   }
 }
 

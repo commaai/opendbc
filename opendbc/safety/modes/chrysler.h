@@ -103,7 +103,7 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
   if ((chrysler_platform != CHRYSLER_PACIFICA) && (msg->bus == 0U) && (msg->addr == CHRYSLER_ADDR(ESP_8))) {
     vehicle_moving = ((msg->data[4] << 8) + msg->data[5]) != 0U;
   }
-  if ((chrysler_platform == CHRYSLER_PACIFICA) && (msg->bus == 0U) && (msg->addr == 514U)) {
+  if ((chrysler_platform == CHRYSLER_PACIFICA) && ADDR_BUS_MATCH(msg, 514U, 0U)) {
     int speed_l = (msg->data[0] << 4) + (msg->data[1] >> 4);
     int speed_r = (msg->data[2] << 4) + (msg->data[3] >> 4);
     vehicle_moving = (speed_l != 0) || (speed_r != 0);
