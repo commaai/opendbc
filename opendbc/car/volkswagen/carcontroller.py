@@ -46,6 +46,7 @@ class MQBStandstillManager:
   """
 
   HOLD_MAX_FRAMES = 50             # frames to hold before disabling long control to avoid a fault
+  HOLD_MIN_FRAMES = 30             # minimum frames to hold at stopping state to ensure ESP engages for the first time
   HOLD_TORQUE_DEADBAND_NM = 40     # stop integrating when this close to target torque (Nm at wheel)
   HOLD_TORQUE_TARGET_RATIO = 0.8   # target this fraction of ESP_Haltemoment to avoid overshoot
   HOLD_ACCEL_KI = 0.0001           # I-controller gain: m/s² per Nm of torque error per ACC_CONTROL_STEP; just a guess for now
@@ -82,8 +83,9 @@ class MQBStandstillManager:
     if long_active and accel <= 0:
       # flat/downhill: drop hold, force starting state
       if not is_uphill and CS.out.standstill:
-        esp_starting_override = not CS.esp_hold_confirmation
-        esp_stopping_override = False
+        if (self.esp_hold_frames > self.HOLD_MIN_FRAMES):
+          esp_starting_override = not CS.esp_hold_confirmation
+          esp_stopping_override = False
 
       # uphill: build engine torque via ACC_06 as rollback prevention, ESP braking held via ACC_07
       elif is_uphill and (CS.esp_hold_confirmation or CS.out.standstill):
