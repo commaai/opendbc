@@ -441,6 +441,21 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
     }
     return self.packer.make_can_msg_safety("ACCDATA", 0, values)
 
+  def test_brake_actuation_short_circuit(self):
+    # Cover || short-circuit in brake_actuation: AccBrkPrchg_B_Rq=0, AccBrkDecel_B_Rq=1
+    self.safety.set_controls_allowed(True)
+    values = {
+      "AccPrpl_A_Rq": self.INACTIVE_GAS,
+      "AccPrpl_A_Pred": self.INACTIVE_GAS,
+      "AccBrkTot_A_Rq": self.INACTIVE_ACCEL,
+      "CmbbDeny_B_Actl": 0,
+      "AccBrkPrchg_B_Rq": 0,
+      "AccBrkDecel_B_Rq": 1,
+    }
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("ACCDATA", 0, values)))
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("ACCDATA", 0, values)))
+
   def test_stock_aeb(self):
     # Test that CmbbDeny_B_Actl is never 1, it prevents the ABS module from actuating AEB requests from ACCDATA_2
     for controls_allowed in (True, False):

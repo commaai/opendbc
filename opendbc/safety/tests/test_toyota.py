@@ -83,6 +83,10 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
       self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
 
+    # First 4 bytes match but last 4 don't (covers || short-circuit on line 332)
+    partial_match = libsafety_py.make_CANPacket(0x750, 0, b"\x0F\x02\x3E\x00\x01\x00\x00\x00")
+    self.assertFalse(self._tx(partial_match))
+
   def test_block_aeb(self, stock_longitudinal: bool = False):
     for controls_allowed in (True, False):
       for bad in (True, False):
