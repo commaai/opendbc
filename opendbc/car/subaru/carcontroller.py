@@ -17,6 +17,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
     self.apply_angle_last = 0
+    self.lat_active_prev = False
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
@@ -25,6 +26,11 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(DBC[CP.carFingerprint][Bus.pt])
 
   def handle_angle_lateral(self, CC, CS):
+    # Re-anchor the first active command to the live steering angle so the
+    # controller and panda safety start from the same reference.
+    if CC.latActive and not self.lat_active_prev:
+      self.apply_angle_last = CS.out.steeringAngleDeg
+
     apply_steer = apply_std_steer_angle_limits(
           CC.actuators.steeringAngleDeg,
           self.apply_angle_last,
@@ -38,6 +44,7 @@ class CarController(CarControllerBase):
       apply_steer = CS.out.steeringAngleDeg
 
     self.apply_angle_last = apply_steer
+    self.lat_active_prev = CC.latActive
     return subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive)
 
   def handle_torque_lateral(self, CC, CS):
@@ -64,6 +71,7 @@ class CarController(CarControllerBase):
       msg = subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req)
 
     self.apply_torque_last = apply_torque
+    self.lat_active_prev = CC.latActive
     return msg
 
   def update(self, CC, CS, now_nanos):
