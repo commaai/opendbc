@@ -266,9 +266,7 @@ class CAR(Platforms):
   )
   ACURA_MDX_4G = HondaBoschPlatformConfig(
     [
-      HondaCarDocs("Acura MDX 2022", "All", footnotes=[Footnote.TRAFFIC_JAM_ASSIST]),
-      # todo: find 2023 fingerprints
-      HondaCarDocs("Acura MDX 2024", "All", footnotes=[Footnote.TRAFFIC_JAM_ASSIST]),
+      HondaCarDocs("Acura MDX 2022-24", "All", footnotes=[Footnote.TRAFFIC_JAM_ASSIST]),
     ],
     CarSpecs(mass=4788 * CV.LB_TO_KG, wheelbase=2.89, steerRatio=16.3, centerToFrontRatio=0.428),  # as spec
     {Bus.pt: 'acura_mdx_2022_can_generated'},
