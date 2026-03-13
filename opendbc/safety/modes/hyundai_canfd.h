@@ -96,13 +96,21 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
     }
 
     // gas press, different for EV, hybrid, and ICE models
-    if ((msg->addr == 0x35U) && hyundai_ev_gas_signal) {
-      gas_pressed = msg->data[5] != 0U;
-    } else if ((msg->addr == 0x105U) && hyundai_hybrid_gas_signal) {
-      gas_pressed = GET_BIT(msg, 103U) || (msg->data[13] != 0U) || GET_BIT(msg, 112U);
-    } else if ((msg->addr == 0x100U) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
-      gas_pressed = GET_BIT(msg, 176U);
-    } else {
+    uint32_t gas_addr = 0x100U;
+    if (hyundai_ev_gas_signal) {
+      gas_addr = 0x35U;
+    } else if (hyundai_hybrid_gas_signal) {
+      gas_addr = 0x105U;
+    }
+
+    if (msg->addr == gas_addr) {
+      if (hyundai_ev_gas_signal) {
+        gas_pressed = msg->data[5] != 0U;
+      } else if (hyundai_hybrid_gas_signal) {
+        gas_pressed = GET_BIT(msg, 103U) | (msg->data[13] != 0U) | GET_BIT(msg, 112U);
+      } else {
+        gas_pressed = GET_BIT(msg, 176U);
+      }
     }
 
     // brake press
@@ -124,14 +132,12 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if (msg->bus == scc_bus) {
-    // cruise state
-    if ((msg->addr == 0x1a0U) && !hyundai_longitudinal) {
-      // 1=enabled, 2=driver override
-      int cruise_status = ((msg->data[8] >> 4) & 0x7U);
-      bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
-      hyundai_common_cruise_state_check(cruise_engaged);
-    }
+  // cruise state
+  if (!hyundai_longitudinal && ADDR_BUS_MATCH(msg, 0x1a0U, scc_bus)) {
+    // 1=enabled, 2=driver override
+    int cruise_status = ((msg->data[8] >> 4) & 0x7U);
+    bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
+    hyundai_common_cruise_state_check(cruise_engaged);
   }
 }
 
@@ -179,7 +185,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   }
 
   // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
-  if (((msg->addr == 0x730U) && hyundai_canfd_lka_steering) || ((msg->addr == 0x7D0U) && !hyundai_camera_scc)) {
+  if ((hyundai_canfd_lka_steering && (msg->addr == 0x730U)) || (!hyundai_camera_scc && (msg->addr == 0x7D0U))) {
     if ((GET_BYTES(msg, 0, 4) != 0x00803E02U) || (GET_BYTES(msg, 4, 4) != 0x0U)) {
       tx = false;
     }
