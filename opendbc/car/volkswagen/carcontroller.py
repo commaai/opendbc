@@ -5,8 +5,7 @@ from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mlbcan, mqbcan, pqcan
-from opendbc.car.volkswagen.values import CanBus, CarControllerParams, HOLD_ACCEL_KI, HOLD_TORQUE_DEADBAND_NM, HOLD_TORQUE_TARGET_RATIO, HOLD_MAX_FRAMES, \
-                                          VolkswagenFlags
+from opendbc.car.volkswagen.values import CanBus, CarControllerParams, VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -46,6 +45,12 @@ class MQBStandstillManager:
   it to while keeping ACC_07 in stopping mode so ESP holds the brake.
   """
 
+  HOLD_MAX_FRAMES = 50             # frames to hold before disabling long control to avoid a fault
+  HOLD_TORQUE_DEADBAND_NM = 40     # stop integrating when this close to target torque (Nm at wheel)
+  HOLD_TORQUE_TARGET_RATIO = 0.8   # target this fraction of ESP_Haltemoment to avoid overshoot
+  HOLD_ACCEL_KI = 0.0001           # I-controller gain: m/s² per Nm of torque error per ACC_CONTROL_STEP
+                                   # just a guess for now, fine-tuning could improve the feel of hill stops
+
   def __init__(self, CCP):
     self._CCP = CCP
     self.esp_hold_frames = 0
@@ -68,7 +73,7 @@ class MQBStandstillManager:
     if CS.out.brakePressed:
       long_active = False
     # stop regulating if hold has been held too long on a hill to avoid a cruise fault
-    elif self.esp_hold_frames > HOLD_MAX_FRAMES and is_uphill:
+    elif self.esp_hold_frames > self.HOLD_MAX_FRAMES and is_uphill:
       long_active = False
 
     # uphill launch: TSK rarely commands enough torque to move from a hill hold, so keep accel > 1 m/s²
@@ -85,15 +90,15 @@ class MQBStandstillManager:
       elif is_uphill and (CS.esp_hold_confirmation or CS.out.standstill):
         # skip torque management for one frame each cycle to avoid check engine light
         if self.esp_hold_frames > 1:
-          error_nm = CS.esp_hold_torque_nm * HOLD_TORQUE_TARGET_RATIO - CS.actual_torque_nm
-          if abs(error_nm) > HOLD_TORQUE_DEADBAND_NM:
-            self.hill_hold_accel = float(np.clip(self.hill_hold_accel + HOLD_ACCEL_KI * error_nm,
+          error_nm = CS.esp_hold_torque_nm * self.HOLD_TORQUE_TARGET_RATIO - CS.actual_torque_nm
+          if abs(error_nm) > self.HOLD_TORQUE_DEADBAND_NM:
+            self.hill_hold_accel = float(np.clip(self.hill_hold_accel + self.HOLD_ACCEL_KI * error_nm,
                                                  self._CCP.ACCEL_MIN, self._CCP.ACCEL_MAX))
           accel = max(accel, self.hill_hold_accel)
           starting = True
           stopping = False
         # near counter limit: attempt release to cycle the ESP hold
-        near_limit = self.esp_hold_frames >= HOLD_MAX_FRAMES - 10
+        near_limit = self.esp_hold_frames >= self.HOLD_MAX_FRAMES - 10
         esp_starting_override = near_limit
         esp_stopping_override = not near_limit
       else:

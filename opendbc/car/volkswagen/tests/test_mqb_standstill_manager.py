@@ -2,7 +2,7 @@
 import types
 
 from opendbc.car.volkswagen.carcontroller import MQBStandstillManager
-from opendbc.car.volkswagen.values import CarControllerParams as CCP, HOLD_MAX_FRAMES
+from opendbc.car.volkswagen.values import CarControllerParams as CCP
 from opendbc.car.volkswagen.tests.esp_tsk_sim import (
   ESPTSKSimulator, SimInputs,
   ACC_ANHALTEWEG_NEUTRAL, ESP_HOLD_TIMER_LIMIT_FRAMES,
@@ -59,8 +59,8 @@ def _mgr_step(sim: ESPTSKSimulator, mgr: MQBStandstillManager,
 class TestMQBStandstillManagerIntegration:
   def test_constants_safe_relative_to_esp_timer(self):
     """HOLD_MAX_FRAMES must be < ESP_HOLD_TIMER_LIMIT_FRAMES so the safety cutoff fires first."""
-    assert HOLD_MAX_FRAMES < ESP_HOLD_TIMER_LIMIT_FRAMES, (
-      f"HOLD_MAX_FRAMES ({HOLD_MAX_FRAMES}) must be < ESP_HOLD_TIMER_LIMIT_FRAMES ({ESP_HOLD_TIMER_LIMIT_FRAMES})"
+    assert MQBStandstillManager.HOLD_MAX_FRAMES < ESP_HOLD_TIMER_LIMIT_FRAMES, (
+      f"HOLD_MAX_FRAMES ({MQBStandstillManager.HOLD_MAX_FRAMES}) must be < ESP_HOLD_TIMER_LIMIT_FRAMES ({ESP_HOLD_TIMER_LIMIT_FRAMES})"
     )
 
   def test_flat_standstill_never_faults(self):
