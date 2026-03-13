@@ -219,3 +219,251 @@ class ESPTSKSimulator:
       "_hill_decel_frames": self.esp.hill_decel_frames,
       "_spontaneous_uphill": self.esp.spontaneous_uphill,
     }
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ESPTSKSimulator test helpers
+# ──────────────────────────────────────────────────────────────────────────────
+
+def stopping(sim: ESPTSKSimulator, n: int = 1) -> None:
+  """Send n frames of stopping (acc_anhalten=True, acc_anfahren=False)."""
+  for _ in range(n):
+    sim.step(SimInputs(acc_anhalten=True, acc_anhalteweg=0.3))
+
+
+def starting(sim: ESPTSKSimulator, n: int = 1) -> None:
+  """Send n frames of starting (acc_anfahren=True, acc_anhalten=False)."""
+  for _ in range(n):
+    sim.step(SimInputs(acc_anfahren=True))
+
+
+def neutral(sim: ESPTSKSimulator, n: int = 1) -> None:
+  """Send n frames of neither starting nor stopping."""
+  for _ in range(n):
+    sim.step(SimInputs())
+
+
+def acquire_hold(sim: ESPTSKSimulator) -> None:
+  """Send one stopping step and assert the hold is confirmed."""
+  stopping(sim, 1)
+  assert sim.car_state()["esp_hold_confirmation"], "hold should confirm after one stopping() step"
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ESPTSKSimulator unit tests
+# ──────────────────────────────────────────────────────────────────────────────
+
+class TestImmediateFaults:
+  def test_simultaneous_start_stop_faults(self):
+    sim = ESPTSKSimulator()
+    sim.step(SimInputs(acc_anfahren=True, acc_anhalten=True, acc_anhalteweg=0.3))
+    assert sim.car_state()["_faulted"]
+
+  def test_anhalten_without_anhalteweg_faults(self):
+    sim = ESPTSKSimulator()
+    sim.step(SimInputs(acc_anhalten=True, acc_anhalteweg=ACC_ANHALTEWEG_NEUTRAL))
+    assert sim.car_state()["_faulted"]
+
+  def test_anhalteweg_without_anhalten_faults(self):
+    sim = ESPTSKSimulator()
+    sim.step(SimInputs(acc_anhalten=False, acc_anhalteweg=0.3))
+    assert sim.car_state()["_faulted"]
+
+  def test_valid_stopping_no_fault(self):
+    sim = ESPTSKSimulator()
+    sim.step(SimInputs(acc_anhalten=True, acc_anhalteweg=0.3))
+    assert not sim.car_state()["_faulted"]
+
+  def test_valid_starting_no_fault(self):
+    sim = ESPTSKSimulator()
+    sim.step(SimInputs(acc_anfahren=True))
+    assert not sim.car_state()["_faulted"]
+
+
+class TestHoldMechanics:
+  def test_hold_acquired_at_standstill(self):
+    sim = ESPTSKSimulator(speed_ms=0.0)
+    acquire_hold(sim)
+    assert sim.car_state()["esp_hold_confirmation"]
+
+  def test_hold_not_acquired_above_threshold_speed(self):
+    sim = ESPTSKSimulator(speed_ms=ESP_HOLD_ACQUIRE_SPEED_MS + 0.01)
+    stopping(sim, 1)
+    assert not sim.car_state()["esp_hold_confirmation"]
+
+  def test_hold_unconditional_release_by_neutral(self):
+    sim = ESPTSKSimulator(speed_ms=0.0)
+    acquire_hold(sim)
+    neutral(sim, 1)
+    assert not sim.car_state()["esp_hold_confirmation"]
+
+  def test_conditional_release_succeeds_with_sufficient_torque(self):
+    """starting=True releases hold when actual wheel torque meets threshold."""
+    haltemoment = 790.0
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=haltemoment, torque_tau_s=0.1)
+    acquire_hold(sim)
+    # Build torque for 20 frames while holding (well within hold timer limit)
+    for _ in range(20):
+      sim.step(SimInputs(acc_anhalten=True, acc_anhalteweg=0.3, acc_sollbeschl_06=2.0))
+    assert sim.actual_torque_nm >= haltemoment * TORQUE_RELEASE_RATIO
+    # Conditional release while maintaining torque (torque must not drop to zero)
+    sim.step(SimInputs(acc_anfahren=True, acc_sollbeschl_06=2.0))
+    assert not sim.car_state()["esp_hold_confirmation"]
+
+  def test_conditional_release_fails_with_insufficient_torque(self):
+    """starting=True does NOT release hold when torque is insufficient."""
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=790.0)
+    acquire_hold(sim)
+    # No torque built — conditional release should fail
+    starting(sim, 1)
+    assert sim.car_state()["esp_hold_confirmation"]
+
+
+class TestTimers:
+  def test_hold_timer_increments_while_confirmed(self):
+    sim = ESPTSKSimulator(speed_ms=0.0)
+    acquire_hold(sim)
+    stopping(sim, 5)
+    assert sim.car_state()["_hold_timer_frames"] == 5
+
+  def test_hold_timer_faults_at_limit(self):
+    sim = ESPTSKSimulator(speed_ms=0.0)
+    acquire_hold(sim)
+    stopping(sim, ESP_HOLD_TIMER_LIMIT_FRAMES)
+    assert not sim.car_state()["_faulted"]
+    stopping(sim, 1)
+    assert sim.car_state()["_faulted"]
+
+  def test_hold_timer_pauses_on_unconditional_release(self):
+    """Neutral (unconditional release) pauses the timer; it resumes on re-acquisition."""
+    sim = ESPTSKSimulator(speed_ms=0.0)
+    acquire_hold(sim)
+    stopping(sim, 10)
+    neutral(sim, 1)  # releases, timer was 10 → pauses
+    # Timer increments once on the neutral step (hold was True at start of that step), so 11
+    acquire_hold(sim)
+    assert sim.car_state()["_hold_timer_frames"] == 11
+
+  def test_hold_timer_resets_on_wheel_movement_without_hold(self):
+    """Timer resets when wheels move while hold is not confirmed."""
+    sim = ESPTSKSimulator(speed_ms=0.0)
+    acquire_hold(sim)
+    stopping(sim, 10)
+    neutral(sim, 1)            # release hold
+    sim.speed_ms = 0.5
+    neutral(sim, 1)            # wheel movement detected, no hold
+    sim.speed_ms = 0.0
+    acquire_hold(sim)
+    assert sim.car_state()["_hold_timer_frames"] == 0
+
+  def test_hold_timer_resets_on_successful_conditional_release(self):
+    """Successful conditional release resets the timer to 0."""
+    haltemoment = 400.0
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=haltemoment, torque_tau_s=0.1)
+    acquire_hold(sim)
+    # Build torque for 20 frames (well within timer limit of 57)
+    for _ in range(20):
+      sim.step(SimInputs(acc_anhalten=True, acc_anhalteweg=0.3, acc_sollbeschl_06=2.0))
+    assert sim.car_state()["_hold_timer_frames"] == 20
+    assert sim.actual_torque_nm >= haltemoment * TORQUE_RELEASE_RATIO
+    # Conditional release while maintaining torque
+    sim.step(SimInputs(acc_anfahren=True, acc_sollbeschl_06=2.0))
+    assert not sim.car_state()["esp_hold_confirmation"]
+    assert sim.car_state()["_hold_timer_frames"] == 0
+
+  def test_hill_decel_timer_counts_while_stopped_on_hill(self):
+    """TSK radbremsmom (no hold, hill) increments the hill decel timer."""
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=790.0)
+    for _ in range(10):
+      sim.step(SimInputs())
+    assert sim.car_state()["_hill_decel_frames"] == 10
+
+  def test_hill_decel_timer_faults_at_limit(self):
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=790.0)
+    for _ in range(HILL_DECEL_TIMEOUT_FRAMES):
+      sim.step(SimInputs())
+    assert not sim.car_state()["_faulted"]
+    sim.step(SimInputs())
+    assert sim.car_state()["_faulted"]
+
+  def test_hill_decel_timer_resets_when_hold_confirms(self):
+    """Hold confirmation stops radbremsmom; timer resets on second stopping step."""
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=790.0)
+    for _ in range(10):
+      sim.step(SimInputs())
+    assert sim.car_state()["_hill_decel_frames"] == 10
+    stopping(sim, 1)  # first stopping: hold acquires; hill_decel increments once more then...
+    stopping(sim, 1)  # second stopping: hold was confirmed at start → hill_decel resets to 0
+    assert sim.car_state()["_hill_decel_frames"] == 0
+
+  def test_hill_decel_timer_flat_no_fault(self):
+    """Flat ground (low haltemoment) does not accumulate hill decel timer."""
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=0.0)
+    for _ in range(HILL_DECEL_TIMEOUT_FRAMES + 10):
+      sim.step(SimInputs())
+    assert not sim.car_state()["_faulted"]
+
+
+class TestFlatStrategy:
+  def test_neutral_releases_hold(self):
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=0.0)
+    acquire_hold(sim)
+    neutral(sim, 1)
+    assert not sim.car_state()["esp_hold_confirmation"]
+
+  def test_starting_prevents_reacquisition(self):
+    """After release, starting=True prevents the ESP from re-acquiring hold."""
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=0.0)
+    acquire_hold(sim)
+    neutral(sim, 1)
+    for _ in range(30):
+      starting(sim, 1)
+    assert not sim.car_state()["esp_hold_confirmation"]
+    assert not sim.car_state()["_faulted"]
+
+  def test_flat_hold_timer_does_not_expire(self):
+    """On flat ground: acquire hold, immediately do neutral+starting; timer never expires."""
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=0.0)
+    acquire_hold(sim)
+    neutral(sim, 1)
+    for _ in range(100):
+      starting(sim, 1)
+    assert not sim.car_state()["_faulted"]
+
+
+class TestSpontaneousReacquisition:
+  def test_spontaneous_reacquisition_sets_flag(self):
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=0.0)
+    sim.trigger_spontaneous_reacquisition = True
+    neutral(sim, 1)
+    cs = sim.car_state()
+    assert cs["esp_hold_confirmation"]
+    assert cs["_spontaneous_uphill"]
+
+  def test_spontaneous_reacquisition_triggers_hill_decel_timeout(self):
+    """After spontaneous reacquisition, hill decel timeout applies even on flat grade."""
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=0.0)  # flat torque
+    sim.trigger_spontaneous_reacquisition = True
+    neutral(sim, 1)   # hold acquires with spontaneous_uphill=True
+    neutral(sim, 1)   # unconditional release; spontaneous_uphill flag persists
+    assert not sim.car_state()["esp_hold_confirmation"]
+    # Hill decel timer now applies (spontaneous_uphill is set)
+    faulted = False
+    for _ in range(HILL_DECEL_TIMEOUT_FRAMES + 2):
+      sim.step(SimInputs())
+      if sim.car_state()["_faulted"]:
+        faulted = True
+        break
+    assert faulted
+
+  def test_spontaneous_uphill_clears_on_wheel_movement(self):
+    """spontaneous_uphill flag clears once wheels move without a hold."""
+    sim = ESPTSKSimulator(speed_ms=0.0, esp_hold_torque_nm=0.0)
+    sim.trigger_spontaneous_reacquisition = True
+    neutral(sim, 1)   # acquires with spontaneous_uphill=True
+    neutral(sim, 1)   # releases
+    assert sim.car_state()["_spontaneous_uphill"]
+    sim.speed_ms = 0.5
+    neutral(sim, 1)   # wheel movement, no hold → clears flag
+    sim.speed_ms = 0.0
+    assert not sim.car_state()["_spontaneous_uphill"]
