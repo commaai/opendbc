@@ -43,12 +43,13 @@ While the primary focus is on supporting ADAS interfaces for [openpilot](https:/
 
 ---
 
-This README and the [supported cars list](docs/CARS.md) are all the docs for the opendbc project.
-Everything you need to know to use, contribute, and extend opendbc are in these docs.
-
-## Quick start
-
-```bash
+* [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC_file_format) files for various cars.
+* [`opendbc/can/`](opendbc/can/) contains CAN message definitions and utilities.
+* [`opendbc/car/`](opendbc/car/) includes car-specific configurations and scripts.
+* [`opendbc/can_common.py`](opendbc/can_common.py) contains common CAN utilities and tests.
+* [`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
+* [`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
+* [`docs/`](docs/) contains documentation for the project.
 git clone https://github.com/commaai/opendbc.git
 cd opendbc
 
