@@ -16,7 +16,6 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.main])
     self.apply_torque_last = 0
     self.CAN = gwmcan.CanBus(CP)
-    self.count_not_repeat_one = 0
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
@@ -49,13 +48,11 @@ class CarController(CarControllerBase):
       # Steer command
       new_torque = int(round(actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
-      # Prevent sending the same 'apply_torque =1' torque repeatedly, as it can cause EPS faults.
-      self.count_not_repeat_one = (self.count_not_repeat_one + 1) if ((self.apply_torque_last == 1) and (apply_torque == 1)) else 0
-      if self.count_not_repeat_one > 2:
-        apply_torque = 2
+      # Prevent sending the same 'apply_torque = 1' torque repeatedly, as it can cause EPS faults.
+      if abs(apply_torque) == 1:
+        apply_torque = 2 if apply_torque > 0 else -2
       if not lat_active:
         apply_torque = 0
-      self.apply_torque_last = apply_torque
       can_sends.append(gwmcan.create_steer_command(
         self.packer,
         self.CAN,

@@ -114,7 +114,7 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
     .max_rate_up = 4,
     .max_rate_down = 6,
     .max_torque_error = 70,
-    .max_rt_delta = 100,
+    .max_rt_delta = 75,
     .type = TorqueMotorLimited,
   };
 
