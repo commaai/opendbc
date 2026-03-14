@@ -62,6 +62,8 @@ class FakeSafety:
 
 
 class TestSafetyReplay(unittest.TestCase):
+  TX_MSGS = None
+
   def test_replay_drive_resets_safety_before_initializing_segment(self):
     safety = FakeSafety()
     msgs = [FakeReplayMessage("can")]
