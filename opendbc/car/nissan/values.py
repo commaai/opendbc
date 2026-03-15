@@ -72,7 +72,7 @@ class CAR(Platforms):
     NissanCarSpecs(mass=1610, wheelbase=2.705)
   )
   NISSAN_ALTIMA = NissanPlatformConfig(
-    [NissanCarDocs("Nissan Altima 2019-20, 2024", car_parts=CarParts.common([CarHarness.nissan_b]))],
+    [NissanCarDocs("Nissan Altima 2019-20, 2023-24", car_parts=CarParts.common([CarHarness.nissan_b]))],
     NissanCarSpecs(mass=1492, wheelbase=2.824)
   )
 
@@ -93,7 +93,7 @@ NISSAN_VERSION_RESPONSE_KWP = b'\x61\x83'
 NISSAN_RX_OFFSET = 0x20
 
 FW_QUERY_CONFIG = FwQueryConfig(
-  requests=[request for bus, logging in ((0, False), (1, True)) for request in [
+  requests=[request for bus, logging in ((0, False), (1, False)) for request in [
     Request(
       [NISSAN_DIAGNOSTIC_REQUEST_KWP, NISSAN_VERSION_REQUEST_KWP],
       [NISSAN_DIAGNOSTIC_RESPONSE_KWP, NISSAN_VERSION_RESPONSE_KWP],
@@ -122,4 +122,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       logging=logging,
     ),
   ]],
+  non_essential_ecus={
+    Ecu.engine: [CAR.NISSAN_ALTIMA],
+  },
 )
