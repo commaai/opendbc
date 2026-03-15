@@ -51,8 +51,10 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self._motor_03_msg(gas_signal=gas)
 
   # ACC engagement status
-  def _tsk_status_msg(self, enable, main_switch=True):
-    values = {"ACC_Status_ACC": 1 if not main_switch else 3 if enable else 2}
+  def _tsk_status_msg(self, enable, main_switch=True, acc_status=None):
+    if acc_status is None:
+      acc_status = 1 if not main_switch else 3 if enable else 2
+    values = {"ACC_Status_ACC": acc_status}
     return self.packer.make_can_msg_safety("ACC_05", 2, values)
 
   def _pcm_status_msg(self, enable):
@@ -120,6 +122,18 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMlb, 0)
     self.safety.init_tests()
 
+  def test_cruise_engaged_all_states(self):
+    for acc_status in (3, 4, 5):
+      self._rx(self._tsk_status_msg(False))
+      self._rx(self._tsk_status_msg(True, acc_status=acc_status))
+      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed for ACC_Status_ACC={acc_status}")
+
+  def test_steer_req_status_values(self):
+    self.safety.set_controls_allowed(True)
+    for steer_status in (5, 7):
+      values = {"HCA_01_LM_Offset": 1, "HCA_01_LM_OffSign": False, "HCA_01_Sendestatus": 1, "HCA_01_Status_HCA": steer_status}
+      self.assertTrue(self._tx(self.packer.make_can_msg_safety("HCA_01", 0, values)), f"steer rejected with status={steer_status}")
+
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._ls_01_msg(cancel=1)))
@@ -135,6 +149,11 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     self.safety.set_controls_allowed(1)
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
+
+  def test_cancel_button_not_pressed(self):
+    self.safety.set_controls_allowed(True)
+    self._rx(self._ls_01_msg(cancel=False, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
 
 
 if __name__ == "__main__":

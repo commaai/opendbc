@@ -16,14 +16,10 @@
 #define PSA_CAM_BUS  2U
 
 static uint8_t psa_get_counter(const CANPacket_t *msg) {
-  uint8_t cnt = 0;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    cnt = (msg->data[3] >> 4) & 0xFU;
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    cnt = (msg->data[5] >> 4) & 0xFU;
-  } else {
+    return (msg->data[3] >> 4) & 0xFU;
   }
-  return cnt;
+  return (msg->data[5] >> 4) & 0xFU;
 }
 
 static uint32_t psa_get_checksum(const CANPacket_t *msg) {
@@ -47,14 +43,8 @@ static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, in
 }
 
 static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
-  uint8_t chk = 0;
-  if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    chk = _psa_compute_checksum(msg, 0x4, 5);
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    chk = _psa_compute_checksum(msg, 0x7, 5);
-  } else {
-  }
-  return chk;
+  uint8_t chk_ini = (msg->addr == PSA_HS2_DAT_MDD_CMD_452) ? 0x4 : 0x7;
+  return _psa_compute_checksum(msg, chk_ini, 5);
 }
 
 static void psa_rx_hook(const CANPacket_t *msg) {
@@ -73,17 +63,12 @@ static void psa_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if (msg->bus == PSA_ADAS_BUS) {
-    if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-      pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
-    }
+  if (ADDR_BUS_MATCH(msg, PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS)) {
+    pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
   }
 
-
-  if (msg->bus == PSA_CAM_BUS) {
-    if (msg->addr == PSA_DAT_BSI) {
-      brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
-    }
+  if (ADDR_BUS_MATCH(msg, PSA_DAT_BSI, PSA_CAM_BUS)) {
+    brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
   }
 }
 

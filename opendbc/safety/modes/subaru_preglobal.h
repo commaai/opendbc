@@ -20,33 +20,31 @@
 static bool subaru_pg_reversed_driver_torque = false;
 
 static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == SUBARU_PG_MAIN_BUS) {
-    if (msg->addr == MSG_SUBARU_PG_Steering_Torque) {
-      int torque_driver_new;
-      torque_driver_new = (msg->data[3] >> 5) + (msg->data[4] << 3);
-      torque_driver_new = to_signed(torque_driver_new, 11);
-      torque_driver_new = subaru_pg_reversed_driver_torque ? -torque_driver_new : torque_driver_new;
-      update_sample(&torque_driver, torque_driver_new);
-    }
+  if (ADDR_BUS_MATCH(msg, MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS)) {
+    int torque_driver_new;
+    torque_driver_new = (msg->data[3] >> 5) + (msg->data[4] << 3);
+    torque_driver_new = to_signed(torque_driver_new, 11);
+    torque_driver_new = subaru_pg_reversed_driver_torque ? -torque_driver_new : torque_driver_new;
+    update_sample(&torque_driver, torque_driver_new);
+  }
 
-    // enter controls on rising edge of ACC, exit controls on ACC off
-    if (msg->addr == MSG_SUBARU_PG_CruiseControl) {
-      bool cruise_engaged = (msg->data[6] >> 1) & 1U;
-      pcm_cruise_check(cruise_engaged);
-    }
+  // enter controls on rising edge of ACC, exit controls on ACC off
+  if (ADDR_BUS_MATCH(msg, MSG_SUBARU_PG_CruiseControl, SUBARU_PG_MAIN_BUS)) {
+    bool cruise_engaged = (msg->data[6] >> 1) & 1U;
+    pcm_cruise_check(cruise_engaged);
+  }
 
-    // update vehicle moving with any non-zero wheel speed
-    if (msg->addr == MSG_SUBARU_PG_Wheel_Speeds) {
-      vehicle_moving = ((GET_BYTES(msg, 0, 4) >> 12) != 0U) || (GET_BYTES(msg, 4, 4) != 0U);
-    }
+  // update vehicle moving with any non-zero wheel speed
+  if (ADDR_BUS_MATCH(msg, MSG_SUBARU_PG_Wheel_Speeds, SUBARU_PG_MAIN_BUS)) {
+    vehicle_moving = ((GET_BYTES(msg, 0, 4) >> 12) != 0U) || (GET_BYTES(msg, 4, 4) != 0U);
+  }
 
-    if (msg->addr == MSG_SUBARU_PG_Brake_Pedal) {
-      brake_pressed = ((GET_BYTES(msg, 0, 4) >> 16) & 0xFFU) > 0U;
-    }
+  if (ADDR_BUS_MATCH(msg, MSG_SUBARU_PG_Brake_Pedal, SUBARU_PG_MAIN_BUS)) {
+    brake_pressed = ((GET_BYTES(msg, 0, 4) >> 16) & 0xFFU) > 0U;
+  }
 
-    if (msg->addr == MSG_SUBARU_PG_Throttle) {
-      gas_pressed = msg->data[0] != 0U;
-    }
+  if (ADDR_BUS_MATCH(msg, MSG_SUBARU_PG_Throttle, SUBARU_PG_MAIN_BUS)) {
+    gas_pressed = msg->data[0] != 0U;
   }
 }
 
