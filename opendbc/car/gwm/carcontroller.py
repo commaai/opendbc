@@ -60,8 +60,8 @@ class CarController(CarControllerBase):
         steer=apply_torque,
         steer_req=lat_active,
       ))
+      self.apply_torque_last = apply_torque
 
-    self.apply_torque_last = apply_torque
     new_actuators = actuators.as_builder()
     new_actuators.torque = self.apply_torque_last / self.params.STEER_MAX
     new_actuators.torqueOutputCan = self.apply_torque_last
