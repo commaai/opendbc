@@ -44,6 +44,13 @@ GEAR_SHIFTER_MAP: dict[str, structs.CarState.GearShifter] = {
 TorqueFromLateralAccelCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning, bool], float]
 LateralAccelFromTorqueCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning, bool], float]
 
+_SPEED_KF_Q = np.array([[0.0, 0.0], [0.0, 100.0]])
+_SPEED_KF_R = 0.3
+_SPEED_KF_A = [[1.0, DT_CTRL], [0.0, 1.0]]
+_SPEED_KF_C = [[1.0, 0.0]]
+_SPEED_KF_X0 = [[0.0], [0.0]]
+_SPEED_KF_K = get_kalman_gain(DT_CTRL, np.array(_SPEED_KF_A), np.array(_SPEED_KF_C), _SPEED_KF_Q, _SPEED_KF_R)
+
 
 @cache
 def get_torque_params():
@@ -281,13 +288,7 @@ class CarStateBase(ABC):
     self.cluster_min_speed = 0.0  # min speed before dropping to 0
     self.secoc_key: bytes = b"00" * 16
 
-    Q = [[0.0, 0.0], [0.0, 100.0]]
-    R = 0.3
-    A = [[1.0, DT_CTRL], [0.0, 1.0]]
-    C = [[1.0, 0.0]]
-    x0=[[0.0], [0.0]]
-    K = get_kalman_gain(DT_CTRL, np.array(A), np.array(C), np.array(Q), R)
-    self.v_ego_kf = KF1D(x0=x0, A=A, C=C[0], K=K)
+    self.v_ego_kf = KF1D(x0=_SPEED_KF_X0, A=_SPEED_KF_A, C=_SPEED_KF_C[0], K=_SPEED_KF_K)
 
   @abstractmethod
   def update(self, can_parsers) -> structs.CarState:
