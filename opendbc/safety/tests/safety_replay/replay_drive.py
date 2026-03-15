@@ -15,6 +15,10 @@ def replay_drive(msgs, safety_mode, param, alternative_experience):
 
   err = safety.set_safety_hooks(safety_mode, param)
   assert err == 0, "invalid safety mode: %d" % safety_mode
+
+  # Mirror standalone safety tests so replay initialization starts from the same
+  # cleared state, then restore route-specific configuration.
+  safety.init_tests()
   safety.set_alternative_experience(alternative_experience)
 
   init_segment(safety, msgs, safety_mode, param)
