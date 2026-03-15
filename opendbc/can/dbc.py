@@ -215,6 +215,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(8, -1, 0, -1, True, SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
   elif dbc_name.startswith("psa_"):
     return ChecksumState(4, 4, 7, 3, False, SignalType.PSA_CHECKSUM, psa_checksum)
+elif dbc_name.startswith("renault_"):
+  return ChecksumState(4, 4, 7, 3, False, SignalType.PSA_CHECKSUM, psa_checksum)
   return None
 
 
@@ -228,3 +230,4 @@ def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_
       sig.calc_checksum = chk.calc_checksum
     elif sig.name == "COUNTER":
       sig.type = SignalType.COUNTER
+
