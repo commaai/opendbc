@@ -583,6 +583,18 @@ FW_VERSIONS = {
       b'\xf1\x00CD ESC \x0b 101 \x10\x03 58910-J7AC0',
     ],
   },
+  CAR.KIA_CEED_PHEV: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00CDph SCC F-CUP      1.00 1.01 99110-CR100         ',
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00CDe MDPS C 1.00 1.01 56310-XX000 4CDHC101',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00CD2 LKAS AT EUR LHD 1.00 1.01 99211-CR010 621',
+      b'\xf1\x00CDP LKAS AT EUR LHD 1.00 1.01 99211-CR000 q31',
+    ],
+  },
   CAR.KIA_FORTE: {
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00BD  MDPS C 1.00 1.02 56310-XX000 4BD2C102',
