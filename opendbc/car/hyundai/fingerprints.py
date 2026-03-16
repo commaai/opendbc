@@ -569,14 +569,17 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00CD__ SCC F-CUP      1.00 1.00 99110-J7500         ',
       b'\xf1\x00CD__ SCC F-CUP      1.00 1.02 99110-J7000         ',
+      b'\xf1\x00CDph SCC F-CUP      1.00 1.01 99110-CR100         ',
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00CD  MDPS C 1.00 1.06 56310-XX000 4CDEC106',
       b'\xf1\x00CDT MDPS C 1.00 1.00 56310-XX000 4CDTC100',
+      b'\xf1\x00CDe MDPS C 1.00 1.01 56310-XX000 4CDHC101',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00CD  LKAS AT EUR LHD 1.00 1.01 99211-J7000 B40',
       b'\xf1\x00CDT LKAS AT EUR LHD 1.00 1.01 99211-J7210 521',
+      b'\xf1\x00CD2 LKAS AT EUR LHD 1.00 1.01 99211-CR010 621',
     ],
     (Ecu.abs, 0x7d1, None): [
       b'\xf1\x00CD ESC \x03 102\x18\x08\x05 58920-J7350',

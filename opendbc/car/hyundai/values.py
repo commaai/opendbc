@@ -510,7 +510,7 @@ class CAR(Platforms):
   KIA_CEED = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Ceed 2019-21", car_parts=CarParts.common([CarHarness.hyundai_e]))],
     CarSpecs(mass=1450, wheelbase=2.65, steerRatio=13.75, tireStiffnessFactor=0.5),
-    flags=HyundaiFlags.LEGACY,
+    flags=HyundaiFlags.LEGACY | HyundaiFlags.HYBRID,
   )
   KIA_EV6 = HyundaiCanFDPlatformConfig(
     [
