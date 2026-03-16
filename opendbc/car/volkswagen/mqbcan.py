@@ -88,7 +88,8 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active):
   return acc_control_value(main_switch_on, acc_faulted, long_active)
 
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting,
+                             esp_hold, esp_starting_override, esp_stopping_override):
   commands = []
 
   acc_06_values = {
@@ -100,8 +101,8 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_zul_Regelabw_oben": 0.2,  # TODO: dynamic adjustment of comfort-band
     "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
     "ACC_pos_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
-    "ACC_Anfahren": starting,
-    "ACC_Anhalten": stopping,
+    "ACC_Anfahren": starting if acc_enabled else False,
+    "ACC_Anhalten": stopping if acc_enabled else False,
   }
   commands.append(packer.make_can_msg("ACC_06", bus, acc_06_values))
 
@@ -114,14 +115,18 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   else:
     acc_hold_type = 0
 
+  # acc 7 is forwarded to ESP
+  acc07_stopping = esp_stopping_override if esp_stopping_override is not None else stopping
+  acc07_starting = esp_starting_override if esp_starting_override is not None else starting
+
   acc_07_values = {
-    "ACC_Anhalteweg": 0.3 if stopping else 20.46,  # Distance to stop (stopping coordinator handles terminal roll-out)
+    "ACC_Anhalteweg": 0.3 if acc07_stopping and acc_enabled else 20.46,  # Distance to stop (stopping coordinator handles terminal roll-out)
     "ACC_Freilauf_Info": 2 if acc_enabled else 0,
     "ACC_Folgebeschl": 3.02,  # Not using secondary controller accel unless and until we understand its impact
     "ACC_Sollbeschleunigung_02": accel if acc_enabled else 3.01,
     "ACC_Anforderung_HMS": acc_hold_type,
-    "ACC_Anfahren": starting,
-    "ACC_Anhalten": stopping,
+    "ACC_Anfahren": acc07_starting if acc_enabled else False,
+    "ACC_Anhalten": acc07_stopping if acc_enabled else False,
   }
   commands.append(packer.make_can_msg("ACC_07", bus, acc_07_values))
 
