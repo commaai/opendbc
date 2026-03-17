@@ -263,6 +263,12 @@ extern bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
 extern int cruise_button_prev;
 extern bool safety_rx_checks_invalid;
 
+// CAN-based ignition detection (used by panda)
+extern bool ignition_can;
+extern uint32_t ignition_can_cnt;
+void ignition_can_reset(void);
+void ignition_can_hook(const CANPacket_t *msg);
+
 // for safety modes with torque steering control
 extern int desired_torque_last;       // last desired steer torque
 extern int rt_torque_last;            // last desired torque for real time check
