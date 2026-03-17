@@ -72,7 +72,6 @@ class CAR(Platforms):
 # - variant: optional letters/digits for generation and hardware variant (e.g. 4, L, S, H, P, PR)
 # - platform_number: 3 digits
 # - version: dot-separated numbers (ignored for fuzzy matching)
-FW_VERSIONS_PATTERN = re.compile(rb',[EYX]')
 PLATFORM_CODE_PATTERN = re.compile(rb',(?P<model>[EYX])(?P<variant>[A-Z0-9]*)(?P<platform>\d{3})\.')
 
 PLATFORM_CODE_ECUS = (Ecu.eps,)

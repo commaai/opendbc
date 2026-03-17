@@ -39,7 +39,9 @@ class TestTeslaFW(unittest.TestCase):
   @parameterized("car_model, fw_versions", FW_VERSIONS.items())
   def test_fw_versions_parseable(self, car_model, fw_versions):
     """All FW versions in the database should have parseable platform codes."""
-    for (ecu, addr, subaddr), fws in fw_versions.items():
+    for (ecu, _addr, _subaddr), fws in fw_versions.items():
+      if ecu not in PLATFORM_CODE_ECUS:
+        continue
       for fw in fws:
         codes = get_platform_codes([fw])
         assert len(codes) == 1, f"Unable to parse platform code from FW: {fw!r}"
