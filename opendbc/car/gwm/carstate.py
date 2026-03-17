@@ -16,6 +16,9 @@ class CarState(CarStateBase):
     self.eps_stock_values = {}
     self.camera_stock_values = {}
     self.steer_fault_temporary_counter = 0
+    self.is_activation_lever_pulled = False
+    self.prev_activation_lever_pulled = False
+    self.main_on = False
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.main]
@@ -67,8 +70,15 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["LIGHTS"]["LEFT_TURN_SIGNAL"],
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
 
-    ret.cruiseState.available = bool(cp_cam.vl["ACC"]["CRUISE_STATE_2"] > 2)
-    ret.cruiseState.enabled = bool(cp_cam.vl["ACC"]["CRUISE_STATE_2"] > 2)
+    if cp.vl["STEER_AND_AP_STALK"]["AP_CANCEL_COMMAND"] or ret.brakePressed:
+      self.main_on = False
+    self.is_activation_lever_pulled = bool(cp.vl["STEER_AND_AP_STALK"]["AP_ENABLE_COMMAND"])
+    if self.is_activation_lever_pulled and not self.prev_activation_lever_pulled and not self.main_on:
+      self.main_on = True
+    self.prev_activation_lever_pulled = self.is_activation_lever_pulled
+
+    ret.cruiseState.available = self.main_on
+    ret.cruiseState.enabled = self.main_on
     return ret
 
   @staticmethod

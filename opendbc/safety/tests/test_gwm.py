@@ -33,8 +33,13 @@ class TestGwm(common.PandaSafetyTest):
     return self.packer.make_can_msg_panda("WHEEL_SPEEDS", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"CRUISE_STATE_2": 3 if enable else 2}
-    return self.packer.make_can_msg_panda("ACC", 0, values)
+    values = {"AP_ENABLE_COMMAND": enable, "AP_CANCEL_COMMAND": not enable}
+    return self.packer.make_can_msg_panda("STEER_AND_AP_STALK", 0, values)
+
+  def test_main_cancel_button(self):
+    self.safety.set_controls_allowed(True)
+    self._rx(self.packer.make_can_msg_panda("STEER_AND_AP_STALK", 0, {"AP_CANCEL_COMMAND": 1}))
+    self.assertFalse(self.safety.get_controls_allowed())
 
   def test_rx_hook(self):
     self.assertTrue(self._rx(self._speed_msg(0)))
