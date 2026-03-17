@@ -24,7 +24,6 @@ testing = [
   "tree-sitter-c",
   "gcovr",
   "unittest-parallel",
-  "hypothesis==6.47.*",
   "zstandard",
 
   # static analysis
