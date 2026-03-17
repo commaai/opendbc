@@ -7,6 +7,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
+from opendbc.car.vin import Vin
 
 Ecu = CarParams.Ecu
 
@@ -665,7 +666,21 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
     if valid_expected_ecus.issubset(valid_found_ecus):
       candidates.add(candidate)
 
-  return candidates - fuzzy_platform_blacklist
+  candidates -= fuzzy_platform_blacklist
+  return disambiguate_car_by_vin(candidates, vin) if len(candidates) > 1 else candidates
+
+
+def disambiguate_car_by_vin(candidates: set[str], vin: str) -> set[str]:
+  # VIN-based disambiguation for known overlapping platforms only used as final failover when multiple candidates remain.
+  if len(candidates) <= 1:
+    return candidates
+  if {str(CAR.HYUNDAI_TUCSON_4TH_GEN), str(CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN)}.issubset(candidates):
+    vin_obj = Vin(vin)
+    if vin_obj.wmi == "5NT" and vin_obj.vds.startswith("J"):
+      return {str(CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN)}
+    if vin_obj.wmi in ("5NM", "KM8") and vin_obj.vds.startswith("J"):
+      return {str(CAR.HYUNDAI_TUCSON_4TH_GEN)}
+  return candidates
 
 
 HYUNDAI_VERSION_REQUEST_LONG = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
