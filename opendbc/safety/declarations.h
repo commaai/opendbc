@@ -36,6 +36,7 @@
 
 #define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
+#define ADDR_BUS_MATCH(msg, _addr, _bus) ((((uint32_t)(msg)->bus << 16) | (msg)->addr) == (((uint32_t)(_bus) << 16) | (_addr)))
 
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), (sizeof((rx)) / sizeof((rx)[0])), \
                                                   (tx), (sizeof((tx)) / sizeof((tx)[0])), \

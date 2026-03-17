@@ -152,15 +152,23 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
     }
 
     // gas press, different for EV, hybrid, and ICE models
-    if ((msg->addr == 0x371U) && hyundai_ev_gas_signal) {
-      gas_pressed = (((msg->data[4] & 0x7FU) << 1) | (msg->data[3] >> 7)) != 0U;
-    } else if ((msg->addr == 0x371U) && hyundai_hybrid_gas_signal) {
-      gas_pressed = msg->data[7] != 0U;
-    } else if ((msg->addr == 0x91U) && hyundai_fcev_gas_signal) {
-      gas_pressed = msg->data[6] != 0U;
-    } else if ((msg->addr == 0x260U) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
-      gas_pressed = (msg->data[7] >> 6) != 0U;
-    } else {
+    uint32_t gas_addr = 0x260U;
+    if (hyundai_ev_gas_signal || hyundai_hybrid_gas_signal) {
+      gas_addr = 0x371U;
+    } else if (hyundai_fcev_gas_signal) {
+      gas_addr = 0x91U;
+    }
+
+    if (msg->addr == gas_addr) {
+      if (hyundai_ev_gas_signal) {
+        gas_pressed = (((msg->data[4] & 0x7FU) << 1) | (msg->data[3] >> 7)) != 0U;
+      } else if (hyundai_hybrid_gas_signal) {
+        gas_pressed = msg->data[7] != 0U;
+      } else if (hyundai_fcev_gas_signal) {
+        gas_pressed = msg->data[6] != 0U;
+      } else {
+        gas_pressed = (msg->data[7] >> 6) != 0U;
+      }
     }
 
     // sample wheel speed, averaging opposite corners

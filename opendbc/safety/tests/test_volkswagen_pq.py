@@ -129,6 +129,17 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
+  def test_cruise_engaged_states(self):
+    # Test acc_status values to cover || short-circuit: 1 and 2 should engage, 0 and 3 should not
+    for acc_status in range(4):
+      # Disengage first (rising edge needed)
+      self._rx(self._motor_2_msg(cruise_engaged=False))
+      # Now send the test status
+      values = {"MO2_BLS": False, "MO2_Sta_GRA": acc_status}
+      self._rx(self.packer.make_can_msg_safety("Motor_2", 0, values))
+      should_engage = acc_status in (1, 2)
+      self.assertEqual(should_engage, self.safety.get_controls_allowed(), f"acc_status={acc_status}")
+
 
 class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.LongitudinalAccelSafetyTest):
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_LDW_1, 0], [MSG_ACC_SYSTEM, 0], [MSG_ACC_GRA_ANZEIGE, 0]]
