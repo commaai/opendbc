@@ -490,6 +490,7 @@ FW_VERSIONS = {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-T5R-L020\x00\x00',
       b'57114-T5R-L220\x00\x00',
+      b'57114-T5R-L320\x00\x00',
     ],
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-T5R-C020\x00\x00',
@@ -501,6 +502,7 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36161-T5R-A040\x00\x00',
       b'36161-T5R-A240\x00\x00',
+      b'36161-T5R-A340\x00\x00',
       b'36161-T5R-A520\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
