@@ -7,11 +7,11 @@ from opendbc.car.body import bodycan
 from opendbc.car.body.values import SPEED_FROM_RPM
 from opendbc.car.interfaces import CarControllerBase
 
-MAX_TORQUE = 500
-MAX_TORQUE_RATE = 50
+MAX_TORQUE = 700
+MAX_TORQUE_RATE = 70
 MAX_ANGLE_ERROR = np.radians(7)
 MAX_POS_INTEGRATOR = 0.2   # meters
-MAX_TURN_INTEGRATOR = 0.1  # meters
+MAX_TURN_INTEGRATOR = 0.2  # meters
 
 
 class CarController(CarControllerBase):
@@ -42,11 +42,16 @@ class CarController(CarControllerBase):
     if CC.enabled:
       # Read these from the joystick
       # TODO: this isn't acceleration, okay?
-      speed_desired = CC.actuators.accel / 5.
-      speed_diff_desired = -CC.actuators.torque / 2.
+      speed_desired = CC.actuators.accel / 4.
+      speed_diff_desired = -CC.actuators.torque
+      if abs(speed_diff_desired) < 0.05:
+        speed_diff_desired = 0.
 
       speed_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
       speed_error = speed_desired - speed_measured
+      freeze_speed_integrator = ((speed_error < 0 and self.wheeled_speed_pid.error_integral <= -MAX_POS_INTEGRATOR) or
+                                 (speed_error > 0 and self.wheeled_speed_pid.error_integral >= MAX_POS_INTEGRATOR))
+      torque = self.wheeled_speed_pid.update(speed_error, freeze_integrator=freeze_speed_integrator)
 
       torque = self.wheeled_speed_pid.update(speed_error, freeze_integrator=False)
 
