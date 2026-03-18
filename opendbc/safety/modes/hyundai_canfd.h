@@ -137,11 +137,11 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
 
 static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits HYUNDAI_CANFD_STEERING_LIMITS = {
-    .max_torque = 270,
-    .max_rt_delta = 112,
-    .max_rate_up = 2,
-    .max_rate_down = 3,
-    .driver_torque_allowance = 250,
+    .max_torque = 270*2,
+    .max_rt_delta = 112*5,
+    .max_rate_up = 2*5,
+    .max_rate_down = 3*4,
+    .driver_torque_allowance = 250*10,
     .driver_torque_multiplier = 2,
     .type = TorqueDriverLimited,
 
@@ -161,9 +161,9 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
     int desired_torque = (((msg->data[6] & 0xFU) << 7U) | (msg->data[5] >> 1U)) - 1024U;
     bool steer_req = GET_BIT(msg, 52U);
 
-//    if (steer_torque_cmd_checks(desired_torque, steer_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
-//      tx = false;
-//    }
+    if (steer_torque_cmd_checks(desired_torque, steer_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
+      tx = false;
+    }
   }
 
   // cruise buttons check
