@@ -780,9 +780,6 @@ CAN_GEARS = {
 }
 
 CANFD_CAR = CAR.with_flags(HyundaiFlags.CANFD)
-CANFD_RADAR_SCC_CAR = CAR.with_flags(HyundaiFlags.RADAR_SCC)  # TODO: merge with UNSUPPORTED_LONGITUDINAL_CAR
-
-CANFD_UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.CANFD_NO_RADAR_DISABLE)  # TODO: merge with UNSUPPORTED_LONGITUDINAL_CAR
 
 CAMERA_SCC_CAR = CAR.with_flags(HyundaiFlags.CAMERA_SCC)
 
@@ -792,8 +789,9 @@ EV_CAR = CAR.with_flags(HyundaiFlags.EV)
 
 LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
 
-# TODO: another PR with (HyundaiFlags.LEGACY | HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.CAMERA_SCC |
-#       HyundaiFlags.CANFD_RADAR_SCC | HyundaiFlags.CANFD_NO_RADAR_DISABLE | )
-UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.LEGACY) | CAR.with_flags(HyundaiFlags.UNSUPPORTED_LONGITUDINAL)
+UNSUPPORTED_LONGITUDINAL_CAR = {
+  "legacy": CAR.with_flags(HyundaiFlags.LEGACY),
+  "can": CAR.with_flags(HyundaiFlags.UNSUPPORTED_LONGITUDINAL),
+}
 
 DBC = CAR.create_dbc_map()
