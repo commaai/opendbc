@@ -1,3 +1,4 @@
+import json
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs
@@ -7,6 +8,8 @@ from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR
 from opendbc.car.interfaces import CarControllerBase
+
+EPS_SWEEP_FILE = "/tmp/eps_sweep.json"
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -54,10 +57,24 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
+    self._sweep_read_counter = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
+
+    # EPS profiling: reload sweep params every 100 frames (1s)
+    self._sweep_read_counter += 1
+    if self._sweep_read_counter >= 100:
+      self._sweep_read_counter = 0
+      try:
+        with open(EPS_SWEEP_FILE) as f:
+          sweep = json.load(f)
+        self.params.STEER_DELTA_UP = int(sweep.get("delta_up", self.params.STEER_DELTA_UP))
+        self.params.STEER_DELTA_DOWN = int(sweep.get("delta_down", self.params.STEER_DELTA_DOWN))
+        self.params.STEER_MAX = int(sweep.get("steer_max", self.params.STEER_MAX))
+      except (FileNotFoundError, json.JSONDecodeError, ValueError):
+        pass
 
     # steering torque
     new_torque = int(round(actuators.torque * self.params.STEER_MAX))
