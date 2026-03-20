@@ -138,11 +138,11 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
 static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   // EPS profiling: panda limits wide open, carcontroller is the sweep knob
   const TorqueSteeringLimits HYUNDAI_CANFD_STEERING_LIMITS = {
-    .max_torque = 512,
-    .max_rt_delta = 51200,
-    .max_rate_up = 512,
-    .max_rate_down = 512,
-    .driver_torque_allowance = 250*10,
+    .max_torque = 400,
+    .max_rt_delta = 500,
+    .max_rate_up = 10,
+    .max_rate_down = 10,
+    .driver_torque_allowance = 250,
     .driver_torque_multiplier = 2,
     .type = TorqueDriverLimited,
 
