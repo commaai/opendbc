@@ -92,13 +92,14 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   return commands
 
 
-def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance, distance):
+def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance, distance, fcw_alert):
   values = {
     "ACA_StaACC": acc_hud_status,
     "ACA_Zeitluecke": distance + 2,
     "ACA_V_Wunsch": set_speed,
     "ACA_gemZeitl": lead_distance,
     "ACA_PrioDisp": 3,
+    "ACA_Akustik2": fcw_alert,
     # TODO: restore dynamic pop-to-foreground/highlight behavior with ACA_PrioDisp and ACA_AnzDisplay
     # TODO: ACA_kmh_mph handling probably needed to resolve rounding errors in displayed setpoint
   }
