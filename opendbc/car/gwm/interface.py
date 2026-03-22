@@ -2,6 +2,7 @@ from opendbc.car import structs, get_safety_config, CanBusBase, Bus
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.gwm.carcontroller import CarController
 from opendbc.car.gwm.carstate import CarState
+from opendbc.car.gwm.values import GwmSafetyFlags
 
 TransmissionType = structs.CarParams.TransmissionType
 
@@ -49,13 +50,22 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerActuatorDelay = 0.15
     ret.steerLimitTimer = 0.4
-    ret.steerAtStandstill = True
+    ret.steerAtStandstill = False
 
     ret.steerControlType = structs.CarParams.SteerControlType.torque
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     ret.radarUnavailable = True
 
-    ret.alphaLongitudinalAvailable = False
+    ret.alphaLongitudinalAvailable = True
+    if alpha_long:
+      ret.openpilotLongitudinalControl = True
+      ret.safetyConfigs[-1].safetyParam |= GwmSafetyFlags.LONG_CONTROL.value
+
+    ret.longitudinalActuatorDelay = 0.05
+    ret.vEgoStopping = 0.25
+    ret.vEgoStarting = 0.25
+    ret.stopAccel = 0
+    ret.stoppingDecelRate = 0.3
 
     return ret

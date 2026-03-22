@@ -8,8 +8,8 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 
 class TestGwm(common.PandaSafetyTest):
-  TX_MSGS = [[0x12B, 0], [0x147, 2], [0xA1, 2]]
-  RELAY_MALFUNCTION_ADDRS = {0: (0x12B), 2: (0x147)}
+  TX_MSGS = [[0x12B, 0], [0x143, 0], [0x147, 2], [0xA1, 2]] # Steer, long, wheel touch, cancel
+  RELAY_MALFUNCTION_ADDRS = {0: (0x12B, 0x143), 2: (0x147)}
   FWD_BLACKLISTED_ADDRS = {0: [0x147], 2: [0x12B]}
 
   MAX_RATE_UP = 3
@@ -18,6 +18,11 @@ class TestGwm(common.PandaSafetyTest):
   MAX_RT_DELTA = 100
   MAX_TORQUE_ERROR = 70
 
+  MIN_GAS = -10
+  MAX_GAS = 4577
+  INACTIVE_GAS = 0
+  MAX_BRAKE = 107
+
   def setUp(self):
     self.packer = CANPackerPanda("gwm_haval_h6_mk3_generated")
     self.safety = libsafety_py.libsafety
@@ -25,7 +30,7 @@ class TestGwm(common.PandaSafetyTest):
     self.safety.init_tests()
 
   def _user_brake_msg(self, brake):
-    values = {"PEDAL_BRAKE_PRESSED": 1 if brake else 0}
+    values = {"PEDAL_BRAKE_PRESSED": brake}
     return self.packer.make_can_msg_panda("BRAKE2", 0, values)
 
   def _speed_msg(self, speed):
@@ -51,6 +56,14 @@ class TestGwm(common.PandaSafetyTest):
   def _steer_cmd_msg(self, torque, steer_req=1):
     values = {"STEER_REQUEST": steer_req, "TORQUE_CMD": torque}
     return self.packer.make_can_msg_panda("STEER_CMD", 0, values)
+
+  def _send_brake_msg(self, brake):
+    values = {"BRAKE_CMD": brake}
+    return self.packer.make_can_msg_panda("ACC_CMD", 0, values)
+
+  def _send_gas_msg(self, gas):
+    values = {"GAS_CMD": gas}
+    return self.packer.make_can_msg_panda("ACC_CMD", 0, values)
 
 
 if __name__ == "__main__":

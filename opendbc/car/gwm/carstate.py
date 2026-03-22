@@ -1,9 +1,11 @@
-from opendbc.car import structs, Bus, CanBusBase
+from opendbc.car import Bus, CanBusBase, create_button_events, structs
 from opendbc.can.parser import CANParser
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.gwm.values import DBC
 import copy
 
+ButtonType = structs.CarState.ButtonEvent.Type
 GearShifter = structs.CarState.GearShifter
 TransmissionType = structs.CarParams.TransmissionType
 
@@ -15,20 +17,28 @@ class CarState(CarStateBase):
     self.steer_and_ap_stalk_msg = {}
     self.eps_stock_values = {}
     self.camera_stock_values = {}
-    self.steer_fault_temporary_counter = 0
+    self.longitudinal_stock_values = {}
+
     self.is_activation_lever_pulled = False
     self.prev_activation_lever_pulled = False
     self.main_on = False
+    self.steer_fault_temporary_counter = 0
+    self.distance_button = 0
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.main]
     cp_cam = can_parsers[Bus.cam]
     ret = structs.CarState()
 
+    prev_distance_button = self.distance_button
+    self.distance_button = cp.vl["STEER_AND_AP_STALK"]["AP_REDUCE_DISTANCE_COMMAND"] or \
+                           cp.vl["STEER_AND_AP_STALK"]["AP_INCREASE_DISTANCE_COMMAND"]
+
     # Store the original message to reuse in carcontroller
     self.steer_and_ap_stalk_msg = copy.copy(cp.vl["STEER_AND_AP_STALK"])
     self.eps_stock_values = copy.copy(cp.vl["RX_STEER_RELATED"])
     self.camera_stock_values = copy.copy(cp_cam.vl["STEER_CMD"])
+    self.longitudinal_stock_values = copy.copy(cp_cam.vl["ACC_CMD"])
 
     # car speed
     self.parse_wheel_speeds(ret,
@@ -37,6 +47,10 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEEDS"]["REAR_LEFT_WHEEL_SPEED"],
       cp.vl["WHEEL_SPEEDS"]["REAR_RIGHT_WHEEL_SPEED"]
     )
+
+    ret.cruiseState.speed = cp_cam.vl["ACC"]["ACC_SPEED_SELECTION"]  * CV.KPH_TO_MS
+    if not self.CP.openpilotLongitudinalControl:
+      ret.cruiseState.speed = -1
 
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
     ret.gasPressed = cp.vl["CAR_OVERALL_SIGNALS2"]["GAS_POSITION"] > 0
@@ -79,6 +93,9 @@ class CarState(CarStateBase):
 
     ret.cruiseState.available = self.main_on
     ret.cruiseState.enabled = self.main_on
+
+    ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+
     return ret
 
   @staticmethod

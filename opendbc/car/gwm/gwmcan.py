@@ -40,6 +40,52 @@ def create_steer_command(packer, CAN: CanBus, camera_stock_values, steer: float,
   return packer.make_can_msg("STEER_CMD", CAN.main, values)
 
 
+def create_longitudinal_command(packer, CAN, longitudinal_stock_values, accel, active, standstill):
+  values = {s: longitudinal_stock_values[s] for s in [
+    "BYPASSME_1",
+    "SPEED_REAL",
+    "COUNTER_BRAKE",
+    "BYPASSME_2",
+    "BYPASS_ACC1",
+    "BYPASS_ACC2",
+    "COUNTER_ACC",
+  ]}
+
+  brake_or_gas = longitudinal_stock_values["BRAKE_OR_GAS_REQ"]
+  standstill1 = longitudinal_stock_values["STANDSTILL_1"]
+  standstill2 = longitudinal_stock_values["STANDSTILL_2"]
+  standstill3 = longitudinal_stock_values["STANDSTILL_3"]
+  brake_cmd = 0
+  accel_cmd = 0
+  if accel < 0 and active:
+    brake_or_gas = 13
+    brake_cmd = (accel * (107 - 41)) - 41
+    accel_cmd = 0
+    standstill1 = 1 if standstill else 0
+    standstill2 = 3 if standstill else 4 # 3 "active" 4 "inactive"
+    standstill3 = 0 if standstill else 1 # 0 "active" 1 "inactive"
+  elif active:
+    brake_or_gas = 12
+    brake_cmd = 0
+    accel_cmd = accel * 4577
+    standstill1 = 0
+    standstill2 = 4 # 3 "active" 4 "inactive"
+    standstill3 = 1 # 0 "active" 1 "inactive"
+  values |= {
+    "BRAKE_OR_GAS_REQ": brake_or_gas,
+    "BRAKE_CMD": brake_cmd,
+    "GAS_CMD": accel_cmd,
+    "STANDSTILL_1": standstill1,
+    "STANDSTILL_2": standstill2,
+    "STANDSTILL_3": standstill3,
+  }
+
+  data = packer.make_can_msg("ACC_CMD", 0, values)[1]
+  values["CRC_BRAKE_0xEF"] = checksum(data[9:16], 0xEF)
+  values["CRC_ACC_0x87"] = checksum(data[25:32], 0x87)
+  return packer.make_can_msg("ACC_CMD", CAN.main, values)
+
+
 def create_eps_update(packer, CAN: CanBus, eps_stock_values, ea_simulated_torque: float):
   values = {s: eps_stock_values[s] for s in [
     "A_CRC_X61",
@@ -65,6 +111,17 @@ def create_eps_update(packer, CAN: CanBus, eps_stock_values, ea_simulated_torque
   values["B_CRC_X61"] = gwm_crc_for_0x147(0, 0, dat)
 
   return packer.make_can_msg("RX_STEER_RELATED", CAN.camera, values)
+
+
+def checksum(data, xor_output):
+  crc = 0
+  poly = 0x1D
+  for byte in data:
+    crc ^= byte
+    for _ in range(8):
+      crc = ((crc << 1) ^ poly) if (crc & 0x80) else (crc << 1)
+      crc &= 0xFF
+  return crc ^ xor_output
 
 
 def gwm_checksum(address: int, sig, d: bytearray) -> int:

@@ -126,29 +126,54 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
     .type = TorqueMotorLimited,
   };
 
+  const LongitudinalLimits GWM_LONG_LIMITS = {
+    .max_gas = 4577,
+    .min_gas = -10,
+    .inactive_gas = 0,
+    .max_brake = 107,
+  };
+
   bool tx = true;
+  bool violation = false;
 
   if (msg->bus == 0U) {
     if (msg->addr == STEER_CMD) {
       int desired_torque = (((msg->data[12] & 0x7FU) << 3) | ((msg->data[13] & 0xE0U) >> 5));
       desired_torque = to_signed(desired_torque, 10) + 1;
       bool steer_req = GET_BIT(msg, 125U);
-      if (steer_torque_cmd_checks(desired_torque, steer_req, GWM_TORQUE_STEERING_LIMITS)) {
-        tx = false;
-      }
+      violation |= steer_torque_cmd_checks(desired_torque, steer_req, GWM_TORQUE_STEERING_LIMITS);
+    }
+
+    if (msg->addr == 0x143U) {
+      int brake_raw = msg->data[13];
+      brake_raw = 181 - brake_raw;
+      violation |= longitudinal_brake_checks(brake_raw, GWM_LONG_LIMITS);
+
+      int gas_raw = ((msg->data[27] & 0x1FU) << 8) | (msg->data[28]);
+      gas_raw = gas_raw - 192;
+      violation |= longitudinal_gas_checks(gas_raw, GWM_LONG_LIMITS);
     }
   }
 
+  if (violation) {
+    tx = false;
+  }
   return tx;
 }
 
 static safety_config gwm_init(uint16_t param) {
-  UNUSED(param);
   static const CanMsg GWM_TX_MSGS[] = {
     {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = false}, // Cancel command
     // {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = true}, // EPS steering
     {GWM_RX_STEER_RELATED, GWM_CAMERA_BUS, 64, .check_relay = true}, // EPS steering feedback to camera
     {STEER_CMD, GWM_MAIN_BUS, 64, .check_relay = true}, // Steering command
+  };
+
+  static const CanMsg GWM_LONG_TX_MSGS[] = {
+    {GWM_LANE_KEEP_ASSIST, GWM_CAMERA_BUS, 8, .check_relay = false}, // Cancel command
+    {GWM_RX_STEER_RELATED, GWM_CAMERA_BUS, 64, .check_relay = true}, // EPS steering feedback to camera
+    {STEER_CMD, GWM_MAIN_BUS, 64, .check_relay = true}, // Steering command
+    {0x143U, 0U, 64, .check_relay = true}, // Longitudinal control message from camera
   };
 
   static RxCheck gwm_rx_checks[] = {
@@ -160,9 +185,22 @@ static safety_config gwm_init(uint16_t param) {
     {.msg = {{GWM_RX_STEER_RELATED, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // eps feedback to camera
     {.msg = {{STEER_CMD, GWM_CAMERA_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // copy stock steering cmd
     {.msg = {{GWM_CRUISE, 2U, 64, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // CRUISE_STATE, ACC
+    {.msg = {{0x143U, 2U, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // Longitudinal control message from camera
   };
 
-  return BUILD_SAFETY_CFG(gwm_rx_checks, GWM_TX_MSGS);
+  bool gwm_longitudinal = false;
+  #ifdef ALLOW_DEBUG
+   const int FLAG_GWM_LONG_CONTROL = 1;
+   gwm_longitudinal = GET_FLAG(param, FLAG_GWM_LONG_CONTROL);
+ #else
+   UNUSED(param);
+ #endif
+
+  // FIXME: cppcheck thinks that gwm_longitudinal is always false. This is not true
+  // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
+  // cppcheck-suppress knownConditionTrueFalse
+  return gwm_longitudinal ? BUILD_SAFETY_CFG(gwm_rx_checks, GWM_LONG_TX_MSGS) : \
+                            BUILD_SAFETY_CFG(gwm_rx_checks, GWM_TX_MSGS);
 }
 
 const safety_hooks gwm_hooks = {

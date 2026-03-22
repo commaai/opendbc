@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import IntFlag
 
 from opendbc.car.structs import CarParams
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
@@ -11,13 +12,17 @@ Ecu = CarParams.Ecu
 class CarControllerParams:
   STEER_STEP = 2
   STEER_MAX = 253
+  ACCEL_MAX = 2
+  ACCEL_MIN = -3.5
 
   def __init__(self, CP: CarParams):
-    self.ACCEL_MAX = 1
-    self.ACCEL_MIN = -3.5
     self.STEER_DELTA_UP = 4
     self.STEER_DELTA_DOWN = 6
     self.STEER_ERROR_MAX = 70
+
+
+class GwmSafetyFlags(IntFlag):
+  LONG_CONTROL = 1
 
 
 @dataclass
