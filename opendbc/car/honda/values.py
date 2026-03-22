@@ -283,6 +283,12 @@ class CAR(Platforms):
     [HondaCarDocs("Acura TLX 2025", "All")],
     CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.87, centerToFrontRatio=0.43, steerRatio=13.7),
   )
+  ACURA_INTEGRA = HondaBoschPlatformConfig(
+    [HondaCarDocs("Acura Integra 2023-25", "All")],
+    CarSpecs(mass=3338.8 * CV.LB_TO_KG, wheelbase=2.5, centerToFrontRatio=0.5, steerRatio=15.5,),
+    {Bus.pt: 'honda_bosch_radarless_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.ALLOW_MANUAL_TRANS,
+  )
 
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
