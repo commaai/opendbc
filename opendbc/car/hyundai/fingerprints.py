@@ -1046,6 +1046,7 @@ FW_VERSIONS = {
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.06 99211-GI010 230110',
       b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.01 99211-GI010 211007',
       b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.01 99211-GI100 240110',
+      b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.01 99211-GI100 240110',
       b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.02 99211-GI010 211206',
       b'\xf1\x00NE1 MFC  AT IND RHD 1.00 1.07 99211-GI010 230620',
       b'\xf1\x00NE1 MFC  AT KOR LHD 1.00 1.00 99211-GI020 230719',
@@ -1060,6 +1061,12 @@ FW_VERSIONS = {
       b'\xf1\x00NE1 MFC  AT USA LHD 1.00 1.05 99211-GI010 220614',
       b'\xf1\x00NE1 MFC  AT USA LHD 1.00 1.06 99211-GI010 230110',
     ],
+    (Ecu.abs, 0x7d1, None): [
+      b'\xf1\x00NE1 IEB \x03 105!\x07\x01 58520-GI000',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00NE1_ RDR -----      1.00 1.00 99110-GI000         ',
+    ],  
   },
   CAR.HYUNDAI_IONIQ_6: {
     (Ecu.fwdRadar, 0x7d0, None): [
