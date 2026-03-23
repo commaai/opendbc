@@ -146,6 +146,9 @@ class CarInterface(CarInterfaceBase):
 
     # Car specific configuration overrides
 
+    if candidate == CAR.KIA_EV6:
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.EV6.value
+
     if candidate == CAR.KIA_OPTIMA_G4_FL:
       ret.steerActuatorDelay = 0.2
 

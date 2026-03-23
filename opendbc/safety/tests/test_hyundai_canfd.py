@@ -174,6 +174,19 @@ class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
     self.safety.init_tests()
 
 
+class TestHyundaiCanfdLKASteeringEV6(TestHyundaiCanfdLKASteeringEV):
+  MAX_RATE_UP = 5
+  MAX_RATE_DOWN = 10
+  MAX_TORQUE_LOOKUP = [0], [350]
+  MAX_RT_DELTA = 348
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS | HyundaiSafetyFlags.EV6)
+    self.safety.init_tests()
+
+
 # TODO: Handle ICE and HEV configurations once we see cars that use the new messages
 class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
 
