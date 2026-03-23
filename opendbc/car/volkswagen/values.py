@@ -69,6 +69,7 @@ class CarControllerParams:
 
   def __init__(self, CP):
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    self.TAXI_STOP_SPEED = CP.vEgoStopping
 
     if CP.flags & VolkswagenFlags.PQ:
       self.LDW_STEP = 5                   # LDW_1 message frequency 20Hz
@@ -125,6 +126,7 @@ class CarControllerParams:
         self.STEER_DRIVER_ALLOWANCE = 80    # Driver intervention threshold 0.8 Nm
         self.STEER_DELTA_UP = 4             # Max HCA reached in 1.50s (STEER_MAX / (50Hz * 1.50))
         self.STEER_DELTA_DOWN = 10          # Min HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
+        self.TAXI_STOP_SPEED = 0.15 * CV.KPH_TO_MS
 
         if CP.transmissionType == TransmissionType.automatic:
           self.shifter_values = can_define.dv["Gateway_73"]["GE_Fahrstufe"]
