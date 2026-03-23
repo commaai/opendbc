@@ -407,7 +407,7 @@ class CAR(Platforms):
   KIA_NIRO_EV_2ND_GEN = HyundaiCanFDPlatformConfig(
     [
       HyundaiCarDocs("Kia Niro EV (without HDA II) 2023-25", "All", car_parts=CarParts.common([CarHarness.hyundai_a])),
-      HyundaiCarDocs("Kia Niro EV (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_r])),
+      HyundaiCarDocs("Kia Niro EV (with HDA II) 2024-25", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_r])),
     ],
     KIA_NIRO_EV.specs,
     flags=HyundaiFlags.EV,
