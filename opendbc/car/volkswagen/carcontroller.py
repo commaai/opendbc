@@ -46,6 +46,8 @@ class MQBStandstillManager:
 
   HOLD_MAX_FRAMES = 50             # frames to hold before disabling long control to avoid a fault
   HOLD_MIN_FRAMES = 10             # minimum frames to hold at stopping state to ensure ESP engages for the first time
+  HOLD_RELEASE_TOTAL_FRAMES = 20  # reserve the last hold-confirmed frames for progressive hill-release pulses
+  HOLD_RELEASE_WINDOW_FRAMES = 3  # allow a few frames for ESP to acknowledge a recent hill release request
   HOLD_TORQUE_DEADBAND_NM = 40     # stop integrating when this close to target torque (Nm at wheel)
   HOLD_TORQUE_TARGET_RATIO = 0.8   # target this fraction of ESP_Haltemoment to avoid overshoot
   HOLD_ACCEL_KI = 0.0001           # I-controller gain: m/s² per Nm of torque error per ACC_CONTROL_STEP; just a guess for now
@@ -56,7 +58,7 @@ class MQBStandstillManager:
     self.hill_hold_accel = 0.0
     self.detected_uphill = False
     self._prev_impulse_count = 0
-    self._prev_starting_hold = False
+    self._recent_release_request_frames = 0
     self._prev_starting_no_hold = False
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
@@ -98,23 +100,34 @@ class MQBStandstillManager:
           accel = max(accel, self.hill_hold_accel)
           starting = True
           stopping = False
-        # near counter limit: attempt release to cycle the ESP hold
-        near_limit = self.esp_hold_frames >= self.HOLD_MAX_FRAMES - 10
-        esp_starting_override = near_limit
-        esp_stopping_override = not near_limit
+        # Near the counter limit, send progressively longer starting pulses:
+        # 1 frame, wait 3, 2 frames, wait 3, 3 frames, wait 3, then hold starting until cutoff.
+        release_phase = self.esp_hold_frames - (self.HOLD_MAX_FRAMES - self.HOLD_RELEASE_TOTAL_FRAMES + 1)
+        is_release_attempt = release_phase >= 0 and release_phase not in (1, 2, 3, 6, 7, 8, 12, 13, 14)
+        esp_starting_override = is_release_attempt
+        esp_stopping_override = not is_release_attempt
       else:
         self.hill_hold_accel = 0.0
 
     # standstill timer resets when:
     # - wheels move while hold is not confirmed
-    # - we drop a hold confirmation after a frame where we were actively starting with hold confirmed
+    # - we drop a hold confirmation shortly after actively starting with hold confirmed
     is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
     if CS.wheel_impulse_count != self._prev_impulse_count and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
       self.detected_uphill = False
-    elif self._prev_starting_hold and not CS.esp_hold_confirmation:
+      self._recent_release_request_frames = 0
+    elif self._recent_release_request_frames > 0 and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-    self._prev_starting_hold = is_starting and CS.esp_hold_confirmation
+      self._recent_release_request_frames = 0
+
+    if not long_active:
+      self._recent_release_request_frames = 0
+    elif is_starting and CS.esp_hold_confirmation:
+      self._recent_release_request_frames = self.HOLD_RELEASE_WINDOW_FRAMES
+    elif self._recent_release_request_frames > 0:
+      self._recent_release_request_frames -= 1
+
     self._prev_impulse_count = CS.wheel_impulse_count
 
     # spontaneous ESP reacquisition while in flat starting mode: treat as uphill from now on
