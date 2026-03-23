@@ -17,7 +17,18 @@ FINGERPRINTS = {
 }
 
 FW_VERSIONS = {
-  CAR.COMMA_BODY: {
+  CAR.COMMA_BODY_V2: {
+    (Ecu.engine, 0x720, None): [
+      b'0.0.01',
+      b'0.3.00a',
+      b'02/27/2022',
+    ],
+    (Ecu.debug, 0x721, None): [
+      b'166bd860',
+      b'dc780f85',
+    ],
+  },
+  CAR.COMMA_BODY_V1: {
     (Ecu.engine, 0x720, None): [
       b'0.0.01',
       b'0.3.00a',
