@@ -4,7 +4,7 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL
 from opendbc.car.common.pid import PIDController
 from opendbc.car.body import bodycan
-from opendbc.car.body.values import SPEED_FROM_RPM
+from opendbc.car.body.values import CAR, SPEED_FROM_RPM
 from opendbc.car.interfaces import CarControllerBase
 
 MAX_TORQUE = 1000
@@ -26,6 +26,7 @@ class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.packer = CANPacker(dbc_names[Bus.main])
+    self.control_bus = 2 if self.CP.carFingerprint == CAR.COMMA_BODY_V2 else 0
 
     self.v_pid = PIDController(k_p=1000, k_i=100, rate=1 / DT_CTRL)
     self.w_pid = PIDController(k_p=2000, k_i=500, rate=1 / DT_CTRL)
@@ -110,7 +111,7 @@ class CarController(CarControllerBase):
       self.w_setpoint = 0
 
     can_sends = []
-    can_sends.append(bodycan.create_control(self.packer, torque_l, torque_r))
+    can_sends.append(bodycan.create_control(self.packer, self.control_bus, torque_l, torque_r))
 
     new_actuators = CC.actuators.as_builder()
     new_actuators.accel = torque_l

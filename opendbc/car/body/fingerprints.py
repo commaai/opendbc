@@ -8,7 +8,10 @@ Ecu = CarParams.Ecu
 
 
 FINGERPRINTS = {
-  CAR.COMMA_BODY: [{
+  CAR.COMMA_BODY_V2: [{
+    513: 8
+  }],
+  CAR.COMMA_BODY_V1: [{
     513: 8, 516: 8, 514: 3, 515: 4
   }],
 }
