@@ -35,8 +35,8 @@ class CarState(CarStateBase):
     ret.gasPressed = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"] > 0
 
     # Brake pedal
-    # ret.brake = cp.vl["ESPiB3"]["iB_BrakePedalApplied"] / 250.0  # pressure in Bar
-    ret.brakePressed = cp.vl["ESP_AebFb"]["iB_BrakePedalApplied"] == 1
+    ret.brake = cp.vl["ESPiB3"]["ESPiB3_pMC1"] / 250.0  # pressure in Bar
+    ret.brakePressed = cp.vl["iBESP2"]["iBESP2_BrakePedalApplied"] == 1
 
     # Steering wheel
     ret.steeringAngleDeg = cp.vl["EPAS_AdasStatus"]["EPAS_InternalSas"]
