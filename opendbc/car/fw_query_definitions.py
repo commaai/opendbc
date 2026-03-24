@@ -90,8 +90,6 @@ class Request:
   whitelist_ecus: list[Ecu] = field(default_factory=list)
   rx_offset: int = 0x8
   bus: int = 1
-  # Whether this query should be run on the first auxiliary panda (CAN FD cars for example)
-  auxiliary: bool = False
   # FW responses from these queries will not be used for fingerprinting
   logging: bool = False
   # pandad toggles OBD multiplexing on/off as needed
