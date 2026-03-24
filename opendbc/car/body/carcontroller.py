@@ -202,7 +202,8 @@ class BodyV2CarController(CarControllerBase):
     return new_actuators, can_sends
 
 
-def CarController(dbc_names, CP):
-  if CP.carFingerprint == CAR.COMMA_BODY_V2:
-    return BodyV2CarController(dbc_names, CP)
-  return BodyV1CarController(dbc_names, CP)
+class CarController(CarControllerBase):
+  def __new__(cls, dbc_names, CP):
+    if CP.carFingerprint == CAR.COMMA_BODY_V2:
+      return BodyV2CarController(dbc_names, CP)
+    return BodyV1CarController(dbc_names, CP)
