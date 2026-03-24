@@ -354,13 +354,13 @@ class CarDocs:
       if self.row[Column.STEERING_TORQUE] != Star.FULL:
         sentence_builder += " This car may not be able to take tight turns on its own."
 
-      if not CP.openpilotLongitudinalControl:
-        sentence_builder += " When openpilot is engaged, gas and brakes are controlled by the car's ACC system and behaves exactly like it did without openpilot."
-
       # experimental mode
       exp_link = "<a href='https://blog.comma.ai/090release/#experimental-mode' target='_blank' class='highlight'>Experimental mode</a>"
       if CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable:
         sentence_builder += f" Traffic light and stop sign handling is also available in {exp_link}."
+      else:
+        sentence_builder += " Gas and brakes are controlled by the car's ACC system and behaves as it did without openpilot."
+
 
       return sentence_builder.format(car_model=f"{self.make} {self.model}", alc=alc, acc=acc)
 
