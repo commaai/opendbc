@@ -134,8 +134,11 @@ def create_lfahda_cluster(packer, CAN, enabled):
 
 
 def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBlinker, rightBlinker, msg_161, msg_162, msg_1b5, is_metric, out):
+  # ccNC cars use CCNC_0x161/CCNC_0x162 instead of the usual LFAHDA_CLUSTER message
+  # block faults (we should figure out root cause instead of masking)
   for f in {"FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW", "FAULT_ESS"}:
     msg_162[f] = 0
+  # block alerts not applicable when using openpilot
   if msg_161["ALERTS_2"] == 5:
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0})
   if msg_161["ALERTS_3"] == 17:
@@ -159,12 +162,14 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     "LANELINE_CURVATURE": curvature.get(max(-15, min(int(out.steeringAngleDeg / 4.5), 15)), 14) if lfa_icon and not anyBlinker else 15,
     "LANELINE_LEFT": (0 if not lfa_icon else 1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 6 if anyBlinker else 2),
     "LANELINE_RIGHT": (0 if not lfa_icon else 1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 6 if anyBlinker else 2),
+    # lane change ui like HDA2
     "LCA_LEFT_ICON": (0 if not lfa_icon or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.leftBlindspot else 2 if anyBlinker else 4),
     "LCA_RIGHT_ICON": (0 if not lfa_icon or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.rightBlindspot else 2 if anyBlinker else 4),
     "LCA_LEFT_ARROW": 2 if leftBlinker else 0,
     "LCA_RIGHT_ARROW": 2 if rightBlinker else 0,
   })
 
+  # show lane position animation when changing lanes like HDA2
   if lfa_icon and (leftBlinker or rightBlinker):
     leftlaneraw, rightlaneraw = msg_1b5["Info_LftLnPosVal"], msg_1b5["Info_RtLnPosVal"]
 
@@ -199,10 +204,12 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     msg_161["LANELINE_LEFT_POSITION"] = leftlane
     msg_161["LANELINE_RIGHT_POSITION"] = rightlane
 
+  # vibrate steering wheel on lane departure
   if hud.leftLaneDepart or hud.rightLaneDepart:
     msg_162["VIBRATE"] = 1
 
   if openpilotLongitudinalControl:
+    # block alerts not applicable when using openpilot long
     if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):
       msg_161["ALERTS_3"] = 0
     if msg_161["ALERTS_5"] == 4:
