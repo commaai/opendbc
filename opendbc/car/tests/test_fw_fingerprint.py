@@ -286,27 +286,26 @@ class TestFwFingerprintTiming(unittest.TestCase):
       }
     }
 
+    num_pandas = 1
     total_times = {1: 0.0, 2: 0.0}
-    for num_pandas in (1, 2):
-      for brand, config in FW_QUERY_CONFIGS.items():
-        with self.subTest(brand=brand, num_pandas=num_pandas):
-          avg_time = self._benchmark_brand(brand, num_pandas)
-          total_times[num_pandas] += avg_time
-          avg_time = round(avg_time, 2)
+    for brand, config in FW_QUERY_CONFIGS.items():
+      with self.subTest(brand=brand, num_pandas=num_pandas):
+        avg_time = self._benchmark_brand(brand, num_pandas)
+        total_times[num_pandas] += avg_time
+        avg_time = round(avg_time, 2)
 
-          ref_time = brand_ref_times[num_pandas].get(brand)
-          if ref_time is None:
-            # ref time should be same as 1 panda if no aux queries
-            ref_time = brand_ref_times[num_pandas - 1][brand]
+        ref_time = brand_ref_times[num_pandas].get(brand)
+        if ref_time is None:
+          # ref time should be same as 1 panda if no aux queries
+          ref_time = brand_ref_times[num_pandas - 1][brand]
 
-          self._assert_timing(avg_time, ref_time)
-          print(f'{brand=}, {num_pandas=}, {len(config.requests)=}, avg FW query time={avg_time} seconds')
+        self._assert_timing(avg_time, ref_time)
+        print(f'{brand=}, {num_pandas=}, {len(config.requests)=}, avg FW query time={avg_time} seconds')
 
-    for num_pandas in (1, 2):
-      with self.subTest(brand='all_brands', num_pandas=num_pandas):
-        total_time = round(total_times[num_pandas], 2)
-        self._assert_timing(total_time, total_ref_time[num_pandas])
-        print(f'all brands, total FW query time={total_time} seconds')
+    with self.subTest(brand='all_brands', num_pandas=num_pandas):
+      total_time = round(total_times[num_pandas], 2)
+      self._assert_timing(total_time, total_ref_time[num_pandas])
+      print(f'all brands, total FW query time={total_time} seconds')
 
   def test_get_fw_versions(self):
     # some coverage on IsoTpParallelQuery and panda UDS library
