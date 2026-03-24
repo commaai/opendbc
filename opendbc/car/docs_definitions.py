@@ -359,7 +359,7 @@ class CarDocs:
       if CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable:
         sentence_builder += f" Traffic light and stop sign handling is also available in {exp_link}."
       else:
-        sentence_builder += " Gas and brakes are controlled by the car's ACC system and behaves as it did without openpilot."
+        sentence_builder += " Acceleration and braking is controlled by the car's ACC system and will behave as it did without openpilot."
 
 
       return sentence_builder.format(car_model=f"{self.make} {self.model}", alc=alc, acc=acc)
