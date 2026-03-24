@@ -48,14 +48,15 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEEDS"]["REAR_RIGHT_WHEEL_SPEED"]
     )
 
+    ret.accFaulted = bool(cp_cam.vl["ACC"]["CRUISE_STATE_2"] == 0)
     ret.cruiseState.speed = cp_cam.vl["ACC"]["ACC_SPEED_SELECTION"]  * CV.KPH_TO_MS
     if not self.CP.openpilotLongitudinalControl:
       ret.cruiseState.speed = -1
 
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
     ret.gasPressed = cp.vl["CAR_OVERALL_SIGNALS2"]["GAS_POSITION"] > 0
-    # ret.brake = cp.vl["BRAKE"]["BRAKE_PRESSURE"]
-    ret.brakePressed = cp.vl["BRAKE2"]["PEDAL_BRAKE_PRESSED"] == 1
+    ret.brakePressed = cp.vl["BRAKE2"]["PEDAL_BRAKE_PRESSED"] != 0
+    ret.brake = cp.vl["BRAKE"]["BRAKE_PRESSURE"] if not ret.brakePressed else 0
     ret.parkingBrake = cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 0
 
     ret.gearShifter = GearShifter.drive if int(cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"]) == 1 else \

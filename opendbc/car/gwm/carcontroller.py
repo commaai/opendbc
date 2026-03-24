@@ -56,7 +56,7 @@ class CarController(CarControllerBase):
 
       # Satisfy steer nudge requests
       ea_simulated_torque = float(np.clip(apply_torque * 2, -self.params.STEER_MAX, self.params.STEER_MAX))
-      if abs(CS.out.steeringTorque) < abs(ea_simulated_torque):
+      if abs(CS.out.steeringTorque) > abs(ea_simulated_torque):
         ea_simulated_torque = CS.out.steeringTorque
       can_sends.append(gwmcan.create_eps_update(
         self.packer,
