@@ -1,4 +1,3 @@
-import copy
 from dataclasses import dataclass, field
 import struct
 from collections.abc import Callable
