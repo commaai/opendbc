@@ -18,6 +18,7 @@ class BodyV1CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.packer = CANPacker(dbc_names[Bus.main])
+    self.control_bus = 0
 
     # PIDs
     self.turn_pid = PIDController(110, k_i=11.5, rate=1 / DT_CTRL)
@@ -76,7 +77,7 @@ class BodyV1CarController(CarControllerBase):
       torque_l = int(np.clip(self.torque_l_filtered, -self.MAX_TORQUE, self.MAX_TORQUE))
 
     can_sends = []
-    can_sends.append(bodycan.create_control(self.packer, torque_l, torque_r))
+    can_sends.append(bodycan.create_control(self.packer, self.control_bus, torque_l, torque_r))
 
     new_actuators = CC.actuators.as_builder()
     new_actuators.accel = torque_l
