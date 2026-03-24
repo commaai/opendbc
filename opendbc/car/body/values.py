@@ -1,3 +1,5 @@
+from enum import IntFlag
+
 from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs
@@ -6,6 +8,10 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 Ecu = CarParams.Ecu
 
 SPEED_FROM_RPM = 0.008587
+
+
+class BodySafetyFlags(IntFlag):
+  BODY_V2 = 1
 
 
 class CarControllerParams:

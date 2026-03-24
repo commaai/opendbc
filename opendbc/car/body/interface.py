@@ -2,7 +2,7 @@ import math
 from opendbc.car import get_safety_config, structs
 from opendbc.car.body.carcontroller import CarController
 from opendbc.car.body.carstate import CarState
-from opendbc.car.body.values import SPEED_FROM_RPM
+from opendbc.car.body.values import SPEED_FROM_RPM, BodySafetyFlags, CAR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.can_definitions import CanData
 
@@ -15,6 +15,8 @@ class CarInterface(CarInterfaceBase):
     ret.notCar = True
     ret.brand = "body"
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.body)]
+    if candidate == CAR.COMMA_BODY_V2:
+      ret.safetyConfigs[0].safetyParam |= BodySafetyFlags.BODY_V2.value
 
     ret.minSteerSpeed = -math.inf
     ret.maxLateralAccel = math.inf  # TODO: set to a reasonable value
