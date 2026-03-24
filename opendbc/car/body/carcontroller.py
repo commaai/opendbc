@@ -44,7 +44,7 @@ class BodyV1CarController(CarControllerBase):
       # Read these from the joystick
       # TODO: this isn't acceleration, okay?
       speed_desired = CC.actuators.accel / 4.
-      speed_diff_desired = -CC.actuators.torque
+      speed_diff_desired = CC.actuators.torque
       if abs(speed_diff_desired) < 0.05:
         speed_diff_desired = 0.
 
