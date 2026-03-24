@@ -28,8 +28,8 @@ class CarState(CarStateBase):
     ret.vEgoRaw = cp.vl["ESP_Status"]["ESP_Vehicle_Speed"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = abs(ret.vEgoRaw) < 0.01
-    conversion = CV.KPH_TO_MS if cp.vl["Cluster"]["Cluster_Unit"] == 0 else CV.MPH_TO_MS
-    ret.vEgoCluster = cp.vl["Cluster"]["Cluster_VehicleSpeed"] * conversion
+    conversion = CV.KPH_TO_MS if cp_adas.vl["Cluster"]["Cluster_Unit"] == 0 else CV.MPH_TO_MS
+    ret.vEgoCluster = cp_adas.vl["Cluster"]["Cluster_VehicleSpeed"] * conversion
 
     # Gas pedal
     ret.gasPressed = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"] > 0
@@ -39,15 +39,15 @@ class CarState(CarStateBase):
     ret.brakePressed = cp.vl["ESP_AebFb"]["iB_BrakePedalApplied"] == 1
 
     # Steering wheel
-    ret.steeringAngleDeg = cp_adas.vl["EPAS_AdasStatus"]["EPAS_InternalSas"]
-    ret.steeringRateDeg = cp_adas.vl["EPAS_AdasStatus"]["EPAS_SteeringAngleSpeed"]
+    ret.steeringAngleDeg = cp.vl["EPAS_AdasStatus"]["EPAS_InternalSas"]
+    ret.steeringRateDeg = cp.vl["EPAS_AdasStatus"]["EPAS_SteeringAngleSpeed"]
     ret.steeringTorque = cp.vl["EPAS_SystemStatus"]["EPAS_TorsionBarTorque"]
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > 1.0, 5)
 
-    ret.steerFaultTemporary = cp_adas.vl["EPAS_AdasStatus"]["EPAS_EacErrorCode"] != 0
+    ret.steerFaultTemporary = cp.vl["EPAS_AdasStatus"]["EPAS_EacErrorCode"] != 0
 
     # Cruise state
-    speed = 85 # min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
+    speed = min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
     self.last_speed = speed if speed != 0 else self.last_speed
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] == 1
     # TODO: find cruise set speed on CAN
@@ -55,7 +55,7 @@ class CarState(CarStateBase):
     if not self.CP.openpilotLongitudinalControl:
       ret.cruiseState.speed = -1
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
-    ret.cruiseState.standstill = False # cp.vl["VDM_AdasSts"]["VDM_AdasVehicleHoldStatus"] == 1
+    ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasVehicleHoldStatus"] == 1
 
     # ACM_Status->ACM_FaultSupervisorState normally 1, appears to go to 3 when either:
     # 1. car in park/not in drive (normal)
@@ -66,7 +66,7 @@ class CarState(CarStateBase):
                       # VDM_AdasFaultStatus=Brk_Intv is the default for some reason
                       # VDM_AdasFaultStatus=Cntr_Fault isn't fully understood, but we've seen it in the wild
                       # VDM_AdasFaultStatus=Imps_Cmd was seen when sending it rapidly changing ACC enable commands, or when ACC command drops out
-                      cp_cam.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3))  # 2=Cntr_Fault, 3=Imps_Cmd
+                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3))  # 2=Cntr_Fault, 3=Imps_Cmd
 
     # Gear
     ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
@@ -79,7 +79,7 @@ class CarState(CarStateBase):
     ret.rightBlinker = cp_adas.vl["IndicatorLights"]["TurnLightRight"] in (1, 2)
 
     # Seatbelt
-    ret.seatbeltUnlatched = False # cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0 if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else cp.vl["VDM_CGM_GW"]["CGM_DriverPresent"] != 1
+    ret.seatbeltUnlatched = cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0 if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else cp.vl["VDM_CGM_GW"]["CGM_DriverPresent"] != 1
 
     # Blindspot
     # ret.leftBlindspot = False
@@ -91,7 +91,7 @@ class CarState(CarStateBase):
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
     self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"]) if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else None
-    self.vdm_adas_status = copy.copy(cp_cam.vl["VDM_AdasSts"])
+    self.vdm_adas_status = copy.copy(cp.vl["VDM_AdasSts"])
     self.acm_longitudinal_request = copy.copy(cp_cam.vl["ACM_longitudinalRequest"])
 
     return ret
