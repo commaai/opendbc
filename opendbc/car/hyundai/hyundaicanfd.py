@@ -177,16 +177,19 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     leftlane = abs(int(round(15 + (leftlaneraw - 1.7) * scale_per_m)))
     rightlane = abs(int(round(15 + (rightlaneraw - 1.7) * scale_per_m)))
 
+    # only accept high or very high lane quality values
     if msg_1b5["Info_LftLnQualSta"] not in (2, 3):
       leftlane = 0
     if msg_1b5["Info_RtLnQualSta"] not in (2, 3):
       rightlane = 0
 
+    # these are the edge limits reported by the camera seen near the end of a lane change
     if leftlaneraw == -2.0248375:
       leftlane = 30 - rightlane
     if rightlaneraw == 2.0248375:
       rightlane = 30 - leftlane
 
+    # keep the lane lines centered and complementary when one or both sides are missing
     if leftlaneraw == rightlaneraw == 0:
       leftlane = rightlane = 15
     elif leftlaneraw == 0:
