@@ -8,16 +8,16 @@ Ecu = CarParams.Ecu
 
 
 FINGERPRINTS = {
+  CAR.COMMA_BODY_V1: [{
+    513: 8, 514: 3, 515: 4, 516: 8, 517: 8, 518: 6, 519: 6
+  }],
   CAR.COMMA_BODY_V2: [{
     513: 8
-  }],
-  CAR.COMMA_BODY_V1: [{
-    513: 8, 516: 8, 514: 3, 515: 4
   }],
 }
 
 FW_VERSIONS = {
-  CAR.COMMA_BODY_V2: {
+  CAR.COMMA_BODY_V1: {
     (Ecu.engine, 0x720, None): [
       b'0.0.01',
       b'0.3.00a',
@@ -28,7 +28,7 @@ FW_VERSIONS = {
       b'dc780f85',
     ],
   },
-  CAR.COMMA_BODY_V1: {
+  CAR.COMMA_BODY_V2: {
     (Ecu.engine, 0x720, None): [
       b'0.0.01',
       b'0.3.00a',
