@@ -70,14 +70,14 @@ class CarController(CarControllerBase):
         standstill = actuators.longControlState == LongCtrlState.stopping
         self.accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
         if self.accel < 0:
-          self.accel = -(self.accel / CarControllerParams.ACCEL_MIN)
+          accel = - abs(self.accel / CarControllerParams.ACCEL_MIN)
         else:
-          self.accel = self.accel / CarControllerParams.ACCEL_MAX
+          accel = self.accel / CarControllerParams.ACCEL_MAX
         can_sends.append(gwmcan.create_longitudinal_command(
           self.packer,
           self.CAN,
           longitudinal_stock_values=CS.longitudinal_stock_values,
-          accel=self.accel,
+          accel=accel,
           active=CC.longActive,
           standstill=standstill,
         ))
