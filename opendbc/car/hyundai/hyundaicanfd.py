@@ -183,7 +183,7 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     if msg_1b5["Info_RtLnQualSta"] not in (2, 3):
       rightlane = 0
 
-    # these are the edge limits reported by the camera seen near the end of a lane change
+    # these are the edge limits reported by the camera seen near the lane change transition
     if leftlaneraw == -2.0248375:
       leftlane = 30 - rightlane
     if rightlaneraw == 2.0248375:
