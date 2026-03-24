@@ -128,6 +128,7 @@ class HyundaiFlags(IntFlag):
   ALT_LIMITS_2 = 2 ** 26
 
   CCNC = 2 ** 27
+  CCNC_NON_HDA2 = 2 ** 28
 
 
 @dataclass
