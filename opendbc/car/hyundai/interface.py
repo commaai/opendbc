@@ -146,7 +146,8 @@ class CarInterface(CarInterfaceBase):
 
     # Car specific configuration overrides
 
-    if candidate == CAR.KIA_EV6:
+    if ret.flags & HyundaiFlags.CANFD and 0x3aa in fingerprint[CAN.ECAN] and 0x2ba in fingerprint[CAN.ECAN]:
+      ret.flags |= HyundaiFlags.EV6.value
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.EV6.value
 
     if candidate == CAR.KIA_OPTIMA_G4_FL:

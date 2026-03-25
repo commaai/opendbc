@@ -32,8 +32,8 @@ class CarControllerParams:
       self.STEER_DELTA_UP = 2
       self.STEER_DELTA_DOWN = 3
 
-      if CP.carFingerprint == CAR.KIA_EV6:
-        self.STEER_MAX = 350
+      if CP.flags & HyundaiFlags.EV6:
+        self.STEER_MAX = 300
         self.STEER_DELTA_UP = 5
         self.STEER_DELTA_DOWN = 10
 
@@ -96,6 +96,8 @@ class HyundaiFlags(IntFlag):
   # these cars use a different gas signal
   HYBRID = 2 ** 10
   EV = 2 ** 11
+
+  EV6 = 2 ** 27
 
   # Static flags
 
