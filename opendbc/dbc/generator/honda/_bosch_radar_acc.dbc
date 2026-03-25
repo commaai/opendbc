@@ -29,7 +29,7 @@ BO_ 495 ACC_CONTROL_ON: 8 XXX
 
 CM_ SG_ 479 CONTROL_ON "Set to 5 when car is being controlled";
 CM_ SG_ 479 AEB_STATUS "set for the duration of AEB event";
-CM_ SG_ 479 MAYBE_DISENGAGE_COMMAND "Might signal the powertrain to disengage or prevent engagement on radar-side ACC faults";
-CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
 CM_ SG_ 479 AEB_BRAKING "set when braking is commanded during AEB event";
+CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
+CM_ SG_ 479 MAYBE_DISENGAGE_COMMAND "Might signal the powertrain to disengage or prevent engagement on radar-side ACC faults";
 CM_ SG_ 479 MAYBE_DISENGAGE_ALERT "Signals the instrument cluster to display an ACC fault";
