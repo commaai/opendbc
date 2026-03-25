@@ -216,7 +216,6 @@ CM_ SG_ 780 PCM_SPEED "Used by Nidec";
 CM_ SG_ 780 PCM_GAS "Used by Nidec";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
 
-
 VAL_ 450 EPB_STATE 3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged" ;
 VAL_ 780 CRUISE_SPEED 255 "no_speed" 252 "stopped";
 VAL_ 780 HUD_LEAD 3 "acc_off" 2 "solid_car" 1 "dashed_car" 0 "no_car";
