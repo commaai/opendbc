@@ -124,7 +124,7 @@ class BodyV2CarController(CarControllerBase):
     torque_r = 0
 
     if CC.enabled:
-      v_target = (CC.actuators.accel / self.ACCEL_INPUT_MAX) * self.MAX_VELOCITY
+      v_target = -(CC.actuators.accel / self.ACCEL_INPUT_MAX) * self.MAX_VELOCITY
       w_target = -CC.actuators.torque * self.MAX_TURN_RATE
 
       user_wants_to_move = (abs(v_target) > 0.01 or abs(w_target) > 0.01)
