@@ -362,7 +362,7 @@ class CarDocs:
       return sentence_builder.format(car_model=f"{self.make} {self.model}", alc=alc, acc=acc)
 
     else:
-      if CP.carFingerprint == "COMMA_BODY_V1":
+      if CP.carFingerprint in ("COMMA_BODY_V1", "COMMA_BODY_V2"):
         return "The body is a robotics dev kit that can run openpilot. <a href='https://www.commabody.com' target='_blank' class='highlight'>Learn more.</a>"
       else:
         raise Exception(f"This notCar does not have a detail sentence: {CP.carFingerprint}")

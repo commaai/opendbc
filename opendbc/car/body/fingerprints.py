@@ -30,5 +30,4 @@ FW_VERSIONS = {
       b'dc780f85',
     ],
   },
-  CAR.COMMA_BODY_V2: {},
 }
