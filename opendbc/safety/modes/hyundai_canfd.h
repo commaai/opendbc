@@ -154,8 +154,8 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   };
 
   const TorqueSteeringLimits HYUNDAI_CANFD_STEERING_LIMITS_EV6 = {
-    .max_torque = 350,
-    .max_rt_delta = 348,
+    .max_torque = 300,
+    .max_rt_delta = 299, // 20% margin
     .max_rate_up = 5,
     .max_rate_down = 10,
     .driver_torque_allowance = 250,

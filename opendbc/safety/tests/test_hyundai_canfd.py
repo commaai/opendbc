@@ -177,8 +177,8 @@ class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
 class TestHyundaiCanfdLKASteeringEV6(TestHyundaiCanfdLKASteeringEV):
   MAX_RATE_UP = 5
   MAX_RATE_DOWN = 10
-  MAX_TORQUE_LOOKUP = [0], [350]
-  MAX_RT_DELTA = 348
+  MAX_TORQUE_LOOKUP = [0], [300]
+  MAX_RT_DELTA = 299
 
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
