@@ -66,7 +66,6 @@ class MQBStandstillManager:
              ) -> tuple[bool, float, bool, bool, bool | None, bool | None]:
     esp_starting_override: bool | None = None
     esp_stopping_override: bool | None = None
-    is_uphill = CS.esp_hold_uphill or self.detected_uphill
 
     if CS.esp_hold_confirmation:
       self.esp_hold_frames += 1
@@ -79,7 +78,7 @@ class MQBStandstillManager:
       long_active = False
 
     # uphill launch: TSK rarely commands enough torque to move from a hill hold, so keep accel > 1 m/s²
-    if long_active and accel > 0 and is_uphill and CS.out.standstill:
+    if long_active and accel > 0 and CS.grade > 4 and CS.out.standstill:
       accel = max(accel, 1.0)
     if long_active and CS.esp_rollback_possible and accel > 0:
       accel = max(accel, 1.0)
@@ -98,11 +97,38 @@ class MQBStandstillManager:
     else:
       self._can_stop_forever = False
 
+    if long_active and accel <= 0:
+      # flat/downhill: drop hold, force starting state
+      # if not is_uphill and CS.out.standstill:
+      #   if (self.esp_hold_frames > self.HOLD_MIN_FRAMES):
+      #     esp_starting_override = not CS.esp_hold_confirmation
+      #     esp_stopping_override = False
+      #     accel *= 1.1 # prevent TSK deactivation
+
+      # steep uphill: build engine torque via ACC_06 as rollback prevention, ESP braking held via ACC_07
+      if CS.grade > 12 and (CS.esp_hold_confirmation or CS.out.standstill):
+        # skip torque management for one frame each cycle to avoid check engine light
+        if self.esp_hold_frames > 1:
+          # f\left(x\right)=0.045x+\frac{1}{16}
+          hill_accel = 0.045 * CS.grade + 0.0625
+          accel = max(accel, hill_accel)
+          starting = True
+          stopping = False
+        # Near the counter limit, send progressively longer starting pulses:
+        # 1 frame, wait 3, 2 frames, wait 3, 3 frames, wait 3, then hold starting until cutoff.
+        release_phase = self.esp_hold_frames - (self.HOLD_MAX_FRAMES - self.HOLD_RELEASE_TOTAL_FRAMES + 1)
+        is_release_attempt = release_phase >= 0 and release_phase not in (1, 2, 3, 6, 7, 8, 12, 13, 14)
+        esp_starting_override = is_release_attempt
+        esp_stopping_override = not is_release_attempt
+      else:
+        self.hill_hold_accel = 0.0
+
+
     # standstill timer resets when:
     # - wheels move while hold is not confirmed
     # - we drop a hold confirmation shortly after actively starting with hold confirmed
     is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
-    if CS.wheel_impulse_count != self._prev_impulse_count and not CS.esp_hold_confirmation:
+    if CS.esp_speed_confirmation > 0 and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
       self.detected_uphill = False
       self._recent_release_request_frames = 0
@@ -122,8 +148,8 @@ class MQBStandstillManager:
     # spontaneous ESP reacquisition while in flat starting mode: treat as uphill from now on
     if self._prev_starting_no_hold and CS.esp_hold_confirmation:
       self.detected_uphill = True
-    self._prev_starting_no_hold = (is_starting and not is_uphill
-                                   and CS.out.standstill and not CS.esp_hold_confirmation)
+    # self._prev_starting_no_hold = (is_starting and not is_uphill
+    #                                and CS.out.standstill and not CS.esp_hold_confirmation)
 
     return long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override
 

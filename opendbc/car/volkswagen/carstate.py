@@ -17,7 +17,7 @@ class CarState(CarStateBase):
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
     self.esp_hold_torque_nm = 0.0
-    self.esp_hold_uphill = False
+    self.grade = 0.0
     self.esp_stopping = False
     self.esp_rollback_possible = False
     self.actual_torque_nm = 0.0
@@ -25,6 +25,7 @@ class CarState(CarStateBase):
     self.eps_stock_values = False
     self.acc_type = 0
     self.wheel_impulse_count = 0
+    self.esp_speed_confirmation = 0
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -119,6 +120,7 @@ class CarState(CarStateBase):
 
       self.acc_type = ext_cp.vl["ACC_06"]["ACC_Typ"]
       self.esp_hold_confirmation = bool(pt_cp.vl["ESP_21"]["ESP_Haltebestaetigung"])
+      self.esp_speed_confirmation = pt_cp.vl["ESP_21"]["ESP_v_Signal"]
       self.esp_stopping = bool(pt_cp.vl["ESP_21"]["ESP_Anhaltevorgang_ACC_aktiv"])
       acc_limiter_mode = ext_cp.vl["ACC_02"]["ACC_Gesetzte_Zeitluecke"] == 0
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
@@ -131,7 +133,7 @@ class CarState(CarStateBase):
         self.esp_hold_torque_nm = esp_hold_raw if haltemoment_antrieb and esp_hold_raw < 10220 else 0.0
         # Motor_16: TSK_Steigung is road grade in percent; use > 2% as uphill threshold since
         # haltemoment floors at 600 Nm and doesn't meaningfully distinguish grades below ~4%
-        self.esp_hold_uphill = pt_cp.vl["Motor_16"]["TSK_Steigung"] > 2.0
+        self.grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
         # Motor_11: MO_Mom_Ist_Summe is unitless — multiply by MO_Faktor_Momente_02 (1/2/3 Nm/unit) for crank Nm,
         # then by GE_Uefkt (crank→wheel ratio) to get wheel Nm comparable to ESP_Haltemoment
         motor_torque_raw = alt_cp.vl["Motor_11"]["MO_Mom_Ist_Summe"]
