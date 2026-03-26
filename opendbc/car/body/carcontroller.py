@@ -27,13 +27,13 @@ class BodyV1CarController(CarControllerBase):
     self.torque_r_filtered = 0.
     self.torque_l_filtered = 0.
 
-  @staticmethod
-  def deadband_filter(torque, deadband):
-    if torque > 0:
-      torque += deadband
-    else:
-      torque -= deadband
-    return torque
+  # @staticmethod
+  # def deadband_filter(torque, deadband):
+  #   if torque > 0:
+  #     torque += deadband
+  #   else:
+  #     torque -= deadband
+  #   return torque
 
   def update(self, CC, CS, now_nanos):
 
@@ -54,8 +54,6 @@ class BodyV1CarController(CarControllerBase):
                                  (speed_error > 0 and self.wheeled_speed_pid.error_integral >= self.MAX_POS_INTEGRATOR))
       torque = self.wheeled_speed_pid.update(speed_error, freeze_integrator=freeze_speed_integrator)
 
-      torque = self.wheeled_speed_pid.update(speed_error, freeze_integrator=False)
-
       speed_diff_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl - CS.out.wheelSpeeds.fr)
       turn_error = speed_diff_measured - speed_diff_desired
       freeze_integrator = ((turn_error < 0 and self.turn_pid.error_integral <= -self.MAX_TURN_INTEGRATOR) or
@@ -67,10 +65,10 @@ class BodyV1CarController(CarControllerBase):
       torque_l = torque - torque_diff
 
       # Torque rate limits
-      self.torque_r_filtered = np.clip(self.deadband_filter(torque_r, 10),
+      self.torque_r_filtered = np.clip(torque_r,
                                        self.torque_r_filtered - self.MAX_TORQUE_RATE,
                                        self.torque_r_filtered + self.MAX_TORQUE_RATE)
-      self.torque_l_filtered = np.clip(self.deadband_filter(torque_l, 10),
+      self.torque_l_filtered = np.clip(torque_l,
                                        self.torque_l_filtered - self.MAX_TORQUE_RATE,
                                        self.torque_l_filtered + self.MAX_TORQUE_RATE)
       torque_r = int(np.clip(self.torque_r_filtered, -self.MAX_TORQUE, self.MAX_TORQUE))
