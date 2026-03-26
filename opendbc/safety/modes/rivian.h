@@ -108,9 +108,9 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
     .driver_torque_allowance = 100,
     .type = TorqueDriverLimited,
 
-    .min_valid_request_frames = 95,
+    .min_valid_request_frames = 92,
     .max_invalid_request_frames = 2,
-    .min_valid_request_rt_interval = 860000,  // 860ms; a ~10% buffer on cutting every 96 frames
+    .min_valid_request_rt_interval = 840000,  // 840ms; a ~10% buffer on cutting every 93 frames
     .has_steer_req_tolerance = true,
   };
 
