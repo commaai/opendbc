@@ -2,7 +2,7 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL
 from opendbc.car.lateral import apply_meas_steer_torque_limits
 from opendbc.car.chrysler import chryslercan
-from opendbc.car.chrysler.values import RAM_CARS, CarControllerParams, ChryslerFlags
+from opendbc.car.chrysler.values import CUSW_CARS, RAM_CARS, CarControllerParams, ChryslerFlags
 from opendbc.car.interfaces import CarControllerBase
 
 
@@ -57,6 +57,9 @@ class CarController(CarControllerBase):
           lkas_control_bit = False
       elif self.CP.carFingerprint in RAM_CARS:
         if CS.out.vEgo < (self.CP.minSteerSpeed - 0.5):
+          lkas_control_bit = False
+      elif self.CP.carFingerprint in CUSW_CARS:
+        if CS.out.vEgo < (self.CP.minSteerSpeed - 2.0):
           lkas_control_bit = False
 
       # EPS faults if LKAS re-enables too quickly
