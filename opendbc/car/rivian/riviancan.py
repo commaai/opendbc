@@ -76,6 +76,18 @@ def create_longitudinal(packer, frame, accel, enabled):
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)
 
 
+def create_lead_info(packer, lead_info, v_ego):
+  values = {s: lead_info[s] for s in (
+    "UNKNOWN_1",
+    "LEAD_CAR",
+  )}
+
+  if v_ego < 9:  # ~20 mph
+    values["LEAD_CAR"] = 1
+
+  return packer.make_can_msg("LEAD_INFO", 1, values)
+
+
 def create_adas_status(packer, frame, vdm_adas_status, interface_status):
   values = {s: vdm_adas_status[s] for s in (
     "VDM_AdasStatus_Checksum",
