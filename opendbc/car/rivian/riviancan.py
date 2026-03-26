@@ -11,7 +11,7 @@ def checksum(data, poly, xor_output):
   return crc ^ xor_output
 
 
-def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, enabled, active, elk_request=0):
+def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, enabled, active):
   # forward auto high beam and speed limit status and nothing else
   values = {s: acm_lka_hba_cmd[s] for s in (
     "ACM_hbaSysState",
@@ -30,7 +30,7 @@ def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, enabled, a
     "ACM_lkaSymbolState": 3 if enabled else 0,
 
     # static values
-    "ACM_lkaElkRequest": elk_request,
+    "ACM_lkaElkRequest": 0,
     "ACM_ldwlkaOnOffState": 2,  # 2=LKAS+LDW on
     "ACM_elkOnOffState": 1,  # 1=LKAS on
     # TODO: what are these used for?

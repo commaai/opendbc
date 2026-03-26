@@ -46,15 +46,9 @@ class CarController(CarControllerBase):
     if torque_fault:
       apply_torque = 0
 
-    # Request ELK at high steering angles to allow EPAS to accept torque beyond 90 degrees
-    # DBC: 0=No_Request, 1=Left_LKA, 2=Right_LKA, 3=Left_ELK, 4=Right_ELK
-    elk_request = 0
-    if CC.latActive and abs(CS.out.steeringAngleDeg) >= MAX_ANGLE:
-      elk_request = 4 if CS.out.steeringAngleDeg > 0 else 3
-
     # send steering command
     self.apply_torque_last = apply_torque
-    can_sends.append(create_lka_steering(self.packer, self.frame, CS.acm_lka_hba_cmd, apply_torque, CC.enabled, apply_steer_req, elk_request))
+    can_sends.append(create_lka_steering(self.packer, self.frame, CS.acm_lka_hba_cmd, apply_torque, CC.enabled, apply_steer_req))
 
     if self.frame % 5 == 0 and self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1:
       can_sends.append(create_wheel_touch(self.packer, CS.sccm_wheel_touch, CC.enabled))
