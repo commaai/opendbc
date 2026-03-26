@@ -25,14 +25,13 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.4
 
     # safety config
-    if candidate in CUSW_CARS:
+    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chrysler)]
+    if candidate in RAM_HD:
+      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_HD.value
+    elif candidate in RAM_DT:
+      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_DT.value
+    elif candidate in CUSW_CARS:
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chryslerCusw)]
-    else:
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chrysler)]
-      if candidate in RAM_HD:
-        ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_HD.value
-      elif candidate in RAM_DT:
-        ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_DT.value
 
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     if candidate not in RAM_CARS:
