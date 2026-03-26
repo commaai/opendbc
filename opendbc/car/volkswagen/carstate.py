@@ -19,7 +19,7 @@ class CarState(CarStateBase):
     self.esp_hold_torque_nm = 0.0
     self.grade = 0.0
     self.esp_stopping = False
-    self.esp_rollback_possible = False
+    self.rolling_backward = False
     self.actual_torque_nm = 0.0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
@@ -90,7 +90,7 @@ class CarState(CarStateBase):
         + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"]
         + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"]
       )
-      self.esp_rollback_possible = (
+      self.rolling_backward = (
         pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"] == 1 or
         pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"] == 1
       )
