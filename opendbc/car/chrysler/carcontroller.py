@@ -59,7 +59,6 @@ class CarController(CarControllerBase):
         if CS.out.vEgo < (self.CP.minSteerSpeed - 0.5):
           lkas_control_bit = False
       elif self.CP.carFingerprint in CUSW_CARS:
-        # TODO: Chrysler 200 appears to support asymmetric down to mid-13s, Cherokee not verified yet, model-year variances likely
         if CS.out.vEgo < (self.CP.minSteerSpeed - 2.0):
           lkas_control_bit = False
 
@@ -73,7 +72,6 @@ class CarController(CarControllerBase):
       # steer torque
       new_torque = int(round(CC.actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
-      # FIXME: CUSW doesn't like being slammed down to zero on disengage, may need to allow torque to fall at MAX_RATE_DOWN
       if not lkas_active or not lkas_control_bit:
         apply_torque = 0
       self.apply_torque_last = apply_torque
