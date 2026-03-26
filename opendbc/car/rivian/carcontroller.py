@@ -8,7 +8,7 @@ from opendbc.car.rivian.values import CarControllerParams, CAR
 
 # EPS faults if you apply torque while the steering angle is above 90 degrees for more than 1 second
 MAX_ANGLE = 90
-MAX_ANGLE_FRAMES = 89
+MAX_ANGLE_FRAMES = 250
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 
@@ -39,11 +39,6 @@ class CarController(CarControllerBase):
                                                                        MAX_ANGLE_CONSECUTIVE_FRAMES)
 
     if not CC.latActive:
-      apply_torque = 0
-
-    # Hold torque with induced temporary fault when cutting the actuation bit
-    torque_fault = CC.latActive and not apply_steer_req
-    if torque_fault:
       apply_torque = 0
 
     # send steering command
