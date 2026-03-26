@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.can import CANParser
+from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
 from opendbc.car.honda.values import DBC
 
@@ -8,7 +8,7 @@ from opendbc.car.honda.values import DBC
 def _create_nidec_can_parser(car_fingerprint):
   radar_messages = [0x400] + list(range(0x430, 0x43A)) + list(range(0x440, 0x446))
   messages = [(m, 20) for m in radar_messages]
-  return CANParser(DBC[car_fingerprint]['radar'], messages, 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
 
 
 class RadarInterface(RadarInterfaceBase):
@@ -33,7 +33,7 @@ class RadarInterface(RadarInterfaceBase):
     if self.radar_off_can:
       return super().update(None)
 
-    vls = self.rcp.update_strings(can_strings)
+    vls = self.rcp.update(can_strings)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
@@ -67,14 +67,12 @@ class RadarInterface(RadarInterfaceBase):
         if ii in self.pts:
           del self.pts[ii]
 
-    errors = []
     if not self.rcp.can_valid:
-      errors.append("canError")
+      ret.errors.canError = True
     if self.radar_fault:
-      errors.append("fault")
+      ret.errors.radarFault = True
     if self.radar_wrong_config:
-      errors.append("wrongConfig")
-    ret.errors = errors
+      ret.errors.wrongConfig = True
 
     ret.points = list(self.pts.values())
 

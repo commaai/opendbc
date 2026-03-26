@@ -1,9 +1,10 @@
-from opendbc.can.packer import CANPacker
-from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, structs
+import numpy as np
+from opendbc.can import CANPacker
+from opendbc.car import Bus, DT_CTRL, structs
+from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.gm import gmcan
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.gm.values import DBC, CanBus, CarControllerParams, CruiseButtons
-from opendbc.car.common.numpy_fast import interp
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -17,10 +18,10 @@ MIN_STEER_MSG_INTERVAL_MS = 15
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    super().__init__(dbc_name, CP)
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
     self.start_time = 0.
-    self.apply_steer_last = 0
+    self.apply_torque_last = 0
     self.apply_gas = 0
     self.apply_brake = 0
     self.last_steer_frame = 0
@@ -32,9 +33,9 @@ class CarController(CarControllerBase):
 
     self.params = CarControllerParams(self.CP)
 
-    self.packer_pt = CANPacker(DBC[self.CP.carFingerprint]['pt'])
-    self.packer_obj = CANPacker(DBC[self.CP.carFingerprint]['radar'])
-    self.packer_ch = CANPacker(DBC[self.CP.carFingerprint]['chassis'])
+    self.packer_pt = CANPacker(DBC[self.CP.carFingerprint][Bus.pt])
+    self.packer_obj = CANPacker(DBC[self.CP.carFingerprint][Bus.radar])
+    self.packer_ch = CANPacker(DBC[self.CP.carFingerprint][Bus.chassis])
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -70,15 +71,15 @@ class CarController(CarControllerBase):
         self.lka_steering_cmd_counter = CS.pt_lka_steering_cmd_counter + 1
 
       if CC.latActive:
-        new_steer = int(round(actuators.steer * self.params.STEER_MAX))
-        apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
+        new_torque = int(round(actuators.torque * self.params.STEER_MAX))
+        apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
       else:
-        apply_steer = 0
+        apply_torque = 0
 
       self.last_steer_frame = self.frame
-      self.apply_steer_last = apply_steer
+      self.apply_torque_last = apply_torque
       idx = self.lka_steering_cmd_counter % 4
-      can_sends.append(gmcan.create_steering_control(self.packer_pt, CanBus.POWERTRAIN, apply_steer, idx, CC.latActive))
+      can_sends.append(gmcan.create_steering_control(self.packer_pt, CanBus.POWERTRAIN, apply_torque, idx, CC.latActive))
 
     if self.CP.openpilotLongitudinalControl:
       # Gas/regen, brakes, and UI commands - all at 25Hz
@@ -89,8 +90,8 @@ class CarController(CarControllerBase):
           self.apply_gas = self.params.INACTIVE_REGEN
           self.apply_brake = 0
         else:
-          self.apply_gas = int(round(interp(actuators.accel, self.params.GAS_LOOKUP_BP, self.params.GAS_LOOKUP_V)))
-          self.apply_brake = int(round(interp(actuators.accel, self.params.BRAKE_LOOKUP_BP, self.params.BRAKE_LOOKUP_V)))
+          self.apply_gas = float(np.interp(actuators.accel, self.params.GAS_LOOKUP_BP, self.params.GAS_LOOKUP_V))
+          self.apply_brake = int(round(np.interp(actuators.accel, self.params.BRAKE_LOOKUP_BP, self.params.BRAKE_LOOKUP_V)))
           # Don't allow any gas above inactive regen while stopping
           # FIXME: brakes aren't applied immediately when enabling at a stop
           if stopping:
@@ -153,8 +154,8 @@ class CarController(CarControllerBase):
         can_sends.append(gmcan.create_pscm_status(self.packer_pt, CanBus.CAMERA, CS.pscm_status))
 
     new_actuators = actuators.as_builder()
-    new_actuators.steer = self.apply_steer_last / self.params.STEER_MAX
-    new_actuators.steerOutputCan = self.apply_steer_last
+    new_actuators.torque = self.apply_torque_last / self.params.STEER_MAX
+    new_actuators.torqueOutputCan = self.apply_torque_last
     new_actuators.gas = self.apply_gas
     new_actuators.brake = self.apply_brake
 

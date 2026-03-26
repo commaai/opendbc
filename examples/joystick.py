@@ -11,6 +11,7 @@ from kbhit import KBHit
 from opendbc.car.structs import CarControl
 from opendbc.car.panda_runner import PandaRunner
 
+
 class Keyboard:
   def __init__(self):
     self.kb = KBHit()
@@ -36,6 +37,7 @@ class Keyboard:
     else:
       return False
     return True
+
 
 class Joystick:
   def __init__(self, gamepad=False):
@@ -72,9 +74,11 @@ class Joystick:
       return False
     return True
 
+
 def joystick_thread(joystick):
   while True:
     joystick.update()
+
 
 def main(joystick):
   threading.Thread(target=joystick_thread, args=(joystick,), daemon=True).start()
@@ -82,7 +86,7 @@ def main(joystick):
     CC = CarControl(enabled=False)
     while True:
       CC.actuators.accel = float(4.0*np.clip(joystick.axes_values['gb'], -1, 1))
-      CC.actuators.steer = float(np.clip(joystick.axes_values['steer'], -1, 1))
+      CC.actuators.torque = float(np.clip(joystick.axes_values['steer'], -1, 1))
       pprint(CC)
 
       p.read()

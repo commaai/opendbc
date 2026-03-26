@@ -6,6 +6,10 @@ car:
   - changed-files:
     - any-glob-to-any-file: 'opendbc/car/**'
 
+car safety:
+  - changed-files:
+    - any-glob-to-any-file: 'opendbc/safety/**'
+
 can:
   - changed-files:
     - any-glob-to-any-file: 'opendbc/can/**'
@@ -46,6 +50,10 @@ mazda:
 nissan:
   - changed-files:
     - any-glob-to-any-file: 'opendbc/car/nissan/**'
+
+rivian:
+  - changed-files:
+    - any-glob-to-any-file: 'opendbc/car/rivian/**'
 
 subaru:
   - changed-files:

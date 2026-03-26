@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from opendbc.can.parser import CANParser
+from opendbc.can import CANParser
+from opendbc.car import Bus
 from opendbc.car.structs import RadarData
 from opendbc.car.toyota.values import DBC, TSS2_CAR
 from opendbc.car.interfaces import RadarInterfaceBase
@@ -17,7 +18,8 @@ def _create_radar_can_parser(car_fingerprint):
   msg_b_n = len(RADAR_B_MSGS)
   messages = list(zip(RADAR_A_MSGS + RADAR_B_MSGS, [20] * (msg_a_n + msg_b_n), strict=True))
 
-  return CANParser(DBC[car_fingerprint]['radar'], messages, 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
+
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
@@ -41,7 +43,7 @@ class RadarInterface(RadarInterfaceBase):
     if self.rcp is None:
       return super().update(None)
 
-    vls = self.rcp.update_strings(can_strings)
+    vls = self.rcp.update(can_strings)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
@@ -54,10 +56,8 @@ class RadarInterface(RadarInterfaceBase):
 
   def _update(self, updated_messages):
     ret = RadarData()
-    errors = []
     if not self.rcp.can_valid:
-      errors.append("canError")
-    ret.errors = errors
+      ret.errors.canError = True
 
     for ii in sorted(updated_messages):
       if ii in self.RADAR_A_MSGS:

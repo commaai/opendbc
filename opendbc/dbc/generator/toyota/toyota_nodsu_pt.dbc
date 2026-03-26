@@ -1,4 +1,5 @@
 CM_ "IMPORT _toyota_2017.dbc";
+CM_ "IMPORT _toyota_adas_standard.dbc";
 
 BO_ 401 STEERING_LTA: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX

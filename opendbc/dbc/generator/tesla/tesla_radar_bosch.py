@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-import os
-from opendbc.dbc.generator.tesla.radar_common import get_radar_point_definition, get_val_definition
+from opendbc.dbc.generator.tesla._radar_common import get_radar_point_definition, get_val_definition
 
-if __name__ == "__main__":
-  dbc_name = os.path.basename(__file__).replace(".py", ".dbc")
-  tesla_path = os.path.dirname(os.path.realpath(__file__))
-  with open(os.path.join(tesla_path, dbc_name), "w", encoding='utf-8') as f:
-    f.write("""
+
+def generate():
+  parts = []
+  parts.append("""
 VERSION ""
 
 NS_ :
@@ -133,15 +131,15 @@ BO_ 1281 TeslaRadarAlertMatrix: 8 Radar
  SG_ unused62 : 62|2@1+ (1,0) [0|3] ""  Autopilot
 """)
 
-    M_RANGE = range(0x310, 0x36D + 1, 3)
-    for i, base_id in enumerate(M_RANGE):
-      f.write(get_radar_point_definition(base_id, f"RadarPoint{i}"))
+  M_RANGE = range(0x310, 0x36D + 1, 3)
+  for i, base_id in enumerate(M_RANGE):
+    parts.append(get_radar_point_definition(base_id, f"RadarPoint{i}"))
 
-    L_RANGE = range(0x371, 0x37D + 1, 3)
-    for i, base_id in enumerate(L_RANGE):
-      f.write(get_radar_point_definition(base_id, f"ProcessedRadarPoint{i+1}"))
+  L_RANGE = range(0x371, 0x37D + 1, 3)
+  for i, base_id in enumerate(L_RANGE):
+    parts.append(get_radar_point_definition(base_id, f"ProcessedRadarPoint{i+1}"))
 
-    f.write("""
+  parts.append("""
 BO_ 697 VIN_VIP_405HS: 8 Autopilot
  SG_ VIN_MuxID M : 0|8@1+ (1,0) [0|0] ""  Radar
  SG_ VIN_Part1 m16 : 47|24@0+ (1,0) [0|16777215] "" Radar
@@ -278,5 +276,7 @@ BA_ "GenMsgCycleTime" BO_ 729 1000;
 
 VAL_ 681 Msg2A9_FourWheelDrive 3 "SNA" 2 "UNUSED" 1 "4WD" 0 "2WD" ;""")
 
-    for base_id in list(M_RANGE) + list(L_RANGE):
-      f.write(get_val_definition(base_id))
+  for base_id in list(M_RANGE) + list(L_RANGE):
+    parts.append(get_val_definition(base_id))
+
+  return {"tesla_radar_bosch.dbc": "".join(parts)}

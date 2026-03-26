@@ -1,12 +1,17 @@
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.fca_giorgio.carcontroller import CarController
+from opendbc.car.fca_giorgio.carstate import CarState
 from opendbc.car.fca_giorgio.values import CAR
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
+
   @staticmethod
-  def _get_params(ret, candidate: CAR, fingerprint, car_fw, experimental_long, docs):
-    ret.carName = "fca_giorgio"
+  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
+    ret.brand = "fca_giorgio"
     ret.radarUnavailable = True
 
     # Set global parameters

@@ -1,9 +1,8 @@
-import numpy as np
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.fca_giorgio.values import DBC, CANBUS, CarControllerParams
+from opendbc.car.fca_giorgio.values import DBC, CanBus, CarControllerParams
 
 
 GearShifter = structs.CarState.GearShifter
@@ -14,19 +13,17 @@ class CarState(CarStateBase):
     self.frame = 0
     self.CCP = CarControllerParams(CP)
 
-  def update(self, pt_cp, cam_cp, *_):
+  def update(self, can_parsers) -> structs.CarState:
+    pt_cp = can_parsers[Bus.pt]
+
     ret = structs.CarState()
-    # Update vehicle speed and acceleration from ABS wheel speeds.
-    ret.wheelSpeeds = self.get_wheel_speeds(
+
+    self.parse_wheel_speeds(ret,
       pt_cp.vl["ABS_1"]["WHEEL_SPEED_FL"],
       pt_cp.vl["ABS_1"]["WHEEL_SPEED_FR"],
       pt_cp.vl["ABS_1"]["WHEEL_SPEED_RL"],
       pt_cp.vl["ABS_1"]["WHEEL_SPEED_RR"],
-      unit=1.0
     )
-
-    ret.vEgoRaw = float(np.mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr]))
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.vEgoRaw == 0
 
     ret.steeringAngleDeg = pt_cp.vl["EPS_1"]["STEERING_ANGLE"]
@@ -38,8 +35,8 @@ class CarState(CarStateBase):
     ret.steerFaultPermanent = bool(pt_cp.vl["EPS_2"]["LKA_FAULT"])
 
     # TODO: unsure if this is accel pedal or engine throttle
-    #ret.gas = pt_cp.vl["ENGINE_1"]["ACCEL_PEDAL"]
-    ret.gasPressed = ret.gas > 0
+    # ret.gas = pt_cp.vl["ENGINE_1"]["ACCEL_PEDAL"]
+    # ret.gasPressed = ret.gas > 0
     ret.brake = pt_cp.vl["ABS_4"]["BRAKE_PRESSURE"]
     ret.brakePressed = bool(pt_cp.vl["ABS_3"]["BRAKE_PEDAL_SWITCH"])
     #ret.parkingBrake = TODO
@@ -61,28 +58,13 @@ class CarState(CarStateBase):
     self.frame += 1
     return ret
 
-
   @staticmethod
-  def get_can_parser(CP):
-    messages = [
-      # sig_address, frequency
-      ("ABS_1", 100),
-      ("ABS_2", 100),
-      ("ABS_3", 100),
-      ("ABS_4", 100),
-      ("ENGINE_1", 100),
-      ("EPS_1", 100),
-      ("EPS_2", 100),
-      ("EPS_3", 100),
-      ("ACC_1", 12),  # 12hz inactive / 50hz active
-      ("BCM_1", 4),  # 4Hz plus triggered updates
-    ]
+  def get_can_parsers(CP):
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.pt)
+    # manually configure some optional and variable-rate/edge-triggered messages
+    pt_messages, cam_messages = [], []
 
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    messages = []
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.cam)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).cam),
+    }

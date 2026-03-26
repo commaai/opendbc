@@ -1,0 +1,30 @@
+name: Update uv.lock
+
+on:
+  schedule:
+    - cron: "0 14 * * 1" # every Monday at 2am UTC (6am PST)
+  workflow_dispatch:
+
+jobs:
+  update-uv-lock:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Update uv.lock
+        run: uv lock --upgrade
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@9153d834b60caba6d51c9b9510b087acf9f33f83
+        with:
+          author: Vehicle Researcher <user@comma.ai>
+          token: ${{ secrets.ACTIONS_CREATE_PR_PAT }}
+          commit-message: "[bot] Update uv.lock"
+          title: "[bot] Update uv.lock"
+          body: "Weekly update of uv.lock dependencies"
+          branch: "update-uv-lock"
+          base: "master"
+          delete-branch: true
+          labels: bot

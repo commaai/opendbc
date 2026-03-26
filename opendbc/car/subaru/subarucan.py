@@ -4,18 +4,18 @@ from opendbc.car.subaru.values import CanBus
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
-def create_steering_control(packer, apply_steer, steer_req):
+def create_steering_control(packer, apply_torque, steer_req):
   values = {
-    "LKAS_Output": apply_steer,
+    "LKAS_Output": apply_torque,
     "LKAS_Request": steer_req,
     "SET_1": 1
   }
   return packer.make_can_msg("ES_LKAS", 0, values)
 
 
-def create_steering_control_angle(packer, apply_steer, steer_req):
+def create_steering_control_angle(packer, apply_torque, steer_req):
   values = {
-    "LKAS_Output": apply_steer,
+    "LKAS_Output": apply_torque,
     "LKAS_Request": steer_req,
     "SET_3": 3
   }
@@ -24,6 +24,7 @@ def create_steering_control_angle(packer, apply_steer, steer_req):
 
 def create_steering_status(packer):
   return packer.make_can_msg("ES_LKAS_State", 0, {})
+
 
 def create_es_distance(packer, frame, es_distance_msg, bus, pcm_cancel_cmd, long_enabled = False, brake_cmd = False, cruise_throttle = 0):
   values = {s: es_distance_msg[s] for s in [
@@ -129,6 +130,7 @@ def create_es_lkas_state(packer, frame, es_lkas_state_msg, enabled, visual_alert
 
   return packer.make_can_msg("ES_LKAS_State", CanBus.main, values)
 
+
 def create_es_dashstatus(packer, frame, dashstatus_msg, enabled, long_enabled, long_active, lead_visible):
   values = {s: dashstatus_msg[s] for s in [
     "CHECKSUM",
@@ -145,8 +147,8 @@ def create_es_dashstatus(packer, frame, dashstatus_msg, enabled, long_enabled, l
     "Signal4",
     "Conventional_Cruise",
     "Signal5",
-    "Cruise_Disengaged",
-    "Cruise_Activated",
+    "Cruise_Disengaged_Dash",
+    "Cruise_Activated_Dash",
     "Signal6",
     "Cruise_Set_Speed",
     "Cruise_Fault",
@@ -163,8 +165,9 @@ def create_es_dashstatus(packer, frame, dashstatus_msg, enabled, long_enabled, l
 
   if long_enabled:
     values["Cruise_State"] = 0
-    values["Cruise_Activated"] = enabled
-    values["Cruise_Disengaged"] = 0
+    # TODO: Cruise_Activated_dash should respect gas pressed and standstill stock behavior
+    values["Cruise_Activated_Dash"] = enabled
+    values["Cruise_Disengaged_Dash"] = 0
     values["Car_Follow"] = int(lead_visible)
 
     values["PCB_Off"] = 1 # AEB is not presevered, so show the PCB_Off on dash
@@ -176,6 +179,7 @@ def create_es_dashstatus(packer, frame, dashstatus_msg, enabled, long_enabled, l
     values["LKAS_State_Msg"] = 0
 
   return packer.make_can_msg("ES_DashStatus", CanBus.main, values)
+
 
 def create_es_brake(packer, frame, es_brake_msg, long_enabled, long_active, brake_value):
   values = {s: es_brake_msg[s] for s in [
@@ -202,6 +206,7 @@ def create_es_brake(packer, frame, es_brake_msg, long_enabled, long_active, brak
     values["Cruise_Brake_Lights"] = brake_value >= 70
 
   return packer.make_can_msg("ES_Brake", CanBus.main, values)
+
 
 def create_es_status(packer, frame, es_status_msg, long_enabled, long_active, cruise_rpm):
   values = {s: es_status_msg[s] for s in [
@@ -283,10 +288,10 @@ def subaru_preglobal_checksum(packer, values, addr, checksum_byte=7):
   return (sum(dat[:checksum_byte]) + sum(dat[checksum_byte+1:])) % 256
 
 
-def create_preglobal_steering_control(packer, frame, apply_steer, steer_req):
+def create_preglobal_steering_control(packer, frame, apply_torque, steer_req):
   values = {
     "COUNTER": frame % 0x08,
-    "LKAS_Command": apply_steer,
+    "LKAS_Command": apply_torque,
     "LKAS_Active": steer_req,
   }
   values["Checksum"] = subaru_preglobal_checksum(packer, values, "ES_LKAS")
@@ -319,3 +324,14 @@ def create_preglobal_es_distance(packer, cruise_button, es_distance_msg):
   values["Checksum"] = subaru_preglobal_checksum(packer, values, "ES_Distance")
 
   return packer.make_can_msg("ES_Distance", CanBus.main, values)
+
+
+def subaru_checksum(address: int, sig, d: bytearray) -> int:
+  s = 0
+  addr = address
+  while addr:
+    s += addr & 0xFF
+    addr >>= 8
+  for i in range(1, len(d)):
+    s += d[i]
+  return s & 0xFF

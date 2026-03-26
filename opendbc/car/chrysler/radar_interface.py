@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.can import CANParser
+from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
 from opendbc.car.chrysler.values import DBC
 
@@ -9,9 +9,9 @@ RADAR_MSGS_D = list(range(0x2a2, 0x2b4+2, 2))  # d_ messages
 LAST_MSG = max(RADAR_MSGS_C + RADAR_MSGS_D)
 NUMBER_MSGS = len(RADAR_MSGS_C) + len(RADAR_MSGS_D)
 
+
 def _create_radar_can_parser(car_fingerprint):
-  dbc = DBC[car_fingerprint]['radar']
-  if dbc is None:
+  if Bus.radar not in DBC[car_fingerprint]:
     return None
 
   msg_n = len(RADAR_MSGS_C)
@@ -27,7 +27,8 @@ def _create_radar_can_parser(car_fingerprint):
                       [20] * msg_n +  # 20Hz (0.05s)
                       [20] * msg_n, strict=True))  # 20Hz (0.05s)
 
-  return CANParser(DBC[car_fingerprint]['radar'], messages, 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
+
 
 def _address_to_track(address):
   if address in RADAR_MSGS_C:
@@ -35,6 +36,7 @@ def _address_to_track(address):
   if address in RADAR_MSGS_D:
     return (address - RADAR_MSGS_D[0]) // 2
   raise ValueError("radar received unexpected address %d" % address)
+
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
@@ -47,17 +49,15 @@ class RadarInterface(RadarInterfaceBase):
     if self.rcp is None or self.CP.radarUnavailable:
       return super().update(None)
 
-    vls = self.rcp.update_strings(can_strings)
+    vls = self.rcp.update(can_strings)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
       return None
 
     ret = structs.RadarData()
-    errors = []
     if not self.rcp.can_valid:
-      errors.append("canError")
-    ret.errors = errors
+      ret.errors.canError = True
 
     for ii in self.updated_messages:  # ii should be the message ID as a number
       cpt = self.rcp.vl[ii]
@@ -73,8 +73,8 @@ class RadarInterface(RadarInterfaceBase):
       if 'LONG_DIST' in cpt:  # c_* message
         self.pts[trackId].dRel = cpt['LONG_DIST']  # from front of car
         # our lat_dist is positive to the right in car's frame.
-        # TODO what does yRel want?
-        self.pts[trackId].yRel = cpt['LAT_DIST']  # in car frame's y axis, left is positive
+        # LAT_DIST is right-positive, yRel is left-positive
+        self.pts[trackId].yRel = -cpt['LAT_DIST']  # in car frame's y axis, left is positive
       else:  # d_* message
         self.pts[trackId].vRel = cpt['REL_SPEED']
 

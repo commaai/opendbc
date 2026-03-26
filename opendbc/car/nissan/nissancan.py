@@ -1,14 +1,14 @@
-import crcmod
+from opendbc.car.crc import CRC8J1850, mk_crc8_fun
 from opendbc.car.nissan.values import CAR
 
 # TODO: add this checksum to the CANPacker
-nissan_checksum = crcmod.mkCrcFun(0x11d, initCrc=0x00, rev=False, xorOut=0xff)
+nissan_checksum = mk_crc8_fun(CRC8J1850, init_crc=0x00, xor_out=0xFF)
 
 
-def create_steering_control(packer, apply_steer, frame, steer_on, lkas_max_torque):
+def create_steering_control(packer, apply_torque, frame, steer_on, lkas_max_torque):
   values = {
     "COUNTER": frame % 0x10,
-    "DESIRED_ANGLE": apply_steer,
+    "DESIRED_ANGLE": apply_torque,
     "SET_0x80_2": 0x80,
     "SET_0x80": 0x80,
     "MAX_TORQUE": lkas_max_torque if steer_on else 0,

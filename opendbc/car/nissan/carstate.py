@@ -1,8 +1,7 @@
 import copy
 from collections import deque
-from opendbc.can.can_define import CANDefine
-from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.can import CANDefine, CANParser
+from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.nissan.values import CAR, DBC, CarControllerParams
@@ -15,7 +14,7 @@ TORQUE_SAMPLES = 12
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.lkas_hud_msg = {}
     self.lkas_hud_info_msg = {}
@@ -25,33 +24,35 @@ class CarState(CarStateBase):
 
     self.distance_button = 0
 
-  def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
+    cp_adas = can_parsers[Bus.adas]
+
     ret = structs.CarState()
 
     prev_distance_button = self.distance_button
     self.distance_button = cp.vl["CRUISE_THROTTLE"]["FOLLOW_DISTANCE_BUTTON"]
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
-      ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL"]
+      ret.gasPressed = bool(cp.vl["GAS_PEDAL"]["GAS_PEDAL"] > 3)
     elif self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
-      ret.gas = cp.vl["CRUISE_THROTTLE"]["GAS_PEDAL"]
-
-    ret.gasPressed = bool(ret.gas > 3)
+      ret.gasPressed = bool(cp.vl["CRUISE_THROTTLE"]["GAS_PEDAL"] > 3)
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
       ret.brakePressed = bool(cp.vl["DOORS_LIGHTS"]["USER_BRAKE_PRESSED"])
     elif self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
       ret.brakePressed = bool(cp.vl["CRUISE_THROTTLE"]["USER_BRAKE_PRESSED"])
 
-    ret.wheelSpeeds = self.get_wheel_speeds(
-      cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FL"],
-      cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FR"],
-      cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"],
-      cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"],
-    )
-    ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
+    fl = cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FL"] * CV.KPH_TO_MS
+    fr = cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FR"] * CV.KPH_TO_MS
+    rl = cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"] * CV.KPH_TO_MS
+    rr = cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"] * CV.KPH_TO_MS
+    # safety uses the rear wheel speeds for the speed measurement and angle limiting
+    ret.vEgoRaw = (rl + rr) / 2.0
 
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
+    v_ego_raw_full = (fl + fr + rl + rr) / 4.0
+    ret.vEgo, ret.aEgo = self.update_speed_kf(v_ego_raw_full)
     ret.standstill = cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"] == 0.0 and cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"] == 0.0
 
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
@@ -130,74 +131,9 @@ class CarState(CarStateBase):
     return ret
 
   @staticmethod
-  def get_can_parser(CP):
-    messages = [
-      # sig_address, frequency
-      ("STEER_ANGLE_SENSOR", 100),
-      ("WHEEL_SPEEDS_REAR", 50),
-      ("WHEEL_SPEEDS_FRONT", 50),
-      ("ESP", 25),
-      ("GEARBOX", 25),
-      ("DOORS_LIGHTS", 10),
-      ("LIGHTS", 10),
-    ]
-
-    if CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
-      messages += [
-        ("GAS_PEDAL", 100),
-        ("CRUISE_THROTTLE", 50),
-        ("HUD", 25),
-      ]
-
-    elif CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
-      messages += [
-        ("BRAKE_PEDAL", 100),
-        ("CRUISE_THROTTLE", 50),
-        ("CANCEL_MSG", 50),
-        ("HUD_SETTINGS", 25),
-        ("SEATBELT", 10),
-      ]
-
-    if CP.carFingerprint == CAR.NISSAN_ALTIMA:
-      messages += [
-        ("CRUISE_STATE", 10),
-        ("LKAS_SETTINGS", 10),
-        ("PROPILOT_HUD", 50),
-      ]
-      return CANParser(DBC[CP.carFingerprint]["pt"], messages, 1)
-
-    messages.append(("STEER_TORQUE_SENSOR", 100))
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
-
-  @staticmethod
-  def get_adas_can_parser(CP):
-    # this function generates lists for signal, messages and initial values
-
-    if CP.carFingerprint == CAR.NISSAN_ALTIMA:
-      messages = [
-        ("LKAS", 100),
-        ("PRO_PILOT", 100),
-      ]
-    else:
-      messages = [
-        ("PROPILOT_HUD_INFO_MSG", 2),
-        ("LKAS_SETTINGS", 10),
-        ("CRUISE_STATE", 50),
-        ("PROPILOT_HUD", 50),
-        ("LKAS", 100),
-      ]
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 2)
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    messages = []
-
-    if CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL):
-      messages.append(("PRO_PILOT", 100))
-    elif CP.carFingerprint == CAR.NISSAN_ALTIMA:
-      messages.append(("STEER_TORQUE_SENSOR", 100))
-      return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 1)
+  def get_can_parsers(CP):
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
+    }

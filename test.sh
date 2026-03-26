@@ -4,17 +4,15 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 cd $DIR
 
-# ensure we're up to date
-uv venv --allow-existing
-source .venv/bin/activate
+source ./setup.sh
 
-uv pip install -e .[testing,docs]
+# *** uv lockfile check ***
+uv lock --check
 
-uv run scons -j8
+# *** lint + test ***
+lefthook run test
 
-uv run pre-commit run --all-files
-uv run pytest -n8
-
+# *** all done ***
 GREEN='\033[0;32m'
 NC='\033[0m'
-printf "\n${GREEN}All good!${NC} Finished build, lint, and test in ${SECONDS}s\n"
+printf "\n${GREEN}All good!${NC} Finished lint and test in ${SECONDS}s\n"
