@@ -146,6 +146,8 @@ class CarState(CarStateBase):
       ret.leftBlindspot = bool(cp.vl["BSM_LEFT"]["LEFT_DETECTED"])
       ret.rightBlindspot = bool(cp.vl["BSM_RIGHT"]["RIGHT_DETECTED"])
 
+    self.lkas_car_model = cp_cam.vl["DAS_6"]["CAR_MODEL"]
+
     return ret
 
   @staticmethod

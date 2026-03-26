@@ -40,7 +40,7 @@ class CarController(CarControllerBase):
 
     # HUD alerts
     if self.frame % 25 == 0:
-      if self.CP.carFingerprint in CUSW_CARS or CS.lkas_car_model != -1:
+      if CS.lkas_car_model != -1:
         can_sends.append(chryslercan.create_lkas_hud(self.packer, self.CP, lkas_active, CC.hudControl.visualAlert,
                                                      self.hud_count, CS.lkas_car_model, CS.auto_high_beam))
         self.hud_count += 1
