@@ -698,6 +698,7 @@ FW_VERSIONS = {
   },
   CAR.HYUNDAI_KONA_EV_2022: {
     (Ecu.abs, 0x7d1, None): [
+      b'\xf1\x00OS IEB \x02 101 \x11\x13 58520-K4010',
       b'\xf1\x00OS IEB \x02 102"\x05\x16 58520-K4010',
       b'\xf1\x00OS IEB \x03 101 \x11\x13 58520-K4010',
       b'\xf1\x00OS IEB \x03 102"\x05\x16 58520-K4010',
@@ -713,6 +714,7 @@ FW_VERSIONS = {
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310-K4271 4OEPC102',
+      b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4261 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4271 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4970 4OEPC102',
       b'\xf1\x00OSP MDPS C 1.00 1.02 56310/K4971 4OEPC102',
