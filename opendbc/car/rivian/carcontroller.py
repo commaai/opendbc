@@ -63,7 +63,8 @@ class CarController(CarControllerBase):
       else:
         self.cancel_frames = 0
 
-      can_sends.append(create_adas_status(self.packer, CS.vdm_adas_status, interface_status))
+      for vdm_adas_status in CS.vdm_adas_status:
+        can_sends.append(create_adas_status(self.packer, vdm_adas_status, interface_status))
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = apply_torque / steer_max

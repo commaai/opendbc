@@ -92,7 +92,7 @@ class CarState(CarStateBase):
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
     self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"]) if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else None
-    self.vdm_adas_status = copy.copy(cp.vl["VDM_AdasSts"])
+    self.vdm_adas_status = [copy.copy(m) for m in cp.vl_all["VDM_AdasSts"]]
     self.acm_longitudinal_request = copy.copy(cp_cam.vl["ACM_longitudinalRequest"])
 
     return ret
