@@ -92,6 +92,11 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
                              esp_hold, esp_starting_override, esp_stopping_override):
   commands = []
 
+  # acc 7 is forwarded to ESP
+  acc07_stopping = esp_stopping_override if esp_stopping_override is not None else stopping
+  acc07_starting = esp_starting_override if esp_starting_override is not None else starting
+  increase_jerk = acc07_starting or acc07_stopping
+
   acc_06_values = {
     "ACC_Typ": acc_type,
     "ACC_Status_ACC": acc_control,
@@ -99,7 +104,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Sollbeschleunigung_02": accel if acc_enabled else 3.01,
     "ACC_zul_Regelabw_unten": 0.2,  # TODO: dynamic adjustment of comfort-band
     "ACC_zul_Regelabw_oben": 0.2,  # TODO: dynamic adjustment of comfort-band
-    "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
+    "ACC_neg_Sollbeschl_Grad_02": 12.75 if increase_jerk else 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
     "ACC_pos_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
     "ACC_Anfahren": starting if acc_enabled else False,
     "ACC_Anhalten": stopping if acc_enabled else False,
@@ -114,10 +119,6 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     acc_hold_type = 1  # hold request
   else:
     acc_hold_type = 0
-
-  # acc 7 is forwarded to ESP
-  acc07_stopping = esp_stopping_override if esp_stopping_override is not None else stopping
-  acc07_starting = esp_starting_override if esp_starting_override is not None else starting
 
   acc_07_values = {
     "ACC_Anhalteweg": 0.3 if acc07_stopping and acc_enabled else 20.46,  # Distance to stop (stopping coordinator handles terminal roll-out)

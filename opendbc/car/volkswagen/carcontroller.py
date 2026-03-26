@@ -91,8 +91,8 @@ class MQBStandstillManager:
         self._can_stop_forever = False
       if not (stopping or starting):
         self._can_stop_forever = False
-      if CS.grade > 12:
-        self._can_stop_forever = False
+      # if CS.grade > 12:
+      #   self._can_stop_forever = False
       if self._can_stop_forever:
         esp_starting_override = True
         esp_stopping_override = False
