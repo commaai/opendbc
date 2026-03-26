@@ -60,6 +60,7 @@ class MQBStandstillManager:
     self._prev_impulse_count = 0
     self._recent_release_request_frames = 0
     self._prev_starting_no_hold = False
+    self._can_stop_forever = False
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
              ) -> tuple[bool, float, bool, bool, bool | None, bool | None]:
@@ -80,10 +81,22 @@ class MQBStandstillManager:
     # uphill launch: TSK rarely commands enough torque to move from a hill hold, so keep accel > 1 m/s²
     if long_active and accel > 0 and is_uphill and CS.out.standstill:
       accel = max(accel, 1.0)
+    if long_active and CS.esp_rollback_possible and accel > 0:
+      accel = max(accel, 1.0)
 
-    if CS.out.vEgo < 0.6 * CV.KPH_TO_MS:
-      esp_stopping_override = False
-      esp_starting_override = True
+    # stopping procedure
+    if long_active:
+      if CS.esp_stopping:
+        self._can_stop_forever = True
+      if CS.esp_hold_confirmation:
+        self._can_stop_forever = False
+      if not (stopping or starting):
+        self._can_stop_forever = False
+      if self._can_stop_forever and accel < 0:
+        esp_starting_override = True
+        esp_stopping_override = False
+    else:
+      self._can_stop_forever = False
 
     # standstill timer resets when:
     # - wheels move while hold is not confirmed

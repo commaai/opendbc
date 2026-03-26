@@ -18,6 +18,8 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = False
     self.esp_hold_torque_nm = 0.0
     self.esp_hold_uphill = False
+    self.esp_stopping = False
+    self.esp_rollback_possible = False
     self.actual_torque_nm = 0.0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
@@ -87,6 +89,10 @@ class CarState(CarStateBase):
         + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"]
         + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"]
       )
+      self.esp_rollback_possible = (
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"] == 1 or
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"] == 1
+      )
 
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
         ret.carFaultedNonCritical = bool(cam_cp.vl["HCA_01"]["EA_Ruckfreigabe"]) or cam_cp.vl["HCA_01"]["EA_ACC_Sollstatus"] > 0  # EA
@@ -113,6 +119,7 @@ class CarState(CarStateBase):
 
       self.acc_type = ext_cp.vl["ACC_06"]["ACC_Typ"]
       self.esp_hold_confirmation = bool(pt_cp.vl["ESP_21"]["ESP_Haltebestaetigung"])
+      self.esp_stopping = bool(pt_cp.vl["ESP_21"]["ESP_Anhaltevorgang_ACC_aktiv"])
       acc_limiter_mode = ext_cp.vl["ACC_02"]["ACC_Gesetzte_Zeitluecke"] == 0
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
 
