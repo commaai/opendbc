@@ -7,9 +7,8 @@ from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudina
 from opendbc.car.rivian.values import CarControllerParams, CAR
 
 # EPS faults if you apply torque while the steering angle is above 90 degrees for more than 1 second
-# All slightly below EPS thresholds to avoid fault
-MAX_ANGLE = 85
-MAX_ANGLE_FRAMES = 25
+MAX_ANGLE = 90
+MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 
@@ -38,15 +37,24 @@ class CarController(CarControllerBase):
     self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
                                                                        self.angle_limit_counter, MAX_ANGLE_FRAMES,
                                                                        MAX_ANGLE_CONSECUTIVE_FRAMES)
-    torque_fault = CC.latActive and not apply_steer_req
 
     if not CC.latActive:
       apply_torque = 0
 
+    # Hold torque with induced temporary fault when cutting the actuation bit
+    torque_fault = CC.latActive and not apply_steer_req
+    if torque_fault:
+      apply_torque = 0
+
+    # Request ELK at high steering angles to allow EPAS to accept torque beyond 90 degrees
+    # DBC: 0=No_Request, 1=Left_LKA, 2=Right_LKA, 3=Left_ELK, 4=Right_ELK
+    elk_request = 0
+    if CC.latActive and abs(CS.out.steeringAngleDeg) >= MAX_ANGLE:
+      elk_request = 4 if CS.out.steeringAngleDeg > 0 else 3
 
     # send steering command
     self.apply_torque_last = apply_torque
-    can_sends.append(create_lka_steering(self.packer, self.frame, CS.acm_lka_hba_cmd, apply_torque, CC.enabled, apply_steer_req, torque_fault))
+    can_sends.append(create_lka_steering(self.packer, self.frame, CS.acm_lka_hba_cmd, apply_torque, CC.enabled, apply_steer_req, elk_request))
 
     if self.frame % 5 == 0 and self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1:
       can_sends.append(create_wheel_touch(self.packer, CS.sccm_wheel_touch, CC.enabled))
