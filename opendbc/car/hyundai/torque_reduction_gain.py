@@ -22,7 +22,12 @@ class TorqueReductionGainController:
     self.gain = min_gain
     self.last_update_time = time.monotonic()
 
-  def update(self, last_requested_angle, actual_angle, lat_active):
+  def update(self, params, last_requested_angle, actual_angle, lat_active):
+    self.min_gain = params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN
+    self.max_gain = params.ANGLE_MAX_TORQUE_REDUCTION_GAIN
+    self.ramp_up_rate = params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE
+    self.ramp_down_rate = params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE
+
     now = time.monotonic()
     dt = now - self.last_update_time
     self.last_update_time = now

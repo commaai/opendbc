@@ -1,4 +1,5 @@
 import math
+import json
 import numpy as np
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANPacker
@@ -23,6 +24,7 @@ MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 MAX_ANGLE_RATE = 5
 ANGLE_SAFETY_BASELINE_MODEL = "GENESIS_GV80_2025"
+TORQUE_REDUCTION_GAIN_JSON = "/data/torque_reduction_gain.json"
 
 
 def get_baseline_safety_cp():
@@ -73,21 +75,6 @@ def sp_smooth_angle(v_ego_raw: float, apply_angle: float, apply_angle_last: floa
   return apply_angle
 
 
-def parse_tq_rdc_gain(val):
-  """
-  Returns the float value divided by 100 if val is not None, else returns None.
-  """
-  if val is not None:
-    return float(val) / 100
-  return None
-
-
-def parse_scaled_value(val, scale=10):
-  if val is not None:
-    return float(val) / scale
-  return None
-
-
 def process_hud_alert(enabled, fingerprint, hud_control):
   sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
 
@@ -131,23 +118,10 @@ class CarController(CarControllerBase):
 
     self.apply_angle_last = 0
     self.angle_torque_reduction_gain = 0
+    self._torque_reduction_gain_read_counter = 0
 
     # For future parametrization / tuning
     self.angle_enable_smoothing_factor = True
-
-    self._params = Params() if PARAMS_AVAILABLE else None
-    if PARAMS_AVAILABLE:
-      self.params.ANGLE_MIN_TORQUE_REDUCTION_GAIN = parse_tq_rdc_gain(
-        self._params.get("HkgTuningAngleMinTorqueReductionGain")) or self.params.ANGLE_MIN_TORQUE_REDUCTION_GAIN
-
-      self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN = parse_tq_rdc_gain(
-        self._params.get("HkgTuningAngleMaxTorqueReductionGain")) or self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN
-
-      self.params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN = parse_tq_rdc_gain(
-        self._params.get("HkgTuningAngleActiveTorqueReductionGain")) or self.params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN
-
-      self.params.ANGLE_TORQUE_OVERRIDE_CYCLES = int(self._params.get("HkgTuningOverridingCycles") or self.params.ANGLE_TORQUE_OVERRIDE_CYCLES)
-      self.angle_enable_smoothing_factor = self._params.get_bool("EnableHkgTuningAngleSmoothingFactor")
 
     self.angle_torque_reduction_gain_controller = TorqueReductionGainController(
       angle_threshold=.3,
@@ -161,6 +135,19 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
+
+    self._torque_reduction_gain_read_counter += 1
+    if self._torque_reduction_gain_read_counter >= 100:
+      self._torque_reduction_gain_read_counter = 0
+      try:
+        with open(TORQUE_REDUCTION_GAIN_JSON) as f:
+          gain = json.load(f)
+        self.params.ANGLE_MIN_TORQUE_REDUCTION_GAIN = float(gain.get("min_torque_reduction_gain"))
+        self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN = float(gain.get("max_torque_reduction_gain"))
+        self.params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN = float(gain.get("active_torque_reduction_gain"))
+        self.params.ANGLE_TORQUE_OVERRIDE_CYCLES = int(gain.get("overriding_cycles"))
+      except (FileNotFoundError, json.JSONDecodeError, ValueError):
+        pass
 
     # steering torque
     if not self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
@@ -187,6 +174,7 @@ class CarController(CarControllerBase):
 
       # Use saturation-based torque reduction gain
       target_torque_reduction_gain = self.angle_torque_reduction_gain_controller.update(
+        self.params,
         last_requested_angle=self.apply_angle_last,
         actual_angle=CS.out.steeringAngleDeg,
         lat_active=CC.latActive
