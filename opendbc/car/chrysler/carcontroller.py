@@ -74,8 +74,8 @@ class CarController(CarControllerBase):
       # steer torque
       new_torque = int(round(CC.actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
-      # CUSW doesn't like being slammed down to zero on disengage, allow torque to fall at MAX_RATE_DOWN
-      if (self.CP.carFingerprint not in CUSW_CARS and not lkas_active) or not lkas_control_bit:
+      # FIXME: CUSW doesn't like being slammed down to zero on disengage, may need to allow torque to fall at MAX_RATE_DOWN
+      if not lkas_active or not lkas_control_bit:
         apply_torque = 0
       self.apply_torque_last = apply_torque
 
