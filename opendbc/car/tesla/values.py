@@ -79,6 +79,7 @@ FSD_14_FW = {
   CAR.TESLA_MODEL_3: [
     b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
     b'TeMYG4_Main_0.0.0 (78),E4HP015.05.0',
+    b'TeMYG4_Main_0.0.0 (77),E4H015.04.5',
   ],
   CAR.TESLA_MODEL_Y: [
     b'TeMYG4_Legacy3Y_0.0.0 (6),Y4003.04.0',
