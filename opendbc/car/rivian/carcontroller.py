@@ -8,7 +8,7 @@ from opendbc.car.rivian.values import CarControllerParams, CAR
 
 # EPS faults if you apply torque while the steering angle is above 90 degrees for more than 1 second
 MAX_ANGLE = 90
-MAX_ANGLE_FRAMES = 250
+MAX_ANGLE_FRAMES = 95
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 
