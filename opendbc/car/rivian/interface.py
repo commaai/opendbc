@@ -25,7 +25,7 @@ class CarInterface(CarInterfaceBase):
     ret.radarUnavailable = True
 
     # TODO: pending finding/handling missing set speed
-    ret.alphaLongitudinalAvailable = True
+    ret.alphaLongitudinalAvailable = False
     if alpha_long:
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[0].safetyParam |= RivianSafetyFlags.LONG_CONTROL.value

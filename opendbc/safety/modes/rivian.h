@@ -78,8 +78,8 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
     }
 
     // Brake pressed
-    if (msg->addr == 0x102U) {
-      brake_pressed = GET_BIT(msg, 15U);
+    if (msg->addr == 0x38fU) {
+      brake_pressed = (msg->data[2] >> 7) & 1U;
     }
   }
 

@@ -35,8 +35,8 @@ class CarState(CarStateBase):
     ret.gasPressed = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"] > 0
 
     # Brake pedal
-    # ret.brake = cp.vl["ESPiB3"]["iB_BrakePedalApplied"] / 250.0  # pressure in Bar
-    ret.brakePressed = cp.vl["ESP_AebFb"]["iB_BrakePedalApplied"] == 1
+    ret.brake = cp.vl["ESPiB3"]["ESPiB3_pMC1"] / 250.0  # pressure in Bar
+    ret.brakePressed = cp.vl["iBESP2"]["iBESP2_BrakePedalApplied"] == 1
 
     # Steering wheel
     ret.steeringAngleDeg = cp.vl["EPAS_AdasStatus"]["EPAS_InternalSas"]
@@ -48,7 +48,7 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = ret.steerFaultTemporary or cp.vl["EPAS_SystemStatus"]["H_CAN_EPSS_ToiFlt"] != 0
 
     # Cruise state
-    speed = 24 # min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
+    speed = min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
     self.last_speed = speed if speed != 0 else self.last_speed
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] == 1
     # TODO: find cruise set speed on CAN
@@ -73,6 +73,7 @@ class CarState(CarStateBase):
     ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
 
     # Doors
+    # door locks prevent opening while driving; on standstill, stock ACC disengages when a door is opened
     ret.doorOpen = any(cp_adas.vl["IndicatorLights"][door] != 2 for door in ("RearDriverDoor", "FrontPassengerDoor", "DriverDoor", "RearPassengerDoor")) if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else False
 
     # Blinkers
@@ -80,7 +81,8 @@ class CarState(CarStateBase):
     ret.rightBlinker = cp_adas.vl["IndicatorLights"]["TurnLightRight"] in (1, 2)
 
     # Seatbelt
-    ret.seatbeltUnlatched = cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0 if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else cp.vl["VDM_CGM_GW"]["CGM_DriverPresent"] != 1
+    # stock ACC disengages when the driver unbuckles the seatbelt
+    ret.seatbeltUnlatched = cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0 if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else False
 
     # Blindspot
     # ret.leftBlindspot = False

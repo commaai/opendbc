@@ -24,7 +24,6 @@ def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, enabled, a
     "ACM_lkaHbaCmd_Counter": frame % 15,
     "ACM_lkaStrToqReq": apply_torque,
     "ACM_lkaActToi": active,
-    "ACM_lkaToiFlt": 0,
 
     "ACM_lkaLaneRecogState": 3 if enabled else 0,
     "ACM_lkaSymbolState": 3 if enabled else 0,
