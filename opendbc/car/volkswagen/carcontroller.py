@@ -169,7 +169,7 @@ class CarController(CarControllerBase):
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         long_active = CC.longActive
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
-        starting = CS.out.vEgo < self.CP.vEgoStopping and (accel >= 0 or CS.out.vEgo > self.CCP.TAXI_STOP_SPEED)
+        starting = CS.out.vEgo < self.CP.vEgoStopping and accel >= 0
         stopping = CS.out.vEgo < self.CP.vEgoStopping and not starting
 
         # distance button debug helper, force stop or start when distance button is pressed
