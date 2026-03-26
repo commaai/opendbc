@@ -22,6 +22,7 @@ __pycache__/
 *.profraw
 opendbc/can/build/
 opendbc/can/obj/
+opendbc/dbc/*_generated.dbc
 
 cppcheck-addon-ctu-file-list
 opendbc/safety/tests/coverage-out

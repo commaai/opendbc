@@ -33,7 +33,7 @@ testing = [
   "lefthook",
   "cpplint",
   "codespell",
-  "cppcheck @ git+https://github.com/commaai/dependencies.git@releases#subdirectory=cppcheck",
+  "cppcheck @ git+https://github.com/commaai/dependencies.git@release-cppcheck#subdirectory=cppcheck",
 ]
 docs = [
   "Jinja2",
