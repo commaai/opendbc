@@ -225,6 +225,10 @@ class VolkswagenCarSpecs(CarSpecs):
 
 
 class Footnote(Enum):
+  SETUP = CarFootnote(
+    "The J533 harness plugs in at the CAN gateway under the dashboard, just above the steering column. " +
+    "More information can be found at <a href=\"https://docs.howtocomma.com/docs/j533-harness-install\" target=\"_blank\">this guide</a>.",
+    Column.MAKE, setup_note=True)
   KAMIQ = CarFootnote(
     "Not including the China market Kamiq, which is based on the (currently) unsupported PQ34 platform.",
     Column.MODEL)
@@ -249,6 +253,7 @@ class Footnote(Enum):
 class VWCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.vw_j533]))
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.SETUP])
 
   def init_make(self, CP: structs.CarParams):
     self.footnotes.append(Footnote.VW_EXP_LONG)
