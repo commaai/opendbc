@@ -109,6 +109,17 @@ class TestRivianStockSafety(TestRivianSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
     self.safety.init_tests()
 
+  def test_wheel_touch(self):
+    # For hiding hold wheel alert on engage (gen1 only)
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      values = {
+        "SCCM_WheelTouch_HandsOn": 1 if controls_allowed else 0,
+        "SCCM_WheelTouch_CapacitiveValue": 100 if controls_allowed else 0,
+        "SETME_X52": 100,
+      }
+      self.assertTrue(self._tx(self.packer.make_can_msg_safety("SCCM_WheelTouch", 2, values)))
+
 
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
 

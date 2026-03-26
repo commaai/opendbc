@@ -20,4 +20,4 @@ class TestRivian:
 
                 matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy({}, vin, FW_VERSIONS)
                 should_match = year in platform.config.years and not bad
-                assert (matches == {platform}) == should_match, f"Bad match for {platform.name} with year {year}"
+                assert (matches == {platform}) == should_match, "Bad match"
