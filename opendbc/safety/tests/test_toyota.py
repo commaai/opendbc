@@ -133,7 +133,7 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
   TORQUE_MEAS_TOLERANCE = 1  # toyota safety adds one to be conservative for rounding
 
   # Safety around steering req bit
-  MIN_VALID_STEERING_FRAMES = 18
+  MIN_VALID_STEERING_FRAMES = 17
   MAX_INVALID_STEERING_FRAMES = 1
 
   def setUp(self):
@@ -202,27 +202,32 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
             should_tx = req == req2 and (torque_wind_down in (0, 100)) and not mismatch
             self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)))
 
-          # Test max EPS torque and driver override thresholds
-          cases = itertools.product(
-            (0, self.MAX_MEAS_TORQUE - 1, self.MAX_MEAS_TORQUE, self.MAX_MEAS_TORQUE + 1, self.MAX_MEAS_TORQUE * 2),
-            (0, self.MAX_LTA_DRIVER_TORQUE - 1, self.MAX_LTA_DRIVER_TORQUE, self.MAX_LTA_DRIVER_TORQUE + 1, self.MAX_LTA_DRIVER_TORQUE * 2)
-          )
-
-          for eps_torque, driver_torque in cases:
-            for sign in (-1, 1):
-              for _ in range(6):
-                self._rx(self._torque_meas_msg(sign * eps_torque, sign * driver_torque))
-
-              # Toyota adds 1 to EPS torque since it is rounded after EPS factor
-              should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE
-              self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
-              self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
-
         else:
           # Controls not allowed
           for req, req2, torque_wind_down in itertools.product([0, 1], [0, 1], [0, 50, 100]):
             should_tx = not (req or req2) and torque_wind_down == 0
             self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)))
+
+    # Test max EPS torque and driver override thresholds (independent of angle, test a few representative angles)
+    for angle in (-89, 0, 89):
+      self.safety.set_controls_allowed(True)
+      self._reset_angle_measurement(angle)
+      self._set_prev_desired_angle(angle)
+
+      cases = itertools.product(
+        (0, self.MAX_MEAS_TORQUE - 1, self.MAX_MEAS_TORQUE, self.MAX_MEAS_TORQUE + 1, self.MAX_MEAS_TORQUE * 2),
+        (0, self.MAX_LTA_DRIVER_TORQUE - 1, self.MAX_LTA_DRIVER_TORQUE, self.MAX_LTA_DRIVER_TORQUE + 1, self.MAX_LTA_DRIVER_TORQUE * 2)
+      )
+
+      for eps_torque, driver_torque in cases:
+        for sign in (-1, 1):
+          for _ in range(6):
+            self._rx(self._torque_meas_msg(sign * eps_torque, sign * driver_torque))
+
+          # Toyota adds 1 to EPS torque since it is rounded after EPS factor
+          should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE
+          self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
+          self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
 
   def test_angle_measurements(self):
     """

@@ -1,7 +1,8 @@
 import os
 import math
+import unittest
 import hypothesis.strategies as st
-import pytest
+from functools import cache
 from hypothesis import Phase, given, settings
 from collections.abc import Callable
 from typing import Any
@@ -27,7 +28,8 @@ DLC_TO_LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]
 MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
 
-def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
+@cache
+def get_fuzzy_strategy():
   # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
   fingerprint_strategy = st.fixed_dictionaries({0: st.dictionaries(st.integers(min_value=0, max_value=0x800),
                                                                    st.sampled_from(DLC_TO_LEN))})
@@ -44,8 +46,11 @@ def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
     'car_fw': car_fw_strategy,
     'alpha_long': st.booleans(),
   })
+  return params_strategy
 
-  params: dict = draw(params_strategy)
+
+def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
+  params: dict = draw(get_fuzzy_strategy())
   # reduce search space by duplicating CAN fingerprints across all buses
   params['fingerprints'] |= {key + 1: params['fingerprints'][0] for key in range(6)}
 
@@ -56,14 +61,13 @@ def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
   return CarInterface(car_params)
 
 
-class TestCarInterfaces:
+def _make_car_test(car_name):
   # FIXME: Due to the lists used in carParams, Phase.target is very slow and will cause
   #  many generated examples to overrun when max_examples > ~20, don't use it
-  @pytest.mark.parametrize("car_name", sorted(PLATFORMS))
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
-  def test_car_interfaces(self, car_name, data):
+  def test(self, data):
     car_interface = get_fuzzy_car_interface(car_name, data.draw)
     car_params = car_interface.CP.as_reader()
 
@@ -125,6 +129,10 @@ class TestCarInterfaces:
       rr = radar_interface.update(cans)
       assert rr is None or len(rr.errors) > 0
 
+  return test
+
+
+class TestCarInterfaces(unittest.TestCase):
   def test_interface_attrs(self):
     """Asserts basic behavior of interface attribute getter"""
     num_brands = len(get_interface_attr('CAR'))
@@ -149,3 +157,7 @@ class TestCarInterfaces:
     ret = get_interface_attr('FINGERPRINTS', ignore_none=True)
     none_brands_in_ret = none_brands.intersection(ret)
     assert len(none_brands_in_ret) == 0, f'Brands with None values in ignore_none=True result: {none_brands_in_ret}'
+
+
+for car_name in sorted(PLATFORMS):
+  setattr(TestCarInterfaces, f'test_car_interfaces_{car_name}', _make_car_test(car_name))
