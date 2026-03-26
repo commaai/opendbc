@@ -70,6 +70,121 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
       self.assertTrue(self._rx(self._user_gas_msg(0)), f"{count=}")
       self.assertTrue(self._rx(self._pcm_status_msg(False)), f"{count=}")
 
+  def _set_prev_torque_with_ramp(self, t):
+    """Set all torque tracking state including the CUSW ramp-down tracker."""
+    self._set_prev_torque(t)
+    self.safety.set_chrysler_cusw_torque_last(t)
+
+  def test_ramp_down_positive_torque(self):
+    """After controls disallowed, positive torque must ramp to zero at MAX_RATE_DOWN"""
+    # Build up torque while controls allowed
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(100)
+    self.assertTrue(self._tx(self._torque_cmd_msg(100)))
+
+    # Disallow controls
+    self.safety.set_controls_allowed(False)
+
+    # Must ramp down, can't stay at same value
+    self.assertFalse(self._tx(self._torque_cmd_msg(100)))
+
+    # Reset and try valid ramp-down
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(100)
+    self.assertTrue(self._tx(self._torque_cmd_msg(100)))
+    self.safety.set_controls_allowed(False)
+
+    # Ramp down at MAX_RATE_DOWN per frame
+    torque = 100
+    while torque > 0:
+      new_torque = max(torque - self.MAX_RATE_DOWN, 0)
+      steer_req = 1 if new_torque != 0 else 0
+      self.assertTrue(self._tx(self._torque_cmd_msg(new_torque, steer_req)), f"ramp-down failed at {torque} -> {new_torque}")
+      torque = new_torque
+
+    # After reaching zero, must stay at zero
+    self.assertTrue(self._tx(self._torque_cmd_msg(0, 0)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(1, 1)))
+
+  def test_ramp_down_negative_torque(self):
+    """After controls disallowed, negative torque must ramp to zero at MAX_RATE_DOWN"""
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(-100)
+    self.assertTrue(self._tx(self._torque_cmd_msg(-100)))
+
+    self.safety.set_controls_allowed(False)
+
+    # Ramp up toward zero at MAX_RATE_DOWN per frame
+    torque = -100
+    while torque < 0:
+      new_torque = min(torque + self.MAX_RATE_DOWN, 0)
+      steer_req = 1 if new_torque != 0 else 0
+      self.assertTrue(self._tx(self._torque_cmd_msg(new_torque, steer_req)), f"ramp-down failed at {torque} -> {new_torque}")
+      torque = new_torque
+
+    self.assertTrue(self._tx(self._torque_cmd_msg(0, 0)))
+
+  def test_ramp_down_too_fast(self):
+    """Torque can't decrease faster than MAX_RATE_DOWN during ramp-down"""
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(100)
+    self.assertTrue(self._tx(self._torque_cmd_msg(100)))
+
+    self.safety.set_controls_allowed(False)
+
+    # Dropping by more than MAX_RATE_DOWN should fail
+    self.assertFalse(self._tx(self._torque_cmd_msg(100 - self.MAX_RATE_DOWN - 1)))
+
+  def test_ramp_down_wrong_direction(self):
+    """Torque can't increase magnitude during ramp-down"""
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(50)
+    self.assertTrue(self._tx(self._torque_cmd_msg(50)))
+
+    self.safety.set_controls_allowed(False)
+
+    # Can't increase
+    self.assertFalse(self._tx(self._torque_cmd_msg(51)))
+    # Can't cross zero
+    self.assertFalse(self._tx(self._torque_cmd_msg(-1)))
+
+  def test_ramp_down_steer_req_must_match(self):
+    """LKAS_CONTROL_BIT must be set while torque non-zero during ramp-down"""
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(20)
+    self.assertTrue(self._tx(self._torque_cmd_msg(20)))
+
+    self.safety.set_controls_allowed(False)
+
+    # Non-zero torque with steer_req=0 must fail
+    self.assertFalse(self._tx(self._torque_cmd_msg(16, steer_req=0)))
+
+    # Non-zero torque with steer_req=1 must pass (valid ramp-down step)
+    self.safety.set_chrysler_cusw_torque_last(20)
+    self.assertTrue(self._tx(self._torque_cmd_msg(16, steer_req=1)))
+
+    # Zero torque with either steer_req value is fine
+    self.safety.set_chrysler_cusw_torque_last(self.MAX_RATE_DOWN)
+    self.assertTrue(self._tx(self._torque_cmd_msg(0, steer_req=0)))
+    self.safety.set_chrysler_cusw_torque_last(self.MAX_RATE_DOWN)
+    self.assertTrue(self._tx(self._torque_cmd_msg(0, steer_req=1)))
+
+  def test_ramp_down_violation_resets(self):
+    """After a ramp-down violation, must send zero torque"""
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(50)
+    self.assertTrue(self._tx(self._torque_cmd_msg(50)))
+
+    self.safety.set_controls_allowed(False)
+
+    # Cause a violation (wrong direction)
+    self.assertFalse(self._tx(self._torque_cmd_msg(51)))
+
+    # After violation, chrysler_cusw_torque_last is reset to 0,
+    # so now only zero torque with steer_req=0 is allowed
+    self.assertFalse(self._tx(self._torque_cmd_msg(46, steer_req=1)))
+    self.assertTrue(self._tx(self._torque_cmd_msg(0, steer_req=0)))
+
 
 if __name__ == "__main__":
   unittest.main()

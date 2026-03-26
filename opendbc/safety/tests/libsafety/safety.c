@@ -191,6 +191,14 @@ bool get_honda_fwd_brake(void){
   return honda_fwd_brake;
 }
 
+void set_chrysler_cusw_torque_last(int t){
+  chrysler_cusw_torque_last = t;
+}
+
+int get_chrysler_cusw_torque_last(void){
+  return chrysler_cusw_torque_last;
+}
+
 void init_tests(void){
   safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
   alternative_experience = 0;
