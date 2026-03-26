@@ -93,7 +93,8 @@ class CarState(CarStateBase):
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
     self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"]) if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else None
     vl_all = cp.vl_all["VDM_AdasSts"]
-    self.vdm_adas_status = [{s: vals[i] for s, vals in vl_all.items()} for i in range(len(next(iter(vl_all.values()))))]
+    num_frames = len(next(iter(vl_all.values()), []))
+    self.vdm_adas_status = [{s: vals[i] for s, vals in vl_all.items()} for i in range(num_frames)]
     self.acm_longitudinal_request = copy.copy(cp_cam.vl["ACM_longitudinalRequest"])
 
     return ret
