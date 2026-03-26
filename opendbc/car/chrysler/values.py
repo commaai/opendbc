@@ -114,7 +114,7 @@ class CarControllerParams:
       self.STEER_STEP = 1  # 100 Hz
       self.STEER_DELTA_UP = 4
       self.STEER_DELTA_DOWN = 4
-      self.STEER_MAX = 250  # TODP: Might have capped out short of 261, need to experiment
+      self.STEER_MAX = 250  # TODO: Some CUSW will go to 261, some not quite, exact boundaries not yet determined
     else:
       self.STEER_DELTA_UP = 3
       self.STEER_DELTA_DOWN = 3
