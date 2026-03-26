@@ -31,13 +31,15 @@ chrysler_to_ram = {
   },
 }
 
-if __name__ == "__main__":
+
+def generate():
   src = '_stellantis_common.dbc'
   chrysler_path = os.path.dirname(os.path.realpath(__file__))
+  result = {}
 
   for out, addr_lookup in chrysler_to_ram.items():
-    with open(os.path.join(chrysler_path, src), encoding='utf-8') as in_f, open(os.path.join(chrysler_path, out), 'w', encoding='utf-8') as out_f:
-      out_f.write(f'CM_ "Generated from {src}"\n\n')
+    with open(os.path.join(chrysler_path, src), encoding='utf-8') as in_f:
+      parts = [f'CM_ "Generated from {src}"\n\n']
 
       wrote_addrs = set()
       for line in in_f.readlines():
@@ -45,10 +47,13 @@ if __name__ == "__main__":
           sl = line.split(' ')
           addr = int(sl[1])
           wrote_addrs.add(addr)
-
           sl[1] = str(addr_lookup.get(addr, addr))
           line = ' '.join(sl)
-        out_f.write(line)
+        parts.append(line)
 
       missing_addrs = set(addr_lookup.keys()) - wrote_addrs
       assert len(missing_addrs) == 0, f"Missing addrs from {src}: {missing_addrs}"
+
+    result[out] = ''.join(parts)
+
+  return result

@@ -9,13 +9,14 @@ jobs:
     name: comment
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    continue-on-error: true
     permissions:
       contents: read
       pull-requests: write
       actions: read
     steps:
     - name: Wait for car diff
+      id: wait
+      continue-on-error: true
       uses: lewagon/wait-on-check-action@v1.3.4
       with:
         ref: ${{ github.event.pull_request.head.sha }}
@@ -24,6 +25,7 @@ jobs:
         allowed-conclusions: success
         wait-interval: 20
     - name: Download car diff
+      if: steps.wait.outcome == 'success'
       uses: dawidd6/action-download-artifact@v6
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -34,6 +36,7 @@ jobs:
         path: .
         allow_forks: true
     - name: Comment car diff on PR
+      if: steps.wait.outcome == 'success'
       uses: thollander/actions-comment-pull-request@v2
       with:
         filePath: diff.txt
