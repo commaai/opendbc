@@ -72,6 +72,10 @@ class MQBStandstillManager:
     if long_active and accel > 0 and desired_launch_accel > 0 and (CS.out.standstill or CS.rolling_backward):
       accel = max(accel, desired_launch_accel)
 
+    # rollback prevention:
+    if long_active and accel <= 0 and CS.rolling_backward:
+      accel = -3.5
+
     # end the stopping procedure right after it starts, before any hold has been confirmed
     # if a hold is confirmed before we end the stopping procedure we won't be able to hold indefinitely
     if long_active:
@@ -81,8 +85,8 @@ class MQBStandstillManager:
         self.can_stop_forever = False
       if not (stopping or starting):
         self.can_stop_forever = False
-      if CS.grade >= 12:
-        self.can_stop_forever = False
+      # if CS.grade >= 12:
+      #   self.can_stop_forever = False
       if self.can_stop_forever:
         esp_starting_override = True
         esp_stopping_override = False
@@ -92,13 +96,13 @@ class MQBStandstillManager:
     # steep uphill: build engine torque via ACC_06 as rollback prevention, ESP braking held via ACC_07
     if long_active and accel <= 0 and not self.can_stop_forever and (CS.esp_hold_confirmation or CS.out.standstill):
       # skip torque management for one frame each cycle to avoid check engine light
-      if self.esp_hold_frames > 1:
-        # too much torque and the car moves, too little and the ESP won't cycle its timer
-        # targets 80% of torque needed to hold the car at stop, derived from ESP_15 and some experimentation
-        hill_accel = 0.045 * CS.grade + 0.0625
-        accel = max(accel, hill_accel)
-        starting = True
-        stopping = False
+      # if self.esp_hold_frames > 1:
+      #   # too much torque and the car moves, too little and the ESP won't cycle its timer
+      #   # targets 80% of torque needed to hold the car at stop, derived from ESP_15 and some experimentation
+      #   hill_accel = 0.045 * CS.grade + 0.0625
+      #   accel = max(accel, hill_accel)
+      #   starting = True
+      #   stopping = False
       # near counter limit: send starting request to cycle the ESP hold and reset the timer
       near_limit = self.esp_hold_frames >= self.HOLD_MAX_FRAMES - 10
       esp_starting_override = near_limit
