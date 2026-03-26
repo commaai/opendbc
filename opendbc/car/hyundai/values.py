@@ -407,7 +407,7 @@ class CAR(Platforms):
   KIA_NIRO_EV_2ND_GEN = HyundaiCanFDPlatformConfig(
     [
       HyundaiCarDocs("Kia Niro EV (without HDA II) 2023-25", "All", car_parts=CarParts.common([CarHarness.hyundai_a])),
-      HyundaiCarDocs("Kia Niro EV (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_r])),
+      HyundaiCarDocs("Kia Niro EV (with HDA II) 2024-25", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_r])),
     ],
     KIA_NIRO_EV.specs,
     flags=HyundaiFlags.EV,
@@ -718,13 +718,11 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [HYUNDAI_VERSION_REQUEST_LONG],
       [HYUNDAI_VERSION_RESPONSE],
       bus=0,
-      auxiliary=True,
     ),
     Request(
       [HYUNDAI_VERSION_REQUEST_LONG],
       [HYUNDAI_VERSION_RESPONSE],
       bus=1,
-      auxiliary=True,
       obd_multiplexing=False,
     ),
 
@@ -734,7 +732,6 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [HYUNDAI_ECU_MANUFACTURING_DATE],
       [HYUNDAI_VERSION_RESPONSE],
       bus=0,
-      auxiliary=True,
       logging=True,
     ),
 
@@ -743,14 +740,12 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [HYUNDAI_VERSION_REQUEST_ALT],
       [HYUNDAI_VERSION_RESPONSE],
       bus=0,
-      auxiliary=True,
       logging=True,
     ),
     Request(
       [HYUNDAI_VERSION_REQUEST_ALT],
       [HYUNDAI_VERSION_RESPONSE],
       bus=1,
-      auxiliary=True,
       logging=True,
       obd_multiplexing=False,
     ),
