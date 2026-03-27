@@ -82,7 +82,7 @@ class CarController(CarControllerBase):
         #   * steering power as counter and near zero before OP lane assist deactivation
         if CC.latActive:
           hca_enabled = True
-          apply_curvature = self.LateralController.update(CS.out, CC, actuators.curvature)
+          apply_curvature = self.LateralController.update(CS.out, CC, actuators.curvature) # hint: preferred: undeprecate steercontroltype curvature, create curvature controller for upstream
           apply_curvature = apply_curvature + (CS.out.steeringCurvature - (CC.currentCurvature - CC.rollCompensation))
           #apply_curvature = actuators.curvature + (CS.out.steeringCurvature - CC.currentCurvature)
           apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.out.steeringCurvature,
