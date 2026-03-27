@@ -39,6 +39,17 @@ def process_hud_alert(enabled, fingerprint, hud_control):
   if hud_control.rightLaneDepart:
     right_lane_warning = 1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2
 
+  # SysState 0 = no icons, 1-2 = white car + lanes, 3 = green car + lanes + green steering wheel, 4 = green car + lanes
+  if fingerprint in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
+    sys_state = 3 if enabled else 1
+
+  # SysWarning 3 = keep hands on wheel (default), 4 = keep hands on wheel (newer cars)
+  # Note: the warning is hidden while the blinkers are on
+  if fingerprint in (*hyundaican.LKAS11_LANE_HUD_CARS, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
+    sys_warning = 4 if sys_warning else 0
+  else:
+    sys_warning = 3 if sys_warning else 0
+
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
 
