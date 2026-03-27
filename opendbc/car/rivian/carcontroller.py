@@ -38,13 +38,12 @@ class CarController(CarControllerBase):
                                                                        self.angle_limit_counter, MAX_ANGLE_FRAMES,
                                                                        MAX_ANGLE_CONSECUTIVE_FRAMES)
     torque_fault = CC.latActive and not apply_steer_req
-
-    if not CC.latActive:
+    if not CC.latActive or torque_fault:
       apply_torque = 0
 
     # send steering command
     self.apply_torque_last = apply_torque
-    can_sends.append(create_lka_steering(self.packer, self.frame, CS.acm_lka_hba_cmd, apply_torque, torque_fault, CC.enabled, apply_steer_req))
+    can_sends.append(create_lka_steering(self.packer, self.frame, CS.acm_lka_hba_cmd, apply_torque, CC.enabled, apply_steer_req))
 
     if self.frame % 5 == 0 and self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1:
       can_sends.append(create_wheel_touch(self.packer, CS.sccm_wheel_touch, CC.enabled))

@@ -11,7 +11,7 @@ def checksum(data, poly, xor_output):
   return crc ^ xor_output
 
 
-def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, torque_fault, enabled, active):
+def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, enabled, active):
   # forward auto high beam and speed limit status and nothing else
   values = {s: acm_lka_hba_cmd[s] for s in (
     "ACM_hbaSysState",
@@ -24,7 +24,7 @@ def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, torque_fau
     "ACM_lkaHbaCmd_Counter": frame % 15,
     "ACM_lkaStrToqReq": apply_torque,
     "ACM_lkaActToi": active,
-    "ACM_lkaToiFlt": torque_fault,
+    "ACM_lkaToiFlt": 0,
 
     "ACM_lkaLaneRecogState": 3 if enabled else 0,
     "ACM_lkaSymbolState": 3 if enabled else 0,
