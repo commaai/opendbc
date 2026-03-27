@@ -243,7 +243,7 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, override):
   return acc_hud_control
 
 
-def acc_hud_event(acc_hud_control, esp_hold, speed_limit_predicative, speed_limit_predicative_type, speed_limit):
+def acc_hud_event(acc_hud_control, esp_hold):
   acc_event = 0
   
   if esp_hold and acc_hud_control == ACC_HUD_ACTIVE:
