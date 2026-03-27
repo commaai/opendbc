@@ -184,7 +184,7 @@ struct CarState {
   brakeHoldActive @38 :Bool;
 
   # steering wheel
-  steeringCurvature @62 :Float32;  # EPS steering curvature equivalent in radiant
+  steeringCurvature @61 :Float32;  # EPS steering curvature equivalent in radiant
   steeringAngleDeg @7 :Float32;
   steeringAngleOffsetDeg @37 :Float32; # Offset between sensors in case there multiple
   steeringRateDeg @15 :Float32;    # optional
@@ -356,6 +356,7 @@ struct CarControl {
   orientationNED @13 :List(Float32);
   angularVelocity @14 :List(Float32);
   currentCurvature @17 :Float32;  # From vehicle model
+  rollCompensation @18 :Float32;
 
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
@@ -403,6 +404,8 @@ struct CarControl {
     rightLaneDepart @8: Bool;
     leftLaneDepart @9: Bool;
     leadDistanceBars @10: Int8;  # 1-3: 1 is closest, 3 is farthest. some ports may utilize 2-4 bars instead
+    leadFollowTime @ 11: Float32;
+    leadDistance @ 12: Float32;
 
     # not used with the dash, TODO: separate structs for dash UI and device UI
     audibleAlert @5: AudibleAlert;
