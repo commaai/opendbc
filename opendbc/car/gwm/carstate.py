@@ -88,7 +88,7 @@ class CarState(CarStateBase):
     if cp.vl["STEER_AND_AP_STALK"]["AP_CANCEL_COMMAND"] or ret.brakePressed:
       self.main_on = False
     self.is_activation_lever_pulled = bool(cp.vl["STEER_AND_AP_STALK"]["AP_ENABLE_COMMAND"])
-    if self.is_activation_lever_pulled and not self.prev_activation_lever_pulled and not self.main_on:
+    if not self.is_activation_lever_pulled and self.prev_activation_lever_pulled and not self.main_on:
       self.main_on = True
     self.prev_activation_lever_pulled = self.is_activation_lever_pulled
 

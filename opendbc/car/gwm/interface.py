@@ -62,12 +62,12 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[-1].safetyParam |= GwmSafetyFlags.LONG_CONTROL.value
 
-      ret.longitudinalActuatorDelay = 0.05
+      ret.longitudinalActuatorDelay = 0.15
       ret.vEgoStopping = 0.1
       ret.vEgoStarting = 0.1
       ret.stopAccel = -0.55
       ret.stoppingDecelRate = 0.75
       ret.longitudinalTuning.kiBP = [0.]
-      ret.longitudinalTuning.kiV = [0.8]
+      ret.longitudinalTuning.kiV = [0.65]
 
     return ret
