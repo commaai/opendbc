@@ -34,23 +34,22 @@ class HCAMitigation:
 
 class MQBStandstillManager:
   """
-  Standstill handling for MQB w/ ACC type 1.
+  Extended standstill for MQB w/ ACC type 1
 
-  When hold is confirmed, TSK stops sending brake requests and the ESP manages braking
-  autonomously, responding only to starting/stopping signals on ACC_07.
-  On flat/downhill the ESP can hold indefinitely; we just force starting state.
-  On uphill it can't, so we use ACC_06 to build engine torque as a rollback
-  prevention measure so that the ESP will willingly cycle its own hold timer when we ask
-  it to while keeping ACC_07 in stopping mode so ESP holds the brake.
+  Normally brake is commanded by the TSK. During a stopping procedure the ESP handles brake autonomously.
+  If we exit the stopping procedure at the perfect moment, the ESP will hold indefinitely without complaining.
+
+  One side effect of exiting the stopping procedure early is that we are prone to rollback on very steep hills.
+  To avoid rolling back, we use ACC_06 to build engine torque while simultaneously using ACC_07 to hold the brake.
+  If the engine is producing enough torque to prevent rollback the ESP will happily cycle its timer when we ask it to.
   """
 
   HOLD_MAX_FRAMES = 50             # frames to hold before disabling long control to avoid a fault
 
-  def __init__(self, CCP):
-    self._CCP = CCP
+  def __init__(self):
     self.esp_hold_frames = 0
-    self._prev_starting_hold = False
-    self._can_stop_forever = False
+    self.prev_starting_hold = False
+    self.can_stop_forever = False
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
              ) -> tuple[bool, float, bool, bool, bool | None, bool | None]:
@@ -60,57 +59,60 @@ class MQBStandstillManager:
     if CS.esp_hold_confirmation:
       self.esp_hold_frames += 1
 
-    # acc type 1 is sensitive to control signals when brake is pressed (preEnabled)
+    # acc type 1 is sensitive to control signals when brake is pressed (when preEnabled)
     if CS.out.brakePressed:
       long_active = False
-    # stop regulating if hold has been held too long on a hill to avoid a cruise fault
-    elif self.esp_hold_frames > self.HOLD_MAX_FRAMES:
+
+    # avoid a cruise fault if a hold is confirmed for too long
+    if self.esp_hold_frames > self.HOLD_MAX_FRAMES:
       long_active = False
 
-    # uphill launch: TSK rarely commands enough torque to move from a hill hold, so keep accel > 1 m/s²
-    if long_active and accel > 0 and CS.grade > 4 and CS.out.standstill:
-      accel = max(accel, 1.0)
-    if long_active and CS.rolling_backward and accel > 0:
-      accel = max(accel, 1.0)
+    # uphill launch: TSK rarely commands enough torque to move from a hill hold
+    desired_launch_accel = 0.2 * CS.grade - 1
+    if long_active and accel > 0 and desired_launch_accel > 0 and (CS.out.standstill or CS.rolling_backward):
+      accel = max(accel, desired_launch_accel)
 
-    # stopping procedure
+    # end the stopping procedure right after it starts, before any hold has been confirmed
+    # if a hold is confirmed before we end the stopping procedure we won't be able to hold indefinitely
     if long_active:
       if CS.esp_stopping:
-        self._can_stop_forever = True
+        self.can_stop_forever = True
       if CS.esp_hold_confirmation:
-        self._can_stop_forever = False
+        self.can_stop_forever = False
       if not (stopping or starting):
-        self._can_stop_forever = False
-      if CS.grade > 12:
-        self._can_stop_forever = False
-      if self._can_stop_forever:
+        self.can_stop_forever = False
+      if CS.grade >= 12:
+        self.can_stop_forever = False
+      if self.can_stop_forever:
         esp_starting_override = True
         esp_stopping_override = False
     else:
-      self._can_stop_forever = False
+      self.can_stop_forever = False
 
     # steep uphill: build engine torque via ACC_06 as rollback prevention, ESP braking held via ACC_07
-    if long_active and accel <= 0 and not self._can_stop_forever and (CS.esp_hold_confirmation or CS.out.standstill):
+    if long_active and accel <= 0 and not self.can_stop_forever and (CS.esp_hold_confirmation or CS.out.standstill):
       # skip torque management for one frame each cycle to avoid check engine light
       if self.esp_hold_frames > 1:
+        # too much torque and the car moves, too little and the ESP won't cycle its timer
+        # targets 80% of torque needed to hold the car at stop, derived from ESP_15 and some experimentation
         hill_accel = 0.045 * CS.grade + 0.0625
         accel = max(accel, hill_accel)
         starting = True
         stopping = False
-      # near counter limit: attempt release to cycle the ESP hold
+      # near counter limit: send starting request to cycle the ESP hold and reset the timer
       near_limit = self.esp_hold_frames >= self.HOLD_MAX_FRAMES - 10
       esp_starting_override = near_limit
       esp_stopping_override = not near_limit
 
     # standstill timer resets when:
     # - wheels move while hold is not confirmed
-    # - we drop a hold confirmation after a frame where we were actively starting with hold confirmed
+    # - we drop a hold confirmation after a frame where we were actively starting with a confirmed hold
     is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
     if CS.out.vEgo > 0 and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-    elif self._prev_starting_hold and not CS.esp_hold_confirmation:
+    elif self.prev_starting_hold and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-    self._prev_starting_hold = is_starting and CS.esp_hold_confirmation
+    self.prev_starting_hold = is_starting and CS.esp_hold_confirmation
 
     return long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override
 
@@ -133,7 +135,7 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.gra_acc_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
-    self.standstill_manager = MQBStandstillManager(self.CCP)
+    self.standstill_manager = MQBStandstillManager()
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -167,17 +169,18 @@ class CarController(CarControllerBase):
     if self.CP.openpilotLongitudinalControl:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         long_active = CC.longActive
-        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
+        accel = actuators.accel
+        esp_starting_override = None
+        esp_stopping_override = None
         starting = CS.out.vEgo < self.CP.vEgoStopping and accel >= 0
         stopping = CS.out.vEgo < self.CP.vEgoStopping and not starting
 
-        esp_starting_override = None
-        esp_stopping_override = None
         if self.CCS == mqbcan and CS.acc_type == 1:
           long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override = \
             self.standstill_manager.update(CS, long_active, accel, stopping, starting)
 
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, long_active)
+        accel = float(np.clip(accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
 
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, long_active, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation,
