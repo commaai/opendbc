@@ -564,6 +564,14 @@ class CAR(Platforms):
     model_years={"N","P"},
     wmis={WMI.SEAT},
   )
+  SKODA_ENYAQ_MK2 = VolkswagenMEBPlatformConfig(
+    [VWCarDocs("Škoda Enyaq 2024-25"),],
+    VolkswagenCarSpecs(mass=1965, wheelbase=2.77),
+    chassis_codes={"NY"},
+    model_years={"R", "S"},
+    wmis={WMI.SKODA},
+    flags=VolkswagenFlags.MEB_GEN2,
+  )
   SKODA_FABIA_MK4 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Škoda Fabia 2022-23", footnotes=[Footnote.VW_MQB_A0])],
     VolkswagenCarSpecs(mass=1266, wheelbase=2.56),
