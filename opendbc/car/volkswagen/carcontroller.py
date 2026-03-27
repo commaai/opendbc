@@ -45,13 +45,11 @@ class MQBStandstillManager:
   """
 
   HOLD_MAX_FRAMES = 50             # frames to hold before disabling long control to avoid a fault
-  HOLD_RELEASE_TOTAL_FRAMES = 20  # reserve the last hold-confirmed frames for progressive hill-release pulses
-  HOLD_RELEASE_WINDOW_FRAMES = 3  # allow a few frames for ESP to acknowledge a recent hill release request
 
   def __init__(self, CCP):
     self._CCP = CCP
     self.esp_hold_frames = 0
-    self._recent_release_request_frames = 0
+    self._prev_starting_hold = False
     self._can_stop_forever = False
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
@@ -99,30 +97,20 @@ class MQBStandstillManager:
         accel = max(accel, hill_accel)
         starting = True
         stopping = False
-      # Near the counter limit, send progressively longer starting pulses:
-      # 1 frame, wait 3, 2 frames, wait 3, 3 frames, wait 3, then hold starting until cutoff.
-      release_phase = self.esp_hold_frames - (self.HOLD_MAX_FRAMES - self.HOLD_RELEASE_TOTAL_FRAMES + 1)
-      is_release_attempt = release_phase >= 0 and release_phase not in (1, 2, 3, 6, 7, 8, 12, 13, 14)
-      esp_starting_override = is_release_attempt
-      esp_stopping_override = not is_release_attempt
+      # near counter limit: attempt release to cycle the ESP hold
+      near_limit = self.esp_hold_frames >= self.HOLD_MAX_FRAMES - 10
+      esp_starting_override = near_limit
+      esp_stopping_override = not near_limit
 
     # standstill timer resets when:
     # - wheels move while hold is not confirmed
-    # - we drop a hold confirmation shortly after actively starting with hold confirmed
+    # - we drop a hold confirmation after a frame where we were actively starting with hold confirmed
     is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
     if CS.out.vEgo > 0 and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-      self._recent_release_request_frames = 0
-    elif self._recent_release_request_frames > 0 and not CS.esp_hold_confirmation:
+    elif self._prev_starting_hold and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-      self._recent_release_request_frames = 0
-
-    if not long_active:
-      self._recent_release_request_frames = 0
-    elif is_starting and CS.esp_hold_confirmation:
-      self._recent_release_request_frames = self.HOLD_RELEASE_WINDOW_FRAMES
-    elif self._recent_release_request_frames > 0:
-      self._recent_release_request_frames -= 1
+    self._prev_starting_hold = is_starting and CS.esp_hold_confirmation
 
     return long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override
 
