@@ -19,36 +19,27 @@ MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 
 def process_hud_alert(enabled, fingerprint, hud_control):
-  sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
+  hud_control_visual_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
 
-  # initialize to no line visible
-  # TODO: this is not accurate for all cars
-  sys_state = 1
-  if (hud_control.leftLaneVisible and hud_control.rightLaneVisible) or sys_warning:  # HUD alert only display when LKAS status is active
-    sys_state = 3 if enabled or sys_warning else 4
+  # SysWarning 3 = keep hands on wheel (older cars), 4 = keep hands on wheel (newer cars)
+  sys_warning_can_value = 4 if fingerprint in (*hyundaican.LKAS11_LANE_HUD_CARS, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL) else 3
+  sys_warning = sys_warning_can_value if hud_control_visual_warning else 0
+
+  if fingerprint in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
+    # SysState 0 = no icons, 1-2 = white car + lanes, 3 = green car + lanes + green steering wheel, 4 = green car + lanes
+    sys_state = 3 if enabled else 1
+  elif (hud_control.leftLaneVisible and hud_control.rightLaneVisible) or hud_control_visual_warning:  # HUD alert only display when LKAS status is active
+    sys_state = 3 if enabled or hud_control_visual_warning else 4
   elif hud_control.leftLaneVisible:
     sys_state = 5
   elif hud_control.rightLaneVisible:
     sys_state = 6
-
-  # initialize to no warnings
-  left_lane_warning = 0
-  right_lane_warning = 0
-  if hud_control.leftLaneDepart:
-    left_lane_warning = 1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2
-  if hud_control.rightLaneDepart:
-    right_lane_warning = 1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2
-
-  # SysState 0 = no icons, 1-2 = white car + lanes, 3 = green car + lanes + green steering wheel, 4 = green car + lanes
-  if fingerprint in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
-    sys_state = 3 if enabled else 1
-
-  # SysWarning 3 = keep hands on wheel (default), 4 = keep hands on wheel (newer cars)
-  # Note: the warning is hidden while the blinkers are on
-  if fingerprint in (*hyundaican.LKAS11_LANE_HUD_CARS, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
-    sys_warning = 4 if sys_warning else 0
   else:
-    sys_warning = 3 if sys_warning else 0
+    sys_state = 1
+
+  lane_departure_can_value = 1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2
+  left_lane_warning = lane_departure_can_value if hud_control.leftLaneDepart else 0
+  right_lane_warning = lane_departure_can_value if hud_control.rightLaneDepart else 0
 
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
