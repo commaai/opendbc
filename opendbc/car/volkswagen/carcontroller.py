@@ -6,6 +6,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mlbcan, mqbcan, pqcan, mebcan
 from opendbc.car.volkswagen.values import CanBus, CarControllerParams, VolkswagenFlags
+from opendbc.car.volkswagen.mebutils import LatControlCurvature
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -61,6 +62,12 @@ class CarController(CarControllerBase):
     self.long_disabled_counter = 0
     self.lead_distance_bars_last = None
     self.distance_bar_frame = 0
+    
+    self.LateralController = (
+      LatControlCurvature(self.CCP.CURVATURE_PID, self.CCP.CURVATURE_LIMITS.CURVATURE_MAX, 1 / (DT_CTRL * self.CCP.STEER_STEP))
+      if (CP.flags & (VolkswagenFlags.MEB | VolkswagenFlags.MQB_EVO))
+      else None
+    )
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -75,7 +82,9 @@ class CarController(CarControllerBase):
         #   * steering power as counter and near zero before OP lane assist deactivation
        if CC.latActive:
           hca_enabled = True
-          apply_curvature = actuators.curvature + (CS.out.steeringCurvature - CC.currentCurvature)
+          apply_curvature = self.LateralController.update(CS.out, CC, actuators.curvature)
+          apply_curvature = apply_curvature + (CS.out.steeringCurvature - (CC.currentCurvature - CC.rollCompensation))
+          #apply_curvature = actuators.curvature + (CS.out.steeringCurvature - CC.currentCurvature)
           apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.out.steeringCurvature,
                                                        self.CCP.STEER_STEP, CC.latActive, self.CCP.CURVATURE_LIMITS)
 
