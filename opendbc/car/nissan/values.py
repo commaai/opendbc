@@ -93,7 +93,7 @@ NISSAN_VERSION_RESPONSE_KWP = b'\x61\x83'
 NISSAN_RX_OFFSET = 0x20
 
 FW_QUERY_CONFIG = FwQueryConfig(
-  requests=[request for bus, obd_multiplexing, logging in ((0, False, False), (1, False, True), (1, True, True)) for request in [
+  requests=[request for bus, obd_multiplexing, logging in ((0, False, False), (1, False, False), (1, True, True)) for request in [
     Request(
       [NISSAN_DIAGNOSTIC_REQUEST_KWP, NISSAN_VERSION_REQUEST_KWP],
       [NISSAN_DIAGNOSTIC_RESPONSE_KWP, NISSAN_VERSION_RESPONSE_KWP],
