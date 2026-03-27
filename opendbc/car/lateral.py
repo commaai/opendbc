@@ -141,7 +141,7 @@ def get_max_curvature_average(v_ego: float) -> Tuple[float, float]:
   return -max_curvature, max_curvature
 
 
-def apply_std_curvature_limits(apply_curvature: float, apply_curvature_last: float, v_ego: float, curvature: float
+def apply_std_curvature_limits(apply_curvature: float, apply_curvature_last: float, v_ego: float, curvature: float,
                                steer_step: int, lat_active: bool, limits: CurvatureSteeringLimits) -> float:
 
   new_apply_curvature = apply_curvature
