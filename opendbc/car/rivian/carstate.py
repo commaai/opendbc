@@ -93,7 +93,7 @@ class CarState(CarStateBase):
 
     # This message can lag and send two messages at once, make sure we forward all of them
     adas_status_msgs = cp.vl_all["VDM_AdasSts"]
-    self.vdm_adas_status = [dict(zip(adas_status_msgs, vals)) for vals in zip(*adas_status_msgs.values())]
+    self.vdm_adas_status = [dict(zip(adas_status_msgs, vals, strict=True)) for vals in zip(*adas_status_msgs.values(), strict=True)]
 
     return ret
 
