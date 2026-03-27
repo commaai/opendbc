@@ -146,7 +146,7 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
     self.standstill_manager = MQBStandstillManager(self.CCP)
-    self.distance_button_was_stopped = None
+    self.distance_button_was_stopped = None  # DEBUG HELPER
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
