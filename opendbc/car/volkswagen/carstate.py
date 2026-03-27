@@ -141,8 +141,6 @@ class CarState(CarStateBase):
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
     self.gra_stock_values = pt_cp.vl["GRA_ACC_01"]
-    self.distance_button_pressed = self.gra_stock_values["GRA_Verstellung_Zeitluecke"] in (1, 2, 3)  # DEBUG HELPER
-
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
