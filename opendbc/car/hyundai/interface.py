@@ -43,7 +43,10 @@ class CarInterface(CarInterfaceBase):
         # this needs to be figured out for cars without an ADAS ECU
         ret.alphaLongitudinalAvailable = False
 
-      ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
+      if candidate in (CAR.HYUNDAI_IONIQ_6, CAR.HYUNDAI_TUCSON_4TH_GEN):
+        ret.enableBsm = 0x1ba in fingerprint[CAN.ECAN]
+      else:
+        ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
       # Check if the car is hybrid. Only HEV/PHEV cars have 0xFA on E-CAN.
       if 0xFA in fingerprint[CAN.ECAN]:
