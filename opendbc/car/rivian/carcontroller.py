@@ -3,7 +3,7 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus
 from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudinal, create_wheel_touch, create_adas_status, create_lead_info
+from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudinal, create_wheel_touch, create_adas_status
 from opendbc.car.rivian.values import CarControllerParams, CAR
 
 # EPS faults if you apply torque while the steering angle is above 90 degrees for more than 1 second
@@ -17,7 +17,6 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
     self.packer = CANPacker(dbc_names[Bus.pt])
-    self.packer_radar = CANPacker(dbc_names[Bus.radar])
     self.angle_limit_counter = 0
 
     self.cancel_frames = 0
@@ -65,9 +64,6 @@ class CarController(CarControllerBase):
 
       for msg in CS.vdm_adas_status:
         can_sends.append(create_adas_status(self.packer, self.frame, msg, interface_status))
-
-    if not CC.enabled:
-      can_sends.append(create_lead_info(self.packer_radar, CS.lead_info, CS.out.vEgoRaw))
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = apply_torque / steer_max

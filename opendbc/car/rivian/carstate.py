@@ -16,13 +16,12 @@ class CarState(CarStateBase):
     self.acm_lka_hba_cmd = None
     self.sccm_wheel_touch = None
     self.vdm_adas_status = None
-    self.lead_info = None
+    self.acm_longitudinal_request = None
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
     cp_adas = can_parsers[Bus.adas]
-    cp_radar = can_parsers[Bus.radar]
     ret = structs.CarState()
 
     # Vehicle speed
@@ -99,7 +98,6 @@ class CarState(CarStateBase):
     adas_status_msgs = cp.vl_all["VDM_AdasSts"]
     self.vdm_adas_status = [dict(zip(adas_status_msgs, vals)) for vals in zip(*adas_status_msgs.values())]
     self.acm_longitudinal_request = copy.copy(cp_cam.vl["ACM_longitudinalRequest"])
-    self.lead_info = copy.copy(cp_radar.vl["LEAD_INFO"])
 
     return ret
 
@@ -109,5 +107,4 @@ class CarState(CarStateBase):
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
       Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 1),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
-      Bus.radar: CANParser(DBC[CP.carFingerprint][Bus.radar], [], 1),
     }

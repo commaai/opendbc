@@ -42,12 +42,6 @@ BS_:
 BU_: XXX
     """)
 
-  parts.append("""
-BO_ 533 LEAD_INFO: 8 XXX
- SG_ UNKNOWN_1 : 6|63@0+ (1,0) [0|9.22337203685478e+18] "" XXX
- SG_ LEAD_CAR : 7|1@0+ (1,0) [0|1] "" XXX
-  """)
-
   for a in range(0x500, 0x500 + 32):
     parts.append(f"""
 BO_ {a} RADAR_TRACK_{a:x}: 8 RADAR
