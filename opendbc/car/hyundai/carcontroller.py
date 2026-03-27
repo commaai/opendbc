@@ -25,6 +25,7 @@ def process_hud_alert(enabled, fingerprint, hud_control):
   sys_warning_can_value = 4 if fingerprint in (*hyundaican.LKAS11_LANE_HUD_CARS, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL) else 3
   sys_warning = sys_warning_can_value if hud_control_visual_warning else 0
 
+  sys_state = 1
   if fingerprint in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
     # SysState 0 = no icons, 1-2 = white car + lanes, 3 = green car + lanes + green steering wheel, 4 = green car + lanes
     sys_state = 3 if enabled else 1
@@ -34,8 +35,6 @@ def process_hud_alert(enabled, fingerprint, hud_control):
     sys_state = 5
   elif hud_control.rightLaneVisible:
     sys_state = 6
-  else:
-    sys_state = 1
 
   lane_departure_can_value = 1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2
   left_lane_warning = lane_departure_can_value if hud_control.leftLaneDepart else 0
