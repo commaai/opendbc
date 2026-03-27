@@ -27,11 +27,6 @@ non_tested_cars = [
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
   VOLKSWAGEN.PORSCHE_MACAN_MK1,
-  # Honda/Acura test routes below expired, replace when CI bucket sync is fixed
-  HONDA.ACURA_TLX_2G,
-  HONDA.HONDA_NBOX_2G,
-  HONDA.ACURA_MDX_4G_MMR,
-  HONDA.HONDA_CITY_7G,
 
   # These had their DSUs unplugged, need new routes
   # TOYOTA.LEXUS_ES  # hybrid
@@ -50,6 +45,7 @@ class CarTestRoute(NamedTuple):
 routes = [
   CarTestRoute("efdf9af95e71cd84/2022-05-13--19-03-31", COMMA.COMMA_BODY),
 
+  CarTestRoute("c5e3aa51055c8f47|2023-12-06--20-01-44", CHRYSLER.JEEP_CHEROKEE_5TH_GEN),
   CarTestRoute("0c94aa1e1296d7c6/2021-05-05--19-48-37", CHRYSLER.JEEP_GRAND_CHEROKEE),
   CarTestRoute("91dfedae61d7bd75/2021-05-22--20-07-52", CHRYSLER.JEEP_GRAND_CHEROKEE_2019),
   CarTestRoute("420a8e183f1aed48/2020-03-05--07-15-29", CHRYSLER.CHRYSLER_PACIFICA_2018_HYBRID),  # 2017
@@ -125,10 +121,13 @@ routes = [
   CarTestRoute("b1c832ad56b6bc9d/00000010--debfcf5867", HONDA.HONDA_CIVIC_2022),  # 2025 Civic Hatch Hybrid with new eCVT transmission
   CarTestRoute("f9c43864cf057d05/2024-01-15--23-01-20", HONDA.HONDA_PILOT_4G),  # TODO: Replace with a newer route
   CarTestRoute("f39cf149898833ff/0000002b--54f3fae045", HONDA.HONDA_ACCORD_11G),
-  # CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
+  CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
   CarTestRoute("2dc4489d7e1410ca/00000001--bbec3f5117", HONDA.HONDA_CRV_6G),
   CarTestRoute("a703d058f4e05aeb/00000008--f169423024", HONDA.HONDA_PASSPORT_4G),
+  CarTestRoute("414af83891dbf72c/00000006--51fa6d99cd", HONDA.HONDA_NBOX_2G),
+  CarTestRoute("ad9840558640c31d/0000001a--d6cd4871c2", HONDA.ACURA_MDX_4G_MMR),  # 2025 MDX
   CarTestRoute("ad9840558640c31d/000001f2--026c4f6275", HONDA.ACURA_TLX_2G_MMR),
+  CarTestRoute("6b22f2fcd61fa86a/00000000--b3adfc8746", HONDA.ACURA_TLX_2G),
 
   CarTestRoute("87d7f06ade479c2e/2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
   CarTestRoute("66189dd8ec7b50e6/2023-09-20--07-02-12", HYUNDAI.HYUNDAI_AZERA_HEV_6TH_GEN),
@@ -192,6 +191,7 @@ routes = [
   CarTestRoute("9b25e8c1484a1b67/2023-04-13--10-41-45", HYUNDAI.KIA_EV6),
   CarTestRoute("007d5e4ad9f86d13/2021-09-30--15-09-23", HYUNDAI.KIA_K5_2021),
   CarTestRoute("c58dfc9fc16590e0/2023-01-14--13-51-48", HYUNDAI.KIA_K5_HEV_2020),
+  CarTestRoute("74fbff45aa20fe9e/00000010--6f173d5799", HYUNDAI.KIA_K7_2017),
   CarTestRoute("78ad5150de133637/2023-09-13--16-15-57", HYUNDAI.KIA_K8_HEV_1ST_GEN),
   CarTestRoute("50c6c9b85fd1ff03/2020-10-26--17-56-06", HYUNDAI.KIA_NIRO_EV),
   CarTestRoute("b153671049a867b3/2023-04-05--10-00-30", HYUNDAI.KIA_NIRO_EV_2ND_GEN),
