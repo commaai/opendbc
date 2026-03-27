@@ -24,7 +24,7 @@ def process_hud_alert(enabled, fingerprint, hud_control):
   # initialize to no line visible
   # TODO: this is not accurate for all cars
   sys_state = 1
-  if hud_control.leftLaneVisible and hud_control.rightLaneVisible or sys_warning:  # HUD alert only display when LKAS status is active
+  if (hud_control.leftLaneVisible and hud_control.rightLaneVisible) or sys_warning:  # HUD alert only display when LKAS status is active
     sys_state = 3 if enabled or sys_warning else 4
   elif hud_control.leftLaneVisible:
     sys_state = 5
@@ -198,11 +198,10 @@ class CarController(CarControllerBase):
         if CC.cruiseControl.cancel:
           if self.CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS:
             can_sends.append(hyundaicanfd.create_acc_cancel(self.packer, self.CP, self.CAN, CS.cruise_info))
-            self.last_button_frame = self.frame
           else:
             for _ in range(20):
               can_sends.append(hyundaicanfd.create_buttons(self.packer, self.CP, self.CAN, CS.buttons_counter + 1, Buttons.CANCEL))
-            self.last_button_frame = self.frame
+          self.last_button_frame = self.frame
 
         # cruise standstill resume
         elif CC.cruiseControl.resume:

@@ -165,10 +165,7 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
 
 def create_spas_messages(packer, CAN, left_blink, right_blink):
   ret = []
-
-  values = {
-  }
-  ret.append(packer.make_can_msg("SPAS1", CAN.ECAN, values))
+  ret.append(packer.make_can_msg("SPAS1", CAN.ECAN, {}))
 
   blink = 0
   if left_blink:
@@ -203,10 +200,7 @@ def create_adrv_messages(packer, CAN, frame):
   # the ADAS Driving ECU to do longitudinal control
 
   ret = []
-
-  values = {
-  }
-  ret.append(packer.make_can_msg("ADRV_0x51", CAN.ACAN, values))
+  ret.append(packer.make_can_msg("ADRV_0x51", CAN.ACAN, {}))
 
   ret.extend(create_fca_warning_light(packer, CAN, frame))
 
