@@ -80,8 +80,8 @@ class CarState(CarStateBase):
       )
 
       self.rolling_backward = (
-        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"] == 1 or
-        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"] == 1
+        pt_cp.vl["ESP_10"]["ESP_HR_Fahrtrichtung"] == 1 or
+        pt_cp.vl["ESP_10"]["ESP_HL_Fahrtrichtung"] == 1
       )
 
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
