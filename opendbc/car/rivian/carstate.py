@@ -13,9 +13,9 @@ class CarState(CarStateBase):
     super().__init__(CP)
     self.last_speed = 30
 
-    self.acm_lka_hba_cmd = None
-    self.sccm_wheel_touch = None
-    self.vdm_adas_status = None
+    self.acm_lka_hba_cmd: dict | None = None
+    self.sccm_wheel_touch: dict | None = None
+    self.vdm_adas_status: list[dict] | None = None
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -90,7 +90,10 @@ class CarState(CarStateBase):
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
     self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
-    self.vdm_adas_status = copy.copy(cp.vl["VDM_AdasSts"])
+
+    # This message can lag and send two messages at once, make sure we forward all of them
+    adas_status_msgs = cp.vl_all["VDM_AdasSts"]
+    self.vdm_adas_status = [dict(zip(adas_status_msgs, vals)) for vals in zip(*adas_status_msgs.values())]
 
     return ret
 
