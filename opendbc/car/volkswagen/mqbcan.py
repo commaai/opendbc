@@ -172,17 +172,38 @@ def create_aeb_hud(packer, aeb_supported, fcw_active):
   return packer.make_can_msg("ACC_15", 0, values)
 
 
-def volkswagen_mqb_meb_checksum(address: int, sig, d: bytearray) -> int:
+def volkswagen_mqb_meb_checksum(address: int, sig, d: bytearray, const: list[int] | None = None) -> int:
   crc = 0xFF
   for i in range(1, len(d)):
     crc ^= d[i]
     crc = CRC8H2F[crc]
   counter = d[1] & 0x0F
-  const = VOLKSWAGEN_MQB_MEB_CONSTANTS.get(address)
+  if const is None:
+    const = VOLKSWAGEN_MQB_MEB_CONSTANTS.get(address)
   if const:
     crc ^= const[counter]
     crc = CRC8H2F[crc]
   return crc ^ 0xFF
+
+
+def volkswagen_mqb_meb_dyn_len_checksum(address: int, sig, d: bytearray, entry: dict | None = None) -> int:
+  const = None
+  if entry:
+    length = entry["length"]
+    d = d[:length]
+    const = entry["magic"]
+      
+  return volkswagen_mqb_meb_checksum(address, sig, d, const)
+
+
+def volkswagen_mqb_meb_gen2_checksum(address: int, sig, d: bytearray) -> int:
+  entry = VOLKSWAGEN_MQB_MEB_GEN2_CONSTANTS.get(address)
+  if entry:
+    checksum = volkswagen_mqb_meb_dyn_len_checksum(address, sig, d, entry)
+    if checksum == d[0]:
+      return checksum
+    
+  return volkswagen_mqb_meb_checksum(address, sig, d)
 
 
 def xor_checksum(address: int, sig, d: bytearray, initial_value: int = 0) -> int:
@@ -255,4 +276,34 @@ VOLKSWAGEN_MQB_MEB_CONSTANTS: dict[int, list[int]] = {
             0xF1, 0xB5, 0x7A, 0xC4, 0xBC, 0x60, 0xE3, 0xD1],  # Licht_Anf_01
     0x65D: [0xAC, 0xB3, 0xAB, 0xEB, 0x7A, 0xE1, 0x3B, 0xF7,
             0x73, 0xBA, 0x7C, 0x9E, 0x06, 0x5F, 0x02, 0xD9],  # ESP_20
+    0x25D: [0xDA, 0x6B, 0x0E, 0xB2, 0x78, 0xBD, 0x5A, 0x81,
+            0x7B, 0xD6, 0x41, 0x39, 0x76, 0xB6, 0xD7, 0x35],  # KLR_01
+}
+
+VOLKSWAGEN_MQB_MEB_GEN2_CONSTANTS: dict[int, list[int]] = {
+  # We do not have enough data from firmware detection without OBD to explicitly differentiate everything.
+  # It is unclear if firmware changes result in more and more signals implementing new checksums via OTA updates.
+  # The corresponding calculation checks checksum correctness by itself and falls back if neccessary.
+  # If different lengths and/or magics are detected, make it list in list per signal and iterate.
+  
+  # model year around 2024?
+  0x0DB: { "length": 42, # length of signal to check
+           "magic": [0x09, 0xFA, 0xCA, 0x8E, 0x62, 0xD5, 0xD1, 0xF0,
+                     0x31, 0xA0, 0xAF, 0xDA, 0x4D, 0x1A, 0x0A, 0x97] }, # AWV_03
+  0xFC:  { "length": 60,
+           "magic": [0x69, 0xDC, 0xF9, 0x64, 0x6A, 0xCE, 0x55, 0x2C,
+                     0xC4, 0x38, 0x8F, 0xD1, 0xC6, 0x43, 0xB4, 0xB1] }, # ESC_51
+  0x102: { "length": 44,
+           "magic": [0xD7, 0x12, 0x85, 0x7E, 0x0B, 0x34, 0xFA, 0x16,
+                     0x7A, 0x25, 0x2D, 0x8F, 0x04, 0x8E, 0x5D, 0x35] }, # ESC_50
+  0x10B: { "length": 44,
+           "magic": [0x2C, 0xB1, 0x1A, 0x75, 0xBB, 0x65, 0x79, 0x47,
+                     0x81, 0x2B, 0xCC, 0x96, 0x17, 0xDB, 0xC0, 0x94] }, # Motor_51
+  0x13D: { "length": 28,
+           "magic": [0x18, 0x71, 0x10, 0x8D, 0xD7, 0xAA, 0xB0, 0x78,
+                     0xAC, 0x12, 0xAE, 0x0C, 0xDD, 0xF1, 0x85, 0x68] }, # QFK_01
+  # model year > 2024?
+  0x139: { "length": 28,
+           "magic": [0x96, 0x92, 0x95, 0xB5, 0x6E, 0xE3, 0xBD, 0xB4,
+                     0xFA, 0xAE, 0xBE, 0xCB, 0xCF, 0xA5, 0x77, 0xEF] }  # VMM_02
 }

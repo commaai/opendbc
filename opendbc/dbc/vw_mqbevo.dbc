@@ -151,13 +151,48 @@ BO_ 178 ESP_19: 8 Gateway_MQB
  SG_ ESP_VL_Radgeschw_02 : 32|16@1+ (0.0075,0) [0|491.49] "Unit_KiloMeterPerHour" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ESP_VR_Radgeschw_02 : 48|16@1+ (0.0075,0) [0|491.49] "Unit_KiloMeterPerHour" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
-BO_ 252 ESP_NEW_1: 48 XXX
- SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+BO_ 219 AWV_03: 48 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ WHEEL_SPEED_RL : 64|16@1+ (0.0075,0) [0|65535] "" XXX
- SG_ WHEEL_SPEED_RR : 80|16@1+ (0.0075,0) [0|65535] "" XXX
- SG_ WHEEL_SPEED_FL : 96|16@1+ (0.0075,0) [0|65535] "" XXX
- SG_ WHEEL_SPEED_FR : 112|16@1+ (0.0075,0) [0|65535] "" XXX
+ SG_ Unknown_01 : 12|3@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_63 : 18|6@1+ (1,0) [0|63] "" XXX
+ SG_ SET_ME_1_2 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_02 : 25|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_30 : 27|5@1+ (1,0) [0|15] "" XXX
+ SG_ SET_ME_127 : 33|7@1+ (1,0) [0|127] "" XXX
+ SG_ Unknown_03 : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_127_2 : 41|7@1+ (1,0) [0|127] "" XXX
+ SG_ Pre_FCW : 64|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_63_2 : 66|6@1+ (1,0) [0|63] "" XXX
+ SG_ SET_ME_15_1 : 72|4@1+ (1,0) [0|15] "" XXX
+ SG_ FCW_Active : 76|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_255 : 80|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_1023 : 94|10@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_1 : 129|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 252 ESC_51: 48 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 14|6@1+ (1,0) [0|3] "" XXX
+ SG_ AEB_Breaking_01 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ AEB_Breaking_02 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ Accelerator_Higher_Speed : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Pressure : 42|9@1+ (0.195,0) [0|100] "Unit_Percent" XXX
+ SG_ NEW_SIGNAL_1 : 52|8@1+ (1,0) [0|15] "" XXX
+ SG_ HL_Radgeschw : 64|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
+ SG_ HR_Radgeschw : 80|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
+ SG_ VL_Radgeschw : 96|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
+ SG_ VR_Radgeschw : 112|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
+ SG_ NEW_SIGNAL_3 : 128|4@1+ (1,0) [0|15] "" XXX
+ SG_ HL_Brake_Pressure : 152|8@1+ (1,0) [0|100] "" XXX
+ SG_ HR_Brake_Pressure : 160|8@1+ (1,0) [0|100] "" XXX
+ SG_ VL_Brake_Pressure : 168|8@1+ (1,0) [0|100] "" XXX
+ SG_ VR_Brake_Pressure : 176|8@1+ (1,0) [0|100] "" XXX
+ SG_ Steering_Wheel_CW : 184|8@1+ (1.67,0) [0|255] "" XXX
+ SG_ Steering_Wheel_CCW : 192|8@1+ (1.67,0) [0|255] "" XXX
+ SG_ ESC_v_Signal : 328|13@1+ (0.052,-107.016) [0|63] "" XXX
+ SG_ NEW_SIGNAL_4 : 342|13@1+ (1,0) [0|3] "" XXX
 
 BO_ 253 ESP_21: 8 Gateway_MQB
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -197,11 +232,24 @@ BO_ 257 ESP_02: 8 Gateway_MQB
  SG_ ESP_PLA_Abbruch : 57|3@1+ (1,0) [0|7] "" Vector__XXX
  SG_ ESP_Status_ESP_PLA : 60|4@1+ (1,0) [0|15] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
 
-BO_ 258 ESP_NEW_2: 48 XXX
- SG_ LATERAL_ACCEL : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LONGITUDINAL_ACCEL : 24|8@1- (1,0) [0|255] "" XXX
- SG_ YAW_RATE : 40|14@1+ (1,0) [0|16383] "" XXX
- SG_ YAW_RATE_SIGN : 54|1@1+ (1,0) [0|1] "" XXX
+BO_ 258 ESC_50: 48 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Lateral_Accel : 16|8@1+ (0.15,-18.9) [0|255] "Unit_MeterPerSquareSecond" XXX
+ SG_ Longitudinal_Accel : 24|10@1+ (0.03125,-16) [0|255] "Unit_MeterPerSquareSecond" XXX
+ SG_ Yaw_Rate : 40|14@1+ (0.01,0) [0|16383] "Unit_DegreePerSecond" XXX
+ SG_ Yaw_Rate_Sign : 54|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Power : 80|8@1+ (1,-100) [0|255] "" XXX
+ SG_ Brake_01 : 90|1@0+ (1,0) [0|1] "" XXX
+ SG_ Regen_Braking : 123|1@1+ (1,0) [0|7] "" XXX
+ SG_ Brake_02 : 125|1@0+ (1,0) [0|1] "" XXX
+ SG_ Standstill : 171|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 180|1@0+ (1,0) [0|1] "" XXX
+ SG_ Longitudinal_Speed : 181|10@1+ (0.25,0) [0|255] "Unit_KilometerPerHour" XXX
+ SG_ Brake_Power_02 : 226|8@1+ (1,-100) [0|63] "" XXX
+ SG_ NEW_SIGNAL_2 : 236|9@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_1 : 248|4@1+ (1,0) [0|15] "" XXX
+ SG_ EPB_Status : 317|3@1+ (1,0) [0|7] "" XXX
 
 BO_ 260 EPB_01: 8 Gateway_MQB
  SG_ EPB_01_CRC : 0|8@1+ (1,0) [0|255] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -221,6 +269,15 @@ BO_ 260 EPB_01: 8 Gateway_MQB
  SG_ EPB_Konsistenz_ACC : 55|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ EPB_Spannkraft : 56|5@1+ (1,0) [0|29] "Unit_KiloNewto" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
  SG_ EPB_Status : 61|2@1+ (1,0) [0|3] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+
+BO_ 261 VMM_01: 8 XXX
+ SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ CNT : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_5 : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 40|2@1+ (1,0) [0|3] "" XXX
+ SG_ Brake : 53|7@1+ (1,0) [0|3] "" XXX
 
 BO_ 262 ESP_05: 8 Gateway_MQB
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -273,11 +330,13 @@ BO_ 264 Fahrwerk_01: 8 XXX
  SG_ Fahrwerk_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Fahrwerk_01_BZ : 8|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 267 MOTOR_NEW_1: 32 XXX
- SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+BO_ 267 Motor_51: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ ACCEL_PEDAL : 12|8@1+ (0.4,0) [0|255] "" XXX
- SG_ TSK_STATUS : 88|3@1+ (1,0) [0|7] "" XXX
+ SG_ Accel_Pedal_Pressure : 12|9@1+ (0.4,0) [0|255] "" XXX
+ SG_ Accel_Low_Pressed_Support : 21|1@1+ (1,0) [0|7] "" XXX
+ SG_ TSK_Status : 88|3@1+ (1,0) [0|7] "" XXX
+ SG_ TSK_Limiter_ausgewaehlt : 95|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 278 ESP_10: 8 Gateway_MQB
  SG_ ESP_10_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -432,24 +491,72 @@ BO_ 302 ACC_07: 8 XXX
  SG_ ACC_Folgebeschl : 32|8@1+ (0.03,-4.6) [-4.6|2.99] "Unit_MeterPerSeconSquar" XXX
  SG_ ACC_Sollbeschleunigung_02 : 53|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" XXX
 
-BO_ 313 ESP_NEW_3: 32 XXX
- SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+BO_ 313 VMM_02: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ BRAKE_PRESSED_1 : 16|1@1+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PRESSED_2 : 27|1@1+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PRESSED_3 : 48|1@1+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PRESSURE : 76|10@1+ (1,0) [0|1023] "" XXX
+ SG_ FCW_Reaction_1 : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Pressed_1 : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Pressed_2 : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ AEB_Active : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ FCW_Reaction_2 : 56|1@1+ (1,0) [0|1] "" XXX
+ SG_ Brake_Pressure : 76|11@1+ (1,0) [0|100] "" XXX
+ SG_ FCW_Reaction_3 : 88|5@1+ (1,0) [0|31] "" XXX
 
-BO_ 317 MOTOR_NEW_2: 32 XXX
- SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+BO_ 317 QFK_01: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_1 : 36|1@1+ (1,0) [0|1] "" XXX
- SG_ UNKNOWN : 76|10@1+ (1,0) [0|1023] "" XXX
+ SG_ NEW_SIGNAL_5 : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ HCA_No_Override : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_8 : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ LatCon_HCA_Accept : 17|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ LatCon_HCA_Status : 20|3@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_1 : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_10 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_6 : 30|3@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 34|3@0+ (1,0) [0|1] "" XXX
+ SG_ Steering_Angle_VZ : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ Curvature : 40|15@1+ (6.7e-06,0) [0|65535] "" XXX
+ SG_ Curvature_VZ : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 56|7@1+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_4 : 63|1@0+ (1,0) [0|1] "" XXX
+ SG_ Steering_Angle : 76|17@1+ (0.00906,0) [0|32767] "" XXX
 
-BO_ 333 ACC_NEW_1: 32 XXX
- SG_ NEW_SIGNAL_1 : 24|12@1+ (1,0) [0|4095] "" XXX
- SG_ NEW_SIGNAL_2 : 48|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 248|8@1+ (1,0) [0|255] "" XXX
+BO_ 332 Motor_54: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Engine_On : 77|1@1+ (1,0) [0|1] "" XXX
+ SG_ Accelerator_Pressure : 175|8@0+ (0.4,-14.8) [0|100] "Unit_Percent" XXX
+
+BO_ 333 ACC_18: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACC_limitierte_Anfahrdyn : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_nachtr_Stopp_Anf : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_DynErhoehung : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_Freilaufstrategie_TSK : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_zul_Regelabw_unten : 16|6@1+ (0.024,0) [0|1.512] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACC_StartStopp_Info : 22|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACC_Sollbeschleunigung_02 : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACC_zul_Regelabw_oben : 35|5@1+ (0.0625,0) [0|1.9375] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACC_neg_Sollbeschl_Grad_02 : 40|8@1+ (0.05,0) [0|12.75] "Unit_MeterPerCubicSecon" XXX
+ SG_ ACC_pos_Sollbeschl_Grad_02 : 48|8@1+ (0.05,0) [0|12.75] "Unit_MeterPerCubicSecon" XXX
+ SG_ ACC_Anfahren : 56|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_Anhalten : 57|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_Typ : 58|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] "" XXX
+ SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_Anhalteweg : 64|11@1+ (0.01,0) [0|2046] "" XXX
+ SG_ ACC_Anforderung_HMS : 77|3@1+ (1,0) [0|7] "" XXX
+ SG_ SET_ME_0XFE : 80|8@1+ (1,0) [0|255] "" XXX
+ SG_ ACC_AKTIV_regelt : 90|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_0X1 : 92|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_0X9 : 232|4@1+ (1,0) [0|15] "" XXX
+ SG_ Speed : 236|12@1+ (0.1,0) [0|15] "" XXX
+ SG_ Accel_Boost : 248|6@1+ (1,0) [0|3] "" XXX
+ SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 387 CAMERA_NEW_3_HF: 64 XXX
  SG_ NEW_SIGNAL_1 : 28|12@1+ (1,0) [0|15] "" XXX
@@ -464,13 +571,34 @@ BO_ 418 ESP_15: 8 XXX
  SG_ ESP_15_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ ESP_15_BZ : 8|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 420 CAMERA_NEW_11: 8 XXX
+BO_ 420 EA_01: 8 Gateway
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ EA_Parken_beibehalten_HMS : 12|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ EA_Warnruckprofil : 28|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ EA_eCall_Anf : 31|2@1+ (1,0) [0|3] "" ZR_High
+ SG_ EA_Funktionsstatus : 40|4@1+ (1,0) [0|15] "" ZR_High
+ SG_ EA_Gurtstraffer_Anf : 44|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ EA_Anforderung_HMS : 48|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ EA_Sollbeschleunigung : 53|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" Vector__XXX
 
 BO_ 427 ESP_33: 8 XXX
  SG_ ESP_33_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ ESP_33_BZ : 8|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 496 CAMERA_NEW_10: 8 XXX
+BO_ 496 EA_02: 8 Gateway
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ EA_Texte : 12|4@1+ (1,0) [0|15] "" ZR_High
+ SG_ ACF_Lampe_Hands_Off : 16|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ EA_Infotainment_Anf : 22|2@1+ (1,0) [0|3] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ EA_Tueren_Anf : 24|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ EA_Innenraumlicht_Anf : 25|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ zFAS_Warnblinken : 26|2@1+ (1,0) [0|3] "" ZR_High
+ SG_ STP_Primaeranz : 28|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ EA_Bremslichtblinken : 31|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EA_Blinken : 32|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ EA_Unknown : 61|4@0+ (1,0) [0|7] "" XXX
 
 BO_ 519 CAMERA_NEW_1_HF: 64 XXX
  SG_ NEW_SIGNAL_2 : 36|11@1+ (1,0) [0|2047] "" XXX
@@ -478,10 +606,77 @@ BO_ 519 CAMERA_NEW_1_HF: 64 XXX
 
 BO_ 564 CAMERA_NEW_2_HF: 64 XXX
 
+BO_ 588 MEB_Side_Assist_01: 16 XXX
+ SG_ Blind_Spot_Passenger : 12|7@1+ (1,0) [0|15] "" XXX
+ SG_ Blind_Spot_Driver : 19|7@1+ (1,0) [0|15] "" XXX
+ SG_ Blind_Spot_Info_Passenger : 26|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Warn_Passenger : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Info_Driver : 29|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Warn_Driver : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ Lower_Speed_01 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ Higher_Speed_01 : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ Higher_Speed_02 : 83|1@0+ (1,0) [0|1] "" XXX
+ SG_ Lower_Speed_02 : 84|1@0+ (1,0) [0|1] "" XXX
+ SG_ Standstill : 86|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 98|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_6 : 119|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 589 NEW_MSG_24D: 64 XXX
  SG_ NEW_SIGNAL_1 : 24|12@1+ (1,0) [0|4095] "" XXX
 
-BO_ 619 CAMERA_NEW_5: 8 XXX
+BO_ 591 Strukturen_01: 64 XXX
+ SG_ Unknown_01 : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ Distance_Status : 13|2@1+ (1,0) [0|3] "" XXX
+ SG_ Same_Lane_01_ObjectID : 16|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
+ SG_ Left_Lane_01_ObjectID : 22|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
+ SG_ Right_Lane_01_ObjectID : 28|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
+ SG_ Same_Lane_02_ObjectID : 34|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
+ SG_ Left_Lane_02_ObjectID : 40|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
+ SG_ Right_Lane_02_ObjectID : 46|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
+ SG_ Unknown_02 : 52|2@1+ (1,0) [0|3] "" XXX
+ SG_ Unknown_03 : 54|10@1+ (1,0) [0|3] "" XXX
+ SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
+ SG_ Same_Lane_01_Lat_Distance : 76|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
+ SG_ Same_Lane_01_Rel_Velo : 86|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
+ SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
+ SG_ Left_Lane_01_Lat_Distance : 108|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
+ SG_ Left_Lane_01_Rel_Velo : 118|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
+ SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
+ SG_ Right_Lane_01_Lat_Distance : 140|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
+ SG_ Right_Lane_01_Rel_Velo : 150|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
+ SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
+ SG_ Same_Lane_02_Lat_Distance : 172|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
+ SG_ Same_Lane_02_Rel_Velo : 182|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
+ SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
+ SG_ Left_Lane_02_Lat_Distance : 204|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
+ SG_ Left_Lane_02_Rel_Velo : 214|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
+ SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
+ SG_ Right_Lane_02_Lat_Distance : 236|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
+ SG_ Right_Lane_02_Rel_Velo : 246|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
+ SG_ Same_Lane_01_Unknown_01 : 256|8@1+ (1,-128) [0|31] "" XXX
+ SG_ Same_Lane_01_Unknown_02 : 264|6@1+ (1,-15) [0|31] "" XXX
+ SG_ Same_Lane_01_Unknown_03 : 270|6@1+ (1,0) [0|127] "" XXX
+ SG_ Same_Lane_01_Unknown_04 : 277|6@1+ (1,0) [0|7] "" XXX
+ SG_ Same_Lane_01_Unknown_05 : 284|6@1+ (1,0) [0|1] "" XXX
+
+BO_ 605 KLR_01: 8 Gateway
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ KLR_Fehler : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ KLR_ResponseError : 13|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ KLR_Lokalaktiv : 14|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ KLR_Fehler_Codierung : 15|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ KLR_Touchintensitaet_1 : 16|8@1+ (1,0) [0|250] "Unit_None" Vector__XXX
+ SG_ KLR_Touchintensitaet_2 : 24|8@1+ (1,0) [0|250] "Unit_None" Vector__XXX
+ SG_ KLR_Touchintensitaet_3 : 32|8@1+ (1,0) [0|250] "Unit_None" Vector__XXX
+ SG_ KLR_Touchauswertung : 40|4@1+ (1,0) [0|15] "" ZR_High
+
+BO_ 619 TA_01: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Travel_Assist_Status : 13|3@1+ (1,0) [0|3] "" XXX
+ SG_ Travel_Assist_Request : 19|3@1+ (1,0) [0|7] "" XXX
+ SG_ Travel_Assist_Available : 23|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 679 ACC_13: 8 XXX
  SG_ ACC_Regelgeschw : 12|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour" XXX
@@ -508,17 +703,67 @@ BO_ 695 RCTA_01: 8 XXX
  SG_ RCTA_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ RCTA_01_BZ : 8|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 768 ACC_NEW_2: 48 XXX
- SG_ SET_SPEED : 76|10@1+ (0.32,0) [0|163.51] "kmh" XXX
- SG_ NEW_SIGNAL_2 : 86|10@1+ (1,0) [0|1023] "" XXX
- SG_ NEW_SIGNAL_3 : 96|8@1+ (1,0) [0|255] "" XXX
+BO_ 768 ACC_19: 48 XXX
+ SG_ ACC_Tempolimit : 64|5@1+ (1,0) [0|31] "" OTA_FC
+ SG_ ACC_Wunschgeschw_Farbe : 69|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ACC_Warnung_Verkehrszeichen_1 : 70|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ACA_Querfuehrung : 71|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ Unknown_02 : 73|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Regelung_AIO : 75|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ACC_Wunschgeschw_02 : 76|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour" Vector__XXX
+ SG_ ACC_Abstandsindex_02 : 86|10@1+ (1,0) [1|1021] "" Vector__XXX
+ SG_ ACC_Display_Prio : 96|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ ACC_rel_Objekt_Zusatzanz : 98|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ ACC_Gesetzte_Zeitluecke : 101|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ ACC_Optischer_Fahrerhinweis : 104|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ACC_Warnhinweis : 105|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ACC_EGO_Fahrzeug : 106|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ ACC_Relevantes_Objekt_02 : 109|2@1+ (1,0) [0|3] "" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ACC_Wunschgeschw_erreicht : 112|1@1+ (1,0) [0|1] "" OTA_FC
+ SG_ ACC_Anzeige_Zeitluecke : 113|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ACC_Texte_Primaeranz_02 : 114|6@1+ (1,0) [0|63] "" Vector__XXX
+ SG_ ACC_Texte_Zusatzanz_02 : 120|6@1+ (1,0) [0|63] "" Vector__XXX
+ SG_ STA_Primaeranz : 126|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ ACC_Event_Wunschgeschw : 140|10@1+ (0.32,0) [0|15] "" XXX
+ SG_ Heartbeat : 150|9@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_0XFFFF : 160|16@1+ (1,0) [0|65535] "" XXX
+ SG_ ACC_Enabled : 186|1@0+ (1,0) [0|1] "" XXX
+ SG_ Zeitluecke_Farbe : 189|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_0X1 : 199|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
+ SG_ ACC_Akustischer_Fahrerhinweis : 211|2@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_08 : 224|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_01 : 225|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_06 : 226|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_07 : 228|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_0X7FFF : 240|16@1+ (1,0) [0|65535] "" XXX
+ SG_ Unknown_09 : 262|1@0+ (1,0) [0|3] "" XXX
+ SG_ Lead_Type_Detected : 265|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Standby_Override : 266|1@0+ (1,0) [0|1] "" XXX
+ SG_ Street_Color : 267|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
+ SG_ Lead_Brightness : 269|4@1+ (1,0) [0|7] "" XXX
+ SG_ SET_ME_0X6A : 273|8@1+ (1,0) [0|7] "" XXX
+ SG_ Lead_Position : 281|2@1+ (1,0) [0|1] "" XXX
+ SG_ Lead_Type : 287|3@1+ (1,0) [0|3] "" XXX
+ SG_ Lead_Distance : 290|10@1+ (0.2,0) [0|7] "Unit_Meter" XXX
+ SG_ Lead_Distance_Right : 300|10@1+ (0.2,0) [0|15] "Unit_Meter" XXX
+ SG_ Lead_Distance_Left : 310|10@1+ (0.2,0) [0|3] "Unit_Meter" XXX
+ SG_ ACC_Events : 332|4@0+ (1,0) [0|3] "Unit_Meter" XXX
+ SG_ Zeitluecke_1 : 334|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
+ SG_ Zeitluecke_2 : 344|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
+ SG_ Zeitluecke_3 : 354|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
+ SG_ Zeitluecke_4 : 364|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
+ SG_ Zeitluecke_5 : 374|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
 
-BO_ 771 HCA_NEW: 24 XXX
- SG_ ENABLED_1 : 13|2@1+ (1,0) [0|3] "" XXX
- SG_ SET_ME_0X54 : 16|7@1+ (1,0) [0|127] "" XXX
- SG_ ASSIST_TORQUE : 24|10@1+ (1,0) [0|1023] "" XXX
- SG_ ASSIST_DIRECTION : 39|1@1+ (1,0) [0|1] "" XXX
- SG_ ENABLED_2 : 66|1@1+ (1,0) [0|1] "" XXX
+BO_ 771 HCA_03: 24 XXX
+ SG_ RequestStatus : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ Power : 16|8@1+ (0.4,0) [0|100] "Unit_Percent" XXX
+ SG_ Curvature : 24|15@1+ (6.7e-06,0) [0|0.219] "Unit_rad/m" XXX
+ SG_ Curvature_VZ : 39|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_01 : 53|1@0+ (1,0) [0|1] "" XXX
+ SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ HighSendRate : 66|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 779 Kombi_01: 8 Gateway_MQB
  SG_ KBI_ABS_Lampe : 0|1@1+ (1,0) [0|1] "" Vector__XXX
@@ -648,8 +893,8 @@ BO_ 869 BEM_05: 8 Gateway_MQB
 
 BO_ 870 Blinkmodi_02: 8 XXX
  SG_ Hazard_Switch : 20|1@1+ (1,0) [0|1] "" XXX
- SG_ Comfort_Signal_Left : 23|1@1+ (1,0) [0|1] "" XXX
- SG_ Comfort_Signal_Right : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ BM_links : 23|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_rechts : 24|1@1+ (1,0) [0|1] "" ZR_High
  SG_ Left_Turn_Exterior_Bulb_1 : 25|1@1+ (1,0) [0|1] "" XXX
  SG_ Right_Turn_Exterior_Bulb_1 : 26|1@1+ (1,0) [0|1] "" XXX
  SG_ Left_Turn_Exterior_Bulb_2 : 27|1@1+ (1,0) [0|1] "" XXX
@@ -774,6 +1019,8 @@ BO_ 949 Klima_11: 8 Gateway_MQB
  SG_ KL_el_Zuheizer_Stufe : 48|3@1+ (1,0) [0|7] "" Motor_Diesel_MQB
 
 BO_ 958 Motor_14: 8 Motor_Diesel_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ MO_StartStopp_Status : 12|2@1+ (1,0) [0|3] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
  SG_ MO_StartStopp_Wiederstart : 14|1@1+ (1,0) [0|1] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
  SG_ MO_StartStopp_Motorstopp : 15|1@1+ (1,0) [0|1] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
@@ -863,6 +1110,33 @@ BO_ 968 Getriebe_14: 8 Getriebe_DQ_Hybrid_MQB
  SG_ GE_LFR_Adaption : 55|1@1+ (1,0) [0|1] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ GE_Sumpftemperatur : 56|8@1+ (1,-58) [-58|196] "Unit_DegreCelsi" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
+BO_ 980 SMLS_01: 8 Gateway
+ SG_ SMLS_01_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ SMLS_01_BZ : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ BH_Blinker_li : 12|1@1+ (1,0) [0|1] "" ZR_High,ZR_Standard
+ SG_ BH_Blinker_re : 13|1@1+ (1,0) [0|1] "" ZR_High,ZR_Standard
+ SG_ BH_Lichthupe : 14|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BH_Fernlicht : 15|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ WH_Tipwischen : 16|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ WH_Intervall : 17|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ WH_WischerStufe1 : 18|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ WH_WischerStufe2 : 19|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ WH_Frontwaschen : 20|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ WH_Heckintervall : 21|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ WH_Heckwaschen : 22|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ WH_Intervallstufen : 23|4@1+ (1,0) [0|15] "" ZR_High
+ SG_ FAS_Taster : 27|1@1+ (1,0) [0|1] "" ZR_High,ZR_Standard
+ SG_ FAS_Taster_Fehler : 28|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ SMLS_Hupe : 29|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ LRH_On_Off : 30|2@1+ (1,0) [0|3] "" ZR_High
+ SG_ LRH_aktiv : 40|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ SMLS_P_verriegelt_plausibel : 43|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ WH_SRA : 44|1@1+ (1,0) [0|1] "" OTA_FC,ZR_High
+ SG_ WH_Wischer_Fehler : 45|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BH_Blinker_Fehler : 46|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ SMLS_PTT : 47|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ WH_Tipwischen_lang : 48|1@1+ (1,0) [0|1] "" ZR_High
+
 BO_ 981 Licht_Anf_01: 8 XXX
 
 BO_ 982 Licht_hinten_01: 8 Gateway_MQB
@@ -951,6 +1225,10 @@ BO_ 987 Gateway_72: 8 Gateway_MQB
  SG_ BCM1_Aussen_Temp_ungef : 56|8@1+ (0.5,-50) [-50|76] "Unit_DegreCelsi" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 988 Gateway_73: 8 XXX
+ SG_ UNKNOWN_1 : 15|2@0+ (1,0) [0|3] "" XXX
+ SG_ GE_Fahrstufe : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ EPB_Status : 53|3@1+ (1,0) [0|7] "" XXX
+ SG_ UNKNOWN_2 : 58|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 989 Gateway_74: 8 Gateway_MQB
  SG_ LH_EPS_01_alt : 0|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB
@@ -978,14 +1256,110 @@ BO_ 997 TSG_FT_02: 8 XXX
  SG_ TSG_FT_02_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ TSG_FT_02_BZ : 8|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 1122 PSD_04: 8 XXX
- SG_ PSD_Object_Index : 0|6@1+ (1,0) [0|63] "" XXX
+BO_ 1122 PSD_04: 8 ZR_High
+ SG_ PSD_Segment_ID : 0|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Vorgaenger_Segment_ID : 6|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Segmentlaenge : 12|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Strassenkategorie : 19|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Endkruemmung : 22|8@1+ (1,0) [0|254] "Unit_None" Gateway,Gateway_PAG
+ SG_ PSD_Endkruemmung_Vorz : 30|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Idenditaets_ID : 31|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_ADAS_Qualitaet : 37|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_wahrscheinlichster_Pfad : 38|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Geradester_Pfad : 39|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Fahrspuren_Anzahl : 40|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Bebauung : 43|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Segment_Komplett : 44|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Rampe : 45|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Anfangskruemmung : 47|8@1+ (1,0) [0|254] "" Gateway,Gateway_PAG
+ SG_ PSD_Anfangskruemmung_Vorz : 55|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Abzweigerichtung : 56|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Abzweigewinkel : 57|7@1+ (1.417323,0) [0|180.000021] "" Gateway,Gateway_PAG
 
-BO_ 1123 PSD_05: 8 XXX
- SG_ PSD_Current_Route_Index : 0|6@1+ (1,0) [0|63] "" XXX
- SG_ Route_Distance_Remaining : 8|5@1+ (1,0) [0|31] "" XXX
+BO_ 1123 PSD_05: 8 ZR_High
+ SG_ PSD_Pos_Segment_ID : 0|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Pos_Segmentlaenge : 6|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Pos_Inhibitzeit : 13|5@1+ (10,0) [0|310] "Unit_MilliSecon" Gateway,Gateway_PAG
+ SG_ PSD_Pos_Standort_Eindeutig : 18|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Pos_Fehler_Laengsrichtung : 19|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG
+ SG_ PSD_Pos_Fahrspur : 22|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Attribut_Segment_ID_05 : 25|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_1_ID : 31|5@1+ (1,0) [1|31] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_1_Wert : 36|4@1+ (1,0) [0|15] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_1_Offset : 40|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_2_ID : 47|5@1+ (1,0) [1|31] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_2_Wert : 52|4@1+ (1,0) [0|15] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_2_Offset : 56|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Attribute_Komplett_05 : 63|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
 
-BO_ 1124 PSD_06: 8 XXX
+BO_ 1124 PSD_06: 8 ZR_High
+ SG_ PSD_06_Mux M : 0|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Segment_ID m0 : 3|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Laendercode m0 : 9|8@1+ (1,0) [0|255] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Geschwindigkeit_Einheit m0 : 17|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Verkehrsrichtung m0 : 18|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Geometrieguete m0 : 19|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Mapmatchingguete m0 : 21|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Alter_Karte m0 : 23|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Zielfuehrung m0 : 26|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Sys_US_State m0 : 27|6@1+ (1,0) [0|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Geometrien m0 : 33|3@1+ (1,0) [0|7] "Unit_None" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Ortsinfo m0 : 36|2@1+ (1,0) [0|3] "Unit_None" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_verfuegbar m0 : 38|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Zielfuehrung_geaendert m0 : 39|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Geometrieguete_erweitert m0 : 40|8@1+ (1,0) [0|255] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_sonstige_Attribute m0 : 48|3@1+ (1,0) [0|7] "Unit_None" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Steigungen m0 : 51|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Strassenkennz m0 : 54|3@1+ (1,0) [0|7] "Unit_None" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Tempolimits m0 : 57|3@1+ (1,0) [0|7] "Unit_None" Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Vorfahrtsregelung m0 : 60|3@1+ (1,0) [0|7] "Unit_None" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_Segment_ID m1 : 3|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_3_ID m1 : 9|5@1+ (1,0) [1|31] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_3_Offset m1 : 14|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_3_Wert m1 : 21|4@1+ (1,0) [0|15] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_4_ID m1 : 25|5@1+ (1,0) [1|31] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_4_Wert m1 : 30|4@1+ (1,0) [0|15] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_4_Offset m1 : 34|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_5_ID m1 : 41|5@1+ (1,0) [1|31] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_5_Offset m1 : 46|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Attribut_5_Wert m1 : 53|4@1+ (1,0) [0|15] "" Gateway,Gateway_PAG
+ SG_ PSD_Attribute_Komplett_06 m1 : 57|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Segment_ID m2 : 3|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Offset m2 : 9|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit m2 : 16|5@1+ (1,0) [0|31] "" Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Ges_Typ m2 : 21|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Spur_Geschw_Begrenzung m2 : 23|6@1+ (1,0) [0|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Gespann m2 : 29|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Witter m2 : 31|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Tag_Anf m2 : 33|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Tag_Ende m2 : 36|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Std_Anf m2 : 39|5@1+ (1,0) [0|24] "Unit_Hours" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Std_Ende m2 : 44|5@1+ (1,0) [0|24] "Unit_Hours" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Ueberholverbot m2 : 49|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Wechselverkehrszeichen m2 : 51|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG
+ SG_ PSD_Wechselverkehrszeichen_Typ m2 : 54|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Gesetzlich_Kategorie m2 : 56|3@1+ (1,0) [0|7] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Gesetzlich_Zusatz m2 : 59|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Verkehrszeichen_Quelle m2 : 61|2@1+ (1,0) [0|3] "" Gateway,Gateway_PAG
+ SG_ PSD_Ges_Attribute_Komplett m2 : 63|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Baum_Laenge_VZ m3 : 3|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Baum_Laenge m3 : 4|25@1+ (1e-05,0) [0|180] "Unit_DegreOfArc" Gateway,Gateway_PAG
+ SG_ PSD_Baum_Breite_VZ m3 : 29|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Baum_Breite m3 : 30|24@1+ (1e-05,0) [0|90] "Unit_DegreOfArc" Gateway,Gateway_PAG
+ SG_ PSD_Baum_Ausrichtung m3 : 54|10@1+ (0.3515625,0) [0|359.6484375] "Unit_DegreOfArc" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_Segment_ID m4 : 3|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_A_Steigung m4 : 9|7@1+ (0.12,0) [0|15] "Unit_PerCent" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_A_Vorz m4 : 16|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_A_Offset m4 : 17|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_B_Steigung m4 : 24|7@1+ (0.12,0) [0|15] "Unit_PerCent" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_B_Vorz m4 : 31|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_B_Offset m4 : 32|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_Attribute_kompl m4 : 39|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Segment_ID m4 : 40|6@1+ (1,0) [2|63] "" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Steigung m4 : 46|7@1+ (0.12,0) [0|15] "Unit_PerCent" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Vorz m4 : 53|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Offset m4 : 54|7@1+ (2,0) [0|254] "Unit_Meter" Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Attribute_kompl m4 : 61|1@1+ (1,0) [0|1] "" Gateway,Gateway_PAG
 
 BO_ 1172 STS_01: 8 Gateway_MQB
  SG_ STS_01_CRC : 0|8@1+ (1,0) [0|255] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -1045,6 +1419,50 @@ BO_ 1313 STH_01: 8 Gateway_MQB
 
 BO_ 1385 HVEM_04: 8 XXX
 
+BO_ 1411 ZV_02: 8 Gateway
+ SG_ BCM_FH_Freigabe : 12|1@1+ (1,0) [0|1] "" BedienDisp_vo
+ SG_ BCM_Komfortfkt_Freigabe : 13|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM_HSK_Freigabe : 14|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM_Verdeck_Freigabe : 15|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_verriegelt_intern_ist : 16|1@1+ (1,0) [0|1] "" DDA,OTA_FC,ZR_High
+ SG_ ZV_verriegelt_extern_ist : 17|1@1+ (1,0) [0|1] "" DDA,OTA_FC,ZR_High
+ SG_ ZV_verriegelt_intern_soll : 18|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_verriegelt_extern_soll : 19|1@1+ (1,0) [0|1] "" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_gesafet_extern_ist : 20|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_gesafet_extern_soll : 21|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ZV_Einzeltuerentriegelung : 22|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ZV_Heckeinzelentriegelung : 23|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ZV_FT_offen : 24|1@1+ (1,0) [0|1] "" DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_BT_offen : 25|1@1+ (1,0) [0|1] "" DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_HFS_offen : 26|1@1+ (1,0) [0|1] "" DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_HBFS_offen : 27|1@1+ (1,0) [0|1] "" DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_HD_offen : 28|1@1+ (1,0) [0|1] "" DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_HS_offen : 29|1@1+ (1,0) [0|1] "" OTA_FC,ZR_High
+ SG_ IRUE_aktiv : 30|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ DWA_aktiv : 31|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ HD_Hauptraste : 32|1@1+ (1,0) [0|1] "" OTA_FC,ZR_High
+ SG_ HD_Vorraste : 33|1@1+ (1,0) [0|1] "" OTA_FC,ZR_High
+ SG_ FFB_CarFinder : 38|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ FFB_Komfortoeffnen : 39|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ FFB_Komfortschliessen : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ZV_Schluessel_Zugang : 42|4@1+ (1,0) [0|15] "" ZR_High
+ SG_ ZV_SafeFunktion_aktiv : 46|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ FBS_Warn_Schluessel_Batt : 47|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_Oeffnungsmodus : 48|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ HFS_verriegelt : 50|1@1+ (1,0) [0|1] "" OTA_FC
+ SG_ HFS_gesafet : 51|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HBFS_verriegelt : 52|1@1+ (1,0) [0|1] "" OTA_FC
+ SG_ HBFS_gesafet : 53|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ZV_ist_Zustand_verfuegbar : 54|1@1+ (1,0) [0|1] "" OTA_FC,ZR_High
+ SG_ IRUE_Taster_Fkts_LED : 55|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_Tankklappe_offen : 56|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_Rollo_auf : 57|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_Rollo_zu : 58|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_SAD_auf : 59|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_SAD_zu : 60|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BCM_Tankklappensteller_Fehler : 61|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ ZV_verriegelt_soll : 62|2@1+ (1,0) [0|3] "" Vector__XXX
+
 BO_ 1413 Systeminfo_01: 8 Gateway_MQB
  SG_ SI_Sammel_SG_Fehler : 0|6@1+ (1,0) [0|60] "" Vector__XXX
  SG_ SI_Rollenmode : 6|2@1+ (1,0) [0|3] "" Vector__XXX
@@ -1075,7 +1493,17 @@ BO_ 1437 Remotestart_FFB: 8 Gateway_MQB
  SG_ RSF_Tastencode_2 : 8|8@1+ (1,0) [0|255] "" Motor_Diesel_MQB,Motor_Otto_MQB
  SG_ RSF_Tastencode_Maske : 16|8@1+ (1,0) [0|255] "" Motor_Diesel_MQB,Motor_Otto_MQB
 
-BO_ 1440 RLS_01: 8 XXX
+BO_ 1440 RLS_01: 8 Gateway
+ SG_ LS_Helligkeit_IR : 0|8@1+ (400,0) [0|101200] "Unit_Lux" ZR_High
+ SG_ LS_Helligkeit_FW : 8|10@1+ (6,0) [0|6126] "Unit_Lux" ZR_High
+ SG_ LS_defekt : 22|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ LS_Verbau : 23|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ RS_Regenmenge : 24|4@1+ (10,0) [0|100] "Unit_PerCent" OTA_FC,ZR_High
+ SG_ RS_Verbau : 29|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ RS_Verglasung_schliessen : 30|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ RS_defekt : 31|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ RS_Wischergeschwindigkeit : 32|3@1+ (1,0) [0|7] "" OTA_FC,ZR_High
+ SG_ RLS_Vorfeldhelligkeit_Boost : 35|4@1+ (1,0) [0|15] "" ZR_High
 
 BO_ 1520 Dimmung_01: 8 Gateway_MQB
  SG_ DI_KL_58xd : 0|8@1+ (1,0) [0|253] "" Airbag_MQB
@@ -1330,7 +1758,45 @@ BO_ 1720 Kombi_03: 8 XXX
  SG_ KBI_Max_Tankinhalt : 40|8@1+ (0.5,0) [0|126.5] "" XXX
  SG_ KBI_Reifenumfang_Sekundaer : 48|12@1+ (1,0) [0|4095] "Unit_MilliMeter" XXX
 
-BO_ 316495015 CAMERA_NEW_6: 32 XXX
+BO_ 316495015 VZE_04: 32 XXX
+ SG_ VZE_Anzeigemodus : 0|2@1+ (1,0) [0|3] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Verkehrszeichen_Einheit : 8|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Anzeigeunterdrueck_Zeichen_3 : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ VZE_Anzeigeunterdrueck_Zeichen_2 : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ VZE_Verkehrszeichen_1_Typ : 11|1@0+ (1,0) [0|1] "" XXX
+ SG_ VZE_Verkehrszeichen_1 : 12|7@1+ (10,0) [1|520] "" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Verkehrszeichen_2_Typ : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ VZE_Verkehrszeichen_2 : 20|7@1+ (10,0) [1|255] "" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Verkehrszeichen_3_Typ : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ VZE_Verkehrszeichen_3 : 28|7@1+ (10,0) [1|255] "" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Warnung_Verkehrszeichen_1 : 35|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Warnung_Verkehrszeichen_2 : 36|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Warnung_Verkehrszeichen_3 : 37|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zusatzschild_1 : 38|4@1+ (1,0) [1|15] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zusatzschild_2 : 42|4@1+ (1,0) [1|15] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zusatzschild_3 : 46|4@1+ (1,0) [1|15] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Anzeigeunterdrueck_Zeichen_1 : 50|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ VZE_Zeichen_01_KameraWied : 51|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_02_KameraWied : 52|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_03_KameraWied : 53|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_01_Kamera : 54|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_01_Karte : 55|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_01_Gesetz : 56|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_02_Kamera : 57|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_02_Karte : 58|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_02_Gesetz : 59|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_03_Kamera : 60|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_03_Karte : 61|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Zeichen_03_Gesetz : 62|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Gong : 63|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ VZE_Verkehrszeichen_4 : 75|8@1+ (1,0) [0|31] "" XXX
+ SG_ VZE_Verkehrszeichen_6 : 92|7@1+ (1,0) [0|7] "" XXX
+ SG_ VZE_Baustelle : 110|1@0+ (1,0) [0|1] "" XXX
+ SG_ Zeichen_Unknown : 129|4@1+ (1,0) [0|15] "" XXX
+ SG_ Zeichen_Unknown_Entfernung : 140|6@1+ (1,0) [0|15] "" XXX
+ SG_ Zusatzschild_Unknown : 147|2@1+ (1,0) [0|3] "" XXX
+ SG_ Unknown_02 : 167|4@1+ (1,0) [0|3] "" XXX
+ SG_ Unknown_01 : 207|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 380196019 CAMERA_NEW_16: 16 XXX
 
@@ -1468,6 +1934,35 @@ BO_ 2600468604 NMH_EMotor_01: 8 LEH_MQB
  SG_ NM_EMotor_01_NL_Daten_EEPROM : 48|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ NM_EMotor_01_UDS_CC : 63|1@1+ (1,0) [0|1] "" Vector__XXX
 
+BO_ 380196013 MEB_AWV_01: 8 XXX
+ SG_ Distance_Warning : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ FCW_Display : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ AWV_Enabled : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ AWV_Init : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ FCW_Sound : 22|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_1 : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_511 : 33|9@1+ (1,0) [0|127] "" XXX
+ SG_ Target : 56|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 401604695 MEB_PACC_01: 8 XXX
+ SG_ NEW_SIGNAL_1 : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 32|16@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 49|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_5 : 56|2@1+ (1,0) [0|3] "" XXX
+ SG_ Dynamic_in_Drive : 63|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 452984919 MEB_Unknown_01: 8 XXX
+ SG_ NEW_SIGNAL_1 : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_5 : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 18|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_6 : 25|2@1+ (1,0) [0|3] "" XXX
+
+BO_ 380196034 MEB_Radar_Unknown_01: 8 XXX
+
+
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
 CM_ SG_ 159 EPS_Berechneter_LW "Raw steering angle, degrees";
 CM_ SG_ 159 EPS_VZ_BLW "Raw steering angle, direction";
@@ -1486,15 +1981,6 @@ CM_ SG_ 294 HCA_01_Vib_Amp "Momentenamplitude der Lenkradvibration";
 CM_ SG_ 294 EA_Ruckfreigabe "Emergency Alert Freigabit für die Warnruck-Anforderung an das ESP";
 CM_ SG_ 294 EA_ACC_Wunschgeschwindigkeit "Emergency Alert Anforderung neue Wunschgeschwindigkeit";
 CM_ SG_ 391 GearPosition "Traditional PRND plus B-mode aggressive regen, B-mode mapped to Drive";
-CM_ SG_ 771 SET_ME_0X54 "Varies but not sure how, may indicate path or curvature";
-CM_ SG_ 870 Hazard_Switch "Four-way flashers active";
-CM_ SG_ 870 Comfort_Signal_Left "Comfort turn signal active, left";
-CM_ SG_ 870 Comfort_Signal_Right "Comfort turn signal active, right";
-CM_ SG_ 870 Left_Turn_Exterior_Bulb_1 "Probably front";
-CM_ SG_ 870 Right_Turn_Exterior_Bulb_1 "Probably front";
-CM_ SG_ 870 Left_Turn_Exterior_Bulb_2 "Probably rear";
-CM_ SG_ 870 Right_Turn_Exterior_Bulb_2 "Probably rear";
-CM_ SG_ 870 Fast_Send_Rate_Active "CAN message send rate";
 CM_ SG_ 919 LDW_DLC "Probable DLC (distance to line crossing)";
 CM_ SG_ 919 LDW_TLC "Probable TLC (time to line crossing)";
 CM_ SG_ 960 ZAS_Kl_15 "Indicates ignition on";
@@ -1507,12 +1993,12 @@ CM_ SG_ 1720 KBI_Tankfuellstand_Prozent "Tankfüllstand in %";
 CM_ SG_ 1720 KBI_Nachtanken_erkannt "Statusinformation Nachtankmodus";
 CM_ SG_ 1720 KBI_Tankinhalt_hochaufl "angezeigter Tankinhalt hochauflösend zur Restreichweitenberechnung";
 CM_ SG_ 1720 KBI_Max_Tankinhalt "Mitteilung des maximalen Tankinhalts an das Reichweitenmodul";
-CM_ SG_ 1720 KBI_Reifenumfang_Sekundaer "Fahrzeuge mit unterschiedlichen Reifenumfängen Vorderachse / Hinterachse:
+CM_ SG_ 1720 KBI_Reifenumfang_Sekundaer "Fahrzeuge mit unterschiedlichen Reifenumfängen Vorderachse / Hinterachse:Primärachse: KBI_Reifenumfang Sekundärachse: KBI_Reifenumfang_Sekundaer";
 
-Primärachse: KBI_Reifenumfang
-Sekundärachse: KBI_Reifenumfang_Sekundaer";
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active";
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 13 "T" 14 "T";
+VAL_ 258 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt";
+VAL_ 267 TSK_Status 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
 VAL_ 279 AWV1_Anf_Prefill 0 "Prefill_nicht_aktivieren" 1 "Prefill_aktivieren";
 VAL_ 279 ANB_CM_Info 0 "Standard" 1 "Erweitert";
 VAL_ 279 AWV2_Freigabe 0 "keine_Freigabe" 1 "Freigabe";
@@ -1554,8 +2040,41 @@ VAL_ 302 ACC_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halt
 VAL_ 302 ACC_Anfahren 0 "keine_Anforderung_Anfahren" 1 "Anforderung_Anfahren";
 VAL_ 302 ACC_Folgebeschl 254 "Neutralwert";
 VAL_ 302 ACC_Sollbeschleunigung_02 2046 "Neutralwert" 2047 "Fehler";
+VAL_ 317 LatCon_HCA_Status 0 "disabled" 1 "initializing" 2 "ready" 3 "fault" 4 "active" 5 "preempted" 6 "fault" 7 "rejected";
+VAL_ 333 ACC_limitierte_Anfahrdyn 0 "keine_Limitierung" 1 "Limitierung_Anfahrdynamik_angefordert";
+VAL_ 333 ACC_nachtr_Stopp_Anf 0 "nicht_angefordert" 1 "angefordert";
+VAL_ 333 ACC_StartStopp_Info 0 "Motorlauf_langfristig_nicht_notwendig_Stoppfreigabe" 1 "Motoranlauf_nicht_zwingend_notwendig_Stoppverbot_keine_Startanforderung" 2 "Motoranlauf_zwingend_notwendig_Startanforderung" 3 "Systemfehler";
+VAL_ 333 ACC_Sollbeschleunigung_02 2046 "Neutralwert" 2047 "Fehler";
+VAL_ 333 ACC_Anfahren 0 "keine_Anforderung_Anfahren" 1 "Anforderung_Anfahren";
+VAL_ 333 ACC_Anhalten 0 "kein_Anhalten_gewuenscht" 1 "Anhalten_gewuenscht";
+VAL_ 333 ACC_Typ 0 "Basis_ACC" 1 "ACC_mit_FollowToStop" 2 "ACC_mit_StopAndGo" 3 "ACC_nicht_codiert";
+VAL_ 333 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
+VAL_ 333 ACC_Minimale_Bremsung 0 "Anforderung_Minimale_Bremsung_nicht_aktiv" 1 "Anforderung_Minimale_Bremsung_aktiv";
+VAL_ 333 ACC_Anhalteweg 2046 "Neutralwert" 2047 "Fehler";
+VAL_ 333 ACC_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe";
+VAL_ 333 Accel_Boost 3 "Driving" 0 "Stop" 2 "Driving" 1 "Driving";
 VAL_ 391 RegenBrakingMode 0 "default" 1 "B1" 2 "B2" 3 "B3";
 VAL_ 391 GearPosition 2 "P" 3 "R" 4 "N" 5 "D" 6 "D";
+VAL_ 420 EA_Parken_beibehalten_HMS 0 "Parken_nicht_beibehalten" 1 "Parken_beibehalten" 2 "Init" 3 "Fehler";
+VAL_ 420 EA_Warnruckprofil 0 "keine_Ruckanforderung" 1 "Profil_1" 2 "Profil_2" 3 "Profil_3" 4 "Profil_4" 5 "Profil_5" 6 "Profil_6" 7 "Profil_7";
+VAL_ 420 EA_eCall_Anf 0 "Keine_Anforderung" 1 "Ausloesen_eCall";
+VAL_ 420 EA_Funktionsstatus 0 "EA_INIT" 1 "EA_OFF" 2 "EA_STANDBY" 3 "EA_PHASE0_AKTIV" 4 "EA_PHASE1_AKTIV" 5 "EA_PHASE2_AKTIV" 6 "EA_PHASE3_AKTIV" 7 "EA_REVERSIBLER_FEHLER" 8 "EA_IRREVERSIBLER_FEHLER";
+VAL_ 420 EA_Gurtstraffer_Anf 0 "Keine_Anforderung" 1 "Haptik_1" 2 "Haptik_2" 3 "Haptik_3";
+VAL_ 420 EA_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe" 6 "Parken_mit_P";
+VAL_ 420 EA_Sollbeschleunigung 2046 "Neutralwert" 2047 "Fehler";
+VAL_ 496 EA_Texte 0 "keine_Anzeige" 1 "Nothalteassistent_fehlende_Fahreraktivitaet" 2 "Nothalteassistent_aktiv_Fahrzeugfuehrung_uebernehmen" 3 "Nothalteassistent_automatischer_Nothalt_wird_durchgefuehrt" 4 "Nothalteassistent_automatischer_Nothalt_durchgefuehrt" 5 "Nothalteassistent_Verbindung_zum_Notruf_wird_aufgebaut" 6 "Nothalteassistent_deaktiviert" 7 "Nothalteassistent_Eingriff_abgebrochen" 8 "Nothalteassistent_fehlende_Fahreraktivitaet_2" 9 "Sekundenschlaf_erkannt" 10 "LaneAssist_Lenkung_uebernehmen" 11 "ACA_Fahrzeugfuehrung_uebernehmen" 12 "EA_Fahr_Standstreifenwechsel" 14 "Nothalteassistent_nicht_verfuegbar_reversibel" 15 "Nothalteassistent_Stoerung_irreversibel";
+VAL_ 496 ACF_Lampe_Hands_Off 0 "keine_Anzeige" 1 "Hands_Off_erkannt";
+VAL_ 496 EA_Infotainment_Anf 0 "Init" 1 "Keine_Absenkung" 2 "Absenkung" 3 "Mute";
+VAL_ 496 EA_Tueren_Anf 0 "Keine_Anforderung" 1 "Tueren_entriegeln";
+VAL_ 496 EA_Innenraumlicht_Anf 0 "Innenraumbeleuchtung_ausschalten" 1 "Innenraumbeleuchtung_einschalten";
+VAL_ 496 zFAS_Warnblinken 0 "Aus" 1 "Statisch" 2 "Taster" 3 "Statisch_ohne_WBT";
+VAL_ 496 STP_Primaeranz 0 "keine_Anzeige" 1 "Verfuegbar" 2 "Aktiv" 3 "Uebernahme" 4 "Aktiv_Warnung" 5 "Nicht_Verfuegbar";
+VAL_ 496 EA_Bremslichtblinken 0 "kein_Blinken" 1 "Anforderung_Bremslichtblinken";
+VAL_ 496 EA_Blinken 0 "Kein_Blinken" 1 "Wechselblinken_links" 2 "Wechselblinken_rechts" 3 "Warnblinken" 4 "Warnblinken_Taster";
+VAL_ 591 Distance_Status 0 "Valid" 3 "Invalid";
+VAL_ 619 Travel_Assist_Status 4 "enabled" 0 "disabled" 2 "ready" 3 "pre_ready";
+VAL_ 619 Travel_Assist_Request 4 "enable" 3 "disable" 0 "no_request" 1 "error";
+VAL_ 619 Travel_Assist_Available 0 "not_available" 1 "available";
 VAL_ 679 ACC_Regelgeschw 1023 "keine_Anzeige";
 VAL_ 679 ACC_Einheit_maxSetzgeschw 0 "kmh" 1 "mph";
 VAL_ 679 ACC_maxSetzgeschw 511 "Init_Neutralwert";
@@ -1573,6 +2092,36 @@ VAL_ 681 AWV_Status_Anzeige 0 "Init" 1 "verfuegbar" 2 "nicht_verfuegbar";
 VAL_ 681 AWV_Einstellung_System_FSG 0 "deaktiviert" 1 "aktiviert";
 VAL_ 681 AWV_Einstellung_Warnung_FSG 0 "Aus" 1 "Setting_2" 2 "Setting_3" 3 "Setting_4" 4 "Setting_5" 5 "Ein";
 VAL_ 681 AWV_Warnlevel 0 "keine_Gefaehrdung" 63 "max_Gefaehrdung";
+VAL_ 768 ACC_Tempolimit 0 "keine_Anzeige" 1 "5_zulHoechstgeschw" 2 "7_zulHoechstgeschw" 3 "10_zulHoechstgeschw" 4 "15_zulHoechstgeschw" 5 "20_zulHoechstgeschw" 6 "25_zulHoechstgeschw" 7 "30_zulHoechstgeschw" 8 "35_zulHoechstgeschw" 9 "40_zulHoechstgeschw" 10 "45_zulHoechstgeschw" 11 "50_zulHoechstgeschw" 12 "55_zulHoechstgeschw" 13 "60_zulHoechstgeschw" 14 "65_zulHoechstgeschw" 15 "70_zulHoechstgeschw" 16 "75_zulHoechstgeschw" 17 "80_zulHoechstgeschw" 18 "85_zulHoechstgeschw" 19 "90_zulHoechstgeschw" 20 "95_zulHoechstgeschw" 21 "100_zulHoechstgeschw" 22 "110_zulHoechstgeschw" 23 "120_zulHoechstgeschw" 24 "130_zulHoechstgeschw" 25 "140_zulHoechstgeschw" 26 "150_zulHoechstgeschw" 27 "160_zulHoechstgeschw" 28 "200_zulHoechstgeschw" 30 "250_zulHoechstgeschw" 31 "Ende_zulHoechstgeschw";
+VAL_ 768 ACC_Wunschgeschw_Farbe 0 "Grundfarbe" 1 "Farbe_1";
+VAL_ 768 ACC_Warnung_Verkehrszeichen_1 0 "keine_Warnung_Initialwert" 1 "Warnung";
+VAL_ 768 ACA_Querfuehrung 0 "keine_Anzeige_oder_init" 1 "passiv" 2 "aktiv" 3 "Warnung";
+VAL_ 768 ACC_Regelung_AIO 0 "Regelung_Ampel_nicht_aktiv" 1 "Regelung_Ampel_aktiv";
+VAL_ 768 ACC_Wunschgeschw_02 1023 "keine_Anzeige";
+VAL_ 768 ACC_Abstandsindex_02 0 "Audi (Init), VW (passiv/aktiv_Freifahrt)" 1022 "aus_passiv" 1023 "aktiv_Freifahrt";
+VAL_ 768 ACC_Display_Prio 0 "hoechste_Prio" 1 "mittlere_Prio" 2 "geringe_Prio" 3 "keine_Prio";
+VAL_ 768 ACC_rel_Objekt_Zusatzanz 0 "keine Anzeige" 1 "Relevantes_Objekt_erkannt" 2 "Relevantes_Objekt_Abstandswarnung";
+VAL_ 768 ACC_Gesetzte_Zeitluecke 0 "keine_Anzeige" 1 "Zeitluecke_1" 2 "Zeitluecke_2" 3 "Zeitluecke_3" 4 "Zeitluecke_4" 5 "Zeitluecke_5" 6 "nicht_definiert" 7 "nicht_definiert";
+VAL_ 768 ACC_Optischer_Fahrerhinweis 0 "optischer_Fahrerhinweis_AUS" 1 "optischer_Fahrerhinweis_EIN";
+VAL_ 768 ACC_Warnhinweis 0 "kein_Warnhinweis" 1 "Warnhinweis";
+VAL_ 768 ACC_EGO_Fahrzeug 0 "keine_Anzeige" 1 "aktiv" 2 "Warnung" 3 "aktiv_stop" 4 "passiv";
+VAL_ 768 ACC_Relevantes_Objekt_02 0 "keine_Anzeige" 1 "Relevantes_Objekt_erkannt" 2 "Relevantes_Objekt_Warnung" 3 "passiv";
+VAL_ 768 ACC_Wunschgeschw_erreicht 0 "Wunschgeschwindigkeit_nicht_erreicht" 1 "Wunschgeschwindigkeit_erreicht";
+VAL_ 768 ACC_Anzeige_Zeitluecke 0 "Anzeige_Zeitluecke_nicht_angefordert" 1 "Anzeige_Zeitluecke_angefordert";
+VAL_ 768 ACC_Texte_Primaeranz_02 0 "keine Anzeige" 1 "VDA_ACC_Symbol_YYY_kmh_mph" 2 "Kurven_Symbol_YYY_kmh_mph" 3 "Tempolimit_Symbol_YYY_kmh_mph" 4 "ACC_anfahrbereit" 5 "eingestellte_Zeitluecke" 6 "Tuer offen !" 7 "Stehendes Objekt voraus" 8 "o  o  o" 9 "ACC aus" 10 "ACC startet" 11 "ACC Sensor Sicht !" 12 "ACC nicht verfuegbar" 13 "ACC Fehler" 14 "ESP Eingriff" 15 "ESP PASSIV !" 16 "Parkbremse !" 17 "Geschwindigkeitsgrenze" 18 "Waehlhebelposition !" 19 "Fahrer Gurtschloss offen !" 20 "Schalthebelposition !" 21 "Drehzahl !" 22 "HDC aktiv" 23 "Kupplung betaetigt" 24 "Gang einlegen !" 25 "Bremse ueberhitzt !" 26 "Steigung_Gefaelle_zu_gross" 27 "ABSTAND" 28 "Rechtsueberholen_verhindert" 29 "Linksueberholen_verhindert" 30 "Kreuzungs_Symbol" 31 "Kreisverkehr_Symbol" 32 "Gefaelle_Symbol" 33 "Tempolimit_Kurvenassistent_ein" 34 "Kurvenassistent_ein" 35 "Tempolimitassistent_ein" 36 "Achtung_Geschwindigkeitsueberschreitung" 37 "Tempolimit_und_Kurvenassistent_nicht_verfuegbar" 38 "Tempolimit_nicht_verfuegbar" 39 "Kurvenassistent_nicht_verfuegbar" 40 "Autobahnausfahrt_Symbol" 41 "Stauende_Symbol" 42 "Engstelle_Symbol" 43 "STP_verfuegbar" 44 "Ampel_vertikal" 45 "Ampel_horizontal" 46 "STA_verfuegbar";
+VAL_ 768 ACC_Texte_Zusatzanz_02 0 "keine_Anzeige" 1 "ACC_AUS" 2 "Standby" 3 "UEBERTRETEN" 4 "ABSTAND" 5 "DISTANZ_1" 6 "DISTANZ_2" 7 "DISTANZ_3" 8 "DISTANZ_4" 9 "DISTANZ_5" 10 "DISTANZ_1__dyn" 11 "DISTANZ_2__dyn" 12 "DISTANZ_3__dyn" 13 "DISTANZ_4__dyn" 14 "DISTANZ_5__dyn" 15 "DISTANZ_1__comf" 16 "DISTANZ_2__comf" 17 "DISTANZ_3__comf" 18 "DISTANZ_4__comf" 19 "DISTANZ_5__comf" 20 "DISTANZ_1__efficiency" 21 "DISTANZ_2__efficiency" 22 "DISTANZ_3__efficiency" 23 "DISTANZ_4__efficiency" 24 "DISTANZ_5__efficiency" 25 "DISTANZ_1__Stau" 26 "DISTANZ_2__Stau" 27 "DISTANZ_3__Stau" 28 "DISTANZ_4__Stau" 29 "DISTANZ_5__Stau" 30 "ACHTUNG" 31 "Abstandsanzeige" 32 "Abstandsanzeige_Warnung_aktiviert" 33 "STA_verfuegbar" 34 "Engstelle" 35 "RUV_aktiv_Rechtsverkehr" 36 "RUV_aktiv_Linksverkehr" 37 "STP_Verfuegbar" 38 "AW_Warnschwelle_1" 39 "AW_Warnschwelle_2" 40 "AW_Warnschwelle_3" 41 "AW_Warnung_1" 42 "AW_Warnung_2" 43 "AW_Warnung_3";
+VAL_ 768 STA_Primaeranz 0 "keine_Anzeige" 1 "STA_standby" 2 "STA_aktiv" 3 "STA_Warnung";
+VAL_ 768 ACC_Event_Wunschgeschw 1023 "None";
+VAL_ 768 Heartbeat 1 "ACC_Init_Low" 420 "ACC_Init_High" 221 "ACC_Available_Low" 360 "ACC_Available_High";
+VAL_ 768 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
+VAL_ 768 Lead_Type_Detected 1 "Lead_Detected" 0 "No_Lead_Detected";
+VAL_ 768 Lead_Type 5 "Bicycle" 3 "Car" 0 "None" 2 "Truck" 4 "Motorcycle";
+VAL_ 768 ACC_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Detected" 9 "Crossing" 4 "Speed_Limit_Ahead" 10 "Roundabout" 6 "Curve";
+VAL_ 768 Zeitluecke_1 0 "keine Anzeige";
+VAL_ 768 Zeitluecke_2 0 "keine Anzeige" 32 "Minimum";
+VAL_ 768 Zeitluecke_3 0 "keine Anzeige";
+VAL_ 768 Zeitluecke_4 0 "keine Anzeige" 40 "Minimum";
+VAL_ 768 Zeitluecke_5 0 "keine Anzeige";
 VAL_ 780 ACC_Wunschgeschw_02 1023 "keine_Anzeige";
 VAL_ 780 ACC_Status_Prim_Anz 0 "Symbol nicht beleuchtet" 1 "Farbe 1 (typisch 'gruen')" 2 "Farbe 2 (typisch 'rot')" 3 "Farbe 3 (typisch 'gelb')";
 VAL_ 780 ACC_Abstandsindex 0 "Sonderanzeige_graue_Fahrbahn" 1022 "Sonderanzeige_graue_Fahrbahn" 1023 "Sonderanzeige_Fahrbahn_mit_gruenem_roten_Bereich";
@@ -1601,7 +2150,156 @@ VAL_ 804 ACC_Tempolimit 0 "keine_Anzeige" 1 "5_zulHoechstgeschw" 2 "7_zulHoechst
 VAL_ 804 ACC_Charisma_FahrPr 0 "keine_Funktion" 1 "Programm_1" 2 "Programm_2" 3 "Programm_3" 4 "Programm_4" 5 "Programm_5" 6 "Programm_6" 7 "Programm_7" 8 "Programm_8" 9 "Programm_9" 10 "Programm_10" 11 "Programm_11" 12 "Programm_12" 13 "Programm_13" 14 "Programm_14" 15 "Programm_15";
 VAL_ 804 ACC_Charisma_Status 0 "Init" 1 "verfuegbar" 2 "nicht_verfuegbar" 3 "asynchron_durch_Fahrerwunsch";
 VAL_ 804 ACC_Texte_Abstandswarner 0 "keine_Anzeige" 1 "Systemstoerung" 2 "keine_Sensorsicht" 3 "zurzeit_eingeschraenkt";
-VAL_ 870 Fast_Send_Rate_Active 0 "1 Hz" 1 "50 Hz";
+VAL_ 870 BM_links 0 "inaktiv" 1 "aktiv";
+VAL_ 870 BM_rechts 0 "inaktiv" 1 "aktiv";
+VAL_ 958 MO_Fahrer_bremst 0 "kein_Bremsen" 1 "Bremse_betaetigt";
+VAL_ 980 BH_Blinker_li 0 "nicht_betaetigt" 1 "Blinkerhebel_Pos_li_betaetigt";
+VAL_ 980 BH_Blinker_re 0 "nicht_betaetigt" 1 "Blinkerhebel_Pos_re_betaetigt";
+VAL_ 980 BH_Lichthupe 0 "nicht_betaetigt" 1 "Blinkerhebel in Richtung Lichthupe betaetigt";
+VAL_ 980 BH_Fernlicht 0 "nicht_betaetigt" 1 "Blinkerhebel_in_Richtung_Fernlicht_betaetigt";
+VAL_ 980 WH_Tipwischen 0 "nicht_betaetigt" 1 "betaetigt";
+VAL_ 980 WH_Intervall 0 "aus" 1 "Wischerhebel in Stellung Intervall";
+VAL_ 980 WH_WischerStufe1 0 "aus" 1 "Wischerhebel in Stufe Wischen 1";
+VAL_ 980 WH_WischerStufe2 0 "aus" 1 "Wischerhebel in Stufe Wischen 2";
+VAL_ 980 WH_Frontwaschen 0 "aus" 1 "Wischerhebel in Stellung Wisch Wasch vorne";
+VAL_ 980 WH_Heckintervall 0 "nicht_betaetigt" 1 "Wischerhebel in Stellung Heckintervall";
+VAL_ 980 WH_Heckwaschen 0 "nicht_betaetigt" 1 "Wischerhebel in Stellung Wisch Wasch hinten";
+VAL_ 980 WH_Intervallstufen 0 "Init / Default" 1 "Intervallstufe 1" 5 "Intervallstufe 2" 9 "Intervallstufe 3" 13 "Intervallstufe 4" 15 "Fehler";
+VAL_ 980 FAS_Taster 0 "nicht_betaetigt" 1 "betaetigt";
+VAL_ 980 FAS_Taster_Fehler 0 "kein_Fehler" 1 "Fehler";
+VAL_ 980 SMLS_Hupe 0 "nicht_betaetigt" 1 "Hupe_gedrueckt";
+VAL_ 980 LRH_On_Off 0 "LRH_aus__keine Anzeige" 1 "LRH_aus" 2 "LRH_ein" 3 "Fehler";
+VAL_ 980 LRH_aktiv 0 "inaktiv" 1 "aktiv";
+VAL_ 980 SMLS_P_verriegelt_plausibel 0 "unplausibel" 1 "plausibel";
+VAL_ 980 WH_SRA 0 "SRA_Aus" 1 "SRA_Ein";
+VAL_ 980 WH_Wischer_Fehler 0 "kein_Fehler" 1 "Fehler";
+VAL_ 980 BH_Blinker_Fehler 0 "kein_Fehler" 1 "Fehler";
+VAL_ 980 SMLS_PTT 0 "nicht_betaetigt" 1 "PTT_gedrueckt";
+VAL_ 980 WH_Tipwischen_lang 0 "nicht_betaetigt" 1 "betaetigt";
+VAL_ 988 GE_Fahrstufe 0 "Zwischenstellung" 1 "Init" 5 "P" 6 "R" 7 "N" 8 "D" 9 "D" 10 "E" 13 "T" 14 "T" 15 "Fehler";
+VAL_ 988 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt";
+VAL_ 1122 PSD_Segment_ID 0 "keine Segmentinformationen vorhanden" 1 "Fehlerwert";
+VAL_ 1122 PSD_Vorgaenger_Segment_ID 0 "keine Segmentinformation vorhanden" 1 "Fehlerwert";
+VAL_ 1122 PSD_Strassenkategorie 0 "Rest_Feldweg_Schotterweg_Privatweg" 1 "Ortsstraߥ" 2 "Kreisstraߥ" 3 "Landstraߥ" 4 "Bundesstraߥ" 5 "Autobahn" 7 "Init";
+VAL_ 1122 PSD_Endkruemmung 255 "Gerade";
+VAL_ 1122 PSD_Endkruemmung_Vorz 0 "Kruemmung_positiv" 1 "Kruemmung_negativ";
+VAL_ 1122 PSD_Idenditaets_ID 0 "keine_Segment_Informationen_vorhanden" 1 "Fehler";
+VAL_ 1122 PSD_ADAS_Qualitaet 0 "keine_ADAS_Qualitaet" 1 "ADAS_Qualitaet";
+VAL_ 1122 PSD_wahrscheinlichster_Pfad 0 "Pfad_mit_geringer_Wahrscheinlichkeit" 1 "wahrscheinlichster_Pfad";
+VAL_ 1122 PSD_Geradester_Pfad 0 "nicht_geradester_PFad" 1 "geradester_Pfad";
+VAL_ 1122 PSD_Fahrspuren_Anzahl 0 "Einbahnstrasse_in_falsche_Richtung" 1 "eine_Fahrspur" 2 "zwei_Fahrspuren" 3 "drei_Fahrspuren" 4 "vier_Fahrspuren" 5 "fuenf_Fahrspuren" 6 "sechs_Fahrspuren" 7 "mehr_als_sechs_Fahrspuren";
+VAL_ 1122 PSD_Bebauung 0 "ausserhalb_bebauten_Gebietes" 1 "innerhalb_bebauten_Gebietes";
+VAL_ 1122 PSD_Segment_Komplett 0 "Segment_Attribute_nicht_komplett" 1 "Segment_Attribute_komplett";
+VAL_ 1122 PSD_Rampe 0 "Strasse_mit_Gegenverkehr" 1 "Auffahrt_Einbahnstr" 2 "Abfahrt_Einbahnstr" 3 "Einbahnstrasse";
+VAL_ 1122 PSD_Anfangskruemmung 255 "Gerade";
+VAL_ 1122 PSD_Anfangskruemmung_Vorz 0 "positiv" 1 "negativ";
+VAL_ 1122 PSD_Abzweigerichtung 0 "rects_abzweigende_Strasse" 1 "links_abzweigende_Strasse";
+VAL_ 1123 PSD_Pos_Segment_ID 0 "keine Position gegeben" 1 "Fehlerwert";
+VAL_ 1123 PSD_Pos_Standort_Eindeutig 0 "mehrdeutiger_Standort" 1 "eindeutiger_Standort";
+VAL_ 1123 PSD_Pos_Fehler_Laengsrichtung 0 "Init" 1 "< 2m" 2 "< 5m" 3 "< 10m" 4 "< 20m" 5 "< 50m" 6 "> 50m" 7 "Off-Road";
+VAL_ 1123 PSD_Pos_Fahrspur 0 "unbekannt" 1 "Erste_Spur_von_rechts" 2 "Zweite_Spur_von_rechts" 3 "Dritte_Spur_von_rechts" 4 "Vierte_Spur_von_rechts" 5 "Fuenfte_Spur_von_rechts" 6 "Sechte_Spur_von_rechts" 7 "Siebte_oder_weitere_Spur_von_rechts";
+VAL_ 1123 PSD_Attribut_Segment_ID_05 0 "keine_Segment_Information" 1 "Fehler";
+VAL_ 1123 PSD_Attribut_1_ID 0 "keine_Information";
+VAL_ 1123 PSD_Attribut_2_ID 0 "keine_Information";
+VAL_ 1123 PSD_Attribute_Komplett_05 0 "Attribute_nicht_komplett" 1 "Attribute_komplett";
+VAL_ 1124 PSD_06_Mux 0 "Init";
+VAL_ 1124 PSD_Sys_Segment_ID 0 "keine Segmentinformationen vorhanden" 1 "nicht zulaessig";
+VAL_ 1124 PSD_Sys_Geschwindigkeit_Einheit 0 "km/h" 1 "mph";
+VAL_ 1124 PSD_Sys_Verkehrsrichtung 0 "Rechtsverkehr" 1 "Linksverkehr";
+VAL_ 1124 PSD_Sys_Geometrieguete 0 "Geringe_Guete" 1 "tbd" 2 "tbd" 3 "Hohe_Guete";
+VAL_ 1124 PSD_Sys_Mapmatchingguete 0 "geringe_Guete" 1 "res" 2 "res" 3 "hohe_Guete";
+VAL_ 1124 PSD_Sys_Alter_Karte 0 "kleiner_1_Jahr" 1 "1_Jahr" 2 "2_Jahre" 3 "3_Jahre" 4 "4_Jahre" 5 "5_Jahre" 6 "6_Jahre" 7 "groesser_7_Jahre";
+VAL_ 1124 PSD_Sys_Zielfuehrung 0 "Zielfuehrung nicht aktiv" 1 "Zielfuehrung aktiv";
+VAL_ 1124 PSD_Sys_US_State 0 "kein_US_State" 1 "Alabama" 2 "Alaska" 3 "Arkansas" 4 "Arizona" 5 "California" 6 "Colorado" 7 "Conneticut" 8 "District_of_Columbia" 9 "Delaware" 10 "Florida" 11 "Georgia" 12 "Hawaii" 13 "Idaho" 14 "Illinois" 15 "Iowa" 16 "Indiana" 17 "Kansas" 18 "Kentucky" 19 "Louisiana" 20 "Massachusetts" 21 "Maryland" 22 "Maine" 23 "Michigan" 24 "Minnesota" 25 "Missouri" 26 "Mississippi" 27 "Montana" 28 "North_Carolina" 29 "North_Dakota" 30 "Nebraska" 31 "Nevada" 32 "New_Hampshire" 33 "New_Jersey" 34 "New_Mexico" 35 "New_York" 36 "Ohio" 37 "Oklahoma" 38 "Oregon" 39 "Pennsylvania" 40 "Puerto_Rico" 41 "Rhode_Island" 42 "South_Carolina" 43 "South_Dakota" 44 "Tennessee" 45 "Texas" 46 "Utah" 47 "Virginia" 48 "Virgin_Islands" 49 "Vermont" 50 "Washington" 51 "Wisconsin" 52 "West_Virginia" 53 "Wyoming";
+VAL_ 1124 PSD_Sys_Quali_verfuegbar 0 "Qualitaetskriterien_nicht_verfuegbar" 1 "Qualitaetskriterien_verfuegbar";
+VAL_ 1124 PSD_Sys_Zielfuehrung_geaendert 0 "Zielfuehrung_nicht_geaendert" 1 "Zielfuehrung_geaendert";
+VAL_ 1124 PSD_Sys_Geometrieguete_erweitert 0 "Init";
+VAL_ 1124 PSD_Attribut_Segment_ID 0 "keine_Segment_Information_vorhanden" 1 "Fehler";
+VAL_ 1124 PSD_Attribut_3_ID 0 "keine_Information";
+VAL_ 1124 PSD_Attribut_4_ID 0 "keine_Information";
+VAL_ 1124 PSD_Attribut_5_ID 0 "keine_Information";
+VAL_ 1124 PSD_Attribute_Komplett_06 0 "Attribute_nicht_komplett" 1 "Attribute_komplett";
+VAL_ 1124 PSD_Ges_Segment_ID 0 "keine Segmentinformationen vorhanden" 1 "nicht zulaessig";
+VAL_ 1124 PSD_Ges_Geschwindigkeit 0 "Kein Geschwindigkeitsgebot" 1 "0 km/h < v_max <  5 km/h" 2 "5 km/h < v_max < 10km/h" 3 "10 km/h < v_max < 15 km/h" 4 "15 km/h < v_max < 20 km/h" 5 "20 km/h < v_max < 25 km/h" 6 "25 km/h < v_max < 30 km/h" 7 "30 km/h < v_max < 35 km/h" 8 "35 km/h < v_max < 40 km/h" 9 "40 km/h < v_max < 45 km/h" 10 "45 km/h < v_max < 50 km/h" 11 "50 km/h < v_max < 60 km/h" 12 "60 km/h < v_max < 70 km/h" 13 "70 km/h < v_max < 80 km/h" 14 "80 km/h < v_max < 90 km/h" 15 "90 km/h < v_max < 100 km/h" 16 "100 km/h < v_max < 110 km/h" 17 "110 km/h < v_max < 120 km/h" 18 "120 km/h < v_max < 130 km/h" 19 "130 km/h < v_max < 140 km/h" 20 "140 km/h < v_max < 150 km/h" 21 "150 km/h < v_max < 160 km/h" 22 "160 km/h < v_max" 23 "Geschwindigkeitsgebot aufgehoben" 24 "..0x1F ungültig";
+VAL_ 1124 PSD_Ges_Typ 0 "Geschw_Klasse_des_Kartendatensuppliers" 1 "Explizit_abgeleiteten_Begrenzung" 2 "Durch_Gesetzg_vorgeg_allgem_Gebot_fuer_uebertr_Rahmenbed" 3 "Init";
+VAL_ 1124 PSD_Ges_Spur_Geschw_Begrenzung 0 "Gebot_fuer_alle_spuren_gueltig";
+VAL_ 1124 PSD_Ges_Geschwindigkeit_Gespann 0 "alle Fahrzeuge" 1 "PKW mit Gespann" 2 "LKW, Busse, etc.";
+VAL_ 1124 PSD_Ges_Geschwindigkeit_Witter 0 "Witterungsunabh䮧ig" 1 "N䳳e, Regen, Niederschlag" 2 "Gl䴴e" 3 "Nebel";
+VAL_ 1124 PSD_Ges_Geschwindigkeit_Tag_Anf 0 "kein Beginn definiert" 1 "Montag" 2 "Dienstag" 3 "Mittwoch" 4 "Donnerstag" 5 "Freitag" 6 "Samstag" 7 "Sonntag";
+VAL_ 1124 PSD_Ges_Geschwindigkeit_Tag_Ende 0 "kein Ende definiert" 1 "Montag" 2 "Dienstag" 3 "Mittwoch" 4 "Donnerstag" 5 "Freitag" 6 "Samstag" 7 "Sonntag";
+VAL_ 1124 PSD_Ges_Geschwindigkeit_Std_Anf 25 "kein Beginn für stundenweise Einschr䮫ungen";
+VAL_ 1124 PSD_Ges_Geschwindigkeit_Std_Ende 25 "kein Ende für stundenweise Einschr䮫ungen";
+VAL_ 1124 PSD_Ges_Ueberholverbot 0 "kein ܢerholverbot" 1 "alle Fahrzeuge" 2 "ܢerholverbot für PKW mit Gespann" 3 "ܢerholverbot für LKW, Busse, etc.";
+VAL_ 1124 PSD_Ges_Wechselverkehrszeichen 0 "Kein Wechselverkehrszeichen" 1 "Wechselverkehrszeichen links" 2 "Wechselverkehrszeichen rechts" 3 "Wechselverkehrszeichen links und rechts" 4 "Wechselverkerhszeichen über der Fahrbahn";
+VAL_ 1124 PSD_Wechselverkehrszeichen_Typ 0 "kein_Wechselverkehrszeichen" 1 "LED_Wechselverkehrszeichen" 2 "nicht_LED_Wechselverkehrszeichen";
+VAL_ 1124 PSD_Ges_Gesetzlich_Kategorie 0 "kein_legales_Verbot" 1 "innerorts" 2 "ausserorts" 3 "Autobahn";
+VAL_ 1124 PSD_Ges_Gesetzlich_Zusatz 0 "kein_Zusatz_zu_legalem_Gebot" 1 "Anhaenger_Klasse_1" 2 "Anhaenger_Klasse_2";
+VAL_ 1124 PSD_Ges_Verkehrszeichen_Quelle 0 "VZA_kein_Onlinedienst" 1 "nur_VZA" 2 "nur_VZO" 3 "VZA_und_VZO";
+VAL_ 1124 PSD_Ges_Attribute_Komplett 0 "Attribute_nicht_komplett" 1 "Attribute_komplett";
+VAL_ 1124 PSD_Baum_Laenge_VZ 0 "Ost" 1 "West";
+VAL_ 1124 PSD_Baum_Breite_VZ 0 "Nord" 1 "Sued";
+VAL_ 1124 PSD_Steigung_1_Segment_ID 0 "keine_Segment_Information_vorhanden" 1 "Fehler";
+VAL_ 1124 PSD_Steigung_1_A_Steigung 126 "mehr_als_15_Prozent" 127 "Steigung_unbekannt";
+VAL_ 1124 PSD_Steigung_1_A_Vorz 0 "Gefaelle" 1 "Steigung";
+VAL_ 1124 PSD_Steigung_1_B_Steigung 126 "mehr_als_15_Prozent" 127 "Steigung_unbekannt";
+VAL_ 1124 PSD_Steigung_1_B_Vorz 0 "Gefaelle" 1 "Steigung";
+VAL_ 1124 PSD_Steigung_1_Attribute_kompl 0 "Steigungen_nicht_komplett" 1 "Steigungen_komplett";
+VAL_ 1124 PSD_Steigung_2_Segment_ID 0 "keine_Segment_Information_vorhanden" 1 "Fehler";
+VAL_ 1124 PSD_Steigung_2_Steigung 126 "mehr_als_15_Prozent" 127 "Steigung_unbekannt";
+VAL_ 1124 PSD_Steigung_2_Vorz 0 "Gefaelle" 1 "Steigung";
+VAL_ 1124 PSD_Steigung_2_Attribute_kompl 0 "Steigungen_nicht_komplett" 1 "Steigungen_komplett";
+VAL_ 1411 BCM_FH_Freigabe 1 "Funktionsfreigabe Fensterheber";
+VAL_ 1411 BCM_Komfortfkt_Freigabe 0 "Komfortfunktion gesperrt" 1 "globale Freigabe der Komfortfunktion erteilt";
+VAL_ 1411 BCM_HSK_Freigabe 0 "erlauben" 1 "sperren";
+VAL_ 1411 BCM_Verdeck_Freigabe 0 "Verdeckbetrieb nicht erlaubt" 1 "Verdeckbetrieb erlaubt";
+VAL_ 1411 ZV_verriegelt_intern_ist 1 "Fahrzeug innen verriegelt; Istzustand";
+VAL_ 1411 ZV_verriegelt_extern_ist 1 "Fahrzeug_aussen_verriegelt_Istzustand";
+VAL_ 1411 ZV_verriegelt_intern_soll 1 "Fahrzeug verriegelt intern; Sollzusstand";
+VAL_ 1411 ZV_verriegelt_extern_soll 1 "Fahrzeug verriegelt extern; Sollzusstand";
+VAL_ 1411 ZV_gesafet_extern_ist 1 "Fahrzeug aussen gesafet; Istzustand";
+VAL_ 1411 ZV_gesafet_extern_soll 1 "Fahrzeug_aussen_gesafet_Sollzustand";
+VAL_ 1411 ZV_Einzeltuerentriegelung 1 "Fahrzeug an Einzeltuer entriegelt";
+VAL_ 1411 ZV_Heckeinzelentriegelung 1 "Heckdeckeleinzelentriegelung";
+VAL_ 1411 ZV_FT_offen 0 "FT_geschlossen" 1 "FT_geoeffnet";
+VAL_ 1411 ZV_BT_offen 0 "BT_geschlossen" 1 "BT_geoeffnet";
+VAL_ 1411 ZV_HFS_offen 0 "geschlossen" 1 "offen";
+VAL_ 1411 ZV_HBFS_offen 0 "geschlossen" 1 "offen";
+VAL_ 1411 ZV_HD_offen 1 "Heckdeckel_auf";
+VAL_ 1411 ZV_HS_offen 0 "Heckscheibe_geschlossen" 1 "Heckscheibe auf";
+VAL_ 1411 IRUE_aktiv 0 "unscharf" 1 "scharf";
+VAL_ 1411 DWA_aktiv 0 "unscharf" 1 "scharf";
+VAL_ 1411 HD_Hauptraste 0 "geschlossen" 1 "offen";
+VAL_ 1411 HD_Vorraste 0 "geschlossen" 1 "offen";
+VAL_ 1411 FFB_CarFinder 0 "nicht aktiv" 1 "aktiv";
+VAL_ 1411 FFB_Komfortoeffnen 0 "kein_Komfortoeffnen_empfangen" 1 "Komfortoeffnen ueber Funk empfangen";
+VAL_ 1411 FFB_Komfortschliessen 0 "kein_Komfortschliessen_empfangen" 1 "Komfortschliessen ueber Funk empfangen";
+VAL_ 1411 ZV_Schluessel_Zugang 0 "kein_auth_Schluessel_erkannt" 1 "aktive_Funkschluessel_Nr_01" 2 "aktive_Funkschluessel_Nr_02" 3 "aktive_Funkschluessel_Nr_03" 4 "aktive_Funkschluessel_Nr_04" 5 "aktive_Funkschluessel_Nr_05" 6 "aktive_Funkschluessel_Nr_06" 7 "aktive_Funkschluessel_Nr_07" 8 "aktive_Funkschluessel_Nr_08" 9 "ungueltig_09" 10 "ungueltig_10" 11 "ungueltig_11" 12 "ungueltig_12" 13 "ungueltig_13" 14 "ungueltig_14" 15 "ungueltig_15";
+VAL_ 1411 ZV_SafeFunktion_aktiv 0 "inaktiv" 1 "aktiv";
+VAL_ 1411 FBS_Warn_Schluessel_Batt 0 "i.O." 1 "defekt";
+VAL_ 1411 ZV_Oeffnungsmodus 0 "globale_Oeffnung" 1 "ZV_mit_Einzeltuerentr" 2 "ZV_individuell_selektiv" 3 "ZV_seitenselektiv";
+VAL_ 1411 HFS_verriegelt 0 "nicht_verriegelt" 1 "verriegelt";
+VAL_ 1411 HFS_gesafet 0 "nicht_gesafet" 1 "gesafet";
+VAL_ 1411 HBFS_verriegelt 0 "nicht_verriegelt" 1 "verriegelt";
+VAL_ 1411 HBFS_gesafet 0 "nicht_gesafet" 1 "gesafet";
+VAL_ 1411 ZV_ist_Zustand_verfuegbar 0 "nicht_verfuegbar" 1 "verfuegbar_alle_TSGs_am_Bus";
+VAL_ 1411 IRUE_Taster_Fkts_LED 0 "LED_aus" 1 "LED_ein";
+VAL_ 1411 ZV_Tankklappe_offen 0 "Tankklappe_geschlossen" 1 "Tankklappe_offen";
+VAL_ 1411 ZV_Rollo_auf 0 "inaktiv" 1 "aktiv";
+VAL_ 1411 ZV_Rollo_zu 0 "inaktiv" 1 "aktiv";
+VAL_ 1411 ZV_SAD_auf 0 "inaktiv" 1 "aktiv";
+VAL_ 1411 ZV_SAD_zu 0 "inaktiv" 1 "aktiv";
+VAL_ 1411 BCM_Tankklappensteller_Fehler 0 "kein_Fehler" 1 "Fehler";
+VAL_ 1411 ZV_verriegelt_soll 0 "Init" 1 "nicht_verriegelt" 2 "verriegelt";
+VAL_ 1440 LS_Helligkeit_IR 254 "Init" 255 "Fehler";
+VAL_ 1440 LS_Helligkeit_FW 1022 "Init" 1023 "Fehler";
+VAL_ 1440 LS_defekt 0 "OK" 1 "defekt";
+VAL_ 1440 LS_Verbau 0 "Init" 1 "Lichtsensor_verbaut";
+VAL_ 1440 RS_Regenmenge 14 "Init" 15 "Fehler";
+VAL_ 1440 RS_Verbau 0 "Init" 1 "Regensensor verbaut";
+VAL_ 1440 RS_Verglasung_schliessen 0 "Verglasung nicht schliessen" 1 "Verglasung schliessen";
+VAL_ 1440 RS_defekt 0 "OK" 1 "defekt";
+VAL_ 1440 RS_Wischergeschwindigkeit 0 "kein Wischen" 1 "42 Huebe/min" 2 "45 Huebe/min" 3 "48 Huebe/min" 4 "51 Huebe/min" 5 "54 Huebe/min" 6 "57 Huebe/min" 7 "60 Huebe/min";
+VAL_ 1440 RLS_Vorfeldhelligkeit_Boost 0 "groesser_24413_Lux" 1 "bis_24413_Lux" 2 "bis_22193_Lux" 3 "bis_20176_Lux" 4 "bis_18342_Lux" 5 "bis_16647_Lux" 6 "bis_15158_Lux" 7 "bis_13780_Lux" 8 "bis_12527_Lux" 9 "bis_11388_Lux" 10 "bis_10353_Lux" 11 "bis_9412_Lux" 12 "bis_8556_Lux" 13 "bis_7778_Lux" 14 "bis_7071_Lux" 15 "bis_6428_Lux";
 VAL_ 1720 KBI_Variante_USA 0 "keine USA-Variante" 1 "USA-Variante";
 VAL_ 1720 KBI_Variante 0 "Zeiger Kombiinstrument" 1 "Volldisplay Kombiinstrument";
 VAL_ 1720 KBI_BCmE_aktiv 0 "Anzeige_nicht_aktiv" 1 "Anzeige_aktiv";
@@ -1610,3 +2308,33 @@ VAL_ 1720 KBI_Tankfuellstand_Prozent 126 "Init" 127 "Fehler";
 VAL_ 1720 KBI_Nachtanken_erkannt 0 "Geberbetrieb" 1 "Nachtankmodus";
 VAL_ 1720 KBI_Tankinhalt_hochaufl 16382 "Init" 16383 "Fehler";
 VAL_ 1720 KBI_Max_Tankinhalt 254 "Init" 255 "Fehler";
+VAL_ 316495015 VZE_Anzeigemodus 0 "EU_RDW" 1 "USA" 2 "Canada" 3 "China";
+VAL_ 316495015 VZE_Verkehrszeichen_Einheit 0 "mph" 1 "kmh";
+VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_3 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
+VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_2 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
+VAL_ 316495015 VZE_Verkehrszeichen_1_Typ 0 "Geschwindigkeitszeichen" 1 "Kein Geschwindigkeitszeichen";
+VAL_ 316495015 VZE_Verkehrszeichen_1 0 "kein_Verkehrszeichen" 520 "Unbegrenzt";
+VAL_ 316495015 VZE_Verkehrszeichen_2_Typ 0 "Geschwindigkeitszeichen" 1 "Kein Geschwindigkeitszeichen";
+VAL_ 316495015 VZE_Verkehrszeichen_2 0 "kein_Verkehrszeichen" 520 "Unbegrenzt";
+VAL_ 316495015 VZE_Verkehrszeichen_3_Typ 0 "Geschwindigkeitszeichen" 1 "Kein Geschwindigkeitszeichen";
+VAL_ 316495015 VZE_Verkehrszeichen_3 0 "kein_Verkehrszeichen" 520 "Unbegrenzt";
+VAL_ 316495015 VZE_Warnung_Verkehrszeichen_1 0 "keine_Warnung_Initialwert_Fehlerwert" 1 "Warnung";
+VAL_ 316495015 VZE_Warnung_Verkehrszeichen_2 0 "keine_Warnung_Initialwert_Fehlerwert" 1 "Warnung";
+VAL_ 316495015 VZE_Warnung_Verkehrszeichen_3 0 "keine_Warnung_Initialwert_Fehlerwert" 1 "Warnung";
+VAL_ 316495015 VZE_Zusatzschild_1 0 "keine_Zusatzschild_Initialwert_Fehlerwert";
+VAL_ 316495015 VZE_Zusatzschild_2 0 "keine_Zusatzschild_Initialwert_Fehlerwert";
+VAL_ 316495015 VZE_Zusatzschild_3 0 "keine_Zusatzschild_Initialwert_Fehlerwert";
+VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_1 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
+VAL_ 316495015 VZE_Zeichen_01_KameraWied 0 "inaktiv" 1 "aktiv";
+VAL_ 316495015 VZE_Zeichen_02_KameraWied 0 "inaktiv" 1 "aktiv";
+VAL_ 316495015 VZE_Zeichen_03_KameraWied 0 "inaktiv" 1 "aktiv";
+VAL_ 316495015 VZE_Zeichen_01_Kamera 0 "nicht_erkannt" 1 "erkannt";
+VAL_ 316495015 VZE_Zeichen_01_Karte 0 "inaktiv" 1 "aktiv";
+VAL_ 316495015 VZE_Zeichen_01_Gesetz 0 "nicht_erkannt" 1 "erkannt";
+VAL_ 316495015 VZE_Zeichen_02_Kamera 0 "nicht_erkannt" 1 "erkannt";
+VAL_ 316495015 VZE_Zeichen_02_Karte 0 "inaktiv" 1 "aktiv";
+VAL_ 316495015 VZE_Zeichen_02_Gesetz 0 "nicht_erkannt" 1 "erkannt";
+VAL_ 316495015 VZE_Zeichen_03_Kamera 0 "nicht_erkannt" 1 "erkannt";
+VAL_ 316495015 VZE_Zeichen_03_Karte 0 "inaktiv" 1 "aktiv";
+VAL_ 316495015 VZE_Zeichen_03_Gesetz 0 "nicht_erkannt" 1 "erkannt";
+VAL_ 316495015 VZE_Gong 0 "Gong_deaktiv" 1 "Gong_aktiv";

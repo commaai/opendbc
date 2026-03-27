@@ -184,6 +184,7 @@ struct CarState {
   brakeHoldActive @38 :Bool;
 
   # steering wheel
+  steeringCurvature @62 :Float32;  # EPS steering curvature equivalent in radiant
   steeringAngleDeg @7 :Float32;
   steeringAngleOffsetDeg @37 :Float32; # Offset between sensors in case there multiple
   steeringRateDeg @15 :Float32;    # optional
