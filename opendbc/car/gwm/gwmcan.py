@@ -1,3 +1,4 @@
+import numpy as np
 from opendbc.car import CanBusBase
 
 
@@ -59,7 +60,8 @@ def create_longitudinal_command(packer, CAN, longitudinal_stock_values, accel, a
   accel_cmd = 0
   if accel < 0 and active:
     brake_or_gas = 13
-    brake_cmd = (accel * (107 - 41)) - 41
+    # brake_cmd = (accel * (107 - 41)) - 41
+    brake_cmd = (np.interp(accel, [-0.01, -0.04, -0.07, -1], [0, -1, -2, -66])) - 41
     accel_cmd = 0
     standstill1 = 1 if standstill else 0
     standstill2 = 3 if standstill else 4 # 3 "active" 4 "inactive"
@@ -67,7 +69,8 @@ def create_longitudinal_command(packer, CAN, longitudinal_stock_values, accel, a
   elif active:
     brake_or_gas = 12
     brake_cmd = 0
-    accel_cmd = accel * 4577
+    # accel_cmd = accel * 4577
+    accel_cmd = np.interp(accel, [0.25, 1], [0, 4577])
     standstill1 = 0
     standstill2 = 4 # 3 "active" 4 "inactive"
     standstill3 = 1 # 0 "active" 1 "inactive"
