@@ -2,7 +2,7 @@ from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.tesla.carcontroller import CarController
 from opendbc.car.tesla.carstate import CarState
-from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CAR, DBC, FSD_14_FW, Ecu
+from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CANBUS, CAR, DBC, FSD_14_FW, Ecu
 from opendbc.car.tesla.radar_interface import RadarInterface, RADAR_START_ADDR
 
 
@@ -22,6 +22,10 @@ class CarInterface(CarInterfaceBase):
     ret.steerAtStandstill = True
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
+
+    # Model X and HW 2.5 vehicles are missing DAS_settings
+    if 0x293 not in fingerprint[CANBUS.autopilot_party]:
+      ret.flags |= TeslaFlags.MISSING_DAS_SETTINGS.value
 
     # Radar support is intended to work for:
     # - Tesla Model 3 vehicles built approximately mid-2017 through early-2021
