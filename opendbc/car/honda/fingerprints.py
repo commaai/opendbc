@@ -1003,6 +1003,7 @@ FW_VERSIONS = {
       b'36161-T47-A060\x00\x00',
       b'36161-T47-A070\x00\x00',
       b'8S102-T20-AA10\x00\x00',
+      b'8S102-T20-AA20\x00\x00',
       b'8S102-T43-J540\x00\x00',
       b'8S102-T47-AA10\x00\x00',
       b'8S102-T47-AA20\x00\x00',
@@ -1011,6 +1012,7 @@ FW_VERSIONS = {
       b'8S102-T56-A070\x00\x00',
       b'8S102-T60-AA10\x00\x00',
       b'8S102-T64-A040\x00\x00',
+      b'8S102-T64-A050\x00\x00',
     ],
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-T20-AB40\x00\x00',
@@ -1103,6 +1105,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'36161-TGV-A030\x00\x00',
+      b'36161-TGV-A040\x00\x00',
     ],
   },
   CAR.ACURA_TLX_2G_MMR: {

@@ -47,7 +47,7 @@ class CAR(Platforms):
       CommunityCarDocs("Acura RLX 2017", "Advance Package or Technology Package"),
       CommunityCarDocs("Acura TLX 2015-17", "Advance Package"),
       CommunityCarDocs("Acura TLX 2018-20"),
-      CommunityCarDocs("Acura TLX 2022-23"),
+      CommunityCarDocs("Acura TLX 2023"),
       GMSecurityCarDocs("Acura ZDX 2024"),
       CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing"),
       CommunityCarDocs("Honda Accord Hybrid 2017"),
