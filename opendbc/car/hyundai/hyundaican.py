@@ -10,10 +10,6 @@ def create_lkas11(packer, frame, CP, apply_torque, steer_req,
                   left_lane_depart, right_lane_depart):
   values = {s: lkas11[s] for s in [
     "CF_Lkas_LdwsActivemode",
-    "CF_Lkas_LdwsSysState",
-    "CF_Lkas_SysWarning",
-    "CF_Lkas_LdwsLHWarning",
-    "CF_Lkas_LdwsRHWarning",
     "CF_Lkas_HbaLamp",
     "CF_Lkas_FcwBasReq",
     "CF_Lkas_HbaSysState",
