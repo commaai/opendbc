@@ -26,9 +26,9 @@ class AngleSteeringLimits:
   MAX_LATERAL_ACCEL: float = 0
   MAX_LATERAL_JERK: float = 0
   MAX_ANGLE_RATE: float = math.inf
-  
-  @dataclass
-  class CurvatureSteeringLimits:
+
+@dataclass
+class CurvatureSteeringLimits:
   CURVATURE_MAX: float
 
 
@@ -134,6 +134,15 @@ def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_e
 
   # prevent fault
   return float(np.clip(new_apply_angle, -limits.ANGLE_LIMITS.STEER_ANGLE_MAX, limits.ANGLE_LIMITS.STEER_ANGLE_MAX))
+
+
+def get_max_curvature_jerk(v_ego: float, steer_step: int) -> float:
+  # ISO 11270
+  # Lateral jerk
+  ts_elapsed = steer_step * DT_CTRL
+  curvature_rate_limit = ISO_LATERAL_JERK / (max(v_ego, 1.0) ** 2)
+  max_jerk = curvature_rate_limit * ts_elapsed
+  return max_jerk
 
 
 def get_max_curvature_average(v_ego: float) -> Tuple[float, float]:
