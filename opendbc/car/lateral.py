@@ -26,9 +26,9 @@ class AngleSteeringLimits:
   MAX_LATERAL_ACCEL: float = 0
   MAX_LATERAL_JERK: float = 0
   MAX_ANGLE_RATE: float = math.inf
-  
-  @dataclass
-  class CurvatureSteeringLimits:
+
+@dataclass
+class CurvatureSteeringLimits:
   CURVATURE_MAX: float
 
 
