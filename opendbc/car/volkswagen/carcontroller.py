@@ -45,21 +45,13 @@ class MQBStandstillManager:
   """
 
   HOLD_MAX_FRAMES = 50             # frames to hold before disabling long control to avoid a fault
-  HOLD_MIN_FRAMES = 10             # minimum frames to hold at stopping state to ensure ESP engages for the first time
   HOLD_RELEASE_TOTAL_FRAMES = 20  # reserve the last hold-confirmed frames for progressive hill-release pulses
   HOLD_RELEASE_WINDOW_FRAMES = 3  # allow a few frames for ESP to acknowledge a recent hill release request
-  HOLD_TORQUE_DEADBAND_NM = 40     # stop integrating when this close to target torque (Nm at wheel)
-  HOLD_TORQUE_TARGET_RATIO = 0.8   # target this fraction of ESP_Haltemoment to avoid overshoot
-  HOLD_ACCEL_KI = 0.0001           # I-controller gain: m/s² per Nm of torque error per ACC_CONTROL_STEP; just a guess for now
 
   def __init__(self, CCP):
     self._CCP = CCP
     self.esp_hold_frames = 0
-    self.hill_hold_accel = 0.0
-    self.detected_uphill = False
-    self._prev_impulse_count = 0
     self._recent_release_request_frames = 0
-    self._prev_starting_no_hold = False
     self._can_stop_forever = False
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
@@ -91,8 +83,8 @@ class MQBStandstillManager:
         self._can_stop_forever = False
       if not (stopping or starting):
         self._can_stop_forever = False
-      # if CS.grade > 12:
-      #   self._can_stop_forever = False
+      if CS.grade > 12:
+        self._can_stop_forever = False
       if self._can_stop_forever:
         esp_starting_override = True
         esp_stopping_override = False
@@ -120,7 +112,6 @@ class MQBStandstillManager:
     is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
     if CS.esp_speed_confirmation > 0 and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-      self.detected_uphill = False
       self._recent_release_request_frames = 0
     elif self._recent_release_request_frames > 0 and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
@@ -132,14 +123,6 @@ class MQBStandstillManager:
       self._recent_release_request_frames = self.HOLD_RELEASE_WINDOW_FRAMES
     elif self._recent_release_request_frames > 0:
       self._recent_release_request_frames -= 1
-
-    self._prev_impulse_count = CS.wheel_impulse_count
-
-    # spontaneous ESP reacquisition while in flat starting mode: treat as uphill from now on
-    if self._prev_starting_no_hold and CS.esp_hold_confirmation:
-      self.detected_uphill = True
-    # self._prev_starting_no_hold = (is_starting and not is_uphill
-    #                                and CS.out.standstill and not CS.esp_hold_confirmation)
 
     return long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override
 

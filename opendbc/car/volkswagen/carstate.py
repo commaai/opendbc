@@ -16,15 +16,12 @@ class CarState(CarStateBase):
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
-    self.esp_hold_torque_nm = 0.0
     self.grade = 0.0
     self.esp_stopping = False
     self.rolling_backward = False
-    self.actual_torque_nm = 0.0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
-    self.wheel_impulse_count = 0
     self.esp_speed_confirmation = 0
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
@@ -60,7 +57,6 @@ class CarState(CarStateBase):
       return self.update_mlb(pt_cp, cam_cp, ext_cp)
 
     ret = structs.CarState()
-    alt_cp = can_parsers[Bus.alt]
 
     if self.CP.transmissionType == TransmissionType.direct:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Motor_EV_01"]["MO_Waehlpos"], None))
@@ -84,12 +80,6 @@ class CarState(CarStateBase):
         pt_cp.vl["ESP_19"]["ESP_HR_Radgeschw_02"],
       )
 
-      self.wheel_impulse_count = (
-        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_VL"]
-        + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_VR"]
-        + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"]
-        + pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"]
-      )
       self.rolling_backward = (
         pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"] == 1 or
         pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"] == 1
@@ -127,19 +117,7 @@ class CarState(CarStateBase):
 
       # extended standstill values for acc type 1
       if self.CP.openpilotLongitudinalControl and self.acc_type == 1:
-        # ESP_15: minimum total wheel torque to hold at current slope when index=Antriebsmoment
-        esp_hold_raw = pt_cp.vl["ESP_15"]["ESP_Haltemoment"]
-        haltemoment_antrieb = pt_cp.vl["ESP_15"]["ESP_Index_Haltemoment"] == 1
-        self.esp_hold_torque_nm = esp_hold_raw if haltemoment_antrieb and esp_hold_raw < 10220 else 0.0
-        # Motor_16: TSK_Steigung is road grade in percent; use > 2% as uphill threshold since
-        # haltemoment floors at 600 Nm and doesn't meaningfully distinguish grades below ~4%
         self.grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
-        # Motor_11: MO_Mom_Ist_Summe is unitless — multiply by MO_Faktor_Momente_02 (1/2/3 Nm/unit) for crank Nm,
-        # then by GE_Uefkt (crank→wheel ratio) to get wheel Nm comparable to ESP_Haltemoment
-        motor_torque_raw = alt_cp.vl["Motor_11"]["MO_Mom_Ist_Summe"]
-        motor_torque_factor = int(pt_cp.vl["Motor_Code_01"]["MO_Faktor_Momente_02"])
-        gear_ratio = pt_cp.vl["Getriebe_11"]["GE_Uefkt"]
-        self.actual_torque_nm = motor_torque_raw * motor_torque_factor * gear_ratio
 
       ret.cruiseState.available = pt_cp.vl["TSK_06"]["TSK_Status"] in (2, 3, 4, 5)
       ret.cruiseState.enabled = pt_cp.vl["TSK_06"]["TSK_Status"] in (3, 4, 5)
@@ -368,7 +346,6 @@ class CarState(CarStateBase):
 
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
-      Bus.alt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).alt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).cam),
     }
 
