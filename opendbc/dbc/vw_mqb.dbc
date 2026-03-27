@@ -1679,10 +1679,10 @@ CM_ SG_ 1720 KBI_Variante_USA "In diesem Signal wird die HW-Variante des Kombis 
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted" ;
 VAL_ 159 EPS_AWA_Status 0 "AWA_deaktiviert" 1 "AWA_Anf_nicht_ausfuehrbar" 2 "Kom_AWA_gestoert" 3 "EPS_bzgl_AWA_funktionsbereit" 4 "AWA_Anf_abgewiesen" 5 "AWA_Momeingriff_1_aktiv" 7 "AWA_Momeingriff_2_aktiv" 8 "AWA_abgewiesen_Momentenpriorisierung" 9 "Anf_abgewiesen_Bedienueblich" 14 "Init" ;
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 13 "T" 14 "T" ;
-VAL_ 278 ESP_VL_Fahrtrichtung 0 "vorwaerts" 1 "rueckwaerts" 2 "Init" 3 "Stillstand" ;
-VAL_ 278 ESP_VR_Fahrtrichtung 0 "vorwaerts" 1 "rueckwaerts" 2 "Init" 3 "Stillstand" ;
-VAL_ 278 ESP_HL_Fahrtrichtung 0 "vorwaerts" 1 "rueckwaerts" 2 "Init" 3 "Stillstand" ;
-VAL_ 278 ESP_HR_Fahrtrichtung 0 "vorwaerts" 1 "rueckwaerts" 2 "Init" 3 "Stillstand" ;
+VAL_ 278 ESP_VL_Fahrtrichtung 0 "vorwaerts" 1 "rueckwaerts" 2 "Init" 3 "Stillstand_oder_nicht_verbaut" ;
+VAL_ 278 ESP_VR_Fahrtrichtung 0 "vorwaerts" 1 "rueckwaerts" 2 "Init" 3 "Stillstand_oder_nicht_verbaut" ;
+VAL_ 278 ESP_HL_Fahrtrichtung 0 "vorwaerts" 1 "rueckwaerts" 2 "Init" 3 "Stillstand_oder_nicht_verbaut" ;
+VAL_ 278 ESP_HR_Fahrtrichtung 0 "vorwaerts" 1 "rueckwaerts" 2 "Init" 3 "Stillstand_oder_nicht_verbaut" ;
 VAL_ 279 AWV_AWA_Status_EPS 0 "AWA_deactivated" 1 "AWA_request_not_executable" 2 "EPS_communication_disturbed" 3 "AWA_ready" 5 "AWA_torque_intervention_1" 7 "AWA_torque_intervention_2" ;
 VAL_ 288 TSK_Status 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault" ;
 VAL_ 288 TSK_v_Begrenzung_aktiv 0 "inaktiv" 1 "aktiv" ;
