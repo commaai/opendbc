@@ -93,7 +93,7 @@ class CarController(CarControllerBase):
       # When angle commands change rapidly, gain drops so EPS eases in (no slap/whine).
       # When commands are stable, gain is high for precise tracking.
       apply_torque = self.torque_reduction_gain_controller.update(
-        CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw, self.apply_angle_last, CS.out.steeringAngleDeg)
+        CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw, self.apply_angle_last)
 
       apply_steer_req = CC.latActive
 
