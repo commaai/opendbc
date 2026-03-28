@@ -9,52 +9,66 @@ class TorqueReductionGainController:
   This is a normalized multiplier (0.0-1.0) that controls how much electrical
   assist the MDPS applies when tracking the commanded steering angle.
 
-  Override philosophy (from maintainer and stock analysis):
-    - During normal lane-keeping, EPS output is only 2-3 Nm regardless of gain
-      level, because angle error is small. This is already "1 finger" overridable.
-    - When the driver overrides, the controls layer detects it via steeringPressed
-      and adjusts the angle command toward the driver's steering. The angle error
-      drops, and with it the EPS resistance — this is the primary override mechanism.
-    - The gain reduction during override is secondary feedback: it provides tactile
-      confirmation that the system is yielding, and ensures the EPS doesn't fight
-      the driver during the few frames before controls adapts.
-    - After override release, slow ramp-up ensures smooth "re-engagement" without
-      a sudden jerk as the system takes back control.
-
-  Stock behavior (from route analysis):
-    - Gain barely changes during torque spikes (road noise, bumps). Stock ignores
-      raw torque for gain control.
-    - During sustained override, gain drops at most 0.008-0.020/frame.
-    - Ramp rates: up ~0.004/frame (median), down ~0.008/frame (median).
-    - Gain ceiling: ~0.85 at low speed, ~0.96 at highway, 1.0 at 100+ km/h.
+  Ramp rates are split by context:
+    - Activation/deactivation: slow ramp to prevent EPS motor noise. The EPS
+      adjusts its output proportionally to gain × angle_error each frame.
+      Fast gain changes cause step changes in EPS torque = audible whine.
+      Stock ramps at ~0.004/frame. We use 0.008 (2x stock) for faster engage.
+    - Override drop: can be faster since the driver is actively steering and
+      their input masks any EPS motor noise.
+    - Override recovery: slow to prevent sudden snap-back when the system
+      takes back control ("safe re-engage").
   """
 
-  SPEED_BP =       [0.,  10.,  50.,  80.]  # km/h
-  SPEED_CEILING =  [0.85, 0.85, 0.96, 1.0]
+  SPEED_BP = [0.,  10.,  50.,  80.]  # km/h
+  SPEED_CEILING = [0.85, 0.85, 0.96, 1.0]
 
   # When steeringPressed: drop gain to this fraction of ceiling.
-  # Not aggressive — the controls layer handles the real disengagement.
-  # This just provides tactile "yielding" feedback.
   OVERRIDE_FACTOR = 0.6
 
-  RAMP_UP_RATE = 0.05    # ~5.0/s — close to stock median of 0.004
-  RAMP_DOWN_RATE = 0.08  # ~8.0/s — slightly faster than stock for responsive feel
+  # Activation/deactivation: slow to avoid EPS whine (stock ~0.004)
+  RAMP_RATE = 0.008
+
+  # Recovery after override: faster than activation so the system can snap
+  # back to lane if the driver releases mid-lane-change, but not instant.
+  RECOVERY_RATE = 0.02
+
+  # Override: fast drop since driver input masks EPS noise
+  OVERRIDE_DROP_RATE = 0.05
 
   def __init__(self):
     self.gain = 0.0
+    self._was_overriding = False
 
   def update(self, steering_pressed: bool, lat_active: bool, v_ego: float) -> float:
     if not lat_active:
       target = 0.0
+      self._was_overriding = False
     else:
       speed_kmh = v_ego * CV.MS_TO_KPH
       ceiling = float(np.interp(speed_kmh, self.SPEED_BP, self.SPEED_CEILING))
       target = ceiling * self.OVERRIDE_FACTOR if steering_pressed else ceiling
 
-    # Smooth ramp toward target
+    if steering_pressed:
+      self._was_overriding = True
+    elif self._was_overriding and lat_active and self.gain >= target - 0.001:
+      # Clear override flag only once gain has fully recovered to ceiling
+      self._was_overriding = False
+
+    # Pick ramp rate based on context
     if target < self.gain:
-      self.gain = max(self.gain - self.RAMP_DOWN_RATE, target)
+      if steering_pressed:
+        rate = self.OVERRIDE_DROP_RATE  # fast drop — driver masks EPS noise
+      else:
+        rate = self.RAMP_RATE  # slow deactivation — no whine
+      self.gain = max(self.gain - rate, target)
     else:
-      self.gain = min(self.gain + self.RAMP_UP_RATE, target)
+      if self._was_overriding:
+        # Recovering from override — faster rate so system can snap
+        # back to lane if driver releases mid-maneuver
+        rate = self.RECOVERY_RATE
+      else:
+        rate = self.RAMP_RATE  # normal activation — slow, no whine
+      self.gain = min(self.gain + rate, target)
 
     return self.gain
