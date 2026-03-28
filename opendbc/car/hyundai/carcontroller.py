@@ -1,4 +1,3 @@
-import math
 import numpy as np
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANPacker
@@ -6,11 +5,11 @@ from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs
 from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance, apply_steer_angle_limits_vm
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
+from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
+from opendbc.car.hyundai.torque_reduction_gain import TorqueReductionGainController
 from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR
 from opendbc.car.interfaces import CarControllerBase
-
-from opendbc.car.hyundai.torque_reduction_gain import TorqueReductionGainController
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -21,56 +20,8 @@ MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
-MAX_ANGLE_RATE = 5
+
 ANGLE_SAFETY_BASELINE_MODEL = "GENESIS_GV80_2025"
-
-
-def get_baseline_safety_cp():
-  from opendbc.car.hyundai.interface import CarInterface
-  return CarInterface.get_non_essential_params(ANGLE_SAFETY_BASELINE_MODEL)
-
-
-def calculate_angle_torque_reduction_gain(params, CS, apply_torque_last, target_torque_reduction_gain):
-  """ Calculate the angle torque reduction gain based on the current steering state. """
-  target_gain = max(target_torque_reduction_gain, params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN)
-
-  driver_torque = abs(CS.out.steeringTorque)
-  alpha = np.interp(driver_torque, [params.STEER_THRESHOLD * .8, params.STEER_THRESHOLD * 2], [0.02, 0.1])
-
-  if CS.out.steeringPressed:
-    scale = 100
-    clamped_torque_gain = max(apply_torque_last, params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN)
-    target_gain = params.ANGLE_MIN_TORQUE_REDUCTION_GAIN + (clamped_torque_gain - params.ANGLE_MIN_TORQUE_REDUCTION_GAIN) \
-                  * math.exp(-(driver_torque - params.STEER_THRESHOLD) / scale)
-
-  # Smooth transition (like a rubber band returning)
-  new_gain = apply_torque_last + alpha * (target_gain - apply_torque_last)
-
-  return float(np.clip(new_gain, params.ANGLE_MIN_TORQUE_REDUCTION_GAIN, params.ANGLE_MAX_TORQUE_REDUCTION_GAIN))
-
-
-def sp_smooth_angle(v_ego_raw: float, apply_angle: float, apply_angle_last: float) -> float:
-  """
-  Smooth the steering angle change based on vehicle speed and an optional smoothing offset.
-  This function helps prevent abrupt steering changes by blending the new desired angle (`apply_angle`)
-  with the previously applied angle (`apply_angle_last`). The blend factor (alpha) is dynamically calculated
-  based on the vehicle's current speed using a predefined lookup table.
-  Behavior:
-    - At low speeds, the smoothing is strong, keeping the steering more stable.
-    - At higher speeds, the smoothing is relaxed, allowing quicker responses.
-    - If the angle change is negligible (≤ 0.1 deg), smoothing is skipped for responsiveness.
-  Parameters:
-    v_ego_raw (float): Raw vehicle speed in m/s.
-    apply_angle (float): New target steering angle in degrees.
-    apply_angle_last (float): Previously applied steering angle in degrees.
-  Returns:
-    float: Smoothed steering angle.
-  """
-  if abs(apply_angle - apply_angle_last) > 0.1:
-    adjusted_alpha = np.interp(v_ego_raw, CarControllerParams.SMOOTHING_ANGLE_VEGO_MATRIX, CarControllerParams.SMOOTHING_ANGLE_ALPHA_MATRIX)
-    adjusted_alpha_limited = float(min(float(adjusted_alpha), 1.))  # Limit the smoothing factor to 1 if adjusted_alpha is greater than 1
-    return (apply_angle * adjusted_alpha_limited) + (apply_angle_last * (1 - adjusted_alpha_limited))
-  return apply_angle
 
 
 def process_hud_alert(enabled, fingerprint, hud_control):
@@ -110,74 +61,36 @@ class CarController(CarControllerBase):
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
 
-    # Vehicle model used for lateral limiting
-    self.VM = VehicleModel(CP)
-    self.BASELINE_VM = VehicleModel(get_baseline_safety_cp())
-
     self.apply_angle_last = 0
-    self.angle_torque_reduction_gain = 0
 
-    # For future parametrization / tuning
-    self.angle_enable_smoothing_factor = True
+    # Vehicle model used for angle steering lateral limiting
+    self.VM = VehicleModel(CarInterface.get_non_essential_params(ANGLE_SAFETY_BASELINE_MODEL))
 
-    self.angle_torque_reduction_gain_controller = TorqueReductionGainController(
-      angle_threshold=.3,
-      debounce_time=.1,
-      min_gain=self.params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN,
-      max_gain=self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN,
-      ramp_up_rate=self.params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE,
-      ramp_down_rate=self.params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE
-    )
+    self.torque_reduction_gain_controller = TorqueReductionGainController()
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
+    # angle control
+    if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+      self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last,
+                                                          CS.out.vEgoRaw, CS.out.steeringAngleDeg,
+                                                          CC.latActive, self.params, self.VM)
+
+      # compute torque reduction gain (EPS assist multiplier 0-1)
+      apply_torque = self.torque_reduction_gain_controller.update(
+        CS.out.steeringTorque, CS.out.steeringPressed, CC.latActive, self.params.STEER_THRESHOLD)
+
+      apply_steer_req = CC.latActive
+
     # steering torque
-    if not self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+    else:
       self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
                                                                          self.angle_limit_counter, MAX_ANGLE_FRAMES,
                                                                          MAX_ANGLE_CONSECUTIVE_FRAMES)
       new_torque = int(round(actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
-
-    # angle control
-    else:
-      v_ego_raw = CS.out.vEgoRaw
-      desired_angle = np.clip(actuators.steeringAngleDeg, -self.params.ANGLE_LIMITS.STEER_ANGLE_MAX, self.params.ANGLE_LIMITS.STEER_ANGLE_MAX)
-
-      if self.angle_enable_smoothing_factor and abs(v_ego_raw) < CarControllerParams.SMOOTHING_ANGLE_MAX_VEGO:
-        desired_angle = sp_smooth_angle(v_ego_raw, desired_angle, self.apply_angle_last)
-
-      apply_angle = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last, v_ego_raw, CS.out.steeringAngleDeg, CC.latActive, self.params, self.VM)
-
-      # if we are not the baseline model, we use the baseline model for further limits to prevent a panda block since it is hardcoded for baseline model.
-      if self.CP.carFingerprint != ANGLE_SAFETY_BASELINE_MODEL:
-        apply_angle = apply_steer_angle_limits_vm(apply_angle or desired_angle, self.apply_angle_last, v_ego_raw, CS.out.steeringAngleDeg, CC.latActive,
-                                                  self.params, self.BASELINE_VM)
-
-      # Use saturation-based torque reduction gain
-      target_torque_reduction_gain = self.angle_torque_reduction_gain_controller.update(
-        self.params,
-        last_requested_angle=self.apply_angle_last,
-        actual_angle=CS.out.steeringAngleDeg,
-        lat_active=CC.latActive
-      )
-
-      # This method ensures that the torque gives up when overriding and controls the ramp rate to avoid feeling jittery.
-      apply_torque = calculate_angle_torque_reduction_gain(self.params, CS, self.apply_torque_last, target_torque_reduction_gain)
-
-      # apply_steer_req is True when we are actively attempting to steer and under the angle limit. Otherwise the user is overriding.
-      apply_steer_req = CC.latActive and apply_torque != 0
-
-      # Failsafe if we detected we'd violate safety
-      if apply_angle is None:
-        apply_torque = 0
-        apply_angle = CS.out.steeringAngleDeg
-        apply_steer_req = False
-
-      # After we've used the last angle wherever we needed it, we now update it.
-      self.apply_angle_last = apply_angle
 
     if not CC.latActive:
       apply_torque = 0

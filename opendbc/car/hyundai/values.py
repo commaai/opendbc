@@ -34,36 +34,6 @@ class CarControllerParams:
     MAX_ANGLE_RATE=5  # comfort rate limit for angle commands, in degrees per frame.
   )
 
-  # Torque control parameters:
-  # The stock torque values we observed are:
-  # - 1.0 is the max we've observed during stock LFA.
-  # - 0.7 has been observed in some models as the max LKAS torque requested.
-  #
-  # Note: When using angle-based steering control, the Torque Reduction Gain
-  # does NOT directly affect lateral acceleration or jerk limits.
-  # Those limits are determined solely by the commanded steering angle and vehicle speed.
-  # In contrast, torque-based control systems do not use a Torque Reduction Gain,
-  # but instead rely directly on torque commands which directly influence these limits.
-  #
-  # The normalized torque command defines the maximum steering torque we allow the EPS to apply
-  # to reach the desired steering angle, effectively limiting the maximum assist torque.
-
-  ANGLE_MAX_TORQUE_REDUCTION_GAIN = 1.  # Maximum torque command applied to the steering actuator.
-  ANGLE_MIN_TORQUE_REDUCTION_GAIN = 0.1  # Minimum torque command allowed when the driver is overriding, to maintain steering feedback.
-  ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN = 0.6  # Torque command when the car is stopped, to prevent steering wheel from being too loose.
-
-  # Rate limits for changing steering torque commands:
-  ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE = 0.008  # Maximum rate at which torque can increase per control cycle.
-  ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE = 0.0012  # Maximum rate at which torque can decrease per cycle
-
-  ANGLE_TORQUE_OVERRIDE_CYCLES = 17  # Number of control cycles over which torque ramps down to minimum after driver override is detected.
-
-  # More torque optimization
-  # The torque is calculated based on the curvature of the road and the speed of the car and it's a percentage of the maximum torque.
-  SMOOTHING_ANGLE_VEGO_MATRIX = [0, 8.5, 11, 13.8, 22.22]
-  SMOOTHING_ANGLE_ALPHA_MATRIX = [0.05, 0.1, 0.3, 0.6, 1]
-  SMOOTHING_ANGLE_MAX_VEGO = SMOOTHING_ANGLE_VEGO_MATRIX[-1]
-
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
     self.STEER_DELTA_DOWN = 7
@@ -80,9 +50,6 @@ class CarControllerParams:
       self.STEER_THRESHOLD = 250
       self.STEER_DELTA_UP = 2
       self.STEER_DELTA_DOWN = 3
-
-    if CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
-       self.STEER_THRESHOLD = 250
 
     # To determine the limit for your car, find the maximum value that the stock LKAS will request.
     # If the max stock LKAS request is <384, add your car to this list.
