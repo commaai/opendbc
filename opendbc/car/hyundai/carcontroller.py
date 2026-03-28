@@ -19,6 +19,8 @@ MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
+ANGLE_SAFETY_BASELINE_MODEL = "GENESIS_GV80_2025"
+
 
 def process_hud_alert(enabled, fingerprint, hud_control):
   sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
@@ -46,7 +48,7 @@ def process_hud_alert(enabled, fingerprint, hud_control):
 
 def get_safety_CP():
   from opendbc.car.hyundai.interface import CarInterface
-  return CarInterface.get_non_essential_params("GENESIS_GV80_2025")
+  return CarInterface.get_non_essential_params(ANGLE_SAFETY_BASELINE_MODEL)
 
 
 class CarController(CarControllerBase):
@@ -65,7 +67,7 @@ class CarController(CarControllerBase):
     self.apply_angle_last = 0
 
     # Vehicle model used for angle steering lateral limiting
-    self.VM = VehicleModel(get_safety_CP())
+    self.VM = VehicleModel(CarInterface.get_non_essential_params(ANGLE_SAFETY_BASELINE_MODEL))
 
     self.torque_reduction_gain_controller = TorqueReductionGainController()
 
