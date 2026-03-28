@@ -67,7 +67,7 @@ class CarController(CarControllerBase):
     self.apply_angle_last = 0
 
     # Vehicle model used for angle steering lateral limiting
-    self.VM = VehicleModel(get_safety_CP())
+    self.VM = VehicleModel(CarInterface.get_non_essential_params(ANGLE_SAFETY_BASELINE_MODEL))
 
     self.torque_reduction_gain_controller = TorqueReductionGainController()
 
@@ -82,7 +82,8 @@ class CarController(CarControllerBase):
                                                           CC.latActive, self.params, self.VM)
 
       # compute torque reduction gain (EPS assist multiplier 0-1)
-      apply_torque = self.torque_reduction_gain_controller.update(CS.out.steeringTorque, CC.latActive, CS.out.vEgoRaw)
+      apply_torque = self.torque_reduction_gain_controller.update(
+        CS.out.steeringTorque, CS.out.steeringPressed, CC.latActive, self.params.STEER_THRESHOLD)
 
       apply_steer_req = CC.latActive
 
@@ -94,7 +95,7 @@ class CarController(CarControllerBase):
       new_torque = int(round(actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
-    if not CC.latActive and not (self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING):
+    if not CC.latActive:
       apply_torque = 0
 
     # Hold torque with induced temporary fault when cutting the actuation bit
