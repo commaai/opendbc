@@ -18,14 +18,18 @@ class TorqueReductionGainController:
   independent of the gain itself.
   """
 
-  SPEED_BP = [0.,  10.,  50.,  80.]  # km/h
-  SPEED_CEILING = [0.85, 0.85, 0.96, 1.0]
+  # Speed-dependent gain ceiling. At low speed, EPS internal PID oscillates
+  # (overshoots, reverses, resonates) when gain is too high relative to the
+  # angle error — this is the audible EPS whine on micro-adjustments.
+  # Lower ceiling at low speed prevents the oscillation.
+  SPEED_BP = [0.,  10.,  30.,  50.,  80.]  # km/h
+  SPEED_CEILING = [0.55, 0.55, 0.75, 0.90, 1.0]
 
   # When steeringPressed: drop gain to this fraction of ceiling.
   # Must be low enough that the driver doesn't have to fight the EPS.
   # At 0.1 × 0.85 = 0.17 (low speed) or 0.2 × 1.0 = 0.2 (highway),
   # EPS only applies ~15-20% effort — easy to override.
-  OVERRIDE_FACTOR = 0.2
+  OVERRIDE_FACTOR = 0.1
 
   # When angle command changes rapidly, reduce gain target.
   # VM rate-limits dangle to ~0.3-0.5°/frame at most speeds — normal steering.
