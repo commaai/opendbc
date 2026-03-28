@@ -53,25 +53,23 @@ def calculate_angle_torque_reduction_gain(params, CS, apply_torque_last, target_
 
 def sp_smooth_angle(v_ego_raw: float, apply_angle: float, apply_angle_last: float) -> float:
   """
-  Smooth the steering angle change based on vehicle speed and an optional smoothing offset.
-  This function helps prevent abrupt steering changes by blending the new desired angle (`apply_angle`)
-  with the previously applied angle (`apply_angle_last`). The blend factor (alpha) is dynamically calculated
-  based on the vehicle's current speed using a predefined lookup table.
-  Behavior:
-    - At low speeds, the smoothing is strong, keeping the steering more stable.
-    - At higher speeds, the smoothing is relaxed, allowing quicker responses.
-    - If the angle change is negligible (≤ 0.1 deg), smoothing is skipped for responsiveness.
-  Parameters:
-    v_ego_raw (float): Raw vehicle speed in m/s.
-    apply_angle (float): New target steering angle in degrees.
-    apply_angle_last (float): Previously applied steering angle in degrees.
-  Returns:
-    float: Smoothed steering angle.
+  Smooth the steering angle change based on vehicle speed.
+
+  Asymmetric smoothing:
+    - Winding (|angle| increasing): strong smoothing to prevent EPS slap/whine
+      when the EPS builds torque to push the steering into a turn.
+    - Unwinding (|angle| decreasing toward center): lighter smoothing so the
+      steering returns quickly. The EPS is releasing torque, not building it,
+      so there's no slap risk. Slow unwind feels like lag.
   """
   if abs(apply_angle - apply_angle_last) > 0.1:
-    adjusted_alpha = np.interp(v_ego_raw, CarControllerParams.SMOOTHING_ANGLE_VEGO_MATRIX, CarControllerParams.SMOOTHING_ANGLE_ALPHA_MATRIX)
-    adjusted_alpha_limited = float(min(float(adjusted_alpha), 1.))  # Limit the smoothing factor to 1 if adjusted_alpha is greater than 1
-    return (apply_angle * adjusted_alpha_limited) + (apply_angle_last * (1 - adjusted_alpha_limited))
+    unwinding = abs(apply_angle) < abs(apply_angle_last)
+    if unwinding:
+      alpha = np.interp(v_ego_raw, CarControllerParams.SMOOTHING_ANGLE_VEGO_MATRIX, CarControllerParams.SMOOTHING_ANGLE_UNWIND_ALPHA_MATRIX)
+    else:
+      alpha = np.interp(v_ego_raw, CarControllerParams.SMOOTHING_ANGLE_VEGO_MATRIX, CarControllerParams.SMOOTHING_ANGLE_ALPHA_MATRIX)
+    alpha = float(min(float(alpha), 1.))
+    return (apply_angle * alpha) + (apply_angle_last * (1 - alpha))
   return apply_angle
 
 
@@ -147,6 +145,8 @@ class CarController(CarControllerBase):
         self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN = float(gain.get("max_torque_reduction_gain"))
         self.params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN = float(gain.get("active_torque_reduction_gain"))
         self.params.ANGLE_TORQUE_OVERRIDE_CYCLES = int(gain.get("overriding_cycles"))
+        self.params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE = float(gain.get("ramp_up_rate"))
+        self.params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE = float(gain.get("ramp_down_rate"))
       except (FileNotFoundError, json.JSONDecodeError, ValueError):
         pass
 
