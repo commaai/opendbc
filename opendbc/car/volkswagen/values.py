@@ -60,8 +60,6 @@ class CarControllerParams:
   STEER_DRIVER_MULTIPLIER = 3              # weight driver torque heavily
   STEER_DRIVER_FACTOR = 1                  # from dbc
 
-  STEER_TIME_MAX = 360                     # Max time that EPS allows uninterrupted HCA steering control
-  STEER_TIME_ALERT = STEER_TIME_MAX - 10   # If mitigation fails, time to soft disengage before EPS timer expires
   STEER_TIME_STUCK_TORQUE = 1.9            # EPS limits same torque to 6 seconds, reset timer 3x within that period
 
   DEFAULT_MIN_STEER_SPEED = 0.4            # m/s, newer EPS racks fault below this speed, don't show a low speed alert
@@ -227,6 +225,10 @@ class VolkswagenCarSpecs(CarSpecs):
 
 
 class Footnote(Enum):
+  SETUP = CarFootnote(
+    "The J533 harness plugs in at the CAN gateway under the dashboard, just above the steering column. " +
+    "More information can be found at <a href=\"https://docs.howtocomma.com/docs/j533-harness-install\" target=\"_blank\">this guide</a>.",
+    Column.MAKE, setup_note=True)
   KAMIQ = CarFootnote(
     "Not including the China market Kamiq, which is based on the (currently) unsupported PQ34 platform.",
     Column.MODEL)
@@ -251,6 +253,7 @@ class Footnote(Enum):
 class VWCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.vw_j533]))
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.SETUP])
 
   def init_make(self, CP: structs.CarParams):
     self.footnotes.append(Footnote.VW_EXP_LONG)
