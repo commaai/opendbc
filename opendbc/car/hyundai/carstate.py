@@ -237,7 +237,7 @@ class CarState(CarStateBase):
                      cp.vl["WHEEL_SPEEDS"]["WHL_SpdRLVal"] <= STANDSTILL_THRESHOLD and cp.vl["WHEEL_SPEEDS"]["WHL_SpdRRVal"] <= STANDSTILL_THRESHOLD
 
     ret.steeringRateDeg = cp.vl["STEERING_SENSORS"]["STEERING_RATE"]
-    ret.steeringAngleDeg = cp.vl["MDPS"]["MDPS_EstStrAnglVal"]
+    ret.steeringAngleDeg = cp.vl["STEERING_SENSORS"]["STEERING_ANGLE"]
     ret.steeringTorque = cp.vl["MDPS"]["MDPS_StrTqSnsrVal"]
     ret.steeringTorqueEps = cp.vl["MDPS"]["MDPS_OutTqVal"]
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > self.params.STEER_THRESHOLD, 5)
