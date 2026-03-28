@@ -51,12 +51,6 @@ class CarControllerParams:
       self.STEER_DELTA_UP = 2
       self.STEER_DELTA_DOWN = 3
 
-    # Angle steering override detection. 300 (~1.5 Nm) is above road noise
-    # p99 (~200 raw / ~1.0 Nm) but low enough for comfortable 2-finger override.
-    # Combined with 5-frame debounce in steeringPressed, transient spikes won't trigger.
-    if CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
-      self.STEER_THRESHOLD = 300
-
     # To determine the limit for your car, find the maximum value that the stock LKAS will request.
     # If the max stock LKAS request is <384, add your car to this list.
     elif CP.carFingerprint in (CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA, CAR.HYUNDAI_ELANTRA_GT_I30, CAR.HYUNDAI_IONIQ,
