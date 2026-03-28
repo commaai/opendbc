@@ -23,7 +23,6 @@ MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 MAX_ANGLE_RATE = 5
 ANGLE_SAFETY_BASELINE_MODEL = "GENESIS_GV80_2025"
-TORQUE_REDUCTION_GAIN_JSON = "/data/torque_reduction_gain.json"
 
 
 def get_baseline_safety_cp():
