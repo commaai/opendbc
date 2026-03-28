@@ -92,7 +92,8 @@ class CarState(CarStateBase):
 
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
-    self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"]) if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else None
+    if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1
+      self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
     # This message can lag and send two messages at once, make sure we forward all of them
     adas_status_msgs = cp.vl_all["VDM_AdasSts"]
     self.vdm_adas_status = [dict(zip(adas_status_msgs, vals, strict=True)) for vals in zip(*adas_status_msgs.values(), strict=True)]
