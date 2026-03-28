@@ -236,13 +236,11 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_upper * speed_upper) * limits.angle_deg_to_can) - 1.;
 
       // ensure that the curvature error doesn't try to enforce above this limit
-      if (desired_angle_last > 0) {
-        lowest_desired_angle = SAFETY_CLAMP(lowest_desired_angle, -max_curvature_lower, max_curvature_lower);
-        highest_desired_angle = SAFETY_CLAMP(highest_desired_angle, -max_curvature_upper, max_curvature_upper);
-      } else {
-        lowest_desired_angle = SAFETY_CLAMP(lowest_desired_angle, -max_curvature_upper, max_curvature_upper);
-        highest_desired_angle = SAFETY_CLAMP(highest_desired_angle, -max_curvature_lower, max_curvature_lower);
-      }
+      // swap upper/lower curvature bounds based on sign of desired angle
+      const int clamp_high = (desired_angle_last > 0) ? max_curvature_upper : max_curvature_lower;
+      const int clamp_low = (desired_angle_last > 0) ? max_curvature_lower : max_curvature_upper;
+      lowest_desired_angle = SAFETY_CLAMP(lowest_desired_angle, -clamp_low, clamp_low);
+      highest_desired_angle = SAFETY_CLAMP(highest_desired_angle, -clamp_high, clamp_high);
     }
 
     // check for violation;

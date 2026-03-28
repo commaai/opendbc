@@ -111,6 +111,21 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
 
+  def test_individual_wheel_speeds(self):
+    # C code checks front_left (bytes 0-1) and rear_right (bytes 6-7) independently
+    for wheel in ["FL", "RR"]:
+      # Reset to stationary
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      # Set only one wheel above threshold
+      values = {"WHL_SPD_%s" % s: 0 for s in ["FL", "FR", "RL", "RR"]}
+      values["WHL_SPD_%s" % wheel] = self.STANDSTILL_THRESHOLD + 100
+      values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
+      values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
+      self.__class__.cnt_speed += 1
+      self._rx(self.packer.make_can_msg_safety("WHL_SPD11", 0, values, fix_checksum=checksum))
+      self.assertTrue(self.safety.get_vehicle_moving(), f"vehicle not moving with {wheel} speed")
+
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
@@ -236,6 +251,17 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
     self.assertTrue(self._tx(self._accel_msg(0)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_req=True)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_decel=1.0)))
+
+  def test_button_msg_passthrough(self):
+    # In longitudinal mode, button messages are forwarded without validation
+    self.assertTrue(self._tx(self._button_msg(0, bus=0)))
+
+  def test_tester_present_partial_match(self):
+    tester_present_ok = libsafety_py.make_CANPacket(0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00")
+    self.assertTrue(self._tx(tester_present_ok))
+
+    partial_match = libsafety_py.make_CANPacket(0x7D0, 0, b"\x02\x3E\x80\x00\x01\x00\x00\x00")
+    self.assertFalse(self._tx(partial_match))
 
 
 class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyundaiSafety):

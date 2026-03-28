@@ -83,6 +83,10 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
       self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
 
+    # First 4 bytes match but last 4 don't (covers || short-circuit on line 332)
+    partial_match = libsafety_py.make_CANPacket(0x750, 0, b"\x0F\x02\x3E\x00\x01\x00\x00\x00")
+    self.assertFalse(self._tx(partial_match))
+
   def test_block_aeb(self, stock_longitudinal: bool = False):
     for controls_allowed in (True, False):
       for bad in (True, False):
@@ -93,6 +97,13 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
             dat = [0]*6 + dat[-1:]
           msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
           self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
+
+  def test_block_aeb_short_circuit(self, stock_longitudinal: bool = False):
+    # Non-zero bytes in different positions should all be blocked
+    msg = libsafety_py.make_CANPacket(0x283, 0, b"\x00\x00\x00\x00\x01\x00\x00")
+    self.assertFalse(self._tx(msg))
+    msg = libsafety_py.make_CANPacket(0x283, 0, b"\x00\x00\x00\x00\x00\x01\x00")
+    self.assertFalse(self._tx(msg))
 
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
@@ -141,6 +152,9 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE)
     self.safety.init_tests()
+
+  def test_steer_angle_initializing(self):
+    self._rx(self._angle_meas_msg(10.0, steer_angle_initializing=True))
 
 
 class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest):
@@ -286,6 +300,9 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
   def test_block_aeb(self, stock_longitudinal: bool = True):
     super().test_block_aeb(stock_longitudinal=stock_longitudinal)
 
+  def test_block_aeb_short_circuit(self, stock_longitudinal: bool = True):
+    super().test_block_aeb_short_circuit(stock_longitudinal=stock_longitudinal)
+
   def test_acc_cancel(self):
     """
       Regardless of controls allowed, never allow ACC_CONTROL if cancel bit isn't set
@@ -384,6 +401,10 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
 
   @unittest.skip("test not applicable for cars without a DSU")
   def test_block_aeb(self, stock_longitudinal: bool = False):
+    pass
+
+  @unittest.skip("test not applicable for cars without a DSU")
+  def test_block_aeb_short_circuit(self, stock_longitudinal: bool = False):
     pass
 
   def test_343_actuation_blocked(self):

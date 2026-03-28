@@ -46,7 +46,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   }
 
   // Handle cruise enabled
-  if ((msg->addr == 0x30fU) && (msg->bus == (nissan_alt_eps ? 1U : 2U))) {
+  if (ADDR_BUS_MATCH(msg, 0x30fU, nissan_alt_eps ? 1U : 2U)) {
     bool cruise_engaged = (msg->data[0] >> 3) & 1U;
     pcm_cruise_check(cruise_engaged);
   }

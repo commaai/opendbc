@@ -69,6 +69,12 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     }
     return self.packer.make_can_msg_safety("CRZ_BTNS", 0, values)
 
+  def test_gas_pressed_large_value(self):
+    self._rx(self._user_gas_msg(0))
+    self.assertFalse(self.safety.get_gas_pressed_prev())
+    self._rx(self._user_gas_msg(256))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
   def test_buttons(self):
     # only cancel allows while controls not allowed
     self.safety.set_controls_allowed(0)

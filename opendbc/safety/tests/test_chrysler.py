@@ -72,6 +72,21 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
 
 
+  def test_pacifica_individual_wheel_speeds(self):
+    # Cover || short-circuit: speed_l=0, speed_r!=0
+    # Only Pacifica uses individual wheel speeds (SPEED_1 at addr 514)
+    if self.DAS_BUS != 0:
+      return
+
+    values = {"SPEED_LEFT": 0, "SPEED_RIGHT": 0}
+    self._rx(self.packer.make_can_msg_safety("SPEED_1", 0, values))
+    self.assertFalse(self.safety.get_vehicle_moving())
+
+    values = {"SPEED_LEFT": 0, "SPEED_RIGHT": 1}
+    self._rx(self.packer.make_can_msg_safety("SPEED_1", 0, values))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+
 class TestChryslerRamDTSafety(TestChryslerSafety):
   TX_MSGS = [[0xB1, 2], [0xA6, 0], [0xFA, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0xA6, 0xFA)}
