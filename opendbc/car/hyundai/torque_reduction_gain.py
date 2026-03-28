@@ -33,8 +33,8 @@ class TorqueReductionGainController:
   TORQUE_BP =      [0.,  100., 200., 300., 400., 500., 750.]
   TORQUE_FACTOR =  [1.0, 0.85, 0.57, 0.48, 0.40, 0.33, 0.10]
 
-  RAMP_UP_RATE = 0.005    # max gain increase per frame (~0.5/s at 100Hz, stock ~0.004)
-  RAMP_DOWN_RATE = 0.010  # max gain decrease per frame (~1.0/s, faster for responsive override)
+  RAMP_UP_RATE = 0.05    # max gain increase per frame (~5.0/s at 100Hz, stock ~0.004)
+  RAMP_DOWN_RATE = 0.08  # max gain decrease per frame (~8.0/s, faster for responsive override)
 
   def __init__(self):
     self.gain = 0.0
