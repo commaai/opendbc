@@ -83,8 +83,7 @@ class CAR(Platforms):
   )
 
   JEEP_GRAND_CHEROKEE_SRT_2016 = ChryslerPlatformConfig(  # 
-    [ChryslerCarDocs("Jeep Grand Cherokee 2016-18", video="https://www.youtube.com/watch?v=eLR9o2JkuRk", 
-      car_parts=CarParts.common([CarHarness.fca]))],
+    [ChryslerCarDocs("Jeep Grand Cherokee 2016-18", video="https://www.youtube.com/watch?v=eLR9o2JkuRk")],
     ChryslerCarSpecs(mass=1836.0, wheelbase=2.70, steerRatio=13.0),
   )
 
