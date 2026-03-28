@@ -454,19 +454,33 @@ BO_ 437 FR_CMR_03_50ms: 32 FR_CMR
  SG_ Relative_Velocity : 200|12@1+ (0.05,-100) [-100|104.75] "m/s" XXX
  SG_ Longitudinal_Distance : 212|12@1+ (0.05,0) [0|204.75] "m" XXX
 
-BO_ 442 BLINDSPOTS_REAR_CORNERS: 24 XXX
- SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
- SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LEFT_BLOCKED : 24|1@0+ (1,0) [0|1] "" XXX
- SG_ LEFT_MB : 30|1@0+ (1,0) [0|3] "" XXX
- SG_ MORE_LEFT_PROB : 32|1@1+ (1,0) [0|3] "" XXX
+BO_ 442 ADAS_CMD_50_50ms: 24 XXX
+ SG_ ADAS_CMD_Crc50Val : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ ADAS_CMD_AlvCnt50Val : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ BCW_Sta : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ BCW_OnOffEquipSta : 28|2@1+ (1,0) [0|3] "" XXX
+ SG_ BCW_LtIndSta : 30|1@0+ (1,0) [0|3] "" XXX
+ SG_ BCW_RtIndSta : 32|1@1+ (1,0) [0|3] "" XXX
+ SG_ BCW_LtSndWrngSta : 34|2@1+ (1,0) [0|3] "" XXX
+ SG_ BCW_RtSndWrngSta : 36|10@1+ (1,0) [0|1023] "" XXX
  SG_ FL_INDICATOR : 46|6@0+ (1,0) [0|1] "" XXX
- SG_ FR_INDICATOR : 54|6@0+ (1,0) [0|63] "" XXX
- SG_ RIGHT_BLOCKED : 64|1@0+ (1,0) [0|1] "" XXX
- SG_ COLLISION_AVOIDANCE_ACTIVE : 68|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_2 : 96|1@0+ (1,0) [0|1] "" XXX
- SG_ FL_INDICATOR_ALT : 138|1@0+ (1,0) [0|1] "" XXX
- SG_ FR_INDICATOR_ALT : 141|1@0+ (1,0) [0|1] "" XXX
+ SG_ FR_INDICATOR : 54|2@0+ (1,0) [0|3] "" XXX
+ SG_ BCW_SnstvtyModRetVal : 56|3@1+ (1,0) [0|7] "" XXX
+ SG_ BCW_IndSta : 59|3@1+ (1,0) [0|7] "" XXX
+ SG_ BCA_OnOffEquip2Sta : 62|2@1+ (1,0) [0|3] "" XXX
+ SG_ BCA_Sta : 64|1@0+ (1,0) [0|1] "" XXX
+ SG_ BCA_OnOffEquipSta : 68|1@0+ (1,0) [0|1] "" XXX
+ SG_ BCA_DRV_WarnSta : 76|4@1+ (1,0) [0|15] "" XXX
+ SG_ BCA_Plus_Deccel_Req : 80|4@1+ (1,0) [0|15] "" XXX
+ SG_ BCA_Plus_BrkCmdSta : 84|2@1+ (1,0) [0|3] "" XXX
+ SG_ BCA_Plus_LtWrngSta : 86|2@1+ (1,0) [0|3] "" XXX
+ SG_ BCA_Plus_RtWrngSta : 88|5@1+ (1,0) [0|31] "" XXX
+ SG_ BCA_Plus_FuncStat : 93|3@1+ (1,0) [0|7] "" XXX
+ SG_ BCA_Plus_Sta : 96|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Control_RL : 110|2@1+ (1,0) [0|3] "" XXX
+ SG_ Brake_Control_RR : 118|2@1+ (1,0) [0|3] "" XXX
+ SG_ OSMrrLamp_LtIndSta : 128|2@1+ (1,0) [0|3] "" XXX
+ SG_ OSMrrLamp_RtIndSta : 130|6@1+ (1,0) [0|63] "" XXX
 
 BO_ 463 CRUISE_BUTTONS: 8 XXX
  SG_ _CHECKSUM : 0|8@1+ (1,0) [0|65535] "" XXX
