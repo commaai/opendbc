@@ -1,5 +1,4 @@
 import math
-import json
 import numpy as np
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANPacker
@@ -118,7 +117,6 @@ class CarController(CarControllerBase):
 
     self.apply_angle_last = 0
     self.angle_torque_reduction_gain = 0
-    self._torque_reduction_gain_read_counter = 0
 
     # For future parametrization / tuning
     self.angle_enable_smoothing_factor = True
@@ -135,19 +133,6 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
-
-    self._torque_reduction_gain_read_counter += 1
-    if self._torque_reduction_gain_read_counter >= 100:
-      self._torque_reduction_gain_read_counter = 0
-      try:
-        with open(TORQUE_REDUCTION_GAIN_JSON) as f:
-          gain = json.load(f)
-        self.params.ANGLE_MIN_TORQUE_REDUCTION_GAIN = float(gain.get("min_torque_reduction_gain"))
-        self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN = float(gain.get("max_torque_reduction_gain"))
-        self.params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN = float(gain.get("active_torque_reduction_gain"))
-        self.params.ANGLE_TORQUE_OVERRIDE_CYCLES = int(gain.get("overriding_cycles"))
-      except (FileNotFoundError, json.JSONDecodeError, ValueError):
-        pass
 
     # steering torque
     if not self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
