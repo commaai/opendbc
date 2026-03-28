@@ -94,6 +94,7 @@ routes = [
   CarTestRoute("68aac44ad69f838e/2021-05-18--20-40-52", HONDA.HONDA_CRV),
   CarTestRoute("14fed2e5fa0aa1a5/2021-05-25--14-59-42", HONDA.HONDA_CRV_HYBRID),
   CarTestRoute("52f3e9ae60c0d886/2021-05-23--15-59-43", HONDA.HONDA_FIT),
+  CarTestRoute("7a27edd824e984f1/0000000a--4fb8a92b44", HONDA.HONDA_FIT),  # manual transmission
   CarTestRoute("2c4292a5cd10536c/2021-08-19--21-32-15", HONDA.HONDA_FREED),
   CarTestRoute("03be5f2fd5c508d1/2020-04-19--18-44-15", HONDA.HONDA_HRV),
   CarTestRoute("320098ff6c5e4730/2023-04-13--17-47-46", HONDA.HONDA_HRV_3G),
@@ -107,7 +108,8 @@ routes = [
   CarTestRoute("f29e2b57a55e7ad5/2021-03-24--20-52-38", HONDA.HONDA_ACCORD),  # hybrid, 2021 with new style HUD msgs
   CarTestRoute("1ad763dd22ef1a0e/2020-02-29--18-37-03", HONDA.HONDA_CRV_5G),
   CarTestRoute("0a96f86fcfe35964/2020-02-05--07-25-51", HONDA.HONDA_ODYSSEY),
-  CarTestRoute("7817fe954aff07b8/00000001--fdaaf36c4f", HONDA.HONDA_ODYSSEY_TWN),
+  CarTestRoute("7817fe954aff07b8/00000001--fdaaf36c4f", HONDA.HONDA_ODYSSEY_TWN),  # Taiwan
+  CarTestRoute("5bd1fcb9a66f60e1/000001d6--f1bff3e876", HONDA.HONDA_ODYSSEY_TWN),  # Singapore
   CarTestRoute("d7233a428eb7d0b5/00000001--9b99b04d43", HONDA.HONDA_ODYSSEY_5G_MMR),
   CarTestRoute("d83f36766f8012a5/2020-02-05--18-42-21", HONDA.HONDA_CIVIC_BOSCH_DIESEL),
   CarTestRoute("f0890d16a07a236b/2021-05-25--17-27-22", HONDA.HONDA_INSIGHT),
@@ -117,6 +119,7 @@ routes = [
   CarTestRoute("f34a60d68d83b1e5/2020-10-06--14-35-55", HONDA.ACURA_RDX),
   CarTestRoute("54fd8451b3974762/2021-04-01--14-50-10", HONDA.HONDA_RIDGELINE),
   CarTestRoute("2d5808fae0b38ac6/2021-09-01--17-14-11", HONDA.HONDA_E),
+  CarTestRoute("16a94dfbfdf5a51f/00000007--5ac9e58f1b", HONDA.HONDA_E_ADVANCE),
   CarTestRoute("f44aa96ace22f34a/2021-12-22--06-22-31", HONDA.HONDA_CIVIC_2022),
   CarTestRoute("1f032f5173c8ad99/00000006--573b3fcaf5", HONDA.HONDA_CIVIC_2022),  # Civic Type R with manual transmission
   CarTestRoute("b1c832ad56b6bc9d/00000010--debfcf5867", HONDA.HONDA_CIVIC_2022),  # 2025 Civic Hatch Hybrid with new eCVT transmission

@@ -19,8 +19,7 @@ class CarInterface(CarInterfaceBase):
     ret.brand = "chrysler"
 
     # TODO: Chrysler CUSW in dashcam pending comma safety validation and a fix for LKAS fault on disengage
-    # ret.dashcamOnly = candidate in (RAM_HD, CUSW_CARS)
-    ret.dashcamOnly = candidate in RAM_HD
+    ret.dashcamOnly = candidate in (RAM_HD | CUSW_CARS)
 
     # radar parsing needs some work, see https://github.com/commaai/openpilot/issues/26842
     ret.radarUnavailable = True # Bus.radar not in DBC[candidate][Bus.radar]

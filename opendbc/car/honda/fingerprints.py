@@ -490,6 +490,7 @@ FW_VERSIONS = {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-T5R-L020\x00\x00',
       b'57114-T5R-L220\x00\x00',
+      b'57114-T5R-L320\x00\x00',
     ],
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-T5R-C020\x00\x00',
@@ -501,6 +502,7 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36161-T5R-A040\x00\x00',
       b'36161-T5R-A240\x00\x00',
+      b'36161-T5R-A340\x00\x00',
       b'36161-T5R-A520\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
@@ -590,12 +592,21 @@ FW_VERSIONS = {
   CAR.HONDA_ODYSSEY_TWN: {
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-T6A-J210\x00\x00',
+      b'39990-T6A-J420\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
+      b'77959-T6A-J130\x00\x00',
       b'77959-T6A-P110\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36161-T6A-P040\x00\x00',
+      b'36161-T6A-U230\x00\x00',
+    ],
+    (Ecu.gateway, 0x18daeff1, None): [
+      b'38897-T6A-J110\x00\x00',
+    ],
+    (Ecu.transmission, 0x18da1ef1, None): [
+      b'28101-5X9-U010\x00\x00',
     ],
   },
   CAR.HONDA_ODYSSEY_5G_MMR: {
@@ -943,6 +954,14 @@ FW_VERSIONS = {
       b'57114-TYF-E030\x00\x00',
     ],
   },
+  CAR.HONDA_E_ADVANCE: {
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'36161-TYF-E020\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36802-TYF-E050\x00\x00',
+    ],
+  },
   CAR.HONDA_CIVIC_2022: {
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-T24-T120\x00\x00',
@@ -992,6 +1011,7 @@ FW_VERSIONS = {
       b'36161-T47-A060\x00\x00',
       b'36161-T47-A070\x00\x00',
       b'8S102-T20-AA10\x00\x00',
+      b'8S102-T20-AA20\x00\x00',
       b'8S102-T43-J540\x00\x00',
       b'8S102-T47-AA10\x00\x00',
       b'8S102-T47-AA20\x00\x00',
@@ -1093,6 +1113,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'36161-TGV-A030\x00\x00',
+      b'36161-TGV-A040\x00\x00',
     ],
   },
   CAR.ACURA_TLX_2G_MMR: {
