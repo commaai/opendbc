@@ -27,9 +27,10 @@ class TorqueReductionGainController:
   # EPS only applies ~15-20% effort — easy to override.
   OVERRIDE_FACTOR = 0.2
 
-  # When angle command changes rapidly, reduce gain instantly.
-  # Small corrections (< 0.3°) don't reduce gain — only large steps matter.
-  DANGLE_BP = [0., 0.3, 0.5, 1.0, 2.0]  # degrees per frame (post VM limiting)
+  # When angle command changes rapidly, reduce gain target.
+  # VM rate-limits dangle to ~0.3-0.5°/frame at most speeds — normal steering.
+  # Only large steps (>0.5°, which are rare after VM) need gain reduction.
+  DANGLE_BP = [0., 0.5, 1.0, 2.0, 5.0]  # degrees per frame (post VM limiting)
   DANGLE_FACTOR = [1.0, 1.0, 0.7, 0.5, 0.3]
 
   RAMP_RATE = 0.008  # normal ramp up/down
@@ -43,6 +44,9 @@ class TorqueReductionGainController:
 
   def update(self, steering_pressed: bool, lat_active: bool, v_ego: float, apply_angle: float) -> float:
     dangle = abs(apply_angle - self.last_angle)
+    # Winding = |angle| increasing (EPS building torque into a turn, slap risk)
+    # Unwinding = |angle| decreasing (EPS releasing torque, no slap risk)
+    winding = abs(apply_angle) > abs(self.last_angle)
     self.last_angle = apply_angle
 
     if not lat_active:
@@ -54,21 +58,18 @@ class TorqueReductionGainController:
 
       if steering_pressed:
         target = ceiling * self.OVERRIDE_FACTOR
-      else:
+      elif winding:
+        # Only reduce gain when winding (|angle| increasing = EPS building torque).
+        # Unwinding gets full gain so the wheel returns to center quickly.
         dangle_factor = float(np.interp(dangle, self.DANGLE_BP, self.DANGLE_FACTOR))
         target = ceiling * dangle_factor
+      else:
+        target = ceiling
 
     if steering_pressed:
       self._was_overriding = True
     elif self._was_overriding and lat_active and self.gain >= target - 0.001:
       self._was_overriding = False
-
-    # Apply dangle reduction instantly (no ramp — catches the frame the command jumps)
-    if lat_active and not steering_pressed:
-      dangle_factor = float(np.interp(dangle, self.DANGLE_BP, self.DANGLE_FACTOR))
-      instant_limit = self.gain * dangle_factor
-      if instant_limit < self.gain:
-        self.gain = instant_limit
 
     # Ramp toward target
     if target < self.gain:
