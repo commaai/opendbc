@@ -13,7 +13,10 @@ def get_steer_ctrl_type(flags: int, ctrl_type: int) -> int:
 class TeslaCAN:
   def __init__(self, CP, packer):
     self.CP = CP
+    self.CCP = CarControllerParams
     self.packer = packer
+    self.jerk_upper = self.CCP.JERK_LIMIT_MAX
+    self.jerk_lower = self.CCP.JERK_LIMIT_MIN
 
   def create_steering_control(self, angle, enabled):
     # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
@@ -28,20 +31,25 @@ class TeslaCAN:
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, active):
+  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, active, gas_pressed):
     from opendbc.car.interfaces import V_CRUISE_MAX
 
     set_speed = max(v_ego * CV.MS_TO_KPH, 0)
     if active:
-      # TODO: this causes jerking after gas override when above set speed
       set_speed = 0 if accel < 0 else V_CRUISE_MAX
+
+    if gas_pressed:
+      self.jerk_upper = self.jerk_lower = 0.0
+    else:
+      self.jerk_lower = max(self.jerk_lower - self.CCP.JERK_RAMP_RATE, self.CCP.JERK_LIMIT_MIN)
+      self.jerk_upper = min(self.jerk_upper + self.CCP.JERK_RAMP_RATE, self.CCP.JERK_LIMIT_MAX)
 
     values = {
       "DAS_setSpeed": set_speed,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,
-      "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
-      "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
+      "DAS_jerkMin": self.jerk_lower,
+      "DAS_jerkMax": self.jerk_upper,
       "DAS_accelMin": accel,
       "DAS_accelMax": max(accel, 0),
       "DAS_controlCounter": counter,
