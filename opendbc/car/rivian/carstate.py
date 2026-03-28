@@ -72,7 +72,8 @@ class CarState(CarStateBase):
 
     # Doors
     # door locks prevent opening while driving; on standstill, stock ACC disengages when a door is opened
-    ret.doorOpen = any(cp_adas.vl["IndicatorLights"][door] != 2 for door in ("RearDriverDoor", "FrontPassengerDoor", "DriverDoor", "RearPassengerDoor")) if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else False
+    if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1:
+      ret.doorOpen = any(cp_adas.vl["IndicatorLights"][door] != 2 for door in ("RearDriverDoor", "FrontPassengerDoor", "DriverDoor", "RearPassengerDoor"))
 
     # Blinkers
     ret.leftBlinker = cp_adas.vl["IndicatorLights"]["TurnLightLeft"] in (1, 2)
