@@ -5,6 +5,7 @@ from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs
 from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance, apply_steer_angle_limits_vm
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
+from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.torque_reduction_gain import TorqueReductionGainController
 from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR
@@ -18,6 +19,9 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
+
+
+ANGLE_SAFETY_BASELINE_MODEL = "GENESIS_GV80_2025"
 
 
 def process_hud_alert(enabled, fingerprint, hud_control):
@@ -44,11 +48,6 @@ def process_hud_alert(enabled, fingerprint, hud_control):
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
 
-def get_safety_CP():
-  from opendbc.car.hyundai.interface import CarInterface
-  return CarInterface.get_non_essential_params("GENESIS_GV80_2025")
-
-
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -65,7 +64,7 @@ class CarController(CarControllerBase):
     self.apply_angle_last = 0
 
     # Vehicle model used for angle steering lateral limiting
-    self.VM = VehicleModel(get_safety_CP())
+    self.VM = VehicleModel(CarInterface.get_non_essential_params(ANGLE_SAFETY_BASELINE_MODEL))
 
     self.torque_reduction_gain_controller = TorqueReductionGainController()
 
