@@ -7,52 +7,43 @@ class TorqueReductionGainController:
   Controls the ADAS_ACIAnglTqRedcGainVal signal for HKG CAN-FD angle steering.
 
   The gain controls how hard the EPS tries to track the commanded angle.
-  Instead of smoothing the angle command (which delays the model's intent),
-  we modulate the gain to control HOW AGGRESSIVELY the EPS follows it.
 
-  When the angle command is changing rapidly (large |dangle|), the gain is
-  reduced so the EPS eases into the new angle instead of slamming. When
-  commands are stable, gain is high for precise tracking.
+  EPS whine happens when gain × angle_error is too high — the EPS internal PID
+  oscillates (overshoots, reverses, resonates). Data from route 16 shows:
+    - gain < 0.3 with any error: ~1-2% EPS oscillation (quiet)
+    - gain 0.5-0.6 with large error: ~20% oscillation (loud whine)
+    - gain 0.8-0.9 with small error: ~3% oscillation (quiet)
 
-  No feedback loop risk: gain reacts to command rate |dangle|, which is
-  independent of the gain itself.
+  The product (gain × error) is what matters, not gain alone. So we limit gain
+  based on the current angle error: when error is large, gain stays low to prevent
+  oscillation. As the EPS tracks and error shrinks, gain ramps up for precision.
+
+  No feedback loop: error = (angle_cmd - angle_est). The angle command doesn't
+  change based on gain, and angle_est is measured from the steering column.
   """
 
-  # Speed-dependent gain ceiling. At low speed, EPS internal PID oscillates
-  # (overshoots, reverses, resonates) when gain is too high relative to the
-  # angle error — this is the audible EPS whine on micro-adjustments.
-  # Lower ceiling at low speed prevents the oscillation.
-  SPEED_BP = [0.,  10.,  30.,  50.,  80.]  # km/h
-  SPEED_CEILING = [0.55, 0.55, 0.75, 0.90, 1.0]
+  SPEED_BP = [0., 10., 30., 50., 80.]  # km/h
+  SPEED_CEILING = [0.85, 0.85, 0.90, 0.96, 1.0]
 
-  # When steeringPressed: drop gain to this fraction of ceiling.
-  # Must be low enough that the driver doesn't have to fight the EPS.
-  # At 0.1 × 0.85 = 0.17 (low speed) or 0.2 × 1.0 = 0.2 (highway),
-  # EPS only applies ~15-20% effort — easy to override.
+  # Gain limit based on angle error. Route 16 data shows EPS oscillation
+  # even at 0.5° error when gain > 0.5 at low speed. The EPS internal PID
+  # resonates when trying to track small errors at moderate-high gain.
+  # Only truly zero error is safe at full gain.
+  ANGLE_ERROR_BP = [0., 0.3, 0.8, 2., 5., 15.]  # degrees
+  ERROR_FACTOR =   [1.0, 0.6, 0.35, 0.25, 0.18, 0.12]
+
   OVERRIDE_FACTOR = 0.1
 
-  # When angle command changes rapidly, reduce gain target.
-  # VM rate-limits dangle to ~0.3-0.5°/frame at most speeds — normal steering.
-  # Only large steps (>0.5°, which are rare after VM) need gain reduction.
-  DANGLE_BP = [0., 0.5, 1.0, 2.0, 5.0]  # degrees per frame (post VM limiting)
-  DANGLE_FACTOR = [1.0, 1.0, 0.7, 0.5, 0.3]
-
-  RAMP_RATE = 0.008  # normal ramp up/down
-  RECOVERY_RATE = 0.02  # faster recovery after override
-  OVERRIDE_DROP_RATE = 0.05  # fast drop during override
+  RAMP_RATE = 0.008
+  RECOVERY_RATE = 0.02
+  OVERRIDE_DROP_RATE = 0.05
 
   def __init__(self):
     self.gain = 0.0
-    self.last_angle = 0.0
     self._was_overriding = False
 
-  def update(self, steering_pressed: bool, lat_active: bool, v_ego: float, apply_angle: float) -> float:
-    dangle = abs(apply_angle - self.last_angle)
-    # Winding = |angle| increasing (EPS building torque into a turn, slap risk)
-    # Unwinding = |angle| decreasing (EPS releasing torque, no slap risk)
-    winding = abs(apply_angle) > abs(self.last_angle)
-    self.last_angle = apply_angle
-
+  def update(self, steering_pressed: bool, lat_active: bool, v_ego: float,
+             apply_angle: float, steering_angle: float) -> float:
     if not lat_active:
       target = 0.0
       self._was_overriding = False
@@ -62,26 +53,29 @@ class TorqueReductionGainController:
 
       if steering_pressed:
         target = ceiling * self.OVERRIDE_FACTOR
-      elif winding:
-        # Only reduce gain when winding (|angle| increasing = EPS building torque).
-        # Unwinding gets full gain so the wheel returns to center quickly.
-        dangle_factor = float(np.interp(dangle, self.DANGLE_BP, self.DANGLE_FACTOR))
-        target = ceiling * dangle_factor
       else:
-        target = ceiling
+        # Limit gain based on angle error to prevent EPS oscillation.
+        # Large error + high gain = EPS PID resonance = audible whine.
+        angle_error = abs(apply_angle - steering_angle)
+        error_factor = float(np.interp(angle_error, self.ANGLE_ERROR_BP, self.ERROR_FACTOR))
+        target = ceiling * error_factor
 
     if steering_pressed:
       self._was_overriding = True
     elif self._was_overriding and lat_active and self.gain >= target - 0.001:
       self._was_overriding = False
 
-    # Ramp toward target
+    # Error-based cap is applied instantly (no ramp) — the EPS must not
+    # push hard when there's a gap to close, or it oscillates.
+    # The ramp only applies for activation, deactivation, and override.
     if target < self.gain:
       if steering_pressed:
-        rate = self.OVERRIDE_DROP_RATE
+        self.gain = max(self.gain - self.OVERRIDE_DROP_RATE, target)
+      elif not lat_active:
+        self.gain = max(self.gain - self.RAMP_RATE, target)
       else:
-        rate = self.RAMP_RATE
-      self.gain = max(self.gain - rate, target)
+        # Error-based reduction: apply instantly
+        self.gain = target
     else:
       if self._was_overriding:
         rate = self.RECOVERY_RATE
