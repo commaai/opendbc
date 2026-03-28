@@ -145,8 +145,7 @@ class CarState(CarStateBase):
     ret.parkingBrake = bool(cp.vl[self.car_state_scm_msg]["PARKING_BRAKE_ON"])
 
     if self.CP.transmissionType == TransmissionType.manual:
-      reverse_light_msg = cp.vl["SCM_FEEDBACK"] if self.CP.carFingerprint in HONDA_BOSCH else cp.vl["SCM_BUTTONS"]
-      ret.gearShifter = GearShifter.reverse if bool(reverse_light_msg["REVERSE_LIGHT"]) else GearShifter.drive
+      ret.gearShifter = GearShifter.reverse if bool(cp.vl[self.car_state_scm_msg]["REVERSE_LIGHT"]) else GearShifter.drive
     else:
       gear_position = self.shifter_values.get(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"], None)
       ret.gearShifter = self.parse_gear_shifter(gear_position)
