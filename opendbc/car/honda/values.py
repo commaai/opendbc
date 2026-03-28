@@ -76,7 +76,7 @@ class HondaFlags(IntFlag):
 
   HAS_ALL_DOOR_STATES = 256  # Some Hondas have all door states, others only driver door
   BOSCH_ALT_RADAR = 512
-  ALLOW_MANUAL_TRANS = 1024
+  # 1024 is available
   HYBRID = 2048
   BOSCH_TJA_CONTROL = 4096
 
@@ -167,7 +167,6 @@ class CAR(Platforms):
     # steerRatio: 11.82 is spec end-to-end
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
-    flags=HondaFlags.ALLOW_MANUAL_TRANS,
   )
   HONDA_ACCORD_11G = HondaBoschCANFDPlatformConfig(
     [
@@ -185,7 +184,6 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1326, wheelbase=2.7, steerRatio=15.38, centerToFrontRatio=0.4),  # steerRatio: 10.93 is end-to-end spec
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
-    flags=HondaFlags.ALLOW_MANUAL_TRANS,
   )
   HONDA_CIVIC_BOSCH_DIESEL = HondaBoschPlatformConfig(
     [],  # don't show in docs
@@ -203,7 +201,7 @@ class CAR(Platforms):
     ],
     HONDA_CIVIC_BOSCH.specs,
     {Bus.pt: 'honda_bosch_radarless_generated'},
-    flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.ALLOW_MANUAL_TRANS
+    flags=HondaFlags.BOSCH_RADARLESS
   )
   HONDA_CRV_5G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V 2017-22", min_steer_speed=15. * CV.MPH_TO_MS)],
@@ -336,7 +334,10 @@ class CAR(Platforms):
     flags=HondaFlags.NIDEC_ALT_PCM_ACCEL | HondaFlags.HAS_ALL_DOOR_STATES,
   )
   HONDA_ODYSSEY_TWN = HondaNidecPlatformConfig(
-    [HondaCarDocs("Honda Odyssey (Taiwan) 2018-19")],
+    [
+      HondaCarDocs("Honda Odyssey (Taiwan) 2018-19"),
+      HondaCarDocs("Honda Odyssey (Singapore) 2021")
+    ],
     CarSpecs(mass=1865, wheelbase=2.9, steerRatio=14.35, centerToFrontRatio=0.44, tireStiffnessFactor=0.82),
     radar_dbc_dict('honda_odyssey_twn_2018_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
