@@ -85,13 +85,23 @@ class CarController(CarControllerBase):
 
     # angle control
     else:
-      self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last,
+      desired_angle = actuators.steeringAngleDeg
+
+      # Light smoothing before VM to reduce command jitter that causes EPS whine.
+      # Our model outputs change at ~0.2°/frame vs stock's ~0.05°/frame at low speed.
+      # Smooth before VM (not after) to avoid double rate-limiting — VM is the safety
+      # backstop, smoothing controls the command rate.
+      # Only smooth when winding (|angle| increasing); unwind is unsmoothed for fast return.
+      if CC.latActive and abs(desired_angle - self.apply_angle_last) > 0.05:
+        unwinding = abs(desired_angle) < abs(self.apply_angle_last)
+        if not unwinding:
+          alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.4, 4.2, 6.1, 8.3], [0.15, 0.20, 0.30, 0.50, 1.0])
+          desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
+
+      self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
                                                           CS.out.vEgoRaw, CS.out.steeringAngleDeg,
                                                           CC.latActive, self.params, self.VM)
 
-      # Torque reduction gain: controls EPS effort instead of smoothing the angle.
-      # When angle commands change rapidly, gain drops so EPS eases in (no slap/whine).
-      # When commands are stable, gain is high for precise tracking.
       apply_torque = self.torque_reduction_gain_controller.update(
         CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw, self.apply_angle_last)
 
