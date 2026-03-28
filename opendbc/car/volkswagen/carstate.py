@@ -18,6 +18,7 @@ class CarState(CarStateBase):
     self.esp_stopping = False
     self.esp_hold_confirmation = False
     self.rolling_backward = False
+    self.rolling_forward = False
     self.grade = 0.0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
@@ -82,7 +83,15 @@ class CarState(CarStateBase):
 
       self.rolling_backward = (
         pt_cp.vl["ESP_10"]["ESP_HR_Fahrtrichtung"] == 1 or
-        pt_cp.vl["ESP_10"]["ESP_HL_Fahrtrichtung"] == 1
+        pt_cp.vl["ESP_10"]["ESP_HL_Fahrtrichtung"] == 1 or
+        pt_cp.vl["ESP_10"]["ESP_VR_Fahrtrichtung"] == 1 or
+        pt_cp.vl["ESP_10"]["ESP_VL_Fahrtrichtung"] == 1
+      )
+      self.rolling_forward = (
+        pt_cp.vl["ESP_10"]["ESP_HR_Fahrtrichtung"] == 0 or
+        pt_cp.vl["ESP_10"]["ESP_HL_Fahrtrichtung"] == 0 or
+        pt_cp.vl["ESP_10"]["ESP_VR_Fahrtrichtung"] == 0 or
+        pt_cp.vl["ESP_10"]["ESP_VL_Fahrtrichtung"] == 0
       )
 
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:

@@ -50,6 +50,7 @@ class MQBStandstillManager:
     self.esp_hold_frames = 0
     self.prev_starting_hold = False
     self.can_stop_forever = False
+    self.rollback_protection_active = False
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
              ) -> tuple[bool, float, bool, bool, bool | None, bool | None]:
@@ -58,23 +59,28 @@ class MQBStandstillManager:
 
     if CS.esp_hold_confirmation:
       self.esp_hold_frames += 1
+    if CS.rolling_backward:
+      self.rollback_protection_active = True
+    elif CS.rolling_forward:
+      self.rollback_protection_active = False
 
     # acc type 1 is sensitive to control signals when brake is pressed (when preEnabled)
     if CS.out.brakePressed:
       long_active = False
 
-    # avoid a cruise fault if a hold is confirmed for too long
+    # avoid a cruise fault if a hold is confirmed for too long and cannot be cycled
     if self.esp_hold_frames > self.HOLD_MAX_FRAMES:
       long_active = False
 
-    # uphill launch: TSK rarely commands enough torque to move from a hill hold
+    # rollback prevention. on it's own, the TSK
+    # - won't command enough accel to move forward on a hill when starting
+    # - won't command enough brake to hold the car when stopping
     desired_launch_accel = 0.2 * CS.grade - 1
-    if long_active and accel > 0 and desired_launch_accel > 0 and (CS.out.standstill or CS.rolling_backward):
-      accel = max(accel, desired_launch_accel)
-
-    # rollback prevention:
-    if long_active and accel <= 0 and CS.rolling_backward:
-      accel = -3.5
+    if long_active and self.rollback_protection_active:
+      if accel > 0:
+        accel = max(accel, desired_launch_accel)
+      else:
+        accel = -3.5
 
     # end the stopping procedure right after it starts, before any hold has been confirmed
     # if a hold is confirmed before we end the stopping procedure we won't be able to hold indefinitely
@@ -190,7 +196,7 @@ class CarController(CarControllerBase):
               stopping = False
               starting = CS.out.vEgo < self.CP.vEgoStopping
             else:
-              accel = min(0.3, accel)
+              accel = min(-0.3, accel)
               stopping = CS.out.vEgo < self.CP.vEgoStopping
               starting = False
         else:
