@@ -438,6 +438,29 @@ FW_VERSIONS = {
       b'68503664AC',
     ],
   },
+  CAR.JEEP_GRAND_CHEROKEE_SRT_2016: {
+    (Ecu.combinationMeter, 0x742, None): [
+      b'68243353AG',
+    ],
+    (Ecu.srs, 0x744, None): [
+      b'68309533AA',
+    ],
+    (Ecu.abs, 0x747, None): [
+      b'68252642AF',
+    ],
+    (Ecu.fwdRadar, 0x753, None): [
+      b'68251506AF',
+    ],
+    (Ecu.eps, 0x75a, None): [
+      b'68252416AL',
+    ],
+    (Ecu.engine, 0x7e0, None): [
+      b'68277171AG ',
+    ],
+    (Ecu.transmission, 0x7e1, None): [
+      b'05035476AE',
+    ],
+  },
   CAR.RAM_1500_5TH_GEN: {
     (Ecu.combinationMeter, 0x742, None): [
       b'68294051AG',
