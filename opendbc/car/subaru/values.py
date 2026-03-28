@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -9,9 +10,23 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries,
 Ecu = CarParams.Ecu
 
 
+# Add extra tolerance for average banked road since safety doesn't have the roll
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
+
+
 class CarControllerParams:
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    190,  # deg, EPS faults above ~200
+    ([], []),
+    ([], []),
+    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
+    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^3
+    MAX_ANGLE_RATE=5,  # deg/frame, comfort rate limit
+  )
+
+  STEER_STEP = 2                        # how often we update the steer cmd
+
   def __init__(self, CP):
-    self.STEER_STEP = 2                # how often we update the steer cmd
     self.STEER_DELTA_UP = 50           # torque increase per refresh, 0.8s to max
     self.STEER_DELTA_DOWN = 70         # torque decrease per refresh
     self.STEER_DRIVER_ALLOWANCE = 60   # allowed driver torque before start limiting
@@ -57,6 +72,7 @@ class SubaruSafetyFlags(IntFlag):
   GEN2 = 1
   LONG = 2
   PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
+  LKAS_ANGLE = 8
 
 
 class SubaruFlags(IntFlag):
@@ -209,6 +225,11 @@ class CAR(Platforms):
   SUBARU_ASCENT_2023 = SubaruGen2PlatformConfig(
     [SubaruCarDocs("Subaru Ascent 2023", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
     SUBARU_ASCENT.specs,
+    flags=SubaruFlags.LKAS_ANGLE,
+  )
+  SUBARU_CROSSTREK_2025 = SubaruGen2PlatformConfig(
+    [SubaruCarDocs("Subaru Crosstrek 2025", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
+    CarSpecs(mass=1529, wheelbase=2.67, steerRatio=17),
     flags=SubaruFlags.LKAS_ANGLE,
   )
 
