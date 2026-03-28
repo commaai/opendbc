@@ -111,8 +111,8 @@ class CarState(CarStateBase):
                         cp.vl["DOORS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_UNLATCHED"])
 
-    ret.brakePressed = bool(cp.vl["BRAKE_2"]["BRAKE_HUMAN"])
-    ret.brake = cp.vl["BRAKE_1"]["BRAKE_PSI"]
+    ret.brakePressed = bool(cp.vl["BRAKE_3"]["DRIVER_BRAKE_SWITCH"])
+    ret.brake = cp.vl["BRAKE_1"]["DRIVER_BRAKE_PRESSURE"]
     ret.gasPressed = cp.vl["ACCEL_GAS"]["GAS_HUMAN"] > 0
 
     ret.espDisabled = bool(cp.vl["TRACTION_BUTTON"]["TRACTION_OFF"])
