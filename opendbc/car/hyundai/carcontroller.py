@@ -82,7 +82,7 @@ class CarController(CarControllerBase):
                                                           CC.latActive, self.params, self.VM)
 
       # compute torque reduction gain (EPS assist multiplier 0-1)
-      apply_torque = self.torque_reduction_gain_controller.update(CS.out.steeringTorque, CC.latActive, CS.out.vEgoRaw)
+      apply_torque = self.torque_reduction_gain_controller.update(CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw)
 
       apply_steer_req = CC.latActive
 
