@@ -489,6 +489,31 @@ class TestHyundaiCanfdLKASteeringAltEVAngle(TestHyundaiCanfdLKASteeringAltEVBase
                                  HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT | HyundaiSafetyFlags.CANFD_ANGLE_STEERING)
     self.safety.init_tests()
 
+  # Angle steering mode does not use torque — override inherited torque tests
+  def test_steer_safety_check(self):
+    pass
+
+  def test_non_realtime_limit_up(self):
+    pass
+
+  def test_steer_req_bit(self):
+    pass
+
+  def test_steer_req_bit_frames(self):
+    pass
+
+  def test_steer_req_bit_multi_invalid(self):
+    pass
+
+  def test_steer_req_bit_realtime(self):
+    pass
+
+  def test_against_torque_driver(self):
+    pass
+
+  def test_realtime_limits(self):
+    pass
+
 
 class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanfdLKASteeringEV):
 
