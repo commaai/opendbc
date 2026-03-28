@@ -117,6 +117,7 @@ class Footnote(Enum):
     "2019 Honda Civic 1.6L Diesel Sedan does not have ALC below 12mph.",
     Column.FSR_STEERING)
 
+
 @dataclass
 class HondaBoschPlatformConfig(PlatformConfig):
   def init(self):
