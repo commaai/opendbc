@@ -27,6 +27,7 @@ non_tested_cars = [
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
   VOLKSWAGEN.PORSCHE_MACAN_MK1,
+  HONDA.ACURA_TLX_2G,
 
   # These had their DSUs unplugged, need new routes
   # TOYOTA.LEXUS_ES  # hybrid
@@ -127,7 +128,6 @@ routes = [
   CarTestRoute("414af83891dbf72c/00000006--51fa6d99cd", HONDA.HONDA_NBOX_2G),
   CarTestRoute("ad9840558640c31d/0000001a--d6cd4871c2", HONDA.ACURA_MDX_4G_MMR),  # 2025 MDX
   CarTestRoute("ad9840558640c31d/000001f2--026c4f6275", HONDA.ACURA_TLX_2G_MMR),
-  CarTestRoute("6b22f2fcd61fa86a/00000000--b3adfc8746", HONDA.ACURA_TLX_2G),
   CarTestRoute("ad9840558640c31d/00000093--de1d71dee8", HONDA.ACURA_MDX_3G_MMR), # serial steering - dashcam in upstream
 
   CarTestRoute("87d7f06ade479c2e/2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
