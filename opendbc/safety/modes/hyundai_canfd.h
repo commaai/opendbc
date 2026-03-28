@@ -207,6 +207,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   const unsigned int steer_addr = (hyundai_canfd_lka_steering && !hyundai_longitudinal) ? hyundai_canfd_get_lka_addr() : 0x12aU;
   if (msg->addr == steer_addr) {
     if (hyundai_canfd_angle_steering) {
+      // TODO: sync torque reduction gain value between openpilot and opendbc safety
       const int lkas_angle_active = (msg->data[9] >> 4U) & 0x3U;
       const bool steer_angle_req = lkas_angle_active != 1;
 
