@@ -254,7 +254,7 @@ class CarState(CarStateBase):
                           cp.vl["BLINDSPOTS_REAR_CORNERS"]["LEFT_MB"] != 0 or \
                           cp.vl["BLINDSPOTS_REAR_CORNERS"]["FL_INDICATOR_ALT"] != 0
       ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FR_INDICATOR"] != 0 or \
-                           cp.vl["BLINDSPOTS_REAR_CORNERS"]["MORE_LEFT_PROB"] != 0 or \
+                           cp.vl["BLINDSPOTS_REAR_CORNERS"]["RIGHT_MB"] != 0 or \
                            cp.vl["BLINDSPOTS_REAR_CORNERS"]["FR_INDICATOR_ALT"] != 0
 
     # cruise state
