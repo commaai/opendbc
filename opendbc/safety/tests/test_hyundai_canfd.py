@@ -13,7 +13,7 @@ import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety, away_round, round_speed
 from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm, ISO_LATERAL_ACCEL, AngleSteeringLimits
-from parameterized import parameterized
+from opendbc.testing import parameterized
 from opendbc.car.hyundai.interface import CarInterface
 
 # All combinations of radar/camera-SCC and gas/hybrid/EV cars
@@ -291,7 +291,7 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
     for _ in range(5):
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
-  @parameterized.expand([(car,) for car in sorted(PLATFORMS)])
+  @parameterized("car_name", sorted(PLATFORMS))
   def test_max_steering_angle_safety(self, car_name):
     """
     Test that ensures the current car's max steering angles are never more than 2%
@@ -325,7 +325,7 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
         f"Slip Factor: {repr(calc_slip_factor(current_vm))}"
       )
 
-  @parameterized.expand([(car,) for car in sorted(PLATFORMS)])
+  @parameterized("car_name", sorted(PLATFORMS))
   def test_max_steering_angle_delta_safety(self, car_name):
     """
     Test that ensures the current car's max steering angle deltas are never more than 2%
