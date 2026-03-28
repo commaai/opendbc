@@ -1,49 +1,56 @@
-import numpy as np
+import time
 
 
 class TorqueReductionGainController:
-  """
-  Controls the ADAS_ACIAnglTqRedcGainVal signal for HKG CAN-FD angle steering.
+  def __init__(self, angle_threshold=3.0, debounce_time=0.5, min_gain=0.0, max_gain=1.0, ramp_up_rate=0.1,
+               ramp_down_rate=0.05):
+    """
+    angle_threshold: degrees difference to consider as 'saturated'
+    debounce_time: seconds to wait before increasing gain
+    min_gain: minimum torque reduction gain (0 = no torque)
+    max_gain: maximum torque reduction gain (1 = max torque)
+    ramp_up_rate: gain increase per second when saturated
+    ramp_down_rate: gain decrease per second when not saturated
+    """
+    self.angle_threshold = angle_threshold
+    self.debounce_time = debounce_time
+    self.min_gain = min_gain
+    self.max_gain = max_gain
+    self.ramp_up_rate = ramp_up_rate
+    self.ramp_down_rate = ramp_down_rate
+    self.saturated_since = None
+    self.gain = min_gain
+    self.last_update_time = time.monotonic()
 
-  This is a normalized multiplier (0.0–1.0) that controls how much electrical
-  assist the MDPS applies when tracking the commanded steering angle.
+  def update(self, params, last_requested_angle, actual_angle, lat_active):
+    self.min_gain = params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN
+    self.max_gain = params.ANGLE_MAX_TORQUE_REDUCTION_GAIN
+    self.ramp_up_rate = params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE
+    self.ramp_down_rate = params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE
 
-  Stock ADAS behavior (observed from route data):
-    - When active and no driver override: gain ramps up to ~0.9–1.0
-    - When driver overrides: gain reduces proportionally to driver torque,
-      but never reaches zero — maintains ~0.08 minimum assist
-    - When inactive: gain is 0
-    - Ramp up: ~0.012/frame at 100Hz
-    - Ramp down: ~0.008/frame at 100Hz during override, ~0.020/frame on deactivation
-  """
+    now = time.monotonic()
+    dt = now - self.last_update_time
+    self.last_update_time = now
 
-  def __init__(self):
-    self.gain = 0.0
+    angle_error = abs(last_requested_angle - actual_angle)
+    saturated = lat_active and angle_error > self.angle_threshold
 
-  def update(self, driver_torque: float, steering_pressed: bool, lat_active: bool,
-             steer_threshold: float) -> float:
-    if not lat_active:
-      # Ramp down to zero when inactive (~0.020/frame, reaches 0 from 1.0 in ~0.5s)
-      self.gain = max(self.gain - 0.020, 0.0)
-      return self.gain
-
-    if steering_pressed:
-      # Driver is overriding: target gain based on torque magnitude
-      # Stock data shows roughly linear relationship:
-      #   |torque| ~threshold -> gain ~0.85
-      #   |torque| ~2x threshold -> gain ~0.58
-      #   |torque| ~3x threshold -> gain ~0.25
-      #   |torque| ~4x+ threshold -> gain ~0.08
-      # Approximated as: clip(1.0 - |torque| / (threshold * 4.5), 0.08, 1.0)
-      target = float(np.clip(1.0 - abs(driver_torque) / (steer_threshold * 4.5), 0.08, 1.0))
-
-      # Ramp toward target (~0.008/frame when reducing)
-      if target < self.gain:
-        self.gain = max(self.gain - 0.008, target)
-      else:
-        self.gain = min(self.gain + 0.012, target)
+    if saturated:
+      if self.saturated_since is None:
+        self.saturated_since = now
+      elif (now - self.saturated_since) > self.debounce_time:
+        self.gain = min(self.gain + self.ramp_up_rate * dt, self.max_gain)
     else:
-      # No override: ramp up toward 1.0 (~0.012/frame, reaches 1.0 from 0 in ~0.8s)
-      self.gain = min(self.gain + 0.012, 1.0)
+      self.saturated_since = None
+      self.gain = max(self.gain - self.ramp_down_rate * dt, self.min_gain)
+
+    if not lat_active:
+      self.gain = self.min_gain
+      self.saturated_since = None
 
     return self.gain
+
+  def reset(self):
+    self.gain = self.min_gain
+    self.saturated_since = None
+    self.last_update_time = time.monotonic()
