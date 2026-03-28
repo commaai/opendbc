@@ -41,7 +41,7 @@ class CarInterface(CarInterfaceBase):
         # this needs to be figured out for cars without an ADAS ECU
         ret.alphaLongitudinalAvailable = False
 
-      ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
+      ret.enableBsm = 0x1ba in fingerprint[CAN.ECAN]
 
       # no longitudinal for all lka_steering angle steering
       if lka_steering and ret.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
