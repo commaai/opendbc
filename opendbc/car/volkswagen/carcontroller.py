@@ -112,9 +112,9 @@ class MQBStandstillManager:
     # - wheels move while hold is not confirmed
     # - we drop a hold confirmation after a frame where we were actively starting with a confirmed hold
     is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
-    if CS.out.vEgo > 0 and not CS.esp_hold_confirmation:
+    if not CS.out.standstill and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
-    elif self.prev_starting_hold and not CS.esp_hold_confirmation:
+    elif long_active and self.prev_starting_hold and not CS.esp_hold_confirmation:
       self.esp_hold_frames = 0
     self.prev_starting_hold = is_starting and CS.esp_hold_confirmation
 
