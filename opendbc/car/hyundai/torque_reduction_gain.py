@@ -1,56 +1,94 @@
-import time
+import numpy as np
+from opendbc.car.common.conversions import Conversions as CV
 
 
 class TorqueReductionGainController:
-  def __init__(self, angle_threshold=3.0, debounce_time=0.5, min_gain=0.0, max_gain=1.0, ramp_up_rate=0.1,
-               ramp_down_rate=0.05):
-    """
-    angle_threshold: degrees difference to consider as 'saturated'
-    debounce_time: seconds to wait before increasing gain
-    min_gain: minimum torque reduction gain (0 = no torque)
-    max_gain: maximum torque reduction gain (1 = max torque)
-    ramp_up_rate: gain increase per second when saturated
-    ramp_down_rate: gain decrease per second when not saturated
-    """
-    self.angle_threshold = angle_threshold
-    self.debounce_time = debounce_time
-    self.min_gain = min_gain
-    self.max_gain = max_gain
-    self.ramp_up_rate = ramp_up_rate
-    self.ramp_down_rate = ramp_down_rate
-    self.saturated_since = None
-    self.gain = min_gain
-    self.last_update_time = time.monotonic()
+  """
+  Controls the ADAS_ACIAnglTqRedcGainVal signal for HKG CAN-FD angle steering.
 
-  def update(self, params, last_requested_angle, actual_angle, lat_active):
-    self.min_gain = params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN
-    self.max_gain = params.ANGLE_MAX_TORQUE_REDUCTION_GAIN
-    self.ramp_up_rate = params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE
-    self.ramp_down_rate = params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE
+  The gain controls how hard the EPS tries to track the commanded angle.
+  Instead of smoothing the angle command (which delays the model's intent),
+  we modulate the gain to control HOW AGGRESSIVELY the EPS follows it.
 
-    now = time.monotonic()
-    dt = now - self.last_update_time
-    self.last_update_time = now
+  When the angle command is changing rapidly (large |dangle|), the gain is
+  reduced so the EPS eases into the new angle instead of slamming. When
+  commands are stable, gain is high for precise tracking.
 
-    angle_error = abs(last_requested_angle - actual_angle)
-    saturated = lat_active and angle_error > self.angle_threshold
+  This achieves the same anti-slap/whine effect as angle smoothing but
+  without delaying what the upper controller wants:
+    - Angle command: always sent directly (faithful to model)
+    - Gain: controls the EPS effort to reach that angle
 
-    if saturated:
-      if self.saturated_since is None:
-        self.saturated_since = now
-      elif (now - self.saturated_since) > self.debounce_time:
-        self.gain = min(self.gain + self.ramp_up_rate * dt, self.max_gain)
-    else:
-      self.saturated_since = None
-      self.gain = max(self.gain - self.ramp_down_rate * dt, self.min_gain)
+  No feedback loop risk: gain reacts to command rate |dangle|, which is
+  independent of the gain itself.
+  """
 
+  SPEED_BP =       [0.,  10.,  50.,  80.]  # km/h
+  SPEED_CEILING =  [0.85, 0.85, 0.96, 1.0]
+
+  # When steeringPressed: drop gain to this fraction of ceiling.
+  OVERRIDE_FACTOR = 0.6
+
+  # When angle command changes rapidly, reduce gain instantly to this fraction.
+  # After VM rate limiting, dangle is typically 0-0.5°/frame. Stock is ~0.02-0.1°/frame.
+  # Small corrections (< 0.3°) should not reduce gain — only large steps matter.
+  DANGLE_BP =       [0.,  0.3, 0.5, 1.0, 2.0]  # degrees per frame (post VM limiting)
+  DANGLE_FACTOR =   [1.0, 1.0, 0.7, 0.5, 0.3]
+
+  RAMP_RATE = 0.008         # normal ramp up/down
+  RECOVERY_RATE = 0.02      # faster recovery after override
+  OVERRIDE_DROP_RATE = 0.05 # fast drop during override
+
+  def __init__(self):
+    self.gain = 0.0
+    self.last_angle = 0.0
+    self._was_overriding = False
+
+  def update(self, steering_pressed: bool, lat_active: bool, v_ego: float, apply_angle: float) -> float:
     if not lat_active:
-      self.gain = self.min_gain
-      self.saturated_since = None
+      target = 0.0
+      self._was_overriding = False
+    else:
+      speed_kmh = v_ego * CV.MS_TO_KPH
+      ceiling = float(np.interp(speed_kmh, self.SPEED_BP, self.SPEED_CEILING))
+
+      if steering_pressed:
+        target = ceiling * self.OVERRIDE_FACTOR
+      else:
+        # Reduce gain when angle command is changing rapidly (prevents EPS slap)
+        dangle = abs(apply_angle - self.last_angle)
+        dangle_factor = float(np.interp(dangle, self.DANGLE_BP, self.DANGLE_FACTOR))
+        target = ceiling * dangle_factor
+
+    self.last_angle = apply_angle
+
+    if steering_pressed:
+      self._was_overriding = True
+    elif self._was_overriding and lat_active and self.gain >= target - 0.001:
+      self._was_overriding = False
+
+    # When angle command changes rapidly, apply the dangle reduction immediately
+    # (no ramp — the whole point is to catch the instant the command jumps).
+    # The gain ramps back up naturally when commands stabilize.
+    if lat_active and not steering_pressed:
+      dangle = abs(apply_angle - self.last_angle)
+      dangle_factor = float(np.interp(dangle, self.DANGLE_BP, self.DANGLE_FACTOR))
+      instant_limit = target * dangle_factor
+      if instant_limit < self.gain:
+        self.gain = instant_limit
+
+    # Ramp toward target (handles activation, deactivation, override, and recovery)
+    if target < self.gain:
+      if steering_pressed:
+        rate = self.OVERRIDE_DROP_RATE
+      else:
+        rate = self.RAMP_RATE
+      self.gain = max(self.gain - rate, target)
+    else:
+      if self._was_overriding:
+        rate = self.RECOVERY_RATE
+      else:
+        rate = self.RAMP_RATE
+      self.gain = min(self.gain + rate, target)
 
     return self.gain
-
-  def reset(self):
-    self.gain = self.min_gain
-    self.saturated_since = None
-    self.last_update_time = time.monotonic()
