@@ -142,6 +142,7 @@ class CarController(CarControllerBase):
       try:
         with open(TORQUE_REDUCTION_GAIN_JSON) as f:
           gain = json.load(f)
+        self.angle_enable_smoothing_factor = bool(gain.get("angle_smoothing_factor"))
         self.params.ANGLE_MIN_TORQUE_REDUCTION_GAIN = float(gain.get("min_torque_reduction_gain"))
         self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN = float(gain.get("max_torque_reduction_gain"))
         self.params.ANGLE_ACTIVE_TORQUE_REDUCTION_GAIN = float(gain.get("active_torque_reduction_gain"))
