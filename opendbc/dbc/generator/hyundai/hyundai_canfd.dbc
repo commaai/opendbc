@@ -760,10 +760,7 @@ CM_ SG_ 203 ADAS_ACIAnglTqRedcGainVal "(LFA) ADAS AngleControlInterface Angle To
 CM_ SG_ 203 FCA_ESA_ActvSta "FCA_ESA Active State";
 CM_ SG_ 203 FCA_ESA_TqBstGainVal "FCA_ESA Torque Boost Gain Value";
 CM_ BO_ 234 "Named MDPS_01_10ms on the official DBC.";
-CM_ SG_ 234 CHECKSUM "The data area for CRC calculation is based on the data length (DLC) of the message DB.
-
-The CRC shall be calculated over the entire data block (excluding the CRC bytes) including the user data, alive counter and Data ID
-
+CM_ SG_ 234 CHECKSUM "The data area for CRC calculation is based on the data length (DLC) of the message DB. The CRC shall be calculated over the entire data block (excluding the CRC bytes) including the user data, alive counter and Data ID. CRC Polynomial (0x1021).";
 CM_ BO_ 229 "[P] Periodic";
 CM_ SG_ 229 ESC_YawSigSta "ESC_YawSigSta";
 CM_ SG_ 229 ESC_LatAccelSigSta "ESC_LatAccelSigSta";
@@ -771,11 +768,7 @@ CM_ SG_ 229 ESC_LongAccelSigSta "ESC_LongAccelSigSta";
 CM_ SG_ 229 ESC_YawRtVal "ESC_YawRtVal";
 CM_ SG_ 229 ESC_LatAccelVal "ESC_LatAccelVal";
 CM_ SG_ 229 ESC_LongAccelVal "ESC_LongAccelVal";
-
-- CRC Polynomial (0x1021) , In";
-CM_ SG_ 234 COUNTER "For the first transmission request for a data element the counter shall be initialized with 0 and shall be incremented by 1 for every subsequent send request.
-
-When the counter reaches the maximum value(0xFF), then it shall restart with 0 for the next s";
+CM_ SG_ 234 COUNTER "For the first transmission request for a data element the counter shall be initialized with 0 and shall be incremented by 1 for every subsequent send request. When the counter reaches the maximum value(0xFF), then it shall restart with 0 for the next send request.";
 CM_ SG_ 234 MDPS_WrngLmpSta "The signal indicates the ststus of the MDPS Warning lamp";
 CM_ SG_ 234 MDPS_Typ "Information regarding the type of MDPS. (C-MDPS / R-MDPS / SbW)";
 CM_ SG_ 234 MDPS_EngIdleRpmReq "This signal indicates the request status for engine idle rpm up according to MDPS fast rotation.";
@@ -784,91 +777,31 @@ CM_ SG_ 234 MDPS_VsmDfctvSta "Information regarding the MDPS defective Indicatio
 CM_ SG_ 234 MDPS_VsmSigErrSta "Information indicating VSM signal status";
 CM_ SG_ 234 MDPS_PaPlugInSta "This signal indicates whether the PA function of MDPS is plugged in or not.";
 CM_ SG_ 234 MDPS_PaModeSta "This signal indicates the status of the PA steering function.";
-CM_ SG_ 234 MDPS_PaCanfltSta "This Signal should be used by only PA
-
-This signal indicates whether the MDPS is defective in PA cooperation control.
-
-This signal is set as '1' only when MDPS Detects CAN Failure(TIMEOUT, Signal Error) of PA CAN Message";
+CM_ SG_ 234 MDPS_PaCanfltSta "This Signal should be used by only PA. This signal indicates whether the MDPS is defective in PA cooperation control. This signal is set as '1' only when MDPS Detects CAN Failure(TIMEOUT, Signal Error) of PA CAN Message";
 CM_ SG_ 234 MDPS_LkaPlgInSta "This signal indicates whether the LKA function of MDPS is plugged in or not.";
 CM_ SG_ 234 MDPS_LkaToiActvSta "This flag is set to 1 in response to the LKA Controller requesting the activation of the torque interface and set back to 0 in response to the LKA Controller requesting the de-activation of the torque interface.";
 CM_ SG_ 234 MDPS_LkaToiUnblSta "This is a flag that is set when the MDPS is not faulty, but is temporarily unable to activate the TOI due to steering torque limiting e.g. when the supply voltage is too low.";
 CM_ SG_ 234 MDPS_LkaToiFltSta "This fault flag is set when a fault within the MDPS system has been detected such that the LKA TOI can no longer function. CAN failures, internal MDPS failures, and LKA controller logic failures are all reported by this flag. Failures reported by the LKA";
 CM_ SG_ 234 MDPS_LkaFailSta "This fault flag is set whilst the MDPS TOI is in a fail state and has not yet recovered from it. This could either be due to an MDPS detected fault (as communicated by the MDPS_LkaToiFltSta' flag) or an LKA detected fault (as communicated by the LKA_";
 CM_ SG_ 234 MDPS_ResetOpSta "Information regarding the state of reset";
-CM_ SG_ 234 MDPS_CurrModVal "This signal indicates flex steer parameter value in MDPS.
-
-
-
- For information about flex steer mode set by user, refer to MDPS_FlxStrSta signal.";
-CM_ SG_ 234 MDPS_OutTqVal "MDPS column torque
-
-this signal has direction information.
-
-'+' Value means Counter clock wise rotation.
-
-'-' value means Clock wise rotation.";
+CM_ SG_ 234 MDPS_CurrModVal "This signal indicates flex steer parameter value in MDPS. For information about flex steer mode set by user, refer to MDPS_FlxStrSta signal.";
+CM_ SG_ 234 MDPS_OutTqVal "MDPS column torque. This signal has direction information. '+' Value means Counter clock wise rotation. '-' value means Clock wise rotation.";
 CM_ SG_ 234 MDPS_VsmActResp "Information of VSM Tqrque Intervention Act Response";
 CM_ SG_ 234 Reprogram_State_MDPS "Information regarding the reprogram state";
-CM_ SG_ 234 MDPS_StrTqSnsrVal "Steering torque sensor value
-
-
-
-Physical Value > 0: Left Direction (CCW)
-
-Physical Value < 0: Right Direction (CW)
-
-
-
-this signal has direction information.
-
-'+' Value means Counter clock wise rotation.
-
-'-' value means Clock wise rotation. (Original definition was (0.005,-20.48) [0|0] but it's different from all OP expects)";
-CM_ SG_ 234 MDPS_PaStrAnglVal "This value is used to inform PA of a compensated steering wheel angle by MDPS. The signal is signed 16bits.
-
-
-
-(PH) = (HEX)  0.1 (for 0 < HEX  32767)  or
-
-= (HEX - 65536)  0.1 (for HEX > 32767) [Deg]
-
-
-
-this signal has direction information.
-
-'+' V";
+CM_ SG_ 234 MDPS_StrTqSnsrVal "Steering torque sensor value. Physical Value > 0: Left Direction (CCW). Physical Value < 0: Right Direction (CW). '+' Value means Counter clock wise rotation. '-' value means Clock wise rotation. (Original definition was (0.005,-20.48) [0|0] but it's different from all OP expects)";
+CM_ SG_ 234 MDPS_PaStrAnglVal "This value is used to inform PA of a compensated steering wheel angle by MDPS. The signal is signed 16bits. (PH) = (HEX) * 0.1 (for 0 < HEX <= 32767) or = (HEX - 65536) * 0.1 (for HEX > 32767) [Deg]. This signal has direction information.";
 CM_ SG_ 234 MDPS_LoamModSta "The signal represent status of the LOAM(Loss Of Assist Mitigation) Mode";
 CM_ SG_ 234 MDPS_HDPSpprtSWVer "This signal indicates HDP-MDPS Control Requirement Spec Version";
 CM_ SG_ 234 MDPS_ADASAciActvSta "State for angle control";
 CM_ SG_ 234 MDPS_ADASAciPluginSta "This signal indicates whether the ADASAci function of MDPS is plugged in or not.";
 CM_ SG_ 234 MDPS_ADAS_AciFltSig "MDPS Fault Status for HDP Function";
-CM_ SG_ 234 MDPS_EstStrAnglVal "This value is used to inform of a compensated steering wheel angle by MDPS . The signal is signed 16bits, and made by motor position sensor.
-
-
-
-(PH) = (HEX)  0.1 (for 0 < HEX  32767)  or
-
-= (HEX - 65536)  0.1 (for HEX > 32767) [Deg]
-
-
-
-this signal";
+CM_ SG_ 234 MDPS_EstStrAnglVal "This value is used to inform of a compensated steering wheel angle by MDPS. The signal is signed 16bits, and made by motor position sensor. (PH) = (HEX) * 0.1 (for 0 < HEX <= 32767) or = (HEX - 65536) * 0.1 (for HEX > 32767) [Deg].";
 CM_ SG_ 234 MDPS_ADASAciActvSta_Lv2 "States for angle control (LV2)";
 CM_ SG_ 234 MDPS_ADAS_AciFltSig_Lv2 "MDPS Fault Status for LV2 Angle Control Function";
 CM_ SG_ 234 MDPS_TpaPlugInSta "This signal indicates whether the TPA function of MDPS is plugged in or not.";
-CM_ SG_ 234 MDPS_TpaCanfltSta "This Signal should be used by only TPA
-
-This signal indicates whether the MDPS is defective in TPA cooperation control.
-
-This signal is set as '1' only when MDPS Detects CAN Failure(TIMEOUT, Signal Error) of TPA CAN Message";
+CM_ SG_ 234 MDPS_TpaCanfltSta "This Signal should be used by only TPA. This signal indicates whether the MDPS is defective in TPA cooperation control. This signal is set as '1' only when MDPS Detects CAN Failure(TIMEOUT, Signal Error) of TPA CAN Message";
 CM_ SG_ 234 MDPS_TpaModeSta "This signal indicates the status of the TPA steering function.";
-CM_ SG_ 234 MDPS_TpaStrAnglVal "This value is used to inform TPA of a compensated steering wheel angle by MDPS. The signal is signed 16bits.
-
-
-
-(PH) = (HEX)  0.1 (for 0 < HEX  32767)  or
-
-= (HEX - 65536)  0.1 (for HEX > 32767) [Deg]";
+CM_ SG_ 234 MDPS_TpaStrAnglVal "This value is used to inform TPA of a compensated steering wheel angle by MDPS. The signal is signed 16bits. (PH) = (HEX) * 0.1 (for 0 < HEX <= 32767) or = (HEX - 65536) * 0.1 (for HEX > 32767) [Deg]";
 CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 CM_ SG_ 272 ToiFltSta "This fault flag is set when a fault in the LKA system has been detected by the LKA ECU such that LKA can no longer function. CAN failures, internal video ECU failures, hard-wired component (e.g. master switch) failures and other system logic failures are";
 CM_ SG_ 272 ADAS_StrAnglReqVal "(LKAS) ADAS Steering Angle Request Value; Capped at 176.7; tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
@@ -892,9 +825,7 @@ CM_ SG_ 282 FR_CMR_SCCEquipSta "This signal indicates equipment for SCC";
 CM_ SG_ 282 FR_CMR_ReqADASMapMsgVal "This signal indicates an ADAS map message request from FR_CMR to H_U. Each bit indicates the request messages as follows. - Bit 0 : H_U_NAVI_V2_STUB_E - Bit 1 : HU_NAVI_V2_PROSHORT_E_00 (곡률) - Bit 2 : HU_NAVI_V2_PROSHORT_E_00 (곡률 외 정보)";
 CM_ SG_ 282 FR_CMR_SwVer1Val "This signal indicates a major version of FR_CMR software. If FR_CMR software version is A.00, 'A' and '00' mean major and minor version respectively.";
 CM_ SG_ 282 FR_CMR_SwVer2Val "This signal indicates a minor version of FR_CMR software. If FR_CMR software version is A.00, 'A' and '00' mean major and minor version respectively.";
-CM_ BO_ 298 "This message controls steering and alerts regarding lateral control. Formerly known as LFA.
-
-Node is flagged as ADRV, but in reality this signal can be seen from either the FR_CMR (front camera) or the ADRV (adas ecu) for some trims.";
+CM_ BO_ 298 "This message controls steering and alerts regarding lateral control. Formerly known as LFA. Node is flagged as ADRV, but in reality this signal can be seen from either the FR_CMR (front camera) or the ADRV (adas ecu) for some trims.";
 CM_ SG_ 298 LKA_OptUsmSta "LKA_OptionUsmStatus ##2G##LDW_LKA - LKA11 - CF_LKA_Opt_USM";
 CM_ SG_ 298 LKA_RcgSta "LKA_RecognitionStatus ##2G##LDW_LKA - LKA11 - CF_LKA_LaneRecogState";
 CM_ SG_ 298 LKA_LHLnWrnSta "LKA_LHLaneWarningStatus ##2G##LDW_LKA - LKA11 - CF_LKA_LHWarning";
