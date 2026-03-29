@@ -80,18 +80,16 @@ class CarController(CarControllerBase):
     if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
       desired_angle = actuators.steeringAngleDeg
 
-      # Light smoothing before VM to reduce command jitter that causes EPS whine.
-      # Our model outputs change at ~0.2°/frame vs stock's ~0.05°/frame at low speed.
-      # Smooth before VM (not after) to avoid double rate-limiting.
-      # Smooth all commands at low speed — both winding and unwinding micro-adjustments
-      # cause EPS noise. Skip smoothing only for large unwind (fast return from big angles).
-      if CC.latActive and abs(desired_angle - self.apply_angle_last) > 0.05:
-        large_unwind = abs(desired_angle) < abs(self.apply_angle_last) and abs(self.apply_angle_last) > 10
-        if not large_unwind:
-          # Target: reduce dangle from ~0.2° to ~0.05° (stock level) at low speed.
-          # Stock is smooth up to 50 km/h, so smoothing extends to ~14 m/s.
-          alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 13.9], [0.10, 0.15, 0.25, 0.40, 1.0])
-          desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
+      # Smooth micro-adjustments that cause EPS whine at low speed.
+      # The model produces ~0.2-0.4°/frame jitter vs stock's ~0.05°. The EPS PID
+      # overshoots tracking these rapid changes, causing motor direction reversals
+      # at audible frequencies. Smoothing reduces the jitter to stock levels.
+      # Skip smoothing for large angle changes (>1°) — those are real steering
+      # maneuvers, not jitter, and should execute immediately.
+      delta = abs(desired_angle - self.apply_angle_last)
+      if CC.latActive and 0.05 < delta < 1.0:
+        alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 11.1, 13.9], [0.08, 0.10, 0.12, 0.20, 0.40, 1.0])
+        desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
 
       self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
                                                           CS.out.vEgoRaw, CS.out.steeringAngleDeg,
