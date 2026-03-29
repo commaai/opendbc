@@ -191,7 +191,7 @@ def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available
 
   # New HUD concept for selected Bosch cars, overwrites some of the above
   # TODO: make global across all Honda if feedback is favorable
-  if CP.carFingerprint == CAR.HONDA_ODYSSEY:
+  if CP.carFingerprint == CAR.HONDA_ODYSSEY_5G:
     lkas_hud_values['DASHED_LANES'] = steering_available
     lkas_hud_values['SOLID_LANES'] = lat_active
     lkas_hud_values['LKAS_PROBLEM'] = lat_active and reduced_steering
