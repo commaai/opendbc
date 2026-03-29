@@ -10,7 +10,7 @@
 |Acura|Integra 2023-25|All|[Community](#community)|
 |Acura|MDX 2015-16|Advance Package|[Community](#community)|
 |Acura|MDX 2017-20|All|[Community](#community)|
-|Acura|MDX 2022-24|All|[Community](#community)|
+|Acura|MDX 2022-24|All|[Upstream](#upstream)|
 |Acura|MDX 2025-26|All except Type S|[Upstream](#upstream)|
 |Acura|MDX Hybrid 2017-20|All|[Community](#community)|
 |Acura|RDX 2016-18|AcuraWatch Plus or Advance Package|[Upstream](#upstream)|
@@ -260,8 +260,8 @@
 |Ram|1500 2019-24|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |Ram|2500 2020-24|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
 |Ram|3500 2019-22|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
-|Rivian|R1S 2022-24|All|[Upstream](#upstream)|
-|Rivian|R1T 2022-24|All|[Upstream](#upstream)|
+|Rivian|R1S 2022-25|All|[Upstream](#upstream)|
+|Rivian|R1T 2022-25|All|[Upstream](#upstream)|
 |SEAT|Alhambra 2018-20|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |SEAT|Ateca 2016-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |SEAT|Leon 2014-20|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|

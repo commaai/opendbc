@@ -2,7 +2,7 @@ from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.volkswagen.values import CAR, DBC, CanBus, NetworkLocation, TransmissionType, GearShifter, \
+from opendbc.car.volkswagen.values import DBC, CanBus, NetworkLocation, TransmissionType, GearShifter, \
                                                       CarControllerParams, VolkswagenFlags
 
 ButtonType = structs.CarState.ButtonEvent.Type
@@ -244,17 +244,12 @@ class CarState(CarStateBase):
     ret.gasPressed = pt_cp.vl["Motor_03"]["MO_Fahrpedalrohwert_01"] > 0
     ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(alt_cp.vl["Getriebe_03"]["GE_Waehlhebel"], None))
 
-    # ACC okay but disabled (1), ACC ready (2), a radar visibility or other fault/disruption (6 or 7)
-    # currently regulating speed (3), driver accel override (4), brake only (5)
-    if self.CP.carFingerprint == CAR.PORSCHE_MACAN_MK1:
-      ret.cruiseState.available = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (2, 3, 4, 5)
-      ret.cruiseState.enabled = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (3, 4, 5)
-      ret.accFaulted = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (6, 7)
-    else:
-      ret.cruiseState.available = pt_cp.vl["TSK_02"]["TSK_Status"] in (0, 1, 2)
-      ret.cruiseState.enabled = pt_cp.vl["TSK_02"]["TSK_Status"] in (1, 2)
-      ret.cruiseState.speed = ext_cp.vl["ACC_02"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
-      ret.accFaulted = pt_cp.vl["TSK_02"]["TSK_Status"] in (3,)
+    # TODO: We don't have a true mainswitch state yet, might need stateful tracking on LS_01 if momentary-press is a thing
+    # TSK_04.TSK_Status_GRA_ACC_02 0 = not engaged, 1 = engaged, 2 = engaged with driver accel override, 3 = fault
+    ret.cruiseState.available = alt_cp.vl["TSK_04"]["TSK_Status_GRA_ACC_02"] in (0, 1, 2)
+    ret.cruiseState.available = alt_cp.vl["TSK_04"]["TSK_Status_GRA_ACC_02"] in (1, 2)
+    ret.accFaulted = alt_cp.vl["TSK_04"]["TSK_Status_GRA_ACC_02"] == 3
+    ret.cruiseState.speed = ext_cp.vl["ACC_02"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
 
     self.parse_mlb_mqb_steering_state(ret, pt_cp)
 

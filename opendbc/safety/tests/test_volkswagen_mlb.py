@@ -10,7 +10,7 @@ MSG_ESP_03 = 0x103      # RX from ABS, for wheel speeds
 MSG_MOTOR_03 = 0x105    # RX from ECU, for driver throttle input and driver brake input
 MSG_ESP_05 = 0x106      # RX from ABS, for brake light state
 MSG_LS_01 = 0x10B       # TX by OP, ACC control buttons for cancel/resume
-MSG_TSK_02 = 0x10C      # RX from ECU, for ACC status from drivetrain coordinator
+MSG_TSK_04 = 0x10E      # RX from ECU, for ACC status from drivetrain coordinator
 MSG_HCA_01 = 0x126      # TX by OP, Heading Control Assist steering torque
 MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 
@@ -50,15 +50,10 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
   def _user_gas_msg(self, gas):
     return self._motor_03_msg(gas_signal=gas)
 
-  # ACC engagement status (Macan: ACC_05 on bus 2)
-  def _tsk_status_msg(self, enable, main_switch=True):
-    values = {"ACC_Status_ACC": 1 if not main_switch else 3 if enable else 2}
-    return self.packer.make_can_msg_safety("ACC_05", 2, values)
-
-  # ACC engagement status (Audi B8: TSK_02 on bus 0)
-  def _tsk_02_status_msg(self, enable=False, main_switch=True):
-    values = {"TSK_Status": 3 if not main_switch else 1 if enable else 0}
-    return self.packer.make_can_msg_safety("TSK_02", 0, values)
+  # ACC engagement status
+  def _tsk_status_msg(self, enable):
+    values = {"TSK_Status_GRA_ACC_02": 1 if enable else 0}
+    return self.packer.make_can_msg_safety("TSK_04", 1, values)
 
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
@@ -136,45 +131,10 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
 
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
-    self._rx(self._tsk_status_msg(False, main_switch=True))
+    self._rx(self._tsk_status_msg(False))
     self.safety.set_controls_allowed(1)
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
-
-  def test_acc_main_switch_off_disables_controls_acc05(self):
-    # Macan: ACC_05 on bus 2, main switch off should disable controls
-    self._rx(self._tsk_status_msg(True))
-    self.assertTrue(self.safety.get_controls_allowed())
-    self._rx(self._tsk_status_msg(False, main_switch=False))
-    self.assertFalse(self.safety.get_controls_allowed())
-
-  def test_tsk_02_cruise_status(self):
-    # Audi B8: TSK_02 on bus 0, TSK_Status values:
-    #   0 = main on, not engaged
-    #   1 = engaged
-    #   2 = engaged
-    #   3 = main off
-
-    # acc_status=1 engages cruise
-    self._rx(self._tsk_02_status_msg(enable=False))
-    self._rx(self._tsk_02_status_msg(enable=True))
-    self.assertTrue(self.safety.get_controls_allowed())
-    self.assertTrue(self.safety.get_acc_main_on())
-
-    # acc_status=0 disengages cruise, main stays on
-    self._rx(self._tsk_02_status_msg(enable=False))
-    self.assertFalse(self.safety.get_controls_allowed())
-    self.assertTrue(self.safety.get_acc_main_on())
-
-    # acc_status=2 also engages cruise
-    self._rx(self.packer.make_can_msg_safety("TSK_02", 0, {"TSK_Status": 2}))
-    self.assertTrue(self.safety.get_controls_allowed())
-    self.assertTrue(self.safety.get_acc_main_on())
-
-    # acc_status=3 = main off, disengages
-    self._rx(self._tsk_02_status_msg(main_switch=False))
-    self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.get_acc_main_on())
 
 
 if __name__ == "__main__":
