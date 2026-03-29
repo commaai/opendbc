@@ -2,9 +2,9 @@ from dataclasses import dataclass, field
 from enum import IntFlag
 
 from opendbc.car.structs import CarParams
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
 
@@ -28,33 +28,49 @@ class GwmSafetyFlags(IntFlag):
 @dataclass
 class GWMCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
-  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.psa_a]))
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
 
 
 @dataclass
 class GWMPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
     Bus.pt: 'gwm_haval_h6_mk3_generated',
-    # Bus.pt: 'psa_aee2010_r3',
   })
 
 
 class CAR(Platforms):
   GWM_HAVAL_H6 = GWMPlatformConfig(
-    [GWMCarDocs("Peugeot 208 2019-25")],
+    [GWMCarDocs("Haval H6 2019-26")],
     CarSpecs(mass=2040, wheelbase=2.738, steerRatio=17.416),
   )
 
 
-# Placeholder, FW Query will be added in separate PR
+GREATWALLMOTORS_VERSION_REQUEST_MULTI = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
+  p16(uds.DATA_IDENTIFIER_TYPE.VEHICLE_MANUFACTURER_SPARE_PART_NUMBER) + \
+  p16(uds.DATA_IDENTIFIER_TYPE.VEHICLE_MANUFACTURER_ECU_SOFTWARE_VERSION_NUMBER) + \
+  p16(uds.DATA_IDENTIFIER_TYPE.APPLICATION_DATA_IDENTIFICATION)
+GREATWALLMOTORS_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40])
+
+GREATWALLMOTORS_RX_OFFSET = 0x6a
+
 FW_QUERY_CONFIG = FwQueryConfig(
-  requests=[
+  requests=[request for bus, obd_multiplexing in [(1, True), (1, False), (0, False)] for request in [
     Request(
-      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
-      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
-      bus=0,
+      [GREATWALLMOTORS_VERSION_REQUEST_MULTI],
+      [GREATWALLMOTORS_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.engine],
+      rx_offset=GREATWALLMOTORS_RX_OFFSET,
+      bus=bus,
+      obd_multiplexing=obd_multiplexing,
     ),
-  ],
+    Request(
+      [GREATWALLMOTORS_VERSION_REQUEST_MULTI],
+      [GREATWALLMOTORS_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.engine],
+      bus=bus,
+      obd_multiplexing=obd_multiplexing,
+    ),
+  ]],
 )
 
 DBC = CAR.create_dbc_map()
