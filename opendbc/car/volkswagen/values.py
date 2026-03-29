@@ -223,7 +223,6 @@ class VolkswagenFlags(IntFlag):
   MEB = 16
 
 
-
 @dataclass
 class VolkswagenMLBPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_mlb'})
