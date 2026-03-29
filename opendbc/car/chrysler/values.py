@@ -18,6 +18,7 @@ class ChryslerFlags(IntFlag):
   # Detected flags
   HIGHER_MIN_STEERING_SPEED = 1
 
+
 @dataclass
 class ChryslerCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC)"
@@ -66,6 +67,11 @@ class CAR(Platforms):
   )
 
   # Jeep
+  JEEP_CHEROKEE_5TH_GEN = ChryslerPlatformConfig(
+    [ChryslerCarDocs("Jeep Cherokee 2019-23")],
+    ChryslerCarSpecs(mass=1747., wheelbase=2.70, steerRatio=17.0, minSteerSpeed=18.5),
+    {Bus.pt: 'chrysler_cusw'},
+  )
   JEEP_GRAND_CHEROKEE = ChryslerPlatformConfig(  # includes 2017 Trailhawk
     [ChryslerCarDocs("Jeep Grand Cherokee 2016-18", video="https://www.youtube.com/watch?v=eLR9o2JkuRk")],
     ChryslerCarSpecs(mass=1778., wheelbase=2.71, steerRatio=16.7),
@@ -104,6 +110,11 @@ class CarControllerParams:
       self.STEER_DELTA_UP = 6
       self.STEER_DELTA_DOWN = 6
       self.STEER_MAX = 261  # EPS allows more, up to 350?
+    elif CP.carFingerprint in CUSW_CARS:
+      self.STEER_STEP = 1  # 100 Hz
+      self.STEER_DELTA_UP = 4
+      self.STEER_DELTA_DOWN = 4
+      self.STEER_MAX = 250  # TODO: Some CUSW will go to 261, some not quite, exact boundaries not yet determined
     else:
       self.STEER_DELTA_UP = 3
       self.STEER_DELTA_DOWN = 3
@@ -115,6 +126,7 @@ STEER_THRESHOLD = 120
 RAM_DT = {CAR.RAM_1500_5TH_GEN, }
 RAM_HD = {CAR.RAM_HD_5TH_GEN, }
 RAM_CARS = RAM_DT | RAM_HD
+CUSW_CARS = {CAR.JEEP_CHEROKEE_5TH_GEN, }
 
 
 CHRYSLER_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \

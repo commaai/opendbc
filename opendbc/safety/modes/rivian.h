@@ -1,24 +1,15 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 static uint8_t rivian_get_counter(const CANPacket_t *msg) {
-  uint8_t cnt = 0;
-  if ((msg->addr == 0x208U) || (msg->addr == 0x150U)) {
-    // Signal: ESP_Status_Counter, VDM_PropStatus_Counter
-    cnt = msg->data[1] & 0xFU;
-  }
-  return cnt;
+  // Signal: ESP_Status_Counter, VDM_PropStatus_Counter
+  return msg->data[1] & 0xFU;
 }
 
 static uint32_t rivian_get_checksum(const CANPacket_t *msg) {
-  uint8_t chksum = 0;
-  if ((msg->addr == 0x208U) || (msg->addr == 0x150U)) {
-    // Signal: ESP_Status_Checksum, VDM_PropStatus_Checksum
-    chksum = msg->data[0];
-  } else {
-  }
-  return chksum;
+  // Signal: ESP_Status_Checksum, VDM_PropStatus_Checksum
+  return msg->data[0];
 }
 
 static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, uint8_t xor_output) {
@@ -167,7 +158,7 @@ static safety_config rivian_init(uint16_t param) {
 
   bool rivian_longitudinal = false;
 
-  UNUSED(param);
+  SAFETY_UNUSED(param);
   #ifdef ALLOW_DEBUG
     const int FLAG_RIVIAN_LONG_CONTROL = 1;
     rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);

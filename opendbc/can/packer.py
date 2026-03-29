@@ -19,7 +19,7 @@ class CANPacker:
     for name, value in values.items():
       sig = msg.sigs.get(name)
       if sig is None:
-        carlog.error(f"unknown signal {name=}")
+        carlog.error(f"unknown signal {name=} in {msg.name}")
         continue
       ival = int(math.floor((value - sig.offset) / sig.factor + 0.5))
       if ival < 0:

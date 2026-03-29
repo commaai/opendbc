@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 from opendbc.car import CanBusBase
 from opendbc.car.crc import CRC16_XMODEM
@@ -37,33 +36,28 @@ class CanBus(CanBusBase):
 
 
 def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque):
-  common_values = {
-    "LKA_MODE": 2,
-    "LKA_ICON": 2 if enabled else 1,
-    "TORQUE_REQUEST": apply_torque,
-    "LKA_ASSIST": 0,
-    "STEER_REQ": 1 if lat_active else 0,
-    "STEER_MODE": 0,
-    "HAS_LANE_SAFETY": 0,  # hide LKAS settings
-    "NEW_SIGNAL_2": 0,
+  values = {
+    "LKA_OptUsmSta": 2,
+    "LKA_SysIndReq": 2 if enabled else 1,
+    "StrTqReqVal": apply_torque,
+    "LKA_SysWrn": 0,
+    "ActToiSta": 1 if lat_active else 0,
+    "LKA_UsmMod": 0,  # hide LKAS settings
+    "LKA_RcgSta": 0,
+    "Damping_Gain": 100,  # can potentially tuned for better perf [3, 200]
   }
-
-  lkas_values = copy.copy(common_values)
-  lkas_values["LKA_AVAILABLE"] = 0
-
-  lfa_values = copy.copy(common_values)
-  lfa_values["NEW_SIGNAL_1"] = 0
 
   ret = []
   if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
     lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "LKAS"
     if CP.openpilotLongitudinalControl:
-      ret.append(packer.make_can_msg("LFA", CAN.ECAN, lfa_values))
-    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, lkas_values))
+      ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
+    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, values))
   else:
-    ret.append(packer.make_can_msg("LFA", CAN.ECAN, lfa_values))
+    ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
 
   return ret
+
 
 def create_suppress_lfa(packer, CAN, lfa_block_msg, lka_steering_alt):
   suppress_msg = "CAM_0x362" if lka_steering_alt else "CAM_0x2a4"
@@ -77,6 +71,7 @@ def create_suppress_lfa(packer, CAN, lfa_block_msg, lka_steering_alt):
   values["RIGHT_LANE_LINE"] = 0
   return packer.make_can_msg(suppress_msg, CAN.ACAN, values)
 
+
 def create_buttons(packer, CP, CAN, cnt, btn):
   values = {
     "COUNTER": cnt,
@@ -87,8 +82,11 @@ def create_buttons(packer, CP, CAN, cnt, btn):
   bus = CAN.ECAN if CP.flags & HyundaiFlags.CANFD_LKA_STEERING else CAN.CAM
   return packer.make_can_msg("CRUISE_BUTTONS", bus, values)
 
+
 def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
-  # TODO: why do we copy different values here?
+  # CAN FD camera-based SCC requires additional signals to be preserved
+  # verbatim from the previous SCC_CONTROL frame to avoid checksum or
+  # state validation faults. Classic CAN SCC only validates a subset.
   if CP.flags & HyundaiFlags.CANFD_CAMERA_SCC.value:
     values = {s: cruise_info_copy[s] for s in [
       "COUNTER",
@@ -116,6 +114,7 @@ def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
     "aReqValue": 0.0,
   })
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
+
 
 def create_lfahda_cluster(packer, CAN, enabled):
   values = {

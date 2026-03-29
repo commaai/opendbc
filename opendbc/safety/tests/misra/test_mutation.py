@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import glob
-import pytest
+import unittest
 import shutil
 import subprocess
 import tempfile
@@ -13,7 +13,6 @@ ROOT = os.path.join(HERE, "../../../../")
 IGNORED_PATHS = (
   'opendbc/safety/main.c',
   'opendbc/safety/tests/',
-  'opendbc/safety/board/',
 )
 
 mutations = [
@@ -35,32 +34,38 @@ patterns = [
 ]
 
 all_files = glob.glob('opendbc/safety/**', root_dir=ROOT, recursive=True)
-files = [f for f in all_files if f.endswith(('.c', '.h')) and not f.startswith(IGNORED_PATHS)]
+files = sorted(f for f in all_files if f.endswith(('.c', '.h')) and not f.startswith(IGNORED_PATHS))
 assert len(files) > 20, files
 
+# fixed seed so every xdist worker collects the same test params
+rng = random.Random(len(files))
 for p in patterns:
-  mutations.append((random.choice(files), *p, True))
+  mutations.append((rng.choice(files), *p, True))
 
-mutations = random.sample(mutations, 2)  # can remove this once cppcheck is faster
+# sample to keep CI fast, but always include the no-mutation case
+mutations = [mutations[0]] + rng.sample(mutations[1:], min(2, len(mutations) - 1))
 
-@pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
-def test_misra_mutation(fn, rule, transform, should_fail):
-  with tempfile.TemporaryDirectory() as tmp:
-    shutil.copytree(ROOT, tmp, dirs_exist_ok=True,
-                    ignore=shutil.ignore_patterns('.venv', 'cppcheck', '.git', '*.ctu-info'))
 
-    # apply patch
-    if fn is not None:
-      with open(os.path.join(tmp, fn), 'r+') as f:
-        content = f.read()
-        f.seek(0)
-        f.write(transform(content))
+class TestMisraMutation(unittest.TestCase):
+  def test_misra_mutation(self):
+    for fn, rule, transform, should_fail in mutations:
+      with self.subTest(fn=fn, rule=rule, should_fail=should_fail):
+        with tempfile.TemporaryDirectory() as tmp:
+          shutil.copytree(ROOT, tmp, dirs_exist_ok=True,
+                          ignore=shutil.ignore_patterns('.venv', '.git', '*.ctu-info', '.hypothesis'))
 
-    # run test
-    r = subprocess.run(f"OPENDBC_ROOT={tmp} opendbc/safety/tests/misra/test_misra.sh",
-                       stdout=subprocess.PIPE, cwd=ROOT, shell=True, encoding='utf8')
-    print(r.stdout) # helpful for debugging failures
-    failed = r.returncode != 0
-    assert failed == should_fail
-    if should_fail:
-      assert rule in r.stdout, "MISRA test failed but not for the correct violation"
+          # apply patch
+          if fn is not None:
+            with open(os.path.join(tmp, fn), 'r+') as f:
+              content = f.read()
+              f.seek(0)
+              f.write(transform(content))
+
+          # run test
+          r = subprocess.run(f"OPENDBC_ROOT={tmp} opendbc/safety/tests/misra/test_misra.sh",
+                             stdout=subprocess.PIPE, cwd=ROOT, shell=True, encoding='utf8')
+          print(r.stdout) # helpful for debugging failures
+          failed = r.returncode != 0
+          assert failed == should_fail
+          if should_fail:
+            assert rule in r.stdout, "MISRA test failed but not for the correct violation"

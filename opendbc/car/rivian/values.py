@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 from opendbc.car.vin import Vin
 
@@ -22,12 +22,13 @@ class ModelYear(StrEnum):
   P_2023 = "P"
   R_2024 = "R"
   S_2025 = "S"
+  T_2026 = "T"
 
 
 @dataclass
 class RivianCarDocs(CarDocs):
   package: str = "All"
-  car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian]))
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.rivian]))
   setup_video: str = "https://youtu.be/uaISd1j7Z4U"
 
 
@@ -39,17 +40,24 @@ class RivianPlatformConfig(PlatformConfig):
   years: set[ModelYear] = field(default_factory=set)
 
 
+class RivianFlags(IntFlag):
+  GEN2 = 1
+
+
+class RivianSafetyFlags(IntFlag):
+  LONG_CONTROL = 1
+
+
 class CAR(Platforms):
-  RIVIAN_R1_GEN1 = RivianPlatformConfig(
-    # TODO: verify this
+  RIVIAN_R1 = RivianPlatformConfig(
     [
-      RivianCarDocs("Rivian R1S 2022-24"),
-      RivianCarDocs("Rivian R1T 2022-24"),
+      RivianCarDocs("Rivian R1S 2022-25"),
+      RivianCarDocs("Rivian R1T 2022-25"),
     ],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
     lines={ModelLine.R1T, ModelLine.R1S},
-    years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024},
+    years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024, ModelYear.S_2025},
   )
 
 
@@ -129,10 +137,6 @@ class CarControllerParams:
 
   def __init__(self, CP):
     pass
-
-
-class RivianSafetyFlags(IntFlag):
-  LONG_CONTROL = 1
 
 
 DBC = CAR.create_dbc_map()

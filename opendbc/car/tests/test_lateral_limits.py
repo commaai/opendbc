@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-from collections import defaultdict
+import unittest
 import importlib
-from parameterized import parameterized_class
-import pytest
-import sys
+from opendbc.testing import parameterized_class
 
 from opendbc.car import DT_CTRL
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.interfaces import ISO_LATERAL_ACCEL, get_torque_params
+from opendbc.car.interfaces import get_torque_params
+from opendbc.car.lateral import ISO_LATERAL_ACCEL
 from opendbc.car.values import PLATFORMS
 
 # ISO 11270 - allowed up jerk is strictly lower than recommended limits
@@ -20,23 +19,26 @@ JERK_MEAS_T = 0.5
 
 
 @parameterized_class('car_model', [(c,) for c in sorted(PLATFORMS)])
-class TestLateralLimits:
+class TestLateralLimits(unittest.TestCase):
   car_model: str
 
   @classmethod
-  def setup_class(cls):
+  def setUpClass(cls):
+    if 'car_model' not in cls.__dict__:
+      raise unittest.SkipTest('Base class')
+
     CarInterface = interfaces[cls.car_model]
     CP = CarInterface.get_non_essential_params(cls.car_model)
 
     if cls.car_model == 'MOCK':
-      pytest.skip('Mock car')
+      raise unittest.SkipTest('Mock car')
 
     # TODO: test all platforms
     if CP.steerControlType != 'torque':
-      pytest.skip()
+      raise unittest.SkipTest
 
     if CP.notCar:
-      pytest.skip()
+      raise unittest.SkipTest
 
     CarControllerParams = importlib.import_module(f'opendbc.car.{CP.brand}.values').CarControllerParams
     cls.control_params = CarControllerParams(CP)
@@ -65,31 +67,3 @@ class TestLateralLimits:
 
   def test_max_lateral_accel(self):
     assert self.torque_params["MAX_LAT_ACCEL_MEASURED"] <= ISO_LATERAL_ACCEL
-
-
-class LatAccelReport:
-  car_model_jerks: defaultdict[str, dict[str, float]] = defaultdict(dict)
-
-  def pytest_sessionfinish(self):
-    print(f"\n\n---- Lateral limit report ({len(PLATFORMS)} cars) ----\n")
-
-    max_car_model_len = max([len(car_model) for car_model in self.car_model_jerks])
-    for car_model, _jerks in sorted(self.car_model_jerks.items(), key=lambda i: i[1]['up_jerk'], reverse=True):
-      violation = _jerks["up_jerk"] > MAX_LAT_JERK_UP + MAX_LAT_JERK_UP_TOLERANCE or \
-                  _jerks["down_jerk"] > MAX_LAT_JERK_DOWN
-      violation_str = " - VIOLATION" if violation else ""
-
-      print(f"{car_model:{max_car_model_len}} - up jerk: {round(_jerks['up_jerk'], 2):5} " +
-            f"m/s^3, down jerk: {round(_jerks['down_jerk'], 2):5} m/s^3{violation_str}")
-
-  @pytest.fixture(scope="class", autouse=True)
-  def class_setup(self, request):
-    yield
-    cls = request.cls
-    if hasattr(cls, "control_params"):
-      up_jerk, down_jerk = TestLateralLimits.calculate_0_5s_jerk(cls.control_params, cls.torque_params)
-      self.car_model_jerks[cls.car_model] = {"up_jerk": up_jerk, "down_jerk": down_jerk}
-
-
-if __name__ == '__main__':
-  sys.exit(pytest.main([__file__, '-n0', '--no-summary'], plugins=[LatAccelReport()]))  # noqa: TID251
