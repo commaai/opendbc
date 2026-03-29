@@ -45,9 +45,10 @@ class CarController(CarControllerBase):
     if (self.frame % self.p.STEER_STEP) == 0:
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
         apply_angle = actuators.steeringAngleDeg
-        # prevent small angle oscillations near standstill
+        # prevent small angle oscillations - speed dependent deadzone
         if CC.latActive and CS.out.vEgoRaw < 10.0:
-          apply_angle = self.apply_angle_last + apply_center_deadzone(apply_angle - self.apply_angle_last, 1.0)
+          deadzone = np.interp(CS.out.vEgoRaw, [2.24, 10.0], [10.0, 3.0])
+          apply_angle = self.apply_angle_last + apply_center_deadzone(apply_angle - self.apply_angle_last, deadzone)
         self.apply_angle_last = apply_steer_angle_limits_vm(apply_angle, self.apply_angle_last, CS.out.vEgoRaw,
                                                             CS.out.steeringAngleDeg, CC.latActive, CarControllerParams, self.VM)
         can_sends.append(subarucan.create_steering_control_angle(self.packer, self.apply_angle_last, CC.latActive))
