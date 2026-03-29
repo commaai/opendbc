@@ -40,8 +40,8 @@ def make_msg(bus, addr, length=8, dat=None):
   return libsafety_py.make_CANPacket(addr, bus, dat)
 
 
-class CANPackerPanda(CANPacker):
-  def make_can_msg_panda(self, name_or_addr, bus, values, fix_checksum=None):
+class CANPackerSafety(CANPacker):
+  def make_can_msg_safety(self, name_or_addr, bus, values, fix_checksum=None):
     msg = self.make_can_msg(name_or_addr, bus, values)
     if fix_checksum is not None:
       msg = fix_checksum(msg)
@@ -71,12 +71,12 @@ def add_regen_tests(cls):
   return cls
 
 
-class PandaSafetyTestBase(unittest.TestCase):
-  safety: libsafety_py.Panda
+class SafetyTestBase(unittest.TestCase):
+  safety: libsafety_py.LibSafety | None
 
   @classmethod
   def setUpClass(cls):
-    if cls.__name__ == "PandaSafetyTestBase":
+    if cls.__name__ == "SafetyTestBase":
       cls.safety = None
       raise unittest.SkipTest
 
@@ -90,12 +90,25 @@ class PandaSafetyTestBase(unittest.TestCase):
   def _tx(self, msg):
     return self.safety.safety_tx_hook(msg)
 
+  @staticmethod
+  def _boundary_values(boundaries, min_val, max_val, step=1, width=5, sparse_count=100):
+    """Generate test values dense around boundaries and sparse across the full range."""
+    values = set()
+    for b in boundaries:
+      for offset in range(-width, width + 1):
+        v = round(b + offset * step, 2)
+        if min_val <= v < max_val:
+          values.add(v)
+    sparse_step = max(step, (max_val - min_val) / sparse_count)
+    for v in np.arange(min_val, max_val, sparse_step):
+      values.add(round(v, 2))
+    return sorted(values)
+
   def _generic_limit_safety_check(self, msg_function: MessageFunction, min_allowed_value: float, max_allowed_value: float,
                                   min_possible_value: float, max_possible_value: float, test_delta: float = 1, inactive_value: float = 0,
                                   msg_allowed = True, additional_setup: Callable[[float], None] | None = None):
     """
       Enforces that a signal within a message is only allowed to be sent within a specific range, min_allowed_value -> max_allowed_value.
-      Tests the range of min_possible_value -> max_possible_value with a delta of test_delta.
       Message is also only allowed to be sent when controls_allowed is true, unless the value is equal to inactive_value.
       Message is never allowed if msg_allowed is false, for example when stock longitudinal is enabled and you are sending acceleration requests.
       additional_setup is used for extra setup before each _tx, ex: for setting the previous torque for rate limits
@@ -105,10 +118,11 @@ class PandaSafetyTestBase(unittest.TestCase):
     self.assertGreater(max_possible_value, max_allowed_value)
     self.assertLessEqual(min_possible_value, min_allowed_value)
 
+    test_values = self._boundary_values([min_allowed_value, max_allowed_value, 0, inactive_value],
+                                        min_possible_value, max_possible_value, test_delta)
+
     for controls_allowed in [False, True]:
-      # enforce we don't skip over 0 or inactive
-      for v in np.concatenate((np.arange(min_possible_value, max_possible_value, test_delta), np.array([0, inactive_value]))):
-        v = round(v, 2)  # floats might not hit exact boundary conditions without rounding
+      for v in test_values:
         self.safety.set_controls_allowed(controls_allowed)
         if additional_setup is not None:
           additional_setup(v)
@@ -133,7 +147,7 @@ class PandaSafetyTestBase(unittest.TestCase):
       self.assertEqual(meas_max_func(), 0)
 
 
-class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
+class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
 
   LONGITUDINAL = True
   MAX_ACCEL: float = 2.0
@@ -173,7 +187,7 @@ class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
           self.assertEqual(should_tx, self._tx(self._accel_msg(accel)))
 
 
-class LongitudinalGasBrakeSafetyTest(PandaSafetyTestBase, abc.ABC):
+class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
 
   MIN_BRAKE: int = 0
   MAX_BRAKE: int | None = None
@@ -182,13 +196,14 @@ class LongitudinalGasBrakeSafetyTest(PandaSafetyTestBase, abc.ABC):
   MIN_GAS: int = 0
   MAX_GAS: int | None = None
   INACTIVE_GAS = 0
-  MIN_POSSIBLE_GAS: int = 0.
+  MIN_POSSIBLE_GAS: int = 0
   MAX_POSSIBLE_GAS: int | None = None
 
   def test_gas_brake_limits_correct(self):
     self.assertIsNotNone(self.MAX_POSSIBLE_BRAKE)
     self.assertIsNotNone(self.MAX_POSSIBLE_GAS)
 
+    assert self.MAX_BRAKE is not None and self.MAX_GAS is not None
     self.assertGreater(self.MAX_BRAKE, self.MIN_BRAKE)
     self.assertGreater(self.MAX_GAS, self.MIN_GAS)
 
@@ -207,7 +222,7 @@ class LongitudinalGasBrakeSafetyTest(PandaSafetyTestBase, abc.ABC):
     self._generic_limit_safety_check(self._send_gas_msg, self.MIN_GAS, self.MAX_GAS, self.MIN_POSSIBLE_GAS, self.MAX_POSSIBLE_GAS, 1, self.INACTIVE_GAS)
 
 
-class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
+class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
 
   MAX_RATE_UP = 0
   MAX_RATE_DOWN = 0
@@ -447,7 +462,7 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
       # Cannot stay at MAX_TORQUE if above DRIVER_TORQUE_ALLOWANCE
       for sign in [-1, 1]:
-        for driver_torque in np.arange(0, self.DRIVER_TORQUE_ALLOWANCE * 2, 1):
+        for driver_torque in self._boundary_values([self.DRIVER_TORQUE_ALLOWANCE], 0, self.DRIVER_TORQUE_ALLOWANCE * 2):
           self._reset_torque_driver_measurement(-driver_torque * sign)
           self._set_prev_torque(max_torque * sign)
           should_tx = abs(driver_torque) <= self.DRIVER_TORQUE_ALLOWANCE
@@ -640,7 +655,7 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
     self.assertEqual(self.safety.get_torque_meas_max(), 0)
 
 
-class VehicleSpeedSafetyTest(PandaSafetyTestBase):
+class VehicleSpeedSafetyTest(SafetyTestBase):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "VehicleSpeedSafetyTest":
@@ -659,7 +674,7 @@ class VehicleSpeedSafetyTest(PandaSafetyTestBase):
 class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   STEER_ANGLE_MAX: float = 300
-  STEER_ANGLE_TEST_MAX: float = None
+  STEER_ANGLE_TEST_MAX: float | None = None
   DEG_TO_CAN: float
   ANGLE_RATE_BP: list[float]
   ANGLE_RATE_UP: list[float]  # windup limit
@@ -807,8 +822,8 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
 
-class PandaSafetyTest(PandaSafetyTestBase):
-  TX_MSGS: list[list[int]] | None = None
+class SafetyTest(SafetyTestBase):
+  TX_MSGS: list[list[int]] = []
   SCANNED_ADDRS = [*range(0x800),                      # Entire 11-bit CAN address space
                    *range(0x18DA00F1, 0x18DB00F1, 0x100),   # 29-bit UDS physical addressing
                    *range(0x18DB00F1, 0x18DC00F1, 0x100),   # 29-bit UDS functional addressing
@@ -818,7 +833,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
   @classmethod
   def setUpClass(cls):
-    if cls.__name__ == "PandaSafetyTest" or cls.__name__.endswith('Base'):
+    if cls.__name__ == "SafetyTest" or cls.__name__.endswith('Base'):
       cls.safety = None
       raise unittest.SkipTest
 
@@ -894,7 +909,8 @@ class PandaSafetyTest(PandaSafetyTestBase):
               continue
             if {attr, current_test}.issubset({'TestHyundaiLongitudinalSafety', 'TestHyundaiLongitudinalSafetyCameraSCC', 'TestHyundaiSafetyFCEVLong'}):
               continue
-            if {attr, current_test}.issubset({'TestVolkswagenMqbSafety', 'TestVolkswagenMqbStockSafety', 'TestVolkswagenMqbLongSafety'}):
+            volkswagen_shared = ('TestVolkswagenMqb', 'TestVolkswagenMlb')
+            if attr.startswith(volkswagen_shared) and current_test.startswith(volkswagen_shared):
               continue
 
             # overlapping TX addrs, but they're not actuating messages for either car
@@ -937,14 +953,14 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
 
 @add_regen_tests
-class PandaCarSafetyTest(PandaSafetyTest):
+class CarSafetyTest(SafetyTest):
   STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
 
   @classmethod
   def setUpClass(cls):
-    if cls.__name__ == "PandaCarSafetyTest" or cls.__name__.endswith('Base'):
+    if cls.__name__ == "CarSafetyTest" or cls.__name__.endswith('Base'):
       cls.safety = None
       raise unittest.SkipTest
 

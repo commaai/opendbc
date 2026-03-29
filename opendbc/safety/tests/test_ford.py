@@ -8,7 +8,7 @@ from opendbc.car.ford.carcontroller import MAX_LATERAL_ACCEL
 from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerSafety
 
 MSG_EngBrakeData = 0x165           # RX from PCM, for driver brake pedal and cruise state
 MSG_EngVehicleSpThrottle = 0x204   # RX from PCM, for driver throttle input
@@ -65,7 +65,7 @@ class Buttons:
 #  * CAN FD with stock longitudinal
 #  * CAN FD with openpilot longitudinal
 
-class TestFordSafetyBase(common.PandaCarSafetyTest):
+class TestFordSafetyBase(common.CarSafetyTest):
   STANDSTILL_THRESHOLD = 1
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
                                  MSG_LateralMotionControl2, MSG_IPMA_Data)}
@@ -89,8 +89,8 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
   cnt_speed_2 = 0
   cnt_yaw_rate = 0
 
-  packer: CANPackerPanda
-  safety: libsafety_py.Panda
+  packer: CANPackerSafety
+  safety: libsafety_py.LibSafety
 
   def get_canfd_curvature_limits(self, speed):
     # Round it in accordance with the safety
@@ -117,37 +117,37 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
       "BpedDrvAppl_D_Actl": 2 if brake else 1,
       "CcStat_D_Actl": 5 if enable else 0,
     }
-    return self.packer.make_can_msg_panda("EngBrakeData", 0, values)
+    return self.packer.make_can_msg_safety("EngBrakeData", 0, values)
 
   # ABS vehicle speed
   def _speed_msg(self, speed: float, quality_flag=True):
     values = {"Veh_V_ActlBrk": speed * 3.6, "VehVActlBrk_D_Qf": 3 if quality_flag else 0, "VehVActlBrk_No_Cnt": self.cnt_speed % 16}
     self.__class__.cnt_speed += 1
-    return self.packer.make_can_msg_panda("BrakeSysFeatures", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("BrakeSysFeatures", 0, values, fix_checksum=checksum)
 
   # PCM vehicle speed
   def _speed_msg_2(self, speed: float, quality_flag=True):
     # Ford relies on speed for driver curvature limiting, so it checks two sources
     values = {"Veh_V_ActlEng": speed * 3.6, "VehVActlEng_D_Qf": 3 if quality_flag else 0, "VehVActlEng_No_Cnt": self.cnt_speed_2 % 16}
     self.__class__.cnt_speed_2 += 1
-    return self.packer.make_can_msg_panda("EngVehicleSpThrottle2", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("EngVehicleSpThrottle2", 0, values, fix_checksum=checksum)
 
   # Standstill state
   def _vehicle_moving_msg(self, speed: float):
     values = {"VehStop_D_Stat": 1 if speed <= self.STANDSTILL_THRESHOLD else random.choice((0, 2, 3))}
-    return self.packer.make_can_msg_panda("DesiredTorqBrk", 0, values)
+    return self.packer.make_can_msg_safety("DesiredTorqBrk", 0, values)
 
   # Current curvature
   def _yaw_rate_msg(self, curvature: float, speed: float, quality_flag=True):
     values = {"VehYaw_W_Actl": curvature * speed, "VehYawWActl_D_Qf": 3 if quality_flag else 0,
               "VehRollYaw_No_Cnt": self.cnt_yaw_rate % 256}
     self.__class__.cnt_yaw_rate += 1
-    return self.packer.make_can_msg_panda("Yaw_Data_FD1", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("Yaw_Data_FD1", 0, values, fix_checksum=checksum)
 
   # Drive throttle input
   def _user_gas_msg(self, gas: float):
     values = {"ApedPos_Pc_ActlArb": gas}
-    return self.packer.make_can_msg_panda("EngVehicleSpThrottle", 0, values)
+    return self.packer.make_can_msg_safety("EngVehicleSpThrottle", 0, values)
 
   # Cruise status
   def _pcm_status_msg(self, enable: bool):
@@ -158,14 +158,14 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
       "BpedDrvAppl_D_Actl": 2 if brake else 1,
       "CcStat_D_Actl": 5 if enable else 0,
     }
-    return self.packer.make_can_msg_panda("EngBrakeData", 0, values)
+    return self.packer.make_can_msg_safety("EngBrakeData", 0, values)
 
   # LKAS command
   def _lkas_command_msg(self, action: int):
     values = {
       "LkaActvStats_D2_Req": action,
     }
-    return self.packer.make_can_msg_panda("Lane_Assist_Data1", 0, values)
+    return self.packer.make_can_msg_safety("Lane_Assist_Data1", 0, values)
 
   # LCA command
   def _lat_ctl_msg(self, enabled: bool, path_offset: float, path_angle: float, curvature: float, curvature_rate: float):
@@ -177,7 +177,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         "LatCtlCurv_NoRate_Actl": curvature_rate,  # Curvature rate [-0.001024|0.00102375] 1/meter^2
         "LatCtlCurv_No_Actl": curvature,           # Curvature [-0.02|0.02094] 1/meter
       }
-      return self.packer.make_can_msg_panda("LateralMotionControl", 0, values)
+      return self.packer.make_can_msg_safety("LateralMotionControl", 0, values)
     elif self.STEER_MESSAGE == MSG_LateralMotionControl2:
       values = {
         "LatCtl_D2_Rq": 1 if enabled else 0,
@@ -186,7 +186,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         "LatCtlCrv_NoRate2_Actl": curvature_rate,  # Curvature rate [-0.001024|0.001023] 1/meter^2
         "LatCtlCurv_No_Actl": curvature,           # Curvature [-0.02|0.02094] 1/meter
       }
-      return self.packer.make_can_msg_panda("LateralMotionControl2", 0, values)
+      return self.packer.make_can_msg_safety("LateralMotionControl2", 0, values)
 
   # Cruise control buttons
   def _acc_button_msg(self, button: int, bus: int):
@@ -195,7 +195,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
       "CcAsllButtnResPress": 1 if button == Buttons.RESUME else 0,
       "TjaButtnOnOffPress": 1 if button == Buttons.TJA_TOGGLE else 0,
     }
-    return self.packer.make_can_msg_panda("Steering_Data_FD1", bus, values)
+    return self.packer.make_can_msg_safety("Steering_Data_FD1", bus, values)
 
   def test_rx_hook(self):
     # checksum, counter, and quality flag checks
@@ -241,16 +241,22 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
   def test_max_lateral_acceleration(self):
     # Ford CAN FD can achieve a higher max lateral acceleration than CAN so we limit curvature based on speed
+    step = 1 / self.DEG_TO_CAN
     for speed in np.arange(0, 40, 0.5):
       # Clip so we test curvature limiting at low speed due to low max curvature
       _, curvature_accel_limit_upper = self.get_canfd_curvature_limits(speed)
       curvature_accel_limit_upper = np.clip(curvature_accel_limit_upper, -self.MAX_CURVATURE, self.MAX_CURVATURE)
 
+      # Test boundary curvature values around the limit, rounded to CAN precision
+      lower = curvature_accel_limit_upper * 0.8
+      upper = min(curvature_accel_limit_upper * 1.2, self.MAX_CURVATURE)
+      test_curvatures = {round(c * self.DEG_TO_CAN) / self.DEG_TO_CAN
+                         for c in self._boundary_values([curvature_accel_limit_upper], lower, upper, step)
+                         if 0 <= c <= self.MAX_CURVATURE}
+
       for sign in (-1, 1):
-        # Test above and below the lateral by 20%, max is clipped since
-        # max curvature at low speed is higher than the signal max
-        for curvature in np.arange(curvature_accel_limit_upper * 0.8, min(curvature_accel_limit_upper * 1.2, self.MAX_CURVATURE), 1 / self.DEG_TO_CAN):
-          curvature = sign * round(curvature * self.DEG_TO_CAN) / self.DEG_TO_CAN  # fix np rounding errors
+        for curvature in sorted(test_curvatures):
+          curvature = sign * curvature
           self.safety.set_controls_allowed(True)
           self._set_prev_desired_angle(curvature)
           self._reset_curvature_measurement(curvature, speed)
@@ -294,7 +300,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
   def test_curvature_rate_limits(self):
     """
     When the curvature error is exceeded, commanded curvature must start moving towards meas respecting rate limits.
-    Since panda allows higher rate limits to avoid false positives, we need to allow a lower rate to move towards meas.
+    Since safety allows higher rate limits to avoid false positives, we need to allow a lower rate to move towards meas.
     """
     self.safety.set_controls_allowed(True)
     # safety fudges the speed (1 m/s) and rate limits (1 CAN unit) to avoid false positives
@@ -393,7 +399,7 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
                                MSG_IPMA_Data]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("ford_lincoln_base_pt")
+    self.packer = CANPackerSafety("ford_lincoln_base_pt")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.CANFD)
     self.safety.init_tests()
@@ -418,7 +424,7 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
       "AccBrkDecel_B_Rq": 1 if brake_actuation else 0,  # Deceleration request: 0=Inactive, 1=Active
       "CmbbDeny_B_Actl": 1 if cmbb_deny else 0,         # [0|1] deny AEB actuation
     }
-    return self.packer.make_can_msg_panda("ACCDATA", 0, values)
+    return self.packer.make_can_msg_safety("ACCDATA", 0, values)
 
   def test_stock_aeb(self):
     # Test that CmbbDeny_B_Actl is never 1, it prevents the ABS module from actuating AEB requests from ACCDATA_2
@@ -439,11 +445,12 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
         self.assertEqual(should_tx, self._tx(self._acc_command_msg(gas, self.INACTIVE_ACCEL, controls_allowed)))
 
   def test_brake_safety_check(self):
+    brake_values = self._boundary_values([self.MIN_ACCEL, self.MAX_ACCEL, self.INACTIVE_ACCEL],
+                                         self.MIN_ACCEL - 2, self.MAX_ACCEL + 2, 0.05)
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
       for brake_actuation in (True, False):
-        for brake in np.arange(self.MIN_ACCEL - 2, self.MAX_ACCEL + 2, 0.05):
-          brake = round(brake, 2)  # floats might not hit exact boundary conditions without rounding
+        for brake in brake_values:
           should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
           should_tx = should_tx and (controls_allowed or not brake_actuation)
           self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, brake_actuation)))
@@ -463,7 +470,7 @@ class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):
                                MSG_IPMA_Data]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("ford_lincoln_base_pt")
+    self.packer = CANPackerSafety("ford_lincoln_base_pt")
     self.safety = libsafety_py.libsafety
     # Make sure we enforce long safety even without long flag for CAN
     self.safety.set_safety_hooks(CarParams.SafetyModel.ford, 0)
@@ -488,7 +495,7 @@ class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
                                MSG_IPMA_Data]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("ford_lincoln_base_pt")
+    self.packer = CANPackerSafety("ford_lincoln_base_pt")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.LONG_CONTROL | FordSafetyFlags.CANFD)
     self.safety.init_tests()

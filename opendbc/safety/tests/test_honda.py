@@ -6,7 +6,7 @@ from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS
+from opendbc.safety.tests.common import CANPackerSafety, MAX_WRONG_COUNTERS
 
 HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 
@@ -28,7 +28,7 @@ class Btn:
 #    * Bosch Radarless with Longitudinal Support
 
 
-class HondaButtonEnableBase(common.PandaCarSafetyTest):
+class HondaButtonEnableBase(common.CarSafetyTest):
 
   # override these inherited tests since we're using button enable
   def test_disable_control_allowed_from_cruise(self):
@@ -134,7 +134,7 @@ class HondaButtonEnableBase(common.PandaCarSafetyTest):
     self.assertTrue(self.safety.get_controls_allowed())
 
 
-class HondaPcmEnableBase(common.PandaCarSafetyTest):
+class HondaPcmEnableBase(common.CarSafetyTest):
 
   def test_buttons(self):
     """
@@ -161,7 +161,7 @@ class HondaPcmEnableBase(common.PandaCarSafetyTest):
             self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
 
 
-class HondaBase(common.PandaCarSafetyTest):
+class HondaBase(common.CarSafetyTest):
   MAX_BRAKE = 255
   PT_BUS: int | None = None  # must be set when inherited
   STEER_BUS: int | None = None  # must be set when inherited
@@ -192,7 +192,7 @@ class HondaBase(common.PandaCarSafetyTest):
       "COUNTER": self.cnt_powertrain_data % 4
     }
     self.__class__.cnt_powertrain_data += 1
-    return self.packer.make_can_msg_panda("POWERTRAIN_DATA", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, values)
 
   def _pcm_status_msg(self, enable):
     return self._powertrain_data_msg(cruise_on=enable)
@@ -200,18 +200,18 @@ class HondaBase(common.PandaCarSafetyTest):
   def _speed_msg(self, speed):
     values = {"XMISSION_SPEED": speed, "COUNTER": self.cnt_speed % 4}
     self.__class__.cnt_speed += 1
-    return self.packer.make_can_msg_panda("ENGINE_DATA", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("ENGINE_DATA", self.PT_BUS, values)
 
   def _acc_state_msg(self, main_on):
     values = {"MAIN_ON": main_on, "COUNTER": self.cnt_acc_state % 4}
     self.__class__.cnt_acc_state += 1
-    return self.packer.make_can_msg_panda("SCM_FEEDBACK", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("SCM_FEEDBACK", self.PT_BUS, values)
 
   def _button_msg(self, buttons, main_on=False, bus=None):
     bus = self.PT_BUS if bus is None else bus
     values = {"CRUISE_BUTTONS": buttons, "COUNTER": self.cnt_button % 4}
     self.__class__.cnt_button += 1
-    return self.packer.make_can_msg_panda("SCM_BUTTONS", bus, values)
+    return self.packer.make_can_msg_safety("SCM_BUTTONS", bus, values)
 
   def _user_brake_msg(self, brake):
     return self._powertrain_data_msg(brake_pressed=brake)
@@ -221,7 +221,7 @@ class HondaBase(common.PandaCarSafetyTest):
 
   def _send_steer_msg(self, steer):
     values = {"STEER_TORQUE": steer}
-    return self.packer.make_can_msg_panda("STEERING_CONTROL", self.STEER_BUS, values)
+    return self.packer.make_can_msg_safety("STEERING_CONTROL", self.STEER_BUS, values)
 
   def _send_brake_msg(self, brake):
     # must be implemented when inherited
@@ -253,14 +253,14 @@ class TestHondaNidecSafetyBase(HondaBase):
   MAX_GAS = 198
 
   def setUp(self):
-    self.packer = CANPackerPanda("honda_civic_touring_2016_can_generated")
+    self.packer = CANPackerSafety("honda_civic_touring_2016_can_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, 0)
     self.safety.init_tests()
 
   def _send_brake_msg(self, brake, aeb_req=0, bus=0):
     values = {"COMPUTER_BRAKE": brake, "AEB_REQ_1": aeb_req}
-    return self.packer.make_can_msg_panda("BRAKE_COMMAND", bus, values)
+    return self.packer.make_can_msg_safety("BRAKE_COMMAND", bus, values)
 
   def _rx_brake_msg(self, brake, aeb_req=0):
     return self._send_brake_msg(brake, aeb_req, bus=2)
@@ -268,7 +268,7 @@ class TestHondaNidecSafetyBase(HondaBase):
   def _send_acc_hud_msg(self, pcm_gas, pcm_speed):
     # Used to control ACC on Nidec without pedal
     values = {"PCM_GAS": pcm_gas, "PCM_SPEED": pcm_speed}
-    return self.packer.make_can_msg_panda("ACC_HUD", 0, values)
+    return self.packer.make_can_msg_safety("ACC_HUD", 0, values)
 
   def test_acc_hud_safety_check(self):
     for controls_allowed in [True, False]:
@@ -343,7 +343,7 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
     Covers the Honda Nidec safety mode with alt SCM messages
   """
   def setUp(self):
-    self.packer = CANPackerPanda("acura_ilx_2016_can_generated")
+    self.packer = CANPackerSafety("acura_ilx_2016_can_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, HondaSafetyFlags.NIDEC_ALT)
     self.safety.init_tests()
@@ -351,13 +351,13 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
   def _acc_state_msg(self, main_on):
     values = {"MAIN_ON": main_on, "COUNTER": self.cnt_acc_state % 4}
     self.__class__.cnt_acc_state += 1
-    return self.packer.make_can_msg_panda("SCM_BUTTONS", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("SCM_BUTTONS", self.PT_BUS, values)
 
   def _button_msg(self, buttons, main_on=False, bus=None):
     bus = self.PT_BUS if bus is None else bus
     values = {"CRUISE_BUTTONS": buttons, "MAIN_ON": main_on, "COUNTER": self.cnt_button % 4}
     self.__class__.cnt_button += 1
-    return self.packer.make_can_msg_panda("SCM_BUTTONS", bus, values)
+    return self.packer.make_can_msg_safety("SCM_BUTTONS", bus, values)
 
 
 # ********************* Honda Bosch **********************
@@ -373,13 +373,13 @@ class TestHondaBoschSafetyBase(HondaBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB)}  # STEERING_CONTROL, BOSCH_SUPPLEMENTAL_1
 
   def setUp(self):
-    self.packer = CANPackerPanda("honda_accord_2018_can_generated")
+    self.packer = CANPackerSafety("honda_civic_hatchback_ex_2017_can_generated")
     self.safety = libsafety_py.libsafety
 
   def _alt_brake_msg(self, brake):
     values = {"BRAKE_PRESSED": brake, "COUNTER": self.cnt_brake % 4}
     self.__class__.cnt_brake += 1
-    return self.packer.make_can_msg_panda("BRAKE_MODULE", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("BRAKE_MODULE", self.PT_BUS, values)
 
   def _send_brake_msg(self, brake):
     pass
@@ -469,7 +469,7 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
       "ACCEL_COMMAND": accel,
       "BRAKE_REQUEST": accel < 0,
     }
-    return self.packer.make_can_msg_panda("ACC_CONTROL", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("ACC_CONTROL", self.PT_BUS, values)
 
   # Longitudinal doesn't need to send buttons
   def test_spam_cancel_safety_check(self):
@@ -510,7 +510,7 @@ class TestHondaBoschRadarlessSafetyBase(TestHondaBoschSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x33D)}  # STEERING_CONTROL
 
   def setUp(self):
-    self.packer = CANPackerPanda("honda_civic_ex_2022_can_generated")
+    self.packer = CANPackerSafety("honda_bosch_radarless_generated")
     self.safety = libsafety_py.libsafety
 
 
@@ -554,7 +554,7 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
     values = {
       "ACCEL_COMMAND": accel,
     }
-    return self.packer.make_can_msg_panda("ACC_CONTROL", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("ACC_CONTROL", self.PT_BUS, values)
 
   # Longitudinal doesn't need to send buttons
   def test_spam_cancel_safety_check(self):
@@ -572,7 +572,7 @@ class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x33D)}
 
   def setUp(self):
-    self.packer = CANPackerPanda("honda_common_canfd_generated")
+    self.packer = CANPackerSafety("honda_common_canfd_generated")
     self.safety = libsafety_py.libsafety
 
 

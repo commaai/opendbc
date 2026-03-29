@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 // CAN msgs we care about
 #define MAZDA_LKAS          0x243U
@@ -94,7 +94,7 @@ static safety_config mazda_init(uint16_t param) {
     {.msg = {{MAZDA_PEDALS,       0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  UNUSED(param);
+  SAFETY_UNUSED(param);
   return BUILD_SAFETY_CFG(mazda_rx_checks, MAZDA_TX_MSGS);
 }
 
