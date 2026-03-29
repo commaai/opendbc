@@ -176,12 +176,13 @@ def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available
   }
 
   if CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD):
+    # TODO: update radarless and canfd values to align with factory lkas_hud presentation
     lkas_hud_values['LANE_LINES'] = 3
     lkas_hud_values['DASHED_LANES'] = hud_control.lanesVisible
-    lkas_hud_values['SOLID_LANES'] = hud_control.lanesVisible,
+    lkas_hud_values['SOLID_LANES'] = hud_control.lanesVisible
   else:
-    lkas_hud_values['DASHED_LANES'] = enabled and not lat_active 
-    lkas_hud_values['SOLID_LANES'] = lat_active,    
+    lkas_hud_values['DASHED_LANES'] = enabled and not lat_active
+    lkas_hud_values['SOLID_LANES'] = lat_active
 
     # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
     # TODO: needed for Bosch CAN FD?
