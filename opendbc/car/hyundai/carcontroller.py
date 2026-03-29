@@ -103,7 +103,7 @@ class CarController(CarControllerBase):
                                                           CC.latActive, self.params, self.VM)
 
       apply_torque = self.torque_reduction_gain_controller.update(
-        CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw, self.apply_angle_last)
+        CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw)
 
       apply_steer_req = CC.latActive
 
