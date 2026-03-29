@@ -42,6 +42,8 @@ const int MAX_WRONG_COUNTERS = 5;
 
 // This can be set by the safety hooks
 bool controls_allowed = false;
+bool controls_allowed_reserved1 = false;
+bool controls_allowed_reserved2 = false;
 bool relay_malfunction = false;
 bool gas_pressed = false;
 bool gas_pressed_prev = false;
@@ -212,6 +214,10 @@ bool safety_rx_hook(const CANPacket_t *msg) {
     heartbeat_engaged_mismatches = 0;
   }
 
+  // keep lateral/longitudinal in sync with controls_allowed
+  controls_allowed_reserved1 = controls_allowed;
+  controls_allowed_reserved2 = controls_allowed;
+
   return valid;
 }
 
@@ -333,6 +339,10 @@ void safety_tick(const safety_config *cfg) {
   }
 
   safety_rx_checks_invalid = rx_checks_invalid;
+
+  // keep reserved fields in sync with controls_allowed
+  controls_allowed_reserved1 = controls_allowed;
+  controls_allowed_reserved2 = controls_allowed;
 }
 
 static void relay_malfunction_set(void) {
@@ -446,6 +456,8 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   reset_sample(&angle_meas);
 
   controls_allowed = false;
+  controls_allowed_reserved1 = false;
+  controls_allowed_reserved2 = false;
   relay_malfunction_reset();
   safety_rx_checks_invalid = false;
 
