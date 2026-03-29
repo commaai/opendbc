@@ -259,10 +259,10 @@ class CarState(CarStateBase):
     ret.parkingBrake = bool(pt_cp.vl["Kombi_01"]["KBI_Handbremse"])
     ret.espDisabled = pt_cp.vl["ESP_01"]["ESP_Tastung_passiv"] != 0
 
-    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(300, pt_cp.vl["Gateway_11"]["BH_Blinker_li"],
-                                                                            pt_cp.vl["Gateway_11"]["BH_Blinker_re"])
+    ret.leftBlinker = bool(pt_cp.vl["BCM"]["BLINKER_LEFT"])
+    ret.rightBlinker = bool(pt_cp.vl["BCM"]["BLINKER_RIGHT"])
 
-    ret.seatbeltUnlatched = pt_cp.vl["Gateway_06"]["AB_Gurtschloss_FA"] != 3
+    ret.seatbeltUnlatched = bool(pt_cp.vl["Airbag_01"]["AB_Gurtwarn_VF"])
     ret.doorOpen = any([pt_cp.vl["Gateway_05"]["FT_Tuer_geoeffnet"],
                         pt_cp.vl["Gateway_05"]["BT_Tuer_geoeffnet"],
                         pt_cp.vl["Gateway_05"]["HL_Tuer_geoeffnet"],
