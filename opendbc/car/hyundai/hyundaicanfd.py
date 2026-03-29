@@ -42,9 +42,9 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque,
     "StrTqReqVal": apply_torque,
     "LKA_SysWrn": 0,
     "ActToiSta": 1 if lat_active else 0,
-    "Damping_Gain": 100,  # can potentially tuned for better perf [3, 200]
     "LKA_UsmMod": 0,  # hide LKAS settings
     "LKA_RcgSta": 0,  # lane recognition status (0 for "not recognized")
+    "Damping_Gain": 100,  # can potentially tuned for better perf [3, 200]
   }
 
   # Angle control doesn't support using LFA yet
