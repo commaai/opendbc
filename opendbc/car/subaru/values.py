@@ -21,7 +21,7 @@ class CarControllerParams:
     ([], []),
     MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
     MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^3
-    MAX_ANGLE_RATE=5,  # deg/frame, comfort rate limit
+    MAX_ANGLE_RATE=1,  # deg/frame, comfort rate limit
   )
 
   STEER_STEP = 2                        # how often we update the steer cmd
