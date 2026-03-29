@@ -1758,6 +1758,13 @@ BO_ 1716 VIN_01: 8 Gateway_D4C7
 BO_ 1414 Waehlhebel_02: 8 Getriebe_AL551_951_D4_C7
  SG_ WH_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
 
+BO_ 1318 BCM: 8 XXX
+ SG_ INVERTED_BLINKER_ACTIVE : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ TURNSTALK_LEFT : 26|1@0+ (1,0) [0|1] "" XXX
+ SG_ TURNSTALK_RIGHT : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ BLINKER_LEFT : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ BLINKER_RIGHT : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN_DRIVER_DOOR_RELATED : 43|1@0+ (1,0) [0|1] "" XXX
 
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" ;
 VAL_ 269 ACC_Freigabe_Momentenanf 0 "Momanf_nicht_freigegeben" 1 "Momanf_freigegeben" ;
