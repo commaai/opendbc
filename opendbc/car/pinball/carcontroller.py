@@ -16,12 +16,9 @@ class CarController(CarControllerBase):
     start = 0
 
     if CC.enabled:
-      # A key → negative torque → left flipper
-      left = int(CC.actuators.torque < 0)
-      # D key → positive torque → right flipper
-      right = int(CC.actuators.torque > 0)
-      # W key → negative accel → start button
-      start = int(CC.actuators.accel < 0)
+      left = int(CC.actuators.gas > 0.5)    # A key → left flipper
+      right = int(CC.actuators.brake > 0.5)  # D key → right flipper
+      start = int(CC.actuators.accel < -0.5) # W key → start button
 
     can_sends = [pinballcan.create_solenoid_cmd(self.packer, left, right, start)]
 
