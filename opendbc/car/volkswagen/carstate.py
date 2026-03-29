@@ -329,8 +329,6 @@ class CarState(CarStateBase):
       pt_messages += [
         ("Blinkmodi_02", 1)  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
       ]
-    if CP.flags & VolkswagenFlags.MLB:
-        pt_messages += []
     if CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
       cam_messages += [
         ("HCA_01", 1),  # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
