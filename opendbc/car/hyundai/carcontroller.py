@@ -1,7 +1,7 @@
 import numpy as np
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs
+from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs, rate_limit
 from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance, apply_steer_angle_limits_vm
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
@@ -101,7 +101,7 @@ class CarController(CarControllerBase):
       # TODO: consider angle direction so you can override in direction and it doesn't reduce torque as much
       # TODO: max_allowed_torque
       apply_torque = np.interp(abs(CS.out.steeringTorque), [0, 500], [1.0, 0.2]) if CC.latActive else 0.0
-      # apply_torque = rate_limit(...)
+      apply_torque = rate_limit(apply_torque, self.apply_torque_last, -0.012, 0.002)  # try 0.004, that's stock
 
       apply_steer_req = CC.latActive
 
