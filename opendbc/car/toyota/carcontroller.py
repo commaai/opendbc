@@ -287,7 +287,7 @@ class CarController(CarControllerBase):
         send_ui = True
 
       if self.frame % 20 == 0 or send_ui:
-        can_sends.append(toyotacan.create_ui_command(self.packer, steer_alert, pcm_cancel_cmd, hud_control.leftLaneVisible,
+        can_sends.append(toyotacan.create_ui_command(self.packer, steer_alert, False, hud_control.leftLaneVisible,
                                                      hud_control.rightLaneVisible, hud_control.leftLaneDepart,
                                                      hud_control.rightLaneDepart, CC.enabled, CS.lkas_hud))
 
