@@ -13,7 +13,6 @@ TransmissionType = structs.CarParams.TransmissionType
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    # Store original message to copy it later in carcontroller
     self.steer_and_ap_stalk_msg = {}
     self.eps_stock_values = {}
     self.camera_stock_values = {}
@@ -34,13 +33,11 @@ class CarState(CarStateBase):
     self.distance_button = cp.vl["STEER_AND_AP_STALK"]["AP_REDUCE_DISTANCE_COMMAND"] or \
                            cp.vl["STEER_AND_AP_STALK"]["AP_INCREASE_DISTANCE_COMMAND"]
 
-    # Store the original message to reuse in carcontroller
     self.steer_and_ap_stalk_msg = copy.copy(cp.vl["STEER_AND_AP_STALK"])
     self.eps_stock_values = copy.copy(cp.vl["RX_STEER_RELATED"])
     self.camera_stock_values = copy.copy(cp_cam.vl["STEER_CMD"])
     self.longitudinal_stock_values = copy.copy(cp_cam.vl["ACC_CMD"])
 
-    # car speed
     self.parse_wheel_speeds(ret,
       cp.vl["WHEEL_SPEEDS"]["FRONT_LEFT_WHEEL_SPEED"],
       cp.vl["WHEEL_SPEEDS"]["FRONT_RIGHT_WHEEL_SPEED"],

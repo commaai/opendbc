@@ -28,7 +28,7 @@ class CarController(CarControllerBase):
     # Increment counter so cancel is prioritized even without openpilot longitudinal
     if CC.cruiseControl.cancel:
       counter = (CS.steer_and_ap_stalk_msg['COUNTER'] + 1) % 16
-      can_sends.append(gwmcan.create_steer_and_ap_stalk(
+      can_sends.append(gwmcan.create_buttons_command(
         self.packer,
         self.CAN,
         counter,
@@ -58,7 +58,7 @@ class CarController(CarControllerBase):
       ea_simulated_torque = float(np.clip(apply_torque * 2, -self.params.STEER_MAX, self.params.STEER_MAX))
       if abs(CS.out.steeringTorque) > abs(ea_simulated_torque):
         ea_simulated_torque = CS.out.steeringTorque
-      can_sends.append(gwmcan.create_eps_update(
+      can_sends.append(gwmcan.create_wheel_touch(
         self.packer,
         self.CAN,
         eps_stock_values=CS.eps_stock_values,
