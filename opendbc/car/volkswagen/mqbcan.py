@@ -92,10 +92,6 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
                              esp_hold, esp_starting_override, esp_stopping_override):
   commands = []
 
-  # acc 7 is forwarded to ESP
-  acc_07_stopping = esp_stopping_override if esp_stopping_override is not None else stopping
-  acc_07_starting = esp_starting_override if esp_starting_override is not None else starting
-
   acc_06_values = {
     "ACC_Typ": acc_type,
     "ACC_Status_ACC": acc_control,
@@ -109,6 +105,10 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Anhalten": stopping if acc_enabled else False,
   }
   commands.append(packer.make_can_msg("ACC_06", bus, acc_06_values))
+
+  # acc 7 is forwarded to ESP
+  acc_07_stopping = esp_stopping_override if esp_stopping_override is not None else stopping
+  acc_07_starting = esp_starting_override if esp_starting_override is not None else starting
 
   if acc_07_starting:
     acc_hold_type = 4  # hold release / startup
