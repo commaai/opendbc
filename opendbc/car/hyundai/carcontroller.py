@@ -89,12 +89,12 @@ class CarController(CarControllerBase):
 
       # Light smoothing before VM to reduce command jitter that causes EPS whine.
       # Our model outputs change at ~0.2°/frame vs stock's ~0.05°/frame at low speed.
-      # Smooth before VM (not after) to avoid double rate-limiting — VM is the safety
-      # backstop, smoothing controls the command rate.
-      # Only smooth when winding (|angle| increasing); unwind is unsmoothed for fast return.
+      # Smooth before VM (not after) to avoid double rate-limiting.
+      # Smooth all commands at low speed — both winding and unwinding micro-adjustments
+      # cause EPS noise. Skip smoothing only for large unwind (fast return from big angles).
       if CC.latActive and abs(desired_angle - self.apply_angle_last) > 0.05:
-        unwinding = abs(desired_angle) < abs(self.apply_angle_last)
-        if not unwinding:
+        large_unwind = abs(desired_angle) < abs(self.apply_angle_last) and abs(self.apply_angle_last) > 10
+        if not large_unwind:
           alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.4, 4.2, 6.1, 8.3], [0.15, 0.20, 0.30, 0.50, 1.0])
           desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
 
