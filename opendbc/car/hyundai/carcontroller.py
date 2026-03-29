@@ -78,7 +78,7 @@ class CarController(CarControllerBase):
 
     # angle control
     if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
-      desired_angle = actuators.steeringAngleDeg
+      desired_angle = round(actuators.steeringAngleDeg, 1)
 
       # Smooth micro-adjustments that cause EPS whine at low speed.
       # The model produces ~0.2-0.4°/frame jitter vs stock's ~0.05°. The EPS PID
@@ -88,7 +88,7 @@ class CarController(CarControllerBase):
       # maneuvers, not jitter, and should execute immediately.
       delta = abs(desired_angle - self.apply_angle_last)
       if CC.latActive and 0.05 < delta < 1.0:
-        alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 11.1, 13.9], [0.08, 0.10, 0.12, 0.20, 0.40, 1.0])
+        alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 11.1, 13.9], [0.15, 0.20, 0.25, 0.35, 0.55, 1.0])
         desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
 
       self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
