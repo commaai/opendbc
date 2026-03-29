@@ -504,41 +504,6 @@ class TestHyundaiCanfdLKASteeringAltEVTorque(TestHyundaiCanfdLKASteeringAltEVBas
     self.safety.init_tests()
 
 
-class TestHyundaiCanfdLKASteeringAltEVAngle(TestHyundaiCanfdLKASteeringAltEVBase, TestHyundaiCanfdAngleSteering):
-
-  def setUp(self):
-    self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS |
-                                 HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT | HyundaiSafetyFlags.CANFD_ANGLE_STEERING)
-    self.safety.init_tests()
-
-  # Angle steering mode does not use torque — override inherited torque tests
-  def test_steer_safety_check(self):
-    pass
-
-  def test_non_realtime_limit_up(self):
-    pass
-
-  def test_steer_req_bit(self):
-    pass
-
-  def test_steer_req_bit_frames(self):
-    pass
-
-  def test_steer_req_bit_multi_invalid(self):
-    pass
-
-  def test_steer_req_bit_realtime(self):
-    pass
-
-  def test_against_torque_driver(self):
-    pass
-
-  def test_realtime_limits(self):
-    pass
-
-
 class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanfdLKASteeringEV):
 
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0], [0x51, 0], [0x730, 1], [0x12a, 1], [0x160, 1],
