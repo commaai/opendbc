@@ -78,7 +78,8 @@ class CarController(CarControllerBase):
 
     # angle control
     if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
-      desired_angle = round(actuators.steeringAngleDeg, 1)
+      # desired_angle = round(actuators.steeringAngleDeg, 1)
+      desired_angle = actuators.steeringAngleDeg
 
       # Smooth micro-adjustments that cause EPS whine at low speed.
       # The model produces ~0.2-0.4°/frame jitter vs stock's ~0.05°. The EPS PID
@@ -86,17 +87,21 @@ class CarController(CarControllerBase):
       # at audible frequencies. Smoothing reduces the jitter to stock levels.
       # Skip smoothing for large angle changes (>1°) — those are real steering
       # maneuvers, not jitter, and should execute immediately.
-      delta = abs(desired_angle - self.apply_angle_last)
-      if CC.latActive and 0.05 < delta < 1.0:
-        alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 11.1, 13.9], [0.15, 0.20, 0.25, 0.35, 0.55, 1.0])
-        desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
+      # delta = abs(desired_angle - self.apply_angle_last)
+      # if CC.latActive and 0.05 < delta < 1.0:
+      #   alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 11.1, 13.9], [0.15, 0.20, 0.25, 0.35, 0.55, 1.0])
+      #   desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
 
       self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
                                                           CS.out.vEgoRaw, CS.out.steeringAngleDeg,
                                                           CC.latActive, self.params, self.VM)
 
-      apply_torque = self.torque_reduction_gain_controller.update(
-        CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw)
+      # apply_torque = self.torque_reduction_gain_controller.update(
+      #   CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw)
+      # TODO: consider angle direction so you can override in direction and it doesn't reduce torque as much
+      # TODO: max_allowed_torque
+      apply_torque = np.interp(abs(CS.out.steeringTorque), [0, 500], [1.0, 0.2]) if CC.latActive else 0.0
+      # apply_torque = rate_limit(...)
 
       apply_steer_req = CC.latActive
 
