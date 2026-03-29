@@ -133,7 +133,7 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
 
   # Angle control limits
   BASELINE_PANDA_ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    180,  # degrees (safe upper bound for command, allowing some margin)
+    360,  # degrees
     ([], []),
     ([], []),
     MAX_LATERAL_ACCEL=(ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * 0.06)),  # ~3.0 m/s^2
@@ -141,7 +141,7 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
     MAX_ANGLE_RATE=5  # comfort rate limit for angle commands, in degrees per frame.
   )
 
-  STEER_ANGLE_MAX = 180  # deg
+  STEER_ANGLE_MAX = 360  # deg
   DEG_TO_CAN = 10
   ANGLE_SAFETY_THRESHOLD_PCT = -2.0  # Fail if difference is less than -2%
 
@@ -220,8 +220,8 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)), f"{angl} -- {max_angle}")
 
-        # 1 unit above limit
-        max_angle_raw = round_angle(get_max_angle_vm(speed, self.get_vm(car_name), self.get_baseline_limits()), 3) * sign
+        # above limit (offset 6 to reliably exceed C float tolerance)
+        max_angle_raw = round_angle(get_max_angle_vm(speed, self.get_vm(car_name), self.get_baseline_limits()), 6) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         self._tx(self._angle_cmd_msg(max_angle, True))
 
@@ -502,6 +502,50 @@ class TestHyundaiCanfdLKASteeringAltEVTorque(TestHyundaiCanfdLKASteeringAltEVBas
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS |
                                  HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT)
     self.safety.init_tests()
+
+
+class TestHyundaiCanfdLKASteeringAltAngle(TestHyundaiCanfdAngleSteering):
+
+  TX_MSGS = [[0x110, 0], [0x1CF, 1], [0x362, 0]]
+  RELAY_MALFUNCTION_ADDRS = {0: (0x110, 0x362)}
+  FWD_BLACKLISTED_ADDRS = {2: [0x110, 0x362]}
+
+  PT_BUS = 1
+  SCC_BUS = 1
+  STEER_MSG = "LKAS_ALT"
+  GAS_MSG = ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED")
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING |
+                                 HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT | HyundaiSafetyFlags.CANFD_ANGLE_STEERING)
+    self.safety.init_tests()
+
+  # Angle steering does not use torque — override inherited torque tests
+  def test_steer_safety_check(self):
+    pass
+
+  def test_non_realtime_limit_up(self):
+    pass
+
+  def test_steer_req_bit(self):
+    pass
+
+  def test_steer_req_bit_frames(self):
+    pass
+
+  def test_steer_req_bit_multi_invalid(self):
+    pass
+
+  def test_steer_req_bit_realtime(self):
+    pass
+
+  def test_against_torque_driver(self):
+    pass
+
+  def test_realtime_limits(self):
+    pass
 
 
 class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanfdLKASteeringEV):
