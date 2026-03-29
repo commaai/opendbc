@@ -72,14 +72,8 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
       // Signal: TSK_04.TSK_Status_GRA_ACC_02
       int acc_status = (msg->data[7] & 0xC0U) >> 6;
       bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
-      // TODO: No real mainswitch state yet, might need stateful tracking of LS_01 to implement OP longitudinal
-      acc_main_on = cruise_engaged || (acc_status == 0);
 
       pcm_cruise_check(cruise_engaged);
-
-      if (!acc_main_on) {
-        controls_allowed = false;
-      }
     }
   }
 }
