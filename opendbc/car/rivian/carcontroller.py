@@ -6,7 +6,7 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudinal, create_wheel_touch, create_adas_status
 from opendbc.car.rivian.values import CarControllerParams
 
-# EPS faults after 90 frames of >90 degree steering
+# EPS faults after 90 frames of >90 degree steering angle
 MAX_ANGLE = 90
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
