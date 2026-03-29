@@ -283,11 +283,16 @@ class CarController(CarControllerBase):
         send_ui = True
         self.alert_active = not self.alert_active
       elif pcm_cancel_cmd:
-        # forcing the pcm to disengage causes a bad fault sound so play a good sound instead
+        # [FIX] Previously: TWO_BEEPS was sent to mask the cancel fault chime (just
+        # masking, not fixing). Now: UI update fires but chime=False so cancel is
+        # truly silent — no "good" chime, no fault display. See bounty #1173.
         send_ui = True
 
       if self.frame % 20 == 0 or send_ui:
-        can_sends.append(toyotacan.create_ui_command(self.packer, steer_alert, pcm_cancel_cmd, hud_control.leftLaneVisible,
+        # [FIX] chime=False — previously pcm_cancel_cmd caused TWO_BEEPS=1 in LKAS_HUD
+        # which masked (but didn't eliminate) the cancel chime. Now the cancel is
+        # genuinely silent across all Toyota models. Fixes bounty commaai/opendbc#1173.
+        can_sends.append(toyotacan.create_ui_command(self.packer, steer_alert, False, hud_control.leftLaneVisible,
                                                      hud_control.rightLaneVisible, hud_control.leftLaneDepart,
                                                      hud_control.rightLaneDepart, CC.enabled, CS.lkas_hud))
 
