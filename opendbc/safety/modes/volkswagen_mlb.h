@@ -14,7 +14,7 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
     {.msg = {{MSG_ESP_03, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_ESP_05, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ACC_05, 2, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_TSK_04, 1, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_MOTOR_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_LS_01, 0, 4, 10U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
@@ -66,15 +66,14 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
 
   }
 
-  if (msg->bus == 2U) {
-    // TODO: See if there's a bus-agnostic TSK message we can use instead
-    if (msg->addr == MSG_ACC_05) {
+  if (msg->bus == 1U) {
+    if (msg->addr == MSG_TSK_04) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
-      // Always exit controls on main switch off
-      // Signal: ACC_05.ACC_Status_ACC
-      int acc_status = (msg->data[7] & 0xEU) >> 1;
-      bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-      acc_main_on = cruise_engaged || (acc_status == 2);
+      // Signal: TSK_04.TSK_Status_GRA_ACC_02
+      int acc_status = (msg->data[7] & 0xC0U) >> 6;
+      bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
+      // TODO: No real mainswitch state yet, might need stateful tracking of LS_01 to implement OP longitudinal
+      acc_main_on = cruise_engaged || (acc_status == 0);
 
       pcm_cruise_check(cruise_engaged);
 

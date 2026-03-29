@@ -10,7 +10,7 @@ MSG_ESP_03 = 0x103      # RX from ABS, for wheel speeds
 MSG_MOTOR_03 = 0x105    # RX from ECU, for driver throttle input and driver brake input
 MSG_ESP_05 = 0x106      # RX from ABS, for brake light state
 MSG_LS_01 = 0x10B       # TX by OP, ACC control buttons for cancel/resume
-MSG_TSK_02 = 0x10C      # RX from ECU, for ACC status from drivetrain coordinator
+MSG_TSK_04 = 0x10E      # RX from ECU, for ACC status from drivetrain coordinator
 MSG_HCA_01 = 0x126      # TX by OP, Heading Control Assist steering torque
 MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 
@@ -52,8 +52,8 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
 
   # ACC engagement status
   def _tsk_status_msg(self, enable, main_switch=True):
-    values = {"ACC_Status_ACC": 1 if not main_switch else 3 if enable else 2}
-    return self.packer.make_can_msg_safety("ACC_05", 2, values)
+    values = {"TSK_Status_GRA_ACC_02": 3 if not main_switch else 1 if enable else 0}
+    return self.packer.make_can_msg_safety("TSK_04", 1, values)
 
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
