@@ -166,11 +166,12 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
     limits.ANGLE_LIMITS = self.BASELINE_PANDA_ANGLE_LIMITS
     return limits
 
-  def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
+  def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True, gain: float = 0.0):
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
       self.__class__.cnt_angle_cmd += 1
-    values = {"ADAS_StrAnglReqVal": angle, "LKAS_ANGLE_ACTIVE": 2 if enabled else 1}
+    values = {"ADAS_StrAnglReqVal": angle, "LKAS_ANGLE_ACTIVE": 2 if enabled else 1,
+              "ADAS_ACIAnglTqRedcGainVal": gain}
     return self.packer.make_can_msg_safety(self.STEER_MSG, self.STEER_BUS, values)
 
   def _angle_meas_msg(self, angle: float):
@@ -290,6 +291,29 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
     self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
     for _ in range(5):
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
+
+  def test_torque_reduction_gain(self):
+    # Valid gains when enabled
+    for gain in [0.0, 0.5, 1.0]:
+      self.safety.set_controls_allowed(True)
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, True, gain=gain)),
+                      f"gain={gain} should be allowed when enabled")
+
+    # Reserved values (raw 251+) must fail even when enabled
+    for gain in [1.004, 1.008, 1.02]:
+      self.safety.set_controls_allowed(True)
+      self.assertFalse(self._tx(self._angle_cmd_msg(0, True, gain=gain)),
+                       f"gain={gain} (reserved) should be blocked")
+
+    # Non-zero gain when disabled must fail
+    for gain in [0.004, 0.5, 1.0]:
+      self.safety.set_controls_allowed(True)
+      self.assertFalse(self._tx(self._angle_cmd_msg(0, False, gain=gain)),
+                       f"gain={gain} should be blocked when disabled")
+
+    # Zero gain when disabled must pass
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False, gain=0.0)))
 
   @parameterized("car_name", sorted(PLATFORMS))
   def test_max_steering_angle_safety(self, car_name):
