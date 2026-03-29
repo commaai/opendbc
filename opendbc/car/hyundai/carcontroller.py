@@ -51,6 +51,17 @@ def process_hud_alert(enabled, fingerprint, hud_control):
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
 
+def compute_torque_reduction_gain(steering_torque, v_ego_kph, lat_active, last_gain):
+  if lat_active:
+    ceiling = np.interp(v_ego_kph, [40, 120], [0.85, 1.0])
+    target = np.interp(abs(steering_torque), [140, 420], [ceiling, 0.19])
+  else:
+    target = 0.0
+  delta = target - last_gain
+  gain = last_gain + max(-0.01, min(0.004, delta))
+  return round(gain / 0.004) * 0.004
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -100,8 +111,10 @@ class CarController(CarControllerBase):
       #   CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw)
       # TODO: consider angle direction so you can override in direction and it doesn't reduce torque as much
       # TODO: max_allowed_torque
-      apply_torque = np.interp(abs(CS.out.steeringTorque), [0, 500], [1.0, 0.2]) if CC.latActive else 0.0
-      apply_torque = rate_limit(apply_torque, self.apply_torque_last, -0.012, 0.002)  # try 0.004, that's stock
+      # apply_torque = np.interp(abs(CS.out.steeringTorque), [0, 500], [1.0, 0.2]) if CC.latActive else 0.0
+      # apply_torque = rate_limit(apply_torque, self.apply_torque_last, -0.012, 0.002)  # try 0.004, that's stock
+      apply_torque = compute_torque_reduction_gain(CS.out.steeringTorque, CS.out.vEgoRaw * CV.MS_TO_KPH,
+                                                   CC.latActive, self.apply_torque_last)
 
       apply_steer_req = CC.latActive
 
