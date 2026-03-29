@@ -262,7 +262,7 @@ class CarState(CarStateBase):
     ret.leftBlinker = bool(pt_cp.vl["BCM"]["BLINKER_LEFT"])
     ret.rightBlinker = bool(pt_cp.vl["BCM"]["BLINKER_RIGHT"])
 
-    ret.seatbeltUnlatched = pt_cp.vl["Gateway_06"]["AB_Gurtschloss_FA"] != 3
+    ret.seatbeltUnlatched = bool(pt_cp.vl["Airbag_01"]["AB_Gurtwarn_VF"])
     ret.doorOpen = any([pt_cp.vl["Gateway_05"]["FT_Tuer_geoeffnet"],
                         pt_cp.vl["Gateway_05"]["BT_Tuer_geoeffnet"],
                         pt_cp.vl["Gateway_05"]["HL_Tuer_geoeffnet"],
