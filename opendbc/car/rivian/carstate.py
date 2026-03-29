@@ -2,7 +2,7 @@ import copy
 from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.rivian.values import CAR, DBC, GEAR_MAP
+from opendbc.car.rivian.values import DBC, GEAR_MAP, RivianFlags
 from opendbc.car.common.conversions import Conversions as CV
 
 GearShifter = structs.CarState.GearShifter
@@ -70,18 +70,17 @@ class CarState(CarStateBase):
     # Gear
     ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
 
-    # Doors
-    # door locks prevent opening while driving; on standstill, stock ACC disengages when a door is opened
-    if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1:
+    # Doors and seatbelt
+    # GEN2 has no CAN signal for these, but stock ACC already handles disengaging
+    # door locks prevent opening while driving
+    # on standstill, stock ACC disengages when a door is opened or seatbelt is unbuckled
+    if not (self.CP.flags & RivianFlags.GEN2):
       ret.doorOpen = any(cp_adas.vl["IndicatorLights"][door] != 2 for door in ("RearDriverDoor", "FrontPassengerDoor", "DriverDoor", "RearPassengerDoor"))
+      ret.seatbeltUnlatched = cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0
 
     # Blinkers
     ret.leftBlinker = cp_adas.vl["IndicatorLights"]["TurnLightLeft"] in (1, 2)
     ret.rightBlinker = cp_adas.vl["IndicatorLights"]["TurnLightRight"] in (1, 2)
-
-    # Seatbelt
-    # stock ACC disengages when the driver unbuckles the seatbelt
-    ret.seatbeltUnlatched = cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0 if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1 else False
 
     # Blindspot
     # ret.leftBlindspot = False
@@ -92,7 +91,7 @@ class CarState(CarStateBase):
 
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
-    if self.CP.carFingerprint == CAR.RIVIAN_R1_GEN1
+    if not (self.CP.flags & RivianFlags.GEN2):
       self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
     # This message can lag and send two messages at once, make sure we forward all of them
     adas_status_msgs = cp.vl_all["VDM_AdasSts"]
