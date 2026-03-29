@@ -181,8 +181,8 @@ def create_lkas_hud(packer, bus, CP, hud_control, lat_active, steering_available
     lkas_hud_values['DASHED_LANES'] = hud_control.lanesVisible
     lkas_hud_values['SOLID_LANES'] = hud_control.lanesVisible
   else:
-    lkas_hud_values['DASHED_LANES'] = enabled and not lat_active
-    lkas_hud_values['SOLID_LANES'] = lat_active
+    lkas_hud_values['SOLID_LANES'] = lat_active and steering_available
+    lkas_hud_values['DASHED_LANES'] = enabled and not bool(lkas_hud_values['SOLID_LANES'])
 
     # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
     # TODO: needed for Bosch CAN FD?
