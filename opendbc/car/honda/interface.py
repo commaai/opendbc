@@ -198,6 +198,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.15
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+      if candidate == CAR.ACURA_ADX:
+        ret.dashcamOnly = is_release  # TODO: release from dashcam when there's enough driving data for torqued/paramsd to converge
 
     else:
       ret.steerActuatorDelay = 0.15
