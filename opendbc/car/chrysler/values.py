@@ -87,7 +87,6 @@ class CAR(Platforms):
     ChryslerCarSpecs(mass=1836.0, wheelbase=2.70, steerRatio=13.0),
   )
 
-
   # Ram
   RAM_1500_5TH_GEN = ChryslerPlatformConfig(
     [ChryslerCarDocs("Ram 1500 2019-24", car_parts=CarParts.common([CarHarness.ram]))],
