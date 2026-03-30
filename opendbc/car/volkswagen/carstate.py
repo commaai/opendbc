@@ -17,6 +17,7 @@ class CarState(CarStateBase):
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_stopping = False
     self.esp_hold_confirmation = False
+    self.esp_hold_torque_nm = 0
     self.rolling_backward = False
     self.rolling_forward = False
     self.grade = 0.0
@@ -121,6 +122,9 @@ class CarState(CarStateBase):
       self.esp_stopping = bool(pt_cp.vl["ESP_21"]["ESP_Anhaltevorgang_ACC_aktiv"])
       self.esp_hold_confirmation = bool(pt_cp.vl["ESP_21"]["ESP_Haltebestaetigung"])
       self.grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
+      esp_hold_raw = pt_cp.vl["ESP_15"]["ESP_Haltemoment"]
+      haltemoment_antrieb = pt_cp.vl["ESP_15"]["ESP_Index_Haltemoment"] == 1
+      self.esp_hold_torque_nm = esp_hold_raw if haltemoment_antrieb and esp_hold_raw < 10220 else 0.0
       acc_limiter_mode = ext_cp.vl["ACC_02"]["ACC_Gesetzte_Zeitluecke"] == 0
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
 
