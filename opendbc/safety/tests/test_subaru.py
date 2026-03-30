@@ -274,7 +274,7 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
 
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_safety("ES_Brake", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Status", self.ALT_MAIN_BUS, values)
 
   def test_angle_cmd_when_enabled(self):
     # VM-based limits are tested below
