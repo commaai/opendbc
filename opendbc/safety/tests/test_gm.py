@@ -141,7 +141,7 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
 
   def test_individual_wheel_speeds(self):
     for wheel in ["RL", "RR"]:
-      values = {"RLWheelSpd": 0, "RRWheelSpd": 0}
+      values: dict[str, int | float] = {"RLWheelSpd": 0, "RRWheelSpd": 0}
       values["%sWheelSpd" % wheel] = self.STANDSTILL_THRESHOLD + 1
       self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
       self.assertTrue(self.safety.get_vehicle_moving(), f"vehicle not moving with {wheel} speed")
