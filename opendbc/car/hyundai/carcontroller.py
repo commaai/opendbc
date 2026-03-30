@@ -1,7 +1,8 @@
 import numpy as np
 from opendbc.car.vehicle_model import VehicleModel
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs, rate_limit
+from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs, rate_limit, apply_hysteresis
 from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance, apply_steer_angle_limits_vm
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
@@ -53,12 +54,12 @@ def process_hud_alert(enabled, fingerprint, hud_control):
 
 def compute_torque_reduction_gain(steering_torque, v_ego_kph, lat_active, last_gain):
   if lat_active:
-    ceiling = np.interp(v_ego_kph, [40, 120], [0.85, 1.0])
-    target = np.interp(abs(steering_torque), [140, 420], [ceiling, 0.19])
+    ceiling = np.interp(v_ego_kph, [40, 120], [0.8, 1.0])
+    target = np.interp(abs(steering_torque), [140, 500], [ceiling, 0.1])
   else:
     target = 0.0
   delta = target - last_gain
-  gain = last_gain + max(-0.01, min(0.004, delta))
+  gain = last_gain + max(-0.012, min(0.006, delta))
   return round(gain / 0.004) * 0.004
 
 
@@ -69,6 +70,8 @@ class CarController(CarControllerBase):
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
+    self.fof = FirstOrderFilter(0.0, 0.1, 0.01)
+    self.angle_steady = 0
 
     self.accel_last = 0
     self.apply_torque_last = 0
@@ -103,6 +106,18 @@ class CarController(CarControllerBase):
       #   alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 11.1, 13.9], [0.15, 0.20, 0.25, 0.35, 0.55, 1.0])
       #   desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
 
+
+      if CC.latActive:
+        #print(apply_angle_last, self.apply_angle_last)
+        print(desired_angle, self.angle_steady)
+        deadzone = np.interp(CS.out.vEgo, [10, 15], [3, 0])
+        desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
+        #desired_angle = self.fof.update(desired_angle)
+        #print('after', apply_angle_last)
+        print('after', desired_angle)
+        self.angle_steady = desired_angle
+        #print()
+
       self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
                                                           CS.out.vEgoRaw, CS.out.steeringAngleDeg,
                                                           CC.latActive, self.params, self.VM)
@@ -115,8 +130,18 @@ class CarController(CarControllerBase):
       # apply_torque = rate_limit(apply_torque, self.apply_torque_last, -0.012, 0.002)  # try 0.004, that's stock
       apply_torque = compute_torque_reduction_gain(CS.out.steeringTorque, CS.out.vEgoRaw * CV.MS_TO_KPH,
                                                    CC.latActive, self.apply_torque_last)
+      #self.apply_angle_last = apply_angle_last_tmp
+      #self.angle_steady = self.apply_angle_last
+
+      #self.apply
+
+      #self.angle_steady = self.apply_angle_last
 
       apply_steer_req = CC.latActive
+      if not CC.latActive:
+        self.fof.x = CS.out.steeringAngleDeg
+        self.angle_steady = CS.out.steeringAngleDeg
+        self.apply_angle_last = CS.out.steeringAngleDeg
 
     # torque control
     else:
