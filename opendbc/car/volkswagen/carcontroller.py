@@ -78,7 +78,7 @@ class MQBStandstillManager:
     # - won't command enough accel to move forward on a hill when starting
     # - won't command enough brake to hold the car when stopping
     desired_launch_accel = 0.2 * CS.grade - 1
-    if long_active and desired_launch_accel > 0 and accel > 0:
+    if long_active and accel > 0 and CS.out.vEgo < 0.25:
       accel = max(accel, desired_launch_accel)
     if long_active and self.rollback_protection_active and accel <= 0:
       accel = -3.5
@@ -88,7 +88,7 @@ class MQBStandstillManager:
     if long_active:
       if CS.esp_stopping:
         self.can_stop_forever = True
-      if CS.esp_hold_confirmation:
+      if self.esp_hold_frames > 0:
         self.can_stop_forever = False
       if not (stopping or starting):
         self.can_stop_forever = False
@@ -130,7 +130,7 @@ class MQBStandstillManager:
     if esp_inactive:
       self.hold_timer_can_reset = False
     if long_active and self.hold_timer_can_reset and not CS.esp_hold_confirmation:
-      self.esp_hold_frames = 0
+      self.esp_hold_frames = 1 # don't switch hold strategies mid hold, that's jank
 
     return long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override
 

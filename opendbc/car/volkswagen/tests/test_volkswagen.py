@@ -104,10 +104,10 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     _, accel, *_ = mgr.update(self._cs(grade=grade), long_active=True, accel=0.5, stopping=False, starting=True)
     assert accel == 0.2 * grade - 1
 
-  def test_launch_boost_not_applied_below_threshold(self):
-    """Accel is not boosted when grade is too low for desired_launch_accel to be positive (grade <= 5)."""
+  def test_launch_boost_not_applied_above_speed_threshold(self):
+    """Accel is not boosted when vEgo >= 0.25 (no longer near-standstill)."""
     mgr = MQBStandstillManager()
-    _, accel, *_ = mgr.update(self._cs(grade=5.0), long_active=True, accel=0.5, stopping=False, starting=True)
+    _, accel, *_ = mgr.update(self._cs(grade=10.0, v_ego=0.25), long_active=True, accel=0.5, stopping=False, starting=True)
     assert accel == 0.5
 
   def test_rollback_brake_protection(self):
@@ -186,7 +186,7 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     assert mgr.hold_timer_can_reset
     # Hold releases while car remains at standstill
     mgr.update(self._cs(esp_hold_confirmation=False), long_active=True, accel=-1.0, stopping=True, starting=False)
-    assert mgr.esp_hold_frames == 0
+    assert mgr.esp_hold_frames == 1
 
   def test_hold_timer_can_reset_clears_on_inactive(self):
     """hold_timer_can_reset is cleared when long control disengages, preventing a stale reset on re-engagement."""
