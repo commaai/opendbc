@@ -55,7 +55,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.JEEP_CHEROKEE_5TH_GEN:
       ret.steerActuatorDelay = 0.15
 
-    elif candidate in (CAR.JEEP_GRAND_CHEROKEE, CAR.JEEP_GRAND_CHEROKEE_2019):
+    elif candidate in (CAR.JEEP_GRAND_CHEROKEE, CAR.JEEP_GRAND_CHEROKEE_2019, CAR.JEEP_GRAND_CHEROKEE_SRT_2016):
       ret.steerActuatorDelay = 0.2
 
       ret.lateralTuning.init('pid')
