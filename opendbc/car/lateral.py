@@ -109,16 +109,16 @@ def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_e
   """Apply jerk, accel, and safety limit constraints to steering angle."""
   v_ego_raw = max(v_ego_raw, 1)
 
+  # *** max lateral accel limit (clip target, not output, to avoid jerk violations) ***
+  max_angle = get_max_angle_vm(v_ego_raw, VM, limits)
+  apply_angle = float(np.clip(apply_angle, -max_angle, max_angle))
+
   # *** max lateral jerk limit ***
   max_angle_delta = get_max_angle_delta_vm(v_ego_raw, VM, limits)
 
   # prevent fault/low speed comfort
   max_angle_delta = min(max_angle_delta, limits.ANGLE_LIMITS.MAX_ANGLE_RATE)
   new_apply_angle = rate_limit(apply_angle, apply_angle_last, -max_angle_delta, max_angle_delta)
-
-  # *** max lateral accel limit ***
-  max_angle = get_max_angle_vm(v_ego_raw, VM, limits)
-  new_apply_angle = np.clip(new_apply_angle, -max_angle, max_angle)
 
   # angle is current angle when inactive
   if not lat_active:
