@@ -109,8 +109,7 @@ class CarState(CarStateBase):
     can_gear = int(cp.vl["GEARBOX"]["GEAR_SHIFTER"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
 
-    # stock lkas should be off
-    # TODO: is this needed?
+    # Stock lkas should be off
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
       ret.invalidLkasSetting = bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
     else:
