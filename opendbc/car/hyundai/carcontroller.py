@@ -54,12 +54,13 @@ def process_hud_alert(enabled, fingerprint, hud_control):
 
 def compute_torque_reduction_gain(steering_torque, v_ego_kph, lat_active, last_gain):
   if lat_active:
-    ceiling = np.interp(v_ego_kph, [40, 120], [0.8, 1.0])
-    target = np.interp(abs(steering_torque), [140, 500], [ceiling, 0.1])
+    ceiling = np.interp(v_ego_kph, [40, 120], [0.85, 1.0])
+    target = np.interp(abs(steering_torque), [140, 420], [ceiling, 0.19])
   else:
     target = 0.0
   delta = target - last_gain
-  gain = last_gain + max(-0.012, min(0.006, delta))
+  rate_dn = np.interp(abs(steering_torque), [0, 300, 700], [0.004, 0.01, 0.04])
+  gain = last_gain + max(-rate_dn, min(0.004, delta))
   return round(gain / 0.004) * 0.004
 
 
