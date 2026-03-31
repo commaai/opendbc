@@ -112,7 +112,6 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
 
 
-
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
@@ -241,7 +240,6 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
   def test_button_msg_passthrough(self):
     # In longitudinal mode, button messages are forwarded without validation
     self.assertTrue(self._tx(self._button_msg(0, bus=0)))
-
 
 
 class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyundaiSafety):

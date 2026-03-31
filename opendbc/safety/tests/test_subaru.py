@@ -108,7 +108,6 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
 
-
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
     values = {"Cruise_Cancel": cancel, "Cruise_Throttle": cruise_throttle}

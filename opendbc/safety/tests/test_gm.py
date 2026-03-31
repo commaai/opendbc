@@ -140,7 +140,6 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
 
 
-
 class TestGmEVSafetyBase(TestGmSafetyBase):
   EXTRA_SAFETY_PARAM = GMSafetyFlags.EV
 
