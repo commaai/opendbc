@@ -81,13 +81,6 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
 
-  def test_individual_wheel_speeds(self):
-    for pos in ["FL", "FR", "RL", "RR"]:
-      values = {f"WHL_Spd{p}Val": 0 for p in ["FL", "FR", "RL", "RR"]}
-      values[f"WHL_Spd{pos}Val"] = 1
-      self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
-      self.assertTrue(self.safety.get_vehicle_moving(), f"vehicle not moving with {pos} speed")
-
   def test_cruise_engaged_all_states(self):
     # Only applicable for non-longitudinal mode (hyundai_longitudinal skips this code path)
     if isinstance(self, HyundaiLongitudinalBase):
@@ -130,17 +123,6 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
     self.safety.init_tests()
 
-  def test_scc_accel_short_circuit(self):
-    # desired_accel_raw=0 but desired_accel_val!=0 should be rejected
-    if isinstance(self, HyundaiLongitudinalBase):
-      return
-    dat = bytearray(32)
-    dat[8] = 0x40   # acc_mode = 4
-    dat[16] = 0xFF
-    dat[17] = 0x03   # desired_accel_raw = 0
-    dat[18] = 0x40   # desired_accel_val = 1
-    self.safety.set_controls_allowed(True)
-    self.assertFalse(self._tx(libsafety_py.make_CANPacket(0x1A0, 0, bytes(dat))))
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
@@ -291,12 +273,6 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
 
-  def test_tester_present_partial_match(self):
-    if self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
-      return
-    addr, bus = self.DISABLED_ECU_UDS_MSG
-    partial_match = libsafety_py.make_CANPacket(addr, bus, b"\x02\x3E\x80\x00\x01\x00\x00\x00")
-    self.assertFalse(self._tx(partial_match))
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)

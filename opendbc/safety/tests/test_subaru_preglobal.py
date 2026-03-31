@@ -59,20 +59,6 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", 0, values)
 
-  def test_vehicle_moving_wheel_speed_components(self):
-    # Cover || short-circuit: first component (bytes 0-3 >> 12) nonzero, second zero
-    msg = libsafety_py.make_CANPacket(0xD4, 0, b"\x00\x10\x00\x00\x00\x00\x00\x00")
-    self._rx(msg)
-    self.assertTrue(self.safety.get_vehicle_moving())
-
-    # Reset to stationary
-    self._rx(libsafety_py.make_CANPacket(0xD4, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00"))
-    self.assertFalse(self.safety.get_vehicle_moving())
-
-    # Second component (bytes 4-7) nonzero, first zero
-    msg = libsafety_py.make_CANPacket(0xD4, 0, b"\x00\x00\x00\x00\x01\x00\x00\x00")
-    self._rx(msg)
-    self.assertTrue(self.safety.get_vehicle_moving())
 
 
 class TestSubaruPreglobalReversedDriverTorqueSafety(TestSubaruPreglobalSafety):

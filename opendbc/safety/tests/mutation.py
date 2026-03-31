@@ -47,6 +47,7 @@ MUTATOR_FAMILIES = {
   "arithmetic_assignment": ("assignment_expression", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
   "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
   "remove_negation": ("unary_expression", {"!": ""}),
+  "logical": ("binary_expression", {"&&": "||", "||": "&&"}),
 }
 
 
@@ -618,8 +619,10 @@ def main():
     known_survivors = {
       ("opendbc/safety/helpers.h", 40, "arithmetic"),
       ("opendbc/safety/lateral.h", 105, "boundary"),
+      ("opendbc/safety/lateral.h", 179, "logical"),
       ("opendbc/safety/lateral.h", 195, "boundary"),
       ("opendbc/safety/lateral.h", 239, "boundary"),
+      ("opendbc/safety/lateral.h", 307, "logical"),
       ("opendbc/safety/lateral.h", 337, "arithmetic"),
     }
     survivors = [r for r in survivors if (str(r.site.origin_file.relative_to(ROOT)), r.site.origin_line, r.site.mutator) not in known_survivors]

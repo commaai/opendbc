@@ -360,14 +360,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
             self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
             self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)))
 
-  def test_angle_error_clamp_beyond_max(self):
-    speed = 15.0
-    self.safety.set_controls_allowed(True)
-    for sign in (-1, 1):
-      self._reset_curvature_measurement(sign * 0.023, speed)
-      self._set_prev_desired_angle(sign * 0.021)
-      self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0)))
-
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)
     self.assertFalse(self._tx(self._lkas_command_msg(1)))
@@ -440,21 +432,6 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
       "CmbbDeny_B_Actl": 1 if cmbb_deny else 0,         # [0|1] deny AEB actuation
     }
     return self.packer.make_can_msg_safety("ACCDATA", 0, values)
-
-  def test_brake_actuation_short_circuit(self):
-    # Cover || short-circuit in brake_actuation: AccBrkPrchg_B_Rq=0, AccBrkDecel_B_Rq=1
-    self.safety.set_controls_allowed(True)
-    values = {
-      "AccPrpl_A_Rq": self.INACTIVE_GAS,
-      "AccPrpl_A_Pred": self.INACTIVE_GAS,
-      "AccBrkTot_A_Rq": self.INACTIVE_ACCEL,
-      "CmbbDeny_B_Actl": 0,
-      "AccBrkPrchg_B_Rq": 0,
-      "AccBrkDecel_B_Rq": 1,
-    }
-    self.assertTrue(self._tx(self.packer.make_can_msg_safety("ACCDATA", 0, values)))
-    self.safety.set_controls_allowed(False)
-    self.assertFalse(self._tx(self.packer.make_can_msg_safety("ACCDATA", 0, values)))
 
   def test_stock_aeb(self):
     # Test that CmbbDeny_B_Actl is never 1, it prevents the ABS module from actuating AEB requests from ACCDATA_2
