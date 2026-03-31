@@ -152,6 +152,16 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     assert esp_starting_override is False
     assert esp_stopping_override is True
 
+  def test_hill_hold_accel_suppressed_on_flat(self):
+    """hill_accel is suppressed on grades <= 3% to prevent unnecessary engine torque on flat ground."""
+    for grade in (0.0, 1.0, 2.0, 3.0):
+      cs = self._cs(esp_hold_confirmation=True, grade=grade)
+      mgr = MQBStandstillManager()
+      for _ in range(2):
+        mgr.update(cs, long_active=True, accel=-1.0, stopping=True, starting=False)
+      _, accel, *_ = mgr.update(cs, long_active=True, accel=-1.0, stopping=True, starting=False)
+      assert accel == -1.0, f"Expected no hill_accel boost at {grade=}"
+
   def test_hill_hold_progressive_release_pattern(self):
     """Progressive release pulses follow the 1-on/3-off, 2-on/3-off, 3-on/3-off, hold pattern near HOLD_MAX_FRAMES."""
     cs = self._cs(esp_hold_confirmation=True, grade=0.0)

@@ -106,8 +106,9 @@ class MQBStandstillManager:
       if self.esp_hold_frames > 1:
         # too much torque and the car moves, too little and the ESP won't cycle its timer
         # targets 80% of torque needed to hold the car at stop, derived from ESP_15 and some experimentation
-        hill_accel = 0.045 * CS.grade + 0.0625
-        accel = max(accel, hill_accel)
+        if CS.grade > 3:
+          hill_accel = 0.045 * CS.grade + 0.0625
+          accel = max(accel, hill_accel)
         starting = True
         stopping = False
       # Near the counter limit, send progressively longer starting pulses:
