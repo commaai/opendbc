@@ -105,7 +105,6 @@ class CarState(CarStateBase):
       self.acc_stock_counters["ACC_06"] = int(ext_cp.vl["ACC_06"]["COUNTER"])
       self.acc_stock_counters["ACC_07"] = int(ext_cp.vl["ACC_07"]["COUNTER"])
       self.acc_stock_counters["ACC_10"] = int(ext_cp.vl["ACC_10"]["COUNTER"])
-      self.acc_stock_counters["ACC_15"] = int(ext_cp.vl["ACC_15"]["COUNTER"])
       self.esp_hold_confirmation = bool(pt_cp.vl["ESP_21"]["ESP_Haltebestaetigung"])
       acc_limiter_mode = ext_cp.vl["ACC_02"]["ACC_Gesetzte_Zeitluecke"] == 0
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
