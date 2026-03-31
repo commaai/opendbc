@@ -36,11 +36,11 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
   RELEASE_START_FRAME = HOLD_MAX_FRAMES - HOLD_RELEASE_TOTAL_FRAMES + 1  # first frame of release window
 
   def _cs(self, *, esp_hold_confirmation=False, esp_stopping=False, rolling_backward=False,
-          rolling_forward=False, grade=0.0, esp_hold_torque_nm=0, brake_pressed=False, standstill=True, v_ego=0.0):
+          rolling_forward=False, grade=0.0, brake_pressed=False, standstill=True, v_ego=0.0):
     out = SimpleNamespace(brakePressed=brake_pressed, standstill=standstill, vEgo=v_ego)
     return SimpleNamespace(out=out, esp_hold_confirmation=esp_hold_confirmation,
                            esp_stopping=esp_stopping, rolling_backward=rolling_backward,
-                           rolling_forward=rolling_forward, grade=grade, esp_hold_torque_nm=esp_hold_torque_nm)
+                           rolling_forward=rolling_forward, grade=grade)
 
   def test_brake_pressed_disables_long_active(self):
     """Brake input overrides long_active to prevent faults when pre-enabled."""
@@ -128,7 +128,8 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
 
   def test_hill_hold_first_frame_skip(self):
     """First frame with hold confirmed skips hill_accel to avoid a check engine light, but still sets overrides."""
-    cs = self._cs(esp_hold_confirmation=True, esp_hold_torque_nm=900)
+    grade = 8.0
+    cs = self._cs(esp_hold_confirmation=True, grade=grade)
     mgr = MQBStandstillManager()
     _, accel, _, _, esp_starting_override, esp_stopping_override = \
       mgr.update(cs, long_active=True, accel=-1.0, stopping=True, starting=False)
@@ -138,14 +139,14 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
 
   def test_hill_hold_accel_and_overrides(self):
     """Engine torque is built via hill_accel and ESP braking is held when stopped on a grade."""
-    torque_nm = 900
-    cs = self._cs(esp_hold_confirmation=True, esp_hold_torque_nm=torque_nm)
+    grade = 8.0
+    cs = self._cs(esp_hold_confirmation=True, grade=grade)
     mgr = MQBStandstillManager()
     for _ in range(2):
       mgr.update(cs, long_active=True, accel=-1.0, stopping=True, starting=False)
     _, accel, stopping, starting, esp_starting_override, esp_stopping_override = \
       mgr.update(cs, long_active=True, accel=-1.0, stopping=True, starting=False)
-    assert accel == torque_nm / 3000 + 0.2
+    assert accel == 0.045 * grade + 0.0625
     assert starting is True
     assert stopping is False
     assert esp_starting_override is False
