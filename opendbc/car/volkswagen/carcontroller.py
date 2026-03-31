@@ -84,7 +84,7 @@ class CarController(CarControllerBase):
 
     if self.CP.openpilotLongitudinalControl:
       if not self.acc_counter_seeded and CS.acc_stock_counters:
-        for name in ("ACC_06", "ACC_07"):
+        for name in ("ACC_02", "ACC_06", "ACC_07", "ACC_10", "ACC_15"):
           addr = self.packer_pt.dbc.name_to_msg[name].address
           self.packer_pt.counters[addr] = (CS.acc_stock_counters[name] + 1) % 16
         self.acc_counter_seeded = True
