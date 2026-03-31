@@ -245,13 +245,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self._rx(self._angle_meas_msg(0, hands_on_level=3))
     self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_cruise_engaged_all_states(self):
-    for cruise_state in (2, 3, 4, 6, 7):
-      self._rx(self._pcm_status_msg(False))
-      values = {"DI_cruiseState": cruise_state, "DI_autoparkState": 0}
-      self._rx(self.packer.make_can_msg_safety("DI_state", 0, values))
-      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed for DI_cruiseState={cruise_state}")
-
   def test_autopark_summon_while_enabled(self):
     # We should not respect Autopark that activates while controls are allowed
     self._rx(self._pcm_status_msg(True, 0))

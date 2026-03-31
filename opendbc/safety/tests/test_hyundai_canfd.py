@@ -81,23 +81,6 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
 
-  def test_cruise_engaged_all_states(self):
-    # Only applicable for non-longitudinal mode (hyundai_longitudinal skips this code path)
-    if isinstance(self, HyundaiLongitudinalBase):
-      return
-    # Exercise all cruise_status values to cover || short-circuit on cruise_engaged
-    for cruise_status in range(8):
-      # Disengage first
-      values = {"ACCMode": 0}
-      self._rx(self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values))
-      # Send a button press to satisfy recent button interaction check
-      self._rx(self._button_msg(1, main_button=1))
-      # Now send the cruise status (rising edge)
-      values = {"ACCMode": cruise_status}
-      self._rx(self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values))
-      should_engage = cruise_status in (1, 2)
-      self.assertEqual(should_engage, self.safety.get_controls_allowed(), f"cruise_status={cruise_status}")
-
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 

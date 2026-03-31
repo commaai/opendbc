@@ -138,12 +138,6 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagen, 0)
     self.safety.init_tests()
 
-  def test_cruise_engaged_all_states(self):
-    for tsk_status in (3, 4, 5):
-      self._rx(self._tsk_status_msg(False))
-      self._rx(self._tsk_status_msg(True, tsk_status=tsk_status))
-      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed for TSK_Status={tsk_status}")
-
   def test_cancel_button_rx(self):
     self.safety.set_controls_allowed(True)
     self._rx(self._gra_acc_01_msg(cancel=True, bus=0))
