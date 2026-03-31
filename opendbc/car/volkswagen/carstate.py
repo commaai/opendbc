@@ -11,8 +11,7 @@ ButtonType = structs.CarState.ButtonEvent.Type
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.frame = 0
-    self.eps_init_complete = False
+    self.disabled_count = 0
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
@@ -136,7 +135,6 @@ class CarState(CarStateBase):
 
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
 
-    self.frame += 1
     return ret
 
   def update_pq(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
@@ -227,7 +225,6 @@ class CarState(CarStateBase):
 
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
 
-    self.frame += 1
     return ret
 
   def update_mlb(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
@@ -282,7 +279,6 @@ class CarState(CarStateBase):
     ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
     ret.standstill = ret.vEgoRaw == 0
 
-    self.frame += 1
     return ret
 
   def update_low_speed_alert(self, v_ego: float) -> bool:
@@ -293,22 +289,25 @@ class CarState(CarStateBase):
       self.low_speed_alert = False
     return self.low_speed_alert
 
-  def parse_mlb_mqb_steering_state(self, ret, pt_cp, drive_mode=True):
+  def parse_mlb_mqb_steering_state(self, ret, pt_cp):
     ret.steeringAngleDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradwinkel"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradwinkel"])]
     ret.steeringRateDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradw_Geschw"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradw_Geschw"])]
     ret.steeringTorque = pt_cp.vl["LH_EPS_03"]["EPS_Lenkmoment"] * (1, -1)[int(pt_cp.vl["LH_EPS_03"]["EPS_VZ_Lenkmoment"])]
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
 
     hca_status = self.CCP.hca_status_values.get(pt_cp.vl["LH_EPS_03"]["EPS_HCA_Status"])
-    ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status, drive_mode)
+    ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
     return
 
-  def update_hca_state(self, hca_status, drive_mode=True):
-    # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
+  def update_hca_state(self, hca_status):
     # DISABLED means the EPS hasn't been configured to support Lane Assist
-    self.eps_init_complete = self.eps_init_complete or (hca_status in ("DISABLED", "READY", "ACTIVE") or self.frame > 600)
-    perm_fault = drive_mode and hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
-    temp_fault = drive_mode and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
+    # we may see a few frames of DISABLED regardless of Lane Assist support
+    if hca_status == "DISABLED":
+      self.disabled_count += 1
+    else:
+      self.disabled_count = 0
+    perm_fault = self.disabled_count > 50
+    temp_fault = hca_status not in ("READY", "ACTIVE") and not perm_fault
     return temp_fault, perm_fault
 
   @staticmethod
