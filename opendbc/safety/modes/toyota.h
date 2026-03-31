@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 // Stock longitudinal
 #define TOYOTA_BASE_TX_MSGS \
@@ -14,7 +14,7 @@
 #define TOYOTA_COMMON_SECOC_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
   {0x2E4, 0, 8, .check_relay = true}, {0x131, 0, 8, .check_relay = true}, \
-  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */  \
+  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */ \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS \
   TOYOTA_COMMON_TX_MSGS \
@@ -30,6 +30,11 @@
   {0x750, 0, 8, .check_relay = false}, \
   /* ACC */                            \
   {0x343, 0, 8, .check_relay = true},  \
+
+#define TOYOTA_COMMON_SECOC_LONG_TX_MSGS \
+  TOYOTA_COMMON_SECOC_TX_MSGS \
+  {0x343, 0, 8, .check_relay = true}, \
+  {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */ \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
   {.msg = {{ 0xaa, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
@@ -72,12 +77,7 @@ static uint32_t toyota_get_checksum(const CANPacket_t *msg) {
 }
 
 static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
-
-  bool valid = false;
-  if (msg->addr == 0x260U) {
-    valid = !GET_BIT(msg, 3U);  // STEER_ANGLE_INITIALIZING
-  }
-  return valid;
+  return !GET_BIT(msg, 3U);  // STEER_ANGLE_INITIALIZING
 }
 
 static void toyota_rx_hook(const CANPacket_t *msg) {
@@ -168,9 +168,9 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
 
     // the EPS faults when the steering angle rate is above a certain threshold for too long. to prevent this,
     // we allow setting STEER_REQUEST bit to 0 while maintaining the requested torque value for a single frame
-    .min_valid_request_frames = 18,
+    .min_valid_request_frames = 17,
     .max_invalid_request_frames = 1,
-    .min_valid_request_rt_interval = 171000,  // 171ms; a ~10% buffer on cutting every 19 frames
+    .min_valid_request_rt_interval = 162000,  // 162ms; a ~10% buffer on cutting every 18 frames
     .has_steer_req_tolerance = true,
   };
 
@@ -208,6 +208,10 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       desired_accel = to_signed(desired_accel, 16);
 
       bool violation = false;
+      if (toyota_secoc) {
+        // SecOC cars move accel to 0x183. Only allow inactive accel on 0x343 to match stock behavior
+        violation = desired_accel != TOYOTA_LONG_LIMITS.inactive_accel;
+      }
       violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
 
       // only ACC messages that cancel are allowed when openpilot is not controlling longitudinal
@@ -224,6 +228,13 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       if (violation) {
         tx = false;
       }
+    }
+
+    if (msg->addr == 0x183U) {
+      int desired_accel = (msg->data[0] << 8) | msg->data[1];
+      desired_accel = to_signed(desired_accel, 16);
+
+      tx = !longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
     }
 
     // AEB: block all actuation. only used when DSU is unplugged
@@ -271,12 +282,12 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
         }
 
         // check if we should wind down torque
-        int driver_torque = MIN(ABS(torque_driver.min), ABS(torque_driver.max));
+        int driver_torque = SAFETY_MIN(SAFETY_ABS(torque_driver.min), SAFETY_ABS(torque_driver.max));
         if ((driver_torque > TOYOTA_LTA_MAX_DRIVER_TORQUE) && (torque_wind_down != 0)) {
           tx = false;
         }
 
-        int eps_torque = MIN(ABS(torque_meas.min), ABS(torque_meas.max));
+        int eps_torque = SAFETY_MIN(SAFETY_ABS(torque_meas.min), SAFETY_ABS(torque_meas.max));
         if ((eps_torque > TOYOTA_LTA_MAX_MEAS_TORQUE) && (torque_wind_down != 0)) {
           tx = false;
         }
@@ -340,6 +351,10 @@ static safety_config toyota_init(uint16_t param) {
     TOYOTA_COMMON_LONG_TX_MSGS
   };
 
+  static const CanMsg TOYOTA_SECOC_LONG_TX_MSGS[] = {
+    TOYOTA_COMMON_SECOC_LONG_TX_MSGS
+  };
+
   // safety param flags
   // first byte is for EPS factor, second is for flags
   const uint32_t TOYOTA_PARAM_OFFSET = 8U;
@@ -359,14 +374,18 @@ static safety_config toyota_init(uint16_t param) {
   toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
 
   safety_config ret;
-  if (toyota_stock_longitudinal) {
-    if (toyota_secoc) {
+  if (toyota_secoc) {
+    if (toyota_stock_longitudinal) {
       SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
     } else {
-      SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
+      SET_TX_MSGS(TOYOTA_SECOC_LONG_TX_MSGS, ret);
     }
   } else {
-    SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
+    if (toyota_stock_longitudinal) {
+      SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
+    } else {
+      SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
+    }
   }
 
   if (toyota_secoc) {

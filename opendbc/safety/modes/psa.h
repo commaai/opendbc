@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 #define PSA_STEERING              757U  // RX from XXX, driver torque
 #define PSA_STEERING_ALT          773U  // RX from EPS, steering angle
@@ -27,14 +27,7 @@ static uint8_t psa_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t psa_get_checksum(const CANPacket_t *msg) {
-  uint8_t chksum = 0;
-  if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    chksum = msg->data[5] & 0xFU;
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    chksum = msg->data[5] & 0xFU;
-  } else {
-  }
-  return chksum;
+  return msg->data[5] & 0xFU;
 }
 
 static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, int chk_pos) {
@@ -124,7 +117,7 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config psa_init(uint16_t param) {
-  UNUSED(param);
+  SAFETY_UNUSED(param);
   static const CanMsg PSA_TX_MSGS[] = {
     {PSA_LANE_KEEP_ASSIST, PSA_MAIN_BUS, 8, .check_relay = true}, // EPS steering
   };

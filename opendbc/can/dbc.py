@@ -1,9 +1,10 @@
 import re
 import os
-from dataclasses import dataclass
 from collections.abc import Callable
+from dataclasses import dataclass
+from functools import cache
 
-from opendbc import DBC_PATH
+from opendbc import DBC_PATH, get_generated_dbcs
 
 # TODO: these should just be passed in along with the DBC file
 from opendbc.car.honda.hondacan import honda_checksum
@@ -11,6 +12,7 @@ from opendbc.car.toyota.toyotacan import toyota_checksum
 from opendbc.car.subaru.subarucan import subaru_checksum
 from opendbc.car.chrysler.chryslercan import chrysler_checksum, fca_giorgio_checksum
 from opendbc.car.hyundai.hyundaicanfd import hkg_can_fd_checksum
+from opendbc.car.volkswagen.mlbcan import volkswagen_mlb_checksum
 from opendbc.car.volkswagen.mqbcan import volkswagen_mqb_meb_checksum, xor_checksum
 from opendbc.car.tesla.teslacan import tesla_checksum
 from opendbc.car.body.bodycan import body_checksum
@@ -31,6 +33,7 @@ class SignalType:
   FCA_GIORGIO_CHECKSUM = 10
   TESLA_CHECKSUM = 11
   PSA_CHECKSUM = 12
+  VOLKSWAGEN_MLB_CHECKSUM = 13
 
 
 @dataclass
@@ -71,25 +74,35 @@ VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
 VAL_SPLIT_RE = re.compile(r'["]+')
 
 
-@dataclass
+@cache
 class DBC:
-  name: str
-  msgs: dict[int, Msg]
-  addr_to_msg: dict[int, Msg]
-  name_to_msg: dict[str, Msg]
-  vals: list[Val]
-
   def __init__(self, name: str):
-    dbc_path = name
-    if not os.path.exists(dbc_path):
+    if os.path.exists(name):
+      self._parse_file(name)
+    else:
       dbc_path = os.path.join(DBC_PATH, name + ".dbc")
+      if os.path.exists(dbc_path):
+        self._parse_file(dbc_path)
+      else:
+        # try in-memory generated DBC
+        generated = get_generated_dbcs()
+        content = generated.get(name)
+        if content is None:
+          raise FileNotFoundError(f"DBC not found: {name}")
+        self._parse_content(name, content)
 
-    self._parse(dbc_path)
-
-  def _parse(self, path: str):
+  def _parse_file(self, path: str):
     self.name = os.path.basename(path).replace(".dbc", "")
     with open(path) as f:
       lines = f.readlines()
+    self._parse_lines(lines)
+
+  def _parse_content(self, name: str, content: str):
+    self.name = name
+    lines = content.splitlines(keepends=True)
+    self._parse_lines(lines)
+
+  def _parse_lines(self, lines: list[str]):
 
     checksum_state = get_checksum_state(self.name)
     be_bits = [j + i * 8 for i in range(64) for j in range(7, -1, -1)]
@@ -186,12 +199,14 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(16, -1, 0, -1, True, SignalType.HKG_CAN_FD_CHECKSUM, hkg_can_fd_checksum)
   elif dbc_name.startswith(("vw_mqb", "vw_mqbevo", "vw_meb")):
     return ChecksumState(8, 4, 0, 0, True, SignalType.VOLKSWAGEN_MQB_MEB_CHECKSUM, volkswagen_mqb_meb_checksum)
+  elif dbc_name.startswith("vw_mlb"):
+    return ChecksumState(8, 4, 0, 0, True, SignalType.VOLKSWAGEN_MLB_CHECKSUM, volkswagen_mlb_checksum)
   elif dbc_name.startswith("vw_pq"):
     return ChecksumState(8, 4, 0, -1, True, SignalType.XOR_CHECKSUM, xor_checksum)
   elif dbc_name.startswith("subaru_global_"):
     return ChecksumState(8, -1, 0, -1, True, SignalType.SUBARU_CHECKSUM, subaru_checksum)
   elif dbc_name.startswith("chrysler_"):
-    return ChecksumState(8, -1, 7, -1, False, SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
+    return ChecksumState(8, 4, 7, -1, False, SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
   elif dbc_name.startswith("fca_giorgio"):
     return ChecksumState(8, -1, 7, -1, False, SignalType.FCA_GIORGIO_CHECKSUM, fca_giorgio_checksum)
   elif dbc_name.startswith("comma_body"):

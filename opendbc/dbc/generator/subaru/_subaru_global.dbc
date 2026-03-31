@@ -45,8 +45,8 @@ BO_ 64 Throttle: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Signal1 : 12|4@1+ (1,0) [0|15] "" XXX
- SG_ Engine_RPM : 16|12@1+ (1,0) [0|4095] "" XXX
- SG_ Signal2 : 28|4@1+ (1,0) [0|15] "" XXX
+ SG_ Engine_RPM : 16|13@1+ (1,0) [0|8191] "" XXX
+ SG_ Neutral : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ Throttle_Pedal : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ Throttle_Cruise : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ Throttle_Combo : 48|8@1+ (1,0) [0|255] "" XXX
@@ -110,6 +110,7 @@ BO_ 282 Steering_2: 8 XXX
 BO_ 312 Brake_Pressure_L_R: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Steering_Angle : 16|16@1- (-0.1,0) [-3276.8|3276.7] "" XXX
  SG_ Brake_1 : 48|8@1+ (1,0) [0|255] "" XXX
  SG_ Brake_2 : 56|8@1+ (1,0) [0|255] "" XXX
 
@@ -158,6 +159,7 @@ BO_ 544 ES_Brake: 8 XXX
 BO_ 577 Cruise_Status: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Clutch_Depressed : 47|1@0+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set_Speed : 51|12@0+ (1,0) [0|120] "" XXX
  SG_ Cruise_On : 54|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Activated : 55|1@1+ (1,0) [0|1] "" XXX
@@ -211,8 +213,8 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Signal4 : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ Conventional_Cruise : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal5 : 33|2@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Activated : 36|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Disengaged_Dash : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Activated_Dash : 36|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal6 : 37|3@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ Cruise_Fault : 48|1@1+ (1,0) [0|1] "" XXX
@@ -283,6 +285,7 @@ CM_ SG_ 544 Cruise_Brake_Lights "1 = switch on brake lights";
 CM_ SG_ 544 Brake_Pressure "Winds down after cruise disabled. Also can be non-zero when likely preparing for AEB";
 CM_ SG_ 544 Signal3 "Usually goes to 2 if AEB_Status is 4";
 CM_ SG_ 544 AEB_Status "Occasionally is 4 instead of 8 while Brake_Pressure is non-zero, unsure why";
+CM_ SG_ 801 Cruise_Activated_Dash "Falls during user gas or standstill. This is likely only a UI signal to the dash to show if ACC is actually actuating";
 CM_ SG_ 801 PCB_Off "Pre-Collision Braking off";
 CM_ SG_ 801 Brake_Lights "Driver or Cruise brake on";
 CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";

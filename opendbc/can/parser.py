@@ -43,6 +43,12 @@ class MessageState:
   counter: int = 0
   counter_fail: int = 0
   first_seen_nanos: int = 0
+  last_warning_log_nanos: int = 0
+
+  def rate_limited_log(self, last_update_nanos: int, msg: str) -> None:
+    if (last_update_nanos - self.last_warning_log_nanos) >= 1_000_000_000:
+      carlog.warning(f"CANParser: {hex(self.address)} {self.name} {msg}")
+      self.last_warning_log_nanos = last_update_nanos
 
   def parse(self, nanos: int, dat: bytes) -> bool:
     tmp_vals: list[float] = [0.0] * len(self.signals)
@@ -58,8 +64,10 @@ class MessageState:
         tmp -= ((tmp >> (sig.size - 1)) & 0x1) * (1 << sig.size)
 
       if not self.ignore_checksum and sig.calc_checksum is not None:
-        if sig.calc_checksum(self.address, sig, bytearray(dat)) != tmp:
+        expected_checksum = sig.calc_checksum(self.address, sig, bytearray(dat))
+        if tmp != expected_checksum:
           checksum_failed = True
+          self.rate_limited_log(nanos, f"checksum failed: received {hex(tmp)}, calculated {hex(expected_checksum)}")
 
       if not self.ignore_counter and sig.type == 1:  # COUNTER
         if not self.update_counter(tmp, sig.size):
@@ -69,7 +77,6 @@ class MessageState:
 
     # must have good counter and checksum to update data
     if checksum_failed or counter_failed:
-      carlog.warning(f"{hex(self.address)} {self.name} checks failed, {checksum_failed=} {counter_failed=}")
       return False
 
     if not self.vals:
@@ -84,7 +91,7 @@ class MessageState:
 
     if self.frequency < 1e-5 and len(self.timestamps) >= 3:
       dt = (self.timestamps[-1] - self.timestamps[0]) * 1e-9
-      if (dt > 1.0 or len(self.timestamps) >= self.timestamps.maxlen) and dt != 0:
+      if (dt > 1.0 or (self.timestamps.maxlen is not None and len(self.timestamps) >= self.timestamps.maxlen)) and dt != 0:
         self.frequency = min(len(self.timestamps) / dt, 100.0)
         self.timeout_threshold = (1_000_000_000 / self.frequency) * 10
     return True
@@ -146,7 +153,7 @@ class CANParser:
     self.last_nonempty_nanos: int = 0
     self._last_update_nanos: int = 0
 
-  def _add_message(self, name_or_addr: str | int, freq: int = None) -> None:
+  def _add_message(self, name_or_addr: str | int, freq: int | None = None) -> None:
     if isinstance(name_or_addr, numbers.Number):
       msg = self.dbc.addr_to_msg.get(int(name_or_addr))
     else:
@@ -197,8 +204,10 @@ class CANParser:
     for state in self.message_states.values():
       if state.counter_fail >= MAX_BAD_COUNTER:
         counters_valid = False
+        state.rate_limited_log(self._last_update_nanos, f"counter invalid, {state.counter_fail=} {MAX_BAD_COUNTER=}")
       if not state.valid(self._last_update_nanos, bus_timeout):
         valid = False
+        state.rate_limited_log(self._last_update_nanos, "not valid (timeout or missing)")
 
     # TODO: probably only want to increment this once per update() call
     self.can_invalid_cnt = 0 if valid else min(self.can_invalid_cnt + 1, CAN_INVALID_CNT)
