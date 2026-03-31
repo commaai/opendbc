@@ -261,7 +261,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
         self._assert_timing(self.total_time / self.N, vin_ref_times[name])
         print(f'get_vin {name} case, query time={self.total_time / self.N} seconds')
 
-  def test_fw_query_timing(self, subtests, mocker):
+  def test_fw_query_timing(self):
     total_ref_time = 8.05
     brand_ref_times = {
       'gm': 1.0,
@@ -279,7 +279,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
       'rivian': 0.3,
       'psa': 0.1,
       'gwm': 0.65,
-    },
+    }
 
     total_times = 0.0
     for brand, config in FW_QUERY_CONFIGS.items():

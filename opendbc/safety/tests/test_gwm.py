@@ -21,10 +21,11 @@ def checksum(msg):
   return addr, ret, bus
 
 
-class TestGwm(common.CarSafetyTest):
+class TestGwm(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, common.LongitudinalGasBrakeSafetyTest,
+              common.VehicleSpeedSafetyTest):
   TX_MSGS = [[0x12B, 0], [0x143, 0], [0x147, 2], [0xA1, 2]] # Steer, long, wheel touch, cancel
-  RELAY_MALFUNCTION_ADDRS = {0: (0x12B, 0x143), 2: (0x147)}
-  FWD_BLACKLISTED_ADDRS = {0: [0x147], 2: [0x12B]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x12B, 0x143), 2: (0x147,)}
+  FWD_BLACKLISTED_ADDRS = {0: [0x147], 2: [0x12B, 0x143]}
 
   MAX_RATE_UP = 3
   MAX_RATE_DOWN = 5
@@ -37,11 +38,21 @@ class TestGwm(common.CarSafetyTest):
   INACTIVE_GAS = 0
   MAX_BRAKE = 107
 
+  MAX_POSSIBLE_BRAKE = 108
+  MAX_POSSIBLE_GAS = 4578  # reasonably excessive limits, not signal max
+  MIN_POSSIBLE_GAS = -11
+
+  PCM_CRUISE = False  # openpilot can control the PCM state if longitudinal
+
   def setUp(self):
     self.packer = CANPackerSafety("gwm_haval_h6_mk3_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.gwm, GwmSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
+
+  def _user_gas_msg(self, gas):
+    values = {"GAS_POSITION": gas}
+    return self.packer.make_can_msg_safety("CAR_OVERALL_SIGNALS2", 0, values)
 
   def _user_brake_msg(self, brake):
     values = {"PEDAL_BRAKE_PRESSED": brake}
@@ -64,7 +75,7 @@ class TestGwm(common.CarSafetyTest):
     values = {"B_RX_EPS_TORQUE": torque}
     return self.packer.make_can_msg_safety("RX_STEER_RELATED", 0, values)
 
-  def _steer_cmd_msg(self, torque, steer_req=1):
+  def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"STEER_REQUEST": steer_req, "TORQUE_CMD": torque}
     return self.packer.make_can_msg_safety("STEER_CMD", 0, values)
 
