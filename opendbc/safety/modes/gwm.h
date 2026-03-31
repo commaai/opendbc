@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 #define GWM_ADAS_ACTIVATION      0xA1U // RX from STEER_AND_AP_STALK
 #define GWM_GAS                  0x60U // RX from CAR_OVERALL_SIGNALS
@@ -181,7 +181,7 @@ static safety_config gwm_init(uint16_t param) {
    const int FLAG_GWM_LONG_CONTROL = 1;
    gwm_longitudinal = GET_FLAG(param, FLAG_GWM_LONG_CONTROL);
  #else
-   UNUSED(param);
+   SAFETY_UNUSED(param);
  #endif
 
   // FIXME: cppcheck thinks that gwm_longitudinal is always false. This is not true
