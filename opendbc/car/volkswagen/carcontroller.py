@@ -50,6 +50,7 @@ class CarController(CarControllerBase):
 
     self.apply_torque_last = 0
     self.gra_acc_counter_last = None
+    self.acc_counter_seeded = False
     self.hca_mitigation = HCAMitigation(self.CCP)
 
   def update(self, CC, CS, now_nanos):
@@ -82,6 +83,12 @@ class CarController(CarControllerBase):
     # **** Acceleration Controls ******************************************** #
 
     if self.CP.openpilotLongitudinalControl:
+      if not self.acc_counter_seeded and CS.acc_stock_counters:
+        for name in ("ACC_06", "ACC_07"):
+          addr = self.packer_pt.dbc.name_to_msg[name].address
+          self.packer_pt.counters[addr] = (CS.acc_stock_counters[name] + 1) % 16
+        self.acc_counter_seeded = True
+
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
