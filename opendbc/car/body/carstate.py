@@ -17,13 +17,11 @@ class CarState(CarStateBase):
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = False
 
-    # body v1 specific
-    if self.car_fingerprint == CAR.COMMA_BODY_V1:
-      ret.steerFaultPermanent = any([cp.vl['VAR_VALUES']['MOTOR_ERR_L'], cp.vl['VAR_VALUES']['MOTOR_ERR_R'],
-                                  cp.vl['VAR_VALUES']['FAULT']])
+    ret.steerFaultPermanent = any([cp.vl['VAR_VALUES']['MOTOR_ERR_L'], cp.vl['VAR_VALUES']['MOTOR_ERR_R'],
+                                cp.vl['VAR_VALUES']['FAULT']])
 
-      ret.charging = cp.vl["BODY_DATA"]["CHARGER_CONNECTED"] == 1
-      ret.fuelGauge = cp.vl["BODY_DATA"]["BATT_PERCENTAGE"] / 100
+    ret.charging = cp.vl["BODY_DATA"]["CHARGER_CONNECTED"] == 1
+    ret.fuelGauge = cp.vl["BODY_DATA"]["BATT_PERCENTAGE"] / 100
 
     # irrelevant for non-car
     ret.gearShifter = structs.CarState.GearShifter.drive
