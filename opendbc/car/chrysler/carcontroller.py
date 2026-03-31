@@ -2,7 +2,7 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL
 from opendbc.car.lateral import apply_meas_steer_torque_limits
 from opendbc.car.chrysler import chryslercan
-from opendbc.car.chrysler.values import CUSW_CARS, RAM_CARS, CarControllerParams, ChryslerFlags
+from opendbc.car.chrysler.values import CUSW_CARS, RAM_CARS, SRT_CARS, CarControllerParams, ChryslerFlags
 from opendbc.car.interfaces import CarControllerBase
 
 
@@ -10,6 +10,7 @@ class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
+    self.lkas_active_prev = False
 
     self.hud_count = 0
     self.last_lkas_falling_edge = 0
@@ -72,12 +73,18 @@ class CarController(CarControllerBase):
       # steer torque
       new_torque = int(round(CC.actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
-      if not lkas_active or not lkas_control_bit:
-        apply_torque = apply_meas_steer_torque_limits(0, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
+      if self.CP.carFingerprint in SRT_CARS:
+        if not lkas_active or not lkas_control_bit:
+          apply_torque = apply_meas_steer_torque_limits(0, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
+        elif not self.lkas_active_prev:
+          apply_torque = apply_meas_steer_torque_limits(apply_torque, 0, CS.out.steeringTorqueEps, self.params)
+      else:
+        if not lkas_active or not lkas_control_bit:
+          apply_torque = 0
+      self.lkas_active_prev = lkas_active
       self.apply_torque_last = apply_torque
 
       can_sends.append(chryslercan.create_lkas_command(self.packer, self.CP, int(apply_torque), lkas_control_bit))
-
     self.frame += 1
 
     new_actuators = CC.actuators.as_builder()
