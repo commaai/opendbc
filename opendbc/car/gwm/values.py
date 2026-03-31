@@ -18,7 +18,7 @@ class CarControllerParams:
   def __init__(self, CP: CarParams):
     self.STEER_DELTA_UP = 4
     self.STEER_DELTA_DOWN = 6
-    self.STEER_ERROR_MAX = 70
+    self.STEER_ERROR_MAX = 80
 
 
 class GwmSafetyFlags(IntFlag):

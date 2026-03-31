@@ -62,7 +62,7 @@ static uint32_t gwm_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void gwm_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
+  if (msg->bus == GWM_MAIN_BUS) {
     // GAS_POSITION
     if (msg->addr == GWM_GAS) {
       gas_pressed = msg->data[9] > 0U;
@@ -82,10 +82,14 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
       brake_pressed = GET_BIT(msg, 11U);
     }
 
-    if (msg->addr == 0x147U) {
+    if (msg->addr == GWM_RX_STEER_RELATED) {
       int torque_meas_new = ((msg->data[13] & 0x7U) << 8) | (msg->data[14]);
       torque_meas_new = to_signed(torque_meas_new, 11) + 548;
       update_sample(&torque_meas, torque_meas_new);
+
+      // increase torque_meas by 1 to be conservative on rounding
+      torque_meas.min--;
+      torque_meas.max++;
     }
 
     // state machine to enter and exit controls for button enabling
@@ -111,8 +115,8 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
     .max_torque = 253,
     .max_rate_up = 4,
     .max_rate_down = 6,
-    .max_torque_error = 70,
-    .max_rt_delta = 75,
+    .max_torque_error = 80,
+    .max_rt_delta = 100,
     .type = TorqueMotorLimited,
   };
 
@@ -126,7 +130,7 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
   bool violation = false;
 
-  if (msg->bus == 0U) {
+  if (msg->bus == GWM_MAIN_BUS) {
     if (msg->addr == GWM_STEER_CMD) {
       int desired_torque = (((msg->data[12] & 0x7FU) << 3) | ((msg->data[13] & 0xE0U) >> 5));
       desired_torque = to_signed(desired_torque, 10) + 1;
@@ -134,7 +138,7 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
       violation |= steer_torque_cmd_checks(desired_torque, steer_req, GWM_TORQUE_STEERING_LIMITS);
     }
 
-    if (msg->addr == 0x143U) {
+    if (msg->addr == GWM_LONG_CONTROL) {
       int brake_raw = msg->data[13];
       brake_raw = 181 - brake_raw;
       violation |= longitudinal_brake_checks(brake_raw, GWM_LONG_LIMITS);

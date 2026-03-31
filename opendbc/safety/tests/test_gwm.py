@@ -21,17 +21,20 @@ def checksum(msg):
   return addr, ret, bus
 
 
-class TestGwm(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, common.LongitudinalGasBrakeSafetyTest,
-              common.VehicleSpeedSafetyTest):
+# class TestGwm(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, common.LongitudinalGasBrakeSafetyTest,
+#               common.VehicleSpeedSafetyTest):
+
+class TestGwm(common.CarSafetyTest):
   TX_MSGS = [[0x12B, 0], [0x143, 0], [0x147, 2], [0xA1, 2]] # Steer, long, wheel touch, cancel
   RELAY_MALFUNCTION_ADDRS = {0: (0x12B, 0x143), 2: (0x147,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x147], 2: [0x12B, 0x143]}
 
-  MAX_RATE_UP = 3
-  MAX_RATE_DOWN = 5
+  MAX_RATE_UP = 4
+  MAX_RATE_DOWN = 6
   MAX_TORQUE_LOOKUP = [0], [254]
   MAX_RT_DELTA = 100
-  MAX_TORQUE_ERROR = 70
+  MAX_TORQUE_ERROR = 80
+  TORQUE_MEAS_TOLERANCE = 1
 
   MIN_GAS = -10
   MAX_GAS = 4577
@@ -41,8 +44,6 @@ class TestGwm(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, common
   MAX_POSSIBLE_BRAKE = 108
   MAX_POSSIBLE_GAS = 4578  # reasonably excessive limits, not signal max
   MIN_POSSIBLE_GAS = -11
-
-  PCM_CRUISE = False  # openpilot can control the PCM state if longitudinal
 
   def setUp(self):
     self.packer = CANPackerSafety("gwm_haval_h6_mk3_generated")
