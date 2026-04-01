@@ -1,6 +1,6 @@
 from opendbc.car import structs
 from opendbc.car.crc import CRC8J1850
-from opendbc.car.chrysler.values import CUSW_CARS, RAM_CARS
+from opendbc.car.chrysler.values import CUSW_CARS, RAM_CARS, SRT_CARS
 
 GearShifter = structs.CarState.GearShifter
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -50,6 +50,9 @@ def create_lkas_hud(packer, CP, lkas_active, hud_alert, hud_count, car_model, au
 
   if CP.carFingerprint in RAM_CARS:
     values['AUTO_HIGH_BEAM_ON'] = auto_high_beam
+  if CP.carFingerprint in SRT_CARS:
+    values['AUTO_HIGH_BEAM_ON'] = auto_high_beam
+    values['LKAS_DISABLED'] = 0 if lkas_active else 1
 
   return packer.make_can_msg("DAS_6", 0, values)
 
