@@ -20,16 +20,19 @@ class CAR(Platforms):
 
 class CarControllerParams:
   def __init__(self, CP):
-    # conversion ratio from RPM to PID input value
-    self.SPEED_FROM_RPM_V = 0.008587 # forward-backward
-    self.SPEED_FROM_RPM_W = 0.0071 # left-right
+    # speed = RPM * (pi * diameter (~6.5 inches) / 60)
+    self.SPEED_FROM_RPM = 0.008644
 
+    self.MAX_POS_INTEGRATOR = 1
+
+    # body v1 is torque control, body v2 is speed control
     if CP.carFingerprint in CAR.COMMA_BODY_V1:
+      self.SPEED_FROM_RPM = self.SPEED_FROM_RPM / 16 # v1 firmware RPM is unscaled
       self.CONTROL_BUS = 0
       self.MAX_TORQUE = 700
       self.MAX_TORQUE_RATE = 70
       self.FLIP_Y = True # flip sign of differential wheel speed
-      self.v_pid_settings, self.w_pid_settings = {
+      self.v_pid_settings = self.w_pid_settings = {
         "k_p": 83,
         "k_i": 73,
         "k_d": 12,
@@ -39,10 +42,10 @@ class CarControllerParams:
       self.MAX_TORQUE = 1000
       self.MAX_TORQUE_RATE = 250
       self.FLIP_Y = False
-      self.v_pid_settings, self.w_pid_settings = {
-        "k_p": 254,
-        "k_i": 252,
-        "k_d": 24,
+      self.v_pid_settings = self.w_pid_settings = {
+        "k_p": 1.27 * self.MAX_TORQUE_RATE,
+        "k_i": 1.26 * self.MAX_TORQUE_RATE,
+        "k_d": 0.12 * self.MAX_TORQUE_RATE,
       }
 
 

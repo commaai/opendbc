@@ -4,7 +4,7 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL
 from opendbc.car.common.pid import PIDController
 from opendbc.car.body import bodycan
-from opendbc.car.body.values import CAR, CarControllerParams
+from opendbc.car.body.values import CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
 
 class CarController(CarControllerBase):
@@ -13,8 +13,8 @@ class CarController(CarControllerBase):
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.main])
 
-    self.v_pid = PIDController(**self.v_pid_settings, rate=1 / DT_CTRL)
-    self.w_pid = PIDController(**self.w_pid_settings, rate=1 / DT_CTRL)
+    self.v_pid = PIDController(**self.params.v_pid_settings, rate=1 / DT_CTRL)
+    self.w_pid = PIDController(**self.params.w_pid_settings, rate=1 / DT_CTRL)
 
     self.torque_r_filtered = 0.
     self.torque_l_filtered = 0.
@@ -25,7 +25,7 @@ class CarController(CarControllerBase):
 
     if CC.enabled:
       v_setpoint = CC.actuators.accel / 4.0
-      w_setpoint = (-1 if self.params.FLIP_Y else 0) * CC.actuators.torque
+      w_setpoint = (-1 if self.params.FLIP_Y else 1) * CC.actuators.torque
 
       user_wants_to_move = (abs(w_setpoint) > 0.01 or abs(v_setpoint) > 0.01)
       robot_is_stopped = (abs(v_setpoint) < 0.05 and abs(w_setpoint) < 0.05)
@@ -36,13 +36,13 @@ class CarController(CarControllerBase):
         self.v_pid.reset()
         self.w_pid.reset()
 
-      v_measured = self.params.SPEED_FROM_RPM_V * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
+      v_measured = self.params.SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
       v_error = v_setpoint - v_measured
       freeze_v_integrator = ((v_error < 0 and self.v_pid.error_integral <= -self.params.MAX_POS_INTEGRATOR) or
                             (v_error > 0 and self.v_pid.error_integral >= self.params.MAX_POS_INTEGRATOR))
       v_torque = self.v_pid.update(v_error, freeze_integrator=freeze_v_integrator)
 
-      w_measured = self.params.SPEED_FROM_RPM_W * -(CS.out.wheelSpeeds.fl - CS.out.wheelSpeeds.fr)
+      w_measured = self.params.SPEED_FROM_RPM * -(CS.out.wheelSpeeds.fl - CS.out.wheelSpeeds.fr)
       w_error = w_setpoint - w_measured
       freeze_w_integrator = ((w_error < 0 and self.w_pid.error_integral <= -self.params.MAX_POS_INTEGRATOR) or
                             (w_error > 0 and self.w_pid.error_integral >= self.params.MAX_POS_INTEGRATOR))
@@ -61,7 +61,7 @@ class CarController(CarControllerBase):
       torque_l = int(np.clip(self.torque_l_filtered, -self.params.MAX_TORQUE, self.params.MAX_TORQUE))
 
     can_sends = []
-    can_sends.append(bodycan.create_control(self.packer, self.control_bus, torque_l, torque_r))
+    can_sends.append(bodycan.create_control(self.packer, self.params.CONTROL_BUS, torque_l, torque_r))
 
     new_actuators = CC.actuators.as_builder()
     new_actuators.accel = torque_l
