@@ -109,11 +109,11 @@ jobs:
         repository: 'commaai/openpilot'
         ref: 'master'
         submodules: true
+    - run: ./tools/op.sh setup
     - run: rm -rf opendbc_repo/
     - uses: actions/checkout@v4
       with:
         path: opendbc_repo
-    - run: ./tools/op.sh setup
     - name: Cache test routes
       id: routes-cache
       uses: actions/cache@v4

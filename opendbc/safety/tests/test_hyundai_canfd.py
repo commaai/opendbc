@@ -56,11 +56,11 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
   BUTTONS_TX_BUS = 1
 
   def _torque_driver_msg(self, torque):
-    values = {"STEERING_COL_TORQUE": torque}
+    values = {"MDPS_StrTqSnsrVal": torque}
     return self.packer.make_can_msg_safety("MDPS", self.PT_BUS, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
-    values = {"TORQUE_REQUEST": torque, "STEER_REQ": steer_req}
+    values = {"StrTqReqVal": torque, "ActToiSta": steer_req}
     return self.packer.make_can_msg_safety(self.STEER_MSG, self.STEER_BUS, values)
 
   def _speed_msg(self, speed):
