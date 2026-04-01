@@ -5,20 +5,6 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
-SPEED_FROM_RPM = 0.008587
-
-
-class CarControllerParams:
-  ANGLE_DELTA_BP = [0., 5., 15.]
-  ANGLE_DELTA_V = [5., .8, .15]     # windup limit
-  ANGLE_DELTA_VU = [5., 3.5, 0.4]   # unwind limit
-  LKAS_MAX_TORQUE = 1               # A value of 1 is easy to overpower
-  STEER_THRESHOLD = 1.0
-
-  def __init__(self, CP):
-    pass
-
-
 class CAR(Platforms):
   COMMA_BODY_V1 = PlatformConfig(
     [CarDocs("comma body", package="All", video="https://youtu.be/VT-i3yRsX2s?t=2736")],
@@ -30,6 +16,34 @@ class CAR(Platforms):
     CarSpecs(mass=9, wheelbase=0.406, steerRatio=0.5, centerToFrontRatio=0.44),
     {Bus.main: 'comma_body'},
   )
+
+
+class CarControllerParams:
+  def __init__(self, CP):
+    # conversion ratio from RPM to PID input value
+    self.SPEED_FROM_RPM_V = 0.008587 # forward-backward
+    self.SPEED_FROM_RPM_W = 0.0071 # left-right
+
+    if CP.carFingerprint in CAR.COMMA_BODY_V1:
+      self.CONTROL_BUS = 0
+      self.MAX_TORQUE = 700
+      self.MAX_TORQUE_RATE = 70
+      self.FLIP_Y = True # flip sign of differential wheel speed
+      self.v_pid_settings, self.w_pid_settings = {
+        "k_p": 83,
+        "k_i": 73,
+        "k_d": 12,
+      }
+    elif CP.carFingerprint in CAR.COMMA_BODY_V2:
+      self.CONTROL_BUS = 2
+      self.MAX_TORQUE = 1000
+      self.MAX_TORQUE_RATE = 250
+      self.FLIP_Y = False
+      self.v_pid_settings, self.w_pid_settings = {
+        "k_p": 254,
+        "k_i": 252,
+        "k_d": 24,
+      }
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
