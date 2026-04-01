@@ -62,6 +62,9 @@ class CarController(CarControllerBase):
       elif self.CP.carFingerprint in CUSW_CARS:
         if CS.out.vEgo < (self.CP.minSteerSpeed - 2.0):
           lkas_control_bit = False
+      elif self.CP.carFingerprint in SRT_CARS: # may merge with other class if it makes sense
+        if CS.out.vEgo < (self.CP.minSteerSpeed - 2.1):
+          lkas_control_bit = False
 
       # EPS faults if LKAS re-enables too quickly
       lkas_control_bit = lkas_control_bit and (self.frame - self.last_lkas_falling_edge > 200)
@@ -73,9 +76,18 @@ class CarController(CarControllerBase):
       # steer torque
       new_torque = int(round(CC.actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
+      lkas_control_bit_cmd = lkas_control_bit
       if self.CP.carFingerprint in SRT_CARS:
         if not lkas_active or not lkas_control_bit:
-          apply_torque = apply_meas_steer_torque_limits(0, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
+          if self.apply_torque_last != 0:
+            if self.apply_torque_last > 0:
+              apply_torque = max(self.apply_torque_last - self.params.STEER_DELTA_DOWN, 0)
+            else:
+              apply_torque = min(self.apply_torque_last + self.params.STEER_DELTA_DOWN, 0)
+            if apply_torque != 0:
+              lkas_control_bit_cmd = True
+          else:
+            apply_torque = 0
         elif not self.lkas_active_prev:
           apply_torque = apply_meas_steer_torque_limits(apply_torque, 0, CS.out.steeringTorqueEps, self.params)
       else:
@@ -84,7 +96,7 @@ class CarController(CarControllerBase):
       self.lkas_active_prev = lkas_active
       self.apply_torque_last = apply_torque
 
-      can_sends.append(chryslercan.create_lkas_command(self.packer, self.CP, int(apply_torque), lkas_control_bit))
+      can_sends.append(chryslercan.create_lkas_command(self.packer, self.CP, int(apply_torque), lkas_control_bit_cmd))
     self.frame += 1
 
     new_actuators = CC.actuators.as_builder()
