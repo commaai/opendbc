@@ -244,7 +244,9 @@ class CarState(CarStateBase):
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > self.params.STEER_THRESHOLD, 5)
     ret.steerFaultTemporary = cp.vl["MDPS"]["MDPS_LkaFailSta"] != 0
 
+    alt = "_ALT" if self.CP.carFingerprint == CAR.HYUNDAI_KONA_EV_2ND_GEN else ""
     if self.CP.flags & HyundaiFlags.CCNC_NON_HDA2:
+      alt = "_ALT"
       self.msg_161, self.msg_162, self.msg_1b5 = map(copy.copy, (cp_cam.vl["CCNC_0x161"], cp_cam.vl["CCNC_0x162"], cp_cam.vl["FR_CMR_03_50ms"]))
       if self.CP.openpilotLongitudinalControl:
         self.cruise_info = copy.copy((cp_cam if self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC else cp).vl["SCC_CONTROL"])
