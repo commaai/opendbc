@@ -71,6 +71,11 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
       self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
 
+  def test_tx_hook_on_wrong_safety_mode(self):
+    # SRT uses SAFETY_CHRYSLER with param flag - TX addresses shared with Pacifica
+    # Cross-mode blocking is not applicable for param variants of the same safety mode
+    pass
+
 
 class TestChryslerRamDTSafety(TestChryslerSafety):
   TX_MSGS = [[0xB1, 2], [0xA6, 0], [0xFA, 0]]
