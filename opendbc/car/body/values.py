@@ -23,6 +23,8 @@ class CarControllerParams:
     # speed = RPM * (pi * diameter (~6.5 inches) / 60)
     self.SPEED_FROM_RPM = 0.008644
 
+    self.MAX_SPEED = 2 # m/s
+    self.MAX_TURN = 1 # m/s
     self.MAX_POS_INTEGRATOR = 1
 
     # body v1 is torque control, body v2 is speed control
