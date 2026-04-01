@@ -81,12 +81,14 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     mgr.update(self._cs(grade=10), long_active=True, accel=-1.0, stopping=True, starting=False)
     assert not mgr.can_stop_forever
 
-  def test_can_stop_forever_cleared_when_not_stopping_or_starting(self):
-    """can_stop_forever is cleared when neither stopping nor starting, e.g. during a resume."""
+  def test_can_stop_forever_cleared_when_clearly_moving(self):
+    """can_stop_forever persists below 1.5 m/s to give TSK time to ramp up brakes, clears above."""
     mgr = MQBStandstillManager()
     mgr.update(self._cs(esp_stopping=True), long_active=True, accel=-1.0, stopping=True, starting=False)
     assert mgr.can_stop_forever
-    mgr.update(self._cs(), long_active=True, accel=0.5, stopping=False, starting=False)
+    mgr.update(self._cs(v_ego=0.6), long_active=True, accel=0.5, stopping=False, starting=False)
+    assert mgr.can_stop_forever  # still alive below 1.5 m/s
+    mgr.update(self._cs(v_ego=1.6), long_active=True, accel=0.5, stopping=False, starting=False)
     assert not mgr.can_stop_forever
 
   def test_can_stop_forever_cleared_when_long_inactive(self):

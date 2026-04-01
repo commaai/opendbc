@@ -90,7 +90,7 @@ class MQBStandstillManager:
         self.can_stop_forever = True
       if self.esp_hold_frames > 0:
         self.can_stop_forever = False
-      if not (stopping or starting):
+      if CS.out.vEgo > 1.5:
         self.can_stop_forever = False
       if CS.grade >= 10: # the car can hold on these grades, but TSK won't command brake fast enough to prevent rollback
         self.can_stop_forever = False
