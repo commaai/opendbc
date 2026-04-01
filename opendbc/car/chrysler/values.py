@@ -12,6 +12,7 @@ Ecu = CarParams.Ecu
 class ChryslerSafetyFlags(IntFlag):
   RAM_DT = 1
   RAM_HD = 2
+  SRT = 4
 
 
 class ChryslerFlags(IntFlag):

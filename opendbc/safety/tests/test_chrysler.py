@@ -120,6 +120,16 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
     values = {"Vehicle_Speed": speed}
     return self.packer.make_can_msg_safety("ESP_8", 0, values)
 
+class TestChryslerSrtSafety(TestChryslerSafety):
+  MAX_RATE_UP = 6
+  MAX_RATE_DOWN = 6
+  MAX_TORQUE_LOOKUP = [0], [261]
+
+  def setUp(self):
+    self.packer = CANPackerSafety("chrysler_pacifica_2017_hybrid_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.SRT)
+    self.safety.init_tests()
 
 if __name__ == "__main__":
   unittest.main()

@@ -35,7 +35,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate in CUSW_CARS:
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chryslerCusw)]
     elif candidate in SRT_CARS:
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chryslerSrt)]
+      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.SRT.value
 
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     if candidate not in RAM_CARS:
