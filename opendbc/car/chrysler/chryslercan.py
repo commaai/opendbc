@@ -56,6 +56,17 @@ def create_lkas_hud(packer, CP, lkas_active, hud_alert, hud_count, car_model, au
 
   return packer.make_can_msg("DAS_6", 0, values)
 
+def create_lkas_heartbit(packer, CP, lkas_heartbit):
+  if not lkas_heartbit:
+    return None
+  values = {s: lkas_heartbit[s] for s in [
+    "LKAS_DISABLED",
+    "AUTO_HIGH_BEAM",
+    "FORWARD_1",
+    "FORWARD_2",
+    "FORWARD_3",
+  ]}
+  return packer.make_can_msg("LKAS_HEARTBIT", 0, values)
 
 def create_lkas_command(packer, CP, apply_torque, lkas_control_bit):
   # LKAS_COMMAND Lane-keeping signal to turn the wheel
@@ -65,7 +76,6 @@ def create_lkas_command(packer, CP, apply_torque, lkas_control_bit):
     "LKAS_CONTROL_BIT": enabled_val if lkas_control_bit else 0,
   }
   return packer.make_can_msg("LKAS_COMMAND", 0, values)
-
 
 def create_cruise_buttons(packer, frame, bus, cancel=False, resume=False):
   values = {
