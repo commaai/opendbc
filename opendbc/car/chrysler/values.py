@@ -86,6 +86,7 @@ class CAR(Platforms):
   JEEP_GRAND_CHEROKEE_SRT_2016 = ChryslerPlatformConfig(  # SRT Trim Specs
     [ChryslerCarDocs("Jeep Grand Cherokee SRT 2016-18")],
     ChryslerCarSpecs(mass=1836.0, wheelbase=2.70, steerRatio=13.0),
+    {Bus.pt: 'chrysler_srt_generated'},
   )
 
   # Ram

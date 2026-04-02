@@ -45,7 +45,7 @@ class CarController(CarControllerBase):
         can_sends.append(chryslercan.create_lkas_hud(self.packer, self.CP, lkas_active, CC.hudControl.visualAlert,
                                                      self.hud_count, CS.lkas_car_model, CS.auto_high_beam))
         self.hud_count += 1
-        
+
     # LKAS heartbeat forwarding for SRT
     if self.CP.carFingerprint in SRT_CARS and self.frame % 10 == 0:
       heartbit_msg = chryslercan.create_lkas_heartbit(self.packer, self.CP, CS.lkas_heartbit)

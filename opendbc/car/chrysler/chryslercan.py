@@ -57,7 +57,7 @@ def create_lkas_hud(packer, CP, lkas_active, hud_alert, hud_count, car_model, au
   return packer.make_can_msg("DAS_6", 0, values)
 
 def create_lkas_heartbit(packer, CP, lkas_heartbit):
-  if not lkas_heartbit:
+  if not lkas_heartbit or "LKAS_DISABLED" not in lkas_heartbit:
     return None
   values = {s: lkas_heartbit[s] for s in [
     "LKAS_DISABLED",
