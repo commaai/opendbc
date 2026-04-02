@@ -39,8 +39,7 @@ class TeslaCAN:
       set_speed = 0 if accel < 0 else V_CRUISE_MAX
 
     if gas_pressed:
-      self.jerk_lower = min(self.jerk_lower + self.CCP.JERK_RAMP_RATE, 0.0)
-      self.jerk_upper = max(self.jerk_upper - self.CCP.JERK_RAMP_RATE, 0.0)
+      self.jerk_upper = self.jerk_lower = 0.0
     else:
       self.jerk_lower = max(self.jerk_lower - self.CCP.JERK_RAMP_RATE, self.CCP.JERK_LIMIT_MIN)
       self.jerk_upper = min(self.jerk_upper + self.CCP.JERK_RAMP_RATE, self.CCP.JERK_LIMIT_MAX)
