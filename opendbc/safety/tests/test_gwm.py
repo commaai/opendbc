@@ -1,12 +1,34 @@
 #!/usr/bin/env python3
 import unittest
 
+from opendbc.can.dbc import DBC
 from opendbc.car.gwm.values import GwmSafetyFlags
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.car.gwm.gwmcan import checksum as _checksum
+
+
+opendbc = "gwm_haval_h6_mk3_generated"
+dbc = DBC(opendbc)
+
+
+def get_signal_range(signal):
+  if signal.is_signed:
+    # For signed: -(2^(bits-1)) a (2^(bits-1)-1)
+    max_val = (2 ** (signal.size - 1)) - 1
+    min_val = -(2 ** (signal.size - 1))
+  else:
+    # For unsigned: 0 a (2^bits - 1)
+    max_val = (2 ** signal.size) - 1
+    min_val = 0
+
+  # Apply factor and offset
+  physical_max = max_val * signal.factor + signal.offset
+  physical_min = min_val * signal.factor + signal.offset
+
+  return physical_min, physical_max
 
 
 def checksum(msg):
@@ -24,14 +46,14 @@ def checksum(msg):
 # class TestGwm(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, common.LongitudinalGasBrakeSafetyTest,
 #               common.VehicleSpeedSafetyTest):
 
-class TestGwm(common.CarSafetyTest):
+class TestGwmSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
   TX_MSGS = [[0x12B, 0], [0x143, 0], [0x147, 2], [0xA1, 2]] # Steer, long, wheel touch, cancel
   RELAY_MALFUNCTION_ADDRS = {0: (0x12B, 0x143), 2: (0x147,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x147], 2: [0x12B, 0x143]}
 
   MAX_RATE_UP = 4
   MAX_RATE_DOWN = 6
-  MAX_TORQUE_LOOKUP = [0], [254]
+  MAX_TORQUE_LOOKUP = [0], [253]
   MAX_RT_DELTA = 100
   MAX_TORQUE_ERROR = 80
   TORQUE_MEAS_TOLERANCE = 1
@@ -46,7 +68,7 @@ class TestGwm(common.CarSafetyTest):
   MIN_POSSIBLE_GAS = -11
 
   def setUp(self):
-    self.packer = CANPackerSafety("gwm_haval_h6_mk3_generated")
+    self.packer = CANPackerSafety(opendbc)
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.gwm, GwmSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
@@ -73,10 +95,20 @@ class TestGwm(common.CarSafetyTest):
     self.assertFalse(self.safety.get_controls_allowed())
 
   def _torque_meas_msg(self, torque):
+    # 11-bit signed signal clip to not produce errors on test
+    torque_signal = dbc.name_to_msg["RX_STEER_RELATED"].sigs["B_RX_EPS_TORQUE"]
+    min_torque, max_torque = get_signal_range(torque_signal)
+    torque = max(min(torque, max_torque), min_torque)
+
     values = {"B_RX_EPS_TORQUE": torque}
     return self.packer.make_can_msg_safety("RX_STEER_RELATED", 0, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
+    # 10-bit signed signal clip to not produce errors on test
+    torque_signal = dbc.name_to_msg["STEER_CMD"].sigs["TORQUE_CMD"]
+    min_torque, max_torque = get_signal_range(torque_signal)
+    torque = max(min(torque, max_torque), min_torque)
+
     values = {"STEER_REQUEST": steer_req, "TORQUE_CMD": torque}
     return self.packer.make_can_msg_safety("STEER_CMD", 0, values)
 
