@@ -12,7 +12,8 @@ from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongit
 
 # 4 bit checkusm used in some hyundai messages
 # lives outside the can packer because we never send this msg
-def checksum(msg):
+# SCC12 (0x420) uses an alternative checksum constant on some legacy platforms
+def checksum(msg, scc12_alt=False):
   addr, dat, bus = msg
 
   chksum = 0
@@ -38,7 +39,7 @@ def checksum(msg):
       elif addr == 0x394 and i == 7:
         continue
       chksum += sum(divmod(b, 16))
-    chksum = (16 - chksum) % 16
+    chksum = ((14 if (addr == 0x421 and scc12_alt) else 16) - chksum) % 16
     ret = bytearray(dat)
     ret[6 if addr == 0x394 else 7] |= chksum << (4 if addr == 0x421 else 0)
 
@@ -189,6 +190,19 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
   def _user_gas_msg(self, gas):
     values = {"CR_Vcu_AccPedDep_Pos": gas}
     return self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum)
+
+
+class TestHyundaiLegacySafetySCC12AltChecksum(TestHyundaiLegacySafetyHEV):
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_kia_generic")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, HyundaiSafetyFlags.HYBRID_GAS | HyundaiSafetyFlags.CAN_LEGACY_SCC12_ALT_CHECKSUM)
+    self.safety.init_tests()
+
+  def _pcm_status_msg(self, enable):
+    values = {"ACCMode": enable, "CR_VSM_Alive": self.cnt_cruise % 16}
+    self.__class__.cnt_cruise += 1
+    return self.packer.make_can_msg_safety("SCC12", self.SCC_BUS, values, fix_checksum=lambda msg: checksum(msg, scc12_alt=True))
 
 
 class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):

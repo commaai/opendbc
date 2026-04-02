@@ -57,6 +57,7 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 };
 
 static bool hyundai_legacy = false;
+static bool hyundai_legacy_scc12_alt_checksum = false;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
 
@@ -120,7 +121,10 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
       }
       chksum += (b % 16U) + (b / 16U);
     }
-    chksum = (16U - (chksum %  16U)) % 16U;
+
+    // SCC12 (0x420) uses an alternative checksum constant on some legacy platforms
+    uint8_t checksum_constant = ((msg->addr == 0x421U) && (hyundai_legacy_scc12_alt_checksum)) ? 14U : 16U;
+    chksum = (checksum_constant - (chksum %  16U)) % 16U;
   }
 
   return chksum;
@@ -320,6 +324,7 @@ static safety_config hyundai_init(uint16_t param) {
 }
 
 static safety_config hyundai_legacy_init(uint16_t param) {
+  const uint16_t HYUNDAI_LEGACY_PARAM_SCC12_ALT_CHECKSUM = 1024;
   // older hyundai models have less checks due to missing counters and checksums
   static RxCheck hyundai_legacy_rx_checks[] = {
     HYUNDAI_COMMON_RX_CHECKS(true)
@@ -328,6 +333,7 @@ static safety_config hyundai_legacy_init(uint16_t param) {
 
   hyundai_common_init(param);
   hyundai_legacy = true;
+  hyundai_legacy_scc12_alt_checksum = GET_FLAG(param, HYUNDAI_LEGACY_PARAM_SCC12_ALT_CHECKSUM);
   hyundai_longitudinal = false;
   hyundai_camera_scc = false;
   return BUILD_SAFETY_CFG(hyundai_legacy_rx_checks, HYUNDAI_TX_MSGS);

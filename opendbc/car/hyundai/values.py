@@ -66,6 +66,7 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_LKA_STEERING_ALT = 128
   FCEV_GAS = 256
   ALT_LIMITS_2 = 512
+  CAN_LEGACY_SCC12_ALT_CHECKSUM = 1024
 
 
 class HyundaiFlags(IntFlag):
