@@ -71,7 +71,7 @@ class CarController(CarControllerBase):
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
-    self.fof = FirstOrderFilter(0.0, 0.1, 0.01)
+    self.angle_filter = FirstOrderFilter(0.0, 0.1, 0.01)
     self.angle_steady = 0
 
     self.accel_last = 0
@@ -113,7 +113,7 @@ class CarController(CarControllerBase):
         print(desired_angle, self.angle_steady)
         deadzone = np.interp(CS.out.vEgo, [10, 15], [3, 0])
         desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
-        #desired_angle = self.fof.update(desired_angle)
+        #desired_angle = self.angle_filter.update(desired_angle)
         #print('after', apply_angle_last)
         print('after', desired_angle)
         self.angle_steady = desired_angle
@@ -140,7 +140,7 @@ class CarController(CarControllerBase):
 
       apply_steer_req = CC.latActive
       if not CC.latActive:
-        self.fof.x = CS.out.steeringAngleDeg
+        self.angle_filter.x = CS.out.steeringAngleDeg
         self.angle_steady = CS.out.steeringAngleDeg
         self.apply_angle_last = CS.out.steeringAngleDeg
 
