@@ -270,6 +270,7 @@ static safety_config hyundai_init(uint16_t param) {
 
   hyundai_common_init(param);
   hyundai_legacy = false;
+  hyundai_legacy_scc12_alt_checksum = false;
 
   safety_config ret;
   if (hyundai_longitudinal) {
