@@ -12,6 +12,7 @@
 #define CHRYSLER_DAS_6            0x2A6  // LKAS HUD and auto headlight control from DASM
 #define CHRYSLER_LKAS_COMMAND     0x292  // LKAS controls from DASM
 #define CHRYSLER_CRUISE_BUTTONS   0x23B  // Cruise control buttons
+#define CHRYSLER_LKAS_HEARTBIT    0x2D9  // LKAS heartbeat forwarded from FFCM
 
 // RAM DT addresses
 #define CHRYSLER_RAM_DT_EPS_2            0x31
@@ -179,6 +180,7 @@ static safety_config chrysler_init(uint16_t param) {
     {CHRYSLER_CRUISE_BUTTONS, 0, 3, .check_relay = false},
     {CHRYSLER_LKAS_COMMAND, 0, 6, .check_relay = true},
     {CHRYSLER_DAS_6, 0, 8, .check_relay = true},
+    {CHRYSLER_LKAS_HEARTBIT, 0, 5, .check_relay = false},
   };
 
   static const CanMsg CHRYSLER_RAM_DT_TX_MSGS[] = {
