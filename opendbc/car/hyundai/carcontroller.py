@@ -107,7 +107,6 @@ class CarController(CarControllerBase):
       #   alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 11.1, 13.9], [0.15, 0.20, 0.25, 0.35, 0.55, 1.0])
       #   desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
 
-
       if CC.latActive:
         #print(apply_angle_last, self.apply_angle_last)
         print(desired_angle, self.angle_steady)
