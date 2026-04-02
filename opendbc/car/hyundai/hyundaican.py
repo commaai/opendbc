@@ -58,7 +58,7 @@ def create_lkas11(packer, frame, CP, apply_torque, steer_req,
     values["CF_Lkas_SysWarning"] = 4 if sys_warning else 0
 
   # Likely cars lacking the ability to show individual lane lines in the dash
-  elif CP.carFingerprint in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL, CAR.KIA_OPTIMA_H):
+  elif CP.carFingerprint in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
     # SysWarning 4 = keep hands on wheel + beep
     values["CF_Lkas_SysWarning"] = 4 if sys_warning else 0
 
@@ -73,7 +73,7 @@ def create_lkas11(packer, frame, CP, apply_torque, steer_req,
     values["CF_Lkas_LdwsActivemode"] = 0
     values["CF_Lkas_FcwOpt_USM"] = 0
 
-  elif CP.carFingerprint == CAR.HYUNDAI_GENESIS:
+  elif CP.carFingerprint in (CAR.HYUNDAI_GENESIS, CAR.KIA_OPTIMA_H):
     # This field is actually LdwsActivemode
     # Genesis and Optima fault when forwarding while engaged
     values["CF_Lkas_LdwsActivemode"] = 2
