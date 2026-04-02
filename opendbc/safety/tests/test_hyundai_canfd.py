@@ -138,7 +138,7 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
     ([], []),
     MAX_LATERAL_ACCEL=(ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * 0.06)),  # ~3.0 m/s^2
     MAX_LATERAL_JERK=(3.0 + (ACCELERATION_DUE_TO_GRAVITY * 0.06)),  # ~3.0 m/s^3,
-    MAX_ANGLE_RATE=5  # comfort rate limit for angle commands, in degrees per frame.
+    MAX_ANGLE_RATE=1  # comfort rate limit for angle commands, in degrees per frame.
   )
 
   STEER_ANGLE_MAX = 360  # deg
