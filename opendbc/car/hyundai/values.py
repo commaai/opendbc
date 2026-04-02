@@ -455,7 +455,7 @@ class CAR(Platforms):
   )
   # TODO: may support adjacent years. may have a non-zero minimum steering speed
   KIA_OPTIMA_H = HyundaiPlatformConfig(
-    [HyundaiCarDocs("Kia Optima Hybrid 2017", "Advanced Smart Cruise Control", car_parts=CarParts.common([CarHarness.hyundai_c]))],
+    [HyundaiCarDocs("Kia Optima Hybrid 2017-18", "Advanced Smart Cruise Control", car_parts=CarParts.common([CarHarness.hyundai_c]))],
     CarSpecs(mass=3558 * CV.LB_TO_KG, wheelbase=2.8, steerRatio=13.75, tireStiffnessFactor=0.5),
     flags=HyundaiFlags.HYBRID | HyundaiFlags.LEGACY,
   )
