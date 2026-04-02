@@ -37,6 +37,13 @@ class CarController(CarControllerBase):
         self.w_pid.reset()
 
       v_measured = self.params.SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
+
+      # remove wind down on left/right
+      if abs(w_setpoint) < 0.05:
+        self.w_setpoint =0
+        self.w_pid.reset()
+
+      v_measured = self.params.SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
       v_error = v_setpoint - v_measured
       freeze_v_integrator = ((v_error < 0 and self.v_pid.error_integral <= -self.params.MAX_POS_INTEGRATOR) or
                             (v_error > 0 and self.v_pid.error_integral >= self.params.MAX_POS_INTEGRATOR))
