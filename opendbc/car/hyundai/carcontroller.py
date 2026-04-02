@@ -112,7 +112,7 @@ class CarController(CarControllerBase):
         #print(apply_angle_last, self.apply_angle_last)
         print(desired_angle, self.angle_steady)
         deadzone = np.interp(CS.out.vEgo, [10, 15], [3, 0])
-        desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
+        #desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
         #desired_angle = self.fof.update(desired_angle)
         #print('after', apply_angle_last)
         print('after', desired_angle)
