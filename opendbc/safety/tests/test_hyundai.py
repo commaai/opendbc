@@ -192,7 +192,7 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
     return self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum)
 
 
-class TestHyundaiLegacySafetySCC12AltChecksum(TestHyundaiLegacySafetyHEV):
+class TestHyundaiLegacySafetyHEVSCC12AltChecksum(TestHyundaiLegacySafetyHEV):
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
