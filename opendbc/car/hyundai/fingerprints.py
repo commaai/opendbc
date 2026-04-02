@@ -1295,4 +1295,13 @@ FW_VERSIONS = {
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
     ],
   },
+  CAR.GENESIS_GV80_2025: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00JX__ RDR -----      1.00 1.03 99110-T6500         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00JX  MFC  AT USA LHD 1.00 1.03 99211-T6510 240124',
+      b'\xf1\x00JX  MFC  AT USA LHD 1.00 1.12 99211-T6600 250423',
+    ],
+  },
 }
