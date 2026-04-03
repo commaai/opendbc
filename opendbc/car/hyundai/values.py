@@ -73,22 +73,22 @@ class HyundaiSafetyFlags(IntFlag):
 # CAN cars:
 #   - Default: Radar sends SCC messages on bus 0. For longitudinal control, disable radar
 #     (0x7d0) and send our own SCC messages. AEB is lost since radar is disabled.
-#   - CAMERA_SCC: Camera sends SCC instead of radar. Block camera SCC and send our own.
-#     Radar still provides AEB independently — best setup for longitudinal.
-#   - RADAR_SCC: Explicitly marks HDA1 cars where the radar handles SCC. Functionally
-#     same as default for longitudinal — radar must be disabled.
+#   - CAMERA_SCC: Camera sends SCC and AEB/FCA messages (all on bus 2). Block camera SCC
+#     and send our own. Stock FCA/AEB messages from camera are forwarded through.
 #
 # CAN-FD cars:
-#   - LKA steering (CANFD_LKA_STEER_MSG, typically HDA2 with ADAS ECU): Camera sends LKA
-#     steering message, ADAS DRV ECU forwards it as LFA to MDPS. For longitudinal, disable
-#     ADAS ECU (0x730) and send ACC on ECAN. OP also suppresses LFA from ADAS ECU to
-#     prevent fighting. Some cars lack the ADAS ECU (long not available).
+#   - CANFD_LKA_STEER_MSG (typically HDA2 with ADAS ECU): Camera sends LKA steering
+#     message, ADAS DRV ECU forwards it as LFA to MDPS. For longitudinal, disable ADAS
+#     ECU (0x730) and send ACC on ECAN. OP also suppresses LFA from ADAS ECU to prevent
+#     fighting. Some cars lack the ADAS ECU (long not available).
 #   - Non-LKA + CANFD_CAMERA_SCC: Camera sends SCC directly (no RADAR_SCC flag set).
-#     Block camera SCC, send our own, radar still provides AEB.
+#     Block camera SCC and send our own.
 #   - Non-LKA + RADAR_SCC: Radar handles SCC on these HDA1 CAN-FD cars.
 #     Disable radar (0x7d0 on ECAN) for longitudinal.
 #   - CANFD_NO_RADAR_DISABLE: Some CAN-FD cars refuse the communication control disable
 #     request (0x7F2822 'conditions not correct') — longitudinal not available.
+#
+# Note: RADAR_SCC is only used in CANFD logic despite not having the prefix.
 
 class HyundaiFlags(IntFlag):
   # Dynamic Flags
