@@ -177,7 +177,7 @@ class HyundaiCANConfig:
     # These cars have the LFA button on the steering wheel
     if 0x391 in fingerprint[0]:
       flags |= HyundaiFlags.HAS_LDA_BUTTON
-    return flags
+    return int(flags)
 
   def to_flags(self) -> int:
     flags = 0
