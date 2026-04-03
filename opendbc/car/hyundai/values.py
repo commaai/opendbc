@@ -222,17 +222,12 @@ class CANFDSteeringMsg(StrEnum):
 
 @dataclass
 class HyundaiCANFDConfig:
-  fuel_type: FuelType = FuelType.ICE
   # On non-LKA (HDA1) cars, camera sends SCC by default.
   # Set True for cars where radar sends SCC instead.
   radar_scc: bool = False
 
   def static_flags(self) -> int:
     flags = 0
-    if self.fuel_type == FuelType.EV:
-      flags |= HyundaiFlags.EV
-    elif self.fuel_type == FuelType.FCEV:
-      flags |= HyundaiFlags.FCEV
     if self.radar_scc:
       flags |= HyundaiFlags.CANFD_RADAR_SCC
     return int(flags)
@@ -258,9 +253,8 @@ class HyundaiCANFDConfig:
       if not (existing_flags & HyundaiFlags.CANFD_RADAR_SCC):
         flags |= HyundaiFlags.CANFD_CAMERA_SCC
 
-    # Hybrid detection: only HEV/PHEV cars have 0xFA (undecoded) on E-CAN.
-    # Skip if already known to be EV/FCEV from static config
-    if not (existing_flags & (HyundaiFlags.EV | HyundaiFlags.FCEV)) and 0xFA in fingerprint[CAN.ECAN]:
+    # Hybrid detection: only HEV/PHEV cars have 0xFA (undecoded) on E-CAN
+    if 0xFA in fingerprint[CAN.ECAN]:
       flags |= HyundaiFlags.HYBRID
 
     # Gear message detection
@@ -397,8 +391,7 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Kona Electric (with HDA II, Korea only) 2023", video="https://www.youtube.com/watch?v=U2fOCmcQ8hw",
                     car_parts=CarParts.common([CarHarness.hyundai_r]))],
     CarSpecs(mass=1740, wheelbase=2.66, steerRatio=13.6, tireStiffnessFactor=0.385),
-    canfd_config=HyundaiCANFDConfig(fuel_type=FuelType.EV),
-    flags=HyundaiFlags.CANFD_NO_RADAR_DISABLE,
+    flags=HyundaiFlags.EV | HyundaiFlags.CANFD_NO_RADAR_DISABLE,
   )
   HYUNDAI_KONA_HEV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_i]))],  # TODO: check packages,
@@ -484,13 +477,12 @@ class CAR(Platforms):
       HyundaiCarDocs("Hyundai Ioniq 5 (with HDA II) 2022-24", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
     ],
     CarSpecs(mass=1948, wheelbase=2.97, steerRatio=14.26, tireStiffnessFactor=0.65),
-    canfd_config=HyundaiCANFDConfig(fuel_type=FuelType.EV),
+    flags=HyundaiFlags.EV,
   )
   HYUNDAI_IONIQ_6 = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq 6 (with HDA II) 2023-24", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_p]))],
     HYUNDAI_IONIQ_5.specs,
-    canfd_config=HyundaiCANFDConfig(fuel_type=FuelType.EV),
-    flags=HyundaiFlags.CANFD_NO_RADAR_DISABLE,
+    flags=HyundaiFlags.EV | HyundaiFlags.CANFD_NO_RADAR_DISABLE,
   )
   HYUNDAI_TUCSON_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
@@ -557,7 +549,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Niro EV (with HDA II) 2024-25", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_r])),
     ],
     KIA_NIRO_EV.specs,
-    canfd_config=HyundaiCANFDConfig(fuel_type=FuelType.EV),
+    flags=HyundaiFlags.EV,
   )
   KIA_NIRO_PHEV = HyundaiPlatformConfig(
     [
@@ -670,7 +662,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia EV6 (with HDA II) 2022-24", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_p]))
     ],
     CarSpecs(mass=2055, wheelbase=2.9, steerRatio=16, tireStiffnessFactor=0.65),
-    canfd_config=HyundaiCANFDConfig(fuel_type=FuelType.EV),
+    flags=HyundaiFlags.EV,
   )
   KIA_CARNIVAL_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
@@ -688,7 +680,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Genesis GV60 (Performance Trim) 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_k])),
     ],
     CarSpecs(mass=2205, wheelbase=2.9, steerRatio=17.6),
-    canfd_config=HyundaiCANFDConfig(fuel_type=FuelType.EV),
+    flags=HyundaiFlags.EV,
   )
   GENESIS_G70 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Genesis G70 2018", "All", car_parts=CarParts.common([CarHarness.hyundai_f]))],
@@ -720,7 +712,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Genesis GV70 Electrified (with HDA II) 2023-24", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
     ],
     CarSpecs(mass=2260, wheelbase=2.87, steerRatio=17.1),
-    canfd_config=HyundaiCANFDConfig(fuel_type=FuelType.EV),
+    flags=HyundaiFlags.EV,
   )
   GENESIS_G80 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Genesis G80 2018-19", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
