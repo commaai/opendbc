@@ -15,6 +15,7 @@
 #include "opendbc/safety/modes/toyota.h"
 #include "opendbc/safety/modes/tesla.h"
 #include "opendbc/safety/modes/gm.h"
+#include "opendbc/safety/modes/fca_giorgio.h"
 #include "opendbc/safety/modes/ford.h"
 #include "opendbc/safety/modes/hyundai.h"
 #include "opendbc/safety/modes/chrysler.h"
@@ -361,6 +362,7 @@ static const safety_hook_config safety_hook_registry[] = {
 #ifdef ALLOW_DEBUG
   {SAFETY_MG, &mg_hooks},
   {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
+  {SAFETY_FCA_GIORGIO, &fca_giorgio_hooks},
   {SAFETY_PSA, &psa_hooks},
   {SAFETY_BYD, &byd_hooks},
   {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
