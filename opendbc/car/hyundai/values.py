@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass, field
-from enum import Enum, IntFlag
+from enum import IntFlag, StrEnum, auto
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.common.conversions import Conversions as CV
@@ -153,29 +153,29 @@ class HyundaiCarDocs(CarDocs):
   package: str = "Smart Cruise Control (SCC)"
 
 
-class FuelType(Enum):
-  GAS = "gas"
-  HYBRID = "hybrid"
-  EV = "ev"
-  FCEV = "fcev"
+class FuelType(StrEnum):
+  GAS = auto()
+  HYBRID = auto()
+  EV = auto()
+  FCEV = auto()
 
 
-class GearSource(Enum):
-  DEFAULT = "default"
-  CLUSTER = "cluster"
-  TCU = "tcu"
+class GearSource(StrEnum):
+  DEFAULT = auto()
+  CLUSTER = auto()
+  TCU = auto()
 
 
-class ChecksumType(Enum):
-  DEFAULT = "default"
-  CRC8 = "crc8"
-  SIX_B = "6B"
+class ChecksumType(StrEnum):
+  DEFAULT = auto()
+  CRC8 = auto()
+  SIX_B = auto()
 
 
-class SteerLimits(Enum):
-  DEFAULT = "default"
-  ALT = "alt"
-  ALT_2 = "alt_2"
+class SteerLimits(StrEnum):
+  DEFAULT = auto()
+  ALT = auto()
+  ALT_2 = auto()
 
 
 @dataclass
