@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 import importlib
-from opendbc.testing import parameterized_class
+from functools import cache
 
 from opendbc.car import DT_CTRL
 from opendbc.car.car_helpers import interfaces
@@ -18,31 +18,28 @@ MAX_LAT_JERK_UP_TOLERANCE = 0.5  # m/s^3
 JERK_MEAS_T = 0.5
 
 
-@parameterized_class('car_model', [(c,) for c in sorted(PLATFORMS)])
+@cache
+def get_lateral_case(car_model: str):
+  CarInterface = interfaces[car_model]
+  CP = CarInterface.get_non_essential_params(car_model)
+
+  if car_model == 'MOCK':
+    return None
+
+  # TODO: test all platforms
+  if CP.steerControlType != 'torque':
+    return None
+
+  if CP.notCar:
+    return None
+
+  CarControllerParams = importlib.import_module(f'opendbc.car.{CP.brand}.values').CarControllerParams
+  control_params = CarControllerParams(CP)
+  torque_params = get_torque_params()[car_model]
+  return control_params, torque_params
+
+
 class TestLateralLimits(unittest.TestCase):
-  car_model: str
-
-  @classmethod
-  def setUpClass(cls):
-    if 'car_model' not in cls.__dict__:
-      raise unittest.SkipTest('Base class')
-
-    CarInterface = interfaces[cls.car_model]
-    CP = CarInterface.get_non_essential_params(cls.car_model)
-
-    if cls.car_model == 'MOCK':
-      raise unittest.SkipTest('Mock car')
-
-    # TODO: test all platforms
-    if CP.steerControlType != 'torque':
-      raise unittest.SkipTest
-
-    if CP.notCar:
-      raise unittest.SkipTest
-
-    CarControllerParams = importlib.import_module(f'opendbc.car.{CP.brand}.values').CarControllerParams
-    cls.control_params = CarControllerParams(CP)
-    cls.torque_params = get_torque_params()[cls.car_model]
 
   @staticmethod
   def calculate_0_5s_jerk(control_params, torque_params):
@@ -61,9 +58,21 @@ class TestLateralLimits(unittest.TestCase):
     return accel_up_0_5_sec / JERK_MEAS_T, accel_down_0_5_sec / JERK_MEAS_T
 
   def test_jerk_limits(self):
-    up_jerk, down_jerk = self.calculate_0_5s_jerk(self.control_params, self.torque_params)
-    assert up_jerk <= MAX_LAT_JERK_UP + MAX_LAT_JERK_UP_TOLERANCE
-    assert down_jerk <= MAX_LAT_JERK_DOWN
+    for car_model in sorted(PLATFORMS):
+      with self.subTest(car_model=car_model):
+        case = get_lateral_case(car_model)
+        if case is None:
+          continue
+        control_params, torque_params = case
+        up_jerk, down_jerk = self.calculate_0_5s_jerk(control_params, torque_params)
+        self.assertLessEqual(up_jerk, MAX_LAT_JERK_UP + MAX_LAT_JERK_UP_TOLERANCE)
+        self.assertLessEqual(down_jerk, MAX_LAT_JERK_DOWN)
 
   def test_max_lateral_accel(self):
-    assert self.torque_params["MAX_LAT_ACCEL_MEASURED"] <= ISO_LATERAL_ACCEL
+    for car_model in sorted(PLATFORMS):
+      with self.subTest(car_model=car_model):
+        case = get_lateral_case(car_model)
+        if case is None:
+          continue
+        _, torque_params = case
+        self.assertLessEqual(torque_params["MAX_LAT_ACCEL_MEASURED"], ISO_LATERAL_ACCEL)
