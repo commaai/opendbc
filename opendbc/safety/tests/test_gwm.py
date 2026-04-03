@@ -43,10 +43,7 @@ def checksum(msg):
   return addr, ret, bus
 
 
-# class TestGwm(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, common.LongitudinalGasBrakeSafetyTest,
-#               common.VehicleSpeedSafetyTest):
-
-class TestGwmSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
+class TestGwmSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, common.LongitudinalGasBrakeSafetyTest):
   TX_MSGS = [[0x12B, 0], [0x143, 0], [0x147, 2], [0xA1, 2]] # Steer, long, wheel touch, cancel
   RELAY_MALFUNCTION_ADDRS = {0: (0x12B, 0x143), 2: (0x147,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x147], 2: [0x12B, 0x143]}
@@ -60,12 +57,12 @@ class TestGwmSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
 
   MIN_GAS = -10
   MAX_GAS = 4577
-  INACTIVE_GAS = 0
-  MAX_BRAKE = 107
-
-  MAX_POSSIBLE_BRAKE = 108
-  MAX_POSSIBLE_GAS = 4578  # reasonably excessive limits, not signal max
   MIN_POSSIBLE_GAS = -11
+  MAX_POSSIBLE_GAS = 4600  # reasonably excessive limits, not signal max
+  INACTIVE_GAS = 0
+
+  MAX_BRAKE = 107
+  MAX_POSSIBLE_BRAKE = 180
 
   def setUp(self):
     self.packer = CANPackerSafety(opendbc)
@@ -113,11 +110,11 @@ class TestGwmSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
     return self.packer.make_can_msg_safety("STEER_CMD", 0, values)
 
   def _send_brake_msg(self, brake):
-    values = {"BRAKE_CMD": brake}
+    values = {"BRAKE_CMD": -brake, "GAS_CMD": 0}
     return self.packer.make_can_msg_safety("ACC_CMD", 0, values)
 
   def _send_gas_msg(self, gas):
-    values = {"GAS_CMD": gas}
+    values = {"GAS_CMD": gas, "BRAKE_CMD": 0}
     return self.packer.make_can_msg_safety("ACC_CMD", 0, values)
 
   def test_rx_hook(self):
