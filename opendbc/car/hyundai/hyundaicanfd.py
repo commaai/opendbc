@@ -9,7 +9,7 @@ class CanBus(CanBusBase):
     super().__init__(CP, fingerprint)
 
     if lka_steering is None:
-      lka_steering = CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value if CP is not None else False
+      lka_steering = CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG.value if CP is not None else False
 
     # On the CAN-FD platforms, the LKAS camera is on both A-CAN and E-CAN. LKA steering cars
     # have a different harness than the LFA steering variants in order to split
@@ -61,8 +61,8 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque,
     }
 
   ret = []
-  if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
-    lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "LKAS"
+  if CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG:
+    lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG_ALT else "LKAS"
     if CP.openpilotLongitudinalControl:
       ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
     ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, values))
@@ -92,7 +92,7 @@ def create_buttons(packer, CP, CAN, cnt, btn):
     "CRUISE_BUTTONS": btn,
   }
 
-  bus = CAN.ECAN if CP.flags & HyundaiFlags.CANFD_LKA_STEERING else CAN.CAM
+  bus = CAN.ECAN if CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG else CAN.CAM
   return packer.make_can_msg("CRUISE_BUTTONS", bus, values)
 
 
