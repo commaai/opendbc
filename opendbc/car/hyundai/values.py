@@ -166,7 +166,7 @@ class HyundaiCANConfig:
   fuel_type: FuelType = FuelType.ICE
 
   @staticmethod
-  def detect(fingerprint) -> int:
+  def detect(fingerprint: dict) -> int:
     flags = 0
 
     # Send LFA message on cars with HDA
@@ -233,29 +233,29 @@ class HyundaiCANFDConfig:
     return int(flags)
 
   @staticmethod
-  def detect(fingerprint, cam_can, existing_flags) -> int:
+  def detect(fingerprint: dict, cam_can: int, existing_flags: int) -> int:
     flags = 0
 
     lka_steering = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
 
-    # Steering message detection
+    from opendbc.car.hyundai.hyundaicanfd import CanBus
+    CAN = CanBus(None, fingerprint, lka_steering)
+
+    # Steering message and SCC source detection
     if lka_steering:
       flags |= HyundaiFlags.CANFD_LKA_STEER_MSG
       if 0x110 in fingerprint[cam_can]:
         flags |= HyundaiFlags.CANFD_LKA_STEER_MSG_ALT
-
-    # Hybrid detection: only HEV/PHEV cars have 0xFA on E-CAN
-    from opendbc.car.hyundai.hyundaicanfd import CanBus
-    CAN = CanBus(None, fingerprint, lka_steering)
-    if 0xFA in fingerprint[CAN.ECAN]:
-      flags |= HyundaiFlags.HYBRID
-
-    if not lka_steering:
+    else:
       # Non-LKA: detect alt buttons and SCC source
       if 0x1cf not in fingerprint[CAN.ECAN]:
         flags |= HyundaiFlags.CANFD_ALT_BUTTONS
       if not (existing_flags & HyundaiFlags.CANFD_RADAR_SCC):
         flags |= HyundaiFlags.CANFD_CAMERA_SCC
+
+    # Hybrid detection: only HEV/PHEV cars have 0xFA (undecoded) on E-CAN
+    if 0xFA in fingerprint[CAN.ECAN]:
+      flags |= HyundaiFlags.HYBRID
 
     # Gear message detection
     if 0x130 not in fingerprint[CAN.ECAN]:
