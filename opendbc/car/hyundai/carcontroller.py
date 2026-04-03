@@ -66,8 +66,7 @@ class CarController(CarControllerBase):
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
-    self.fof = FirstOrderFilter(0.0, 0.05, 0.01)
-    self.angle_steady = 0
+    self.angle_filter = FirstOrderFilter(0.0, 0.2, DT_CTRL)
 
     self.accel_last = 0
     self.apply_torque_last = 0
@@ -89,13 +88,10 @@ class CarController(CarControllerBase):
       desired_angle = actuators.steeringAngleDeg
 
       # EPS is sensitive to small jitter from model desired angle at low speed,
-      # so we apply some hysteresis and filtering to prevent this.
-
+      # so we apply speed-dependent smoothing to prevent this.
       if CC.latActive:
-        deadzone = np.interp(CS.out.vEgo, [10, 15], [2, 0])
-        desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
-        self.angle_steady = desired_angle
-        desired_angle = self.fof.update(desired_angle)
+        self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [15, 20], [0.2, 0.0])))
+        desired_angle = self.angle_filter.update(desired_angle)
 
       self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
                                                           CS.out.vEgoRaw, CS.out.steeringAngleDeg,
@@ -108,8 +104,7 @@ class CarController(CarControllerBase):
 
       apply_steer_req = CC.latActive
       if not CC.latActive:
-        self.fof.x = self.apply_angle_last
-        self.angle_steady = self.apply_angle_last
+        self.angle_filter.x = self.apply_angle_last
 
     # torque control
     else:
