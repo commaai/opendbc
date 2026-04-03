@@ -214,12 +214,22 @@ class HyundaiPlatformConfig(PlatformConfig):
       self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
 
 
+class CANFDSCCSource(StrEnum):
+  ADAS_ECU = auto()  # LKA/HDA2 steering — ADAS ECU handles SCC
+  CAMERA = auto()    # non-LKA, camera sends SCC (default for HDA1)
+  RADAR = auto()     # non-LKA, radar sends SCC
+
+
 @dataclass
 class HyundaiCanFDPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_canfd_generated"})
+  scc_source: CANFDSCCSource = CANFDSCCSource.ADAS_ECU
 
   def init(self):
     self.flags |= HyundaiFlags.CANFD
+
+    if self.scc_source == CANFDSCCSource.RADAR:
+      self.flags |= HyundaiFlags.CANFD_RADAR_SCC
 
 
 class CAR(Platforms):
