@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass, field
-from enum import IntFlag
+from enum import IntFlag, StrEnum, auto
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.common.conversions import Conversions as CV
@@ -153,14 +153,38 @@ class HyundaiCarDocs(CarDocs):
   package: str = "Smart Cruise Control (SCC)"
 
 
+class FuelType(StrEnum):
+  ICE = auto()  # default
+  HYBRID = auto()
+  EV = auto()
+  FCEV = auto()
+
+
+@dataclass
+class HyundaiCANConfig:
+  camera_scc: bool = False
+  fuel_type: FuelType = FuelType.ICE
+
+  def to_flags(self) -> int:
+    flags = 0
+    if self.camera_scc:
+      flags |= HyundaiFlags.CAMERA_SCC
+    if self.fuel_type == FuelType.HYBRID:
+      flags |= HyundaiFlags.HYBRID
+    elif self.fuel_type == FuelType.EV:
+      flags |= HyundaiFlags.EV
+    elif self.fuel_type == FuelType.FCEV:
+      flags |= HyundaiFlags.FCEV
+    return flags
+
+
 @dataclass
 class HyundaiPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_kia_generic"})
-  camera_scc: bool = False
+  can_config: HyundaiCANConfig = field(default_factory=HyundaiCANConfig)
 
   def init(self):
-    if self.camera_scc:
-      self.flags |= HyundaiFlags.CAMERA_SCC
+    self.flags |= self.can_config.to_flags()
 
     if self.flags & HyundaiFlags.MANDO_RADAR:
       self.dbc_dict = {Bus.pt: "hyundai_kia_generic", Bus.radar: 'hyundai_kia_mando_front_radar_generated'}
@@ -189,7 +213,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Hyundai Azera Hybrid 2020", "All", car_parts=CarParts.common([CarHarness.hyundai_k])),
     ],
     CarSpecs(mass=1675, wheelbase=2.885, steerRatio=14.5),
-    flags=HyundaiFlags.HYBRID,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
   )
   HYUNDAI_ELANTRA = HyundaiPlatformConfig(
     [
@@ -218,7 +242,8 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Elantra Hybrid 2021-23", video="https://youtu.be/_EdYQtV52-c",
                     car_parts=CarParts.common([CarHarness.hyundai_k]))],
     CarSpecs(mass=3017 * CV.LB_TO_KG, wheelbase=2.72, steerRatio=12.9, tireStiffnessFactor=0.65),
-    flags=HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.CHECKSUM_CRC8,
   )
   HYUNDAI_GENESIS = HyundaiPlatformConfig(
     [
@@ -232,32 +257,36 @@ class CAR(Platforms):
   HYUNDAI_IONIQ = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Hybrid 2017-19", car_parts=CarParts.common([CarHarness.hyundai_c]))],
     CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.MIN_STEER_32_MPH,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.MIN_STEER_32_MPH,
   )
   HYUNDAI_IONIQ_HEV_2022 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Hybrid 2020-22", car_parts=CarParts.common([CarHarness.hyundai_h]))],
     CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.LEGACY,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.LEGACY,
   )
   HYUNDAI_IONIQ_EV_LTD = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Electric 2019", car_parts=CarParts.common([CarHarness.hyundai_c]))],
     CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.EV | HyundaiFlags.LEGACY | HyundaiFlags.MIN_STEER_32_MPH,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.EV),
+    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.LEGACY | HyundaiFlags.MIN_STEER_32_MPH,
   )
   HYUNDAI_IONIQ_EV_2020 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Electric 2020", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
     CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.EV,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.EV),
   )
   HYUNDAI_IONIQ_PHEV_2019 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Plug-in Hybrid 2019", car_parts=CarParts.common([CarHarness.hyundai_c]))],
     CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.MIN_STEER_32_MPH,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.MIN_STEER_32_MPH,
   )
   HYUNDAI_IONIQ_PHEV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Plug-in Hybrid 2020-22", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
     CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.HYBRID,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
   )
   HYUNDAI_KONA = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona 2020", min_enable_speed=6 * CV.MPH_TO_MS, car_parts=CarParts.common([CarHarness.hyundai_b]))],
@@ -267,19 +296,20 @@ class CAR(Platforms):
   HYUNDAI_KONA_2022 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona 2022-23", car_parts=CarParts.common([CarHarness.hyundai_o]))],
     CarSpecs(mass=1491, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
-    camera_scc=True,
+    can_config=HyundaiCANConfig(camera_scc=True),
     flags=HyundaiFlags.ALT_LIMITS_2,
   )
   HYUNDAI_KONA_EV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Electric 2018-21", car_parts=CarParts.common([CarHarness.hyundai_g]))],
     CarSpecs(mass=1685, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.EV | HyundaiFlags.ALT_LIMITS,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.EV),
+    flags=HyundaiFlags.ALT_LIMITS,
   )
   HYUNDAI_KONA_EV_2022 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Electric 2022-23", car_parts=CarParts.common([CarHarness.hyundai_o]))],
     CarSpecs(mass=1743, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
-    camera_scc=True,
-    flags=HyundaiFlags.EV | HyundaiFlags.ALT_LIMITS,
+    can_config=HyundaiCANConfig(camera_scc=True, fuel_type=FuelType.EV),
+    flags=HyundaiFlags.ALT_LIMITS,
   )
   HYUNDAI_KONA_EV_2ND_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Electric (with HDA II, Korea only) 2023", video="https://www.youtube.com/watch?v=U2fOCmcQ8hw",
@@ -290,12 +320,13 @@ class CAR(Platforms):
   HYUNDAI_KONA_HEV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_i]))],  # TODO: check packages,
     CarSpecs(mass=1425, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.ALT_LIMITS,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.ALT_LIMITS,
   )
   HYUNDAI_NEXO_1ST_GEN = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Nexo 2021", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
     CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.79, steerRatio=14.19),  # https://www.hyundainews.com/assets/documents/original/42768-2021NEXOProductGuideSpecs.pdf
-    flags=HyundaiFlags.FCEV,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.FCEV),
   )
   HYUNDAI_SANTA_FE = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Santa Fe 2019-20", "All", video="https://youtu.be/bjDR0YjM__s",
@@ -312,12 +343,14 @@ class CAR(Platforms):
   HYUNDAI_SANTA_FE_HEV_2022 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Santa Fe Hybrid 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_l]))],
     HYUNDAI_SANTA_FE.specs,
-    flags=HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.CHECKSUM_CRC8,
   )
   HYUNDAI_SANTA_FE_PHEV_2022 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Santa Fe Plug-in Hybrid 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_l]))],
     HYUNDAI_SANTA_FE.specs,
-    flags=HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.CHECKSUM_CRC8,
   )
   HYUNDAI_SONATA = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Sonata 2020-23", "All", video="https://www.youtube.com/watch?v=ix63r9kE3Fw",
@@ -358,7 +391,8 @@ class CAR(Platforms):
   HYUNDAI_SONATA_HYBRID = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Sonata Hybrid 2020-23", "All", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     HYUNDAI_SONATA.specs,
-    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8,
   )
   HYUNDAI_IONIQ_5 = HyundaiCanFDPlatformConfig(
     [
@@ -410,7 +444,8 @@ class CAR(Platforms):
   KIA_K5_HEV_2020 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia K5 Hybrid 2020-22", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     KIA_K5_2021.specs,
-    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8,
   )
   KIA_K7_2017 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia K7 2017", car_parts=CarParts.common([CarHarness.hyundai_c]))],
@@ -429,7 +464,8 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Niro EV 2022", "All", video="https://www.youtube.com/watch?v=lT7zcG6ZpGo", car_parts=CarParts.common([CarHarness.hyundai_h])),
     ],
     CarSpecs(mass=3543 * CV.LB_TO_KG, wheelbase=2.7, steerRatio=13.6, tireStiffnessFactor=0.385),  # average of all the cars
-    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.EV,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.EV),
+    flags=HyundaiFlags.MANDO_RADAR,
   )
   KIA_NIRO_EV_2ND_GEN = HyundaiCanFDPlatformConfig(
     [
@@ -446,7 +482,8 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Niro Plug-in Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_d])),
     ],
     KIA_NIRO_EV.specs,
-    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.HYBRID | HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.MIN_STEER_32_MPH,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.MIN_STEER_32_MPH,
   )
   KIA_NIRO_PHEV_2022 = HyundaiPlatformConfig(
     [
@@ -454,7 +491,8 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Niro Plug-in Hybrid 2022", car_parts=CarParts.common([CarHarness.hyundai_f])),
     ],
     KIA_NIRO_EV.specs,
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.MANDO_RADAR,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.MANDO_RADAR,
   )
   KIA_NIRO_HEV_2021 = HyundaiPlatformConfig(
     [
@@ -462,7 +500,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Niro Hybrid 2022", car_parts=CarParts.common([CarHarness.hyundai_f])),
     ],
     KIA_NIRO_EV.specs,
-    flags=HyundaiFlags.HYBRID,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
   )
   KIA_NIRO_HEV_2ND_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Kia Niro Hybrid 2023-24", car_parts=CarParts.common([CarHarness.hyundai_a]))],
@@ -483,12 +521,14 @@ class CAR(Platforms):
   KIA_OPTIMA_H = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Optima Hybrid 2017", "Advanced Smart Cruise Control", car_parts=CarParts.common([CarHarness.hyundai_c]))],
     CarSpecs(mass=3558 * CV.LB_TO_KG, wheelbase=2.8, steerRatio=13.75, tireStiffnessFactor=0.5),
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.LEGACY,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.LEGACY,
   )
   KIA_OPTIMA_H_G4_FL = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Optima Hybrid 2019", car_parts=CarParts.common([CarHarness.hyundai_h]))],
     CarSpecs(mass=3558 * CV.LB_TO_KG, wheelbase=2.8, steerRatio=13.75, tireStiffnessFactor=0.5),
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.UNSUPPORTED_LONGITUDINAL,
+    can_config=HyundaiCANConfig(fuel_type=FuelType.HYBRID),
+    flags=HyundaiFlags.UNSUPPORTED_LONGITUDINAL,
   )
   KIA_SELTOS = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Seltos 2021", car_parts=CarParts.common([CarHarness.hyundai_a]))],
