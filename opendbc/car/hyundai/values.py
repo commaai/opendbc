@@ -214,21 +214,17 @@ class HyundaiPlatformConfig(PlatformConfig):
       self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
 
 
-class CANFDSCCSource(StrEnum):
-  ADAS_ECU = auto()  # LKA/HDA2 steering — ADAS ECU handles SCC
-  CAMERA = auto()    # non-LKA, camera sends SCC (default for HDA1)
-  RADAR = auto()     # non-LKA, radar sends SCC
-
-
 @dataclass
 class HyundaiCanFDPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_canfd_generated"})
-  scc_source: CANFDSCCSource = CANFDSCCSource.ADAS_ECU
+  # On non-LKA (HDA1) cars, camera sends SCC by default.
+  # Set True for cars where radar sends SCC instead.
+  radar_scc: bool = False
 
   def init(self):
     self.flags |= HyundaiFlags.CANFD
 
-    if self.scc_source == CANFDSCCSource.RADAR:
+    if self.radar_scc:
       self.flags |= HyundaiFlags.CANFD_RADAR_SCC
 
 
@@ -586,7 +582,7 @@ class CAR(Platforms):
   KIA_SORENTO_4TH_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Kia Sorento 2021-23", car_parts=CarParts.common([CarHarness.hyundai_k]))],
     CarSpecs(mass=3957 * CV.LB_TO_KG, wheelbase=2.81, steerRatio=13.5),  # average of the platforms
-    flags=HyundaiFlags.CANFD_RADAR_SCC,
+    radar_scc=True,
   )
   KIA_SORENTO_HEV_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
@@ -594,7 +590,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Sorento Plug-in Hybrid 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_a])),
     ],
     CarSpecs(mass=4395 * CV.LB_TO_KG, wheelbase=2.81, steerRatio=13.5),  # average of the platforms
-    flags=HyundaiFlags.CANFD_RADAR_SCC,
+    radar_scc=True,
   )
   KIA_STINGER = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Stinger 2018-20", video="https://www.youtube.com/watch?v=MJ94qoofYw0",
@@ -625,7 +621,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Carnival (China only) 2023", car_parts=CarParts.common([CarHarness.hyundai_k]))
     ],
     CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
-    flags=HyundaiFlags.CANFD_RADAR_SCC,
+    radar_scc=True,
   )
 
   # Genesis
@@ -659,7 +655,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Genesis GV70 (3.5T Trim, without HDA II) 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_m])),
     ],
     CarSpecs(mass=1950, wheelbase=2.87, steerRatio=14.6),
-    flags=HyundaiFlags.CANFD_RADAR_SCC,
+    radar_scc=True,
   )
   GENESIS_GV70_ELECTRIFIED_1ST_GEN = HyundaiCanFDPlatformConfig(
     [
@@ -685,7 +681,7 @@ class CAR(Platforms):
   GENESIS_GV80 = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Genesis GV80 2023", "All", car_parts=CarParts.common([CarHarness.hyundai_m]))],
     CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
-    flags=HyundaiFlags.CANFD_RADAR_SCC,
+    radar_scc=True,
   )
 
 
