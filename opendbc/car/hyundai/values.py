@@ -81,10 +81,11 @@ class HyundaiSafetyFlags(IntFlag):
 #     message, ADAS DRV ECU forwards it as LFA to MDPS. For longitudinal, disable ADAS
 #     ECU (0x730) and send ACC on ECAN. OP also suppresses LFA from ADAS ECU to prevent
 #     fighting. Some cars lack the ADAS ECU (long not available).
-#   - Non-LKA + CANFD_CAMERA_SCC: Camera sends SCC directly (no CANFD_RADAR_SCC flag set).
-#     Block camera SCC and send our own.
-#   - Non-LKA + CANFD_RADAR_SCC: Radar handles SCC on these HDA1 CAN-FD cars.
-#     Disable radar (0x7d0 on ECAN) for longitudinal.
+#   - Non-LKA (HDA1): Camera sends LFA steering directly to MDPS (no ADAS ECU).
+#     + CANFD_CAMERA_SCC: Camera also sends SCC (no CANFD_RADAR_SCC flag set).
+#       Block camera SCC and send our own.
+#     + CANFD_RADAR_SCC: Radar handles SCC instead.
+#       Disable radar (0x7d0 on ECAN) for longitudinal.
 #   - CANFD_NO_RADAR_DISABLE: Some CAN-FD cars refuse the communication control disable
 #     request (0x7F2822 'conditions not correct') — longitudinal not available.
 
