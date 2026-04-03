@@ -30,8 +30,8 @@ bool hyundai_longitudinal = false;
 extern bool hyundai_camera_scc;
 bool hyundai_camera_scc = false;
 
-extern bool hyundai_canfd_lka_steering;
-bool hyundai_canfd_lka_steering = false;
+extern bool hyundai_canfd_lka_steer_msg;
+bool hyundai_canfd_lka_steer_msg = false;
 
 extern bool hyundai_alt_limits;
 bool hyundai_alt_limits = false;
