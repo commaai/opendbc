@@ -214,18 +214,67 @@ class HyundaiPlatformConfig(PlatformConfig):
       self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
 
 
+class CANFDSteeringMsg(StrEnum):
+  LFA = auto()       # HDA1: camera sends LFA directly to MDPS
+  LKA = auto()       # HDA2: camera sends LKA (0x50) → ADAS ECU → LFA to MDPS
+  LKA_ALT = auto()   # HDA2: camera sends LKA_ALT (0x110) → ADAS ECU → LFA to MDPS
+
+
 @dataclass
-class HyundaiCanFDPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_canfd_generated"})
+class HyundaiCANFDConfig:
   # On non-LKA (HDA1) cars, camera sends SCC by default.
   # Set True for cars where radar sends SCC instead.
   radar_scc: bool = False
 
+  def static_flags(self) -> int:
+    flags = 0
+    if self.radar_scc:
+      flags |= HyundaiFlags.CANFD_RADAR_SCC
+    return int(flags)
+
+  @staticmethod
+  def detect(fingerprint, cam_can, existing_flags) -> int:
+    flags = 0
+
+    lka_steering = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
+
+    # Steering message detection
+    if lka_steering:
+      flags |= HyundaiFlags.CANFD_LKA_STEER_MSG
+      if 0x110 in fingerprint[cam_can]:
+        flags |= HyundaiFlags.CANFD_LKA_STEER_MSG_ALT
+
+    # Hybrid detection: only HEV/PHEV cars have 0xFA on E-CAN
+    from opendbc.car.hyundai.hyundaicanfd import CanBus
+    CAN = CanBus(None, fingerprint, lka_steering)
+    if 0xFA in fingerprint[CAN.ECAN]:
+      flags |= HyundaiFlags.HYBRID
+
+    if not lka_steering:
+      # Non-LKA: detect alt buttons and SCC source
+      if 0x1cf not in fingerprint[CAN.ECAN]:
+        flags |= HyundaiFlags.CANFD_ALT_BUTTONS
+      if not (existing_flags & HyundaiFlags.CANFD_RADAR_SCC):
+        flags |= HyundaiFlags.CANFD_CAMERA_SCC
+
+    # Gear message detection
+    if 0x130 not in fingerprint[CAN.ECAN]:
+      if 0x40 not in fingerprint[CAN.ECAN]:
+        flags |= HyundaiFlags.CANFD_ALT_GEARS_2
+      else:
+        flags |= HyundaiFlags.CANFD_ALT_GEARS
+
+    return int(flags)
+
+
+@dataclass
+class HyundaiCanFDPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_canfd_generated"})
+  canfd_config: HyundaiCANFDConfig = field(default_factory=HyundaiCANFDConfig)
+
   def init(self):
     self.flags |= HyundaiFlags.CANFD
-
-    if self.radar_scc:
-      self.flags |= HyundaiFlags.CANFD_RADAR_SCC
+    self.flags |= self.canfd_config.static_flags()
 
 
 class CAR(Platforms):
@@ -582,7 +631,7 @@ class CAR(Platforms):
   KIA_SORENTO_4TH_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Kia Sorento 2021-23", car_parts=CarParts.common([CarHarness.hyundai_k]))],
     CarSpecs(mass=3957 * CV.LB_TO_KG, wheelbase=2.81, steerRatio=13.5),  # average of the platforms
-    radar_scc=True,
+    canfd_config=HyundaiCANFDConfig(radar_scc=True),
   )
   KIA_SORENTO_HEV_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
@@ -590,7 +639,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Sorento Plug-in Hybrid 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_a])),
     ],
     CarSpecs(mass=4395 * CV.LB_TO_KG, wheelbase=2.81, steerRatio=13.5),  # average of the platforms
-    radar_scc=True,
+    canfd_config=HyundaiCANFDConfig(radar_scc=True),
   )
   KIA_STINGER = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Stinger 2018-20", video="https://www.youtube.com/watch?v=MJ94qoofYw0",
@@ -621,7 +670,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Carnival (China only) 2023", car_parts=CarParts.common([CarHarness.hyundai_k]))
     ],
     CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
-    radar_scc=True,
+    canfd_config=HyundaiCANFDConfig(radar_scc=True),
   )
 
   # Genesis
@@ -655,7 +704,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Genesis GV70 (3.5T Trim, without HDA II) 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_m])),
     ],
     CarSpecs(mass=1950, wheelbase=2.87, steerRatio=14.6),
-    radar_scc=True,
+    canfd_config=HyundaiCANFDConfig(radar_scc=True),
   )
   GENESIS_GV70_ELECTRIFIED_1ST_GEN = HyundaiCanFDPlatformConfig(
     [
@@ -681,7 +730,7 @@ class CAR(Platforms):
   GENESIS_GV80 = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Genesis GV80 2023", "All", car_parts=CarParts.common([CarHarness.hyundai_m]))],
     CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
-    radar_scc=True,
+    canfd_config=HyundaiCANFDConfig(radar_scc=True),
   )
 
 

@@ -1,6 +1,6 @@
 from opendbc.car import Bus, get_safety_config, structs, uds
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, HyundaiCANConfig, CAR, DBC, HyundaiSafetyFlags
+from opendbc.car.hyundai.values import HyundaiFlags, HyundaiCANConfig, HyundaiCANFDConfig, CAR, DBC, HyundaiSafetyFlags
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
@@ -26,46 +26,20 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "hyundai"
 
-    # "LKA steering" if LKAS or LKAS_ALT messages are seen coming from the camera.
-    # Generally means our LKAS message is forwarded to another ECU (commonly ADAS ECU)
-    # that finally retransmits our steering command in LFA or LFA_ALT to the MDPS.
-    # "LFA steering" if camera directly sends LFA to the MDPS
-    cam_can = CanBus(None, fingerprint).CAM
-    lka_steering = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
-    CAN = CanBus(None, fingerprint, lka_steering)
-
     if ret.flags & HyundaiFlags.CANFD:
       # Shared configuration for CAN-FD cars
+      cam_can = CanBus(None, fingerprint).CAM
+      ret.flags |= HyundaiCANFDConfig.detect(fingerprint, cam_can, ret.flags)
+
+      lka_steering = ret.flags & HyundaiFlags.CANFD_LKA_STEER_MSG
+      CAN = CanBus(None, fingerprint, lka_steering)
+
       ret.alphaLongitudinalAvailable = not (ret.flags & HyundaiFlags.CANFD_NO_RADAR_DISABLE)
-      if lka_steering and Ecu.adas not in [fw.ecu for fw in car_fw]:
+      if (ret.flags & HyundaiFlags.CANFD_LKA_STEER_MSG) and Ecu.adas not in [fw.ecu for fw in car_fw]:
         # this needs to be figured out for cars without an ADAS ECU
         ret.alphaLongitudinalAvailable = False
 
       ret.enableBsm = 0x1ba in fingerprint[CAN.ECAN]
-
-      # Check if the car is hybrid. Only HEV/PHEV cars have 0xFA on E-CAN.
-      if 0xFA in fingerprint[CAN.ECAN]:
-        ret.flags |= HyundaiFlags.HYBRID.value
-
-      if lka_steering:
-        # detect LKA steering
-        ret.flags |= HyundaiFlags.CANFD_LKA_STEER_MSG.value
-        if 0x110 in fingerprint[CAN.CAM]:
-          ret.flags |= HyundaiFlags.CANFD_LKA_STEER_MSG_ALT.value
-      else:
-        # no LKA steering
-        if 0x1cf not in fingerprint[CAN.ECAN]:
-          ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
-        if not ret.flags & HyundaiFlags.CANFD_RADAR_SCC:
-          ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
-
-      # Some LKA steering cars have alternative messages for gear checks
-      # ICE cars do not have 0x130; GEARS message on 0x40 or 0x70 instead
-      if 0x130 not in fingerprint[CAN.ECAN]:
-        if 0x40 not in fingerprint[CAN.ECAN]:
-          ret.flags |= HyundaiFlags.CANFD_ALT_GEARS_2.value
-        else:
-          ret.flags |= HyundaiFlags.CANFD_ALT_GEARS.value
 
       cfgs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiCanfd), ]
       if CAN.ECAN >= 4:
