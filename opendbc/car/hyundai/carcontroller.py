@@ -9,7 +9,6 @@ from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.hyundai.torque_reduction_gain import TorqueReductionGainController
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -84,8 +83,6 @@ class CarController(CarControllerBase):
     # Vehicle model used for angle steering lateral limiting
     self.VM = VehicleModel(get_baseline_safety_cp())
 
-    self.torque_reduction_gain_controller = TorqueReductionGainController()
-
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -123,8 +120,6 @@ class CarController(CarControllerBase):
                                                           CS.out.vEgoRaw, CS.out.steeringAngleDeg,
                                                           CC.latActive, self.params, self.VM)
 
-      # apply_torque = self.torque_reduction_gain_controller.update(
-      #   CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw)
       # TODO: consider angle direction so you can override in direction and it doesn't reduce torque as much
       # TODO: max_allowed_torque
       # apply_torque = np.interp(abs(CS.out.steeringTorque), [0, 500], [1.0, 0.2]) if CC.latActive else 0.0
@@ -253,7 +248,7 @@ class CarController(CarControllerBase):
 
     # steering control
     can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req,
-                                                           apply_torque, self.apply_angle_last, CS.lkas_msg))
+                                                           apply_torque, self.apply_angle_last))
 
     # prevent LFA from activating on LKA steering cars by sending "no lane lines detected" to ADAS ECU
     if self.frame % 5 == 0 and lka_steering:
