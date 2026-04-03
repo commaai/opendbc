@@ -71,10 +71,6 @@ class CarController(CarControllerBase):
     if not CC.latActive:
       apply_torque = 0
 
-    # Hold torque with induced temporary fault when cutting the actuation bit
-    # FIXME: we don't use this with CAN FD?
-    torque_fault = CC.latActive and not apply_steer_req
-
     self.apply_torque_last = apply_torque
 
     # accel + longitudinal
@@ -103,6 +99,10 @@ class CarController(CarControllerBase):
       can_sends.extend(self.create_canfd_msgs(apply_steer_req, apply_torque, set_speed_in_units, accel,
                                               stopping, hud_control, CS, CC))
     else:
+      # Hold torque with induced temporary fault when cutting the actuation bit
+      # FIXME: we don't use this with CAN FD?
+      torque_fault = CC.latActive and not apply_steer_req
+
       can_sends.extend(self.create_can_msgs(apply_steer_req, apply_torque, torque_fault, set_speed_in_units, accel,
                                             stopping, hud_control, actuators, CS, CC))
 
