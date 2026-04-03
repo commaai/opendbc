@@ -168,27 +168,34 @@ class HyundaiCANConfig:
   @staticmethod
   def detect(fingerprint) -> int:
     flags = 0
+
     # Send LFA message on cars with HDA
     if 0x485 in fingerprint[2]:
       flags |= HyundaiFlags.SEND_LFA
+
     # These cars use the FCA11 message for the AEB and FCW signals, all others use SCC12
     if 0x38d in fingerprint[0] or 0x38d in fingerprint[2]:
       flags |= HyundaiFlags.USE_FCA
+
     # These cars have the LFA button on the steering wheel
     if 0x391 in fingerprint[0]:
       flags |= HyundaiFlags.HAS_LDA_BUTTON
+
     return int(flags)
 
   def to_flags(self) -> int:
     flags = 0
+
     if self.camera_scc:
       flags |= HyundaiFlags.CAMERA_SCC
+
     if self.fuel_type == FuelType.HYBRID:
       flags |= HyundaiFlags.HYBRID
     elif self.fuel_type == FuelType.EV:
       flags |= HyundaiFlags.EV
     elif self.fuel_type == FuelType.FCEV:
       flags |= HyundaiFlags.FCEV
+
     return flags
 
 
