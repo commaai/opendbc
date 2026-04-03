@@ -1,6 +1,6 @@
 from opendbc.car import Bus, get_safety_config, structs, uds
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, HyundaiCANConfig, CAR, DBC, HyundaiSafetyFlags
+from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, HyundaiSafetyFlags
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
@@ -83,10 +83,16 @@ class CarInterface(CarInterfaceBase):
 
     else:
       # Shared configuration for non CAN-FD cars
-      ret.flags |= HyundaiCANConfig.detect(fingerprint)
-
       ret.alphaLongitudinalAvailable = not (ret.flags & (HyundaiFlags.LEGACY | HyundaiFlags.UNSUPPORTED_LONGITUDINAL))
       ret.enableBsm = 0x58b in fingerprint[0]
+
+      # Send LFA message on cars with HDA
+      if 0x485 in fingerprint[2]:
+        ret.flags |= HyundaiFlags.SEND_LFA.value
+
+      # These cars use the FCA11 message for the AEB and FCW signals, all others use SCC12
+      if 0x38d in fingerprint[0] or 0x38d in fingerprint[2]:
+        ret.flags |= HyundaiFlags.USE_FCA.value
 
       if ret.flags & HyundaiFlags.LEGACY:
         # these cars require a special panda safety mode due to missing counters and checksums in the messages
@@ -96,6 +102,10 @@ class CarInterface(CarInterfaceBase):
 
       if ret.flags & HyundaiFlags.CAMERA_SCC:
         ret.safetyConfigs[0].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
+
+      # These cars have the LFA button on the steering wheel
+      if 0x391 in fingerprint[0]:
+        ret.flags |= HyundaiFlags.HAS_LDA_BUTTON.value
 
     # Common lateral control setup
 
