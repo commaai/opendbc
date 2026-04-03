@@ -19,12 +19,10 @@ MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
-ANGLE_SAFETY_BASELINE_MODEL = "GENESIS_GV80_2025"
-
 
 def get_baseline_safety_cp():
   from opendbc.car.hyundai.interface import CarInterface
-  return CarInterface.get_non_essential_params(ANGLE_SAFETY_BASELINE_MODEL)
+  return CarInterface.get_non_essential_params("KIA_EV6_2025")
 
 
 def process_hud_alert(enabled, fingerprint, hud_control):

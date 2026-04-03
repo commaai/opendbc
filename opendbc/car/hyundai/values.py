@@ -618,18 +618,6 @@ class CAR(Platforms):
     CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
     flags=HyundaiFlags.RADAR_SCC,
   )
-  GENESIS_GV80_2025 = HyundaiCanFDPlatformConfig(
-    [
-      HyundaiCarDocs("Genesis GV80 (3.5T, with HDA2 & LFA2) 2025-26", "Highway Driving Assist 2 & Lane Follow Assist 2",
-                     car_parts=CarParts.common([CarHarness.hyundai_q])),
-      HyundaiCarDocs("Genesis GV80 Coupe (3.5 T, with HDA2 & LFA2) 2025-26", "Highway Driving Assist 2 & Lane Follow Assist 2",
-                     car_parts=CarParts.common([CarHarness.hyundai_q])),
-      HyundaiCarDocs("Genesis GV80 (2.5T, with HDA2 & LFA2) 2025-26", "Highway Driving Assist 2 & Lane Follow Assist 2",
-                     car_parts=CarParts.common([CarHarness.hyundai_r])),
-    ],
-    GENESIS_GV80.specs,
-    flags=HyundaiFlags.CANFD_ANGLE_STEERING | HyundaiFlags.EV,
-  )
 
 
 class Buttons:
