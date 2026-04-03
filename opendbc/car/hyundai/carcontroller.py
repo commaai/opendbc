@@ -20,7 +20,7 @@ MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 
-def get_baseline_safety_cp():
+def get_safety_CP():
   from opendbc.car.hyundai.interface import CarInterface
   return CarInterface.get_non_essential_params("KIA_EV6_2025")
 
@@ -55,8 +55,7 @@ def compute_torque_reduction_gain(steering_torque, v_ego_kph, lat_active, last_g
     target = np.interp(abs(steering_torque), [75, 400], [ceiling, 0.2])
   else:
     target = 0.0
-  delta = target - last_gain
-  gain = last_gain + max(-0.014, min(0.004, delta))
+  gain = rate_limit(target, last_gain, -0.014, 0.004)
   return round(gain / 0.004) * 0.004
 
 
@@ -77,8 +76,8 @@ class CarController(CarControllerBase):
 
     self.apply_angle_last = 0
 
-    # Vehicle model used for angle steering lateral limiting
-    self.VM = VehicleModel(get_baseline_safety_cp())
+    # Vehicle model used for lateral limiting
+    self.VM = VehicleModel(get_safety_CP())
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -87,31 +86,16 @@ class CarController(CarControllerBase):
 
     # angle control
     if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
-      # desired_angle = round(actuators.steeringAngleDeg, 1)
       desired_angle = actuators.steeringAngleDeg
 
-      # Smooth micro-adjustments that cause EPS whine at low speed.
-      # The model produces ~0.2-0.4°/frame jitter vs stock's ~0.05°. The EPS PID
-      # overshoots tracking these rapid changes, causing motor direction reversals
-      # at audible frequencies. Smoothing reduces the jitter to stock levels.
-      # Skip smoothing for large angle changes (>1°) — those are real steering
-      # maneuvers, not jitter, and should execute immediately.
-      # delta = abs(desired_angle - self.apply_angle_last)
-      # if CC.latActive and 0.05 < delta < 1.0:
-      #   alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 11.1, 13.9], [0.15, 0.20, 0.25, 0.35, 0.55, 1.0])
-      #   desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
-
+      # EPS is sensitive to small jitter from model desired angle at low speed,
+      # so we apply some hysteresis and filtering to prevent this.
 
       if CC.latActive:
-        #print(apply_angle_last, self.apply_angle_last)
-        print(desired_angle, self.angle_steady)
         deadzone = np.interp(CS.out.vEgo, [10, 15], [2, 0])
         desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
         self.angle_steady = desired_angle
         desired_angle = self.fof.update(desired_angle)
-        #print('after', apply_angle_last)
-        print('after', desired_angle)
-        #print()
 
       self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
                                                           CS.out.vEgoRaw, CS.out.steeringAngleDeg,
@@ -119,22 +103,13 @@ class CarController(CarControllerBase):
 
       # TODO: consider angle direction so you can override in direction and it doesn't reduce torque as much
       # TODO: max_allowed_torque
-      # apply_torque = np.interp(abs(CS.out.steeringTorque), [0, 500], [1.0, 0.2]) if CC.latActive else 0.0
-      # apply_torque = rate_limit(apply_torque, self.apply_torque_last, -0.012, 0.002)  # try 0.004, that's stock
       apply_torque = compute_torque_reduction_gain(CS.out.steeringTorque, CS.out.vEgoRaw * CV.MS_TO_KPH,
                                                    CC.latActive, self.apply_torque_last)
-      #self.apply_angle_last = apply_angle_last_tmp
-      #self.angle_steady = self.apply_angle_last
-
-      #self.apply
-
-      #self.angle_steady = self.apply_angle_last
 
       apply_steer_req = CC.latActive
       if not CC.latActive:
-        self.fof.x = CS.out.steeringAngleDeg
-        self.angle_steady = CS.out.steeringAngleDeg
-        self.apply_angle_last = CS.out.steeringAngleDeg
+        self.fof.x = self.apply_angle_last
+        self.angle_steady = self.apply_angle_last
 
     # torque control
     else:
