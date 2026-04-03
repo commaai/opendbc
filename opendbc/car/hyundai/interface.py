@@ -44,7 +44,7 @@ class CarInterface(CarInterfaceBase):
 
       ret.enableBsm = 0x1ba in fingerprint[CAN.ECAN]
 
-      # no longitudinal for all lka_steering angle steering
+      # no longitudinal for all lka_steer_msg angle steering
       if lka_steering and ret.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
         ret.alphaLongitudinalAvailable = False
 
