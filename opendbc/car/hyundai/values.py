@@ -31,7 +31,7 @@ class CarControllerParams:
     ([], []),
     MAX_LATERAL_ACCEL=(ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)),  # ~3.6 m/s^2
     MAX_LATERAL_JERK=(3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)),  # ~3.6 m/s^3,
-    MAX_ANGLE_RATE=1  # comfort rate limit for angle commands, in degrees per frame.
+    MAX_ANGLE_RATE=5  # comfort rate limit for angle commands, in degrees per frame.
   )
 
   def __init__(self, CP):
@@ -621,7 +621,7 @@ class CAR(Platforms):
                      car_parts=CarParts.common([CarHarness.hyundai_r])),
     ],
     GENESIS_GV80.specs,
-    flags=HyundaiFlags.CANFD_ANGLE_STEERING,
+    flags=HyundaiFlags.CANFD_ANGLE_STEERING | HyundaiFlags.EV,
   )
 
 

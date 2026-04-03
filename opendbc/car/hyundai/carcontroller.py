@@ -54,12 +54,12 @@ def process_hud_alert(enabled, fingerprint, hud_control):
 
 def compute_torque_reduction_gain(steering_torque, v_ego_kph, lat_active, last_gain):
   if lat_active:
-    ceiling = np.interp(v_ego_kph, [40, 120], [0.85, 1.0])
-    target = np.interp(abs(steering_torque), [140, 420], [ceiling, 0.19])
+    ceiling = np.interp(v_ego_kph, [40, 120], [0.75, 0.95])
+    target = np.interp(abs(steering_torque), [75, 400], [ceiling, 0.2])
   else:
     target = 0.0
   delta = target - last_gain
-  rate_dn = np.interp(abs(steering_torque), [0, 300, 700], [0.004, 0.01, 0.04])
+  rate_dn = np.interp(abs(steering_torque), [0, 300, 700], [0.01, 0.02, 0.04])
   gain = last_gain + max(-rate_dn, min(0.004, delta))
   return round(gain / 0.004) * 0.004
 
@@ -71,7 +71,7 @@ class CarController(CarControllerBase):
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
-    self.fof = FirstOrderFilter(0.0, 0.1, 0.01)
+    self.fof = FirstOrderFilter(0.0, 0.05, 0.01)
     self.angle_steady = 0
 
     self.accel_last = 0
@@ -111,12 +111,12 @@ class CarController(CarControllerBase):
       if CC.latActive:
         #print(apply_angle_last, self.apply_angle_last)
         print(desired_angle, self.angle_steady)
-        deadzone = np.interp(CS.out.vEgo, [10, 15], [3, 0])
-        #desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
-        #desired_angle = self.fof.update(desired_angle)
+        deadzone = np.interp(CS.out.vEgo, [10, 15], [2, 0])
+        desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
+        self.angle_steady = desired_angle
+        desired_angle = self.fof.update(desired_angle)
         #print('after', apply_angle_last)
         print('after', desired_angle)
-        self.angle_steady = desired_angle
         #print()
 
       self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
@@ -253,7 +253,7 @@ class CarController(CarControllerBase):
 
     # steering control
     can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req,
-                                                           apply_torque, self.apply_angle_last, CS.lfa_msg))
+                                                           apply_torque, self.apply_angle_last, CS.lkas_msg))
 
     # prevent LFA from activating on LKA steering cars by sending "no lane lines detected" to ADAS ECU
     if self.frame % 5 == 0 and lka_steering:
