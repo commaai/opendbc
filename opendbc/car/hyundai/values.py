@@ -148,6 +148,65 @@ class HyundaiFlags(IntFlag):
   ALT_LIMITS_2 = 2 ** 26
 
 
+class HyundaiCANFDFlags(IntFlag):
+  # Dynamic Flags
+
+  # Default assumption: all cars use LFA (ADAS) steering from the camera (HDA1).
+  # CANFD_LKA_STEER_MSG/CANFD_LKA_STEER_MSG_ALT cars typically have both LKA (camera) and LFA (ADAS) steering messages,
+  # with LKA commands forwarded to the ADAS DRV ECU.
+  # Most HDA2 trims are assumed to be equipped with the ADAS DRV ECU, though some variants may not be equipped with one.
+  CANFD_LKA_STEER_MSG = 1
+  CANFD_ALT_BUTTONS = 2
+  CANFD_ALT_GEARS = 2 ** 2
+  CANFD_CAMERA_SCC = 2 ** 3
+
+  ALT_LIMITS = 2 ** 4
+  CANFD_ENABLE_BLINKERS = 2 ** 5
+  CANFD_ALT_GEARS_2 = 2 ** 6
+  SEND_LFA = 2 ** 7
+  USE_FCA = 2 ** 8
+  CANFD_LKA_STEER_MSG_ALT = 2 ** 9
+
+  # these cars use a different gas signal
+  HYBRID = 2 ** 10
+  EV = 2 ** 11
+
+  # Static flags
+
+  # If 0x500 is present on bus 1 it probably has a Mando radar outputting radar points.
+  # If no points are outputted by default it might be possible to turn it on using  selfdrive/debug/hyundai_enable_radar_points.py
+  MANDO_RADAR = 2 ** 12
+  CANFD = 2 ** 13
+
+  # The radar does SCC on these cars when HDA I, rather than the camera
+  CANFD_RADAR_SCC = 2 ** 14
+  # The camera does SCC on these cars, rather than the radar
+  CAMERA_SCC = 2 ** 15
+  CHECKSUM_CRC8 = 2 ** 16
+  CHECKSUM_6B = 2 ** 17
+
+  # these cars require a special panda safety mode due to missing counters and checksums in the messages
+  LEGACY = 2 ** 18
+
+  # these cars have not been verified to work with longitudinal yet - radar disable, sending correct messages, etc.
+  UNSUPPORTED_LONGITUDINAL = 2 ** 19
+
+  # These CAN FD cars do not accept communication control to disable the ADAS ECU,
+  # responds with 0x7F2822 - 'conditions not correct'
+  CANFD_NO_RADAR_DISABLE = 2 ** 20
+
+  CLUSTER_GEARS = 2 ** 21
+  TCU_GEARS = 2 ** 22
+
+  MIN_STEER_32_MPH = 2 ** 23
+
+  HAS_LDA_BUTTON = 2 ** 24
+
+  FCEV = 2 ** 25
+
+  ALT_LIMITS_2 = 2 ** 26
+
+
 @dataclass
 class HyundaiCarDocs(CarDocs):
   package: str = "Smart Cruise Control (SCC)"
