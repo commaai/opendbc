@@ -183,7 +183,7 @@ class HyundaiCANConfig:
 
     return int(flags)
 
-  def to_flags(self) -> int:
+  def static_flags(self) -> int:
     flags = 0
 
     if self.camera_scc:
@@ -205,7 +205,7 @@ class HyundaiPlatformConfig(PlatformConfig):
   can_config: HyundaiCANConfig = field(default_factory=HyundaiCANConfig)
 
   def init(self):
-    self.flags |= self.can_config.to_flags()
+    self.flags |= self.can_config.static_flags()
 
     if self.flags & HyundaiFlags.MANDO_RADAR:
       self.dbc_dict = {Bus.pt: "hyundai_kia_generic", Bus.radar: 'hyundai_kia_mando_front_radar_generated'}
