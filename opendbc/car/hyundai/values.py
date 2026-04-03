@@ -71,7 +71,7 @@ class HyundaiSafetyFlags(IntFlag):
 class HyundaiFlags(IntFlag):
   # Dynamic Flags
 
-  # Default assumption: all cars use LFA (ADAS) steering from the camera.
+  # Default assumption: all cars use LFA (ADAS) steering from the camera (HDA1).
   # CANFD_LKA_STEER_MSG/CANFD_LKA_STEER_MSG_ALT cars typically have both LKA (camera) and LFA (ADAS) steering messages,
   # with LKA commands forwarded to the ADAS DRV ECU.
   # Most HDA2 trims are assumed to be equipped with the ADAS DRV ECU, though some variants may not be equipped with one.
