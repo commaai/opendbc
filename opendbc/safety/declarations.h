@@ -264,6 +264,10 @@ extern bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
 extern int cruise_button_prev;
 extern bool safety_rx_checks_invalid;
 
+// reserved for forks
+extern bool controls_allowed_reserved1;
+extern bool controls_allowed_reserved2;
+
 // for safety modes with torque steering control
 extern int desired_torque_last;       // last desired steer torque
 extern int rt_torque_last;            // last desired torque for real time check

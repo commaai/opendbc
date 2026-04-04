@@ -58,6 +58,10 @@ bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
 bool safety_rx_checks_invalid = false;
 
+// reserved for forks
+bool controls_allowed_reserved1 = false;
+bool controls_allowed_reserved2 = false;
+
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
 int rt_torque_last = 0;            // last desired torque for real time check
