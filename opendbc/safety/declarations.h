@@ -264,7 +264,7 @@ extern bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
 extern int cruise_button_prev;
 extern bool safety_rx_checks_invalid;
 
-// reserved for forks, such as sunnypilot's MADS implementation
+// reserved for downstream forks
 extern bool controls_allowed_reserved1;
 extern bool controls_allowed_reserved2;
 
