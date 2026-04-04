@@ -79,7 +79,7 @@ def create_lkas11(packer, frame, CP, apply_torque, steer_req,
     values["CF_Lkas_LdwsActivemode"] = 2
 
   elif CP.carFingerprint == CAR.KIA_OPTIMA_H:
-    # Optima Hybrid sends these to keep MDPS happy
+    # Optima Hybrid needs to send these to keep MDPS happy
     values["CF_Lkas_LdwsActivemode"] = 2
     values["CF_Lkas_LdwsOpt_USM"] = 3
 
