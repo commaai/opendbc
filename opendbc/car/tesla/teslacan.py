@@ -36,7 +36,7 @@ class TeslaCAN:
 
     # while braking, accel max is positive and vice versa. it has been seen changing based on speed
     accel_min_inactive = np.interp(v_ego, [5, 35], [-1.56, -0.8])
-    accel_max_inactive = np.interp(v_ego, [0, 5, 35], [2.2, 1.7, 0.64])
+    accel_max_inactive = np.interp(v_ego, [0, 35], [2.0, 0.64])
 
     accel_min = accel if accel <= 0 else accel_min_inactive
     accel_max = accel if accel > 0 else accel_max_inactive
