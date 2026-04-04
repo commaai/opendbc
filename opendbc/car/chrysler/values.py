@@ -41,21 +41,21 @@ class ChryslerCarSpecs(CarSpecs):
 class CAR(Platforms):
   # Chrysler
   CHRYSLER_PACIFICA_2018_HYBRID = ChryslerPlatformConfig(
-    [ChryslerCarDocs("Chrysler Pacifica Hybrid 2017-18")],
+    [ChryslerCarDocs("Chrysler Pacifica Hybrid 2017-18", video='https://www.youtube.com/watch?v=zJi_834Ob-g')],
     ChryslerCarSpecs(mass=2242., wheelbase=3.089, steerRatio=16.2),
   )
   CHRYSLER_PACIFICA_2019_HYBRID = ChryslerPlatformConfig(
-    [ChryslerCarDocs("Chrysler Pacifica Hybrid 2019-25")],
+    [ChryslerCarDocs("Chrysler Pacifica Hybrid 2019-25", video='https://www.youtube.com/watch?v=zJi_834Ob-g')],
     CHRYSLER_PACIFICA_2018_HYBRID.specs,
   )
   CHRYSLER_PACIFICA_2018 = ChryslerPlatformConfig(
-    [ChryslerCarDocs("Chrysler Pacifica 2017-18")],
+    [ChryslerCarDocs("Chrysler Pacifica 2017-18", video='https://www.youtube.com/watch?v=zJi_834Ob-g')],
     CHRYSLER_PACIFICA_2018_HYBRID.specs,
   )
   CHRYSLER_PACIFICA_2020 = ChryslerPlatformConfig(
     [
-      ChryslerCarDocs("Chrysler Pacifica 2019-20"),
-      ChryslerCarDocs("Chrysler Pacifica 2021-23", package="All"),
+      ChryslerCarDocs("Chrysler Pacifica 2019-20", video='https://www.youtube.com/watch?v=zJi_834Ob-g'),
+      ChryslerCarDocs("Chrysler Pacifica 2021-23", package="All", video='https://www.youtube.com/watch?v=zJi_834Ob-g'),
     ],
     CHRYSLER_PACIFICA_2018_HYBRID.specs,
   )
@@ -79,14 +79,14 @@ class CAR(Platforms):
 
   # Ram
   RAM_1500_5TH_GEN = ChryslerPlatformConfig(
-    [ChryslerCarDocs("Ram 1500 2019-24", car_parts=CarParts.common([CarHarness.ram]))],
+    [ChryslerCarDocs("Ram 1500 2019-24", car_parts=CarParts.common([CarHarness.ram]), video='https://www.youtube.com/watch?v=_RMkvdwF-qc')],
     ChryslerCarSpecs(mass=2493., wheelbase=3.88, steerRatio=16.3, minSteerSpeed=14.5),
     {Bus.pt: 'chrysler_ram_dt_generated'},
   )
   RAM_HD_5TH_GEN = ChryslerPlatformConfig(
     [
-      ChryslerCarDocs("Ram 2500 2020-24", car_parts=CarParts.common([CarHarness.ram])),
-      ChryslerCarDocs("Ram 3500 2019-22", car_parts=CarParts.common([CarHarness.ram])),
+      ChryslerCarDocs("Ram 2500 2020-24", car_parts=CarParts.common([CarHarness.ram]), video='https://www.youtube.com/watch?v=w1KDRif9qiM'),
+      ChryslerCarDocs("Ram 3500 2019-22", car_parts=CarParts.common([CarHarness.ram]), video='https://www.youtube.com/watch?v=-bOnIBnv1IY'),
     ],
     ChryslerCarSpecs(mass=3405., wheelbase=3.785, steerRatio=15.61, minSteerSpeed=16.),
     {Bus.pt: 'chrysler_ram_hd_generated'},

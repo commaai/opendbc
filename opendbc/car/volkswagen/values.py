@@ -313,14 +313,14 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_GOLF_MK7 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen e-Golf 2014-20"),
-      VWCarDocs("Volkswagen Golf 2015-20", auto_resume=False),
-      VWCarDocs("Volkswagen Golf Alltrack 2015-19", auto_resume=False),
-      VWCarDocs("Volkswagen Golf GTD 2015-20"),
-      VWCarDocs("Volkswagen Golf GTE 2015-20"),
-      VWCarDocs("Volkswagen Golf GTI 2015-21", auto_resume=False),
-      VWCarDocs("Volkswagen Golf R 2015-19"),
-      VWCarDocs("Volkswagen Golf SportsVan 2015-20"),
+      VWCarDocs("Volkswagen e-Golf 2014-20", video='https://www.youtube.com/watch?v=8TZAY3am8E4'),
+      VWCarDocs("Volkswagen Golf 2015-20", auto_resume=False, video='https://www.youtube.com/watch?v=8TZAY3am8E4'),
+      VWCarDocs("Volkswagen Golf Alltrack 2015-19", auto_resume=False, video='https://www.youtube.com/watch?v=8TZAY3am8E4'),
+      VWCarDocs("Volkswagen Golf GTD 2015-20", video='https://www.youtube.com/watch?v=8TZAY3am8E4'),
+      VWCarDocs("Volkswagen Golf GTE 2015-20", video='https://www.youtube.com/watch?v=8TZAY3am8E4'),
+      VWCarDocs("Volkswagen Golf GTI 2015-21", auto_resume=False, video='https://www.youtube.com/watch?v=8TZAY3am8E4'),
+      VWCarDocs("Volkswagen Golf R 2015-19", video='https://www.youtube.com/watch?v=8TZAY3am8E4'),
+      VWCarDocs("Volkswagen Golf SportsVan 2015-20", video='https://www.youtube.com/watch?v=8TZAY3am8E4'),
     ],
     VolkswagenCarSpecs(mass=1397, wheelbase=2.62),
     chassis_codes={"5G", "AU", "BA", "BE"},
@@ -343,9 +343,9 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_PASSAT_MK8 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Passat 2015-22", footnotes=[Footnote.PASSAT]),
-      VWCarDocs("Volkswagen Passat Alltrack 2015-22"),
-      VWCarDocs("Volkswagen Passat GTE 2015-22"),
+      VWCarDocs("Volkswagen Passat 2015-22", footnotes=[Footnote.PASSAT], video='https://www.youtube.com/watch?v=AhqvqLemzBM'),
+      VWCarDocs("Volkswagen Passat Alltrack 2015-22", video='https://www.youtube.com/watch?v=AhqvqLemzBM'),
+      VWCarDocs("Volkswagen Passat GTE 2015-22", video='https://www.youtube.com/watch?v=AhqvqLemzBM'),
     ],
     VolkswagenCarSpecs(mass=1551, wheelbase=2.79),
     chassis_codes={"3C", "3G"},
@@ -389,8 +389,8 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_TIGUAN_MK2 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Tiguan 2018-24"),
-      VWCarDocs("Volkswagen Tiguan eHybrid 2021-23"),
+      VWCarDocs("Volkswagen Tiguan 2018-24", video='https://www.youtube.com/watch?v=CKYMxAgjTio'),
+      VWCarDocs("Volkswagen Tiguan eHybrid 2021-23", video='https://www.youtube.com/watch?v=CKYMxAgjTio'),
     ],
     VolkswagenCarSpecs(mass=1715, wheelbase=2.74),
     chassis_codes={"5N", "AD", "AX", "BW"},
@@ -404,25 +404,25 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_TRANSPORTER_T61 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Caravelle 2020"),
-      VWCarDocs("Volkswagen California 2021-23"),
+      VWCarDocs("Volkswagen Caravelle 2020", video='https://www.youtube.com/watch?v=prW9ZOFbpZg'),
+      VWCarDocs("Volkswagen California 2021-23", video='https://www.youtube.com/watch?v=prW9ZOFbpZg'),
     ],
     VolkswagenCarSpecs(mass=1926, wheelbase=3.00, minSteerSpeed=14.0),
     chassis_codes={"7H", "7L"},
     wmis={WMI.VOLKSWAGEN_COMMERCIAL_BUS_VAN},
   )
   VOLKSWAGEN_TROC_MK1 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Volkswagen T-Roc 2018-23")],
+    [VWCarDocs("Volkswagen T-Roc 2018-23", video='https://www.youtube.com/watch?v=Cf1OmyyIXC0')],
     VolkswagenCarSpecs(mass=1413, wheelbase=2.63),
     chassis_codes={"A1"},
     wmis={WMI.VOLKSWAGEN_EUROPE_SUV},
   )
   AUDI_A3_MK3 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Audi A3 2014-19"),
-      VWCarDocs("Audi A3 Sportback e-tron 2017-18"),
-      VWCarDocs("Audi RS3 2018"),
-      VWCarDocs("Audi S3 2015-17"),
+      VWCarDocs("Audi A3 2014-19", video='https://www.youtube.com/watch?v=yYqTq6S1zqA'),
+      VWCarDocs("Audi A3 Sportback e-tron 2017-18", video='https://www.youtube.com/watch?v=yYqTq6S1zqA'),
+      VWCarDocs("Audi RS3 2018", video='https://www.youtube.com/watch?v=yYqTq6S1zqA'),
+      VWCarDocs("Audi S3 2015-17", video='https://www.youtube.com/watch?v=Hpc9jW2DwFk'),
     ],
     VolkswagenCarSpecs(mass=1335, wheelbase=2.61),
     chassis_codes={"8V", "FF"},
@@ -441,16 +441,16 @@ class CAR(Platforms):
     wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR, WMI.VOLKSWAGEN_CHINA_FAW},
   )
   PORSCHE_MACAN_MK1 = VolkswagenMLBPlatformConfig(
-    [VWCarDocs("Porsche Macan 2017-24")],
+    [VWCarDocs("Porsche Macan 2017-24", video='https://www.youtube.com/watch?v=8YnHFPcAvVg')],
     VolkswagenCarSpecs(mass=1895, wheelbase=2.81, steerRatio=16.2),
     chassis_codes={"95", "A5"},
     wmis={WMI.PORSCHE_SUV},
   )
   SEAT_ATECA_MK1 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("CUPRA Ateca 2018-23"),
-      VWCarDocs("SEAT Ateca 2016-23"),
-      VWCarDocs("SEAT Leon 2014-20"),
+      VWCarDocs("CUPRA Ateca 2018-23", video='https://www.youtube.com/watch?v=8zWOh97rijY'),
+      VWCarDocs("SEAT Ateca 2016-23", video='https://www.youtube.com/watch?v=8zWOh97rijY'),
+      VWCarDocs("SEAT Leon 2014-20", video='https://www.youtube.com/watch?v=8zWOh97rijY'),
     ],
     VolkswagenCarSpecs(mass=1300, wheelbase=2.64),
     chassis_codes={"5F"},
@@ -478,16 +478,16 @@ class CAR(Platforms):
     wmis={WMI.SKODA},
   )
   SKODA_KODIAQ_MK1 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Škoda Kodiaq 2017-23")],
+    [VWCarDocs("Škoda Kodiaq 2017-23", video='https://www.youtube.com/watch?v=-E8fad2kQjo')],
     VolkswagenCarSpecs(mass=1569, wheelbase=2.79),
     chassis_codes={"NS"},
     wmis={WMI.SKODA, WMI.VOLKSWAGEN_GROUP_RUS},
   )
   SKODA_OCTAVIA_MK3 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Škoda Octavia 2015-19"),
-      VWCarDocs("Škoda Octavia RS 2016"),
-      VWCarDocs("Škoda Octavia Scout 2017-19"),
+      VWCarDocs("Škoda Octavia 2015-19", video='https://www.youtube.com/watch?v=gJd6RAbHEPg'),
+      VWCarDocs("Škoda Octavia RS 2016", video='https://www.youtube.com/watch?v=gJd6RAbHEPg'),
+      VWCarDocs("Škoda Octavia Scout 2017-19", video='https://www.youtube.com/watch?v=gJd6RAbHEPg'),
     ],
     VolkswagenCarSpecs(mass=1388, wheelbase=2.68),
     chassis_codes={"NE"},

@@ -56,7 +56,7 @@ class NissanPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   NISSAN_XTRAIL = NissanPlatformConfig(
-    [NissanCarDocs("Nissan X-Trail 2017")],
+    [NissanCarDocs("Nissan X-Trail 2017", video='https://www.youtube.com/watch?v=DMosH6HAhD0')],
     NissanCarSpecs(mass=1610, wheelbase=2.705)
   )
   NISSAN_LEAF = NissanPlatformConfig(
@@ -68,11 +68,11 @@ class CAR(Platforms):
   # Currently the only known difference between them is the inverted seatbelt signal.
   NISSAN_LEAF_IC = NISSAN_LEAF.override(car_docs=[])
   NISSAN_ROGUE = NissanPlatformConfig(
-    [NissanCarDocs("Nissan Rogue 2018-20")],
+    [NissanCarDocs("Nissan Rogue 2018-20", video='https://www.youtube.com/watch?v=DMosH6HAhD0')],
     NissanCarSpecs(mass=1610, wheelbase=2.705)
   )
   NISSAN_ALTIMA = NissanPlatformConfig(
-    [NissanCarDocs("Nissan Altima 2019-20, 2024", car_parts=CarParts.common([CarHarness.nissan_b]))],
+    [NissanCarDocs("Nissan Altima 2019-20, 2024", car_parts=CarParts.common([CarHarness.nissan_b]), video='https://www.youtube.com/watch?v=7lnyl9pAtCE')],
     NissanCarSpecs(mass=1492, wheelbase=2.824)
   )
 

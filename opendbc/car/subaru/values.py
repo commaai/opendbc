@@ -126,20 +126,20 @@ class SubaruGen2PlatformConfig(SubaruPlatformConfig):
 class CAR(Platforms):
   # Global platform
   SUBARU_ASCENT = SubaruPlatformConfig(
-    [SubaruCarDocs("Subaru Ascent 2019-21", "All")],
+    [SubaruCarDocs("Subaru Ascent 2019-21", "All", video='https://www.youtube.com/watch?v=RLzaRUMGEZo')],
     CarSpecs(mass=2031, wheelbase=2.89, steerRatio=13.5),
   )
   SUBARU_OUTBACK = SubaruGen2PlatformConfig(
-    [SubaruCarDocs("Subaru Outback 2020-22", "All", car_parts=CarParts.common([CarHarness.subaru_b]))],
+    [SubaruCarDocs("Subaru Outback 2020-22", "All", car_parts=CarParts.common([CarHarness.subaru_b]), video='https://www.youtube.com/watch?v=UJs2gzsyzLA')],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=17),
   )
   SUBARU_LEGACY = SubaruGen2PlatformConfig(
-    [SubaruCarDocs("Subaru Legacy 2020-22", "All", car_parts=CarParts.common([CarHarness.subaru_b]))],
+    [SubaruCarDocs("Subaru Legacy 2020-22", "All", car_parts=CarParts.common([CarHarness.subaru_b]), video='https://www.youtube.com/watch?v=-1Snpp3cQEg')],
     SUBARU_OUTBACK.specs,
   )
   SUBARU_IMPREZA = SubaruPlatformConfig(
     [
-      SubaruCarDocs("Subaru Impreza 2017-19"),
+      SubaruCarDocs("Subaru Impreza 2017-19", video='https://youtu.be/Agww7oE1k-s?t=26'),
       SubaruCarDocs("Subaru Crosstrek 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
       SubaruCarDocs("Subaru XV 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
     ],
@@ -147,16 +147,16 @@ class CAR(Platforms):
   )
   SUBARU_IMPREZA_2020 = SubaruPlatformConfig(
     [
-      SubaruCarDocs("Subaru Impreza 2020-22"),
-      SubaruCarDocs("Subaru Crosstrek 2020-23"),
-      SubaruCarDocs("Subaru XV 2020-21"),
+      SubaruCarDocs("Subaru Impreza 2020-22", video='https://www.youtube.com/watch?v=iM1bJ6KUIz0'),
+      SubaruCarDocs("Subaru Crosstrek 2020-23", video='https://www.youtube.com/watch?v=pkmGu_wgwrc'),
+      SubaruCarDocs("Subaru XV 2020-21", video='https://www.youtube.com/watch?v=pkmGu_wgwrc'),
     ],
     CarSpecs(mass=1480, wheelbase=2.67, steerRatio=17),
     flags=SubaruFlags.STEER_RATE_LIMITED,
   )
   # TODO: is there an XV and Impreza too?
   SUBARU_CROSSTREK_HYBRID = SubaruPlatformConfig(
-    [SubaruCarDocs("Subaru Crosstrek Hybrid 2020", car_parts=CarParts.common([CarHarness.subaru_b]))],
+    [SubaruCarDocs("Subaru Crosstrek Hybrid 2020", car_parts=CarParts.common([CarHarness.subaru_b]), video='https://www.youtube.com/watch?v=xg8apcmdOUY')],
     CarSpecs(mass=1668, wheelbase=2.67, steerRatio=17),
     flags=SubaruFlags.HYBRID,
   )
@@ -178,19 +178,19 @@ class CAR(Platforms):
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_LEGACY_PREGLOBAL = SubaruPlatformConfig(
-    [SubaruCarDocs("Subaru Legacy 2015-18")],
+    [SubaruCarDocs("Subaru Legacy 2015-18", video='https://www.youtube.com/watch?v=-1Snpp3cQEg')],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=12.5),
     {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_OUTBACK_PREGLOBAL = SubaruPlatformConfig(
-    [SubaruCarDocs("Subaru Outback 2015-17")],
+    [SubaruCarDocs("Subaru Outback 2015-17", video='https://www.youtube.com/watch?v=UJs2gzsyzLA')],
     SUBARU_FORESTER_PREGLOBAL.specs,
     {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_OUTBACK_PREGLOBAL_2018 = SubaruPlatformConfig(
-    [SubaruCarDocs("Subaru Outback 2018-19")],
+    [SubaruCarDocs("Subaru Outback 2018-19", video='https://www.youtube.com/watch?v=UJs2gzsyzLA')],
     SUBARU_FORESTER_PREGLOBAL.specs,
     {Bus.pt: 'subaru_outback_2019_generated'},
     flags=SubaruFlags.PREGLOBAL,
@@ -202,12 +202,12 @@ class CAR(Platforms):
     flags=SubaruFlags.LKAS_ANGLE,
   )
   SUBARU_OUTBACK_2023 = SubaruGen2PlatformConfig(
-    [SubaruCarDocs("Subaru Outback 2023", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
+    [SubaruCarDocs("Subaru Outback 2023", "All", car_parts=CarParts.common([CarHarness.subaru_d]), video='https://www.youtube.com/watch?v=UJs2gzsyzLA')],
     SUBARU_OUTBACK.specs,
     flags=SubaruFlags.LKAS_ANGLE,
   )
   SUBARU_ASCENT_2023 = SubaruGen2PlatformConfig(
-    [SubaruCarDocs("Subaru Ascent 2023", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
+    [SubaruCarDocs("Subaru Ascent 2023", "All", car_parts=CarParts.common([CarHarness.subaru_d]), video='https://www.youtube.com/watch?v=RLzaRUMGEZo')],
     SUBARU_ASCENT.specs,
     flags=SubaruFlags.LKAS_ANGLE,
   )

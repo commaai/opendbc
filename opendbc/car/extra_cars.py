@@ -39,27 +39,27 @@ class CAR(Platforms):
     [
       CommunityCarDocs("Acura ADX 2025-26"),
       CommunityCarDocs("Acura Integra 2023-25"),
-      CommunityCarDocs("Acura MDX 2015-16", "Advance Package"),
-      CommunityCarDocs("Acura MDX 2017-20"),
-      CommunityCarDocs("Acura MDX Hybrid 2017-20"),
-      CommunityCarDocs("Acura MDX 2022-24"),
+      CommunityCarDocs("Acura MDX 2015-16", "Advance Package", video='https://www.youtube.com/watch?v=nyTndfkH-QU'),
+      CommunityCarDocs("Acura MDX 2017-20", video='https://www.youtube.com/watch?v=nyTndfkH-QU'),
+      CommunityCarDocs("Acura MDX Hybrid 2017-20", video='https://www.youtube.com/watch?v=nyTndfkH-QU'),
+      CommunityCarDocs("Acura MDX 2022-24", video='https://www.youtube.com/watch?v=nyTndfkH-QU'),
       CommunityCarDocs("Acura RDX 2022-25"),
       CommunityCarDocs("Acura RLX 2017", "Advance Package or Technology Package"),
       CommunityCarDocs("Acura TLX 2015-17", "Advance Package"),
       CommunityCarDocs("Acura TLX 2018-20"),
       CommunityCarDocs("Acura TLX 2022-23"),
       GMSecurityCarDocs("Acura ZDX 2024"),
-      CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing"),
-      CommunityCarDocs("Honda Accord Hybrid 2017"),
-      CommunityCarDocs("Honda Clarity 2018-21"),
+      CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing", video='https://www.youtube.com/watch?v=R2Guz8sMwSg'),
+      CommunityCarDocs("Honda Accord Hybrid 2017", video='https://www.youtube.com/watch?v=lBgYT4MklhE'),
+      CommunityCarDocs("Honda Clarity 2018-21", video='https://www.youtube.com/watch?v=D1ThojEXuKs'),
       GMSecurityCarDocs("Honda Prologue 2024-25"),
     ],
   )
 
   EXTRA_HYUNDAI = ExtraPlatformConfig(
     [
-      CommunityCarDocs("Hyundai Palisade 2023-24", "Highway Driving Assist II"),
-      CommunityCarDocs("Kia Telluride 2023-24", "Highway Driving Assist II"),
+      CommunityCarDocs("Hyundai Palisade 2023-24", "Highway Driving Assist II", video='https://www.youtube.com/watch?v=eIWa2FD5RZs'),
+      CommunityCarDocs("Kia Telluride 2023-24", "Highway Driving Assist II", video='https://www.youtube.com/watch?v=jvgYCXu6oJ0'),
     ],
   )
 
@@ -68,10 +68,10 @@ class CAR(Platforms):
       ToyotaSecurityCarDocs("Subaru Solterra 2023-25"),
       ToyotaSecurityCarDocs("Lexus NS 2022-25"),
       ToyotaSecurityCarDocs("Toyota bZ4x 2023-25"),
-      ToyotaSecurityCarDocs("Toyota Camry 2025"),
-      ToyotaSecurityCarDocs("Toyota Corolla Cross 2022-25"),
-      ToyotaSecurityCarDocs("Toyota Highlander 2025"),
-      ToyotaSecurityCarDocs("Toyota RAV4 Prime 2024-25"),
+      ToyotaSecurityCarDocs("Toyota Camry 2025", video='https://www.youtube.com/watch?v=I3m95gJ57uw'),
+      ToyotaSecurityCarDocs("Toyota Corolla Cross 2022-25", video='https://www.youtube.com/watch?v=Eqwu4WDPfj8'),
+      ToyotaSecurityCarDocs("Toyota Highlander 2025", video='https://www.youtube.com/watch?v=honHMK7_deI'),
+      ToyotaSecurityCarDocs("Toyota RAV4 Prime 2024-25", video='https://www.youtube.com/watch?v=9p3F3ESMKMo'),
       ToyotaSecurityCarDocs("Toyota Sequoia 2023-25"),
       ToyotaSecurityCarDocs("Toyota Sienna 2024-25"),
       ToyotaSecurityCarDocs("Toyota Tundra 2022-25"),
@@ -81,7 +81,7 @@ class CAR(Platforms):
 
   EXTRA_VOLKSWAGEN = ExtraPlatformConfig(
     [
-      FlexRayCarDocs("Audi A4 2016-24"),
+      FlexRayCarDocs("Audi A4 2016-24", video='https://www.youtube.com/watch?v=HDXP6sLIVmQ'),
       FlexRayCarDocs("Audi A5 2016-24"),
       FlexRayCarDocs("Audi Q5 2017-24"),
     ],
