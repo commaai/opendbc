@@ -282,20 +282,32 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
         violation = true;
       }
 
-      // Don't allow any acceleration limits above the safety limits
-//      violation |= longitudinal_accel_checks(raw_accel_max, TESLA_LONG_LIMITS);
-      {
-        bool accel_valid = get_longitudinal_allowed() && !safety_max_limit_check(raw_accel_max, TESLA_LONG_LIMITS.max_accel, TESLA_LONG_LIMITS.min_accel);
-        bool accel_inactive = raw_accel_max == TESLA_LONG_LIMITS.inactive_accel;
-        violation |= !(accel_valid || accel_inactive);
+      // Tesla stock ACC from DAS always fills out signals as if it was actuating even while disabled.
+      // DI is assumed to properly do state management.
+
+      if (!safety_max_limit_check(raw_accel_max, TESLA_LONG_LIMITS.max_accel, TESLA_LONG_LIMITS.min_accel)) {
+        violation = true;
       }
 
-//      violation |= longitudinal_accel_checks(raw_accel_min, TESLA_LONG_LIMITS);
-      {
-        bool accel_valid = get_longitudinal_allowed() && !safety_max_limit_check(raw_accel_min, TESLA_LONG_LIMITS.max_accel, TESLA_LONG_LIMITS.min_accel);
-        bool accel_inactive = raw_accel_min == TESLA_LONG_LIMITS.inactive_accel;
-        violation |= !(accel_valid || accel_inactive);
+      if (!safety_max_limit_check(raw_accel_min, TESLA_LONG_LIMITS.max_accel, TESLA_LONG_LIMITS.min_accel)) {
+        violation = true;
       }
+
+
+//      // Don't allow any acceleration limits above the safety limits
+////      violation |= longitudinal_accel_checks(raw_accel_max, TESLA_LONG_LIMITS);
+//      {
+//        bool accel_valid = get_longitudinal_allowed() && !safety_max_limit_check(raw_accel_max, TESLA_LONG_LIMITS.max_accel, TESLA_LONG_LIMITS.min_accel);
+//        bool accel_inactive = raw_accel_max == TESLA_LONG_LIMITS.inactive_accel;
+//        violation |= !(accel_valid || accel_inactive);
+//      }
+//
+////      violation |= longitudinal_accel_checks(raw_accel_min, TESLA_LONG_LIMITS);
+//      {
+//        bool accel_valid = get_longitudinal_allowed() && !safety_max_limit_check(raw_accel_min, TESLA_LONG_LIMITS.max_accel, TESLA_LONG_LIMITS.min_accel);
+//        bool accel_inactive = raw_accel_min == TESLA_LONG_LIMITS.inactive_accel;
+//        violation |= !(accel_valid || accel_inactive);
+//      }
     } else {
       // Can only send cancel longitudinal messages when not controlling longitudinal
       if (acc_state != 13) {  // ACC_CANCEL_GENERIC_SILENT
