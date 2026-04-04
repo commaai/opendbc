@@ -2,6 +2,7 @@ import math
 import numbers
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
+from functools import cache
 
 from opendbc.car.carlog import carlog
 from opendbc.can.dbc import DBC, Signal
@@ -253,22 +254,28 @@ class CANParser:
     return updated_addrs
 
 
+@cache
+def _get_define_values(dbc_name: str) -> dict[int | str, dict[str, dict[int, str]]]:
+  dbc = DBC(dbc_name)
+
+  dv = defaultdict(dict)
+  for val in dbc.vals:
+    sgname = val.name
+    address = val.address
+    msg = dbc.addr_to_msg.get(address)
+    if msg is None:
+      raise KeyError(address)
+    msgname = msg.name
+    parts = val.def_val.split()
+    values = [int(v) for v in parts[::2]]
+    defs = parts[1::2]
+    dv[address][sgname] = dict(zip(values, defs, strict=True))
+    dv[msgname][sgname] = dv[address][sgname]
+
+  return dict(dv)
+
+
 class CANDefine:
   def __init__(self, dbc_name: str):
-    dbc = DBC(dbc_name)
-
-    dv = defaultdict(dict)
-    for val in dbc.vals:
-      sgname = val.name
-      address = val.address
-      msg = dbc.addr_to_msg.get(address)
-      if msg is None:
-        raise KeyError(address)
-      msgname = msg.name
-      parts = val.def_val.split()
-      values = [int(v) for v in parts[::2]]
-      defs = parts[1::2]
-      dv[address][sgname] = dict(zip(values, defs, strict=True))
-      dv[msgname][sgname] = dv[address][sgname]
-
-    self.dv = dict(dv)
+    # CANDefine is read-only in normal usage; reuse the parsed definitions per DBC.
+    self.dv = _get_define_values(dbc_name)
