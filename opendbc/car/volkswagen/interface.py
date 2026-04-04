@@ -92,7 +92,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.07
 
     ret.pcmCruise = not ret.openpilotLongitudinalControl
-    ret.stopAccel = -0.55
+    if ret.flags & VolkswagenFlags.PQ:
+      ret.stopAccel = -0.55
     ret.vEgoStarting = 0.1
     ret.vEgoStopping = 0.5
     ret.autoResumeSng = ret.minEnableSpeed == -1

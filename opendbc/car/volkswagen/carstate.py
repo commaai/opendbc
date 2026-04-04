@@ -15,10 +15,15 @@ class CarState(CarStateBase):
     self.eps_init_complete = False
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
+    self.esp_stopping = False
     self.esp_hold_confirmation = False
+    self.rolling_backward = False
+    self.rolling_forward = False
+    self.grade = 0.0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
+    self.distance_button_pressed = False
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -77,6 +82,19 @@ class CarState(CarStateBase):
         pt_cp.vl["ESP_19"]["ESP_HR_Radgeschw_02"],
       )
 
+      self.rolling_backward = (
+        pt_cp.vl["ESP_10"]["ESP_HR_Fahrtrichtung"] == 1 or
+        pt_cp.vl["ESP_10"]["ESP_HL_Fahrtrichtung"] == 1 or
+        pt_cp.vl["ESP_10"]["ESP_VR_Fahrtrichtung"] == 1 or
+        pt_cp.vl["ESP_10"]["ESP_VL_Fahrtrichtung"] == 1
+      )
+      self.rolling_forward = (
+        pt_cp.vl["ESP_10"]["ESP_HR_Fahrtrichtung"] == 0 or
+        pt_cp.vl["ESP_10"]["ESP_HL_Fahrtrichtung"] == 0 or
+        pt_cp.vl["ESP_10"]["ESP_VR_Fahrtrichtung"] == 0 or
+        pt_cp.vl["ESP_10"]["ESP_VL_Fahrtrichtung"] == 0
+      )
+
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
         ret.carFaultedNonCritical = bool(cam_cp.vl["HCA_01"]["EA_Ruckfreigabe"]) or cam_cp.vl["HCA_01"]["EA_ACC_Sollstatus"] > 0  # EA
 
@@ -101,7 +119,9 @@ class CarState(CarStateBase):
       ret.stockAeb = bool(ext_cp.vl["ACC_10"]["ANB_Teilbremsung_Freigabe"]) or bool(ext_cp.vl["ACC_10"]["ANB_Zielbremsung_Freigabe"])
 
       self.acc_type = ext_cp.vl["ACC_06"]["ACC_Typ"]
+      self.esp_stopping = bool(pt_cp.vl["ESP_21"]["ESP_Anhaltevorgang_ACC_aktiv"])
       self.esp_hold_confirmation = bool(pt_cp.vl["ESP_21"]["ESP_Haltebestaetigung"])
+      self.grade = pt_cp.vl["Motor_16"]["TSK_Steigung"]
       acc_limiter_mode = ext_cp.vl["ACC_02"]["ACC_Gesetzte_Zeitluecke"] == 0
       speed_limiter_mode = bool(pt_cp.vl["TSK_06"]["TSK_Limiter_ausgewaehlt"])
 
@@ -132,6 +152,7 @@ class CarState(CarStateBase):
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
     self.gra_stock_values = pt_cp.vl["GRA_ACC_01"]
+    self.distance_button_pressed = self.gra_stock_values["GRA_Verstellung_Zeitluecke"] in (1, 2, 3)
 
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
