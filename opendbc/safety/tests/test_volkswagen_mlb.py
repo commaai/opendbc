@@ -51,8 +51,10 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self._motor_03_msg(gas_signal=gas)
 
   # ACC engagement status
-  def _tsk_status_msg(self, enable):
-    values = {"TSK_Status_GRA_ACC_02": 1 if enable else 0}
+  def _tsk_status_msg(self, enable, acc_status=None):
+    if acc_status is None:
+      acc_status = 1 if enable else 0
+    values = {"TSK_Status_GRA_ACC_02": acc_status}
     return self.packer.make_can_msg_safety("TSK_04", 1, values)
 
   def _pcm_status_msg(self, enable):
