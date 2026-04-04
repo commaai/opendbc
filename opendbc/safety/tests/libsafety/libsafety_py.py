@@ -107,6 +107,9 @@ void set_honda_alt_brake_msg(bool c);
 void set_honda_bosch_long(bool c);
 int get_honda_hw(void);
 
+void set_chrysler_cusw_torque_last(int t);
+int get_chrysler_cusw_torque_last(void);
+
 void mutation_set_active_mutant(int id);
 int mutation_get_active_mutant(void);
 """)
