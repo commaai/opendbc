@@ -139,7 +139,7 @@ class TestCarInterfaces(unittest.TestCase):
         @settings(max_examples=MAX_EXAMPLES, deadline=None,
                   phases=(Phase.reuse, Phase.generate, Phase.shrink))
         @given(data=st.data())
-        def run_case(data):
+        def run_case(data, car_name=car_name):
           _run_car_interface_test(car_name, data)
 
         run_case()
