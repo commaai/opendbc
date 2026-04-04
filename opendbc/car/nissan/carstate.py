@@ -78,13 +78,12 @@ class CarState(CarStateBase):
     else:
       speed = cp_adas.vl["PROPILOT_HUD"]["SET_SPEED"]
 
-    if speed != 255:
+    if speed != 254: #Offset of -1 at dbc file
       if self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
         conversion = CV.MPH_TO_MS if cp.vl["HUD_SETTINGS"]["SPEED_MPH"] else CV.KPH_TO_MS
       else:
         conversion = CV.MPH_TO_MS if cp.vl["HUD"]["SPEED_MPH"] else CV.KPH_TO_MS
       ret.cruiseState.speed = speed * conversion
-      ret.cruiseState.speedCluster = (speed - 1) * conversion  # Speed on HUD is always 1 lower than actually sent on can bus
 
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
       ret.steeringTorque = cp_cam.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
@@ -110,8 +109,7 @@ class CarState(CarStateBase):
     can_gear = int(cp.vl["GEARBOX"]["GEAR_SHIFTER"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
 
-    # stock lkas should be off
-    # TODO: is this needed?
+    # Stock lkas should be off
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
       ret.invalidLkasSetting = bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
     else:
