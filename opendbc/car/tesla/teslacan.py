@@ -34,7 +34,8 @@ class TeslaCAN:
     set_speed = v_ego + accel * 0.7  # TODO: 0.7 may not be important
     set_speed = min(max(set_speed * CV.MS_TO_KPH, 0), 400)  # signal max is 409.4
 
-    # while braking, accel max is positive and vice versa. it has been seen changing based on speed
+    # while braking, accel max is positive and vice versa. it has been seen changing based on speed.
+    # it may be a comfort limit in case setSpeed changes rapidly, not sure how this is actually used
     accel_min_inactive = np.interp(v_ego, [5, 35], [-1.56, -0.8])
     accel_max_inactive = np.interp(v_ego, [0, 35], [2.0, 0.64])
 
