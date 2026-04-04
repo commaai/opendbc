@@ -4,74 +4,71 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL
 from opendbc.car.common.pid import PIDController
 from opendbc.car.body import bodycan
-from opendbc.car.body.values import SPEED_FROM_RPM
+from opendbc.car.body.values import CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
-
-MAX_TORQUE = 500
-MAX_TORQUE_RATE = 50
-MAX_ANGLE_ERROR = np.radians(7)
-MAX_POS_INTEGRATOR = 0.2   # meters
-MAX_TURN_INTEGRATOR = 0.1  # meters
-
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
+    self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.main])
 
-    # PIDs
-    self.turn_pid = PIDController(110, k_i=11.5, rate=1 / DT_CTRL)
-    self.wheeled_speed_pid = PIDController(110, k_i=11.5, rate=1 / DT_CTRL)
+    self.v_pid = PIDController(**self.params.v_pid_settings, rate=1 / DT_CTRL)
+    self.w_pid = PIDController(**self.params.w_pid_settings, rate=1 / DT_CTRL)
 
     self.torque_r_filtered = 0.
     self.torque_l_filtered = 0.
 
-  @staticmethod
-  def deadband_filter(torque, deadband):
-    if torque > 0:
-      torque += deadband
-    else:
-      torque -= deadband
-    return torque
-
   def update(self, CC, CS, now_nanos):
-
     torque_l = 0
     torque_r = 0
 
     if CC.enabled:
-      # Read these from the joystick
-      # TODO: this isn't acceleration, okay?
-      speed_desired = CC.actuators.accel / 5.
-      speed_diff_desired = -CC.actuators.torque / 2.
+      v_setpoint = (CC.actuators.accel / 4.0) * self.params.MAX_SPEED
+      w_setpoint = (-1 if self.params.FLIP_Y else 1) * CC.actuators.torque * self.params.MAX_TURN
 
-      speed_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
-      speed_error = speed_desired - speed_measured
+      user_wants_to_move = (abs(w_setpoint) > 0.01 or abs(v_setpoint) > 0.01)
+      robot_is_stopped = (abs(v_setpoint) < 0.05 and abs(w_setpoint) < 0.05)
 
-      torque = self.wheeled_speed_pid.update(speed_error, freeze_integrator=False)
+      if not user_wants_to_move and robot_is_stopped:
+        self.v_setpoint = 0
+        self.w_setpoint = 0
+        self.v_pid.reset()
+        self.w_pid.reset()
 
-      speed_diff_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl - CS.out.wheelSpeeds.fr)
-      turn_error = speed_diff_measured - speed_diff_desired
-      freeze_integrator = ((turn_error < 0 and self.turn_pid.error_integral <= -MAX_TURN_INTEGRATOR) or
-                           (turn_error > 0 and self.turn_pid.error_integral >= MAX_TURN_INTEGRATOR))
-      torque_diff = self.turn_pid.update(turn_error, freeze_integrator=freeze_integrator)
+      v_measured = self.params.SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
 
-      # Combine 2 PIDs outputs
-      torque_r = torque + torque_diff
-      torque_l = torque - torque_diff
+      # remove wind down on left/right
+      if abs(w_setpoint) < 0.05:
+        self.w_setpoint =0
+        self.w_pid.reset()
 
-      # Torque rate limits
-      self.torque_r_filtered = np.clip(self.deadband_filter(torque_r, 10),
-                                       self.torque_r_filtered - MAX_TORQUE_RATE,
-                                       self.torque_r_filtered + MAX_TORQUE_RATE)
-      self.torque_l_filtered = np.clip(self.deadband_filter(torque_l, 10),
-                                       self.torque_l_filtered - MAX_TORQUE_RATE,
-                                       self.torque_l_filtered + MAX_TORQUE_RATE)
-      torque_r = int(np.clip(self.torque_r_filtered, -MAX_TORQUE, MAX_TORQUE))
-      torque_l = int(np.clip(self.torque_l_filtered, -MAX_TORQUE, MAX_TORQUE))
+      v_measured = self.params.SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
+      v_error = v_setpoint - v_measured
+      freeze_v_integrator = ((v_error < 0 and self.v_pid.error_integral <= -self.params.MAX_POS_INTEGRATOR) or
+                            (v_error > 0 and self.v_pid.error_integral >= self.params.MAX_POS_INTEGRATOR))
+      v_torque = self.v_pid.update(v_error, freeze_integrator=freeze_v_integrator)
+
+      w_measured = self.params.SPEED_FROM_RPM * -(CS.out.wheelSpeeds.fl - CS.out.wheelSpeeds.fr)
+      w_error = w_setpoint - w_measured
+      freeze_w_integrator = ((w_error < 0 and self.w_pid.error_integral <= -self.params.MAX_POS_INTEGRATOR) or
+                            (w_error > 0 and self.w_pid.error_integral >= self.params.MAX_POS_INTEGRATOR))
+      w_torque = self.w_pid.update(w_error, freeze_integrator=freeze_w_integrator)
+
+      torque_r = v_torque + w_torque
+      torque_l = v_torque - w_torque
+
+      self.torque_r_filtered = np.clip(torque_r,
+                                       self.torque_r_filtered - self.params.MAX_TORQUE_RATE,
+                                       self.torque_r_filtered + self.params.MAX_TORQUE_RATE)
+      self.torque_l_filtered = np.clip(torque_l,
+                                       self.torque_l_filtered - self.params.MAX_TORQUE_RATE,
+                                       self.torque_l_filtered + self.params.MAX_TORQUE_RATE)
+      torque_r = int(np.clip(self.torque_r_filtered, -self.params.MAX_TORQUE, self.params.MAX_TORQUE))
+      torque_l = int(np.clip(self.torque_l_filtered, -self.params.MAX_TORQUE, self.params.MAX_TORQUE))
 
     can_sends = []
-    can_sends.append(bodycan.create_control(self.packer, torque_l, torque_r))
+    can_sends.append(bodycan.create_control(self.packer, self.params.CONTROL_BUS, torque_l, torque_r))
 
     new_actuators = CC.actuators.as_builder()
     new_actuators.accel = torque_l

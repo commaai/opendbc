@@ -5,26 +5,55 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
-SPEED_FROM_RPM = 0.008587
-
-
-class CarControllerParams:
-  ANGLE_DELTA_BP = [0., 5., 15.]
-  ANGLE_DELTA_V = [5., .8, .15]     # windup limit
-  ANGLE_DELTA_VU = [5., 3.5, 0.4]   # unwind limit
-  LKAS_MAX_TORQUE = 1               # A value of 1 is easy to overpower
-  STEER_THRESHOLD = 1.0
-
-  def __init__(self, CP):
-    pass
-
-
 class CAR(Platforms):
-  COMMA_BODY = PlatformConfig(
+  COMMA_BODY_V1 = PlatformConfig(
     [CarDocs("comma body", package="All", video="https://youtu.be/VT-i3yRsX2s?t=2736")],
     CarSpecs(mass=9, wheelbase=0.406, steerRatio=0.5, centerToFrontRatio=0.44),
     {Bus.main: 'comma_body'},
   )
+  COMMA_BODY_V2 = PlatformConfig(
+    [CarDocs("comma body", package="All")],
+    CarSpecs(mass=9, wheelbase=0.406, steerRatio=0.5, centerToFrontRatio=0.44),
+    {Bus.main: 'comma_body'},
+  )
+
+
+class CarControllerParams:
+  def __init__(self, CP):
+    # speed = RPM * (pi * diameter (~6.5 inches) / 60)
+    self.SPEED_FROM_RPM = 0.008644
+
+    self.MAX_SPEED = 1 # m/s
+    self.MAX_TURN = 1 # m/s
+    self.MAX_POS_INTEGRATOR = 1
+
+    # body v1 is torque control, body v2 is speed control
+    if CP.carFingerprint in CAR.COMMA_BODY_V1:
+      self.SPEED_FROM_RPM = self.SPEED_FROM_RPM # v1 firmware RPM is unscaled
+      self.CONTROL_BUS = 0
+      self.MAX_TORQUE = 700
+      self.MAX_TORQUE_RATE = 70
+      self.FLIP_Y = True # flip sign of differential wheel speed
+      self.v_pid_settings = {
+        "k_p": 0.6 * self.MAX_TORQUE_RATE,
+        "k_i": 0.6 * self.MAX_TORQUE_RATE,
+        "k_d": 0.0 * self.MAX_TORQUE_RATE,
+      }
+      self.w_pid_settings = {
+          "k_p": [[0, self.MAX_SPEED], [0.6 * self.MAX_TORQUE_RATE, 0.1 * self.MAX_TORQUE_RATE]],
+          "k_i": [[0, self.MAX_SPEED], [0.6 * self.MAX_TORQUE_RATE, 0.1 * self.MAX_TORQUE_RATE]],
+          "k_d": [[0, self.MAX_SPEED], [0.0 * self.MAX_TORQUE_RATE, 0.0 * self.MAX_TORQUE_RATE]],
+      }
+    elif CP.carFingerprint in CAR.COMMA_BODY_V2:
+      self.CONTROL_BUS = 2
+      self.MAX_TORQUE = 1000
+      self.MAX_TORQUE_RATE = 250
+      self.FLIP_Y = False
+      self.v_pid_settings = self.w_pid_settings = {
+        "k_p": 1.27 * self.MAX_TORQUE_RATE,
+        "k_i": 1.26 * self.MAX_TORQUE_RATE,
+        "k_d": 0.12 * self.MAX_TORQUE_RATE,
+      }
 
 
 FW_QUERY_CONFIG = FwQueryConfig(

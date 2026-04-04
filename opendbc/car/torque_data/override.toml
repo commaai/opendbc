@@ -38,7 +38,8 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 ###
 
 # No steering wheel
-"COMMA_BODY" = [nan, 1000, nan]
+"COMMA_BODY_V1" = [nan, 1000, nan]
+"COMMA_BODY_V2" = [nan, 1000, nan]
 
 # Totally new cars
 "RAM_1500_5TH_GEN" = [2.0, 2.0, 0.05]
