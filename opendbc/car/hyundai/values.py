@@ -66,6 +66,8 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_LKA_STEER_MSG_ALT = 128
   FCEV_GAS = 256
   ALT_LIMITS_2 = 512
+
+  # opt-in skips SCC12 checksum validation on legacy platforms, some platforms may alternate checksum constants (14/16)
   CAN_LEGACY_SCC12_SKIP_CHECKSUM = 1024
 
 
