@@ -2,7 +2,8 @@ import re
 from dataclasses import dataclass, field
 from enum import IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds, ACCELERATION_DUE_TO_GRAVITY
+from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
@@ -10,10 +11,28 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
 
+# Add extra tolerance for average banked road since safety doesn't have the roll
+AVERAGE_ROAD_ROLL = 0.06  # ~0 degrees, 0% superelevation. higher actual roll lowers lateral acceleration (it's 0 for HKG to remove margin)
+
 
 class CarControllerParams:
   ACCEL_MIN = -3.5 # m/s
   ACCEL_MAX = 2.0 # m/s
+
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    # Steering angle limits based on observed stock ADAS behavior:
+    # - LKAS max requested angle is 176.7°, but no fault occurs if higher values are requested.
+    # - LFA max stock value is 119.9°.
+    # The ADAS ECU clamps LKAS commands above 176.7° down to 176.7°,
+    # and clamps LFA commands above 119.9° down to 119.9°.
+    360,  # degrees (must match safety max_angle / angle_deg_to_can)
+    # HKG uses a vehicle model instead, check carcontroller.py for details
+    ([], []),
+    ([], []),
+    MAX_LATERAL_ACCEL=(ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)),  # ~3.6 m/s^2
+    MAX_LATERAL_JERK=(3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)),  # ~3.6 m/s^3,
+    MAX_ANGLE_RATE=5  # comfort rate limit for angle commands, in degrees per frame.
+  )
 
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
@@ -66,6 +85,7 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_LKA_STEER_MSG_ALT = 128
   FCEV_GAS = 256
   ALT_LIMITS_2 = 512
+  CANFD_ANGLE_STEERING = 1024
 
 
 # Hyundai/Kia/Genesis SCC (Smart Cruise Control) and steering architecture:
@@ -90,7 +110,7 @@ class HyundaiSafetyFlags(IntFlag):
 #     request (0x7F2822 'conditions not correct') — longitudinal not available.
 
 class HyundaiFlags(IntFlag):
-  # Dynamic Flags
+  # --- Dynamic Flags ---
 
   # Default assumption: all cars use LFA (ADAS) steering from the camera (HDA1).
   # CANFD_LKA_STEER_MSG/CANFD_LKA_STEER_MSG_ALT cars typically have both LKA (camera) and LFA (ADAS) steering messages,
@@ -110,9 +130,10 @@ class HyundaiFlags(IntFlag):
 
   # these cars use a different gas signal
   HYBRID = 2 ** 10
-  EV = 2 ** 11
 
-  # Static flags
+  # --- Static flags ---
+
+  EV = 2 ** 11
 
   # If 0x500 is present on bus 1 it probably has a Mando radar outputting radar points.
   # If no points are outputted by default it might be possible to turn it on using  selfdrive/debug/hyundai_enable_radar_points.py
@@ -146,6 +167,9 @@ class HyundaiFlags(IntFlag):
   FCEV = 2 ** 25
 
   ALT_LIMITS_2 = 2 ** 26
+
+  # These cars use angle-based lateral control (ADAS_StrAnglReqVal and ADAS_ACIAnglTqRedcGainVal)
+  CANFD_ANGLE_STEERING = 2 ** 27
 
 
 @dataclass
@@ -541,6 +565,11 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=2055, wheelbase=2.9, steerRatio=16, tireStiffnessFactor=0.65),
     flags=HyundaiFlags.EV,
+  )
+  KIA_EV6_2025 = HyundaiCanFDPlatformConfig(
+    [HyundaiCarDocs("Kia EV6 (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_p]))],
+    KIA_EV6.specs,
+    flags=HyundaiFlags.EV | HyundaiFlags.CANFD_ANGLE_STEERING,
   )
   KIA_CARNIVAL_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
