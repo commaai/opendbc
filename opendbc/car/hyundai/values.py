@@ -67,6 +67,9 @@ class HyundaiSafetyFlags(IntFlag):
   FCEV_GAS = 256
   ALT_LIMITS_2 = 512
 
+  # opt-in skips SCC12 checksum validation on legacy platforms, some platforms may alternate checksum constants (14/16)
+  CAN_LEGACY_SCC12_SKIP_CHECKSUM = 1024
+
 
 # Hyundai/Kia/Genesis SCC (Smart Cruise Control) and steering architecture:
 #
@@ -473,11 +476,10 @@ class CAR(Platforms):
     CarSpecs(mass=3558 * CV.LB_TO_KG, wheelbase=2.8, steerRatio=13.75, tireStiffnessFactor=0.5),
     flags=HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.TCU_GEARS,
   )
-  # TODO: may support adjacent years. may have a non-zero minimum steering speed
   KIA_OPTIMA_H = HyundaiPlatformConfig(
-    [HyundaiCarDocs("Kia Optima Hybrid 2017", "Advanced Smart Cruise Control", car_parts=CarParts.common([CarHarness.hyundai_c]))],
+    [HyundaiCarDocs("Kia Optima Hybrid 2017-18", "Advanced Smart Cruise Control", car_parts=CarParts.common([CarHarness.hyundai_c]))],
     CarSpecs(mass=3558 * CV.LB_TO_KG, wheelbase=2.8, steerRatio=13.75, tireStiffnessFactor=0.5),
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.LEGACY,
+    flags=HyundaiFlags.HYBRID | HyundaiFlags.LEGACY | HyundaiFlags.MIN_STEER_32_MPH,
   )
   KIA_OPTIMA_H_G4_FL = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Optima Hybrid 2019", car_parts=CarParts.common([CarHarness.hyundai_h]))],
