@@ -78,12 +78,13 @@ def create_lkas11(packer, frame, CP, apply_torque, steer_req,
     # Genesis and Optima fault when forwarding while engaged
     values["CF_Lkas_LdwsActivemode"] = 2
 
-  elif CP.carFingerprint == CAR.KIA_OPTIMA_H:
-    # Optima Hybrid needs to send these to keep MDPS happy
+  elif CP.carFingerprint in (CAR.KIA_OPTIMA_H, CAR.KIA_OPTIMA_H_G4_FL):
+    # Mirror stock LKAS11 behavior while steering on Optima Hybrid platforms.
+    # Stock steering uses LdwsActivemode=2, LdwsOpt_USM=3, SysState=3 and does not raise SysWarning.
     values["CF_Lkas_LdwsActivemode"] = 2
     values["CF_Lkas_LdwsOpt_USM"] = 3
-    values["CF_Lkas_LdwsSysState"] = 3 if enabled else 1
-    values["CF_Lkas_SysWarning"] = 4 if sys_warning else 0
+    values["CF_Lkas_LdwsSysState"] = 3 if steer_req else 1
+    values["CF_Lkas_SysWarning"] = 0
 
   dat = packer.make_can_msg("LKAS11", 0, values)[1]
 

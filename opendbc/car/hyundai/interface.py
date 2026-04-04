@@ -151,7 +151,7 @@ class CarInterface(CarInterfaceBase):
     # Dashcam cars are missing a test route, or otherwise need validation
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
     if candidate in (CAR.KIA_OPTIMA_H,):
-      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAN_LEGACY_SCC12_ALT_CHECKSUM.value
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAN_LEGACY_SCC12_SKIP_CHECKSUM.value
 
     return ret
 

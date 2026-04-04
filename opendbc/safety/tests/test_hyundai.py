@@ -192,11 +192,12 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
     return self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum)
 
 
-class TestHyundaiLegacySafetyHEVSCC12AltChecksum(TestHyundaiLegacySafetyHEV):
+class TestHyundaiLegacySafetyHEVSCC12SkipChecksum(TestHyundaiLegacySafetyHEV):
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, HyundaiSafetyFlags.HYBRID_GAS | HyundaiSafetyFlags.CAN_LEGACY_SCC12_ALT_CHECKSUM)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy,
+                                 HyundaiSafetyFlags.HYBRID_GAS | HyundaiSafetyFlags.CAN_LEGACY_SCC12_SKIP_CHECKSUM)
     self.safety.init_tests()
 
   def _pcm_status_msg(self, enable):

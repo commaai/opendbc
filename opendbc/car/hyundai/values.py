@@ -66,7 +66,7 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_LKA_STEER_MSG_ALT = 128
   FCEV_GAS = 256
   ALT_LIMITS_2 = 512
-  CAN_LEGACY_SCC12_ALT_CHECKSUM = 1024
+  CAN_LEGACY_SCC12_SKIP_CHECKSUM = 1024
 
 
 # Hyundai/Kia/Genesis SCC (Smart Cruise Control) and steering architecture:
