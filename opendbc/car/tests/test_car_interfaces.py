@@ -134,14 +134,18 @@ def _run_car_interface_test(car_name: str, data):
 
 class TestCarInterfaces(unittest.TestCase):
   def test_car_interfaces(self):
+
+    def make_run_case(car_name):
+      @settings(max_examples=MAX_EXAMPLES, deadline=None,
+                phases=(Phase.reuse, Phase.generate, Phase.shrink))
+      @given(data=st.data())
+      def run_case(data):
+        _run_car_interface_test(car_name, data)
+      return run_case
+
     for car_name in sorted(PLATFORMS):
       with self.subTest(car_model=car_name):
-        @settings(max_examples=MAX_EXAMPLES, deadline=None,
-                  phases=(Phase.reuse, Phase.generate, Phase.shrink))
-        @given(data=st.data())
-        def run_case(data, car_name=car_name):
-          _run_car_interface_test(car_name, data)
-
+        run_case = make_run_case(car_name)
         run_case()
 
   def test_interface_attrs(self):
