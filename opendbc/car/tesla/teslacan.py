@@ -29,15 +29,18 @@ class TeslaCAN:
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, active):
+  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, a_ego, active):
     # DAS_setSpeed is theorized to just be a signal for DI to determine if it should actuate accelMin or accelMax
+    accel = accel if active else a_ego
+    accel = float(np.clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+
     set_speed = v_ego + accel * 0.7  # TODO: 0.7 may not be important
     set_speed = min(max(set_speed * CV.MS_TO_KPH, 0), 400)  # signal max is 409.4
 
     # while braking, accel max is positive and vice versa. it has been seen changing based on speed.
     # it may be a comfort limit in case setSpeed changes rapidly, not sure how this is actually used
-    accel_min_inactive = np.interp(v_ego, [5, 35], [-1.56, -0.8])
-    accel_max_inactive = np.interp(v_ego, [0, 35], [2.0, 0.64])
+    accel_min_inactive = float(np.interp(v_ego, [5, 35], [-1.56, -0.8]))
+    accel_max_inactive = float(np.interp(v_ego, [0, 35], [2.0, 0.64]))
 
     accel_min = accel if accel <= 0 else accel_min_inactive
     accel_max = accel if accel > 0 else accel_max_inactive
