@@ -282,9 +282,17 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
         violation = true;
       }
 
+      // Tesla stock ACC from DAS always fills out signals as if it was actuating even while disabled.
+      // DI is assumed to properly do state management.
+
       // Don't allow any acceleration limits above the safety limits
-      violation |= longitudinal_accel_checks(raw_accel_max, TESLA_LONG_LIMITS);
-      violation |= longitudinal_accel_checks(raw_accel_min, TESLA_LONG_LIMITS);
+      if (!safety_max_limit_check(raw_accel_max, TESLA_LONG_LIMITS.max_accel, TESLA_LONG_LIMITS.min_accel)) {
+        violation = true;
+      }
+
+      if (!safety_max_limit_check(raw_accel_min, TESLA_LONG_LIMITS.max_accel, TESLA_LONG_LIMITS.min_accel)) {
+        violation = true;
+      }
     } else {
       // Can only send cancel longitudinal messages when not controlling longitudinal
       if (acc_state != 13) {  // ACC_CANCEL_GENERIC_SILENT
