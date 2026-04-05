@@ -101,6 +101,7 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "JEEP_CHEROKEE_5TH_GEN" = [1.5, 1.5, 0.15]
 "ACURA_MDX_4G" = [1.4, 1.4, 0.17]
 "ACURA_RDX_3G_MMR" = [1.5, 1.5, 0.16]
+"ACURA_ADX" = [2.9, 2.9, 0.30]
 
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]
