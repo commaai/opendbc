@@ -21,7 +21,7 @@ class TestTeslaFingerprint:
         elif car_model == CAR.TESLA_MODEL_Y:
           # Model Y: FSD 14 FW is Y4x version >= 003.04
           prefix, _, ver = version.partition(b'.')
-          y4_003 = prefix.startswith(b'Y4') and prefix.endswith(b'003')
+          y4_003 = prefix.startswith(b'Y4') and prefix.endswith(b'003')  # Y4=HW4, 003=version series (002 is never FSD 14)
           high_version = y4_003 and int(ver.split(b'.')[0]) >= 4
           assert is_fsd_14 == high_version, f"{fw}"
 
