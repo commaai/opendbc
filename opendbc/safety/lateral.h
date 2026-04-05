@@ -305,6 +305,11 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   bool violation = false;
 
   if (controls_allowed && steer_control_enabled) {
+    // *** ISO lateral accel limit ***
+    const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
+    const float max_angle = get_angle_from_curvature(max_curvature, curvature_factor, params);
+    const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
+
     // *** ISO lateral jerk limit ***
     // calculate maximum angle rate per second
     const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
@@ -314,17 +319,12 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     const float max_angle_delta = max_angle_rate_sec / (float)limits.frequency;
     const int max_angle_delta_can = (max_angle_delta * limits.angle_deg_to_can) + 1.;
 
-    // NOTE: symmetric up and down limits
-    const int highest_desired_angle = desired_angle_last + max_angle_delta_can;
-    const int lowest_desired_angle = desired_angle_last - max_angle_delta_can;
+    // NOTE: symmetric up and down limits (allowing relaxation when lat accel limit conflicts)
+    const int highest_desired_angle = SAFETY_MAX((desired_angle_last + max_angle_delta_can), -max_angle_can);
+    const int lowest_desired_angle = SAFETY_MIN((desired_angle_last - max_angle_delta_can), max_angle_can);
 
+    // Apply Limit Checks
     violation |= safety_max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
-
-    // *** ISO lateral accel limit ***
-    const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
-    const float max_angle = get_angle_from_curvature(max_curvature, curvature_factor, params);
-    const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
-
     violation |= safety_max_limit_check(desired_angle, max_angle_can, -max_angle_can);
 
     // *** angle real time rate limit check ***
