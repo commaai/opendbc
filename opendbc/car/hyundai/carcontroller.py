@@ -17,10 +17,10 @@ MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
-# MDPS rejects LKAS steering commands below ~32 MPH after ~410ms of continuous steer request
+# MDPS rejects LKAS steering commands below ~32 MPH after ~50ms of continuous steer request (fast fault mode)
 # Toggle steer request off before the timeout to reset the MDPS fault counter
 MAX_LOW_SPEED = 32 * CV.MPH_TO_MS
-MAX_LOW_SPEED_FRAMES = 35
+MAX_LOW_SPEED_FRAMES = 3
 MAX_LOW_SPEED_CONSECUTIVE_FRAMES = 2
 
 
