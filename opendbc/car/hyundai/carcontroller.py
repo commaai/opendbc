@@ -17,12 +17,6 @@ MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
-# MDPS rejects LKAS steering commands below ~32 MPH after ~410ms of continuous steer request
-# Toggle steer request off before the timeout to reset the MDPS fault counter
-MAX_LOW_SPEED = 32 * CV.MPH_TO_MS
-MAX_LOW_SPEED_FRAMES = 35
-MAX_LOW_SPEED_CONSECUTIVE_FRAMES = 2
-
 
 def process_hud_alert(enabled, fingerprint, hud_control):
   sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
@@ -55,7 +49,6 @@ class CarController(CarControllerBase):
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
-    self.low_speed_limit_counter = 0
 
     self.accel_last = 0
     self.apply_torque_last = 0
@@ -74,12 +67,6 @@ class CarController(CarControllerBase):
     self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
                                                                        self.angle_limit_counter, MAX_ANGLE_FRAMES,
                                                                        MAX_ANGLE_CONSECUTIVE_FRAMES)
-
-    # low speed MDPS fault prevention (KIA_OPTIMA_H only for now, may be extended to other platforms with MIN_STEER_32_MPH)
-    if self.CP.carFingerprint == CAR.KIA_OPTIMA_H:
-      self.low_speed_limit_counter, apply_steer_req = common_fault_avoidance(CS.out.vEgo < MAX_LOW_SPEED, apply_steer_req,
-                                                                             self.low_speed_limit_counter, MAX_LOW_SPEED_FRAMES,
-                                                                             MAX_LOW_SPEED_CONSECUTIVE_FRAMES)
 
     if not CC.latActive:
       apply_torque = 0
