@@ -600,7 +600,7 @@ class CAR(Platforms):
   GENESIS_G80_2ND_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Genesis G80 (3.3T Sport Prestige Trim, with HDA I) 2022", "Highway Driving Assist I", car_parts=CarParts.common([CarHarness.hyundai_m]))],
     CarSpecs(mass=2060, wheelbase=3.00, steerRatio=13.0),
-    flags=HyundaiFlags.RADAR_SCC,
+    flags=HyundaiFlags.CANFD_RADAR_SCC,
   )
   GENESIS_G80_2ND_GEN_FL = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Genesis G80 (2.5T Advanced Trim, with HDA II) 2024", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_p]))],
