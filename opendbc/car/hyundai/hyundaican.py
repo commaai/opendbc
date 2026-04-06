@@ -78,7 +78,7 @@ def create_lkas11(packer, frame, CP, apply_torque, steer_req,
     # Genesis and Optima fault when forwarding while engaged
     values["CF_Lkas_LdwsActivemode"] = 2
 
-  elif CP.carFingerprint in (CAR.KIA_OPTIMA_H, CAR.KIA_OPTIMA_H_G4_FL):
+  elif CP.carFingerprint == CAR.KIA_OPTIMA_H:
     # Optima Hybrid needs to send these to keep MDPS happy
     values["CF_Lkas_LdwsActivemode"] = 2
     values["CF_Lkas_LdwsOpt_USM"] = 3
