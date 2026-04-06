@@ -368,6 +368,7 @@ struct CarControl {
     # longitudinal commands
     accel @4: Float32;  # m/s^2
     longControlState @5: LongControlState;
+    maxPlannedSpeed @9: Float32;  # m/s, max desired speed over the current planning horizon
 
     # these are only for logging the actual values sent to the car over CAN
     gas @0: Float32;   # [0.0, 1.0]
