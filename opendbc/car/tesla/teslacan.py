@@ -45,8 +45,9 @@ class TeslaCAN:
     accel_min = accel if accel <= 0 else accel_min_inactive
     accel_max = accel if accel > 0 else accel_max_inactive
 
-    # Scale jerk with accel error to reach targets fast without overshooting
-    jerk = float(np.clip(abs(accel - a_ego) * 0.7, 0.5, CarControllerParams.JERK_LIMIT_MAX))
+    # Scale jerk with sqrt of accel error to reach targets fast without overshooting.
+    # Reaches target in finite time: t = 2 * sqrt(error) / K
+    jerk = float(np.clip(4.0 * np.sqrt(abs(accel - a_ego)), 0.5, CarControllerParams.JERK_LIMIT_MAX))
 
     values = {
       "DAS_setSpeed": set_speed,
