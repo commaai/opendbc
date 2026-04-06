@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, structs
@@ -8,6 +9,7 @@ from opendbc.car.volkswagen import mlbcan, mqbcan, pqcan
 from opendbc.car.volkswagen.values import CanBus, CarControllerParams, VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
+LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
 class HCAMitigation:
@@ -34,106 +36,126 @@ class HCAMitigation:
 
 class MQBStandstillManager:
   """
-  Extended standstill for MQB w/ ACC type 1
+  Extended standstill for MQB w/ ACC type 1.
 
   Normally brake is commanded by the TSK. During a stopping procedure the ESP handles brake autonomously.
   If we exit the stopping procedure at the perfect moment, the ESP will hold indefinitely without complaining.
 
-  One side effect of exiting the stopping procedure early is that we are prone to rollback on very steep hills.
-  To avoid rolling back, we use ACC_06 to build engine torque while simultaneously using ACC_07 to hold the brake.
-  If the engine is producing enough torque to prevent rollback the ESP will happily cycle its timer when we ask it to.
-  If we must, we can also use this strategy on flat ground if the other (better) strategy is unavailable.
+  It does get slightly more complicated than that because we must manually prevent rollback.
   """
 
-  HOLD_MAX_FRAMES = 50             # frames to hold before disabling long control to avoid a fault
-  HOLD_RELEASE_TOTAL_FRAMES = 20   # total time allotted for progressive hill-release pulses
+  BRAKE_TORQUE_RAMP_RATE = 2800.0     # Nm/s
+  ASSUMED_WHEEL_RADIUS = 0.328        # m, typical MQB tire rolling radius
+  GRAVITY = 9.81                      # m/s^2
+  WEGIMPULSE_STILLNESS_FRAMES = 10    # frames of no wheel tick change before assuming standstill
 
-  def __init__(self):
-    self.esp_hold_frames = 0
+  def __init__(self, vehicle_mass: float = 1540.0):
+    self.vehicle_mass = vehicle_mass
     self.can_stop_forever = False
-    self.rollback_protection_active = False
-    self.hold_timer_can_reset = False
+    self.rollback_detected = False
+    self.stop_commit_active = False
+    self.start_commit_active = False
+    self.frames_since_wegimpulse_change = 0
+    self.prev_sum_wegimpulse: int | None = None
 
-  def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool
-             ) -> tuple[bool, float, bool, bool, bool | None, bool | None]:
-    esp_starting_override: bool | None = None
-    esp_stopping_override: bool | None = None
+  def get_theoretical_safe_speed(self, grade_pct: float, v_ego: float) -> float:
+    # Because brake torque is based off a jerk-limited speed target even at standstill, the TSK may
+    # not be able to build torque fast enough to prevent rollback when the car is moving slowly. If
+    # the car is moving fast enough, we can rely on momentum to prevent rollback while the TSK is
+    # building brake torque. Below this speed we lose our momentum buffer and risk rollback, so we
+    # must force the car to stop prematurely. Higher grades require a higher minimum safe speed.
+    if grade_pct <= 0 or self.vehicle_mass <= 0:
+      return 0.0
 
-    if CS.esp_hold_confirmation:
-      self.esp_hold_frames += 1
+    sin_theta = grade_pct / math.sqrt(grade_pct ** 2 + 10000.0)
+    grade_accel = self.GRAVITY * sin_theta
+    brake_decel_build_rate = self.BRAKE_TORQUE_RAMP_RATE / (self.vehicle_mass * self.ASSUMED_WHEEL_RADIUS)
+
+    return 1.5 * grade_accel ** 2 / brake_decel_build_rate
+
+  def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool,
+             max_planned_speed: float = 0.0) -> tuple[bool, float, bool, bool, "mqbcan.ESPOverride | None"]:
+    esp_override: mqbcan.ESPOverride | None = None
+    theoretical_safe_stop_speed = self.get_theoretical_safe_speed(CS.grade, CS.out.vEgo)
+    can_leave_stop = max_planned_speed > theoretical_safe_stop_speed
+    hill_launch_accel = 0.2 * CS.grade - 1
+
     if CS.rolling_backward:
-      self.rollback_protection_active = True
+      self.rollback_detected = True
     elif CS.rolling_forward:
-      self.rollback_protection_active = False
+      self.rollback_detected = False
+
+    if CS.sum_wegimpulse != self.prev_sum_wegimpulse:
+      self.frames_since_wegimpulse_change = 0
+    else:
+      self.frames_since_wegimpulse_change += 1
+    self.prev_sum_wegimpulse = CS.sum_wegimpulse
+    # this is more sensitive than CS.out.standstill so we can exit before the hold confirmation fires
+    # vEgo lags behind the actual impulse signals and is too delayed for us to use reliably here
+    at_standstill = self.frames_since_wegimpulse_change >= self.WEGIMPULSE_STILLNESS_FRAMES
 
     # acc type 1 is sensitive to control signals when brake is pressed (when preEnabled)
     if CS.out.brakePressed:
       long_active = False
 
-    # avoid a cruise fault if a hold is confirmed for too long and cannot be cycled
-    if self.esp_hold_frames > self.HOLD_MAX_FRAMES:
-      long_active = False
-
-    # rollback prevention. on it's own, the TSK
-    # - won't command enough accel to move forward on a hill when starting
-    # - won't command enough brake to hold the car when stopping
-    desired_launch_accel = 0.2 * CS.grade - 1
-    if long_active and accel > 0 and CS.out.vEgo < 0.25:
-      accel = max(accel, desired_launch_accel)
-    if long_active and self.rollback_protection_active and accel <= 0:
-      accel = -3.5
-
-    # end the stopping procedure right after it starts, before any hold has been confirmed
-    # if a hold is confirmed before we end the stopping procedure we won't be able to hold indefinitely
+    # rollback prevention!
+    # If we drop below our safe speed, we must force the car to stop. We remain stopped until the
+    # vehicle has strong intent to drive away to prevent a scenario where we want to stop but cannot build
+    # brake torque fast enough to prevent rollback.
     if long_active:
-      if CS.esp_stopping:
+      # this only happens if the user preEnables, we must handle it
+      if CS.esp_hold_confirmation:
+        self.start_commit_active = True
+        self.stop_commit_active = False
+      # start commit ends when we exceed safe stop speed
+      elif self.start_commit_active:
+        if CS.out.vEgo > theoretical_safe_stop_speed and not at_standstill:
+          self.start_commit_active = False
+          self.stop_commit_active = False
+      # stop commit ends if we want to drive away
+      elif self.stop_commit_active:
+        if can_leave_stop and accel > 0:
+          self.start_commit_active = True
+          self.stop_commit_active = False
+      # trigger stop commit when necessary
+      elif CS.out.vEgo < theoretical_safe_stop_speed:
+        self.start_commit_active = False
+        self.stop_commit_active = True
+    else:
+      self.start_commit_active = False
+      self.stop_commit_active = False
+
+    # apply acceleration adjustments based on our current rollback prevention state
+    if long_active:
+      if self.stop_commit_active or (self.rollback_detected and accel <= 0):
+        accel = -3.5
+        stopping = True
+        starting = False
+      elif self.start_commit_active or (self.rollback_detected and accel > 0):
+        accel = max(accel, hill_launch_accel, 0.2)
+        stopping = False
+        starting = True
+
+    # the magic sauce for infinite standstill
+    # begin a stopping procedure, then exit to starting state before the car reaches standstill
+    if long_active:
+      # reset if hold is confirmed
+      if CS.esp_hold_confirmation:
+        self.can_stop_forever = False
+      # reset when moving
+      elif CS.out.vEgo > 1 and not CS.esp_stopping:
+        self.can_stop_forever = False
+      # latch into holding state when detected
+      elif CS.esp_stopping or self.can_stop_forever:
         self.can_stop_forever = True
-      if self.esp_hold_frames > 0:
-        self.can_stop_forever = False
-      if CS.out.vEgo > 1.5:
-        self.can_stop_forever = False
-      if CS.grade >= 10: # the car can hold on these grades, but TSK won't command brake fast enough to prevent rollback
-        self.can_stop_forever = False
-      if self.can_stop_forever:
-        esp_starting_override = True
-        esp_stopping_override = False
+        esp_override = mqbcan.ESPOverride.START
+      # trigger stopping state when almost stopped or during a stop commit
+      elif at_standstill or self.stop_commit_active:
+        esp_override = mqbcan.ESPOverride.STOP
     else:
       self.can_stop_forever = False
 
-    # steep uphill: build engine torque via ACC_06 as rollback prevention, ESP braking held via ACC_07
-    if long_active and accel <= 0 and not self.can_stop_forever and (CS.esp_hold_confirmation or CS.out.standstill):
-      # skip torque management for one frame each cycle to avoid check engine light
-      if self.esp_hold_frames > 1:
-        # too much torque and the car moves, too little and the ESP won't cycle its timer
-        # targets 80% of torque needed to hold the car at stop, derived from ESP_15 and some experimentation
-        if CS.grade > 3:
-          hill_accel = 0.045 * CS.grade + 0.0625
-          accel = max(accel, hill_accel)
-        starting = True
-        stopping = False
-      # Near the counter limit, send progressively longer starting pulses:
-      # 1 frame, wait 3, 2 frames, wait 3, 3 frames, wait 3, then hold starting until cutoff.
-      release_phase = self.esp_hold_frames - (self.HOLD_MAX_FRAMES - self.HOLD_RELEASE_TOTAL_FRAMES + 1)
-      is_release_attempt = release_phase >= 0 and release_phase not in (1, 2, 3, 6, 7, 8, 12, 13, 14)
-      esp_starting_override = is_release_attempt
-      esp_stopping_override = not is_release_attempt
-
-    # standstill timer resets under two conditions:
-    # - wheels move while hold is not confirmed
-    if not CS.out.standstill and not CS.esp_hold_confirmation:
-      self.esp_hold_frames = 0
-    # - we drop a hold confirmation after sending a start request
-    esp_is_starting = long_active and (esp_starting_override if esp_starting_override is not None else starting)
-    esp_is_stopping = long_active and (esp_stopping_override if esp_stopping_override is not None else stopping)
-    esp_inactive = not esp_is_starting and not esp_is_stopping
-    if esp_is_starting and CS.esp_hold_confirmation:
-      self.hold_timer_can_reset = True
-    if esp_inactive:
-      self.hold_timer_can_reset = False
-    if long_active and self.hold_timer_can_reset and not CS.esp_hold_confirmation:
-      self.esp_hold_frames = 1 # don't switch hold strategies mid hold, that's jank
-
-    return long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override
+    return long_active, accel, stopping, starting, esp_override
 
 
 class CarController(CarControllerBase):
@@ -154,8 +176,7 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.gra_acc_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
-    self.standstill_manager = MQBStandstillManager()
-    self.distance_button_was_stopped = None
+    self.standstill_manager = MQBStandstillManager(CP.mass)
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -190,29 +211,12 @@ class CarController(CarControllerBase):
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         long_active = CC.longActive
         accel = actuators.accel
-        esp_starting_override = None
-        esp_stopping_override = None
-        starting = CS.out.vEgo < self.CP.vEgoStopping and accel >= 0
-        stopping = CS.out.vEgo < self.CP.vEgoStopping and not starting
-
-        # distance button debug helper, force stop or start when distance button is pressed
-        if self.CCS == mqbcan and CS.distance_button_pressed:
-          if self.distance_button_was_stopped is None:
-            self.distance_button_was_stopped = CS.out.standstill
-          if long_active:
-            if self.distance_button_was_stopped:
-              accel = max(0.3, accel)
-              stopping = False
-              starting = CS.out.vEgo < self.CP.vEgoStopping
-            else:
-              accel = min(-0.3, accel)
-              stopping = CS.out.vEgo < self.CP.vEgoStopping
-              starting = False
-        else:
-          self.distance_button_was_stopped = None
+        esp_override = None
+        stopping = CS.out.vEgo < self.CP.vEgoStopping and actuators.longControlState == LongCtrlState.stopping
+        starting = CS.out.vEgo < self.CP.vEgoStopping and not stopping
 
         if self.CCS == mqbcan and CS.acc_type == 1:
-          long_active, accel, stopping, starting, esp_starting_override, esp_stopping_override = \
+          long_active, accel, stopping, starting, esp_override = \
             self.standstill_manager.update(CS, long_active, accel, stopping, starting)
 
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, long_active)
@@ -220,7 +224,7 @@ class CarController(CarControllerBase):
 
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, long_active, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation,
-                                                           esp_starting_override, esp_stopping_override))
+                                                           esp_override))
 
       #if self.aeb_available:
       #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:
