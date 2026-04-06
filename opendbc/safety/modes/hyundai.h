@@ -121,8 +121,7 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
       }
       chksum += (b % 16U) + (b / 16U);
     }
-
-    chksum = (16U - (chksum % 16U)) % 16U;
+    chksum = (16U - (chksum %  16U)) % 16U;
   }
 
   return chksum;
