@@ -4,7 +4,6 @@ from opendbc.car.body.carcontroller import CarController
 from opendbc.car.body.carstate import CarState
 from opendbc.car.body.values import SPEED_FROM_RPM
 from opendbc.car.interfaces import CarInterfaceBase
-from panda.board.body.v1.flash import update
 
 
 class CarInterface(CarInterfaceBase):
@@ -13,7 +12,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def init(CP, can_recv, can_send, communication_control=None):
-    # run update script to check and update firmware
+    from panda.board.body.v1.flash import update
     update()
 
   @staticmethod
