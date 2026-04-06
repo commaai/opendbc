@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
@@ -15,6 +16,9 @@ class TeslaCAN:
   def __init__(self, CP, packer):
     self.CP = CP
     self.packer = packer
+    self.active_time = time.monotonic()
+    self.active_prev = False
+    self.disabled_accel = 0.0
 
   def create_steering_control(self, angle, enabled):
     # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
@@ -30,10 +34,19 @@ class TeslaCAN:
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
   def create_longitudinal_command(self, acc_state, accel, counter, v_ego, a_ego, active):
-    # DAS_setSpeed is theorized to just be a signal for DI to determine if it should actuate accelMin or accelMax
     accel = accel if active else a_ego
+
+    if not active:
+      self.disabled_accel = accel
+    if active and not self.active_prev:
+      self.active_time = time.monotonic()
+    self.active_prev = active
+
+    accel = np.interp(time.monotonic() - self.active_time, [0, 0.5], [self.disabled_accel, accel])
+
     accel = float(np.clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
 
+    # DAS_setSpeed is theorized to just be a signal for DI to determine if it should actuate accelMin or accelMax
     set_speed = v_ego + accel * 0.7  # TODO: 0.7 may not be important
     set_speed = min(max(set_speed * CV.MS_TO_KPH, 0), 400)  # signal max is 409.4
 
