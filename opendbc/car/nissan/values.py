@@ -68,7 +68,7 @@ class CAR(Platforms):
   # Currently the only known difference between them is the inverted seatbelt signal.
   NISSAN_LEAF_IC = NISSAN_LEAF.override(car_docs=[])
   NISSAN_ROGUE = NissanPlatformConfig(
-    [NissanCarDocs("Nissan Rogue 2018-20", video='https://www.youtube.com/watch?v=DMosH6HAhD0')],
+    [NissanCarDocs("Nissan Rogue 2018-20")],
     NissanCarSpecs(mass=1610, wheelbase=2.705)
   )
   NISSAN_ALTIMA = NissanPlatformConfig(

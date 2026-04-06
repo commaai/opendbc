@@ -127,16 +127,16 @@ class CAR(Platforms):
   )
   FORD_ESCAPE_MK4 = FordPlatformConfig(
     [
-      FordCarDocs("Ford Escape 2020-22", hybrid=True, plug_in_hybrid=True, video='https://www.youtube.com/watch?v=uUGkH6C_EQU'),
-      FordCarDocs("Ford Kuga 2020-23", "Adaptive Cruise Control with Lane Centering", hybrid=True, plug_in_hybrid=True, video='https://www.youtube.com/watch?v=uUGkH6C_EQU'),
+      FordCarDocs("Ford Escape 2020-22", hybrid=True, plug_in_hybrid=True),
+      FordCarDocs("Ford Kuga 2020-23", "Adaptive Cruise Control with Lane Centering", hybrid=True, plug_in_hybrid=True),
     ],
     CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
   )
   FORD_ESCAPE_MK4_5 = FordCANFDPlatformConfig(
     [
-      FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True, setup_video="https://www.youtube.com/watch?v=M6uXf4b2SHM", video='https://www.youtube.com/watch?v=uUGkH6C_EQU'),
-      FordCarDocs("Ford Kuga Hybrid 2024", "All", video='https://www.youtube.com/watch?v=uUGkH6C_EQU'),
-      FordCarDocs("Ford Kuga Plug-in Hybrid 2024", "All", video='https://www.youtube.com/watch?v=uUGkH6C_EQU'),
+      FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True, setup_video="https://www.youtube.com/watch?v=M6uXf4b2SHM"),
+      FordCarDocs("Ford Kuga Hybrid 2024", "All"),
+      FordCarDocs("Ford Kuga Plug-in Hybrid 2024", "All"),
     ],
     CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
   )
@@ -148,7 +148,7 @@ class CAR(Platforms):
     CarSpecs(mass=2050, wheelbase=3.025, steerRatio=16.8),
   )
   FORD_EXPEDITION_MK4 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Expedition 2022-24", "Co-Pilot360 Assist 2.0", hybrid=False, video='https://www.youtube.com/watch?v=uUGkH6C_EQU')],
+    [FordCarDocs("Ford Expedition 2022-24", "Co-Pilot360 Assist 2.0", hybrid=False)],
     CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
   )
   FORD_F_150_MK14 = FordCANFDPlatformConfig(
@@ -165,8 +165,8 @@ class CAR(Platforms):
   )
   FORD_MAVERICK_MK1 = FordPlatformConfig(
     [
-      FordCarDocs("Ford Maverick 2022", "LARIAT Luxury", hybrid=True, video='https://www.youtube.com/watch?v=hQDDrPkAc7g'),
-      FordCarDocs("Ford Maverick 2023-24", "Co-Pilot360 Assist", hybrid=True, video='https://www.youtube.com/watch?v=hQDDrPkAc7g'),
+      FordCarDocs("Ford Maverick 2022", "LARIAT Luxury", hybrid=True),
+      FordCarDocs("Ford Maverick 2023-24", "Co-Pilot360 Assist", hybrid=True),
     ],
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
   )

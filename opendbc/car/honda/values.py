@@ -161,8 +161,8 @@ class CAR(Platforms):
   HONDA_ACCORD = HondaBoschPlatformConfig(
     [
       HondaCarDocs("Honda Accord 2018-22", "All", video="https://www.youtube.com/watch?v=mrUwlj3Mi58", min_steer_speed=3. * CV.MPH_TO_MS),
-      HondaCarDocs("Honda Inspire 2018", "All", min_steer_speed=3. * CV.MPH_TO_MS, video='https://www.youtube.com/watch?v=mrUwlj3Mi58'),
-      HondaCarDocs("Honda Accord Hybrid 2018-22", "All", min_steer_speed=3. * CV.MPH_TO_MS, video='https://www.youtube.com/watch?v=mrUwlj3Mi58'),
+      HondaCarDocs("Honda Inspire 2018", "All", min_steer_speed=3. * CV.MPH_TO_MS),
+      HondaCarDocs("Honda Accord Hybrid 2018-22", "All", min_steer_speed=3. * CV.MPH_TO_MS),
     ],
     # steerRatio: 11.82 is spec end-to-end
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
@@ -171,17 +171,17 @@ class CAR(Platforms):
   )
   HONDA_ACCORD_11G = HondaBoschCANFDPlatformConfig(
     [
-      HondaCarDocs("Honda Accord 2023-25", "All", video='https://www.youtube.com/watch?v=R2Guz8sMwSg'),
+      HondaCarDocs("Honda Accord 2023-25", "All"),
       HondaCarDocs("Honda Accord Hybrid 2023-25", "All", video='https://www.youtube.com/watch?v=lBgYT4MklhE'),
   ],
     CarSpecs(mass=3477 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.0, centerToFrontRatio=0.39),
   )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
-      HondaCarDocs("Honda Civic 2019-21", "All", video="https://www.youtube.com/watch?v=4Iz1Mz5LGF8",
+      HondaCarDocs("Honda Civic 2019-21", "All",
                    footnotes=[Footnote.CIVIC_DIESEL], min_steer_speed=2. * CV.MPH_TO_MS),
-      HondaCarDocs("Honda Civic Hatchback 2017-18", min_steer_speed=12. * CV.MPH_TO_MS, video='https://www.youtube.com/watch?v=4Iz1Mz5LGF8'),
-      HondaCarDocs("Honda Civic Hatchback 2019-21", "All", min_steer_speed=12. * CV.MPH_TO_MS, video='https://www.youtube.com/watch?v=4Iz1Mz5LGF8'),
+      HondaCarDocs("Honda Civic Hatchback 2017-18", min_steer_speed=12. * CV.MPH_TO_MS),
+      HondaCarDocs("Honda Civic Hatchback 2019-21", "All", min_steer_speed=12. * CV.MPH_TO_MS),
     ],
     CarSpecs(mass=1326, wheelbase=2.7, steerRatio=15.38, centerToFrontRatio=0.4),  # steerRatio: 10.93 is end-to-end spec
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
@@ -195,11 +195,11 @@ class CAR(Platforms):
   HONDA_CIVIC_2022 = HondaBoschPlatformConfig(
     [
       HondaCarDocs("Honda Civic 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
-      HondaCarDocs("Honda Civic Hybrid 2025-26", "All", video='https://youtu.be/ytiOT5lcp6Q'),
-      HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
-      HondaCarDocs("Honda Civic Hatchback Hybrid (Europe only) 2023", "All", video='https://youtu.be/ytiOT5lcp6Q'),
+      HondaCarDocs("Honda Civic Hybrid 2025-26", "All"),
+      HondaCarDocs("Honda Civic Hatchback 2022-24", "All"),
+      HondaCarDocs("Honda Civic Hatchback Hybrid (Europe only) 2023", "All"),
       # TODO: Confirm 2024
-      HondaCarDocs("Honda Civic Hatchback Hybrid 2025-26", "All", video='https://youtu.be/ytiOT5lcp6Q'),
+      HondaCarDocs("Honda Civic Hatchback Hybrid 2025-26", "All"),
     ],
     HONDA_CIVIC_BOSCH.specs,
     {Bus.pt: 'honda_bosch_radarless_generated'},
@@ -263,11 +263,11 @@ class CAR(Platforms):
   )
   # mid-model refresh
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
-    [HondaCarDocs("Acura MDX 2025-26", "All except Type S", video='https://www.youtube.com/watch?v=nyTndfkH-QU')],
+    [HondaCarDocs("Acura MDX 2025-26", "All except Type S")],
     CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=16.2),
   )
   HONDA_ODYSSEY_5G_MMR = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda Odyssey 2021-26", "All", min_steer_speed=70. * CV.KPH_TO_MS, video='https://www.youtube.com/watch?v=P1OGK2QG6sY')],
+    [HondaCarDocs("Honda Odyssey 2021-26", "All", min_steer_speed=70. * CV.KPH_TO_MS)],
     CarSpecs(mass=4590 * CV.LB_TO_KG, wheelbase=3.00, steerRatio=19.4, centerToFrontRatio=0.41),
     {Bus.pt: 'acura_rdx_2020_can_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE | HondaFlags.BOSCH_ALT_RADAR,
@@ -325,13 +325,13 @@ class CAR(Platforms):
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
   HONDA_ODYSSEY = HondaNidecPlatformConfig(
-    [HondaCarDocs("Honda Odyssey 2018-20", video='https://www.youtube.com/watch?v=P1OGK2QG6sY')],
+    [HondaCarDocs("Honda Odyssey 2018-20")],
     CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
     radar_dbc_dict('honda_odyssey_exl_2018_generated'),
     flags=HondaFlags.NIDEC_ALT_PCM_ACCEL | HondaFlags.HAS_ALL_DOOR_STATES,
   )
   HONDA_ODYSSEY_TWN = HondaNidecPlatformConfig(
-    [HondaCarDocs("Honda Odyssey (Taiwan) 2018-19", video='https://www.youtube.com/watch?v=P1OGK2QG6sY')],
+    [HondaCarDocs("Honda Odyssey (Taiwan) 2018-19")],
     CarSpecs(mass=1865, wheelbase=2.9, steerRatio=14.35, centerToFrontRatio=0.44, tireStiffnessFactor=0.82),
     radar_dbc_dict('honda_odyssey_twn_2018_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
@@ -344,8 +344,8 @@ class CAR(Platforms):
   )
   HONDA_PILOT = HondaNidecPlatformConfig(
     [
-      HondaCarDocs("Honda Pilot 2016-22", min_steer_speed=12. * CV.MPH_TO_MS, video='https://www.youtube.com/watch?v=GNsILL7eJuU'),
-      HondaCarDocs("Honda Passport 2019-25", "All", min_steer_speed=12. * CV.MPH_TO_MS, video='https://www.youtube.com/watch?v=GNsILL7eJuU'),
+      HondaCarDocs("Honda Pilot 2016-22", min_steer_speed=12. * CV.MPH_TO_MS),
+      HondaCarDocs("Honda Passport 2019-25", "All", min_steer_speed=12. * CV.MPH_TO_MS),
     ],
     HONDA_PILOT_4G.specs,
     radar_dbc_dict('acura_ilx_2016_can_generated'),

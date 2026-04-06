@@ -44,16 +44,16 @@ class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
     [
       # TODO: do we support 2017? It's HW3
-      TeslaCarDocsHW3("Tesla Model 3 (with HW3) 2019-23", video='https://www.youtube.com/watch?v=HclgrjTssYM'),
-      TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024-25", video='https://www.youtube.com/watch?v=HclgrjTssYM'),
+      TeslaCarDocsHW3("Tesla Model 3 (with HW3) 2019-23"),
+      TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024-25"),
     ],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
     {Bus.party: 'tesla_model3_party', Bus.radar: 'tesla_radar_continental_generated'},
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
     [
-      TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-23", video='https://www.youtube.com/watch?v=ljMDHocoxxM'),
-      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024-25", video='https://www.youtube.com/watch?v=ljMDHocoxxM'),
+      TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-23"),
+      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024-25"),
     ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
     {Bus.party: 'tesla_model3_party', Bus.radar: 'tesla_radar_continental_generated'},
