@@ -117,7 +117,7 @@ def reset_body(handle):
   handle.controlWrite(REQUEST_IN, 0xd8, 0, 0, b'', expect_disconnect=True)
 
 
-def update(can_send, can_recv, addr, bus, file, update_url, current_signature):
+def update(can_send, can_recv, addr, bus, file, update_url, current_signature=None):
   if not os.path.exists(file):
     print("local bin is not up-to-date, fetching latest")
     fetch_bin(file, update_url)
