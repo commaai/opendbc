@@ -44,7 +44,7 @@ class MQBStandstillManager:
   It does get slightly more complicated than that because we must manually prevent rollback.
   """
 
-  BRAKE_TORQUE_RAMP_RATE = 2800.0     # Nm/s
+  BRAKE_TORQUE_RAMP_RATE = 2000.0     # Nm/s
   ASSUMED_WHEEL_RADIUS = 0.328        # m, typical MQB tire rolling radius
   GRAVITY = 9.81                      # m/s^2
   WEGIMPULSE_STILLNESS_FRAMES = 10    # frames of no wheel tick change before assuming standstill
