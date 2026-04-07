@@ -52,16 +52,45 @@ def process_hud_alert(enabled, fingerprint, hud_control):
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
 
-def compute_torque_reduction_gain(steering_torque, v_ego_kph, lat_active, last_gain):
+def compute_torque_reduction_gain(steering_torque, v_ego_kph, lat_active, last_gain, steering_error):
   if lat_active:
-    ceiling = np.interp(v_ego_kph, [40, 120], [0.85, 1.0])
-    target = np.interp(abs(steering_torque), [140, 420], [ceiling, 0.19])
+    base_ceiling = np.interp(v_ego_kph, [10, 30], [0.85, 1.0])
+    # Error-based boost reduction gain: At 0 kph, ignore errors under 1.25 deg.
+    error_start = np.interp(v_ego_kph, [0, 20, 40, 120], [1.25, 0.5, 0.3, 0.2])
+    error_mult = np.interp(abs(steering_error), [error_start, error_start*2], [1.0, 2])
+    dynamic_ceiling = min(1.0, base_ceiling * error_mult)
+    target = np.interp(abs(steering_torque), [140, 420], [dynamic_ceiling, 0.19])
   else:
     target = 0.0
   delta = target - last_gain
   rate_dn = np.interp(abs(steering_torque), [0, 300, 700], [0.004, 0.01, 0.04])
   gain = last_gain + max(-rate_dn, min(0.004, delta))
   return round(gain / 0.004) * 0.004
+
+
+def sp_smooth_angle(v_ego_raw: float, apply_angle: float, apply_angle_last: float) -> float:
+  """
+  Smooth the steering angle change based on vehicle speed and an optional smoothing offset.
+
+  This function helps prevent abrupt steering changes by blending the new desired angle (`apply_angle`)
+  with the previously applied angle (`apply_angle_last`). The blend factor (alpha) is dynamically calculated
+  based on the vehicle's current speed using a predefined lookup table.
+
+  Behavior:
+    - At low speeds, the smoothing is strong, keeping the steering more stable.
+    - At higher speeds, the smoothing is relaxed, allowing quicker responses.
+
+  Parameters:
+    v_ego_raw (float): Raw vehicle speed in m/s.
+    apply_angle (float): New target steering angle in degrees.
+    apply_angle_last (float): Previously applied steering angle in degrees.
+
+  Returns:
+    float: Smoothed steering angle.
+  """
+  adjusted_alpha = np.interp(v_ego_raw, CarControllerParams.SMOOTHING_ANGLE_VEGO_MATRIX, CarControllerParams.SMOOTHING_ANGLE_ALPHA_MATRIX)
+  adjusted_alpha_limited = float(min(float(adjusted_alpha), 1.))  # Limit the smoothing factor to 1 if adjusted_alpha is greater than 1
+  return (apply_angle * adjusted_alpha_limited) + (apply_angle_last * (1 - adjusted_alpha_limited))
 
 
 class CarController(CarControllerBase):
@@ -93,6 +122,7 @@ class CarController(CarControllerBase):
 
     # angle control
     if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+      v_ego_raw = CS.out.vEgoRaw
       # desired_angle = round(actuators.steeringAngleDeg, 1)
       desired_angle = actuators.steeringAngleDeg
 
@@ -107,20 +137,22 @@ class CarController(CarControllerBase):
       #   alpha = np.interp(abs(CS.out.vEgoRaw), [0, 2.8, 5.6, 8.3, 11.1, 13.9], [0.15, 0.20, 0.25, 0.35, 0.55, 1.0])
       #   desired_angle = float(desired_angle * alpha + self.apply_angle_last * (1 - alpha))
 
-      if CC.latActive:
-        #print(apply_angle_last, self.apply_angle_last)
-        print(desired_angle, self.angle_steady)
-        deadzone = np.interp(CS.out.vEgo, [10, 15], [3, 0])
-        desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
-        #desired_angle = self.angle_filter.update(desired_angle)
-        #print('after', apply_angle_last)
-        print('after', desired_angle)
-        self.angle_steady = desired_angle
-        #print()
+      # if CC.latActive:
+      #   #print(apply_angle_last, self.apply_angle_last)
+      #   print(desired_angle, self.angle_steady)
+      #   deadzone = np.interp(CS.out.vEgo, [10, 15], [3, 0])
+      #   desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
+      #   #desired_angle = self.angle_filter.update(desired_angle)
+      #   #print('after', apply_angle_last)
+      #   print('after', desired_angle)
+      #   self.angle_steady = desired_angle
+      #   #print()
 
-      self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
-                                                          CS.out.vEgoRaw, CS.out.steeringAngleDeg,
-                                                          CC.latActive, self.params, self.VM)
+      if abs(v_ego_raw) < CarControllerParams.SMOOTHING_ANGLE_MAX_VEGO:
+        desired_angle = sp_smooth_angle(v_ego_raw, desired_angle, self.apply_angle_last)
+
+      self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last, v_ego_raw,
+                                                          CS.out.steeringAngleDeg, CC.latActive, self.params, self.VM)
 
       # apply_torque = self.torque_reduction_gain_controller.update(
       #   CS.out.steeringPressed, CC.latActive, CS.out.vEgoRaw)
@@ -128,8 +160,8 @@ class CarController(CarControllerBase):
       # TODO: max_allowed_torque
       # apply_torque = np.interp(abs(CS.out.steeringTorque), [0, 500], [1.0, 0.2]) if CC.latActive else 0.0
       # apply_torque = rate_limit(apply_torque, self.apply_torque_last, -0.012, 0.002)  # try 0.004, that's stock
-      apply_torque = compute_torque_reduction_gain(CS.out.steeringTorque, CS.out.vEgoRaw * CV.MS_TO_KPH,
-                                                   CC.latActive, self.apply_torque_last)
+      apply_torque = compute_torque_reduction_gain(CS.out.steeringTorque, v_ego_raw * CV.MS_TO_KPH,
+                                                   CC.latActive, self.apply_torque_last, self.apply_angle_last - CS.out.steeringAngleDeg)
       #self.apply_angle_last = apply_angle_last_tmp
       #self.angle_steady = self.apply_angle_last
 
@@ -140,7 +172,7 @@ class CarController(CarControllerBase):
       apply_steer_req = CC.latActive
       if not CC.latActive:
         self.angle_filter.x = CS.out.steeringAngleDeg
-        self.angle_steady = CS.out.steeringAngleDeg
+        # self.angle_steady = CS.out.steeringAngleDeg
         self.apply_angle_last = float(np.clip(CS.out.steeringAngleDeg, -self.params.ANGLE_LIMITS.STEER_ANGLE_MAX, self.params.ANGLE_LIMITS.STEER_ANGLE_MAX))
 
     # steering torque
