@@ -17,6 +17,13 @@ MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
+# On HKG CAN and CANFD non-ALT_BUTTONS, the cancel button (CF_Clu_CruiseSwState / CRUISE_BUTTONS = 4) is actually
+# a pause/resume toggle, not a dedicated cancel. Firing it mid-brake conflicts with the brake-driven factory SCC
+# disengagement and triggers the "SCC Conditions Not Met" alert. Delaying the button send lets factory SCC disengage
+# naturally on brake press (~100 ms), and falls back to actually sending the button if SCC fails to disengage for any
+# other reason.
+CANCEL_BUTTON_DELAY_FRAMES = 10
+
 
 def process_hud_alert(enabled, fingerprint, hud_control):
   sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
@@ -54,6 +61,7 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
+    self.cancel_counter = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -79,6 +87,10 @@ class CarController(CarControllerBase):
     set_speed_in_units = hud_control.setSpeed * (CV.MS_TO_KPH if CS.is_metric else CV.MS_TO_MPH)
 
     can_sends = []
+
+    # Delay the cancel button send so the brake can disengage factory SCC first.
+    # Reset whenever openpilot is no longer requesting cancel.
+    self.cancel_counter = self.cancel_counter + 1 if CC.cruiseControl.cancel else 0
 
     # *** common hyundai stuff ***
 
@@ -128,11 +140,10 @@ class CarController(CarControllerBase):
 
     # Button messages
     if not self.CP.openpilotLongitudinalControl:
-      if CC.cruiseControl.cancel and not CS.out.brakePressed:
-        # Suppress cancel button while braking. The brake already disengages factory SCC,
-        # and on newer CAN models the cancel button (CF_Clu_CruiseSwState=4) acts as a pause/resume button,
-        # and sending it mid-brake produces a "SCC Conditions Not Met" alert on the driver cluster.
-        # Safe on all HKG CAN cars since braking universally disengages SCC within ~100 ms.
+      if CC.cruiseControl.cancel and self.cancel_counter > CANCEL_BUTTON_DELAY_FRAMES:
+        # Delayed cancel: on newer CAN models, CF_Clu_CruiseSwState=4 is a pause/resume toggle (not a true cancel).
+        # Waiting CANCEL_BUTTON_DELAY_FRAMES lets factory SCC disengage naturally on brake press within its ~100 ms
+        # latency, and this branch acts as a fallback if SCC fails to disengage for any other reason.
         can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP))
       elif CC.cruiseControl.resume:
         # send resume at a max freq of 10Hz
@@ -203,10 +214,10 @@ class CarController(CarControllerBase):
           if self.CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS:
             can_sends.append(hyundaicanfd.create_acc_cancel(self.packer, self.CP, self.CAN, CS.cruise_info))
             self.last_button_frame = self.frame
-          elif not CS.out.brakePressed:
-            # CRUISE_BUTTONS=4 is a pause/resume button on non-CANFD_ALT_BUTTONS CANFD cars.
-            # Suppress the pause/resume button while braking. The brake already disengages factory SCC,
-            # and sending the pause/resume button mid-brake produces a "SCC Conditions Not Met" alert on the driver cluster.
+          elif self.cancel_counter > CANCEL_BUTTON_DELAY_FRAMES:
+            # Delayed cancel: CRUISE_BUTTONS=4 is a pause/resume toggle on non-CANFD_ALT_BUTTONS cars.
+            # Waiting CANCEL_BUTTON_DELAY_FRAMES lets factory SCC disengage naturally on brake press within
+            # its ~100 ms latency, and this burst acts as a fallback if SCC fails to disengage for any other reason.
             for _ in range(20):
               can_sends.append(hyundaicanfd.create_buttons(self.packer, self.CP, self.CAN, CS.buttons_counter + 1, Buttons.CANCEL))
             self.last_button_frame = self.frame
