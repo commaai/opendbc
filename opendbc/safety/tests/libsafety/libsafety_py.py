@@ -14,7 +14,6 @@ def _build_libsafety() -> str:
   """Compile libsafety.so to a temp file and return its path."""
   root = str(Path(libsafety_dir).parents[3])
   safety_c = os.path.join(libsafety_dir, "safety.c")
-  safety_os = os.path.join(libsafety_dir, "safety.os")
 
   cflags = [
     '-Wall', '-Wextra', '-Werror', '-nostdlib', '-fno-builtin',
@@ -27,11 +26,14 @@ def _build_libsafety() -> str:
     '-fprofile-arcs', '-ftest-coverage',
   ]
 
-  fd, libsafety_so = tempfile.mkstemp(suffix='.so')
-  os.close(fd)
+  with tempfile.TemporaryDirectory() as tmp:
+    safety_os = os.path.join(tmp, "safety.os")
+    fd, libsafety_so = tempfile.mkstemp(suffix='.so')
+    print(("Compiling libsafety.so to", libsafety_so))
+    os.close(fd)
 
-  subprocess.check_call(['cc', '-fPIC', *cflags, '-I', root, '-c', safety_c, '-o', safety_os])
-  subprocess.check_call(['cc', '-shared', safety_os, '-o', libsafety_so, *ldflags])
+    subprocess.check_call(['cc', '-fPIC', *cflags, '-I', root, '-c', safety_c, '-o', safety_os])
+    subprocess.check_call(['cc', '-shared', safety_os, '-o', libsafety_so, *ldflags])
   return libsafety_so
 
 
