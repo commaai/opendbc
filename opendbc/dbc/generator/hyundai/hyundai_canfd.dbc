@@ -462,12 +462,10 @@ BO_ 442 ADAS_CMD_50_50ms: 24 XXX
  SG_ ADAS_CMD_AlvCnt50Val : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ BCW_Sta : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ BCW_OnOffEquipSta : 28|2@1+ (1,0) [0|3] "" XXX
- SG_ BCW_LtIndSta : 30|1@0+ (1,0) [0|3] "" XXX
- SG_ BCW_RtIndSta : 32|1@1+ (1,0) [0|3] "" XXX
+ SG_ BCW_LtIndSta : 31|2@0+ (1,0) [0|3] "" XXX
+ SG_ BCW_RtIndSta : 32|2@1+ (1,0) [0|3] "" XXX
  SG_ BCW_LtSndWrngSta : 34|2@1+ (1,0) [0|3] "" XXX
  SG_ BCW_RtSndWrngSta : 36|10@1+ (1,0) [0|1023] "" XXX
- SG_ FL_INDICATOR : 46|6@0+ (1,0) [0|1] "" XXX
- SG_ FR_INDICATOR : 54|2@0+ (1,0) [0|3] "" XXX
  SG_ BCW_SnstvtyModRetVal : 56|3@1+ (1,0) [0|7] "" XXX
  SG_ BCW_IndSta : 59|3@1+ (1,0) [0|7] "" XXX
  SG_ BCA_OnOffEquip2Sta : 62|2@1+ (1,0) [0|3] "" XXX
@@ -876,6 +874,8 @@ CM_ SG_ 437 Info_RtLnHdingAnglVal "This signal outputs the heading angle of righ
 CM_ SG_ 437 Info_RtLnCvtrVal "This signal outputs the curvature of right line.";
 CM_ SG_ 437 ID_CIPV "Valid Object = 1 to 255 - ID detected by front camera can vary depending on vehicle environment. - Additional logic would be required to apply this signal for ISG.";
 CM_ SG_ 437 Relative_Velocity "+ : Preceding, - : Oncoming - Velocity detected by front camera can vary depending on vehicle environment. - Additional logic would be required to apply this signal for ISG. - Confirmaiton by Autonomous Driving Engineering Team is required to use ID_C";
+CM_ SG_ 442 BCW_LtIndSta "Left blind-spot indicator. When a vehicle is detected, the BCW light on the side mirror illuminates. When the blinker is also on, the BCW light flashes on both the dash and the mirror to alert the driver.";
+CM_ SG_ 442 BCW_RtIndSta "Right blind-spot indicator. When a vehicle is detected, the BCW light on the side mirror illuminates. When the blinker is also on, the BCW light flashes on both the dash and the mirror to alert the driver.";
 CM_ SG_ 416 SCC_ObjSta "state of in-path object and information of controllable state.";
 CM_ SG_ 480 NEW_SIGNAL_5 "todo: figure out why always set to 1";
 CM_ BO_ 506 "Sent by the camera containing speed limit information. ISLW stands for Intelligent Speed Limit Warning, and ISLA is Intelligent Speed Limit Assist. it also contains road sign information.";
@@ -1115,6 +1115,8 @@ VAL_ 437 Info_LftLnDptSta 0 "No Left Line Departure" 1 "Left Line Departure" 2 "
 VAL_ 437 Info_RtLnQualSta 0 "Very Low Quality" 1 "Low Quality" 2 "High Quality" 3 "Very High Quality" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Error indicator";
 VAL_ 437 Info_RtLnDptSta 0 "No Right Line Departure" 1 "Right Line Departure" 2 "Reserved" 3 "Error Indicator";
 VAL_ 437 Info_RtLnCvtrVal 65534 "Reserved" 65535 "Error indicator";
+VAL_ 442 BCW_LtIndSta 0 "No detection" 1 "Blind-spot warning active" 2 "Blind-spot warning + blinker, flashing" 3 "Reserved";
+VAL_ 442 BCW_RtIndSta 0 "No detection" 1 "Blind-spot warning active" 2 "Blind-spot warning + blinker, flashing" 3 "Reserved";
 VAL_ 463 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume";
 VAL_ 463 RIGHT_PADDLE 0 "Not Pulled" 1 "Pulled";
 VAL_ 463 LEFT_PADDLE 0 "Not Pulled" 1 "Pulled";

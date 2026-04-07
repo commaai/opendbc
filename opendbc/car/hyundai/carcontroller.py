@@ -143,20 +143,18 @@ class CarController(CarControllerBase):
         self.angle_steady = CS.out.steeringAngleDeg
         self.apply_angle_last = CS.out.steeringAngleDeg
 
-    # torque control
+    # steering torque
     else:
-      self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
-                                                                         self.angle_limit_counter, MAX_ANGLE_FRAMES,
-                                                                         MAX_ANGLE_CONSECUTIVE_FRAMES)
       new_torque = int(round(actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
+      # >90 degree steering fault prevention
+      self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
+                                                                         self.angle_limit_counter, MAX_ANGLE_FRAMES,
+                                                                         MAX_ANGLE_CONSECUTIVE_FRAMES)
+
       if not CC.latActive:
         apply_torque = 0
-
-      # Hold torque with induced temporary fault when cutting the actuation bit
-      # FIXME: we don't use this with CAN FD?
-      torque_fault = CC.latActive and not apply_steer_req
 
     self.apply_torque_last = apply_torque
 
@@ -173,12 +171,12 @@ class CarController(CarControllerBase):
     if self.frame % 100 == 0 and not (self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC) and self.CP.openpilotLongitudinalControl:
       # for longitudinal control, either radar or ADAS driving ECU
       addr, bus = 0x7d0, self.CAN.ECAN if self.CP.flags & HyundaiFlags.CANFD else 0
-      if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value:
+      if self.CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG.value:
         addr, bus = 0x730, self.CAN.ECAN
       can_sends.append(make_tester_present_msg(addr, bus, suppress_response=True))
 
       # for blinkers
-      if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
+      if self.CP.flags & HyundaiFlags.CANFD_ENABLE_BLINKERS:
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
     # *** CAN/CAN FD specific ***
@@ -186,6 +184,10 @@ class CarController(CarControllerBase):
       can_sends.extend(self.create_canfd_msgs(apply_steer_req, apply_torque, set_speed_in_units, accel,
                                               stopping, hud_control, CS, CC))
     else:
+      # Hold torque with induced temporary fault when cutting the actuation bit
+      # FIXME: we don't use this with CAN FD?
+      torque_fault = CC.latActive and not apply_steer_req
+
       can_sends.extend(self.create_can_msgs(apply_steer_req, apply_torque, torque_fault, set_speed_in_units, accel,
                                             stopping, hud_control, actuators, CS, CC))
 
@@ -247,7 +249,7 @@ class CarController(CarControllerBase):
   def create_canfd_msgs(self, apply_steer_req, apply_torque, set_speed_in_units, accel, stopping, hud_control, CS, CC):
     can_sends = []
 
-    lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING
+    lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG
     lka_steering_long = lka_steering and self.CP.openpilotLongitudinalControl
 
     # steering control
@@ -257,14 +259,14 @@ class CarController(CarControllerBase):
     # prevent LFA from activating on LKA steering cars by sending "no lane lines detected" to ADAS ECU
     if self.frame % 5 == 0 and lka_steering:
       can_sends.append(hyundaicanfd.create_suppress_lfa(self.packer, self.CAN, CS.lfa_block_msg,
-                                                        self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT))
+                                                        self.CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG_ALT))
 
     # LFA and HDA icons
     if self.frame % 5 == 0 and (not lka_steering or lka_steering_long):
       can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, CC.enabled))
 
     # blinkers
-    if lka_steering and self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
+    if lka_steering and self.CP.flags & HyundaiFlags.CANFD_ENABLE_BLINKERS:
       can_sends.extend(hyundaicanfd.create_spas_messages(self.packer, self.CAN, CC.leftBlinker, CC.rightBlinker))
 
     if self.CP.openpilotLongitudinalControl:
