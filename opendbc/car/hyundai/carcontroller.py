@@ -128,7 +128,11 @@ class CarController(CarControllerBase):
 
     # Button messages
     if not self.CP.openpilotLongitudinalControl:
-      if CC.cruiseControl.cancel:
+      if CC.cruiseControl.cancel and not CS.out.brakePressed:
+        # Suppress cancel button while braking. The brake already disengages factory SCC,
+        # and on newer CAN models the cancel button (CF_Clu_CruiseSwState=4) acts as a pause/resume button,
+        # and sending it mid-brake produces a "SCC Conditions Not Met" alert on the driver cluster.
+        # Safe on all HKG CAN cars since braking universally disengages SCC within ~100 ms.
         can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP))
       elif CC.cruiseControl.resume:
         # send resume at a max freq of 10Hz
@@ -199,7 +203,10 @@ class CarController(CarControllerBase):
           if self.CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS:
             can_sends.append(hyundaicanfd.create_acc_cancel(self.packer, self.CP, self.CAN, CS.cruise_info))
             self.last_button_frame = self.frame
-          else:
+          elif not CS.out.brakePressed:
+            # CRUISE_BUTTONS=4 is a pause/resume button on non-CANFD_ALT_BUTTONS CANFD cars.
+            # Suppress the pause/resume button while braking. The brake already disengages factory SCC,
+            # and sending the pause/resume button mid-brake produces a "SCC Conditions Not Met" alert on the driver cluster.
             for _ in range(20):
               can_sends.append(hyundaicanfd.create_buttons(self.packer, self.CP, self.CAN, CS.buttons_counter + 1, Buttons.CANCEL))
             self.last_button_frame = self.frame
