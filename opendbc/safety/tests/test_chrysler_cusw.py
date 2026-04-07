@@ -41,8 +41,8 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
     return self.packer.make_can_msg_safety("ACCEL_GAS", 0, values)
 
   def _user_brake_msg(self, brake):
-    values = {"BRAKE_HUMAN": 1 if brake else 0}
-    return self.packer.make_can_msg_safety("BRAKE_2", 0, values)
+    values = {"DRIVER_BRAKE_SWITCH": 1 if brake else 0}
+    return self.packer.make_can_msg_safety("BRAKE_3", 0, values)
 
   def _torque_meas_msg(self, torque):
     values = {"TORQUE_MOTOR": torque}

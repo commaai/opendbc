@@ -81,15 +81,12 @@ class DBC:
       self._parse_file(name)
     else:
       dbc_path = os.path.join(DBC_PATH, name + ".dbc")
-      if os.path.exists(dbc_path):
+      if content := get_generated_dbcs().get(name):
+        self._parse_content(name, content)
+      elif os.path.exists(dbc_path):
         self._parse_file(dbc_path)
       else:
-        # try in-memory generated DBC
-        generated = get_generated_dbcs()
-        content = generated.get(name)
-        if content is None:
-          raise FileNotFoundError(f"DBC not found: {name}")
-        self._parse_content(name, content)
+        raise FileNotFoundError(f"DBC not found: {name}")
 
   def _parse_file(self, path: str):
     self.name = os.path.basename(path).replace(".dbc", "")
