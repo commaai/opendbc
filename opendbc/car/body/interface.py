@@ -2,7 +2,7 @@ import math
 from opendbc.car import get_safety_config, structs
 from opendbc.car.body.carcontroller import CarController
 from opendbc.car.body.carstate import CarState
-from opendbc.car.body.values import SPEED_FROM_RPM, FIRMWARE_VERSION, BIN_PATH, BIN_URL, FLASH_ADDR, UDS_TX, UDS_RX, BUS
+from opendbc.car.body.values import SPEED_FROM_RPM, BIN_PATH, BIN_URL, FLASH_ADDR, BUS
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.body.flash import update
 from opendbc.car.fw_query_definitions import StdQueries
