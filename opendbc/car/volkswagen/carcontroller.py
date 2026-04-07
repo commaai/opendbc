@@ -74,7 +74,7 @@ class MQBStandstillManager:
     return 1.5 * grade_accel ** 2 / brake_decel_build_rate
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool,
-             max_planned_speed: float = 0.0) -> tuple[bool, float, bool, bool, "mqbcan.ESPOverride | None"]:
+             max_planned_speed: float) -> tuple[bool, float, bool, bool, "mqbcan.ESPOverride | None"]:
     esp_override: mqbcan.ESPOverride | None = None
     theoretical_safe_stop_speed = self.get_theoretical_safe_speed(CS.grade, CS.out.vEgo)
     can_leave_stop = max_planned_speed > theoretical_safe_stop_speed
@@ -217,7 +217,7 @@ class CarController(CarControllerBase):
 
         if self.CCS == mqbcan and CS.acc_type == 1:
           long_active, accel, stopping, starting, esp_override = \
-            self.standstill_manager.update(CS, long_active, accel, stopping, starting)
+            self.standstill_manager.update(CS, long_active, accel, stopping, starting, actuators.maxPlannedSpeed)
 
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, long_active)
         accel = float(np.clip(accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
