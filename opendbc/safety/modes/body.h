@@ -21,12 +21,6 @@ static bool body_tx_hook(const CANPacket_t *msg) {
     tx = true;
   }
 
-  // Allow UDS firmware queries through for fingerprinting
-  bool uds_msg = (msg->addr == 0x720U);
-  if (!controls_allowed && uds_msg) {
-    tx = true;
-  }
-
   return tx;
 }
 
@@ -36,8 +30,7 @@ static safety_config body_init(uint16_t param) {
   };
 
   static const CanMsg BODY_TX_MSGS[] = {{0x250, 0, 8, .check_relay = false}, {0x250, 0, 6, .check_relay = false}, {0x251, 0, 5, .check_relay = false},  // body
-                                        {0x1, 0, 8, .check_relay = false},   // CAN flasher
-                                        {0x720, 0, 8, .check_relay = false}};  // UDS firmware query
+                                        {0x1, 0, 8, .check_relay = false}};   // CAN flasher
 
   SAFETY_UNUSED(param);
   safety_config ret = BUILD_SAFETY_CFG(body_rx_checks, BODY_TX_MSGS);
