@@ -29,7 +29,6 @@ def _build_libsafety() -> str:
   with tempfile.TemporaryDirectory() as tmp:
     safety_os = os.path.join(tmp, "safety.os")
     fd, libsafety_so = tempfile.mkstemp(suffix='.so')
-    print("Compiling libsafety.so to", libsafety_so, file=os.sys.stderr)
     os.close(fd)
 
     subprocess.check_call(['cc', '-fPIC', *cflags, '-I', root, '-c', safety_c, '-o', safety_os])
