@@ -87,9 +87,9 @@ def fetch_bin(bin_path, update_url):
     raise RuntimeError(f"download failed with HTTP {status}")
 
 
-def get_firmware_signature(can_send, can_recv, uds_base, uds_signature_offset, uds_bus, timeout=DEFAULT_ISOTP_TIMEOUT):
+def get_firmware_signature(can_send, can_recv, uds_tx, uds_rx, uds_bus, timeout=DEFAULT_ISOTP_TIMEOUT):
   callbacks = CanCallbacks(can_send, can_recv)
-  uds_client = UdsClient(callbacks, uds_base, uds_signature_offset, bus=uds_bus, timeout=timeout)
+  uds_client = UdsClient(callbacks, uds_tx, uds_rx, bus=uds_bus, timeout=timeout)
 
   try:
     return uds_client.read_data_by_identifier(DATA_IDENTIFIER_TYPE.APPLICATION_SOFTWARE_FINGERPRINT)
@@ -127,16 +127,16 @@ def reset_body(handle):
   handle.controlWrite(REQUEST_IN, 0xd8, 0, 0, b'', expect_disconnect=True)
 
 
-def update(bootloader_addr, bootloader_bus, file, update_url, can_send, can_recv, uds_base, uds_signature_offset, uds_bus):
+def update(bootloader_addr, bootloader_bus, file, update_url, can_send, can_recv, uds_tx, uds_rx, uds_bus):
   if not os.path.exists(file):
     print("local bin is not up-to-date, fetching latest")
     fetch_bin(file, update_url)
 
   current_signature = None
   expected_signature = None
-  if None not in (uds_base, uds_signature_offset, uds_bus):
+  if None not in (uds_tx, uds_rx, uds_bus):
     print("checking body firmware signature")
-    current_signature = get_firmware_signature(can_send, can_recv, uds_base, uds_signature_offset, uds_bus)
+    current_signature = get_firmware_signature(can_send, can_recv, uds_tx, uds_rx, uds_bus)
 
     with open(file, "rb") as f:
       expected_signature = f.read()[-128:]
