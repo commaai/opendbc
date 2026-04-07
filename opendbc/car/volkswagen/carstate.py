@@ -46,11 +46,12 @@ class CarState(CarStateBase):
     pt_cp = can_parsers[Bus.pt]
     cam_cp = can_parsers[Bus.cam]
     ext_cp = pt_cp if self.CP.networkLocation == NetworkLocation.fwdCamera else cam_cp
+    alt_cp = can_parsers[Bus.alt]
 
     if self.CP.flags & VolkswagenFlags.PQ:
       return self.update_pq(pt_cp, cam_cp, ext_cp)
     elif self.CP.flags & VolkswagenFlags.MLB:
-      return self.update_mlb(pt_cp, cam_cp, ext_cp)
+      return self.update_mlb(pt_cp, cam_cp, ext_cp, alt_cp)
 
     ret = structs.CarState()
 
@@ -230,7 +231,7 @@ class CarState(CarStateBase):
     self.frame += 1
     return ret
 
-  def update_mlb(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
+  def update_mlb(self, pt_cp, cam_cp, ext_cp, alt_cp) -> structs.CarState:
     ret = structs.CarState()
 
     self.parse_wheel_speeds(ret,
@@ -241,14 +242,14 @@ class CarState(CarStateBase):
     )
 
     ret.gasPressed = pt_cp.vl["Motor_03"]["MO_Fahrpedalrohwert_01"] > 0
-    ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_03"]["GE_Waehlhebel"], None))
+    ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(alt_cp.vl["Getriebe_03"]["GE_Waehlhebel"], None))
 
-    # ACC okay but disabled (1), ACC ready (2), a radar visibility or other fault/disruption (6 or 7)
-    # currently regulating speed (3), driver accel override (4), brake only (5)
-    # TODO: get this from the drivetrain side instead, for openpilot long support later
-    ret.cruiseState.available = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (2, 3, 4, 5)
-    ret.cruiseState.enabled = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (3, 4, 5)
-    ret.accFaulted = ext_cp.vl["ACC_05"]["ACC_Status_ACC"] in (6, 7)
+    # TODO: We don't have a true mainswitch state yet, might need stateful tracking on LS_01 if momentary-press is a thing
+    # TSK_04.TSK_Status_GRA_ACC_02 0 = not engaged, 1 = engaged, 2 = engaged with driver accel override, 3 = fault
+    ret.cruiseState.available = alt_cp.vl["TSK_04"]["TSK_Status_GRA_ACC_02"] in (0, 1, 2)
+    ret.cruiseState.available = alt_cp.vl["TSK_04"]["TSK_Status_GRA_ACC_02"] in (1, 2)
+    ret.accFaulted = alt_cp.vl["TSK_04"]["TSK_Status_GRA_ACC_02"] == 3
+    ret.cruiseState.speed = ext_cp.vl["ACC_02"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
 
     self.parse_mlb_mqb_steering_state(ret, pt_cp)
 
@@ -259,14 +260,14 @@ class CarState(CarStateBase):
     ret.parkingBrake = bool(pt_cp.vl["Kombi_01"]["KBI_Handbremse"])
     ret.espDisabled = pt_cp.vl["ESP_01"]["ESP_Tastung_passiv"] != 0
 
-    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(300, pt_cp.vl["Gateway_11"]["BH_Blinker_li"],
-                                                                            pt_cp.vl["Gateway_11"]["BH_Blinker_re"])
+    ret.leftBlinker = bool(pt_cp.vl["BCM"]["BLINKER_LEFT"])
+    ret.rightBlinker = bool(pt_cp.vl["BCM"]["BLINKER_RIGHT"])
 
-    ret.seatbeltUnlatched = pt_cp.vl["Gateway_06"]["AB_Gurtschloss_FA"] != 3
-    ret.doorOpen = any([pt_cp.vl["Gateway_05"]["FT_Tuer_geoeffnet"],
-                        pt_cp.vl["Gateway_05"]["BT_Tuer_geoeffnet"],
-                        pt_cp.vl["Gateway_05"]["HL_Tuer_geoeffnet"],
-                        pt_cp.vl["Gateway_05"]["HR_Tuer_geoeffnet"]])
+    ret.seatbeltUnlatched = bool(pt_cp.vl["Airbag_01"]["AB_Gurtwarn_VF"])
+    ret.doorOpen = any([alt_cp.vl["Gateway_05"]["FT_Tuer_geoeffnet"],
+                        alt_cp.vl["Gateway_05"]["BT_Tuer_geoeffnet"],
+                        alt_cp.vl["Gateway_05"]["HL_Tuer_geoeffnet"],
+                        alt_cp.vl["Gateway_05"]["HR_Tuer_geoeffnet"]])
 
     # Consume blind-spot monitoring info/warning LED states, if available.
     # Infostufe: BSM LED on, Warnung: BSM LED flashing
@@ -317,7 +318,7 @@ class CarState(CarStateBase):
       return CarState.get_can_parsers_pq(CP)
 
     # manually configure some optional and variable-rate/edge-triggered messages
-    pt_messages, cam_messages = [], []
+    pt_messages, cam_messages, alt_messages = [], [], []
 
     if not CP.flags & VolkswagenFlags.MLB:
       pt_messages += [
@@ -331,6 +332,7 @@ class CarState(CarStateBase):
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).cam),
+      Bus.alt: CANParser(DBC[CP.carFingerprint][Bus.pt], alt_messages, CanBus(CP).alt),
     }
 
   @staticmethod
@@ -338,4 +340,5 @@ class CarState(CarStateBase):
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).cam),
+      Bus.alt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).alt),
     }
