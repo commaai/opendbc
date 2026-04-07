@@ -56,5 +56,10 @@ class TestBody(common.SafetyTest):
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
     self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
 
+  def test_uds_firmware_query(self):
+    # UDS firmware query allowed without controls
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self._tx(common.make_msg(0, 0x720, 8)))
+
 if __name__ == "__main__":
   unittest.main()
