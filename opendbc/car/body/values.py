@@ -8,15 +8,15 @@ Ecu = CarParams.Ecu
 
 SPEED_FROM_RPM = 0.008587
 
-FLASH_ADDR = 0x250
-UDS_TX = 0x720
-UDS_RX = 0x728
-BUS = 0
 FIRMWARE_VERSION = "v0.3.1"
 BIN_URL = f"https://github.com/commaai/body/releases/download/{FIRMWARE_VERSION}/body.bin.signed"
 BIN_NAME = f"body-v1-{FIRMWARE_VERSION}.bin.signed"
 BODY_DIR = os.path.dirname(os.path.realpath(__file__))
 BIN_PATH = os.path.join(BODY_DIR, BIN_NAME)
+FLASH_ADDR = 0x250
+UDS_TX = 0x720
+UDS_RX = 0x728
+BUS = 0
 
 class CarControllerParams:
   ANGLE_DELTA_BP = [0., 5., 15.]
