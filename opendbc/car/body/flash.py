@@ -149,6 +149,12 @@ def update(can_send, can_recv, addr, bus, file, update_url, current_signature=No
         print(f"flash failed (attempt {i + 1}/{retries}): {e}, trying again...")
       else:
         print("successfully flashed")
+
+        # Clear cached CarParams so FW queries run fresh after flash
+        car_params_cache = "/data/params/d/CarParamsCache"
+        if os.path.isfile(car_params_cache):
+          os.remove(car_params_cache)
+          print("cleared CarParamsCache")
         return
 
     # on fail: attempt to exit bootloader
