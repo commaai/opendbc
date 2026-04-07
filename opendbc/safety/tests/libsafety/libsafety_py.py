@@ -26,13 +26,13 @@ def _build_libsafety() -> str:
     '-fprofile-arcs', '-ftest-coverage',
   ]
 
-  with tempfile.TemporaryDirectory() as tmp:
-    safety_os = os.path.join(tmp, "safety.os")
-    fd, libsafety_so = tempfile.mkstemp(suffix='.so')
-    os.close(fd)
+  fd, safety_os = tempfile.mkstemp(suffix='.os', dir=libsafety_dir)
+  os.close(fd)
+  fd, libsafety_so = tempfile.mkstemp(suffix='.so')
+  os.close(fd)
 
-    subprocess.check_call(['cc', '-fPIC', *cflags, '-I', root, '-c', safety_c, '-o', safety_os])
-    subprocess.check_call(['cc', '-shared', safety_os, '-o', libsafety_so, *ldflags])
+  subprocess.check_call(['cc', '-fPIC', *cflags, '-I', root, '-c', safety_c, '-o', safety_os])
+  subprocess.check_call(['cc', '-shared', safety_os, '-o', libsafety_so, *ldflags])
   return libsafety_so
 
 
