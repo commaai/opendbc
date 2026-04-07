@@ -15,9 +15,10 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def init(CP, can_recv, can_send, communication_control=None):
     fw_signature = next(
-      fw.fwVersion for fw in CP.carFw
+      (fw.fwVersion for fw in CP.carFw
       if fw.ecu == structs.CarParams.Ecu.engine
-      and fw.request[1] == StdQueries.APPLICATION_SOFTWARE_FINGERPRINT_REQUEST
+      and fw.request[1] == StdQueries.APPLICATION_SOFTWARE_FINGERPRINT_REQUEST),
+      b""
     )
     update(can_send, can_recv, FLASH_ADDR, BUS, BIN_PATH, BIN_URL, fw_signature)
 
