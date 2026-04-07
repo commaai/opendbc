@@ -14,7 +14,6 @@ def _build_libsafety() -> str:
   """Compile libsafety.so to a temp file and return its path."""
   root = str(Path(libsafety_dir).parents[3])
   safety_c = os.path.join(libsafety_dir, "safety.c")
-  safety_os = os.path.join(libsafety_dir, "safety.os")
 
   cflags = [
     '-Wall', '-Wextra', '-Werror', '-nostdlib', '-fno-builtin',
@@ -27,6 +26,8 @@ def _build_libsafety() -> str:
     '-fprofile-arcs', '-ftest-coverage',
   ]
 
+  fd, safety_os = tempfile.mkstemp(suffix='.os', dir=libsafety_dir)
+  os.close(fd)
   fd, libsafety_so = tempfile.mkstemp(suffix='.so')
   os.close(fd)
 
