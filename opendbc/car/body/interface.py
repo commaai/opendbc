@@ -6,11 +6,12 @@ from opendbc.car.body.carstate import CarState
 from opendbc.car.body.values import SPEED_FROM_RPM
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.body.flash import update
-from opendbc.car.common.basedir import BASEDIR
 
 FIRMWARE_VERSION = "v0.3.1"
 BIN_URL = f"https://github.com/commaai/body/releases/download/{FIRMWARE_VERSION}/body.bin.signed"
 BIN_NAME = f"body-v1-{FIRMWARE_VERSION}.bin.signed"
+BODY_DIR = os.path.dirname(os.path.realpath(__file__))
+BIN_PATH = os.path.join(BODY_DIR, BIN_NAME)
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
@@ -18,7 +19,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def init(CP, can_recv, can_send, communication_control=None):
-    update(0x250, os.path.join(BASEDIR, "../", f"panda/board/obj/{BIN_NAME}"), BIN_URL, can_recv, can_send, 0x720, 0x728)
+    update(0x250, 0, BIN_PATH, BIN_URL, can_send, can_recv, 0x720, 0x728, 0)
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
