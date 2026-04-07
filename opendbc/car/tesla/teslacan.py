@@ -1,3 +1,5 @@
+import time
+import numpy as np
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
 
@@ -14,6 +16,9 @@ class TeslaCAN:
   def __init__(self, CP, packer):
     self.CP = CP
     self.packer = packer
+    self.active_time = time.monotonic()
+    self.active_prev = False
+    self.disabled_accel = 0.0
 
   def create_steering_control(self, angle, enabled):
     # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
@@ -28,22 +33,43 @@ class TeslaCAN:
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, active):
-    from opendbc.car.interfaces import V_CRUISE_MAX
+  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, a_ego, active):
+    accel = accel if active else a_ego
 
-    set_speed = max(v_ego * CV.MS_TO_KPH, 0)
-    if active:
-      # TODO: this causes jerking after gas override when above set speed
-      set_speed = 0 if accel < 0 else V_CRUISE_MAX
+    if not active:
+      self.disabled_accel = accel
+    if active and not self.active_prev:
+      self.active_time = time.monotonic()
+    self.active_prev = active
+
+    accel = np.interp(time.monotonic() - self.active_time, [0, 0.5], [self.disabled_accel, accel])
+
+    accel = float(np.clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+
+    # DAS_setSpeed is theorized to just be a signal for DI to determine if it should actuate accelMin or accelMax
+    set_speed = v_ego + accel * 0.7  # TODO: 0.7 may not be important
+    set_speed = min(max(set_speed * CV.MS_TO_KPH, 0), 400)  # signal max is 409.4
+
+    # while braking, accel max is positive and vice versa. it has been seen changing based on speed.
+    # it may be a comfort limit in case setSpeed changes rapidly, not sure how this is actually used
+    accel_min_inactive = float(np.interp(v_ego, [5, 35], [-1.56, -0.8]))
+    accel_max_inactive = float(np.interp(v_ego, [0, 35], [2.0, 0.64]))
+
+    accel_min = accel if accel <= 0 else accel_min_inactive
+    accel_max = accel if accel > 0 else accel_max_inactive
+
+    # Scale jerk with sqrt of accel error to reach targets fast without overshooting.
+    # Reaches target in finite time: t = 2 * sqrt(error) / K
+    jerk = float(np.clip(4.0 * np.sqrt(abs(accel - a_ego)), 0.5, CarControllerParams.JERK_LIMIT_MAX))
 
     values = {
       "DAS_setSpeed": set_speed,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,
-      "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
-      "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
-      "DAS_accelMin": accel,
-      "DAS_accelMax": max(accel, 0),
+      "DAS_jerkMin": -9.1,
+      "DAS_jerkMax": 8.636,
+      "DAS_accelMin": accel_min,
+      "DAS_accelMax": accel_max,
       "DAS_controlCounter": counter,
     }
     return self.packer.make_can_msg("DAS_control", CANBUS.party, values)
