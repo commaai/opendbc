@@ -29,7 +29,7 @@ class CanCallbacks:
     return [(msg.address, msg.dat, msg.src) for packet in self._can_recv_cb() for msg in packet]
 
 
-class CanHandle():
+class CanHandle:
   def __init__(self, can_send, can_recv, bus):
     callbacks = CanCallbacks(can_send, can_recv)
     self.client = CanClient(callbacks.can_send, callbacks.can_recv, tx_addr=1, rx_addr=2, bus=bus)
@@ -69,7 +69,7 @@ class CanHandle():
 
 
 def flush_recv_buffer(can_recv):
-  while(1):
+  while (1):
     if len(can_recv()) == 0:
       break
 

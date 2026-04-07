@@ -9,7 +9,8 @@ from opendbc.safety.tests.common import CANPackerSafety
 
 class TestBody(common.SafetyTest):
   TX_MSGS = [[0x250, 0], [0x251, 0],
-             [0x1, 0], [0x1, 1], [0x1, 2], [0x1, 3]]
+             [0x1, 0], [0x1, 1], [0x1, 2], [0x1, 3],
+             [0x720, 0]]
   FWD_BUS_LOOKUP = {}
 
   def setUp(self):
@@ -54,7 +55,6 @@ class TestBody(common.SafetyTest):
     self.assertTrue(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
     self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
-
 
 if __name__ == "__main__":
   unittest.main()
