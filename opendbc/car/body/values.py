@@ -44,6 +44,11 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
       bus=0,
     ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.APPLICATION_SOFTWARE_FINGERPRINT_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.APPLICATION_SOFTWARE_FINGERPRINT_RESPONSE],
+      bus=0,
+    ),
   ],
 )
 
