@@ -4,7 +4,6 @@ import struct
 import subprocess
 from itertools import accumulate
 
-from opendbc.car.can_definitions import CanData
 from opendbc.car.uds import CanClient, IsoTpMessage, MessageTimeoutError
 
 REQUEST_IN = 0xC0
@@ -15,24 +14,9 @@ F4Config = {
   "sector_sizes": [0x4000 for _ in range(4)] + [0x10000] + [0x20000 for _ in range(11)],
 }
 
-
-class CanCallbacks:
-  def __init__(self, can_send, can_recv):
-    self._can_send_cb = can_send
-    self._can_recv_cb = can_recv
-
-  def can_send(self, addr: int, dat: bytes, bus: int, timeout: int = 0):
-    del timeout
-    self._can_send_cb([CanData(address=addr, dat=dat, src=bus)])
-
-  def can_recv(self):
-    return [(msg.address, msg.dat, msg.src) for packet in self._can_recv_cb() for msg in packet]
-
-
 class CanHandle:
   def __init__(self, can_send, can_recv, bus):
-    callbacks = CanCallbacks(can_send, can_recv)
-    self.client = CanClient(callbacks.can_send, callbacks.can_recv, tx_addr=1, rx_addr=2, bus=bus)
+    self.client = CanClient(can_send, can_recv, tx_addr=1, rx_addr=2, bus=bus)
 
   def transact(self, dat, timeout=DEFAULT_ISOTP_TIMEOUT, expect_disconnect=False):
     try:
@@ -132,7 +116,7 @@ def update(can_send, can_recv, addr, bus, file, update_url, current_signature=No
 
   if current_signature is None or current_signature != expected_signature:
     print("flashing motherboard")
-    can_send([CanData(address=addr, dat=b"\xce\xfa\xad\xde\x1e\x0b\xb0\x0a", src=bus)])
+    can_send(addr, b"\xce\xfa\xad\xde\x1e\x0b\xb0\x0a", bus)
     time.sleep(0.1)
 
     print("flashing", file)

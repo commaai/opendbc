@@ -6,6 +6,7 @@ from opendbc.car.body.values import SPEED_FROM_RPM, BIN_PATH, BIN_URL, FLASH_ADD
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.body.flash import update
 from opendbc.car.fw_query_definitions import StdQueries
+from opendbc.car.can_definitions import CanData
 
 
 class CarInterface(CarInterfaceBase):
@@ -20,7 +21,14 @@ class CarInterface(CarInterfaceBase):
       and fw.request[1] == StdQueries.APPLICATION_SOFTWARE_FINGERPRINT_REQUEST),
       b""
     )
-    update(can_send, can_recv, FLASH_ADDR, BUS, BIN_PATH, BIN_URL, fw_signature)
+
+    def p_can_send(addr: int, dat: bytes, bus: int):
+      can_send([CanData(address=addr, dat=dat, src=bus)])
+
+    def p_can_recv():
+      return [(msg.address, msg.dat, msg.src) for packet in can_recv() for msg in packet]
+
+    update(p_can_send, p_can_recv, FLASH_ADDR, BUS, BIN_PATH, BIN_URL, fw_signature)
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
