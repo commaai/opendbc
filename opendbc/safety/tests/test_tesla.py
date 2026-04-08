@@ -32,7 +32,6 @@ class TestTeslaCanIgnition(unittest.TestCase):
   def setUp(self):
     self.safety = libsafety_py.libsafety
     self.safety.init_tests()
-    self.safety.ignition_can_reset()
 
   def _rx_ign(self, data):
     msg = libsafety_py.make_CANPacket(0x221, 0, data)

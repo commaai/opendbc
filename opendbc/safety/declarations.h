@@ -270,10 +270,8 @@ extern int cruise_button_prev;
 extern bool safety_rx_checks_invalid;
 
 // CAN-based ignition detection (used by panda)
-#define SAFETY_IGNITION_CAN_HOOKS 1
 extern bool ignition_can;
 extern uint32_t ignition_can_cnt;
-void ignition_can_reset(void);
 void ignition_can_hook(const CANPacket_t *msg);
 
 // for safety modes with torque steering control

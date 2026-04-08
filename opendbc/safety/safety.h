@@ -88,41 +88,41 @@ int alternative_experience = 0;
 // time since safety mode has been changed
 uint32_t safety_mode_cnt = 0U;
 
-static const safety_hook_config safety_hook_registry[] = {
-  {SAFETY_SILENT, &nooutput_hooks},
-  {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
-  {SAFETY_TOYOTA, &toyota_hooks},
-  {SAFETY_ELM327, &elm327_hooks},
-  {SAFETY_GM, &gm_hooks},
-  {SAFETY_HONDA_BOSCH, &honda_bosch_hooks},
-  {SAFETY_HYUNDAI, &hyundai_hooks},
-  {SAFETY_CHRYSLER, &chrysler_hooks},
-  {SAFETY_SUBARU, &subaru_hooks},
-  {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
-  {SAFETY_NISSAN, &nissan_hooks},
-  {SAFETY_NOOUTPUT, &nooutput_hooks},
-  {SAFETY_HYUNDAI_LEGACY, &hyundai_legacy_hooks},
-  {SAFETY_MAZDA, &mazda_hooks},
-  {SAFETY_BODY, &body_hooks},
-  {SAFETY_FORD, &ford_hooks},
-  {SAFETY_RIVIAN, &rivian_hooks},
-  {SAFETY_TESLA, &tesla_hooks},
-  {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
+typedef struct {
+  safety_hook_config config;
+  ignition_can_state_t ignition_state;
+  bool ignition_hook_active;
+} safety_hook_registry_entry;
+
+static safety_hook_registry_entry safety_hook_registry[] = {
+  { .config = { .id = SAFETY_SILENT, .hooks = &nooutput_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_HONDA_NIDEC, .hooks = &honda_nidec_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_TOYOTA, .hooks = &toyota_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_ELM327, .hooks = &elm327_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_GM, .hooks = &gm_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_HONDA_BOSCH, .hooks = &honda_bosch_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_HYUNDAI, .hooks = &hyundai_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_CHRYSLER, .hooks = &chrysler_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_SUBARU, .hooks = &subaru_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_VOLKSWAGEN_MQB, .hooks = &volkswagen_mqb_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_NISSAN, .hooks = &nissan_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_NOOUTPUT, .hooks = &nooutput_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_HYUNDAI_LEGACY, .hooks = &hyundai_legacy_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_MAZDA, .hooks = &mazda_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_BODY, .hooks = &body_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_FORD, .hooks = &ford_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_RIVIAN, .hooks = &rivian_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_TESLA, .hooks = &tesla_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_HYUNDAI_CANFD, .hooks = &hyundai_canfd_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
 #ifdef ALLOW_DEBUG
-  {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
-  {SAFETY_PSA, &psa_hooks},
-  {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
-  {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
-  {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
-  {SAFETY_ALLOUTPUT, &alloutput_hooks},
+  { .config = { .id = SAFETY_CHRYSLER_CUSW, .hooks = &chrysler_cusw_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_PSA, .hooks = &psa_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_SUBARU_PREGLOBAL, .hooks = &subaru_preglobal_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_VOLKSWAGEN_MLB, .hooks = &volkswagen_mlb_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_VOLKSWAGEN_PQ, .hooks = &volkswagen_pq_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
+  { .config = { .id = SAFETY_ALLOUTPUT, .hooks = &alloutput_hooks }, .ignition_state = { .values = {0, 0} }, .ignition_hook_active = false },
 #endif
 };
-#ifdef ALLOW_DEBUG
-#define SAFETY_HOOK_REGISTRY_COUNT 25
-#else
-#define SAFETY_HOOK_REGISTRY_COUNT 19
-#endif
-static ignition_can_state_t ignition_hook_states[SAFETY_HOOK_REGISTRY_COUNT];
 
 uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
@@ -132,34 +132,43 @@ safety_config current_safety_config;
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
 
-static bool safety_hook_is_duplicate(int index) {
-  bool duplicate = false;
-
-  for (int i = 0; i < index; i++) {
-    if (safety_hook_registry[i].hooks == safety_hook_registry[index].hooks) {
-      duplicate = true;
-      break;
-    }
-  }
-
-  return duplicate;
+static int safety_hook_registry_count(void) {
+  return sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0]);
 }
 
-void ignition_can_reset(void) {
-  ignition_can = false;
-  ignition_can_cnt = 0U;
+static void init_ignition_hook_registry(void) {
+  static bool ignition_hook_registry_initialized = false;
+  if (!ignition_hook_registry_initialized) {
+    for (int i = 0; i < safety_hook_registry_count(); i++) {
+      safety_hook_registry[i].ignition_hook_active = false;
+      safety_hook_registry[i].ignition_state = (ignition_can_state_t){0};
 
-  for (int i = 0; i < SAFETY_HOOK_REGISTRY_COUNT; i++) {
-    if (!safety_hook_is_duplicate(i)) {
-      ignition_hook_states[i] = (ignition_can_state_t){0};
+      if (safety_hook_registry[i].config.hooks->ignition_hook != NULL) {
+        bool duplicate = false;
+
+        for (int j = 0; j < i; j++) {
+          if (safety_hook_registry[j].config.hooks == safety_hook_registry[i].config.hooks) {
+            duplicate = true;
+            break;
+          }
+        }
+
+        if (!duplicate) {
+          safety_hook_registry[i].ignition_hook_active = true;
+        }
+      }
     }
+
+    ignition_hook_registry_initialized = true;
   }
 }
 
 void ignition_can_hook(const CANPacket_t *msg) {
-  for (int i = 0; i < SAFETY_HOOK_REGISTRY_COUNT; i++) {
-    if (!safety_hook_is_duplicate(i) && (safety_hook_registry[i].hooks->ignition_hook != NULL)) {
-      safety_hook_registry[i].hooks->ignition_hook(msg, &ignition_hook_states[i]);
+  init_ignition_hook_registry();
+
+  for (int i = 0; i < safety_hook_registry_count(); i++) {
+    if (safety_hook_registry[i].ignition_hook_active) {
+      safety_hook_registry[i].config.hooks->ignition_hook(msg, &safety_hook_registry[i].ignition_state);
     }
   }
 }
@@ -498,9 +507,9 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   current_safety_config.disable_forwarding = false;
 
   int set_status = -1;  // not set
-  for (int i = 0; i < SAFETY_HOOK_REGISTRY_COUNT; i++) {
-    if (safety_hook_registry[i].id == mode) {
-      current_hooks = safety_hook_registry[i].hooks;
+  for (int i = 0; i < safety_hook_registry_count(); i++) {
+    if (safety_hook_registry[i].config.id == mode) {
+      current_hooks = safety_hook_registry[i].config.hooks;
       current_safety_mode = mode;
       current_safety_param = param;
       set_status = 0;  // set

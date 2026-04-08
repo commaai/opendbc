@@ -21,7 +21,6 @@ class TestGmCanIgnition(unittest.TestCase):
   def setUp(self):
     self.safety = libsafety_py.libsafety
     self.safety.init_tests()
-    self.safety.ignition_can_reset()
 
   def _rx_ign(self, addr: int, bus: int, data):
     msg = libsafety_py.make_CANPacket(addr, bus, data)
@@ -31,7 +30,7 @@ class TestGmCanIgnition(unittest.TestCase):
   def test_reset(self):
     self.safety.set_ignition_can(True)
     self.safety.set_ignition_can_cnt(123)
-    self.safety.ignition_can_reset()
+    self.safety.init_tests()
     self.assertFalse(self.safety.get_ignition_can())
     self.assertEqual(0, self.safety.get_ignition_can_cnt())
 

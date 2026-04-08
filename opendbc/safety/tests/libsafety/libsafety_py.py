@@ -95,7 +95,6 @@ int get_angle_meas_max(void);
 bool get_cruise_engaged_prev(void);
 void set_cruise_engaged_prev(bool engaged);
 bool get_vehicle_moving(void);
-void ignition_can_reset(void);
 void ignition_can_hook(CANPacket_t *msg);
 void set_ignition_can(bool c);
 bool get_ignition_can(void);

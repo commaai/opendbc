@@ -13,7 +13,6 @@ class TestMazdaCanIgnition(unittest.TestCase):
   def setUp(self):
     self.safety = libsafety_py.libsafety
     self.safety.init_tests()
-    self.safety.ignition_can_reset()
 
   def test_mazda_9e(self):
     # (data[0] >> 5) == 0x6
