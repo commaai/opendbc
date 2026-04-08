@@ -69,11 +69,6 @@ class CarController(CarControllerBase):
     self.angle_filter = FirstOrderFilter(0.0, 0.2, DT_CTRL)
     self.angle_steady = 0
 
-    # Adaptive KF for angle command: state = [angle, angle_rate]
-    # R adapts based on estimated rate: low rate = smooth (noise), high rate = track (real turn)
-    self.angle_kf_x = np.array([[0.0], [0.0]])
-    self.angle_kf_P = np.eye(2) * 10.0
-
     self.accel_last = 0
     self.apply_torque_last = 0
     self.car_fingerprint = CP.carFingerprint
@@ -100,31 +95,9 @@ class CarController(CarControllerBase):
         # desired_angle = apply_hysteresis(desired_angle, self.angle_steady, deadzone)
         # self.angle_steady = desired_angle
 
-        # FOF filtering (commented out, replaced by adaptive KF)
-        # self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5, 10, 20], [0.5, 0.2, 0.0])))
-        # desired_angle = self.angle_filter.update(desired_angle)
-
-        # Adaptive KF: smooth when rate is low (noise), track when rate is high (real turn)
-        dt = DT_CTRL
-        A = np.array([[1.0, dt], [0.0, 1.0]])
-        C = np.array([[1.0, 0.0]])
-
-        last_rate = abs(self.angle_kf_x[1, 0])
-        self.angle_kf_x = A @ self.angle_kf_x
-        q11 = 5.0 if abs(self.angle_kf_x[1, 0]) > last_rate else 50.0
-        Q = np.array([[0.5, 0.0], [0.0, q11]])
-        self.angle_kf_P = A @ self.angle_kf_P @ A.T + dt * Q
-
-        y = desired_angle - (C @ self.angle_kf_x)[0, 0]
-        est_rate = abs(self.angle_kf_x[1, 0])
-        R = float(np.interp(est_rate, [5, 30.0], [200.0, 0.5]))
-
-        S = (C @ self.angle_kf_P @ C.T)[0, 0] + R
-        K = (self.angle_kf_P @ C.T) / S
-        self.angle_kf_x = self.angle_kf_x + K * y
-        self.angle_kf_P = (np.eye(2) - K @ C) @ self.angle_kf_P
-
-        desired_angle = self.angle_kf_x[0, 0]
+        # self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [15, 20], [0.25, 0.0])))
+        self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5, 10, 20], [0.5, 0.2, 0.0])))
+        desired_angle = self.angle_filter.update(desired_angle)
 
       self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
                                                           CS.out.vEgoRaw, CS.out.steeringAngleDeg,
@@ -139,8 +112,6 @@ class CarController(CarControllerBase):
       if not CC.latActive:
         self.angle_filter.x = self.apply_angle_last
         self.angle_steady = self.apply_angle_last
-        self.angle_kf_x = np.array([[self.apply_angle_last], [0.0]])
-        self.angle_kf_P = np.eye(2) * 10.0
 
     # torque control
     else:
