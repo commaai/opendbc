@@ -10,6 +10,7 @@
 #define GWM_STEER_CMD           0x12BU // TX from OP to EPS
 #define GWM_CRUISE              0x2ABU
 #define GWM_LONG_CONTROL        0x143U // TX from OP to PCM
+#define GWM_BLIND_SPOT          0x16FU
 
 // CAN bus
 #define GWM_MAIN_BUS 0U
@@ -178,6 +179,7 @@ static safety_config gwm_init(uint16_t param) {
     {.msg = {{GWM_STEER_CMD, GWM_CAMERA_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // copy stock steering cmd
     {.msg = {{GWM_CRUISE, GWM_CAMERA_BUS, 64, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // CRUISE_STATE, ACC
     {.msg = {{GWM_LONG_CONTROL, GWM_CAMERA_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // Longitudinal control message from camera
+    {.msg = {{GWM_BLIND_SPOT, GWM_MAIN_BUS, 64, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // Blind spot monitor
   };
 
   bool gwm_longitudinal = false;
