@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #include "opendbc/safety/helpers.h"
 #include "opendbc/safety/lateral.h"
 #include "opendbc/safety/longitudinal.h"
@@ -118,9 +120,7 @@ static const safety_hook_config safety_hook_registry[] = {
 #endif
 };
 
-enum { SAFETY_HOOK_REGISTRY_COUNT = sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0]) };
-
-static ignition_can_state_t ignition_hook_states[SAFETY_HOOK_REGISTRY_COUNT];
+static ignition_can_state_t ignition_hook_states[sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0])];
 
 uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
@@ -130,16 +130,12 @@ safety_config current_safety_config;
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
 
-static int safety_hook_registry_count(void) {
-  return SAFETY_HOOK_REGISTRY_COUNT;
-}
-
 static void update_ignition_can(void) {
   bool seen = false;
   bool active = false;
   uint32_t min_cnt = 0U;
 
-  for (int i = 0; i < safety_hook_registry_count(); i++) {
+  for (size_t i = 0U; i < (sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0])); i++) {
     if ((safety_hook_registry[i].hooks->ignition_hook != NULL) && ignition_hook_states[i].seen) {
       active |= ignition_hook_states[i].ignition;
       if (!seen || (ignition_hook_states[i].age < min_cnt)) {
@@ -156,7 +152,7 @@ static void update_ignition_can(void) {
 void ignition_can_hook(const CANPacket_t *msg) {
   bool updated = false;
 
-  for (int i = 0; i < safety_hook_registry_count(); i++) {
+  for (size_t i = 0U; i < (sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0])); i++) {
     if (safety_hook_registry[i].hooks->ignition_hook != NULL) {
       ignition_hook_states[i].updated = false;
       safety_hook_registry[i].hooks->ignition_hook(msg, &ignition_hook_states[i]);
@@ -503,7 +499,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   current_safety_config.disable_forwarding = false;
 
   int set_status = -1;  // not set
-  for (int i = 0; i < safety_hook_registry_count(); i++) {
+  for (size_t i = 0U; i < (sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0])); i++) {
     if (safety_hook_registry[i].id == mode) {
       current_hooks = safety_hook_registry[i].hooks;
       current_safety_mode = mode;

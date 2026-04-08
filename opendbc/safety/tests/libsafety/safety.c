@@ -216,7 +216,7 @@ void init_tests(void){
   invalid_steer_req_count = 0;
   ignition_can = false;
   ignition_can_cnt = 0U;
-  for (int i = 0; i < safety_hook_registry_count(); i++) {
+  for (size_t i = 0U; i < (sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0])); i++) {
     ignition_hook_states[i] = (ignition_can_state_t){0};
   }
 
