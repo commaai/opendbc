@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from functools import cache
 
 from opendbc import DBC_PATH, get_generated_dbcs
+from opendbc.can._types import Signal, Msg, Val, SignalType
 
 # TODO: these should just be passed in along with the DBC file
 from opendbc.car.honda.hondacan import honda_checksum
@@ -17,54 +18,6 @@ from opendbc.car.volkswagen.mqbcan import volkswagen_mqb_meb_checksum, xor_check
 from opendbc.car.tesla.teslacan import tesla_checksum
 from opendbc.car.body.bodycan import body_checksum
 from opendbc.car.psa.psacan import psa_checksum
-
-
-class SignalType:
-  DEFAULT = 0
-  COUNTER = 1
-  HONDA_CHECKSUM = 2
-  TOYOTA_CHECKSUM = 3
-  BODY_CHECKSUM = 4
-  VOLKSWAGEN_MQB_MEB_CHECKSUM = 5
-  XOR_CHECKSUM = 6
-  SUBARU_CHECKSUM = 7
-  CHRYSLER_CHECKSUM = 8
-  HKG_CAN_FD_CHECKSUM = 9
-  FCA_GIORGIO_CHECKSUM = 10
-  TESLA_CHECKSUM = 11
-  PSA_CHECKSUM = 12
-  VOLKSWAGEN_MLB_CHECKSUM = 13
-
-
-@dataclass
-class Signal:
-  name: str
-  start_bit: int
-  msb: int
-  lsb: int
-  size: int
-  is_signed: bool
-  factor: float
-  offset: float
-  is_little_endian: bool
-  type: int = SignalType.DEFAULT
-  calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
-
-
-@dataclass
-class Msg:
-  name: str
-  address: int
-  size: int
-  sigs: dict[str, Signal]
-
-
-@dataclass
-class Val:
-  name: str
-  address: int
-  def_val: str
-  sigs: dict[str, Signal] | None = None
 
 
 BO_RE = re.compile(r"^BO_ (\w+) (\w+) *: (\w+) (\w+)")
@@ -118,7 +71,7 @@ class DBC:
         address = int(m.group(1), 0)
         msg_name = m.group(2)
         size = int(m.group(3), 0)
-        sigs = {}
+        sigs: dict[str, Signal] = {}
         self.msgs[address] = Msg(msg_name, address, size, sigs)
         self.addr_to_msg[address] = self.msgs[address]
         self.name_to_msg[msg_name] = self.msgs[address]
