@@ -19,7 +19,6 @@ dependencies = [
 [project.optional-dependencies]
 testing = [
   "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
-  "cffi",
   "tree-sitter",
   "tree-sitter-c",
   "gcovr",
