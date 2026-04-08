@@ -218,8 +218,8 @@ void init_tests(void){
   ignition_can = false;
   ignition_can_cnt = 0U;
   for (int i = 0; i < safety_hook_registry_count(); i++) {
-    if (safety_hook_registry[i].ignition_hook_active) {
-      safety_hook_registry[i].ignition_state = (ignition_can_state_t){0};
+    if (ignition_hook_registry[i].active) {
+      ignition_hook_registry[i].state = (ignition_can_state_t){0};
     }
   }
 
