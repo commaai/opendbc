@@ -22,44 +22,6 @@ def checksum(msg):
   return addr, ret, bus
 
 
-class TestRivianCanIgnition(unittest.TestCase):
-  TX_MSGS = []
-
-  def setUp(self):
-    self.safety = libsafety_py.libsafety
-    self.safety.init_tests()
-
-  def _rx_ign(self, data):
-    msg = libsafety_py.make_CANPacket(0x152, 0, data)
-    self.safety.ignition_can_hook(msg)
-    return msg
-
-  def test_rivian_152_sequential_counter_sets(self):
-    self.safety.set_ignition_can(False)
-    self._rx_ign([0x0, 0x0] + ([0x0] * 5) + [0x10])
-    self.assertFalse(self.safety.get_ignition_can())
-
-    self.safety.set_ignition_can_cnt(42)
-    self._rx_ign([0x0, 0x1] + ([0x0] * 5) + [0x10])
-    self.assertTrue(self.safety.get_ignition_can())
-    self.assertEqual(0, self.safety.get_ignition_can_cnt())
-
-    self.safety.set_ignition_can_cnt(7)
-    self._rx_ign([0x0, 0x2] + ([0x0] * 5) + [0x00])
-    self.assertFalse(self.safety.get_ignition_can())
-    self.assertEqual(0, self.safety.get_ignition_can_cnt())
-
-  def test_rivian_152_skipped_counter_no_update(self):
-    self.safety.set_ignition_can(False)
-    self._rx_ign([0x0, 0x0] + ([0x0] * 5) + [0x10])
-    self.assertFalse(self.safety.get_ignition_can())
-
-    self.safety.set_ignition_can_cnt(99)
-    self._rx_ign([0x0, 0x2] + ([0x0] * 5) + [0x10])
-    self.assertFalse(self.safety.get_ignition_can())
-    self.assertEqual(99, self.safety.get_ignition_can_cnt())
-
-
 class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest,
                            common.VehicleSpeedSafetyTest):
 
@@ -158,6 +120,11 @@ class TestRivianStockSafety(TestRivianSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
     self.safety.init_tests()
 
+  def _rx_ign(self, data):
+    msg = libsafety_py.make_CANPacket(0x152, 0, data)
+    self.safety.ignition_can_hook(msg)
+    return msg
+
   def test_adas_status(self):
     # For canceling stock ACC
     for controls_allowed in (True, False):
@@ -165,6 +132,31 @@ class TestRivianStockSafety(TestRivianSafetyBase):
       for interface_status in range(4):
         values = {"VDM_AdasInterfaceStatus": interface_status}
         self.assertTrue(self._tx(self.packer.make_can_msg_safety("VDM_AdasSts", 2, values)))
+
+  def test_ignition_rivian_152_sequential_counter_sets(self):
+    self.safety.set_ignition_can(False)
+    self._rx_ign([0x0, 0x0] + ([0x0] * 5) + [0x10])
+    self.assertFalse(self.safety.get_ignition_can())
+
+    self.safety.set_ignition_can_cnt(42)
+    self._rx_ign([0x0, 0x1] + ([0x0] * 5) + [0x10])
+    self.assertTrue(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+    self.safety.set_ignition_can_cnt(7)
+    self._rx_ign([0x0, 0x2] + ([0x0] * 5) + [0x00])
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+  def test_ignition_rivian_152_skipped_counter_no_update(self):
+    self.safety.set_ignition_can(False)
+    self._rx_ign([0x0, 0x0] + ([0x0] * 5) + [0x10])
+    self.assertFalse(self.safety.get_ignition_can())
+
+    self.safety.set_ignition_can_cnt(99)
+    self._rx_ign([0x0, 0x2] + ([0x0] * 5) + [0x10])
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(99, self.safety.get_ignition_can_cnt())
 
 
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
