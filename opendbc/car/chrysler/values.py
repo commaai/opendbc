@@ -12,6 +12,7 @@ Ecu = CarParams.Ecu
 class ChryslerSafetyFlags(IntFlag):
   RAM_DT = 1
   RAM_HD = 2
+  SRT = 4
 
 
 class ChryslerFlags(IntFlag):
@@ -82,6 +83,12 @@ class CAR(Platforms):
     JEEP_GRAND_CHEROKEE.specs,
   )
 
+  JEEP_GRAND_CHEROKEE_SRT_2016 = ChryslerPlatformConfig(  # SRT Trim Specs
+    [ChryslerCarDocs("Jeep Grand Cherokee SRT 2016-18")],
+    ChryslerCarSpecs(mass=1836.0, wheelbase=2.70, steerRatio=13.0),
+    {Bus.pt: 'chrysler_srt_generated'},
+  )
+
   # Ram
   RAM_1500_5TH_GEN = ChryslerPlatformConfig(
     [ChryslerCarDocs("Ram 1500 2019-24", car_parts=CarParts.common([CarHarness.ram]))],
@@ -115,6 +122,10 @@ class CarControllerParams:
       self.STEER_DELTA_UP = 4
       self.STEER_DELTA_DOWN = 4
       self.STEER_MAX = 250  # TODO: Some CUSW will go to 261, some not quite, exact boundaries not yet determined
+    elif CP.carFingerprint in SRT_CARS:
+      self.STEER_DELTA_UP = 6
+      self.STEER_DELTA_DOWN = 6
+      self.STEER_MAX = 261
     else:
       self.STEER_DELTA_UP = 3
       self.STEER_DELTA_DOWN = 3
@@ -127,6 +138,7 @@ RAM_DT = {CAR.RAM_1500_5TH_GEN, }
 RAM_HD = {CAR.RAM_HD_5TH_GEN, }
 RAM_CARS = RAM_DT | RAM_HD
 CUSW_CARS = {CAR.JEEP_CHEROKEE_5TH_GEN, }
+SRT_CARS = {CAR.JEEP_GRAND_CHEROKEE_SRT_2016, }
 
 
 CHRYSLER_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
