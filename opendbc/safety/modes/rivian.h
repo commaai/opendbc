@@ -7,14 +7,13 @@ static void rivian_ignition_hook(const CANPacket_t *msg, ignition_can_state_t *s
     // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
     const int counter = msg->data[1] & 0xFU;  // max is only 14
 
-    if ((state->values[1] != 0) && (counter == ((state->values[0] + 1) % 15))) {
+    if ((state->scratch[1] != 0) && (counter == ((state->scratch[0] + 1) % 15))) {
       // VDM_OutputSignals->VDM_EpasPowerMode
       const uint8_t power_mode = (msg->data[7] >> 4U) & 0x3U;
-      ignition_can = power_mode == 1U;  // VDM_EpasPowerMode_Drive_On=1
-      ignition_can_cnt = 0U;
+      update_ignition_can_state(state, power_mode == 1U);  // VDM_EpasPowerMode_Drive_On=1
     }
-    state->values[0] = counter;
-    state->values[1] = 1;
+    state->scratch[0] = counter;
+    state->scratch[1] = 1;
   }
 }
 

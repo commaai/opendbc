@@ -20,14 +20,13 @@ static void tesla_ignition_hook(const CANPacket_t *msg, ignition_can_state_t *st
     // 0x221 overlaps with Rivian which has random data on byte 0
     const int counter = msg->data[6] >> 4U;
 
-    if ((state->values[1] != 0) && (counter == ((state->values[0] + 1) % 16))) {
+    if ((state->scratch[1] != 0) && (counter == ((state->scratch[0] + 1) % 16))) {
       // VCFRONT_LVPowerState->VCFRONT_vehiclePowerState
       const uint8_t power_state = (msg->data[0] >> 5U) & 0x3U;
-      ignition_can = power_state == 0x3U;  // VEHICLE_POWER_STATE_DRIVE=3
-      ignition_can_cnt = 0U;
+      update_ignition_can_state(state, power_state == 0x3U);  // VEHICLE_POWER_STATE_DRIVE=3
     }
-    state->values[0] = counter;
-    state->values[1] = 1;
+    state->scratch[0] = counter;
+    state->scratch[1] = 1;
   }
 }
 

@@ -16,10 +16,8 @@
 #define MAZDA_CAM  2
 
 static void mazda_ignition_hook(const CANPacket_t *msg, ignition_can_state_t *state) {
-  SAFETY_UNUSED(state);
   if ((msg->bus == 0U) && (msg->addr == 0x9EU) && (GET_LEN(msg) == 8U)) {
-    ignition_can = (msg->data[0] >> 5U) == 0x6U;
-    ignition_can_cnt = 0U;
+    update_ignition_can_state(state, (msg->data[0] >> 5U) == 0x6U);
   }
 }
 

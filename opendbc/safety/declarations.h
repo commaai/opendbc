@@ -208,9 +208,20 @@ typedef uint32_t (*compute_checksum_t)(const CANPacket_t *msg);
 typedef uint8_t (*get_counter_t)(const CANPacket_t *msg);
 typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *msg);
 typedef struct {
-  int values[2];
+  int scratch[2];
+  bool ignition;
+  bool seen;
+  bool updated;
+  uint32_t age;
 } ignition_can_state_t;
 typedef void (*ignition_can_hook_t)(const CANPacket_t *msg, ignition_can_state_t *state);
+
+static inline void update_ignition_can_state(ignition_can_state_t *state, bool ignition_active) {
+  state->ignition = ignition_active;
+  state->seen = true;
+  state->updated = true;
+  state->age = 0U;
+}
 
 typedef safety_config (*safety_hook_init)(uint16_t param);
 typedef void (*rx_hook)(const CANPacket_t *msg);
@@ -333,6 +344,7 @@ extern const safety_hooks body_hooks;
 extern const safety_hooks chrysler_hooks;
 extern const safety_hooks chrysler_cusw_hooks;
 extern const safety_hooks elm327_hooks;
+extern const safety_hooks silent_hooks;
 extern const safety_hooks nooutput_hooks;
 extern const safety_hooks alloutput_hooks;
 extern const safety_hooks ford_hooks;

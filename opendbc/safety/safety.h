@@ -89,7 +89,7 @@ int alternative_experience = 0;
 uint32_t safety_mode_cnt = 0U;
 
 static const safety_hook_config safety_hook_registry[] = {
-  {SAFETY_SILENT, &nooutput_hooks},
+  {SAFETY_SILENT, &silent_hooks},
   {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
   {SAFETY_TOYOTA, &toyota_hooks},
   {SAFETY_ELM327, &elm327_hooks},
@@ -118,59 +118,54 @@ static const safety_hook_config safety_hook_registry[] = {
 #endif
 };
 
-typedef struct {
-  ignition_can_state_t state;
-  bool active;
-} ignition_hook_registry_entry;
+enum { SAFETY_HOOK_REGISTRY_COUNT = sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0]) };
 
-static ignition_hook_registry_entry ignition_hook_registry[sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0])];
+static ignition_can_state_t ignition_hook_states[SAFETY_HOOK_REGISTRY_COUNT];
 
 uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
-static const safety_hooks *current_hooks = &nooutput_hooks;
+static const safety_hooks *current_hooks = &silent_hooks;
 safety_config current_safety_config;
 
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
 
 static int safety_hook_registry_count(void) {
-  return sizeof(safety_hook_registry) / sizeof(safety_hook_registry[0]);
+  return SAFETY_HOOK_REGISTRY_COUNT;
 }
 
-static void init_ignition_hook_registry(void) {
-  static bool ignition_hook_registry_initialized = false;
-  if (!ignition_hook_registry_initialized) {
-    for (int i = 0; i < safety_hook_registry_count(); i++) {
-      ignition_hook_registry[i].active = false;
-      ignition_hook_registry[i].state = (ignition_can_state_t){0};
+static void update_ignition_can(void) {
+  bool seen = false;
+  bool active = false;
+  uint32_t min_cnt = 0U;
 
-      if (safety_hook_registry[i].hooks->ignition_hook != NULL) {
-        bool duplicate = false;
-
-        for (int j = 0; j < i; j++) {
-          if (safety_hook_registry[j].hooks == safety_hook_registry[i].hooks) {
-            duplicate = true;
-            break;
-          }
-        }
-
-        if (!duplicate) {
-          ignition_hook_registry[i].active = true;
-        }
+  for (int i = 0; i < safety_hook_registry_count(); i++) {
+    if ((safety_hook_registry[i].hooks->ignition_hook != NULL) && ignition_hook_states[i].seen) {
+      active |= ignition_hook_states[i].ignition;
+      if (!seen || (ignition_hook_states[i].age < min_cnt)) {
+        min_cnt = ignition_hook_states[i].age;
       }
+      seen = true;
     }
-
-    ignition_hook_registry_initialized = true;
   }
+
+  ignition_can = active;
+  ignition_can_cnt = seen ? min_cnt : 0U;
 }
 
 void ignition_can_hook(const CANPacket_t *msg) {
-  init_ignition_hook_registry();
+  bool updated = false;
 
   for (int i = 0; i < safety_hook_registry_count(); i++) {
-    if (ignition_hook_registry[i].active) {
-      safety_hook_registry[i].hooks->ignition_hook(msg, &ignition_hook_registry[i].state);
+    if (safety_hook_registry[i].hooks->ignition_hook != NULL) {
+      ignition_hook_states[i].updated = false;
+      safety_hook_registry[i].hooks->ignition_hook(msg, &ignition_hook_states[i]);
+      updated |= ignition_hook_states[i].updated;
     }
+  }
+
+  if (updated) {
+    update_ignition_can();
   }
 }
 

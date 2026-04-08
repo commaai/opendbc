@@ -105,9 +105,11 @@ def _site_key(site):
 
 
 def _is_in_constexpr_context(node):
-  """Check if a node is inside a static or file-scope variable initializer."""
+  """Check if a node is inside a build-time constant expression context."""
   current = node.parent
   while current is not None:
+    if current.type in ("array_declarator", "enumerator"):
+      return True
     if current.type == "init_declarator":
       decl = current.parent
       if decl and decl.type == "declaration":

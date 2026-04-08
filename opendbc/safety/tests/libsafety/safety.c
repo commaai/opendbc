@@ -214,13 +214,10 @@ void init_tests(void){
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;
   invalid_steer_req_count = 0;
-  init_ignition_hook_registry();
   ignition_can = false;
   ignition_can_cnt = 0U;
   for (int i = 0; i < safety_hook_registry_count(); i++) {
-    if (ignition_hook_registry[i].active) {
-      ignition_hook_registry[i].state = (ignition_can_state_t){0};
-    }
+    ignition_hook_states[i] = (ignition_can_state_t){0};
   }
 
   // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
