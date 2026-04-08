@@ -49,9 +49,10 @@ def process_hud_alert(enabled, fingerprint, hud_control):
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
 
-def compute_torque_reduction_gain(steering_torque, v_ego_kph, lat_active, last_gain):
+def compute_torque_reduction_gain(steering_torque, v_ego, lat_active, last_gain):
   if lat_active:
-    ceiling = np.interp(v_ego_kph, [40, 120], [0.75, 0.95])
+    # full torque at near-stop
+    ceiling = np.interp(v_ego, [0.5, 1.5], [1.0, 0.85])
     target = np.interp(abs(steering_torque), [75, 400], [ceiling, 0.2])
   else:
     target = 0.0
@@ -105,7 +106,7 @@ class CarController(CarControllerBase):
 
       # TODO: consider angle direction so you can override in direction and it doesn't reduce torque as much
       # TODO: max_allowed_torque
-      apply_torque = compute_torque_reduction_gain(CS.out.steeringTorque, CS.out.vEgoRaw * CV.MS_TO_KPH,
+      apply_torque = compute_torque_reduction_gain(CS.out.steeringTorque, CS.out.vEgoRaw,
                                                    CC.latActive, self.apply_torque_last)
 
       apply_steer_req = CC.latActive
