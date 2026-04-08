@@ -15,6 +15,46 @@ class Buttons:
   CANCEL = 6
 
 
+class TestGmCanIgnition(unittest.TestCase):
+  TX_MSGS = []
+
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.init_tests()
+    self.safety.ignition_can_reset()
+
+  def _rx_ign(self, addr: int, bus: int, data):
+    msg = libsafety_py.make_CANPacket(addr, bus, data)
+    self.safety.ignition_can_hook(msg)
+    return msg
+
+  def test_reset(self):
+    self.safety.set_ignition_can(True)
+    self.safety.set_ignition_can_cnt(123)
+    self.safety.ignition_can_reset()
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+  def test_bus_not_zero_noop(self):
+    self.safety.set_ignition_can(True)
+    self.safety.set_ignition_can_cnt(123)
+    self._rx_ign(0x1F1, 1, [0x0] * 8)
+    self.assertTrue(self.safety.get_ignition_can())
+    self.assertEqual(123, self.safety.get_ignition_can_cnt())
+
+  def test_gm_1f1(self):
+    self.safety.set_ignition_can(False)
+    self.safety.set_ignition_can_cnt(5)
+    self._rx_ign(0x1F1, 0, [0x2] + ([0x0] * 7))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+    self.safety.set_ignition_can_cnt(7)
+    self._rx_ign(0x1F1, 0, [0x0] * 8)
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+
 class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafetyTest):
 
   RELAY_MALFUNCTION_ADDRS = {0: (0x180, 0x2CB), 2: (0x184,)}  # ASCMLKASteeringCmd, ASCMGasRegenCmd, PSCMStatus

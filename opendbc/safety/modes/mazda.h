@@ -15,6 +15,14 @@
 #define MAZDA_MAIN 0
 #define MAZDA_CAM  2
 
+static void mazda_ignition_hook(const CANPacket_t *msg, ignition_can_state_t *state) {
+  SAFETY_UNUSED(state);
+  if ((msg->bus == 0U) && (msg->addr == 0x9EU) && (GET_LEN(msg) == 8U)) {
+    ignition_can = (msg->data[0] >> 5U) == 0x6U;
+    ignition_can_cnt = 0U;
+  }
+}
+
 // track msgs coming from OP so that we know what CAM msgs to drop and what to forward
 static void mazda_rx_hook(const CANPacket_t *msg) {
   if ((int)msg->bus == MAZDA_MAIN) {
@@ -102,4 +110,5 @@ const safety_hooks mazda_hooks = {
   .init = mazda_init,
   .rx = mazda_rx_hook,
   .tx = mazda_tx_hook,
+  .ignition_hook = mazda_ignition_hook,
 };

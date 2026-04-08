@@ -207,6 +207,10 @@ typedef uint32_t (*get_checksum_t)(const CANPacket_t *msg);
 typedef uint32_t (*compute_checksum_t)(const CANPacket_t *msg);
 typedef uint8_t (*get_counter_t)(const CANPacket_t *msg);
 typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *msg);
+typedef struct {
+  int values[2];
+} ignition_can_state_t;
+typedef void (*ignition_can_hook_t)(const CANPacket_t *msg, ignition_can_state_t *state);
 
 typedef safety_config (*safety_hook_init)(uint16_t param);
 typedef void (*rx_hook)(const CANPacket_t *msg);
@@ -218,6 +222,7 @@ typedef struct {
   rx_hook rx;
   tx_hook tx;
   fwd_hook fwd;
+  ignition_can_hook_t ignition_hook;
   get_checksum_t get_checksum;
   compute_checksum_t compute_checksum;
   get_counter_t get_counter;
@@ -263,6 +268,13 @@ extern bool vehicle_moving;
 extern bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
 extern int cruise_button_prev;
 extern bool safety_rx_checks_invalid;
+
+// CAN-based ignition detection (used by panda)
+#define SAFETY_IGNITION_CAN_HOOKS 1
+extern bool ignition_can;
+extern uint32_t ignition_can_cnt;
+void ignition_can_reset(void);
+void ignition_can_hook(const CANPacket_t *msg);
 
 // for safety modes with torque steering control
 extern int desired_torque_last;       // last desired steer torque

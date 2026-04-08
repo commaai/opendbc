@@ -7,6 +7,30 @@ import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 
 
+class TestMazdaCanIgnition(unittest.TestCase):
+  TX_MSGS = []
+
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.init_tests()
+    self.safety.ignition_can_reset()
+
+  def test_mazda_9e(self):
+    # (data[0] >> 5) == 0x6
+    self.safety.set_ignition_can(False)
+    self.safety.set_ignition_can_cnt(9)
+    msg = libsafety_py.make_CANPacket(0x9E, 0, [0xC0] + ([0x0] * 7))
+    self.safety.ignition_can_hook(msg)
+    self.assertTrue(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+    self.safety.set_ignition_can_cnt(11)
+    msg = libsafety_py.make_CANPacket(0x9E, 0, [0x00] * 8)
+    self.safety.ignition_can_hook(msg)
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+
 class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   TX_MSGS = [[0x243, 0], [0x09d, 0], [0x440, 0]]

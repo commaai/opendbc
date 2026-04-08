@@ -58,6 +58,10 @@ bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
 bool safety_rx_checks_invalid = false;
 
+// CAN-based ignition detection (used by panda)
+bool ignition_can = false;
+uint32_t ignition_can_cnt = 0U;
+
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
 int rt_torque_last = 0;            // last desired torque for real time check
@@ -84,6 +88,42 @@ int alternative_experience = 0;
 // time since safety mode has been changed
 uint32_t safety_mode_cnt = 0U;
 
+static const safety_hook_config safety_hook_registry[] = {
+  {SAFETY_SILENT, &nooutput_hooks},
+  {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
+  {SAFETY_TOYOTA, &toyota_hooks},
+  {SAFETY_ELM327, &elm327_hooks},
+  {SAFETY_GM, &gm_hooks},
+  {SAFETY_HONDA_BOSCH, &honda_bosch_hooks},
+  {SAFETY_HYUNDAI, &hyundai_hooks},
+  {SAFETY_CHRYSLER, &chrysler_hooks},
+  {SAFETY_SUBARU, &subaru_hooks},
+  {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
+  {SAFETY_NISSAN, &nissan_hooks},
+  {SAFETY_NOOUTPUT, &nooutput_hooks},
+  {SAFETY_HYUNDAI_LEGACY, &hyundai_legacy_hooks},
+  {SAFETY_MAZDA, &mazda_hooks},
+  {SAFETY_BODY, &body_hooks},
+  {SAFETY_FORD, &ford_hooks},
+  {SAFETY_RIVIAN, &rivian_hooks},
+  {SAFETY_TESLA, &tesla_hooks},
+  {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
+#ifdef ALLOW_DEBUG
+  {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
+  {SAFETY_PSA, &psa_hooks},
+  {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
+  {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
+  {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
+  {SAFETY_ALLOUTPUT, &alloutput_hooks},
+#endif
+};
+#ifdef ALLOW_DEBUG
+#define SAFETY_HOOK_REGISTRY_COUNT 25
+#else
+#define SAFETY_HOOK_REGISTRY_COUNT 19
+#endif
+static ignition_can_state_t ignition_hook_states[SAFETY_HOOK_REGISTRY_COUNT];
+
 uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
@@ -91,6 +131,38 @@ safety_config current_safety_config;
 
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
+
+static bool safety_hook_is_duplicate(int index) {
+  bool duplicate = false;
+
+  for (int i = 0; i < index; i++) {
+    if (safety_hook_registry[i].hooks == safety_hook_registry[index].hooks) {
+      duplicate = true;
+      break;
+    }
+  }
+
+  return duplicate;
+}
+
+void ignition_can_reset(void) {
+  ignition_can = false;
+  ignition_can_cnt = 0U;
+
+  for (int i = 0; i < SAFETY_HOOK_REGISTRY_COUNT; i++) {
+    if (!safety_hook_is_duplicate(i)) {
+      ignition_hook_states[i] = (ignition_can_state_t){0};
+    }
+  }
+}
+
+void ignition_can_hook(const CANPacket_t *msg) {
+  for (int i = 0; i < SAFETY_HOOK_REGISTRY_COUNT; i++) {
+    if (!safety_hook_is_duplicate(i) && (safety_hook_registry[i].hooks->ignition_hook != NULL)) {
+      safety_hook_registry[i].hooks->ignition_hook(msg, &ignition_hook_states[i]);
+    }
+  }
+}
 
 static bool is_msg_valid(RxCheck addr_list[], int index) {
   bool valid = true;
@@ -384,36 +456,6 @@ static void reset_sample(struct sample_t *sample) {
 }
 
 int set_safety_hooks(uint16_t mode, uint16_t param) {
-  const safety_hook_config safety_hook_registry[] = {
-    {SAFETY_SILENT, &nooutput_hooks},
-    {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
-    {SAFETY_TOYOTA, &toyota_hooks},
-    {SAFETY_ELM327, &elm327_hooks},
-    {SAFETY_GM, &gm_hooks},
-    {SAFETY_HONDA_BOSCH, &honda_bosch_hooks},
-    {SAFETY_HYUNDAI, &hyundai_hooks},
-    {SAFETY_CHRYSLER, &chrysler_hooks},
-    {SAFETY_SUBARU, &subaru_hooks},
-    {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
-    {SAFETY_NISSAN, &nissan_hooks},
-    {SAFETY_NOOUTPUT, &nooutput_hooks},
-    {SAFETY_HYUNDAI_LEGACY, &hyundai_legacy_hooks},
-    {SAFETY_MAZDA, &mazda_hooks},
-    {SAFETY_BODY, &body_hooks},
-    {SAFETY_FORD, &ford_hooks},
-    {SAFETY_RIVIAN, &rivian_hooks},
-    {SAFETY_TESLA, &tesla_hooks},
-    {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
-#ifdef ALLOW_DEBUG
-    {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
-    {SAFETY_PSA, &psa_hooks},
-    {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
-    {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
-    {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
-    {SAFETY_ALLOUTPUT, &alloutput_hooks},
-#endif
-  };
-
   // reset state set by safety mode
   safety_mode_cnt = 0U;
   relay_malfunction = false;
@@ -456,8 +498,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   current_safety_config.disable_forwarding = false;
 
   int set_status = -1;  // not set
-  int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
-  for (int i = 0; i < hook_config_count; i++) {
+  for (int i = 0; i < SAFETY_HOOK_REGISTRY_COUNT; i++) {
     if (safety_hook_registry[i].id == mode) {
       current_hooks = safety_hook_registry[i].hooks;
       current_safety_mode = mode;

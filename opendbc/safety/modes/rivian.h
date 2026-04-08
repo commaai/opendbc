@@ -2,6 +2,22 @@
 
 #include "opendbc/safety/declarations.h"
 
+static void rivian_ignition_hook(const CANPacket_t *msg, ignition_can_state_t *state) {
+  if ((msg->bus == 0U) && (msg->addr == 0x152U) && (GET_LEN(msg) == 8U)) {
+    // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
+    const int counter = msg->data[1] & 0xFU;  // max is only 14
+
+    if ((state->values[1] != 0) && (counter == ((state->values[0] + 1) % 15))) {
+      // VDM_OutputSignals->VDM_EpasPowerMode
+      const uint8_t power_mode = (msg->data[7] >> 4U) & 0x3U;
+      ignition_can = power_mode == 1U;  // VDM_EpasPowerMode_Drive_On=1
+      ignition_can_cnt = 0U;
+    }
+    state->values[0] = counter;
+    state->values[1] = 1;
+  }
+}
+
 static uint8_t rivian_get_counter(const CANPacket_t *msg) {
   // Signal: ESP_Status_Counter, VDM_PropStatus_Counter
   return msg->data[1] & 0xFU;
@@ -175,6 +191,7 @@ const safety_hooks rivian_hooks = {
   .init = rivian_init,
   .rx = rivian_rx_hook,
   .tx = rivian_tx_hook,
+  .ignition_hook = rivian_ignition_hook,
   .get_counter = rivian_get_counter,
   .get_checksum = rivian_get_checksum,
   .compute_checksum = rivian_compute_checksum,

@@ -26,6 +26,45 @@ def round_angle(apply_angle, can_offset=0):
   return away_round(apply_angle_can + rnd_offset) * 0.1 - 1638.35
 
 
+class TestTeslaCanIgnition(unittest.TestCase):
+  TX_MSGS = []
+
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.init_tests()
+    self.safety.ignition_can_reset()
+
+  def _rx_ign(self, data):
+    msg = libsafety_py.make_CANPacket(0x221, 0, data)
+    self.safety.ignition_can_hook(msg)
+    return msg
+
+  def test_tesla_221_sequential_counter_sets(self):
+    self.safety.set_ignition_can(False)
+    self._rx_ign([0x60] + ([0x0] * 5) + [0x00, 0x00])
+    self.assertFalse(self.safety.get_ignition_can())
+
+    self.safety.set_ignition_can_cnt(8)
+    self._rx_ign([0x60] + ([0x0] * 5) + [0x10, 0x00])
+    self.assertTrue(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+    self.safety.set_ignition_can_cnt(12)
+    self._rx_ign([0x00] + ([0x0] * 5) + [0x20, 0x00])
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+  def test_tesla_221_skipped_counter_no_update(self):
+    self.safety.set_ignition_can(False)
+    self._rx_ign([0x60] + ([0x0] * 5) + [0x00, 0x00])
+    self.assertFalse(self.safety.get_ignition_can())
+
+    self.safety.set_ignition_can_cnt(77)
+    self._rx_ign([0x60] + ([0x0] * 5) + [0x30, 0x00])
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(77, self.safety.get_ignition_can_cnt())
+
+
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
   SAFETY_PARAM = 0
 

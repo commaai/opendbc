@@ -29,6 +29,15 @@ typedef enum {
 static GmHardware gm_hw = GM_ASCM;
 static bool gm_pcm_cruise = false;
 
+static void gm_ignition_hook(const CANPacket_t *msg, ignition_can_state_t *state) {
+  SAFETY_UNUSED(state);
+  if ((msg->bus == 0U) && (msg->addr == 0x1F1U) && (GET_LEN(msg) == 8U)) {
+    // SystemPowerMode (2=Run, 3=Crank Request)
+    ignition_can = (msg->data[0] & 0x2U) != 0U;
+    ignition_can_cnt = 0U;
+  }
+}
+
 static void gm_rx_hook(const CANPacket_t *msg) {
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
 
@@ -240,4 +249,5 @@ const safety_hooks gm_hooks = {
   .init = gm_init,
   .rx = gm_rx_hook,
   .tx = gm_tx_hook,
+  .ignition_hook = gm_ignition_hook,
 };

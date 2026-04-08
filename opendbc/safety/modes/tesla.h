@@ -15,6 +15,22 @@ static bool tesla_stock_lkas_prev = false;
 static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
 
+static void tesla_ignition_hook(const CANPacket_t *msg, ignition_can_state_t *state) {
+  if ((msg->bus == 0U) && (msg->addr == 0x221U) && (GET_LEN(msg) == 8U)) {
+    // 0x221 overlaps with Rivian which has random data on byte 0
+    const int counter = msg->data[6] >> 4U;
+
+    if ((state->values[1] != 0) && (counter == ((state->values[0] + 1) % 16))) {
+      // VCFRONT_LVPowerState->VCFRONT_vehiclePowerState
+      const uint8_t power_state = (msg->data[0] >> 5U) & 0x3U;
+      ignition_can = power_state == 0x3U;  // VEHICLE_POWER_STATE_DRIVE=3
+      ignition_can_cnt = 0U;
+    }
+    state->values[0] = counter;
+    state->values[1] = 1;
+  }
+}
+
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
 
   uint8_t cnt = 0;
@@ -386,6 +402,7 @@ const safety_hooks tesla_hooks = {
   .rx = tesla_rx_hook,
   .tx = tesla_tx_hook,
   .fwd = tesla_fwd_hook,
+  .ignition_hook = tesla_ignition_hook,
   .get_counter = tesla_get_counter,
   .get_checksum = tesla_get_checksum,
   .compute_checksum = tesla_compute_checksum,
