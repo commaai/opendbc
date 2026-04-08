@@ -53,14 +53,23 @@ def compute_torque_reduction_gain(steering_torque, v_ego, lat_active, last_gain)
   if lat_active:
     # full torque at near-stop
     ceiling = np.interp(v_ego, [0.5, 1.5], [1.0, 0.85])
-    # target = np.interp(abs(steering_torque), [75, 400], [ceiling, 0.2])
-    # stock reduces gain earlier depending on speed
-    start_bp = np.interp(v_ego, [2, 11], [75, 125])
-    shelf_bp = start_bp + 25
-    # shelf_bp = np.interp(v_ego, [2, 11], [])
+    # # target = np.interp(abs(steering_torque), [75, 400], [ceiling, 0.2])
+    # # stock reduces gain earlier depending on speed
+    # start_bp = np.interp(v_ego, [2, 11], [75, 125])
+    # shelf_bp = start_bp + 25
+    # # shelf_bp = np.interp(v_ego, [2, 11], [])
+    #
+    # target = np.interp(abs(steering_torque), [start_bp, shelf_bp + 25, shelf_bp + 100, 400],
+    #                    [ceiling, 0.5, 0.5, 0.2])
 
-    target = np.interp(abs(steering_torque), [start_bp, shelf_bp + 25, shelf_bp + 100, 400],
-                       [ceiling, 0.5, 0.5, 0.2])
+    shelf = np.interp(v_ego, [2, 11], [0.45, 0.6])
+    floor = np.interp(v_ego, [2, 22], [0.1, 0.3])
+    bp1 = np.interp(v_ego, [2, 11], [75, 125])
+    bp2 = np.interp(v_ego, [2, 11], [125, 150])
+    bp3 = np.interp(v_ego, [2, 11], [175, 275])
+    bp4 = np.interp(v_ego, [2, 22], [400, 700])
+    target = np.interp(abs(steering_torque), [bp1, bp2, bp3, bp4], [ceiling, shelf, shelf, floor])
+
   else:
     target = 0.0
   gain = rate_limit(target, last_gain, -0.014, 0.004)
