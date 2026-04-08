@@ -28,7 +28,7 @@ class GwmSafetyFlags(IntFlag):
 @dataclass
 class GWMCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
-  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.gwm]))
 
 
 @dataclass
