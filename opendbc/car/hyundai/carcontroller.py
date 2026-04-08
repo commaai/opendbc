@@ -96,7 +96,7 @@ class CarController(CarControllerBase):
         # self.angle_steady = desired_angle
 
         # self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [15, 20], [0.25, 0.0])))
-        self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5, 10, 20], [0.5, 0.2, 0.0])))
+        self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5, 10, 20], [0.2, 0.1, 0.0])))
         desired_angle = self.angle_filter.update(desired_angle)
 
       self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last,
