@@ -155,11 +155,11 @@ class HyundaiCarDocs(CarDocs):
 
 @dataclass
 class HyundaiPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_kia_generic"})
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_can_generated"})
 
   def init(self):
     if self.flags & HyundaiFlags.MANDO_RADAR:
-      self.dbc_dict = {Bus.pt: "hyundai_kia_generic", Bus.radar: 'hyundai_kia_mando_front_radar_generated'}
+      self.dbc_dict = {Bus.pt: "hyundai_can_generated", Bus.radar: 'hyundai_kia_mando_front_radar_generated'}
 
     if self.flags & HyundaiFlags.MIN_STEER_32_MPH:
       self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
