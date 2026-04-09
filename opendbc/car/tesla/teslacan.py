@@ -1,4 +1,3 @@
-import time
 import numpy as np
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
