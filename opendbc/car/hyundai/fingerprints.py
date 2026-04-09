@@ -860,6 +860,7 @@ FW_VERSIONS = {
   CAR.KIA_OPTIMA_H: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JFhe SCC FNCUP      1.00 1.00 96400-A8000         ',
+      b'\xf1\x00JFhe SCC F-CUP      1.00 1.00 96400-A8000         ',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00JFP LKAS AT EUR LHD 1.00 1.03 95895-A8100 160711',
