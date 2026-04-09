@@ -96,7 +96,7 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
 static int ford_desired_path_angle_last = 0;
 
 // Curvature rate limits
-#define FORD_LIMITS(limit_lateral_acceleration) {                                               \
+#define FORD_LIMITS(limit_lateral_acceleration, check_angle_error) {                             \
   .max_angle = 1000,          /* 0.02 curvature */                                              \
   .angle_deg_to_can = 50000,  /* 1 / (2e-5) rad to can */                                       \
   .max_angle_error = 100,     /* 0.002 * FORD_STEERING_LIMITS.angle_deg_to_can */               \
@@ -113,11 +113,11 @@ static int ford_desired_path_angle_last = 0;
   .angle_error_min_speed = 10.0,    /* m/s */                                                   \
                                                                                                 \
   .angle_is_curvature = (limit_lateral_acceleration),                                           \
-  .enforce_angle_error = true,                                                                  \
+  .enforce_angle_error = (check_angle_error),                                                   \
   .inactive_angle_is_zero = true,                                                               \
 }
 
-static const AngleSteeringLimits FORD_STEERING_LIMITS = FORD_LIMITS(false);
+static const AngleSteeringLimits FORD_STEERING_LIMITS = FORD_LIMITS(false, true);
 
 static void ford_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == FORD_MAIN_BUS) {
@@ -267,7 +267,10 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
 
   // Safety check for LateralMotionControl2 action
   if (msg->addr == FORD_LateralMotionControl2) {
-    static const AngleSteeringLimits FORD_CANFD_STEERING_LIMITS = FORD_LIMITS(true);
+    // CAN FD: c1/c0 control steering, c2=0 always. Disable curvature error check
+    // since desired curvature won't match measured when c1/c0 are doing the steering.
+    // ISO lateral accel limit still enforced on c2 range.
+    static const AngleSteeringLimits FORD_CANFD_STEERING_LIMITS = FORD_LIMITS(true, false);
 
     // Signal: LatCtl_D2_Rq
     bool steer_control_enabled = ((msg->data[0] >> 4) & 0x7U) != 0U;
