@@ -23,6 +23,9 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "TESLA_MODEL_Y" = [nan, 2.5, nan]
 "TESLA_MODEL_X" = [nan, 2.5, nan]
 
+# Hyundai/Kia/Genesis angle control
+"KIA_EV6_2025" = [nan, 2.5, nan]
+
 # Guess
 "FORD_BRONCO_SPORT_MK1" = [nan, 1.5, nan]
 "FORD_ESCAPE_MK4" = [nan, 1.5, nan]
