@@ -90,11 +90,6 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
 #define FORD_MAX_PATH_ANGLE 1047
 // Path offset limits for CAN FD (CAN units, 1 unit = 0.01m)
 #define FORD_MAX_PATH_OFFSET 512
-// Path angle rate limit: 0.55 rad/s at 20Hz = 55 CAN units/step
-#define FORD_PATH_ANGLE_MAX_DELTA 55
-
-static int ford_desired_path_angle_last = 0;
-
 // Curvature rate limits
 #define FORD_LIMITS(limit_lateral_acceleration, check_angle_error) {                             \
   .max_angle = 1000,          /* 0.02 curvature */                                              \
@@ -299,8 +294,6 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     if (!steer_control_enabled || !controls_allowed) {
       violation |= (desired_path_angle != 0) || (desired_path_offset != 0);
     }
-
-    ford_desired_path_angle_last = violation ? 0 : desired_path_angle;
 
     if (violation) {
       tx = false;
