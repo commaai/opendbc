@@ -1,3 +1,5 @@
+import time
+import numpy as np
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
 
@@ -14,7 +16,7 @@ class TeslaCAN:
   def __init__(self, CP, packer):
     self.CP = CP
     self.packer = packer
-    self.jerk = CarControllerParams.JERK_LIMIT_MAX
+    self.gas_release_time = 0.0
 
   def create_steering_control(self, angle, enabled):
     # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
@@ -36,16 +38,16 @@ class TeslaCAN:
     # This jerk exists on stock TACC as well, so we ramp up jerk to avoid this.
     # Setting both jerks to 0 seems to be the only thing that prevents the unintentional braking.
     if gas_pressed:
-      self.jerk = 0.0
-    else:
-      self.jerk = min(self.jerk + CarControllerParams.JERK_RAMP_RATE, CarControllerParams.JERK_LIMIT_MAX)
+      self.gas_release_time = time.monotonic()
+
+    jerk = float(np.interp(time.monotonic() - self.gas_release_time, [0.5, 1.5], [0.5, CarControllerParams.JERK_LIMIT_MAX]))
 
     values = {
       "DAS_setSpeed": set_speed,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,
-      "DAS_jerkMin": -self.jerk,
-      "DAS_jerkMax": self.jerk,
+      "DAS_jerkMin": -jerk,
+      "DAS_jerkMax": jerk,
       "DAS_accelMin": accel,
       "DAS_accelMax": max(accel, 0),
       "DAS_controlCounter": counter,
