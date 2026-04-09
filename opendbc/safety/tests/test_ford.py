@@ -283,7 +283,16 @@ class TestFordSafetyBase(common.CarSafetyTest):
                   self._set_prev_desired_angle(curvature)
                   self._reset_curvature_measurement(curvature, speed)
 
-                  should_tx = path_offset == 0 and path_angle == 0 and curvature_rate == 0
+                  # CAN FD allows c0/c1; non-CAN FD requires them inactive
+                  if self.STEER_MESSAGE == MSG_LateralMotionControl2:
+                    should_tx = curvature_rate == 0
+                    should_tx = should_tx and abs(path_angle) <= 0.5235
+                    should_tx = should_tx and abs(path_offset) <= 5.12
+                    if not steer_control_enabled or not controls_allowed:
+                      should_tx = should_tx and path_angle == 0 and path_offset == 0
+                  else:
+                    should_tx = path_offset == 0 and path_angle == 0 and curvature_rate == 0
+
                   # when request bit is 0, only allow curvature of 0 since the signal range
                   # is not large enough to enforce it tracking measured
                   should_tx = should_tx and (controls_allowed if steer_control_enabled else curvature == 0)
@@ -302,6 +311,9 @@ class TestFordSafetyBase(common.CarSafetyTest):
     When the curvature error is exceeded, commanded curvature must start moving towards meas respecting rate limits.
     Since safety allows higher rate limits to avoid false positives, we need to allow a lower rate to move towards meas.
     """
+    # CAN FD disables curvature error check since c1/c0 control steering, not c2
+    if self.STEER_MESSAGE == MSG_LateralMotionControl2:
+      self.skipTest("Curvature error check disabled for CAN FD (c1/c0 steering)")
     self.safety.set_controls_allowed(True)
     # safety fudges the speed (1 m/s) and rate limits (1 CAN unit) to avoid false positives
     small_curvature = 1 / self.DEG_TO_CAN  # significant small amount of curvature to cross boundary

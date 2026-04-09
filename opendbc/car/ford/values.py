@@ -34,6 +34,15 @@ class CarControllerParams:
   )
   CURVATURE_ERROR = 0.002  # ~6 degrees at 10 m/s, ~10 degrees at 35 m/s
 
+  # Rate limits for c1 (path_angle) in radian space — used with apply_std_steer_angle_limits
+  C1_RATE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    0.5,  # Max path_angle magnitude (DBC range is [-0.5, 0.5235])
+    # Wind-up — uncapped, PSCM rate-limits internally
+    ([5, 25], [0.50, 0.50]),
+    # Unwind — uncapped
+    ([5, 25], [0.50, 0.50]),
+  )
+
   ACCEL_MAX = 2.0               # m/s^2 max acceleration
   ACCEL_MIN = -3.5              # m/s^2 max deceleration
   MIN_GAS = -0.5
