@@ -132,10 +132,11 @@ class CarController(CarControllerBase):
           d_look = max(v_ego * 1.0, 7.0)
           x_pts = np.array(self.model.position.x)
           path_angle = float(np.interp(d_look, x_pts, np.array(self.model.orientation.z)))
-          path_offset = float(np.interp(d_look, x_pts, np.array(self.model.position.y)))
-
-          c0_scale = float(np.interp(v_ego, [11., 14.], [1., 0.]))
-          path_offset *= c0_scale
+          # c0: shorter lookahead at speed to prevent early curve entry
+          # Low speed: c0 at d_look (full authority for tight turns)
+          # High speed: c0 at 6m (near-term centering only)
+          d_c0 = float(np.interp(v_ego, [11., 14.], [d_look, 6.0]))
+          path_offset = float(np.interp(d_c0, x_pts, np.array(self.model.position.y)))
 
           path_angle = apply_std_steer_angle_limits(
             path_angle, self.path_angle_last, v_ego, 0., CC.latActive, CarControllerParams.C1_RATE_LIMITS)
