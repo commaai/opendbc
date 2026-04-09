@@ -86,6 +86,15 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
 
 #define FORD_CANFD_INACTIVE_CURVATURE_RATE 1024U
 
+// Path angle limits for CAN FD (CAN units, 1 unit = 0.0005 rad)
+#define FORD_MAX_PATH_ANGLE 1047
+// Path offset limits for CAN FD (CAN units, 1 unit = 0.01m)
+#define FORD_MAX_PATH_OFFSET 512
+// Path angle rate limit: 0.55 rad/s at 20Hz = 55 CAN units/step
+#define FORD_PATH_ANGLE_MAX_DELTA 55
+
+static int ford_desired_path_angle_last = 0;
+
 // Curvature rate limits
 #define FORD_LIMITS(limit_lateral_acceleration) {                                               \
   .max_angle = 1000,          /* 0.02 curvature */                                              \
@@ -267,12 +276,30 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     unsigned int raw_path_angle = ((msg->data[3] & 0x1FU) << 6) | (msg->data[4] >> 2);
     unsigned int raw_path_offset = ((msg->data[4] & 0x3U) << 8) | msg->data[5];
 
-    // These signals are not yet tested with the current safety limits
-    bool violation = (raw_curvature_rate != FORD_CANFD_INACTIVE_CURVATURE_RATE) || (raw_path_angle != FORD_INACTIVE_PATH_ANGLE) || (raw_path_offset != FORD_INACTIVE_PATH_OFFSET);
+    // Curvature rate must be inactive
+    bool violation = (raw_curvature_rate != FORD_CANFD_INACTIVE_CURVATURE_RATE);
 
-    // Check angle error and steer_control_enabled
-    int desired_curvature = raw_curvature - FORD_INACTIVE_CURVATURE;  // /FORD_STEERING_LIMITS.angle_deg_to_can to get real curvature
+    int desired_path_angle = raw_path_angle - FORD_INACTIVE_PATH_ANGLE;
+    int desired_path_offset = raw_path_offset - FORD_INACTIVE_PATH_OFFSET;
+
+    // Path angle: DBC range check and rate limit
+    violation |= safety_max_limit_check(desired_path_angle, FORD_MAX_PATH_ANGLE, -FORD_MAX_PATH_ANGLE);
+    int path_angle_delta = desired_path_angle - ford_desired_path_angle_last;
+    violation |= safety_max_limit_check(path_angle_delta, FORD_PATH_ANGLE_MAX_DELTA, -FORD_PATH_ANGLE_MAX_DELTA);
+
+    // Path offset: DBC range check
+    violation |= safety_max_limit_check(desired_path_offset, FORD_MAX_PATH_OFFSET, -FORD_MAX_PATH_OFFSET);
+
+    // Curvature check (with ISO lateral accel enforcement)
+    int desired_curvature = raw_curvature - FORD_INACTIVE_CURVATURE;
     violation |= steer_angle_cmd_checks(desired_curvature, steer_control_enabled, FORD_CANFD_STEERING_LIMITS);
+
+    // When not steering or controls not allowed, c0/c1 must be inactive
+    if (!steer_control_enabled || !is_lat_active()) {
+      violation |= (desired_path_angle != 0) || (desired_path_offset != 0);
+    }
+
+    ford_desired_path_angle_last = violation ? 0 : desired_path_angle;
 
     if (violation) {
       tx = false;
