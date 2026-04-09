@@ -16,6 +16,7 @@ from opendbc.car.values import Platform
 from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
 from opendbc.car.body.values import CAR as COMMA
 from opendbc.car.psa.values import CAR as PSA
+from opendbc.car.mg.values import CAR as MG
 
 # FIXME: add routes for these cars
 non_tested_cars = [
@@ -28,6 +29,7 @@ non_tested_cars = [
   SUBARU.SUBARU_FORESTER_HYBRID,
   VOLKSWAGEN.PORSCHE_MACAN_MK1,
   HONDA.ACURA_TLX_2G,
+  MG.MG_ZS_EV,
 
   # These had their DSUs unplugged, need new routes
   # TOYOTA.LEXUS_ES  # hybrid
@@ -348,6 +350,8 @@ routes = [
   CarTestRoute("c8a98e58647765ad/00000002--84e4746136", TESLA.TESLA_MODEL_Y),
   CarTestRoute("2c912ca5de3b1ee9/0000025d--6eb6bcbca4", TESLA.TESLA_MODEL_Y, segment=4),
   CarTestRoute("bdda168c0c35fad7/00000001--5c5a36ec06", TESLA.TESLA_MODEL_X), # openpilot longitudinal
+
+  CarTestRoute("5d61e2f6e1f247f3/00000054--d3dfb01b34", MG.MG_5_EV),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold

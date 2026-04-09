@@ -55,6 +55,10 @@ rivian:
   - changed-files:
     - any-glob-to-any-file: 'opendbc/car/rivian/**'
 
+mg:
+  - changed-files:
+    - any-glob-to-any-file: 'opendbc/car/mg/**'
+
 subaru:
   - changed-files:
     - any-glob-to-any-file: 'opendbc/car/subaru/**'
