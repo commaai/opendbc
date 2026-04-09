@@ -50,13 +50,13 @@ class CarController(CarControllerBase):
         state = 13 if CC.cruiseControl.cancel else 4  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
         accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
         cntr = (self.frame // 4) % 8
-        can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CS.out.vEgo, CC.longActive, CS.out.gasPressed))
+        can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CS.out.vEgo, CS.out.gasPressed))
 
     else:
       # Increment counter so cancel is prioritized even without openpilot longitudinal
       if CC.cruiseControl.cancel:
         cntr = (CS.das_control["DAS_controlCounter"] + 1) % 8
-        can_sends.append(self.tesla_can.create_longitudinal_command(13, 0, cntr, CS.out.vEgo, False, CS.out.gasPressed))
+        can_sends.append(self.tesla_can.create_longitudinal_command(13, 0, cntr, CS.out.vEgo, False))
 
     # TODO: HUD control
     new_actuators = actuators.as_builder()
