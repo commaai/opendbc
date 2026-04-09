@@ -13,9 +13,8 @@ def get_steer_ctrl_type(flags: int, ctrl_type: int) -> int:
 class TeslaCAN:
   def __init__(self, CP, packer):
     self.CP = CP
-    self.CCP = CarControllerParams
     self.packer = packer
-    self.jerk = self.CCP.JERK_LIMIT_MAX
+    self.jerk = CarControllerParams.JERK_LIMIT_MAX
 
   def create_steering_control(self, angle, enabled):
     # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
@@ -39,7 +38,7 @@ class TeslaCAN:
     if gas_pressed:
       self.jerk = 0.0
     else:
-      self.jerk = min(self.jerk + self.CCP.JERK_RAMP_RATE, self.CCP.JERK_LIMIT_MAX)
+      self.jerk = min(self.jerk + CarControllerParams.JERK_RAMP_RATE, CarControllerParams.JERK_LIMIT_MAX)
 
     values = {
       "DAS_setSpeed": set_speed,
