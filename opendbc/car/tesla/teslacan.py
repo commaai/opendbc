@@ -32,11 +32,7 @@ class TeslaCAN:
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
   def create_longitudinal_command(self, acc_state, accel, counter, v_ego, active, gas_pressed):
-    from opendbc.car.interfaces import V_CRUISE_MAX
-
-    set_speed = max(v_ego * CV.MS_TO_KPH, 0)
-    if active:
-      set_speed = 0 if accel < 0 else V_CRUISE_MAX
+    set_speed = min(max(v_ego + accel, 0) * CV.MS_TO_KPH, 400)
 
     if gas_pressed:
       self.jerk_upper = self.jerk_lower = 0.0
