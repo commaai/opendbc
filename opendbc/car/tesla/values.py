@@ -130,7 +130,6 @@ class CarControllerParams:
   ACCEL_MAX = 2.0    # m/s^2
   ACCEL_MIN = -3.48  # m/s^2
   JERK_LIMIT_MAX = 4.9  # m/s^3, ACC faults at 5.0
-  JERK_RAMP_RATE = JERK_LIMIT_MAX / (2.0 / 0.04)  # 1s, per longitudinal control step (25 Hz)
 
 
 class TeslaSafetyFlags(IntFlag):
