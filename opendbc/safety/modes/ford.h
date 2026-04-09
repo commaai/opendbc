@@ -295,7 +295,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     violation |= steer_angle_cmd_checks(desired_curvature, steer_control_enabled, FORD_CANFD_STEERING_LIMITS);
 
     // When not steering or controls not allowed, c0/c1 must be inactive
-    if (!steer_control_enabled || !is_lat_active()) {
+    if (!steer_control_enabled || !controls_allowed) {
       violation |= (desired_path_angle != 0) || (desired_path_offset != 0);
     }
 
