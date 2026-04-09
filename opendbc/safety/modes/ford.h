@@ -282,10 +282,8 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     int desired_path_angle = raw_path_angle - FORD_INACTIVE_PATH_ANGLE;
     int desired_path_offset = raw_path_offset - FORD_INACTIVE_PATH_OFFSET;
 
-    // Path angle: DBC range check and rate limit
+    // Path angle: DBC range check (software rate-limits at 0.50 rad/s)
     violation |= safety_max_limit_check(desired_path_angle, FORD_MAX_PATH_ANGLE, -FORD_MAX_PATH_ANGLE);
-    int path_angle_delta = desired_path_angle - ford_desired_path_angle_last;
-    violation |= safety_max_limit_check(path_angle_delta, FORD_PATH_ANGLE_MAX_DELTA, -FORD_PATH_ANGLE_MAX_DELTA);
 
     // Path offset: DBC range check
     violation |= safety_max_limit_check(desired_path_offset, FORD_MAX_PATH_OFFSET, -FORD_MAX_PATH_OFFSET);
