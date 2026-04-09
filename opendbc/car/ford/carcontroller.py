@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from numpy import clip, interp
+from numpy import clip
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
 from opendbc.car.lateral import ISO_LATERAL_ACCEL, apply_std_steer_angle_limits
