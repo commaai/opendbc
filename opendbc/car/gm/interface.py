@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from math import fabs, exp
+from math import fabs, tanh
 import numpy as np
 
 from opendbc.car import get_safety_config, structs
@@ -55,7 +55,7 @@ class CarInterface(CarInterfaceBase):
       assert non_linear_torque_params, "The params are not defined"
       a, b, c, d = non_linear_torque_params
       sig_input = a * lateral_acceleration
-      sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
+      sig = 0.5 * tanh(0.5 * sig_input)
       steer_torque = (sig * b) + (lateral_acceleration * c) + d
       return float(steer_torque)
 
