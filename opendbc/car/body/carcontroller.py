@@ -17,7 +17,6 @@ MAX_TORQUE_RATE = 70
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
-    self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.main])
 
     self.v_pid_settings = {
@@ -31,8 +30,8 @@ class CarController(CarControllerBase):
         "k_d": [[0, MAX_SPEED], [0.0 * MAX_TORQUE_RATE, 0.0 * MAX_TORQUE_RATE]],
     }
 
-    self.v_pid = PIDController(**self.params.v_pid_settings, rate=1 / DT_CTRL)
-    self.w_pid = PIDController(**self.params.w_pid_settings, rate=1 / DT_CTRL)
+    self.v_pid = PIDController(**self.v_pid_settings, rate=1 / DT_CTRL)
+    self.w_pid = PIDController(**self.w_pid_settings, rate=1 / DT_CTRL)
 
     self.torque_r_filtered = 0.
     self.torque_l_filtered = 0.
@@ -43,7 +42,7 @@ class CarController(CarControllerBase):
 
     if CC.enabled:
       v_setpoint = (CC.actuators.accel / 4.0) * MAX_SPEED
-      w_setpoint = (-1 if self.params.FLIP_Y else 1) * CC.actuators.torque * MAX_TURN
+      w_setpoint = -CC.actuators.torque * MAX_TURN
 
       user_wants_to_move = (abs(w_setpoint) > 0.01 or abs(v_setpoint) > 0.01)
       robot_is_stopped = (abs(v_setpoint) < 0.05 and abs(w_setpoint) < 0.05)
