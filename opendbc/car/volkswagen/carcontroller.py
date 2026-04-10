@@ -127,14 +127,14 @@ class MQBStandstillManager:
 
     # apply acceleration adjustments based on our current rollback prevention state
     if long_active:
-      if self.stop_commit_active or (self.rollback_detected and accel <= 0):
-        accel = -0.5 if CS.rolling_forward else -3.5
-        stopping = True
-        starting = False
-      elif self.start_commit_active or (self.rollback_detected and accel > 0):
+      if self.start_commit_active or (self.rollback_detected and accel > 0):
         accel = max(accel, hill_launch_accel, 0.2)
         stopping = False
         starting = True
+      elif self.stop_commit_active or (self.rollback_detected and accel <= 0):
+        accel = -0.5 if CS.rolling_forward else -3.5
+        stopping = True
+        starting = False
 
     # the magic sauce for infinite standstill
     # begin a stopping procedure, then exit to starting state before the car reaches standstill
