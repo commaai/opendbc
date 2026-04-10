@@ -2,7 +2,7 @@
 import random
 import unittest
 
-from opendbc.car.hyundai.values import HyundaiSafetyFlags
+from opendbc.car.hyundai.values import HyundaiSafetyFlags, HyundaiCanSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
@@ -120,7 +120,7 @@ class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.ALT_LIMITS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiCanSafetyFlags.ALT_LIMITS)
     self.safety.init_tests()
 
 
@@ -132,7 +132,7 @@ class TestHyundaiSafetyAltLimits2(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.ALT_LIMITS_2)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiCanSafetyFlags.ALT_LIMITS_2)
     self.safety.init_tests()
 
 
