@@ -4,7 +4,7 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL
 from opendbc.car.common.pid import PIDController
 from opendbc.car.body import bodycan
-from opendbc.car.body.values import CarControllerParams, SPEED_FROM_RPM
+from opendbc.car.body.values import SPEED_FROM_RPM
 from opendbc.car.interfaces import CarControllerBase
 
 MAX_SPEED = 1 # m/s
@@ -41,7 +41,7 @@ class CarController(CarControllerBase):
     torque_r = 0
 
     if CC.enabled:
-      v_setpoint = (CC.actuators.accel / 4.0) * MAX_SPEED
+      v_setpoint = -(CC.actuators.accel / 4.0) * MAX_SPEED
       w_setpoint = -CC.actuators.torque * MAX_TURN
 
       user_wants_to_move = (abs(w_setpoint) > 0.01 or abs(v_setpoint) > 0.01)
