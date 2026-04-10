@@ -80,6 +80,21 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
+  def test_ignition_mazda_9e(self):
+    # (data[0] >> 5) == 0x6
+    self.safety.set_ignition_can(False)
+    self.safety.set_ignition_can_cnt(9)
+    msg = libsafety_py.make_CANPacket(0x9E, 0, [0xC0] + ([0x0] * 7))
+    self.safety.ignition_can_hook(msg)
+    self.assertTrue(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+    self.safety.set_ignition_can_cnt(11)
+    msg = libsafety_py.make_CANPacket(0x9E, 0, [0x00] * 8)
+    self.safety.ignition_can_hook(msg)
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
 
 if __name__ == "__main__":
   unittest.main()

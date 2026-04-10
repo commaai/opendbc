@@ -30,6 +30,12 @@ const safety_hooks nooutput_hooks = {
   .tx = nooutput_tx_hook,
 };
 
+const safety_hooks silent_hooks = {
+  .init = nooutput_init,
+  .rx = default_rx_hook,
+  .tx = nooutput_tx_hook,
+};
+
 // *** all output safety mode ***
 static safety_config alloutput_init(uint16_t param) {
   // Enables passthrough mode where relay is open and bus 0 gets forwarded to bus 2 and vice versa

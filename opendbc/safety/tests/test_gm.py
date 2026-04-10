@@ -162,6 +162,37 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.gm, self.EXTRA_SAFETY_PARAM)
     self.safety.init_tests()
 
+  def _rx_ign(self, addr: int, bus: int, data):
+    msg = libsafety_py.make_CANPacket(addr, bus, data)
+    self.safety.ignition_can_hook(msg)
+    return msg
+
+  def test_ignition_reset(self):
+    self.safety.set_ignition_can(True)
+    self.safety.set_ignition_can_cnt(123)
+    self.safety.init_tests()
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+  def test_ignition_bus_not_zero_noop(self):
+    self.safety.set_ignition_can(True)
+    self.safety.set_ignition_can_cnt(123)
+    self._rx_ign(0x1F1, 1, [0x0] * 8)
+    self.assertTrue(self.safety.get_ignition_can())
+    self.assertEqual(123, self.safety.get_ignition_can_cnt())
+
+  def test_ignition_gm_1f1(self):
+    self.safety.set_ignition_can(False)
+    self.safety.set_ignition_can_cnt(5)
+    self._rx_ign(0x1F1, 0, [0x2] + ([0x0] * 7))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
+    self.safety.set_ignition_can_cnt(7)
+    self._rx_ign(0x1F1, 0, [0x0] * 8)
+    self.assertFalse(self.safety.get_ignition_can())
+    self.assertEqual(0, self.safety.get_ignition_can_cnt())
+
 
 class TestGmAscmEVSafety(TestGmAscmSafety, TestGmEVSafetyBase):
   pass
