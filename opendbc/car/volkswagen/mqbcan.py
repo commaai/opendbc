@@ -88,8 +88,16 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active):
   return acc_control_value(main_switch_on, acc_faulted, long_active)
 
 
+from enum import Enum, auto
+
+
+class ESPOverride(Enum):
+  STOP = auto()
+  START = auto()
+
+
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting,
-                             esp_hold, esp_starting_override, esp_stopping_override):
+                             esp_hold, esp_override):
   commands = []
 
   acc_06_values = {
@@ -107,8 +115,8 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   commands.append(packer.make_can_msg("ACC_06", bus, acc_06_values))
 
   # acc 7 is forwarded to ESP
-  acc_07_stopping = esp_stopping_override if esp_stopping_override is not None else stopping
-  acc_07_starting = esp_starting_override if esp_starting_override is not None else starting
+  acc_07_stopping = stopping if esp_override is None else esp_override == ESPOverride.STOP
+  acc_07_starting = starting if esp_override is None else esp_override == ESPOverride.START
 
   if acc_07_starting:
     acc_hold_type = 4  # hold release / startup
