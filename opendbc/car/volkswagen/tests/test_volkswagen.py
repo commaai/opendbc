@@ -225,11 +225,11 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     assert not mgr.can_stop_forever
 
   def test_can_stop_forever_cleared_when_moving(self):
-    """can_stop_forever clears when vEgo > 1 and esp_stopping is not active."""
+    """can_stop_forever clears when vEgo > 9.5 km/h and esp_stopping is not active."""
     mgr = MQBStandstillManager()
     self._run(mgr, self._cs(esp_stopping=True), accel=-1.0, stopping=True)
     assert mgr.can_stop_forever
-    self._run(mgr, self._cs(v_ego=1.1), accel=0.5)
+    self._run(mgr, self._cs(v_ego=9.5 / 3.6 + 0.1), accel=0.5)
     assert not mgr.can_stop_forever
 
   def test_can_stop_forever_cleared_when_long_inactive(self):
