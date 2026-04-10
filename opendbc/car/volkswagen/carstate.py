@@ -20,10 +20,10 @@ class CarState(CarStateBase):
     self.rolling_backward = False
     self.rolling_forward = False
     self.grade = 0.0
+    self.sum_wegimpulse = 0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
-    self.distance_button_pressed = False
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -93,6 +93,12 @@ class CarState(CarStateBase):
         pt_cp.vl["ESP_10"]["ESP_VR_Fahrtrichtung"] == 0 or
         pt_cp.vl["ESP_10"]["ESP_VL_Fahrtrichtung"] == 0
       )
+      self.sum_wegimpulse = int(
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_VL"] +
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_VR"] +
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"] +
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"]
+      )
 
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
         ret.carFaultedNonCritical = bool(cam_cp.vl["HCA_01"]["EA_Ruckfreigabe"]) or cam_cp.vl["HCA_01"]["EA_ACC_Sollstatus"] > 0  # EA
@@ -151,7 +157,6 @@ class CarState(CarStateBase):
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
     self.gra_stock_values = pt_cp.vl["GRA_ACC_01"]
-    self.distance_button_pressed = self.gra_stock_values["GRA_Verstellung_Zeitluecke"] in (1, 2, 3)
 
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
