@@ -2,13 +2,33 @@ import math
 from opendbc.car import get_safety_config, structs
 from opendbc.car.body.carcontroller import CarController
 from opendbc.car.body.carstate import CarState
-from opendbc.car.body.values import SPEED_FROM_RPM
+from opendbc.car.body.values import SPEED_FROM_RPM, BIN_PATH, BIN_URL, FLASH_ADDR, BUS
 from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.body.flash import update
+from opendbc.car.fw_query_definitions import StdQueries
+from opendbc.car.can_definitions import CanData
 
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+
+  @staticmethod
+  def init(CP, can_recv, can_send, communication_control=None):
+    fw_signature = next(
+      (fw.fwVersion for fw in CP.carFw
+      if fw.ecu == structs.CarParams.Ecu.engine
+      and fw.request[1] == StdQueries.APPLICATION_SOFTWARE_FINGERPRINT_REQUEST),
+      b""
+    )
+
+    def p_can_send(addr: int, dat: bytes, bus: int):
+      can_send([CanData(address=addr, dat=dat, src=bus)])
+
+    def p_can_recv():
+      return [(msg.address, msg.dat, msg.src) for packet in can_recv() for msg in packet]
+
+    update(p_can_send, p_can_recv, FLASH_ADDR, BUS, BIN_PATH, BIN_URL, fw_signature)
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:

@@ -1,3 +1,4 @@
+import os
 from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs
@@ -6,6 +7,15 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 Ecu = CarParams.Ecu
 
 SPEED_FROM_RPM = 0.008587
+
+FIRMWARE_VERSION = "v0.3.1"
+BIN_URL = f"https://github.com/commaai/body/releases/download/{FIRMWARE_VERSION}/body.bin.signed"
+BIN_NAME = f"body-v1-{FIRMWARE_VERSION}.bin.signed"
+BODY_DIR = os.path.dirname(os.path.realpath(__file__))
+_PANDA_BIN_DIR = os.path.join(BODY_DIR, "../../../../panda/board/body/v1")
+BIN_PATH = os.path.join(_PANDA_BIN_DIR, BIN_NAME) if os.path.isdir(_PANDA_BIN_DIR) else os.path.join(BODY_DIR, BIN_NAME)
+FLASH_ADDR = 0x250
+BUS = 0
 
 
 class CarControllerParams:
