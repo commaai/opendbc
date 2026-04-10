@@ -78,7 +78,7 @@ class MQBStandstillManager:
     esp_override: mqbcan.ESPOverride | None = None
     theoretical_safe_stop_speed = self.get_theoretical_safe_speed(CS.grade, CS.out.vEgo)
     can_leave_stop = max_planned_speed > theoretical_safe_stop_speed
-    hill_launch_accel = 0.2 * CS.grade - 1
+    hill_launch_accel = 0.1 * CS.grade
 
     if CS.rolling_backward:
       self.rollback_detected = True
