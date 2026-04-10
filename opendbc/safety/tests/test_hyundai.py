@@ -68,6 +68,8 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
   cnt_cruise = 0
   cnt_button = 0
 
+  LFAHDA_MFC_LEN = 4
+
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_can_generated")
     self.safety = libsafety_py.libsafety
@@ -110,6 +112,15 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
+
+  def test_lfahda_mfc_tx_length(self):
+    # correct length should be allowed
+    self.safety.set_controls_allowed(1)
+    self.assertTrue(self._tx(common.make_msg(0, 0x485, self.LFAHDA_MFC_LEN)))
+
+    # wrong length should be rejected
+    wrong_len = 8 if self.LFAHDA_MFC_LEN == 4 else 4
+    self.assertFalse(self._tx(common.make_msg(0, 0x485, wrong_len)))
 
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
@@ -157,6 +168,16 @@ class TestHyundaiSafetyFCEV(TestHyundaiSafety):
   def _user_gas_msg(self, gas):
     values = {"ACCELERATOR_PEDAL": gas}
     return self.packer.make_can_msg_safety("FCEV_ACCELERATOR", 0, values)
+
+
+class TestHyundaiSafetyCanRefresh(TestHyundaiSafety):
+  LFAHDA_MFC_LEN = 8
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_can_refresh_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.CAN_REFRESH_MSGS)
+    self.safety.init_tests()
 
 
 class TestHyundaiLegacySafety(TestHyundaiSafety):
