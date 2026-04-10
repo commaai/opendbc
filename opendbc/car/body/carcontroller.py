@@ -61,13 +61,13 @@ class CarController(CarControllerBase):
         self.w_pid.reset()
 
       v_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
-      v_error = v_measured - v_setpoint
+      v_error = v_setpoint - v_measured
       freeze_v_integrator = ((v_error < 0 and self.v_pid.error_integral <= -MAX_POS_INTEGRATOR) or
                             (v_error > 0 and self.v_pid.error_integral >= MAX_POS_INTEGRATOR))
       v_torque = self.v_pid.update(v_error, freeze_integrator=freeze_v_integrator)
 
       w_measured = SPEED_FROM_RPM * -(CS.out.wheelSpeeds.fl - CS.out.wheelSpeeds.fr)
-      w_error = w_measured - w_setpoint
+      w_error = w_setpoint - w_measured
       freeze_w_integrator = ((w_error < 0 and self.w_pid.error_integral <= -MAX_POS_INTEGRATOR) or
                             (w_error > 0 and self.w_pid.error_integral >= MAX_POS_INTEGRATOR))
       w_torque = self.w_pid.update(w_error, freeze_integrator=freeze_w_integrator)
