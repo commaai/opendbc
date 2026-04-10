@@ -26,9 +26,9 @@ class CarController(CarControllerBase):
       "k_d": 0.0 * MAX_TORQUE_RATE,
     }
     self.w_pid_settings = {
-        "k_p": [[0, self.MAX_SPEED], [0.6 * MAX_TORQUE_RATE, 0.1 * MAX_TORQUE_RATE]],
-        "k_i": [[0, self.MAX_SPEED], [0.6 * MAX_TORQUE_RATE, 0.1 * MAX_TORQUE_RATE]],
-        "k_d": [[0, self.MAX_SPEED], [0.0 * MAX_TORQUE_RATE, 0.0 * MAX_TORQUE_RATE]],
+        "k_p": [[0, MAX_SPEED], [0.6 * MAX_TORQUE_RATE, 0.1 * MAX_TORQUE_RATE]],
+        "k_i": [[0, MAX_SPEED], [0.6 * MAX_TORQUE_RATE, 0.1 * MAX_TORQUE_RATE]],
+        "k_d": [[0, MAX_SPEED], [0.0 * MAX_TORQUE_RATE, 0.0 * MAX_TORQUE_RATE]],
     }
 
     self.v_pid = PIDController(**self.params.v_pid_settings, rate=1 / DT_CTRL)
