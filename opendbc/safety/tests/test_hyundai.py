@@ -292,6 +292,36 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
     pass
 
 
+class TestHyundaiSafetyCanRefreshCameraSCC(TestHyundaiSafetyCameraSCC):
+  LFAHDA_MFC_LEN = 8
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_can_refresh_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.CAMERA_SCC | HyundaiSafetyFlags.CAN_REFRESH_MSGS)
+    self.safety.init_tests()
+
+
+class TestHyundaiSafetyCanRefreshLong(TestHyundaiLongitudinalSafety):
+  LFAHDA_MFC_LEN = 8
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_can_refresh_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CAN_REFRESH_MSGS)
+    self.safety.init_tests()
+
+
+class TestHyundaiSafetyCanRefreshLongCameraSCC(TestHyundaiLongitudinalSafetyCameraSCC):
+  LFAHDA_MFC_LEN = 8
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_can_refresh_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CAMERA_SCC | HyundaiSafetyFlags.CAN_REFRESH_MSGS)
+    self.safety.init_tests()
+
+
 class TestHyundaiSafetyFCEVLong(TestHyundaiLongitudinalSafety, TestHyundaiSafetyFCEV):
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_can_generated")
