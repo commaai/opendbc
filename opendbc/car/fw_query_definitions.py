@@ -1,4 +1,3 @@
-import copy
 from dataclasses import dataclass, field
 import struct
 from collections.abc import Callable
@@ -56,6 +55,11 @@ class StdQueries:
   SUPPLIER_SOFTWARE_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
     p16(uds.DATA_IDENTIFIER_TYPE.SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
 
+  MANUFACTURER_ECU_HARDWARE_NUMBER_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
+    p16(uds.DATA_IDENTIFIER_TYPE.VEHICLE_MANUFACTURER_ECU_HARDWARE_NUMBER)
+  MANUFACTURER_ECU_HARDWARE_NUMBER_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
+    p16(uds.DATA_IDENTIFIER_TYPE.VEHICLE_MANUFACTURER_ECU_HARDWARE_NUMBER)
+
   UDS_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
     p16(uds.DATA_IDENTIFIER_TYPE.APPLICATION_SOFTWARE_IDENTIFICATION)
   UDS_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
@@ -85,8 +89,6 @@ class Request:
   whitelist_ecus: list[Ecu] = field(default_factory=list)
   rx_offset: int = 0x8
   bus: int = 1
-  # Whether this query should be run on the first auxiliary panda (CAN FD cars for example)
-  auxiliary: bool = False
   # FW responses from these queries will not be used for fingerprinting
   logging: bool = False
   # pandad toggles OBD multiplexing on/off as needed
@@ -124,17 +126,6 @@ class FwQueryConfig:
     for request_obj in self.requests:
       assert len(request_obj.request) == len(request_obj.response), ("Request and response lengths do not match: " +
                                                                      f"{request_obj.request} vs. {request_obj.response}")
-
-      # No request on the OBD port (bus 1, multiplexed) should be run on an aux panda
-      assert not (request_obj.auxiliary and request_obj.bus == 1 and request_obj.obd_multiplexing), ("OBD multiplexed request should not " +
-                                                                                                     f"be marked auxiliary: {request_obj}")
-
-    # Add aux requests (second panda) for all requests that are marked as auxiliary
-    for i in range(len(self.requests)):
-      if self.requests[i].auxiliary:
-        new_request = copy.deepcopy(self.requests[i])
-        new_request.bus += 4
-        self.requests.append(new_request)
 
   def get_all_ecus(self, offline_fw_versions: OfflineFwVersions,
                    include_extra_ecus: bool = True) -> set[EcuAddrSubAddr]:

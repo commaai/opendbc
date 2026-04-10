@@ -11,7 +11,7 @@ from opendbc.car.fw_query_definitions import AddrType
 class IsoTpParallelQuery:
   def __init__(self, can_send: CanSendCallable, can_recv: CanRecvCallable, bus: int, addrs: list[int] | list[AddrType],
                request: list[bytes], response: list[bytes], response_offset: int = 0x8,
-               functional_addrs: list[int] = None, response_pending_timeout: float = 10) -> None:
+               functional_addrs: list[int] | None = None, response_pending_timeout: float = 10) -> None:
     self.can_send = can_send
     self.can_recv = can_recv
     self.bus = bus
@@ -42,13 +42,13 @@ class IsoTpParallelQuery:
     self.can_send([msg])
 
   def _can_rx(self, addr, sub_addr=None):
-    """Helper function to retrieve message with specified address and subadress from buffer"""
+    """Helper function to retrieve message with specified address and subaddress from buffer"""
     keep_msgs = []
 
     if sub_addr is None:
       msgs = self.msg_buffer[addr]
     else:
-      # Filter based on subadress
+      # Filter based on subaddress
       msgs = []
       for m in self.msg_buffer[addr]:
         first_byte = m[1][0]

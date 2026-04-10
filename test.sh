@@ -6,18 +6,13 @@ cd $DIR
 
 source ./setup.sh
 
-# *** build ***
-scons -j8
+# *** uv lockfile check ***
+uv lock --check
 
-# *** lint ***
-# TODO: pre-commit is slow; replace it with openpilot's "op lint"
-#pre-commit run --all-files
-ruff check .
-
-# *** test ***
-pytest -n8 --ignore opendbc/safety
+# *** lint + test ***
+lefthook run test
 
 # *** all done ***
 GREEN='\033[0;32m'
 NC='\033[0m'
-printf "\n${GREEN}All good!${NC} Finished build, lint, and test in ${SECONDS}s\n"
+printf "\n${GREEN}All good!${NC} Finished lint and test in ${SECONDS}s\n"

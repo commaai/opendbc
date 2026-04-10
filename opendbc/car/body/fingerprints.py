@@ -1,4 +1,4 @@
-# ruff: noqa: E501
+""" AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, EDIT STRUCTURE THERE."""
 from opendbc.car.structs import CarParams
 from opendbc.car.body.values import CAR
 
@@ -9,7 +9,7 @@ Ecu = CarParams.Ecu
 
 FINGERPRINTS = {
   CAR.COMMA_BODY: [{
-    513: 8, 516: 8, 514: 3, 515: 4
+    513: 8, 516: 8, 514: 3, 515: 4, 517: 8, 518: 6, 519: 6
   }],
 }
 

@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from enum import StrEnum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 from opendbc.car.vin import Vin
 
 
@@ -22,12 +22,12 @@ class ModelYear(StrEnum):
   P_2023 = "P"
   R_2024 = "R"
   S_2025 = "S"
+  T_2026 = "T"
 
 
 @dataclass
 class RivianCarDocs(CarDocs):
   package: str = "All"
-  car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian]))
 
 
 @dataclass
@@ -38,17 +38,26 @@ class RivianPlatformConfig(PlatformConfig):
   years: set[ModelYear] = field(default_factory=set)
 
 
+class RivianFlags(IntFlag):
+  GEN2 = 1
+
+
+class RivianSafetyFlags(IntFlag):
+  LONG_CONTROL = 1
+
+
 class CAR(Platforms):
-  RIVIAN_R1_GEN1 = RivianPlatformConfig(
-    # TODO: verify this
+  RIVIAN_R1 = RivianPlatformConfig(
     [
-      RivianCarDocs("Rivian R1S 2022-24"),
-      RivianCarDocs("Rivian R1T 2022-24"),
+      RivianCarDocs("Rivian R1S 2022-24", setup_video="https://youtu.be/uaISd1j7Z4U", car_parts=CarParts.common([CarHarness.rivian_a])),
+      RivianCarDocs("Rivian R1S 2025", car_parts=CarParts.common([CarHarness.rivian_b])),
+      RivianCarDocs("Rivian R1T 2022-24", setup_video="https://youtu.be/uaISd1j7Z4U", car_parts=CarParts.common([CarHarness.rivian_a])),
+      RivianCarDocs("Rivian R1T 2025", car_parts=CarParts.common([CarHarness.rivian_b])),
     ],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
     lines={ModelLine.R1T, ModelLine.R1S},
-    years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024},
+    years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024, ModelYear.S_2025},
   )
 
 
@@ -66,6 +75,10 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   return {str(c) for c in candidates}
 
 
+RIVIAN_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
+  p16(0xf1a0)
+RIVIAN_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40])
+
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
@@ -73,7 +86,21 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
       rx_offset=0x40,
       bus=0,
-    )
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.MANUFACTURER_ECU_HARDWARE_NUMBER_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.MANUFACTURER_ECU_HARDWARE_NUMBER_RESPONSE],
+      rx_offset=0x40,
+      bus=0,
+      logging=True,
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, RIVIAN_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, RIVIAN_VERSION_RESPONSE],
+      rx_offset=0x40,
+      bus=0,
+      logging=True,
+    ),
   ],
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
@@ -88,10 +115,16 @@ GEAR_MAP = {
 
 
 class CarControllerParams:
-  # The Rivian R1T we tested on achieves slightly more lateral acceleration going left vs. right
-  # and lateral acceleration rises as speed increases. This value is set conservatively to
-  # reach a maximum of 2.5-3.0 m/s^2 turning left at 80 mph, but is less at lower speeds
-  STEER_MAX = 250  # ~2.5 m/s^2
+  # The R1T 2023 and R1S 2023 we tested on achieves slightly more lateral acceleration going left vs. right
+  # and lateral acceleration falls linearly as speed decreases from 38 mph to 20 mph. These values are set
+  # conservatively to reach a maximum of 3.0 m/s^2 turning left at 80 mph
+
+  # These refer to turning left:
+  # 250 is ~2.8 m/s^2 above 17 m/s, then linearly ramps to ~1.6 m/s^2 from 17 m/s to 9 m/s
+  # TODO: it is theorized older models have different steering racks and achieve down to half the
+  #  lateral acceleration referenced here at all speeds. detect this and ship a torque increase for those models
+  STEER_MAX = 250  # 350 is intended to maintain lateral accel, not increase it
+  STEER_MAX_LOOKUP = [9, 17], [350, 250]
   STEER_STEP = 1
   STEER_DELTA_UP = 3  # torque increase per refresh
   STEER_DELTA_DOWN = 5  # torque decrease per refresh
@@ -104,10 +137,6 @@ class CarControllerParams:
 
   def __init__(self, CP):
     pass
-
-
-class RivianSafetyFlags(IntFlag):
-  LONG_CONTROL = 1
 
 
 DBC = CAR.create_dbc_map()

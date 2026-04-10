@@ -1,13 +1,14 @@
-from opendbc.can.parser import CANParser
+import unittest
+from opendbc.can import CANParser
 from opendbc.can.tests import ALL_DBCS
 
 
-class TestDBCParser:
+class TestDBCParser(unittest.TestCase):
   def test_enough_dbcs(self):
     # sanity check that we're running on the real DBCs
     assert len(ALL_DBCS) > 20
 
-  def test_parse_all_dbcs(self, subtests):
+  def test_parse_all_dbcs(self):
     """
       Dynamic DBC parser checks:
         - Checksum and counter length, start bit, endianness
@@ -17,5 +18,5 @@ class TestDBCParser:
     """
 
     for dbc in ALL_DBCS:
-      with subtests.test(dbc=dbc):
+      with self.subTest(dbc=dbc):
         CANParser(dbc, [], 0)
