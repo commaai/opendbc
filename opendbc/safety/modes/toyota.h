@@ -196,6 +196,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
   const LongitudinalLimits TOYOTA_LONG_LIMITS = {
     .max_accel = 2000,   // 2.0 m/s2
     .min_accel = -3500,  // -3.5 m/s2
+    .zero_accel = 0,
   };
 
   bool tx = true;

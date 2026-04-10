@@ -177,14 +177,19 @@ class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
       for accel in np.concatenate((np.arange(min_accel - 1, max_accel + 1, 0.05), [0, self.INACTIVE_ACCEL])):
         accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
         for controls_allowed in [True, False]:
-          self.safety.set_controls_allowed(controls_allowed)
-          self.safety.set_alternative_experience(alternative_experience)
-          if self.LONGITUDINAL:
-            should_tx = controls_allowed and min_accel <= accel <= max_accel
-            should_tx = should_tx or accel == self.INACTIVE_ACCEL
-          else:
-            should_tx = False
-          self.assertEqual(should_tx, self._tx(self._accel_msg(accel)))
+          for gas_pressed in [True, False]:
+            self.safety.set_controls_allowed(controls_allowed)
+            self.safety.set_gas_pressed_prev(gas_pressed)
+            self.safety.set_alternative_experience(alternative_experience)
+            if self.LONGITUDINAL:
+              gas_allowed = controls_allowed
+              brake_allowed = controls_allowed and not gas_pressed
+              longitudinal_allowed = gas_allowed if accel >= 0 else brake_allowed
+              should_tx = longitudinal_allowed and min_accel <= accel <= max_accel
+              should_tx = should_tx or accel == self.INACTIVE_ACCEL
+            else:
+              should_tx = False
+            self.assertEqual(should_tx, self._tx(self._accel_msg(accel)))
 
 
 class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
@@ -1032,10 +1037,12 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
     # Test we allow lateral, but not longitudinal
     self.assertTrue(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.get_longitudinal_allowed())
+    self.assertFalse(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
     # Make sure we can re-gain longitudinal actuation
     self._rx(self._user_gas_msg(0))
-    self.assertTrue(self.safety.get_longitudinal_allowed())
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
 
   def test_prev_user_brake(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:
@@ -1077,14 +1084,17 @@ class CarSafetyTest(SafetyTest):
     self.safety.set_controls_allowed(1)
     self._rx(_user_brake_msg(1))
     self.assertTrue(self.safety.get_controls_allowed())
-    self.assertTrue(self.safety.get_longitudinal_allowed())
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
     self._rx(_user_brake_msg(0))
     self.assertTrue(self.safety.get_controls_allowed())
-    self.assertTrue(self.safety.get_longitudinal_allowed())
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
     # rising edge of brake should disengage
     self._rx(_user_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.get_longitudinal_allowed())
+    self.assertFalse(self.safety.get_longitudinal_brake_allowed())
+    self.assertFalse(self.safety.get_longitudinal_gas_allowed())
     self._rx(_user_brake_msg(0))  # reset no brakes
 
   def test_not_allow_user_brake_when_moving(self, _user_brake_msg=None, get_brake_pressed_prev=None):
@@ -1097,11 +1107,13 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._vehicle_moving_msg(self.STANDSTILL_THRESHOLD))
     self._rx(_user_brake_msg(1))
     self.assertTrue(self.safety.get_controls_allowed())
-    self.assertTrue(self.safety.get_longitudinal_allowed())
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
     self._rx(self._vehicle_moving_msg(self.STANDSTILL_THRESHOLD + 1))
     self._rx(_user_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.get_longitudinal_allowed())
+    self.assertFalse(self.safety.get_longitudinal_brake_allowed())
+    self.assertFalse(self.safety.get_longitudinal_gas_allowed())
     self._rx(self._vehicle_moving_msg(0))
 
   def test_vehicle_moving(self):

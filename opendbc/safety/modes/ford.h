@@ -169,6 +169,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     .max_accel = 5641,       //  1.9999 m/s^s
     .min_accel = 4231,       // -3.4991 m/s^2
     .inactive_accel = 5128,  // -0.0008 m/s^2
+    .zero_accel = 5129,      //  0.0031 m/s^2
 
     // gas cmd limits
     // Signal: AccPrpl_A_Rq & AccPrpl_A_Pred
@@ -201,7 +202,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     // Safety check for stock AEB
     violation |= cmbb_deny; // do not prevent stock AEB actuation
 
-    violation |= !get_longitudinal_allowed() && brake_actuation;
+    violation |= !get_longitudinal_brake_allowed() && brake_actuation;
 
     if (violation) {
       tx = false;
