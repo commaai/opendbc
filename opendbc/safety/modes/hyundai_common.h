@@ -30,17 +30,8 @@ bool hyundai_longitudinal = false;
 extern bool hyundai_camera_scc;
 bool hyundai_camera_scc = false;
 
-extern bool hyundai_canfd_lka_steer_msg;
-bool hyundai_canfd_lka_steer_msg = false;
-
-extern bool hyundai_alt_limits;
-bool hyundai_alt_limits = false;
-
 extern bool hyundai_fcev_gas_signal;
 bool hyundai_fcev_gas_signal = false;
-
-extern bool hyundai_alt_limits_2;
-bool hyundai_alt_limits_2 = false;
 
 static uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 
@@ -55,11 +46,6 @@ void hyundai_common_init(uint16_t param) {
   hyundai_hybrid_gas_signal = !hyundai_ev_gas_signal && GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
   hyundai_camera_scc = GET_FLAG(param, HYUNDAI_PARAM_CAMERA_SCC);
   hyundai_fcev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_FCEV_GAS);
-
-  // reset mode-specific state
-  hyundai_canfd_lka_steer_msg = false;
-  hyundai_alt_limits = false;
-  hyundai_alt_limits_2 = false;
 
   hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
 

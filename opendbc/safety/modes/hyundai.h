@@ -57,6 +57,8 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 };
 
 static bool hyundai_legacy = false;
+static bool hyundai_alt_limits = false;
+static bool hyundai_alt_limits_2 = false;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
 
