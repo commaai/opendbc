@@ -142,6 +142,9 @@ class MQBStandstillManager:
       # reset if hold is confirmed
       if CS.esp_hold_confirmation:
         self.can_stop_forever = False
+      # force ESP into starting state during a start commit to prevent rapid toggling of start/stop on takeoff
+      elif self.start_commit_active:
+        esp_override = mqbcan.ESPOverride.START
       # reset when moving
       elif CS.out.vEgo > 1 and not CS.esp_stopping:
         self.can_stop_forever = False
