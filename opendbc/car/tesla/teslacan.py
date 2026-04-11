@@ -1,3 +1,4 @@
+import numpy as np
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
 
@@ -14,6 +15,7 @@ class TeslaCAN:
   def __init__(self, CP, packer):
     self.CP = CP
     self.packer = packer
+    self.gas_release_frame = 0
 
   def create_steering_control(self, angle, enabled):
     # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
@@ -28,15 +30,23 @@ class TeslaCAN:
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, active):
+  def create_longitudinal_command(self, acc_state, accel, counter, frame, v_ego, gas_pressed):
     set_speed = min(max(v_ego + accel, 0) * CV.MS_TO_KPH, 400)
+
+    # There exists a jerk after overriding with gas above the set speed.
+    # This jerk exists on stock TACC as well, so we ramp up jerk to avoid this.
+    # Setting both jerks to 0 seems to be the only thing that prevents the unintentional braking.
+    if gas_pressed:
+      self.gas_release_frame = frame
+
+    jerk = float(np.interp(frame - self.gas_release_frame, [0, 100], [0.0, CarControllerParams.JERK_LIMIT_MAX]))
 
     values = {
       "DAS_setSpeed": set_speed,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,
-      "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
-      "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
+      "DAS_jerkMin": -jerk,
+      "DAS_jerkMax": jerk,
       "DAS_accelMin": accel,
       "DAS_accelMax": max(accel, 0),
       "DAS_controlCounter": counter,
