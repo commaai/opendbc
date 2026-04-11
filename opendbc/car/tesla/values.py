@@ -4,9 +4,24 @@ from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, Pla
 from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries
+import re
 
 Ecu = CarParams.Ecu
+
+# Tesla EPS firmware version pattern:
+#   <platform>_<build>_<version> (<build_num>),<model_code><part_version>
+# The model_code after the comma uniquely identifies the vehicle model:
+#   E... = Model 3, Y... = Model Y, X... = Model X
+TESLA_FW_PATTERN = re.compile(
+  rb'^(?P<platform>\w+)_(?P<build>[\w]+)_(?P<version>\d+\.\d+\.\d+) '
+  rb'\((?P<build_num>\d+)\),'
+  rb'(?P<model_code>[A-Z][A-Z0-9]*?)'
+  rb'(?P<part_version>\d{3}[\d.]*[\d]*)$'
+)
+
+# ECUs expected to have parseable platform codes for fuzzy matching
+PLATFORM_CODE_ECUS = (Ecu.eps,)
 
 
 class Footnote(Enum):
@@ -64,6 +79,48 @@ class CAR(Platforms):
   )
 
 
+def get_platform_codes(fw_versions: list[bytes] | set[bytes]) -> set[tuple[bytes, bytes]]:
+  """Extract (model_letter, platform_prefix) tuples from Tesla EPS firmware versions."""
+  codes = set()
+  for fw in fw_versions:
+    match = TESLA_FW_PATTERN.match(fw)
+    if match is not None:
+      model_letter = match.group('model_code')[:1]
+      platform = match.group('platform')
+      codes.add((model_letter, platform))
+  return codes
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str,
+                          offline_fw_versions: OfflineFwVersions) -> set[str]:
+  """Fuzzy fingerprint matching for Tesla vehicles using model identifier codes."""
+  candidates: set[str] = set()
+
+  for candidate, fws in offline_fw_versions.items():
+    for ecu, expected_versions in fws.items():
+      addr = ecu[1:]
+      if ecu[0] not in PLATFORM_CODE_ECUS:
+        continue
+
+      found_versions = live_fw_versions.get(addr, set())
+      if not found_versions:
+        continue
+
+      expected_codes = get_platform_codes(expected_versions)
+      found_codes = get_platform_codes(found_versions)
+
+      if not expected_codes or not found_codes:
+        continue
+
+      expected_model_letters = {code[0] for code in expected_codes}
+      found_model_letters = {code[0] for code in found_codes}
+
+      if expected_model_letters & found_model_letters:
+        candidates.add(candidate)
+
+  return candidates
+
+
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
@@ -71,7 +128,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
       bus=0,
     )
-  ]
+  ],
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 # Cars with this EPS FW have FSD 14 and use TeslaFlags.FSD_14
