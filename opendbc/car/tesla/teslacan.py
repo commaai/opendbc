@@ -39,7 +39,7 @@ class TeslaCAN:
     if gas_pressed:
       self.gas_release_frame = frame
 
-    jerk = float(np.interp(frame - self.gas_release_frame, [50, 150], [0.5, CarControllerParams.JERK_LIMIT_MAX]))
+    jerk = float(np.interp(frame - self.gas_release_frame, [0, 100], [0.0, CarControllerParams.JERK_LIMIT_MAX]))
 
     values = {
       "DAS_setSpeed": set_speed,
