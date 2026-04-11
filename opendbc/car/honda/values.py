@@ -1,14 +1,72 @@
+import re
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
+from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries, p16
 
 Ecu = structs.CarParams.Ecu
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 GearShifter = structs.CarState.GearShifter
+
+# Honda firmware version pattern:
+#   <part_number>-<platform_code>-<version>\x00\x00
+# The 3-char platform_code identifies the vehicle platform:
+#   e.g. TVA = Accord, TBA = Civic, TLA = CR-V 5G
+HONDA_FW_PATTERN = re.compile(
+  rb'^(?P<part_number>[A-Z0-9]{5})-'
+  rb'(?P<platform_code>[A-Z0-9]{3})-'
+  rb'(?P<version>[A-Z0-9]{4})\x00*$'
+)
+
+# ECUs expected to have parseable platform codes for fuzzy matching.
+# Excludes eps and vsa which are non-essential for many Honda models.
+PLATFORM_CODE_ECUS = (Ecu.srs, Ecu.fwdRadar, Ecu.fwdCamera)
+
+
+def get_platform_codes(fw_versions: list[bytes] | set[bytes]) -> set[bytes]:
+  """Extract 3-char platform codes from Honda firmware version strings."""
+  codes: set[bytes] = set()
+  for fw in fw_versions:
+    match = HONDA_FW_PATTERN.match(fw)
+    if match is not None:
+      codes.add(match.group('platform_code'))
+  return codes
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str,
+                          offline_fw_versions: OfflineFwVersions) -> set[str]:
+  """Fuzzy fingerprint matching for Honda vehicles using platform codes."""
+  candidates: set[str] = set()
+
+  for candidate, fws in offline_fw_versions.items():
+    valid_found_ecus = set()
+    valid_expected_ecus = {ecu[1:] for ecu in fws if ecu[0] in PLATFORM_CODE_ECUS}
+
+    for ecu, expected_versions in fws.items():
+      addr = ecu[1:]
+      if ecu[0] not in PLATFORM_CODE_ECUS:
+        continue
+
+      expected_codes = get_platform_codes(expected_versions)
+      found_codes = get_platform_codes(live_fw_versions.get(addr, set()))
+
+      if not expected_codes or not found_codes:
+        continue
+
+      # Platform codes must overlap
+      if not (expected_codes & found_codes):
+        break
+
+      valid_found_ecus.add(addr)
+
+    # All expected platform code ECUs must be found and matching
+    if valid_expected_ecus.issubset(valid_found_ecus):
+      candidates.add(candidate)
+
+  return candidates
 
 
 class CarControllerParams:
@@ -416,6 +474,7 @@ HONDA_ALT_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
   requests=[
     # Currently used to fingerprint
     Request(
