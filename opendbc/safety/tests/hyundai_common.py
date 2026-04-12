@@ -58,6 +58,14 @@ class HyundaiButtonBase:
         controls_allowed = btn in ENABLE_BUTTONS or main_button
         self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
 
+  def test_cruise_engaged_no_rising_edge(self):
+    self._rx(self._button_msg(Buttons.SET))
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+    # Staying in cruise should not re-trigger the engage logic
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+
   def test_sampling_cruise_buttons(self):
     """
       Test that we allow controls on recent button press, but not as button leaves sliding window
@@ -91,6 +99,9 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     pass
 
   def test_sampling_cruise_buttons(self):
+    pass
+
+  def test_cruise_engaged_no_rising_edge(self):
     pass
 
   def test_cruise_engaged_prev(self):
