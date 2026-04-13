@@ -303,6 +303,7 @@ static safety_config honda_nidec_init(uint16_t param) {
   honda_bosch_long = false;
   honda_bosch_radarless = false;
   honda_bosch_canfd = false;
+  honda_no_engine_data_msg = false;
 
   safety_config ret;
 
