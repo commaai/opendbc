@@ -90,7 +90,7 @@ class CarState(CarStateBase):
       else:
         lowspeed_source = sum(([cp.vl["ABS_MESSAGE"][f"ABS_MESSAGE_{s}"]] - getattr(self, f"abs_prior_{s}")) % 256 for s in ("FL", "FR", "RL", "RR"))
       for s in ("FL", "FR", "RL", "RR"):
-        setattr(self, f"abs_prior_{s}", [cp.vl["ABS_MESSAGE"][f"ABS_MESSAGE_{s}"])
+        setattr(self, f"abs_prior_{s}", cp.vl["ABS_MESSAGE"][f"ABS_MESSAGE_{s}"])
     else:
       lowspeed_source = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"]
     v_weight = float(np.interp(v_wheel, v_weight_bp, v_weight_v))
