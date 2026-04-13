@@ -566,16 +566,21 @@ class TestHondaBoschRadarlessLongNoEngineDataMsgSafety(TestHondaBoschRadarlessLo
     Covers the Honda Bosch Radarless safety mode with longitudinal control and no engine_data message
   """
 
+  cnt_abs = 0
+  _abs_tick = 0
+
   def setUp(self):
     super().setUp()
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch,
                                  HondaSafetyFlags.RADARLESS | HondaSafetyFlags.BOSCH_LONG | HondaSafetyFlags.NO_ENGINE_DATA_MSG)
+    self._abs_tick = 0
+    self._rx(self._abs_sensor_msg(self._abs_tick))  # prime prev_sensor state
     self.safety.init_tests()
 
-  def _speed_msg(self, speed):
-    values = {"ABS_SENSOR_FL": speed, "COUNTER": self.cnt_speed % 4}
-    self.__class__.cnt_speed += 1
-    return self.packer.make_can_msg_safety("ABS_SENSOR", self.PT_BUS, values)
+  def _vehicle_moving_msg(self, speed):
+    if speed > self.STANDSTILL_THRESHOLD:
+      self._abs_tick = (self._abs_tick + 1) & 0xFF  # motion => changed sensor sample
+    return self._abs_sensor_msg(self._abs_tick)
 
 
 class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
