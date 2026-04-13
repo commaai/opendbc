@@ -88,7 +88,7 @@ class CarState(CarStateBase):
       if self.abs_prior_FL == -1:
         lowspeed_source = v_wheel # initialize to v_wheel
       else:
-        lowspeed_source = sum(([cp.vl["ABS_MESSAGE"][f"ABS_MESSAGE_{s}"]] - getattr(self, f"abs_prior_{s}")) % 256 for s in ("FL", "FR", "RL", "RR")])
+        lowspeed_source = sum(([cp.vl["ABS_MESSAGE"][f"ABS_MESSAGE_{s}"]] - getattr(self, f"abs_prior_{s}")) % 256 for s in ("FL", "FR", "RL", "RR"))
       for s in ("FL", "FR", "RL", "RR"):
         setattr(self, f"abs_prior_{s}", [cp.vl["ABS_MESSAGE"][f"ABS_MESSAGE_{s}"])
     else:
