@@ -29,7 +29,7 @@ class CarState(CarStateBase):
     ret.steeringAngleDeg = pt_cp.vl["EPS_1"]["STEERING_ANGLE"]
     ret.steeringRateDeg = pt_cp.vl["EPS_1"]["STEERING_RATE"]
     ret.steeringTorque = pt_cp.vl["EPS_2"]["DRIVER_TORQUE"]
-    ret.steeringTorqueEps = pt_cp.vl["EPS_3"]["EPS_TORQUE"]
+    # ret.steeringTorqueEps = pt_cp.vl["EPS_3"]["EPS_TORQUE"]
     ret.steeringPressed = ret.steeringTorque > 80
     ret.yawRate = pt_cp.vl["ABS_2"]["YAW_RATE"]
     ret.steerFaultPermanent = bool(pt_cp.vl["EPS_2"]["LKA_FAULT"])
@@ -45,6 +45,7 @@ class CarState(CarStateBase):
     else:
       ret.gearShifter = GearShifter.drive
 
+    # TODO: ACC_2, but is it ok that speed is gated by "enabled"?
     ret.cruiseState.available = pt_cp.vl["ACC_1"]["CRUISE_STATUS"] in (1, 2, 3)
     ret.cruiseState.enabled = pt_cp.vl["ACC_1"]["CRUISE_STATUS"] in (2, 3)
     ret.cruiseState.speed = pt_cp.vl["ACC_1"]["HUD_SPEED"] * CV.KPH_TO_MS
