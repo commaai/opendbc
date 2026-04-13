@@ -565,17 +565,18 @@ class TestHondaBoschRadarlessLongNoEngineDataMsgSafety(TestHondaBoschRadarlessLo
   """
     Covers the Honda Bosch Radarless safety mode with longitudinal control and no engine_data message
   """
-
-  cnt_abs = 0
-
   def setUp(self):
     TestHondaBoschRadarlessSafetyBase.setUp(self)
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch,
                                  HondaSafetyFlags.RADARLESS | HondaSafetyFlags.BOSCH_LONG | HondaSafetyFlags.NO_ENGINE_DATA_MSG)
     self.safety.init_tests()
-    self.__class__.cnt_abs = 0
+    cnt_speed_before_prime = self.__class__.cnt_speed
     self._abs_tick = 0
-    self._rx(self._abs_sensor_msg(self._abs_tick))  # prime prev-sensor state for movement tests
+    # Prime twice so movement starts in a stable "current == prior" state
+    self._rx(self._abs_sensor_msg(self._abs_tick))
+    self._rx(self._abs_sensor_msg(self._abs_tick))
+    # Keep inherited counter-based tests on the same phase as other Honda classes.
+    self.__class__.cnt_speed = cnt_speed_before_prime
 
   def _abs_sensor_msg(self, abs_sensor):
     values = {
@@ -583,15 +584,17 @@ class TestHondaBoschRadarlessLongNoEngineDataMsgSafety(TestHondaBoschRadarlessLo
       "ABS_SENSOR_FR": abs_sensor,
       "ABS_SENSOR_RL": abs_sensor,
       "ABS_SENSOR_RR": abs_sensor,
-      "COUNTER": self.cnt_abs % 4,
+      # Use the shared speed counter so inherited counter checks keep their expectations.
+      "COUNTER": self.cnt_speed % 4,
     }
-    self.__class__.cnt_abs += 1
+    self.__class__.cnt_speed += 1
     return self.packer.make_can_msg_safety("ABS_SENSOR", self.PT_BUS, values)
 
   def _speed_msg(self, speed):
     return self._vehicle_moving_msg(speed)
 
-  # vehicle_moving in safety is based on consecutive ABS_SENSOR samples
+  # vehicle_moving in safety is based on consecutive ABS_SENSOR samples.
+  # Standstill sends the same sample; moving sends a changed sample.
   def _vehicle_moving_msg(self, speed):
     if speed > self.STANDSTILL_THRESHOLD:
       self._abs_tick = (self._abs_tick + 1) % 256

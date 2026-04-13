@@ -55,6 +55,7 @@ class CarState(CarStateBase):
     self.abs_prior_FR = 0
     self.abs_prior_RL = 0
     self.abs_prior_RR = 0
+    self.abs_counter_prev = None
     self.lowspeed_source = 0.0
 
   def update(self, can_parsers) -> structs.CarState:
@@ -85,10 +86,13 @@ class CarState(CarStateBase):
     # blend in transmission speed at low speed, since it has more low speed accuracy
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     v_wheel = sum([cp.vl["WHEEL_SPEEDS"][f"WHEEL_SPEED_{s}"] for s in ("FL", "FR", "RL", "RR")]) / 4.0 * CV.KPH_TO_MS
-    if self.CP.carFingerprint == CAR.ACURA_INTEGRA: # use ABS_SENSOR for Integra since no ENGINE_DATA message
-      self.lowspeed_source = sum((cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"] - getattr(self, f"abs_prior_{s}")) % 256 for s in ("FL", "FR", "RL", "RR"))
-      for s in ("FL", "FR", "RL", "RR"):
-        setattr(self, f"abs_prior_{s}", cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"])
+    if self.CP.carFingerprint == CAR.ACURA_INTEGRA:  # use ABS_SENSOR for Integra since no ENGINE_DATA message
+      abs_counter = cp.vl["ABS_SENSOR"]["COUNTER"]
+      if self.abs_counter_prev != abs_counter:
+        self.lowspeed_source = sum((cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"] - getattr(self, f"abs_prior_{s}")) % 256 for s in ("FL", "FR", "RL", "RR"))
+        for s in ("FL", "FR", "RL", "RR"):
+          setattr(self, f"abs_prior_{s}", cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"])
+        self.abs_counter_prev = abs_counter
     else:
       self.lowspeed_source = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"]
     v_weight = float(np.interp(v_wheel, v_weight_bp, v_weight_v))
