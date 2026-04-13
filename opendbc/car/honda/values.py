@@ -56,6 +56,7 @@ class HondaSafetyFlags(IntFlag):
   NIDEC_ALT = 4
   RADARLESS = 8
   BOSCH_CANFD = 16
+  NO_ENGINE_DATA_MSG = 32
 
 
 class HondaFlags(IntFlag):
