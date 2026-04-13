@@ -71,14 +71,14 @@ static uint8_t honda_get_counter(const CANPacket_t *msg) {
 
 static void honda_rx_hook(const CANPacket_t *msg) {
   const bool pcm_cruise = ((honda_hw == HONDA_BOSCH) && !honda_bosch_long) || (honda_hw == HONDA_NIDEC);
-  static int abs_prev_fl = 0;
-  static int abs_prev_fr = 0;
-  static int abs_prev_rl = 0;
-  static int abs_prev_rr = 0;
   unsigned int pt_bus = honda_get_pt_bus();
 
   // sample speed - 0x158 used for all supported Hondas except Integra (use 0x20E abs_sensor message)
   if (honda_no_engine_data_msg && (msg->addr == 0x20EU)) {
+    static int abs_prev_fl = 0;
+    static int abs_prev_fr = 0;
+    static int abs_prev_rl = 0;
+    static int abs_prev_rr = 0;
     vehicle_moving = ((msg->data[0] - abs_prev_fl) | (msg->data[1] - abs_prev_fr) | (msg->data[2] - abs_prev_rl) | (msg->data[3] - abs_prev_rr));
     abs_prev_fl = msg->data[0];
     abs_prev_fr = msg->data[1];
