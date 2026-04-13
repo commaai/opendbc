@@ -525,17 +525,6 @@ class TestHondaBoschRadarlessSafety(HondaPcmEnableBase, TestHondaBoschRadarlessS
     self.safety.init_tests()
 
 
-class TestHondaBoschRadarlessNoEngineDataMsgSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase):
-  """
-    Covers the Honda Bosch Radarless safety mode with stock longitudinal and no engine_data message
-  """
-
-  def setUp(self):
-    super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.NO_ENGINE_DATA_MSG)
-    self.safety.init_tests()
-
-
 class TestHondaBoschRadarlessAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase, TestHondaBoschAltBrakeSafetyBase):
   """
     Covers the Honda Bosch Radarless safety mode with stock longitudinal and an alternate brake message
@@ -570,6 +559,17 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
   # Longitudinal doesn't need to send buttons
   def test_spam_cancel_safety_check(self):
     pass
+
+
+class TestHondaBoschRadarlessLongNoEngineDataMsgSafety(TestHondaBoschRadarlessLongSafety):
+  """
+    Covers the Honda Bosch Radarless safety mode with longitudinal control and no engine_data message
+  """
+
+  def setUp(self):
+    super().setUp()
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.BOSCH_LONG | HondaSafetyFlags.NO_ENGINE_DATA_MSG)
+    self.safety.init_tests()
 
 
 class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
