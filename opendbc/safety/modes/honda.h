@@ -7,7 +7,7 @@
   {.msg = {{0x1A6, (pt_bus), 8, 25U, .max_counter = 3U, .ignore_quality_flag = true},                  /* SCM_BUTTONS */       \
            {0x296, (pt_bus), 4, 25U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }}},                                 \
   {.msg = {{0x158, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true},                   /* ENGINE_DATA */     \
-           {0x309, (pt_bus), 8, 10U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }}},             /* CAR_SPEED */     \
+           {0x20E, (pt_bus), 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }}},            /* ABS_SENSOR */     \
   {.msg = {{0x17C, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* POWERTRAIN_DATA */  \
 
 #define HONDA_COMMON_RX_CHECKS(pt_bus)                                                                                                  \
@@ -27,12 +27,17 @@ enum {
 };
 
 static int honda_brake = 0;
+static int abs_prev_fl = 0;
+static int abs_prev_fr = 0;
+static int abs_prev_rl = 0;
+static int abs_prev_fr = 0;
 static bool honda_brake_switch_prev = false;
 static bool honda_alt_brake_msg = false;
 static bool honda_fwd_brake = false;
 static bool honda_bosch_long = false;
 static bool honda_bosch_radarless = false;
 static bool honda_bosch_canfd = false;
+static bool honda_no_engine_data_msg = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
 
@@ -72,8 +77,15 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   const bool pcm_cruise = ((honda_hw == HONDA_BOSCH) && !honda_bosch_long) || (honda_hw == HONDA_NIDEC);
   unsigned int pt_bus = honda_get_pt_bus();
 
-  // sample speed - 0x158 used for all supported Hondas except Integra (use 0x309 car_speed message)
-  if ((msg->addr == 0x158U) || (msg->addr == 0x309U)) {
+  // sample speed - 0x158 used for all supported Hondas except Integra (use 0x20E abs_sensor message)
+  if (honda_no_engine_data_msg && (msg->addr == 0x20EU)) {
+    vehicle_moving = ((msg->data[0] - abs_prev_fl) | (msg->data[1] - abs_prev_fr) | (msg->data[2] - abs_prev_rl) | (msg->data[3] - abs_prev_rr));
+    abs_rev_fl = msg->data[0]
+    abs_rev_fr = msg->data[1]
+    abs_rev_rl = msg->data[2]
+    abs_rev_rr = msg->data[3]
+  }
+  else if (msg->addr == 0x158U) {
     vehicle_moving = msg->data[0] | msg->data[1];
   }
 
@@ -338,6 +350,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
   const uint16_t HONDA_PARAM_RADARLESS = 8;
   const uint16_t HONDA_PARAM_BOSCH_CANFD = 16;
+  const uint16_t HONDA_PARAM_NO_ENGINE_DATA_MSG = 32;
 
   // Bosch radarless has the powertrain bus on bus 0
   static RxCheck honda_bosch_pt0_rx_checks[] = {
@@ -363,6 +376,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   honda_brake_switch_prev = false;
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
   honda_bosch_canfd = GET_FLAG(param, HONDA_PARAM_BOSCH_CANFD);
+  honda_no_engine_data_msg = GET_FLAG(param, HONDA_PARAM_NO_ENGINE_DATA_MSG);
   // Checking for alternate brake override from safety parameter
   honda_alt_brake_msg = GET_FLAG(param, HONDA_PARAM_ALT_BRAKE);
 
