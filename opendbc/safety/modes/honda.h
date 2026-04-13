@@ -33,7 +33,6 @@ static bool honda_fwd_brake = false;
 static bool honda_bosch_long = false;
 static bool honda_bosch_radarless = false;
 static bool honda_bosch_canfd = false;
-static bool honda_no_engine_data_msg = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
 
@@ -74,6 +73,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   unsigned int pt_bus = honda_get_pt_bus();
 
   // sample speed - 0x158 used for all supported Hondas except Integra (use 0x20E abs_sensor message)
+  static bool honda_no_engine_data_msg = GET_FLAG(param, HONDA_PARAM_NO_ENGINE_DATA_MSG);
   if (honda_no_engine_data_msg && (msg->addr == 0x20EU)) {
     static unsigned int abs_prev_fl = 0;
     static unsigned int abs_prev_fr = 0;
@@ -377,7 +377,6 @@ static safety_config honda_bosch_init(uint16_t param) {
   honda_brake_switch_prev = false;
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
   honda_bosch_canfd = GET_FLAG(param, HONDA_PARAM_BOSCH_CANFD);
-  honda_no_engine_data_msg = GET_FLAG(param, HONDA_PARAM_NO_ENGINE_DATA_MSG);
   // Checking for alternate brake override from safety parameter
   honda_alt_brake_msg = GET_FLAG(param, HONDA_PARAM_ALT_BRAKE);
 
