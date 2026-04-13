@@ -80,10 +80,10 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   // sample speed - 0x158 used for all supported Hondas except Integra (use 0x20E abs_sensor message)
   if (honda_no_engine_data_msg && (msg->addr == 0x20EU)) {
     vehicle_moving = ((msg->data[0] - abs_prev_fl) | (msg->data[1] - abs_prev_fr) | (msg->data[2] - abs_prev_rl) | (msg->data[3] - abs_prev_rr));
-    abs_rev_fl = msg->data[0];
-    abs_rev_fr = msg->data[1];
-    abs_rev_rl = msg->data[2];
-    abs_rev_rr = msg->data[3];
+    abs_prev_fl = msg->data[0];
+    abs_prev_fr = msg->data[1];
+    abs_prev_rl = msg->data[2];
+    abs_prev_rr = msg->data[3];
   }
   else if (msg->addr == 0x158U) {
     vehicle_moving = msg->data[0] | msg->data[1];
