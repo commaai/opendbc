@@ -84,8 +84,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     abs_prev_fr = msg->data[1];
     abs_prev_rl = msg->data[2];
     abs_prev_rr = msg->data[3];
-  }
-  else if (msg->addr == 0x158U) {
+  } else if (msg->addr == 0x158U) {
     vehicle_moving = msg->data[0] | msg->data[1];
   }
 
