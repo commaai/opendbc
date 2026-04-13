@@ -561,7 +561,7 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
     pass
 
 
-class TestHondaBoschRadarlessNoEngineDataMsgLongSafety(common.LongitudinalAccelSafetyTest, HondaButtonEnableBase,
+class TestHondaBoschRadarlessLongNoEngineDataMsgSafety(common.LongitudinalAccelSafetyTest, HondaButtonEnableBase,
                                                        TestHondaBoschRadarlessSafetyBase):
   """
     Covers the Honda Bosch Radarless safety mode with longitudinal control and no engine_data message
