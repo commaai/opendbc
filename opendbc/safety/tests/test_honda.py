@@ -567,19 +567,34 @@ class TestHondaBoschRadarlessLongNoEngineDataMsgSafety(TestHondaBoschRadarlessLo
   """
 
   cnt_abs = 0
-  _abs_tick = 0
 
   def setUp(self):
-    super().setUp()
+    TestHondaBoschRadarlessSafetyBase.setUp(self)
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch,
                                  HondaSafetyFlags.RADARLESS | HondaSafetyFlags.BOSCH_LONG | HondaSafetyFlags.NO_ENGINE_DATA_MSG)
-    self._abs_tick = 0
-    self._rx(self._abs_sensor_msg(self._abs_tick))  # prime prev_sensor state
     self.safety.init_tests()
+    self.__class__.cnt_abs = 0
+    self._abs_tick = 0
+    self._rx(self._abs_sensor_msg(self._abs_tick))  # prime prev-sensor state for movement tests
 
+  def _abs_sensor_msg(self, abs_sensor):
+    values = {
+      "ABS_SENSOR_FL": abs_sensor,
+      "ABS_SENSOR_FR": abs_sensor,
+      "ABS_SENSOR_RL": abs_sensor,
+      "ABS_SENSOR_RR": abs_sensor,
+      "COUNTER": self.cnt_abs % 4,
+    }
+    self.__class__.cnt_abs += 1
+    return self.packer.make_can_msg_safety("ABS_SENSOR", self.PT_BUS, values)
+
+  def _speed_msg(self, speed):
+    return self._vehicle_moving_msg(speed)
+
+  # vehicle_moving in safety is based on consecutive ABS_SENSOR samples
   def _vehicle_moving_msg(self, speed):
     if speed > self.STANDSTILL_THRESHOLD:
-      self._abs_tick = (self._abs_tick + 1) & 0xFF  # motion => changed sensor sample
+      self._abs_tick = (self._abs_tick + 1) % 256
     return self._abs_sensor_msg(self._abs_tick)
 
 
