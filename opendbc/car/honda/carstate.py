@@ -55,6 +55,7 @@ class CarState(CarStateBase):
     self.abs_prior_FR = 0
     self.abs_prior_RL = 0
     self.abs_prior_RR = 0
+    self.lowspeed_source = 0.0
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -85,15 +86,15 @@ class CarState(CarStateBase):
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     v_wheel = sum([cp.vl["WHEEL_SPEEDS"][f"WHEEL_SPEED_{s}"] for s in ("FL", "FR", "RL", "RR")]) / 4.0 * CV.KPH_TO_MS
     if self.CP.carFingerprint == CAR.ACURA_INTEGRA: # use ABS_SENSOR for Integra since no ENGINE_DATA message
-      lowspeed_source = sum((cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"] - getattr(self, f"abs_prior_{s}")) % 256 for s in ("FL", "FR", "RL", "RR"))
+      self.lowspeed_source = sum((cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"] - getattr(self, f"abs_prior_{s}")) % 256 for s in ("FL", "FR", "RL", "RR"))
       for s in ("FL", "FR", "RL", "RR"):
         setattr(self, f"abs_prior_{s}", cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"])
     else:
-      lowspeed_source = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"]
+      self.lowspeed_source = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"]
     v_weight = float(np.interp(v_wheel, v_weight_bp, v_weight_v))
-    ret.vEgoRaw = (1. - v_weight) * lowspeed_source * CV.KPH_TO_MS * self.CP.wheelSpeedFactor + v_weight * v_wheel
+    ret.vEgoRaw = (1. - v_weight) * self.lowspeed_source * CV.KPH_TO_MS * self.CP.wheelSpeedFactor + v_weight * v_wheel
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = lowspeed_source < 1e-5
+    ret.standstill = self.lowspeed_source < 1e-5
 
     # doorOpen is true if we can find any door open, but signal locations vary, and we may only see the driver's door
     # TODO: Test the eight Nidec cars without SCM signals for driver's door state, may be able to consolidate further
