@@ -571,7 +571,8 @@ class TestHondaBoschRadarlessLongNoEngineDataMsgSafety(TestHondaBoschRadarlessLo
 
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.BOSCH_LONG | HondaSafetyFlags.NO_ENGINE_DATA_MSG)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch,
+                                 HondaSafetyFlags.RADARLESS | HondaSafetyFlags.BOSCH_LONG | HondaSafetyFlags.NO_ENGINE_DATA_MSG)
     self.safety.init_tests()
 
   def _accel_msg(self, accel):
