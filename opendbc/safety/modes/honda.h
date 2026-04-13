@@ -2,18 +2,27 @@
 
 #include "opendbc/safety/declarations.h"
 
-// All common address checks except SCM_BUTTONS which isn't on one Nidec safety configuration
-#define HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                      \
+// All common address checks except SCM_BUTTONS and ENGINE_DATA which aren't on some safety configurations
+#define HONDA_BASE_RX_CHECKS(pt_bus)                                                                                                    \
   {.msg = {{0x1A6, (pt_bus), 8, 25U, .max_counter = 3U, .ignore_quality_flag = true},                  /* SCM_BUTTONS */       \
            {0x296, (pt_bus), 4, 25U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }}},                                 \
-  {.msg = {{0x158, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true},                   /* ENGINE_DATA */     \
-           {0x20E, (pt_bus), 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }}},            /* ABS_SENSOR */     \
   {.msg = {{0x17C, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* POWERTRAIN_DATA */  \
+
+// All common address checks except SCM_BUTTONS which isn't on one Nidec safety configuration
+#define HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                  \
+  HONDA_BASE_RX_CHECKS(pt_bus)                                                                                                          \
+  {.msg = {{0x158, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* ENGINE_DATA */  \
 
 #define HONDA_COMMON_RX_CHECKS(pt_bus)                                                                                                  \
   HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                        \
   {.msg = {{0x326, (pt_bus), 8, 10U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* SCM_FEEDBACK */  \
 
+// For radarless cars without ENGINE_DATA, swap in ABS_SENSOR for low-speed movement checks.
+#define HONDA_COMMON_RX_CHECKS_NO_ENGINE_DATA(pt_bus)                                                                                   \
+  HONDA_BASE_RX_CHECKS(pt_bus)                                                                                                          \
+  {.msg = {{0x20E, (pt_bus), 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* ABS_SENSOR */    \
+  {.msg = {{0x326, (pt_bus), 8, 10U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* SCM_FEEDBACK */  \
+    
 // Alternate brake message is used on some Honda Bosch, and Honda Bosch radarless (where PT bus is 0)
 #define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                                              \
   {.msg = {{0x1BE, (pt_bus), 3, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
@@ -364,6 +373,11 @@ static safety_config honda_bosch_init(uint16_t param) {
     HONDA_ALT_BRAKE_ADDR_CHECK(0)
   };
 
+  // Only used by no-engine-data radarless configurations (e.g. Integra).
+  static RxCheck honda_bosch_radarless_no_engine_data_rx_checks[] = {
+    HONDA_COMMON_RX_CHECKS_NO_ENGINE_DATA(0)
+  };
+
   // Bosch has powertrain on bus 1, verified 0x1A6 does not exist
   static RxCheck honda_bosch_pt1_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(1)
@@ -389,7 +403,9 @@ static safety_config honda_bosch_init(uint16_t param) {
 #endif
 
   safety_config ret;
-  if (honda_bosch_radarless || honda_bosch_canfd) {
+  if (honda_no_engine_data_msg && honda_bosch_radarless) {
+    SET_RX_CHECKS(honda_bosch_radarless_no_engine_data_rx_checks, ret);
+  } else if (honda_bosch_radarless || honda_bosch_canfd) {
     if (honda_alt_brake_msg) {
       SET_RX_CHECKS(honda_bosch_pt0_alt_brake_rx_checks, ret);
     } else {
