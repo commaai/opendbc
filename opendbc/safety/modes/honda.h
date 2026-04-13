@@ -86,6 +86,8 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     abs_prev_rr = msg->data[3];
   } else if (msg->addr == 0x158U) {
     vehicle_moving = msg->data[0] | msg->data[1];
+  } else {
+    // no change to vehicle_moving
   }
 
   // check ACC main state
