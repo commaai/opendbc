@@ -79,7 +79,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     static unsigned int abs_prev_fr = 0;
     static unsigned int abs_prev_rl = 0;
     static unsigned int abs_prev_rr = 0;
-    vehicle_moving = ((msg->data[0] == abs_prev_fl) && (msg->data[1] == abs_prev_fr) && (msg->data[2] == abs_prev_rl) && (msg->data[3] == abs_prev_rr));
+    vehicle_moving = ((msg->data[0] != abs_prev_fl) || (msg->data[1] != abs_prev_fr) || (msg->data[2] != abs_prev_rl) || (msg->data[3] != abs_prev_rr));
     abs_prev_fl = msg->data[0];
     abs_prev_fr = msg->data[1];
     abs_prev_rl = msg->data[2];
