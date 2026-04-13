@@ -164,7 +164,7 @@ def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw
   """Match live firmware to a car platform using part numbers (revision-agnostic).
 
   For each candidate platform, checks that every checkable ECU's live part number
-  appears in the database for that platform. ECUs with unparseable FW (non-standard
+  appears in the database for that platform. ECUs with unparsable FW (non-standard
   format) are skipped rather than treated as a mismatch. Requires at least 2 ECUs
   to match to avoid false positives from single shared part numbers.
   """

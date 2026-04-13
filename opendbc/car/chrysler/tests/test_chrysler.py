@@ -5,7 +5,7 @@ from hypothesis import settings, given, strategies as st
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car.chrysler.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, PLATFORM_CODE_ECUS, get_platform_codes
+from opendbc.car.chrysler.values import FW_QUERY_CONFIG, FW_PATTERN, PLATFORM_CODE_ECUS, get_platform_codes
 from opendbc.car.chrysler.fingerprints import FW_VERSIONS
 from opendbc.testing import parameterized
 
@@ -18,7 +18,7 @@ class TestChryslerFW(unittest.TestCase):
   # but each ECU should have at least one standard XXXXXXXXYY format entry.
   @parameterized("car_model, fw_versions", FW_VERSIONS.items())
   def test_fw_versions(self, car_model, fw_versions):
-    for (ecu, addr, subaddr), fws in fw_versions.items():
+    for (ecu, _addr, _subaddr), fws in fw_versions.items():
       if ecu not in PLATFORM_CODE_ECUS:
         continue
 
