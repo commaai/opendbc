@@ -212,7 +212,7 @@ CM_ SG_ 577 LINE_DASHED "1 = line is dashed";
 CM_ SG_ 577 LINE_SOLID "1 = line is solid";
 
 VAL_ 228 CONTROL_STATE 0 "init" 1 "standby" 2 "lka_active" 3 "driver_override" 5 "rdm_active";
-VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal";
+VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 1 "tja_low_speed_lockout" 0 "normal";
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 806 CMBS_STATES 3 "pressed" 0 "released" ;

@@ -19,6 +19,19 @@
 [![X Follow](https://img.shields.io/twitter/follow/comma_ai)](https://x.com/comma_ai)
 [![Discord](https://img.shields.io/discord/469524606043160576)](https://discord.comma.ai)
 
+<br>
+<h3><i>How to Port a Car — Jason Young, COMMA_CON 2023</i></h3>
+<a href="https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s">
+  <img src="https://github.com/user-attachments/assets/ae89198e-561b-4210-a0d4-ccecd917577d" alt="▶ How to Port a Car - Jason Young, COMMA_CON 2023" width="800">
+</a>
+<br>
+
+<h3><i>How Do We Control The Car? — Robbe Derks, COMMA_CON 2021</i></h3>
+<a href="https://www.youtube.com/watch?v=nNU6ipme878">
+  <img src="https://github.com/user-attachments/assets/28c40bc0-7884-47e9-b392-f47f03190497" alt="▶ How Do We Control The Car? - Robbe Derks, COMMA_CON 2021" width="800">
+</a>
+<br>
+
 </div>
 
 ---
