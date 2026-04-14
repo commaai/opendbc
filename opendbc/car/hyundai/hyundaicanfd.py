@@ -35,7 +35,7 @@ class CanBus(CanBusBase):
     return self._cam
 
 
-def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque):
+def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque, apply_angle):
   values = {
     "LKA_OptUsmSta": 2,
     "LKA_SysIndReq": 2 if enabled else 1,
@@ -43,9 +43,22 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque)
     "LKA_SysWrn": 0,
     "ActToiSta": 1 if lat_active else 0,
     "LKA_UsmMod": 0,  # hide LKAS settings
-    "LKA_RcgSta": 0,
+    "LKA_RcgSta": 0,  # lane recognition status (0 for "not recognized")
     "Damping_Gain": 100,  # can potentially tuned for better perf [3, 200]
   }
+
+  # Angle control doesn't support using LFA yet
+  if CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+    # LKAS messages take priority over LFA messages on HDA2.
+    values |= {
+      "LKA_OptUsmSta": 0,  # TODO: not used by the stock system
+      "StrTqReqVal": 0,  # we don't use torque
+      "ActToiSta": 0,  # we don't use torque
+      "LKA_RcgSta": 3 if lat_active else 0,
+      "ADAS_StrAnglReqVal": apply_angle,
+      "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
+      "ADAS_ACIAnglTqRedcGainVal": apply_torque if lat_active else 0,
+    }
 
   ret = []
   if CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG:
