@@ -35,7 +35,7 @@ def calculate_lat_ctl2_checksum(mode: int, counter: int, dat: bytearray) -> int:
   return 0xFF - (checksum & 0xFF)
 
 
-def create_lka_msg(packer, CAN: CanBus, lat_active: bool, apply_angle: float, curvature: float, direction: int):
+def create_lka_msg(packer, CAN: CanBus, lat_active: bool, apply_angle: float, curvature: float, direction: int, ramp_type: int):
   """
   Creates a CAN message for the Ford LKA Command.
 
@@ -51,10 +51,10 @@ def create_lka_msg(packer, CAN: CanBus, lat_active: bool, apply_angle: float, cu
     "LkaDrvOvrrd_D_Rq": 0,
     "LkaActvStats_D2_Req": direction,
     "LaRefAng_No_Req": millirad,
-    "LaRampType_B_Req": 0,
-    "LaCurvature_No_Calc": curvature,
+    "LaRampType_B_Req": ramp_type,
+    "LaCurvature_No_Calc": 0,
     "LdwActvStats_D_Req": 0,
-    "LdwActvIntns_D_Req": 2,
+    "LdwActvIntns_D_Req": 3,
   }
 
   return packer.make_can_msg("Lane_Assist_Data1", CAN.main, values)
@@ -85,7 +85,7 @@ def create_lat_ctl_msg(packer, CAN: CanBus, lat_active: bool, lateral_motion_con
   values = {
     "LatCtlRng_L_Max": lateral_motion_control["LatCtlRng_L_Max"],                       # Unknown [0|126] meter
     "HandsOffCnfm_B_Rq": lateral_motion_control["HandsOffCnfm_B_Rq"],                   # Unknown: 0=Inactive, 1=Active [0|1]
-    "LatCtl_D_Rq": 1 if lat_active else 0,      # Mode: 0=None, 1=ContinuousPathFollowing, 2=InterventionLeft,
+    "LatCtl_D_Rq": 0,                                                                      # Mode: 0=None, 1=ContinuousPathFollowing, 2=InterventionLeft,
                                                 #       3=InterventionRight, 4-7=NotUsed [0|7]
     "LatCtlRampType_D_Rq": lateral_motion_control["LatCtlRampType_D_Rq"],              # Ramp speed: 0=Slow, 1=Medium, 2=Fast, 3=Immediate [0|3]
                                                 #             Makes no difference with curvature control
@@ -96,7 +96,7 @@ def create_lat_ctl_msg(packer, CAN: CanBus, lat_active: bool, lateral_motion_con
     "LatCtlCurv_NoRate_Actl": lateral_motion_control["LatCtlCurv_NoRate_Actl"],         # Curvature rate [-0.001024|0.00102375] 1/meter^2
     "LatCtlCurv_No_Actl": lateral_motion_control["LatCtlCurv_No_Actl"],                 # Curvature [-0.02|0.02094] 1/meter
   }
-  return packer.make_can_msg("LateralMotionControl", CAN.main, values)
+  return packer.make_can_msg("LateralMotionControl", CAN.main, {})
 
 
 def create_lat_ctl2_msg(packer, CAN: CanBus, mode: int, path_offset: float, path_angle: float, curvature: float,
