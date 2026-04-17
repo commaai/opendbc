@@ -1,3 +1,5 @@
+import math
+
 from opendbc.car import CanBusBase, structs
 
 HUDControl = structs.CarControl.HUDControl
@@ -33,16 +35,29 @@ def calculate_lat_ctl2_checksum(mode: int, counter: int, dat: bytearray) -> int:
   return 0xFF - (checksum & 0xFF)
 
 
-def create_lka_msg(packer, CAN: CanBus):
+def create_lka_msg(packer, CAN: CanBus, lat_active: bool, apply_angle: float, curvature: float, direction: int):
   """
-  Creates an empty CAN message for the Ford LKA Command.
+  Creates a CAN message for the Ford LKA Command.
 
   This command can apply "Lane Keeping Aid" maneuvers, which are subject to the PSCM lockout.
 
   Frequency is 33Hz.
   """
 
-  return packer.make_can_msg("Lane_Assist_Data1", CAN.main, {})
+  millirad = math.radians(apply_angle) * 1000
+  millirad = min(max(millirad, -102.4), 102.3)
+
+  values = {
+    "LkaDrvOvrrd_D_Rq": 0,
+    "LkaActvStats_D2_Req": direction,
+    "LaRefAng_No_Req": millirad,
+    "LaRampType_B_Req": 0,
+    "LaCurvature_No_Calc": curvature,
+    "LdwActvStats_D_Req": 0,
+    "LdwActvIntns_D_Req": 2,
+  }
+
+  return packer.make_can_msg("Lane_Assist_Data1", CAN.main, values)
 
 
 def create_lat_ctl_msg(packer, CAN: CanBus, lat_active: bool, path_offset: float, path_angle: float, curvature: float,

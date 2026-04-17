@@ -2,7 +2,7 @@ import math
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
-from opendbc.car.lateral import ISO_LATERAL_ACCEL, apply_std_steer_angle_limits
+from opendbc.car.lateral import ISO_LATERAL_ACCEL, AngleSteeringLimits, apply_std_steer_angle_limits
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags, CAR
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
@@ -14,6 +14,24 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 # Limit to average banked road since safety doesn't have the roll
 AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll raises lateral acceleration
 MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
+
+
+class CarControllerParamsBronco:
+  STEER_STEP = 5
+  LKA_STEP = 3
+  ACC_CONTROL_STEP = 2
+  LKAS_UI_STEP = 100
+  ACC_UI_STEP = 20
+  BUTTONS_STEP = 5
+
+  CURVATURE_MAX = 0.02
+  STEER_DRIVER_ALLOWANCE = 1.0
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    0.02,
+    ([5, 25], [0.5, 0.5]),
+    ([5, 25], [0.5, 0.5]),
+  )
+  CURVATURE_ERROR = 0.002
 
 
 def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
@@ -58,6 +76,11 @@ def apply_creep_compensation(accel: float, v_ego: float) -> float:
   return float(accel)
 
 
+def apply_ford_angle(desired_angle, apply_angle_last, current_angle, v_ego_raw):
+  apply_angle = desired_angle - current_angle
+  return apply_std_steer_angle_limits(apply_angle, apply_angle_last, v_ego_raw, current_angle, True, CarControllerParamsBronco.ANGLE_LIMITS)
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -65,6 +88,7 @@ class CarController(CarControllerBase):
     self.CAN = fordcan.CanBus(CP)
 
     self.apply_curvature_last = 0
+    self.apply_angle_last = 0
     self.anti_overshoot_curvature_last = 0
     self.accel = 0.0
     self.gas = 0.0
@@ -74,6 +98,9 @@ class CarController(CarControllerBase):
     self.steer_alert_last = False
     self.lead_distance_bars_last = None
     self.distance_bar_frame = 0
+    self.last_direction = 0
+    self.last_direction_count = 0
+    self.reset_count = 0
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
@@ -114,6 +141,14 @@ class CarController(CarControllerBase):
       self.apply_curvature_last = apply_ford_curvature_limits(apply_curvature, self.apply_curvature_last, current_curvature,
                                                               CS.out.vEgoRaw, 0., CC.latActive, self.CP)
 
+      apply_angle = 0.0
+      if self.CP.carFingerprint == CAR.FORD_BRONCO_MK6:
+        if CC.latActive:
+          apply_angle = apply_ford_angle(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.steeringAngleDeg, CS.out.vEgoRaw)
+        else:
+          apply_angle = 0.0
+        self.apply_angle_last = apply_angle
+
       if self.CP.flags & FordFlags.CANFD:
         # TODO: extended mode
         # Ford uses four individual signals to dictate how to drive to the car. Curvature alone (limited to 0.02m/s^2)
@@ -124,12 +159,33 @@ class CarController(CarControllerBase):
         mode = 1 if CC.latActive else 0
         counter = (self.frame // CarControllerParams.STEER_STEP) % 0x10
         can_sends.append(fordcan.create_lat_ctl2_msg(self.packer, self.CAN, mode, 0., 0., -self.apply_curvature_last, 0., counter))
-      else:
+      elif self.CP.carFingerprint != CAR.FORD_BRONCO_MK6:
         can_sends.append(fordcan.create_lat_ctl_msg(self.packer, self.CAN, CC.latActive, 0., 0., -self.apply_curvature_last, 0.))
 
     # send lka msg at 33Hz
     if (self.frame % CarControllerParams.LKA_STEP) == 0:
-      can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN))
+      if self.CP.carFingerprint == CAR.FORD_BRONCO_MK6:
+        if CC.latActive:
+          new_direction = 4 if actuators.steeringAngleDeg > 0 else 2
+        else:
+          new_direction = 0
+
+        if (self.last_direction_count != 0 and self.last_direction != new_direction) or self.last_direction_count > 40:
+          new_direction = 0
+
+        if new_direction == 0:
+          self.reset_count += 1
+
+        if self.reset_count >= 2:
+          self.last_direction_count = 0
+          self.reset_count = 0
+        else:
+          self.last_direction_count += 1
+
+        can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN, CC.latActive, self.apply_angle_last, -self.apply_curvature_last, new_direction))
+        self.last_direction = new_direction
+      else:
+        can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN, False, 0.0, 0.0, 0))
 
     ### longitudinal control ###
     # send acc msg at 50Hz
@@ -196,6 +252,7 @@ class CarController(CarControllerBase):
 
     new_actuators = actuators.as_builder()
     new_actuators.curvature = self.apply_curvature_last
+    new_actuators.steeringAngleDeg = self.apply_angle_last + CS.out.steeringAngleDeg
     new_actuators.accel = self.accel
     new_actuators.gas = self.gas
 
