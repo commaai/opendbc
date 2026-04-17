@@ -60,8 +60,7 @@ def create_lka_msg(packer, CAN: CanBus, lat_active: bool, apply_angle: float, cu
   return packer.make_can_msg("Lane_Assist_Data1", CAN.main, values)
 
 
-def create_lat_ctl_msg(packer, CAN: CanBus, lat_active: bool, path_offset: float, path_angle: float, curvature: float,
-                       curvature_rate: float):
+def create_lat_ctl_msg(packer, CAN: CanBus, lat_active: bool, lateral_motion_control):
   """
   Creates a CAN message for the Ford TJA/LCA Command.
 
@@ -84,18 +83,18 @@ def create_lat_ctl_msg(packer, CAN: CanBus, lat_active: bool, path_offset: float
   """
 
   values = {
-    "LatCtlRng_L_Max": 0,                       # Unknown [0|126] meter
-    "HandsOffCnfm_B_Rq": 0,                     # Unknown: 0=Inactive, 1=Active [0|1]
+    "LatCtlRng_L_Max": lateral_motion_control["LatCtlRng_L_Max"],                       # Unknown [0|126] meter
+    "HandsOffCnfm_B_Rq": lateral_motion_control["HandsOffCnfm_B_Rq"],                   # Unknown: 0=Inactive, 1=Active [0|1]
     "LatCtl_D_Rq": 1 if lat_active else 0,      # Mode: 0=None, 1=ContinuousPathFollowing, 2=InterventionLeft,
                                                 #       3=InterventionRight, 4-7=NotUsed [0|7]
-    "LatCtlRampType_D_Rq": 0,                   # Ramp speed: 0=Slow, 1=Medium, 2=Fast, 3=Immediate [0|3]
+    "LatCtlRampType_D_Rq": lateral_motion_control["LatCtlRampType_D_Rq"],              # Ramp speed: 0=Slow, 1=Medium, 2=Fast, 3=Immediate [0|3]
                                                 #             Makes no difference with curvature control
-    "LatCtlPrecision_D_Rq": 1,                  # Precision: 0=Comfortable, 1=Precise, 2/3=NotUsed [0|3]
+    "LatCtlPrecision_D_Rq": lateral_motion_control["LatCtlPrecision_D_Rq"],             # Precision: 0=Comfortable, 1=Precise, 2/3=NotUsed [0|3]
                                                 #            The stock system always uses comfortable
-    "LatCtlPathOffst_L_Actl": path_offset,      # Path offset [-5.12|5.11] meter
-    "LatCtlPath_An_Actl": path_angle,           # Path angle [-0.5|0.5235] radians
-    "LatCtlCurv_NoRate_Actl": curvature_rate,   # Curvature rate [-0.001024|0.00102375] 1/meter^2
-    "LatCtlCurv_No_Actl": curvature,            # Curvature [-0.02|0.02094] 1/meter
+    "LatCtlPathOffst_L_Actl": lateral_motion_control["LatCtlPathOffst_L_Actl"],         # Path offset [-5.12|5.11] meter
+    "LatCtlPath_An_Actl": lateral_motion_control["LatCtlPath_An_Actl"],                 # Path angle [-0.5|0.5235] radians
+    "LatCtlCurv_NoRate_Actl": lateral_motion_control["LatCtlCurv_NoRate_Actl"],         # Curvature rate [-0.001024|0.00102375] 1/meter^2
+    "LatCtlCurv_No_Actl": lateral_motion_control["LatCtlCurv_No_Actl"],                 # Curvature [-0.02|0.02094] 1/meter
   }
   return packer.make_can_msg("LateralMotionControl", CAN.main, values)
 

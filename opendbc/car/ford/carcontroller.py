@@ -27,7 +27,7 @@ class CarControllerParamsBronco:
   CURVATURE_MAX = 0.02
   STEER_DRIVER_ALLOWANCE = 1.0
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    0.02,
+    5.86,  # Lane_Assist_Data1 LaRefAng_No_Req saturates at about +/-102.3 mrad ~= +/-5.86 deg
     ([5, 25], [0.5, 0.5]),
     ([5, 25], [0.5, 0.5]),
   )
@@ -159,8 +159,8 @@ class CarController(CarControllerBase):
         mode = 1 if CC.latActive else 0
         counter = (self.frame // CarControllerParams.STEER_STEP) % 0x10
         can_sends.append(fordcan.create_lat_ctl2_msg(self.packer, self.CAN, mode, 0., 0., -self.apply_curvature_last, 0., counter))
-      elif self.CP.carFingerprint != CAR.FORD_BRONCO_MK6:
-        can_sends.append(fordcan.create_lat_ctl_msg(self.packer, self.CAN, CC.latActive, 0., 0., -self.apply_curvature_last, 0.))
+      else:
+        can_sends.append(fordcan.create_lat_ctl_msg(self.packer, self.CAN, CC.latActive, CS.lateral_motion_control))
 
     # send lka msg at 33Hz
     if (self.frame % CarControllerParams.LKA_STEP) == 0:
