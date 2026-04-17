@@ -167,7 +167,14 @@ class CarController(CarControllerBase):
     if (self.frame % CarControllerParams.LKA_STEP) == 0:
       if self.CP.carFingerprint == CAR.FORD_BRONCO_MK6:
         if CC.latActive and lkas_available:
-          new_direction = 4 if actuators.steeringAngleDeg > 0 else 2
+          # Direction should follow the commanded LKA angle delta.
+          # Using actuator target sign directly can bias one direction on MK6.
+          if self.apply_angle_last > 0.05:
+            new_direction = 2
+          elif self.apply_angle_last < -0.05:
+            new_direction = 4
+          else:
+            new_direction = 0
         else:
           new_direction = 0
 
