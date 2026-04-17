@@ -32,6 +32,8 @@ class CarInterface(CarInterfaceBase):
     ret.brand = "ford"
 
     ret.radarUnavailable = Bus.radar not in DBC[candidate]
+    if candidate == CAR.FORD_BRONCO_MK6:
+      ret.radarUnavailable = True
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.2
     ret.steerLimitTimer = 1.0
