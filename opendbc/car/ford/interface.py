@@ -79,11 +79,8 @@ class CarInterface(CarInterfaceBase):
           config_tja = pscm_config.fwVersion[7]  # Traffic Jam Assist
           config_lca = pscm_config.fwVersion[8]  # Lane Centering Assist
           if config_tja != 0xFF or config_lca != 0xFF:
-          carlog.error('dashcamOnly: Car lacks required lateral control APIs')
-          ret.dashcamOnly = True
-
-    if candidate == CAR.FORD_BRONCO_MK6:
-      ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.ALLOW_LKA_ACTION.value
+            carlog.error('dashcamOnly: Car lacks required lateral control APIs')
+            ret.dashcamOnly = True
 
     # Auto Transmission: 0x732 ECU or Gear_Shift_by_Wire_FD1
     found_ecus = [fw.ecu for fw in car_fw]
