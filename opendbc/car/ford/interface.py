@@ -82,9 +82,6 @@ class CarInterface(CarInterfaceBase):
             carlog.error('dashcamOnly: Car lacks required lateral control APIs')
             ret.dashcamOnly = True
 
-    if candidate == CAR.FORD_BRONCO_MK6:
-      ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.ALLOW_LKA_ACTION.value
-
     # Auto Transmission: 0x732 ECU or Gear_Shift_by_Wire_FD1
     found_ecus = [fw.ecu for fw in car_fw]
     if Ecu.shiftByWire in found_ecus or 0x5A in fingerprint[CAN.main] or docs:
