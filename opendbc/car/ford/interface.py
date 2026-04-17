@@ -54,7 +54,7 @@ class CarInterface(CarInterfaceBase):
     ret.safetyConfigs = cfgs
 
     ret.alphaLongitudinalAvailable = ret.radarUnavailable
-    if alpha_long or not ret.radarUnavailable:
+    if alpha_long or not ret.radarUnavailable or candidate == CAR.FORD_BRONCO_MK6:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.LONG_CONTROL.value
       ret.openpilotLongitudinalControl = True
 
