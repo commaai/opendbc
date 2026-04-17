@@ -6,7 +6,7 @@ from opendbc.car.ford.carcontroller import CarController
 from opendbc.car.ford.carstate import CarState
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.radar_interface import RadarInterface
-from opendbc.car.ford.values import CarControllerParams, DBC, Ecu, FordFlags, RADAR, FordSafetyFlags
+from opendbc.car.ford.values import CAR, CarControllerParams, DBC, Ecu, FordFlags, RADAR, FordSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -87,6 +87,10 @@ class CarInterface(CarInterfaceBase):
     else:
       ret.transmissionType = TransmissionType.manual
       ret.minEnableSpeed = 20.0 * CV.MPH_TO_MS
+
+    # Full-size Bronco bring-up data was captured on an automatic platform.
+    if candidate == CAR.FORD_BRONCO_MK6:
+      ret.transmissionType = TransmissionType.automatic
 
     # BSM: Side_Detect_L_Stat, Side_Detect_R_Stat
     # TODO: detect bsm in car_fw?

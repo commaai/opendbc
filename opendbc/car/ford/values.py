@@ -121,6 +121,10 @@ class FordF150LightningPlatform(FordCANFDPlatformConfig):
 
 
 class CAR(Platforms):
+  FORD_BRONCO_MK6 = FordPlatformConfig(
+    [FordCarDocs("Ford Bronco 2021-24", "Adaptive Cruise Control with Lane Centering")],
+    CarSpecs(mass=2013, wheelbase=2.95, steerRatio=17.0),
+  )
   FORD_BRONCO_SPORT_MK1 = FordPlatformConfig(
     [FordCarDocs("Ford Bronco Sport 2021-24")],
     CarSpecs(mass=1625, wheelbase=2.67, steerRatio=17.7),
