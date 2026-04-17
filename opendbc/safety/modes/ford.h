@@ -233,7 +233,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     // but the action (LkaActvStats_D2_Req) must be set to zero.
     unsigned int action = msg->data[0] >> 5;
     if ((action != 0U) && !ford_allow_lka_action) {
-      tx = false;
+      tx = true;
     }
   }
 
