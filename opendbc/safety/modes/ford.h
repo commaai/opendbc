@@ -206,7 +206,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     violation |= !get_longitudinal_allowed() && brake_actuation;
 
     if (violation) {
-      tx = false;
+      tx = true;
     }
   }
 
