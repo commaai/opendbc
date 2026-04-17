@@ -107,6 +107,7 @@ class CarController(CarControllerBase):
 
     actuators = CC.actuators
     hud_control = CC.hudControl
+    lkas_available = getattr(CS, "lkas_available", True)
 
     main_on = CS.out.cruiseState.available
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
@@ -165,7 +166,7 @@ class CarController(CarControllerBase):
     # send lka msg at 33Hz
     if (self.frame % CarControllerParams.LKA_STEP) == 0:
       if self.CP.carFingerprint == CAR.FORD_BRONCO_MK6:
-        if CC.latActive:
+        if CC.latActive and lkas_available:
           new_direction = 4 if actuators.steeringAngleDeg > 0 else 2
         else:
           new_direction = 0
@@ -182,7 +183,7 @@ class CarController(CarControllerBase):
         else:
           self.last_direction_count += 1
 
-        can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN, CC.latActive, self.apply_angle_last, -self.apply_curvature_last, new_direction))
+        can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN, CC.latActive and lkas_available, self.apply_angle_last, -self.apply_curvature_last, new_direction))
         self.last_direction = new_direction
       else:
         can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN, False, 0.0, 0.0, 0))

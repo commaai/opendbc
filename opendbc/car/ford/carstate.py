@@ -19,6 +19,7 @@ class CarState(CarStateBase):
 
     self.distance_button = 0
     self.lc_button = 0
+    self.lkas_available = True
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -55,6 +56,13 @@ class CarState(CarStateBase):
     if self.CP.flags & FordFlags.CANFD:
       # this signal is always 0 on non-CAN FD cars
       ret.steerFaultTemporary |= cp.vl["Lane_Assist_Data3_FD1"]["LatCtlSte_D_Stat"] not in (1, 2, 3)
+
+    # Some Ford platforms expose explicit lane-assist availability on the same message.
+    # Default True when unavailable so we don't hard-disable lateral due to a missing signal.
+    try:
+      self.lkas_available = cp.vl["Lane_Assist_Data3_FD1"]["LaActAvail_D_Actl"] == 3
+    except KeyError:
+      self.lkas_available = True
 
     # cruise state
     is_metric = cp.vl["INSTRUMENT_PANEL"]["METRIC_UNITS"] == 1 if not self.CP.flags & FordFlags.CANFD else False
