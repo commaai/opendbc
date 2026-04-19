@@ -61,14 +61,20 @@ class CAR(Platforms):
     FcaGiorgioCarSpecs(wheelbase=2.82),
   )
 
+  RAM_PROMASTER = FcaGiorgioPlatformConfig(
+    [FcaGiorgioCarDocs("RAM ProMaster")],
+    # rough specs for Promaster 2500 with medium wheelbase
+    FcaGiorgioCarSpecs(wheelbase=3.45),
+  )
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"\x01\x01[A-Z0-9-]{10}\x00\x0b",
   requests=[
     # TODO: Placeholder implementation only
     Request(
       [StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
-      whitelist_ecus=[Ecu.engine],
+      whitelist_ecus=[Ecu.engine, Ecu.eps],
       bus=0,
     ),
   ],
