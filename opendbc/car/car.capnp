@@ -177,7 +177,7 @@ struct CarState {
   gasPressed @4 :Bool;    # this is user pedal only
 
   # brake pedal, 0.0-1.0
-  brake @5 :Float32;      # this is user pedal only
+  brakeDEPRECATED @5 :Float32;  # this is user pedal only
   brakePressed @6 :Bool;  # this is user pedal only
   regenBraking @45 :Bool; # this is user pedal only
   parkingBrake @39 :Bool;
