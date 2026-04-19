@@ -34,9 +34,9 @@ class CarState(CarStateBase):
     ret.yawRate = pt_cp.vl["ABS_2"]["YAW_RATE"]
     ret.steerFaultPermanent = bool(pt_cp.vl["EPS_2"]["LKA_FAULT"])
 
-    ret.gas = pt_cp.vl["ENGINE_1"]["ACCEL_PEDAL"]
-    ret.gasPressed = ret.gas > 0
-    ret.brake = pt_cp.vl["ABS_4"]["BRAKE_PRESSURE"]
+    ret.gasPressed = pt_cp.vl["ENGINE_1"]["ACCEL_PEDAL"] > 0
+    # TODO: find driver brake pressure (through openpilot doesnt actually use this)
+    # ret.brake = pt_cp.vl["ABS_4"]["BRAKE_PRESSURE"]
     ret.brakePressed = bool(pt_cp.vl["ABS_3"]["BRAKE_PEDAL_SWITCH"])
     #ret.parkingBrake = TODO
 
