@@ -561,31 +561,39 @@ BO_ 540 CRZ_CTRL: 8 XXX
  SG_ HANDS_OFF_STEERING : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ HANDS_ON_STEER_WARN : 59|4@0+ (1,0) [0|255] "" XXX
  SG_ CRZ_ACTIVE : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ MSG_1 : 0|1@0+ (1,0) [0|3] "" XXX
+ SG_ MSG_1_INV : 1|1@0+ (1,0) [0|1] "" XXX
+ SG_ MSG_1_INV_COPY : 8|1@0+ (1,0) [0|7] "" XXX
+ SG_ MSG_1_COPY : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 13|1@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_8 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ CRZ_AVAILABLE : 17|1@0+ (1,0) [0|255] "" XXX
  SG_ DISTANCE_SETTING : 20|3@0+ (1,0) [0|7] "" XXX
- SG_ MSG_1_INV : 1|1@0+ (1,0) [0|1] "" XXX
- SG_ MSG_1_COPY : 9|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_GAS_MAYBE : 23|1@0+ (1,0) [0|31] "" XXX
- SG_ ACC_ACTIVE_2 : 52|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_10 : 30|1@0+ (1,0) [0|1] "" XXX
- SG_ MSG_1 : 0|1@0+ (1,0) [0|3] "" XXX
- SG_ 5_SEC_DISABLE_TIMER : 45|3@0+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_3 : 13|1@0+ (1,0) [0|3] "" XXX
- SG_ MSG_1_INV_COPY : 8|1@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_7 : 22|2@0+ (1,0) [0|3] "" XXX
  SG_ RADAR_HAS_LEAD : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_9 : 28|15@0+ (1,0) [0|16383] "" XXX
  SG_ RADAR_LEAD_RELATIVE_DISTANCE : 31|3@0+ (1,0) [0|5] "" XXX
+ SG_ NEW_SIGNAL_5 : 42|6@0+ (1,0) [0|3] "" XXX
+ SG_ DISABLE_TIMER_1 : 43|3@1+ (1,0) [0|7] "" XXX
+ SG_ DISABLE_TIMER_2 : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_6 : 49|3@1+ (1,0) [0|3] "" XXX
+ SG_ ACC_ACTIVE_2 : 52|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 63|8@0+ (1,0) [0|3] "" XXX
 
 BO_ 539 CRZ_INFO: 8 XXX
- SG_ CTR1 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ STATUS : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ STATIC_1 : 15|11@0+ (1,0) [0|2047] "" XXX
+ SG_ ACCEL_CMD : 17|13@0+ (1,-4096) [0|8191] "" XXX
+ SG_ STATIC_2 : 18|3@1+ (1,0) [0|7] "" XXX
  SG_ ACC_ACTIVE : 33|1@0+ (1,0) [0|1] "" XXX
- SG_ CHKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_7 : 47|1@0+ (1,0) [0|255] "" XXX
  SG_ ACC_SET_ALLOWED : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ CRZ_ENDED : 36|1@0+ (1,0) [0|255] "" XXX
- SG_ ACCEL_CMD : 17|13@0+ (1,-4096) [0|1] "" XXX
- SG_ STATIC_1 : 15|11@0+ (1,0) [0|16383] "" XXX
- SG_ STATIC_2 : 18|3@1+ (1,0) [0|3] "" XXX
- SG_ ERROR_STATUS : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ STOPPING_MAYBE : 42|1@0+ (1,0) [0|1] "" XXX
+ SG_ MYSTERY_BIT : 47|1@0+ (1,0) [0|255] "" XXX
+ SG_ CTR1 : 51|4@0+ (1,0) [0|255] "" XXX
+ SG_ STOPPING_MAYBE2 : 52|1@0+ (1,0) [0|1] "" XXX
+ SG_ RESUME_UNLATCHING_MAYBE : 54|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 121 EPB: 8 XXX
  SG_ NEW_SIGNAL_1 : 4|4@0+ (1,0) [0|255] "" XXX

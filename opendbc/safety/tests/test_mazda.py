@@ -81,5 +81,20 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
 
+class TestMazdaLongitudinalSafety(TestMazdaSafety):
+
+  TX_MSGS = [[0x243, 0], [0x09d, 0], [0x440, 0], [0x21b, 0], [0x21c, 0], [0x764, 0]]
+
+  def setUp(self):
+    self.packer = CANPackerSafety("mazda_2017")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.mazda, 1)
+    self.safety.init_tests()
+
+  def _pcm_status_msg(self, enable):
+    values = {"ACC_ACTIVE": enable, "BRAKE_ON": 0}
+    return self.packer.make_can_msg_safety("PEDALS", 0, values)
+
+
 if __name__ == "__main__":
   unittest.main()

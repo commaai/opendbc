@@ -21,6 +21,16 @@ class CarState(CarStateBase):
     self.distance_button = 0
     self.accel_button = 0
     self.decel_button = 0
+    self.cancel_button = 0
+    self.main_button = 0
+
+  def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
+    if not self.CP.pcmCruise:
+      for b in buttonEvents:
+        if (b.type == ButtonType.accelCruise and b.pressed) or \
+           (b.type == ButtonType.decelCruise and not b.pressed):
+          return True
+    return False
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -79,12 +89,48 @@ class CarState(CarStateBase):
     else:
       self.lkas_allowed_speed = True
 
-    # TODO: the signal used for available seems to be the adaptive cruise signal, instead of the main on
-    #       it should be used for carState.cruiseState.nonAdaptive instead
-    ret.cruiseState.available = cp.vl["CRZ_CTRL"]["CRZ_AVAILABLE"] == 1
-    ret.cruiseState.enabled = cp.vl["CRZ_CTRL"]["CRZ_ACTIVE"] == 1
+    # cruise control button events: main/cancel survive radar suppression on
+    # CRZ_BTNS as MODE_X+MODE_Y and CAN_OFF respectively.
+    prev_distance_button = self.distance_button
+    prev_accel_button = self.accel_button
+    prev_decel_button = self.decel_button
+    prev_cancel_button = self.cancel_button
+    prev_main_button = self.main_button
+    self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]
+    self.accel_button = cp.vl["CRZ_BTNS"]["RES"]
+    self.decel_button = cp.vl["CRZ_BTNS"]["SET_M"]
+    self.cancel_button = cp.vl["CRZ_BTNS"]["CAN_OFF"]
+    self.main_button = int(cp.vl["CRZ_BTNS"]["MODE_X"] == 1 and cp.vl["CRZ_BTNS"]["MODE_Y"] == 1)
+
+    ret.buttonEvents = [
+      *create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}),
+      *create_button_events(self.accel_button, prev_accel_button, {1: ButtonType.accelCruise}),
+      *create_button_events(self.decel_button, prev_decel_button, {1: ButtonType.decelCruise}),
+      *create_button_events(self.cancel_button, prev_cancel_button, {1: ButtonType.cancel}),
+      *create_button_events(self.main_button, prev_main_button, {1: ButtonType.mainCruise}),
+    ]
+
+    # In alpha-long mode the radar-owned CRZ_CTRL frame is intentionally
+    # suppressed, so do not subscribe to it here or card will mark CAN invalid
+    # once the stock frame times out after takeover. On Mazda, PEDALS.ACC_OFF
+    # is asserted while MRCC is armed but not actively controlling, and
+    # PEDALS.ACC_ACTIVE is asserted once stock ACC takes over. Treat either
+    # state as cruise available so MADS does not interpret a stock ACC engage
+    # as the MRCC main switch turning off.
+    if self.CP.openpilotLongitudinalControl:
+      acc_armed = cp.vl["PEDALS"]["ACC_OFF"] == 1
+      acc_active = cp.vl["PEDALS"]["ACC_ACTIVE"] == 1
+      ret.cruiseState.available = acc_armed or acc_active
+      ret.cruiseState.enabled = acc_active
+    else:
+      # TODO: the signal used for available seems to be the adaptive cruise signal,
+      # instead of the main on. It should be used for
+      # carState.cruiseState.nonAdaptive instead.
+      ret.cruiseState.available = cp.vl["CRZ_CTRL"]["CRZ_AVAILABLE"] == 1
+      ret.cruiseState.enabled = cp.vl["CRZ_CTRL"]["CRZ_ACTIVE"] == 1
     ret.cruiseState.standstill = cp.vl["PEDALS"]["STANDSTILL"] == 1
     ret.cruiseState.speed = cp.vl["CRZ_EVENTS"]["CRZ_SPEED"] * CV.KPH_TO_MS
+    ret.cruiseState.speedCluster = ret.cruiseState.speed
 
     # stock lkas should be on
     # TODO: is this needed?
@@ -110,20 +156,6 @@ class CarState(CarStateBase):
     self.cam_lkas = cp_cam.vl["CAM_LKAS"]
     self.cam_laneinfo = cp_cam.vl["CAM_LANEINFO"]
     ret.steerFaultPermanent = cp_cam.vl["CAM_LKAS"]["ERR_BIT_1"] == 1
-
-    # cruise control button events: distance, inc, and dec
-    prev_distance_button = self.distance_button
-    prev_accel_button = self.accel_button
-    prev_decel_button = self.decel_button
-    self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]
-    self.accel_button = cp.vl["CRZ_BTNS"]["RES"]
-    self.decel_button = cp.vl["CRZ_BTNS"]["SET_M"]
-
-    ret.buttonEvents = [
-      *create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}),
-      *create_button_events(self.accel_button, prev_accel_button, {1: ButtonType.accelCruise}),
-      *create_button_events(self.decel_button, prev_decel_button, {1: ButtonType.decelCruise}),
-    ]
 
     return ret
 
