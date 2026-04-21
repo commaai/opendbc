@@ -56,11 +56,18 @@ class BydCarDocs(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
 
-
 @dataclass
 class BydPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
     Bus.pt: 'byd_atto3',
+  })
+  wmis: set[WMI] = field(default_factory=set)
+  years: set[ModelYear] = field(default_factory=set)
+
+@dataclass
+class BydSealionPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {
+    Bus.pt: 'byd_sealion_7',
   })
   wmis: set[WMI] = field(default_factory=set)
   years: set[ModelYear] = field(default_factory=set)
@@ -72,6 +79,10 @@ class CAR(Platforms):
     CarSpecs(mass=1750, wheelbase=2.72, steerRatio=14.8),
     wmis={WMI.BYD_AUTO},
     years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024, ModelYear.S_2025},
+  )
+  BYD_SEALION_7 = BydSealionPlatformConfig(
+    [BydCarDocs("BYD Sealion 7 2024")],
+    CarSpecs(mass=2090., wheelbase=2.72, steerRatio=16.0, centerToFrontRatio=0.44)
   )
 
 

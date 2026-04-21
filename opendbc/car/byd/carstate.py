@@ -3,7 +3,7 @@ import copy
 from opendbc.car import Bus, structs
 from opendbc.can.parser import CANParser
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.byd.values import DBC, CarControllerParams as CCP
+from opendbc.car.byd.values import CAR, DBC, CarControllerParams as CCP
 from opendbc.car.interfaces import CarStateBase
 
 GearShifter = structs.CarState.GearShifter
@@ -27,12 +27,20 @@ class CarState(CarStateBase):
     cp_cam = can_parsers[Bus.cam]
     ret = structs.CarState()
 
-    # speed
-    speed_kph = cp.vl["WHEELSPEED_CLEAN"]["WHEELSPEED_CLEAN"]
-    ret.vEgoRaw = speed_kph * CV.KPH_TO_MS
+    if self.CP.carFingerprint == CAR.BYD_SEALION_7:
+      ret.wheelSpeeds.fl = cp.vl["WHEEL_SPEEDS"]["FL"] * CV.KPH_TO_MS
+      ret.wheelSpeeds.rl = cp.vl["WHEEL_SPEEDS"]["RL"] * CV.KPH_TO_MS
+      ret.vEgoRaw = (ret.wheelSpeeds.rl + ret.wheelSpeeds.fl) / 2.0
+      ret.standstill = ret.vEgoRaw < 0.01
+      ret.vEgoCluster = ret.vEgo * 1.068 # FIXME: update dbc multiplier to get correct kph
+    else:
+      # speed
+      speed_kph = cp.vl["WHEELSPEED_CLEAN"]["WHEELSPEED_CLEAN"]
+      ret.vEgoRaw = speed_kph * CV.KPH_TO_MS
+      ret.standstill = speed_kph < 0.1
+      ret.vEgoCluster = ret.vEgo
+
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = speed_kph < 0.1
-    ret.vEgoCluster = ret.vEgo
 
     # steering wheel
     ret.steeringAngleDeg = cp.vl["STEER_MODULE_2"]["STEER_ANGLE_2"]
