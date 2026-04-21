@@ -1,70 +1,143 @@
-BO_ 213 BRAKE_POSITION: 8 XXX
- SG_ BRAKE_POSITION : 0|9@1+ (1,0) [0|1] "" XXX
+VERSION ""
 
-BO_ 287 STEER_ANGLE_SENSOR: 5 XXX
- SG_ STEER_RACK_ANGLE : 0|16@1- (0.01,0) [-50|50] "deg" XXX
- SG_ STEER_TORQUE_MAG : 16|8@1+ (1,0) [0|255] "Nm" XXX
 
-BO_ 289 NEW_MSG_121: 8 XXX
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
 
-BO_ 482 NEW_MSG_1E2: 8 XXX
- SG_ STEER_ANGLE_2 : 24|16@1- (0.01,0) [0|65535] "" XXX
+BS_:
 
-BO_ 496 WHEEL_SPEEDS: 8 XXX
- SG_ WHEEL_FL : 0|12@1+ (0.075,0) [0|4095] "" XXX
- SG_ WHEEL_FR : 16|12@1+ (0.075,0) [0|4095] "" XXX
- SG_ WHEEL_RL : 28|12@1+ (0.075,0) [0|31] "" XXX
- SG_ WHEEL_RR : 40|12@1+ (0.075,0) [0|8191] "" XXX
- SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" XXX
+BU_: EPS ESP_ECU BCM VCU MPC_CAM ADAS_ECU MCU
 
-BO_ 508 ICC_STEERING: 8 XXX
- SG_ ICC_STEERING_STATE : 1|1@0+ (1,0) [0|1] "" XXX
- SG_ STEER_ANGLE_EPS : 4|28@1- (1,0) [-1000|1000] "" XXX
- SG_ EPS_STEERING : 32|12@1- (1,0) [-2048|2047] "" XXX
- SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|15] "" XXX
 
-BO_ 537 BRAKE: 8 XXX
+BO_ 287 STEER_MODULE_2: 5 EPS
+ SG_ STEER_ANGLE_2 : 0|16@1- (0.1,0) [-3276.8|3276.7] "deg" MCU,ADAS_ECU
+ SG_ DRIVER_EPS_TORQUE : 16|8@1+ (1,0) [0|255] "" MCU,ADAS_ECU
+ SG_ COUNTER : 35|4@0+ (1,0) [0|15] "" MCU
+ SG_ CHECKSUM_4BIT : 39|4@0+ (1,0) [0|15] "" MCU
+
+BO_ 307 STALKS: 8 BCM
+ SG_ LEFT_BLINKER : 37|1@0+ (1,0) [0|1] "" MCU
+ SG_ RIGHT_BLINKER : 38|1@0+ (1,0) [0|1] "" MCU
+ SG_ COUNTER : 48|4@1+ (1,0) [0|15] "" MCU
+
+BO_ 482 STEERING_MODULE_ADAS: 8 ADAS_ECU
+ SG_ ANGLE_RATE_LIMIT_UPPER : 0|10@1- (1,0) [-512|511] "" EPS
+ SG_ ANGLE_RATE_LIMIT_LOWER : 10|10@1- (1,0) [-512|511] "" EPS
+ SG_ STEER_REQ_ACTIVE_LOW : 20|1@0+ (1,0) [0|1] "" EPS
+ SG_ STEER_REQ : 21|1@0+ (1,0) [0|1] "" EPS
+ SG_ SET_ME_1_2 : 22|1@0+ (1,0) [0|1] "" EPS
+ SG_ SET_ME_1_1 : 23|1@0+ (1,0) [0|1] "" EPS
+ SG_ STEER_ANGLE : 24|16@1- (0.1,0) [-3276.8|3276.7] "deg" EPS
+ SG_ SET_ME_FF : 47|8@0+ (1,0) [0|255] "" EPS
+ SG_ SET_ME_F : 48|4@1+ (1,0) [0|15] "" EPS
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" EPS
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" EPS
+
+BO_ 496 WHEELSPEED_CLEAN: 8 ESP_ECU
+ SG_ WHEELSPEED_CLEAN : 0|16@1+ (0.1,0) [0|6553.5] "kph" MCU
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
+
+BO_ 508 STEERING_TORQUE: 8 EPS
+ SG_ MAIN_TORQUE : 0|16@1- (0.1,0) [-3276.8|3276.7] "" MCU,ADAS_ECU
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
+
+BO_ 537 SL7_BRAKE: 8 XXX
  SG_ BRAKE_PRESSED : 2|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 544 NEW_MSG_220: 8 XXX
+BO_ 578 DRIVE_STATE: 8 VCU
+ SG_ RAW_THROTTLE : 30|7@0+ (1,0) [0|127] "" MCU
+ SG_ BRAKE_PRESSED : 37|1@0+ (1,0) [0|1] "" MCU,ADAS_ECU
+ SG_ GEAR : 40|3@1+ (1,0) [0|7] "" MCU
 
-BO_ 546 YAW_RATE: 8 XXX
- SG_ YAW_RATE : 0|11@1+ (1,-982) [0|2047] "" XXX
+BO_ 660 METER_CLUSTER: 8 BCM
+ SG_ FRONT_RIGHT_DOOR : 1|1@1+ (1,0) [0|1] "" MCU
+ SG_ FRONT_LEFT_DOOR : 3|1@0+ (1,0) [0|1] "" MCU
+ SG_ BACK_LEFT_DOOR : 5|1@1+ (1,0) [0|1] "" MCU
+ SG_ BACK_RIGHT_DOOR : 7|1@0+ (1,0) [0|1] "" MCU
+ SG_ SEATBELT_DRIVER : 17|1@0+ (1,0) [0|1] "" MCU
 
-BO_ 547 NEW_MSG_223: 8 XXX
+BO_ 790 LKAS_HUD_ADAS: 8 MPC_CAM
+ SG_ HMA : 4|5@0+ (1,0) [0|31] "" MCU
+ SG_ STEER_ACTIVE_1_1 : 5|1@0+ (1,0) [0|1] "" MCU
+ SG_ LSS_STATE : 7|2@0+ (1,0) [0|3] "" MCU
+ SG_ HAND_ON_WHEEL_WARNING : 10|1@0+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_XFF : 23|8@0+ (1,0) [0|255] "" MCU
+ SG_ SET_ME_X5F : 31|8@0+ (1,0) [0|255] "" MCU
+ SG_ SET_ME_1_2 : 32|1@0+ (1,0) [0|1] "" MCU
+ SG_ STEER_ACTIVE_1_3 : 35|1@0+ (1,0) [0|1] "" MCU
+ SG_ STEER_ACTIVE_ACTIVE_LOW : 36|1@0+ (1,0) [0|1] "" MCU
+ SG_ STEER_ACTIVE_1_2 : 37|1@0+ (1,0) [0|1] "" MCU
+ SG_ TSR : 47|8@0+ (1,0) [0|255] "" MCU
+ SG_ SETTINGS : 48|4@1+ (1,0) [0|15] "" MCU
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" MCU
 
-BO_ 578 NEW_MSG_242: 8 XXX
- SG_ GAS_PEDAL_2 : 30|7@0+ (1,0) [0|127] "" XXX
- SG_ BRAKE_STATE : 37|1@0+ (1,0) [0|1] "" XXX
+BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
+ SG_ SET_SPEED : 0|8@1+ (0.5,0) [0|127.5] "kph" MCU
+ SG_ SET_DISTANCE : 12|3@0+ (1,0) [0|7] "" MCU
+ SG_ ACC_STATE : 19|3@1+ (1,0) [0|7] "" MCU
+ SG_ ACC_ON2 : 20|1@0+ (1,0) [0|1] "" MCU
+ SG_ ACC_ON1 : 22|1@0+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_XFF : 47|8@0+ (1,0) [0|255] "" MCU
+ SG_ COUNTER : 48|4@1+ (1,0) [0|15] "" MCU
+ SG_ SET_ME_XF : 55|4@0+ (1,0) [0|15] "" MCU
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
-BO_ 660 SEATBELT: 8 XXX
- SG_ DOOR_FL_OPEN : 1|1@0+ (1,0) [0|1] "" XXX
- SG_ DOOR_FR_OPEN : 3|1@0+ (1,0) [0|1] "" XXX
- SG_ DOOR_RL_OPEN : 5|1@0+ (1,0) [0|1] "" XXX
- SG_ DOOR_RR_OPEN : 7|1@0+ (1,0) [0|1] "" XXX
- SG_ SEATBELT_DRIVER_LATCHED : 17|1@0+ (1,0) [0|1] "" XXX
+BO_ 814 ACC_CMD: 8 ADAS_ECU
+ SG_ ACCEL_CMD : 0|8@1+ (1,-100) [-100|155] "" MCU
+ SG_ ACC_ON_1 : 9|1@0+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_25_1 : 10|6@1+ (1,0) [0|63] "" MCU
+ SG_ ACC_ON_2 : 17|1@0+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_25_2 : 18|6@1+ (1,0) [0|63] "" MCU
+ SG_ DECEL_FACTOR : 24|4@1+ (1,0) [0|15] "" MCU
+ SG_ SET_ME_X8 : 31|4@0+ (1,0) [0|15] "" MCU
+ SG_ ACCEL_FACTOR : 32|4@1+ (1,0) [0|15] "" MCU
+ SG_ CMD_REQ_ACTIVE_LOW : 36|1@0+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_1 : 38|1@0+ (1,0) [0|1] "" MCU
+ SG_ STANDSTILL_RESUME : 39|1@0+ (1,0) [0|1] "" MCU
+ SG_ STANDSTILL_STATE : 40|1@0+ (1,0) [0|1] "" MCU
+ SG_ ACC_REQ_NOT_STANDSTILL : 43|1@0+ (1,0) [0|1] "" MCU
+ SG_ ACC_CONTROLLABLE_AND_ON : 44|1@0+ (1,0) [0|1] "" MCU
+ SG_ ACC_OVERRIDE_OR_STANDSTILL : 45|1@0+ (1,0) [0|1] "" MCU
+ SG_ COUNTER : 48|4@1+ (1,0) [0|15] "" MCU
+ SG_ SET_ME_XF : 55|4@0+ (1,0) [0|15] "" MCU
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
-BO_ 661 NEW_MSG_295: 8 XXX
-
-BO_ 790 ICC_STATE: 8 XXX
- SG_ ACC_ON : 27|1@0+ (1,0) [0|1] "" XXX
- SG_ ICC_ON : 28|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_2 : 63|4@0+ (1,0) [0|15] "" XXX
-
-BO_ 814 ICC_GAS_NOTSURE: 8 XXX
- SG_ GAS_NOTSURE : 7|16@0+ (1,0) [0|65535] "" XXX
- SG_ CHECKSUM : 51|12@0+ (1,0) [0|4095] "" XXX
-
-BO_ 834 PEDALS: 8 XXX
- SG_ GAS_PEDAL : 6|7@0+ (1,0) [0|127] "" XXX
- SG_ BRAKE_PRESSED : 14|7@0+ (1,0) [0|1] "" XXX
+BO_ 834 PEDAL: 8 VCU
+ SG_ GAS_PEDAL : 0|8@1+ (0.01,0) [0|2.55] "" MCU
+ SG_ BRAKE_PEDAL : 8|8@1+ (0.01,0) [0|2.55] "" MCU
  SG_ DRIVE_MODE : 22|3@0+ (1,0) [0|7] "" XXX
- SG_ COUNTER : 55|12@0+ (1,0) [0|4095] "" XXX
-
-BO_ 854 NEW_MSG_356: 8 XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
 BO_ 860 GEAR_STATE: 8 XXX
  SG_ GEAR_STATE : 8|3@1+ (1,0) [0|7] "" XXX
@@ -75,31 +148,35 @@ BO_ 906 LIGHTS: 8 XXX
  SG_ RIGHT_TURN : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_LIGHT : 59|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 944 STEERING_WHEEL_BUTTONS: 8 XXX
- SG_ ACC_SPEED_BUTTON_MINUS : 3|1@1+ (1,0) [0|3] "" XXX
- SG_ ACC_SPEED_BUTTON_PLUS : 4|2@0+ (1,0) [0|3] "" XXX
- SG_ ACC_BUTTON : 6|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_DISTANCE_BUTTON_NOTSURE_MINUS : 15|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_DISTANCE_BUTTON_NOTSURE_PLUS : 16|1@0+ (1,0) [0|1] "" XXX
+BO_ 944 PCM_BUTTONS: 8 MCU
+ SG_ SET_ME_1_1 : 2|1@0+ (1,0) [0|1] "" MCU
+ SG_ SET_BTN : 3|1@0+ (1,0) [0|1] "" MCU
+ SG_ RES_BTN : 4|1@0+ (1,0) [0|1] "" MCU
+ SG_ LKAS_ON_BTN : 6|1@0+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_1_2 : 12|1@0+ (1,0) [0|1] "" MCU
+ SG_ DEC_DISTANCE_BTN : 15|1@0+ (1,0) [0|1] "" MCU
+ SG_ INC_DISTANCE_BTN : 16|1@0+ (1,0) [0|1] "" MCU
+ SG_ ACC_ON_BTN : 19|1@0+ (1,0) [0|1] "" MCU
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" MCU
 
 BO_ 1028 IGNITION: 8 XXX
  SG_ IGNITION_ON : 6|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 1033 NEW_MSG_409: 8 XXX
-
-BO_ 1040 xxxx: 8 XXX
-
-BO_ 1058 MAYBE_RPM: 8 XXX
-
-BO_ 1092 NEW_MSG_444: 8 XXX
-
-BO_ 1093 maybe_ignition: 8 XXX
-
-BO_ 1189 NEW_MSG_4A5: 8 XXX
-
-BO_ 1193 DRIVING_MODE_BUTTON: 8 XXX
- SG_ DRIVING_MODE_BUTTON_PRESSED : 40|1@0+ (1,0) [0|1] "" XXX
-
-CM_ BO_ 1193 "to be deleted";
+CM_ BO_ 287 "EPS steering wheel angle + driver torque. Validated: angle range plausible, DRIVER_EPS_TORQUE stays near 0 when hands-off.";
+CM_ BO_ 307 "Turn signal / stalk info. Validated: LEFT_BLINKER and RIGHT_BLINKER transition 0->1 during lane change events.";
+CM_ BO_ 482 "Lateral steering command sent by MPC camera/ADAS ECU to EPS. Blocked by panda on bus 2; panda injects its own on bus 0.";
+CM_ BO_ 496 "Wheel speed (cleaned average). Validated: 0-127 km/h matching driving speed.";
+CM_ BO_ 508 "Column steering torque from EPS.";
+CM_ BO_ 578 "Drivetrain state: gear, brake pressed, raw throttle.";
+CM_ BO_ 660 "Body/meter cluster: doors + seatbelt.";
+CM_ BO_ 790 "LKAS HUD ADAS message from camera. Blocked by panda on bus 2; panda re-injects.";
+CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state).";
+CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active.";
+CM_ BO_ 834 "Gas/brake pedal percentages.";
+CM_ BO_ 944 "Steering-wheel cruise control buttons.";
+VAL_ 578 GEAR 4 "D" 2 "R" 3 "N" 1 "P";
+VAL_ 813 SET_DISTANCE 4 "4bar" 3 "3bar" 2 "2bar" 1 "1bar";
+VAL_ 813 ACC_STATE 0 "OFF" 2 "ACC_ON" 3 "ACC_ACTIVE" 5 "FORCE_ACCEL" 7 "ERROR";
 VAL_ 834 DRIVE_MODE 0 "RESERVED" 1 "ECO" 2 "SPORT" 3 "SNOW" 4 "NORMAL" 5 "RESERVED" 6 "RESERVED" 7 "RESERVED";
 VAL_ 860 GEAR_STATE 1 "P" 2 "R" 3 "N" 4 "D" 0 "UNKNOWN" 5 "UNKNOWN" 6 "UNKNOWN" 7 "UNKNOWN";
