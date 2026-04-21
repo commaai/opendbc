@@ -28,8 +28,16 @@ class TeslaCAN:
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, active):
-    set_speed = min(max(v_ego + accel, 0) * CV.MS_TO_KPH, 400)
+  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, active, enabled):
+    set_speed = min(max(v_ego + accel * 3, 0) * CV.MS_TO_KPH, 400)
+    if not enabled or acc_state == 13:
+      accel_min, accel_max = 0, 0
+    elif not active:
+      accel_min, accel_max = CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX
+    elif accel < 0:
+      accel_min, accel_max = accel, CarControllerParams.ACCEL_MAX
+    else:
+      accel_min, accel_max = CarControllerParams.ACCEL_MIN, accel
 
     values = {
       "DAS_setSpeed": set_speed,
@@ -37,8 +45,8 @@ class TeslaCAN:
       "DAS_aebEvent": 0,
       "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
       "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
-      "DAS_accelMin": accel,
-      "DAS_accelMax": max(accel, 0),
+      "DAS_accelMin": accel_min,
+      "DAS_accelMax": accel_max,
       "DAS_controlCounter": counter,
     }
     return self.packer.make_can_msg("DAS_control", CANBUS.party, values)
