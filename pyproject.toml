@@ -1,6 +1,6 @@
 [project]
 name = "opendbc"
-version = "0.2.1"
+version = "0.3.0"
 description = "a Python API for your car"
 license = "MIT"
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
