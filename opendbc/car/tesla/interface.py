@@ -48,6 +48,11 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= TeslaFlags.FSD_14.value
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FSD_14.value
 
+    # Legacy Model 3/Y use 10.3; Highland (Model 3) and Juniper (Model Y)
+    # variants identified by FSD14 EPS FW keep 12.0.
+    if candidate in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y) and fsd_14:
+      ret.steerRatio = 12.0
+
     ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
 
     return ret

@@ -47,7 +47,7 @@ class CAR(Platforms):
       TeslaCarDocsHW3("Tesla Model 3 (with HW3) 2019-23"),
       TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024-25"),
     ],
-    CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
+    CarSpecs(mass=1899., wheelbase=2.875, steerRatio=10.3),
     {Bus.party: 'tesla_model3_party', Bus.radar: 'tesla_radar_continental_generated'},
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
@@ -55,7 +55,7 @@ class CAR(Platforms):
       TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-23"),
       TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024-25"),
     ],
-    CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
+    CarSpecs(mass=2072., wheelbase=2.890, steerRatio=10.3),
     {Bus.party: 'tesla_model3_party', Bus.radar: 'tesla_radar_continental_generated'},
   )
   TESLA_MODEL_X = TeslaPlatformConfig(
@@ -74,7 +74,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
   ]
 )
 
-# Cars with this EPS FW have FSD 14 and use TeslaFlags.FSD_14
+# Cars with this EPS FW have FSD14 and use TeslaFlags.FSD_14.
+# For Model 3/Y steer ratio, this map is used to keep Highland/Juniper at 12.0.
 FSD_14_FW = {
   CAR.TESLA_MODEL_3: [
     b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
