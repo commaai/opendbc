@@ -22,12 +22,14 @@ FW_VERSIONS = {
       b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
       b'TeMYG4_Main_0.0.0 (78),E4HP015.05.0',
       b'TeMYG4_SingleECU_0.0.0 (33),E4S014.27',
+      b'TeMYG4_Main_0.0.0 (78),E4H015.05.0',
     ],
   },
   CAR.TESLA_MODEL_Y: {
     (Ecu.eps, 0x730, None): [
       b'TeM3_E014p10_0.0.0 (16),Y002.18.00',
       b'TeM3_E014p10_0.0.0 (16),YP002.18.00',
+      b'TeM3_E014p10_0.0.0 (24),YP002.21.2',
       b'TeM3_ES014p11_0.0.0 (16),YS002.17',
       b'TeM3_ES014p11_0.0.0 (25),YS002.19.0',
       b'TeMYG4_DCS_Update_0.0.0 (13),Y4002.27.1',
