@@ -1,3 +1,5 @@
+import unittest
+
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.tesla.interface import CarInterface
@@ -8,7 +10,7 @@ from opendbc.car.tesla.values import CAR, FSD_14_FW
 Ecu = CarParams.Ecu
 
 
-class TestTeslaFingerprint:
+class TestTeslaFingerprint(unittest.TestCase):
   def test_fsd_14_fw(self):
     for car_model, ecus in FW_VERSIONS.items():
       for fw in ecus.get((Ecu.eps, 0x730, None), []):

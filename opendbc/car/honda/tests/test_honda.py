@@ -1,4 +1,5 @@
 import re
+import unittest
 
 from opendbc.car.honda.fingerprints import FW_VERSIONS
 from opendbc.car.honda.values import HONDA_BOSCH, HONDA_BOSCH_TJA_CONTROL
@@ -6,7 +7,7 @@ from opendbc.car.honda.values import HONDA_BOSCH, HONDA_BOSCH_TJA_CONTROL
 HONDA_FW_VERSION_RE = br"[A-Z0-9]{5}-[A-Z0-9]{3}(-|,)[A-Z0-9]{4}(\x00){2}$"
 
 
-class TestHondaFingerprint:
+class TestHondaFingerprint(unittest.TestCase):
   def test_fw_version_format(self):
     # Asserts all FW versions follow an expected format
     for fw_by_ecu in FW_VERSIONS.values():
