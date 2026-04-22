@@ -36,7 +36,6 @@ FW_RE = re.compile(
   rb'(?:\.(?P<software_minor>\d+))?$'
 )
 
-# Only semantic claim we make from the version string: the leading letter identifies the car.
 PLATFORM_TO_CAR = {
   b'E': CAR.TESLA_MODEL_3,
   b'Y': CAR.TESLA_MODEL_Y,
