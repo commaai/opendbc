@@ -139,7 +139,7 @@ class CarController(CarControllerBase):
 
     # Button messages
     if not self.CP.openpilotLongitudinalControl:
-      if CC.cruiseControl.cancel and self.cancel_counter > CANCEL_BUTTON_DELAY_FRAMES:
+      if self.cancel_counter > CANCEL_BUTTON_DELAY_FRAMES:
         can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP))
       elif CC.cruiseControl.resume:
         # send resume at a max freq of 10Hz
