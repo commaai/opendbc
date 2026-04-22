@@ -8,7 +8,7 @@ from opendbc.car.tesla.values import CAR, FSD_14_FW
 
 Ecu = CarParams.Ecu
 
-# Full Tesla EPS FW. Fields prefixed unknown_* we observe structurally but don't know the meaning of.
+# Fields prefixed unknown_* we observe structurally but don't know the meaning of.
 # Only `platform` has evidence-backed semantic meaning (matches car_model in FW_VERSIONS).
 #
 # unknown_prefix is everything before the comma; we don't split it because we don't know what its
