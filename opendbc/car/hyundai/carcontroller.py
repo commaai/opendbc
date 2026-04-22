@@ -18,10 +18,9 @@ MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 # On some HKG CAN and CAN FD non-CANFD_ALT_BUTTONS, the cancel button (CF_Clu_CruiseSwState / CRUISE_BUTTONS = 4) is
-# a pause/resume toggle, not a dedicated cancel. Firing it mid-brake conflicts with the brake-driven factory SCC
-# disengagement and triggers the "SCC Conditions Not Met" alert. Delaying the button send lets factory SCC disengage
-# naturally on brake press (~100 ms), and falls back to actually sending the button if SCC fails to disengage for any
-# other reason.
+# a pause/resume toggle, not a dedicated cancel. Firing it mid-brake inadvertently can cause a re-enable attempt
+# and triggers the "SCC Conditions Not Met" alert. Delaying the button send lets factory SCC disengage
+# naturally on brake press. We send ~100 ms later if it fails to do so, or if we want to cancel for another reason.
 CANCEL_BUTTON_DELAY_FRAMES = 10
 
 
