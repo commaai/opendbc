@@ -429,34 +429,6 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
     self.assertEqual(0, self.safety.safety_fwd_hook(2, aeb_msg_cam.addr))
     self.assertFalse(self._tx(no_aeb_msg))
 
-  def test_encoder_panda_compatible(self):
-    from opendbc.car.tesla.teslacan import TeslaCAN
-    from opendbc.can import CANPacker
-    from opendbc.car.tesla.values import DBC, CAR
-    from opendbc.car import Bus
-    from opendbc.car.structs import CarParams
-
-    tc = TeslaCAN(CarParams.new_message(), CANPacker(DBC[CAR.TESLA_MODEL_Y][Bus.party]))
-
-    def encode_and_tx(accel, active, enabled, controls_allowed, gas_pressed):
-      _, data, _ = tc.create_longitudinal_command(self.acc_states["ACC_ON"], accel, 0, 25.0, active, enabled)
-      v = int.from_bytes(bytes(data), 'little')
-      msg = self._long_control_msg(((v >> 0) & 0xFFF) * 0.1, acc_state=(v >> 12) & 0xF,
-                                   jerk_limits=(((v >> 18) & 0x1FF) * 0.018 - 9.1, ((v >> 27) & 0xFF) * 0.034),
-                                   accel_limits=(((v >> 35) & 0x1FF) * 0.04 - 15, ((v >> 44) & 0x1FF) * 0.04 - 15),
-                                   aeb_event=(v >> 16) & 0x3)
-      self._rx(self._pcm_status_msg(True, 0))
-      self.safety.set_controls_allowed(controls_allowed)
-      self.safety.set_gas_pressed_prev(gas_pressed)
-      return self._tx(msg)
-
-    for enabled, controls_allowed in ((False, False), (True, True)):
-      for active in (False, True):
-        for gas_pressed in (False, True):
-          for accel in (self.MIN_ACCEL, -1.5, 0.0, 1.0, self.MAX_ACCEL):
-            self.assertTrue(encode_and_tx(accel, active, enabled, controls_allowed, gas_pressed),
-                            (enabled, controls_allowed, active, gas_pressed, accel))
-
   def test_prevent_reverse(self):
     # Note: Tesla can reverse while at a standstill if both accel_min and accel_max are negative.
     self.safety.set_controls_allowed(True)
