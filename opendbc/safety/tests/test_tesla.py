@@ -28,6 +28,8 @@ def round_angle(apply_angle, can_offset=0):
 
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
   SAFETY_PARAM = 0
+  # Keep in sync with opendbc/safety/modes/tesla.h (TESLA_STEERING_PARAMS.steer_ratio)
+  SAFETY_STEER_RATIO = 12.0
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor)}
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor]}
@@ -64,6 +66,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
   def setUp(self):
     self.VM = VehicleModel(get_safety_CP())
+    self.VM.update_params(1.0, self.SAFETY_STEER_RATIO)
     self.packer = CANPackerSafety("tesla_model3_party")
     self.define = CANDefine("tesla_model3_party")
     self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
