@@ -1,15 +1,18 @@
 Version 0.3.0 (2026-04-22)
 ========================
 * Supported car count: 345 → 397
-* Tesla Model 3, Model Y, and Model X (HW3 and HW4) support thanks to sshane, lukasloetkolben, and greatgitsby!
+* Tesla Model 3, Model Y, and Model X (HW3 and HW4) support thanks to lukasloetkolben and greatgitsby!
 * Rivian R1S and R1T (Gen 1 and Gen 2) support thanks to lukasloetkolben!
 * Porsche Macan and Audi Q5 (VW MLB) support thanks to jyoung8607 and Dennis-NL!
 * VW MEB (ID.x) architecture support thanks to jyoung8607!
 * PSA AEE2010_R3 platform support thanks to elkoled!
-* Jeep Cherokee 2019-23 support thanks to jyoung8607!
-* Many new Honda / Acura CAN-FD platforms (Accord, CR-V, Pilot, Passport, Odyssey, HR-V, Civic Hybrid, MDX, RDX, TLX) thanks to jyoung8607, mvl-boston, and vanillagorillaa!
-* Honda City 2023 and N-Box 2018 support thanks to thalesac and miettal!
-* Ford F-150, F-150 Lightning, Mach-E, Ranger, Expedition, Escape 2023-24, and Kuga 2024 support thanks to incognitojam, alan-polk, and hiimisaac!
+* Honda Accord 2023-25, CR-V 2023-25, Pilot 2023-25, Passport 2026, and Acura MDX 2025 support thanks to vanillagorillaa and MVL!
+* Honda Odyssey 2021-25 support thanks to csouers and MVL!
+* Acura TLX 2021 support thanks to MVL!
+* Honda City 2023 support thanks to vanillagorillaa and drFritz!
+* Honda N-Box 2018 support thanks to miettal!
+* Ford F-150, F-150 Hybrid, Mach-E, and Ranger support
+* Ford Escape 2023-24 and Kuga 2024 support thanks to incognitojam!
 * Hyundai Nexo 2021 support thanks to sunnyhaibin!
 * Kia K7 2017 support thanks to royjr!
 * Lexus LS 2018 support thanks to Hacheoy!
