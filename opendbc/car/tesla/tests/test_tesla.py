@@ -29,10 +29,10 @@ Ecu = CarParams.Ecu
 #   unknown_prefix='TeMYG4_Main_0.0.0 (78)'
 #   platform=E  variant_code=4HP015  software_major=05  software_minor=0
 FW_RE = re.compile(
-  rb'^(?P<unknown_prefix>.+),'
-  rb'(?P<platform>[EYX])'
-  rb'(?P<variant_code>\d?[A-Z]*\d{3})'
-  rb'\.(?P<software_major>\d+)'
+  rb'^(?P<unknown_prefix>.+),' +
+  rb'(?P<platform>[EYX])' +
+  rb'(?P<variant_code>\d?[A-Z]*\d{3})' +
+  rb'\.(?P<software_major>\d+)' +
   rb'(?:\.(?P<software_minor>\d+))?$'
 )
 
@@ -59,7 +59,7 @@ class TestTeslaFingerprint:
       for fw in ecus.get((Ecu.eps, 0x730, None), []):
         m = FW_RE.match(fw)
 
-        assert m is not None, f"Unparseable FW: {fw}"
+        assert m is not None, f"Unparsable FW: {fw}"
         assert PLATFORM_TO_CAR[m['platform']] == car_model, f"Platform letter {m['platform']!r} != {car_model.value}: {fw}"
 
   def test_fsd_14_fw(self):
@@ -70,7 +70,7 @@ class TestTeslaFingerprint:
       variant_prefix, variant_suffix = FSD_14_FW_RULE[car_model]
       for fw in ecus.get((Ecu.eps, 0x730, None), []):
         m = FW_RE.match(fw)
-        assert m is not None, f"Unparseable FW: {fw}"
+        assert m is not None, f"Unparsable FW: {fw}"
 
         is_fsd_14 = fw in FSD_14_FW.get(car_model, [])
         expected = (
