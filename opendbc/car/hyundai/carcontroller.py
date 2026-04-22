@@ -87,10 +87,6 @@ class CarController(CarControllerBase):
 
     can_sends = []
 
-    # Delay the cancel button send so the brake can disengage factory SCC first.
-    # Reset whenever openpilot is no longer requesting cancel.
-    self.cancel_counter = self.cancel_counter + 1 if CC.cruiseControl.cancel else 0
-
     # *** common hyundai stuff ***
 
     # tester present - w/ no response (keeps relevant ECU disabled)
@@ -104,6 +100,10 @@ class CarController(CarControllerBase):
       # for blinkers
       if self.CP.flags & HyundaiFlags.CANFD_ENABLE_BLINKERS:
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
+
+    # Delay the cancel button send so the brake can disengage factory SCC first.
+    # Reset whenever openpilot is no longer requesting cancel.
+    self.cancel_counter = self.cancel_counter + 1 if CC.cruiseControl.cancel else 0
 
     # *** CAN/CAN FD specific ***
     if self.CP.flags & HyundaiFlags.CANFD:
