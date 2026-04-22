@@ -37,11 +37,14 @@ PLATFORM_TO_CAR = {
   b'X': CAR.TESLA_MODEL_X,
 }
 
-# FSD 14 FW: prefix-before-first-dot starts with the platform tag and ends with the version series,
-# and the first component of the version is >= 4. Older series (E4H 014, Y4 002) are never FSD 14.
+# Hypothesized FSD 14 profile, in terms of FW_RE fields (given unknown_hw_digit='4' and major>=4):
+#   M3: unknown_mid_letters starts with 'H',  unknown_series='015'
+#   MY: unknown_mid_letters unconstrained,    unknown_series='003'
+# Older series (M3 '014', MY '002') are never FSD 14.
+# Empty bytes for the mid_letters prefix means any value satisfies (b''.startswith is always True).
 FSD_14_FW_RULE = {
-  CAR.TESLA_MODEL_3: (b'E4H', b'015'),
-  CAR.TESLA_MODEL_Y: (b'Y4',  b'003'),
+  CAR.TESLA_MODEL_3: (b'H', b'015'),
+  CAR.TESLA_MODEL_Y: (b'',  b'003'),
 }
 
 
@@ -58,13 +61,18 @@ class TestTeslaFingerprint:
     for car_model, ecus in FW_VERSIONS.items():
       if car_model not in FSD_14_FW_RULE:
         continue
-      tag, series = FSD_14_FW_RULE[car_model]
+      mid_prefix, series = FSD_14_FW_RULE[car_model]
       for fw in ecus.get((Ecu.eps, 0x730, None), []):
-        _, _, version = fw.partition(b',')
+        m = FW_RE.match(fw)
+        assert m is not None, f"Unparseable FW: {fw}"
         is_fsd_14 = fw in FSD_14_FW.get(car_model, [])
-        prefix, _, ver = version.partition(b'.')
-        high_version = prefix.startswith(tag) and prefix.endswith(series) and int(ver.split(b'.')[0]) >= 4
-        assert is_fsd_14 == high_version, f"{fw}"
+        expected = (
+          m['unknown_hw_digit'] == b'4'
+          and m['unknown_mid_letters'].startswith(mid_prefix)
+          and m['unknown_series'] == series
+          and int(m['major']) >= 4
+        )
+        assert is_fsd_14 == expected, f"{fw}"
 
   def test_radar_detection(self):
     # Test radar availability detection for cars with radar DBC defined
