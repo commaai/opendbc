@@ -1,3 +1,7 @@
+Version 0.3.1 (2026-04-22)
+========================
+* Include DBCs so that DBC tools can read CAN messages
+
 Version 0.3.0 (2026-04-22)
 ========================
 * Supported car count: 345 → 397

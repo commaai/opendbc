@@ -1,6 +1,6 @@
 [project]
 name = "opendbc"
-version = "0.3.0"
+version = "0.3.1"
 description = "a Python API for your car"
 license = "MIT"
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
@@ -134,4 +134,6 @@ too-many-positional-arguments = "ignore"
 include-package-data = true
 
 [tool.setuptools.package-data]
-"opendbc.safety" = ["*.h", "board/*.h", "board/drivers/*.h", "modes/*.h"]
+"opendbc.car" = ["**/*.capnp", "**/*.toml"]
+"opendbc.dbc" = ["**/*.dbc"]
+"opendbc.safety" = ["*.h", "modes/*.h"]
