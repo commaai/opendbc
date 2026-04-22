@@ -1,6 +1,6 @@
 Version 0.3.1 (2026-04-22)
 ========================
-* Include DBCs so that DBC tools can read CAN messages
+* Ship DBCs, capnp schemas, and torque data in the wheel
 
 Version 0.3.0 (2026-04-22)
 ========================
