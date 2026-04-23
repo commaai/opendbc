@@ -17,10 +17,11 @@ AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll 
 MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
 
 # Hard-coded LKA payload for bench testing.
-HARDCODED_LKA_APPLY_ANGLE_DEG = 5.0
+HARDCODED_LKA_APPLY_ANGLE_DEG = 2.93
 HARDCODED_LKA_CURVATURE = 0.0
 HARDCODED_LKA_DIRECTION = 2
 HARDCODED_LKA_RAMP_TYPE = 1
+HARDCODED_LKA_RAMP_STEP_DEG = 0.15
 
 
 class CarControllerParamsBronco:
@@ -110,6 +111,7 @@ class CarController(CarControllerBase):
     self.reset_count = 0
     self.last_timeout_at = time.time()
     self.last_timeout_duration = 100000000
+    self.lka_apply_angle_ramped = 0.0
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
@@ -186,13 +188,16 @@ class CarController(CarControllerBase):
         else:
           near_timeout = False
 
-        lka_active = cruise_enabled and lkas_available and not near_timeout
+        lka_active = cruise_enabled
         if lka_active:
-          lka_apply_angle = HARDCODED_LKA_APPLY_ANGLE_DEG
+          self.lka_apply_angle_ramped = min(HARDCODED_LKA_APPLY_ANGLE_DEG,
+                                            self.lka_apply_angle_ramped + HARDCODED_LKA_RAMP_STEP_DEG)
+          lka_apply_angle = self.lka_apply_angle_ramped
           lka_curvature = HARDCODED_LKA_CURVATURE
           lka_direction = HARDCODED_LKA_DIRECTION
           lka_ramp_type = HARDCODED_LKA_RAMP_TYPE
         else:
+          self.lka_apply_angle_ramped = 0.0
           lka_apply_angle = 0.0
           lka_curvature = 0.0
           lka_direction = 0
