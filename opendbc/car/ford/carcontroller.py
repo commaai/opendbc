@@ -16,6 +16,12 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll raises lateral acceleration
 MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
 
+# Hard-coded LKA payload for bench testing.
+HARDCODED_LKA_APPLY_ANGLE_DEG = 5.0
+HARDCODED_LKA_CURVATURE = 0.0
+HARDCODED_LKA_DIRECTION = 2
+HARDCODED_LKA_RAMP_TYPE = 1
+
 
 class CarControllerParamsBronco:
   STEER_STEP = 5
@@ -113,6 +119,7 @@ class CarController(CarControllerBase):
     lkas_available = getattr(CS, "lkas_available", True)
 
     main_on = CS.out.cruiseState.available
+    cruise_enabled = CS.out.cruiseState.enabled
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
     fcw_alert = hud_control.visualAlert == VisualAlert.fcw
 
@@ -179,14 +186,20 @@ class CarController(CarControllerBase):
         else:
           near_timeout = False
 
-        if CC.latActive and lkas_available and not near_timeout:
-          new_direction = 2 if CS.out.steeringAngleDeg > 0 else 4
+        lka_active = cruise_enabled and lkas_available and not near_timeout
+        if lka_active:
+          lka_apply_angle = HARDCODED_LKA_APPLY_ANGLE_DEG
+          lka_curvature = HARDCODED_LKA_CURVATURE
+          lka_direction = HARDCODED_LKA_DIRECTION
+          lka_ramp_type = HARDCODED_LKA_RAMP_TYPE
         else:
-          new_direction = 0
+          lka_apply_angle = 0.0
+          lka_curvature = 0.0
+          lka_direction = 0
+          lka_ramp_type = 0
 
-        ramp_type = 1 if abs(apply_angle) >= 5 else 0
-        can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN, CC.latActive and lkas_available,
-                                                apply_angle, -apply_curvature, new_direction, ramp_type))
+        can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN, lka_active,
+                                                lka_apply_angle, lka_curvature, lka_direction, lka_ramp_type))
       else:
         can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN, False, 0.0, 0.0, 0, 0))
 
