@@ -183,7 +183,7 @@ def build_crz_ctrl(long_active: bool, lead_visible: bool, hold_request: bool, ho
 
 
 def create_longitudinal_messages(bus: int, accel: float, counter: int, long_active: bool,
-                                 lead_visible: bool, standstill: bool, *, hold_request: bool = False,
+                                 lead_visible: bool, *, hold_request: bool = False,
                                  crz_ctrl_hold_request: bool | None = None,
                                  hold_latched: bool = False, crz_hold_latched: bool = False,
                                  crz_hold_passive: bool = False,

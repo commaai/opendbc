@@ -189,7 +189,7 @@ class CarController(CarControllerBase):
         long_active = CC.longActive
         lead_visible = CC.hudControl.leadVisible
         can_sends.extend(create_longitudinal_messages(RADAR_BUS, accel, self.long_counter,
-                                                      long_active, lead_visible, CS.out.standstill,
+                                                      long_active, lead_visible,
                                                       hold_request=crz_info_hold_request,
                                                       crz_ctrl_hold_request=stop_go_request,
                                                       hold_latched=hold_latched,

@@ -81,9 +81,12 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
 
-class TestMazdaLongitudinalSafety(TestMazdaSafety):
+class TestMazdaLongitudinalSafety(TestMazdaSafety, common.LongitudinalAccelSafetyTest):
 
   TX_MSGS = [[0x243, 0], [0x09d, 0], [0x440, 0], [0x21b, 0], [0x21c, 0], [0x764, 0]]
+  MAX_ACCEL = 2000.0
+  MIN_ACCEL = -2000.0
+  INACTIVE_ACCEL = 0.0
 
   def setUp(self):
     self.packer = CANPackerSafety("mazda_2017")
@@ -94,6 +97,25 @@ class TestMazdaLongitudinalSafety(TestMazdaSafety):
   def _pcm_status_msg(self, enable):
     values = {"ACC_ACTIVE": enable, "BRAKE_ON": 0}
     return self.packer.make_can_msg_safety("PEDALS", 0, values)
+
+  def _accel_msg(self, accel: float):
+    values = {"ACCEL_CMD": accel}
+    return self.packer.make_can_msg_safety("CRZ_INFO", 0, values)
+
+  def test_accel_actuation_limits(self):
+    # CRZ_INFO.ACCEL_CMD is a raw integer command in Mazda's DBC, so use
+    # integer-domain boundaries to avoid float rounding artifacts in packing.
+    limits = ((self.MIN_ACCEL, self.MAX_ACCEL, common.ALTERNATIVE_EXPERIENCE.DEFAULT),
+              (self.MIN_ACCEL, self.MAX_ACCEL, common.ALTERNATIVE_EXPERIENCE.RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX))
+
+    for min_accel, max_accel, alternative_experience in limits:
+      for accel in range(int(min_accel) - 1, int(max_accel) + 2):
+        for controls_allowed in [True, False]:
+          self.safety.set_controls_allowed(controls_allowed)
+          self.safety.set_alternative_experience(alternative_experience)
+          should_tx = controls_allowed and min_accel <= accel <= max_accel
+          should_tx = should_tx or accel == self.INACTIVE_ACCEL
+          self.assertEqual(should_tx, self._tx(self._accel_msg(float(accel))))
 
 
 if __name__ == "__main__":
