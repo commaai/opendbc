@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from opendbc.can.dbc import DBC
 from opendbc.can.packer import set_value
@@ -40,7 +40,7 @@ ACCEL_SCALE_DOWN_BP = (0.0, 1.4, 5.6, 22.2)
 ACCEL_SCALE_DOWN_V = (1200.0, 1000.0, 925.0, 950.0)
 
 
-class MazdaLongitudinalProfile(str, Enum):
+class MazdaLongitudinalProfile(StrEnum):
   STANDBY = "standby"
   ENGAGED_CRUISE = "engaged_cruise"
   ENGAGED_FOLLOW = "engaged_follow"

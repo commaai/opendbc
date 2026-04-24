@@ -47,7 +47,7 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
       }
     }
 
-    if (msg->addr == MAZDA_CRZ_BTNS && mazda_longitudinal) {
+    if ((msg->addr == MAZDA_CRZ_BTNS) && mazda_longitudinal) {
       bool cancel = GET_BIT(msg, 0U);
       if (cancel) {
         controls_allowed = false;
@@ -118,7 +118,10 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
       // Mazda's CRZ_INFO.ACCEL_CMD packing in this stack follows the DBC
       // bit ordering used by set_value() in opendbc, which places the 13-bit
       // raw command across data[2] low bits, all of data[3], and data[4] high bits.
-      int desired_accel = ((((int)msg->data[2] & 0x3U) << 11) | (((int)msg->data[3]) << 3) | (((int)msg->data[4]) >> 5)) - 4096;
+      uint32_t accel_raw = ((((uint32_t)msg->data[2] & 0x3U) << 11U) |
+                            (((uint32_t)msg->data[3]) << 3U) |
+                            (((uint32_t)msg->data[4]) >> 5U));
+      int desired_accel = (int)accel_raw - 4096;
       if (longitudinal_accel_checks(desired_accel, MAZDA_LONG_LIMITS)) {
         tx = false;
       }

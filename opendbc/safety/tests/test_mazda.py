@@ -102,6 +102,13 @@ class TestMazdaLongitudinalSafety(TestMazdaSafety, common.LongitudinalAccelSafet
     values = {"ACCEL_CMD": accel}
     return self.packer.make_can_msg_safety("CRZ_INFO", 0, values)
 
+  def _crz_ctrl_msg(self, cruise_active: bool):
+    values = {"CRZ_ACTIVE": cruise_active}
+    return self.packer.make_can_msg_safety("CRZ_CTRL", 0, values)
+
+  def _radar_uds_msg(self, dat: bytes):
+    return libsafety_py.make_CANPacket(0x764, 0, dat)
+
   def test_accel_actuation_limits(self):
     # CRZ_INFO.ACCEL_CMD is a raw integer command in Mazda's DBC, so use
     # integer-domain boundaries to avoid float rounding artifacts in packing.
@@ -116,6 +123,30 @@ class TestMazdaLongitudinalSafety(TestMazdaSafety, common.LongitudinalAccelSafet
           should_tx = controls_allowed and min_accel <= accel <= max_accel
           should_tx = should_tx or accel == self.INACTIVE_ACCEL
           self.assertEqual(should_tx, self._tx(self._accel_msg(float(accel))))
+
+  def test_rx_cancel_disables_controls(self):
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._rx(self._button_msg(cancel=True)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_crz_ctrl_active_requires_controls_allowed(self):
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(self._crz_ctrl_msg(cruise_active=True)))
+    self.assertTrue(self._tx(self._crz_ctrl_msg(cruise_active=False)))
+
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._tx(self._crz_ctrl_msg(cruise_active=True)))
+
+  def test_radar_uds_allowlist(self):
+    tester_present = b"\x02\x3E\x80\x00\x00\x00\x00\x00"
+    session_default = b"\x02\x10\x01\x00\x00\x00\x00\x00"
+    session_programming = b"\x02\x10\x02\x00\x00\x00\x00\x00"
+    disallowed = b"\x03\x22\xF1\x90\x00\x00\x00\x00"
+
+    self.assertTrue(self._tx(self._radar_uds_msg(tester_present)))
+    self.assertTrue(self._tx(self._radar_uds_msg(session_default)))
+    self.assertTrue(self._tx(self._radar_uds_msg(session_programming)))
+    self.assertFalse(self._tx(self._radar_uds_msg(disallowed)))
 
 
 if __name__ == "__main__":
