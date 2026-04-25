@@ -430,7 +430,7 @@ requires-dist = [
     { name = "jinja2", marker = "extra == 'docs'" },
     { name = "lefthook", marker = "extra == 'testing'" },
     { name = "numpy" },
-    { name = "pycapnp", specifier = "==2.1.0" },
+    { name = "pycapnp" },
     { name = "pycryptodome" },
     { name = "ruff", marker = "extra == 'testing'" },
     { name = "tqdm" },
