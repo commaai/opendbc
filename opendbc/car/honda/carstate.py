@@ -85,7 +85,7 @@ class CarState(CarStateBase):
     v_wheel = sum([cp.vl["WHEEL_SPEEDS"][f"WHEEL_SPEED_{s}"] for s in ("FL", "FR", "RL", "RR")]) / 4.0 * CV.KPH_TO_MS
     if self.CP.carFingerprint == CAR.ACURA_INTEGRA:  # use ABS_SENSOR for Integra since no ENGINE_DATA message
       abs_counter, abs_checksum = cp.vl["ABS_SENSOR"]["COUNTER"], cp.vl["ABS_SENSOR"]["CHECKSUM"]
-      if (self.abs_counter_prev != abs_counter) or (self.abs_checksum_prev != abs_checksum): # checksum needed since safety tests skip to frame 0 after warm up
+      if (self.abs_counter_prev != abs_counter) or (self.abs_checksum_prev != abs_checksum): # checksum needed since safety tests jump to frame 0 after warm up
         self.lowspeed_source = sum((cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"] - getattr(self, f"abs_prior_{s}")) % 256 for s in ("FL", "FR", "RL", "RR"))
         for s in ("FL", "FR", "RL", "RR"):
           setattr(self, f"abs_prior_{s}", cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"])
