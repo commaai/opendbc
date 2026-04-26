@@ -51,12 +51,8 @@ class CarState(CarStateBase):
     self.is_metric = False
     self.v_cruise_factor = 1.
 
-    self.abs_prior_FL = 0
-    self.abs_prior_FR = 0
-    self.abs_prior_RL = 0
-    self.abs_prior_RR = 0
-    self.abs_counter_prev = None
-    self.abs_checksum_prev = None
+    self.abs_prior_FL, self.abs_prior_FR, self.abs_prior_RL, self.abs_prior_RR = 0, 0, 0, 0
+    self.abs_counter_prev, self.abs_checksum_prev = None, None
     self.lowspeed_source = 0.0
 
   def update(self, can_parsers) -> structs.CarState:
@@ -88,14 +84,12 @@ class CarState(CarStateBase):
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     v_wheel = sum([cp.vl["WHEEL_SPEEDS"][f"WHEEL_SPEED_{s}"] for s in ("FL", "FR", "RL", "RR")]) / 4.0 * CV.KPH_TO_MS
     if self.CP.carFingerprint == CAR.ACURA_INTEGRA:  # use ABS_SENSOR for Integra since no ENGINE_DATA message
-      abs_counter = cp.vl["ABS_SENSOR"]["COUNTER"]
-      abs_checksum = cp.vl["ABS_SENSOR"]["CHECKSUM"]
+      abs_counter, abs_checksum = cp.vl["ABS_SENSOR"]["COUNTER"], cp.vl["ABS_SENSOR"]["CHECKSUM"]
       if (self.abs_counter_prev != abs_counter) or (self.abs_checksum_prev != abs_checksum): # checksum needed since safety tests skip to frame 0 after warm up
         self.lowspeed_source = sum((cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"] - getattr(self, f"abs_prior_{s}")) % 256 for s in ("FL", "FR", "RL", "RR"))
         for s in ("FL", "FR", "RL", "RR"):
           setattr(self, f"abs_prior_{s}", cp.vl["ABS_SENSOR"][f"ABS_SENSOR_{s}"])
-        self.abs_counter_prev = abs_counter
-        self.abs_checksum_prev = abs_checksum
+        self.abs_counter_prev, self.abs_checksum_prev = abs_counter, abs_checksum
     else:
       self.lowspeed_source = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"]
     v_weight = float(np.interp(v_wheel, v_weight_bp, v_weight_v))
