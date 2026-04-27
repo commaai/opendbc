@@ -51,8 +51,8 @@ class CarState(CarStateBase):
     self.is_metric = False
     self.v_cruise_factor = 1.
 
-    self.abs_prior_FL, self.abs_prior_FR, self.abs_prior_RL, self.abs_prior_RR = 0, 0, 0, 0
-    self.abs_counter_prev, self.abs_checksum_prev = None, None
+    self.abs_prior_FL = self.abs_prior_FR = self.abs_prior_RL = self.abs_prior_RR = 0
+    self.abs_counter_prev = self.abs_checksum_prev = None
     self.lowspeed_source = 0.0
 
   def update(self, can_parsers) -> structs.CarState:
