@@ -84,7 +84,11 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 
   // sample speed - 0x158 used for all supported Hondas except Integra (use 0x20E abs_sensor message)
   if (honda_no_engine_data_msg && (msg->addr == 0x20EU)) {
-    static unsigned int abs_prev_fl = 0, abs_prev_fr = 0, abs_prev_rl = 0, abs_prev_rr = 0, abs_prev_counter_checksum = 0;
+    static unsigned int abs_prev_fl = 0;
+    static unsigned int abs_prev_fr = 0;
+    static unsigned int abs_prev_rl = 0;
+    static unsigned int abs_prev_rr = 0;
+    static unsigned int abs_prev_counter_checksum = 0;
     if (msg->data[7] != abs_prev_counter_checksum) { // occasionally car sends repeated abs_sensor messages, need to ignore
       vehicle_moving = ((msg->data[0] != abs_prev_fl) || (msg->data[1] != abs_prev_fr) || (msg->data[2] != abs_prev_rl) || (msg->data[3] != abs_prev_rr));
     }
