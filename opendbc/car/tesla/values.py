@@ -75,7 +75,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
 )
 
 # Cars with this EPS FW have FSD14 and use TeslaFlags.FSD_14.
-# For Model 3/Y steer ratio, this map is used to keep Highland/Juniper at 12.0.
+# For Model 3/Y steer ratio, this map is used to preserve current 12.0 behavior
+# for FSD14-identified variants in this legacy-only tuning change.
 FSD_14_FW = {
   CAR.TESLA_MODEL_3: [
     b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
