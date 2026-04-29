@@ -41,6 +41,11 @@ class CarState(CarStateBase):
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorqueEps) > CCP.STEER_DRIVER_OVERRIDE, 5)
     ret.steeringDisengage = abs(ret.steeringTorqueEps) > CCP.STEER_DRIVER_DISENGAGE
 
+    # LKAS_STATE follows the BYD TJA_STATE_* enum: 0=Off, 1=Passive, 2/3=Active, 4=Fault.
+    # LKS_PREPARED on the EPS is also 1 at route start before any engagement, so it can't be
+    # used directly as a fault flag - the camera-side fault state is the reliable indicator.
+    ret.steerFaultTemporary = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"]) == 4
+
     # gas / brake
     ret.gasPressed = cp.vl["DRIVE_STATE"]["RAW_THROTTLE"] > 0
     ret.brake = cp.vl["PEDAL"]["BRAKE_PEDAL"]

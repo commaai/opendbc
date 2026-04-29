@@ -29,11 +29,18 @@ def create_buttons(packer, cancel: bool):
   return packer.make_can_msg("PCM_BUTTONS", 0, values)
 
 
-def create_lkas_hud(packer, lat_active: bool, counter: int, stock_lkas_hud: dict):
+def create_lkas_hud(packer, lat_active: bool, counter: int, stock_lkas_hud: dict, hud_control):
   values = {**stock_lkas_hud, "COUNTER": counter, "HANDS_ON_WHEEL_REQ": 0}
   if lat_active:
-    values["LKS_MODE"] = 2
-    values["LKAS_STATE"] = 2 # Maybe 0 to turn the lanes green?
-    values["LEFT_LANE_STATE"] = 1
-    values["RIGHT_LANE_STATE"] = 1
+    values["LKS_MODE"] = 2 # green lane line icon
+    values["LKAS_STATE"] = 2 # green steering wheel icon
+    # LANE_STATE: 0=Grey, 1=Green, 2=Orange
+    values["LEFT_LANE_STATE"] = 1 if hud_control.leftLaneVisible else 0
+    values["RIGHT_LANE_STATE"] = 1 if hud_control.rightLaneVisible else 0
+
+  if hud_control.leftLaneDepart:
+    values["LEFT_LANE_STATE"] = 2
+  if hud_control.rightLaneDepart:
+    values["RIGHT_LANE_STATE"] = 2
+
   return packer.make_can_msg("LKAS_HUD_ADAS", 0, values)

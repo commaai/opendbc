@@ -24,6 +24,7 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     can_sends = []
     actuators = CC.actuators
+    hud_control = CC.hudControl
 
     if self.frame % 2:
       self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
@@ -31,7 +32,7 @@ class CarController(CarControllerBase):
 
       cntr = (self.frame // 2) % 16
       can_sends.append(bydcan.create_steering_control(self.packer, self.apply_angle_last, CC.latActive, cntr))
-      can_sends.append(bydcan.create_lkas_hud(self.packer, CC.latActive, cntr, CS.lkas_hud))
+      can_sends.append(bydcan.create_lkas_hud(self.packer, CC.latActive, cntr, CS.lkas_hud, hud_control))
 
     if CC.cruiseControl.cancel and self.frame % 10 == 0:
       can_sends.append(bydcan.create_buttons(self.packer, cancel=True))
