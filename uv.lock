@@ -382,7 +382,7 @@ wheels = [
 
 [[package]]
 name = "opendbc"
-version = "0.2.1"
+version = "0.3.1"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
@@ -401,8 +401,6 @@ examples = [
 testing = [
     { name = "cffi" },
     { name = "codespell" },
-    { name = "comma-car-segments" },
-    { name = "cppcheck" },
     { name = "cpplint" },
     { name = "gcovr" },
     { name = "hypothesis" },
@@ -415,12 +413,16 @@ testing = [
     { name = "zstandard" },
 ]
 
+[package.dev-dependencies]
+testing = [
+    { name = "comma-car-segments" },
+    { name = "cppcheck" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "cffi", marker = "extra == 'testing'" },
     { name = "codespell", marker = "extra == 'testing'" },
-    { name = "comma-car-segments", marker = "extra == 'testing'", url = "https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl" },
-    { name = "cppcheck", marker = "extra == 'testing'", git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=release-cppcheck" },
     { name = "cpplint", marker = "extra == 'testing'" },
     { name = "gcovr", marker = "extra == 'testing'" },
     { name = "hypothesis", marker = "extra == 'testing'", specifier = "==6.47.*" },
@@ -428,7 +430,7 @@ requires-dist = [
     { name = "jinja2", marker = "extra == 'docs'" },
     { name = "lefthook", marker = "extra == 'testing'" },
     { name = "numpy" },
-    { name = "pycapnp", specifier = "==2.1.0" },
+    { name = "pycapnp" },
     { name = "pycryptodome" },
     { name = "ruff", marker = "extra == 'testing'" },
     { name = "tqdm" },
@@ -439,6 +441,12 @@ requires-dist = [
     { name = "zstandard", marker = "extra == 'testing'" },
 ]
 provides-extras = ["testing", "docs", "examples"]
+
+[package.metadata.requires-dev]
+testing = [
+    { name = "comma-car-segments", url = "https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl" },
+    { name = "cppcheck", git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=release-cppcheck" },
+]
 
 [[package]]
 name = "pycapnp"
