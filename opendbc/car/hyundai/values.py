@@ -462,6 +462,10 @@ class CAR(Platforms):
     [HyundaiCarDocs("Kia Niro Hybrid 2023-24", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     KIA_NIRO_EV.specs,
   )
+  KIA_NIRO_PHEV_2ND_GEN = HyundaiCanFDPlatformConfig(
+    [HyundaiCarDocs("Kia Niro Plug-in Hybrid 2023-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
+    CarSpecs(mass=3336 * CV.LB_TO_KG, wheelbase=2.72, steerRatio=13.3, tireStiffnessFactor=0.385),
+  )
   KIA_OPTIMA_G4 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Optima 2017", "Advanced Smart Cruise Control",
                     car_parts=CarParts.common([CarHarness.hyundai_b]))],  # TODO: may support 2016, 2018
@@ -708,6 +712,9 @@ PART_NUMBER_FW_PATTERN = re.compile(b'(?<=[0-9][.,][0-9]{2} )([0-9]{5}[-/]?[A-Z]
 
 # We've seen both ICE and hybrid for these platforms, and they have hybrid descriptors (e.g. MQ4 vs MQ4H)
 CANFD_FUZZY_WHITELIST = {CAR.KIA_SORENTO_4TH_GEN, CAR.KIA_SORENTO_HEV_4TH_GEN, CAR.KIA_K8_HEV_1ST_GEN,
+                         # TODO: also whitelist KIA_NIRO_HEV_2ND_GEN once an EPS FW sample is collected
+                         # (without it the HEV's platform codes alias to PHEV's, since cam/radar are identical)
+                         CAR.KIA_NIRO_PHEV_2ND_GEN,
                          # TODO: the hybrid variant is not out yet
                          CAR.KIA_CARNIVAL_4TH_GEN}
 
