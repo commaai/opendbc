@@ -430,7 +430,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Niro EV (without HDA II) 2023-25", "All", car_parts=CarParts.common([CarHarness.hyundai_a])),
       HyundaiCarDocs("Kia Niro EV (with HDA II) 2024-25", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_r])),
     ],
-    KIA_NIRO_EV.specs,
+    CarSpecs(mass=3721 * CV.LB_TO_KG, wheelbase=2.72, steerRatio=13.3, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.EV,
   )
   KIA_NIRO_PHEV = HyundaiPlatformConfig(
@@ -460,7 +460,7 @@ class CAR(Platforms):
   )
   KIA_NIRO_HEV_2ND_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Kia Niro Hybrid 2023-24", car_parts=CarParts.common([CarHarness.hyundai_a]))],
-    KIA_NIRO_EV.specs,
+    CarSpecs(mass=3071 * CV.LB_TO_KG, wheelbase=2.72, steerRatio=13.7, tireStiffnessFactor=0.385),
   )
   KIA_NIRO_PHEV_2ND_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Kia Niro Plug-in Hybrid 2023-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
