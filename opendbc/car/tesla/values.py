@@ -75,6 +75,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
 )
 
 # Cars with this EPS FW have FSD 14 and use TeslaFlags.FSD_14
+# For these cars we need to send a different value on DAS_steeringControlType.
 FSD_14_FW = {
   CAR.TESLA_MODEL_3: [
     b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
@@ -89,6 +90,15 @@ FSD_14_FW = {
   ]
 }
 
+# HW3 cars with FW 2026.8.6+ can trigger a false FSD14 detection.
+HW3_FW = {
+  CAR.TESLA_MODEL_3: [
+    b'TeM3_E014p10_0.0.0 (24),E014.20.2',
+  ],
+  CAR.TESLA_MODEL_Y: [
+    b'TeM3_E014p10_0.0.0 (24),YP002.21.2',
+  ]
+}
 
 class CANBUS:
   party = 0
@@ -143,6 +153,7 @@ class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
   FSD_14 = 2
   MISSING_DAS_SETTINGS = 4
+  HW3 = 8
 
 
 DBC = CAR.create_dbc_map()
