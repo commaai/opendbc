@@ -14,7 +14,7 @@ from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallabl
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
-from opendbc.car.values import PLATFORMS
+from opendbc.car.values import BRANDS, PLATFORMS
 from opendbc.can import CANParser
 
 GearShifter = structs.CarState.GearShifter
@@ -376,30 +376,37 @@ INTERFACE_ATTR_FILE = {
   "FW_VERSIONS": "fingerprints",
 }
 
-# interface-specific helpers
+
+@cache
+def _brand_dirs() -> tuple[str, ...]:
+  # Canonical list of brand subpackages, derived from BRANDS rather than os.walk.
+  # Sorted for deterministic ordering (matches previous os.walk(sorted(...)) behavior).
+  return tuple(sorted({brand.__module__.split('.')[-2] for brand in BRANDS}))
+
+
+@cache
+def _get_interface_attr_cached(attr: str, combine_brands: bool, ignore_none: bool) -> tuple[tuple[str, Any], ...]:
+  module_name = INTERFACE_ATTR_FILE.get(attr, "values")
+  result: dict[str | StrEnum, Any] = {}
+  for brand_name in _brand_dirs():
+    try:
+      brand_values = __import__(f'opendbc.car.{brand_name}.{module_name}', fromlist=[attr])
+    except ImportError:
+      continue
+
+    if not hasattr(brand_values, attr) and ignore_none:
+      continue
+    attr_data = getattr(brand_values, attr, None)
+
+    if combine_brands and isinstance(attr_data, dict):
+      for f, v in attr_data.items():
+        result[f] = v
+    elif not combine_brands:
+      result[brand_name] = attr_data
+
+  return tuple(result.items())
 
 
 def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: bool = False) -> dict[str | StrEnum, Any]:
-  # read all the folders in opendbc/car and return a dict where:
-  # - keys are all the car models or brand names
-  # - values are attr values from all car folders
-  result = {}
-  for car_folder in sorted([x[0] for x in os.walk(BASEDIR)]):
-    try:
-      brand_name = car_folder.split('/')[-1]
-      brand_values = __import__(f'opendbc.car.{brand_name}.{INTERFACE_ATTR_FILE.get(attr, "values")}', fromlist=[attr])
-      if hasattr(brand_values, attr) or not ignore_none:
-        attr_data = getattr(brand_values, attr, None)
-      else:
-        continue
-
-      if combine_brands:
-        if isinstance(attr_data, dict):
-          for f, v in attr_data.items():
-            result[f] = v
-      else:
-        result[brand_name] = attr_data
-    except (ImportError, OSError):
-      pass
-
-  return result
+  # Return a fresh dict so callers that mutate the result don't poison the cache.
+  return dict(_get_interface_attr_cached(attr, combine_brands, ignore_none))
