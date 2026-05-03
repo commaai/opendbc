@@ -11,6 +11,7 @@ FW_VERSIONS = {
   },
   CAR.RAM_PROMASTER: {
     (Ecu.eps, 0x18da30f1, None): [
+      b'\x01\x01FI06FF00-0\x00\x0b',  # 2026 Promaster 2500 ACC-only
       b'\x01\x01FI06FD00-0\x00\x0b',  # 2025 Promaster 2500 ACC-only
       b'\x01\x01S2FI04EB00\x00\x0b',  # 2022 Promaster 3500 w/LKAS
     ],
