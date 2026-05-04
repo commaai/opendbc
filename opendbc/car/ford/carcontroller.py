@@ -18,13 +18,15 @@ MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_R
 FORD_PATH_SPEED_BP = [0., 5., 15., 30.]
 FORD_PATH_C1_FF = [5., 7., 13., 18.]
 FORD_PATH_C1_FB = [0., 2., 5., 6.]
-FORD_PATH_C0_FF = [20., 35., 90., 140.]
+FORD_PATH_C0_FF = [10., 20., 55., 80.]
 FORD_PATH_C0_FB = [0., 20., 60., 100.]
 FORD_PATH_CURVATURE_ERROR = 0.006
 FORD_PATH_C1_CLIP = (-0.475, 0.497)
 FORD_PATH_C0_CLIP = (-4.61, 4.60)
-FORD_PATH_C1_RATE = 6.0   # rad/s
-FORD_PATH_C0_RATE = 4.0   # m/s
+FORD_PATH_C1_RATE_UP = 6.0      # rad/s
+FORD_PATH_C1_RATE_DOWN = 10.0   # rad/s
+FORD_PATH_C0_RATE_UP = 4.0      # m/s
+FORD_PATH_C0_RATE_DOWN = 10.0   # m/s
 FORD_PATH_C1_DEADBAND = 0.001
 FORD_PATH_C0_DEADBAND = 0.01
 
@@ -146,10 +148,14 @@ class CarController(CarControllerBase):
                         (curvature_error * np.interp(v_ego, FORD_PATH_SPEED_BP, FORD_PATH_C0_FB))
 
           dt = DT_CTRL * CarControllerParams.STEER_STEP
-          path_angle = float(np.clip(path_angle, self.path_angle_last - (FORD_PATH_C1_RATE * dt),
-                                     self.path_angle_last + (FORD_PATH_C1_RATE * dt)))
-          path_offset = float(np.clip(path_offset, self.path_offset_last - (FORD_PATH_C0_RATE * dt),
-                                      self.path_offset_last + (FORD_PATH_C0_RATE * dt)))
+          c1_winding_up = path_angle * self.path_angle_last >= 0. and abs(path_angle) > abs(self.path_angle_last)
+          c0_winding_up = path_offset * self.path_offset_last >= 0. and abs(path_offset) > abs(self.path_offset_last)
+          c1_rate = FORD_PATH_C1_RATE_UP if c1_winding_up else FORD_PATH_C1_RATE_DOWN
+          c0_rate = FORD_PATH_C0_RATE_UP if c0_winding_up else FORD_PATH_C0_RATE_DOWN
+          path_angle = float(np.clip(path_angle, self.path_angle_last - (c1_rate * dt),
+                                     self.path_angle_last + (c1_rate * dt)))
+          path_offset = float(np.clip(path_offset, self.path_offset_last - (c0_rate * dt),
+                                      self.path_offset_last + (c0_rate * dt)))
 
           path_angle = float(np.clip(path_angle, FORD_PATH_C1_CLIP[0], FORD_PATH_C1_CLIP[1]))
           path_offset = float(np.clip(path_offset, FORD_PATH_C0_CLIP[0], FORD_PATH_C0_CLIP[1]))
