@@ -168,7 +168,8 @@ class TestFordSafetyBase(common.CarSafetyTest):
     return self.packer.make_can_msg_safety("Lane_Assist_Data1", 0, values)
 
   # LCA command
-  def _lat_ctl_msg(self, enabled: bool, path_offset: float, path_angle: float, curvature: float, curvature_rate: float):
+  def _lat_ctl_msg(self, enabled: bool, path_offset: float, path_angle: float, curvature: float, curvature_rate: float,
+                   mode: int | None = None):
     if self.STEER_MESSAGE == MSG_LateralMotionControl:
       values = {
         "LatCtl_D_Rq": 1 if enabled else 0,
@@ -180,7 +181,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
       return self.packer.make_can_msg_safety("LateralMotionControl", 0, values)
     elif self.STEER_MESSAGE == MSG_LateralMotionControl2:
       values = {
-        "LatCtl_D2_Rq": 1 if enabled else 0,
+        "LatCtl_D2_Rq": (2 if enabled else 0) if mode is None else mode,
         "LatCtlPathOffst_L_Actl": path_offset,     # Path offset [-5.12|5.11] meter
         "LatCtlPath_An_Actl": path_angle,          # Path angle [-0.5|0.5235] radians
         "LatCtlCrv_NoRate2_Actl": curvature_rate,  # Curvature rate [-0.001024|0.001023] 1/meter^2
@@ -240,6 +241,9 @@ class TestFordSafetyBase(common.CarSafetyTest):
         self.assertEqual(self.safety.get_angle_meas_max(), 0)
 
   def test_max_lateral_acceleration(self):
+    if self.STEER_MESSAGE == MSG_LateralMotionControl2:
+      self.skipTest("CAN FD path mode keeps curvature inactive")
+
     # Ford CAN FD can achieve a higher max lateral acceleration than CAN so we limit curvature based on speed
     step = 1 / self.DEG_TO_CAN
     for speed in np.arange(0, 40, 0.5):
@@ -265,8 +269,8 @@ class TestFordSafetyBase(common.CarSafetyTest):
           self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, curvature, 0)))
 
   def test_steer_allowed(self):
-    path_offsets = np.arange(-5.12, 5.11, 2.5).round()
-    path_angles = np.arange(-0.5, 0.5235, 0.25).round(1)
+    path_offsets = [-5.12, -5.11, -2.5, 0., 2.5, 5.1, 5.11]
+    path_angles = [-0.5, -0.4995, -0.25, 0., 0.25, 0.523, 0.5235]
     curvature_rates = np.arange(-0.001024, 0.00102375, 0.001).round(3)
     curvatures = np.arange(-0.02, 0.02094, 0.01).round(2)
 
@@ -285,10 +289,12 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
                   # CAN FD allows c0/c1; non-CAN FD requires them inactive
                   if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-                    should_tx = curvature_rate == 0
-                    should_tx = should_tx and abs(path_angle) <= 0.5235
-                    should_tx = should_tx and abs(path_offset) <= 5.12
-                    if not steer_control_enabled or not controls_allowed:
+                    should_tx = curvature == 0 and curvature_rate == 0
+                    should_tx = should_tx and -0.5 <= path_angle <= 0.5235
+                    should_tx = should_tx and -5.12 <= path_offset <= 5.11
+                    if steer_control_enabled:
+                      should_tx = should_tx and controls_allowed
+                    else:
                       should_tx = should_tx and path_angle == 0 and path_offset == 0
                   else:
                     should_tx = path_offset == 0 and path_angle == 0 and curvature_rate == 0
@@ -297,14 +303,31 @@ class TestFordSafetyBase(common.CarSafetyTest):
                   # is not large enough to enforce it tracking measured
                   should_tx = should_tx and (controls_allowed if steer_control_enabled else curvature == 0)
 
-                  # Only CAN FD has the max lateral acceleration limit
-                  if self.STEER_MESSAGE == MSG_LateralMotionControl2:
+                  # Only CAN FD has the max lateral acceleration limit, but CAN FD path mode keeps curvature inactive.
+                  if self.STEER_MESSAGE == MSG_LateralMotionControl2 and curvature != 0:
                     should_tx = should_tx and abs(curvature) <= curvature_accel_limit_upper
 
                   with self.subTest(controls_allowed=controls_allowed, steer_control_enabled=steer_control_enabled,
                                     path_offset=float(path_offset), path_angle=float(path_angle), curvature_rate=float(curvature_rate),
                                     curvature=float(curvature)):
                     self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(steer_control_enabled, path_offset, path_angle, curvature, curvature_rate)))
+
+  def test_canfd_path_mode(self):
+    if self.STEER_MESSAGE != MSG_LateralMotionControl2:
+      self.skipTest("CAN FD only")
+
+    for controls_allowed in (True, False):
+      for mode in range(8):
+        self.safety.set_controls_allowed(controls_allowed)
+        path_offset = 0.5 if mode == 2 else 0.
+        path_angle = 0.1 if mode == 2 else 0.
+        should_tx = mode == 0 or (mode == 2 and controls_allowed)
+        self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(mode == 2, path_offset, path_angle, 0., 0., mode=mode)))
+
+    self.safety.set_controls_allowed(True)
+    self.assertFalse(self._tx(self._lat_ctl_msg(False, 0.5, 0.1, 0., 0., mode=0)))
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0., 0., 0.01, 0., mode=2)))
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0., 0., 0., 0.001, mode=2)))
 
   def test_curvature_rate_limits(self):
     """
