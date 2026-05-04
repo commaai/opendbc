@@ -38,28 +38,28 @@ BU_: XXX
 BO_ 565 OCCUPANT_STATUS: 11 XXX
  CM_ BO_ 565 "Occupant classification, confidence, posture, and intrusion status (CAN-FD, 125 ms)";
 
- SG_ FL_1SL_Class   : 0|4@1+   (1,0) [0|15] "" XXX
- SG_ FR_1SR_Class   : 4|4@1+   (1,0) [0|15] "" XXX
- SG_ RL_2SL_Class   : 8|4@1+   (1,0) [0|15] "" XXX
- SG_ RC_2SM_Class   : 12|4@1+  (1,0) [0|15] "" XXX
- SG_ RR_2SR_Class   : 16|4@1+  (1,0) [0|15] "" XXX
+ SG_ FL_1SL_Class : 0|4@1+ (1,0) [0|15] "" XXX
+ SG_ FR_1SR_Class : 4|4@1+ (1,0) [0|15] "" XXX
+ SG_ RL_2SL_Class : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ RC_2SM_Class : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ RR_2SR_Class : 16|4@1+ (1,0) [0|15] "" XXX
 
- SG_ ALL_CPD_LPD    : 20|4@1+  (1,0) [0|15] "" XXX
- SG_ FOOT_Status    : 24|4@1+  (1,0) [0|15] "" XXX
- SG_ INTR_Status    : 28|4@1+  (1,0) [0|15] "" XXX
+ SG_ ALL_CPD_LPD : 20|4@1+ (1,0) [0|15] "" XXX
+ SG_ FOOT_Status : 24|4@1+ (1,0) [0|15] "" XXX
+ SG_ INTR_Status : 28|4@1+ (1,0) [0|15] "" XXX
 
- SG_ FL_Confidence  : 32|8@1+  (1,0) [0|255] "%" XXX
- SG_ FR_Confidence  : 40|8@1+  (1,0) [0|255] "%" XXX
- SG_ RL_Confidence  : 48|8@1+  (1,0) [0|255] "%" XXX
- SG_ RC_Confidence  : 56|8@1+  (1,0) [0|255] "%" XXX
- SG_ RR_Confidence  : 64|8@1+  (1,0) [0|255] "%" XXX
+ SG_ FL_Confidence : 32|8@1+ (1,0) [0|255] "%" XXX
+ SG_ FR_Confidence : 40|8@1+ (1,0) [0|255] "%" XXX
+ SG_ RL_Confidence : 48|8@1+ (1,0) [0|255] "%" XXX
+ SG_ RC_Confidence : 56|8@1+ (1,0) [0|255] "%" XXX
+ SG_ RR_Confidence : 64|8@1+ (1,0) [0|255] "%" XXX
 
- SG_ FL_OOP_Status  : 72|4@1+  (1,0) [0|15] "" XXX
- SG_ FL_Stature     : 76|4@1+  (1,0) [0|15] "" XXX
- SG_ FR_OOP_Status  : 80|4@1+  (1,0) [0|15] "" XXX
- SG_ FR_Stature     : 84|4@1+  (1,0) [0|15] "" XXX
+ SG_ FL_OOP_Status : 72|4@1+ (1,0) [0|15] "" XXX
+ SG_ FL_Stature : 76|4@1+ (1,0) [0|15] "" XXX
+ SG_ FR_OOP_Status : 80|4@1+ (1,0) [0|15] "" XXX
+ SG_ FR_Stature : 84|4@1+ (1,0) [0|15] "" XXX
 
- SG_ Reserved       : 88|8@1+  (1,0) [0|255] "" XXX
+ SG_ Reserved : 88|8@1+ (1,0) [0|255] "" XXX
 
 
 CM_ "All VAL_ act as a legend in CABANA, and are not necessarily the actual values sent by the radar";
