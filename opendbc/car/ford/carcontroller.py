@@ -21,6 +21,7 @@ FORD_PATH_C1_FB = [0., 2., 5., 6.]
 FORD_PATH_C0_FF = [25., 43.75, 112.5, 175.]
 FORD_PATH_C0_FB = [0., 20., 60., 100.]
 FORD_PATH_CURVATURE_ERROR = 0.006
+FORD_PATH_C0_UNWIND_FACTOR = 0.65
 FORD_PATH_C1_CLIP = (-0.475, 0.497)
 FORD_PATH_C0_CLIP = (-4.61, 4.60)
 FORD_PATH_C1_RATE_UP = 6.0      # rad/s
@@ -142,10 +143,16 @@ class CarController(CarControllerBase):
 
           # Empirical Ford PSCM path command. This maps openpilot's filtered curvature intent into
           # Ford's opaque c0/c1 response channels; constants are expected to be tuned from drives.
+          c0_ff = desired_curvature * np.interp(v_ego, FORD_PATH_SPEED_BP, FORD_PATH_C0_FF)
+
+          # When the vehicle is still curving in the commanded direction but the target is
+          # unwinding toward zero, reduce c0 so it does not keep carrying old-side offset.
+          if v_ego > 5. and desired_curvature * current_curvature > 0. and abs(desired_curvature) < abs(current_curvature):
+            c0_ff *= FORD_PATH_C0_UNWIND_FACTOR
+
           path_angle = (desired_curvature * np.interp(v_ego, FORD_PATH_SPEED_BP, FORD_PATH_C1_FF)) + \
                        (curvature_error * np.interp(v_ego, FORD_PATH_SPEED_BP, FORD_PATH_C1_FB))
-          path_offset = (desired_curvature * np.interp(v_ego, FORD_PATH_SPEED_BP, FORD_PATH_C0_FF)) + \
-                        (curvature_error * np.interp(v_ego, FORD_PATH_SPEED_BP, FORD_PATH_C0_FB))
+          path_offset = c0_ff + (curvature_error * np.interp(v_ego, FORD_PATH_SPEED_BP, FORD_PATH_C0_FB))
 
           dt = DT_CTRL * CarControllerParams.STEER_STEP
           c1_winding_up = path_angle * self.path_angle_last >= 0. and abs(path_angle) > abs(self.path_angle_last)
