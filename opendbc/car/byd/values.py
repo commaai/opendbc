@@ -17,7 +17,9 @@ AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll 
 class CarControllerParams:
   STEER_STEP = 2  # Angle command is sent at 50 Hz
 
-  # STEERING_TORQUE.MAIN_TORQUE is saturated at +-300 (probably 3.0nm)
+  # On a fault STEERING_TORQUE.LKS_PREPARED goes from 0 to 1.
+  # STEERING_TORQUE.MAIN_TORQUE is saturated at -300 for around 900ms,
+  # while the wheel sits 15-26 deg past the commanded TARGET_ANGLE.
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     390,  # deg
     # BYD uses a vehicle model instead, check carcontroller.py for details
