@@ -213,6 +213,10 @@ BO_ 851 SCS_HSC2_FrP15: 8 SCSABS
  SG_ VehSpdAvgNonDrvnVHSC2 : 39|1@0+ (1,0) [0|1] ""  FVCM
 
 BO_ 1130 GW_HSC2_BCM_FrP04: 8 GW
+ SG_ BlinkerBulbLeft : 37|1@0+ (1,0) [0|1] ""  XXX
+ SG_ BlinkerBulbRight : 38|1@0+ (1,0) [0|1] ""  XXX
+ SG_ BlinkerLeft : 59|1@0+ (1,0) [0|1] ""  XXX
+ SG_ BlinkerRight : 60|1@0+ (1,0) [0|1] ""  XXX
  SG_ BntOpenStsHSC2 : 47|2@0+ (1,0) [0|3] ""  FVCM
  SG_ DipdBeamLghtOnHSC2 : 13|1@0+ (1,0) [0|1] ""  FVCM
  SG_ DircnIndLampSwStsHSC2 : 3|2@0+ (1,0) [0|3] ""  FVCM
