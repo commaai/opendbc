@@ -51,10 +51,70 @@ PLATFORM_TO_CAR = {
 #   M3: variant_code starts with '4H',  ends with '015'
 #   MY: variant_code starts with '4',   ends with '003'
 # Older series (M3 '014', MY '002') are never FSD 14.
-FSD_14_FW_RULE = {
-  CAR.TESLA_MODEL_3: (b'4H', b'015'),
-  CAR.TESLA_MODEL_Y: (b'4',  b'003'),
+# Tuple format: (variant_code_regex, software_major, software_major greater or equal)
+FSD_14_FW_RULES = {
+  CAR.TESLA_MODEL_3: [
+    (b'^4H.*015$', 4, 1),
+  ],
+  CAR.TESLA_MODEL_Y: [
+    (b'^4.*003$', 4, 1),
+  ],
 }
+
+# Non FSD 14 HW4 and HW3 cars with recent FW (2026.8.6+) in which Tesla uses
+# "Self-Driving" as name for its ADAS.
+# Tuple format: (variant_code_regex, software_major, software_major greater or equal)
+NON_FSD_14_SELFDRIVE_FW_RULES = {
+  CAR.TESLA_MODEL_3: [
+    (b'^(L|S)?014$', 20, 1),
+  ],
+  CAR.TESLA_MODEL_Y: [
+    (b'^(P|S)?002$', 21, 1),
+  ],
+}
+
+# Non FSD 14 HW4 and HW3 cars with older FW (2026.8.3-) in which Tesla uses
+# "Autopilot" as name for its ADAS.
+# Tuple format: (variant_code_regex, software_major, software_major greater or equal)
+NON_FSD_14_AUTOPILOT_FW_RULES = {
+  CAR.TESLA_MODEL_3: [
+    (b'^(L|S)?014$', 19, 0),
+    (b'^4.*014$', 0, 1),
+    (b'^4.*015$', 3, 0),
+  ],
+  CAR.TESLA_MODEL_Y: [
+    (b'^(P|S)?002$', 20, 0),
+    (b'^4.*002$', 0, 1),
+    (b'^4.*003$', 3, 0),
+  ],
+}
+
+def compile_rules_dict(rules_dict):
+  compiled = {}
+  for car_model, rules in rules_dict.items():
+    compiled[car_model] = []
+    for rule in rules:
+      regex_str = rule[0]
+      compiled_rule = (re.compile(regex_str), rule[1], rule[2])
+      compiled[car_model].append(compiled_rule)
+  return compiled
+
+def match_rules(rules, fw) -> bool:
+  decoded_fw = FW_RE.match(fw)
+  assert decoded_fw is not None, f"Unparsable FW: {fw}"
+  any_rule_matches = False
+  for rule in rules:
+    variant_regex, software_major, software_major_geq = rule
+    any_rule_matches |= (
+      variant_regex.match(decoded_fw['variant_code']) is not None
+      and ((software_major_geq and int(decoded_fw['software_major']) >= software_major)
+      or (not software_major_geq and int(decoded_fw['software_major']) <= software_major))
+    )
+  return any_rule_matches
+
+FSD_14_FW_RULES = compile_rules_dict(FSD_14_FW_RULES)
+NON_FSD_14_SELFDRIVE_FW_RULES = compile_rules_dict(NON_FSD_14_SELFDRIVE_FW_RULES)
+NON_FSD_14_AUTOPILOT_FW_RULES = compile_rules_dict(NON_FSD_14_AUTOPILOT_FW_RULES)
 
 
 class TestTeslaFingerprint(unittest.TestCase):
@@ -69,21 +129,29 @@ class TestTeslaFingerprint(unittest.TestCase):
 
   def test_fsd_14_fw(self):
     for car_model, ecus in FW_VERSIONS.items():
-      if car_model not in FSD_14_FW_RULE:
+      if car_model not in FSD_14_FW_RULES:
         continue
 
-      variant_prefix, variant_suffix = FSD_14_FW_RULE[car_model]
-      for fw in ecus.get((Ecu.eps, 0x730, None), []):
-        m = FW_RE.match(fw)
-        assert m is not None, f"Unparsable FW: {fw}"
+      for rule in FSD_14_FW_RULES[car_model]:
+        variant_regex, software_major, software_major_geq = rule
+        for fw in ecus.get((Ecu.eps, 0x730, None), []):
+          is_fsd_14 = fw in FSD_14_FW.get(car_model, [])
+          expected = match_rules(FSD_14_FW_RULES[car_model], fw)
+          assert is_fsd_14 == expected, f"{fw}"
 
-        is_fsd_14 = fw in FSD_14_FW.get(car_model, [])
-        expected = (
-          m['variant_code'].startswith(variant_prefix)
-          and m['variant_code'].endswith(variant_suffix)
-          and int(m['software_major']) >= 4
-        )
-        assert is_fsd_14 == expected, f"{fw}"
+  def test_rules_uniqueness(self):
+    # check if rules lead to exactly one match
+    for car_model, ecus in FW_VERSIONS.items():
+      if car_model not in FSD_14_FW_RULES:
+        continue
+
+      for fw in ecus.get((Ecu.eps, 0x730, None), []):
+        matches = [
+          match_rules(FSD_14_FW_RULES[car_model], fw),
+          match_rules(NON_FSD_14_SELFDRIVE_FW_RULES[car_model], fw),
+          match_rules(NON_FSD_14_AUTOPILOT_FW_RULES[car_model], fw),
+        ]
+        assert sum(matches) == 1, f"{fw}: matched {sum(matches)} rule sets"
 
   def test_radar_detection(self):
     # Test radar availability detection for cars with radar DBC defined
