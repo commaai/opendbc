@@ -172,7 +172,6 @@ struct CarState {
 
   yawRate @22 :Float32;     # best estimate of yaw rate
   standstill @18 :Bool;
-  wheelSpeeds @2 :WheelSpeeds;
 
   gasPressed @4 :Bool;    # this is user pedal only
 
@@ -293,6 +292,7 @@ struct CarState {
   eventsDEPRECATED @13 :List(OnroadEventDEPRECATED);
   clutchPressedDEPRECATED @28 :Bool;
   engineRpmDEPRECATED @46 :Float32;
+  wheelSpeedsDEPRECATED @2 :WheelSpeeds;
 }
 
 # ******* radar state @ 20hz *******
