@@ -122,6 +122,11 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       self.assertFalse(self._rx(msg))
       self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_vehicle_speed_measurements(self):
+    # OVERRIDDEN: 72.22_ is the max speed in m/s
+    self._common_measurement_test(self._speed_msg, 0, 259 / 3.6, 1,
+                                  self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+
 
 class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
 
