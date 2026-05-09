@@ -146,7 +146,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       int speed = 0;
       // sum 4 wheel speeds. conversion: raw * 0.01 - 67.67
       for (uint8_t i = 0U; i < 8U; i += 2U) {
-        int wheel_speed = (msg->data[i] << 8U) | msg->data[(i + 1U)];
+        int wheel_speed = ((msg->data[i] & 0x7FU) << 8U) | msg->data[(i + 1U)];
         speed += wheel_speed - 6767;
       }
       // check that all wheel speeds are at zero value
