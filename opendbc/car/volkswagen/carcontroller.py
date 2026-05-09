@@ -47,6 +47,8 @@ class MQBStandstillManager:
   BRAKE_TORQUE_RAMP_RATE = 2000.0     # Nm/s
   ASSUMED_WHEEL_RADIUS = 0.328        # m, typical MQB tire rolling radius
   GRAVITY = 9.81                      # m/s^2
+  HARD_BRAKE_ACCEL = -3.5             # m/s^2
+  SMOOTH_BRAKE_ACCEL = -0.1           # m/s^2
   WEGIMPULSE_STILLNESS_FRAMES = 10    # frames of no wheel tick change before assuming standstill
 
   def __init__(self, vehicle_mass: float = 1540.0):
@@ -58,7 +60,7 @@ class MQBStandstillManager:
     self.frames_since_wegimpulse_change = 0
     self.prev_sum_wegimpulse: int | None = None
 
-  def get_theoretical_safe_speed(self, grade_pct: float, v_ego: float) -> float:
+  def get_theoretical_safe_speed(self, grade_pct: float, starting_brake_torque: float) -> float:
     # Because brake torque is based off a jerk-limited speed target even at standstill, the TSK may
     # not be able to build torque fast enough to prevent rollback when the car is moving slowly. If
     # the car is moving fast enough, we can rely on momentum to prevent rollback while the TSK is
@@ -69,16 +71,19 @@ class MQBStandstillManager:
 
     sin_theta = grade_pct / math.sqrt(grade_pct ** 2 + 10000.0)
     grade_accel = self.GRAVITY * sin_theta
+    starting_brake_decel = max(starting_brake_torque, 0.0) / (self.vehicle_mass * self.ASSUMED_WHEEL_RADIUS)
+    grade_accel = max(grade_accel - starting_brake_decel, 0.0)
     brake_decel_build_rate = self.BRAKE_TORQUE_RAMP_RATE / (self.vehicle_mass * self.ASSUMED_WHEEL_RADIUS)
 
     return 1.5 * grade_accel ** 2 / brake_decel_build_rate
 
   def update(self, CS, long_active: bool, accel: float, stopping: bool, starting: bool,
-             max_planned_speed: float) -> tuple[bool, float, bool, bool, "mqbcan.ESPOverride | None"]:
+             max_planned_speed: float, grade_pct: float, tsk_brake_torque: float) -> tuple[bool, float, bool, bool, "mqbcan.ESPOverride | None"]:
     esp_override: mqbcan.ESPOverride | None = None
-    theoretical_safe_stop_speed = self.get_theoretical_safe_speed(CS.grade, CS.out.vEgo)
-    can_leave_stop = max_planned_speed > theoretical_safe_stop_speed
-    hill_launch_accel = 0.1 * CS.grade
+    zero_brake_safe_stop_speed = self.get_theoretical_safe_speed(grade_pct, 0.0)
+    current_brake_safe_stop_speed = self.get_theoretical_safe_speed(grade_pct, tsk_brake_torque)
+    can_leave_stop = max_planned_speed > zero_brake_safe_stop_speed
+    hill_launch_accel = 0.1 * grade_pct
 
     if CS.rolling_backward:
       self.rollback_detected = True
@@ -107,9 +112,12 @@ class MQBStandstillManager:
       if CS.esp_hold_confirmation:
         self.start_commit_active = True
         self.stop_commit_active = False
+      elif CS.esp_stopping:
+        self.start_commit_active = False
+        self.stop_commit_active = True
       # start commit ends when we exceed safe stop speed
       elif self.start_commit_active:
-        if CS.out.vEgo > theoretical_safe_stop_speed and not at_standstill:
+        if CS.out.vEgo > zero_brake_safe_stop_speed and not at_standstill:
           self.start_commit_active = False
           self.stop_commit_active = False
       # stop commit ends if we want to drive away
@@ -118,7 +126,7 @@ class MQBStandstillManager:
           self.start_commit_active = True
           self.stop_commit_active = False
       # trigger stop commit when necessary
-      elif CS.out.vEgo < theoretical_safe_stop_speed:
+      elif CS.out.vEgo < zero_brake_safe_stop_speed:
         self.start_commit_active = False
         self.stop_commit_active = True
     else:
@@ -132,28 +140,30 @@ class MQBStandstillManager:
         stopping = False
         starting = True
       elif self.stop_commit_active or (self.rollback_detected and accel <= 0):
-        accel = -0.5 if CS.rolling_forward else -3.5
+        hard_brake = self.rollback_detected or CS.out.vEgo < current_brake_safe_stop_speed
+        accel = self.HARD_BRAKE_ACCEL if hard_brake else self.SMOOTH_BRAKE_ACCEL
         stopping = True
         starting = False
 
     # the magic sauce for infinite standstill
     # begin a stopping procedure, then exit to starting state before the car reaches standstill
     if long_active:
+      moving_too_fast_for_esp = CS.out.vEgo > 9.5 * CV.KPH_TO_MS and not CS.esp_stopping
+      if moving_too_fast_for_esp:
+        self.can_stop_forever = False
+
       # reset if hold is confirmed
       if CS.esp_hold_confirmation:
         self.can_stop_forever = False
       # force ESP into starting state during a start commit to prevent rapid toggling of start/stop on takeoff
       elif self.start_commit_active:
         esp_override = mqbcan.ESPOverride.START
-      # reset when moving too fast (ESP resets at 10kmh)
-      elif CS.out.vEgo > 9.5 * CV.KPH_TO_MS and not CS.esp_stopping:
-        self.can_stop_forever = False
       # latch into holding state when detected
-      elif CS.esp_stopping or self.can_stop_forever:
+      elif not moving_too_fast_for_esp and (CS.esp_stopping or self.can_stop_forever):
         self.can_stop_forever = True
         esp_override = mqbcan.ESPOverride.START
       # trigger stopping state when almost stopped or during a stop commit
-      elif at_standstill or self.stop_commit_active:
+      elif not moving_too_fast_for_esp and (at_standstill or self.stop_commit_active):
         esp_override = mqbcan.ESPOverride.STOP
     else:
       self.can_stop_forever = False
@@ -219,8 +229,10 @@ class CarController(CarControllerBase):
         starting = CS.out.vEgo < self.CP.vEgoStopping and not stopping
 
         if self.CCS == mqbcan and CS.acc_type == 1:
+          grade_pct = math.tan(CC.orientationNED[1]) * 100.0 if len(CC.orientationNED) == 3 else 0.0
           long_active, accel, stopping, starting, esp_override = \
-            self.standstill_manager.update(CS, long_active, accel, stopping, starting, actuators.maxPlannedSpeed)
+            self.standstill_manager.update(CS, long_active, accel, stopping, starting, actuators.maxPlannedSpeed,
+                                           grade_pct, CS.tsk_brake_torque)
 
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, long_active)
         accel = float(np.clip(accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
