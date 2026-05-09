@@ -83,8 +83,8 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
   } else if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
     // each wheel speed is 1-bit fault + 15-bit speed
     valid = true;
-    for (uint8_t i = 0U; i < 8U; i += 2U) {
-      if ((msg->data[i] & 0x80U) != 0U) {
+    for (uint8_t i = 0U; i < 4U; i += 1U) {
+      if (GET_BIT(msg, i * 16U + 7U)) {
         valid = false;
         break;
       }
