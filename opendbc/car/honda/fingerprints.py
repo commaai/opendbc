@@ -511,6 +511,7 @@ FW_VERSIONS = {
   },
   CAR.HONDA_FIT_4G: {
     (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36161-TZK-P140\x00\x00',
       b'8S102-TZK-PA20\x00\x00',
       b'8S102-TZK-PB10\x00\x00',
     ],
