@@ -21,6 +21,20 @@ BUTTONS_DICT = {Buttons.RES_ACCEL: ButtonType.accelCruise, Buttons.SET_DECEL: Bu
                 Buttons.GAP_DIST: ButtonType.gapAdjustCruise, Buttons.CANCEL: ButtonType.cancel}
 
 
+def maybe_reclassify_main_button(button_events: list[structs.CarState.ButtonEvent], prev_available: bool, available: bool) -> list[structs.CarState.ButtonEvent]:
+    # Some Hyundai platforms expose the main/availability toggle through the same cruise button signal that is
+    # normally used for resume. When the availability bit flips on that button press, treat the event as mainCruise so
+    # higher-level logic does not interpret it as a resume request.
+    if prev_available == available:
+      return button_events
+
+    ret: list[structs.CarState.ButtonEvent] = []
+    for button_event in button_events:
+      button_type = ButtonType.mainCruise if button_event.type == ButtonType.accelCruise else button_event.type
+      ret.append(structs.CarState.ButtonEvent(pressed=button_event.pressed, type=button_type))
+    return ret
+
+
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
@@ -62,6 +76,7 @@ class CarState(CarStateBase):
     self.cluster_speed_counter = CLUSTER_SAMPLE_RATE
 
     self.params = CarControllerParams(CP)
+    self.cruise_available_prev = False
 
   def recent_button_interaction(self) -> bool:
     # On some newer model years, the CANCEL button acts as a pause/resume button based on the PCM state
@@ -192,6 +207,7 @@ class CarState(CarStateBase):
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
                         *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+    ret.buttonEvents = maybe_reclassify_main_button(ret.buttonEvents, self.cruise_available_prev, ret.cruiseState.available)
 
     ret.blockPcmEnable = not self.recent_button_interaction()
 
@@ -201,6 +217,7 @@ class CarState(CarStateBase):
     if ret.vEgo > (self.CP.minSteerSpeed + 4.):
       self.low_speed_alert = False
     ret.lowSpeedAlert = self.low_speed_alert
+    self.cruise_available_prev = ret.cruiseState.available
 
     return ret
 
@@ -290,8 +307,10 @@ class CarState(CarStateBase):
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
                         *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+    ret.buttonEvents = maybe_reclassify_main_button(ret.buttonEvents, self.cruise_available_prev, ret.cruiseState.available)
 
     ret.blockPcmEnable = not self.recent_button_interaction()
+    self.cruise_available_prev = ret.cruiseState.available
 
     return ret
 

@@ -2,11 +2,13 @@ from hypothesis import settings, given, strategies as st
 
 import unittest
 
+from opendbc.car import structs
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
+from opendbc.car.hyundai.carstate import maybe_reclassify_main_button
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
                                          HYBRID_CAR, EV_CAR, FW_QUERY_CONFIG, LEGACY_SAFETY_MODE_CAR, CANFD_FUZZY_WHITELIST, \
@@ -246,3 +248,15 @@ class TestHyundaiFingerprint(unittest.TestCase):
         platforms_with_shared_codes.add(platform)
 
     assert platforms_with_shared_codes == excluded_platforms
+
+  def test_main_button_reclassification(self):
+    button_event = structs.CarState.ButtonEvent(pressed=True, type=structs.CarState.ButtonEvent.Type.accelCruise)
+    reclassified = maybe_reclassify_main_button([button_event], prev_available=False, available=True)
+
+    assert len(reclassified) == 1
+    assert reclassified[0].pressed is True
+    assert reclassified[0].type == structs.CarState.ButtonEvent.Type.mainCruise
+
+    unchanged = maybe_reclassify_main_button([button_event], prev_available=True, available=True)
+    assert len(unchanged) == 1
+    assert unchanged[0].type == structs.CarState.ButtonEvent.Type.accelCruise
