@@ -2,7 +2,7 @@ import copy
 from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.rivian.values import DBC, GEAR_MAP
+from opendbc.car.rivian.values import DBC, GEAR_MAP, RivianFlags
 from opendbc.car.common.conversions import Conversions as CV
 
 GearShifter = structs.CarState.GearShifter
@@ -13,9 +13,9 @@ class CarState(CarStateBase):
     super().__init__(CP)
     self.last_speed = 30
 
-    self.acm_lka_hba_cmd = None
-    self.sccm_wheel_touch = None
-    self.vdm_adas_status = None
+    self.acm_lka_hba_cmd: dict | None = None
+    self.sccm_wheel_touch: dict | None = None
+    self.vdm_adas_status: list[dict] | None = None
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -70,15 +70,17 @@ class CarState(CarStateBase):
     # Gear
     ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
 
-    # Doors
-    ret.doorOpen = any(cp_adas.vl["IndicatorLights"][door] != 2 for door in ("RearDriverDoor", "FrontPassengerDoor", "DriverDoor", "RearPassengerDoor"))
+    # Doors and seatbelt
+    # GEN2 has no CAN signal for these, but stock ACC already handles disengaging
+    # door locks prevent opening while driving
+    # on standstill, stock ACC disengages when a door is opened or seatbelt is unbuckled
+    if not (self.CP.flags & RivianFlags.GEN2):
+      ret.doorOpen = any(cp_adas.vl["IndicatorLights"][door] != 2 for door in ("RearDriverDoor", "FrontPassengerDoor", "DriverDoor", "RearPassengerDoor"))
+      ret.seatbeltUnlatched = cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0
 
     # Blinkers
     ret.leftBlinker = cp_adas.vl["IndicatorLights"]["TurnLightLeft"] in (1, 2)
     ret.rightBlinker = cp_adas.vl["IndicatorLights"]["TurnLightRight"] in (1, 2)
-
-    # Seatbelt
-    ret.seatbeltUnlatched = cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0
 
     # Blindspot
     # ret.leftBlindspot = False
@@ -89,8 +91,11 @@ class CarState(CarStateBase):
 
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
-    self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
-    self.vdm_adas_status = copy.copy(cp.vl["VDM_AdasSts"])
+    if not (self.CP.flags & RivianFlags.GEN2):
+      self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
+    # This message can lag and send two messages at once, make sure we forward all of them
+    adas_status_msgs = cp.vl_all["VDM_AdasSts"]
+    self.vdm_adas_status = [dict(zip(adas_status_msgs, vals, strict=True)) for vals in zip(*adas_status_msgs.values(), strict=True)]
 
     return ret
 
