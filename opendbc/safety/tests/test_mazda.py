@@ -81,5 +81,73 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
 
+class TestMazdaLongitudinalSafety(TestMazdaSafety, common.LongitudinalAccelSafetyTest):
+
+  TX_MSGS = [[0x243, 0], [0x09d, 0], [0x440, 0], [0x21b, 0], [0x21c, 0], [0x764, 0]]
+  MAX_ACCEL = 2000.0
+  MIN_ACCEL = -2000.0
+  INACTIVE_ACCEL = 0.0
+
+  def setUp(self):
+    self.packer = CANPackerSafety("mazda_2017")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.mazda, 1)
+    self.safety.init_tests()
+
+  def _pcm_status_msg(self, enable):
+    values = {"ACC_ACTIVE": enable, "BRAKE_ON": 0}
+    return self.packer.make_can_msg_safety("PEDALS", 0, values)
+
+  def _accel_msg(self, accel: float):
+    values = {"ACCEL_CMD": accel}
+    return self.packer.make_can_msg_safety("CRZ_INFO", 0, values)
+
+  def _crz_ctrl_msg(self, cruise_active: bool):
+    values = {"CRZ_ACTIVE": cruise_active}
+    return self.packer.make_can_msg_safety("CRZ_CTRL", 0, values)
+
+  def _radar_uds_msg(self, dat: bytes):
+    return libsafety_py.make_CANPacket(0x764, 0, dat)
+
+  def test_accel_actuation_limits(self):
+    # CRZ_INFO.ACCEL_CMD is a raw integer command in Mazda's DBC, so use
+    # integer-domain boundaries to avoid float rounding artifacts in packing.
+    limits = ((self.MIN_ACCEL, self.MAX_ACCEL, common.ALTERNATIVE_EXPERIENCE.DEFAULT),
+              (self.MIN_ACCEL, self.MAX_ACCEL, common.ALTERNATIVE_EXPERIENCE.RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX))
+
+    for min_accel, max_accel, alternative_experience in limits:
+      for accel in range(int(min_accel) - 1, int(max_accel) + 2):
+        for controls_allowed in [True, False]:
+          self.safety.set_controls_allowed(controls_allowed)
+          self.safety.set_alternative_experience(alternative_experience)
+          should_tx = controls_allowed and min_accel <= accel <= max_accel
+          should_tx = should_tx or accel == self.INACTIVE_ACCEL
+          self.assertEqual(should_tx, self._tx(self._accel_msg(float(accel))))
+
+  def test_rx_cancel_disables_controls(self):
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._rx(self._button_msg(cancel=True)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_crz_ctrl_active_requires_controls_allowed(self):
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(self._crz_ctrl_msg(cruise_active=True)))
+    self.assertTrue(self._tx(self._crz_ctrl_msg(cruise_active=False)))
+
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._tx(self._crz_ctrl_msg(cruise_active=True)))
+
+  def test_radar_uds_allowlist(self):
+    tester_present = b"\x02\x3E\x80\x00\x00\x00\x00\x00"
+    session_default = b"\x02\x10\x01\x00\x00\x00\x00\x00"
+    session_programming = b"\x02\x10\x02\x00\x00\x00\x00\x00"
+    disallowed = b"\x03\x22\xF1\x90\x00\x00\x00\x00"
+
+    self.assertTrue(self._tx(self._radar_uds_msg(tester_present)))
+    self.assertTrue(self._tx(self._radar_uds_msg(session_default)))
+    self.assertTrue(self._tx(self._radar_uds_msg(session_programming)))
+    self.assertFalse(self._tx(self._radar_uds_msg(disallowed)))
+
+
 if __name__ == "__main__":
   unittest.main()
