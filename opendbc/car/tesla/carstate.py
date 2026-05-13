@@ -1,26 +1,28 @@
 import copy
 from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, structs
-from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.teslacan import get_steer_ctrl_type
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, TeslaFlags
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
 
+def _party_dbc(CP) -> str:
+  if CP.flags & TeslaFlags.LEGACY_DAS_STEERING:
+    return 'tesla_model3_party_legacy'
+  return DBC[CP.carFingerprint][Bus.party]
+
+
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.party])
+    self.can_define = CANDefine(_party_dbc(CP))
     self.shifter_values = self.can_define.dv["DI_systemStatus"]["DI_gear"]
 
     self.autopark = False
     self.autopark_prev = False
     self.cruise_enabled_prev = False
-    self.fsd14_error_logged = False
-    self.suspected_fsd14 = False
 
     self.hands_on_level = 0
     self.das_control = None
@@ -109,29 +111,12 @@ class CarState(CarStateBase):
     ret.stockAeb = cp_ap_party.vl["DAS_control"]["DAS_aebEvent"] == 1
 
     # LKAS
-    # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
-    # FSD switched from using ANGLE_CONTROL to LANE_KEEP_ASSIST to likely keep the old steering override disengage logic.
-    # LKAS switched from LANE_KEEP_ASSIST to ANGLE_CONTROL to likely allow overriding LKAS events smoothly
-    lkas_ctrl_type = get_steer_ctrl_type(self.CP.flags, 2)
-    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == lkas_ctrl_type  # LANE_KEEP_ASSIST
+    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
 
     # Stock Autosteer should be off (includes FSD)
     # TODO: find for TESLA_MODEL_X and HW2.5 vehicles
     if not (self.CP.flags & TeslaFlags.MISSING_DAS_SETTINGS):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
-
-      # Because we don't have FSD 14 detection outside of a set of FW, we should check if this FW is accidentally missing from FSD_14_FW
-      # 1. If in Autosteer or FSD, already caught by invalidLkasSetting
-      # 2. If in TACC and DAS ever sends ANGLE_CONTROL (1), we can infer it's trying to do LKAS on FSD 14+
-      angle_control = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 1  # ANGLE_CONTROL
-      if not ret.invalidLkasSetting and angle_control and not self.CP.flags & TeslaFlags.FSD_14:
-        self.suspected_fsd14 = True
-
-      if self.suspected_fsd14:
-        ret.invalidLkasSetting = True
-        if not self.fsd14_error_logged:
-          carlog.error("FSD 14 detected, but FW not in FSD_14_FW set")
-          self.fsd14_error_logged = True
 
     # Buttons # ToDo: add Gap adjust button
 
@@ -142,7 +127,8 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
+    party_dbc = _party_dbc(CP)
     return {
-      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.party),
-      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.autopilot_party)
+      Bus.party: CANParser(party_dbc, [], CANBUS.party),
+      Bus.ap_party: CANParser(party_dbc, [], CANBUS.autopilot_party)
     }
