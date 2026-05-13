@@ -6,7 +6,6 @@ from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class TestIgnitionHook(unittest.TestCase):
-  TX_MSGS: list = []
 
   def setUp(self):
     self.safety = libsafety_py.libsafety
