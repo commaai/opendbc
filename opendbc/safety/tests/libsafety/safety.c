@@ -13,22 +13,6 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
 
-static bool test_ignition_can = false;
-static uint32_t test_ignition_can_cnt = 0U;
-
-void ignition_can_hook_test(const CANPacket_t *msg) {
-  ignition_can_hook(msg, &test_ignition_can, &test_ignition_can_cnt);
-}
-
-bool get_ignition_can(void) {
-  return test_ignition_can;
-}
-
-void reset_ignition_can(void) {
-  test_ignition_can = false;
-  test_ignition_can_cnt = 0U;
-}
-
 void safety_tick_current_safety_config() {
   safety_tick(&current_safety_config);
 }
@@ -62,8 +46,16 @@ void set_relay_malfunction(bool c){
   relay_malfunction = c;
 }
 
+void set_ignition_can(bool c){
+  ignition_can = c;
+}
+
 bool get_controls_allowed(void){
   return controls_allowed;
+}
+
+bool get_ignition_can(void){
+  return ignition_can;
 }
 
 int get_alternative_experience(void){
@@ -218,4 +210,7 @@ void init_tests(void){
 
   // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
   tesla_autopark = false;
+
+  ignition_can = false;
+  ignition_can_cnt = 0U;
 }
