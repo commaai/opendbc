@@ -53,6 +53,19 @@ void ignition_can_hook(const CANPacket_t *msg) {
       ignition_can = (msg->data[0] >> 5) == 0x6U;
       ignition_can_cnt = 0U;
     }
+
+    // Volkswagen MEB exception
+    if ((msg->addr == 0x3C0U) && (len == 4)) {
+      int counter = msg->data[1] & 0xFU;
+
+      static int prev_counter_vw_meb = -1;
+      if ((counter == ((prev_counter_vw_meb + 1) % 16)) && (prev_counter_vw_meb != -1)) {
+        // Klemmen_Status_01->ZAS_Kl_15
+        ignition_can = ((msg->data[2] >> 1) & 1U) != 0U;
+        ignition_can_cnt = 0U;
+      }
+      prev_counter_vw_meb = counter;
+    }
   }
 
   // TODO: this is too loose, Teslas have 0x222
