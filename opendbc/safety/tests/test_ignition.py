@@ -11,7 +11,6 @@ class TestIgnitionHook(unittest.TestCase):
   def setUp(self):
     self.safety = libsafety_py.libsafety
     self.safety.reset_ignition_can()
-    self.safety.init_tests()
     self.gm_packer = CANPackerSafety("gm_global_a_powertrain_generated")
     self.rivian_packer = CANPackerSafety("rivian_primary_actuator")
     self.tesla_packer = CANPackerSafety("tesla_model3_party")

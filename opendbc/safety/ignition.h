@@ -5,14 +5,6 @@
 
 #include "opendbc/safety/can.h"
 
-static int prev_counter_rivian = -1;
-static int prev_counter_tesla = -1;
-
-static inline void ignition_init(void) {
-  prev_counter_rivian = -1;
-  prev_counter_tesla = -1;
-}
-
 static inline void ignition_can_hook(const CANPacket_t *msg, bool *ignition_can, uint32_t *ignition_can_cnt) {
   if (msg->bus == 0U) {
     int len = GET_LEN(msg);
@@ -29,6 +21,7 @@ static inline void ignition_can_hook(const CANPacket_t *msg, bool *ignition_can,
       // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
       int counter = msg->data[1] & 0xFU;  // max is only 14
 
+      static int prev_counter_rivian = -1;
       if ((counter == ((prev_counter_rivian + 1) % 15)) && (prev_counter_rivian != -1)) {
         // VDM_OutputSignals->VDM_EpasPowerMode
         *ignition_can = ((msg->data[7] >> 4U) & 0x3U) == 1U;  // VDM_EpasPowerMode_Drive_On=1
@@ -42,6 +35,7 @@ static inline void ignition_can_hook(const CANPacket_t *msg, bool *ignition_can,
       // 0x221 overlaps with Rivian which has random data on byte 0
       int counter = msg->data[6] >> 4;
 
+      static int prev_counter_tesla = -1;
       if ((counter == ((prev_counter_tesla + 1) % 16)) && (prev_counter_tesla != -1)) {
         // VCFRONT_LVPowerState->VCFRONT_vehiclePowerState
         int power_state = (msg->data[0] >> 5U) & 0x3U;
