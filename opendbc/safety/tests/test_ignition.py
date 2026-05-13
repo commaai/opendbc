@@ -62,10 +62,12 @@ class TestIgnitionHook(unittest.TestCase):
 
   # Tesla: VEHICLE_POWER_STATE_DRIVE=3 (counter-gated)
   def test_tesla_ignition_on(self):
-    self.safety.ignition_can_hook(self._tesla_msg(0, 3))
-    self.assertFalse(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._tesla_msg(1, 3))
-    self.assertTrue(self.safety.get_ignition_can())
+    for i in range(16):
+      self.safety.init_tests()
+      self.safety.ignition_can_hook(self._tesla_msg(i, 3))
+      self.assertFalse(self.safety.get_ignition_can())
+      self.safety.ignition_can_hook(self._tesla_msg((i + 1) % 16, 3))
+      self.assertTrue(self.safety.get_ignition_can())
 
   def test_tesla_ignition_off(self):
     self.safety.ignition_can_hook(self._tesla_msg(0, 3))
