@@ -18,7 +18,7 @@ class TestVolkswagenMebIgnition(unittest.TestCase):
                                            {"Klemmen_Status_01_BZ": counter,
                                             "ZAS_Kl_15": ign})
 
-  # ZAS_Kl_15=1 (counter-gated)
+  # ZAS_Kl_15=1
   def test_ignition_on(self):
     for i in range(16):
       self.safety.init_tests()
