@@ -142,5 +142,36 @@ class TestRivianLongitudinalSafety(TestRivianSafetyBase):
     self.safety.init_tests()
 
 
+class TestRivianIgnition(unittest.TestCase):
+  TX_MSGS: list = []
+
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.init_tests()
+    self.packer = CANPackerSafety("rivian_primary_actuator")
+
+  def _msg(self, counter, mode):
+    return self.packer.make_can_msg_safety("VDM_OutputSignals", 0,
+                                           {"VDM_OutputSigs_Counter": counter,
+                                            "VDM_EpasPowerMode": mode})
+
+  # VDM_EpasPowerMode_Drive_On=1
+  def test_ignition_on(self):
+    for i in range(15):
+      self.safety.init_tests()
+      self.safety.ignition_can_hook(self._msg(i, 1))
+      self.assertFalse(self.safety.get_ignition_can())
+      self.safety.ignition_can_hook(self._msg((i + 1) % 15, 1))
+      self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    self.safety.ignition_can_hook(self._msg(0, 1))
+    self.safety.ignition_can_hook(self._msg(1, 1))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 0))
+    self.safety.ignition_can_hook(self._msg(3, 0))
+    self.assertFalse(self.safety.get_ignition_can())
+
+
 if __name__ == "__main__":
   unittest.main()
