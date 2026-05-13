@@ -45,9 +45,14 @@ class TestIgnitionHook(unittest.TestCase):
 
   def test_rivian_ignition_off(self):
     self._hook(self.rivian_packer.make_can_msg_safety("VDM_OutputSignals", 0,
-                                                      {"VDM_OutputSigs_Counter": 0, "VDM_EpasPowerMode": 0}))
+                                                      {"VDM_OutputSigs_Counter": 0, "VDM_EpasPowerMode": 1}))
     self._hook(self.rivian_packer.make_can_msg_safety("VDM_OutputSignals", 0,
-                                                      {"VDM_OutputSigs_Counter": 1, "VDM_EpasPowerMode": 0}))
+                                                      {"VDM_OutputSigs_Counter": 1, "VDM_EpasPowerMode": 1}))
+    self.assertTrue(self._ign())
+    self._hook(self.rivian_packer.make_can_msg_safety("VDM_OutputSignals", 0,
+                                                      {"VDM_OutputSigs_Counter": 2, "VDM_EpasPowerMode": 0}))
+    self._hook(self.rivian_packer.make_can_msg_safety("VDM_OutputSignals", 0,
+                                                      {"VDM_OutputSigs_Counter": 3, "VDM_EpasPowerMode": 0}))
     self.assertFalse(self._ign())
 
   # Tesla: VEHICLE_POWER_STATE_DRIVE=3
@@ -61,9 +66,14 @@ class TestIgnitionHook(unittest.TestCase):
 
   def test_tesla_ignition_off(self):
     self._hook(self.tesla_packer.make_can_msg_safety("VCFRONT_LVPowerState", 0,
-                                                     {"VCFRONT_LVPowerStateCounter": 0, "VCFRONT_vehiclePowerState": 2}))
+                                                     {"VCFRONT_LVPowerStateCounter": 0, "VCFRONT_vehiclePowerState": 3}))
     self._hook(self.tesla_packer.make_can_msg_safety("VCFRONT_LVPowerState", 0,
-                                                     {"VCFRONT_LVPowerStateCounter": 1, "VCFRONT_vehiclePowerState": 2}))
+                                                     {"VCFRONT_LVPowerStateCounter": 1, "VCFRONT_vehiclePowerState": 3}))
+    self.assertTrue(self._ign())
+    self._hook(self.tesla_packer.make_can_msg_safety("VCFRONT_LVPowerState", 0,
+                                                     {"VCFRONT_LVPowerStateCounter": 2, "VCFRONT_vehiclePowerState": 2}))
+    self._hook(self.tesla_packer.make_can_msg_safety("VCFRONT_LVPowerState", 0,
+                                                     {"VCFRONT_LVPowerStateCounter": 3, "VCFRONT_vehiclePowerState": 2}))
     self.assertFalse(self._ign())
 
   # Mazda: 0x9E byte 0 high 3 bits == 6
