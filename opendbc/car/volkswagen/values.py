@@ -7,7 +7,6 @@ from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
-from opendbc.car.volkswagen.curvature import CurvatureSteeringLimits
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 from opendbc.car.vin import Vin
 
@@ -69,21 +68,14 @@ class CarControllerParams:
   ACCEL_MAX = 2.0                          # 2.0 m/s max acceleration
   ACCEL_MIN = -3.5                         # 3.5 m/s max deceleration
 
-  # MEB curvature command is rate-limited through apply_steer_angle_limits_vm.
-  # The helper expects a steering-angle-shaped input in degrees, so the carcontroller
-  # scales curvature by RAD_TO_DEG before/after the call and pairs it with a stub
-  # VehicleModel (slip=0, steerRatio=1, wheelbase=1) so the helper math reduces to
-  # an identity on curvature. The matching safety params use the same stub so the
-  # Python envelope is always within the safety envelope.
-  MEB_RAD_TO_DEG = 180.0 / 3.141592653589793
   # Add extra tolerance for average banked road since safety doesn't have the roll
   MEB_AVERAGE_ROAD_ROLL = 0.06
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    0.195 * MEB_RAD_TO_DEG,  # STEER_ANGLE_MAX in curvature*RAD_TO_DEG units
+    720,
     ([], []),
     ([], []),
-    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * MEB_AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
-    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * MEB_AVERAGE_ROAD_ROLL),  # ~3.6 m/s^3
+    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * MEB_AVERAGE_ROAD_ROLL),
+    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * MEB_AVERAGE_ROAD_ROLL),
   )
 
   def __init__(self, CP):
@@ -127,7 +119,7 @@ class CarControllerParams:
       self.STEERING_POWER_MIN = 4         # HCA_03 minimum steering power, percentage
       self.STEERING_POWER_STEP = 2        # HCA_03 steering power counter steps
 
-      self.CURVATURE_LIMITS = CurvatureSteeringLimits(0.195)  # Max curvature for steering command, m^-1
+      self.CURVATURE_MAX = 0.195  # Max curvature for steering command, m^-1
 
       self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
       self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]

@@ -23,7 +23,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest):
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02), 2: (MSG_KLR_01,)}
 
-  MAX_CURVATURE = 29105
   CURVATURE_TO_CAN = 149253.7313
 
   def _speed_msg(self, speed_mps: float):
@@ -82,6 +81,36 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest):
     self.assertFalse(self.safety.get_brake_pressed_prev())
     self._rx(self._user_brake_msg(True))
     self.assertTrue(self.safety.get_brake_pressed_prev())
+
+  def test_curvature_measurements(self):
+    for c in (0.0, 0.05, -0.05, 0.15, -0.15):
+      self._rx(self._curvature_meas_msg(c))
+
+  def test_torque_driver_measurements(self):
+    for t in (0, 100, -100, 250, -250):
+      self._rx(self._torque_driver_msg(t))
+
+  def test_main_switch_off_disables_controls(self):
+    self.safety.set_controls_allowed(True)
+    self._rx(self._tsk_status_msg(False, main_switch=False))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_cancel_button_rising_edge(self):
+    self.safety.set_controls_allowed(True)
+    self._rx(self._button_msg(cancel=1, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_curvature_cmd_safety_check(self):
+    # Exercise tx HCA_03 path with both signs and steer_req states
+    for c in (0.0, 0.01, -0.01, 0.1, -0.1):
+      for steer_req in (0, 1):
+        self.safety.set_controls_allowed(True)
+        self._tx(self._curvature_cmd_msg(c, steer_req=steer_req))
+
+    # When controls are not allowed, only steer_req=0 with small curvature is allowed
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0.0, steer_req=0)))
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0.1, steer_req=1)))
 
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
