@@ -1,4 +1,4 @@
-def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power):
+def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power=0):
   values = {
     "Curvature": abs(apply_curvature),  # in rad/m
     "Curvature_VZ": 1 if apply_curvature > 0 and lkas_enabled else 0,

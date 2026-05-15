@@ -72,8 +72,8 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest):
     values = {"EPS_Lenkmoment": abs(torque), "EPS_VZ_Lenkmoment": torque < 0}
     return self.packer.make_can_msg_safety("LH_EPS_03", 0, values)
 
-  def _button_msg(self, cancel=0, resume=0, set=0, bus=2):
-    values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": set, "GRA_Tip_Wiederaufnahme": resume}
+  def _button_msg(self, cancel=0, resume=0, _set=0, bus=2):
+    values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume}
     return self.packer.make_can_msg_safety("GRA_ACC_01", bus, values)
 
   def test_brake_signal(self):
@@ -128,7 +128,7 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._button_msg(cancel=1)))
     self.assertFalse(self._tx(self._button_msg(resume=1)))
-    self.assertFalse(self._tx(self._button_msg(set=1)))
+    self.assertFalse(self._tx(self._button_msg(_set=1)))
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=1)))
 

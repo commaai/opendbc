@@ -141,7 +141,7 @@ class CarController(CarControllerBase):
     # Emergency Assist intervention
     if self.CP.flags & VolkswagenFlags.MEB and self.CP.flags & VolkswagenFlags.STOCK_KLR_PRESENT:
       # send capacitive steering wheel touched
-      # propably EA is stock activated only for cars equipped with capacitive steering wheel
+      # probably EA is stock activated only for cars equipped with capacitive steering wheel
       # (also stock long does resume from stop as long as hands on is detected additionally to OP resume spam)
       klr_send_ready = CS.klr_stock_values["COUNTER"] != self.klr_counter_last
       if klr_send_ready:
