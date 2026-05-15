@@ -87,7 +87,6 @@ BO_ 304 PLA_01: 8 XXX
  SG_ PLA_LW_Soll : 16|13@1+ (0.1,0) [0.0|819.1] "Unit_DegreOfArc"  XXX
  SG_ PLA_VZ_LW_Soll : 31|1@1+ (1.0,0.0) [0.0|1] ""  XXX
  SG_ PLA_Status_PLA_EPS : 32|4@1+ (1.0,0.0) [0.0|15] ""  XXX
- SG_ PLA_Bremsmoment : 36|13@1+ (4,0) [0|32760] "Unit_NewtoMeter"  XXX
  SG_ PLA_Bremsverzoegerung : 36|7@1+ (0.1,0) [0.0|12.0] "Unit_MeterPerSeconSquar"  XXX
  SG_ PLA_Anf_Bremsverzoegerung : 43|1@1+ (1.0,0.0) [0.0|1] ""  XXX
  SG_ PLA_BremsMom_Verzoeg : 50|1@1+ (1.0,0.0) [0.0|1] ""  XXX
