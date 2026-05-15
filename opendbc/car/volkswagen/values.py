@@ -6,7 +6,8 @@ from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CanBusBase, CarSpecs, 
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.lateral import AngleSteeringLimits, CurvatureSteeringLimits, ISO_LATERAL_ACCEL
+from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
+from opendbc.car.volkswagen.curvature import CurvatureSteeringLimits
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 from opendbc.car.vin import Vin
 

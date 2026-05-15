@@ -263,7 +263,6 @@ class TestMEBBlindspot(unittest.TestCase):
         self.assertEqual(ret.rightBlindspot, exp_right)
 
 
-@unittest.skip("sender/safety envelope alignment WIP")
 class TestMEBSafetyOracle(unittest.TestCase):
   """Drive carcontroller through randomized inputs and confirm panda safety
   (volkswagenMeb) accepts every HCA_03 frame it produces. Conversely confirm
@@ -293,16 +292,17 @@ class TestMEBSafetyOracle(unittest.TestCase):
     return self.libsafety_py.make_CANPacket(addr, 0, dat)
 
   def test_oracle_random_sequence(self):
+    from opendbc.can import CANPacker
+    packer = CANPacker(DBC[CAR.VOLKSWAGEN_ID4_MK1.value][Bus.pt])
     rng = np.random.default_rng(0)
     CS = _make_carstate(self.inst, vEgo=15.0)
 
-    # Walk through randomized requested curvatures + measured curvatures
     sends_us = 0
     for step in range(500):
       v = float(rng.uniform(2.0, 30.0))
       cmd = float(rng.uniform(-0.25, 0.25))
       meas = float(rng.uniform(-0.2, 0.2))
-      lat_active = bool(rng.integers(0, 2)) or step < 200  # mostly active
+      lat_active = bool(rng.integers(0, 2)) or step < 200
 
       CS.out.vEgo = v
       CS.out.vEgoRaw = v
@@ -311,15 +311,16 @@ class TestMEBSafetyOracle(unittest.TestCase):
       CC = _build_cc(latActive=lat_active, curvature=cmd)
       _, sends = self.inst.CC.update(CC, CS, 0)
 
-      # Feed safety the wheel speed so steer_angle_cmd_checks_vm sees the same v_ego
       val = int(v * 3.6 / 0.0075)
       esc = self.libsafety_py.make_CANPacket(0xFC, 0, bytes(8) + val.to_bytes(2, 'little') * 4)
       self.safety.safety_rx_hook(esc)
 
+      qfk_addr, qfk_dat, _ = packer.make_can_msg("QFK_01", 0, {"Curvature": abs(meas), "Curvature_VZ": 1 if meas > 0 else 0})
+      self.safety.safety_rx_hook(self.libsafety_py.make_CANPacket(qfk_addr, 0, qfk_dat))
+
       for addr, dat, _bus in sends:
         if addr != HCA_03_ADDR:
           continue
-        # advance timer 20ms per HCA frame so the rt_angle limit window resets correctly
         sends_us += 20000
         self.safety.set_timer(sends_us)
         pkt = self._raw_hca_to_safety_packet(dat, addr)

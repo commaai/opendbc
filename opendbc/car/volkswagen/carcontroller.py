@@ -1,7 +1,8 @@
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, structs
-from opendbc.car.lateral import ISO_LATERAL_ACCEL, apply_driver_steer_torque_limits, apply_std_curvature_limits
+from opendbc.car.lateral import ISO_LATERAL_ACCEL, apply_driver_steer_torque_limits
+from opendbc.car.volkswagen.curvature import apply_std_curvature_limits, get_max_curvature_jerk
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mebcan, mlbcan, mqbcan, pqcan
@@ -91,9 +92,13 @@ class CarController(CarControllerBase):
         else:
           if self.steering_power_last > 0:
             hca_enabled = True
-            apply_curvature = float(np.clip(CS.curvature_meas,
-                                            -self.CCP.CURVATURE_LIMITS.CURVATURE_MAX,
-                                            self.CCP.CURVATURE_LIMITS.CURVATURE_MAX))
+            target_curvature = float(np.clip(CS.curvature_meas,
+                                             -self.CCP.CURVATURE_LIMITS.CURVATURE_MAX,
+                                             self.CCP.CURVATURE_LIMITS.CURVATURE_MAX))
+            max_jerk = get_max_curvature_jerk(CS.out.vEgoRaw, self.CCP.STEER_STEP)
+            apply_curvature = float(np.clip(target_curvature,
+                                            self.apply_curvature_last - max_jerk,
+                                            self.apply_curvature_last + max_jerk))
             steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, 0)
           else:
             hca_enabled = False
