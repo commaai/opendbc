@@ -40,6 +40,25 @@ class CarInterface(CarInterfaceBase):
       ret.networkLocation = NetworkLocation.gateway
       ret.dashcamOnly = is_release  # Release support needs HCA timeout fix, safety validation, revised J533 harness
 
+    elif ret.flags & VolkswagenFlags.MEB:
+      # Set global MEB parameters
+      safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
+      ret.transmissionType = TransmissionType.direct
+      ret.steerControlType = structs.CarParams.SteerControlType.angle
+      ret.steerAtStandstill = True
+
+      if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, QFK_01
+        ret.networkLocation = NetworkLocation.gateway
+      else:
+        ret.networkLocation = NetworkLocation.fwdCamera
+
+      ret.enableBsm = 0x24C in fingerprint[0]  # MEB_Side_Assist_01
+
+      if 0x25D in fingerprint[0]:  # KLR_01
+        ret.flags |= VolkswagenFlags.STOCK_KLR_PRESENT.value
+
+      ret.dashcamOnly = is_release
+
     else:
       # Set global MQB parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagen)]
@@ -61,6 +80,8 @@ class CarInterface(CarInterfaceBase):
         ret.flags |= VolkswagenFlags.STOCK_HCA_PRESENT.value
       if 0x6B8 in fingerprint[0]:  # Kombi_03
         ret.flags |= VolkswagenFlags.KOMBI_PRESENT.value
+      if 0x3DC in fingerprint[0]:  # Gateway_73
+        ret.flags |= VolkswagenFlags.ALT_GEAR.value
 
     # Global lateral tuning defaults, can be overridden per-vehicle
 
@@ -68,6 +89,8 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & VolkswagenFlags.PQ or ret.flags & VolkswagenFlags.MLB:
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+    elif ret.flags & VolkswagenFlags.MEB:
+      ret.steerActuatorDelay = 0.3
     else:
       ret.steerActuatorDelay = 0.1
       ret.lateralTuning.pid.kpBP = [0.]
@@ -78,8 +101,8 @@ class CarInterface(CarInterfaceBase):
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
-    ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
-    if alpha_long:
+    ret.alphaLongitudinalAvailable = (ret.networkLocation == NetworkLocation.gateway or docs) and not (ret.flags & VolkswagenFlags.MEB)
+    if alpha_long and not (ret.flags & VolkswagenFlags.MEB):
       # Proof-of-concept, prep for E2E only. No radar points available. Panda ALLOW_DEBUG firmware required.
       ret.openpilotLongitudinalControl = True
       safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value

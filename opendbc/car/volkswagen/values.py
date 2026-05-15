@@ -2,10 +2,11 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
-from opendbc.car import Bus, CanBusBase, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CanBusBase, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.lateral import AngleSteeringLimits, CurvatureSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 from opendbc.car.vin import Vin
 
@@ -67,6 +68,23 @@ class CarControllerParams:
   ACCEL_MAX = 2.0                          # 2.0 m/s max acceleration
   ACCEL_MIN = -3.5                         # 3.5 m/s max deceleration
 
+  # MEB curvature command is rate-limited through apply_steer_angle_limits_vm.
+  # The helper expects a steering-angle-shaped input in degrees, so the carcontroller
+  # scales curvature by RAD_TO_DEG before/after the call and pairs it with a stub
+  # VehicleModel (slip=0, steerRatio=1, wheelbase=1) so the helper math reduces to
+  # an identity on curvature. The matching safety params use the same stub so the
+  # Python envelope is always within the safety envelope.
+  MEB_RAD_TO_DEG = 180.0 / 3.141592653589793
+  # Add extra tolerance for average banked road since safety doesn't have the roll
+  MEB_AVERAGE_ROAD_ROLL = 0.06
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    0.195 * MEB_RAD_TO_DEG,  # STEER_ANGLE_MAX in curvature*RAD_TO_DEG units
+    ([], []),
+    ([], []),
+    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * MEB_AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
+    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * MEB_AVERAGE_ROAD_ROLL),  # ~3.6 m/s^3
+  )
+
   def __init__(self, CP):
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
@@ -97,6 +115,35 @@ class CarControllerParams:
         "laneAssistUnavailNoSensorView": 3,  # "Lane Assist not available. No sensor view."
         "laneAssistTakeOver": 4,  # "Lane Assist: Please Take Over Steering"
         "laneAssistDeactivTrailer": 5,  # "Lane Assist: no function with trailer"
+      }
+
+    elif CP.flags & VolkswagenFlags.MEB:
+      self.LDW_STEP = 10                  # LDW_02 message frequency 10Hz
+      self.ACC_HUD_STEP = 6
+      self.STEER_DRIVER_ALLOWANCE = 100   # Driver torque 1.0 Nm, begin steering reduction from MAX
+      self.STEER_DRIVER_MAX = 300         # Driver torque 3.0 Nm, stop steering reduction at MIN
+      self.STEERING_POWER_MAX = 50        # HCA_03 maximum steering power, percentage
+      self.STEERING_POWER_MIN = 4         # HCA_03 minimum steering power, percentage
+      self.STEERING_POWER_STEP = 2        # HCA_03 steering power counter steps
+
+      self.CURVATURE_LIMITS = CurvatureSteeringLimits(0.195)  # Max curvature for steering command, m^-1
+
+      self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
+      self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]
+
+      self.BUTTONS = [
+        Button(structs.CarState.ButtonEvent.Type.setCruise, "GRA_ACC_01", "GRA_Tip_Setzen", [1]),
+        Button(structs.CarState.ButtonEvent.Type.resumeCruise, "GRA_ACC_01", "GRA_Tip_Wiederaufnahme", [1]),
+        Button(structs.CarState.ButtonEvent.Type.accelCruise, "GRA_ACC_01", "GRA_Tip_Hoch", [1]),
+        Button(structs.CarState.ButtonEvent.Type.decelCruise, "GRA_ACC_01", "GRA_Tip_Runter", [1]),
+        Button(structs.CarState.ButtonEvent.Type.cancel, "GRA_ACC_01", "GRA_Abbrechen", [1]),
+        Button(structs.CarState.ButtonEvent.Type.gapAdjustCruise, "GRA_ACC_01", "GRA_Verstellung_Zeitluecke", [3]),
+      ]
+
+      self.LDW_MESSAGES = {
+        "none": 0,                        # Nothing to display
+        "laneAssistTakeOverUrgent": 4,    # "Lane Assist: Please Take Over Steering" (red)
+        "laneAssistTakeOver": 8,          # "Lane Assist: Please Take Over Steering" (white)
       }
 
     else:
@@ -184,10 +231,13 @@ class VolkswagenFlags(IntFlag):
   # Detected flags
   STOCK_HCA_PRESENT = 1
   KOMBI_PRESENT = 4
+  ALT_GEAR = 32
+  STOCK_KLR_PRESENT = 64
 
   # Static flags
   PQ = 2
   MLB = 8
+  MEB = 16
 
 
 @dataclass
@@ -207,6 +257,16 @@ class VolkswagenMQBPlatformConfig(PlatformConfig):
   # on camera-integrated cars, as we lose too many ECUs to reliably identify the vehicle
   chassis_codes: set[str] = field(default_factory=set)
   wmis: set[WMI] = field(default_factory=set)
+
+
+@dataclass
+class VolkswagenMEBPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_meb'})
+  chassis_codes: set[str] = field(default_factory=set)
+  wmis: set[WMI] = field(default_factory=set)
+
+  def init(self):
+    self.flags |= VolkswagenFlags.MEB
 
 
 @dataclass
@@ -269,7 +329,7 @@ class VWCarDocs(CarDocs):
 # FW_VERSIONS for that existing CAR.
 
 class CAR(Platforms):
-  config: VolkswagenMQBPlatformConfig | VolkswagenPQPlatformConfig
+  config: VolkswagenMQBPlatformConfig | VolkswagenPQPlatformConfig | VolkswagenMEBPlatformConfig
 
   VOLKSWAGEN_ARTEON_MK1 = VolkswagenMQBPlatformConfig(
     [
@@ -330,6 +390,14 @@ class CAR(Platforms):
     VolkswagenCarSpecs(mass=1397, wheelbase=2.62),
     chassis_codes={"5G", "AU", "BA", "BE"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
+  )
+  VOLKSWAGEN_ID4_MK1 = VolkswagenMEBPlatformConfig(
+    [
+      VWCarDocs("Volkswagen ID.4 2021-23"),
+    ],
+    VolkswagenCarSpecs(mass=2224, wheelbase=2.77),
+    chassis_codes={"E2"},
+    wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_EUROPE_SUV},
   )
   VOLKSWAGEN_JETTA_MK6 = VolkswagenPQPlatformConfig(
     [VWCarDocs("Volkswagen Jetta 2015-18")],

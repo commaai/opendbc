@@ -1,14 +1,18 @@
 import numpy as np
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, structs
-from opendbc.car.lateral import apply_driver_steer_torque_limits
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, structs
+from opendbc.car.lateral import ISO_LATERAL_ACCEL, apply_driver_steer_torque_limits, apply_std_curvature_limits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.volkswagen import mlbcan, mqbcan, pqcan
+from opendbc.car.volkswagen import mebcan, mlbcan, mqbcan, pqcan
 from opendbc.car.volkswagen.values import CanBus, CarControllerParams, VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
+
+# Limit to average banked road since safety doesn't have the roll
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll raises lateral acceleration
+MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
 
 
 class HCAMitigation:
@@ -45,11 +49,16 @@ class CarController(CarControllerBase):
       self.CCS = pqcan
     elif CP.flags & VolkswagenFlags.MLB:
       self.CCS = mlbcan
+    elif CP.flags & VolkswagenFlags.MEB:
+      self.CCS = mebcan
     else:
       self.CCS = mqbcan
 
     self.apply_torque_last = 0
+    self.apply_curvature_last = 0.
+    self.steering_power_last = 0
     self.gra_acc_counter_last = None
+    self.klr_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
 
   def update(self, CC, CS, now_nanos):
@@ -61,14 +70,58 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.STEER_STEP == 0:
       apply_torque = 0
-      if CC.latActive:
-        new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
-        apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
+      if self.CP.flags & VolkswagenFlags.MEB:
+        if CC.latActive:
+          hca_enabled = True
+          apply_curvature = actuators.curvature + (CS.curvature_meas - CC.currentCurvature)
+          apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw,
+                                                      CS.curvature_meas, False, self.CCP.STEER_STEP, CC.latActive,
+                                                      self.CCP.CURVATURE_LIMITS)
+          # Limit curvature to conservative max lateral acceleration
+          curvature_accel_limit = MAX_LATERAL_ACCEL / (max(CS.out.vEgoRaw, 1) ** 2)
+          apply_curvature = float(np.clip(apply_curvature, -curvature_accel_limit, curvature_accel_limit))
 
-      apply_torque = self.hca_mitigation.update(apply_torque, self.apply_torque_last)
-      hca_enabled = apply_torque != 0
-      self.apply_torque_last = apply_torque
-      can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_torque, hca_enabled))
+          min_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MIN)
+          max_power = min(self.steering_power_last + self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MAX)
+          target_power_driver = int(np.interp(CS.out.steeringTorque, [self.CCP.STEER_DRIVER_ALLOWANCE, self.CCP.STEER_DRIVER_MAX],
+                                                                     [self.CCP.STEERING_POWER_MAX, self.CCP.STEERING_POWER_MIN]))
+          target_power = int(np.interp(CS.out.vEgo, [0., 0.5], [self.CCP.STEERING_POWER_MIN, target_power_driver]))
+          steering_power = min(max(target_power, min_power), max_power)
+
+        else:
+          if self.steering_power_last > 0:
+            hca_enabled = True
+            apply_curvature = float(np.clip(CS.curvature_meas,
+                                            -self.CCP.CURVATURE_LIMITS.CURVATURE_MAX,
+                                            self.CCP.CURVATURE_LIMITS.CURVATURE_MAX))
+            steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, 0)
+          else:
+            hca_enabled = False
+            apply_curvature = 0.
+            steering_power = 0
+
+        can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_curvature, hca_enabled, steering_power))
+        self.apply_curvature_last = apply_curvature
+        self.steering_power_last = steering_power
+
+      else:
+        # Logic to avoid HCA state 4 "refused":
+        #   * Don't steer unless HCA is in state 3 "ready" or 5 "active"
+        #   * Don't steer at standstill
+        #   * Don't send > 3.00 Newton-meters torque
+        #   * Don't send the same torque for > 6 seconds
+        #   * Don't send uninterrupted steering for > 360 seconds
+        # MQB racks reset the uninterrupted steering timer after a single frame
+        # of HCA disabled; this is done whenever output happens to be zero.
+        apply_torque = 0
+        if CC.latActive:
+          new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
+          apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
+
+        apply_torque = self.hca_mitigation.update(apply_torque, self.apply_torque_last)
+        hca_enabled = apply_torque != 0
+        self.apply_torque_last = apply_torque
+        can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_torque, hca_enabled))
 
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
         # Pacify VW Emergency Assist driver inactivity detection by changing its view of driver steering input torque
@@ -78,6 +131,17 @@ class CarController(CarControllerBase):
         if abs(CS.out.steeringTorque) > abs(ea_simulated_torque):
           ea_simulated_torque = CS.out.steeringTorque
         can_sends.append(self.CCS.create_eps_update(self.packer_pt, self.CAN.cam, CS.eps_stock_values, ea_simulated_torque))
+
+    # Emergency Assist intervention
+    if self.CP.flags & VolkswagenFlags.MEB and self.CP.flags & VolkswagenFlags.STOCK_KLR_PRESENT:
+      # send capacitive steering wheel touched
+      # propably EA is stock activated only for cars equipped with capacitive steering wheel
+      # (also stock long does resume from stop as long as hands on is detected additionally to OP resume spam)
+      klr_send_ready = CS.klr_stock_values["COUNTER"] != self.klr_counter_last
+      if klr_send_ready:
+        can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.cam, CC.latActive, CS.klr_stock_values))
+        can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.pt, CC.latActive, CS.klr_stock_values))
+      self.klr_counter_last = CS.klr_stock_values["COUNTER"]
 
     # **** Acceleration Controls ******************************************** #
 
@@ -126,6 +190,7 @@ class CarController(CarControllerBase):
     new_actuators = actuators.as_builder()
     new_actuators.torque = self.apply_torque_last / self.CCP.STEER_MAX
     new_actuators.torqueOutputCan = self.apply_torque_last
+    new_actuators.curvature = float(self.apply_curvature_last)
 
     self.gra_acc_counter_last = CS.gra_stock_values["COUNTER"]
     self.frame += 1
