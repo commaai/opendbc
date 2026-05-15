@@ -20,6 +20,7 @@ class CarState(CarStateBase):
     self.rolling_backward = False
     self.rolling_forward = False
     self.tsk_brake_torque = 0.0
+    self.sum_wegimpulse = 0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
@@ -92,6 +93,12 @@ class CarState(CarStateBase):
         pt_cp.vl["ESP_10"]["ESP_HL_Fahrtrichtung"] == 0 or
         pt_cp.vl["ESP_10"]["ESP_VR_Fahrtrichtung"] == 0 or
         pt_cp.vl["ESP_10"]["ESP_VL_Fahrtrichtung"] == 0
+      )
+      self.sum_wegimpulse = int(
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_VL"] +
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_VR"] +
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HL"] +
+        pt_cp.vl["ESP_10"]["ESP_Wegimpuls_HR"]
       )
 
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
