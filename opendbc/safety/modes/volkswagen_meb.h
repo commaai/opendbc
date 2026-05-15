@@ -9,7 +9,7 @@
 #define MSG_Motor_51         0x10BU   // RX for TSK state and accel pedal
 #define MSG_KLR_01           0x25DU   // TX, for capacitive steering wheel
 
-#define VOLKSWAGEN_MEB_CURVATURE_TO_CAN 149253.7313f  // 1 / 6.7e-6
+#define VOLKSWAGEN_MEB_CURVATURE_TO_CAN 149253.7313f
 #define VOLKSWAGEN_MEB_MAX_CURVATURE_CAN 29105
 
 static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
@@ -59,7 +59,8 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {MSG_GRA_ACC_01, 0, 8, .check_relay = false},
     {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
     {MSG_LDW_02, 0, 8, .check_relay = true},
-    {MSG_KLR_01, 0, 8, .check_relay = false}, {MSG_KLR_01, 2, 8, .check_relay = true},
+    {MSG_KLR_01, 0, 8, .check_relay = false},
+    {MSG_KLR_01, 2, 8, .check_relay = true},
   };
 
   static RxCheck volkswagen_meb_rx_checks[] = {
