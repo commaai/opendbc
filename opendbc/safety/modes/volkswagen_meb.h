@@ -45,18 +45,15 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 }
 
 static const AngleSteeringLimits VOLKSWAGEN_MEB_STEERING_LIMITS = {
-  .max_angle = VOLKSWAGEN_MEB_MAX_CURVATURE_CAN,
-  .angle_deg_to_can = VOLKSWAGEN_MEB_CURVATURE_TO_CAN,
-  .angle_rate_up_lookup = {
-    {1., 5., 25.},
-    {0.4, 0.008, 0.00032},
-  },
-  .angle_rate_down_lookup = {
-    {1., 5., 25.},
-    {0.4, 0.008, 0.00032},
-  },
-  .angle_is_curvature = true,
-  .inactive_angle_is_zero = true,
+  .max_angle = 15000,
+  .angle_deg_to_can = 10,
+  .frequency = 50U,
+};
+
+static const AngleSteeringParams VOLKSWAGEN_MEB_STEERING_PARAMS = {
+  .slip_factor = -0.000605517151234571f,
+  .steer_ratio = 15.6,
+  .wheelbase = 2.77,
 };
 
 static safety_config volkswagen_meb_init(uint16_t param) {
@@ -102,7 +99,12 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
       if (!current_curvature_sign) {
         current_curvature *= -1;
       }
-      update_sample(&angle_meas, current_curvature);
+      const float speed_ms = SAFETY_MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
+      const float curvature_factor = get_curvature_factor(speed_ms, VOLKSWAGEN_MEB_STEERING_PARAMS);
+      const float current_curvature_rad_m = (float)current_curvature / VOLKSWAGEN_MEB_CURVATURE_TO_CAN;
+      const float current_angle_deg = get_angle_from_curvature(current_curvature_rad_m, curvature_factor, VOLKSWAGEN_MEB_STEERING_PARAMS);
+      const int current_angle_can = current_angle_deg * VOLKSWAGEN_MEB_STEERING_LIMITS.angle_deg_to_can;
+      update_sample(&angle_meas, current_angle_can);
     }
 
     if (msg->addr == MSG_LH_EPS_03) {
@@ -145,7 +147,13 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     }
     bool steer_req = (((msg->data[1] >> 4) & 0x0FU) == 4U);
 
-    if (steer_angle_cmd_checks(desired_curvature, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
+    const float speed_ms = SAFETY_MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
+    const float curvature_factor = get_curvature_factor(speed_ms, VOLKSWAGEN_MEB_STEERING_PARAMS);
+    const float desired_curvature_rad_m = (float)desired_curvature / VOLKSWAGEN_MEB_CURVATURE_TO_CAN;
+    const float desired_angle_deg = get_angle_from_curvature(desired_curvature_rad_m, curvature_factor, VOLKSWAGEN_MEB_STEERING_PARAMS);
+    const int desired_angle_can = desired_angle_deg * VOLKSWAGEN_MEB_STEERING_LIMITS.angle_deg_to_can;
+
+    if (steer_angle_cmd_checks_vm(desired_angle_can, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS, VOLKSWAGEN_MEB_STEERING_PARAMS)) {
       tx = false;
     }
   }
