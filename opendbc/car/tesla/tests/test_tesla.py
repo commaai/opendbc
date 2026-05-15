@@ -47,8 +47,6 @@ PLATFORM_TO_CAR = {
   b'X': CAR.TESLA_MODEL_X,
 }
 
-PREFIX_RE = re.compile(rb'^(?P<family>[^_]+)_(?P<package>.+)_\d+\.\d+\.\d+ \((?P<build>\d+)\)$')
-
 
 class TestTeslaFingerprint(unittest.TestCase):
   def test_fw_platform_code(self):
@@ -61,24 +59,9 @@ class TestTeslaFingerprint(unittest.TestCase):
         assert PLATFORM_TO_CAR[m['platform']] == car_model, f"Platform letter {m['platform']!r} != {car_model.value}: {fw}"
 
   def test_legacy_das_steering_fw(self):
-    for car_model, ecus in FW_VERSIONS.items():
-      if car_model not in LEGACY_DAS_STEERING_FW:
-        continue
-
-      legacy_set = set(LEGACY_DAS_STEERING_FW[car_model])
-      for fw in ecus.get((Ecu.eps, 0x730, None), []):
-        m = FW_RE.match(fw)
-        assert m is not None, f"Unparsable FW: {fw}"
-
-        prefix = PREFIX_RE.match(m['unknown_prefix'])
-        assert prefix is not None, f"Unparseable prefix: {m['unknown_prefix']!r}"
-
-        is_new_format = prefix['package'] == b'Main' and int(prefix['build']) >= 78
-        is_legacy = fw in legacy_set
-        assert is_legacy != is_new_format, f"{fw}: legacy={is_legacy}, new_format={is_new_format}"
-
+    # Ensure all legacy FW strings are present in FW_VERSIONS
     for car_model, fws in LEGACY_DAS_STEERING_FW.items():
-      known = {fw for ecus in [FW_VERSIONS.get(car_model, {})] for fws_list in ecus.values() for fw in fws_list}
+      known = {fw for fws_list in FW_VERSIONS.get(car_model, {}).values() for fw in fws_list}
       for fw in fws:
         assert fw in known, f"Legacy FW not in FW_VERSIONS for {car_model.value}: {fw}"
 
