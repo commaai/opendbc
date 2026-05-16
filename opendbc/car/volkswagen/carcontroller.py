@@ -47,7 +47,7 @@ class MQBStandstillManager:
   BRAKE_TORQUE_RAMP_RATE = 2000.0     # Nm/s
   ASSUMED_WHEEL_RADIUS = 0.328        # m, typical MQB tire rolling radius
   GRAVITY = 9.81                      # m/s^2
-  WEGIMPULSE_STILLNESS_FRAMES = 10    # frames of no wheel tick change before assuming standstill
+  WEGIMPULSE_STILLNESS_FRAMES = 5     # frames of no wheel tick change before assuming standstill
   ESP_OVERRIDE_SPEED = 9.5 * CV.KPH_TO_MS
 
   def __init__(self, vehicle_mass: float, accel_min: float):
