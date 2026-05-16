@@ -12,6 +12,12 @@ MAX_STEER_RATE = 25  # deg/s
 MAX_STEER_RATE_FRAMES = 7  # tx control frames needed before torque can be cut
 
 
+def interp2d(x, y, x_bp, y_bp, table):
+  # table[i] is the y_bp lookup for x_bp[i]; bilinear via nested np.interp
+  row_vals = [np.interp(y, y_bp, row) for row in table]
+  return np.interp(x, x_bp, row_vals)
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -60,8 +66,14 @@ class CarController(CarControllerBase):
     # *** longitudinal ***
 
     if CC.longActive:
-      apply_throttle = int(round(np.interp(actuators.accel, CarControllerParams.THROTTLE_LOOKUP_BP, CarControllerParams.THROTTLE_LOOKUP_V)))
-      apply_rpm = int(round(np.interp(actuators.accel, CarControllerParams.RPM_LOOKUP_BP, CarControllerParams.RPM_LOOKUP_V)))
+      apply_throttle = int(round(interp2d(CS.out.vEgo, actuators.accel,
+                                          CarControllerParams.SPEED_LOOKUP_BP,
+                                          CarControllerParams.THROTTLE_LOOKUP_BP,
+                                          CarControllerParams.THROTTLE_LOOKUP_V)))
+      apply_rpm = int(round(interp2d(CS.out.vEgo, actuators.accel,
+                                     CarControllerParams.SPEED_LOOKUP_BP,
+                                     CarControllerParams.RPM_LOOKUP_BP,
+                                     CarControllerParams.RPM_LOOKUP_V)))
       apply_brake = int(round(np.interp(actuators.accel, CarControllerParams.BRAKE_LOOKUP_BP, CarControllerParams.BRAKE_LOOKUP_V)))
 
       # limit min and max values

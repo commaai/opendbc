@@ -30,27 +30,42 @@ class CarControllerParams:
       self.STEER_MAX = 2047
 
   THROTTLE_MIN = 808
-  THROTTLE_MAX = 3400
+  THROTTLE_MAX = 3600            # ECM gain becomes erratic above ~3200 (the "knee"); cap modestly above
 
-  THROTTLE_INACTIVE     = 1818   # corresponds to zero acceleration
-  THROTTLE_ENGINE_BRAKE = 808    # while braking, eyesight sets throttle to this, probably for engine braking
+  THROTTLE_INACTIVE     = 1818   # neutral value sent when long is not active / on cancel
+  THROTTLE_ENGINE_BRAKE = 808    # eyesight uses this during engine braking
 
   BRAKE_MIN = 0
-  BRAKE_MAX = 600                # about -3.5m/s2 from testing
+  BRAKE_MAX = 600                # ~ -3.5 m/s2
 
-  RPM_MIN = 0
-  RPM_MAX = 3600
+  RPM_MIN = 0                    # clip floor / "no request" value when long is not active
+  RPM_MAX = 3900
 
-  RPM_INACTIVE = 600             # a good base rpm for zero acceleration
+  # Lookups derived empirically from EyeSight's actual schedule (per-speed medians,
+  # 2 routes: 9cda0159903f3e3d/0000000f-- and /00000044--). Both Cruise_Throttle and
+  # Cruise_RPM are strongly speed-dependent (cruising at 60 kph needs ~1450 RPM, at
+  # 120 kph needs ~2150 RPM), so these are 2-D over (accel, vEgo).
+  SPEED_LOOKUP_BP = [8.3, 19.4, 27.8, 33.3]  # m/s ≈ 30 / 70 / 100 / 120 kph
 
-  THROTTLE_LOOKUP_BP = [0, 2]
-  THROTTLE_LOOKUP_V = [THROTTLE_INACTIVE, THROTTLE_MAX]
+  THROTTLE_LOOKUP_BP = [-0.5, -0.2, 0.0, 0.2, 0.5, 1.5]
+  # rows: SPEED_LOOKUP_BP, cols: THROTTLE_LOOKUP_BP
+  THROTTLE_LOOKUP_V = [
+    [808, 1700, 1900, 2300, 3000, 3400],
+    [808, 1900, 2000, 2500, 3100, 3450],
+    [808, 1950, 2300, 2800, 3300, 3500],
+    [808, 2150, 2700, 3100, 3400, 3550],
+  ]
 
-  RPM_LOOKUP_BP = [0, 2]
-  RPM_LOOKUP_V = [RPM_INACTIVE, RPM_MAX]
+  RPM_LOOKUP_BP = [-0.5, -0.2, 0.0, 0.2, 0.5, 1.5]
+  RPM_LOOKUP_V = [
+    [1000, 1100, 1200, 1500, 2000, 2700],
+    [1300, 1400, 1450, 1750, 2400, 2900],
+    [1550, 1650, 1800, 2200, 3100, 3500],
+    [1900, 2050, 2150, 2500, 3400, 3900],
+  ]
 
-  BRAKE_LOOKUP_BP = [-3.5, 0]
-  BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
+  BRAKE_LOOKUP_BP = [-3.5, -2.5, -1.5, -1.0, -0.5, -0.2, 0.0]
+  BRAKE_LOOKUP_V  = [ 600,  300,  185,  140,   70,   25,   0]
 
 
 class SubaruSafetyFlags(IntFlag):
