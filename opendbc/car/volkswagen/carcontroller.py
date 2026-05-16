@@ -58,6 +58,7 @@ class MQBStandstillManager:
     self.start_commit_active = False
     self.frames_since_last_wheel_pulse = 0
     self.prev_sum_wegimpulse: int | None = None
+    self.prev_accel = 0
 
   def get_hill_hold_decel_deficit(self, grade_pct: float, brake_torque: float) -> float:
     """
@@ -170,6 +171,9 @@ class MQBStandstillManager:
         accel = self.accel_min
         stopping = True
         starting = False
+      # latch after we've settled to avoid oscillation
+      if CS.out.standstill and accel < 0:
+        accel = min(accel, self.prev_accel)
 
     # the magic sauce for infinite standstill
     # begin a stopping procedure, then exit to starting state before the car reaches standstill
@@ -196,6 +200,7 @@ class MQBStandstillManager:
     else:
       self.can_stop_forever = False
 
+    self.prev_accel = accel
     return long_active, accel, stopping, starting, esp_override
 
 

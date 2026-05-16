@@ -89,7 +89,7 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     """Rolling forward clears rollback state, so no rollback brake override is applied."""
     mgr = self._mgr()
     self._run(mgr, self._cs(rolling_backward=True))
-    _, accel, *_ = self._run(mgr, self._cs(rolling_forward=True), accel=-0.5)
+    _, accel, *_ = self._run(mgr, self._cs(rolling_forward=True, standstill=False), accel=-0.5)
     assert accel == -0.5
 
   def test_rollback_forces_brake_with_positive_accel(self):
