@@ -1,3 +1,4 @@
+import math
 import random
 import re
 import unittest
@@ -49,10 +50,14 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
            max_planned_speed=0.0, grade_pct=0.0, tsk_brake_torque=0.0):
     """Convenience wrapper for update() with sensible defaults."""
     return mgr.update(cs, long_active=long_active, accel=accel, stopping=stopping, starting=starting,
-                      max_planned_speed=max_planned_speed, grade_pct=grade_pct, tsk_brake_torque=tsk_brake_torque)
+                      max_planned_speed=max_planned_speed, pitch=self._pitch(grade_pct),
+                      tsk_brake_torque=tsk_brake_torque)
 
   def _safe_speed(self, mgr, grade_pct, brake_torque=0.0):
-    return mgr.get_safe_speed_for_brake_torque(grade_pct, brake_torque)
+    return mgr.get_safe_speed_for_brake_torque(self._pitch(grade_pct), brake_torque)
+
+  def _pitch(self, grade_pct):
+    return math.atan(grade_pct / 100.0)
 
   # ── brake press ──────────────────────────────────────────────────────────────
 
@@ -125,6 +130,11 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     mgr = self._mgr()
     assert self._safe_speed(mgr, 20.0, 10000.0) == 0.0
 
+  def test_safe_speed_is_capped_at_10_kph(self):
+    """Very steep pitch does not raise rollback-risk logic above the ESP grant speed."""
+    mgr = self._mgr()
+    assert self._safe_speed(mgr, 100.0) == MQBStandstillManager.MAX_SAFE_STOPPING_SPEED
+
   def test_esp_stopping_passes_raw_accel_on_flat(self):
     """esp_stopping latches ESP behavior without forcing a brake command on flat ground."""
     mgr = self._mgr()
@@ -140,7 +150,7 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     mgr = self._mgr()
     grade = 20.0
     safe_speed = self._safe_speed(mgr, grade)
-    required_torque = mgr.get_hill_hold_decel_deficit(grade, 0.0) * mgr.vehicle_mass * mgr.ASSUMED_WHEEL_RADIUS
+    required_torque = mgr.get_hill_hold_decel_deficit(self._pitch(grade), 0.0) * mgr.vehicle_mass * mgr.ASSUMED_WHEEL_RADIUS
     _, accel, stopping, starting, _ = self._run(mgr, self._cs(v_ego=safe_speed * 0.5), accel=-0.55,
                                                 grade_pct=grade, tsk_brake_torque=required_torque * 0.5)
     assert CCP.ACCEL_MIN < accel < -0.55
