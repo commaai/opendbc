@@ -1,4 +1,4 @@
-import numpy as np
+import math
 
 
 class Conversions:
@@ -13,7 +13,7 @@ class Conversions:
   KNOTS_TO_MS = 1. / MS_TO_KNOTS
 
   # Angle
-  DEG_TO_RAD = np.pi / 180.
+  DEG_TO_RAD = math.pi / 180.
   RAD_TO_DEG = 1. / DEG_TO_RAD
 
   # Mass

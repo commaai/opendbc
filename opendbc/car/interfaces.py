@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 import os
-import numpy as np
 import time
 import tomllib
 from abc import abstractmethod, ABC
 from enum import StrEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from collections.abc import Callable
 from functools import cache
 
@@ -14,8 +15,9 @@ from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallabl
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
-from opendbc.car.values import PLATFORMS
-from opendbc.can import CANParser
+
+if TYPE_CHECKING:
+  from opendbc.can import CANParser
 
 GearShifter = structs.CarState.GearShifter
 ButtonType = structs.CarState.ButtonEvent.Type
@@ -92,9 +94,9 @@ class RadarInterfaceBase(ABC):
 
 
 class CarInterfaceBase(ABC):
-  CarState: type['CarStateBase']
-  CarController: type['CarControllerBase']
-  RadarInterface: type['RadarInterfaceBase'] = RadarInterfaceBase
+  CarState: type[CarStateBase]
+  CarController: type[CarControllerBase]
+  RadarInterface: type[RadarInterfaceBase] = RadarInterfaceBase
 
   DRIVABLE_GEARS: tuple[structs.CarState.GearShifter, ...] = ()
 
@@ -131,6 +133,7 @@ class CarInterfaceBase(ABC):
                  alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
     ret = CarInterfaceBase.get_std_params(candidate)
 
+    from opendbc.car.values import PLATFORMS
     platform = PLATFORMS[candidate]
     ret.mass = platform.config.specs.mass
     ret.wheelbase = platform.config.specs.wheelbase
@@ -286,6 +289,7 @@ class CarStateBase(ABC):
     A = [[1.0, DT_CTRL], [0.0, 1.0]]
     C = [[1.0, 0.0]]
     x0=[[0.0], [0.0]]
+    import numpy as np
     K = get_kalman_gain(DT_CTRL, np.array(A), np.array(C), np.array(Q), R)
     self.v_ego_kf = KF1D(x0=x0, A=A, C=C[0], K=K)
 
@@ -315,6 +319,7 @@ class CarStateBase(ABC):
   def update_steering_pressed(self, steering_pressed, steering_pressed_min_count):
     """Applies filtering on steering pressed for noisy driver torque signals."""
     self.steering_pressed_cnt += 1 if steering_pressed else -1
+    import numpy as np
     self.steering_pressed_cnt = int(np.clip(self.steering_pressed_cnt, 0, steering_pressed_min_count * 2 + 1))
     return self.steering_pressed_cnt > steering_pressed_min_count
 
@@ -379,15 +384,21 @@ INTERFACE_ATTR_FILE = {
 # interface-specific helpers
 
 
-def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: bool = False) -> dict[str | StrEnum, Any]:
-  # read all the folders in opendbc/car and return a dict where:
-  # - keys are all the car models or brand names
-  # - values are attr values from all car folders
+@cache
+def _get_interface_attr_cached(attr: str, combine_brands: bool, ignore_none: bool) -> tuple:
+  # Iterate over known BRANDS instead of filesystem walking to avoid
+  # os.walk overhead and failed __import__ attempts on non-brand dirs.
+  from opendbc.car.values import BRANDS
   result = {}
-  for car_folder in sorted([x[0] for x in os.walk(BASEDIR)]):
+  seen_brands: set[str] = set()
+  for brand in BRANDS:
+    brand_name = brand.__module__.split('.')[-2]
+    if brand_name in seen_brands:
+      continue
+    seen_brands.add(brand_name)
+    module_name = f'opendbc.car.{brand_name}.{INTERFACE_ATTR_FILE.get(attr, "values")}'
     try:
-      brand_name = car_folder.split('/')[-1]
-      brand_values = __import__(f'opendbc.car.{brand_name}.{INTERFACE_ATTR_FILE.get(attr, "values")}', fromlist=[attr])
+      brand_values = __import__(module_name, fromlist=[attr])
       if hasattr(brand_values, attr) or not ignore_none:
         attr_data = getattr(brand_values, attr, None)
       else:
@@ -402,4 +413,8 @@ def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: boo
     except (ImportError, OSError):
       pass
 
-  return result
+  return tuple(result.items())
+
+
+def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: bool = False) -> dict[str | StrEnum, Any]:
+  return dict(_get_interface_attr_cached(attr, combine_brands, ignore_none))

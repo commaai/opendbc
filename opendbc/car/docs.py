@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import re
 import os
-import jinja2
 import argparse
 import unicodedata
 from typing import get_args
@@ -88,6 +87,7 @@ def group_by_make(all_car_docs: list[CarDocs]) -> dict[str, list[CarDocs]]:
 # CAUTION: This function is imported by shop.comma.ai and comma.ai/vehicles, test changes carefully
 def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str, **kwargs) -> str:
   with open(template_fn) as f:
+    import jinja2
     template = jinja2.Template(f.read(), trim_blocks=True, lstrip_blocks=True)
 
   footnotes = [fn.value.text for fn in get_all_footnotes()]

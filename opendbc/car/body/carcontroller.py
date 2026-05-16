@@ -1,4 +1,4 @@
-import numpy as np
+import math
 
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL
@@ -9,7 +9,7 @@ from opendbc.car.interfaces import CarControllerBase
 
 MAX_TORQUE = 500
 MAX_TORQUE_RATE = 50
-MAX_ANGLE_ERROR = np.radians(7)
+MAX_ANGLE_ERROR = math.radians(7)
 MAX_POS_INTEGRATOR = 0.2   # meters
 MAX_TURN_INTEGRATOR = 0.1  # meters
 
@@ -61,14 +61,14 @@ class CarController(CarControllerBase):
       torque_l = torque - torque_diff
 
       # Torque rate limits
-      self.torque_r_filtered = np.clip(self.deadband_filter(torque_r, 10),
-                                       self.torque_r_filtered - MAX_TORQUE_RATE,
-                                       self.torque_r_filtered + MAX_TORQUE_RATE)
-      self.torque_l_filtered = np.clip(self.deadband_filter(torque_l, 10),
-                                       self.torque_l_filtered - MAX_TORQUE_RATE,
-                                       self.torque_l_filtered + MAX_TORQUE_RATE)
-      torque_r = int(np.clip(self.torque_r_filtered, -MAX_TORQUE, MAX_TORQUE))
-      torque_l = int(np.clip(self.torque_l_filtered, -MAX_TORQUE, MAX_TORQUE))
+      self.torque_r_filtered = max(self.torque_r_filtered - MAX_TORQUE_RATE,
+                                   min(self.torque_r_filtered + MAX_TORQUE_RATE,
+                                       self.deadband_filter(torque_r, 10)))
+      self.torque_l_filtered = max(self.torque_l_filtered - MAX_TORQUE_RATE,
+                                   min(self.torque_l_filtered + MAX_TORQUE_RATE,
+                                       self.deadband_filter(torque_l, 10)))
+      torque_r = int(max(-MAX_TORQUE, min(MAX_TORQUE, self.torque_r_filtered)))
+      torque_l = int(max(-MAX_TORQUE, min(MAX_TORQUE, self.torque_l_filtered)))
 
     can_sends = []
     can_sends.append(bodycan.create_control(self.packer, torque_l, torque_r))

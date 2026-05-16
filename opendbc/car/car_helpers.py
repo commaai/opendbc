@@ -14,14 +14,65 @@ from opendbc.car.vin import get_vin, is_valid_vin, VIN_UNKNOWN
 FRAME_FINGERPRINT = 100  # 1s
 
 
-def load_interfaces(brand_names):
-  ret = {}
-  for brand_name in brand_names:
+class _LazyInterfacesDict:
+  """Dict-like mapping of car model name → CarInterface, loaded per-brand on first access."""
+
+  def __init__(self, brand_names: dict[str, list[str]]) -> None:
+    self._brand_names = brand_names
+    self._cache: dict = {}
+    self._model_to_brand: dict[str, str] = {
+      model: brand for brand, models in brand_names.items() for model in models
+    }
+
+  def _ensure_brand(self, brand_name: str) -> None:
+    if brand_name not in self._brand_names:
+      raise KeyError(brand_name)
+    if any(m in self._cache for m in self._brand_names[brand_name]):
+      return
     path = f'opendbc.car.{brand_name}'
     CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
-    for model_name in brand_names[brand_name]:
-      ret[model_name] = CarInterface
-  return ret
+    for model in self._brand_names[brand_name]:
+      self._cache[model] = CarInterface
+
+  def _ensure_all(self) -> None:
+    for brand_name in self._brand_names:
+      self._ensure_brand(brand_name)
+
+  def __getitem__(self, key: str):
+    if key not in self._model_to_brand:
+      raise KeyError(key)
+    self._ensure_brand(self._model_to_brand[key])
+    return self._cache[key]
+
+  def __contains__(self, key) -> bool:
+    return key in self._model_to_brand
+
+  def __iter__(self):
+    return iter(self._model_to_brand)
+
+  def __len__(self) -> int:
+    return len(self._model_to_brand)
+
+  def keys(self):
+    return self._model_to_brand.keys()
+
+  def values(self):
+    self._ensure_all()
+    return self._cache.values()
+
+  def items(self):
+    self._ensure_all()
+    return self._cache.items()
+
+  def get(self, key, default=None):
+    try:
+      return self[key]
+    except KeyError:
+      return default
+
+
+def load_interfaces(brand_names: dict[str, list[str]]) -> _LazyInterfacesDict:
+  return _LazyInterfacesDict(brand_names)
 
 
 def _get_interface_names() -> dict[str, list[str]]:
@@ -36,7 +87,23 @@ def _get_interface_names() -> dict[str, list[str]]:
 
 # imports from directory opendbc/car/<name>/
 interface_names = _get_interface_names()
-interfaces = load_interfaces(interface_names)
+_interfaces: _LazyInterfacesDict | None = None
+
+
+def _get_interfaces() -> _LazyInterfacesDict:
+  global _interfaces
+  if _interfaces is None:
+    _interfaces = load_interfaces(interface_names)
+  return _interfaces
+
+
+def __getattr__(name: str):
+  # Lazy-load `interfaces` to defer heavy brand imports (secoc, Crypto) until
+  # actually needed at runtime. This keeps pytest collection fast.
+  global _interfaces
+  if name == "interfaces":
+    return _get_interfaces()
+  raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def can_fingerprint(can_recv: CanRecvCallable) -> tuple[str | None, dict[int, dict]]:
@@ -156,18 +223,18 @@ def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multip
     carlog.error({"event": "car doesn't match any fingerprints", "fingerprints": repr(fingerprints)})
     candidate = "MOCK"
 
-  CarInterface = interfaces[candidate]
+  CarInterface = _get_interfaces()[candidate]
   CP: CarParams = CarInterface.get_params(candidate, fingerprints, car_fw, alpha_long_allowed, is_release, docs=False)
   CP.carVin = vin
   CP.carFw = car_fw
   CP.fingerprintSource = source
   CP.fuzzyFingerprint = not exact_match
 
-  return interfaces[CP.carFingerprint](CP)
+  return _get_interfaces()[CP.carFingerprint](CP)
 
 
 def get_demo_car_params():
   platform = MOCK.MOCK
-  CarInterface = interfaces[platform]
+  CarInterface = _get_interfaces()[platform]
   CP = CarInterface.get_non_essential_params(platform)
   return CP

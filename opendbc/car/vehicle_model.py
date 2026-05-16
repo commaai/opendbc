@@ -12,9 +12,12 @@ x_dot = A*x + B*u
 
 A depends on longitudinal speed, u [m/s], and vehicle parameters CP
 """
+from __future__ import annotations
 
-import numpy as np
-from numpy.linalg import solve
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+  import numpy as np
 
 from opendbc.car.structs import CarParams
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY
@@ -161,6 +164,7 @@ def kin_ss_sol(sa: float, u: float, VM: VehicleModel) -> np.ndarray:
   Returns:
     2x1 matrix with steady state solution
   """
+  import numpy as np
   K = np.zeros((2, 1))
   K[0, 0] = VM.aR / VM.sR / VM.l * u
   K[1, 0] = 1. / VM.sR / VM.l * u
@@ -187,6 +191,7 @@ def create_dyn_state_matrices(u: float, VM: VehicleModel) -> tuple[np.ndarray, n
     sR: Steering ratio [-]
     chi: Steer ratio rear [-]
   """
+  import numpy as np
   A = np.zeros((2, 2))
   B = np.zeros((2, 2))
   A[0, 0] = - (VM.cF + VM.cR) / (VM.m * u)
@@ -217,6 +222,8 @@ def dyn_ss_sol(sa: float, u: float, roll: float, VM: VehicleModel) -> np.ndarray
   Returns:
     2x1 matrix with steady state solution
   """
+  import numpy as np
+  from numpy.linalg import solve
   A, B = create_dyn_state_matrices(u, VM)
   inp = np.array([[sa], [roll]])
   return -solve(A, B) @ inp

@@ -2,8 +2,6 @@ from collections import defaultdict
 from collections.abc import Callable, Iterator
 from typing import Protocol, TypeVar
 
-from tqdm import tqdm
-
 from opendbc.car import uds
 from opendbc.car.can_definitions import CanRecvCallable, CanSendCallable
 from opendbc.car.carlog import carlog
@@ -284,7 +282,8 @@ def get_fw_versions(can_recv: CanRecvCallable, can_send: CanSendCallable, set_ob
   # Get versions and build capnp list to put into CarParams
   car_fw = []
   requests = [(brand, config, r) for brand, config, r in REQUESTS if is_brand(brand, query_brand)]
-  for addr_group in tqdm(addrs, disable=not progress):  # split by subaddr, if any
+  from tqdm import tqdm
+  for addr_group in tqdm(addrs, disable=not progress):
     for addr_chunk in chunks(addr_group):
       for brand, config, r in requests:
         # Toggle OBD multiplexing for each request
