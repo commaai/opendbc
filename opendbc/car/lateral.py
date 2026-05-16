@@ -50,17 +50,17 @@ def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, 
   driver_min_torque = -steer_max + (-LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
   max_steer_allowed = max(min(steer_max, driver_max_torque), 0)
   min_steer_allowed = min(max(-steer_max, driver_min_torque), 0)
-  apply_torque = _clip(apply_torque, min_steer_allowed, max_steer_allowed)
+  torque: float = _clip(apply_torque, min_steer_allowed, max_steer_allowed)
 
   # slow rate if steer torque increases in magnitude
   if apply_torque_last > 0:
-    apply_torque = _clip(apply_torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
-                         apply_torque_last + LIMITS.STEER_DELTA_UP)
+    torque = _clip(torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
+                   apply_torque_last + LIMITS.STEER_DELTA_UP)
   else:
-    apply_torque = _clip(apply_torque, apply_torque_last - LIMITS.STEER_DELTA_UP,
-                         min(apply_torque_last + LIMITS.STEER_DELTA_DOWN, LIMITS.STEER_DELTA_UP))
+    torque = _clip(torque, apply_torque_last - LIMITS.STEER_DELTA_UP,
+                   min(apply_torque_last + LIMITS.STEER_DELTA_DOWN, LIMITS.STEER_DELTA_UP))
 
-  return int(round(float(apply_torque)))
+  return int(round(torque))
 
 
 def apply_dist_to_meas_limits(val, val_last, val_meas,
