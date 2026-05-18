@@ -180,6 +180,17 @@ class TestFwFingerprint(unittest.TestCase):
       for request_ecu in request_ecus:
         assert request_ecu in {e for e, _, _ in version_ecus}, f"Ecu.{ECU_NAME[request_ecu]} not in {brand} FW versions"
 
+  def test_obd_logging_requests(self):
+    # TODO: migrate these brands to fingerprint on bus 0 with bus 1 as logging only
+    skip_brands = {'honda', 'hyundai', 'subaru', 'volkswagen'}
+    for brand, config in FW_QUERY_CONFIGS.items():
+      with self.subTest(brand=brand):
+        if brand in skip_brands:
+          raise unittest.SkipTest(f"{brand} not yet migrated to OBD-less fingerprinting")
+
+        for request in config.requests:
+          assert request.bus != 1 or request.logging, f"{brand}: bus 1 (OBD) requests must be logging only"
+
   def test_brand_ecu_matches(self):
     brand_matches = get_brand_ecu_matches(set())
     assert len(brand_matches) > 0
