@@ -19,11 +19,17 @@ MSG_LDW_02     = 0x397
 MSG_MOTOR_14   = 0x3BE
 
 
-class TestVolkswagenMebSafetyBase(common.CarSafetyTest):
+class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteeringSafetyTest):
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02), 2: (MSG_KLR_01,)}
 
+  MAX_CURVATURE = 29105
+  MAX_CURVATURE_TEST = 0.195
   CURVATURE_TO_CAN = 149253.7313
+  INACTIVE_CURVATURE_IS_ZERO = True
+  MAX_POWER = 125
+  MAX_POWER_TEST = 50
+  SEND_RATE = 0.02
 
   def _speed_msg(self, speed_mps: float):
     spd_kph = speed_mps * 3.6
@@ -76,15 +82,30 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest):
     values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume}
     return self.packer.make_can_msg_safety("GRA_ACC_01", bus, values)
 
+  def test_curvature_measurements(self):
+    self._rx(self._curvature_meas_msg(0.15))
+    self._rx(self._curvature_meas_msg(-0.1))
+    self._rx(self._curvature_meas_msg(0))
+    self._rx(self._curvature_meas_msg(0))
+    self._rx(self._curvature_meas_msg(0))
+    self._rx(self._curvature_meas_msg(0))
+
+    self.assertEqual(int(-0.1 * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_min())
+    self.assertEqual(int(0.15 * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_max())
+
+    self._rx(self._curvature_meas_msg(0))
+    self.assertEqual(0, self.safety.get_curvature_meas_max())
+    self.assertEqual(int(-0.1 * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_min())
+
+    self._rx(self._curvature_meas_msg(0))
+    self.assertEqual(0, self.safety.get_curvature_meas_max())
+    self.assertEqual(0, self.safety.get_curvature_meas_min())
+
   def test_brake_signal(self):
     self._rx(self._user_brake_msg(False))
     self.assertFalse(self.safety.get_brake_pressed_prev())
     self._rx(self._user_brake_msg(True))
     self.assertTrue(self.safety.get_brake_pressed_prev())
-
-  def test_curvature_measurements(self):
-    for c in (0.0, 0.05, -0.05, 0.15, -0.15):
-      self._rx(self._curvature_meas_msg(c))
 
   def test_torque_driver_measurements(self):
     for t in (0, 100, -100, 250, -250):
@@ -99,26 +120,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest):
     self.safety.set_controls_allowed(True)
     self._rx(self._button_msg(cancel=1, bus=0))
     self.assertFalse(self.safety.get_controls_allowed())
-
-  def test_curvature_release(self):
-    self.safety.set_controls_allowed(True)
-    self._tx(self._curvature_cmd_msg(0.0, steer_req=1, power=50))
-    self.safety.set_controls_allowed(False)
-    self.assertTrue(self._tx(self._curvature_cmd_msg(0.0, steer_req=1, power=50)))
-    self.assertTrue(self._tx(self._curvature_cmd_msg(0.0, steer_req=1, power=40)))
-    self.assertTrue(self._tx(self._curvature_cmd_msg(0.0, steer_req=1, power=0)))
-
-  def test_curvature_cmd_safety_check(self):
-    # Exercise tx HCA_03 path with both signs and steer_req states
-    for c in (0.0, 0.01, -0.01, 0.1, -0.1):
-      for steer_req in (0, 1):
-        self.safety.set_controls_allowed(True)
-        self._tx(self._curvature_cmd_msg(c, steer_req=steer_req))
-
-    # When controls are not allowed, only steer_req=0 with small curvature is allowed
-    self.safety.set_controls_allowed(False)
-    self.assertTrue(self._tx(self._curvature_cmd_msg(0.0, steer_req=0)))
-    self.assertFalse(self._tx(self._curvature_cmd_msg(0.1, steer_req=1)))
 
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):

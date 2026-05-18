@@ -2,11 +2,11 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
-from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CanBusBase, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
+from opendbc.car import Bus, CanBusBase, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
+from opendbc.car.lateral import CurvatureSteeringLimits
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 from opendbc.car.vin import Vin
 
@@ -68,16 +68,6 @@ class CarControllerParams:
   ACCEL_MAX = 2.0                          # 2.0 m/s max acceleration
   ACCEL_MIN = -3.5                         # 3.5 m/s max deceleration
 
-  # Add extra tolerance for average banked road since safety doesn't have the roll
-  MEB_AVERAGE_ROAD_ROLL = 0.06
-  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    720,
-    ([], []),
-    ([], []),
-    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * MEB_AVERAGE_ROAD_ROLL),
-    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * MEB_AVERAGE_ROAD_ROLL),
-  )
-
   def __init__(self, CP):
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
@@ -113,13 +103,23 @@ class CarControllerParams:
     elif CP.flags & VolkswagenFlags.MEB:
       self.LDW_STEP = 10                  # LDW_02 message frequency 10Hz
       self.ACC_HUD_STEP = 6
-      self.STEER_DRIVER_ALLOWANCE = 100   # Driver torque 1.0 Nm, begin steering reduction from MAX
+      self.STEER_DRIVER_ALLOWANCE = 60    # Driver torque 0.6 Nm, begin steering reduction from MAX
       self.STEER_DRIVER_MAX = 300         # Driver torque 3.0 Nm, stop steering reduction at MIN
       self.STEERING_POWER_MAX = 50        # HCA_03 maximum steering power, percentage
       self.STEERING_POWER_MIN = 4         # HCA_03 minimum steering power, percentage
       self.STEERING_POWER_STEP = 2        # HCA_03 steering power counter steps
 
-      self.CURVATURE_MAX = 0.195  # Max curvature for steering command, m^-1
+      self.CURVATURE_PID: structs.CarParams.LateralPIDTuning = structs.CarParams.LateralPIDTuning(
+        kpBP=[10., 40.],
+        kiBP=[10., 40.],
+        kf=1.,
+        kpV=[0., 1.45],
+        kiV=[0., 0.12],
+      )
+
+      self.CURVATURE_LIMITS: CurvatureSteeringLimits = CurvatureSteeringLimits(
+        0.195,  # Max curvature for steering command, m^-1
+      )
 
       self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
       self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]
