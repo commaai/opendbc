@@ -16,7 +16,7 @@
 |Acura|RDX 2016-18|AcuraWatch Plus or Advance Package|[Upstream](#upstream)|
 |Acura|RDX 2019-21|All|[Upstream](#upstream)|
 |Acura|RDX 2022-24|All|[Dashcam mode](#dashcam)|
-|Acura|RDX 2025|All|[Community](#community)|
+|Acura|RDX 2025-26|All|[Community](#community)|
 |Acura|RLX 2017|Advance Package or Technology Package|[Community](#community)|
 |Acura|TLX 2015-17|Advance Package|[Community](#community)|
 |Acura|TLX 2018-20|All|[Community](#community)|
@@ -138,6 +138,7 @@
 |Honda|Passport 2026|All|[Upstream](#upstream)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
 |Honda|Pilot 2023-25|All|[Upstream](#upstream)|
+|Honda|Pilot 2026|All|[Community](#community)|
 |Honda|Prologue 2024-25|All|[Not compatible](#can-bus-security)|
 |Honda|Ridgeline 2017-25|Honda Sensing|[Upstream](#upstream)|
 |Hyundai|Azera 2022|All|[Upstream](#upstream)|
@@ -157,6 +158,7 @@
 |Hyundai|Ioniq 5 (with HDA II) 2022-24|Highway Driving Assist II|[Upstream](#upstream)|
 |Hyundai|Ioniq 5 (without HDA II) 2022-24|Highway Driving Assist|[Upstream](#upstream)|
 |Hyundai|Ioniq 6 (with HDA II) 2023-24|Highway Driving Assist II|[Upstream](#upstream)|
+|Hyundai|Ioniq 6 (without HDA II) 2023-24|Highway Driving Assist|[Upstream](#upstream)|
 |Hyundai|Ioniq Electric 2019|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Ioniq Electric 2020|All|[Upstream](#upstream)|
 |Hyundai|Ioniq Hybrid 2017-19|Smart Cruise Control (SCC)|[Upstream](#upstream)|
