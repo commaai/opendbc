@@ -100,6 +100,14 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest):
     self._rx(self._button_msg(cancel=1, bus=0))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_curvature_release(self):
+    self.safety.set_controls_allowed(True)
+    self._tx(self._curvature_cmd_msg(0.0, steer_req=1, power=50))
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0.0, steer_req=1, power=50)))
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0.0, steer_req=1, power=40)))
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0.0, steer_req=1, power=0)))
+
   def test_curvature_cmd_safety_check(self):
     # Exercise tx HCA_03 path with both signs and steer_req states
     for c in (0.0, 0.01, -0.01, 0.1, -0.1):

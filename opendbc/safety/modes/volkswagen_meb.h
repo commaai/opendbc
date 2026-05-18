@@ -52,7 +52,14 @@ static const AngleSteeringParams VOLKSWAGEN_MEB_STEERING_PARAMS = {
   .wheelbase = 2.77,
 };
 
+static int volkswagen_meb_power_last;
+static bool volkswagen_meb_steer_req_last;
+static bool volkswagen_meb_controls_allowed_last;
+
 static safety_config volkswagen_meb_init(uint16_t param) {
+  volkswagen_meb_power_last = 0;
+  volkswagen_meb_steer_req_last = false;
+  volkswagen_meb_controls_allowed_last = false;
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {
     {MSG_HCA_03, 0, 24, .check_relay = true},
@@ -143,16 +150,39 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       desired_curvature *= -1;
     }
     bool steer_req = (((msg->data[1] >> 4) & 0x0FU) == 4U);
+    int desired_power = msg->data[2];
 
-    const float speed_ms = SAFETY_MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
-    const float curvature_factor = get_curvature_factor(speed_ms, VOLKSWAGEN_MEB_STEERING_PARAMS);
-    const float desired_curvature_rad_m = (float)desired_curvature / VOLKSWAGEN_MEB_CURVATURE_TO_CAN;
-    const float desired_angle_deg = get_angle_from_curvature(desired_curvature_rad_m, curvature_factor, VOLKSWAGEN_MEB_STEERING_PARAMS);
-    const int desired_angle_can = desired_angle_deg * VOLKSWAGEN_MEB_STEERING_LIMITS.angle_deg_to_can;
-
-    if (steer_angle_cmd_checks_vm(desired_angle_can, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS, VOLKSWAGEN_MEB_STEERING_PARAMS)) {
-      tx = false;
+    // Substitute measured angle for inactive zero-curvature frames so the inactive bound holds.
+    int desired_angle_can;
+    if (!steer_req && (desired_curvature == 0)) {
+      desired_angle_can = angle_meas.values[0];
+    } else {
+      const float speed_ms = SAFETY_MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
+      const float curvature_factor = get_curvature_factor(speed_ms, VOLKSWAGEN_MEB_STEERING_PARAMS);
+      const float desired_curvature_rad_m = (float)desired_curvature / VOLKSWAGEN_MEB_CURVATURE_TO_CAN;
+      const float desired_angle_deg = get_angle_from_curvature(desired_curvature_rad_m, curvature_factor, VOLKSWAGEN_MEB_STEERING_PARAMS);
+      desired_angle_can = desired_angle_deg * VOLKSWAGEN_MEB_STEERING_LIMITS.angle_deg_to_can;
     }
+
+    // Allow steer_req on the disengage frame and while power then ramps down.
+    bool just_lost_controls = !controls_allowed && volkswagen_meb_controls_allowed_last;
+    bool releasing = !controls_allowed && steer_req && (just_lost_controls || (desired_power < volkswagen_meb_power_last));
+
+    if (releasing) {
+      desired_angle_last = angle_meas.values[0];
+    } else {
+      // Align state on inactive->active so the per-frame jerk limit does not reject resumption.
+      if (steer_req && !volkswagen_meb_steer_req_last) {
+        desired_angle_last = desired_angle_can;
+      }
+      if (steer_angle_cmd_checks_vm(desired_angle_can, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS, VOLKSWAGEN_MEB_STEERING_PARAMS)) {
+        tx = false;
+      }
+    }
+
+    volkswagen_meb_power_last = desired_power;
+    volkswagen_meb_steer_req_last = steer_req;
+    volkswagen_meb_controls_allowed_last = controls_allowed;
   }
 
   if ((msg->addr == MSG_GRA_ACC_01) && !controls_allowed) {
