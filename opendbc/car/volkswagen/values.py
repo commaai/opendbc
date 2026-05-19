@@ -103,7 +103,7 @@ class CarControllerParams:
     elif CP.flags & VolkswagenFlags.MEB:
       self.LDW_STEP = 10                  # LDW_02 message frequency 10Hz
       self.ACC_HUD_STEP = 6
-      self.STEER_DRIVER_ALLOWANCE = 60    # Driver torque 0.6 Nm, begin steering reduction from MAX
+      self.STEER_DRIVER_ALLOWANCE = 80    # Driver torque 0.6 Nm, begin steering reduction from MAX
       self.STEER_DRIVER_MAX = 300         # Driver torque 3.0 Nm, stop steering reduction at MIN
       self.STEERING_POWER_MAX = 50        # HCA_03 maximum steering power, percentage
       self.STEERING_POWER_MIN = 4         # HCA_03 minimum steering power, percentage
