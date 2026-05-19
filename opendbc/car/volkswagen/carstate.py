@@ -20,6 +20,7 @@ class CarState(CarStateBase):
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
+    self.travel_assist_available = False
     self.curvature_meas = 0.
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):

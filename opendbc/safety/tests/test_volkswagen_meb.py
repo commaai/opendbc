@@ -18,6 +18,7 @@ MSG_Motor_51   = 0x10B
 MSG_GRA_ACC_01 = 0x12B
 MSG_QFK_01     = 0x13D
 MSG_ACC_18     = 0x14D
+MSG_TA_01      = 0x26B
 MSG_KLR_01     = 0x25D
 MSG_MEB_ACC_01 = 0x300
 MSG_HCA_03     = 0x303
@@ -154,10 +155,15 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
 
 class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2],
-             [MSG_KLR_01, 0], [MSG_KLR_01, 2], [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0]]
-  FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01], 2: [MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18]}
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18), 2: (MSG_KLR_01,)}
+             [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0], [MSG_TA_01, 0],
+             [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
+  FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01],
+                           2: [MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01]}
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01),
+                             2: (MSG_KLR_01,)}
 
+  ALLOW_OVERRIDE = True
+  ACCEL_OVERRIDE = 0
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):
@@ -205,14 +211,20 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
 
   def test_accel_safety_check(self):
     for controls_allowed in [True, False]:
-      # enforce we don't skip over 0 or inactive accel
       for accel in np.concatenate((np.arange(MIN_ACCEL - 2, MAX_ACCEL + 2, 0.03), [0, self.INACTIVE_ACCEL])):
-        accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
+        accel = round(accel, 2)
         is_inactive_accel = accel == self.INACTIVE_ACCEL
         send = (controls_allowed and MIN_ACCEL <= accel <= MAX_ACCEL) or is_inactive_accel
         self.safety.set_controls_allowed(controls_allowed)
-        # accel request used by ECU
         self.assertEqual(send, self._tx(self._accel_msg(accel)), (controls_allowed, accel))
+
+  def test_accel_override_with_gas(self):
+    if not self.ALLOW_OVERRIDE:
+      pass
+    self.safety.set_controls_allowed(True)
+    self.safety.set_gas_pressed_prev(True)
+    self.assertTrue(self._tx(self._accel_msg(self.ACCEL_OVERRIDE)))
+    self.assertFalse(self._tx(self._accel_msg(MAX_ACCEL)))
 
 
 class TestVolkswagenMebIgnition(unittest.TestCase):

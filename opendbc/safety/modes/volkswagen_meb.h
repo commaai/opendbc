@@ -10,6 +10,7 @@
 #define MSG_QFK_01           0x13DU
 #define MSG_Motor_51         0x10BU   // RX for TSK state and accel pedal
 #define MSG_KLR_01           0x25DU   // TX, for capacitive steering wheel
+#define MSG_TA_01            0x26BU   // TX by OP, Travel Assist status
 
 static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
@@ -52,11 +53,14 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
   static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {
     {MSG_HCA_03, 0, 24, .check_relay = true},
+    {MSG_GRA_ACC_01, 0, 8, .check_relay = false},
+    {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
     {MSG_LDW_02, 0, 8, .check_relay = true},
     {MSG_KLR_01, 0, 8, .check_relay = false},
     {MSG_KLR_01, 2, 8, .check_relay = true},
-    {MSG_ACC_18, 0, 32, .check_relay = true},
     {MSG_MEB_ACC_01, 0, 48, .check_relay = true},
+    {MSG_ACC_18, 0, 32, .check_relay = true},
+    {MSG_TA_01, 0, 8, .check_relay = true},
   };
 
   static RxCheck volkswagen_meb_rx_checks[] = {
@@ -162,7 +166,9 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == MSG_ACC_18) {
     // Signal: ACC_18.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
     int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
-    if (longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
+    // allow ACCEL_OVERRIDE (0) while controls are allowed even when the driver is on the gas
+    bool accel_override = controls_allowed && (desired_accel == 0);
+    if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
       tx = false;
     }
   }

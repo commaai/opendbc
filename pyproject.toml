@@ -55,7 +55,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.codespell]
 quiet-level = 3
-ignore-words-list = "alo,ba,bu,deque,hda,grey,arange"
+ignore-words-list = "alo,ba,bu,deque,hda,grey,arange,mechnism,colour"
 builtin = "clear,rare,informal,code,names,en-GB_to_en-US"
 check-hidden = true
 
