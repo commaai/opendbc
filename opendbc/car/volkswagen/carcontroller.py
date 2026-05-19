@@ -60,6 +60,7 @@ class MQBStandstillManager:
     self.frames_since_last_wheel_pulse = 0
     self.prev_sum_wegimpulse: int | None = None
     self.prev_accel = 0
+    self.hold_recovery_active = False
 
   def get_hill_hold_decel_deficit(self, pitch: float, brake_torque: float) -> float:
     """
@@ -187,6 +188,7 @@ class MQBStandstillManager:
       # reset if hold is confirmed
       if CS.esp_hold_confirmation:
         self.can_stop_forever = False
+        self.hold_recovery_active = True
 
       # force ESP into starting state during a start commit
       if self.start_commit_active:
@@ -194,14 +196,19 @@ class MQBStandstillManager:
       # latch into starting state when a hold procedure is detected
       elif CS.esp_stopping:
         self.can_stop_forever = True
+        self.hold_recovery_active = False
         esp_override = mqbcan.ESPOverride.START
       elif self.can_stop_forever:
         esp_override = mqbcan.ESPOverride.START
       # trigger a stopping procedure
       elif near_standstill:
         esp_override = mqbcan.ESPOverride.STOP
+      # recover from hold confirmations while moving to prevent reconfirming them
+      elif self.hold_recovery_active and not CS.out.standstill:
+        esp_override = mqbcan.ESPOverride.STOP
     else:
       self.can_stop_forever = False
+      self.hold_recovery_active = False
 
     self.prev_accel = accel
     return long_active, accel, stopping, starting, esp_override
