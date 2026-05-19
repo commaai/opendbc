@@ -274,6 +274,8 @@ class CarState(CarStateBase):
 
     self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
     self.esp_hold_confirmation = bool(pt_cp.vl["ESC_50"]["Standstill"])
+    self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
+    ret.stockFcw = bool(ext_cp.vl["AWV_03"]["FCW_Active"])
 
     ret.cruiseState.available = pt_cp.vl["Motor_51"]["TSK_Status"] in (2, 3, 4, 5)
     ret.cruiseState.enabled = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
@@ -436,14 +438,13 @@ class CarState(CarStateBase):
       # frequency changes too much for the CANParser to figure out
       ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
       ("SMLS_01", 1),       # From Stalk Controls
-      ("ESP_21", 50),
-      ("ESC_50", 50),
-      ("Motor_51", 50),
     ]
-    cam_messages = [
-      ("ACC_18", 50),
-      ("MEB_ACC_01", 17),
-    ]
+    if CP.networkLocation == NetworkLocation.fwdCamera:
+      pt_messages.append(("AWV_03", 1)) # Front Collision Detection (1 Hz when inactive, 50 Hz when active)
+
+    cam_messages = []
+    if CP.networkLocation == NetworkLocation.gateway:
+      cam_messages.append(("AWV_03", 1)) # Front Collision Detection (1 Hz when inactive, 50 Hz when active)
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).cam),
