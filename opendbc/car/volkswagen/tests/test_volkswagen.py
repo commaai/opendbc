@@ -270,6 +270,30 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     self._run(mgr, self._cs(esp_hold_confirmation=True), accel=-1.0, stopping=True)
     assert not mgr.can_stop_forever
 
+  def test_hold_confirmation_recovers_stop_forever_after_launch_commit(self):
+    """A hold confirmation starts recovery, then requests STOP once launch commit clears while moving."""
+    mgr = self._mgr()
+    grade = 20.0
+    safe_speed = self._safe_speed(mgr, grade)
+
+    *_, esp_override = self._run(mgr, self._cs(esp_hold_confirmation=True, sum_wegimpulse=0), accel=0.0,
+                                 grade_pct=grade)
+    assert mgr.start_commit_active
+    assert mgr.hold_recovery_active
+    assert esp_override == ESPOverride.START
+
+    *_, esp_override = self._run(mgr, self._cs(v_ego=safe_speed * 2.0, standstill=False, sum_wegimpulse=1), accel=0.0,
+                                 grade_pct=grade)
+    assert not mgr.start_commit_active
+    assert mgr.hold_recovery_active
+    assert esp_override == ESPOverride.STOP
+
+    *_, esp_override = self._run(mgr, self._cs(esp_stopping=True, v_ego=safe_speed * 2.0, standstill=False,
+                                               sum_wegimpulse=2), accel=0.0, grade_pct=grade)
+    assert mgr.can_stop_forever
+    assert not mgr.hold_recovery_active
+    assert esp_override == ESPOverride.START
+
   def test_can_stop_forever_cleared_when_moving(self):
     """can_stop_forever clears above the ESP grant speed when esp_stopping is not active."""
     mgr = self._mgr()
