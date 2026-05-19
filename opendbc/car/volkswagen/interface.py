@@ -2,11 +2,13 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.volkswagen.carcontroller import CarController
 from opendbc.car.volkswagen.carstate import CarState
+from opendbc.car.volkswagen.radar_interface import RadarInterface
 from opendbc.car.volkswagen.values import CanBus, CAR, NetworkLocation, TransmissionType, VolkswagenFlags, VolkswagenSafetyFlags
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+  RadarInterface = RadarInterface
 
   DRIVABLE_GEARS = (structs.CarState.GearShifter.eco, structs.CarState.GearShifter.sport,
                     structs.CarState.GearShifter.manumatic)
@@ -14,7 +16,7 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "volkswagen"
-    ret.radarUnavailable = True
+    ret.radarUnavailable = not (ret.flags & VolkswagenFlags.MEB)
 
     if ret.flags & VolkswagenFlags.PQ:
       # Set global PQ35/PQ46/NMS parameters
@@ -56,6 +58,8 @@ class CarInterface(CarInterfaceBase):
 
       if 0x25D in fingerprint[0]:  # KLR_01
         ret.flags |= VolkswagenFlags.STOCK_KLR_PRESENT.value
+
+      ret.radarDelay = 0.8
 
       ret.dashcamOnly = is_release
 
@@ -101,8 +105,8 @@ class CarInterface(CarInterfaceBase):
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
-    ret.alphaLongitudinalAvailable = (ret.networkLocation == NetworkLocation.gateway or docs) and not (ret.flags & VolkswagenFlags.MEB)
-    if alpha_long and not (ret.flags & VolkswagenFlags.MEB):
+    ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
+    if alpha_long:
       # Proof-of-concept, prep for E2E only. No radar points available. Panda ALLOW_DEBUG firmware required.
       ret.openpilotLongitudinalControl = True
       safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value

@@ -271,6 +271,9 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = pt_cp.vl["Airbag_02"]["AB_Gurtschloss_FA"] != 3
     ret.espDisabled = bool(pt_cp.vl["ESP_21"]["ESP_Tastung_passiv"])
 
+    self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
+    self.esp_hold_confirmation = bool(pt_cp.vl["ESC_50"]["Standstill"])
+
     ret.cruiseState.available = pt_cp.vl["Motor_51"]["TSK_Status"] in (2, 3, 4, 5)
     ret.cruiseState.enabled = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
     ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
@@ -432,8 +435,14 @@ class CarState(CarStateBase):
       # frequency changes too much for the CANParser to figure out
       ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
       ("SMLS_01", 1),       # From Stalk Controls
+      ("ESP_21", 50),
+      ("ESC_50", 50),
+      ("Motor_51", 50),
     ]
-    cam_messages = []
+    cam_messages = [
+      ("ACC_18", 50),
+      ("MEB_ACC_01", 17),
+    ]
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).cam),

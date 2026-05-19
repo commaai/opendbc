@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 import unittest
+import numpy as np
 
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
+from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 
+MAX_ACCEL = 2.0
+MIN_ACCEL = -3.5
 
 # MEB message IDs
 MSG_LH_EPS_03  = 0x9F
@@ -13,7 +17,9 @@ MSG_ESC_51     = 0xFC
 MSG_Motor_51   = 0x10B
 MSG_GRA_ACC_01 = 0x12B
 MSG_QFK_01     = 0x13D
+MSG_ACC_18     = 0x14D
 MSG_KLR_01     = 0x25D
+MSG_MEB_ACC_01 = 0x300
 MSG_HCA_03     = 0x303
 MSG_LDW_02     = 0x397
 MSG_MOTOR_14   = 0x3BE
@@ -82,6 +88,10 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume}
     return self.packer.make_can_msg_safety("GRA_ACC_01", bus, values)
 
+  def _accel_msg(self, accel):
+    values = {"ACC_Sollbeschleunigung_02": accel}
+    return self.packer.make_can_msg_safety("ACC_18", 0, values)
+
   def test_curvature_measurements(self):
     self._rx(self._curvature_meas_msg(0.15))
     self._rx(self._curvature_meas_msg(-0.1))
@@ -140,6 +150,69 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
     self.assertFalse(self._tx(self._button_msg(_set=1)))
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=1)))
+
+
+class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
+  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2],
+             [MSG_KLR_01, 0], [MSG_KLR_01, 2], [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0]]
+  FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01], 2: [MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18]}
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18), 2: (MSG_KLR_01,)}
+
+  INACTIVE_ACCEL = 3.01
+
+  def setUp(self):
+    self.packer = CANPackerSafety("vw_meb")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.LONG_CONTROL)
+    self.safety.init_tests()
+
+  # stock cruise controls are entirely bypassed under openpilot longitudinal control
+  def test_disable_control_allowed_from_cruise(self):
+    pass
+
+  def test_enable_control_allowed_from_cruise(self):
+    pass
+
+  def test_cruise_engaged_prev(self):
+    pass
+
+  def test_set_and_resume_buttons(self):
+    for button in ["set", "resume"]:
+      # ACC main switch must be on, engage on falling edge
+      self.safety.set_controls_allowed(0)
+      self._rx(self._tsk_status_msg(False, main_switch=False))
+      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
+      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} with main switch off")
+      self._rx(self._tsk_status_msg(False, main_switch=True))
+      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
+      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
+      self._rx(self._button_msg(bus=0))
+      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
+
+  def test_cancel_button(self):
+    # Disable on rising edge of cancel button
+    self._rx(self._tsk_status_msg(False, main_switch=True))
+    self.safety.set_controls_allowed(1)
+    self._rx(self._button_msg(cancel=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
+
+  def test_main_switch(self):
+    # Disable as soon as main switch turns off
+    self._rx(self._tsk_status_msg(False, main_switch=True))
+    self.safety.set_controls_allowed(1)
+    self._rx(self._tsk_status_msg(False, main_switch=False))
+    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after ACC main switch off")
+
+  def test_accel_safety_check(self):
+    for controls_allowed in [True, False]:
+      # enforce we don't skip over 0 or inactive accel
+      for accel in np.concatenate((np.arange(MIN_ACCEL - 2, MAX_ACCEL + 2, 0.03), [0, self.INACTIVE_ACCEL])):
+        accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
+        is_inactive_accel = accel == self.INACTIVE_ACCEL
+        send = (controls_allowed and MIN_ACCEL <= accel <= MAX_ACCEL) or is_inactive_accel
+        self.safety.set_controls_allowed(controls_allowed)
+        # accel request used by ECU
+        self.assertEqual(send, self._tx(self._accel_msg(accel)), (controls_allowed, accel))
 
 
 class TestVolkswagenMebIgnition(unittest.TestCase):

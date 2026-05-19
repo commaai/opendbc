@@ -69,6 +69,73 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
 
 
+def acc_control_value(main_switch_on, acc_faulted, long_active):
+  if acc_faulted:
+    acc_control = 6
+  elif long_active:
+    acc_control = 3
+  elif main_switch_on:
+    acc_control = 2
+  else:
+    acc_control = 0
+
+  return acc_control
+
+
+def acc_hud_status_value(main_switch_on, acc_faulted, long_active):
+  return acc_control_value(main_switch_on, acc_faulted, long_active)
+
+
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold):
+  commands = []
+
+  acceleration = accel if acc_enabled else 3.01
+
+  if starting:
+    acc_hold_type = 4  # release request and startup
+  elif stopping and esp_hold:
+    acc_hold_type = 3  # hold standby
+  elif stopping:
+    acc_hold_type = 1  # hold or hold request
+  else:
+    acc_hold_type = 0  # no hold request
+
+  values = {
+    "ACC_Typ":                    acc_type,
+    "ACC_Status_ACC":             acc_control,
+    "ACC_StartStopp_Info":        acc_enabled,
+    "ACC_Sollbeschleunigung_02":  acceleration,
+    "ACC_zul_Regelabw_unten":     0.2 if acc_enabled else 0,
+    "ACC_zul_Regelabw_oben":      0.2 if acc_enabled else 0,
+    "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,
+    "ACC_pos_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,
+    "ACC_Anfahren":               starting,
+    "ACC_Anhalten":               1 if stopping and not esp_hold else 0,
+    "ACC_Anhalteweg":             0 if stopping and not esp_hold else 20.46,
+    "ACC_Anforderung_HMS":        acc_hold_type,
+    "ACC_AKTIV_regelt":           1 if acc_control == 3 else 0,
+    "SET_ME_0XFE":                0xFE,
+    "SET_ME_0X1":                 0x1,
+    "SET_ME_0X9":                 0x9,
+  }
+
+  commands.append(packer.make_can_msg("ACC_18", bus, values))
+
+  return commands
+
+
+def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance, distance):
+  values = {
+    "ACC_Status_ACC":          acc_hud_status,
+    "ACC_Wunschgeschw_02":     set_speed if set_speed < 250 else 327.36,
+    "ACC_Gesetzte_Zeitluecke": distance + 2,
+    "ACC_Display_Prio":        3,
+    "ACC_Abstandsindex_02":    569 if lead_distance else 0,
+  }
+
+  return packer.make_can_msg("MEB_ACC_01", bus, values)
+
+
 def create_capacitive_wheel_touch(packer, bus, lat_active, klr_stock_values):
   values = {s: klr_stock_values[s] for s in [
     "COUNTER",
