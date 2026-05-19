@@ -5,7 +5,6 @@ from opendbc.car.lateral import apply_driver_steer_torque_limits, apply_std_curv
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mebcan, mlbcan, mqbcan, pqcan
-from opendbc.car.volkswagen.mebutils import LatControlCurvature
 from opendbc.car.volkswagen.values import CanBus, CarControllerParams, VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -57,11 +56,6 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = None
     self.klr_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
-    self.LateralController = (
-      LatControlCurvature(self.CCP.CURVATURE_PID, self.CCP.CURVATURE_LIMITS.CURVATURE_MAX, 1 / (DT_CTRL * self.CCP.STEER_STEP))
-      if (CP.flags & VolkswagenFlags.MEB)
-      else None
-    )
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -80,8 +74,7 @@ class CarController(CarControllerBase):
 
         if CC.latActive:
           hca_enabled = True
-          apply_curvature = self.LateralController.update(CS, CC, actuators.curvature)
-          apply_curvature = apply_curvature + (CS.curvature_meas - (CC.currentCurvature - float(getattr(CC, "rollCompensation", 0.0))))
+          apply_curvature = actuators.curvature + (CS.curvature_meas - CC.currentCurvature)
           apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
                                                        self.CCP.STEER_STEP, CC.latActive, self.CCP.CURVATURE_LIMITS)
 
@@ -93,7 +86,6 @@ class CarController(CarControllerBase):
           steering_power = min(max(target_power, min_power), max_power)
 
         else:
-          self.LateralController.reset()
           if self.steering_power_last > 0:  # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
             apply_curvature = float(np.clip(CS.curvature_meas, -self.CCP.CURVATURE_LIMITS.CURVATURE_MAX, self.CCP.CURVATURE_LIMITS.CURVATURE_MAX))
