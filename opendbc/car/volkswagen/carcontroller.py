@@ -149,19 +149,19 @@ class CarController(CarControllerBase):
 
       if self.CP.flags & VolkswagenFlags.MEB:
         starting = actuators.longControlState == LongCtrlState.starting and CS.out.vEgo <= self.CP.vEgoStarting
-        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
+        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
 
         long_override = CC.cruiseControl.override or CS.out.gasPressed
         self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
         long_override_begin = long_override and self.long_override_counter < 5
 
-        self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.longActive else 0
-        long_disabling = not CC.longActive and self.long_disabled_counter < 5
+        self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
+        long_disabling = not CC.enabled and self.long_disabled_counter < 5
 
-        acc_control = mebcan.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive, long_override)
-        acc_hold_type = mebcan.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive, starting, stopping,
+        acc_control = mebcan.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, long_override)
+        acc_hold_type = mebcan.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
                                              CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
-        can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive,
+        can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.enabled,
                                                          4.0, 4.0, 0., 0.,
                                                          accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
                                                          CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))
@@ -206,7 +206,7 @@ class CarController(CarControllerBase):
         lead_distance = 0
         if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:
           lead_distance = 8
-        acc_hud_status = mebcan.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive,
+        acc_hud_status = mebcan.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                      CC.cruiseControl.override or CS.out.gasPressed)
         can_sends.append(mebcan.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH,
                                                        hud_control.leadVisible, hud_control.leadDistanceBars + 1, show_distance_bars,
