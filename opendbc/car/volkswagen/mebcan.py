@@ -134,7 +134,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, 
 
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, upper_jerk, lower_jerk, upper_control_limit, lower_control_limit,
                              accel, acc_control, acc_hold_type, stopping, starting, esp_hold, speed, override, travel_assist_available):
-  # active longitudinal control disables one pedal driving (regen mode) while using overriding mechnism
+  # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
   # -> this mode is seen for different cars with same firmware radars so could be a coded operational mode
