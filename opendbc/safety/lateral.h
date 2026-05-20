@@ -351,3 +351,55 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
   return violation;
 }
+
+bool steer_power_cmd_checks(int desired_steer_power, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
+  bool violation = false;
+
+  violation |= safety_max_limit_check(desired_steer_power, limits.max_power, 0);
+  violation |= (desired_steer_power > 0) && !steer_control_enabled;
+  violation |= !controls_allowed && steer_control_enabled && (desired_steer_power != 0) && (desired_steer_power >= desired_steer_power_last);
+  violation |= !controls_allowed && !steer_control_enabled && (desired_steer_power != 0);
+
+  desired_steer_power_last = desired_steer_power;
+
+  return violation;
+}
+
+// Safety checks for curvature-based steering commands
+bool steer_curvature_cmd_checks_average(int desired_curvature, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
+  bool violation = false;
+
+  if (controls_allowed && steer_control_enabled) {
+    violation |= safety_max_limit_check(desired_curvature, limits.max_curvature, -limits.max_curvature);
+
+    // ISO jerk limit
+    static const float ISO_LATERAL_JERK_CURV = 5.0;  // m/s^3
+    float fudged_speed = SAFETY_MAX((vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1., 1.0);
+    float max_curvature_rate_sec = ISO_LATERAL_JERK_CURV / (fudged_speed * fudged_speed);
+
+    float max_curvature_delta = max_curvature_rate_sec * (float)limits.send_rate;
+    int max_curvature_delta_can = (int)((max_curvature_delta * limits.curvature_to_can) + 1.);
+
+    int highest_desired_curvature = desired_curvature_last + max_curvature_delta_can;
+    int lowest_desired_curvature = desired_curvature_last - max_curvature_delta_can;
+
+    // ISO lateral limit by yaw rate
+    const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
+    float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
+    max_curvature = (max_curvature * limits.curvature_to_can) + 1.;
+
+    // ensure that the curvature error doesn't try to enforce above this limit
+    highest_desired_curvature = SAFETY_CLAMP(highest_desired_curvature, -max_curvature, max_curvature) + 1;
+    lowest_desired_curvature = SAFETY_CLAMP(lowest_desired_curvature, -max_curvature, max_curvature) - 1;
+
+    // check for violation;
+    violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature, lowest_desired_curvature);
+  }
+
+  // Curvature should either be 0 or same as current curvature while not steering
+  if (!steer_control_enabled) {
+    violation |= desired_curvature != 0;
+  }
+  desired_curvature_last = desired_curvature;
+  return violation;
+}
