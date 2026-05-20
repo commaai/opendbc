@@ -179,7 +179,6 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       .curvature_to_can = 149253.7313f,
       .send_rate = 0.02f,
       .inactive_curvature_is_zero = true,
-      .max_power = 125,
     };
 
     int desired_curvature_raw = GET_BYTES(msg, 3, 2) & 0x7FFFU;
@@ -192,7 +191,15 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     bool steer_req = (((msg->data[1] >> 4) & 0x0FU) == 4U);
     int steer_power = msg->data[2];
 
-    if (steer_power_cmd_checks(steer_power, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
+    static const int VOLKSWAGEN_MEB_MAX_STEER_POWER = 125;
+    static int volkswagen_meb_steer_power_last = 0;
+    bool power_violation = false;
+    power_violation |= safety_max_limit_check(steer_power, VOLKSWAGEN_MEB_MAX_STEER_POWER, 0);
+    power_violation |= (steer_power > 0) && !steer_req;
+    power_violation |= !controls_allowed && steer_req && (steer_power != 0) && (steer_power >= volkswagen_meb_steer_power_last);
+    power_violation |= !controls_allowed && !steer_req && (steer_power != 0);
+    volkswagen_meb_steer_power_last = steer_power;
+    if (power_violation) {
       tx = false;
     }
 

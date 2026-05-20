@@ -34,8 +34,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   MAX_CURVATURE_TEST = 0.195
   CURVATURE_TO_CAN = 149253.7313
   INACTIVE_CURVATURE_IS_ZERO = True
-  MAX_POWER = 125
-  MAX_POWER_TEST = 50
   SEND_RATE = 0.02
 
   def _speed_msg(self, speed_mps: float):

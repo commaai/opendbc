@@ -177,10 +177,6 @@ int get_angle_meas_max(void){
   return angle_meas.max;
 }
 
-void set_desired_steer_power_last(int power){
-  desired_steer_power_last = power;
-}
-
 void set_desired_curvature_last(int curvature){
   desired_curvature_last = curvature;
 }
