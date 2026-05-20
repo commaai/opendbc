@@ -34,7 +34,58 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   MAX_CURVATURE_TEST = 0.195
   CURVATURE_TO_CAN = 149253.7313
   INACTIVE_CURVATURE_IS_ZERO = True
+  MAX_POWER = 125
+  MAX_POWER_TEST = 50
   SEND_RATE = 0.02
+
+  def _set_prev_desired_power(self, power: int):
+    # Seed the file-local static via a sequenced tx; the power-state assignment is unconditional
+    prev_allowed = self.safety.get_controls_allowed()
+    self.safety.set_controls_allowed(True)
+    self._tx(self._curvature_cmd_msg(0, steer_req=True, power=power))
+    self.safety.set_controls_allowed(prev_allowed)
+
+  def test_power_limit(self):
+    max_power_can = self.MAX_POWER
+    max_power = self.MAX_POWER_TEST
+    self._set_prev_desired_power(max_power_can)
+    self.safety.set_controls_allowed(True)
+
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power + 1)))
+
+    self.safety.set_controls_allowed(True)
+
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=max_power)))
+
+    self.safety.set_controls_allowed(True)
+
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=-max_power)))
+
+  def test_power_without_control(self):
+    max_power_can = self.MAX_POWER
+    max_power = self.MAX_POWER_TEST
+    self._set_prev_desired_power(max_power_can)
+    self.safety.set_controls_allowed(False)
+
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=max_power)))
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=0)))
+
+    self._set_prev_desired_power(max_power - 1)
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=max_power)))
+
+    self._set_prev_desired_power(max_power - 1)
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))  # increase not allowed
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))  # equal not allowed
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))  # decrease allowed
 
   def _speed_msg(self, speed_mps: float):
     spd_kph = speed_mps * 3.6
