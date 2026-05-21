@@ -39,7 +39,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   SEND_RATE = 0.02
 
   def _set_prev_desired_power(self, power: int):
-    # Seed the file-local static via a sequenced tx; the power-state assignment is unconditional
+    # init with local tx sequence
     prev_allowed = self.safety.get_controls_allowed()
     self.safety.set_controls_allowed(True)
     self._tx(self._curvature_cmd_msg(0, steer_req=True, power=power))
@@ -180,6 +180,13 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.safety.set_controls_allowed(True)
     self._rx(self._button_msg(cancel=1, bus=0))
     self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_curvature_cmd_when_not_steering(self):
+    # Curvature must be 0 while not steering, regardless of controls_allowed
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=0)))
+      self.assertFalse(self._tx(self._curvature_cmd_msg(self.MAX_CURVATURE_TEST, steer_req=False, power=0)))
 
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):

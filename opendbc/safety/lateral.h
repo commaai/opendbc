@@ -379,7 +379,7 @@ bool steer_curvature_cmd_checks_average(int desired_curvature, bool steer_contro
     highest_desired_curvature = SAFETY_CLAMP(highest_desired_curvature, -max_curvature, max_curvature) + 1;
     lowest_desired_curvature = SAFETY_CLAMP(lowest_desired_curvature, -max_curvature, max_curvature) - 1;
 
-    // check for violation;
+    // check for violation
     violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature, lowest_desired_curvature);
   }
 
