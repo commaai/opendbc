@@ -11,6 +11,7 @@
 #define MSG_Motor_51         0x10BU   // RX for TSK state and accel pedal
 #define MSG_KLR_01           0x25DU   // TX, for capacitive steering wheel
 #define MSG_TA_01            0x26BU   // TX by OP, Travel Assist status
+#define MSG_EA_02            0x1F0U   // TX by OP, blinker control
 
 static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
@@ -32,6 +33,8 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
     crc ^= (uint8_t[]){0x77, 0x5C, 0xA0, 0x89, 0x4B, 0x7C, 0xBB, 0xD6, 0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD}[counter];
   } else if (msg->addr == MSG_Motor_51) {
     crc ^= (uint8_t[]){0x77, 0x5C, 0xA0, 0x89, 0x4B, 0x7C, 0xBB, 0xD6, 0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD}[counter];
+  } else if (msg->addr == MSG_EA_02) {
+    crc ^= (uint8_t[]){0x2F,0x3C,0x22,0x60,0x18,0xEB,0x63,0x76,0xC5,0x91,0x0F,0x27,0x34,0x04,0x7F,0x02}[counter];
   } else {
     // Undefined CAN message, CRC check expected to fail
   }
@@ -49,6 +52,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {MSG_LDW_02, 0, 8, .check_relay = true},
     {MSG_KLR_01, 0, 8, .check_relay = false},
     {MSG_KLR_01, 2, 8, .check_relay = true},
+    {MSG_EA_02, 0, 8, .check_relay = true},
   };
 
   static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {
@@ -61,6 +65,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {MSG_MEB_ACC_01, 0, 48, .check_relay = true},
     {MSG_ACC_18, 0, 32, .check_relay = true},
     {MSG_TA_01, 0, 8, .check_relay = true},
+    {MSG_EA_02, 0, 8, .check_relay = true},
   };
 
   static RxCheck volkswagen_meb_rx_checks[] = {
