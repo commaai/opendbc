@@ -16,7 +16,7 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "volkswagen"
-    ret.radarUnavailable = not (ret.flags & VolkswagenFlags.MEB)
+    ret.radarUnavailable = True
 
     if ret.flags & VolkswagenFlags.PQ:
       # Set global PQ35/PQ46/NMS parameters
@@ -61,9 +61,11 @@ class CarInterface(CarInterfaceBase):
       if 0x3DC in fingerprint[0]:  # Gateway_73
         ret.flags |= VolkswagenFlags.ALT_GEAR.value
 
+      ret.radarUnavailable = 0x24F not in fingerprint[0] # Strukturen_01
       ret.radarDelay = 0.8
 
-      ret.dashcamOnly = is_release
+      # only allow gateway harness for now
+      ret.dashcamOnly = is_release or ret.networkLocation == NetworkLocation.fwdCamera
 
     else:
       # Set global MQB parameters
