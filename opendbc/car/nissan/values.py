@@ -121,5 +121,12 @@ FW_QUERY_CONFIG = FwQueryConfig(
       bus=bus,
       logging=logging,
     ),
+    # Some newer Altima respond at normal rx offset
+    Request(
+      [StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
+      [StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
+      bus=bus,
+      logging=logging,
+    ),
   ]],
 )
