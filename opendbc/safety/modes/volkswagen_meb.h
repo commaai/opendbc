@@ -11,7 +11,6 @@
 #define MSG_Motor_51         0x10BU   // RX for TSK state and accel pedal
 #define MSG_KLR_01           0x25DU   // TX, for capacitive steering wheel
 #define MSG_TA_01            0x26BU   // TX by OP, Travel Assist status
-#define MSG_EA_02            0x1F0U   // TX by OP, blinker control
 
 static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
@@ -50,7 +49,6 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {MSG_LDW_02, 0, 8, .check_relay = true},
     {MSG_KLR_01, 0, 8, .check_relay = false},
     {MSG_KLR_01, 2, 8, .check_relay = true},
-    {MSG_EA_02, 0, 8, .check_relay = true},
   };
 
   static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {
@@ -63,7 +61,6 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {MSG_MEB_ACC_01, 0, 48, .check_relay = true},
     {MSG_ACC_18, 0, 32, .check_relay = true},
     {MSG_TA_01, 0, 8, .check_relay = true},
-    {MSG_EA_02, 0, 8, .check_relay = true},
   };
 
   static RxCheck volkswagen_meb_rx_checks[] = {

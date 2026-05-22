@@ -18,7 +18,6 @@ MSG_Motor_51   = 0x10B
 MSG_GRA_ACC_01 = 0x12B
 MSG_QFK_01     = 0x13D
 MSG_ACC_18     = 0x14D
-MSG_EA_02      = 0x1F0
 MSG_TA_01      = 0x26B
 MSG_KLR_01     = 0x25D
 MSG_MEB_ACC_01 = 0x300
@@ -191,10 +190,9 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
 
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
-  FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01], 2: [MSG_HCA_03, MSG_LDW_02, MSG_EA_02]}
+  FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01], 2: [MSG_HCA_03, MSG_LDW_02]}
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2],
-             [MSG_KLR_01, 0], [MSG_KLR_01, 2], [MSG_EA_02, 0]]
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_EA_02), 2: (MSG_KLR_01,)}
+             [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
 
   def setUp(self):
     self.packer = CANPackerSafety("vw_meb")
@@ -214,10 +212,10 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
 class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2],
              [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0], [MSG_TA_01, 0],
-             [MSG_KLR_01, 0], [MSG_KLR_01, 2], [MSG_EA_02, 0]]
+             [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01],
-                           2: [MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01, MSG_EA_02]}
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01, MSG_EA_02),
+                           2: [MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01]}
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01),
                              2: (MSG_KLR_01,)}
 
   ALLOW_OVERRIDE = True
