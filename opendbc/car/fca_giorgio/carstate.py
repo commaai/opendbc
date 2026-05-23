@@ -15,6 +15,7 @@ class CarState(CarStateBase):
 
   def update(self, can_parsers) -> structs.CarState:
     pt_cp = can_parsers[Bus.pt]
+    pt_cam = can_parsers[Bus.cam]
 
     ret = structs.CarState()
 
@@ -45,10 +46,11 @@ class CarState(CarStateBase):
     else:
       ret.gearShifter = GearShifter.drive
 
-    # TODO: ACC_2, but is it ok that speed is gated by "enabled"?
-    ret.cruiseState.available = pt_cp.vl["ACC_1"]["CRUISE_STATUS"] in (1, 2, 3)
-    ret.cruiseState.enabled = pt_cp.vl["ACC_1"]["CRUISE_STATUS"] in (2, 3)
-    ret.cruiseState.speed = pt_cp.vl["ACC_1"]["HUD_SPEED"] * CV.KPH_TO_MS
+    # TODO: is it ok that speed is gated by "enabled"?
+    # TODO: correct units on speed?
+    ret.cruiseState.available = pt_cam.vl["ACC_4"]["CRUISE_MODE"] == 2  # acc
+    ret.cruiseState.enabled = bool(pt_cam.vl["ACC_2"]["CRUISE_STATUS"])
+    ret.cruiseState.speed = pt_cam.vl["ACC_2"]["HUD_SPEED"] * CV.KPH_TO_MS
 
     ret.leftBlinker = bool(pt_cp.vl["BCM_1"]["LEFT_TURN_STALK"])
     ret.rightBlinker = bool(pt_cp.vl["BCM_1"]["RIGHT_TURN_STALK"])

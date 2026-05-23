@@ -6,6 +6,21 @@ BO_ 171 NEW_MSG_AB: 8 XXX
  SG_ NEW_SIGNAL_3 : 51|12@0+ (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_4 : 55|4@0+ (1,0) [0|15] "" XXX
 
+BO_ 218 NEW_MSG_DA: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|13@0+ (1,0) [0|8191] "" XXX
+ SG_ NEW_SIGNAL_2 : 10|13@0+ (1,0) [0|8191] "" XXX
+ SG_ NEW_SIGNAL_3 : 29|13@0+ (1,0) [0|8191] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 220 NEW_MSG_DC: 8 XXX
+ SG_ NEW_SIGNAL_1 : 4|13@0+ (1,0) [0|8191] "" XXX
+ SG_ NEW_SIGNAL_4 : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 36|13@0+ (1,0) [0|8191] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 222 EPS_1: 6 EPS
  SG_ STEERING_ANGLE : 5|14@0+ (0.1,-716.8) [0|16383] "deg" XXX
  SG_ STEERING_RATE : 19|12@0+ (0.5,-1000) [0|4095] "deg/s" XXX
@@ -13,6 +28,9 @@ BO_ 222 EPS_1: 6 EPS
  SG_ UNKNOWN_2 : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 35|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 224 CAM_2: 4 XXX
+ SG_ SPEED_LIMIT : 7|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 228 NEW_MSG_E4: 6 XXX
  SG_ NEW_SIGNAL_1 : 13|1@0+ (1,0) [0|1] "" XXX
@@ -37,16 +55,16 @@ BO_ 249 NEW_MSG_F9: 4 XXX
 BO_ 250 ABS_3: 8 ABS
  SG_ BRAKE_PRESSURE_THRESHOLD : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_PEDAL_SWITCH : 3|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 9|2@0+ (1,0) [0|3] "" XXX
+ SG_ RIGHT_TURN_SIGNAL : 8|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_TURN_SIGNAL : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ XCOUNTER : 38|4@0+ (1,0) [0|15] "" XXX
- SG_ XCHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 252 ENGINE_1: 8 ENGINE
  SG_ ENGINE_RPM : 7|14@0+ (1,0) [0|255] "rev/min" XXX
  SG_ ACCEL_PEDAL : 20|8@0+ (0.4,0) [0|255] "percent" XXX
  SG_ REVERSE : 26|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 46|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 47|11@0+ (1,0) [0|2047] "" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -62,11 +80,10 @@ BO_ 257 ABS_6: 8 ABS
  SG_ MAYBE_ACC_BRAKE : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ VEHICLE_SPEED : 15|11@0+ (0.017,0) [0|2047] "" XXX
  SG_ BRAKE_PRESSURE_1 : 20|11@0+ (1,0) [0|2047] "" XXX
- SG_ BRAKE_PRESSURE_2 : 43|12@0+ (1,0) [0|4095] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 262 EPS_2: 7 EPS
- SG_ UNKNOWN_TORQUE : 7|12@0+ (1,-2000) [0|4095] "" XXX
  SG_ UNKNOWN_1 : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ UNKNOWN_STATUS : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ DRIVER_TORQUE : 23|11@0+ (1,-1024) [0|2047] "" XXX
@@ -90,6 +107,10 @@ BO_ 270 ABS_7: 7 XXX
  SG_ COUNTER : 43|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 55|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 271 NEW_MSG_10F: 8 XXX
+ SG_ NEW_SIGNAL_1 : 5|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_2 : 23|12@0+ (1,0) [0|4095] "" XXX
+
 BO_ 278 ABS_5: 8 ABS
  SG_ WHEEL_IMPULSE_FL : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ WHEEL_IMPULSE_FR : 15|8@0+ (1,0) [0|255] "" XXX
@@ -105,6 +126,12 @@ BO_ 278 ABS_5: 8 ABS
  SG_ REVERSE_2 : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 279 NEW_MSG_117: 4 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,-128) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 19|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 31|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 280 NEW_MSG_118: 6 XXX
  SG_ COUNTER : 35|4@0+ (1,0) [0|15] "" XXX
@@ -138,28 +165,54 @@ BO_ 501 NEW_MSG_1F5: 5 XXX
  SG_ NEW_SIGNAL_3 : 27|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 39|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 502 LKA_COMMAND: 8 CAMERA
+BO_ 502 LKA_COMMAND: 4 CAMERA
  SG_ LKA_TORQUE : 7|11@0+ (1,-1024) [0|2047] "" XXX
- SG_ HAPTIC_WARN_1 : 8|1@0+ (1,0) [0|1] "" XXX
- SG_ LKA_ACTIVE : 11|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ HAPTIC_WARN_2 : 19|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ LKA_ACTIVE : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 19|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 506 NEW_MSG_1FA: 8 XXX
+ SG_ BRAKE_ACTIVE : 25|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 508 NEW_MSG_1FC: 8 XXX
  SG_ NEW_SIGNAL_1 : 6|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 554 ACC_2: 8 RADAR
+ SG_ HUD_SPEED : 7|8@0+ (1,0) [0|255] "km/h" XXX
+ SG_ TARGET_SPEED : 15|8@0- (0.443,0) [0|255] "" XXX
+ SG_ CRUISE_STATUS : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 599 BCM_2: 8 XXX
+ SG_ SEATBELT_UNBUCKLED_FL : 21|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 601 NEW_MSG_259: 8 XXX
+ SG_ NEW_SIGNAL_2 : 37|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 762 NEW_MSG_2FA: 3 XXX
- SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+BO_ 762 ACC_BUTTON: 4 XXX
+ SG_ ACC : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ CRUISE : 1|1@0+ (1,0) [0|1] "" XXX
+ SG_ RESUME : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ SPEED_MINUS : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ SPEED_PLUS : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ DIST_MINUS : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ CANCEL : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ SPEED_LIMITER : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ DIST_PLUS : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECKSUM : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 766 CAM_UNKNOWN_1: 4 CAMERA
 
-BO_ 900 NEW_MSG_384: 8 XXX
+BO_ 896 NEW_MSG_380: 8 XXX
+ SG_ NEW_SIGNAL_1 : 4|3@0+ (1,0) [0|7] "" XXX
+
+BO_ 900 BCM_3: 8 XXX
  SG_ NEW_SIGNAL_1 : 19|3@0+ (1,0) [0|7] "" XXX
+ SG_ PARKING_BRAKE_ENABLED : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKA_BUTTON : 30|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1040 NEW_MSG_410: 8 XXX
  SG_ NEW_SIGNAL_3 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -192,6 +245,76 @@ BO_ 1046 NEW_MSG_416: 8 XXX
  SG_ UNKNOWN_M2_6 m2 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ UNKNOWN_M2_7 m2 : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 1050 NEW_MSG_41A: 8 XXX
+ SG_ NEW_SIGNAL_1 : 32|9@0+ (1,0) [0|511] "" XXX
+
+BO_ 1051 NEW_MSG_41B: 8 XXX
+ SG_ NEW_SIGNAL_1 : 27|12@0+ (1,0) [0|4095] "" XXX
+
+BO_ 1052 NEW_MSG_41C: 8 XXX
+ SG_ NEW_SIGNAL_1 : 10|9@0+ (1,0) [0|511] "" XXX
+ SG_ NEW_SIGNAL_2 : 17|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_3 : 25|12@0+ (1,0) [0|4095] "" XXX
+
+BO_ 1053 NEW_MSG_41D: 8 XXX
+ SG_ NEW_SIGNAL_2 : 7|13@0+ (1,0) [0|8191] "" XXX
+ SG_ NEW_SIGNAL_1 : 10|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_3 : 30|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_4 : 34|10@0+ (1,0) [0|1023] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1054 NEW_MSG_41E: 8 XXX
+ SG_ NEW_SIGNAL_3 : 12|13@0+ (1,0) [0|8191] "" XXX
+ SG_ NEW_SIGNAL_2 : 29|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_1 : 33|12@0+ (1,0) [0|4095] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1055 NEW_MSG_41F: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_2 : 11|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_3 : 31|12@0+ (1,0) [0|4095] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1061 NEW_MSG_425: 8 XXX
+ SG_ NEW_SIGNAL_1 : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 13|6@0+ (1,0) [0|63] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1064 NEW_MSG_428: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|13@0+ (1,0) [0|8191] "" XXX
+ SG_ NEW_SIGNAL_2 : 10|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_3 : 30|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_4 : 34|10@0+ (1,0) [0|1023] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1085 NEW_MSG_43D: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|6@0+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_3 : 11|10@0+ (1,0) [0|1023] "" XXX
+ SG_ NEW_SIGNAL_4 : 17|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 25|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_5 : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1086 NEW_MSG_43E: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|13@0+ (1,0) [0|8191] "" XXX
+ SG_ NEW_SIGNAL_2 : 9|11@0+ (1,0) [0|2047] "" XXX
+ SG_ NEW_SIGNAL_3 : 30|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_4 : 34|10@0+ (1,0) [0|1023] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1095 NEW_MSG_447: 6 XXX
+ SG_ NEW_SIGNAL_2 : 2|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_1 : 9|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 35|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 1194 CAM_UNKNOWN_2: 8 CAMERA
 
 BO_ 1198 LKA_HUD_1: 8 CAMERA
@@ -203,9 +326,13 @@ BO_ 1198 LKA_HUD_1: 8 CAMERA
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 1199 ACC_3: 8 RADAR
+ SG_ CRUISE_STATUS : 11|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1351 LKA_HUD_2: 8 CAMERA
+ SG_ LKA_DISABLE : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 51|3@0+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_2 : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ LKA_ACTIVE : 55|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 1442 ACC_1: 8 RADAR
  SG_ HUD_SPEED : 7|8@0+ (1,0) [0|255] "km/h" XXX
@@ -215,12 +342,24 @@ BO_ 1442 ACC_1: 8 RADAR
  SG_ CRUISE_STATUS : 22|2@0+ (1,0) [0|3] "" XXX
  SG_ MAYBE_TJA : 23|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1445 NEW_MSG_5A5: 8 XXX
+ SG_ NEW_SIGNAL_2 : 20|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_3 : 44|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_1 : 50|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1449 ENGINE_2: 8 XXX
+ SG_ GEAR : 23|3@0+ (1,0) [0|7] "" XXX
+
 BO_ 1458 CAM_UNKNOWN_5: 4 CAMERA
  SG_ NEW_SIGNAL_1 : 5|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1508 ACC_4: 8 XXX
+ SG_ CRUISE_MODE : 60|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 1854 BCM_1: 4 BCM
  SG_ RIGHT_TURN_STALK : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ LEFT_TURN_STALK : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ MAYBE_BRAKE_LIGHT : 18|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1865 NEW_MSG_749: 8 XXX
  SG_ NEW_SIGNAL_1 : 23|2@0+ (1,0) [0|3] "" XXX
@@ -237,7 +376,7 @@ CM_ SG_ 278 FORWARD_2 "probably per-axle";
 CM_ SG_ 278 REVERSE_2 "probably per-axle";
 CM_ SG_ 282 NEW_SIGNAL_1 "smoothed yaw rate with low speed cutoff, maybe active forward lighting target angle";
 CM_ SG_ 284 VEHICLE_SPEED "scale estimated";
-CM_ SG_ 502 HAPTIC_WARN_1 "correlates with steering wheel haptic";
-CM_ SG_ 502 HAPTIC_WARN_2 "correlates with steering wheel haptic";
 CM_ BO_ 1198 "Definite LKA activity, probably contains lane-line recognition and lane departure signals, indicator of LKA vs TJA, perhaps indicator of active assist in map-permitted areas";
-VAL_ 262 LKA_STATUS 0 "standby" 1 "lka_active";
+VAL_ 262 LKA_STATUS 0 "standby" 2 "lka_active";
+VAL_ 1449 GEAR 1 "park" 2 "reverse" 3 "neutral" 4 "drive" 6 "drive manual";
+VAL_ 1508 CRUISE_MODE 0 "off" 3 "manual" 2 "acc";
