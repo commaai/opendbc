@@ -66,6 +66,7 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_LKA_STEER_MSG_ALT = 128
   FCEV_GAS = 256
   ALT_LIMITS_2 = 512
+  CAN_REFRESH_MSGS = 1024
 
 
 # Hyundai/Kia/Genesis SCC (Smart Cruise Control) and steering architecture:
@@ -147,6 +148,8 @@ class HyundaiFlags(IntFlag):
 
   ALT_LIMITS_2 = 2 ** 26
 
+  CAN_REFRESH_MSGS = 2 ** 27
+
 
 @dataclass
 class HyundaiCarDocs(CarDocs):
@@ -154,15 +157,26 @@ class HyundaiCarDocs(CarDocs):
 
 
 @dataclass
-class HyundaiPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_kia_generic"})
-
+class HyundaiPlatformConfigBase(PlatformConfig):
   def init(self):
     if self.flags & HyundaiFlags.MANDO_RADAR:
-      self.dbc_dict = {Bus.pt: "hyundai_kia_generic", Bus.radar: 'hyundai_kia_mando_front_radar_generated'}
+      self.dbc_dict = {**self.dbc_dict, Bus.radar: 'hyundai_kia_mando_front_radar_generated'}
 
     if self.flags & HyundaiFlags.MIN_STEER_32_MPH:
       self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
+
+
+@dataclass
+class HyundaiPlatformConfig(HyundaiPlatformConfigBase):
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_can_generated"})
+
+
+@dataclass
+class HyundaiRefreshPlatformConfig(HyundaiPlatformConfigBase):
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_can_refresh_generated"})
+
+  def init(self):
+    self.flags |= HyundaiFlags.CAN_REFRESH_MSGS
 
 
 @dataclass
@@ -210,11 +224,24 @@ class CAR(Platforms):
     CarSpecs(mass=2800 * CV.LB_TO_KG, wheelbase=2.72, steerRatio=12.9, tireStiffnessFactor=0.65),
     flags=HyundaiFlags.CHECKSUM_CRC8,
   )
+  HYUNDAI_ELANTRA_2024 = HyundaiRefreshPlatformConfig(
+    [HyundaiCarDocs("Hyundai Elantra 2024-25", car_parts=CarParts.common([CarHarness.hyundai_k]))],
+    CarSpecs(mass=2797 * CV.LB_TO_KG, wheelbase=2.72, steerRatio=12.9, tireStiffnessFactor=0.65),
+    flags=HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.CAMERA_SCC,
+  )
   HYUNDAI_ELANTRA_HEV_2021 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Elantra Hybrid 2021-23", video="https://youtu.be/_EdYQtV52-c",
                     car_parts=CarParts.common([CarHarness.hyundai_k]))],
     CarSpecs(mass=3017 * CV.LB_TO_KG, wheelbase=2.72, steerRatio=12.9, tireStiffnessFactor=0.65),
     flags=HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
+  )
+  HYUNDAI_ELANTRA_HEV_2024 = HyundaiRefreshPlatformConfig(
+    [
+      HyundaiCarDocs("Hyundai Elantra Hybrid 2024-25", car_parts=CarParts.common([CarHarness.hyundai_k])),
+      HyundaiCarDocs("Hyundai i30 Hybrid 2024", car_parts=CarParts.common([CarHarness.hyundai_k])),
+    ],
+    CarSpecs(mass=3017 * CV.LB_TO_KG, wheelbase=2.72, steerRatio=12.9, tireStiffnessFactor=0.65),
+    flags=HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.CAMERA_SCC | HyundaiFlags.HYBRID,
   )
   HYUNDAI_GENESIS = HyundaiPlatformConfig(
     [
