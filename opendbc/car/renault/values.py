@@ -1,6 +1,4 @@
 from dataclasses import dataclass, field
-from enum import IntFlag
-
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -47,21 +45,14 @@ GEAR_MAP = {
 
 
 class CarControllerParams:
-  # Tuned against torque_data/override.toml ISO 11270 jerk limits; retune on-vehicle.
-  STEER_STEP = 2               # 0x134 is 100 Hz; tx cadence 50 Hz
-  STEER_MAX = 100              # 0x134 TORQUE_CMD is an 8-bit field
+  # Defined for lateral limit tests. Not used for control while dashcamOnly/noOutput.
+  STEER_STEP = 2
+  STEER_MAX = 100
   STEER_DELTA_UP = 2
   STEER_DELTA_DOWN = 4
-  STEER_DRIVER_ALLOWANCE = 150
-  STEER_DRIVER_MULTIPLIER = 2
-  STEER_DRIVER_FACTOR = 1
 
   def __init__(self, CP):
     pass
-
-
-class RenaultSafetyFlags(IntFlag):
-  pass
 
 
 DBC = CAR.create_dbc_map()
