@@ -12,7 +12,7 @@ urls = { "homepage" = "https://github.com/commaai/opendbc" }
 dependencies = [
   "numpy",
   "tqdm",
-  "pycapnp==2.1.0",
+  "pycapnp",
   "pycryptodome",
 ]
 
