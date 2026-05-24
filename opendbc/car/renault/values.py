@@ -3,7 +3,7 @@ from enum import IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 
 @dataclass
@@ -25,9 +25,15 @@ class CAR(Platforms):
   )
 
 
-# Currently identified through legacy CAN fingerprints only.
-# Keep an empty FW_QUERY_CONFIG.
-FW_QUERY_CONFIG = FwQueryConfig(requests=[])
+FW_QUERY_CONFIG = FwQueryConfig(
+  requests=[
+    Request(
+      [StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
+      [StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
+      whitelist_ecus=[structs.CarParams.Ecu.fwdCamera],
+    ),
+  ],
+)
 
 
 # 0x12F.GEAR_STATE (see VAL table in renault_5_etech.dbc); PARK is a separate bit
