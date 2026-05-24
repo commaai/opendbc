@@ -233,6 +233,9 @@ class CANParser:
         state = self.message_states.get(address)
         if state is None or len(dat) > 64:
           continue
+        if len(dat) != state.size:
+          state.rate_limited_log(t, f"got message with unexpected length: expected {state.size}, got {len(dat)}")
+          continue
         if state.parse(t, dat):
           updated_addrs.add(address)
 

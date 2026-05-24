@@ -79,6 +79,26 @@ class TestCanParserPacker(unittest.TestCase):
     ret = parser.update([])
     assert len(ret) == 0
 
+  def test_parser_message_length(self):
+    msgs = [("Brake_Status", 0)]
+    parser = CANParser(TEST_DBC, msgs, 0)
+    packer = CANPacker(TEST_DBC)
+
+    msg = packer.make_can_msg("Brake_Status", 0, {"Signal1": 1})
+    parser.update([0, [msg]])
+    assert parser.vl["Brake_Status"]["Signal1"] == 1
+
+    expected_length = len(msg[1])
+    short_msg = (msg[0], msg[1][:-1], msg[2])
+    long_msg = (msg[0], msg[1] + b"\x00", msg[2])
+
+    for bad_msg in (short_msg, long_msg):
+      ret = parser.update([0, [bad_msg]])
+      assert ret == set()
+      assert parser.vl["Brake_Status"]["Signal1"] == 1
+      assert parser.vl_all["Brake_Status"]["Signal1"] == []
+      assert len(bad_msg[1]) != expected_length
+
   def test_parser_counter_can_valid(self):
     """
     Tests number of allowed bad counters + ensures CAN stays invalid
