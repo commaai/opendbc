@@ -61,7 +61,7 @@ class CarInterface(CarInterfaceBase):
       if 0x3DC in fingerprint[0]:  # Gateway_73
         ret.flags |= VolkswagenFlags.ALT_GEAR.value
 
-      ret.radarUnavailable = 0x24F not in fingerprint[0] # Strukturen_01
+      ret.radarUnavailable = 0x24F not in fingerprint[0]  # Strukturen_01
       ret.radarDelay = 0.8
 
       # only allow gateway harness for now
