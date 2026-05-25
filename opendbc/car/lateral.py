@@ -27,11 +27,6 @@ class AngleSteeringLimits:
   MAX_ANGLE_RATE: float = math.inf
 
 
-@dataclass
-class CurvatureSteeringLimits:
-  CURVATURE_MAX: float
-
-
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int | None = None):
   # some safety modes utilize a dynamic max steer
   if steer_max is None:
@@ -151,7 +146,7 @@ def get_max_curvature_average(v_ego: float) -> tuple[float, float]:
 
 
 def apply_std_curvature_limits(apply_curvature: float, apply_curvature_last: float, v_ego: float, curvature: float,
-                               steer_step: int, lat_active: bool, limits: CurvatureSteeringLimits) -> float:
+                               steer_step: int, lat_active: bool) -> float:
   new_apply_curvature = apply_curvature
 
   # Lateral jerk
@@ -169,7 +164,7 @@ def apply_std_curvature_limits(apply_curvature: float, apply_curvature_last: flo
   if not lat_active:
     new_apply_curvature = curvature
 
-  return float(np.clip(new_apply_curvature, -limits.CURVATURE_MAX, limits.CURVATURE_MAX))
+  return new_apply_curvature
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,
