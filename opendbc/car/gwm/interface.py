@@ -1,4 +1,4 @@
-from opendbc.car import structs, get_safety_config, CanBusBase, Bus, create_button_events
+from opendbc.car import structs, get_safety_config, Bus, create_button_events
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.gwm.carcontroller import CarController
 from opendbc.car.gwm.carstate import CarState
@@ -51,16 +51,7 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = 'gwm'
 
-    cfgs = [get_safety_config(structs.CarParams.SafetyModel.gwm)]
-
-    # If multipanda mapping is detected (offset >= 4), keep the first safety slot
-    # as `noOutput` so an internal panda remains silent and the vehicle safety config
-    # stays as the last entry (`-1`). This enables external panda to control the vehicle.
-    CAN = CanBusBase(None, fingerprint)
-    if CAN.offset >= 4:
-      cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
-
-    ret.safetyConfigs = cfgs
+    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.gwm)]
 
     ret.dashcamOnly = False
 
