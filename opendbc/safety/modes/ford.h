@@ -90,6 +90,11 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
 #define FORD_MIN_PATH_ANGLE -1000  // -0.5 rad
 #define FORD_MAX_PATH_OFFSET 511   // 5.11 m
 #define FORD_MIN_PATH_OFFSET -512  // -5.12 m
+// CAN FD bal mode uses c2/c3 of the path polynomial alongside c0/c1.
+#define FORD_MAX_CANFD_CURVATURE 1000        //  0.02 1/m
+#define FORD_MIN_CANFD_CURVATURE -1000       // -0.02 1/m
+#define FORD_MAX_CANFD_CURVATURE_RATE 1023   //  0.001023 1/m^2
+#define FORD_MIN_CANFD_CURVATURE_RATE -1024  // -0.001024 1/m^2
 // Curvature rate limits
 #define FORD_LIMITS(limit_lateral_acceleration) {                                                \
   .max_angle = 1000,          /* 0.02 curvature */                                              \
@@ -274,16 +279,20 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
 
     int desired_path_angle = raw_path_angle - FORD_INACTIVE_PATH_ANGLE;
     int desired_path_offset = raw_path_offset - FORD_INACTIVE_PATH_OFFSET;
+    int desired_curvature = raw_curvature - FORD_INACTIVE_CURVATURE;
+    int desired_curvature_rate = raw_curvature_rate - FORD_CANFD_INACTIVE_CURVATURE_RATE;
 
-    // CAN FD path steering uses c0/c1 in extended path-following mode. Curvature and curvature rate stay inactive.
+    // CAN FD path steering uses the full c0/c1/c2/c3 polynomial in extended path-following mode.
+    // Each coefficient is bounded to its DBC range; relative authority is shared by the PSCM polynomial response.
     violation |= (lat_ctl_mode != 0U) && !steer_control_enabled;
-    violation |= raw_curvature != FORD_INACTIVE_CURVATURE;
-    violation |= raw_curvature_rate != FORD_CANFD_INACTIVE_CURVATURE_RATE;
     violation |= safety_max_limit_check(desired_path_angle, FORD_MAX_PATH_ANGLE, FORD_MIN_PATH_ANGLE);
     violation |= safety_max_limit_check(desired_path_offset, FORD_MAX_PATH_OFFSET, FORD_MIN_PATH_OFFSET);
+    violation |= safety_max_limit_check(desired_curvature, FORD_MAX_CANFD_CURVATURE, FORD_MIN_CANFD_CURVATURE);
+    violation |= safety_max_limit_check(desired_curvature_rate, FORD_MAX_CANFD_CURVATURE_RATE, FORD_MIN_CANFD_CURVATURE_RATE);
 
     if (!steer_control_enabled) {
       violation |= (desired_path_angle != 0) || (desired_path_offset != 0);
+      violation |= (desired_curvature != 0) || (desired_curvature_rate != 0);
     }
     violation |= steer_control_enabled && !controls_allowed;
 
