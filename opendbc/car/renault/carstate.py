@@ -40,15 +40,18 @@ class CarState(CarStateBase):
     ret.leftBlinker = cp_body.vl["STEERING_SENSOR_112"]["TURN_SIGNAL_LEFT"] == 1
     ret.rightBlinker = cp.vl["TURN_SIGNAL_RIGHT_58B"]["TURN_SIGNAL_RIGHT"] == 1
 
-    # ADAS_ENGAGED is a multi-state enum and currently only used as availability.
-    # Keep enabled False until an ACC-active state/bit is identified.
-    adas_engaged = cp_body.vl["EPS_STATE_4B5"]["ADAS_ENGAGED"]
-    ret.cruiseState.available = adas_engaged != 0
-    ret.cruiseState.enabled = False
+    # 0x57A is the clean ADAS state source. State 0 is active controlling;
+    # state 8 is armed/standby; state 16 is driver override; state 41 is fault.
+    adas_state = cp_body.vl["ADAS_STATE_57A"]["ADAS_STATE"]
+    set_speed_kph = cp.vl["ACC_SETPOINT_5EF"]["SET_SPEED"]
+    active_target_kph = cp_body.vl["ADAS_TARGET_517"]["ADAS_ACTIVE_TARGET"]
+    has_target = 0 < active_target_kph < 250
+    ret.cruiseState.available = adas_state in (0, 8, 16) and (set_speed_kph > 0 or has_target)
+    ret.cruiseState.enabled = adas_state == 0 and set_speed_kph > 0
     ret.cruiseState.standstill = False
-    # Raw 200 km/h is the UNSET sentinel when cruise has no target
-    set_speed_kph = cp.vl["VEHICLE_SPEED_3FA"]["CRUISE_SET_SPEED"]
-    ret.cruiseState.speed = 0.0 if set_speed_kph >= 200 else set_speed_kph * CV.KPH_TO_MS
+    # Driver-selected ACC/limiter setpoint; 0x517 tracks the active sign-adapted
+    # target and is kept in the DBC, but isn't the driver's set speed.
+    ret.cruiseState.speed = set_speed_kph * CV.KPH_TO_MS if set_speed_kph > 0 else 0.0
 
     ret.steerFaultTemporary = cp.vl["STEERING_CTRL_1AB"]["LKAS_STATE"] == 3
 
@@ -68,11 +71,14 @@ class CarState(CarStateBase):
       ("VEHICLE_SPEED_3FA", 10),
       ("TURN_SIGNAL_RIGHT_58B", 10),
       ("BELTS_DOORS_588", 10),
+      ("ACC_SETPOINT_5EF", 1),
     ]
     body_messages = [
       ("STEERING_SENSOR_112", 100),
       ("PEDAL_AND_GEAR_224", 50),
       ("EPS_STATE_4B5", 10),
+      ("ADAS_TARGET_517", 2),
+      ("ADAS_STATE_57A", 2),
     ]
     return {
       Bus.pt:   CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages,   0),
