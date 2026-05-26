@@ -126,13 +126,13 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.07
 
     ret.pcmCruise = not ret.openpilotLongitudinalControl
-    ret.vEgoStarting = 0.1
-
     if ret.flags & VolkswagenFlags.MEB:
       ret.startingState = True
+      ret.startAccel = 0.8
     else:
       ret.stopAccel = -0.55
       ret.vEgoStopping = 0.5
+      ret.vEgoStarting = 0.1
     ret.autoResumeSng = ret.minEnableSpeed == -1
 
     CAN = CanBus(fingerprint=fingerprint)
