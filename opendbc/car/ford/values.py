@@ -4,7 +4,7 @@ from dataclasses import dataclass, field, replace
 from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
-from opendbc.car.lateral import AngleSteeringLimits
+from opendbc.car.lateral import AngleSteeringLimits, CurvatureSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries, p16
@@ -21,6 +21,10 @@ class CarControllerParams:
   BUTTONS_STEP = 5      # Steering_Data_FD1, 10Hz, but send twice as fast
 
   STEER_DRIVER_ALLOWANCE = 1.0  # Driver intervention threshold, Nm
+
+  CURVATURE_LIMITS: CurvatureSteeringLimits = CurvatureSteeringLimits(
+    0.02,  # Max curvature for steering command, m^-1
+  )
 
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     0.02,  # Max curvature for steering command, m^-1
