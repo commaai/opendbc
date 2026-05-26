@@ -83,11 +83,23 @@ class CarController(CarControllerBase):
 
         if CC.latActive:
           hca_enabled = True
+          overriding = CS.out.steeringPressed
           error = actuators.curvature - CC.currentCurvature
-          freeze_integrator = CS.out.steeringPressed or CS.out.vEgoRaw < 5
+          freeze_integrator = overriding or CS.out.vEgoRaw < 5
+          # Keep the PID running with override=True so its integrator
+          # unwinds normally during driver intervention, but do NOT use
+          # its output: at highway speed k_p reaches 1.45 1/m per (1/m)
+          # of error, and currentCurvature diverges instantly when the
+          # driver pulls the wheel, so the P term + feedforward would
+          # saturate apply_curvature directly against the driver.
           pid_curvature = self.curvature_pid.update(error, speed=CS.out.vEgo, feedforward=actuators.curvature,
-                                                    freeze_integrator=freeze_integrator, override=CS.out.steeringPressed)
-          apply_curvature = pid_curvature + (CS.curvature_meas - CC.currentCurvature)
+                                                    freeze_integrator=freeze_integrator, override=overriding)
+          if overriding:
+            # Pre-PID compensation form: tracks the rack at its current
+            # position, no torque commanded against the driver.
+            apply_curvature = actuators.curvature + (CS.curvature_meas - CC.currentCurvature)
+          else:
+            apply_curvature = pid_curvature + (CS.curvature_meas - CC.currentCurvature)
           apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
                                                        self.CCP.STEER_STEP, CC.latActive)
           apply_curvature = float(np.clip(apply_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX))
