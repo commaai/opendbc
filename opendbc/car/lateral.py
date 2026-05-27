@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from dataclasses import dataclass
-from opendbc.car import structs, rate_limit, DT_CTRL
+from opendbc.car import structs, rate_limit, DT_CTRL, ACCELERATION_DUE_TO_GRAVITY
 from opendbc.car.vehicle_model import VehicleModel
 
 FRICTION_THRESHOLD = 0.2
@@ -9,6 +9,9 @@ FRICTION_THRESHOLD = 0.2
 # ISO 11270
 ISO_LATERAL_ACCEL = 3.0  # m/s^2
 ISO_LATERAL_JERK = 5.0  # m/s^3
+# Add extra tolerance for average banked road since safety doesn't have the roll
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
+MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
 
 
 @dataclass
@@ -22,6 +25,14 @@ class AngleSteeringLimits:
   MAX_LATERAL_ACCEL: float = 0
   MAX_LATERAL_JERK: float = 0
   MAX_ANGLE_RATE: float = math.inf
+
+
+@dataclass
+class CurvatureSteeringLimits:
+  # v1 limits (using apply_std_curvature_limits)
+  CURVATURE_MAX: float
+  CURVATURE_RATE_LIMIT_UP: tuple[list[float], list[float]]
+  CURVATURE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
 
 
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int | None = None):
@@ -126,6 +137,22 @@ def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_e
 
   # prevent fault
   return float(np.clip(new_apply_angle, -limits.ANGLE_LIMITS.STEER_ANGLE_MAX, limits.ANGLE_LIMITS.STEER_ANGLE_MAX))
+
+
+def apply_std_curvature_limits(apply_curvature: float, apply_curvature_last: float, v_ego: float, curvature: float,
+                               lat_active: bool, limits: CurvatureSteeringLimits) -> float:
+  # pick curvature rate limits based on wind up/down
+  curvature_up = apply_curvature_last * apply_curvature >= 0. and abs(apply_curvature) > abs(apply_curvature_last)
+  rate_limits = limits.CURVATURE_RATE_LIMIT_UP if curvature_up else limits.CURVATURE_RATE_LIMIT_DOWN
+
+  curvature_rate_lim = np.interp(v_ego, rate_limits[0], rate_limits[1])
+  new_apply_curvature = np.clip(apply_curvature, apply_curvature_last - curvature_rate_lim, apply_curvature_last + curvature_rate_lim)
+
+  # curvature is current curvature when inactive on all curvature cars
+  if not lat_active:
+    new_apply_curvature = curvature
+
+  return float(np.clip(new_apply_curvature, -limits.CURVATURE_MAX, limits.CURVATURE_MAX))
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,
