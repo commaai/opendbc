@@ -65,6 +65,7 @@ class CarController(CarControllerBase):
     self.curvature_pid = PIDController(([10., 40.], [0., 1.45]), ([10., 40.], [0., 0.12]), k_f=1.,
                                        pos_limit=self.CCP.CURVATURE_MAX, neg_limit=-self.CCP.CURVATURE_MAX,
                                        rate=1 / (DT_CTRL * self.CCP.STEER_STEP))
+    self.overriding_last = False
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -85,15 +86,13 @@ class CarController(CarControllerBase):
           hca_enabled = True
           overriding = CS.out.steeringPressed
           error = actuators.curvature - CC.currentCurvature
+          # zero i on override rising edge; PIDController's linear unwind sign-flips
+          if overriding and not self.overriding_last:
+            self.curvature_pid.i = 0.0
+          self.overriding_last = overriding
           freeze_integrator = overriding or CS.out.vEgoRaw < 5
-          # Keep the PID running with override=True so its integrator
-          # unwinds normally during driver intervention, but do NOT use
-          # its output: at highway speed k_p reaches 1.45 1/m per (1/m)
-          # of error, and currentCurvature diverges instantly when the
-          # driver pulls the wheel, so the P term + feedforward would
-          # saturate apply_curvature directly against the driver.
           pid_curvature = self.curvature_pid.update(error, speed=CS.out.vEgo, feedforward=actuators.curvature,
-                                                    freeze_integrator=freeze_integrator, override=overriding)
+                                                    freeze_integrator=freeze_integrator)
           if overriding:
             # Pre-PID compensation form: tracks the rack at its current
             # position, no torque commanded against the driver.
