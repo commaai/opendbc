@@ -9,7 +9,7 @@ from collections.abc import Callable
 from opendbc.can import CANPacker
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.car.lateral import ISO_LATERAL_JERK, MAX_LATERAL_ACCEL
+from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 
 MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
@@ -864,7 +864,7 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
     v = 1
     for sign in (1, -1):
       max_curvature = self.MAX_CURVATURE_TEST * sign
-      max_curvature_rate = ISO_LATERAL_JERK / v**2
+      max_curvature_rate = MAX_LATERAL_JERK / v**2
       max_curvature_delta = max_curvature_rate * self.SEND_RATE * sign
 
       self._reset_speed_measurement(v)
@@ -887,7 +887,7 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
     for v in speeds:
       for sign in (1, -1):
         max_curvature = np.clip(((MAX_LATERAL_ACCEL / (v - 1)**2) * sign), -self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST)
-        max_curvature_rate = ISO_LATERAL_JERK / (v - 1)**2
+        max_curvature_rate = MAX_LATERAL_JERK / (v - 1)**2
         max_curvature_delta = max_curvature_rate * self.SEND_RATE * sign
 
         self._reset_speed_measurement(v)
@@ -908,7 +908,7 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
   def test_iso_jerk_limit(self):
     speeds = [2., 5., 10., 15., 50.]
     for v in speeds:
-      max_curvature_rate = ISO_LATERAL_JERK / (v - 1)**2
+      max_curvature_rate = MAX_LATERAL_JERK / (v - 1)**2
       max_curvature_delta = max_curvature_rate * self.SEND_RATE
 
       self._reset_speed_measurement(v)
@@ -926,9 +926,9 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
 
       self.assertFalse(self._tx(self._curvature_cmd_msg(max_curvature_delta, True)))
 
+      # after violation, prev is reset to 0; jumping past the jerk limit must fail
       self.safety.set_controls_allowed(True)
-
-      self.assertFalse(self._tx(self._curvature_cmd_msg(-max_curvature_delta, True)))
+      self.assertFalse(self._tx(self._curvature_cmd_msg(2 * max_curvature_delta, True)))
 
 
 class SafetyTest(SafetyTestBase):

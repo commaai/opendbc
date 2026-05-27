@@ -91,7 +91,7 @@ int get_desired_angle_last();
 void set_angle_meas(int min, int max);
 int get_angle_meas_min(void);
 int get_angle_meas_max(void);
-void set_desired_curvature_last(int curvature);
+void set_desired_curvature_last(int t);
 int get_desired_curvature_last();
 void set_curvature_meas(int min, int max);
 int get_curvature_meas_min(void);

@@ -177,8 +177,9 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     const CurvatureSteeringLimits VOLKSWAGEN_MEB_STEERING_LIMITS = {
       .max_curvature = 29105,
       .curvature_to_can = 149253.7313f,
-      .send_rate = 0.02f,
-      .inactive_curvature_is_zero = true,
+      .frequency = 50,                    // Hz
+      .max_curvature_error = 0,           // disabled; MEB doesn't track rack
+      .curvature_error_min_speed = 10.0,  // m/s
     };
 
     int desired_curvature_raw = GET_BYTES(msg, 3, 2) & 0x7FFFU;
@@ -203,7 +204,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       tx = false;
     }
 
-    if (steer_curvature_cmd_checks_average(desired_curvature_raw, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
+    if (steer_curvature_cmd_checks(desired_curvature_raw, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
       tx = false;
     }
   }

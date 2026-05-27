@@ -89,9 +89,10 @@ class CarController(CarControllerBase):
       if CS.out.vEgoRaw > 9:
         apply_curvature = float(np.clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
                                         current_curvature + CarControllerParams.CURVATURE_ERROR))
-      self.apply_curvature_last = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw,
-                                                             current_curvature, CarControllerParams.STEER_STEP,
-                                                             CC.latActive, CarControllerParams.CURVATURE_LIMITS)
+      apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw,
+                                                   0., CarControllerParams.STEER_STEP, CC.latActive,
+                                                   CarControllerParams.CURVATURE_LIMITS)
+      self.apply_curvature_last = apply_curvature
 
       if self.CP.flags & FordFlags.CANFD:
         # TODO: extended mode

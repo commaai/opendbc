@@ -82,10 +82,12 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self._set_prev_desired_power(max_power - 1)
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=max_power)))
 
+    # When controls are not allowed, steer_req=True is always disallowed by the
+    # shared curvature safety regardless of power value.
     self._set_prev_desired_power(max_power - 1)
-    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))  # increase not allowed
-    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))  # equal not allowed
-    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))  # decrease allowed
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))
 
   def _speed_msg(self, speed_mps: float):
     spd_kph = speed_mps * 3.6

@@ -77,9 +77,11 @@ uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heart
 uint32_t rt_angle_msgs = 0;
 uint32_t ts_angle_check_last = 0;
 int desired_angle_last = 0;
-struct sample_t angle_meas;         // last 6 steer angles/curvatures
-struct sample_t curvature_meas;     // last 6 curvatures
+struct sample_t angle_meas;         // last 6 steer angles
+
+// for safety modes with curvature steering control
 int desired_curvature_last = 0;
+struct sample_t curvature_meas;     // last 6 steer curvatures
 
 
 int alternative_experience = 0;

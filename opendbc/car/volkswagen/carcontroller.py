@@ -62,9 +62,10 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = None
     self.klr_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
-    self.curvature_pid = PIDController(([10., 40.], [0., 1.45]), ([10., 40.], [0., 0.12]), k_f=1.,
-                                       pos_limit=self.CCP.CURVATURE_MAX, neg_limit=-self.CCP.CURVATURE_MAX,
-                                       rate=1 / (DT_CTRL * self.CCP.STEER_STEP))
+    if CP.flags & VolkswagenFlags.MEB:
+      self.curvature_pid = PIDController(([10., 40.], [0., 1.45]), ([10., 40.], [0., 0.12]), k_f=1.,
+                                         pos_limit=self.CCP.CURVATURE_MAX, neg_limit=-self.CCP.CURVATURE_MAX,
+                                         rate=1 / (DT_CTRL * self.CCP.STEER_STEP))
     self.overriding_last = False
 
   def update(self, CC, CS, now_nanos):

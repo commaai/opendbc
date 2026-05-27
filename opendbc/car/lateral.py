@@ -12,6 +12,8 @@ ISO_LATERAL_JERK = 5.0  # m/s^3
 # Add extra tolerance for average banked road since safety doesn't have the roll
 AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
 MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
+# Lower than ISO 11270 lateral jerk limit (5.0 m/s^3) with bank tolerance, matches safety MAX_LATERAL_JERK
+MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^3
 
 
 @dataclass
@@ -136,34 +138,17 @@ def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_e
   return float(np.clip(new_apply_angle, -limits.ANGLE_LIMITS.STEER_ANGLE_MAX, limits.ANGLE_LIMITS.STEER_ANGLE_MAX))
 
 
-def get_max_curvature_jerk(v_ego: float, steer_step: int) -> float:
-  # ISO 11270
-  # Lateral jerk
-  ts_elapsed = steer_step * DT_CTRL
-  curvature_rate_limit = ISO_LATERAL_JERK / (max(v_ego, 1.0) ** 2)
-  max_jerk = curvature_rate_limit * ts_elapsed
-  return max_jerk
-
-
-def get_max_curvature_average(v_ego: float) -> tuple[float, float]:
-  max_curvature = MAX_LATERAL_ACCEL / (max(v_ego, 1.0) ** 2)
-  return -max_curvature, max_curvature
-
-
 def apply_std_curvature_limits(apply_curvature: float, apply_curvature_last: float, v_ego: float, curvature: float,
                                steer_step: int, lat_active: bool, limits: CurvatureSteeringLimits) -> float:
   new_apply_curvature = apply_curvature
 
-  # Lateral jerk
-  max_jerk = get_max_curvature_jerk(v_ego, steer_step)
-  curvature_up = apply_curvature_last + max_jerk
-  curvature_down = apply_curvature_last - max_jerk
+  # ISO 11270 lateral jerk
+  max_jerk = (MAX_LATERAL_JERK / (max(v_ego, 1.0) ** 2)) * (steer_step * DT_CTRL)
+  new_apply_curvature = float(np.clip(new_apply_curvature, apply_curvature_last - max_jerk, apply_curvature_last + max_jerk))
 
-  new_apply_curvature = float(np.clip(new_apply_curvature, curvature_down, curvature_up))
-
-  # Lateral acceleration
-  min_curvature, max_curvature = get_max_curvature_average(v_ego)
-  new_apply_curvature = float(np.clip(new_apply_curvature, min_curvature, max_curvature))
+  # ISO 11270 lateral acceleration
+  max_curvature = MAX_LATERAL_ACCEL / (max(v_ego, 1.0) ** 2)
+  new_apply_curvature = float(np.clip(new_apply_curvature, -max_curvature, max_curvature))
 
   # curvature is current curvature when inactive on all curvature cars
   if not lat_active:

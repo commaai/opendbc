@@ -177,8 +177,8 @@ int get_angle_meas_max(void){
   return angle_meas.max;
 }
 
-void set_desired_curvature_last(int curvature){
-  desired_curvature_last = curvature;
+void set_desired_curvature_last(int t){
+  desired_curvature_last = t;
 }
 
 int get_desired_curvature_last(void){
