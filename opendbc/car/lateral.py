@@ -29,7 +29,6 @@ class AngleSteeringLimits:
 
 @dataclass
 class CurvatureSteeringLimits:
-  # v1 limits (using apply_std_curvature_limits)
   CURVATURE_MAX: float
   CURVATURE_RATE_LIMIT_UP: tuple[list[float], list[float]]
   CURVATURE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
