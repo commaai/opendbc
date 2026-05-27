@@ -241,7 +241,7 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
     violation |= safety_max_limit_check(desired_curvature, max_curvature_can, -max_curvature_can);
 
     // *** curvature error from measured ***
-    if ((limits.max_curvature_error > 0) && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.curvature_error_min_speed)) {
+    if (limits.max_curvature_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.curvature_error_min_speed)) {
       const int lowest_desired_curvature_error = curvature_meas.min - limits.max_curvature_error - 1;
       const int highest_desired_curvature_error = curvature_meas.max + limits.max_curvature_error + 1;
       violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature_error, lowest_desired_curvature_error);

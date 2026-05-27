@@ -78,6 +78,8 @@ class TestFordSafetyBase(common.CarSafetyTest):
   # Curvature control limits
   DEG_TO_CAN = 50000  # 1 / (2e-5) rad to can
   MAX_CURVATURE = 0.02
+  MAX_CURVATURE_ERROR = 0.002         # rad/m, = 100 CAN units
+  CURVATURE_ERROR_MIN_SPEED = 10.0    # m/s
 
   # Frequency of the lateral control message, used for RT rate limit gating
   LATERAL_FREQUENCY = 20  # Hz
@@ -361,6 +363,60 @@ class TestFordSafetyBase(common.CarSafetyTest):
     next_can = base_can + max_delta_can
     self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, next_can / self.DEG_TO_CAN, 0)),
                     msg=f"prev should track commanded curvature; speed={speed} base={base_can} next={next_can}")
+
+  def test_curvature_error_clamps_to_meas(self):
+    # Above curvature_error_min_speed, commanded curvature must be within max_curvature_error
+    # of the measured curvature (with a +/-1 CAN-unit fudge). Tests both bounds.
+    speed = 15.
+    max_error_can = round(self.MAX_CURVATURE_ERROR * self.DEG_TO_CAN)  # 100
+    self._reset_curvature_measurement(0, speed)  # meas.min == meas.max == 0
+
+    # Upper bound: band is [-(max_error+1), +(max_error+1)] = [-101, 101]
+    prev_can = max_error_can  # 100, stays within jerk limit of test cmds
+    self.safety.set_controls_allowed(True)
+    self.safety.set_desired_curvature_last(prev_can)
+    self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, (max_error_can + 1) / self.DEG_TO_CAN, 0)))
+
+    self.safety.set_controls_allowed(True)
+    self.safety.set_desired_curvature_last(prev_can)
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, (max_error_can + 2) / self.DEG_TO_CAN, 0)))
+
+    # Lower bound: symmetric.
+    prev_can = -max_error_can
+    self.safety.set_controls_allowed(True)
+    self.safety.set_desired_curvature_last(prev_can)
+    self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, -(max_error_can + 1) / self.DEG_TO_CAN, 0)))
+
+    self.safety.set_controls_allowed(True)
+    self.safety.set_desired_curvature_last(prev_can)
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, -(max_error_can + 2) / self.DEG_TO_CAN, 0)))
+
+  def test_curvature_error_disabled_below_min_speed(self):
+    # Below curvature_error_min_speed, the rack-tracking check is skipped: a command outside
+    # the measured-curvature error band but within ISO accel + jerk caps must pass.
+    speed = 9.  # < CURVATURE_ERROR_MIN_SPEED
+    max_error_can = round(self.MAX_CURVATURE_ERROR * self.DEG_TO_CAN)
+    self._reset_curvature_measurement(0, speed)
+
+    prev_can = max_error_can
+    cmd_can = max_error_can + 5  # outside [-101, 101], well inside ISO accel cap at speed=9
+    self.safety.set_controls_allowed(True)
+    self.safety.set_desired_curvature_last(prev_can)
+    self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, cmd_can / self.DEG_TO_CAN, 0)))
+
+  def test_curvature_error_uses_newest_speed(self):
+    # The check must read vehicle_speed.values[0] (newest). Stage the speed buffer so values[0]
+    # crosses the min_speed threshold while older samples don't: original enforces, a mutant
+    # reading any older index would skip.
+    max_error_can = round(self.MAX_CURVATURE_ERROR * self.DEG_TO_CAN)
+    self._reset_curvature_measurement(0, 9)  # all speed samples = 9, meas = 0
+    self._rx(self._speed_msg(15))  # values[0] = 15, values[1..5] = 9
+
+    prev_can = max_error_can
+    cmd_can = max_error_can + 5  # outside band; jerk delta = 5, well within limits
+    self.safety.set_controls_allowed(True)
+    self.safety.set_desired_curvature_last(prev_can)
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, cmd_can / self.DEG_TO_CAN, 0)))
 
   def test_steer_allowed(self):
     # New simple curvature safety:
