@@ -66,7 +66,6 @@ class CarController(CarControllerBase):
       self.curvature_pid = PIDController(([10., 40.], [0., 1.45]), ([10., 40.], [0., 0.12]), k_f=1.,
                                          pos_limit=self.CCP.CURVATURE_MAX, neg_limit=-self.CCP.CURVATURE_MAX,
                                          rate=1 / (DT_CTRL * self.CCP.STEER_STEP))
-    self.overriding_last = False
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -85,21 +84,16 @@ class CarController(CarControllerBase):
 
         if CC.latActive:
           hca_enabled = True
+          # during override, command feedforward only (no feedback) so we don't fight the driver:
+          # zeroing both error and the integrator collapses the PID output to actuators.curvature
           overriding = CS.out.steeringPressed
-          error = actuators.curvature - CC.currentCurvature
-          # zero i on override rising edge; PIDController's linear unwind sign-flips
-          if overriding and not self.overriding_last:
+          if overriding:
             self.curvature_pid.i = 0.0
-          self.overriding_last = overriding
+          error = 0. if overriding else actuators.curvature - CC.currentCurvature
           freeze_integrator = overriding or CS.out.vEgoRaw < 5
           pid_curvature = self.curvature_pid.update(error, speed=CS.out.vEgo, feedforward=actuators.curvature,
                                                     freeze_integrator=freeze_integrator)
-          if overriding:
-            # Pre-PID compensation form: tracks the rack at its current
-            # position, no torque commanded against the driver.
-            apply_curvature = actuators.curvature + (CS.curvature_meas - CC.currentCurvature)
-          else:
-            apply_curvature = pid_curvature + (CS.curvature_meas - CC.currentCurvature)
+          apply_curvature = pid_curvature + (CS.curvature_meas - CC.currentCurvature)
           apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
                                                        self.CCP.STEER_STEP, CC.latActive, self.CCP.CURVATURE_LIMITS)
 
