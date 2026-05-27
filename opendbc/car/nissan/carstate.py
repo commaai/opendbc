@@ -101,7 +101,6 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"]
 
-
     ret.leftBlinker = bool(cp.vl["LIGHTS"]["LEFT_BLINKER"])
     ret.rightBlinker = bool(cp.vl["LIGHTS"]["RIGHT_BLINKER"])
 
