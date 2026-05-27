@@ -2,17 +2,13 @@ import math
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
-from opendbc.car.lateral import AVERAGE_ROAD_ROLL, ISO_LATERAL_ACCEL, apply_std_curvature_limits
+from opendbc.car.lateral import MAX_LATERAL_ACCEL, apply_std_curvature_limits
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags, CAR
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
-
-# CAN FD limits:
-# Limit to average banked road since safety doesn't have the roll
-MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
 
 
 def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
@@ -96,12 +92,9 @@ class CarController(CarControllerBase):
       apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw,
                                                    0., CC.latActive, CarControllerParams.CURVATURE_LIMITS)
 
-      # Ford Q4/CAN FD has more torque available compared to Q3/CAN so we limit it based on lateral acceleration.
-      # Safety is not aware of the road roll so we subtract a conservative amount at all times
-      if self.CP.flags & FordFlags.CANFD:
-        # Limit curvature to conservative max lateral acceleration
-        curvature_accel_limit = MAX_LATERAL_ACCEL / (max(CS.out.vEgoRaw, 1) ** 2)
-        apply_curvature = float(np.clip(apply_curvature, -curvature_accel_limit, curvature_accel_limit))
+      # Limit curvature to ISO 11270 lateral acceleration with bank tolerance
+      curvature_accel_limit = MAX_LATERAL_ACCEL / (max(CS.out.vEgoRaw, 1) ** 2)
+      apply_curvature = float(np.clip(apply_curvature, -curvature_accel_limit, curvature_accel_limit))
       self.apply_curvature_last = apply_curvature
 
       if self.CP.flags & FordFlags.CANFD:

@@ -177,6 +177,27 @@ int get_angle_meas_max(void){
   return angle_meas.max;
 }
 
+void set_desired_curvature_last(int t){
+  desired_curvature_last = t;
+}
+
+int get_desired_curvature_last(void){
+  return desired_curvature_last;
+}
+
+void set_curvature_meas(int min, int max){
+  curvature_meas.min = min;
+  curvature_meas.max = max;
+}
+
+int get_curvature_meas_min(void){
+  return curvature_meas.min;
+}
+
+int get_curvature_meas_max(void){
+  return curvature_meas.max;
+}
+
 
 // ***** car specific helpers *****
 

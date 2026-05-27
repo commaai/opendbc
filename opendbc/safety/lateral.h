@@ -6,6 +6,9 @@ static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 static const float EARTH_G = 9.81;
 static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
 
+// Highway curves are rolled in the direction of the turn, add tolerance to compensate
+static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
+
 // check that commanded torque value isn't too far from measured
 static bool dist_to_meas_check(int val, int val_last, struct sample_t *val_meas,
                         const int MAX_RATE_UP, const int MAX_RATE_DOWN, const int MAX_ERROR) {
@@ -190,75 +193,16 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
     int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
 
-    // check that commanded angle value isn't too far from measured, used to limit torque for some safety modes
-    // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
-    if (limits.enforce_angle_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.angle_error_min_speed)) {
-      // flipped fudge to avoid false positives
-      const float fudged_speed_error = (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.;
-      const int delta_angle_up_relaxed = (safety_interpolate(limits.angle_rate_up_lookup, fudged_speed_error) * limits.angle_deg_to_can) - 1.;
-      const int delta_angle_down_relaxed = (safety_interpolate(limits.angle_rate_down_lookup, fudged_speed_error) * limits.angle_deg_to_can) - 1.;
-
-      // the minimum and maximum angle allowed based on the measured angle
-      const int lowest_desired_angle_error = angle_meas.min - limits.max_angle_error - 1;
-      const int highest_desired_angle_error = angle_meas.max + limits.max_angle_error + 1;
-
-      // the MAX is to allow the desired angle to hit the edge of the bounds and not require going under it
-      if (desired_angle_last > highest_desired_angle_error) {
-        const int delta = (desired_angle_last >= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
-        highest_desired_angle = SAFETY_MAX(desired_angle_last - delta, highest_desired_angle_error);
-
-      } else if (desired_angle_last < lowest_desired_angle_error) {
-        const int delta = (desired_angle_last <= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
-        lowest_desired_angle = SAFETY_MIN(desired_angle_last + delta, lowest_desired_angle_error);
-
-      } else {
-        // already inside error boundary, don't allow commanding outside it
-        highest_desired_angle = SAFETY_MIN(highest_desired_angle, highest_desired_angle_error);
-        lowest_desired_angle = SAFETY_MAX(lowest_desired_angle, lowest_desired_angle_error);
-      }
-
-      // don't enforce above the max steer
-      // TODO: this should always be done
-      lowest_desired_angle = SAFETY_CLAMP(lowest_desired_angle, -limits.max_angle, limits.max_angle);
-      highest_desired_angle = SAFETY_CLAMP(highest_desired_angle, -limits.max_angle, limits.max_angle);
-    }
-
-    // check not above ISO 11270 lateral accel assuming worst case road roll
-    if (limits.angle_is_curvature) {
-
-      // Limit to average banked road since safety doesn't have the roll
-      static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
-
-      // Allow small tolerance by using minimum speed and rounding curvature up
-      const float speed_lower = SAFETY_MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
-      const float speed_upper = SAFETY_MAX(vehicle_speed.max / VEHICLE_SPEED_FACTOR, 1.0);
-      const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_lower * speed_lower) * limits.angle_deg_to_can) + 1.;
-      const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_upper * speed_upper) * limits.angle_deg_to_can) - 1.;
-
-      // ensure that the curvature error doesn't try to enforce above this limit
-      if (desired_angle_last > 0) {
-        lowest_desired_angle = SAFETY_CLAMP(lowest_desired_angle, -max_curvature_lower, max_curvature_lower);
-        highest_desired_angle = SAFETY_CLAMP(highest_desired_angle, -max_curvature_upper, max_curvature_upper);
-      } else {
-        lowest_desired_angle = SAFETY_CLAMP(lowest_desired_angle, -max_curvature_upper, max_curvature_upper);
-        highest_desired_angle = SAFETY_CLAMP(highest_desired_angle, -max_curvature_lower, max_curvature_lower);
-      }
-    }
-
     // check for violation;
     violation |= safety_max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
   }
   desired_angle_last = desired_angle;
 
-  // Angle should either be 0 or same as current angle while not steering
+  // Angle should be close to current angle while not steering
   if (!steer_control_enabled) {
-    if (limits.inactive_angle_is_zero) {
-      violation |= desired_angle != 0;
-    } else {
-      const int max_inactive_angle = SAFETY_CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
-      const int min_inactive_angle = SAFETY_CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
-      violation |= safety_max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
-    }
+    const int max_inactive_angle = SAFETY_CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
+    const int min_inactive_angle = SAFETY_CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
+    violation |= safety_max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
   }
 
   // No angle control allowed when controls are not allowed
@@ -268,11 +212,94 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
   // reset to current angle if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
-    if (limits.inactive_angle_is_zero) {
-      desired_angle_last = 0;
-    } else {
-      desired_angle_last = SAFETY_CLAMP(angle_meas.values[0], -limits.max_angle, limits.max_angle);
+    desired_angle_last = SAFETY_CLAMP(angle_meas.values[0], -limits.max_angle, limits.max_angle);
+  }
+
+  return violation;
+}
+
+// Safety checks for curvature-based steering commands
+bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
+  bool violation = false;
+
+  if (controls_allowed && steer_control_enabled) {
+    // convert floating point curvature rate limits to integers in the scale of the desired curvature on CAN,
+    // add 1 to not false trigger the violation. also fudge the speed by 1 m/s so rate limits are
+    // always slightly above openpilot's in case we read an updated speed in between curvature commands
+    const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
+    int delta_curvature_up = (safety_interpolate(limits.curvature_rate_up_lookup, fudged_speed) * limits.curvature_to_can) + 1.;
+    int delta_curvature_down = (safety_interpolate(limits.curvature_rate_down_lookup, fudged_speed) * limits.curvature_to_can) + 1.;
+
+    // allow down limits at zero since small floats from openpilot will be rounded to 0
+    int highest_desired_curvature = desired_curvature_last + ((desired_curvature_last > 0) ? delta_curvature_up : delta_curvature_down);
+    int lowest_desired_curvature = desired_curvature_last - ((desired_curvature_last >= 0) ? delta_curvature_down : delta_curvature_up);
+
+    // check that commanded curvature value isn't too far from measured
+    // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
+    if (limits.enforce_curvature_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.curvature_error_min_speed)) {
+      // flipped fudge to avoid false positives
+      const float fudged_speed_error = (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.;
+      const int delta_curvature_up_relaxed = (safety_interpolate(limits.curvature_rate_up_lookup, fudged_speed_error) * limits.curvature_to_can) - 1.;
+      const int delta_curvature_down_relaxed = (safety_interpolate(limits.curvature_rate_down_lookup, fudged_speed_error) * limits.curvature_to_can) - 1.;
+
+      // the minimum and maximum curvature allowed based on the measured curvature
+      const int lowest_desired_curvature_error = curvature_meas.min - limits.max_curvature_error - 1;
+      const int highest_desired_curvature_error = curvature_meas.max + limits.max_curvature_error + 1;
+
+      // the MAX is to allow the desired curvature to hit the edge of the bounds and not require going under it
+      if (desired_curvature_last > highest_desired_curvature_error) {
+        const int delta = (desired_curvature_last >= 0) ? delta_curvature_down_relaxed : delta_curvature_up_relaxed;
+        highest_desired_curvature = SAFETY_MAX(desired_curvature_last - delta, highest_desired_curvature_error);
+
+      } else if (desired_curvature_last < lowest_desired_curvature_error) {
+        const int delta = (desired_curvature_last <= 0) ? delta_curvature_down_relaxed : delta_curvature_up_relaxed;
+        lowest_desired_curvature = SAFETY_MIN(desired_curvature_last + delta, lowest_desired_curvature_error);
+
+      } else {
+        // already inside error boundary, don't allow commanding outside it
+        highest_desired_curvature = SAFETY_MIN(highest_desired_curvature, highest_desired_curvature_error);
+        lowest_desired_curvature = SAFETY_MAX(lowest_desired_curvature, lowest_desired_curvature_error);
+      }
+
+      // don't enforce above the max curvature
+      lowest_desired_curvature = SAFETY_CLAMP(lowest_desired_curvature, -limits.max_curvature, limits.max_curvature);
+      highest_desired_curvature = SAFETY_CLAMP(highest_desired_curvature, -limits.max_curvature, limits.max_curvature);
     }
+
+    // check not above ISO 11270 lateral accel assuming worst case road roll
+    // Allow small tolerance by using minimum speed and rounding curvature up
+    const float speed_lower = SAFETY_MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
+    const float speed_upper = SAFETY_MAX(vehicle_speed.max / VEHICLE_SPEED_FACTOR, 1.0);
+    const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_lower * speed_lower) * limits.curvature_to_can) + 1.;
+    const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_upper * speed_upper) * limits.curvature_to_can) - 1.;
+
+    // ensure that the curvature error doesn't try to enforce above this limit
+    if (desired_curvature_last > 0) {
+      lowest_desired_curvature = SAFETY_CLAMP(lowest_desired_curvature, -max_curvature_lower, max_curvature_lower);
+      highest_desired_curvature = SAFETY_CLAMP(highest_desired_curvature, -max_curvature_upper, max_curvature_upper);
+    } else {
+      lowest_desired_curvature = SAFETY_CLAMP(lowest_desired_curvature, -max_curvature_upper, max_curvature_upper);
+      highest_desired_curvature = SAFETY_CLAMP(highest_desired_curvature, -max_curvature_lower, max_curvature_lower);
+    }
+
+    // check for violation;
+    violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature, lowest_desired_curvature);
+  }
+  desired_curvature_last = desired_curvature;
+
+  // Curvature must be 0 while not steering
+  if (!steer_control_enabled) {
+    violation |= desired_curvature != 0;
+  }
+
+  // No curvature control allowed when controls are not allowed
+  if (!controls_allowed) {
+    violation |= steer_control_enabled;
+  }
+
+  // reset to zero if either controls is not allowed or there's a violation
+  if (violation || !controls_allowed) {
+    desired_curvature_last = 0;
   }
 
   return violation;
@@ -294,8 +321,6 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   // This check uses a simple vehicle model to allow for constant lateral acceleration and jerk limits across all speeds.
   // TODO: remove the inaccurate breakpoint angle limiting function above and always use this one
 
-  // Highway curves are rolled in the direction of the turn, add tolerance to compensate
-  static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
   // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
   static const float MAX_LATERAL_JERK = 3.0 + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
 

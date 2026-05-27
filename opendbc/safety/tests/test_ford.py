@@ -4,7 +4,7 @@ import random
 import unittest
 
 import opendbc.safety.tests.common as common
-from opendbc.car.ford.carcontroller import MAX_LATERAL_ACCEL
+from opendbc.car.lateral import MAX_LATERAL_ACCEL
 from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -92,7 +92,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
   packer: CANPackerSafety
   safety: libsafety_py.LibSafety
 
-  def get_canfd_curvature_limits(self, speed):
+  def get_curvature_limits(self, speed):
     # Round it in accordance with the safety
     curvature_accel_limit = MAX_LATERAL_ACCEL / (max(speed, 1) ** 2)
     curvature_accel_limit_lower = int(curvature_accel_limit * self.DEG_TO_CAN - 1) / self.DEG_TO_CAN
@@ -101,7 +101,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)
-    self.safety.set_desired_angle_last(t)
+    self.safety.set_desired_curvature_last(t)
 
   def _reset_curvature_measurement(self, curvature, speed):
     for _ in range(6):
@@ -228,23 +228,23 @@ class TestFordSafetyBase(common.CarSafetyTest):
         for c in (curvature, -curvature, 0, 0, 0, 0):
           self._rx(self._yaw_rate_msg(c, speed))
 
-        self.assertEqual(self.safety.get_angle_meas_min(), round(-curvature * self.DEG_TO_CAN))
-        self.assertEqual(self.safety.get_angle_meas_max(), round(curvature * self.DEG_TO_CAN))
+        self.assertEqual(self.safety.get_curvature_meas_min(), round(-curvature * self.DEG_TO_CAN))
+        self.assertEqual(self.safety.get_curvature_meas_max(), round(curvature * self.DEG_TO_CAN))
 
         self._rx(self._yaw_rate_msg(0, speed))
-        self.assertEqual(self.safety.get_angle_meas_min(), round(-curvature * self.DEG_TO_CAN))
-        self.assertEqual(self.safety.get_angle_meas_max(), 0)
+        self.assertEqual(self.safety.get_curvature_meas_min(), round(-curvature * self.DEG_TO_CAN))
+        self.assertEqual(self.safety.get_curvature_meas_max(), 0)
 
         self._rx(self._yaw_rate_msg(0, speed))
-        self.assertEqual(self.safety.get_angle_meas_min(), 0)
-        self.assertEqual(self.safety.get_angle_meas_max(), 0)
+        self.assertEqual(self.safety.get_curvature_meas_min(), 0)
+        self.assertEqual(self.safety.get_curvature_meas_max(), 0)
 
   def test_max_lateral_acceleration(self):
     # Ford CAN FD can achieve a higher max lateral acceleration than CAN so we limit curvature based on speed
     step = 1 / self.DEG_TO_CAN
     for speed in np.arange(0, 40, 0.5):
       # Clip so we test curvature limiting at low speed due to low max curvature
-      _, curvature_accel_limit_upper = self.get_canfd_curvature_limits(speed)
+      _, curvature_accel_limit_upper = self.get_curvature_limits(speed)
       curvature_accel_limit_upper = np.clip(curvature_accel_limit_upper, -self.MAX_CURVATURE, self.MAX_CURVATURE)
 
       # Test boundary curvature values around the limit, rounded to CAN precision
@@ -272,7 +272,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
     for speed in (self.CURVATURE_ERROR_MIN_SPEED - 1,
                   self.CURVATURE_ERROR_MIN_SPEED + 1):
-      _, curvature_accel_limit_upper = self.get_canfd_curvature_limits(speed)
+      _, curvature_accel_limit_upper = self.get_curvature_limits(speed)
       for controls_allowed in (True, False):
         for steer_control_enabled in (True, False):
           for path_offset in path_offsets:
@@ -288,9 +288,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
                   # is not large enough to enforce it tracking measured
                   should_tx = should_tx and (controls_allowed if steer_control_enabled else curvature == 0)
 
-                  # Only CAN FD has the max lateral acceleration limit
-                  if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-                    should_tx = should_tx and abs(curvature) <= curvature_accel_limit_upper
+                  should_tx = should_tx and abs(curvature) <= curvature_accel_limit_upper
 
                   with self.subTest(controls_allowed=controls_allowed, steer_control_enabled=steer_control_enabled,
                                     path_offset=float(path_offset), path_angle=float(path_angle), curvature_rate=float(curvature_rate),
@@ -307,7 +305,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     small_curvature = 1 / self.DEG_TO_CAN  # significant small amount of curvature to cross boundary
 
     for speed in np.arange(0, 40, 0.5):
-      curvature_accel_limit_lower, curvature_accel_limit_upper = self.get_canfd_curvature_limits(speed)
+      curvature_accel_limit_lower, curvature_accel_limit_upper = self.get_curvature_limits(speed)
       limit_command = speed > self.CURVATURE_ERROR_MIN_SPEED
       # ensure our limits match the safety's rounded limits
       max_delta_up = int(np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP) * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN
@@ -345,15 +343,13 @@ class TestFordSafetyBase(common.CarSafetyTest):
           self._reset_curvature_measurement(sign * angle_meas, speed)
           for should_tx, initial_curvature, desired_curvature in cases:
 
-            # Only CAN FD has the max lateral acceleration limit
-            if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-              if should_tx:
-                # can not send if the curvature is above the max lateral acceleration
-                should_tx = should_tx and abs(desired_curvature) <= curvature_accel_limit_upper
-              else:
-                # if desired curvature violates driver curvature error, it can only send if
-                # the curvature is being limited by max lateral acceleration
-                should_tx = should_tx or curvature_accel_limit_lower <= abs(desired_curvature) <= curvature_accel_limit_upper
+            if should_tx:
+              # can not send if the curvature is above the max lateral acceleration
+              should_tx = should_tx and abs(desired_curvature) <= curvature_accel_limit_upper
+            else:
+              # if desired curvature violates driver curvature error, it can only send if
+              # the curvature is being limited by max lateral acceleration
+              should_tx = should_tx or curvature_accel_limit_lower <= abs(desired_curvature) <= curvature_accel_limit_upper
 
             # small curvature ensures we're using up limits. at 0, safety allows down limits to allow to account for rounding errors
             curvature_offset = small_curvature if initial_curvature == 0 else 0
