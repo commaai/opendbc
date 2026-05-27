@@ -257,17 +257,13 @@ class TestFordSafetyBase(common.CarSafetyTest):
         self.assertEqual(self.safety.get_curvature_meas_max(), 0)
 
   def test_max_lateral_acceleration(self):
-    # ISO 11270 lateral acceleration cap (3.6 m/s^2 with bank tolerance) limits curvature based on speed.
-    # The C-side check is `safety_max_limit_check(val, max_can, -max_can)` where
-    # `max_can = int(MAX_LATERAL_ACCEL / max(speed - 1, 1)^2 * DEG_TO_CAN) + 1`.
+    # Safety enforces min(absolute MAX_CURVATURE cap, ISO 11270 lateral accel cap) per direction.
+    max_curvature_can = round(self.MAX_CURVATURE * self.DEG_TO_CAN)
     for speed in np.arange(0, 40, 0.5):
-      max_can = self._max_curvature_can(speed)
+      max_can = min(self._max_curvature_can(speed), max_curvature_can)
       # Boundary samples in CAN units: deep below, just below, at, just above, deep above the limit.
       for offset in (-5, -1, 0, 1, 5):
         curvature_can = max_can + offset
-        # Skip values exceeding the message-encodable range (|curvature| <= MAX_CURVATURE).
-        if abs(curvature_can) > round(self.MAX_CURVATURE * self.DEG_TO_CAN):
-          continue
         curvature = curvature_can / self.DEG_TO_CAN
 
         for sign in (-1, 1):

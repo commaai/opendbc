@@ -226,6 +226,9 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
   bool violation = false;
 
   if (controls_allowed && steer_control_enabled) {
+    // *** absolute curvature cap ***
+    violation |= safety_max_limit_check(desired_curvature, limits.max_curvature, -limits.max_curvature);
+
     // *** ISO lateral jerk limit ***
     const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
     const float max_curvature_delta = max_curvature_rate_sec / (float)limits.frequency;
