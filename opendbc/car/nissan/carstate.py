@@ -88,14 +88,17 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
       ret.steeringTorque = cp_cam.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
+      ret.steeringFaultTemporary = cp_cam.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
     else:
       ret.steeringTorque = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
+      ret.steeringFaultTemporary = cp.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
 
     self.steeringTorqueSamples.append(ret.steeringTorque)
     # Filtering driver torque to prevent steeringPressed false positives
     ret.steeringPressed = bool(abs(sum(self.steeringTorqueSamples) / TORQUE_SAMPLES) > CarControllerParams.STEER_THRESHOLD)
 
     ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"]
+
 
     ret.leftBlinker = bool(cp.vl["LIGHTS"]["LEFT_BLINKER"])
     ret.rightBlinker = bool(cp.vl["LIGHTS"]["RIGHT_BLINKER"])
