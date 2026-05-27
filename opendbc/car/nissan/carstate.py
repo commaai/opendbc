@@ -90,10 +90,10 @@ class CarState(CarStateBase):
     # It also faults on sharp curves, although the threshold is unknown at this time
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
       ret.steeringTorque = cp_cam.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
-      ret.steeringFaultTemporary = cp_cam.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
+      ret.steerFaultTemporary = cp_cam.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
     else:
       ret.steeringTorque = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
-      ret.steeringFaultTemporary = cp.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
+      ret.steerFaultTemporary = cp.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
 
     self.steeringTorqueSamples.append(ret.steeringTorque)
     # Filtering driver torque to prevent steeringPressed false positives
