@@ -39,7 +39,7 @@ def create_steering_control(packer, apply_torque, frame, steer_on, lkas_max_torq
   return packer.make_can_msg("LKAS", 0, values)
 
 
-def create_steer_torque_sensor(packer, steer_torque_sensor_msg: dict, force_decel: bool):
+def create_steer_torque_sensor(packer, steer_torque_sensor_msg: dict, lat_active: bool, force_decel: bool):
   values = {s: steer_torque_sensor_msg[s] for s in [
     "STEER_TORQUE_DRIVER",
     "STEER_ANGLE",
@@ -53,8 +53,12 @@ def create_steer_torque_sensor(packer, steer_torque_sensor_msg: dict, force_dece
   # Starts stock driver monitoring progression by setting driver torque to 0
   if force_decel:
     values["STEER_TORQUE_DRIVER"] = 0.0
+  elif lat_active:
+    # When steering normally we need to silence stock DM system
+    values["STEER_TORQUE_DRIVER"] = 1.0
 
   dat = packer.make_can_msg("STEER_TORQUE_SENSOR", 2, values)[1]
+
   values["CHECKSUM"] = nissan_checksum(dat[:7])
   return packer.make_can_msg("STEER_TORQUE_SENSOR", 2, values)
 

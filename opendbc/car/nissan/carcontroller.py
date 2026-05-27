@@ -59,7 +59,7 @@ class CarController(CarControllerBase):
 
     # Use stock driver attentiveness warning when forcing a deceleration
     for steer_torque_sensor_msg in CS.steer_torque_sensor_msgs:
-      can_sends.append(nissancan.create_steer_torque_sensor(self.packer, steer_torque_sensor_msg, CC.forceDecel))
+      can_sends.append(nissancan.create_steer_torque_sensor(self.packer, steer_torque_sensor_msg, CC.latActive, CC.forceDecel))
 
     # Below are the HUD messages. We copy the stock message and modify
     if self.CP.carFingerprint != CAR.NISSAN_ALTIMA:
