@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-import os
 
-if __name__ == "__main__":
-  dbc_name = os.path.basename(__file__).replace(".py", ".dbc")
-  rivian_path = os.path.dirname(os.path.realpath(__file__))
-  with open(os.path.join(rivian_path, dbc_name), "w", encoding='utf-8') as f:
-    f.write("""
+
+def generate():
+  parts = []
+  parts.append("""
 VERSION ""
 
 
@@ -44,8 +42,8 @@ BS_:
 BU_: XXX
     """)
 
-    for a in range(0x500, 0x500 + 32):
-        f.write(f"""
+  for a in range(0x500, 0x500 + 32):
+    parts.append(f"""
 BO_ {a} RADAR_TRACK_{a:x}: 8 RADAR
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
@@ -57,8 +55,10 @@ BO_ {a} RADAR_TRACK_{a:x}: 8 RADAR
  SG_ REL_SPEED : 53|14@0- (0.01,0) [-81.92|81.92] "m/s" XXX
     """)
 
-    for a in range(0x500, 0x500 + 32):
-        f.write(f"""
+  for a in range(0x500, 0x500 + 32):
+    parts.append(f"""
 VAL_ {a} STATE 0 "Empty" 1 "New" 2 "New_updated" 3 "Updated" 4 "Coasting" 7 "New_coasting" ;
 VAL_ {a} MODE 0 "None" 1 "SRR" 2 "LRR" 3 "SRR_and_LRR" ;
     """)
+
+  return {"rivian_mando_front_radar.dbc": "".join(parts)}
