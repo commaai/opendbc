@@ -86,24 +86,10 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
 
 #define FORD_CANFD_INACTIVE_CURVATURE_RATE 1024U
 
-// Curvature rate limits
 static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
-  .max_curvature = 1000,          /* 0.02 curvature */
-  .curvature_to_can = 50000,      /* 1 / (2e-5) rad to can */
-  .max_curvature_error = 100,     /* 0.002 * FORD_STEERING_LIMITS.curvature_to_can */
-  .curvature_rate_up_lookup = {
-    {5., 25., 25.},
-    {0.00045, 0.0001, 0.0001}
-  },
-  .curvature_rate_down_lookup = {
-    {5., 25., 25.},
-    {0.00045, 0.00015, 0.00015}
-  },
-
-  // no blending at low speed due to lack of torque wind-up and inaccurate current curvature
-  .curvature_error_min_speed = 10.0,    // m/s
-
-  .enforce_curvature_error = true,
+  .max_curvature = 1000,         // 0.02 curvature
+  .curvature_to_can = 50000,     // 1 / (2e-5) rad to can
+  .frequency = 20,               // Hz
 };
 
 static void ford_rx_hook(const CANPacket_t *msg) {

@@ -134,15 +134,8 @@ typedef struct {
 typedef struct {
   // curvature cmd limits
   const int max_curvature;
-
   const float curvature_to_can;
-  const struct lookup_t curvature_rate_up_lookup;
-  const struct lookup_t curvature_rate_down_lookup;
-  const int max_curvature_error;         // used to limit error between meas and cmd while enabled
-  const float curvature_error_min_speed; // minimum speed to start limiting curvature error
   const uint32_t frequency;              // Hz
-
-  const bool enforce_curvature_error;    // enables max_curvature_error check
 } CurvatureSteeringLimits;
 
 // parameters for lateral accel/jerk angle limiting using a simple vehicle model

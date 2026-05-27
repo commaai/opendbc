@@ -30,8 +30,6 @@ class AngleSteeringLimits:
 @dataclass
 class CurvatureSteeringLimits:
   CURVATURE_MAX: float
-  CURVATURE_RATE_LIMIT_UP: tuple[list[float], list[float]]
-  CURVATURE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
 
 
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int | None = None):
@@ -139,13 +137,16 @@ def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_e
 
 
 def apply_std_curvature_limits(apply_curvature: float, apply_curvature_last: float, v_ego: float, curvature: float,
-                               lat_active: bool, limits: CurvatureSteeringLimits) -> float:
-  # pick curvature rate limits based on wind up/down
-  curvature_up = apply_curvature_last * apply_curvature >= 0. and abs(apply_curvature) > abs(apply_curvature_last)
-  rate_limits = limits.CURVATURE_RATE_LIMIT_UP if curvature_up else limits.CURVATURE_RATE_LIMIT_DOWN
+                               steer_step: int, lat_active: bool, limits: CurvatureSteeringLimits) -> float:
+  new_apply_curvature = apply_curvature
 
-  curvature_rate_lim = np.interp(v_ego, rate_limits[0], rate_limits[1])
-  new_apply_curvature = np.clip(apply_curvature, apply_curvature_last - curvature_rate_lim, apply_curvature_last + curvature_rate_lim)
+  # ISO 11270 lateral jerk
+  max_jerk = (ISO_LATERAL_JERK / (max(v_ego, 1.0) ** 2)) * (steer_step * DT_CTRL)
+  new_apply_curvature = float(np.clip(new_apply_curvature, apply_curvature_last - max_jerk, apply_curvature_last + max_jerk))
+
+  # ISO 11270 lateral acceleration
+  max_curvature = MAX_LATERAL_ACCEL / (max(v_ego, 1.0) ** 2)
+  new_apply_curvature = float(np.clip(new_apply_curvature, -max_curvature, max_curvature))
 
   # curvature is current curvature when inactive on all curvature cars
   if not lat_active:

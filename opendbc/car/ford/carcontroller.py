@@ -90,11 +90,8 @@ class CarController(CarControllerBase):
         apply_curvature = float(np.clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
                                         current_curvature + CarControllerParams.CURVATURE_ERROR))
       apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw,
-                                                   0., CC.latActive, CarControllerParams.CURVATURE_LIMITS)
-
-      # Limit curvature to ISO 11270 lateral acceleration with bank tolerance
-      curvature_accel_limit = MAX_LATERAL_ACCEL / (max(CS.out.vEgoRaw, 1) ** 2)
-      apply_curvature = float(np.clip(apply_curvature, -curvature_accel_limit, curvature_accel_limit))
+                                                   0., CarControllerParams.STEER_STEP, CC.latActive,
+                                                   CarControllerParams.CURVATURE_LIMITS)
       self.apply_curvature_last = apply_curvature
 
       if self.CP.flags & FordFlags.CANFD:
