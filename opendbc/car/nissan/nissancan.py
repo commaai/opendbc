@@ -5,6 +5,24 @@ from opendbc.car.nissan.values import CAR
 nissan_checksum = mk_crc8_fun(CRC8J1850, init_crc=0x00, xor_out=0xFF)
 
 
+def create_steer_torque_spoof(packer, bus, steer_torque_msg, driver_torque):
+  # Re-emit EPS's STEER_TORQUE_SENSOR on the camera-side bus with a spoofed
+  # STEER_TORQUE_DRIVER to satisfy ProPilot's hands-on check. The real message
+  # from bus 0 must be blocked in safety so only this one reaches the ADAS ECU.
+  values = {s: steer_torque_msg[s] for s in [
+    "LKAS_ACTIVE",
+    "LKAS_STATUS",
+    "STEER_TORQUE_LKAS",
+    "STEER_ANGLE",
+    "COUNTER",
+  ]}
+  values["STEER_TORQUE_DRIVER"] = driver_torque
+
+  dat = packer.make_can_msg("STEER_TORQUE_SENSOR", bus, values)[1]
+  values["CHECKSUM"] = nissan_checksum(dat[:7])
+  return packer.make_can_msg("STEER_TORQUE_SENSOR", bus, values)
+
+
 def create_steering_control(packer, apply_torque, frame, steer_on, lkas_max_torque):
   values = {
     "COUNTER": frame % 0x10,
@@ -19,6 +37,26 @@ def create_steering_control(packer, apply_torque, frame, steer_on, lkas_max_torq
 
   values["CHECKSUM"] = nissan_checksum(dat[:7])
   return packer.make_can_msg("LKAS", 0, values)
+
+
+def create_steer_torque_sensor(packer, steer_torque_sensor_msg: dict, force_decel: bool):
+  values = {s: steer_torque_sensor_msg[s] for s in [
+    "STEER_TORQUE_DRIVER",
+    "STEER_ANGLE",
+    "LKAS_ACTIVE",
+    "STEER_TORQUE_LKAS",
+    "COUNTER",
+    "LKAS_STATUS",
+    "CHECKSUM",
+  ]}
+
+  # Starts stock driver monitoring progression by setting driver torque to 0
+  if force_decel:
+    values["STEER_TORQUE_DRIVER"] = 0.0
+
+  dat = packer.make_can_msg("STEER_TORQUE_SENSOR", 2, values)[1]
+  values["CHECKSUM"] = nissan_checksum(dat[:7])
+  return packer.make_can_msg("STEER_TORQUE_SENSOR", 2, values)
 
 
 def create_acc_cancel_cmd(packer, car_fingerprint, cruise_throttle_msg):
