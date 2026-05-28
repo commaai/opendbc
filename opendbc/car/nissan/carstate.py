@@ -18,7 +18,6 @@ class CarState(CarStateBase):
 
     self.lkas_hud_msg = {}
     self.lkas_hud_info_msg = {}
-    self.steer_torque_sensor_msgs = [{}]
 
     self.steeringTorqueSamples = deque(TORQUE_SAMPLES*[0], TORQUE_SAMPLES)
     self.shifter_values = can_define.dv["GEARBOX"]["GEAR_SHIFTER"]
@@ -92,11 +91,9 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
       ret.steeringTorque = cp_cam.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
       ret.steerFaultTemporary = cp_cam.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
-      self.steer_torque_sensor_msgs = cp_cam.vl_all["STEER_TORQUE_SENSOR"]
     else:
       ret.steeringTorque = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
       ret.steerFaultTemporary = cp.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
-      self.steer_torque_sensor_msgs = cp.vl_all["STEER_TORQUE_SENSOR"]
 
     self.steeringTorqueSamples.append(ret.steeringTorque)
     # Filtering driver torque to prevent steeringPressed false positives
@@ -117,11 +114,12 @@ class CarState(CarStateBase):
     can_gear = int(cp.vl["GEARBOX"]["GEAR_SHIFTER"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
 
-    # stock lkas should be on to allow stock driver monitoring system to progress when desired
+    # stock lkas should be off
+    # TODO: is this needed?
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
-      ret.invalidLkasSetting = not bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
+      ret.invalidLkasSetting = bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
     else:
-      ret.invalidLkasSetting = not bool(cp_adas.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
+      ret.invalidLkasSetting = bool(cp_adas.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
 
     self.cruise_throttle_msg = copy.copy(cp.vl["CRUISE_THROTTLE"])
 

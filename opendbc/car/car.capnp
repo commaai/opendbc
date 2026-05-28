@@ -358,7 +358,6 @@ struct CarControl {
 
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
-  forceDecel @18 :Bool;
 
   struct Actuators {
     # lateral commands, mutually exclusive
