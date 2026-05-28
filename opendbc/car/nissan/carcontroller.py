@@ -40,7 +40,7 @@ class CarController(CarControllerBase):
         # Scale max torque based on how much torque the driver is applying to the wheel.
         # Start scaling torque at STEER_THRESHOLD down to 0.2. If we don't scale this low, EPS will temp fault from high driver and LKAS torque
         lkas_max_torque = max(
-          0.2,
+          CarControllerParams.LKAS_MIN_TORQUE,
           CarControllerParams.LKAS_MAX_TORQUE - 0.6 * max(0, abs(CS.out.steeringTorque) - CarControllerParams.STEER_THRESHOLD),
         )
 
