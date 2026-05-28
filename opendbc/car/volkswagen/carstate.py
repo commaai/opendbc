@@ -13,7 +13,6 @@ class CarState(CarStateBase):
     super().__init__(CP)
     self.frame = 0
     self.eps_init_complete = False
-    self.cruise_recovery_timer = 0
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
@@ -297,9 +296,7 @@ class CarState(CarStateBase):
         ret.cruiseState.speed = 0
     else:
       ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
-    accFaulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
-    ret.accFaulted = self.update_acc_fault(accFaulted, parking_brake=ret.parkingBrake, drive_mode=drive_mode,
-                                            brake_pressed=ret.brakePressed)
+    ret.accFaulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(240, pt_cp.vl["SMLS_01"]["BH_Blinker_li"],
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
@@ -401,19 +398,6 @@ class CarState(CarStateBase):
     perm_fault = drive_mode and hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
     temp_fault = drive_mode and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
-
-  def update_acc_fault(self, acc_fault, parking_brake=False, drive_mode=True, brake_pressed=False, recovery_frames_max=100):
-    # Ignore FAULT when not in drive mode and parked
-    # do not show misleading error during ignition in parked state
-    # grant a short time to recover a normal cruise state
-    # after hard brake, stock system prevents acc re-enable for ~1 second
-    fault = acc_fault
-    if (parking_brake and not drive_mode) or brake_pressed:
-      fault = False
-      self.cruise_recovery_timer = self.frame
-    elif self.frame - self.cruise_recovery_timer < recovery_frames_max:
-      fault = False
-    return fault
 
   @staticmethod
   def get_can_parsers(CP):
