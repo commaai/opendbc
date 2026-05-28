@@ -32,11 +32,11 @@ class CarController(CarControllerBase):
     ### STEER ###
     steer_hud_alert = 1 if hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw) else 0
 
-    self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5, 10, 20], [0.2, 0.1, 0.0])))
-    if not CC.latActive:
-      self.angle_filter.x = actuators.steeringAngleDeg
-    else:
+    if CC.latActive:
+      self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5, 10, 20], [0.2, 0.1, 0.0])))
       self.angle_filter.update(actuators.steeringAngleDeg)
+    else:
+      self.angle_filter.x = actuators.steeringAngleDeg
 
     # windup slower
     self.apply_angle_last = apply_std_steer_angle_limits(self.angle_filter.x, self.apply_angle_last, CS.out.vEgoRaw,
