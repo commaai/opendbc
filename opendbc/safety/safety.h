@@ -15,6 +15,7 @@
 #include "opendbc/safety/modes/ford.h"
 #include "opendbc/safety/modes/hyundai.h"
 #include "opendbc/safety/modes/chrysler.h"
+#include "opendbc/safety/modes/chrysler_cusw.h"
 #include "opendbc/safety/modes/rivian.h"
 #include "opendbc/safety/modes/subaru.h"
 #include "opendbc/safety/modes/subaru_preglobal.h"
@@ -319,15 +320,19 @@ void safety_tick(const safety_config *cfg) {
       // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
       // Quite conservative to not risk false triggers.
       // 2s of lag is worse case, since the function is called at 1Hz
-      uint32_t timestep = 1e6 / cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
+      uint32_t frequency = cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
+      uint32_t timestep = 1e6 / frequency;
       bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
       cfg->rx_checks[i].status.lagging = lagging;
       if (lagging) {
         controls_allowed = false;
       }
 
-      if (lagging || !is_msg_valid(cfg->rx_checks, i)) {
+      // enforce minimum frequency for safety-relevant messages
+      bool frequency_invalid = frequency < 10U;
+      if (lagging || frequency_invalid || !is_msg_valid(cfg->rx_checks, i)) {
         rx_checks_invalid = true;
+        controls_allowed = false;
       }
     }
   }
@@ -405,6 +410,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_TESLA, &tesla_hooks},
     {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
 #ifdef ALLOW_DEBUG
+    {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
     {SAFETY_PSA, &psa_hooks},
     {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
     {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},

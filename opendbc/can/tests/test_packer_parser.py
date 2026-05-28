@@ -1,4 +1,4 @@
-import pytest
+import unittest
 import random
 
 from opendbc.can import CANPacker, CANParser
@@ -7,7 +7,7 @@ from opendbc.can.tests import TEST_DBC
 MAX_BAD_COUNTER = 5
 
 
-class TestCanParserPacker:
+class TestCanParserPacker(unittest.TestCase):
   def test_packer(self):
     packer = CANPacker(TEST_DBC)
 
@@ -169,7 +169,7 @@ class TestCanParserPacker:
 
         for k, v in values.items():
           for key, val in v.items():
-            assert parser.vl[k][key] == pytest.approx(val)
+            self.assertAlmostEqual(parser.vl[k][key], val)
 
         # also check address
         for sig in ("STEER_TORQUE", "STEER_TORQUE_REQUEST", "COUNTER", "CHECKSUM"):
@@ -187,7 +187,7 @@ class TestCanParserPacker:
       msgs = packer.make_can_msg("VSA_STATUS", 0, values)
       parser.update([0, [msgs]])
 
-      assert parser.vl["VSA_STATUS"]["USER_BRAKE"] == pytest.approx(brake)
+      self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], brake)
 
   def test_subaru(self):
     # Subaru is little endian
@@ -211,10 +211,10 @@ class TestCanParserPacker:
         msgs = packer.make_can_msg("ES_LKAS", 0, values)
         parser.update([0, [msgs]])
 
-        assert parser.vl["ES_LKAS"]["LKAS_Output"] == pytest.approx(steer)
-        assert parser.vl["ES_LKAS"]["LKAS_Request"] == pytest.approx(active)
-        assert parser.vl["ES_LKAS"]["SET_1"] == pytest.approx(1)
-        assert parser.vl["ES_LKAS"]["COUNTER"] == pytest.approx(idx % 16)
+        self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Output"], steer)
+        self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Request"], active)
+        self.assertAlmostEqual(parser.vl["ES_LKAS"]["SET_1"], 1)
+        self.assertAlmostEqual(parser.vl["ES_LKAS"]["COUNTER"], idx % 16)
         idx += 1
 
   def test_bus_timeout(self):
@@ -325,7 +325,7 @@ class TestCanParserPacker:
 
     for msg in existing_messages:
       CANParser(TEST_DBC, [(msg, 0)], 0)
-      with pytest.raises(RuntimeError):
+      with self.assertRaises(RuntimeError):
         new_msg = msg + "1" if isinstance(msg, str) else msg + 1
         CANParser(TEST_DBC, [(new_msg, 0)], 0)
 
@@ -352,10 +352,10 @@ class TestCanParserPacker:
   def test_disallow_duplicate_messages(self):
     CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5)], 0)
 
-    with pytest.raises(RuntimeError):
+    with self.assertRaises(RuntimeError):
       CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5), ("ACC_CONTROL", 10)], 0)
 
-    with pytest.raises(RuntimeError):
+    with self.assertRaises(RuntimeError):
       CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 10), ("ACC_CONTROL", 10)], 0)
 
   def test_allow_undefined_msgs(self):
