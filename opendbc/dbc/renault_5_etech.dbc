@@ -1,0 +1,190 @@
+CM_ "Renault 5 E-Tech (CMF-BEV). CHECKSUM uses CRC-8 poly 0x1D init 0 with
+per-message XOR. Most messages use a 7-byte protected body before the checksum
+byte; 0x134 LKA_CMD is the exception with a tail-positioned CHECKSUM (byte 16,
+XOR 0xEB) protecting bytes[17:24].";
+
+
+BO_ 136 ACCEL_088: 8 XXX
+ SG_ ACCEL_LIKE : 47|16@0+ (0.02,-213.5) [-10|10] "m/s^2" XXX
+
+BO_ 140 ACC_PEDAL_8C: 12 XXX
+ SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ ACCEL_PEDAL : 55|16@0+ (0.001525902,0) [0|100] "%" XXX
+
+BO_ 274 STEERING_SENSOR_112: 64 XXX
+ SG_ CHECKSUM_1 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_1 : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ BRAKE_LIGHT : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSED : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ STEER_RATE : 71|8@0+ (1,0) [0|255] "deg/s" XXX
+ SG_ CHECKSUM_2 : 111|8@0+ (1,0) [0|255] "" XXX
+ SG_ TURN_SIGNAL_LEFT : 112|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER_2 : 119|4@0+ (1,0) [0|15] "" XXX
+ SG_ STEER_ANGLE_1 : 127|11@0+ (0.2,-204.8) [-204.8|204.6] "deg" XXX
+ SG_ FORWARD_GEAR_ACTIVE : 147|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECKSUM_3 : 191|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_3 : 199|4@0+ (1,0) [0|15] "" XXX
+ SG_ STEER_ANGLE_2 : 207|11@0+ (0.2,-204.8) [-204.8|204.6] "deg" XXX
+ SG_ CHECKSUM_4 : 271|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_4 : 279|4@0+ (1,0) [0|15] "" XXX
+ SG_ LONG_ACCEL : 291|10@0+ (0.02,-12.32) [-12.32|8.14] "m/s^2" XXX
+
+BO_ 303 GEAR_12F: 12 XXX
+ SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ GEAR_STATE : 52|4@0+ (1,0) [0|15] "" XXX
+ SG_ GEAR_ENGAGED : 53|1@0+ (1,0) [0|1] "" XXX
+ SG_ PARK_ACTIVE : 55|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 308 LKA_CMD_134: 24 XXX
+ SG_ STEERING_TORQUE_134 : 87|8@0+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 135|8@0+ (1,0) [0|255] "" XXX
+ SG_ LKA_ACTIVE : 139|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 143|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 380 EPS_17C: 12 XXX
+ SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ EPS_MOTOR_POS : 53|14@0+ (1,0) [0|16383] "" XXX
+ SG_ DRIVER_TORQUE : 79|16@0+ (1,-32768) [-32768|32767] "" XXX
+
+BO_ 427 STEERING_CTRL_1AB: 48 XXX
+ SG_ CHECKSUM_A : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_A : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ LKAS_TORQUE_CMD : 63|8@0+ (1,-150) [-150|105] "" XXX
+ SG_ LKAS_STATE : 74|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM_B : 119|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_B : 127|4@0+ (1,0) [0|15] "" XXX
+ SG_ STEER_ANGLE : 135|16@0+ (0.1,-3276.8) [-3276.8|3276.7] "deg" XXX
+ SG_ STEER_TURN_CNT : 151|16@0+ (1,0) [0|65535] "" XXX
+ SG_ STEER_RATE : 167|16@0+ (0.01,-327.68) [-327.68|327.67] "deg/s" XXX
+ SG_ CHECKSUM_C : 215|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_C : 223|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 548 PEDAL_AND_GEAR_224: 7 XXX
+ SG_ GEAR_SELECTED : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSURE : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ DIRECTION_HI : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ DIRECTION_LO : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 550 WHEEL_SPEEDS_226: 48 XXX
+ SG_ CHECKSUM_A : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_A : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ WHEEL_SPEED_FL : 55|16@0+ (0.005,0) [0|320] "km/h" XXX
+ SG_ WHEEL_SPEED_FR : 71|16@0+ (0.005,0) [0|320] "km/h" XXX
+ SG_ CHECKSUM_B : 191|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_B_LO : 179|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM_C : 287|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_C_LO : 275|4@0+ (1,0) [0|15] "" XXX
+ SG_ WHEEL_SPEED_RL : 231|16@0+ (0.005,0) [0|320] "km/h" XXX
+ SG_ WHEEL_SPEED_RR : 247|16@0+ (0.005,0) [0|320] "km/h" XXX
+
+BO_ 788 ADAS_LANE_314: 64 XXX
+ SG_ LANE_DETECTED : 463|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 847 ACC_TARGET_34F: 64 XXX
+ SG_ OBJ_A_PRESENT : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ OBJ_B_PRESENT : 239|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 998 ACC_SETPOINT_3E6: 20 XXX
+ SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ SET_SPEED : 55|8@0+ (1,0) [0|255] "km/h" XXX
+
+BO_ 1018 VEHICLE_SPEED_3FA: 48 XXX
+ SG_ VEHICLE_SPEED_MPH : 39|8@0+ (1.609,0) [0|400] "km/h" XXX
+ SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ SPEED_LIKE_HIGH_RES : 52|13@0+ (0.00616,0) [0|50] "km/h" XXX
+ SG_ DRIVING_PROFILE_SPEED_CAP : 119|8@0+ (1,0) [0|255] "km/h" XXX
+ SG_ ACCEL_PEDAL_LOW_RATE : 167|8@0+ (0.5,-18.5) [-18.5|109] "%" XXX
+
+BO_ 1100 GEAR_DIRECTION_44C: 12 XXX
+ SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ GEAR_DIRECTION : 70|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 1107 GEAR_INDICATORS_453: 12 XXX
+ SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ REVERSE_LIGHT : 43|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1204 EPS_STATE_4B4: 8 XXX
+ SG_ EPS_STATE_HEARTBEAT : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ EPS_STATE : 30|7@0+ (1,0) [0|127] "" XXX
+
+BO_ 1205 EPS_STATE_4B5: 8 XXX
+ SG_ ADAS_ENGAGED : 7|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1233 CRUISE_BUTTONS_4D1: 8 XXX
+ SG_ FOLLOW_DISTANCE : 28|2@0+ (1,0) [0|3] "" XXX
+ SG_ BUTTON_C_SET : 45|1@0+ (1,0) [0|1] "" XXX
+ SG_ BUTTON_D_CANCEL : 53|1@0+ (1,0) [0|1] "" XXX
+ SG_ BUTTON_B_SPEED : 54|1@0+ (1,0) [0|1] "" XXX
+ SG_ BUTTON_A_RES : 55|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1203 ADAS_TARGET_BUCKET_4B3: 5 XXX
+ SG_ ADAS_TARGET_BUCKET : 7|8@0+ (1,0) [0|255] "km/h" XXX
+
+BO_ 1303 ADAS_TARGET_517: 8 XXX
+ SG_ ADAS_ACTIVE_TARGET : 23|8@0+ (1,0) [0|255] "km/h" XXX
+ SG_ LONGITUDINAL_ENFORCING_CANDIDATE : 47|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1402 ADAS_STATE_57A: 8 XXX
+ SG_ ADAS_STATE : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ ACTIVE_ASSIST_SELECTED : 48|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1416 BELTS_DOORS_588: 24 XXX
+ SG_ CHECKSUM_A : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_A : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ DOOR_DRIVER_OPEN_CANDIDATE : 66|1@0+ (1,0) [0|1] "" XXX
+ SG_ BELT_UNBUCKLED_CANDIDATE : 87|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECKSUM_B : 135|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_B : 143|4@0+ (1,0) [0|15] "" XXX
+ SG_ TURN_SIGNAL_RIGHT_ECHO : 153|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1419 TURN_SIGNAL_RIGHT_58B: 12 XXX
+ SG_ TURN_SIGNAL_RIGHT : 89|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1519 ACC_SETPOINT_5EF: 8 XXX
+ SG_ SET_SPEED : 31|8@0+ (1,0) [0|255] "km/h" XXX
+ SG_ SET_SPEED_DUP : 39|8@0+ (1,0) [0|255] "km/h" XXX
+
+BO_ 1638 BODY_666: 24 XXX
+ SG_ BRAKE_PRESSED_LOW_RATE : 43|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1661 MOTOR_RPM_67D: 8 XXX
+ SG_ MOTOR_RPM : 3|12@0+ (1,0) [0|4095] "rpm" XXX
+
+
+CM_ BO_ 136 "Redundant longitudinal acceleration estimate. In sampled logs this tracks 0x112.LONG_ACCEL but has a different bias/scale origin; 0x112 remains the preferred longitudinal acceleration source.";
+CM_ BO_ 274 "Multi-subframe (64B, 4 subframes) steering sensor on body bus. Carries BRAKE_PRESSED (byte 7 bit 1), TURN_SIGNAL_LEFT, longitudinal accel, redundant 12-bit steering angle. Right turn signal is on 0x58B (R5 splits L/R across buses).";
+CM_ BO_ 308 "Byte 16 = CRC-8 (poly 0x1D, XOR 0xEB, body = bytes[17:24]); tail-positioned rather than at byte 4 like every other message in this DBC. Byte 17 high nibble is COUNTER; low nibble is LKA_ACTIVE. Observed raw states are 0, 3, 4, 6, 7, and 8.";
+CM_ SG_ 308 STEERING_TORQUE_134 "Byte 10. Originally labeled TORQUE_CMD assuming this was the LKA command, but corpus mining shows it is not correlated with 0x1AB.LKAS_TORQUE_CMD and is usually zero. Exact steering-telemetry semantics are not fully decoded; do not use as a command signal.";
+CM_ BO_ 548 "Body-bus pedal/gear status. GEAR_SELECTED, DIRECTION_HI, and DIRECTION_LO are redundant indicators around gear selection; primary openpilot gear state remains 0x12F.";
+CM_ BO_ 788 "Camera lane-model/status message. LANE_DETECTED is 0xFF when no lane model is present; non-0xFF values appear during lane-detection/assist contexts.";
+CM_ BO_ 847 "ACC object-presence message. OBJ_*_PRESENT is 0xFF when no target is tracked; non-0xFF values appear when objects are tracked.";
+CM_ BO_ 998 "Redundant ACC/limiter setpoint on body bus. 0x5EF remains the cleaner low-rate powertrain-bus setpoint source.";
+CM_ BO_ 1100 "Redundant gear-direction enum: 1=reverse, 2=stationary/P/N, 3=forward D/B. Validated against 0x12F gear states in captured gear-cycle and driving logs.";
+CM_ BO_ 1107 "Reverse/gear indicator observed in captured gear-cycle logs. REVERSE_LIGHT is high during reverse and some adjacent neutral transition frames.";
+CM_ BO_ 1203 "ADAS target-speed bucket. Byte 0 usually equals ADAS_TARGET_517.ADAS_ACTIVE_TARGET - 5 for sign/target speeds (e.g. 45 when target is 50, 125 when target is 130). Special value 250 pairs with target 255 unset/no-target. Redundant with 0x517 for openpilot use.";
+CM_ BO_ 1204 "EPS state byte with a heartbeat bit; low 7 bits carry the state value. Note: bit 31 (EPS_STATE_HEARTBEAT) toggles continuously even with no ADAS activity; do not mistake for an event signal.";
+CM_ BO_ 1205 "ADAS_ENGAGED is a multi-state enum. Observed values include 0 and many non-zero states across powered-on, driving, assist, and pre-init contexts; exact per-state semantics are not fully decoded yet.";
+CM_ BO_ 1233 "Cruise/ADAS controls and follow distance. Button bits are momentary; FOLLOW_DISTANCE enum follows Nissan/ProPilot-style near/mid/far states.";
+CM_ BO_ 1303 "Universal ADAS active-target message. Byte 2 = the speed the car is currently enforcing (km/h), used by ACC, Speed Limiter, and Active Assist. 0xFF is unset/no-target. This is NOT the driver's manually-set value: byte 2 tracks the camera-detected road speed-limit sign (Speed Limit Adapt feature) — confirmed in 2026-05-17 and 2026-05-23 drives across 10+ sign transitions (130->70->50->30->40->100->80->130->100->80->90->50), and updates regardless of ADAS engagement state. The driver's intent setpoint is on ACC_SETPOINT_5EF / ACC_SETPOINT_3E6 (camera-side bus).";
+CM_ BO_ 1402 "ADAS state and availability. Byte 5 is the activity state enum. Byte 6 bit 0 (ACTIVE_ASSIST_SELECTED) is 1 only when Active Assist is the chosen ADAS mode; 0 in ACC, Speed Limiter, and when ADAS is fully off. Confirmed across 3 cycles of mode switching 2026-05-23. Note: this does NOT indicate ADAS-enabled in general — use ADAS_STATE != ARMED-with-byte6==0x40 patterns for that.";
+CM_ SG_ 1018 VEHICLE_SPEED_MPH "Byte 4 carries vehicle speed in MPH (not km/h as labeled in early reverse-engineering); scale 1.609 converts to km/h. WHEEL_SPEEDS_226 is the preferred speed source.";
+CM_ SG_ 1018 SPEED_LIKE_HIGH_RES "13-bit speed-like field. It tracks speed over parts of the range but wraps/diverges in broader drive mining, so do not use it as the primary vehicle speed.";
+CM_ SG_ 1018 DRIVING_PROFILE_SPEED_CAP "Byte 14 holds the current driving-profile speed cap. Confirmed 115 km/h in Comfort mode (persistent across multiple drives 2026-05-16 / 17 / 23, never moved from 115 over hours of driving). Eco/Sport/Personal mode values have NOT been validated — comment will need updating once a cross-mode toggle test is captured.";
+CM_ SG_ 1303 ADAS_ACTIVE_TARGET "Active enforced speed cap in km/h. Continuously tracks the camera-detected Speed Limit Adapt sign value (confirmed: drove through 130/100/90/80/70/50/40/30 zones with byte tracking each transition within ~1s, including while driver-set limiter was held at 120). For driver intent see ACC_SETPOINT_5EF.SET_SPEED. 0xFF is unset/no-target.";
+CM_ SG_ 1303 LONGITUDINAL_ENFORCING_CANDIDATE "Byte 5 bit. Candidate longitudinal-enforcement/status bit observed in ACC/limiter-related contexts, but broader corpus mining also shows it during some armed/override states. Treat as tentative until mode-specific captures fully isolate it.";
+CM_ SG_ 1519 SET_SPEED "Driver-selected ACC/limiter setpoint in km/h. Observed as duplicated bytes in captured engaged-drive logs.";
+CM_ BO_ 1638 "Low-rate body status. BRAKE_PRESSED_LOW_RATE is a redundant brake-pressed indicator and lags/disagrees during transitions, so 0x112 remains preferred.";
+CM_ BO_ 1661 "Motor RPM broadcast observed on both captured buses.";
+
+VAL_ 303 GEAR_STATE 1 "R" 2 "N" 3 "B" 8 "D" ;
+VAL_ 308 LKA_ACTIVE 0 "STATE_0" 1 "INIT_BOOT" 3 "STATE_3" 4 "STATE_4" 6 "ACTIVE" 7 "STATE_7" 8 "STATE_8" ;
+VAL_ 1100 GEAR_DIRECTION 1 "REVERSE" 2 "STATIONARY_PN" 3 "FORWARD_DB" ;
+VAL_ 1233 FOLLOW_DISTANCE 0 "UNSET" 1 "NEAR" 2 "MID" 3 "FAR" ;
+VAL_ 1402 ADAS_STATE 0 "ACTIVE_CONTROLLING" 1 "INIT_BOOT" 8 "ARMED" 16 "DRIVER_OVERRIDE" 41 "FAULT" ;
+VAL_ 427 LKAS_STATE 1 "ACTIVE_OR_READY" 2 "SUPPRESSED_BY_DRIVER" 3 "UNAVAILABLE" ;

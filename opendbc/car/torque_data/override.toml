@@ -41,6 +41,7 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "COMMA_BODY" = [nan, 1000, nan]
 
 # Totally new cars
+"RENAULT_5_ETECH" = [1.5, 1.5, 0.12] # placeholder values, not yet tuned on-vehicle
 "RAM_1500_5TH_GEN" = [2.0, 2.0, 0.05]
 "RAM_HD_5TH_GEN" = [1.4, 1.4, 0.05]
 "SUBARU_OUTBACK" = [2.0, 1.5, 0.2]

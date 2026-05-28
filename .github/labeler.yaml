@@ -51,6 +51,10 @@ nissan:
   - changed-files:
     - any-glob-to-any-file: 'opendbc/car/nissan/**'
 
+renault:
+  - changed-files:
+    - any-glob-to-any-file: 'opendbc/car/renault/**'
+
 rivian:
   - changed-files:
     - any-glob-to-any-file: 'opendbc/car/rivian/**'
