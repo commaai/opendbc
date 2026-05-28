@@ -266,6 +266,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
     brand_ref_times = {
       'gm': 1.0,
       'body': 0.1,
+      'byd': 0.2,
       'chrysler': 0.3,
       'ford': 1.5,
       'honda': 0.45,
