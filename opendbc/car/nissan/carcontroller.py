@@ -37,11 +37,11 @@ class CarController(CarControllerBase):
       if not bool(CS.out.steeringPressed):
         lkas_max_torque = CarControllerParams.LKAS_MAX_TORQUE
       else:
-        # Scale max torque based on how much torque the driver is applying to the wheel
+        # Scale max torque based on how much torque the driver is applying to the wheel.
+        # Start scaling torque at STEER_THRESHOLD down to 0.2. If we don't scale this low, EPS will temp fault from high driver torque and high LKAS torque
         lkas_max_torque = max(
           0.2,
-          # Start scaling torque at STEER_THRESHOLD
-          CarControllerParams.LKAS_MAX_TORQUE - 0.6 * max(0, abs(CS.out.steeringTorque) - CarControllerParams.STEER_THRESHOLD)
+          CarControllerParams.LKAS_MAX_TORQUE - 0.6 * max(0, abs(CS.out.steeringTorque) - CarControllerParams.STEER_THRESHOLD),
         )
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA) and pcm_cancel_cmd:
