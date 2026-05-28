@@ -37,8 +37,8 @@
   {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */ \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
-  {.msg = {{ 0xaa, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{0x260, 0, 8, 50U, .ignore_counter = true, .ignore_quality_flag=!(lta)}, { 0 }, { 0 }}},                           \
+  {.msg = {{ 0xaa, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},      \
+  {.msg = {{0x260, 0, 8, 50U, .ignore_counter = true, .ignore_quality_flag=!(lta)}, { 0 }, { 0 }}},  \
 
 #define TOYOTA_RX_CHECKS(lta)                                                                                                               \
   TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                              \
@@ -77,7 +77,21 @@ static uint32_t toyota_get_checksum(const CANPacket_t *msg) {
 }
 
 static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
-  return !GET_BIT(msg, 3U);  // STEER_ANGLE_INITIALIZING
+  bool valid = false;
+  if (msg->addr == 0x260U) {
+    valid = !GET_BIT(msg, 3U);  // STEER_TORQUE_SENSOR.STEER_ANGLE_INITIALIZING
+  } else if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
+    // each wheel speed is 1-bit fault + 15-bit speed
+    valid = true;
+    for (uint8_t i = 0U; i < 4U; i += 1U) {
+      if (GET_BIT(msg, (i * 16U) + 7U)) {  // WHEEL_SPEED_xx_FAULT
+        valid = false;
+        break;
+      }
+    }
+  } else {
+  }
+  return valid;
 }
 
 static void toyota_rx_hook(const CANPacket_t *msg) {
@@ -146,7 +160,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       int speed = 0;
       // sum 4 wheel speeds. conversion: raw * 0.01 - 67.67
       for (uint8_t i = 0U; i < 8U; i += 2U) {
-        int wheel_speed = (msg->data[i] << 8U) | msg->data[(i + 1U)];
+        int wheel_speed = ((msg->data[i] & 0x7FU) << 8U) | msg->data[(i + 1U)];
         speed += wheel_speed - 6767;
       }
       // check that all wheel speeds are at zero value
