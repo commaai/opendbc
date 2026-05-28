@@ -92,7 +92,9 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
       ret.steeringTorque = cp_cam.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
       ret.steerFaultTemporary = cp_cam.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
-      self.steer_torque_sensor_msgs = cp_cam.vl_all["STEER_TORQUE_SENSOR"]
+      # self.steer_torque_sensor_msgs = cp_cam.vl_all["STEER_TORQUE_SENSOR"]
+      adas_status_msgs = cp_cam.vl_all["STEER_TORQUE_SENSOR"]
+      self.steer_torque_sensor_msgs = [dict(zip(adas_status_msgs, vals, strict=True)) for vals in zip(*adas_status_msgs.values(), strict=True)]
     else:
       ret.steeringTorque = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
       ret.steerFaultTemporary = cp.vl["STEER_TORQUE_SENSOR"]["LKAS_STATUS"] == 9
