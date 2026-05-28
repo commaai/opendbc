@@ -1,5 +1,5 @@
 from opendbc.can import CANPacker
-from opendbc.car import Bus, structs
+from opendbc.car import Bus, structs, rate_limit
 from opendbc.car.lateral import apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.nissan import nissancan
@@ -14,6 +14,7 @@ class CarController(CarControllerBase):
     self.car_fingerprint = CP.carFingerprint
 
     self.apply_angle_last = 0
+    self.lkas_max_torque = 0
 
     self.packer = CANPacker(dbc_names[Bus.pt])
 
@@ -40,9 +41,11 @@ class CarController(CarControllerBase):
         # Scale max torque based on how much torque the driver is applying to the wheel.
         # Start scaling torque at STEER_THRESHOLD down to 0.2. If we don't scale this low, EPS will temp fault from high driver and LKAS torque
         lkas_max_torque = max(
-          CarControllerParams.LKAS_MIN_TORQUE,
+          0.0,
           CarControllerParams.LKAS_MAX_TORQUE - 0.6 * max(0, abs(CS.out.steeringTorque) - CarControllerParams.STEER_THRESHOLD),
         )
+
+    self.lkas_max_torque = rate_limit(lkas_max_torque, self.lkas_max_torque, -0.01, 0.005)
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA) and pcm_cancel_cmd:
       can_sends.append(nissancan.create_acc_cancel_cmd(self.packer, self.car_fingerprint, CS.cruise_throttle_msg))
@@ -55,7 +58,7 @@ class CarController(CarControllerBase):
       can_sends.append(nissancan.create_cancel_msg(self.packer, CS.cancel_msg, pcm_cancel_cmd))
 
     can_sends.append(nissancan.create_steering_control(
-      self.packer, self.apply_angle_last, self.frame, CC.latActive, lkas_max_torque))
+      self.packer, self.apply_angle_last, self.frame, CC.latActive, self.lkas_max_torque))
 
     # Below are the HUD messages. We copy the stock message and modify
     if self.CP.carFingerprint != CAR.NISSAN_ALTIMA:
