@@ -26,7 +26,7 @@ class CarControllerParams:
   # Max curvature is limited by the EPS to an equivalent of ~2.0 m/s^2 at all speeds,
   #  however max curvature rate linearly decreases as speed increases:
   #  ~0.009 m^-1/sec at 7 m/s, ~0.002 m^-1/sec at 35 m/s
-  # Limit to ~2 m/s^3 up, ~3.3 m/s^3 down at 75 mph and match EPS limit at low speed
+  # We observed no windup so we allow higher than EPS
   CURVATURE_LIMITS: CurvatureSteeringLimits = CurvatureSteeringLimits(0.02)  # Max curvature for steering command, m^-1
   CURVATURE_ERROR = 0.002  # ~6 degrees at 10 m/s, ~10 degrees at 35 m/s
 
