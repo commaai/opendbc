@@ -12,6 +12,8 @@ ISO_LATERAL_JERK = 5.0  # m/s^3
 # Add extra tolerance for average banked road since safety doesn't have the roll
 AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
 MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
+# Lower than ISO 11270 lateral jerk limit (5.0 m/s^3) with bank tolerance, matches safety MAX_LATERAL_JERK
+MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^3
 
 
 @dataclass
@@ -141,7 +143,7 @@ def apply_std_curvature_limits(apply_curvature: float, apply_curvature_last: flo
   new_apply_curvature = apply_curvature
 
   # ISO 11270 lateral jerk
-  max_jerk = (ISO_LATERAL_JERK / (max(v_ego, 1.0) ** 2)) * (steer_step * DT_CTRL)
+  max_jerk = (MAX_LATERAL_JERK / (max(v_ego, 1.0) ** 2)) * (steer_step * DT_CTRL)
   new_apply_curvature = float(np.clip(new_apply_curvature, apply_curvature_last - max_jerk, apply_curvature_last + max_jerk))
 
   # ISO 11270 lateral acceleration
