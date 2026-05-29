@@ -138,6 +138,7 @@ typedef struct {
   const uint32_t frequency;              // Hz
   const int max_curvature_error;         // max deviation from measured curvature (0 disables)
   const float curvature_error_min_speed; // min speed for the curvature error check [m/s]
+  const int max_steer_power;             // max steer power if EPS supports it (0 disables)
 } CurvatureSteeringLimits;
 
 // parameters for lateral accel/jerk angle limiting using a simple vehicle model
@@ -239,7 +240,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params);
-bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enabled, const CurvatureSteeringLimits limits);
+bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool steer_control_enabled, const CurvatureSteeringLimits limits);
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
 bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limits);
 bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
@@ -290,6 +291,7 @@ extern struct sample_t angle_meas;         // last 6 steer angles
 
 // for safety modes with curvature steering control
 extern int desired_curvature_last;
+extern int desired_steer_power_last;
 extern uint32_t rt_curvature_msgs;
 extern uint32_t ts_curvature_check_last;
 extern struct sample_t curvature_meas;     // last 6 steer curvatures

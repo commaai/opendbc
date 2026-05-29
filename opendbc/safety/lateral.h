@@ -238,7 +238,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 }
 
 // Safety checks for curvature-based steering commands
-bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
+bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
   static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
   // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
@@ -277,17 +277,24 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
   }
   desired_curvature_last = desired_curvature;
 
-  // Curvature should be 0 while not steering
+  // Curvature must be 0 while not steering
   if (!steer_control_enabled) {
     violation |= desired_curvature != 0;
   }
 
-  // No curvature control allowed when controls are not allowed
-  if (!controls_allowed) {
-    violation |= steer_control_enabled;
+  // *** steer power check ***
+  // allow power winddown after disengage to prevent EPS fault
+  if (limits.max_steer_power != 0) {
+    violation |= safety_max_limit_check(steer_power, limits.max_steer_power, 0);
+    violation |= (steer_power != 0) && !steer_control_enabled;
+    violation |= !controls_allowed && (steer_power != 0) && (steer_power >= desired_steer_power_last);
+    desired_steer_power_last = steer_power;
+  } else {
+    // No curvature control allowed when controls are not allowed
+    violation |= !controls_allowed && steer_control_enabled;
   }
 
-  // reset to 0 if either controls is not allowed or there's a violation
+  // reset to zero if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
     desired_curvature_last = 0;
   }

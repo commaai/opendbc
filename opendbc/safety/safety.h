@@ -83,6 +83,7 @@ struct sample_t angle_meas;         // last 6 steer angles
 uint32_t rt_curvature_msgs = 0;
 uint32_t ts_curvature_check_last = 0;
 int desired_curvature_last = 0;
+int desired_steer_power_last = 0;
 struct sample_t curvature_meas;     // last 6 steer curvatures
 
 
@@ -449,6 +450,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   rt_curvature_msgs = 0;
   ts_curvature_check_last = 0;
   desired_curvature_last = 0;
+  desired_steer_power_last = 0;
   ts_torque_check_last = 0;
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;
