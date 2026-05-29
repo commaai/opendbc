@@ -75,7 +75,7 @@ class CarState(CarStateBase):
       ret.gasPressed = cp.vl["GAS_PEDAL"]["GAS_PEDAL_USER"] > 0
       can_gear = int(cp.vl["GEAR_PACKET_HYBRID"]["GEAR"])
     else:
-      ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0  # TODO: these also have GAS_PEDAL, come back and unify
+      ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
       can_gear = int(cp.vl["GEAR_PACKET"]["GEAR"])
       if not self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
         ret.stockAeb = bool(cp_acc.vl["PRE_COLLISION"]["PRECOLLISION_ACTIVE"] and cp_acc.vl["PRE_COLLISION"]["FORCE"] < -1e-5)
@@ -89,6 +89,9 @@ class CarState(CarStateBase):
     ret.vEgoCluster = ret.vEgo * 1.015  # minimum of all the cars
 
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
+
+    ret.vehicleSensorsInvalid = any(cp.vl["WHEEL_SPEEDS"][f"WHEEL_SPEED_{whl}_FAULT"]
+                                    for whl in ("FL", "FR", "RL", "RR"))
 
     ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] + cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
     ret.steeringRateDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
@@ -126,7 +129,8 @@ class CarState(CarStateBase):
 
       # Lane Tracing Assist control is unavailable (EPS_STATUS->LTA_STATE=0) until
       # the more accurate angle sensor signal is initialized
-      ret.vehicleSensorsInvalid = not self.accurate_steer_angle_seen
+      if not self.accurate_steer_angle_seen:
+        ret.vehicleSensorsInvalid = True
 
     if self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:
       # TODO: find the bit likely in DSU_CRUISE that describes an ACC fault. one may also exist in CLUTCH
