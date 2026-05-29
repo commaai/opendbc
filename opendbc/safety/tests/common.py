@@ -827,7 +827,6 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
   MAX_CURVATURE: float
   MAX_CURVATURE_TEST: float
   CURVATURE_TO_CAN: float
-  INACTIVE_CURVATURE_IS_ZERO: bool = False
   SEND_RATE: float
 
   @classmethod

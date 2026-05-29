@@ -26,7 +26,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   MAX_CURVATURE = 29105
   MAX_CURVATURE_TEST = 0.195
   CURVATURE_TO_CAN = 149253.7313
-  INACTIVE_CURVATURE_IS_ZERO = False
   MAX_POWER = 125
   MAX_POWER_TEST = 50
   SEND_RATE = 0.02
@@ -191,7 +190,7 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
     self.safety.init_tests()
 
   def test_curvature_violation(self):
-    # if violation occurs, curvature cmd is reset to current curvature
+    # if violation occurs, curvature cmd is reset to 0
     meas = self.MAX_CURVATURE_TEST / 4
     self.safety.set_controls_allowed(True)
     self._reset_curvature_measurement(meas)
@@ -200,13 +199,12 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
     # cause a violation by sending a command far from prev=0
     self.assertFalse(self._tx(self._curvature_cmd_msg(self.MAX_CURVATURE_TEST, steer_req=True, power=50)))
 
-    # prev should be reset to meas
-    self.assertEqual(int(round(meas * self.CURVATURE_TO_CAN)), self.safety.get_desired_curvature_last())
+    # prev should be reset to 0
+    self.assertEqual(0, self.safety.get_desired_curvature_last())
 
   def test_curvature_cmd_when_not_steering(self):
-    # Tests that only curvatures close to the meas are allowed while
-    # steer actuation bit is 0, regardless of controls allowed
-    step = 1 / self.CURVATURE_TO_CAN
+    # Tests that only a zero curvature is allowed while the steer
+    # actuation bit is 0, regardless of controls allowed or meas
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
 
@@ -217,8 +215,8 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
           for curvature_cmd in np.arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST / 5):
             self._set_prev_desired_curvature(curvature_cmd)
 
-            # controls_allowed is checked if actuation bit is 1, else the curvature must be close to meas (inactive)
-            should_tx = controls_allowed if steer_req else abs(curvature_cmd - curvature_meas) <= step
+            # controls_allowed is checked if actuation bit is 1, else the curvature must be zero (inactive)
+            should_tx = controls_allowed if steer_req else round(curvature_cmd * self.CURVATURE_TO_CAN) == 0
             self.assertEqual(should_tx, self._tx(self._curvature_cmd_msg(curvature_cmd, steer_req=steer_req, power=50 if steer_req else 0)))
 
   def test_spam_cancel_safety_check(self):

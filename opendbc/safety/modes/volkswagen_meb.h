@@ -128,7 +128,6 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       .frequency = 50,                    // Hz
       .max_curvature_error = 0,           // disabled; MEB doesn't track rack
       .curvature_error_min_speed = 10.0,  // m/s
-      .inactive_curvature_is_zero = false,
     };
 
     int desired_curvature_raw = GET_BYTES(msg, 3, 2) & 0x7FFFU;
