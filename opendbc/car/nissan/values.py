@@ -93,34 +93,39 @@ NISSAN_VERSION_RESPONSE_KWP = b'\x61\x83'
 
 NISSAN_RX_OFFSET = 0x20
 
+# TODO: once we gather enough Altima data on PT bus (1), we can remove OBD queries to speed up fingerprinting
 FW_QUERY_CONFIG = FwQueryConfig(
-  requests=[request for bus, logging in ((0, False), (1, True)) for request in [
+  requests=[request for bus, obd_multiplexing in ((0, False), (1, False), (1, True)) for request in [
     Request(
       [NISSAN_DIAGNOSTIC_REQUEST_KWP, NISSAN_VERSION_REQUEST_KWP],
       [NISSAN_DIAGNOSTIC_RESPONSE_KWP, NISSAN_VERSION_RESPONSE_KWP],
       bus=bus,
-      logging=logging,
+      logging=obd_multiplexing,
+      obd_multiplexing=obd_multiplexing,
     ),
     Request(
       [NISSAN_DIAGNOSTIC_REQUEST_KWP, NISSAN_VERSION_REQUEST_KWP],
       [NISSAN_DIAGNOSTIC_RESPONSE_KWP, NISSAN_VERSION_RESPONSE_KWP],
       rx_offset=NISSAN_RX_OFFSET,
       bus=bus,
-      logging=logging,
+      logging=obd_multiplexing,
+      obd_multiplexing=obd_multiplexing,
     ),
     # Rogue's engine solely responds to this
     Request(
       [NISSAN_DIAGNOSTIC_REQUEST_KWP_2, NISSAN_VERSION_REQUEST_KWP],
       [NISSAN_DIAGNOSTIC_RESPONSE_KWP_2, NISSAN_VERSION_RESPONSE_KWP],
       bus=bus,
-      logging=logging,
+      logging=obd_multiplexing,
+      obd_multiplexing=obd_multiplexing,
     ),
     Request(
       [StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
       rx_offset=NISSAN_RX_OFFSET,
       bus=bus,
-      logging=logging,
+      logging=obd_multiplexing,
+      obd_multiplexing=obd_multiplexing,
     ),
     # Some newer Altima engines respond at normal rx offset
     Request(
@@ -128,6 +133,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
       bus=bus,
       logging=logging,
+      obd_multiplexing=obd_multiplexing,
     ),
   ]],
+  extra_ecus=[(Ecu.engine, 0x7e0, None)],
 )
