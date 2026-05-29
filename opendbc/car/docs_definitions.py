@@ -139,7 +139,8 @@ class CarHarness(EnumBase):
   mazda = BaseCarHarness("Mazda connector")
   ford_q3 = BaseCarHarness("Ford Q3 connector")
   ford_q4 = BaseCarHarness("Ford Q4 connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable])
-  rivian = BaseCarHarness("Rivian A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable])
+  rivian_a = BaseCarHarness("Rivian A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable])
+  rivian_b = BaseCarHarness("Rivian B connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable])
   tesla_a = BaseCarHarness("Tesla A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable])
   tesla_b = BaseCarHarness("Tesla B connector", parts=[Accessory.harness_box, Cable.long_obdc_cable])
   psa_a = BaseCarHarness("PSA A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable])
@@ -186,7 +187,7 @@ CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "setup_n
 class CommonFootnote(Enum):
   EXP_LONG_AVAIL = CarFootnote(
     "openpilot Longitudinal Control (Alpha) is available behind a toggle; " +
-    "the toggle is only available in non-release branches such as `devel` or `nightly-dev`.",
+    "the toggle is only available in non-release branches such as `nightly-dev`.",
     Column.LONGITUDINAL, docs_only=True)
 
 
