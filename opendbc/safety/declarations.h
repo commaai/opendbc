@@ -138,6 +138,7 @@ typedef struct {
   const uint32_t frequency;              // Hz
   const int max_curvature_error;         // max deviation from measured curvature (0 disables)
   const float curvature_error_min_speed; // min speed for the curvature error check [m/s]
+  const bool inactive_curvature_is_zero; // if true, inactive curvature must be 0 and reset on violation is to 0
 } CurvatureSteeringLimits;
 
 // parameters for lateral accel/jerk angle limiting using a simple vehicle model
@@ -290,6 +291,8 @@ extern struct sample_t angle_meas;         // last 6 steer angles
 
 // for safety modes with curvature steering control
 extern int desired_curvature_last;
+extern uint32_t rt_curvature_msgs;
+extern uint32_t ts_curvature_check_last;
 extern struct sample_t curvature_meas;     // last 6 steer curvatures
 
 // Alt experiences can be set with a USB command

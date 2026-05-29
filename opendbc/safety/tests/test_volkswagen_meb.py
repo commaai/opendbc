@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import numpy as np
 import unittest
 
 from opendbc.car.structs import CarParams
@@ -25,10 +26,13 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   MAX_CURVATURE = 29105
   MAX_CURVATURE_TEST = 0.195
   CURVATURE_TO_CAN = 149253.7313
-  INACTIVE_CURVATURE_IS_ZERO = True
+  INACTIVE_CURVATURE_IS_ZERO = False
   MAX_POWER = 125
   MAX_POWER_TEST = 50
   SEND_RATE = 0.02
+  LATERAL_FREQUENCY = 50  # Hz
+
+  cnt_curvature_cmd = 0
 
   def _set_prev_desired_power(self, power: int):
     # init with local tx sequence
@@ -104,7 +108,10 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     values = {"Curvature": abs(curvature), "Curvature_VZ": curvature > 0}
     return self.packer.make_can_msg_safety("QFK_01", 0, values)
 
-  def _curvature_cmd_msg(self, curvature, steer_req=1, power=50):
+  def _curvature_cmd_msg(self, curvature, steer_req=1, power=50, increment_timer=True):
+    if increment_timer:
+      self.safety.set_timer(self.cnt_curvature_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      self.__class__.cnt_curvature_cmd += 1
     values = {
       "Curvature": abs(curvature),
       "Curvature_VZ": curvature > 0,
@@ -171,13 +178,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self._rx(self._button_msg(cancel=1, bus=0))
     self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_curvature_cmd_when_not_steering(self):
-    # Curvature must be 0 while not steering, regardless of controls_allowed
-    for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
-      self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=0)))
-      self.assertFalse(self._tx(self._curvature_cmd_msg(self.MAX_CURVATURE_TEST, steer_req=False, power=0)))
-
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
   FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01], 2: [MSG_HCA_03, MSG_LDW_02]}
@@ -189,6 +189,37 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, 0)
     self.safety.init_tests()
+
+  def test_curvature_violation(self):
+    # if violation occurs, curvature cmd is reset to current curvature
+    meas = self.MAX_CURVATURE_TEST / 4
+    self.safety.set_controls_allowed(True)
+    self._reset_curvature_measurement(meas)
+    self._set_prev_desired_curvature(0)
+
+    # cause a violation by sending a command far from prev=0
+    self.assertFalse(self._tx(self._curvature_cmd_msg(self.MAX_CURVATURE_TEST, steer_req=True, power=50)))
+
+    # prev should be reset to meas
+    self.assertEqual(int(round(meas * self.CURVATURE_TO_CAN)), self.safety.get_desired_curvature_last())
+
+  def test_curvature_cmd_when_not_steering(self):
+    # Tests that only curvatures close to the meas are allowed while
+    # steer actuation bit is 0, regardless of controls allowed
+    step = 1 / self.CURVATURE_TO_CAN
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+
+      for steer_req in (True, False):
+        for curvature_meas in np.arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST / 5):
+          self._reset_curvature_measurement(curvature_meas)
+
+          for curvature_cmd in np.arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST / 5):
+            self._set_prev_desired_curvature(curvature_cmd)
+
+            # controls_allowed is checked if actuation bit is 1, else the curvature must be close to meas (inactive)
+            should_tx = controls_allowed if steer_req else abs(curvature_cmd - curvature_meas) <= step
+            self.assertEqual(should_tx, self._tx(self._curvature_cmd_msg(curvature_cmd, steer_req=steer_req, power=50 if steer_req else 0)))
 
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)

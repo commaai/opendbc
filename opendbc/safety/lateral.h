@@ -172,6 +172,28 @@ static bool rt_angle_rate_limit_check(AngleSteeringLimits limits) {
   return violation;
 }
 
+static bool rt_curvature_rate_limit_check(CurvatureSteeringLimits limits) {
+  bool violation = false;
+  uint32_t ts = microsecond_timer_get();
+
+  // *** curvature real time rate limit check ***
+  int max_rt_msgs = ((float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2) + 1;  // 1.2x buffer
+  if ((int)rt_curvature_msgs > max_rt_msgs) {
+    violation = true;
+  }
+
+  rt_curvature_msgs += 1U;
+
+  // every RT_INTERVAL reset message counter
+  uint32_t ts_elapsed = safety_get_ts_elapsed(ts, ts_curvature_check_last);
+  if (ts_elapsed >= MAX_RT_INTERVAL) {
+    rt_curvature_msgs = 0;
+    ts_curvature_check_last = ts;
+  }
+
+  return violation;
+}
+
 // Safety checks for angle-based steering commands
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits) {
   bool violation = false;
@@ -249,12 +271,21 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
       const int highest_desired_curvature_error = curvature_meas.max + limits.max_curvature_error + 1;
       violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature_error, lowest_desired_curvature_error);
     }
+
+    // *** curvature real time rate limit check ***
+    violation |= rt_curvature_rate_limit_check(limits);
   }
   desired_curvature_last = desired_curvature;
 
-  // Curvature must be 0 while not steering
+  // Curvature should either be 0 or same as current curvature while not steering
   if (!steer_control_enabled) {
-    violation |= desired_curvature != 0;
+    if (limits.inactive_curvature_is_zero) {
+      violation |= desired_curvature != 0;
+    } else {
+      const int max_inactive_curvature = SAFETY_CLAMP(curvature_meas.max, -limits.max_curvature, limits.max_curvature) + 1;
+      const int min_inactive_curvature = SAFETY_CLAMP(curvature_meas.min, -limits.max_curvature, limits.max_curvature) - 1;
+      violation |= safety_max_limit_check(desired_curvature, max_inactive_curvature, min_inactive_curvature);
+    }
   }
 
   // No curvature control allowed when controls are not allowed
@@ -262,9 +293,13 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
     violation |= steer_control_enabled;
   }
 
-  // reset to zero if either controls is not allowed or there's a violation
+  // reset to current curvature if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
-    desired_curvature_last = 0;
+    if (limits.inactive_curvature_is_zero) {
+      desired_curvature_last = 0;
+    } else {
+      desired_curvature_last = SAFETY_CLAMP(curvature_meas.values[0], -limits.max_curvature, limits.max_curvature);
+    }
   }
 
   return violation;

@@ -86,6 +86,7 @@ class CarController(CarControllerBase):
 
       # apply rate limits, curvature error limit, and clip to signal range
       current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+      # No blending at low speed due to lack of torque wind-up and inaccurate current curvature
       if CS.out.vEgoRaw > 9:
         apply_curvature = float(np.clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
                                         current_curvature + CarControllerParams.CURVATURE_ERROR))
