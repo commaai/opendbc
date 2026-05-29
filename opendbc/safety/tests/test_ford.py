@@ -360,6 +360,31 @@ class TestFordSafetyBase(common.CarSafetyTest):
             self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
             self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)))
 
+  def test_curvature_accel_boundary(self):
+    # Ford CAN FD must allow curvature at the max lateral acceleration boundary and reject one CAN unit beyond
+    if self.STEER_MESSAGE != MSG_LateralMotionControl2:
+      return
+
+    self.safety.set_controls_allowed(True)
+    small_curvature = 1 / self.DEG_TO_CAN
+
+    for speed in np.arange(0, 40, 0.5):
+      curvature_accel_limit_lower, curvature_accel_limit_upper = self.get_canfd_curvature_limits(speed)
+      # accel boundary must fit inside the curvature-error window around measured
+      if curvature_accel_limit_upper + small_curvature >= self.MAX_CURVATURE_ERROR * 3:
+        continue
+
+      for sign in (-1, 1):
+        self._reset_curvature_measurement(sign * self.MAX_CURVATURE_ERROR * 2, speed)
+        # wind up to upper accel boundary
+        self._set_prev_desired_angle(sign * curvature_accel_limit_lower)
+        self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, sign * curvature_accel_limit_upper, 0)))
+        self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_accel_limit_upper + small_curvature), 0)))
+        # wind down to lower accel boundary
+        self._set_prev_desired_angle(sign * curvature_accel_limit_upper)
+        self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, sign * curvature_accel_limit_lower, 0)))
+        self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_accel_limit_lower - small_curvature), 0)))
+
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)
     self.assertFalse(self._tx(self._lkas_command_msg(1)))
