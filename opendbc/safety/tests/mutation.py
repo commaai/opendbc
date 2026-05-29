@@ -620,15 +620,7 @@ def main():
       ("opendbc/safety/lateral.h", 105, "boundary"),
       ("opendbc/safety/lateral.h", 212, "boundary"),
       ("opendbc/safety/lateral.h", 213, "boundary"),
-      ("opendbc/safety/lateral.h", 364, "arithmetic"),
-      # else branch of inactive_curvature_is_zero, will be exercised by VW MEB
-      ("opendbc/safety/lateral.h", 285, "comparison"),
-      ("opendbc/safety/lateral.h", 285, "arithmetic"),
-      ("opendbc/safety/lateral.h", 286, "comparison"),
-      ("opendbc/safety/lateral.h", 286, "arithmetic"),
-      ("opendbc/safety/lateral.h", 287, "bitwise_assignment"),
-      ("opendbc/safety/lateral.h", 301, "comparison"),
-
+      ("opendbc/safety/lateral.h", 354, "arithmetic"),
     }
     survivors = [r for r in survivors if (str(r.site.origin_file.relative_to(ROOT)), r.site.origin_line, r.site.mutator) not in known_survivors]
 

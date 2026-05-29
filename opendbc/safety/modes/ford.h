@@ -92,7 +92,6 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
   .frequency = 20,                    // Hz
   .max_curvature_error = 100,         // 0.002 * curvature_to_can
   .curvature_error_min_speed = 10.0,  // m/s
-  .inactive_curvature_is_zero = true,
 };
 
 static void ford_rx_hook(const CANPacket_t *msg) {
