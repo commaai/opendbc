@@ -397,8 +397,8 @@ class CarState(CarStateBase):
     # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
     # DISABLED means the EPS hasn't been configured to support Lane Assist
     self.eps_init_complete = self.eps_init_complete or (hca_status in ("DISABLED", "READY", "ACTIVE") or self.frame > 600)
-    perm_fault = (drive_mode and hca_status == "DISABLED") or (self.eps_init_complete and hca_status == "FAULT")
-    temp_fault = (drive_mode and hca_status in ("REJECTED", "PREEMPTED")) or not self.eps_init_complete
+    perm_fault = drive_mode and hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
+    temp_fault = drive_mode and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
   def update_acc_fault(self, acc_fault, parking_brake=False, drive_mode=True, recovery_frames_max=100):

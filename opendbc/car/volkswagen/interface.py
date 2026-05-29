@@ -61,7 +61,6 @@ class CarInterface(CarInterfaceBase):
       if 0x3DC in fingerprint[0]:  # Gateway_73
         ret.flags |= VolkswagenFlags.ALT_GEAR.value
 
-      # MEB is lateral-only; stock ACC is preserved as pass-through.
       ret.radarUnavailable = True
 
       # only allow gateway harness for now
