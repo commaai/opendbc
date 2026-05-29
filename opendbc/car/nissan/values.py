@@ -132,7 +132,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
       bus=bus,
-      logging=logging,
+      logging=obd_multiplexing,
       obd_multiplexing=obd_multiplexing,
     ),
   ]],
