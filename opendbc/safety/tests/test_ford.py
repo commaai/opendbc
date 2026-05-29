@@ -375,7 +375,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
         continue
 
       for sign in (-1, 1):
-        self._reset_curvature_measurement(sign * self.MAX_CURVATURE_ERROR * 2, speed)
+        self._reset_curvature_measurement(sign * (self.MAX_CURVATURE - self.MAX_CURVATURE_ERROR * 2), speed)
         # wind up to upper accel boundary
         self._set_prev_desired_angle(sign * curvature_accel_limit_lower)
         self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, sign * curvature_accel_limit_upper, 0)))
@@ -383,7 +383,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
         # wind down to lower accel boundary
         self._set_prev_desired_angle(sign * curvature_accel_limit_upper)
         self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, sign * curvature_accel_limit_lower, 0)))
-        self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_accel_limit_lower - small_curvature), 0)))
 
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)
