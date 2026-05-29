@@ -136,5 +136,4 @@ FW_QUERY_CONFIG = FwQueryConfig(
       obd_multiplexing=obd_multiplexing,
     ),
   ]],
-  extra_ecus=[(Ecu.engine, 0x7e0, None)],
 )
