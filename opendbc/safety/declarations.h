@@ -138,7 +138,7 @@ typedef struct {
   const uint32_t frequency;              // Hz
   const int max_curvature_error;         // max deviation from measured curvature (0 disables)
   const float curvature_error_min_speed; // min speed for the curvature error check [m/s]
-  const bool inactive_curvature_is_zero; // if true, inactive curvature must be 0 and reset on violation is to 0
+  const bool inactive_curvature_is_zero; // if false, enforces curvature near meas when disabled (default)
 } CurvatureSteeringLimits;
 
 // parameters for lateral accel/jerk angle limiting using a simple vehicle model
