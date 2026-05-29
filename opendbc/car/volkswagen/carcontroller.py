@@ -80,13 +80,13 @@ class CarController(CarControllerBase):
         if CC.latActive:
           hca_enabled = True
           # while overriding, only command feedforward (actuators.curvature) so we don't fight the driver
-          overriding = CS.out.steeringPressed
-          if overriding:
-            self.curvature_pid.i = 0.0
-          error = 0. if overriding else actuators.curvature - CC.currentCurvature
-          freeze_integrator = overriding or CS.out.vEgoRaw < 5
-          pid_curvature = self.curvature_pid.update(error, speed=CS.out.vEgo, feedforward=actuators.curvature,
-                                                    freeze_integrator=freeze_integrator)
+          if CS.out.steeringPressed:
+            self.curvature_pid.reset()
+            pid_curvature = actuators.curvature
+          else:
+            error = actuators.curvature - CC.currentCurvature
+            pid_curvature = self.curvature_pid.update(error, speed=CS.out.vEgo, feedforward=actuators.curvature,
+                                                      freeze_integrator=CS.out.vEgoRaw < 5)
           apply_curvature = pid_curvature + (CS.curvature_meas - CC.currentCurvature)
           apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
                                                        self.CCP.STEER_STEP, CC.latActive, self.CCP.CURVATURE_LIMITS)
