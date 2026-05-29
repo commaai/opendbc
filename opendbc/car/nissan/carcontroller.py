@@ -31,6 +31,7 @@ class CarController(CarControllerBase):
     ### STEER ###
     steer_hud_alert = 1 if hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw) else 0
 
+    # At low speeds and at high steering angles, EPS is sensitive to jitter in angle request. Smooth to fix uncomfortable response.
     if CC.latActive:
       self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5, 10, 20], [0.2, 0.1, 0.0])))
       self.angle_filter.update(actuators.steeringAngleDeg)
@@ -50,7 +51,7 @@ class CarController(CarControllerBase):
         # Scale max torque based on how much torque the driver is applying to the wheel.
         # Start scaling torque at STEER_THRESHOLD down to 0.2. If we don't scale this low, EPS will temp fault from high driver and LKAS torque
         lkas_max_torque = max(
-          0.0,
+          CarControllerParams.LKAS_MIN_TORQUE,
           CarControllerParams.LKAS_MAX_TORQUE - 0.6 * max(0, abs(CS.out.steeringTorque) - CarControllerParams.STEER_THRESHOLD),
         )
 
