@@ -85,6 +85,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
   cnt_speed = 0
   cnt_speed_2 = 0
   cnt_yaw_rate = 0
+  cnt_lat_ctl = 0
 
   packer: CANPackerSafety
   safety: libsafety_py.LibSafety
@@ -169,7 +170,11 @@ class TestFordSafetyBase(common.CarSafetyTest):
     return self.packer.make_can_msg_safety("Lane_Assist_Data1", 0, values)
 
   # LCA command
-  def _lat_ctl_msg(self, enabled: bool, path_offset: float, path_angle: float, curvature: float, curvature_rate: float):
+  def _lat_ctl_msg(self, enabled: bool, path_offset: float, path_angle: float, curvature: float, curvature_rate: float,
+                   increment_timer: bool = True):
+    if increment_timer:
+      self.safety.set_timer(self.cnt_lat_ctl * int(1e6 / self.LATERAL_FREQUENCY))
+      self.__class__.cnt_lat_ctl += 1
     if self.STEER_MESSAGE == MSG_LateralMotionControl:
       values = {
         "LatCtl_D_Rq": 1 if enabled else 0,
@@ -318,6 +323,27 @@ class TestFordSafetyBase(common.CarSafetyTest):
     # prev tracks the commanded curvature on a passing tx (not reset to 0 every frame)
     self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, max_delta_can / self.DEG_TO_CAN, 0)))
     self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 2 * max_delta_can / self.DEG_TO_CAN, 0)))
+
+  def test_rt_limits(self):
+    # Curvature safety enforces real time limits by checking the message send frequency in a 250ms time window
+    self.safety.set_timer(0)
+    self.safety.set_controls_allowed(True)
+    max_rt_msgs = int(self.LATERAL_FREQUENCY * common.RT_INTERVAL / 1e6 * 1.2 + 1)  # 1.2x buffer
+
+    for i in range(max_rt_msgs * 2):
+      should_tx = i <= max_rt_msgs
+      self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+
+    # One under RT interval should do nothing
+    self.safety.set_timer(common.RT_INTERVAL - 1)
+    for _ in range(5):
+      self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+
+    # Increment timer and send 1 message to reset RT window
+    self.safety.set_timer(common.RT_INTERVAL)
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+    for _ in range(5):
+      self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
 
   def test_steer_allowed(self):
     path_offsets = np.arange(-5.12, 5.11, 2.5).round()
