@@ -1,6 +1,6 @@
 import numpy as np
 from opendbc.can import CANPacker
-from opendbc.car import Bus, structs
+from opendbc.car import Bus, DT_CTRL, structs
 from opendbc.car.lateral import apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.nissan import nissancan
@@ -15,7 +15,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.car_fingerprint = CP.carFingerprint
 
-    self.angle_filter = FirstOrderFilter(0.0, 0.1, 0.01)
+    self.angle_filter = FirstOrderFilter(0.0, 0.1, DT_CTRL)
 
     self.apply_angle_last = 0
 
