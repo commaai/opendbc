@@ -277,9 +277,15 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
   }
   desired_curvature_last = desired_curvature;
 
-  // Curvature must be 0 while not steering
+  // Curvature should either be 0 or same as current curvature while not steering
   if (!steer_control_enabled) {
-    violation |= desired_curvature != 0;
+    if (limits.inactive_curvature_is_zero) {
+      violation |= desired_curvature != 0;
+    } else {
+      const int max_inactive_curvature = SAFETY_CLAMP(curvature_meas.max, -limits.max_curvature, limits.max_curvature) + 1;
+      const int min_inactive_curvature = SAFETY_CLAMP(curvature_meas.min, -limits.max_curvature, limits.max_curvature) - 1;
+      violation |= safety_max_limit_check(desired_curvature, max_inactive_curvature, min_inactive_curvature);
+    }
   }
 
   // No curvature control allowed when controls are not allowed
@@ -287,9 +293,13 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
     violation |= steer_control_enabled;
   }
 
-  // reset to zero if either controls is not allowed or there's a violation
+  // reset to current curvature if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
-    desired_curvature_last = 0;
+    if (limits.inactive_curvature_is_zero) {
+      desired_curvature_last = 0;
+    } else {
+      desired_curvature_last = SAFETY_CLAMP(curvature_meas.values[0], -limits.max_curvature, limits.max_curvature);
+    }
   }
 
   return violation;
