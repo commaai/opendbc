@@ -226,8 +226,8 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     // check not above ISO 11270 lateral accel assuming worst case road roll
     if (limits.angle_is_curvature) {
 
-      // Highway curves are rolled in the direction of the turn, add tolerance to compensate
-      static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
+      // Limit to average banked road since safety doesn't have the roll
+      static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
 
       // Allow small tolerance by using minimum speed and rounding curvature up
       const float speed_lower = SAFETY_MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
