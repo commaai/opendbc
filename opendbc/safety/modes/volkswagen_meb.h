@@ -38,7 +38,6 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 }
 
 static safety_config volkswagen_meb_init(uint16_t param) {
-  // MEB is lateral-only; openpilot longitudinal control is not supported.
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {
     {MSG_HCA_03, 0, 24, .check_relay = true},
