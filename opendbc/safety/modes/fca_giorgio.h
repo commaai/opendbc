@@ -5,6 +5,7 @@
 
 #define FCA_GIORGIO_ABS_1           0xEE
 #define FCA_GIORGIO_ABS_3           0xFA
+#define FCA_GIORGIO_EPS_2           0x106
 #define FCA_GIORGIO_EPS_3           0x122
 #define FCA_GIORGIO_LKA_COMMAND     0x1F6
 // TODO: this isn't actually an LKA message on promester, coming from radar ECU
@@ -29,6 +30,8 @@ static safety_config fca_giorgio_init(uint16_t param) {
     {.msg = {{FCA_GIORGIO_ACC_1, 0, 8, 12U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ABS_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ABS_3, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    // TODO: confirm rate
+    {.msg = {{FCA_GIORGIO_EPS_2, 0, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_EPS_3, 0, 4, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
@@ -80,9 +83,9 @@ static void fca_giorgio_rx_hook(const CANPacket_t *msg) {
     }
 
     // Update driver input torque samples
-    // Signal: EPS_3.EPS_TORQUE
-    if (msg->addr == FCA_GIORGIO_EPS_3) {
-      int torque_driver_new = from_offset(GET_BYTES_BE(msg, 0, 2) >> 4, 2048);
+    // Signal: EPS_2.DRIVER_TORQUE
+    if (msg->addr == FCA_GIORGIO_EPS_2) {
+      int torque_driver_new = from_offset(GET_BYTES_BE(msg, 2, 2) >> 5, 1024);
       update_sample(&safety.torque_driver, torque_driver_new);
     }
 
