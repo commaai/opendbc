@@ -53,7 +53,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
         cam_can = CanBus(None, fingerprint).CAM
         fingerprint[cam_can] = [0x50, 0x110]  # LKA steering messages
       CP = CarInterface.get_params(CAR.KIA_EV6, fingerprint, [], False, False, False)
-      assert bool(CP.flags & HyundaiFlags.CANFD_LKA_STEERING) == lka_steering
+      assert bool(CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG) == lka_steering
 
     # radar available
     for radar in (True, False):
@@ -75,7 +75,8 @@ class TestHyundaiFingerprint(unittest.TestCase):
     assert set.union(*CAN_GEARS.values()) & (HYBRID_CAR | EV_CAR) == set()
 
     # Test CAN FD car not in CAN feature lists
-    can_specific_feature_list = set.union(*CAN_GEARS.values(), *CHECKSUM.values(), LEGACY_SAFETY_MODE_CAR, UNSUPPORTED_LONGITUDINAL_CAR, CAMERA_SCC_CAR)
+    can_specific_feature_list = set.union(*CAN_GEARS.values(), *CHECKSUM.values(), LEGACY_SAFETY_MODE_CAR,
+                                          *UNSUPPORTED_LONGITUDINAL_CAR.values(), CAMERA_SCC_CAR)
     for car_model in CANFD_CAR:
       assert car_model not in can_specific_feature_list, "CAN FD car unexpectedly found in a CAN feature list"
 
