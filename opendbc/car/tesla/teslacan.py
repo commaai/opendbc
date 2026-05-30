@@ -10,7 +10,7 @@ class TeslaCAN:
   def create_steering_control(self, angle, enabled):
     control_type = 1 if enabled else 0  # ANGLE_CONTROL
     if self.CP.flags & TeslaFlags.LEGACY_DAS_STEERING:
-      control_type <<= 1  # legacy firmware carries the type in a 2-bit field, one bit up from the 3-bit signal
+      control_type <<= 1  # legacy firmware uses a 2-bit field, one bit up from the 3-bit signal
 
     values = {
       "DAS_steeringAngleRequest": -angle,

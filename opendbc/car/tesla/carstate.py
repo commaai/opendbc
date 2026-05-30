@@ -107,7 +107,7 @@ class CarState(CarStateBase):
     # LKAS
     steer_control_type = int(cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"])
     if self.CP.flags & TeslaFlags.LEGACY_DAS_STEERING:
-      steer_control_type >>= 1  # legacy firmware carries the type in a 2-bit field, one bit up from the 3-bit signal
+      steer_control_type >>= 1  # legacy firmware uses a 2-bit field, one bit up from the 3-bit signal
     ret.stockLkas = steer_control_type == 2  # LANE_KEEP_ASSIST
 
     # Stock Autosteer should be off (includes FSD)

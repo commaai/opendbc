@@ -28,8 +28,7 @@ def round_angle(apply_angle, can_offset=0):
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
   SAFETY_PARAM = 0
   PARTY_DBC = "tesla_model3_party"
-  # legacy firmware carries DAS_steeringControlType in a 2-bit field, one bit up from the 3-bit signal
-  STEER_TYPE_SHIFT = 0
+  STEER_TYPE_SHIFT = 0  # legacy firmware uses a 2-bit field, one bit up from the 3-bit signal
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor)}
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor]}
