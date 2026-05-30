@@ -198,11 +198,6 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = cp.vl["POWERTRAIN_DATA"]["ACC_STATUS"] != 0
     ret.cruiseState.available = bool(cp.vl[self.car_state_scm_msg]["MAIN_ON"])
 
-    # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
-    if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):
-      if ret.brake > 0.1:
-        ret.brakePressed = True
-
     if self.CP.carFingerprint in HONDA_BOSCH:
       # TODO: find the radarless AEB_STATUS bit and make sure ACCEL_COMMAND is correct to enable AEB alerts
       if self.CP.carFingerprint not in HONDA_BOSCH_RADARLESS:
