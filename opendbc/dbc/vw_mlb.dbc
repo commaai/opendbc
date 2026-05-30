@@ -34,6 +34,18 @@ BS_:
 
 BU_: Airbag_D4 EPB_D4 ESP_D4 Gateway_D4C7 Getriebe_AL551_951_D4_C7 Getriebe_DL501_C7 Getriebe_VL381_C7 LWS_D4 Motor_EDC17_D4 Motor_ME17_BY Motor_MED17_SIMOS8_D4 Motor_Slave_D4 QSP_D4 SAK_C7 SCR_C7 SCU_D4
 
+BO_ 265 ACC_01: 8 Gateway_B8
+ SG_ ACC_01_CHK : 0|8@1+ (1,0) [0|255] ""  Magnetic_Ride_LB,Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Magnetic_Ride_LB,Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_zul_Regelabw_unten : 16|6@1+ (0.024,0) [0|1.512] "Unit_MeterPerSeconSquar"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_Sollbeschleunigung : 24|11@1+ (0.005,-7.22) [-7.22|3.01] "Unit_MeterPerSeconSquar"  Magnetic_Ride_LB,Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_zul_Regelabw_oben : 35|5@1+ (0.0625,0) [0|1.9375] "Unit_MeterPerSeconSquar"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_neg_Sollbeschl_Grad : 40|8@1+ (0.05,0) [0|12.7] "Unit_MeterPerCubicSecon"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_pos_Sollbeschl_Grad : 48|8@1+ (0.05,0) [0|12.7] "Unit_MeterPerCubicSecon"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_Dynamik : 58|2@1+ (1,0) [0|3] ""  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
+ SG_ ACC_Anhalten : 56|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] ""  XXX
+ SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] ""  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
 
 BO_ 780 ACC_02: 8 Gateway_D4C7
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  HUD_C7,Kombi_D4
@@ -1696,7 +1708,7 @@ BO_ 786 TSK_03: 8 Motor_EDC17_D4
 
 BO_ 270 TSK_04: 8 Motor_EDC17_D4
  SG_ TSK_04_CHK : 0|8@1+ (1,0) [0|255] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
- SG_ TSK_04_BZ : 8|4@1+ (1,0) [0|15] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ TSK_zul_Regelabw : 12|6@1+ (0.024,0) [0.000|1.512] "Unit_MeterPerSeconSquar"  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ TSK_ax_Getriebe : 18|9@1+ (0.024,-2.016) [-2.016|10.224] "Unit_MeterPerSeconSquar"  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ TSK_Wunsch_Uebersetz : 27|10@1+ (0.0245,0) [0.0245|25.0635] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
@@ -1746,6 +1758,13 @@ BO_ 1716 VIN_01: 8 Gateway_D4C7
 BO_ 1414 Waehlhebel_02: 8 Getriebe_AL551_951_D4_C7
  SG_ WH_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
 
+BO_ 1318 BCM: 8 XXX
+ SG_ INVERTED_BLINKER_ACTIVE : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ TURNSTALK_LEFT : 26|1@0+ (1,0) [0|1] "" XXX
+ SG_ TURNSTALK_RIGHT : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ BLINKER_LEFT : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ BLINKER_RIGHT : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN_DRIVER_DOOR_RELATED : 43|1@0+ (1,0) [0|1] "" XXX
 
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" ;
 VAL_ 269 ACC_Freigabe_Momentenanf 0 "Momanf_nicht_freigegeben" 1 "Momanf_freigegeben" ;

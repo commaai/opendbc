@@ -217,7 +217,7 @@ class CcpClient:
     resp = self._recv_dto(0.025)
     # mta_addr_ext = resp[0]
     mta_addr = struct.unpack(f"{self.byte_order.value}I", resp[1:5])[0]
-    return mta_addr  # type: ignore
+    return mta_addr
 
   def download_6_bytes(self, data: bytes) -> int:
     if len(data) != 6:
@@ -226,7 +226,7 @@ class CcpClient:
     resp = self._recv_dto(0.025)
     # mta_addr_ext = resp[0]
     mta_addr = struct.unpack(f"{self.byte_order.value}I", resp[1:5])[0]
-    return mta_addr  # type: ignore
+    return mta_addr
 
   def upload(self, size: int) -> bytes:
     if size > 5:
@@ -325,7 +325,7 @@ class CcpClient:
     resp = self._recv_dto(0.1)
     # mta_addr_ext = resp[0]
     mta_addr = struct.unpack(f"{self.byte_order.value}I", resp[1:5])[0]
-    return mta_addr  # type: ignore
+    return mta_addr
 
   def program_6_bytes(self, data: bytes) -> int:
     if len(data) != 6:
@@ -334,7 +334,7 @@ class CcpClient:
     resp = self._recv_dto(0.1)
     # mta_addr_ext = resp[0]
     mta_addr = struct.unpack(f"{self.byte_order.value}I", resp[1:5])[0]
-    return mta_addr  # type: ignore
+    return mta_addr
 
   def move_memory_block(self, size: int) -> None:
     self._send_cro(COMMAND_CODE.MOVE, struct.pack(f"{self.byte_order.value}I", size))

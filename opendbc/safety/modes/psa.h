@@ -27,14 +27,7 @@ static uint8_t psa_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t psa_get_checksum(const CANPacket_t *msg) {
-  uint8_t chksum = 0;
-  if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    chksum = msg->data[5] & 0xFU;
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    chksum = msg->data[5] & 0xFU;
-  } else {
-  }
-  return chksum;
+  return msg->data[5] & 0xFU;
 }
 
 static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, int chk_pos) {

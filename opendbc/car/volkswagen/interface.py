@@ -4,10 +4,12 @@ from opendbc.car.volkswagen.carcontroller import CarController
 from opendbc.car.volkswagen.carstate import CarState
 from opendbc.car.volkswagen.values import CanBus, CAR, NetworkLocation, TransmissionType, VolkswagenFlags, VolkswagenSafetyFlags
 
-
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+
+  DRIVABLE_GEARS = (structs.CarState.GearShifter.eco, structs.CarState.GearShifter.sport,
+                    structs.CarState.GearShifter.manumatic)
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
@@ -29,20 +31,14 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
 
-      # The PQ port is in dashcam-only mode due to a fixed six-minute maximum timer on HCA steering. An unsupported
-      # EPS flash update to work around this timer, and enable steering down to zero, is available from:
-      #   https://github.com/pd0wm/pq-flasher
-      # It is documented in a four-part blog series:
-      #   https://blog.willemmelching.nl/carhacking/2022/01/02/vw-part1/
-      # Panda ALLOW_DEBUG firmware required.
-      ret.dashcamOnly = True
+      ret.dashcamOnly = is_release  # Release support needs HCA timeout fix, safety validation
 
     elif ret.flags & VolkswagenFlags.MLB:
       # Set global MLB parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMlb)]
       ret.enableBsm = 0x30F in fingerprint[0]  # SWA_01
       ret.networkLocation = NetworkLocation.gateway
-      ret.dashcamOnly = True  # Pending HCA timeout fix, safety validation, harness termination, install procedure
+      ret.dashcamOnly = is_release  # Release support needs HCA timeout fix, safety validation, revised J533 harness
 
     else:
       # Set global MQB parameters

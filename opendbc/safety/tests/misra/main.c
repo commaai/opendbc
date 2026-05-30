@@ -2,6 +2,8 @@
 
 // this file is checked by cppcheck
 
+extern uint32_t microsecond_timer_get(void);
+
 // Ignore misra-c2012-8.7 as these functions are only called from libsafety
 SAFETY_UNUSED(heartbeat_engaged);
 

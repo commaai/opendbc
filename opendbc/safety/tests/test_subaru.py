@@ -25,9 +25,9 @@ class SubaruMsg(enum.IntEnum):
   ES_LKAS_State     = 0x322
   ES_Infotainment   = 0x323
   ES_UDS_Request    = 0x787
-  ES_HighBeamAssist = 0x121
-  ES_STATIC_1       = 0x22a
-  ES_STATIC_2       = 0x325
+  ES_HighBeamAssist = 0x22A
+  ES_STATIC_1       = 0x325
+  ES_STATIC_2       = 0x121
 
 
 SUBARU_MAIN_BUS = 0
@@ -94,10 +94,6 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
   def _speed_msg(self, speed):
     values = {s: speed for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
-
-  def _angle_meas_msg(self, angle):
-    values = {"Steering_Angle": angle}
-    return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
   def _user_brake_msg(self, brake):
     values = {"Brake": brake}
