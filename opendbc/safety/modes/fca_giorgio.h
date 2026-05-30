@@ -7,6 +7,7 @@
 #define FCA_GIORGIO_ABS_3           0xFA
 #define FCA_GIORGIO_EPS_3           0x122
 #define FCA_GIORGIO_LKA_COMMAND     0x1F6
+// TODO: this isn't actually an LKA message on promester, coming from radar ECU
 #define FCA_GIORGIO_LKA_HUD_1       0x4AE
 #define FCA_GIORGIO_LKA_HUD_2       0x547
 #define FCA_GIORGIO_ACC_1           0x5A2
@@ -15,7 +16,11 @@ static safety_config fca_giorgio_init(uint16_t param) {
   SAFETY_UNUSED(param);
 
   // TODO: need to find a button message for cancel spam
-  static const CanMsg FCA_GIORGIO_TX_MSGS[] = {{FCA_GIORGIO_LKA_COMMAND, 0, 8, .check_relay = true}, {FCA_GIORGIO_LKA_HUD_1, 0, 8, .check_relay = true}, {FCA_GIORGIO_LKA_HUD_2, 0, 8, .check_relay = true}};
+  static const CanMsg FCA_GIORGIO_TX_MSGS[] = {
+    {FCA_GIORGIO_LKA_COMMAND, 0, 8, .check_relay = true},
+    {FCA_GIORGIO_LKA_HUD_1, 0, 8, .check_relay = true},
+    {FCA_GIORGIO_LKA_HUD_2, 0, 8, .check_relay = true},
+  };
 
   // TODO: need to find a message for driver gas
   // TODO: re-check counter/checksum for ABS_3
