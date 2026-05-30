@@ -46,8 +46,6 @@ class CarController(CarControllerBase):
       self.CCS = pqcan
     elif CP.flags & VolkswagenFlags.MLB:
       self.CCS = mlbcan
-    elif CP.flags & VolkswagenFlags.MEB:
-      self.CCS = mebcan
     else:
       self.CCS = mqbcan
 
@@ -107,27 +105,18 @@ class CarController(CarControllerBase):
           self.curvature_pid.reset()
           if self.steering_power_last > 0:  # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
-            apply_curvature = apply_std_curvature_limits(CS.curvature_meas, self.apply_curvature_last, CS.out.vEgoRaw,
-                                                         CS.curvature_meas, self.CCP.STEER_STEP, True, self.CCP.CURVATURE_LIMITS)
+            apply_curvature = float(np.clip(CS.curvature_meas, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX))
             steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, 0)
           else:
             hca_enabled = False
             apply_curvature = 0.  # inactive curvature
             steering_power = 0
 
-        can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_curvature, hca_enabled, steering_power))
+        can_sends.append(mebcan.create_steering_control(self.packer_pt, self.CAN.pt, apply_curvature, hca_enabled, steering_power))
         self.apply_curvature_last = apply_curvature
         self.steering_power_last = steering_power
 
       else:
-        # Logic to avoid HCA state 4 "refused":
-        #   * Don't steer unless HCA is in state 3 "ready" or 5 "active"
-        #   * Don't steer at standstill
-        #   * Don't send > 3.00 Newton-meters torque
-        #   * Don't send the same torque for > 6 seconds
-        #   * Don't send uninterrupted steering for > 360 seconds
-        # MQB racks reset the uninterrupted steering timer after a single frame
-        # of HCA disabled; this is done whenever output happens to be zero.
         if CC.latActive:
           new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
           apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
@@ -159,35 +148,36 @@ class CarController(CarControllerBase):
 
     # **** Acceleration Controls ******************************************** #
 
-    if self.frame % self.CCP.ACC_CONTROL_STEP == 0 and self.CP.openpilotLongitudinalControl:
-      stopping = actuators.longControlState == LongCtrlState.stopping
+    if self.CP.openpilotLongitudinalControl:
+      if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
+        stopping = actuators.longControlState == LongCtrlState.stopping
 
-      if self.CP.flags & VolkswagenFlags.MEB:
-        starting = actuators.longControlState == LongCtrlState.starting and CS.out.vEgo <= self.CP.vEgoStarting
-        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
+        if self.CP.flags & VolkswagenFlags.MEB:
+          starting = actuators.longControlState == LongCtrlState.starting and CS.out.vEgo <= self.CP.vEgoStarting
+          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
 
-        long_override = CC.cruiseControl.override or CS.out.gasPressed
-        self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
-        long_override_begin = long_override and self.long_override_counter < 5
+          long_override = CC.cruiseControl.override or CS.out.gasPressed
+          self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
+          long_override_begin = long_override and self.long_override_counter < 5
 
-        self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
-        long_disabling = not CC.enabled and self.long_disabled_counter < 5
+          self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
+          long_disabling = not CC.enabled and self.long_disabled_counter < 5
 
-        acc_control = mebcan.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, long_override)
-        acc_hold_type = mebcan.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
-                                             CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
-        can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.enabled,
-                                                         4.0, 4.0, 0., 0.,
-                                                         accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
-                                                         CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))
-        self.accel_last = accel
+          acc_control = mebcan.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, long_override)
+          acc_hold_type = mebcan.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
+                                               CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
+          can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.enabled,
+                                                           4.0, 4.0, 0., 0.,
+                                                           accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
+                                                           CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))
+          self.accel_last = accel
 
-      else:
-        starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
-                                                           acc_control, stopping, starting, CS.esp_hold_confirmation))
+        else:
+          acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
+          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
+          starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
+          can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
+                                                             acc_control, stopping, starting, CS.esp_hold_confirmation))
 
       #if self.aeb_available:
       #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:

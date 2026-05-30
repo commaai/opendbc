@@ -64,7 +64,7 @@ class CarInterface(CarInterfaceBase):
       ret.radarUnavailable = 0x24F not in fingerprint[0]  # Strukturen_01
       ret.radarDelay = 0.8
 
-      # only allow gateway harness for now
+      # only allow gateway harness to escalate Emergency Assist
       ret.dashcamOnly = is_release or ret.networkLocation == NetworkLocation.fwdCamera
 
     else:
@@ -131,8 +131,8 @@ class CarInterface(CarInterfaceBase):
       ret.startAccel = 0.8
     else:
       ret.stopAccel = -0.55
-      ret.vEgoStopping = 0.5
       ret.vEgoStarting = 0.1
+      ret.vEgoStopping = 0.5
     ret.autoResumeSng = ret.minEnableSpeed == -1
 
     CAN = CanBus(fingerprint=fingerprint)
