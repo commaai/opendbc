@@ -8,16 +8,10 @@ from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, Tes
 ButtonType = structs.CarState.ButtonEvent.Type
 
 
-def _party_dbc(CP) -> str:
-  if CP.flags & TeslaFlags.LEGACY_DAS_STEERING:
-    return 'tesla_model3_party_legacy'
-  return DBC[CP.carFingerprint][Bus.party]
-
-
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.can_define = CANDefine(_party_dbc(CP))
+    self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.party])
     self.shifter_values = self.can_define.dv["DI_systemStatus"]["DI_gear"]
 
     self.autopark = False
@@ -111,7 +105,10 @@ class CarState(CarStateBase):
     ret.stockAeb = cp_ap_party.vl["DAS_control"]["DAS_aebEvent"] == 1
 
     # LKAS
-    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
+    steer_control_type = int(cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"])
+    if self.CP.flags & TeslaFlags.LEGACY_DAS_STEERING:
+      steer_control_type >>= 1  # legacy firmware carries the type in a 2-bit field, one bit up from the 3-bit signal
+    ret.stockLkas = steer_control_type == 2  # LANE_KEEP_ASSIST
 
     # Stock Autosteer should be off (includes FSD)
     # TODO: find for TESLA_MODEL_X and HW2.5 vehicles
@@ -127,7 +124,7 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    party_dbc = _party_dbc(CP)
+    party_dbc = DBC[CP.carFingerprint][Bus.party]
     return {
       Bus.party: CANParser(party_dbc, [], CANBUS.party),
       Bus.ap_party: CANParser(party_dbc, [], CANBUS.autopilot_party)

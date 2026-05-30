@@ -28,6 +28,8 @@ def round_angle(apply_angle, can_offset=0):
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
   SAFETY_PARAM = 0
   PARTY_DBC = "tesla_model3_party"
+  # legacy firmware carries DAS_steeringControlType in a 2-bit field, one bit up from the 3-bit signal
+  STEER_TYPE_SHIFT = 0
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor)}
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor]}
@@ -77,7 +79,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
-    values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
+    values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": int(state) << self.STEER_TYPE_SHIFT}
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
       self.__class__.cnt_angle_cmd += 1
@@ -398,7 +400,7 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 
 class TestTeslaLegacyDasSteeringStockSafety(TestTeslaStockSafety):
   SAFETY_PARAM = TeslaSafetyFlags.LEGACY_DAS_STEERING
-  PARTY_DBC = "tesla_model3_party_legacy"
+  STEER_TYPE_SHIFT = 1
 
 
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
@@ -451,7 +453,7 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
 
 class TestTeslaLegacyDasSteeringLongitudinalSafety(TestTeslaLongitudinalSafety):
   SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL | TeslaSafetyFlags.LEGACY_DAS_STEERING
-  PARTY_DBC = "tesla_model3_party_legacy"
+  STEER_TYPE_SHIFT = 1
 
 
 class TestTeslaIgnition(unittest.TestCase):

@@ -1,5 +1,5 @@
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.tesla.values import CANBUS, CarControllerParams
+from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
 
 
 class TeslaCAN:
@@ -8,10 +8,14 @@ class TeslaCAN:
     self.packer = packer
 
   def create_steering_control(self, angle, enabled):
+    control_type = 1 if enabled else 0  # ANGLE_CONTROL
+    if self.CP.flags & TeslaFlags.LEGACY_DAS_STEERING:
+      control_type <<= 1  # legacy firmware carries the type in a 2-bit field, one bit up from the 3-bit signal
+
     values = {
       "DAS_steeringAngleRequest": -angle,
       "DAS_steeringHapticRequest": 0,
-      "DAS_steeringControlType": 1 if enabled else 0,  # ANGLE_CONTROL
+      "DAS_steeringControlType": control_type,
     }
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
