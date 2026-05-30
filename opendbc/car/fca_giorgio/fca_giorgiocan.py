@@ -1,6 +1,6 @@
-def create_steering_control(packer, bus, apply_steer, lkas_enabled):
+def create_steering_control(packer, bus, apply_steer, lat_active):
   values = {
-    "LKA_ACTIVE": lkas_enabled,
+    "LKA_ACTIVE": lat_active,
     "LKA_TORQUE": apply_steer,
   }
 
@@ -18,7 +18,9 @@ def create_lka_hud_1_control(packer, bus, lat_active):
 
 def create_lka_hud_2_control(packer, bus, lat_active):
   values = {
-    "NEW_SIGNAL_1": 1,
+    "LKA_DISABLE": 0,
+    "NEW_SIGNAL_1": 0,  # TODO: remove this signal
+    "LKA_ACTIVE": lat_active,
   }
 
   return packer.make_can_msg("LKA_HUD_2", bus, values)
