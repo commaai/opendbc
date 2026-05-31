@@ -13,10 +13,10 @@ ISO_LATERAL_JERK = 5.0  # m/s^3
 
 # - Common angle safety limits
 # Add extra tolerance for average banked road since safety doesn't have the roll
-AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
-MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
+ANGLE_AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
+ANGLE_MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * ANGLE_AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
 # Lower than ISO 11270 lateral jerk limit (5.0 m/s^3) with bank tolerance, matches safety MAX_LATERAL_JERK
-MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^3
+ANGLE_MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * ANGLE_AVERAGE_ROAD_ROLL)  # ~3.6 m/s^3
 
 
 # TODO: deprecate in favor of vehicle-model-based limiting
@@ -32,12 +32,9 @@ class AngleSteeringLimits:
 @dataclass
 class AngleSteeringLimitsVM:
   # using apply_steer_angle_limits_vm
-  # Add extra tolerance for average banked road since safety doesn't have the roll
-  AVERAGE_ROAD_ROLL: ClassVar[float] = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
-  MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
-  # Lower than ISO 11270 lateral jerk limit (5.0 m/s^3) with bank tolerance, matches safety MAX_LATERAL_JERK
-  MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^3
-
+  STEER_ANGLE_MAX: float
+  MAX_LATERAL_ACCEL: float = ANGLE_MAX_LATERAL_ACCEL
+  MAX_LATERAL_JERK: float = ANGLE_MAX_LATERAL_JERK
   MAX_ANGLE_RATE: float = math.inf
 
 
