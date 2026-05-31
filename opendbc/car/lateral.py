@@ -1,7 +1,6 @@
 import math
 import numpy as np
 from dataclasses import dataclass
-from typing import ClassVar
 from opendbc.car import structs, rate_limit, DT_CTRL, ACCELERATION_DUE_TO_GRAVITY
 from opendbc.car.vehicle_model import VehicleModel
 
