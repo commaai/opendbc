@@ -19,7 +19,8 @@ const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
 
 static void nissan_rx_hook(const CANPacket_t *msg) {
 
-  if (msg->bus == (nissan_alt_eps ? 1U : 0U)) {
+  // Altima: on camera bus, others: on pt bus
+  if (msg->bus == 0U) {
     if (msg->addr == 0x185U) {
       // Current steering angle
       // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
@@ -29,7 +30,9 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
       // update array of samples
       update_sample(&angle_meas, angle_meas_new);
     }
+  }
 
+  if (msg->bus == (nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x285U) {
       // Get current speed and standstill
       uint16_t right_rear = (msg->data[0] << 8) | (msg->data[1]);
@@ -108,8 +111,7 @@ static safety_config nissan_init(uint16_t param) {
 
   // Signals duplicated below due to the fact that these messages can come in on either CAN bus, depending on car model.
   static RxCheck nissan_rx_checks[] = {
-    {.msg = {{0x185, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x185, 1, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},  // STEER_TORQUE_SENSOR
+    {.msg = {{0x185, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_TORQUE_SENSOR
     {.msg = {{0x285, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
              {0x285, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}}, // WHEEL_SPEEDS_REAR
     {.msg = {{0x30f, 2, 3, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
