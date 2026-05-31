@@ -10,7 +10,6 @@ from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
-
 def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
   diff = 0.1
   tau = 5  # 5s smooths over the overshoot
