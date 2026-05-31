@@ -354,7 +354,7 @@ BO_ 1458 CAM_UNKNOWN_5: 4 CAMERA
  SG_ NEW_SIGNAL_1 : 5|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1508 ACC_4: 8 XXX
- SG_ CRUISE_MODE : 60|2@0+ (1,0) [0|3] "" XXX
+ SG_ CRUISE_MODE : 61|3@0+ (1,0) [0|3] "" XXX
 
 BO_ 1854 BCM_1: 4 BCM
  SG_ RIGHT_TURN_STALK : 16|1@0+ (1,0) [0|1] "" XXX
@@ -379,4 +379,4 @@ CM_ SG_ 284 VEHICLE_SPEED "scale estimated";
 CM_ BO_ 1198 "Definite LKA activity, probably contains lane-line recognition and lane departure signals, indicator of LKA vs TJA, perhaps indicator of active assist in map-permitted areas";
 VAL_ 262 LKA_STATUS 0 "standby" 2 "lka_active";
 VAL_ 1449 GEAR 1 "park" 2 "reverse" 3 "neutral" 4 "drive" 6 "drive manual";
-VAL_ 1508 CRUISE_MODE 0 "off" 3 "manual" 2 "acc";
+VAL_ 1508 CRUISE_MODE 0 "off" 3 "manual" 2 "acc-available" 4 "acc-enabled" 6 "acc-override";
