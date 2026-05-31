@@ -23,8 +23,8 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
     if (msg->addr == 0x185U) {
       // Current steering angle
-      // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
       int angle_meas_new = (msg->data[2] << 10) | (msg->data[3] << 2) | (msg->data[4] >> 6);
+      // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
       angle_meas_new = -angle_meas_new + (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
 
       // update array of samples
