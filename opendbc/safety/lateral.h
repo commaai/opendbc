@@ -247,13 +247,9 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
   const float fudged_speed = SAFETY_MAX((vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0, 1.0);
   bool violation = false;
 
-  // convert curvature rad/m limits to CAN units
-  const int max_curvature = (int)((limits.max_curvature * limits.curvature_to_can) + 0.5f);
-  const int max_curvature_error = (int)((limits.max_curvature_error * limits.curvature_to_can) + 0.5f);
-
   if (controls_allowed && steer_control_enabled) {
     // *** absolute curvature cap ***
-    violation |= safety_max_limit_check(desired_curvature, max_curvature, -max_curvature);
+    violation |= safety_max_limit_check(desired_curvature, limits.max_curvature, -limits.max_curvature);
 
     // *** ISO lateral jerk limit ***
     const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
@@ -265,14 +261,14 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
     violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature, lowest_desired_curvature);
 
     // *** ISO lateral accel limit ***
-    const float iso_max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
-    const int iso_max_curvature_can = (iso_max_curvature * limits.curvature_to_can) + 1.;
-    violation |= safety_max_limit_check(desired_curvature, iso_max_curvature_can, -iso_max_curvature_can);
+    const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
+    const int max_curvature_can = (max_curvature * limits.curvature_to_can) + 1.;
+    violation |= safety_max_limit_check(desired_curvature, max_curvature_can, -max_curvature_can);
 
     // *** curvature error from measured ***
-    if ((limits.max_curvature_error > 0.f) && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.curvature_error_min_speed)) {
-      const int lowest_desired_curvature_error = curvature_meas.min - max_curvature_error - 1;
-      const int highest_desired_curvature_error = curvature_meas.max + max_curvature_error + 1;
+    if (limits.max_curvature_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.curvature_error_min_speed)) {
+      const int lowest_desired_curvature_error = curvature_meas.min - limits.max_curvature_error - 1;
+      const int highest_desired_curvature_error = curvature_meas.max + limits.max_curvature_error + 1;
       violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature_error, lowest_desired_curvature_error);
     }
 

@@ -133,10 +133,10 @@ typedef struct {
 
 typedef struct {
   // curvature cmd limits
-  const float max_curvature;             // rad/m
+  const int max_curvature;               // rad/m * curvature_to_can
   const float curvature_to_can;          // CAN units per rad/m
   const uint32_t frequency;              // Hz
-  const float max_curvature_error;       // rad/m, max deviation from measured curvature (0 disables)
+  const int max_curvature_error;         // rad/m * curvature_to_can, max deviation from measured curvature (0 disables)
   const float curvature_error_min_speed; // min speed for the curvature error check [m/s]
 } CurvatureSteeringLimits;
 
