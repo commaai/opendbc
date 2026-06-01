@@ -1,0 +1,14 @@
+VERSION ""
+
+NS_ :
+    NS_DESC_
+    VAL_
+    VAL_TABLE_
+
+BS_:
+
+BO_ 1024 STEERING_COMMAND: 8 Vector__XXX
+ SG_ STEER_ANGLE : 0|16@0+ (0.01,-327.68) [-500|500] "deg" Vector__XXX
+
+BO_ 1025 GAS_COMMAND: 8 Vector__XXX
+ SG_ GAS_CMD : 0|8@0+ (0.5,0) [0|100] "%" Vector__XXX
