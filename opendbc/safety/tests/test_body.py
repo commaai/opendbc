@@ -55,6 +55,18 @@ class TestBody(common.SafetyTest):
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
     self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
 
+  def test_can_flasher_all_branches(self):
+    # Flash unlock with controls allowed (short-circuits !controls_allowed)
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
+
+    # Wrong first 4 bytes only
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\x00\x00\x00\x00\x1e\x0b\xb0\x0a')))
+
+    # Wrong last 4 bytes only
+    self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x00\x00\x00\x00')))
+
 
 if __name__ == "__main__":
   unittest.main()

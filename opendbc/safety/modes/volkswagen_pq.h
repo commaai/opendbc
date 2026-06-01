@@ -25,7 +25,6 @@ static uint8_t volkswagen_pq_get_counter(const CANPacket_t *msg) {
     counter = (uint8_t)(msg->data[1] & 0xF0U) >> 4;
   } else if (msg->addr == MSG_GRA_NEU) {
     counter = (uint8_t)(msg->data[2] & 0xF0U) >> 4;
-  } else {
   }
 
   return counter;
