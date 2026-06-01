@@ -4,7 +4,7 @@ import random
 import unittest
 
 import opendbc.safety.tests.common as common
-from opendbc.car.lateral import MAX_LATERAL_ACCEL
+from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -76,9 +76,9 @@ class TestFordSafetyBase(common.CarSafetyTest):
   STEER_MESSAGE = 0
 
   # Curvature control limits
-  DEG_TO_CAN = 50000  # 1 / (2e-5) rad to can
-  MAX_CURVATURE = 0.02
-  MAX_CURVATURE_ERROR = 0.002         # rad/m, = 100 CAN units
+  DEG_TO_CAN = 50000   # CAN units per rad/m
+  MAX_CURVATURE = 0.02 # rad/m, 1000 CAN units
+  MAX_CURVATURE_ERROR = 0.002         # rad/m, 100 CAN units
   CURVATURE_ERROR_MIN_SPEED = 10.0    # m/s
   LATERAL_FREQUENCY = 20              # Hz, for per-frame jerk limit
 
@@ -91,13 +91,10 @@ class TestFordSafetyBase(common.CarSafetyTest):
   safety: libsafety_py.LibSafety
 
   def _get_max_curvature_can(self, speed):
-    # matches safety fudge
     fudged_speed = max(speed - 1.0, 1.0)
     return int(MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed) * self.DEG_TO_CAN) + 1
 
   def _get_max_curvature_delta_can(self, speed):
-    # matches safety fudge
-    MAX_LATERAL_JERK = 3.0 + (9.81 * 0.06)
     fudged_speed = max(speed - 1.0, 1.0)
     return int(MAX_LATERAL_JERK / (fudged_speed * fudged_speed) / self.LATERAL_FREQUENCY * self.DEG_TO_CAN) + 1
 
@@ -263,6 +260,36 @@ class TestFordSafetyBase(common.CarSafetyTest):
           should_tx = abs(curvature_can) <= max_can
           self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, signed_curvature, 0)))
 
+  def test_steer_allowed(self):
+    path_offsets = np.arange(-5.12, 5.11, 2.5).round()
+    path_angles = np.arange(-0.5, 0.5235, 0.25).round(1)
+    curvature_rates = np.arange(-0.001024, 0.00102375, 0.001).round(3)
+    curvatures = np.arange(-0.02, 0.02094, 0.01).round(2)
+
+    for speed in (self.CURVATURE_ERROR_MIN_SPEED - 1,
+                  self.CURVATURE_ERROR_MIN_SPEED + 1):
+      max_curvature_can = self._get_max_curvature_can(speed)
+      for controls_allowed in (True, False):
+        for steer_control_enabled in (True, False):
+          for path_offset in path_offsets:
+            for path_angle in path_angles:
+              for curvature_rate in curvature_rates:
+                for curvature in curvatures:
+                  self.safety.set_controls_allowed(controls_allowed)
+                  self._set_prev_desired_angle(curvature)
+                  self._reset_curvature_measurement(curvature, speed)
+
+                  should_tx = path_offset == 0 and path_angle == 0 and curvature_rate == 0
+                  # when request bit is 0, only allow curvature of 0 since the signal range
+                  # is not large enough to enforce it tracking measured
+                  should_tx = should_tx and (controls_allowed if steer_control_enabled else curvature == 0)
+                  should_tx = should_tx and abs(round(curvature * self.DEG_TO_CAN)) <= max_curvature_can
+
+                  with self.subTest(controls_allowed=controls_allowed, steer_control_enabled=steer_control_enabled,
+                                    path_offset=float(path_offset), path_angle=float(path_angle), curvature_rate=float(curvature_rate),
+                                    curvature=float(curvature)):
+                    self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(steer_control_enabled, path_offset, path_angle, curvature, curvature_rate)))
+
   def test_curvature_rate_limits(self):
     """Curvature command must satisfy the ISO 11270 lateral jerk limit per frame."""
     self.safety.set_controls_allowed(True)
@@ -308,7 +335,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, (max_error_can + 2) / self.DEG_TO_CAN, 0)))
 
   def test_curvature_violation(self):
-    # If violation occurs, curvature cmd is blocked until reset to 0. Matches behavior of angle safety modes
+    # If violation occurs, curvature cmd is blocked until reset to 0
     self.safety.set_controls_allowed(True)
     speed = 25.
     max_delta_can = self._get_max_curvature_delta_can(speed)
@@ -344,36 +371,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
     self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
     for _ in range(5):
       self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
-
-  def test_steer_allowed(self):
-    path_offsets = np.arange(-5.12, 5.11, 2.5).round()
-    path_angles = np.arange(-0.5, 0.5235, 0.25).round(1)
-    curvature_rates = np.arange(-0.001024, 0.00102375, 0.001).round(3)
-    curvatures = np.arange(-0.02, 0.02094, 0.01).round(2)
-
-    for speed in (self.CURVATURE_ERROR_MIN_SPEED - 1,
-                  self.CURVATURE_ERROR_MIN_SPEED + 1):
-      max_curvature_can = self._get_max_curvature_can(speed)
-      for controls_allowed in (True, False):
-        for steer_control_enabled in (True, False):
-          for path_offset in path_offsets:
-            for path_angle in path_angles:
-              for curvature_rate in curvature_rates:
-                for curvature in curvatures:
-                  self.safety.set_controls_allowed(controls_allowed)
-                  self._set_prev_desired_angle(curvature)
-                  self._reset_curvature_measurement(curvature, speed)
-
-                  should_tx = path_offset == 0 and path_angle == 0 and curvature_rate == 0
-                  # when request bit is 0, only allow curvature of 0 since the signal range
-                  # is not large enough to enforce it tracking measured
-                  should_tx = should_tx and (controls_allowed if steer_control_enabled else curvature == 0)
-                  should_tx = should_tx and abs(round(curvature * self.DEG_TO_CAN)) <= max_curvature_can
-
-                  with self.subTest(controls_allowed=controls_allowed, steer_control_enabled=steer_control_enabled,
-                                    path_offset=float(path_offset), path_angle=float(path_angle), curvature_rate=float(curvature_rate),
-                                    curvature=float(curvature)):
-                    self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(steer_control_enabled, path_offset, path_angle, curvature, curvature_rate)))
 
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)

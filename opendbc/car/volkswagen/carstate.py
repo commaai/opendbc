@@ -85,7 +85,6 @@ class CarState(CarStateBase):
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
         ret.carFaultedNonCritical = bool(cam_cp.vl["HCA_01"]["EA_Ruckfreigabe"]) or cam_cp.vl["HCA_01"]["EA_ACC_Sollstatus"] > 0  # EA
 
-      ret.brake = pt_cp.vl["ESP_05"]["ESP_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
       brake_pedal_pressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
       brake_pressure_detected = bool(pt_cp.vl["ESP_05"]["ESP_Fahrer_bremst"])
       ret.brakePressed = brake_pedal_pressed or brake_pressure_detected
@@ -163,7 +162,6 @@ class CarState(CarStateBase):
 
     # Update gas, brakes, and gearshift.
     ret.gasPressed = pt_cp.vl["Motor_3"]["MO3_Pedalwert"] > 0
-    ret.brake = pt_cp.vl["Bremse_5"]["BR5_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
     ret.brakePressed = bool(pt_cp.vl["Motor_2"]["MO2_BLS"])
     ret.parkingBrake = bool(pt_cp.vl["Kombi_1"]["Bremsinfo"])
 
@@ -269,7 +267,6 @@ class CarState(CarStateBase):
 
     ret.gasPressed = pt_cp.vl["Motor_51"]["Accel_Pedal_Pressure"] > 0
     ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
-    ret.brake = pt_cp.vl["ESC_51"]["Brake_Pressure"]
     ret.parkingBrake = pt_cp.vl["ESC_50"]["EPB_Status"] in (1, 4) # EPB closing or closed (candidate for all platforms)
     #ret.parkingBrake = pt_cp.vl["Gateway_73"]["EPB_Status"] in (1, 4) # this signal is not working for newer models
     ret.seatbeltUnlatched = pt_cp.vl["Airbag_02"]["AB_Gurtschloss_FA"] != 3
@@ -343,7 +340,6 @@ class CarState(CarStateBase):
 
     self.parse_mlb_mqb_steering_state(ret, pt_cp)
 
-    ret.brake = pt_cp.vl["ESP_05"]["ESP_Bremsdruck"] / 250.0
     brake_pedal_pressed = bool(pt_cp.vl["Motor_03"]["MO_Fahrer_bremst"])
     brake_pressure_detected = bool(pt_cp.vl["ESP_05"]["ESP_Fahrer_bremst"])
     ret.brakePressed = brake_pedal_pressed or brake_pressure_detected
