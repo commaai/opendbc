@@ -89,7 +89,7 @@ class CarController(CarControllerBase):
                                                       freeze_integrator=CS.out.vEgoRaw < 5)
           apply_curvature = pid_curvature + (CS.curvature_meas - CC.currentCurvature)
           apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
-                                                       self.CCP.STEER_STEP, CC.latActive, self.CCP.CURVATURE_LIMITS)
+                                                       CC.latActive, self.CCP)
 
           min_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MIN)
           max_power = min(self.steering_power_last + self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MAX)
