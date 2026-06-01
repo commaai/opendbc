@@ -87,10 +87,10 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
 #define FORD_CANFD_INACTIVE_CURVATURE_RATE 1024U
 
 static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
-  .max_curvature = 1000,              // 0.02 curvature
-  .curvature_to_can = 50000,          // 1 / (2e-5) rad to can
+  .max_curvature = 1000,              // 0.02 rad/m * curvature_to_can
+  .curvature_to_can = 50000,          // CAN units per rad/m
   .frequency = 20,                    // Hz
-  .max_curvature_error = 100,         // 0.002 * curvature_to_can
+  .max_curvature_error = 100,         // 0.002 rad/m * curvature_to_can
   .curvature_error_min_speed = 10.0,  // m/s
   .max_steer_power = 0,               // disabled, Ford has no steed power signal
 };
