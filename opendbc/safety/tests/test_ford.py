@@ -4,7 +4,7 @@ import random
 import unittest
 
 import opendbc.safety.tests.common as common
-from opendbc.car.lateral import MAX_LATERAL_ACCEL
+from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -95,7 +95,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
     return int(MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed) * self.DEG_TO_CAN) + 1
 
   def _get_max_curvature_delta_can(self, speed):
-    MAX_LATERAL_JERK = 3.0 + (9.81 * 0.06)
     fudged_speed = max(speed - 1.0, 1.0)
     return int(MAX_LATERAL_JERK / (fudged_speed * fudged_speed) / self.LATERAL_FREQUENCY * self.DEG_TO_CAN) + 1
 
