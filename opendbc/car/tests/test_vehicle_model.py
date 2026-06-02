@@ -1,4 +1,4 @@
-import pytest
+import unittest
 import math
 
 import numpy as np
@@ -8,8 +8,8 @@ from opendbc.car.honda.values import CAR
 from opendbc.car.vehicle_model import VehicleModel, dyn_ss_sol, create_dyn_state_matrices
 
 
-class TestVehicleModel:
-  def setup_method(self):
+class TestVehicleModel(unittest.TestCase):
+  def setUp(self):
     CP = CarInterface.get_non_essential_params(CAR.HONDA_CIVIC)
     self.VM = VehicleModel(CP)
 
@@ -21,7 +21,7 @@ class TestVehicleModel:
           yr = self.VM.yaw_rate(sa, u, roll)
           new_sa = self.VM.get_steer_from_yaw_rate(yr, u, roll)
 
-          assert sa == pytest.approx(new_sa)
+          self.assertAlmostEqual(sa, new_sa, places=10)
 
   def test_dyn_ss_sol_against_yaw_rate(self):
     """Verify that the yaw_rate helper function matches the results
@@ -36,7 +36,7 @@ class TestVehicleModel:
 
           # Compute yaw rate using direct computations
           yr2 = self.VM.yaw_rate(sa, u, roll)
-          assert float(yr1[0]) == pytest.approx(yr2)
+          self.assertAlmostEqual(float(yr1[0]), yr2, places=10)
 
   def test_syn_ss_sol_simulate(self):
     """Verifies that dyn_ss_sol matches a simulation"""
