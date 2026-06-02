@@ -306,6 +306,11 @@ class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
       raise unittest.SkipTest("No steering request bit")
 
     self.safety.set_controls_allowed(True)
+
+    # commanding zero torque is never a steer request mismatch, even with steer_req=0
+    self._set_prev_torque(0)
+    self.assertTrue(self._tx(self._torque_cmd_msg(0, steer_req=0)))
+
     self._set_prev_torque(self.MAX_TORQUE)
 
     # Send torque successfully, then only drop the request bit and ensure it stays blocked
@@ -818,8 +823,12 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
     # Increment timer and send 1 message to reset RT window
     self.safety.set_timer(RT_INTERVAL)
     self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
-    for _ in range(5):
-      self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
+
+    # Without further time elapsing, the per-window message limit must still trigger.
+    # This pins the window on elapsed time (ts - ts_last); a ts + ts_last bug would keep resetting it.
+    for i in range(max_rt_msgs * 2):
+      should_tx = i <= max_rt_msgs
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
 
 class SafetyTest(SafetyTestBase):
