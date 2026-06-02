@@ -1,6 +1,6 @@
 [project]
 name = "opendbc"
-version = "0.2.1"
+version = "0.3.1"
 description = "a Python API for your car"
 license = "MIT"
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
@@ -12,13 +12,12 @@ urls = { "homepage" = "https://github.com/commaai/opendbc" }
 dependencies = [
   "numpy",
   "tqdm",
-  "pycapnp==2.1.0",
+  "pycapnp",
   "pycryptodome",
 ]
 
 [project.optional-dependencies]
 testing = [
-  "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
   "cffi",
   "tree-sitter",
   "tree-sitter-c",
@@ -33,13 +32,21 @@ testing = [
   "lefthook",
   "cpplint",
   "codespell",
-  "cppcheck @ git+https://github.com/commaai/dependencies.git@release-cppcheck#subdirectory=cppcheck",
 ]
 docs = [
   "Jinja2",
 ]
 examples = [
   "inputs",
+]
+
+# Dependency groups (PEP 735) are not included in the published wheel.
+# Direct URL dependencies must live here because PyPI rejects uploads whose
+# `Requires-Dist` contains direct URLs.
+[dependency-groups]
+testing = [
+  "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
+  "cppcheck @ git+https://github.com/commaai/dependencies.git@release-cppcheck#subdirectory=cppcheck",
 ]
 
 [build-system]
@@ -127,4 +134,6 @@ too-many-positional-arguments = "ignore"
 include-package-data = true
 
 [tool.setuptools.package-data]
-"opendbc.safety" = ["*.h", "board/*.h", "board/drivers/*.h", "modes/*.h"]
+"opendbc.car" = ["**/*.capnp", "**/*.toml"]
+"opendbc.dbc" = ["**/*.dbc"]
+"opendbc.safety" = ["*.h", "modes/*.h"]
