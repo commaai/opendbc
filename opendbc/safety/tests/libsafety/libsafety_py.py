@@ -111,6 +111,10 @@ int get_honda_hw(void);
 void mutation_set_active_mutant(int id);
 int mutation_get_active_mutant(void);
 
+void ignition_can_hook(const CANPacket_t *msg);
+bool get_ignition_can(void);
+void set_ignition_can(bool c);
+
 bool get_controls_allowed_lateral(void);
 bool get_controls_requested_lateral(void);
 void set_current_safety_param_sp(uint16_t param);

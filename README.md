@@ -59,7 +59,7 @@ cd opendbc
 # here are the individual commands it runs
 pip3 install -e .[testing,docs]  # install dependencies
 scons -j8                        # build with 8 cores
-pytest .                         # run the tests
+unittest-parallel                # run the tests
 lefthook run lint                # run the linter
 ```
 

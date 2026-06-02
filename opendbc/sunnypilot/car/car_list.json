@@ -656,23 +656,31 @@
     ],
     "package": "Co-Pilot360 Assist 2.0"
   },
-  "Ford Focus 2018": {
+  "Ford Focus 2018-22": {
     "platform": "FORD_FOCUS_MK4",
     "make": "Ford",
     "brand": "ford",
     "model": "Focus",
     "year": [
-      "2018"
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022"
     ],
     "package": "Adaptive Cruise Control with Lane Centering"
   },
-  "Ford Focus Hybrid 2018": {
+  "Ford Focus Hybrid 2018-22": {
     "platform": "FORD_FOCUS_MK4",
     "make": "Ford",
     "brand": "ford",
     "model": "Focus Hybrid",
     "year": [
-      "2018"
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022"
     ],
     "package": "Adaptive Cruise Control with Lane Centering"
   },
@@ -1605,6 +1613,17 @@
       "2024"
     ],
     "package": "Highway Driving Assist II"
+  },
+  "Hyundai Ioniq 6 (without HDA II) 2023-24": {
+    "platform": "HYUNDAI_IONIQ_6",
+    "make": "Hyundai",
+    "brand": "hyundai",
+    "model": "Ioniq 6 (without HDA II)",
+    "year": [
+      "2023",
+      "2024"
+    ],
+    "package": "Highway Driving Assist"
   },
   "Hyundai Ioniq Electric 2019": {
     "platform": "HYUNDAI_IONIQ_EV_LTD",
@@ -2789,7 +2808,7 @@
     ],
     "package": "All"
   },
-  "Nissan Altima 2019-20, 2024": {
+  "Nissan Altima 2019-24": {
     "platform": "NISSAN_ALTIMA",
     "make": "Nissan",
     "brand": "nissan",
@@ -2797,6 +2816,9 @@
     "year": [
       "2019",
       "2020",
+      "2021",
+      "2022",
+      "2023",
       "2024"
     ],
     "package": "ProPILOT Assist"
