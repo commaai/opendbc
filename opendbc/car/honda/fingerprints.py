@@ -1139,6 +1139,7 @@ FW_VERSIONS = {
       b'8S302-3A0-A220\x00\x00',
       b'8S302-3C0-Q050\x00\x00',
       b'8S302-3D4-A050\x00\x00',
+      b'8S302-3D4-A060\x00\x00',
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'8S102-3A0-A070\x00\x00',
