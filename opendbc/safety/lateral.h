@@ -294,9 +294,9 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
     violation |= !controls_allowed && steer_control_enabled;
   }
 
-  // reset to zero if either controls is not allowed or there's a violation
+  // reset to zero or measured curvature depending on EPS expectation
   if (violation || !controls_allowed) {
-    desired_curvature_last = 0;
+    desired_curvature_last = limits.inactive_curvature_is_zero ? 0 : curvature_meas.values[0];
   }
 
   return violation;
