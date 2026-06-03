@@ -618,9 +618,10 @@ def main():
     known_survivors = {
       ("opendbc/safety/helpers.h", 40, "arithmetic"),
       ("opendbc/safety/lateral.h", 105, "boundary"),
-      ("opendbc/safety/lateral.h", 204, "boundary"),
-      ("opendbc/safety/lateral.h", 205, "boundary"),
-      ("opendbc/safety/lateral.h", 350, "arithmetic"),
+      ("opendbc/safety/lateral.h", 188, "boundary"),
+      ("opendbc/safety/lateral.h", 212, "boundary"),
+      ("opendbc/safety/lateral.h", 213, "boundary"),
+      ("opendbc/safety/lateral.h", 354, "arithmetic"),
     }
     survivors = [r for r in survivors if (str(r.site.origin_file.relative_to(ROOT)), r.site.origin_line, r.site.mutator) not in known_survivors]
 

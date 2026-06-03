@@ -98,15 +98,9 @@ class TestFordSafetyBase(common.CarSafetyTest):
     fudged_speed = max(speed - 1.0, 1.0)
     return int(MAX_LATERAL_JERK / (fudged_speed * fudged_speed) / self.LATERAL_FREQUENCY * self.DEG_TO_CAN) + 1
 
-  def _get_max_curvature_rt_delta_can(self, speed):
-    fudged_speed = max(speed - 1.0, 1.0)
-    return int(MAX_LATERAL_JERK / (fudged_speed * fudged_speed) * (common.RT_INTERVAL / 1e6) * self.DEG_TO_CAN * 1.2) + 1
-
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)
     self.safety.set_desired_curvature_last(t)
-    # keep the real time baseline in sync so the RT window check does not interfere with other limits
-    self.safety.set_rt_curvature_last(t)
 
   def _reset_curvature_measurement(self, curvature, speed):
     for _ in range(6):
@@ -318,7 +312,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
         self._reset_curvature_measurement(sign * base_can / self.DEG_TO_CAN, speed)
         for should_tx, delta_can in cases:
           self.safety.set_desired_curvature_last(sign * base_can)
-          self.safety.set_rt_curvature_last(sign * base_can)
           self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (base_can + delta_can) / self.DEG_TO_CAN, 0)))
 
   def test_curvature_error_limits(self):
@@ -359,27 +352,32 @@ class TestFordSafetyBase(common.CarSafetyTest):
     self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 2 * max_delta_can / self.DEG_TO_CAN, 0)))
 
   def test_rt_limits(self):
-    """Curvature command must satisfy the ISO 11270 lateral jerk limit over each RT interval"""
+    # send rate is limited over a rolling 250ms window split into two half-interval buckets
     self.safety.set_controls_allowed(True)
-    speed = 35.  # above CURVATURE_ERROR_MIN_SPEED so the curvature error check doesn't interfere
-    self._reset_curvature_measurement(0, speed)
-    max_delta_can = self._get_max_curvature_delta_can(speed)
-    max_rt_delta_can = self._get_max_curvature_rt_delta_can(speed)
+    self._reset_curvature_measurement(0, 0)
+    max_rt_msgs = int(self.LATERAL_FREQUENCY * common.RT_INTERVAL / 1e6 * 1.2 + 1)
+    half = common.RT_INTERVAL // 2
 
-    for sign in (-1, 1):
-      # hold the timer within one interval so the anchor stays at 0
-      self.safety.set_timer(0)
-      for should_tx, command_can in ((True, max_rt_delta_can), (False, max_rt_delta_can + 1)):
-        self.safety.set_rt_curvature_last(0)
-        self.safety.set_desired_curvature_last(sign * command_can)  # per-frame jerk check passes
-        self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * command_can / self.DEG_TO_CAN, 0, increment_timer=False)))
+    # too many messages within one window is blocked
+    self.safety.set_timer(0)
+    for i in range(max_rt_msgs * 2):
+      self.assertEqual(i <= max_rt_msgs, self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
 
-      # advancing past the interval re-bases the anchor, so a further frame-step is allowed again
-      self.safety.set_rt_curvature_last(0)
-      self.safety.set_desired_curvature_last(sign * max_rt_delta_can)
-      self.safety.set_timer(common.RT_INTERVAL + 1)
-      self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, sign * max_rt_delta_can / self.DEG_TO_CAN, 0, increment_timer=False)))
-      self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, sign * (max_rt_delta_can + max_delta_can) / self.DEG_TO_CAN, 0, increment_timer=False)))
+    # shift the overflow into the previous bucket
+    self.safety.set_timer(half)
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+
+    # previous bucket still counts within the half interval
+    self.safety.set_timer(half + 2 * common.RT_INTERVAL // 5)
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+
+    # both buckets clear after a full interval
+    self.safety.set_timer(half + common.RT_INTERVAL)
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+    self.safety.set_timer(half + 2 * common.RT_INTERVAL)
+    for _ in range(max_rt_msgs):
+      self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
 
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)
