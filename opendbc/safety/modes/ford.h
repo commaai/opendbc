@@ -123,7 +123,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
       float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
       float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
       // convert current curvature into units on CAN for comparison with desired curvature
-      update_sample(&curvature_meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
+      update_sample(&curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
     }
 
     // Update gas pedal

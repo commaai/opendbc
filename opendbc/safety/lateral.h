@@ -178,17 +178,17 @@ static bool rt_curvature_rate_limit_check(CurvatureSteeringLimits limits) {
 
   // *** curvature real time rate limit check ***
   int max_rt_msgs = ((float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2) + 1;  // 1.2x buffer
-  uint32_t rt_msgs = rt_curvature_msgs + rt_curvature_msgs_prev;
+  uint32_t rt_msgs = curvature_state.rt_msgs + curvature_state.rt_msgs_prev;
   if ((int)rt_msgs > max_rt_msgs) {
     violation = true;
   }
-  rt_curvature_msgs += 1U;
+  curvature_state.rt_msgs += 1U;
 
   //roll the window every half interval
-  if (safety_get_ts_elapsed(ts, ts_curvature_check_last) >= (MAX_RT_INTERVAL / 2U)) {
-    rt_curvature_msgs_prev = rt_curvature_msgs;
-    rt_curvature_msgs = 0U;
-    ts_curvature_check_last = ts;
+  if (safety_get_ts_elapsed(ts, curvature_state.ts_check_last) >= (MAX_RT_INTERVAL / 2U)) {
+    curvature_state.rt_msgs_prev = curvature_state.rt_msgs;
+    curvature_state.rt_msgs = 0U;
+    curvature_state.ts_check_last = ts;
   }
 
   return violation;
@@ -256,8 +256,8 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
     const float max_curvature_delta = max_curvature_rate_sec / (float)limits.frequency;
     const int max_curvature_delta_can = (max_curvature_delta * limits.curvature_to_can) + 1.;
 
-    const int highest_desired_curvature = desired_curvature_last + max_curvature_delta_can;
-    const int lowest_desired_curvature = desired_curvature_last - max_curvature_delta_can;
+    const int highest_desired_curvature = curvature_state.desired_last + max_curvature_delta_can;
+    const int lowest_desired_curvature = curvature_state.desired_last - max_curvature_delta_can;
     violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature, lowest_desired_curvature);
 
     // *** ISO lateral accel limit ***
@@ -267,15 +267,15 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
 
     // *** curvature error from measured ***
     if (limits.max_curvature_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.curvature_error_min_speed)) {
-      const int lowest_desired_curvature_error = curvature_meas.min - limits.max_curvature_error - 1;
-      const int highest_desired_curvature_error = curvature_meas.max + limits.max_curvature_error + 1;
+      const int lowest_desired_curvature_error = curvature_state.meas.min - limits.max_curvature_error - 1;
+      const int highest_desired_curvature_error = curvature_state.meas.max + limits.max_curvature_error + 1;
       violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature_error, lowest_desired_curvature_error);
     }
 
     // *** real time rate limit check ***
     violation |= rt_curvature_rate_limit_check(limits);
   }
-  desired_curvature_last = desired_curvature;
+  curvature_state.desired_last = desired_curvature;
 
   // Curvature must be 0 while not steering
   if (!steer_control_enabled) {
@@ -289,7 +289,7 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
 
   // reset to zero if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
-    desired_curvature_last = 0;
+    curvature_state.desired_last = 0;
   }
 
   return violation;

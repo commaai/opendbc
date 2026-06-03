@@ -289,11 +289,14 @@ extern int desired_angle_last;
 extern struct sample_t angle_meas;         // last 6 steer angles
 
 // for safety modes with curvature steering control
-extern int desired_curvature_last;
-extern uint32_t rt_curvature_msgs;
-extern uint32_t rt_curvature_msgs_prev;
-extern uint32_t ts_curvature_check_last;
-extern struct sample_t curvature_meas;     // last 6 steer curvatures
+typedef struct {
+  int desired_last;
+  uint32_t rt_msgs;
+  uint32_t rt_msgs_prev;
+  uint32_t ts_check_last;
+  struct sample_t meas;          // last 6 steer curvatures
+} CurvatureSteeringState;
+extern CurvatureSteeringState curvature_state;
 
 // Alt experiences can be set with a USB command
 // It enables features that allow alternative experiences, like not disengaging on gas press
