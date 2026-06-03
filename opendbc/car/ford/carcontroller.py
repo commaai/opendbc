@@ -4,6 +4,7 @@ from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
 from opendbc.car.lateral import AVERAGE_ROAD_ROLL, ISO_LATERAL_ACCEL, apply_std_steer_angle_limits
 from opendbc.car.ford import fordcan
+from opendbc.car.ford.lateral_bal import FordBalLiveScale, bal_encode
 from opendbc.car.ford.values import CarControllerParams, FordFlags, CAR
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
@@ -13,6 +14,12 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 # CAN FD limits:
 # Limit to average banked road since safety doesn't have the roll, higher actual roll lowers lateral acceleration
 MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
+
+# Path polynomial DBC clip magnitudes — match LateralMotionControl2 signal ranges
+FORD_PATH_C0_CLIP = (-5.12, 5.11)     # m
+FORD_PATH_C1_CLIP = (-0.5, 0.5235)    # rad
+FORD_PATH_C2_CLIP = (-0.02, 0.02)     # 1/m (the DBC allows +0.02094 but bal stays symmetric)
+FORD_CURVATURE_RATE_CLIP = 0.001023   # 1/m² — LatCtlCrv_NoRate2_Actl
 
 
 def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
@@ -65,9 +72,18 @@ class CarController(CarControllerBase):
 
     self.apply_curvature_last = 0
     self.anti_overshoot_curvature_last = 0
+    self.desired_curvature_last = 0.0
+    self.path_angle_last = 0.0
+    self.path_offset_last = 0.0
+    # bal: PSCM-inverse encoder with always-on live scale estimator.
+    # Soft-imports openpilot.common.params for persistence; runs in-memory
+    # when Params isn't available (e.g. standalone opendbc tests).
+    self.bal_live_scale = FordBalLiveScale()
+
     self.accel = 0.0
     self.gas = 0.0
     self.brake_request = False
+
     self.main_on_last = False
     self.lkas_enabled_last = False
     self.steer_alert_last = False
@@ -79,7 +95,6 @@ class CarController(CarControllerBase):
 
     actuators = CC.actuators
     hud_control = CC.hudControl
-
     main_on = CS.out.cruiseState.available
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
     fcw_alert = hud_control.visualAlert == VisualAlert.fcw
@@ -98,33 +113,74 @@ class CarController(CarControllerBase):
 
     ### lateral control ###
     # send steer msg at 20Hz
+    apply_curvature = 0.0
+    path_angle = 0.0
+    path_offset = 0.0
+    curvature_rate = 0.0
+    ramp_type = 0
+
     if (self.frame % CarControllerParams.STEER_STEP) == 0:
-      # Bronco and some other cars consistently overshoot curv requests
-      # Apply some deadzone + smoothing convergence to avoid oscillations
-      if self.CP.carFingerprint in (CAR.FORD_BRONCO_SPORT_MK1, CAR.FORD_F_150_MK14):
-        self.anti_overshoot_curvature_last = anti_overshoot(actuators.curvature, self.anti_overshoot_curvature_last, CS.out.vEgoRaw)
-        apply_curvature = self.anti_overshoot_curvature_last
-      else:
-        apply_curvature = actuators.curvature
+      desired_curvature = 0.0
 
-      # apply rate limits, curvature error limit, and clip to signal range
-      current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+      if CC.latActive:
+        v_ego = CS.out.vEgoRaw
+        desired_curvature = actuators.curvature
 
-      self.apply_curvature_last = apply_ford_curvature_limits(apply_curvature, self.apply_curvature_last, current_curvature,
-                                                              CS.out.vEgoRaw, 0., CC.latActive, self.CP)
+        # Bronco and some other cars consistently overshoot curv requests.
+        # Apply the same input shaping before either Ford lateral command path.
+        if self.CP.carFingerprint in (CAR.FORD_BRONCO_SPORT_MK1, CAR.FORD_F_150_MK14):
+          self.anti_overshoot_curvature_last = anti_overshoot(desired_curvature, self.anti_overshoot_curvature_last, CS.out.vEgoRaw)
+          desired_curvature = self.anti_overshoot_curvature_last
+
+        current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+
+        if self.CP.flags & FordFlags.CANFD:
+          # bal: PSCM-inverse polynomial encoding. The live scale estimator
+          # (always-on, bounded ±15% from the platform default) adapts a
+          # per-vehicle multiplier on the regression coefficients.
+          fingerprint = str(self.CP.carFingerprint)
+          act_k = -CS.out.yawRate / max(v_ego, 0.5)
+          self.bal_live_scale.update(desired_curvature, act_k, v_ego,
+                                     CC.latActive, CS.out.steeringPressed)
+          live = self.bal_live_scale.current_scale(fingerprint)
+
+          c0_int, c1_int, c2_int = bal_encode(desired_curvature, v_ego, fingerprint, live)
+
+          path_offset    = float(np.clip(c0_int, FORD_PATH_C0_CLIP[0], FORD_PATH_C0_CLIP[1]))
+          path_angle     = float(np.clip(c1_int, FORD_PATH_C1_CLIP[0], FORD_PATH_C1_CLIP[1]))
+          apply_curvature = float(np.clip(c2_int, FORD_PATH_C2_CLIP[0], FORD_PATH_C2_CLIP[1]))
+
+          # Curvature rate (4th polynomial slot, LatCtlCrv_NoRate2_Actl):
+          # dκ/dx in 1/m². PSCM expects per-distance so dκ/dt is divided
+          # by v_ego. Frame-to-frame derivative on raw planner desk.
+          dt = DT_CTRL * CarControllerParams.STEER_STEP
+          desk_dot_per_meter = (desired_curvature - self.desired_curvature_last) / (dt * max(v_ego, 1.0))
+          curvature_rate = float(np.clip(desk_dot_per_meter,
+                                          -FORD_CURVATURE_RATE_CLIP,
+                                           FORD_CURVATURE_RATE_CLIP))
+          ramp_type = 3
+        else:
+          # Non-CAN FD: curvature-only control (unchanged from upstream)
+          apply_curvature = desired_curvature
+          apply_curvature = apply_ford_curvature_limits(apply_curvature, self.apply_curvature_last, current_curvature,
+                                                        CS.out.vEgoRaw, 0., CC.latActive, self.CP)
+
+      self.path_angle_last = path_angle
+      self.path_offset_last = path_offset
+      self.apply_curvature_last = apply_curvature
+      self.desired_curvature_last = desired_curvature
 
       if self.CP.flags & FordFlags.CANFD:
-        # TODO: extended mode
-        # Ford uses four individual signals to dictate how to drive to the car. Curvature alone (limited to 0.02m/s^2)
-        # can actuate the steering for a large portion of any lateral movements. However, in order to get further control on
-        # steer actuation, the other three signals are necessary. Ford controls vehicles differently than most other makes.
-        # A detailed explanation on ford control can be found here:
-        # https://www.f150gen14.com/forum/threads/introducing-bluepilot-a-ford-specific-fork-for-comma3x-openpilot.24241/#post-457706
-        mode = 1 if CC.latActive else 0
+        mode = 2 if CC.latActive else 0
         counter = (self.frame // CarControllerParams.STEER_STEP) % 0x10
-        can_sends.append(fordcan.create_lat_ctl2_msg(self.packer, self.CAN, mode, 0., 0., -self.apply_curvature_last, 0., counter))
+        can_sends.append(fordcan.create_lat_ctl2_msg(
+          self.packer, self.CAN, mode, ramp_type, 1, -path_offset, -path_angle,
+          -apply_curvature, -curvature_rate, counter
+        ))
       else:
-        can_sends.append(fordcan.create_lat_ctl_msg(self.packer, self.CAN, CC.latActive, 0., 0., -self.apply_curvature_last, 0.))
+        can_sends.append(fordcan.create_lat_ctl_msg(
+          self.packer, self.CAN, CC.latActive, 0., 0., -self.apply_curvature_last, 0.
+        ))
 
     # send lka msg at 33Hz
     if (self.frame % CarControllerParams.LKA_STEP) == 0:
