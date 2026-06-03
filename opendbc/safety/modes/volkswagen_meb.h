@@ -102,7 +102,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
       if (!current_curvature_sign) {
         current_curvature *= -1;
       }
-      update_sample(&curvature_meas, current_curvature);
+      update_sample(&curvature_state.meas, current_curvature);
     }
 
     if (msg->addr == MSG_LH_EPS_03) {
