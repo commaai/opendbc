@@ -352,24 +352,31 @@ class TestFordSafetyBase(common.CarSafetyTest):
     self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 2 * max_delta_can / self.DEG_TO_CAN, 0)))
 
   def test_rt_limits(self):
-    # Curvature safety enforces real time limits by checking the message send frequency in a 250ms time window
-    self.safety.set_timer(0)
+    # send rate is limited over a rolling 250ms window split into two half-interval buckets
     self.safety.set_controls_allowed(True)
-    max_rt_msgs = int(self.LATERAL_FREQUENCY * common.RT_INTERVAL / 1e6 * 1.2 + 1)  # 1.2x buffer
+    self._reset_curvature_measurement(0, 0)
+    max_rt_msgs = int(self.LATERAL_FREQUENCY * common.RT_INTERVAL / 1e6 * 1.2 + 1)
+    half = common.RT_INTERVAL // 2
 
+    # too many messages within one window is blocked
+    self.safety.set_timer(0)
     for i in range(max_rt_msgs * 2):
-      should_tx = i <= max_rt_msgs
-      self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+      self.assertEqual(i <= max_rt_msgs, self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
 
-    # One under RT interval should do nothing
-    self.safety.set_timer(common.RT_INTERVAL - 1)
-    for _ in range(5):
-      self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
-
-    # Increment timer and send 1 message to reset RT window
-    self.safety.set_timer(common.RT_INTERVAL)
+    # shift the overflow into the previous bucket
+    self.safety.set_timer(half)
     self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
-    for _ in range(5):
+
+    # previous bucket still counts within the half interval
+    self.safety.set_timer(half + 2 * common.RT_INTERVAL // 5)
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+
+    # both buckets clear after a full interval
+    self.safety.set_timer(half + common.RT_INTERVAL)
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
+    self.safety.set_timer(half + 2 * common.RT_INTERVAL)
+    for _ in range(max_rt_msgs):
       self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
 
   def test_prevent_lkas_action(self):

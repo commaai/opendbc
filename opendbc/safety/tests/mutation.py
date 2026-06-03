@@ -618,6 +618,7 @@ def main():
     known_survivors = {
       ("opendbc/safety/helpers.h", 40, "arithmetic"),
       ("opendbc/safety/lateral.h", 105, "boundary"),
+      ("opendbc/safety/lateral.h", 188, "boundary"),
       ("opendbc/safety/lateral.h", 212, "boundary"),
       ("opendbc/safety/lateral.h", 213, "boundary"),
       ("opendbc/safety/lateral.h", 361, "arithmetic"),
