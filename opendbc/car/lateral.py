@@ -41,11 +41,30 @@ class AngleSteeringLimitsVM:
 
 @dataclass
 class CurvatureSteeringLimits:
-  # uses apply_std_curvature_limits
   # Max accepted by the EPS
   CURVATURE_MAX: float
   MAX_LATERAL_ACCEL: float = MAX_LATERAL_ACCEL
   MAX_LATERAL_JERK: float = MAX_LATERAL_JERK
+
+  def apply_limits(self, apply_curvature: float, apply_curvature_last: float, v_ego: float, curvature: float,
+                   lat_active: bool, steer_step: int) -> float:
+    """Apply accel and jerk constraints to curvature."""
+    v_ego = max(v_ego, 1)
+
+    # *** max lateral accel limit ***
+    max_curvature = self.MAX_LATERAL_ACCEL / (v_ego ** 2)
+    new_apply_curvature = float(np.clip(apply_curvature, -max_curvature, max_curvature))
+
+    # *** max lateral jerk limit ***
+    max_jerk = (self.MAX_LATERAL_JERK / (v_ego ** 2)) * (steer_step * DT_CTRL)
+    new_apply_curvature = float(np.clip(new_apply_curvature, apply_curvature_last - max_jerk, apply_curvature_last + max_jerk))
+
+    # curvature is current curvature when inactive
+    if not lat_active:
+      new_apply_curvature = curvature
+
+    # prevent fault
+    return float(np.clip(new_apply_curvature, -self.CURVATURE_MAX, self.CURVATURE_MAX))
 
 
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int | None = None):
@@ -150,27 +169,6 @@ def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_e
 
   # prevent fault
   return float(np.clip(new_apply_angle, -limits.ANGLE_LIMITS.STEER_ANGLE_MAX, limits.ANGLE_LIMITS.STEER_ANGLE_MAX))
-
-
-def apply_std_curvature_limits(apply_curvature: float, apply_curvature_last: float, v_ego: float, curvature: float,
-                               lat_active: bool, limits) -> float:
-  """Apply jerk, accel, and safety limit constraints to curvature."""
-  v_ego = max(v_ego, 1)
-
-  # *** max lateral jerk limit ***
-  max_jerk = (limits.CURVATURE_LIMITS.MAX_LATERAL_JERK / (v_ego ** 2)) * (limits.STEER_STEP * DT_CTRL)
-  new_apply_curvature = float(np.clip(apply_curvature, apply_curvature_last - max_jerk, apply_curvature_last + max_jerk))
-
-  # *** max lateral accel limit ***
-  max_curvature = limits.CURVATURE_LIMITS.MAX_LATERAL_ACCEL / (v_ego ** 2)
-  new_apply_curvature = float(np.clip(new_apply_curvature, -max_curvature, max_curvature))
-
-  # curvature is current curvature when inactive
-  if not lat_active:
-    new_apply_curvature = curvature
-
-  # prevent fault
-  return float(np.clip(new_apply_curvature, -limits.CURVATURE_LIMITS.CURVATURE_MAX, limits.CURVATURE_LIMITS.CURVATURE_MAX))
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,

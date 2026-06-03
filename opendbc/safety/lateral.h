@@ -172,22 +172,14 @@ static bool rt_angle_rate_limit_check(AngleSteeringLimits limits) {
   return violation;
 }
 
-static bool rt_curvature_rate_limit_check(CurvatureSteeringLimits limits) {
-  bool violation = false;
-  uint32_t ts = microsecond_timer_get();
-
+static bool rt_curvature_rate_limit_check(int desired_curvature, int max_rt_delta, uint32_t ts) {
   // *** curvature real time rate limit check ***
-  int max_rt_msgs = ((float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2) + 1;  // 1.2x buffer
-  if ((int)rt_curvature_msgs > max_rt_msgs) {
-    violation = true;
-  }
+  bool violation = safety_max_limit_check(desired_curvature, rt_curvature_last + max_rt_delta,
+                                                             rt_curvature_last - max_rt_delta);
 
-  rt_curvature_msgs += 1U;
-
-  // every RT_INTERVAL reset message counter
-  uint32_t ts_elapsed = safety_get_ts_elapsed(ts, ts_curvature_check_last);
-  if (ts_elapsed >= MAX_RT_INTERVAL) {
-    rt_curvature_msgs = 0;
+  // every RT_INTERVAL set the new baseline
+  if (safety_get_ts_elapsed(ts, ts_curvature_check_last) > MAX_RT_INTERVAL) {
+    rt_curvature_last = desired_curvature;
     ts_curvature_check_last = ts;
   }
 
@@ -246,6 +238,7 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
 
   const float fudged_speed = SAFETY_MAX((vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0, 1.0);
   bool violation = false;
+  uint32_t ts = microsecond_timer_get();
 
   if (controls_allowed && steer_control_enabled) {
     // *** absolute curvature cap ***
@@ -272,8 +265,9 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
       violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature_error, lowest_desired_curvature_error);
     }
 
-    // *** curvature real time rate limit check ***
-    violation |= rt_curvature_rate_limit_check(limits);
+    // *** real time rate limit check ***
+    const int max_curvature_rt_delta_can = (max_curvature_rate_sec * (float)MAX_RT_INTERVAL / 1e6 * limits.curvature_to_can * 1.2) + 1.;
+    violation |= rt_curvature_rate_limit_check(desired_curvature, max_curvature_rt_delta_can, ts);
   }
   desired_curvature_last = desired_curvature;
 
@@ -290,6 +284,8 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
   // reset to zero if either controls is not allowed or there's a violation
   if (violation || !controls_allowed) {
     desired_curvature_last = 0;
+    rt_curvature_last = 0;
+    ts_curvature_check_last = ts;
   }
 
   return violation;

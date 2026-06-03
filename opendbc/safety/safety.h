@@ -79,7 +79,7 @@ int desired_angle_last = 0;
 struct sample_t angle_meas;         // last 6 steer angles
 
 // for safety modes with curvature steering control
-uint32_t rt_curvature_msgs = 0;
+int rt_curvature_last = 0;
 uint32_t ts_curvature_check_last = 0;
 int desired_curvature_last = 0;
 struct sample_t curvature_meas;     // last 6 steer curvatures
@@ -444,7 +444,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   rt_angle_msgs = 0;
   ts_angle_check_last = 0;
   desired_angle_last = 0;
-  rt_curvature_msgs = 0;
+  rt_curvature_last = 0;
   ts_curvature_check_last = 0;
   desired_curvature_last = 0;
   ts_torque_check_last = 0;

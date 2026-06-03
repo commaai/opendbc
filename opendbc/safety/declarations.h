@@ -290,7 +290,7 @@ extern struct sample_t angle_meas;         // last 6 steer angles
 
 // for safety modes with curvature steering control
 extern int desired_curvature_last;
-extern uint32_t rt_curvature_msgs;
+extern int rt_curvature_last;
 extern uint32_t ts_curvature_check_last;
 extern struct sample_t curvature_meas;     // last 6 steer curvatures
 
