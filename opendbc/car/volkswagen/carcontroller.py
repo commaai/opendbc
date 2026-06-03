@@ -1,7 +1,7 @@
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, structs
-from opendbc.car.lateral import apply_driver_steer_torque_limits, apply_std_curvature_limits
+from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.common.pid import PIDController
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
@@ -88,8 +88,8 @@ class CarController(CarControllerBase):
             pid_curvature = self.curvature_pid.update(error, speed=CS.out.vEgo, feedforward=actuators.curvature,
                                                       freeze_integrator=CS.out.vEgoRaw < 5)
           apply_curvature = pid_curvature + (CS.curvature_meas - CC.currentCurvature)
-          apply_curvature = apply_std_curvature_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
-                                                       CC.latActive, self.CCP)
+          apply_curvature = self.CCP.CURVATURE_LIMITS.apply_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
+                                                                   CC.latActive, self.CCP.STEER_STEP)
 
           min_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MIN)
           max_power = min(self.steering_power_last + self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MAX)
