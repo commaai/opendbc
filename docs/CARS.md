@@ -93,7 +93,7 @@
 |Honda|Accord 2023-25|All|[Upstream](#upstream)|
 |Honda|Accord Hybrid 2017|All|[Community](#community)|
 |Honda|Accord Hybrid 2018-22|All|[Upstream](#upstream)|
-|Honda|Accord Hybrid 2023-25|All|[Upstream](#upstream)|
+|Honda|Accord Hybrid 2023-26|All|[Upstream](#upstream)|
 |Honda|City (Brazil only) 2023|All|[Upstream](#upstream)|
 |Honda|Civic 2016-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic 2019-21|All|[Upstream](#upstream)|
