@@ -399,11 +399,11 @@ class CarState(CarStateBase):
     temp_fault = drive_mode and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
-  def update_acc_fault(self, acc_fault, parking_brake=False, drive_mode=True, brake_pressed=False, recovery_frames_max=100):
+  def update_acc_fault(self, acc_fault, parking_brake=False, drive_mode=True, brake_pressed=False, recovery_frames_max=300):
     # Ignore FAULT when not in drive mode and parked
     # do not show misleading error during ignition in parked state
     # grant a short time to recover a normal cruise state
-    # after hard brake, stock system prevents acc re-enable for ~1 second
+    # after hard brake, stock system prevents acc engage for ~3 seconds
     fault = acc_fault
     if (parking_brake and not drive_mode) or brake_pressed:
       fault = False
