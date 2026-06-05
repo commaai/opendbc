@@ -1,8 +1,13 @@
 #include "opendbc/safety/modes/chrysler_common.h"
 
+// Tracks the last accepted torque for ramp-down on disengage.
+// When controls are disallowed, CUSW must ramp torque to zero at max_rate_down
+// before clearing the LKAS active bit, to avoid EPS faults.
+static int chrysler_cusw_torque_last = 0;
 
 static safety_config chrysler_cusw_init(uint16_t param) {
   SAFETY_UNUSED(param);
+  chrysler_cusw_torque_last = 0;
 
   static const CanMsg CHRYSLER_CUSW_TX_MSGS[] = {
     {0x1F6U, 0, 4, .check_relay = true},
@@ -53,7 +58,7 @@ static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
-  const TorqueSteeringLimits CHRYSLER_CUSW_STEERING_LIMITS = {
+  static const TorqueSteeringLimits CHRYSLER_CUSW_STEERING_LIMITS = {
     .max_torque = 250,  // TODO: Find the actual cap, think we're faulting before 261
     .max_rt_delta = 150,
     .max_rate_up = 4,
@@ -71,10 +76,48 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
 
     // Signal: LKAS_COMMAND.LKAS_CONTROL_BIT
     const bool steer_req = GET_BIT(msg, 12U);
-    if (steer_torque_cmd_checks(desired_torque, steer_req, CHRYSLER_CUSW_STEERING_LIMITS)) {
-      tx = false;
-      // FIXME: too many problems here right now, hotwire things while investigating
-      // tx = true;
+
+    if (controls_allowed) {
+      // Normal operation: use standard torque checks
+      if (steer_torque_cmd_checks(desired_torque, steer_req, CHRYSLER_CUSW_STEERING_LIMITS)) {
+        tx = false;
+        chrysler_cusw_torque_last = 0;
+      } else {
+        chrysler_cusw_torque_last = desired_torque;
+      }
+    } else if (chrysler_cusw_torque_last != 0) {
+      // Ramp-down: torque must move toward zero at max_rate_down per frame
+      bool violation = false;
+      const int max_delta = CHRYSLER_CUSW_STEERING_LIMITS.max_rate_down;
+
+      if (chrysler_cusw_torque_last > 0) {
+        violation |= (desired_torque >= chrysler_cusw_torque_last);  // must decrease
+        violation |= (desired_torque < (chrysler_cusw_torque_last - max_delta));
+        violation |= (desired_torque < 0);
+      } else {
+        violation |= (desired_torque <= chrysler_cusw_torque_last);  // must increase toward zero
+        violation |= (desired_torque > (chrysler_cusw_torque_last + max_delta));
+        violation |= (desired_torque > 0);
+      }
+
+      // LKAS active bit must be set while commanding non-zero torque
+      violation |= (desired_torque != 0) && !steer_req;
+
+      // Keep global state reset so re-engage starts clean
+      desired_torque_last = 0;
+      rt_torque_last = 0;
+
+      if (violation) {
+        chrysler_cusw_torque_last = 0;
+        tx = false;
+      } else {
+        chrysler_cusw_torque_last = desired_torque;
+      }
+    } else {
+      // Ramp-down complete or never started: torque must be zero
+      if (desired_torque != 0) {
+        tx = false;
+      }
     }
   }
 
