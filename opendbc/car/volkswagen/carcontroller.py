@@ -84,7 +84,8 @@ class CarController(CarControllerBase):
             self.curvature_pid.reset()
             pid_curvature = actuators.curvature
           else:
-            error = actuators.curvature - CC.currentCurvature
+            actual_curvature = CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+            error = actuators.curvature - actual_curvature
             pid_curvature = self.curvature_pid.update(error, speed=CS.out.vEgo, feedforward=actuators.curvature,
                                                       freeze_integrator=CS.out.vEgoRaw < 5)
           apply_curvature = pid_curvature + (CS.curvature_meas - CC.currentCurvature)
