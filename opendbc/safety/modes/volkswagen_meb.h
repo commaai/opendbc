@@ -103,7 +103,6 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
 
       pcm_cruise_check(cruise_engaged);
 
-
       int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
       gas_pressed = accel_pedal_value > 0;
     }
