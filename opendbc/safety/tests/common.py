@@ -852,22 +852,9 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
       self._rx(self._curvature_meas_msg(curvature))
 
   def _reset_speed_measurement(self, speed: float):
-    super()._reset_speed_measurement(speed)
     for _ in range(MAX_SAMPLE_VALS):
+      self._rx(self._speed_msg(speed))
       self._rx(self._speed_msg_2(speed))
-
-  def test_rx_hook_speed_mismatch(self):
-    # curvature safety checks the redundant speed on TX
-    for speed in np.arange(0, 40, 0.5):
-      for speed_delta in np.arange(-5, 5, 0.1):
-        speed_2 = round(max(speed + speed_delta, 0), 1)
-        self._rx(self._speed_msg(speed))
-        self._rx(self._speed_msg_2(speed_2))
-        self.safety.set_controls_allowed(True)
-        self._tx(self._curvature_cmd_msg(0, steer_req=True))
-
-        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_curvature_measurements(self):
     self._common_measurement_test(self._curvature_meas_msg, -self.MAX_CURVATURE, self.MAX_CURVATURE, self.CURVATURE_TO_CAN,
