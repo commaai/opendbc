@@ -115,7 +115,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
       // Disable controls if speeds from ABS and PCM ECUs are too far apart.
       // Signal: Veh_V_ActlEng
       float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
-      speed_mismatch_check(filtered_pcm_speed);
+      UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
     }
 
     // Update vehicle yaw rate

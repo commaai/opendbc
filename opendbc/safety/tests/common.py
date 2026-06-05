@@ -854,6 +854,7 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
   def _reset_speed_measurement(self, speed: float):
     for _ in range(MAX_SAMPLE_VALS):
       self._rx(self._speed_msg(speed))
+      self._rx(self._speed_msg_2(speed))
 
   def test_curvature_measurements(self):
     self._common_measurement_test(self._curvature_meas_msg, -self.MAX_CURVATURE, self.MAX_CURVATURE, self.CURVATURE_TO_CAN,

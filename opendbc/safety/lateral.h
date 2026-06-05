@@ -247,6 +247,8 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
   const float fudged_speed = SAFETY_MAX((vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0, 1.0);
   bool violation = false;
 
+  speed_mismatch_check((float)vehicle_speed_2.values[0] / VEHICLE_SPEED_FACTOR);
+
   if (controls_allowed && steer_control_enabled) {
     // *** absolute curvature cap ***
     violation |= safety_max_limit_check(desired_curvature, limits.max_curvature, -limits.max_curvature);

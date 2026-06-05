@@ -54,6 +54,7 @@ bool steering_disengage;
 bool steering_disengage_prev;
 bool cruise_engaged_prev = false;
 struct sample_t vehicle_speed;
+struct sample_t vehicle_speed_2;
 bool vehicle_moving = false;
 bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
@@ -403,7 +404,6 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_CHRYSLER, &chrysler_hooks},
     {SAFETY_SUBARU, &subaru_hooks},
     {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
-    {SAFETY_VOLKSWAGEN_MEB, &volkswagen_meb_hooks},
     {SAFETY_NISSAN, &nissan_hooks},
     {SAFETY_NOOUTPUT, &nooutput_hooks},
     {SAFETY_HYUNDAI_LEGACY, &hyundai_legacy_hooks},
@@ -417,6 +417,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
     {SAFETY_PSA, &psa_hooks},
     {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
+    {SAFETY_VOLKSWAGEN_MEB, &volkswagen_meb_hooks},
     {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
     {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
     {SAFETY_ALLOUTPUT, &alloutput_hooks},
@@ -455,6 +456,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 
   // reset samples
   reset_sample(&vehicle_speed);
+  reset_sample(&vehicle_speed_2);
   reset_sample(&torque_meas);
   reset_sample(&torque_driver);
   reset_sample(&angle_meas);
