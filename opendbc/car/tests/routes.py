@@ -33,6 +33,7 @@ non_tested_cars = [
   # TOYOTA.LEXUS_ES  # hybrid
   TOYOTA.TOYOTA_COROLLA,
   TOYOTA.TOYOTA_RAV4H,
+  TOYOTA.TOYOTA_ALPHARD_H,
 
 ]
 
