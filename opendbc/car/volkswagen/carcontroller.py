@@ -2,7 +2,6 @@ import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, structs
 from opendbc.car.lateral import apply_driver_steer_torque_limits
-from opendbc.car.common.pid import PIDController
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mebcan, mlbcan, mqbcan, pqcan
@@ -57,10 +56,6 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = None
     self.klr_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
-    if CP.flags & VolkswagenFlags.MEB:
-      self.curvature_pid = PIDController(([10., 40.], [0., 1.45]), ([10., 40.], [0., 0.12]), k_f=1.,
-                                         pos_limit=self.CCP.CURVATURE_MAX, neg_limit=-self.CCP.CURVATURE_MAX,
-                                         rate=1 / (DT_CTRL * self.CCP.STEER_STEP))
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -79,17 +74,7 @@ class CarController(CarControllerBase):
 
         if CC.latActive:
           hca_enabled = True
-          # while overriding, only command feedforward (actuators.curvature) so we don't fight the driver
-          if CS.out.steeringPressed:
-            self.curvature_pid.reset()
-            pid_curvature = actuators.curvature
-          else:
-            actual_curvature = CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
-            error = actuators.curvature - actual_curvature
-            pid_curvature = self.curvature_pid.update(error, speed=CS.out.vEgo, feedforward=actuators.curvature,
-                                                      freeze_integrator=CS.out.vEgoRaw < 5)
-          apply_curvature = pid_curvature + (CS.curvature_meas - CC.currentCurvature)
-          apply_curvature = self.CCP.CURVATURE_LIMITS.apply_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
+          apply_curvature = self.CCP.CURVATURE_LIMITS.apply_limits(actuators.curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
                                                                    CC.latActive, self.CCP.STEER_STEP)
 
           min_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MIN)
@@ -100,7 +85,6 @@ class CarController(CarControllerBase):
           steering_power = min(max(target_power, min_power), max_power)
 
         else:
-          self.curvature_pid.reset()
           if self.steering_power_last > 0:  # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
             apply_curvature = float(np.clip(CS.curvature_meas, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX))
