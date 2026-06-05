@@ -84,7 +84,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == MSG_ESP_21) {
       // Signal: ESP_v_Signal
       float esp_speed = ((msg->data[5] << 8) | msg->data[4]) * 0.01 * KPH_TO_MS;
-      speed_mismatch_check(esp_speed);
+      UPDATE_VEHICLE_SPEED_2(esp_speed);
     }
 
     if (msg->addr == MSG_QFK_01) {

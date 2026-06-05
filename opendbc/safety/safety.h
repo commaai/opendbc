@@ -54,6 +54,7 @@ bool steering_disengage;
 bool steering_disengage_prev;
 bool cruise_engaged_prev = false;
 struct sample_t vehicle_speed;
+struct sample_t vehicle_speed_2;
 bool vehicle_moving = false;
 bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
@@ -455,6 +456,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 
   // reset samples
   reset_sample(&vehicle_speed);
+  reset_sample(&vehicle_speed_2);
   reset_sample(&torque_meas);
   reset_sample(&torque_driver);
   reset_sample(&angle_meas);
