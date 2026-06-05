@@ -5,26 +5,56 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
-SPEED_FROM_RPM = 0.008587
-
-
-class CarControllerParams:
-  ANGLE_DELTA_BP = [0., 5., 15.]
-  ANGLE_DELTA_V = [5., .8, .15]     # windup limit
-  ANGLE_DELTA_VU = [5., 3.5, 0.4]   # unwind limit
-  LKAS_MAX_TORQUE = 1               # A value of 1 is easy to overpower
-  STEER_THRESHOLD = 1.0
-
-  def __init__(self, CP):
-    pass
+# RPM * (pi * diameter (~6.5 inches) / 60)
+SPEED_FROM_RPM = 0.008644
 
 
 class CAR(Platforms):
-  COMMA_BODY = PlatformConfig(
+  COMMA_BODY_V1 = PlatformConfig(
     [CarDocs("comma body", package="All", video="https://youtu.be/VT-i3yRsX2s?t=2736")],
     CarSpecs(mass=9, wheelbase=0.406, steerRatio=0.5, centerToFrontRatio=0.44),
     {Bus.main: 'comma_body'},
   )
+  COMMA_BODY_V2 = PlatformConfig(
+    [CarDocs("comma body", package="All")],
+    CarSpecs(mass=9, wheelbase=0.406, steerRatio=0.5, centerToFrontRatio=0.44),
+    {Bus.main: 'comma_body'},
+  )
+
+
+class CarControllerParams:
+  def __init__(self, CP):
+    self.MAX_SPEED = 1 # m/s
+    self.MAX_POS_INTEGRATOR = 1
+
+    # body v1 is torque control, body v2 is speed control
+    if CP.carFingerprint in CAR.COMMA_BODY_V1:
+      self.MAX_TURN = 0.75 # m/s
+      self.CONTROL_BUS = 0
+      self.MAX_TORQUE = 700
+      self.MAX_TORQUE_RATE = 70
+      self.FLIP = False # flip outputs
+      self.v_pid_settings = {
+        "k_p": 110,
+        "k_i": 11.5,
+        "k_d": 0.0,
+      }
+      self.w_pid_settings = {
+          "k_p": 150,
+          "k_i": 15,
+          "k_d": 0,
+      }
+    elif CP.carFingerprint in CAR.COMMA_BODY_V2:
+      self.MAX_TURN = 1 # m/s
+      self.CONTROL_BUS = 2
+      self.MAX_TORQUE = 1000
+      self.MAX_TORQUE_RATE = 250
+      self.FLIP = True
+      self.v_pid_settings = self.w_pid_settings = {
+        "k_p": 1.27 * self.MAX_TORQUE_RATE,
+        "k_i": 1.26 * self.MAX_TORQUE_RATE,
+        "k_d": 0.12 * self.MAX_TORQUE_RATE,
+      }
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
