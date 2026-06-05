@@ -151,8 +151,8 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
   }
 
   if ((msg->addr == MSG_GRA_ACC_01) && !controls_allowed) {
-    // disallow resume and set: bits 16 and 19
-    if ((msg->data[2] & 0x9U) != 0U) {
+    // only allow cancel button: bit 13
+    if (!GET_BIT(msg, 13U)) {
       tx = false;
     }
   }
