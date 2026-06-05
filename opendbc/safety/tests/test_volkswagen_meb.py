@@ -35,6 +35,13 @@ class TestVolkswagenMebIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(3, 0))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_wrong_len_ignored(self):
+    self.safety.ignition_can_hook(self._msg(0, 1))
+    msg = self._msg(1, 1)
+    msg[0].data_len_code = 3
+    self.safety.ignition_can_hook(msg)
+    self.assertFalse(self.safety.get_ignition_can())
+
 
 if __name__ == "__main__":
   unittest.main()

@@ -102,6 +102,10 @@ class TestMazdaIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(0x20))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_wrong_len_ignored(self):
+    self.safety.ignition_can_hook(make_msg(0, 0x9E, dat=b"\xC0" + b"\x00" * 6))
+    self.assertFalse(self.safety.get_ignition_can())
+
 
 if __name__ == "__main__":
   unittest.main()
