@@ -48,7 +48,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   return packer.make_can_msg("ACC_05", bus, values)
 
 
-def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance, distance):
+def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance, distance, fcw_alert):
   values = {}
   return packer.make_can_msg("ACC_02", bus, values)
 
