@@ -44,7 +44,6 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = cp.vl["ORC_1"]["SEATBELT_DRIVER_UNLATCHED"] == 1
 
     # brake pedal
-    ret.brake = 0
     ret.brakePressed = cp.vl["ESP_1"]['Brake_Pedal_State'] == 1  # Physical brake pedal switch
 
     # gas pedal
@@ -112,7 +111,6 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_UNLATCHED"])
 
     ret.brakePressed = bool(cp.vl["BRAKE_3"]["DRIVER_BRAKE_SWITCH"])
-    ret.brake = cp.vl["BRAKE_1"]["DRIVER_BRAKE_PRESSURE"]
     ret.gasPressed = cp.vl["ACCEL_GAS"]["GAS_HUMAN"] > 0
 
     ret.espDisabled = bool(cp.vl["TRACTION_BUTTON"]["TRACTION_OFF"])

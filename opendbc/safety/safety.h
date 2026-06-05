@@ -76,7 +76,10 @@ uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heart
 uint32_t rt_angle_msgs = 0;
 uint32_t ts_angle_check_last = 0;
 int desired_angle_last = 0;
-struct sample_t angle_meas;         // last 6 steer angles/curvatures
+struct sample_t angle_meas;         // last 6 steer angles
+
+// for safety modes with curvature steering control
+CurvatureSteeringState curvature_state;
 
 
 int alternative_experience = 0;
@@ -438,6 +441,10 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   rt_angle_msgs = 0;
   ts_angle_check_last = 0;
   desired_angle_last = 0;
+  curvature_state.desired_last = 0;
+  curvature_state.rt_msgs = 0;
+  curvature_state.rt_msgs_prev = 0;
+  curvature_state.ts_check_last = 0;
   ts_torque_check_last = 0;
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;
@@ -448,6 +455,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   reset_sample(&torque_meas);
   reset_sample(&torque_driver);
   reset_sample(&angle_meas);
+  reset_sample(&curvature_state.meas);
 
   controls_allowed = false;
   relay_malfunction_reset();
