@@ -49,29 +49,32 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_Neu", bus, values)
 
 
-def acc_control_value(main_switch_on, acc_faulted, long_active):
-  if long_active:
+def acc_control_value(main_switch_on, acc_faulted, long_active, long_override):
+  if long_active or long_override:
     acc_control = 1
   elif main_switch_on:
     acc_control = 2
+  elif acc_faulted:
+    acc_control = 3
   else:
     acc_control = 0
 
   return acc_control
 
 
-def acc_hud_status_value(main_switch_on, acc_faulted, long_active):
-  if acc_faulted:
-    hud_status = 6
+def acc_hud_status_value(main_switch_on, acc_faulted, long_active, long_override):
+  if long_override:
+    hud_status = 4
   elif long_active:
     hud_status = 3
+  elif acc_faulted:
+    hud_status = 6
   elif main_switch_on:
     hud_status = 2
   else:
     hud_status = 0
 
   return hud_status
-
 
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold):
   commands = []
