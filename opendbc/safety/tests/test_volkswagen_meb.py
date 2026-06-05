@@ -90,6 +90,10 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     values = {f"{s}_Radgeschw": spd_kph for s in ("VL", "VR", "HL", "HR")}
     return self.packer.make_can_msg_safety("ESC_51", 0, values)
 
+  def _speed_msg_2(self, speed_mps: float):
+    values = {"ESP_v_Signal": speed_mps * 3.6}
+    return self.packer.make_can_msg_safety("ESP_21", 0, values)
+
   def _motor_14_msg(self, brake):
     values = {"MO_Fahrer_bremst": brake}
     return self.packer.make_can_msg_safety("Motor_14", 0, values)

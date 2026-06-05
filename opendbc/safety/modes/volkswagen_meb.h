@@ -4,10 +4,12 @@
 #include "opendbc/safety/modes/volkswagen_common.h"
 
 #define MSG_ESC_51           0xFCU    // RX, for wheel speeds
+#define MSG_ESP_21           0xFDU    // RX, redundant vehicle speed source
 #define MSG_HCA_03           0x303U
 #define MSG_QFK_01           0x13DU
 #define MSG_Motor_51         0x10BU   // RX for TSK state and accel pedal
 #define MSG_KLR_01           0x25DU   // TX, for capacitive steering wheel
+
 
 static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
@@ -27,6 +29,8 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
     crc ^= (uint8_t[]){0x20, 0xCA, 0x68, 0xD5, 0x1B, 0x31, 0xE2, 0xDA, 0x08, 0x0A, 0xD4, 0xDE, 0x9C, 0xE4, 0x35, 0x5B}[counter];
   } else if (msg->addr == MSG_ESC_51) {
     crc ^= (uint8_t[]){0x77, 0x5C, 0xA0, 0x89, 0x4B, 0x7C, 0xBB, 0xD6, 0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD}[counter];
+  } else if (msg->addr == MSG_ESP_21) {
+    crc ^= (uint8_t[]){0xB4, 0xEF, 0xF8, 0x49, 0x1E, 0xE5, 0xC2, 0xC0, 0x97, 0x19, 0x3C, 0xC9, 0xF1, 0x98, 0xD6, 0x61}[counter];
   } else if (msg->addr == MSG_Motor_51) {
     crc ^= (uint8_t[]){0x77, 0x5C, 0xA0, 0x89, 0x4B, 0x7C, 0xBB, 0xD6, 0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD}[counter];
   } else {
@@ -39,7 +43,7 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 
 static safety_config volkswagen_meb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {
+  static const CanMsg VOLKSWAGEN_MEB_TX_MSGS[] = {
     {MSG_HCA_03, 0, 24, .check_relay = true},
     {MSG_GRA_ACC_01, 0, 8, .check_relay = false},
     {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
@@ -55,12 +59,13 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {.msg = {{MSG_QFK_01, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_ESP_21, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
   volkswagen_common_init();
   SAFETY_UNUSED(param);
 
-  return BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
+  return BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
 }
 
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
@@ -73,6 +78,13 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
       uint32_t rr = msg->data[14] | (msg->data[15] << 8);
       vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
       UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
+    }
+
+    // Check vehicle speed with redundant source
+    if (msg->addr == MSG_ESP_21) {
+      // Signal: ESP_v_Signal
+      float esp_speed = ((msg->data[5] << 8) | msg->data[4]) * 0.01 * KPH_TO_MS;
+      speed_mismatch_check(esp_speed);
     }
 
     if (msg->addr == MSG_QFK_01) {
