@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import unittest
 import numpy as np
-
 from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
@@ -524,6 +523,15 @@ class TestHondaBoschRadarlessSafety(HondaPcmEnableBase, TestHondaBoschRadarlessS
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS)
     self.safety.init_tests()
 
+class TestHondaBoschRadarlessAltSCMSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase):
+  """
+    Covers the Honda Bosch Radarless safety mode with stock longitudinal
+  """
+
+  def setUp(self):
+    super().setUp()
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.NIDEC_ALT)
+    self.safety.init_tests()
 
 class TestHondaBoschRadarlessAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase, TestHondaBoschAltBrakeSafetyBase):
   """
