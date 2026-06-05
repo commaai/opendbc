@@ -46,7 +46,7 @@ class CarInterface(CarInterfaceBase):
       # Set global MEB parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
       ret.transmissionType = TransmissionType.direct
-      ret.steerControlType = structs.CarParams.SteerControlType.angle
+      ret.steerControlType = structs.CarParams.SteerControlType.curvature
       ret.steerAtStandstill = True
 
       if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, QFK_01
