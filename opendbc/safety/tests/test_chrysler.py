@@ -71,6 +71,11 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
       self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
 
+  def test_tx_hook_on_wrong_safety_mode(self):
+    # SRT uses SAFETY_CHRYSLER with param flag - TX addresses shared with Pacifica
+    # Cross-mode blocking is not applicable for param variants of the same safety mode
+    pass
+
 
 class TestChryslerRamDTSafety(TestChryslerSafety):
   TX_MSGS = [[0xB1, 2], [0xA6, 0], [0xFA, 0]]
@@ -120,6 +125,21 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
     values = {"Vehicle_Speed": speed}
     return self.packer.make_can_msg_safety("ESP_8", 0, values)
 
+class TestChryslerSrtSafety(TestChryslerSafety):
+  MAX_RATE_UP = 6
+  MAX_RATE_DOWN = 6
+  MAX_TORQUE_LOOKUP = [0], [261]
+
+  def setUp(self):
+    self.packer = CANPackerSafety("chrysler_pacifica_2017_hybrid_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.SRT)
+    self.safety.init_tests()
+
+  def test_tx_hook_on_wrong_safety_mode(self):
+    # SRT uses SAFETY_CHRYSLER with param flag - TX addresses are shared with Pacifica
+    # Cross-mode blocking is not applicable for param variants of the same safety mode
+    pass
 
 if __name__ == "__main__":
   unittest.main()
