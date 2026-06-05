@@ -103,13 +103,9 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == MSG_Motor_51) {
       int acc_status = (msg->data[11] & 0x07U);
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-      acc_main_on = cruise_engaged || (acc_status == 2);
 
       pcm_cruise_check(cruise_engaged);
 
-      if (!acc_main_on) {
-        controls_allowed = false;
-      }
 
       int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
       gas_pressed = accel_pedal_value > 0;
