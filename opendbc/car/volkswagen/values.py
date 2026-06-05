@@ -66,6 +66,7 @@ class CarControllerParams:
 
   ACCEL_MAX = 2.0                          # 2.0 m/s max acceleration
   ACCEL_MIN = -3.5                         # 3.5 m/s max deceleration
+  VW_LOW_SPEED_STATE_SPEED = 0.5           # always send either starting or stopping below this speed
 
   def __init__(self, CP):
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
