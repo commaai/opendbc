@@ -490,6 +490,7 @@ FW_VERSIONS = {
       b'\xa1  \x08\x02',
       b'\xa1 "\t\x00',
       b'\xa1 "\t\x01',
+      b'\xa1 "\t\x02',
     ],
     (Ecu.eps, 0x746, None): [
       b'\x1b\xc0\x10\x00',
@@ -503,6 +504,7 @@ FW_VERSIONS = {
       b'\x00\x00e\x80\x00\x1f@ \x19\x00',
       b'\x00\x00e\x9a\x00\x00\x00\x00\x00\x00',
       b'\x00\x00e\x9a\x00\x1f@ 1\x00',
+      b'\xd3\x13\x0e',
     ],
     (Ecu.engine, 0x7e0, None): [
       b'\xbc"`@\x07',
@@ -517,6 +519,8 @@ FW_VERSIONS = {
       b'\xe2"`t\x07',
       b'\xe2,\xa0p\x07',
       b'\xe3,\xa0@\x07',
+      b'\xe3,\xa0p\x07',
+      b'\xf1\x82\xe3,\xa0p\x07',
     ],
     (Ecu.transmission, 0x7e1, None): [
       b'\xa5\xf6D@\x00',
@@ -527,6 +531,9 @@ FW_VERSIONS = {
       b'\xa7\xf6D@\x00',
       b'\xa7\xfe\xf4@\x00',
       b'\xa7\xfe\xf6@\x00',
+      b'\xa7\x8e\xf70\x00',
+      b'\xf1\x82\xa7\x8e\xf70\x00',
+      b'\xf1\x00\xd7\x10@',
     ],
   },
   CAR.SUBARU_FORESTER_2022: {
