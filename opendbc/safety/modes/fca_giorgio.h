@@ -26,7 +26,7 @@ static safety_config fca_giorgio_init(uint16_t param) {
 
   // TODO: need to find a message for driver gas
   // TODO: re-check counter/checksum for ABS_3
-  // TODO: reenable checksums/counters on ABS_1 and EPS_3 once checksums are bruteforced
+  // TODO: re-enable checksums/counters on ABS_1 and EPS_3 once checksums are bruteforced
   static const RxCheck fca_giorgio_rx_checks[] = {
     {.msg = {{FCA_GIORGIO_ACC_1, 0, 8, 12U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     // TODO: confirm rate
