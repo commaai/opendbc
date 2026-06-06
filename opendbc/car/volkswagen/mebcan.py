@@ -73,7 +73,7 @@ def create_capacitive_wheel_touch(packer, bus, lat_active, klr_stock_values):
   # KLR_01: capacitive steering wheel hands-on signal
   # Sent by J1158
   # Consumed by R242 (camera) for lane assist hands on and J428 (ACC / Travel Assist / Emergency Assist)
-  # for resume and EA suppression
+  # for resume and EA control
   values = {s: klr_stock_values[s] for s in [
     "COUNTER",
     "KLR_Touchintensitaet_1",
