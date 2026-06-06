@@ -69,7 +69,6 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   };
 
   volkswagen_common_init();
-  volkswagen_longitudinal = true;
   SAFETY_UNUSED(param);
 
   return BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
@@ -118,7 +117,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     }
 
     if (msg->addr == MSG_GRA_ACC_01) {
-      // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
+      // Enter controls on falling edge of Set or Resume with main switch on
       // Signal: GRA_ACC_01.GRA_Tip_Setzen
       // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
       bool set_button = GET_BIT(msg, 16U);
@@ -142,7 +141,6 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
-  // longitudinal limits
   // acceleration in m/s2 * 1000 to avoid floating point math
   const LongitudinalLimits VOLKSWAGEN_MEB_LONG_LIMITS = {
     .max_accel = 2000,
