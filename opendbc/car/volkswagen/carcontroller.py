@@ -124,9 +124,12 @@ class CarController(CarControllerBase):
     # Emergency Assist intervention
     if self.CP.flags & VolkswagenFlags.MEB and self.CP.flags & VolkswagenFlags.STOCK_KLR_PRESENT:
       # send capacitive steering wheel hands-on message to keep ACC resume active and control Emergency Assist
+      # MEB Emergency Assist brake jerks after 30s of continued hands-off time.
+      # We send the stock wheeltouch message to start the stock DM timer when openpilot latches the critical driver monitoring alert
       if self.frame % self.CCP.KLR_01_STEP == 0:
-        can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.cam, CC.latActive, CS.klr_stock_values))
-        can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.pt, CC.latActive, CS.klr_stock_values))
+        lat_active = CC.latActive and not CC.driverMonitoringEscalation
+        can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.cam, lat_active, CS.klr_stock_values))
+        can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.pt, lat_active, CS.klr_stock_values))
 
     # **** Acceleration Controls ******************************************** #
 
