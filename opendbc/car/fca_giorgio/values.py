@@ -56,13 +56,13 @@ class FcaGiorgioCarDocs(CarDocs):
 class CAR(Platforms):
   config: FcaGiorgioPlatformConfig
 
-  ALFA_ROMEO_STELVIO_1ST_GEN = FcaGiorgioPlatformConfig(
-    [FcaGiorgioCarDocs("Alfa Romeo Stelvio 2017-24")],
-    FcaGiorgioCarSpecs(wheelbase=2.82),
-  )
+  # ALFA_ROMEO_STELVIO_1ST_GEN = FcaGiorgioPlatformConfig(
+  #   [FcaGiorgioCarDocs("Alfa Romeo Stelvio 2017-24")],
+  #   FcaGiorgioCarSpecs(wheelbase=2.82),
+  # )
 
   RAM_PROMASTER = FcaGiorgioPlatformConfig(
-    [FcaGiorgioCarDocs("RAM ProMaster")],
+    [FcaGiorgioCarDocs("RAM ProMaster 2024-26")],
     # rough specs for Promaster 2500 with medium wheelbase
     FcaGiorgioCarSpecs(wheelbase=3.45),
   )
