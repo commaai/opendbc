@@ -74,7 +74,7 @@ class CarController(CarControllerBase):
 
         if CC.latActive:
           hca_enabled = True
-          apply_curvature = self.CCP.CURVATURE_LIMITS.apply_limits(actuators.curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.out.steeringCurvature,
+          apply_curvature = self.CCP.CURVATURE_LIMITS.apply_limits(actuators.curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
                                                                    CC.latActive, self.CCP.STEER_STEP)
 
           min_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MIN)
@@ -87,7 +87,7 @@ class CarController(CarControllerBase):
         else:
           if self.steering_power_last > 0:  # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
-            apply_curvature = float(np.clip(CS.out.steeringCurvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX))
+            apply_curvature = float(np.clip(CS.curvature_meas, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX))
             steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, 0)
           else:
             hca_enabled = False
