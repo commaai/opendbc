@@ -364,7 +364,8 @@ routes = [
 
   CarTestRoute("5d61e2f6e1f247f3/00000054--d3dfb01b34", MG.MG_5_EV),
 
-  CarTestRoute("6a3e5d31bf499cfe/0000000b--a48d1b4e42", FCA_GIORGIO.ALFA_ROMEO_STELVIO_1ST_GEN),
+  # CarTestRoute("6a3e5d31bf499cfe/0000000b--a48d1b4e42", FCA_GIORGIO.ALFA_ROMEO_STELVIO_1ST_GEN),
+  CarTestRoute("69cd3a350561a4d8/00000195--aa6ccc4f6e", FCA_GIORGIO.RAM_PROMASTER),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold
