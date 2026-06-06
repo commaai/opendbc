@@ -124,7 +124,7 @@ class CarController(CarControllerBase):
     # Emergency Assist intervention
     if self.CP.flags & VolkswagenFlags.MEB and self.CP.flags & VolkswagenFlags.STOCK_KLR_PRESENT:
       # send capacitive steering wheel hands-on message to keep ACC resume active and control Emergency Assist
-      # MEB Emergency Assist break jerks after 30s of continued hands-off time
+      # MEB Emergency Assist brake jerks after 30s of continued hands-off time
       # so we send the stock wheeltouch message starting with the steerRequired alert to reduce reaction time after the latched red alert
       if self.frame % self.CCP.KLR_01_STEP == 0:
         lat_active = CC.latActive and hud_control.visualAlert != VisualAlert.steerRequired
