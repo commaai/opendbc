@@ -47,6 +47,13 @@ class CarInterface(CarInterfaceBase):
       ret.steerControlType = structs.CarParams.SteerControlType.curvature
       ret.steerAtStandstill = True
 
+      ret.lateralTuning.init('pid')
+      ret.lateralTuning.pid.kpBP = [10., 40.]
+      ret.lateralTuning.pid.kpV = [0., 1.45]
+      ret.lateralTuning.pid.kiBP = [10., 40.]
+      ret.lateralTuning.pid.kiV = [0., 0.12]
+      ret.lateralTuning.pid.kf = 1.
+
       if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, QFK_01
         ret.networkLocation = NetworkLocation.gateway
       else:
