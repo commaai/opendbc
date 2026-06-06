@@ -45,14 +45,17 @@ class CarController(CarControllerBase):
       self.CCS = pqcan
     elif CP.flags & VolkswagenFlags.MLB:
       self.CCS = mlbcan
-    elif CP.flags & VolkswagenFlags.MEB:
-      self.CCS = mebcan
     else:
       self.CCS = mqbcan
 
     self.apply_torque_last = 0
     self.apply_curvature_last = 0.
     self.steering_power_last = 0
+    self.accel_last = 0.
+    self.long_override_counter = 0
+    self.long_disabled_counter = 0
+    self.lead_distance_bars_last = None
+    self.distance_bar_frame = 0
     self.gra_acc_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
 
@@ -95,7 +98,7 @@ class CarController(CarControllerBase):
             apply_curvature = 0.  # inactive curvature
             steering_power = 0
 
-        can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_curvature, hca_enabled, steering_power))
+        can_sends.append(mebcan.create_steering_control(self.packer_pt, self.CAN.pt, apply_curvature, hca_enabled, steering_power))
         self.apply_curvature_last = apply_curvature
         self.steering_power_last = steering_power
 
@@ -129,12 +132,34 @@ class CarController(CarControllerBase):
 
     if self.CP.openpilotLongitudinalControl:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
-        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
-        starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
-                                                           acc_control, stopping, starting, CS.esp_hold_confirmation))
+
+        if self.CP.flags & VolkswagenFlags.MEB:
+          starting = actuators.longControlState == LongCtrlState.starting and CS.out.vEgo <= self.CP.vEgoStarting
+          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
+
+          long_override = CC.cruiseControl.override or CS.out.gasPressed
+          self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
+          long_override_begin = long_override and self.long_override_counter < 5
+
+          self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
+          long_disabling = not CC.enabled and self.long_disabled_counter < 5
+
+          acc_control = mebcan.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, long_override)
+          acc_hold_type = mebcan.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
+                                               CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
+          can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.enabled,
+                                                           4.0, 4.0, 0., 0.,
+                                                           accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
+                                                           CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))
+          self.accel_last = accel
+
+        else:
+          acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
+          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
+          starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
+          can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
+                                                             acc_control, stopping, starting, CS.esp_hold_confirmation))
 
       #if self.aeb_available:
       #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:
@@ -151,16 +176,32 @@ class CarController(CarControllerBase):
       can_sends.append(self.CCS.create_lka_hud_control(self.packer_pt, self.CAN.pt, CS.ldw_stock_values, CC.latActive,
                                                        CS.out.steeringPressed, hud_alert, hud_control))
 
+    if hud_control.leadDistanceBars != self.lead_distance_bars_last:
+      self.distance_bar_frame = self.frame
+
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
-      lead_distance = 0
-      if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:  # Don't display lead until we know the scaling factor
-        lead_distance = 512 if CS.upscale_lead_car_signal else 8
-      acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
-      # FIXME: PQ may need to use the on-the-wire mph/kmh toggle to fix rounding errors
-      # FIXME: Detect clusters with vEgoCluster offsets and apply an identical vCruiseCluster offset
-      set_speed = hud_control.setSpeed * CV.MS_TO_KPH
-      can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_hud_status, set_speed,
-                                                       lead_distance, hud_control.leadDistanceBars))
+      if self.CP.flags & VolkswagenFlags.MEB:
+        fcw_alert = hud_control.visualAlert == VisualAlert.fcw
+        show_distance_bars = self.frame - self.distance_bar_frame < 400
+        lead_distance = 0
+        if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:
+          lead_distance = 8
+        acc_hud_status = mebcan.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
+                                                     CC.cruiseControl.override or CS.out.gasPressed)
+        can_sends.append(mebcan.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH,
+                                                       hud_control.leadVisible, hud_control.leadDistanceBars + 1, show_distance_bars,
+                                                       CS.esp_hold_confirmation, lead_distance, 0, fcw_alert))
+
+      else:
+        lead_distance = 0
+        if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:  # Don't display lead until we know the scaling factor
+          lead_distance = 512 if CS.upscale_lead_car_signal else 8
+        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
+        # FIXME: PQ may need to use the on-the-wire mph/kmh toggle to fix rounding errors
+        # FIXME: Detect clusters with vEgoCluster offsets and apply an identical vCruiseCluster offset
+        set_speed = hud_control.setSpeed * CV.MS_TO_KPH
+        can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_hud_status, set_speed,
+                                                         lead_distance, hud_control.leadDistanceBars))
 
     # **** Stock ACC Button Controls **************************************** #
 
@@ -173,7 +214,9 @@ class CarController(CarControllerBase):
     new_actuators.torque = self.apply_torque_last / self.CCP.STEER_MAX
     new_actuators.torqueOutputCan = self.apply_torque_last
     new_actuators.curvature = self.apply_curvature_last
+    new_actuators.accel = self.accel_last
 
+    self.lead_distance_bars_last = hud_control.leadDistanceBars
     self.gra_acc_counter_last = CS.gra_stock_values["COUNTER"]
     self.frame += 1
     return new_actuators, can_sends

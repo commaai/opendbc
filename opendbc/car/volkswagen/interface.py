@@ -66,9 +66,7 @@ class CarInterface(CarInterfaceBase):
       if 0x3DC in fingerprint[0]:  # Gateway_73
         ret.flags |= VolkswagenFlags.ALT_GEAR.value
 
-      ret.radarUnavailable = True
-
-      # only allow gateway harness for now
+      # only allow gateway harness to escalate Emergency Assist
       ret.dashcamOnly = is_release or ret.networkLocation == NetworkLocation.fwdCamera
 
     else:
@@ -111,10 +109,14 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kiV = [0.2]
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
-    ret.alphaLongitudinalAvailable = not (ret.flags & VolkswagenFlags.MEB) and \
-                                     (ret.networkLocation == NetworkLocation.gateway or docs)
-    if alpha_long and not (ret.flags & VolkswagenFlags.MEB):
-      # Proof-of-concept, prep for E2E only. No radar points available. Panda ALLOW_DEBUG firmware required.
+
+    if ret.flags & VolkswagenFlags.MEB:
+      ret.longitudinalActuatorDelay = 0.5
+      ret.longitudinalTuning.kiBP = [0., 30.]
+      ret.longitudinalTuning.kiV = [0.4, 0.]
+
+    ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
+    if alpha_long:
       ret.openpilotLongitudinalControl = True
       safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
       if ret.transmissionType == TransmissionType.manual:
@@ -126,10 +128,13 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.07
 
     ret.pcmCruise = not ret.openpilotLongitudinalControl
-    if not (ret.flags & VolkswagenFlags.MEB):
+    if ret.flags & VolkswagenFlags.MEB:
+      ret.startingState = True
+      ret.startAccel = 0.8
+    else:
       ret.stopAccel = -0.55
-      ret.vEgoStopping = 0.5
       ret.vEgoStarting = 0.1
+      ret.vEgoStopping = 0.5
     ret.autoResumeSng = ret.minEnableSpeed == -1
 
     CAN = CanBus(fingerprint=fingerprint)

@@ -4,11 +4,14 @@
 #include "opendbc/safety/modes/volkswagen_common.h"
 
 #define MSG_ESC_51           0xFCU    // RX, for wheel speeds
+#define MSG_ACC_18           0x14DU   // TX by OP, ACC control instructions to the drivetrain coordinator
 #define MSG_ESP_21           0xFDU    // RX, redundant vehicle speed source
 #define MSG_HCA_03           0x303U
+#define MSG_MEB_ACC_01       0x300U   // TX by OP, ACC HUD data to the instrument cluster
 #define MSG_QFK_01           0x13DU
 #define MSG_Motor_51         0x10BU   // RX for TSK state and accel pedal
 #define MSG_KLR_01           0x25DU   // TX, for capacitive steering wheel
+#define MSG_TA_01            0x26BU   // TX by OP, Travel Assist status
 
 
 static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
@@ -43,13 +46,23 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 
 static safety_config volkswagen_meb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_MEB_TX_MSGS[] = {
+  static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {
     {MSG_HCA_03, 0, 24, .check_relay = true},
     {MSG_GRA_ACC_01, 0, 8, .check_relay = false},
     {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
     {MSG_LDW_02, 0, 8, .check_relay = true},
     {MSG_KLR_01, 0, 8, .check_relay = false},
     {MSG_KLR_01, 2, 8, .check_relay = true},
+  };
+
+  static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {
+    {MSG_HCA_03, 0, 24, .check_relay = true},
+    {MSG_LDW_02, 0, 8, .check_relay = true},
+    {MSG_KLR_01, 0, 8, .check_relay = false},
+    {MSG_KLR_01, 2, 8, .check_relay = true},
+    {MSG_MEB_ACC_01, 0, 48, .check_relay = true},
+    {MSG_ACC_18, 0, 32, .check_relay = true},
+    {MSG_TA_01, 0, 8, .check_relay = true},
   };
 
   static RxCheck volkswagen_meb_rx_checks[] = {
@@ -63,9 +76,15 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   };
 
   volkswagen_common_init();
-  SAFETY_UNUSED(param);
 
-  return BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
+#ifdef ALLOW_DEBUG
+  volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
+#else
+  SAFETY_UNUSED(param);
+#endif
+
+  return volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS) : \
+                                   BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
 }
 
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
@@ -100,14 +119,34 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == MSG_Motor_51) {
       int acc_status = (msg->data[11] & 0x07U);
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
+      acc_main_on = cruise_engaged || (acc_status == 2);
 
-      pcm_cruise_check(cruise_engaged);
+      if (!volkswagen_longitudinal) {
+        pcm_cruise_check(cruise_engaged);
+      }
+
+      if (!acc_main_on) {
+        controls_allowed = false;
+      }
 
       int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
       gas_pressed = accel_pedal_value > 0;
     }
 
     if (msg->addr == MSG_GRA_ACC_01) {
+      // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
+      // Signal: GRA_ACC_01.GRA_Tip_Setzen
+      // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
+      if (volkswagen_longitudinal) {
+        bool set_button = GET_BIT(msg, 16U);
+        bool resume_button = GET_BIT(msg, 19U);
+        if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
+          controls_allowed = acc_main_on;
+        }
+        volkswagen_set_button_prev = set_button;
+        volkswagen_resume_button_prev = resume_button;
+      }
+
       // Always exit controls on rising edge of Cancel
       if (GET_BIT(msg, 13U)) {
         controls_allowed = false;
@@ -121,8 +160,25 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
-  // MEB is lateral-only; no openpilot longitudinal TX messages are allowed.
+  // acceleration in m/s2 * 1000 to avoid floating point math
+  const LongitudinalLimits VOLKSWAGEN_MEB_LONG_LIMITS = {
+    .max_accel = 2000,
+    .min_accel = -3500,
+    .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
+  };
+
   bool tx = true;
+
+  // Safety check for MSG_ACC_18 acceleration requests
+  if (msg->addr == MSG_ACC_18) {
+    // Signal: ACC_18.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
+    int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
+    // allow ACCEL_OVERRIDE (0) while controls are allowed even when the driver is on the gas
+    bool accel_override = controls_allowed && (desired_accel == 0);
+    if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
+      tx = false;
+    }
+  }
 
   if (msg->addr == MSG_HCA_03) {
     const CurvatureSteeringLimits VOLKSWAGEN_MEB_STEERING_LIMITS = {
