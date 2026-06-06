@@ -355,7 +355,7 @@ struct CarControl {
   angularVelocity @14 :List(Float32);
   currentCurvature @17 :Float32;  # From vehicle model
 
-  dmEscalation @18 :Bool; # trigger the car's stock driver monitoring escalation
+  driverMonitoringEscalation @18 :Bool; # trigger the car's stock driver monitoring escalation
 
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
