@@ -111,8 +111,6 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kiV = [0.2]
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
-
-    # MEB is lateral-only; openpilot longitudinal is not available on this platform.
     ret.alphaLongitudinalAvailable = not (ret.flags & VolkswagenFlags.MEB) and \
                                      (ret.networkLocation == NetworkLocation.gateway or docs)
     if alpha_long and not (ret.flags & VolkswagenFlags.MEB):

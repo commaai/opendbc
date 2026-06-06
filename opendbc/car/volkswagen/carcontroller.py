@@ -120,8 +120,7 @@ class CarController(CarControllerBase):
 
     # Emergency Assist intervention
     if self.CP.flags & VolkswagenFlags.MEB and self.CP.flags & VolkswagenFlags.STOCK_KLR_PRESENT:
-      # send capacitive steering wheel touched
-      # spoof capacitive steering wheel hands-on message to keep ACC resume active and suppress Emergency Assist
+      # send capacitive steering wheel hands-on message to keep ACC resume active and control Emergency Assist
       if self.frame % self.CCP.KLR_01_STEP == 0:
         can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.cam, CC.latActive, CS.klr_stock_values))
         can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.pt, CC.latActive, CS.klr_stock_values))
