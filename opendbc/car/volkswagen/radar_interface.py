@@ -21,31 +21,22 @@ SIGNAL_SETS = tuple(
 )
 
 
-def get_radar_can_parser(CP):
-  if CP.flags & VolkswagenFlags.MEB:
-    messages = [("MEB_Distance_01", 25)]
-  else:
-    return None
-
-  return CANParser(DBC[CP.carFingerprint][Bus.radar], messages, 2)
-
-
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
 
     self.updated_messages: set[int] = set()
     self.trigger_msg: int = RADAR_ADDR
-    self._track_id_counter: int = 0
 
-    self.radar_off_can: bool = CP.radarUnavailable
-    self.rcp: CANParser | None = get_radar_can_parser(CP)
+    self.rcp: CANParser | None = None
+    if CP.flags & VolkswagenFlags.MEB:
+      self.rcp = CANParser(DBC[CP.carFingerprint][Bus.radar], [("MEB_Distance_01", 25)], 2)
 
     self._pts = self.pts
+    self._track_id_counter: int = 0
 
   def update(self, can_strings):
-    """Entry‑point called by the vehicle loop every CAN tick."""
-    if self.radar_off_can or self.rcp is None:
+    if self.CP.radarUnavailable or self.rcp is None:
       return super().update(None)
 
     vls = self.rcp.update(can_strings)
