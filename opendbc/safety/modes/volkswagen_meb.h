@@ -46,10 +46,17 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 
 static safety_config volkswagen_meb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_MEB_TX_MSGS[] = {
+  static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {
     {MSG_HCA_03, 0, 24, .check_relay = true},
     {MSG_GRA_ACC_01, 0, 8, .check_relay = false},
     {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
+    {MSG_LDW_02, 0, 8, .check_relay = true},
+    {MSG_KLR_01, 0, 8, .check_relay = false},
+    {MSG_KLR_01, 2, 8, .check_relay = true},
+  };
+
+  static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {
+    {MSG_HCA_03, 0, 24, .check_relay = true},
     {MSG_LDW_02, 0, 8, .check_relay = true},
     {MSG_KLR_01, 0, 8, .check_relay = false},
     {MSG_KLR_01, 2, 8, .check_relay = true},
@@ -69,9 +76,15 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   };
 
   volkswagen_common_init();
-  SAFETY_UNUSED(param);
 
-  return BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
+#ifdef ALLOW_DEBUG
+  volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
+#else
+  SAFETY_UNUSED(param);
+#endif
+
+  return volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS) : \
+                                   BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
 }
 
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
@@ -108,6 +121,10 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
       acc_main_on = cruise_engaged || (acc_status == 2);
 
+      if (!volkswagen_longitudinal) {
+        pcm_cruise_check(cruise_engaged);
+      }
+
       if (!acc_main_on) {
         controls_allowed = false;
       }
@@ -117,16 +134,18 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     }
 
     if (msg->addr == MSG_GRA_ACC_01) {
-      // Enter controls on falling edge of Set or Resume with main switch on
+      // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
       // Signal: GRA_ACC_01.GRA_Tip_Setzen
       // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-      bool set_button = GET_BIT(msg, 16U);
-      bool resume_button = GET_BIT(msg, 19U);
-      if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-        controls_allowed = acc_main_on;
+      if (volkswagen_longitudinal) {
+        bool set_button = GET_BIT(msg, 16U);
+        bool resume_button = GET_BIT(msg, 19U);
+        if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
+          controls_allowed = acc_main_on;
+        }
+        volkswagen_set_button_prev = set_button;
+        volkswagen_resume_button_prev = resume_button;
       }
-      volkswagen_set_button_prev = set_button;
-      volkswagen_resume_button_prev = resume_button;
 
       // Always exit controls on rising edge of Cancel
       if (GET_BIT(msg, 13U)) {

@@ -2,13 +2,11 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.volkswagen.carcontroller import CarController
 from opendbc.car.volkswagen.carstate import CarState
-from opendbc.car.volkswagen.radar_interface import RadarInterface
 from opendbc.car.volkswagen.values import CanBus, CAR, NetworkLocation, TransmissionType, VolkswagenFlags, VolkswagenSafetyFlags
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
-  RadarInterface = RadarInterface
 
   DRIVABLE_GEARS = (structs.CarState.GearShifter.eco, structs.CarState.GearShifter.sport,
                     structs.CarState.GearShifter.manumatic)
@@ -61,9 +59,6 @@ class CarInterface(CarInterfaceBase):
       if 0x3DC in fingerprint[0]:  # Gateway_73
         ret.flags |= VolkswagenFlags.ALT_GEAR.value
 
-      ret.radarUnavailable = 0x24F not in fingerprint[0]  # Strukturen_01
-      ret.radarDelay = 0.8
-
       # only allow gateway harness to escalate Emergency Assist
       ret.dashcamOnly = is_release or ret.networkLocation == NetworkLocation.fwdCamera
 
@@ -112,15 +107,13 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalActuatorDelay = 0.5
       ret.longitudinalTuning.kiBP = [0., 30.]
       ret.longitudinalTuning.kiV = [0.4, 0.]
+
+    ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
+    if alpha_long:
       ret.openpilotLongitudinalControl = True
       safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
-    else:
-      if alpha_long:
-        ret.openpilotLongitudinalControl = True
-        safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
-        if ret.transmissionType == TransmissionType.manual:
-          ret.minEnableSpeed = 4.5
-      ret.alphaLongitudinalAvailable = (ret.networkLocation == NetworkLocation.gateway or docs)
+      if ret.transmissionType == TransmissionType.manual:
+        ret.minEnableSpeed = 4.5
 
     # Per-vehicle overrides
 

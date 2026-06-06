@@ -3,6 +3,7 @@ import numpy as np
 import unittest
 
 from opendbc.car.structs import CarParams
+from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
@@ -204,36 +205,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
         within_delta = abs(speed - speed_2) <= common.MAX_SPEED_DELTA
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
-
-class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
-  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2],
-             [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0], [MSG_TA_01, 0],
-             [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
-  FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01],
-                           2: [MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01]}
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01),
-                             2: (MSG_KLR_01,)}
-
-  ALLOW_OVERRIDE = True
-  ACCEL_OVERRIDE = 0
-  INACTIVE_ACCEL = 3.01
-
-  def setUp(self):
-    self.packer = CANPackerSafety("vw_meb")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, 0)
-    self.safety.init_tests()
-
-  # stock cruise controls are entirely bypassed under openpilot longitudinal control
-  def test_disable_control_allowed_from_cruise(self):
-    pass
-
-  def test_enable_control_allowed_from_cruise(self):
-    pass
-
-  def test_cruise_engaged_prev(self):
-    pass
-
   def test_curvature_violation(self):
     # if violation occurs, MEB resets desired_curvature_last to measured curvature
     meas = self.MAX_CURVATURE_TEST / 4
@@ -264,6 +235,18 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
             should_tx = controls_allowed if steer_req else round(curvature_cmd * self.CURVATURE_TO_CAN) == 0
             self.assertEqual(should_tx, self._tx(self._curvature_cmd_msg(curvature_cmd, steer_req=steer_req, power=50 if steer_req else 0)))
 
+
+class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
+  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2],
+             [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
+  FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01], 2: [MSG_HCA_03, MSG_LDW_02]}
+
+  def setUp(self):
+    self.packer = CANPackerSafety("vw_meb")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, 0)
+    self.safety.init_tests()
+
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._button_msg(cancel=1)))
@@ -271,6 +254,35 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
     self.assertFalse(self._tx(self._button_msg(_set=1)))
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=1)))
+
+
+class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
+  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0],
+             [MSG_TA_01, 0], [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
+  FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01],
+                           2: [MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01]}
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01),
+                             2: (MSG_KLR_01,)}
+
+  ALLOW_OVERRIDE = True
+  ACCEL_OVERRIDE = 0
+  INACTIVE_ACCEL = 3.01
+
+  def setUp(self):
+    self.packer = CANPackerSafety("vw_meb")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.LONG_CONTROL)
+    self.safety.init_tests()
+
+  # stock cruise controls are entirely bypassed under openpilot longitudinal control
+  def test_disable_control_allowed_from_cruise(self):
+    pass
+
+  def test_enable_control_allowed_from_cruise(self):
+    pass
+
+  def test_cruise_engaged_prev(self):
+    pass
 
   def test_set_and_resume_buttons(self):
     for button in ["set", "resume"]:
