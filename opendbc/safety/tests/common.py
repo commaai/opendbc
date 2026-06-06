@@ -926,7 +926,7 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
 
       self.assertFalse(self._tx(self._curvature_cmd_msg(max_curvature_delta, True)))
 
-      # after violation, prev is reset to 0; jumping past the jerk limit must fail
+      # after violation, prev is reset to 0, going past the jerk limit must fail
       self.safety.set_controls_allowed(True)
       self.assertFalse(self._tx(self._curvature_cmd_msg(2 * max_curvature_delta, True)))
 

@@ -45,8 +45,6 @@ class CarController(CarControllerBase):
       self.CCS = pqcan
     elif CP.flags & VolkswagenFlags.MLB:
       self.CCS = mlbcan
-    elif CP.flags & VolkswagenFlags.MEB:
-      self.CCS = mebcan
     else:
       self.CCS = mqbcan
 
@@ -100,7 +98,7 @@ class CarController(CarControllerBase):
             apply_curvature = 0.  # inactive curvature
             steering_power = 0
 
-        can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_curvature, hca_enabled, steering_power))
+        can_sends.append(mebcan.create_steering_control(self.packer_pt, self.CAN.pt, apply_curvature, hca_enabled, steering_power))
         self.apply_curvature_last = apply_curvature
         self.steering_power_last = steering_power
 
