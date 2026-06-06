@@ -415,6 +415,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param);
 
 extern const safety_hooks chrysler_cusw_hooks;
 extern const safety_hooks alloutput_hooks;
+extern const safety_hooks fca_giorgio_hooks;
 extern const safety_hooks subaru_preglobal_hooks;
 extern const safety_hooks volkswagen_mlb_hooks;
 extern const safety_hooks volkswagen_pq_hooks;
