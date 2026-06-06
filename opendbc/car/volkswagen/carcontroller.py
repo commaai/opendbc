@@ -127,7 +127,7 @@ class CarController(CarControllerBase):
       # MEB Emergency Assist brake jerks after 30s of continued hands-off time
       # so we send the stock wheeltouch message starting with the steerRequired alert to reduce reaction time after the latched red alert
       if self.frame % self.CCP.KLR_01_STEP == 0:
-        lat_active = CC.latActive and hud_control.visualAlert != VisualAlert.steerRequired
+        lat_active = CC.latActive and not CC.dmEscalation
         can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.cam, lat_active, CS.klr_stock_values))
         can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.pt, lat_active, CS.klr_stock_values))
 
