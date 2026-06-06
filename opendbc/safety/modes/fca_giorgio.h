@@ -3,16 +3,16 @@
 
 #include "opendbc/safety/declarations.h"
 
-#define FCA_GIORGIO_ABS_1           0xEE
-#define FCA_GIORGIO_ABS_3           0xFA
-#define FCA_GIORGIO_EPS_2           0x106
-#define FCA_GIORGIO_EPS_3           0x122
-#define FCA_GIORGIO_LKA_COMMAND     0x1F6
+#define FCA_GIORGIO_ABS_1           0xEEU
+#define FCA_GIORGIO_ABS_3           0xFAU
+#define FCA_GIORGIO_EPS_2           0x106U
+#define FCA_GIORGIO_EPS_3           0x122U
+#define FCA_GIORGIO_LKA_COMMAND     0x1F6U
 // TODO: this isn't actually an LKA message on promester, coming from radar ECU
-#define FCA_GIORGIO_LKA_HUD_1       0x4AE
-#define FCA_GIORGIO_LKA_HUD_2       0x547
-#define FCA_GIORGIO_ACC_1           0x5A2
-#define FCA_GIORGIO_ACC_2           0x22A
+#define FCA_GIORGIO_LKA_HUD_1       0x4AEU
+#define FCA_GIORGIO_LKA_HUD_2       0x547U
+#define FCA_GIORGIO_ACC_1           0x5A2U
+#define FCA_GIORGIO_ACC_2           0x22AU
 
 static safety_config fca_giorgio_init(uint16_t param) {
   SAFETY_UNUSED(param);
@@ -63,7 +63,7 @@ static uint32_t fca_giorgio_compute_crc(const CANPacket_t *msg) {
   }
 
   // TODO: bruteforce final XORs for Panda relevant messages
-  if (msg->addr == 0xFF) {
+  if (msg->addr == 0xFFU) {
     final_xor = 0xFFU;
   } else {
     final_xor = 0x0;
@@ -143,7 +143,7 @@ static bool fca_giorgio_tx_hook(const CANPacket_t *msg) {
   // TODO: sanity check cancel spam, once a button message is found
 
   // FIXME: don't actually run any checks during early testing
-  tx = true;
+  tx |= true;
 
   return tx;
 }
