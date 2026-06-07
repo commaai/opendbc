@@ -86,6 +86,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
     .driver_torque_allowance = 65,
     .driver_torque_multiplier = 4,
     .max_rt_delta = 128,
+    // use TorqueMotorLimited if we can find EPS torque or some EPS limit signal?
     .type = TorqueDriverLimited,
   };
 

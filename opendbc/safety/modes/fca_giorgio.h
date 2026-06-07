@@ -128,7 +128,7 @@ static bool fca_giorgio_tx_hook(const CANPacket_t *msg) {
     .max_rate_down = 4,
     .driver_torque_allowance = 80,
     .driver_torque_multiplier = 3,
-    .type = TorqueMotorLimited,
+    .type = TorqueDriverLimited,
   };
 
   bool tx = true;
