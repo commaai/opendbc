@@ -7,7 +7,7 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSaf
   DBC = "fca_giorgio"
   SAFETY_MODEL = CarParams.SafetyModel.fcaGiorgio
 
-  RELAY_MALFUNCTION_ADDRS = {0: (0x1F6,)}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x1F6, 0x4AE, 0x547)}
 
   MAX_RATE_UP = 4
   MAX_RATE_DOWN = 4
