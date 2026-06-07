@@ -5,6 +5,7 @@
 
 #define FCA_GIORGIO_ABS_1           0xEEU
 #define FCA_GIORGIO_ABS_3           0xFAU
+#define FCA_GIORGIO_ENGINE_1        0xFCU
 #define FCA_GIORGIO_EPS_2           0x106U
 #define FCA_GIORGIO_EPS_3           0x122U
 #define FCA_GIORGIO_LKA_COMMAND     0x1F6U
@@ -33,6 +34,7 @@ static safety_config fca_giorgio_init(uint16_t param) {
     {.msg = {{FCA_GIORGIO_ACC_2, 0, 8, 12U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ABS_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ABS_3, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{FCA_GIORGIO_ENGINE_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     // TODO: confirm rate
     {.msg = {{FCA_GIORGIO_EPS_2, 0, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_EPS_3, 0, 4, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -105,7 +107,10 @@ static void fca_giorgio_rx_hook(const CANPacket_t *msg) {
 
     // TODO: find cruise button message
 
-    // TODO: find a driver gas message
+    // Signal: ENGINE_1.ACCEL_PEDAL
+    if (msg->addr == FCA_GIORGIO_ENGINE_1) {
+      safety.gas_pressed = ((GET_BYTES_BE(msg, 2, 2) >> 5) & 0xFFU) > 0U;
+    }
 
     // Signal: ABS_3.BRAKE_PEDAL_SWITCH
     if (msg->addr == FCA_GIORGIO_ABS_3) {
