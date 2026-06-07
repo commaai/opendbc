@@ -3,7 +3,7 @@ import unittest
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 
-class TestFcaGiorgio_Safety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
+class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   DBC = "fca_giorgio"
   SAFETY_MODEL = CarParams.SafetyModel.fcaGiorgio
 
@@ -42,7 +42,7 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.MotorTorqueSteeringSafe
     values = {"BRAKE_PEDAL_SWITCH": 1 if brake else 0}
     return self.packer.make_can_msg_safety("ABS_3", 0, values)
 
-  def _torque_meas_msg(self, torque):
+  def _torque_driver_msg(self, torque):
     values = {"DRIVER_TORQUE": torque}
     return self.packer.make_can_msg_safety("EPS_2", 0, values)
 
@@ -54,7 +54,7 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.MotorTorqueSteeringSafe
     for count in range(20):
       self.assertTrue(self._rx(self._speed_msg(0)), f"{count=}")
       self.assertTrue(self._rx(self._user_brake_msg(False)), f"{count=}")
-      self.assertTrue(self._rx(self._torque_meas_msg(0)), f"{count=}")
+      self.assertTrue(self._rx(self._torque_driver_msg(0)), f"{count=}")
       self.assertTrue(self._rx(self._user_gas_msg(0)), f"{count=}")
       self.assertTrue(self._rx(self._pcm_status_msg(False)), f"{count=}")
 
