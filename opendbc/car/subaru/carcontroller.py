@@ -24,6 +24,49 @@ class CarController(CarControllerBase):
     self.p = CarControllerParams(CP)
     self.packer = CANPacker(DBC[CP.carFingerprint][Bus.pt])
 
+  def lateral_angle(self, CC, CS):
+    apply_steer = apply_std_steer_angle_limits(
+            CC.actuators.steeringAngleDeg,
+            self.apply_steer_last,
+            CS.out.vEgoRaw,
+            CS.out.steeringAngleDeg,
+            CC.latActive,
+            CarControllerParams.ANGLE_LIMITS)
+
+    if not CC.latActive:
+      apply_steer = CS.out.steeringAngleDeg
+
+    self.apply_steer_last = apply_steer
+
+    return subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive)
+
+  def lateral_torque(self, CC, CS):
+    apply_torque = int(round(CC.actuators.torque * self.p.STEER_MAX))
+
+    # limits due to driver torque
+    new_torque = int(round(apply_torque))
+    if CC.latActive:
+      apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.p)
+
+    else:
+      apply_torque = 0
+
+    self.apply_torque_last = apply_torque
+
+    if self.CP.flags & SubaruFlags.PREGLOBAL:
+      return subarucan.create_preglobal_steering_control(self.packer, self.frame // self.p.STEER_STEP, apply_torque, CC.latActive)
+
+    else:
+      apply_steer_req = CC.latActive
+
+      if self.CP.flags & SubaruFlags.STEER_RATE_LIMITED:
+        # Steering rate fault prevention
+        self.steer_rate_counter, apply_steer_req = \
+          common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
+                                self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+
+      return subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req)
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -33,47 +76,16 @@ class CarController(CarControllerBase):
 
     # *** steering ***
     if (self.frame % self.p.STEER_STEP) == 0:
-      apply_steer = 0
-      apply_torque = 0
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
-        apply_steer = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_steer_last, CS.out.vEgoRaw,
-                                                   CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
-
-        if not CC.latActive:
-          apply_steer = CS.out.steeringAngleDeg
-
-        can_sends.append(subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive))
-        self.apply_steer_last = apply_steer
+        msg = self.lateral_angle(CC, CS)
 
       # torque-based steering
       else:
-        apply_torque = int(round(actuators.torque * self.p.STEER_MAX))
+        msg = self.lateral_torque(CC, CS)
 
-        # limits due to driver torque
-
-        new_torque = int(round(apply_torque))
-        apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.p)
-
-        if not CC.latActive:
-          apply_torque = 0
-
-        if self.CP.flags & SubaruFlags.PREGLOBAL:
-          can_sends.append(subarucan.create_preglobal_steering_control(self.packer, self.frame // self.p.STEER_STEP, apply_torque, CC.latActive))
-        else:
-          apply_steer_req = CC.latActive
-
-          if self.CP.flags & SubaruFlags.STEER_RATE_LIMITED:
-            # Steering rate fault prevention
-            self.steer_rate_counter, apply_steer_req = \
-              common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
-                                    self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
-
-          can_sends.append(subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req))
-
-        self.apply_torque_last = apply_torque
+      can_sends.append(msg)
 
     # *** longitudinal ***
-
     if CC.longActive:
       apply_throttle = int(round(np.interp(actuators.accel, CarControllerParams.THROTTLE_LOOKUP_BP, CarControllerParams.THROTTLE_LOOKUP_V)))
       apply_rpm = int(round(np.interp(actuators.accel, CarControllerParams.RPM_LOOKUP_BP, CarControllerParams.RPM_LOOKUP_V)))
