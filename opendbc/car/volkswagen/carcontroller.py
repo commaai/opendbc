@@ -57,6 +57,7 @@ class CarController(CarControllerBase):
     self.lead_distance_bars_last = None
     self.distance_bar_frame = 0
     self.gra_acc_counter_last = None
+    self.klr_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
 
   def update(self, CC, CS, now_nanos):
@@ -126,10 +127,12 @@ class CarController(CarControllerBase):
       # send capacitive steering wheel hands-on message to keep ACC resume active and control Emergency Assist
       # MEB Emergency Assist brake jerks after 30s of continued hands-off time.
       # We send the stock wheeltouch message to start the stock DM timer when openpilot latches the critical driver monitoring alert
-      if self.frame % self.CCP.KLR_01_STEP == 0:
+      # Synced with stock counter
+      if self.frame % self.CCP.KLR_01_STEP == 0 and CS.klr_stock_values["COUNTER"] != self.klr_counter_last:
         lat_active = CC.latActive and not CC.driverMonitoringEscalation
         can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.cam, lat_active, CS.klr_stock_values))
         can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.pt, lat_active, CS.klr_stock_values))
+        self.klr_counter_last = CS.klr_stock_values["COUNTER"]
 
     # **** Acceleration Controls ******************************************** #
 
