@@ -26,6 +26,8 @@ class Btn:
 #    * Bosch with Longitudinal Support
 #  * Bosch Radarless
 #    * Bosch Radarless with Longitudinal Support
+#  * Bosch CAN-FD
+#    * Bosch CAN-FD with Longitudinal Support
 
 
 class HondaButtonEnableBase(common.CarSafetyTest):
@@ -562,7 +564,7 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
 
 
 class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
-  """Base class for CANFD Honda Bosch"""
+  """Base class for CAN-FD Honda Bosch"""
   PT_BUS = 0
   STEER_BUS = 0
   BUTTONS_BUS = 0
@@ -578,7 +580,7 @@ class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
 
 class TestHondaBoschCANFDSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBase):
   """
-    Covers the Honda Bosch CANFD safety mode with stock longitudinal
+    Covers the Honda Bosch CAN-FD safety mode with stock longitudinal
   """
 
   def setUp(self):
@@ -589,12 +591,31 @@ class TestHondaBoschCANFDSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBas
 
 class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBase, TestHondaBoschAltBrakeSafetyBase):
   """
-    Covers the Honda Bosch CANFD safety mode with stock longitudinal and an alternate brake message
+    Covers the Honda Bosch CAN-FD safety mode with stock longitudinal and an alternate brake message
   """
 
   def setUp(self):
     super().setUp()
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.ALT_BRAKE)
+    self.safety.init_tests()
+
+
+class TestHondaBoschCANFDLongSafety(TestHondaBoschLongSafety, TestHondaBoschCANFDSafetyBase):
+  """
+    Covers the Honda Bosch CAN-FD safety mode with longitudinal control
+  """
+
+  PT_BUS = 0
+  STEER_BUS = 0
+  BUTTONS_BUS = 0
+
+  TX_MSGS = [[0xE4, 0], [0x1DF, 0],  [0x1EF, 0], [0x30C, 0], [0x33D, 0],  [0x39F, 0], [0x18DAB0F1, 0]]
+  FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x33D]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x33D)}  # STEERING_CONTROL / LKAS_HUD
+
+  def setUp(self):
+    super().setUp()
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.BOSCH_LONG)
     self.safety.init_tests()
 
 
