@@ -281,7 +281,7 @@ BO_ 559 TRACK_B_15: 6 XXX
  SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
 
 CM_ SG_ 291 RADAR_STATUS "Goes to 0 when radar is initializing, or car is at a standstill in non-US cars. Goes to 3 when INVALID_COUNTER is >= 2659 and throws dirty radar disable alert, or ACC is in non-adaptive mode.";
-CM_ SG_ 291 INVALID_COUNTER "Observed to rise when car is moving and radar is obstructed (object, snow, rain). Drops when obstruction is removed. Baseline is not the same across cars.";
+CM_ SG_ 291 INVALID_COUNTER "Unit unknown. Observed to rise when car is moving and radar is obstructed (object, snow, rain). Drops when obstruction is removed. Baseline is not the same across cars.";
 CM_ SG_ 291 RADAR_PRE_FAULT "Goes to 3 when INVALID_COUNTER is >= 1358.";
 
 VAL_ 291 RADAR_STATUS 0 "no points" 1 "ok" 3 "fault";
