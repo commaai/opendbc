@@ -44,10 +44,13 @@ BO_ 16 SAS0: 8 SAS
  SG_ SteeringAngle : 53|14@0+ (0.0445,0) [0|65535] "degrees" XXX
 
 BO_ 32 AccPedal: 8 XXX
- SG_ AccPedal : 17|10@0+ (0.1,0) [0|100.0] "%" XXX
+ SG_ AccPedal : 17|10@0+ (0.1,0) [0|102.3] "%" XXX
 
 BO_ 81 FSM0: 8 FSM
- SG_ ACCStatus : 18|3@0+ (1,0) [0|7] "" XXX
+ SG_ ACC_FrontCar : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Available : 17|1@0+ (1,0) [0|7] "" XXX
+ SG_ ACC_Enabled : 18|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_BrakeAlert : 27|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 277 NEW_MSG_7: 8 XXX
  SG_ NEW_SIGNAL_1 : 39|16@0+ (1,0) [0|65535] "" XXX
@@ -125,8 +128,8 @@ BO_ 565 wheelspeed0: 8 BCM
 
 BO_ 582 PSCM1: 8 PSCM
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ SteeringWheelRateOfChange : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1464.8) [0|65535] "deg" XXX
+ SG_ EPSTorque : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1465) [0|65535] "deg" XXX
  SG_ LKATorque : 35|12@0+ (1,-2000) [0|65535] "" XXX
  SG_ byte4 : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ LKAActive : 55|8@0+ (1,0) [0|255] "" XXX
@@ -134,6 +137,13 @@ BO_ 582 PSCM1: 8 PSCM
 
 BO_ 608 FSM1: 8 FSM
  SG_ ACC_Distance : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_3 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_4 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_5 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_6 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_7 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 609 fromWhere: 8 XXX
  SG_ COUNTER : 3|4@0+ (1,0) [0|15] "" XXX
@@ -155,10 +165,16 @@ BO_ 612 Accessories_03: 8 XXX
 
 BO_ 624 FSM3: 8 FSM
  SG_ ACC_Standstill : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ Byte_02 : 1|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Check : 2|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_AccelDecel : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ ACC_Some : 17|10@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_01 : 7|5@0+ (1,0) [0|31] "" XXX
+ SG_ ACC_AccelerationRequest : 15|8@0+ (0.04,-5.04) [0|255] "" XXX
+ SG_ Byte_2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_3 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_4 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_5 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_6 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ Byte_7 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 648 BrakePedal: 8 XXX
  SG_ Counter : 0|3@1+ (1,0) [0|6] "" XXX
@@ -266,7 +282,7 @@ BO_ 2015 diagGlobalReq: 8 XXX
 
 CM_ SG_ 16 SteeringDirection "0 = CCW, 1=CW (turning left or right of center)";
 CM_ SG_ 16 SteeringRateOfChange "Rate of change? Torque?";
-CM_ SG_ 81 ACCStatus "0=Acc Unavailable, 1=???, 2=Acc Ready, 3,4=???, 6= Acc Active, 7=Acc active tracking object (probably)";
+CM_ SG_ 81 ACC_Available "0=Acc Unavailable, 1=???, 2=Acc Ready, 3,4=???, 6= Acc Active, 7=Acc active tracking object (probably)";
 CM_ SG_ 295 ACCMinusBtnInv "Active zero when button pressed.";
 CM_ SG_ 295 TimeGapIncreaseBtnInv "Active zero when button pressed.";
 CM_ SG_ 295 TimeGapDecreaseBtnInv "Active zero when button pressed.";
@@ -283,15 +299,13 @@ CM_ SG_ 298 NEW_SIGNAL_4 "related to gas pedal";
 CM_ SG_ 298 NEW_SIGNAL_5 "related to ACCStatus";
 CM_ SG_ 298 NEW_SIGNAL_6 "went high at same time as ACCStatus >= 2";
 CM_ SG_ 298 BrakePressed "driver";
-CM_ SG_ 298 EngineRpm "Might be engine rpm. But behaves a bit weird.";
+CM_ SG_ 298 EngineRpm "Might be engine rpm. But behaves abit weird.";
 CM_ SG_ 582 byte0 "0=CCW, 1=CW, bit 2,";
-CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel? Torque?";
+CM_ SG_ 582 EPSTorque "Some rate of change for steering wheel? Torque?";
 CM_ SG_ 582 byte4 "High nibble";
 CM_ SG_ 582 LKAActive "Bit 1, 1 When LKA Active, Bit 3, 1 When denying?";
 CM_ SG_ 608 ACC_Distance "Seems to track distance, or speed of vehicle in front.";
 CM_ SG_ 610 SET_X_22 "0x20 Heartbeat, VEgo <58kph = 0x03, VEgo >65kph = 0x04, 0x05";
-CM_ SG_ 624 ACC_AccelDecel "Might be some acc speed, moved a bit after activating acc";
-CM_ SG_ 624 ACC_Some "Jumps to life after activating ACC, 0 when not active";
 CM_ SG_ 648 Counter "counts 0 to 6";
 CM_ SG_ 1021 TSR_Speed "Traffic Sign Recognition speed";
 CM_ SG_ 1039 TurnSignal "0 = Nothing, 1= Left, 3=Right";

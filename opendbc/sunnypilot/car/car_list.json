@@ -4477,5 +4477,17 @@
       "2023"
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Volvo V60": {
+    "platform": "VOLVO_V60",
+    "make": "Volvo",
+    "brand": "volvo",
+    "model": "V60",
+    "year": [
+      "2015",
+      "2016",
+      "2017"
+    ],
+    "package": "Adaptive Cruise Control & Lane Keeping Aid"
   }
 }
