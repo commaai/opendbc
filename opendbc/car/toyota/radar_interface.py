@@ -61,7 +61,7 @@ class RadarInterface(RadarInterfaceBase):
     if not self.rcp.can_valid:
       ret.errors.canError = True
 
-    if self.rcp.vl['STATUS_MSG']['RADAR_STATUS'] != 1:
+    if self.rcp.vl['STATUS_MSG']['RADAR_STATUS'] != 1 or self.rcp.vl['STATUS_MSG']['RADAR_PRE_FAULT'] != 0:
       ret.errors.radarUnavailableTemporary = True
 
     for ii in sorted(updated_messages):
