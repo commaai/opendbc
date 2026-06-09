@@ -238,7 +238,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 }
 
 // Safety checks for curvature-based steering commands
-bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
+bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
   static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
   // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
@@ -246,6 +246,8 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
 
   const float fudged_speed = SAFETY_MAX((vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0, 1.0);
   bool violation = false;
+
+  speed_mismatch_check((float)vehicle_speed_2.values[0] / VEHICLE_SPEED_FACTOR);
 
   if (controls_allowed && steer_control_enabled) {
     // *** absolute curvature cap ***
@@ -282,14 +284,21 @@ bool steer_curvature_cmd_checks(int desired_curvature, bool steer_control_enable
     violation |= desired_curvature != 0;
   }
 
-  // No curvature control allowed when controls are not allowed
-  if (!controls_allowed) {
-    violation |= steer_control_enabled;
+  // *** steer power check ***
+  // allow power winddown after disengage to prevent EPS fault
+  if (limits.max_steer_power != 0) {
+    violation |= safety_max_limit_check(steer_power, limits.max_steer_power, 0);
+    violation |= (steer_power != 0) && !steer_control_enabled;
+    violation |= !controls_allowed && (steer_power != 0) && (steer_power >= curvature_state.steer_power_last);
+    curvature_state.steer_power_last = steer_power;
+  } else {
+    // No curvature control allowed when controls are not allowed
+    violation |= !controls_allowed && steer_control_enabled;
   }
 
-  // reset to zero if either controls is not allowed or there's a violation
+  // reset to zero or measured curvature depending on EPS expectation
   if (violation || !controls_allowed) {
-    curvature_state.desired_last = 0;
+    curvature_state.desired_last = limits.inactive_curvature_is_zero ? 0 : curvature_state.meas.values[0];
   }
 
   return violation;

@@ -92,6 +92,8 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
   .frequency = 20,                    // Hz
   .max_curvature_error = 100,         // 0.002 rad/m * curvature_to_can
   .curvature_error_min_speed = 10.0,  // m/s
+  .max_steer_power = 0,               // disabled, Ford has no steed power signal
+  .inactive_curvature_is_zero = true, // Ford EPS expects curvature=0 when inactive
 };
 
 static void ford_rx_hook(const CANPacket_t *msg) {
@@ -113,7 +115,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
       // Disable controls if speeds from ABS and PCM ECUs are too far apart.
       // Signal: Veh_V_ActlEng
       float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
-      speed_mismatch_check(filtered_pcm_speed);
+      UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
     }
 
     // Update vehicle yaw rate
@@ -233,7 +235,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
 
     // Check angle error and steer_control_enabled
     int desired_curvature = raw_curvature - FORD_INACTIVE_CURVATURE;  // /FORD_STEERING_LIMITS.curvature_to_can to get real curvature
-    violation |= steer_curvature_cmd_checks(desired_curvature, steer_control_enabled, FORD_STEERING_LIMITS);
+    violation |= steer_curvature_cmd_checks(desired_curvature, 0, steer_control_enabled, FORD_STEERING_LIMITS);
 
     if (violation) {
       tx = false;
@@ -254,7 +256,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
 
     // Check angle error and steer_control_enabled
     int desired_curvature = raw_curvature - FORD_INACTIVE_CURVATURE;  // /FORD_STEERING_LIMITS.curvature_to_can to get real curvature
-    violation |= steer_curvature_cmd_checks(desired_curvature, steer_control_enabled, FORD_STEERING_LIMITS);
+    violation |= steer_curvature_cmd_checks(desired_curvature, 0, steer_control_enabled, FORD_STEERING_LIMITS);
 
     if (violation) {
       tx = false;
