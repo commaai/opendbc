@@ -31,7 +31,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workflow: tests.yml
         workflow_conclusion: ''
-        pr: ${{ github.event.number }}
+        commit: ${{ github.event.pull_request.head.sha }}
         name: car_diff_${{ github.event.number }}
         path: .
         allow_forks: true
