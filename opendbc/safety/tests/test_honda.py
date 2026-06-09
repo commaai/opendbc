@@ -561,6 +561,31 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
     pass
 
 
+class TestHondaBoschRadarlessLongNoEngineDataMsgSafety(TestHondaBoschRadarlessLongSafety):
+  """
+    Covers the Honda Bosch Radarless safety mode with longitudinal control and no engine_data message
+  """
+  def setUp(self):
+    super().setUp()
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch,
+                                 HondaSafetyFlags.RADARLESS | HondaSafetyFlags.BOSCH_LONG | HondaSafetyFlags.NO_ENGINE_DATA_MSG)
+    self.safety.init_tests()
+    self._abs_tick = 0
+
+  # ABS_SENSOR values increase with movement.  Change in sum of units per message approximates units of XMISSION_SPEED.
+  def _speed_msg(self, speed):
+    self._abs_tick += speed
+    values = {
+      "ABS_SENSOR_FL": (self._abs_tick // 4) % 256,
+      "ABS_SENSOR_FR": (self._abs_tick // 4) % 256,
+      "ABS_SENSOR_RL": (self._abs_tick // 4) % 256,
+      "ABS_SENSOR_RR": ((self._abs_tick // 4) + (self._abs_tick % 4)) % 256,
+      "COUNTER": self.cnt_speed % 4,
+    }
+    self.__class__.cnt_speed += 1
+    return self.packer.make_can_msg_safety("ABS_SENSOR", self.PT_BUS, values)
+
+
 class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
   """Base class for CANFD Honda Bosch"""
   PT_BUS = 0
