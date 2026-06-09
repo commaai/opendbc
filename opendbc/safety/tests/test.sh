@@ -25,7 +25,11 @@ fi
 if [ "$1" == "--report" ]; then
   mkdir -p coverage-out
   gcovr -r ../ --gcov-executable "$GCOV_EXEC" --html-nested coverage-out/index.html
-  sensible-browser coverage-out/index.html
+  if [ "$(uname)" = "Darwin" ]; then
+    open coverage-out/index.html
+  else
+    sensible-browser coverage-out/index.html
+  fi
 fi
 
 # test coverage
