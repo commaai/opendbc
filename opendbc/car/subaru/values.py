@@ -12,9 +12,9 @@ Ecu = CarParams.Ecu
 
 class CarControllerParams:
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    100,
-    ([0., 15., 15.], [5., .8, .8]),
-    ([0., 15., 15.], [5., .4, 0.4]),
+    300,
+    ([0., 5., 15.], [5., .75, .4]),
+    ([0., 5., 15.], [5., 1.5, .8]),
   )
 
   def __init__(self, CP):

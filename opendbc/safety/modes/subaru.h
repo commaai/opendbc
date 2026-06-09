@@ -160,12 +160,12 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     .max_angle = 500*100,
     .angle_deg_to_can = 100.,
     .angle_rate_up_lookup = {
-      {0., 15., 15.},
-      {5.,  .8,  .8}
+      {0.,  5., 15.},
+      {5., .75, .4}
     },
     .angle_rate_down_lookup = {
-      {0., 15., 15.},
-      {5.,  .4,  .4}
+      {0.,  5., 15.},
+      {5., 1.5, .8}
     },
   };
 

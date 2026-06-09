@@ -180,9 +180,10 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
 
   STEER_ANGLE_MAX = 500
   STEER_ANGLE_TEST_MAX = 550
-  ANGLE_RATE_BP = [0, 15, 15]
-  ANGLE_RATE_UP = [5, 0.15, 0.15]
-  ANGLE_RATE_DOWN = [5, 0.4, 0.4]
+
+  ANGLE_RATE_BP = [0, 5, 15]
+  ANGLE_RATE_UP = [5., .75, .4]
+  ANGLE_RATE_DOWN = [5., 1.5, .8]
 
   def _angle_cmd_msg(self, angle, enabled=1):
     values = {"LKAS_Output": angle, "LKAS_Request": enabled}
