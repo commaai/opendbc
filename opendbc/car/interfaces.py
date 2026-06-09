@@ -364,7 +364,12 @@ class CarControllerBase(ABC):
   def __init__(self, dbc_names: dict[StrEnum, str], CP: structs.CarParams):
     self.CP = CP
     self.frame = 0
+    self.cancel_counter = 0  # delays cancellation for some brands, read reasoning in respective files
     self.secoc_key: bytes = b"00" * 16
+
+  def cancel_after_delay(self, cancel: bool, delay_frames: int) -> bool:
+    self.cancel_counter = self.cancel_counter + 1 if cancel else 0
+    return self.cancel_counter > delay_frames
 
   @abstractmethod
   def update(self, CC: structs.CarControl, CS: CarStateBase, now_nanos: int) -> tuple[structs.CarControl.Actuators, list[CanData]]:
