@@ -67,6 +67,19 @@ class TestVolvoSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"VehicleSpeed": 0 if speed <= self.STANDSTILL_THRESHOLD else 10}
     return self.packer.make_can_msg_safety("VehicleSpeed1", 0, values)
 
+  def test_fwd_hook_blocks_fsm_when_controls_allowed(self):
+    # When controls are allowed and gas is not pressed, OP relays FSM1/FSM3 itself,
+    # so stock cam→main messages for those addrs must be blocked.
+    for controls_allowed in (True, False):
+      for gas_pressed in (True, False):
+        self.safety.set_controls_allowed(controls_allowed)
+        self._rx(self._user_gas_msg(gas_pressed))
+        for addr in (0x260, 0x270):  # VOLVO_EUCD_FSM1, VOLVO_EUCD_FSM3
+          result = self.safety.safety_fwd_hook(self.VOLVO_CAM_BUS, addr)
+          should_block = controls_allowed and not gas_pressed
+          expected = -1 if should_block else self.VOLVO_MAIN_BUS
+          self.assertEqual(expected, result, f"{addr=:#x} {controls_allowed=} {gas_pressed=}")
+
   # Volvo gates the angle command on engagement, not on the LKASteerDirection flag (which
   # drops to NONE mid-control during the anti-windup pause), and uses inactive_angle_is_zero:
   # while engaged the rate-limited angle is allowed, while disengaged only a zero angle passes.
