@@ -94,12 +94,8 @@ class CarState(CarStateBase):
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
 
     else:
-      if self.CP.flags & SubaruFlags.HYBRID:
-        ret.cruiseState.enabled = cp_cam.vl["ES_DashStatus"]['Cruise_Activated'] != 0
-        ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
-      else:
-        ret.cruiseState.enabled = cp_cruise.vl["CruiseControl"]["Cruise_Activated"] != 0
-        ret.cruiseState.available = cp_cruise.vl["CruiseControl"]["Cruise_On"] != 0
+      ret.cruiseState.enabled = cp_cruise.vl["CruiseControl"]["Cruise_Activated"] != 0
+      ret.cruiseState.available = cp_cruise.vl["CruiseControl"]["Cruise_On"] != 0
 
     ret.cruiseState.speed = cp_cam.vl["ES_DashStatus"]["Cruise_Set_Speed"] * CV.KPH_TO_MS
 
