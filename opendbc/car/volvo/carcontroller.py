@@ -1,11 +1,11 @@
 from opendbc.can import CANPacker
 from openpilot.common.params import Params
 from openpilot.common.realtime import DT_CTRL
-from opendbc.car import Bus, structs
+from opendbc.car import Bus
 from opendbc.car.lateral import apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volvo import volvocan
-from opendbc.car.volvo.values import CANBUS, CarControllerParams, SteerDirection
+from opendbc.car.volvo.values import CarControllerParams, SteerDirection
 from opendbc.sunnypilot.car.volvo.icbm import IntelligentCruiseButtonManagementInterface
 
 
@@ -58,8 +58,10 @@ class CarController(CarControllerBase, IntelligentCruiseButtonManagementInterfac
     # run at 50hz
     if self.frame % 2 == 0:
       if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed:
-        #apply_steer = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_steer_prev, CS.out.vEgoRaw, CarControllerParams)
-        apply_steer = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_steer_prev, CS.out.vEgoRaw, CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
+        apply_steer = apply_std_steer_angle_limits(
+          actuators.steeringAngleDeg, self.apply_steer_prev, CS.out.vEgoRaw,
+          CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS
+        )
         apply_steer_dir = SteerDirection.LEFT if apply_steer > 0 else SteerDirection.RIGHT
 
         error = CS.out.steeringAngleDeg - apply_steer

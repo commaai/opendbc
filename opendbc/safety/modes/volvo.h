@@ -116,7 +116,12 @@ static bool volvo_tx_hook(const CANPacket_t *msg) {
   // check_relay=false lets stock FSM3 flow cam->main; OP overlays only when long-active.
   if (addr == VOLVO_EUCD_FSM3) {
     int raw_accel = (int)GET_BYTES(msg, 1, 1) - 126;
-    if (!controls_allowed || longitudinal_accel_checks(raw_accel, VOLVO_LONG_LIMITS)) {
+    // When controls are not allowed, only the inactive (neutral) accel is permitted so OP
+    // can relay stock FSM3 at 50Hz without faulting the ECU. When controls are allowed,
+    // enforce the standard accel range.
+    bool accel_violation = controls_allowed ? longitudinal_accel_checks(raw_accel, VOLVO_LONG_LIMITS)
+                                             : (raw_accel != VOLVO_LONG_LIMITS.inactive_accel);
+    if (accel_violation) {
       violation = true;
     }
   }

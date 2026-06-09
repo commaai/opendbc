@@ -4,7 +4,7 @@ from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.volvo.carcontroller import CarController
 from opendbc.car.volvo.carstate import CarState
 from opendbc.car.volvo.radar_interface import RadarInterface
-from opendbc.car.volvo.values import CAR, DBC
+from opendbc.car.volvo.values import DBC
 
 #ButtonType = car.CarState.ButtonEvent.Type
 #EventName = car.CarEvent.EventName

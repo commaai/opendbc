@@ -13,7 +13,6 @@ def create_button_msg(packer, resume=False, cancel=False, set_plus=False, minus=
   return packer.make_can_msg("CCButtons", bus, msg)
 
 
-
 def create_lkas_state_msg(packer, steering_angle: float, stock_values: dict):
   # zero LKATorque/LKAActive to prevent stock LKA interference
   msg = {

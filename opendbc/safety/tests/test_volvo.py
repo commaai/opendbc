@@ -67,6 +67,18 @@ class TestVolvoSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"VehicleSpeed": 0 if speed <= self.STANDSTILL_THRESHOLD else 10}
     return self.packer.make_can_msg_safety("VehicleSpeed1", 0, values)
 
+  def _longitudinal_cmd_msg(self, accel: float):
+    values = {"ACC_AccelerationRequest": accel, "ACC_Check": 0}
+    return self.packer.make_can_msg_safety("FSM3", self.VOLVO_MAIN_BUS, values)
+
+  def test_longitudinal_relay_when_controls_not_allowed(self):
+    # OP relays FSM3 at 50Hz even when controls are not allowed (to keep the ECU alive).
+    # The safety hook must allow inactive accel (0.0) and block any non-zero accel.
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self._tx(self._longitudinal_cmd_msg(0.0)))    # neutral — must pass
+    self.assertFalse(self._tx(self._longitudinal_cmd_msg(1.0)))   # any accel — must be blocked
+    self.assertFalse(self._tx(self._longitudinal_cmd_msg(-1.0)))  # any decel — must be blocked
+
   def test_fwd_hook_blocks_fsm_when_controls_allowed(self):
     # When controls are allowed and gas is not pressed, OP relays FSM1/FSM3 itself,
     # so stock cam→main messages for those addrs must be blocked.
