@@ -91,6 +91,11 @@ int get_desired_angle_last();
 void set_angle_meas(int min, int max);
 int get_angle_meas_min(void);
 int get_angle_meas_max(void);
+void set_desired_curvature_last(int t);
+int get_desired_curvature_last();
+void set_curvature_meas(int min, int max);
+int get_curvature_meas_min(void);
+int get_curvature_meas_max(void);
 
 bool get_cruise_engaged_prev(void);
 void set_cruise_engaged_prev(bool engaged);
@@ -110,6 +115,10 @@ int get_honda_hw(void);
 
 void mutation_set_active_mutant(int id);
 int mutation_get_active_mutant(void);
+
+void ignition_can_hook(const CANPacket_t *msg);
+bool get_ignition_can(void);
+void set_ignition_can(bool c);
 """)
 
 class LibSafety:
