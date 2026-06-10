@@ -271,6 +271,11 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Pilot 2023-25", "All")],
     CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=17.5),
   )
+  # Mid-Model Refresh has more powerful EPS
+  HONDA_PILOT_4G_MMR = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Honda Pilot 2026", "All")],
+    CarSpecs(mass=4528 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=19.2),
+  )
   HONDA_PASSPORT_4G = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Honda Passport 2026", "All")],
     CarSpecs(mass=4620 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=18.5),
@@ -406,6 +411,7 @@ STEER_THRESHOLD = {
   CAR.HONDA_CRV_EU: 400,
   CAR.HONDA_ACCORD_11G: 600,
   CAR.HONDA_PILOT_4G: 600,
+  CAR.HONDA_PILOT_4G_MMR: 600,
   CAR.HONDA_PASSPORT_4G: 600,
   CAR.ACURA_MDX_4G_MMR: 600,
   CAR.HONDA_CRV_6G: 600,
