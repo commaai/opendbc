@@ -355,6 +355,8 @@ struct CarControl {
   angularVelocity @14 :List(Float32);
   currentCurvature @17 :Float32;  # From vehicle model
 
+  driverMonitoringEscalation @18 :Bool; # trigger the car's stock driver monitoring escalation
+
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
 
@@ -639,8 +641,7 @@ struct CarParams {
   enum SteerControlType {
     torque @0;
     angle @1;
-
-    curvatureDEPRECATED @2;
+    curvature @2;
   }
 
   enum TransmissionType {
