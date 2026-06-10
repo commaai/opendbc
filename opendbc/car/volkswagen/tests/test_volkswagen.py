@@ -50,8 +50,17 @@ class TestVolkswagenPlatformConfigs(unittest.TestCase):
         for comp in CAR:
           if platform == comp:
             continue
-          assert set() == platform.config.chassis_codes & comp.config.chassis_codes, \
-                           f"Shared chassis codes: {comp}"
+
+          shared_chassis_codes = platform.config.chassis_codes & comp.config.chassis_codes
+          if len(shared_chassis_codes) == 0:
+            continue
+
+          platform_model_years = getattr(platform.config, "model_years", set())
+          comp_model_years = getattr(comp.config, "model_years", set())
+          if platform_model_years and comp_model_years and platform_model_years.isdisjoint(comp_model_years):
+            continue
+
+          assert set() == shared_chassis_codes, f"Shared chassis codes: {comp}"
 
   def test_custom_fuzzy_fingerprinting(self):
     all_radar_fw = list({fw for ecus in FW_VERSIONS.values() for fw in ecus[Ecu.fwdRadar, 0x757, None]})
@@ -60,18 +69,23 @@ class TestVolkswagenPlatformConfigs(unittest.TestCase):
       with self.subTest(platform=platform.name):
         for wmi in WMI:
           for chassis_code in platform.config.chassis_codes | {"00"}:
-            vin = ["0"] * 17
-            vin[0:3] = wmi
-            vin[6:8] = chassis_code
-            vin = "".join(vin)
+            platform_model_years = getattr(platform.config, "model_years", set())
+            model_years = platform_model_years if platform_model_years else {"0"}
+            for model_year in model_years | {"0"}:
+              vin = ["0"] * 17
+              vin[0:3] = wmi
+              vin[6:8] = chassis_code
+              vin[9] = model_year
+              vin = "".join(vin)
 
-            # Check a few FW cases - expected, unexpected
-            for radar_fw in random.sample(all_radar_fw, 5) + [b'\xf1\x875Q0907572G \xf1\x890571', b'\xf1\x877H9907572AA\xf1\x890396']:
-              should_match = ((wmi in platform.config.wmis and chassis_code in platform.config.chassis_codes) and
-                              radar_fw in all_radar_fw)
+              # Check a few FW cases - expected, unexpected
+              for radar_fw in random.sample(all_radar_fw, 5) + [b'\xf1\x875Q0907572G \xf1\x890571', b'\xf1\x877H9907572AA\xf1\x890396']:
+                model_year_match = len(platform_model_years) == 0 or model_year in platform_model_years
+                should_match = ((wmi in platform.config.wmis and chassis_code in platform.config.chassis_codes and model_year_match) and
+                                radar_fw in all_radar_fw)
 
-              live_fws = {(0x757, None): [radar_fw]}
-              matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fws, vin, FW_VERSIONS)
+                live_fws = {(0x757, None): [radar_fw]}
+                matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fws, vin, FW_VERSIONS)
 
-              expected_matches = {platform} if should_match else set()
-              assert expected_matches == matches, "Bad match"
+                expected_matches = {platform} if should_match else set()
+                assert expected_matches == matches, "Bad match"

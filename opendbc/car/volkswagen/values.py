@@ -223,6 +223,7 @@ class VolkswagenFlags(IntFlag):
   PQ = 2
   MLB = 8
   MEB = 16
+  MEB_GEN2 = 512
 
 
 @dataclass
@@ -249,9 +250,12 @@ class VolkswagenMEBPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_meb', Bus.radar: 'vw_meb'})
   chassis_codes: set[str] = field(default_factory=set)
   wmis: set[WMI] = field(default_factory=set)
+  model_years: set[str] = field(default_factory=set)
 
   def init(self):
     self.flags |= VolkswagenFlags.MEB
+    if self.flags & VolkswagenFlags.MEB_GEN2:
+      self.dbc_dict = {Bus.pt: 'vw_meb_2024', Bus.radar: 'vw_meb_2024'}
 
 
 @dataclass
@@ -375,6 +379,18 @@ class CAR(Platforms):
     VolkswagenCarSpecs(mass=1397, wheelbase=2.62),
     chassis_codes={"5G", "AU", "BA", "BE"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
+  )
+  VOLKSWAGEN_ID3_MK2 = VolkswagenMEBPlatformConfig(
+    [
+      VWCarDocs("Volkswagen ID.3 2024-25"),
+      VWCarDocs("Volkswagen ID.3 2025 SAIC"),
+      VWCarDocs("Volkswagen MEB Gen 2 2024-25"),
+    ],
+    VolkswagenCarSpecs(mass=1935, wheelbase=2.77, steerRatio=15.6),
+    chassis_codes={"E1"},
+    wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_CAR, WMI.SAIC_VOLKSWAGEN},
+    model_years={"R", "S"},
+    flags=VolkswagenFlags.MEB_GEN2,
   )
   VOLKSWAGEN_ID4_MK1 = VolkswagenMEBPlatformConfig(
     [
@@ -583,9 +599,39 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   # Check the WMI and chassis code to determine the platform
   # https://www.clubvw.org.au/vwreference/vwvin
   vin_obj = Vin(vin)
-  chassis_code = vin_obj.vds[3:5]
+  vin_wmi = vin_obj.wmi if len(vin_obj.wmi) == 3 else None
+  chassis_code = vin_obj.vds[3:5] if len(vin_obj.vds) >= 5 else None
+  model_year_code = vin_obj.vis[0] if len(vin_obj.vis) > 0 else None
+  vin_available = vin_wmi is not None and chassis_code is not None
+
+  fallback_ecus = CHECK_FUZZY_ECUS | {Ecu.fwdCamera, Ecu.adas, Ecu.cornerRadar, Ecu.parkingAdas}
+  fallback_optional_ecus = fallback_ecus - CHECK_FUZZY_ECUS
 
   for platform in CAR:
+    if not vin_available:
+      matched_ecus = set()
+      optional_ecu_seen = False
+      for ecu, versions in offline_fw_versions[platform].items():
+        if ecu[0] not in fallback_ecus:
+          continue
+
+        found_versions = live_fw_versions.get(ecu[1:], [])
+        if len(found_versions) == 0:
+          continue
+
+        if ecu[0] in fallback_optional_ecus:
+          optional_ecu_seen = True
+
+        if any(found_version in versions for found_version in found_versions):
+          matched_ecus.add(ecu[0])
+        else:
+          matched_ecus = set()
+          break
+
+      if Ecu.fwdRadar in matched_ecus and (len(matched_ecus) >= 2 or not optional_ecu_seen):
+        candidates.add(platform)
+      continue
+
     valid_ecus = set()
     for ecu in offline_fw_versions[platform]:
       addr = ecu[1:]
@@ -603,7 +649,10 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
     if valid_ecus != CHECK_FUZZY_ECUS:
       continue
 
-    if vin_obj.wmi in platform.config.wmis and chassis_code in platform.config.chassis_codes:
+    model_years = getattr(platform.config, "model_years", set())
+    if vin_wmi in platform.config.wmis and chassis_code in platform.config.chassis_codes:
+      if len(model_years) > 0 and model_year_code is not None and model_year_code not in model_years:
+        continue
       candidates.add(platform)
 
   return {str(c) for c in candidates}
@@ -629,13 +678,14 @@ VOLKSWAGEN_VERSION_REQUEST_MULTI = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFI
 VOLKSWAGEN_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40])
 
 VOLKSWAGEN_RX_OFFSET = 0x6a
+VOLKSWAGEN_RX_OFFSET_CANFD = 0x20000
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[request for bus, obd_multiplexing in [(1, True), (1, False), (0, False)] for request in [
     Request(
       [VOLKSWAGEN_VERSION_REQUEST_MULTI],
       [VOLKSWAGEN_VERSION_RESPONSE],
-      whitelist_ecus=[Ecu.srs, Ecu.eps, Ecu.fwdRadar, Ecu.fwdCamera],
+      whitelist_ecus=[Ecu.srs, Ecu.eps, Ecu.fwdRadar, Ecu.fwdCamera, Ecu.parkingAdas, Ecu.cornerRadar, Ecu.adas],
       rx_offset=VOLKSWAGEN_RX_OFFSET,
       bus=bus,
       obd_multiplexing=obd_multiplexing,
@@ -647,9 +697,20 @@ FW_QUERY_CONFIG = FwQueryConfig(
       bus=bus,
       obd_multiplexing=obd_multiplexing,
     ),
+    Request(
+      [VOLKSWAGEN_VERSION_REQUEST_MULTI],
+      [VOLKSWAGEN_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.engine, Ecu.inverter],
+      rx_offset=VOLKSWAGEN_RX_OFFSET_CANFD,
+      bus=bus,
+      obd_multiplexing=obd_multiplexing,
+    ),
   ]],
   non_essential_ecus={Ecu.eps: list(CAR)},
-  extra_ecus=[(Ecu.fwdCamera, 0x74f, None)],
+  extra_ecus=[(Ecu.fwdCamera, 0x74f, None),
+              (Ecu.parkingAdas, 0x70a, None),
+              (Ecu.cornerRadar, 0x74e, None),
+              (Ecu.adas, 0x769, None)],
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
