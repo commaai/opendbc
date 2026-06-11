@@ -67,7 +67,7 @@ class RadarInterface(RadarInterfaceBase):
         cpt = self.rcp.vl[ii]
 
         score = self.rcp.vl[ii+16]['SCORE']
-        # print (ii, score, cpt['VALID'], cpt['LONG_DIST'], cpt['LAT_DIST'])
+        # print(ii, score, cpt['VALID'], cpt['LONG_DIST'], cpt['LAT_DIST'])
 
         # radar point only valid if it's a valid measurement and score is above 50
         if cpt['VALID'] or (score > 50 and cpt['LONG_DIST'] < 255):
