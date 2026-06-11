@@ -2,11 +2,13 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.volkswagen.carcontroller import CarController
 from opendbc.car.volkswagen.carstate import CarState
+from opendbc.car.volkswagen.radar_interface import RadarInterface
 from opendbc.car.volkswagen.values import CanBus, CAR, NetworkLocation, TransmissionType, VolkswagenFlags, VolkswagenSafetyFlags
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+  RadarInterface = RadarInterface
 
   DRIVABLE_GEARS = (structs.CarState.GearShifter.eco, structs.CarState.GearShifter.sport,
                     structs.CarState.GearShifter.manumatic)
@@ -58,6 +60,9 @@ class CarInterface(CarInterfaceBase):
         ret.networkLocation = NetworkLocation.gateway
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
+
+      if ret.networkLocation == NetworkLocation.gateway:
+        ret.radarUnavailable = 0x24F not in fingerprint[2]  # MEB_Distance_01
 
       ret.enableBsm = 0x24C in fingerprint[0]  # MEB_Side_Assist_01
 
