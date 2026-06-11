@@ -113,6 +113,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
     .max_accel = 200,
     .min_accel = -350,
     .inactive_accel = 0,
+    .zero_accel = 0,
   };
 
   bool tx = true;
