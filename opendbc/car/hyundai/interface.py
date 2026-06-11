@@ -148,10 +148,8 @@ class CarInterface(CarInterfaceBase):
     if candidate == CAR.KIA_OPTIMA_G4_FL:
       ret.steerActuatorDelay = 0.2
 
-    # Dashcam cars are missing a test route, or otherwise need validation
-    # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
     if candidate in (CAR.KIA_OPTIMA_H,):
-      ret.dashcamOnly = True
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAN_LEGACY_SCC12_SKIP_CHECKSUM.value
 
     return ret
 
