@@ -4,11 +4,12 @@ import unittest
 from opendbc.safety.tests.libsafety.libsafety_py import _build_libsafety
 
 
-class TestReleaseBuild(unittest.TestCase):
-  def test_build_without_allow_debug(self):
-    # panda's release firmware builds the safety code without ALLOW_DEBUG
+class TestBuild(unittest.TestCase):
+  def test_development_build(self):
+    _build_libsafety(release=False)
+
+  def test_release_build(self):
     _build_libsafety(release=True)
-    assert False
 
 
 if __name__ == "__main__":
