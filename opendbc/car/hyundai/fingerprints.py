@@ -353,6 +353,7 @@ FW_VERSIONS = {
   },
   CAR.HYUNDAI_CUSTIN_1ST_GEN: {
     (Ecu.abs, 0x7d1, None): [
+      b'\xf1\x00KU ESC \x01 100$\x06\x03 58910-O3250',
       b'\xf1\x00KU ESC \x01 101!\x02\x03 58910-O3200',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
@@ -360,9 +361,11 @@ FW_VERSIONS = {
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00KU  MDPS C 1.00 1.01 56310/O3100 4KUCC101',
+      b'\xf1\x00KU  MDPS C 1.00 1.01 56310O3100  4KUCC101',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00KU2 MFC  AT CHN LHD 1.00 1.02 99211-O3000 220923',
+      b'\xf1\x00KU2 MFC  AT CHN LHD 1.00 1.04 99211-O3000 231129',
     ],
   },
   CAR.KIA_STINGER: {
