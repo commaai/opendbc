@@ -216,9 +216,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
   def test_user_brake_quality_flag(self):
-    for quality_flag in (True, False):
-      msg = self._user_brake_msg(True, quality_flag=quality_flag)
-      self.assertEqual(quality_flag, self._rx(msg))
+    # ESP_driverBrakeApply is valid only when not NotInit_orOff (0) and not Faulty_SNA (3)
+    for status, valid in ((1, True), (2, True), (0, False), (3, False)):
+      msg = self.packer.make_can_msg_safety("ESP_status", 0, {"ESP_driverBrakeApply": status})
+      self.assertEqual(valid, self._rx(msg))
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control

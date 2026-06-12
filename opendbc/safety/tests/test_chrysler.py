@@ -41,6 +41,14 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
     values = {"SPEED_LEFT": speed, "SPEED_RIGHT": speed}
     return self.packer.make_can_msg_safety("SPEED_1", 0, values)
 
+  def test_vehicle_moving_single_side(self):
+    # Pacifica derives vehicle_moving from two speed sources; either one non-zero must count
+    if self.__class__ is not TestChryslerSafety:
+      raise unittest.SkipTest("Pacifica-only SPEED_1 sources")
+    for values in ({"SPEED_LEFT": 0, "SPEED_RIGHT": 100}, {"SPEED_LEFT": 100, "SPEED_RIGHT": 0}):
+      self._rx(self.packer.make_can_msg_safety("SPEED_1", 0, values))
+      self.assertTrue(self.safety.get_vehicle_moving())
+
   def _user_gas_msg(self, gas):
     values = {"Accelerator_Position": gas}
     return self.packer.make_can_msg_safety("ECM_5", 0, values)
