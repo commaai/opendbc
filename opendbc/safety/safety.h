@@ -322,7 +322,7 @@ void safety_tick(const safety_config *cfg) {
     // lag threshold is 1s: at the enforced 10Hz minimum frequency (see test_rx_check_frequency),
     // 10 missed messages equals 1s, and higher-frequency messages are even more conservative.
     // 2s of lag is worst case, since the function is called at 1Hz.
-    bool lagging = elapsed_time > (uint32_t)1e6;
+    bool lagging = elapsed_time > 1000000U;
     cfg->rx_checks[i].status.lagging = lagging;
     if (lagging) {
       controls_allowed = false;
