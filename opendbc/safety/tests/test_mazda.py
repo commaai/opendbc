@@ -109,6 +109,17 @@ class TestMazdaIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(0x20))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_wrong_length(self):
+    # ignition message must be 8 bytes long
+    self.safety.ignition_can_hook(make_msg(0, 0x9E, dat=bytes([0xC0])))
+    self.assertFalse(self.safety.get_ignition_can())
+
+    self.safety.ignition_can_hook(self._msg(0xC0))
+    self.assertTrue(self.safety.get_ignition_can())
+    # wrong-length 'off' message should be ignored
+    self.safety.ignition_can_hook(make_msg(0, 0x9E, dat=bytes([0x20])))
+    self.assertTrue(self.safety.get_ignition_can())
+
 
 if __name__ == "__main__":
   unittest.main()

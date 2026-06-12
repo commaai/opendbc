@@ -172,6 +172,16 @@ class TestRivianIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(3, 0))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_wrong_length(self):
+    # ignition message must be 8 bytes long
+    self.safety.ignition_can_hook(self._msg(0, 1))
+    self.safety.ignition_can_hook(self._msg(1, 1))
+    self.assertTrue(self.safety.get_ignition_can())
+    # wrong-length 'off' messages with consecutive counters should be ignored
+    self.safety.ignition_can_hook(common.make_msg(0, 0x152, dat=bytes([0, 2, 0, 0])))
+    self.safety.ignition_can_hook(common.make_msg(0, 0x152, dat=bytes([0, 3, 0, 0])))
+    self.assertTrue(self.safety.get_ignition_can())
+
 
 if __name__ == "__main__":
   unittest.main()

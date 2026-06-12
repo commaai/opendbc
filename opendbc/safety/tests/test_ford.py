@@ -160,6 +160,14 @@ class TestFordSafetyBase(common.CarSafetyTest):
     }
     return self.packer.make_can_msg_safety("EngBrakeData", 0, values)
 
+  def test_cruise_engaged_state_4(self):
+    # CcStat_D_Actl == 4 must also count as cruise engaged (not just 5)
+    self._rx(self._pcm_status_msg(False))
+    self.assertFalse(self.safety.get_controls_allowed())
+    values = {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": 4}
+    self._rx(self.packer.make_can_msg_safety("EngBrakeData", 0, values))
+    self.assertTrue(self.safety.get_controls_allowed())
+
   # LKAS command
   def _lkas_command_msg(self, action: int):
     values = {

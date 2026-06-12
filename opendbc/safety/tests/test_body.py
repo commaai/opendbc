@@ -53,7 +53,9 @@ class TestBody(common.SafetyTest):
     # 0xdeadfaceU allowed for CAN flashing mode
     self.assertTrue(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
+    self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x00\x00\x00\x00')))  # wrong second magic word
     self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
+    self.assertTrue(self._tx(common.make_msg(0, 0x1, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # full magic payload on always-allowed addr
 
 
 if __name__ == "__main__":

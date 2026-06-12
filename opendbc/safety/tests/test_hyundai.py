@@ -111,6 +111,13 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
 
+  def test_no_gas_from_wrong_powertrain_msg(self):
+    # E_EMS11 (0x371) is an rx alternative in all configs, but the hybrid gas signal
+    # on it must not set gas pressed unless the hybrid flag is set
+    values = {"CR_Vcu_AccPedDep_Pos": 100}
+    self._rx(self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum))
+    self.assertFalse(self.safety.get_gas_pressed_prev())
+
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
@@ -190,6 +197,10 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
     values = {"CR_Vcu_AccPedDep_Pos": gas}
     return self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum)
 
+  def test_no_gas_from_wrong_powertrain_msg(self):
+    # the hybrid gas signal on E_EMS11 is this config's gas signal
+    pass
+
 
 class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
   TX_MSGS = [[0x340, 0], [0x4F1, 0], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0], [0x38D, 0], [0x483, 0], [0x7D0, 0]]
@@ -237,6 +248,12 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
     self.assertFalse(self._tx(self._accel_msg(0, aeb_req=True)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_decel=1.0)))
 
+  def test_button_sends(self):
+    # CLU11 (0x4F1) button safety checks don't apply when longitudinal
+    self.safety.set_controls_allowed(0)
+    for btn in range(8):
+      self.assertTrue(self._tx(self._button_msg(btn, bus=self.BUTTONS_TX_BUS)))
+
 
 class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyundaiSafety):
   TX_MSGS = [[0x340, 0], [0x4F1, 2], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0]]
@@ -263,6 +280,12 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
     self.assertTrue(self._tx(self._accel_msg(0)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_req=True)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_decel=1.0)))
+
+  def test_button_sends(self):
+    # CLU11 (0x4F1) button safety checks don't apply when longitudinal, tx on bus 2 for camera SCC
+    self.safety.set_controls_allowed(0)
+    for btn in range(8):
+      self.assertTrue(self._tx(self._button_msg(btn, bus=2)))
 
   def test_tester_present_allowed(self):
     pass

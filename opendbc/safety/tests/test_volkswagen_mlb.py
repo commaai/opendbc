@@ -64,11 +64,11 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self.packer.make_can_msg_safety("LH_EPS_03", 0, values)
 
   # openpilot steering output torque
-  def _torque_cmd_msg(self, torque, steer_req=1):
+  def _torque_cmd_msg(self, torque, steer_req=1, hca_status=7):
     values = {"HCA_01_LM_Offset": abs(torque),
               "HCA_01_LM_OffSign": torque < 0,
               "HCA_01_Sendestatus": steer_req,
-              "HCA_01_Status_HCA": 7 if steer_req else 3}
+              "HCA_01_Status_HCA": hca_status if steer_req else 3}
     return self.packer.make_can_msg_safety("HCA_01", 0, values)
 
   # Cruise control buttons
@@ -108,6 +108,14 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
+  def test_torque_cmd_enable_variants(self):
+    # The EPS rack accepts either 5 or 7 for an enabled status, with different low speed tuning behavior
+    self.safety.set_controls_allowed(1)
+    for enabled_status in (5, 7):
+      self._set_prev_torque(0)
+      self.assertTrue(self._tx(self._torque_cmd_msg(self.MAX_RATE_UP, steer_req=1, hca_status=enabled_status)),
+                      f"torque cmd rejected with {enabled_status=}")
+
 
 class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LS_01, 0], [MSG_LS_01, 2]]
@@ -130,9 +138,12 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     self.assertTrue(self._tx(self._ls_01_msg(resume=1)))
 
   def test_cancel_button(self):
-    # Disable on rising edge of cancel button
+    # Stay engaged while no buttons are pressed
     self._rx(self._tsk_status_msg(False))
     self.safety.set_controls_allowed(1)
+    self._rx(self._ls_01_msg(bus=0))
+    self.assertTrue(self.safety.get_controls_allowed(), "controls not allowed with no buttons pressed")
+    # Disable on rising edge of cancel button
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
