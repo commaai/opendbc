@@ -175,7 +175,9 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
       uint8_t counter = safety_hooks->get_counter(msg);
       update_counter(cfg->rx_checks, index, counter);
     } else {
-      cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : MAX_WRONG_COUNTERS;
+      // not counter-checked: every such rx check is ignore_counter (enforced by
+      // test_rx_check_counter_invariant), so the counter is considered valid
+      cfg->rx_checks[index].status.wrong_counters = 0;
     }
 
     // quality flag check

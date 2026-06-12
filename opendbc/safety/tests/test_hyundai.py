@@ -7,7 +7,7 @@ from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
-from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
+from opendbc.safety.tests.hyundai_common import Buttons, HyundaiButtonBase, HyundaiLongitudinalBase
 
 
 # 4 bit checkusm used in some hyundai messages
@@ -90,13 +90,16 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("TCS13", 0, values, fix_checksum=checksum)
 
-  def _speed_msg(self, speed):
+  def _wheel_speeds_msg(self, speeds):
     # safety doesn't scale, so undo the scaling
-    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
+    values = {"WHL_SPD_%s" % s: speeds[s] * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
     values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
     values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
     self.__class__.cnt_speed += 1
     return self.packer.make_can_msg_safety("WHL_SPD11", 0, values, fix_checksum=checksum)
+
+  def _speed_msg(self, speed):
+    return self._wheel_speeds_msg({s: speed for s in ["FL", "FR", "RL", "RR"]})
 
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": enable, "CR_VSM_Alive": self.cnt_cruise % 16}
@@ -117,6 +120,28 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     values = {"CR_Vcu_AccPedDep_Pos": 100}
     self._rx(self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum))
     self.assertFalse(self.safety.get_gas_pressed_prev())
+
+  def test_vehicle_moving_individual_wheels(self):
+    # safety only checks the front left and rear right wheel speeds,
+    # either one alone must register the vehicle as moving
+    for wheel in ("FL", "RR"):
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+
+      speeds = {s: 0 for s in ["FL", "FR", "RL", "RR"]}
+      speeds[wheel] = self.STANDSTILL_THRESHOLD + 1
+      self._rx(self._wheel_speeds_msg(speeds))
+      self.assertTrue(self.safety.get_vehicle_moving(), f"not moving with wheel {wheel} speed")
+
+  def test_cruise_state_ignored_on_wrong_bus(self):
+    # SCC12 (0x421) cruise state is only accepted on bus 0 (radar-SCC) or bus 2 (camera-SCC),
+    # it must be ignored on the other bus
+    wrong_bus = 2 if self.SCC_BUS == 0 else 0
+    self._rx(self._button_msg(Buttons.SET))
+    values = {"ACCMode": 1, "CR_VSM_Alive": self.cnt_cruise % 16}
+    self.__class__.cnt_cruise += 1
+    self._rx(self.packer.make_can_msg_safety("SCC12", wrong_bus, values, fix_checksum=checksum))
+    self.assertFalse(self.safety.get_controls_allowed())
 
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):

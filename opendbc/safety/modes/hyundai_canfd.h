@@ -178,8 +178,10 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
     }
   }
 
-  // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
-  if (((msg->addr == 0x730U) && hyundai_canfd_lka_steer_msg) || ((msg->addr == 0x7D0U) && !hyundai_camera_scc)) {
+  // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address.
+  // 0x730 is only TX-whitelisted in the LKA-steer-msg config and 0x7D0 only in the non-camera-SCC
+  // config, so the TX whitelist already enforces the config gating.
+  if ((msg->addr == 0x730U) || (msg->addr == 0x7D0U)) {
     if ((GET_BYTES(msg, 0, 4) != 0x00803E02U) || (GET_BYTES(msg, 4, 4) != 0x0U)) {
       tx = false;
     }

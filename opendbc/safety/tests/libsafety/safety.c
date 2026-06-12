@@ -49,6 +49,21 @@ int get_rx_check_min_frequency(void) {
   return min_freq;
 }
 
+bool get_rx_checks_counter_invariant_ok(void) {
+  // every rx check must be counter-validatable (the mode provides get_counter and the message
+  // has max_counter > 0) or explicitly ignore_counter; otherwise rx_msg_safety_check would
+  // treat a counter-expecting message as valid without ever checking its counter
+  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
+    for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (current_safety_config.rx_checks[i].msg[j].addr != 0U); j++) {
+      bool counter_checkable = (current_hooks->get_counter != NULL) && (current_safety_config.rx_checks[i].msg[j].max_counter > 0U);
+      if (!counter_checkable && !current_safety_config.rx_checks[i].msg[j].ignore_counter) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 void set_controls_allowed(bool c){
   controls_allowed = c;
 }

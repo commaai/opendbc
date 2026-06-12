@@ -126,13 +126,12 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
 
 static void hyundai_rx_hook(const CANPacket_t *msg) {
 
-  // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
+  // SCC12 is rx-checked on bus 2 for camera-based SCC cars and bus 0 on all others;
+  // the RX whitelist pins it to the correct bus per config
   if (msg->addr == 0x421U) {
-    if (((msg->bus == 0U) && !hyundai_camera_scc) || ((msg->bus == 2U) && hyundai_camera_scc)) {
-      // 2 bits: 13-14
-      int cruise_engaged = (GET_BYTES(msg, 0, 4) >> 13) & 0x3U;
-      hyundai_common_cruise_state_check(cruise_engaged);
-    }
+    // 2 bits: 13-14
+    int cruise_engaged = (GET_BYTES(msg, 0, 4) >> 13) & 0x3U;
+    hyundai_common_cruise_state_check(cruise_engaged);
   }
 
   if (msg->bus == 0U) {

@@ -232,6 +232,11 @@ class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSub
     # Non-Tester present is not allowed
     self.assertFalse(self._tx(self._es_uds_msg(not_tester_present)))
 
+    # Valid first four bytes with any non-zero trailing byte is not allowed
+    for tail in (b'\x01\x00\x00\x00', b'\x00\x00\x00\x01'):
+      self.assertFalse(self._tx(self._es_uds_msg(tester_present[:4] + tail)))
+      self.assertFalse(self._tx(self._es_uds_msg(self._rdbi_msg(button_did)[:4] + tail)))
+
     # Only button_did is allowed to be read via UDS
     for did in range(0xFFFF):
       should_tx = (did == button_did)

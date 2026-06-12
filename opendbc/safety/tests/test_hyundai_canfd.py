@@ -7,7 +7,7 @@ from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
-from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
+from opendbc.safety.tests.hyundai_common import Buttons, HyundaiButtonBase, HyundaiLongitudinalBase
 
 # All combinations of radar/camera-SCC and gas/hybrid/EV cars
 ALL_GAS_EV_HYBRID_COMBOS = [
@@ -108,6 +108,18 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
       self.assertFalse(self.safety.get_gas_pressed_prev())
       self._rx(self._user_gas_msg(gas))
       self.assertTrue(self.safety.get_gas_pressed_prev(), f"gas not pressed with {gas=}")
+
+  def test_cruise_engaged_with_driver_override(self):
+    # SCC_CONTROL (0x1a0) ACC_Mode 2 is cruise enabled with driver gas override,
+    # it must be treated as engaged just like ACC_Mode 1
+    if isinstance(self, HyundaiLongitudinalBase):
+      raise unittest.SkipTest("Cruise state is not checked when longitudinal")
+
+    self._rx(self._pcm_status_msg(False))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.SET))
+    self._rx(self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, {"ACCMode": 2}))
+    self.assertTrue(self.safety.get_controls_allowed())
 
   def test_vehicle_moving_individual_wheels(self):
     # any single wheel moving should set vehicle moving
@@ -265,6 +277,11 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
     }
     return self.packer.make_can_msg_safety("SCC_CONTROL", 1, values)
 
+  def test_tester_present_radar_addr_blocked(self):
+    # this config knocks out the ADAS ECU at 0x730, tester present to the radar at 0x7D0 must be blocked
+    tester_present = libsafety_py.make_CANPacket(0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00")
+    self.assertFalse(self._tx(tester_present))
+
 
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
 class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCanfdLFASteeringBase):
@@ -297,6 +314,11 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
+
+  def test_tester_present_adas_addr_blocked(self):
+    # these configs knock out the radar at 0x7D0, tester present to the ADAS ECU at 0x730 must be blocked
+    tester_present = libsafety_py.make_CANPacket(0x730, 1, b"\x02\x3E\x80\x00\x00\x00\x00\x00")
+    self.assertFalse(self._tx(tester_present))
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)

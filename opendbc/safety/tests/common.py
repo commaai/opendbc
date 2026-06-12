@@ -1272,3 +1272,8 @@ class CarSafetyTest(SafetyTest):
     # every safety message must be at least 10Hz; this invariant replaces the
     # minimum-frequency check that used to run in safety_tick
     self.assertGreaterEqual(self.safety.get_rx_check_min_frequency(), 10)
+
+  def test_rx_check_counter_invariant(self):
+    # every rx check must be counter-validated or explicitly ignore_counter; this invariant
+    # lets the non-counter-checked path in rx_msg_safety_check treat the counter as valid
+    self.assertTrue(self.safety.get_rx_checks_counter_invariant_ok())

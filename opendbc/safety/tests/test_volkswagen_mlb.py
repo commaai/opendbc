@@ -147,6 +147,15 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
+  def test_cruise_engaged_status_values(self):
+    # Both TSK_Status_GRA_ACC_02 = 1 (ACC active) and 2 (driver override) are engaged states
+    for status in (1, 2):
+      self._rx(self._tsk_status_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed())
+      values = {"TSK_Status_GRA_ACC_02": status}
+      self._rx(self.packer.make_can_msg_safety("TSK_04", 1, values))
+      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed with ACC status {status}")
+
 
 if __name__ == "__main__":
   unittest.main()

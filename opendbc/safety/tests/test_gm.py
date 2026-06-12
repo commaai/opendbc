@@ -70,6 +70,15 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_gas_regen_apply_bit(self):
+    # The apply bit can only be set when controls are allowed, independent of the gas/regen value
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      for apply_bit in (0, 1):
+        values = {"GasRegenCmd": self.INACTIVE_GAS, "GasRegenCmdActive": apply_bit}
+        should_tx = controls_allowed or apply_bit == 0
+        self.assertEqual(should_tx, self._tx(self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)))
+
 
 class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   STANDSTILL_THRESHOLD = 10 * 0.0311
@@ -106,6 +115,16 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
   def _speed_msg(self, speed):
     values = {"%sWheelSpd" % s: speed for s in ["RL", "RR"]}
     return self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values)
+
+  def test_vehicle_moving_single_rear_wheel(self):
+    # vehicle_moving must be set when either rear wheel speed alone is above the threshold
+    for moving, stopped in (("RL", "RR"), ("RR", "RL")):
+      values = {f"{moving}WheelSpd": self.STANDSTILL_THRESHOLD + 1, f"{stopped}WheelSpd": 0}
+      self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
+      self.assertTrue(self.safety.get_vehicle_moving())
+
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
 
   def _user_brake_msg(self, brake):
     # GM safety has a brake threshold of 8

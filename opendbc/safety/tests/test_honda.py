@@ -365,7 +365,6 @@ class TestHondaNidecPcmSafety(HondaPcmEnableBase, TestHondaNidecSafetyBase):
   def test_disable_control_allowed_from_cruise(self):
     pass
 
-
 class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
   """
     Covers the Honda Nidec safety mode with alt SCM messages
