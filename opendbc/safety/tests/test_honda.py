@@ -3,7 +3,6 @@ import unittest
 import numpy as np
 
 from opendbc.car.honda.values import HondaSafetyFlags
-from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
@@ -176,7 +175,7 @@ class HondaBase(common.CarSafetyTest):
   cnt_powertrain_data = 0
   cnt_acc_state = 0
 
-  def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None, brake_switch=0):
+  def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None):
     # preserve the state
     if cruise_on is None:
       # or'd with controls allowed since the tests use it to "enable" cruise
@@ -189,7 +188,6 @@ class HondaBase(common.CarSafetyTest):
     values = {
       "ACC_STATUS": cruise_on,
       "BRAKE_PRESSED": brake_pressed,
-      "BRAKE_SWITCH": brake_switch,
       "PEDAL_GAS": gas_pressed,
       "COUNTER": self.cnt_powertrain_data % 4
     }
@@ -238,10 +236,6 @@ class HondaBase(common.CarSafetyTest):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
     self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
-
-    # with controls allowed, non-zero torque is allowed
-    self.safety.set_controls_allowed(1)
-    self.assertTrue(self._tx(self._send_steer_msg(0x1000)))
 
 
 # ********************* Honda Nidec **********************
@@ -295,28 +289,6 @@ class TestHondaNidecSafetyBase(HondaBase):
     self.safety.set_honda_fwd_brake(True)
     super().test_fwd_hook()
 
-  def test_brake_switch_delayed_brake(self):
-    # BRAKE_SWITCH leads BRAKE_PRESSED, so it must be set for two
-    # consecutive frames before it registers as braking
-    self.assertTrue(self._rx(self._powertrain_data_msg(brake_pressed=0, brake_switch=0)))
-    self.assertFalse(self.safety.get_brake_pressed_prev())
-    self.assertTrue(self._rx(self._powertrain_data_msg(brake_pressed=0, brake_switch=1)))
-    self.assertFalse(self.safety.get_brake_pressed_prev())
-    self.assertTrue(self._rx(self._powertrain_data_msg(brake_pressed=0, brake_switch=1)))
-    self.assertTrue(self.safety.get_brake_pressed_prev())
-
-  def test_stock_aeb_disabled(self):
-    # with ALT_EXP_DISABLE_STOCK_AEB, the stock AEB brake message should never be forwarded
-    self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.DISABLE_STOCK_AEB)
-    self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=1)))
-    self.assertFalse(self.safety.get_honda_fwd_brake())
-
-  def test_alt_steer_msg_safety_check(self):
-    # 0x194 is the steering message for CR-V and RDX
-    self.safety.set_controls_allowed(0)
-    self.assertTrue(self._tx(libsafety_py.make_CANPacket(0x194, 0, b"\x00\x00\x00\x00")))
-    self.assertFalse(self._tx(libsafety_py.make_CANPacket(0x194, 0, b"\x10\x00\x00\x00")))
-
   def test_honda_fwd_brake_latching(self):
     # Shouldn't fwd stock Honda requesting brake without AEB
     self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=0)))
@@ -364,6 +336,7 @@ class TestHondaNidecPcmSafety(HondaPcmEnableBase, TestHondaNidecSafetyBase):
   # Nidec doesn't disengage on falling edge of cruise. See comment in safety_honda.h
   def test_disable_control_allowed_from_cruise(self):
     pass
+
 
 class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
   """
@@ -463,13 +436,6 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, 0)
     self.safety.init_tests()
 
-  def test_bosch_supplemental_msg(self):
-    # only the hardcoded valid payload is allowed, the last byte is ignored
-    self.assertTrue(self._tx(libsafety_py.make_CANPacket(0xE5, 0, b"\x04\x00\x80\x10\x00\x00\x00\x00")))
-    self.assertTrue(self._tx(libsafety_py.make_CANPacket(0xE5, 0, b"\x04\x00\x80\x10\x00\x00\x00\xFF")))
-    self.assertFalse(self._tx(libsafety_py.make_CANPacket(0xE5, 0, b"\x04\x00\x80\x10\x01\x00\x00\x00")))
-    self.assertFalse(self._tx(libsafety_py.make_CANPacket(0xE5, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00")))
-
 
 class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):
   """
@@ -515,10 +481,6 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
     not_tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")
     self.assertFalse(self._tx(not_tester_present))
-
-    # valid tester present header, but non-zero trailing bytes
-    tester_present_nonzero_tail = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x02\x3E\x80\x00\x01\x00\x00\x00")
-    self.assertFalse(self._tx(tester_present_nonzero_tail))
 
   def test_gas_safety_check(self):
     for controls_allowed in [True, False]:

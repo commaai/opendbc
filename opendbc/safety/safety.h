@@ -494,11 +494,10 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 
 // convert a trimmed integer to signed 32 bit int
 int to_signed(int d, int bits) {
-  // all call sites pass a positive bit width, so bits >= 1
   int d_signed = d;
-  int max_value = (1 << (bits - 1));
+  int max_value = (1 << SAFETY_MAX((bits - 1), 0));
   if (d >= max_value) {
-    d_signed = d - (1 << bits);
+    d_signed = d - (1 << SAFETY_MAX(bits, 0));
   }
   return d_signed;
 }

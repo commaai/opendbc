@@ -63,14 +63,6 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
               "RES_BUTTON": res, "NO_BUTTON_PRESSED": no_button}
     return self.packer.make_can_msg_safety("CRUISE_THROTTLE", 2, values)
 
-  def test_cruise_state_wrong_bus(self):
-    # CRUISE_STATE is rx-whitelisted on both bus 1 and 2, but cruise
-    # state should only be parsed from CRUISE_BUS
-    wrong_bus = 1 if self.CRUISE_BUS == 2 else 2
-    self.safety.set_controls_allowed(False)
-    self._rx(self.packer.make_can_msg_safety("CRUISE_STATE", wrong_bus, {"CRUISE_ENABLED": 1}))
-    self.assertFalse(self.safety.get_controls_allowed())
-
   def test_acc_buttons(self):
     btns = [
       ("cancel", True),

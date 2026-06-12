@@ -125,8 +125,8 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->bus == scc_bus) {
-    // cruise state — 0x1a0 is only rx-checked in non-longitudinal configs
-    if (!hyundai_longitudinal && (msg->addr == 0x1a0U)) {
+    // cruise state
+    if ((msg->addr == 0x1a0U) && !hyundai_longitudinal) {
       // 1=enabled, 2=driver override
       int cruise_status = ((msg->data[8] >> 4) & 0x7U);
       bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
@@ -178,10 +178,8 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
     }
   }
 
-  // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address.
-  // 0x730 is only TX-whitelisted in the LKA-steer-msg config and 0x7D0 only in the non-camera-SCC
-  // config, so the TX whitelist already enforces the config gating.
-  if ((msg->addr == 0x730U) || (msg->addr == 0x7D0U)) {
+  // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
+  if (((msg->addr == 0x730U) && hyundai_canfd_lka_steer_msg) || ((msg->addr == 0x7D0U) && !hyundai_camera_scc)) {
     if ((GET_BYTES(msg, 0, 4) != 0x00803E02U) || (GET_BYTES(msg, 4, 4) != 0x0U)) {
       tx = false;
     }

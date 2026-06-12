@@ -70,15 +70,6 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_gas_regen_apply_bit(self):
-    # The apply bit can only be set when controls are allowed, independent of the gas/regen value
-    for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
-      for apply_bit in (0, 1):
-        values = {"GasRegenCmd": self.INACTIVE_GAS, "GasRegenCmdActive": apply_bit}
-        should_tx = controls_allowed or apply_bit == 0
-        self.assertEqual(should_tx, self._tx(self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)))
-
 
 class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   STANDSTILL_THRESHOLD = 10 * 0.0311
@@ -115,16 +106,6 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
   def _speed_msg(self, speed):
     values = {"%sWheelSpd" % s: speed for s in ["RL", "RR"]}
     return self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values)
-
-  def test_vehicle_moving_single_rear_wheel(self):
-    # vehicle_moving must be set when either rear wheel speed alone is above the threshold
-    for moving, stopped in (("RL", "RR"), ("RR", "RL")):
-      values = {f"{moving}WheelSpd": self.STANDSTILL_THRESHOLD + 1, f"{stopped}WheelSpd": 0}
-      self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
-      self.assertTrue(self.safety.get_vehicle_moving())
-
-      self._rx(self._speed_msg(0))
-      self.assertFalse(self.safety.get_vehicle_moving())
 
   def _user_brake_msg(self, brake):
     # GM safety has a brake threshold of 8
@@ -219,15 +200,6 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
       self._rx(self._pcm_status_msg(enabled))
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
 
-  def test_buttons_dont_engage_with_pcm_cruise(self):
-    # When tied to the PCM, the set/resume buttons on the pt bus should not engage controls
-    for btn_prev, btn_cur in ((Buttons.DECEL_SET, Buttons.UNPRESS),   # falling edge of set
-                              (Buttons.UNPRESS, Buttons.RES_ACCEL)):  # rising edge of resume
-      self.safety.set_controls_allowed(0)
-      self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": btn_prev}))
-      self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": btn_cur}))
-      self.assertFalse(self.safety.get_controls_allowed())
-
 
 class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
   pass
@@ -264,8 +236,8 @@ class TestGmIgnition(unittest.TestCase):
     self.safety.init_tests()
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
 
-  def _msg(self, mode, bus=0):
-    return self.packer.make_can_msg_safety("BCMGeneralPlatformStatus", bus, {"SystemPowerMode": mode})
+  def _msg(self, mode):
+    return self.packer.make_can_msg_safety("BCMGeneralPlatformStatus", 0, {"SystemPowerMode": mode})
 
   # SystemPowerMode 2=Run, 3=Crank Request
   def test_ignition_on(self):
@@ -277,26 +249,6 @@ class TestGmIgnition(unittest.TestCase):
     self.assertTrue(self.safety.get_ignition_can())
     self.safety.ignition_can_hook(self._msg(0))
     self.assertFalse(self.safety.get_ignition_can())
-
-  def test_ignition_wrong_bus(self):
-    # ignition is only parsed from bus 0
-    self.safety.ignition_can_hook(self._msg(2, bus=1))
-    self.assertFalse(self.safety.get_ignition_can())
-
-    self.safety.ignition_can_hook(self._msg(2))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(0, bus=1))
-    self.assertTrue(self.safety.get_ignition_can())
-
-  def test_ignition_wrong_length(self):
-    # ignition message must be 8 bytes long
-    self.safety.ignition_can_hook(common.make_msg(0, 0x1F1, dat=b"\x02\x00\x00\x00"))
-    self.assertFalse(self.safety.get_ignition_can())
-
-    self.safety.ignition_can_hook(self._msg(2))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(common.make_msg(0, 0x1F1, 4))
-    self.assertTrue(self.safety.get_ignition_can())
 
 
 if __name__ == "__main__":

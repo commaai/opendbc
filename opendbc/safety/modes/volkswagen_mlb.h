@@ -67,13 +67,14 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->bus == 1U) {
-    // MSG_TSK_04 is the only RX message on bus 1 (addr+bus+len enforced by rx_msg_safety_check)
-    // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
-    // Signal: TSK_04.TSK_Status_GRA_ACC_02
-    int acc_status = (msg->data[7] & 0xC0U) >> 6;
-    bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
+    if (msg->addr == MSG_TSK_04) {
+      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
+      // Signal: TSK_04.TSK_Status_GRA_ACC_02
+      int acc_status = (msg->data[7] & 0xC0U) >> 6;
+      bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
 
-    pcm_cruise_check(cruise_engaged);
+      pcm_cruise_check(cruise_engaged);
+    }
   }
 }
 

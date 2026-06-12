@@ -61,7 +61,8 @@ static float safety_interpolate(struct lookup_t xy, float x) {
         float y0 = xy.y[i];
         float dx = xy.x[i+1] - x0;
         float dy = xy.y[i+1] - y0;
-        // dx is strictly positive here: reaching this point requires xy.x[i] <= x < xy.x[i+1]
+        // dx should not be zero as xy.x is supposed to be monotonic
+        dx = SAFETY_MAX(dx, 0.0001);
         ret = (dy * (x - x0) / dx) + y0;
         break;
       }

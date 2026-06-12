@@ -105,8 +105,6 @@ void set_timer(uint32_t t);
 
 void safety_tick_current_safety_config();
 bool safety_config_valid();
-int get_rx_check_min_frequency(void);
-bool get_rx_checks_counter_invariant_ok(void);
 
 void init_tests(void);
 

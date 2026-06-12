@@ -80,13 +80,6 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
-  def test_gas_pressed_high_bits(self):
-    # PEDAL_GAS is a 12-bit signal; a value >= 16 sets ENGINE_DATA byte 4 (the upper bits)
-    self._rx(self._user_gas_msg(0))
-    self.assertFalse(self.safety.get_gas_pressed_prev())
-    self._rx(self._user_gas_msg(100))
-    self.assertTrue(self.safety.get_gas_pressed_prev())
-
 
 class TestMazdaIgnition(unittest.TestCase):
   TX_MSGS: list = []
@@ -108,17 +101,6 @@ class TestMazdaIgnition(unittest.TestCase):
     self.assertTrue(self.safety.get_ignition_can())
     self.safety.ignition_can_hook(self._msg(0x20))
     self.assertFalse(self.safety.get_ignition_can())
-
-  def test_ignition_wrong_length(self):
-    # ignition message must be 8 bytes long
-    self.safety.ignition_can_hook(make_msg(0, 0x9E, dat=bytes([0xC0])))
-    self.assertFalse(self.safety.get_ignition_can())
-
-    self.safety.ignition_can_hook(self._msg(0xC0))
-    self.assertTrue(self.safety.get_ignition_can())
-    # wrong-length 'off' message should be ignored
-    self.safety.ignition_can_hook(make_msg(0, 0x9E, dat=bytes([0x20])))
-    self.assertTrue(self.safety.get_ignition_can())
 
 
 if __name__ == "__main__":

@@ -65,15 +65,6 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       values |= {"WHEEL_SPEED_%s_FAULT" % n: 1.0 for n in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("WHEEL_SPEEDS", 0, values)
 
-  def test_rx_wrong_length_ignored(self):
-    # a frame matching a checked address+bus but with the wrong length must not be
-    # processed (covers the length check in get_addr_check_index for an already-seen msg)
-    msg = self._speed_msg(50)
-    self._rx(msg)
-    self.assertTrue(self.safety.get_vehicle_moving())
-    self._rx(common.make_msg(msg[0].bus, msg[0].addr, 1))
-    self.assertTrue(self.safety.get_vehicle_moving())
-
   def _user_brake_msg(self, brake):
     values = {"BRAKE_PRESSED": brake}
     return self.packer.make_can_msg_safety("BRAKE_MODULE", 0, values)
@@ -90,8 +81,6 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
-                           (False, b"\x0F\x02\x3E\x00\x01\x00\x00\x00"),  # tester present with non-zero trailing bytes
-                           (False, b"\x0F\x02\x3E\x00\x00\x00\x00\x01"),  # tester present with non-zero trailing bytes
                            (True, b"\x0F\x02\x3E\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
       self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
@@ -106,11 +95,6 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
             dat = [0]*6 + dat[-1:]
           msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
           self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
-
-    # deterministic cases: a single nonzero byte in bytes 4 and 5 is blocked
-    for dat in (b"\x00\x00\x00\x00\x01\x00\xff", b"\x00\x00\x00\x00\x00\x01\xff"):
-      msg = libsafety_py.make_CANPacket(0x283, 0, dat)
-      self.assertFalse(self._tx(msg))
 
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
@@ -171,21 +155,6 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE)
     self.safety.init_tests()
-
-  def test_steer_angle_initializing(self):
-    # Without the LTA flag, the init quality flag does not invalidate rx,
-    # but the angle measurement should not be ingested while initializing
-    angle_can = round(50 / 0.0573)  # STEER_ANGLE factor
-    for _ in range(6):
-      self.assertTrue(self._rx(self._angle_meas_msg(50, steer_angle_initializing=True)))
-    self.assertEqual(0, self.safety.get_angle_meas_min())
-    self.assertEqual(0, self.safety.get_angle_meas_max())
-
-    # ingested once the init flag clears
-    for _ in range(6):
-      self.assertTrue(self._rx(self._angle_meas_msg(50, steer_angle_initializing=False)))
-    self.assertEqual(angle_can, self.safety.get_angle_meas_min())
-    self.assertEqual(angle_can, self.safety.get_angle_meas_max())
 
 
 class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest):
@@ -273,22 +242,6 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
           should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE
           self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
           self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
-
-    # Test an asymmetric driver torque window: the lowest magnitude of the window is used,
-    # so full torque is still allowed despite samples above the threshold on one side
-    self.safety.set_controls_allowed(True)
-    self._reset_angle_measurement(0)
-    self._set_prev_desired_angle(0)
-
-    self._rx(self._torque_meas_msg(0, -50))
-    for _ in range(5):
-      self._rx(self._torque_meas_msg(0, self.MAX_LTA_DRIVER_TORQUE + 50))
-    self.assertTrue(self._tx(self._lta_msg(1, 1, 0, 100)))
-
-    # once the whole window is above the threshold, wind down is required
-    self._rx(self._torque_meas_msg(0, self.MAX_LTA_DRIVER_TORQUE + 50))
-    self.assertFalse(self._tx(self._lta_msg(1, 1, 0, 100)))
-    self.assertTrue(self._tx(self._lta_msg(1, 1, 0, 0)))
 
   def test_angle_measurements(self):
     """

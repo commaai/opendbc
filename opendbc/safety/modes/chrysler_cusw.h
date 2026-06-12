@@ -22,32 +22,33 @@ static safety_config chrysler_cusw_init(uint16_t param) {
 }
 
 static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
-  // all RX messages are whitelisted on bus 0 (addr+bus+len enforced by rx_msg_safety_check)
-  if (msg->addr == 0x1ECU) {
-    // Signal: EPS_STATUS.TORQUE_MOTOR
-    int torque_meas_new = ((msg->data[3] & 0xFU) << 8) + msg->data[4] - 2048U;
-    update_sample(&torque_meas, torque_meas_new);
-  }
+  if (msg->bus == 0U) {
+    if (msg->addr == 0x1ECU) {
+      // Signal: EPS_STATUS.TORQUE_MOTOR
+      int torque_meas_new = ((msg->data[3] & 0xFU) << 8) + msg->data[4] - 2048U;
+      update_sample(&torque_meas, torque_meas_new);
+    }
 
-  if (msg->addr == 0x2ECU) {
-    // Signal: ACC_CONTROL.ACC_ACTIVE
-    bool cruise_engaged = GET_BIT(msg, 7U);
-    pcm_cruise_check(cruise_engaged);
-  }
+    if (msg->addr == 0x2ECU) {
+      // Signal: ACC_CONTROL.ACC_ACTIVE
+      bool cruise_engaged = GET_BIT(msg, 7U);
+      pcm_cruise_check(cruise_engaged);
+    }
 
-  if (msg->addr == 0x1E4U) {
-    // Signal: BRAKE_1.VEHICLE_SPEED
-    vehicle_moving = (((msg->data[4] & 0x7U) << 8) + msg->data[5]) != 0U;
-  }
+    if (msg->addr == 0x1E4U) {
+      // Signal: BRAKE_1.VEHICLE_SPEED
+      vehicle_moving = (((msg->data[4] & 0x7U) << 8) + msg->data[5]) != 0U;
+    }
 
-  if (msg->addr == 0x1FEU) {
-    // Signal: ACCEL_GAS.GAS_HUMAN
-    gas_pressed = msg->data[1] != 0U;
-  }
+    if (msg->addr == 0x1FEU) {
+      // Signal: ACCEL_GAS.GAS_HUMAN
+      gas_pressed = msg->data[1] != 0U;
+    }
 
-  if (msg->addr == 0x1E8U) {
-    // Signal: BRAKE_3.DRIVER_BRAKE_SWITCH
-    brake_pressed = GET_BIT(msg, 18U);
+    if (msg->addr == 0x1E8U) {
+      // Signal: BRAKE_3.DRIVER_BRAKE_SWITCH
+      brake_pressed = GET_BIT(msg, 18U);
+    }
   }
 }
 

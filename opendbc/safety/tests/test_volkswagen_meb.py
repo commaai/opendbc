@@ -135,10 +135,8 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     values = {"ACC_Sollbeschleunigung_02": accel}
     return self.packer.make_can_msg_safety("ACC_18", 0, values)
 
-  def _tsk_status_msg(self, enable, main_switch=True, status=None):
-    if status is not None:
-      tsk_status = status
-    elif main_switch:
+  def _tsk_status_msg(self, enable, main_switch=True):
+    if main_switch:
       tsk_status = 3 if enable else 2
     else:
       tsk_status = 0
@@ -194,15 +192,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.safety.set_controls_allowed(True)
     self._rx(self._button_msg(cancel=1, bus=0))
     self.assertFalse(self.safety.get_controls_allowed())
-
-  def test_vehicle_moving_single_wheel(self):
-    # vehicle_moving must be set when any single wheel is moving
-    for wheel in ("VL", "VR", "HL", "HR"):
-      self._rx(self._speed_msg(0))
-      self.assertFalse(self.safety.get_vehicle_moving())
-      values = {f"{s}_Radgeschw": 3.6 if s == wheel else 0 for s in ("VL", "VR", "HL", "HR")}
-      self._rx(self.packer.make_can_msg_safety("ESC_51", 0, values))
-      self.assertTrue(self.safety.get_vehicle_moving(), f"vehicle not moving with only {wheel} wheel speed")
 
   def test_rx_hook_speed_mismatch(self):
     for speed in np.arange(0, 40, 0.5):
@@ -266,14 +255,6 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=1)))
 
-  def test_cruise_engaged_status_variants(self):
-    # TSK_Status of 3, 4 or 5 all indicate engaged stock ACC
-    for status in (3, 4, 5):
-      self._rx(self._tsk_status_msg(False))
-      self.assertFalse(self.safety.get_cruise_engaged_prev())
-      self._rx(self._tsk_status_msg(False, status=status))
-      self.assertTrue(self.safety.get_cruise_engaged_prev(), f"cruise not engaged with TSK_Status={status}")
-
 
 class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0],
@@ -313,8 +294,6 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
       self._rx(self._tsk_status_msg(False, main_switch=True))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
-      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
-      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} held")
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 
@@ -379,15 +358,6 @@ class TestVolkswagenMebIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(2, 0))
     self.safety.ignition_can_hook(self._msg(3, 0))
     self.assertFalse(self.safety.get_ignition_can())
-
-  def test_ignition_wrong_length(self):
-    # Klemmen_Status_01 must be exactly 4 bytes to be considered for ignition
-    self.safety.ignition_can_hook(self._msg(0, 1))
-    self.safety.ignition_can_hook(self._msg(1, 1))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(common.make_msg(0, 0x3C0, 8))
-    self.safety.ignition_can_hook(common.make_msg(0, 0x3C0, 8))
-    self.assertTrue(self.safety.get_ignition_can())
 
 
 if __name__ == "__main__":

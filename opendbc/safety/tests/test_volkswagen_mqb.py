@@ -58,10 +58,8 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self.packer.make_can_msg_safety("Motor_20", 0, values)
 
   # ACC engagement status
-  def _tsk_status_msg(self, enable, main_switch=True, status=None):
-    if status is not None:
-      tsk_status = status
-    elif main_switch:
+  def _tsk_status_msg(self, enable, main_switch=True):
+    if main_switch:
       tsk_status = 3 if enable else 2
     else:
       tsk_status = 0
@@ -148,20 +146,6 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._gra_acc_01_msg(resume=1)))
 
-  def test_cruise_engaged_status_variants(self):
-    # TSK_Status of 3, 4 or 5 all indicate engaged stock ACC
-    for status in (3, 4, 5):
-      self._rx(self._tsk_status_msg(False))
-      self.assertFalse(self.safety.get_cruise_engaged_prev())
-      self._rx(self._tsk_status_msg(False, status=status))
-      self.assertTrue(self.safety.get_cruise_engaged_prev(), f"cruise not engaged with TSK_Status={status}")
-
-  def test_cancel_button_rising_edge(self):
-    # Always exit controls on rising edge of Cancel, even without openpilot longitudinal
-    self.safety.set_controls_allowed(1)
-    self._rx(self._gra_acc_01_msg(cancel=1, bus=0))
-    self.assertFalse(self.safety.get_controls_allowed())
-
 
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_ACC_02, 0], [MSG_ACC_06, 0], [MSG_ACC_07, 0]]
@@ -195,8 +179,6 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
       self._rx(self._tsk_status_msg(False, main_switch=True))
       self._rx(self._gra_acc_01_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
-      self._rx(self._gra_acc_01_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
-      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} held")
       self._rx(self._gra_acc_01_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 

@@ -77,12 +77,11 @@ static uint32_t toyota_get_checksum(const CANPacket_t *msg) {
 }
 
 static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
-  // quality flag checks are only enabled for 0x260 and 0xaa
-  bool valid;
+  bool valid = false;
   if (msg->addr == 0x260U) {
     valid = !GET_BIT(msg, 3U);  // STEER_TORQUE_SENSOR.STEER_ANGLE_INITIALIZING
-  } else {
-    // WHEEL_SPEEDS (0xaa): each wheel speed is 1-bit fault + 15-bit speed
+  } else if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
+    // each wheel speed is 1-bit fault + 15-bit speed
     valid = true;
     for (uint8_t i = 0U; i < 4U; i += 1U) {
       if (GET_BIT(msg, (i * 16U) + 7U)) {  // WHEEL_SPEED_xx_FAULT
@@ -90,82 +89,85 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
         break;
       }
     }
+  } else {
   }
   return valid;
 }
 
 static void toyota_rx_hook(const CANPacket_t *msg) {
-  // all RX messages are whitelisted on bus 0 (addr+bus+len enforced by rx_msg_safety_check)
-  // get eps motor torque (0.66 factor in dbc)
-  if (msg->addr == 0x260U) {
-    int torque_meas_new = (msg->data[5] << 8) | msg->data[6];
-    torque_meas_new = to_signed(torque_meas_new, 16);
+  if (msg->bus == 0U) {
 
-    // scale by dbc_factor
-    torque_meas_new = (torque_meas_new * toyota_dbc_eps_torque_factor) / 100;
+    // get eps motor torque (0.66 factor in dbc)
+    if (msg->addr == 0x260U) {
+      int torque_meas_new = (msg->data[5] << 8) | msg->data[6];
+      torque_meas_new = to_signed(torque_meas_new, 16);
 
-    // update array of sample
-    update_sample(&torque_meas, torque_meas_new);
+      // scale by dbc_factor
+      torque_meas_new = (torque_meas_new * toyota_dbc_eps_torque_factor) / 100;
 
-    // increase torque_meas by 1 to be conservative on rounding
-    torque_meas.min--;
-    torque_meas.max++;
+      // update array of sample
+      update_sample(&torque_meas, torque_meas_new);
 
-    // driver torque for angle limiting
-    int torque_driver_new = (msg->data[1] << 8) | msg->data[2];
-    torque_driver_new = to_signed(torque_driver_new, 16);
-    update_sample(&torque_driver, torque_driver_new);
+      // increase torque_meas by 1 to be conservative on rounding
+      torque_meas.min--;
+      torque_meas.max++;
 
-    // LTA request angle should match current angle while inactive, clipped to max accepted angle.
-    // note that angle can be relative to init angle on some TSS2 platforms, LTA has the same offset
-    bool steer_angle_initializing = GET_BIT(msg, 3U);
-    if (!steer_angle_initializing) {
-      int angle_meas_new = (msg->data[3] << 8U) | msg->data[4];
-      angle_meas_new = to_signed(angle_meas_new, 16);
-      update_sample(&angle_meas, angle_meas_new);
-    }
-  }
+      // driver torque for angle limiting
+      int torque_driver_new = (msg->data[1] << 8) | msg->data[2];
+      torque_driver_new = to_signed(torque_driver_new, 16);
+      update_sample(&torque_driver, torque_driver_new);
 
-  // enter controls on rising edge of ACC, exit controls on ACC off
-  // exit controls on rising edge of gas press, if not alternative experience
-  // exit controls on rising edge of brake press
-  if (toyota_secoc) {
-    if (msg->addr == 0x176U) {
-      bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
-      pcm_cruise_check(cruise_engaged);
+      // LTA request angle should match current angle while inactive, clipped to max accepted angle.
+      // note that angle can be relative to init angle on some TSS2 platforms, LTA has the same offset
+      bool steer_angle_initializing = GET_BIT(msg, 3U);
+      if (!steer_angle_initializing) {
+        int angle_meas_new = (msg->data[3] << 8U) | msg->data[4];
+        angle_meas_new = to_signed(angle_meas_new, 16);
+        update_sample(&angle_meas, angle_meas_new);
+      }
     }
-    if (msg->addr == 0x116U) {
-      gas_pressed = msg->data[1] != 0U;  // GAS_PEDAL.GAS_PEDAL_USER
-    }
-    if (msg->addr == 0x101U) {
-      brake_pressed = GET_BIT(msg, 3U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_rav4_prime_generated.dbc)
-    }
-  } else {
-    if (msg->addr == 0x1D2U) {
-      bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
-      pcm_cruise_check(cruise_engaged);
-      gas_pressed = !GET_BIT(msg, 4U);  // PCM_CRUISE.GAS_RELEASED
-    }
-    if (!toyota_alt_brake && (msg->addr == 0x226U)) {
-      brake_pressed = GET_BIT(msg, 37U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_nodsu_pt_generated.dbc)
-    }
-    if (toyota_alt_brake && (msg->addr == 0x224U)) {
-      brake_pressed = GET_BIT(msg, 5U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_new_mc_pt_generated.dbc)
-    }
-  }
 
-  // sample speed
-  if (msg->addr == 0xaaU) {
-    int speed = 0;
-    // sum 4 wheel speeds. conversion: raw * 0.01 - 67.67
-    for (uint8_t i = 0U; i < 8U; i += 2U) {
-      int wheel_speed = ((msg->data[i] & 0x7FU) << 8U) | msg->data[(i + 1U)];
-      speed += wheel_speed - 6767;
+    // enter controls on rising edge of ACC, exit controls on ACC off
+    // exit controls on rising edge of gas press, if not alternative experience
+    // exit controls on rising edge of brake press
+    if (toyota_secoc) {
+      if (msg->addr == 0x176U) {
+        bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
+        pcm_cruise_check(cruise_engaged);
+      }
+      if (msg->addr == 0x116U) {
+        gas_pressed = msg->data[1] != 0U;  // GAS_PEDAL.GAS_PEDAL_USER
+      }
+      if (msg->addr == 0x101U) {
+        brake_pressed = GET_BIT(msg, 3U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_rav4_prime_generated.dbc)
+      }
+    } else {
+      if (msg->addr == 0x1D2U) {
+        bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
+        pcm_cruise_check(cruise_engaged);
+        gas_pressed = !GET_BIT(msg, 4U);  // PCM_CRUISE.GAS_RELEASED
+      }
+      if (!toyota_alt_brake && (msg->addr == 0x226U)) {
+        brake_pressed = GET_BIT(msg, 37U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_nodsu_pt_generated.dbc)
+      }
+      if (toyota_alt_brake && (msg->addr == 0x224U)) {
+        brake_pressed = GET_BIT(msg, 5U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_new_mc_pt_generated.dbc)
+      }
     }
-    // check that all wheel speeds are at zero value
-    vehicle_moving = speed != 0;
 
-    UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 * KPH_TO_MS);
+    // sample speed
+    if (msg->addr == 0xaaU) {
+      int speed = 0;
+      // sum 4 wheel speeds. conversion: raw * 0.01 - 67.67
+      for (uint8_t i = 0U; i < 8U; i += 2U) {
+        int wheel_speed = ((msg->data[i] & 0x7FU) << 8U) | msg->data[(i + 1U)];
+        speed += wheel_speed - 6767;
+      }
+      // check that all wheel speeds are at zero value
+      vehicle_moving = speed != 0;
+
+      UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 * KPH_TO_MS);
+    }
   }
 }
 

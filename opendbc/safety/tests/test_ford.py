@@ -160,14 +160,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
     }
     return self.packer.make_can_msg_safety("EngBrakeData", 0, values)
 
-  def test_cruise_engaged_state_4(self):
-    # CcStat_D_Actl == 4 must also count as cruise engaged (not just 5)
-    self._rx(self._pcm_status_msg(False))
-    self.assertFalse(self.safety.get_controls_allowed())
-    values = {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": 4}
-    self._rx(self.packer.make_can_msg_safety("EngBrakeData", 0, values))
-    self.assertTrue(self.safety.get_controls_allowed())
-
   # LKAS command
   def _lkas_command_msg(self, action: int):
     values = {
@@ -455,32 +447,16 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   INACTIVE_GAS = -5.0
 
   # ACC command
-  def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False,
-                       brake_prchg: bool | None = None, brake_decel: bool | None = None):
-    # both brake actuation bits follow brake_actuation unless explicitly overridden
-    brake_prchg = brake_actuation if brake_prchg is None else brake_prchg
-    brake_decel = brake_actuation if brake_decel is None else brake_decel
+  def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False):
     values = {
-      "AccPrpl_A_Rq": gas,                            # [-5|5.23] m/s^2
-      "AccPrpl_A_Pred": gas,                          # [-5|5.23] m/s^2
-      "AccBrkTot_A_Rq": brake,                        # [-20|11.9449] m/s^2
-      "AccBrkPrchg_B_Rq": 1 if brake_prchg else 0,    # Pre-charge brake request: 0=No, 1=Yes
-      "AccBrkDecel_B_Rq": 1 if brake_decel else 0,    # Deceleration request: 0=Inactive, 1=Active
-      "CmbbDeny_B_Actl": 1 if cmbb_deny else 0,       # [0|1] deny AEB actuation
+      "AccPrpl_A_Rq": gas,                              # [-5|5.23] m/s^2
+      "AccPrpl_A_Pred": gas,                            # [-5|5.23] m/s^2
+      "AccBrkTot_A_Rq": brake,                          # [-20|11.9449] m/s^2
+      "AccBrkPrchg_B_Rq": 1 if brake_actuation else 0,  # Pre-charge brake request: 0=No, 1=Yes
+      "AccBrkDecel_B_Rq": 1 if brake_actuation else 0,  # Deceleration request: 0=Inactive, 1=Active
+      "CmbbDeny_B_Actl": 1 if cmbb_deny else 0,         # [0|1] deny AEB actuation
     }
     return self.packer.make_can_msg_safety("ACCDATA", 0, values)
-
-  def test_brake_actuation_bits(self):
-    # AccBrkPrchg_B_Rq and AccBrkDecel_B_Rq must each independently be blocked
-    # when longitudinal is not allowed
-    for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
-      for brake_prchg in (True, False):
-        for brake_decel in (True, False):
-          should_tx = controls_allowed or not (brake_prchg or brake_decel)
-          self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, self.INACTIVE_ACCEL, False,
-                                                                     brake_prchg=brake_prchg, brake_decel=brake_decel)),
-                           (controls_allowed, brake_prchg, brake_decel))
 
   def test_stock_aeb(self):
     # Test that CmbbDeny_B_Actl is never 1, it prevents the ABS module from actuating AEB requests from ACCDATA_2

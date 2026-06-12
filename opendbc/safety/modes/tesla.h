@@ -16,8 +16,8 @@ static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
 
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
-  // counter checks are only enabled for these messages
-  uint8_t cnt;
+
+  uint8_t cnt = 0;
   if (msg->addr == 0x2b9U) {
     // Signal: DAS_controlCounter
     cnt = msg->data[6] >> 5;
@@ -30,56 +30,64 @@ static uint8_t tesla_get_counter(const CANPacket_t *msg) {
   } else if (msg->addr == 0x155U) {
     // Signal: ESP_wheelRotationCounter
     cnt = msg->data[6] >> 4;
-  } else {
-    // Signal: EPAS3S_sysStatusCounter (0x370)
+  } else if (msg->addr == 0x370U) {
+    // Signal: EPAS3S_sysStatusCounter
     cnt = msg->data[6] & 0x0FU;
+  } else {
   }
   return cnt;
 }
 
 static int _tesla_get_checksum_byte(const int addr) {
-  // only called for checksum-checked messages, whose addresses are all enumerated here
-  int checksum_byte;
+  int checksum_byte = -1;
   if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
     // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
     checksum_byte = 7;
   } else if (addr == 0x488) {
     // Signal: DAS_steeringControlChecksum
     checksum_byte = 3;
-  } else {
+  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x145) || (addr == 0x286) || (addr == 0x311)) {
     // Signal: DI_speedChecksum, DI_systemStatusChecksum, ESP_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
-    // (0x257, 0x118, 0x145, 0x286, 0x311)
     checksum_byte = 0;
+  } else {
   }
   return checksum_byte;
 }
 
 static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
+  uint8_t chksum = 0;
   int checksum_byte = _tesla_get_checksum_byte(msg->addr);
-  return msg->data[checksum_byte];
+  if (checksum_byte != -1) {
+    chksum = msg->data[checksum_byte];
+  }
+  return chksum;
 }
 
 static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
+  uint8_t chksum = 0;
   int checksum_byte = _tesla_get_checksum_byte(msg->addr);
 
-  uint8_t chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
-  int len = GET_LEN(msg);
-  for (int i = 0; i < len; i++) {
-    if (i != checksum_byte) {
-      chksum += msg->data[i];
+  if (checksum_byte != -1) {
+    chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
+    int len = GET_LEN(msg);
+    for (int i = 0; i < len; i++) {
+      if (i != checksum_byte) {
+        chksum += msg->data[i];
+      }
     }
   }
   return chksum;
 }
 
 static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
-  // quality flag checks are only enabled for 0x155 and 0x145
-  bool valid;
+
+  bool valid = false;
   if (msg->addr == 0x155U) {
     valid = (msg->data[5] & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
-  } else {
-    int user_brake_status = (msg->data[3] >> 5) & 0x03U;  // 0x145
+  } else if (msg->addr == 0x145U) {
+    int user_brake_status = (msg->data[3] >> 5) & 0x03U;
     valid = (user_brake_status != 0) && (user_brake_status != 3);  // ESP_driverBrakeApply=NotInit_orOff, Faulty_SNA
+  } else {
   }
   return valid;
 }
@@ -88,8 +96,12 @@ static int tesla_get_steer_ctrl_type(const int ctrl_type) {
   // Returns ANGLE_CONTROL-equivalent control type for FSD 14
   int steer_ctrl_type = ctrl_type;
   if (tesla_fsd_14) {
-    // only called with 1 (ANGLE_CONTROL) or 2 (LKAS)
-    steer_ctrl_type = (ctrl_type == 1) ? 2 : 1;
+    if (ctrl_type == 1) {
+      steer_ctrl_type = 2;
+    } else if (ctrl_type == 2) {
+      steer_ctrl_type = 1;
+    } else {
+    }
   }
   return steer_ctrl_type;
 }

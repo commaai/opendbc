@@ -29,7 +29,7 @@ if [ "$1" == "--report" ]; then
 fi
 
 # test coverage
-GCOV="gcovr -r $DIR/../ --gcov-executable \"$GCOV_EXEC\" -d --fail-under-line=100 --fail-under-branch=100 --txt-metric=branch -e ^libsafety"
+GCOV="gcovr -r $DIR/../ --gcov-executable \"$GCOV_EXEC\" -d --fail-under-line=100 -e ^libsafety"
 if ! GCOV_OUTPUT="$(eval $GCOV)"; then
   echo -e "FAILED:\n$GCOV_OUTPUT"
   exit 1

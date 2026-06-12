@@ -127,7 +127,7 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
       self._rx(self._speed_msg(0))
       self.assertFalse(self.safety.get_vehicle_moving())
 
-      values = {f"WHL_Spd{pos}Val": 0 for pos in ("FL", "FR", "RL", "RR")}
+      values = {f"WHL_Spd{pos}Val": 0.0 for pos in ("FL", "FR", "RL", "RR")}
       values[f"WHL_Spd{wheel}Val"] = (self.STANDSTILL_THRESHOLD + 1) * 0.03125
       self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
       self.assertTrue(self.safety.get_vehicle_moving(), f"not moving with wheel {wheel} speed")
