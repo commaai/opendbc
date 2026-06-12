@@ -22,59 +22,60 @@
 #define FORD_CAM_BUS  2U
 
 static uint8_t ford_get_counter(const CANPacket_t *msg) {
-  uint8_t cnt = 0;
+  // counter checks are only enabled for these two messages
+  uint8_t cnt;
   if (msg->addr == FORD_BrakeSysFeatures) {
     // Signal: VehVActlBrk_No_Cnt
     cnt = (msg->data[2] >> 2) & 0xFU;
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
-    // Signal: VehRollYaw_No_Cnt
-    cnt = msg->data[5];
   } else {
+    // Signal: VehRollYaw_No_Cnt (FORD_Yaw_Data_FD1)
+    cnt = msg->data[5];
   }
   return cnt;
 }
 
 static uint32_t ford_get_checksum(const CANPacket_t *msg) {
-  uint8_t chksum = 0;
+  // checksum checks are only enabled for these two messages
+  uint8_t chksum;
   if (msg->addr == FORD_BrakeSysFeatures) {
     // Signal: VehVActlBrk_No_Cs
     chksum = msg->data[3];
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
-    // Signal: VehRollYawW_No_Cs
-    chksum = msg->data[4];
   } else {
+    // Signal: VehRollYawW_No_Cs (FORD_Yaw_Data_FD1)
+    chksum = msg->data[4];
   }
   return chksum;
 }
 
 static uint32_t ford_compute_checksum(const CANPacket_t *msg) {
+  // checksum checks are only enabled for these two messages
   uint8_t chksum = 0;
   if (msg->addr == FORD_BrakeSysFeatures) {
     chksum += msg->data[0] + msg->data[1];  // Veh_V_ActlBrk
     chksum += msg->data[2] >> 6;                    // VehVActlBrk_D_Qf
     chksum += (msg->data[2] >> 2) & 0xFU;           // VehVActlBrk_No_Cnt
     chksum = 0xFFU - chksum;
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
+  } else {
+    // FORD_Yaw_Data_FD1
     chksum += msg->data[0] + msg->data[1];  // VehRol_W_Actl
     chksum += msg->data[2] + msg->data[3];  // VehYaw_W_Actl
     chksum += msg->data[5];                         // VehRollYaw_No_Cnt
     chksum += msg->data[6] >> 6;                    // VehRolWActl_D_Qf
     chksum += (msg->data[6] >> 4) & 0x3U;           // VehYawWActl_D_Qf
     chksum = 0xFFU - chksum;
-  } else {
   }
   return chksum;
 }
 
 static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
-  bool valid = false;
+  // quality flag checks are only enabled for these three messages
+  bool valid;
   if (msg->addr == FORD_BrakeSysFeatures) {
     valid = (msg->data[2] >> 6) == 0x3U;           // VehVActlBrk_D_Qf
   } else if (msg->addr == FORD_EngVehicleSpThrottle2) {
     valid = ((msg->data[4] >> 5) & 0x3U) == 0x3U;  // VehVActlEng_D_Qf
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
-    valid = ((msg->data[6] >> 4) & 0x3U) == 0x3U;  // VehYawWActl_D_Qf
   } else {
+    valid = ((msg->data[6] >> 4) & 0x3U) == 0x3U;  // VehYawWActl_D_Qf (FORD_Yaw_Data_FD1)
   }
   return valid;
 }
@@ -97,54 +98,53 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
 };
 
 static void ford_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == FORD_MAIN_BUS) {
-    // Update in motion state from standstill signal
-    if (msg->addr == FORD_DesiredTorqBrk) {
-      // Signal: VehStop_D_Stat
-      vehicle_moving = ((msg->data[3] >> 3) & 0x3U) != 1U;
-    }
+  // all RX messages are whitelisted on the main bus (addr+bus+len enforced by rx_msg_safety_check)
+  // Update in motion state from standstill signal
+  if (msg->addr == FORD_DesiredTorqBrk) {
+    // Signal: VehStop_D_Stat
+    vehicle_moving = ((msg->data[3] >> 3) & 0x3U) != 1U;
+  }
 
-    // Update vehicle speed
-    if (msg->addr == FORD_BrakeSysFeatures) {
-      // Signal: Veh_V_ActlBrk
-      UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01 * KPH_TO_MS);
-    }
+  // Update vehicle speed
+  if (msg->addr == FORD_BrakeSysFeatures) {
+    // Signal: Veh_V_ActlBrk
+    UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01 * KPH_TO_MS);
+  }
 
-    // Check vehicle speed against a second source
-    if (msg->addr == FORD_EngVehicleSpThrottle2) {
-      // Disable controls if speeds from ABS and PCM ECUs are too far apart.
-      // Signal: Veh_V_ActlEng
-      float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
-      UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
-    }
+  // Check vehicle speed against a second source
+  if (msg->addr == FORD_EngVehicleSpThrottle2) {
+    // Disable controls if speeds from ABS and PCM ECUs are too far apart.
+    // Signal: Veh_V_ActlEng
+    float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
+    UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
+  }
 
-    // Update vehicle yaw rate
-    if (msg->addr == FORD_Yaw_Data_FD1) {
-      // Signal: VehYaw_W_Actl
-      // TODO: we should use the speed which results in the closest angle measurement to the desired angle
-      float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
-      float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
-      // convert current curvature into units on CAN for comparison with desired curvature
-      update_sample(&curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
-    }
+  // Update vehicle yaw rate
+  if (msg->addr == FORD_Yaw_Data_FD1) {
+    // Signal: VehYaw_W_Actl
+    // TODO: we should use the speed which results in the closest angle measurement to the desired angle
+    float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
+    float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
+    // convert current curvature into units on CAN for comparison with desired curvature
+    update_sample(&curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
+  }
 
-    // Update gas pedal
-    if (msg->addr == FORD_EngVehicleSpThrottle) {
-      // Pedal position: (0.1 * val) in percent
-      // Signal: ApedPos_Pc_ActlArb
-      gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
-    }
+  // Update gas pedal
+  if (msg->addr == FORD_EngVehicleSpThrottle) {
+    // Pedal position: (0.1 * val) in percent
+    // Signal: ApedPos_Pc_ActlArb
+    gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
+  }
 
-    // Update brake pedal and cruise state
-    if (msg->addr == FORD_EngBrakeData) {
-      // Signal: BpedDrvAppl_D_Actl
-      brake_pressed = ((msg->data[0] >> 4) & 0x3U) == 2U;
+  // Update brake pedal and cruise state
+  if (msg->addr == FORD_EngBrakeData) {
+    // Signal: BpedDrvAppl_D_Actl
+    brake_pressed = ((msg->data[0] >> 4) & 0x3U) == 2U;
 
-      // Signal: CcStat_D_Actl
-      unsigned int cruise_state = msg->data[1] & 0x07U;
-      bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
-      pcm_cruise_check(cruise_engaged);
-    }
+    // Signal: CcStat_D_Actl
+    unsigned int cruise_state = msg->data[1] & 0x07U;
+    bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
+    pcm_cruise_check(cruise_engaged);
   }
 }
 

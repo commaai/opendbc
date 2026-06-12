@@ -67,7 +67,8 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
     if (limits.dynamic_max_torque) {
       const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
       max_torque = safety_interpolate(limits.max_torque_lookup, fudged_speed) + 1;
-      max_torque = SAFETY_CLAMP(max_torque, -limits.max_torque, limits.max_torque);
+      // the interpolated torque is a positive magnitude, so only the upper bound can bind
+      max_torque = SAFETY_MIN(max_torque, limits.max_torque);
     }
 
     // *** global torque limit check ***

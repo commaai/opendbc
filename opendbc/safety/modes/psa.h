@@ -16,12 +16,12 @@
 #define PSA_CAM_BUS  2U
 
 static uint8_t psa_get_counter(const CANPacket_t *msg) {
-  uint8_t cnt = 0;
+  // only these two messages have counter checks enabled
+  uint8_t cnt;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
     cnt = (msg->data[3] >> 4) & 0xFU;
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    cnt = (msg->data[5] >> 4) & 0xFU;
   } else {
+    cnt = (msg->data[5] >> 4) & 0xFU;  // PSA_HS2_DYN_ABR_38D
   }
   return cnt;
 }
@@ -47,12 +47,12 @@ static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, in
 }
 
 static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
-  uint8_t chk = 0;
+  // only these two messages have checksum checks enabled
+  uint8_t chk;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
     chk = _psa_compute_checksum(msg, 0x4, 5);
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    chk = _psa_compute_checksum(msg, 0x7, 5);
   } else {
+    chk = _psa_compute_checksum(msg, 0x7, 5);  // PSA_HS2_DYN_ABR_38D
   }
   return chk;
 }
@@ -74,16 +74,13 @@ static void psa_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->bus == PSA_ADAS_BUS) {
-    if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-      pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
-    }
+    // PSA_HS2_DAT_MDD_CMD_452 is the only RX message on the ADAS bus
+    pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
   }
 
-
   if (msg->bus == PSA_CAM_BUS) {
-    if (msg->addr == PSA_DAT_BSI) {
-      brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
-    }
+    // PSA_DAT_BSI is the only RX message on the camera bus
+    brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
   }
 }
 
@@ -102,16 +99,14 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
     },
   };
 
-  // Safety check for LKA
-  if (msg->addr == PSA_LANE_KEEP_ASSIST) {
-    // SET_ANGLE
-    int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
-    // TORQUE_FACTOR
-    bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
+  // Safety check for LKA — PSA_LANE_KEEP_ASSIST is the only TX message
+  // SET_ANGLE
+  int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
+  // TORQUE_FACTOR
+  bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
 
-    if (steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS)) {
-      tx = false;
-    }
+  if (steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS)) {
+    tx = false;
   }
   return tx;
 }

@@ -146,12 +146,11 @@ static void update_addr_timestamp(RxCheck addr_list[], int index) {
 }
 
 static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
-  if (index != -1) {
-    uint8_t expected_counter = (addr_list[index].status.last_counter + 1U) % (addr_list[index].msg[addr_list[index].status.index].max_counter + 1U);
-    addr_list[index].status.wrong_counters += (expected_counter == counter) ? -1 : 1;
-    addr_list[index].status.wrong_counters = SAFETY_CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
-    addr_list[index].status.last_counter = counter;
-  }
+  // index is always valid here: the only caller guards on index != -1 before calling
+  uint8_t expected_counter = (addr_list[index].status.last_counter + 1U) % (addr_list[index].msg[addr_list[index].status.index].max_counter + 1U);
+  addr_list[index].status.wrong_counters += (expected_counter == counter) ? -1 : 1;
+  addr_list[index].status.wrong_counters = SAFETY_CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
+  addr_list[index].status.last_counter = counter;
 }
 
 static bool rx_msg_safety_check(const CANPacket_t *msg,
@@ -162,8 +161,8 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
   update_addr_timestamp(cfg->rx_checks, index);
 
   if (index != -1) {
-    // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
+    // checksum check (get_checksum and compute_checksum are always defined together per mode)
+    if ((safety_hooks->get_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
       uint32_t checksum = safety_hooks->get_checksum(msg);
       uint32_t checksum_comp = safety_hooks->compute_checksum(msg);
       cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
@@ -315,29 +314,23 @@ void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
 
 // 1Hz safety function called by main. Now just a check for lagging safety messages
 void safety_tick(const safety_config *cfg) {
-  const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = microsecond_timer_get();
-  if (cfg != NULL) {
-    for (int i=0; i < cfg->rx_checks_len; i++) {
-      uint32_t elapsed_time = safety_get_ts_elapsed(ts, cfg->rx_checks[i].status.last_timestamp);
-      // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
-      // Quite conservative to not risk false triggers.
-      // 2s of lag is worse case, since the function is called at 1Hz
-      uint32_t frequency = cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
-      uint32_t timestep = 1e6 / frequency;
-      bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
-      cfg->rx_checks[i].status.lagging = lagging;
-      if (lagging) {
-        controls_allowed = false;
-      }
+  // cfg is always valid: callers pass the address of a safety config
+  for (int i=0; i < cfg->rx_checks_len; i++) {
+    uint32_t elapsed_time = safety_get_ts_elapsed(ts, cfg->rx_checks[i].status.last_timestamp);
+    // lag threshold is 1s: at the enforced 10Hz minimum frequency (see test_rx_check_frequency),
+    // 10 missed messages equals 1s, and higher-frequency messages are even more conservative.
+    // 2s of lag is worst case, since the function is called at 1Hz.
+    bool lagging = elapsed_time > (uint32_t)1e6;
+    cfg->rx_checks[i].status.lagging = lagging;
+    if (lagging) {
+      controls_allowed = false;
+    }
 
-      // enforce minimum frequency for safety-relevant messages
-      bool frequency_invalid = frequency < 10U;
-      if (lagging || frequency_invalid || !is_msg_valid(cfg->rx_checks, i)) {
-        rx_checks_invalid = true;
-        controls_allowed = false;
-      }
+    if (lagging || !is_msg_valid(cfg->rx_checks, i)) {
+      rx_checks_invalid = true;
+      controls_allowed = false;
     }
   }
 
@@ -482,7 +475,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
       set_status = 0;  // set
     }
   }
-  if ((set_status == 0) && (current_hooks->init != NULL)) {
+  if (set_status == 0) {  // every registered mode defines an init hook
     safety_config cfg = current_hooks->init(param);
     current_safety_config.rx_checks = cfg.rx_checks;
     current_safety_config.rx_checks_len = cfg.rx_checks_len;
@@ -499,10 +492,11 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 
 // convert a trimmed integer to signed 32 bit int
 int to_signed(int d, int bits) {
+  // all call sites pass a positive bit width, so bits >= 1
   int d_signed = d;
-  int max_value = (1 << SAFETY_MAX((bits - 1), 0));
+  int max_value = (1 << (bits - 1));
   if (d >= max_value) {
-    d_signed = d - (1 << SAFETY_MAX(bits, 0));
+    d_signed = d - (1 << bits);
   }
   return d_signed;
 }

@@ -59,8 +59,8 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 static bool hyundai_legacy = false;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
-
-  uint8_t cnt = 0;
+  // counter checks are only enabled for these messages
+  uint8_t cnt;
   if (msg->addr == 0x260U) {
     cnt = (msg->data[7] >> 4) & 0x3U;
   } else if (msg->addr == 0x386U) {
@@ -69,25 +69,23 @@ static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
     cnt = (msg->data[1] >> 5) & 0x7U;
   } else if (msg->addr == 0x421U) {
     cnt = msg->data[7] & 0xFU;
-  } else if (msg->addr == 0x4F1U) {
-    cnt = (msg->data[3] >> 4) & 0xFU;
   } else {
+    cnt = (msg->data[3] >> 4) & 0xFU;  // 0x4F1
   }
   return cnt;
 }
 
 static uint32_t hyundai_get_checksum(const CANPacket_t *msg) {
-
-  uint8_t chksum = 0;
+  // checksum checks are only enabled for these messages
+  uint8_t chksum;
   if (msg->addr == 0x260U) {
     chksum = msg->data[7] & 0xFU;
   } else if (msg->addr == 0x386U) {
     chksum = ((msg->data[7] >> 6) << 2) | (msg->data[5] >> 6);
   } else if (msg->addr == 0x394U) {
     chksum = msg->data[6] & 0xFU;
-  } else if (msg->addr == 0x421U) {
-    chksum = msg->data[7] >> 4;
   } else {
+    chksum = msg->data[7] >> 4;  // 0x421
   }
   return chksum;
 }
@@ -100,8 +98,8 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
       uint8_t b = msg->data[i];
       for (int j = 0; j < 8; j++) {
         uint8_t bit = 0;
-        // exclude checksum and counter
-        if (((i != 1) || (j < 6)) && ((i != 3) || (j < 6)) && ((i != 5) || (j < 6)) && ((i != 7) || (j < 6))) {
+        // exclude checksum and counter: the top two bits of odd-indexed bytes
+        if ((j < 6) || ((i % 2) == 0)) {
           bit = (b >> (uint8_t)j) & 1U;
         }
         chksum += bit;
@@ -156,7 +154,7 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
       gas_pressed = (((msg->data[4] & 0x7FU) << 1) | (msg->data[3] >> 7)) != 0U;
     } else if ((msg->addr == 0x371U) && hyundai_hybrid_gas_signal) {
       gas_pressed = msg->data[7] != 0U;
-    } else if ((msg->addr == 0x91U) && hyundai_fcev_gas_signal) {
+    } else if (hyundai_fcev_gas_signal && (msg->addr == 0x91U)) {  // 0x91 is only rx-checked in FCEV configs
       gas_pressed = msg->data[6] != 0U;
     } else if ((msg->addr == 0x260U) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
       gas_pressed = (msg->data[7] >> 6) != 0U;

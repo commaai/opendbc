@@ -19,13 +19,12 @@ static uint32_t volkswagen_pq_get_checksum(const CANPacket_t *msg) {
 }
 
 static uint8_t volkswagen_pq_get_counter(const CANPacket_t *msg) {
-  uint8_t counter = 0U;
-
+  // only LENKHILFE_3 and GRA_NEU have counter checks enabled
+  uint8_t counter;
   if (msg->addr == MSG_LENKHILFE_3) {
     counter = (uint8_t)(msg->data[1] & 0xF0U) >> 4;
-  } else if (msg->addr == MSG_GRA_NEU) {
-    counter = (uint8_t)(msg->data[2] & 0xF0U) >> 4;
   } else {
+    counter = (uint8_t)(msg->data[2] & 0xF0U) >> 4;  // MSG_GRA_NEU
   }
 
   return counter;

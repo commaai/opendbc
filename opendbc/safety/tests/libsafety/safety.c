@@ -34,6 +34,21 @@ bool safety_config_valid() {
   return true;
 }
 
+int get_rx_check_min_frequency(void) {
+  // minimum configured frequency across all rx checks and their alternatives;
+  // safety_tick relies on every safety message being at least 10Hz
+  int min_freq = -1;
+  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
+    for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (current_safety_config.rx_checks[i].msg[j].addr != 0U); j++) {
+      int f = (int)current_safety_config.rx_checks[i].msg[j].frequency;
+      if ((min_freq == -1) || (f < min_freq)) {
+        min_freq = f;
+      }
+    }
+  }
+  return min_freq;
+}
+
 void set_controls_allowed(bool c){
   controls_allowed = c;
 }
