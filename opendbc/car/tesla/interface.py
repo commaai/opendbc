@@ -2,7 +2,7 @@ from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.tesla.carcontroller import CarController
 from opendbc.car.tesla.carstate import CarState
-from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CANBUS, CAR, DBC, FSD_14_FW, Ecu
+from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CANBUS, CAR, DBC, LEGACY_DAS_STEERING_FW, Ecu
 from opendbc.car.tesla.radar_interface import RadarInterface, RADAR_START_ADDR
 
 
@@ -43,10 +43,10 @@ class CarInterface(CarInterfaceBase):
       ret.vEgoStarting = 0.1
       ret.stoppingDecelRate = 0.3
 
-    fsd_14 = any(fw.ecu == Ecu.eps and fw.fwVersion in FSD_14_FW.get(candidate, []) for fw in car_fw)
-    if fsd_14:
-      ret.flags |= TeslaFlags.FSD_14.value
-      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FSD_14.value
+    legacy_das = any(fw.ecu == Ecu.eps and fw.fwVersion in LEGACY_DAS_STEERING_FW.get(candidate, []) for fw in car_fw)
+    if legacy_das:
+      ret.flags |= TeslaFlags.LEGACY_DAS_STEERING.value
+      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LEGACY_DAS_STEERING.value
 
     ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
 
