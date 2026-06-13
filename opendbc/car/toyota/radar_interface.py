@@ -35,8 +35,6 @@ class RadarInterface(RadarInterfaceBase):
       self.RADAR_A_MSGS = list(range(0x210, 0x220))
       self.RADAR_B_MSGS = list(range(0x220, 0x230))
 
-    self.valid_cnt = {key: 0 for key in self.RADAR_A_MSGS}
-
     self.rcp = None if CP.radarUnavailable else _create_radar_can_parser(CP.carFingerprint)
     self.trigger_msg = self.RADAR_B_MSGS[-1]
     self.updated_messages = set()
@@ -68,18 +66,11 @@ class RadarInterface(RadarInterfaceBase):
       if ii in self.RADAR_A_MSGS:
         cpt = self.rcp.vl[ii]
 
-        if cpt['LONG_DIST'] >= 255 or cpt['NEW_TRACK']:
-          self.valid_cnt[ii] = 0    # reset counter
-        if cpt['VALID'] and cpt['LONG_DIST'] < 255:
-          self.valid_cnt[ii] += 1
-        else:
-          self.valid_cnt[ii] = max(self.valid_cnt[ii] - 1, 0)
-
         score = self.rcp.vl[ii+16]['SCORE']
-        # print ii, self.valid_cnt[ii], score, cpt['VALID'], cpt['LONG_DIST'], cpt['LAT_DIST']
+        # print(ii, score, cpt['VALID'], cpt['LONG_DIST'], cpt['LAT_DIST'])
 
         # radar point only valid if it's a valid measurement and score is above 50
-        if cpt['VALID'] or (score > 50 and cpt['LONG_DIST'] < 255 and self.valid_cnt[ii] > 0):
+        if cpt['VALID'] or (score > 50 and cpt['LONG_DIST'] < 255):
           if ii not in self.pts or cpt['NEW_TRACK']:
             self.pts[ii] = RadarData.RadarPoint()
             self.pts[ii].trackId = self.track_id
