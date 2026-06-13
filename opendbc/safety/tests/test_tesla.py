@@ -486,6 +486,13 @@ class TestTeslaIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(3, 2))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_wrong_len_ignored(self):
+    self.safety.ignition_can_hook(self._msg(0, 3))
+    msg = self._msg(1, 3)
+    msg[0].data_len_code = 7
+    self.safety.ignition_can_hook(msg)
+    self.assertFalse(self.safety.get_ignition_can())
+
 
 if __name__ == "__main__":
   unittest.main()

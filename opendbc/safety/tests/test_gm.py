@@ -250,6 +250,14 @@ class TestGmIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(0))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_wrong_bus_ignored(self):
+    self.safety.ignition_can_hook(common.make_msg(1, 0x1F1, dat=b"\x02" + b"\x00" * 7))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_wrong_len_ignored(self):
+    self.safety.ignition_can_hook(common.make_msg(0, 0x1F1, dat=b"\x02" + b"\x00" * 6))
+    self.assertFalse(self.safety.get_ignition_can())
+
 
 if __name__ == "__main__":
   unittest.main()
