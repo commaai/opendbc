@@ -57,6 +57,19 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
     values = {"STEERING_TORQUE": torque, "LKAS_CONTROL_BIT": self.LKAS_ACTIVE_VALUE if steer_req else 0}
     return self.packer.make_can_msg_safety("LKAS_COMMAND", 0, values)
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches with wrong-bus messages"""
+    # EPS_2 torque measurement - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("EPS_2", 1, {"EPS_TORQUE_MOTOR": 0}))
+    # DAS_3 cruise status - correct bus is 0 for Pacifica
+    self._rx(self.packer.make_can_msg_safety("DAS_3", 1, {"ACC_ACTIVE": 0}))
+    # SPEED_1 wheel speeds - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("SPEED_1", 1, {"SPEED_LEFT": 0, "SPEED_RIGHT": 0}))
+    # ECM_5 gas press - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("ECM_5", 1, {"Accelerator_Position": 0}))
+    # ESP_1 brake press - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("ESP_1", 1, {"Brake_Pedal_State": 0}))
+
   def test_buttons(self):
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
@@ -95,6 +108,19 @@ class TestChryslerRamDTSafety(TestChryslerSafety):
     values = {"Vehicle_Speed": speed}
     return self.packer.make_can_msg_safety("ESP_8", 0, values)
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches with wrong-bus messages for RAM DT"""
+    # EPS_2 torque measurement - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("EPS_2", 1, {"EPS_TORQUE_MOTOR": 0}))
+    # DAS_3 cruise status - correct bus is 2 for RAM DT
+    self._rx(self.packer.make_can_msg_safety("DAS_3", 0, {"ACC_ACTIVE": 0}))
+    # ESP_8 vehicle speed - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("ESP_8", 1, {"Vehicle_Speed": 0}))
+    # ECM_5 gas press - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("ECM_5", 1, {"Accelerator_Position": 0}))
+    # ESP_1 brake press - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("ESP_1", 1, {"Brake_Pedal_State": 0}))
+
 
 class TestChryslerRamHDSafety(TestChryslerSafety):
   TX_MSGS = [[0x275, 0], [0x276, 0], [0x23A, 2]]
@@ -119,6 +145,19 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
   def _speed_msg(self, speed):
     values = {"Vehicle_Speed": speed}
     return self.packer.make_can_msg_safety("ESP_8", 0, values)
+
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches with wrong-bus messages for RAM HD"""
+    # EPS_2 torque measurement - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("EPS_2", 1, {"EPS_TORQUE_MOTOR": 0}))
+    # DAS_3 cruise status - correct bus is 2 for RAM HD
+    self._rx(self.packer.make_can_msg_safety("DAS_3", 0, {"ACC_ACTIVE": 0}))
+    # ESP_8 vehicle speed - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("ESP_8", 1, {"Vehicle_Speed": 0}))
+    # ECM_5 gas press - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("ECM_5", 1, {"Accelerator_Position": 0}))
+    # ESP_1 brake press - correct bus is 0
+    self._rx(self.packer.make_can_msg_safety("ESP_1", 1, {"Brake_Pedal_State": 0}))
 
 
 if __name__ == "__main__":
