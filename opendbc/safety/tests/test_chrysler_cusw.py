@@ -70,6 +70,15 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
       self.assertTrue(self._rx(self._user_gas_msg(0)), f"{count=}")
       self.assertTrue(self._rx(self._pcm_status_msg(False)), f"{count=}")
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches with wrong-bus messages"""
+    # All chrysler_cusw messages expect bus 0
+    self._rx(self.packer.make_can_msg_safety("EPS_STATUS", 1, {"TORQUE_MOTOR": 0}))
+    self._rx(self.packer.make_can_msg_safety("ACC_CONTROL", 1, {"ACC_ACTIVE": 0}))
+    self._rx(self.packer.make_can_msg_safety("BRAKE_1", 1, {"VEHICLE_SPEED": 0}))
+    self._rx(self.packer.make_can_msg_safety("ACCEL_GAS", 1, {"GAS_HUMAN": 0}))
+    self._rx(self.packer.make_can_msg_safety("BRAKE_3", 1, {"DRIVER_BRAKE_SWITCH": 0}))
+
 
 if __name__ == "__main__":
   unittest.main()
