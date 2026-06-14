@@ -32,6 +32,14 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.safety.set_safety_hooks(CarParams.SafetyModel.mazda, 0)
     self.safety.init_tests()
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered bus branches with messages on wrong buses"""
+    # MAZDA_MAIN=0 messages on wrong bus
+    self._rx(make_msg(2, 0x202, 8))
+    self._rx(make_msg(2, 0x240, 8))
+    self._rx(make_msg(2, 0x21c, 8))
+    self._rx(make_msg(2, 0x165, 8))
+
   def _torque_meas_msg(self, torque):
     values = {"STEER_TORQUE_MOTOR": torque}
     return self.packer.make_can_msg_safety("STEER_TORQUE", 0, values)
