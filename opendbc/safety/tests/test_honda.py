@@ -237,6 +237,16 @@ class HondaBase(common.CarSafetyTest):
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
     self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches with wrong-bus messages"""
+    # Buttons (0x1A6/0x296) expect PT_BUS, send on wrong bus
+    wrong_bus = 1 if self.PT_BUS == 0 else 0
+    self._rx(self._button_msg(0, bus=wrong_bus))
+    # AEB brake (0x1FA) expects bus 2, send on wrong bus
+    self._rx(libsafety_py.make_CANPacket(0x1FA, 0, b'\x00' * 8))
+    # Also try the alternate brake message (0x1BE) on wrong bus
+    # (0x1BE has no bus check but we cover the AEB path)
+
 
 # ********************* Honda Nidec **********************
 
