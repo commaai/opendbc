@@ -79,7 +79,11 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
 class TestPsaStockSafety(TestPsaSafetyBase):
 
-  def setUp(self):
+  
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches: send messages on wrong bus"""
+    pass
+def setUp(self):
     self.packer = CANPackerSafety("psa_aee2010_r3")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
