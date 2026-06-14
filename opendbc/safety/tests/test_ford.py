@@ -416,6 +416,16 @@ class TestFordSafetyBase(common.CarSafetyTest):
       for bus in (0, 2):
         self.assertEqual(enabled, self._tx(self._acc_button_msg(Buttons.CANCEL, bus)))
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches with wrong-bus messages"""
+    # All Ford rx messages expect bus 0 (FORD_MAIN_BUS)
+    self._rx(self.packer.make_can_msg_safety("DesiredTorqBrk", 1, {"VehStop_D_Stat": 0}))
+    self._rx(self.packer.make_can_msg_safety("BrakeSysFeatures", 1, {"Veh_V_ActlBrk": 0, "VehVActlBrk_D_Qf": 3, "VehVActlBrk_No_Cnt": 0}))
+    self._rx(self.packer.make_can_msg_safety("EngVehicleSpThrottle2", 1, {"Veh_V_ActlEng": 0, "VehVActlEng_D_Qf": 3, "VehVActlEng_No_Cnt": 0}))
+    self._rx(self.packer.make_can_msg_safety("Yaw_Data_FD1", 1, {"VehYaw_W_Actl": 0, "VehYawWActl_D_Qf": 3, "VehRollYaw_No_Cnt": 0}))
+    self._rx(self.packer.make_can_msg_safety("EngVehicleSpThrottle", 1, {"ApedPos_Pc_ActlArb": 0}))
+    self._rx(self.packer.make_can_msg_safety("EngBrakeData", 1, {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": 0}))
+
 
 class TestFordCANFDStockSafety(TestFordSafetyBase):
   STEER_MESSAGE = MSG_LateralMotionControl2
