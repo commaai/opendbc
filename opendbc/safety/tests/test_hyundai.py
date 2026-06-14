@@ -79,6 +79,21 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_button += 1
     return self.packer.make_can_msg_safety("CLU11", bus, values)
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches with wrong-bus messages"""
+    # SCC12 (0x421) expects bus 0 for non-camera SCC, send on wrong bus (1)
+    self._rx(self.packer.make_can_msg_safety("SCC12", 1, {"ACCMode": 0}))
+    # MDPS12 (0x251) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("MDPS12", 1, {"CR_Mdps_StrColTq": 0}))
+    # CLU11 (0x4F1) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("CLU11", 1, {"CF_Clu_CruiseSwState": 0}))
+    # EMS16 (0x371) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("EMS16", 1, {"CF_Ems_AclAct": 0}))
+    # WHL_SPD11 (0x386) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("WHL_SPD11", 1, {"WHL_SPD_FL": 0, "WHL_SPD_FR": 0, "WHL_SPD_RL": 0, "WHL_SPD_RR": 0}))
+    # TCS13 (0x394) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("TCS13", 1, {"DriverOverride": 0}))
+
   def _user_gas_msg(self, gas):
     values = {"CF_Ems_AclAct": gas, "AliveCounter": self.cnt_gas % 4}
     self.__class__.cnt_gas += 1
@@ -145,6 +160,21 @@ class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.CAMERA_SCC)
     self.safety.init_tests()
+
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches with wrong-bus messages for camera SCC"""
+    # SCC12 (0x421) expects bus 2 for camera SCC, send on wrong bus (0)
+    self._rx(self.packer.make_can_msg_safety("SCC12", 0, {"ACCMode": 0}))
+    # MDPS12 (0x251) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("MDPS12", 1, {"CR_Mdps_StrColTq": 0}))
+    # CLU11 (0x4F1) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("CLU11", 1, {"CF_Clu_CruiseSwState": 0}))
+    # EMS16 (0x371) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("EMS16", 1, {"CF_Ems_AclAct": 0}))
+    # WHL_SPD11 (0x386) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("WHL_SPD11", 1, {"WHL_SPD_FL": 0, "WHL_SPD_FR": 0, "WHL_SPD_RL": 0, "WHL_SPD_RR": 0}))
+    # TCS13 (0x394) expects bus 0
+    self._rx(self.packer.make_can_msg_safety("TCS13", 1, {"DriverOverride": 0}))
 
 
 class TestHyundaiSafetyFCEV(TestHyundaiSafety):
