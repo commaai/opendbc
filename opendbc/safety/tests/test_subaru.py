@@ -107,6 +107,21 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered &&/|| branches with wrong-bus messages"""
+    # Wrong bus for Steering_Torque (should be MAIN_BUS=0)
+    self._rx(self.packer.make_can_msg_safety("Steering_Torque", 2, {"Steer_Torque_Sensor": 0}))
+    # Wrong bus for CruiseControl (should be alt_main_bus)
+    self._rx(self.packer.make_can_msg_safety("CruiseControl", 0, {"Cruise_Activated": 0}))
+    # Wrong bus for Wheel_Speeds (should be alt_main_bus)
+    self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", 0, {"FR": 0, "FL": 0, "RR": 0, "RL": 0}))
+    # Wrong bus for Brake_Status (should be alt_main_bus)
+    self._rx(self.packer.make_can_msg_safety("Brake_Status", 0, {"Brake": 0}))
+    # Wrong bus for Throttle (should be MAIN_BUS=0)
+    self._rx(self.packer.make_can_msg_safety("Throttle", 2, {"Throttle_Pedal": 0}))
+    # Wheel_Speeds on correct bus but first wheel=0, second !=0 (|| short-circuit)
+    self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, {"FR": 0, "FL": 0, "RR": 1, "RL": 0}))
+
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
