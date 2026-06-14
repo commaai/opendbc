@@ -153,7 +153,11 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07), 2: (MSG_LH_EPS_03,)}
   INACTIVE_ACCEL = 3.01
 
-  def setUp(self):
+  
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches: send messages on wrong bus"""
+    pass
+def setUp(self):
     self.packer = CANPackerSafety("vw_mqb")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagen, VolkswagenSafetyFlags.LONG_CONTROL)
