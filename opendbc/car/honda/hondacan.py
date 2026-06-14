@@ -68,7 +68,7 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
   if (CP.flags & HondaFlags.HYBRID):
     values.update({
       "COMPUTER_BRAKE_HYBRID": apply_brake,
-      "BRAKE_PUMP_REQUEST_HYBRID": (apply_brake > 0),
+      "BRAKE_PUMP_REQUEST_HYBRID": brake_rq,
     })
   else:
     values.update({
