@@ -8,14 +8,18 @@ FW_VERSIONS = {
   CAR.NISSAN_ALTIMA: {
     (Ecu.fwdCamera, 0x707, None): [
       b'284N86CA1D',
+      b'284N86CA7A',
     ],
     (Ecu.eps, 0x742, None): [
       b'6CA2B\xa9A\x02\x02G8A89P90D6A\x00\x00\x01\x80',
       b'6CA2C\xa9A\x02\x02G8A89P90D6A\x00\x00\x01\x80',
+      b'6CA0A\xa9A\x02\x02G8A89P90D6A\x00\x00\x01\x80',
     ],
     (Ecu.engine, 0x7e0, None): [
       b'237106GU3B',
       b'237109HE2B',
+      b'237106GV3A',
+      b'237106AP9B',
     ],
     (Ecu.gateway, 0x18dad0f1, None): [
       b'284U29HE0A',
