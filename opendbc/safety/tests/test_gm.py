@@ -132,6 +132,17 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"ACCButtons": buttons}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches with wrong-bus messages"""
+    # All GM rx messages expect bus 0
+    self._rx(self.packer.make_can_msg_safety("PSCMStatus", 1, {"LKADriverAppldTrq": 0}))
+    self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 1, {"RL_WheelSpd": 0, "RR_WheelSpd": 0}))
+    self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 1, {"ACCButtons": 1}))
+    self._rx(self.packer.make_can_msg_safety("ECMAcceleratorPos", 1, {"BrakePedalPos": 0}))
+    self._rx(self.packer.make_can_msg_safety("ECMEngineStatus", 1, {"BrakePressed": 0}))
+    self._rx(self.packer.make_can_msg_safety("AcceleratorPedal2", 1, {"AcceleratorPedal2": 0}))
+    self._rx(self.packer.make_can_msg_safety("EBCMRegenPaddle", 1, {"RegenPaddle": 0}))
+
 
 class TestGmEVSafetyBase(TestGmSafetyBase):
   EXTRA_SAFETY_PARAM = GMSafetyFlags.EV
