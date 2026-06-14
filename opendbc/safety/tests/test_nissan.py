@@ -80,6 +80,22 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         self.assertEqual(tx, should_tx)
 
 
+  def test_cruise_state_wrong_bus(self):
+    # Send cruise state on a bus that doesn't match the safety config
+    # to exercise the branch where addr matches but bus doesn't
+    for msg_bus in [0, 1, 2]:
+      for alt_eps in [0, 1]:
+        self.safety.init_tests()
+        self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, alt_eps)
+        expected_bus = 1 if alt_eps else 2
+        if msg_bus == expected_bus:
+          continue  # skip correct bus, that's already tested
+        msg = self.packer.make_can_msg_safety("CRUISE_STATE", msg_bus, {"CRUISE_ENABLED": 1})
+        self.safety.safety_rx_hook(msg)
+        # Cruise should NOT be engaged since bus doesn't match
+        self.assertFalse(self.safety.get_controls_allowed())
+
+
 class TestNissanSafetyAltEpsBus(TestNissanSafety):
   """Altima uses different buses"""
 

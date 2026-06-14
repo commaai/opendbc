@@ -55,6 +55,14 @@ class TestBody(common.SafetyTest):
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
     self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
 
+  def test_can_flasher_additional_branches(self):
+    # Exercise additional branches in the flash check
+    self.safety.set_controls_allowed(False)
+    # 0x250 with len 6 (whitelisted) to exercise flash_msg false branch
+    self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde')))  # len=6, flash_msg=False
+    # 0x250 with len 8 but wrong second magic to exercise inner condition
+    self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x00\x00\x00\x00')))  # second half doesn't match
+
 
 if __name__ == "__main__":
   unittest.main()
