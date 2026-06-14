@@ -51,6 +51,17 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {"LKAS_Command": torque, "LKAS_Active": steer_req}
     return self.packer.make_can_msg_safety("ES_LKAS", 0, values)
 
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches: matching addr on wrong bus"""
+    # Send known messages on the WRONG bus to test the false branches
+    # L23: bus != SUBARU_PG_MAIN_BUS (bus 0)
+    self._rx(self.packer.make_can_msg_safety("Steering_Torque", 2, {"Steer_Torque_Sensor": 0}))
+    self._rx(self.packer.make_can_msg_safety("CruiseControl", 2, {"Cruise_Activated": 0}))
+    self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", 2, {"FR": 0, "FL": 0, "RR": 0, "RL": 0}))
+    self._rx(self.packer.make_can_msg_safety("Brake_Pedal", 2, {"Brake_Pedal": 0}))
+    # L40: || with first operand = 0, second != 0
+    self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", 0, {"FR": 0, "FL": 0, "RR": 1, "RL": 0}))
+
   def _user_gas_msg(self, gas):
     values = {"Throttle_Pedal": gas}
     return self.packer.make_can_msg_safety("Throttle", 0, values)
