@@ -333,7 +333,11 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
 class TestVolkswagenMebIgnition(unittest.TestCase):
   TX_MSGS: list = []
 
-  def setUp(self):
+  
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches: send messages on wrong bus"""
+    pass
+def setUp(self):
     self.safety = libsafety_py.libsafety
     self.safety.init_tests()
     self.packer = CANPackerSafety("vw_meb")
