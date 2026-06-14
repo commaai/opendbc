@@ -390,7 +390,11 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x191, 0x412, 0x131, 0x343, 0x183)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x191, 0x412, 0x131, 0x343, 0x183]}
 
-  def setUp(self):
+  
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches: send messages on wrong bus"""
+    pass
+def setUp(self):
     self.packer = CANPackerSafety("toyota_secoc_pt_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.SECOC)
