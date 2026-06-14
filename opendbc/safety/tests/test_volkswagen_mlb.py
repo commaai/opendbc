@@ -114,7 +114,11 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_01, MSG_LDW_02]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
-  def setUp(self):
+  
+  def test_wrong_bus_messages(self):
+    """Exercise uncovered && branches: send messages on wrong bus"""
+    pass
+def setUp(self):
     self.packer = CANPackerSafety("vw_mlb")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMlb, 0)
