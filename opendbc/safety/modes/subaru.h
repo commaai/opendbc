@@ -102,7 +102,7 @@ static uint32_t subaru_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void subaru_rx_hook(const CANPacket_t *msg) {
-  const unsigned int alt_main_bus = (subaru_gen2 || subaru_lkas_angle) ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
+  const unsigned int alt_main_bus = subaru_gen2 ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
 
   if ((msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
     int torque_driver_new;
@@ -272,6 +272,11 @@ static safety_config subaru_init(uint16_t param) {
     SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS)
   };
 
+  static const CanMsg subaru_lkas_angle_tx_msgs_gen1[] = {
+    SUBARU_BASE_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS_ANGLE)
+    SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS)
+  };
+
   static RxCheck subaru_rx_checks[] = {
     SUBARU_COMMON_RX_CHECKS(SUBARU_MAIN_BUS)
   };
@@ -282,6 +287,10 @@ static safety_config subaru_init(uint16_t param) {
 
   static RxCheck subaru_lkas_angle_rx_checks[] = {
     SUBARU_LKAS_ANGLE_RX_CHECKS(SUBARU_ALT_BUS)
+  };
+
+  static RxCheck subaru_lkas_angle_rx_checks_gen1[] = {
+    SUBARU_LKAS_ANGLE_RX_CHECKS(SUBARU_MAIN_BUS)
   };
 
   const uint16_t SUBARU_PARAM_GEN2 = 1;
@@ -297,7 +306,8 @@ static safety_config subaru_init(uint16_t param) {
 
   safety_config ret;
   if (subaru_lkas_angle) {
-    ret = BUILD_SAFETY_CFG(subaru_lkas_angle_rx_checks, subaru_lkas_angle_tx_msgs);
+    ret = subaru_gen2 ? BUILD_SAFETY_CFG(subaru_lkas_angle_rx_checks, subaru_lkas_angle_tx_msgs) : \
+                        BUILD_SAFETY_CFG(subaru_lkas_angle_rx_checks_gen1, subaru_lkas_angle_tx_msgs_gen1);
   } else if (subaru_gen2) {
     ret = subaru_longitudinal ? BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_LONG_TX_MSGS) : \
                                 BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_TX_MSGS);
