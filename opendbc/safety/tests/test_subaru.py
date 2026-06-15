@@ -147,7 +147,8 @@ class TestSubaruLongitudinalSafetyBase(TestSubaruSafetyBase, common.Longitudinal
 
   def _send_brake_msg(self, brake):
     values = {"Brake_Pressure": brake}
-    return self.packer.make_can_msg_safety("ES_Brake", self.ALT_MAIN_BUS, values)
+    bus = SUBARU_ALT_BUS if (self.FLAGS & SubaruSafetyFlags.GEN2) else SUBARU_MAIN_BUS
+    return self.packer.make_can_msg_safety("ES_Brake", bus, values)
 
   def _send_gas_msg(self, gas):
     values = {"Cruise_Throttle": gas}
@@ -223,7 +224,8 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
   # messages unchanged for now: still ES_Brake (bit 39) for engagement
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_safety("ES_Brake", self.ALT_MAIN_BUS, values)
+    bus = SUBARU_ALT_BUS if (self.FLAGS & SubaruSafetyFlags.GEN2) else SUBARU_CAM_BUS
+    return self.packer.make_can_msg_safety("ES_Brake", bus, values)
 
   def test_angle_cmd_when_enabled(self):
     # lateral accel and jerk are tested separately below
