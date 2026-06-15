@@ -209,7 +209,7 @@ class CarInterface(CarInterfaceBase):
       ret.dashcamOnly = is_release  # TODO: release from dashcam when there's enough driving data for torqued/paramsd to converge
 
     # These cars use alternate user brake msg (0x1BE)
-    if 0x1BE in fingerprint[CAN.pt]:
+    if (candidate in HONDA_BOSCH) and (0x1BE in fingerprint[CAN.pt]):
       ret.flags |= HondaFlags.BOSCH_ELECTRIC_BRAKE_BOOSTER.value
 
     if ret.flags & HondaFlags.BOSCH_ELECTRIC_BRAKE_BOOSTER:
