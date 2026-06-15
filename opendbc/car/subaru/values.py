@@ -2,19 +2,19 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
-from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
+from opendbc.car.lateral import AngleSteeringLimitsVM
+
 
 Ecu = CarParams.Ecu
 
 
 class CarControllerParams:
-  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    300,
-    ([0., 5., 15.], [5., .75, .4]),
-    ([0., 5., 15.], [5., 1.5, .8]),
+  ANGLE_LIMITS: AngleSteeringLimitsVM = AngleSteeringLimitsVM(
+    190,                # STEER_ANGLE_MAX, deg, EPS faults above ~200
+    MAX_ANGLE_RATE=5,   # deg/frame, comfort rate limit
   )
 
   def __init__(self, CP):
