@@ -13,7 +13,7 @@ Ecu = CarParams.Ecu
 
 class CarControllerParams:
   ANGLE_LIMITS: AngleSteeringLimitsVM = AngleSteeringLimitsVM(
-    190,                # STEER_ANGLE_MAX, deg, EPS faults above ~200
+    650,                # STEER_ANGLE_MAX, deg
     MAX_ANGLE_RATE=5,   # deg/frame, comfort rate limit
   )
 

@@ -184,8 +184,9 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
 
   FLAGS = SubaruSafetyFlags.LKAS_ANGLE | SubaruSafetyFlags.GEN2
 
-  # EPS faults above ~200 deg; matches AngleSteeringLimitsVM(190, ...) in CarControllerParams
-  STEER_ANGLE_MAX = 190  # deg
+  # max steering angle must cover all legitimate inputs. safety model limits based on
+  # calculated jerk from speed
+  STEER_ANGLE_MAX = 650  # deg
   DEG_TO_CAN = 100
 
   # Subaru uses the VM-based lateral accel/jerk limits, not a breakpoint table. The breakpoint

@@ -158,7 +158,13 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits SUBARU_GEN2_STEERING_LIMITS = SUBARU_STEERING_LIMITS_GENERATOR(1000, 40, 40);
 
   const AngleSteeringLimits SUBARU_ANGLE_STEERING_LIMITS = {
-    .max_angle = 190 * 100.,  // 190 deg, EPS faults above ~200
+    // NOTE: max angle must be set high enough for a legitimate full-lock command to pass
+    //       through. the VM jerk limits will apply at lower values during active controls
+    //       but, setting this too low will clip normal output from the camera and cause
+    //       LKAS faults at low-speed full-lock steering inputs (without cruise engaged).
+    //       During active control, steer_angle_cmd_checks_vm bounds the angle well below
+    //       this via speed-scaled accel/jerk limits; 650 is only reachable at very low speed
+    .max_angle = 650 * 100.,
     .angle_deg_to_can = 100.,
     .frequency = 50U,
   };
