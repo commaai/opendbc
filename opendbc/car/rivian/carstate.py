@@ -17,6 +17,10 @@ class CarState(CarStateBase):
     self.sccm_wheel_touch: dict | None = None
     self.vdm_adas_status: list[dict] | None = None
 
+    self.v_cruise = 0
+    self.prev_stalk_enable_adj = 0
+    self.prev_stalk_cancel_res = 0
+
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
@@ -48,8 +52,38 @@ class CarState(CarStateBase):
     speed = min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
     self.last_speed = speed if speed != 0 else self.last_speed
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] == 1
-    # TODO: find cruise set speed on CAN
-    ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
+
+    is_metric = cp_adas.vl["Cluster"]["Cluster_Unit"] == 0
+    speed_conv = CV.KPH_TO_MS if is_metric else CV.MPH_TO_MS
+
+    stalk_enable_adj = cp.vl["VDM_AdasStalk"]["VDM_AdasStalkAccEnableAdj"]
+    stalk_cancel_res = cp.vl["VDM_AdasStalk"]["VDM_AdasStalkAccCancelRes"]
+
+    if ret.cruiseState.enabled:
+      if self.v_cruise == 0:
+        current_speed = round(ret.vEgoCluster / speed_conv)
+        self.v_cruise = max(20 if not is_metric else 30, current_speed)
+
+      if stalk_enable_adj != self.prev_stalk_enable_adj:
+        if stalk_enable_adj == 1:
+          self.v_cruise += 1
+        elif stalk_enable_adj == 2:
+          self.v_cruise += 5
+        elif stalk_enable_adj == 3:
+          self.v_cruise -= 1
+        elif stalk_enable_adj == 4:
+          self.v_cruise -= 5
+
+        min_speed = 20 if not is_metric else 30
+        max_speed = 85 if not is_metric else 140
+        self.v_cruise = max(min_speed, min(self.v_cruise, max_speed))
+    else:
+      self.v_cruise = 0
+
+    self.prev_stalk_enable_adj = stalk_enable_adj
+    self.prev_stalk_cancel_res = stalk_cancel_res
+
+    ret.cruiseState.speed = self.v_cruise * speed_conv
     if not self.CP.openpilotLongitudinalControl:
       ret.cruiseState.speed = -1
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
