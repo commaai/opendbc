@@ -1,11 +1,13 @@
+import unittest
+
 from opendbc.car.rivian.fingerprints import FW_VERSIONS
 from opendbc.car.rivian.values import CAR, FW_QUERY_CONFIG, WMI, ModelLine, ModelYear
 
 
-class TestRivian:
-  def test_custom_fuzzy_fingerprinting(self, subtests):
+class TestRivian(unittest.TestCase):
+  def test_custom_fuzzy_fingerprinting(self):
     for platform in CAR:
-      with subtests.test(platform=platform.name):
+      with self.subTest(platform=platform.name):
         for wmi in WMI:
           for line in ModelLine:
             for year in ModelYear:
