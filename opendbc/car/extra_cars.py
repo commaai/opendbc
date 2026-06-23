@@ -42,7 +42,7 @@ class CAR(Platforms):
       CommunityCarDocs("Acura MDX 2015-16", "Advance Package"),
       CommunityCarDocs("Acura MDX 2017-20"),
       CommunityCarDocs("Acura MDX Hybrid 2017-20"),
-      CommunityCarDocs("Acura RDX 2025"),
+      CommunityCarDocs("Acura RDX 2025-26"),
       CommunityCarDocs("Acura RLX 2017", "Advance Package or Technology Package"),
       CommunityCarDocs("Acura TLX 2015-17", "Advance Package"),
       CommunityCarDocs("Acura TLX 2018-20"),
@@ -51,6 +51,7 @@ class CAR(Platforms):
       CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing"),
       CommunityCarDocs("Honda Accord Hybrid 2017"),
       CommunityCarDocs("Honda Clarity 2018-21"),
+      CommunityCarDocs("Honda Pilot 2026"),
       GMSecurityCarDocs("Honda Prologue 2024-25"),
     ],
   )
