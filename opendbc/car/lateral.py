@@ -1,27 +1,70 @@
 import math
 import numpy as np
 from dataclasses import dataclass
-from opendbc.car import structs, rate_limit, DT_CTRL
+from opendbc.car import structs, rate_limit, DT_CTRL, ACCELERATION_DUE_TO_GRAVITY
 from opendbc.car.vehicle_model import VehicleModel
 
 FRICTION_THRESHOLD = 0.2
 
-# ISO 11270
+# - ISO 11270
 ISO_LATERAL_ACCEL = 3.0  # m/s^2
 ISO_LATERAL_JERK = 5.0  # m/s^3
 
+# - Common angle/curvature safety limits
+# Add extra tolerance for average banked road since safety doesn't have the roll
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
+MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
+# Lower than ISO 11270 lateral jerk limit (5.0 m/s^3) with bank tolerance, matches safety MAX_LATERAL_JERK
+MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^3
 
+
+# TODO: deprecate in favor of vehicle-model-based limiting
+#  (need to solve cars having different steering ratios, etc.)
 @dataclass
 class AngleSteeringLimits:
-  # v1 limits (using apply_std_steer_angle_limits)
+  # uses apply_std_steer_angle_limits
   STEER_ANGLE_MAX: float
   ANGLE_RATE_LIMIT_UP: tuple[list[float], list[float]]
   ANGLE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
 
-  # v2 vehicle model limits (using apply_steer_angle_limits_vm)
-  MAX_LATERAL_ACCEL: float = 0
-  MAX_LATERAL_JERK: float = 0
+
+@dataclass
+class AngleSteeringLimitsVM:
+  # uses apply_steer_angle_limits_vm
+  # Max accepted by the EPS
+  STEER_ANGLE_MAX: float
+  MAX_LATERAL_ACCEL: float = MAX_LATERAL_ACCEL
+  MAX_LATERAL_JERK: float = MAX_LATERAL_JERK
+  # Used for comfort or to prevent faults at low speed
   MAX_ANGLE_RATE: float = math.inf
+
+
+@dataclass
+class CurvatureSteeringLimits:
+  # Max accepted by the EPS
+  CURVATURE_MAX: float
+  MAX_LATERAL_ACCEL: float = MAX_LATERAL_ACCEL
+  MAX_LATERAL_JERK: float = MAX_LATERAL_JERK
+
+  def apply_limits(self, apply_curvature: float, apply_curvature_last: float, v_ego: float, curvature: float,
+                   lat_active: bool, steer_step: int) -> float:
+    """Apply accel and jerk constraints to curvature."""
+    v_ego = max(v_ego, 1)
+
+    # *** max lateral accel limit ***
+    max_curvature = self.MAX_LATERAL_ACCEL / (v_ego ** 2)
+    new_apply_curvature = float(np.clip(apply_curvature, -max_curvature, max_curvature))
+
+    # *** max lateral jerk limit ***
+    max_jerk = (self.MAX_LATERAL_JERK / (v_ego ** 2)) * (steer_step * DT_CTRL)
+    new_apply_curvature = float(np.clip(new_apply_curvature, apply_curvature_last - max_jerk, apply_curvature_last + max_jerk))
+
+    # curvature is current curvature when inactive
+    if not lat_active:
+      new_apply_curvature = curvature
+
+    # prevent fault
+    return float(np.clip(new_apply_curvature, -self.CURVATURE_MAX, self.CURVATURE_MAX))
 
 
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int | None = None):
