@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
+from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, p16
 
 Ecu = CarParams.Ecu
 
@@ -141,6 +141,67 @@ CHRYSLER_SOFTWARE_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTI
 
 CHRYSLER_RX_OFFSET = -0x280
 
+
+# Chrysler FW responses encode a part number followed by a variable-length revision
+# suffix, e.g. 68227902AF. The trailing characters are bumped on every software update
+# (recalls, calibration tweaks, model-year refreshes), while the leading digits identify
+# the physical part/platform. Empirically (validated against ~2 years of real firmware
+# seen in the wild via opendbc's fingerprint-collection bot, see PR description) Chrysler
+# revises more than just the last 2 characters on actual updates, so we drop the last 4.
+PLATFORM_CODE_TRIM = 4
+
+# ECUs that consistently report platform part numbers, observed across all known platforms
+PLATFORM_CODE_ECUS = (Ecu.combinationMeter, Ecu.abs, Ecu.fwdRadar, Ecu.eps)
+
+
+def get_platform_codes(fw_versions: list[bytes] | set[bytes]) -> set[bytes]:
+  """Extract platform codes (part numbers with the revision suffix dropped) from firmware versions."""
+  codes: set[bytes] = set()
+  for fw in fw_versions:
+    clean_fw = fw.rstrip(b'\x00').strip()
+    if len(clean_fw) <= PLATFORM_CODE_TRIM:
+      continue
+    codes.add(clean_fw[:-PLATFORM_CODE_TRIM])
+  return codes
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str,
+                           offline_fw_versions: OfflineFwVersions) -> set[str]:
+  """
+  Match live firmware versions to car platforms using fuzzy fingerprinting.
+
+  Requires agreement across all PLATFORM_CODE_ECUS simultaneously (not just any one),
+  since any single ECU's code can collide between platforms - corroboration across
+  multiple independent ECUs is what keeps false positives at zero in validation.
+  """
+  candidates: set[str] = set()
+
+  for candidate, fws in offline_fw_versions.items():
+    valid_found_ecus: set[tuple[int, int | None]] = set()
+    valid_expected_ecus = {ecu[1:] for ecu in fws if ecu[0] in PLATFORM_CODE_ECUS}
+
+    for ecu, expected_versions in fws.items():
+      if ecu[0] not in PLATFORM_CODE_ECUS:
+        continue
+
+      addr = ecu[1:]
+      expected_codes = get_platform_codes(expected_versions)
+      found_codes = get_platform_codes(live_fw_versions.get(addr, set()))
+
+      if not expected_codes or not found_codes:
+        break
+
+      if not any(code in expected_codes for code in found_codes):
+        break
+
+      valid_found_ecus.add(addr)
+
+    if valid_expected_ecus and valid_expected_ecus.issubset(valid_found_ecus):
+      candidates.add(candidate)
+
+  return candidates
+
+
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
@@ -166,6 +227,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
   extra_ecus=[
     (Ecu.abs, 0x7e4, None),  # alt address for abs on hybrids, NOTE: not on all hybrid platforms
   ],
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 DBC = CAR.create_dbc_map()
