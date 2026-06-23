@@ -47,7 +47,6 @@ class CarState(CarStateBase):
     ret.gasPressed = cp_party.vl["DI_speed"]["DI_accelPedalPressed"] == 1
 
     # Brake pedal
-    ret.brake = 0
     ret.brakePressed = cp_party.vl["ESP_status"]["ESP_driverBrakeApply"] == 2
 
     # Steering wheel
