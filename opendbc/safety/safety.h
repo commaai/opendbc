@@ -59,6 +59,9 @@ bool vehicle_moving = false;
 bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
 bool safety_rx_checks_invalid = false;
+bool speed_mismatch = false;  // set in speed_mismatch_check
+bool rx_msgs_invalid = false;  // lagging/invalid safety rx messages, set in safety_tick
+// safety_rx_checks_invalid = rx_msgs_invalid || speed_mismatch, recomputed wherever either changes
 
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
@@ -341,7 +344,8 @@ void safety_tick(const safety_config *cfg) {
     }
   }
 
-  safety_rx_checks_invalid = rx_checks_invalid;
+  rx_msgs_invalid = rx_checks_invalid;
+  safety_rx_checks_invalid = rx_msgs_invalid || speed_mismatch;
 }
 
 static void relay_malfunction_set(void) {
@@ -465,6 +469,8 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   controls_allowed = false;
   relay_malfunction_reset();
   safety_rx_checks_invalid = false;
+  speed_mismatch = false;
+  rx_msgs_invalid = false;
 
   current_safety_config.rx_checks = NULL;
   current_safety_config.rx_checks_len = 0;
@@ -547,6 +553,8 @@ void speed_mismatch_check(const float speed_2) {
   // For safety modes that use speed to adjust torque or angle limits
   const float MAX_SPEED_DELTA = 2.0;  // m/s
   bool is_invalid_speed = SAFETY_ABS(speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
+  speed_mismatch = is_invalid_speed;
+  safety_rx_checks_invalid = rx_msgs_invalid || speed_mismatch;
   if (is_invalid_speed) {
     controls_allowed = false;
   }

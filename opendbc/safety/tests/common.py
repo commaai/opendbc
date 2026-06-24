@@ -1243,6 +1243,9 @@ class CarSafetyTest(SafetyTest):
         within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
+        # a speed mismatch should also invalidate the safety rx checks, not just disable controls
+        self.assertEqual(self.safety.get_safety_rx_checks_invalid(), not within_delta)
+
   def test_safety_tick(self):
     self.safety.set_timer(int(2e6))
     self.safety.set_controls_allowed(True)

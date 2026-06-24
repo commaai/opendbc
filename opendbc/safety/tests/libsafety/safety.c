@@ -54,6 +54,10 @@ bool get_controls_allowed(void){
   return controls_allowed;
 }
 
+bool get_safety_rx_checks_invalid(void){
+  return safety_rx_checks_invalid;
+}
+
 bool get_ignition_can(void){
   return ignition_can;
 }

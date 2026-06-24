@@ -199,6 +199,9 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
+        # a speed mismatch should also invalidate the safety rx checks, not just disable controls
+        self.assertEqual(self.safety.get_safety_rx_checks_invalid(), not within_delta)
+
     # Test ESP_B quality flag
     for quality_flag in (True, False):
       self.safety.set_controls_allowed(True)
