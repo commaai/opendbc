@@ -46,6 +46,7 @@
 |Chrysler|Pacifica Hybrid 2019-25|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |comma|body|All|[Upstream](#upstream)|
 |CUPRA|Ateca 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|CUPRA|Born 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Dodge|Durango 2020-21|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |Ford|Bronco Sport 2021-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Escape 2020-22|Co-Pilot360 Assist+|[Upstream](#upstream)|
@@ -59,8 +60,8 @@
 |Ford|Explorer Hybrid 2020-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|F-150 2021-23|Co-Pilot360 Assist 2.0|[Upstream](#upstream)|
 |Ford|F-150 Hybrid 2021-23|Co-Pilot360 Assist 2.0|[Upstream](#upstream)|
-|Ford|Focus 2018|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
-|Ford|Focus Hybrid 2018|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
+|Ford|Focus 2018-22|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
+|Ford|Focus Hybrid 2018-22|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Kuga 2020-23|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Kuga Hybrid 2020-23|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Kuga Hybrid 2024|All|[Upstream](#upstream)|
@@ -93,7 +94,7 @@
 |Honda|Accord 2023-25|All|[Upstream](#upstream)|
 |Honda|Accord Hybrid 2017|All|[Community](#community)|
 |Honda|Accord Hybrid 2018-22|All|[Upstream](#upstream)|
-|Honda|Accord Hybrid 2023-25|All|[Upstream](#upstream)|
+|Honda|Accord Hybrid 2023-26|All|[Upstream](#upstream)|
 |Honda|City (Brazil only) 2023|All|[Upstream](#upstream)|
 |Honda|Civic 2016-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic 2019-21|All|[Upstream](#upstream)|
@@ -265,9 +266,7 @@
 |Ram|2500 2020-24|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
 |Ram|3500 2019-22|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
 |Rivian|R1S 2022-24|All|[Upstream](#upstream)|
-|Rivian|R1S 2025|All|[Upstream](#upstream)|
 |Rivian|R1T 2022-24|All|[Upstream](#upstream)|
-|Rivian|R1T 2025|All|[Upstream](#upstream)|
 |SEAT|Alhambra 2018-20|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |SEAT|Ateca 2016-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |SEAT|Leon 2014-20|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -384,6 +383,7 @@
 |Volkswagen|Golf R 2015-19|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Golf SportsVan 2015-20|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Grand California 2019-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Volkswagen|ID.4 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Volkswagen|Jetta 2015-18|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Volkswagen|Jetta 2019-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Jetta GLI 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
