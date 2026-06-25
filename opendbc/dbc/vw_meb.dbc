@@ -232,6 +232,7 @@ BO_ 258 ESC_50: 48 XXX
  SG_ Regen_Braking : 123|1@1+ (1,0) [0|7] "" XXX
  SG_ Standstill : 171|1@0+ (1,0) [0|1] "" XXX
  SG_ Longitudinal_Speed : 181|10@1+ (0.25,0) [0|255] "Unit_KilometerPerHour" XXX
+ SG_ EPB_Status : 317|3@1+ (1,0) [0|7] "" XXX
 
 BO_ 261 VMM_01: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX

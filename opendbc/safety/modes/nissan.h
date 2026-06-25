@@ -4,20 +4,35 @@
 
 static bool nissan_alt_eps = false;
 
+static const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
+  .max_angle = 60000,  // 600 deg, reasonable limit
+  .angle_deg_to_can = 100,
+  .angle_rate_up_lookup = {
+    {0., 5., 15.},
+    {5., .8, .15}
+  },
+  .angle_rate_down_lookup = {
+    {0., 5., 15.},
+    {5., 3.5, .4}
+  },
+};
+
 static void nissan_rx_hook(const CANPacket_t *msg) {
 
-  if (msg->bus == (nissan_alt_eps ? 1U : 0U)) {
-    if (msg->addr == 0x2U) {
+  // Altima: on camera bus, others: on pt bus
+  if (msg->bus == 0U) {
+    if (msg->addr == 0x185U) {
       // Current steering angle
-      // Factor -0.1, little endian
-      int angle_meas_new = (GET_BYTES(msg, 0, 4) & 0xFFFFU);
-      // Multiply by -10 to match scale of LKAS angle
-      angle_meas_new = to_signed(angle_meas_new, 16) * -10;
+      int angle_meas_new = (msg->data[2] << 10) | (msg->data[3] << 2) | (msg->data[4] >> 6);
+      // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
+      angle_meas_new = -angle_meas_new + (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
 
       // update array of samples
       update_sample(&angle_meas, angle_meas_new);
     }
+  }
 
+  if (msg->bus == (nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x285U) {
       // Get current speed and standstill
       uint16_t right_rear = (msg->data[0] << 8) | (msg->data[1]);
@@ -54,19 +69,6 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
 
 
 static bool nissan_tx_hook(const CANPacket_t *msg) {
-  const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
-    .max_angle = 60000,  // 600 deg, reasonable limit
-    .angle_deg_to_can = 100,
-    .angle_rate_up_lookup = {
-      {0., 5., 15.},
-      {5., .8, .15}
-    },
-    .angle_rate_down_lookup = {
-      {0., 5., 15.},
-      {5., 3.5, .4}
-    },
-  };
-
   bool tx = true;
   bool violation = false;
 
@@ -109,8 +111,7 @@ static safety_config nissan_init(uint16_t param) {
 
   // Signals duplicated below due to the fact that these messages can come in on either CAN bus, depending on car model.
   static RxCheck nissan_rx_checks[] = {
-    {.msg = {{0x2, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x2, 1, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},  // STEER_ANGLE_SENSOR
+    {.msg = {{0x185, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_TORQUE_SENSOR
     {.msg = {{0x285, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
              {0x285, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}}, // WHEEL_SPEEDS_REAR
     {.msg = {{0x30f, 2, 3, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
