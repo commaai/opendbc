@@ -1,4 +1,4 @@
-using Cxx = import "./include/c++.capnp";
+using Cxx = import "/include/c++.capnp";
 $Cxx.namespace("cereal");
 
 @0x8e2af1e708af8b8d;
@@ -176,8 +176,6 @@ struct CarState {
 
   gasPressed @4 :Bool;    # this is user pedal only
 
-  # brake pedal, 0.0-1.0
-  brake @5 :Float32;      # this is user pedal only
   brakePressed @6 :Bool;  # this is user pedal only
   regenBraking @45 :Bool; # this is user pedal only
   parkingBrake @39 :Bool;
@@ -285,7 +283,8 @@ struct CarState {
 
   # deprecated
   errorsDEPRECATED @0 :List(OnroadEventDEPRECATED.EventName);
-  gasDEPRECATED @3 :Float32;        # this is user pedal only
+  gasDEPRECATED @3 :Float32;
+  brakeDEPRECATED @5 :Float32;
   brakeLightsDEPRECATED @19 :Bool;
   steeringRateLimitedDEPRECATED @29 :Bool;
   canMonoTimesDEPRECATED @12: List(UInt64);
@@ -355,6 +354,8 @@ struct CarControl {
   orientationNED @13 :List(Float32);
   angularVelocity @14 :List(Float32);
   currentCurvature @17 :Float32;  # From vehicle model
+
+  driverMonitoringEscalation @18 :Bool; # trigger the car's stock driver monitoring escalation
 
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
@@ -640,8 +641,7 @@ struct CarParams {
   enum SteerControlType {
     torque @0;
     angle @1;
-
-    curvatureDEPRECATED @2;
+    curvature @2;
   }
 
   enum TransmissionType {

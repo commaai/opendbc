@@ -82,7 +82,7 @@ def _make_car_test(car_name):
     assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
 
     # Lateral sanity checks
-    if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
+    if car_params.steerControlType not in (structs.CarParams.SteerControlType.angle, structs.CarParams.SteerControlType.curvature):
       tune = car_params.lateralTuning
       if tune.which() == 'pid':
         if car_name != MOCK.MOCK:
