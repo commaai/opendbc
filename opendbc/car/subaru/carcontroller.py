@@ -25,6 +25,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
     self.apply_steer_last = 0
+    self.driver_override = False
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
@@ -36,21 +37,35 @@ class CarController(CarControllerBase):
       self.VM = VehicleModel(get_safety_CP())
 
   def lateral_angle(self, CC, CS):
+    # Match Tesla's override handling: go inactive on heavy driver override so the
+    # commanded angle tracks measured during the override. Subaru has no graded EPS
+    # hands-on level like Tesla's EPAS3S_handsOnLevel, so threshold raw torque with
+    # hysteresis. Prevents command-vs-measured divergence that panda's angle safety
+    # check blocks — those dropped frames can fault the EPS.
+    abs_torque = abs(CS.out.steeringTorque)
+    if abs_torque > self.p.STEER_OVERRIDE_TORQUE_HIGH:
+      self.driver_override = True
+    elif abs_torque < self.p.STEER_OVERRIDE_TORQUE_LOW:
+      self.driver_override = False
+    # between thresholds: hold current state
+
+    lat_active = CC.latActive and not self.driver_override
+
     apply_steer = apply_steer_angle_limits_vm(
             CC.actuators.steeringAngleDeg,
             self.apply_steer_last,
             CS.out.vEgoRaw,
             CS.out.steeringAngleDeg,
-            CC.latActive,
+            lat_active,
             self.p,
             self.VM)
 
-    if not CC.latActive:
+    if not lat_active:
       apply_steer = CS.out.steeringAngleDeg
 
     self.apply_steer_last = apply_steer
 
-    return subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive)
+    return subarucan.create_steering_control_angle(self.packer, apply_steer, lat_active)
 
   def lateral_torque(self, CC, CS):
     apply_torque = int(round(CC.actuators.torque * self.p.STEER_MAX))
