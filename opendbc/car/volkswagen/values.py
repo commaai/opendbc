@@ -520,6 +520,12 @@ class CAR(Platforms):
     chassis_codes={"5F"},
     wmis={WMI.SEAT},
   )
+  CUPRA_BORN_MK1 = VolkswagenMEBPlatformConfig(
+    [VWCarDocs("CUPRA Born 2021-23"),],
+    VolkswagenCarSpecs(mass=1956, wheelbase=2.766),
+    chassis_codes={"K1"},
+    wmis={WMI.SEAT},
+  )
   SKODA_FABIA_MK4 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Škoda Fabia 2022-23", footnotes=[Footnote.VW_MQB_A0])],
     VolkswagenCarSpecs(mass=1266, wheelbase=2.56),
