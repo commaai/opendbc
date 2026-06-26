@@ -39,7 +39,7 @@ def test_lightweight_path_uses_model_c0_and_c1():
   assert math.isclose(path_offset, 0.6)
 
 
-def test_lightweight_path_adds_curvature_error_feedback():
+def test_lightweight_path_adds_curvature_error_feedback_to_c1_only():
   model = SimpleNamespace(
     position=SimpleNamespace(x=[0.0, 10.0, 20.0], y=[0.0, 0.0, 0.0]),
     orientation=SimpleNamespace(z=[0.0, 0.0, 0.0]),
@@ -48,7 +48,7 @@ def test_lightweight_path_adds_curvature_error_feedback():
   path_offset, path_angle = lightweight_path_from_model(model, 0.004, 0.0, 20.0, 0.0, True)
 
   assert math.isclose(path_angle, 0.004 * (5.0 + (20.0 - 15.0) * (6.0 - 5.0) / (30.0 - 15.0)))
-  assert math.isclose(path_offset, 0.004 * (60.0 + (20.0 - 15.0) * (100.0 - 60.0) / (30.0 - 15.0)))
+  assert math.isclose(path_offset, 0.0)
 
 
 def test_lightweight_path_falls_back_to_curvature_without_model():

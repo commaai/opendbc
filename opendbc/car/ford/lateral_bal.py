@@ -16,7 +16,6 @@ FORD_MODEL_C0_SPEED_BP = (11.0, 14.0)
 
 FORD_PATH_FEEDBACK_SPEED_BP = (0.0, 5.0, 15.0, 30.0)
 FORD_PATH_C1_FEEDBACK = (0.0, 2.0, 5.0, 6.0)
-FORD_PATH_C0_FEEDBACK = (0.0, 20.0, 60.0, 100.0)
 FORD_PATH_CURVATURE_ERROR = 0.006
 
 FORD_PATH_C1_RATE_BP = (5.0, 25.0)
@@ -83,12 +82,12 @@ def lightweight_path_from_curvature(desired_curvature: float, v_ego: float,
 
 def lightweight_path_from_model(model, desired_curvature: float, current_curvature: float, v_ego: float,
                                 path_angle_last: float, lat_active: bool) -> tuple[float, float]:
-  """Return Ford c0/c1 from the model path plus bounded curvature feedback.
+  """Return Ford c0/c1 from the model path plus bounded c1 curvature feedback.
 
   The model supplies the path shape Ford's PSCM wants: c1 from orientation.z at
   a far lookahead and c0 from position.y at a shorter speed-dependent lookahead.
-  The curvature error term adds centering authority when the truck is not
-  matching the requested curvature yet.
+  The curvature error term adjusts heading authority without adding a steady
+  lateral offset.
   """
   if not _valid_model_path(model):
     return lightweight_path_from_curvature(desired_curvature, v_ego, path_angle_last, lat_active)
@@ -108,7 +107,6 @@ def lightweight_path_from_model(model, desired_curvature: float, current_curvatu
 
   curvature_error = _clip(desired_curvature - current_curvature, -FORD_PATH_CURVATURE_ERROR, FORD_PATH_CURVATURE_ERROR)
   path_angle += curvature_error * _interp(v_ego, FORD_PATH_FEEDBACK_SPEED_BP, FORD_PATH_C1_FEEDBACK)
-  path_offset += curvature_error * _interp(v_ego, FORD_PATH_FEEDBACK_SPEED_BP, FORD_PATH_C0_FEEDBACK)
 
   c1_rate = _interp(v_ego, FORD_PATH_C1_RATE_BP, FORD_PATH_C1_RATE)
   path_angle = _clip(path_angle, path_angle_last - c1_rate, path_angle_last + c1_rate)
