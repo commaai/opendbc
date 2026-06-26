@@ -19,7 +19,6 @@ class CarState(CarStateBase):
 
     self.v_cruise = 0
     self.prev_stalk_enable_adj = 0
-    self.prev_stalk_cancel_res = 0
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -56,32 +55,31 @@ class CarState(CarStateBase):
     is_metric = cp_adas.vl["Cluster"]["Cluster_Unit"] == 0
     speed_conv = CV.KPH_TO_MS if is_metric else CV.MPH_TO_MS
 
-    stalk_enable_adj = cp.vl["VDM_AdasStalk"]["VDM_AdasStalkAccEnableAdj"]
-    stalk_cancel_res = cp.vl["VDM_AdasStalk"]["VDM_AdasStalkAccCancelRes"]
-
     if ret.cruiseState.enabled:
       if self.v_cruise == 0:
         current_speed = round(ret.vEgoCluster / speed_conv)
         self.v_cruise = max(20 if not is_metric else 30, current_speed)
 
-      if stalk_enable_adj != self.prev_stalk_enable_adj:
-        if stalk_enable_adj == 1:
-          self.v_cruise += 1
-        elif stalk_enable_adj == 2:
-          self.v_cruise += 5
-        elif stalk_enable_adj == 3:
-          self.v_cruise -= 1
-        elif stalk_enable_adj == 4:
-          self.v_cruise -= 5
+      # VDM_AdasStalk is event-driven; use vl_all to avoid marking it as a required periodic message
+      stalk_msgs = cp.vl_all["VDM_AdasStalk"]
+      for stalk_enable_adj in stalk_msgs.get("VDM_AdasStalkAccEnableAdj", []):
+        if stalk_enable_adj != self.prev_stalk_enable_adj:
+          if stalk_enable_adj == 1:
+            self.v_cruise += 1
+          elif stalk_enable_adj == 2:
+            self.v_cruise += 5
+          elif stalk_enable_adj == 3:
+            self.v_cruise -= 1
+          elif stalk_enable_adj == 4:
+            self.v_cruise -= 5
 
-        min_speed = 20 if not is_metric else 30
-        max_speed = 85 if not is_metric else 140
-        self.v_cruise = max(min_speed, min(self.v_cruise, max_speed))
+          min_speed = 20 if not is_metric else 30
+          max_speed = 85 if not is_metric else 140
+          self.v_cruise = max(min_speed, min(self.v_cruise, max_speed))
+          self.prev_stalk_enable_adj = stalk_enable_adj
     else:
       self.v_cruise = 0
-
-    self.prev_stalk_enable_adj = stalk_enable_adj
-    self.prev_stalk_cancel_res = stalk_cancel_res
+      self.prev_stalk_enable_adj = 0
 
     ret.cruiseState.speed = self.v_cruise * speed_conv
     if not self.CP.openpilotLongitudinalControl:
