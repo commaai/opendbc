@@ -1,17 +1,17 @@
 #pragma once
 
 extern const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL;
-extern const uint16_t FLAG_VOLKSWAGEN_ALT_CRC_VARIANT_1;
+extern const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC;
 const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
-const uint16_t FLAG_VOLKSWAGEN_ALT_CRC_VARIANT_1 = 2;
+const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
 
 static uint8_t volkswagen_crc8_lut_8h2f[256]; // Static lookup table for CRC8 poly 0x2F, aka 8H2F/AUTOSAR
 
 extern bool volkswagen_longitudinal;
 bool volkswagen_longitudinal = false;
 
-extern bool volkswagen_alt_crc_variant_1;
-bool volkswagen_alt_crc_variant_1 = false;
+extern bool volkswagen_meb_alt_crc;
+bool volkswagen_meb_alt_crc = false;
 
 extern bool volkswagen_set_button_prev;
 bool volkswagen_set_button_prev = false;

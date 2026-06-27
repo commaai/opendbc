@@ -210,7 +210,7 @@ class WMI(StrEnum):
 
 class VolkswagenSafetyFlags(IntFlag):
   LONG_CONTROL = 1
-  ALT_CRC_VARIANT_1 = 2
+  MEB_ALT_CRC = 2
 
 
 class VolkswagenFlags(IntFlag):

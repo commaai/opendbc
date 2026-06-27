@@ -260,7 +260,7 @@ class TestVolkswagenMebGen2StockSafety(TestVolkswagenMebStockSafety):
   def setUp(self):
     self.packer = CANPackerSafety("vw_meb_2024")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.ALT_CRC_VARIANT_1)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.MEB_ALT_CRC)
     self.safety.init_tests()
 
   def test_rx_hook_speed_mismatch(self):
@@ -345,7 +345,7 @@ class TestVolkswagenMebGen2LongSafety(TestVolkswagenMebLongSafety):
     self.packer = CANPackerSafety("vw_meb_2024")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb,
-                                 VolkswagenSafetyFlags.LONG_CONTROL | VolkswagenSafetyFlags.ALT_CRC_VARIANT_1)
+                                 VolkswagenSafetyFlags.LONG_CONTROL | VolkswagenSafetyFlags.MEB_ALT_CRC)
     self.safety.init_tests()
 
   def test_rx_hook_speed_mismatch(self):

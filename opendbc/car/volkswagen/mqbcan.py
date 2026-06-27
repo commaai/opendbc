@@ -196,8 +196,8 @@ def volkswagen_mqb_meb_dyn_len_checksum(address: int, sig, d: bytearray, entry: 
   return volkswagen_mqb_meb_checksum(address, sig, d, const)
 
 
-def volkswagen_mqb_meb_gen2_checksum(address: int, sig, d: bytearray) -> int:
-  entry = VOLKSWAGEN_MQB_MEB_GEN2_CONSTANTS.get(address)
+def volkswagen_meb_alt_crc_checksum(address: int, sig, d: bytearray) -> int:
+  entry = VOLKSWAGEN_MEB_ALT_CRC_CONSTANTS.get(address)
   if entry:
     checksum = volkswagen_mqb_meb_dyn_len_checksum(address, sig, d, entry)
     if checksum == d[0]:
@@ -281,7 +281,7 @@ VOLKSWAGEN_MQB_MEB_CONSTANTS: dict[int, list[int]] = {
 }
 
 
-VOLKSWAGEN_MQB_MEB_GEN2_CONSTANTS: dict[int, list[int]] = {
+VOLKSWAGEN_MEB_ALT_CRC_CONSTANTS: dict[int, dict[str, list[int] | int]] = {
   # We do not have enough data from firmware detection without OBD to explicitly differentiate everything.
   # It is unclear if firmware changes result in more and more signals implementing new checksums via OTA updates.
   # The corresponding calculation checks checksum correctness by itself and falls back if neccessary.

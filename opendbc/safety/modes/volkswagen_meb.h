@@ -44,12 +44,12 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   return (uint8_t)(crc ^ 0xFFU);
 }
 
-static uint32_t volkswagen_meb_gen2_compute_crc(const CANPacket_t *msg) {
+static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
   uint32_t ret = 0U;
   int len = GET_LEN(msg);
-  bool use_gen2_crc = volkswagen_alt_crc_variant_1;
+  bool use_alt_crc = volkswagen_meb_alt_crc;
 
-  if (use_gen2_crc) {
+  if (use_alt_crc) {
     if (msg->addr == MSG_QFK_01) {
       len = 28;
     } else if (msg->addr == MSG_ESC_51) {
@@ -57,11 +57,11 @@ static uint32_t volkswagen_meb_gen2_compute_crc(const CANPacket_t *msg) {
     } else if (msg->addr == MSG_Motor_51) {
       len = 44;
     } else {
-      use_gen2_crc = false;
+      use_alt_crc = false;
     }
   }
 
-  if (use_gen2_crc) {
+  if (use_alt_crc) {
     uint8_t crc = 0xFFU;
     for (int i = 1; i < len; i++) {
       crc ^= (uint8_t)msg->data[i];
@@ -81,11 +81,11 @@ static uint32_t volkswagen_meb_gen2_compute_crc(const CANPacket_t *msg) {
     if (crc == msg->data[0]) {
       ret = crc;
     } else {
-      use_gen2_crc = false;
+      use_alt_crc = false;
     }
   }
 
-  if (!use_gen2_crc) {
+  if (!use_alt_crc) {
     ret = volkswagen_meb_compute_crc(msg);
   }
   return ret;
@@ -133,18 +133,18 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   };
 
   volkswagen_common_init();
-  volkswagen_alt_crc_variant_1 = GET_FLAG(param, FLAG_VOLKSWAGEN_ALT_CRC_VARIANT_1);
+  volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
 
 #ifdef ALLOW_DEBUG
   volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
 #endif
 
   safety_config ret;
-  if (volkswagen_longitudinal && volkswagen_alt_crc_variant_1) {
+  if (volkswagen_longitudinal && volkswagen_meb_alt_crc) {
     ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
   } else if (volkswagen_longitudinal) {
     ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
-  } else if (volkswagen_alt_crc_variant_1) {
+  } else if (volkswagen_meb_alt_crc) {
     ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
   } else {
     ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
@@ -287,5 +287,5 @@ const safety_hooks volkswagen_meb_hooks = {
   .tx = volkswagen_meb_tx_hook,
   .get_counter = volkswagen_mqb_meb_get_counter,
   .get_checksum = volkswagen_mqb_meb_get_checksum,
-  .compute_checksum = volkswagen_meb_gen2_compute_crc,
+  .compute_checksum = volkswagen_meb_alt_crc_compute,
 };
