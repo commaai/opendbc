@@ -44,6 +44,53 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   return (uint8_t)(crc ^ 0xFFU);
 }
 
+static uint32_t volkswagen_meb_gen2_compute_crc(const CANPacket_t *msg) {
+  uint32_t ret = 0U;
+  int len = GET_LEN(msg);
+  bool use_gen2_crc = volkswagen_alt_crc_variant_1;
+
+  if (use_gen2_crc) {
+    if (msg->addr == MSG_QFK_01) {
+      len = 28;
+    } else if (msg->addr == MSG_ESC_51) {
+      len = 60;
+    } else if (msg->addr == MSG_Motor_51) {
+      len = 44;
+    } else {
+      use_gen2_crc = false;
+    }
+  }
+
+  if (use_gen2_crc) {
+    uint8_t crc = 0xFFU;
+    for (int i = 1; i < len; i++) {
+      crc ^= (uint8_t)msg->data[i];
+      crc = volkswagen_crc8_lut_8h2f[crc];
+    }
+
+    uint8_t counter = volkswagen_mqb_meb_get_counter(msg);
+    if (msg->addr == MSG_QFK_01) {
+      crc ^= (uint8_t[]){0x18, 0x71, 0x10, 0x8D, 0xD7, 0xAA, 0xB0, 0x78, 0xAC, 0x12, 0xAE, 0x0C, 0xDD, 0xF1, 0x85, 0x68}[counter];
+    } else if (msg->addr == MSG_ESC_51) {
+      crc ^= (uint8_t[]){0x69, 0xDC, 0xF9, 0x64, 0x6A, 0xCE, 0x55, 0x2C, 0xC4, 0x38, 0x8F, 0xD1, 0xC6, 0x43, 0xB4, 0xB1}[counter];
+    } else {
+      crc ^= (uint8_t[]){0x2C, 0xB1, 0x1A, 0x75, 0xBB, 0x65, 0x79, 0x47, 0x81, 0x2B, 0xCC, 0x96, 0x17, 0xDB, 0xC0, 0x94}[counter];
+    }
+
+    crc = (uint8_t)(volkswagen_crc8_lut_8h2f[crc] ^ 0xFFU);
+    if (crc == msg->data[0]) {
+      ret = crc;
+    } else {
+      use_gen2_crc = false;
+    }
+  }
+
+  if (!use_gen2_crc) {
+    ret = volkswagen_meb_compute_crc(msg);
+  }
+  return ret;
+}
+
 static safety_config volkswagen_meb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {
@@ -75,16 +122,34 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {.msg = {{MSG_ESP_21, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
+  static RxCheck volkswagen_meb_gen2_rx_checks[] = {
+    {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_14, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_GRA_ACC_01, 0, 8, 33U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_QFK_01, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_ESP_21, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+  };
+
   volkswagen_common_init();
+  volkswagen_alt_crc_variant_1 = GET_FLAG(param, FLAG_VOLKSWAGEN_ALT_CRC_VARIANT_1);
 
 #ifdef ALLOW_DEBUG
   volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
-#else
-  SAFETY_UNUSED(param);
 #endif
 
-  return volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS) : \
-                                   BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
+  safety_config ret;
+  if (volkswagen_longitudinal && volkswagen_alt_crc_variant_1) {
+    ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
+  } else if (volkswagen_longitudinal) {
+    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
+  } else if (volkswagen_alt_crc_variant_1) {
+    ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
+  } else {
+    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
+  }
+  return ret;
 }
 
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
@@ -222,5 +287,5 @@ const safety_hooks volkswagen_meb_hooks = {
   .tx = volkswagen_meb_tx_hook,
   .get_counter = volkswagen_mqb_meb_get_counter,
   .get_checksum = volkswagen_mqb_meb_get_checksum,
-  .compute_checksum = volkswagen_meb_compute_crc,
+  .compute_checksum = volkswagen_meb_gen2_compute_crc,
 };

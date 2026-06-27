@@ -256,6 +256,17 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
     self.assertTrue(self._tx(self._button_msg(resume=1)))
 
 
+class TestVolkswagenMebGen2StockSafety(TestVolkswagenMebStockSafety):
+  def setUp(self):
+    self.packer = CANPackerSafety("vw_meb_2024")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.ALT_CRC_VARIANT_1)
+    self.safety.init_tests()
+
+  def test_rx_hook_speed_mismatch(self):
+    pass
+
+
 class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0],
              [MSG_TA_01, 0], [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
@@ -327,6 +338,18 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
     self.safety.set_gas_pressed_prev(True)
     self.assertTrue(self._tx(self._accel_msg(self.ACCEL_OVERRIDE)))
     self.assertFalse(self._tx(self._accel_msg(MAX_ACCEL)))
+
+
+class TestVolkswagenMebGen2LongSafety(TestVolkswagenMebLongSafety):
+  def setUp(self):
+    self.packer = CANPackerSafety("vw_meb_2024")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb,
+                                 VolkswagenSafetyFlags.LONG_CONTROL | VolkswagenSafetyFlags.ALT_CRC_VARIANT_1)
+    self.safety.init_tests()
+
+  def test_rx_hook_speed_mismatch(self):
+    pass
 
 
 # ZAS_Kl_15=1

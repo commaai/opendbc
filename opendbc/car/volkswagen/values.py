@@ -210,6 +210,7 @@ class WMI(StrEnum):
 
 class VolkswagenSafetyFlags(IntFlag):
   LONG_CONTROL = 1
+  ALT_CRC_VARIANT_1 = 2
 
 
 class VolkswagenFlags(IntFlag):
@@ -223,6 +224,7 @@ class VolkswagenFlags(IntFlag):
   PQ = 2
   MLB = 8
   MEB = 16
+  MEB_GEN2 = 128
 
 
 @dataclass
@@ -252,6 +254,8 @@ class VolkswagenMEBPlatformConfig(PlatformConfig):
 
   def init(self):
     self.flags |= VolkswagenFlags.MEB
+    if self.flags & VolkswagenFlags.MEB_GEN2:
+      self.dbc_dict = {Bus.pt: 'vw_meb_2024', Bus.radar: 'vw_meb_2024'}
 
 
 @dataclass
@@ -383,6 +387,14 @@ class CAR(Platforms):
     VolkswagenCarSpecs(mass=2224, wheelbase=2.77),
     chassis_codes={"E2"},
     wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_EUROPE_SUV},
+  )
+  VOLKSWAGEN_ID4_MK2 = VolkswagenMEBPlatformConfig(
+    [VWCarDocs("Volkswagen ID.4 2024-25")],
+    VolkswagenCarSpecs(mass=2224, wheelbase=2.77),
+    chassis_codes={"E8"},
+    wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_EUROPE_SUV},
+    #model_years={"R","S"},
+    flags=VolkswagenFlags.MEB_GEN2,
   )
   VOLKSWAGEN_JETTA_MK6 = VolkswagenPQPlatformConfig(
     [VWCarDocs("Volkswagen Jetta 2015-18")],
