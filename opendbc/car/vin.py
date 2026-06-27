@@ -65,7 +65,7 @@ def get_vin(can_recv, can_send, buses, timeout=0.1, retry=2):
               if vin.startswith(b'\x11'):
                 vin = vin[1:18]
 
-              carlog.error(f"got vin with {request=}")
+              carlog.error(f"got vin with {request=}, {bus=}")
               return uds.get_rx_addr_for_tx_addr(addr, rx_offset=rx_offset), bus, vin.decode()
         except Exception:
           carlog.exception("VIN query exception")
