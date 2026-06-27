@@ -349,9 +349,9 @@
 |Toyota|RAV4 2023-25|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2016|Toyota Safety Sense P|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2017-18|All|[Upstream](#upstream)|
-|Toyota|RAV4 Hybrid 2019-21|All|[Upstream](#upstream)|
-|Toyota|RAV4 Hybrid 2022|All|[Upstream](#upstream)|
-|Toyota|RAV4 Hybrid 2023-25|All|[Upstream](#upstream)|
+|Toyota|RAV4 Hybrid (Non-PHEV) 2019-21|All|[Upstream](#upstream)|
+|Toyota|RAV4 Hybrid (Non-PHEV) 2022|All|[Upstream](#upstream)|
+|Toyota|RAV4 Hybrid (Non-PHEV) 2023-25|All|[Upstream](#upstream)|
 |Toyota|RAV4 Prime 2021-23|All|[Custom](#secoc-cars-with-recoverable-keys)|
 |Toyota|RAV4 Prime 2024-25|All|[Not compatible](#can-bus-security)|
 |Toyota|Sequoia 2023-25|All|[Not compatible](#can-bus-security)|
