@@ -25,10 +25,12 @@ FW_VERSIONS = {
     (Ecu.engine, 0x7e0, None): [
       b'\xbb,\xa0t\x07',
       b'\xd1,\xa0q\x07',
+      b'\xd9,\xa0@\x07',
     ],
     (Ecu.transmission, 0x7e1, None): [
       b'\x00>\xf0\x00\x00',
       b'\x00\xfe\xf7\x00\x00',
+      b'\x01\xfe\xe9\x00\x00',
       b'\x01\xfe\xf7\x00\x00',
       b'\x01\xfe\xf9\x00\x00',
       b'\x01\xfe\xfa\x00\x00',
