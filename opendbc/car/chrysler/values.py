@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16, LiveFwVersions, OfflineFwVersions
 
 Ecu = CarParams.Ecu
 
@@ -141,7 +141,49 @@ CHRYSLER_SOFTWARE_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTI
 
 CHRYSLER_RX_OFFSET = -0x280
 
+PLATFORM_CODE_ECUS = (Ecu.srs, Ecu.eps, Ecu.fwdRadar, Ecu.combinationMeter, Ecu.abs, Ecu.engine, Ecu.transmission, Ecu.hybrid)
+
+def get_platform_codes(fw_versions: list[bytes]) -> set[bytes]:
+  # Returns unique, platform-specific identification codes for a set of versions
+  codes = set()
+  for fw in fw_versions:
+    fw_str = fw.strip()
+    if len(fw_str) >= 8 and fw_str[:8].isdigit():
+      codes.add(fw_str[:8])
+    elif b'_' in fw_str:
+      codes.add(fw_str.split(b'_')[0])
+    elif len(fw_str) > 2:
+      codes.add(fw_str[:-2])
+    else:
+      codes.add(fw_str)
+  return codes
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw_versions: OfflineFwVersions) -> set[str]:
+  candidates: set[str] = set()
+
+  for candidate, fws in offline_fw_versions.items():
+    valid_found_ecus = set()
+    valid_expected_ecus = {ecu[1:] for ecu in fws if ecu[0] in PLATFORM_CODE_ECUS}
+    for ecu, expected_versions in fws.items():
+      addr = ecu[1:]
+      if ecu[0] not in PLATFORM_CODE_ECUS:
+        continue
+
+      expected_platform_codes = get_platform_codes(expected_versions)
+      found_platform_codes = get_platform_codes(live_fw_versions.get(addr, set()))
+
+      if not any(found_platform_code in expected_platform_codes for found_platform_code in found_platform_codes):
+        break
+
+      valid_found_ecus.add(addr)
+
+    if valid_expected_ecus.issubset(valid_found_ecus):
+      candidates.add(candidate)
+
+  return candidates
+
 FW_QUERY_CONFIG = FwQueryConfig(
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
   requests=[
     Request(
       [CHRYSLER_VERSION_REQUEST],
