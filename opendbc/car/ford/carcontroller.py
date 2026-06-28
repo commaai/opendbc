@@ -117,10 +117,10 @@ class CarController(CarControllerBase):
         current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
 
         if self.CP.flags & FordFlags.CANFD:
-          path_offset, path_angle = lightweight_path_from_model(
-            self.model, desired_curvature, current_curvature, v_ego, self.path_angle_last, CC.latActive
+          path_offset, path_angle, apply_curvature = lightweight_path_from_model(
+            self.model, desired_curvature, current_curvature, v_ego,
+            self.path_angle_last, self.apply_curvature_last, CC.latActive
           )
-          apply_curvature = 0.0
           curvature_rate = 0.0
           ramp_type = 3
         else:
