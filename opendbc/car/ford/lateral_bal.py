@@ -23,6 +23,8 @@ FORD_PATH_FEEDBACK_SPEED_BP = (0.0, 5.0, 15.0, 22.35, 30.0)
 FORD_PATH_C1_FEEDBACK = (0.0, 2.0, 4.5, 4.0, 3.5)
 FORD_PATH_CURVATURE_ERROR = 0.006
 FORD_PATH_C2_ERROR_DEADBAND = 0.0004
+FORD_PATH_C2_DESIRED_DELTA_DEADBAND = 0.0003
+FORD_PATH_C2_CURRENT_RATIO_MAX = 0.35
 FORD_PATH_C2_ERROR_GAIN_SPEED_BP = (0.0, 5.0, 10.0, 20.0, 30.0)
 FORD_PATH_C2_ERROR_GAIN = (0.0, 0.25, 0.45, 0.60, 0.55)
 FORD_PATH_C2_RATE_UP = 0.04
@@ -69,12 +71,25 @@ def _path_offset_gain(v_ego: float) -> float:
   return _interp(v_ego, FORD_MODEL_C0_GAIN_SPEED_BP, FORD_MODEL_C0_GAIN)
 
 
-def _path_curvature_assist(desired_curvature: float, current_curvature: float, v_ego: float,
-                           path_curvature_last: float) -> float:
+def _path_curvature_assist(desired_curvature: float, desired_curvature_last: float,
+                           current_curvature: float, v_ego: float, path_curvature_last: float) -> float:
   curvature_error = _clip(desired_curvature - current_curvature, -FORD_PATH_CURVATURE_ERROR, FORD_PATH_CURVATURE_ERROR)
-  c2_target = _apply_deadband(curvature_error, FORD_PATH_C2_ERROR_DEADBAND)
-  c2_target *= _interp(v_ego, FORD_PATH_C2_ERROR_GAIN_SPEED_BP, FORD_PATH_C2_ERROR_GAIN)
-  c2_target = _clip(c2_target, *FORD_PATH_C2_CAN_CLIP)
+  desired_delta = desired_curvature - desired_curvature_last
+  same_curve_side = desired_curvature * desired_curvature_last >= 0.0 or abs(desired_curvature_last) <= FORD_PATH_C2_DESIRED_DELTA_DEADBAND
+  demand_is_building = desired_curvature * desired_delta > 0.0 and abs(desired_delta) > FORD_PATH_C2_DESIRED_DELTA_DEADBAND
+  current_is_not_established = (
+    desired_curvature * current_curvature <= 0.0 or
+    abs(current_curvature) < abs(desired_curvature) * FORD_PATH_C2_CURRENT_RATIO_MAX
+  )
+
+  c2_target = 0.0
+  if same_curve_side and demand_is_building and current_is_not_established:
+    c2_target = _apply_deadband(curvature_error, FORD_PATH_C2_ERROR_DEADBAND)
+    if c2_target * desired_curvature > 0.0:
+      c2_target *= _interp(v_ego, FORD_PATH_C2_ERROR_GAIN_SPEED_BP, FORD_PATH_C2_ERROR_GAIN)
+      c2_target = _clip(c2_target, *FORD_PATH_C2_CAN_CLIP)
+    else:
+      c2_target = 0.0
 
   winding_up = c2_target * path_curvature_last >= 0.0 and abs(c2_target) > abs(path_curvature_last)
   c2_rate = FORD_PATH_C2_RATE_UP if winding_up else FORD_PATH_C2_RATE_DOWN
@@ -92,7 +107,7 @@ def _valid_model_path(model) -> bool:
 
 
 def lightweight_path_from_curvature(desired_curvature: float, current_curvature: float, v_ego: float,
-                                    path_angle_last: float, path_curvature_last: float,
+                                    path_angle_last: float, path_curvature_last: float, desired_curvature_last: float,
                                     lat_active: bool) -> tuple[float, float, float]:
   """Return Ford path offset, path angle, and dynamic path curvature assist.
 
@@ -105,6 +120,7 @@ def lightweight_path_from_curvature(desired_curvature: float, current_curvature:
 
   desired_curvature = _finite(desired_curvature)
   current_curvature = _finite(current_curvature)
+  desired_curvature_last = _finite(desired_curvature_last)
   v_ego = _finite(v_ego)
 
   d_look = _path_angle_lookahead(v_ego)
@@ -115,7 +131,7 @@ def lightweight_path_from_curvature(desired_curvature: float, current_curvature:
 
   c1_rate = _interp(v_ego, FORD_PATH_C1_RATE_BP, FORD_PATH_C1_RATE)
   path_angle = _clip(path_angle, path_angle_last - c1_rate, path_angle_last + c1_rate)
-  path_curvature = _path_curvature_assist(desired_curvature, current_curvature, v_ego, path_curvature_last)
+  path_curvature = _path_curvature_assist(desired_curvature, desired_curvature_last, current_curvature, v_ego, path_curvature_last)
 
   return (
     _clip(path_offset, *FORD_PATH_C0_CAN_CLIP),
@@ -125,7 +141,7 @@ def lightweight_path_from_curvature(desired_curvature: float, current_curvature:
 
 
 def lightweight_path_from_model(model, desired_curvature: float, current_curvature: float, v_ego: float,
-                                path_angle_last: float, path_curvature_last: float,
+                                path_angle_last: float, path_curvature_last: float, desired_curvature_last: float,
                                 lat_active: bool) -> tuple[float, float, float]:
   """Return Ford c0/c1/c2 from the model path plus bounded curvature feedback.
 
@@ -136,13 +152,14 @@ def lightweight_path_from_model(model, desired_curvature: float, current_curvatu
   """
   if not _valid_model_path(model):
     return lightweight_path_from_curvature(
-      desired_curvature, current_curvature, v_ego, path_angle_last, path_curvature_last, lat_active
+      desired_curvature, current_curvature, v_ego, path_angle_last, path_curvature_last, desired_curvature_last, lat_active
     )
   if not lat_active:
     return 0.0, 0.0, 0.0
 
   desired_curvature = _finite(desired_curvature)
   current_curvature = _finite(current_curvature)
+  desired_curvature_last = _finite(desired_curvature_last)
   v_ego = _finite(v_ego)
 
   d_look = _path_angle_lookahead(v_ego)
@@ -157,7 +174,7 @@ def lightweight_path_from_model(model, desired_curvature: float, current_curvatu
 
   c1_rate = _interp(v_ego, FORD_PATH_C1_RATE_BP, FORD_PATH_C1_RATE)
   path_angle = _clip(path_angle, path_angle_last - c1_rate, path_angle_last + c1_rate)
-  path_curvature = _path_curvature_assist(desired_curvature, current_curvature, v_ego, path_curvature_last)
+  path_curvature = _path_curvature_assist(desired_curvature, desired_curvature_last, current_curvature, v_ego, path_curvature_last)
 
   return (
     _clip(path_offset, *FORD_PATH_C0_CAN_CLIP),

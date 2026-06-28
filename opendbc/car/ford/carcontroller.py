@@ -47,6 +47,7 @@ class CarController(CarControllerBase):
 
     self.apply_curvature_last = 0
     self.anti_overshoot_curvature_last = 0
+    self.desired_curvature_last = 0.0
     self.path_angle_last = 0.0
     self.path_offset_last = 0.0
     self.model = None
@@ -119,7 +120,7 @@ class CarController(CarControllerBase):
         if self.CP.flags & FordFlags.CANFD:
           path_offset, path_angle, apply_curvature = lightweight_path_from_model(
             self.model, desired_curvature, current_curvature, v_ego,
-            self.path_angle_last, self.apply_curvature_last, CC.latActive
+            self.path_angle_last, self.apply_curvature_last, self.desired_curvature_last, CC.latActive
           )
           curvature_rate = 0.0
           ramp_type = 3
@@ -134,6 +135,7 @@ class CarController(CarControllerBase):
       self.path_angle_last = path_angle
       self.path_offset_last = path_offset
       self.apply_curvature_last = apply_curvature
+      self.desired_curvature_last = desired_curvature
 
       if self.CP.flags & FordFlags.CANFD:
         mode = 2 if CC.latActive else 0
