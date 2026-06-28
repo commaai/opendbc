@@ -9,13 +9,17 @@ import math
 FORD_PATH_C0_CAN_CLIP = (-4.61, 4.60)
 FORD_PATH_C1_CAN_CLIP = (-0.475, 0.497)
 
-FORD_MODEL_DLOOK_TIME = 1.0
 FORD_MODEL_DLOOK_MIN = 7.0
+FORD_MODEL_C1_DLOOK_TIME_BP = (0.0, 10.0, 20.0, 30.0)
+FORD_MODEL_C1_DLOOK_TIME = (1.0, 0.9, 0.62, 0.50)
+FORD_MODEL_C1_DLOOK_MAX = 16.0
 FORD_MODEL_C0_HIGH_SPEED_LOOKAHEAD = 6.0
 FORD_MODEL_C0_SPEED_BP = (11.0, 14.0)
+FORD_MODEL_C0_GAIN_SPEED_BP = (0.0, 5.0, 15.0, 25.0, 35.0)
+FORD_MODEL_C0_GAIN = (0.80, 0.75, 0.50, 0.30, 0.25)
 
-FORD_PATH_FEEDBACK_SPEED_BP = (0.0, 5.0, 15.0, 30.0)
-FORD_PATH_C1_FEEDBACK = (0.0, 2.0, 5.0, 6.0)
+FORD_PATH_FEEDBACK_SPEED_BP = (0.0, 5.0, 15.0, 22.35, 30.0)
+FORD_PATH_C1_FEEDBACK = (0.0, 2.0, 4.5, 4.0, 3.5)
 FORD_PATH_CURVATURE_ERROR = 0.006
 
 FORD_PATH_C1_RATE_BP = (5.0, 25.0)
@@ -43,6 +47,15 @@ def _finite(value: float, fallback: float = 0.0) -> float:
   return float(value) if math.isfinite(value) else fallback
 
 
+def _path_angle_lookahead(v_ego: float) -> float:
+  lookahead_time = _interp(v_ego, FORD_MODEL_C1_DLOOK_TIME_BP, FORD_MODEL_C1_DLOOK_TIME)
+  return min(max(v_ego * lookahead_time, FORD_MODEL_DLOOK_MIN), FORD_MODEL_C1_DLOOK_MAX)
+
+
+def _path_offset_gain(v_ego: float) -> float:
+  return _interp(v_ego, FORD_MODEL_C0_GAIN_SPEED_BP, FORD_MODEL_C0_GAIN)
+
+
 def _valid_model_path(model) -> bool:
   if model is None:
     return False
@@ -65,11 +78,11 @@ def lightweight_path_from_curvature(desired_curvature: float, v_ego: float,
   desired_curvature = _finite(desired_curvature)
   v_ego = _finite(v_ego)
 
-  d_look = max(v_ego * FORD_MODEL_DLOOK_TIME, FORD_MODEL_DLOOK_MIN)
+  d_look = _path_angle_lookahead(v_ego)
   d_c0 = _interp(v_ego, FORD_MODEL_C0_SPEED_BP, (d_look, FORD_MODEL_C0_HIGH_SPEED_LOOKAHEAD))
 
   path_angle = desired_curvature * d_look
-  path_offset = 0.5 * desired_curvature * d_c0 * d_c0
+  path_offset = 0.5 * desired_curvature * d_c0 * d_c0 * _path_offset_gain(v_ego)
 
   c1_rate = _interp(v_ego, FORD_PATH_C1_RATE_BP, FORD_PATH_C1_RATE)
   path_angle = _clip(path_angle, path_angle_last - c1_rate, path_angle_last + c1_rate)
@@ -98,12 +111,12 @@ def lightweight_path_from_model(model, desired_curvature: float, current_curvatu
   current_curvature = _finite(current_curvature)
   v_ego = _finite(v_ego)
 
-  d_look = max(v_ego * FORD_MODEL_DLOOK_TIME, FORD_MODEL_DLOOK_MIN)
+  d_look = _path_angle_lookahead(v_ego)
   d_c0 = _interp(v_ego, FORD_MODEL_C0_SPEED_BP, (d_look, FORD_MODEL_C0_HIGH_SPEED_LOOKAHEAD))
 
   x_pts = model.position.x
   path_angle = _interp(d_look, x_pts, model.orientation.z)
-  path_offset = _interp(d_c0, x_pts, model.position.y)
+  path_offset = _interp(d_c0, x_pts, model.position.y) * _path_offset_gain(v_ego)
 
   curvature_error = _clip(desired_curvature - current_curvature, -FORD_PATH_CURVATURE_ERROR, FORD_PATH_CURVATURE_ERROR)
   path_angle += curvature_error * _interp(v_ego, FORD_PATH_FEEDBACK_SPEED_BP, FORD_PATH_C1_FEEDBACK)
