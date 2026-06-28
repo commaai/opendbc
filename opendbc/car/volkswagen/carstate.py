@@ -304,10 +304,11 @@ class CarState(CarStateBase):
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
 
     if self.CP.enableBsm:
-      ret.leftBlindspot = (bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Left"]) or
-                           bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Left"]))
-      ret.rightBlindspot = (bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Right"]) or
-                            bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Right"]))
+      bsm_bus = pt_cp if (self.CP.flags & VolkswagenFlags.MEB_GEN2) else ext_cp
+      ret.leftBlindspot = (bool(bsm_bus.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Driver"]) or
+                           bool(bsm_bus.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Driver"]))
+      ret.rightBlindspot = (bool(bsm_bus.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Passenger"]) or
+                            bool(bsm_bus.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Passenger"]))
 
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
