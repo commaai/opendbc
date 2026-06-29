@@ -3,9 +3,14 @@ import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
 from opendbc.car.ford import fordcan
-from opendbc.car.ford.lateral_bal import lightweight_path_from_curvature
+from opendbc.car.ford.lateral_bal import lightweight_path_from_model
 from opendbc.car.ford.values import CarControllerParams, FordFlags, CAR
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
+
+try:
+  import openpilot.cereal.messaging as messaging
+except ImportError:
+  messaging = None
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -44,6 +49,13 @@ class CarController(CarControllerBase):
     self.anti_overshoot_curvature_last = 0
     self.path_angle_last = 0.0
     self.path_offset_last = 0.0
+    self.model = None
+    self.sm = None
+    if messaging is not None and CP.flags & FordFlags.CANFD:
+      try:
+        self.sm = messaging.SubMaster(["modelV2"])
+      except Exception:
+        self.sm = None
 
     self.accel = 0.0
     self.gas = 0.0
@@ -57,6 +69,11 @@ class CarController(CarControllerBase):
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
+
+    if self.sm is not None:
+      self.sm.update(0)
+      if self.sm.updated["modelV2"]:
+        self.model = self.sm["modelV2"]
 
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -97,8 +114,8 @@ class CarController(CarControllerBase):
         current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
 
         if self.CP.flags & FordFlags.CANFD:
-          path_offset, path_angle, apply_curvature = lightweight_path_from_curvature(
-            desired_curvature, current_curvature, CS.out.vEgoRaw,
+          path_offset, path_angle, apply_curvature = lightweight_path_from_model(
+            self.model, desired_curvature, actuators.steeringAngleDeg, CS.out.vEgoRaw,
             self.path_offset_last, self.path_angle_last, CC.latActive
           )
           ramp_type = 3
