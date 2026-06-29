@@ -393,7 +393,6 @@ class CAR(Platforms):
     VolkswagenCarSpecs(mass=2224, wheelbase=2.77),
     chassis_codes={"E8"},
     wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_EUROPE_SUV},
-    #model_years={"R","S"},
     flags=VolkswagenFlags.MEB_GEN2,
   )
   VOLKSWAGEN_JETTA_MK6 = VolkswagenPQPlatformConfig(

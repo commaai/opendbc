@@ -263,9 +263,6 @@ class TestVolkswagenMebGen2StockSafety(TestVolkswagenMebStockSafety):
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.MEB_ALT_CRC)
     self.safety.init_tests()
 
-  def test_rx_hook_speed_mismatch(self):
-    pass
-
 
 class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0],
@@ -347,9 +344,6 @@ class TestVolkswagenMebGen2LongSafety(TestVolkswagenMebLongSafety):
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb,
                                  VolkswagenSafetyFlags.LONG_CONTROL | VolkswagenSafetyFlags.MEB_ALT_CRC)
     self.safety.init_tests()
-
-  def test_rx_hook_speed_mismatch(self):
-    pass
 
 
 # ZAS_Kl_15=1
