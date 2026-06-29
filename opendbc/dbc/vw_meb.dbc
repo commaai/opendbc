@@ -601,7 +601,7 @@ BO_ 706 Motor_41: 8 Gateway
  SG_ MO_OelMessung_Dauer : 52|4@1+ (15,15) [15|225] "Unit_Secon" Vector__XXX
  SG_ TSK_vMax_FahrerInfo : 56|8@1+ (1,15) [16|270] "" Vector__XXX
 
-BO_ 768 MEB_ACC_01: 48 XXX
+BO_ 768 ACC_19: 48 XXX
  SG_ ACC_Tempolimit : 64|5@1+ (1,0) [0|31] "" OTA_FC
  SG_ ACC_Wunschgeschw_Farbe : 69|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ACC_Warnung_Verkehrszeichen_1 : 70|1@1+ (1,0) [0|1] "" Vector__XXX

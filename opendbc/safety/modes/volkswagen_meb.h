@@ -7,7 +7,7 @@
 #define MSG_ACC_18           0x14DU   // TX by OP, ACC control instructions to the drivetrain coordinator
 #define MSG_ESP_21           0xFDU    // RX, redundant vehicle speed source
 #define MSG_HCA_03           0x303U
-#define MSG_MEB_ACC_01       0x300U   // TX by OP, ACC HUD data to the instrument cluster
+#define MSG_ACC_19           0x300U   // TX by OP, ACC HUD data to the instrument cluster
 #define MSG_QFK_01           0x13DU
 #define MSG_Motor_51         0x10BU   // RX for TSK state and accel pedal
 #define MSG_KLR_01           0x25DU   // TX, for capacitive steering wheel
@@ -60,7 +60,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {MSG_LDW_02, 0, 8, .check_relay = true},
     {MSG_KLR_01, 0, 8, .check_relay = false},
     {MSG_KLR_01, 2, 8, .check_relay = true},
-    {MSG_MEB_ACC_01, 0, 48, .check_relay = true},
+    {MSG_ACC_19, 0, 48, .check_relay = true},
     {MSG_ACC_18, 0, 32, .check_relay = true},
     {MSG_TA_01, 0, 8, .check_relay = true},
   };

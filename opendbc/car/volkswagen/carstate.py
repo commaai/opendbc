@@ -289,8 +289,8 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
     ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
     if self.CP.pcmCruise:
-      ret.cruiseState.nonAdaptive = bool(ext_cp.vl["MEB_ACC_01"]["ACC_Limiter_Mode"])
-      ret.cruiseState.speed = ext_cp.vl["MEB_ACC_01"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
+      ret.cruiseState.nonAdaptive = bool(ext_cp.vl["ACC_19"]["ACC_Limiter_Mode"])
+      ret.cruiseState.speed = ext_cp.vl["ACC_19"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
       if ret.cruiseState.speed > 90:  # 255 kph in m/s == no current setpoint
         ret.cruiseState.speed = 0
     else:
