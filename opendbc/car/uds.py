@@ -602,6 +602,8 @@ def get_rx_addr_for_tx_addr(tx_addr, rx_offset=0x8):
     return tx_addr + rx_offset
 
   if tx_addr > 0x10000000 and tx_addr < 0xFFFFFFFF:
+    if rx_offset not in (None, 0x8, 0):
+      return tx_addr + rx_offset
     # standard 29 bit response addr (flip last two bytes)
     return (tx_addr & 0xFFFF0000) + (tx_addr << 8 & 0xFF00) + (tx_addr >> 8 & 0xFF)
 
