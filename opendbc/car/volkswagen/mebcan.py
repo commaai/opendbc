@@ -222,7 +222,8 @@ def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
   return gap
 
 
-def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, show_distance_bars, esp_hold, distance, desired_gap, fcw_alert):
+def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, show_distance_bars, esp_hold, distance, desired_gap,
+                           fcw_alert):
 
   values = {
     "ACC_Status_ACC":                acc_control,
@@ -256,7 +257,7 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "SET_ME_0X7FFF":                 0x7FFF, # unknown
   }
 
-  return packer.make_can_msg("MEB_ACC_01", bus, values)
+  return packer.make_can_msg("ACC_19", bus, values)
 
 
 def create_capacitive_wheel_touch(packer, bus, lat_active, klr_stock_values):
