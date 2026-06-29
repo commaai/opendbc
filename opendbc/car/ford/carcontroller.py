@@ -3,6 +3,7 @@ import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
 from opendbc.car.ford import fordcan
+from opendbc.car.ford.lateral_bal import lightweight_path_from_curvature
 from opendbc.car.ford.values import CarControllerParams, FordFlags, CAR
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
@@ -41,6 +42,8 @@ class CarController(CarControllerBase):
 
     self.apply_curvature_last = 0
     self.anti_overshoot_curvature_last = 0
+    self.path_angle_last = 0.0
+    self.path_offset_last = 0.0
 
     self.accel = 0.0
     self.gas = 0.0
@@ -76,6 +79,9 @@ class CarController(CarControllerBase):
     ### lateral control ###
     # send steer msg at 20Hz
     apply_curvature = 0.0
+    path_angle = 0.0
+    path_offset = 0.0
+    ramp_type = 0
 
     if (self.frame % CarControllerParams.STEER_STEP) == 0:
       desired_curvature = 0.0
@@ -90,20 +96,29 @@ class CarController(CarControllerBase):
 
         current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
 
-        apply_curvature = desired_curvature
-        if CS.out.vEgoRaw > 9:
-          apply_curvature = float(np.clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
-                                          current_curvature + CarControllerParams.CURVATURE_ERROR))
-        apply_curvature = CarControllerParams.CURVATURE_LIMITS.apply_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw,
-                                                                            0., CC.latActive, CarControllerParams.STEER_STEP)
+        if self.CP.flags & FordFlags.CANFD:
+          path_offset, path_angle, apply_curvature = lightweight_path_from_curvature(
+            desired_curvature, current_curvature, CS.out.vEgoRaw,
+            self.path_offset_last, self.path_angle_last, CC.latActive
+          )
+          ramp_type = 3
+        else:
+          apply_curvature = desired_curvature
+          if CS.out.vEgoRaw > 9:
+            apply_curvature = float(np.clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
+                                            current_curvature + CarControllerParams.CURVATURE_ERROR))
+          apply_curvature = CarControllerParams.CURVATURE_LIMITS.apply_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw,
+                                                                              0., CC.latActive, CarControllerParams.STEER_STEP)
 
+      self.path_angle_last = path_angle
+      self.path_offset_last = path_offset
       self.apply_curvature_last = apply_curvature
 
       if self.CP.flags & FordFlags.CANFD:
-        mode = 1 if CC.latActive else 0
+        mode = 2 if CC.latActive else 0
         counter = (self.frame // CarControllerParams.STEER_STEP) % 0x10
         can_sends.append(fordcan.create_lat_ctl2_msg(
-          self.packer, self.CAN, mode, 0, 1, 0., 0., -self.apply_curvature_last, 0., counter
+          self.packer, self.CAN, mode, ramp_type, 1, -path_offset, -path_angle, -self.apply_curvature_last, 0., counter
         ))
       else:
         can_sends.append(fordcan.create_lat_ctl_msg(
