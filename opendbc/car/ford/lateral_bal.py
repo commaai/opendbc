@@ -7,14 +7,16 @@ import math
 FORD_PATH_C0_CAN_CLIP = (-0.35, 0.35)
 FORD_PATH_C1_CAN_CLIP = (-0.42, 0.42)
 
-FORD_PATH_LOOKAHEAD_TIME = 0.65
-FORD_PATH_LOOKAHEAD_MIN = 6.0
-FORD_PATH_LOOKAHEAD_MAX = 14.0
-FORD_PATH_FULL_CURVATURE = 0.010
-FORD_PATH_FULL_LAT_ACCEL = 1.5
-FORD_PATH_FULL_STEER_ANGLE_DEG = 12.0
-FORD_PATH_C0_RATE = 0.08
-FORD_PATH_C1_RATE = 0.16
+FORD_MODEL_DLOOK_MIN = 7.0
+FORD_MODEL_C1_DLOOK_TIME = 0.70
+FORD_MODEL_C1_DLOOK_MAX = 16.0
+FORD_MODEL_C0_LOOKAHEAD = 6.0
+
+FORD_PATH_CURVATURE_ERROR = 0.004
+FORD_PATH_C1_ERROR_GAIN = 4.0
+FORD_PATH_CURVATURE_DEADBAND = 0.00025
+FORD_PATH_C0_RATE = 0.16
+FORD_PATH_C1_RATE = 0.30
 
 
 def _clip(value: float, lo: float, hi: float) -> float:
@@ -42,15 +44,12 @@ def _rate_limit(value: float, last_value: float, step: float) -> float:
   return _clip(value, last_value - step, last_value + step)
 
 
-def _path_lookahead(v_ego: float) -> float:
-  return _clip(v_ego * FORD_PATH_LOOKAHEAD_TIME, FORD_PATH_LOOKAHEAD_MIN, FORD_PATH_LOOKAHEAD_MAX)
+def _path_angle_lookahead(v_ego: float) -> float:
+  return _clip(v_ego * FORD_MODEL_C1_DLOOK_TIME, FORD_MODEL_DLOOK_MIN, FORD_MODEL_C1_DLOOK_MAX)
 
 
-def _path_gain(desired_curvature: float, desired_steering_angle_deg: float, v_ego: float) -> float:
-  curvature_gain = abs(desired_curvature) / FORD_PATH_FULL_CURVATURE
-  lat_accel_gain = abs(desired_curvature) * v_ego * v_ego / FORD_PATH_FULL_LAT_ACCEL
-  steer_angle_gain = abs(desired_steering_angle_deg) / FORD_PATH_FULL_STEER_ANGLE_DEG
-  return _clip(max(curvature_gain, lat_accel_gain, steer_angle_gain), 0.0, 1.0)
+def _path_offset_lookahead(v_ego: float, path_angle_lookahead: float) -> float:
+  return min(path_angle_lookahead, FORD_MODEL_C0_LOOKAHEAD)
 
 
 def _valid_model_path(model) -> bool:
@@ -62,21 +61,16 @@ def _valid_model_path(model) -> bool:
     return False
 
 
-def _model_path_offset_at_car(model) -> float:
-  x_pts = model.position.x
-  y_pts = model.position.y
-  if x_pts[0] <= 0.0 <= x_pts[-1]:
-    return _interp(0.0, x_pts, y_pts)
-
-  dx = x_pts[1] - x_pts[0]
-  if abs(dx) < 1e-3:
-    return y_pts[0]
-
-  slope = (y_pts[1] - y_pts[0]) / dx
-  return y_pts[0] - (slope * x_pts[0])
+def _curvature_c1_feedback(desired_curvature: float, current_curvature: float) -> float:
+  curvature_error = _clip(desired_curvature - current_curvature, -FORD_PATH_CURVATURE_ERROR, FORD_PATH_CURVATURE_ERROR)
+  return curvature_error * FORD_PATH_C1_ERROR_GAIN
 
 
-def lightweight_path_from_curvature(desired_curvature: float, desired_steering_angle_deg: float, v_ego: float,
+def _zero_demand(desired_curvature: float, current_curvature: float) -> bool:
+  return abs(desired_curvature) < FORD_PATH_CURVATURE_DEADBAND and abs(current_curvature) < FORD_PATH_CURVATURE_DEADBAND
+
+
+def lightweight_path_from_curvature(desired_curvature: float, current_curvature: float, v_ego: float,
                                     path_offset_last: float, path_angle_last: float,
                                     lat_active: bool) -> tuple[float, float, float]:
   """Fallback c0/c1 path when model samples are unavailable."""
@@ -84,49 +78,71 @@ def lightweight_path_from_curvature(desired_curvature: float, desired_steering_a
     return 0.0, 0.0, 0.0
 
   desired_curvature = _finite(desired_curvature)
-  desired_steering_angle_deg = _finite(desired_steering_angle_deg)
+  current_curvature = _finite(current_curvature)
   v_ego = _finite(v_ego)
+  path_offset_last = _finite(path_offset_last)
   path_angle_last = _finite(path_angle_last)
+  if _zero_demand(desired_curvature, current_curvature):
+    return (
+      _rate_limit(0.0, path_offset_last, FORD_PATH_C0_RATE),
+      _rate_limit(0.0, path_angle_last, FORD_PATH_C1_RATE),
+      0.0,
+    )
 
-  gain = _path_gain(desired_curvature, desired_steering_angle_deg, v_ego)
-  path_angle = desired_curvature * _path_lookahead(v_ego) * gain
+  d_look = _path_angle_lookahead(v_ego)
+  d_c0 = _path_offset_lookahead(v_ego, d_look)
+
+  path_angle = (desired_curvature * d_look) + _curvature_c1_feedback(desired_curvature, current_curvature)
   path_angle = _rate_limit(path_angle, path_angle_last, FORD_PATH_C1_RATE)
 
+  path_offset = 0.5 * desired_curvature * d_c0 * d_c0
+  path_offset = _rate_limit(path_offset, path_offset_last, FORD_PATH_C0_RATE)
+
   return (
-    0.0,
+    _clip(path_offset, *FORD_PATH_C0_CAN_CLIP),
     _clip(path_angle, *FORD_PATH_C1_CAN_CLIP),
     0.0,
   )
 
 
-def lightweight_path_from_model(model, desired_curvature: float, desired_steering_angle_deg: float, v_ego: float,
+def lightweight_path_from_model(model, desired_curvature: float, current_curvature: float, v_ego: float,
                                 path_offset_last: float, path_angle_last: float,
                                 lat_active: bool) -> tuple[float, float, float]:
   """Return Ford c0/c1 from the model path with c2 held inactive.
 
-  The model path defines the target geometry. Desired curvature and steering
-  angle only scale how strongly we assert model heading; c0 stays tied to the
-  model's near-car offset so future road curvature does not become lane bias.
+  The model path carries preview geometry, which gives the PSCM the unwind
+  information that desired curvature alone lacks. Desired/current curvature
+  only trims c1 tracking error; c0 stays model-derived so it does not become a
+  persistent feedback bias.
   """
   if not _valid_model_path(model):
     return lightweight_path_from_curvature(
-      desired_curvature, desired_steering_angle_deg, v_ego, path_offset_last, path_angle_last, lat_active
+      desired_curvature, current_curvature, v_ego, path_offset_last, path_angle_last, lat_active
     )
   if not lat_active:
     return 0.0, 0.0, 0.0
 
   desired_curvature = _finite(desired_curvature)
-  desired_steering_angle_deg = _finite(desired_steering_angle_deg)
+  current_curvature = _finite(current_curvature)
   v_ego = _finite(v_ego)
   path_offset_last = _finite(path_offset_last)
   path_angle_last = _finite(path_angle_last)
+  if _zero_demand(desired_curvature, current_curvature):
+    return (
+      _rate_limit(0.0, path_offset_last, FORD_PATH_C0_RATE),
+      _rate_limit(0.0, path_angle_last, FORD_PATH_C1_RATE),
+      0.0,
+    )
 
-  gain = _path_gain(desired_curvature, desired_steering_angle_deg, v_ego)
+  d_look = _path_angle_lookahead(v_ego)
+  d_c0 = _path_offset_lookahead(v_ego, d_look)
+
   x_pts = model.position.x
-  path_angle = _interp(_path_lookahead(v_ego), x_pts, model.orientation.z) * gain
+  path_angle = _interp(d_look, x_pts, model.orientation.z)
+  path_angle += _curvature_c1_feedback(desired_curvature, current_curvature)
   path_angle = _rate_limit(path_angle, path_angle_last, FORD_PATH_C1_RATE)
 
-  path_offset = _model_path_offset_at_car(model)
+  path_offset = _interp(d_c0, x_pts, model.position.y)
   path_offset = _rate_limit(path_offset, path_offset_last, FORD_PATH_C0_RATE)
 
   return (

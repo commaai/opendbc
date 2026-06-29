@@ -11,7 +11,7 @@ def _model(x, y, z):
   )
 
 
-def test_model_path_uses_heading_without_future_y_as_c0():
+def test_model_path_uses_preview_geometry_without_c2():
   curvature = 0.006
   x = [0.0, 5.0, 10.0, 15.0]
   model = _model(
@@ -22,12 +22,12 @@ def test_model_path_uses_heading_without_future_y_as_c0():
 
   path_offset, path_angle, path_curvature = lightweight_path_from_model(model, curvature, 0.0, 20.0, 0.0, 0.0, True)
 
-  assert math.isclose(path_offset, 0.0)
-  assert path_angle > 0.07
+  assert 0.10 < path_offset < 0.13
+  assert path_angle > 0.09
   assert math.isclose(path_curvature, 0.0)
 
 
-def test_model_path_c0_represents_near_car_offset():
+def test_model_path_zero_demand_does_not_assert_lateral_offset():
   model = _model(
     [0.0, 5.0, 10.0],
     [0.2, 0.2, 0.2],
@@ -36,7 +36,7 @@ def test_model_path_c0_represents_near_car_offset():
 
   path_offset, path_angle, path_curvature = lightweight_path_from_model(model, 0.0, 0.0, 20.0, 0.0, 0.0, True)
 
-  assert math.isclose(path_offset, 0.08)
+  assert math.isclose(path_offset, 0.0)
   assert math.isclose(path_angle, 0.0)
   assert math.isclose(path_curvature, 0.0)
 
@@ -77,30 +77,30 @@ def test_model_path_zero_demand_does_not_assert_heading():
 def test_model_path_falls_back_to_curvature_heading_without_c0():
   path_offset, path_angle, path_curvature = lightweight_path_from_model(None, 0.018, 0.0, 20.0, 0.0, 0.0, True)
 
-  assert math.isclose(path_offset, 0.0)
-  assert path_angle > 0.14
+  assert path_offset > 0.15
+  assert path_angle > 0.25
   assert math.isclose(path_curvature, 0.0)
 
 
-def test_model_path_can_gain_from_desired_steering_angle():
+def test_model_path_uses_current_curvature_to_unwind():
   model = _model(
     [0.0, 5.0, 10.0, 15.0],
     [0.0, 0.0, 0.0, 0.0],
     [0.0, 0.03, 0.06, 0.09],
   )
 
-  _, no_angle, _ = lightweight_path_from_model(model, 0.0, 0.0, 20.0, 0.0, 0.0, True)
-  _, with_angle, path_curvature = lightweight_path_from_model(model, 0.0, 12.0, 20.0, 0.0, 0.0, True)
+  _, no_demand, _ = lightweight_path_from_model(model, 0.0, 0.0, 20.0, 0.0, 0.0, True)
+  _, overtracking, path_curvature = lightweight_path_from_model(model, 0.0, 0.004, 20.0, 0.0, 0.0, True)
 
-  assert math.isclose(no_angle, 0.0)
-  assert with_angle > 0.07
+  assert math.isclose(no_demand, 0.0)
+  assert 0.05 < overtracking < 0.07
   assert math.isclose(path_curvature, 0.0)
 
 
 def test_path_assist_rate_limits_large_reversal():
-  _, path_angle, _ = lightweight_path_from_curvature(-0.02, -12.0, 20.0, 0.0, 0.25, True)
+  _, path_angle, _ = lightweight_path_from_curvature(-0.02, -0.02, 20.0, 0.0, 0.25, True)
 
-  assert path_angle > 0.0
+  assert path_angle < 0.0
 
 
 def test_path_assist_inactive_returns_zero():

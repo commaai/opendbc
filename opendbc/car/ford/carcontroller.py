@@ -115,7 +115,7 @@ class CarController(CarControllerBase):
 
         if self.CP.flags & FordFlags.CANFD:
           path_offset, path_angle, apply_curvature = lightweight_path_from_model(
-            self.model, desired_curvature, actuators.steeringAngleDeg, CS.out.vEgoRaw,
+            self.model, desired_curvature, current_curvature, CS.out.vEgoRaw,
             self.path_offset_last, self.path_angle_last, CC.latActive
           )
           ramp_type = 3
