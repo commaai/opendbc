@@ -13,6 +13,8 @@
 #define MSG_KLR_01           0x25DU   // TX, for capacitive steering wheel
 #define MSG_TA_01            0x26BU   // TX by OP, Travel Assist status
 
+static const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
+static bool volkswagen_meb_alt_crc = false;
 
 static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   int len = GET_LEN(msg);

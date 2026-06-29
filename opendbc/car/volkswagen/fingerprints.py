@@ -379,12 +379,8 @@ FW_VERSIONS = {
     ],
   },
   CAR.VOLKSWAGEN_ID4_MK2: {
-    (Ecu.engine, 0x17fc0076, None): [
-      b'\xf1\x870EA906014DR\xf1\x893630',
-    ],
     (Ecu.fwdRadar, 0x757, None): [
       b'\xf1\x871EA907567D \xf1\x890250',
-      b'\xf1\x871EA907567C \xf1\x890099',
     ],
   },
   CAR.VOLKSWAGEN_JETTA_MK6: {
