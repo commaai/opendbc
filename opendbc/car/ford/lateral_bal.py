@@ -16,8 +16,10 @@ FORD_MODEL_C0_SPEED_BP = (11.0, 14.0)
 
 FORD_PATH_FEEDBACK_SPEED_BP = (0.0, 5.0, 15.0, 30.0)
 FORD_PATH_C1_FEEDBACK = (0.0, 2.0, 5.0, 6.0)
-FORD_PATH_C0_FEEDBACK = (0.0, 20.0, 60.0, 100.0)
 FORD_PATH_CURVATURE_ERROR = 0.006
+
+FORD_PATH_C0_RESIDUAL_SPEED_BP = (0.0, 5.0, 15.0, 30.0)
+FORD_PATH_C0_RESIDUAL_GAIN = (0.55, 0.55, 0.35, 0.20)
 
 FORD_PATH_C1_RATE_BP = (5.0, 25.0)
 FORD_PATH_C1_RATE = (0.50, 0.50)
@@ -53,6 +55,10 @@ def _valid_model_path(model) -> bool:
     return False
 
 
+def _offset_from_path_angle(path_angle: float, d_c0: float, d_look: float) -> float:
+  return 0.5 * path_angle * d_c0 * d_c0 / max(d_look, 0.1)
+
+
 def lightweight_path_from_curvature(desired_curvature: float, v_ego: float,
                                     path_angle_last: float, lat_active: bool) -> tuple[float, float]:
   """Return Ford path offset and path angle for the lightweight path controller.
@@ -83,12 +89,12 @@ def lightweight_path_from_curvature(desired_curvature: float, v_ego: float,
 
 def lightweight_path_from_model(model, desired_curvature: float, current_curvature: float, v_ego: float,
                                 path_angle_last: float, lat_active: bool) -> tuple[float, float]:
-  """Return Ford c0/c1 from the model path plus bounded curvature feedback.
+  """Return Ford c0/c1 from the model path plus bounded c1 tracking feedback.
 
   The model supplies the path shape Ford's PSCM wants: c1 from orientation.z at
-  a far lookahead and c0 from position.y at a shorter speed-dependent lookahead.
-  The curvature error term adds centering authority when the truck is not
-  matching the requested curvature yet.
+  a far lookahead and a damped c0 companion from position.y at a shorter
+  speed-dependent lookahead. Curvature error assists c1 only so c0 doesn't
+  become a persistent artificial lateral offset.
   """
   if not _valid_model_path(model):
     return lightweight_path_from_curvature(desired_curvature, v_ego, path_angle_last, lat_active)
@@ -103,12 +109,15 @@ def lightweight_path_from_model(model, desired_curvature: float, current_curvatu
   d_c0 = _interp(v_ego, FORD_MODEL_C0_SPEED_BP, (d_look, FORD_MODEL_C0_HIGH_SPEED_LOOKAHEAD))
 
   x_pts = model.position.x
-  path_angle = _interp(d_look, x_pts, model.orientation.z)
-  path_offset = _interp(d_c0, x_pts, model.position.y)
+  model_path_angle = _interp(d_look, x_pts, model.orientation.z)
+  model_path_offset = _interp(d_c0, x_pts, model.position.y)
+
+  path_offset = _offset_from_path_angle(model_path_angle, d_c0, d_look)
+  residual_gain = _interp(v_ego, FORD_PATH_C0_RESIDUAL_SPEED_BP, FORD_PATH_C0_RESIDUAL_GAIN)
+  path_offset += (model_path_offset - path_offset) * residual_gain
 
   curvature_error = _clip(desired_curvature - current_curvature, -FORD_PATH_CURVATURE_ERROR, FORD_PATH_CURVATURE_ERROR)
-  path_angle += curvature_error * _interp(v_ego, FORD_PATH_FEEDBACK_SPEED_BP, FORD_PATH_C1_FEEDBACK)
-  path_offset += curvature_error * _interp(v_ego, FORD_PATH_FEEDBACK_SPEED_BP, FORD_PATH_C0_FEEDBACK)
+  path_angle = model_path_angle + curvature_error * _interp(v_ego, FORD_PATH_FEEDBACK_SPEED_BP, FORD_PATH_C1_FEEDBACK)
 
   c1_rate = _interp(v_ego, FORD_PATH_C1_RATE_BP, FORD_PATH_C1_RATE)
   path_angle = _clip(path_angle, path_angle_last - c1_rate, path_angle_last + c1_rate)
