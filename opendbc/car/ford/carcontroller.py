@@ -98,15 +98,18 @@ class CarController(CarControllerBase):
     apply_curvature = 0.0
     path_angle = 0.0
     path_offset = 0.0
+    curvature_rate = 0.0
     ramp_type = 0
 
     if (self.frame % CarControllerParams.STEER_STEP) == 0:
       desired_curvature = 0.0
 
       if CC.latActive:
+        v_ego = CS.out.vEgoRaw
         desired_curvature = actuators.curvature
 
         # Bronco and some other cars consistently overshoot curv requests.
+        # Apply the same input shaping before either Ford lateral command path.
         if self.CP.carFingerprint in (CAR.FORD_BRONCO_SPORT_MK1, CAR.FORD_F_150_MK14):
           self.anti_overshoot_curvature_last = anti_overshoot(desired_curvature, self.anti_overshoot_curvature_last, CS.out.vEgoRaw)
           desired_curvature = self.anti_overshoot_curvature_last
@@ -114,10 +117,11 @@ class CarController(CarControllerBase):
         current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
 
         if self.CP.flags & FordFlags.CANFD:
-          path_offset, path_angle, apply_curvature = lightweight_path_from_model(
-            self.model, desired_curvature, current_curvature, CS.out.vEgoRaw,
-            self.path_offset_last, self.path_angle_last, CC.latActive
+          path_offset, path_angle = lightweight_path_from_model(
+            self.model, desired_curvature, current_curvature, v_ego, self.path_angle_last, CC.latActive
           )
+          apply_curvature = 0.0
+          curvature_rate = 0.0
           ramp_type = 3
         else:
           apply_curvature = desired_curvature
@@ -135,7 +139,8 @@ class CarController(CarControllerBase):
         mode = 2 if CC.latActive else 0
         counter = (self.frame // CarControllerParams.STEER_STEP) % 0x10
         can_sends.append(fordcan.create_lat_ctl2_msg(
-          self.packer, self.CAN, mode, ramp_type, 1, -path_offset, -path_angle, -self.apply_curvature_last, 0., counter
+          self.packer, self.CAN, mode, ramp_type, 1, -path_offset, -path_angle,
+          -apply_curvature, -curvature_rate, counter
         ))
       else:
         can_sends.append(fordcan.create_lat_ctl_msg(

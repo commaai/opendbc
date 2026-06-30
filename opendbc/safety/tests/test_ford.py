@@ -257,7 +257,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def test_max_lateral_acceleration(self):
     if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-      self.skipTest("CAN FD path assist keeps curvature inactive")
+      self.skipTest("CAN FD path mode keeps curvature inactive")
 
     # Ford CAN FD can achieve a higher max lateral acceleration than CAN so we limit curvature based on speed
     max_curvature_can = round(self.MAX_CURVATURE * self.DEG_TO_CAN)
@@ -295,9 +295,10 @@ class TestFordSafetyBase(common.CarSafetyTest):
                   self._set_prev_desired_angle(curvature)
                   self._reset_curvature_measurement(curvature, speed)
 
+                  # CAN FD lightweight path mode allows c0/c1 only; non-CAN FD requires c0/c1/c3 inactive
                   if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-                    should_tx = -0.35 <= path_offset <= 0.35
-                    should_tx = should_tx and -0.42 <= path_angle <= 0.42
+                    should_tx = -0.5 <= path_angle <= 0.5235
+                    should_tx = should_tx and -5.12 <= path_offset <= 5.11
                     should_tx = should_tx and curvature == 0
                     should_tx = should_tx and curvature_rate == 0
                     if steer_control_enabled:
@@ -307,9 +308,10 @@ class TestFordSafetyBase(common.CarSafetyTest):
                   else:
                     should_tx = path_offset == 0 and path_angle == 0 and curvature_rate == 0
 
-                    # when request bit is 0, only allow curvature of 0 since the signal range
-                    # is not large enough to enforce it tracking measured
-                    should_tx = should_tx and (controls_allowed if steer_control_enabled else curvature == 0)
+                  # when request bit is 0, only allow curvature of 0 since the signal range
+                  # is not large enough to enforce it tracking measured
+                  should_tx = should_tx and (controls_allowed if steer_control_enabled else curvature == 0)
+                  if self.STEER_MESSAGE != MSG_LateralMotionControl2:
                     should_tx = should_tx and abs(round(curvature * self.DEG_TO_CAN)) <= max_curvature_can
 
                   with self.subTest(controls_allowed=controls_allowed, steer_control_enabled=steer_control_enabled,
@@ -324,19 +326,17 @@ class TestFordSafetyBase(common.CarSafetyTest):
     for controls_allowed in (True, False):
       for mode in range(8):
         self.safety.set_controls_allowed(controls_allowed)
-        path_offset = 0.2 if mode == 2 else 0.
-        path_angle = 0.2 if mode == 2 else 0.
+        path_offset = 0.5 if mode == 2 else 0.
+        path_angle = 0.1 if mode == 2 else 0.
         should_tx = mode == 0 or (mode == 2 and controls_allowed)
         self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(mode == 2, path_offset, path_angle, 0., 0., mode=mode)))
 
     self.safety.set_controls_allowed(True)
     self.assertFalse(self._tx(self._lat_ctl_msg(False, 0.5, 0.1, 0., 0., mode=0)))
-    self.assertTrue(self._tx(self._lat_ctl_msg(True, 0.2, 0.2, 0., 0., mode=2)))
-    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0.36, 0., 0., 0., mode=2)))
-    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0., 0.421, 0., 0., mode=2)))
+    # Lightweight path mode keeps c2/c3 inactive.
     self.assertFalse(self._tx(self._lat_ctl_msg(True, 0., 0., 0.01, 0., mode=2)))
     self.assertFalse(self._tx(self._lat_ctl_msg(True, 0., 0., 0., 0.001, mode=2)))
-    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0.2, 0.2, 0., 0., mode=1)))
+    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0., 0., 0.02094, 0., mode=2)))
     # non-zero c2/c3 must still be inactive when not enabled
     self.assertFalse(self._tx(self._lat_ctl_msg(False, 0., 0., 0.01, 0., mode=0)))
     self.assertFalse(self._tx(self._lat_ctl_msg(False, 0., 0., 0., 0.001, mode=0)))
@@ -344,8 +344,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
   def test_curvature_rate_limits(self):
     """Curvature command must satisfy the ISO 11270 lateral jerk limit per frame."""
     if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-      self.skipTest("CAN FD path assist keeps curvature inactive")
-
+      self.skipTest("CAN FD path mode keeps curvature inactive")
     self.safety.set_controls_allowed(True)
     max_encoded_can = int(self.MAX_CURVATURE * self.DEG_TO_CAN)
 
@@ -370,7 +369,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def test_curvature_error_limits(self):
     if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-      self.skipTest("CAN FD path assist keeps curvature inactive")
+      self.skipTest("CAN FD path mode keeps curvature inactive")
 
     # above CURVATURE_ERROR_MIN_SPEED, command must be within max_curvature_error of measured, below the check is skipped
     self.safety.set_controls_allowed(True)
@@ -393,7 +392,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def test_curvature_violation(self):
     if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-      self.skipTest("CAN FD path assist keeps curvature inactive")
+      self.skipTest("CAN FD path mode keeps curvature inactive")
 
     # If violation occurs, curvature cmd is blocked until reset to 0
     self.safety.set_controls_allowed(True)
@@ -413,7 +412,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def test_rt_limits(self):
     if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-      self.skipTest("CAN FD path assist keeps curvature inactive")
+      self.skipTest("CAN FD path mode keeps curvature inactive")
 
     # send rate is limited over a rolling 250ms window split into two half-interval buckets
     self.safety.set_controls_allowed(True)
