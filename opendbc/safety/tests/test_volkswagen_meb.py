@@ -20,7 +20,7 @@ MSG_QFK_01     = 0x13D
 MSG_ACC_18     = 0x14D
 MSG_KLR_01     = 0x25D
 MSG_TA_01      = 0x26B
-MSG_MEB_ACC_01 = 0x300
+MSG_ACC_19     = 0x300
 MSG_HCA_03     = 0x303
 MSG_LDW_02     = 0x397
 MSG_MOTOR_14   = 0x3BE
@@ -257,11 +257,11 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
 
 
 class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
-  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0],
+  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_ACC_19, 0], [MSG_ACC_18, 0],
              [MSG_TA_01, 0], [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01],
-                           2: [MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01]}
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01),
+                           2: [MSG_HCA_03, MSG_LDW_02, MSG_ACC_19, MSG_ACC_18, MSG_TA_01]}
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_ACC_19, MSG_ACC_18, MSG_TA_01),
                              2: (MSG_KLR_01,)}
 
   ALLOW_OVERRIDE = True
