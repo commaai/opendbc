@@ -172,7 +172,7 @@ class Freezable:
     super().__setattr__(*args, **kwargs)
 
 
-@dataclass(order=True)
+@dataclass
 class PlatformConfigBase(Freezable):
   car_docs: list[CarDocs] | list[ExtraCarDocs]
   specs: CarSpecs
@@ -196,14 +196,14 @@ class PlatformConfigBase(Freezable):
     self.init()
 
 
-@dataclass(order=True)
+@dataclass
 class PlatformConfig(PlatformConfigBase):
   car_docs: list[CarDocs]
   specs: CarSpecs
   dbc_dict: DbcDict
 
 
-@dataclass(order=True)
+@dataclass
 class ExtraPlatformConfig(PlatformConfigBase):
   car_docs: list[ExtraCarDocs]
   specs: CarSpecs = CarSpecs(mass=0., wheelbase=0., steerRatio=0.)
