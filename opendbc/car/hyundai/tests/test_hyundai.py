@@ -63,11 +63,15 @@ class TestHyundaiFingerprint(unittest.TestCase):
       assert CP.radarUnavailable != radar
 
   def test_alternate_limits(self):
-    # Alternate lateral control limits, for high torque cars, verify Panda safety mode flag is set
+    # Alternate lateral control limits: for cars with a non-default steer-torque cap, verify the
+    # car-side flag is propagated to the panda safetyParam so panda enforces the same tier.
+    # Both restrictive tiers must be covered: ALT_LIMITS (270) and ALT_LIMITS_2 (170). If a tier's
+    # flag is not propagated, panda silently falls back to the 384 default (hyundai.h fail-open).
     fingerprint = gen_empty_fingerprint()
     for car_model in CAR:
       CP = CarInterface.get_params(car_model, fingerprint, [], False, False, False)
       assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.ALT_LIMITS)
+      assert bool(CP.flags & HyundaiFlags.ALT_LIMITS_2) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.ALT_LIMITS_2)
 
   def test_can_features(self):
     # Test no EV/HEV in any gear lists (should all use ELECT_GEAR)
