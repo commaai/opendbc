@@ -62,6 +62,8 @@ static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
       len = 60;
     } else if (msg->addr == MSG_Motor_51) {
       len = 44;
+    } else {
+      len = 0;
     }
   }
 
