@@ -242,7 +242,7 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
   FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01], 2: [MSG_HCA_03, MSG_LDW_02]}
 
   def setUp(self):
-    self.packer = CANPackerSafety("vw_meb")
+    self.packer = CANPackerSafety("vw_meb_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, 0)
     self.safety.init_tests()
@@ -254,6 +254,14 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
     self.assertFalse(self._tx(self._button_msg(_set=1)))
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=1)))
+
+
+class TestVolkswagenMebGen2StockSafety(TestVolkswagenMebStockSafety):
+  def setUp(self):
+    self.packer = CANPackerSafety("vw_meb_2024_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.MEB_ALT_CRC)
+    self.safety.init_tests()
 
 
 class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
@@ -269,7 +277,7 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):
-    self.packer = CANPackerSafety("vw_meb")
+    self.packer = CANPackerSafety("vw_meb_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
@@ -329,6 +337,15 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
     self.assertFalse(self._tx(self._accel_msg(MAX_ACCEL)))
 
 
+class TestVolkswagenMebGen2LongSafety(TestVolkswagenMebLongSafety):
+  def setUp(self):
+    self.packer = CANPackerSafety("vw_meb_2024_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb,
+                                 VolkswagenSafetyFlags.LONG_CONTROL | VolkswagenSafetyFlags.MEB_ALT_CRC)
+    self.safety.init_tests()
+
+
 # ZAS_Kl_15=1
 class TestVolkswagenMebIgnition(unittest.TestCase):
   TX_MSGS: list = []
@@ -336,7 +353,7 @@ class TestVolkswagenMebIgnition(unittest.TestCase):
   def setUp(self):
     self.safety = libsafety_py.libsafety
     self.safety.init_tests()
-    self.packer = CANPackerSafety("vw_meb")
+    self.packer = CANPackerSafety("vw_meb_generated")
 
   def _msg(self, counter, ign):
     return self.packer.make_can_msg_safety("Klemmen_Status_01", 0,
