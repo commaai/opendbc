@@ -201,7 +201,7 @@ class CarState(CarStateBase):
 
     ret.buttonEvents = buttonEvents
 
-    ret.belowEngageSpeed = self.CP.openpilotLongitudinalControl and ret.vEgo < self.CP.minEnableSpeed
+    ret.cruiseState.belowEngageSpeed = self.CP.openpilotLongitudinalControl and ret.vEgo < self.CP.minEnableSpeed
 
     return ret
 

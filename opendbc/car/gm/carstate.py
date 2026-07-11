@@ -162,7 +162,7 @@ class CarState(CarStateBase):
     # This checks a higher brake threshold at standstill to fix a fault when you engage at a stop
     # with light brake pressure. Likely because PCM and camera have different thresholds in different
     # scenarios (yes, stock ACC faults and so this fixes their bug).
-    ret.belowEngageSpeed = ret.vEgo < self.CP.minEnableSpeed and \
+    ret.cruiseState.belowEngageSpeed = ret.vEgo < self.CP.minEnableSpeed and \
       not (ret.standstill and pt_cp.vl["ECMAcceleratorPos"]["BrakePedalPos"] >= 20 and
            self.CP.networkLocation == NetworkLocation.fwdCamera)
 
