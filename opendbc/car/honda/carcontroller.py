@@ -34,7 +34,7 @@ def compute_gas_brake(accel, speed, fingerprint):
 
 
 # TODO not clear this does anything useful
-def actuator_hysteresis(brake, braking, brake_steady, v_ego, car_fingerprint):
+def actuator_hysteresis(brake, braking, brake_steady):
   # hyst params
   brake_hyst_on = 0.02    # to activate brakes exceed this value
   brake_hyst_off = 0.005  # to deactivate brakes below this value
@@ -128,8 +128,7 @@ class CarController(CarControllerBase):
     self.last_torque = limited_torque
 
     # *** apply brake hysteresis ***
-    pre_limit_brake, self.braking, self.brake_steady = actuator_hysteresis(brake, self.braking, self.brake_steady,
-                                                                           CS.out.vEgo, self.CP.carFingerprint)
+    pre_limit_brake, self.braking, self.brake_steady = actuator_hysteresis(brake, self.braking, self.brake_steady)
 
     # *** rate limit after the enable check ***
     self.brake_last = rate_limit(pre_limit_brake, self.brake_last, -2., DT_CTRL)
@@ -212,8 +211,7 @@ class CarController(CarControllerBase):
 
           pcm_override = True
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
-                                                         pcm_override, pcm_cancel_cmd, alert_fcw,
-                                                         self.CP.carFingerprint, CS.stock_brake))
+                                                         pcm_override, pcm_cancel_cmd, alert_fcw, CS.stock_brake))
           self.apply_brake_last = apply_brake
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
