@@ -75,3 +75,7 @@ void ignition_can_hook(const CANPacket_t *msg) {
   //   ignition_can_cnt = 0U;
   // }
 }
+
+#ifdef ALLOW_DEBUG
+#include "opendbc/safety/tests/hitl.h"
+#endif

@@ -337,6 +337,9 @@ extern safety_config current_safety_config;
 
 int safety_fwd_hook(int bus_num, int addr);
 int set_safety_hooks(uint16_t mode, uint16_t param);
+#ifdef ALLOW_DEBUG
+bool safety_test_harness(CANPacket_t *msg);
+#endif
 
 extern const safety_hooks body_hooks;
 extern const safety_hooks chrysler_hooks;

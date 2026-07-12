@@ -1,4 +1,5 @@
 import os
+import importlib
 import subprocess
 import tempfile
 from pathlib import Path
@@ -132,7 +133,12 @@ def load(path):
 
 def __getattr__(name):
   if name == "libsafety":
-    load(_build_libsafety())
+    backend = os.getenv("LIBSAFETY_BACKEND")
+    if backend:
+      global libsafety
+      libsafety = importlib.import_module(backend).libsafety
+    else:
+      load(_build_libsafety())
     return libsafety
   raise AttributeError(name)
 
