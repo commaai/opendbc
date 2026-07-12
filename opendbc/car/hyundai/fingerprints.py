@@ -1210,6 +1210,23 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00SG2_ RDR -----      1.00 1.01 99110-AT000         ',
     ],
+    (Ecu.transmission, 0x7e1, None): [
+      b'\xf1\x00PSBG2552  D121049\x00\x00\x00DSG2G16XXH049NS6',
+    ],
+  },
+  CAR.KIA_NIRO_PHEV_2ND_GEN: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00SG2HMFC  AT USA LHD 1.01 1.09 99211-AT000 220801',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00SG2_ RDR -----      1.00 1.01 99110-AT000         ',
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00SG2 MDPS C A.00 1.02 56310AT150  4SGPC102',
+    ],
+    (Ecu.transmission, 0x7e1, None): [
+      b'\xf1\x00PSBG2552  D121092\x00\x00\x00BSG2G16XXP092NS7E\xeb\x11\x05',
+    ],
   },
   CAR.GENESIS_GV80: {
     (Ecu.fwdCamera, 0x7c4, None): [
