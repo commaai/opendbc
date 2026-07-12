@@ -21,7 +21,7 @@ def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, enabled, a
   )}
 
   values |= {
-    "ACM_lkaHbaCmd_Counter": frame % 15,
+    "ACM_lkaHbaCmd_Counter": frame % 15,  # 0-14 counter (15 states), so % 15 is correct despite the 4-bit field
     "ACM_lkaStrToqReq": apply_torque,
     "ACM_lkaActToi": active,
 
@@ -64,7 +64,7 @@ def create_wheel_touch(packer, sccm_wheel_touch, enabled):
 
 def create_longitudinal(packer, frame, accel, enabled):
   values = {
-    "ACM_longitudinalRequest_Counter": frame % 15,
+    "ACM_longitudinalRequest_Counter": frame % 15,  # 0-14 counter (15 states), so % 15 is correct despite the 4-bit field
     "ACM_AccelerationRequest": accel,
     "ACM_PrndRequest": 0,
     "ACM_longInterfaceEnable": 1 if enabled else 0,
