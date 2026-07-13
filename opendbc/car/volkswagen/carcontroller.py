@@ -50,6 +50,7 @@ class CarController(CarControllerBase):
 
     self.apply_torque_last = 0
     self.apply_curvature_last = 0.
+    self.enabled_last = False
     self.steering_power_last = 0
     self.accel_last = 0.
     self.long_override_counter = 0
@@ -74,7 +75,7 @@ class CarController(CarControllerBase):
         # MEB rack can be used continuously without time limits
         # maximum real steering angle change ~ 120-130 deg/s
 
-        if CC.latActive:
+        if CC.latActive and self.enabled_last:
           hca_enabled = True
           # compensate the gap between measured and current curvature
           apply_curvature = actuators.curvature + (CS.curvature_meas - CC.currentCurvature)
@@ -91,7 +92,8 @@ class CarController(CarControllerBase):
         else:
           if self.steering_power_last > 0:  # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
-            apply_curvature = float(np.clip(CS.curvature_meas, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX))
+            apply_curvature = self.CCP.CURVATURE_LIMITS.apply_limits(CS.curvature_meas, self.apply_curvature_last, CS.out.vEgoRaw,
+                                                                     CS.curvature_meas, True, self.CCP.STEER_STEP)
             steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, 0)
           else:
             hca_enabled = False
@@ -101,6 +103,7 @@ class CarController(CarControllerBase):
         can_sends.append(mebcan.create_steering_control(self.packer_pt, self.CAN.pt, apply_curvature, hca_enabled, steering_power))
         self.apply_curvature_last = apply_curvature
         self.steering_power_last = steering_power
+        self.enabled_last = CC.enabled
 
       else:
         if CC.latActive:
