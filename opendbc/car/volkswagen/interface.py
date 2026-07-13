@@ -43,6 +43,9 @@ class CarInterface(CarInterfaceBase):
     elif ret.flags & VolkswagenFlags.MEB:
       # Set global MEB parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
+      if ret.flags & VolkswagenFlags.MEB_GEN2:
+        safety_configs[0].safetyParam |= VolkswagenSafetyFlags.MEB_ALT_CRC.value
+
       ret.transmissionType = TransmissionType.direct
       ret.steerControlType = structs.CarParams.SteerControlType.curvature
       ret.steerAtStandstill = True
@@ -99,7 +102,6 @@ class CarInterface(CarInterfaceBase):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     elif ret.flags & VolkswagenFlags.MEB:
       ret.steerActuatorDelay = 0.3
-      ret.steerLimitTimer = 0.1
     else:
       ret.steerActuatorDelay = 0.1
       ret.lateralTuning.pid.kpBP = [0.]
