@@ -13,5 +13,9 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "mock"
+    ret.lateralTuning.pid.kpBP = [0.]
+    ret.lateralTuning.pid.kpV = [0.]
+    ret.lateralTuning.pid.kiBP = [0.]
+    ret.lateralTuning.pid.kiV = [0.]
     ret.dashcamOnly = True
     return ret

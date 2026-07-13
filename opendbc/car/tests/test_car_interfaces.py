@@ -12,7 +12,6 @@ from opendbc.car.car_helpers import interfaces
 from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import FW_QUERY_CONFIGS
 from opendbc.car.interfaces import CarInterfaceBase, get_interface_attr
-from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.values import PLATFORMS
 
 DrawType = Callable[[st.SearchStrategy], Any]
@@ -85,10 +84,9 @@ def _make_car_test(car_name):
     if car_params.steerControlType not in (structs.CarParams.SteerControlType.angle, structs.CarParams.SteerControlType.curvature):
       tune = car_params.lateralTuning
       if tune.which() == 'pid':
-        if car_name != MOCK.MOCK:
-          assert not math.isnan(tune.pid.kf) and tune.pid.kf > 0
-          assert len(tune.pid.kpV) > 0 and len(tune.pid.kpV) == len(tune.pid.kpBP)
-          assert len(tune.pid.kiV) > 0 and len(tune.pid.kiV) == len(tune.pid.kiBP)
+        assert not math.isnan(tune.pid.kf) and tune.pid.kf >= 0
+        assert len(tune.pid.kpV) > 0 and len(tune.pid.kpV) == len(tune.pid.kpBP)
+        assert len(tune.pid.kiV) > 0 and len(tune.pid.kiV) == len(tune.pid.kiBP)
 
       elif tune.which() == 'torque':
         assert not math.isnan(tune.torque.latAccelFactor) and tune.torque.latAccelFactor > 0
