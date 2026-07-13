@@ -159,7 +159,7 @@ class CarController(CarControllerBase):
 
         else:
           acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, CC.longActive)
-          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
+          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else self.CCP.ACCEL_INACTIVE)
           driver_gas_override = CC.enabled and CS.out.gasPressed
           start_control_required = CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping
           starting = (actuators.longControlState == LongCtrlState.pid or driver_gas_override) and start_control_required
