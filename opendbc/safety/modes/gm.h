@@ -181,9 +181,11 @@ static safety_config gm_init(uint16_t param) {
     .max_brake = 400,
   };
 
+#ifdef ALLOW_DEBUG
   // block PSCMStatus (0x184); forwarded through openpilot to hide an alert from the camera
   static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4, .check_relay = true}, {0x315, 0, 5, .check_relay = true}, {0x2CB, 0, 8, .check_relay = true}, {0x370, 0, 6, .check_relay = true},  // pt bus
                                                {0x184, 2, 8, .check_relay = true}};  // camera bus
+#endif
 
 
   static RxCheck gm_rx_checks[] = {
@@ -206,20 +208,19 @@ static safety_config gm_init(uint16_t param) {
     gm_long_limits = &GM_ASCM_LONG_LIMITS;
   }
 
-  bool gm_cam_long = false;
-
-#ifdef ALLOW_DEBUG
-  const uint16_t GM_PARAM_HW_CAM_LONG = 2;
-  gm_cam_long = GET_FLAG(param, GM_PARAM_HW_CAM_LONG);
-#endif
-  gm_pcm_cruise = (gm_hw == GM_CAM) && !gm_cam_long;
+  gm_pcm_cruise = (gm_hw == GM_CAM);
 
   safety_config ret;
   if (gm_hw == GM_CAM) {
-    // FIXME: cppcheck thinks that gm_cam_long is always false. This is not true
-    // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
-    // cppcheck-suppress knownConditionTrueFalse
-    ret = gm_cam_long ? BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS) : BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
+#ifdef ALLOW_DEBUG
+    const uint16_t GM_PARAM_HW_CAM_LONG = 2;
+    const bool gm_cam_long = GET_FLAG(param, GM_PARAM_HW_CAM_LONG);
+    gm_pcm_cruise = !gm_cam_long;
+    if (gm_cam_long) {
+      ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS);
+    }
+#endif
   } else {
     ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
   }

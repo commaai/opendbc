@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-import os
 from opendbc.dbc.generator.tesla._radar_common import get_radar_point_definition, get_val_definition
 
-if __name__ == "__main__":
-  dbc_name = os.path.basename(__file__).replace(".py", ".dbc")
-  tesla_path = os.path.dirname(os.path.realpath(__file__))
-  with open(os.path.join(tesla_path, dbc_name), "w", encoding='utf-8') as f:
-    f.write("""
+
+def generate():
+  parts = []
+  parts.append("""
 VERSION ""
 
 NS_ :
@@ -66,12 +64,14 @@ BO_ 1601 UDS_radcRequest: 8 Diag
    SG_ UDS_radcRequestData : 7|64@0+ (1,0) [0|1.84467e+19] "" Radar
 """)
 
-    POINT_RANGE = range(0x410, 0x45E + 1, 2)
-    for i, base_id in enumerate(POINT_RANGE):
-      f.write(get_radar_point_definition(base_id, f"RadarPoint{i}"))
+  POINT_RANGE = range(0x410, 0x45E + 1, 2)
+  for i, base_id in enumerate(POINT_RANGE):
+    parts.append(get_radar_point_definition(base_id, f"RadarPoint{i}"))
 
-    f.write("""
+  parts.append("""
 VAL_ 1025 lowPowerMode 1 "COMMANDED_LOW_POWER" 0 "DEFAULT_LOW_POWER" 2 "NORMAL_POWER" 3 "SNA";""")
 
-    for base_id in list(POINT_RANGE):
-      f.write(get_val_definition(base_id))
+  for base_id in list(POINT_RANGE):
+    parts.append(get_val_definition(base_id))
+
+  return {"tesla_radar_continental.dbc": "".join(parts)}
