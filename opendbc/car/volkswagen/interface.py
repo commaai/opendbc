@@ -64,8 +64,8 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
 
-      if ret.networkLocation == NetworkLocation.gateway:
-        ret.radarUnavailable = 0x24F not in fingerprint[2]  # MEB_Distance_01
+      # if ret.networkLocation == NetworkLocation.gateway:
+      #   ret.radarUnavailable = 0x24F not in fingerprint[2]  # MEB_Distance_01
 
       ret.enableBsm = 0x24C in fingerprint[0]  # MEB_Side_Assist_01
 
