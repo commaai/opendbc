@@ -49,7 +49,7 @@ BO_ 588 MEB_Side_Assist_01: 16 XXX
  SG_ Lower_Speed_02 : 84|1@0+ (1,0) [0|1] "" XXX
  SG_ Standstill : 86|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 591 Strukturen_01: 64 XXX
+BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Distance_Status : 13|2@1+ (1,0) [0|3] "" XXX
  SG_ Same_Lane_01_ObjectID : 16|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
  SG_ Left_Lane_01_ObjectID : 22|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
