@@ -29,14 +29,14 @@ class RadarInterface(RadarInterfaceBase):
     self.trigger_msg: int = RADAR_ADDR
 
     self.rcp: CANParser | None = None
-    if CP.flags & VolkswagenFlags.MEB:
+    if CP.flags & VolkswagenFlags.MEB and not self.CP.radarUnavailable:
       self.rcp = CANParser(DBC[CP.carFingerprint][Bus.radar], [("MEB_Distance_01", 25)], CanBus(CP).cam)
 
     self._pts = self.pts
     self._track_id_counter: int = 0
 
   def update(self, can_strings):
-    if self.CP.radarUnavailable or self.rcp is None:
+    if self.rcp is None:
       return super().update(None)
 
     vls = self.rcp.update(can_strings)
