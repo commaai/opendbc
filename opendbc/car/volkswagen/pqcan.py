@@ -61,7 +61,6 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, long_override):
 
   return acc_control
 
-
 def acc_hud_status_value(main_switch_on, acc_faulted, long_active, long_override):
   if long_override:
     hud_status = 4

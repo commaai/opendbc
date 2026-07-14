@@ -85,17 +85,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, long_override):
   return acc_control
 
 def acc_hud_status_value(main_switch_on, acc_faulted, long_active, long_override):
-  if long_override:
-    hud_status = 4
-  elif long_active:
-    hud_status = 3
-  elif acc_faulted:
-    hud_status = 6
-  elif main_switch_on:
-    hud_status = 2
-  else:
-    hud_status = 0
-  return hud_status
+    return acc_control_value(main_switch_on, acc_faulted, long_active, long_override)
 
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold):
   commands = []
