@@ -378,6 +378,11 @@ FW_VERSIONS = {
       b'\xf1\x871EA907572H \xf1\x890234',
     ],
   },
+  CAR.VOLKSWAGEN_ID4_MK2: {
+    (Ecu.fwdRadar, 0x757, None): [
+      b'\xf1\x871EA907567D \xf1\x890250',
+    ],
+  },
   CAR.VOLKSWAGEN_JETTA_MK6: {
     (Ecu.srs, 0x715, None): [
       b'\xf1\x875C0959655M \xf1\x890726\xf1\x82\t00NB1108--------24',
@@ -1088,6 +1093,14 @@ FW_VERSIONS = {
       b'\xf1\x875Q0907572K \xf1\x890402\xf1\x82\x0101',
       b'\xf1\x875Q0907572P \xf1\x890682',
       b'\xf1\x875Q0907572R \xf1\x890771',
+    ],
+  },
+  CAR.CUPRA_BORN_MK1: {
+    (Ecu.srs, 0x715, None): [
+      b'\xf1\x871EA959655EH\xf1\x890381',
+    ],
+    (Ecu.fwdRadar, 0x757, None): [
+      b'\xf1\x871EA907572H \xf1\x890234',
     ],
   },
   CAR.SKODA_FABIA_MK4: {
