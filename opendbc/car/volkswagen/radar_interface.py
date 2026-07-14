@@ -3,7 +3,7 @@ import math
 from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
-from opendbc.car.volkswagen.values import DBC, VolkswagenFlags
+from opendbc.car.volkswagen.values import DBC, VolkswagenFlags, CanBus
 
 RADAR_ADDR = 0x24F
 NO_OBJECT = 0
@@ -30,7 +30,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.rcp: CANParser | None = None
     if CP.flags & VolkswagenFlags.MEB:
-      self.rcp = CANParser(DBC[CP.carFingerprint][Bus.radar], [("MEB_Distance_01", 25)], 2)
+      self.rcp = CANParser(DBC[CP.carFingerprint][Bus.radar], [("MEB_Distance_01", 25)], CanBus(CP).cam)
 
     self._pts = self.pts
     self._track_id_counter: int = 0
