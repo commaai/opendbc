@@ -2,7 +2,6 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.renault.values import DBC, GEAR_MAP
-from opendbc.car.common.conversions import Conversions as CV
 
 GearShifter = structs.CarState.GearShifter
 
@@ -22,7 +21,6 @@ class CarState(CarStateBase):
     ret.standstill = ret.vEgoRaw < 0.01
 
     ret.gasPressed = cp.vl["ACC_PEDAL_8C"]["ACCEL_PEDAL"] > 0.1
-    ret.brake = cp_body.vl["PEDAL_AND_GEAR_224"]["BRAKE_PRESSURE"] / 255.0
     ret.brakePressed = cp_body.vl["STEERING_SENSOR_112"]["BRAKE_PRESSED"] == 1
 
     ret.steeringAngleDeg = cp.vl["STEERING_CTRL_1AB"]["STEER_ANGLE"]
@@ -40,23 +38,27 @@ class CarState(CarStateBase):
     ret.leftBlinker = cp_body.vl["STEERING_SENSOR_112"]["TURN_SIGNAL_LEFT"] == 1
     ret.rightBlinker = cp.vl["TURN_SIGNAL_RIGHT_58B"]["TURN_SIGNAL_RIGHT"] == 1
 
-    # 0x57A is the clean ADAS state source. State 0 is active controlling;
-    # state 8 is armed/standby; state 16 is driver override; state 41 is fault.
-    adas_state = cp_body.vl["ADAS_STATE_57A"]["ADAS_STATE"]
-    set_speed_kph = cp.vl["ACC_SETPOINT_5EF"]["SET_SPEED"]
-    active_target_kph = cp_body.vl["ADAS_TARGET_517"]["ADAS_ACTIVE_TARGET"]
-    has_target = 0 < active_target_kph < 250
-    ret.cruiseState.available = adas_state in (0, 8, 16) and (set_speed_kph > 0 or has_target)
-    ret.cruiseState.enabled = adas_state == 0 and set_speed_kph > 0
+    # 0x57A byte 5 alone cannot distinguish Active Assist from ACC/limiter:
+    # state 16 occurs in all longitudinal-only modes and during steering
+    # override. Byte 6 carries the mode context needed for lateral availability.
+    adas_mode_state = int(cp_body.vl["ADAS_STATE_57A"]["ADAS_MODE_STATE"])
+    ret.cruiseState.available = adas_mode_state in (0x02, 0x41, 0x91)
+    ret.cruiseState.enabled = adas_mode_state in (0x02, 0x91)
     ret.cruiseState.standstill = False
-    # Driver-selected ACC/limiter setpoint; 0x517 tracks the active sign-adapted
-    # target and is kept in the DBC, but isn't the driver's set speed.
-    ret.cruiseState.speed = set_speed_kph * CV.KPH_TO_MS if set_speed_kph > 0 else 0.0
+    # The driver-selected setpoint is not present on the two intercepted CAN
+    # pairs. 0x517 is the camera-detected road limit and 0x5EF stayed at 16
+    # while the displayed setpoint moved between 60 and 123 km/h in the
+    # 2026-07-11 capture. Reporting zero is safer than publishing either as the
+    # driver's set speed.
+    ret.cruiseState.speed = 0.0
 
-    ret.steerFaultTemporary = cp.vl["STEERING_CTRL_1AB"]["LKAS_STATE"] == 3
+    # No steering-fault signal has been isolated. LKAS_STATE 3 was previously
+    # called unavailable, but today's drive only exercised states 1 and 2 and
+    # does not justify exposing state 3 as a CarState fault.
 
-    ret.doorOpen = cp.vl["BELTS_DOORS_588"]["DOOR_DRIVER_OPEN_CANDIDATE"] == 1
-    ret.seatbeltUnlatched = cp.vl["BELTS_DOORS_588"]["BELT_UNBUCKLED_CANDIDATE"] == 1
+    # Door and belt candidates on 0x588 did not remain asserted through the
+    # controlled 2026-07-11 door/belt states and also toggled together. Leave
+    # the CarState fields at their safe defaults until isolated signals exist.
 
     return ret
 
@@ -68,16 +70,11 @@ class CarState(CarStateBase):
       ("EPS_17C", 100),
       ("STEERING_CTRL_1AB", 100),
       ("WHEEL_SPEEDS_226", 50),
-      ("VEHICLE_SPEED_3FA", 10),
       ("TURN_SIGNAL_RIGHT_58B", 10),
-      ("BELTS_DOORS_588", 10),
-      ("ACC_SETPOINT_5EF", 1),
     ]
     body_messages = [
       ("STEERING_SENSOR_112", 100),
       ("PEDAL_AND_GEAR_224", 50),
-      ("EPS_STATE_4B5", 10),
-      ("ADAS_TARGET_517", 2),
       ("ADAS_STATE_57A", 2),
     ]
     return {
