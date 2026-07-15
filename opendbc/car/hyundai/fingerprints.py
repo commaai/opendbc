@@ -755,7 +755,7 @@ FW_VERSIONS = {
       b'\xf1\x00DEE MFC  AT USA LHD 1.00 1.03 95740-Q4000 180821',
     ],
   },
-    CAR.KIA_NIRO_PLUS_EV: {
+  CAR.KIA_NIRO_PLUS_EV: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00DEev SCC FHCUP      1.00 1.00 99110-Q4510         ',
     ],
