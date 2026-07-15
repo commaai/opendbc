@@ -60,22 +60,21 @@ class RadarInterface(RadarInterfaceBase):
       return ret
 
     msg = self.rcp.vl["MEB_Distance_01"]
-    get = msg.__getitem__
 
     active_objects: dict[int, tuple[float, float, float]] = {}
     for obj_id_sig, long_sig, lat_sig, vel_sig in SIGNAL_SETS:
-      obj_id = int(get(obj_id_sig))
+      obj_id = int(msg[obj_id_sig])
       if obj_id == NO_OBJECT:
         continue
 
       if obj_id in active_objects:
-        ret.errors.canError = True
+        ret.errors.radarFault = True
         return ret
 
       active_objects[obj_id] = (
-        get(long_sig),  # dRel
-        get(lat_sig),   # yRel
-        get(vel_sig),   # vRel
+        msg[long_sig],  # dRel
+        msg[lat_sig],   # yRel
+        msg[vel_sig],   # vRel
       )
 
     for obj_id, (d_rel, y_rel, v_rel) in active_objects.items():
