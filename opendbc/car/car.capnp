@@ -308,14 +308,12 @@ struct RadarData @0x888ad6581cf0aacb {
   }
 
   # similar to LiveTracks
-  # is one timestamp valid for all? I think so
   struct RadarPoint {
+    # all fields required
     trackId @0 :UInt64;  # no trackId reuse
-
-    # these 3 are the minimum required
-    dRel @1 :Float32; # m from the front bumper of the car
-    yRel @2 :Float32; # m
-    vRel @3 :Float32; # m/s
+    dRel @1 :Float32;    # m from the front bumper of the car
+    yRel @2 :Float32;    # m
+    vRel @3 :Float32;    # m/s
 
     deprecated :group {
       aRel @4 :Float32; # m/s^2
@@ -330,9 +328,10 @@ struct RadarData @0x888ad6581cf0aacb {
     wrongConfig @2;
   }
 
-  # deprecated
-  canMonoTimesDEPRECATED @2 :List(UInt64);
-  errorsDEPRECATED @0 :List(ErrorDEPRECATED);
+  deprecated :group {
+    canMonoTimes @2 :List(UInt64);
+    errors @0 :List(ErrorDEPRECATED);
+  }
 }
 
 # ******* car controls @ 100hz *******
