@@ -465,6 +465,13 @@ class CAR(Platforms):
     [HyundaiCarDocs("Kia Niro Hybrid 2023-24", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     KIA_NIRO_EV.specs,
   )
+KIA_NIRO_PLUS_EV = HyundaiPlatformConfig(
+    [
+      HyundaiCarDocs("Kia Niro Plus EV 2023", "All", video="https://www.youtube.com/watch?v=lT7zcG6ZpGo", car_parts=CarParts.common([CarHarness.hyundai_h])),
+    ],
+    CarSpecs(mass=1760, wheelbase=2.7, steerRatio=13.6, tireStiffnessFactor=0.385),  # average of all the cars
+    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.EV,
+  )
   KIA_OPTIMA_G4 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Optima 2017", "Advanced Smart Cruise Control",
                     car_parts=CarParts.common([CarHarness.hyundai_b]))],  # TODO: may support 2016, 2018
