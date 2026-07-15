@@ -465,7 +465,7 @@ class CAR(Platforms):
     [HyundaiCarDocs("Kia Niro Hybrid 2023-24", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     KIA_NIRO_EV.specs,
   )
-KIA_NIRO_PLUS_EV = HyundaiPlatformConfig(
+  KIA_NIRO_PLUS_EV = HyundaiPlatformConfig(
     [
       HyundaiCarDocs("Kia Niro Plus EV 2023", "All", video="https://www.youtube.com/watch?v=lT7zcG6ZpGo", car_parts=CarParts.common([CarHarness.hyundai_h])),
     ],
