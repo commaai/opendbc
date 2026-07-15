@@ -81,9 +81,6 @@ class RadarInterface(RadarInterfaceBase):
       self.pts[i].dRel = msg_a['LongDist']
       self.pts[i].yRel = msg_a['LatDist']
       self.pts[i].vRel = msg_a['LongSpeed']
-      self.pts[i].aRel = msg_a['LongAccel']
-      self.pts[i].yvRel = msg_b['LatSpeed']
-      self.pts[i].measured = bool(msg_a['Meas'])
 
     ret.points = list(self.pts.values())
     return ret
