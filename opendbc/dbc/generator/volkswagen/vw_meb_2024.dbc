@@ -49,33 +49,6 @@ BO_ 588 MEB_Side_Assist_01: 16 XXX
  SG_ Lower_Speed_02 : 84|1@0+ (1,0) [0|1] "" XXX
  SG_ Standstill : 86|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 591 MEB_Distance_01: 64 XXX
- SG_ Distance_Status : 13|2@1+ (1,0) [0|3] "" XXX
- SG_ Same_Lane_01_ObjectID : 16|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
- SG_ Left_Lane_01_ObjectID : 22|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
- SG_ Right_Lane_01_ObjectID : 28|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
- SG_ Same_Lane_02_ObjectID : 34|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
- SG_ Left_Lane_02_ObjectID : 40|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
- SG_ Right_Lane_02_ObjectID : 46|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
- SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
- SG_ Same_Lane_01_Lat_Distance : 76|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
- SG_ Same_Lane_01_Rel_Velo : 86|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
- SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
- SG_ Left_Lane_01_Lat_Distance : 108|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
- SG_ Left_Lane_01_Rel_Velo : 118|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
- SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
- SG_ Right_Lane_01_Lat_Distance : 140|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
- SG_ Right_Lane_01_Rel_Velo : 150|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
- SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
- SG_ Same_Lane_02_Lat_Distance : 172|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
- SG_ Same_Lane_02_Rel_Velo : 182|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
- SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
- SG_ Left_Lane_02_Lat_Distance : 204|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
- SG_ Left_Lane_02_Rel_Velo : 214|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
- SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.07,-6) [0|300] "Unit_Meter" XXX
- SG_ Right_Lane_02_Lat_Distance : 236|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
- SG_ Right_Lane_02_Rel_Velo : 246|10@1+ (0.28,-143.36) [-150|150] "Unit_MeterPerSecond" XXX
-
 BO_ 768 ACC_19: 48 XXX
  SG_ ACC_Tempolimit : 64|5@1+ (1,0) [0|31] "" OTA_FC
  SG_ ACC_Wunschgeschw_Farbe : 69|1@1+ (1,0) [0|1] "" Vector__XXX
