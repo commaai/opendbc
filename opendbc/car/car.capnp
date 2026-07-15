@@ -317,9 +317,11 @@ struct RadarData @0x888ad6581cf0aacb {
     yRel @2 :Float32; # m
     vRel @3 :Float32; # m/s
 
-    aRelDEPRECATED @4 :Float32; # m/s^2
-    yvRelDEPRECATED @5 :Float32; # m/s
-    measuredDEPRECATED @6 :Bool;  # measurement VS estimate flag
+    deprecated :group {
+      aRel @4 :Float32; # m/s^2
+      yvRel @5 :Float32; # m/s
+      measured @6 :Bool;  # measurement VS estimate flag
+    }
   }
 
   enum ErrorDEPRECATED {
