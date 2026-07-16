@@ -201,8 +201,8 @@ int get_curvature_meas_max(void){
 
 // ***** car specific helpers *****
 
-void set_honda_alt_brake_msg(bool c){
-  honda_alt_brake_msg = c;
+void set_honda_elec_brake_msg(bool c){
+  honda_elec_brake_msg = c;
 }
 
 void set_honda_bosch_long(bool c){

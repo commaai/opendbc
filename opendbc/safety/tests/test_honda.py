@@ -376,7 +376,7 @@ class TestHondaBoschSafetyBase(HondaBase):
     self.packer = CANPackerSafety("honda_civic_hatchback_ex_2017_can_generated")
     self.safety = libsafety_py.libsafety
 
-  def _alt_brake_msg(self, brake):
+  def _elec_brake_msg(self, brake):
     values = {"BRAKE_PRESSED": brake, "COUNTER": self.cnt_brake % 4}
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("BRAKE_MODULE", self.PT_BUS, values)
@@ -394,36 +394,36 @@ class TestHondaBoschSafetyBase(HondaBase):
     self.assertTrue(self._tx(self._button_msg(Btn.RESUME, bus=self.BUTTONS_BUS)))
 
 
-class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
+class TestHondaBoschElecBrakeSafetyBase(TestHondaBoschSafetyBase):
   """
-    Base Bosch safety test class with an alternate brake message
+    Base Bosch safety test class with electric brake booster message
   """
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.ALT_BRAKE)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.ELECTRIC_BRAKE_BOOSTER)
     self.safety.init_tests()
 
   def _user_brake_msg(self, brake):
-    return self._alt_brake_msg(brake)
+    return self._elec_brake_msg(brake)
 
-  def test_alt_brake_rx_hook(self):
-    self.safety.set_honda_alt_brake_msg(1)
+  def test_elec_brake_rx_hook(self):
+    self.safety.set_honda_elec_brake_msg(1)
     self.safety.set_controls_allowed(1)
-    msg = self._alt_brake_msg(0)
+    msg = self._elec_brake_msg(0)
     self.assertTrue(self._rx(msg))
     msg[0].data[2] = msg[0].data[2] & 0xF0  # invalidate checksum
     self.assertFalse(self._rx(msg))
     self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_alt_disengage_on_brake(self):
-    self.safety.set_honda_alt_brake_msg(1)
+  def test_elec_disengage_on_brake(self):
+    self.safety.set_honda_elec_brake_msg(1)
     self.safety.set_controls_allowed(1)
-    self._rx(self._alt_brake_msg(1))
+    self._rx(self._elec_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
 
-    self.safety.set_honda_alt_brake_msg(0)
+    self.safety.set_honda_elec_brake_msg(0)
     self.safety.set_controls_allowed(1)
-    self._rx(self._alt_brake_msg(1))
+    self._rx(self._elec_brake_msg(1))
     self.assertTrue(self.safety.get_controls_allowed())
 
 
@@ -437,9 +437,9 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
     self.safety.init_tests()
 
 
-class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):
+class TestHondaBoschElecBrakeSafety(HondaPcmEnableBase, TestHondaBoschElecBrakeSafetyBase):
   """
-    Covers the Honda Bosch safety mode with stock longitudinal and an alternate brake message
+    Covers the Honda Bosch safety mode with stock longitudinal and an electric brake booster message
   """
 
 
@@ -525,14 +525,14 @@ class TestHondaBoschRadarlessSafety(HondaPcmEnableBase, TestHondaBoschRadarlessS
     self.safety.init_tests()
 
 
-class TestHondaBoschRadarlessAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase, TestHondaBoschAltBrakeSafetyBase):
+class TestHondaBoschRadarlessElecBrakeSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase, TestHondaBoschElecBrakeSafetyBase):
   """
-    Covers the Honda Bosch Radarless safety mode with stock longitudinal and an alternate brake message
+    Covers the Honda Bosch Radarless safety mode with stock longitudinal and an electric brake booster message
   """
 
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.ALT_BRAKE)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.ELECTRIC_BRAKE_BOOSTER)
     self.safety.init_tests()
 
 
@@ -587,14 +587,14 @@ class TestHondaBoschCANFDSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBas
     self.safety.init_tests()
 
 
-class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBase, TestHondaBoschAltBrakeSafetyBase):
+class TestHondaBoschCANFDElecBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBase, TestHondaBoschElecBrakeSafetyBase):
   """
-    Covers the Honda Bosch CANFD safety mode with stock longitudinal and an alternate brake message
+    Covers the Honda Bosch CANFD safety mode with stock longitudinal and an electric brake booster message
   """
 
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.ALT_BRAKE)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.ELECTRIC_BRAKE_BOOSTER)
     self.safety.init_tests()
 
 
