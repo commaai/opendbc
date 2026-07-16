@@ -140,6 +140,7 @@ class CarState(CarStateBase):
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
+    ret.cruiseState.belowEngageSpeed = self.CP.openpilotLongitudinalControl and ret.vEgo < self.CP.minEnableSpeed + 0.5
 
     self.frame += 1
     return ret
@@ -230,6 +231,7 @@ class CarState(CarStateBase):
     ret.espDisabled = bool(pt_cp.vl["Bremse_1"]["BR1_ESPASR_passive"])
 
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
+    ret.cruiseState.belowEngageSpeed = self.CP.openpilotLongitudinalControl and ret.vEgo < self.CP.minEnableSpeed + 0.5
 
     self.frame += 1
     return ret
@@ -375,6 +377,8 @@ class CarState(CarStateBase):
 
     ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
     ret.standstill = ret.vEgoRaw == 0
+
+    ret.cruiseState.belowEngageSpeed = self.CP.openpilotLongitudinalControl and ret.vEgo < self.CP.minEnableSpeed + 0.5
 
     self.frame += 1
     return ret

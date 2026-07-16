@@ -200,6 +200,9 @@ class CarState(CarStateBase):
         buttonEvents += create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
 
     ret.buttonEvents = buttonEvents
+
+    ret.cruiseState.belowEngageSpeed = self.CP.openpilotLongitudinalControl and ret.vEgo < self.CP.minEnableSpeed
+
     return ret
 
   @staticmethod
