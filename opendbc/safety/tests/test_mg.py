@@ -52,17 +52,5 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
     return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values)
 
 
-class TestMGAltBrakeSafety(TestMGSafety):
-  def setUp(self):
-    self.packer = CANPackerSafety("mg")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.mg, 1)
-    self.safety.init_tests()
-
-  def _user_brake_msg(self, brake):
-    values = {"EPTBrkPdlDscrtInptStsHSC2": 1 if brake else 0}
-    return self.packer.make_can_msg_safety("GW_HSC2_HCU_FrP00", 0, values)
-
-
 if __name__ == "__main__":
   unittest.main()
