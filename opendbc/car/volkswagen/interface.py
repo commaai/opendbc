@@ -115,12 +115,14 @@ class CarInterface(CarInterfaceBase):
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
-    if ret.flags & VolkswagenFlags.MEB:
+    if ret.flags & VolkswagenFlags.MEB and ret.networkLocation == NetworkLocation.gateway:
+      ret.openpilotLongitudinalControl = True
       ret.longitudinalActuatorDelay = 0.5
       ret.longitudinalTuning.kiBP = [0., 30.]
       ret.longitudinalTuning.kiV = [0.4, 0.]
+    else:
+      ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
 
-    ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
     if alpha_long:
       ret.openpilotLongitudinalControl = True
       safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
