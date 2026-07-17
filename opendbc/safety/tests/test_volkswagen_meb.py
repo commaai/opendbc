@@ -355,8 +355,8 @@ class TestVolkswagenMebIgnition(unittest.TestCase):
     self.safety.init_tests()
     self.packer = CANPackerSafety("vw_meb_generated")
 
-  def _msg(self, counter, ign):
-    return self.packer.make_can_msg_safety("Klemmen_Status_01", 0,
+  def _msg(self, counter, ign, bus = 0):
+    return self.packer.make_can_msg_safety("Klemmen_Status_01", bus,
                                            {"Klemmen_Status_01_BZ": counter,
                                             "ZAS_Kl_15": ign})
 
@@ -376,6 +376,20 @@ class TestVolkswagenMebIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(3, 0))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_ignore_nonzero_bus(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 1, 1))
+    self.safety.ignition_can_hook(self._msg(1, 1, 1))
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 1, 0))
+    self.safety.ignition_can_hook(self._msg(1, 1, 0))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 0, 1))
+    self.safety.ignition_can_hook(self._msg(3, 0, 1))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 0, 0))
+    self.safety.ignition_can_hook(self._msg(3, 0, 0))
+    self.assertFalse(self.safety.get_ignition_can())
 
 if __name__ == "__main__":
   unittest.main()

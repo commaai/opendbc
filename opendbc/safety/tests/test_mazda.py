@@ -88,8 +88,8 @@ class TestMazdaIgnition(unittest.TestCase):
     self.safety = libsafety_py.libsafety
     self.safety.init_tests()
 
-  def _msg(self, byte0):
-    return make_msg(0, 0x9E, dat=bytes([byte0]) + b"\x00" * 7)
+  def _msg(self, byte0, bus = 0):
+    return make_msg(bus, 0x9E, dat=bytes([byte0]) + b"\x00" * 7)
 
   # 0x9E byte 0 high 3 bits == 6 (0xC0)
   def test_ignition_on(self):
@@ -102,6 +102,16 @@ class TestMazdaIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(0x20))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_ignore_nonzero_bus(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0xC0, 1))
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0xC0, 0))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0x20, 1))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0x20, 0))
+    self.assertFalse(self.safety.get_ignition_can())
 
 if __name__ == "__main__":
   unittest.main()

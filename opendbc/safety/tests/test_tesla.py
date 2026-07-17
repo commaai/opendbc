@@ -464,8 +464,8 @@ class TestTeslaIgnition(unittest.TestCase):
     self.safety.init_tests()
     self.packer = CANPackerSafety("tesla_model3_party")
 
-  def _msg(self, counter, state):
-    return self.packer.make_can_msg_safety("VCFRONT_LVPowerState", 0,
+  def _msg(self, counter, state, bus = 0):
+    return self.packer.make_can_msg_safety("VCFRONT_LVPowerState", bus,
                                            {"VCFRONT_LVPowerStateCounter": counter,
                                             "VCFRONT_vehiclePowerState": state})
 
@@ -486,6 +486,20 @@ class TestTeslaIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(3, 2))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_ignore_nonzero_bus(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 3, 1))
+    self.safety.ignition_can_hook(self._msg(1, 3, 1))
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 3, 0))
+    self.safety.ignition_can_hook(self._msg(1, 3, 0))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 2, 1))
+    self.safety.ignition_can_hook(self._msg(3, 2, 1))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 2, 0))
+    self.safety.ignition_can_hook(self._msg(3, 2, 0))
+    self.assertFalse(self.safety.get_ignition_can())
 
 if __name__ == "__main__":
   unittest.main()
