@@ -45,16 +45,13 @@ class RadarInterface(RadarInterfaceBase):
   def _update(self):
     ret = structs.RadarData()
 
-    if self.rcp is None:
-      return ret
-
     if not self.rcp.can_valid:
       ret.errors.canError = True
       return ret
 
     msg = self.rcp.vl["MEB_Distance_01"]
 
-    # Can be triggered by obstructing radar sensor
+    # Can be 3 when radar sensor is obstructed
     if msg["Distance_Status"] != 0:
       ret.errors.radarUnavailableTemporary = True
 
