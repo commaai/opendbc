@@ -83,6 +83,7 @@ class RadarInterfaceBase(ABC):
     self.rcp = None
     self.pts: dict[int, structs.RadarData.RadarPoint] = {}
     self.frame = 0
+    self.track_id: int = 0
 
   def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
     self.frame += 1
