@@ -28,8 +28,6 @@ class RadarInterface(RadarInterfaceBase):
     if CP.flags & VolkswagenFlags.MEB and not self.CP.radarUnavailable:
       self.rcp = CANParser(DBC[CP.carFingerprint][Bus.radar], [("MEB_Distance_01", 25)], CanBus(CP).cam)
 
-    self.track_id: int = 0
-
   def update(self, can_strings):
     if self.rcp is None:
       return super().update(None)
