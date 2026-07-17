@@ -88,12 +88,9 @@ class RadarInterface(RadarInterfaceBase):
       else:
         pt = self._pts[obj_id]
 
-      pt.measured = True
       pt.dRel = msg[long_sig]
       pt.yRel = msg[lat_sig]
       pt.vRel = msg[vel_sig]
-      pt.aRel = math.nan
-      pt.yvRel = math.nan
 
     inactive_ids = self._pts.keys() - seen_ids
     for obj_id in inactive_ids:
