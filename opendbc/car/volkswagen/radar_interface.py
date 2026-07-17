@@ -3,7 +3,6 @@ from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
 from opendbc.car.volkswagen.values import DBC, VolkswagenFlags, CanBus
 
-RADAR_ADDR = 0x24F
 NO_OBJECT_ID = 0
 LANE_TYPES = ("Same_Lane", "Left_Lane", "Right_Lane")
 SIGNAL_SETS = tuple(
@@ -41,10 +40,9 @@ class RadarInterface(RadarInterfaceBase):
     if len(self.rcp.vl_all["MEB_Distance_01"]["Distance_Status"]) == 0:
       return None
 
-    radar_data = self._process_radar_frame()
-    return radar_data
+    return self._update()
 
-  def _process_radar_frame(self):
+  def _update(self):
     ret = structs.RadarData()
 
     if self.rcp is None:
