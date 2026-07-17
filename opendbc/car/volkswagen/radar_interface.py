@@ -64,7 +64,7 @@ class RadarInterface(RadarInterfaceBase):
     msg = self.rcp.vl["MEB_Distance_01"]
 
     # Can be triggered by obstructing radar sensor
-    if msg["DistanceStatus"] != 0:
+    if msg["Distance_Status"] != 0:
       ret.errors.radarUnavailableTemporary = True
 
     seen_ids = set()
