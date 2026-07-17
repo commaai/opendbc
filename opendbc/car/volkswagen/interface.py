@@ -1,12 +1,14 @@
-from opendbc.car import get_safety_config, structs
+from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.volkswagen.carcontroller import CarController
 from opendbc.car.volkswagen.carstate import CarState
-from opendbc.car.volkswagen.values import CanBus, CAR, NetworkLocation, TransmissionType, VolkswagenFlags, VolkswagenSafetyFlags
+from opendbc.car.volkswagen.radar_interface import RadarInterface
+from opendbc.car.volkswagen.values import CanBus, CAR, DBC, NetworkLocation, TransmissionType, VolkswagenFlags, VolkswagenSafetyFlags
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+  RadarInterface = RadarInterface
 
   DRIVABLE_GEARS = (structs.CarState.GearShifter.eco, structs.CarState.GearShifter.sport,
                     structs.CarState.GearShifter.manumatic)
@@ -14,7 +16,7 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "volkswagen"
-    ret.radarUnavailable = True
+    ret.radarUnavailable = Bus.radar not in DBC[candidate]
 
     if ret.flags & VolkswagenFlags.PQ:
       # Set global PQ35/PQ46/NMS parameters
@@ -43,6 +45,9 @@ class CarInterface(CarInterfaceBase):
     elif ret.flags & VolkswagenFlags.MEB:
       # Set global MEB parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
+      if ret.flags & VolkswagenFlags.MEB_GEN2:
+        safety_configs[0].safetyParam |= VolkswagenSafetyFlags.MEB_ALT_CRC.value
+
       ret.transmissionType = TransmissionType.direct
       ret.steerControlType = structs.CarParams.SteerControlType.curvature
       ret.steerAtStandstill = True
@@ -58,6 +63,7 @@ class CarInterface(CarInterfaceBase):
         ret.networkLocation = NetworkLocation.gateway
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
+        ret.radarUnavailable = True
 
       ret.enableBsm = 0x24C in fingerprint[0]  # MEB_Side_Assist_01
 
@@ -99,7 +105,6 @@ class CarInterface(CarInterfaceBase):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     elif ret.flags & VolkswagenFlags.MEB:
       ret.steerActuatorDelay = 0.3
-      ret.steerLimitTimer = 0.1
     else:
       ret.steerActuatorDelay = 0.1
       ret.lateralTuning.pid.kpBP = [0.]
