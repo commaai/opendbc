@@ -23,7 +23,7 @@ class RadarInterface(RadarInterfaceBase):
     super().__init__(CP)
 
     # With the MEB gateway harness, we do not have access to the raw points from the radar.
-    # However, the camera publishes decent, albeit filtered, tracks. Two for each lane, left, center, and right.
+    # However, the camera publishes decent, albeit filtered, tracks. Two for each lane; left, center, and right.
     self.rcp: CANParser | None = None
     if CP.flags & VolkswagenFlags.MEB and not self.CP.radarUnavailable:
       self.rcp = CANParser(DBC[CP.carFingerprint][Bus.radar], [("MEB_Distance_01", 25)], CanBus(CP).cam)
