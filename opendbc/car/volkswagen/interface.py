@@ -117,7 +117,7 @@ class CarInterface(CarInterfaceBase):
 
     if ret.flags & VolkswagenFlags.MEB and ret.networkLocation == NetworkLocation.gateway:
       ret.openpilotLongitudinalControl = True
-      ret.longitudinalActuatorDelay = 0.5
+      ret.longitudinalActuatorDelay = 0.3
       ret.longitudinalTuning.kiBP = [0., 30.]
       ret.longitudinalTuning.kiV = [0.4, 0.]
     else:
@@ -136,8 +136,11 @@ class CarInterface(CarInterfaceBase):
 
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     if ret.flags & VolkswagenFlags.MEB:
-      ret.startingState = True
-      ret.startAccel = 0.8
+      # ret.startingState = True
+      # ret.startAccel = 0.8
+      ret.vEgoStopping = 0.1
+      ret.vEgoStarting = 0.1
+      ret.stoppingDecelRate = 0.3
     else:
       ret.stopAccel = -0.55
       ret.vEgoStarting = 0.1
