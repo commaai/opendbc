@@ -28,7 +28,6 @@ class RadarInterface(RadarInterfaceBase):
     if CP.flags & VolkswagenFlags.MEB and not self.CP.radarUnavailable:
       self.rcp = CANParser(DBC[CP.carFingerprint][Bus.radar], [("MEB_Distance_01", 25)], CanBus(CP).cam)
 
-    self._pts = self.pts
     self.track_id: int = 0
 
   def update(self, can_strings):
@@ -68,21 +67,21 @@ class RadarInterface(RadarInterfaceBase):
 
       seen_ids.add(obj_id)
 
-      if obj_id not in self._pts:
+      if obj_id not in self.pts:
         pt = structs.RadarData.RadarPoint()
         pt.trackId = self.track_id
         self.track_id += 1
-        self._pts[obj_id] = pt
+        self.pts[obj_id] = pt
       else:
-        pt = self._pts[obj_id]
+        pt = self.pts[obj_id]
 
       pt.dRel = msg[long_sig]
       pt.yRel = msg[lat_sig]
       pt.vRel = msg[vel_sig]
 
-    inactive_ids = self._pts.keys() - seen_ids
+    inactive_ids = self.pts.keys() - seen_ids
     for obj_id in inactive_ids:
-      self._pts.pop(obj_id, None)
+      self.pts.pop(obj_id, None)
 
-    ret.points = list(self._pts.values())
+    ret.points = list(self.pts.values())
     return ret
