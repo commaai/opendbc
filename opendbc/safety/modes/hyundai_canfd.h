@@ -88,9 +88,11 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
       if (msg->addr == 0x1cfU) {
         cruise_button = msg->data[2] & 0x7U;
         main_button = GET_BIT(msg, 19U);
+        mads_button_press = GET_BIT(msg, 23U) ? MADS_BUTTON_PRESSED : MADS_BUTTON_NOT_PRESSED;  // MADS: LFA button
       } else {
         cruise_button = (msg->data[4] >> 4) & 0x7U;
         main_button = GET_BIT(msg, 34U);
+        mads_button_press = GET_BIT(msg, 39U) ? MADS_BUTTON_PRESSED : MADS_BUTTON_NOT_PRESSED;  // MADS: LFA button (alt)
       }
       hyundai_common_cruise_buttons_check(cruise_button, main_button);
     }
@@ -131,6 +133,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
       int cruise_status = ((msg->data[8] >> 4) & 0x7U);
       bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
       hyundai_common_cruise_state_check(cruise_engaged);
+      acc_main_on = GET_BIT(msg, 66U);  // MADS: ACC MAIN state for main-cruise lateral engagement
     }
   }
 }

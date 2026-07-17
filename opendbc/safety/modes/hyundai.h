@@ -137,11 +137,25 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
     }
   }
 
+  // MADS: ACC MAIN (LFA/cruise main) state from SCC11, used to engage lateral on main-cruise
+  if (msg->addr == 0x420U) {
+    if (((msg->bus == 0U) && !hyundai_camera_scc) || ((msg->bus == 2U) && hyundai_camera_scc)) {
+      if (!hyundai_longitudinal) {
+        acc_main_on = GET_BIT(msg, 0U);
+      }
+    }
+  }
+
   if (msg->bus == 0U) {
     if (msg->addr == 0x251U) {
       int torque_driver_new = (GET_BYTES(msg, 0, 2) & 0x7ffU) - 1024U;
       // update array of samples
       update_sample(&torque_driver, torque_driver_new);
+    }
+
+    // MADS: LKAS/LFA button (0x391 bit 4) toggles lateral independently of ACC
+    if (msg->addr == 0x391U) {
+      mads_button_press = GET_BIT(msg, 4U) ? MADS_BUTTON_PRESSED : MADS_BUTTON_NOT_PRESSED;
     }
 
     // ACC steering wheel buttons
