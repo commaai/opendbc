@@ -501,5 +501,11 @@ class TestTeslaIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(3, 2, 0))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_ignore_non_8_length(self):
+    msg = common.make_msg(0, 0x221, length=7, dat=b"\x02" + b"\x00" * 6)
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(msg)
+    self.assertFalse(self.safety.get_ignition_can())
+
 if __name__ == "__main__":
   unittest.main()
