@@ -882,7 +882,7 @@ CM_ SG_ 414 DSC_full_off "0x4 enabling, 0xA enabled. TBD";
 
 CM_ SG_ 416 YawRate "Lateral Acceleration";
 
-CM_ SG_ 408 ParkButtonSecond "Redundant buton. 0x1 = pressed;";
+CM_ SG_ 408 ParkButtonSecond "Redundant button. 0x1 = pressed;";
 CM_ SG_ 408 SideButton "0x1 = pressed;";
 CM_ SG_ 408 SportButtonPressed "0x1 = pressed;";
 CM_ SG_ 408 M3_button "M3 POWER (?)";

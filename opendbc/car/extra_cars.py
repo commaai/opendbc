@@ -51,7 +51,8 @@ class CAR(Platforms):
       CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing"),
       CommunityCarDocs("Honda Accord Hybrid 2017"),
       CommunityCarDocs("Honda Clarity 2018-21"),
-      GMSecurityCarDocs("Honda Prologue 2024-25"),
+      GMSecurityCarDocs("Honda Prologue 2024-26"),
+      CommunityCarDocs("Honda Ridgeline 2026"),
     ],
   )
 

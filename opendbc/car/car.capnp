@@ -1,4 +1,4 @@
-using Cxx = import "./include/c++.capnp";
+using Cxx = import "/include/c++.capnp";
 $Cxx.namespace("cereal");
 
 @0x8e2af1e708af8b8d;
@@ -308,21 +308,18 @@ struct RadarData @0x888ad6581cf0aacb {
   }
 
   # similar to LiveTracks
-  # is one timestamp valid for all? I think so
   struct RadarPoint {
+    # all fields required
     trackId @0 :UInt64;  # no trackId reuse
+    dRel @1 :Float32;    # m from the front bumper of the car
+    yRel @2 :Float32;    # m
+    vRel @3 :Float32;    # m/s
 
-    # these 3 are the minimum required
-    dRel @1 :Float32; # m from the front bumper of the car
-    yRel @2 :Float32; # m
-    vRel @3 :Float32; # m/s
-
-    # these are optional and valid if they are not NaN
-    aRel @4 :Float32; # m/s^2
-    yvRel @5 :Float32; # m/s
-
-    # some radars flag measurements VS estimates
-    measured @6 :Bool;
+    deprecated :group {
+      aRel @4 :Float32; # m/s^2
+      yvRel @5 :Float32; # m/s
+      measured @6 :Bool;  # measurement VS estimate flag
+    }
   }
 
   enum ErrorDEPRECATED {
@@ -331,9 +328,10 @@ struct RadarData @0x888ad6581cf0aacb {
     wrongConfig @2;
   }
 
-  # deprecated
-  canMonoTimesDEPRECATED @2 :List(UInt64);
-  errorsDEPRECATED @0 :List(ErrorDEPRECATED);
+  deprecated :group {
+    canMonoTimes @2 :List(UInt64);
+    errors @0 :List(ErrorDEPRECATED);
+  }
 }
 
 # ******* car controls @ 100hz *******

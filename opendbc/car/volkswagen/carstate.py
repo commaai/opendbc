@@ -289,13 +289,14 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
     ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
     if self.CP.pcmCruise:
-      ret.cruiseState.nonAdaptive = bool(ext_cp.vl["MEB_ACC_01"]["ACC_Limiter_Mode"])
-      ret.cruiseState.speed = ext_cp.vl["MEB_ACC_01"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
+      ret.cruiseState.nonAdaptive = bool(ext_cp.vl["ACC_19"]["ACC_Limiter_Mode"])
+      ret.cruiseState.speed = ext_cp.vl["ACC_19"]["ACC_Wunschgeschw_02"] * CV.KPH_TO_MS
       if ret.cruiseState.speed > 90:  # 255 kph in m/s == no current setpoint
         ret.cruiseState.speed = 0
     else:
       ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
-    accFaulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
+    accFaulted = (pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7) or
+                  ext_cp.vl["ACC_19"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
     ret.accFaulted = self.update_acc_fault(accFaulted, parking_brake=ret.parkingBrake, drive_mode=drive_mode,
                                             brake_pressed=ret.brakePressed)
 
@@ -303,10 +304,16 @@ class CarState(CarStateBase):
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
 
     if self.CP.enableBsm:
-      ret.leftBlindspot = (bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Left"]) or
-                           bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Left"]))
-      ret.rightBlindspot = (bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Right"]) or
-                            bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Right"]))
+      if self.CP.flags & VolkswagenFlags.MEB_GEN2:
+        ret.leftBlindspot = (bool(pt_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Driver"]) or
+                             bool(pt_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Driver"]))
+        ret.rightBlindspot = (bool(pt_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Passenger"]) or
+                              bool(pt_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Passenger"]))
+      else:
+        ret.leftBlindspot = (bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Left"]) or
+                             bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Left"]))
+        ret.rightBlindspot = (bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Right"]) or
+                              bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Right"]))
 
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
