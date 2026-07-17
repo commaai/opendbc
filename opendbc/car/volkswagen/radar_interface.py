@@ -23,9 +23,6 @@ class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
 
-    self.updated_messages: set[int] = set()
-    self.trigger_msg: int = RADAR_ADDR
-
     # With the MEB gateway harness, we do not have access to the raw points from the radar.
     # However, the camera publishes decent, albeit filtered, tracks. Two for each lane, left center and right.
     self.rcp: CANParser | None = None
@@ -39,14 +36,12 @@ class RadarInterface(RadarInterfaceBase):
     if self.rcp is None:
       return super().update(None)
 
-    vls = self.rcp.update(can_strings)
-    self.updated_messages.update(vls)
+    self.rcp.update(can_strings)
 
-    if self.trigger_msg not in self.updated_messages:
+    if len(self.rcp.vl_all["MEB_Distance_01"]["Distance_Status"]) == 0:
       return None
 
     radar_data = self._process_radar_frame()
-    self.updated_messages.clear()
     return radar_data
 
   def _process_radar_frame(self):
