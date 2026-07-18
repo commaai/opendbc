@@ -105,7 +105,7 @@ def get_acc_control(CS, CC, long_override):
 
 def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, long_override, long_override_begin, long_disabling):
   # warning: car is reacting to hold mechanic even with long control off
-  if CS.out.accFaulted:
+  if CS.accFaulted:
     acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
   elif not CC.enabled:
     if long_disabling:
@@ -190,15 +190,15 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
   return commands
 
 
-def get_acc_hud_status(main_switch_on, acc_faulted, long_active, long_override):
-  if acc_faulted:
+def get_acc_hud_status(CS, CC, long_override):
+  if CS.accFaulted:
     acc_hud_control = ACC_HUD_ERROR  # error state
-  elif long_active:
+  elif CC.enabled:
     if long_override:
       acc_hud_control = ACC_HUD_OVERRIDE  # overriding
     else:
       acc_hud_control = ACC_HUD_ACTIVE  # active
-  elif main_switch_on:
+  elif CS.cruiseState.available:
     acc_hud_control = ACC_HUD_ENABLED  # inactive
   else:
     acc_hud_control = ACC_HUD_DISABLED  # deactivated
