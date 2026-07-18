@@ -2,7 +2,7 @@ import random
 import unittest
 
 from opendbc import fuzz as st
-from opendbc.fuzz import given, settings
+from opendbc.fuzz import fuzz
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
@@ -67,8 +67,7 @@ class TestFordFW(unittest.TestCase):
         codes = get_platform_codes([fw])
         assert 1 == len(codes), f"Unable to parse FW: {fw!r}"
 
-  @settings(max_examples=100)
-  @given(data=st.data())
+  @fuzz(examples=100, data=st.data())
   def test_platform_codes_fuzzy_fw(self, data):
     """Ensure function doesn't raise an exception"""
     fw_strategy = st.lists(st.binary())

@@ -1,7 +1,7 @@
 import unittest
 
 from opendbc import fuzz as st
-from opendbc.fuzz import given, settings
+from opendbc.fuzz import fuzz
 
 from opendbc.car import Bus
 from opendbc.car.structs import CarParams
@@ -75,8 +75,7 @@ class TestToyotaFingerprint(unittest.TestCase):
 
   # Tests for part numbers, platform codes, and sub-versions which Toyota will use to fuzzy
   # fingerprint in the absence of full FW matches:
-  @settings(max_examples=100)
-  @given(data=st.data())
+  @fuzz(examples=100, data=st.data())
   def test_platform_codes_fuzzy_fw(self, data):
     fw_strategy = st.lists(st.binary())
     fws = data.draw(fw_strategy)

@@ -3,7 +3,7 @@ import math
 import unittest
 from opendbc import fuzz as st
 from functools import cache
-from opendbc.fuzz import given, settings
+from opendbc.fuzz import fuzz
 from collections.abc import Callable
 from typing import Any
 
@@ -14,7 +14,7 @@ from opendbc.car.fw_versions import FW_QUERY_CONFIGS
 from opendbc.car.interfaces import CarInterfaceBase, get_interface_attr
 from opendbc.car.values import PLATFORMS
 
-DrawType = Callable[[st.SearchStrategy], Any]
+DrawType = Callable[[st.Strategy], Any]
 
 ALL_ECUS = {ecu for ecus in FW_VERSIONS.values() for ecu in ecus.keys()}
 ALL_ECUS |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra_ecus}
@@ -61,10 +61,8 @@ def get_fuzzy_car_interface(car_name: str, draw: DrawType) -> CarInterfaceBase:
 
 
 def _make_car_test(car_name):
-  # FIXME: Due to the lists used in carParams, Phase.target is very slow and will cause
-  #  many generated examples to overrun when max_examples > ~20, don't use it
-  @settings(max_examples=MAX_EXAMPLES, deadline=None)
-  @given(data=st.data())
+  # Keep the example count modest: nested carParams lists make each additional draw expensive.
+  @fuzz(examples=MAX_EXAMPLES, data=st.data())
   def test(self, data):
     car_interface = get_fuzzy_car_interface(car_name, data.draw)
     car_params = car_interface.CP.as_reader()

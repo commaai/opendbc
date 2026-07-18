@@ -1,5 +1,5 @@
 from opendbc import fuzz as st
-from opendbc.fuzz import given, settings
+from opendbc.fuzz import fuzz
 
 import unittest
 
@@ -119,8 +119,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
           assert all(fw.startswith(expected_fw_prefix) for fw in fws), \
                           f"FW from unexpected request in database: {(ecu, fws)}"
 
-  @settings(max_examples=100)
-  @given(data=st.data())
+  @fuzz(examples=100, data=st.data())
   def test_platform_codes_fuzzy_fw(self, data):
     """Ensure function doesn't raise an exception"""
     fw_strategy = st.lists(st.binary())

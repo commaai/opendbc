@@ -11,7 +11,6 @@ import math
 import random
 import struct
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
@@ -23,11 +22,6 @@ class Strategy(Generic[T]):
 
   def example(self, rng: random.Random, index: int = 0) -> T:
     return self._generate(rng, index)
-
-
-# Familiar name for annotations in the test generators.
-SearchStrategy = Strategy
-
 
 class Data:
   def __init__(self, rng: random.Random, index: int):
@@ -132,41 +126,22 @@ def data() -> Strategy[Data]:
   return Strategy(lambda rng, i: Data(rng, i))
 
 
-@dataclass(frozen=True)
-class _Settings:
-  max_examples: int = 100
-  deadline: int | None = 200
-
-
-def settings(*, max_examples: int = 100, deadline: int | None = 200, **_ignored):
-  def decorator(func):
-    func._fuzz_settings = _Settings(max_examples, deadline)
-    return func
-  return decorator
-
-
-def given(*given_strategies: Strategy, **named_strategies: Strategy):
+def fuzz(*, examples: int = 100, **strategies: Strategy):
+  """Run a test repeatedly with deterministic values from named strategies."""
   def decorator(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-      config = getattr(wrapper, "_fuzz_settings", getattr(func, "_fuzz_settings", _Settings()))
       instance = args[0] if args else None
       test_name = getattr(instance, "_testMethodName", "")
       identity = f"{func.__module__}.{func.__qualname__}.{test_name}".encode()
       base_seed = int.from_bytes(hashlib.sha256(identity).digest()[:8])
-      for index in range(config.max_examples):
+      for index in range(examples):
         rng = random.Random(base_seed + index)
-        positional = [s.example(rng, index + n) for n, s in enumerate(given_strategies)]
-        named = {name: strategy.example(rng, index + len(positional) + n)
-                 for n, (name, strategy) in enumerate(named_strategies.items())}
-        func(*args, *positional, **kwargs, **named)
+        generated = {name: strategy.example(rng, index + n) for n, (name, strategy) in enumerate(strategies.items())}
+        func(*args, **kwargs, **generated)
     # Generated arguments must not be interpreted as pytest fixtures.
     signature = inspect.signature(func)
-    generated = set(named_strategies)
-    positional_count = len(given_strategies)
-    parameters = [p for p in signature.parameters.values() if p.name not in generated]
-    if positional_count:
-      parameters = parameters[:-positional_count]
+    parameters = [p for p in signature.parameters.values() if p.name not in strategies]
     wrapper.__signature__ = signature.replace(parameters=parameters)
     return wrapper
   return decorator
