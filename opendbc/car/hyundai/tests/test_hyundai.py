@@ -1,4 +1,5 @@
-from hypothesis import settings, given, strategies as st
+from opendbc import fuzz as st
+from opendbc.fuzz import given, settings
 
 import unittest
 

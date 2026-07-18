@@ -1,7 +1,8 @@
 import random
 import unittest
 
-from hypothesis import settings, given, strategies as st
+from opendbc import fuzz as st
+from opendbc.fuzz import given, settings
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict

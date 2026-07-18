@@ -1,6 +1,7 @@
 import unittest
 
-from hypothesis import given, settings, strategies as st
+from opendbc import fuzz as st
+from opendbc.fuzz import given, settings
 
 from opendbc.car import Bus
 from opendbc.car.structs import CarParams
