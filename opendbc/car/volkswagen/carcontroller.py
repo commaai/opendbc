@@ -59,12 +59,8 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
 
-    # TEMPORARY live-tunable EPB fault repro: HOLD-before-NONE seconds read from /data/hold_time
-    self.inject_phase = 0      # 0=arming, 1=injecting
-    self.inject_settle = 0     # ticks held before injecting
-    self.inject_t = 0          # ticks since injection started
-    self.inject_moving = 0     # ticks clearly driven off (to re-arm)
-    self.inject_hold_time = 0.56
+    self.hold_active = False       # latched while requesting HALTEN and through the leaving-hold ramp
+    self.hold_release_counter = 0  # ticks since leaving the hold, for the RELEASE ramp
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -145,49 +141,12 @@ class CarController(CarControllerBase):
         stopping = actuators.longControlState == LongCtrlState.stopping
 
         if self.CP.flags & VolkswagenFlags.MEB:
-          # only send ACC_HMS_RELEASE when in cruise standstill and want to resume
-          starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
+          # leaving HOLD must exit via RELEASE for a few frames, never a bare HALTEN->NONE which clamps the EPB
+          self.hold_release_counter = min(self.hold_release_counter + 1, 5) if not stopping else 0
+          leaving_hold = self.hold_active and not stopping and self.hold_release_counter < 5
+          self.hold_active = stopping or leaving_hold
+          starting = (actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation) or leaving_hold
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
-
-          # ============================================================================
-          # TEMPORARY source-level EPB fault repro (REMOVE after). Reproduce the real bug's
-          # path: after held ~3s, every `hold_time` s force a 0.2s pid/creep request at the
-          # SOURCE -> stopping=False, starting=False, accel=-0.2 -> the normal pipeline then
-          # derives HALTEN -> NONE + -0.2, exactly as the fault does. Clamp on a pulse => that
-          # path is the cause. Tune live (no rebuild):
-          #   echo 0.4 > /data/hold_time   (then drive off and stop again to re-arm / re-read)
-          # Runs at 50Hz (ACC_CONTROL_STEP), so ticks are 20ms.
-          held = CC.enabled and CS.esp_hold_confirmation and stopping
-          if self.inject_phase == 0:
-            if held:
-              self.inject_settle += 1
-              if self.inject_settle == 1:
-                try:
-                  with open('/data/hold_time', 'r') as f:
-                    self.inject_hold_time = float(f.read().strip())
-                except Exception:
-                  pass
-              if self.inject_settle > 150:  # ~3s settle
-                self.inject_phase = 1
-                self.inject_t = 0
-            else:
-              self.inject_settle = 0
-          elif self.inject_phase == 1:
-            self.inject_t += 1
-            hold_ticks = max(1, int(self.inject_hold_time * 50.0))
-            if (self.inject_t % (hold_ticks + 10)) >= hold_ticks:  # 0.2s pid/-0.2 pulse
-              stopping = False   # simulate longControlState leaving stopping (pid)
-              starting = False   # pid without esp_hold -> get_acc_hold_type derives NONE
-              accel = -0.2       # the creep request
-            if not held:
-              self.inject_moving += 1
-              if self.inject_moving > 50:  # ~1s clearly driven off -> re-arm & re-read file
-                self.inject_phase = 0
-                self.inject_settle = 0
-                self.inject_moving = 0
-            else:
-              self.inject_moving = 0
-          # ============================================================================
 
           long_override = CC.cruiseControl.override or CS.out.gasPressed
           self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
