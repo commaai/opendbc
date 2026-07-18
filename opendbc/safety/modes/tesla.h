@@ -17,41 +17,50 @@ static bool tesla_autopark_prev = false;
 
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
 
-  uint8_t cnt = 0;
-  if (msg->addr == 0x2b9U) {
+  switch (msg->addr) {
+  case 0x2b9U:
     // Signal: DAS_controlCounter
-    cnt = msg->data[6] >> 5;
-  } else if (msg->addr == 0x488U) {
+    return msg->data[6] >> 5;
+  case 0x488U:
     // Signal: DAS_steeringControlCounter
-    cnt = msg->data[2] & 0x0FU;
-  } else if ((msg->addr == 0x257U) || (msg->addr == 0x118U) || (msg->addr == 0x145U) || (msg->addr == 0x286U) || (msg->addr == 0x311U)) {
+    return msg->data[2] & 0x0FU;
+  case 0x257U:
+  case 0x118U:
+  case 0x145U:
+  case 0x286U:
+  case 0x311U:
     // Signal: DI_speedCounter, DI_systemStatusCounter, ESP_statusCounter, DI_locStatusCounter, UI_warningCounter
-    cnt = msg->data[1] & 0x0FU;
-  } else if (msg->addr == 0x155U) {
+    return msg->data[1] & 0x0FU;
+  case 0x155U:
     // Signal: ESP_wheelRotationCounter
-    cnt = msg->data[6] >> 4;
-  } else if (msg->addr == 0x370U) {
+    return msg->data[6] >> 4;
+  case 0x370U:
     // Signal: EPAS3S_sysStatusCounter
-    cnt = msg->data[6] & 0x0FU;
-  } else {
+    return msg->data[6] & 0x0FU;
+  default:
+    return 0;
   }
-  return cnt;
 }
 
 static int _tesla_get_checksum_byte(const int addr) {
-  int checksum_byte = -1;
-  if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
+  switch (addr) {
+  case 0x370:
+  case 0x2b9:
+  case 0x155:
     // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
-    checksum_byte = 7;
-  } else if (addr == 0x488) {
+    return 7;
+  case 0x488:
     // Signal: DAS_steeringControlChecksum
-    checksum_byte = 3;
-  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x145) || (addr == 0x286) || (addr == 0x311)) {
-    // Signal: DI_speedChecksum, DI_systemStatusChecksum, ESP_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
-    checksum_byte = 0;
-  } else {
+    return 3;
+  case 0x257:
+  case 0x118:
+  case 0x145:
+  case 0x286:
+  case 0x311:
+    return 0;
+  default:
+    return -1;
   }
-  return checksum_byte;
 }
 
 static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
