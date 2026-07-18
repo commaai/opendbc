@@ -138,7 +138,7 @@ class CarController(CarControllerBase):
         stopping = actuators.longControlState == LongCtrlState.stopping
 
         if self.CP.flags & VolkswagenFlags.MEB:
-          # drive-off from a held stop: we launch in pid (no starting state), so detect it here and request RELEASE (anfahren)
+          # only send ACC_HMS_RELEASE when in cruise standstill and want to resume
           starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
 
