@@ -138,7 +138,8 @@ class CarController(CarControllerBase):
         stopping = actuators.longControlState == LongCtrlState.stopping
 
         if self.CP.flags & VolkswagenFlags.MEB:
-          starting = actuators.longControlState == LongCtrlState.starting and CS.out.vEgo <= self.CP.vEgoStarting
+          # drive-off from a held stop: we launch in pid (no starting state), so detect it here and request RELEASE (anfahren)
+          starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
 
           long_override = CC.cruiseControl.override or CS.out.gasPressed

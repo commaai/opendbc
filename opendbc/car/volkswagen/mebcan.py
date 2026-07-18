@@ -70,6 +70,7 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
 
 
 ACCEL_INACTIVE = 3.01
+ACCEL_STOPPING = -0.20   # gentle decel stock sends while settling into a hold (paired with HMS=HALTEN)
 ACCEL_OVERRIDE = 0.00
 
 ACC_CTRL_ERROR    = 6
@@ -124,8 +125,8 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, 
       acc_hold_type = ACC_HMS_NO_REQUEST # overriding / no request
   elif starting:
     acc_hold_type = ACC_HMS_RELEASE # release request and startup
-  elif stopping or esp_hold:
-    acc_hold_type = ACC_HMS_HOLD # hold or hold request
+  elif stopping:
+    acc_hold_type = ACC_HMS_HOLD # hold while stopping/stopped (drive-off from hold is caught by 'starting' above)
   else:
     acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
 
@@ -154,9 +155,11 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, upper_jerk, low
     if override: # the car expects a non inactive accel while overriding
       acceleration = ACCEL_OVERRIDE # original ACC still sends active accel in this case (seamless experience)
     elif full_stop:
-      acceleration = ACCEL_INACTIVE # inactive accel, newer gen >2024 error of not neutral value
+      acceleration = ACCEL_INACTIVE # held: HMS=HALTEN + inactive accel (matches stock)
+    elif actually_stopping:
+      acceleration = ACCEL_STOPPING # settling into hold: HMS=HALTEN + gentle decel (never the raw request, matches stock)
     else:
-      acceleration = accel
+      acceleration = accel          # active control / drive-off: live accel
   else:
     acceleration = ACCEL_INACTIVE # inactive accel
 
@@ -169,7 +172,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, upper_jerk, low
     "ACC_zul_Regelabw_oben":      upper_control_limit if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
     "ACC_neg_Sollbeschl_Grad_02": lower_jerk if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
     "ACC_pos_Sollbeschl_Grad_02": upper_jerk if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_Anfahren":               starting,
+    "ACC_Anfahren":               0,  # stock signals drive-off via ACC_Anforderung_HMS=anfahren only, leaves this bit 0
     "ACC_Anhalten":               1 if actually_stopping else 0,
     "ACC_Anhalteweg":             terminal_rollout if actually_stopping else 20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
