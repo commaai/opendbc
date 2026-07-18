@@ -117,7 +117,6 @@ class CarControllerParams:
       self.ACCEL_INACTIVE = 3.01  # m/s^2
       self.ACCEL_OVERRIDE = 0.00  # m/s^2
       self.JERK_LIMIT = 4.0  # m/s^3
-      self.HOLD_RELEASE_DEBOUNCE = 25  # ACC_CONTROL_STEP ticks (~0.5s @ 50Hz) to hold HALTEN through a transient stopping->pid blip before allowing NONE
 
       self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
       self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]

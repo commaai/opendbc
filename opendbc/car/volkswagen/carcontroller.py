@@ -59,9 +59,6 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
 
-    self.acc_hold_type_last = mebcan.ACC_HMS_NO_REQUEST
-    self.hold_release_frames = 0
-
     # TEMPORARY live-tunable EPB fault repro: HOLD-before-NONE seconds read from /data/hold_time
     self.inject_phase = 0      # 0=arming, 1=injecting
     self.inject_settle = 0     # ticks held before injecting
@@ -152,41 +149,17 @@ class CarController(CarControllerBase):
           starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
 
-          long_override = CC.cruiseControl.override or CS.out.gasPressed
-          self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
-          long_override_begin = long_override and self.long_override_counter < 5
-
-          self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
-          long_disabling = not CC.enabled and self.long_disabled_counter < 5
-
-          acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
-          acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
-                                                   CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
-
-          # Debounce HALTEN -> NONE: an abrupt drop of the hold request at a stop clamps the EPB (proven
-          # on-car; stock never does it). Near a stop the planner eases a_target into the stop, briefly
-          # flipping shouldStop->False (stopping->pid) for a few frames -> NONE. Hold the last HALTEN
-          # through those blips. A genuine drive-off is ANFAHREN(RELEASE), not NONE, so it is unaffected;
-          # while actually driving the request is a steady NONE, so this never fires there.
-          if acc_hold_type == mebcan.ACC_HMS_NO_REQUEST and self.acc_hold_type_last == mebcan.ACC_HMS_HOLD \
-             and self.hold_release_frames < self.CCP.HOLD_RELEASE_DEBOUNCE:
-            self.hold_release_frames += 1
-            acc_hold_type = mebcan.ACC_HMS_HOLD
-          else:
-            self.hold_release_frames = 0
-          self.acc_hold_type_last = acc_hold_type
-
           # ============================================================================
-          # TEMPORARY live-tunable EPB fault repro (REMOVE after). Hands-off:
-          #   engage -> brake to a stop -> held ~3s -> then hold HALTEN for `hold_time`s,
-          #   drop to NONE for 0.1s, repeat. Overrides the debounce so the HALTEN->NONE
-          #   edge actually goes out. If the EPB clamps on the drop, hold_time is in the
-          #   fault zone. Tune live on-device between runs (no rebuild):
-          #     echo 0.56 > /data/hold_time   (then drive off and stop again to re-arm)
+          # TEMPORARY source-level EPB fault repro (REMOVE after). Reproduce the real bug's
+          # path: after held ~3s, every `hold_time` s force a 0.2s pid/creep request at the
+          # SOURCE -> stopping=False, starting=False, accel=-0.2 -> the normal pipeline then
+          # derives HALTEN -> NONE + -0.2, exactly as the fault does. Clamp on a pulse => that
+          # path is the cause. Tune live (no rebuild):
+          #   echo 0.4 > /data/hold_time   (then drive off and stop again to re-arm / re-read)
           # Runs at 50Hz (ACC_CONTROL_STEP), so ticks are 20ms.
-          armed = CC.enabled and CS.esp_hold_confirmation and stopping
+          held = CC.enabled and CS.esp_hold_confirmation and stopping
           if self.inject_phase == 0:
-            if armed:
+            if held:
               self.inject_settle += 1
               if self.inject_settle == 1:
                 try:
@@ -202,9 +175,11 @@ class CarController(CarControllerBase):
           elif self.inject_phase == 1:
             self.inject_t += 1
             hold_ticks = max(1, int(self.inject_hold_time * 50.0))
-            none_ticks = 5  # 0.1s NONE pulse
-            acc_hold_type = mebcan.ACC_HMS_HOLD if (self.inject_t % (hold_ticks + none_ticks)) < hold_ticks else mebcan.ACC_HMS_NO_REQUEST
-            if not stopping and not CS.esp_hold_confirmation:
+            if (self.inject_t % (hold_ticks + 10)) >= hold_ticks:  # 0.2s pid/-0.2 pulse
+              stopping = False   # simulate longControlState leaving stopping (pid)
+              starting = False   # pid without esp_hold -> get_acc_hold_type derives NONE
+              accel = -0.2       # the creep request
+            if not held:
               self.inject_moving += 1
               if self.inject_moving > 50:  # ~1s clearly driven off -> re-arm & re-read file
                 self.inject_phase = 0
@@ -213,6 +188,17 @@ class CarController(CarControllerBase):
             else:
               self.inject_moving = 0
           # ============================================================================
+
+          long_override = CC.cruiseControl.override or CS.out.gasPressed
+          self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
+          long_override_begin = long_override and self.long_override_counter < 5
+
+          self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
+          long_disabling = not CC.enabled and self.long_disabled_counter < 5
+
+          acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
+          acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
+                                                   CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
 
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
