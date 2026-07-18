@@ -90,44 +90,42 @@ ACC_HUD_ENABLED  = 2
 ACC_HUD_DISABLED = 0
 
 
-def get_acc_control(main_switch_on, acc_faulted, long_active, override):
-
-  if acc_faulted:
-    acc_control = ACC_CTRL_ERROR # error state
-  elif long_active:
-    if override:
-      acc_control = ACC_CTRL_OVERRIDE # overriding
+def get_acc_control(CS, CC, long_override):
+  if CS.accFaulted:
+    acc_control = ACC_CTRL_ERROR  # error state
+  elif CC.enabled:
+    if long_override:
+      acc_control = ACC_CTRL_OVERRIDE  # overriding
     else:
-      acc_control = ACC_CTRL_ACTIVE # active long control state
-  elif main_switch_on:
-    acc_control = ACC_CTRL_ENABLED # long control ready
+      acc_control = ACC_CTRL_ACTIVE  # active long control state
+  elif CS.cruiseState.available:
+    acc_control = ACC_CTRL_ENABLED  # long control ready
   else:
-    acc_control = ACC_CTRL_DISABLED # long control deactivated state
+    acc_control = ACC_CTRL_DISABLED  # long control deactivated state
 
   return acc_control
 
 
-def get_acc_hold_type(acc_faulted, long_active, starting, stopping, esp_hold, override, override_begin, long_disabling):
+def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, override, override_begin, long_disabling):
   # warning: car is reacting to hold mechanic even with long control off
-
-  if acc_faulted:
-    acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
-  elif not long_active:
+  if CS.out.accFaulted:
+    acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
+  elif not CC.enabled:
     if long_disabling:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests right after disabling long control (prevents car error with EPB at low speed)
+      acc_hold_type = ACC_HMS_RAMP_RELEASE  # ramp release of requests right after disabling long control (prevents car error with EPB at low speed)
     else:
-      acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
+      acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
   elif override:
     if override_begin:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override (prevents car error with EPB at low speed)
+      acc_hold_type = ACC_HMS_RAMP_RELEASE  # ramp release of requests at the beginning of override (prevents car error with EPB at low speed)
     else:
-      acc_hold_type = ACC_HMS_NO_REQUEST # overriding / no request
+      acc_hold_type = ACC_HMS_NO_REQUEST  # overriding / no request
   elif starting:
-    acc_hold_type = ACC_HMS_RELEASE # release request and startup
+    acc_hold_type = ACC_HMS_RELEASE  # release request and startup
   elif stopping or esp_hold:
-    acc_hold_type = ACC_HMS_HOLD # hold or hold request
+    acc_hold_type = ACC_HMS_HOLD  # hold or hold request
   else:
-    acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
+    acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
 
   return acc_hold_type
 

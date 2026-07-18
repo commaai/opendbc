@@ -148,8 +148,8 @@ class CarController(CarControllerBase):
           self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
           long_disabling = not CC.enabled and self.long_disabled_counter < 5
 
-          acc_control = mebcan.get_acc_control(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, long_override)
-          acc_hold_type = mebcan.get_acc_hold_type(CS.out.accFaulted, CC.enabled, starting, stopping,
+          acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
+          acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
                                                    CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.enabled,
                                                            4.0, 4.0, 0., 0.,
