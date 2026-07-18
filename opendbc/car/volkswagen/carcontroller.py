@@ -151,7 +151,7 @@ class CarController(CarControllerBase):
           acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
           acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
                                                    CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
-          can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.enabled,
+          can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            4.0, 4.0, 0., 0.,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))
@@ -189,8 +189,8 @@ class CarController(CarControllerBase):
         lead_distance = 0
         if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:
           lead_distance = 8
-        acc_hud_status = mebcan.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
-                                                     CC.cruiseControl.override or CS.out.gasPressed)
+        acc_hud_status = mebcan.get_acc_hud_status(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
+                                                   CC.cruiseControl.override or CS.out.gasPressed)
         can_sends.append(mebcan.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH,
                                                        hud_control.leadVisible, hud_control.leadDistanceBars + 1, show_distance_bars,
                                                        CS.esp_hold_confirmation, lead_distance, 0, fcw_alert))

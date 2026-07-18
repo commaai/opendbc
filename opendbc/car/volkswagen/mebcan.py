@@ -69,9 +69,6 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
 
 
-ACCEL_INACTIVE = 3.01
-ACCEL_OVERRIDE = 0.00
-
 ACC_CTRL_ERROR    = 6
 ACC_CTRL_OVERRIDE = 4
 ACC_CTRL_ACTIVE   = 3
@@ -130,7 +127,7 @@ def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, override, override_b
   return acc_hold_type
 
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, upper_jerk, lower_jerk, upper_control_limit, lower_control_limit,
+def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, upper_jerk, lower_jerk, upper_control_limit, lower_control_limit,
                              accel, acc_control, acc_hold_type, stopping, starting, esp_hold, speed, override, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
@@ -144,38 +141,38 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, upper_jerk, low
   # ACC_Anhalteweg: when stopping: MEB: values <> 0 the car can execute a hard brake probably if target is too close, MQBEvo: value 0 results in hard brake
   terminal_rollout = 0
 
-  full_stop          = stopping and esp_hold
+  full_stop = stopping and esp_hold
   full_stop_no_start = esp_hold and not starting
-  actually_stopping  = stopping and not esp_hold
+  actually_stopping = stopping and not esp_hold
 
   if acc_enabled:
-    if override: # the car expects a non inactive accel while overriding
-      acceleration = ACCEL_OVERRIDE # original ACC still sends active accel in this case (seamless experience)
+    if override:  # the car expects a non-inactive accel while overriding
+      acceleration = CCP.ACCEL_OVERRIDE  # original ACC still sends active accel in this case (seamless experience)
     elif full_stop:
-      acceleration = ACCEL_INACTIVE # inactive accel, newer gen >2024 error of not neutral value
+      acceleration = CCP.ACCEL_INACTIVE  # inactive accel, newer gen >2024 error of not neutral value
     else:
       acceleration = accel
   else:
-    acceleration = ACCEL_INACTIVE # inactive accel
+    acceleration = CCP.ACCEL_INACTIVE  # inactive accel
 
   values = {
-    "ACC_Typ":                    acc_type,
-    "ACC_Status_ACC":             acc_control,
-    "ACC_StartStopp_Info":        acc_enabled,
-    "ACC_Sollbeschleunigung_02":  acceleration,
-    "ACC_zul_Regelabw_unten":     lower_control_limit if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_zul_Regelabw_oben":      upper_control_limit if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
+    "ACC_Typ": acc_type,
+    "ACC_Status_ACC": acc_control,
+    "ACC_StartStopp_Info": acc_enabled,
+    "ACC_Sollbeschleunigung_02": acceleration,
+    "ACC_zul_Regelabw_unten": lower_control_limit if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
+    "ACC_zul_Regelabw_oben": upper_control_limit if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
     "ACC_neg_Sollbeschl_Grad_02": lower_jerk if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
     "ACC_pos_Sollbeschl_Grad_02": upper_jerk if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_Anfahren":               starting,
-    "ACC_Anhalten":               1 if actually_stopping else 0,
-    "ACC_Anhalteweg":             terminal_rollout if actually_stopping else 20.46,
-    "ACC_Anforderung_HMS":        acc_hold_type,
-    "ACC_AKTIV_regelt":           1 if acc_control == ACC_CTRL_ACTIVE else 0,
-    "Speed":                      speed,
-    "SET_ME_0XFE":                0xFE,
-    "SET_ME_0X1":                 0x1,
-    "SET_ME_0X9":                 0x9,
+    "ACC_Anfahren": starting,
+    "ACC_Anhalten": 1 if actually_stopping else 0,
+    "ACC_Anhalteweg": terminal_rollout if actually_stopping else 20.46,
+    "ACC_Anforderung_HMS": acc_hold_type,
+    "ACC_AKTIV_regelt": 1 if acc_control == ACC_CTRL_ACTIVE else 0,
+    "Speed": speed,
+    "SET_ME_0XFE": 0xFE,
+    "SET_ME_0X1": 0x1,
+    "SET_ME_0X9": 0x9,
   }
 
   commands.append(packer.make_can_msg("ACC_18", bus, values))
@@ -183,9 +180,9 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, upper_jerk, low
   if travel_assist_available:
     # satisfy car to prevent errors when pressing Travel Assist Button
     values_ta = {
-       "Travel_Assist_Status":    4 if acc_enabled else 2,
-       "Travel_Assist_Request":   0,
-       "Travel_Assist_Available": 1,
+      "Travel_Assist_Status": 4 if acc_enabled else 2,
+      "Travel_Assist_Request": 0,
+      "Travel_Assist_Available": 1,
     }
 
     commands.append(packer.make_can_msg("TA_01", bus, values_ta))
@@ -193,7 +190,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, upper_jerk, low
   return commands
 
 
-def acc_hud_status_value(main_switch_on, acc_faulted, long_active, override):
+def get_acc_hud_status(main_switch_on, acc_faulted, long_active, override):
 
   if acc_faulted:
     acc_hud_control = ACC_HUD_ERROR # error state
