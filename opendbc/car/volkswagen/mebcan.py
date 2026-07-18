@@ -119,8 +119,8 @@ def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, long_override, long_
       acc_hold_type = ACC_HMS_NO_REQUEST  # overriding / no request
   elif starting:
     acc_hold_type = ACC_HMS_RELEASE  # release request and startup
-  elif stopping or esp_hold:
-    acc_hold_type = ACC_HMS_HOLD  # hold or hold request
+  elif stopping:
+    acc_hold_type = ACC_HMS_HOLD  # hold while stopping/stopped
   else:
     acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
 
@@ -164,7 +164,7 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     "ACC_zul_Regelabw_oben":      0,
     "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
     "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_Anfahren":               starting,
+    "ACC_Anfahren":               0,  # always zero, stock uses ACC_Anforderung_HMS
     "ACC_Anhalten":               1 if actually_stopping else 0,
     "ACC_Anhalteweg":             terminal_rollout if actually_stopping else 20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
