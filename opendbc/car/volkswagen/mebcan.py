@@ -120,7 +120,7 @@ def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, long_override, long_
   elif starting:
     acc_hold_type = ACC_HMS_RELEASE  # release request and startup
   elif stopping:
-    acc_hold_type = ACC_HMS_HOLD  # hold while stopping/stopped (drive-off from hold is caught by 'starting' above)
+    acc_hold_type = ACC_HMS_HOLD  # hold while stopping/stopped
   else:
     acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
 
@@ -151,7 +151,7 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     elif full_stop:
       acceleration = CCP.ACCEL_INACTIVE  # held: HMS=HALTEN + inactive accel (matches stock)
     else:
-      acceleration = accel  # active control / settling / drive-off: live accel
+      acceleration = accel
   else:
     acceleration = CCP.ACCEL_INACTIVE  # inactive accel
 
