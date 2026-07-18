@@ -128,9 +128,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
   volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
 
-#ifdef ALLOW_DEBUG
   volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
-#endif
 
   safety_config ret;
   if (volkswagen_longitudinal && volkswagen_meb_alt_crc) {
