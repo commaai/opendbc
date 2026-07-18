@@ -113,8 +113,10 @@ class CarControllerParams:
       self.CURVATURE_MAX = 0.195          # Max curvature for steering command, m^-1
       self.CURVATURE_LIMITS = CurvatureSteeringLimits(self.CURVATURE_MAX)
 
-      self.ACCEL_INACTIVE = 3.01
-      self.ACCEL_OVERRIDE = 0.00
+      # Longitudinal constants
+      self.ACCEL_INACTIVE = 3.01  # m/s^2
+      self.ACCEL_OVERRIDE = 0.00  # m/s^2
+      self.JERK_LIMIT = 4.0  # m/s^3
 
       self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
       self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]

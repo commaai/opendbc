@@ -127,8 +127,8 @@ def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, override, override_b
   return acc_hold_type
 
 
-def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, upper_jerk, lower_jerk, upper_control_limit, lower_control_limit,
-                             accel, acc_control, acc_hold_type, stopping, starting, esp_hold, speed, override, travel_assist_available):
+def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_control, acc_hold_type,
+                             stopping, starting, esp_hold, speed, override, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
@@ -160,10 +160,10 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, upper_jerk
     "ACC_Status_ACC": acc_control,
     "ACC_StartStopp_Info": acc_enabled,
     "ACC_Sollbeschleunigung_02": acceleration,
-    "ACC_zul_Regelabw_unten": lower_control_limit if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_zul_Regelabw_oben": upper_control_limit if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_neg_Sollbeschl_Grad_02": lower_jerk if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_pos_Sollbeschl_Grad_02": upper_jerk if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
+    "ACC_zul_Regelabw_unten": 0,
+    "ACC_zul_Regelabw_oben": 0,
+    "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
+    "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
     "ACC_Anfahren": starting,
     "ACC_Anhalten": 1 if actually_stopping else 0,
     "ACC_Anhalteweg": terminal_rollout if actually_stopping else 20.46,
