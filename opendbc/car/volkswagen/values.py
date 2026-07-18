@@ -116,6 +116,7 @@ class CarControllerParams:
       # Longitudinal constants
       self.ACCEL_INACTIVE = 3.01  # m/s^2
       self.ACCEL_OVERRIDE = 0.00  # m/s^2
+      self.ACCEL_STOPPING = -0.20  # m/s^2, gentle decel stock sends while settling into a hold (paired with HMS=HALTEN)
       self.JERK_LIMIT = 4.0  # m/s^3
 
       self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
