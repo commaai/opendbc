@@ -112,7 +112,6 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kiV = [2.0, 1.5]
       ret.stoppingDecelRate = 2.0  # reach brake quickly after enabling
       ret.vEgoStopping = 0.25
-      ret.vEgoStarting = 0.25
 
       if alpha_long:
         ret.pcmCruise = False
