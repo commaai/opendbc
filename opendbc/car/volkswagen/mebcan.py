@@ -191,18 +191,17 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
 
 
 def get_acc_hud_status(main_switch_on, acc_faulted, long_active, override):
-
   if acc_faulted:
-    acc_hud_control = ACC_HUD_ERROR # error state
+    acc_hud_control = ACC_HUD_ERROR  # error state
   elif long_active:
     if override:
-      acc_hud_control = ACC_HUD_OVERRIDE # overriding
+      acc_hud_control = ACC_HUD_OVERRIDE  # overriding
     else:
-      acc_hud_control = ACC_HUD_ACTIVE # active
+      acc_hud_control = ACC_HUD_ACTIVE  # active
   elif main_switch_on:
-    acc_hud_control = ACC_HUD_ENABLED # inactive
+    acc_hud_control = ACC_HUD_ENABLED  # inactive
   else:
-    acc_hud_control = ACC_HUD_DISABLED # deactivated
+    acc_hud_control = ACC_HUD_DISABLED  # deactivated
 
   return acc_hud_control
 
@@ -218,7 +217,6 @@ def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
 
 
 def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, show_distance_bars, esp_hold, distance, desired_gap, fcw_alert):
-
   values = {
     "ACC_Status_ACC":                acc_control,
     "ACC_Tempolimit":                0,
