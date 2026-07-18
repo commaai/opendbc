@@ -97,54 +97,46 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
 };
 
 static void ford_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == FORD_MAIN_BUS) {
-    // Update in motion state from standstill signal
-    if (msg->addr == FORD_DesiredTorqBrk) {
-      // Signal: VehStop_D_Stat
-      vehicle_moving = ((msg->data[3] >> 3) & 0x3U) != 1U;
-    }
-
+  // Update in motion state from standstill signal
+  if (msg->addr == FORD_DesiredTorqBrk) {
+    // Signal: VehStop_D_Stat
+    vehicle_moving = ((msg->data[3] >> 3) & 0x3U) != 1U;
+  }
     // Update vehicle speed
-    if (msg->addr == FORD_BrakeSysFeatures) {
-      // Signal: Veh_V_ActlBrk
-      UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01 * KPH_TO_MS);
-    }
-
+  if (msg->addr == FORD_BrakeSysFeatures) {
+    // Signal: Veh_V_ActlBrk
+    UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01 * KPH_TO_MS);
+  }
     // Check vehicle speed against a second source
-    if (msg->addr == FORD_EngVehicleSpThrottle2) {
-      // Disable controls if speeds from ABS and PCM ECUs are too far apart.
-      // Signal: Veh_V_ActlEng
-      float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
-      UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
-    }
-
+  if (msg->addr == FORD_EngVehicleSpThrottle2) {
+    // Disable controls if speeds from ABS and PCM ECUs are too far apart.
+    // Signal: Veh_V_ActlEng
+    float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
+    UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
+  }
     // Update vehicle yaw rate
-    if (msg->addr == FORD_Yaw_Data_FD1) {
-      // Signal: VehYaw_W_Actl
-      // TODO: we should use the speed which results in the closest angle measurement to the desired angle
-      float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
-      float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
-      // convert current curvature into units on CAN for comparison with desired curvature
-      update_sample(&curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
-    }
-
+  if (msg->addr == FORD_Yaw_Data_FD1) {
+    // Signal: VehYaw_W_Actl
+    // TODO: we should use the speed which results in the closest angle measurement to the desired angle
+    float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
+    float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
+    // convert current curvature into units on CAN for comparison with desired curvature
+    update_sample(&curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
+  }
     // Update gas pedal
-    if (msg->addr == FORD_EngVehicleSpThrottle) {
-      // Pedal position: (0.1 * val) in percent
-      // Signal: ApedPos_Pc_ActlArb
-      gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
-    }
-
+  if (msg->addr == FORD_EngVehicleSpThrottle) {
+    // Pedal position: (0.1 * val) in percent
+    // Signal: ApedPos_Pc_ActlArb
+    gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
+  }
     // Update brake pedal and cruise state
-    if (msg->addr == FORD_EngBrakeData) {
-      // Signal: BpedDrvAppl_D_Actl
-      brake_pressed = ((msg->data[0] >> 4) & 0x3U) == 2U;
-
+  if (msg->addr == FORD_EngBrakeData) {
+    // Signal: BpedDrvAppl_D_Actl
+    brake_pressed = ((msg->data[0] >> 4) & 0x3U) == 2U;
       // Signal: CcStat_D_Actl
-      unsigned int cruise_state = msg->data[1] & 0x07U;
-      bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
-      pcm_cruise_check(cruise_engaged);
-    }
+    unsigned int cruise_state = msg->data[1] & 0x07U;
+    bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
+    pcm_cruise_check(cruise_engaged);
   }
 }
 
