@@ -120,6 +120,9 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalActuatorDelay = 0.3
       # ret.longitudinalTuning.kiBP = [0., 30.]
       # ret.longitudinalTuning.kiV = [0.4, 0.]
+      safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
+      if ret.transmissionType == TransmissionType.manual:
+        ret.minEnableSpeed = 4.5
     else:
       ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
 
