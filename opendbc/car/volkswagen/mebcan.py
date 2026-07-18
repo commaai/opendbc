@@ -150,6 +150,8 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
       acceleration = CCP.ACCEL_OVERRIDE  # original ACC still sends active accel in this case (seamless experience)
     elif full_stop:
       acceleration = CCP.ACCEL_INACTIVE  # inactive accel, newer gen >2024 error of not neutral value
+    elif actually_stopping:
+      acceleration = CCP.ACCEL_STOPPING  # settling into hold: HMS=HALTEN + gentle decel; a hard live decel here trips the EPB clamp
     else:
       acceleration = accel
   else:
