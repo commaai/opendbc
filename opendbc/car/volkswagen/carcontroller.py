@@ -59,8 +59,8 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
 
-    self.hold_active = False       # latched while requesting HALTEN and through the leaving-hold ramp
-    self.hold_release_counter = 0  # ticks since leaving the hold, for the RELEASE ramp
+    self.acc_hold_type_last = mebcan.ACC_HMS_NO_REQUEST
+    self.leaving_hold_frames = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -141,11 +141,7 @@ class CarController(CarControllerBase):
         stopping = actuators.longControlState == LongCtrlState.stopping
 
         if self.CP.flags & VolkswagenFlags.MEB:
-          # leaving HOLD must exit via RELEASE for a few frames, never a bare HALTEN->NONE which clamps the EPB
-          self.hold_release_counter = min(self.hold_release_counter + 1, 5) if not stopping else 0
-          leaving_hold = self.hold_active and not stopping and self.hold_release_counter < 5
-          self.hold_active = stopping or leaving_hold
-          starting = (actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation) or leaving_hold
+          starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
 
           long_override = CC.cruiseControl.override or CS.out.gasPressed
@@ -158,6 +154,14 @@ class CarController(CarControllerBase):
           acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
           acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
                                                    CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
+
+          # leaving HOLD: force RELEASE for 5 frames instead of a bare HALTEN->NONE (clamps the EPB)
+          if self.acc_hold_type_last == mebcan.ACC_HMS_HOLD and acc_hold_type == mebcan.ACC_HMS_NO_REQUEST:
+            self.leaving_hold_frames = 5
+          if self.leaving_hold_frames > 0:
+            self.leaving_hold_frames -= 1
+            acc_hold_type = mebcan.ACC_HMS_RELEASE
+          self.acc_hold_type_last = acc_hold_type
 
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
