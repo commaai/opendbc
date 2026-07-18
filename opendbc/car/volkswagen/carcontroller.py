@@ -59,10 +59,8 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
 
-    # TEMPORARY EPB-clamp fault-injection experiment state (remove after proving cause)
-    self.test_epb_phase = 0     # 0=arming, 1=injecting, 2=done
-    self.test_epb_held = 0      # frames held at standstill before injecting
-    self.test_epb_inject = 0    # frames since injection started
+    self.acc_hold_type_last = mebcan.ACC_HMS_NO_REQUEST
+    self.hold_release_frames = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -158,35 +156,18 @@ class CarController(CarControllerBase):
           acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
                                                    CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
 
-          # ============================================================================
-          # TEMPORARY EPB-clamp fault-injection experiment (REMOVE after proving cause).
-          # Hypothesis: an abrupt HALTEN -> NONE hold-request transition while stopped/held
-          # (no driver input) is what clamps the EPB and shifts to Park.
-          # Sequence, fully hands-off: engage -> brake to a smooth stop -> hold ~3s ->
-          # then toggle the hold request HALTEN<->NONE for ~3s, everything else identical.
-          # If the EPB clamps during that toggle window, the transition is the cause.
-          # Note: 50Hz here (ACC_CONTROL_STEP), so counts are in 20ms ticks.
-          TEST_SETTLE = 150  # ~3s held before injecting
-          TEST_WINDOW = 150  # ~3s injection
-          TEST_HALF   = 10   # ~0.2s per HALTEN / NONE plateau
-          if CC.enabled and self.test_epb_phase == 0:
-            if CS.esp_hold_confirmation and stopping:
-              self.test_epb_held += 1
-              if self.test_epb_held > TEST_SETTLE:
-                self.test_epb_phase = 1
-                self.test_epb_inject = 0
-            else:
-              self.test_epb_held = 0
-          if self.test_epb_phase == 1:
-            self.test_epb_inject += 1
-            toggle_none = (self.test_epb_inject // TEST_HALF) % 2 == 1
-            acc_hold_type = mebcan.ACC_HMS_NO_REQUEST if toggle_none else mebcan.ACC_HMS_HOLD
-            if self.test_epb_inject > TEST_WINDOW:
-              self.test_epb_phase = 2  # one-shot; power-cycle (or drive off) to re-arm
-          if not (CS.esp_hold_confirmation or stopping) and self.test_epb_phase != 1:
-            self.test_epb_phase = 0    # re-arm once we've clearly driven off
-            self.test_epb_held = 0
-          # ============================================================================
+          # Debounce HALTEN -> NONE: an abrupt drop of the hold request at a stop clamps the EPB (proven
+          # on-car; stock never does it). Near a stop the planner eases a_target into the stop, briefly
+          # flipping shouldStop->False (stopping->pid) for a few frames -> NONE. Hold the last HALTEN
+          # through those blips. A genuine drive-off is ANFAHREN(RELEASE), not NONE, so it is unaffected;
+          # while actually driving the request is a steady NONE, so this never fires there.
+          if acc_hold_type == mebcan.ACC_HMS_NO_REQUEST and self.acc_hold_type_last == mebcan.ACC_HMS_HOLD \
+             and self.hold_release_frames < self.CCP.HOLD_RELEASE_DEBOUNCE:
+            self.hold_release_frames += 1
+            acc_hold_type = mebcan.ACC_HMS_HOLD
+          else:
+            self.hold_release_frames = 0
+          self.acc_hold_type_last = acc_hold_type
 
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
