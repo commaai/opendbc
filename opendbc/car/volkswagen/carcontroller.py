@@ -62,6 +62,13 @@ class CarController(CarControllerBase):
     self.acc_hold_type_last = mebcan.ACC_HMS_NO_REQUEST
     self.hold_release_frames = 0
 
+    # TEMPORARY live-tunable EPB fault repro: HOLD-before-NONE seconds read from /data/hold_time
+    self.inject_phase = 0      # 0=arming, 1=injecting
+    self.inject_settle = 0     # ticks held before injecting
+    self.inject_t = 0          # ticks since injection started
+    self.inject_moving = 0     # ticks clearly driven off (to re-arm)
+    self.inject_hold_time = 0.56
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -168,6 +175,44 @@ class CarController(CarControllerBase):
           else:
             self.hold_release_frames = 0
           self.acc_hold_type_last = acc_hold_type
+
+          # ============================================================================
+          # TEMPORARY live-tunable EPB fault repro (REMOVE after). Hands-off:
+          #   engage -> brake to a stop -> held ~3s -> then hold HALTEN for `hold_time`s,
+          #   drop to NONE for 0.1s, repeat. Overrides the debounce so the HALTEN->NONE
+          #   edge actually goes out. If the EPB clamps on the drop, hold_time is in the
+          #   fault zone. Tune live on-device between runs (no rebuild):
+          #     echo 0.56 > /data/hold_time   (then drive off and stop again to re-arm)
+          # Runs at 50Hz (ACC_CONTROL_STEP), so ticks are 20ms.
+          armed = CC.enabled and CS.esp_hold_confirmation and stopping
+          if self.inject_phase == 0:
+            if armed:
+              self.inject_settle += 1
+              if self.inject_settle == 1:
+                try:
+                  with open('/data/hold_time', 'r') as f:
+                    self.inject_hold_time = float(f.read().strip())
+                except Exception:
+                  pass
+              if self.inject_settle > 150:  # ~3s settle
+                self.inject_phase = 1
+                self.inject_t = 0
+            else:
+              self.inject_settle = 0
+          elif self.inject_phase == 1:
+            self.inject_t += 1
+            hold_ticks = max(1, int(self.inject_hold_time * 50.0))
+            none_ticks = 5  # 0.1s NONE pulse
+            acc_hold_type = mebcan.ACC_HMS_HOLD if (self.inject_t % (hold_ticks + none_ticks)) < hold_ticks else mebcan.ACC_HMS_NO_REQUEST
+            if not stopping and not CS.esp_hold_confirmation:
+              self.inject_moving += 1
+              if self.inject_moving > 50:  # ~1s clearly driven off -> re-arm & re-read file
+                self.inject_phase = 0
+                self.inject_settle = 0
+                self.inject_moving = 0
+            else:
+              self.inject_moving = 0
+          # ============================================================================
 
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
