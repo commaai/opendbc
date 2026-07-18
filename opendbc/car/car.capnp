@@ -504,7 +504,6 @@ struct CarParams {
     torque @67 :LateralTorqueTuning;
   }
 
-  steerLimitAlert @28 :Bool;
   steerLimitTimer @47 :Float32;  # time before steerLimitAlert is issued
 
   vEgoStopping @29 :Float32; # Speed at which the car goes into stopping state
@@ -727,6 +726,7 @@ struct CarParams {
     enableGasInterceptor @2 :Bool;
     enableCamera @4 :Bool;
     enableApgs @6 :Bool;
+    steerLimitAlert @28 :Bool;
     steerRateCost @33 :Float32;
     isPandaBlack @39 :Bool;
     hasStockCamera @57 :Bool;
