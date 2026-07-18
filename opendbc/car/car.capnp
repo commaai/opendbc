@@ -499,8 +499,8 @@ struct CarParams {
   lateralParams @48 :LateralParams;
   lateralTuning :union {
     pid @26 :LateralPIDTuning;
-    indiDEPRECATED @27 :LateralINDITuning;
-    lqrDEPRECATED @40 :LateralLQRTuning;
+    indiDEPRECATED @27 :LateralINDITuningDEPRECATED;
+    lqrDEPRECATED @40 :LateralLQRTuningDEPRECATED;
     torque @67 :LateralTorqueTuning;
   }
 
@@ -581,7 +581,7 @@ struct CarParams {
     }
   }
 
-  struct LateralINDITuning {
+  struct LateralINDITuningDEPRECATED {
     outerLoopGainBP @4 :List(Float32);
     outerLoopGainV @5 :List(Float32);
     innerLoopGainBP @6 :List(Float32);
@@ -599,7 +599,7 @@ struct CarParams {
     }
   }
 
-  struct LateralLQRTuning {
+  struct LateralLQRTuningDEPRECATED {
     scale @0 :Float32;
     ki @1 :Float32;
     dcGain @2 :Float32;
