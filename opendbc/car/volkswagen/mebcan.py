@@ -149,7 +149,7 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     if long_override:  # the car expects a non-inactive accel while overriding
       acceleration = CCP.ACCEL_OVERRIDE  # original ACC still sends active accel in this case (seamless experience)
     elif full_stop:
-      acceleration = CCP.ACCEL_INACTIVE  # held: HMS=HALTEN + inactive accel (matches stock)
+      acceleration = CCP.ACCEL_INACTIVE  # inactive accel, newer gen >2024 error of not neutral value
     else:
       acceleration = accel
   else:
@@ -164,7 +164,7 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     "ACC_zul_Regelabw_oben":      0,
     "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
     "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_Anfahren":               0,  # stock signals drive-off via ACC_Anforderung_HMS=anfahren only, leaves this bit 0
+    "ACC_Anfahren":               0,  # always zero, stock uses ACC_Anforderung_HMS
     "ACC_Anhalten":               1 if actually_stopping else 0,
     "ACC_Anhalteweg":             terminal_rollout if actually_stopping else 20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
