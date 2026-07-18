@@ -132,9 +132,8 @@ def get_acc_hold_type(acc_faulted, long_active, starting, stopping, esp_hold, ov
   return acc_hold_type
 
 
-def create_acc_accel_control(packer, bus, main_switch_on, acc_faulted,
-                             acc_type, acc_enabled, upper_jerk, lower_jerk, upper_control_limit, lower_control_limit,
-                             accel, stopping, starting, esp_hold, speed, override, travel_assist_available):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, upper_jerk, lower_jerk, upper_control_limit, lower_control_limit,
+                             accel, acc_control, acc_hold_type, stopping, starting, esp_hold, speed, override, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
@@ -160,10 +159,6 @@ def create_acc_accel_control(packer, bus, main_switch_on, acc_faulted,
       acceleration = accel
   else:
     acceleration = ACCEL_INACTIVE # inactive accel
-
-  acc_control = get_acc_control(main_switch_on, acc_faulted, CC.enabled, long_override)
-  acc_hold_type = get_acc_hold_type(acc_faulted, CC.enabled, starting, stopping,
-                                    CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
 
   values = {
     "ACC_Typ":                    acc_type,

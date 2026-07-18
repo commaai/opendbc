@@ -148,16 +148,17 @@ class CarController(CarControllerBase):
           self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
           long_disabling = not CC.enabled and self.long_disabled_counter < 5
 
-          can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.out.cruiseState.available,
-                                                           CS.out.accFaulted,
-                                                           CS.acc_type, CC.enabled,
+          acc_control = mebcan.get_acc_control(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, long_override)
+          acc_hold_type = mebcan.get_acc_hold_type(CS.out.accFaulted, CC.enabled, starting, stopping,
+                                                   CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
+          can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.enabled,
                                                            4.0, 4.0, 0., 0.,
-                                                           accel, stopping, starting, CS.esp_hold_confirmation,
+                                                           accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))
           self.accel_last = accel
 
         else:
-          acc_control = self.CCS.get_acc_control(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
+          acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
           starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
           can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
