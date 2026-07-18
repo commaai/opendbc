@@ -151,7 +151,7 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     elif full_stop:
       acceleration = CCP.ACCEL_INACTIVE  # inactive accel, newer gen >2024 error of not neutral value
     else:
-      acceleration = accel  # live decel while settling (stock modulates -0.2..-3.0 to catch the car), live accel on drive-off
+      acceleration = accel
   else:
     acceleration = CCP.ACCEL_INACTIVE  # inactive accel
 

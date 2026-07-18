@@ -59,9 +59,6 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = None
     self.hca_mitigation = HCAMitigation(self.CCP)
 
-    self.acc_hold_type_last = mebcan.ACC_HMS_NO_REQUEST
-    self.leaving_hold_frames = 0
-
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -141,6 +138,7 @@ class CarController(CarControllerBase):
         stopping = actuators.longControlState == LongCtrlState.stopping
 
         if self.CP.flags & VolkswagenFlags.MEB:
+          # only send ACC_HMS_RELEASE when in cruise standstill and want to resume
           starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
 
@@ -154,15 +152,6 @@ class CarController(CarControllerBase):
           acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
           acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
                                                    CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
-
-          # leaving HOLD: force RELEASE for 5 frames instead of a bare HALTEN->NONE (clamps the EPB)
-          if self.acc_hold_type_last == mebcan.ACC_HMS_HOLD and acc_hold_type == mebcan.ACC_HMS_NO_REQUEST:
-            self.leaving_hold_frames = 5
-          if self.leaving_hold_frames > 0:
-            self.leaving_hold_frames -= 1
-            acc_hold_type = mebcan.ACC_HMS_RELEASE
-          self.acc_hold_type_last = acc_hold_type
-
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))
