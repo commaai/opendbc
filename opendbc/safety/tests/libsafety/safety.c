@@ -102,6 +102,10 @@ bool get_acc_main_on(void){
   return acc_main_on;
 }
 
+void set_acc_main_on(bool on){
+  acc_main_on = on;
+}
+
 float get_vehicle_speed_min(void){
   return vehicle_speed.min / VEHICLE_SPEED_FACTOR;
 }
@@ -209,8 +213,16 @@ void set_honda_bosch_long(bool c){
   honda_bosch_long = c;
 }
 
+bool get_honda_bosch_long(void) {
+  return honda_bosch_long;
+}
+
 int get_honda_hw(void) {
   return honda_hw;
+}
+
+void set_honda_hw(int h) {
+  honda_hw = h;
 }
 
 void set_honda_fwd_brake(bool c){
