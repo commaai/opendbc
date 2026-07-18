@@ -134,8 +134,6 @@ class CarInterface(CarInterfaceBase):
 
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     if not (ret.flags & VolkswagenFlags.MEB):
-      # MEB drives off from a held stop via the ACC hold-release (anfahren) request, not a fixed launch accel,
-      # so it uses no starting state / startAccel; vEgoStopping/vEgoStarting keep their 0.5 defaults.
       ret.stopAccel = -0.55
       ret.vEgoStarting = 0.1
       ret.vEgoStopping = 0.5

@@ -150,10 +150,8 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
       acceleration = CCP.ACCEL_OVERRIDE  # original ACC still sends active accel in this case (seamless experience)
     elif full_stop:
       acceleration = CCP.ACCEL_INACTIVE  # held: HMS=HALTEN + inactive accel (matches stock)
-    elif actually_stopping:
-      acceleration = CCP.ACCEL_STOPPING  # settling into hold: HMS=HALTEN + gentle decel (never the raw request, matches stock)
     else:
-      acceleration = accel  # active control / drive-off: live accel
+      acceleration = accel  # active control / settling / drive-off: live accel
   else:
     acceleration = CCP.ACCEL_INACTIVE  # inactive accel
 
