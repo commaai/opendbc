@@ -97,7 +97,6 @@ class RadarInterface(RadarInterfaceBase):
     self.clusters: list[Cluster] = []
 
     self.updated_messages = set()
-    self.track_id = 0
     self.radar = DBC[CP.carFingerprint].get(Bus.radar)
     self.scan_index_invalid_cnt = 0
     self.radar_unavailable_cnt = 0
