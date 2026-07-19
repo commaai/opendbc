@@ -70,11 +70,13 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
 
 
-def acc_control_value(main_switch_on, acc_faulted, long_active):
+def acc_control_value(main_switch_on, acc_faulted, enabled, long_active):
   if acc_faulted:
     acc_control = 6
   elif long_active:
     acc_control = 3
+  elif enabled:
+    acc_control = 4
   elif main_switch_on:
     acc_control = 2
   else:
@@ -83,9 +85,8 @@ def acc_control_value(main_switch_on, acc_faulted, long_active):
   return acc_control
 
 
-def acc_hud_status_value(main_switch_on, acc_faulted, long_active):
-  # TODO: happens to resemble the ACC control value for now, but extend this for init/gas override later
-  return acc_control_value(main_switch_on, acc_faulted, long_active)
+def acc_hud_status_value(main_switch_on, acc_faulted, enabled, long_active):
+  return acc_control_value(main_switch_on, acc_faulted, enabled, long_active)
 
 
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, stopping, starting, esp_hold):
