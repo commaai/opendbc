@@ -1,3 +1,8 @@
+from opendbc.car import structs
+
+LongCtrlState = structs.CarControl.Actuators.LongControlState
+
+
 def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power=0):
   values = {
     "Curvature": abs(apply_curvature),  # in rad/m
@@ -80,95 +85,116 @@ ACC_HMS_RELEASE      = 4
 ACC_HMS_HOLD         = 1
 ACC_HMS_NO_REQUEST   = 0
 
-ACC_HUD_ERROR    = 6
-ACC_HUD_OVERRIDE = 4
-ACC_HUD_ACTIVE   = 3
-ACC_HUD_ENABLED  = 2
-ACC_HUD_DISABLED = 0
 
+class MebLongState:
+  """MEB longitudinal command state (ACC_18).
 
-def get_acc_control(CS, CC, long_override):
-  if CS.accFaulted:
-    acc_control = ACC_CTRL_ERROR  # error state
-  elif CC.enabled:
-    if long_override:
-      acc_control = ACC_CTRL_OVERRIDE  # overriding
+  ACC_Status_ACC, ACC_Anforderung_HMS and ACC_Sollbeschleunigung_02 have to agree with each other every
+  frame. The car faults, and can clamp the EPB into Park, on an illegal hold transition or on the inactive
+  accel sentinel without a hold request, so all three are derived here from one state instead of being
+  reconstructed independently per frame.
+
+  A hold is only ever left through a release request, never dropped straight to NONE:
+    NONE -> HALTEN -> {ANFAHREN (openpilot wants to go) | RAMP_RELEASE (override or disengage)} -> NONE
+  Stock never once sends HALTEN->NONE, and it faults us when we do. Since the next request is keyed off the
+  last one we actually sent, no amount of chatter out of the planner can produce an illegal transition.
+  """
+  RAMP_FRAMES = 5  # RAMP_RELEASE length, ~100ms at 50Hz
+
+  def __init__(self, CCP):
+    self.CCP = CCP
+    self.enabled = False
+    self.control = ACC_CTRL_DISABLED
+    self.hold = ACC_HMS_NO_REQUEST
+    self.accel = CCP.ACCEL_INACTIVE
+    self.held = False    # car is physically stopped under our hold request
+    self.settling = False  # hold requested, still braking down to the stop
+    self.ramp = 0        # frames left of RAMP_RELEASE
+
+  def update(self, CS, CC, accel):
+    faulted = CS.out.accFaulted
+    override = CC.cruiseControl.override
+    esp_hold = CS.esp_hold_confirmation
+    long_state = CC.actuators.longControlState
+    prev = self.hold
+
+    # **** hold request **** #
+
+    if faulted:
+      self.ramp = 0
+      self.hold = ACC_HMS_NO_REQUEST  # the car has already given up, nothing left to hold
+    elif prev == ACC_HMS_HOLD:
+      if long_state == LongCtrlState.pid:
+        self.hold = ACC_HMS_RELEASE  # openpilot wants to go, drive off
+      elif not CC.longActive:
+        self.ramp = self.RAMP_FRAMES
+        self.hold = ACC_HMS_RAMP_RELEASE  # driver override or disengage, ramp the hold out
+      else:
+        self.hold = ACC_HMS_HOLD
+    elif prev == ACC_HMS_RELEASE:
+      if not esp_hold:
+        self.ramp = self.RAMP_FRAMES
+        self.hold = ACC_HMS_RAMP_RELEASE  # rolling, drive off is done, ramp the request out
+      elif long_state == LongCtrlState.pid and CC.longActive:
+        self.hold = ACC_HMS_RELEASE  # still waiting on the car to move
+      else:
+        self.hold = ACC_HMS_HOLD  # go was withdrawn before we moved, settle back into the hold
+    elif prev == ACC_HMS_RAMP_RELEASE:
+      self.ramp -= 1
+      self.hold = ACC_HMS_RAMP_RELEASE if self.ramp > 0 else ACC_HMS_NO_REQUEST
     else:
-      acc_control = ACC_CTRL_ACTIVE  # active long control state
-  elif CS.cruiseState.available:
-    acc_control = ACC_CTRL_ENABLED  # long control ready
-  else:
-    acc_control = ACC_CTRL_DISABLED  # long control deactivated state
+      self.hold = ACC_HMS_HOLD if CC.longActive and (long_state == LongCtrlState.stopping or esp_hold) else ACC_HMS_NO_REQUEST
 
-  return acc_control
+    self.held = esp_hold and self.hold == ACC_HMS_HOLD
+    self.settling = self.hold == ACC_HMS_HOLD and not esp_hold
 
+    # **** control state **** #
 
-def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, long_override, long_override_begin, long_disabling):
-  # warning: car is reacting to hold mechanic even with long control off
-  if CS.accFaulted:
-    acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
-  elif not CC.enabled:
-    if long_disabling:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE  # ramp release of requests right after disabling long control (prevents car error with EPB at low speed)
+    self.enabled = CC.enabled
+    if faulted:
+      self.control = ACC_CTRL_ERROR  # error state
+    elif CC.enabled:
+      self.control = ACC_CTRL_OVERRIDE if override else ACC_CTRL_ACTIVE
+    elif CS.out.cruiseState.available:
+      self.control = ACC_CTRL_ENABLED  # long control ready
     else:
-      acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
-  elif long_override:
-    if long_override_begin:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE  # ramp release of requests at the beginning of override (prevents car error with EPB at low speed)
+      self.control = ACC_CTRL_DISABLED  # long control deactivated state
+
+    # **** acceleration **** #
+
+    # once the car is holding itself we hand it the neutral sentinel and let its standstill logic hold, while
+    # still settling we send the live decel (stock modulates it, up to hard braking, to catch the car). Stock
+    # only ever pairs the sentinel with HALTEN, and sending it under any other request faults the car
+    if not CC.enabled:
+      self.accel = self.CCP.ACCEL_INACTIVE
+    elif override:
+      self.accel = self.CCP.ACCEL_OVERRIDE  # the car expects a non-inactive accel while overriding
+    elif self.held:
+      self.accel = self.CCP.ACCEL_INACTIVE
     else:
-      acc_hold_type = ACC_HMS_NO_REQUEST  # overriding / no request
-  elif starting:
-    acc_hold_type = ACC_HMS_RELEASE  # release request and startup
-  elif stopping:
-    acc_hold_type = ACC_HMS_HOLD  # hold while stopping/stopped
-  else:
-    acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
-
-  return acc_hold_type
+      self.accel = accel
 
 
-def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_control, acc_hold_type,
-                             stopping, starting, esp_hold, speed, long_override, travel_assist_available):
+def create_acc_accel_control(packer, bus, acc_type, state, speed, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
-  # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
-  # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
-  # -> this mode is seen for different cars with same firmware radars so could be a coded operational mode
-  # - jerk and control limits values set to 0 when fully stopped
-  # - set accel to 0 / no stop accel for full stop (seems to be compatible with old (non 0 stop accel) and new gen, because HMS state holds the car anyways)
-  # - stopping command sent as long as actually stopping
   commands = []
 
-  # ACC_Anhalteweg: when stopping: MEB: values <> 0 the car can execute a hard brake probably if target is too close, MQBEvo: value 0 results in hard brake
-  terminal_rollout = 0
-
-  full_stop = stopping and esp_hold
-  full_stop_no_start = esp_hold and not starting
-  actually_stopping = stopping and not esp_hold
-
-  if acc_enabled:
-    if long_override:  # the car expects a non-inactive accel while overriding
-      acceleration = CCP.ACCEL_OVERRIDE  # original ACC still sends active accel in this case (seamless experience)
-    elif full_stop:
-      acceleration = CCP.ACCEL_INACTIVE  # inactive accel, newer gen >2024 error of not neutral value
-    else:
-      acceleration = accel
-  else:
-    acceleration = CCP.ACCEL_INACTIVE  # inactive accel
+  jerk_limit = state.CCP.JERK_LIMIT if state.control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not state.held else 0
 
   values = {
     "ACC_Typ":                    acc_type,
-    "ACC_Status_ACC":             acc_control,
-    "ACC_StartStopp_Info":        acc_enabled,
-    "ACC_Sollbeschleunigung_02":  acceleration,
+    "ACC_Status_ACC":             state.control,
+    "ACC_StartStopp_Info":        state.enabled,
+    "ACC_Sollbeschleunigung_02":  state.accel,
     "ACC_zul_Regelabw_unten":     0,
     "ACC_zul_Regelabw_oben":      0,
-    "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
+    "ACC_neg_Sollbeschl_Grad_02": jerk_limit,
+    "ACC_pos_Sollbeschl_Grad_02": jerk_limit,
     "ACC_Anfahren":               0,  # always zero, stock uses ACC_Anforderung_HMS
-    "ACC_Anhalten":               1 if actually_stopping else 0,
-    "ACC_Anhalteweg":             terminal_rollout if actually_stopping else 20.46,
-    "ACC_Anforderung_HMS":        acc_hold_type,
-    "ACC_AKTIV_regelt":           1 if acc_control == ACC_CTRL_ACTIVE else 0,
+    "ACC_Anhalten":               1 if state.settling else 0,
+    "ACC_Anhalteweg":             0 if state.settling else 20.46,
+    "ACC_Anforderung_HMS":        state.hold,
+    "ACC_AKTIV_regelt":           1 if state.control == ACC_CTRL_ACTIVE else 0,
     "Speed":                      speed,
     "SET_ME_0XFE":                0xFE,
     "SET_ME_0X1":                 0x1,
@@ -180,7 +206,7 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
   if travel_assist_available:
     # satisfy car to prevent errors when pressing Travel Assist Button
     values_ta = {
-       "Travel_Assist_Status":    4 if acc_enabled else 2,
+       "Travel_Assist_Status":    4 if state.enabled else 2,
        "Travel_Assist_Request":   0,
        "Travel_Assist_Available": 1,
     }
@@ -188,22 +214,6 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     commands.append(packer.make_can_msg("TA_01", bus, values_ta))
 
   return commands
-
-
-def get_acc_hud_status(CS, CC, long_override):
-  if CS.accFaulted:
-    acc_hud_control = ACC_HUD_ERROR  # error state
-  elif CC.enabled:
-    if long_override:
-      acc_hud_control = ACC_HUD_OVERRIDE  # overriding
-    else:
-      acc_hud_control = ACC_HUD_ACTIVE  # active
-  elif CS.cruiseState.available:
-    acc_hud_control = ACC_HUD_ENABLED  # inactive
-  else:
-    acc_hud_control = ACC_HUD_DISABLED  # deactivated
-
-  return acc_hud_control
 
 
 def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
@@ -222,27 +232,27 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "ACC_Tempolimit":                0,
     "ACC_Wunschgeschw_02":           set_speed if set_speed < 250 else 327.36,
     "ACC_Gesetzte_Zeitluecke":       distance_bars, # 5 distance bars available (3 are used by OP)
-    "ACC_Display_Prio":              0 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 1, # probably keeping warning in front
-    "ACC_Optischer_Fahrerhinweis":   1 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # enables optical warning
-    "ACC_Akustischer_Fahrerhinweis": 3 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # enables sound warning
-    "ACC_Texte_Zusatzanz_02":        11 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # type of warning: Break!
+    "ACC_Display_Prio":              0 if fcw_alert and acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) else 1, # probably keeping warning in front
+    "ACC_Optischer_Fahrerhinweis":   1 if fcw_alert and acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) else 0, # enables optical warning
+    "ACC_Akustischer_Fahrerhinweis": 3 if fcw_alert and acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) else 0, # enables sound warning
+    "ACC_Texte_Zusatzanz_02":        11 if fcw_alert and acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) else 0, # type of warning: Break!
     "ACC_Abstandsindex_02":          569, # seems to be default for MEB but is not static in every case
-    "ACC_EGO_Fahrzeug":              2 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else
-                                     (1 if acc_control == ACC_HUD_ACTIVE else 0), # red car warn symbol for fcw
+    "ACC_EGO_Fahrzeug":              2 if fcw_alert and acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) else
+                                     (1 if acc_control == ACC_CTRL_ACTIVE else 0), # red car warn symbol for fcw
     "Lead_Type_Detected":            1 if lead_visible else 0, # object should be displayed
     "Lead_Type":                     3 if lead_visible else 0, # displaying a car
     "Lead_Distance":                 distance if lead_visible else 0, # hud distance of object
-    "ACC_Enabled":                   1 if acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0,
-    "ACC_Standby_Override":          1 if acc_control != ACC_HUD_ACTIVE else 0,
-    "Street_Color":                  1 if acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # light grey (1) or dark (0) street
-    "Lead_Brightness":               3 if acc_control == ACC_HUD_ACTIVE else 0, # object shows in color
+    "ACC_Enabled":                   1 if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) else 0,
+    "ACC_Standby_Override":          1 if acc_control != ACC_CTRL_ACTIVE else 0,
+    "Street_Color":                  1 if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) else 0, # light grey (1) or dark (0) street
+    "Lead_Brightness":               3 if acc_control == ACC_CTRL_ACTIVE else 0, # object shows in color
     "Zeitluecke_1":                  get_desired_gap(distance_bars, desired_gap, 1), # desired distance to lead object for distance bar 1
     "Zeitluecke_2":                  get_desired_gap(distance_bars, desired_gap, 2), # desired distance to lead object for distance bar 2
     "Zeitluecke_3":                  get_desired_gap(distance_bars, desired_gap, 3), # desired distance to lead object for distance bar 3
     "Zeitluecke_4":                  get_desired_gap(distance_bars, desired_gap, 4), # desired distance to lead object for distance bar 4
     "Zeitluecke_5":                  get_desired_gap(distance_bars, desired_gap, 5), # desired distance to lead object for distance bar 5
-    "Zeitluecke_Farbe":              1 if acc_control in (ACC_HUD_ENABLED, ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # yellow (1) or white (0) time gap
-    "ACC_Anzeige_Zeitluecke":        show_distance_bars if acc_control != ACC_HUD_DISABLED else 0, # show distance bar selection
+    "Zeitluecke_Farbe":              1 if acc_control in (ACC_CTRL_ENABLED, ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) else 0, # yellow (1) or white (0) time gap
+    "ACC_Anzeige_Zeitluecke":        show_distance_bars if acc_control != ACC_CTRL_DISABLED else 0, # show distance bar selection
     "SET_ME_0X1":                    0x1,    # unknown
     "SET_ME_0X6A":                   0x6A,   # unknown
     "SET_ME_0XFFFF":                 0xFFFF, # unknown
