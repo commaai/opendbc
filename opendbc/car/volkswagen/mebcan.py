@@ -108,7 +108,7 @@ class MebLongState:
     self.hold = ACC_HMS_NO_REQUEST
     self.accel = CCP.ACCEL_INACTIVE
     self.held = False    # car is physically stopped under our hold request
-    self.settling = False  # hold requested, still braking down to the stop
+    self.settling = False  # hold requested, still braking down to a stop
     self.ramp = 0        # frames left of RAMP_RELEASE
 
   def update(self, CS, CC, accel):
