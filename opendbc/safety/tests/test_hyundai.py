@@ -195,6 +195,15 @@ class TestHyundaiMadsSafety(common.SafetyTestBase):
     self.assertFalse(self._tx(resume))
     self.assertFalse(self._tx(accel))
 
+  def test_stale_main_status_blocks_lateral(self):
+    self._prime_rx_checks()
+    self._rx(self._main_status_msg(True))
+    self.assertTrue(self._tx(self._torque_cmd_msg(1)))
+
+    self.safety.set_timer(100_001)
+    self.assertFalse(self._tx(self._torque_cmd_msg(1)))
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
+
   def test_main_switch_does_not_enable_mads_without_alternative_experience(self):
     self._prime_rx_checks()
     self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.DEFAULT)

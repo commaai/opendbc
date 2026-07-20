@@ -60,6 +60,7 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 };
 
 static bool hyundai_legacy = false;
+static uint32_t hyundai_mads_main_ts = 0U;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
 
@@ -138,6 +139,7 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
   if (msg->addr == 0x420U) {
     if (((msg->bus == 0U) && !hyundai_camera_scc) || ((msg->bus == 2U) && hyundai_camera_scc)) {
       acc_main_on = GET_BIT(msg, 0U);
+      hyundai_mads_main_ts = microsecond_timer_get();
     }
   }
 
@@ -193,11 +195,17 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *msg) {
+  const uint32_t HYUNDAI_MADS_MAIN_TIMEOUT = 100000U;
   const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS = HYUNDAI_LIMITS(384, 3, 7);
   const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS_ALT = HYUNDAI_LIMITS(270, 2, 3);
   const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS_ALT_2 = HYUNDAI_LIMITS(170, 2, 3);
 
   bool tx = true;
+
+  if (((alternative_experience & ALT_EXP_ENABLE_MADS) != 0) && controls_allowed_lateral &&
+      (safety_get_ts_elapsed(microsecond_timer_get(), hyundai_mads_main_ts) > HYUNDAI_MADS_MAIN_TIMEOUT)) {
+    controls_allowed_lateral = false;
+  }
 
   // FCA11: Block any potential actuation
   if (msg->addr == 0x38DU) {
@@ -282,6 +290,7 @@ static safety_config hyundai_init(uint16_t param) {
 
   hyundai_common_init(param);
   hyundai_legacy = false;
+  hyundai_mads_main_ts = 0U;
 
   safety_config ret;
   if (hyundai_longitudinal) {
