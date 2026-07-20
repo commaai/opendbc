@@ -61,6 +61,7 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 
 static bool hyundai_legacy = false;
 static uint32_t hyundai_mads_main_ts = 0U;
+static const uint32_t HYUNDAI_MADS_MAIN_TIMEOUT = 100000U;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
 
@@ -191,11 +192,11 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
   }
 
   const bool mads_requested = ((alternative_experience & ALT_EXP_ENABLE_MADS) != 0) && acc_main_on;
-  controls_allowed_lateral = mads_requested && heartbeat_engaged && !safety_rx_checks_invalid;
+  const bool mads_main_fresh = safety_get_ts_elapsed(microsecond_timer_get(), hyundai_mads_main_ts) <= HYUNDAI_MADS_MAIN_TIMEOUT;
+  controls_allowed_lateral = mads_requested && mads_main_fresh && heartbeat_engaged && !safety_rx_checks_invalid;
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *msg) {
-  const uint32_t HYUNDAI_MADS_MAIN_TIMEOUT = 100000U;
   const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS = HYUNDAI_LIMITS(384, 3, 7);
   const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS_ALT = HYUNDAI_LIMITS(270, 2, 3);
   const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS_ALT_2 = HYUNDAI_LIMITS(170, 2, 3);

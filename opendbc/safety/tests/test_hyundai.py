@@ -204,6 +204,12 @@ class TestHyundaiMadsSafety(common.SafetyTestBase):
     self.assertFalse(self._tx(self._torque_cmd_msg(1)))
     self.assertFalse(self.safety.get_controls_allowed_lateral())
 
+    # Other valid RX traffic must not make stale Main authorization appear
+    # active in panda health or reauthorize steering.
+    self._rx(self.packer.make_can_msg_safety("MDPS12", 0, {}))
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
+    self.assertFalse(self._tx(self._torque_cmd_msg(1)))
+
   def test_main_switch_does_not_enable_mads_without_alternative_experience(self):
     self._prime_rx_checks()
     self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.DEFAULT)
