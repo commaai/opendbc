@@ -8,6 +8,7 @@ from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
+from opendbc.safety import ALTERNATIVE_EXPERIENCE
 
 
 # 4 bit checkusm used in some hyundai messages
@@ -103,6 +104,9 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_cruise += 1
     return self.packer.make_can_msg_safety("SCC12", self.SCC_BUS, values, fix_checksum=checksum)
 
+  def _main_status_msg(self, enable):
+    return self.packer.make_can_msg_safety("SCC11", self.SCC_BUS, {"MainMode_ACC": enable})
+
   def _torque_driver_msg(self, torque):
     values = {"CR_Mdps_StrColTq": torque}
     return self.packer.make_can_msg_safety("MDPS12", 0, values)
@@ -110,7 +114,6 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
-
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
@@ -122,6 +125,37 @@ class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.ALT_LIMITS)
     self.safety.init_tests()
+
+
+class TestHyundaiMadsSafety(common.SafetyTestBase):
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_can_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
+    self.safety.init_tests()
+
+  def _main_status_msg(self, enable):
+    return self.packer.make_can_msg_safety("SCC11", 0, {"MainMode_ACC": enable})
+
+  def _torque_cmd_msg(self, torque, steer_req=1):
+    values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
+    return self.packer.make_can_msg_safety("LKAS11", 0, values)
+
+  def test_main_switch_controls_lateral_independently(self):
+    self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.ENABLE_MADS)
+    self._rx(self._main_status_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self.safety.get_controls_allowed_lateral())
+    self.assertTrue(self._tx(self._torque_cmd_msg(1)))
+
+    self._rx(self._main_status_msg(False))
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
+    self.assertFalse(self._tx(self._torque_cmd_msg(1)))
+    self.assertTrue(self._tx(self._torque_cmd_msg(0, steer_req=0)))
+
+  def test_main_switch_does_not_enable_mads_without_alternative_experience(self):
+    self._rx(self._main_status_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
 
 
 class TestHyundaiSafetyAltLimits2(TestHyundaiSafety):

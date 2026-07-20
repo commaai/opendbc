@@ -49,6 +49,9 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 #define HYUNDAI_SCC12_ADDR_CHECK(scc_bus)                                                                            \
   {.msg = {{0x421, (scc_bus), 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
+#define HYUNDAI_SCC11_ADDR_CHECK(scc_bus) \
+  {.msg = {{0x420, (scc_bus), 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
+
 #define HYUNDAI_FCEV_GAS_ADDR_CHECK \
   {.msg = {{0x91,  0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
@@ -128,6 +131,14 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
 
 static void hyundai_rx_hook(const CANPacket_t *msg) {
 
+  // MainMode_ACC is the physical ACC main switch. With MADS it is the
+  // independent authorization source for lateral control.
+  if (msg->addr == 0x420U) {
+    if (((msg->bus == 0U) && !hyundai_camera_scc) || ((msg->bus == 2U) && hyundai_camera_scc)) {
+      acc_main_on = GET_BIT(msg, 0U);
+    }
+  }
+
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
   if (msg->addr == 0x421U) {
     if (((msg->bus == 0U) && !hyundai_camera_scc) || ((msg->bus == 2U) && hyundai_camera_scc)) {
@@ -174,6 +185,8 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
       brake_pressed = ((msg->data[5] >> 5U) & 0x3U) == 0x2U;
     }
   }
+
+  controls_allowed_lateral = ((alternative_experience & ALT_EXP_ENABLE_MADS) != 0) && acc_main_on;
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *msg) {
@@ -294,6 +307,7 @@ static safety_config hyundai_init(uint16_t param) {
     static RxCheck hyundai_cam_scc_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
       HYUNDAI_SCC12_ADDR_CHECK(2)
+      HYUNDAI_SCC11_ADDR_CHECK(2)
     };
 
     ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
@@ -301,11 +315,13 @@ static safety_config hyundai_init(uint16_t param) {
     static RxCheck hyundai_rx_checks[] = {
        HYUNDAI_COMMON_RX_CHECKS(false)
        HYUNDAI_SCC12_ADDR_CHECK(0)
+       HYUNDAI_SCC11_ADDR_CHECK(0)
     };
 
     static RxCheck hyundai_fcev_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
       HYUNDAI_SCC12_ADDR_CHECK(0)
+      HYUNDAI_SCC11_ADDR_CHECK(0)
       HYUNDAI_FCEV_GAS_ADDR_CHECK
     };
 
@@ -324,6 +340,7 @@ static safety_config hyundai_legacy_init(uint16_t param) {
   static RxCheck hyundai_legacy_rx_checks[] = {
     HYUNDAI_COMMON_RX_CHECKS(true)
     HYUNDAI_SCC12_ADDR_CHECK(0)
+    HYUNDAI_SCC11_ADDR_CHECK(0)
   };
 
   hyundai_common_init(param);

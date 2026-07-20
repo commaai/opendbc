@@ -67,6 +67,9 @@ extern const int MAX_WRONG_COUNTERS;
 #define VEHICLE_SPEED_FACTOR 1000.0
 #define MAX_RT_INTERVAL 250000U
 
+// MADS keeps lateral authorization separate from longitudinal controls_allowed.
+#define ALT_EXP_ENABLE_MADS 1024
+
 // Conversions
 #define KPH_TO_MS (1.0 / 3.6)
 
@@ -322,6 +325,7 @@ extern CurvatureSteeringState curvature_state;
 #define ALT_EXP_ALLOW_AEB 16
 
 extern int alternative_experience;
+extern bool controls_allowed_lateral;
 
 // time since safety mode has been changed
 extern uint32_t safety_mode_cnt;
