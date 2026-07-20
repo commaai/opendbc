@@ -499,22 +499,18 @@ struct CarParams {
   lateralParams @48 :LateralParams;
   lateralTuning :union {
     pid @26 :LateralPIDTuning;
-    indiDEPRECATED @27 :LateralINDITuning;
-    lqrDEPRECATED @40 :LateralLQRTuning;
+    indiDEPRECATED @27 :LateralINDITuningDEPRECATED;
+    lqrDEPRECATED @40 :LateralLQRTuningDEPRECATED;
     torque @67 :LateralTorqueTuning;
   }
 
-  steerLimitAlert @28 :Bool;
   steerLimitTimer @47 :Float32;  # time before steerLimitAlert is issued
 
   vEgoStopping @29 :Float32; # Speed at which the car goes into stopping state
-  vEgoStarting @59 :Float32; # Speed at which the car goes into starting state
   steerControlType @34 :SteerControlType;
   radarUnavailable @35 :Bool; # True when radar objects aren't visible on CAN or aren't parsed out
   stopAccel @60 :Float32; # Required acceleration to keep vehicle stationary
   stoppingDecelRate @52 :Float32; # m/s^2/s while trying to stop
-  startAccel @32 :Float32; # Required acceleration to get car moving
-  startingState @70 :Bool; # Does this car make use of special starting state
 
   steerActuatorDelay @36 :Float32; # Steering wheel actuator delay in seconds
   longitudinalActuatorDelay @58 :Float32; # Gas/Brake actuator delay in seconds
@@ -585,7 +581,7 @@ struct CarParams {
     }
   }
 
-  struct LateralINDITuning {
+  struct LateralINDITuningDEPRECATED {
     outerLoopGainBP @4 :List(Float32);
     outerLoopGainV @5 :List(Float32);
     innerLoopGainBP @6 :List(Float32);
@@ -603,7 +599,7 @@ struct CarParams {
     }
   }
 
-  struct LateralLQRTuning {
+  struct LateralLQRTuningDEPRECATED {
     scale @0 :Float32;
     ki @1 :Float32;
     dcGain @2 :Float32;
@@ -730,6 +726,7 @@ struct CarParams {
     enableGasInterceptor @2 :Bool;
     enableCamera @4 :Bool;
     enableApgs @6 :Bool;
+    steerLimitAlert @28 :Bool;
     steerRateCost @33 :Float32;
     isPandaBlack @39 :Bool;
     hasStockCamera @57 :Bool;
@@ -751,5 +748,8 @@ struct CarParams {
     stoppingControl @31 :Bool; # Does the car allow full control even at lows speeds when stopping
     radarTimeStep @45: Float32 = 0.05;  # time delta between radar updates, 20Hz is very standard
     enableDsu @5 :Bool;        # driving support unit
+    vEgoStarting @59 :Float32; # Speed at which the car goes into starting state
+    startAccel @32 :Float32; # Required acceleration to get car moving
+    startingState @70 :Bool; # Does this car make use of special starting state
   }
 }
