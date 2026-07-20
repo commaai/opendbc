@@ -104,6 +104,7 @@ bool get_vehicle_moving(void);
 void set_timer(uint32_t t);
 
 void safety_tick_current_safety_config();
+void safety_watchdog_reset(void);
 bool safety_config_valid();
 
 void init_tests(void);

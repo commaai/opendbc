@@ -1249,3 +1249,13 @@ class CarSafetyTest(SafetyTest):
     self.safety.safety_tick_current_safety_config()
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertFalse(self.safety.safety_config_valid())
+
+  def test_safety_watchdog_reset(self):
+    self.safety.set_controls_allowed(False)
+    self.safety.safety_watchdog_reset()
+    self.safety.set_controls_allowed(True)
+    self.safety.safety_watchdog_reset()
+    self.safety.safety_watchdog_reset()
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.safety.safety_watchdog_reset()
+    self.assertFalse(self.safety.get_controls_allowed())

@@ -252,6 +252,7 @@ void pcm_cruise_check(bool cruise_engaged);
 void speed_mismatch_check(const float speed_2);
 
 void safety_tick(const safety_config *safety_config);
+void safety_watchdog_reset(void);
 
 // This can be set by the safety hooks
 extern bool controls_allowed;
@@ -284,7 +285,6 @@ extern uint32_t ts_steer_req_mismatch_last;  // last timestamp steer req was mis
 
 // state for controls_allowed timeout logic
 extern bool heartbeat_engaged;             // openpilot enabled, passed in heartbeat USB command
-extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
 extern uint32_t rt_angle_msgs;
