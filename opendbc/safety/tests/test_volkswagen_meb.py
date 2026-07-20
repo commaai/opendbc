@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import numpy as np
+from opendbc.math import arange, concatenate
 import unittest
 
 from opendbc.car.structs import CarParams
@@ -194,8 +194,8 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_rx_hook_speed_mismatch(self):
-    for speed in np.arange(0, 40, 0.5):
-      for speed_delta in np.arange(-5, 5, 0.1):
+    for speed in arange(0, 40, 0.5):
+      for speed_delta in arange(-5, 5, 0.1):
         speed_2 = round(max(speed + speed_delta, 0), 1)
         self._rx(self._speed_msg(speed))
         self._rx(self._speed_msg_2(speed_2))
@@ -225,10 +225,10 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
       self.safety.set_controls_allowed(controls_allowed)
 
       for steer_req in (True, False):
-        for curvature_meas in np.arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST / 5):
+        for curvature_meas in arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST / 5):
           self._reset_curvature_measurement(curvature_meas)
 
-          for curvature_cmd in np.arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST / 5):
+          for curvature_cmd in arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST / 5):
             self._set_prev_desired_curvature(curvature_cmd)
 
             # controls_allowed is checked if actuation bit is 1, else the curvature must be zero (inactive)
@@ -321,7 +321,7 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
 
   def test_accel_safety_check(self):
     for controls_allowed in [True, False]:
-      for accel in np.concatenate((np.arange(MIN_ACCEL - 2, MAX_ACCEL + 2, 0.03), [0, self.INACTIVE_ACCEL])):
+      for accel in concatenate((arange(MIN_ACCEL - 2, MAX_ACCEL + 2, 0.03), [0, self.INACTIVE_ACCEL])):
         accel = round(accel, 2)
         is_inactive_accel = accel == self.INACTIVE_ACCEL
         send = (controls_allowed and MIN_ACCEL <= accel <= MAX_ACCEL) or is_inactive_accel

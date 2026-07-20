@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import random
 import unittest
-import numpy as np
+from opendbc.math import arange, linspace, clip
 
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.tesla.teslacan import get_steer_ctrl_type
@@ -184,10 +184,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   def test_rx_hook_speed_mismatch(self):
     # TODO: overridden because of custom rounding
     # Tesla relies on speed for lateral limits close to ISO 11270, so it checks two sources
-    for speed in np.arange(0, 40, 0.5):
+    for speed in arange(0, 40, 0.5):
       # match signal rounding on CAN
       speed = away_round(speed / 0.08 * 3.6) * 0.08 / 3.6
-      for speed_delta in np.arange(-5, 5, 0.1):
+      for speed_delta in arange(-5, 5, 0.1):
         speed_2 = max(speed + speed_delta, 0)
         speed_2 = away_round(speed_2 * 2 * 3.6) / 2 / 3.6
 
@@ -298,7 +298,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     pass
 
   def test_lateral_accel_limit(self):
-    for speed in np.linspace(0, 40, 100):
+    for speed in linspace(0, 40, 100):
       speed = max(speed, 1)
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
@@ -311,14 +311,14 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
         # at limit (safety tolerance adds 1)
         max_angle = round_angle(get_max_angle_vm(speed, self.VM, CarControllerParams), angle_unit_offset + 1) * sign
-        max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        max_angle = clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
         # 1 unit above limit
         max_angle_raw = round_angle(get_max_angle_vm(speed, self.VM, CarControllerParams), angle_unit_offset + 2) * sign
-        max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        max_angle = clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         self._tx(self._angle_cmd_msg(max_angle, True))
 
         # at low speeds max angle is above 360, so adding 1 has no effect
@@ -326,7 +326,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
 
   def test_lateral_jerk_limit(self):
-    for speed in np.linspace(0, 40, 100):
+    for speed in linspace(0, 40, 100):
       speed = max(speed, 1)
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)

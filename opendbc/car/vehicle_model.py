@@ -13,8 +13,8 @@ x_dot = A*x + B*u
 A depends on longitudinal speed, u [m/s], and vehicle parameters CP
 """
 
-import numpy as np
-from numpy.linalg import solve
+import numpy as np  # noqa: TID251
+from numpy.linalg import solve  # noqa: TID251
 
 from opendbc.car.structs import CarParams
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY

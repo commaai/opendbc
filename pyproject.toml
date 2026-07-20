@@ -69,7 +69,6 @@ target-version="py311"
 preview = true
 select = [
   "E", "F", "W", "PIE", "C4", "ISC", "A", "B",
-  "NPY", # numpy
   "UP",  # pyupgrade
   "TRY203", "TRY400", "TRY401", # try/excepts
   "RUF008", "RUF100",
@@ -87,7 +86,6 @@ ignore = [
   "B027",
   "B024",
   "UP031",
-  "NPY002",  # new numpy random syntax is worse
   "C420",
   "E111", "E114", "E226", "E241",
   "E221", "E265", "E266", "E261",
@@ -97,7 +95,7 @@ ignore = [
 flake8-implicit-str-concat.allow-multiline=false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
-"numpy.mean".msg = "Sum and divide. np.mean is slow"
+"numpy".msg = "Use opendbc.math. Allowed only in ford radar clustering (see radar_interface.py)."
 
 [tool.ty.rules]
 # Ignore rules that produce false positives due to:

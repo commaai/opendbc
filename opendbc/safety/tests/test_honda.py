@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import unittest
-import numpy as np
+from opendbc.math import arange
 
 from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -316,7 +316,7 @@ class TestHondaNidecSafetyBase(HondaBase):
   def test_brake_safety_check(self):
     for fwd_brake in [False, True]:
       self.safety.set_honda_fwd_brake(fwd_brake)
-      for brake in np.arange(0, self.MAX_BRAKE + 10, 1):
+      for brake in arange(0, self.MAX_BRAKE + 10, 1):
         for controls_allowed in [True, False]:
           self.safety.set_controls_allowed(controls_allowed)
           if fwd_brake:
@@ -484,7 +484,7 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
   def test_gas_safety_check(self):
     for controls_allowed in [True, False]:
-      for gas in np.arange(self.NO_GAS, self.MAX_GAS + 2000, 100):
+      for gas in arange(self.NO_GAS, self.MAX_GAS + 2000, 100):
         accel = 0 if gas < 0 else gas / 1000
         self.safety.set_controls_allowed(controls_allowed)
         send = (controls_allowed and 0 <= gas <= self.MAX_GAS) or gas == self.NO_GAS
@@ -492,7 +492,7 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
   def test_brake_safety_check(self):
     for controls_allowed in [True, False]:
-      for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.01):
+      for accel in arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.01):
         accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
         self.safety.set_controls_allowed(controls_allowed)
         send = self.MIN_ACCEL <= accel <= self.MAX_ACCEL if controls_allowed else accel == 0

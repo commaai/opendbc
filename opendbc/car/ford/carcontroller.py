@@ -1,5 +1,5 @@
 import math
-import numpy as np
+from opendbc.math import clip, interp
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
 from opendbc.car.ford import fordcan
@@ -13,7 +13,7 @@ def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
   diff = 0.1
   tau = 5  # 5s smooths over the overshoot
   dt = DT_CTRL * CarControllerParams.STEER_STEP
-  alpha = 1 - np.exp(-dt / tau)
+  alpha = 1 - math.exp(-dt / tau)
 
   lataccel = apply_curvature * (v_ego ** 2)
   last_lataccel = apply_curvature_last * (v_ego ** 2)
@@ -22,12 +22,12 @@ def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
 
   output_curvature = last_lataccel / (max(v_ego, 1) ** 2)
 
-  return float(np.interp(v_ego, [5, 10], [apply_curvature, output_curvature]))
+  return float(interp(v_ego, [5, 10], [apply_curvature, output_curvature]))
 
 
 def apply_creep_compensation(accel: float, v_ego: float) -> float:
-  creep_accel = np.interp(v_ego, [1., 3.], [0.6, 0.])
-  creep_accel = np.interp(accel, [0., 0.2], [creep_accel, 0.])
+  creep_accel = interp(v_ego, [1., 3.], [0.6, 0.])
+  creep_accel = interp(accel, [0., 0.2], [creep_accel, 0.])
   accel -= creep_accel
   return float(accel)
 
@@ -86,7 +86,7 @@ class CarController(CarControllerBase):
       current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
       # No blending at low speed due to lack of torque wind-up and inaccurate current curvature
       if CS.out.vEgoRaw > 9:
-        apply_curvature = float(np.clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
+        apply_curvature = float(clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
                                         current_curvature + CarControllerParams.CURVATURE_ERROR))
       apply_curvature = CarControllerParams.CURVATURE_LIMITS.apply_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw,
                                                                           0., CC.latActive, CarControllerParams.STEER_STEP)
@@ -125,8 +125,8 @@ class CarController(CarControllerBase):
         # however even 3.5 m/s^3 causes some overshoot with a step response.
         accel = max(accel, self.accel - (3.5 * CarControllerParams.ACC_CONTROL_STEP * DT_CTRL))
 
-      accel = float(np.clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
-      gas = float(np.clip(gas, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+      accel = float(clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+      gas = float(clip(gas, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
 
       # Both gas and accel are in m/s^2, accel is used solely for braking
       if not CC.longActive or gas < CarControllerParams.MIN_GAS:

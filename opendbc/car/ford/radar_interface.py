@@ -1,8 +1,10 @@
-import numpy as np
 from typing import cast
 from collections import defaultdict
 from math import cos, sin
 from dataclasses import dataclass
+
+import numpy as np  # noqa: TID251  # vectorized clustering is much faster than pure Python
+
 from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV

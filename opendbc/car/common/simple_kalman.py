@@ -1,7 +1,8 @@
-import numpy as np
+import numpy as np  # noqa: TID251
 
 
 def get_kalman_gain(dt, A, C, Q, R, iterations=100):
+  A, C, Q = np.asarray(A), np.asarray(C), np.asarray(Q)
   P = np.zeros_like(Q)
   for _ in range(iterations):
     P = A.dot(P).dot(A.T) + dt * Q

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import numpy as np
+from opendbc.math import arange, concatenate
 import random
 import unittest
 
@@ -202,8 +202,8 @@ class TestFordSafetyBase(common.CarSafetyTest):
     return self.packer.make_can_msg_safety("Steering_Data_FD1", bus, values)
 
   def test_rx_hook_speed_mismatch(self):
-    for speed in np.arange(0, 40, 0.5):
-      for speed_delta in np.arange(-5, 5, 0.1):
+    for speed in arange(0, 40, 0.5):
+      for speed_delta in arange(-5, 5, 0.1):
         speed_2 = round(max(speed + speed_delta, 0), 1)
         self._rx(self._speed_msg(speed))
         self._rx(self._speed_msg_2(speed_2))
@@ -238,8 +238,8 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def test_angle_measurements(self):
     """Tests rx hook correctly parses the curvature measurement from the vehicle speed and yaw rate"""
-    for speed in np.arange(0.5, 40, 0.5):
-      for curvature in np.arange(0, self.MAX_CURVATURE * 2, 2e-3):
+    for speed in arange(0.5, 40, 0.5):
+      for curvature in arange(0, self.MAX_CURVATURE * 2, 2e-3):
         self._rx(self._speed_msg(speed))
         for c in (curvature, -curvature, 0, 0, 0, 0):
           self._rx(self._yaw_rate_msg(c, speed))
@@ -258,7 +258,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
   def test_max_lateral_acceleration(self):
     # Ford CAN FD can achieve a higher max lateral acceleration than CAN so we limit curvature based on speed
     max_curvature_can = round(self.MAX_CURVATURE * self.DEG_TO_CAN)
-    for speed in np.arange(0, 40, 0.5):
+    for speed in arange(0, 40, 0.5):
       max_can = min(self._get_max_curvature_can(speed), max_curvature_can)
       for offset in (-5, -1, 0, 1, 5):
         curvature_can = max_can + offset
@@ -274,10 +274,10 @@ class TestFordSafetyBase(common.CarSafetyTest):
           self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, signed_curvature, 0)))
 
   def test_steer_allowed(self):
-    path_offsets = np.arange(-5.12, 5.11, 2.5).round()
-    path_angles = np.arange(-0.5, 0.5235, 0.25).round(1)
-    curvature_rates = np.arange(-0.001024, 0.00102375, 0.001).round(3)
-    curvatures = np.arange(-0.02, 0.02094, 0.01).round(2)
+    path_offsets = [round(x) for x in arange(-5.12, 5.11, 2.5)]
+    path_angles = [round(x, 1) for x in arange(-0.5, 0.5235, 0.25)]
+    curvature_rates = [round(x, 3) for x in arange(-0.001024, 0.00102375, 0.001)]
+    curvatures = [round(x, 2) for x in arange(-0.02, 0.02094, 0.01)]
 
     for speed in (self.CURVATURE_ERROR_MIN_SPEED - 1,
                   self.CURVATURE_ERROR_MIN_SPEED + 1):
@@ -308,7 +308,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     self.safety.set_controls_allowed(True)
     max_encoded_can = int(self.MAX_CURVATURE * self.DEG_TO_CAN)
 
-    for speed in np.arange(0, 40, 0.5):
+    for speed in arange(0, 40, 0.5):
       max_can = self._get_max_curvature_can(speed)
       max_delta_can = self._get_max_curvature_delta_can(speed)
       base_can = max_delta_can * 2
@@ -471,7 +471,7 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   def test_gas_safety_check(self):
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
-      for gas in np.concatenate((np.arange(self.MIN_GAS - 2, self.MAX_GAS + 2, 0.05), [self.INACTIVE_GAS])):
+      for gas in concatenate((arange(self.MIN_GAS - 2, self.MAX_GAS + 2, 0.05), [self.INACTIVE_GAS])):
         gas = round(gas, 2)  # floats might not hit exact boundary conditions without rounding
         should_tx = (controls_allowed and self.MIN_GAS <= gas <= self.MAX_GAS) or gas == self.INACTIVE_GAS
         self.assertEqual(should_tx, self._tx(self._acc_command_msg(gas, self.INACTIVE_ACCEL, controls_allowed)))

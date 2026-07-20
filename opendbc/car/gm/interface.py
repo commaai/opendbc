@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from math import fabs, exp
-import numpy as np
+from opendbc.math import arange, interp, sign
 
 from opendbc.car import get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
@@ -45,7 +45,7 @@ class CarInterface(CarInterfaceBase):
     else:
       return CarInterfaceBase.get_steer_feedforward_default
 
-  def get_lataccel_torque_siglin(self) -> tuple[list[float], np.ndarray]:
+  def get_lataccel_torque_siglin(self) -> tuple[list[float], list[float]]:
 
     def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
       # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
@@ -55,11 +55,11 @@ class CarInterface(CarInterfaceBase):
       assert non_linear_torque_params, "The params are not defined"
       a, b, c, d = non_linear_torque_params
       sig_input = a * lateral_acceleration
-      sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
+      sig = sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
       steer_torque = (sig * b) + (lateral_acceleration * c) + d
       return float(steer_torque)
 
-    lataccel_values = np.arange(-5.0, 5.0, 0.01)
+    lataccel_values = arange(-5.0, 5.0, 0.01)
     torque_values = [torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
     assert min(torque_values) < -1 and max(torque_values) > 1, "The torque values should cover the range [-1, 1]"
     return torque_values, lataccel_values
@@ -69,7 +69,7 @@ class CarInterface(CarInterfaceBase):
       torque_values, lataccel_values = self.get_lataccel_torque_siglin()
 
       def torque_from_lateral_accel_siglin(lateral_acceleration: float, torque_params: structs.CarParams.LateralTorqueTuning):
-        return np.interp(lateral_acceleration, lataccel_values, torque_values)
+        return interp(lateral_acceleration, lataccel_values, torque_values)
       return torque_from_lateral_accel_siglin
     else:
       return self.torque_from_lateral_accel_linear
@@ -79,7 +79,7 @@ class CarInterface(CarInterfaceBase):
       torque_values, lataccel_values = self.get_lataccel_torque_siglin()
 
       def lateral_accel_from_torque_siglin(torque: float, torque_params: structs.CarParams.LateralTorqueTuning):
-        return np.interp(torque, torque_values, lataccel_values)
+        return interp(torque, torque_values, lataccel_values)
       return lateral_accel_from_torque_siglin
     else:
       return self.lateral_accel_from_torque_linear

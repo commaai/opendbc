@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import unittest
-import numpy as np
+from opendbc.math import arange, concatenate
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
@@ -199,7 +199,7 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   def test_accel_safety_check(self):
     for controls_allowed in [True, False]:
       # enforce we don't skip over 0 or inactive accel
-      for accel in np.concatenate((np.arange(MIN_ACCEL - 2, MAX_ACCEL + 2, 0.03), [0, self.INACTIVE_ACCEL])):
+      for accel in concatenate((arange(MIN_ACCEL - 2, MAX_ACCEL + 2, 0.03), [0, self.INACTIVE_ACCEL])):
         accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
         is_inactive_accel = accel == self.INACTIVE_ACCEL
         send = (controls_allowed and MIN_ACCEL <= accel <= MAX_ACCEL) or is_inactive_accel

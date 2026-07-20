@@ -1,5 +1,5 @@
 # functions common among cars
-import numpy as np
+from opendbc.math import clip
 from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
@@ -93,7 +93,7 @@ class Bus(StrEnum):
 
 
 def rate_limit(new_value, last_value, dw_step, up_step):
-  return float(np.clip(new_value, last_value + dw_step, last_value + up_step))
+  return float(clip(new_value, last_value + dw_step, last_value + up_step))
 
 
 def make_tester_present_msg(addr, bus, subaddr=None, suppress_response=False):

@@ -1,4 +1,4 @@
-import numpy as np
+from opendbc.math import interp
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, structs
 from opendbc.car.lateral import apply_std_steer_angle_limits
@@ -33,7 +33,7 @@ class CarController(CarControllerBase):
 
     # At low speeds and at high steering angles, EPS is sensitive to jitter in angle request. Smooth to fix uncomfortable response.
     if CC.latActive:
-      self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5, 10, 20], [0.2, 0.1, 0.0])))
+      self.angle_filter.update_alpha(float(interp(CS.out.vEgo, [5, 10, 20], [0.2, 0.1, 0.0])))
       self.angle_filter.update(actuators.steeringAngleDeg)
     else:
       self.angle_filter.x = actuators.steeringAngleDeg

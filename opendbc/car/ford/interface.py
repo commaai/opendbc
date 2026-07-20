@@ -1,4 +1,4 @@
-import numpy as np
+from opendbc.math import interp
 from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
@@ -25,7 +25,7 @@ class CarInterface(CarInterfaceBase):
     # so limit limits of pid to prevent windup
     ACCEL_MAX_VALS = [CarControllerParams.ACCEL_MAX, 0.2]
     ACCEL_MAX_BP = [cruise_speed - 2., cruise_speed - .4]
-    return CarControllerParams.ACCEL_MIN, np.interp(current_speed, ACCEL_MAX_BP, ACCEL_MAX_VALS)
+    return CarControllerParams.ACCEL_MIN, interp(current_speed, ACCEL_MAX_BP, ACCEL_MAX_VALS)
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:

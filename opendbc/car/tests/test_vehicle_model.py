@@ -1,8 +1,9 @@
 import unittest
 import math
 
-import numpy as np
+import numpy as np  # noqa: TID251
 
+from opendbc.math import linspace
 from opendbc.car.honda.interface import CarInterface
 from opendbc.car.honda.values import CAR
 from opendbc.car.vehicle_model import VehicleModel, dyn_ss_sol, create_dyn_state_matrices
@@ -15,9 +16,9 @@ class TestVehicleModel(unittest.TestCase):
 
   def test_round_trip_yaw_rate(self):
     # TODO: fix VM to work at zero speed
-    for u in np.linspace(1, 30, num=10):
-      for roll in np.linspace(math.radians(-20), math.radians(20), num=11):
-        for sa in np.linspace(math.radians(-20), math.radians(20), num=11):
+    for u in linspace(1, 30, num=10):
+      for roll in linspace(math.radians(-20), math.radians(20), num=11):
+        for sa in linspace(math.radians(-20), math.radians(20), num=11):
           yr = self.VM.yaw_rate(sa, u, roll)
           new_sa = self.VM.get_steer_from_yaw_rate(yr, u, roll)
 
@@ -27,9 +28,9 @@ class TestVehicleModel(unittest.TestCase):
     """Verify that the yaw_rate helper function matches the results
     from the state space model."""
 
-    for roll in np.linspace(math.radians(-20), math.radians(20), num=11):
-      for u in np.linspace(1, 30, num=10):
-        for sa in np.linspace(math.radians(-20), math.radians(20), num=11):
+    for roll in linspace(math.radians(-20), math.radians(20), num=11):
+      for u in linspace(1, 30, num=10):
+        for sa in linspace(math.radians(-20), math.radians(20), num=11):
 
           # Compute yaw rate based on state space model
           _, yr1 = dyn_ss_sol(sa, u, roll, self.VM)
@@ -41,8 +42,8 @@ class TestVehicleModel(unittest.TestCase):
   def test_syn_ss_sol_simulate(self):
     """Verifies that dyn_ss_sol matches a simulation"""
 
-    for roll in np.linspace(math.radians(-20), math.radians(20), num=11):
-      for u in np.linspace(1, 30, num=10):
+    for roll in linspace(math.radians(-20), math.radians(20), num=11):
+      for u in linspace(1, 30, num=10):
         A, B = create_dyn_state_matrices(u, self.VM)
 
         # Convert to discrete time system
@@ -53,7 +54,7 @@ class TestVehicleModel(unittest.TestCase):
         Ad = Md[:A.shape[0], :A.shape[1]]
         Bd = Md[:A.shape[0], A.shape[1]:]
 
-        for sa in np.linspace(math.radians(-20), math.radians(20), num=11):
+        for sa in linspace(math.radians(-20), math.radians(20), num=11):
           inp = np.array([[sa], [roll]])
 
           # Simulate for 1 second

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import numpy as np
+from opendbc.math import arange, linspace, isclose
 import random
 import unittest
 import itertools
@@ -101,7 +101,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     for engaged, req, req2, torque_wind_down, angle in itertools.product([True, False],
                                                                   [0, 1], [0, 1],
                                                                   [0, 50, 100],
-                                                                  np.linspace(-20, 20, 5)):
+                                                                  linspace(-20, 20, 5)):
       self.safety.set_controls_allowed(engaged)
 
       should_tx = not req and not req2 and angle == 0 and torque_wind_down == 0
@@ -181,7 +181,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
   def test_lka_steer_cmd(self):
     for engaged, steer_req, torque in itertools.product([True, False],
                                                         [0, 1],
-                                                        np.linspace(-1500, 1500, 7)):
+                                                        linspace(-1500, 1500, 7)):
       self.safety.set_controls_allowed(engaged)
       torque = int(torque)
       self.safety.set_rt_torque_last(torque)
@@ -203,7 +203,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
     * STEER_REQUEST, STEER_REQUEST_2, and TORQUE_WIND_DOWN are all 0
     """
     for controls_allowed in (True, False):
-      for angle in np.arange(-90, 90, 1):
+      for angle in arange(-90, 90, 1):
         self.safety.set_controls_allowed(controls_allowed)
         self._reset_angle_measurement(angle)
         self._set_prev_desired_angle(angle)
@@ -249,7 +249,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
     * Tests rx hook correctly clips the angle measurement, since it is to be compared to LTA cmd when inactive
     """
     for steer_angle_initializing in (True, False):
-      for angle in np.arange(0, self.STEER_ANGLE_MAX * 2, 1):
+      for angle in arange(0, self.STEER_ANGLE_MAX * 2, 1):
         # If init flag is set, do not rx or parse any angle measurements
         for a in (angle, -angle, 0, 0, 0, 0):
           self.assertEqual(not steer_angle_initializing,
@@ -306,9 +306,9 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
     """
     for controls_allowed in [True, False]:
       self.safety.set_controls_allowed(controls_allowed)
-      for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.1):
+      for accel in arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.1):
         self.assertFalse(self._tx(self._accel_msg_343(accel)))
-        should_tx = np.isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
+        should_tx = isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel, cancel_req=1)))
 
 
@@ -361,7 +361,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
     return self.packer.make_can_msg_safety("STEERING_LTA_2", 0, values)
 
   def test_lta_2_steer_cmd(self):
-    for engaged, req, req2, angle in itertools.product([True, False], [0, 1], [0, 1], np.linspace(-20, 20, 5)):
+    for engaged, req, req2, angle in itertools.product([True, False], [0, 1], [0, 1], linspace(-20, 20, 5)):
       self.safety.set_controls_allowed(engaged)
 
       should_tx = not req and not req2 and angle == 0
@@ -407,8 +407,8 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
     """
     for controls_allowed in [True, False]:
       self.safety.set_controls_allowed(controls_allowed)
-      for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.1):
-        should_tx = np.isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
+      for accel in arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.1):
+        should_tx = isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel)))
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel, cancel_req=1)))
 

@@ -2,7 +2,7 @@
 import time
 import threading
 import argparse
-import numpy as np
+from opendbc.math import clip, interp
 from pprint import pprint
 from inputs import get_gamepad
 
@@ -33,7 +33,7 @@ class Keyboard:
     elif key in self.axes_map:
       axis = self.axes_map[key]
       incr = self.axis_increment if key in ['w', 'a'] else -self.axis_increment
-      self.axes_values[axis] = float(np.clip(self.axes_values[axis] + incr, -1, 1))
+      self.axes_values[axis] = float(clip(self.axes_values[axis] + incr, -1, 1))
     else:
       return False
     return True
@@ -68,7 +68,7 @@ class Joystick:
       self.max_axis_value[event[0]] = max(event[1], self.max_axis_value[event[0]])
       self.min_axis_value[event[0]] = min(event[1], self.min_axis_value[event[0]])
 
-      norm = -float(np.interp(event[1], [self.min_axis_value[event[0]], self.max_axis_value[event[0]]], [-1., 1.]))
+      norm = -float(interp(event[1], [self.min_axis_value[event[0]], self.max_axis_value[event[0]]], [-1., 1.]))
       self.axes_values[event[0]] = norm if abs(norm) > 0.05 else 0.  # center can be noisy, deadzone of 5%
     else:
       return False
@@ -85,8 +85,8 @@ def main(joystick):
   with PandaRunner() as p:
     CC = CarControl(enabled=False)
     while True:
-      CC.actuators.accel = float(4.0*np.clip(joystick.axes_values['gb'], -1, 1))
-      CC.actuators.torque = float(np.clip(joystick.axes_values['steer'], -1, 1))
+      CC.actuators.accel = float(4.0*clip(joystick.axes_values['gb'], -1, 1))
+      CC.actuators.torque = float(clip(joystick.axes_values['steer'], -1, 1))
       pprint(CC)
 
       p.read()
