@@ -470,7 +470,9 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   controls_allowed = false;
   controls_allowed_lateral = false;
   relay_malfunction_reset();
-  safety_rx_checks_invalid = false;
+  // Lateral-only authorization must remain fail-closed until safety_tick has
+  // verified that the complete configured RX set is present and valid.
+  safety_rx_checks_invalid = true;
 
   current_safety_config.rx_checks = NULL;
   current_safety_config.rx_checks_len = 0;
