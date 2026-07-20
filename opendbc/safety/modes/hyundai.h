@@ -50,7 +50,7 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {.msg = {{0x421, (scc_bus), 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
 #define HYUNDAI_SCC11_ADDR_CHECK(scc_bus) \
-  {.msg = {{0x420, (scc_bus), 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
+  {.msg = {{0x420, (scc_bus), 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
 #define HYUNDAI_FCEV_GAS_ADDR_CHECK \
   {.msg = {{0x91,  0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
@@ -72,6 +72,8 @@ static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
     cnt = (msg->data[1] >> 5) & 0x7U;
   } else if (msg->addr == 0x421U) {
     cnt = msg->data[7] & 0xFU;
+  } else if (msg->addr == 0x420U) {
+    cnt = (msg->data[0] >> 4) & 0xFU;
   } else if (msg->addr == 0x4F1U) {
     cnt = (msg->data[3] >> 4) & 0xFU;
   } else {
@@ -186,7 +188,8 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  controls_allowed_lateral = ((alternative_experience & ALT_EXP_ENABLE_MADS) != 0) && acc_main_on;
+  const bool mads_requested = ((alternative_experience & ALT_EXP_ENABLE_MADS) != 0) && acc_main_on;
+  controls_allowed_lateral = mads_requested && heartbeat_engaged && !safety_rx_checks_invalid;
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *msg) {

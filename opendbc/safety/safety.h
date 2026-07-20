@@ -105,6 +105,7 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
       valid = false;
       controls_allowed = false;
       controls_allowed_lateral = false;
+      safety_rx_checks_invalid = true;
     }
   }
   return valid;

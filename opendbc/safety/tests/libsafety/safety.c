@@ -62,6 +62,10 @@ bool get_controls_allowed_lateral(void){
   return controls_allowed_lateral;
 }
 
+void set_heartbeat_engaged(bool engaged){
+  heartbeat_engaged = engaged;
+}
+
 bool get_ignition_can(void){
   return ignition_can;
 }

@@ -135,9 +135,13 @@ class TestHyundaiMadsSafety(common.SafetyTestBase):
     self.safety.init_tests()
     self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.ENABLE_MADS)
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
+    self.safety.set_heartbeat_engaged(True)
+    self.cnt_main = 0
 
   def _main_status_msg(self, enable):
-    return self.packer.make_can_msg_safety("SCC11", 0, {"MainMode_ACC": enable})
+    values = {"MainMode_ACC": enable, "AliveCounterACC": self.cnt_main % 16}
+    self.cnt_main += 1
+    return self.packer.make_can_msg_safety("SCC11", 0, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
@@ -156,6 +160,25 @@ class TestHyundaiMadsSafety(common.SafetyTestBase):
 
   def test_main_switch_does_not_enable_mads_without_alternative_experience(self):
     self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.DEFAULT)
+    self._rx(self._main_status_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
+
+  def test_rx_lag_cannot_immediately_reauthorize_lateral(self):
+    self._rx(self._main_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed_lateral())
+
+    self.safety.set_timer(2_000_000)
+    self.safety.safety_tick_current_safety_config()
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
+
+    self._rx(self._main_status_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
+
+  def test_heartbeat_disengaged_blocks_reauthorization(self):
+    self._rx(self._main_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed_lateral())
+
+    self.safety.set_heartbeat_engaged(False)
     self._rx(self._main_status_msg(True))
     self.assertFalse(self.safety.get_controls_allowed_lateral())
 
