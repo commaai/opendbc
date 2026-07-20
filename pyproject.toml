@@ -95,7 +95,7 @@ ignore = [
 flake8-implicit-str-concat.allow-multiline=false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
-"numpy".msg = "Use opendbc.math. Allowed only in ford radar clustering (see radar_interface.py)."
+"numpy".msg = "Use opendbc.math. It's faster in most cases."
 
 [tool.ty.rules]
 # Ignore rules that produce false positives due to:
