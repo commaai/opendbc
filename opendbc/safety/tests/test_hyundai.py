@@ -133,6 +133,8 @@ class TestHyundaiMadsSafety(common.SafetyTestBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
     self.safety.init_tests()
+    self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.ENABLE_MADS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
 
   def _main_status_msg(self, enable):
     return self.packer.make_can_msg_safety("SCC11", 0, {"MainMode_ACC": enable})
@@ -142,7 +144,6 @@ class TestHyundaiMadsSafety(common.SafetyTestBase):
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
 
   def test_main_switch_controls_lateral_independently(self):
-    self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.ENABLE_MADS)
     self._rx(self._main_status_msg(True))
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertTrue(self.safety.get_controls_allowed_lateral())
@@ -154,6 +155,7 @@ class TestHyundaiMadsSafety(common.SafetyTestBase):
     self.assertTrue(self._tx(self._torque_cmd_msg(0, steer_req=0)))
 
   def test_main_switch_does_not_enable_mads_without_alternative_experience(self):
+    self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.DEFAULT)
     self._rx(self._main_status_msg(True))
     self.assertFalse(self.safety.get_controls_allowed_lateral())
 

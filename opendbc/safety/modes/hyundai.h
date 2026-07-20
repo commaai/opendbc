@@ -307,12 +307,16 @@ static safety_config hyundai_init(uint16_t param) {
     static RxCheck hyundai_cam_scc_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
       HYUNDAI_SCC12_ADDR_CHECK(2)
-      HYUNDAI_SCC11_ADDR_CHECK(2)
     };
 
     ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
   } else {
     static RxCheck hyundai_rx_checks[] = {
+       HYUNDAI_COMMON_RX_CHECKS(false)
+       HYUNDAI_SCC12_ADDR_CHECK(0)
+    };
+
+    static RxCheck hyundai_mads_rx_checks[] = {
        HYUNDAI_COMMON_RX_CHECKS(false)
        HYUNDAI_SCC12_ADDR_CHECK(0)
        HYUNDAI_SCC11_ADDR_CHECK(0)
@@ -321,13 +325,14 @@ static safety_config hyundai_init(uint16_t param) {
     static RxCheck hyundai_fcev_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
       HYUNDAI_SCC12_ADDR_CHECK(0)
-      HYUNDAI_SCC11_ADDR_CHECK(0)
       HYUNDAI_FCEV_GAS_ADDR_CHECK
     };
 
     SET_TX_MSGS(HYUNDAI_TX_MSGS, ret);
     if (hyundai_fcev_gas_signal) {
       SET_RX_CHECKS(hyundai_fcev_rx_checks, ret);
+    } else if ((alternative_experience & ALT_EXP_ENABLE_MADS) != 0) {
+      SET_RX_CHECKS(hyundai_mads_rx_checks, ret);
     } else {
       SET_RX_CHECKS(hyundai_rx_checks, ret);
     }
@@ -340,7 +345,6 @@ static safety_config hyundai_legacy_init(uint16_t param) {
   static RxCheck hyundai_legacy_rx_checks[] = {
     HYUNDAI_COMMON_RX_CHECKS(true)
     HYUNDAI_SCC12_ADDR_CHECK(0)
-    HYUNDAI_SCC11_ADDR_CHECK(0)
   };
 
   hyundai_common_init(param);
