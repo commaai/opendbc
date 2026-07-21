@@ -80,6 +80,10 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
+  def test_engine_on(self):
+    self.assertFalse(self.safety.get_gas_pressed_prev())
+    self._rx(self._user_gas_msg(16))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
 
 class TestMazdaIgnition(unittest.TestCase):
   TX_MSGS: list = []
