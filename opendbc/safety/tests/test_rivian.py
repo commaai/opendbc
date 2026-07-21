@@ -109,6 +109,12 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
         self.assertFalse(self._rx(msg))
         self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_compute_checksum_default(self):
+    self.assertEqual(0, self.safety._test_compute_checksum(self._user_brake_msg(False)))
+
+  def test_get_quality_flag_valid_default(self):
+    self.assertEqual(False, self.safety._test_get_quality_flag_valid(self._user_brake_msg(False)))
+
 
 class TestRivianStockSafety(TestRivianSafetyBase):
 

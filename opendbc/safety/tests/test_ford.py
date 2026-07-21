@@ -416,6 +416,18 @@ class TestFordSafetyBase(common.CarSafetyTest):
       for bus in (0, 2):
         self.assertEqual(enabled, self._tx(self._acc_button_msg(Buttons.CANCEL, bus)))
 
+  def test_get_counter_default(self):
+    self.assertEqual(0, self.safety._test_get_counter(common.make_msg(0, 0, length=0)))
+
+  def test_get_quality_valid_flag_default(self):
+    self.assertFalse(self.safety._test_get_quality_flag_valid(common.make_msg(0, 0, length=0)))
+
+  def test_get_checksum_default(self):
+    self.assertEqual(0, self.safety._test_get_checksum(common.make_msg(0, 0, length=0)))
+
+  def test_compute_checksum(self):
+    self.assertEqual(0, self.safety._test_compute_checksum(common.make_msg(0, 0, length=0)))
+
 
 class TestFordCANFDStockSafety(TestFordSafetyBase):
   STEER_MESSAGE = MSG_LateralMotionControl2

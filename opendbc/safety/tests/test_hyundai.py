@@ -111,6 +111,12 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
 
+  def test_get_counter_default(self):
+    self.assertEqual(0, self.safety._test_get_counter(common.make_msg(0, 0, length=0)))
+
+  def test_get_checksum_default(self):
+    self.assertEqual(0, self.safety._test_get_checksum(common.make_msg(0, 0, length=0)))
+
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2

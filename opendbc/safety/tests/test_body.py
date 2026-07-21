@@ -55,6 +55,10 @@ class TestBody(common.SafetyTest):
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
     self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
 
+  def test_rx_hook_nonactive(self):
+    self.safety.set_controls_allowed(False)
+    self.safety._test_rx_hook(common.make_msg(0, 0, length=0))
+    self.assertFalse(self.safety.get_controls_allowed())
 
 if __name__ == "__main__":
   unittest.main()

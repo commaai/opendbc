@@ -81,6 +81,9 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
 
+  def test_compute_checksum_default(self):
+    self.assertEqual(0, self.safety._test_compute_checksum(common.make_msg(0, 0, length=16, dat=b'\x00' * 16)))
+
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
