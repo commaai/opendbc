@@ -74,7 +74,7 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
       // allow resume spamming while controls allowed, but
       // only allow cancel while controls not allowed
       bool cancel_cmd = (msg->data[0] == 0x1U);
-      if (!controls_allowed && !cancel_cmd) {
+      if (!safety_controls_allowed_internal && !cancel_cmd) {
         tx = false;
       }
     }

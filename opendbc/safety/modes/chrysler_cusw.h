@@ -83,7 +83,7 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
     // Signal: CRUISE_BUTTONS.ACC_Resume
     const bool is_cancel = GET_BIT(msg, 0U);
     const bool is_resume = GET_BIT(msg, 4U);
-    const bool allowed = is_cancel || (is_resume && controls_allowed);
+    const bool allowed = is_cancel || (is_resume && safety_controls_allowed_internal);
     if (!allowed) {
       tx = false;
     }

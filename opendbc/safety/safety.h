@@ -1,5 +1,10 @@
 #pragma once
 
+// Header-only implementation entry point. Consumers should use the interface
+// declared in api.h and define OPENDBC_SAFETY_API_ONLY before including this.
+#define OPENDBC_SAFETY_INTERNAL
+
+#include "opendbc/safety/api.h"
 #include "opendbc/safety/helpers.h"
 #include "opendbc/safety/lateral.h"
 #include "opendbc/safety/longitudinal.h"
@@ -42,8 +47,8 @@ uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
 const int MAX_WRONG_COUNTERS = 5;
 
 // This can be set by the safety hooks
-bool controls_allowed = false;
-bool relay_malfunction = false;
+bool safety_controls_allowed_internal = false;
+bool safety_relay_malfunction_internal = false;
 bool gas_pressed = false;
 bool gas_pressed_prev = false;
 bool brake_pressed = false;
@@ -58,7 +63,7 @@ struct sample_t vehicle_speed_2;
 bool vehicle_moving = false;
 bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
-bool safety_rx_checks_invalid = false;
+bool safety_rx_checks_invalid_internal = false;
 
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
@@ -70,9 +75,8 @@ struct sample_t torque_driver;     // last 6 driver torques measured
 uint32_t ts_torque_check_last = 0;
 uint32_t ts_steer_req_mismatch_last = 0;  // last timestamp steer req was mismatched with torque
 
-// state for controls_allowed timeout logic
-bool heartbeat_engaged = false;             // openpilot enabled, passed in heartbeat USB command
-uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heartbeat_engaged and controls_allowed
+// state for safety_controls_allowed_internal timeout logic
+bool safety_heartbeat_engaged_internal = false;             // openpilot enabled, passed in heartbeat USB command
 
 // for safety modes with angle steering control
 uint32_t rt_angle_msgs = 0;
@@ -84,15 +88,15 @@ struct sample_t angle_meas;         // last 6 steer angles
 CurvatureSteeringState curvature_state;
 
 
-int alternative_experience = 0;
+int safety_alternative_experience_internal = 0;
 
 // time since safety mode has been changed
-uint32_t safety_mode_cnt = 0U;
+uint32_t safety_mode_cnt_internal = 0U;
 
-uint16_t current_safety_mode = SAFETY_SILENT;
-uint16_t current_safety_param = 0;
+uint16_t safety_mode_internal = SAFETY_SILENT;
+uint16_t safety_param_internal = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
-safety_config current_safety_config;
+safety_config safety_config_internal;
 
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
@@ -102,7 +106,7 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
   if (index != -1) {
     if (!addr_list[index].status.valid_checksum || !addr_list[index].status.valid_quality_flag || (addr_list[index].status.wrong_counters >= MAX_WRONG_COUNTERS)) {
       valid = false;
-      controls_allowed = false;
+      safety_controls_allowed_internal = false;
     }
   }
   return valid;
@@ -190,10 +194,8 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 }
 
 bool safety_rx_hook(const CANPacket_t *msg) {
-  bool controls_allowed_prev = controls_allowed;
-
-  bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
-  bool whitelisted = get_addr_check_index(msg, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
+  bool valid = rx_msg_safety_check(msg, &safety_config_internal, current_hooks);
+  bool whitelisted = get_addr_check_index(msg, safety_config_internal.rx_checks, safety_config_internal.rx_checks_len) != -1;
   if (valid && whitelisted) {
     current_hooks->rx(msg);
   }
@@ -205,16 +207,11 @@ bool safety_rx_hook(const CANPacket_t *msg) {
   // check all applicable tx msgs for liveness on sending bus.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
   const int addr = msg->addr;
-  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
-    const CanMsg *m = &current_safety_config.tx_msgs[i];
+  for (int i = 0; i < safety_config_internal.tx_msgs_len; i++) {
+    const CanMsg *m = &safety_config_internal.tx_msgs[i];
     if (m->check_relay) {
       stock_ecu_check((m->addr == addr) && (m->bus == msg->bus));
     }
-  }
-
-  // reset mismatches on rising edge of controls_allowed to avoid rare race condition
-  if (controls_allowed && !controls_allowed_prev) {
-    heartbeat_engaged_mismatches = 0;
   }
 
   return valid;
@@ -235,8 +232,8 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
 }
 
 bool safety_tx_hook(CANPacket_t *msg) {
-  bool whitelisted = tx_msg_safety_check(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
-  if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
+  bool whitelisted = tx_msg_safety_check(msg, safety_config_internal.tx_msgs, safety_config_internal.tx_msgs_len);
+  if ((safety_mode_internal == SAFETY_ALLOUTPUT) || (safety_mode_internal == SAFETY_ELM327)) {
     whitelisted = true;
   }
 
@@ -245,7 +242,7 @@ bool safety_tx_hook(CANPacket_t *msg) {
     safety_allowed = current_hooks->tx(msg);
   }
 
-  return !relay_malfunction && whitelisted && safety_allowed;
+  return !safety_relay_malfunction_internal && whitelisted && safety_allowed;
 }
 
 static int get_fwd_bus(int bus_num) {
@@ -261,14 +258,14 @@ static int get_fwd_bus(int bus_num) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
+  bool blocked = safety_relay_malfunction_internal || safety_config_internal.disable_forwarding;
 
   // Block messages that are being checked for relay malfunctions. Safety modes can opt out of this
   // in the case of selective AEB forwarding
   const int destination_bus = get_fwd_bus(bus_num);
   if (!blocked) {
-    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
-      const CanMsg *m = &current_safety_config.tx_msgs[i];
+    for (int i = 0; i < safety_config_internal.tx_msgs_len; i++) {
+      const CanMsg *m = &safety_config_internal.tx_msgs[i];
       if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == (unsigned int)destination_bus)) {
         blocked = true;
         break;
@@ -314,38 +311,63 @@ void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
 }
 
 // 1Hz safety function called by main. Now just a check for lagging safety messages
-void safety_tick(const safety_config *cfg) {
+void safety_tick(void) {
   const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = microsecond_timer_get();
-  if (cfg != NULL) {
-    for (int i=0; i < cfg->rx_checks_len; i++) {
-      uint32_t elapsed_time = safety_get_ts_elapsed(ts, cfg->rx_checks[i].status.last_timestamp);
-      // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
-      // Quite conservative to not risk false triggers.
-      // 2s of lag is worse case, since the function is called at 1Hz
-      uint32_t frequency = cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
-      uint32_t timestep = 1e6 / frequency;
-      bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
-      cfg->rx_checks[i].status.lagging = lagging;
-      if (lagging) {
-        controls_allowed = false;
-      }
+  const safety_config *cfg = &safety_config_internal;
+  for (int i=0; i < cfg->rx_checks_len; i++) {
+    uint32_t elapsed_time = safety_get_ts_elapsed(ts, cfg->rx_checks[i].status.last_timestamp);
+    // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
+    // Quite conservative to not risk false triggers.
+    // 2s of lag is worse case, since the function is called at 1Hz
+    uint32_t frequency = cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
+    uint32_t timestep = 1e6 / frequency;
+    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
+    cfg->rx_checks[i].status.lagging = lagging;
+    if (lagging) {
+      safety_controls_allowed_internal = false;
+    }
 
-      // enforce minimum frequency for safety-relevant messages
-      bool frequency_invalid = frequency < 10U;
-      if (lagging || frequency_invalid || !is_msg_valid(cfg->rx_checks, i)) {
-        rx_checks_invalid = true;
-        controls_allowed = false;
-      }
+    // enforce minimum frequency for safety-relevant messages
+    bool frequency_invalid = frequency < 10U;
+    if (lagging || frequency_invalid || !is_msg_valid(cfg->rx_checks, i)) {
+      rx_checks_invalid = true;
+      safety_controls_allowed_internal = false;
     }
   }
 
-  safety_rx_checks_invalid = rx_checks_invalid;
+  safety_rx_checks_invalid_internal = rx_checks_invalid;
+  safety_mode_cnt_internal += 1U;
+}
+
+safety_state safety_get_state(void) {
+  const safety_state state = {
+    .controls_allowed = safety_controls_allowed_internal,
+    .relay_malfunction = safety_relay_malfunction_internal,
+    .heartbeat_engaged = safety_heartbeat_engaged_internal,
+    .rx_checks_invalid = safety_rx_checks_invalid_internal,
+    .mode = safety_mode_internal,
+    .param = safety_param_internal,
+    .alternative_experience = safety_alternative_experience_internal,
+  };
+  return state;
+}
+
+void safety_disengage(void) {
+  safety_controls_allowed_internal = false;
+}
+
+void safety_set_alternative_experience(int mode) {
+  safety_alternative_experience_internal = mode;
+}
+
+void safety_set_heartbeat_engaged(bool engaged) {
+  safety_heartbeat_engaged_internal = engaged;
 }
 
 static void relay_malfunction_set(void) {
-  relay_malfunction = true;
+  safety_relay_malfunction_internal = true;
 }
 
 static void generic_rx_checks(void) {
@@ -353,19 +375,19 @@ static void generic_rx_checks(void) {
 
   // exit controls on rising edge of brake press
   if (brake_pressed && (!brake_pressed_prev || vehicle_moving)) {
-    controls_allowed = false;
+    safety_controls_allowed_internal = false;
   }
   brake_pressed_prev = brake_pressed;
 
   // exit controls on rising edge of regen paddle
   if (regen_braking && (!regen_braking_prev || vehicle_moving)) {
-    controls_allowed = false;
+    safety_controls_allowed_internal = false;
   }
   regen_braking_prev = regen_braking;
 
   // exit controls on rising edge of steering override/disengage
   if (steering_disengage && !steering_disengage_prev) {
-    controls_allowed = false;
+    safety_controls_allowed_internal = false;
   }
   steering_disengage_prev = steering_disengage;
 }
@@ -375,13 +397,13 @@ static void stock_ecu_check(bool stock_ecu_detected) {
   const uint32_t RELAY_TRNS_TIMEOUT = 1U;
 
   // check if stock ECU is on bus broken by car harness
-  if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && stock_ecu_detected) {
+  if ((safety_mode_cnt_internal > RELAY_TRNS_TIMEOUT) && stock_ecu_detected) {
     relay_malfunction_set();
   }
 }
 
 static void relay_malfunction_reset(void) {
-  relay_malfunction = false;
+  safety_relay_malfunction_internal = false;
 }
 
 // resets values and min/max for sample_t struct
@@ -425,8 +447,8 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   };
 
   // reset state set by safety mode
-  safety_mode_cnt = 0U;
-  relay_malfunction = false;
+  safety_mode_cnt_internal = 0U;
+  safety_relay_malfunction_internal = false;
   gas_pressed = false;
   gas_pressed_prev = false;
   brake_pressed = false;
@@ -462,36 +484,36 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   reset_sample(&angle_meas);
   reset_sample(&curvature_state.meas);
 
-  controls_allowed = false;
+  safety_controls_allowed_internal = false;
   relay_malfunction_reset();
-  safety_rx_checks_invalid = false;
+  safety_rx_checks_invalid_internal = false;
 
-  current_safety_config.rx_checks = NULL;
-  current_safety_config.rx_checks_len = 0;
-  current_safety_config.tx_msgs = NULL;
-  current_safety_config.tx_msgs_len = 0;
-  current_safety_config.disable_forwarding = false;
+  safety_config_internal.rx_checks = NULL;
+  safety_config_internal.rx_checks_len = 0;
+  safety_config_internal.tx_msgs = NULL;
+  safety_config_internal.tx_msgs_len = 0;
+  safety_config_internal.disable_forwarding = false;
 
   int set_status = -1;  // not set
   int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
   for (int i = 0; i < hook_config_count; i++) {
     if (safety_hook_registry[i].id == mode) {
       current_hooks = safety_hook_registry[i].hooks;
-      current_safety_mode = mode;
-      current_safety_param = param;
+      safety_mode_internal = mode;
+      safety_param_internal = param;
       set_status = 0;  // set
     }
   }
   if ((set_status == 0) && (current_hooks->init != NULL)) {
     safety_config cfg = current_hooks->init(param);
-    current_safety_config.rx_checks = cfg.rx_checks;
-    current_safety_config.rx_checks_len = cfg.rx_checks_len;
-    current_safety_config.tx_msgs = cfg.tx_msgs;
-    current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
-    current_safety_config.disable_forwarding = cfg.disable_forwarding;
+    safety_config_internal.rx_checks = cfg.rx_checks;
+    safety_config_internal.rx_checks_len = cfg.rx_checks_len;
+    safety_config_internal.tx_msgs = cfg.tx_msgs;
+    safety_config_internal.tx_msgs_len = cfg.tx_msgs_len;
+    safety_config_internal.disable_forwarding = cfg.disable_forwarding;
     // reset all dynamic fields in addr struct
-    for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
-      current_safety_config.rx_checks[j].status = (RxStatus){0};
+    for (int j = 0; j < safety_config_internal.rx_checks_len; j++) {
+      safety_config_internal.rx_checks[j].status = (RxStatus){0};
     }
   }
   return set_status;
@@ -534,10 +556,10 @@ int ROUND(float val) {
 void pcm_cruise_check(bool cruise_engaged) {
   // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
   if (!cruise_engaged) {
-    controls_allowed = false;
+    safety_controls_allowed_internal = false;
   }
   if (cruise_engaged && !cruise_engaged_prev) {
-    controls_allowed = true;
+    safety_controls_allowed_internal = true;
   }
   cruise_engaged_prev = cruise_engaged;
 }
@@ -548,6 +570,11 @@ void speed_mismatch_check(const float speed_2) {
   const float MAX_SPEED_DELTA = 2.0;  // m/s
   bool is_invalid_speed = SAFETY_ABS(speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
   if (is_invalid_speed) {
-    controls_allowed = false;
+    safety_controls_allowed_internal = false;
   }
 }
+
+#ifdef OPENDBC_SAFETY_API_ONLY
+  #pragma GCC poison safety_controls_allowed_internal safety_relay_malfunction_internal safety_heartbeat_engaged_internal safety_rx_checks_invalid_internal
+  #pragma GCC poison safety_mode_internal safety_param_internal safety_config_internal safety_alternative_experience_internal safety_mode_cnt_internal
+#endif

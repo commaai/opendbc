@@ -101,7 +101,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
         // Signal: Motor_5.MO5_GRA_Hauptsch
         acc_main_on = GET_BIT(msg, 50U);
         if (!acc_main_on) {
-          controls_allowed = false;
+          safety_controls_allowed_internal = false;
         }
       }
 
@@ -112,14 +112,14 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
         bool set_button = GET_BIT(msg, 16U);
         bool resume_button = GET_BIT(msg, 17U);
         if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-          controls_allowed = acc_main_on;
+          safety_controls_allowed_internal = acc_main_on;
         }
         volkswagen_set_button_prev = set_button;
         volkswagen_resume_button_prev = resume_button;
         // Exit controls on rising edge of Cancel, override Set/Resume if present simultaneously
         // Signal: GRA_ACC_01.GRA_Abbrechen
         if (GET_BIT(msg, 9U)) {
-          controls_allowed = false;
+          safety_controls_allowed_internal = false;
         }
       }
     } else {
@@ -198,7 +198,7 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((msg->addr == MSG_GRA_NEU) && !controls_allowed) {
+  if ((msg->addr == MSG_GRA_NEU) && !safety_controls_allowed_internal) {
     // Signal: GRA_Neu.GRA_Neu_Setzen
     // Signal: GRA_Neu.GRA_Neu_Recall
     if (GET_BIT(msg, 16U) || GET_BIT(msg, 17U)) {

@@ -47,7 +47,7 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
       // Always exit controls on rising edge of Cancel
       // Signal: LS_01.LS_Abbrechen
       if (GET_BIT(msg, 13U)) {
-        controls_allowed = false;
+        safety_controls_allowed_internal = false;
       }
     }
 
@@ -106,7 +106,7 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((msg->addr == MSG_LS_01) && !controls_allowed) {
+  if ((msg->addr == MSG_LS_01) && !safety_controls_allowed_internal) {
     // disallow resume and set: bits 16 and 19
     if (GET_BIT(msg, 16U) || GET_BIT(msg, 19U)) {
       tx = false;

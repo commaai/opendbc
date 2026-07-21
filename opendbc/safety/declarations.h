@@ -1,39 +1,13 @@
 #pragma once
 
+#ifndef OPENDBC_SAFETY_INTERNAL
+  #error "This is an internal opendbc safety header; include opendbc/safety/api.h instead"
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 
-// from cereal.car.CarParams.SafetyModel
-#define SAFETY_SILENT 0U
-#define SAFETY_HONDA_NIDEC 1U
-#define SAFETY_TOYOTA 2U
-#define SAFETY_ELM327 3U
-#define SAFETY_GM 4U
-#define SAFETY_HONDA_BOSCH_GIRAFFE 5U
-#define SAFETY_FORD 6U
-#define SAFETY_HYUNDAI 8U
-#define SAFETY_CHRYSLER 9U
-#define SAFETY_TESLA 10U
-#define SAFETY_SUBARU 11U
-#define SAFETY_MAZDA 13U
-#define SAFETY_NISSAN 14U
-#define SAFETY_VOLKSWAGEN_MQB 15U
-#define SAFETY_ALLOUTPUT 17U
-#define SAFETY_GM_ASCM 18U
-#define SAFETY_NOOUTPUT 19U
-#define SAFETY_HONDA_BOSCH 20U
-#define SAFETY_VOLKSWAGEN_PQ 21U
-#define SAFETY_SUBARU_PREGLOBAL 22U
-#define SAFETY_HYUNDAI_LEGACY 23U
-#define SAFETY_HYUNDAI_COMMUNITY 24U
-#define SAFETY_VOLKSWAGEN_MLB 25U
-#define SAFETY_FAW 26U
-#define SAFETY_BODY 27U
-#define SAFETY_HYUNDAI_CANFD 28U
-#define SAFETY_CHRYSLER_CUSW 30U
-#define SAFETY_PSA 31U
-#define SAFETY_RIVIAN 33U
-#define SAFETY_VOLKSWAGEN_MEB 34U
+#include "opendbc/safety/api.h"
 
 #define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
@@ -230,8 +204,6 @@ typedef struct {
   get_quality_flag_valid_t get_quality_flag_valid;
 } safety_hooks;
 
-bool safety_rx_hook(const CANPacket_t *msg);
-bool safety_tx_hook(CANPacket_t *msg);
 int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
@@ -251,11 +223,9 @@ bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limit
 void pcm_cruise_check(bool cruise_engaged);
 void speed_mismatch_check(const float speed_2);
 
-void safety_tick(const safety_config *safety_config);
-
 // This can be set by the safety hooks
-extern bool controls_allowed;
-extern bool relay_malfunction;
+extern bool safety_controls_allowed_internal;
+extern bool safety_relay_malfunction_internal;
 extern bool gas_pressed;
 extern bool gas_pressed_prev;
 extern bool brake_pressed;
@@ -270,7 +240,7 @@ extern struct sample_t vehicle_speed_2;
 extern bool vehicle_moving;
 extern bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
 extern int cruise_button_prev;
-extern bool safety_rx_checks_invalid;
+extern bool safety_rx_checks_invalid_internal;
 
 // for safety modes with torque steering control
 extern int desired_torque_last;       // last desired steer torque
@@ -282,9 +252,8 @@ extern struct sample_t torque_driver;     // last 6 driver torques measured
 extern uint32_t ts_torque_check_last;
 extern uint32_t ts_steer_req_mismatch_last;  // last timestamp steer req was mismatched with torque
 
-// state for controls_allowed timeout logic
-extern bool heartbeat_engaged;             // openpilot enabled, passed in heartbeat USB command
-extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between heartbeat_engaged and controls_allowed
+// state for safety_controls_allowed_internal timeout logic
+extern bool safety_heartbeat_engaged_internal;             // openpilot enabled, passed in heartbeat USB command
 
 // for safety modes with angle steering control
 extern uint32_t rt_angle_msgs;
@@ -321,22 +290,19 @@ extern CurvatureSteeringState curvature_state;
 // This flag allows AEB to be commanded from openpilot.
 #define ALT_EXP_ALLOW_AEB 16
 
-extern int alternative_experience;
+extern int safety_alternative_experience_internal;
 
 // time since safety mode has been changed
-extern uint32_t safety_mode_cnt;
+extern uint32_t safety_mode_cnt_internal;
 
 typedef struct {
   uint16_t id;
   const safety_hooks *hooks;
 } safety_hook_config;
 
-extern uint16_t current_safety_mode;
-extern uint16_t current_safety_param;
-extern safety_config current_safety_config;
-
-int safety_fwd_hook(int bus_num, int addr);
-int set_safety_hooks(uint16_t mode, uint16_t param);
+extern uint16_t safety_mode_internal;
+extern uint16_t safety_param_internal;
+extern safety_config safety_config_internal;
 
 extern const safety_hooks body_hooks;
 extern const safety_hooks chrysler_hooks;

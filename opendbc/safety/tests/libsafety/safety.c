@@ -14,17 +14,17 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/ignition.h"
 
 void safety_tick_current_safety_config() {
-  safety_tick(&current_safety_config);
+  safety_tick();
 }
 
 bool safety_config_valid() {
-  if (current_safety_config.rx_checks_len <= 0) {
+  if (safety_config_internal.rx_checks_len <= 0) {
     printf("missing RX checks\n");
     return false;
   }
 
-  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
-    const RxCheck addr = current_safety_config.rx_checks[i];
+  for (int i = 0; i < safety_config_internal.rx_checks_len; i++) {
+    const RxCheck addr = safety_config_internal.rx_checks[i];
     bool valid = addr.status.msg_seen && !addr.status.lagging && addr.status.valid_checksum && (addr.status.wrong_counters < MAX_WRONG_COUNTERS) && addr.status.valid_quality_flag;
     if (!valid) {
       // printf("i %d seen %d lagging %d valid checksum %d wrong counters %d valid quality flag %d\n", i, addr.status.msg_seen, addr.status.lagging, addr.status.valid_checksum, addr.status.wrong_counters, addr.status.valid_quality_flag);
@@ -35,15 +35,15 @@ bool safety_config_valid() {
 }
 
 void set_controls_allowed(bool c){
-  controls_allowed = c;
+  safety_controls_allowed_internal = c;
 }
 
 void set_alternative_experience(int mode){
-  alternative_experience = mode;
+  safety_alternative_experience_internal = mode;
 }
 
 void set_relay_malfunction(bool c){
-  relay_malfunction = c;
+  safety_relay_malfunction_internal = c;
 }
 
 void set_ignition_can(bool c){
@@ -51,7 +51,7 @@ void set_ignition_can(bool c){
 }
 
 bool get_controls_allowed(void){
-  return controls_allowed;
+  return safety_controls_allowed_internal;
 }
 
 bool get_ignition_can(void){
@@ -59,11 +59,11 @@ bool get_ignition_can(void){
 }
 
 int get_alternative_experience(void){
-  return alternative_experience;
+  return safety_alternative_experience_internal;
 }
 
 bool get_relay_malfunction(void){
-  return relay_malfunction;
+  return safety_relay_malfunction_internal;
 }
 
 bool get_gas_pressed_prev(void){
@@ -111,11 +111,11 @@ float get_vehicle_speed_max(void){
 }
 
 int get_current_safety_mode(void){
-  return current_safety_mode;
+  return safety_mode_internal;
 }
 
 int get_current_safety_param(void){
-  return current_safety_param;
+  return safety_param_internal;
 }
 
 void set_timer(uint32_t t){
@@ -222,8 +222,8 @@ bool get_honda_fwd_brake(void){
 }
 
 void init_tests(void){
-  safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
-  alternative_experience = 0;
+  safety_mode_cnt_internal = 2U;  // avoid ignoring safety_relay_malfunction_internal logic
+  safety_alternative_experience_internal = 0;
   set_timer(0);
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;

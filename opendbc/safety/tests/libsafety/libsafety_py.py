@@ -56,10 +56,24 @@ class CANPacket:
   pass
 
 ffi.cdef("""
+typedef struct {
+  bool controls_allowed;
+  bool relay_malfunction;
+  bool heartbeat_engaged;
+  bool rx_checks_invalid;
+  uint16_t mode;
+  uint16_t param;
+  int alternative_experience;
+} safety_state;
+
 bool safety_rx_hook(CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
 int safety_fwd_hook(int bus_num, int addr);
 int set_safety_hooks(uint16_t mode, uint16_t param);
+void safety_disengage(void);
+safety_state safety_get_state(void);
+void safety_set_alternative_experience(int mode);
+void safety_set_heartbeat_engaged(bool engaged);
 
 void set_controls_allowed(bool c);
 bool get_controls_allowed(void);

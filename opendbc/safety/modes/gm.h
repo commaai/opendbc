@@ -55,12 +55,12 @@ static void gm_rx_hook(const CANPacket_t *msg) {
       bool set = (button != GM_BTN_SET) && (cruise_button_prev == GM_BTN_SET);
       bool res = (button == GM_BTN_RESUME) && (cruise_button_prev != GM_BTN_RESUME);
       if (set || res) {
-        controls_allowed = true;
+        safety_controls_allowed_internal = true;
       }
 
       // exit controls on cancel press
       if (button == GM_BTN_CANCEL) {
-        controls_allowed = false;
+        safety_controls_allowed_internal = false;
       }
 
       cruise_button_prev = button;
@@ -134,7 +134,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
     bool violation = false;
     // Allow apply bit in pre-enabled and overriding states
-    violation |= !controls_allowed && apply;
+    violation |= !safety_controls_allowed_internal && apply;
     violation |= longitudinal_gas_checks(gas_regen, *gm_long_limits);
 
     if (violation) {

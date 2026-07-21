@@ -81,7 +81,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   if ((msg->addr == 0x326U) || (msg->addr == 0x1A6U)) {
     acc_main_on = GET_BIT(msg, ((msg->addr == 0x326U) ? 28U : 47U));
     if (!acc_main_on) {
-      controls_allowed = false;
+      safety_controls_allowed_internal = false;
     }
   }
 
@@ -90,13 +90,13 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     const bool cruise_engaged = GET_BIT(msg, 38U);
     // engage on rising edge
     if (cruise_engaged && !cruise_engaged_prev) {
-      controls_allowed = true;
+      safety_controls_allowed_internal = true;
     }
 
     // Since some Nidec cars can brake down to 0 after the PCM disengages,
     // we don't disengage when the PCM does.
     if (!cruise_engaged && (honda_hw != HONDA_NIDEC)) {
-      controls_allowed = false;
+      safety_controls_allowed_internal = false;
     }
     cruise_engaged_prev = cruise_engaged;
   }
@@ -110,12 +110,12 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     bool set = (button != HONDA_BTN_SET) && (cruise_button_prev == HONDA_BTN_SET);
     bool res = (button != HONDA_BTN_RESUME) && (cruise_button_prev == HONDA_BTN_RESUME);
     if (acc_main_on && !pcm_cruise && (set || res)) {
-      controls_allowed = true;
+      safety_controls_allowed_internal = true;
     }
 
     // exit controls once main or cancel are pressed
     if ((button == HONDA_BTN_MAIN) || (button == HONDA_BTN_CANCEL)) {
-      controls_allowed = false;
+      safety_controls_allowed_internal = false;
     }
     cruise_button_prev = button;
   }
@@ -144,7 +144,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   }
 
   // disable stock Honda AEB in alternative experience
-  if (!(alternative_experience & ALT_EXP_DISABLE_STOCK_AEB)) {
+  if (!(safety_alternative_experience_internal & ALT_EXP_DISABLE_STOCK_AEB)) {
     if ((msg->bus == 2U) && (msg->addr == 0x1FAU)) {
       bool honda_stock_aeb = GET_BIT(msg, 29U);
       int honda_stock_brake = (msg->data[0] << 2) | (msg->data[1] >> 6);
@@ -238,7 +238,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // STEER: safety check
   if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
-    if (!controls_allowed) {
+    if (!safety_controls_allowed_internal) {
       bool steer_applied = msg->data[0] | msg->data[1];
       if (steer_applied) {
         tx = false;
@@ -256,7 +256,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   // FORCE CANCEL: safety check only relevant when spamming the cancel button in Bosch HW
   // ensuring that only the cancel button press is sent (VAL 2) when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((msg->addr == 0x296U) && !controls_allowed && (msg->bus == bus_buttons)) {
+  if ((msg->addr == 0x296U) && !safety_controls_allowed_internal && (msg->bus == bus_buttons)) {
     if (((msg->data[0] >> 5) & 0x7U) != 2U) {
       tx = false;
     }

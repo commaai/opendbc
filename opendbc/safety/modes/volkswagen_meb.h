@@ -184,7 +184,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
       }
 
       if (!acc_main_on) {
-        controls_allowed = false;
+        safety_controls_allowed_internal = false;
       }
 
       int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
@@ -199,7 +199,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
         bool set_button = GET_BIT(msg, 16U);
         bool resume_button = GET_BIT(msg, 19U);
         if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-          controls_allowed = acc_main_on;
+          safety_controls_allowed_internal = acc_main_on;
         }
         volkswagen_set_button_prev = set_button;
         volkswagen_resume_button_prev = resume_button;
@@ -207,7 +207,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
 
       // Always exit controls on rising edge of Cancel
       if (GET_BIT(msg, 13U)) {
-        controls_allowed = false;
+        safety_controls_allowed_internal = false;
       }
     }
 
@@ -232,7 +232,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     // Signal: ACC_18.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
     int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
     // allow ACCEL_OVERRIDE (0) while controls are allowed even when the driver is on the gas
-    bool accel_override = controls_allowed && (desired_accel == 0);
+    bool accel_override = safety_controls_allowed_internal && (desired_accel == 0);
     if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
       tx = false;
     }
@@ -264,7 +264,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if ((msg->addr == MSG_GRA_ACC_01) && !controls_allowed) {
+  if ((msg->addr == MSG_GRA_ACC_01) && !safety_controls_allowed_internal) {
     // only allow cancel button: bit 13
     if (!GET_BIT(msg, 13U)) {
       tx = false;

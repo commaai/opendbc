@@ -133,7 +133,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == CHRYSLER_ADDR(CRUISE_BUTTONS)) {
     const bool is_cancel = msg->data[0] == 1U;
     const bool is_resume = msg->data[0] == 0x10U;
-    const bool allowed = is_cancel || (is_resume && controls_allowed);
+    const bool allowed = is_cancel || (is_resume && safety_controls_allowed_internal);
     if (!allowed) {
       tx = false;
     }

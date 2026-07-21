@@ -91,6 +91,24 @@ class SafetyTestBase(unittest.TestCase):
   def _tx(self, msg):
     return self.safety.safety_tx_hook(msg)
 
+  def test_public_api(self):
+    state = self.safety.safety_get_state()
+    self.assertEqual(state.mode, self.safety.get_current_safety_mode())
+    self.assertEqual(state.param, self.safety.get_current_safety_param())
+
+    self.safety.set_controls_allowed(True)
+    self.safety.safety_disengage()
+    self.assertFalse(self.safety.safety_get_state().controls_allowed)
+
+    self.safety.safety_set_heartbeat_engaged(True)
+    self.assertTrue(self.safety.safety_get_state().heartbeat_engaged)
+    self.safety.safety_set_heartbeat_engaged(False)
+
+    alternative_experience = state.alternative_experience
+    self.safety.safety_set_alternative_experience(alternative_experience + 1)
+    self.assertEqual(self.safety.safety_get_state().alternative_experience, alternative_experience + 1)
+    self.safety.safety_set_alternative_experience(alternative_experience)
+
   @staticmethod
   def _boundary_values(boundaries, min_val, max_val, step=1, width=5, sparse_count=100):
     """Generate test values dense around boundaries and sparse across the full range."""

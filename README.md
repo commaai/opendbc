@@ -136,6 +136,8 @@ When a [panda](https://comma.ai/shop/panda) powers up with [opendbc safety firmw
 
 Safety modes optionally support `controls_allowed`, which allows or blocks a subset of messages based on a customizable state in the board.
 
+Consumers must use the public interface in [`opendbc/safety/api.h`](opendbc/safety/api.h). Other headers in that directory are implementation details; internal headers reject direct inclusion at compile time.
+
 ## Code Rigor
 
 The opendbc safety firmware is written for its use in conjunction with [openpilot](https://github.com/commaai/openpilot) and [panda](https://github.com/commaai/panda). The safety firmware, through its safety model, provides and enforces the

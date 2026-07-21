@@ -238,7 +238,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
   if ((msg->addr == 0x4F1U) && !hyundai_longitudinal) {
     int button = msg->data[0] & 0x7U;
 
-    bool allowed_resume = (button == 1) && controls_allowed;
+    bool allowed_resume = (button == 1) && safety_controls_allowed_internal;
     bool allowed_cancel = (button == 4) && cruise_engaged_prev;
     if (!(allowed_resume || allowed_cancel)) {
       tx = false;
