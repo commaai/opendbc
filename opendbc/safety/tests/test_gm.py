@@ -128,9 +128,11 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"LKASteeringCmd": torque, "LKASteeringCmdActive": steer_req}
     return self.packer.make_can_msg_safety("ASCMLKASteeringCmd", 0, values)
 
-  def _button_msg(self, buttons):
+  def _button_msg(self, buttons, bus=None):
+    if bus == None:
+      bus = self.BUTTONS_BUS
     values = {"ACCButtons": buttons}
-    return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
+    return self.packer.make_can_msg_safety("ASCMSteeringButton", bus, values)
 
 
 class TestGmEVSafetyBase(TestGmSafetyBase):
@@ -200,6 +202,11 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
       self._rx(self._pcm_status_msg(enabled))
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
 
+  def test_button_skip_pcm(self):
+    old = self.safety.get_controls_allowed()
+    self._rx(self._button_msg(not old, bus=0))
+    self.assertEqual(old, self.safety.get_controls_allowed())
+
 
 class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
   pass
@@ -226,7 +233,6 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
 
 class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVSafetyBase):
   pass
-
 
 class TestGmIgnition(unittest.TestCase):
   TX_MSGS: list = []
@@ -266,6 +272,7 @@ class TestGmIgnition(unittest.TestCase):
     self.assertFalse(self.safety.get_ignition_can())
     self.safety.ignition_can_hook(msg)
     self.assertFalse(self.safety.get_ignition_can())
+
 
 if __name__ == "__main__":
   unittest.main()
