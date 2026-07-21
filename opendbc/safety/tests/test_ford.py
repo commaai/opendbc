@@ -428,6 +428,19 @@ class TestFordSafetyBase(common.CarSafetyTest):
   def test_compute_checksum(self):
     self.assertEqual(0, self.safety._test_compute_checksum(common.make_msg(0, 0, length=0)))
 
+  def test_cruise_engaged_on_4(self):
+    self.safety.set_controls_allowed(False)
+
+    # Adapted from _pcm_status_msg
+    brake = self.safety.get_brake_pressed_prev()
+    values = {
+      "BpedDrvAppl_D_Actl": 2 if brake else 1,
+      "CcStat_D_Actl": 4
+    }
+    self._rx(self.packer.make_can_msg_safety("EngBrakeData", 0, values))
+
+    self.assertTrue(self.safety.get_controls_allowed())
+
 
 class TestFordCANFDStockSafety(TestFordSafetyBase):
   STEER_MESSAGE = MSG_LateralMotionControl2
