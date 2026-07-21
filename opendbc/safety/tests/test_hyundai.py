@@ -238,6 +238,75 @@ class TestHyundaiMadsSafety(common.SafetyTestBase):
     self.assertFalse(self.safety.get_controls_allowed_lateral())
 
 
+class TestHyundaiLongitudinalMadsSafety(common.SafetyTestBase):
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_can_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG)
+    self.safety.init_tests()
+    self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.ENABLE_MADS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG)
+    self.safety.set_heartbeat_engaged(True)
+    self.cnt_button = 0
+
+  def _button_msg(self, button=Buttons.NONE, main_button=0):
+    values = {"CF_Clu_CruiseSwState": button, "CF_Clu_CruiseSwMain": main_button,
+              "CF_Clu_AliveCnt1": self.cnt_button % 16}
+    self.cnt_button += 1
+    return self.packer.make_can_msg_safety("CLU11", 0, values)
+
+  def _torque_cmd_msg(self, torque, steer_req=1):
+    values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
+    return self.packer.make_can_msg_safety("LKAS11", 0, values)
+
+  def _accel_msg(self, accel):
+    return self.packer.make_can_msg_safety("SCC12", 0, {"aReqRaw": accel, "aReqValue": accel})
+
+  def _prime_rx_checks(self):
+    messages = (
+      self.packer.make_can_msg_safety("EMS16", 0, {"AliveCounter": 0}, fix_checksum=checksum),
+      self.packer.make_can_msg_safety("WHL_SPD11", 0, {}, fix_checksum=checksum),
+      self.packer.make_can_msg_safety("TCS13", 0, {"AliveCounterTCS": 0}, fix_checksum=checksum),
+      self.packer.make_can_msg_safety("MDPS12", 0, {}),
+      self._button_msg(),
+    )
+    for msg in messages:
+      self._rx(msg)
+    self.safety.safety_tick_current_safety_config()
+
+  def test_main_latches_lateral_and_gates_longitudinal(self):
+    self._prime_rx_checks()
+    self._rx(self._button_msg(main_button=1))
+    self.assertTrue(self.safety.get_controls_allowed_lateral())
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self._tx(self._torque_cmd_msg(1)))
+    self.assertFalse(self._tx(self._accel_msg(0.1)))
+
+    self._rx(self._button_msg(button=Buttons.SET))
+    self._rx(self._button_msg())
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self.safety.get_controls_allowed_lateral())
+    self.assertTrue(self._tx(self._accel_msg(0.1)))
+
+    self._rx(self._button_msg(button=Buttons.CANCEL))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self.safety.get_controls_allowed_lateral())
+    self.assertFalse(self._tx(self._accel_msg(0.1)))
+
+    self._rx(self._button_msg())
+    self._rx(self._button_msg(main_button=1))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
+    self.assertFalse(self._tx(self._torque_cmd_msg(1)))
+
+  def test_set_cannot_enable_longitudinal_with_main_off(self):
+    self._prime_rx_checks()
+    self._rx(self._button_msg(button=Buttons.SET))
+    self._rx(self._button_msg())
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
+
+
 class TestHyundaiSafetyAltLimits2(TestHyundaiSafety):
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
