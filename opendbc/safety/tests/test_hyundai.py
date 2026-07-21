@@ -181,6 +181,12 @@ class TestHyundaiLegacySafety(TestHyundaiSafety):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, 0)
     self.safety.init_tests()
 
+  def test_ignore_ev_gas_hybrid_gas_msg(self):
+    self._rx(self._user_gas_msg(10))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+    self.safety._test_rx_hook(TestHyundaiLegacySafetyEV._user_gas_msg(self, 0))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
 
 class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
   def setUp(self):
@@ -292,6 +298,12 @@ class TestHyundaiSafetyFCEVLong(TestHyundaiLongitudinalSafety, TestHyundaiSafety
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS | HyundaiSafetyFlags.LONG)
     self.safety.init_tests()
+
+
+  def test_long_ignore_buttons(self):
+    self.safety.set_controls_allowed(False)
+    self.safety.set_cruise_engaged_prev(False)
+    self.assertTrue(self._tx(self._button_msg(0)))
 
 
 if __name__ == "__main__":
