@@ -337,7 +337,7 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
     self.assertFalse(self._tx(self._accel_msg(MAX_ACCEL)))
 
   def test_double_falling_edge_nothing(self):
-    self.safety.set_controls_allowed(0);
+    self.safety.set_controls_allowed(0)
     self._rx(self._tsk_status_msg(False, main_switch=False))
     self._rx(self._button_msg(_set=1, resume=1, bus=0))
     self.assertFalse(self.safety.get_controls_allowed())
@@ -354,10 +354,10 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
       msg = self.packer.make_can_msg_safety("ESC_51", 0, values)
 
       self._rx(msg)
-      next = self.safety.get_vehicle_speed_max()
-      self.assertTrue(next > prev)
+      next_speed = self.safety.get_vehicle_speed_max()
+      self.assertTrue(next_speed > prev)
 
-      prev = next
+      prev = next_speed
       speed += 10
 
   def test_tsk_cruise_engaged(self):

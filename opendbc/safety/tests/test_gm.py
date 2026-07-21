@@ -129,7 +129,7 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     return self.packer.make_can_msg_safety("ASCMLKASteeringCmd", 0, values)
 
   def _button_msg(self, buttons, bus=None):
-    if bus == None:
+    if bus is None:
       bus = self.BUTTONS_BUS
     values = {"ACCButtons": buttons}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", bus, values)

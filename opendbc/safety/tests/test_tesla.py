@@ -399,7 +399,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     # true => violation (_tx = false)
     return not self._tx(self._angle_cmd_msg(0, 0))
 
-
   def test_ensure_lkas_falling_or_disallowed(self):
     self._rx(self._angle_cmd_msg(0, 2, bus=2))
     self._rx(self._angle_cmd_msg(0, 2, bus=2))

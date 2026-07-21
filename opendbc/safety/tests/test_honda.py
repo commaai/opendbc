@@ -251,7 +251,7 @@ class HondaBase(common.CarSafetyTest):
   def test_brake_switch(self):
     self._rx(self._user_brake_msg(True))
     self.assertTrue(self.safety.get_brake_pressed_prev())
-    values = { "BRAKE_PRESSED": False, "BRAKE_SWITCH": True }
+    values = {"BRAKE_PRESSED": False, "BRAKE_SWITCH": True}
     msg = self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, values)
     self._rx(msg)
     self.assertFalse(self.safety.get_brake_pressed_prev())

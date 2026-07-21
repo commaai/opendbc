@@ -4,7 +4,6 @@ import unittest
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 
 class TestSafety(common.SafetyTestBase):
   def setUp(self):
@@ -70,9 +69,9 @@ class TestConfigValid(unittest.TestCase):
     test_cases = (
       # frequency_invalid, msg_invalid, timestamp, controls_allowed after tick
       (False, False, 1_000_001, False),  # lagging
-      (True,  False, 0,         False),  # frequency_invalid
-      (False, True,  0,         False),  # !is_msg_valid
-      (False, False, 0,         True),   # all terms false
+      (True, False, 0, False),  # frequency_invalid
+      (False, True,  0, False),  # !is_msg_valid
+      (False, False, 0, True),   # all terms false
     )
     for frequency_invalid, msg_invalid, timestamp, expected_controls_allowed in test_cases:
       self.safety._test_setup_safety_tick_rx_check(frequency_invalid, msg_invalid)

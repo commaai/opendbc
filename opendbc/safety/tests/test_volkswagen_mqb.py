@@ -63,7 +63,7 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
       tsk_status = 3 if enable else 2
     else:
       tsk_status = 0
-    values = {"TSK_Status": _test_val if _test_val != None else tsk_status}
+    values = {"TSK_Status": _test_val if _test_val is not None else tsk_status}
     return self.packer.make_can_msg_safety("TSK_06", 0, values)
 
   def _pcm_status_msg(self, enable):
@@ -201,7 +201,7 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
       self._rx(self._gra_acc_01_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 
-    self.safety.set_controls_allowed(0);
+    self.safety.set_controls_allowed(0)
     self._rx(self._tsk_status_msg(False, main_switch=False))
     self._rx(self._gra_acc_01_msg(_set=1, resume=1, bus=0))
     self.assertFalse(self.safety.get_controls_allowed())

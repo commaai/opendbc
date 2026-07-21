@@ -111,14 +111,14 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     speed = self.safety.get_vehicle_speed_max()
     for wheel in ["FL", "FR", "RL", "RR"]:
       # Modified from _speed_msg
-      values = {s: speed + 10.0 if s == wheel else 0.0 for s in ("FL", "FR", "RL", "RR")}
+      values = {s: (4 * speed) + 10.0 if s == wheel else 0.0 for s in ("FL", "FR", "RL", "RR")}
       msg = self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
 
       self._rx(msg)
-      next = self.safety.get_vehicle_speed_max()
-      self.assertTrue(next > speed)
+      next_speed = self.safety.get_vehicle_speed_max()
+      self.assertTrue(next_speed > speed)
 
-      prev = next
+      speed = next_speed
 
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):

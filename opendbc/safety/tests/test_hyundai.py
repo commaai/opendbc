@@ -299,7 +299,6 @@ class TestHyundaiSafetyFCEVLong(TestHyundaiLongitudinalSafety, TestHyundaiSafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS | HyundaiSafetyFlags.LONG)
     self.safety.init_tests()
 
-
   def test_long_ignore_buttons(self):
     self.safety.set_controls_allowed(False)
     self.safety.set_cruise_engaged_prev(False)
