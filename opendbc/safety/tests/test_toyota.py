@@ -96,6 +96,9 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
           msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
           self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
 
+    self.safety.set_controls_allowed(True)
+    self.assertFalse(self._tx(common.make_msg(0, 0x283, dat=b'\x00\x00\x00\x00\x01\x00\x00')))
+
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
     for engaged, req, req2, torque_wind_down, angle in itertools.product([True, False],
@@ -130,6 +133,11 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
 
     msg = self._speed_msg(0, quality_flag=False)
     self.assertFalse(self._rx(msg))
+
+    # ignore steering during init
+    old = self.safety.get_angle_meas_max()
+    self._rx(self._angle_meas_msg(old + 10., True))
+    self.assertEqual(old, self.safety.get_angle_meas_max())
 
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 72.22_ is the max speed in m/s
