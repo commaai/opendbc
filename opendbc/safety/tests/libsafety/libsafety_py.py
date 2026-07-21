@@ -72,6 +72,7 @@ bool get_gas_pressed_prev(void);
 void set_gas_pressed_prev(bool);
 bool get_brake_pressed_prev(void);
 bool get_regen_braking_prev(void);
+void set_steering_disengage_prev(bool);
 bool get_steering_disengage_prev(void);
 bool get_acc_main_on(void);
 void set_acc_main_on(bool on);
@@ -105,6 +106,7 @@ bool get_vehicle_moving(void);
 void set_timer(uint32_t t);
 
 void safety_tick_current_safety_config();
+void safety_tick(void *);
 bool safety_config_valid();
 
 void init_tests(void);
@@ -130,7 +132,11 @@ uint32_t _test_compute_checksum(const CANPacket_t *msg);
 bool _test_get_quality_flag_valid(const CANPacket_t *msg);
 void _test_rx_hook(const CANPacket_t *msg);
 bool _test_tx_hook(const CANPacket_t *msg);
+void _test_setup_safety_tick_rx_check(bool frequency_invalid, bool msg_invalid);
 void _test_setup_safety_config_valid_checks(int inverted);
+void _test_nullify_compute_checksum(void);
+void _test_nullify_init(void);
+int _test_get_rx_checks_len(void);
 """)
 
 class LibSafety:

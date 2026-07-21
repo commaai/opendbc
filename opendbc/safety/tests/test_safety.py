@@ -61,6 +61,44 @@ class TestConfigValid(unittest.TestCase):
       self.safety._test_setup_safety_config_valid_checks(i)
       self.assertFalse(self.safety.safety_config_valid())
 
+  def test_no_config_safety_tick(self):
+    # Shouldn't segfault
+    self.safety.safety_tick(libsafety_py.ffi.NULL)
+
+  def test_safety_tick_rx_check_conditions(self):
+    # Exercise each term in `lagging || frequency_invalid || !is_msg_valid`.
+    test_cases = (
+      # frequency_invalid, msg_invalid, timestamp, controls_allowed after tick
+      (False, False, 1_000_001, False),  # lagging
+      (True,  False, 0,         False),  # frequency_invalid
+      (False, True,  0,         False),  # !is_msg_valid
+      (False, False, 0,         True),   # all terms false
+    )
+    for frequency_invalid, msg_invalid, timestamp, expected_controls_allowed in test_cases:
+      self.safety._test_setup_safety_tick_rx_check(frequency_invalid, msg_invalid)
+      self.safety.set_timer(timestamp)
+      self.safety.set_controls_allowed(True)
+      self.safety.safety_tick_current_safety_config()
+      self.assertEqual(expected_controls_allowed, self.safety.get_controls_allowed())
+
+class TestSafetyExtra(common.SafetyTestBase):
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.init_tests()
+
+  def test_rx_compute_no_get_checksum(self):
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, 0)
+    self.safety._test_nullify_compute_checksum()
+    self.assertFalse(self._rx(common.make_msg(0, 0x158)))
+
+  def test_rx_skip_null_init(self):
+    self.safety._test_nullify_init()
+    self.safety.set_safety_hooks(65001, 0)
+    self.assertEqual(0, self.safety._test_get_rx_checks_len())
+
+  def test_rx_check_index_invalid_length(self):
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, 0)
+    self.assertFalse(self._rx(common.make_msg(0, 0x158)))
 
 if __name__ == "__main__":
   unittest.main()

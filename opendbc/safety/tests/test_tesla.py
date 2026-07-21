@@ -444,6 +444,12 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
     self.assertEqual(0, self.safety.safety_fwd_hook(2, aeb_msg_cam.addr))
     self.assertFalse(self._tx(no_aeb_msg))
 
+  def test_steering_disengage_falling_skip(self):
+    self.safety.set_controls_allowed(True)
+    self.safety.set_steering_disengage_prev(True)
+    self._rx(self._angle_meas_msg(0.0, hands_on_level=3))
+    self.assertTrue(self.safety.get_controls_allowed())
+
 
 class TestTeslaFSD14StockSafety(TestTeslaStockSafety):
   SAFETY_PARAM = TeslaSafetyFlags.FSD_14

@@ -82,6 +82,10 @@ bool get_regen_braking_prev(void){
   return regen_braking_prev;
 }
 
+void set_steering_disengage_prev(bool b) {
+  steering_disengage_prev = b;
+}
+
 bool get_steering_disengage_prev(void){
   return steering_disengage_prev;
 }
