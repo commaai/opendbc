@@ -107,9 +107,9 @@ static int tesla_get_steer_ctrl_type(const int ctrl_type) {
   if (tesla_fsd_14) {
     if (ctrl_type == 1) {
       steer_ctrl_type = 2;
-    } else if (ctrl_type == 2) {
-      steer_ctrl_type = 1;
     } else {
+      /* ctrl_type == 2 */
+      steer_ctrl_type = 1;
     }
   }
   return steer_ctrl_type;

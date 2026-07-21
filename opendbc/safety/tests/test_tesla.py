@@ -376,6 +376,39 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   def test_get_counter_default(self):
     self.assertEqual(0, self.safety._test_get_counter(common.make_msg(0, 0, length=0)))
 
+  def test_various_cruise_states(self):
+    for state, enabledness in enumerate([False, False, True, True, True, False, True, True]):
+      self._reset_safety_hooks()
+      self.safety.set_controls_allowed(not enabledness)
+
+      # Adapted from self._pcm_status_msg
+      values = {
+        "DI_cruiseState": state,
+        "DI_autoparkState": False,
+      }
+      self._rx(self.packer.make_can_msg_safety("DI_state", 0, values))
+
+      self.assertEqual(enabledness, self.safety.get_controls_allowed(), f'{state} {enabledness}')
+
+  def test_fwd_ignore_if_autopark(self):
+    self._rx(self._pcm_status_msg(1, 3))
+    self.assertFalse(self.safety.safety_fwd_hook(2, MSG_APS_eacMonitor))
+
+  def _get_tesla_stock_lkas(self):
+    # Should hinge on tesla_stock_lkas
+    # true => violation (_tx = false)
+    return not self._tx(self._angle_cmd_msg(0, 0))
+
+
+  def test_ensure_lkas_falling_or_disallowed(self):
+    self._rx(self._angle_cmd_msg(0, 2, bus=2))
+    self._rx(self._angle_cmd_msg(0, 2, bus=2))
+    self.assertTrue(self._get_tesla_stock_lkas())
+    self._reset_safety_hooks()
+    self.safety.set_controls_allowed(True)
+    self._rx(self._angle_cmd_msg(0, 2, bus=2))
+    self.assertTrue(self._get_tesla_stock_lkas())
+
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
 
