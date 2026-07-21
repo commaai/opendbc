@@ -237,6 +237,27 @@ class HondaBase(common.CarSafetyTest):
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
     self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
 
+  def test_buttons_ignore_non_button_bus(self):
+    btn = Btn.CANCEL + 1
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self.safety._test_tx_hook(self._button_msg(btn, bus=self.BUTTONS_BUS + 1)))
+    self.assertFalse(self._tx(self._button_msg(btn)))
+
+  def test_steer_msg_manual(self):
+    for b in (True, False):
+      self.safety.set_controls_allowed(b)
+      self.assertEqual(b, self.safety._test_tx_hook(common.make_msg(0, 0x194, dat=b"\x00\x10")))
+
+  def test_brake_switch(self):
+    self._rx(self._user_brake_msg(True))
+    self.assertTrue(self.safety.get_brake_pressed_prev())
+    values = { "BRAKE_PRESSED": False, "BRAKE_SWITCH": True }
+    msg = self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, values)
+    self._rx(msg)
+    self.assertFalse(self.safety.get_brake_pressed_prev())
+    self._rx(msg)
+    self.assertTrue(self.safety.get_brake_pressed_prev())
+
 
 # ********************* Honda Nidec **********************
 
@@ -265,10 +286,10 @@ class TestHondaNidecSafetyBase(HondaBase):
   def _rx_brake_msg(self, brake, aeb_req=0):
     return self._send_brake_msg(brake, aeb_req, bus=2)
 
-  def _send_acc_hud_msg(self, pcm_gas, pcm_speed):
+  def _send_acc_hud_msg(self, pcm_gas, pcm_speed, bus=0):
     # Used to control ACC on Nidec without pedal
     values = {"PCM_GAS": pcm_gas, "PCM_SPEED": pcm_speed}
-    return self.packer.make_can_msg_safety("ACC_HUD", 0, values)
+    return self.packer.make_can_msg_safety("ACC_HUD", bus, values)
 
   def test_acc_hud_safety_check(self):
     for controls_allowed in [True, False]:
@@ -327,6 +348,14 @@ class TestHondaNidecSafetyBase(HondaBase):
             send = brake == 0
           self.assertEqual(send, self._tx(self._send_brake_msg(brake)))
 
+  def test_acc_hud_ignore_non_pt_bus(self):
+    self.assertTrue(self.safety._test_tx_hook(self._send_acc_hud_msg(self.MAX_GAS + 10, 0, bus=self.PT_BUS + 1)))
+    self.assertFalse(self._tx(self._send_acc_hud_msg(self.MAX_GAS + 10, 0)))
+
+  def test_brake_ignore_non_pt_bus(self):
+    self.assertTrue(self.safety._test_tx_hook(self._send_brake_msg(self.MAX_BRAKE + 10, bus=self.PT_BUS + 1)))
+    self.assertFalse(self.safety._test_tx_hook(self._send_brake_msg(self.MAX_BRAKE + 10)))
+
 
 class TestHondaNidecPcmSafety(HondaPcmEnableBase, TestHondaNidecSafetyBase):
   """
@@ -358,6 +387,12 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
     values = {"CRUISE_BUTTONS": buttons, "MAIN_ON": main_on, "COUNTER": self.cnt_button % 4}
     self.__class__.cnt_button += 1
     return self.packer.make_can_msg_safety("SCM_BUTTONS", bus, values)
+
+  def test_alt_skip(self):
+    self.safety.set_alternative_experience(2)
+    self.safety.set_honda_fwd_brake(True)
+    self.safety._test_rx_hook(self._rx_brake_msg(0))
+    self.assertTrue(self.safety.get_honda_fwd_brake())
 
 
 # ********************* Honda Bosch **********************
@@ -393,6 +428,12 @@ class TestHondaBoschSafetyBase(HondaBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(Btn.RESUME, bus=self.BUTTONS_BUS)))
 
+  def test_supplemental_control(self):
+    if [0xE5, 0] in self.TX_MSGS:
+      self.assertFalse(self._tx(common.make_msg(0, 0xE5, dat=b"\x00\x00\x00\x00\x00\x00\x00\x00")))
+      self.assertFalse(self._tx(common.make_msg(0, 0xE5, dat=b"\x04\x00\x80\x10\x00\x00\x01\x00")))
+      self.assertTrue(self._tx(common.make_msg(0, 0xE5, dat=b"\x04\x00\x80\x10\x00\x00\x00\x00")))
+
 
 class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
   """
@@ -425,6 +466,9 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
     self.safety.set_controls_allowed(1)
     self._rx(self._alt_brake_msg(1))
     self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_brake_switch(self):
+    pass
 
 
 class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
@@ -482,6 +526,9 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
     not_tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")
     self.assertFalse(self._tx(not_tester_present))
 
+    not_tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x02\x3E\x80\x00\x00\x00\x00\x01")
+    self.assertFalse(self._tx(not_tester_present))
+
   def test_gas_safety_check(self):
     for controls_allowed in [True, False]:
       for gas in np.arange(self.NO_GAS, self.MAX_GAS + 2000, 100):
@@ -497,6 +544,12 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
         self.safety.set_controls_allowed(controls_allowed)
         send = self.MIN_ACCEL <= accel <= self.MAX_ACCEL if controls_allowed else accel == 0
         self.assertEqual(send, self._tx(self._send_gas_brake_msg(self.NO_GAS, accel)), (controls_allowed, accel))
+
+  def test_gas_brake_ignore_non_pt(self):
+    self.PT_BUS += 1
+    self.assertTrue(self.safety._test_tx_hook(self._send_gas_brake_msg(self.MAX_GAS + 10, self.MAX_ACCEL + 2)))
+    self.PT_BUS -= 1
+    self.assertFalse(self._tx(self._send_gas_brake_msg(self.MAX_GAS + 10, self.MAX_ACCEL + 2)))
 
 
 class TestHondaBoschRadarlessSafetyBase(TestHondaBoschSafetyBase):
@@ -559,6 +612,12 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
   # Longitudinal doesn't need to send buttons
   def test_spam_cancel_safety_check(self):
     pass
+
+  def test_accel_ignore_non_pt(self):
+    self.PT_BUS += 1
+    self.assertTrue(self.safety._test_tx_hook(self._accel_msg(100)))
+    self.PT_BUS -= 1
+    self.assertFalse(self._tx(self._accel_msg(100)))
 
 
 class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):

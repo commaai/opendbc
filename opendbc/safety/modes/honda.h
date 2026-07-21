@@ -145,7 +145,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 
   // disable stock Honda AEB in alternative experience
   if (!(alternative_experience & ALT_EXP_DISABLE_STOCK_AEB)) {
-    if ((msg->bus == 2U) && (msg->addr == 0x1FAU)) {
+    if (msg->addr == 0x1FAU) {
       bool honda_stock_aeb = GET_BIT(msg, 29U);
       int honda_stock_brake = (msg->data[0] << 2) | (msg->data[1] >> 6);
 
