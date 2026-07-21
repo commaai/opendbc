@@ -84,6 +84,14 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
   def test_compute_checksum_default(self):
     self.assertEqual(0, self.safety._test_compute_checksum(common.make_msg(0, 0, length=16, dat=b'\x00' * 16)))
 
+  def test_individual_wheels(self):
+    for i in ["FL", "FR", "RL", "RR"]:
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      values = {f"WHL_Spd{pos}Val": 100 if pos == i else 0 for pos in ["FL", "FR", "RL", "RR"]}
+      self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
+      self.assertTrue(self.safety.get_vehicle_moving())
+
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
@@ -108,6 +116,17 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
     self.safety.init_tests()
+
+
+class TestHyundaiCanfdLFASteeringAccel(TestHyundaiCanfdLFASteeringBase):
+
+  GAS_MSG = ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED")
+  SCC_BUS = 0
+  SAFETY_PARAM = 0
+
+  def test_raw_val_diff_accel(self):
+    msg = self.packer.make_can_msg_safety("SCC_CONTROL", 0, {"ACCMode": 4, "aReqValue": 0, "aReqRaw": 1})
+    self.assertFalse(self._tx(msg))
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
@@ -266,6 +285,15 @@ class TestHyundaiCanfdLFASteeringLong(TestHyundaiCanfdLFASteeringLongBase):
     if cls.__name__ == "TestHyundaiCanfdLFASteeringLong":
       cls.safety = None
       raise unittest.SkipTest
+
+  def test_gas(self):
+    if self.GAS_MSG[0] == "ACCELERATOR_ALT":
+      for i in range(10):
+        self._rx(self._user_gas_msg(0))
+        self.assertFalse(self.safety.get_gas_pressed_prev())
+        # CAN value is scaled in dbc
+        self._rx(self._user_gas_msg((1 << i) * 0.25))
+        self.assertTrue(self.safety.get_gas_pressed_prev(), f'{i}')
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)

@@ -96,11 +96,11 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
     }
 
     // gas press, different for EV, hybrid, and ICE models
-    if ((msg->addr == 0x35U) && hyundai_ev_gas_signal) {
+    if (msg->addr == 0x35U) {
       gas_pressed = msg->data[5] != 0U;
-    } else if ((msg->addr == 0x105U) && hyundai_hybrid_gas_signal) {
+    } else if (msg->addr == 0x105U) {
       gas_pressed = GET_BIT(msg, 103U) || (msg->data[13] != 0U) || GET_BIT(msg, 112U);
-    } else if ((msg->addr == 0x100U) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
+    } else if (msg->addr == 0x100U) {
       gas_pressed = GET_BIT(msg, 176U);
     } else {
     }
@@ -126,7 +126,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == scc_bus) {
     // cruise state
-    if ((msg->addr == 0x1a0U) && !hyundai_longitudinal) {
+    if (msg->addr == 0x1a0U) {
       // 1=enabled, 2=driver override
       int cruise_status = ((msg->data[8] >> 4) & 0x7U);
       bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
@@ -187,14 +187,14 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check
   if (msg->addr == 0x1a0U) {
-    int desired_accel_raw = (((msg->data[17] & 0x7U) << 8) | msg->data[16]) - 1023U;
-    int desired_accel_val = ((msg->data[18] << 4) | (msg->data[17] >> 4)) - 1023U;
+    int desired_accel_val = (((msg->data[17] & 0x7U) << 8) | msg->data[16]) - 1023U;
+    int desired_accel_raw = ((msg->data[18] << 4) | (msg->data[17] >> 4)) - 1023U;
 
     bool violation = false;
 
     if (hyundai_longitudinal) {
-      violation |= longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
       violation |= longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
+      violation |= longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
     } else {
       // only used to cancel on here
       const int acc_mode = (msg->data[8] >> 4) & 0x7U;
@@ -202,7 +202,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
         violation = true;
       }
 
-      if ((desired_accel_raw != 0) || (desired_accel_val != 0)) {
+      if ((desired_accel_val != 0) || (desired_accel_raw != 0)) {
         violation = true;
       }
     }
