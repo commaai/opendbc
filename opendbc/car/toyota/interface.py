@@ -64,6 +64,9 @@ class CarInterface(CarInterfaceBase):
         if fw.ecu == "eps" and not fw.fwVersion == b'8965B47060\x00\x00\x00\x00\x00\x00':
           ret.steerActuatorDelay = 0.25
           CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning, steering_angle_deadzone_deg=0.2)
+        # 2021+ TSS2 steering rack swapped into a TSS-P car, not supported
+        if fw.ecu == "eps" and fw.fwVersion == b'8965B47070\x00\x00\x00\x00\x00\x00':
+          ret.dashcamOnly = True
 
     elif candidate in (CAR.LEXUS_RX, CAR.LEXUS_RX_TSS2):
       stop_and_go = True
@@ -112,9 +115,6 @@ class CarInterface(CarInterfaceBase):
 
     if candidate in TSS2_CAR:
       ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
-
-      ret.vEgoStopping = 0.25
-      ret.stoppingDecelRate = 0.3  # reach stopping target smoothly
 
       # Hybrids have much quicker longitudinal actuator response
       if ret.flags & ToyotaFlags.HYBRID.value:
