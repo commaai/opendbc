@@ -136,6 +136,22 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
+  def test_resume_doesnt_cancel(self):
+    self.safety.set_controls_allowed(True)
+    self._rx(self._ls_01_msg(resume=False, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_invaild_steering_request(self):
+    torque, steer_req = 100, 5
+    values = {"HCA_01_LM_Offset": abs(torque),
+              "HCA_01_LM_OffSign": torque < 0,
+              "HCA_01_Sendestatus": steer_req,
+              "HCA_01_Status_HCA": steer_req}
+
+    msg = self.packer.make_can_msg_safety("HCA_01", 0, values)
+
+    self.assertFalse(self._tx(msg))
+
 
 if __name__ == "__main__":
   unittest.main()
