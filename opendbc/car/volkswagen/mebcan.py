@@ -1,3 +1,11 @@
+from enum import IntEnum
+from opendbc.car import Bus, structs
+from opendbc.can import CANDefine
+from opendbc.car.volkswagen.values import DBC
+
+LongCtrlState = structs.CarControl.Actuators.LongControlState
+
+
 def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power=0):
   values = {
     "Curvature": abs(apply_curvature),  # in rad/m
@@ -87,20 +95,73 @@ ACC_HUD_ENABLED  = 2
 ACC_HUD_DISABLED = 0
 
 
-def get_acc_control(CS, CC, long_override):
+class MebLongState(IntEnum):
+  DISABLED = 0
+  FAULTED = 1
+  ENABLED = 2
+  HOLDING = 3
+  OVERRIDE = 4
+  RELEASING = 5
+
+
+class MebLongStateMachine:
+  def __init__(self, CP, CCP):
+    self.CCP = CCP
+    self.state = MebLongState.DISABLED
+
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
+    self.acc_hold_type_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Anforderung_HMS'].items()}
+
+  def step(self, CS, CC, accel):
+    acc_status = self.acc_status_vals['ACC_OFF_Hauptschalter_aus']  # disabled
+    acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+
+    if CS.accFaulted:
+      self.state = MebLongState.FAULTED
+    elif CC.enabled:
+      # TODO: what happens if you engage at stop with foot on brake?
+      if CC.longActive:
+        acc_status = self.acc_status_vals['ACC_AKTIV_regelt']
+      else:
+        acc_status = self.acc_status_vals['ACC_OVERRIDE']
+    elif CS.cruiseState.available:
+      acc_status = self.acc_status_vals['ACC_STANDBY']
+
+
+    # if CS.accFaulted:
+    #   acc_status = ACC_CTRL_ERROR
+    #   acc_hold_type = ACC_HMS_NO_REQUEST
+    # elif not CC.longActive:
+    #   # gas override
+    #   if CS.gasPressed:
+    #     pass
+    #   elif
+
+  def update(self, accel):
+    acc_status = ACC_CTRL_DISABLED
+    acc_hold_type = ACC_HMS_NO_REQUEST
+
+    ...
+
+    return acc_status, acc_hold_type, accel
+
+
+
+def get_acc_status(CS, CC, long_override):
   if CS.accFaulted:
-    acc_control = ACC_CTRL_ERROR  # error state
+    acc_status = ACC_CTRL_ERROR  # error state
   elif CC.enabled:
     if long_override:
-      acc_control = ACC_CTRL_OVERRIDE  # overriding
+      acc_status = ACC_CTRL_OVERRIDE  # overriding
     else:
-      acc_control = ACC_CTRL_ACTIVE  # active long control state
+      acc_status = ACC_CTRL_ACTIVE  # active long control state
   elif CS.cruiseState.available:
-    acc_control = ACC_CTRL_ENABLED  # long control ready
+    acc_status = ACC_CTRL_ENABLED  # long control ready
   else:
-    acc_control = ACC_CTRL_DISABLED  # long control deactivated state
+    acc_status = ACC_CTRL_DISABLED  # long control deactivated state
 
-  return acc_control
+  return acc_status
 
 
 def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, long_override, long_override_begin, long_disabling):
@@ -127,7 +188,7 @@ def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, long_override, long_
   return acc_hold_type
 
 
-def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_control, acc_hold_type,
+def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
                              stopping, starting, esp_hold, speed, long_override, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
@@ -157,18 +218,18 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
 
   values = {
     "ACC_Typ":                    acc_type,
-    "ACC_Status_ACC":             acc_control,
+    "ACC_Status_ACC":             acc_status,
     "ACC_StartStopp_Info":        acc_enabled,
     "ACC_Sollbeschleunigung_02":  acceleration,
     "ACC_zul_Regelabw_unten":     0,
     "ACC_zul_Regelabw_oben":      0,
-    "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_control in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
+    "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_status in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
+    "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_status in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
     "ACC_Anfahren":               0,  # always zero, stock uses ACC_Anforderung_HMS
     "ACC_Anhalten":               1 if actually_stopping else 0,
     "ACC_Anhalteweg":             terminal_rollout if actually_stopping else 20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
-    "ACC_AKTIV_regelt":           1 if acc_control == ACC_CTRL_ACTIVE else 0,
+    "ACC_AKTIV_regelt":           1 if acc_status == ACC_CTRL_ACTIVE else 0,
     "Speed":                      speed,
     "SET_ME_0XFE":                0xFE,
     "SET_ME_0X1":                 0x1,
@@ -216,33 +277,33 @@ def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
   return gap
 
 
-def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, show_distance_bars, esp_hold, distance, desired_gap, fcw_alert):
+def create_acc_hud_control(packer, bus, acc_status, set_speed, lead_visible, distance_bars, show_distance_bars, esp_hold, distance, desired_gap, fcw_alert):
   values = {
-    "ACC_Status_ACC":                acc_control,
+    "ACC_Status_ACC":                acc_status,
     "ACC_Tempolimit":                0,
     "ACC_Wunschgeschw_02":           set_speed if set_speed < 250 else 327.36,
     "ACC_Gesetzte_Zeitluecke":       distance_bars, # 5 distance bars available (3 are used by OP)
-    "ACC_Display_Prio":              0 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 1, # probably keeping warning in front
-    "ACC_Optischer_Fahrerhinweis":   1 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # enables optical warning
-    "ACC_Akustischer_Fahrerhinweis": 3 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # enables sound warning
-    "ACC_Texte_Zusatzanz_02":        11 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # type of warning: Break!
+    "ACC_Display_Prio":              0 if fcw_alert and acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 1, # probably keeping warning in front
+    "ACC_Optischer_Fahrerhinweis":   1 if fcw_alert and acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # enables optical warning
+    "ACC_Akustischer_Fahrerhinweis": 3 if fcw_alert and acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # enables sound warning
+    "ACC_Texte_Zusatzanz_02":        11 if fcw_alert and acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # type of warning: Break!
     "ACC_Abstandsindex_02":          569, # seems to be default for MEB but is not static in every case
-    "ACC_EGO_Fahrzeug":              2 if fcw_alert and acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else
-                                     (1 if acc_control == ACC_HUD_ACTIVE else 0), # red car warn symbol for fcw
+    "ACC_EGO_Fahrzeug":              2 if fcw_alert and acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else
+                                     (1 if acc_status == ACC_HUD_ACTIVE else 0), # red car warn symbol for fcw
     "Lead_Type_Detected":            1 if lead_visible else 0, # object should be displayed
     "Lead_Type":                     3 if lead_visible else 0, # displaying a car
     "Lead_Distance":                 distance if lead_visible else 0, # hud distance of object
-    "ACC_Enabled":                   1 if acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0,
-    "ACC_Standby_Override":          1 if acc_control != ACC_HUD_ACTIVE else 0,
-    "Street_Color":                  1 if acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # light grey (1) or dark (0) street
-    "Lead_Brightness":               3 if acc_control == ACC_HUD_ACTIVE else 0, # object shows in color
+    "ACC_Enabled":                   1 if acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0,
+    "ACC_Standby_Override":          1 if acc_status != ACC_HUD_ACTIVE else 0,
+    "Street_Color":                  1 if acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # light grey (1) or dark (0) street
+    "Lead_Brightness":               3 if acc_status == ACC_HUD_ACTIVE else 0, # object shows in color
     "Zeitluecke_1":                  get_desired_gap(distance_bars, desired_gap, 1), # desired distance to lead object for distance bar 1
     "Zeitluecke_2":                  get_desired_gap(distance_bars, desired_gap, 2), # desired distance to lead object for distance bar 2
     "Zeitluecke_3":                  get_desired_gap(distance_bars, desired_gap, 3), # desired distance to lead object for distance bar 3
     "Zeitluecke_4":                  get_desired_gap(distance_bars, desired_gap, 4), # desired distance to lead object for distance bar 4
     "Zeitluecke_5":                  get_desired_gap(distance_bars, desired_gap, 5), # desired distance to lead object for distance bar 5
-    "Zeitluecke_Farbe":              1 if acc_control in (ACC_HUD_ENABLED, ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # yellow (1) or white (0) time gap
-    "ACC_Anzeige_Zeitluecke":        show_distance_bars if acc_control != ACC_HUD_DISABLED else 0, # show distance bar selection
+    "Zeitluecke_Farbe":              1 if acc_status in (ACC_HUD_ENABLED, ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # yellow (1) or white (0) time gap
+    "ACC_Anzeige_Zeitluecke":        show_distance_bars if acc_status != ACC_HUD_DISABLED else 0, # show distance bar selection
     "SET_ME_0X1":                    0x1,    # unknown
     "SET_ME_0X6A":                   0x6A,   # unknown
     "SET_ME_0XFFFF":                 0xFFFF, # unknown

@@ -41,6 +41,8 @@ class CarController(CarControllerBase):
     self.packer_pt = CANPacker(dbc_names[Bus.pt])
     self.aeb_available = not CP.flags & VolkswagenFlags.PQ
 
+    self.meb_long_state_machine = mebcan.MebLongStateMachine(self.CP, self.CCP)
+
     if CP.flags & VolkswagenFlags.PQ:
       self.CCS = pqcan
     elif CP.flags & VolkswagenFlags.MLB:
