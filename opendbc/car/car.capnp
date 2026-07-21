@@ -508,6 +508,7 @@ struct CarParams {
 
   steerControlType @34 :SteerControlType;
   radarUnavailable @35 :Bool; # True when radar objects aren't visible on CAN or aren't parsed out
+  stopAccel @60 :Float32; # Required acceleration to keep vehicle stationary
 
   steerActuatorDelay @36 :Float32; # Steering wheel actuator delay in seconds
   longitudinalActuatorDelay @58 :Float32; # Gas/Brake actuator delay in seconds
@@ -749,7 +750,6 @@ struct CarParams {
     startAccel @32 :Float32; # Required acceleration to get car moving
     startingState @70 :Bool; # Does this car make use of special starting state
     vEgoStopping @29 :Float32; # Speed at which the car goes into stopping state
-    stopAccel @60 :Float32; # Required acceleration to keep vehicle stationary
     stoppingDecelRate @52 :Float32; # m/s^2/s while trying to stop
   }
 }
