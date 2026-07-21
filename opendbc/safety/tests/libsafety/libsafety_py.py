@@ -130,6 +130,7 @@ uint32_t _test_compute_checksum(const CANPacket_t *msg);
 bool _test_get_quality_flag_valid(const CANPacket_t *msg);
 void _test_rx_hook(const CANPacket_t *msg);
 bool _test_tx_hook(const CANPacket_t *msg);
+void _test_setup_safety_config_valid_checks(int inverted);
 """)
 
 class LibSafety:

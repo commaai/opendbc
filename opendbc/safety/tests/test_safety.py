@@ -39,5 +39,28 @@ class TestSafety(common.SafetyTestBase):
       self.assertEqual(third, getter1())
       self.assertEqual(fourth, getter2())
 
+  def test_set_safety_hooks_invalid_mode(self):
+    self.assertEqual(-1, self.safety.set_safety_hooks(65000, 0))
+
+
+class TestConfigValid(unittest.TestCase):
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.init_tests()
+
+  def test_invalid_config_no_rx(self):
+    self.safety._test_setup_safety_config_valid_checks(-1)
+    self.assertFalse(self.safety.safety_config_valid())
+
+  def test_valid_config(self):
+    self.safety._test_setup_safety_config_valid_checks(-2)
+    self.assertTrue(self.safety.safety_config_valid())
+
+  def test_invalid_rx_check(self):
+    for i in range(5):
+      self.safety._test_setup_safety_config_valid_checks(i)
+      self.assertFalse(self.safety.safety_config_valid())
+
+
 if __name__ == "__main__":
   unittest.main()

@@ -573,6 +573,39 @@ void _test_rx_hook(const CANPacket_t *msg) {
 }
 
 bool _test_tx_hook(const CANPacket_t *msg) {
-
   return current_hooks->tx(msg);
+}
+
+void _test_setup_safety_config_valid_checks(int inverted) {
+  if (inverted == -1) {
+    current_safety_config.rx_checks_len = 0;
+  } else {
+    static RxCheck valid_rx_check[] = {{}};
+
+    valid_rx_check[0].status.msg_seen = true;
+    valid_rx_check[0].status.lagging = false;
+    valid_rx_check[0].status.valid_checksum = true;
+    valid_rx_check[0].status.wrong_counters = 0;
+    valid_rx_check[0].status.valid_quality_flag = true;
+
+    switch (inverted) {
+    case 0:
+        valid_rx_check[0].status.msg_seen = false;
+        break;
+    case 1:
+        valid_rx_check[0].status.lagging = true;
+        break;
+    case 2:
+        valid_rx_check[0].status.valid_checksum = false;
+        break;
+    case 3:
+        valid_rx_check[0].status.wrong_counters = MAX_WRONG_COUNTERS;
+        break;
+    case 4:
+        valid_rx_check[0].status.valid_quality_flag = false;
+        break;
+    }
+    current_safety_config.rx_checks = valid_rx_check;
+    current_safety_config.rx_checks_len = 1;
+  }
 }

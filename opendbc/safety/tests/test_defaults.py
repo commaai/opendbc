@@ -4,6 +4,7 @@ import unittest
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
+import unittest
 
 
 class TestDefaultRxHookBase(common.SafetyTest):
