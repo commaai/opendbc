@@ -38,6 +38,10 @@ void set_controls_allowed(bool c){
   controls_allowed = c;
 }
 
+void set_controls_allowed_lateral(bool c){
+  controls_allowed_lateral = c;
+}
+
 void set_alternative_experience(int mode){
   alternative_experience = mode;
 }
@@ -52,6 +56,14 @@ void set_ignition_can(bool c){
 
 bool get_controls_allowed(void){
   return controls_allowed;
+}
+
+bool get_controls_allowed_lateral(void){
+  return controls_allowed_lateral;
+}
+
+void set_heartbeat_engaged(bool engaged){
+  heartbeat_engaged = engaged;
 }
 
 bool get_ignition_can(void){

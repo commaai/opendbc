@@ -49,6 +49,9 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 #define HYUNDAI_SCC12_ADDR_CHECK(scc_bus)                                                                            \
   {.msg = {{0x421, (scc_bus), 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
+#define HYUNDAI_SCC11_ADDR_CHECK(scc_bus) \
+  {.msg = {{0x420, (scc_bus), 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
+
 #define HYUNDAI_FCEV_GAS_ADDR_CHECK \
   {.msg = {{0x91,  0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
@@ -57,6 +60,9 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 };
 
 static bool hyundai_legacy = false;
+static uint32_t hyundai_mads_main_ts = 0U;
+static bool hyundai_mads_main_button_prev = false;
+static const uint32_t HYUNDAI_MADS_MAIN_TIMEOUT = 100000U;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
 
@@ -69,6 +75,8 @@ static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
     cnt = (msg->data[1] >> 5) & 0x7U;
   } else if (msg->addr == 0x421U) {
     cnt = msg->data[7] & 0xFU;
+  } else if (msg->addr == 0x420U) {
+    cnt = (msg->data[0] >> 4) & 0xFU;
   } else if (msg->addr == 0x4F1U) {
     cnt = (msg->data[3] >> 4) & 0xFU;
   } else {
@@ -128,6 +136,15 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
 
 static void hyundai_rx_hook(const CANPacket_t *msg) {
 
+  // MainMode_ACC is the physical ACC main switch. With MADS it is the
+  // independent authorization source for lateral control.
+  if (msg->addr == 0x420U) {
+    if (((msg->bus == 0U) && !hyundai_camera_scc) || ((msg->bus == 2U) && hyundai_camera_scc)) {
+      acc_main_on = GET_BIT(msg, 0U);
+      hyundai_mads_main_ts = microsecond_timer_get();
+    }
+  }
+
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
   if (msg->addr == 0x421U) {
     if (((msg->bus == 0U) && !hyundai_camera_scc) || ((msg->bus == 2U) && hyundai_camera_scc)) {
@@ -148,6 +165,15 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == 0x4F1U) {
       int cruise_button = msg->data[0] & 0x7U;
       bool main_button = GET_BIT(msg, 3U);
+      if (hyundai_longitudinal && ((alternative_experience & ALT_EXP_ENABLE_MADS) != 0)) {
+        if (main_button && !hyundai_mads_main_button_prev) {
+          acc_main_on = !acc_main_on;
+          if (!acc_main_on) {
+            controls_allowed = false;
+          }
+        }
+        hyundai_mads_main_button_prev = main_button;
+      }
       hyundai_common_cruise_buttons_check(cruise_button, main_button);
     }
 
@@ -174,6 +200,11 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
       brake_pressed = ((msg->data[5] >> 5U) & 0x3U) == 0x2U;
     }
   }
+
+  const bool mads_requested = ((alternative_experience & ALT_EXP_ENABLE_MADS) != 0) && acc_main_on;
+  const bool mads_main_fresh = hyundai_longitudinal ||
+                               (safety_get_ts_elapsed(microsecond_timer_get(), hyundai_mads_main_ts) <= HYUNDAI_MADS_MAIN_TIMEOUT);
+  controls_allowed_lateral = mads_requested && mads_main_fresh && heartbeat_engaged && !safety_rx_checks_invalid;
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *msg) {
@@ -182,6 +213,11 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS_ALT_2 = HYUNDAI_LIMITS(170, 2, 3);
 
   bool tx = true;
+
+  if (!hyundai_longitudinal && ((alternative_experience & ALT_EXP_ENABLE_MADS) != 0) && controls_allowed_lateral &&
+      (safety_get_ts_elapsed(microsecond_timer_get(), hyundai_mads_main_ts) > HYUNDAI_MADS_MAIN_TIMEOUT)) {
+    controls_allowed_lateral = false;
+  }
 
   // FCA11: Block any potential actuation
   if (msg->addr == 0x38DU) {
@@ -266,6 +302,8 @@ static safety_config hyundai_init(uint16_t param) {
 
   hyundai_common_init(param);
   hyundai_legacy = false;
+  hyundai_mads_main_ts = 0U;
+  hyundai_mads_main_button_prev = false;
 
   safety_config ret;
   if (hyundai_longitudinal) {
@@ -303,6 +341,12 @@ static safety_config hyundai_init(uint16_t param) {
        HYUNDAI_SCC12_ADDR_CHECK(0)
     };
 
+    static RxCheck hyundai_mads_rx_checks[] = {
+       HYUNDAI_COMMON_RX_CHECKS(false)
+       HYUNDAI_SCC12_ADDR_CHECK(0)
+       HYUNDAI_SCC11_ADDR_CHECK(0)
+    };
+
     static RxCheck hyundai_fcev_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
       HYUNDAI_SCC12_ADDR_CHECK(0)
@@ -312,6 +356,8 @@ static safety_config hyundai_init(uint16_t param) {
     SET_TX_MSGS(HYUNDAI_TX_MSGS, ret);
     if (hyundai_fcev_gas_signal) {
       SET_RX_CHECKS(hyundai_fcev_rx_checks, ret);
+    } else if ((alternative_experience & ALT_EXP_ENABLE_MADS) != 0) {
+      SET_RX_CHECKS(hyundai_mads_rx_checks, ret);
     } else {
       SET_RX_CHECKS(hyundai_rx_checks, ret);
     }

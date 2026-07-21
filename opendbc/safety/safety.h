@@ -43,6 +43,7 @@ const int MAX_WRONG_COUNTERS = 5;
 
 // This can be set by the safety hooks
 bool controls_allowed = false;
+bool controls_allowed_lateral = false;
 bool relay_malfunction = false;
 bool gas_pressed = false;
 bool gas_pressed_prev = false;
@@ -103,6 +104,8 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
     if (!addr_list[index].status.valid_checksum || !addr_list[index].status.valid_quality_flag || (addr_list[index].status.wrong_counters >= MAX_WRONG_COUNTERS)) {
       valid = false;
       controls_allowed = false;
+      controls_allowed_lateral = false;
+      safety_rx_checks_invalid = true;
     }
   }
   return valid;
@@ -330,6 +333,7 @@ void safety_tick(const safety_config *cfg) {
       cfg->rx_checks[i].status.lagging = lagging;
       if (lagging) {
         controls_allowed = false;
+        controls_allowed_lateral = false;
       }
 
       // enforce minimum frequency for safety-relevant messages
@@ -337,6 +341,7 @@ void safety_tick(const safety_config *cfg) {
       if (lagging || frequency_invalid || !is_msg_valid(cfg->rx_checks, i)) {
         rx_checks_invalid = true;
         controls_allowed = false;
+        controls_allowed_lateral = false;
       }
     }
   }
@@ -463,8 +468,11 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   reset_sample(&curvature_state.meas);
 
   controls_allowed = false;
+  controls_allowed_lateral = false;
   relay_malfunction_reset();
-  safety_rx_checks_invalid = false;
+  // Lateral-only authorization must remain fail-closed until safety_tick has
+  // verified that the complete configured RX set is present and valid.
+  safety_rx_checks_invalid = true;
 
   current_safety_config.rx_checks = NULL;
   current_safety_config.rx_checks_len = 0;
