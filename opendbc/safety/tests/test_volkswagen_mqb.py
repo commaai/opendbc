@@ -135,6 +135,12 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
       self._rx(self._tsk_status_msg(False, _test_val=i))
       self.assertTrue(self.safety.get_controls_allowed())
 
+  def test_default_checksum(self):
+    # I don't like this, but I don't really see a better way
+    # that simply running an invalid message through and seeing
+    # what value remains. Wish it returned like 0 or something...
+    self.assertEqual(189, self.safety._test_compute_checksum(common.make_msg(0, 0, length=0)))
+
 
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2]]
