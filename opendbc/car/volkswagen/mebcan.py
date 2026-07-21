@@ -115,35 +115,49 @@ class MebLongState:
     faulted = CS.out.accFaulted
     override = CC.cruiseControl.override
     esp_hold = CS.esp_hold_confirmation
-    long_state = CC.actuators.longControlState
+    going = CC.actuators.longControlState == LongCtrlState.pid
+    stopping = CC.actuators.longControlState == LongCtrlState.stopping
     prev = self.hold
 
     # **** hold request **** #
+    # a handshake already in progress finishes before the policy gets a say, so the car only ever sees the
+    # transitions it accepts. Below that, the policy picks which of the legal successors we take
 
     if faulted:
       self.ramp = 0
       self.hold = ACC_HMS_NO_REQUEST  # the car has already given up, nothing left to hold
-    elif prev == ACC_HMS_HOLD:
-      if long_state == LongCtrlState.pid:
-        self.hold = ACC_HMS_RELEASE  # openpilot wants to go, drive off
-      elif not CC.longActive:
-        self.ramp = self.RAMP_FRAMES
-        self.hold = ACC_HMS_RAMP_RELEASE  # driver override or disengage, ramp the hold out
+    elif prev == ACC_HMS_RAMP_RELEASE:
+      self.ramp -= 1
+      if self.ramp > 0:
+        self.hold = ACC_HMS_RAMP_RELEASE
       else:
-        self.hold = ACC_HMS_HOLD
-    elif prev == ACC_HMS_RELEASE:
+        self.hold = ACC_HMS_NO_REQUEST
+    elif not CC.longActive:  # driver override or disengage
+      if prev in (ACC_HMS_HOLD, ACC_HMS_RELEASE):
+        self.ramp = self.RAMP_FRAMES
+        self.hold = ACC_HMS_RAMP_RELEASE  # ramp out of whatever we were requesting
+      else:
+        self.hold = ACC_HMS_NO_REQUEST
+    elif prev == ACC_HMS_RELEASE:  # driving off
       if not esp_hold:
         self.ramp = self.RAMP_FRAMES
-        self.hold = ACC_HMS_RAMP_RELEASE  # rolling, drive off is done, ramp the request out
-      elif long_state == LongCtrlState.pid and CC.longActive:
+        self.hold = ACC_HMS_RAMP_RELEASE  # rolling, drive off is done
+      elif going:
         self.hold = ACC_HMS_RELEASE  # still waiting on the car to move
       else:
         self.hold = ACC_HMS_HOLD  # go was withdrawn before we moved, settle back into the hold
-    elif prev == ACC_HMS_RAMP_RELEASE:
-      self.ramp -= 1
-      self.hold = ACC_HMS_RAMP_RELEASE if self.ramp > 0 else ACC_HMS_NO_REQUEST
+    elif going:  # openpilot wants to go
+      if prev == ACC_HMS_HOLD:
+        self.hold = ACC_HMS_RELEASE  # drive off
+      elif esp_hold:
+        self.hold = ACC_HMS_HOLD  # stopped without a hold, enter one so we can drive off legally
+      else:
+        self.hold = ACC_HMS_NO_REQUEST
     else:
-      self.hold = ACC_HMS_HOLD if CC.longActive and (long_state == LongCtrlState.stopping or esp_hold) else ACC_HMS_NO_REQUEST
+      if prev == ACC_HMS_HOLD or stopping or esp_hold:
+        self.hold = ACC_HMS_HOLD
+      else:
+        self.hold = ACC_HMS_NO_REQUEST
 
     self.held = esp_hold and self.hold == ACC_HMS_HOLD
     self.settling = self.hold == ACC_HMS_HOLD and not esp_hold
