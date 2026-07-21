@@ -107,6 +107,19 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
+  def test_vehicle_speed_all_wheels_accounted_for(self):
+    speed = self.safety.get_vehicle_speed_max()
+    for wheel in ["FL", "FR", "RL", "RR"]:
+      # Modified from _speed_msg
+      values = {s: speed + 10.0 if s == wheel else 0.0 for s in ("FL", "FR", "RL", "RR")}
+      msg = self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
+
+      self._rx(msg)
+      next = self.safety.get_vehicle_speed_max()
+      self.assertTrue(next > speed)
+
+      prev = next
+
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
