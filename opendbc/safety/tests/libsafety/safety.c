@@ -251,3 +251,103 @@ void init_tests(void){
   ignition_can = false;
   ignition_can_cnt = 0U;
 }
+
+uint8_t _test_get_counter(const CANPacket_t *msg) {
+  return current_hooks->get_counter(msg);
+}
+
+uint32_t _test_get_checksum(const CANPacket_t *msg) {
+  return current_hooks->get_checksum(msg);
+}
+
+uint32_t _test_compute_checksum(const CANPacket_t *msg) {
+  return current_hooks->compute_checksum(msg);
+}
+
+bool _test_get_quality_flag_valid(const CANPacket_t *msg) {
+  return current_hooks->get_quality_flag_valid(msg);
+}
+
+void _test_rx_hook(const CANPacket_t *msg) {
+  current_hooks->rx(msg);
+}
+
+bool _test_tx_hook(const CANPacket_t *msg) {
+  return current_hooks->tx(msg);
+}
+
+// Configure one RX check for unit-testing the safety_tick condition paths.
+void _test_setup_safety_tick_rx_check(bool frequency_invalid, bool msg_invalid) {
+  static RxCheck valid_frequency_rx_check[] = {
+    {.msg = {{.addr = 1, .bus = 0, .len = 8, .frequency = 10U}, { 0 }, { 0 }}},
+  };
+  static RxCheck invalid_frequency_rx_check[] = {
+    {.msg = {{.addr = 1, .bus = 0, .len = 8, .frequency = 9U}, { 0 }, { 0 }}},
+  };
+
+  RxCheck *rx_check = frequency_invalid ? invalid_frequency_rx_check : valid_frequency_rx_check;
+  rx_check[0].status = (RxStatus){
+    .msg_seen = true,
+    .index = 0,
+    .valid_checksum = !msg_invalid,
+    .wrong_counters = 0,
+    .valid_quality_flag = true,
+    .last_counter = 0U,
+    .last_timestamp = 0U,
+    .lagging = false,
+  };
+  current_safety_config.rx_checks = rx_check;
+  current_safety_config.rx_checks_len = 1;
+}
+
+void _test_setup_safety_config_valid_checks(int inverted) {
+  if (inverted == -1) {
+    current_safety_config.rx_checks_len = 0;
+  } else {
+    static RxCheck valid_rx_check[] = {{}};
+
+    valid_rx_check[0].status.msg_seen = true;
+    valid_rx_check[0].status.lagging = false;
+    valid_rx_check[0].status.valid_checksum = true;
+    valid_rx_check[0].status.wrong_counters = 0;
+    valid_rx_check[0].status.valid_quality_flag = true;
+
+    switch (inverted) {
+    case 0:
+      valid_rx_check[0].status.msg_seen = false;
+      break;
+    case 1:
+      valid_rx_check[0].status.lagging = true;
+      break;
+    case 2:
+      valid_rx_check[0].status.valid_checksum = false;
+      break;
+    case 3:
+      valid_rx_check[0].status.wrong_counters = MAX_WRONG_COUNTERS;
+      break;
+    case 4:
+      valid_rx_check[0].status.valid_quality_flag = false;
+      break;
+    default:
+      break;
+    }
+    current_safety_config.rx_checks = valid_rx_check;
+    current_safety_config.rx_checks_len = 1;
+  }
+}
+
+void _test_nullify_compute_checksum(void) {
+  _test_hooks = *current_hooks;
+  _test_hooks.compute_checksum = NULL;
+  current_hooks = &_test_hooks;
+}
+
+void _test_nullify_init(void) {
+  _test_hooks = *current_hooks;
+  _test_hooks.init = NULL;
+  current_hooks = &_test_hooks;
+}
+
+int _test_get_rx_checks_len(void) {
+  return current_safety_config.rx_checks_len;
+}

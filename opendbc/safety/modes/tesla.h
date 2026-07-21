@@ -16,51 +16,66 @@ static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
 
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
+  uint8_t result;
 
   switch (msg->addr) {
   case 0x2b9U:
     // Signal: DAS_controlCounter
-    return msg->data[6] >> 5;
+    result = msg->data[6] >> 5;
+    break;
   case 0x488U:
     // Signal: DAS_steeringControlCounter
-    return msg->data[2] & 0x0FU;
+    result = msg->data[2] & 0x0FU;
+    break;
   case 0x257U:
   case 0x118U:
   case 0x145U:
   case 0x286U:
   case 0x311U:
     // Signal: DI_speedCounter, DI_systemStatusCounter, ESP_statusCounter, DI_locStatusCounter, UI_warningCounter
-    return msg->data[1] & 0x0FU;
+    result = msg->data[1] & 0x0FU;
+    break;
   case 0x155U:
     // Signal: ESP_wheelRotationCounter
-    return msg->data[6] >> 4;
+    result = msg->data[6] >> 4;
+    break;
   case 0x370U:
     // Signal: EPAS3S_sysStatusCounter
-    return msg->data[6] & 0x0FU;
+    result = msg->data[6] & 0x0FU;
+    break;
   default:
-    return 0;
+    result = 0;
+    break;
   }
+
+  return result;
 }
 
 static int _tesla_get_checksum_byte(const int addr) {
+  int ret;
   switch (addr) {
   case 0x370:
   case 0x2b9:
   case 0x155:
     // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
-    return 7;
+    ret = 7;
+    break;
   case 0x488:
     // Signal: DAS_steeringControlChecksum
-    return 3;
+    ret = 3;
+    break;
   case 0x257:
   case 0x118:
   case 0x145:
   case 0x286:
   case 0x311:
-    return 0;
+    ret = 0;
+    break;
   default:
-    return -1;
+    ret = -1;
+    break;
   }
+  return ret;
 }
 
 static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
