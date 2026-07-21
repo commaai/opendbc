@@ -123,6 +123,13 @@ int mutation_get_active_mutant(void);
 void ignition_can_hook(const CANPacket_t *msg);
 bool get_ignition_can(void);
 void set_ignition_can(bool c);
+
+uint8_t _test_get_counter(const CANPacket_t *msg);
+uint32_t _test_get_checksum(const CANPacket_t *msg);
+uint32_t _test_compute_checksum(const CANPacket_t *msg);
+bool _test_get_quality_flag_valid(const CANPacket_t *msg);
+void _test_rx_hook(const CANPacket_t *msg);
+bool _test_tx_hook(const CANPacket_t *msg);
 """)
 
 class LibSafety:

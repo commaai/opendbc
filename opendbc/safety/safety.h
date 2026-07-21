@@ -551,3 +551,28 @@ void speed_mismatch_check(const float speed_2) {
     controls_allowed = false;
   }
 }
+
+uint8_t _test_get_counter(const CANPacket_t *msg) {
+  return current_hooks->get_counter(msg);
+}
+
+uint32_t _test_get_checksum(const CANPacket_t *msg) {
+  return current_hooks->get_checksum(msg);
+}
+
+uint32_t _test_compute_checksum(const CANPacket_t *msg) {
+  return current_hooks->compute_checksum(msg);
+}
+
+bool _test_get_quality_flag_valid(const CANPacket_t *msg) {
+  return current_hooks->get_quality_flag_valid(msg);
+}
+
+void _test_rx_hook(const CANPacket_t *msg) {
+  current_hooks->rx(msg);
+}
+
+bool _test_tx_hook(const CANPacket_t *msg) {
+
+  return current_hooks->tx(msg);
+}
