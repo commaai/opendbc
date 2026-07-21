@@ -118,6 +118,15 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.assertEqual(0, self.safety._test_get_checksum(common.make_msg(0, 0, length=0)))
 
 
+class TestHyundaiSafetyNonLong(TestHyundaiSafety):
+  def test_cruise_check_falling_edge_enable(self):
+    self.safety.set_controls_allowed(False)
+    self._rx(self._button_msg(1))
+    self._rx(self._pcm_status_msg(True))
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
