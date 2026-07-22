@@ -121,7 +121,7 @@ class MebLongStateMachine:
     else:
       acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
-    # enforce legal transitions.
+    # enforce legal transitions
     if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
       # allow going into hold at any time, reset ramp counter
       self.ramp_counter = 0
