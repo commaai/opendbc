@@ -163,22 +163,6 @@ class MebLongStateMachine:
     return acc_status, acc_hold_type, accel
 
 
-def get_acc_status(CS, CC, long_override):
-  if CS.accFaulted:
-    acc_status = ACC_CTRL_ERROR  # error state
-  elif CC.enabled:
-    if long_override:
-      acc_status = ACC_CTRL_OVERRIDE  # overriding
-    else:
-      acc_status = ACC_CTRL_ACTIVE  # active long control state
-  elif CS.cruiseState.available:
-    acc_status = ACC_CTRL_ENABLED  # long control ready
-  else:
-    acc_status = ACC_CTRL_DISABLED  # long control deactivated state
-
-  return acc_status
-
-
 def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, long_override, long_override_begin, long_disabling):
   # warning: car is reacting to hold mechanic even with long control off
   if CS.accFaulted:
