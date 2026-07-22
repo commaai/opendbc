@@ -54,8 +54,6 @@ class CarController(CarControllerBase):
     self.apply_curvature_last = 0.
     self.steering_power_last = 0
     self.accel_last = 0.
-    self.long_override_counter = 0
-    self.long_disabled_counter = 0
     self.lead_distance_bars_last = None
     self.distance_bar_frame = 0
     self.gra_acc_counter_last = None
@@ -140,19 +138,7 @@ class CarController(CarControllerBase):
         stopping = actuators.longControlState == LongCtrlState.stopping
 
         if self.CP.flags & VolkswagenFlags.MEB:
-          # only send ACC_HMS_RELEASE when in cruise standstill and want to resume
-          # starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
-          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))# if CC.enabled else 0)
-          #
-          # long_override = CC.cruiseControl.override or CS.out.gasPressed
-          # self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
-          # long_override_begin = long_override and self.long_override_counter < 5
-          #
-          # self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
-          # long_disabling = not CC.enabled and self.long_disabled_counter < 5
-          #
-          # acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
-          #                                          CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
+          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
           acc_status, acc_hold_type, accel = self.meb_long_state_machine.update(CS, CC, accel)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_status, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,

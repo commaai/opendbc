@@ -122,6 +122,7 @@ class MebLongStateMachine:
       return self.acc_status_vals['ACC_OFF_HAUPTSCHALTER_AUS']  # disabled
 
   def _get_hold_type(self, CS, CC) -> int:
+    # warning: car is reacting to hold mechanic even with long control off
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
 
@@ -134,12 +135,13 @@ class MebLongStateMachine:
     else:
       acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
-    # enforce legal transitions
+    # enforce legal transitions.
     if acc_hold_type == self.acc_hold_type_vals['halten']:
       # allow going into hold at any time, reset ramp counter
       self.ramp_counter = 0
-    elif acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG'] and self.prev_acc_hold_type == self.acc_hold_type_vals['halten']:
-      # if we request to hold but never hit standstill before wanting to resume, we match stock and send just ramp
+    elif self.prev_acc_hold_type == self.acc_hold_type_vals['halten'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
+      # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
+      # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter = self.RAMP_FRAMES
     elif self.ramp_counter > 0:
@@ -161,30 +163,6 @@ class MebLongStateMachine:
     self.prev_acc_hold_type = acc_hold_type
     self.frame += 1
     return acc_status, acc_hold_type, accel
-
-
-def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, long_override, long_override_begin, long_disabling):
-  # warning: car is reacting to hold mechanic even with long control off
-  if CS.accFaulted:
-    acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
-  elif not CC.enabled:
-    if long_disabling:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE  # ramp release of requests right after disabling long control (prevents car error with EPB at low speed)
-    else:
-      acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
-  elif long_override:
-    if long_override_begin:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE  # ramp release of requests at the beginning of override (prevents car error with EPB at low speed)
-    else:
-      acc_hold_type = ACC_HMS_NO_REQUEST  # overriding / no request
-  elif starting:
-    acc_hold_type = ACC_HMS_RELEASE  # release request and startup
-  elif stopping:
-    acc_hold_type = ACC_HMS_HOLD  # hold while stopping/stopped
-  else:
-    acc_hold_type = ACC_HMS_NO_REQUEST  # no hold request
-
-  return acc_hold_type
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
