@@ -76,17 +76,6 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
 
 
-ACC_CTRL_ERROR    = 6
-ACC_CTRL_OVERRIDE = 4
-ACC_CTRL_ACTIVE   = 3
-ACC_CTRL_ENABLED  = 2
-ACC_CTRL_DISABLED = 0
-
-ACC_HMS_RAMP_RELEASE = 5
-ACC_HMS_RELEASE      = 4
-ACC_HMS_HOLD         = 1
-ACC_HMS_NO_REQUEST   = 0
-
 ACC_HUD_ERROR    = 6
 ACC_HUD_OVERRIDE = 4
 ACC_HUD_ACTIVE   = 3
@@ -114,7 +103,7 @@ class MebLongStateMachine:
     if CS.out.accFaulted:
       return self.acc_status_vals['REVERSIBLER_FEHLER_IM_ACC_SYSTEM']
     elif CC.enabled:
-      return self.acc_status_vals['ACC_OVERRIDE' if CC.cruiseControl.override else 'ACC_AKTIV_regelt']
+      return self.acc_status_vals['ACC_OVERRIDE' if CC.cruiseControl.override else 'ACC_AKTIV_REGELT']
     elif CS.out.cruiseState.available:
       return self.acc_status_vals['ACC_STANDBY']
     else:
@@ -135,10 +124,10 @@ class MebLongStateMachine:
       acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     # enforce legal transitions.
-    if acc_hold_type == self.acc_hold_type_vals['halten']:
+    if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
       # allow going into hold at any time, reset ramp counter
       self.ramp_counter = 0
-    elif self.prev_acc_hold_type == self.acc_hold_type_vals['halten'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
+    elif self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
       # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
       # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
@@ -153,19 +142,22 @@ class MebLongStateMachine:
     acc_status = self._get_acc_status(CS, CC)
     acc_hold_type = self._get_hold_type(CS, CC)
 
-    held = CS.esp_hold_confirmation and acc_hold_type == self.acc_hold_type_vals['halten']
+    held = CS.esp_hold_confirmation and acc_hold_type == self.acc_hold_type_vals['HALTEN']
     if not CC.enabled or held:
       accel = self.CCP.ACCEL_INACTIVE
     else:
       accel = accel
 
+    # hold requested but the car hasn't reached standstill yet
+    braking_to_stop = acc_hold_type == self.acc_hold_type_vals['HALTEN'] and not CS.esp_hold_confirmation
+
     self.prev_acc_hold_type = acc_hold_type
     self.frame += 1
-    return acc_status, acc_hold_type, accel
+    return acc_status, acc_hold_type, accel, braking_to_stop
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
-                             esp_hold, speed, travel_assist_available):
+                             braking_to_stop, speed, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
@@ -178,10 +170,6 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
   # ACC_Anhalteweg: when stopping: MEB: values <> 0 the car can execute a hard brake probably if target is too close, MQBEvo: value 0 results in hard brake
   terminal_rollout = 0
 
-  # derived from the hold request so they can't disagree with it: ANFAHREN is only ever sent when starting,
-  # HALTEN only ever when stopping
-  actually_stopping = acc_hold_type == ACC_HMS_HOLD and not esp_hold
-
   values = {
     "ACC_Typ":                    acc_type,
     "ACC_Status_ACC":             acc_status,
@@ -192,10 +180,10 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.INACTIVE_ACCEL else 0,
     "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.INACTIVE_ACCEL else 0,
     "ACC_Anfahren":               0,  # always zero, stock uses ACC_Anforderung_HMS
-    "ACC_Anhalten":               1 if actually_stopping else 0,
-    "ACC_Anhalteweg":             terminal_rollout if actually_stopping else 20.46,
+    "ACC_Anhalten":               1 if braking_to_stop else 0,
+    "ACC_Anhalteweg":             terminal_rollout if braking_to_stop else 20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
-    "ACC_AKTIV_regelt":           1 if acc_status == ACC_CTRL_ACTIVE else 0,
+    "ACC_AKTIV_regelt":           0,  # always zero, stock uses ACC_Status_ACC
     "Speed":                      speed,
     "SET_ME_0XFE":                0xFE,
     "SET_ME_0X1":                 0x1,
