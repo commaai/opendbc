@@ -95,20 +95,9 @@ ACC_HUD_ENABLED  = 2
 ACC_HUD_DISABLED = 0
 
 
-class MebLongState(IntEnum):
-  DISABLED = 0
-  FAULTED = 1
-  ENABLED = 2
-  ACTIVE = 3
-  STOPPING = 4
-  OVERRIDE = 5
-  RELEASING = 6
-
-
 class MebLongStateMachine:
   def __init__(self, CP, CCP):
     self.CCP = CCP
-    self.state = MebLongState.DISABLED
     self.frame = 0
 
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP
@@ -132,7 +121,7 @@ class MebLongStateMachine:
     else:
       return self.acc_status_vals['ACC_OFF_Hauptschalter_aus']  # disabled
 
-  def step(self, CS, CC, accel):
+  def update(self, CS, CC, accel):
     acc_status = self.acc_status(CS, CC)
 
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
@@ -159,20 +148,16 @@ class MebLongStateMachine:
       acc_hold_type = self.acc_hold_type_vals['Loesen_ueber_Rampe']
       self.ramp_counter -= 1
 
+    held = CS.esp_hold_confirmation and acc_hold_type == self.acc_hold_type_vals['halten']
+    if not CC.enabled or held:
+      accel = self.CCP.ACCEL_INACTIVE
+    else:
+      accel = accel
 
     self.prev_acc_hold_type = acc_hold_type
     self.frame += 1
 
     return acc_status, acc_hold_type, accel
-
-  def update(self, accel):
-    acc_status = ACC_CTRL_DISABLED
-    acc_hold_type = ACC_HMS_NO_REQUEST
-
-    ...
-
-    return acc_status, acc_hold_type, accel
-
 
 
 def get_acc_status(CS, CC, long_override):
