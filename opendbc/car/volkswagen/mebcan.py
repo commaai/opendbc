@@ -109,10 +109,24 @@ class MebLongStateMachine:
   def __init__(self, CP, CCP):
     self.CCP = CCP
     self.state = MebLongState.DISABLED
+    self.frame = 0
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
     self.acc_hold_type_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Anforderung_HMS'].items()}
+
+    self.prev_acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+
+  def acc_status(self, CS, CC, override):
+    # stateless: ACC_Status_ACC is a pure function of this frame's inputs, no memory needed
+    if CS.accFaulted:
+      return self.acc_status_vals['reversibler_Fehler_im_ACC_System']  # error state
+    elif CC.enabled:
+      return self.acc_status_vals['ACC_OVERRIDE' if override else 'ACC_AKTIV_regelt']  # overriding / active
+    elif CS.cruiseState.available:
+      return self.acc_status_vals['ACC_STANDBY']  # long control ready
+    else:
+      return self.acc_status_vals['ACC_OFF_Hauptschalter_aus']  # long control deactivated
 
   def step(self, CS, CC, accel):
     acc_status = self.acc_status_vals['ACC_OFF_Hauptschalter_aus']  # disabled
@@ -122,20 +136,33 @@ class MebLongStateMachine:
 
     if CS.accFaulted:
       self.state = MebLongState.FAULTED
-    elif CC.enabled:
-      # normally active or pre-enabled at a stop with foot on brake
-      if CC.longActive:
-        acc_status = self.acc_status_vals['ACC_AKTIV_regelt']
-      else:
-        # gas overriding
-        acc_status = self.acc_status_vals['ACC_OVERRIDE']
-    elif CS.cruiseState.available:
-      acc_status = self.acc_status_vals['ACC_STANDBY']
 
-    if acc_status == self.acc_status_vals['ACC_AKTIV_regelt']:
-      if stopping:
-        acc_hold_type = self.acc_hold_type_vals['halten']
-        accel = self.CCP.ACCEL_OVERRIDE
+    elif not CS.cruiseState.available:
+      self.state = MebLongState.DISABLED
+
+    else:
+      if CC.enabled:
+        # normally active or pre-enabled at a stop with foot on brake
+        if CC.longActive:
+          self.state = MebLongState.STOPPING if stopping else MebLongState.ACTIVE
+          acc_status = self.acc_status_vals['ACC_AKTIV_regelt']
+        else:
+          # gas overriding
+          acc_status = self.acc_status_vals['ACC_OVERRIDE']
+
+      else:
+        pass
+
+
+
+
+
+
+    # # wtf
+    # if acc_status == self.acc_status_vals['ACC_AKTIV_regelt']:
+    #   if stopping:
+    #     acc_hold_type = self.acc_hold_type_vals['halten']
+    #     accel = self.CCP.ACCEL_OVERRIDE
 
 
     # if CS.accFaulted:
@@ -146,6 +173,9 @@ class MebLongStateMachine:
     #   if CS.gasPressed:
     #     pass
     #   elif
+
+    self.prev_acc_hold_type = acc_hold_type
+    self.frame += 1
 
     return acc_status, acc_hold_type, accel
 
