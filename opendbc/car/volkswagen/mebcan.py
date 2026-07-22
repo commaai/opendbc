@@ -188,7 +188,7 @@ def get_acc_hold_type(CS, CC, starting, stopping, esp_hold, long_override, long_
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
-                             stopping, starting, esp_hold, speed, long_override, travel_assist_available):
+                             stopping, starting, esp_hold, speed, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
@@ -201,25 +201,14 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
   # ACC_Anhalteweg: when stopping: MEB: values <> 0 the car can execute a hard brake probably if target is too close, MQBEvo: value 0 results in hard brake
   terminal_rollout = 0
 
-  full_stop = stopping and esp_hold
   full_stop_no_start = esp_hold and not starting
   actually_stopping = stopping and not esp_hold
-
-  if acc_enabled:
-    if long_override:  # the car expects a non-inactive accel while overriding
-      acceleration = CCP.ACCEL_OVERRIDE  # original ACC still sends active accel in this case (seamless experience)
-    elif full_stop:
-      acceleration = CCP.ACCEL_INACTIVE  # inactive accel, newer gen >2024 error of not neutral value
-    else:
-      acceleration = accel
-  else:
-    acceleration = CCP.ACCEL_INACTIVE  # inactive accel
 
   values = {
     "ACC_Typ":                    acc_type,
     "ACC_Status_ACC":             acc_status,
     "ACC_StartStopp_Info":        acc_enabled,
-    "ACC_Sollbeschleunigung_02":  acceleration,
+    "ACC_Sollbeschleunigung_02":  accel,
     "ACC_zul_Regelabw_unten":     0,
     "ACC_zul_Regelabw_oben":      0,
     "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_status in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
