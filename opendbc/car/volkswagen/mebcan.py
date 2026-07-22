@@ -1,4 +1,3 @@
-from enum import IntEnum
 from opendbc.car import Bus, structs
 from opendbc.can import CANDefine
 from opendbc.car.volkswagen.values import DBC
@@ -166,7 +165,7 @@ class MebLongStateMachine:
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
-                             stopping, starting, esp_hold, speed, travel_assist_available):
+                             esp_hold, speed, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
@@ -179,8 +178,9 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
   # ACC_Anhalteweg: when stopping: MEB: values <> 0 the car can execute a hard brake probably if target is too close, MQBEvo: value 0 results in hard brake
   terminal_rollout = 0
 
-  full_stop_no_start = esp_hold and not starting
-  actually_stopping = stopping and not esp_hold
+  # derived from the hold request so they can't disagree with it: ANFAHREN is only ever sent when starting,
+  # HALTEN only ever when stopping
+  actually_stopping = acc_hold_type == ACC_HMS_HOLD and not esp_hold
 
   values = {
     "ACC_Typ":                    acc_type,
@@ -189,8 +189,8 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     "ACC_Sollbeschleunigung_02":  accel,
     "ACC_zul_Regelabw_unten":     0,
     "ACC_zul_Regelabw_oben":      0,
-    "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_status in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
-    "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if acc_status in (ACC_CTRL_ACTIVE, ACC_CTRL_OVERRIDE) and not full_stop_no_start else 0,
+    "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.INACTIVE_ACCEL else 0,
+    "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.INACTIVE_ACCEL else 0,
     "ACC_Anfahren":               0,  # always zero, stock uses ACC_Anforderung_HMS
     "ACC_Anhalten":               1 if actually_stopping else 0,
     "ACC_Anhalteweg":             terminal_rollout if actually_stopping else 20.46,

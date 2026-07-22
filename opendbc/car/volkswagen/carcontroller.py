@@ -141,7 +141,7 @@ class CarController(CarControllerBase):
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
           acc_status, acc_hold_type, accel = self.meb_long_state_machine.update(CS, CC, accel)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
-                                                           accel, acc_status, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
+                                                           accel, acc_status, acc_hold_type, CS.esp_hold_confirmation,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available))
           self.accel_last = accel
 
