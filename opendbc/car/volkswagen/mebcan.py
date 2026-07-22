@@ -117,16 +117,24 @@ class MebLongStateMachine:
     acc_status = self.acc_status_vals['ACC_OFF_Hauptschalter_aus']  # disabled
     acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
 
+    stopping = CC.actuators.longControlState == LongCtrlState.stopping
+
     if CS.accFaulted:
       self.state = MebLongState.FAULTED
     elif CC.enabled:
-      # TODO: what happens if you engage at stop with foot on brake?
+      # normally active or pre-enabled at a stop with foot on brake
       if CC.longActive:
         acc_status = self.acc_status_vals['ACC_AKTIV_regelt']
       else:
+        # gas overriding
         acc_status = self.acc_status_vals['ACC_OVERRIDE']
     elif CS.cruiseState.available:
       acc_status = self.acc_status_vals['ACC_STANDBY']
+
+    if acc_status == self.acc_status_vals['ACC_AKTIV_regelt']:
+      if stopping:
+        acc_hold_type = self.acc_hold_type_vals['halten']
+        accel = self.CCP.ACCEL_OVERRIDE
 
 
     # if CS.accFaulted:
@@ -137,6 +145,8 @@ class MebLongStateMachine:
     #   if CS.gasPressed:
     #     pass
     #   elif
+
+    return acc_status, acc_hold_type, accel
 
   def update(self, accel):
     acc_status = ACC_CTRL_DISABLED

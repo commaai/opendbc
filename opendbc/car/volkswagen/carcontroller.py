@@ -141,21 +141,22 @@ class CarController(CarControllerBase):
 
         if self.CP.flags & VolkswagenFlags.MEB:
           # only send ACC_HMS_RELEASE when in cruise standstill and want to resume
-          starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
-          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
-
-          long_override = CC.cruiseControl.override or CS.out.gasPressed
-          self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
-          long_override_begin = long_override and self.long_override_counter < 5
-
-          self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
-          long_disabling = not CC.enabled and self.long_disabled_counter < 5
-
-          acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
-          acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
-                                                   CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
+          # starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
+          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))# if CC.enabled else 0)
+          #
+          # long_override = CC.cruiseControl.override or CS.out.gasPressed
+          # self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
+          # long_override_begin = long_override and self.long_override_counter < 5
+          #
+          # self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
+          # long_disabling = not CC.enabled and self.long_disabled_counter < 5
+          #
+          # acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
+          # acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
+          #                                          CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
+          acc_status, acc_hold_type, accel = self.meb_long_state_machine.step(CS.out, CC, accel)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
-                                                           accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
+                                                           accel, acc_status, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))
           self.accel_last = accel
 
