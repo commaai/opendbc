@@ -111,47 +111,111 @@ class MebLongStateMachine:
     self.state = MebLongState.DISABLED
     self.frame = 0
 
+    self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP
+
+    self.ramp_counter = 0
+    self.prev_stopping = False
+
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
     self.acc_hold_type_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Anforderung_HMS'].items()}
 
     self.prev_acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
 
-  def acc_status(self, CS, CC, override):
-    # stateless: ACC_Status_ACC is a pure function of this frame's inputs, no memory needed
+  def acc_status(self, CS, CC):
+    # stateless
     if CS.accFaulted:
-      return self.acc_status_vals['reversibler_Fehler_im_ACC_System']  # error state
+      return self.acc_status_vals['reversibler_Fehler_im_ACC_System']
     elif CC.enabled:
-      return self.acc_status_vals['ACC_OVERRIDE' if override else 'ACC_AKTIV_regelt']  # overriding / active
+      return self.acc_status_vals['ACC_OVERRIDE' if CC.cruiseControl.override else 'ACC_AKTIV_regelt']
     elif CS.cruiseState.available:
-      return self.acc_status_vals['ACC_STANDBY']  # long control ready
+      return self.acc_status_vals['ACC_STANDBY']
     else:
-      return self.acc_status_vals['ACC_OFF_Hauptschalter_aus']  # long control deactivated
+      return self.acc_status_vals['ACC_OFF_Hauptschalter_aus']  # disabled
 
   def step(self, CS, CC, accel):
-    acc_status = self.acc_status_vals['ACC_OFF_Hauptschalter_aus']  # disabled
-    acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+    acc_status = self.acc_status(CS, CC)
+    # acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
 
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
+    starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
+    # starting = not stopping and self.prev_stopping
 
-    if CS.accFaulted:
-      self.state = MebLongState.FAULTED
-
-    elif not CS.cruiseState.available:
-      self.state = MebLongState.DISABLED
-
+    if CS.accFaulted or not CC.longActive:
+      acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+    elif stopping:
+      acc_hold_type = self.acc_hold_type_vals['halten']  # stop
+    elif starting:
+      acc_hold_type = self.acc_hold_type_vals['anfahren']  # resume
     else:
-      if CC.enabled:
-        # normally active or pre-enabled at a stop with foot on brake
-        if CC.longActive:
-          self.state = MebLongState.STOPPING if stopping else MebLongState.ACTIVE
-          acc_status = self.acc_status_vals['ACC_AKTIV_regelt']
-        else:
-          # gas overriding
-          acc_status = self.acc_status_vals['ACC_OVERRIDE']
+      acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
 
-      else:
-        pass
+    # enforce legal transitions
+    if acc_hold_type == self.acc_hold_type_vals['halten']:
+      # allow going into hold at any time, reset ramp counter
+      self.ramp_counter = 0
+    elif acc_hold_type == self.acc_hold_type_vals['keine_Anforderung'] and self.prev_acc_hold_type == self.acc_hold_type_vals['halten']:
+      # if we request to hold but never hit standstill before wanting to resume, we match stock and send just ramp
+      acc_hold_type = self.acc_hold_type_vals['Loesen_ueber_Rampe']
+      self.ramp_counter = self.RAMP_FRAMES
+    elif self.ramp_counter > 0:
+      acc_hold_type = self.acc_hold_type_vals['Loesen_ueber_Rampe']
+      self.ramp_counter -= 1
+
+    # if acc_hold_type == self.acc_hold_type_vals['keine_Anforderung'] and self.prev_acc_hold_type == self.acc_hold_type_vals['halten']:
+    #   # requesting to release brakes, starting from stop or overriding?
+    #   # if we request to hold but never hit standstill before wanting to resume, we match stock and send just ramp
+    #   if starting:
+    #     acc_hold_type = self.acc_hold_type_vals['anfahren']
+    #   else:
+    #     acc_hold_type = self.acc_hold_type_vals['Loesen_ueber_Rampe']
+    #     self.ramp_counter = self.RAMP_FRAMES
+    #
+    # elif acc_hold_type == self.acc_hold_type_vals['Loesen_ueber_Rampe']:
+    #   self.ramp_counter -= 1
+    #   if self.ramp_counter <= 0:
+    #     acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+
+    # if CS.accFaulted:
+    #   acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+    #   # self.ramp_counter = 0
+    #   # # self.hold = None
+    #   # # self.state = MebLongState.FAULTED
+    #
+    # # elif self.prev_acc_hold_type == self.acc_hold_type_vals['Loesen_ueber_Rampe']:
+    # #   self.ramp_counter -= 1
+    # #   acc_hold_type = self.acc_hold_type_vals['Loesen_ueber_Rampe'] if self.ramp_counter > 0 else self.acc_hold_type_vals['keine_Anforderung']
+    #
+    # elif not CC.longActive:
+    #   acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+    #   # if self.prev_acc_hold_type == self.acc_hold_type_vals['halten']:
+    #   #   self.ramp_counter = self.RAMP_FRAMES
+    #   #   acc_hold_type = self.acc_hold_type_vals['Loesen_ueber_Rampe']
+    #
+    # elif stopping:
+    #   acc_hold_type = self.acc_hold_type_vals['halten']
+    #
+    # else:
+    #   acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+
+
+
+
+    # elif not CS.cruiseState.available:
+    #   self.state = MebLongState.DISABLED
+    #
+    # else:
+    #   if CC.enabled:
+    #     # normally active or pre-enabled at a stop with foot on brake
+    #     if CC.longActive:
+    #       self.state = MebLongState.STOPPING if stopping else MebLongState.ACTIVE
+    #       acc_status = self.acc_status_vals['ACC_AKTIV_regelt']
+    #     else:
+    #       # gas overriding
+    #       acc_status = self.acc_status_vals['ACC_OVERRIDE']
+    #
+    #   else:
+    #     pass
 
 
 
@@ -174,7 +238,13 @@ class MebLongStateMachine:
     #     pass
     #   elif
 
+    # if not CC.enabled:
+    #   accel = self.CCP.ACCEL_INACTIVE
+    # elif override:
+    #   accel = self.CCP.ACCEL_OVERRIDE
+
     self.prev_acc_hold_type = acc_hold_type
+    self.prev_stopping = stopping
     self.frame += 1
 
     return acc_status, acc_hold_type, accel
