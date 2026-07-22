@@ -41,7 +41,8 @@ class CarController(CarControllerBase):
     self.packer_pt = CANPacker(dbc_names[Bus.pt])
     self.aeb_available = not CP.flags & VolkswagenFlags.PQ
 
-    self.meb_long_state_machine = mebcan.MebLongStateMachine(self.CP, self.CCP)
+    if CP.flags & VolkswagenFlags.MEB:
+      self.meb_long_state = mebcan.MebLongStateMachine(self.CP, self.CCP)
 
     if CP.flags & VolkswagenFlags.PQ:
       self.CCS = pqcan
@@ -135,17 +136,16 @@ class CarController(CarControllerBase):
 
     if self.CP.openpilotLongitudinalControl:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
-        stopping = actuators.longControlState == LongCtrlState.stopping
-
         if self.CP.flags & VolkswagenFlags.MEB:
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
-          acc_status, acc_hold_type, accel, braking_to_stop = self.meb_long_state_machine.update(CS, CC, accel)
+          acc_status, acc_hold_type, accel, braking_to_stop = self.meb_long_state.update(CS, CC, accel)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_status, acc_hold_type, braking_to_stop,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available))
           self.accel_last = accel
 
         else:
+          stopping = actuators.longControlState == LongCtrlState.stopping
           acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
           starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < 0.25)

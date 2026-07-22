@@ -86,8 +86,6 @@ ACC_HUD_DISABLED = 0
 class MebLongStateMachine:
   def __init__(self, CP, CCP):
     self.CCP = CCP
-    self.frame = 0
-
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP
 
     self.ramp_counter = 0
@@ -152,7 +150,6 @@ class MebLongStateMachine:
     braking_to_stop = acc_hold_type == self.acc_hold_type_vals['HALTEN'] and not CS.esp_hold_confirmation
 
     self.prev_acc_hold_type = acc_hold_type
-    self.frame += 1
     return acc_status, acc_hold_type, accel, braking_to_stop
 
 
@@ -162,9 +159,9 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
   # -> this mode is seen for different cars with same firmware radars so could be a coded operational mode
-  # - jerk and control limits values set to 0 when fully stopped
+  # - jerk and control limits values set inactive together when fully stopped
   # - set accel to 0 / no stop accel for full stop (seems to be compatible with old (non 0 stop accel) and new gen, because HMS state holds the car anyways)
-  # - stopping command sent as long as actually stopping
+  # - stopping command sent while requesting stop but ESP is not in standstill
   commands = []
 
   # ACC_Anhalteweg: when stopping: MEB: values <> 0 the car can execute a hard brake probably if target is too close, MQBEvo: value 0 results in hard brake
