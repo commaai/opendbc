@@ -174,8 +174,8 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     "ACC_Sollbeschleunigung_02":  accel,
     "ACC_zul_Regelabw_unten":     0,
     "ACC_zul_Regelabw_oben":      0,
-    "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.INACTIVE_ACCEL else 0,
-    "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.INACTIVE_ACCEL else 0,
+    "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.ACCEL_INACTIVE else 0,
+    "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.ACCEL_INACTIVE else 0,
     "ACC_Anfahren":               0,  # always zero, stock uses ACC_Anforderung_HMS
     "ACC_Anhalten":               1 if braking_to_stop else 0,
     "ACC_Anhalteweg":             terminal_rollout if braking_to_stop else 20.46,
