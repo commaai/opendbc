@@ -114,7 +114,6 @@ class MebLongStateMachine:
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP
 
     self.ramp_counter = 0
-    self.prev_stopping = False
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -139,14 +138,13 @@ class MebLongStateMachine:
 
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
-    # starting = not stopping and self.prev_stopping
 
     if CS.accFaulted or not CC.longActive:
       acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
     elif stopping:
-      acc_hold_type = self.acc_hold_type_vals['halten']  # stop
+      acc_hold_type = self.acc_hold_type_vals['halten']  # stopping/stopped
     elif starting:
-      acc_hold_type = self.acc_hold_type_vals['anfahren']  # resume
+      acc_hold_type = self.acc_hold_type_vals['anfahren']  # resume after reaching full stop
     else:
       acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
 
@@ -244,7 +242,6 @@ class MebLongStateMachine:
     #   accel = self.CCP.ACCEL_OVERRIDE
 
     self.prev_acc_hold_type = acc_hold_type
-    self.prev_stopping = stopping
     self.frame += 1
 
     return acc_status, acc_hold_type, accel
