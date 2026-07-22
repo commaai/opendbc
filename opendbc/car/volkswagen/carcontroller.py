@@ -154,7 +154,7 @@ class CarController(CarControllerBase):
           # acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
           # acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
           #                                          CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
-          acc_status, acc_hold_type, accel = self.meb_long_state_machine.update(CS.out, CC, accel)
+          acc_status, acc_hold_type, accel = self.meb_long_state_machine.update(CS, CC, accel)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_status, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))

@@ -108,45 +108,49 @@ class MebLongStateMachine:
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
     self.acc_hold_type_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Anforderung_HMS'].items()}
 
-    self.prev_acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+    self.prev_acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
-  def acc_status(self, CS, CC):
+  def _get_acc_status(self, CS, CC) -> int:
     # stateless
-    if CS.accFaulted:
-      return self.acc_status_vals['reversibler_Fehler_im_ACC_System']
+    if CS.out.accFaulted:
+      return self.acc_status_vals['REVERSIBLER_FEHLER_IM_ACC_SYSTEM']
     elif CC.enabled:
       return self.acc_status_vals['ACC_OVERRIDE' if CC.cruiseControl.override else 'ACC_AKTIV_regelt']
-    elif CS.cruiseState.available:
+    elif CS.out.cruiseState.available:
       return self.acc_status_vals['ACC_STANDBY']
     else:
-      return self.acc_status_vals['ACC_OFF_Hauptschalter_aus']  # disabled
+      return self.acc_status_vals['ACC_OFF_HAUPTSCHALTER_AUS']  # disabled
 
-  def update(self, CS, CC, accel):
-    acc_status = self.acc_status(CS, CC)
-
+  def _get_hold_type(self, CS, CC) -> int:
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
 
-    if CS.accFaulted or not CC.longActive:
-      acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+    if CS.out.accFaulted or not CC.longActive:
+      acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
     elif stopping:
-      acc_hold_type = self.acc_hold_type_vals['halten']  # stopping/stopped
+      acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
     elif starting:
-      acc_hold_type = self.acc_hold_type_vals['anfahren']  # resume after reaching full stop
+      acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
     else:
-      acc_hold_type = self.acc_hold_type_vals['keine_Anforderung']  # no request
+      acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     # enforce legal transitions
     if acc_hold_type == self.acc_hold_type_vals['halten']:
       # allow going into hold at any time, reset ramp counter
       self.ramp_counter = 0
-    elif acc_hold_type == self.acc_hold_type_vals['keine_Anforderung'] and self.prev_acc_hold_type == self.acc_hold_type_vals['halten']:
+    elif acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG'] and self.prev_acc_hold_type == self.acc_hold_type_vals['halten']:
       # if we request to hold but never hit standstill before wanting to resume, we match stock and send just ramp
-      acc_hold_type = self.acc_hold_type_vals['Loesen_ueber_Rampe']
+      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter = self.RAMP_FRAMES
     elif self.ramp_counter > 0:
-      acc_hold_type = self.acc_hold_type_vals['Loesen_ueber_Rampe']
+      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter -= 1
+
+    return acc_hold_type
+
+  def update(self, CS, CC, accel):
+    acc_status = self._get_acc_status(CS, CC)
+    acc_hold_type = self._get_hold_type(CS, CC)
 
     held = CS.esp_hold_confirmation and acc_hold_type == self.acc_hold_type_vals['halten']
     if not CC.enabled or held:
@@ -156,7 +160,6 @@ class MebLongStateMachine:
 
     self.prev_acc_hold_type = acc_hold_type
     self.frame += 1
-
     return acc_status, acc_hold_type, accel
 
 
