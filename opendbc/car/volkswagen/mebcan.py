@@ -99,9 +99,10 @@ class MebLongState(IntEnum):
   DISABLED = 0
   FAULTED = 1
   ENABLED = 2
-  HOLDING = 3
-  OVERRIDE = 4
-  RELEASING = 5
+  ACTIVE = 3
+  STOPPING = 4
+  OVERRIDE = 5
+  RELEASING = 6
 
 
 class MebLongStateMachine:
