@@ -95,6 +95,7 @@ class MebLongStateMachine:
     self.acc_hold_type_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Anforderung_HMS'].items()}
 
     self.prev_acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
+    self.acc_status = self.acc_status_vals['ACC_OFF_HAUPTSCHALTER_AUS']  # last acc status, read by HUD msg
 
   def _get_acc_status(self, CS, CC) -> int:
     # stateless
@@ -149,6 +150,7 @@ class MebLongStateMachine:
     braking_to_stop = requesting_hold and not CS.esp_hold_confirmation
 
     self.prev_acc_hold_type = acc_hold_type
+    self.acc_status = acc_status
     return accel, acc_status, acc_hold_type, braking_to_stop
 
 
@@ -199,22 +201,6 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     commands.append(packer.make_can_msg("TA_01", bus, values_ta))
 
   return commands
-
-
-def get_acc_hud_status(CS, CC, long_override):
-  if CS.accFaulted:
-    acc_hud_control = ACC_HUD_ERROR  # error state
-  elif CC.enabled:
-    if long_override:
-      acc_hud_control = ACC_HUD_OVERRIDE  # overriding
-    else:
-      acc_hud_control = ACC_HUD_ACTIVE  # active
-  elif CS.cruiseState.available:
-    acc_hud_control = ACC_HUD_ENABLED  # inactive
-  else:
-    acc_hud_control = ACC_HUD_DISABLED  # deactivated
-
-  return acc_hud_control
 
 
 def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
