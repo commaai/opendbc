@@ -136,21 +136,20 @@ class MebLongStateMachine:
 
     return acc_hold_type
 
-  def update(self, CS, CC, accel):
+  def update(self, CS, CC, accel) -> tuple[float, int, int, bool]:
     acc_status = self._get_acc_status(CS, CC)
     acc_hold_type = self._get_hold_type(CS, CC)
 
-    held = CS.esp_hold_confirmation and acc_hold_type == self.acc_hold_type_vals['HALTEN']
+    requesting_hold = acc_hold_type == self.acc_hold_type_vals['HALTEN']
+    held = requesting_hold and CS.esp_hold_confirmation
     if not CC.enabled or held:
       accel = self.CCP.ACCEL_INACTIVE
-    else:
-      accel = accel
 
     # hold requested but the car hasn't reached standstill yet
-    braking_to_stop = acc_hold_type == self.acc_hold_type_vals['HALTEN'] and not CS.esp_hold_confirmation
+    braking_to_stop = requesting_hold and not CS.esp_hold_confirmation
 
     self.prev_acc_hold_type = acc_hold_type
-    return acc_status, acc_hold_type, accel, braking_to_stop
+    return accel, acc_status, acc_hold_type, braking_to_stop
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
