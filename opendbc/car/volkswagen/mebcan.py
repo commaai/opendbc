@@ -110,6 +110,7 @@ class MebLongStateMachine:
 
   def _get_hold_type(self, CS, CC) -> int:
     # warning: car is reacting to hold mechanic even with long control off
+    # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
 
