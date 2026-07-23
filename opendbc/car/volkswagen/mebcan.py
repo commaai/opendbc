@@ -86,7 +86,7 @@ ACC_HUD_DISABLED = 0
 class MebLongStateMachine:
   def __init__(self, CP, CCP):
     self.CCP = CCP
-    self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP
+    self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
     self.ramp_counter = 0
 
