@@ -38,6 +38,7 @@ ANGLE_DEG_TO_CAN = {
 NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
 JOB_ID = int(os.environ.get("JOB_ID", "0"))
 MAX_EXAMPLES = int(os.environ.get("MAX_EXAMPLES", "300"))
+RELAY_TRANSITION_TIMEOUT_US = 2_000_000
 DOWNLOAD_CACHE_ROOT = Path(os.environ.get("COMMA_CACHE", "/tmp/comma_download_cache"))
 OPENPILOT_CI_URL = "https://commadataci.blob.core.windows.net/openpilotci"
 COMMA_API_URL = "https://api.commadotai.com"
@@ -232,6 +233,8 @@ class TestCarModelBase(unittest.TestCase):
 
     start_ts = self.can_msgs[0][0]
     failed_addrs = Counter()
+    last_relay_malfunction_us = 0.
+    relay_open_inferred = False
     for can in self.can_msgs:
       t = (can[0] - start_ts) / 1e3
       self.safety.set_timer(int(t))
@@ -256,6 +259,15 @@ class TestCarModelBase(unittest.TestCase):
 
       if self.car_safety_mode_frame is not None and t / 1e4 > self.car_safety_mode_frame:
         self.assertFalse(self.safety.get_relay_malfunction())
+      elif relay_open_inferred:
+        self.assertFalse(self.safety.get_relay_malfunction())
+      elif self.safety.get_relay_malfunction():
+        # Relay-check messages can be present before panda opens the harness relay.
+        # Once they disappear for a stable window, treat later occurrences as a malfunction.
+        last_relay_malfunction_us = t
+        self.safety.set_relay_malfunction(False)
+      elif t - last_relay_malfunction_us > RELAY_TRANSITION_TIMEOUT_US:
+        relay_open_inferred = True
       else:
         self.safety.set_relay_malfunction(False)
 
