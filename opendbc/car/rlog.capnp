@@ -12,24 +12,6 @@ struct CanData {
   src @3 :UInt8;
 }
 
-struct PandaState {
-  reserved0 @0 :Void;
-  reserved1 @1 :Void;
-  reserved2 @2 :Void;
-  reserved3 @3 :Void;
-  reserved4 @4 :Void;
-  reserved5 @5 :Void;
-  reserved6 @6 :Void;
-  reserved7 @7 :Void;
-  reserved8 @8 :Void;
-  reserved9 @9 :Void;
-  reserved10 @10 :Void;
-  reserved11 @11 :Void;
-  reserved12 @12 :Void;
-  reserved13 @13 :Void;
-  safetyModel @14 :Car.CarParams.SafetyModel;
-}
-
 struct Event {
   logMonoTime @0 :UInt64;
 
@@ -45,7 +27,7 @@ struct Event {
     reserved9 @9 :Void;
     reserved10 @10 :Void;
     reserved11 @11 :Void;
-    pandaStateDEPRECATED @12 :PandaState;
+    reserved12 @12 :Void;
     reserved13 @13 :Void;
     reserved14 @14 :Void;
     reserved15 @15 :Void;
@@ -103,17 +85,5 @@ struct Event {
     reserved67 @67 :Void;
     reserved68 @68 :Void;
     carParams @69 :Car.CarParams;
-    reserved70 @70 :Void;
-    reserved71 @71 :Void;
-    reserved72 @72 :Void;
-    reserved73 @73 :Void;
-    reserved74 @74 :Void;
-    reserved75 @75 :Void;
-    reserved76 @76 :Void;
-    reserved77 @77 :Void;
-    reserved78 @78 :Void;
-    reserved79 @79 :Void;
-    reserved80 @80 :Void;
-    pandaStates @81 :List(PandaState);
   }
 }
