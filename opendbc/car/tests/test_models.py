@@ -21,6 +21,7 @@ from opendbc.car.structs import car
 from opendbc.car.tests.routes import CarTestRoute, non_tested_cars, routes
 from opendbc.car.toyota.values import ToyotaFlags
 from opendbc.car.values import PLATFORMS, Platform
+from opendbc.car.volkswagen.values import VolkswagenFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 
 
@@ -285,10 +286,15 @@ class TestCarModelBase(unittest.TestCase):
     if self.CP.flags & ToyotaFlags.SECOC:
       self.skipTest("SecOC transmit tests require the vehicle key")
 
+    controller_params = self.CP
+    if self.CP.flags & VolkswagenFlags.MLB and self.CP.openpilotLongitudinalControl:
+      # Some archived MLB routes record alpha longitudinal, which current MLB safety does not support.
+      controller_params = self.CarInterface.get_params(self.platform, self.fingerprint, self.CP.carFw, False, False, docs=False)
+
     def test_car_controller(car_control):
       now_nanos = 0
       msgs_sent = 0
-      CI = self.CarInterface(self.CP)
+      CI = self.CarInterface(controller_params)
       for _ in range(round(10.0 / DT_CTRL)):
         CI.update([])
         _, sendcan = CI.apply(car_control, now_nanos)
