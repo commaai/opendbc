@@ -287,7 +287,7 @@ class TestCarModelBase(unittest.TestCase):
       self.skipTest("SecOC transmit tests require the vehicle key")
 
     controller_params = self.CP
-    if self.CP.flags & VolkswagenFlags.MLB and self.CP.openpilotLongitudinalControl:
+    if self.CP.brand == "volkswagen" and self.CP.flags & VolkswagenFlags.MLB and self.CP.openpilotLongitudinalControl:
       # Some archived MLB routes record alpha longitudinal, which current MLB safety does not support.
       controller_params = self.CarInterface.get_params(self.platform, self.fingerprint, self.CP.carFw, False, False, docs=False)
 
