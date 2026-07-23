@@ -120,8 +120,8 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kiBP = [0., 30.]
       ret.longitudinalTuning.kiV = [0.4, 0.]
 
-    ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
-    if alpha_long:
+    ret.alphaLongitudinalAvailable = (ret.networkLocation == NetworkLocation.gateway or docs) and not ret.flags & VolkswagenFlags.MLB
+    if alpha_long and ret.alphaLongitudinalAvailable:
       ret.openpilotLongitudinalControl = True
       safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
       if ret.transmissionType == TransmissionType.manual:

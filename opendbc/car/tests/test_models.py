@@ -216,10 +216,14 @@ class TestCarModelBase(unittest.TestCase):
     assert RI
 
     error_cnt = 0
-    for i, msg in enumerate(self.can_msgs[self.elm_frame:]):
-      rr: structs.RadarData | None = RI.update(normalize_can_buses(msg, self.raw_can_keys))
-      if rr is not None and i > 50:
+    radar_initialized = False
+    for msg in self.can_msgs[self.elm_frame:]:
+      rr: structs.RadarData | None = RI.update(msg)
+      if rr is not None and not rr.errors.canError:
+        radar_initialized = True
+      if rr is not None and radar_initialized:
         error_cnt += rr.errors.canError
+    self.assertTrue(radar_initialized or self.CP.radarUnavailable)
     self.assertEqual(error_cnt, 0)
 
   def test_panda_safety_rx_checks(self):
