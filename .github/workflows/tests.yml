@@ -115,5 +115,6 @@ jobs:
       timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.routes-cache.outputs.cache-hit == 'true') && 2 || 6 }}
       run: MAX_EXAMPLES=1 .venv/bin/unittest-parallel -j0 --level class -s opendbc/car/tests -p test_models.py
       env:
+        RUN_MODEL_TESTS: 1
         NUM_JOBS: 4
         JOB_ID: ${{ matrix.job }}

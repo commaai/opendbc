@@ -19,6 +19,7 @@ from opendbc.car.honda.values import HondaFlags
 from opendbc.car.logreader import LogReader
 from opendbc.car.structs import car
 from opendbc.car.tests.routes import CarTestRoute, non_tested_cars, routes
+from opendbc.car.toyota.values import ToyotaFlags
 from opendbc.car.values import PLATFORMS, Platform
 from opendbc.safety.tests.libsafety import libsafety_py
 
@@ -238,6 +239,13 @@ class TestCarModelBase(unittest.TestCase):
         if self.safety.safety_rx_hook(packet) != 1:
           failed_addrs[hex(msg.address)] += 1
 
+      # Some logs contain a bus only as panda's returned bus (bus + 128).
+      # Replay returned-only messages, but ignore rejected TX echoes.
+      for msg in can[1]:
+        if msg.src >= 128 and (msg.address, msg.src % 128) not in self.raw_can_keys:
+          packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
+          self.safety.safety_rx_hook(packet)
+
       self.safety.safety_tick_current_safety_config()
       if t > 1e6:
         self.assertTrue(self.safety.safety_config_valid())
@@ -258,6 +266,8 @@ class TestCarModelBase(unittest.TestCase):
       self.skipTest("no need to check panda safety for dashcamOnly")
     if self.CP.notCar:
       self.skipTest("skipping test for notCar")
+    if self.CP.flags & ToyotaFlags.SECOC:
+      self.skipTest("SecOC transmit tests require the vehicle key")
 
     def test_car_controller(car_control):
       now_nanos = 0
@@ -343,7 +353,7 @@ class TestCarModelBase(unittest.TestCase):
       self.skipTest("no need to check panda safety for dashcamOnly")
 
     for can in self.can_msgs[:300]:
-      self.CI.update(normalize_can_buses(can, self.raw_can_keys))
+      self.CI.update(can)
       for msg in (msg for msg in can[1] if msg.src < 64):
         self.safety.safety_rx_hook(libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat))
 
@@ -353,7 +363,7 @@ class TestCarModelBase(unittest.TestCase):
     vehicle_speed_seen = self.CP.steerControlType == SteerControlType.angle and not self.CP.notCar
 
     for idx, can in enumerate(self.can_msgs):
-      CS = self.CI.update(normalize_can_buses(can, self.raw_can_keys)).as_reader()
+      CS = self.CI.update(can).as_reader()
       for msg in (msg for msg in can[1] if msg.src < 64):
         packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
         ret = self.safety.safety_rx_hook(packet)
@@ -408,9 +418,10 @@ class TestCarModelBase(unittest.TestCase):
     self.assertFalse(failed_checks, f"panda safety doesn't agree with CarState: {failed_checks}")
 
 
-for index, (platform, test_route) in enumerate(get_test_cases()):
-  name = f"TestCarModel_{index}_{platform}"
-  globals()[name] = type(name, (TestCarModelBase,), {"platform": platform, "test_route": test_route})
+if os.environ.get("RUN_MODEL_TESTS"):
+  for index, (platform, test_route) in enumerate(get_test_cases()):
+    name = f"TestCarModel_{index}_{platform}"
+    globals()[name] = type(name, (TestCarModelBase,), {"platform": platform, "test_route": test_route})
 
 
 if __name__ == "__main__":
