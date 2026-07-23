@@ -140,7 +140,6 @@ typedef struct {
   const int max_curvature_error;         // rad/m * curvature_to_can, max deviation from measured curvature (0 disables)
   const float curvature_error_min_speed; // min speed for the curvature error check [m/s]
   const int max_steer_power;             // max steer power if EPS supports it (0 disables)
-  const bool inactive_curvature_is_zero; // true resets desired to 0 on violation, false resets to measured curvature
 } CurvatureSteeringLimits;
 
 // parameters for lateral accel/jerk angle limiting using a simple vehicle model
