@@ -142,6 +142,7 @@ class MebLongStateMachine:
     acc_status = self._get_acc_status(CS, CC)
     acc_hold_type = self._get_hold_type(CS, CC)
 
+    # transition to inactive accel and jerks as soon as we enter ESP standstill
     requesting_hold = acc_hold_type == self.acc_hold_type_vals['HALTEN']
     held = requesting_hold and CS.esp_hold_confirmation
     if not CC.enabled or held:
