@@ -1,9 +1,11 @@
 import hashlib
+import json
 import os
 import time
 import unittest
 from collections import Counter, defaultdict
 from pathlib import Path
+from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
 import hypothesis.strategies as st
@@ -37,6 +39,7 @@ JOB_ID = int(os.environ.get("JOB_ID", "0"))
 MAX_EXAMPLES = int(os.environ.get("MAX_EXAMPLES", "300"))
 DOWNLOAD_CACHE_ROOT = Path(os.environ.get("COMMA_CACHE", "/tmp/comma_download_cache"))
 OPENPILOT_CI_URL = "https://commadataci.blob.core.windows.net/openpilotci"
+COMMA_API_URL = "https://api.commadotai.com"
 
 
 def get_test_cases() -> list[tuple[str, CarTestRoute | None]]:
@@ -52,8 +55,26 @@ def get_test_cases() -> list[tuple[str, CarTestRoute | None]]:
 
 
 def get_cached_segment(route: str, segment: int) -> Path:
-  url = f"{OPENPILOT_CI_URL}/{route.replace('|', '/')}/{segment}/rlog.zst"
-  cache_path = DOWNLOAD_CACHE_ROOT / f"{hashlib.sha256(url.encode()).hexdigest()}.zst"
+  for filename in ("rlog.zst", "rlog.bz2"):
+    url = f"{OPENPILOT_CI_URL}/{route.replace('|', '/')}/{segment}/{filename}"
+    try:
+      return get_cached_url(url)
+    except OSError:
+      pass
+
+  canonical_route = route.replace("/", "|")
+  with urlopen(f"{COMMA_API_URL}/v1/route/{quote(canonical_route, safe='')}/files") as response:
+    route_files = json.load(response)
+  for url in route_files["logs"]:
+    path = Path(urlparse(url).path)
+    if path.parent.name == str(segment) and path.name.startswith("rlog."):
+      return get_cached_url(url)
+
+  raise FileNotFoundError(f"no log found for {route}/{segment}")
+
+
+def get_cached_url(url: str) -> Path:
+  cache_path = DOWNLOAD_CACHE_ROOT / f"{hashlib.sha256(url.encode()).hexdigest()}{Path(url).suffix}"
   if not cache_path.exists():
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = cache_path.with_suffix(f".{os.getpid()}.tmp")
@@ -61,6 +82,14 @@ def get_cached_segment(route: str, segment: int) -> Path:
       output.write(response.read())
     tmp_path.replace(cache_path)
   return cache_path
+
+
+def normalize_can_buses(can: tuple[int, list[CanData]], raw_can_keys: set[tuple[int, int]]) -> tuple[int, list[CanData]]:
+  timestamp, messages = can
+  return timestamp, [
+    CanData(msg.address, msg.dat, msg.src % 128) for msg in messages
+    if msg.src < 128 or (msg.address, msg.src % 128) not in raw_can_keys
+  ]
 
 
 class TestCarModelBase(unittest.TestCase):
@@ -137,6 +166,7 @@ class TestCarModelBase(unittest.TestCase):
       raise Exception(f"missing test route for {cls.platform}")
 
     car_fw, cls.can_msgs, alpha_long = cls.get_testing_data()
+    cls.raw_can_keys = {(msg.address, msg.src) for _, messages in cls.can_msgs for msg in messages if msg.src < 128}
     cls.CarInterface = interfaces[cls.platform]
     cls.CP = cls.CarInterface.get_params(cls.platform, cls.fingerprint, car_fw, alpha_long, False, docs=False)
     assert cls.CP
@@ -174,7 +204,7 @@ class TestCarModelBase(unittest.TestCase):
     can_invalid_cnt = 0
     CC = structs.CarControl().as_reader()
     for i, msg in enumerate(self.can_msgs):
-      CS = self.CI.update(msg)
+      CS = self.CI.update(normalize_can_buses(msg, self.raw_can_keys))
       self.CI.apply(CC, msg[0])
       if i > 250:
         can_invalid_cnt += not CS.canValid
@@ -186,7 +216,7 @@ class TestCarModelBase(unittest.TestCase):
 
     error_cnt = 0
     for i, msg in enumerate(self.can_msgs[self.elm_frame:]):
-      rr: structs.RadarData | None = RI.update(msg)
+      rr: structs.RadarData | None = RI.update(normalize_can_buses(msg, self.raw_can_keys))
       if rr is not None and i > 50:
         error_cnt += rr.errors.canError
     self.assertEqual(error_cnt, 0)
@@ -313,7 +343,7 @@ class TestCarModelBase(unittest.TestCase):
       self.skipTest("no need to check panda safety for dashcamOnly")
 
     for can in self.can_msgs[:300]:
-      self.CI.update(can)
+      self.CI.update(normalize_can_buses(can, self.raw_can_keys))
       for msg in (msg for msg in can[1] if msg.src < 64):
         self.safety.safety_rx_hook(libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat))
 
@@ -323,7 +353,7 @@ class TestCarModelBase(unittest.TestCase):
     vehicle_speed_seen = self.CP.steerControlType == SteerControlType.angle and not self.CP.notCar
 
     for idx, can in enumerate(self.can_msgs):
-      CS = self.CI.update(can).as_reader()
+      CS = self.CI.update(normalize_can_buses(can, self.raw_can_keys)).as_reader()
       for msg in (msg for msg in can[1] if msg.src < 64):
         packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
         ret = self.safety.safety_rx_hook(packet)
