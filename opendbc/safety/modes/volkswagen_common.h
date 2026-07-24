@@ -47,12 +47,12 @@ static void volkswagen_common_init(void) {
   return;
 }
 
-static uint32_t volkswagen_mqb_meb_get_checksum(const CANPacket_t *msg) {
+static uint32_t volkswagen_mqb_meb_mlb_get_checksum(const CANPacket_t *msg) {
   return (uint8_t)msg->data[0];
 }
 
-static uint8_t volkswagen_mqb_meb_get_counter(const CANPacket_t *msg) {
-  // MQB/MEB message counters are consistently found at LSB 8.
+static uint8_t volkswagen_mqb_meb_mlb_get_counter(const CANPacket_t *msg) {
+  // MQB/MEB/MLB message counters are consistently found at LSB 8.
   return (uint8_t)msg->data[1] & 0xFU;
 }
 
@@ -68,7 +68,7 @@ static uint32_t volkswagen_mqb_meb_compute_crc(const CANPacket_t *msg) {
     crc = volkswagen_crc8_lut_8h2f[crc];
   }
 
-  uint8_t counter = volkswagen_mqb_meb_get_counter(msg);
+  uint8_t counter = volkswagen_mqb_meb_mlb_get_counter(msg);
   if (msg->addr == MSG_LH_EPS_03) {
     crc ^= (uint8_t[]){0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5}[counter];
   } else if (msg->addr == MSG_ESP_05) {
@@ -107,4 +107,19 @@ static int volkswagen_mlb_mqb_steering_control_torque(const CANPacket_t *msg) {
     desired_torque *= -1;
   }
   return desired_torque;
+}
+
+// XOR over the payload, skipping the byte the checksum itself lives in.
+// Mirrors xor_checksum() in opendbc/car/volkswagen/
+static uint8_t volkswagen_xor_checksum(const CANPacket_t *msg, unsigned int checksum_byte, uint8_t initial_value) {
+  unsigned int len = GET_LEN(msg);
+  uint8_t checksum = initial_value;
+
+  for (unsigned int i = 0U; i < len; i++) {
+    if (i != checksum_byte) {
+      checksum ^= (uint8_t)msg->data[i];
+    }
+  }
+
+  return checksum;
 }
