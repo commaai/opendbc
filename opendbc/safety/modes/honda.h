@@ -329,7 +329,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   static CanMsg HONDA_RADARLESS_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x296, 2, 4, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}};  // Bosch radarless
 
   static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = true}, {0x1C8, 0, 8, .check_relay = true},
-                                                  {0x30C, 0, 8, .check_relay = true}};  // Bosch radarless w/ gas and brakes
+                                                  {0x30C, 0, 8, .check_relay = true}, {0x296, 2, 4, .check_relay = false}};  // Bosch radarless w/ gas and brakes
 
   static CanMsg HONDA_CANFD_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x296, 0, 4, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}};
 
@@ -426,10 +426,22 @@ const safety_hooks honda_nidec_hooks = {
   .compute_checksum = honda_compute_checksum,
 };
 
+static bool honda_bosch_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
+
+  // For radarless, OP sends SCM_BUTTONS (0x296) when engaged. Only forward when disengaged.
+  if (honda_bosch_radarless && controls_allowed && (bus_num == 0) && (addr == 0x296)) {
+    block_msg = true;
+  }
+
+  return block_msg;
+}
+
 const safety_hooks honda_bosch_hooks = {
   .init = honda_bosch_init,
   .rx = honda_rx_hook,
   .tx = honda_tx_hook,
+  .fwd = honda_bosch_fwd_hook,
   .get_counter = honda_get_counter,
   .get_checksum = honda_get_checksum,
   .compute_checksum = honda_compute_checksum,
