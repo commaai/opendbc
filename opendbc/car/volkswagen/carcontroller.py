@@ -41,6 +41,9 @@ class CarController(CarControllerBase):
     self.packer_pt = CANPacker(dbc_names[Bus.pt])
     self.aeb_available = not CP.flags & VolkswagenFlags.PQ
 
+    if CP.flags & VolkswagenFlags.MEB:
+      self.meb_long_state = mebcan.MebLongStateMachine(self.CP, self.CCP)
+
     if CP.flags & VolkswagenFlags.PQ:
       self.CCS = pqcan
     elif CP.flags & VolkswagenFlags.MLB:
@@ -52,8 +55,6 @@ class CarController(CarControllerBase):
     self.apply_curvature_last = 0.
     self.steering_power_last = 0
     self.accel_last = 0.
-    self.long_override_counter = 0
-    self.long_disabled_counter = 0
     self.lead_distance_bars_last = None
     self.distance_bar_frame = 0
     self.gra_acc_counter_last = None
@@ -135,29 +136,16 @@ class CarController(CarControllerBase):
 
     if self.CP.openpilotLongitudinalControl:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
-        stopping = actuators.longControlState == LongCtrlState.stopping
-
         if self.CP.flags & VolkswagenFlags.MEB:
-          # only send ACC_HMS_RELEASE when in cruise standstill and want to resume
-          starting = actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
-          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0)
-
-          long_override = CC.cruiseControl.override or CS.out.gasPressed
-          self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
-          long_override_begin = long_override and self.long_override_counter < 5
-
-          self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
-          long_disabling = not CC.enabled and self.long_disabled_counter < 5
-
-          acc_control = mebcan.get_acc_control(CS.out, CC, long_override)
-          acc_hold_type = mebcan.get_acc_hold_type(CS.out, CC, starting, stopping,
-                                                   CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
+          accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
+          accel, acc_status, acc_hold_type, braking_to_stop = self.meb_long_state.update(CS, CC, accel)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
-                                                           accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
-                                                           CS.out.vEgoRaw * CV.MS_TO_KPH, long_override, CS.travel_assist_available))
+                                                           accel, acc_status, acc_hold_type, braking_to_stop,
+                                                           CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available))
           self.accel_last = accel
 
         else:
+          stopping = actuators.longControlState == LongCtrlState.stopping
           acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
           starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < 0.25)
@@ -189,8 +177,7 @@ class CarController(CarControllerBase):
         lead_distance = 0
         if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:
           lead_distance = 8
-        acc_hud_status = mebcan.get_acc_hud_status(CS.out, CC, CC.cruiseControl.override or CS.out.gasPressed)
-        can_sends.append(mebcan.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH,
+        can_sends.append(mebcan.create_acc_hud_control(self.packer_pt, self.CAN.pt, self.meb_long_state.acc_status, hud_control.setSpeed * CV.MS_TO_KPH,
                                                        hud_control.leadVisible, hud_control.leadDistanceBars + 1, show_distance_bars,
                                                        CS.esp_hold_confirmation, lead_distance, 0, fcw_alert))
 

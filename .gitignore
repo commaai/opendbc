@@ -9,7 +9,6 @@
 *.dylib
 .*.swp
 .DS_Store
-.hypothesis
 *.egg-info/
 *.html
 *.gcda
