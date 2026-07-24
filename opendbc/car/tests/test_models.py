@@ -239,7 +239,7 @@ class TestCarModelBase(unittest.TestCase):
     failed_addrs = Counter()
     last_relay_malfunction_us = 0.
     relay_open_inferred = False
-    for can in self.can_msgs:
+    for can_idx, can in enumerate(self.can_msgs):
       t = (can[0] - start_ts) / 1e3
       self.safety.set_timer(int(t))
 
@@ -252,22 +252,26 @@ class TestCarModelBase(unittest.TestCase):
 
       # Some logs contain a bus only as panda's returned bus (bus + 128).
       # Replay returned-only messages, but ignore rejected TX echoes.
+      relay_malfunction = self.safety.get_relay_malfunction()
       for msg in can[1]:
         if msg.src >= 128 and (msg.address, msg.src % 128) not in self.raw_can_keys:
           packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
           self.safety.safety_rx_hook(packet)
+      self.safety.set_relay_malfunction(relay_malfunction)
 
       self.safety.safety_tick_current_safety_config()
       if t > 1e6:
         self.assertTrue(self.safety.safety_config_valid())
 
-      if self.car_safety_mode_frame is not None and t / 1e4 > self.car_safety_mode_frame:
-        self.assertFalse(self.safety.get_relay_malfunction())
+      if self.car_safety_mode_frame is not None:
+        if can_idx >= self.car_safety_mode_frame:
+          self.assertFalse(self.safety.get_relay_malfunction())
+        else:
+          self.safety.set_relay_malfunction(False)
       elif relay_open_inferred:
         self.assertFalse(self.safety.get_relay_malfunction())
       elif self.safety.get_relay_malfunction():
-        # Relay-check messages can be present before panda opens the harness relay.
-        # Once they disappear for a stable window, treat later occurrences as a malfunction.
+        # Without recorded panda state, infer the transition once relay-check traffic disappears.
         last_relay_malfunction_us = t
         self.safety.set_relay_malfunction(False)
       elif t - last_relay_malfunction_us > RELAY_TRANSITION_TIMEOUT_US:

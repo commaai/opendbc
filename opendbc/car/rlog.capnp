@@ -12,8 +12,29 @@ struct CanData {
   src @3 :UInt8;
 }
 
+# Field types through safetyModel preserve the historical data layout.
+struct PandaState {
+  voltage @0 :UInt32;
+  current @1 :UInt32;
+  ignitionLine @2 :Bool;
+  controlsAllowed @3 :Bool;
+  gasInterceptorDetectedDEPRECATED @4 :Bool;
+  startedSignalDetectedDEPRECATED @5 :Bool;
+  hasGpsDEPRECATED @6 :Bool;
+  rxBufferOverflow @7 :UInt32;
+  txBufferOverflow @8 :UInt32;
+  gmlanSendErrsDEPRECATED @9 :UInt32;
+  pandaType @10 :UInt16;
+  fanSpeedRpmDEPRECATED @11 :UInt16;
+  usbPowerModeDEPRECATED @12 :UInt16;
+  ignitionCan @13 :Bool;
+  safetyModel @14 :Car.CarParams.SafetyModel;
+}
+
 struct Event {
   logMonoTime @0 :UInt64;
+  # This field is outside the union in cereal; placing it inside shifts later discriminants.
+  valid @67 :Bool = true;
 
   union {
     initData @1 :Void;
@@ -27,7 +48,7 @@ struct Event {
     reserved9 @9 :Void;
     reserved10 @10 :Void;
     reserved11 @11 :Void;
-    reserved12 @12 :Void;
+    pandaStateDEPRECATED @12 :PandaState;
     reserved13 @13 :Void;
     reserved14 @14 :Void;
     reserved15 @15 :Void;
@@ -82,8 +103,19 @@ struct Event {
     reserved64 @64 :Void;
     reserved65 @65 :Void;
     reserved66 @66 :Void;
-    reserved67 @67 :Void;
     reserved68 @68 :Void;
     carParams @69 :Car.CarParams;
+    reserved70 @70 :Void;
+    reserved71 @71 :Void;
+    reserved72 @72 :Void;
+    reserved73 @73 :Void;
+    reserved74 @74 :Void;
+    reserved75 @75 :Void;
+    reserved76 @76 :Void;
+    reserved77 @77 :Void;
+    reserved78 @78 :Void;
+    reserved79 @79 :Void;
+    reserved80 @80 :Void;
+    pandaStates @81 :List(PandaState);
   }
 }
