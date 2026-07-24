@@ -11,9 +11,6 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
-import hypothesis.strategies as st
-from hypothesis import Phase, given, settings
-
 from opendbc.car import DT_CTRL, gen_empty_fingerprint, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
@@ -26,6 +23,7 @@ from opendbc.car.toyota.values import ToyotaFlags
 from opendbc.car.values import PLATFORMS, Platform
 from opendbc.car.volkswagen.values import VolkswagenFlags
 from opendbc.safety.tests.libsafety import libsafety_py
+from opendbc.testing import fuzzy_test
 
 
 SafetyModel = car.CarParams.SafetyModel
@@ -41,7 +39,6 @@ ANGLE_DEG_TO_CAN = {
 
 NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
 JOB_ID = int(os.environ.get("JOB_ID", "0"))
-MAX_EXAMPLES = int(os.environ.get("MAX_EXAMPLES", "300"))
 RELAY_TRANSITION_TIMEOUT_US = 10_000_000
 DOWNLOAD_CACHE_ROOT = Path(os.environ.get("COMMA_CACHE", "/tmp/comma_download_cache"))
 OPENPILOT_CI_URL = "https://commadataci.blob.core.windows.net/openpilotci"
@@ -322,15 +319,14 @@ class TestCarModelBase(unittest.TestCase):
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
 
-  @settings(max_examples=MAX_EXAMPLES, deadline=None, phases=(Phase.reuse, Phase.generate, Phase.shrink))
-  @given(data=st.data())
-  def test_panda_safety_carstate_fuzzy(self, data):
+  @fuzzy_test(max_examples=300)
+  def test_panda_safety_carstate_fuzzy(self, fuzzy):
     if self.CP.dashcamOnly:
       self.skipTest("no need to check panda safety for dashcamOnly")
 
     valid_addrs = [(addr, bus, size) for bus, addrs in self.fingerprint.items() for addr, size in addrs.items()]
-    address, bus, size = data.draw(st.sampled_from(valid_addrs))
-    msgs = data.draw(st.lists(st.binary(min_size=size, max_size=size), min_size=20))
+    address, bus, size = fuzzy.choice(valid_addrs)
+    msgs = fuzzy.list(lambda: fuzzy.binary(min_size=size, max_size=size), min_size=20)
     vehicle_speed_seen = self.CP.steerControlType == SteerControlType.angle and not self.CP.notCar
 
     for n, dat in enumerate(msgs):
