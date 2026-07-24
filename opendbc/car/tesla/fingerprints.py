@@ -11,6 +11,7 @@ FW_VERSIONS = {
       b'TeM3_E014p10_0.0.0 (16),EL014.17.00',
       b'TeM3_ES014p11_0.0.0 (25),ES014.19.0',
       b'TeM3_E014p10_0.0.0 (24),E014.20.2',
+      b'TeM3_E014p10_0.0.0 (24),EL014.20.2',
       b'TeMYG4_DCS_Update_0.0.0 (13),E4014.28.1',
       b'TeMYG4_DCS_Update_0.0.0 (9),E4014.26.0',
       b'TeMYG4_Legacy3Y_0.0.0 (2),E4015.02.0',
@@ -30,6 +31,7 @@ FW_VERSIONS = {
     (Ecu.eps, 0x730, None): [
       b'TeM3_E014p10_0.0.0 (16),Y002.18.00',
       b'TeM3_E014p10_0.0.0 (16),YP002.18.00',
+      b'TeM3_E014p10_0.0.0 (24),Y002.21.2',
       b'TeM3_E014p10_0.0.0 (24),YP002.21.2',
       b'TeM3_ES014p11_0.0.0 (16),YS002.17',
       b'TeM3_ES014p11_0.0.0 (25),YS002.19.0',
@@ -43,6 +45,7 @@ FW_VERSIONS = {
       b'TeMYG4_Legacy3Y_0.0.0 (6),Y4003.04.0',
       b'TeMYG4_Main_0.0.0 (77),Y4003.05.4',
       b'TeMYG4_Main_0.0.0 (78),Y4003.06.0',
+      b'TeMYG4_Main_0.0.0 (78),Y4OC003.08.1',
       b'TeMYG4_SingleECU_0.0.0 (28),Y4S002.23.0',
       b'TeMYG4_SingleECU_0.0.0 (33),Y4S002.26',
     ],
