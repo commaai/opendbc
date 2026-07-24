@@ -56,16 +56,25 @@ class CarControllerParams:
 
 
 class HyundaiSafetyFlags(IntFlag):
+  # common flags, shared across all Hyundai safety modes
   EV_GAS = 1
   HYBRID_GAS = 2
   LONG = 4
   CAMERA_SCC = 8
-  CANFD_LKA_STEER_MSG = 16
-  CANFD_ALT_BUTTONS = 32
-  ALT_LIMITS = 64
-  CANFD_LKA_STEER_MSG_ALT = 128
   FCEV_GAS = 256
+
+
+class HyundaiCanSafetyFlags(IntFlag):
+  # CAN-specific flags
+  ALT_LIMITS = 64
   ALT_LIMITS_2 = 512
+
+
+class HyundaiCanFDSafetyFlags(IntFlag):
+  # CAN FD-specific flags
+  LKA_STEER_MSG = 16
+  ALT_BUTTONS = 32
+  LKA_STEER_MSG_ALT = 128
 
 
 # Hyundai/Kia/Genesis SCC (Smart Cruise Control) and steering architecture:

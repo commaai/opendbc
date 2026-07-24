@@ -57,6 +57,8 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 };
 
 static bool hyundai_legacy = false;
+static bool hyundai_alt_limits = false;
+static bool hyundai_alt_limits_2 = false;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
 
@@ -264,7 +266,13 @@ static safety_config hyundai_init(uint16_t param) {
     HYUNDAI_LONG_COMMON_TX_MSGS(2)
   };
 
+  // CAN-specific flags, own namespace
+  const uint16_t HYUNDAI_CAN_PARAM_ALT_LIMITS = 64;
+  const uint16_t HYUNDAI_CAN_PARAM_ALT_LIMITS_2 = 512;
+
   hyundai_common_init(param);
+  hyundai_alt_limits = GET_FLAG(param, HYUNDAI_CAN_PARAM_ALT_LIMITS);
+  hyundai_alt_limits_2 = GET_FLAG(param, HYUNDAI_CAN_PARAM_ALT_LIMITS_2);
   hyundai_legacy = false;
 
   safety_config ret;
