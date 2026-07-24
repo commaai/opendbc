@@ -1,5 +1,3 @@
-from hypothesis import settings, given, strategies as st
-
 import unittest
 
 from opendbc.car import gen_empty_fingerprint
@@ -13,6 +11,7 @@ from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR
                                          UNSUPPORTED_LONGITUDINAL_CAR, PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
                                          HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+from opendbc.testing import fuzzy_test
 
 Ecu = CarParams.Ecu
 
@@ -118,13 +117,10 @@ class TestHyundaiFingerprint(unittest.TestCase):
           assert all(fw.startswith(expected_fw_prefix) for fw in fws), \
                           f"FW from unexpected request in database: {(ecu, fws)}"
 
-  @settings(max_examples=100)
-  @given(data=st.data())
-  def test_platform_codes_fuzzy_fw(self, data):
+  @fuzzy_test(max_examples=100)
+  def test_platform_codes_fuzzy_fw(self, fuzzy):
     """Ensure function doesn't raise an exception"""
-    fw_strategy = st.lists(st.binary())
-    fws = data.draw(fw_strategy)
-    get_platform_codes(fws)
+    get_platform_codes(fuzzy.list(fuzzy.binary))
 
   def test_expected_platform_codes(self):
     # Ensures we don't accidentally add multiple platform codes for a car unless it is intentional
