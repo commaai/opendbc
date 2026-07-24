@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+
 import hashlib
 import json
 import os
+import sys
 import time
 import unittest
 from collections import Counter, defaultdict
@@ -440,11 +443,15 @@ class TestCarModelBase(unittest.TestCase):
     self.assertFalse(failed_checks, f"panda safety doesn't agree with CarState: {failed_checks}")
 
 
-if os.environ.get("RUN_MODEL_TESTS"):
+DIRECTLY_CALLED = Path(sys.argv[0]).resolve() == Path(__file__).resolve()
+
+if DIRECTLY_CALLED:
   for index, (platform, test_route) in enumerate(get_test_cases()):
     name = f"TestCarModel_{index}_{platform}"
     globals()[name] = type(name, (TestCarModelBase,), {"platform": platform, "test_route": test_route})
 
 
 if __name__ == "__main__":
-  unittest.main()
+  from unittest_parallel.main import main
+
+  main(["-j0", "--level", "class", "-s", str(Path(__file__).parent), "-p", Path(__file__).name])
