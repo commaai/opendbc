@@ -206,7 +206,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_curvature_violation(self):
-    # if violation occurs, MEB resets desired_curvature_last to measured curvature
+    # if violation occurs, desired_curvature_last is reset to 0
     meas = self.MAX_CURVATURE_TEST / 4
     self.safety.set_controls_allowed(True)
     self._reset_curvature_measurement(meas)
@@ -215,8 +215,8 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     # cause a violation by sending a command far from prev=0
     self.assertFalse(self._tx(self._curvature_cmd_msg(self.MAX_CURVATURE_TEST, steer_req=True, power=50)))
 
-    # prev should track curvature_meas
-    self.assertEqual(self.safety.get_curvature_meas_min(), self.safety.get_desired_curvature_last())
+    # prev should be reset to 0
+    self.assertEqual(0, self.safety.get_desired_curvature_last())
 
   def test_curvature_cmd_when_not_steering(self):
     # Tests that only a zero curvature is allowed while the steer

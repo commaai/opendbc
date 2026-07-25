@@ -93,7 +93,6 @@ jobs:
         git commit -m "car_diff refs for ${{ github.sha }}" || echo "No changes to commit"
         git push origin car_diff
 
-  # TODO: this needs to move to opendbc
   test_models:
     name: test models
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
@@ -105,26 +104,16 @@ jobs:
       CI: 1
     steps:
     - uses: actions/checkout@v4
-      with:
-        repository: 'commaai/openpilot'
-        ref: 'master'
-        submodules: true
-    - run: ./tools/op.sh setup
-    - run: rm -rf opendbc_repo/
-    - uses: actions/checkout@v4
-      with:
-        path: opendbc_repo
+    - run: ./setup.sh
     - name: Cache test routes
       id: routes-cache
       uses: actions/cache@v4
       with:
         path: /tmp/comma_download_cache
-        key: car_models-${{ hashFiles('openpilot/selfdrive/car/tests/test_models.py', 'opendbc/car/tests/routes.py') }}-${{ matrix.job }}
-    - name: Build openpilot
-      run: scons -j$(nproc) openpilot/common/ openpilot/cereal/ openpilot/selfdrive/pandad/ msgq_repo/ opendbc_repo
+        key: car_models-${{ hashFiles('opendbc/car/tests/test_models.py', 'opendbc/car/tests/routes.py') }}-${{ matrix.job }}
     - name: Test car models
       timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.routes-cache.outputs.cache-hit == 'true') && 2 || 6 }}
-      run: MAX_EXAMPLES=1 pytest --continue-on-collection-errors --durations=0 --durations-min=5 -n logical openpilot/selfdrive/car/tests/test_models.py
+      run: source .venv/bin/activate && MAX_EXAMPLES=1 opendbc/car/tests/test_models.py
       env:
         NUM_JOBS: 4
         JOB_ID: ${{ matrix.job }}
