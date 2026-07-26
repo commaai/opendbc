@@ -284,7 +284,6 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = bool(pt_cp.vl["ESC_50"]["Standstill"])
     self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
     ret.stockFcw = bool(ext_cp.vl["AWV_03"]["FCW_Active"])
-    ret.stockAeb = bool(ext_cp.vl["AWV_03"]["AEB_Active"])
 
     ret.cruiseState.available = pt_cp.vl["Motor_51"]["TSK_Status"] in (2, 3, 4, 5)
     ret.cruiseState.enabled = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
