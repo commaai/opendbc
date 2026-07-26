@@ -1,4 +1,5 @@
 import math
+from functools import cache
 
 from opendbc.car.carlog import carlog
 from opendbc.can.dbc import DBC, Signal, SignalType
@@ -15,26 +16,37 @@ class CANPacker:
       carlog.error(f"msg not found for {address=}")
       return bytearray()
     dat = bytearray(msg.size)
-    counter_set = False
+    signal_values: list[tuple[Signal, float]] = []
     for name, value in values.items():
       sig = msg.sigs.get(name)
       if sig is None:
         carlog.error(f"unknown signal {name=} in {msg.name}")
         continue
+      signal_values.append((sig, value))
+
+    counter_set = any(sig.type == SignalType.COUNTER or sig.name == "COUNTER" for sig, _ in signal_values)
+    sig_counter = next((s for s in msg.sigs.values() if s.type == SignalType.COUNTER or s.name == "COUNTER"), None)
+    sig_checksum = next((s for s in msg.sigs.values() if s.type > SignalType.COUNTER), None)
+
+    written_signals = [sig for sig, _ in signal_values]
+    if sig_counter and not counter_set:
+      written_signals.append(sig_counter)
+    if sig_checksum and sig_checksum.calc_checksum:
+      written_signals.append(sig_checksum)
+    assert_no_signal_overlap(msg.size, written_signals)
+
+    for sig, value in signal_values:
       ival = int(math.floor((value - sig.offset) / sig.factor + 0.5))
       if ival < 0:
         ival = (1 << sig.size) + ival
       set_value(dat, sig, ival)
       if sig.type == SignalType.COUNTER or sig.name == "COUNTER":
         self.counters[address] = int(value)
-        counter_set = True
-    sig_counter = next((s for s in msg.sigs.values() if s.type == SignalType.COUNTER or s.name == "COUNTER"), None)
     if sig_counter and not counter_set:
       if address not in self.counters:
         self.counters[address] = 0
       set_value(dat, sig_counter, self.counters[address])
       self.counters[address] = (self.counters[address] + 1) % (1 << sig_counter.size)
-    sig_checksum = next((s for s in msg.sigs.values() if s.type > SignalType.COUNTER), None)
     if sig_checksum and sig_checksum.calc_checksum:
       checksum = sig_checksum.calc_checksum(address, sig_checksum, dat)
       set_value(dat, sig_checksum, checksum)
@@ -53,6 +65,34 @@ class CANPacker:
     if len(dat) == 0:
       return 0, b'', bus
     return addr, bytes(dat), bus
+
+
+def assert_no_signal_overlap(msg_size: int, signals: list[Signal]) -> None:
+  signal_masks: dict[str, int] = {}
+  written_mask = 0
+  for sig in signals:
+    if sig.name in signal_masks:
+      continue
+
+    mask = get_signal_mask(msg_size, sig.lsb, sig.size, sig.is_little_endian)
+    overlap = written_mask & mask
+    assert not overlap, f"signals {next(name for name, other_mask in signal_masks.items() if other_mask & overlap)} and {sig.name} overlap"
+    signal_masks[sig.name] = mask
+    written_mask |= mask
+
+
+@cache
+def get_signal_mask(msg_size: int, lsb: int, size: int, is_little_endian: bool) -> int:
+  mask = 0
+  i = lsb // 8
+  bits = size
+  while 0 <= i < msg_size and bits > 0:
+    shift = lsb % 8 if (lsb // 8) == i else 0
+    byte_size = min(bits, 8 - shift)
+    mask |= ((1 << byte_size) - 1) << (i * 8 + shift)
+    bits -= byte_size
+    i = i + 1 if is_little_endian else i - 1
+  return mask
 
 
 def set_value(msg: bytearray, sig: Signal, ival: int) -> None:

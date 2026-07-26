@@ -47,6 +47,36 @@ class TestCanParserPacker(unittest.TestCase):
       parser.update([0, [msg]])
       assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == ((cnt + i) % 256)
 
+  def test_packer_overlapping_signals(self):
+    packer = CANPacker(TEST_DBC)
+
+    # Overlapping signals in a DBC are valid as long as a pack call only writes
+    # one of them.
+    assert packer.make_can_msg("OVERLAPPING_SIGNALS", 0, {"LE_16": 0xFFFF})[1][:2] == b"\xff\xff"
+    packer.make_can_msg("OVERLAPPING_SIGNALS", 0, {"LE_16": 1, "BE_16": 2, "INDEPENDENT": 3})
+
+    for values in (
+      {"LE_16": 1, "LE_8": 2},
+      {"BE_16": 1, "BE_8": 2},
+      {"BE_16": 1, "CROSS_ENDIAN": 2},
+    ):
+      with self.assertRaisesRegex(AssertionError, "signals .* overlap"):
+        packer.make_can_msg("OVERLAPPING_SIGNALS", 0, values)
+
+    # Automatically populated fields count as writes too.
+    with self.assertRaisesRegex(AssertionError, "signals .* overlap"):
+      packer.make_can_msg("OVERLAPPING_COUNTER", 0, {"VALUE": 1})
+
+  def test_parser_overlapping_signals(self):
+    packer = CANPacker(TEST_DBC)
+    parser = CANParser(TEST_DBC, [("OVERLAPPING_SIGNALS", 0)], 0)
+
+    msg = packer.make_can_msg("OVERLAPPING_SIGNALS", 0, {"LE_16": 0xABCD})
+    parser.update([0, [msg]])
+
+    assert parser.vl["OVERLAPPING_SIGNALS"]["LE_16"] == 0xABCD
+    assert parser.vl["OVERLAPPING_SIGNALS"]["LE_8"] == 0xAB
+
   def test_parser_can_valid(self):
     msgs = [("CAN_FD_MESSAGE", 10), ]
     packer = CANPacker(TEST_DBC)
