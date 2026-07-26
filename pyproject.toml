@@ -32,9 +32,6 @@ testing = [
   "cpplint",
   "codespell",
 ]
-docs = [
-  "Jinja2",
-]
 examples = [
   "inputs",
 ]
