@@ -266,18 +266,23 @@ BO_ 252 ESC_51: 64 XXX
 BO_ 219 AWV_03: 48 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ SET_ME_126 : 17|7@1+ (1,0) [0|127] "" XXX
- SG_ SET_ME_30 : 27|5@1+ (1,0) [0|31] "" XXX
- SG_ Timer_SET_ME_254 : 32|8@1+ (1,0) [0|255] "" XXX
- SG_ Speed_SET_ME_254 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ AEB_Object_Status : 12|3@1+ (1,0) [0|7] "" XXX
+ SG_ VRU_Detected : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_17 : 17|7@1+ (1,0) [0|127] "" XXX
+ SG_ AEB_Object_Status_B : 24|3@1+ (1,0) [0|7] "" XXX
+ SG_ Unknown_27 : 27|5@1+ (1,0) [0|31] "" XXX
+ SG_ SET_ME_254 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ AEB_TTC_Countdown : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ Active : 64|1@1+ (1,0) [0|1] "" XXX
  SG_ AEB_Active : 65|1@1+ (1,0) [0|1] "" XXX
- SG_ Accel_SET_ME_1023 : 66|10@1+ (1,0) [0|1023] "" XXX
+ SG_ AEB_Target_Decel : 66|10@1+ (0.01,-10.23) [-10.23|0] "Unit_MeterPerSeconSquar" XXX
  SG_ FCW_Active : 76|1@1+ (1,0) [0|1] "" XXX
- SG_ Timer_2_SET_ME_255 : 80|8@1+ (1,0) [0|255] "" XXX
- SG_ Timer_3_SET_ME_126 : 93|7@1+ (1,0) [0|127] "" XXX
- SG_ SET_ME_15 : 100|4@1+ (1,0) [0|15] "" XXX
- SG_ SET_ME_2 : 128|4@1+ (1,0) [0|15] "" XXX
+ SG_ Unknown_80 : 80|8@1+ (1,0) [0|255] "" XXX
+ SG_ AEB_Active_2 : 91|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_93 : 93|7@1+ (1,0) [0|127] "" XXX
+ SG_ Unknown_100 : 100|4@1+ (1,0) [0|15] "" XXX
+ SG_ AWV_Init_Status : 128|2@1+ (1,0) [0|3] "" XXX
+ SG_ AWV_Valid : 192|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 267 Motor_51: 48 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -351,6 +356,11 @@ BO_ 333 ACC_18: 32 XXX
  SG_ Speed : 236|12@1+ (0.1,0) [0|15] "" XXX
  SG_ Accel_Boost : 248|6@1+ (1,0) [0|3] "" XXX
  SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
+
+CM_ BO_ 219 "AEB_Object_Status and AEB_Object_Status_B values 4 and 5/6 coincide with AEB potentially activating";
+CM_ SG_ 219 AEB_Target_Decel "Scale is estimated. Lowest request seen was -6.99";
+CM_ SG_ 219 AEB_TTC_Countdown "Can count down to zero before AEB activates, but may not always precede an AEB or mean it will happen";
+CM_ SG_ 219 VRU_Detected "Commonly high when a pedestrian is seen";
 
 VAL_ 258 Motion_State 1 "Forwards" 2 "Reversing" 3 "Stopped";
 VAL_ 258 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt";
