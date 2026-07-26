@@ -61,6 +61,7 @@ pip3 install -e .[testing,docs]  # install dependencies
 scons -j8                        # build with 8 cores
 unittest-parallel                # run the tests
 lefthook run lint                # run the linter
+python3 -m opendbc.dbc.lint path/to/file.dbc  # check DBC signal layouts
 ```
 
 [`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
