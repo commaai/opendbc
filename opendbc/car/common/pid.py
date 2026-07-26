@@ -1,19 +1,25 @@
 import numpy as np
+from collections.abc import Sequence
 from numbers import Number
 
 
+Gain = Sequence[Sequence[float]] | float
+
+
+def _normalize_gain(gain: Gain) -> Sequence[Sequence[float]]:
+  if isinstance(gain, (int, float)):
+    return ((0.,), (gain,))
+  if isinstance(gain, Number):
+    return ((0.,), (float(gain),))
+  return gain
+
+
 class PIDController:
-  def __init__(self, k_p, k_i, k_f=0., k_d=0., pos_limit=1e308, neg_limit=-1e308, rate=100):
-    self._k_p = k_p
-    self._k_i = k_i
-    self._k_d = k_d
+  def __init__(self, k_p: Gain, k_i: Gain, k_f=0., k_d: Gain = 0., pos_limit=1e308, neg_limit=-1e308, rate=100):
+    self._k_p = _normalize_gain(k_p)
+    self._k_i = _normalize_gain(k_i)
+    self._k_d = _normalize_gain(k_d)
     self.k_f = k_f   # feedforward gain
-    if isinstance(self._k_p, Number):
-      self._k_p = [[0], [self._k_p]]
-    if isinstance(self._k_i, Number):
-      self._k_i = [[0], [self._k_i]]
-    if isinstance(self._k_d, Number):
-      self._k_d = [[0], [self._k_d]]
 
     self.pos_limit = pos_limit
     self.neg_limit = neg_limit

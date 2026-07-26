@@ -162,6 +162,7 @@ def parameterized_class(attrs, values=None):
   """
   if isinstance(attrs, str):
     attrs = [attrs]
+    assert values is not None
     params = [dict(zip(attrs, v, strict=True)) for v in values]
   else:
     params = attrs

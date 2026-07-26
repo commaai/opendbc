@@ -156,6 +156,7 @@ class TestToyotaFingerprint(unittest.TestCase):
                                         subAddress=0 if sub_addr is None else sub_addr))
 
       CP = CarParams(carFw=car_fw)
+      assert FW_QUERY_CONFIG.match_fw_to_car_fuzzy is not None
       matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, FW_VERSIONS)
       if len(matches) == 1:
         assert list(matches)[0] == platform

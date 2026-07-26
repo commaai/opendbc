@@ -1151,6 +1151,7 @@ class CarSafetyTest(SafetyTest):
       _user_brake_msg = self._user_brake_msg
       get_brake_pressed_prev = self.safety.get_brake_pressed_prev
 
+    assert get_brake_pressed_prev is not None
     self.assertFalse(get_brake_pressed_prev())
     for pressed in [True, False]:
       self._rx(_user_brake_msg(not pressed))

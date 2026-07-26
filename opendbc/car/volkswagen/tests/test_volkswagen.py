@@ -71,6 +71,7 @@ class TestVolkswagenPlatformConfigs(unittest.TestCase):
                               radar_fw in all_radar_fw)
 
               live_fws = {(0x757, None): [radar_fw]}
+              assert FW_QUERY_CONFIG.match_fw_to_car_fuzzy is not None
               matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fws, vin, FW_VERSIONS)
 
               expected_matches = {platform} if should_match else set()

@@ -107,24 +107,8 @@ unresolved-import = "ignore"
 # Intentional LSP violations in subclass method signatures
 invalid-method-override = "ignore"
 
-# Optional callables called without None checks in test code
-call-non-callable = "ignore"
-
 # Complex type narrowing ty doesn't handle well (isinstance with abstract types)
 invalid-argument-type = "ignore"
-
-# Dynamic type patterns (e.g., values converted from Number to list in __init__)
-not-subscriptable = "ignore"
-unsupported-operator = "ignore"
-
-# Return types with complex callable signatures
-invalid-return-type = "ignore"
-
-# unittest TestSuite iteration (TestCase | TestSuite is always iterable in practice)
-not-iterable = "ignore"
-
-# Test class method signature differences
-too-many-positional-arguments = "ignore"
 
 [tool.setuptools]
 include-package-data = true

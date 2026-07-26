@@ -80,6 +80,7 @@ class TestFordFW(unittest.TestCase):
     assert results == {(b"X6A", b"J"), (b"Z6T", b"N"), (b"J6T", b"P"), (b"B5A", b"L")}
 
   def test_fuzzy_match(self):
+    assert FW_QUERY_CONFIG.match_fw_to_car_fuzzy is not None
     for platform, fw_by_addr in FW_VERSIONS.items():
       # Ensure there's no overlaps in platform codes
       for _ in range(20):
@@ -95,6 +96,7 @@ class TestFordFW(unittest.TestCase):
         assert matches == {platform}
 
   def test_match_fw_fuzzy(self):
+    assert FW_QUERY_CONFIG.match_fw_to_car_fuzzy is not None
     offline_fw = {
       (Ecu.eps, 0x730, None): [
         b"L1MC-14D003-AJ\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",

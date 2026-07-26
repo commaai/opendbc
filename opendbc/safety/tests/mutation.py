@@ -365,12 +365,19 @@ def print_live_status(text, *, final=False):
 
 
 def _discover_test_catalog():
+  def iter_test_cases(suite):
+    for test in suite:
+      if isinstance(test, unittest.TestSuite):
+        yield from iter_test_cases(test)
+      else:
+        yield test
+
   loader = unittest.TestLoader()
   catalog = {}
   for test_file in sorted(SAFETY_TESTS_DIR.glob("test_*.py")):
     module_name = ".".join(test_file.relative_to(ROOT).with_suffix("").parts)
     suite = loader.loadTestsFromName(module_name)
-    catalog[test_file.name] = [t.id() for group in suite for t in group]
+    catalog[test_file.name] = [test.id() for test in iter_test_cases(suite)]
   return catalog
 
 

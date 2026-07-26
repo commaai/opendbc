@@ -81,7 +81,8 @@ class IsoTpParallelQuery:
     request_counter = {}
     request_done = {}
     for tx_addr, rx_addr in self.msg_addrs.items():
-      msgs[tx_addr] = self._create_isotp_msg(*tx_addr, rx_addr)
+      addr, sub_addr = tx_addr
+      msgs[tx_addr] = self._create_isotp_msg(addr, sub_addr, rx_addr)
       request_counter[tx_addr] = 0
       request_done[tx_addr] = False
 

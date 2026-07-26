@@ -20,6 +20,7 @@ class TestRivian(unittest.TestCase):
                   vin[3] = "Z"
                 vin = "".join(vin)
 
+                assert FW_QUERY_CONFIG.match_fw_to_car_fuzzy is not None
                 matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy({}, vin, FW_VERSIONS)
                 should_match = year in platform.config.years and not bad
                 assert (matches == {platform}) == should_match, "Bad match"
