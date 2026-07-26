@@ -88,6 +88,7 @@ class FordPlatformConfig(PlatformConfig):
 
   def init(self):
     for car_docs in list(self.car_docs):
+      assert isinstance(car_docs, FordCarDocs)
       if car_docs.hybrid:
         name = f"{car_docs.make} {car_docs.model} Hybrid {car_docs.years}"
         self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))

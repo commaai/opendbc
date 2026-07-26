@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 import numpy as np
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -29,6 +31,12 @@ class Btn:
 
 
 class HondaButtonEnableBase(common.CarSafetyTest):
+  if TYPE_CHECKING:
+    _acc_state_msg: Callable[..., libsafety_py.CANPacket]
+    _button_msg: Callable[..., libsafety_py.CANPacket]
+    cnt_button: int
+    cnt_powertrain_data: int
+    cnt_speed: int
 
   # override these inherited tests since we're using button enable
   def test_disable_control_allowed_from_cruise(self):
@@ -135,6 +143,9 @@ class HondaButtonEnableBase(common.CarSafetyTest):
 
 
 class HondaPcmEnableBase(common.CarSafetyTest):
+  if TYPE_CHECKING:
+    _acc_state_msg: Callable[..., libsafety_py.CANPacket]
+    _button_msg: Callable[..., libsafety_py.CANPacket]
 
   def test_buttons(self):
     """

@@ -148,6 +148,7 @@ class TestCarModelBase(unittest.TestCase):
 
   @classmethod
   def get_testing_data(cls):
+    assert cls.test_route is not None
     test_segments = (2, 1, 0) if cls.test_route.segment is None else (cls.test_route.segment,)
     for segment in test_segments:
       try:

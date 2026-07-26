@@ -96,8 +96,6 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
   def setUpClass(cls):
     super().setUpClass()
     if cls.__name__ in ("TestHyundaiCanfdLFASteering", "TestHyundaiCanfdLFASteeringAltButtons"):
-      cls.packer = None
-      cls.safety = None
       raise unittest.SkipTest
 
   def setUp(self):
@@ -236,7 +234,6 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "TestHyundaiCanfdLFASteeringLongBase":
-      cls.safety = None
       raise unittest.SkipTest
 
   def setUp(self):
@@ -261,7 +258,6 @@ class TestHyundaiCanfdLFASteeringLong(TestHyundaiCanfdLFASteeringLongBase):
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "TestHyundaiCanfdLFASteeringLong":
-      cls.safety = None
       raise unittest.SkipTest
 
 
@@ -270,7 +266,6 @@ class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongB
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "TestHyundaiCanfdLFASteeringLongAltButtons":
-      cls.safety = None
       raise unittest.SkipTest
 
   def setUp(self):

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import unittest
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from opendbc.car.gm.values import GMSafetyFlags
 from opendbc.car.structs import CarParams
@@ -16,7 +18,11 @@ class Buttons:
 
 
 class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafetyTest):
+  if TYPE_CHECKING:
+    packer_chassis: CANPackerSafety
+    _button_msg: Callable[..., libsafety_py.CANPacket]
 
+  BRAKE_BUS: int
   RELAY_MALFUNCTION_ADDRS = {0: (0x180, 0x2CB), 2: (0x184,)}  # ASCMLKASteeringCmd, ASCMGasRegenCmd, PSCMStatus
 
   MAX_POSSIBLE_BRAKE = 2 ** 12

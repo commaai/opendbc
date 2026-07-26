@@ -29,10 +29,11 @@ class RadarInterface(RadarInterfaceBase):
   def update(self, can_strings):
     # in Bosch radar and we are only steering for now, so sleep 0.05s to keep
     # radard at 20Hz and return no points
-    if self.radar_off_can:
+    rcp = self.rcp
+    if rcp is None:
       return super().update(None)
 
-    vls = self.rcp.update(can_strings)
+    vls = rcp.update(can_strings)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
@@ -43,10 +44,12 @@ class RadarInterface(RadarInterfaceBase):
     return rr
 
   def _update(self, updated_messages):
+    rcp = self.rcp
+    assert rcp is not None
     ret = structs.RadarData()
 
     for ii in sorted(updated_messages):
-      cpt = self.rcp.vl[ii]
+      cpt = rcp.vl[ii]
       if ii == 0x400:
         # check for radar faults
         self.radar_fault = cpt['RADAR_STATE'] != 0x79
@@ -63,7 +66,7 @@ class RadarInterface(RadarInterfaceBase):
         if ii in self.pts:
           del self.pts[ii]
 
-    if not self.rcp.can_valid:
+    if not rcp.can_valid:
       ret.errors.canError = True
     if self.radar_fault:
       ret.errors.radarFault = True

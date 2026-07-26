@@ -40,10 +40,11 @@ class RadarInterface(RadarInterfaceBase):
     self.updated_messages = set()
 
   def update(self, can_strings):
-    if self.rcp is None:
+    rcp = self.rcp
+    if rcp is None:
       return super().update(None)
 
-    vls = self.rcp.update(can_strings)
+    vls = rcp.update(can_strings)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
@@ -55,16 +56,18 @@ class RadarInterface(RadarInterfaceBase):
     return rr
 
   def _update(self, updated_messages):
+    rcp = self.rcp
+    assert rcp is not None
     ret = RadarData()
-    if not self.rcp.can_valid:
+    if not rcp.can_valid:
       ret.errors.canError = True
 
-    if self.rcp.vl['STATUS_MSG']['RADAR_STATUS'] != 1 or self.rcp.vl['STATUS_MSG']['RADAR_PRE_FAULT'] != 0:
+    if rcp.vl['STATUS_MSG']['RADAR_STATUS'] != 1 or rcp.vl['STATUS_MSG']['RADAR_PRE_FAULT'] != 0:
       ret.errors.radarUnavailableTemporary = True
 
     for ii in sorted(updated_messages):
       if ii in self.RADAR_A_MSGS:
-        cpt = self.rcp.vl[ii]
+        cpt = rcp.vl[ii]
 
         if cpt['LONG_DIST'] >= 255 or cpt['NEW_TRACK']:
           self.valid_cnt[ii] = 0    # reset counter
@@ -73,7 +76,7 @@ class RadarInterface(RadarInterfaceBase):
         else:
           self.valid_cnt[ii] = max(self.valid_cnt[ii] - 1, 0)
 
-        score = self.rcp.vl[ii+16]['SCORE']
+        score = rcp.vl[ii+16]['SCORE']
         # print ii, self.valid_cnt[ii], score, cpt['VALID'], cpt['LONG_DIST'], cpt['LAT_DIST']
 
         # radar point only valid if it's a valid measurement and score is above 50

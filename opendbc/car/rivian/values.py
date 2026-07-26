@@ -71,6 +71,7 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 
   candidates = set()
   for platform in CAR:
+    assert isinstance(platform.config, RivianPlatformConfig)
     if vin_obj.wmi in platform.config.wmis and line in platform.config.lines and year in platform.config.years:
       candidates.add(platform)
 

@@ -96,12 +96,11 @@ flake8-implicit-str-concat.allow-multiline=false
 "numpy.mean".msg = "Sum and divide. np.mean is slow"
 
 [tool.ty.rules]
-# Ignore rules that produce false positives due to:
-# - Dynamic attributes on LibSafety (loaded from compiled C library)
-# - External dependencies not installed (panda, cereal, openpilot)
-# - capnp dynamically generated types
-possibly-missing-attribute = "ignore"
-unresolved-attribute = "ignore"
+# Dynamic boundaries are suppressed at their declarations or individual uses.
+possibly-missing-attribute = "error"
+unresolved-attribute = "error"
+
+# External dependencies not installed (panda, cereal, openpilot)
 unresolved-import = "ignore"
 
 # Intentional LSP violations in subclass method signatures

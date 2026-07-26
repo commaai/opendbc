@@ -29,24 +29,27 @@ class RadarInterface(RadarInterfaceBase):
       self.rcp = CANParser(DBC[CP.carFingerprint][Bus.radar], [("MEB_Distance_01", 25)], CanBus(CP).cam)
 
   def update(self, can_strings):
-    if self.rcp is None:
+    rcp = self.rcp
+    if rcp is None:
       return super().update(None)
 
-    self.rcp.update(can_strings)
+    rcp.update(can_strings)
 
-    if len(self.rcp.vl_all["MEB_Distance_01"]["Distance_Status"]) == 0:
+    if len(rcp.vl_all["MEB_Distance_01"]["Distance_Status"]) == 0:
       return None
 
     return self._update()
 
   def _update(self):
+    rcp = self.rcp
+    assert rcp is not None
     ret = structs.RadarData()
 
-    if not self.rcp.can_valid:
+    if not rcp.can_valid:
       ret.errors.canError = True
       return ret
 
-    msg = self.rcp.vl["MEB_Distance_01"]
+    msg = rcp.vl["MEB_Distance_01"]
 
     # Can be 3 when radar sensor is obstructed
     if msg["Distance_Status"] != 0:

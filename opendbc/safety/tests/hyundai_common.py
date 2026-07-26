@@ -1,4 +1,6 @@
 import unittest
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -19,6 +21,16 @@ ENABLE_BUTTONS = (Buttons.RESUME, Buttons.SET, Buttons.CANCEL)
 class HyundaiButtonBase:
   BUTTONS_TX_BUS = 0  # tx on this bus, rx on 0
   SCC_BUS = 0  # rx on this bus
+
+  if TYPE_CHECKING:
+    safety: libsafety_py.LibSafety
+    assertEqual: Callable[..., None]
+    assertFalse: Callable[..., None]
+    assertTrue: Callable[..., None]
+    _button_msg: Callable[..., libsafety_py.CANPacket]
+    _pcm_status_msg: Callable[..., libsafety_py.CANPacket]
+    _rx: Callable[[libsafety_py.CANPacket], bool]
+    _tx: Callable[[libsafety_py.CANPacket], bool]
 
   def test_button_sends(self):
     """
@@ -76,11 +88,12 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
   DISABLED_ECU_UDS_MSG: tuple[int, int]
   DISABLED_ECU_ACTUATION_MSG: tuple[int, int]
+  if TYPE_CHECKING:
+    _button_msg: Callable[..., libsafety_py.CANPacket]
 
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "HyundaiLongitudinalBase":
-      cls.safety = None
       raise unittest.SkipTest
 
   # override these tests from CarSafetyTest, hyundai longitudinal uses button enable
