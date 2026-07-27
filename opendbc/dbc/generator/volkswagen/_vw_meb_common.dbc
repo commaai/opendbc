@@ -147,6 +147,27 @@ BO_ 184 EM1_HYB_13: 8 Gateway
 BO_ 192 EM1_01: 32 XXX
  SG_ Schubbetrieb : 79|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 219 AWV_03: 48 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ AEB_Object_Status : 12|3@1+ (1,0) [0|7] "" XXX
+ SG_ VRU_Detected : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_17 : 17|7@1+ (1,0) [0|127] "" XXX
+ SG_ AEB_Object_Status_B : 24|3@1+ (1,0) [0|7] "" XXX
+ SG_ Unknown_27 : 27|5@1+ (1,0) [0|31] "" XXX
+ SG_ SET_ME_254 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ AEB_TTC_Countdown : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ Active : 64|1@1+ (1,0) [0|1] "" XXX
+ SG_ AEB_Active : 65|1@1+ (1,0) [0|1] "" XXX
+ SG_ AEB_Target_Decel : 66|10@1+ (0.01,-10.23) [-10.23|0] "Unit_MeterPerSeconSquar" XXX
+ SG_ FCW_Active : 76|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_80 : 80|8@1+ (1,0) [0|255] "" XXX
+ SG_ AEB_Active_2 : 91|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_93 : 93|7@1+ (1,0) [0|127] "" XXX
+ SG_ Unknown_100 : 100|4@1+ (1,0) [0|15] "" XXX
+ SG_ AWV_Init_Status : 128|2@1+ (1,0) [0|3] "" XXX
+ SG_ AWV_Valid : 192|1@1+ (1,0) [0|1] "" XXX
+
 BO_ 247 MEB_HVEM_02: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ CNT : 8|4@1+ (1,0) [0|15] "" XXX
@@ -1799,6 +1820,10 @@ BO_ 452984911 MEB_Camera_13: 8 XXX
 
 CM_ BO_ 184 "Motorsteuergerät";
 CM_ BO_ 192 "Motorsteuergerät";
+CM_ BO_ 219 "AEB_Object_Status and AEB_Object_Status_B values 4 and 5/6 coincide with AEB potentially activating";
+CM_ SG_ 219 AEB_Target_Decel "Scale is estimated. Lowest request seen was -6.99";
+CM_ SG_ 219 AEB_TTC_Countdown "Can count down to zero before AEB activates, but may not always precede an AEB or mean it will happen";
+CM_ SG_ 219 VRU_Detected "Commonly high when a pedestrian is seen";
 CM_ BO_ 317 "Lenkungssteuergerät";
 CM_ BO_ 517 "Steuergerät für Motorstart";
 CM_ BO_ 522 "Steuergerät für Fahrzeugbewegung";
