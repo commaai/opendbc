@@ -517,6 +517,36 @@ BO_ 869 NVEM_05: 8 Gateway
  SG_ BEM_HYB_DC_uSollLV : 50|6@1+ (0.1,10.6) [10.6|16] "Unit_Volt" DCDC_800V_PAG,DCDC_HV,LE_MLBevo
  SG_ BEM_HYB_DC_uMinLV : 56|8@1+ (0.1,0) [0|25.3] "Unit_Volt" Vector__XXX
 
+BO_ 870 Blinkmodi_02: 8 Gateway
+ SG_ BM_ZV_auf : 12|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_ZV_zu : 13|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_DWA_ein : 14|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_DWA_Alarm : 15|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_Crash : 16|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_Panik : 17|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_Not_Bremsung : 18|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_GDO : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BM_Warnblinken : 20|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_Taxi_Notalarm : 21|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_Telematik : 22|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_links : 23|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_rechts : 24|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ Blinken_li_Fzg_Takt : 25|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ Blinken_re_Fzg_Takt : 26|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ Blinken_li_Kombi_Takt : 27|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ Blinken_re_Kombi_Takt : 28|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ BM_NBA_n_codiert_n_aktiv : 29|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BM_NBA_Status : 30|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ BM_WBT_Beleuchtung : 32|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_HD_Oeffnung_angelernt : 33|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BM_Autobahn : 34|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ BM_Rollenmodus_Blinken : 35|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BM_Recas : 36|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_Wischblinken : 37|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ BM_Telematik_Abbruchgrund : 38|6@1+ (1,0) [0|63] "" Vector__XXX
+ SG_ BM_PiloPa : 44|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ DWA_Alarmquelle : 59|5@1+ (1,0) [0|31] "" ZR_High
+
 BO_ 888 GNSS_04: 8 Gateway
  SG_ GNSS_Nachrichtenpaket_ID4 : 0|2@1+ (1,0) [0|3] "Unit_Bit" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
  SG_ GNSS_Ortung_Zeit_in_GPSWoche : 2|30@1+ (1,0) [0|604800001] "Unit_MilliSecon" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
@@ -1832,7 +1862,9 @@ BO_ 380196013 MEB_AWV_01: 8 XXX
  SG_ Target : 56|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 380196019 MEB_Camera_07: 16 XXX
+BO_ 380196034 MEB_Radar_Unknown_01: 8 XXX
 BO_ 380196036 MEB_Camera_08: 8 XXX
+BO_ 389241616 MEB_Camera_09: 8 XXX
 BO_ 389241617 MEB_Camera_10: 8 XXX
 BO_ 401604687 MEB_Camera_11: 8 XXX
 BO_ 401604695 MEB_PACC_01: 8 XXX
@@ -1848,6 +1880,7 @@ BO_ 441800114 Charging_Optimization: 8 XXX
  SG_ Temperature_Status_Charge : 15|3@1+ (1,0) [0|7] "" XXX
 
 BO_ 452984911 MEB_Camera_13: 8 XXX
+BO_ 452984919 MEB_Unknown_01: 8 XXX
 
 CM_ BO_ 184 "Motorsteuergerät";
 CM_ BO_ 192 "Motorsteuergerät";
