@@ -37,23 +37,6 @@ BO_ 252 ESC_51: 48 XXX
  SG_ Steering_Wheel_CW : 184|8@1+ (1.67,0) [0|255] "" XXX
  SG_ Steering_Wheel_CCW : 192|8@1+ (1.67,0) [0|255] "" XXX
 
-BO_ 258 ESC_50: 48 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Lateral_Accel : 16|8@1+ (0.15,-18.9) [0|255] "Unit_MeterPerSquareSecond" XXX
- SG_ Longitudinal_Accel : 24|10@1+ (0.03125,-16) [0|255] "Unit_MeterPerSquareSecond" XXX
- SG_ Yaw_Rate : 40|14@1+ (0.01,0) [0|16383] "Unit_DegreePerSecond" XXX
- SG_ Yaw_Rate_Sign : 54|1@0+ (1,0) [0|1] "" XXX
- SG_ Brake_Power : 80|8@1+ (1,-100) [0|255] "" XXX
- SG_ Brake_01 : 90|1@0+ (1,0) [0|1] "" XXX
- SG_ Regen_Braking : 123|1@1+ (1,0) [0|7] "" XXX
- SG_ Brake_02 : 125|1@0+ (1,0) [0|1] "" XXX
- SG_ Standstill : 171|1@0+ (1,0) [0|1] "" XXX
- SG_ Motion_State : 171|2@0+ (1,0) [0|1] "" XXX
- SG_ Longitudinal_Speed : 181|10@1+ (0.25,0) [0|255] "Unit_KilometerPerHour" XXX
- SG_ Brake_Power_02 : 226|8@1+ (1,-100) [0|63] "" XXX
- SG_ EPB_Status : 317|3@1+ (1,0) [0|7] "" XXX
-
 BO_ 267 Motor_51: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
