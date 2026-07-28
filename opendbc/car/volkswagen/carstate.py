@@ -298,8 +298,9 @@ class CarState(CarStateBase):
       ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
     accFaulted = (pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7) or
                   ext_cp.vl["ACC_19"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
+    brake_override = bool(pt_cp.vl["VMM_02"]["Driver_Brake_Override"])
     ret.accFaulted = self.update_acc_fault(accFaulted, parking_brake=ret.parkingBrake, in_drive=in_drive,
-                                           brake_pressed=ret.brakePressed)
+                                           brake_override=brake_override)
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(240, pt_cp.vl["SMLS_01"]["BH_Blinker_li"],
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
@@ -406,18 +407,13 @@ class CarState(CarStateBase):
     temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
-  def update_acc_fault(self, acc_fault, parking_brake=False, in_drive=True, brake_pressed=False, recovery_frames_max=300):
-    # Ignore FAULT when not in drive mode and parked
-    # do not show misleading error during ignition in parked state
-    # grant a short time to recover a normal cruise state
-    # after hard brake, stock system prevents acc engage for ~3 seconds
-    fault = acc_fault
-    if (parking_brake and not in_drive) or brake_pressed:
-      fault = False
+  def update_acc_fault(self, acc_fault, parking_brake=False, in_drive=True, brake_override=False, recovery_frames_max=25):
+    # The TSK reports a reversible fault in two states that aren't faults at all: while parked, and for
+    # the duration of a firm driver brake application. VMM_02 flags the latter a frame or two before the
+    # TSK does and clears it a frame or two after, so require the fault to outlive both states.
+    if not acc_fault or (parking_brake and not in_drive) or brake_override:
       self.cruise_recovery_timer = self.frame
-    elif self.frame - self.cruise_recovery_timer < recovery_frames_max:
-      fault = False
-    return fault
+    return self.frame - self.cruise_recovery_timer >= recovery_frames_max
 
   @staticmethod
   def get_can_parsers(CP):
