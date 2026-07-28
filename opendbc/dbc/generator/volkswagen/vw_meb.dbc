@@ -65,7 +65,7 @@ BO_ 313 VMM_02: 32 XXX
  SG_ AEB_Active : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ Driver_Brake_Override : 53|1@1+ (1,0) [0|1] "" XXX
+ SG_ Driver_Brake_Override : 52|2@1+ (1,0) [0|3] "" XXX
  SG_ FCW_Active : 56|1@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressure : 76|11@1+ (1,0) [0|100] "" XXX
 
