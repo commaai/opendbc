@@ -16,26 +16,14 @@ def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power=0)
   return packer.make_can_msg("HCA_03", bus, values)
 
 
-def create_eps_update(packer, bus, eps_stock_values, ea_simulated_torque):
-  values = {s: eps_stock_values[s] for s in [
-    "COUNTER",                     # Sync counter value to EPS output
-    "EPS_Lenkungstyp",             # EPS rack type
-    "EPS_Berechneter_LW",          # Absolute raw steering angle
-    "EPS_VZ_BLW",                  # Raw steering angle sign
-    "EPS_HCA_Status",              # EPS HCA control status
-  ]}
-
-  values.update({
-    # Absolute driver torque input and sign, with EA inactivity mitigation
-    "EPS_Lenkmoment": abs(ea_simulated_torque),
-    "EPS_VZ_Lenkmoment": 1 if ea_simulated_torque < 0 else 0,
-  })
-
-  return packer.make_can_msg("LH_EPS_03", bus, values)
+LDW_LERNMODUS_MAX = 3  # LDW_Lernmodus_links/rechts are 2 bit signals, the CAN packer masks instead of clamping
 
 
 def create_lka_hud_control(packer, bus, ldw_stock_values, lat_active, steering_pressed, hud_alert, hud_control, sound_alert=False):
   display_mode = 1 if lat_active else 0  # travel assist style showing yellow lanes when op is active
+
+  def lane_display(lane_depart, lane_visible):
+    return min(3 + display_mode if lane_depart else 1 + lane_visible + display_mode, LDW_LERNMODUS_MAX)
 
   values = {}
   if len(ldw_stock_values):
@@ -51,8 +39,8 @@ def create_lka_hud_control(packer, bus, ldw_stock_values, lat_active, steering_p
     "LDW_Gong": sound_alert,
     "LDW_Status_LED_gelb": 1 if lat_active and steering_pressed else 0,
     "LDW_Status_LED_gruen": 1 if lat_active and not steering_pressed else 0,
-    "LDW_Lernmodus_links": 3 + display_mode if hud_control.leftLaneDepart else 1 + hud_control.leftLaneVisible + display_mode,
-    "LDW_Lernmodus_rechts": 3 + display_mode if hud_control.rightLaneDepart else 1 + hud_control.rightLaneVisible + display_mode,
+    "LDW_Lernmodus_links": lane_display(hud_control.leftLaneDepart, hud_control.leftLaneVisible),
+    "LDW_Lernmodus_rechts": lane_display(hud_control.rightLaneDepart, hud_control.rightLaneVisible),
     "LDW_Texte": hud_alert,
   })
   return packer.make_can_msg("LDW_02", bus, values)
