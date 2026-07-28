@@ -298,6 +298,17 @@ BO_ 313 VMM_02: 32 XXX
  SG_ Brake_Pressure : 76|11@1+ (1,0) [0|100] "" XXX
  SG_ FCW_Reaction_3 : 88|5@1+ (1,0) [0|31] "" XXX
 
+BO_ 317 QFK_01: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ HCA_No_Override : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ LatCon_HCA_Accept : 17|2@1+ (1,0) [0|3] "" XXX
+ SG_ LatCon_HCA_Status : 20|3@1+ (1,0) [0|15] "" XXX
+ SG_ Steering_Angle_VZ : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ Curvature : 40|15@1+ (6.7e-06,0) [0|65535] "" XXX
+ SG_ Curvature_VZ : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ Steering_Angle : 76|17@1+ (0.00906,0) [0|32767] "" XXX
+
 BO_ 319 PreCrash_02: 8 Gateway
  SG_ PreCrash_02_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ PreCrash_02_BZ : 8|4@1+ (1,0) [0|15] "" Vector__XXX
@@ -321,6 +332,12 @@ BO_ 319 PreCrash_02: 8 Gateway
  SG_ PreCrash_Fo_KSV_verfahren : 51|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ SC_PreCrash_Warnung : 56|4@1+ (1,0) [0|15] "" NightVision
  SG_ SC_PreCrash_Texte : 60|4@1+ (1,0) [0|15] "" Vector__XXX
+
+BO_ 332 Motor_54: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Engine_On : 77|1@1+ (1,0) [0|1] "" XXX
+ SG_ Accelerator_Pressure : 175|8@0+ (0.4,-14.8) [0|100] "Unit_Percent" XXX
 
 BO_ 333 ACC_18: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
