@@ -107,23 +107,6 @@ BO_ 771 HCA_03: 24 XXX
 VAL_ 768 ACC_Event_Wunschgeschw 1023 "None";
 VAL_ 768 ACC_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Detected" 9 "Crossing" 4 "Speed_Limit_Ahead" 10 "Roundabout" 6 "Curve";
 
-BO_ 258 ESC_50: 48 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Lateral_Accel : 16|8@1+ (0.15,-18.9) [0|255] "Unit_MeterPerSquareSecond" XXX
- SG_ Longitudinal_Accel : 24|10@1+ (0.03125,-16) [0|255] "Unit_MeterPerSquareSecond" XXX
- SG_ Yaw_Rate : 40|14@1+ (0.01,0) [0|16383] "Unit_DegreePerSecond" XXX
- SG_ Yaw_Rate_Sign : 54|1@0+ (1,0) [0|1] "" XXX
- SG_ Brake_Power : 80|8@1+ (1,-100) [0|255] "" XXX
- SG_ Brake_01 : 90|1@0+ (1,0) [0|1] "" XXX
- SG_ Regen_Braking : 123|1@1+ (1,0) [0|7] "" XXX
- SG_ Brake_02 : 125|1@0+ (1,0) [0|1] "" XXX
- SG_ Standstill : 171|1@0+ (1,0) [0|1] "" XXX
- SG_ Motion_State : 171|2@0+ (1,0) [0|1] "" XXX
- SG_ Longitudinal_Speed : 181|10@1+ (0.25,0) [0|255] "Unit_KilometerPerHour" XXX
- SG_ Brake_Power_02 : 226|8@1+ (1,-100) [0|63] "" XXX
- SG_ EPB_Status : 317|3@1+ (1,0) [0|7] "" XXX
-
 BO_ 252 ESC_51: 64 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
@@ -216,5 +199,3 @@ BO_ 333 ACC_18: 32 XXX
  SG_ Accel_Boost : 248|6@1+ (1,0) [0|3] "" XXX
  SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
-VAL_ 258 Motion_State 1 "Forwards" 2 "Reversing" 3 "Stopped";
-VAL_ 258 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt";
