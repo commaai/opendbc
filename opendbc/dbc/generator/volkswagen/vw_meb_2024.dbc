@@ -305,4 +305,3 @@ BO_ 333 ACC_18: 32 XXX
  SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
 VAL_ 258 Motion_State 1 "Forwards" 2 "Reversing" 3 "Stopped";
-VAL_ 258 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt";

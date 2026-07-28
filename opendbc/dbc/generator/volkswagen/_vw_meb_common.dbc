@@ -3137,3 +3137,4 @@ VAL_ 1714 UH_Tag 0 "Init";
 VAL_ 1714 Kombi_02_alt 0 "aktuell" 1 "veraltet";
 VAL_ 1714 Uhrzeit_01_alt 0 "aktuell" 1 "veraltet";
 VAL_ 441800114 Temperature_Status_Charge 0 "init" 1 "temp under optimal" 2 "temp optimal" 3 "temp over optimal" 7 "fault";
+VAL_ 258 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt";
