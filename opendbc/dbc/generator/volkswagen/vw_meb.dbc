@@ -45,17 +45,6 @@ BO_ 267 Motor_51: 32 XXX
  SG_ TSK_Status : 88|3@1+ (1,0) [0|7] "" XXX
  SG_ TSK_Limiter_ausgewaehlt : 95|1@1+ (1,0) [0|3] "" XXX
 
-BO_ 313 VMM_02: 32 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Brake_Pressed_1 : 16|1@0+ (1,0) [0|1] "" XXX
- SG_ Brake_Pressed_2 : 27|1@0+ (1,0) [0|1] "" XXX
- SG_ AEB_Active : 31|1@0+ (1,0) [0|1] "" XXX
- SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
- SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ FCW_Active : 56|1@1+ (1,0) [0|1] "" XXX
- SG_ Brake_Pressure : 76|11@1+ (1,0) [0|100] "" XXX
-
 BO_ 317 QFK_01: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
@@ -70,34 +59,6 @@ BO_ 332 Motor_54: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Accelerator_Pressure : 175|8@0+ (0.4,-14.8) [0|100] "Unit_Percent" XXX
-
-BO_ 333 ACC_18: 32 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ ACC_limitierte_Anfahrdyn : 12|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_nachtr_Stopp_Anf : 13|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_DynErhoehung : 14|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_Freilaufstrategie_TSK : 15|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_zul_Regelabw_unten : 16|6@1+ (0.024,0) [0|1.512] "Unit_MeterPerSeconSquar" XXX
- SG_ ACC_StartStopp_Info : 22|2@1+ (1,0) [0|3] "" XXX
- SG_ ACC_Sollbeschleunigung_02 : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" XXX
- SG_ ACC_zul_Regelabw_oben : 35|5@1+ (0.0625,0) [0|1.9375] "Unit_MeterPerSeconSquar" XXX
- SG_ ACC_neg_Sollbeschl_Grad_02 : 40|8@1+ (0.05,0) [0|12.75] "Unit_MeterPerCubicSecon" XXX
- SG_ ACC_pos_Sollbeschl_Grad_02 : 48|8@1+ (0.05,0) [0|12.75] "Unit_MeterPerCubicSecon" XXX
- SG_ ACC_Anfahren : 56|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_Anhalten : 57|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_Typ : 58|2@1+ (1,0) [0|3] "" XXX
- SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] "" XXX
- SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_Anhalteweg : 64|11@1+ (0.01,0) [0|2046] "" XXX
- SG_ ACC_Anforderung_HMS : 77|3@1+ (1,0) [0|7] "" XXX
- SG_ SET_ME_0XFE : 80|8@1+ (1,0) [0|255] "" XXX
- SG_ ACC_AKTIV_regelt : 90|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_0X1 : 92|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_0X9 : 232|4@1+ (1,0) [0|15] "" XXX
- SG_ Speed : 236|12@1+ (0.1,0) [0|15] "" XXX
- SG_ Accel_Boost : 248|6@1+ (1,0) [0|3] "" XXX
- SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 496 EA_02: 8 Gateway
  SG_ EA_02_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
@@ -182,14 +143,5 @@ BO_ 768 ACC_19: 48 XXX
  SG_ Zeitluecke_3 : 354|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
  SG_ Zeitluecke_4 : 364|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
  SG_ Zeitluecke_5 : 374|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
-
-BO_ 771 HCA_03: 24 XXX
- SG_ RequestStatus : 12|4@1+ (1,0) [0|15] "" XXX
- SG_ Power : 16|8@1+ (0.4,0) [0.0|100.0] "percent" XXX
- SG_ Curvature : 24|15@1+ (6.7e-06,0) [0|0.219] "Unit_rad/m" XXX
- SG_ Curvature_VZ : 39|1@1+ (1,0) [0|1] "" XXX
- SG_ Unknown_01 : 53|1@0+ (1,0) [0|1] "" XXX
- SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
- SG_ HighSendRate : 66|1@1+ (1,0) [0|1] "" XXX
 
 VAL_ 768 ACC_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Camera" 9 "Street_Type" 4 "Speed_Limit_in_Nav";
