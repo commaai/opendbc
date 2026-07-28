@@ -1795,6 +1795,17 @@ BO_ 316495049 SAL_01: 8 XXX
  SG_ Right_Blinker_02 : 44|1@1+ (1,0) [0|3] "" XXX
  SG_ Left_Blinker_02 : 45|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 316495056 Charging_Dynamics: 8 XXX
+ SG_ Max_Charge_Power : 51|13@1+ (0.1,0) [0|819.1] "kW" XXX
+ SG_ Max_Charge_Current : 25|13@1+ (0.2,0) [0|1638.2] "A" XXX
+
+BO_ 316495058 Battery_Heating_Status: 8 XXX
+ SG_ Battery_Heating_Active : 38|1@1+ (1,0) [0|1] "" XXX
+ SG_ Heating_Request : 45|3@1+ (1,0) [0|7] "" XXX
+ SG_ Cooling_Request : 42|3@1+ (1,0) [0|7] "" XXX
+ SG_ Power_Batt_Heating : 48|8@1+ (1,0) [0|255] "W" XXX
+ SG_ Power_Batt_Heating_Req : 56|8@1+ (1,0) [0|255] "W" XXX
+
 BO_ 316495081 MEB_Camera_05: 8 XXX
 BO_ 316495106 AAA_01: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1806,16 +1817,36 @@ BO_ 316495165 HVL_01: 8 XXX
  SG_ CHK : 8|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 380195935 IPA_02: 8 XXX
+BO_ 380196006 Battery_Temperatures: 8 XXX
+ SG_ Battery_Max_Temp : 24|8@1+ (0.5,-40) [-40|87.5] "degC" XXX
+ SG_ Battery_Min_Temp : 32|8@1+ (0.5,-40) [-40|87.5] "degC" XXX
+
+BO_ 380196013 MEB_AWV_01: 8 XXX
+ SG_ Distance_Warning : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ FCW_Display : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ AWV_Enabled : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ AWV_Init : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ FCW_Sound : 22|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_1 : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_511 : 33|9@1+ (1,0) [0|127] "" XXX
+ SG_ Target : 56|8@1+ (1,0) [0|255] "" XXX
+
 BO_ 380196019 MEB_Camera_07: 16 XXX
 BO_ 380196036 MEB_Camera_08: 8 XXX
 BO_ 389241617 MEB_Camera_10: 8 XXX
 BO_ 401604687 MEB_Camera_11: 8 XXX
+BO_ 401604695 MEB_PACC_01: 8 XXX
+ SG_ Dynamic_in_Drive : 63|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 402522959 MEB_Camera_14: 8 XXX
 BO_ 441800001 EML_02: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ CHK : 8|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 441800082 MEB_Camera_12: 8 XXX
+BO_ 441800114 Charging_Optimization: 8 XXX
+ SG_ Temperature_Status_Charge : 15|3@1+ (1,0) [0|7] "" XXX
+
 BO_ 452984911 MEB_Camera_13: 8 XXX
 
 CM_ BO_ 184 "Motorsteuergerät";
@@ -3105,3 +3136,4 @@ VAL_ 1714 UH_Monat 0 "Init" 14 "Relatives_Datum" 15 "Fehler";
 VAL_ 1714 UH_Tag 0 "Init";
 VAL_ 1714 Kombi_02_alt 0 "aktuell" 1 "veraltet";
 VAL_ 1714 Uhrzeit_01_alt 0 "aktuell" 1 "veraltet";
+VAL_ 441800114 Temperature_Status_Charge 0 "init" 1 "temp under optimal" 2 "temp optimal" 3 "temp over optimal" 7 "fault";
