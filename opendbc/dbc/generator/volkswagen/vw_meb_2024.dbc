@@ -166,37 +166,6 @@ BO_ 316495015 VZE_04: 32 XXX
  SG_ VZE_Verkehrszeichen_6 : 92|7@1+ (1,0) [0|7] "" XXX
  SG_ VZE_Baustelle : 110|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 316495058 Battery_Heating_Status: 8 XXX
- SG_ Battery_Heating_Active : 38|1@1+ (1,0) [0|1] "" XXX
- SG_ Heating_Request : 45|3@1+ (1,0) [0|7] "" XXX
- SG_ Cooling_Request : 42|3@1+ (1,0) [0|7] "" XXX
- SG_ Power_Batt_Heating : 48|8@1+ (1,0) [0|255] "W" XXX
- SG_ Power_Batt_Heating_Req : 56|8@1+ (1,0) [0|255] "W" XXX
-
-BO_ 441800114 Charging_Optimization: 8 XXX
- SG_ Temperature_Status_Charge : 15|3@1+ (1,0) [0|7] "" XXX
-
-BO_ 316495056 Charging_Dynamics: 8 XXX
- SG_ Max_Charge_Power : 51|13@1+ (0.1,0) [0|819.1] "kW" XXX
- SG_ Max_Charge_Current : 25|13@1+ (0.2,0) [0|1638.2] "A" XXX
-
-BO_ 380196006 Battery_Temperatures: 8 XXX
- SG_ Battery_Max_Temp : 24|8@1+ (0.5,-40) [-40|87.5] "degC" XXX
- SG_ Battery_Min_Temp : 32|8@1+ (0.5,-40) [-40|87.5] "degC" XXX
-
-BO_ 380196013 MEB_AWV_01: 8 XXX
- SG_ Distance_Warning : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ FCW_Display : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ AWV_Enabled : 15|1@0+ (1,0) [0|1] "" XXX
- SG_ AWV_Init : 17|1@0+ (1,0) [0|1] "" XXX
- SG_ FCW_Sound : 22|2@1+ (1,0) [0|3] "" XXX
- SG_ SET_ME_1 : 28|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_511 : 33|9@1+ (1,0) [0|127] "" XXX
- SG_ Target : 56|8@1+ (1,0) [0|255] "" XXX
-
-BO_ 401604695 MEB_PACC_01: 8 XXX
- SG_ Dynamic_in_Drive : 63|1@0+ (1,0) [0|1] "" XXX
-
 VAL_ 768 ACC_Event_Wunschgeschw 1023 "None";
 VAL_ 768 ACC_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Detected" 9 "Crossing" 4 "Speed_Limit_Ahead" 10 "Roundabout" 6 "Curve";
 VAL_ 316495015 VZE_Anzeigemodus 0 "EU_RDW" 1 "USA" 2 "Canada" 3 "China";
@@ -225,7 +194,6 @@ VAL_ 316495015 VZE_Zeichen_03_Kamera 0 "nicht_erkannt" 1 "erkannt";
 VAL_ 316495015 VZE_Zeichen_03_Karte 0 "inaktiv" 1 "aktiv";
 VAL_ 316495015 VZE_Zeichen_03_Gesetz 0 "nicht_erkannt" 1 "erkannt";
 VAL_ 316495015 VZE_Gong 0 "Gong_deaktiv" 1 "Gong_aktiv";
-VAL_ 441800114 Temperature_Status_Charge 0 "init" 1 "temp under optimal" 2 "temp optimal" 3 "temp over optimal" 7 "fault";
 
 BO_ 258 ESC_50: 48 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
