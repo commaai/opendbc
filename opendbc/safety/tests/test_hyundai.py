@@ -90,9 +90,9 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("TCS13", 0, values, fix_checksum=checksum)
 
-  def _speed_msg(self, speed):
+  def _speed_msg(self, speed, wheel=None):
     # safety doesn't scale, so undo the scaling
-    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
+    values = {"WHL_SPD_%s" % s: (speed * 0.03125 if wheel == s or wheel is None else 0) for s in ["FL", "FR", "RL", "RR"]}
     values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
     values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
     self.__class__.cnt_speed += 1
@@ -116,6 +116,12 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
 
   def test_get_checksum_default(self):
     self.assertEqual(0, self.safety._test_get_checksum(common.make_msg(0, 0, length=0)))
+
+  def test_individual_wheel_speed(self):
+    self._rx(self._speed_msg(50, "FL"))
+    self.assertTrue(self.safety.get_vehicle_moving())
+    self._rx(self._speed_msg(50, "RR"))
+    self.assertTrue(self.safety.get_vehicle_moving())
 
 
 class TestHyundaiSafetyNonLong(TestHyundaiSafety):

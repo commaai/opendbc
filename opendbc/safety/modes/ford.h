@@ -169,7 +169,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     bool cmbb_deny = (msg->data[4] >> 5) & 1U;
 
     // Signal: AccBrkPrchg_B_Rq & AccBrkDecel_B_Rq
-    bool brake_actuation = ((msg->data[6] >> 6) & 1U) || ((msg->data[6] >> 7) & 1U);
+    bool brake_actuation = ((msg->data[6] >> 6) & 0b11U) != 0U;
 
     bool violation = false;
     violation |= longitudinal_accel_checks(accel, FORD_LONG_LIMITS);

@@ -81,6 +81,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
+                           (False, b"\x0F\x02\x3E\x00\x01\x00\x00\x00"),
                            (True, b"\x0F\x02\x3E\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
       self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
@@ -98,6 +99,8 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
 
     self.safety.set_controls_allowed(True)
     self.assertFalse(self._tx(common.make_msg(0, 0x283, dat=b'\x00\x00\x00\x00\x01\x00\x00')))
+    self.safety.set_controls_allowed(True)
+    self.assertFalse(self._tx(common.make_msg(0, 0x283, dat=b'\x00\x00\x00\x00\x00\x01\x00')))
 
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):

@@ -152,6 +152,12 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
 
     self.assertFalse(self._tx(msg))
 
+  def test_motor_acc_statuses(self):
+    for i in range(4):
+      msg = self.packer.make_can_msg_safety("TSK_04", 1, {"TSK_Status_GRA_ACC_02": i})
+      self._rx(msg)
+      self.assertEqual(i == 1 or i == 2, self.safety.get_controls_allowed())
+
 
 if __name__ == "__main__":
   unittest.main()

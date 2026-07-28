@@ -95,6 +95,13 @@ class TestSafetyExtra(common.SafetyTestBase):
     self.safety.set_safety_hooks(65001, 0)
     self.assertEqual(0, self.safety._test_get_rx_checks_len())
 
+  def test_rx_test_counter(self):
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, 0)
+    self.safety._test_setup_test_get_counter()
+    self.assertEqual(0, self.safety._test_get_test_wrong_counters())
+    self._rx(common.make_msg(0, 1, length = 0))
+    self.assertEqual(5, self.safety._test_get_test_wrong_counters())
+
   def test_rx_check_index_invalid_length(self):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, 0)
     self.assertFalse(self._rx(common.make_msg(0, 0x158)))

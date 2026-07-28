@@ -348,6 +348,19 @@ void _test_nullify_init(void) {
   current_hooks = &_test_hooks;
 }
 
+void _test_setup_test_get_counter(void) {
+  _test_hooks = *current_hooks;
+  _test_hooks.get_counter = NULL;
+  current_hooks = &_test_hooks;
+  static RxCheck check[] = {{.msg = {{1, 0, 0, 10U, .ignore_counter = false, .ignore_checksum = true, .ignore_quality_flag = true}}}};
+  current_safety_config.rx_checks = check;
+  current_safety_config.rx_checks_len = 1;
+}
+
+int _test_get_test_wrong_counters(void) {
+  return current_safety_config.rx_checks[0].status.wrong_counters;
+}
+
 int _test_get_rx_checks_len(void) {
   return current_safety_config.rx_checks_len;
 }

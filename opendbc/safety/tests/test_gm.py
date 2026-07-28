@@ -70,6 +70,11 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_gas_active(self):
+    self.safety.set_controls_allowed(False)
+    msg = self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, {"GasRegenCmd": 1, "GasRegenCmdActive": True})
+    self.assertFalse(self._tx(msg))
+
 
 class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   STANDSTILL_THRESHOLD = 10 * 0.0311
@@ -133,6 +138,18 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
       bus = self.BUTTONS_BUS
     values = {"ACCButtons": buttons}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", bus, values)
+
+  def test_individual_wheel_speed(self):
+    for left, right, valid in [
+        (0, 0, False),
+        (0, 10, True),
+        (10, 0, True),
+        (10, 10, True)
+    ]:
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, {"RLWheelSpd": left, "RRWheelSpd": right}))
+      self.assertEqual(valid, self.safety.get_vehicle_moving())
 
 
 class TestGmEVSafetyBase(TestGmSafetyBase):

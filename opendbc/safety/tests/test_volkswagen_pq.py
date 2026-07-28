@@ -132,6 +132,11 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
+  def test_motor_acc_statuses(self):
+    for i in range(4):
+      self._rx(self._motor_2_msg(cruise_engaged=i))
+      self.assertEqual(i == 1 or i == 2, self.safety.get_controls_allowed())
+
 
 class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.LongitudinalAccelSafetyTest):
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_LDW_1, 0], [MSG_ACC_SYSTEM, 0], [MSG_ACC_GRA_ANZEIGE, 0]]
@@ -189,6 +194,25 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
     for enabled_status in (5, 7):
       self.assertTrue(self._tx(self._torque_cmd_msg(self.MAX_RATE_UP, steer_req=1, hca_status=enabled_status)),
                       f"torque cmd rejected with {enabled_status=}")
+
+  def test_button_only_falling_edge(self):
+    self.safety.set_acc_main_on(True)
+
+    self.safety.set_controls_allowed(False)
+    self._rx(self._button_msg(_set=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed(), "set activated on rising edge")
+    self._rx(self._button_msg(_set=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed(), "set activated on continued on")
+    self._rx(self._button_msg(_set=False, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed(), "set not activated on falling edge")
+
+    self.safety.set_controls_allowed(False)
+    self._rx(self._button_msg(resume=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed(), "resume activated on rising edge")
+    self._rx(self._button_msg(resume=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed(), "resume activated continued on")
+    self._rx(self._button_msg(resume=False, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed(), "resume not activated on falling edge")
 
 
 if __name__ == "__main__":

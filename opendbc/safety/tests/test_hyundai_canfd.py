@@ -92,6 +92,13 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
       self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
       self.assertTrue(self.safety.get_vehicle_moving())
 
+  def test_cruise_engage(self):
+    for i in range(4):
+      self._reset_safety_hooks()
+      self._rx(self._button_msg(1)) # HYUNDAI_BUTTON_RESUME
+      self._rx(self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, {"ACCMode": i}))
+      self.assertEqual(i == 1 or i == 2, self.safety.get_controls_allowed())
+
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
@@ -244,6 +251,9 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
     }
     return self.packer.make_can_msg_safety("SCC_CONTROL", 1, values)
 
+  def test_cruise_engage(self):
+    pass
+
 
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
 class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCanfdLFASteeringBase):
@@ -276,6 +286,9 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
+
+  def test_cruise_engage(self):
+    pass
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)

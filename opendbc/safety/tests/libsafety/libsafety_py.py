@@ -136,6 +136,8 @@ void _test_setup_safety_tick_rx_check(bool frequency_invalid, bool msg_invalid);
 void _test_setup_safety_config_valid_checks(int inverted);
 void _test_nullify_compute_checksum(void);
 void _test_nullify_init(void);
+void _test_setup_test_get_counter(void);
+int _test_get_test_wrong_counters(void);
 int _test_get_rx_checks_len(void);
 """)
 

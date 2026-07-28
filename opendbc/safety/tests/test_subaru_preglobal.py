@@ -38,9 +38,9 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {"Steer_Torque_Sensor": torque}
     return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
-  def _speed_msg(self, speed):
+  def _speed_msg(self, speed, wheel=None):
     # subaru safety doesn't use the scaled value, so undo the scaling
-    values = {s: speed*0.0592 for s in ["FR", "FL", "RR", "RL"]}
+    values = {s: (speed*0.0592 if s == wheel or wheel is None else 0) for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", 0, values)
 
   def _user_brake_msg(self, brake):
@@ -59,6 +59,10 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", 0, values)
 
+  def test_individual_wheel_speeds(self):
+    for wheel in ["FR", "FL", "RR", "RL"]:
+      self._rx(self._speed_msg(20, wheel=wheel))
+      self.assertTrue(self.safety.get_vehicle_moving())
 
 class TestSubaruPreglobalReversedDriverTorqueSafety(TestSubaruPreglobalSafety):
   FLAGS = SubaruSafetyFlags.PREGLOBAL_REVERSED_DRIVER_TORQUE
