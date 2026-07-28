@@ -17,12 +17,6 @@ BO_ 190 MEB_HVEM_01: 48 XXX
  SG_ Inactive : 300|1@0+ (1,0) [0|1] "" XXX
  SG_ Inactive_02 : 303|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 332 Motor_54: 32 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Engine_On : 77|1@1+ (1,0) [0|1] "" XXX
- SG_ Accelerator_Pressure : 175|8@0+ (0.4,-14.8) [0|100] "Unit_Percent" XXX
-
 BO_ 496 EA_02: 8 Gateway
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
@@ -125,17 +119,6 @@ BO_ 267 Motor_51: 48 XXX
  SG_ Accel_Low_Pressed_Support : 21|1@1+ (1,0) [0|7] "" XXX
  SG_ TSK_Status : 88|3@1+ (1,0) [0|7] "" XXX
  SG_ TSK_Limiter_ausgewaehlt : 95|1@1+ (1,0) [0|3] "" XXX
-
-BO_ 317 QFK_01: 32 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ HCA_No_Override : 14|1@0+ (1,0) [0|1] "" XXX
- SG_ LatCon_HCA_Accept : 17|2@1+ (1,0) [0|3] "" XXX
- SG_ LatCon_HCA_Status : 20|3@1+ (1,0) [0|15] "" XXX
- SG_ Steering_Angle_VZ : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ Curvature : 40|15@1+ (6.7e-06,0) [0|65535] "" XXX
- SG_ Curvature_VZ : 55|1@0+ (1,0) [0|1] "" XXX
- SG_ Steering_Angle : 76|17@1+ (0.00906,0) [0|32767] "" XXX
 
 BO_ 619 TA_01: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
