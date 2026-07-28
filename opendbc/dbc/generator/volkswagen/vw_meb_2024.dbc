@@ -104,66 +104,8 @@ BO_ 771 HCA_03: 24 XXX
  SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
  SG_ HighSendRate : 66|1@1+ (1,0) [0|1] "" XXX
 
-BO_ 316495015 VZE_04: 32 XXX
- SG_ VZE_Anzeigemodus : 0|2@1+ (1,0) [0|3] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ Detected_01 : 8|1@0+ (1,0) [0|1] "" XXX
- SG_ VZE_Anzeigeunterdrueck_Zeichen_3 : 9|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ VZE_Anzeigeunterdrueck_Zeichen_2 : 10|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ VZE_Verkehrszeichen_1 : 11|8@1+ (5,0) [1|520] "" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Verkehrszeichen_2 : 19|8@1+ (5,0) [1|255] "" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Verkehrszeichen_3 : 27|8@1+ (5,0) [1|255] "" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Warnung_Verkehrszeichen_1 : 35|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Warnung_Verkehrszeichen_2 : 36|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Warnung_Verkehrszeichen_3 : 37|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zusatzschild_1 : 38|4@1+ (1,0) [1|15] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zusatzschild_2 : 42|4@1+ (1,0) [1|15] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zusatzschild_3 : 46|4@1+ (1,0) [1|15] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Anzeigeunterdrueck_Zeichen_1 : 50|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ VZE_Zeichen_01_KameraWied : 51|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_02_KameraWied : 52|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_03_KameraWied : 53|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_01_Kamera : 54|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_01_Karte : 55|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_01_Gesetz : 56|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_02_Kamera : 57|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_02_Karte : 58|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_02_Gesetz : 59|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_03_Kamera : 60|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_03_Karte : 61|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Zeichen_03_Gesetz : 62|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Gong : 63|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
- SG_ VZE_Verkehrszeichen_4 : 75|8@1+ (1,0) [0|31] "" XXX
- SG_ VZE_Verkehrszeichen_6 : 92|7@1+ (1,0) [0|7] "" XXX
- SG_ VZE_Baustelle : 110|1@0+ (1,0) [0|1] "" XXX
-
 VAL_ 768 ACC_Event_Wunschgeschw 1023 "None";
 VAL_ 768 ACC_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Detected" 9 "Crossing" 4 "Speed_Limit_Ahead" 10 "Roundabout" 6 "Curve";
-VAL_ 316495015 VZE_Anzeigemodus 0 "EU_RDW" 1 "USA" 2 "Canada" 3 "China";
-VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_3 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
-VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_2 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
-VAL_ 316495015 VZE_Verkehrszeichen_1 0 "kein_Verkehrszeichen" 520 "Unbegrenzt";
-VAL_ 316495015 VZE_Verkehrszeichen_2 0 "kein_Verkehrszeichen" 520 "Unbegrenzt";
-VAL_ 316495015 VZE_Verkehrszeichen_3 0 "kein_Verkehrszeichen" 520 "Unbegrenzt";
-VAL_ 316495015 VZE_Warnung_Verkehrszeichen_1 0 "keine_Warnung_Initialwert_Fehlerwert" 1 "Warnung";
-VAL_ 316495015 VZE_Warnung_Verkehrszeichen_2 0 "keine_Warnung_Initialwert_Fehlerwert" 1 "Warnung";
-VAL_ 316495015 VZE_Warnung_Verkehrszeichen_3 0 "keine_Warnung_Initialwert_Fehlerwert" 1 "Warnung";
-VAL_ 316495015 VZE_Zusatzschild_1 0 "keine_Zusatzschild_Initialwert_Fehlerwert";
-VAL_ 316495015 VZE_Zusatzschild_2 0 "keine_Zusatzschild_Initialwert_Fehlerwert";
-VAL_ 316495015 VZE_Zusatzschild_3 0 "keine_Zusatzschild_Initialwert_Fehlerwert";
-VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_1 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
-VAL_ 316495015 VZE_Zeichen_01_KameraWied 0 "inaktiv" 1 "aktiv";
-VAL_ 316495015 VZE_Zeichen_02_KameraWied 0 "inaktiv" 1 "aktiv";
-VAL_ 316495015 VZE_Zeichen_03_KameraWied 0 "inaktiv" 1 "aktiv";
-VAL_ 316495015 VZE_Zeichen_01_Kamera 0 "nicht_erkannt" 1 "erkannt";
-VAL_ 316495015 VZE_Zeichen_01_Karte 0 "inaktiv" 1 "aktiv";
-VAL_ 316495015 VZE_Zeichen_01_Gesetz 0 "nicht_erkannt" 1 "erkannt";
-VAL_ 316495015 VZE_Zeichen_02_Kamera 0 "nicht_erkannt" 1 "erkannt";
-VAL_ 316495015 VZE_Zeichen_02_Karte 0 "inaktiv" 1 "aktiv";
-VAL_ 316495015 VZE_Zeichen_02_Gesetz 0 "nicht_erkannt" 1 "erkannt";
-VAL_ 316495015 VZE_Zeichen_03_Kamera 0 "nicht_erkannt" 1 "erkannt";
-VAL_ 316495015 VZE_Zeichen_03_Karte 0 "inaktiv" 1 "aktiv";
-VAL_ 316495015 VZE_Zeichen_03_Gesetz 0 "nicht_erkannt" 1 "erkannt";
-VAL_ 316495015 VZE_Gong 0 "Gong_deaktiv" 1 "Gong_aktiv";
 
 BO_ 258 ESC_50: 48 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX

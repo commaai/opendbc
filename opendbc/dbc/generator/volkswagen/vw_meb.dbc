@@ -204,6 +204,4 @@ BO_ 771 HCA_03: 24 XXX
  SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
  SG_ HighSendRate : 66|1@1+ (1,0) [0|1] "" XXX
 
-BO_ 316495015 MEB_Camera_04: 32 XXX
-
 VAL_ 768 ACC_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Camera" 9 "Street_Type" 4 "Speed_Limit_in_Nav";
