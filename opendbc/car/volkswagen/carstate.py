@@ -286,9 +286,6 @@ class CarState(CarStateBase):
 
     ret.cruiseState.available = pt_cp.vl["Motor_51"]["TSK_Status"] in (2, 3, 4, 5)
     ret.cruiseState.enabled = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
-    # TSK winds its braking down through brake_only after a driver brake. Requesting drive-off in this
-    # state can fault TSK, and stock refuses to engage here as well, so block entry until it clears.
-    ret.carNotReady = pt_cp.vl["Motor_51"]["TSK_Status"] == 5  # brake_only
     ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
     if self.CP.pcmCruise:
       ret.cruiseState.nonAdaptive = bool(ext_cp.vl["ACC_19"]["ACC_Limiter_Mode"])
@@ -304,6 +301,10 @@ class CarState(CarStateBase):
     # TODO: check permanent camera fault, it happens too often right now
     ret.accFaulted = (self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit) or
                       ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
+
+    # TSK winds its braking down through brake_only after a driver brake. Requesting drive-off in this
+    # state can fault TSK, and stock refuses to engage here as well, so block entry until it clears.
+    ret.carNotReady = pt_cp.vl["Motor_51"]["TSK_Status"] == 5 or long_control_inhibit
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(240, pt_cp.vl["SMLS_01"]["BH_Blinker_li"],
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
