@@ -96,7 +96,9 @@ class MebBrakeOnlyRepro:
       # HMS 4 -> 0 and accel -> 0.0 on the same frame, exactly as fault 0
       return 0.0, LongCtrlState.off
 
-    return accel, long_control_state
+    # hold with HALTEN for the rest of the engagement. handing back to the policy here would let it
+    # re-request ANFAHREN immediately at standstill, so each attempt is one withdrawal, not a train.
+    return self.STOP_ACCEL, LongCtrlState.stopping
 
 
 class CarController(CarControllerBase):
