@@ -295,9 +295,9 @@ class CarState(CarStateBase):
     else:
       ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
 
+    driver_brake_override = pt_cp.vl["VMM_02"]["Driver_Brake_Override"] == 2
     tsk_faulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
-    tsk_faulted = self.update_acc_fault(tsk_faulted, parking_brake=ret.parkingBrake, in_drive=in_drive,
-                                        brake_pressed=ret.brakePressed)
+    tsk_faulted = self.update_acc_fault(tsk_faulted, parking_brake=ret.parkingBrake, in_drive=in_drive, brake_override=driver_brake_override)
     # TODO: check permanent camera fault, it happens too often right now
     ret.accFaulted = tsk_faulted or ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6  # reversible fault in ACC system
 
@@ -406,13 +406,13 @@ class CarState(CarStateBase):
     temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
-  def update_acc_fault(self, acc_fault, parking_brake=False, in_drive=True, brake_pressed=False, recovery_frames_max=300):
+  def update_acc_fault(self, acc_fault, parking_brake=False, in_drive=True, brake_override=False, recovery_frames_max=300):
     # Ignore FAULT when not in drive mode and parked
     # do not show misleading error during ignition in parked state
     # grant a short time to recover a normal cruise state
     # after hard brake, stock system prevents acc engage for ~3 seconds
     fault = acc_fault
-    if (parking_brake and not in_drive) or brake_pressed:
+    if (parking_brake and not in_drive) or brake_override:
       fault = False
       self.cruise_recovery_timer = self.frame
     elif self.frame - self.cruise_recovery_timer < recovery_frames_max:
