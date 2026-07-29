@@ -408,7 +408,7 @@ class CarState(CarStateBase):
 
   def update_acc_fault(self, acc_fault, in_drive, long_inhibit, fault_frames=10):
     # TSK temporarily faults when we're not in drive, and shortly after driver harshly brakes.
-    # Both conditions lead and trail the TSK state by a frame or two. Worst measured delay is 60 ms
+    # Both conditions lead and trail the TSK state, measured up to 60 ms
     if not acc_fault or not in_drive or long_inhibit:
       self.tsk_recovery_timer = self.frame
     return self.frame - self.tsk_recovery_timer >= fault_frames
