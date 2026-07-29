@@ -13,7 +13,7 @@ class CarState(CarStateBase):
     super().__init__(CP)
     self.frame = 0
     self.eps_init_complete = False
-    self.cruise_recovery_timer = 0
+    self.tsk_recovery_timer = 0
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
@@ -297,7 +297,7 @@ class CarState(CarStateBase):
 
     tsk_faulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
     long_control_inhibit = pt_cp.vl["VMM_02"]["Long_Control_Inhibit"] == 2
-    tsk_faulted = self.update_acc_fault(tsk_faulted, in_drive=in_drive, long_inhibit=long_control_inhibit)
+    tsk_faulted = self.update_acc_fault(tsk_faulted, in_drive, long_control_inhibit)
     # TODO: check permanent camera fault, it happens too often right now
     ret.accFaulted = tsk_faulted or ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6  # reversible fault in ACC system
 
@@ -406,20 +406,12 @@ class CarState(CarStateBase):
     temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
-  def update_acc_fault(self, acc_fault, in_drive=True, long_inhibit=False):
-    # Ignore FAULT when not in drive mode and parked
-    # do not show misleading error during ignition in parked state
-    # grant a short time to recover a normal cruise state
-    # after hard brake, stock system prevents acc engage for ~3 seconds
-    if not in_drive or long_inhibit:
-      return False
-    return acc_fault
-    # if (parking_brake and not in_drive) or long_inhibit:
-    #   fault = False
-    #   self.cruise_recovery_timer = self.frame
-    # elif self.frame - self.cruise_recovery_timer < recovery_frames_max:
-    #   fault = False
-    # return fault
+  def update_acc_fault(self, acc_fault, in_drive, long_inhibit, fault_frames=10):
+    # TSK temporarily faults when we're not in drive, and shortly after driver harshly brakes.
+    # Both conditions lead and trail the TSK state by a frame or two. Worst measured delay is 60 ms
+    if not acc_fault or not in_drive or long_inhibit:
+      self.tsk_recovery_timer = self.frame
+    return self.frame - self.tsk_recovery_timer >= fault_frames
 
   @staticmethod
   def get_can_parsers(CP):
