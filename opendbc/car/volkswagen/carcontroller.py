@@ -75,13 +75,13 @@ class MebBrakeOnlyRepro:
 
     # but never command actuation while overriding
     if not CC.longActive:
-      return accel, long_control_state
+      return accel, long_control_state, None
 
     if self.engage_count % 2:
       # odd engagement: brake. fault 0 was braking in pid, not stopping, when the driver braked at
       # 2.2 m/s, so HALTEN was never sent and the re-engage went KEINE_ANFORDERUNG -> ANFAHREN
       # directly. Below HOLD_SPEED we fall back to HALTEN so the car is held if it does stop.
-      return self.STOP_ACCEL, LongCtrlState.pid if CS.out.vEgo > self.HOLD_SPEED else LongCtrlState.stopping
+      return self.STOP_ACCEL, LongCtrlState.pid if CS.out.vEgo > self.HOLD_SPEED else LongCtrlState.stopping, None
 
     # even engagement: request drive-off, then withdraw the way the gas override does.
     # ANFAHREN only goes out once ESP confirms standstill, so time the withdrawal from there.
@@ -90,12 +90,13 @@ class MebBrakeOnlyRepro:
     elapsed = self.request_frames * DT_CTRL
 
     if self.WITHDRAW_DELAY <= elapsed < self.WITHDRAW_DELAY + self.WITHDRAW_HOLD:
-      # simulate the gas override: HMS 4 -> 0 and accel -> 0.0 on the same frame, exactly as fault 0
-      return 0.0, LongCtrlState.off
+      # simulate the gas override exactly as both TSK faults saw it: on the same frame,
+      # HMS 4 -> 0, accel -> 0.0, and ACC_Status_ACC 3 -> 4 (ACC_OVERRIDE)
+      return 0.0, LongCtrlState.off, mebcan.ACC_HUD_OVERRIDE
 
     # request before and after, so the withdrawal is the only event. never hand back to the policy
     # here -- at standstill it flip-flops pid/stopping and oscillates HMS, which is its own fault mode
-    return self.REQUEST_ACCEL, LongCtrlState.pid
+    return self.REQUEST_ACCEL, LongCtrlState.pid, None
 
 
 class CarController(CarControllerBase):
@@ -131,9 +132,9 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
     can_sends = []
 
-    accel_req, long_control_state = actuators.accel, actuators.longControlState
+    accel_req, long_control_state, acc_status_override = actuators.accel, actuators.longControlState, None
     if self.CP.flags & VolkswagenFlags.MEB and self.CP.openpilotLongitudinalControl:
-      accel_req, long_control_state = self.brake_only_repro.update(CC, CS, accel_req, long_control_state)
+      accel_req, long_control_state, acc_status_override = self.brake_only_repro.update(CC, CS, accel_req, long_control_state)
 
     # **** Steering Controls ************************************************ #
 
@@ -208,7 +209,8 @@ class CarController(CarControllerBase):
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         if self.CP.flags & VolkswagenFlags.MEB:
           accel = float(np.clip(accel_req, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
-          accel, acc_status, acc_hold_type, braking_to_stop = self.meb_long_state.update(CS, CC, accel, long_control_state)
+          accel, acc_status, acc_hold_type, braking_to_stop = self.meb_long_state.update(CS, CC, accel, long_control_state,
+                                                                                        acc_status_override)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_status, acc_hold_type, braking_to_stop,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available))
