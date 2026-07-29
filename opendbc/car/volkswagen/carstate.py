@@ -296,8 +296,9 @@ class CarState(CarStateBase):
       ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
     accFaulted = (pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7) or
                   ext_cp.vl["ACC_19"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
-    ret.accFaulted = self.update_acc_fault(accFaulted, parking_brake=ret.parkingBrake, in_drive=in_drive,
-                                           brake_pressed=ret.brakePressed)
+    # ret.accFaulted = self.update_acc_fault(accFaulted, parking_brake=ret.parkingBrake, in_drive=in_drive,
+    #                                        brake_pressed=ret.brakePressed)
+    ret.accFaulted = accFaulted
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(240, pt_cp.vl["SMLS_01"]["BH_Blinker_li"],
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
