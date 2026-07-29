@@ -58,8 +58,8 @@ class MebBrakeOnlyRepro:
   # which is what the gas pedal was producing via the override. Doing it in code removes the pedal
   # from the loop. Gas landed 0.41 s and 1.05 s into the request on the two faults, so sweep that
   # range across successive request engagements instead of guessing one value.
-  WITHDRAW_DELAYS = (0.4, 0.7, 1.0, 1.3)
-  WITHDRAW_HOLD = 0.3
+  WITHDRAW_DELAY = 0.55     # how long ANFAHREN runs before the simulated gas press lands
+  WITHDRAW_HOLD = 1.0       # how long the simulated gas press lasts before the request resumes
 
   def __init__(self):
     self.engage_count = 0
@@ -88,17 +88,14 @@ class MebBrakeOnlyRepro:
     if CS.esp_hold_confirmation:
       self.request_frames += 1
     elapsed = self.request_frames * DT_CTRL
-    delay = self.WITHDRAW_DELAYS[(self.engage_count // 2 - 1) % len(self.WITHDRAW_DELAYS)]
 
-    if elapsed < delay:
-      return self.REQUEST_ACCEL, LongCtrlState.pid
-    elif elapsed < delay + self.WITHDRAW_HOLD:
-      # HMS 4 -> 0 and accel -> 0.0 on the same frame, exactly as fault 0
+    if self.WITHDRAW_DELAY <= elapsed < self.WITHDRAW_DELAY + self.WITHDRAW_HOLD:
+      # simulate the gas override: HMS 4 -> 0 and accel -> 0.0 on the same frame, exactly as fault 0
       return 0.0, LongCtrlState.off
 
-    # hold with HALTEN for the rest of the engagement. handing back to the policy here would let it
-    # re-request ANFAHREN immediately at standstill, so each attempt is one withdrawal, not a train.
-    return self.STOP_ACCEL, LongCtrlState.stopping
+    # request before and after, so the withdrawal is the only event. never hand back to the policy
+    # here -- at standstill it flip-flops pid/stopping and oscillates HMS, which is its own fault mode
+    return self.REQUEST_ACCEL, LongCtrlState.pid
 
 
 class CarController(CarControllerBase):
