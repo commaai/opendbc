@@ -299,7 +299,7 @@ class CarState(CarStateBase):
     tsk_faulted = self.update_acc_fault(tsk_faulted, parking_brake=ret.parkingBrake, in_drive=in_drive,
                                         brake_pressed=ret.brakePressed)
     # TODO: check permanent camera fault, it happens too often right now
-    ret.accFaulted = tsk_faulted or ext_cp.vl["ACC_19"]["ACC_Status_ACC"] == 6  # reversible fault in ACC system
+    ret.accFaulted = tsk_faulted or ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6  # reversible fault in ACC system
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(240, pt_cp.vl["SMLS_01"]["BH_Blinker_li"],
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
