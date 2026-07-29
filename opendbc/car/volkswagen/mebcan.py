@@ -108,11 +108,11 @@ class MebLongStateMachine:
     else:
       return self.acc_status_vals['ACC_OFF_HAUPTSCHALTER_AUS']  # disabled
 
-  def _get_hold_type(self, CS, CC) -> int:
+  def _get_hold_type(self, CS, CC, long_control_state) -> int:
     # warning: car is reacting to hold mechanic even with long control off
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
-    stopping = CC.actuators.longControlState == LongCtrlState.stopping
-    starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
+    stopping = long_control_state == LongCtrlState.stopping
+    starting = long_control_state == LongCtrlState.pid and CS.esp_hold_confirmation
 
     if CS.out.accFaulted or not CC.longActive:
       acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
@@ -138,9 +138,11 @@ class MebLongStateMachine:
 
     return acc_hold_type
 
-  def update(self, CS, CC, accel) -> tuple[float, int, int, bool]:
+  def update(self, CS, CC, accel, long_control_state=None) -> tuple[float, int, int, bool]:
+    if long_control_state is None:
+      long_control_state = CC.actuators.longControlState
     acc_status = self._get_acc_status(CS, CC)
-    acc_hold_type = self._get_hold_type(CS, CC)
+    acc_hold_type = self._get_hold_type(CS, CC, long_control_state)
 
     # transition to inactive accel and jerks as soon as we enter ESP standstill
     requesting_hold = acc_hold_type == self.acc_hold_type_vals['HALTEN']
