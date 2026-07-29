@@ -56,13 +56,15 @@ class MebBrakeOnlyRepro:
 
   def __init__(self):
     self.engage_count = 0
-    self.prev_long_active = False
+    self.prev_enabled = False
 
   def update(self, CC, CS, accel, long_control_state):
-    if CC.longActive and not self.prev_long_active:
+    # count on enabled, not longActive, so a gas override doesn't flip the parity mid-attempt
+    if CC.enabled and not self.prev_enabled:
       self.engage_count += 1
-    self.prev_long_active = CC.longActive
+    self.prev_enabled = CC.enabled
 
+    # but never command actuation while overriding
     if not CC.longActive:
       return accel, long_control_state
 
