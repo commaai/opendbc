@@ -13,7 +13,7 @@ class CarState(CarStateBase):
     super().__init__(CP)
     self.frame = 0
     self.eps_init_complete = False
-    self.cruise_recovery_timer = 0
+    self.tsk_recovery_timer = 0
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
@@ -297,10 +297,13 @@ class CarState(CarStateBase):
         ret.cruiseState.speed = 0
     else:
       ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
-    accFaulted = (pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7) or
-                  ext_cp.vl["ACC_19"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
-    ret.accFaulted = self.update_acc_fault(accFaulted, parking_brake=ret.parkingBrake, in_drive=in_drive,
-                                           brake_pressed=ret.brakePressed)
+
+    tsk_faulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
+    engine_off = pt_cp.vl["Motor_54"]["Engine_On"] == 0
+    long_control_inhibit = pt_cp.vl["VMM_02"]["Long_Control_Inhibit"] == 2
+    # TODO: check permanent camera fault, it happens too often right now
+    ret.accFaulted = (self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit) or
+                      ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(240, pt_cp.vl["SMLS_01"]["BH_Blinker_li"],
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
@@ -407,18 +410,12 @@ class CarState(CarStateBase):
     temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
-  def update_acc_fault(self, acc_fault, parking_brake=False, in_drive=True, brake_pressed=False, recovery_frames_max=300):
-    # Ignore FAULT when not in drive mode and parked
-    # do not show misleading error during ignition in parked state
-    # grant a short time to recover a normal cruise state
-    # after hard brake, stock system prevents acc engage for ~3 seconds
-    fault = acc_fault
-    if (parking_brake and not in_drive) or brake_pressed:
-      fault = False
-      self.cruise_recovery_timer = self.frame
-    elif self.frame - self.cruise_recovery_timer < recovery_frames_max:
-      fault = False
-    return fault
+  def update_acc_fault(self, acc_fault, engine_off, long_inhibit, recovery_frames=10):
+    # TSK temporarily faults when car is "off" (no power steering), and shortly after driver harshly brakes.
+    # Both conditions rise with or slightly before TSK fault, and the fault trails the conditions clearing by under 100 ms
+    if engine_off or long_inhibit:
+      self.tsk_recovery_timer = self.frame
+    return acc_fault and self.frame - self.tsk_recovery_timer >= recovery_frames
 
   @staticmethod
   def get_can_parsers(CP):

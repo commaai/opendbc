@@ -205,16 +205,6 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
   return commands
 
 
-def get_desired_gap(distance_bars, current_gap_signal):
-  # mapping desired gap to correct signal of corresponding distance bar
-  gap = 0
-
-  if distance_bars == current_gap_signal:
-    gap = distance_bars * 20  # m
-
-  return gap
-
-
 def create_acc_hud_control(packer, bus, acc_status, set_speed, lead_visible, distance_bars, show_distance_bars, distance, fcw_alert):
   values = {
     "ACC_Status_ACC":                acc_status,
@@ -235,11 +225,12 @@ def create_acc_hud_control(packer, bus, acc_status, set_speed, lead_visible, dis
     "ACC_Standby_Override":          1 if acc_status != ACC_HUD_ACTIVE else 0,
     "Street_Color":                  1 if acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # light grey (1) or dark (0) street
     "Lead_Brightness":               3 if acc_status == ACC_HUD_ACTIVE else 0, # object shows in color
-    "Zeitluecke_1":                  get_desired_gap(distance_bars, 1), # desired distance to lead object for distance bar 1
-    "Zeitluecke_2":                  get_desired_gap(distance_bars, 2), # desired distance to lead object for distance bar 2
-    "Zeitluecke_3":                  get_desired_gap(distance_bars, 3), # desired distance to lead object for distance bar 3
-    "Zeitluecke_4":                  get_desired_gap(distance_bars, 4), # desired distance to lead object for distance bar 4
-    "Zeitluecke_5":                  get_desired_gap(distance_bars, 5), # desired distance to lead object for distance bar 5
+    # TODO: a nice speed dependent bar distance
+    "Zeitluecke_1":                  0, # desired distance to lead object for distance bar 1
+    "Zeitluecke_2":                  0, # desired distance to lead object for distance bar 2
+    "Zeitluecke_3":                  0, # desired distance to lead object for distance bar 3
+    "Zeitluecke_4":                  0, # desired distance to lead object for distance bar 4
+    "Zeitluecke_5":                  0, # desired distance to lead object for distance bar 5
     "Zeitluecke_Farbe":              1 if acc_status in (ACC_HUD_ENABLED, ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # yellow (1) or white (0) time gap
     "ACC_Anzeige_Zeitluecke":        show_distance_bars if acc_status != ACC_HUD_DISABLED else 0, # show distance bar selection
     "SET_ME_0X1":                    0x1,    # unknown

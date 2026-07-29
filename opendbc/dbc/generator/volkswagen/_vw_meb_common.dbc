@@ -294,6 +294,7 @@ BO_ 313 VMM_02: 32 XXX
  SG_ AEB_Active : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ Long_Control_Inhibit : 52|2@1+ (1,0) [0|3] "" XXX
  SG_ FCW_Reaction_2 : 56|1@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressure : 76|11@1+ (1,0) [0|100] "" XXX
  SG_ FCW_Reaction_3 : 88|5@1+ (1,0) [0|31] "" XXX
@@ -2005,6 +2006,7 @@ CM_ BO_ 219 "AEB_Object_Status and AEB_Object_Status_B values 4 and 5/6 coincide
 CM_ SG_ 219 AEB_Target_Decel "Scale is estimated. Lowest request seen was -6.99";
 CM_ SG_ 219 AEB_TTC_Countdown "Can count down to zero before AEB activates, but may not always precede an AEB or mean it will happen";
 CM_ SG_ 219 VRU_Detected "Commonly high when a pedestrian is seen";
+CM_ SG_ 313 Long_Control_Inhibit "Goes high after user brakes hard, causes temporary TSK_Status fault";
 CM_ SG_ 333 SET_ME_0x2FE "Only set by stock ACC on 2024+; reads 0 on pre-2024 and is not packed by mebcan";
 CM_ BO_ 317 "Lenkungssteuergerät";
 CM_ BO_ 517 "Steuergerät für Motorstart";
@@ -2131,6 +2133,7 @@ VAL_ 299 GRA_Fehler 0 "kein_Fehler" 1 "Fehler";
 VAL_ 299 GRA_LIM_Taste_verfuegbar 0 "Limiter_Taste_nicht_vorhanden" 1 "Limiter_Taste_vorhanden";
 VAL_ 299 GRA_Tip_Stufe_2 0 "Tip_Stufe_1__keine_Betaetigung" 1 "Tip_Stufe_2";
 VAL_ 299 GRA_TravelAssist 0 "nicht_betaetigt" 1 "betaetigt";
+VAL_ 313 Long_Control_Inhibit 1 "not_inhibited" 2 "inhibited";
 VAL_ 317 LatCon_HCA_Status 0 "disabled" 1 "initializing" 2 "ready" 3 "fault" 4 "active" 5 "preempted" 6 "fault" 7 "rejected";
 VAL_ 319 PreCrash_Charisma_FahrPr 0 "keine_Funktion" 1 "Programm_1" 2 "Programm_2" 3 "Programm_3" 4 "Programm_4" 5 "Programm_5" 6 "Programm_6" 7 "Programm_7" 8 "Programm_8" 9 "Programm_9" 10 "Programm_10" 11 "Programm_11" 12 "Programm_12" 13 "Programm_13" 14 "Programm_14" 15 "Programm_15";
 VAL_ 319 PreCrash_Charisma_Status 0 "Init" 1 "verfuegbar" 2 "nicht_verfuegbar" 3 "asynchron_durch_Fahrerwunsch";
