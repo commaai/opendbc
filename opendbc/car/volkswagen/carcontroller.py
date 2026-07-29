@@ -52,7 +52,6 @@ class MebBrakeOnlyRepro:
   STOP_ACCEL = -1.5
   REQUEST_ACCEL = 0.55
   REQUEST_FRAMES = 200      # 2 s at 100 Hz
-  ABORT_SPEED = 1.0         # give up the request if the car actually moves off
   HOLD_SPEED = 0.3          # below this, hold with HALTEN instead of braking in pid
 
   BRAKING, WAIT_REENGAGE, REQUESTING = range(3)
@@ -77,7 +76,7 @@ class MebBrakeOnlyRepro:
 
     elif self.state == self.REQUESTING:
       self.counter -= 1
-      if self.counter <= 0 or not CC.longActive or v_ego > self.ABORT_SPEED:
+      if self.counter <= 0 or not CC.longActive:
         self.state = self.BRAKING
 
     self.prev_long_active = CC.longActive
