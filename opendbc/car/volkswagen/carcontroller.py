@@ -179,8 +179,8 @@ class CarController(CarControllerBase):
         if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:
           lead_distance = 8
         can_sends.append(mebcan.create_acc_hud_control(self.packer_pt, self.CAN.pt, self.meb_long_state.acc_status, hud_control.setSpeed * CV.MS_TO_KPH,
-                                                       hud_control.leadVisible, hud_control.leadDistanceBars, show_distance_bars,
-                                                       lead_distance, fcw_alert))
+                                                       hud_control.leadVisible, hud_control.leadDistanceBars + 1, show_distance_bars,
+                                                       lead_distance, 0, fcw_alert))
 
       else:
         lead_distance = 0
