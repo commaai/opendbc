@@ -51,7 +51,7 @@ class MebBrakeOnlyRepro:
   Distinctive accel values make each attempt easy to find in the logs.
   """
   ARM_SPEED = 10 * CV.MPH_TO_MS
-  STOP_ACCEL = -1.11
+  STOP_ACCEL = -1.5
   REQUEST_ACCEL = 0.55
   REQUEST_FRAMES = 200      # 2 s at 100 Hz
   ABORT_SPEED = 1.0         # give up the request if the car actually moves off
