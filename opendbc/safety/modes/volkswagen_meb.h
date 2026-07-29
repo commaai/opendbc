@@ -81,8 +81,10 @@ static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
       crc ^= (uint8_t[]){0x18, 0x71, 0x10, 0x8D, 0xD7, 0xAA, 0xB0, 0x78, 0xAC, 0x12, 0xAE, 0x0C, 0xDD, 0xF1, 0x85, 0x68}[counter];
     } else if (msg->addr == MSG_ESC_51) {
       crc ^= (uint8_t[]){0x69, 0xDC, 0xF9, 0x64, 0x6A, 0xCE, 0x55, 0x2C, 0xC4, 0x38, 0x8F, 0xD1, 0xC6, 0x43, 0xB4, 0xB1}[counter];
-    } else {
+    } else if (msg->addr == MSG_Motor_51) {
       crc ^= (uint8_t[]){0x2C, 0xB1, 0x1A, 0x75, 0xBB, 0x65, 0x79, 0x47, 0x81, 0x2B, 0xCC, 0x96, 0x17, 0xDB, 0xC0, 0x94}[counter];
+    } else {
+      // Undefined CAN message, CRC check expected to fail
     }
 
     crc = (uint8_t)(volkswagen_crc8_lut_8h2f[crc] ^ 0xFFU);
@@ -233,7 +235,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == MSG_ACC_18) {
     // Signal: ACC_18.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
     int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
-    // allow ACCEL_OVERRIDE (0) while controls are allowed even when the driver is on the gas
+    // MEB inactive accel is 3.01, but we also need to send 0.0 for gas override
     bool accel_override = controls_allowed && (desired_accel == 0);
     if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
       tx = false;

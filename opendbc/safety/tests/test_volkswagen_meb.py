@@ -272,7 +272,6 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_ACC_19, MSG_ACC_18, MSG_TA_01),
                              2: (MSG_KLR_01,)}
 
-  ALLOW_OVERRIDE = True
   ACCEL_OVERRIDE = 0
   INACTIVE_ACCEL = 3.01
 
@@ -329,8 +328,6 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
         self.assertEqual(send, self._tx(self._accel_msg(accel)), (controls_allowed, accel))
 
   def test_accel_override_with_gas(self):
-    if not self.ALLOW_OVERRIDE:
-      pass
     self.safety.set_controls_allowed(True)
     self.safety.set_gas_pressed_prev(True)
     self.assertTrue(self._tx(self._accel_msg(self.ACCEL_OVERRIDE)))
