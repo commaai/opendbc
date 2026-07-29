@@ -138,10 +138,10 @@ class MebLongStateMachine:
 
     return acc_hold_type
 
-  def update(self, CS, CC, accel, long_control_state=None, acc_status_override=None) -> tuple[float, int, int, bool]:
+  def update(self, CS, CC, accel, long_control_state=None) -> tuple[float, int, int, bool]:
     if long_control_state is None:
       long_control_state = CC.actuators.longControlState
-    acc_status = self._get_acc_status(CS, CC) if acc_status_override is None else acc_status_override
+    acc_status = self._get_acc_status(CS, CC)
     acc_hold_type = self._get_hold_type(CS, CC, long_control_state)
 
     # transition to inactive accel and jerks as soon as we enter ESP standstill

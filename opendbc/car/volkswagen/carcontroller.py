@@ -37,9 +37,8 @@ class MebBrakeOnlyRepro:
   """
   REPRO BRANCH ONLY. Reproduces the TSK_Status temp fault from
   f73c01590368ee5b/00000088--a80293d8f7 seg8 (route t=493): openpilot requested ANFAHREN with
-  positive accel while the drivetrain was still in TSK_Status 5 (brake_only), and TSK went to 6
-  90 ms later. In that log a gas press landed in the same 120 ms window, so it can't be told apart
-  from the ANFAHREN request. This runs the sequence with no pedal input so the two separate.
+  positive accel while the drivetrain was still in TSK_Status 5 (brake_only), the driver's gas press
+  withdrew the request, and TSK went to 6 90 ms later.
 
   Alternates on every engagement, for as long as that engagement lasts:
     1st engage: brake
@@ -48,55 +47,34 @@ class MebBrakeOnlyRepro:
     ...
 
   So the run is: engage and let it brake, brake pedal to disengage (drivetrain enters brake_only),
-  re-engage and it requests. Distinctive accel values make each attempt easy to find in the logs.
+  re-engage and it requests, then press the gas. Distinctive accel values make attempts easy to find.
   """
   STOP_ACCEL = -1.5
   REQUEST_ACCEL = 0.55
   HOLD_SPEED = 0.3          # below this, hold with HALTEN instead of braking in pid
 
-  # Both TSK faults so far came 0.08-0.09 s after HMS 4->0 and accel->0.0 landed on the same frame,
-  # which is what the gas pedal was producing via the override. Doing it in code removes the pedal
-  # from the loop. Gas landed 0.41 s and 1.05 s into the request on the two faults, so sweep that
-  # range across successive request engagements instead of guessing one value.
-  WITHDRAW_DELAY = 0.55     # how long ANFAHREN runs before the simulated gas press lands
-  WITHDRAW_HOLD = 1.0       # how long the simulated gas press lasts before the request resumes
-
   def __init__(self):
     self.engage_count = 0
     self.prev_enabled = False
-    self.request_frames = 0
 
   def update(self, CC, CS, accel, long_control_state):
     # count on enabled, not longActive, so a gas override doesn't flip the parity mid-attempt
     if CC.enabled and not self.prev_enabled:
       self.engage_count += 1
-      self.request_frames = 0
     self.prev_enabled = CC.enabled
 
     # but never command actuation while overriding
     if not CC.longActive:
-      return accel, long_control_state, None
+      return accel, long_control_state
 
     if self.engage_count % 2:
       # odd engagement: brake. fault 0 was braking in pid, not stopping, when the driver braked at
       # 2.2 m/s, so HALTEN was never sent and the re-engage went KEINE_ANFORDERUNG -> ANFAHREN
       # directly. Below HOLD_SPEED we fall back to HALTEN so the car is held if it does stop.
-      return self.STOP_ACCEL, LongCtrlState.pid if CS.out.vEgo > self.HOLD_SPEED else LongCtrlState.stopping, None
+      return self.STOP_ACCEL, LongCtrlState.pid if CS.out.vEgo > self.HOLD_SPEED else LongCtrlState.stopping
 
-    # even engagement: request drive-off, then withdraw the way the gas override does.
-    # ANFAHREN only goes out once ESP confirms standstill, so time the withdrawal from there.
-    if CS.esp_hold_confirmation:
-      self.request_frames += 1
-    elapsed = self.request_frames * DT_CTRL
-
-    if self.WITHDRAW_DELAY <= elapsed < self.WITHDRAW_DELAY + self.WITHDRAW_HOLD:
-      # simulate the gas override exactly as both TSK faults saw it: on the same frame,
-      # HMS 4 -> 0, accel -> 0.0, and ACC_Status_ACC 3 -> 4 (ACC_OVERRIDE)
-      return 0.0, LongCtrlState.off, mebcan.ACC_HUD_OVERRIDE
-
-    # request before and after, so the withdrawal is the only event. never hand back to the policy
-    # here -- at standstill it flip-flops pid/stopping and oscillates HMS, which is its own fault mode
-    return self.REQUEST_ACCEL, LongCtrlState.pid, None
+    # even engagement: request drive-off for the whole engagement, driver supplies the gas press
+    return self.REQUEST_ACCEL, LongCtrlState.pid
 
 
 class CarController(CarControllerBase):
@@ -132,9 +110,9 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
     can_sends = []
 
-    accel_req, long_control_state, acc_status_override = actuators.accel, actuators.longControlState, None
+    accel_req, long_control_state = actuators.accel, actuators.longControlState
     if self.CP.flags & VolkswagenFlags.MEB and self.CP.openpilotLongitudinalControl:
-      accel_req, long_control_state, acc_status_override = self.brake_only_repro.update(CC, CS, accel_req, long_control_state)
+      accel_req, long_control_state = self.brake_only_repro.update(CC, CS, accel_req, long_control_state)
 
     # **** Steering Controls ************************************************ #
 
@@ -209,8 +187,7 @@ class CarController(CarControllerBase):
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         if self.CP.flags & VolkswagenFlags.MEB:
           accel = float(np.clip(accel_req, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
-          accel, acc_status, acc_hold_type, braking_to_stop = self.meb_long_state.update(CS, CC, accel, long_control_state,
-                                                                                        acc_status_override)
+          accel, acc_status, acc_hold_type, braking_to_stop = self.meb_long_state.update(CS, CC, accel, long_control_state)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_status, acc_hold_type, braking_to_stop,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available))
