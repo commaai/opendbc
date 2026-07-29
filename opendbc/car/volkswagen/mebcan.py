@@ -225,7 +225,7 @@ def create_acc_hud_control(packer, bus, acc_status, set_speed, lead_visible, dis
     "ACC_Standby_Override":          1 if acc_status != ACC_HUD_ACTIVE else 0,
     "Street_Color":                  1 if acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # light grey (1) or dark (0) street
     "Lead_Brightness":               3 if acc_status == ACC_HUD_ACTIVE else 0, # object shows in color
-    # TODO: a nice speed dependant bar distance
+    # TODO: a nice speed dependent bar distance
     "Zeitluecke_1":                  0, # desired distance to lead object for distance bar 1
     "Zeitluecke_2":                  0, # desired distance to lead object for distance bar 2
     "Zeitluecke_3":                  0, # desired distance to lead object for distance bar 3
