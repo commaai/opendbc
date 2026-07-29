@@ -295,7 +295,7 @@ class CarState(CarStateBase):
     else:
       ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
     accFaulted = (pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7) or
-                  ext_cp.vl["ACC_19"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
+                  ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
     ret.accFaulted = self.update_acc_fault(accFaulted, parking_brake=ret.parkingBrake, in_drive=in_drive,
                                            brake_pressed=ret.brakePressed)
 
