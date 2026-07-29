@@ -42,43 +42,32 @@ class MebBrakeOnlyRepro:
   from the ANFAHREN request. This runs the sequence with no pedal input so the two separate.
 
   Driver does nothing but engage, brake to disengage, and re-engage:
-    1. arm once engaged above ARM_SPEED
-    2. force a stop, holding with HALTEN
-    3. once stopped, wait for the brake-disengage that puts the drivetrain in brake_only
-    4. on re-engage, request ANFAHREN + positive accel for REQUEST_FRAMES
+    1. brake as soon as openpilot is engaged
+    2. driver brakes to disengage, which puts the drivetrain in brake_only
+    3. on re-engage, request ANFAHREN + positive accel for REQUEST_FRAMES
+    4. go back to braking, so the next disengage/re-engage runs another attempt
 
-  Re-arms itself above ARM_SPEED so it can be run repeatedly in one drive.
   Distinctive accel values make each attempt easy to find in the logs.
   """
-  ARM_SPEED = 10 * CV.MPH_TO_MS
   STOP_ACCEL = -1.5
   REQUEST_ACCEL = 0.55
   REQUEST_FRAMES = 200      # 2 s at 100 Hz
   ABORT_SPEED = 1.0         # give up the request if the car actually moves off
   HOLD_SPEED = 0.3          # below this, hold with HALTEN instead of braking in pid
 
-  IDLE, STOPPING, HOLDING, WAIT_REENGAGE, REQUESTING, DONE = range(6)
+  BRAKING, WAIT_REENGAGE, REQUESTING = range(3)
 
   def __init__(self):
-    self.state = self.IDLE
+    self.state = self.BRAKING
     self.counter = 0
+    self.prev_long_active = False
 
   def update(self, CC, CS, accel, long_control_state):
     v_ego = CS.out.vEgo
-    stopped = CS.esp_hold_confirmation
 
-    if self.state == self.IDLE:
-      if CC.longActive and v_ego > self.ARM_SPEED:
-        self.state = self.STOPPING
-
-    elif self.state == self.STOPPING:
-      if not CC.longActive:
-        self.state = self.WAIT_REENGAGE  # driver braked before we got there, still usable
-      elif stopped:
-        self.state = self.HOLDING
-
-    elif self.state == self.HOLDING:
-      if not CC.longActive:
+    if self.state == self.BRAKING:
+      # falling edge only, so the first engagement of a drive brakes instead of counting as a re-engage
+      if self.prev_long_active and not CC.longActive:
         self.state = self.WAIT_REENGAGE
 
     elif self.state == self.WAIT_REENGAGE:
@@ -89,20 +78,16 @@ class MebBrakeOnlyRepro:
     elif self.state == self.REQUESTING:
       self.counter -= 1
       if self.counter <= 0 or not CC.longActive or v_ego > self.ABORT_SPEED:
-        self.state = self.DONE
+        self.state = self.BRAKING
 
-    elif self.state == self.DONE:
-      if v_ego > self.ARM_SPEED:
-        self.state = self.IDLE
+    self.prev_long_active = CC.longActive
 
-    if self.state == self.STOPPING:
+    if self.state == self.BRAKING:
       # fault 0 was braking in pid, not stopping, when the driver braked at 2.2 m/s, so HALTEN was
       # never sent and the re-engage went KEINE_ANFORDERUNG -> ANFAHREN directly. Braking above
       # HOLD_SPEED in pid keeps that path when the driver disengages before we stop; below it we
       # fall back to HALTEN so the car is actually held if they let it come to a stop.
       return self.STOP_ACCEL, LongCtrlState.pid if v_ego > self.HOLD_SPEED else LongCtrlState.stopping
-    elif self.state == self.HOLDING:
-      return self.STOP_ACCEL, LongCtrlState.stopping
     elif self.state == self.REQUESTING:
       return self.REQUEST_ACCEL, LongCtrlState.pid
 
