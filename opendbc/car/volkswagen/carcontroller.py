@@ -54,14 +54,23 @@ class MebBrakeOnlyRepro:
   REQUEST_ACCEL = 0.55
   HOLD_SPEED = 0.3          # below this, hold with HALTEN instead of braking in pid
 
+  # Both TSK faults so far came 0.08-0.09 s after HMS 4->0 and accel->0.0 landed on the same frame,
+  # which is what the gas pedal was producing via the override. Doing it in code removes the pedal
+  # from the loop. Gas landed 0.41 s and 1.05 s into the request on the two faults, so sweep that
+  # range across successive request engagements instead of guessing one value.
+  WITHDRAW_DELAYS = (0.4, 0.7, 1.0, 1.3)
+  WITHDRAW_HOLD = 0.3
+
   def __init__(self):
     self.engage_count = 0
     self.prev_enabled = False
+    self.request_frames = 0
 
   def update(self, CC, CS, accel, long_control_state):
     # count on enabled, not longActive, so a gas override doesn't flip the parity mid-attempt
     if CC.enabled and not self.prev_enabled:
       self.engage_count += 1
+      self.request_frames = 0
     self.prev_enabled = CC.enabled
 
     # but never command actuation while overriding
@@ -74,8 +83,20 @@ class MebBrakeOnlyRepro:
       # directly. Below HOLD_SPEED we fall back to HALTEN so the car is held if it does stop.
       return self.STOP_ACCEL, LongCtrlState.pid if CS.out.vEgo > self.HOLD_SPEED else LongCtrlState.stopping
 
-    # even engagement: request drive-off for the whole engagement
-    return self.REQUEST_ACCEL, LongCtrlState.pid
+    # even engagement: request drive-off, then withdraw the way the gas override does.
+    # ANFAHREN only goes out once ESP confirms standstill, so time the withdrawal from there.
+    if CS.esp_hold_confirmation:
+      self.request_frames += 1
+    elapsed = self.request_frames * DT_CTRL
+    delay = self.WITHDRAW_DELAYS[(self.engage_count // 2 - 1) % len(self.WITHDRAW_DELAYS)]
+
+    if elapsed < delay:
+      return self.REQUEST_ACCEL, LongCtrlState.pid
+    elif elapsed < delay + self.WITHDRAW_HOLD:
+      # HMS 4 -> 0 and accel -> 0.0 on the same frame, exactly as fault 0
+      return 0.0, LongCtrlState.off
+
+    return accel, long_control_state
 
 
 class CarController(CarControllerBase):
