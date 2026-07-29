@@ -296,8 +296,9 @@ class CarState(CarStateBase):
       ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
 
     tsk_faulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
+    engine_off = pt_cp.vl["Motor_54"]["Engine_On"] == 0
     long_control_inhibit = pt_cp.vl["VMM_02"]["Long_Control_Inhibit"] == 2
-    tsk_faulted = self.update_acc_fault(tsk_faulted, ret.gearShifter == GearShifter.park, long_control_inhibit)
+    tsk_faulted = self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit)
     # TODO: check permanent camera fault, it happens too often right now
     ret.accFaulted = tsk_faulted or ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6  # reversible fault in ACC system
 
@@ -406,10 +407,10 @@ class CarState(CarStateBase):
     temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
-  def update_acc_fault(self, acc_fault, in_park, long_inhibit, recovery_frames=10):
-    # TSK temporarily faults when we're in park, and shortly after driver harshly brakes.
-    # Both conditions lead and trail the TSK state, measured up to 60 ms
-    if in_park or long_inhibit:
+  def update_acc_fault(self, acc_fault, engine_off, long_inhibit, recovery_frames=10):
+    # TSK temporarily faults when car is off (no power steering), and shortly after driver harshly brakes.
+    # Both conditions rise with or slightly before fault, and the fault trails the conditions clearing by under 100 ms
+    if engine_off or long_inhibit:
       self.tsk_recovery_timer = self.frame
     return acc_fault and self.frame - self.tsk_recovery_timer >= recovery_frames
 
