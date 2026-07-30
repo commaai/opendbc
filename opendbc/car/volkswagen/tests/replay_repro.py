@@ -78,11 +78,13 @@ def replay(seg):
     report(armed)
 
 
-def sim(v0=5.0, grade=0.0, seconds=30.0):
+def sim(v0=5.0, grade=0.0, seconds=30.0, release_frames=5, release_accel=0.5):
   """Crude plant: an integrator, plus an ESP hold that grabs when stopped under a hold request and
-  lets go a frame after that request drops, which is how fast it let go in 0000007f/30. Enough to
-  show the creep and the churn, not a car model. It has no creep torque, so it needs more commanded
-  accel to get moving than the real car does.
+  only lets go after release_frames of a sustained drive-off request worth at least release_accel.
+  That threshold is the thing the harness has to beat and nobody has measured it, so it is
+  deliberately pessimistic: b6 poked the hold with 0.12 m/s^2 for 0.21 s and it never let go, while
+  0000007f/30 released within a frame of ANFAHREN + 1.51. Enough to show the creep and the churn,
+  not a car model. It has no creep torque, so it needs more commanded accel to move than a real car.
   """
   repro, long_state = MebCreepChurnRepro(CP, CCP), MebLongStateMachine(CP, CCP)
   v, held, release_delay, out = v0, False, 0, []
@@ -90,8 +92,9 @@ def sim(v0=5.0, grade=0.0, seconds=30.0):
     accel, hold_type, braking_to_stop, _ = step(repro, long_state, v, held)
     if held:
       v = 0.0
-      release_delay = release_delay + 1 if hold_type not in (1, 2) else 0
-      if release_delay > 1:
+      asking = hold_type not in (1, 2) and accel >= release_accel
+      release_delay = release_delay + 1 if asking else 0
+      if release_delay >= release_frames:
         held, release_delay = False, 0
     else:
       v = max(0.0, v + (accel - grade) * DT)

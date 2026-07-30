@@ -191,14 +191,20 @@ class MebCreepChurnRepro:
   reproduces on its own: the creep is what makes the ESP hold grab and let go, and the stop is
   where both faults actually fired.
 
+  The creep half will not start itself from a hold. A 200 ms drive-off request is not enough to get
+  the ESP to let go, and the churn puts a fresh hold request in every 300 ms, so the car just sits
+  there. Both real faults were already rolling when the churn started. So while stopped, ask to go
+  and keep asking until the car is actually moving, and only then churn.
+
   Brake or gas hands the car straight back to the policy, so the driver always wins.
   """
   ARM_SPEED = 10.0     # m/s, engage anywhere under this and the harness brakes the car down itself
   CHURN_SPEED = 2.0    # m/s, above this hold a steady stop request so the approach is a normal stop
   CREEP_SPEED = 0.15   # m/s, creep target. b6 crept at 0.06-0.12 through its first phase
-  KP = 4.0             # lands the creep on 0.07-0.15 m/s, and doubles as the approach brake
+  MOVING_SPEED = 0.05  # m/s, below this the ESP is holding the car and a churn cannot get it out
+  KP = 7.0             # 1.05 m/s^2 from a stop, which is a real drive-off, and 0 at the creep speed
   ACCEL_MIN = -1.5
-  ACCEL_MAX = 0.6
+  ACCEL_MAX = 1.05
   POKE_ACCEL = 0.12    # what b6 sent with ANFAHREN in its second phase, too weak to break the hold
   STOP_ACCEL = -0.55   # MEB stopAccel, interface.py. the creep needs a real stop request to end
   GO_FRAMES = 10       # 200 ms, b6 averaged 0.21 s in ANFAHREN
@@ -216,7 +222,9 @@ class MebCreepChurnRepro:
 
     self.frames += 1
     creeping = self.frames % (self.CREEP_FRAMES + self.HOLD_FRAMES) < self.CREEP_FRAMES
-    going = CS.out.vEgo < self.CHURN_SPEED and self.frames % (self.GO_FRAMES + self.STOP_FRAMES) < self.GO_FRAMES
+    launching = creeping and CS.out.vEgo < self.MOVING_SPEED
+    going = launching or (CS.out.vEgo < self.CHURN_SPEED and
+                          self.frames % (self.GO_FRAMES + self.STOP_FRAMES) < self.GO_FRAMES)
 
     accel = min(max((self.CREEP_SPEED - CS.out.vEgo) * self.KP, self.ACCEL_MIN), self.ACCEL_MAX)
     if not creeping:
