@@ -302,7 +302,7 @@ class CarState(CarStateBase):
     ret.accFaulted = (self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit) or
                       ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
 
-    # TSK winds braking down through brake_only after a driver brake at low speeds. Requesting drive-off in this
+    # TSK winds braking down through brake_only after driver brakes at low speeds. Requesting drive-off in this
     # state can fault TSK, and stock refuses to engage here as well, so block entry until it clears.
     ret.carNotReady = pt_cp.vl["Motor_51"]["TSK_Status"] == 5  # brake_only
 
