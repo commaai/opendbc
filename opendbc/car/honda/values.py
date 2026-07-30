@@ -275,6 +275,14 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Passport 2026", "All")],
     CarSpecs(mass=4620 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=18.5),
   )
+  HONDA_PRELUDE_6G = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda Prelude 2026", "All")],
+    # Shares the Civic e:HEV platform and the radarless Bosch messaging. 63/37 front/rear weight distribution.
+    # steerRatio from liveParameters, converged at 13.65 on a EU-market car (variable ratio rack, 14.9 on-center)
+    CarSpecs(mass=1480, wheelbase=2.605, steerRatio=13.65, centerToFrontRatio=0.37),
+    {Bus.pt: 'honda_bosch_radarless_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS,
+  )
   ACURA_MDX_4G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura MDX 2022-24", "All", min_steer_speed=70. * CV.KPH_TO_MS)],
     CarSpecs(mass=4788 * CV.LB_TO_KG, wheelbase=2.89, steerRatio=15.8, centerToFrontRatio=0.428),  # as spec
