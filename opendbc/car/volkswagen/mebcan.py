@@ -219,7 +219,9 @@ class MebHoldPulseRepro:
     self.approach_frames = 0
 
   def update(self, CS, CC, accel, acc_hold_type, braking_to_stop) -> tuple[float, int, bool]:
-    armed = CC.longActive and not CS.out.brakePressed and \
+    # CC.enabled, not longActive: a gas press to induce the creep drops longActive and would hand
+    # the policy straight back, which is the opposite of what we want here
+    armed = CC.enabled and not CS.out.brakePressed and \
             (CS.esp_hold_confirmation or CS.out.vEgo < self.APPROACH_SPEED)
     if not armed:
       self.frames = self.approach_frames = 0
