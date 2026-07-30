@@ -156,6 +156,55 @@ class MebLongStateMachine:
     return accel, acc_status, acc_hold_type, braking_to_stop
 
 
+class MebHoldPulseRepro:
+  """REPRO ONLY, do not merge. Reproduces the TSK permanent fault seen at a standstill in
+  000000b6--48c9d2f02a/23 (t=35.26) and 000000b8--ab902978ef/9 (t=50.15).
+
+  In both routes the policy chattered pid/stopping while fully stopped, so we alternated
+  ANFAHREN + 0.12 m/s^2 with HALTEN + ACCEL_INACTIVE about 5x/s. Measured dwells: ANFAHREN
+  0.10-0.34 s, HALTEN 0.04-0.16 s, 8 cycles over 2.2 s, then TSK -> 7 while sitting in HALTEN.
+
+  Two competing theories. Test the cheap one first:
+    CYCLES = 1  -> is a single too-short ANFAHREN enough, i.e. a minimum dwell violation?
+    CYCLES > 1  -> or does it take sustained oscillation? raise until it faults.
+  Shorten PULSE_FRAMES to probe the dwell threshold itself (2 frames = 40 ms is the shortest
+  HALTEN block observed in the logs).
+
+  Only acts once the car is held, holds steady for SETTLE_FRAMES first so the pulse train is the
+  only stimulus, and hands control back to MebLongStateMachine afterwards so the car can drive off.
+  """
+  SETTLE_FRAMES = 100  # 2 s of steady HALTEN before pulsing
+  PULSE_FRAMES = 5     # ANFAHREN pulse, 100 ms
+  GAP_FRAMES = 5       # HALTEN between pulses, 100 ms
+  CYCLES = 1
+  PULSE_ACCEL = 0.12   # accel sent with ANFAHREN, matches both routes
+
+  def __init__(self, CP, CCP):
+    self.CCP = CCP
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    acc_hold_type_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Anforderung_HMS'].items()}
+    self.halten = acc_hold_type_vals['HALTEN']
+    self.anfahren = acc_hold_type_vals['ANFAHREN']
+    self.frames = 0
+
+  def update(self, CS, CC, accel, acc_hold_type) -> tuple[float, int]:
+    if not (CC.longActive and CS.esp_hold_confirmation):
+      self.frames = 0
+      return accel, acc_hold_type
+
+    self.frames += 1
+    frame = self.frames - self.SETTLE_FRAMES
+    period = self.PULSE_FRAMES + self.GAP_FRAMES
+
+    if frame <= 0:
+      return self.CCP.ACCEL_INACTIVE, self.halten  # settling, steady hold
+    if frame > self.CYCLES * period:
+      return accel, acc_hold_type  # pulse train done, hand back so the car can resume
+    if (frame - 1) % period < self.PULSE_FRAMES:
+      return self.PULSE_ACCEL, self.anfahren
+    return self.CCP.ACCEL_INACTIVE, self.halten
+
+
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
                              braking_to_stop, speed, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
