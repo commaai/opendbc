@@ -188,15 +188,22 @@ class MebCreepChurnRepro:
 
   The gains are picked so the loop settles inside b6's band rather than stopping the car: over one
   300 ms cycle the go halves average KP * (CREEP_SPEED - v) and the stop halves HOLD_ACCEL, which
-  balance at 0.125 m/s. From a dead stop the go halves ask for 1.05, a real drive-off, so it can get
-  out of an ESP hold if one grabs; b8 toggled Standstill 6 times under exactly this kind of churn.
+  balance at 0.125 m/s. Coming down from the engage speed it therefore lands in the creep band
+  without ever stopping, which is how b6 got there: its churn caught the car on the way down.
+
+  If the car does stop, no amount of churning gets it going again. The ESP will not let go for a
+  200 ms request, which b6 proves the hard way: it poked the hold with ANFAHREN every 300 ms for
+  2.2 s at hld=1 and never moved, and 0000007f/30 released within a frame of a sustained
+  ANFAHREN + 1.51. So from a stop, drive off for real, and only start churning once it is rolling.
 
   Brake or gas hands the car straight back to the policy, so the driver always wins.
   """
   ARM_SPEED = 10.0     # m/s, engage anywhere under this and the harness brakes the car down itself
   CHURN_SPEED = 2.0    # m/s, above this hold a steady stop request so the approach is a normal stop
   CREEP_SPEED = 0.15   # m/s, creep target, which the churn pulls down to 0.125. b6 held 0.06-0.12
-  KP = 7.0             # 1.05 m/s^2 from a stop, which is a real drive-off, and 0 at the creep speed
+  MOVING_SPEED = 0.05  # m/s, below this the ESP has the car and only a sustained request gets it out
+  LAUNCH_ACCEL = 1.5   # 0000007f/30 released the hold at 1.51
+  KP = 7.0             # 1.05 m/s^2 from a stop, and 0 at the creep speed
   ACCEL_MIN = -1.5
   ACCEL_MAX = 1.05
   HOLD_ACCEL = -0.35   # what b6 sent in the HALTEN blocks it crept through, and it never stopped it
@@ -212,6 +219,9 @@ class MebCreepChurnRepro:
       return accel, CC
 
     self.frames += 1
+    if CS.out.vEgo < self.MOVING_SPEED:
+      return self.LAUNCH_ACCEL, _ReproCarControl(CC, LongCtrlState.pid)
+
     going = CS.out.vEgo < self.CHURN_SPEED and self.frames % (self.GO_FRAMES + self.STOP_FRAMES) < self.GO_FRAMES
     accel = min(max((self.CREEP_SPEED - CS.out.vEgo) * self.KP, self.ACCEL_MIN), self.ACCEL_MAX)
     if not going:
