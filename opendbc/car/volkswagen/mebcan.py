@@ -156,127 +156,68 @@ class MebLongStateMachine:
     return accel, acc_status, acc_hold_type, braking_to_stop
 
 
-class MebHoldPulseRepro:
-  """REPRO ONLY, do not merge. Reproduces the TSK permanent fault seen at a standstill in
-  000000b6--48c9d2f02a/23 (t=35.26) and 000000b8--ab902978ef/9 (t=50.15).
+class _ReproCarControl:
+  """REPRO ONLY. Stand-in for the immutable capnp CarControl reader with longControlState replaced."""
+  def __init__(self, CC, long_control_state):
+    self.enabled = CC.enabled
+    self.longActive = CC.longActive
+    self.cruiseControl = CC.cruiseControl
+    self.actuators = structs.CarControl.Actuators(longControlState=long_control_state)
 
-  In both routes the policy chattered pid/stopping while fully stopped, so we alternated
-  ANFAHREN + 0.12 m/s^2 with HALTEN + ACCEL_INACTIVE about 5x/s. Measured dwells: ANFAHREN
-  0.10-0.34 s, HALTEN 0.04-0.16 s, 8 cycles over 2.2 s, then TSK -> 7 while sitting in HALTEN.
 
-  Ladder, cheapest theory first:
-    1. CYCLES=1, GAP=5  one 100 ms ANFAHREN, the shortest ANFAHREN block in the logs. TESTED, does
-                        not fault. Brakes audibly release, so the car does act on it, meaning a
-                        single short drive-off request is not by itself illegal.
-    2. CYCLES=2, GAP=2  adds one 40 ms HALTEN, the shortest block of any kind in the logs and one
-                        step 1 never produced. TESTED, does not fault. So no single transition or
-                        dwell is illegal on its own.
-    3. CYCLES=12        sustained 5 Hz churn, 2.4 s and 24 transitions, a little past b6 (8 cycles
-                        over 2.2 s) and near b8 (25 transitions). If only this faults it is the
-                        rate, not any single transition.  <-- current
-    4. TOGGLE_ANHALTEN   step 3 clean too, so the HMS/accel pattern alone is not the trigger.
-                        Measured over the 6 s before each fault: b6 toggled ACC_Anhalten and
-                        ACC_Anhalteweg 8 times, b8 20 times, this harness 0. braking_to_stop is
-                        requesting_hold and not esp_hold, and we only ever run at hld=1, so those
-                        fields sat constant while the real faults cycled them 1<->0 and
-                        0<->20.46 alongside the HMS. Same pulse train as step 3, plus that.  <-- current
+class MebCreepChurnRepro:
+  """REPRO ONLY, do not merge. Reproduces the TSK permanent fault from 000000b6--48c9d2f02a/23
+  (t=35.26) and 000000b8--ab902978ef/9 (t=50.15).
 
-  Waits for the driver to be off the brake so the car is held by ESP alone, matching both routes.
-  longActive is already true while pre-enabled with the brake held, so without this the whole train
-  elapses against the brake pedal and the car just drives off normally when you release it.
+  In both routes the policy chattered longControlState pid/stopping at ~6.5 Hz while the car was
+  CREEPING, not while parked. b6 crept at 0.06-0.12 m/s for 1.3 s with the hold off, then churned
+  another 2.2 s with it on, then TSK went to 7. So the stimulus is the car repeatedly grabbing and
+  releasing the ESP hold, which a pulse train against a car that never moves cannot produce.
 
-  Holds steady for SETTLE_FRAMES so the pulse train is the only stimulus, then hands control back to
-  MebLongStateMachine so the car can drive off.
+  So drive it closed loop: a P controller onto a creep target, plus the pid/stopping chatter fed
+  into the REAL MebLongStateMachine. Everything downstream (which HMS value, the RAMP insertion,
+  the accel zeroing, braking_to_stop) is production code, so this cannot emit a transition master
+  could not, and the two phases of the real fault fall out on their own: with the hold off "go"
+  legalizes to RAMP then KEINE_ANFORDERUNG, with it on "go" is ANFAHREN.
+
+  Two rates. The fast one is the churn itself, at b6's measured rate. The slow one alternates
+  creeping with sitting stopped, because that is the shape of the real fault and neither half
+  reproduces on its own: the creep is what makes the ESP hold grab and let go, and the stop is
+  where both faults actually fired.
+
+  Brake or gas hands the car straight back to the policy, so the driver always wins.
   """
-  SETTLE_FRAMES = 50   # 1 s of steady HALTEN before pulsing
-  PULSE_FRAMES = 10    # ANFAHREN 200 ms, b6 phase B averaged 0.21 s
-  GAP_FRAMES = 5       # HALTEN 100 ms, b6 phase B averaged 0.10 s
-  CYCLES = 7           # 2.1 s at 6.7 transitions/s, b6 phase B was 2.16 s at 6.5
-  PULSE_ACCEL = 0.12   # accel sent with ANFAHREN, matches both routes
-  TOGGLE_ANHALTEN = True  # cycle ACC_Anhalten 1<->0 and ACC_Anhalteweg 0<->20.46 with the train
-  # 5 s of steady HALTEN after the train. both faults fired after the churn stopped, b6 0.38 s into
-  # the following HALTEN block rather than during the churn itself
-  HOLD_AFTER_FRAMES = 50
-  # phase A, run on the approach while the hold is still off. block lengths from b6 30.88-32.14
-  # both faults were engaged while ALREADY CREEPING, b6 at 0.11 m/s and b8 at 0.46 m/s, and b6's
-  # churn began 0.14 s after the engage. engaging at a full stop skips this phase entirely because
-  # esp_hold is already set, which is what every test so far did.
-  ARM_SPEED = 10.0      # m/s, engage anywhere under this and the harness brakes the car down itself
-  CREEP_SPEED = 0.5     # m/s, start churning below this. b6 engaged at 0.11, b8 at 0.46
-  STOPPED_SPEED = 0.1   # m/s. esp_hold alone is not enough, ESC_50.Standstill reads 1 while rolling
-  BRAKE_ACCEL = -1.5    # bring the car down into the creep band
-  A_FRAMES = 100        # 2 s ceiling on the churn, b6 churned for 1.26 s
-  A_HALTEN = 10         # 200 ms
-  A_RAMP = 6            # 120 ms
-  A_NONE = 1            # 20 ms, gives 8.8 transitions/s against b6's 8.7
-  # b6 phase A: HALTEN blocks went slightly negative, RAMP blocks were POSITIVE at +0.07 to +0.11,
-  # netting about -0.08 m/s^2 so the car crept at 0.06-0.12 m/s rather than being braked to a stop
-  A_HOLD_ACCEL = -0.25
-  A_RELEASE_ACCEL = 0.10
-  STOP_ACCEL = -1.0     # after the churn window, get it stopped so phase B starts from a standstill
-  TOTAL_FRAMES = 6000   # 120 s cap, long enough to sit at a light and take many attempts
+  ARM_SPEED = 10.0     # m/s, engage anywhere under this and the harness brakes the car down itself
+  CHURN_SPEED = 2.0    # m/s, above this hold a steady stop request so the approach is a normal stop
+  CREEP_SPEED = 0.15   # m/s, creep target. b6 crept at 0.06-0.12 through its first phase
+  KP = 4.0             # lands the creep on 0.07-0.15 m/s, and doubles as the approach brake
+  ACCEL_MIN = -1.5
+  ACCEL_MAX = 0.6
+  POKE_ACCEL = 0.12    # what b6 sent with ANFAHREN in its second phase, too weak to break the hold
+  STOP_ACCEL = -0.55   # MEB stopAccel, interface.py. the creep needs a real stop request to end
+  GO_FRAMES = 10       # 200 ms, b6 averaged 0.21 s in ANFAHREN
+  STOP_FRAMES = 5      # 100 ms, b6 averaged 0.10 s in HALTEN, so 6.7 transitions/s against b6's 6.5
+  CREEP_FRAMES = 75    # 1.5 s creeping, b6's first phase ran 1.26 s
+  HOLD_FRAMES = 100    # then 2 s stopped, b6's second ran 2.16 s
 
   def __init__(self, CP, CCP):
-    self.CCP = CCP
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
-    acc_hold_type_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Anforderung_HMS'].items()}
-    self.halten = acc_hold_type_vals['HALTEN']
-    self.anfahren = acc_hold_type_vals['ANFAHREN']
-    self.ramp = acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-    self.none = acc_hold_type_vals['KEINE_ANFORDERUNG']
     self.frames = 0
-    self.churn_frames = 0
-    self.held_frames = 0
 
-  def update(self, CS, CC, accel, acc_hold_type, braking_to_stop) -> tuple[float, int, bool]:
-    # CC.enabled, not longActive: a gas press to induce the creep drops longActive and would hand
-    # the policy straight back, which is the opposite of what we want here
-    armed = CC.enabled and not CS.out.brakePressed and \
-            (CS.esp_hold_confirmation or CS.out.vEgo < self.ARM_SPEED)
-    if not armed or self.frames > self.TOTAL_FRAMES:
-      if not armed:
-        self.frames = self.churn_frames = self.held_frames = 0
-      return accel, acc_hold_type, braking_to_stop
+  def update(self, CS, CC, accel):
+    if not CC.enabled or CS.out.brakePressed or CS.out.gasPressed or CS.out.vEgo > self.ARM_SPEED:
+      self.frames = 0
+      return accel, CC
 
     self.frames += 1
+    creeping = self.frames % (self.CREEP_FRAMES + self.HOLD_FRAMES) < self.CREEP_FRAMES
+    going = CS.out.vEgo < self.CHURN_SPEED and self.frames % (self.GO_FRAMES + self.STOP_FRAMES) < self.GO_FRAMES
 
-    # not held yet. churn for A_FRAMES, then brake to a stop. the accel has to be commanded here or
-    # the policy drives the car away, and phase B must never pulse a rolling car because ANFAHREN +
-    # PULSE_ACCEL would just accelerate it. brake down from ARM_SPEED first, then churn, then stop.
-    # block lengths from b6 30.88-32.14, the only phase that makes the car actually grab and release
-    if not (CS.esp_hold_confirmation and CS.out.vEgo < self.STOPPED_SPEED):
-      self.held_frames = 0
-      if CS.out.vEgo > self.CREEP_SPEED:
-        self.churn_frames = 0
-        return self.BRAKE_ACCEL, self.halten, True  # too fast, brake down into the creep band first
-      self.churn_frames += 1
-      if self.churn_frames > self.A_FRAMES:
-        return self.STOP_ACCEL, self.halten, True  # churn window over, get it stopped
-      i = self.churn_frames % (self.A_HALTEN + self.A_RAMP + self.A_NONE)
-      if i < self.A_HALTEN:
-        return self.A_HOLD_ACCEL, self.halten, True
-      if i < self.A_HALTEN + self.A_RAMP:
-        return self.A_RELEASE_ACCEL, self.ramp, False
-      return self.A_RELEASE_ACCEL, self.none, False
-
-    # held, so phase B runs off its own counter and always starts from a real standstill
-    self.held_frames += 1
-    frame = self.held_frames - self.SETTLE_FRAMES
-    period = self.PULSE_FRAMES + self.GAP_FRAMES
-
-    if frame <= 0:
-      return self.CCP.ACCEL_INACTIVE, self.halten, False  # settling, steady hold
-
-    # loop the train for as long as we are stopped. one burst per stop is far too slow to tell
-    # whether the camera latching 7 is a precondition or just something that happens on the way
-    frame = (frame - 1) % (self.CYCLES * period + self.HOLD_AFTER_FRAMES) + 1
-    if frame > self.CYCLES * period:
-      return self.CCP.ACCEL_INACTIVE, self.halten, False  # steady hold between trains
-    if (frame - 1) % period < self.PULSE_FRAMES:
-      return self.PULSE_ACCEL, self.anfahren, False
-    # the real faults cycled the stop request with the hold request, we cannot get there through
-    # braking_to_stop because that needs esp_hold low, so force it alongside the HALTEN blocks
-    return self.CCP.ACCEL_INACTIVE, self.halten, self.TOGGLE_ANHALTEN
+    accel = min(max((self.CREEP_SPEED - CS.out.vEgo) * self.KP, self.ACCEL_MIN), self.ACCEL_MAX)
+    if not creeping:
+      accel = self.POKE_ACCEL if going else min(accel, self.STOP_ACCEL)
+    elif not going:
+      accel = min(accel, 0.0)  # coast, braking every 200 ms would take the creep away
+    return accel, _ReproCarControl(CC, LongCtrlState.pid if going else LongCtrlState.stopping)
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
