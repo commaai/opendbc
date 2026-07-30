@@ -175,42 +175,33 @@ class MebCreepChurnRepro:
   """REPRO ONLY, do not merge. Reproduces the TSK permanent fault from 000000b6--48c9d2f02a/23
   (t=35.26) and 000000b8--ab902978ef/9 (t=50.15).
 
-  In both routes the policy chattered longControlState pid/stopping at ~6.5 Hz while the car was
-  CREEPING, not while parked. b6 crept at 0.06-0.12 m/s for 1.3 s with the hold off, then churned
-  another 2.2 s with it on, then TSK went to 7. So the stimulus is the car repeatedly grabbing and
-  releasing the ESP hold, which a pulse train against a car that never moves cannot produce.
+  In both routes the policy chattered longControlState pid/stopping at ~6.5 Hz WHILE THE CAR WAS
+  CREEPING. Not creeping then churning at a stop, and not churning against a car that never moves:
+  b6 held 0.06-0.12 m/s continuously through 11 blocks of HALTEN -> RAMP -> none, with the ESP hold
+  off the whole time, and only then did it settle and fault. The creep and the churn are one state.
 
-  So drive it closed loop: a P controller onto a creep target, plus the pid/stopping chatter fed
-  into the REAL MebLongStateMachine. Everything downstream (which HMS value, the RAMP insertion,
-  the accel zeroing, braking_to_stop) is production code, so this cannot emit a transition master
-  could not, and the two phases of the real fault fall out on their own: with the hold off "go"
-  legalizes to RAMP then KEINE_ANFORDERUNG, with it on "go" is ANFAHREN.
+  So it is one state here too: a P controller onto the creep speed, with the pid/stopping chatter
+  running on top of it and never interrupted. Feeding that chatter into the REAL MebLongStateMachine
+  is what decides the HMS value, the RAMP insertion, the accel zeroing and braking_to_stop, so this
+  cannot emit a transition master could not, and b6's HALTEN -> RAMP -> none falls out on its own
+  (with the hold off "go" legalizes to RAMP then KEINE_ANFORDERUNG; with it on "go" is ANFAHREN).
 
-  Two rates. The fast one is the churn itself, at b6's measured rate. The slow one alternates
-  creeping with sitting stopped, because that is the shape of the real fault and neither half
-  reproduces on its own: the creep is what makes the ESP hold grab and let go, and the stop is
-  where both faults actually fired.
-
-  The creep half will not start itself from a hold. A 200 ms drive-off request is not enough to get
-  the ESP to let go, and the churn puts a fresh hold request in every 300 ms, so the car just sits
-  there. Both real faults were already rolling when the churn started. So while stopped, ask to go
-  and keep asking until the car is actually moving, and only then churn.
+  The gains are picked so the loop settles inside b6's band rather than stopping the car: over one
+  300 ms cycle the go halves average KP * (CREEP_SPEED - v) and the stop halves HOLD_ACCEL, which
+  balance at 0.125 m/s. From a dead stop the go halves ask for 1.05, a real drive-off, so it can get
+  out of an ESP hold if one grabs; b8 toggled Standstill 6 times under exactly this kind of churn.
 
   Brake or gas hands the car straight back to the policy, so the driver always wins.
   """
   ARM_SPEED = 10.0     # m/s, engage anywhere under this and the harness brakes the car down itself
   CHURN_SPEED = 2.0    # m/s, above this hold a steady stop request so the approach is a normal stop
-  CREEP_SPEED = 0.15   # m/s, creep target. b6 crept at 0.06-0.12 through its first phase
-  MOVING_SPEED = 0.05  # m/s, below this the ESP is holding the car and a churn cannot get it out
+  CREEP_SPEED = 0.15   # m/s, creep target, which the churn pulls down to 0.125. b6 held 0.06-0.12
   KP = 7.0             # 1.05 m/s^2 from a stop, which is a real drive-off, and 0 at the creep speed
   ACCEL_MIN = -1.5
   ACCEL_MAX = 1.05
-  POKE_ACCEL = 0.12    # what b6 sent with ANFAHREN in its second phase, too weak to break the hold
-  STOP_ACCEL = -0.55   # MEB stopAccel, interface.py. the creep needs a real stop request to end
+  HOLD_ACCEL = -0.35   # what b6 sent in the HALTEN blocks it crept through, and it never stopped it
   GO_FRAMES = 10       # 200 ms, b6 averaged 0.21 s in ANFAHREN
   STOP_FRAMES = 5      # 100 ms, b6 averaged 0.10 s in HALTEN, so 6.7 transitions/s against b6's 6.5
-  CREEP_FRAMES = 75    # 1.5 s creeping, b6's first phase ran 1.26 s
-  HOLD_FRAMES = 100    # then 2 s stopped, b6's second ran 2.16 s
 
   def __init__(self, CP, CCP):
     self.frames = 0
@@ -221,16 +212,10 @@ class MebCreepChurnRepro:
       return accel, CC
 
     self.frames += 1
-    creeping = self.frames % (self.CREEP_FRAMES + self.HOLD_FRAMES) < self.CREEP_FRAMES
-    launching = creeping and CS.out.vEgo < self.MOVING_SPEED
-    going = launching or (CS.out.vEgo < self.CHURN_SPEED and
-                          self.frames % (self.GO_FRAMES + self.STOP_FRAMES) < self.GO_FRAMES)
-
+    going = CS.out.vEgo < self.CHURN_SPEED and self.frames % (self.GO_FRAMES + self.STOP_FRAMES) < self.GO_FRAMES
     accel = min(max((self.CREEP_SPEED - CS.out.vEgo) * self.KP, self.ACCEL_MIN), self.ACCEL_MAX)
-    if not creeping:
-      accel = self.POKE_ACCEL if going else min(accel, self.STOP_ACCEL)
-    elif not going:
-      accel = min(accel, 0.0)  # coast, braking every 200 ms would take the creep away
+    if not going:
+      accel = min(accel, self.HOLD_ACCEL)
     return accel, _ReproCarControl(CC, LongCtrlState.pid if going else LongCtrlState.stopping)
 
 
