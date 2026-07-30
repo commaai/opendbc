@@ -197,6 +197,11 @@ class MebHoldPulseRepro:
   # 5 s of steady HALTEN after the train. both faults fired after the churn stopped, b6 0.38 s into
   # the following HALTEN block rather than during the churn itself
   HOLD_AFTER_FRAMES = 250
+  # phase A, run on the approach while the hold is still off. block lengths from b6 30.88-32.14
+  APPROACH_SPEED = 1.0  # m/s, start churning once we are creeping in
+  A_HALTEN = 10         # 200 ms
+  A_RAMP = 6            # 120 ms
+  A_NONE = 1            # 20 ms
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
@@ -204,12 +209,30 @@ class MebHoldPulseRepro:
     acc_hold_type_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Anforderung_HMS'].items()}
     self.halten = acc_hold_type_vals['HALTEN']
     self.anfahren = acc_hold_type_vals['ANFAHREN']
+    self.ramp = acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+    self.none = acc_hold_type_vals['KEINE_ANFORDERUNG']
     self.frames = 0
+    self.approach_frames = 0
 
   def update(self, CS, CC, accel, acc_hold_type, braking_to_stop) -> tuple[float, int, bool]:
-    if not (CC.longActive and CS.esp_hold_confirmation) or CS.out.brakePressed:
-      self.frames = 0
+    armed = CC.longActive and not CS.out.brakePressed and \
+            (CS.esp_hold_confirmation or CS.out.vEgo < self.APPROACH_SPEED)
+    if not armed:
+      self.frames = self.approach_frames = 0
       return accel, acc_hold_type, braking_to_stop
+
+    # phase A, churn while the hold is still off. this is where both faults spent ~1.3 s and the
+    # only phase that can make the car actually grab and release: a 100 ms ANFAHREN at hld=1 never
+    # drops Standstill, so nothing hydraulic cycles. block lengths from b6 30.88-32.14.
+    if not CS.esp_hold_confirmation:
+      self.frames = 0
+      self.approach_frames += 1
+      i = self.approach_frames % (self.A_HALTEN + self.A_RAMP + self.A_NONE)
+      if i < self.A_HALTEN:
+        return accel, self.halten, True
+      if i < self.A_HALTEN + self.A_RAMP:
+        return accel, self.ramp, False
+      return accel, self.none, False
 
     self.frames += 1
     frame = self.frames - self.SETTLE_FRAMES
