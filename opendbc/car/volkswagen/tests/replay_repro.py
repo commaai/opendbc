@@ -30,15 +30,16 @@ def step(repro, long_state, v, held, brake=False, gas=False, enabled=True):
           esp_hold_confirmation=held)
   CC = NS(enabled=enabled, longActive=enabled and not gas, cruiseControl=NS(override=gas),
           actuators=NS(longControlState=0, accel=0.0))
-  accel, CC_repro = repro.update(CS, CC, -99.0)  # sentinel, shows up as passthrough if we disarm
+  accel, CC_repro = repro.update(CS, CC, 0.0)
+  armed = CC_repro is not CC  # the harness hands back the reader it was given when it disarms
   accel, _, hold_type, braking_to_stop = long_state.update(CS, CC_repro, accel)
-  return accel, hold_type, braking_to_stop
+  return accel, hold_type, braking_to_stop, armed
 
 
 def report(out):
   """out rows: (t, accel, hold_type, braking_to_stop, v, held)"""
   trans = sum(1 for a, b in zip(out, out[1:], strict=False) if a[2] != b[2])
-  released_while_held = [r for r in out if r[5] and r[2] in (0, 5)]
+  released_while_held = [r for r in out if r[5] and r[2] == 0]
   grabs = sum(1 for a, b in zip(out, out[1:], strict=False) if not a[5] and b[5])
   releases = sum(1 for a, b in zip(out, out[1:], strict=False) if a[5] and not b[5])
   span = max(1e-3, out[-1][0] - out[0][0])
@@ -46,14 +47,14 @@ def report(out):
   print(f"  HMS transitions      : {trans} over {span:.1f} s = {trans / span:.1f}/s  (b6 phase B was 6.5/s)")
   print(f"  accel range          : {min(r[1] for r in out):.2f} .. {max(r[1] for r in out):.2f}")
   print(f"  hold grabbed/released: {grabs}x / {releases}x")
-  print(f"  no-request while held: {len(released_while_held)}   <-- must be 0, this is what clamps the EPB into park")
+  print(f"  no-request while held: {len(released_while_held)}   <-- must be 0, this is what clamped the EPB into park in 000000ca")
 
 
 def replay(seg):
   from openpilot.tools.lib.logreader import LogReader
   repro, long_state = MebCreepChurnRepro(CP, CCP), MebLongStateMachine(CP, CCP)
   car = CANParser("vw_meb_2024_generated", [("ESC_50", 50)], 0)
-  v, brake, gas, enabled, t0, frame, out = 0.0, False, False, False, None, 0, []
+  v, brake, gas, enabled, t0, frame, steps, out = 0.0, False, False, False, None, 0, 0, []
   for m in LogReader(seg):
     if m.which() == "carState":
       v, brake, gas = m.carState.vEgo, m.carState.brakePressed, m.carState.gasPressed
@@ -66,11 +67,13 @@ def replay(seg):
       if frame % 2:  # the harness runs at 50 Hz, CAN arrives at 100
         continue
       held = bool(car.vl["ESC_50"]["Standstill"])
-      accel, hold_type, braking_to_stop = step(repro, long_state, v, held, brake, gas, enabled)
-      out.append(((m.logMonoTime - t0) / 1e9, round(accel, 2), hold_type, braking_to_stop, round(v, 2), held))
+      accel, hold_type, braking_to_stop, is_armed = step(repro, long_state, v, held, brake, gas, enabled)
+      if is_armed:
+        out.append(((m.logMonoTime - t0) / 1e9, round(accel, 2), hold_type, braking_to_stop, round(v, 2), held))
+      steps += 1
 
-  armed = [r for r in out if r[1] != -99.0]
-  print(f"{seg}: {len(out)} steps, {len(armed)} under the harness ({100 * len(armed) / max(1, len(out)):.0f}%)")
+  armed = out
+  print(f"{seg}: {steps} steps, {len(armed)} under the harness ({100 * len(armed) / max(1, steps):.0f}%)")
   if armed:
     report(armed)
 
@@ -84,7 +87,7 @@ def sim(v0=5.0, grade=0.0, seconds=30.0):
   repro, long_state = MebCreepChurnRepro(CP, CCP), MebLongStateMachine(CP, CCP)
   v, held, release_delay, out = v0, False, 0, []
   for i in range(int(seconds / DT)):
-    accel, hold_type, braking_to_stop = step(repro, long_state, v, held)
+    accel, hold_type, braking_to_stop, _ = step(repro, long_state, v, held)
     if held:
       v = 0.0
       release_delay = release_delay + 1 if hold_type not in (1, 2) else 0
