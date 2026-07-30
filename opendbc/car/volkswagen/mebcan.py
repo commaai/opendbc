@@ -169,9 +169,15 @@ class MebHoldPulseRepro:
                         not fault. Brakes audibly release, so the car does act on it, meaning a
                         single short drive-off request is not by itself illegal.
     2. CYCLES=2, GAP=2  adds one 40 ms HALTEN, the shortest block of any kind in the logs and one
-                        step 1 never produced. Isolates a minimum dwell on HALTEN.  <-- current
-    3. CYCLES=8, GAP=5  sustained oscillation, matching the b6 fault window. If only this faults,
-                        it is the rate rather than any single transition.
+                        step 1 never produced. TESTED, does not fault. So no single transition or
+                        dwell is illegal on its own.
+    3. CYCLES=12        sustained 5 Hz churn, 2.4 s and 24 transitions, a little past b6 (8 cycles
+                        over 2.2 s) and near b8 (25 transitions). If only this faults it is the
+                        rate, not any single transition.  <-- current
+    4. if step 3 is also clean the trigger is outside the HMS/accel pattern. The remaining
+                        difference is that the real churn started before standstill, so it also
+                        toggled braking_to_stop and with it ACC_Anhalten and ACC_Anhalteweg, which
+                        this harness holds constant.
 
   Waits for the driver to be off the brake so the car is held by ESP alone, matching both routes.
   longActive is already true while pre-enabled with the brake held, so without this the whole train
@@ -182,8 +188,8 @@ class MebHoldPulseRepro:
   """
   SETTLE_FRAMES = 100  # 2 s of steady HALTEN before pulsing
   PULSE_FRAMES = 5     # ANFAHREN pulse, 100 ms, the shortest ANFAHREN block in the logs
-  GAP_FRAMES = 2       # HALTEN between pulses, 40 ms, the shortest HALTEN block in the logs
-  CYCLES = 2
+  GAP_FRAMES = 5       # HALTEN between pulses, 100 ms
+  CYCLES = 12          # 2.4 s of 5 Hz churn, 24 transitions
   PULSE_ACCEL = 0.12   # accel sent with ANFAHREN, matches both routes
 
   def __init__(self, CP, CCP):
