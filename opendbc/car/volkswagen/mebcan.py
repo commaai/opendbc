@@ -132,6 +132,11 @@ class MebLongStateMachine:
       # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter = self.RAMP_FRAMES
+    elif self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
+      # Stock behavior is to transition to LOESEN_UEBER_RAMPE after resuming from a stop
+      # TODO: determine if this is a time constant or speed threshold (5 kph?)
+      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+      self.ramp_counter = self.RAMP_FRAMES
     elif self.ramp_counter > 0:
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter -= 1
