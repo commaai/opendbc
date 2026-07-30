@@ -304,7 +304,8 @@ class CarState(CarStateBase):
 
     # TSK winds braking down through brake_only after driver brakes at low speeds. Requesting drive-off in this
     # state can fault TSK, and stock refuses to engage here as well, so block entry until it clears.
-    ret.carNotReady = pt_cp.vl["Motor_51"]["TSK_Status"] == 5  # brake_only
+    # Secondly, after harshly braking, long control is temporarily inhibited (ignored as a fault above)
+    ret.carNotReady = pt_cp.vl["Motor_51"]["TSK_Status"] == 5 or long_control_inhibit
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(240, pt_cp.vl["SMLS_01"]["BH_Blinker_li"],
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
