@@ -203,6 +203,7 @@ class MebHoldPulseRepro:
   # esp_hold is already set, which is what every test so far did.
   ARM_SPEED = 10.0      # m/s, engage anywhere under this and the harness brakes the car down itself
   CREEP_SPEED = 0.5     # m/s, start churning below this. b6 engaged at 0.11, b8 at 0.46
+  STOPPED_SPEED = 0.1   # m/s. esp_hold alone is not enough, ESC_50.Standstill reads 1 while rolling
   BRAKE_ACCEL = -1.5    # bring the car down into the creep band
   A_FRAMES = 100        # 2 s ceiling on the churn, b6 churned for 1.26 s
   A_HALTEN = 10         # 200 ms
@@ -243,7 +244,7 @@ class MebHoldPulseRepro:
     # the policy drives the car away, and phase B must never pulse a rolling car because ANFAHREN +
     # PULSE_ACCEL would just accelerate it. brake down from ARM_SPEED first, then churn, then stop.
     # block lengths from b6 30.88-32.14, the only phase that makes the car actually grab and release
-    if not CS.esp_hold_confirmation:
+    if not (CS.esp_hold_confirmation and CS.out.vEgo < self.STOPPED_SPEED):
       self.held_frames = 0
       if CS.out.vEgo > self.CREEP_SPEED:
         self.churn_frames = 0
