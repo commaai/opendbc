@@ -203,6 +203,7 @@ struct CarState {
   vehicleSensorsInvalid @52 :Bool;  # invalid steering angle readings, etc.
   lowSpeedAlert @56 :Bool;  # lost steering control due to a dynamic min steering speed
   blockPcmEnable @60 :Bool;  # whether to allow PCM to enable this frame
+  carNotReady @61 :Bool;  # car is transiently refusing engagement, used to prevent a fault if engaged
 
   # cruise state
   cruiseState @10 :CruiseState;
