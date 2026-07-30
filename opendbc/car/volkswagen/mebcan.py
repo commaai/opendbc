@@ -89,6 +89,7 @@ class MebLongStateMachine:
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
     self.ramp_counter = 0
+    self.launching = False
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -124,22 +125,31 @@ class MebLongStateMachine:
       acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     # enforce legal transitions
+    # TODO: stock also ramps on a brake disengage (NONE -> RAMP), starting on brakePressed and ending once TSK_Status leaves 5, we send no request
     if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
-      # allow going into hold at any time, reset ramp counter
+      # allow going into hold at any time, reset ramp counter. stock also aborts the drive-off ramp back to HALTEN
       self.ramp_counter = 0
+      self.launching = False
     elif self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
       # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
       # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter = self.RAMP_FRAMES
     elif self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
-      # Stock behavior is to transition to LOESEN_UEBER_RAMPE after resuming from a stop
-      # TODO: determine if this is a time constant or speed threshold (5 kph?)
+      # stock transitions to LOESEN_UEBER_RAMPE after resuming from a stop and holds it until the car is actually
+      # rolling. dropping to no request while still at a standstill hands standstill management back to the EPB,
+      # which clamps and faults into park on a grade.
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter = self.RAMP_FRAMES
-    elif self.ramp_counter > 0:
+      self.launching = True
+    elif self.ramp_counter > 0 or self.launching:
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-      self.ramp_counter -= 1
+      self.ramp_counter = max(self.ramp_counter - 1, 0)
+
+    # stock ends the drive-off ramp on speed, not time: 5.02 kph mean over 6 launches, sd 0.20. bail if we lose
+    # long control so we can never hold the request indefinitely
+    if self.launching and (not CC.longActive or CS.out.vEgo > self.CCP.LAUNCH_RAMP_SPEED):
+      self.launching = False
 
     return acc_hold_type
 

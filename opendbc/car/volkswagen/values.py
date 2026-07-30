@@ -116,6 +116,7 @@ class CarControllerParams:
       # Longitudinal constants
       self.ACCEL_INACTIVE = 3.01  # m/s^2
       self.JERK_LIMIT = 4.0  # m/s^3
+      self.LAUNCH_RAMP_SPEED = 5 * CV.KPH_TO_MS  # stock drops the drive-off ramp request at 5 kph
 
       self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
       self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]
