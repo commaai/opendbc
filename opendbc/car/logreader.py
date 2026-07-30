@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import bz2
 import capnp
 import urllib.parse
 import warnings
@@ -8,7 +9,7 @@ import zstandard as zstd
 
 from opendbc.car.common.basedir import BASEDIR
 
-capnp_log = capnp.load(os.path.join(BASEDIR, "rlog.capnp"))
+capnp_log = capnp.load(os.path.join(BASEDIR, "rlog.capnp"), imports=[BASEDIR])
 
 
 def decompress_stream(data: bytes):
@@ -33,7 +34,9 @@ class LogReader:
       with open(fn, "rb") as f:
         dat = f.read()
 
-    if ext == ".zst" or dat.startswith(b'\x28\xB5\x2F\xFD'):
+    if ext == ".bz2" or dat.startswith(b"BZh"):
+      dat = bz2.decompress(dat)
+    elif ext == ".zst" or dat.startswith(b'\x28\xB5\x2F\xFD'):
       # https://github.com/facebook/zstd/blob/dev/doc/zstd_compression_format.md#zstandard-frames
       dat = decompress_stream(dat)
 
