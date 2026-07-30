@@ -206,6 +206,9 @@ class MebHoldPulseRepro:
   A_HALTEN = 10         # 200 ms
   A_RAMP = 6            # 120 ms
   A_NONE = 1            # 20 ms, gives 8.8 transitions/s against b6's 8.7
+  # b6 phase A ran -0.35 to +0.11 and the car decayed 0.12 -> 0.02 m/s. this has to be commanded:
+  # passing the policy accel through lets the car accelerate straight out of APPROACH_SPEED
+  A_ACCEL = -0.2
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
