@@ -196,7 +196,7 @@ class MebHoldPulseRepro:
   TOGGLE_ANHALTEN = True  # cycle ACC_Anhalten 1<->0 and ACC_Anhalteweg 0<->20.46 with the train
   # 5 s of steady HALTEN after the train. both faults fired after the churn stopped, b6 0.38 s into
   # the following HALTEN block rather than during the churn itself
-  HOLD_AFTER_FRAMES = 150
+  HOLD_AFTER_FRAMES = 50
   # phase A, run on the approach while the hold is still off. block lengths from b6 30.88-32.14
   # both faults were engaged while ALREADY CREEPING, b6 at 0.11 m/s and b8 at 0.46 m/s, and b6's
   # churn began 0.14 s after the engage. engaging at a full stop skips this phase entirely because
@@ -208,9 +208,12 @@ class MebHoldPulseRepro:
   A_HALTEN = 10         # 200 ms
   A_RAMP = 6            # 120 ms
   A_NONE = 1            # 20 ms, gives 8.8 transitions/s against b6's 8.7
-  A_ACCEL = -0.5        # b6 phase A ran -0.35 to +0.11 while decaying 0.12 -> 0.02 m/s
+  # b6 phase A: HALTEN blocks went slightly negative, RAMP blocks were POSITIVE at +0.07 to +0.11,
+  # netting about -0.08 m/s^2 so the car crept at 0.06-0.12 m/s rather than being braked to a stop
+  A_HOLD_ACCEL = -0.25
+  A_RELEASE_ACCEL = 0.10
   STOP_ACCEL = -1.0     # after the churn window, get it stopped so phase B starts from a standstill
-  TOTAL_FRAMES = 1500   # 30 s overall cap, enough to brake down from ARM_SPEED and run the sequence
+  TOTAL_FRAMES = 6000   # 120 s cap, long enough to sit at a light and take many attempts
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
@@ -250,10 +253,10 @@ class MebHoldPulseRepro:
         return self.STOP_ACCEL, self.halten, True  # churn window over, get it stopped
       i = self.churn_frames % (self.A_HALTEN + self.A_RAMP + self.A_NONE)
       if i < self.A_HALTEN:
-        return self.A_ACCEL, self.halten, True
+        return self.A_HOLD_ACCEL, self.halten, True
       if i < self.A_HALTEN + self.A_RAMP:
-        return self.A_ACCEL, self.ramp, False
-      return self.A_ACCEL, self.none, False
+        return self.A_RELEASE_ACCEL, self.ramp, False
+      return self.A_RELEASE_ACCEL, self.none, False
 
     # held, so phase B runs off its own counter and always starts from a real standstill
     self.held_frames += 1
@@ -262,10 +265,12 @@ class MebHoldPulseRepro:
 
     if frame <= 0:
       return self.CCP.ACCEL_INACTIVE, self.halten, False  # settling, steady hold
-    if frame > self.CYCLES * period + self.HOLD_AFTER_FRAMES:
-      return accel, acc_hold_type, braking_to_stop  # done, hand back so the car can resume
+
+    # loop the train for as long as we are stopped. one burst per stop is far too slow to tell
+    # whether the camera latching 7 is a precondition or just something that happens on the way
+    frame = (frame - 1) % (self.CYCLES * period + self.HOLD_AFTER_FRAMES) + 1
     if frame > self.CYCLES * period:
-      return self.CCP.ACCEL_INACTIVE, self.halten, False  # steady hold, the policy is not sent at all
+      return self.CCP.ACCEL_INACTIVE, self.halten, False  # steady hold between trains
     if (frame - 1) % period < self.PULSE_FRAMES:
       return self.PULSE_ACCEL, self.anfahren, False
     # the real faults cycled the stop request with the hold request, we cannot get there through
