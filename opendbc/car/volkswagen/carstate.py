@@ -302,6 +302,11 @@ class CarState(CarStateBase):
     ret.accFaulted = (self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit) or
                       ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
 
+    # TSK winds braking down through brake_only after driver brakes at low speeds. Requesting drive-off in this
+    # state can fault TSK, and stock refuses to engage here as well, so block entry until it clears.
+    # Secondly, after harshly braking, long control is temporarily inhibited (ignored as a fault above)
+    ret.carNotReady = pt_cp.vl["Motor_51"]["TSK_Status"] == 5 or long_control_inhibit
+
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(240, pt_cp.vl["SMLS_01"]["BH_Blinker_li"],
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
 
