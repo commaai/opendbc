@@ -164,11 +164,14 @@ class MebHoldPulseRepro:
   ANFAHREN + 0.12 m/s^2 with HALTEN + ACCEL_INACTIVE about 5x/s. Measured dwells: ANFAHREN
   0.10-0.34 s, HALTEN 0.04-0.16 s, 8 cycles over 2.2 s, then TSK -> 7 while sitting in HALTEN.
 
-  Two competing theories. Test the cheap one first:
-    CYCLES = 1  -> is a single too-short ANFAHREN enough, i.e. a minimum dwell violation?
-    CYCLES > 1  -> or does it take sustained oscillation? raise until it faults.
-  Shorten PULSE_FRAMES to probe the dwell threshold itself (2 frames = 40 ms is the shortest
-  HALTEN block observed in the logs).
+  Ladder, cheapest theory first:
+    1. CYCLES=1, GAP=5  one 100 ms ANFAHREN, the shortest ANFAHREN block in the logs. TESTED, does
+                        not fault. Brakes audibly release, so the car does act on it, meaning a
+                        single short drive-off request is not by itself illegal.
+    2. CYCLES=2, GAP=2  adds one 40 ms HALTEN, the shortest block of any kind in the logs and one
+                        step 1 never produced. Isolates a minimum dwell on HALTEN.  <-- current
+    3. CYCLES=8, GAP=5  sustained oscillation, matching the b6 fault window. If only this faults,
+                        it is the rate rather than any single transition.
 
   Waits for the driver to be off the brake so the car is held by ESP alone, matching both routes.
   longActive is already true while pre-enabled with the brake held, so without this the whole train
@@ -178,9 +181,9 @@ class MebHoldPulseRepro:
   MebLongStateMachine so the car can drive off.
   """
   SETTLE_FRAMES = 100  # 2 s of steady HALTEN before pulsing
-  PULSE_FRAMES = 5     # ANFAHREN pulse, 100 ms
-  GAP_FRAMES = 5       # HALTEN between pulses, 100 ms
-  CYCLES = 1
+  PULSE_FRAMES = 5     # ANFAHREN pulse, 100 ms, the shortest ANFAHREN block in the logs
+  GAP_FRAMES = 2       # HALTEN between pulses, 40 ms, the shortest HALTEN block in the logs
+  CYCLES = 2
   PULSE_ACCEL = 0.12   # accel sent with ANFAHREN, matches both routes
 
   def __init__(self, CP, CCP):
