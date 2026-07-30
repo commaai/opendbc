@@ -188,20 +188,24 @@ class MebHoldPulseRepro:
   Holds steady for SETTLE_FRAMES so the pulse train is the only stimulus, then hands control back to
   MebLongStateMachine so the car can drive off.
   """
-  SETTLE_FRAMES = 100  # 2 s of steady HALTEN before pulsing
-  PULSE_FRAMES = 5     # ANFAHREN pulse, 100 ms, the shortest ANFAHREN block in the logs
-  GAP_FRAMES = 5       # HALTEN between pulses, 100 ms
-  CYCLES = 12          # 2.4 s of 5 Hz churn, 24 transitions
+  SETTLE_FRAMES = 50   # 1 s of steady HALTEN before pulsing
+  PULSE_FRAMES = 10    # ANFAHREN 200 ms, b6 phase B averaged 0.21 s
+  GAP_FRAMES = 5       # HALTEN 100 ms, b6 phase B averaged 0.10 s
+  CYCLES = 7           # 2.1 s at 6.7 transitions/s, b6 phase B was 2.16 s at 6.5
   PULSE_ACCEL = 0.12   # accel sent with ANFAHREN, matches both routes
   TOGGLE_ANHALTEN = True  # cycle ACC_Anhalten 1<->0 and ACC_Anhalteweg 0<->20.46 with the train
   # 5 s of steady HALTEN after the train. both faults fired after the churn stopped, b6 0.38 s into
   # the following HALTEN block rather than during the churn itself
-  HOLD_AFTER_FRAMES = 250
+  HOLD_AFTER_FRAMES = 150
   # phase A, run on the approach while the hold is still off. block lengths from b6 30.88-32.14
+  # both faults were engaged while ALREADY CREEPING, b6 at 0.11 m/s and b8 at 0.46 m/s, and b6's
+  # churn began 0.14 s after the engage. engaging at a full stop skips this phase entirely because
+  # esp_hold is already set, which is what every test so far did.
   APPROACH_SPEED = 1.0  # m/s, start churning once we are creeping in
+  A_FRAMES = 100        # 2 s ceiling, b6 churned for 1.26 s. bounded: the churn can stop the hold latching
   A_HALTEN = 10         # 200 ms
   A_RAMP = 6            # 120 ms
-  A_NONE = 1            # 20 ms
+  A_NONE = 1            # 20 ms, gives 8.8 transitions/s against b6's 8.7
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
@@ -221,21 +225,23 @@ class MebHoldPulseRepro:
       self.frames = self.approach_frames = 0
       return accel, acc_hold_type, braking_to_stop
 
+    self.frames += 1
+
     # phase A, churn while the hold is still off. this is where both faults spent ~1.3 s and the
     # only phase that can make the car actually grab and release: a 100 ms ANFAHREN at hld=1 never
     # drops Standstill, so nothing hydraulic cycles. block lengths from b6 30.88-32.14.
-    if not CS.esp_hold_confirmation:
-      self.frames = 0
-      self.approach_frames += 1
-      i = self.approach_frames % (self.A_HALTEN + self.A_RAMP + self.A_NONE)
-      if i < self.A_HALTEN:
-        return accel, self.halten, True
-      if i < self.A_HALTEN + self.A_RAMP:
-        return accel, self.ramp, False
-      return accel, self.none, False
+    # bounded, since the churn itself can stop the hold from ever latching
+    if self.frames <= self.A_FRAMES:
+      if not CS.esp_hold_confirmation:
+        i = self.frames % (self.A_HALTEN + self.A_RAMP + self.A_NONE)
+        if i < self.A_HALTEN:
+          return accel, self.halten, True
+        if i < self.A_HALTEN + self.A_RAMP:
+          return accel, self.ramp, False
+        return accel, self.none, False
+      return self.CCP.ACCEL_INACTIVE, self.halten, False  # already held, wait out the phase
 
-    self.frames += 1
-    frame = self.frames - self.SETTLE_FRAMES
+    frame = self.frames - self.A_FRAMES - self.SETTLE_FRAMES
     period = self.PULSE_FRAMES + self.GAP_FRAMES
 
     if frame <= 0:
