@@ -87,6 +87,7 @@ class MebLongStateMachine:
   def __init__(self, CP, CCP):
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
+    self.LAUNCH_RAMP_FRAMES = 100 // CCP.ACC_CONTROL_STEP  # 1 s
 
     self.ramp_counter = 0
 
@@ -132,6 +133,11 @@ class MebLongStateMachine:
       # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter = self.RAMP_FRAMES
+    elif self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
+      # stock ramps out of the drive-off request instead of dropping it at standstill, which hands standstill
+      # management back to the EPB and can clamp into park on a grade. stock holds it until ~5 kph.
+      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+      self.ramp_counter = self.LAUNCH_RAMP_FRAMES
     elif self.ramp_counter > 0:
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter -= 1
