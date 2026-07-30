@@ -174,10 +174,12 @@ class MebHoldPulseRepro:
     3. CYCLES=12        sustained 5 Hz churn, 2.4 s and 24 transitions, a little past b6 (8 cycles
                         over 2.2 s) and near b8 (25 transitions). If only this faults it is the
                         rate, not any single transition.  <-- current
-    4. if step 3 is also clean the trigger is outside the HMS/accel pattern. The remaining
-                        difference is that the real churn started before standstill, so it also
-                        toggled braking_to_stop and with it ACC_Anhalten and ACC_Anhalteweg, which
-                        this harness holds constant.
+    4. TOGGLE_ANHALTEN   step 3 clean too, so the HMS/accel pattern alone is not the trigger.
+                        Measured over the 6 s before each fault: b6 toggled ACC_Anhalten and
+                        ACC_Anhalteweg 8 times, b8 20 times, this harness 0. braking_to_stop is
+                        requesting_hold and not esp_hold, and we only ever run at hld=1, so those
+                        fields sat constant while the real faults cycled them 1<->0 and
+                        0<->20.46 alongside the HMS. Same pulse train as step 3, plus that.  <-- current
 
   Waits for the driver to be off the brake so the car is held by ESP alone, matching both routes.
   longActive is already true while pre-enabled with the brake held, so without this the whole train
@@ -191,6 +193,7 @@ class MebHoldPulseRepro:
   GAP_FRAMES = 5       # HALTEN between pulses, 100 ms
   CYCLES = 12          # 2.4 s of 5 Hz churn, 24 transitions
   PULSE_ACCEL = 0.12   # accel sent with ANFAHREN, matches both routes
+  TOGGLE_ANHALTEN = True  # cycle ACC_Anhalten 1<->0 and ACC_Anhalteweg 0<->20.46 with the train
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
@@ -200,22 +203,24 @@ class MebHoldPulseRepro:
     self.anfahren = acc_hold_type_vals['ANFAHREN']
     self.frames = 0
 
-  def update(self, CS, CC, accel, acc_hold_type) -> tuple[float, int]:
+  def update(self, CS, CC, accel, acc_hold_type, braking_to_stop) -> tuple[float, int, bool]:
     if not (CC.longActive and CS.esp_hold_confirmation) or CS.out.brakePressed:
       self.frames = 0
-      return accel, acc_hold_type
+      return accel, acc_hold_type, braking_to_stop
 
     self.frames += 1
     frame = self.frames - self.SETTLE_FRAMES
     period = self.PULSE_FRAMES + self.GAP_FRAMES
 
     if frame <= 0:
-      return self.CCP.ACCEL_INACTIVE, self.halten  # settling, steady hold
+      return self.CCP.ACCEL_INACTIVE, self.halten, False  # settling, steady hold
     if frame > self.CYCLES * period:
-      return accel, acc_hold_type  # pulse train done, hand back so the car can resume
+      return accel, acc_hold_type, braking_to_stop  # pulse train done, hand back so the car can resume
     if (frame - 1) % period < self.PULSE_FRAMES:
-      return self.PULSE_ACCEL, self.anfahren
-    return self.CCP.ACCEL_INACTIVE, self.halten
+      return self.PULSE_ACCEL, self.anfahren, False
+    # the real faults cycled the stop request with the hold request, we cannot get there through
+    # braking_to_stop because that needs esp_hold low, so force it alongside the HALTEN blocks
+    return self.CCP.ACCEL_INACTIVE, self.halten, self.TOGGLE_ANHALTEN
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,

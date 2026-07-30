@@ -140,7 +140,8 @@ class CarController(CarControllerBase):
         if self.CP.flags & VolkswagenFlags.MEB:
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
           accel, acc_status, acc_hold_type, braking_to_stop = self.meb_long_state.update(CS, CC, accel)
-          accel, acc_hold_type = self.meb_repro.update(CS, CC, accel, acc_hold_type)  # REPRO ONLY, do not merge
+          # REPRO ONLY, do not merge
+          accel, acc_hold_type, braking_to_stop = self.meb_repro.update(CS, CC, accel, acc_hold_type, braking_to_stop)
           self.meb_long_state.prev_acc_hold_type = acc_hold_type  # legalizer must see what we actually sent
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_status, acc_hold_type, braking_to_stop,
