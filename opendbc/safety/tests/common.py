@@ -991,8 +991,8 @@ class SafetyTest(SafetyTestBase):
     for tf in test_files:
       test = importlib.import_module("opendbc.safety.tests."+tf[:-3])
       for attr in dir(test):
-        if attr.startswith("Test") and attr != current_test:
-          tc = getattr(test, attr)
+        tc = getattr(test, attr)
+        if isinstance(tc, type) and issubclass(tc, SafetyTest) and attr != current_test:
           tx = tc.TX_MSGS
           if tx is not None and not attr.endswith('Base'):
             # No point in comparing different Tesla safety modes

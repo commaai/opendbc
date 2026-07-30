@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import re
 import os
-import jinja2
 import argparse
 import unicodedata
+from string import Template
 from typing import get_args
 
 from enum import Enum
@@ -12,7 +12,7 @@ from collections import defaultdict
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import BaseCarHarness, CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType, SupportType
+from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs, ExtraCarsColumn, CommonFootnote
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.interfaces import get_interface_attr
 from opendbc.car.values import Platform
@@ -85,18 +85,44 @@ def group_by_make(all_car_docs: list[CarDocs]) -> dict[str, list[CarDocs]]:
   return dict(sorted_car_docs)
 
 
+def _build_cars_table(all_car_docs: list[CarDocs], **kwargs) -> tuple[str, str, str]:
+  """Build markdown table header, separator, and body rows for ExtraCarsColumn."""
+  hardware_col_name = kwargs.get("hardware_col_name", "")
+  wide_hardware_col_name = kwargs.get("wide_hardware_col_name", "")
+
+  columns = list(ExtraCarsColumn)
+  header_cells = [col.value for col in columns]
+  if hardware_col_name:
+    header_cells = [wide_hardware_col_name if c == hardware_col_name else c for c in header_cells]
+  table_header = "|" + "|".join(header_cells) + "|"
+
+  # First three columns left-aligned (---), remaining centered (:---:)
+  sep_parts = ["---"] * min(3, len(columns)) + [":---:"] * max(0, len(columns) - 3)
+  table_separator = "|" + "|".join(sep_parts) + "|"
+
+  rows = []
+  for car_docs in all_car_docs:
+    cells = [car_docs.get_extra_cars_column(column) for column in columns]
+    rows.append("|" + "|".join(cells) + "|")
+  table_rows = "\n".join(rows) + ("\n" if rows else "")
+
+  return table_header, table_separator, table_rows
+
+
 # CAUTION: This function is imported by shop.comma.ai and comma.ai/vehicles, test changes carefully
 def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str, **kwargs) -> str:
   with open(template_fn) as f:
-    template = jinja2.Template(f.read(), trim_blocks=True, lstrip_blocks=True)
+    template = Template(f.read())
 
-  footnotes = [fn.value.text for fn in get_all_footnotes()]
-  cars_md: str = template.render(all_car_docs=all_car_docs, PartType=PartType,
-                                 group_by_make=group_by_make, footnotes=footnotes,
-                                 Device=Device, Column=Column, ExtraCarsColumn=ExtraCarsColumn,
-                                 BaseCarHarness=BaseCarHarness, SupportType=SupportType,
-                                 **kwargs)
-  return cars_md
+  table_header, table_separator, table_rows = _build_cars_table(all_car_docs, **kwargs)
+  cars_md: str = template.substitute(
+    car_count=len(all_car_docs),
+    table_header=table_header,
+    table_separator=table_separator,
+    table_rows=table_rows,
+  )
+  # Match historical output: no trailing newline at EOF
+  return cars_md.rstrip("\n")
 
 
 if __name__ == "__main__":
