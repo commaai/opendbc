@@ -84,6 +84,8 @@ ACC_HUD_DISABLED = 0
 
 
 class MebLongStateMachine:
+  BRAKE_THRESHOLD = -0.1  # m/s^2, deadband so accel noise around zero cannot chatter the request
+
   def __init__(self, CP, CCP):
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
@@ -108,15 +110,21 @@ class MebLongStateMachine:
     else:
       return self.acc_status_vals['ACC_OFF_HAUPTSCHALTER_AUS']  # disabled
 
-  def _get_hold_type(self, CS, CC) -> int:
+  def _get_hold_type(self, CS, CC, accel) -> int:
     # warning: car is reacting to hold mechanic even with long control off
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
 
+    # braking while the car is held is a hold request, not a drive-off request. pairing a negative
+    # accel with anything else permanently faults the TSK: 000000bb seg 7 rolled backwards down a
+    # 24% grade, which cleared should_stop because vEgo is a magnitude, and we sent ANFAHREN with
+    # -1.00 m/s^2 for 7.32 s before TSK went to 7. stock only ever brakes at a standstill via HALTEN
+    braking_while_held = CS.esp_hold_confirmation and accel < self.BRAKE_THRESHOLD
+
     if CS.out.accFaulted or not CC.longActive:
       acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
-    elif stopping:
+    elif stopping or braking_while_held:
       acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
     elif starting:
       acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
@@ -140,7 +148,7 @@ class MebLongStateMachine:
 
   def update(self, CS, CC, accel) -> tuple[float, int, int, bool]:
     acc_status = self._get_acc_status(CS, CC)
-    acc_hold_type = self._get_hold_type(CS, CC)
+    acc_hold_type = self._get_hold_type(CS, CC, accel)
 
     # transition to inactive accel and jerks as soon as we enter ESP standstill
     requesting_hold = acc_hold_type == self.acc_hold_type_vals['HALTEN']
