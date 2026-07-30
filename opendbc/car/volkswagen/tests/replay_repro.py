@@ -56,9 +56,9 @@ for m in LogReader(SEG):
 armed = [r for r in out if r[1] != -99.0]
 pulses = sum(1 for a, b in zip(out, out[1:], strict=False) if b[2] == 4 and a[2] != 4)
 moving_pulse = sum(1 for r in out if r[2] == 4 and r[4] > 0.1)
-passthru_armed = 0
-print(f"{SEG.split('/')[-2][:8]}/{SEG.split('/')[-1]}: {len(out)} control steps, "
-      f"{len(armed)} under harness control ({100 * len(armed) / max(1, len(out)):.0f}%)")
+pct = 100 * len(armed) / max(1, len(out))
+name = SEG.split('/')[-2][:8] + '/' + SEG.split('/')[-1]
+print(f"{name}: {len(out)} control steps, {len(armed)} under harness control ({pct:.0f}%)")
 print(f"  ANFAHREN pulses emitted        : {pulses}")
 print(f"  pulses while vEgo > 0.1 m/s    : {moving_pulse}   <-- must be 0, would drive the car")
 print(f"  HMS values emitted while armed : {dict(Counter(HMS.get(r[2], r[2]) for r in armed))}")
