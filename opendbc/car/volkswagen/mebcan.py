@@ -194,6 +194,9 @@ class MebHoldPulseRepro:
   CYCLES = 12          # 2.4 s of 5 Hz churn, 24 transitions
   PULSE_ACCEL = 0.12   # accel sent with ANFAHREN, matches both routes
   TOGGLE_ANHALTEN = True  # cycle ACC_Anhalten 1<->0 and ACC_Anhalteweg 0<->20.46 with the train
+  # 5 s of steady HALTEN after the train. both faults fired after the churn stopped, b6 0.38 s into
+  # the following HALTEN block rather than during the churn itself
+  HOLD_AFTER_FRAMES = 250
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
@@ -214,8 +217,10 @@ class MebHoldPulseRepro:
 
     if frame <= 0:
       return self.CCP.ACCEL_INACTIVE, self.halten, False  # settling, steady hold
+    if frame > self.CYCLES * period + self.HOLD_AFTER_FRAMES:
+      return accel, acc_hold_type, braking_to_stop  # done, hand back so the car can resume
     if frame > self.CYCLES * period:
-      return accel, acc_hold_type, braking_to_stop  # pulse train done, hand back so the car can resume
+      return self.CCP.ACCEL_INACTIVE, self.halten, False  # steady hold, the policy is not sent at all
     if (frame - 1) % period < self.PULSE_FRAMES:
       return self.PULSE_ACCEL, self.anfahren, False
     # the real faults cycled the stop request with the hold request, we cannot get there through
