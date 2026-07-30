@@ -201,14 +201,16 @@ class MebHoldPulseRepro:
   # both faults were engaged while ALREADY CREEPING, b6 at 0.11 m/s and b8 at 0.46 m/s, and b6's
   # churn began 0.14 s after the engage. engaging at a full stop skips this phase entirely because
   # esp_hold is already set, which is what every test so far did.
-  APPROACH_SPEED = 1.0  # m/s, start churning once we are creeping in
-  A_FRAMES = 100        # 2 s ceiling, b6 churned for 1.26 s. bounded: the churn can stop the hold latching
+  ARM_SPEED = 10.0      # m/s, engage anywhere under this and the harness brakes the car down itself
+  CREEP_SPEED = 0.5     # m/s, start churning below this. b6 engaged at 0.11, b8 at 0.46
+  BRAKE_ACCEL = -1.5    # bring the car down into the creep band
+  A_FRAMES = 100        # 2 s ceiling on the churn, b6 churned for 1.26 s
   A_HALTEN = 10         # 200 ms
   A_RAMP = 6            # 120 ms
   A_NONE = 1            # 20 ms, gives 8.8 transitions/s against b6's 8.7
-  # b6 phase A ran -0.35 to +0.11 and the car decayed 0.12 -> 0.02 m/s. this has to be commanded:
-  # passing the policy accel through lets the car accelerate straight out of APPROACH_SPEED
-  A_ACCEL = -0.2
+  A_ACCEL = -0.5        # b6 phase A ran -0.35 to +0.11 while decaying 0.12 -> 0.02 m/s
+  STOP_ACCEL = -1.0     # after the churn window, get it stopped so phase B starts from a standstill
+  TOTAL_FRAMES = 1500   # 30 s overall cap, enough to brake down from ARM_SPEED and run the sequence
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
@@ -219,34 +221,43 @@ class MebHoldPulseRepro:
     self.ramp = acc_hold_type_vals['LOESEN_UEBER_RAMPE']
     self.none = acc_hold_type_vals['KEINE_ANFORDERUNG']
     self.frames = 0
-    self.approach_frames = 0
+    self.churn_frames = 0
+    self.held_frames = 0
 
   def update(self, CS, CC, accel, acc_hold_type, braking_to_stop) -> tuple[float, int, bool]:
     # CC.enabled, not longActive: a gas press to induce the creep drops longActive and would hand
     # the policy straight back, which is the opposite of what we want here
     armed = CC.enabled and not CS.out.brakePressed and \
-            (CS.esp_hold_confirmation or CS.out.vEgo < self.APPROACH_SPEED)
-    if not armed:
-      self.frames = self.approach_frames = 0
+            (CS.esp_hold_confirmation or CS.out.vEgo < self.ARM_SPEED)
+    if not armed or self.frames > self.TOTAL_FRAMES:
+      if not armed:
+        self.frames = self.churn_frames = self.held_frames = 0
       return accel, acc_hold_type, braking_to_stop
 
     self.frames += 1
 
-    # phase A, churn while the hold is still off. this is where both faults spent ~1.3 s and the
-    # only phase that can make the car actually grab and release: a 100 ms ANFAHREN at hld=1 never
-    # drops Standstill, so nothing hydraulic cycles. block lengths from b6 30.88-32.14.
-    # bounded, since the churn itself can stop the hold from ever latching
-    if self.frames <= self.A_FRAMES:
-      if not CS.esp_hold_confirmation:
-        i = self.frames % (self.A_HALTEN + self.A_RAMP + self.A_NONE)
-        if i < self.A_HALTEN:
-          return accel, self.halten, True
-        if i < self.A_HALTEN + self.A_RAMP:
-          return accel, self.ramp, False
-        return accel, self.none, False
-      return self.CCP.ACCEL_INACTIVE, self.halten, False  # already held, wait out the phase
+    # not held yet. churn for A_FRAMES, then brake to a stop. the accel has to be commanded here or
+    # the policy drives the car away, and phase B must never pulse a rolling car because ANFAHREN +
+    # PULSE_ACCEL would just accelerate it. brake down from ARM_SPEED first, then churn, then stop.
+    # block lengths from b6 30.88-32.14, the only phase that makes the car actually grab and release
+    if not CS.esp_hold_confirmation:
+      self.held_frames = 0
+      if CS.out.vEgo > self.CREEP_SPEED:
+        self.churn_frames = 0
+        return self.BRAKE_ACCEL, self.halten, True  # too fast, brake down into the creep band first
+      self.churn_frames += 1
+      if self.churn_frames > self.A_FRAMES:
+        return self.STOP_ACCEL, self.halten, True  # churn window over, get it stopped
+      i = self.churn_frames % (self.A_HALTEN + self.A_RAMP + self.A_NONE)
+      if i < self.A_HALTEN:
+        return self.A_ACCEL, self.halten, True
+      if i < self.A_HALTEN + self.A_RAMP:
+        return self.A_ACCEL, self.ramp, False
+      return self.A_ACCEL, self.none, False
 
-    frame = self.frames - self.A_FRAMES - self.SETTLE_FRAMES
+    # held, so phase B runs off its own counter and always starts from a real standstill
+    self.held_frames += 1
+    frame = self.held_frames - self.SETTLE_FRAMES
     period = self.PULSE_FRAMES + self.GAP_FRAMES
 
     if frame <= 0:
