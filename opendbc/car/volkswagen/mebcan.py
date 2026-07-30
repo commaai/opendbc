@@ -170,8 +170,12 @@ class MebHoldPulseRepro:
   Shorten PULSE_FRAMES to probe the dwell threshold itself (2 frames = 40 ms is the shortest
   HALTEN block observed in the logs).
 
-  Only acts once the car is held, holds steady for SETTLE_FRAMES first so the pulse train is the
-  only stimulus, and hands control back to MebLongStateMachine afterwards so the car can drive off.
+  Waits for the driver to be off the brake so the car is held by ESP alone, matching both routes.
+  longActive is already true while pre-enabled with the brake held, so without this the whole train
+  elapses against the brake pedal and the car just drives off normally when you release it.
+
+  Holds steady for SETTLE_FRAMES so the pulse train is the only stimulus, then hands control back to
+  MebLongStateMachine so the car can drive off.
   """
   SETTLE_FRAMES = 100  # 2 s of steady HALTEN before pulsing
   PULSE_FRAMES = 5     # ANFAHREN pulse, 100 ms
@@ -188,7 +192,7 @@ class MebHoldPulseRepro:
     self.frames = 0
 
   def update(self, CS, CC, accel, acc_hold_type) -> tuple[float, int]:
-    if not (CC.longActive and CS.esp_hold_confirmation):
+    if not (CC.longActive and CS.esp_hold_confirmation) or CS.out.brakePressed:
       self.frames = 0
       return accel, acc_hold_type
 
