@@ -91,7 +91,7 @@ class MebLongStateMachine:
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
-    self.hold_release_ramp_active = False
+    self.hold_release_active = False
     self.ramp_counter = 0
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
@@ -129,21 +129,22 @@ class MebLongStateMachine:
 
     # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
     # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
+    # stock also transitions ANFAHREN -> RAMP and holds it until 5 km/h.
     starting_hold_release = (
-      self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and
+      self.prev_acc_hold_type in (self.acc_hold_type_vals['HALTEN'], self.acc_hold_type_vals['ANFAHREN']) and
       acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']
     )
 
     # enforce legal transitions
     if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
       # allow going into hold at any time, reset ramp counter
-      self.hold_release_ramp_active = False
+      self.hold_release_active = False
       self.ramp_counter = 0
-    elif self.hold_release_ramp_active or starting_hold_release:
+    elif self.hold_release_active or starting_hold_release:
       release_active = CC.longActive and not CS.out.accFaulted
-      # keep active stop aborts in RAMP until another HALTEN or the stock 5 km/h threshold
-      self.hold_release_ramp_active = release_active and CS.out.vEgo < self.HOLD_RELEASE_SPEED
-      if self.hold_release_ramp_active or not release_active:
+      # keep active hold releases in RAMP until another HALTEN or the stock 5 km/h threshold
+      self.hold_release_active = release_active and CS.out.vEgo < self.HOLD_RELEASE_SPEED
+      if self.hold_release_active or not release_active:
         acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       if not release_active:
         # preserve the original short release tail on disengagement, brake, gas override, or fault
