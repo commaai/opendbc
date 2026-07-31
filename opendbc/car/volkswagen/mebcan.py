@@ -127,16 +127,15 @@ class MebLongStateMachine:
     else:
       acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
-    halten = self.acc_hold_type_vals['HALTEN']
-    keine_anforderung = self.acc_hold_type_vals['KEINE_ANFORDERUNG']
-    ramp = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-
     # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
     # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
-    starting_hold_release = self.prev_acc_hold_type == halten and acc_hold_type == keine_anforderung
+    starting_hold_release = (
+      self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and
+      acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']
+    )
 
     # enforce legal transitions
-    if acc_hold_type == halten:
+    if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
       # allow going into hold at any time, reset ramp counter
       self.hold_release_ramp_active = False
       self.ramp_counter = 0
@@ -145,12 +144,12 @@ class MebLongStateMachine:
       # keep active stop aborts in RAMP until another HALTEN or the stock 5 km/h threshold
       self.hold_release_ramp_active = release_active and CS.out.vEgo < self.HOLD_RELEASE_SPEED
       if self.hold_release_ramp_active or not release_active:
-        acc_hold_type = ramp
+        acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       if not release_active:
         # preserve the original short release tail on disengagement, brake, gas override, or fault
         self.ramp_counter = self.RAMP_FRAMES
     elif self.ramp_counter > 0:
-      acc_hold_type = ramp
+      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter -= 1
 
     return acc_hold_type
