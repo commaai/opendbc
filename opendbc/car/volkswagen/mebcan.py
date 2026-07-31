@@ -1,4 +1,3 @@
-import enum
 from opendbc.car import Bus, structs
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
@@ -85,12 +84,6 @@ ACC_HUD_ENABLED  = 2
 ACC_HUD_DISABLED = 0
 
 
-class MebHoldState(enum.IntEnum):
-  IDLE = 0
-  DISENGAGE_RAMP = 1
-  FINISHING_STARTING = 2  # or policy wants to abort stop request
-
-
 class MebLongStateMachine:
   HOLD_RELEASE_SPEED = 5 * CV.KPH_TO_MS
 
@@ -98,8 +91,8 @@ class MebLongStateMachine:
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
-    self.hold_ramp_counter = 0
-    self.hold_state = MebHoldState.IDLE
+    self.disengage_ramp_counter = 0  # ramp when disengaging if holding or starting
+    self.finishing_starting = False  # or policy wants to abort stop request
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -127,34 +120,33 @@ class MebLongStateMachine:
     long_active = not CS.out.accFaulted and CC.longActive
 
     if not long_active:
+      self.finishing_starting = False
       if self.prev_acc_hold_type in (self.acc_hold_type_vals['HALTEN'], self.acc_hold_type_vals['ANFAHREN']):
-        self.hold_state = MebHoldState.DISENGAGE_RAMP
-        self.hold_ramp_counter = self.RAMP_FRAMES
+        self.disengage_ramp_counter = self.RAMP_FRAMES
 
-      if self.hold_state == MebHoldState.DISENGAGE_RAMP and self.hold_ramp_counter > 0:
+      if self.disengage_ramp_counter > 0:
         acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
-        self.hold_ramp_counter -= 1
+        self.disengage_ramp_counter -= 1
       else:
-        self.hold_state = MebHoldState.IDLE
         acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     else:
+      self.disengage_ramp_counter = 0
+
       if stopping:
-        self.hold_state = MebHoldState.IDLE
         acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
       elif starting:
-        self.hold_state = MebHoldState.IDLE
         acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
       else:
         aborting_stop = self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN']
         finished_starting = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
 
-        releasing = finished_starting or aborting_stop or self.hold_state == MebHoldState.FINISHING_STARTING
+        releasing = finished_starting or aborting_stop or self.finishing_starting
         if releasing and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
-          self.hold_state = MebHoldState.FINISHING_STARTING
+          self.finishing_starting = True
           acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
         else:
-          self.hold_state = MebHoldState.IDLE
+          self.finishing_starting = False
           acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']
 
     return acc_hold_type
