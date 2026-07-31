@@ -86,15 +86,17 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
     self.assertFalse(self.repro._planner_wants_stop(0.1, self.repro.SHOULD_GO_ACCEL))
     self.assertFalse(self.repro._planner_wants_stop(0.3, self.repro.SHOULD_STOP_ACCEL))
 
-  def test_creep_churn_never_sends_negative_accel_without_halten(self):
+  def test_creep_churn_matches_recorded_moving_waveform(self):
     self.enter_creep_churn()
     emitted = [self.step(0.1, False) for _ in range(self.repro.CREEP_CHURN_FRAMES)]
     halten = self.long_state.acc_hold_type_vals["HALTEN"]
     ramp = self.long_state.acc_hold_type_vals["LOESEN_UEBER_RAMPE"]
+    none = self.long_state.acc_hold_type_vals["KEINE_ANFORDERUNG"]
 
-    period = self.repro.CREEP_STOP_FRAMES + self.repro.CREEP_GO_FRAMES
-    expected = ([halten] * self.repro.CREEP_STOP_FRAMES + [ramp] * self.repro.CREEP_GO_FRAMES) * \
-               (self.repro.CREEP_CHURN_FRAMES // period)
+    cycle = ([halten] * self.repro.CREEP_STOP_FRAMES +
+             [ramp] * (self.long_state.RAMP_FRAMES + 1) +
+             [none] * (self.repro.CREEP_GO_FRAMES - self.long_state.RAMP_FRAMES - 1))
+    expected = (cycle * self.repro.CREEP_CHURN_FRAMES)[:self.repro.CREEP_CHURN_FRAMES]
     self.assertEqual([row[1] for row in emitted], expected)
     for accel, hold_type, _, armed in emitted:
       self.assertTrue(armed)
@@ -135,7 +137,7 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
     accel, hold_type, braking_to_stop, armed = self.step(0.0, True)
 
     self.assertTrue(armed)
-    self.assertEqual(self.repro.phase, self.repro.FINAL_HOLD)
+    self.assertEqual(self.repro.phase, self.repro.HELD_CHURN)
     self.assertEqual(accel, self.CCP.ACCEL_INACTIVE)
     self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
     self.assertFalse(braking_to_stop)
@@ -160,7 +162,7 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
       else:
         self.assertAlmostEqual(accel, self.repro.HELD_POKE_ACCEL)
 
-  def test_moving_churn_brakes_to_stop_then_holds(self):
+  def test_moving_churn_brakes_to_stop_then_starts_held_churn(self):
     self.enter_stop_for_hold()
     halten = self.long_state.acc_hold_type_vals["HALTEN"]
 
@@ -170,20 +172,6 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
     self.assertEqual(accel, self.repro.STOP_ACCEL)
     self.assertEqual(hold_type, halten)
     self.assertTrue(braking_to_stop)
-
-    accel, hold_type, braking_to_stop, armed = self.step(0.0, True)
-    self.assertTrue(armed)
-    self.assertEqual(self.repro.phase, self.repro.FINAL_HOLD)
-    self.assertEqual(accel, self.CCP.ACCEL_INACTIVE)
-    self.assertEqual(hold_type, halten)
-    self.assertFalse(braking_to_stop)
-
-    for _ in range(self.repro.FINAL_HOLD_FRAMES - 1):
-      accel, hold_type, braking_to_stop, armed = self.step(0.0, True)
-      self.assertTrue(armed)
-      self.assertEqual(accel, self.CCP.ACCEL_INACTIVE)
-      self.assertEqual(hold_type, halten)
-      self.assertFalse(braking_to_stop)
 
     accel, hold_type, braking_to_stop, armed = self.step(0.0, True)
     self.assertTrue(armed)
@@ -240,10 +228,9 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
     self.assertTrue(self.step(0.1, False)[3])
 
   def test_gas_during_anfahren_disarms_through_ramp(self):
-    for _ in range(self.repro.HELD_STOP_FRAMES):
-      _, hold_type, _, armed = self.step(0.0, True)
-      self.assertTrue(armed)
-      self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
+    _, hold_type, _, armed = self.step(0.0, True)
+    self.assertTrue(armed)
+    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
 
     _, hold_type, _, armed = self.step(0.0, True)
     self.assertTrue(armed)
@@ -254,20 +241,16 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
     self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["LOESEN_UEBER_RAMPE"])
     self.assertNotEqual(hold_type, self.long_state.acc_hold_type_vals["KEINE_ANFORDERUNG"])
 
-  def test_held_churn_precedes_launch_and_moving_churn(self):
+  def test_launches_to_creep_before_any_held_churn(self):
     halten = self.long_state.acc_hold_type_vals["HALTEN"]
     anfahren = self.long_state.acc_hold_type_vals["ANFAHREN"]
 
-    held_churn = [self.step(0.0, True) for _ in range(self.repro.HELD_CHURN_FRAMES)]
-    period = self.repro.HELD_STOP_FRAMES + self.repro.HELD_GO_FRAMES
-    self.assertEqual([row[1] for row in held_churn],
-                     ([halten] * self.repro.HELD_STOP_FRAMES + [anfahren] * self.repro.HELD_GO_FRAMES) *
-                     (self.repro.HELD_CHURN_FRAMES // period))
+    accel, hold_type, _, armed = self.step(0.0, True)
+    self.assertTrue(armed)
+    self.assertEqual(accel, self.CCP.ACCEL_INACTIVE)
+    self.assertEqual(hold_type, halten)
 
-    settle = [self.step(0.0, True) for _ in range(self.repro.SETTLE_FRAMES)]
-    self.assertTrue(all(row[0] == self.CCP.ACCEL_INACTIVE and row[1] == halten for row in settle))
-
-    held_launch = [self.step(0.0, True) for _ in range(20)]
+    held_launch = [self.step(0.0, True) for _ in range(19)]
     self.assertTrue(all(row[0] == self.repro.LAUNCH_ACCEL and row[1] == anfahren for row in held_launch))
     accel, _, _, armed = self.step(0.04, False)
     self.assertTrue(armed)
@@ -365,4 +348,4 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
 
       self.assertGreaterEqual(maximum_consecutive_creep_frames, self.repro.CREEP_CHURN_FRAMES)
       self.assertTrue({self.repro.ESTABLISH_CREEP, self.repro.STABILIZE_CREEP, self.repro.CREEP_CHURN,
-                       self.repro.STOP_FOR_HOLD, self.repro.FINAL_HOLD, self.repro.HELD_CHURN, self.repro.SETTLE}.issubset(phases))
+                       self.repro.STOP_FOR_HOLD, self.repro.HELD_CHURN, self.repro.SETTLE}.issubset(phases))

@@ -20,12 +20,10 @@ class MebShouldStopChurnRepro:
 
   Recreates the low-speed pid/stopping uncertainty preceding TSK permanent faults in
   000000b6--48c9d2f02a/23 and 000000b8--ab902978ef/9. A closed-loop speed command first settles into
-  forward creep around 0.1 m/s. After the car remains in the recorded 0.06-0.12 m/s band for 500 ms,
-  a separate synthetic planner acceleration alternates across should_stop's 0.1 m/s^2 threshold and
-  feeds the resulting pid/stopping state through the production MebLongStateMachine. The churn then
-  runs for a fixed two seconds so physical brake actuation cannot reset it before the final stop request. Both churns use 100 ms
-  blocks: HALTEN/RAMP while moving and HALTEN/ANFAHREN while held. The moving burst ends in a real
-  stop followed by three seconds of uninterrupted HALTEN before the experiment repeats.
+  forward creep around 0.1 m/s. After 500 ms in the recorded 0.06-0.12 m/s band, the moving phase
+  sends 200 ms HALTEN at -0.05 m/s^2 followed by 120 ms RAMP and 20 ms NONE for 1.26 seconds. It
+  then brakes continuously into a real stop and immediately sends the recorded 100 ms HALTEN/200 ms
+  ANFAHREN held churn for 2.16 seconds, followed by 0.38 seconds of quiet HALTEN.
 
   If an ANFAHREN pulse releases the ESP hold during held churn, the timer pauses and HALTEN safely
   reacquires the stop before resuming. No ANFAHREN pulse is sent while rolling. No ACC payload or fault
@@ -71,13 +69,13 @@ class MebShouldStopChurnRepro:
   HELD_POKE_ACCEL = 0.12
 
   CREEP_STABLE_FRAMES = 25  # remain in the measured creep band for 500 ms before phase A
-  CREEP_STOP_FRAMES = 5     # 100 ms HALTEN, long enough for brake actuation to begin
-  CREEP_GO_FRAMES = 5       # 100 ms RAMP, then HALTEN truncates the stock ~5 kph ramp
-  CREEP_CHURN_FRAMES = 100  # 2 s / 10 HALTEN-RAMP cycles
+  CREEP_STOP_FRAMES = 10    # 200 ms HALTEN
+  CREEP_GO_FRAMES = 7       # 120 ms RAMP + one 20 ms NONE frame
+  CREEP_CHURN_FRAMES = 63   # 1.26 s, matching b6 phase A
   HELD_STOP_FRAMES = 5      # 100 ms HALTEN
-  HELD_GO_FRAMES = 5        # 100 ms ANFAHREN
-  HELD_CHURN_FRAMES = 100   # 2 s / 10 HALTEN-ANFAHREN cycles
-  FINAL_HOLD_FRAMES = 150   # 3 s uninterrupted HALTEN after braking to a real stop
+  HELD_GO_FRAMES = 10       # 200 ms ANFAHREN
+  HELD_CHURN_FRAMES = 108   # 2.16 s, matching b6 phase B
+  FINAL_HOLD_FRAMES = 0     # begin held churn immediately when the final stop is confirmed
   SETTLE_FRAMES = 19        # TSK faulted 0.38 s after the b6 chatter ended
 
   def __init__(self):
@@ -171,11 +169,9 @@ class MebShouldStopChurnRepro:
       return accel, CC
 
     if self.phase == self.APPROACH:
-      if self._stopped_and_held(CS):
-        self.phase = self.HELD_CHURN
+      if CS.esp_hold_confirmation or CS.meb_motion_state == self.MOTION_STOPPED:
+        self.phase = self.ESTABLISH_CREEP
         self.phase_frames = 0
-      elif CS.esp_hold_confirmation or CS.meb_motion_state == self.MOTION_STOPPED:
-        return self._stopping(CC, self.STOP_ACCEL)
       elif CS.out.vEgo > self.APPROACH_ENTRY_SPEED:
         return self._approach(CC, CS.out.vEgo)
       elif CS.meb_motion_state == self.MOTION_FORWARDS:
