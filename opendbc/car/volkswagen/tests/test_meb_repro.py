@@ -3,9 +3,31 @@ from collections import deque
 from types import SimpleNamespace
 
 from opendbc.car.structs import CarParams
-from opendbc.car.volkswagen.meb_repro import MebShouldStopChurnRepro
+from opendbc.car.volkswagen.meb_repro import MebCameraFaultPreconditioner, MebShouldStopChurnRepro
 from opendbc.car.volkswagen.mebcan import MebLongStateMachine
 from opendbc.car.volkswagen.values import CarControllerParams, VolkswagenFlags
+
+
+class TestMebCameraFaultPreconditioner(unittest.TestCase):
+  def test_two_fault_pulses_before_engagement(self):
+    preconditioner = MebCameraFaultPreconditioner()
+    wait = preconditioner.STARTUP_WAIT_FRAMES
+    pulse = preconditioner.FAULT_PULSE_FRAMES
+    gap = preconditioner.BETWEEN_PULSE_FRAMES
+    second_start = wait + pulse + gap
+
+    self.assertEqual(preconditioner.update(wait - 1, False, 2), 2)
+    self.assertEqual(preconditioner.update(wait, False, 2), 6)
+    self.assertEqual(preconditioner.update(wait + pulse - 1, False, 2), 6)
+    self.assertEqual(preconditioner.update(wait + pulse, False, 2), 2)
+    self.assertEqual(preconditioner.update(second_start - 1, False, 2), 2)
+    self.assertEqual(preconditioner.update(second_start, False, 2), 6)
+    self.assertEqual(preconditioner.update(second_start + pulse - 1, False, 2), 6)
+    self.assertEqual(preconditioner.update(second_start + pulse, False, 2), 2)
+
+  def test_never_overrides_while_engaged(self):
+    preconditioner = MebCameraFaultPreconditioner()
+    self.assertEqual(preconditioner.update(preconditioner.STARTUP_WAIT_FRAMES, True, 3), 3)
 
 
 class TestMebShouldStopChurnRepro(unittest.TestCase):

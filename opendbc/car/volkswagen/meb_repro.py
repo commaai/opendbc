@@ -1,8 +1,25 @@
 """On-car experiment for reproducing the MEB near-standstill TSK permanent fault."""
 
-from opendbc.car import structs
+from opendbc.car import DT_CTRL, structs
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
+
+
+class MebCameraFaultPreconditioner:
+  """Advertise two temporary ACC faults before engagement, then stay inactive."""
+
+  ACC_FAULT_STATUS = 6
+  STARTUP_WAIT_FRAMES = round(2.0 / DT_CTRL)
+  FAULT_PULSE_FRAMES = round(2.0 / DT_CTRL)
+  BETWEEN_PULSE_FRAMES = round(2.0 / DT_CTRL)
+
+  def update(self, frame, enabled, acc_status):
+    first_pulse_start = self.STARTUP_WAIT_FRAMES
+    first_pulse_end = first_pulse_start + self.FAULT_PULSE_FRAMES
+    second_pulse_start = first_pulse_end + self.BETWEEN_PULSE_FRAMES
+    second_pulse_end = second_pulse_start + self.FAULT_PULSE_FRAMES
+    fault_pulse_active = first_pulse_start <= frame < first_pulse_end or second_pulse_start <= frame < second_pulse_end
+    return self.ACC_FAULT_STATUS if fault_pulse_active and not enabled else acc_status
 
 
 class _ReproCarControl:
