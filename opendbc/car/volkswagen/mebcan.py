@@ -1,5 +1,6 @@
 from opendbc.car import Bus, structs
 from opendbc.can import CANDefine
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -84,11 +85,13 @@ ACC_HUD_DISABLED = 0
 
 
 class MebLongStateMachine:
+  HOLD_RELEASE_SPEED = 5 * CV.KPH_TO_MS
+
   def __init__(self, CP, CCP):
     self.CCP = CCP
-    self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
     self.LAUNCH_RAMP_FRAMES = 100 // CCP.ACC_CONTROL_STEP  # 1 s
 
+    self.hold_release_ramp_active = False
     self.ramp_counter = 0
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
@@ -125,20 +128,31 @@ class MebLongStateMachine:
       acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     # enforce legal transitions
-    if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
-      # allow going into hold at any time, reset ramp counter
+    if not CC.enabled or CS.out.accFaulted:
+      # Stop advertising a release request once longitudinal control disengages or faults.
+      self.hold_release_ramp_active = False
       self.ramp_counter = 0
+    elif acc_hold_type == self.acc_hold_type_vals['HALTEN']:
+      # Allow going into hold at any time and cancel either release ramp.
+      self.hold_release_ramp_active = False
+      self.ramp_counter = 0
+    elif self.hold_release_ramp_active:
+      if CS.out.vEgo < self.HOLD_RELEASE_SPEED:
+        acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+      else:
+        self.hold_release_ramp_active = False
     elif (self.prev_acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG'] and
           acc_hold_type == self.acc_hold_type_vals['ANFAHREN']):
       # Establish the ESP hold request before releasing it. Stock transitions through
       # HALTEN rather than reacting to the Standstill rising edge with NONE -> ANFAHREN.
       acc_hold_type = self.acc_hold_type_vals['HALTEN']
       self.ramp_counter = 0
-    elif self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
-      # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
-      # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
-      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-      self.ramp_counter = self.RAMP_FRAMES
+    elif (self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and
+          acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']):
+      # Stock holds RAMP after aborting a stop until 5 km/h, unless another stop is requested first.
+      if CS.out.vEgo < self.HOLD_RELEASE_SPEED:
+        acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+        self.hold_release_ramp_active = True
     elif self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
       # REPRO safety: never drop a launch request directly while the ESP may still be releasing.
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
