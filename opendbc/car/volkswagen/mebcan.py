@@ -1,3 +1,4 @@
+import enum
 from opendbc.car import Bus, structs
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
@@ -84,6 +85,19 @@ ACC_HUD_ENABLED  = 2
 ACC_HUD_DISABLED = 0
 
 
+class MebHoldState(enum.IntEnum):
+  # NO_REQUEST = 0
+  # STARTING = 1
+  # FINISHING_STARTING = 2  # same as ABORTING_STOP
+  # STOPPING = 3
+  # DISENGAGING = 4
+  # ABORTING_STOP = 5
+
+  IDLE = 0
+  DISENGAGING = 1
+  FINISHING_STARTING = 2  # or policy wants to abort stop request
+
+
 class MebLongStateMachine:
   HOLD_RELEASE_SPEED = 5 * CV.KPH_TO_MS
 
@@ -91,7 +105,9 @@ class MebLongStateMachine:
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
-    self.ramp_frames = 0
+    self.hold_ramp_counter = 0
+    self.hold_state = MebHoldState.IDLE
+    self.prev_long_active = False
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -116,36 +132,65 @@ class MebLongStateMachine:
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
-    long_active = CC.longActive and not CS.out.accFaulted
+    long_active = not CS.out.accFaulted and CC.longActive
 
     if not long_active:
-      acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
-    elif stopping:
-      acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
-    elif starting:
-      acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
-    else:
-      acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
+      if self.prev_long_active:
+        self.hold_state = MebHoldState.DISENGAGING
+        self.hold_ramp_counter = self.RAMP_FRAMES
 
-    # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
-    # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
-    # stock also transitions ANFAHREN -> RAMP after resuming and holds it until 5 km/h.
-    started_release = (self.prev_acc_hold_type in (self.acc_hold_type_vals['HALTEN'], self.acc_hold_type_vals['ANFAHREN']) and
-                       acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG'])
-
-    # enforce legal transitions
-    # TODO: check what stock does when user brakes while in ANFAHREN or LOESEN_UEBER_RAMPE
-    if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
-      self.ramp_frames = 0  # a new hold request ends any release
-    elif started_release or self.ramp_frames > 0:
-      # stock holds the release until 5 km/h, with no timer, so keep topping it up while we are
-      # engaged and slow. whatever is left when it stops being topped up drains as the short tail,
-      # whether the release ended on a disengagement, brake, gas override, fault or 5 km/h
-      if started_release or (long_active and CS.out.vEgo < self.HOLD_RELEASE_SPEED):
-        self.ramp_frames = self.RAMP_FRAMES
+      if self.hold_state == MebHoldState.DISENGAGING and self.hold_ramp_counter > 0:
+        acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
+        self.hold_ramp_counter -= 1
       else:
-        self.ramp_frames -= 1
-      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+        self.hold_state = MebHoldState.IDLE
+        acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
+
+    else:
+      if stopping:
+        self.hold_state = MebHoldState.IDLE
+        acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
+      elif starting:
+        self.hold_state = MebHoldState.IDLE
+        acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
+      else:
+        aborting_stop = self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN']
+        finished_starting = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
+
+        releasing = finished_starting or aborting_stop or self.hold_state == MebHoldState.FINISHING_STARTING
+        if releasing and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
+          self.hold_state = MebHoldState.FINISHING_STARTING
+          acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
+        else:
+          self.hold_state = MebHoldState.IDLE
+          acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']
+
+    self.prev_long_active = long_active
+
+    # # should go to RAMP also when we're starting a stop but abort until 5 kph
+    # # should go to RAMP also after anfahren until 5 kph
+    # aborting_stop = self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']
+    # finished_starting = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']
+    #
+    # # enforce legal transitions
+    # if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
+    #   self.hold_state =
+
+    # # enforce legal transitions
+    # if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
+    #   # allow going into hold at any time, reset ramp counter
+    #   self.hold_ramp_counter = 0
+    # elif aborting_stop:
+    #   if CC.longActive:
+    #     pass
+    #   else:
+    #     # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
+    #     # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
+    #     acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+    #     self.hold_ramp_counter = self.RAMP_FRAMES
+    # elif self.hold_ramp_counter > 0:
+    #   acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+    #   self.hold_ramp_counter -= 1
 
     return acc_hold_type
 
