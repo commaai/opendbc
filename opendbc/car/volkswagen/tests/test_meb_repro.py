@@ -98,8 +98,10 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
     self.assertEqual([row[1] for row in emitted], expected)
     for accel, hold_type, _, armed in emitted:
       self.assertTrue(armed)
-      if accel < 0:
-        self.assertEqual(hold_type, halten)
+      if hold_type == halten:
+        self.assertEqual(accel, self.repro.CREEP_STOP_ACCEL)
+      else:
+        self.assertGreaterEqual(accel, 0)
 
   def test_moving_churn_finishes_after_speed_leaves_band(self):
     self.enter_creep_churn()

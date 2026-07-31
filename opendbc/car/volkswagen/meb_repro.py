@@ -49,7 +49,6 @@ class MebShouldStopChurnRepro:
   CREEP_SPEED_MIN = 0.06
   CREEP_SPEED_TARGET = 0.10
   CREEP_SPEED_MAX = 0.12
-  STOPPING_CREEP_TARGET = 0.09
   GOING_CREEP_TARGET = 0.11
 
   MOTION_FORWARDS = 1
@@ -66,6 +65,7 @@ class MebShouldStopChurnRepro:
   STABILIZE_ACCEL_MIN = -0.35
   ESTABLISH_ACCEL_MAX = 0.12
   CREEP_ACCEL_MAX = 0.12
+  CREEP_STOP_ACCEL = -0.05
   STOP_ACCEL = -0.35
   LAUNCH_ACCEL = 0.12
   HELD_POKE_ACCEL = 0.12
@@ -143,9 +143,7 @@ class MebShouldStopChurnRepro:
     self.phase_frames += 1
 
     if self._planner_wants_stop(CS.out.vEgo, planner_accel):
-      creep_accel = self._speed_control_accel(CS.out.vEgo, self.STOPPING_CREEP_TARGET,
-                                              self.STOP_ACCEL, 0.0)
-      return self._stopping(CC, creep_accel)
+      return self._stopping(CC, self.CREEP_STOP_ACCEL)
 
     creep_accel = self._speed_control_accel(CS.out.vEgo, self.GOING_CREEP_TARGET,
                                             0.0, self.CREEP_ACCEL_MAX)
