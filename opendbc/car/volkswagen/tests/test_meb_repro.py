@@ -172,6 +172,10 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
   def test_gas_during_anfahren_disarms_through_ramp(self):
     _, hold_type, _, armed = self.step(0.0, True)
     self.assertTrue(armed)
+    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
+
+    _, hold_type, _, armed = self.step(0.0, True)
+    self.assertTrue(armed)
     self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["ANFAHREN"])
 
     _, hold_type, _, armed = self.step(0.0, True, gas=True, long_active=False)
@@ -181,9 +185,12 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
 
   def test_launch_settles_before_churn(self):
     held_launch = [self.step(0.0, True) for _ in range(20)]
+    halten = self.long_state.acc_hold_type_vals["HALTEN"]
     anfahren = self.long_state.acc_hold_type_vals["ANFAHREN"]
 
-    self.assertTrue(all(row[0] == self.repro.LAUNCH_ACCEL and row[1] == anfahren for row in held_launch))
+    self.assertEqual(held_launch[0][0], self.CCP.ACCEL_INACTIVE)
+    self.assertEqual(held_launch[0][1], halten)
+    self.assertTrue(all(row[0] == self.repro.LAUNCH_ACCEL and row[1] == anfahren for row in held_launch[1:]))
     accel, _, _, armed = self.step(0.04, False)
     self.assertTrue(armed)
     self.assertEqual(self.repro.phase, self.repro.STABILIZE_CREEP)

@@ -111,7 +111,7 @@ class MebLongStateMachine:
 
   def _get_hold_type(self, CS, CC) -> int:
     # warning: car is reacting to hold mechanic even with long control off
-    # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
+    # NONE -> ANFAHREN is legalized through HALTEN below.
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
 
@@ -127,6 +127,12 @@ class MebLongStateMachine:
     # enforce legal transitions
     if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
       # allow going into hold at any time, reset ramp counter
+      self.ramp_counter = 0
+    elif (self.prev_acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG'] and
+          acc_hold_type == self.acc_hold_type_vals['ANFAHREN']):
+      # Establish the ESP hold request before releasing it. Stock transitions through
+      # HALTEN rather than reacting to the Standstill rising edge with NONE -> ANFAHREN.
+      acc_hold_type = self.acc_hold_type_vals['HALTEN']
       self.ramp_counter = 0
     elif self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
       # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
