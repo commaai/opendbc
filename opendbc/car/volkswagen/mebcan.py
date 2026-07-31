@@ -84,6 +84,8 @@ ACC_HUD_DISABLED = 0
 
 
 class MebLongStateMachine:
+  RELEASE_SPEED = 0.1  # m/s, stock drops the accel request at 0.07 on every stop measured
+
   def __init__(self, CP, CCP):
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
@@ -142,9 +144,14 @@ class MebLongStateMachine:
     acc_status = self._get_acc_status(CS, CC)
     acc_hold_type = self._get_hold_type(CS, CC)
 
-    # transition to inactive accel and jerks as soon as we enter ESP standstill
+    # transition to inactive accel and jerks as soon as we enter ESP standstill, or once we are
+    # slow enough that the hold request alone will finish the stop. waiting for the confirmation
+    # means the accel is still ramping down when it arrives, and it then steps to inactive in one
+    # frame with the jerk limits going to zero alongside it: 00000088 seg 12 stepped -0.56 -> 3.01
+    # at t=37.80 and TSK went to 7 at t=38.20. stock lets go at 0.07 m/s from -0.20, every time,
+    # 0.64-0.96 s before the confirmation arrives
     requesting_hold = acc_hold_type == self.acc_hold_type_vals['HALTEN']
-    held = requesting_hold and CS.esp_hold_confirmation
+    held = requesting_hold and (CS.esp_hold_confirmation or CS.out.vEgo < self.RELEASE_SPEED)
     if not CC.enabled or held:
       accel = self.CCP.ACCEL_INACTIVE
 
