@@ -21,7 +21,6 @@ class TestMebLongStateMachine(unittest.TestCase):
     self.state_machine = MebLongStateMachine(self.CP, self.CCP)
     self.none = self.state_machine.acc_hold_type_vals["KEINE_ANFORDERUNG"]
     self.halten = self.state_machine.acc_hold_type_vals["HALTEN"]
-    self.anfahren = self.state_machine.acc_hold_type_vals["ANFAHREN"]
     self.ramp = self.state_machine.acc_hold_type_vals["LOESEN_UEBER_RAMPE"]
 
   @staticmethod
@@ -127,17 +126,6 @@ class TestMebLongStateMachine(unittest.TestCase):
     self.assertEqual(hold_type, self.ramp)
     self.assertFalse(self.state_machine.hold_release_ramp_active)
     self.assertEqual(self.state_machine.ramp_counter, self.state_machine.RAMP_FRAMES)
-
-  def test_launch_release_keeps_existing_timed_ramp(self):
-    speed = 0.0
-    self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed, held=True), self.halten)
-    self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed, held=True), self.anfahren)
-    self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed, held=False), self.ramp)
-
-    for _ in range(self.state_machine.LAUNCH_RAMP_FRAMES):
-      self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed, held=False), self.ramp)
-
-    self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed, held=False), self.none)
 
 
 if __name__ == "__main__":

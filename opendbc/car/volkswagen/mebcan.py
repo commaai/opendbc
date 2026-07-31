@@ -90,7 +90,6 @@ class MebLongStateMachine:
   def __init__(self, CP, CCP):
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
-    self.LAUNCH_RAMP_FRAMES = 100 // CCP.ACC_CONTROL_STEP  # 1 s
 
     self.hold_release_ramp_active = False
     self.ramp_counter = 0
@@ -115,7 +114,7 @@ class MebLongStateMachine:
 
   def _get_hold_type(self, CS, CC) -> int:
     # warning: car is reacting to hold mechanic even with long control off
-    # NONE -> ANFAHREN is legalized through HALTEN below.
+    # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
 
@@ -144,12 +143,6 @@ class MebLongStateMachine:
       else:
         # Longitudinal is still active and the car reached the stock 5 km/h release threshold.
         self.hold_release_ramp_active = False
-    elif (self.prev_acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG'] and
-          acc_hold_type == self.acc_hold_type_vals['ANFAHREN']):
-      # Establish the ESP hold request before releasing it. Stock transitions through
-      # HALTEN rather than reacting to the Standstill rising edge with NONE -> ANFAHREN.
-      acc_hold_type = self.acc_hold_type_vals['HALTEN']
-      self.ramp_counter = 0
     elif (self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and
           acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']):
       if CC.longActive and not CS.out.accFaulted:
@@ -161,10 +154,6 @@ class MebLongStateMachine:
         # Preserve the original short release tail whenever longitudinal control is no longer active.
         acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
         self.ramp_counter = self.RAMP_FRAMES
-    elif self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
-      # REPRO safety: never drop a launch request directly while the ESP may still be releasing.
-      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-      self.ramp_counter = self.LAUNCH_RAMP_FRAMES
     elif self.ramp_counter > 0:
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
       self.ramp_counter -= 1
