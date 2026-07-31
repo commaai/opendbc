@@ -20,9 +20,10 @@ class MebShouldStopChurnRepro:
 
   Recreates the low-speed pid/stopping uncertainty preceding TSK permanent faults in
   000000b6--48c9d2f02a/23 and 000000b8--ab902978ef/9. A closed-loop speed command first settles into
-  forward creep around 0.1 m/s. While the car remains in the recorded 0.06-0.12 m/s band, a separate
-  synthetic planner acceleration alternates across should_stop's 0.1 m/s^2 threshold and feeds the
-  resulting pid/stopping state through the production MebLongStateMachine. Both churns use 100 ms
+  forward creep around 0.1 m/s. After the car remains in the recorded 0.06-0.12 m/s band for 500 ms,
+  a separate synthetic planner acceleration alternates across should_stop's 0.1 m/s^2 threshold and
+  feeds the resulting pid/stopping state through the production MebLongStateMachine. The churn then
+  runs for a fixed two seconds so physical brake actuation cannot reset it before the final stop request. Both churns use 100 ms
   blocks: HALTEN/RAMP while moving and HALTEN/ANFAHREN while held. The moving burst ends in a real
   stop followed by three seconds of uninterrupted HALTEN before the experiment repeats.
 
@@ -205,21 +206,15 @@ class MebShouldStopChurnRepro:
       return self._stabilize_creep(CC, CS.out.vEgo)
 
     if self.phase == self.CREEP_CHURN:
-      creeping_forwards = (CS.meb_motion_state == self.MOTION_FORWARDS and
-                           not CS.esp_hold_confirmation and
-                           self.CREEP_SPEED_MIN <= CS.out.vEgo <= self.CREEP_SPEED_MAX)
-      if not creeping_forwards:
-        if CS.esp_hold_confirmation or CS.meb_motion_state == self.MOTION_STOPPED:
-          self.phase = self.ESTABLISH_CREEP
-          self.phase_frames = 0
-          return self._going(CC, self.LAUNCH_ACCEL)
-        self._enter_stabilize_creep()
-        return self._stabilize_creep(CC, CS.out.vEgo)
       if self.phase_frames >= self.CREEP_CHURN_FRAMES:
         self.phase = self.STOP_FOR_HOLD
         self.phase_frames = 0
         return self._stopping(CC, self.STOP_ACCEL)
-      return self._creep_churn_command(CS, CC)
+      if CS.esp_hold_confirmation or CS.meb_motion_state != self.MOTION_FORWARDS:
+        self.phase = self.STOP_FOR_HOLD
+        self.phase_frames = 0
+      else:
+        return self._creep_churn_command(CS, CC)
 
     if self.phase == self.STOP_FOR_HOLD:
       if self._stopped_and_held(CS):
