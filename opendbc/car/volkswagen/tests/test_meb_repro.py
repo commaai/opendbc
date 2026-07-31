@@ -92,9 +92,8 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
     emitted = [self.step(0.1, False) for _ in range(self.repro.CREEP_CHURN_FRAMES)]
     halten = self.long_state.acc_hold_type_vals["HALTEN"]
     ramp = self.long_state.acc_hold_type_vals["LOESEN_UEBER_RAMPE"]
-    none = self.long_state.acc_hold_type_vals["KEINE_ANFORDERUNG"]
 
-    self.assertEqual({row[1] for row in emitted}, {halten, ramp, none})
+    self.assertEqual([row[1] for row in emitted], [halten, ramp] * (self.repro.CREEP_CHURN_FRAMES // 2))
     for accel, hold_type, _, armed in emitted:
       self.assertTrue(armed)
       if accel < 0:
@@ -121,7 +120,7 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
     halten = self.long_state.acc_hold_type_vals["HALTEN"]
     anfahren = self.long_state.acc_hold_type_vals["ANFAHREN"]
 
-    self.assertEqual({row[1] for row in emitted}, {halten, anfahren})
+    self.assertEqual([row[1] for row in emitted], [anfahren, halten] * (self.repro.HELD_CHURN_FRAMES // 2))
     for accel, hold_type, _, armed in emitted:
       self.assertTrue(armed)
       self.assertGreaterEqual(accel, 0)
@@ -250,14 +249,19 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
     self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["LOESEN_UEBER_RAMPE"])
     self.assertNotEqual(hold_type, self.long_state.acc_hold_type_vals["KEINE_ANFORDERUNG"])
 
-  def test_launch_settles_before_churn(self):
-    held_launch = [self.step(0.0, True) for _ in range(20)]
+  def test_held_churn_precedes_launch_and_moving_churn(self):
     halten = self.long_state.acc_hold_type_vals["HALTEN"]
     anfahren = self.long_state.acc_hold_type_vals["ANFAHREN"]
 
-    self.assertEqual(held_launch[0][0], self.CCP.ACCEL_INACTIVE)
-    self.assertEqual(held_launch[0][1], halten)
-    self.assertTrue(all(row[0] == self.repro.LAUNCH_ACCEL and row[1] == anfahren for row in held_launch[1:]))
+    held_churn = [self.step(0.0, True) for _ in range(self.repro.HELD_CHURN_FRAMES)]
+    self.assertEqual([row[1] for row in held_churn],
+                     [halten, anfahren] * (self.repro.HELD_CHURN_FRAMES // 2))
+
+    settle = [self.step(0.0, True) for _ in range(self.repro.SETTLE_FRAMES)]
+    self.assertTrue(all(row[0] == self.CCP.ACCEL_INACTIVE and row[1] == halten for row in settle))
+
+    held_launch = [self.step(0.0, True) for _ in range(20)]
+    self.assertTrue(all(row[0] == self.repro.LAUNCH_ACCEL and row[1] == anfahren for row in held_launch))
     accel, _, _, armed = self.step(0.04, False)
     self.assertTrue(armed)
     self.assertEqual(self.repro.phase, self.repro.STABILIZE_CREEP)
