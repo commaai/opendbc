@@ -87,7 +87,7 @@ ACC_HUD_DISABLED = 0
 
 class MebHoldState(enum.IntEnum):
   IDLE = 0
-  DISENGAGING = 1
+  DISENGAGE_RAMP = 1
   FINISHING_STARTING = 2  # or policy wants to abort stop request
 
 
@@ -100,7 +100,6 @@ class MebLongStateMachine:
 
     self.hold_ramp_counter = 0
     self.hold_state = MebHoldState.IDLE
-    self.prev_long_active = False
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -128,11 +127,11 @@ class MebLongStateMachine:
     long_active = not CS.out.accFaulted and CC.longActive
 
     if not long_active:
-      if self.prev_long_active:
-        self.hold_state = MebHoldState.DISENGAGING
+      if self.prev_acc_hold_type in (self.acc_hold_type_vals['HALTEN'], self.acc_hold_type_vals['ANFAHREN']):
+        self.hold_state = MebHoldState.DISENGAGE_RAMP
         self.hold_ramp_counter = self.RAMP_FRAMES
 
-      if self.hold_state == MebHoldState.DISENGAGING and self.hold_ramp_counter > 0:
+      if self.hold_state == MebHoldState.DISENGAGE_RAMP and self.hold_ramp_counter > 0:
         acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
         self.hold_ramp_counter -= 1
       else:
@@ -157,8 +156,6 @@ class MebLongStateMachine:
         else:
           self.hold_state = MebHoldState.IDLE
           acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']
-
-    self.prev_long_active = long_active
 
     return acc_hold_type
 
