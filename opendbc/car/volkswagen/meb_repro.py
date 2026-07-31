@@ -23,7 +23,8 @@ class MebShouldStopChurnRepro:
   forward creep around 0.1 m/s. While the car remains in the recorded 0.06-0.12 m/s band, a separate
   synthetic planner acceleration alternates across should_stop's 0.1 m/s^2 threshold and feeds the
   resulting pid/stopping state through the production MebLongStateMachine. The moving burst resets if
-  the car leaves the creep band. It is followed by the recorded held churn and quiet HALTEN delay.
+  the car leaves the creep band. It is followed by the recorded RAMP-to-ANFAHREN held-edge handoff,
+  held churn, and quiet HALTEN delay.
 
   If an ANFAHREN pulse releases the ESP hold during held churn, the timer pauses and HALTEN safely
   reacquires the stop before resuming. No ANFAHREN pulse is sent while rolling. No ACC payload or fault
@@ -38,6 +39,7 @@ class MebShouldStopChurnRepro:
   CREEP_CHURN = "creep_churn"
   STOP_FOR_HOLD = "stop_for_hold"
   RELEASE_FOR_HOLD = "release_for_hold"
+  HELD_LAUNCH = "held_launch"
   HELD_CHURN = "held_churn"
   REACQUIRE_HOLD = "reacquire_hold"
   SETTLE = "settle"
@@ -75,6 +77,7 @@ class MebShouldStopChurnRepro:
   CREEP_GO_FRAMES = 7       # 120 ms RAMP + one 20 ms NONE frame
   CREEP_CHURN_FRAMES = 63   # 1.26 s, matching b6 phase A
   HOLD_RELEASE_FRAMES = 40  # 800 ms maximum released coast waiting for ESP standstill
+  HELD_LAUNCH_FRAMES = 16   # 320 ms from standstill: ~100 ms RAMP + ~220 ms ANFAHREN in route 111
   HELD_STOP_FRAMES = 5      # 100 ms HALTEN
   HELD_GO_FRAMES = 10       # 200 ms ANFAHREN
   HELD_CHURN_FRAMES = 108   # 2.16 s, matching b6 phase B
@@ -233,8 +236,9 @@ class MebShouldStopChurnRepro:
 
     if self.phase == self.RELEASE_FOR_HOLD:
       if self._stopped_and_held(CS):
-        self.phase = self.HELD_CHURN
-        self.phase_frames = 0
+        self.phase = self.HELD_LAUNCH
+        self.phase_frames = 1
+        return self._going(CC, self.HOLD_RELEASE_ACCEL)
       elif CS.out.vEgo > self.CREEP_SPEED_MAX or self.phase_frames >= self.HOLD_RELEASE_FRAMES:
         self.phase = self.STOP_FOR_HOLD
         self.phase_frames = 0
@@ -242,6 +246,17 @@ class MebShouldStopChurnRepro:
       else:
         self.phase_frames += 1
         return self._going(CC, self.HOLD_RELEASE_ACCEL)
+
+    if self.phase == self.HELD_LAUNCH:
+      if not self._stopped_and_held(CS):
+        self.phase = self.STOP_FOR_HOLD
+        self.phase_frames = 0
+        return self._stopping(CC, self.STOP_ACCEL)
+      if self.phase_frames < self.HELD_LAUNCH_FRAMES:
+        self.phase_frames += 1
+        return self._going(CC, self.HOLD_RELEASE_ACCEL)
+      self.phase = self.HELD_CHURN
+      self.phase_frames = 0
 
     if self.phase == self.REACQUIRE_HOLD:
       if self._stopped_and_held(CS):
