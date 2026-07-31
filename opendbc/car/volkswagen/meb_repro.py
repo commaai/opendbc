@@ -22,9 +22,9 @@ class MebShouldStopChurnRepro:
   000000b6--48c9d2f02a/23 and 000000b8--ab902978ef/9. A closed-loop speed command first settles into
   forward creep around 0.1 m/s. While the car remains in the recorded 0.06-0.12 m/s band, a separate
   synthetic planner acceleration alternates across should_stop's 0.1 m/s^2 threshold and feeds the
-  resulting pid/stopping state through the production MebLongStateMachine. The moving burst alternates
-  HALTEN/RAMP every 20 ms and resets if the car leaves the creep band. It is followed by the recorded
-  RAMP-to-ANFAHREN held-edge handoff, a 20 ms HALTEN/ANFAHREN churn, and quiet HALTEN delay.
+  resulting pid/stopping state through the production MebLongStateMachine. Both churns use 100 ms
+  blocks: HALTEN/RAMP while moving and HALTEN/ANFAHREN while held. The moving burst ends in a real
+  stop followed by three seconds of uninterrupted HALTEN before the experiment repeats.
 
   If an ANFAHREN pulse releases the ESP hold during held churn, the timer pauses and HALTEN safely
   reacquires the stop before resuming. No ANFAHREN pulse is sent while rolling. No ACC payload or fault
@@ -38,8 +38,7 @@ class MebShouldStopChurnRepro:
   STABILIZE_CREEP = "stabilize_creep"
   CREEP_CHURN = "creep_churn"
   STOP_FOR_HOLD = "stop_for_hold"
-  RELEASE_FOR_HOLD = "release_for_hold"
-  HELD_LAUNCH = "held_launch"
+  FINAL_HOLD = "final_hold"
   HELD_CHURN = "held_churn"
   REACQUIRE_HOLD = "reacquire_hold"
   SETTLE = "settle"
@@ -67,20 +66,17 @@ class MebShouldStopChurnRepro:
   ESTABLISH_ACCEL_MAX = 0.12
   CREEP_ACCEL_MAX = 0.12
   STOP_ACCEL = -0.35
-  HOLD_RELEASE_ACCEL = 0.11
-  HOLD_RELEASE_SPEED = 0.06
   LAUNCH_ACCEL = 0.12
   HELD_POKE_ACCEL = 0.12
 
   CREEP_STABLE_FRAMES = 25  # remain in the measured creep band for 500 ms before phase A
-  CREEP_STOP_FRAMES = 1     # one 20 ms HALTEN frame
-  CREEP_GO_FRAMES = 1       # one 20 ms RAMP frame; next HALTEN cancels the remaining ramp
-  CREEP_CHURN_FRAMES = 100  # 2 s / 50 HALTEN-RAMP cycles
-  HOLD_RELEASE_FRAMES = 40  # 800 ms maximum released coast waiting for ESP standstill
-  HELD_LAUNCH_FRAMES = 16   # 320 ms from standstill: ~100 ms RAMP + ~220 ms ANFAHREN in route 111
-  HELD_STOP_FRAMES = 1      # one 20 ms HALTEN frame
-  HELD_GO_FRAMES = 1        # one 20 ms ANFAHREN frame
-  HELD_CHURN_FRAMES = 100   # 2 s / 50 HALTEN-ANFAHREN cycles
+  CREEP_STOP_FRAMES = 5     # 100 ms HALTEN, long enough for brake actuation to begin
+  CREEP_GO_FRAMES = 5       # 100 ms RAMP, then HALTEN truncates the stock ~5 kph ramp
+  CREEP_CHURN_FRAMES = 100  # 2 s / 10 HALTEN-RAMP cycles
+  HELD_STOP_FRAMES = 5      # 100 ms HALTEN
+  HELD_GO_FRAMES = 5        # 100 ms ANFAHREN
+  HELD_CHURN_FRAMES = 100   # 2 s / 10 HALTEN-ANFAHREN cycles
+  FINAL_HOLD_FRAMES = 150   # 3 s uninterrupted HALTEN after braking to a real stop
   SETTLE_FRAMES = 19        # TSK faulted 0.38 s after the b6 chatter ended
 
   def __init__(self):
@@ -227,36 +223,18 @@ class MebShouldStopChurnRepro:
 
     if self.phase == self.STOP_FOR_HOLD:
       if self._stopped_and_held(CS):
-        self.phase = self.HELD_CHURN
+        self.phase = self.FINAL_HOLD
         self.phase_frames = 0
-      elif CS.out.vEgo <= self.HOLD_RELEASE_SPEED:
-        self.phase = self.RELEASE_FOR_HOLD
-        self.phase_frames = 1
-        return self._going(CC, self.HOLD_RELEASE_ACCEL)
       else:
         return self._stopping(CC, self.STOP_ACCEL)
 
-    if self.phase == self.RELEASE_FOR_HOLD:
-      if self._stopped_and_held(CS):
-        self.phase = self.HELD_LAUNCH
-        self.phase_frames = 1
-        return self._going(CC, self.HOLD_RELEASE_ACCEL)
-      elif CS.out.vEgo > self.CREEP_SPEED_MAX or self.phase_frames >= self.HOLD_RELEASE_FRAMES:
-        self.phase = self.STOP_FOR_HOLD
-        self.phase_frames = 0
-        return self._stopping(CC, self.STOP_ACCEL)
-      else:
-        self.phase_frames += 1
-        return self._going(CC, self.HOLD_RELEASE_ACCEL)
-
-    if self.phase == self.HELD_LAUNCH:
+    if self.phase == self.FINAL_HOLD:
       if not self._stopped_and_held(CS):
-        self.phase = self.STOP_FOR_HOLD
         self.phase_frames = 0
         return self._stopping(CC, self.STOP_ACCEL)
-      if self.phase_frames < self.HELD_LAUNCH_FRAMES:
+      if self.phase_frames < self.FINAL_HOLD_FRAMES:
         self.phase_frames += 1
-        return self._going(CC, self.HOLD_RELEASE_ACCEL)
+        return self._stopping(CC, self.STOP_ACCEL)
       self.phase = self.HELD_CHURN
       self.phase_frames = 0
 
