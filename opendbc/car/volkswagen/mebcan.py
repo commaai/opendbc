@@ -174,8 +174,9 @@ class MebFaultReplay:
   controller, through the real MebLongStateMachine, so nothing illegal goes out while it manoeuvres.
 
   Then it plays the recording frame for frame at 50 Hz, and runs the whole sequence again. Every
-  ACC_18 field comes from the recording except ACC_Status_ACC, which stays live so that a real
-  camera or TSK fault still shows up in what we advertise. Since COUNTER and CHECKSUM are
+  ACC_18 signal is replayed, not just the ones long control happens to set, so the payload repacks
+  byte for byte identical to what the car was sent. Only CHECKSUM and COUNTER are regenerated,
+  which they have to be or the car rejects the frame. Since COUNTER and CHECKSUM are
   regenerated and every other ACC_18 field is constant, the car sees the same bytes it saw before
   it faulted. What this cannot replay is the car's half of it: the grade, the camera state, and the
   TSK state the fault started from. So a fault here proves our TX is sufficient on its own, and no
@@ -204,7 +205,7 @@ class MebFaultReplay:
     if not CC.enabled or CS.out.brakePressed or CS.out.gasPressed or CS.out.vEgo > self.ARM_SPEED or \
        (playing and CS.out.vEgo > self.ABORT_SPEED):
       self.frame = None
-      return accel, acc_hold_type, braking_to_stop
+      return None, accel, acc_hold_type, braking_to_stop
 
     if not playing:
       at_speed = abs(CS.out.vEgo - self.window.v0) < self.START_TOL
@@ -213,22 +214,24 @@ class MebFaultReplay:
         if self.window.v0 < self.STOPPED_SPEED:
           # the recording starts held, and only a hold request gets the ESP to grab. entering
           # HALTEN is legal from any state, so this cannot produce a transition master could not
-          return accel, self.halten, not CS.esp_hold_confirmation
-        return accel, acc_hold_type, braking_to_stop
+          return None, accel, self.halten, not CS.esp_hold_confirmation
+        return None, accel, acc_hold_type, braking_to_stop
       self.frame = 0
 
-    accel, _, hold_type, anhalten = self.window.rows[self.frame]
+    values = self.window.values(self.frame)
+    accel = values["ACC_Sollbeschleunigung_02"]
+    hold_type = int(values["ACC_Anforderung_HMS"])
     self.frame += 1
     if self.frame >= len(self.window.rows):
       # back to the preamble rather than wrapping. both recordings end in HALTEN and b6 starts in
       # KEINE_ANFORDERUNG, so wrapping straight round would emit the HALTEN -> NONE that clamps the
       # EPB into park. going through the preamble puts the state machine's legalizer back in the loop
       self.frame = None
-    return accel, hold_type, bool(anhalten)
+    return values, accel, hold_type, bool(values["ACC_Anhalten"])
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
-                             braking_to_stop, speed, travel_assist_available):
+                             braking_to_stop, speed, travel_assist_available, replay_values=None):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
@@ -260,6 +263,9 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     "SET_ME_0X1":                 0x1,
     "SET_ME_0X9":                 0x9,
   }
+
+  if replay_values is not None:
+    values = replay_values  # REPRO ONLY, do not merge
 
   commands.append(packer.make_can_msg("ACC_18", bus, values))
 

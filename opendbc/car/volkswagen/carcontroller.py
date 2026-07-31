@@ -141,11 +141,13 @@ class CarController(CarControllerBase):
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
           accel, acc_status, acc_hold_type, braking_to_stop = self.meb_long_state.update(CS, CC, accel)
           # REPRO ONLY, do not merge
-          accel, acc_hold_type, braking_to_stop = self.meb_repro.update(CS, CC, accel, acc_status, acc_hold_type, braking_to_stop)
+          replay_values, accel, acc_hold_type, braking_to_stop = self.meb_repro.update(CS, CC, accel, acc_status,
+                                                                                       acc_hold_type, braking_to_stop)
           self.meb_long_state.prev_acc_hold_type = acc_hold_type  # the legalizer must see what we actually sent
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_status, acc_hold_type, braking_to_stop,
-                                                           CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available))
+                                                           CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available,
+                                                           replay_values))
 
         else:
           stopping = actuators.longControlState == LongCtrlState.stopping

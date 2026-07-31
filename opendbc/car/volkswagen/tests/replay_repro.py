@@ -31,7 +31,7 @@ def step(repro, long_state, v, held, brake=False, gas=False, enabled=True):
   CC = NS(enabled=enabled, longActive=enabled and not gas, cruiseControl=NS(override=gas),
           actuators=NS(longControlState=0, accel=0.0))
   accel, status, hold_type, braking_to_stop = long_state.update(CS, CC, 0.0)
-  accel, hold_type, braking_to_stop = repro.update(CS, CC, accel, status, hold_type, braking_to_stop)
+  _, accel, hold_type, braking_to_stop = repro.update(CS, CC, accel, status, hold_type, braking_to_stop)
   long_state.prev_acc_hold_type = hold_type
   return accel, hold_type, braking_to_stop, repro.frame is not None
 
