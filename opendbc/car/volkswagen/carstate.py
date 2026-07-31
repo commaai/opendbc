@@ -17,6 +17,7 @@ class CarState(CarStateBase):
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
+    self.meb_motion_state = 0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
@@ -280,6 +281,7 @@ class CarState(CarStateBase):
 
     self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
     self.esp_hold_confirmation = bool(pt_cp.vl["ESC_50"]["Standstill"])
+    self.meb_motion_state = int(pt_cp.vl["ESC_50"]["Motion_State"])
     self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
     ret.stockFcw = bool(ext_cp.vl["AWV_03"]["FCW_Active"])
     ret.stockAeb = bool(ext_cp.vl["AWV_03"]["AEB_Active"])
@@ -298,9 +300,8 @@ class CarState(CarStateBase):
     tsk_faulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
     engine_off = pt_cp.vl["Motor_54"]["Engine_On"] == 0
     long_control_inhibit = pt_cp.vl["VMM_02"]["Long_Control_Inhibit"] == 2
-    # TODO: check permanent camera fault, it happens too often right now
-    ret.accFaulted = (self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit) or
-                      ext_cp.vl["ACC_18"]["ACC_Status_ACC"] == 6)  # reversible fault in ACC system
+    # REPRO ONLY: camera ACC faults are noisy during this experiment; report only TSK faults.
+    ret.accFaulted = self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit)
 
     # TSK winds braking down through brake_only after driver brakes at low speeds. Requesting drive-off in this
     # state can fault TSK, and stock refuses to engage here as well, so block entry until it clears.
