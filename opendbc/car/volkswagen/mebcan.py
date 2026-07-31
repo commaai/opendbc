@@ -132,11 +132,9 @@ class MebLongStateMachine:
 
     else:
       self.disengage_ramp_counter = 0
-
-      if stopping:
-        acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
-      elif starting:
-        acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
+      if stopping or starting:
+        self.finishing_starting = False
+        acc_hold_type = self.acc_hold_type_vals['HALTEN'] if stopping else self.acc_hold_type_vals['ANFAHREN']
       else:
         aborting_stop = self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN']
         finished_starting = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
