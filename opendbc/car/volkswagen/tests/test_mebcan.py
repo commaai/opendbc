@@ -75,32 +75,58 @@ class TestMebLongStateMachine(unittest.TestCase):
     self.assertEqual(hold_type, self.none)
     self.assertFalse(self.state_machine.hold_release_ramp_active)
 
-  def test_disengagement_cancels_hold_abort_ramp(self):
-    self.start_hold_abort_ramp()
+  def test_halten_abort_at_five_kph_needs_no_ramp(self):
+    speed = 5 * CV.KPH_TO_MS
+    self.assertEqual(self.update_hold_type(LongCtrlState.stopping, speed), self.halten)
 
-    hold_type = self.update_hold_type(LongCtrlState.pid, 1 * CV.KPH_TO_MS,
-                                      enabled=False, long_active=False)
+    hold_type = self.update_hold_type(LongCtrlState.pid, speed)
 
     self.assertEqual(hold_type, self.none)
     self.assertFalse(self.state_machine.hold_release_ramp_active)
+    self.assertEqual(self.state_machine.ramp_counter, 0)
 
-  def test_longitudinal_override_keeps_ramp_while_enabled(self):
-    self.assertEqual(self.update_hold_type(LongCtrlState.stopping, 1 * CV.KPH_TO_MS), self.halten)
+  def assert_short_release_tail(self, enabled, long_active, acc_faulted=False):
+    speed = 1 * CV.KPH_TO_MS
+    self.assertEqual(self.update_hold_type(LongCtrlState.stopping, speed), self.halten)
+    self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed,
+                                          enabled=enabled, long_active=long_active,
+                                          acc_faulted=acc_faulted), self.ramp)
 
-    hold_type = self.update_hold_type(LongCtrlState.pid, 1 * CV.KPH_TO_MS,
+    for _ in range(self.state_machine.RAMP_FRAMES):
+      self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed,
+                                            enabled=enabled, long_active=long_active,
+                                            acc_faulted=acc_faulted), self.ramp)
+
+    self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed,
+                                          enabled=enabled, long_active=long_active,
+                                          acc_faulted=acc_faulted), self.none)
+
+  def test_disengagement_from_halten_keeps_original_short_ramp(self):
+    self.assert_short_release_tail(enabled=False, long_active=False)
+
+  def test_gas_override_from_halten_keeps_original_short_ramp(self):
+    self.assert_short_release_tail(enabled=True, long_active=False)
+
+  def test_gas_override_converts_active_latch_to_short_ramp(self):
+    speed = 1 * CV.KPH_TO_MS
+    self.start_hold_abort_ramp(speed)
+
+    hold_type = self.update_hold_type(LongCtrlState.pid, speed,
                                       enabled=True, long_active=False)
 
     self.assertEqual(hold_type, self.ramp)
-    self.assertTrue(self.state_machine.hold_release_ramp_active)
-
-  def test_acc_fault_cancels_hold_abort_ramp(self):
-    self.start_hold_abort_ramp()
-
-    hold_type = self.update_hold_type(LongCtrlState.pid, 1 * CV.KPH_TO_MS,
-                                      acc_faulted=True)
-
-    self.assertEqual(hold_type, self.none)
     self.assertFalse(self.state_machine.hold_release_ramp_active)
+    self.assertEqual(self.state_machine.ramp_counter, self.state_machine.RAMP_FRAMES)
+
+  def test_acc_fault_converts_active_latch_to_short_ramp(self):
+    speed = 1 * CV.KPH_TO_MS
+    self.start_hold_abort_ramp(speed)
+
+    hold_type = self.update_hold_type(LongCtrlState.pid, speed, acc_faulted=True)
+
+    self.assertEqual(hold_type, self.ramp)
+    self.assertFalse(self.state_machine.hold_release_ramp_active)
+    self.assertEqual(self.state_machine.ramp_counter, self.state_machine.RAMP_FRAMES)
 
   def test_launch_release_keeps_existing_timed_ramp(self):
     speed = 0.0

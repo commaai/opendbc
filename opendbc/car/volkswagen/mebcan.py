@@ -89,6 +89,7 @@ class MebLongStateMachine:
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
+    self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
     self.LAUNCH_RAMP_FRAMES = 100 // CCP.ACC_CONTROL_STEP  # 1 s
 
     self.hold_release_ramp_active = False
@@ -128,18 +129,20 @@ class MebLongStateMachine:
       acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     # enforce legal transitions
-    if not CC.enabled or CS.out.accFaulted:
-      # Stop advertising a release request once longitudinal control disengages or faults.
-      self.hold_release_ramp_active = False
-      self.ramp_counter = 0
-    elif acc_hold_type == self.acc_hold_type_vals['HALTEN']:
+    if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
       # Allow going into hold at any time and cancel either release ramp.
       self.hold_release_ramp_active = False
       self.ramp_counter = 0
     elif self.hold_release_ramp_active:
-      if CS.out.vEgo < self.HOLD_RELEASE_SPEED:
+      if CC.longActive and not CS.out.accFaulted and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
         acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+      elif not CC.longActive or CS.out.accFaulted:
+        # Preserve the original short release tail on disengagement, brake, gas override, or fault.
+        acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+        self.hold_release_ramp_active = False
+        self.ramp_counter = self.RAMP_FRAMES
       else:
+        # Longitudinal is still active and the car reached the stock 5 km/h release threshold.
         self.hold_release_ramp_active = False
     elif (self.prev_acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG'] and
           acc_hold_type == self.acc_hold_type_vals['ANFAHREN']):
@@ -149,10 +152,15 @@ class MebLongStateMachine:
       self.ramp_counter = 0
     elif (self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and
           acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']):
-      # Stock holds RAMP after aborting a stop until 5 km/h, unless another stop is requested first.
-      if CS.out.vEgo < self.HOLD_RELEASE_SPEED:
+      if CC.longActive and not CS.out.accFaulted:
+        if CS.out.vEgo < self.HOLD_RELEASE_SPEED:
+          # Stock holds RAMP after aborting a stop until 5 km/h, unless another stop is requested first.
+          acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+          self.hold_release_ramp_active = True
+      else:
+        # Preserve the original short release tail whenever longitudinal control is no longer active.
         acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-        self.hold_release_ramp_active = True
+        self.ramp_counter = self.RAMP_FRAMES
     elif self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
       # REPRO safety: never drop a launch request directly while the ESP may still be releasing.
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
