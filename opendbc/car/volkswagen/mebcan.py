@@ -136,6 +136,7 @@ class MebLongStateMachine:
     )
 
     # enforce legal transitions
+    # TODO: check what stock does when user brakes while in ANFAHREN or LOESEN_UEBER_RAMPE
     if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
       # allow going into hold at any time, reset ramp counter
       self.hold_release_active = False
