@@ -1,5 +1,6 @@
+import hashlib
+import struct
 import unittest
-from collections import deque
 from types import SimpleNamespace
 
 from opendbc.car.structs import CarParams
@@ -17,335 +18,142 @@ class TestMebShouldStopChurnRepro(unittest.TestCase):
 
   def setUp(self):
     self.repro = MebShouldStopChurnRepro()
-    self.long_state = MebLongStateMachine(self.CP, self.CCP)
 
   @staticmethod
-  def make_car_state(speed, held, motion_state, brake=False, gas=False, acc_faulted=False, parking_brake=False):
-    out = SimpleNamespace(vEgo=speed, brakePressed=brake, gasPressed=gas, accFaulted=acc_faulted,
-                          parkingBrake=parking_brake, cruiseState=SimpleNamespace(available=True))
+  def make_car_state(speed, held=False, motion_state=1, brake=False, gas=False,
+                     acc_faulted=False, parking_brake=False):
+    out = SimpleNamespace(vEgo=speed, brakePressed=brake, gasPressed=gas,
+                          accFaulted=acc_faulted, parkingBrake=parking_brake,
+                          cruiseState=SimpleNamespace(available=True))
     return SimpleNamespace(out=out, esp_hold_confirmation=held, meb_motion_state=motion_state)
 
   @staticmethod
   def make_car_control(enabled=True, long_active=True, accel=0.0):
     actuators = SimpleNamespace(longControlState=0, accel=accel)
     return SimpleNamespace(enabled=enabled, longActive=long_active,
-                           cruiseControl=SimpleNamespace(override=not long_active), actuators=actuators)
+                           cruiseControl=SimpleNamespace(override=not long_active),
+                           actuators=actuators)
 
-  def step(self, speed, held, motion_state=None, brake=False, gas=False, enabled=True, long_active=True,
-           policy_accel=0.0, acc_faulted=False, parking_brake=False):
-    if motion_state is None:
-      motion_state = self.repro.MOTION_STOPPED if held or speed == 0.0 else self.repro.MOTION_FORWARDS
-    car_state = self.make_car_state(speed, held, motion_state, brake, gas, acc_faulted, parking_brake)
+  @staticmethod
+  def raw_long_control_state(car_control):
+    state = car_control.actuators.longControlState
+    if hasattr(state, "raw"):
+      return state.raw
+    return state
+
+  def update(self, speed, held=False, motion_state=1, brake=False, gas=False,
+             enabled=True, long_active=True, policy_accel=0.0,
+             acc_faulted=False, parking_brake=False):
+    car_state = self.make_car_state(speed, held, motion_state, brake, gas,
+                                    acc_faulted, parking_brake)
     car_control = self.make_car_control(enabled, long_active, policy_accel)
     accel, repro_control = self.repro.update(car_state, car_control, policy_accel)
-    armed = repro_control is not car_control
-    accel, _, hold_type, braking_to_stop = self.long_state.update(car_state, repro_control, accel)
-    return accel, hold_type, braking_to_stop, armed
+    return car_state, car_control, accel, repro_control
 
-  def enter_creep_churn(self):
-    self.step(self.repro.CREEP_SPEED_MAX + 0.01, False)
-    for _ in range(self.repro.CREEP_STABLE_FRAMES):
-      self.step(0.1, False)
-    self.assertEqual(self.repro.phase, self.repro.CREEP_CHURN)
-    self.assertEqual(self.repro.phase_frames, 0)
+  def test_recorded_policy_fingerprint(self):
+    inputs = self.repro.RECORDED_POLICY_INPUTS
+    payload = b"".join(struct.pack("<Bf", state, accel) for state, accel in inputs)
 
-  def enter_stop_for_hold(self):
-    self.enter_creep_churn()
-    for _ in range(self.repro.CREEP_CHURN_FRAMES):
-      self.step(0.1, False)
-    self.step(0.1, False)
-    self.assertEqual(self.repro.phase, self.repro.STOP_FOR_HOLD)
+    self.assertEqual(len(inputs), 225)
+    self.assertEqual(inputs[0], (1, 0.054852768778800964))
+    self.assertEqual(inputs[-1], (2, -0.4000000059604645))
+    self.assertEqual(hashlib.sha256(payload).hexdigest(),
+                     "1329d466e87768caa54a31533d1aca4a924d2edc2f004e01e720f2ca6b6786c8")
 
-  def enter_held_churn(self):
-    self.enter_stop_for_hold()
-    self.step(0.0, True)
-    for _ in range(self.repro.FINAL_HOLD_FRAMES):
-      self.step(0.0, True)
-    self.assertEqual(self.repro.phase, self.repro.HELD_CHURN)
+  def test_replays_every_recorded_policy_input_frame_for_frame(self):
+    emitted = []
+    for _ in self.repro.RECORDED_POLICY_INPUTS:
+      _, original_control, accel, repro_control = self.update(self.repro.ENTRY_SPEED_TARGET)
+      self.assertIsNot(repro_control, original_control)
+      emitted.append((self.raw_long_control_state(repro_control), accel))
 
-  def test_approach_brakes_through_halten(self):
-    accel, hold_type, braking_to_stop, armed = self.step(5.0, False)
+    self.assertEqual(tuple(emitted), self.repro.RECORDED_POLICY_INPUTS)
+    self.assertEqual(self.repro.phase, self.repro.APPROACH)
+    self.assertEqual(self.repro.replay_index, 0)
 
-    self.assertTrue(armed)
-    self.assertAlmostEqual(accel, self.repro.APPROACH_ACCEL_MIN)
-    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
-    self.assertTrue(braking_to_stop)
+  def test_restarts_replay_at_first_frame(self):
+    for _ in self.repro.RECORDED_POLICY_INPUTS:
+      self.update(self.repro.ENTRY_SPEED_TARGET)
 
-  def test_creep_must_be_stable_before_churn_counts(self):
-    for _ in range(self.repro.CREEP_STABLE_FRAMES - 1):
-      self.step(0.1, False)
-    self.assertEqual(self.repro.phase, self.repro.STABILIZE_CREEP)
+    _, _, accel, repro_control = self.update(self.repro.ENTRY_SPEED_TARGET)
 
-    self.step(0.13, False)
-    self.assertEqual(self.repro.phase_frames, 0)
+    self.assertEqual((self.raw_long_control_state(repro_control), accel),
+                     self.repro.RECORDED_POLICY_INPUTS[0])
+    self.assertEqual(self.repro.phase, self.repro.REPLAY)
+    self.assertEqual(self.repro.replay_index, 1)
 
-    self.enter_creep_churn()
+  def test_approach_automatically_matches_entry_speed(self):
+    _, _, accel, repro_control = self.update(5.0)
+    self.assertEqual(accel, self.repro.APPROACH_ACCEL_MIN)
+    self.assertEqual(self.raw_long_control_state(repro_control), 2)
 
-  def test_should_stop_switches_on_recorded_planner_threshold(self):
-    self.assertTrue(self.repro._planner_wants_stop(0.1, self.repro.SHOULD_STOP_ACCEL))
-    self.assertFalse(self.repro._planner_wants_stop(0.1, self.repro.SHOULD_GO_ACCEL))
-    self.assertFalse(self.repro._planner_wants_stop(0.3, self.repro.SHOULD_STOP_ACCEL))
+    _, _, accel, repro_control = self.update(0.02)
+    self.assertEqual(accel, self.repro.APPROACH_ACCEL_MAX)
+    self.assertEqual(self.raw_long_control_state(repro_control), 1)
 
-  def test_creep_churn_matches_recorded_moving_waveform(self):
-    self.enter_creep_churn()
-    emitted = [self.step(0.1, False) for _ in range(self.repro.CREEP_CHURN_FRAMES)]
-    halten = self.long_state.acc_hold_type_vals["HALTEN"]
-    ramp = self.long_state.acc_hold_type_vals["LOESEN_UEBER_RAMPE"]
-    none = self.long_state.acc_hold_type_vals["KEINE_ANFORDERUNG"]
+  def test_approach_releases_a_confirmed_hold_through_production_state_machine(self):
+    car_state, _, accel, repro_control = self.update(0.0, held=True,
+                                                     motion_state=self.repro.MOTION_STOPPED)
+    long_state = MebLongStateMachine(self.CP, self.CCP)
+    output_accel, _, hold_type, braking_to_stop = long_state.update(car_state, repro_control, accel)
 
-    cycle = ([halten] * self.repro.CREEP_STOP_FRAMES +
-             [ramp] * (self.long_state.RAMP_FRAMES + 1) +
-             [none] * (self.repro.CREEP_GO_FRAMES - self.long_state.RAMP_FRAMES - 1))
-    expected = (cycle * self.repro.CREEP_CHURN_FRAMES)[:self.repro.CREEP_CHURN_FRAMES]
-    self.assertEqual([row[1] for row in emitted], expected)
-    for accel, hold_type, _, armed in emitted:
-      self.assertTrue(armed)
-      if hold_type == halten:
-        self.assertEqual(accel, self.repro.CREEP_STOP_ACCEL)
-      else:
-        self.assertGreaterEqual(accel, 0)
-
-  def test_moving_churn_finishes_after_speed_leaves_band(self):
-    self.enter_creep_churn()
-    for _ in range(20):
-      self.step(0.1, False)
-    self.assertEqual(self.repro.phase_frames, 20)
-
-    accel, hold_type, _, armed = self.step(0.13, False)
-
-    self.assertTrue(armed)
-    self.assertEqual(self.repro.phase, self.repro.CREEP_CHURN)
-    self.assertEqual(self.repro.phase_frames, 21)
-    self.assertLess(accel, 0)
-    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
-
-    for _ in range(self.repro.CREEP_CHURN_FRAMES - self.repro.phase_frames):
-      self.step(0.04, False)
-    accel, hold_type, braking_to_stop, armed = self.step(0.04, False)
-
-    self.assertTrue(armed)
-    self.assertEqual(self.repro.phase, self.repro.STOP_FOR_HOLD)
-    self.assertEqual(accel, self.repro.STOP_ACCEL)
-    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
-    self.assertTrue(braking_to_stop)
-
-  def test_moving_churn_treats_early_standstill_as_final_stop(self):
-    self.enter_creep_churn()
-    for _ in range(20):
-      self.step(0.1, False)
-
-    accel, hold_type, braking_to_stop, armed = self.step(0.0, True)
-
-    self.assertTrue(armed)
-    self.assertEqual(self.repro.phase, self.repro.HELD_CHURN)
-    self.assertEqual(accel, self.CCP.ACCEL_INACTIVE)
-    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
+    self.assertEqual(self.raw_long_control_state(repro_control), 1)
+    self.assertEqual(accel, self.repro.LAUNCH_ACCEL)
+    self.assertEqual(output_accel, self.CCP.ACCEL_INACTIVE)
+    self.assertEqual(hold_type, long_state.acc_hold_type_vals["HALTEN"])
     self.assertFalse(braking_to_stop)
 
-  def test_held_churn_uses_only_halten_and_anfahren(self):
-    self.enter_held_churn()
+  def test_long_inactive_restarts_the_exact_sequence(self):
+    for _ in range(20):
+      self.update(self.repro.ENTRY_SPEED_TARGET)
+    self.assertEqual(self.repro.replay_index, 20)
 
-    emitted = [self.step(0.0, True) for _ in range(self.repro.HELD_CHURN_FRAMES - 1)]
-    halten = self.long_state.acc_hold_type_vals["HALTEN"]
-    anfahren = self.long_state.acc_hold_type_vals["ANFAHREN"]
-    period = self.repro.HELD_STOP_FRAMES + self.repro.HELD_GO_FRAMES
-    expected = []
-    for phase_frame in range(1, self.repro.HELD_CHURN_FRAMES):
-      expected.append(halten if phase_frame % period < self.repro.HELD_STOP_FRAMES else anfahren)
+    _, original_control, accel, repro_control = self.update(
+      self.repro.ENTRY_SPEED_TARGET, long_active=False, policy_accel=0.25)
+    self.assertIs(repro_control, original_control)
+    self.assertEqual(accel, 0.25)
+    self.assertEqual(self.repro.phase, self.repro.APPROACH)
 
-    self.assertEqual([row[1] for row in emitted], expected)
-    for accel, hold_type, _, armed in emitted:
-      self.assertTrue(armed)
-      self.assertGreaterEqual(accel, 0)
-      if hold_type == halten:
-        self.assertEqual(accel, self.CCP.ACCEL_INACTIVE)
-      else:
-        self.assertAlmostEqual(accel, self.repro.HELD_POKE_ACCEL)
-
-  def test_moving_churn_brakes_to_stop_then_starts_held_churn(self):
-    self.enter_stop_for_hold()
-    halten = self.long_state.acc_hold_type_vals["HALTEN"]
-
-    accel, hold_type, braking_to_stop, armed = self.step(0.06, False)
-    self.assertTrue(armed)
-    self.assertEqual(self.repro.phase, self.repro.STOP_FOR_HOLD)
-    self.assertEqual(accel, self.repro.STOP_ACCEL)
-    self.assertEqual(hold_type, halten)
-    self.assertTrue(braking_to_stop)
-
-    accel, hold_type, braking_to_stop, armed = self.step(0.0, True)
-    self.assertTrue(armed)
-    self.assertEqual(self.repro.phase, self.repro.HELD_CHURN)
-    self.assertEqual(accel, self.CCP.ACCEL_INACTIVE)
-    self.assertEqual(hold_type, halten)
-    self.assertFalse(braking_to_stop)
-
-  def test_held_churn_pauses_and_resumes_after_hold_release(self):
-    self.enter_held_churn()
-    for _ in range(30):
-      self.step(0.0, True)
-    held_progress = self.repro.phase_frames
-
-    accel, hold_type, _, armed = self.step(0.04, False)
-    self.assertTrue(armed)
-    self.assertEqual(self.repro.phase, self.repro.REACQUIRE_HOLD)
-    self.assertEqual(self.repro.phase_frames, held_progress)
-    self.assertEqual(accel, self.repro.STOP_ACCEL)
-    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
-
-    for _ in range(10):
-      self.step(0.02, False)
-    self.assertEqual(self.repro.phase_frames, held_progress)
-
-    self.step(0.0, True)
-    self.assertEqual(self.repro.phase, self.repro.HELD_CHURN)
-    self.assertEqual(self.repro.phase_frames, held_progress + 1)
-
-    for _ in range(self.repro.HELD_CHURN_FRAMES - self.repro.phase_frames):
-      self.step(0.0, True)
-    self.step(0.0, True)
-    self.assertEqual(self.repro.phase, self.repro.SETTLE)
+    _, _, accel, repro_control = self.update(self.repro.ENTRY_SPEED_TARGET)
+    self.assertEqual((self.raw_long_control_state(repro_control), accel),
+                     self.repro.RECORDED_POLICY_INPUTS[0])
 
   def test_driver_cancel_blocks_until_disengagement(self):
-    self.assertTrue(self.step(0.1, False)[3])
-    self.assertFalse(self.step(0.1, False, gas=True)[3])
-    self.assertFalse(self.step(0.1, False)[3])
-    self.assertFalse(self.step(0.1, False, enabled=False, long_active=False)[3])
-    self.assertTrue(self.step(0.1, False)[3])
+    _, original_control, _, repro_control = self.update(self.repro.ENTRY_SPEED_TARGET, gas=True)
+    self.assertIs(repro_control, original_control)
 
-  def test_reverse_blocks_until_disengagement(self):
-    reverse = self.repro.MOTION_REVERSING
+    _, original_control, _, repro_control = self.update(self.repro.ENTRY_SPEED_TARGET)
+    self.assertIs(repro_control, original_control)
 
-    self.assertFalse(self.step(0.1, False, motion_state=reverse)[3])
-    self.assertFalse(self.step(0.1, False)[3])
-    self.assertFalse(self.step(0.1, False, enabled=False, long_active=False)[3])
-    self.assertTrue(self.step(0.1, False)[3])
+    _, original_control, _, repro_control = self.update(
+      self.repro.ENTRY_SPEED_TARGET, enabled=False, long_active=False)
+    self.assertIs(repro_control, original_control)
 
-  def test_tsk_fault_blocks_until_disengagement(self):
-    self.assertFalse(self.step(0.1, False, acc_faulted=True)[3])
-    self.assertFalse(self.step(0.1, False)[3])
-    self.assertFalse(self.step(0.1, False, enabled=False, long_active=False)[3])
-    self.assertTrue(self.step(0.1, False)[3])
+    _, original_control, _, repro_control = self.update(self.repro.ENTRY_SPEED_TARGET)
+    self.assertIsNot(repro_control, original_control)
 
-  def test_gas_during_anfahren_disarms_through_ramp(self):
-    _, hold_type, _, armed = self.step(0.0, True)
-    self.assertTrue(armed)
-    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["HALTEN"])
+  def test_unsafe_vehicle_states_block_until_disengagement(self):
+    unsafe_states = (
+      dict(acc_faulted=True),
+      dict(parking_brake=True),
+      dict(speed=self.repro.ARM_SPEED + 0.01),
+      dict(motion_state=self.repro.MOTION_REVERSING),
+    )
+    for unsafe_state in unsafe_states:
+      with self.subTest(unsafe_state=unsafe_state):
+        self.repro = MebShouldStopChurnRepro()
+        arguments = dict(speed=self.repro.ENTRY_SPEED_TARGET)
+        arguments.update(unsafe_state)
+        _, original_control, _, repro_control = self.update(**arguments)
+        self.assertIs(repro_control, original_control)
 
-    _, hold_type, _, armed = self.step(0.0, True)
-    self.assertTrue(armed)
-    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["ANFAHREN"])
+        _, original_control, _, repro_control = self.update(self.repro.ENTRY_SPEED_TARGET)
+        self.assertIs(repro_control, original_control)
 
-    _, hold_type, _, armed = self.step(0.0, True, gas=True, long_active=False)
-    self.assertFalse(armed)
-    self.assertEqual(hold_type, self.long_state.acc_hold_type_vals["LOESEN_UEBER_RAMPE"])
-    self.assertNotEqual(hold_type, self.long_state.acc_hold_type_vals["KEINE_ANFORDERUNG"])
+        self.update(self.repro.ENTRY_SPEED_TARGET, enabled=False, long_active=False)
+        _, original_control, _, repro_control = self.update(self.repro.ENTRY_SPEED_TARGET)
+        self.assertIsNot(repro_control, original_control)
 
-  def test_launches_to_creep_before_any_held_churn(self):
-    halten = self.long_state.acc_hold_type_vals["HALTEN"]
-    anfahren = self.long_state.acc_hold_type_vals["ANFAHREN"]
 
-    accel, hold_type, _, armed = self.step(0.0, True)
-    self.assertTrue(armed)
-    self.assertEqual(accel, self.CCP.ACCEL_INACTIVE)
-    self.assertEqual(hold_type, halten)
-
-    held_launch = [self.step(0.0, True) for _ in range(19)]
-    self.assertTrue(all(row[0] == self.repro.LAUNCH_ACCEL and row[1] == anfahren for row in held_launch))
-    accel, _, _, armed = self.step(0.04, False)
-    self.assertTrue(armed)
-    self.assertEqual(self.repro.phase, self.repro.STABILIZE_CREEP)
-    self.assertGreater(accel, 0)
-
-    for speed in (0.07, 0.14, 0.20, 0.15, 0.11):
-      self.step(speed, False)
-      self.assertNotEqual(self.repro.phase, self.repro.CREEP_CHURN)
-
-    self.enter_creep_churn()
-
-  def test_delayed_plant_does_not_accelerate_to_one_mph(self):
-    speed = 0.0
-    held = True
-    motion_state = self.repro.MOTION_STOPPED
-    release_frames = 0
-    delayed_accel = deque([0.0] * 20)  # adversarial 400 ms actuator delay
-    maximum_speed_before_stop = 0.0
-
-    for _ in range(1000):
-      accel, hold_type, braking_to_stop, armed = self.step(speed, held, motion_state=motion_state)
-      self.assertTrue(armed)
-      if self.repro.phase in (self.repro.ESTABLISH_CREEP, self.repro.STABILIZE_CREEP, self.repro.CREEP_CHURN):
-        maximum_speed_before_stop = max(maximum_speed_before_stop, speed)
-      if self.repro.phase == self.repro.STOP_FOR_HOLD:
-        break
-
-      anfahren = self.long_state.acc_hold_type_vals["ANFAHREN"]
-      command_accel = 0.0 if accel == self.CCP.ACCEL_INACTIVE else accel
-      delayed_accel.append(command_accel)
-      effective_accel = delayed_accel.popleft()
-      if held:
-        speed = 0.0
-        asking_to_launch = hold_type == anfahren and accel >= 0.1
-        release_frames = release_frames + 1 if asking_to_launch else 0
-        if release_frames >= 5:
-          held = False
-          release_frames = 0
-      else:
-        speed = max(0.0, speed + effective_accel * 0.02)
-        held = speed < 0.005 and braking_to_stop
-      motion_state = self.repro.MOTION_STOPPED if held or speed == 0.0 else self.repro.MOTION_FORWARDS
-
-    self.assertEqual(self.repro.phase, self.repro.STOP_FOR_HOLD)
-    self.assertLess(maximum_speed_before_stop, 0.15)
-
-  def test_closed_loop_sustains_forward_creep_before_held_churn(self):
-    for initial_speed in (0.0, 0.2, 2.0, 9.5):
-      self.setUp()
-      speed = initial_speed
-      held = initial_speed == 0.0
-      motion_state = self.repro.MOTION_STOPPED if held else self.repro.MOTION_FORWARDS
-      release_frames = 0
-      consecutive_creep_frames = 0
-      maximum_consecutive_creep_frames = 0
-      phases = set()
-
-      for _ in range(5000):
-        accel, hold_type, braking_to_stop, armed = self.step(speed, held, motion_state=motion_state)
-        phases.add(self.repro.phase)
-        self.assertTrue(armed)
-
-        halten = self.long_state.acc_hold_type_vals["HALTEN"]
-        anfahren = self.long_state.acc_hold_type_vals["ANFAHREN"]
-        ramp = self.long_state.acc_hold_type_vals["LOESEN_UEBER_RAMPE"]
-        if accel < 0:
-          self.assertEqual(hold_type, halten)
-        if held:
-          self.assertIn(hold_type, (halten, anfahren, ramp))
-
-        if self.repro.phase == self.repro.CREEP_CHURN:
-          self.assertEqual(motion_state, self.repro.MOTION_FORWARDS)
-          self.assertFalse(held)
-          self.assertGreaterEqual(speed, self.repro.CREEP_SPEED_MIN)
-          self.assertLessEqual(speed, self.repro.CREEP_SPEED_MAX)
-          consecutive_creep_frames += 1
-          maximum_consecutive_creep_frames = max(maximum_consecutive_creep_frames, consecutive_creep_frames)
-        else:
-          consecutive_creep_frames = 0
-
-        if held:
-          speed = 0.0
-          asking_to_launch = hold_type == anfahren and accel >= 0.1
-          release_frames = release_frames + 1 if asking_to_launch else 0
-          if release_frames >= 5:
-            held = False
-            release_frames = 0
-        else:
-          effective_accel = 0.0 if accel == self.CCP.ACCEL_INACTIVE else accel
-          speed = max(0.0, speed + effective_accel * 0.02)
-          held = speed < 0.005 and braking_to_stop
-
-        motion_state = self.repro.MOTION_STOPPED if held or speed == 0.0 else self.repro.MOTION_FORWARDS
-
-      self.assertGreaterEqual(maximum_consecutive_creep_frames, self.repro.CREEP_CHURN_FRAMES)
-      self.assertTrue({self.repro.ESTABLISH_CREEP, self.repro.STABILIZE_CREEP, self.repro.CREEP_CHURN,
-                       self.repro.STOP_FOR_HOLD, self.repro.HELD_CHURN, self.repro.SETTLE}.issubset(phases))
+if __name__ == "__main__":
+  unittest.main()
