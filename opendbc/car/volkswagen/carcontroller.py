@@ -44,7 +44,6 @@ class CarController(CarControllerBase):
     if CP.flags & VolkswagenFlags.MEB:
       self.meb_long_state = mebcan.MebLongStateMachine(self.CP, self.CCP)
       self.meb_tsk_repro = meb_repro.MebShouldStopChurnRepro()  # REPRO ONLY, do not merge
-      self.meb_camera_fault_preconditioner = meb_repro.MebCameraFaultPreconditioner()  # REPRO ONLY, do not merge
 
     if CP.flags & VolkswagenFlags.PQ:
       self.CCS = pqcan
@@ -142,7 +141,6 @@ class CarController(CarControllerBase):
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
           accel, long_control = self.meb_tsk_repro.update(CS, CC, accel)
           accel, acc_status, acc_hold_type, braking_to_stop = self.meb_long_state.update(CS, long_control, accel)
-          acc_status = self.meb_camera_fault_preconditioner.update(self.frame, CC.enabled, acc_status)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_status, acc_hold_type, braking_to_stop,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available))
@@ -182,8 +180,7 @@ class CarController(CarControllerBase):
         lead_distance = 0
         if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:
           lead_distance = 8
-        acc_status = self.meb_camera_fault_preconditioner.update(self.frame, CC.enabled, self.meb_long_state.acc_status)
-        can_sends.append(mebcan.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_status, hud_control.setSpeed * CV.MS_TO_KPH,
+        can_sends.append(mebcan.create_acc_hud_control(self.packer_pt, self.CAN.pt, self.meb_long_state.acc_status, hud_control.setSpeed * CV.MS_TO_KPH,
                                                        hud_control.leadVisible, hud_control.leadDistanceBars, show_distance_bars,
                                                        lead_distance, fcw_alert))
 

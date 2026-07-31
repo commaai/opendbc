@@ -1,25 +1,8 @@
 """On-car experiment for reproducing the MEB near-standstill TSK permanent fault."""
 
-from opendbc.car import DT_CTRL, structs
+from opendbc.car import structs
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
-
-
-class MebCameraFaultPreconditioner:
-  """Advertise two temporary ACC faults before engagement, then stay inactive."""
-
-  ACC_FAULT_STATUS = 6
-  STARTUP_WAIT_FRAMES = round(2.0 / DT_CTRL)
-  FAULT_PULSE_FRAMES = round(2.0 / DT_CTRL)
-  BETWEEN_PULSE_FRAMES = round(2.0 / DT_CTRL)
-
-  def update(self, frame, enabled, acc_status):
-    first_pulse_start = self.STARTUP_WAIT_FRAMES
-    first_pulse_end = first_pulse_start + self.FAULT_PULSE_FRAMES
-    second_pulse_start = first_pulse_end + self.BETWEEN_PULSE_FRAMES
-    second_pulse_end = second_pulse_start + self.FAULT_PULSE_FRAMES
-    fault_pulse_active = first_pulse_start <= frame < first_pulse_end or second_pulse_start <= frame < second_pulse_end
-    return self.ACC_FAULT_STATUS if fault_pulse_active and not enabled else acc_status
 
 
 class _ReproCarControl:
@@ -54,6 +37,7 @@ class MebShouldStopChurnRepro:
   STABILIZE_CREEP = "stabilize_creep"
   CREEP_CHURN = "creep_churn"
   STOP_FOR_HOLD = "stop_for_hold"
+  RELEASE_FOR_HOLD = "release_for_hold"
   HELD_CHURN = "held_churn"
   REACQUIRE_HOLD = "reacquire_hold"
   SETTLE = "settle"
@@ -81,6 +65,8 @@ class MebShouldStopChurnRepro:
   ESTABLISH_ACCEL_MAX = 0.12
   CREEP_ACCEL_MAX = 0.12
   STOP_ACCEL = -0.35
+  HOLD_RELEASE_ACCEL = 0.11
+  HOLD_RELEASE_SPEED = 0.06
   LAUNCH_ACCEL = 0.12
   HELD_POKE_ACCEL = 0.12
 
@@ -88,6 +74,7 @@ class MebShouldStopChurnRepro:
   CREEP_STOP_FRAMES = 10    # 200 ms HALTEN
   CREEP_GO_FRAMES = 7       # 120 ms RAMP + one 20 ms NONE frame
   CREEP_CHURN_FRAMES = 63   # 1.26 s, matching b6 phase A
+  HOLD_RELEASE_FRAMES = 40  # 800 ms maximum released coast waiting for ESP standstill
   HELD_STOP_FRAMES = 5      # 100 ms HALTEN
   HELD_GO_FRAMES = 10       # 200 ms ANFAHREN
   HELD_CHURN_FRAMES = 108   # 2.16 s, matching b6 phase B
@@ -237,8 +224,24 @@ class MebShouldStopChurnRepro:
       if self._stopped_and_held(CS):
         self.phase = self.HELD_CHURN
         self.phase_frames = 0
+      elif CS.out.vEgo <= self.HOLD_RELEASE_SPEED:
+        self.phase = self.RELEASE_FOR_HOLD
+        self.phase_frames = 1
+        return self._going(CC, self.HOLD_RELEASE_ACCEL)
       else:
         return self._stopping(CC, self.STOP_ACCEL)
+
+    if self.phase == self.RELEASE_FOR_HOLD:
+      if self._stopped_and_held(CS):
+        self.phase = self.HELD_CHURN
+        self.phase_frames = 0
+      elif CS.out.vEgo > self.CREEP_SPEED_MAX or self.phase_frames >= self.HOLD_RELEASE_FRAMES:
+        self.phase = self.STOP_FOR_HOLD
+        self.phase_frames = 0
+        return self._stopping(CC, self.STOP_ACCEL)
+      else:
+        self.phase_frames += 1
+        return self._going(CC, self.HOLD_RELEASE_ACCEL)
 
     if self.phase == self.REACQUIRE_HOLD:
       if self._stopped_and_held(CS):
