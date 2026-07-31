@@ -126,6 +126,52 @@ class TestMebLongStateMachine(unittest.TestCase):
     self.assertFalse(self.state_machine.hold_release_active)
     self.assertEqual(self.state_machine.ramp_counter, 0)
 
+  def test_active_transition_matrix_below_five_kph(self):
+    cases = (
+      (self.none, LongCtrlState.pid, False, self.none),
+      (self.none, LongCtrlState.stopping, False, self.halten),
+      (self.none, LongCtrlState.pid, True, self.anfahren),
+      (self.halten, LongCtrlState.pid, False, self.ramp),
+      (self.halten, LongCtrlState.stopping, False, self.halten),
+      (self.halten, LongCtrlState.pid, True, self.anfahren),
+      (self.anfahren, LongCtrlState.pid, False, self.ramp),
+      (self.anfahren, LongCtrlState.stopping, False, self.halten),
+      (self.anfahren, LongCtrlState.pid, True, self.anfahren),
+    )
+
+    for previous_hold_type, long_control_state, held, expected_hold_type in cases:
+      with self.subTest(previous_hold_type=previous_hold_type, long_control_state=long_control_state, held=held):
+        self.state_machine = MebLongStateMachine(self.CP, self.CCP)
+        self.state_machine.prev_acc_hold_type = previous_hold_type
+        hold_type = self.update_hold_type(long_control_state, 1 * CV.KPH_TO_MS, held)
+        self.assertEqual(hold_type, expected_hold_type)
+
+  def test_halten_none_oscillation_never_emits_none(self):
+    speed = 1 * CV.KPH_TO_MS
+
+    for _ in range(100):
+      self.assertEqual(self.update_hold_type(LongCtrlState.stopping, speed), self.halten)
+      self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed), self.ramp)
+
+  def test_anfahren_does_not_interrupt_active_release(self):
+    speed = 1 * CV.KPH_TO_MS
+    self.start_launch_ramp(speed)
+
+    hold_type = self.update_hold_type(LongCtrlState.pid, speed, held=True)
+
+    self.assertEqual(hold_type, self.ramp)
+    self.assertTrue(self.state_machine.hold_release_active)
+
+  def test_disengagement_from_anfahren_uses_short_ramp(self):
+    speed = 1 * CV.KPH_TO_MS
+    self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed, held=True), self.anfahren)
+
+    hold_type = self.update_hold_type(LongCtrlState.pid, speed, enabled=False, long_active=False)
+
+    self.assertEqual(hold_type, self.ramp)
+    self.assertFalse(self.state_machine.hold_release_active)
+    self.assertEqual(self.state_machine.ramp_counter, self.state_machine.RAMP_FRAMES)
+
   def assert_short_release_tail(self, enabled, long_active, acc_faulted=False):
     speed = 1 * CV.KPH_TO_MS
     self.assertEqual(self.update_hold_type(LongCtrlState.stopping, speed), self.halten)
@@ -148,7 +194,7 @@ class TestMebLongStateMachine(unittest.TestCase):
   def test_gas_override_from_halten_keeps_original_short_ramp(self):
     self.assert_short_release_tail(enabled=True, long_active=False)
 
-  def test_gas_override_converts_active_latch_to_short_ramp(self):
+  def test_gas_override_converts_active_release_to_short_ramp(self):
     speed = 1 * CV.KPH_TO_MS
     self.start_hold_abort_ramp(speed)
 
@@ -159,7 +205,7 @@ class TestMebLongStateMachine(unittest.TestCase):
     self.assertFalse(self.state_machine.hold_release_active)
     self.assertEqual(self.state_machine.ramp_counter, self.state_machine.RAMP_FRAMES)
 
-  def test_acc_fault_converts_active_latch_to_short_ramp(self):
+  def test_acc_fault_converts_active_release_to_short_ramp(self):
     speed = 1 * CV.KPH_TO_MS
     self.start_hold_abort_ramp(speed)
 
