@@ -15,7 +15,7 @@ from types import SimpleNamespace as NS
 
 from opendbc.can import CANParser
 from opendbc.car.structs import CarParams
-from opendbc.car.volkswagen.mebcan import MebCreepChurnRepro, MebLongStateMachine
+from opendbc.car.volkswagen.mebcan import MebFaultReplay, MebLongStateMachine
 from opendbc.car.volkswagen.values import CarControllerParams, VolkswagenFlags
 
 HMS = {0: "none", 1: "HALTEN", 2: "PARKEN", 3: "stby", 4: "ANFAHREN", 5: "RAMP"}
@@ -30,10 +30,10 @@ def step(repro, long_state, v, held, brake=False, gas=False, enabled=True):
           esp_hold_confirmation=held)
   CC = NS(enabled=enabled, longActive=enabled and not gas, cruiseControl=NS(override=gas),
           actuators=NS(longControlState=0, accel=0.0))
-  accel, CC_repro = repro.update(CS, CC, 0.0)
-  armed = CC_repro is not CC  # the harness hands back the reader it was given when it disarms
-  accel, _, hold_type, braking_to_stop = long_state.update(CS, CC_repro, accel)
-  return accel, hold_type, braking_to_stop, armed
+  accel, status, hold_type, braking_to_stop = long_state.update(CS, CC, 0.0)
+  accel, hold_type, braking_to_stop = repro.update(CS, CC, accel, status, hold_type, braking_to_stop)
+  long_state.prev_acc_hold_type = hold_type
+  return accel, hold_type, braking_to_stop, repro.frame is not None
 
 
 def report(out):
@@ -52,7 +52,7 @@ def report(out):
 
 def replay(seg):
   from openpilot.tools.lib.logreader import LogReader
-  repro, long_state = MebCreepChurnRepro(CP, CCP), MebLongStateMachine(CP, CCP)
+  repro, long_state = MebFaultReplay(CP, CCP), MebLongStateMachine(CP, CCP)
   car = CANParser("vw_meb_2024_generated", [("ESC_50", 50)], 0)
   v, brake, gas, enabled, t0, frame, steps, out = 0.0, False, False, False, None, 0, 0, []
   for m in LogReader(seg):
@@ -86,7 +86,7 @@ def sim(v0=5.0, grade=0.0, seconds=30.0, release_frames=5, release_accel=0.5):
   0000007f/30 released within a frame of ANFAHREN + 1.51. Enough to show the creep and the churn,
   not a car model. It has no creep torque, so it needs more commanded accel to move than a real car.
   """
-  repro, long_state = MebCreepChurnRepro(CP, CCP), MebLongStateMachine(CP, CCP)
+  repro, long_state = MebFaultReplay(CP, CCP), MebLongStateMachine(CP, CCP)
   v, held, release_delay, out = v0, False, 0, []
   for i in range(int(seconds / DT)):
     accel, hold_type, braking_to_stop, _ = step(repro, long_state, v, held)

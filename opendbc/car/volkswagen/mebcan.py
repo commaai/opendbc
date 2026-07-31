@@ -1,5 +1,6 @@
 from opendbc.car import Bus, structs
 from opendbc.can import CANDefine
+from opendbc.car.volkswagen.meb_fault_windows import WINDOWS
 from opendbc.car.volkswagen.values import DBC
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -162,71 +163,68 @@ class MebLongStateMachine:
     return accel, acc_status, acc_hold_type, braking_to_stop
 
 
-class _ReproCarControl:
-  """REPRO ONLY. Stand-in for the immutable capnp CarControl reader with longControlState replaced."""
-  def __init__(self, CC, long_control_state):
-    self.enabled = CC.enabled
-    self.longActive = CC.longActive
-    self.cruiseControl = CC.cruiseControl
-    self.actuators = structs.CarControl.Actuators(longControlState=long_control_state)
+class MebFaultReplay:
+  """REPRO ONLY, do not merge. Replays the exact ACC_18 payload we sent in the seconds before a
+  real TSK permanent fault, instead of trying to synthesise something that looks like it.
 
+  Two stages. First it gets the car into the state the recording starts in, because the payload is
+  open loop and only means the same thing from the same starting point: b6 begins rolling at
+  2.5 m/s with the hold off and brakes itself to a stop over the window, b8 begins already stopped
+  and held. Engage at any speed under ARM_SPEED and the preamble closes the gap with a P
+  controller, through the real MebLongStateMachine, so nothing illegal goes out while it manoeuvres.
 
-class MebCreepChurnRepro:
-  """REPRO ONLY, do not merge. Reproduces the TSK permanent fault from 000000b6--48c9d2f02a/23
-  (t=35.26) and 000000b8--ab902978ef/9 (t=50.15).
-
-  In both routes the policy chattered longControlState pid/stopping at ~6.5 Hz WHILE THE CAR WAS
-  CREEPING. Not creeping then churning at a stop, and not churning against a car that never moves:
-  b6 held 0.06-0.12 m/s continuously through 11 blocks of HALTEN -> RAMP -> none, with the ESP hold
-  off the whole time, and only then did it settle and fault. The creep and the churn are one state.
-
-  So it is one state here too: a P controller onto the creep speed, with the pid/stopping chatter
-  running on top of it and never interrupted. Feeding that chatter into the REAL MebLongStateMachine
-  is what decides the HMS value, the RAMP insertion, the accel zeroing and braking_to_stop, so this
-  cannot emit a transition master could not, and b6's HALTEN -> RAMP -> none falls out on its own
-  (with the hold off "go" legalizes to RAMP then KEINE_ANFORDERUNG; with it on "go" is ANFAHREN).
-
-  The gains are picked so the loop settles inside b6's band rather than stopping the car: over one
-  300 ms cycle the go halves average KP * (CREEP_SPEED - v) and the stop halves HOLD_ACCEL, which
-  balance at 0.125 m/s. Coming down from the engage speed it therefore lands in the creep band
-  without ever stopping, which is how b6 got there: its churn caught the car on the way down.
-
-  If the car does stop, no amount of churning gets it going again. The ESP will not let go for a
-  200 ms request, which b6 proves the hard way: it poked the hold with ANFAHREN every 300 ms for
-  2.2 s at hld=1 and never moved, and 0000007f/30 released within a frame of a sustained
-  ANFAHREN + 1.51. So from a stop, drive off for real, and only start churning once it is rolling.
+  Then it plays the recording frame for frame at 50 Hz, and runs the whole sequence again. Every
+  ACC_18 field comes from the recording except ACC_Status_ACC, which stays live so that a real
+  camera or TSK fault still shows up in what we advertise. Since COUNTER and CHECKSUM are
+  regenerated and every other ACC_18 field is constant, the car sees the same bytes it saw before
+  it faulted. What this cannot replay is the car's half of it: the grade, the camera state, and the
+  TSK state the fault started from. So a fault here proves our TX is sufficient on its own, and no
+  fault narrows it to something car-side rather than clearing us.
 
   Brake or gas hands the car straight back to the policy, so the driver always wins.
   """
-  ARM_SPEED = 10.0     # m/s, engage anywhere under this and the harness brakes the car down itself
-  CHURN_SPEED = 2.0    # m/s, above this hold a steady stop request so the approach is a normal stop
-  CREEP_SPEED = 0.15   # m/s, creep target, which the churn pulls down to 0.125. b6 held 0.06-0.12
-  MOVING_SPEED = 0.05  # m/s, below this the ESP has the car and only a sustained request gets it out
-  LAUNCH_ACCEL = 1.5   # 0000007f/30 released the hold at 1.51
-  KP = 7.0             # 1.05 m/s^2 from a stop, and 0 at the creep speed
+  WINDOW = "b6"        # b6 rolls in at 2.5 m/s, b8 starts stopped and held
+  ARM_SPEED = 10.0     # m/s, engage under this and the preamble brakes the car down itself
+  START_TOL = 0.25     # m/s, how close to the recording's first speed before playback starts
+  KP = 2.0
   ACCEL_MIN = -1.5
-  ACCEL_MAX = 1.05
-  HOLD_ACCEL = -0.35   # what b6 sent in the HALTEN blocks it crept through, and it never stopped it
-  GO_FRAMES = 10       # 200 ms, b6 averaged 0.21 s in ANFAHREN
-  STOP_FRAMES = 5      # 100 ms, b6 averaged 0.10 s in HALTEN, so 6.7 transitions/s against b6's 6.5
+  ACCEL_MAX = 0.6
+  STOPPED_SPEED = 0.1  # m/s, at or under this the preamble asks for a hold so the ESP can grab
+  ABORT_SPEED = 4.0    # m/s, the recording never goes near this, so the car is not doing what it did
 
   def __init__(self, CP, CCP):
-    self.frames = 0
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    acc_hold_type_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Anforderung_HMS'].items()}
+    self.halten = acc_hold_type_vals['HALTEN']
+    self.window = WINDOWS[self.WINDOW]
+    self.frame = None  # None while the preamble is still working
 
-  def update(self, CS, CC, accel):
-    if not CC.enabled or CS.out.brakePressed or CS.out.gasPressed or CS.out.vEgo > self.ARM_SPEED:
-      self.frames = 0
-      return accel, CC
+  def update(self, CS, CC, accel, acc_status, acc_hold_type, braking_to_stop):
+    playing = self.frame is not None
+    if not CC.enabled or CS.out.brakePressed or CS.out.gasPressed or CS.out.vEgo > self.ARM_SPEED or \
+       (playing and CS.out.vEgo > self.ABORT_SPEED):
+      self.frame = None
+      return accel, acc_hold_type, braking_to_stop
 
-    self.frames += 1
-    if CS.out.vEgo < self.MOVING_SPEED:
-      return self.LAUNCH_ACCEL, _ReproCarControl(CC, LongCtrlState.pid)
+    if not playing:
+      at_speed = abs(CS.out.vEgo - self.window.v0) < self.START_TOL
+      if not at_speed or CS.esp_hold_confirmation != self.window.hold0:
+        accel = min(max((self.window.v0 - CS.out.vEgo) * self.KP, self.ACCEL_MIN), self.ACCEL_MAX)
+        if self.window.v0 < self.STOPPED_SPEED:
+          # the recording starts held, and only a hold request gets the ESP to grab. entering
+          # HALTEN is legal from any state, so this cannot produce a transition master could not
+          return accel, self.halten, not CS.esp_hold_confirmation
+        return accel, acc_hold_type, braking_to_stop
+      self.frame = 0
 
-    going = CS.out.vEgo < self.CHURN_SPEED and self.frames % (self.GO_FRAMES + self.STOP_FRAMES) < self.GO_FRAMES
-    accel = min(max((self.CREEP_SPEED - CS.out.vEgo) * self.KP, self.ACCEL_MIN), self.ACCEL_MAX)
-    if not going:
-      accel = min(accel, self.HOLD_ACCEL)
-    return accel, _ReproCarControl(CC, LongCtrlState.pid if going else LongCtrlState.stopping)
+    accel, _, hold_type, anhalten = self.window.rows[self.frame]
+    self.frame += 1
+    if self.frame >= len(self.window.rows):
+      # back to the preamble rather than wrapping. both recordings end in HALTEN and b6 starts in
+      # KEINE_ANFORDERUNG, so wrapping straight round would emit the HALTEN -> NONE that clamps the
+      # EPB into park. going through the preamble puts the state machine's legalizer back in the loop
+      self.frame = None
+    return accel, hold_type, bool(anhalten)
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
