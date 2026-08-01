@@ -71,6 +71,21 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
       self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
 
+  def test_speed_difference(self):
+    if type(self) is not TestChryslerSafety:
+      return
+
+    for left, right, valid in [
+        (0, 0, False),
+        (0, 10, True),
+        (10, 0, True),
+        (10, 10, True)
+    ]:
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self.packer.make_can_msg_safety("SPEED_1", 0, {"SPEED_LEFT": left, "SPEED_RIGHT": right}))
+      self.assertEqual(valid, self.safety.get_vehicle_moving())
+
 
 class TestChryslerRamDTSafety(TestChryslerSafety):
   TX_MSGS = [[0xB1, 2], [0xA6, 0], [0xFA, 0]]

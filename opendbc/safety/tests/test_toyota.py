@@ -81,6 +81,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
+                           (False, b"\x0F\x02\x3E\x00\x01\x00\x00\x00"),
                            (True, b"\x0F\x02\x3E\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
       self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
@@ -95,6 +96,11 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
             dat = [0]*6 + dat[-1:]
           msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
           self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
+
+    self.safety.set_controls_allowed(True)
+    self.assertFalse(self._tx(common.make_msg(0, 0x283, dat=b'\x00\x00\x00\x00\x01\x00\x00')))
+    self.safety.set_controls_allowed(True)
+    self.assertFalse(self._tx(common.make_msg(0, 0x283, dat=b'\x00\x00\x00\x00\x00\x01\x00')))
 
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
@@ -131,10 +137,18 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     msg = self._speed_msg(0, quality_flag=False)
     self.assertFalse(self._rx(msg))
 
+    # ignore steering during init
+    old = self.safety.get_angle_meas_max()
+    self._rx(self._angle_meas_msg(old + 10., True))
+    self.assertEqual(old, self.safety.get_angle_meas_max())
+
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 72.22_ is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 259 / 3.6, 1,
                                   self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+
+  def test_get_quality_flag_valid_default(self):
+    self.assertFalse(self.safety._test_get_quality_flag_valid(common.make_msg(0, 0, length=0)))
 
 
 class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):

@@ -21,15 +21,17 @@ else
   GCOV_EXEC="gcov"
 fi
 
+EXCLUDE='.*SAFETY_(MIN|MAX|CLAMP|ABS).*'
+
 # generate and open report
 if [ "$1" == "--report" ]; then
   mkdir -p coverage-out
-  gcovr -r ../ --gcov-executable "$GCOV_EXEC" --html-nested coverage-out/index.html
+  gcovr -r ../ --gcov-executable "$GCOV_EXEC" --html-nested coverage-out/index.html --exclude-branches-by-pattern "$EXCLUDE"
   sensible-browser coverage-out/index.html
 fi
 
 # test coverage
-GCOV="gcovr -r $DIR/../ --gcov-executable \"$GCOV_EXEC\" -d --fail-under-line=100 -e ^libsafety"
+GCOV="gcovr -r $DIR/../ --gcov-executable \"$GCOV_EXEC\" -d --fail-under-line=100 --fail-under-branch=100 --txt-metric=branch --exclude-branches-by-patter '$EXCLUDE' -e ^libsafety"
 if ! GCOV_OUTPUT="$(eval $GCOV)"; then
   echo -e "FAILED:\n$GCOV_OUTPUT"
   exit 1

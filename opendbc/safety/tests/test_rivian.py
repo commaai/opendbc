@@ -109,6 +109,12 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
         self.assertFalse(self._rx(msg))
         self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_compute_checksum_default(self):
+    self.assertEqual(0, self.safety._test_compute_checksum(self._user_brake_msg(False)))
+
+  def test_get_quality_flag_valid_default(self):
+    self.assertEqual(False, self.safety._test_get_quality_flag_valid(self._user_brake_msg(False)))
+
 
 class TestRivianStockSafety(TestRivianSafetyBase):
 
@@ -150,8 +156,8 @@ class TestRivianIgnition(unittest.TestCase):
     self.safety.init_tests()
     self.packer = CANPackerSafety("rivian_primary_actuator")
 
-  def _msg(self, counter, mode):
-    return self.packer.make_can_msg_safety("VDM_OutputSignals", 0,
+  def _msg(self, counter, mode, bus = 0):
+    return self.packer.make_can_msg_safety("VDM_OutputSignals", bus,
                                            {"VDM_OutputSigs_Counter": counter,
                                             "VDM_EpasPowerMode": mode})
 
@@ -172,6 +178,26 @@ class TestRivianIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(3, 0))
     self.assertFalse(self.safety.get_ignition_can())
 
+  def test_ignition_ignore_nonzero_bus(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 1, 1))
+    self.safety.ignition_can_hook(self._msg(1, 1, 1))
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 1, 0))
+    self.safety.ignition_can_hook(self._msg(1, 1, 0))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 0, 1))
+    self.safety.ignition_can_hook(self._msg(3, 0, 1))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 0, 0))
+    self.safety.ignition_can_hook(self._msg(3, 0, 0))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_ignore_non_8_length(self):
+    msg = common.make_msg(0, 0x152, length=7, dat=b"\x02" + b"\x00" * 6)
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(msg)
+    self.assertFalse(self.safety.get_ignition_can())
 
 if __name__ == "__main__":
   unittest.main()

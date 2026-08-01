@@ -138,6 +138,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
     addr, bus = self.DISABLED_ECU_UDS_MSG
     for should_tx, msg in ((True, b"\x02\x3E\x80\x00\x00\x00\x00\x00"),
+                           (False, b"\x02\x3E\x80\x00\x00\x00\x00\x01"),
                            (False, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(addr, bus, msg)
       self.assertEqual(should_tx and ecu_disable, self._tx(tester_present))

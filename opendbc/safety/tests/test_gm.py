@@ -70,6 +70,11 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_gas_active(self):
+    self.safety.set_controls_allowed(False)
+    msg = self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, {"GasRegenCmd": 1, "GasRegenCmdActive": True})
+    self.assertFalse(self._tx(msg))
+
 
 class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   STANDSTILL_THRESHOLD = 10 * 0.0311
@@ -128,9 +133,23 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"LKASteeringCmd": torque, "LKASteeringCmdActive": steer_req}
     return self.packer.make_can_msg_safety("ASCMLKASteeringCmd", 0, values)
 
-  def _button_msg(self, buttons):
+  def _button_msg(self, buttons, bus=None):
+    if bus is None:
+      bus = self.BUTTONS_BUS
     values = {"ACCButtons": buttons}
-    return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
+    return self.packer.make_can_msg_safety("ASCMSteeringButton", bus, values)
+
+  def test_individual_wheel_speed(self):
+    for left, right, valid in [
+        (0, 0, False),
+        (0, 10, True),
+        (10, 0, True),
+        (10, 10, True)
+    ]:
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, {"RLWheelSpd": left, "RRWheelSpd": right}))
+      self.assertEqual(valid, self.safety.get_vehicle_moving())
 
 
 class TestGmEVSafetyBase(TestGmSafetyBase):
@@ -200,6 +219,11 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
       self._rx(self._pcm_status_msg(enabled))
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
 
+  def test_button_skip_pcm(self):
+    old = self.safety.get_controls_allowed()
+    self._rx(self._button_msg(not old, bus=0))
+    self.assertEqual(old, self.safety.get_controls_allowed())
+
 
 class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
   pass
@@ -227,7 +251,6 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
 class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVSafetyBase):
   pass
 
-
 class TestGmIgnition(unittest.TestCase):
   TX_MSGS: list = []
 
@@ -236,8 +259,8 @@ class TestGmIgnition(unittest.TestCase):
     self.safety.init_tests()
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
 
-  def _msg(self, mode):
-    return self.packer.make_can_msg_safety("BCMGeneralPlatformStatus", 0, {"SystemPowerMode": mode})
+  def _msg(self, mode, bus=0):
+    return self.packer.make_can_msg_safety("BCMGeneralPlatformStatus", bus, {"SystemPowerMode": mode})
 
   # SystemPowerMode 2=Run, 3=Crank Request
   def test_ignition_on(self):
@@ -248,6 +271,23 @@ class TestGmIgnition(unittest.TestCase):
     self.safety.ignition_can_hook(self._msg(2))
     self.assertTrue(self.safety.get_ignition_can())
     self.safety.ignition_can_hook(self._msg(0))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_ignore_nonzero_bus(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 1))
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 0))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 1))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 0))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_ignore_non_8_length(self):
+    msg = common.make_msg(0, 0x1F1, length=7, dat=b"\x02" + b"\x00" * 6)
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(msg)
     self.assertFalse(self.safety.get_ignition_can())
 
 

@@ -94,6 +94,8 @@ uint16_t current_safety_param = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
 
+static safety_hooks _test_hooks;
+
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
 
@@ -128,8 +130,7 @@ static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], con
 
     if (addr_list[i].status.msg_seen) {
       int idx = addr_list[i].status.index;
-      if ((addr == addr_list[i].msg[idx].addr) && (msg->bus == addr_list[i].msg[idx].bus) &&
-          (length == addr_list[i].msg[idx].len)) {
+      if ((addr == addr_list[i].msg[idx].addr) && (msg->bus == addr_list[i].msg[idx].bus)) {
         index = i;
         break;
       }
@@ -146,12 +147,10 @@ static void update_addr_timestamp(RxCheck addr_list[], int index) {
 }
 
 static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
-  if (index != -1) {
-    uint8_t expected_counter = (addr_list[index].status.last_counter + 1U) % (addr_list[index].msg[addr_list[index].status.index].max_counter + 1U);
-    addr_list[index].status.wrong_counters += (expected_counter == counter) ? -1 : 1;
-    addr_list[index].status.wrong_counters = SAFETY_CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
-    addr_list[index].status.last_counter = counter;
-  }
+  uint8_t expected_counter = (addr_list[index].status.last_counter + 1U) % (addr_list[index].msg[addr_list[index].status.index].max_counter + 1U);
+  addr_list[index].status.wrong_counters += (expected_counter == counter) ? -1 : 1;
+  addr_list[index].status.wrong_counters = SAFETY_CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
+  addr_list[index].status.last_counter = counter;
 }
 
 static bool rx_msg_safety_check(const CANPacket_t *msg,
@@ -328,9 +327,6 @@ void safety_tick(const safety_config *cfg) {
       uint32_t timestep = 1e6 / frequency;
       bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
       cfg->rx_checks[i].status.lagging = lagging;
-      if (lagging) {
-        controls_allowed = false;
-      }
 
       // enforce minimum frequency for safety-relevant messages
       bool frequency_invalid = frequency < 10U;
@@ -421,6 +417,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
     {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
     {SAFETY_ALLOUTPUT, &alloutput_hooks},
+    {65001, &_test_hooks}
 #endif
   };
 

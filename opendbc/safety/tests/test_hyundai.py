@@ -90,9 +90,9 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("TCS13", 0, values, fix_checksum=checksum)
 
-  def _speed_msg(self, speed):
+  def _speed_msg(self, speed, wheel=None):
     # safety doesn't scale, so undo the scaling
-    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
+    values = {"WHL_SPD_%s" % s: (speed * 0.03125 if wheel == s or wheel is None else 0) for s in ["FL", "FR", "RL", "RR"]}
     values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
     values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
     self.__class__.cnt_speed += 1
@@ -110,6 +110,27 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
+
+  def test_get_counter_default(self):
+    self.assertEqual(0, self.safety._test_get_counter(common.make_msg(0, 0, length=0)))
+
+  def test_get_checksum_default(self):
+    self.assertEqual(0, self.safety._test_get_checksum(common.make_msg(0, 0, length=0)))
+
+  def test_individual_wheel_speed(self):
+    self._rx(self._speed_msg(50, "FL"))
+    self.assertTrue(self.safety.get_vehicle_moving())
+    self._rx(self._speed_msg(50, "RR"))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+
+class TestHyundaiSafetyNonLong(TestHyundaiSafety):
+  def test_cruise_check_falling_edge_enable(self):
+    self.safety.set_controls_allowed(False)
+    self._rx(self._button_msg(1))
+    self._rx(self._pcm_status_msg(True))
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
 
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
@@ -165,6 +186,12 @@ class TestHyundaiLegacySafety(TestHyundaiSafety):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, 0)
     self.safety.init_tests()
+
+  def test_ignore_ev_gas_hybrid_gas_msg(self):
+    self._rx(self._user_gas_msg(10))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+    self.safety._test_rx_hook(TestHyundaiLegacySafetyEV._user_gas_msg(self, 0))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
 
 
 class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
@@ -277,6 +304,11 @@ class TestHyundaiSafetyFCEVLong(TestHyundaiLongitudinalSafety, TestHyundaiSafety
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS | HyundaiSafetyFlags.LONG)
     self.safety.init_tests()
+
+  def test_long_ignore_buttons(self):
+    self.safety.set_controls_allowed(False)
+    self.safety.set_cruise_engaged_prev(False)
+    self.assertTrue(self._tx(self._button_msg(0)))
 
 
 if __name__ == "__main__":

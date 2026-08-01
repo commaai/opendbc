@@ -72,8 +72,10 @@ bool get_gas_pressed_prev(void);
 void set_gas_pressed_prev(bool);
 bool get_brake_pressed_prev(void);
 bool get_regen_braking_prev(void);
+void set_steering_disengage_prev(bool);
 bool get_steering_disengage_prev(void);
 bool get_acc_main_on(void);
+void set_acc_main_on(bool on);
 float get_vehicle_speed_min(void);
 float get_vehicle_speed_max(void);
 int get_current_safety_mode(void);
@@ -104,6 +106,7 @@ bool get_vehicle_moving(void);
 void set_timer(uint32_t t);
 
 void safety_tick_current_safety_config();
+void safety_tick(void *);
 bool safety_config_valid();
 
 void init_tests(void);
@@ -112,7 +115,9 @@ void set_honda_fwd_brake(bool c);
 bool get_honda_fwd_brake(void);
 void set_honda_alt_brake_msg(bool c);
 void set_honda_bosch_long(bool c);
+bool get_honda_bosch_long(void);
 int get_honda_hw(void);
+void set_honda_hw(int h);
 
 void mutation_set_active_mutant(int id);
 int mutation_get_active_mutant(void);
@@ -120,6 +125,20 @@ int mutation_get_active_mutant(void);
 void ignition_can_hook(const CANPacket_t *msg);
 bool get_ignition_can(void);
 void set_ignition_can(bool c);
+
+uint8_t _test_get_counter(const CANPacket_t *msg);
+uint32_t _test_get_checksum(const CANPacket_t *msg);
+uint32_t _test_compute_checksum(const CANPacket_t *msg);
+bool _test_get_quality_flag_valid(const CANPacket_t *msg);
+void _test_rx_hook(const CANPacket_t *msg);
+bool _test_tx_hook(const CANPacket_t *msg);
+void _test_setup_safety_tick_rx_check(bool frequency_invalid, bool msg_invalid);
+void _test_setup_safety_config_valid_checks(int inverted);
+void _test_nullify_compute_checksum(void);
+void _test_nullify_init(void);
+void _test_setup_test_get_counter(void);
+int _test_get_test_wrong_counters(void);
+int _test_get_rx_checks_len(void);
 """)
 
 class LibSafety:

@@ -107,6 +107,19 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
+  def test_vehicle_speed_all_wheels_accounted_for(self):
+    speed = self.safety.get_vehicle_speed_max()
+    for wheel in ["FL", "FR", "RL", "RR"]:
+      # Modified from _speed_msg
+      values = {s: (4 * speed) + 10.0 if s == wheel else 0.0 for s in ("FL", "FR", "RL", "RR")}
+      msg = self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
+
+      self._rx(msg)
+      next_speed = self.safety.get_vehicle_speed_max()
+      self.assertTrue(next_speed > speed)
+
+      speed = next_speed
+
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
@@ -231,6 +244,10 @@ class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSub
     for sid in range(0xFF):
       msg = b'\x03' + sid.to_bytes(1) + b'\x00' * 6
       self.assertFalse(self._tx(self._es_uds_msg(msg)))
+
+    # Disallow second 32-bit int beinging non-zero
+    self.assertFalse(self._tx(self._es_uds_msg(b"\x03\x22\x11\x30\x01\x00\x00\x00")))
+    self.assertFalse(self._tx(self._es_uds_msg(b"\x02\x3E\x80\x00\x01\x00\x00\x00")))
 
 
 if __name__ == "__main__":

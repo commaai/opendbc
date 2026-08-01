@@ -76,6 +76,16 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     msg[0].data[6] = 0xAB
     self.assertTrue(self._rx(msg))
 
+  def test_get_counter_default(self):
+    self.assertEqual(0, self.safety._test_get_counter(common.make_msg(0, 0, length=0)))
+
+  def test_compute_checksum_default(self):
+    self.assertEqual(0, self.safety._test_compute_checksum(common.make_msg(0, 0, length=0)))
+
+  # I don't really like this one
+  def test_tx_hook_default(self):
+    self.assertTrue(self.safety._test_tx_hook(common.make_msg(0, 0, length=0)))
+
 
 class TestPsaStockSafety(TestPsaSafetyBase):
 

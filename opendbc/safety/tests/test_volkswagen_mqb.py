@@ -58,12 +58,12 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self.packer.make_can_msg_safety("Motor_20", 0, values)
 
   # ACC engagement status
-  def _tsk_status_msg(self, enable, main_switch=True):
+  def _tsk_status_msg(self, enable, main_switch=True, _test_val=None):
     if main_switch:
       tsk_status = 3 if enable else 2
     else:
       tsk_status = 0
-    values = {"TSK_Status": tsk_status}
+    values = {"TSK_Status": _test_val if _test_val is not None else tsk_status}
     return self.packer.make_can_msg_safety("TSK_06", 0, values)
 
   def _pcm_status_msg(self, enable):
@@ -126,6 +126,21 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
+  def test_tsk06_cruise_engaged(self):
+    self.safety.set_controls_allowed(True)
+    self._rx(self._tsk_status_msg(False, _test_val=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+    for i in range(3, 6):
+      self.safety.set_controls_allowed(True)
+      self._rx(self._tsk_status_msg(False, _test_val=i))
+      self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_default_checksum(self):
+    # I don't like this, but I don't really see a better way
+    # that simply running an invalid message through and seeing
+    # what value remains. Wish it returned like 0 or something...
+    self.assertEqual(189, self.safety._test_compute_checksum(common.make_msg(0, 0, length=0)))
+
 
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2]]
@@ -145,6 +160,10 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
     # do not block resume if we are engaged already
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._gra_acc_01_msg(resume=1)))
+
+  # I feel like this should just have the code replaced with a switch
+  def test_gra_acc_non_long_rx(self):
+    self.assertTrue(self._rx(self._gra_acc_01_msg(bus=0)))
 
 
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
@@ -181,6 +200,14 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
       self._rx(self._gra_acc_01_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
+
+    self.safety.set_controls_allowed(0)
+    self._rx(self._tsk_status_msg(False, main_switch=False))
+    self._rx(self._gra_acc_01_msg(_set=1, resume=1, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._tsk_status_msg(False, main_switch=True))
+    self._rx(self._gra_acc_01_msg(_set=1, resume=1, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed())
 
   def test_cancel_button(self):
     # Disable on rising edge of cancel button

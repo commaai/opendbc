@@ -333,6 +333,50 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
     self.assertTrue(self._tx(self._accel_msg(self.ACCEL_OVERRIDE)))
     self.assertFalse(self._tx(self._accel_msg(MAX_ACCEL)))
 
+  def test_double_falling_edge_nothing(self):
+    self.safety.set_controls_allowed(0)
+    self._rx(self._tsk_status_msg(False, main_switch=False))
+    self._rx(self._button_msg(_set=1, resume=1, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._tsk_status_msg(False, main_switch=True))
+    self._rx(self._button_msg(_set=1, resume=1, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_vehicle_speed_all_wheels_accounted_for(self):
+    prev = self.safety.get_vehicle_speed_max()
+    speed = 10
+    for wheel in ["VL", "VR", "HL", "HR"]:
+      # Modified from _speed_msg
+      values = {f"{s}_Radgeschw": speed if s == wheel else 0.0 for s in ("VL", "VR", "HL", "HR")}
+      msg = self.packer.make_can_msg_safety("ESC_51", 0, values)
+
+      self._rx(msg)
+      next_speed = self.safety.get_vehicle_speed_max()
+      self.assertTrue(next_speed > prev)
+
+      prev = next_speed
+      speed += 10
+
+  def test_tsk_cruise_engaged(self):
+    # Adapted from _tsk_status_msg
+    def tsk_status_msg(self, val):
+      values = {"TSK_Status": val}
+      return self.packer.make_can_msg_safety("Motor_51", 0, values)
+
+    self.safety.set_controls_allowed(True)
+    self._rx(tsk_status_msg(self, 0))
+    self.assertFalse(self.safety.get_controls_allowed())
+    for i in range(2, 5 + 1):
+      self.safety.set_controls_allowed(True)
+      self._rx(tsk_status_msg(self, i))
+      self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_default_checksum(self):
+    # I don't like this, but I don't really see a better way
+    # that simply running an invalid message through and seeing
+    # what value remains. Wish it returned like 0 or something...
+    self.assertEqual(189, self.safety._test_compute_checksum(common.make_msg(0, 0, length=0)))
+
 
 class TestVolkswagenMebGen2LongSafety(TestVolkswagenMebLongSafety):
   def setUp(self):
@@ -352,8 +396,8 @@ class TestVolkswagenMebIgnition(unittest.TestCase):
     self.safety.init_tests()
     self.packer = CANPackerSafety("vw_meb_generated")
 
-  def _msg(self, counter, ign):
-    return self.packer.make_can_msg_safety("Klemmen_Status_01", 0,
+  def _msg(self, counter, ign, bus = 0):
+    return self.packer.make_can_msg_safety("Klemmen_Status_01", bus,
                                            {"Klemmen_Status_01_BZ": counter,
                                             "ZAS_Kl_15": ign})
 
@@ -371,6 +415,27 @@ class TestVolkswagenMebIgnition(unittest.TestCase):
     self.assertTrue(self.safety.get_ignition_can())
     self.safety.ignition_can_hook(self._msg(2, 0))
     self.safety.ignition_can_hook(self._msg(3, 0))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_ignore_nonzero_bus(self):
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 1, 1))
+    self.safety.ignition_can_hook(self._msg(1, 1, 1))
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0, 1, 0))
+    self.safety.ignition_can_hook(self._msg(1, 1, 0))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 0, 1))
+    self.safety.ignition_can_hook(self._msg(3, 0, 1))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 0, 0))
+    self.safety.ignition_can_hook(self._msg(3, 0, 0))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_ignore_non_4_length(self):
+    msg = common.make_msg(0, 0x3C0, length=3, dat=b"\x02" + b"\x00" * 2)
+    self.assertFalse(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(msg)
     self.assertFalse(self.safety.get_ignition_can())
 
 
