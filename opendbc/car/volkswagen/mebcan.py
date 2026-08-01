@@ -92,7 +92,6 @@ class MebLongStateMachine:
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
     self.disengage_ramp_counter = 0  # always ramp when disengaging
-    self.hold_release_active = False  # after starting or policy wants to abort stop request, ramp to 5 kph
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -122,8 +121,6 @@ class MebLongStateMachine:
     long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
     if not long_active:
-      self.hold_release_active = False
-
       # Stock goes to RAMP for as long as TSK_Status is 5 usually, 100ms seems fine to mimic that behavior.
       # Stock stays active for gas press, but we go inactive
       if self.disengage_ramp_counter > 0:
@@ -133,22 +130,22 @@ class MebLongStateMachine:
         acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     else:
+      was_engaged = self.disengage_ramp_counter == self.RAMP_FRAMES
       self.disengage_ramp_counter = self.RAMP_FRAMES  # prep ramp if we disengage
 
-      # After aborting a stop or finishing starting, we need to send RAMP until we hit 5 kph or go long inactive
-      if stopping or starting:
-        self.hold_release_active = False
-        acc_hold_type = self.acc_hold_type_vals['HALTEN'] if stopping else self.acc_hold_type_vals['ANFAHREN']
+      if stopping:
+        acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
+      elif starting:
+        acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
       else:
-        aborting_stop = self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN']
-        finished_starting = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
+        # After aborting a stop or finishing starting, we need to send RAMP until we hit 5 kph or go long inactive
+        releasing = was_engaged and self.prev_acc_hold_type in (self.acc_hold_type_vals['HALTEN'],
+                                                                self.acc_hold_type_vals['ANFAHREN'],
+                                                                self.acc_hold_type_vals['LOESEN_UEBER_RAMPE'])
 
-        releasing = finished_starting or aborting_stop or self.hold_release_active
         if releasing and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
-          self.hold_release_active = True
           acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
         else:
-          self.hold_release_active = False
           acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']
 
     return acc_hold_type
