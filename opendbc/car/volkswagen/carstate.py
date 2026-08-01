@@ -311,16 +311,15 @@ class CarState(CarStateBase):
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
 
     if self.CP.enableBsm:
-      if self.CP.flags & VolkswagenFlags.MEB_GEN2:
-        ret.leftBlindspot = (bool(pt_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Driver"]) or
-                             bool(pt_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Driver"]))
-        ret.rightBlindspot = (bool(pt_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Passenger"]) or
-                              bool(pt_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Passenger"]))
-      else:
-        ret.leftBlindspot = (bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Left"]) or
-                             bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Left"]))
-        ret.rightBlindspot = (bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Right"]) or
-                              bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Right"]))
+      bsm_cp = pt_cp if self.CP.flags & VolkswagenFlags.MEB_GEN2 else ext_cp
+      driver_blindspot = (bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Driver"]) or
+                          bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Driver"]))
+      passenger_blindspot = (bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Passenger"]) or
+                             bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Passenger"]))
+      right_hand_drive = (ext_cp.vl["MEB_Distance_01"]["Steering_Wheel_Side"] ==
+                          self.CCP.steering_wheel_side_values["RIGHT_HAND_DRIVE"])
+      ret.leftBlindspot = passenger_blindspot if right_hand_drive else driver_blindspot
+      ret.rightBlindspot = driver_blindspot if right_hand_drive else passenger_blindspot
 
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
