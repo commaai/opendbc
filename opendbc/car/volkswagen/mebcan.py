@@ -114,6 +114,8 @@ class MebLongStateMachine:
 
   def _get_hold_type(self, CS, CC) -> int:
     # warning: car is reacting to hold mechanic even with long control off
+    # HALTEN -> KEINE_ANFORDERUNG causes the car to fault into park, so both branches below put a ramp in
+    # between: disengaging always ramps, and while engaged a release ramps until 5 kph
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
     # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
@@ -134,11 +136,12 @@ class MebLongStateMachine:
       self.disengage_ramp_counter = self.RAMP_FRAMES  # prep ramp if we disengage
 
       if stopping:
-        acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
+        acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped, allowed at any time
       elif starting:
         acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
       else:
-        # After aborting a stop or finishing starting, we need to send RAMP until we hit 5 kph or go long inactive
+        # After aborting a stop or finishing starting, we need to send RAMP until we hit 5 kph or go long inactive,
+        # only if we didn't just re-engage
         releasing = was_engaged and self.prev_acc_hold_type in (self.acc_hold_type_vals['HALTEN'],
                                                                 self.acc_hold_type_vals['ANFAHREN'],
                                                                 self.acc_hold_type_vals['LOESEN_UEBER_RAMPE'])
@@ -146,7 +149,7 @@ class MebLongStateMachine:
         if releasing and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
           acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
         else:
-          acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']
+          acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     return acc_hold_type
 
