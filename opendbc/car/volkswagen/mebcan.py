@@ -123,6 +123,7 @@ class MebLongStateMachine:
 
     if not long_active:
       self.hold_release_active = False
+
       # Stock goes to RAMP for as long as TSK_Status is 5 usually, 100ms seems fine to mimic that behavior.
       # Stock stays active for gas press, but we go inactive
       if self.disengage_ramp_counter > 0:
@@ -132,7 +133,9 @@ class MebLongStateMachine:
         acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     else:
-      self.disengage_ramp_counter = self.RAMP_FRAMES  # prep if we disengage
+      self.disengage_ramp_counter = self.RAMP_FRAMES  # prep ramp if we disengage
+
+      # After aborting a stop or finishing starting, we need to send RAMP until we hit 5 kph or go long inactive
       if stopping or starting:
         self.hold_release_active = False
         acc_hold_type = self.acc_hold_type_vals['HALTEN'] if stopping else self.acc_hold_type_vals['ANFAHREN']
