@@ -114,7 +114,7 @@ class TestMebLongStateMachine(unittest.TestCase):
 
     self.assertEqual(hold_type, self.none)
     self.assertFalse(self.state_machine.hold_release_active)
-    self.assertEqual(self.state_machine.ramp_counter, 0)
+    self.assertEqual(self.state_machine.disengage_ramp_counter, 0)
 
   def test_anfahren_release_at_five_kph_needs_no_ramp(self):
     speed = 5 * CV.KPH_TO_MS
@@ -124,7 +124,7 @@ class TestMebLongStateMachine(unittest.TestCase):
 
     self.assertEqual(hold_type, self.none)
     self.assertFalse(self.state_machine.hold_release_active)
-    self.assertEqual(self.state_machine.ramp_counter, 0)
+    self.assertEqual(self.state_machine.disengage_ramp_counter, 0)
 
   def test_active_transition_matrix_below_five_kph(self):
     cases = (
@@ -153,14 +153,14 @@ class TestMebLongStateMachine(unittest.TestCase):
       self.assertEqual(self.update_hold_type(LongCtrlState.stopping, speed), self.halten)
       self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed), self.ramp)
 
-  def test_anfahren_does_not_interrupt_active_release(self):
+  def test_anfahren_interrupts_active_release(self):
     speed = 1 * CV.KPH_TO_MS
     self.start_launch_ramp(speed)
 
     hold_type = self.update_hold_type(LongCtrlState.pid, speed, held=True)
 
-    self.assertEqual(hold_type, self.ramp)
-    self.assertTrue(self.state_machine.hold_release_active)
+    self.assertEqual(hold_type, self.anfahren)
+    self.assertFalse(self.state_machine.hold_release_active)
 
   def test_disengagement_from_anfahren_uses_short_ramp(self):
     speed = 1 * CV.KPH_TO_MS
@@ -170,7 +170,7 @@ class TestMebLongStateMachine(unittest.TestCase):
 
     self.assertEqual(hold_type, self.ramp)
     self.assertFalse(self.state_machine.hold_release_active)
-    self.assertEqual(self.state_machine.ramp_counter, self.state_machine.RAMP_FRAMES)
+    self.assertEqual(self.state_machine.disengage_ramp_counter, self.state_machine.RAMP_FRAMES - 1)
 
   def assert_short_release_tail(self, enabled, long_active, acc_faulted=False):
     speed = 1 * CV.KPH_TO_MS
@@ -179,7 +179,7 @@ class TestMebLongStateMachine(unittest.TestCase):
                                           enabled=enabled, long_active=long_active,
                                           acc_faulted=acc_faulted), self.ramp)
 
-    for _ in range(self.state_machine.RAMP_FRAMES):
+    for _ in range(self.state_machine.RAMP_FRAMES - 1):
       self.assertEqual(self.update_hold_type(LongCtrlState.pid, speed,
                                             enabled=enabled, long_active=long_active,
                                             acc_faulted=acc_faulted), self.ramp)
@@ -194,26 +194,26 @@ class TestMebLongStateMachine(unittest.TestCase):
   def test_gas_override_from_halten_keeps_original_short_ramp(self):
     self.assert_short_release_tail(enabled=True, long_active=False)
 
-  def test_gas_override_converts_active_release_to_short_ramp(self):
+  def test_gas_override_ends_active_release(self):
     speed = 1 * CV.KPH_TO_MS
     self.start_hold_abort_ramp(speed)
 
     hold_type = self.update_hold_type(LongCtrlState.pid, speed,
                                       enabled=True, long_active=False)
 
-    self.assertEqual(hold_type, self.ramp)
+    self.assertEqual(hold_type, self.none)
     self.assertFalse(self.state_machine.hold_release_active)
-    self.assertEqual(self.state_machine.ramp_counter, self.state_machine.RAMP_FRAMES)
+    self.assertEqual(self.state_machine.disengage_ramp_counter, 0)
 
-  def test_acc_fault_converts_active_release_to_short_ramp(self):
+  def test_acc_fault_ends_active_release(self):
     speed = 1 * CV.KPH_TO_MS
     self.start_hold_abort_ramp(speed)
 
     hold_type = self.update_hold_type(LongCtrlState.pid, speed, acc_faulted=True)
 
-    self.assertEqual(hold_type, self.ramp)
+    self.assertEqual(hold_type, self.none)
     self.assertFalse(self.state_machine.hold_release_active)
-    self.assertEqual(self.state_machine.ramp_counter, self.state_machine.RAMP_FRAMES)
+    self.assertEqual(self.state_machine.disengage_ramp_counter, 0)
 
 
 if __name__ == "__main__":

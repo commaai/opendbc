@@ -91,8 +91,8 @@ class MebLongStateMachine:
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
-    self.disengage_ramp_counter = 0  # ramp when disengaging if holding or starting
-    self.finishing_starting = False  # or policy wants to abort stop request
+    self.disengage_ramp_counter = 0  # always ramp when disengaging
+    self.hold_release_active = False  # after starting or policy wants to abort stop request, ramp to 5 kph
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -103,6 +103,7 @@ class MebLongStateMachine:
 
   def _get_acc_status(self, CS, CC) -> int:
     # stateless
+    # NOTE: stock TSK and camera goes to 5 on disengage independently which we don't model, but hasn't been shown to fault without it
     if CS.out.accFaulted:
       return self.acc_status_vals['REVERSIBLER_FEHLER_IM_ACC_SYSTEM']
     elif CC.enabled:
@@ -115,15 +116,15 @@ class MebLongStateMachine:
   def _get_hold_type(self, CS, CC) -> int:
     # warning: car is reacting to hold mechanic even with long control off
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
+    # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
-    long_active = not CS.out.accFaulted and CC.longActive
+    long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
     if not long_active:
-      self.finishing_starting = False
-      if self.prev_acc_hold_type in (self.acc_hold_type_vals['HALTEN'], self.acc_hold_type_vals['ANFAHREN']):
-        self.disengage_ramp_counter = self.RAMP_FRAMES
-
+      self.hold_release_active = False
+      # Stock goes to RAMP for as long as TSK_Status is 5 usually, 100ms seems fine to mimic that behavior.
+      # Stock stays active for gas press, but we go inactive
       if self.disengage_ramp_counter > 0:
         acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
         self.disengage_ramp_counter -= 1
@@ -131,20 +132,20 @@ class MebLongStateMachine:
         acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     else:
-      self.disengage_ramp_counter = 0
+      self.disengage_ramp_counter = self.RAMP_FRAMES  # prep if we disengage
       if stopping or starting:
-        self.finishing_starting = False
+        self.hold_release_active = False
         acc_hold_type = self.acc_hold_type_vals['HALTEN'] if stopping else self.acc_hold_type_vals['ANFAHREN']
       else:
         aborting_stop = self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN']
         finished_starting = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
 
-        releasing = finished_starting or aborting_stop or self.finishing_starting
+        releasing = finished_starting or aborting_stop or self.hold_release_active
         if releasing and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
-          self.finishing_starting = True
+          self.hold_release_active = True
           acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
         else:
-          self.finishing_starting = False
+          self.hold_release_active = False
           acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']
 
     return acc_hold_type
