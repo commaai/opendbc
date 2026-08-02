@@ -3,7 +3,7 @@ from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.tesla.carcontroller import CarController
 from opendbc.car.tesla.carstate import CarState
 from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CANBUS, CAR, DBC, FSD_14_FW, Ecu
-from opendbc.car.tesla.radar_interface import RadarInterface, RADAR_START_ADDR
+from opendbc.car.tesla.radar_interface import BROWNPANDA_RADAR_CARS, RadarInterface, RADAR_START_ADDR
 
 
 class CarInterface(CarInterfaceBase):
@@ -32,7 +32,16 @@ class CarInterface(CarInterfaceBase):
     # - Tesla Model Y vehicles built approximately mid-2020 through early-2021
     # - Vehicles equipped with the Continental ARS4-B radar (used on HW2 / HW2.5 / early HW3)
     # - Radar CAN lines must be tapped and connected to CAN bus 1 (normally not used for tesla vehicles)
-    ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[candidate]
+    #
+    # BrownPanda-gatewayed cars have no bus-1 tap and instead advertise the
+    # same Continental ARS4-B layout on logical party bus 0 (see
+    # opendbc/car/tesla/radar_interface.py + docs/BROWNPANDA_RADAR.md).
+    # Either source being present is sufficient.
+    native_radar_present = RADAR_START_ADDR in fingerprint[1] and Bus.radar in DBC[candidate]
+    party_fingerprint = fingerprint.get(CANBUS.party, {})
+    brownpanda_radar_present = party_fingerprint.get(0x401) == 8 and party_fingerprint.get(0x45F) == 8
+    brownpanda_radar_available = candidate in BROWNPANDA_RADAR_CARS and brownpanda_radar_present
+    ret.radarUnavailable = not (native_radar_present or brownpanda_radar_available)
 
     ret.alphaLongitudinalAvailable = True
     if alpha_long:

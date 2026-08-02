@@ -36,6 +36,14 @@
 
 ---
 
+> **exo-electronics fork:** `master` carries the v0.10-compatible BrownPanda
+> Tesla radar adapter used by NGP10. It preserves the official Continental
+> signal layout but consumes BrownPanda's optional converted stream on Tesla party
+> bus 0. See [the BrownPanda radar contract](docs/BROWNPANDA_RADAR.md). Projects
+> must pin an exact commit; the branch name alone is not a reproducible version.
+
+---
+
 Most cars since 2016 have electronically-actuatable steering, gas, and brakes thanks to [LKAS](https://en.wikipedia.org/wiki/Lane_departure_warning_system#Lane_keeping_and_next_technologies) and [ACC](https://en.wikipedia.org/wiki/Adaptive_cruise_control).
 The goal of this project is to support controlling the steering, gas, and brakes on every single one of those cars.
 

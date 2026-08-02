@@ -1,9 +1,12 @@
 import os
 import numpy as np
 import time
-import tomllib
+try:
+  import tomllib
+except ImportError:  # Python 3.10
+  import tomli as tomllib
 from abc import abstractmethod, ABC
-from enum import StrEnum
+from opendbc.car import StrEnum
 from typing import Any
 from collections.abc import Callable
 from functools import cache

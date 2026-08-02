@@ -1,7 +1,25 @@
 # functions common among cars
 import numpy as np
 from dataclasses import dataclass, field
-from enum import ReprEnum, StrEnum, EnumType, auto
+from enum import Enum, EnumMeta, auto
+
+# Keep the shared OpenDBC fork usable by EOP10/NGP10 on Ubuntu 22.04.
+# Python 3.11 added these enum helpers, while ROS 2 Humble and the EOP10
+# base image remain on Python 3.10.  The fallbacks intentionally implement
+# only the small API surface used by this module and by car values modules.
+try:
+  from enum import ReprEnum, StrEnum, EnumType
+  _HAS_MODERN_ENUM = True
+except ImportError:  # pragma: no cover - exercised on Python 3.10
+  _HAS_MODERN_ENUM = False
+  EnumType = EnumMeta
+
+  class StrEnum(str, Enum):
+    def __str__(self):
+      return str(self.value)
+
+  class ReprEnum(Enum):
+    pass
 from dataclasses import replace
 
 from opendbc.car import structs, uds
@@ -212,11 +230,18 @@ class ExtraPlatformConfig(PlatformConfigBase):
 
 class PlatformsType(EnumType):
   def __new__(metacls, cls, bases, classdict, *, boundary=None, _simple=False, **kwds):
-    for key in classdict._member_names.keys():
+    member_names = classdict._member_names
+    # EnumDict changed from a dict to an insertion-ordered list in newer
+    # Python versions.  Support both forms so one OpenDBC fork serves 3.10+
+    # without changing platform declaration order.
+    keys = member_names if isinstance(member_names, list) else member_names.keys()
+    for key in keys:
       cfg: PlatformConfig = classdict[key]
       cfg.platform_str = key
       cfg.freeze()
-    return super().__new__(metacls, cls, bases, classdict, boundary=boundary, _simple=_simple, **kwds)
+    if _HAS_MODERN_ENUM:
+      return super().__new__(metacls, cls, bases, classdict, boundary=boundary, _simple=_simple, **kwds)
+    return super().__new__(metacls, cls, bases, classdict)
 
 
 class Platforms(str, ReprEnum, metaclass=PlatformsType):
