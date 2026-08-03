@@ -266,7 +266,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
 
     // Signal: ACC_18.ACC_Status_ACC
     // Claiming ACC is regulating is what makes the drivetrain act on our requests, so it may only be
-    // claimed while controls are allowed. Standby, off and the fault state stay available for the HUD.
+    // sent while controls are allowed. Standby, off and the fault state stay available for the HUD.
     uint8_t acc_status = (msg->data[7] >> 4) & 0x07U;
     bool acc_status_active = (acc_status == VOLKSWAGEN_MEB_ACC_AKTIV_REGELT) ||
                              (acc_status == VOLKSWAGEN_MEB_ACC_OVERRIDE);
