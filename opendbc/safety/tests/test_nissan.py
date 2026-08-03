@@ -38,7 +38,7 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
   def _angle_meas_msg(self, angle: float):
     values = {"STEER_ANGLE": angle}
-    return self.packer.make_can_msg_safety("STEER_ANGLE_SENSOR", self.EPS_BUS, values)
+    return self.packer.make_can_msg_safety("STEER_TORQUE_SENSOR", 0, values)
 
   def _pcm_status_msg(self, enable):
     values = {"CRUISE_ENABLED": enable}
