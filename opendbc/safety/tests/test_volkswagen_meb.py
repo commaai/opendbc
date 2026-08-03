@@ -187,19 +187,20 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     # checksum and counter checks
     for name in ("LH_EPS_03", "Motor_14", "GRA_ACC_01", "QFK_01", "ESP_21", "Motor_51", "ESC_51"):
       with self.subTest(msg=name):
-        # send multiple times to verify counter checks
-        for counter in range(10):
+        # a run of expected counters is needed before the message reads as valid
+        next_counter = common.MAX_WRONG_COUNTERS + 1
+        for counter in range(next_counter):
           valid = self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": counter}))
         self.assertTrue(valid)
 
         # mess with the checksum to make it fail, it's the first byte of every MEB message
-        msg = self.packer.make_can_msg_safety(name, 0, {"COUNTER": 10})
+        msg = self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})
         msg[0].data[0] ^= 0xFF
         self.assertFalse(self._rx(msg))
 
         # a stuck counter fails as well, its checksum is still correct
         for _ in range(common.MAX_WRONG_COUNTERS):
-          valid = self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": 10}))
+          valid = self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter}))
         self.assertFalse(valid)
 
   def test_main_switch_off_disables_controls(self):
