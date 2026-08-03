@@ -13,6 +13,16 @@
 #define MSG_KLR_01           0x25DU   // TX, for capacitive steering wheel
 #define MSG_TA_01            0x26BU   // TX by OP, Travel Assist status
 
+// ACC_18.ACC_Anforderung_HMS, the states openpilot is allowed to request
+#define VOLKSWAGEN_MEB_HMS_KEINE_ANFORDERUNG   0U
+#define VOLKSWAGEN_MEB_HMS_HALTEN              1U
+#define VOLKSWAGEN_MEB_HMS_ANFAHREN            4U
+#define VOLKSWAGEN_MEB_HMS_LOESEN_UEBER_RAMPE  5U
+
+// ACC_18.ACC_Status_ACC, the states that tell the drivetrain ACC is regulating
+#define VOLKSWAGEN_MEB_ACC_AKTIV_REGELT        3U
+#define VOLKSWAGEN_MEB_ACC_OVERRIDE            4U
+
 static bool volkswagen_meb_alt_crc = false;
 
 #define VOLKSWAGEN_MEB_COMMON_RX_CHECKS \
@@ -238,6 +248,29 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     // MEB inactive accel is 3.01, but we also need to send 0.0 for gas override
     bool accel_override = controls_allowed && (desired_accel == 0);
     if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
+      tx = false;
+    }
+
+    // Signal: ACC_18.ACC_Anforderung_HMS
+    // The drivetrain acts on these with ACC disengaged: PARKEN engages the EPB, from rolling as well as
+    // at a stop, and HALTEN holds the car at a standstill. Only the release states are unconditional,
+    // as the disengage ramp sends LOESEN_UEBER_RAMPE after controls are no longer allowed.
+    uint8_t hold_type = (msg->data[9] >> 5) & 0x07U;
+    bool hold_type_allowed = (hold_type == VOLKSWAGEN_MEB_HMS_KEINE_ANFORDERUNG) ||
+                             (hold_type == VOLKSWAGEN_MEB_HMS_LOESEN_UEBER_RAMPE) ||
+                             (controls_allowed && ((hold_type == VOLKSWAGEN_MEB_HMS_HALTEN) ||
+                                                   (hold_type == VOLKSWAGEN_MEB_HMS_ANFAHREN)));
+    if (!hold_type_allowed) {
+      tx = false;
+    }
+
+    // Signal: ACC_18.ACC_Status_ACC
+    // Claiming ACC is regulating is what makes the drivetrain act on our requests, so it may only be
+    // sent while controls are allowed. Standby, off and the fault state stay available for the HUD.
+    uint8_t acc_status = (msg->data[7] >> 4) & 0x07U;
+    bool acc_status_active = (acc_status == VOLKSWAGEN_MEB_ACC_AKTIV_REGELT) ||
+                             (acc_status == VOLKSWAGEN_MEB_ACC_OVERRIDE);
+    if (acc_status_active && !controls_allowed) {
       tx = false;
     }
   }
