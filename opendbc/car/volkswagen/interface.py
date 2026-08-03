@@ -115,22 +115,18 @@ class CarInterface(CarInterfaceBase):
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
-    if ret.flags & VolkswagenFlags.MEB and ret.networkLocation == NetworkLocation.gateway:
+    if ret.flags & VolkswagenFlags.MEB:
       ret.openpilotLongitudinalControl = True
-      ret.longitudinalActuatorDelay = 0.3
-      # ret.longitudinalTuning.kiBP = [0., 30.]
-      # ret.longitudinalTuning.kiV = [0.4, 0.]
-      safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
-      if ret.transmissionType == TransmissionType.manual:
-        ret.minEnableSpeed = 4.5
+      ret.longitudinalActuatorDelay = 0.5
+      ret.longitudinalTuning.kiBP = [0., 30.]
+      ret.longitudinalTuning.kiV = [0.4, 0.]
     else:
       ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
-
-    if alpha_long:
-      ret.openpilotLongitudinalControl = True
-      safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
-      if ret.transmissionType == TransmissionType.manual:
-        ret.minEnableSpeed = 4.5
+      if alpha_long:
+        ret.openpilotLongitudinalControl = True
+        safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
+        if ret.transmissionType == TransmissionType.manual:
+          ret.minEnableSpeed = 4.5
 
     # Per-vehicle overrides
 
@@ -138,16 +134,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.07
 
     ret.pcmCruise = not ret.openpilotLongitudinalControl
-    if ret.flags & VolkswagenFlags.MEB:
-      # ret.startingState = True
-      # ret.startAccel = 0.8
-      ret.vEgoStopping = 0.1
-      ret.vEgoStarting = 0.1
-      ret.stoppingDecelRate = 0.3
-    else:
-      ret.stopAccel = -0.55
-      ret.vEgoStarting = 0.1
-      ret.vEgoStopping = 0.5
+    ret.stopAccel = -0.55
     ret.autoResumeSng = ret.minEnableSpeed == -1
 
     CAN = CanBus(fingerprint=fingerprint)
