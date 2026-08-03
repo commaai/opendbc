@@ -14,14 +14,14 @@
 #define MSG_TA_01            0x26BU   // TX by OP, Travel Assist status
 
 // ACC_18.ACC_Anforderung_HMS, the states openpilot is allowed to request
-#define VOLKSWAGEN_MEB_HMS_KEINE_ANFORDERUNG  0U
-#define VOLKSWAGEN_MEB_HMS_HALTEN             1U
-#define VOLKSWAGEN_MEB_HMS_ANFAHREN           4U
-#define VOLKSWAGEN_MEB_HMS_LOESEN_UEBER_RAMPE 5U
+#define VOLKSWAGEN_MEB_HMS_KEINE_ANFORDERUNG   0U
+#define VOLKSWAGEN_MEB_HMS_HALTEN              1U
+#define VOLKSWAGEN_MEB_HMS_ANFAHREN            4U
+#define VOLKSWAGEN_MEB_HMS_LOESEN_UEBER_RAMPE  5U
 
 // ACC_18.ACC_Status_ACC, the states that tell the drivetrain ACC is regulating
-#define VOLKSWAGEN_MEB_ACC_AKTIV_REGELT       3U
-#define VOLKSWAGEN_MEB_ACC_OVERRIDE           4U
+#define VOLKSWAGEN_MEB_ACC_AKTIV_REGELT        3U
+#define VOLKSWAGEN_MEB_ACC_OVERRIDE            4U
 
 static bool volkswagen_meb_alt_crc = false;
 
