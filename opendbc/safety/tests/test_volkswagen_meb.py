@@ -368,21 +368,19 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
     # LOESEN_UEBER_RAMPE stay unconditional, the disengage ramp sends the latter once disallowed
     for controls_allowed in (True, False):
       for hold_type in range(8):
-        with self.subTest(controls_allowed=controls_allowed, hold_type=hold_type):
-          self.safety.set_controls_allowed(controls_allowed)
-          send = (hold_type in (HMS_KEINE_ANFORDERUNG, HMS_LOESEN_UEBER_RAMPE) or
-                  (controls_allowed and hold_type in (HMS_HALTEN, HMS_ANFAHREN)))
-          self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, hold_type=hold_type)))
+        self.safety.set_controls_allowed(controls_allowed)
+        send = (hold_type in (HMS_KEINE_ANFORDERUNG, HMS_LOESEN_UEBER_RAMPE) or
+                (controls_allowed and hold_type in (HMS_HALTEN, HMS_ANFAHREN)))
+        self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, hold_type=hold_type)))
 
   def test_acc_status_safety_check(self):
     # claiming ACC_AKTIV_REGELT or ACC_OVERRIDE is what makes the drivetrain act on our requests.
     # standby, off and the fault state stay available for the HUD with controls disallowed
     for controls_allowed in (True, False):
       for acc_status in range(8):
-        with self.subTest(controls_allowed=controls_allowed, acc_status=acc_status):
-          self.safety.set_controls_allowed(controls_allowed)
-          send = controls_allowed or acc_status not in (ACC_AKTIV_REGELT, ACC_OVERRIDE)
-          self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, acc_status=acc_status)))
+        self.safety.set_controls_allowed(controls_allowed)
+        send = controls_allowed or acc_status not in (ACC_AKTIV_REGELT, ACC_OVERRIDE)
+        self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, acc_status=acc_status)))
 
 
 class TestVolkswagenMebGen2LongSafety(TestVolkswagenMebLongSafety):
