@@ -131,8 +131,9 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     }
     return self.packer.make_can_msg_safety("HCA_03", 0, values)
 
-  def _accel_msg(self, accel):
-    values = {"ACC_Sollbeschleunigung_02": accel}
+  def _accel_msg(self, accel, hold_type=0, acc_status=0):
+    values = {"ACC_Sollbeschleunigung_02": accel, "ACC_Anforderung_HMS": hold_type,
+              "ACC_Status_ACC": acc_status}
     return self.packer.make_can_msg_safety("ACC_18", 0, values)
 
   def _tsk_status_msg(self, enable, main_switch=True):
@@ -351,6 +352,28 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
     self.safety.set_gas_pressed_prev(True)
     self.assertTrue(self._tx(self._accel_msg(self.ACCEL_OVERRIDE)))
     self.assertFalse(self._tx(self._accel_msg(MAX_ACCEL)))
+
+  def test_hold_type_safety_check(self):
+    # PARKEN engages the EPB and HALTEN holds the car, both with ACC disengaged. The release states
+    # stay unconditional, the disengage ramp sends LOESEN_UEBER_RAMPE after controls are disallowed
+    for controls_allowed in (True, False):
+      for hold_type in range(8):
+        with self.subTest(controls_allowed=controls_allowed, hold_type=hold_type):
+          self.safety.set_controls_allowed(controls_allowed)
+          accel = self.ACCEL_OVERRIDE if controls_allowed else self.INACTIVE_ACCEL
+          send = hold_type in (0, 5) or (controls_allowed and hold_type in (1, 4))
+          self.assertEqual(send, self._tx(self._accel_msg(accel, hold_type=hold_type)))
+
+  def test_acc_status_safety_check(self):
+    # claiming ACC is regulating is what makes the drivetrain act on our requests. standby, off and
+    # the fault state stay available for the HUD with controls disallowed
+    for controls_allowed in (True, False):
+      for acc_status in range(8):
+        with self.subTest(controls_allowed=controls_allowed, acc_status=acc_status):
+          self.safety.set_controls_allowed(controls_allowed)
+          accel = self.ACCEL_OVERRIDE if controls_allowed else self.INACTIVE_ACCEL
+          send = controls_allowed or acc_status not in (3, 4)
+          self.assertEqual(send, self._tx(self._accel_msg(accel, acc_status=acc_status)))
 
 
 class TestVolkswagenMebGen2LongSafety(TestVolkswagenMebLongSafety):
