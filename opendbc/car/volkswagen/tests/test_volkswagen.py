@@ -5,7 +5,8 @@ import unittest
 from opendbc.car import DT_CTRL
 from opendbc.car.structs import CarParams
 from opendbc.car.volkswagen.carcontroller import HCAMitigation
-from opendbc.car.volkswagen.values import CAR, CarControllerParams as CCP, FW_QUERY_CONFIG, WMI
+from opendbc.car.volkswagen.carstate import CarState
+from opendbc.car.volkswagen.values import CAR, CarControllerParams as CCP, FW_QUERY_CONFIG, WMI, VolkswagenFlags
 from opendbc.car.volkswagen.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
@@ -28,6 +29,45 @@ class TestVolkswagenHCAMitigation(unittest.TestCase):
         should_nudge = actuator_value != 0 and frame == self.STUCK_TORQUE_FRAMES
         expected_torque = actuator_value - (1, -1)[actuator_value < 0] if should_nudge else actuator_value
         assert hca_mitigation.update(actuator_value, actuator_value) == expected_torque, f"{frame=}"
+
+
+class TestVolkswagenMEBSteeringWheelSide(unittest.TestCase):
+  def setUp(self):
+    CP = CarParams()
+    CP.carFingerprint = CAR.VOLKSWAGEN_ID4_MK1
+    CP.flags = int(VolkswagenFlags.MEB)
+    self.CS = CarState(CP)
+    self.left_hand_drive = self.CS.CCP.steering_wheel_side_values["LEFT_HAND_DRIVE"]
+    self.right_hand_drive = self.CS.CCP.steering_wheel_side_values["RIGHT_HAND_DRIVE"]
+
+  def test_debounce(self):
+    self.CS.update_steering_wheel_side(self.right_hand_drive)
+    assert self.CS.steering_wheel_side is None
+
+    self.CS.update_steering_wheel_side(self.right_hand_drive)
+    assert self.CS.steering_wheel_side == self.right_hand_drive
+
+  def test_invalid_resets_debounce(self):
+    for steering_wheel_side in (self.left_hand_drive, 0, self.left_hand_drive, 3, self.left_hand_drive):
+      self.CS.update_steering_wheel_side(steering_wheel_side)
+      assert self.CS.steering_wheel_side is None
+
+    self.CS.update_steering_wheel_side(self.left_hand_drive)
+    assert self.CS.steering_wheel_side == self.left_hand_drive
+
+  def test_alternating_valid_sides_do_not_latch(self):
+    for steering_wheel_side in (self.left_hand_drive, self.right_hand_drive,
+                                self.left_hand_drive, self.right_hand_drive):
+      self.CS.update_steering_wheel_side(steering_wheel_side)
+      assert self.CS.steering_wheel_side is None
+
+  def test_latched_side_does_not_change(self):
+    for steering_wheel_side in (self.right_hand_drive, self.right_hand_drive, 0, 3,
+                                self.left_hand_drive, self.left_hand_drive):
+      self.CS.update_steering_wheel_side(steering_wheel_side)
+
+    assert self.CS.steering_wheel_side == self.right_hand_drive
+
 
 class TestVolkswagenPlatformConfigs(unittest.TestCase):
   def test_spare_part_fw_pattern(self):

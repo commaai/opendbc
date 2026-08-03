@@ -9,6 +9,8 @@ ButtonType = structs.CarState.ButtonEvent.Type
 
 
 class CarState(CarStateBase):
+  STEERING_WHEEL_SIDE_DEBOUNCE_FRAMES = 2
+
   def __init__(self, CP):
     super().__init__(CP)
     self.frame = 0
@@ -22,6 +24,26 @@ class CarState(CarStateBase):
     self.acc_type = 0
     self.travel_assist_available = False
     self.curvature_meas = 0.
+    self.steering_wheel_side = None
+    self.steering_wheel_side_candidate = None
+    self.steering_wheel_side_candidate_frames = 0
+
+  def update_steering_wheel_side(self, steering_wheel_side):
+    if self.steering_wheel_side is not None:
+      return
+
+    valid_sides = (self.CCP.steering_wheel_side_values["LEFT_HAND_DRIVE"],
+                   self.CCP.steering_wheel_side_values["RIGHT_HAND_DRIVE"])
+    if steering_wheel_side not in valid_sides:
+      self.steering_wheel_side_candidate = None
+      self.steering_wheel_side_candidate_frames = 0
+    elif steering_wheel_side != self.steering_wheel_side_candidate:
+      self.steering_wheel_side_candidate = steering_wheel_side
+      self.steering_wheel_side_candidate_frames = 1
+    else:
+      self.steering_wheel_side_candidate_frames += 1
+      if self.steering_wheel_side_candidate_frames >= self.STEERING_WHEEL_SIDE_DEBOUNCE_FRAMES:
+        self.steering_wheel_side = steering_wheel_side
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -316,10 +338,12 @@ class CarState(CarStateBase):
                           bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Driver"]))
       passenger_blindspot = (bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Passenger"]) or
                              bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Passenger"]))
-      right_hand_drive = (ext_cp.vl["MEB_Distance_01"]["Steering_Wheel_Side"] ==
-                          self.CCP.steering_wheel_side_values["RIGHT_HAND_DRIVE"])
-      ret.leftBlindspot = passenger_blindspot if right_hand_drive else driver_blindspot
-      ret.rightBlindspot = driver_blindspot if right_hand_drive else passenger_blindspot
+      for steering_wheel_side in ext_cp.vl_all["MEB_Distance_01"]["Steering_Wheel_Side"]:
+        self.update_steering_wheel_side(steering_wheel_side)
+      if self.steering_wheel_side is not None:
+        right_hand_drive = self.steering_wheel_side == self.CCP.steering_wheel_side_values["RIGHT_HAND_DRIVE"]
+        ret.leftBlindspot = passenger_blindspot if right_hand_drive else driver_blindspot
+        ret.rightBlindspot = driver_blindspot if right_hand_drive else passenger_blindspot
 
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}

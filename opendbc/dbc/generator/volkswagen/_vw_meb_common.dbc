@@ -1944,6 +1944,7 @@ BO_ 316495015 VZE_04: 32 XXX
  SG_ VZE_Verkehrszeichen_4 : 75|8@1+ (1,0) [0|31] "" XXX
  SG_ VZE_Verkehrszeichen_6 : 92|7@1+ (1,0) [0|7] "" XXX
  SG_ VZE_Baustelle : 110|1@0+ (1,0) [0|1] "" XXX
+ SG_ Traffic_Side : 206|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 316495049 SAL_01: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
@@ -3307,6 +3308,7 @@ VAL_ 1714 Kombi_02_alt 0 "aktuell" 1 "veraltet";
 VAL_ 1714 Uhrzeit_01_alt 0 "aktuell" 1 "veraltet";
 VAL_ 441800114 Temperature_Status_Charge 0 "init" 1 "temp under optimal" 2 "temp optimal" 3 "temp over optimal" 7 "fault";
 VAL_ 316495015 VZE_Anzeigemodus 0 "EU_RDW" 1 "USA" 2 "Canada" 3 "China";
+VAL_ 316495015 Traffic_Side 0 "Unavailable" 1 "Left_Hand_Traffic" 2 "Right_Hand_Traffic" 3 "Invalid";
 VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_3 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
 VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_2 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
 VAL_ 316495015 VZE_Verkehrszeichen_1 0 "kein_Verkehrszeichen" 520 "Unbegrenzt";
