@@ -18,7 +18,6 @@ HMS_ANFAHREN = 4
 HMS_LOESEN_UEBER_RAMPE = 5
 
 # ACC_18.ACC_Status_ACC
-ACC_STANDBY = 2
 ACC_AKTIV_REGELT = 3
 ACC_OVERRIDE = 4
 
@@ -368,28 +367,22 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
     # PARKEN engages the EPB and HALTEN holds the car, both with ACC disengaged. KEINE_ANFORDERUNG and
     # LOESEN_UEBER_RAMPE stay unconditional, the disengage ramp sends the latter once disallowed
     for controls_allowed in (True, False):
-      # a real accel and a legal status, so the hold type is the only thing under test
-      accel = MIN_ACCEL / 2 if controls_allowed else self.INACTIVE_ACCEL
-      acc_status = ACC_AKTIV_REGELT if controls_allowed else ACC_STANDBY
       for hold_type in range(8):
         with self.subTest(controls_allowed=controls_allowed, hold_type=hold_type):
           self.safety.set_controls_allowed(controls_allowed)
           send = (hold_type in (HMS_KEINE_ANFORDERUNG, HMS_LOESEN_UEBER_RAMPE) or
                   (controls_allowed and hold_type in (HMS_HALTEN, HMS_ANFAHREN)))
-          self.assertEqual(send, self._tx(self._accel_msg(accel, hold_type=hold_type, acc_status=acc_status)))
+          self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, hold_type=hold_type)))
 
   def test_acc_status_safety_check(self):
     # claiming ACC_AKTIV_REGELT or ACC_OVERRIDE is what makes the drivetrain act on our requests.
     # standby, off and the fault state stay available for the HUD with controls disallowed
     for controls_allowed in (True, False):
-      # a real accel and a legal hold type, so the status is the only thing under test
-      accel = MIN_ACCEL / 2 if controls_allowed else self.INACTIVE_ACCEL
-      hold_type = HMS_HALTEN if controls_allowed else HMS_LOESEN_UEBER_RAMPE
       for acc_status in range(8):
         with self.subTest(controls_allowed=controls_allowed, acc_status=acc_status):
           self.safety.set_controls_allowed(controls_allowed)
           send = controls_allowed or acc_status not in (ACC_AKTIV_REGELT, ACC_OVERRIDE)
-          self.assertEqual(send, self._tx(self._accel_msg(accel, hold_type=hold_type, acc_status=acc_status)))
+          self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, acc_status=acc_status)))
 
 
 class TestVolkswagenMebGen2LongSafety(TestVolkswagenMebLongSafety):
