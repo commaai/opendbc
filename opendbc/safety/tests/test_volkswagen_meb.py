@@ -183,6 +183,25 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     for t in (0, 100, -100, 250, -250):
       self._rx(self._torque_driver_msg(t))
 
+  def test_rx_hook(self):
+    # checksum and counter checks
+    for name in ("LH_EPS_03", "Motor_14", "GRA_ACC_01", "QFK_01", "ESP_21", "Motor_51", "ESC_51"):
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        next_counter = common.MAX_WRONG_COUNTERS + 1
+        for counter in range(next_counter):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": counter})))
+
+        # mess with the checksum to make it fail, it's the first byte of every MEB message
+        msg = self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})
+        msg[0].data[0] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})))
+
   def test_main_switch_off_disables_controls(self):
     self.safety.set_controls_allowed(True)
     self._rx(self._tsk_status_msg(False, main_switch=False))
