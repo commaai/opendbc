@@ -86,6 +86,7 @@ ACC_HUD_DISABLED = 0
 
 class MebLongStateMachine:
   HOLD_RELEASE_SPEED = 5 * CV.KPH_TO_MS
+  PROBE_ACCEL = -0.5  # PROBE: negative brakes, positive drives off. flip with care
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
@@ -181,6 +182,13 @@ class MebLongStateMachine:
     elif self.probe_ramp_counter > 0:
       acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
       self.probe_ramp_counter -= 1
+
+    # PROBE 2: can openpilot engage ACC on its own, without the driver ever pressing set or resume?
+    # While disengaged and belted in, claim ACC is active and request a small accel. Overrides the
+    # inactive accel set above, so it needs the matching volkswagen_meb.h patch to get past panda.
+    if not CC.enabled and not CS.out.seatbeltUnlatched:
+      acc_status = self.acc_status_vals['ACC_AKTIV_REGELT']
+      accel = self.PROBE_ACCEL
 
     self.prev_acc_hold_type = acc_hold_type
     self.acc_status = acc_status

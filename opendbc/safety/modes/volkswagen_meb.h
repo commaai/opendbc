@@ -237,7 +237,12 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
     // MEB inactive accel is 3.01, but we also need to send 0.0 for gas override
     bool accel_override = controls_allowed && (desired_accel == 0);
-    if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
+    // PROBE: normally only inactive_accel passes while controls aren't allowed. Drop that gate so the
+    // seatbelt probe can request an accel while disengaged, but keep the min/max bound.
+    bool accel_in_range = !safety_max_limit_check(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS.max_accel,
+                                                  VOLKSWAGEN_MEB_LONG_LIMITS.min_accel);
+    bool accel_inactive = desired_accel == VOLKSWAGEN_MEB_LONG_LIMITS.inactive_accel;
+    if (!accel_override && !accel_in_range && !accel_inactive) {
       tx = false;
     }
   }
