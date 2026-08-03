@@ -1,5 +1,6 @@
 from opendbc.car import Bus, structs
 from opendbc.can import CANDefine
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -84,11 +85,13 @@ ACC_HUD_DISABLED = 0
 
 
 class MebLongStateMachine:
+  HOLD_RELEASE_SPEED = 5 * CV.KPH_TO_MS
+
   def __init__(self, CP, CCP):
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
-    self.ramp_counter = 0
+    self.disengage_ramp_counter = 0  # always ramp when disengaging
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -99,6 +102,7 @@ class MebLongStateMachine:
 
   def _get_acc_status(self, CS, CC) -> int:
     # stateless
+    # NOTE: stock TSK and camera goes to 5 on disengage independently which we don't model, but hasn't been shown to fault without it
     if CS.out.accFaulted:
       return self.acc_status_vals['REVERSIBLER_FEHLER_IM_ACC_SYSTEM']
     elif CC.enabled:
@@ -110,31 +114,42 @@ class MebLongStateMachine:
 
   def _get_hold_type(self, CS, CC) -> int:
     # warning: car is reacting to hold mechanic even with long control off
+    # HALTEN -> KEINE_ANFORDERUNG causes the car to fault into park, so both branches below put a ramp in
+    # between: disengaging always ramps, and while engaged a release ramps until 5 kph
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
+    # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
+    long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
-    if CS.out.accFaulted or not CC.longActive:
-      acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
-    elif stopping:
-      acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
-    elif starting:
-      acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
+    if not long_active:
+      # Stock goes to RAMP for as long as TSK_Status is 5 usually, 100ms seems fine to mimic that behavior.
+      # Stock stays active for gas press, but we go inactive
+      if self.disengage_ramp_counter > 0:
+        acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
+        self.disengage_ramp_counter -= 1
+      else:
+        acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
+
     else:
-      acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
+      was_engaged = self.disengage_ramp_counter == self.RAMP_FRAMES
+      self.disengage_ramp_counter = self.RAMP_FRAMES  # prep ramp if we disengage
 
-    # enforce legal transitions
-    if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
-      # allow going into hold at any time, reset ramp counter
-      self.ramp_counter = 0
-    elif self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
-      # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
-      # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
-      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-      self.ramp_counter = self.RAMP_FRAMES
-    elif self.ramp_counter > 0:
-      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-      self.ramp_counter -= 1
+      if stopping:
+        acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped, allowed at any time
+      elif starting:
+        acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
+      else:
+        # After aborting a stop or finishing starting, we need to send RAMP until we hit 5 kph or go long inactive,
+        # only if we didn't just re-engage
+        releasing = was_engaged and self.prev_acc_hold_type in (self.acc_hold_type_vals['HALTEN'],
+                                                                self.acc_hold_type_vals['ANFAHREN'],
+                                                                self.acc_hold_type_vals['LOESEN_UEBER_RAMPE'])
+
+        if releasing and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
+          acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
+        else:
+          acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     return acc_hold_type
 
