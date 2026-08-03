@@ -92,6 +92,7 @@ class MebLongStateMachine:
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
     self.disengage_ramp_counter = 0  # always ramp when disengaging
+    self.probe_ramp_counter = 0  # PROBE: ramp out of a blinker-requested hold
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -165,6 +166,21 @@ class MebLongStateMachine:
 
     # hold requested but the car hasn't reached standstill yet
     braking_to_stop = requesting_hold and not CS.esp_hold_confirmation
+
+    # PROBE: does the car actuate on ACC_Anforderung_HMS alone? Left blinker requests HALTEN, right
+    # requests PARKEN. Applied here, after accel and braking_to_stop are settled, so ONLY the HMS field
+    # changes: accel stays inactive while disengaged and in-range while engaged, and ACC_Anhalten /
+    # ACC_Anhalteweg stay untouched so the probe can't trigger a stop request of its own.
+    # Releases through LOESEN_UEBER_RAMPE so the probe never emits HALTEN -> KEINE_ANFORDERUNG.
+    if CS.out.leftBlinker:
+      acc_hold_type = self.acc_hold_type_vals['HALTEN']
+      self.probe_ramp_counter = self.RAMP_FRAMES
+    elif CS.out.rightBlinker:
+      acc_hold_type = self.acc_hold_type_vals['PARKEN']
+      self.probe_ramp_counter = self.RAMP_FRAMES
+    elif self.probe_ramp_counter > 0:
+      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
+      self.probe_ramp_counter -= 1
 
     self.prev_acc_hold_type = acc_hold_type
     self.acc_status = acc_status
