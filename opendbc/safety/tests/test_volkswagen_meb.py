@@ -199,9 +199,9 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
         self.assertFalse(self._rx(msg))
 
         # a stuck counter fails as well, its checksum is still correct
-        for _ in range(common.MAX_WRONG_COUNTERS):
-          valid = self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter}))
-        self.assertFalse(valid)
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})))
 
   def test_main_switch_off_disables_controls(self):
     self.safety.set_controls_allowed(True)
