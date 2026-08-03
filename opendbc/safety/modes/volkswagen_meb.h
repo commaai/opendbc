@@ -106,17 +106,7 @@ static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
 }
 
 static safety_config volkswagen_meb_init(uint16_t param) {
-  // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {
-    {MSG_HCA_03, 0, 24, .check_relay = true},
-    {MSG_GRA_ACC_01, 0, 8, .check_relay = false},
-    {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
-    {MSG_LDW_02, 0, 8, .check_relay = true},
-    {MSG_KLR_01, 0, 8, .check_relay = false},
-    {MSG_KLR_01, 2, 8, .check_relay = true},
-  };
-
-  static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {
+  static const CanMsg VOLKSWAGEN_MEB_TX_MSGS[] = {
     {MSG_HCA_03, 0, 24, .check_relay = true},
     {MSG_LDW_02, 0, 8, .check_relay = true},
     {MSG_KLR_01, 0, 8, .check_relay = false},
@@ -144,9 +134,9 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
   safety_config ret;
   if (volkswagen_meb_alt_crc) {
-    ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   } else {
-    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   }
   return ret;
 }
@@ -194,7 +184,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     }
 
     if (msg->addr == MSG_GRA_ACC_01) {
-      // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
+      // Enter controls on falling edge of Set or Resume with main switch on
       // Signal: GRA_ACC_01.GRA_Tip_Setzen
       // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
       bool set_button = GET_BIT(msg, 16U);
@@ -282,13 +272,6 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     int steer_power = msg->data[2];
 
     if (steer_curvature_cmd_checks(desired_curvature_raw, steer_power, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
-      tx = false;
-    }
-  }
-
-  if ((msg->addr == MSG_GRA_ACC_01) && !controls_allowed) {
-    // only allow cancel button: bit 13
-    if (!GET_BIT(msg, 13U)) {
       tx = false;
     }
   }
