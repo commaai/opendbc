@@ -142,17 +142,11 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
   volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
 
-  volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
-
   safety_config ret;
-  if (volkswagen_longitudinal && volkswagen_meb_alt_crc) {
+  if (volkswagen_meb_alt_crc) {
     ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
-  } else if (volkswagen_longitudinal) {
-    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
-  } else if (volkswagen_meb_alt_crc) {
-    ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
   } else {
-    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
   }
   return ret;
 }
@@ -191,10 +185,6 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
       acc_main_on = cruise_engaged || (acc_status == 2);
 
-      if (!volkswagen_longitudinal) {
-        pcm_cruise_check(cruise_engaged);
-      }
-
       if (!acc_main_on) {
         controls_allowed = false;
       }
@@ -207,15 +197,13 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
       // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
       // Signal: GRA_ACC_01.GRA_Tip_Setzen
       // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-      if (volkswagen_longitudinal) {
-        bool set_button = GET_BIT(msg, 16U);
-        bool resume_button = GET_BIT(msg, 19U);
-        if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-          controls_allowed = acc_main_on;
-        }
-        volkswagen_set_button_prev = set_button;
-        volkswagen_resume_button_prev = resume_button;
+      bool set_button = GET_BIT(msg, 16U);
+      bool resume_button = GET_BIT(msg, 19U);
+      if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
+        controls_allowed = acc_main_on;
       }
+      volkswagen_set_button_prev = set_button;
+      volkswagen_resume_button_prev = resume_button;
 
       // Always exit controls on rising edge of Cancel
       if (GET_BIT(msg, 13U)) {
