@@ -98,7 +98,7 @@
 |Honda|City (Brazil only) 2023|All|[Upstream](#upstream)|
 |Honda|Civic 2016-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic 2019-21|All|[Upstream](#upstream)|
-|Honda|Civic 2022-24|All|[Upstream](#upstream)|
+|Honda|Civic 2022-26|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2017-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2019-21|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2022-24|All|[Upstream](#upstream)|
