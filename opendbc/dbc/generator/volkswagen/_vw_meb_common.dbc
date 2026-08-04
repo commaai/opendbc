@@ -2029,8 +2029,6 @@ CM_ SG_ 219 Unknown_80 "Low bit is normally 1 and clears with AWV_Unavailable, b
 CM_ SG_ 313 Long_Control_Inhibit "Goes high after user brakes hard, causes temporary TSK_Status fault";
 CM_ SG_ 333 SET_ME_0x2FE "Only set by stock ACC on 2024+; reads 0 on pre-2024 and is not packed by mebcan";
 CM_ SG_ 380196013 AWV_Status "Mirrors AWV_03.AWV_Unavailable, at a higher rate";
-CM_ SG_ 380196013 Unknown_15 "Reads 0 for most of normal driving, and takes both values with AWV available and unavailable";
-CM_ SG_ 380196013 Unknown_17 "Reads 0 during normal driving as well as when AWV is unavailable";
 CM_ BO_ 317 "Lenkungssteuergerät";
 CM_ BO_ 517 "Steuergerät für Motorstart";
 CM_ BO_ 522 "Steuergerät für Fahrzeugbewegung";
