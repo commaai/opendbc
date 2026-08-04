@@ -319,6 +319,42 @@ class TestCarModelBase(unittest.TestCase):
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
 
+  def test_panda_safety_tx_replay(self):
+    """Asserts safety accepts the carcontroller commanding the path the car is already driving."""
+    if self.CP.dashcamOnly:
+      self.skipTest("no need to check panda safety for dashcamOnly")
+    if self.CP.notCar:
+      self.skipTest("skipping test for notCar")
+    if self.CP.brand == "toyota" and self.CP.flags & ToyotaFlags.SECOC:
+      self.skipTest("SecOC transmit tests require the vehicle key")
+
+    start_ts = self.can_msgs[0][0]
+    blocked_addrs = Counter()
+    for i, can in enumerate(self.can_msgs):
+      self.safety.set_timer(int((can[0] - start_ts) / 1e3))
+      for msg in can[1]:
+        if msg.src < 64:
+          self.safety.safety_rx_hook(libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat))
+
+      CS = self.CI.update(normalize_can_buses(can, self.raw_can_keys))
+      long_active = self.CP.openpilotLongitudinalControl and not self.safety.get_gas_pressed_prev()
+      actuators = structs.CarControl.Actuators(curvature=-CS.yawRate / max(CS.vEgoRaw, 0.1),
+                                               steeringAngleDeg=CS.steeringAngleDeg,
+                                               accel=CS.aEgo if long_active else 0.0)
+      cruise_control = structs.CarControl.CruiseControl(override=self.safety.get_gas_pressed_prev())
+      CC = structs.CarControl(enabled=True, latActive=True, actuators=actuators, longActive=long_active,
+                              cruiseControl=cruise_control)
+
+      self.safety.set_controls_allowed(True)
+      self.safety.set_relay_malfunction(False)
+      _, sendcan = self.CI.apply(CC.as_reader(), can[0])
+      for addr, dat, bus in sendcan:
+        sent = self.safety.safety_tx_hook(libsafety_py.make_CANPacket(addr, bus % 4, dat))
+        if not sent and i > 250:
+          blocked_addrs[hex(addr)] += 1
+
+    self.assertFalse(blocked_addrs, f"panda safety TX blocked openpilot's own path: {blocked_addrs}")
+
   @fuzzy_test(max_examples=300)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
     if self.CP.dashcamOnly:
