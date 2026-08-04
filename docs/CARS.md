@@ -46,7 +46,7 @@
 |Chrysler|Pacifica Hybrid 2019-25|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |comma|body|All|[Upstream](#upstream)|
 |CUPRA|Ateca 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|CUPRA|Born 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
+|CUPRA|Born 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Dodge|Durango 2020-21|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |Ford|Bronco Sport 2021-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Escape 2020-22|Co-Pilot360 Assist+|[Upstream](#upstream)|
@@ -98,7 +98,7 @@
 |Honda|City (Brazil only) 2023|All|[Upstream](#upstream)|
 |Honda|Civic 2016-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic 2019-21|All|[Upstream](#upstream)|
-|Honda|Civic 2022-24|All|[Upstream](#upstream)|
+|Honda|Civic 2022-26|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2017-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2019-21|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2022-24|All|[Upstream](#upstream)|
@@ -384,8 +384,8 @@
 |Volkswagen|Golf R 2015-19|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Golf SportsVan 2015-20|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Grand California 2019-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|ID.4 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
-|Volkswagen|ID.4 2024-25|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
+|Volkswagen|ID.4 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Volkswagen|ID.4 2024-25|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Jetta 2015-18|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Volkswagen|Jetta 2019-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Jetta GLI 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
