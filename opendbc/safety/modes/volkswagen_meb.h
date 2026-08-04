@@ -116,26 +116,26 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {MSG_TA_01, 0, 8, .check_relay = true},
   };
 
-  static RxCheck volkswagen_meb_rx_checks[] = {
-    VOLKSWAGEN_MEB_COMMON_RX_CHECKS
-    {.msg = {{MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-  };
-
-  static RxCheck volkswagen_meb_gen2_rx_checks[] = {
-    VOLKSWAGEN_MEB_COMMON_RX_CHECKS
-    {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-  };
-
   volkswagen_common_init();
   const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
   volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
 
   safety_config ret;
   if (volkswagen_meb_alt_crc) {
+    static RxCheck volkswagen_meb_gen2_rx_checks[] = {
+      VOLKSWAGEN_MEB_COMMON_RX_CHECKS
+      {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+      {.msg = {{MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    };
+
     ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   } else {
+    static RxCheck volkswagen_meb_rx_checks[] = {
+      VOLKSWAGEN_MEB_COMMON_RX_CHECKS
+      {.msg = {{MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+      {.msg = {{MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    };
+
     ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   }
   return ret;
