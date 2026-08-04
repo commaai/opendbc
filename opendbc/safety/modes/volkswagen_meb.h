@@ -106,17 +106,7 @@ static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
 }
 
 static safety_config volkswagen_meb_init(uint16_t param) {
-  // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {
-    {MSG_HCA_03, 0, 24, .check_relay = true},
-    {MSG_GRA_ACC_01, 0, 8, .check_relay = false},
-    {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
-    {MSG_LDW_02, 0, 8, .check_relay = true},
-    {MSG_KLR_01, 0, 8, .check_relay = false},
-    {MSG_KLR_01, 2, 8, .check_relay = true},
-  };
-
-  static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {
+  static const CanMsg VOLKSWAGEN_MEB_TX_MSGS[] = {
     {MSG_HCA_03, 0, 24, .check_relay = true},
     {MSG_LDW_02, 0, 8, .check_relay = true},
     {MSG_KLR_01, 0, 8, .check_relay = false},
@@ -126,35 +116,27 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {MSG_TA_01, 0, 8, .check_relay = true},
   };
 
-  static RxCheck volkswagen_meb_rx_checks[] = {
-    VOLKSWAGEN_MEB_COMMON_RX_CHECKS
-    {.msg = {{MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-  };
-
-  static RxCheck volkswagen_meb_gen2_rx_checks[] = {
-    VOLKSWAGEN_MEB_COMMON_RX_CHECKS
-    {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-  };
-
   volkswagen_common_init();
   const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
   volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
 
-#ifdef ALLOW_DEBUG
-  volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
-#endif
-
   safety_config ret;
-  if (volkswagen_longitudinal && volkswagen_meb_alt_crc) {
-    ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
-  } else if (volkswagen_longitudinal) {
-    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS);
-  } else if (volkswagen_meb_alt_crc) {
-    ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
+  if (volkswagen_meb_alt_crc) {
+    static RxCheck volkswagen_meb_gen2_rx_checks[] = {
+      VOLKSWAGEN_MEB_COMMON_RX_CHECKS
+      {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+      {.msg = {{MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    };
+
+    ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   } else {
-    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
+    static RxCheck volkswagen_meb_rx_checks[] = {
+      VOLKSWAGEN_MEB_COMMON_RX_CHECKS
+      {.msg = {{MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+      {.msg = {{MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    };
+
+    ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   }
   return ret;
 }
@@ -193,10 +175,6 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
       acc_main_on = cruise_engaged || (acc_status == 2);
 
-      if (!volkswagen_longitudinal) {
-        pcm_cruise_check(cruise_engaged);
-      }
-
       if (!acc_main_on) {
         controls_allowed = false;
       }
@@ -206,18 +184,16 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     }
 
     if (msg->addr == MSG_GRA_ACC_01) {
-      // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
+      // Enter controls on falling edge of Set or Resume with main switch on
       // Signal: GRA_ACC_01.GRA_Tip_Setzen
       // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-      if (volkswagen_longitudinal) {
-        bool set_button = GET_BIT(msg, 16U);
-        bool resume_button = GET_BIT(msg, 19U);
-        if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-          controls_allowed = acc_main_on;
-        }
-        volkswagen_set_button_prev = set_button;
-        volkswagen_resume_button_prev = resume_button;
+      bool set_button = GET_BIT(msg, 16U);
+      bool resume_button = GET_BIT(msg, 19U);
+      if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
+        controls_allowed = acc_main_on;
       }
+      volkswagen_set_button_prev = set_button;
+      volkswagen_resume_button_prev = resume_button;
 
       // Always exit controls on rising edge of Cancel
       if (GET_BIT(msg, 13U)) {
@@ -296,13 +272,6 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     int steer_power = msg->data[2];
 
     if (steer_curvature_cmd_checks(desired_curvature_raw, steer_power, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
-      tx = false;
-    }
-  }
-
-  if ((msg->addr == MSG_GRA_ACC_01) && !controls_allowed) {
-    // only allow cancel button: bit 13
-    if (!GET_BIT(msg, 13U)) {
       tx = false;
     }
   }
