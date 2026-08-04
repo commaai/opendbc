@@ -287,7 +287,7 @@ class TestCarModelBase(unittest.TestCase):
       self.skipTest("no need to check panda safety for dashcamOnly")
     if self.CP.notCar:
       self.skipTest("skipping test for notCar")
-    if self.CP.flags & ToyotaFlags.SECOC:
+    if self.CP.brand == "toyota" and self.CP.flags & ToyotaFlags.SECOC:
       self.skipTest("SecOC transmit tests require the vehicle key")
 
     controller_params = self.CP
@@ -318,6 +318,37 @@ class TestCarModelBase(unittest.TestCase):
     self.safety.set_controls_allowed(True)
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
+
+  @fuzzy_test(max_examples=10)
+  def test_panda_safety_tx_fuzzy(self, fuzzy):
+    if self.CP.dashcamOnly:
+      self.skipTest("no need to check panda safety for dashcamOnly")
+    if self.CP.notCar:
+      self.skipTest("skipping test for notCar")
+    if self.CP.brand == "toyota" and self.CP.flags & ToyotaFlags.SECOC:
+      self.skipTest("SecOC transmit tests require the vehicle key")
+
+    CI = self.CarInterface(self.CP.copy())
+    self.safety.init_tests()
+
+    for frame in range(250):
+      self.safety.set_controls_allowed(True)
+      self.safety.set_timer(frame * int(DT_CTRL * 1e6))
+
+      curvature = fuzzy.integer(-20_000, 20_000) / 1e6
+      steering_angle = fuzzy.integer(-9_000, 9_000) / 10
+      torque = fuzzy.integer(-1_000, 1_000) / 1_000
+      accel = fuzzy.integer(-500, 300) / 100
+      lat_active = fuzzy.boolean()
+      long_active = self.CP.openpilotLongitudinalControl and fuzzy.boolean()
+      actuators = structs.CarControl.Actuators(curvature=curvature, steeringAngleDeg=steering_angle, torque=torque, accel=accel)
+      CC = structs.CarControl(enabled=lat_active or long_active, latActive=lat_active, longActive=long_active, actuators=actuators)
+      CI.update([])
+      _, sendcan = CI.apply(CC.as_reader(), frame * int(DT_CTRL * 1e9))
+
+      for addr, dat, bus in sendcan:
+        packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)
+        self.assertTrue(self.safety.safety_tx_hook(packet), (addr, dat, bus))
 
   @fuzzy_test(max_examples=300)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
