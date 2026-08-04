@@ -298,7 +298,8 @@ class CarState(CarStateBase):
     tsk_faulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
     engine_off = pt_cp.vl["Motor_54"]["Engine_On"] == 0
     long_control_inhibit = pt_cp.vl["VMM_02"]["Long_Control_Inhibit"] == 2
-    ret.accFaulted = self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit)
+    ret.accFaulted = (self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit) or
+                      cam_cp.vl["AWV_03"]["AWV_Unavailable"] == 1)  # AEB unavailable (from radar covered or PT ECUs not sending)
 
     # TSK winds braking down through brake_only after driver brakes at low speeds. Requesting drive-off in this
     # state can fault TSK, and stock refuses to engage here as well, so block entry until it clears.
