@@ -100,6 +100,29 @@ def _parse_int_literal(token):
   return value, base, suffix
 
 
+def _is_int_constant_expression(node, txt):
+  if node.type == "number_literal":
+    return _parse_int_literal(txt[node.start_byte:node.end_byte]) is not None
+  if node.type == "parenthesized_expression":
+    return len(node.named_children) == 1 and _is_int_constant_expression(node.named_children[0], txt)
+  if node.type == "binary_expression":
+    left = node.child_by_field_name("left")
+    right = node.child_by_field_name("right")
+    return left is not None and right is not None and \
+      _is_int_constant_expression(left, txt) and _is_int_constant_expression(right, txt)
+  return False
+
+
+def _constant_boundary_expression(node, operand, txt):
+  boundary = node
+  while boundary != operand:
+    parent = boundary.parent
+    if parent is None or not _is_int_constant_expression(parent, txt):
+      break
+    boundary = parent
+  return boundary
+
+
 def _site_key(site):
   return (site.op_start, site.op_end, site.mutator)
 
@@ -195,30 +218,35 @@ def enumerate_sites(input_source, preprocessed_file):
     node = stack.pop()
     kind = node.type
 
-    # Boundary mutations: find number_literals inside comparison operands
+    # Boundary mutations: increment integer constant expressions inside comparison operands
     if kind == "binary_expression":
       cmp_op = node.child_by_field_name("operator")
       if cmp_op and cmp_op.type in COMPARISON_OPERATOR_MAP:
-        lit_stack = []
         for field in ("left", "right"):
           operand = node.child_by_field_name(field)
-          if operand:
-            lit_stack.append(operand)
-        while lit_stack:
-          n = lit_stack.pop()
-          if n.type == "number_literal":
-            token = txt[n.start_byte:n.end_byte]
-            parsed = _parse_int_literal(token)
-            if parsed:
-              value, base, suffix = parsed
-              mutated = f"0x{value + 1:X}{suffix}" if base == "hex" else f"{value + 1}{suffix}"
-              line = n.start_point[0] + 1
-              bsite = _RawSite(n.start_byte, n.end_byte, n.start_byte, n.end_byte, line, token, mutated, "boundary")
-              key = _site_key(bsite)
-              deduped[key] = bsite
-              if _is_in_constexpr_context(n):
-                build_incompatible_keys.add(key)
-          lit_stack.extend(n.children)
+          if operand is None:
+            continue
+          lit_stack = [operand]
+          while lit_stack:
+            child = lit_stack.pop()
+            if child.type == "number_literal":
+              parsed = _parse_int_literal(txt[child.start_byte:child.end_byte])
+              if parsed is not None:
+                boundary = _constant_boundary_expression(child, operand, txt)
+                token = txt[boundary.start_byte:boundary.end_byte]
+                if boundary == child:
+                  value, base, suffix = parsed
+                  mutated = f"0x{value + 1:X}{suffix}" if base == "hex" else f"{value + 1}{suffix}"
+                else:
+                  mutated = f"({token} + 1)"
+                line = boundary.start_point[0] + 1
+                bsite = _RawSite(boundary.start_byte, boundary.end_byte, boundary.start_byte, boundary.end_byte,
+                                 line, token, mutated, "boundary")
+                key = _site_key(bsite)
+                deduped[key] = bsite
+                if _is_in_constexpr_context(boundary):
+                  build_incompatible_keys.add(key)
+            lit_stack.extend(child.children)
 
     # Operator mutations: any node with an operator child
     op_child = node.child_by_field_name("operator")
@@ -438,6 +466,9 @@ def _instrument_source(source, sites):
     parts.append(seg)
 
     expr_text = "".join(parts)
+    if site.op_start == site.expr_start and site.op_end == site.expr_end:
+      return f"((__mutation_active_id == {site.site_id}) ? ({site.mutated_op}) : ({expr_text}))"
+
     op_len = site.op_end - site.op_start
     assert op_rel is not None and expr_text[op_rel : op_rel + op_len] == site.original_op, (
       f"Operator mismatch (site_id={site.site_id}): expected {site.original_op!r} at offset {op_rel}"
