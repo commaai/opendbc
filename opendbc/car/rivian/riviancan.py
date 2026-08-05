@@ -47,8 +47,9 @@ def create_wheel_touch(packer, sccm_wheel_touch, enabled):
   values = {s: sccm_wheel_touch[s] for s in (
     "SCCM_WheelTouch_Counter",
     "SCCM_WheelTouch_HandsOn",
+    "SCCM_WheelTouch_Calibration",
     "SCCM_WheelTouch_CapacitiveValue",
-    "SETME_X52",
+    "SCCM_WheelTouch_ResistiveValue",
   )}
 
   # When only using ACC without lateral, the ACM warns the driver to hold the steering wheel on engagement
