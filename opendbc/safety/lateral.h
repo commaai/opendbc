@@ -215,8 +215,18 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
     // allow down limits at zero since small floats from openpilot will be rounded to 0
     // TODO: openpilot should be cognizant of this and not send small floats
-    int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
-    int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
+    int delta_angle_increase = delta_angle_down;
+    int delta_angle_decrease = delta_angle_down;
+    if (desired_angle_last > 0) {
+      delta_angle_increase = delta_angle_up;
+    } else if (desired_angle_last < 0) {
+      delta_angle_decrease = delta_angle_up;
+    } else {
+      // both directions use the unwind limit at zero
+    }
+
+    int highest_desired_angle = desired_angle_last + delta_angle_increase;
+    int lowest_desired_angle = desired_angle_last - delta_angle_decrease;
 
     // check for violation;
     violation |= safety_max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);

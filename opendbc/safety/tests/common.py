@@ -785,6 +785,17 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
             should_tx = controls_allowed if steer_control_enabled else angle_cmd == angle_meas
             self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, steer_control_enabled)))
 
+  def test_angle_cmd_zero_uses_unwind_rate(self):
+    if self.ANGLE_RATE_BP is None or self.ANGLE_RATE_DOWN is None:
+      raise unittest.SkipTest("No breakpoint angle rate limits")
+
+    self._reset_speed_measurement(10.)
+    fudged_speed = self.safety.get_vehicle_speed_min() - 1.
+    delta_down = int(np.interp(fudged_speed, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN + 1.)
+    self.safety.set_controls_allowed(True)
+    self._set_prev_desired_angle(0)
+    self.assertTrue(self._tx(self._angle_cmd_msg(-delta_down / self.DEG_TO_CAN, True)))
+
   def test_angle_violation(self):
     # If violation occurs, angle cmd is blocked until reset to 0. Matches behavior of torque safety modes
     self.safety.set_controls_allowed(True)
