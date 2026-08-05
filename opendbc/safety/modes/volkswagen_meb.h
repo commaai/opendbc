@@ -240,6 +240,15 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       tx = false;
     }
 
+    // Signal: ACC_18.ACC_Anfahren
+    // Signal: ACC_18.ACC_Anhalten
+    // These carry the same drive off and hold requests as the hold type, so they are gated the same way
+    bool acc_anfahren = GET_BIT(msg, 56U);
+    bool acc_anhalten = GET_BIT(msg, 57U);
+    if ((acc_anfahren || acc_anhalten) && !controls_allowed) {
+      tx = false;
+    }
+
     // Signal: ACC_18.ACC_Status_ACC
     // Claiming ACC is regulating is what makes the drivetrain act on our requests, so it may only be
     // sent while controls are allowed. Standby, off and the fault state stay available for the HUD.

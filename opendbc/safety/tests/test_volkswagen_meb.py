@@ -139,9 +139,10 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     }
     return self.packer.make_can_msg_safety("HCA_03", 0, values)
 
-  def _accel_msg(self, accel, hold_type=0, acc_status=0):
+  def _accel_msg(self, accel, hold_type=0, acc_status=0, acc_anfahren=0, acc_anhalten=0):
     values = {"ACC_Sollbeschleunigung_02": accel, "ACC_Anforderung_HMS": hold_type,
-              "ACC_Status_ACC": acc_status}
+              "ACC_Status_ACC": acc_status, "ACC_Anfahren": acc_anfahren,
+              "ACC_Anhalten": acc_anhalten}
     return self.packer.make_can_msg_safety("ACC_18", 0, values)
 
   def _tsk_status_msg(self, enable, main_switch=True):
@@ -342,6 +343,16 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
         send = (hold_type in (HMS_KEINE_ANFORDERUNG, HMS_LOESEN_UEBER_RAMPE) or
                 (controls_allowed and hold_type in (HMS_HALTEN, HMS_ANFAHREN)))
         self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, hold_type=hold_type)))
+
+  def test_drive_off_and_hold_request_safety_check(self):
+    # ACC_Anfahren and ACC_Anhalten carry the same drive off and hold requests as the hold type
+    for controls_allowed in (True, False):
+      for acc_anfahren in (0, 1):
+        for acc_anhalten in (0, 1):
+          self.safety.set_controls_allowed(controls_allowed)
+          send = controls_allowed or not (acc_anfahren or acc_anhalten)
+          self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, acc_anfahren=acc_anfahren,
+                                                          acc_anhalten=acc_anhalten)))
 
   def test_acc_status_safety_check(self):
     # claiming ACC_AKTIV_REGELT or ACC_OVERRIDE is what makes the drivetrain act on our requests.
