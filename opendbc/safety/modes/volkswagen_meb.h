@@ -243,9 +243,9 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     // Signal: ACC_18.ACC_Anfahren
     // Signal: ACC_18.ACC_Anhalten
     // These carry the same drive off and hold requests as the hold type, so they are gated the same way
-    bool leaving_standstill = GET_BIT(msg, 56U);
-    bool braking_to_stop = GET_BIT(msg, 57U);
-    if ((leaving_standstill || braking_to_stop) && !controls_allowed) {
+    bool acc_anfahren = GET_BIT(msg, 56U);
+    bool acc_anhalten = GET_BIT(msg, 57U);
+    if ((acc_anfahren || acc_anhalten) && !controls_allowed) {
       tx = false;
     }
 
