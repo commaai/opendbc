@@ -95,14 +95,14 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
     }
   }
 
-  // no torque if controls is not allowed
-  if (!controls_allowed && (desired_torque != 0)) {
+  bool torque_requested = desired_torque != 0;
+  if (!controls_allowed && torque_requested) {
     violation = true;
   }
 
   // certain safety modes set their steer request bit low for one or more frame at a
   // predefined max frequency to avoid steering faults in certain situations
-  bool steer_req_mismatch = (steer_req == 0) && (desired_torque != 0);
+  bool steer_req_mismatch = (steer_req == 0) && torque_requested;
   if (!limits.has_steer_req_tolerance) {
     if (steer_req_mismatch) {
       violation = true;
