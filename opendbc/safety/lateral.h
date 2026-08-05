@@ -271,7 +271,10 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
     if (limits.max_curvature_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.curvature_error_min_speed)) {
       const int lowest_desired_curvature_error = curvature_state.meas.min - limits.max_curvature_error - 1;
       const int highest_desired_curvature_error = curvature_state.meas.max + limits.max_curvature_error + 1;
-      violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature_error, lowest_desired_curvature_error);
+      // When lateral control engages in a curve, the rate limit can make it impossible to immediately get within the
+      // measured-curvature error bound. Allow commands outside the bound only while they are moving toward it.
+      violation |= (desired_curvature > highest_desired_curvature_error) && (desired_curvature >= curvature_state.desired_last);
+      violation |= (desired_curvature < lowest_desired_curvature_error) && (desired_curvature <= curvature_state.desired_last);
     }
 
     // *** real time rate limit check ***

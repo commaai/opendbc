@@ -11,6 +11,8 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
+import numpy as np
+
 from opendbc.car import DT_CTRL, gen_empty_fingerprint, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
@@ -318,6 +320,94 @@ class TestCarModelBase(unittest.TestCase):
     self.safety.set_controls_allowed(True)
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
+
+  @fuzzy_test(max_examples=10)
+  def test_panda_safety_controller_fuzzy(self, fuzzy):
+    if self.CP.dashcamOnly:
+      self.skipTest("no need to check panda safety for dashcamOnly")
+    if self.CP.notCar:
+      self.skipTest("skipping test for notCar")
+    if self.CP.flags & ToyotaFlags.SECOC:
+      self.skipTest("SecOC transmit tests require the vehicle key")
+
+    CI = self.CarInterface(self.CP.copy())
+    CI.update([])
+    self.safety.init_tests()
+    packer = CI.CC.packer if self.CP.brand == "ford" else None
+    speed_counter = 0
+    yaw_counter = 0
+
+    def checksum(addr, dat, bus):
+      dat = bytearray(dat)
+      if addr == 0x415:
+        total = dat[0] + dat[1] + ((dat[2] >> 2) & 0xf) + (dat[2] >> 6)
+        dat[3] = 0xff - (total & 0xff)
+      elif addr == 0x91:
+        total = dat[0] + dat[1] + dat[2] + dat[3] + dat[5] + (dat[6] >> 6) + ((dat[6] >> 4) & 0x3)
+        dat[4] = 0xff - (total & 0xff)
+      return addr, dat, bus
+
+    speed = fuzzy.integer(0, 5000) / 100. if self.CP.brand == "ford" else 0.
+    curvature = fuzzy.integer(-2000, 2000) / 100000.
+    for frame in range(fuzzy.integer(50, 100)):
+      self.safety.set_timer(frame * int(DT_CTRL * 1e6))
+      if self.CP.brand == "ford":
+        speed = float(np.clip(speed + fuzzy.integer(-2, 2) / 100., 0., 50.))
+        max_curvature = min(0.02, 3.0 / max(speed - 1., 1.) ** 2)
+        curvature = float(np.clip(curvature + fuzzy.integer(-1, 1) / 100000., -max_curvature, max_curvature))
+      yaw_rate = curvature * speed
+
+      if self.CP.brand == "ford":
+        speed_values = {
+          "Veh_V_ActlBrk": speed * 3.6,
+          "VehVActlBrk_D_Qf": 3,
+          "VehVActlBrk_No_Cnt": speed_counter % 16,
+        }
+        yaw_values = {
+          "VehYaw_W_Actl": yaw_rate,
+          "VehYawWActl_D_Qf": 3,
+          "VehRollYaw_No_Cnt": yaw_counter % 256,
+        }
+        speed_msg = packer.make_can_msg("BrakeSysFeatures", 0, speed_values)
+        speed_2_msg = packer.make_can_msg("EngVehicleSpThrottle2", 0, {
+          "Veh_V_ActlEng": speed * 3.6,
+          "VehVActlEng_D_Qf": 3,
+        })
+        yaw_msg = packer.make_can_msg("Yaw_Data_FD1", 0, yaw_values)
+        speed_counter += 1
+        yaw_counter += 1
+        for addr, dat, bus in (checksum(*speed_msg), speed_2_msg, checksum(*yaw_msg)):
+          packet = libsafety_py.make_CANPacket(addr, bus, dat)
+          self.assertTrue(self.safety.safety_rx_hook(packet))
+
+      CI.CS.out.vEgo = speed
+      CI.CS.out.vEgoRaw = speed
+      CI.CS.out.yawRate = yaw_rate
+      CI.CS.out.steeringTorque = 0.
+      CI.CS.out.steeringAngleDeg = 0.
+      self.safety.set_torque_meas(round(CI.CS.out.steeringTorque), round(CI.CS.out.steeringTorque))
+      self.safety.set_torque_driver(round(CI.CS.out.steeringTorque), round(CI.CS.out.steeringTorque))
+      if self.CP.brand in ANGLE_DEG_TO_CAN:
+        angle = round(CI.CS.out.steeringAngleDeg * ANGLE_DEG_TO_CAN[self.CP.brand])
+        self.safety.set_angle_meas(angle, angle)
+
+      lat_active = fuzzy.boolean()
+      long_active = fuzzy.boolean() and self.CP.openpilotLongitudinalControl
+      self.safety.set_controls_allowed(lat_active or long_active)
+      actuators = structs.CarControl.Actuators(
+        curvature=fuzzy.integer(-3000, 3000) / 100000.,
+        accel=fuzzy.integer(-500, 300) / 100.,
+      )
+      CC = structs.CarControl(actuators=actuators, enabled=lat_active or long_active,
+                              latActive=lat_active, longActive=long_active)
+      _, sendcan = CI.apply(CC.as_reader(), frame * int(DT_CTRL * 1e9))
+      for addr, dat, bus in sendcan:
+        packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)
+        self.assertTrue(self.safety.safety_tx_hook(packet), (frame, addr, dat, bus, speed, curvature,
+                                                            self.safety.get_controls_allowed(),
+                                                            self.safety.get_desired_curvature_last(),
+                                                            self.safety.get_curvature_meas_min(),
+                                                            self.safety.get_curvature_meas_max(), CC))
 
   @fuzzy_test(max_examples=300)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):

@@ -129,6 +129,8 @@ class CarController(CarControllerBase):
       gas = float(np.clip(gas, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
 
       # Both gas and accel are in m/s^2, accel is used solely for braking
+      if not CC.longActive:
+        accel = 0.
       if not CC.longActive or gas < CarControllerParams.MIN_GAS:
         gas = CarControllerParams.INACTIVE_GAS
 
