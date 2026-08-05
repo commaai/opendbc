@@ -492,7 +492,7 @@ class CAR(Platforms):
   )
   AUDI_A3_MK3 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Audi A3 2014-19"),
+      VWCarDocs("Audi A3 2014-20"),
       VWCarDocs("Audi A3 Sportback e-tron 2017-18"),
       VWCarDocs("Audi RS3 2018"),
       VWCarDocs("Audi S3 2015-17"),
