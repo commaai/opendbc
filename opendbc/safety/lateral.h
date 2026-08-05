@@ -194,6 +194,12 @@ static bool rt_curvature_rate_limit_check(CurvatureSteeringLimits limits) {
   return violation;
 }
 
+static bool steer_angle_cmd_inactive_check(int desired_angle, int max_angle) {
+  const int max_inactive_angle = SAFETY_CLAMP(angle_meas.max, -max_angle, max_angle) + 1;
+  const int min_inactive_angle = SAFETY_CLAMP(angle_meas.min, -max_angle, max_angle) - 1;
+  return safety_max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
+}
+
 // Safety checks for angle-based steering commands
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits) {
   bool violation = false;
@@ -219,9 +225,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
   // Angle should be close to current angle while not steering
   if (!steer_control_enabled) {
-    const int max_inactive_angle = SAFETY_CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
-    const int min_inactive_angle = SAFETY_CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
-    violation |= safety_max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
+    violation |= steer_angle_cmd_inactive_check(desired_angle, limits.max_angle);
   }
 
   // No angle control allowed when controls are not allowed
@@ -359,9 +363,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
   // Angle should either be 0 or same as current angle while not steering
   if (!steer_control_enabled) {
-    const int max_inactive_angle = SAFETY_CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
-    const int min_inactive_angle = SAFETY_CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
-    violation |= safety_max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
+    violation |= steer_angle_cmd_inactive_check(desired_angle, limits.max_angle);
   }
 
   // No angle control allowed when controls are not allowed
