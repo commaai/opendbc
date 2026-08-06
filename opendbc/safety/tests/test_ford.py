@@ -98,6 +98,11 @@ class TestFordSafetyBase(common.CarSafetyTest):
     fudged_speed = max(speed - 1.0, 1.0)
     return int(MAX_LATERAL_JERK / (fudged_speed * fudged_speed) / self.LATERAL_FREQUENCY * self.DEG_TO_CAN) + 1
 
+  def _get_max_curvature_delta_relaxed_can(self, speed):
+    # flipped fudge, this is the least movement toward the error bounds safety requires
+    fudged_speed = speed + 1.0
+    return int(MAX_LATERAL_JERK / (fudged_speed * fudged_speed) / self.LATERAL_FREQUENCY * self.DEG_TO_CAN) - 1
+
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)
     self.safety.set_desired_curvature_last(t)
@@ -326,6 +331,51 @@ class TestFordSafetyBase(common.CarSafetyTest):
         for should_tx, delta_can in cases:
           self.safety.set_desired_curvature_last(sign * base_can)
           self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (base_can + delta_can) / self.DEG_TO_CAN, 0)))
+
+  def test_curvature_error_rate_limits(self):
+    """
+    When the command is outside the curvature error bounds it must move back toward them respecting
+    rate limits. Since safety fudges its rate limits up to avoid false positives, it has to require
+    a lower rate of movement than openpilot's own. Moving toward zero is never required.
+    """
+    self.safety.set_controls_allowed(True)
+    max_error_can = round(self.MAX_CURVATURE_ERROR * self.DEG_TO_CAN)
+
+    for speed in np.arange(self.CURVATURE_ERROR_MIN_SPEED + 1, 40, 0.5):
+      delta = self._get_max_curvature_delta_can(speed)
+      relaxed = self._get_max_curvature_delta_relaxed_can(speed)
+      if self._get_max_curvature_can(speed) < 4 * max_error_can:
+        continue
+
+      # command sits well beyond the error bounds, it has to wind back down toward them
+      last = 3 * max_error_can
+      down_cases = [
+        (False, last),                  # holding still is not enough
+        (False, last - relaxed + 1),    # moving, but slower than required
+        (True, last - relaxed),         # least movement safety accepts
+        (True, last - delta),           # openpilot's own rate limit
+        (False, last - delta - 1),      # faster than the jerk limit
+      ]
+
+      # command is inside the bounds on the zero side, it is never required to catch up to measured
+      up_cases = [
+        (True, 0),                      # zero is always allowed
+        (True, delta),                  # may move toward measured at the jerk limit
+        (False, delta + 1),             # but no faster
+      ]
+
+      for sign in (-1, 1):
+        self._reset_curvature_measurement(0, speed)
+        for should_tx, desired_can in down_cases:
+          self.safety.set_desired_curvature_last(sign * last)
+          self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * desired_can / self.DEG_TO_CAN, 0)),
+                           (speed, sign, desired_can))
+
+        self._reset_curvature_measurement(sign * 3 * max_error_can / self.DEG_TO_CAN, speed)
+        for should_tx, desired_can in up_cases:
+          self.safety.set_desired_curvature_last(0)
+          self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * desired_can / self.DEG_TO_CAN, 0)),
+                           (speed, sign, desired_can))
 
   def test_curvature_error_limits(self):
     # above CURVATURE_ERROR_MIN_SPEED, command must be within max_curvature_error of measured, below the check is skipped
