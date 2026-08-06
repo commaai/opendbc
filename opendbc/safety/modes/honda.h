@@ -13,8 +13,8 @@
   HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                        \
   {.msg = {{0x326, (pt_bus), 8, 10U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* SCM_FEEDBACK */  \
 
-// Alternate brake message is used on some Honda Bosch, and Honda Bosch radarless (where PT bus is 0)
-#define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                                              \
+// Electric brake booster message is used on some Honda Bosch, and Honda Bosch radarless (where PT bus is 0)
+#define HONDA_ELEC_BRAKE_ADDR_CHECK(pt_bus)                                                                                              \
   {.msg = {{0x1BE, (pt_bus), 3, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
 
 enum {
@@ -27,7 +27,7 @@ enum {
 
 static int honda_brake = 0;
 static bool honda_brake_switch_prev = false;
-static bool honda_alt_brake_msg = false;
+static bool honda_elec_brake_msg = false;
 static bool honda_fwd_brake = false;
 static bool honda_bosch_long = false;
 static bool honda_bosch_radarless = false;
@@ -120,13 +120,13 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     cruise_button_prev = button;
   }
 
-  // user brake signal on 0x17C reports applied brake from computer brake on accord
-  // and crv, which prevents the usual brake safety from working correctly. these
-  // cars have a signal on 0x1BE which only detects user's brake being applied so
-  // in these cases, this is used instead.
-  // most hondas: 0x17C
-  // accord, crv: 0x1BE
-  if (honda_alt_brake_msg) {
+  // user brake signal on 0x17C reports applied brake from computer brake on models
+  // with an electric brake booster, which prevents the usual brake safety from working
+  // correctly. these cars have a signal on 0x1BE which only detects user's brake being
+  // applied so in these cases, this is used instead.
+  // without electric brake booster: 0x17C
+  // with electric brake booster: 0x1BE
+  if (honda_elec_brake_msg) {
     if (msg->addr == 0x1BEU) {
       brake_pressed = GET_BIT(msg, 4U);
     }
@@ -285,7 +285,7 @@ static safety_config honda_nidec_init(uint16_t param) {
   honda_brake = 0;
   honda_brake_switch_prev = false;
   honda_fwd_brake = false;
-  honda_alt_brake_msg = false;
+  honda_elec_brake_msg = false;
   honda_bosch_long = false;
   honda_bosch_radarless = false;
   honda_bosch_canfd = false;
@@ -334,7 +334,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   static CanMsg HONDA_CANFD_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x296, 0, 4, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}};
 
 
-  const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
+  const uint16_t HONDA_PARAM_ELEC_BRAKE = 1;
   const uint16_t HONDA_PARAM_RADARLESS = 8;
   const uint16_t HONDA_PARAM_BOSCH_CANFD = 16;
 
@@ -343,9 +343,9 @@ static safety_config honda_bosch_init(uint16_t param) {
     HONDA_COMMON_RX_CHECKS(0)
   };
 
-  static RxCheck honda_bosch_pt0_alt_brake_rx_checks[] = {
+  static RxCheck honda_bosch_pt0_elec_brake_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(0)
-    HONDA_ALT_BRAKE_ADDR_CHECK(0)
+    HONDA_ELEC_BRAKE_ADDR_CHECK(0)
   };
 
   // Bosch has powertrain on bus 1, verified 0x1A6 does not exist
@@ -353,9 +353,9 @@ static safety_config honda_bosch_init(uint16_t param) {
     HONDA_COMMON_RX_CHECKS(1)
   };
 
-  static RxCheck honda_bosch_pt1_alt_brake_rx_checks[] = {
+  static RxCheck honda_bosch_pt1_elec_brake_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(1)
-    HONDA_ALT_BRAKE_ADDR_CHECK(1)
+    HONDA_ELEC_BRAKE_ADDR_CHECK(1)
   };
 
   honda_hw = HONDA_BOSCH;
@@ -363,7 +363,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
   honda_bosch_canfd = GET_FLAG(param, HONDA_PARAM_BOSCH_CANFD);
   // Checking for alternate brake override from safety parameter
-  honda_alt_brake_msg = GET_FLAG(param, HONDA_PARAM_ALT_BRAKE);
+  honda_elec_brake_msg = GET_FLAG(param, HONDA_PARAM_ELEC_BRAKE);
 
   // radar disabled so allow gas/brakes
 #ifdef ALLOW_DEBUG
@@ -373,14 +373,14 @@ static safety_config honda_bosch_init(uint16_t param) {
 
   safety_config ret;
   if (honda_bosch_radarless || honda_bosch_canfd) {
-    if (honda_alt_brake_msg) {
-      SET_RX_CHECKS(honda_bosch_pt0_alt_brake_rx_checks, ret);
+    if (honda_elec_brake_msg) {
+      SET_RX_CHECKS(honda_bosch_pt0_elec_brake_rx_checks, ret);
     } else {
       SET_RX_CHECKS(honda_bosch_pt0_rx_checks, ret);
     }
   } else {
-   if (honda_alt_brake_msg) {
-     SET_RX_CHECKS(honda_bosch_pt1_alt_brake_rx_checks, ret);
+   if (honda_elec_brake_msg) {
+     SET_RX_CHECKS(honda_bosch_pt1_elec_brake_rx_checks, ret);
    } else {
      SET_RX_CHECKS(honda_bosch_pt1_rx_checks, ret);
    }
