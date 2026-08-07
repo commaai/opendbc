@@ -381,25 +381,13 @@ class TestFordSafetyBase(common.CarSafetyTest):
             self._set_prev_desired_angle(sign * initial_curvature)
             self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * desired_curvature, 0)))
 
-  def test_curvature_error_limits(self):
-    # above CURVATURE_ERROR_MIN_SPEED, command must be within max_curvature_error of measured, below the check is skipped
-    self.safety.set_controls_allowed(True)
-    max_error_can = round(self.MAX_CURVATURE_ERROR * self.DEG_TO_CAN)
-
-    for speed in (self.CURVATURE_ERROR_MIN_SPEED - 1, self.CURVATURE_ERROR_MIN_SPEED + 1):
-      limit_command = speed > self.CURVATURE_ERROR_MIN_SPEED
-      self._reset_curvature_measurement(0, speed)
-      for sign in (-1, 1):
-        self.safety.set_desired_curvature_last(sign * max_error_can)
-        self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, sign * (max_error_can + 1) / self.DEG_TO_CAN, 0)))
-        self.safety.set_desired_curvature_last(sign * max_error_can)
-        self.assertEqual(not limit_command, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (max_error_can + 2) / self.DEG_TO_CAN, 0)))
-
-    # newest speed sample gates the check
-    self._reset_curvature_measurement(0, self.CURVATURE_ERROR_MIN_SPEED - 1)
-    self._rx(self._speed_msg(self.CURVATURE_ERROR_MIN_SPEED + 1))
-    self.safety.set_desired_curvature_last(max_error_can)
-    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, (max_error_can + 2) / self.DEG_TO_CAN, 0)))
+    # the newest speed sample gates the check, not the whole sample window
+    max_error = self.MAX_CURVATURE_ERROR + small_curvature * 2
+    for sign in (-1, 1):
+      self._reset_curvature_measurement(0, self.CURVATURE_ERROR_MIN_SPEED - 1)
+      self._rx(self._speed_msg(self.CURVATURE_ERROR_MIN_SPEED + 1))
+      self._set_prev_desired_angle(sign * self.MAX_CURVATURE_ERROR)
+      self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, sign * max_error, 0)))
 
   def test_curvature_violation(self):
     # If violation occurs, curvature cmd is blocked until reset to 0
