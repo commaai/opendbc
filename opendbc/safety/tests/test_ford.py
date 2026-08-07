@@ -355,7 +355,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
           self._reset_curvature_measurement(sign * angle_meas, speed)
           for should_tx, initial_curvature, desired_curvature in cases:
 
-            # at low speeds one frame of jerk exceeds the curvature signal, so the falsy cases will rightly not fail.
+            # at low speeds one frame of jerk exceeds the curvature signal, so the should_tx=False cases will rightly not fail.
             # assert we never drop a case at a speed where the curvature error is enforced
             if abs(desired_curvature) > self.MAX_CURVATURE:
               self.assertLess(speed, self.CURVATURE_ERROR_MIN_SPEED)
