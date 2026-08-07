@@ -257,6 +257,11 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
     // *** absolute curvature cap ***
     violation |= safety_max_limit_check(desired_curvature, limits.max_curvature, -limits.max_curvature);
 
+    // *** ISO lateral accel limit ***
+    const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
+    const int max_curvature_can = (max_curvature * limits.curvature_to_can) + 1.;
+    violation |= safety_max_limit_check(desired_curvature, max_curvature_can, -max_curvature_can);
+
     // *** ISO lateral jerk limit ***
     const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
     const float max_curvature_delta = max_curvature_rate_sec / (float)limits.frequency;
@@ -264,11 +269,6 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
 
     int highest_desired_curvature = curvature_state.desired_last + max_curvature_delta_can;
     int lowest_desired_curvature = curvature_state.desired_last - max_curvature_delta_can;
-
-    // *** ISO lateral accel limit ***
-    const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
-    const int max_curvature_can = (max_curvature * limits.curvature_to_can) + 1.;
-    violation |= safety_max_limit_check(desired_curvature, max_curvature_can, -max_curvature_can);
 
     // *** curvature error from measured ***
     // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
