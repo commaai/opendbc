@@ -103,6 +103,12 @@ class TestFordSafetyBase(common.CarSafetyTest):
     fudged_speed = speed + 1.0
     return int(MAX_LATERAL_JERK / (fudged_speed * fudged_speed) / self.LATERAL_FREQUENCY * self.DEG_TO_CAN) - 1
 
+  def _get_max_curvature_relaxed_can(self, speed):
+    # flipped fudge, safety never requires commanding more curvature than openpilot can send
+    fudged_speed = speed + 1.0
+    max_curvature_accel_can = int(MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed) * self.DEG_TO_CAN) - 1
+    return min(max_curvature_accel_can, round(self.MAX_CURVATURE * self.DEG_TO_CAN))
+
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)
     self.safety.set_desired_curvature_last(t)
@@ -366,6 +372,30 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
             self._set_prev_desired_angle(sign * initial_curvature)
             self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * desired_curvature, 0)))
+
+  def test_curvature_error_relaxed_limits(self):
+    """
+    The driver can hold a curvature openpilot is not allowed to command, either above the lateral
+    acceleration limit or above the max the EPS accepts. Safety must not require moving past either.
+    """
+    self.safety.set_controls_allowed(True)
+    # measured well outside anything openpilot may send, so the error bounds always demand more
+    curvature_meas = self.MAX_CURVATURE * 2
+
+    for speed in np.arange(self.CURVATURE_ERROR_MIN_SPEED + 1, 40, 0.5):
+      max_curvature_relaxed = self._get_max_curvature_relaxed_can(speed)
+
+      cases = [
+        (True, max_curvature_relaxed),       # holding at the most openpilot can send is accepted
+        (False, max_curvature_relaxed - 1),  # anything less has to keep moving toward measured
+      ]
+
+      for sign in (-1, 1):
+        self._reset_curvature_measurement(sign * curvature_meas, speed)
+        for should_tx, desired_can in cases:
+          self._set_prev_desired_angle(sign * max_curvature_relaxed / self.DEG_TO_CAN)
+          self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * desired_can / self.DEG_TO_CAN, 0)),
+                           (speed, sign, desired_can))
 
   def test_curvature_error_limits(self):
     # above CURVATURE_ERROR_MIN_SPEED, command must be within max_curvature_error of measured, below the check is skipped
