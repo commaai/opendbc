@@ -356,9 +356,15 @@ class TestFordSafetyBase(common.CarSafetyTest):
       # the driver can hold a curvature openpilot may not command, safety must never require moving past
       # the most it can send: the lower of the lateral acceleration limit and what the EPS accepts
       max_curvature_relaxed = self._get_max_curvature_relaxed_can(speed) / self.DEG_TO_CAN
+      # safety fudges the speed down for the accel check and up for the cap, so the last command can sit above the cap
+      max_curvature_allowed_can = min(self._get_max_curvature_can(speed), round(self.MAX_CURVATURE * self.DEG_TO_CAN))
+      winds_down_within_jerk = (max_curvature_allowed_can - self._get_max_curvature_relaxed_can(speed) <=
+                                self._get_max_curvature_delta_can(speed))
       relaxed_cases = (self.MAX_CURVATURE * 2, [
         (True, max_curvature_relaxed, max_curvature_relaxed),
         (not limit_command, max_curvature_relaxed, max_curvature_relaxed - small_curvature),
+        # no longer requiring the command to wind towards meas doesn't stop rate limiting it winding away
+        (winds_down_within_jerk, max_curvature_allowed_can / self.DEG_TO_CAN, max_curvature_relaxed),
       ])
 
       for sign in (-1, 1):
