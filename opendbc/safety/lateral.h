@@ -273,6 +273,9 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
       const float max_curvature_rate_sec_relaxed = MAX_LATERAL_JERK / (fudged_speed_error * fudged_speed_error);
       const int max_curvature_delta_relaxed_can = (max_curvature_rate_sec_relaxed / (float)limits.frequency * limits.curvature_to_can) - 1.;
 
+      // openpilot clips its command to the lateral accel limit, so requiring more than this can never be met
+      const int max_curvature_relaxed_can = (MAX_LATERAL_ACCEL / (fudged_speed_error * fudged_speed_error) * limits.curvature_to_can) - 1.;
+
       // the minimum and maximum curvature allowed based on the measured curvature
       const int lowest_desired_curvature_error = curvature_state.meas.min - limits.max_curvature_error - 1;
       const int highest_desired_curvature_error = curvature_state.meas.max + limits.max_curvature_error + 1;
@@ -280,9 +283,11 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
       // the MAX is to allow the desired curvature to hit the edge of the bounds and not require going under it
       if (curvature_state.desired_last > highest_desired_curvature_error) {
         highest_desired_curvature = SAFETY_MAX(curvature_state.desired_last - max_curvature_delta_relaxed_can, highest_desired_curvature_error);
+        highest_desired_curvature = SAFETY_MAX(highest_desired_curvature, -max_curvature_relaxed_can);
 
       } else if (curvature_state.desired_last < lowest_desired_curvature_error) {
         lowest_desired_curvature = SAFETY_MIN(curvature_state.desired_last + max_curvature_delta_relaxed_can, lowest_desired_curvature_error);
+        lowest_desired_curvature = SAFETY_MIN(lowest_desired_curvature, max_curvature_relaxed_can);
 
       } else {
         // already inside error boundary, don't allow commanding outside it
