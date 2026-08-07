@@ -287,16 +287,16 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
       const int lowest_desired_curvature_error = curvature_state.meas.min - limits.max_curvature_error - 1;
       const int highest_desired_curvature_error = curvature_state.meas.max + limits.max_curvature_error + 1;
 
-      // the MAX is to allow the desired curvature to hit the edge of the bounds and not require going under it
       if (curvature_state.desired_last > highest_desired_curvature_error) {
-        int required = SAFETY_MAX(curvature_state.desired_last - max_curvature_delta_relaxed_can, highest_desired_curvature_error);
-        required = SAFETY_MAX(required, -max_curvature_relaxed_can);
-        // relaxing what we require must never widen the rate limit window
-        highest_desired_curvature = SAFETY_MIN(highest_desired_curvature, required);
+        // demand winding down: never require more than the relaxed step, never past the band edge,
+        // and never past what openpilot can reach (lat accel or max_curvature).
+        const int required = SAFETY_MAX(SAFETY_MAX(curvature_state.desired_last - max_curvature_delta_relaxed_can,
+                                                   highest_desired_curvature_error), -max_curvature_relaxed_can);
+        highest_desired_curvature = SAFETY_MIN(highest_desired_curvature, required);  // can't widen the rate limit window
 
       } else if (curvature_state.desired_last < lowest_desired_curvature_error) {
-        int required = SAFETY_MIN(curvature_state.desired_last + max_curvature_delta_relaxed_can, lowest_desired_curvature_error);
-        required = SAFETY_MIN(required, max_curvature_relaxed_can);
+        const int required = SAFETY_MIN(SAFETY_MIN(curvature_state.desired_last + max_curvature_delta_relaxed_can,
+                                                   lowest_desired_curvature_error), max_curvature_relaxed_can);
         lowest_desired_curvature = SAFETY_MAX(lowest_desired_curvature, required);
 
       } else {
