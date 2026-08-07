@@ -265,6 +265,11 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
     int highest_desired_curvature = curvature_state.desired_last + max_curvature_delta_can;
     int lowest_desired_curvature = curvature_state.desired_last - max_curvature_delta_can;
 
+    // *** ISO lateral accel limit ***
+    const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
+    const int max_curvature_can = (max_curvature * limits.curvature_to_can) + 1.;
+    violation |= safety_max_limit_check(desired_curvature, max_curvature_can, -max_curvature_can);
+
     // *** curvature error from measured ***
     // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
     if (limits.max_curvature_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.curvature_error_min_speed)) {
@@ -298,11 +303,6 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
       }
     }
     violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature, lowest_desired_curvature);
-
-    // *** ISO lateral accel limit ***
-    const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
-    const int max_curvature_can = (max_curvature * limits.curvature_to_can) + 1.;
-    violation |= safety_max_limit_check(desired_curvature, max_curvature_can, -max_curvature_can);
 
     // *** real time rate limit check ***
     violation |= rt_curvature_rate_limit_check(limits);
