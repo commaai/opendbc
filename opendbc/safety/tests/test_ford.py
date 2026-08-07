@@ -328,18 +328,15 @@ class TestFordSafetyBase(common.CarSafetyTest):
       limit_command = speed > self.CURVATURE_ERROR_MIN_SPEED
       # ensure our limits match the safety's rounded limits
       # lateral jerk is symmetric, so the wind up and wind down limits are the same
-      max_delta_up = self._get_max_curvature_delta_can(speed) / self.DEG_TO_CAN
-      max_delta_up_lower = self._get_max_curvature_delta_relaxed_can(speed) / self.DEG_TO_CAN
-
-      max_delta_down = max_delta_up
-      max_delta_down_lower = max_delta_up_lower
+      max_delta = self._get_max_curvature_delta_can(speed) / self.DEG_TO_CAN
+      max_delta_relaxed = self._get_max_curvature_delta_relaxed_can(speed) / self.DEG_TO_CAN
 
       up_cases = (self.MAX_CURVATURE_ERROR * 2, [
         (not limit_command, 0, 0),
-        (not limit_command, 0, max_delta_up_lower - small_curvature),
-        (True, 0, max_delta_up_lower),
-        (True, 0, max_delta_up),
-        (False, 0, max_delta_up + small_curvature),
+        (not limit_command, 0, max_delta_relaxed - small_curvature),
+        (True, 0, max_delta_relaxed),
+        (True, 0, max_delta),
+        (False, 0, max_delta + small_curvature),
         # stay at boundary limit
         (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
         # 1 unit below boundary limit
@@ -350,10 +347,10 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
       down_cases = (self.MAX_CURVATURE - self.MAX_CURVATURE_ERROR * 2, [
         (not limit_command, self.MAX_CURVATURE, self.MAX_CURVATURE),
-        (not limit_command, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down_lower + small_curvature),
-        (True, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down_lower),
-        (True, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down),
-        (False, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down - small_curvature),
+        (not limit_command, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_relaxed + small_curvature),
+        (True, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_relaxed),
+        (True, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta),
+        (False, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta - small_curvature),
       ])
 
       # the driver can hold a curvature openpilot may not command, safety must never require moving past
