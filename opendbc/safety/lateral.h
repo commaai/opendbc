@@ -289,12 +289,15 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
 
       // the MAX is to allow the desired curvature to hit the edge of the bounds and not require going under it
       if (curvature_state.desired_last > highest_desired_curvature_error) {
-        highest_desired_curvature = SAFETY_MAX(curvature_state.desired_last - max_curvature_delta_relaxed_can, highest_desired_curvature_error);
-        highest_desired_curvature = SAFETY_MAX(highest_desired_curvature, -max_curvature_relaxed_can);
+        int required = SAFETY_MAX(curvature_state.desired_last - max_curvature_delta_relaxed_can, highest_desired_curvature_error);
+        required = SAFETY_MAX(required, -max_curvature_relaxed_can);
+        // relaxing what we require must never widen the rate limit window
+        highest_desired_curvature = SAFETY_MIN(highest_desired_curvature, required);
 
       } else if (curvature_state.desired_last < lowest_desired_curvature_error) {
-        lowest_desired_curvature = SAFETY_MIN(curvature_state.desired_last + max_curvature_delta_relaxed_can, lowest_desired_curvature_error);
-        lowest_desired_curvature = SAFETY_MIN(lowest_desired_curvature, max_curvature_relaxed_can);
+        int required = SAFETY_MIN(curvature_state.desired_last + max_curvature_delta_relaxed_can, lowest_desired_curvature_error);
+        required = SAFETY_MIN(required, max_curvature_relaxed_can);
+        lowest_desired_curvature = SAFETY_MAX(lowest_desired_curvature, required);
 
       } else {
         // already inside error boundary, don't allow commanding outside it
