@@ -336,7 +336,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     """
     When the command is outside the curvature error bounds it must move back toward them respecting
     rate limits. Since safety fudges its rate limits up to avoid false positives, it has to require
-    a lower rate of movement than openpilot's own. Moving toward zero is never required.
+    a lower rate of movement than openpilot's own.
     """
     self.safety.set_controls_allowed(True)
     max_error_can = round(self.MAX_CURVATURE_ERROR * self.DEG_TO_CAN)
@@ -357,11 +357,13 @@ class TestFordSafetyBase(common.CarSafetyTest):
         (False, last - delta - 1),      # faster than the jerk limit
       ]
 
-      # command is inside the bounds on the zero side, it is never required to catch up to measured
+      # command sits well below the error bounds, it has to wind back up toward them
       up_cases = [
-        (True, 0),                      # zero is always allowed
-        (True, delta),                  # may move toward measured at the jerk limit
-        (False, delta + 1),             # but no faster
+        (False, 0),                     # holding still is not enough
+        (False, relaxed - 1),           # moving, but slower than required
+        (True, relaxed),                # least movement safety accepts
+        (True, delta),                  # openpilot's own rate limit
+        (False, delta + 1),             # faster than the jerk limit
       ]
 
       for sign in (-1, 1):
