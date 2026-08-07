@@ -284,5 +284,72 @@ class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongB
     pass
 
 
+# LKA steering + ALT_BUTTONS (e.g. 2025-26 Kia Carnival HDA II Hybrid).
+# Required because the LKA-steering init paths previously hardcoded STD_BUTTONS.
+class TestHyundaiCanfdLKASteeringAltButtonsEV(TestHyundaiCanfdLKASteeringEV):
+
+  TX_MSGS = [[0x50, 0], [0x1AA, 1], [0x2A4, 0]]
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd,
+                                 HyundaiSafetyFlags.CANFD_LKA_STEER_MSG |
+                                 HyundaiSafetyFlags.CANFD_ALT_BUTTONS |
+                                 HyundaiSafetyFlags.EV_GAS)
+    self.safety.init_tests()
+
+  def _button_msg(self, buttons, main_button=0, bus=None):
+    if bus is None:
+      bus = self.PT_BUS
+    values = {"CRUISE_BUTTONS": buttons, "ADAPTIVE_CRUISE_MAIN_BTN": main_button}
+    return self.packer.make_can_msg_safety("CRUISE_BUTTONS_ALT", bus, values)
+
+
+# LKA_STEER_MSG_ALT (0x110) + ALT_BUTTONS
+class TestHyundaiCanfdLKASteeringAltAltButtonsEV(TestHyundaiCanfdLKASteeringAltEV):
+
+  TX_MSGS = [[0x110, 0], [0x1AA, 1], [0x362, 0]]
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd,
+                                 HyundaiSafetyFlags.CANFD_LKA_STEER_MSG |
+                                 HyundaiSafetyFlags.CANFD_LKA_STEER_MSG_ALT |
+                                 HyundaiSafetyFlags.CANFD_ALT_BUTTONS |
+                                 HyundaiSafetyFlags.EV_GAS)
+    self.safety.init_tests()
+
+  def _button_msg(self, buttons, main_button=0, bus=None):
+    if bus is None:
+      bus = self.PT_BUS
+    values = {"CRUISE_BUTTONS": buttons, "ADAPTIVE_CRUISE_MAIN_BTN": main_button}
+    return self.packer.make_can_msg_safety("CRUISE_BUTTONS_ALT", bus, values)
+
+
+# LKA steering + ALT_BUTTONS + longitudinal
+class TestHyundaiCanfdLKASteeringLongAltButtonsEV(TestHyundaiCanfdLKASteeringLongEV):
+
+  TX_MSGS = [[0x50, 0], [0x1AA, 1], [0x2A4, 0], [0x51, 0], [0x730, 1], [0x12a, 1], [0x160, 1],
+             [0x1e0, 1], [0x1a0, 1], [0x1ea, 1], [0x200, 1], [0x345, 1], [0x1da, 1]]
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd,
+                                 HyundaiSafetyFlags.CANFD_LKA_STEER_MSG |
+                                 HyundaiSafetyFlags.CANFD_ALT_BUTTONS |
+                                 HyundaiSafetyFlags.LONG |
+                                 HyundaiSafetyFlags.EV_GAS)
+    self.safety.init_tests()
+
+  def _button_msg(self, buttons, main_button=0, bus=None):
+    if bus is None:
+      bus = self.PT_BUS
+    values = {"CRUISE_BUTTONS": buttons, "ADAPTIVE_CRUISE_MAIN_BTN": main_button}
+    return self.packer.make_can_msg_safety("CRUISE_BUTTONS_ALT", bus, values)
+
+
 if __name__ == "__main__":
   unittest.main()
