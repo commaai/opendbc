@@ -74,19 +74,41 @@ FW_QUERY_CONFIG = FwQueryConfig(
   ]
 )
 
-# Cars with this EPS FW have FSD 14 and use TeslaFlags.FSD_14
-FSD_14_FW = {
+# Cars with this EPS FW have a 2-bit DAS_steeringControlType and use TeslaFlags.LEGACY_DAS_STEERING
+LEGACY_DAS_STEERING_FW = {
   CAR.TESLA_MODEL_3: [
-    b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
-    b'TeMYG4_Main_0.0.0 (78),E4HP015.05.0',
-    b'TeMYG4_Main_0.0.0 (77),E4H015.04.5',
-    b'TeMYG4_Main_0.0.0 (78),E4H015.05.0',
+    b'TeM3_E014p10_0.0.0 (16),E014.17.00',
+    b'TeM3_E014p10_0.0.0 (16),EL014.17.00',
+    b'TeM3_ES014p11_0.0.0 (25),ES014.19.0',
+    b'TeMYG4_DCS_Update_0.0.0 (13),E4014.28.1',
+    b'TeMYG4_DCS_Update_0.0.0 (9),E4014.26.0',
+    b'TeMYG4_Legacy3Y_0.0.0 (2),E4015.02.0',
+    b'TeMYG4_Legacy3Y_0.0.0 (5),E4015.03.2',
+    b'TeMYG4_Legacy3Y_0.0.0 (5),E4L015.03.2',
+    b'TeMYG4_Main_0.0.0 (59),E4H014.29.0',
+    b'TeMYG4_Main_0.0.0 (65),E4H015.01.0',
+    b'TeMYG4_Main_0.0.0 (67),E4H015.02.1',
+    b'TeMYG4_SingleECU_0.0.0 (33),E4S014.27',
   ],
   CAR.TESLA_MODEL_Y: [
-    b'TeMYG4_Legacy3Y_0.0.0 (6),Y4003.04.0',
-    b'TeMYG4_Main_0.0.0 (77),Y4003.05.4',
-    b'TeMYG4_Main_0.0.0 (78),Y4003.06.0',
-  ]
+    b'TeM3_E014p10_0.0.0 (16),Y002.18.00',
+    b'TeM3_E014p10_0.0.0 (16),YP002.18.00',
+    b'TeM3_ES014p11_0.0.0 (16),YS002.17',
+    b'TeM3_ES014p11_0.0.0 (25),YS002.19.0',
+    b'TeMYG4_DCS_Update_0.0.0 (13),Y4002.27.1',
+    b'TeMYG4_DCS_Update_0.0.0 (13),Y4P002.27.1',
+    b'TeMYG4_DCS_Update_0.0.0 (9),Y4P002.25.0',
+    b'TeMYG4_Legacy3Y_0.0.0 (2),Y4003.02.0',
+    b'TeMYG4_Legacy3Y_0.0.0 (2),Y4P003.02.0',
+    b'TeMYG4_Legacy3Y_0.0.0 (5),Y4003.03.2',
+    b'TeMYG4_Legacy3Y_0.0.0 (5),Y4P003.03.2',
+    b'TeMYG4_SingleECU_0.0.0 (28),Y4S002.23.0',
+    b'TeMYG4_SingleECU_0.0.0 (33),Y4S002.26',
+  ],
+  CAR.TESLA_MODEL_X: [
+    b'TeM3_SP_XP002p2_0.0.0 (23),XPR003.6.0',
+    b'TeM3_SP_XP002p2_0.0.0 (36),XPR003.10.0',
+  ],
 }
 
 
@@ -123,12 +145,12 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
-  FSD_14 = 2
+  LEGACY_DAS_STEERING = 2
 
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
-  FSD_14 = 2
+  LEGACY_DAS_STEERING = 2
   MISSING_DAS_SETTINGS = 4
 
 
