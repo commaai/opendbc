@@ -288,7 +288,7 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
       const int highest_desired_curvature_error = curvature_state.meas.max + limits.max_curvature_error + 1;
 
       if (curvature_state.desired_last < lowest_desired_curvature_error) {
-        // demand winding up: never require more than the relaxed step, never past the band edge,
+        // demand winding up: never require more than the relaxed step, never past the error band edge,
         // and never past what openpilot can reach (lat accel or max_curvature).
         const int required = SAFETY_MIN(SAFETY_MIN(curvature_state.desired_last + max_curvature_delta_relaxed_can,
                                                    lowest_desired_curvature_error), max_curvature_relaxed_can);
