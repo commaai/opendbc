@@ -90,13 +90,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
   packer: CANPackerSafety
   safety: libsafety_py.LibSafety
 
-  def get_canfd_curvature_limits(self, speed):
-    # Round it in accordance with the safety
-    curvature_accel_limit = MAX_LATERAL_ACCEL / (max(speed, 1) ** 2)
-    curvature_accel_limit_lower = int(curvature_accel_limit * self.DEG_TO_CAN - 1) / self.DEG_TO_CAN
-    curvature_accel_limit_upper = int(curvature_accel_limit * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN
-    return curvature_accel_limit_lower, curvature_accel_limit_upper
-
   def _get_max_curvature_can(self, speed):
     fudged_speed = max(speed - 1.0, 1.0)
     return int(MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed) * self.DEG_TO_CAN) + 1
@@ -325,7 +318,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     small_curvature = 1 / self.DEG_TO_CAN  # significant small amount of curvature to cross boundary
 
     for speed in np.arange(0, 40, 0.5):
-      curvature_accel_limit_lower, curvature_accel_limit_upper = self.get_canfd_curvature_limits(speed)
+      curvature_accel_limit = self._get_max_curvature_can(speed) / self.DEG_TO_CAN
       limit_command = speed > self.CURVATURE_ERROR_MIN_SPEED
       # ensure our limits match the safety's rounded limits
       # lateral jerk is symmetric, so the wind up and wind down limits are the same
@@ -362,15 +355,8 @@ class TestFordSafetyBase(common.CarSafetyTest):
           self._reset_curvature_measurement(sign * angle_meas, speed)
           for should_tx, initial_curvature, desired_curvature in cases:
 
-            # Only CAN FD has the max lateral acceleration limit
-            if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-              if should_tx:
-                # can not send if the curvature is above the max lateral acceleration
-                should_tx = should_tx and abs(desired_curvature) <= curvature_accel_limit_upper
-              else:
-                # if desired curvature violates driver curvature error, it can only send if
-                # the curvature is being limited by max lateral acceleration
-                should_tx = should_tx or curvature_accel_limit_lower <= abs(desired_curvature) <= curvature_accel_limit_upper
+            # can not send if the curvature is above the max lateral acceleration
+            should_tx = should_tx and abs(desired_curvature) <= curvature_accel_limit
 
             self._set_prev_desired_angle(sign * initial_curvature)
             self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * desired_curvature, 0)))
