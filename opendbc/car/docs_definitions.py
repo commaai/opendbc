@@ -241,6 +241,8 @@ class CarDocs:
 
   # all the parts needed for the supported car
   car_parts: CarParts = field(default_factory=CarParts)
+  # Mazda requires comma power
+  requires_comma_power: bool = False
 
   merged: bool = True
   support_type: SupportType = SupportType.UPSTREAM
