@@ -1,6 +1,6 @@
 from opendbc.car import Bus, get_safety_config, structs, uds
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, HyundaiSafetyFlags
+from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, HyundaiSafetyFlags, HyundaiCanSafetyFlags, HyundaiCanFDSafetyFlags
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
@@ -74,11 +74,11 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs = cfgs
 
       if ret.flags & HyundaiFlags.CANFD_LKA_STEER_MSG:
-        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_LKA_STEER_MSG.value
+        ret.safetyConfigs[-1].safetyParam |= HyundaiCanFDSafetyFlags.LKA_STEER_MSG.value
         if ret.flags & HyundaiFlags.CANFD_LKA_STEER_MSG_ALT:
-          ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_LKA_STEER_MSG_ALT.value
+          ret.safetyConfigs[-1].safetyParam |= HyundaiCanFDSafetyFlags.LKA_STEER_MSG_ALT.value
       if ret.flags & HyundaiFlags.CANFD_ALT_BUTTONS:
-        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_ALT_BUTTONS.value
+        ret.safetyConfigs[-1].safetyParam |= HyundaiCanFDSafetyFlags.ALT_BUTTONS.value
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
 
@@ -116,10 +116,10 @@ class CarInterface(CarInterfaceBase):
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     if ret.flags & HyundaiFlags.ALT_LIMITS:
-      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.ALT_LIMITS.value
+      ret.safetyConfigs[-1].safetyParam |= HyundaiCanSafetyFlags.ALT_LIMITS.value
 
     if ret.flags & HyundaiFlags.ALT_LIMITS_2:
-      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.ALT_LIMITS_2.value
+      ret.safetyConfigs[-1].safetyParam |= HyundaiCanSafetyFlags.ALT_LIMITS_2.value
 
       # see https://github.com/commaai/opendbc/pull/1137/
       ret.dashcamOnly = True
