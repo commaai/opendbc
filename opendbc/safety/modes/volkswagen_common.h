@@ -39,6 +39,7 @@ bool volkswagen_brake_pressure_detected = false;
 #define MSG_TSK_04      0x10EU   // RX from ECU, for ACC status from drivetrain coordinator
 
 static void volkswagen_common_init(void) {
+  volkswagen_longitudinal = false;
   volkswagen_set_button_prev = false;
   volkswagen_resume_button_prev = false;
   volkswagen_brake_pedal_switch = false;
