@@ -24,8 +24,8 @@ static uint8_t tesla_get_counter(const CANPacket_t *msg) {
   } else if (msg->addr == 0x488U) {
     // Signal: DAS_steeringControlCounter
     cnt = msg->data[2] & 0x0FU;
-  } else if ((msg->addr == 0x257U) || (msg->addr == 0x118U) || (msg->addr == 0x145U) || (msg->addr == 0x286U) || (msg->addr == 0x311U)) {
-    // Signal: DI_speedCounter, DI_systemStatusCounter, ESP_statusCounter, DI_locStatusCounter, UI_warningCounter
+  } else if ((msg->addr == 0x257U) || (msg->addr == 0x145U) || (msg->addr == 0x286U) || (msg->addr == 0x311U)) {
+    // Signal: DI_speedCounter, ESP_statusCounter, DI_locStatusCounter, UI_warningCounter
     cnt = msg->data[1] & 0x0FU;
   } else if (msg->addr == 0x155U) {
     // Signal: ESP_wheelRotationCounter
@@ -46,8 +46,8 @@ static int _tesla_get_checksum_byte(const int addr) {
   } else if (addr == 0x488) {
     // Signal: DAS_steeringControlChecksum
     checksum_byte = 3;
-  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x145) || (addr == 0x286) || (addr == 0x311)) {
-    // Signal: DI_speedChecksum, DI_systemStatusChecksum, ESP_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
+  } else if ((addr == 0x257) || (addr == 0x145) || (addr == 0x286) || (addr == 0x311)) {
+    // Signal: DI_speedChecksum, ESP_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
     checksum_byte = 0;
   } else {
   }
@@ -128,6 +128,9 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
       float speed = ((((msg->data[2] << 4) | (msg->data[1] >> 4)) * 0.08) - 40.) * KPH_TO_MS;
       UPDATE_VEHICLE_SPEED(speed);
+
+      // Signal: DI_accelPedalPressed
+      gas_pressed = GET_BIT(msg, 34U);
     }
 
     // 2nd vehicle speed (ESP_B)
@@ -135,11 +138,6 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
       float esp_speed = (((msg->data[6] & 0x0FU) << 6) | (msg->data[5] >> 2)) * 0.5 * KPH_TO_MS;
       speed_mismatch_check(esp_speed);
-    }
-
-    // Gas pressed
-    if (msg->addr == 0x118U) {
-      gas_pressed = (msg->data[4] != 0U);
     }
 
     // Brake pressed
@@ -363,10 +361,9 @@ static safety_config tesla_init(uint16_t param) {
   static RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, 25U, .max_counter = 7U, .ignore_quality_flag = true}, { 0 }, { 0 }}},    // DAS_control
     {.msg = {{0x488, 2, 4, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // DAS_steeringControl
-    {.msg = {{0x257, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
+    {.msg = {{0x257, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // DI_speed (speed in kph, gas pressed)
     {.msg = {{0x155, 0, 8, 50U, .max_counter = 15U}, { 0 }, { 0 }}},                                // ESP_B (2nd speed in kph)
     {.msg = {{0x370, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
-    {.msg = {{0x118, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
     {.msg = {{0x145, 0, 8, 50U, .max_counter = 15U}, { 0 }, { 0 }}},                                // ESP_status (brakes)
     {.msg = {{0x286, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // DI_state (acc state)
     {.msg = {{0x311, 0, 7, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
