@@ -56,6 +56,7 @@ class HondaSafetyFlags(IntFlag):
   NIDEC_ALT = 4
   RADARLESS = 8
   BOSCH_CANFD = 16
+  NO_ENGINE_DATA_MSG = 32
 
 
 class HondaFlags(IntFlag):
@@ -302,6 +303,12 @@ class CAR(Platforms):
   ACURA_TLX_2G_MMR = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Acura TLX 2025", "All")],
     CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.87, centerToFrontRatio=0.43, steerRatio=13.7),
+  )
+  ACURA_INTEGRA = HondaBoschPlatformConfig(
+    [HondaCarDocs("Acura Integra 2023-25", "All")],
+    CarSpecs(mass=3338.8 * CV.LB_TO_KG, wheelbase=2.5, centerToFrontRatio=0.5, steerRatio=15.5,),
+    {Bus.pt: 'honda_bosch_radarless_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS,
   )
 
   # Nidec Cars
