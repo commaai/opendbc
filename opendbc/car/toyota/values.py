@@ -127,6 +127,11 @@ class ToyotaSecOCPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   # Toyota
+  TOYOTA_ALPHARD_H = PlatformConfig(
+    [ToyotaCarDocs("Toyota Alphard Hybrid 2016")],
+    CarSpecs(mass=2136., wheelbase=3.00, steerRatio=15.6),
+    dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
+  )
   TOYOTA_ALPHARD_TSS2 = ToyotaTSS2PlatformConfig(
     [
       ToyotaCarDocs("Toyota Alphard 2019-20"),
@@ -510,7 +515,7 @@ FW_CHUNK_LEN = 16
 PLATFORM_CODE_ECUS = (Ecu.fwdCamera, Ecu.fwdRadar, Ecu.eps)
 
 # These platforms have at least one platform code for all ECUs shared with another platform.
-FUZZY_EXCLUDED_PLATFORMS: set[CAR] = set()
+FUZZY_EXCLUDED_PLATFORMS: set[CAR] = {CAR.TOYOTA_ALPHARD_H, CAR.TOYOTA_ALPHARD_TSS2}
 
 # Some ECUs that use KWP2000 have their FW versions on non-standard data identifiers.
 # Toyota diagnostic software first gets the supported data ids, then queries them one by one.
@@ -545,7 +550,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
     # FIXME: On some models, abs can sometimes be missing
     Ecu.abs: [CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_SIENNA, CAR.LEXUS_IS, CAR.TOYOTA_ALPHARD_TSS2],
     # On some models, the engine can show on two different addresses
-    Ecu.engine: [CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_CAMRY, CAR.TOYOTA_COROLLA_TSS2, CAR.TOYOTA_CHR, CAR.TOYOTA_CHR_TSS2, CAR.LEXUS_IS,
+    Ecu.engine: [CAR.TOYOTA_ALPHARD_H, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_CAMRY, CAR.TOYOTA_COROLLA_TSS2, CAR.TOYOTA_CHR, CAR.TOYOTA_CHR_TSS2, CAR.LEXUS_IS,
                  CAR.LEXUS_IS_TSS2, CAR.LEXUS_RC, CAR.LEXUS_NX, CAR.LEXUS_NX_TSS2, CAR.LEXUS_RX, CAR.LEXUS_RX_TSS2],
   },
   extra_ecus=[
