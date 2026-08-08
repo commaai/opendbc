@@ -33,6 +33,7 @@ FW_VERSIONS = {
       b'TeM3_E014p10_0.0.0 (24),YP002.21.2',
       b'TeM3_ES014p11_0.0.0 (16),YS002.17',
       b'TeM3_ES014p11_0.0.0 (25),YS002.19.0',
+      b'TeM3_E014p10_0.0.0 (24),Y002.21.2',
       b'TeMYG4_DCS_Update_0.0.0 (13),Y4002.27.1',
       b'TeMYG4_DCS_Update_0.0.0 (13),Y4P002.27.1',
       b'TeMYG4_DCS_Update_0.0.0 (9),Y4P002.25.0',
