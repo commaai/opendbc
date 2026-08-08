@@ -8,7 +8,7 @@ from typing import Any
 from collections.abc import Callable
 from functools import cache
 
-from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, STD_CARGO_KG
+from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.common.basedir import BASEDIR
@@ -133,7 +133,8 @@ class CarInterfaceBase(ABC):
     ret = CarInterfaceBase.get_std_params(candidate)
 
     platform = PLATFORMS[candidate]
-    ret.mass = platform.config.specs.mass
+    # Arbitrary mass; it cancels out of the vehicle dynamics but keeps the formulation readable.
+    ret.unitMass = 1.0
     ret.wheelbase = platform.config.specs.wheelbase
     ret.steerRatio = platform.config.specs.steerRatio
     ret.centerToFront = ret.wheelbase * platform.config.specs.centerToFrontRatio
@@ -144,13 +145,9 @@ class CarInterfaceBase(ABC):
 
     ret = cls._get_params(ret, candidate, fingerprint, car_fw, alpha_long, is_release, docs)
 
-    # Vehicle mass is published curb weight plus assumed payload such as a human driver; notCars have no assumed payload
-    if not ret.notCar:
-      ret.mass = ret.mass + STD_CARGO_KG
-
     # Set params dependent on values set by the car interface
-    ret.rotationalInertia = scale_rot_inertia(ret.mass, ret.wheelbase)
-    ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront, ret.tireStiffnessFactor)
+    ret.rotationalInertia = scale_rot_inertia(ret.unitMass, ret.wheelbase)
+    ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.unitMass, ret.wheelbase, ret.centerToFront, ret.tireStiffnessFactor)
 
     return ret
 
