@@ -3,6 +3,19 @@
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/volkswagen_common.h"
 
+static uint32_t volkswagen_mlb_compute_checksum(const CANPacket_t *msg) {
+  // XOR checksum seeded with the CAN address high byte XOR low byte, except LH_EPS_03 which uses the CRC8H2F MQB/MEB checksum.
+  // This only covers messages used in safety. Full reference python implementation is in opendbc/car/volkswagen/
+  uint32_t result;
+
+  if (msg->addr == MSG_LH_EPS_03) {
+    result = volkswagen_mqb_meb_compute_crc(msg);
+  } else {
+    uint8_t seed = (uint8_t)(((msg->addr >> 8) & 0xFFU) ^ (msg->addr & 0xFFU));
+    result = volkswagen_xor_checksum(msg, 0U, seed);
+  }
+  return result;
+}
 
 static safety_config volkswagen_mlb_init(uint16_t param) {
   // Transmit of LS_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
@@ -10,13 +23,12 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
                                                         {MSG_LS_01, 0, 4, .check_relay = false}, {MSG_LS_01, 2, 4, .check_relay = false}};
 
   static RxCheck volkswagen_mlb_rx_checks[] = {
-    // TODO: implement checksum validation
-    {.msg = {{MSG_ESP_03, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ESP_05, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_TSK_04, 1, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_LS_01, 0, 4, 10U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_ESP_03, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_ESP_05, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_TSK_04, 1, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LS_01, 0, 4, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
   SAFETY_UNUSED(param);
@@ -121,7 +133,7 @@ const safety_hooks volkswagen_mlb_hooks = {
   .init = volkswagen_mlb_init,
   .rx = volkswagen_mlb_rx_hook,
   .tx = volkswagen_mlb_tx_hook,
-  .get_counter = volkswagen_mqb_meb_get_counter,
-  .get_checksum = volkswagen_mqb_meb_get_checksum,
-  .compute_checksum = volkswagen_mqb_meb_compute_crc,
+  .get_counter = volkswagen_mqb_meb_mlb_get_counter,
+  .get_checksum = volkswagen_mqb_meb_mlb_get_checksum,
+  .compute_checksum = volkswagen_mlb_compute_checksum,
 };

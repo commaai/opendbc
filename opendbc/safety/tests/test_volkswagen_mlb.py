@@ -88,6 +88,21 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
       self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
                        f"expected {brake_pressed=} with {motor_03_signal=} and {esp_05_signal=}")
 
+  def test_rx_hook(self):
+    # LH_EPS_03 uses the MQB/MEB CRC, all other messages use an XOR checksum
+    for msg_type in ("speed", "torque_driver"):
+      self.safety.set_controls_allowed(True)
+
+      # send multiple times to verify counter checks
+      for _ in range(10):
+        msg = self._speed_msg(0) if msg_type == "speed" else self._torque_driver_msg(0)
+        self.assertTrue(self._rx(msg))
+        self.assertTrue(self.safety.get_controls_allowed())
+
+      msg[0].data[0] ^= 0xFF  # invalidate checksum
+      self.assertFalse(self._rx(msg))
+      self.assertFalse(self.safety.get_controls_allowed())
+
   def test_torque_measurements(self):
     # TODO: make this test work with all cars
     self._rx(self._torque_driver_msg(50))
