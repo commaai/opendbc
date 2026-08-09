@@ -2,7 +2,6 @@ from opendbc.car import structs
 from opendbc.car.crc import CRC8J1850
 from opendbc.car.chrysler.values import CUSW_CARS, RAM_CARS
 
-GearShifter = structs.CarState.GearShifter
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 

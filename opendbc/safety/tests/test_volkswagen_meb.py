@@ -22,17 +22,12 @@ ACC_AKTIV_REGELT = 3
 ACC_OVERRIDE = 4
 
 # MEB message IDs
-MSG_LH_EPS_03  = 0x9F
-MSG_ESC_51     = 0xFC
-MSG_Motor_51   = 0x10B
-MSG_QFK_01     = 0x13D
 MSG_ACC_18     = 0x14D
 MSG_KLR_01     = 0x25D
 MSG_TA_01      = 0x26B
 MSG_ACC_19     = 0x300
 MSG_HCA_03     = 0x303
 MSG_LDW_02     = 0x397
-MSG_MOTOR_14   = 0x3BE
 
 
 class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteeringSafetyTest):

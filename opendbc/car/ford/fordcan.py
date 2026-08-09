@@ -1,6 +1,4 @@
-from opendbc.car import CanBusBase, structs
-
-HUDControl = structs.CarControl.HUDControl
+from opendbc.car import CanBusBase
 
 
 class CanBus(CanBusBase):

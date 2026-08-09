@@ -7,7 +7,6 @@ from string import Template
 from typing import get_args
 
 from enum import Enum
-from collections import defaultdict
 
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
@@ -76,13 +75,6 @@ def get_all_car_docs() -> list[CarDocs]:
   collected_footnotes = get_all_footnotes()
   sorted_list: list[CarDocs] = build_sorted_car_docs_list(EXTRA_PLATFORMS, footnotes=collected_footnotes)
   return sorted_list
-
-
-def group_by_make(all_car_docs: list[CarDocs]) -> dict[str, list[CarDocs]]:
-  sorted_car_docs = defaultdict(list)
-  for car_docs in all_car_docs:
-    sorted_car_docs[car_docs.make].append(car_docs)
-  return dict(sorted_car_docs)
 
 
 def _build_cars_table(all_car_docs: list[CarDocs], **kwargs) -> tuple[str, str, str]:

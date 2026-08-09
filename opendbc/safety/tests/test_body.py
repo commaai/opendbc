@@ -26,10 +26,6 @@ class TestBody(common.SafetyTest):
     values = {"TORQUE_L": torque_l, "TORQUE_R": torque_r}
     return self.packer.make_can_msg_safety("TORQUE_CMD", 0, values)
 
-  def _max_motor_rpm_cmd_msg(self, max_rpm_l, max_rpm_r):
-    values = {"MAX_RPM_L": max_rpm_l, "MAX_RPM_R": max_rpm_r}
-    return self.packer.make_can_msg_safety("MAX_MOTOR_RPM_CMD", 0, values)
-
   def test_rx_hook(self):
     self.assertFalse(self.safety.get_controls_allowed())
 
