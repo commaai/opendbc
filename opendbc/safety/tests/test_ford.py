@@ -10,8 +10,6 @@ from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import CANPackerSafety
 
-MSG_EngBrakeData = 0x165           # RX from PCM, for driver brake pedal and cruise state
-MSG_EngVehicleSpThrottle = 0x204   # RX from PCM, for driver throttle input
 MSG_BrakeSysFeatures = 0x415       # RX from ABS, for vehicle speed
 MSG_EngVehicleSpThrottle2 = 0x202  # RX from PCM, for second vehicle speed
 MSG_Yaw_Data_FD1 = 0x91            # RX from RCM, for yaw rate
