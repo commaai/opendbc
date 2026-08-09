@@ -2,7 +2,7 @@ import re
 import unittest
 
 from opendbc.car.honda.fingerprints import FW_VERSIONS
-from opendbc.car.honda.values import HONDA_BOSCH, HONDA_BOSCH_TJA_CONTROL
+from opendbc.car.honda.values import CAR, HondaFlags
 
 HONDA_FW_VERSION_RE = br"[A-Z0-9]{5}-[A-Z0-9]{3}(-|,)[A-Z0-9]{4}(\x00){2}$"
 
@@ -16,4 +16,6 @@ class TestHondaFingerprint(unittest.TestCase):
           assert re.match(HONDA_FW_VERSION_RE, fw) is not None, fw
 
   def test_tja_bosch_only(self):
-    assert set(HONDA_BOSCH_TJA_CONTROL).issubset(set(HONDA_BOSCH)), "Nidec car found in TJA control list"
+    for car_model in CAR:
+      if car_model.config.flags & HondaFlags.BOSCH_TJA_CONTROL:
+        assert car_model.config.flags & HondaFlags.BOSCH, "Nidec car found with TJA control"
