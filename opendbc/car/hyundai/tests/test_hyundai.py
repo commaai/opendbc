@@ -3,7 +3,7 @@ import unittest
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car.hyundai.interface import HyundaiInterface as Interface
+from opendbc.car.hyundai.interface import HyundaiInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.hyundai.values import CAR, DATE_FW_ECUS, FW_QUERY_CONFIG, CANFD_FUZZY_WHITELIST, \
@@ -58,7 +58,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
       if lka_steering:
         cam_can = CanBus(None, fingerprint).CAM
         fingerprint[cam_can] = [0x50, 0x110]  # LKA steering messages
-      CP = Interface.get_params(CAR.KIA_EV6, fingerprint, [], False, False, False)
+      CP = HyundaiInterface.get_params(CAR.KIA_EV6, fingerprint, [], False, False, False)
       assert bool(CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG) == lka_steering
 
     # radar available
@@ -66,14 +66,14 @@ class TestHyundaiFingerprint(unittest.TestCase):
       fingerprint = gen_empty_fingerprint()
       if radar:
         fingerprint[1][RADAR_START_ADDR] = 8
-      CP = Interface.get_params(CAR.HYUNDAI_SONATA, fingerprint, [], False, False, False)
+      CP = HyundaiInterface.get_params(CAR.HYUNDAI_SONATA, fingerprint, [], False, False, False)
       assert CP.radarUnavailable != radar
 
   def test_alternate_limits(self):
     # Alternate lateral control limits, for high torque cars, verify Panda safety mode flag is set
     fingerprint = gen_empty_fingerprint()
     for car_model in CAR:
-      CP = Interface.get_params(car_model, fingerprint, [], False, False, False)
+      CP = HyundaiInterface.get_params(car_model, fingerprint, [], False, False, False)
       assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.ALT_LIMITS)
 
   def test_can_features(self):

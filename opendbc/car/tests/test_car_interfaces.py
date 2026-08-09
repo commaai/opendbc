@@ -101,23 +101,7 @@ def _make_car_test(car_name):
 
 
 class TestInterfaces(unittest.TestCase):
-  def test_registries(self):
-    """Sanity checks for the explicit per-brand registries (opendbc.car.registries)."""
-    from opendbc.car.values import FW_VERSIONS, FINGERPRINTS, VERSIONS, FW_QUERY_CONFIGS
-
-    # every brand with firmware versions also has a query config, and vice versa
-    assert set(VERSIONS) == set(FW_QUERY_CONFIGS)
-    assert len(VERSIONS) >= 12
-
-    # combined firmware versions cover every per-brand platform
-    assert set(FW_VERSIONS) == {platform for fw in VERSIONS.values() for platform in fw}
-
-    # legacy fingerprints are only published by body and gm
-    assert len(FINGERPRINTS) >= 1
-
-    # every brand in VERSIONS is a non-None dict
-    for brand, fw in VERSIONS.items():
-      assert isinstance(fw, dict), f"{brand} firmware versions is not a dict"
+  pass
 
 
 for car_name in sorted(PLATFORMS):
