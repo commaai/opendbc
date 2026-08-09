@@ -142,6 +142,7 @@ CHRYSLER_SOFTWARE_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTI
 CHRYSLER_RX_OFFSET = -0x280
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[A-Z0-9_]{10} ?",
   requests=[
     Request(
       [CHRYSLER_VERSION_REQUEST],

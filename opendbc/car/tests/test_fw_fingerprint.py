@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 import random
+import re
 import time
 from collections import defaultdict
 
@@ -105,6 +106,14 @@ class TestFwFingerprint(unittest.TestCase):
             duplicates = {fw for fw in ecu_fw if ecu_fw.count(fw) > 1}
             assert not len(duplicates), f'{car_model}: Duplicate FW versions: Ecu.{ecu[0]}, {duplicates}'
             assert len(ecu_fw) > 0, f'{car_model}: No FW versions: Ecu.{ecu[0]}'
+
+  def test_fw_version_format(self):
+    for brand, config in FW_QUERY_CONFIGS.items():
+      for car_model, ecus in VERSIONS[brand].items():
+        for ecu, fw_versions in ecus.items():
+          for fw in fw_versions:
+            with self.subTest(brand=brand, car_model=car_model.value, ecu=ecu, fw=fw):
+              assert re.fullmatch(config.fw_version_regex, fw) is not None, fw
 
   def test_all_addrs_map_to_one_ecu(self):
     for brand, cars in VERSIONS.items():

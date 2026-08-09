@@ -85,7 +85,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
       values = {
         "SCCM_WheelTouch_HandsOn": 1 if controls_allowed else 0,
         "SCCM_WheelTouch_CapacitiveValue": 100 if controls_allowed else 0,
-        "SETME_X52": 100,
+        "SCCM_WheelTouch_Calibration": 100,
       }
       self.assertTrue(self._tx(self.packer.make_can_msg_safety("SCCM_WheelTouch", 2, values)))
 
