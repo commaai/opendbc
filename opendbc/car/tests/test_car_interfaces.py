@@ -30,7 +30,7 @@ def get_fuzzy_car_interface(car_name: str, fuzzy: Fuzzy) -> CarInterfaceBase:
   # initialize car interface
   Interface = interfaces[car_name]
   car_params = Interface.get_params(car_name, fingerprints, fuzzy.list(generate_car_fw),
-                                       alpha_long=fuzzy.boolean(), is_release=False, docs=False)
+                                    alpha_long=fuzzy.boolean(), is_release=False, docs=False)
   return Interface(car_params)
 
 
@@ -100,9 +100,9 @@ def _make_car_test(car_name):
   return test
 
 
-class TestInterfaces(unittest.TestCase):
+class TestCarInterfaces(unittest.TestCase):
   pass
 
 
 for car_name in sorted(PLATFORMS):
-  setattr(TestInterfaces, f'test_car_interfaces_{car_name}', _make_car_test(car_name))
+  setattr(TestCarInterfaces, f'test_car_interfaces_{car_name}', _make_car_test(car_name))
