@@ -3,20 +3,24 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.chrysler.carcontroller import CarController
 from opendbc.car.chrysler.carstate import CarState
 from opendbc.car.chrysler.radar_interface import RadarInterface
-from opendbc.car.chrysler.values import CAR, CUSW_CARS, RAM_HD, RAM_DT, RAM_CARS, ChryslerFlags, ChryslerSafetyFlags
+from opendbc.car.chrysler.fingerprints import FW_VERSIONS
+from opendbc.car.chrysler.values import FW_QUERY_CONFIG, CAR, CUSW_CARS, RAM_HD, RAM_DT, RAM_CARS, ChryslerFlags, ChryslerSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
 
 
-class CarInterface(CarInterfaceBase):
+class ChryslerInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
   RadarInterface = RadarInterface
+  CAR = CAR
+  BRAND = "chrysler"
+  FW_QUERY_CONFIG = FW_QUERY_CONFIG
+  FW_VERSIONS = FW_VERSIONS
 
   DRIVABLE_GEARS = (structs.CarState.GearShifter.low,)
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
-    ret.brand = "chrysler"
 
     # TODO: Chrysler CUSW in dashcam pending comma safety validation and a fix for LKAS fault on disengage
     ret.dashcamOnly = candidate in (RAM_HD | CUSW_CARS)

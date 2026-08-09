@@ -4,17 +4,15 @@ import time
 import tomllib
 from abc import abstractmethod, ABC
 from enum import StrEnum
-from typing import Any
 from collections.abc import Callable
 from functools import cache
 
 from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, STD_CARGO_KG
-from opendbc.car import structs
+from opendbc.car import structs, Platforms
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
-from opendbc.car.values import PLATFORMS
 from opendbc.can import CANParser
 
 GearShifter = structs.CarState.GearShifter
@@ -97,6 +95,11 @@ class CarInterfaceBase(ABC):
   CarController: type['CarControllerBase']
   RadarInterface: type['RadarInterfaceBase'] = RadarInterfaceBase
 
+  # Brand identity and static config. Every concrete Interface sets CAR and BRAND;
+  # the firmware/fingerprint attributes are set by brands that publish them.
+  CAR: type[Platforms]
+  BRAND: str
+
   DRIVABLE_GEARS: tuple[structs.CarState.GearShifter, ...] = ()
 
   def __init__(self, CP: structs.CarParams):
@@ -130,9 +133,34 @@ class CarInterfaceBase(ABC):
   @classmethod
   def get_params(cls, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw],
                  alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
-    ret = CarInterfaceBase.get_std_params(candidate)
+    ret = structs.CarParams()
+    ret.carFingerprint = candidate
+    ret.brand = cls.BRAND
 
-    platform = PLATFORMS[candidate]
+    # Car docs fields
+    ret.maxLateralAccel = get_torque_params()[candidate]['MAX_LAT_ACCEL_MEASURED']
+    ret.autoResumeSng = True  # describes whether car can resume from a stop automatically
+
+    # standard ALC params
+    ret.tireStiffnessFactor = 1.0
+    ret.steerControlType = structs.CarParams.SteerControlType.torque
+    ret.minSteerSpeed = 0.
+    ret.wheelSpeedFactor = 1.0
+
+    ret.pcmCruise = True     # openpilot's state is tied to the PCM's cruise state on most cars
+    ret.minEnableSpeed = -1. # enable is done by stock ACC, so ignore this
+    ret.steerRatioRear = 0.  # no rear steering, at least on the listed cars above
+    ret.openpilotLongitudinalControl = False
+    ret.stopAccel = -2.0
+    ret.longitudinalTuning.kpBP = [0.]
+    ret.longitudinalTuning.kpV = [0.]
+    ret.longitudinalTuning.kiBP = [0.]
+    ret.longitudinalTuning.kiV = [0.]
+    # TODO estimate car specific lag, use .15s for now
+    ret.longitudinalActuatorDelay = 0.15
+    ret.steerLimitTimer = 1.0
+
+    platform = cls.CAR(candidate)
     ret.mass = platform.config.specs.mass
     ret.wheelbase = platform.config.specs.wheelbase
     ret.steerRatio = platform.config.specs.steerRatio
@@ -188,36 +216,6 @@ class CarInterfaceBase(ABC):
 
   def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
     return self.lateral_accel_from_torque_linear
-
-  # returns a set of default params to avoid repetition in car specific params
-  @staticmethod
-  def get_std_params(candidate: str) -> structs.CarParams:
-    ret = structs.CarParams()
-    ret.carFingerprint = candidate
-
-    # Car docs fields
-    ret.maxLateralAccel = get_torque_params()[candidate]['MAX_LAT_ACCEL_MEASURED']
-    ret.autoResumeSng = True  # describes whether car can resume from a stop automatically
-
-    # standard ALC params
-    ret.tireStiffnessFactor = 1.0
-    ret.steerControlType = structs.CarParams.SteerControlType.torque
-    ret.minSteerSpeed = 0.
-    ret.wheelSpeedFactor = 1.0
-
-    ret.pcmCruise = True     # openpilot's state is tied to the PCM's cruise state on most cars
-    ret.minEnableSpeed = -1. # enable is done by stock ACC, so ignore this
-    ret.steerRatioRear = 0.  # no rear steering, at least on the listed cars aboveA
-    ret.openpilotLongitudinalControl = False
-    ret.stopAccel = -2.0
-    ret.longitudinalTuning.kpBP = [0.]
-    ret.longitudinalTuning.kpV = [0.]
-    ret.longitudinalTuning.kiBP = [0.]
-    ret.longitudinalTuning.kiV = [0.]
-    # TODO estimate car specific lag, use .15s for now
-    ret.longitudinalActuatorDelay = 0.15
-    ret.steerLimitTimer = 1.0
-    return ret
 
   @staticmethod
   def configure_torque_tune(candidate: str, tune: structs.CarParams.LateralTuning, steering_angle_deadzone_deg: float = 0.0):
@@ -367,37 +365,3 @@ class CarControllerBase(ABC):
   @abstractmethod
   def update(self, CC: structs.CarControl, CS: CarStateBase, now_nanos: int) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     pass
-
-
-INTERFACE_ATTR_FILE = {
-  "FINGERPRINTS": "fingerprints",
-  "FW_VERSIONS": "fingerprints",
-}
-
-# interface-specific helpers
-
-
-def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: bool = False) -> dict[str | StrEnum, Any]:
-  # read all the folders in opendbc/car and return a dict where:
-  # - keys are all the car models or brand names
-  # - values are attr values from all car folders
-  result = {}
-  for car_folder in sorted([x[0] for x in os.walk(BASEDIR)]):
-    try:
-      brand_name = car_folder.split('/')[-1]
-      brand_values = __import__(f'opendbc.car.{brand_name}.{INTERFACE_ATTR_FILE.get(attr, "values")}', fromlist=[attr])
-      if hasattr(brand_values, attr) or not ignore_none:
-        attr_data = getattr(brand_values, attr, None)
-      else:
-        continue
-
-      if combine_brands:
-        if isinstance(attr_data, dict):
-          for f, v in attr_data.items():
-            result[f] = v
-      else:
-        result[brand_name] = attr_data
-    except (ImportError, OSError):
-      pass
-
-  return result

@@ -3,16 +3,21 @@ from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.subaru.carcontroller import CarController
 from opendbc.car.subaru.carstate import CarState
-from opendbc.car.subaru.values import CAR, GLOBAL_ES_ADDR, SubaruFlags, SubaruSafetyFlags
+from opendbc.car.subaru.fingerprints import FW_VERSIONS
+from opendbc.car.subaru.values import Footnote, FW_QUERY_CONFIG, CAR, GLOBAL_ES_ADDR, SubaruFlags, SubaruSafetyFlags
 
 
-class CarInterface(CarInterfaceBase):
+class SubaruInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+  CAR = CAR
+  BRAND = "subaru"
+  FW_QUERY_CONFIG = FW_QUERY_CONFIG
+  FW_VERSIONS = FW_VERSIONS
+  Footnote = Footnote
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
-    ret.brand = "subaru"
     ret.radarUnavailable = True
     # for HYBRID CARS to be upstreamed, we need:
     # - replacement for ES_Distance so we can cancel the cruise control
@@ -109,4 +114,4 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def deinit(CP, can_recv, can_send):
     communication_control = bytes([uds.SERVICE_TYPE.COMMUNICATION_CONTROL, uds.CONTROL_TYPE.ENABLE_RX_ENABLE_TX, uds.MESSAGE_TYPE.NORMAL])
-    CarInterface.init(CP, can_recv, can_send, communication_control)
+    SubaruInterface.init(CP, can_recv, can_send, communication_control)

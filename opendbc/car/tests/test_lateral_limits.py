@@ -27,8 +27,8 @@ class TestLateralLimits(unittest.TestCase):
     if 'car_model' not in cls.__dict__:
       raise unittest.SkipTest('Base class')
 
-    CarInterface = interfaces[cls.car_model]
-    CP = CarInterface.get_non_essential_params(cls.car_model)
+    Interface = interfaces[cls.car_model]
+    CP = Interface.get_non_essential_params(cls.car_model)
 
     if cls.car_model == 'MOCK':
       raise unittest.SkipTest('Mock car')

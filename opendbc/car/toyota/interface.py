@@ -2,7 +2,8 @@ from opendbc.car import Bus, structs, get_safety_config, uds
 from opendbc.car.toyota.carstate import CarState
 from opendbc.car.toyota.carcontroller import CarController
 from opendbc.car.toyota.radar_interface import RadarInterface
-from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, MIN_ACC_SPEED, \
+from opendbc.car.toyota.fingerprints import FW_VERSIONS
+from opendbc.car.toyota.values import Footnote, FW_QUERY_CONFIG, Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, MIN_ACC_SPEED, \
                                                   EPS_SCALE, ToyotaSafetyFlags
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
@@ -10,10 +11,15 @@ from opendbc.car.interfaces import CarInterfaceBase
 SteerControlType = structs.CarParams.SteerControlType
 
 
-class CarInterface(CarInterfaceBase):
+class ToyotaInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
   RadarInterface = RadarInterface
+  CAR = CAR
+  BRAND = "toyota"
+  FW_QUERY_CONFIG = FW_QUERY_CONFIG
+  FW_VERSIONS = FW_VERSIONS
+  Footnote = Footnote
 
   DRIVABLE_GEARS = (structs.CarState.GearShifter.sport,)
 
@@ -23,7 +29,6 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
-    ret.brand = "toyota"
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.toyota)]
     ret.safetyConfigs[0].safetyParam = EPS_SCALE[candidate]
 
@@ -134,4 +139,4 @@ class CarInterface(CarInterfaceBase):
   def deinit(CP, can_recv, can_send):
     # re-enable radar if alpha longitudinal toggled on radar-ACC car
     communication_control = bytes([uds.SERVICE_TYPE.COMMUNICATION_CONTROL, uds.CONTROL_TYPE.ENABLE_RX_ENABLE_TX, uds.MESSAGE_TYPE.NORMAL])
-    CarInterface.init(CP, can_recv, can_send, communication_control)
+    ToyotaInterface.init(CP, can_recv, can_send, communication_control)

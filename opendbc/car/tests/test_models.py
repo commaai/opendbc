@@ -170,8 +170,8 @@ class TestCarModelBase(unittest.TestCase):
 
     car_fw, cls.can_msgs, alpha_long = cls.get_testing_data()
     cls.raw_can_keys = {(msg.address, msg.src) for _, messages in cls.can_msgs for msg in messages if msg.src < 128}
-    cls.CarInterface = interfaces[cls.platform]
-    cls.CP = cls.CarInterface.get_params(cls.platform, cls.fingerprint, car_fw, alpha_long, False, docs=False)
+    cls.Interface = interfaces[cls.platform]
+    cls.CP = cls.Interface.get_params(cls.platform, cls.fingerprint, car_fw, alpha_long, False, docs=False)
     assert cls.CP
     assert cls.CP.carFingerprint == cls.platform
 
@@ -180,7 +180,7 @@ class TestCarModelBase(unittest.TestCase):
     del cls.can_msgs
 
   def setUp(self):
-    self.CI = self.CarInterface(self.CP.copy())
+    self.CI = self.Interface(self.CP.copy())
     assert self.CI
 
     self.safety = libsafety_py.libsafety
@@ -214,7 +214,7 @@ class TestCarModelBase(unittest.TestCase):
     self.assertEqual(can_invalid_cnt, 0)
 
   def test_radar_interface(self):
-    RI = self.CarInterface.RadarInterface(self.CP)
+    RI = self.Interface.RadarInterface(self.CP)
     assert RI
 
     error_cnt = 0
@@ -293,12 +293,12 @@ class TestCarModelBase(unittest.TestCase):
     controller_params = self.CP
     if self.CP.brand == "volkswagen" and self.CP.flags & VolkswagenFlags.MLB and self.CP.openpilotLongitudinalControl:
       # Some archived MLB routes record alpha longitudinal, which current MLB safety does not support.
-      controller_params = self.CarInterface.get_params(self.platform, self.fingerprint, self.CP.carFw, False, False, docs=False)
+      controller_params = self.Interface.get_params(self.platform, self.fingerprint, self.CP.carFw, False, False, docs=False)
 
     def test_car_controller(car_control):
       now_nanos = 0
       msgs_sent = 0
-      CI = self.CarInterface(controller_params)
+      CI = self.Interface(controller_params)
       for _ in range(round(10.0 / DT_CTRL)):
         CI.update([])
         _, sendcan = CI.apply(car_control, now_nanos)

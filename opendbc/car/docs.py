@@ -14,9 +14,9 @@ from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs, ExtraCarsColumn, CommonFootnote
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.interfaces import get_interface_attr
+from opendbc.car.values import FOOTNOTES
 from opendbc.car.values import Platform
-from opendbc.car.mock.values import CAR as MOCK
+from opendbc.car.mock.interface import MockInterface
 from opendbc.car.extra_cars import CAR as EXTRA
 
 
@@ -30,7 +30,7 @@ EXTRA_PLATFORMS: dict[str, ExtraPlatform] = {str(platform): platform for brand i
 
 
 def get_params_for_docs(platform) -> CarParams:
-  cp_platform = platform if platform in interfaces else MOCK.MOCK
+  cp_platform = platform if platform in interfaces else MockInterface.CAR.MOCK
   CP: CarParams = interfaces[cp_platform].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
                                                      car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
                                                      alpha_long=True, is_release=True, docs=True)
@@ -39,7 +39,7 @@ def get_params_for_docs(platform) -> CarParams:
 
 def get_all_footnotes() -> dict[Enum, int]:
   all_footnotes = list(CommonFootnote)
-  for footnotes in get_interface_attr("Footnote", ignore_none=True).values():
+  for footnotes in FOOTNOTES:
     all_footnotes.extend(footnotes)
   return {fn: idx + 1 for idx, fn in enumerate(all_footnotes)}
 

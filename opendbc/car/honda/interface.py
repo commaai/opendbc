@@ -4,7 +4,8 @@ from opendbc.car import get_safety_config, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.honda.hondacan import CanBus
-from opendbc.car.honda.values import CarControllerParams, HondaFlags, CAR, HondaSafetyFlags
+from opendbc.car.honda.fingerprints import FW_VERSIONS
+from opendbc.car.honda.values import Footnote, FW_QUERY_CONFIG, CarControllerParams, HondaFlags, CAR, HondaSafetyFlags
 from opendbc.car.honda.carcontroller import CarController
 from opendbc.car.honda.carstate import CarState
 from opendbc.car.honda.radar_interface import RadarInterface
@@ -13,10 +14,15 @@ from opendbc.car.interfaces import CarInterfaceBase
 TransmissionType = structs.CarParams.TransmissionType
 
 
-class CarInterface(CarInterfaceBase):
+class HondaInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
   RadarInterface = RadarInterface
+  CAR = CAR
+  BRAND = "honda"
+  FW_QUERY_CONFIG = FW_QUERY_CONFIG
+  FW_VERSIONS = FW_VERSIONS
+  Footnote = Footnote
 
   DRIVABLE_GEARS = (structs.CarState.GearShifter.sport,)
 
@@ -33,7 +39,6 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
-    ret.brand = "honda"
 
     CAN = CanBus(ret, fingerprint)
 
@@ -252,4 +257,4 @@ class CarInterface(CarInterfaceBase):
   def deinit(CP, can_recv, can_send):
     communication_control = bytes([uds.SERVICE_TYPE.COMMUNICATION_CONTROL, 0x80 | uds.CONTROL_TYPE.ENABLE_RX_ENABLE_TX,
                                    uds.MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT])
-    CarInterface.init(CP, can_recv, can_send, communication_control)
+    HondaInterface.init(CP, can_recv, can_send, communication_control)

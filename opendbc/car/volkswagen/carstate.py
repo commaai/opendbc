@@ -227,7 +227,7 @@ class CarState(CarStateBase):
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
     self.gra_stock_values = pt_cp.vl["GRA_Neu"]
 
-    # Additional safety checks performed in CarInterface.
+    # Additional safety checks performed in Interface.
     ret.espDisabled = bool(pt_cp.vl["Bremse_1"]["BR1_ESPASR_passive"])
 
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
