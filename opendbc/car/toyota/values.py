@@ -74,6 +74,16 @@ class ToyotaFlags(IntFlag):
   RAISED_ACCEL_LIMIT = 1024
   SECOC = 2048
 
+  # Runtime support groups. These replace platform checks downstream while
+  # existing platform manifests remain as a migration/attestation source.
+  PT_DBC_NEW_MC = 4096
+  PT_DBC_TNGA_K = 8192
+  PT_DBC_NO_DSU = 16384
+  PT_DBC_SECOC = 32768
+  ACC_CAMERA = 65536
+  ACC_RADAR = 131072
+  LKA_HUD = 262144
+
   # deprecated flags
   # these cars are speculated to allow stop and go when the DSU is unplugged
   SNG_WITHOUT_DSU_DEPRECATED = 512

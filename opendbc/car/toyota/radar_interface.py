@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 from opendbc.can import CANParser
-from opendbc.car import Bus
 from opendbc.car.structs import RadarData
-from opendbc.car.toyota.values import DBC, TSS2_CAR
+from opendbc.car.toyota.values import ToyotaFlags
 from opendbc.car.interfaces import RadarInterfaceBase
 
 
-def _create_radar_can_parser(car_fingerprint):
-  if car_fingerprint in TSS2_CAR:
+def _create_radar_can_parser(tss2: bool):
+  if tss2:
     RADAR_A_MSGS = list(range(0x180, 0x190))
     RADAR_B_MSGS = list(range(0x190, 0x1a0))
   else:
@@ -20,13 +19,14 @@ def _create_radar_can_parser(car_fingerprint):
 
   messages.append(('STATUS_MSG', 10))
 
-  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
+  return CANParser("toyota_tss2_adas" if tss2 else "toyota_adas", messages, 1)
 
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
-    if CP.carFingerprint in TSS2_CAR:
+    tss2 = bool(CP.flags & ToyotaFlags.TSS2)
+    if tss2:
       self.RADAR_A_MSGS = list(range(0x180, 0x190))
       self.RADAR_B_MSGS = list(range(0x190, 0x1a0))
     else:
@@ -35,7 +35,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.valid_cnt = {key: 0 for key in self.RADAR_A_MSGS}
 
-    self.rcp = None if CP.radarUnavailable else _create_radar_can_parser(CP.carFingerprint)
+    self.rcp = None if CP.radarUnavailable else _create_radar_can_parser(tss2)
     self.trigger_msg = self.RADAR_B_MSGS[-1]
     self.updated_messages = set()
 
