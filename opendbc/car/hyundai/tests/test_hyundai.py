@@ -46,6 +46,10 @@ CAN_FEATURE_FLAGS = (HyundaiFlags.CLUSTER_GEARS | HyundaiFlags.TCU_GEARS | Hyund
                      HyundaiFlags.CAMERA_SCC)
 
 
+def cars_with(flags):
+  return {c for c in CAR if c.config.flags & flags}
+
+
 class TestHyundaiFingerprint(unittest.TestCase):
   def test_feature_detection(self):
     # LKA steering
@@ -153,9 +157,8 @@ class TestHyundaiFingerprint(unittest.TestCase):
   # fingerprint in the absence of full FW matches:
   def test_platform_code_ecus_available(self):
     # TODO: add queries for these non-CAN FD cars to get EPS
-    no_eps_platforms = {c for c in CAR if c.config.flags & HyundaiFlags.CANFD} | {
-      CAR.KIA_SORENTO, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL, CAR.KIA_OPTIMA_H, CAR.KIA_K7_2017,
-      CAR.KIA_OPTIMA_H_G4_FL, CAR.HYUNDAI_SONATA_LF, CAR.HYUNDAI_TUCSON, CAR.GENESIS_G90, CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA}
+    no_eps_platforms = cars_with(HyundaiFlags.CANFD) | {CAR.KIA_SORENTO, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL, CAR.KIA_OPTIMA_H, CAR.KIA_K7_2017,
+                                    CAR.KIA_OPTIMA_H_G4_FL, CAR.HYUNDAI_SONATA_LF, CAR.HYUNDAI_TUCSON, CAR.GENESIS_G90, CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA}
 
     # Asserts ECU keys essential for fuzzy fingerprinting are available on all platforms
     for car_model, ecus in FW_VERSIONS.items():
@@ -233,9 +236,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
       CAR.GENESIS_G70,            # shared platform code, part number, and date
       CAR.GENESIS_G70_2020,
     }
-    # shared platform codes on non-EV CAN FD cars outside the fuzzy whitelist
-    excluded_platforms |= {c for c in CAR if c.config.flags & HyundaiFlags.CANFD and
-                           not (c.config.flags & HyundaiFlags.EV) and c not in CANFD_FUZZY_WHITELIST}
+    excluded_platforms |= cars_with(HyundaiFlags.CANFD) - cars_with(HyundaiFlags.EV) - CANFD_FUZZY_WHITELIST  # shared platform codes
     excluded_platforms |= NO_DATES_PLATFORMS  # date codes are required to match
 
     platforms_with_shared_codes = set()

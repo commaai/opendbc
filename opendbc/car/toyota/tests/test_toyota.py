@@ -16,18 +16,18 @@ def check_fw_version(fw_version: bytes) -> bool:
   return b'?' not in fw_version and b'!' not in fw_version
 
 
+def cars_with(flags):
+  return {c for c in CAR if c.config.flags & flags}
+
+
 class TestToyotaInterfaces(unittest.TestCase):
   def test_car_flags(self):
     # Angle and radar-ACC cars are always TSS2 cars
-    for car_model in CAR:
-      flags = car_model.config.flags
-      if flags & (ToyotaFlags.ANGLE_CONTROL | ToyotaFlags.RADAR_ACC):
-        assert flags & ToyotaFlags.TSS2
+    assert not (cars_with(ToyotaFlags.ANGLE_CONTROL | ToyotaFlags.RADAR_ACC) - cars_with(ToyotaFlags.TSS2))
 
   def test_lta_platforms(self):
     # At this time, only RAV4 2023 is expected to use LTA/angle control
-    angle_control_cars = {c for c in CAR if c.config.flags & ToyotaFlags.ANGLE_CONTROL}
-    assert angle_control_cars == {CAR.TOYOTA_RAV4_TSS2_2023}
+    assert cars_with(ToyotaFlags.ANGLE_CONTROL) == {CAR.TOYOTA_RAV4_TSS2_2023}
 
   def test_tss2_dbc(self):
     # We make some assumptions about TSS2 platforms,
