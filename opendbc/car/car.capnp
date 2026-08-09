@@ -484,17 +484,16 @@ struct CarParams {
   autoResumeSng @69 :Bool;               # describes whether car can resume from a stop automatically
 
   # things about the car in the manual
-  mass @17 :Float32;            # [kg] curb weight: all fluids no cargo
   wheelbase @18 :Float32;       # [m] distance from rear axle to front axle
   centerToFront @19 :Float32;   # [m] distance from center of mass to front axle
   steerRatio @20 :Float32;      # [] ratio of steering wheel angle to front wheel angle
   steerRatioRear @21 :Float32;  # [] ratio of steering wheel angle to rear wheel angle (usually 0)
 
-  # things we can derive
-  rotationalInertia @22 :Float32;    # [kg*m2] body rotational inertia
+  # mass-normalized vehicle dynamics parameters
+  rotationalInertiaPerMass @22 :Float32;  # [m^2] rotational inertia per unit mass
   tireStiffnessFactor @72 :Float32;  # scaling factor used in calculating tireStiffness[Front,Rear]
-  tireStiffnessFront @23 :Float32;   # [N/rad] front tire coeff of stiff
-  tireStiffnessRear @24 :Float32;    # [N/rad] rear tire coeff of stiff
+  tireStiffnessFrontPerMass @23 :Float32;  # [N/(rad*kg)] front tire stiffness per unit mass
+  tireStiffnessRearPerMass @24 :Float32;   # [N/(rad*kg)] rear tire stiffness per unit mass
 
   longitudinalTuning @25 :LongitudinalPIDTuning;
   lateralParams @48 :LateralParams;
@@ -722,6 +721,7 @@ struct CarParams {
   }
 
   deprecated :group {
+    mass @17 :Float32;
     enableGasInterceptor @2 :Bool;
     enableCamera @4 :Bool;
     enableApgs @6 :Bool;
