@@ -519,6 +519,7 @@ TOYOTA_VERSION_REQUEST_KWP = b'\x1a\x88\x01'
 TOYOTA_VERSION_RESPONSE_KWP = b'\x5a\x88\x01'
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[\x00-\x03A-Z0-9 ]{16,49}",
   # TODO: look at data to whitelist new ECUs effectively
   requests=[
     Request(
