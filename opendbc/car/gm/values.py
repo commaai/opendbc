@@ -117,39 +117,39 @@ class GMSDGMPlatformConfig(GMPlatformConfig):
 class CAR(Platforms):
   HOLDEN_ASTRA = GMASCMPlatformConfig(
     [GMCarDocs("Holden Astra 2017")],
-    GMCarSpecs(mass=1363, wheelbase=2.662, steerRatio=15.7, centerToFrontRatio=0.4),
+    GMCarSpecs(wheelbase=2.662, steerRatio=15.7, centerToFrontRatio=0.4),
   )
   CHEVROLET_VOLT = GMASCMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2017-18", min_enable_speed=0, video="https://youtu.be/QeMCN_4TFfQ")],
-    GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=17.7, centerToFrontRatio=0.45, tireStiffnessFactor=0.469),
+    GMCarSpecs(wheelbase=2.69, steerRatio=17.7, centerToFrontRatio=0.45, tireStiffnessFactor=0.469),
   )
   CADILLAC_ATS = GMASCMPlatformConfig(
     [GMCarDocs("Cadillac ATS Premium Performance 2018")],
-    GMCarSpecs(mass=1601, wheelbase=2.78, steerRatio=15.3),
+    GMCarSpecs(wheelbase=2.78, steerRatio=15.3),
   )
   CHEVROLET_MALIBU = GMASCMPlatformConfig(
     [GMCarDocs("Chevrolet Malibu Premier 2017")],
-    GMCarSpecs(mass=1496, wheelbase=2.83, steerRatio=15.8, centerToFrontRatio=0.4),
+    GMCarSpecs(wheelbase=2.83, steerRatio=15.8, centerToFrontRatio=0.4),
   )
   GMC_ACADIA = GMASCMPlatformConfig(
     [GMCarDocs("GMC Acadia 2018", video="https://www.youtube.com/watch?v=0ZN6DdsBUZo")],
-    GMCarSpecs(mass=1975, wheelbase=2.86, steerRatio=14.4, centerToFrontRatio=0.4),
+    GMCarSpecs(wheelbase=2.86, steerRatio=14.4, centerToFrontRatio=0.4),
   )
   BUICK_LACROSSE = GMASCMPlatformConfig(
     [GMCarDocs("Buick LaCrosse 2017-19", "Driver Confidence Package 2")],
-    GMCarSpecs(mass=1712, wheelbase=2.91, steerRatio=15.8, centerToFrontRatio=0.4),
+    GMCarSpecs(wheelbase=2.91, steerRatio=15.8, centerToFrontRatio=0.4),
   )
   BUICK_REGAL = GMASCMPlatformConfig(
     [GMCarDocs("Buick Regal Essence 2018")],
-    GMCarSpecs(mass=1714, wheelbase=2.83, steerRatio=14.4, centerToFrontRatio=0.4),
+    GMCarSpecs(wheelbase=2.83, steerRatio=14.4, centerToFrontRatio=0.4),
   )
   CADILLAC_ESCALADE = GMASCMPlatformConfig(
     [GMCarDocs("Cadillac Escalade 2017", "Driver Assist Package")],
-    GMCarSpecs(mass=2564, wheelbase=2.95, steerRatio=17.3),
+    GMCarSpecs(wheelbase=2.95, steerRatio=17.3),
   )
   CADILLAC_ESCALADE_ESV = GMASCMPlatformConfig(
     [GMCarDocs("Cadillac Escalade ESV 2016", "Adaptive Cruise Control (ACC) & LKAS")],
-    GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=17.3, tireStiffnessFactor=1.0),
+    GMCarSpecs(wheelbase=3.302, steerRatio=17.3, tireStiffnessFactor=1.0),
   )
   CADILLAC_ESCALADE_ESV_2019 = GMASCMPlatformConfig(
     [GMCarDocs("Cadillac Escalade ESV 2019", "Adaptive Cruise Control (ACC) & LKAS")],
@@ -160,38 +160,38 @@ class CAR(Platforms):
       GMCarDocs("Chevrolet Bolt EUV 2022-23", "Premier or Premier Redline Trim, without Super Cruise Package", video="https://youtu.be/xvwzGMUA210"),
       GMCarDocs("Chevrolet Bolt EV 2022-23", "2LT Trim with Adaptive Cruise Control Package"),
     ],
-    GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
+    GMCarSpecs(wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
   )
   CHEVROLET_SILVERADO = GMPlatformConfig(
     [
       GMCarDocs("Chevrolet Silverado 1500 2020-21", "Safety Package II"),
       GMCarDocs("GMC Sierra 1500 2020-21", "Driver Alert Package II", video="https://youtu.be/5HbNoBLzRwE"),
     ],
-    GMCarSpecs(mass=2450, wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
+    GMCarSpecs(wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
   )
   CHEVROLET_EQUINOX = GMPlatformConfig(
     [GMCarDocs("Chevrolet Equinox 2019-22")],
-    GMCarSpecs(mass=1588, wheelbase=2.72, steerRatio=14.4, centerToFrontRatio=0.4),
+    GMCarSpecs(wheelbase=2.72, steerRatio=14.4, centerToFrontRatio=0.4),
   )
   CHEVROLET_TRAILBLAZER = GMPlatformConfig(
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
-    GMCarSpecs(mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
+    GMCarSpecs(wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
   )
   CADILLAC_XT4 = GMSDGMPlatformConfig(
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
-    GMCarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
+    GMCarSpecs(wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
   )
   CHEVROLET_VOLT_2019 = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
-    GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
+    GMCarSpecs(wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
   )
   CHEVROLET_TRAVERSE = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Traverse 2022-23", "RS, Premier, or High Country Trim")],
-    GMCarSpecs(mass=1955, wheelbase=3.07, steerRatio=17.9, centerToFrontRatio=0.4),
+    GMCarSpecs(wheelbase=3.07, steerRatio=17.9, centerToFrontRatio=0.4),
   )
   GMC_YUKON = GMPlatformConfig(
     [GMCarDocs("GMC Yukon 2019-20", "Adaptive Cruise Control (ACC) & LKAS")],
-    GMCarSpecs(mass=2490, wheelbase=2.94, steerRatio=17.3, centerToFrontRatio=0.5, tireStiffnessFactor=1.0),
+    GMCarSpecs(wheelbase=2.94, steerRatio=17.3, centerToFrontRatio=0.5, tireStiffnessFactor=1.0),
   )
 
 

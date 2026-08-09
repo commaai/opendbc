@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from enum import IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
-from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -51,19 +50,19 @@ class MazdaPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   MAZDA_CX5 = MazdaPlatformConfig(
     [MazdaCarDocs("Mazda CX-5 2017-21")],
-    MazdaCarSpecs(mass=3655 * CV.LB_TO_KG, wheelbase=2.7, steerRatio=15.5)
+    MazdaCarSpecs(wheelbase=2.7, steerRatio=15.5)
   )
   MAZDA_CX9 = MazdaPlatformConfig(
     [MazdaCarDocs("Mazda CX-9 2016-20")],
-    MazdaCarSpecs(mass=4217 * CV.LB_TO_KG, wheelbase=3.1, steerRatio=17.6)
+    MazdaCarSpecs(wheelbase=3.1, steerRatio=17.6)
   )
   MAZDA_3 = MazdaPlatformConfig(
     [MazdaCarDocs("Mazda 3 2017-18")],
-    MazdaCarSpecs(mass=2875 * CV.LB_TO_KG, wheelbase=2.7, steerRatio=14.0)
+    MazdaCarSpecs(wheelbase=2.7, steerRatio=14.0)
   )
   MAZDA_6 = MazdaPlatformConfig(
     [MazdaCarDocs("Mazda 6 2017-20")],
-    MazdaCarSpecs(mass=3443 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=15.5)
+    MazdaCarSpecs(wheelbase=2.83, steerRatio=15.5)
   )
   MAZDA_CX9_2021 = MazdaPlatformConfig(
     [MazdaCarDocs("Mazda CX-9 2021-23", video="https://youtu.be/dA3duO4a0O4")],

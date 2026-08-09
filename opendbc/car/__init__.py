@@ -147,7 +147,6 @@ class CanSignalRateCalculator:
 
 @dataclass(frozen=True, kw_only=True)
 class CarSpecs:
-  mass: float  # kg, curb weight
   wheelbase: float  # meters
   steerRatio: float
   centerToFrontRatio: float = 0.5
@@ -206,7 +205,7 @@ class PlatformConfig(PlatformConfigBase):
 @dataclass
 class ExtraPlatformConfig(PlatformConfigBase):
   car_docs: list[ExtraCarDocs]
-  specs: CarSpecs = CarSpecs(mass=0., wheelbase=0., steerRatio=0.)
+  specs: CarSpecs = CarSpecs(wheelbase=0., steerRatio=0.)
   dbc_dict: DbcDict = field(default_factory=lambda: dict())
 
 
