@@ -8,6 +8,7 @@ from opendbc.car.structs import CarParams, CarParamsT
 from opendbc.car.fingerprints import eliminate_incompatible_cars, all_legacy_fingerprint_cars
 from opendbc.car.fw_versions import ObdCallback, get_fw_versions_ordered, get_present_ecus, match_fw_to_car
 from opendbc.car.mock.values import CAR as MOCK
+from opendbc.car.support_policy import is_platform_vin_supported
 from opendbc.car.values import BRANDS
 from opendbc.car.vin import get_vin, is_valid_vin, VIN_UNKNOWN
 
@@ -162,6 +163,13 @@ def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multip
   CP.carFw = car_fw
   CP.fingerprintSource = source
   CP.fuzzyFingerprint = not exact_match
+
+  # Vehicle identity support policy is deliberately downstream from protocol
+  # fingerprinting. A car may resolve to valid read/write support groups while
+  # a new, unvalidated model year remains dashcam-only until whitelisted.
+  if CP.brand == "toyota" and not is_platform_vin_supported(candidate, vin):
+    carlog.error({"event": "unsupported vehicle identity", "car_fingerprint": str(candidate), "vin": vin})
+    CP.dashcamOnly = True
 
   return interfaces[CP.carFingerprint](CP)
 

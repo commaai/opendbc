@@ -1,9 +1,10 @@
-from opendbc.car import Bus, structs, get_safety_config, uds
+from opendbc.car import structs, get_safety_config, uds
 from opendbc.car.toyota.carstate import CarState
 from opendbc.car.toyota.carcontroller import CarController
 from opendbc.car.toyota.radar_interface import RadarInterface
-from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, TSS2_CAR, RADAR_ACC_CAR, MIN_ACC_SPEED, \
-                                                  EPS_SCALE, ANGLE_CONTROL_CAR, ToyotaSafetyFlags
+from opendbc.car.toyota.values import ToyotaFlags, CarControllerParams, MIN_ACC_SPEED, ToyotaSafetyFlags
+from opendbc.car.toyota.support_groups import ToyotaAccGroup, ToyotaLateralGroup, ToyotaLongitudinalGroup, ToyotaPtGroup, ToyotaSupportGroups, \
+                                                       apply_support_groups
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
 
@@ -24,19 +25,31 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "toyota"
+    groups = ToyotaSupportGroups.from_platform(candidate, fingerprint, car_fw)
+    apply_support_groups(ret, groups)
+    openpilot_longitudinal = groups.tss2 and (groups.acc != ToyotaAccGroup.RADAR or alpha_long)
+
+    # Protocol-compatible Toyotas share one deliberately generic dynamics
+    # prior. paramsd/torqued learn the effective steering model online.
+    ret.mass = 1700.
+    ret.wheelbase = 2.75
+    ret.steerRatio = 15.0
+    ret.tireStiffnessFactor = 0.55
+    ret.maxLateralAccel = 2.0
+
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.toyota)]
-    ret.safetyConfigs[0].safetyParam = EPS_SCALE[candidate]
+    ret.safetyConfigs[0].safetyParam = groups.eps_torque_scale
 
     # BRAKE_MODULE is on a different address for these cars
-    if DBC[candidate][Bus.pt] == "toyota_new_mc_pt_generated":
+    if groups.pt == ToyotaPtGroup.NEW_MC:
       ret.safetyConfigs[0].safetyParam |= ToyotaSafetyFlags.ALT_BRAKE.value
 
-    if ret.flags & ToyotaFlags.SECOC.value:
+    if groups.secoc:
       ret.secOcRequired = True
       ret.safetyConfigs[0].safetyParam |= ToyotaSafetyFlags.SECOC.value
       ret.dashcamOnly = is_release
 
-    if candidate in ANGLE_CONTROL_CAR:
+    if groups.lateral == ToyotaLateralGroup.LTA_ANGLE:
       ret.steerControlType = SteerControlType.angle
       ret.safetyConfigs[0].safetyParam |= ToyotaSafetyFlags.LTA.value
 
@@ -44,53 +57,34 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.18
       ret.steerLimitTimer = 0.8
     else:
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+      # Generic initialization only; liveTorqueParameters learns the vehicle.
+      CarInterfaceBase.configure_torque_tune("TOYOTA_RAV4_TSS2", ret.lateralTuning)
 
       ret.steerActuatorDelay = 0.12  # Default delay, Prius has larger delay
       ret.steerLimitTimer = 0.4
 
-    stop_and_go = candidate in TSS2_CAR
-
-    # In TSS2 cars, the camera does long control
-    found_ecus = [fw.ecu for fw in car_fw]
-
-    if Ecu.hybrid in found_ecus:
+    if groups.hybrid:
       ret.flags |= ToyotaFlags.HYBRID.value
 
-    if candidate == CAR.TOYOTA_PRIUS:
-      stop_and_go = True
-      # Only give steer angle deadzone to for bad angle sensor prius
-      for fw in car_fw:
-        if fw.ecu == "eps" and not fw.fwVersion == b'8965B47060\x00\x00\x00\x00\x00\x00':
-          ret.steerActuatorDelay = 0.25
-          CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning, steering_angle_deadzone_deg=0.2)
-        # 2021+ TSS2 steering rack swapped into a TSS-P car, not supported
-        if fw.ecu == "eps" and fw.fwVersion == b'8965B47070\x00\x00\x00\x00\x00\x00':
-          ret.dashcamOnly = True
+    ret.wheelSpeedFactor = groups.wheel_speed_factor
 
-    elif candidate in (CAR.LEXUS_RX, CAR.LEXUS_RX_TSS2):
-      stop_and_go = True
-      ret.wheelSpeedFactor = 1.035
-
-    elif candidate in (CAR.TOYOTA_AVALON, CAR.TOYOTA_AVALON_2019, CAR.TOYOTA_AVALON_TSS2):
-      # starting from 2019, all Avalon variants have stop and go
-      # https://engage.toyota.com/static/images/toyota_safety_sense/TSS_Applicability_Chart.pdf
-      stop_and_go = candidate != CAR.TOYOTA_AVALON
-
-    elif candidate in (CAR.TOYOTA_CHR, CAR.TOYOTA_CAMRY, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_LS, CAR.LEXUS_NX):
-      # TODO: Some of these platforms are not advertised to have full range ACC, do they really all have sng?
-      stop_and_go = True
+    # EPS firmware attests exceptional rack behavior independently of identity.
+    for fw in car_fw:
+      if fw.ecu == "eps" and fw.fwVersion.startswith(b'8965B470') and fw.fwVersion != b'8965B47060\x00\x00\x00\x00\x00\x00':
+        CarInterfaceBase.configure_torque_tune("TOYOTA_RAV4_TSS2", ret.lateralTuning, steering_angle_deadzone_deg=0.2)
+      if fw.ecu == "eps" and fw.fwVersion == b'8965B47070\x00\x00\x00\x00\x00\x00':
+        ret.dashcamOnly = True
 
     ret.centerToFront = ret.wheelbase * 0.44
 
     # TODO: Some TSS-P platforms have BSM, but are flipped based on region or driving direction.
     # Detect flipped signals and enable for C-HR and others
-    ret.enableBsm = 0x3F6 in fingerprint[0] and candidate in TSS2_CAR
+    ret.enableBsm = 0x3F6 in fingerprint[0] and groups.tss2
 
-    ret.radarUnavailable = Bus.radar not in DBC[candidate]
+    ret.radarUnavailable = groups.acc == ToyotaAccGroup.RADAR
 
     # since we don't yet parse radar on TSS2 radar-based ACC cars, gate longitudinal behind alpha toggle
-    if candidate in RADAR_ACC_CAR:
+    if groups.longitudinal == ToyotaLongitudinalGroup.RADAR_ACC or bool(ret.flags & ToyotaFlags.RADAR_ACC):
       ret.alphaLongitudinalAvailable = True
 
       if alpha_long:
@@ -101,8 +95,7 @@ class CarInterface(CarInterfaceBase):
     # openpilot longitudinal behind alpha long toggle:
     #  - TSS2 radar ACC cars (disables radar)
 
-    ret.openpilotLongitudinalControl = (candidate in (TSS2_CAR - RADAR_ACC_CAR) or
-                                        bool(ret.flags & ToyotaFlags.DISABLE_RADAR.value))
+    ret.openpilotLongitudinalControl = openpilot_longitudinal
 
     ret.autoResumeSng = ret.openpilotLongitudinalControl
 
@@ -111,9 +104,9 @@ class CarInterface(CarInterfaceBase):
 
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
     # to a negative value, so it won't matter.
-    ret.minEnableSpeed = -1. if stop_and_go else MIN_ACC_SPEED
+    ret.minEnableSpeed = -1. if groups.stop_and_go else MIN_ACC_SPEED
 
-    if candidate in TSS2_CAR:
+    if groups.raised_accel_limit:
       ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
 
       # Hybrids have much quicker longitudinal actuator response
