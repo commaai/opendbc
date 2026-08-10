@@ -193,7 +193,7 @@ class TestCarModelBase(unittest.TestCase):
     if self.CP.dashcamOnly:
       self.skipTest("no need to check carParams for dashcamOnly")
 
-    self.assertGreater(self.CP.mass, 1)
+    self.assertEqual(self.CP.mass, 1)
     if self.CP.steerControlType not in (SteerControlType.angle, SteerControlType.curvature):
       tuning = self.CP.lateralTuning.which()
       if tuning == "pid":

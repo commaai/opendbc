@@ -332,7 +332,7 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Arteon Shooting Brake 2020-23", video="https://youtu.be/FAomFKPFlDA"),
       VWCarDocs("Volkswagen CC 2018-22", video="https://youtu.be/FAomFKPFlDA"),
     ],
-    VolkswagenCarSpecs(mass=1733, wheelbase=2.84),
+    VolkswagenCarSpecs(wheelbase=2.84),
     chassis_codes={"AN", "3H"},
     wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
   )
@@ -344,7 +344,7 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Teramont Cross Sport 2021-22"),
       VWCarDocs("Volkswagen Teramont X 2021-22"),
     ],
-    VolkswagenCarSpecs(mass=2011, wheelbase=2.98),
+    VolkswagenCarSpecs(wheelbase=2.98),
     chassis_codes={"CA"},
     wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_SUV},
   )
@@ -353,7 +353,7 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Caddy 2019"),
       VWCarDocs("Volkswagen Caddy Maxi 2019"),
     ],
-    VolkswagenCarSpecs(mass=1613, wheelbase=2.6, minSteerSpeed=21 * CV.KPH_TO_MS),
+    VolkswagenCarSpecs(wheelbase=2.6, minSteerSpeed=21 * CV.KPH_TO_MS),
     chassis_codes={"2K"},
     wmis={WMI.VOLKSWAGEN_COMMERCIAL_BUS_VAN},
   )
@@ -365,7 +365,7 @@ class CAR(Platforms):
       VWCarDocs("MAN TGE 2017-24", video="https://youtu.be/4100gLeabmo"),
       VWCarDocs("MAN eTGE 2020-24", video="https://youtu.be/4100gLeabmo"),
     ],
-    VolkswagenCarSpecs(mass=2100, wheelbase=3.64, minSteerSpeed=50 * CV.KPH_TO_MS),
+    VolkswagenCarSpecs(wheelbase=3.64, minSteerSpeed=50 * CV.KPH_TO_MS),
     chassis_codes={"SY", "SZ", "UY", "UZ"},
     wmis={WMI.VOLKSWAGEN_COMMERCIAL, WMI.MAN},
   )
@@ -380,7 +380,7 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Golf R 2015-19"),
       VWCarDocs("Volkswagen Golf SportsVan 2015-20"),
     ],
-    VolkswagenCarSpecs(mass=1397, wheelbase=2.62),
+    VolkswagenCarSpecs(wheelbase=2.62),
     chassis_codes={"5G", "AU", "BA", "BE"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
   )
@@ -388,20 +388,20 @@ class CAR(Platforms):
     [
       VWCarDocs("Volkswagen ID.4 2021-23"),
     ],
-    VolkswagenCarSpecs(mass=2224, wheelbase=2.77),
+    VolkswagenCarSpecs(wheelbase=2.77),
     chassis_codes={"E2"},
     wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_EUROPE_SUV},
   )
   VOLKSWAGEN_ID4_MK2 = VolkswagenMEBPlatformConfig(
     [VWCarDocs("Volkswagen ID.4 2024-25")],
-    VolkswagenCarSpecs(mass=2224, wheelbase=2.77),
+    VolkswagenCarSpecs(wheelbase=2.77),
     chassis_codes={"E8"},
     wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_EUROPE_SUV},
     flags=VolkswagenFlags.MEB_GEN2,
   )
   VOLKSWAGEN_JETTA_MK6 = VolkswagenPQPlatformConfig(
     [VWCarDocs("Volkswagen Jetta 2015-18")],
-    VolkswagenCarSpecs(mass=1518, wheelbase=2.65, minSteerSpeed=50 * CV.KPH_TO_MS, minEnableSpeed=20 * CV.KPH_TO_MS),
+    VolkswagenCarSpecs(wheelbase=2.65, minSteerSpeed=50 * CV.KPH_TO_MS, minEnableSpeed=20 * CV.KPH_TO_MS),
     chassis_codes={"5K", "AJ"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR},
   )
@@ -410,7 +410,7 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Jetta 2019-23"),
       VWCarDocs("Volkswagen Jetta GLI 2021-23"),
     ],
-    VolkswagenCarSpecs(mass=1328, wheelbase=2.71),
+    VolkswagenCarSpecs(wheelbase=2.71),
     chassis_codes={"BU"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
   )
@@ -420,13 +420,13 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Passat Alltrack 2015-22"),
       VWCarDocs("Volkswagen Passat GTE 2015-22"),
     ],
-    VolkswagenCarSpecs(mass=1551, wheelbase=2.79),
+    VolkswagenCarSpecs(wheelbase=2.79),
     chassis_codes={"3C", "3G"},
     wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
   )
   VOLKSWAGEN_PASSAT_NMS = VolkswagenPQPlatformConfig(
     [VWCarDocs("Volkswagen Passat NMS 2017-22")],
-    VolkswagenCarSpecs(mass=1503, wheelbase=2.80, minSteerSpeed=50 * CV.KPH_TO_MS, minEnableSpeed=20 * CV.KPH_TO_MS),
+    VolkswagenCarSpecs(wheelbase=2.80, minSteerSpeed=50 * CV.KPH_TO_MS, minEnableSpeed=20 * CV.KPH_TO_MS),
     chassis_codes={"A3"},
     wmis={WMI.VOLKSWAGEN_USA_CAR},
   )
@@ -435,7 +435,7 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Polo 2018-23", footnotes=[Footnote.VW_MQB_A0]),
       VWCarDocs("Volkswagen Polo GTI 2018-23", footnotes=[Footnote.VW_MQB_A0]),
     ],
-    VolkswagenCarSpecs(mass=1230, wheelbase=2.55),
+    VolkswagenCarSpecs(wheelbase=2.55),
     chassis_codes={"AW"},
     wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
   )
@@ -444,19 +444,19 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Sharan 2018-22"),
       VWCarDocs("SEAT Alhambra 2018-20"),
     ],
-    VolkswagenCarSpecs(mass=1639, wheelbase=2.92, minSteerSpeed=50 * CV.KPH_TO_MS),
+    VolkswagenCarSpecs(wheelbase=2.92, minSteerSpeed=50 * CV.KPH_TO_MS),
     chassis_codes={"7N"},
     wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
   )
   VOLKSWAGEN_TAOS_MK1 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Volkswagen Taos 2022-24")],
-    VolkswagenCarSpecs(mass=1498, wheelbase=2.69),
+    VolkswagenCarSpecs(wheelbase=2.69),
     chassis_codes={"B2"},
     wmis={WMI.VOLKSWAGEN_MEXICO_SUV, WMI.VOLKSWAGEN_ARGENTINA},
   )
   VOLKSWAGEN_TCROSS_MK1 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Volkswagen T-Cross 2021", footnotes=[Footnote.VW_MQB_A0])],
-    VolkswagenCarSpecs(mass=1150, wheelbase=2.60),
+    VolkswagenCarSpecs(wheelbase=2.60),
     chassis_codes={"C1"},
     wmis={WMI.VOLKSWAGEN_EUROPE_SUV},
   )
@@ -465,13 +465,13 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Tiguan 2018-24"),
       VWCarDocs("Volkswagen Tiguan eHybrid 2021-23"),
     ],
-    VolkswagenCarSpecs(mass=1715, wheelbase=2.74),
+    VolkswagenCarSpecs(wheelbase=2.74),
     chassis_codes={"5N", "AD", "AX", "BW"},
     wmis={WMI.VOLKSWAGEN_EUROPE_SUV, WMI.VOLKSWAGEN_MEXICO_SUV},
   )
   VOLKSWAGEN_TOURAN_MK2 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Volkswagen Touran 2016-23")],
-    VolkswagenCarSpecs(mass=1516, wheelbase=2.79),
+    VolkswagenCarSpecs(wheelbase=2.79),
     chassis_codes={"1T"},
     wmis={WMI.VOLKSWAGEN_EUROPE_SUV},
   )
@@ -480,13 +480,13 @@ class CAR(Platforms):
       VWCarDocs("Volkswagen Caravelle 2020"),
       VWCarDocs("Volkswagen California 2021-23"),
     ],
-    VolkswagenCarSpecs(mass=1926, wheelbase=3.00, minSteerSpeed=14.0),
+    VolkswagenCarSpecs(wheelbase=3.00, minSteerSpeed=14.0),
     chassis_codes={"7H", "7L"},
     wmis={WMI.VOLKSWAGEN_COMMERCIAL_BUS_VAN},
   )
   VOLKSWAGEN_TROC_MK1 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Volkswagen T-Roc 2018-23")],
-    VolkswagenCarSpecs(mass=1413, wheelbase=2.63),
+    VolkswagenCarSpecs(wheelbase=2.63),
     chassis_codes={"A1"},
     wmis={WMI.VOLKSWAGEN_EUROPE_SUV},
   )
@@ -497,31 +497,31 @@ class CAR(Platforms):
       VWCarDocs("Audi RS3 2018"),
       VWCarDocs("Audi S3 2015-17"),
     ],
-    VolkswagenCarSpecs(mass=1335, wheelbase=2.61),
+    VolkswagenCarSpecs(wheelbase=2.61),
     chassis_codes={"8V", "FF"},
     wmis={WMI.AUDI_GERMANY_CAR, WMI.AUDI_SPORT, WMI.VOLKSWAGEN_CHINA_FAW},
   )
   AUDI_Q2_MK1 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Audi Q2 2018")],
-    VolkswagenCarSpecs(mass=1205, wheelbase=2.61),
+    VolkswagenCarSpecs(wheelbase=2.61),
     chassis_codes={"GA"},
     wmis={WMI.AUDI_GERMANY_CAR, WMI.VOLKSWAGEN_CHINA_FAW},
   )
   AUDI_Q3_MK2 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Audi Q3 2019-24")],
-    VolkswagenCarSpecs(mass=1623, wheelbase=2.68),
+    VolkswagenCarSpecs(wheelbase=2.68),
     chassis_codes={"8U", "F3", "FS"},
     wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR, WMI.VOLKSWAGEN_CHINA_FAW},
   )
   AUDI_Q5_MK1 = VolkswagenMLBPlatformConfig(
     [VWCarDocs("Audi Q5 2013-17")],
-    VolkswagenCarSpecs(mass=1895, wheelbase=2.81),
+    VolkswagenCarSpecs(wheelbase=2.81),
     chassis_codes={"8R"},
     wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR},
   )
   PORSCHE_MACAN_MK1 = VolkswagenMLBPlatformConfig(
     [VWCarDocs("Porsche Macan 2017-24")],
-    VolkswagenCarSpecs(mass=1895, wheelbase=2.81, steerRatio=16.2),
+    VolkswagenCarSpecs(wheelbase=2.81, steerRatio=16.2),
     chassis_codes={"95", "A5"},
     wmis={WMI.PORSCHE_SUV},
   )
@@ -531,19 +531,19 @@ class CAR(Platforms):
       VWCarDocs("SEAT Ateca 2016-23"),
       VWCarDocs("SEAT Leon 2014-20"),
     ],
-    VolkswagenCarSpecs(mass=1300, wheelbase=2.64),
+    VolkswagenCarSpecs(wheelbase=2.64),
     chassis_codes={"5F"},
     wmis={WMI.SEAT},
   )
   CUPRA_BORN_MK1 = VolkswagenMEBPlatformConfig(
     [VWCarDocs("CUPRA Born 2021-23"),],
-    VolkswagenCarSpecs(mass=1956, wheelbase=2.766),
+    VolkswagenCarSpecs(wheelbase=2.766),
     chassis_codes={"K1"},
     wmis={WMI.SEAT},
   )
   SKODA_FABIA_MK4 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Škoda Fabia 2022-23", footnotes=[Footnote.VW_MQB_A0])],
-    VolkswagenCarSpecs(mass=1266, wheelbase=2.56),
+    VolkswagenCarSpecs(wheelbase=2.56),
     chassis_codes={"PJ"},
     wmis={WMI.SKODA},
   )
@@ -552,19 +552,19 @@ class CAR(Platforms):
       VWCarDocs("Škoda Kamiq 2021-23", footnotes=[Footnote.VW_MQB_A0, Footnote.KAMIQ]),
       VWCarDocs("Škoda Scala 2020-23", footnotes=[Footnote.VW_MQB_A0]),
     ],
-    VolkswagenCarSpecs(mass=1230, wheelbase=2.66),
+    VolkswagenCarSpecs(wheelbase=2.66),
     chassis_codes={"NW"},
     wmis={WMI.SKODA},
   )
   SKODA_KAROQ_MK1 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Škoda Karoq 2019-23")],
-    VolkswagenCarSpecs(mass=1278, wheelbase=2.66),
+    VolkswagenCarSpecs(wheelbase=2.66),
     chassis_codes={"NU"},
     wmis={WMI.SKODA},
   )
   SKODA_KODIAQ_MK1 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Škoda Kodiaq 2017-23")],
-    VolkswagenCarSpecs(mass=1569, wheelbase=2.79),
+    VolkswagenCarSpecs(wheelbase=2.79),
     chassis_codes={"NS"},
     wmis={WMI.SKODA, WMI.VOLKSWAGEN_GROUP_RUS},
   )
@@ -574,13 +574,13 @@ class CAR(Platforms):
       VWCarDocs("Škoda Octavia RS 2016"),
       VWCarDocs("Škoda Octavia Scout 2017-19"),
     ],
-    VolkswagenCarSpecs(mass=1388, wheelbase=2.68),
+    VolkswagenCarSpecs(wheelbase=2.68),
     chassis_codes={"NE"},
     wmis={WMI.SKODA},
   )
   SKODA_SUPERB_MK3 = VolkswagenMQBPlatformConfig(
     [VWCarDocs("Škoda Superb 2015-22")],
-    VolkswagenCarSpecs(mass=1505, wheelbase=2.84),
+    VolkswagenCarSpecs(wheelbase=2.84),
     chassis_codes={"3V", "NP"},
     wmis={WMI.SKODA},
   )
