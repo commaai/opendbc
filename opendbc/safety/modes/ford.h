@@ -93,7 +93,6 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
   .max_curvature_error = 100,         // 0.002 rad/m * curvature_to_can
   .curvature_error_min_speed = 10.0,  // m/s
   .max_steer_power = 0,               // disabled, Ford has no steed power signal
-  .inactive_curvature_is_zero = true, // Ford EPS expects curvature=0 when inactive
 };
 
 static void ford_rx_hook(const CANPacket_t *msg) {
@@ -120,6 +119,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
 
     // Update vehicle yaw rate
     if (msg->addr == FORD_Yaw_Data_FD1) {
+      // FIXME: safety can receive yaw before new vehicle speed, it should recompute meas on either received
       // Signal: VehYaw_W_Actl
       // TODO: we should use the speed which results in the closest angle measurement to the desired angle
       float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
@@ -289,11 +289,13 @@ static safety_config ford_init(uint16_t param) {
     {FORD_Lane_Assist_Data1, 0, 8, .check_relay = true},  \
     {FORD_IPMA_Data, 0, 8, .check_relay = true},          \
 
+#ifdef ALLOW_DEBUG
   static const CanMsg FORD_CANFD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
     {FORD_ACCDATA, 0, 8, .check_relay = true},
     {FORD_LateralMotionControl2, 0, 8, .check_relay = true},
   };
+#endif
 
   static const CanMsg FORD_CANFD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
@@ -309,20 +311,15 @@ static safety_config ford_init(uint16_t param) {
   const uint16_t FORD_PARAM_CANFD = 2;
   const bool ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
 
-  bool ford_longitudinal = false;
-
-#ifdef ALLOW_DEBUG
-  const uint16_t FORD_PARAM_LONGITUDINAL = 1;
-  ford_longitudinal = GET_FLAG(param, FORD_PARAM_LONGITUDINAL);
-#endif
-
-  // Longitudinal is the default for CAN, and optional for CAN FD w/ ALLOW_DEBUG
-  ford_longitudinal = !ford_canfd || ford_longitudinal;
-
   safety_config ret;
   if (ford_canfd) {
-    ret = ford_longitudinal ? BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_LONG_TX_MSGS) : \
-                              BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_STOCK_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_STOCK_TX_MSGS);
+#ifdef ALLOW_DEBUG
+    const uint16_t FORD_PARAM_LONGITUDINAL = 1;
+    if (GET_FLAG(param, FORD_PARAM_LONGITUDINAL)) {
+      ret = BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_LONG_TX_MSGS);
+    }
+#endif
   } else {
     ret = BUILD_SAFETY_CFG(ford_rx_checks, FORD_LONG_TX_MSGS);
   }
