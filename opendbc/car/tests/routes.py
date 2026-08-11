@@ -1,5 +1,6 @@
 from typing import NamedTuple
 
+from opendbc.car.byd.values import CAR as BYD
 from opendbc.car.chrysler.values import CAR as CHRYSLER
 from opendbc.car.gm.values import CAR as GM
 from opendbc.car.ford.values import CAR as FORD
@@ -20,6 +21,9 @@ from opendbc.car.psa.values import CAR as PSA
 # FIXME: add routes for these cars
 non_tested_cars = [
   MOCK.MOCK,
+  # route b8b2d1a1df1b3aad|000000a0--7c51639c22 is driven and public, but only qlogs have
+  # been uploaded so far; swap this for a CarTestRoute once the rlogs are up
+  BYD.BYD_ATTO3,
   GM.CADILLAC_ATS,
   GM.HOLDEN_ASTRA,
   GM.CHEVROLET_MALIBU,
