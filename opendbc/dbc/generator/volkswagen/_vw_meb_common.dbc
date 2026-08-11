@@ -152,7 +152,8 @@ BO_ 219 AWV_03: 48 XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ AEB_Object_Status : 12|3@1+ (1,0) [0|7] "" XXX
  SG_ VRU_Detected : 15|1@1+ (1,0) [0|1] "" XXX
- SG_ Unknown_17 : 17|7@1+ (1,0) [0|127] "" XXX
+ SG_ AWV_Unavailable : 17|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_18 : 18|6@1+ (1,0) [0|63] "" XXX
  SG_ AEB_Object_Status_B : 24|3@1+ (1,0) [0|7] "" XXX
  SG_ Unknown_27 : 27|5@1+ (1,0) [0|31] "" XXX
  SG_ SET_ME_254 : 32|8@1+ (1,0) [0|255] "" XXX
@@ -166,7 +167,7 @@ BO_ 219 AWV_03: 48 XXX
  SG_ Unknown_93 : 93|7@1+ (1,0) [0|127] "" XXX
  SG_ Unknown_100 : 100|4@1+ (1,0) [0|15] "" XXX
  SG_ AWV_Init_Status : 128|2@1+ (1,0) [0|3] "" XXX
- SG_ AWV_Valid : 192|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_192 : 192|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 247 MEB_HVEM_02: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
@@ -417,6 +418,20 @@ BO_ 522 EML_06: 64 XXX
  SG_ Yaw_Rate : 200|16@1+ (0.007,-229.34) [0|255] "" XXX
 
 BO_ 564 MEB_Camera_02: 64 XXX
+
+BO_ 588 MEB_Side_Assist_01: 16 XXX
+ SG_ Blind_Spot_Passenger : 12|7@1+ (1,0) [0|15] "" XXX
+ SG_ Blind_Spot_Driver : 19|7@1+ (1,0) [0|15] "" XXX
+ SG_ Blind_Spot_Info_Passenger : 26|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Warn_Passenger : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Info_Driver : 29|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Warn_Driver : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ Lower_Speed_01 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ Higher_Speed_01 : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ Higher_Speed_02 : 83|1@0+ (1,0) [0|1] "" XXX
+ SG_ Lower_Speed_02 : 84|1@0+ (1,0) [0|1] "" XXX
+ SG_ Standstill : 86|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 589 MEB_Side_Assist_02: 64 XXX
  SG_ Unknown_01 : 100|3@0+ (1,0) [0|7] "" XXX
  SG_ Unknown_02 : 108|3@0+ (1,0) [0|7] "" XXX
@@ -1972,10 +1987,10 @@ BO_ 380196006 Battery_Temperatures: 8 XXX
 BO_ 380196013 MEB_AWV_01: 8 XXX
  SG_ Distance_Warning : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ FCW_Display : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ AWV_Enabled : 15|1@0+ (1,0) [0|1] "" XXX
- SG_ AWV_Init : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_15 : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_17 : 17|1@0+ (1,0) [0|1] "" XXX
  SG_ FCW_Sound : 22|2@1+ (1,0) [0|3] "" XXX
- SG_ SET_ME_1 : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ AWV_Status : 28|2@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_511 : 33|9@1+ (1,0) [0|127] "" XXX
  SG_ Target : 56|8@1+ (1,0) [0|255] "" XXX
 
@@ -2005,9 +2020,15 @@ CM_ BO_ 192 "Motorsteuergerät";
 CM_ BO_ 219 "AEB_Object_Status and AEB_Object_Status_B values 4 and 5/6 coincide with AEB potentially activating";
 CM_ SG_ 219 AEB_Target_Decel "Scale is estimated. Lowest request seen was -6.99";
 CM_ SG_ 219 AEB_TTC_Countdown "Can count down to zero before AEB activates, but may not always precede an AEB or mean it will happen";
-CM_ SG_ 219 VRU_Detected "Commonly high when a pedestrian is seen";
+CM_ SG_ 219 VRU_Detected "Commonly high when a pedestrian is seen. Also goes high with AWV_Unavailable";
+CM_ SG_ 219 AWV_Unavailable "High when the AWV function cannot operate, seen with the radar obstructed and with the powertrain ECU off the bus. MEB_AWV_01.AWV_Status carries the same state";
+CM_ SG_ 219 AWV_Init_Status "Power-up state only, reads 2 once running. Does not report whether AEB can operate, use AWV_Unavailable for that";
+CM_ SG_ 219 Unknown_192 "Constant per platform (0 on all gen1 ID.4/Born, 1 on all gen2 ID.4)";
+CM_ SG_ 219 Unknown_27 "Low bit tracks AWV_Unavailable, but is also set in 20-33% of normal driving";
+CM_ SG_ 219 Unknown_80 "Low bit is normally 1 and clears with AWV_Unavailable, but also clears in ~1% of normal driving";
 CM_ SG_ 313 Long_Control_Inhibit "Goes high after user brakes hard, causes temporary TSK_Status fault";
 CM_ SG_ 333 SET_ME_0x2FE "Only set by stock ACC on 2024+; reads 0 on pre-2024 and is not packed by mebcan";
+CM_ SG_ 380196013 AWV_Status "Mirrors AWV_03.AWV_Unavailable, at a higher rate";
 CM_ BO_ 317 "Lenkungssteuergerät";
 CM_ BO_ 517 "Steuergerät für Motorstart";
 CM_ BO_ 522 "Steuergerät für Fahrzeugbewegung";
@@ -3319,3 +3340,5 @@ VAL_ 316495015 VZE_Zeichen_03_Gesetz 0 "nicht_erkannt" 1 "erkannt";
 VAL_ 316495015 VZE_Gong 0 "Gong_deaktiv" 1 "Gong_aktiv";
 VAL_ 258 Motion_State 1 "Forwards" 2 "Reversing" 3 "Stopped";
 VAL_ 258 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt";
+VAL_ 219 AWV_Unavailable 0 "Available" 1 "Unavailable";
+VAL_ 380196013 AWV_Status 0 "Init" 1 "Available" 2 "Unavailable";

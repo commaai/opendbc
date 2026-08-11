@@ -28,6 +28,7 @@ class CAR(Platforms):
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"(?:\d+\.\d+\.\d+[a-z]?|\d{2}/\d{2}/\d{4}|[0-9a-f]{8})",
   requests=[
     Request(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
