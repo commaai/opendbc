@@ -21,12 +21,7 @@ ALL_GAS_EV_HYBRID_COMBOS = [
   {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS | HyundaiSafetyFlags.CAMERA_SCC},
 ]
 
-ALL_GAS_EV_HYBRID_COMBOS_CCNC = [
-  # Camera SCC
-  {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.CAMERA_SCC},
-  {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS | HyundaiSafetyFlags.CAMERA_SCC},
-  {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS | HyundaiSafetyFlags.CAMERA_SCC},
-]
+CAMERA_SCC_COMBOS = ALL_GAS_EV_HYBRID_COMBOS[3:]
 
 
 class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
@@ -291,72 +286,47 @@ class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongB
     pass
 
 
-@parameterized_class(ALL_GAS_EV_HYBRID_COMBOS_CCNC)
-class TestHyundaiCanfdLFASteeringCCNC(TestHyundaiCanfdLFASteeringBase):
+class HyundaiCanfdCCNCTest:
+
+  CCNC_SAFETY_PARAM = HyundaiSafetyFlags.CCNC
+
+  @classmethod
+  def setUpClass(cls):
+    if cls.__name__ in (
+      "TestHyundaiCanfdLFASteeringCCNC",
+      "TestHyundaiCanfdLFASteeringLongCCNC",
+    ):
+      cls.safety = None
+      raise unittest.SkipTest
+
+  def setUp(self):
+    self.packer = CANPackerSafety("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.CCNC_SAFETY_PARAM | self.SAFETY_PARAM)
+    self.safety.init_tests()
+
+  def test_ccnc_tx_msgs(self):
+    for msg, bus in (("CCNC_0x161", 0), ("CCNC_0x162", 0), ("MDPS", 2)):
+      self.assertTrue(self._tx(self.packer.make_can_msg_safety(msg, bus, {})))
+    self.assertTrue(self._tx(common.make_msg(2, 0x7C4)))
+
+
+@parameterized_class(CAMERA_SCC_COMBOS)
+class TestHyundaiCanfdLFASteeringCCNC(HyundaiCanfdCCNCTest, TestHyundaiCanfdLFASteeringBase):
 
   TX_MSGS = [[0x12A, 0], [0x1E0, 0], [0x1CF, 2], [0x7C4, 2]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x12A, 0x1E0, 0x161, 0x162), 2: (0x7C4, 0xEA)}
   FWD_BLACKLISTED_ADDRS = {2: [0x12A, 0x1E0, 0x161, 0x162], 0: [0x7C4, 0xEA]}
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestHyundaiCanfdLFASteeringCCNC":
-      cls.safety = None
-      raise unittest.SkipTest
 
-  def setUp(self):
-    self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CCNC | self.SAFETY_PARAM)
-    self.safety.init_tests()
+@parameterized_class(CAMERA_SCC_COMBOS)
+class TestHyundaiCanfdLFASteeringLongCCNC(HyundaiCanfdCCNCTest, TestHyundaiCanfdLFASteeringLongBase):
 
-  def test_ccnc(self):
-    self.assertTrue(self._tx(self.packer.make_can_msg_safety("CCNC_0x161", self.STEER_BUS, {})))
-    self.assertTrue(self._tx(self.packer.make_can_msg_safety("CCNC_0x162", self.STEER_BUS, {})))
-
-  def test_tx_hook_on_wrong_safety_mode(self):
-    from opendbc.safety.tests.common import make_msg
-    import importlib
-    for test_name in ["TestElm327"]:
-      mod = importlib.import_module("opendbc.safety.tests.test_" + test_name.replace("Test", "").lower())
-      tx_list = [m for m in getattr(mod, test_name).TX_MSGS if m[0] != 0x7C4]  # skip overlapping 0x7C4 from Elm327
-      for addr, bus in tx_list:
-        if [addr, bus] not in self.TX_MSGS:
-          self.assertFalse(self._tx(make_msg(bus, addr)), f"allowed TX {addr=:#x} {bus=}")
-
-
-@parameterized_class(ALL_GAS_EV_HYBRID_COMBOS_CCNC)
-class TestHyundaiCanfdLFASteeringLongCCNC(TestHyundaiCanfdLFASteeringLongBase):
+  CCNC_SAFETY_PARAM = HyundaiSafetyFlags.CCNC | HyundaiSafetyFlags.LONG
 
   TX_MSGS = [[0x12A, 0], [0x1E0, 0], [0x1CF, 2], [0x7C4, 2], [0x1A0, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x12A, 0x1E0, 0x161, 0x162, 0x1A0), 2: (0x7C4, 0xEA)}
   FWD_BLACKLISTED_ADDRS = {2: [0x12A, 0x1E0, 0x161, 0x162, 0x1A0], 0: [0x7C4, 0xEA]}
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestHyundaiCanfdLFASteeringLongCCNC":
-      cls.safety = None
-      raise unittest.SkipTest
-
-  def setUp(self):
-    self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CCNC | HyundaiSafetyFlags.LONG | self.SAFETY_PARAM)
-    self.safety.init_tests()
-
-  def test_ccnc(self):
-    self.assertTrue(self._tx(self.packer.make_can_msg_safety("CCNC_0x161", self.STEER_BUS, {})))
-    self.assertTrue(self._tx(self.packer.make_can_msg_safety("CCNC_0x162", self.STEER_BUS, {})))
-
-  def test_tx_hook_on_wrong_safety_mode(self):
-    from opendbc.safety.tests.common import make_msg
-    import importlib
-    for test_name in ["TestElm327"]:
-      mod = importlib.import_module("opendbc.safety.tests.test_" + test_name.replace("Test", "").lower())
-      tx_list = [m for m in getattr(mod, test_name).TX_MSGS if m[0] != 0x7C4]  # skip overlapping 0x7C4 from Elm327
-      for addr, bus in tx_list:
-        if [addr, bus] not in self.TX_MSGS:
-          self.assertFalse(self._tx(make_msg(bus, addr)), f"allowed TX {addr=:#x} {bus=}")
 
 
 if __name__ == "__main__":

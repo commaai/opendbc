@@ -125,23 +125,20 @@ def create_lfahda_cluster(packer, CAN, enabled):
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
 
-def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBlinker, rightBlinker, msg_161, msg_162, msg_1b5, is_metric, out):
-  # ccNC cars use CCNC_0x161/CCNC_0x162 instead of the usual LFAHDA_CLUSTER message
-  # block faults (we should figure out root cause instead of masking)
+def create_ccnc(packer, CAN, openpilot_longitudinal_control, enabled, hud, left_blinker, right_blinker, msg_161, msg_162, msg_1b5, is_metric, out):
   for f in {"FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW", "FAULT_ESS"}:
     msg_162[f] = 0
-  # block alerts not applicable when using openpilot
   if msg_161["ALERTS_2"] == 5:
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0})
   if msg_161["ALERTS_3"] == 17:
     msg_161["ALERTS_3"] = 0
   if msg_161["ALERTS_5"] in (2, 5):
     msg_161["ALERTS_5"] = 0
-  if msg_161["SOUNDS_4"] == 2 and msg_161["LFA_ICON"] in (3, 0,):
+  if msg_161["SOUNDS_4"] == 2 and msg_161["LFA_ICON"] in (0, 3):
     msg_161["SOUNDS_4"] = 0
 
-  LANE_CHANGE_SPEED_MIN = 8.9408
-  anyBlinker = leftBlinker or rightBlinker
+  LANE_CHANGE_SPEED_MIN = 8.9408  # 20 mph
+  any_blinker = left_blinker or right_blinker
   curvature = {i: (31 if i == -1 else 13 - abs(i + 15)) if i < 0 else 15 + i for i in range(-15, 16)}
 
   lfa_icon = enabled
@@ -151,60 +148,53 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     "LKA_ICON": 0,
     "LFA_ICON": 2 if lfa_icon else 0,
     "CENTERLINE": 1 if lfa_icon else 0,
-    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(out.steeringAngleDeg / 4.5), 15)), 14) if lfa_icon and not anyBlinker else 15,
-    "LANELINE_LEFT": (0 if not lfa_icon else 1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 6 if anyBlinker else 2),
-    "LANELINE_RIGHT": (0 if not lfa_icon else 1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 6 if anyBlinker else 2),
-    # lane change ui like HDA2
-    "LCA_LEFT_ICON": (0 if not lfa_icon or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.leftBlindspot else 2 if anyBlinker else 4),
-    "LCA_RIGHT_ICON": (0 if not lfa_icon or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.rightBlindspot else 2 if anyBlinker else 4),
-    "LCA_LEFT_ARROW": 2 if leftBlinker else 0,
-    "LCA_RIGHT_ARROW": 2 if rightBlinker else 0,
+    "LANELINE_CURVATURE": curvature[max(-15, min(int(out.steeringAngleDeg / 4.5), 15))] if lfa_icon and not any_blinker else 15,
+    "LANELINE_LEFT": (0 if not lfa_icon else 1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 6 if any_blinker else 2),
+    "LANELINE_RIGHT": (0 if not lfa_icon else 1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 6 if any_blinker else 2),
+    "LCA_LEFT_ICON": (0 if not lfa_icon or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.leftBlindspot else 2 if any_blinker else 4),
+    "LCA_RIGHT_ICON": (0 if not lfa_icon or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.rightBlindspot else 2 if any_blinker else 4),
+    "LCA_LEFT_ARROW": 2 if left_blinker else 0,
+    "LCA_RIGHT_ARROW": 2 if right_blinker else 0,
   })
 
-  # show lane position animation when changing lanes like HDA2
-  if lfa_icon and (leftBlinker or rightBlinker):
-    leftlaneraw, rightlaneraw = msg_1b5["Info_LftLnPosVal"], msg_1b5["Info_RtLnPosVal"]
+  if lfa_icon and any_blinker:
+    left_lane_raw, right_lane_raw = msg_1b5["Info_LftLnPosVal"], msg_1b5["Info_RtLnPosVal"]
 
     scale_per_m = 15 / 1.7
-    leftlane = abs(int(round(15 + (leftlaneraw - 1.7) * scale_per_m)))
-    rightlane = abs(int(round(15 + (rightlaneraw - 1.7) * scale_per_m)))
+    left_lane = abs(int(round(15 + (left_lane_raw - 1.7) * scale_per_m)))
+    right_lane = abs(int(round(15 + (right_lane_raw - 1.7) * scale_per_m)))
 
-    # only accept high or very high lane quality values
     if msg_1b5["Info_LftLnQualSta"] not in (2, 3):
-      leftlane = 0
+      left_lane = 0
     if msg_1b5["Info_RtLnQualSta"] not in (2, 3):
-      rightlane = 0
+      right_lane = 0
 
-    # these are the edge limits reported by the camera seen near the lane change transition
-    if leftlaneraw == -2.0248375:
-      leftlane = 30 - rightlane
-    if rightlaneraw == 2.0248375:
-      rightlane = 30 - leftlane
+    if left_lane_raw == -2.0248375:
+      left_lane = 30 - right_lane
+    if right_lane_raw == 2.0248375:
+      right_lane = 30 - left_lane
 
-    # keep the lane lines centered and complementary when one or both sides are missing
-    if leftlaneraw == rightlaneraw == 0:
-      leftlane = rightlane = 15
-    elif leftlaneraw == 0:
-      leftlane = 30 - rightlane
-    elif rightlaneraw == 0:
-      rightlane = 30 - leftlane
+    if left_lane_raw == right_lane_raw == 0:
+      left_lane = right_lane = 15
+    elif left_lane_raw == 0:
+      left_lane = 30 - right_lane
+    elif right_lane_raw == 0:
+      right_lane = 30 - left_lane
 
-    total = leftlane + rightlane
+    total = left_lane + right_lane
     if total == 0:
-      leftlane = rightlane = 15
+      left_lane = right_lane = 15
     else:
-      leftlane = round((leftlane / total) * 30)
-      rightlane = 30 - leftlane
+      left_lane = round((left_lane / total) * 30)
+      right_lane = 30 - left_lane
 
-    msg_161["LANELINE_LEFT_POSITION"] = leftlane
-    msg_161["LANELINE_RIGHT_POSITION"] = rightlane
+    msg_161["LANELINE_LEFT_POSITION"] = left_lane
+    msg_161["LANELINE_RIGHT_POSITION"] = right_lane
 
-  # vibrate steering wheel on lane departure
   if hud.leftLaneDepart or hud.rightLaneDepart:
     msg_162["VIBRATE"] = 1
 
-  if openpilotLongitudinalControl:
-    # block alerts not applicable when using openpilot long
+  if openpilot_longitudinal_control:
     if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):
       msg_161["ALERTS_3"] = 0
     if msg_161["ALERTS_5"] == 4:
