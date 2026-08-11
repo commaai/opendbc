@@ -242,9 +242,12 @@ class _BrownPandaRadarInterface:
       point.vRel = point_a["vRel"]
       # BrownPanda reserves these unproven BYD motion fields on the wire.
       # NaN is OpenDBC's canonical marker for an unavailable optional field.
-      point.aRel = float("nan")
-      point.yvRel = float("nan")
-      point.measured = True
+      # car.capnp moved these under the `deprecated` group upstream; no other
+      # brand still reads them, but setting them preserves this adapter's
+      # original documented intent (see docs/BROWNPANDA_RADAR.md).
+      point.deprecated.aRel = float("nan")
+      point.deprecated.yvRel = float("nan")
+      point.deprecated.measured = True
 
     for track_id in list(self.pts):
       if track_id not in current_tracks:

@@ -41,6 +41,12 @@
 > signal layout but consumes BrownPanda's optional converted stream on Tesla party
 > bus 0. See [the BrownPanda radar contract](docs/BROWNPANDA_RADAR.md). Projects
 > must pin an exact commit; the branch name alone is not a reproducible version.
+>
+> Branch `port/upstream-bump-byd-chery-jaecoo` (not yet merged to `master`)
+> adds BYD and Chery/Omoda/iCaur/JAECOO car support, ported from
+> [kommuai/opendbc](https://github.com/kommuai/opendbc). See
+> [the port writeup](docs/BYD_CHERY_JAECOO_PORT.md) for provenance and known
+> gaps before pinning it anywhere.
 
 ---
 

@@ -1,0 +1,278 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: EON XXX INTERCEPTOR ANY ACTUATOR SAFETY
+
+BO_ 196 STEER_RELATED: 8 XXX
+ SG_ STEERING_ANGLE : 7|16@0+ (0.06,-1966) [-450|450] "deg" XXX
+ SG_ DRIVER_TORQUE : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 250 GAS: 8 XXX
+ SG_ GAS_THROTTLE : 31|8@0+ (0.01,0) [0|255] "" XXX
+ SG_ GAS_PEDAL_PRESSURE : 53|6@0+ (0.01,0) [0|63] "" XXX
+
+BO_ 269 TRANSMISSION: 8 XXX
+ SG_ GEAR : 43|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 745 OMODA_BRAKE: 8 XXX
+ SG_ BRAKE_PRESSURE : 16|8@1+ (0.0188679,0) [0|53] "" XXX
+
+BO_ 259 OMODA_BRAKE_PEDAL: 8 XXX
+ SG_ BRAKE_PRESSED : 0|8@1+ (1,0) [0|255] "" XXX
+
+CM_ BO_ 745 "Chery Omoda 5 driver brake on 0x2E9 byte 2. Raw 0=off, 6..0x35=pedal; 1..5 are multiplex variants.";
+CM_ SG_ 745 BRAKE_PRESSURE "Omoda 5: payload byte 2, raw 0..0x35 scaled to 0..1; ignore raw>0x35.";
+
+BO_ 768 OMODA_TRANSMISSION: 8 XXX
+ SG_ GEAR : 0|4@1+ (1,0) [0|15] "" XXX
+
+BO_ 467 EPS: 8 XXX
+ SG_ STEERING_ANGLE : 7|14@0+ (0.1,-780.1) [0|16383] "" XXX
+ SG_ DRIVER_TORQUE : 22|7@0+ (1,0) [0|127] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 483 ADAS_RELATED: 8 XXX
+ SG_ NEW_SIGNAL_2 : 1|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_3 : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 15|11@0+ (1,-1024) [0|2047] "" XXX
+
+BO_ 608 SPEED_RELATED: 8 XXX
+ SG_ NON_CAL_SPEED1 : 1|9@0+ (1,0) [0|511] "" XXX
+ SG_ NON_CAL_SPEED2 : 17|9@0+ (1,0) [0|511] "" XXX
+
+BO_ 666 BRAKE_PEDAL: 8 XXX
+ SG_ BRAKE_PRESSURE : 18|9@0+ (0.002,-0.2) [0|511] "" XXX
+ SG_ AUTO_HOLD : 40|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 647 SEATBELT_287: 8 XXX
+ SG_ DRIVER_UNBUCKLED : 25|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 1072 SEATBELT_430: 8 XXX
+ SG_ DRIVER_UNBUCKLED : 46|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 295 DOOR_BCM_127: 8 XXX
+ SG_ B0 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ B1 : 8|8@1+ (1,0) [0|255] "" XXX
+ SG_ DOOR_B2_STATUS : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ B3 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ B4 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ DOOR_B5_STATUS : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ B6 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ B7 : 56|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 914 BCM_STAT_392: 8 XXX
+ SG_ B0 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ B1 : 8|8@1+ (1,0) [0|255] "" XXX
+ SG_ B2 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ B3 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ B4 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ B5 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ B6 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ B7 : 56|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 1042 BCM_STAT_412: 8 XXX
+ SG_ B0 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ B1 : 8|8@1+ (1,0) [0|255] "" XXX
+ SG_ B2 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ B3 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ B4 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ B5 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ B6 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ B7 : 56|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 1125 BCM_STAT_465: 8 XXX
+ SG_ B0 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ B1 : 8|8@1+ (1,0) [0|255] "" XXX
+ SG_ B2 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ B3 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ B4 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ B5 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ B6 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ B7 : 56|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 787 WHEELSPEED_2: 8 XXX
+ SG_ WHEEL_FL : 7|16@0+ (0.01,0) [0|65535] "" XXX
+ SG_ WHEEL_FR : 23|16@0+ (0.01,0) [0|65535] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 790 WHEELSPEED_1: 8 XXX
+ SG_ WHEEL_BL : 7|16@0+ (0.01,0) [0|65535] "" XXX
+ SG_ WHEEL_BR : 23|16@0+ (0.01,0) [0|65535] "" XXX
+ SG_ ACC_ENABLED : 41|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 837 LANE_KEEP: 8 XXX
+ SG_ STEER_CMD_ANGLE : 7|14@0+ (0.1,-780.1) [0|16383] "" XXX
+ SG_ LKAS_ENABLE : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_XFF : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_XFC : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_XF4 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X63 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ SET_ME_XF : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 864 PCM_BUTTONS: 6 XXX
+ SG_ CHECKSUM_BUTTONS : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ ICC_TOGGLE : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ RES_BUTTON : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ CRUISE_BUTTON : 32|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 903 HUD: 8 XXX
+ SG_ AEB : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ HANDS_ON_WHEEL_STEER : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ CANCEL_CRUISE_UNCERTAIN : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ GAS_RESUME_UNCERTAIN : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ FOLLOW_DISTANCE : 9|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_1 : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ PCW : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ CRUISE_STATE : 34|2@1+ (1,0) [0|3] "" XXX
+ SG_ GAS_OVERRIDE : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ AEB_RELATED : 39|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_SPEED : 44|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 913 STALK: 8 XXX
+ SG_ RIGHT_BLINKER : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_BLINKER : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ GENERIC_TOGGLE : 2|1@1+ (1,0) [0|1] "" XXX
+ SG_ PAYLOAD391_B0 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ PAYLOAD391_B1 : 8|8@1+ (1,0) [0|255] "" XXX
+ SG_ PAYLOAD391_B3 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ PAYLOAD391_B4 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ PAYLOAD391_B5 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ PAYLOAD391_B6 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ PAYLOAD391_B7 : 56|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 916 LKAS_INFO: 8 XXX
+ SG_ MAIN_TORQUE : 7|10@0+ (1,0) [0|1023] "" XXX
+ SG_ LKAS_ENABLE : 10|1@0+ (1,0) [0|1] "" XXX
+ SG_ STEER_RELATED : 23|16@0+ (1,-32637) [0|65535] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 990 ACC_UNCERTAIN: 8 XXX
+ SG_ NEW_SIGNAL_2 : 8|9@0+ (1,-260) [0|511] "" XXX
+
+BO_ 775 STEER_STATUS: 8 XXX
+ SG_ LKAS_AVAILABLE : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_FAULT : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 933 LKA_STATUS: 8 XXX
+ SG_ HANDS_ON_WHEEL_WARN : 44|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1201 BSM_LEFT: 8 XXX
+ SG_ LEFT_FAR_APPROACHING : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_APPROACHING : 14|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1203 BSM_RIGHT: 8 XXX
+ SG_ RIGHT_FAR_APPROACHING : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ RIGHT_APPROACHING : 14|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 546 ICAUR_WHEELSPEED_A: 8 XXX
+ SG_ WHEEL_FL : 7|13@0+ (1,0) [0|8191] "" XXX
+ SG_ WHEEL_FR : 23|13@0+ (1,0) [0|8191] "" XXX
+
+BO_ 547 ICAUR_WHEELSPEED_B: 8 XXX
+ SG_ WHEEL_BL : 7|13@0+ (1,0) [0|8191] "" XXX
+ SG_ WHEEL_BR : 23|13@0+ (1,0) [0|8191] "" XXX
+
+BO_ 306 ICAUR_BRAKE: 8 XXX
+ SG_ BRAKE_PRESSURE : 31|8@0+ (0.01,0) [0|1] "" XXX
+
+BO_ 330 ICAUR_GAS: 8 XXX
+ SG_ GAS_PEDAL_PRESSURE : 23|12@0+ (0.001,-2) [0|1] "" XXX
+
+BO_ 581 ICAUR_STALK: 8 XXX
+ SG_ BLINKER : 11|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 789 ICAUR_TRANSMISSION: 8 XXX
+ SG_ GEAR : 11|4@0+ (1,0) [0|15] "" XXX
+
+
+CM_ SG_ 269 GEAR "D is 4, N is 3, R is 2, P is 1";
+CM_ SG_ 768 GEAR "Omoda 5: 0x300 byte0 bits 0-3. 0xB=D 0xC=N 0xD=R 0xE=P.";
+CM_ SG_ 666 AUTO_HOLD "Only gear D it will be active";
+CM_ SG_ 666 BRAKE_PRESSURE "Offset -0.2 removes ~0.2 idle bias (Jaecoo J7); scale 0.002 unchanged.";
+CM_ SG_ 903 FOLLOW_DISTANCE "Jaecoo J7 ACC gap bars on HUD byte1 bits 9-11 (3-bit LE). Raw 1=1 bar (min gap) .. raw 5=5 bars (max gap); 0/6/7 unknown.";
+CM_ SG_ 903 HANDS_ON_WHEEL_STEER "HUD 0x387 byte0 bit4 (0x10): 'ACC cancelled / uncertain' indicator the cluster latches AFTER cruise drops to CRUISE_STATE=1. NOT the active in-LKAS hands-on-wheel icon — CarController re-emits HUD on PT with this bit forced 0 to suppress spurious cancel glyphs.";
+CM_ SG_ 903 CANCEL_CRUISE_UNCERTAIN "HUD 0x387 byte0 bit5 (0x20).";
+CM_ SG_ 933 HANDS_ON_WHEEL_WARN "LKA_STATUS 0x3a5 byte5 bit4 (0x10). Co-fires with the HUD cancel indicator after cruise drops — not the active in-LKAS hands-on-wheel icon.";
+CM_ BO_ 647 "Driver seatbelt: byte3 bit1 (Intel start bit 25) set when unbuckled (Jaecoo J7 log).";
+CM_ BO_ 1072 "Driver seatbelt: byte5 bit6 (Intel start bit 46) set when unbuckled (Jaecoo J7 log).";
+CM_ BO_ 295 "BCM 0x127 (optional): door-related bytes vary; not present on every latch event — do not use alone for doorOpen.";
+CM_ BO_ 913 "CAN 0x391 STALK+BCM. Door: PAYLOAD391_B3 (wire byte3) 0x08 latched vs 0x09 ajar — use LSB (byte3&1), not B1/B6 (counter).";
+CM_ SG_ 913 GENERIC_TOGGLE "Stalk/aux toggle -> carState.genericToggle; byte0 bit2 set (0xCC..) vs clear (0xC8..).";
+CM_ BO_ 914 "BCM 0x392 (Jaecoo J7): raw BCM; door decode uses 0x391 PAYLOAD391_B3 as in CM_ BO_ 913.";
+CM_ BO_ 1042 "BCM frame 0x412; trailing bytes roll (counter) in capture.";
+CM_ BO_ 1125 "BCM frame 0x465; single sample in door-close capture — label for follow-up.";
+CM_ SG_ 903 CRUISE_STATE "3 is ENABLE, 2 is READY, 1 is IDLE";
+CM_ SG_ 467 STEERING_ANGLE "Jaecoo J7: offset -780.1 removes ~7.1 deg bias at straight-ahead vs -773.";
+CM_ SG_ 196 STEERING_ANGLE "0xC4 bytes0-1 motorola 16-bit. iCaur03: road-wheel angle factor 0.06 offset -1966. -1985 overshot (~-17° paramsd offset / paramsdTemporaryError on live 3d73…); drive-straight bias with -1966 stays within OFFSET_MAX=10°. Jaecoo: same bits formerly STEERING_ANGLE_NOT_CALIBRATED (raw>=36000 ≈ phys intervention).";
+CM_ SG_ 196 DRIVER_TORQUE "iCaur03: 0xC4 start bit 23, 8-bit unsigned driver torque (byte2). Scale 1.";
+CM_ BO_ 196 "Chery 0xC4 STEER_RELATED: iCaur angle+torque; Jaecoo also uses this ID.";
+CM_ SG_ 837 STEER_CMD_ANGLE "Match EPS STEERING_ANGLE scale/offset for LANE_KEEP TX.";
+CM_ SG_ 864 ICC_TOGGLE "Cruise on/off (byte3 bit0).";
+CM_ SG_ 864 CRUISE_BUTTON "Cruise SET (byte4 bit0, mask 0x01). Verified on capture 2026-05-26.";
+CM_ SG_ 864 RES_BUTTON "RES / resume (byte3 bit6, mask 0x40); 3-5 frames per tap.";
+CM_ SG_ 775 LKAS_FAULT "Camera-broadcast LKAS fault flag (byte0 bit6). Set when EPS rejects LKAS, e.g. driver torque overpowers (route 2026-05-20--05-56-41 t=454.06: 0x80->0x40 the instant LKAS_ENABLE in 0x394 drops).";
+CM_ SG_ 775 LKAS_AVAILABLE "Camera LKAS-OK flag (byte0 bit7); inverse of LKAS_FAULT.";
+CM_ SG_ 864 CHECKSUM_BUTTONS "Byte 0; Chrysler-style CRC over bytes 1..5 (Jaecoo J7 route 2026-05-14--07-49-04).";
+CM_ BO_ 546 "iCaur 03 wheel speed A (0x222). 13-bit motorola (byte0 + top 5 of byte1; low 3 of byte1 unused by speed). DBC scale 1 (raw counts); CarInterface wheelSpeedFactor~0.01756 -> m/s (GPS origin-fit on rlog 2026-07-13--04-13-59; replaces prior 8-bit*0.55). Offset 0 so raw=0 is standstill. Bytes 0-1 / 2-3 track together (vehicle-speed duplicate, not independent wheels).";
+CM_ BO_ 547 "iCaur 03 wheel speed B (0x223). Same 13-bit encoding as 0x222; byte pairs duplicate vehicle speed.";
+CM_ BO_ 306 "iCaur 03 brake pressure (0x132 start bit 31, 8-bit motorola). DBC scale 0.01 so raw 100 → 1.0; CarState uses 0..1.";
+CM_ BO_ 330 "iCaur 03 gas pedal (0x14A start bit 23, 12-bit motorola). phys=(raw-2000)/1000 so idle raw 2000→0 and raw 3000→1.0.";
+CM_ BO_ 581 "iCaur 03 stalk/blinker (0x245 start bit 11, 4-bit). Left=4|6, right=8|9.";
+CM_ SG_ 581 BLINKER "iCaur03: left when 4 or 6; right when 8 or 9.";
+CM_ BO_ 789 "iCaur 03 transmission (0x315 start bit 11, 4-bit gear).";
+CM_ SG_ 789 GEAR "iCaur03: P=11 D=1 N=10 R=9.";
+
+VAL_ 768 GEAR 11 "D" 12 "N" 13 "R" 14 "P";
+VAL_ 581 BLINKER 4 "LEFT" 6 "LEFT" 8 "RIGHT" 9 "RIGHT";
+VAL_ 789 GEAR 1 "D" 9 "R" 10 "N" 11 "P";
+VAL_ 903 FOLLOW_DISTANCE 0 "UNKNOWN" 1 "1_BAR" 2 "2_BAR" 3 "3_BAR" 4 "4_BAR" 5 "5_BAR" 6 "UNKNOWN" 7 "UNKNOWN";
+VAL_ 903 HANDS_ON_WHEEL_STEER 0 "NORMAL" 1 "ACC_CANCELLED_INDICATOR";
+VAL_ 933 HANDS_ON_WHEEL_WARN 0 "NO_WARNING" 1 "WARNING";
+VAL_ 913 GENERIC_TOGGLE 0 "OFF" 1 "ON";
+

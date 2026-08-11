@@ -648,6 +648,8 @@ struct CarParams {
     fcaGiorgio @32;
     rivian @33;
     volkswagenMeb @34;
+    byd @35;    # matches dev/EDP10's opendbc_repo/opendbc/car/car.capnp numbering
+    chery @36;  # covers Chery/Omoda/iCaur/JAECOO (chery.h) — no dev/EDP10 equivalent yet
   }
 
   enum SteerControlType {

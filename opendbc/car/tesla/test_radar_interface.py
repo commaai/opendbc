@@ -1,6 +1,6 @@
 import math
 
-from opendbc.car import structs
+from opendbc.car import gen_empty_fingerprint, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.tesla.interface import CarInterface
 from opendbc.car.tesla.radar_interface import RadarInterface
@@ -50,15 +50,17 @@ def _complete_set(selected_slot: int | None = None, **selected_kwargs):
   return messages
 
 
-def _car_params(fingerprint):
+def _car_params(party_fingerprint):
+  fingerprint = gen_empty_fingerprint()
+  fingerprint[CANBUS.party] = party_fingerprint
   return CarInterface._get_params(structs.CarParams(), CAR.TESLA_MODEL_3, fingerprint, [], False, False, False)
 
 
 def test_brownpanda_radar_capability_fingerprint():
-  assert _car_params({CANBUS.party: {}}).radarUnavailable
-  assert _car_params({CANBUS.party: {0x401: 8}}).radarUnavailable
-  assert _car_params({CANBUS.party: {0x401: 8, 0x45F: 7}}).radarUnavailable
-  assert not _car_params({CANBUS.party: {0x401: 8, 0x45F: 8}}).radarUnavailable
+  assert _car_params({}).radarUnavailable
+  assert _car_params({0x401: 8}).radarUnavailable
+  assert _car_params({0x401: 8, 0x45F: 7}).radarUnavailable
+  assert not _car_params({0x401: 8, 0x45F: 8}).radarUnavailable
 
 
 def test_party_bus_point_and_reserved_motion_fields():
@@ -75,9 +77,9 @@ def test_party_bus_point_and_reserved_motion_fields():
   assert abs(point.dRel - 42.5) < 1e-6
   assert abs(point.yRel - 2.25) < 1e-6
   assert abs(point.vRel + 3.0) < 1e-6
-  assert math.isnan(point.aRel)
-  assert math.isnan(point.yvRel)
-  assert point.measured
+  assert math.isnan(point.deprecated.aRel)
+  assert math.isnan(point.deprecated.yvRel)
+  assert point.deprecated.measured
 
 
 def test_wrong_bus_unavailable_status_and_stale_status_fail_closed():
@@ -108,7 +110,7 @@ def test_incomplete_unmeasured_and_short_trigger_do_not_publish():
   result = radar.update(_packet(_message(0x401, bytes(8)), point_b, _message(0x45F, bytes(8))))
   assert result is not None
   assert result.errors.radarUnavailableTemporary
-  assert not radar.pts
+  assert not radar._brownpanda.pts
 
   assert radar.update(_packet(_message(0x401, bytes(8)))) is None
   point_a, point_b = _point_pair(0)

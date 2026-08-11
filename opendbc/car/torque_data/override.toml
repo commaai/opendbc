@@ -111,3 +111,16 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 # Manually checked
 "HONDA_CIVIC_2022" = [2.5, 1.2, 0.15]
 "HONDA_HRV_3G" = [2.5, 1.2, 0.2]
+
+# BYD, Chery/Omoda/iCaur/JAECOO - community-reverse-engineered, no measured MAX_LAT_ACCEL yet
+"BYD_ATTO3" = [2.5, 2.5, 0.1]
+"BYD_M6" = [2.5, 2.5, 0.1]
+"BYD_SONG_PLUS_DMI_21" = [2.5, 2.5, 0.1]
+"BYD_SEAL" = [2.5, 2.5, 0.1]
+"BYD_SEALION7" = [2.5, 2.5, 0.1]
+"BYD_SEAL6" = [2.5, 2.5, 0.1]
+"BYD_SHARK" = [2.5, 2.5, 0.1]
+"CHERY_JAECOO_J7_PHEV" = [2.5, 2.5, 0.1]
+"CHERY_TIGGO_8_PRO" = [2.5, 2.5, 0.1]
+"CHERY_OMODA_5" = [2.5, 2.5, 0.1]
+"CHERY_ICAUR_03" = [2.5, 2.5, 0.1]

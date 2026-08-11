@@ -181,6 +181,12 @@ class CarParts:
     return self.parts + parts
 
 
+# Default "custom harness" parts used by platforms that don't model a
+# specific harness connector yet but still need docs generation to have
+# a connector + mount + OBD-C cable for tests.
+CUSTOM_CAR_PARTS = CarParts.common([CarHarness.custom])
+
+
 CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "setup_note"], defaults=(False, False))
 
 
@@ -231,6 +237,18 @@ class CarDocs:
 
   # the simplest description of the requirements for the US market
   package: str
+
+  # trim/variant descriptor for platforms with multiple documented sub-variants
+  variant: str | None = None
+
+  # community-reverse-engineered spec fields, shown as dedicated docs columns
+  # when set (used by e.g. byd, chery car docs)
+  acc_low_speed: bool | None = None
+  acc_speed_range: str | None = None
+  acc_stop_and_go: bool | None = None
+  lkc_torque: str | None = None
+  lkc_speed_range: str | None = None
+  max_steering_angle: str | None = None
 
   video: str | None = None
   setup_video: str | None = None
