@@ -2,17 +2,22 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.nissan.carcontroller import CarController
 from opendbc.car.nissan.carstate import CarState
-from opendbc.car.nissan.values import CAR, NissanSafetyFlags
+from opendbc.car.nissan.fingerprints import FW_VERSIONS
+from opendbc.car.nissan.values import Footnote, FW_QUERY_CONFIG, CAR, NissanSafetyFlags
 
-class CarInterface(CarInterfaceBase):
+class NissanInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+  CAR = CAR
+  BRAND = "nissan"
+  FW_QUERY_CONFIG = FW_QUERY_CONFIG
+  FW_VERSIONS = FW_VERSIONS
+  Footnote = Footnote
 
   DRIVABLE_GEARS = (structs.CarState.GearShifter.brake, structs.CarState.GearShifter.low)
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
-    ret.brand = "nissan"
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.nissan)]
     ret.autoResumeSng = False
     ret.steerAtStandstill = True

@@ -4,16 +4,20 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.mazda.carcontroller import CarController
 from opendbc.car.mazda.carstate import CarState
-from opendbc.car.mazda.values import CAR, LKAS_LIMITS
+from opendbc.car.mazda.fingerprints import FW_VERSIONS
+from opendbc.car.mazda.values import FW_QUERY_CONFIG, CAR, LKAS_LIMITS
 
 
-class CarInterface(CarInterfaceBase):
+class MazdaInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+  CAR = CAR
+  BRAND = "mazda"
+  FW_QUERY_CONFIG = FW_QUERY_CONFIG
+  FW_VERSIONS = FW_VERSIONS
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
-    ret.brand = "mazda"
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.mazda)]
     ret.radarUnavailable = True
 

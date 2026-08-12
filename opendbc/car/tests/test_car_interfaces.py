@@ -3,10 +3,9 @@ import unittest
 
 from opendbc.car import DT_CTRL, CanData, structs
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.fingerprints import FW_VERSIONS
+from opendbc.car.values import FW_VERSIONS, PLATFORMS
+from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.fw_versions import FW_QUERY_CONFIGS
-from opendbc.car.interfaces import CarInterfaceBase, get_interface_attr
-from opendbc.car.values import PLATFORMS
 from opendbc.testing import Fuzzy, fuzzy_test
 
 ALL_ECUS = tuple(sorted({ecu for ecus in FW_VERSIONS.values() for ecu in ecus} |
@@ -29,10 +28,10 @@ def get_fuzzy_car_interface(car_name: str, fuzzy: Fuzzy) -> CarInterfaceBase:
                                   request=fuzzy.choice(ALL_REQUESTS))
 
   # initialize car interface
-  CarInterface = interfaces[car_name]
-  car_params = CarInterface.get_params(car_name, fingerprints, fuzzy.list(generate_car_fw),
-                                       alpha_long=fuzzy.boolean(), is_release=False, docs=False)
-  return CarInterface(car_params)
+  Interface = interfaces[car_name]
+  car_params = Interface.get_params(car_name, fingerprints, fuzzy.list(generate_car_fw),
+                                    alpha_long=fuzzy.boolean(), is_release=False, docs=False)
+  return Interface(car_params)
 
 
 def _make_car_test(car_name):
@@ -102,30 +101,7 @@ def _make_car_test(car_name):
 
 
 class TestCarInterfaces(unittest.TestCase):
-  def test_interface_attrs(self):
-    """Asserts basic behavior of interface attribute getter"""
-    num_brands = len(get_interface_attr('CAR'))
-    assert num_brands >= 12
-
-    # Should return value for all brands when not combining, even if attribute doesn't exist
-    ret = get_interface_attr('FAKE_ATTR')
-    assert len(ret) == num_brands
-
-    # Make sure we can combine dicts
-    ret = get_interface_attr('DBC', combine_brands=True)
-    assert len(ret) >= 160
-
-    # We don't support combining non-dicts
-    ret = get_interface_attr('CAR', combine_brands=True)
-    assert len(ret) == 0
-
-    # If brand has None value, it shouldn't return when ignore_none=True is specified
-    none_brands = {b for b, v in get_interface_attr('FINGERPRINTS').items() if v is None}
-    assert len(none_brands) >= 1
-
-    ret = get_interface_attr('FINGERPRINTS', ignore_none=True)
-    none_brands_in_ret = none_brands.intersection(ret)
-    assert len(none_brands_in_ret) == 0, f'Brands with None values in ignore_none=True result: {none_brands_in_ret}'
+  pass
 
 
 for car_name in sorted(PLATFORMS):

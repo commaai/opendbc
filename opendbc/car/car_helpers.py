@@ -7,36 +7,17 @@ from opendbc.car.carlog import carlog
 from opendbc.car.structs import CarParams, CarParamsT
 from opendbc.car.fingerprints import eliminate_incompatible_cars, all_legacy_fingerprint_cars
 from opendbc.car.fw_versions import ObdCallback, get_fw_versions_ordered, get_present_ecus, match_fw_to_car
-from opendbc.car.mock.values import CAR as MOCK
-from opendbc.car.values import BRANDS
+from opendbc.car.mock.interface import MockInterface
+from opendbc.car.values import ALL_INTERFACES
 from opendbc.car.vin import get_vin, is_valid_vin, VIN_UNKNOWN
 
 FRAME_FINGERPRINT = 100  # 1s
 
-
-def load_interfaces(brand_names):
-  ret = {}
-  for brand_name in brand_names:
-    path = f'opendbc.car.{brand_name}'
-    CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
-    for model_name in brand_names[brand_name]:
-      ret[model_name] = CarInterface
-  return ret
-
-
-def _get_interface_names() -> dict[str, list[str]]:
-  # returns a dict of brand name and its respective models
-  brand_names = {}
-  for brand in BRANDS:
-    brand_name = brand.__module__.split('.')[-2]
-    brand_names[brand_name] = [model.value for model in brand]
-
-  return brand_names
-
-
-# imports from directory opendbc/car/<name>/
-interface_names = _get_interface_names()
-interfaces = load_interfaces(interface_names)
+# Map every platform string to its brand's Interface. Interface carries
+# its platform enum as a class attribute (CAR), so no dynamic import is needed.
+interfaces: dict[str, type] = {
+  platform.value: ci for ci in ALL_INTERFACES for platform in ci.CAR
+}
 
 
 def can_fingerprint(can_recv: CanRecvCallable) -> tuple[str | None, dict[int, dict]]:
@@ -156,8 +137,8 @@ def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multip
     carlog.error({"event": "car doesn't match any fingerprints", "fingerprints": repr(fingerprints)})
     candidate = "MOCK"
 
-  CarInterface = interfaces[candidate]
-  CP: CarParams = CarInterface.get_params(candidate, fingerprints, car_fw, alpha_long_allowed, is_release, docs=False)
+  Interface = interfaces[candidate]
+  CP: CarParams = Interface.get_params(candidate, fingerprints, car_fw, alpha_long_allowed, is_release, docs=False)
   CP.carVin = vin
   CP.carFw = car_fw
   CP.fingerprintSource = source
@@ -167,7 +148,7 @@ def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multip
 
 
 def get_demo_car_params():
-  platform = MOCK.MOCK
-  CarInterface = interfaces[platform]
-  CP = CarInterface.get_non_essential_params(platform)
+  platform = MockInterface.CAR.MOCK
+  Interface = interfaces[platform]
+  CP = Interface.get_non_essential_params(platform)
   return CP

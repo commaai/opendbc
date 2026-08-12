@@ -3,7 +3,7 @@ import unittest
 
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
-from opendbc.car.tesla.interface import CarInterface
+from opendbc.car.tesla.interface import TeslaInterface
 from opendbc.car.tesla.fingerprints import FW_VERSIONS
 from opendbc.car.tesla.radar_interface import RADAR_START_ADDR
 from opendbc.car.tesla.values import CAR, FSD_14_FW
@@ -91,7 +91,7 @@ class TestTeslaFingerprint(unittest.TestCase):
       fingerprint = gen_empty_fingerprint()
       if radar:
         fingerprint[1][RADAR_START_ADDR] = 8
-      CP = CarInterface.get_params(CAR.TESLA_MODEL_3, fingerprint, [], False, False, False)
+      CP = TeslaInterface.get_params(CAR.TESLA_MODEL_3, fingerprint, [], False, False, False)
       assert CP.radarUnavailable != radar
 
   def test_no_radar_car(self):
@@ -100,5 +100,5 @@ class TestTeslaFingerprint(unittest.TestCase):
       fingerprint = gen_empty_fingerprint()
       if radar:
         fingerprint[1][RADAR_START_ADDR] = 8
-      CP = CarInterface.get_params(CAR.TESLA_MODEL_X, fingerprint, [], False, False, False)
+      CP = TeslaInterface.get_params(CAR.TESLA_MODEL_X, fingerprint, [], False, False, False)
       assert CP.radarUnavailable  # Always unavailable since no radar DBC
