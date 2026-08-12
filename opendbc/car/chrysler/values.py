@@ -78,7 +78,7 @@ class CAR(Platforms):
   )
 
   JEEP_GRAND_CHEROKEE_2019 = ChryslerPlatformConfig(  # includes 2020 Trailhawk
-    [ChryslerCarDocs("Jeep Grand Cherokee 2019-21", video="https://www.youtube.com/watch?v=jBe4lWnRSu4")],
+    [ChryslerCarDocs("Jeep Grand Cherokee 2019-21")],
     JEEP_GRAND_CHEROKEE.specs,
   )
 
