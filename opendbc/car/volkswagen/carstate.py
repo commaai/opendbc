@@ -142,6 +142,7 @@ class CarState(CarStateBase):
 
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
 
+    self.frame += 1
     return ret
 
   def update_pq(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
@@ -231,6 +232,7 @@ class CarState(CarStateBase):
 
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
 
+    self.frame += 1
     return ret
 
   def update_meb(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
@@ -369,6 +371,7 @@ class CarState(CarStateBase):
     ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
     ret.standstill = ret.vEgoRaw == 0
 
+    self.frame += 1
     return ret
 
   def update_low_speed_alert(self, v_ego: float) -> bool:
@@ -387,7 +390,6 @@ class CarState(CarStateBase):
 
     hca_status = self.CCP.hca_status_values.get(pt_cp.vl["LH_EPS_03"]["EPS_HCA_Status"])
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
-    return
 
   def update_hca_state(self, hca_status, in_drive=True):
     # DISABLED means the EPS hasn't been configured to support Lane Assist
