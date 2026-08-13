@@ -21,9 +21,6 @@ from opendbc.car.psa.values import CAR as PSA
 # FIXME: add routes for these cars
 non_tested_cars = [
   MOCK.MOCK,
-  # route b8b2d1a1df1b3aad|000000a0--7c51639c22 is driven and public, but only qlogs have
-  # been uploaded so far; swap this for a CarTestRoute once the rlogs are up
-  BYD.BYD_ATTO3,
   GM.CADILLAC_ATS,
   GM.HOLDEN_ASTRA,
   GM.CHEVROLET_MALIBU,
@@ -49,6 +46,8 @@ class CarTestRoute(NamedTuple):
 
 routes = [
   CarTestRoute("efdf9af95e71cd84/2022-05-13--19-03-31", COMMA.COMMA_BODY),
+
+  CarTestRoute("b8b2d1a1df1b3aad/000000a0--7c51639c22", BYD.BYD_ATTO3, segment=0),
 
   CarTestRoute("c5e3aa51055c8f47|2023-12-06--20-01-44", CHRYSLER.JEEP_CHEROKEE_5TH_GEN),
   CarTestRoute("0c94aa1e1296d7c6/2021-05-05--19-48-37", CHRYSLER.JEEP_GRAND_CHEROKEE),
