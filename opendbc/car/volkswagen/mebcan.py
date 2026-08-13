@@ -82,6 +82,10 @@ class MebLongStateMachine:
     self.prev_acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
     self.acc_status = self.acc_status_vals['ACC_OFF_HAUPTSCHALTER_AUS']  # last acc status, read by HUD msg
 
+  def init(self, acc_hold_type: int):
+    # seed state machine with stock value so we can properly ramp out of halten if we go onroad while stock acc is engaged at a stop
+    self.prev_acc_hold_type = acc_hold_type
+
   def _get_acc_status(self, CS, CC) -> int:
     # stateless
     # NOTE: stock TSK and camera goes to 5 on disengage independently which we don't model, but hasn't been shown to fault without it
