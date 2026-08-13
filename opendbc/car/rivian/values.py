@@ -49,10 +49,12 @@ class RivianSafetyFlags(IntFlag):
 class CAR(Platforms):
   RIVIAN_R1 = RivianPlatformConfig(
     [
-      RivianCarDocs("Rivian R1S 2022-24", setup_video="https://youtu.be/uaISd1j7Z4U", car_parts=CarParts.common([CarHarness.rivian_a])),
-      RivianCarDocs("Rivian R1S 2025", car_parts=CarParts.common([CarHarness.rivian_b])),
-      RivianCarDocs("Rivian R1T 2022-24", setup_video="https://youtu.be/uaISd1j7Z4U", car_parts=CarParts.common([CarHarness.rivian_a])),
-      RivianCarDocs("Rivian R1T 2025", car_parts=CarParts.common([CarHarness.rivian_b])),
+      RivianCarDocs("Rivian R1S 2022-24", video="https://youtu.be/dflSSGQwYNc", setup_video="https://youtu.be/uaISd1j7Z4U",
+                    car_parts=CarParts.common([CarHarness.rivian_a])),
+      # RivianCarDocs("Rivian R1S 2025", car_parts=CarParts.common([CarHarness.rivian_b])),
+      RivianCarDocs("Rivian R1T 2022-24", video="https://youtu.be/dflSSGQwYNc", setup_video="https://youtu.be/uaISd1j7Z4U",
+                    car_parts=CarParts.common([CarHarness.rivian_a])),
+      # RivianCarDocs("Rivian R1T 2025", car_parts=CarParts.common([CarHarness.rivian_b])),
     ],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
@@ -80,6 +82,7 @@ RIVIAN_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
 RIVIAN_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40])
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"R1TS_v\d+\.\d+\.\d+\(\d+\),\d+\.\d+\.\d+\x00",
   requests=[
     Request(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
