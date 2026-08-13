@@ -139,6 +139,7 @@ class CarController(CarControllerBase):
         if self.CP.flags & VolkswagenFlags.MEB:
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
 
+          # TODO: better way to do this? is this strictly safe? what if engage
           if self.frame * DT_CTRL < 1.0:
             self.meb_long_state.init(CS.acc_hole_type)
 
