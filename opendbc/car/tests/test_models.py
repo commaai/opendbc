@@ -187,6 +187,7 @@ class TestCarModelBase(unittest.TestCase):
     cfg = self.CP.safetyConfigs[-1]
     set_status = self.safety.set_safety_hooks(cfg.safetyModel.raw, cfg.safetyParam)
     self.assertEqual(0, set_status, f"failed to set safetyModel {cfg}")
+    self.safety.set_alternative_experience(self.CP.alternativeExperience)
     self.safety.init_tests()
 
   def test_car_params(self):
@@ -318,6 +319,55 @@ class TestCarModelBase(unittest.TestCase):
     self.safety.set_controls_allowed(True)
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
+
+  @fuzzy_test(max_examples=50)
+  def test_panda_safety_tx_fuzzy(self, fuzzy):
+    """Car controllers must only generate messages accepted by panda safety.
+
+    Exercise active/inactive lateral and longitudinal commands at controller
+    input boundaries. The generated CAN is tested rather than the input so
+    every platform continues to define its own clipping and message cadence.
+    """
+    if self.CP.dashcamOnly or self.CP.notCar:
+      self.skipTest("no safety-controlled transmit messages")
+    if self.CP.flags & ToyotaFlags.SECOC:
+      self.skipTest("SecOC transmit tests require the vehicle key")
+
+    CI = self.CarInterface(self.CP.copy())
+    now_nanos = 0
+    messages_checked = 0
+    for _ in range(fuzzy.integer(2, 8)):
+      lat_active = fuzzy.boolean()
+      long_active = fuzzy.boolean()
+      CC = structs.CarControl(
+        enabled=lat_active or long_active,
+        latActive=lat_active,
+        longActive=long_active,
+        actuators=structs.CarControl.Actuators(
+          torque=fuzzy.integer(-1000, 1000) / 1000,
+          steeringAngleDeg=fuzzy.integer(-900, 900),
+          curvature=fuzzy.integer(-1000, 1000) / 100000,
+          accel=fuzzy.integer(-500, 300) / 100,
+        ),
+        cruiseControl=structs.CarControl.CruiseControl(
+          cancel=fuzzy.boolean(),
+          resume=fuzzy.boolean(),
+        ),
+      ).as_reader()
+
+      CI.update([])
+      _, sendcan = CI.apply(CC, now_nanos)
+      now_nanos += DT_CTRL * 1e9
+
+      # This fuzzes controller behavior, not engagement state transitions.
+      # TX safety needs controls allowed for non-zero actuation to be valid.
+      self.safety.set_controls_allowed(True)
+      for addr, dat, bus in sendcan:
+        packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)
+        self.assertTrue(self.safety.safety_tx_hook(packet), (addr, dat, bus, CC))
+        messages_checked += 1
+
+    self.assertGreater(messages_checked, 0)
 
   @fuzzy_test(max_examples=300)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
