@@ -141,7 +141,7 @@ class CarController(CarControllerBase):
 
           # TODO: better way to do this? is this strictly safe? what if engage
           if self.frame * DT_CTRL < 1.0:
-            self.meb_long_state.init(CS.acc_hole_type)
+            self.meb_long_state.init(CS.acc_hold_type)
 
           accel, acc_status, acc_hold_type, braking_to_stop, leaving_standstill = self.meb_long_state.update(CS, CC, accel)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
