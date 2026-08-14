@@ -30,7 +30,14 @@ SafetyModel = car.CarParams.SafetyModel
 SteerControlType = structs.CarParams.SteerControlType
 
 # panda safety stores angle_meas in brand-specific CAN units (angle_deg_to_can in opendbc/safety/modes/*.h).
+# Brands that transmit nothing while openpilot is not actively steering, so that the stock
+# camera keeps the EPS whenever openpilot is quiet. Their steering command is blocked by the
+# safety mode per-frame only while openpilot is sending it, so transmitting continuously would
+# keep the camera locked out forever. See opendbc/safety/modes/byd.h.
+BRANDS_SILENT_WHEN_INACTIVE = {"byd"}
+
 ANGLE_DEG_TO_CAN = {
+  "byd": 10,
   "tesla": -10,
   "toyota": 17.452007,
   "nissan": 100,
@@ -307,7 +314,8 @@ class TestCarModelBase(unittest.TestCase):
         for addr, dat, bus in sendcan:
           packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)
           self.assertTrue(self.safety.safety_tx_hook(packet), (addr, dat, bus))
-      self.assertGreater(msgs_sent, 50)
+      if car_control.latActive or self.CP.brand not in BRANDS_SILENT_WHEN_INACTIVE:
+        self.assertGreater(msgs_sent, 50)
 
     test_car_controller(structs.CarControl().as_reader())
 
@@ -318,6 +326,12 @@ class TestCarModelBase(unittest.TestCase):
     self.safety.set_controls_allowed(True)
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
+
+    if self.CP.brand in BRANDS_SILENT_WHEN_INACTIVE:
+      # the cases above are all inactive, where these cars are silent by design, so exercise
+      # the transmitting path explicitly to keep them covered by the message count check
+      self.safety.set_controls_allowed(True)
+      test_car_controller(structs.CarControl(enabled=True, latActive=True).as_reader())
 
   @fuzzy_test(max_examples=300)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
