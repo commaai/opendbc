@@ -260,11 +260,11 @@ def enumerate_sites(input_source, preprocessed_file):
 def _build_core_tests(catalog):
   """Build test ordering for core (non-mode) files.
 
-  One test per unique method name from evenly-spaced modules,
-  ordered by how widely each method is shared. Methods inherited by many
-  classes exercise the most fundamental safety logic and run first.
+  Tests are ordered by how widely each method is shared. Methods inherited by
+  many classes exercise the most fundamental safety logic and run first.
+
+  Keep every implementation of each method.
   """
-  MAX_PER_METHOD = 5
   method_freq = {}
   method_by_module = {}
   for name in sorted(catalog.keys()):
@@ -275,23 +275,14 @@ def _build_core_tests(catalog):
         method_by_module[method] = {}
       if name not in method_by_module[method]:
         method_by_module[method][name] = test_id
-  # Pick evenly-spaced modules for each method to maximize configuration diversity
-  method_ids = {}
-  for method, module_map in method_by_module.items():
-    modules = sorted(module_map.keys())
-    n = len(modules)
-    if n <= MAX_PER_METHOD:
-      method_ids[method] = [module_map[m] for m in modules]
-    else:
-      step = n / MAX_PER_METHOD
-      method_ids[method] = [module_map[modules[int(i * step)]] for i in range(MAX_PER_METHOD)]
   # Round-robin: first instance of each method (by freq), then second, etc.
   # This ensures diverse early coverage with failfast.
   sorted_methods = sorted(method_freq, key=lambda m: -method_freq[m])
   ordered = []
-  for round_idx in range(MAX_PER_METHOD):
+  max_implementations = max(len(module_map) for module_map in method_by_module.values())
+  for round_idx in range(max_implementations):
     for m in sorted_methods:
-      ids = method_ids.get(m, [])
+      ids = [method_by_module[m][module] for module in sorted(method_by_module[m])]
       if round_idx < len(ids):
         ordered.append(ids[round_idx])
   return ordered
