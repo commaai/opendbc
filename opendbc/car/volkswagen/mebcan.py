@@ -105,14 +105,8 @@ class MebLongStateMachine:
       CC.actuators.longControlState == LongCtrlState.pid
       and (
         CS.esp_hold_confirmation
-        or (
-          self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN']
-          and CS.out.vEgoRaw < 0.1
-        )
-        or (
-          self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
-          and CS.out.vEgoRaw < 0.25
-        )
+        or (self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and CS.out.vEgoRaw < 0.1)
+        or (self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.out.vEgoRaw < 0.25)
       )
     )
     long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
