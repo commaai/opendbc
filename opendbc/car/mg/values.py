@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
@@ -17,12 +17,7 @@ class MgPlatformConfig(PlatformConfig):
 
 
 class CAR(Platforms):
-  MG_5_EV = MgPlatformConfig(
-    [
-      MgCarDocs("MG 5 EV 2021"),
-    ],
-    CarSpecs(mass=1640., wheelbase=2.66, steerRatio=15.8),
-  )
+  MG_5_EV = MgPlatformConfig([MgCarDocs("MG 5 EV 2021")], CarSpecs(mass=1640., wheelbase=2.66, steerRatio=15.8))
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
@@ -35,15 +30,6 @@ FW_QUERY_CONFIG = FwQueryConfig(
     ),
   ],
 )
-
-GEAR_MAP = {
-  0: structs.CarState.GearShifter.unknown,
-  15: structs.CarState.GearShifter.park,
-  14: structs.CarState.GearShifter.reverse,
-  13: structs.CarState.GearShifter.neutral,
-  **{i: structs.CarState.GearShifter.drive for i in range(1, 9)},
-}
-
 
 class CarControllerParams:
   STEER_STEP = 2  # FVCM_HSC2_FrP03 message frequency 50Hz

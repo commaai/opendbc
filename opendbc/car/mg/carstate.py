@@ -1,10 +1,18 @@
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.mg.values import DBC, GEAR_MAP
+from opendbc.car.mg.values import DBC
 from opendbc.car.common.conversions import Conversions as CV
 
 GearShifter = structs.CarState.GearShifter
+
+GEAR_MAP = {
+  0: GearShifter.unknown,
+  15: GearShifter.park,
+  14: GearShifter.reverse,
+  13: GearShifter.neutral,
+  **{i: GearShifter.drive for i in range(1, 9)},
+}
 
 
 class CarState(CarStateBase):
@@ -56,10 +64,6 @@ class CarState(CarStateBase):
 
     # Seatbelt
     ret.seatbeltUnlatched = cp.vl["GW_HSC2_SDM_FrP00"]["DrvrSbltAtcHSC2"] != 1
-
-    # Blindspot
-    # ret.leftBlindspot = False
-    # ret.rightBlindspot = False
 
     return ret
 
