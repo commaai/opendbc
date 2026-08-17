@@ -18,5 +18,5 @@ if ! command -v uv &>/dev/null; then
 fi
 
 export UV_PROJECT_ENVIRONMENT="$BASEDIR/.venv"
-uv sync --all-extras --inexact
+uv sync --all-extras --all-groups --inexact
 source "$PYTHONPATH/.venv/bin/activate"

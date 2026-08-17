@@ -1,8 +1,10 @@
+import unittest
+
 from opendbc.can import CANDefine
 from opendbc.can.tests import ALL_DBCS
 
 
-class TestCANDefine:
+class TestCANDefine(unittest.TestCase):
   def test_civic(self):
 
     dbc_file = "honda_civic_touring_2016_can_generated"
@@ -20,8 +22,8 @@ class TestCANDefine:
                              0: 'NORMAL'}
                             }
 
-  def test_all_dbcs(self, subtests):
+  def test_all_dbcs(self):
     # Asserts no exceptions on all DBCs
     for dbc in ALL_DBCS:
-      with subtests.test(dbc=dbc):
+      with self.subTest(dbc=dbc):
         CANDefine(dbc)
