@@ -197,7 +197,7 @@ class CAR(Platforms):
   )
   HONDA_CIVIC_2022 = HondaBoschPlatformConfig(
     [
-      HondaCarDocs("Honda Civic 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
+      HondaCarDocs("Honda Civic 2022-26", "All", video="https://youtu.be/ytiOT5lcp6Q"),
       HondaCarDocs("Honda Civic Hybrid 2025-26", "All"),
       HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
       HondaCarDocs("Honda Civic Hatchback Hybrid (Europe only) 2023", "All"),
@@ -388,15 +388,6 @@ class CAR(Platforms):
   )
 
 
-HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
-HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
-HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
-HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
-HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
-HONDA_BOSCH_ALT_RADAR = CAR.with_flags(HondaFlags.BOSCH_ALT_RADAR)
-HONDA_BOSCH_TJA_CONTROL = CAR.with_flags(HondaFlags.BOSCH_TJA_CONTROL)
-
-
 DBC = CAR.create_dbc_map()
 
 
@@ -421,6 +412,7 @@ HONDA_ALT_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[A-Z0-9]{5}-[A-Z0-9]{3}(-|,)[A-Z0-9]{4}(\x00){2}$",
   requests=[
     # Currently used to fingerprint
     Request(
@@ -455,11 +447,11 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # Note that we still attempt to match with them when they are present
   # This is or'd with (ALL_ECUS - ESSENTIAL_ECUS) from fw_versions.py
   non_essential_ecus={
-    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_E, CAR.HONDA_E_ADVANCE, CAR.ACURA_MDX_4G, *HONDA_BOSCH_ALT_RADAR,
-              *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
+    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_E, CAR.HONDA_E_ADVANCE, CAR.ACURA_MDX_4G,
+              *[c for c in CAR if c.config.flags & (HondaFlags.BOSCH_ALT_RADAR | HondaFlags.BOSCH_RADARLESS | HondaFlags.BOSCH_CANFD)]],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID, CAR.HONDA_E,
-              CAR.HONDA_E_ADVANCE, CAR.HONDA_INSIGHT, CAR.HONDA_NBOX_2G, CAR.ACURA_MDX_4G, *HONDA_BOSCH_ALT_RADAR, *HONDA_BOSCH_RADARLESS,
-              *HONDA_BOSCH_CANFD],
+              CAR.HONDA_E_ADVANCE, CAR.HONDA_INSIGHT, CAR.HONDA_NBOX_2G, CAR.ACURA_MDX_4G,
+              *[c for c in CAR if c.config.flags & (HondaFlags.BOSCH_ALT_RADAR | HondaFlags.BOSCH_RADARLESS | HondaFlags.BOSCH_CANFD)]],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
