@@ -106,6 +106,7 @@ class MebLongStateMachine:
       and (
         CS.esp_hold_confirmation
         or (self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and CS.out.vEgoRaw < 0.1)
+        or (self.prev_acc_hold_type == self.acc_hold_type_vals['LOESEN_UEBER_RAMPE'] and CS.out.vEgoRaw < 0.05)
         or (self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.out.vEgoRaw < 0.25)
       )
     )
