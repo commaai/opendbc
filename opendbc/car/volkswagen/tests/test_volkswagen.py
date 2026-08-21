@@ -51,7 +51,7 @@ class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
            max_planned_speed=0.0, grade_pct=0.0, tsk_brake_torque=0.0):
     """Convenience wrapper for update() with sensible defaults."""
     long_control_state = LongCtrlState.stopping if stopping else LongCtrlState.pid if starting else LongCtrlState.off
-    actuators = SimpleNamespace(accel=accel, longControlState=long_control_state, maxPlannedSpeed=max_planned_speed)
+    actuators = SimpleNamespace(accel=accel, longControlState=long_control_state, speed=max_planned_speed)
     cc = SimpleNamespace(longActive=long_active, actuators=actuators, orientationNED=[0.0, self._pitch(grade_pct), 0.0])
     cs.tsk_brake_torque = tsk_brake_torque
     return mgr.update(cs, cc)

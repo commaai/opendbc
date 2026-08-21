@@ -95,7 +95,7 @@ class MqbLongStateMachine:
     pitch = CC.orientationNED[1] if len(CC.orientationNED) == 3 else 0.0
     safe_stopping_speed = self.get_safe_speed_for_brake_torque(pitch, 0.0)
     below_safe_stop_speed = CS.out.vEgo < safe_stopping_speed
-    can_accelerate = actuators.maxPlannedSpeed > safe_stopping_speed
+    can_accelerate = actuators.speed > safe_stopping_speed
     uphill_grade_pct = max(math.tan(pitch) * 100.0, 0.0)
     takeoff_acceleration = max(0.2, 0.1 * uphill_grade_pct)
     esp_override = ESPOverride.START if CS.out.vEgo < self.ESP_OVERRIDE_SPEED else None
