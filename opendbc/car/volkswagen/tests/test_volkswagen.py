@@ -4,14 +4,15 @@ import re
 import unittest
 from types import SimpleNamespace
 
-from opendbc.car import DT_CTRL
+from opendbc.car import DT_CTRL, structs
 from opendbc.car.structs import CarParams
-from opendbc.car.volkswagen.carcontroller import HCAMitigation, MQBStandstillManager
-from opendbc.car.volkswagen.mqbcan import ESPOverride
+from opendbc.car.volkswagen.carcontroller import HCAMitigation
+from opendbc.car.volkswagen.mqbcan import ESPOverride, MqbLongStateMachine
 from opendbc.car.volkswagen.values import CAR, CarControllerParams as CCP, FW_QUERY_CONFIG, WMI
 from opendbc.car.volkswagen.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
+LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 CHASSIS_CODE_PATTERN = re.compile('[A-Z0-9]{2}')
 # TODO: determine the unknown groups
@@ -33,25 +34,27 @@ class TestVolkswagenHCAMitigation(unittest.TestCase):
         assert hca_mitigation.update(actuator_value, actuator_value) == expected_torque, f"{frame=}"
 
 
-class TestVolkswagenMQBStandstillManager(unittest.TestCase):
+class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
 
   def _mgr(self):
-    return MQBStandstillManager(vehicle_mass=1540.0, accel_min=CCP.ACCEL_MIN)
+    return MqbLongStateMachine(vehicle_mass=1540.0, accel_min=CCP.ACCEL_MIN, v_ego_stopping=0.25)
 
   def _cs(self, *, esp_hold_confirmation=False, esp_stopping=False, rolling_backward=False,
           rolling_forward=False, brake_pressed=False, gas_pressed=False, standstill=True, v_ego=0.0,
           sum_wegimpulse=0):
     out = SimpleNamespace(brakePressed=brake_pressed, gasPressed=gas_pressed, standstill=standstill, vEgo=v_ego)
-    return SimpleNamespace(out=out, esp_hold_confirmation=esp_hold_confirmation,
+    return SimpleNamespace(out=out, acc_type=1, esp_hold_confirmation=esp_hold_confirmation,
                            esp_stopping=esp_stopping, rolling_backward=rolling_backward,
                            rolling_forward=rolling_forward, sum_wegimpulse=sum_wegimpulse)
 
   def _run(self, mgr, cs, *, long_active=True, accel=0.0, stopping=False, starting=False,
            max_planned_speed=0.0, grade_pct=0.0, tsk_brake_torque=0.0):
     """Convenience wrapper for update() with sensible defaults."""
-    return mgr.update(cs, long_active=long_active, accel=accel, stopping=stopping, starting=starting,
-                      max_planned_speed=max_planned_speed, pitch=self._pitch(grade_pct),
-                      tsk_brake_torque=tsk_brake_torque)
+    long_control_state = LongCtrlState.stopping if stopping else LongCtrlState.pid if starting else LongCtrlState.off
+    actuators = SimpleNamespace(accel=accel, longControlState=long_control_state, maxPlannedSpeed=max_planned_speed)
+    cc = SimpleNamespace(longActive=long_active, actuators=actuators, orientationNED=[0.0, self._pitch(grade_pct), 0.0])
+    cs.tsk_brake_torque = tsk_brake_torque
+    return mgr.update(cs, cc)
 
   def _safe_speed(self, mgr, grade_pct, brake_torque=0.0):
     return mgr.get_safe_speed_for_brake_torque(self._pitch(grade_pct), brake_torque)
@@ -133,7 +136,7 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
   def test_safe_speed_is_capped_at_10_kph(self):
     """Very steep pitch does not raise rollback-risk logic above the ESP grant speed."""
     mgr = self._mgr()
-    assert self._safe_speed(mgr, 100.0) == MQBStandstillManager.MAX_SAFE_STOPPING_SPEED
+    assert self._safe_speed(mgr, 100.0) == MqbLongStateMachine.MAX_SAFE_STOPPING_SPEED
 
   def test_esp_stopping_passes_raw_accel_on_flat(self):
     """esp_stopping latches ESP behavior without forcing a brake command on flat ground."""
@@ -299,7 +302,7 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     mgr = self._mgr()
     self._run(mgr, self._cs(esp_stopping=True), accel=-1.0, stopping=True)
     assert mgr.can_stop_forever
-    self._run(mgr, self._cs(v_ego=MQBStandstillManager.ESP_OVERRIDE_SPEED + 0.01), accel=0.5)
+    self._run(mgr, self._cs(v_ego=MqbLongStateMachine.ESP_OVERRIDE_SPEED + 0.01), accel=0.5)
     assert not mgr.can_stop_forever
 
   def test_can_stop_forever_cleared_when_long_inactive(self):
@@ -314,14 +317,14 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     """ESPOverride.STOP is requested once wheel impulses have been still long enough."""
     mgr = self._mgr()
     esp_override = None
-    for _ in range(MQBStandstillManager.WEGIMPULSE_STILLNESS_FRAMES + 1):
+    for _ in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES + 1):
       *_, esp_override = self._run(mgr, self._cs(sum_wegimpulse=0), accel=-1.0, stopping=True)
     assert esp_override == ESPOverride.STOP
 
   def test_esp_override_stop_persists_at_standstill(self):
     """ESPOverride.STOP remains requested while wheel impulses are still and no hold procedure is detected."""
     mgr = self._mgr()
-    for _ in range(MQBStandstillManager.WEGIMPULSE_STILLNESS_FRAMES + 1):
+    for _ in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES + 1):
       self._run(mgr, self._cs(sum_wegimpulse=0), accel=-1.0, stopping=True)
     *_, esp_override = self._run(mgr, self._cs(sum_wegimpulse=0), accel=-1.0, stopping=True)
     assert esp_override == ESPOverride.STOP
@@ -338,7 +341,7 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
     """Below 10 kph, ESPOverride.START is the default while wheel impulses are changing."""
     mgr = self._mgr()
     esp_override = None
-    for sum_wegimpulse in range(MQBStandstillManager.WEGIMPULSE_STILLNESS_FRAMES + 1):
+    for sum_wegimpulse in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES + 1):
       *_, esp_override = self._run(mgr, self._cs(sum_wegimpulse=sum_wegimpulse), accel=-1.0, stopping=True)
     assert esp_override == ESPOverride.START
 
@@ -351,14 +354,14 @@ class TestVolkswagenMQBStandstillManager(unittest.TestCase):
   def test_wegimpulse_at_standstill_after_stillness_frames(self):
     """Wheel impulse stillness is tracked after WEGIMPULSE_STILLNESS_FRAMES with constant sum_wegimpulse."""
     mgr = self._mgr()
-    for _ in range(MQBStandstillManager.WEGIMPULSE_STILLNESS_FRAMES + 1):
+    for _ in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES + 1):
       self._run(mgr, self._cs(sum_wegimpulse=0))
-    assert mgr.frames_since_last_wheel_pulse >= MQBStandstillManager.WEGIMPULSE_STILLNESS_FRAMES
+    assert mgr.frames_since_last_wheel_pulse >= MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES
 
   def test_wegimpulse_resets_on_change(self):
     """Wheel impulse stillness resets when sum_wegimpulse changes."""
     mgr = self._mgr()
-    for _ in range(MQBStandstillManager.WEGIMPULSE_STILLNESS_FRAMES):
+    for _ in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES):
       self._run(mgr, self._cs(sum_wegimpulse=0))
     self._run(mgr, self._cs(sum_wegimpulse=1))
     assert mgr.frames_since_last_wheel_pulse == 0
