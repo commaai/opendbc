@@ -23,7 +23,6 @@ testing = [
   "tree-sitter-c",
   "gcovr",
   "unittest-parallel",
-  "hypothesis==6.47.*",
   "zstandard",
 
   # static analysis
@@ -32,9 +31,6 @@ testing = [
   "lefthook",
   "cpplint",
   "codespell",
-]
-docs = [
-  "Jinja2",
 ]
 examples = [
   "inputs",

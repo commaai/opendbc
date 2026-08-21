@@ -98,6 +98,8 @@ class Request:
 @dataclass
 class FwQueryConfig:
   requests: list[Request]
+  # Full-match regex used to validate firmware versions in the fingerprint database
+  fw_version_regex: bytes
   # TODO: make this automatic and remove hardcoded lists, or do fingerprinting with ecus
   # Overrides and removes from essential ecus for specific models and ecus (exact matching)
   non_essential_ecus: dict[Ecu, list[str]] = field(default_factory=dict)
