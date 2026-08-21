@@ -25,11 +25,11 @@ class MqbLongStateMachine:
   WEGIMPULSE_STILLNESS_FRAMES = 5     # frames of no wheel tick change before assuming standstill
   ESP_OVERRIDE_SPEED = 9.5 * CV.KPH_TO_MS
   MAX_SAFE_STOPPING_SPEED = 10.0 * CV.KPH_TO_MS
+  STARTING_SPEED = 0.25
 
-  def __init__(self, vehicle_mass: float, accel_min: float, v_ego_stopping: float):
+  def __init__(self, vehicle_mass: float, accel_min: float):
     self.vehicle_mass = vehicle_mass
     self.accel_min = accel_min
-    self.v_ego_stopping = v_ego_stopping
     self.can_stop_forever = False
     self.rollback_detected = False
     self.start_commit_active = False
@@ -88,7 +88,7 @@ class MqbLongStateMachine:
     long_active = CC.longActive
     accel = actuators.accel
     stopping = actuators.longControlState == LongCtrlState.stopping
-    starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.v_ego_stopping)
+    starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.STARTING_SPEED)
     if CS.acc_type != 1:
       return long_active, accel, stopping, starting, None
 

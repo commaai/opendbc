@@ -37,7 +37,7 @@ class TestVolkswagenHCAMitigation(unittest.TestCase):
 class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
 
   def _mgr(self):
-    return MqbLongStateMachine(vehicle_mass=1540.0, accel_min=CCP.ACCEL_MIN, v_ego_stopping=0.25)
+    return MqbLongStateMachine(vehicle_mass=1540.0, accel_min=CCP.ACCEL_MIN)
 
   def _cs(self, *, esp_hold_confirmation=False, esp_stopping=False, rolling_backward=False,
           rolling_forward=False, brake_pressed=False, gas_pressed=False, standstill=True, v_ego=0.0,

@@ -44,7 +44,7 @@ class CarController(CarControllerBase):
     if CP.flags & VolkswagenFlags.MEB:
       self.meb_long_state = mebcan.MebLongStateMachine(self.CP, self.CCP)
     elif not CP.flags & (VolkswagenFlags.PQ | VolkswagenFlags.MLB):
-      self.mqb_long_state = mqbcan.MqbLongStateMachine(CP.mass, self.CCP.ACCEL_MIN, CP.vEgoStopping)
+      self.mqb_long_state = mqbcan.MqbLongStateMachine(CP.mass, self.CCP.ACCEL_MIN)
 
     if CP.flags & VolkswagenFlags.PQ:
       self.CCS = pqcan
@@ -157,7 +157,7 @@ class CarController(CarControllerBase):
           stopping = actuators.longControlState == LongCtrlState.stopping
           acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
-          starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
+          starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < 0.25)
           can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
                                                              acc_control, stopping, starting, CS.esp_hold_confirmation, None))
 
