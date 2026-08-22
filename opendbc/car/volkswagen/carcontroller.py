@@ -43,6 +43,8 @@ class CarController(CarControllerBase):
 
     if CP.flags & VolkswagenFlags.MEB:
       self.meb_long_state = mebcan.MebLongStateMachine(self.CP, self.CCP)
+    elif not CP.flags & (VolkswagenFlags.PQ | VolkswagenFlags.MLB):
+      self.mqb_long_state = mqbcan.MqbLongStateMachine(CP.mass, self.CCP.ACCEL_MIN)
 
     if CP.flags & VolkswagenFlags.PQ:
       self.CCS = pqcan
@@ -143,13 +145,21 @@ class CarController(CarControllerBase):
                                                            accel, acc_status, acc_hold_type, braking_to_stop, leaving_standstill,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available))
 
+        elif self.CCS == mqbcan:
+          long_active, accel, stopping, starting, esp_override = self.mqb_long_state.update(CS, CC)
+          acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, long_active)
+          accel = float(np.clip(accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if long_active else 0)
+          can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, long_active, accel,
+                                                             acc_control, stopping, starting, CS.esp_hold_confirmation,
+                                                             esp_override))
+
         else:
           stopping = actuators.longControlState == LongCtrlState.stopping
           acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
           starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < 0.25)
           can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
-                                                             acc_control, stopping, starting, CS.esp_hold_confirmation))
+                                                             acc_control, stopping, starting, CS.esp_hold_confirmation, None))
 
         self.accel_last = accel
 
