@@ -41,7 +41,7 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
     crc = volkswagen_crc8_lut_8h2f[crc];
   }
 
-  uint8_t counter = volkswagen_mqb_meb_get_counter(msg);
+  uint8_t counter = volkswagen_mqb_meb_mlb_get_counter(msg);
   if (msg->addr == MSG_LH_EPS_03) {
     crc ^= (uint8_t[]){0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5}[counter];
   } else if (msg->addr == MSG_MOTOR_14) {
@@ -86,7 +86,7 @@ static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
       crc = volkswagen_crc8_lut_8h2f[crc];
     }
 
-    uint8_t counter = volkswagen_mqb_meb_get_counter(msg);
+    uint8_t counter = volkswagen_mqb_meb_mlb_get_counter(msg);
     if (msg->addr == MSG_QFK_01) {
       crc ^= (uint8_t[]){0x18, 0x71, 0x10, 0x8D, 0xD7, 0xAA, 0xB0, 0x78, 0xAC, 0x12, 0xAE, 0x0C, 0xDD, 0xF1, 0x85, 0x68}[counter];
     } else if (msg->addr == MSG_ESC_51) {
@@ -292,7 +292,7 @@ const safety_hooks volkswagen_meb_hooks = {
   .init = volkswagen_meb_init,
   .rx = volkswagen_meb_rx_hook,
   .tx = volkswagen_meb_tx_hook,
-  .get_counter = volkswagen_mqb_meb_get_counter,
-  .get_checksum = volkswagen_mqb_meb_get_checksum,
+  .get_counter = volkswagen_mqb_meb_mlb_get_counter,
+  .get_checksum = volkswagen_mqb_meb_mlb_get_checksum,
   .compute_checksum = volkswagen_meb_alt_crc_compute,
 };
