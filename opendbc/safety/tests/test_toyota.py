@@ -243,6 +243,20 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
           self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
           self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
 
+  def test_lta_torque_wind_down_recovers_after_oscillation(self):
+    """Recent zero torque must clear a previous oscillating EPS torque."""
+    self.safety.set_controls_allowed(True)
+    self._reset_angle_measurement(0)
+    self._set_prev_desired_angle(0)
+
+    high_torque = self.MAX_MEAS_TORQUE + 100
+    for torque in (-high_torque, high_torque) * 3:
+      self._rx(self._torque_meas_msg(torque, 0))
+    self.assertFalse(self._tx(self._lta_msg(1, 1, 0, 100)))
+
+    self._rx(self._torque_meas_msg(0, 0))
+    self.assertTrue(self._tx(self._lta_msg(1, 1, 0, 100)))
+
   def test_angle_measurements(self):
     """
     * Tests angle meas quality flag dictates whether angle measurement is parsed, and if rx is valid
