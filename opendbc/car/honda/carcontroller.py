@@ -3,7 +3,7 @@ import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
-from opendbc.car.honda.values import CAR, CruiseButtons, HondaFlags, CarControllerParams
+from opendbc.car.honda.values import CAR, CruiseButtons, CruiseSettings, HondaFlags, CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -108,6 +108,9 @@ class CarController(CarControllerBase):
     self.brake = 0.0
     self.last_torque = 0.0
 
+    self.lkas_button_send_remaining = 0
+    self.last_lkas_button_frame = 0
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -186,9 +189,9 @@ class CarController(CarControllerBase):
         can_sends.append(hondacan.create_bosch_supplemental_1(self.packer, self.CAN))
       # If using stock ACC, spam cancel command to kill gas when OP disengages.
       if pcm_cancel_cmd:
-        can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.CANCEL, self.CP))
+        can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.CANCEL, 0, self.CP))
       elif CC.cruiseControl.resume:
-        can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.RES_ACCEL, self.CP))
+        can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.RES_ACCEL, 0, self.CP))
 
     else:
       # Send gas and brake commands.
@@ -234,6 +237,23 @@ class CarController(CarControllerBase):
         if not (self.CP.flags & HondaFlags.BOSCH):
           self.speed = pcm_speed
           self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+
+    # Radarless: when stock LKAS is active, touch steering wheel nag causes ACC disengagement. Disable LKAS automatically
+    # and block driver LKAS button from reaching camera
+    if self.CP.flags & HondaFlags.BOSCH_RADARLESS and CC.enabled and self.frame % 4 == 0 and not pcm_cancel_cmd and not CC.cruiseControl.resume:
+      if self.lkas_button_send_remaining == 0 and CS.lkas_hud["LKAS_READY"] and self.frame >= self.last_lkas_button_frame + 500:
+        self.lkas_button_send_remaining = 3
+
+      if self.lkas_button_send_remaining > 0:
+        self.last_lkas_button_frame = self.frame
+        self.lkas_button_send_remaining -= 1
+        cruise_setting = CruiseSettings.LKAS
+      elif CS.cruise_setting == CruiseSettings.LKAS:
+        cruise_setting = 0  # block driver's LKAS button press
+      else:
+        cruise_setting = CS.cruise_setting
+
+      can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CS.cruise_buttons, cruise_setting, self.CP))
 
     new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed
