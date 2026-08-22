@@ -95,6 +95,7 @@ NISSAN_RX_OFFSET = 0x20
 
 # TODO: once we gather enough Altima data on PT bus (1), we can remove OBD queries to speed up fingerprinting
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"(?:[A-Z0-9]{10}|[\x00-\xff]{24})",
   requests=[request for bus, obd_multiplexing in ((0, False), (1, False), (1, True)) for request in [
     Request(
       [NISSAN_DIAGNOSTIC_REQUEST_KWP, NISSAN_VERSION_REQUEST_KWP],
