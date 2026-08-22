@@ -119,6 +119,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
 
     // Update vehicle yaw rate
     if (msg->addr == FORD_Yaw_Data_FD1) {
+      // FIXME: safety can receive yaw before new vehicle speed, it should recompute meas on either received
       // Signal: VehYaw_W_Actl
       // TODO: we should use the speed which results in the closest angle measurement to the desired angle
       float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;

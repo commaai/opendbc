@@ -519,6 +519,7 @@ TOYOTA_VERSION_REQUEST_KWP = b'\x1a\x88\x01'
 TOYOTA_VERSION_RESPONSE_KWP = b'\x5a\x88\x01'
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[\x00-\x03A-Z0-9 ]{16,49}",
   # TODO: look at data to whitelist new ECUs effectively
   requests=[
     Request(
@@ -585,18 +586,5 @@ STEER_THRESHOLD = 100
 # These cars have non-standard EPS torque scale factors. All others are 73
 EPS_SCALE = defaultdict(lambda: 73,
                         {CAR.TOYOTA_PRIUS: 66, CAR.TOYOTA_COROLLA: 88, CAR.LEXUS_IS: 77, CAR.LEXUS_RC: 77, CAR.LEXUS_CTH: 100, CAR.TOYOTA_PRIUS_V: 100})
-
-# Toyota/Lexus Safety Sense 2.0 and 2.5
-TSS2_CAR = CAR.with_flags(ToyotaFlags.TSS2)
-
-# the DSU uses the AEB message for longitudinal on these cars
-UNSUPPORTED_DSU_CAR = CAR.with_flags(ToyotaFlags.UNSUPPORTED_DSU)
-
-# these cars have a radar which sends ACC messages instead of the camera
-RADAR_ACC_CAR = CAR.with_flags(ToyotaFlags.RADAR_ACC)
-
-ANGLE_CONTROL_CAR = CAR.with_flags(ToyotaFlags.ANGLE_CONTROL)
-
-SECOC_CAR = CAR.with_flags(ToyotaFlags.SECOC)
 
 DBC = CAR.create_dbc_map()

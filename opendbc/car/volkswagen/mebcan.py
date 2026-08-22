@@ -1,5 +1,6 @@
 from opendbc.car import Bus, structs
 from opendbc.can import CANDefine
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -58,24 +59,6 @@ def create_lka_hud_control(packer, bus, ldw_stock_values, lat_active, steering_p
   return packer.make_can_msg("LDW_02", bus, values)
 
 
-def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resume=False, up=False, down=False):
-  values = {s: gra_stock_values[s] for s in [
-    "GRA_Hauptschalter",           # ACC button, on/off
-    "GRA_Typ_Hauptschalter",       # ACC main button type
-    "GRA_Codierung",               # ACC button configuration/coding
-    "GRA_Tip_Stufe_2",             # unknown related to stalk type
-    "GRA_ButtonTypeInfo",          # unknown related to stalk type
-  ]}
-
-  values.update({
-    "COUNTER": (gra_stock_values["COUNTER"] + 1) % 16,
-    "GRA_Abbrechen": cancel,
-    "GRA_Tip_Wiederaufnahme": resume or up,
-    "GRA_Tip_Setzen": down,
-  })
-  return packer.make_can_msg("GRA_ACC_01", bus, values)
-
-
 ACC_HUD_ERROR    = 6
 ACC_HUD_OVERRIDE = 4
 ACC_HUD_ACTIVE   = 3
@@ -84,11 +67,13 @@ ACC_HUD_DISABLED = 0
 
 
 class MebLongStateMachine:
+  HOLD_RELEASE_SPEED = 5 * CV.KPH_TO_MS
+
   def __init__(self, CP, CCP):
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
-    self.ramp_counter = 0
+    self.disengage_ramp_counter = 0  # always ramp when disengaging
 
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.acc_status_vals = {v: k for k, v in can_define.dv['ACC_18']['ACC_Status_ACC'].items()}
@@ -99,6 +84,7 @@ class MebLongStateMachine:
 
   def _get_acc_status(self, CS, CC) -> int:
     # stateless
+    # NOTE: stock TSK and camera goes to 5 on disengage independently which we don't model, but hasn't been shown to fault without it
     if CS.out.accFaulted:
       return self.acc_status_vals['REVERSIBLER_FEHLER_IM_ACC_SYSTEM']
     elif CC.enabled:
@@ -110,35 +96,46 @@ class MebLongStateMachine:
 
   def _get_hold_type(self, CS, CC) -> int:
     # warning: car is reacting to hold mechanic even with long control off
+    # HALTEN -> KEINE_ANFORDERUNG causes the car to fault into park, so both branches below put a ramp in
+    # between: disengaging always ramps, and while engaged a release ramps until 5 kph
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
+    # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
+    long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
-    if CS.out.accFaulted or not CC.longActive:
-      acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
-    elif stopping:
-      acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped
-    elif starting:
-      acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
+    if not long_active:
+      # Stock goes to RAMP for as long as TSK_Status is 5 usually, 100ms seems fine to mimic that behavior.
+      # Stock stays active for gas press, but we go inactive
+      if self.disengage_ramp_counter > 0:
+        acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
+        self.disengage_ramp_counter -= 1
+      else:
+        acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
+
     else:
-      acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
+      was_engaged = self.disengage_ramp_counter == self.RAMP_FRAMES
+      self.disengage_ramp_counter = self.RAMP_FRAMES  # prep ramp if we disengage
 
-    # enforce legal transitions
-    if acc_hold_type == self.acc_hold_type_vals['HALTEN']:
-      # allow going into hold at any time, reset ramp counter
-      self.ramp_counter = 0
-    elif self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and acc_hold_type == self.acc_hold_type_vals['KEINE_ANFORDERUNG']:
-      # HALTEN -> NONE causes car to fault into park. this enforces HALTEN -> RAMP if user overrides, or
-      # if we requested to hold but never hit standstill before wanting to go again, we match stock and send just RAMP.
-      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-      self.ramp_counter = self.RAMP_FRAMES
-    elif self.ramp_counter > 0:
-      acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
-      self.ramp_counter -= 1
+      if stopping:
+        acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped, allowed at any time
+      elif starting:
+        acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
+      else:
+        # After aborting a stop or finishing starting, we need to send RAMP until we hit 5 kph or go long inactive,
+        # only if we didn't just re-engage
+        releasing = was_engaged and self.prev_acc_hold_type in (self.acc_hold_type_vals['HALTEN'],
+                                                                self.acc_hold_type_vals['ANFAHREN'],
+                                                                self.acc_hold_type_vals['LOESEN_UEBER_RAMPE'])
+
+        if releasing and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
+          acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
+        else:
+          acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
 
     return acc_hold_type
 
-  def update(self, CS, CC, accel) -> tuple[float, int, int, bool]:
+  def update(self, CS, CC, accel) -> tuple[float, int, int, bool, bool]:
     acc_status = self._get_acc_status(CS, CC)
     acc_hold_type = self._get_hold_type(CS, CC)
 
@@ -151,13 +148,16 @@ class MebLongStateMachine:
     # hold requested but the car hasn't reached standstill yet
     braking_to_stop = requesting_hold and not CS.esp_hold_confirmation
 
+    # driving off from a hold
+    leaving_standstill = acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
+
     self.prev_acc_hold_type = acc_hold_type
     self.acc_status = acc_status
-    return accel, acc_status, acc_hold_type, braking_to_stop
+    return accel, acc_status, acc_hold_type, braking_to_stop, leaving_standstill
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
-                             braking_to_stop, speed, travel_assist_available):
+                             braking_to_stop, leaving_standstill, speed, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
@@ -179,7 +179,8 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     "ACC_zul_Regelabw_oben":      0,
     "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.ACCEL_INACTIVE else 0,
     "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.ACCEL_INACTIVE else 0,
-    "ACC_Anfahren":               0,  # always zero, stock uses ACC_Anforderung_HMS
+    # NOTE: gen1 stock sets this while launching, gen2 stock never does
+    "ACC_Anfahren":               1 if leaving_standstill else 0,
     "ACC_Anhalten":               1 if braking_to_stop else 0,
     "ACC_Anhalteweg":             terminal_rollout if braking_to_stop else 20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
@@ -205,17 +206,7 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
   return commands
 
 
-def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
-  # mapping desired gap to correct signal of corresponding distance bar
-  gap = 0
-
-  if distance_bars == current_gap_signal:
-    gap = desired_gap
-
-  return gap
-
-
-def create_acc_hud_control(packer, bus, acc_status, set_speed, lead_visible, distance_bars, show_distance_bars, esp_hold, distance, desired_gap, fcw_alert):
+def create_acc_hud_control(packer, bus, acc_status, set_speed, lead_visible, distance_bars, show_distance_bars, distance, fcw_alert):
   values = {
     "ACC_Status_ACC":                acc_status,
     "ACC_Tempolimit":                0,
@@ -235,11 +226,12 @@ def create_acc_hud_control(packer, bus, acc_status, set_speed, lead_visible, dis
     "ACC_Standby_Override":          1 if acc_status != ACC_HUD_ACTIVE else 0,
     "Street_Color":                  1 if acc_status in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # light grey (1) or dark (0) street
     "Lead_Brightness":               3 if acc_status == ACC_HUD_ACTIVE else 0, # object shows in color
-    "Zeitluecke_1":                  get_desired_gap(distance_bars, desired_gap, 1), # desired distance to lead object for distance bar 1
-    "Zeitluecke_2":                  get_desired_gap(distance_bars, desired_gap, 2), # desired distance to lead object for distance bar 2
-    "Zeitluecke_3":                  get_desired_gap(distance_bars, desired_gap, 3), # desired distance to lead object for distance bar 3
-    "Zeitluecke_4":                  get_desired_gap(distance_bars, desired_gap, 4), # desired distance to lead object for distance bar 4
-    "Zeitluecke_5":                  get_desired_gap(distance_bars, desired_gap, 5), # desired distance to lead object for distance bar 5
+    # TODO: a nice speed dependent bar distance
+    "Zeitluecke_1":                  0, # desired distance to lead object for distance bar 1
+    "Zeitluecke_2":                  0, # desired distance to lead object for distance bar 2
+    "Zeitluecke_3":                  0, # desired distance to lead object for distance bar 3
+    "Zeitluecke_4":                  0, # desired distance to lead object for distance bar 4
+    "Zeitluecke_5":                  0, # desired distance to lead object for distance bar 5
     "Zeitluecke_Farbe":              1 if acc_status in (ACC_HUD_ENABLED, ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # yellow (1) or white (0) time gap
     "ACC_Anzeige_Zeitluecke":        show_distance_bars if acc_status != ACC_HUD_DISABLED else 0, # show distance bar selection
     "SET_ME_0X1":                    0x1,    # unknown

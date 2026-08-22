@@ -11,24 +11,27 @@ from opendbc.safety.tests.common import CANPackerSafety
 MAX_ACCEL = 2.0
 MIN_ACCEL = -3.5
 
+# ACC_18.ACC_Anforderung_HMS
+HMS_KEINE_ANFORDERUNG = 0
+HMS_HALTEN = 1
+HMS_ANFAHREN = 4
+HMS_LOESEN_UEBER_RAMPE = 5
+
+# ACC_18.ACC_Status_ACC
+ACC_AKTIV_REGELT = 3
+ACC_OVERRIDE = 4
+
 # MEB message IDs
-MSG_LH_EPS_03  = 0x9F
-MSG_ESC_51     = 0xFC
-MSG_Motor_51   = 0x10B
-MSG_GRA_ACC_01 = 0x12B
-MSG_QFK_01     = 0x13D
 MSG_ACC_18     = 0x14D
 MSG_KLR_01     = 0x25D
 MSG_TA_01      = 0x26B
 MSG_ACC_19     = 0x300
 MSG_HCA_03     = 0x303
 MSG_LDW_02     = 0x397
-MSG_MOTOR_14   = 0x3BE
 
 
 class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteeringSafetyTest):
   STANDSTILL_THRESHOLD = 0
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02), 2: (MSG_KLR_01,)}
 
   MAX_CURVATURE = 29105
   MAX_CURVATURE_TEST = 0.195
@@ -131,8 +134,10 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     }
     return self.packer.make_can_msg_safety("HCA_03", 0, values)
 
-  def _accel_msg(self, accel):
-    values = {"ACC_Sollbeschleunigung_02": accel}
+  def _accel_msg(self, accel, hold_type=0, acc_status=0, acc_anfahren=0, acc_anhalten=0):
+    values = {"ACC_Sollbeschleunigung_02": accel, "ACC_Anforderung_HMS": hold_type,
+              "ACC_Status_ACC": acc_status, "ACC_Anfahren": acc_anfahren,
+              "ACC_Anhalten": acc_anhalten}
     return self.packer.make_can_msg_safety("ACC_18", 0, values)
 
   def _tsk_status_msg(self, enable, main_switch=True):
@@ -182,6 +187,25 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   def test_torque_driver_measurements(self):
     for t in (0, 100, -100, 250, -250):
       self._rx(self._torque_driver_msg(t))
+
+  def test_rx_hook(self):
+    # checksum and counter checks
+    for name in ("LH_EPS_03", "Motor_14", "GRA_ACC_01", "QFK_01", "ESP_21", "Motor_51", "ESC_51"):
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        next_counter = common.MAX_WRONG_COUNTERS + 1
+        for counter in range(next_counter):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": counter})))
+
+        # mess with the checksum to make it fail, it's the first byte of every MEB message
+        msg = self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})
+        msg[0].data[0] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})))
 
   def test_main_switch_off_disables_controls(self):
     self.safety.set_controls_allowed(True)
@@ -236,35 +260,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
             self.assertEqual(should_tx, self._tx(self._curvature_cmd_msg(curvature_cmd, steer_req=steer_req, power=50 if steer_req else 0)))
 
 
-class TestVolkswagenMebStockSafety(TestVolkswagenMebSafetyBase):
-  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2],
-             [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
-  FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01], 2: [MSG_HCA_03, MSG_LDW_02]}
-
-  def setUp(self):
-    self.packer = CANPackerSafety("vw_meb_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, 0)
-    self.safety.init_tests()
-
-  def test_spam_cancel_safety_check(self):
-    self.safety.set_controls_allowed(0)
-    self.assertTrue(self._tx(self._button_msg(cancel=1)))
-    self.assertFalse(self._tx(self._button_msg(resume=1)))
-    self.assertFalse(self._tx(self._button_msg(_set=1)))
-    self.safety.set_controls_allowed(1)
-    self.assertTrue(self._tx(self._button_msg(resume=1)))
-
-
-class TestVolkswagenMebGen2StockSafety(TestVolkswagenMebStockSafety):
-  def setUp(self):
-    self.packer = CANPackerSafety("vw_meb_2024_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.MEB_ALT_CRC)
-    self.safety.init_tests()
-
-
-class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
+class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_ACC_19, 0], [MSG_ACC_18, 0],
              [MSG_TA_01, 0], [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01],
@@ -272,14 +268,13 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_ACC_19, MSG_ACC_18, MSG_TA_01),
                              2: (MSG_KLR_01,)}
 
-  ALLOW_OVERRIDE = True
   ACCEL_OVERRIDE = 0
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):
     self.packer = CANPackerSafety("vw_meb_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.LONG_CONTROL)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, 0)
     self.safety.init_tests()
 
   # stock cruise controls are entirely bypassed under openpilot longitudinal control
@@ -329,20 +324,46 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafetyBase):
         self.assertEqual(send, self._tx(self._accel_msg(accel)), (controls_allowed, accel))
 
   def test_accel_override_with_gas(self):
-    if not self.ALLOW_OVERRIDE:
-      pass
     self.safety.set_controls_allowed(True)
     self.safety.set_gas_pressed_prev(True)
     self.assertTrue(self._tx(self._accel_msg(self.ACCEL_OVERRIDE)))
     self.assertFalse(self._tx(self._accel_msg(MAX_ACCEL)))
 
+  def test_hold_type_safety_check(self):
+    # PARKEN engages the EPB and HALTEN holds the car, both with ACC disengaged. KEINE_ANFORDERUNG and
+    # LOESEN_UEBER_RAMPE stay unconditional, the disengage ramp sends the latter once disallowed
+    for controls_allowed in (True, False):
+      for hold_type in range(8):
+        self.safety.set_controls_allowed(controls_allowed)
+        send = (hold_type in (HMS_KEINE_ANFORDERUNG, HMS_LOESEN_UEBER_RAMPE) or
+                (controls_allowed and hold_type in (HMS_HALTEN, HMS_ANFAHREN)))
+        self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, hold_type=hold_type)))
 
-class TestVolkswagenMebGen2LongSafety(TestVolkswagenMebLongSafety):
+  def test_drive_off_and_hold_request_safety_check(self):
+    # ACC_Anfahren and ACC_Anhalten carry the same drive off and hold requests as the hold type
+    for controls_allowed in (True, False):
+      for acc_anfahren in (0, 1):
+        for acc_anhalten in (0, 1):
+          self.safety.set_controls_allowed(controls_allowed)
+          send = controls_allowed or not (acc_anfahren or acc_anhalten)
+          self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, acc_anfahren=acc_anfahren,
+                                                          acc_anhalten=acc_anhalten)))
+
+  def test_acc_status_safety_check(self):
+    # claiming ACC_AKTIV_REGELT or ACC_OVERRIDE is what makes the drivetrain act on our requests.
+    # standby, off and the fault state stay available for the HUD with controls disallowed
+    for controls_allowed in (True, False):
+      for acc_status in range(8):
+        self.safety.set_controls_allowed(controls_allowed)
+        send = controls_allowed or acc_status not in (ACC_AKTIV_REGELT, ACC_OVERRIDE)
+        self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, acc_status=acc_status)))
+
+
+class TestVolkswagenMebGen2Safety(TestVolkswagenMebSafety):
   def setUp(self):
     self.packer = CANPackerSafety("vw_meb_2024_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb,
-                                 VolkswagenSafetyFlags.LONG_CONTROL | VolkswagenSafetyFlags.MEB_ALT_CRC)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.MEB_ALT_CRC)
     self.safety.init_tests()
 
 

@@ -73,7 +73,7 @@ class CarInterface(CarInterfaceBase):
         ret.flags |= VolkswagenFlags.ALT_GEAR.value
 
       # only allow gateway harness to escalate Emergency Assist
-      ret.dashcamOnly = ret.networkLocation == NetworkLocation.fwdCamera
+      ret.dashcamOnly = ret.networkLocation == NetworkLocation.fwdCamera and not docs
 
     else:
       # Set global MQB parameters
@@ -116,16 +116,15 @@ class CarInterface(CarInterfaceBase):
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
     if ret.flags & VolkswagenFlags.MEB:
-      ret.longitudinalActuatorDelay = 0.5
-      ret.longitudinalTuning.kiBP = [0., 30.]
-      ret.longitudinalTuning.kiV = [0.4, 0.]
-
-    ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
-    if alpha_long:
       ret.openpilotLongitudinalControl = True
-      safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
-      if ret.transmissionType == TransmissionType.manual:
-        ret.minEnableSpeed = 4.5
+      ret.longitudinalActuatorDelay = 0.3
+    else:
+      ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
+      if alpha_long:
+        ret.openpilotLongitudinalControl = True
+        safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
+        if ret.transmissionType == TransmissionType.manual:
+          ret.minEnableSpeed = 4.5
 
     # Per-vehicle overrides
 
