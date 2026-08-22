@@ -128,6 +128,7 @@
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
 |Honda|Pilot 2023-25|All|[Upstream](#upstream)|
 |Honda|Pilot 2026|All|[Community](#community)|
+|Honda|Prelude 2026|All|[Upstream](#upstream)|
 |Honda|Prologue 2024-26|All|[Not compatible](#can-bus-security)|
 |Honda|Ridgeline 2017-25|Honda Sensing|[Upstream](#upstream)|
 |Honda|Ridgeline 2026|All|[Community](#community)|
