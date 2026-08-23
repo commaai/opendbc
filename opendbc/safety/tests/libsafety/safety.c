@@ -17,6 +17,33 @@ void safety_tick_current_safety_config() {
   safety_tick(&current_safety_config);
 }
 
+// main passes NULL before a safety mode is set
+void safety_tick_no_safety_config(void) {
+  safety_tick(NULL);
+}
+
+// the RX check tables are const, so let the tests build the misconfigurations the guards are there for
+static CanMsgCheck *mutable_rx_check(int index) {
+  RxCheck *check = &current_safety_config.rx_checks[index];
+  return (CanMsgCheck *)&check->msg[check->status.index];
+}
+
+void set_rx_check_frequency(int index, uint32_t frequency) {
+  *(uint32_t *)&mutable_rx_check(index)->frequency = frequency;
+}
+
+void set_rx_check_ignore_counter(int index, bool ignore) {
+  *(bool *)&mutable_rx_check(index)->ignore_counter = ignore;
+}
+
+void set_rx_check_max_counter(int index, uint8_t max_counter) {
+  *(uint8_t *)&mutable_rx_check(index)->max_counter = max_counter;
+}
+
+int get_rx_checks_len(void) {
+  return current_safety_config.rx_checks_len;
+}
+
 bool safety_config_valid() {
   if (current_safety_config.rx_checks_len <= 0) {
     printf("missing RX checks\n");

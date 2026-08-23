@@ -15,6 +15,7 @@ MSG_LDW_1 = 0x5BE             # TX by OP, Lane line recognition and text alerts
 
 
 class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+  LONGITUDINAL = False
   cruise_engaged = False
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1)}
@@ -42,6 +43,16 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
     return self._motor_2_msg(brake_pressed=brake, cruise_engaged=self.safety.get_controls_allowed())
 
   # ACC engaged status (shared message Motor_2)
+  def test_cruise_status_values(self):
+    # MO2_Sta_GRA: 1 and 2 both mean engaged
+    if self.LONGITUDINAL:
+      self.skipTest("stock cruise is bypassed under openpilot longitudinal")
+    for acc_status in range(4):
+      self._rx(self.packer.make_can_msg_safety("Motor_2", 0, {"MO2_Sta_GRA": 0}))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self._rx(self.packer.make_can_msg_safety("Motor_2", 0, {"MO2_Sta_GRA": acc_status}))
+      self.assertEqual(acc_status in (1, 2), self.safety.get_controls_allowed(), f"{acc_status=}")
+
   def _pcm_status_msg(self, enable):
     self.__class__.cruise_engaged = enable
     return self._motor_2_msg(cruise_engaged=enable)
@@ -126,6 +137,7 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
 
 
 class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.LongitudinalAccelSafetyTest):
+  LONGITUDINAL = True
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_LDW_1, 0], [MSG_ACC_SYSTEM, 0], [MSG_ACC_GRA_ANZEIGE, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1, MSG_ACC_SYSTEM, MSG_ACC_GRA_ANZEIGE]}
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1, MSG_ACC_SYSTEM, MSG_ACC_GRA_ANZEIGE)}
@@ -160,6 +172,25 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
+
+  def test_both_buttons_falling_edge(self):
+    # both buttons pressed, then released one at a time
+    self.safety.set_controls_allowed(0)
+    self._rx(self._motor_5_msg(main_switch=True))
+    self._rx(self._button_msg(_set=True, resume=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(_set=True, resume=False, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # and the other way around
+    self.safety.set_controls_allowed(0)
+    self._rx(self._button_msg(_set=True, resume=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+    # holding both is not a falling edge on either
+    self._rx(self._button_msg(_set=True, resume=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(_set=False, resume=True, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
 
   def test_cancel_button(self):
     # Disable on rising edge of cancel button

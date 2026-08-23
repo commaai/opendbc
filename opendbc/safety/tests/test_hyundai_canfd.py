@@ -7,7 +7,7 @@ from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
-from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
+from opendbc.safety.tests.hyundai_common import Buttons, HyundaiButtonBase, HyundaiLongitudinalBase
 
 # All combinations of radar/camera-SCC and gas/hybrid/EV cars
 ALL_GAS_EV_HYBRID_COMBOS = [
@@ -71,6 +71,45 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": 1 if enable else 0}
     return self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values)
+
+  def test_gas_msg_selection(self):
+    # only the gas message matching the car's flags is read
+    for msg, sig in (("ACCELERATOR", "ACCELERATOR_PEDAL"), ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"),
+                     ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED")):
+      # reset so the RX check locks onto this message instead of the car's own
+      self.safety.set_safety_hooks(self.safety.get_current_safety_mode(), self.safety.get_current_safety_param())
+      self.safety.init_tests()
+      self._rx(self.packer.make_can_msg_safety(msg, self.PT_BUS, {sig: 1}))
+      self.assertEqual(msg == self.GAS_MSG[0], self.safety.get_gas_pressed_prev(), f"{msg=}")
+
+  def test_hybrid_gas_signal_bytes(self):
+    # the hybrid pedal signal spans three bytes, each is checked on its own
+    if self.GAS_MSG[0] != "ACCELERATOR_ALT":
+      self.skipTest("hybrid gas signal only")
+    for pedal in (0, 0.25, 0.5, 128):
+      self._rx(self.packer.make_can_msg_safety("ACCELERATOR_ALT", self.PT_BUS, {"ACCELERATOR_PEDAL": pedal}))
+      self.assertEqual(pedal > 0, self.safety.get_gas_pressed_prev(), f"{pedal=}")
+
+  def test_vehicle_moving_each_wheel(self):
+    # any wheel alone is enough to be moving
+    wheels = ["FL", "FR", "RL", "RR"]
+    moving = self.STANDSTILL_THRESHOLD + 0.1
+    for moving_wheel in [None, *wheels]:
+      values = {f"WHL_Spd{pos}Val": (moving if pos == moving_wheel else 0) for pos in wheels}
+      self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
+      self.assertEqual(moving_wheel is not None, self.safety.get_vehicle_moving(), f"{moving_wheel=}")
+
+  def test_cruise_status_values(self):
+    # ACCMode: 1 (enabled) and 2 (driver override) both mean engaged
+    if self.safety.get_current_safety_param() & HyundaiSafetyFlags.LONG:
+      self.skipTest("stock cruise is bypassed under openpilot longitudinal")
+    for acc_mode in range(8):
+      self._rx(self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, {"ACCMode": 0}))
+      self.safety.set_controls_allowed(False)
+      # a recent button interaction is a prerequisite to engage
+      self._rx(self._button_msg(Buttons.NONE, main_button=1))
+      self._rx(self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, {"ACCMode": acc_mode}))
+      self.assertEqual(acc_mode in (1, 2), self.safety.get_controls_allowed(), f"{acc_mode=}")
 
   def _button_msg(self, buttons, main_button=0, bus=None):
     if bus is None:
@@ -149,6 +188,12 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
       self.assertTrue(self._tx(self._acc_cancel_msg(True)))
       self.assertFalse(self._tx(self._acc_cancel_msg(True, accel=1)))
       self.assertFalse(self._tx(self._acc_cancel_msg(False)))
+
+      # both accel signals have to be inactive to cancel
+      for raw, val in ((0, 0), (0, 1), (1, 0), (1, 1)):
+        values = {"ACCMode": 4, "aReqRaw": raw, "aReqValue": val}
+        msg = self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
+        self.assertEqual(not (raw or val), self._tx(msg), f"{raw=} {val=}")
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)

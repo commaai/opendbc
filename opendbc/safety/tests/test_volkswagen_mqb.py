@@ -20,6 +20,7 @@ MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 
 
 class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+  LONGITUDINAL = False
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02), 2: (MSG_LH_EPS_03,)}
 
   MAX_RATE_UP = 4
@@ -64,6 +65,21 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
 
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
+
+  def test_tsk_status_values(self):
+    # TSK_Status: 3, 4 and 5 are engaged, 2 is main switch on only
+    for tsk_status in range(8):
+      values = {"TSK_Status": tsk_status}
+      self._rx(self.packer.make_can_msg_safety("TSK_06", 0, values))
+      self.assertEqual(tsk_status in (2, 3, 4, 5), self.safety.get_acc_main_on(), f"{tsk_status=}")
+
+  def test_buttons_rx(self):
+    # the buttons only enable under openpilot longitudinal
+    self._rx(self._tsk_status_msg(False))  # main switch on
+    self.safety.set_controls_allowed(False)
+    self._rx(self._gra_acc_01_msg(_set=1, bus=0))
+    self._rx(self._gra_acc_01_msg(_set=0, bus=0))
+    self.assertEqual(self.LONGITUDINAL, self.safety.get_controls_allowed())
 
   # Driver steering input torque
   def _torque_driver_msg(self, torque):
@@ -144,6 +160,7 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
 
 
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
+  LONGITUDINAL = True
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_ACC_02, 0], [MSG_ACC_06, 0], [MSG_ACC_07, 0]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07]}
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07), 2: (MSG_LH_EPS_03,)}

@@ -442,6 +442,15 @@ class TestFordSafetyBase(common.CarSafetyTest):
     self.safety.set_controls_allowed(0)
     self.assertFalse(self._tx(self._lkas_command_msg(1)))
 
+  def test_cruise_engaged_states(self):
+    # CcStat_D_Actl: both 4 (Normal) and 5 (Override) mean engaged
+    for cruise_state in range(8):
+      self._rx(self._pcm_status_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed())
+      values = {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": cruise_state}
+      self._rx(self.packer.make_can_msg_safety("EngBrakeData", 0, values))
+      self.assertEqual(cruise_state in (4, 5), self.safety.get_controls_allowed())
+
   def test_acc_buttons(self):
     for allowed in (0, 1):
       self.safety.set_controls_allowed(allowed)
@@ -510,6 +519,22 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
         self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, self.INACTIVE_ACCEL, controls_allowed, cmbb_deny)))
         should_tx = controls_allowed and not cmbb_deny
         self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.MAX_GAS, self.MAX_ACCEL, controls_allowed, cmbb_deny)))
+
+  def test_brake_actuation_bits(self):
+    # AccBrkPrchg_B_Rq and AccBrkDecel_B_Rq each block actuation on their own
+    for controls_allowed in (True, False):
+      for prechrg in (0, 1):
+        for decel in (0, 1):
+          self.safety.set_controls_allowed(controls_allowed)
+          values = {
+            "AccPrpl_A_Rq": self.INACTIVE_GAS,
+            "AccPrpl_A_Pred": self.INACTIVE_GAS,
+            "AccBrkTot_A_Rq": self.INACTIVE_ACCEL,
+            "AccBrkPrchg_B_Rq": prechrg,
+            "AccBrkDecel_B_Rq": decel,
+          }
+          should_tx = controls_allowed or not (prechrg or decel)
+          self.assertEqual(should_tx, self._tx(self.packer.make_can_msg_safety("ACCDATA", 0, values)))
 
   def test_gas_safety_check(self):
     for controls_allowed in (True, False):
