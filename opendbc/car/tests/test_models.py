@@ -25,6 +25,7 @@ from opendbc.car.volkswagen.values import VolkswagenFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.testing import fuzzy_test
 
+MAX_EXAMPLES = 300
 
 SafetyModel = car.CarParams.SafetyModel
 SteerControlType = structs.CarParams.SteerControlType
