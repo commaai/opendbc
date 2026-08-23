@@ -319,7 +319,60 @@ class TestCarModelBase(unittest.TestCase):
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
 
-  @fuzzy_test(max_examples=300)
+
+
+  @fuzzy_test(max_examples=MAX_EXAMPLES)
+  def test_panda_safety_tx_fuzzy(self, fuzzy):
+    if self.CP.dashcamOnly:
+      self.skipTest("no need to check panda safety for dashcamOnly")
+    if self.CP.notCar:
+      self.skipTest("skipping test for notCar")
+    if self.CP.flags & ToyotaFlags.SECOC:
+      self.skipTest("SecOC transmit tests require the vehicle key")
+
+    controller_params = self.CP
+    if self.CP.brand == "volkswagen" and self.CP.flags & VolkswagenFlags.MLB and self.CP.openpilotLongitudinalControl:
+      controller_params = self.CarInterface.get_params(self.platform, self.fingerprint, self.CP.carFw, False, False, docs=False)
+
+    CC = structs.CarControl(
+      enabled=fuzzy.boolean(),
+      latActive=fuzzy.boolean(),
+      longActive=fuzzy.boolean(),
+      leftBlinker=fuzzy.boolean(),
+      rightBlinker=fuzzy.boolean(),
+      actuators=structs.CarControl.Actuators(
+        torque=fuzzy.integer(-1000, 1000) / 100.0,
+        steeringAngleDeg=fuzzy.integer(-1000, 1000),
+        curvature=fuzzy.integer(-1000, 1000) / 1000.0,
+        accel=fuzzy.integer(-1000, 1000) / 100.0,
+        gas=fuzzy.integer(0, 100) / 100.0,
+        brake=fuzzy.integer(0, 100) / 100.0,
+        speed=fuzzy.integer(0, 100)
+      ),
+      cruiseControl=structs.CarControl.CruiseControl(
+        cancel=fuzzy.boolean(),
+        resume=fuzzy.boolean()
+      ),
+      hudControl=structs.CarControl.HUDControl(
+        setSpeed=fuzzy.integer(0, 100),
+        leadVisible=fuzzy.boolean()
+      )
+    )
+
+    self.safety.set_controls_allowed(CC.enabled)
+    self.safety.set_cruise_engaged_prev(CC.enabled)
+
+    CI = self.CarInterface(controller_params)
+    now_nanos = 0
+    for _ in range(round(1.0 / DT_CTRL)):
+      CI.update([])
+      _, sendcan = CI.apply(CC.as_reader(), now_nanos)
+      now_nanos += DT_CTRL * 1e9
+
+      for addr, dat, bus in sendcan:
+        packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)
+        self.assertTrue(self.safety.safety_tx_hook(packet), (addr, dat, bus))
+
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
     if self.CP.dashcamOnly:
       self.skipTest("no need to check panda safety for dashcamOnly")
