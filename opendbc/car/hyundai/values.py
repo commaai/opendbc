@@ -646,7 +646,9 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   # Non-electric CAN FD platforms often do not have platform code specifiers needed
   # to distinguish between hybrid and ICE. All EVs so far are either exclusively
   # electric or specify electric in the platform code.
-  fuzzy_platform_blacklist = {str(c) for c in (CANFD_CAR - EV_CAR - CANFD_FUZZY_WHITELIST)}
+  canfd_cars = {c for c in CAR if c.config.flags & HyundaiFlags.CANFD}
+  ev_cars = {c for c in CAR if c.config.flags & HyundaiFlags.EV}
+  fuzzy_platform_blacklist = {str(c) for c in canfd_cars - ev_cars - CANFD_FUZZY_WHITELIST}
   candidates: set[str] = set()
 
   for candidate, fws in offline_fw_versions.items():
@@ -724,6 +726,7 @@ DATE_FW_ECUS = [Ecu.fwdCamera]
 # Note: an ECU on CAN FD cars may sometimes send 0x30080aaaaaaaaaaa (flow control continue) while we
 # are attempting to query ECUs. This currently does not seem to affect fingerprinting from the camera
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"\xf1\x00[\x00-\xff]{19,56}",
   requests=[
     # TODO: add back whitelists
     # CAN queries (OBD-II port)
@@ -786,31 +789,5 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # Custom fuzzy fingerprinting function using platform codes, part numbers + FW dates:
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
-
-CHECKSUM = {
-  "crc8": CAR.with_flags(HyundaiFlags.CHECKSUM_CRC8),
-  "6B": CAR.with_flags(HyundaiFlags.CHECKSUM_6B),
-}
-
-CAN_GEARS = {
-  # which message has the gear. hybrid and EV use ELECT_GEAR
-  "use_cluster_gears": CAR.with_flags(HyundaiFlags.CLUSTER_GEARS),
-  "use_tcu_gears": CAR.with_flags(HyundaiFlags.TCU_GEARS),
-}
-
-CANFD_CAR = CAR.with_flags(HyundaiFlags.CANFD)
-
-CAMERA_SCC_CAR = CAR.with_flags(HyundaiFlags.CAMERA_SCC)
-
-HYBRID_CAR = CAR.with_flags(HyundaiFlags.HYBRID)
-
-EV_CAR = CAR.with_flags(HyundaiFlags.EV)
-
-LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
-
-UNSUPPORTED_LONGITUDINAL_CAR = {
-  "legacy": CAR.with_flags(HyundaiFlags.LEGACY),
-  "can": CAR.with_flags(HyundaiFlags.UNSUPPORTED_LONGITUDINAL),
-}
 
 DBC = CAR.create_dbc_map()

@@ -568,8 +568,6 @@ struct CarParams {
   }
 
   struct LongitudinalPIDTuning {
-    kpBP @0 :List(Float32);
-    kpV @1 :List(Float32);
     kiBP @2 :List(Float32);
     kiV @3 :List(Float32);
 
@@ -577,6 +575,8 @@ struct CarParams {
       kf @6 :Float32;
       deadzoneBP @4 :List(Float32);
       deadzoneV @5 :List(Float32);
+      kpBP @0 :List(Float32);
+      kpV @1 :List(Float32);
     }
   }
 
@@ -648,6 +648,10 @@ struct CarParams {
     fcaGiorgio @32;
     rivian @33;
     volkswagenMeb @34;
+    byd @35;
+    volvo @36;
+    bmw @37;
+    mg @38;
   }
 
   enum SteerControlType {
