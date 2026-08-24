@@ -2,7 +2,6 @@ from opendbc.car import structs
 from opendbc.car.crc import CRC8J1850
 from opendbc.car.chrysler.values import CUSW_CARS, RAM_CARS
 
-GearShifter = structs.CarState.GearShifter
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
@@ -22,7 +21,7 @@ def create_lkas_hud(packer, CP, lkas_active, hud_alert, hud_count, car_model, au
   # 0A right lane close
   # 0B left Lane very close
   # 0C right Lane very close
-  # 0D left cross cross
+  # 0D left lane cross
   # 0E right lane cross
 
   # == Alerts ==

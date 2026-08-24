@@ -93,7 +93,6 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
   .max_curvature_error = 100,         // 0.002 rad/m * curvature_to_can
   .curvature_error_min_speed = 10.0,  // m/s
   .max_steer_power = 0,               // disabled, Ford has no steed power signal
-  .inactive_curvature_is_zero = true, // Ford EPS expects curvature=0 when inactive
 };
 
 static void ford_rx_hook(const CANPacket_t *msg) {
@@ -120,6 +119,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
 
     // Update vehicle yaw rate
     if (msg->addr == FORD_Yaw_Data_FD1) {
+      // FIXME: safety can receive yaw before new vehicle speed, it should recompute meas on either received
       // Signal: VehYaw_W_Actl
       // TODO: we should use the speed which results in the closest angle measurement to the desired angle
       float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
