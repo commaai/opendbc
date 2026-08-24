@@ -46,10 +46,9 @@ ANGLE_DEG_TO_CAN = {
 TX_FUZZ_WARMUP = 200
 TX_FUZZ_FRAMES = 150
 
-# Bounds controlsd keeps its actuators within. Car controllers clamp further, and it's that clamping
-# panda has to agree with, so these only need to be wide enough to push every controller into its limits.
-MAX_ACTUATOR_ANGLE = 180.  # deg
-MAX_ACTUATOR_CURVATURE = 0.2  # 1/m, MAX_CURVATURE in openpilot's clip_curvature
+# MAX_CURVATURE in openpilot's clip_curvature, the bound controlsd keeps its desired curvature within.
+# The angle command is derived from it, so this also sets how far the angle controllers get pushed.
+MAX_ACTUATOR_CURVATURE = 0.2  # 1/m
 
 NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
 JOB_ID = int(os.environ.get("JOB_ID", "0"))
@@ -116,7 +115,6 @@ def fuzzy_controls(fuzzy) -> dict:
     "lat_active": fuzzy.boolean(),
     "long_active": fuzzy.boolean(),
     "torque": fuzzy.real(-1., 1.),
-    "angle": fuzzy.real(-MAX_ACTUATOR_ANGLE, MAX_ACTUATOR_ANGLE),
     "curvature": fuzzy.real(-MAX_ACTUATOR_CURVATURE, MAX_ACTUATOR_CURVATURE),
     "accel": fuzzy.real(ACCEL_MIN, ACCEL_MAX),
     "long_control_state": fuzzy.choice(tuple(LongControlState.schema.enumerants)),
@@ -144,6 +142,9 @@ def build_car_control(controls: dict, CP, VM: VehicleModel, CS) -> structs.CarCo
   # while inactive the controllers command the car's current state, not the planner's, see
   # selfdrive/controls/lib/latcontrol_angle.py and longcontrol.py
   curvature = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - CS.steeringAngleOffsetDeg), CS.vEgo, 0.)
+  # the angle command is the desired curvature through the vehicle model, so it reaches as far as the
+  # car's steering ratio allows rather than an arbitrary cap
+  angle = math.degrees(VM.get_steer_from_curvature(-controls["curvature"], CS.vEgo, 0.))
 
   return structs.CarControl(
     enabled=enabled,
@@ -154,7 +155,7 @@ def build_car_control(controls: dict, CP, VM: VehicleModel, CS) -> structs.CarCo
     currentCurvature=curvature,
     actuators=structs.CarControl.Actuators(
       torque=controls["torque"] if lat_active else 0.,
-      steeringAngleDeg=controls["angle"] if lat_active else CS.steeringAngleDeg,
+      steeringAngleDeg=angle if lat_active else CS.steeringAngleDeg,
       curvature=controls["curvature"] if lat_active else curvature,
       accel=controls["accel"] if long_active else 0.,
       longControlState=controls["long_control_state"] if long_active else "off",
