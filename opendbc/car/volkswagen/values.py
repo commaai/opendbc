@@ -62,6 +62,7 @@ class CarControllerParams:
   STEER_DRIVER_FACTOR = 1                  # from dbc
 
   STEER_TIME_STUCK_TORQUE = 1.9            # EPS limits same torque to 6 seconds, reset timer 3x within that period
+  STEER_TIME_RESET = 1.1                   # HCA must stay disabled this long for the EPS to reset its steer timer
 
   DEFAULT_MIN_STEER_SPEED = 0.4            # m/s, newer EPS racks fault below this speed, don't show a low speed alert
 

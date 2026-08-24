@@ -15,13 +15,28 @@ class HCAMitigation:
   """
   Manages HCA fault mitigations for VW/Audi EPS racks:
     * Reduces torque by 1 for a single frame after commanding the same torque value for too long
+    * For MLB racks: opportunistically disables HCA during low-torque periods before the 6-minute EPS lockout
   """
 
-  def __init__(self, CCP):
+  MLB_LOCKOUT_MITIGATION_START = 240. # EPS engaged time before attempting opportunistic reset (sec)
+  MLB_LOCKOUT_LOW_TORQUE = 60         # Desired torque must be less than this before and during reset (centi-Nm)
+  MLB_LOCKOUT_LOW_TORQUE_TIME = 0.5   # How long to observe low torque for before starting the reset (sec)
+
+  def __init__(self, CCP, eps_timer_workaround=False):
     self._max_same_torque_frames = CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP)
     self._same_torque_frames = 0
 
-  def update(self, apply_torque, apply_torque_last):
+    self._eps_timer_workaround = eps_timer_workaround
+    if eps_timer_workaround:
+      self._steer_step = CCP.STEER_STEP
+      self._hca_active_frames = 0
+      self._hca_inactive_frames = 0
+      self._low_torque_frames = 0
+      self._frames_for_mitigation_start = self.MLB_LOCKOUT_MITIGATION_START / DT_CTRL
+      self._frames_for_low_torque = self.MLB_LOCKOUT_LOW_TORQUE_TIME / DT_CTRL
+      self._frames_for_reset = CCP.STEER_TIME_RESET / DT_CTRL
+
+  def update(self, apply_torque, apply_torque_last, desired_torque):
     if apply_torque != 0 and apply_torque_last == apply_torque:
       self._same_torque_frames += 1
       if self._same_torque_frames > self._max_same_torque_frames:
@@ -29,6 +44,29 @@ class HCAMitigation:
         self._same_torque_frames = 0
     else:
       self._same_torque_frames = 0
+
+    # MLB steering racks have a 6min max engagement. After that time it will return status = 'rejected' for ~2.0s and not execute torque requests. After the
+    # ~2.0s lockout period it will return to accepting torque requests by itself. This max engagement timer can also be reset by disabling control for ~1.1s.
+    # Attempt to mitigate this by opportunistically disabling HCA during periods of low torque desired.
+    if self._eps_timer_workaround:
+      self._hca_active_frames += self._steer_step
+
+      if (self._hca_active_frames >= self._frames_for_mitigation_start
+          and abs(desired_torque) <= self.MLB_LOCKOUT_LOW_TORQUE):
+        self._low_torque_frames += self._steer_step
+      else:
+        self._low_torque_frames = 0
+
+      # Only disable HCA if desired torque is <=0.6Nm for 0.5 seconds continuously. A desired torque > 0.6Nm will also abort any in progress reset.
+      if self._low_torque_frames >= self._frames_for_low_torque:
+        apply_torque = 0
+
+      if apply_torque == 0:
+        self._hca_inactive_frames += self._steer_step
+        if self._hca_inactive_frames >= self._frames_for_reset:
+          self._hca_active_frames = 0
+      else:
+        self._hca_inactive_frames = 0
 
     return apply_torque
 
@@ -58,7 +96,7 @@ class CarController(CarControllerBase):
     self.lead_distance_bars_last = None
     self.distance_bar_frame = 0
     self.gra_acc_counter_last = None
-    self.hca_mitigation = HCAMitigation(self.CCP)
+    self.hca_mitigation = HCAMitigation(self.CCP, eps_timer_workaround=bool(CP.flags & VolkswagenFlags.MLB))
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -104,11 +142,12 @@ class CarController(CarControllerBase):
         self.steering_power_last = steering_power
 
       else:
+        new_torque = 0
         if CC.latActive:
           new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
           apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
 
-        apply_torque = self.hca_mitigation.update(apply_torque, self.apply_torque_last)
+        apply_torque = self.hca_mitigation.update(apply_torque, self.apply_torque_last, new_torque)
         hca_enabled = apply_torque != 0
         self.apply_torque_last = apply_torque
         can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_torque, hca_enabled))
