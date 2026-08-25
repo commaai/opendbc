@@ -223,7 +223,11 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
   // check es_status transmission_rpm limits
   if (msg->addr == MSG_SUBARU_ES_Status) {
     int transmission_rpm = (GET_BYTES(msg, 2, 2) & 0x1FFFU);
-    violation |= longitudinal_transmission_rpm_checks(transmission_rpm, SUBARU_LONG_LIMITS);
+    bool rpm_valid = get_longitudinal_allowed() &&
+                     !safety_max_limit_check(transmission_rpm, SUBARU_LONG_LIMITS.max_transmission_rpm,
+                                             SUBARU_LONG_LIMITS.min_transmission_rpm);
+    bool rpm_inactive = transmission_rpm == SUBARU_LONG_LIMITS.inactive_transmission_rpm;
+    violation |= !(rpm_valid || rpm_inactive);
   }
 
   if (msg->addr == MSG_SUBARU_ES_UDS_Request) {

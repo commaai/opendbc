@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
-from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import AngleSteeringLimitsVM
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -10,17 +10,9 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries,
 Ecu = CarParams.Ecu
 
 
-# Add extra tolerance for average banked road since safety doesn't have the roll
-AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
-
-
 class CarControllerParams:
-  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+  ANGLE_LIMITS: AngleSteeringLimitsVM = AngleSteeringLimitsVM(
     190,  # deg, EPS faults above ~200
-    ([], []),
-    ([], []),
-    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
-    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^3
     MAX_ANGLE_RATE=5,  # deg/frame, comfort rate limit
   )
 
