@@ -180,8 +180,8 @@ BO_ 1633 Anhaenger_01: 3 Gateway_D4C7
  SG_ AAG_AVS_Stati : 20|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
 
 BO_ 777 BEM_01: 4 Gateway_D4C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ BEM_01_CHK : 0|8@1+ (1,0) [0|255] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ BEM_01_BZ : 8|4@1+ (1,0) [0|15] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ BEM_Segel_Info : 12|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
  SG_ BEM_P_Generator : 16|8@1+ (50,0) [0|12700] "Unit_Watt"  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ BEM_n_LLA : 24|2@1+ (1.0,0.0) [0.0|3] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
@@ -258,8 +258,8 @@ BO_ 2617042433 CCP_Soundaktor_DTO_01: 8 SAK_C7
  SG_ CCP_Soundaktor_DTO_01_Data : 0|64@1+ (1.0,0.0) [0.0|18446744073709551615] ""  Vector__XXX
 
 BO_ 901 Charisma_01: 8 Gateway_D4C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,SCU_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ CHA_01_CHK : 0|8@1+ (1,0) [0|255] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,SCU_D4
+ SG_ CHA_01_BZ : 8|4@1+ (1,0) [0|15] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ CHA_Systemstatus : 12|2@1+ (1.0,0.0) [0.0|3] ""  Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,SCU_D4
  SG_ CHA_Fahrer_Umschaltung : 14|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ CHA_Ziel_FahrPr_MO : 16|3@1+ (1.0,0.0) [0.0|7] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
@@ -307,8 +307,8 @@ BO_ 1603 Einheiten_01: 3 Gateway_D4C7
  SG_ KBI_Einheit_Sprache : 16|8@1+ (1,0) [0|255] ""  Vector__XXX
 
 BO_ 260 EPB_01: 8 EPB_D4
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ EPB_01_CHK : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ EPB_01_BZ : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ EPB_QBit_Laengsbeschleunigung : 12|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
  SG_ EPB_QBit_Pedalweg_Kuppl : 13|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ EPB_BCM2_Motor_Wakeup : 14|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
@@ -358,7 +358,7 @@ BO_ 256 ESP_01: 8 Gateway_D4C7
  SG_ ESP_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
 BO_ 257 ESP_02: 8 Gateway_D4C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Airbag_D4,EPB_D4,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ ESP_02_CHK : 0|8@1+ (1,0) [0|255] ""  Airbag_D4,EPB_D4,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Airbag_D4,EPB_D4,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ ESP_QBit_Gierrate : 12|1@1+ (1.0,0.0) [0.0|1] ""  Airbag_D4
  SG_ ESP_QBit_Laengsbeschl : 13|1@1+ (1.0,0.0) [0.0|1] ""  Airbag_D4,EPB_D4,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
@@ -458,8 +458,8 @@ BO_ 132 ESP_06: 8 ESP_D4
  SG_ ESP_06_CRC : 56|8@1+ (1,0) [0|255] ""  Airbag_D4,SCU_D4
 
 BO_ 914 ESP_07_FR: 8 Gateway_D4C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  LWS_D4,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  LWS_D4,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ ESP_07_CHK : 0|8@1+ (1,0) [0|255] ""  LWS_D4,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ ESP_07_BZ : 8|4@1+ (1,0) [0|15] ""  LWS_D4,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ ESP_ACC_LDE : 12|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ ESP_Quattro_Antrieb : 13|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ ESP_Codierung_ADS : 14|2@1+ (1.0,0.0) [0.0|3] ""  LWS_D4
@@ -478,8 +478,8 @@ BO_ 914 ESP_07_FR: 8 Gateway_D4C7
  SG_ ESP_OBD_Status : 61|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
 BO_ 286 ESP_08: 8 Vector__XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ ESP_08_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ESP_08_BZ : 8|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ ESP_ANB_CM_Rueckk_Umsetz : 12|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ESP_Konsistenz_ACC_Botschaft : 13|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ESP_Stillstandsphase_erschoepft : 14|1@1+ (1,0) [0|1] "" Vector__XXX
@@ -596,8 +596,8 @@ BO_ 1138 Gateway_MED9_01: 8 Gateway_B8
  SG_ GW_MED9_01_va_17 : 7|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 130 Getriebe_01: 8 Getriebe_AL551_951_D4_C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ Getriebe_01_CHK : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ Getriebe_01_BZ : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ GE_Schaltvorgang : 12|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ GE_Status_Kupplung : 13|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ GE_Verbot_Ausblendung : 15|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
@@ -610,8 +610,8 @@ BO_ 130 Getriebe_01: 8 Getriebe_AL551_951_D4_C7
  SG_ GE_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
 
 BO_ 131 Getriebe_02: 8 Getriebe_AL551_951_D4_C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ Getriebe_02_CHK : 0|8@1+ (1,0) [0|255] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ Getriebe_02_BZ : 8|4@1+ (1,0) [0|15] ""  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ GE_Anf_Zylabsch : 13|2@1+ (1.0,0.0) [0.0|3] ""  Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ GE_Synchro_Wunschdrehz : 15|9@1+ (25,0) [0|12750] "Unit_MinutInver"  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ GE_Synchro_Zeit : 24|8@1+ (20,0) [0|5080] "Unit_MilliSecon"  Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
@@ -775,8 +775,8 @@ BO_ 1424 Kessy_02: 8 Gateway_D4C7
  SG_ FBS_KD_Fehler : 47|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
 BO_ 960 Klemmen_Status_01: 4 Gateway_D4C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  EPB_D4,Getriebe_AL551_951_D4_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  EPB_D4,Getriebe_AL551_951_D4_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ Klemmen_Status_01_CHK : 0|8@1+ (1,0) [0|255] ""  EPB_D4,Getriebe_AL551_951_D4_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
+ SG_ Klemmen_Status_01_BZ : 8|4@1+ (1,0) [0|15] ""  EPB_D4,Getriebe_AL551_951_D4_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ ZV_verriegelt_extern_soll_02 : 12|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7
  SG_ ZAS_Kl_S : 16|1@1+ (1.0,0.0) [0.0|1] ""  EPB_D4,Getriebe_AL551_951_D4_C7
  SG_ ZAS_Kl_15 : 17|1@1+ (1.0,0.0) [0.0|1] ""  EPB_D4,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,SCU_D4
@@ -862,7 +862,7 @@ BO_ 779 Kombi_01: 8 Gateway_D4C7
  SG_ KBI_Lenkung_Lampe : 5|1@1+ (1,0) [0|1] ""  Getriebe_AL551_951_D4_C7
  SG_ KBI_Vorglueh_System_Lampe : 6|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7,Motor_EDC17_D4
  SG_ KBI_NV_in_Anzeige : 7|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Getriebe_AL551_951_D4_C7
+ SG_ XCOUNTER : 8|4@1+ (1,0) [0|15] ""  Getriebe_AL551_951_D4_C7
  SG_ KBI_Anzeigestatus_ACC : 12|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7
  SG_ KBI_Oeldruck_Schalter : 15|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7
  SG_ KBI_Tankwarnung : 16|1@1+ (1.0,0.0) [0.0|1] ""  Getriebe_AL551_951_D4_C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
@@ -928,8 +928,8 @@ BO_ 919 LDW_02: 8 Gateway_D4C7
  SG_ LDW_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
 BO_ 810 LH_EPS_01: 8 Gateway_D4C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  APS_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  APS_D4
+ SG_ EPS_01_CRC : 0|8@1+ (1,0) [0|255] ""  APS_D4
+ SG_ EPS_01_BZ : 8|4@1+ (1,0) [0|15] ""  APS_D4
  SG_ EPS_Akustiksignal : 16|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
  SG_ EPS_Fehlerlampe : 17|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ EPS_KD_Fehler : 18|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
@@ -944,8 +944,8 @@ BO_ 810 LH_EPS_01: 8 Gateway_D4C7
  SG_ EPS_Anf_KL : 43|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
 BO_ 285 LH_EPS_02: 8 Gateway_D4C7
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  SCU_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  SCU_D4
+ SG_ EPS_02_CRC : 0|8@1+ (1,0) [0|255] ""  SCU_D4
+ SG_ EPS_02_BZ : 8|4@1+ (1,0) [0|15] ""  SCU_D4
  SG_ EPS_Notlauf : 12|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
  SG_ EPS_Lastinfo : 16|8@1+ (1,0) [0|253] "Unit_Amper"  Vector__XXX
  SG_ EPS_Unterstuetzungsleistung : 24|8@1+ (0.5,0) [0.0|100.0] "Unit_PerCent"  SCU_D4
@@ -1043,8 +1043,8 @@ BO_ 134 LWI_01: 8 LWS_D4
 BO_ 917 LWR_AFS_01: 8 XXX
 
 BO_ 128 Motor_01: 8 Motor_EDC17_D4
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
+ SG_ Motor_01_CHK : 0|8@1+ (1,0) [0|255] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
+ SG_ Motor_01_BZ : 8|4@1+ (1,0) [0|15] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ MO_Mom_o_ex : 12|10@1+ (1,0) [0|1021] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ MO_Mom_m_ex : 22|10@1+ (1,0) [0|1021] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,SAK_C7
  SG_ MO_Mom_Verlust : 32|10@1+ (1,0) [0|1021] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,SAK_C7
@@ -1054,8 +1054,8 @@ BO_ 128 Motor_01: 8 Motor_EDC17_D4
  SG_ MO_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
 
 BO_ 129 Motor_02: 8 Motor_EDC17_D4
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,SCU_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,SCU_D4
+ SG_ Motor_02_CHK : 0|8@1+ (1,0) [0|255] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,SCU_D4
+ SG_ Motor_02_BZ : 8|4@1+ (1,0) [0|15] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,SCU_D4
  SG_ MO_Mom_ZWR : 12|10@1+ (1,0) [0|1021] ""  Gateway_D4C7
  SG_ MO_Mom_Soll : 22|10@1+ (1,0) [0|1021] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ MO_Mom_Ist : 32|10@1+ (1,0) [0|1021] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
@@ -1102,8 +1102,8 @@ BO_ 263 Motor_04: 8 Motor_EDC17_D4
  SG_ MO_KVS_Ueberlauf : 63|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
 
 BO_ 782 Motor_05: 8 Motor_EDC17_D4
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
+ SG_ Motor_05_CHK : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
+ SG_ Motor_05_BZ : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ MO_EKlKomLeiRed : 12|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7
  SG_ MO_Freig_Reku : 14|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7
  SG_ MO_Klima_Eingr : 16|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7
@@ -1211,8 +1211,8 @@ BO_ 1607 Motor_09: 8 Motor_EDC17_D4
  SG_ MO_MKB_04 m3  : 59|5@1+ (1.0,0.0) [0.0|31] ""  Gateway_D4C7
 
 BO_ 276 Motor_10: 8 Motor_EDC17_D4
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7
+ SG_ Motor_10_CHK : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7
+ SG_ Motor_10_BZ : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7
  SG_ MO_Sig_Fahrpedalgradient : 12|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
  SG_ MO_BKV_Unterdruckwarnung : 13|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
  SG_ MO_Zylinderabschaltung : 14|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7
@@ -1239,8 +1239,8 @@ BO_ 1010 Motor_19: 8 Motor_EDC17_D4
  SG_ MO_SCR_Dosierpumpe_Soll : 56|8@1+ (0.4,0) [0.0|100.0] "Unit_PerCent"  SCR_C7
 
 BO_ 1601 Motor_Code_01: 8 Motor_EDC17_D4
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
+ SG_ Motor_Code_01_CHK : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
+ SG_ Motor_Code_01_BZ : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ MO_Faktor_Momente : 12|2@1+ (1.0,0.0) [0.0|3] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7
  SG_ MO_Hybridfahrzeug : 14|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7
  SG_ MO_Code : 16|8@1+ (1,0) [0|255] ""  EPB_D4,Gateway_D4C7,Getriebe_AL551_951_D4_C7,Getriebe_DL501_C7,Getriebe_VL381_C7,SAK_C7
@@ -1638,8 +1638,8 @@ BO_ 1512 SCR_CAL_ID2: 8 SCR_C7
  SG_ SCR_CAL_ID_Index_04 : 56|8@1+ (1.0,0.0) [0.0|255] ""  Motor_EDC17_D4
 
 BO_ 133 SCU_01: 8 SCU_D4
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Airbag_D4,ESP_D4,Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,QSP_D4
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Airbag_D4,ESP_D4,Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,QSP_D4
+ SG_ SCU_01_CHK : 0|8@1+ (1,0) [0|255] ""  Airbag_D4,ESP_D4,Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,QSP_D4
+ SG_ SCU_01_BZ : 8|4@1+ (1,0) [0|15] ""  Airbag_D4,ESP_D4,Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,QSP_D4
  SG_ SCU_Ue_Winkel_ADS : 16|12@1+ (0.1,0) [0.0|409.3] "Unit_DegreOfArc"  Airbag_D4,ESP_D4,Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,QSP_D4
  SG_ SCU_VZ_Ue_Winkel_ADS : 28|1@1+ (1.0,0.0) [0.0|1] ""  Airbag_D4,ESP_D4,Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4,QSP_D4
  SG_ SCU_Soll_Ue_Winkel : 29|11@1+ (0.1,0) [0.0|204.5] "Unit_DegreOfArc"  ESP_D4,Gateway_D4C7,QSP_D4
@@ -1772,8 +1772,8 @@ BO_ 512 TPS_Tester: 7 Gateway_D4C7
  SG_ TPS_Tester_Data : 0|56@1+ (1.0,0.0) [0.0|72057594037927935] ""  SCU_D4
 
 BO_ 266 TSK_01: 8 Motor_MLB_AU48_AU416_Diesel
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Gateway_B8
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Gateway_B8
+ SG_ TSK_01_CHK : 0|8@1+ (1,0) [0|255] ""  Gateway_B8
+ SG_ TSK_01_BZ : 8|4@1+ (1,0) [0|15] ""  Gateway_B8
  SG_ TSK_QBit_Steigung : 12|1@1+ (1,0) [0|1] ""  Gateway_B8
  SG_ TSK_Status_AB : 16|24@1+ (1,0) [0|16777215] ""  Gateway_B8
  SG_ TSK_Steigung : 40|8@1+ (0.8,-101.6) [-101.6|101.6] "Unit_PerCent"  Gateway_B8
@@ -1781,7 +1781,7 @@ BO_ 266 TSK_01: 8 Motor_MLB_AU48_AU416_Diesel
  SG_ TSK_Getriebeinfo : 57|2@1+ (1,0) [0|3] ""  Gateway_B8
 
 BO_ 268 TSK_02: 8 Motor_MLB_AU48_AU416_Diesel
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Gateway_B8,Getriebe_AL551_651_B8,Getriebe_AL551_Q5_Hybrid,Getriebe_SL_LB
+ SG_ TSK_02_CHK : 0|8@1+ (1,0) [0|255] ""  Gateway_B8,Getriebe_AL551_651_B8,Getriebe_AL551_Q5_Hybrid,Getriebe_SL_LB
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Gateway_B8,Getriebe_AL551_651_B8,Getriebe_AL551_Q5_Hybrid,Getriebe_SL_LB
  SG_ TSK_Anhalten : 12|1@1+ (1,0) [0|1] ""  Gateway_B8
  SG_ TSK_Status_GRA_ACC_01 : 16|2@1+ (1,0) [0|3] ""  Gateway_B8
@@ -1795,8 +1795,8 @@ BO_ 268 TSK_02: 8 Motor_MLB_AU48_AU416_Diesel
  SG_ TSK_Verzoeg_Anf : 56|8@1+ (0.024,-3.984) [-3.984|2.112] "Unit_MeterPerSeconSquar"  Gateway_B8
 
 BO_ 786 TSK_03: 8 Motor_EDC17_D4
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7
+ SG_ TSK_03_CHK : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7
+ SG_ TSK_03_BZ : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7
  SG_ FAS_Wunschgeschw : 12|10@1+ (0.32,0) [0.00|326.72] "Unit_KiloMeterPerHour"  Gateway_D4C7
  SG_ FAS_Status_Prim_Anz : 22|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7
  SG_ FAS_Texte_Primaeranz : 48|7@1+ (1.0,0.0) [0.0|127] ""  Gateway_D4C7
