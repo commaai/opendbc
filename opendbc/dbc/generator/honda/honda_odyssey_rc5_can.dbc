@@ -1,0 +1,15 @@
+CM_ "IMPORT _honda_common.dbc";
+CM_ "IMPORT _bosch_2023_odyssey.dbc";
+CM_ "IMPORT _steering_control_a.dbc";
+CM_ "IMPORT _steering_sensors_b.dbc";
+CM_ "IMPORT _gearbox_common.dbc";
+CM_ "IMPORT _nidec_scm_group_a.dbc";
+CM_ "IMPORT _lkas_hud_8byte.dbc";
+CM_ "IMPORT _bosch_standstill.dbc";
+CM_ "IMPORT _bosch_radarless_common.dbc";
+
+
+BO_ 882 CRUISE_PARAMS: 8 PCM
+ SG_ CRUISE_SPEED_OFFSET : 31|8@0- (0.1,0) [-128|127] "kph" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|15] "" EON
