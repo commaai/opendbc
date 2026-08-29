@@ -28,13 +28,12 @@ class HCAMitigation:
 
     self._eps_timer_workaround = eps_timer_workaround
     if eps_timer_workaround:
-      self._steer_step = CCP.STEER_STEP
       self._hca_active_frames = 0
       self._hca_inactive_frames = 0
       self._low_torque_frames = 0
-      self._frames_for_mitigation_start = self.MLB_LOCKOUT_MITIGATION_START / DT_CTRL
-      self._frames_for_low_torque = self.MLB_LOCKOUT_LOW_TORQUE_TIME / DT_CTRL
-      self._frames_for_reset = CCP.STEER_TIME_RESET / DT_CTRL
+      self._frames_for_mitigation_start = self.MLB_LOCKOUT_MITIGATION_START / (DT_CTRL * CCP.STEER_STEP)
+      self._frames_for_low_torque = self.MLB_LOCKOUT_LOW_TORQUE_TIME / (DT_CTRL * CCP.STEER_STEP)
+      self._frames_for_reset = CCP.STEER_TIME_RESET / (DT_CTRL * CCP.STEER_STEP)
 
   def update(self, apply_torque, apply_torque_last, desired_torque):
     if apply_torque != 0 and apply_torque_last == apply_torque:
@@ -49,24 +48,17 @@ class HCAMitigation:
     # ~2.0s lockout period it will return to accepting torque requests by itself. This max engagement timer can also be reset by disabling control for ~1.1s.
     # Attempt to mitigate this by opportunistically disabling HCA during periods of low torque desired.
     if self._eps_timer_workaround:
-      self._hca_active_frames += self._steer_step
+      if self._hca_inactive_frames >= self._frames_for_reset:
+        self._hca_active_frames = 0
 
-      if (self._hca_active_frames >= self._frames_for_mitigation_start
-          and abs(desired_torque) <= self.MLB_LOCKOUT_LOW_TORQUE):
-        self._low_torque_frames += self._steer_step
-      else:
-        self._low_torque_frames = 0
+      low_torque = abs(desired_torque) <= self.MLB_LOCKOUT_LOW_TORQUE
 
-      # Only disable HCA if desired torque is <=0.6Nm for 0.5 seconds continuously. A desired torque > 0.6Nm will also abort any in progress reset.
-      if self._low_torque_frames >= self._frames_for_low_torque:
+      if low_torque and self._low_torque_frames >= self._frames_for_low_torque and self._hca_active_frames >= self._frames_for_mitigation_start:
         apply_torque = 0
 
-      if apply_torque == 0:
-        self._hca_inactive_frames += self._steer_step
-        if self._hca_inactive_frames >= self._frames_for_reset:
-          self._hca_active_frames = 0
-      else:
-        self._hca_inactive_frames = 0
+      self._low_torque_frames = self._low_torque_frames + 1 if low_torque else 0
+      self._hca_inactive_frames = self._hca_inactive_frames + 1 if apply_torque == 0 else 0
+      self._hca_active_frames += 1
 
     return apply_torque
 

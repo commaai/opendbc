@@ -403,28 +403,29 @@ class CarState(CarStateBase):
     # MLB steering racks have a 6min max engagement. After that time it will return status = 'rejected' for ~2.0s and not execute torque requests. After the
     # ~2.0s lockout period it will return to accepting torque requests by itself. This max engagement timer can also be reset by disabling control for ~1.1s.
     # This warning trigger gives advance notice to the driver that steering is about to become unavailable so they can take control.
-    self.hca_active_frames += 1
-    if hca_status in ("ACTIVE", "ACTIVE_MODE_7"):
-      self.hca_inactive_frames = 0
-    else:
-      self.hca_inactive_frames += 1
-      if self.hca_inactive_frames >= (self.CCP.STEER_TIME_RESET - 0.05) / DT_CTRL: # 50ms buffer for detecting opportunistic resets from HCAMitigation
-        self.hca_active_frames = 0
-    return self.hca_active_frames >= (self.MLB_EPS_TIMER_MAX - self.MLB_EPS_TIMER_WARNING) / DT_CTRL
+    warning = self.hca_active_frames >= (self.MLB_EPS_TIMER_MAX - self.MLB_EPS_TIMER_WARNING) / DT_CTRL
+
+    self.hca_inactive_frames = 0 if hca_status in ("ACTIVE", "ACTIVE_MODE_7") else self.hca_inactive_frames + 1
+    # 50 ms buffer for reset so we catch the opportunistic reset mitigation
+    self.hca_active_frames = 0 if self.hca_inactive_frames >= (self.CCP.STEER_TIME_RESET - 0.05) / DT_CTRL else self.hca_active_frames + 1
+
+    return warning
 
   def update_hca_state(self, hca_status, in_drive=True):
     # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
     # DISABLED means the EPS hasn't been configured to support Lane Assist
     # MLB EPS initially returns READY upon boot for ~1.2s until lack of stock HCA_01 message triggers FAULT.
     # FAULT recovers back to READY once openpilot HCA_01 tx starts.
+    perm_fault = in_drive and hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
+    temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or (not self.eps_init_complete and hca_status == "FAULT")
+
     if not self.eps_init_complete:
+      self.eps_init_complete = hca_status == "DISABLED" or self.frame > 1000 or self.eps_init_ready_frames >= 150
       if hca_status in ("READY", "ACTIVE", "ACTIVE_MODE_7"):
         self.eps_init_ready_frames += 1
       else:
         self.eps_init_ready_frames = 0
-      self.eps_init_complete = hca_status == "DISABLED" or self.frame > 1000 or self.eps_init_ready_frames >= 150
-    perm_fault = in_drive and hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
-    temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or (not self.eps_init_complete and hca_status == "FAULT")
+
     return temp_fault, perm_fault
 
   def update_acc_fault(self, acc_fault, engine_off, long_inhibit, recovery_frames=10):
