@@ -27,7 +27,7 @@ class VehicleModel:
       CP: Car Parameters
     """
     # for math readability, convert long names car params into short names
-    self.m: float = CP.mass
+    self.m: float = CP.unitMass
     self.j: float = CP.rotationalInertia
     self.l: float = CP.wheelbase
     self.aF: float = CP.centerToFront
