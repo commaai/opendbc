@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from opendbc.car.honda.values import HondaSafetyFlags
+from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
@@ -227,6 +228,34 @@ class HondaBase(common.CarSafetyTest):
     # must be implemented when inherited
     raise NotImplementedError
 
+  def test_brake_switch_and_pressed(self):
+    # brake_pressed is either the pressed signal, or the switch high for two frames
+    if self.safety.get_current_safety_param() & HondaSafetyFlags.ALT_BRAKE:
+      self.skipTest("alt brake cars read a different message")
+    for pressed in (0, 1):
+      for switch in (0, 1):
+        # switch needs two frames in a row, so send the same state twice
+        for _ in range(2):
+          values = {"BRAKE_PRESSED": pressed, "BRAKE_SWITCH": switch, "COUNTER": self.cnt_powertrain_data % 4}
+          self.__class__.cnt_powertrain_data += 1
+          self._rx(self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, values))
+        self.assertEqual(bool(pressed or switch), self.safety.get_brake_pressed_prev(), f"{pressed=} {switch=}")
+
+  def test_steer_alt_address(self):
+    # 0x194 is the steering command on the CRV and RDX
+    if [0x194, self.STEER_BUS] not in self.TX_MSGS:
+      self.skipTest("car does not use the alternate steering address")
+    self.safety.set_controls_allowed(0)
+    self.assertTrue(self._tx(common.make_msg(self.STEER_BUS, 0x194, 4)))
+    self.assertFalse(self._tx(common.make_msg(self.STEER_BUS, 0x194, 4, dat=b'\x01\x00\x00\x00')))
+
+  def test_steer_when_controls_allowed(self):
+    # steering is only blocked while controls are not allowed
+    self.safety.set_controls_allowed(1)
+    self.assertTrue(self._tx(self._send_steer_msg(1)))
+    self.safety.set_controls_allowed(0)
+    self.assertFalse(self._tx(self._send_steer_msg(1)))
+
   def test_disengage_on_brake(self):
     self.safety.set_controls_allowed(1)
     self._rx(self._user_brake_msg(1))
@@ -288,6 +317,13 @@ class TestHondaNidecSafetyBase(HondaBase):
     self.FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
     self.safety.set_honda_fwd_brake(True)
     super().test_fwd_hook()
+
+  def test_stock_aeb_disabled(self):
+    # with the alternative experience set, stock AEB is never forwarded
+    self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.DISABLE_STOCK_AEB)
+    self.safety.set_honda_fwd_brake(False)
+    self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=1)))
+    self.assertFalse(self.safety.get_honda_fwd_brake())
 
   def test_honda_fwd_brake_latching(self):
     # Shouldn't fwd stock Honda requesting brake without AEB
@@ -371,6 +407,16 @@ class TestHondaBoschSafetyBase(HondaBase):
   TX_MSGS = [[0xE4, 0], [0xE5, 0], [0x296, 1], [0x33D, 0], [0x33DA, 0], [0x33DB, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB]}
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB)}  # STEERING_CONTROL, BOSCH_SUPPLEMENTAL_1
+
+  def test_bosch_supplemental_control(self):
+    # only one fixed payload is allowed, the last byte is a counter and checksum
+    if [0xE5, 0] not in self.TX_MSGS:
+      self.skipTest("car does not send the supplemental control message")
+    for dat, should_tx in ((b'\x04\x00\x80\x10\x00\x00\x00\x00', True),
+                           (b'\x04\x00\x80\x10\x00\x00\x00\xff', True),
+                           (b'\x00\x00\x00\x00\x00\x00\x00\x00', False),
+                           (b'\x04\x00\x80\x10\x01\x00\x00\x00', False)):
+      self.assertEqual(should_tx, self._tx(common.make_msg(0, 0xE5, dat=dat)), f"{dat.hex()=}")
 
   def setUp(self):
     self.packer = CANPackerSafety("honda_civic_hatchback_ex_2017_can_generated")
@@ -481,6 +527,10 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
     not_tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")
     self.assertFalse(self._tx(not_tester_present))
+
+    # a valid header with a non-zero tail is not tester present either
+    bad_tail = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x02\x3E\x80\x00\x01\x00\x00\x00")
+    self.assertFalse(self._tx(bad_tail))
 
   def test_gas_safety_check(self):
     for controls_allowed in [True, False]:

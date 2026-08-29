@@ -50,6 +50,8 @@ class TestBody(common.SafetyTest):
     self.assertTrue(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
     self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
+    self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x00\x00\x00\x00')))  # wrong second word
+    self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\x00\x00\x00\x00\x1e\x0b\xb0\x0a')))  # wrong first word
 
 
 if __name__ == "__main__":

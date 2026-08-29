@@ -104,6 +104,11 @@ bool get_vehicle_moving(void);
 void set_timer(uint32_t t);
 
 void safety_tick_current_safety_config();
+void safety_tick_no_safety_config(void);
+void set_rx_check_frequency(int index, uint32_t frequency);
+void set_rx_check_ignore_counter(int index, bool ignore);
+void set_rx_check_max_counter(int index, uint8_t max_counter);
+int get_rx_checks_len(void);
 bool safety_config_valid();
 
 void init_tests(void);

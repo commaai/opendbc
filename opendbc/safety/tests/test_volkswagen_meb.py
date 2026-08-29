@@ -100,6 +100,21 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     values = {f"{s}_Radgeschw": spd_kph for s in ("VL", "VR", "HL", "HR")}
     return self.packer.make_can_msg_safety("ESC_51", 0, values)
 
+  def test_vehicle_moving_each_wheel(self):
+    # any wheel alone is enough to be moving
+    wheels = ("VL", "VR", "HL", "HR")
+    for moving_wheel in (None, *wheels):
+      values = {f"{s}_Radgeschw": (1.0 if s == moving_wheel else 0.0) for s in wheels}
+      self._rx(self.packer.make_can_msg_safety("ESC_51", 0, values))
+      self.assertEqual(moving_wheel is not None, self.safety.get_vehicle_moving(), f"{moving_wheel=}")
+
+  def test_tsk_status_values(self):
+    # TSK_Status: 3, 4 and 5 are engaged, 2 is main switch on only
+    for tsk_status in range(8):
+      values = {"TSK_Status": tsk_status}
+      self._rx(self.packer.make_can_msg_safety("Motor_51", 0, values))
+      self.assertEqual(tsk_status in (2, 3, 4, 5), self.safety.get_acc_main_on(), f"{tsk_status=}")
+
   def _speed_msg_2(self, speed_mps: float):
     values = {"ESP_v_Signal": speed_mps * 3.6}
     return self.packer.make_can_msg_safety("ESP_21", 0, values)

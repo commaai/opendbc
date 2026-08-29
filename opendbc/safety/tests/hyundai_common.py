@@ -138,9 +138,19 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
     addr, bus = self.DISABLED_ECU_UDS_MSG
     for should_tx, msg in ((True, b"\x02\x3E\x80\x00\x00\x00\x00\x00"),
+                           (False, b"\x02\x3E\x80\x00\x01\x00\x00\x00"),
                            (False, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(addr, bus, msg)
       self.assertEqual(should_tx and ecu_disable, self._tx(tester_present))
+
+  def test_tester_present_other_address(self):
+    # the other diagnostic address is not ours to send on
+    if not hasattr(self, "DISABLED_ECU_UDS_MSG"):
+      self.skipTest("car does not disable an ECU")
+    addr, bus = self.DISABLED_ECU_UDS_MSG
+    other = 0x7D0 if addr == 0x730 else 0x730
+    msg = libsafety_py.make_CANPacket(other, bus, b"\x02\x3E\x80\x00\x00\x00\x00\x00")
+    self.assertFalse(self._tx(msg))
 
   def test_disabled_ecu_alive(self):
     """

@@ -35,6 +35,15 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     values = {"GasRegenCmd": gas}
     return self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)
 
+  def test_gas_regen_apply_bit(self):
+    # GasRegenCmdActive is only allowed while controls are allowed
+    for controls_allowed in (True, False):
+      for apply_bit in (0, 1):
+        self.safety.set_controls_allowed(controls_allowed)
+        values = {"GasRegenCmd": self.INACTIVE_GAS, "GasRegenCmdActive": apply_bit}
+        msg = self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)
+        self.assertEqual(controls_allowed or not apply_bit, self._tx(msg))
+
   # override these tests from CarSafetyTest, GM longitudinal uses button enable
   def _pcm_status_msg(self, enable):
     raise NotImplementedError
@@ -107,6 +116,14 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"%sWheelSpd" % s: speed for s in ["RL", "RR"]}
     return self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values)
 
+  def test_vehicle_moving_each_wheel(self):
+    # either rear wheel alone is enough to be moving
+    moving = self.STANDSTILL_THRESHOLD + 1
+    for left, right in ((0, 0), (0, moving), (moving, 0), (moving, moving)):
+      values = {"RLWheelSpd": left, "RRWheelSpd": right}
+      self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
+      self.assertEqual(bool(left or right), self.safety.get_vehicle_moving())
+
   def _user_brake_msg(self, brake):
     # GM safety has a brake threshold of 8
     values = {"BrakePedalPos": 8 if brake else 0}
@@ -171,6 +188,16 @@ class TestGmCameraSafetyBase(TestGmSafetyBase):
   def _user_brake_msg(self, brake):
     values = {"BrakePressed": brake}
     return self.packer.make_can_msg_safety("ECMEngineStatus", 0, values)
+
+  def test_buttons_ignored_on_rx(self):
+    # when tied to the PCM, buttons on the powertrain bus can't enable
+    if not self.PCM_CRUISE:
+      self.skipTest("openpilot longitudinal enables from the buttons")
+    for btn in range(8):
+      self.safety.set_controls_allowed(0)
+      values = {"ACCButtons": btn}
+      self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, values))
+      self.assertFalse(self.safety.get_controls_allowed())
 
 
 class TestGmCameraSafety(TestGmCameraSafetyBase):

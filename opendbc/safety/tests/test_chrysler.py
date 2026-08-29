@@ -9,6 +9,8 @@ from opendbc.safety.tests.common import CANPackerSafety
 
 
 class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
+  # Pacifica reads left and right wheel speeds, Ram reads a single speed signal
+  PACIFICA_SPEED = True
   TX_MSGS = [[0x23B, 0], [0x292, 0], [0x2A6, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x292, 0x2A6)}
   FWD_BLACKLISTED_ADDRS = {2: [0x292, 0x2A6]}
@@ -40,6 +42,15 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
   def _speed_msg(self, speed):
     values = {"SPEED_LEFT": speed, "SPEED_RIGHT": speed}
     return self.packer.make_can_msg_safety("SPEED_1", 0, values)
+
+  def test_vehicle_moving_each_wheel(self):
+    # either wheel alone is enough to be moving
+    if not self.PACIFICA_SPEED:
+      self.skipTest("Ram reads a single speed signal")
+    for speed_l, speed_r in ((0, 0), (0, 1), (1, 0), (1, 1)):
+      values = {"SPEED_LEFT": speed_l, "SPEED_RIGHT": speed_r}
+      self._rx(self.packer.make_can_msg_safety("SPEED_1", 0, values))
+      self.assertEqual(bool(speed_l or speed_r), self.safety.get_vehicle_moving())
 
   def _user_gas_msg(self, gas):
     values = {"Accelerator_Position": gas}
@@ -73,6 +84,7 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
 
 
 class TestChryslerRamDTSafety(TestChryslerSafety):
+  PACIFICA_SPEED = False
   TX_MSGS = [[0xB1, 2], [0xA6, 0], [0xFA, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0xA6, 0xFA)}
   FWD_BLACKLISTED_ADDRS = {2: [0xA6, 0xFA]}
@@ -97,6 +109,7 @@ class TestChryslerRamDTSafety(TestChryslerSafety):
 
 
 class TestChryslerRamHDSafety(TestChryslerSafety):
+  PACIFICA_SPEED = False
   TX_MSGS = [[0x275, 0], [0x276, 0], [0x23A, 2]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x276, 0x275)}
   FWD_BLACKLISTED_ADDRS = {2: [0x275, 0x276]}

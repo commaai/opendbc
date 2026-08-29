@@ -69,8 +69,19 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
     return self.packer.make_can_msg_safety("GW_HSC2_HCU_FrP00", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
+    return self._cruise_state_msg(2 if enable else 1)
+
+  def _cruise_state_msg(self, cruise_state):
+    values = {"ACCSysSts_RadarHSC2": cruise_state, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
     return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values, fix_checksum=checksum)
+
+  def test_cruise_engaged_states(self):
+    # ACCSysSts_RadarHSC2: both 2 (Active) and 3 (Override) mean engaged
+    for cruise_state in range(8):
+      self._rx(self._cruise_state_msg(1))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self._rx(self._cruise_state_msg(cruise_state))
+      self.assertEqual(cruise_state in (2, 3), self.safety.get_controls_allowed())
 
 
 if __name__ == "__main__":
