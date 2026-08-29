@@ -29,6 +29,7 @@ class TestVolkswagenHCAMitigation(unittest.TestCase):
         expected_torque = actuator_value - (1, -1)[actuator_value < 0] if should_nudge else actuator_value
         assert hca_mitigation.update(actuator_value, actuator_value) == expected_torque, f"{frame=}"
 
+
 class TestVolkswagenPlatformConfigs(unittest.TestCase):
   def test_spare_part_fw_pattern(self):
     # Relied on for determining if a FW is likely VW

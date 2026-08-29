@@ -22,6 +22,8 @@ class CarState(CarStateBase):
     self.acc_type = 0
     self.travel_assist_available = False
     self.curvature_meas = 0.
+    self.steering_wheel_side = None
+    self.previous_steering_wheel_side = None
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -304,10 +306,22 @@ class CarState(CarStateBase):
 
     if self.CP.enableBsm:
       bsm_cp = pt_cp if self.CP.flags & VolkswagenFlags.MEB_GEN2 else ext_cp
-      ret.leftBlindspot = (bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Driver"]) or
-                           bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Driver"]))
-      ret.rightBlindspot = (bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Passenger"]) or
-                            bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Passenger"]))
+      driver_blindspot = (bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Driver"]) or
+                          bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Driver"]))
+      passenger_blindspot = (bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Passenger"]) or
+                             bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Passenger"]))
+      if self.steering_wheel_side is None:
+        valid_sides = (self.CCP.steering_wheel_side_values["LEFT_HAND_DRIVE"],
+                       self.CCP.steering_wheel_side_values["RIGHT_HAND_DRIVE"])
+        for steering_wheel_side in ext_cp.vl_all["MEB_Distance_01"]["Steering_Wheel_Side"]:
+          if steering_wheel_side in valid_sides and steering_wheel_side == self.previous_steering_wheel_side:
+            self.steering_wheel_side = steering_wheel_side
+            break
+          self.previous_steering_wheel_side = steering_wheel_side
+      if self.steering_wheel_side is not None:
+        right_hand_drive = self.steering_wheel_side == self.CCP.steering_wheel_side_values["RIGHT_HAND_DRIVE"]
+        ret.leftBlindspot = passenger_blindspot if right_hand_drive else driver_blindspot
+        ret.rightBlindspot = driver_blindspot if right_hand_drive else passenger_blindspot
 
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
