@@ -320,8 +320,6 @@ class TestCarModelBase(unittest.TestCase):
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
 
-
-
   @fuzzy_test(max_examples=MAX_EXAMPLES)
   def test_panda_safety_tx_fuzzy(self, fuzzy):
     if self.CP.dashcamOnly:
@@ -374,6 +372,7 @@ class TestCarModelBase(unittest.TestCase):
         packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)
         self.assertTrue(self.safety.safety_tx_hook(packet), (addr, dat, bus))
 
+  @fuzzy_test(max_examples=MAX_EXAMPLES)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
     if self.CP.dashcamOnly:
       self.skipTest("no need to check panda safety for dashcamOnly")
