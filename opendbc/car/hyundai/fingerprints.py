@@ -1118,6 +1118,7 @@ FW_VERSIONS = {
   CAR.KIA_SPORTAGE_5TH_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00NQ5 FR_CMR AT AUS RHD 1.00 1.00 99211-P1040 663',
+      b'\xf1\x00NQ5 FR_CMR AT EUR LHD 1.00 1.02 99211-R2000 D12',
       b'\xf1\x00NQ5 FR_CMR AT EUR LHD 1.00 1.00 99211-P1040 663',
       b'\xf1\x00NQ5 FR_CMR AT GEN LHD 1.00 1.00 99211-P1040 663',
       b'\xf1\x00NQ5 FR_CMR AT GEN LHD 1.00 1.00 99211-P1060 665',
@@ -1133,6 +1134,7 @@ FW_VERSIONS = {
       b'\xf1\x00NQ5__               1.00 1.03 99110-P1000         ',
       b'\xf1\x00NQ5__               1.01 1.03 99110-CH000         ',
       b'\xf1\x00NQ5__               1.01 1.03 99110-P1000         ',
+      b'\xf1\x00NQ5__               1.00 1.03 99110R2000          ',
     ],
   },
   CAR.GENESIS_GV70_1ST_GEN: {
