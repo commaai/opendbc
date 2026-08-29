@@ -43,7 +43,6 @@ class TeslaPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
     [
-      # TODO: do we support 2017? It's HW3
       TeslaCarDocsHW3("Tesla Model 3 (with HW3) 2019-23"),
       TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024-25"),
     ],
