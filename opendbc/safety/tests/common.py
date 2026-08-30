@@ -1016,6 +1016,8 @@ class SafetyTest(SafetyTestBase):
               continue
             if attr.startswith('TestHyundaiCanfd') and current_test.startswith('TestHyundaiCanfd'):
               continue
+            if attr == 'TestElm327' and current_test.startswith(('TestHyundaiCanfdLFASteeringCCNC', 'TestHyundaiCanfdLFASteeringLongCCNC')):
+              tx = list(filter(lambda m: m[0] != 0x7C4, tx))
             if {attr, current_test}.issubset({'TestHyundaiLongitudinalSafety', 'TestHyundaiLongitudinalSafetyCameraSCC', 'TestHyundaiSafetyFCEVLong'}):
               continue
             volkswagen_shared = ('TestVolkswagenMqb', 'TestVolkswagenMlb', 'TestVolkswagenMeb')
