@@ -24,6 +24,7 @@ class CarState(CarStateBase):
       pt_cp.vl["ABS_1"]["WHEEL_SPEED_FR"],
       pt_cp.vl["ABS_1"]["WHEEL_SPEED_RL"],
       pt_cp.vl["ABS_1"]["WHEEL_SPEED_RR"],
+      unit=1,
     )
     ret.standstill = ret.vEgoRaw == 0
 
