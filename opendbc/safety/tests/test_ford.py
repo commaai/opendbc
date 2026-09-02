@@ -10,8 +10,6 @@ from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import CANPackerSafety
 
-MSG_EngBrakeData = 0x165           # RX from PCM, for driver brake pedal and cruise state
-MSG_EngVehicleSpThrottle = 0x204   # RX from PCM, for driver throttle input
 MSG_BrakeSysFeatures = 0x415       # RX from ABS, for vehicle speed
 MSG_EngVehicleSpThrottle2 = 0x202  # RX from PCM, for second vehicle speed
 MSG_Yaw_Data_FD1 = 0x91            # RX from RCM, for yaw rate
@@ -97,6 +95,17 @@ class TestFordSafetyBase(common.CarSafetyTest):
   def _get_max_curvature_delta_can(self, speed):
     fudged_speed = max(speed - 1.0, 1.0)
     return int(MAX_LATERAL_JERK / (fudged_speed * fudged_speed) / self.LATERAL_FREQUENCY * self.DEG_TO_CAN) + 1
+
+  def _get_max_curvature_delta_relaxed_can(self, speed):
+    # flipped fudge, this is the least movement toward the error bounds safety requires
+    fudged_speed = speed + 1.0
+    return int(MAX_LATERAL_JERK / (fudged_speed * fudged_speed) / self.LATERAL_FREQUENCY * self.DEG_TO_CAN) - 1
+
+  def _get_max_curvature_relaxed_can(self, speed):
+    # flipped fudge, safety never requires commanding more curvature than openpilot can send
+    fudged_speed = speed + 1.0
+    max_curvature_accel_can = int(MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed) * self.DEG_TO_CAN) - 1
+    return min(max_curvature_accel_can, round(self.MAX_CURVATURE * self.DEG_TO_CAN))
 
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)
@@ -304,48 +313,82 @@ class TestFordSafetyBase(common.CarSafetyTest):
                     self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(steer_control_enabled, path_offset, path_angle, curvature, curvature_rate)))
 
   def test_curvature_rate_limits(self):
-    """Curvature command must satisfy the ISO 11270 lateral jerk limit per frame."""
+    """
+    When the curvature error is exceeded, commanded curvature must start moving towards meas respecting rate limits.
+    Since safety allows higher rate limits to avoid false positives, we need to allow a lower rate to move towards meas.
+    """
     self.safety.set_controls_allowed(True)
-    max_encoded_can = int(self.MAX_CURVATURE * self.DEG_TO_CAN)
+    # safety fudges the speed (1 m/s) and rate limits (1 CAN unit) to avoid false positives
+    small_curvature = 1 / self.DEG_TO_CAN  # significant small amount of curvature to cross boundary
 
     for speed in np.arange(0, 40, 0.5):
-      max_can = self._get_max_curvature_can(speed)
-      max_delta_can = self._get_max_curvature_delta_can(speed)
-      base_can = max_delta_can * 2
-      if base_can + max_delta_can + 5 > min(max_can, max_encoded_can):
-        continue
-
-      # (should_tx, desired_curvature_can) relative to base_can
-      cases = [
-        (True, max_delta_can),       # at jerk limit
-        (False, max_delta_can + 5),  # over jerk limit
-      ]
-
-      for sign in (-1, 1):
-        self._reset_curvature_measurement(sign * base_can / self.DEG_TO_CAN, speed)
-        for should_tx, delta_can in cases:
-          self.safety.set_desired_curvature_last(sign * base_can)
-          self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (base_can + delta_can) / self.DEG_TO_CAN, 0)))
-
-  def test_curvature_error_limits(self):
-    # above CURVATURE_ERROR_MIN_SPEED, command must be within max_curvature_error of measured, below the check is skipped
-    self.safety.set_controls_allowed(True)
-    max_error_can = round(self.MAX_CURVATURE_ERROR * self.DEG_TO_CAN)
-
-    for speed in (self.CURVATURE_ERROR_MIN_SPEED - 1, self.CURVATURE_ERROR_MIN_SPEED + 1):
+      curvature_accel_limit = self._get_max_curvature_can(speed) / self.DEG_TO_CAN
       limit_command = speed > self.CURVATURE_ERROR_MIN_SPEED
-      self._reset_curvature_measurement(0, speed)
-      for sign in (-1, 1):
-        self.safety.set_desired_curvature_last(sign * max_error_can)
-        self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, sign * (max_error_can + 1) / self.DEG_TO_CAN, 0)))
-        self.safety.set_desired_curvature_last(sign * max_error_can)
-        self.assertEqual(not limit_command, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (max_error_can + 2) / self.DEG_TO_CAN, 0)))
+      # ensure our limits match the safety's rounded limits
+      # lateral jerk is symmetric, so the wind up and wind down limits are the same
+      max_delta = self._get_max_curvature_delta_can(speed) / self.DEG_TO_CAN
+      max_delta_relaxed = self._get_max_curvature_delta_relaxed_can(speed) / self.DEG_TO_CAN
 
-    # newest speed sample gates the check
-    self._reset_curvature_measurement(0, self.CURVATURE_ERROR_MIN_SPEED - 1)
-    self._rx(self._speed_msg(self.CURVATURE_ERROR_MIN_SPEED + 1))
-    self.safety.set_desired_curvature_last(max_error_can)
-    self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, (max_error_can + 2) / self.DEG_TO_CAN, 0)))
+      up_cases = (self.MAX_CURVATURE_ERROR * 2, [
+        (not limit_command, 0, 0),
+        (not limit_command, 0, max_delta_relaxed - small_curvature),
+        (True, 0, max_delta_relaxed),
+        (True, 0, max_delta),
+        (False, 0, max_delta + small_curvature),
+        # stay at boundary limit
+        (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
+        # 1 unit below boundary limit
+        (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature * 2, self.MAX_CURVATURE_ERROR - small_curvature * 2),
+        # shouldn't allow command to move outside the boundary limit if last was inside
+        (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature * 2),
+      ])
+
+      down_cases = (self.MAX_CURVATURE - self.MAX_CURVATURE_ERROR * 2, [
+        (not limit_command, self.MAX_CURVATURE, self.MAX_CURVATURE),
+        (not limit_command, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_relaxed + small_curvature),
+        (True, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_relaxed),
+        (True, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta),
+        (False, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta - small_curvature),
+      ])
+
+      # the driver can hold a curvature openpilot may not command, safety must never require moving past
+      # the most it can send: the lower of the lateral acceleration limit and what the EPS accepts
+      max_curvature_relaxed = self._get_max_curvature_relaxed_can(speed) / self.DEG_TO_CAN
+      # safety fudges the speed down for the accel check and up for the cap, so the last command can sit above the cap
+      max_curvature_allowed_can = min(self._get_max_curvature_can(speed), round(self.MAX_CURVATURE * self.DEG_TO_CAN))
+      winds_down_within_jerk = (max_curvature_allowed_can - self._get_max_curvature_relaxed_can(speed) <=
+                                self._get_max_curvature_delta_can(speed))
+      relaxed_cases = (self.MAX_CURVATURE * 2, [
+        (True, max_curvature_relaxed, max_curvature_relaxed),
+        (not limit_command, max_curvature_relaxed, max_curvature_relaxed - small_curvature),
+        # no longer requiring the command to wind towards meas doesn't stop rate limiting it winding away
+        (winds_down_within_jerk, max_curvature_allowed_can / self.DEG_TO_CAN, max_curvature_relaxed),
+      ])
+
+      for sign in (-1, 1):
+        for angle_meas, cases in (up_cases, down_cases, relaxed_cases):
+          self._reset_curvature_measurement(sign * angle_meas, speed)
+          for should_tx, initial_curvature, desired_curvature in cases:
+
+            # at low speeds one frame of jerk exceeds the curvature signal, so the should_tx=False cases will rightly not fail.
+            # assert we never drop a case at a speed where the curvature error is enforced
+            if abs(desired_curvature) > self.MAX_CURVATURE:
+              self.assertLess(speed, self.CURVATURE_ERROR_MIN_SPEED)
+              continue
+
+            # can not send if the curvature is above the max lateral acceleration
+            should_tx = should_tx and abs(desired_curvature) <= curvature_accel_limit
+
+            self._set_prev_desired_angle(sign * initial_curvature)
+            self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * desired_curvature, 0)))
+
+    # the newest speed sample gates the check, not the whole sample window
+    max_error = self.MAX_CURVATURE_ERROR + small_curvature * 2
+    for sign in (-1, 1):
+      self._reset_curvature_measurement(0, self.CURVATURE_ERROR_MIN_SPEED - 1)
+      self._rx(self._speed_msg(self.CURVATURE_ERROR_MIN_SPEED + 1))
+      self._set_prev_desired_angle(sign * self.MAX_CURVATURE_ERROR)
+      self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, sign * max_error, 0)))
 
   def test_curvature_violation(self):
     # If violation occurs, curvature cmd is blocked until reset to 0
