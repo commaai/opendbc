@@ -69,7 +69,7 @@ class CarInterface(CarInterfaceBase):
 
     if all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
       ret.transmissionType = TransmissionType.manual
-    elif 0x191 in fingerprint[CAN.pt] and candidate != CAR.ACURA_RDX:
+    elif 0x191 in fingerprint[CAN.pt] and candidate not in (CAR.ACURA_RDX, CAR.HONDA_CRV_SA):
       # Traditional CVTs, gearshift position in GEARBOX_CVT
       ret.transmissionType = TransmissionType.cvt
     else:
