@@ -42,6 +42,7 @@ class CAR(Platforms):
 
 # Placeholder, FW Query will be added in separate PR
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"\d{9}",
   requests=[
     Request(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
