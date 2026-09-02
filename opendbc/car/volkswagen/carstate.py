@@ -9,18 +9,16 @@ ButtonType = structs.CarState.ButtonEvent.Type
 
 
 class CarState(CarStateBase):
-  MLB_EPS_TIMER_MAX = 360.   # Maximum EPS engagement time before lockout will reject requests (sec)
-  MLB_EPS_TIMER_WARNING = 5. # How long before lockout should we warn the driver (sec)
-
   def __init__(self, CP):
     super().__init__(CP)
     self.frame = 0
     self.eps_init_complete = False
-    self.eps_init_ready_frames = 0
     self.hca_active_frames = 0
     self.hca_inactive_frames = 0
     self.tsk_recovery_timer = 0
     self.CCP = CarControllerParams(CP)
+    self.frames_steering_reset_detection = (self.CCP.STEER_TIME_RESET - self.CCP.STEER_TIME_RESET_DETECTION_BUFFER) / DT_CTRL
+    self.frames_steering_time_warning = (self.CCP.STEER_TIME_MAX_ENGAGED - self.CCP.STEER_TIME_WARNING) / DT_CTRL
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
     self.upscale_lead_car_signal = False
@@ -400,32 +398,22 @@ class CarState(CarStateBase):
       ret.steerTimeLimit = self.steer_time_limit_warning(hca_status)
 
   def steer_time_limit_warning(self, hca_status) -> bool:
-    # MLB steering racks have a 6min max engagement. After that time it will return status = 'rejected' for ~2.0s and not execute torque requests. After the
-    # ~2.0s lockout period it will return to accepting torque requests by itself. This max engagement timer can also be reset by disabling control for ~1.1s.
-    # This warning trigger gives advance notice to the driver that steering is about to become unavailable so they can take control.
-    warning = self.hca_active_frames >= (self.MLB_EPS_TIMER_MAX - self.MLB_EPS_TIMER_WARNING) / DT_CTRL
+    # MLB steering racks have a hard 6min max engagement. After that time it will return status = 'rejected' for ~2.0s and not execute torque requests. After
+    # the ~2.0s lockout period it will return to accepting torque requests. This warning trigger gives advance notice to the driver that steering is about to
+    # become unavailable so they can take control. This should only fire very rarely as we will opportunistically reset the steering rack in HCAMitigation.
+    warning = self.hca_active_frames >= self.frames_steering_time_warning
 
     self.hca_inactive_frames = 0 if hca_status in ("ACTIVE", "ACTIVE_MODE_7") else self.hca_inactive_frames + 1
-    # 50 ms buffer for reset so we catch the opportunistic reset mitigation
-    self.hca_active_frames = 0 if self.hca_inactive_frames >= (self.CCP.STEER_TIME_RESET - 0.05) / DT_CTRL else self.hca_active_frames + 1
+    self.hca_active_frames = 0 if self.hca_inactive_frames >= self.frames_steering_reset_detection else self.hca_active_frames + 1
 
     return warning
 
   def update_hca_state(self, hca_status, in_drive=True):
     # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
     # DISABLED means the EPS hasn't been configured to support Lane Assist
-    # MLB EPS initially returns READY upon boot for ~1.2s until lack of stock HCA_01 message triggers FAULT.
-    # FAULT recovers back to READY once openpilot HCA_01 tx starts.
+    self.eps_init_complete = self.eps_init_complete or (hca_status in ("DISABLED", "READY", "ACTIVE") or self.frame > 600)
     perm_fault = in_drive and hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
-    temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or (not self.eps_init_complete and hca_status == "FAULT")
-
-    if not self.eps_init_complete:
-      self.eps_init_complete = hca_status == "DISABLED" or self.frame > 1000 or self.eps_init_ready_frames >= 150
-      if hca_status in ("READY", "ACTIVE", "ACTIVE_MODE_7"):
-        self.eps_init_ready_frames += 1
-      else:
-        self.eps_init_ready_frames = 0
-
+    temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
   def update_acc_fault(self, acc_fault, engine_off, long_inhibit, recovery_frames=10):

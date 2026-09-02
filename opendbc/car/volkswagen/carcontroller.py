@@ -18,22 +18,19 @@ class HCAMitigation:
     * For MLB racks: opportunistically disables HCA during low-torque periods before the 6-minute EPS lockout
   """
 
-  MLB_LOCKOUT_MITIGATION_START = 240. # EPS engaged time before attempting opportunistic reset (sec)
-  MLB_LOCKOUT_LOW_TORQUE = 60         # Desired torque must be less than this before and during reset (centi-Nm)
-  MLB_LOCKOUT_LOW_TORQUE_TIME = 0.5   # How long to observe low torque for before starting the reset (sec)
-
-  def __init__(self, CCP, eps_timer_workaround=False):
+  def __init__(self, CCP, steer_timer_mitigation=False):
     self._max_same_torque_frames = CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP)
     self._same_torque_frames = 0
 
-    self._eps_timer_workaround = eps_timer_workaround
-    if eps_timer_workaround:
+    self._steer_timer_mitigation = steer_timer_mitigation
+    if steer_timer_mitigation:
       self._hca_active_frames = 0
       self._hca_inactive_frames = 0
       self._low_torque_frames = 0
-      self._frames_for_mitigation_start = self.MLB_LOCKOUT_MITIGATION_START / (DT_CTRL * CCP.STEER_STEP)
-      self._frames_for_low_torque = self.MLB_LOCKOUT_LOW_TORQUE_TIME / (DT_CTRL * CCP.STEER_STEP)
-      self._frames_for_reset = CCP.STEER_TIME_RESET / (DT_CTRL * CCP.STEER_STEP)
+      self._low_torque_threshold = CCP.STEER_TIME_LOW_TORQUE
+      self._frames_mitigation_start = CCP.STEER_TIME_MITIGATION_START / (DT_CTRL * CCP.STEER_STEP)
+      self._frames_low_torque = CCP.STEER_TIME_LOW_TORQUE_TIME / (DT_CTRL * CCP.STEER_STEP)
+      self._frames_reset = CCP.STEER_TIME_RESET / (DT_CTRL * CCP.STEER_STEP)
 
   def update(self, apply_torque, apply_torque_last, desired_torque):
     if apply_torque != 0 and apply_torque_last == apply_torque:
@@ -44,16 +41,16 @@ class HCAMitigation:
     else:
       self._same_torque_frames = 0
 
-    # MLB steering racks have a 6min max engagement. After that time it will return status = 'rejected' for ~2.0s and not execute torque requests. After the
-    # ~2.0s lockout period it will return to accepting torque requests by itself. This max engagement timer can also be reset by disabling control for ~1.1s.
-    # Attempt to mitigate this by opportunistically disabling HCA during periods of low torque desired.
-    if self._eps_timer_workaround:
-      if self._hca_inactive_frames >= self._frames_for_reset:
+    # Disabling lateral controls for ~1.1s will reset the max steer timer on MLB. This reset is done opportunistically
+    # during sustained periods of low desired torque. In the rare case that no such low desired torque period exists
+    # there is a warning triggered prior to the hard lockout by CarState.steer_time_limit_warning().
+    if self._steer_timer_mitigation:
+      if self._hca_inactive_frames >= self._frames_reset:
         self._hca_active_frames = 0
 
-      low_torque = abs(desired_torque) <= self.MLB_LOCKOUT_LOW_TORQUE
+      low_torque = abs(desired_torque) <= self._low_torque_threshold
 
-      if low_torque and self._low_torque_frames >= self._frames_for_low_torque and self._hca_active_frames >= self._frames_for_mitigation_start:
+      if low_torque and self._low_torque_frames >= self._frames_low_torque and self._hca_active_frames >= self._frames_mitigation_start:
         apply_torque = 0
 
       self._low_torque_frames = self._low_torque_frames + 1 if low_torque else 0
@@ -88,7 +85,7 @@ class CarController(CarControllerBase):
     self.lead_distance_bars_last = None
     self.distance_bar_frame = 0
     self.gra_acc_counter_last = None
-    self.hca_mitigation = HCAMitigation(self.CCP, eps_timer_workaround=bool(CP.flags & VolkswagenFlags.MLB))
+    self.hca_mitigation = HCAMitigation(self.CCP, steer_timer_mitigation=bool(CP.flags & VolkswagenFlags.MLB))
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators

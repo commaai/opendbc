@@ -31,17 +31,17 @@ class TestVolkswagenHCAMitigation(unittest.TestCase):
 
   def test_eps_timer_reset(self):
     """The mitigation respects start time threshold, aborts on real steering requests, and resets when expected."""
-    hca_mitigation = HCAMitigation(CCP, eps_timer_workaround=True)
-    mitigation_start_calls = round(HCAMitigation.MLB_LOCKOUT_MITIGATION_START / DT_CTRL / CCP.STEER_STEP)
-    low_torque_calls = round(HCAMitigation.MLB_LOCKOUT_LOW_TORQUE_TIME / DT_CTRL / CCP.STEER_STEP)
-    reset_calls = round(CCP.STEER_TIME_RESET / DT_CTRL / CCP.STEER_STEP)
+    hca_mitigation = HCAMitigation(CCP, steer_timer_mitigation=True)
+    mitigation_start_calls = round(CCP.STEER_TIME_MITIGATION_START / (DT_CTRL * CCP.STEER_STEP))
+    low_torque_calls = round(CCP.STEER_TIME_LOW_TORQUE_TIME / (DT_CTRL * CCP.STEER_STEP))
+    reset_calls = round(CCP.STEER_TIME_RESET / (DT_CTRL * CCP.STEER_STEP))
 
-    low_torque = HCAMitigation.MLB_LOCKOUT_LOW_TORQUE
+    low_torque = CCP.STEER_TIME_LOW_TORQUE
     apply_torque = 0
 
     for _ in range(mitigation_start_calls):
       apply_torque = hca_mitigation.update(low_torque, apply_torque, low_torque)
-      assert apply_torque != 0, "mitigation must not engage before MLB_LOCKOUT_MITIGATION_START"
+      assert apply_torque != 0, "mitigation must not engage before STEER_TIME_MITIGATION_START"
 
     # Reset aborted due to desired torque above threshold
     for _ in range(reset_calls - 1):

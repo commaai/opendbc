@@ -62,7 +62,13 @@ class CarControllerParams:
   STEER_DRIVER_FACTOR = 1                  # from dbc
 
   STEER_TIME_STUCK_TORQUE = 1.9            # EPS limits same torque to 6 seconds, reset timer 3x within that period
-  STEER_TIME_RESET = 1.1                   # HCA must stay disabled this long for the EPS to reset its steer timer
+  STEER_TIME_RESET = 1.1                   # MLB-only: HCA must stay disabled this long for the EPS to reset its steer timer (sec)
+  STEER_TIME_RESET_DETECTION_BUFFER = 0.05 # MLB-only: Detection uses LH_EPS_03 whereas actuation is HCA_01 so allow some buffer in detection (sec)
+  STEER_TIME_MAX_ENGAGED = 360.            # MLB-only: Maximum EPS engagement time before lockout will reject requests (sec)
+  STEER_TIME_WARNING = 5.                  # MLB-only: How long before max engaged steer time should warning fire (sec)
+  STEER_TIME_MITIGATION_START = 240.       # MLB-only: EPS engaged time before attempting opportunistic reset (sec)
+  STEER_TIME_LOW_TORQUE = 60               # MLB-only: Desired torque must be less than this before and during reset (centi-Nm)
+  STEER_TIME_LOW_TORQUE_TIME = 0.5         # MLB-only: How long to observe low torque for before starting the reset (sec)
 
   DEFAULT_MIN_STEER_SPEED = 0.4            # m/s, newer EPS racks fault below this speed, don't show a low speed alert
 
