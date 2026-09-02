@@ -7,12 +7,10 @@
 #define FCA_GIORGIO_ABS_3           0xFAU
 #define FCA_GIORGIO_ENGINE_1        0xFCU
 #define FCA_GIORGIO_EPS_2           0x106U
-#define FCA_GIORGIO_EPS_3           0x122U
 #define FCA_GIORGIO_LKA_COMMAND     0x1F6U
 // TODO: this isn't actually an LKA message on promester, coming from radar ECU
 #define FCA_GIORGIO_LKA_HUD_1       0x4AEU
 #define FCA_GIORGIO_LKA_HUD_2       0x547U
-#define FCA_GIORGIO_ACC_1           0x5A2U
 #define FCA_GIORGIO_ACC_2           0x22AU
 
 static safety_config fca_giorgio_init(uint16_t param) {
@@ -27,17 +25,13 @@ static safety_config fca_giorgio_init(uint16_t param) {
 
   // TODO: need to find a message for driver gas
   // TODO: re-check counter/checksum for ABS_3
-  // TODO: re-enable checksums/counters on ABS_1 and EPS_3 once checksums are bruteforced
+  // TODO: re-enable checksums/counters on ABS_1 once checksums are bruteforced
   static const RxCheck fca_giorgio_rx_checks[] = {
-    {.msg = {{FCA_GIORGIO_ACC_1, 0, 8, 12U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    // TODO: confirm rate
-    {.msg = {{FCA_GIORGIO_ACC_2, 0, 8, 12U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{FCA_GIORGIO_ACC_2, 2, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ABS_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ABS_3, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ENGINE_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    // TODO: confirm rate
     {.msg = {{FCA_GIORGIO_EPS_2, 0, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{FCA_GIORGIO_EPS_3, 0, 4, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
   return BUILD_SAFETY_CFG(fca_giorgio_rx_checks, FCA_GIORGIO_TX_MSGS);
@@ -94,19 +88,6 @@ static void fca_giorgio_rx_hook(const CANPacket_t *msg) {
       update_sample(&safety.torque_driver, torque_driver_new);
     }
 
-    if (msg->addr == FCA_GIORGIO_ACC_2) {
-      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
-      // Always exit controls on main switch off
-      // Signal: ACC_2.CRUISE_STATUS
-      bool cruise_engaged = GET_BIT(msg, 23U);
-      // TODO: don't think we need to set safety.acc_main_on (engaged is gated).
-      //   `safety.acc_main_on` member is dubious (most cars don't set it, and seems unused)
-      safety.acc_main_on = true;
-      pcm_cruise_check(cruise_engaged);
-    }
-
-    // TODO: find cruise button message
-
     // Signal: ENGINE_1.ACCEL_PEDAL
     if (msg->addr == FCA_GIORGIO_ENGINE_1) {
       safety.gas_pressed = ((GET_BYTES_BE(msg, 2, 2) >> 5) & 0xFFU) > 0U;
@@ -115,6 +96,16 @@ static void fca_giorgio_rx_hook(const CANPacket_t *msg) {
     // Signal: ABS_3.BRAKE_PEDAL_SWITCH
     if (msg->addr == FCA_GIORGIO_ABS_3) {
       safety.brake_pressed = GET_BIT(msg, 3U);
+    }
+  }
+
+  if (msg->bus == 2U) {
+    if (msg->addr == FCA_GIORGIO_ACC_2) {
+      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
+      // Signal: ACC_2.CRUISE_STATUS
+      bool cruise_engaged = GET_BIT(msg, 23U);
+      safety.acc_main_on = true;
+      pcm_cruise_check(cruise_engaged);
     }
   }
 }

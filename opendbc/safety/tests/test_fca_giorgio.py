@@ -28,7 +28,7 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSaf
 
   def _pcm_status_msg(self, enable):
     values = {"CRUISE_STATUS": enable}
-    return self.packer.make_can_msg_safety("ACC_2", 0, values)
+    return self.packer.make_can_msg_safety("ACC_2", 2, values)
 
   def _speed_msg(self, speed):
     values = {"WHEEL_SPEED_%s" % s: speed for s in ["FL", "FR", "RL", "RR"]}
