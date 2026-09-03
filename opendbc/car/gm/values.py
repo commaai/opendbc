@@ -257,6 +257,7 @@ GM_FW_REQUESTS = [
 GM_RX_OFFSET = 0x400
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[\x00-\xff]+",
   requests=[request for req in GM_FW_REQUESTS for request in [
     Request(
       [StdQueries.SHORT_TESTER_PRESENT_REQUEST, req],

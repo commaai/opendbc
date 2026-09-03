@@ -65,6 +65,7 @@ class CAR(Platforms):
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br".+,[EYX]\d?[A-Z]*\d{3}\.\d+(?:\.\d+)?",
   requests=[
     Request(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
