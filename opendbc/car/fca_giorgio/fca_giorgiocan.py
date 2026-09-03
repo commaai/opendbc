@@ -18,8 +18,8 @@ def create_lka_hud_1_control(packer, bus, lat_active):
 
 def create_lka_hud_2_control(packer, bus, lat_active):
   values = {
-    "LKA_DISABLE": 0,
-    "NEW_SIGNAL_1": 0,  # TODO: remove this signal
+    "LKA_DISABLE": 1,  # a test assuming we have wrong polarity
+    "NEW_SIGNAL_1": 0,  # needs to be inverse of LKA_DISABLE?
     "LKA_ACTIVE": lat_active,
   }
 
