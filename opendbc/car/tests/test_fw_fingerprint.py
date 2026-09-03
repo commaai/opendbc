@@ -5,13 +5,14 @@ import re
 import time
 from collections import defaultdict
 
+from opendbc.car import uds
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.structs import CarParams
 from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
                                     match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
-from opendbc.car.vin import get_vin
+from opendbc.car.vin import get_vin, VIN_UNKNOWN
 from opendbc.testing import parameterized
 
 CarFw = CarParams.CarFw
@@ -326,3 +327,102 @@ class TestFwFingerprintTiming(unittest.TestCase):
       for brand in FW_QUERY_CONFIGS.keys():
         with self.subTest(brand=brand):
           get_fw_versions(self.fake_can_recv, self.fake_can_send, lambda obd: None, brand)
+
+
+class FakeIsoTpEcu:
+  """A UDS ECU on one bus that answers 22 F1 90 with a VIN over ISO-TP. It answers a request addressed to it if
+  answers_direct is set, the functional request for its address width if answers_functional is set, and ignores the
+  first `ignore` requests it sees."""
+
+  def __init__(self, bus, tx_addr, vin, answers_functional=True, answers_direct=True, ignore=0):
+    self.bus = bus
+    self.tx_addr = tx_addr
+    self.functional_addr = uds.FUNCTIONAL_ADDRS[0] if tx_addr < 0x800 else uds.FUNCTIONAL_ADDRS[1]
+    self.answers_functional = answers_functional
+    self.answers_direct = answers_direct
+    self.ignore = ignore
+    self.payload = b"\x62\xf1\x90" + vin
+    self.direct_requests = 0
+    self.functional_requests = 0
+    self.rx = []
+    self.pending = []
+
+  def on_can(self, msg):
+    if msg.src != self.bus:
+      return
+    if (msg.dat[0] >> 4) == 0 and msg.dat[1:4] == b"\x22\xf1\x90":
+      if msg.address == self.tx_addr:
+        self.direct_requests += 1
+        answer = self.answers_direct
+      elif msg.address == self.functional_addr:
+        self.functional_requests += 1
+        answer = self.answers_functional
+      else:
+        return
+      if self.ignore > 0:
+        self.ignore -= 1
+        return
+      if not answer:
+        return
+      # first frame now, consecutive frames once the flow control frame arrives
+      self.rx.append(CanData(self.tx_addr + 8, bytes([0x10, len(self.payload)]) + self.payload[:6], self.bus))
+      rest = self.payload[6:]
+      self.pending = [bytes([0x20 | ((n + 1) & 0xf)]) + rest[n * 7:(n + 1) * 7].ljust(7, b"\x00") for n in range((len(rest) + 6) // 7)]
+    elif msg.address == self.tx_addr and (msg.dat[0] >> 4) == 3:
+      self.rx.extend(CanData(self.tx_addr + 8, dat, self.bus) for dat in self.pending)
+      self.pending = []
+
+
+class TestVinQuery(unittest.TestCase):
+  VIN = b"1HGBH41JXMN109186"
+
+  def setUp(self):
+    self.ecus = []
+
+  def can_send(self, msgs):
+    for msg in msgs:
+      for ecu in self.ecus:
+        ecu.on_can(msg)
+
+  def can_recv(self, wait_for_one=False):
+    msgs = [m for ecu in self.ecus for m in ecu.rx]
+    for ecu in self.ecus:
+      ecu.rx = []
+    if wait_for_one and not msgs:
+      time.sleep(0.001)
+    return [msgs]
+
+  def get_vin(self, **kwargs):
+    return get_vin(self.can_recv, self.can_send, (0, 1), timeout=0.01, **kwargs)
+
+  def test_functional_response(self):
+    # an ECU that answers the functional request is found on the first attempt and never addressed directly
+    ecu = FakeIsoTpEcu(0, 0x7e0, self.VIN)
+    self.ecus = [ecu]
+    assert self.get_vin(retry=1) == (0x7e8, 0, self.VIN.decode())
+    assert ecu.functional_requests == 1
+    assert ecu.direct_requests == 0
+
+  def test_direct_response_only(self):
+    # an ECU that ignores the functional request is found on the retry, which addresses it directly
+    ecu = FakeIsoTpEcu(0, 0x7c6, self.VIN, answers_functional=False)
+    self.ecus = [ecu]
+    assert self.get_vin(retry=1) == (-1, -1, VIN_UNKNOWN)
+    assert ecu.direct_requests == 0
+    assert self.get_vin() == (0x7ce, 0, self.VIN.decode())
+    assert ecu.direct_requests == 1
+
+  def test_retry_after_silence(self):
+    # an ECU that answers both forms but missed the first attempt gets a single direct request on the retry
+    ecu = FakeIsoTpEcu(0, 0x7e0, self.VIN, ignore=1)
+    self.ecus = [ecu]
+    assert self.get_vin() == (0x7e8, 0, self.VIN.decode())
+    assert ecu.functional_requests == 1
+    assert ecu.direct_requests == 1
+
+  def test_functional_response_only(self):
+    # an ECU that only answers the functional request and missed the first attempt is found when it comes around again
+    ecu = FakeIsoTpEcu(0, 0x7e0, self.VIN, answers_direct=False, ignore=1)
+    self.ecus = [ecu]
+    assert self.get_vin() == (-1, -1, VIN_UNKNOWN)
+    assert self.get_vin(retry=3) == (0x7e8, 0, self.VIN.decode())
