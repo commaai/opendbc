@@ -55,6 +55,14 @@ class CarState(CarStateBase):
     self.is_metric = False
     self.buttons_counter = 0
 
+    # With openpilot longitudinal, stock SCC no longer publishes its main/set state.
+    # Mirror the steering-wheel state so button behavior remains stock-like.
+    self.main_enabled = False
+    self.main_enable_used = False
+    self.cruise_speed_set = False
+    self.cruise_available = False
+    self.pause_resume_is_resume = False
+
     self.cruise_info = {}
 
     # On some cars, CLU15->CF_Clu_VehicleSpeed can oscillate faster than the dash updates. Sample at 5 Hz
@@ -62,6 +70,51 @@ class CarState(CarStateBase):
     self.cluster_speed_counter = CLUSTER_SAMPLE_RATE
 
     self.params = CarControllerParams(CP)
+
+  @property
+  def has_pause_resume_button(self) -> bool:
+    return bool(self.CP.flags & HyundaiFlags.PAUSE_RESUME)
+
+  def update_cruise_button_state(self, ret: structs.CarState) -> None:
+    if self.CP.pcmCruise:
+      return
+
+    for event in ret.buttonEvents:
+      if event.type == ButtonType.mainCruise and event.pressed:
+        self.main_enabled = not self.main_enabled
+
+      if self.has_pause_resume_button and event.type == ButtonType.cancel:
+        # Latch the meaning for the whole press. Otherwise the release could be
+        # mistaken for resume after the press has already disengaged controls.
+        if event.pressed:
+          self.pause_resume_is_resume = not self.out.cruiseState.enabled
+        if self.pause_resume_is_resume:
+          event.type = ButtonType.accelCruise
+        if not event.pressed:
+          self.pause_resume_is_resume = False
+
+    ret.cruiseState.available = ret.cruiseState.available and self.main_enabled
+    self.cruise_available = ret.cruiseState.available
+
+  def update_button_enable(self, button_events: list[structs.CarState.ButtonEvent]) -> bool:
+    if self.CP.pcmCruise:
+      return False
+
+    for event in button_events:
+      if event.type == ButtonType.mainCruise and event.pressed:
+        if self.has_pause_resume_button and self.cruise_available and not self.main_enable_used:
+          self.main_enable_used = True
+          self.cruise_speed_set = True
+          return True
+      elif event.type == ButtonType.decelCruise and not event.pressed:
+        if self.cruise_available:
+          self.cruise_speed_set = True
+          return True
+      elif event.type == ButtonType.accelCruise and not event.pressed:
+        if self.cruise_available and self.cruise_speed_set:
+          return True
+
+    return False
 
   def recent_button_interaction(self) -> bool:
     # On some newer model years, the CANCEL button acts as a pause/resume button based on the PCM state
@@ -191,6 +244,8 @@ class CarState(CarStateBase):
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
                         *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
 
+    self.update_cruise_button_state(ret)
+
     ret.blockPcmEnable = not self.recent_button_interaction()
 
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
@@ -288,6 +343,8 @@ class CarState(CarStateBase):
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
                         *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+
+    self.update_cruise_button_state(ret)
 
     ret.blockPcmEnable = not self.recent_button_interaction()
 

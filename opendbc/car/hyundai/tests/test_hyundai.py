@@ -1,9 +1,10 @@
 import unittest
 
-from opendbc.car import gen_empty_fingerprint
+from opendbc.car import gen_empty_fingerprint, structs
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.hyundai.interface import CarInterface
+from opendbc.car.hyundai.carstate import CarState
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.hyundai.values import CAR, DATE_FW_ECUS, FW_QUERY_CONFIG, CANFD_FUZZY_WHITELIST, \
@@ -13,6 +14,7 @@ from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 from opendbc.testing import fuzzy_test
 
 Ecu = CarParams.Ecu
+ButtonType = structs.CarState.ButtonEvent.Type
 
 # Some platforms have date codes in a different format we don't yet parse (or are missing).
 # For now, assert list of expected missing date cars
@@ -256,3 +258,84 @@ class TestHyundaiFingerprint(unittest.TestCase):
         platforms_with_shared_codes.add(platform)
 
     assert platforms_with_shared_codes == excluded_platforms
+
+
+class TestHyundaiButtonLogic(unittest.TestCase):
+  @staticmethod
+  def make_state(candidate):
+    CP = CarInterface.get_params(candidate, gen_empty_fingerprint(), [], True, False, False)
+    return CP, CarState(CP)
+
+  @staticmethod
+  def update_buttons(CS, events, cruise_enabled=False):
+    CS.out.cruiseState.enabled = cruise_enabled
+    ret = structs.CarState()
+    ret.cruiseState.available = True
+    ret.buttonEvents = events
+    CS.update_cruise_button_state(ret)
+    return ret, CS.update_button_enable(ret.buttonEvents)
+
+  @staticmethod
+  def event(button_type, pressed):
+    return structs.CarState.ButtonEvent(type=button_type, pressed=pressed)
+
+  def test_main_gates_cruise_without_clearing_set_speed(self):
+    _, CS = self.make_state(CAR.HYUNDAI_SONATA)
+
+    ret, enable = self.update_buttons(CS, [self.event(ButtonType.decelCruise, False)])
+    self.assertFalse(ret.cruiseState.available)
+    self.assertFalse(enable)
+
+    ret, enable = self.update_buttons(CS, [self.event(ButtonType.mainCruise, True)])
+    self.assertTrue(ret.cruiseState.available)
+    self.assertFalse(enable)
+    _, enable = self.update_buttons(CS, [self.event(ButtonType.accelCruise, False)])
+    self.assertFalse(enable)
+
+    _, enable = self.update_buttons(CS, [self.event(ButtonType.decelCruise, False)])
+    self.assertTrue(enable)
+    self.update_buttons(CS, [self.event(ButtonType.mainCruise, True)])
+    self.update_buttons(CS, [self.event(ButtonType.mainCruise, False)])
+    ret, enable = self.update_buttons(CS, [self.event(ButtonType.mainCruise, True)])
+    self.assertTrue(ret.cruiseState.available)
+    self.assertFalse(enable)
+    _, enable = self.update_buttons(CS, [self.event(ButtonType.accelCruise, False)])
+    self.assertTrue(enable)
+
+  def test_pause_resume_latches_press_meaning(self):
+    _, CS = self.make_state(CAR.HYUNDAI_KONA_EV_2022)
+
+    _, enable = self.update_buttons(CS, [self.event(ButtonType.mainCruise, True)])
+    self.assertTrue(enable)
+
+    ret, enable = self.update_buttons(CS, [self.event(ButtonType.cancel, True)], cruise_enabled=True)
+    self.assertEqual(ret.buttonEvents[0].type, ButtonType.cancel)
+    self.assertFalse(enable)
+    ret, enable = self.update_buttons(CS, [self.event(ButtonType.cancel, False)], cruise_enabled=False)
+    self.assertEqual(ret.buttonEvents[0].type, ButtonType.cancel)
+    self.assertFalse(enable)
+
+    ret, enable = self.update_buttons(CS, [self.event(ButtonType.cancel, True)], cruise_enabled=False)
+    self.assertEqual(ret.buttonEvents[0].type, ButtonType.accelCruise)
+    self.assertFalse(enable)
+    ret, enable = self.update_buttons(CS, [self.event(ButtonType.cancel, False)], cruise_enabled=False)
+    self.assertEqual(ret.buttonEvents[0].type, ButtonType.accelCruise)
+    self.assertTrue(enable)
+
+  def test_pause_resume_platform_flags(self):
+    expected = {
+      CAR.HYUNDAI_KONA_EV_2022,
+      CAR.HYUNDAI_SANTA_FE_2022,
+      CAR.HYUNDAI_SANTA_FE_HEV_2022,
+      CAR.HYUNDAI_SANTA_FE_PHEV_2022,
+      CAR.HYUNDAI_IONIQ_5,
+      CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN,
+      CAR.KIA_EV6,
+      CAR.GENESIS_GV70_1ST_GEN,
+    }
+    self.assertEqual(cars_with(HyundaiFlags.PAUSE_RESUME), expected)
+
+    for candidate in expected:
+      CP, CS = self.make_state(candidate)
+      self.assertTrue(CS.has_pause_resume_button)
+      self.assertTrue(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.PAUSE_RESUME)
