@@ -8,7 +8,7 @@ from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.hyundai.values import CAR, DATE_FW_ECUS, FW_QUERY_CONFIG, CANFD_FUZZY_WHITELIST, \
                                          PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
-                                         HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
+                                         HyundaiFlags, get_platform_codes, HyundaiSafetyFlags, CarControllerParams
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 from opendbc.testing import fuzzy_test
 
@@ -75,6 +75,22 @@ class TestHyundaiFingerprint(unittest.TestCase):
     for car_model in CAR:
       CP = CarInterface.get_params(car_model, fingerprint, [], False, False, False)
       assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.ALT_LIMITS)
+
+  def test_dynamic_torque_scope(self):
+    assert cars_with(HyundaiFlags.CANFD_DYNAMIC_TORQUE) == {CAR.KIA_EV6}
+    for car_model in CAR:
+      for lka_steering in (False, True):
+        fingerprint = gen_empty_fingerprint()
+        if lka_steering:
+          fingerprint[CanBus(None, fingerprint).CAM][0x50] = 16
+        CP = CarInterface.get_params(car_model, fingerprint, [], False, False, False)
+        enabled = car_model == CAR.KIA_EV6
+        assert bool(CP.flags & HyundaiFlags.CANFD_DYNAMIC_TORQUE) == enabled
+        assert bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.CANFD_DYNAMIC_TORQUE) == enabled
+        if CP.flags & HyundaiFlags.CANFD:
+          params = CarControllerParams(CP)
+          assert params.STEER_MAX == (310 if enabled else 270)
+          assert (params.STEER_DELTA_UP, params.STEER_DELTA_DOWN) == (2, 3)
 
   def test_can_features(self):
     for car_model in CAR:

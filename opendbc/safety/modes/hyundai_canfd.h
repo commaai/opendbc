@@ -47,6 +47,7 @@
 
 static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steer_msg_alt = false;
+static bool hyundai_canfd_dynamic_torque = false;
 
 static unsigned int hyundai_canfd_get_lka_addr(void) {
   return hyundai_canfd_lka_steer_msg_alt ? 0x110U : 0x50U;
@@ -136,8 +137,17 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
+  const struct lookup_t HYUNDAI_CANFD_MAX_TORQUE_LOOKUP = {
+    {9., 13., 17.},
+    {310., 310., 270.},
+  };
+  // Cap the generic dynamic-limit tolerance at the nominal curve, including 270 at high speed.
+  const int max_torque = hyundai_canfd_dynamic_torque ?
+    ROUND(safety_interpolate(HYUNDAI_CANFD_MAX_TORQUE_LOOKUP, vehicle_speed.min / VEHICLE_SPEED_FACTOR)) : 270;
   const TorqueSteeringLimits HYUNDAI_CANFD_STEERING_LIMITS = {
-    .max_torque = 270,
+    .max_torque = max_torque,
+    .dynamic_max_torque = hyundai_canfd_dynamic_torque,
+    .max_torque_lookup = HYUNDAI_CANFD_MAX_TORQUE_LOOKUP,
     .max_rt_delta = 112,
     .max_rate_up = 2,
     .max_rate_down = 3,
@@ -218,6 +228,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
 static safety_config hyundai_canfd_init(uint16_t param) {
   const uint16_t HYUNDAI_PARAM_CANFD_LKA_STEER_MSG_ALT = 128;
   const uint16_t HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
+  const uint16_t HYUNDAI_PARAM_CANFD_DYNAMIC_TORQUE = 1024;
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEER_MSG_TX_MSGS[] = {
     HYUNDAI_CANFD_LKA_STEER_MSG_COMMON_TX_MSGS(0, 1)
@@ -267,6 +278,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   gen_crc_lookup_table_16(0x1021, hyundai_canfd_crc_lut);
   hyundai_canfd_alt_buttons = GET_FLAG(param, HYUNDAI_PARAM_CANFD_ALT_BUTTONS);
   hyundai_canfd_lka_steer_msg_alt = GET_FLAG(param, HYUNDAI_PARAM_CANFD_LKA_STEER_MSG_ALT);
+  hyundai_canfd_dynamic_torque = GET_FLAG(param, HYUNDAI_PARAM_CANFD_DYNAMIC_TORQUE);
 
   safety_config ret;
   if (hyundai_longitudinal) {
