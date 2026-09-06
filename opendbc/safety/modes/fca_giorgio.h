@@ -27,7 +27,7 @@ static safety_config fca_giorgio_init(uint16_t param) {
 
   // TODO: need to find a message for driver gas
   // TODO: re-check counter/checksum for ABS_3
-  // TODO: re-enable checksums/counters on ABS_1 once checksums are bruteforced
+  // TODO: re-enable checksums/counters once poly and final XORs are fixed below
   static const RxCheck fca_giorgio_rx_checks[] = {
     {.msg = {{FCA_GIORGIO_ACC_2, 2, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ABS_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -57,10 +57,13 @@ static uint32_t fca_giorgio_compute_crc(const CANPacket_t *msg) {
   uint8_t final_xor = 0U;
 
   for (uint32_t i = 0U; (i + 1U) < len; i++) {
+    // TODO: wrong poly — should be 0x1D (SAE J1850), not 0x2F (AUTOSAR)
     crc = crc8_update(crc, msg->data[i], 0x2FU);
   }
 
-  // TODO: bruteforce final XORs for Panda relevant messages
+  // TODO: fill in final XORs for RX messages (see FCA_GIORGIO_CHECKSUM_XORS in chryslercan.py):
+  //   0x0A: ABS_1 (0xEE), ENGINE_1 (0xFC), ACC_2 (0x22A)
+  //   0xF6: EPS_2 (0x106)
   if (msg->addr == 0xFFU) {
     final_xor = 0xFFU;
   } else {
