@@ -8,6 +8,7 @@
 #define FCA_GIORGIO_ENGINE_1        0xFCU
 #define FCA_GIORGIO_EPS_2           0x106U
 #define FCA_GIORGIO_LKA_COMMAND     0x1F6U
+#define FCA_GIORGIO_LKA_COMMAND_2   0x117U
 // TODO: this isn't actually an LKA message on promester, coming from radar ECU
 #define FCA_GIORGIO_LKA_HUD_1       0x4AEU
 #define FCA_GIORGIO_LKA_HUD_2       0x547U
@@ -19,6 +20,7 @@ static safety_config fca_giorgio_init(uint16_t param) {
   // TODO: need to find a button message for cancel spam
   static const CanMsg FCA_GIORGIO_TX_MSGS[] = {
     {FCA_GIORGIO_LKA_COMMAND, 0, 4, .check_relay = true},
+    {FCA_GIORGIO_LKA_COMMAND_2, 0, 4, .check_relay = true},
     {FCA_GIORGIO_LKA_HUD_1, 0, 8, .check_relay = true},
     {FCA_GIORGIO_LKA_HUD_2, 0, 8, .check_relay = true},
   };
@@ -130,6 +132,17 @@ static bool fca_giorgio_tx_hook(const CANPacket_t *msg) {
     int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 5, 1024);
     // Signal: LKA_COMMAND.LKA_ACTIVE
     bool steer_req = GET_BIT(msg, 12U);
+
+    if (steer_torque_cmd_checks(desired_torque, steer_req, FCA_GIORGIO_STEERING_LIMITS)) {
+      tx = false;
+    }
+  }
+
+  if (msg->addr == FCA_GIORGIO_LKA_COMMAND_2) {
+    // Signal: LKA_COMMAND_2.LKA_TORQUE (12-bit, ~4x scale of LKA_COMMAND), normalized to LKA_COMMAND units
+    int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 4, 2048) / 4;
+    // Signal: LKA_COMMAND_2.LKA_ACTIVE
+    bool steer_req = GET_BIT(msg, 11U);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, FCA_GIORGIO_STEERING_LIMITS)) {
       tx = false;

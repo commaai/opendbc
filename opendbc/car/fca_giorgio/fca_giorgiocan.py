@@ -1,10 +1,10 @@
-def create_steering_control(packer, bus, apply_steer, lat_active):
+def create_steering_control(packer, bus, msg, apply_steer, lat_active):
   values = {
     "LKA_ACTIVE": lat_active,
     "LKA_TORQUE": apply_steer,
   }
 
-  return packer.make_can_msg("LKA_COMMAND", bus, values)
+  return packer.make_can_msg(msg, bus, values)
 
 
 def create_lka_hud_1_control(packer, bus, lat_active):
