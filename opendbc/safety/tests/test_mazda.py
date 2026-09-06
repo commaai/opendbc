@@ -4,7 +4,7 @@ import unittest
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
+from opendbc.safety.tests.common import CANPackerSafety, make_msg
 
 
 class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
@@ -79,6 +79,28 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
+
+
+class TestMazdaIgnition(unittest.TestCase):
+  TX_MSGS: list = []
+
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.init_tests()
+
+  def _msg(self, byte0):
+    return make_msg(0, 0x9E, dat=bytes([byte0]) + b"\x00" * 7)
+
+  # 0x9E byte 0 high 3 bits == 6 (0xC0)
+  def test_ignition_on(self):
+    self.safety.ignition_can_hook(self._msg(0xC0))
+    self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    self.safety.ignition_can_hook(self._msg(0xC0))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0x20))
+    self.assertFalse(self.safety.get_ignition_can())
 
 
 if __name__ == "__main__":

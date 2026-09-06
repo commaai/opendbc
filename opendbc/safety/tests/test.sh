@@ -10,7 +10,7 @@ source ../../../setup.sh
 rm -f ./libsafety/*.gcda
 
 # run safety tests and generate coverage data
-python -m unittest discover -s . -p 'test_*.py' -t ../../../
+python -m unittest discover -s .
 
 # NOTE: we accept that these tools will have slight differences,
 # and in return, we get to use the stock toolchain instead of

@@ -66,9 +66,6 @@ class RadarInterface(RadarInterfaceBase):
       if trackId not in self.pts:
         self.pts[trackId] = structs.RadarData.RadarPoint()
         self.pts[trackId].trackId = trackId
-        self.pts[trackId].aRel = float('nan')
-        self.pts[trackId].yvRel = float('nan')
-        self.pts[trackId].measured = True
 
       if 'LONG_DIST' in cpt:  # c_* message
         self.pts[trackId].dRel = cpt['LONG_DIST']  # from front of car

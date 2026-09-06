@@ -87,8 +87,9 @@ class CarInterface(CarInterfaceBase):
     else:
       raise ValueError(f"unknown car: {candidate}")
 
-    ret.alphaLongitudinalAvailable = not (ret.flags & (SubaruFlags.GLOBAL_GEN2 | SubaruFlags.PREGLOBAL |
-                                                       SubaruFlags.LKAS_ANGLE | SubaruFlags.HYBRID))
+    # TODO: the longitudinal limits need to be speed-dependent, so alpha long is disabled for now
+    # revert this in the PR that re-enables Subaru longitudinal: https://github.com/commaai/opendbc/pull/3689
+    ret.alphaLongitudinalAvailable = False
     ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
 
     if ret.flags & SubaruFlags.GLOBAL_GEN2 and ret.openpilotLongitudinalControl:
