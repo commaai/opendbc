@@ -81,16 +81,23 @@ def chrysler_checksum(address: int, sig, d: bytearray) -> int:
   return crc ^ 0xFF
 
 
+# CRC-8 SAE J1850 final XOR values, per address (default 0x0A)
+FCA_GIORGIO_CHECKSUM_XORS = {
+  0xDE: 0x10,   # EPS_1
+  0x106: 0xF6,  # EPS_2
+  0x10E: 0xF6,  # ABS_7
+  0x117: 0xF1,  # LKA_COMMAND_2
+  0x122: 0xF1,  # EPS_3
+  0x1F6: 0xF1,  # LKA_COMMAND
+  0x2FA: 0xC4,  # ACC_BUTTON
+  0x447: 0x10,  # NEW_MSG_447
+  0x4AA: 0x10,  # CAM_UNKNOWN_2
+}
+
+
 def fca_giorgio_checksum(address: int, sig, d: bytearray) -> int:
   crc = 0
   for i in range(len(d) - 1):
     crc ^= d[i]
     crc = CRC8J1850[crc]
-  if address == 0xDE:
-    return crc ^ 0x10
-  elif address == 0x106:
-    return crc ^ 0xF6
-  elif address == 0x122:
-    return crc ^ 0xF1
-  else:
-    return crc ^ 0x0A
+  return crc ^ FCA_GIORGIO_CHECKSUM_XORS.get(address, 0x0A)
