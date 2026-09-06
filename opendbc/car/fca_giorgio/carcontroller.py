@@ -30,7 +30,8 @@ class CarController(CarControllerBase):
         apply_torque = 0
 
       self.apply_torque_last = apply_torque
-      can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, apply_torque, CC.latActive))
+      can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND", apply_torque, CC.latActive))
+      can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND_2", apply_torque * 4, CC.latActive))
 
     # **** HUD Controls ***************************************************** #
 
