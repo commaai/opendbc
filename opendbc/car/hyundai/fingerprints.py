@@ -778,7 +778,6 @@ FW_VERSIONS = {
       b'\xf1\x00DEH MFC  AT USA LHD 1.00 1.00 95740-G5010 170117',
       b'\xf1\x00DEP MFC  AT USA LHD 1.00 1.00 95740-G5010 170117',
       b'\xf1\x00DEP MFC  AT USA LHD 1.00 1.01 95740-G5010 170424',
-      b'\xf1\x00DEP MFC  AT USA LHD 1.00 1.05 99211-G5000 190826',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00DEhe SCC F-CUP      1.00 1.02 99110-G5100         ',
@@ -789,12 +788,8 @@ FW_VERSIONS = {
   CAR.KIA_NIRO_PHEV_2020: {
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00DE  MDPS C 1.00 1.01 56310G5520\x00 4DEPC101',
-      b'\xf1\x00DE  MDPS C 1.00 1.09 56310G5301\x00 4DEHC109',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00DEH MFC  AT USA LHD 1.00 1.00 95740-G5010 170117',
-      b'\xf1\x00DEP MFC  AT USA LHD 1.00 1.00 95740-G5010 170117',
-      b'\xf1\x00DEP MFC  AT USA LHD 1.00 1.01 95740-G5010 170424',
       b'\xf1\x00DEP MFC  AT USA LHD 1.00 1.05 99211-G5000 190826',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
