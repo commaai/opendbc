@@ -24,3 +24,12 @@ def create_lka_hud_2_control(packer, bus, lat_active):
   }
 
   return packer.make_can_msg("LKA_HUD_2", bus, values)
+
+
+def create_lka_hud_3_control(packer, bus, lat_active):
+  # NEW_SIGNAL_1 omitted -- may be haptic steering wheel feedback level, probably not consequential to steering control
+  values = {
+    "LKA_ACTIVE": lat_active,
+  }
+
+  return packer.make_can_msg("LKA_HUD_3", bus, values)
