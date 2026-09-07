@@ -12,6 +12,7 @@ class CarState(CarStateBase):
     super().__init__(CP)
     self.frame = 0
     self.CCP = CarControllerParams(CP)
+    self.lka_status = 0
 
   def update(self, can_parsers) -> structs.CarState:
     pt_cp = can_parsers[Bus.pt]
@@ -35,6 +36,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = ret.steeringTorque > 80
     ret.yawRate = pt_cp.vl["ABS_2"]["YAW_RATE"]
     ret.steerFaultPermanent = bool(pt_cp.vl["EPS_2"]["LKA_FAULT"])
+    self.lka_status = pt_cp.vl["EPS_2"]["LKA_STATUS"]
 
     ret.gasPressed = pt_cp.vl["ENGINE_1"]["ACCEL_PEDAL"] > 0
     ret.brakePressed = bool(pt_cp.vl["ABS_3"]["BRAKE_PEDAL_SWITCH"])
