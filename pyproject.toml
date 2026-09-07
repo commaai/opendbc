@@ -133,3 +133,13 @@ include-package-data = true
 "opendbc.car" = ["**/*.capnp", "**/*.toml"]
 "opendbc.dbc" = ["**/*.dbc"]
 "opendbc.safety" = ["*.h", "modes/*.h"]
+
+# --- TODO REMOVE AFTER DEPENDENCY PR MERGES (commaai/dependencies#107): fork-only index of the comma-deps Windows wheels until PyPI has them; not for upstream ---
+[[tool.uv.index]]
+name = "comma-deps-windows"
+url = "https://github.com/AmyJeanes/commaai-dependencies/releases/download/windows-post117/index.html"
+format = "flat"
+explicit = true
+
+[tool.uv.sources]
+comma-deps-cppcheck = [{ index = "comma-deps-windows", marker = "sys_platform == 'win32'" }]

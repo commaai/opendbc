@@ -2,7 +2,8 @@ version = 1
 revision = 3
 requires-python = ">=3.11, <3.13"
 resolution-markers = [
-    "python_full_version >= '3.12'",
+    "python_full_version >= '3.12' and sys_platform == 'win32'",
+    "python_full_version >= '3.12' and sys_platform != 'win32'",
     "python_full_version < '3.12'",
 ]
 
@@ -134,10 +135,24 @@ requires-dist = [{ name = "requests" }]
 name = "comma-deps-cppcheck"
 version = "2.21.0.post101"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.12' and sys_platform != 'win32'",
+]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/05/57/364a71d9c58c26e32a7943303f62d5dd8f405acc0a96a834fab5b86cf5fc/comma_deps_cppcheck-2.21.0.post101-py3-none-macosx_11_0_arm64.whl", hash = "sha256:00d93d9a8c02e6f00c36b39a9f35d5a7248eb2cba5389f8334cb7c8390dfacb6", size = 2709883, upload-time = "2026-08-27T18:22:56.715Z" },
     { url = "https://files.pythonhosted.org/packages/7a/c6/e3b115a15b44eba7b1431592c4376aa3c59bed7437d37ffdcc586c3c6ce9/comma_deps_cppcheck-2.21.0.post101-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:89c1d9b89e8459cadad705f33dc710f8cdc6cb489477042bbf4e3d1f872fd8be", size = 3050896, upload-time = "2026-08-27T18:23:00.435Z" },
     { url = "https://files.pythonhosted.org/packages/68/12/7214df4928c86f29ea25e350acb2a4ad28365d65b19a884a1ab26e9c9944/comma_deps_cppcheck-2.21.0.post101-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:4170753f8451abe980d73b2135836565b3a7c4a887f6a3d68e452541bac6f00c", size = 3307666, upload-time = "2026-08-27T18:23:04.023Z" },
+]
+
+[[package]]
+name = "comma-deps-cppcheck"
+version = "2.21.0.post117"
+source = { registry = "https://github.com/AmyJeanes/commaai-dependencies/releases/download/windows-post117/index.html" }
+resolution-markers = [
+    "python_full_version >= '3.12' and sys_platform == 'win32'",
+]
+wheels = [
+    { url = "https://github.com/AmyJeanes/commaai-dependencies/releases/download/windows-post117/comma_deps_cppcheck-2.21.0.post117-py3-none-win_amd64.whl", hash = "sha256:5bfcbfa3077a0d799999dd840e21306b27d78a30cb1ea55287e8ec760c82ad0c" },
 ]
 
 [[package]]
@@ -369,7 +384,8 @@ name = "numpy"
 version = "2.5.2"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.12'",
+    "python_full_version >= '3.12' and sys_platform == 'win32'",
+    "python_full_version >= '3.12' and sys_platform != 'win32'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9a/80/db0b4559e57ec36362bedbb05530a87fafbcb6067708c946967a41d449e7/numpy-2.5.2.tar.gz", hash = "sha256:d482d171c406ae88c5b19cad3b6a1c4c5209f886ab74bc44c2c865c23f52d860", size = 20773161, upload-time = "2026-08-09T13:48:27.962Z" }
 wheels = [
@@ -419,7 +435,8 @@ testing = [
 [package.dev-dependencies]
 testing = [
     { name = "comma-car-segments" },
-    { name = "comma-deps-cppcheck", marker = "python_full_version >= '3.12'" },
+    { name = "comma-deps-cppcheck", version = "2.21.0.post101", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12' and sys_platform != 'win32'" },
+    { name = "comma-deps-cppcheck", version = "2.21.0.post117", source = { registry = "https://github.com/AmyJeanes/commaai-dependencies/releases/download/windows-post117/index.html" }, marker = "python_full_version >= '3.12' and sys_platform == 'win32'" },
 ]
 
 [package.metadata]
@@ -446,7 +463,8 @@ provides-extras = ["testing", "examples"]
 [package.metadata.requires-dev]
 testing = [
     { name = "comma-car-segments", url = "https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl" },
-    { name = "comma-deps-cppcheck", marker = "python_full_version >= '3.12'" },
+    { name = "comma-deps-cppcheck", marker = "python_full_version >= '3.12' and sys_platform == 'win32'", index = "https://github.com/AmyJeanes/commaai-dependencies/releases/download/windows-post117/index.html" },
+    { name = "comma-deps-cppcheck", marker = "python_full_version >= '3.12' and sys_platform != 'win32'" },
 ]
 
 [[package]]
