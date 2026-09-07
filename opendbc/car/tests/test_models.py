@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import math
 import os
 import sys
 import time
@@ -11,16 +12,21 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
+from opendbc.can.dbc import DBC, SignalType
+from opendbc.can.packer import CANPacker
+from opendbc.can.parser import get_raw_value
 from opendbc.car import DT_CTRL, gen_empty_fingerprint, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
 from opendbc.car.fingerprints import MIGRATION
 from opendbc.car.honda.values import HondaFlags
+from opendbc.car.interfaces import ACCEL_MAX, ACCEL_MIN
 from opendbc.car.logreader import LogReader
 from opendbc.car.structs import car
 from opendbc.car.tests.routes import CarTestRoute, non_tested_cars, routes
 from opendbc.car.toyota.values import ToyotaFlags
 from opendbc.car.values import PLATFORMS, Platform
+from opendbc.car.vehicle_model import VehicleModel
 from opendbc.car.volkswagen.values import VolkswagenFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.testing import fuzzy_test
@@ -28,6 +34,8 @@ from opendbc.testing import fuzzy_test
 
 SafetyModel = car.CarParams.SafetyModel
 SteerControlType = structs.CarParams.SteerControlType
+LongControlState = structs.CarControl.Actuators.LongControlState
+VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 # panda safety stores angle_meas in brand-specific CAN units (angle_deg_to_can in opendbc/safety/modes/*.h).
 ANGLE_DEG_TO_CAN = {
@@ -36,6 +44,32 @@ ANGLE_DEG_TO_CAN = {
   "nissan": 100,
   "psa": 10,
 }
+
+# TX fuzzing: route CAN replayed so openpilot and panda derive the same vehicle state, then 100Hz control frames
+TX_FUZZ_WARMUP = 300
+TX_FUZZ_FRAMES = 200
+# MAX_CURVATURE in openpilot's clip_curvature: the bound controlsd keeps its desired curvature within.
+# The angle command is derived from it through the vehicle model, so it also bounds the angle controllers.
+MAX_ACTUATOR_CURVATURE = 0.2  # 1/m
+
+# The steering command message and the signal panda checks, per brand, for the TX edge probe. The probe re-sends an
+# accepted frame with that signal at the DBC's own extreme and asserts panda rejects it, so a panda that stopped
+# enforcing the absolute cap is caught even though openpilot never emits such a command itself. Each entry lists
+# candidates; the first whose message exists in one of the platform's DBCs is used, so a brand with several CAN
+# generations needs one line per generation. Platforms with no matching candidate skip the probe.
+STEER_CMD_SIGNALS = {
+  "toyota": {"angle": [("STEERING_LTA", "STEER_ANGLE_CMD")], "torque": [("STEERING_LKA", "STEER_TORQUE_CMD")]},
+  "nissan": {"angle": [("LKAS", "DESIRED_ANGLE")]},
+  "psa": {"angle": [("LANE_KEEP_ASSIST", "SET_ANGLE")]},
+  "hyundai": {"torque": [("LKAS11", "CR_Lkas_StrToqReq"),  # CAN
+                         ("LKAS", "StrTqReqVal"), ("LKAS_ALT", "StrTqReqVal"), ("LFA", "StrTqReqVal")]},  # CAN FD
+  "subaru": {"torque": [("ES_LKAS", "LKAS_Output")]},
+  "tesla": {"angle": [("DAS_steeringControl", "DAS_steeringAngleRequest")]},
+  "volkswagen": {"curvature": [("HCA_03", "Curvature")]},
+}
+# Absolute angle caps enforced by panda (max_angle / angle_deg_to_can in opendbc/safety/modes/*.h). The edge probe
+# needs the DBC extreme to lie strictly beyond the cap for the rejection to be meaningful.
+STEER_ANGLE_CAP_DEG = {"toyota": 94.9461, "nissan": 600., "psa": 390., "tesla": 360.}
 
 NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
 JOB_ID = int(os.environ.get("JOB_ID", "0"))
@@ -93,6 +127,101 @@ def normalize_can_buses(can: tuple[int, list[CanData]], raw_can_keys: set[tuple[
     CanData(msg.address, msg.dat, msg.src % 128) for msg in messages
     if msg.src < 128 or (msg.address, msg.src % 128) not in raw_can_keys
   ]
+
+
+def fuzzy_controls(fuzzy) -> dict:
+  """Everything controlsd is free to pick when it builds a CarControl. Add new state here to fuzz it."""
+  return {
+    "lat_active": fuzzy.boolean(),
+    "long_active": fuzzy.boolean(),
+    "torque": fuzzy.real(-1., 1.),
+    "curvature": fuzzy.real(-MAX_ACTUATOR_CURVATURE, MAX_ACTUATOR_CURVATURE),
+    "accel": fuzzy.real(ACCEL_MIN, ACCEL_MAX),
+    "long_control_state": fuzzy.choice(tuple(LongControlState.schema.enumerants)),
+    "resume": fuzzy.boolean(),
+    "left_blinker": fuzzy.boolean(),
+    "right_blinker": fuzzy.boolean(),
+    "visual_alert": fuzzy.choice(tuple(VisualAlert.schema.enumerants)),
+    "lead_visible": fuzzy.boolean(),
+    "lanes_visible": fuzzy.boolean(),
+    "lane_depart": fuzzy.boolean(),
+    "lead_distance_bars": fuzzy.integer(1, 3),
+    "set_speed": fuzzy.real(0., 40.),
+  }
+
+
+def build_car_control(controls: dict, enabled: bool, CP, VM: VehicleModel, CS) -> structs.CarControl:
+  """The CarControl controlsd would send for these controls, mirroring selfdrive/controls/controlsd.py.
+
+  enabled is passed in rather than drawn: the caller derives it from panda's own engagement state so that
+  a rejected frame is a limits mismatch and never an artifact of the test forcing the two sides to agree.
+  """
+  standstill = abs(CS.vEgo) <= max(CP.minSteerSpeed, 0.3) or CS.standstill
+  lat_active = enabled and controls["lat_active"] and not CS.steerFaultTemporary and \
+               not CS.steerFaultPermanent and (not standstill or CP.steerAtStandstill)
+  # a pressed gas pedal is an OVERRIDE_LONGITUDINAL event, which matches panda's longitudinal_allowed gate
+  long_active = enabled and controls["long_active"] and CP.openpilotLongitudinalControl and not CS.gasPressed
+
+  # while inactive the controllers command the car's current state, not the planner's, see
+  # selfdrive/controls/lib/latcontrol_angle.py and longcontrol.py
+  curvature = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - CS.steeringAngleOffsetDeg), CS.vEgo, 0.)
+  angle = math.degrees(VM.get_steer_from_curvature(-controls["curvature"], CS.vEgo, 0.))
+
+  return structs.CarControl(
+    enabled=enabled,
+    latActive=lat_active,
+    longActive=long_active,
+    leftBlinker=controls["left_blinker"],
+    rightBlinker=controls["right_blinker"],
+    currentCurvature=curvature,
+    actuators=structs.CarControl.Actuators(
+      torque=controls["torque"] if lat_active else 0.,
+      steeringAngleDeg=angle if lat_active else CS.steeringAngleDeg,
+      curvature=controls["curvature"] if lat_active else curvature,
+      accel=controls["accel"] if long_active else 0.,
+      longControlState=controls["long_control_state"] if long_active else "off",
+    ),
+    cruiseControl=structs.CarControl.CruiseControl(
+      cancel=CS.cruiseState.enabled and (not enabled or not CP.pcmCruise),
+      resume=enabled and CS.cruiseState.standstill and controls["resume"],
+      override=enabled and not long_active and CP.openpilotLongitudinalControl,
+    ),
+    hudControl=structs.CarControl.HUDControl(
+      speedVisible=enabled,
+      setSpeed=controls["set_speed"],
+      lanesVisible=controls["lanes_visible"],
+      leadVisible=controls["lead_visible"],
+      visualAlert=controls["visual_alert"],
+      leftLaneVisible=controls["lanes_visible"],
+      rightLaneVisible=controls["lanes_visible"],
+      leftLaneDepart=controls["lane_depart"],
+      rightLaneDepart=controls["lane_depart"],
+      leadDistanceBars=controls["lead_distance_bars"],
+    ),
+  )
+
+
+def decode_frame(dbc, address: int, dat: bytes) -> dict[str, float]:
+  """Physical values of every plain signal in a frame. Checksums and counters are left out so CANPacker regenerates them."""
+  values = {}
+  for sig in dbc.addr_to_msg[address].sigs.values():
+    if sig.type != SignalType.DEFAULT:
+      continue
+    raw = get_raw_value(dat, sig)
+    if sig.is_signed and raw >= 1 << (sig.size - 1):
+      raw -= 1 << sig.size
+    values[sig.name] = raw * sig.factor + sig.offset
+  return values
+
+
+def signal_extreme(dbc, address: int, name: str, positive: bool) -> float:
+  """The largest (or smallest) physical value the signal's bit field can carry."""
+  sig = dbc.addr_to_msg[address].sigs[name]
+  if sig.is_signed:
+    raw = (1 << (sig.size - 1)) - 1 if positive else -(1 << (sig.size - 1))
+  else:
+    raw = (1 << sig.size) - 1 if positive else 0
+  return raw * sig.factor + sig.offset
 
 
 class TestCarModelBase(unittest.TestCase):
@@ -318,6 +447,190 @@ class TestCarModelBase(unittest.TestCase):
     self.safety.set_controls_allowed(True)
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
+
+  def _tx_test_params(self):
+    """Skips cars we can't transmit for and returns the CarParams to build the car controller with."""
+    if self.CP.dashcamOnly:
+      self.skipTest("no need to check panda safety for dashcamOnly")
+    if self.CP.notCar:
+      self.skipTest("skipping test for notCar")
+    if self.CP.flags & ToyotaFlags.SECOC:
+      self.skipTest("SecOC transmit tests require the vehicle key")
+    if self.CP.brand == "volkswagen" and self.CP.flags & VolkswagenFlags.MLB and self.CP.openpilotLongitudinalControl:
+      # Some archived MLB routes record alpha longitudinal, which current MLB safety does not support.
+      return self.CarInterface.get_params(self.platform, self.fingerprint, self.CP.carFw, False, False, docs=False)
+    return self.CP
+
+  def _tx_replay(self, CI, can):
+    """Feeds one CAN frame to both sides so they derive the same vehicle state, and returns openpilot's CarState."""
+    self.safety.set_timer(int((can[0] - self.can_msgs[0][0]) / 1e3))
+    for msg in (msg for msg in can[1] if msg.src < 64):
+      self.safety.safety_rx_hook(libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat))
+    return CI.update(normalize_can_buses(can, self.raw_can_keys))
+
+  @fuzzy_test(max_examples=25)
+  def test_panda_safety_tx_fuzzy(self, fuzzy):
+    """Fuzzes what openpilot sends and asserts panda safety accepts all of it.
+
+    Both sides read the car's state off the same route CAN, and openpilot's engagement is taken from panda's own
+    controls_allowed rather than forced, so every message the car controller emits for a CarControl controlsd can
+    reach has to pass panda's TX checks. A rejection is a mismatch between the limits openpilot applies to its
+    commands and the ones panda enforces on them.
+
+    Scenarios push the two sides to the places they are most likely to disagree: winding the rate limiters up
+    to the actuator bound and stepping back, toggling engagement while a command is live, and skipping control
+    frames so the real time rate checks see an irregular cadence.
+    """
+    controller_params = self._tx_test_params()
+    CI = self.CarInterface(controller_params)
+    VM = VehicleModel(controller_params)
+    cfg = self.CP.safetyConfigs[-1]
+    self.safety.set_safety_hooks(cfg.safetyModel.raw, cfg.safetyParam)
+    self.safety.init_tests()
+
+    scenario = fuzzy.choice(("random", "hold_windup", "churn", "cadence_jitter"))
+    # fuzz a random part of the route so examples cover different driving conditions
+    start = fuzzy.integer(0, max(len(self.can_msgs) - TX_FUZZ_WARMUP - 2 * TX_FUZZ_FRAMES, 0))
+    controls = fuzzy.list(lambda: fuzzy_controls(fuzzy), min_size=1, max_size=8)
+    # holding a control lets openpilot's rate limiters wind up; the steps between holds are what panda's rate limits check
+    hold_frames = fuzzy.integer(1, TX_FUZZ_FRAMES)
+    skip_every = fuzzy.integer(2, 7)
+
+    for can in self.can_msgs[start:start + TX_FUZZ_WARMUP]:
+      self._tx_replay(CI, can)
+
+    frame, sent, rejected = 0, Counter(), []
+    next_apply_ts = self.can_msgs[start + TX_FUZZ_WARMUP][0]
+    for can in self.can_msgs[start + TX_FUZZ_WARMUP:]:
+      CS = self._tx_replay(CI, can)
+
+      # openpilot controls at 100Hz however fast the route logged CAN, and panda checks its real time
+      # rate limits against the log's timestamps, so both have to run on the same clock
+      if can[0] < next_apply_ts:
+        continue
+      next_apply_ts += DT_CTRL * 1e9
+
+      frame += 1
+      if frame > TX_FUZZ_FRAMES:
+        break
+      if scenario == "cadence_jitter" and frame % skip_every == 0:
+        continue
+
+      control = controls[frame // hold_frames % len(controls)]
+      if scenario == "hold_windup":
+        # first half: hold the actuator bound so the rate limiters wind all the way up. second half: step to zero.
+        windup = frame <= TX_FUZZ_FRAMES // 2
+        control = {**control, "lat_active": True,
+                   "curvature": math.copysign(MAX_ACTUATOR_CURVATURE, control["curvature"] or 1.) if windup else 0.,
+                   "torque": math.copysign(1., control["torque"] or 1.) if windup else 0.}
+
+      # panda's engagement comes from the replayed CAN, exactly as it would on the car. never forced.
+      enabled = bool(self.safety.get_controls_allowed())
+      if scenario == "churn":
+        enabled = enabled and (frame // max(hold_frames // 4, 1)) % 2 == 0
+      CC = build_car_control(control, enabled, controller_params, VM, CS)
+
+      # relay malfunction is an RX side check covered by test_panda_safety_rx_checks; clear it so it can't mask a TX check
+      self.safety.set_relay_malfunction(False)
+      _, sendcan = CI.apply(CC.as_reader(), can[0])
+      for addr, dat, bus in sendcan:
+        sent[(hex(addr), bus)] += 1
+        if not self.safety.safety_tx_hook(libsafety_py.make_CANPacket(addr, bus % 4, dat)):
+          actuation = {k: control[k] for k in ("lat_active", "long_active", "torque", "curvature", "accel")}
+          rejected.append((frame, hex(addr), bus, enabled, actuation))
+
+    self.assertGreater(sum(sent.values()), 0, f"no TX messages sent ({scenario=}, {frame=})")
+    self.assertFalse(rejected, f"panda safety rejected {len(rejected)} TX frames ({scenario=}), first: {rejected[:3]}, sent: {dict(sent)}")
+
+  def test_panda_safety_tx_edge(self):
+    """Re-sends accepted steering commands pushed past the absolute limit and asserts panda rejects them.
+
+    The fuzz test can only show that panda accepts what openpilot sends. This shows the other direction: a frame
+    openpilot would never emit, the steering command at the DBC's own extreme, is refused. If panda stopped
+    enforcing a cap, the fuzz test would stay green and this would go red. The unmodified frame is re-packed and
+    sent first, so a rejection can't be an artifact of the decode and re-pack round trip.
+    """
+    signals = STEER_CMD_SIGNALS.get(self.CP.brand)
+    # capnp enum values compare equal to the schema enumerants but do not hash equal, so no dict lookup here
+    if self.CP.steerControlType == SteerControlType.angle:
+      kind = "angle"
+    elif self.CP.steerControlType == SteerControlType.curvature:
+      kind = "curvature"
+    else:
+      kind = "torque"
+    if not signals or kind not in signals:
+      self.skipTest(f"no steering command signal registered for {self.CP.brand} {kind} control")
+
+    controller_params = self._tx_test_params()
+    CI = self.CarInterface(controller_params)
+    VM = VehicleModel(controller_params)
+    cfg = self.CP.safetyConfigs[-1]
+    self.safety.set_safety_hooks(cfg.safetyModel.raw, cfg.safetyParam)
+    self.safety.init_tests()
+
+    # every candidate present in one of the platform's DBCs, keyed by address: which one the car actually sends is
+    # decided by flags inside the car controller, so the first accepted frame that matches picks the candidate
+    candidates = {}
+    for dbc in (DBC(cp.dbc_name) for cp in CI.can_parsers.values()):
+      for msg, sig in signals[kind]:
+        if msg in dbc.name_to_msg:
+          candidates.setdefault(dbc.name_to_msg[msg].address, (msg, sig, dbc))
+    if not candidates:
+      self.skipTest(f"none of {[msg for msg, _ in signals[kind]]} in the DBCs used by {self.platform}")
+
+    control = {"lat_active": True, "long_active": False, "torque": 0.5, "curvature": 0.05, "accel": 0.,
+               "long_control_state": "off", "resume": False, "left_blinker": False, "right_blinker": False,
+               "visual_alert": "none", "lead_visible": False, "lanes_visible": True, "lane_depart": False,
+               "lead_distance_bars": 2, "set_speed": 30.}
+
+    for can in self.can_msgs[:TX_FUZZ_WARMUP]:
+      self._tx_replay(CI, can)
+
+    probes = 0
+    next_apply_ts = self.can_msgs[TX_FUZZ_WARMUP][0]
+    for can in self.can_msgs[TX_FUZZ_WARMUP:]:
+      CS = self._tx_replay(CI, can)
+      if can[0] < next_apply_ts:
+        continue
+      next_apply_ts += DT_CTRL * 1e9
+
+      # engagement is needed for the command to be live; take it from panda and, if the route never engages, from the
+      # test override that test_panda_safety_tx_cases also relies on
+      if not self.safety.get_controls_allowed():
+        self.safety.set_controls_allowed(True)
+      CC = build_car_control(control, True, controller_params, VM, CS)
+      self.safety.set_relay_malfunction(False)
+      _, sendcan = CI.apply(CC.as_reader(), can[0])
+
+      for addr, dat, bus in sendcan:
+        if addr not in candidates or not self.safety.safety_tx_hook(libsafety_py.make_CANPacket(addr, bus % 4, dat)):
+          continue
+        msg_name, sig_name, dbc = candidates[addr]
+        address = addr
+        packer = CANPacker(dbc.name)
+
+        values = decode_frame(dbc, address, dat)
+        # round trip: the same values re-packed must still be accepted, or the harness is what's broken
+        _, dat_rt, _ = packer.make_can_msg(msg_name, bus, values)
+        self.assertTrue(self.safety.safety_tx_hook(libsafety_py.make_CANPacket(address, bus % 4, dat_rt)),
+                        f"re-packed {msg_name} was rejected: decode/pack round trip is not faithful ({values})")
+
+        for positive in (True, False):
+          extreme = signal_extreme(dbc, address, sig_name, positive)
+          if extreme == 0:
+            continue  # an unsigned magnitude (sign carried in another signal) bottoms out at zero, never past a cap
+          if kind == "angle" and abs(extreme) <= STEER_ANGLE_CAP_DEG[self.CP.brand]:
+            continue  # the field can't represent anything past the cap in this direction
+          _, dat_x, _ = packer.make_can_msg(msg_name, bus, {**values, sig_name: extreme})
+          self.assertFalse(self.safety.safety_tx_hook(libsafety_py.make_CANPacket(address, bus % 4, dat_x)),
+                           f"panda accepted {msg_name}.{sig_name}={extreme} (was {values[sig_name]})")
+          probes += 1
+        break
+
+      if probes:
+        break
+
+    self.assertGreater(probes, 0, f"never got an accepted {[msg for msg, _, _ in candidates.values()]} frame to probe")
 
   @fuzzy_test(max_examples=300)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
