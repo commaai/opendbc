@@ -567,7 +567,7 @@ class IsoTpMessage:
         num_bytes = self.max_len - 1
         start = self.max_len - 2 + self.tx_idx * num_bytes
         count = rx_data[1]
-        end = start + count * num_bytes if count > 0 else self.tx_len
+        end = min(start + count * num_bytes, self.tx_len) if count > 0 else self.tx_len
         tx_msgs = []
         for i in range(start, end, num_bytes):
           self.tx_idx += 1
