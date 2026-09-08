@@ -2,7 +2,6 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus
 from opendbc.car.pinball import pinballcan
 from opendbc.car.interfaces import CarControllerBase
-from openpilot.common.swaglog import cloudlog
 
 
 class CarController(CarControllerBase):
@@ -16,9 +15,11 @@ class CarController(CarControllerBase):
     start = 0
 
     if CC.enabled:
-      left = int(CC.actuators.gas > 0.5)    # A key → left flipper
-      right = int(CC.actuators.brake > 0.5)  # D key → right flipper
-      start = int(CC.actuators.accel < -0.5) # W key → start button
+      # Separate joystick axes allow both flippers at once; negative accel starts.
+      left = int(CC.actuators.accel > 0.5)    # W key → left flipper
+      right = int(CC.actuators.torque > 0.5)  # A key → right flipper
+      start = int(CC.actuators.accel < -0.5)  # S key → start button
+      # Keyboard axes accumulate with each key press; R resets all outputs.
 
     can_sends = [pinballcan.create_solenoid_cmd(self.packer, left, right, start)]
 
