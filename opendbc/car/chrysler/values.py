@@ -1,10 +1,11 @@
+import re
 from enum import IntFlag
 from dataclasses import dataclass, field
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
+from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, p16
 
 Ecu = CarParams.Ecu
 
@@ -141,6 +142,63 @@ CHRYSLER_SOFTWARE_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTI
 
 CHRYSLER_RX_OFFSET = -0x280
 
+
+# FW response is a Mopar part number: an 8 character base part number followed by a two letter
+# revision, e.g. b'68227902AF'. Engine responses carry a trailing space.
+# e.g. 68227902AF
+#      11111111 22
+# 1 = base part number, specific to the platform
+# 2 = revision, bumped for running software changes that don't change the platform
+FW_PATTERN = re.compile(b'^(?P<part_number>[0-9A-Z]{8})(?P<revision>[A-Z]{2}) ?$')
+
+
+def get_platform_codes(fw_versions: list[bytes] | set[bytes]) -> set[bytes]:
+  codes = set()
+  for fw in fw_versions:
+    match = FW_PATTERN.match(fw)
+    if match is not None:
+      codes.add(match.group('part_number'))
+
+  return codes
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw_versions: OfflineFwVersions) -> set[str]:
+  candidates: set[str] = set()
+
+  for candidate, fws in offline_fw_versions.items():
+    # Keep track of ECUs which pass all checks (part number is one we've seen on this platform)
+    valid_found_ecus = set()
+    valid_expected_ecus = {ecu[1:] for ecu in fws if ecu[0] in PLATFORM_CODE_ECUS}
+    for ecu, expected_versions in fws.items():
+      addr = ecu[1:]
+      # Only check ECUs expected to have platform codes
+      if ecu[0] not in PLATFORM_CODE_ECUS:
+        continue
+
+      expected_platform_codes = get_platform_codes(expected_versions)
+      found_platform_codes = get_platform_codes(live_fw_versions.get(addr, set()))
+
+      # Check platform code matches for any found versions
+      if not any(found_platform_code in expected_platform_codes for found_platform_code in found_platform_codes):
+        continue
+
+      valid_found_ecus.add(addr)
+
+    # A new model year usually swaps one platform code ECU's part number and leaves the rest of the
+    # platform alone, so tolerate one unseen or missing ECU. This can't match a sibling platform:
+    # every platform needs at least two of these ECUs replaced to look like any other one, which
+    # test_platforms_distinguishable pins.
+    if len(valid_found_ecus) >= 2 and len(valid_expected_ecus - valid_found_ecus) <= 1:
+      candidates.add(candidate)
+
+  return candidates
+
+
+# ECUs expected to have platform codes we can match. Engine and transmission part numbers change
+# with nearly every calibration, and radar and EPS part numbers are shared across sibling platforms,
+# so neither adds discrimination here.
+PLATFORM_CODE_ECUS = (Ecu.abs, Ecu.combinationMeter, Ecu.srs)
+
 FW_QUERY_CONFIG = FwQueryConfig(
   fw_version_regex=br"[A-Z0-9_]{10} ?",
   requests=[
@@ -167,6 +225,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
   extra_ecus=[
     (Ecu.abs, 0x7e4, None),  # alt address for abs on hybrids, NOTE: not on all hybrid platforms
   ],
+  # Custom fuzzy fingerprinting function using platform codes (Mopar part numbers)
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 DBC = CAR.create_dbc_map()
