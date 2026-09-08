@@ -49,8 +49,9 @@ class CarState(CarStateBase):
 
     # TODO: is it ok that speed is gated by "enabled"?
     # TODO: correct units on speed?
-    ret.cruiseState.available = pt_cam.vl["ACC_4"]["CRUISE_MODE"] in {2, 4, 6}  # acc
+    # NOTE: CRUISE_MODE glitches to zero for a frame on ACC enable
     ret.cruiseState.enabled = bool(pt_cam.vl["ACC_2"]["CRUISE_STATUS"])
+    ret.cruiseState.available = pt_cam.vl["ACC_4"]["CRUISE_MODE"] in {2, 4, 6} or ret.cruiseState.enabled
     ret.cruiseState.speed = pt_cam.vl["ACC_2"]["HUD_SPEED"] * CV.KPH_TO_MS
 
     ret.leftBlinker = bool(pt_cp.vl["BCM_1"]["LEFT_TURN_STALK"])
