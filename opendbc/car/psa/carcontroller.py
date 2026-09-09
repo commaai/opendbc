@@ -1,9 +1,9 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus
+from opendbc.car import Bus, structs
 from opendbc.car.lateral import apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa.psacan import create_lka_steering
-from opendbc.car.psa.values import CarControllerParams
+from opendbc.car.psa.values import CAR, CarControllerParams
 
 
 class CarController(CarControllerBase):
@@ -12,8 +12,15 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.main])
     self.apply_angle_last = 0
     self.status = 2
+    self.read_only = CP.carFingerprint == CAR.PSA_PEUGEOT_308_T9
 
   def update(self, CC, CS, now_nanos):
+    if self.read_only:
+      self.frame += 1
+      # No CAN output, even if a caller explicitly requests lateral/longitudinal
+      # control. Report zero applied actuators rather than echoing the request.
+      return structs.CarControl.Actuators(), []
+
     can_sends = []
     actuators = CC.actuators
 
