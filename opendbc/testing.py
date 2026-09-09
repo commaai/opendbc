@@ -57,6 +57,16 @@ class Fuzzy:
     valid_edges = tuple(dict.fromkeys(value for value in edges if min_value <= value <= max_value))
     return self._draw(valid_edges, lambda: self._random.randint(min_value, max_value))
 
+  def float(self, min_value: float, max_value: float) -> float:
+    """Draw a float in [min_value, max_value] with boundary coverage.
+
+    Values are integer thousandths so every draw is reproducible on any platform.
+    """
+    if min_value > max_value:
+      raise ValueError(f"{min_value=} must not exceed {max_value=}")
+    scale = 1000
+    return self.integer(round(min_value * scale), round(max_value * scale)) / scale
+
   def _length(self, min_size: int, max_size: int | None) -> int:
     if min_size < 0:
       raise ValueError("minimum size must be non-negative")
