@@ -19,4 +19,4 @@ fi
 
 export UV_PROJECT_ENVIRONMENT="$BASEDIR/.venv"
 uv sync --all-extras --all-groups --inexact
-source "$PYTHONPATH/.venv/bin/activate"
+source "$PYTHONPATH"/.venv/*/activate  # bin/, or Scripts/ on Windows

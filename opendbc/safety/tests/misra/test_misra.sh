@@ -11,10 +11,10 @@ YELLOW="\e[1;33m"
 RED="\e[1;31m"
 NC='\033[0m'
 
-: "${CPPCHECK_DIR:=$(python3 -c "import cppcheck; print(cppcheck.DIR)")}"
+: "${CPPCHECK_DIR:=$(python -c "import cppcheck; print(cppcheck.DIR)")}"
 
 # ensure checked in coverage table is up to date
-python3 $CPPCHECK_DIR/addons/misra.py -generate-table > coverage_table
+python $CPPCHECK_DIR/addons/misra.py -generate-table > coverage_table
 if ! git diff --quiet coverage_table; then
   echo -e "${YELLOW}MISRA coverage table doesn't match. Update and commit:${NC}"
   exit 3
