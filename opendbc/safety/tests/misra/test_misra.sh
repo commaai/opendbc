@@ -2,7 +2,7 @@
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $DIR
+cd "$DIR"
 
 source ../../../../setup.sh
 
@@ -20,7 +20,7 @@ if ! git diff --quiet coverage_table; then
   exit 3
 fi
 
-cd $BASEDIR
+cd "$BASEDIR"
 
 CHECKLIST=$(mktemp)
 echo "Cppcheck checkers list from test_misra.sh:" > $CHECKLIST
@@ -65,10 +65,10 @@ printf "\n${GREEN}Success!${NC} took $SECONDS seconds\n"
 
 # ensure list of checkers is up to date
 if [ -z "$OPENDBC_ROOT" ]; then
-  cd $DIR
+  cd "$DIR"
   if ! git diff --quiet $CHECKLIST; then
     echo -e "\n${YELLOW}WARNING: Cppcheck checkers.txt report has changed. Review and commit...${NC}"
-    mv $CHECKLIST $DIR/checkers.txt
+    mv "$CHECKLIST" "$DIR/checkers.txt"
     exit 4
   fi
 fi
