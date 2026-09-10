@@ -13,10 +13,10 @@ if ! command -v uv &>/dev/null; then
 
   # must source this after install on some platforms
   if [ -f $HOME/.local/bin/env ]; then
-    source $HOME/.local/bin/env
+    source "$HOME/.local/bin/env"
   fi
 fi
 
 export UV_PROJECT_ENVIRONMENT="$BASEDIR/.venv"
 uv sync --all-extras --all-groups --inexact
-source "$PYTHONPATH/.venv/bin/activate"
+source "$PYTHONPATH"/.venv/*/activate  # bin/, or Scripts/ on Windows

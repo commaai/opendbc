@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -23,6 +24,8 @@ def _build_libsafety(release: bool = False) -> str:
   ldflags = [
     '-fsanitize=undefined', '-fno-sanitize-recover=undefined',
   ]
+  if sys.platform == 'win32':
+    cflags += ['-mno-ms-bitfields']  # the firmware's packed layout, not mingw's MS one
   if not release:
     cflags += ['-DALLOW_DEBUG', '-fprofile-arcs', '-ftest-coverage']
     ldflags += ['-fprofile-arcs', '-ftest-coverage']
@@ -44,9 +47,10 @@ typedef struct {
   unsigned char fd : 1;
   unsigned char bus : 3;
   unsigned char data_len_code : 4;
-  unsigned char rejected : 1;
-  unsigned char returned : 1;
-  unsigned char extended : 1;
+  // unsigned int like addr: same layout under GCC, and the one cffi's MSVC rules also lay out like the firmware
+  unsigned int rejected : 1;
+  unsigned int returned : 1;
+  unsigned int extended : 1;
   unsigned int addr : 29;
   unsigned char checksum;
   unsigned char data[64];

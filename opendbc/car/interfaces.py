@@ -382,7 +382,7 @@ def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: boo
   result = {}
   for car_folder in sorted([x[0] for x in os.walk(BASEDIR)]):
     try:
-      brand_name = car_folder.split('/')[-1]
+      brand_name = os.path.basename(car_folder)
       brand_values = __import__(f'opendbc.car.{brand_name}.{INTERFACE_ATTR_FILE.get(attr, "values")}', fromlist=[attr])
       if hasattr(brand_values, attr) or not ignore_none:
         attr_data = getattr(brand_values, attr, None)

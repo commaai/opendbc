@@ -42,7 +42,7 @@ examples = [
 [dependency-groups]
 testing = [
   "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
-  "cppcheck @ git+https://github.com/commaai/dependencies.git@release-cppcheck#subdirectory=cppcheck",
+  "comma-deps-cppcheck ; python_full_version >= '3.12'",  # the wheel needs 3.12
 ]
 
 [build-system]
@@ -133,3 +133,13 @@ include-package-data = true
 "opendbc.car" = ["**/*.capnp", "**/*.toml"]
 "opendbc.dbc" = ["**/*.dbc"]
 "opendbc.safety" = ["*.h", "modes/*.h"]
+
+# --- TODO REMOVE AFTER DEPENDENCY PR MERGES (commaai/dependencies#107): fork-only index of the comma-deps Windows wheels until PyPI has them; not for upstream ---
+[[tool.uv.index]]
+name = "comma-deps-windows"
+url = "https://github.com/AmyJeanes/commaai-dependencies/releases/download/windows-post117/index.html"
+format = "flat"
+explicit = true
+
+[tool.uv.sources]
+comma-deps-cppcheck = [{ index = "comma-deps-windows", marker = "sys_platform == 'win32'" }]

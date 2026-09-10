@@ -16,11 +16,20 @@ jobs:
         include:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+          - os: windows-latest
+    defaults:
+      run:
+        shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash -e {0}' }}
     steps:
     - uses: actions/checkout@v4
+    - uses: msys2/setup-msys2@v2
+      if: contains(matrix.os, 'windows')
+      with:
+        msystem: CLANG64
+        install: mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-git mingw-w64-clang-x86_64-uv  # cc for libsafety, git for misra
     - uses: commaai/timeout@v1
       with:
-        timeout: ${{ github.repository == 'commaai/opendbc' && '90' || '999' }}
+        timeout: ${{ contains(matrix.os, 'windows') && '180' || github.repository == 'commaai/opendbc' && '90' || '999' }}  # a 4-core hosted runner
     - run: ./test.sh
 
   safety_tests:
