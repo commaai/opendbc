@@ -52,8 +52,8 @@ class CAR(Platforms):
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"PLACEHOLDER_FOR_VIN_FINGERPRINT",
   requests=[],
-  fw_version_regex=b"",
 )
 
 
