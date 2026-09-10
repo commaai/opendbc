@@ -41,6 +41,19 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
     values = {"SPEED_LEFT": speed, "SPEED_RIGHT": speed}
     return self.packer.make_can_msg_safety("SPEED_1", 0, values)
 
+  def test_vehicle_moving_single_wheel(self):
+    if self.DAS_BUS != 0:
+      self.skipTest("RAM reports a single vehicle speed")
+    for wheel in ("LEFT", "RIGHT"):
+      with self.subTest(wheel=wheel):
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
+        msg = self.packer.make_can_msg_safety("SPEED_1", 0, {f"SPEED_{wheel}": 1})
+        self.assertTrue(self._rx(msg))
+        self.assertTrue(self.safety.get_vehicle_moving())
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
+
   def _user_gas_msg(self, gas):
     values = {"Accelerator_Position": gas}
     return self.packer.make_can_msg_safety("ECM_5", 0, values)

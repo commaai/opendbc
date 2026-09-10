@@ -7,7 +7,7 @@ from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
-from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
+from opendbc.safety.tests.hyundai_common import Buttons, HyundaiButtonBase, HyundaiLongitudinalBase
 
 
 # 4 bit checkusm used in some hyundai messages
@@ -90,13 +90,24 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("TCS13", 0, values, fix_checksum=checksum)
 
-  def _speed_msg(self, speed):
+  def _speed_msg(self, speed, **wheel_speeds):
     # safety doesn't scale, so undo the scaling
-    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
+    values = {"WHL_SPD_%s" % s: wheel_speeds.get(s, speed) * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
     values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
     values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
     self.__class__.cnt_speed += 1
     return self.packer.make_can_msg_safety("WHL_SPD11", 0, values, fix_checksum=checksum)
+
+  def test_vehicle_moving_single_wheel(self):
+    # Both wheel-speed inputs used for standstill must independently detect motion.
+    for wheel in ("FL", "RR"):
+      with self.subTest(wheel=wheel):
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
+        self.assertTrue(self._rx(self._speed_msg(0, **{wheel: self.STANDSTILL_THRESHOLD + 1})))
+        self.assertTrue(self.safety.get_vehicle_moving())
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
 
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": enable, "CR_VSM_Alive": self.cnt_cruise % 16}
@@ -201,6 +212,14 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
   DISABLED_ECU_UDS_MSG = (0x7D0, 0)
   DISABLED_ECU_ACTUATION_MSG = (0x421, 0)
 
+  def test_button_sends(self):
+    # With openpilot longitudinal, CLU11 is forwarded without the stock SCC restrictions.
+    for controls_allowed in (False, True):
+      for button in (Buttons.NONE, Buttons.RESUME, Buttons.SET, Buttons.CANCEL):
+        with self.subTest(controls_allowed=controls_allowed, button=button):
+          self.safety.set_controls_allowed(controls_allowed)
+          self.assertTrue(self._tx(self._button_msg(button, bus=self.BUTTONS_TX_BUS)))
+
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_can_generated")
     self.safety = libsafety_py.libsafety
@@ -269,6 +288,23 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
 
   def test_disabled_ecu_alive(self):
     pass
+
+
+class TestHyundaiGasConfiguration(unittest.TestCase):
+  def test_hybrid_signal_does_not_act_as_ice_gas(self):
+    safety = libsafety_py.libsafety
+    packer = CANPackerSafety("hyundai_can_generated")
+    safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
+    safety.init_tests()
+    # The first accelerator packet selects the shared RX descriptor. Even though
+    # this alternative is admitted, an ICE configuration must ignore its pedal.
+    for pedal in (0, 1, 255, 0):
+      with self.subTest(pedal=pedal):
+        msg = packer.make_can_msg_safety("E_EMS11", 0, {"CR_Vcu_AccPedDep_Pos": pedal})
+        safety.set_controls_allowed(True)
+        self.assertTrue(safety.safety_rx_hook(msg))
+        self.assertFalse(safety.get_gas_pressed_prev())
+        self.assertTrue(safety.get_controls_allowed())
 
 
 class TestHyundaiSafetyFCEVLong(TestHyundaiLongitudinalSafety, TestHyundaiSafetyFCEV):

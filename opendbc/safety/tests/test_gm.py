@@ -31,9 +31,16 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     values = {"FrictionBrakeCmd": -brake}
     return self.packer_chassis.make_can_msg_safety("EBCMFrictionBrakeCmd", self.BRAKE_BUS, values)
 
-  def _send_gas_msg(self, gas):
-    values = {"GasRegenCmd": gas}
+  def _send_gas_msg(self, gas, apply=False):
+    values = {"GasRegenCmd": gas, "GasRegenCmdActive": apply}
     return self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)
+
+  def test_gas_apply_requires_controls(self):
+    for controls_allowed in (False, True):
+      for apply in (False, True):
+        with self.subTest(controls_allowed=controls_allowed, apply=apply):
+          self.safety.set_controls_allowed(controls_allowed)
+          self.assertEqual(controls_allowed or not apply, self._tx(self._send_gas_msg(self.INACTIVE_GAS, apply)))
 
   # override these tests from CarSafetyTest, GM longitudinal uses button enable
   def _pcm_status_msg(self, enable):
@@ -103,9 +110,19 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     else:
       raise NotImplementedError
 
-  def _speed_msg(self, speed):
-    values = {"%sWheelSpd" % s: speed for s in ["RL", "RR"]}
+  def _speed_msg(self, speed, **wheel_speeds):
+    values = {"%sWheelSpd" % s: wheel_speeds.get(s, speed) for s in ["RL", "RR"]}
     return self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values)
+
+  def test_vehicle_moving_single_wheel(self):
+    for wheel in ("RL", "RR"):
+      with self.subTest(wheel=wheel):
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
+        self.assertTrue(self._rx(self._speed_msg(0, **{wheel: self.STANDSTILL_THRESHOLD + 1})))
+        self.assertTrue(self.safety.get_vehicle_moving())
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
 
   def _user_brake_msg(self, brake):
     # GM safety has a brake threshold of 8
@@ -178,6 +195,15 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
              [0x184, 2]]  # camera bus
   FWD_BLACKLISTED_ADDRS = {2: [0x180], 0: [0x184]}  # block LKAS message and PSCMStatus
   BUTTONS_BUS = 2  # tx only
+
+  def test_rx_buttons_do_not_change_pcm_controls(self):
+    for controls_allowed in (False, True):
+      for button in (Buttons.RES_ACCEL, Buttons.DECEL_SET, Buttons.UNPRESS, Buttons.CANCEL):
+        with self.subTest(controls_allowed=controls_allowed, button=button):
+          self.safety.set_controls_allowed(controls_allowed)
+          msg = self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": button})
+          self.assertTrue(self._rx(msg))
+          self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
 
   def setUp(self):
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")

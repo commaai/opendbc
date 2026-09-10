@@ -95,10 +95,30 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))      # steady power
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))   # decreasing power
 
-  def _speed_msg(self, speed_mps: float):
-    spd_kph = speed_mps * 3.6
-    values = {f"{s}_Radgeschw": spd_kph for s in ("VL", "VR", "HL", "HR")}
+  def _speed_msg(self, speed_mps: float, **wheel_speeds):
+    values = {f"{s}_Radgeschw": wheel_speeds.get(s, speed_mps) * 3.6 for s in ("VL", "VR", "HL", "HR")}
     return self.packer.make_can_msg_safety("ESC_51", 0, values)
+
+  def test_vehicle_moving_single_wheel(self):
+    for wheel in ("VL", "VR", "HL", "HR"):
+      with self.subTest(wheel=wheel):
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
+        self.assertTrue(self._rx(self._speed_msg(0, **{wheel: 1})))
+        self.assertTrue(self.safety.get_vehicle_moving())
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
+
+  def test_cruise_main_states(self):
+    # Standby, active and override retain the main switch permission. A status
+    # frame alone must never enable openpilot longitudinal control.
+    for state in range(8):
+      for enabled in (False, True):
+        with self.subTest(state=state, enabled=enabled):
+          self.safety.set_controls_allowed(enabled)
+          msg = self.packer.make_can_msg_safety("Motor_51", 0, {"TSK_Status": state})
+          self.assertTrue(self._rx(msg))
+          self.assertEqual(enabled and state in (2, 3, 4, 5), self.safety.get_controls_allowed())
 
   def _speed_msg_2(self, speed_mps: float):
     values = {"ESP_v_Signal": speed_mps * 3.6}
@@ -297,6 +317,8 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
       self._rx(self._tsk_status_msg(False, main_switch=True))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
+      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
+      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed while holding {button}")
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 

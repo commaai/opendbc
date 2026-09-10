@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import numpy as np
-import random
 import unittest
 import itertools
 
@@ -81,20 +80,22 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
+                           (False, b"\x0F\x02\x3E\x00\x01\x00\x00\x00"),  # valid prefix, invalid trailing data
                            (True, b"\x0F\x02\x3E\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
       self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
 
   def test_block_aeb(self, stock_longitudinal: bool = False):
-    for controls_allowed in (True, False):
-      for bad in (True, False):
-        for _ in range(10):
-          self.safety.set_controls_allowed(controls_allowed)
-          dat = [random.randint(1, 255) for _ in range(7)]
-          if not bad:
-            dat = [0]*6 + dat[-1:]
-          msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
-          self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
+    # A single nonzero actuation byte must be rejected independently of the
+    # other fields. The final checksum byte is the only unrestricted byte.
+    for controls_allowed, byte, value in itertools.product((True, False), range(7), (0, 1, 255)):
+      with self.subTest(controls_allowed=controls_allowed, byte=byte, value=value):
+        self.safety.set_controls_allowed(controls_allowed)
+        dat = bytearray(7)
+        dat[byte] = value
+        msg = libsafety_py.make_CANPacket(0x283, 0, dat)
+        should_tx = (byte == 6 or value == 0) and not stock_longitudinal
+        self.assertEqual(should_tx, self._tx(msg))
 
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
@@ -155,6 +156,28 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE)
     self.safety.init_tests()
+
+  def test_initializing_angle_does_not_update_sample(self):
+    # Torque mode accepts this packet without using its angle quality flag for
+    # RX validity, but an initializing angle must not enter the sample window.
+    for initializing in (True, False):
+      self.safety.set_angle_meas(0, 0)
+      for _ in range(6):
+        self.assertTrue(self._rx(self._angle_meas_msg(10, initializing)))
+      expected = 0 if initializing else round(10 / 0.0573)
+      self.assertEqual(self.safety.get_angle_meas_min(), expected)
+      self.assertEqual(self.safety.get_angle_meas_max(), expected)
+
+  def test_unwind_toward_measurement_at_rate_limit(self):
+    # When the previous command exceeds the measurement allowance, require the
+    # full unwind rate until the command returns to that allowance.
+    previous = self.MAX_TORQUE_ERROR + self.MAX_RATE_DOWN + 10
+    for sign, unwind in itertools.product((-1, 1), (self.MAX_RATE_DOWN - 1, self.MAX_RATE_DOWN)):
+      with self.subTest(sign=sign, unwind=unwind):
+        self.safety.set_controls_allowed(True)
+        self._set_prev_torque(sign * previous)
+        self.safety.set_torque_meas(0, 0)
+        self.assertEqual(self._tx(self._torque_cmd_msg(sign * (previous - unwind))), unwind == self.MAX_RATE_DOWN)
 
 
 class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest):
@@ -242,6 +265,25 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
           should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE
           self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
           self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
+
+  def test_driver_override_uses_nearest_sample_to_zero(self):
+    # A recent sample within the driver torque limit allows full LTA torque,
+    # even while older samples in the window exceed it, for either direction.
+    for sign in (-1, 1):
+      for low in (0, self.MAX_LTA_DRIVER_TORQUE):
+        with self.subTest(sign=sign, low=low):
+          self._reset_angle_measurement(0)
+          self._set_prev_desired_angle(0)
+          self.safety.set_controls_allowed(True)
+          high = self.MAX_LTA_DRIVER_TORQUE + 1
+          for _ in range(6):
+            self.assertTrue(self._rx(self._torque_meas_msg(0, sign * high)))
+          self.assertFalse(self._tx(self._lta_msg(1, 1, 0, 100)))
+          self.assertTrue(self._rx(self._torque_meas_msg(0, sign * low)))
+          self.assertTrue(self._tx(self._lta_msg(1, 1, 0, 100)))
+          for _ in range(6):
+            self.assertTrue(self._rx(self._torque_meas_msg(0, sign * high)))
+          self.assertFalse(self._tx(self._lta_msg(1, 1, 0, 100)))
 
   def test_angle_measurements(self):
     """

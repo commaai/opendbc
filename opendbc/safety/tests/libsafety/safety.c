@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 // TODO: time should just be passed into the hooks we expose
 uint32_t timer_cnt = 0;
@@ -12,6 +13,87 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/can.h"
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
+
+static RxCheck *test_rx_checks;
+static safety_hooks test_hooks;
+static unsigned int test_rx_count;
+
+static void test_rx_hook(const CANPacket_t *msg) {
+  steering_disengage = (msg->data[4] & 1U) != 0U;
+  test_rx_count++;
+}
+
+static uint32_t test_get_checksum(const CANPacket_t *msg) {
+  return msg->data[0];
+}
+
+static uint32_t test_compute_checksum(const CANPacket_t *msg) {
+  return msg->data[1];
+}
+
+static uint8_t test_get_counter(const CANPacket_t *msg) {
+  return msg->data[2];
+}
+
+static bool test_get_quality_flag_valid(const CANPacket_t *msg) {
+  return msg->data[3] == 1U;
+}
+
+// Build configurations that production modes intentionally avoid, so the common
+// safety checks' fail-closed behavior can be tested independently of any car.
+void safety_test_configure_rx(uint32_t frequency, bool ignore_checksum, bool ignore_counter,
+                              bool ignore_quality_flag, uint8_t max_counter, uint8_t callbacks) {
+  set_safety_hooks(SAFETY_NOOUTPUT, 0);
+  const RxCheck checks[] = {
+    {.msg = {{0x123, 0, 8, frequency, .ignore_checksum = ignore_checksum, .ignore_counter = ignore_counter,
+              .max_counter = max_counter, .ignore_quality_flag = ignore_quality_flag}, {0}, {0}}},
+  };
+  free(test_rx_checks);
+  // Fresh storage initializes the const message descriptors without modifying
+  // the const subobjects of a previously declared RxCheck.
+  test_rx_checks = malloc(sizeof(checks));
+  if (test_rx_checks == NULL) {
+    abort();
+  }
+  memcpy(test_rx_checks, checks, sizeof(checks));
+  current_safety_config.rx_checks = test_rx_checks;
+  current_safety_config.rx_checks_len = 1;
+  test_hooks = (safety_hooks){
+    .rx = test_rx_hook,
+    .get_checksum = (callbacks & 1U) ? test_get_checksum : NULL,
+    .compute_checksum = (callbacks & 2U) ? test_compute_checksum : NULL,
+    .get_counter = (callbacks & 4U) ? test_get_counter : NULL,
+    .get_quality_flag_valid = (callbacks & 8U) ? test_get_quality_flag_valid : NULL,
+  };
+  current_hooks = &test_hooks;
+  test_rx_count = 0;
+}
+
+unsigned int safety_test_get_rx_count(void) {
+  return test_rx_count;
+}
+
+bool get_safety_rx_checks_invalid(void) {
+  return safety_rx_checks_invalid;
+}
+
+void safety_test_tick_null(void) {
+  safety_tick(NULL);
+}
+
+float safety_test_interpolate(float x, float midpoint) {
+  const struct lookup_t table = {{0., midpoint, 1.}, {0., 1., 2.}};
+  return safety_interpolate(table, x);
+}
+
+bool safety_test_dynamic_torque_limit(float torque) {
+  const TorqueSteeringLimits limits = {
+    .max_torque = 300, .max_rate_up = 10, .max_rate_down = 10,
+    .dynamic_max_torque = true, .max_torque_lookup = {{0., 1., 2.}, {torque, torque, torque}},
+    .type = TorqueDriverLimited,
+  };
+  return steer_torque_cmd_checks(0, 0, limits);
+}
 
 void safety_tick_current_safety_config() {
   safety_tick(&current_safety_config);

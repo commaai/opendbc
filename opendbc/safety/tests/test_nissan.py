@@ -44,6 +44,20 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"CRUISE_ENABLED": enable}
     return self.packer.make_can_msg_safety("CRUISE_STATE", self.CRUISE_BUS, values)
 
+  def test_cruise_wrong_variant_bus_first_packet(self):
+    # Both buses are RX alternatives, so the variant guard must also protect the
+    # first packet, before the RX check has selected a bus.
+    for enabled in (False, True):
+      with self.subTest(enabled=enabled):
+        self.setUp()
+        self.safety.set_controls_allowed(not enabled)
+        self.safety.set_cruise_engaged_prev(not enabled)
+        msg = self._pcm_status_msg(enabled)
+        msg[0].bus = 1 if self.CRUISE_BUS == 2 else 2
+        self.assertTrue(self._rx(msg))
+        self.assertEqual(self.safety.get_controls_allowed(), not enabled)
+        self.assertEqual(self.safety.get_cruise_engaged_prev(), not enabled)
+
   def _speed_msg(self, speed):
     values = {"WHEEL_SPEED_%s" % s: speed * 3.6 for s in ["RR", "RL"]}
     return self.packer.make_can_msg_safety("WHEEL_SPEEDS_REAR", self.EPS_BUS, values)
