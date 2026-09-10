@@ -588,6 +588,7 @@ FW_VERSIONS = {
   CAR.KIA_FORTE: {
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00BD  MDPS C 1.00 1.02 56310-XX000 4BD2C102',
+      b'\xf1\x00BD  MDPS C 1.00 1.02 56310M6610\x00 4BPDC102',
       b'\xf1\x00BD  MDPS C 1.00 1.08 56310/M6300 4BDDC108',
       b'\xf1\x00BD  MDPS C 1.00 1.08 56310M6300\x00 4BDDC108',
       b'\xf1\x00BDm MDPS C A.01 1.01 56310M7800\x00 4BPMC101',
@@ -595,9 +596,11 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00BD  LKAS AT USA LHD 1.00 1.04 95740-M6000 J33',
+      b'\xf1\x00BDP LKAS AT KOR LHD 1.00 1.05 99211-M6500 744',
       b'\xf1\x00BDP LKAS AT USA LHD 1.00 1.05 99211-M6500 744',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00BDPE_SCC F-CUPC     1.01 1.04 99110-M6500\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'\xf1\x00BDPE_SCC FHCUPC     1.00 1.04 99110-M6500\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'\xf1\x00BD__ SCC H-CUP      1.00 1.02 99110-M6000         ',
     ],
