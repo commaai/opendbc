@@ -227,12 +227,17 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
         cc = CarControl()
         cc.actuators.steeringAngleDeg = sign * 51.60
         for frame in range(100):
+          # Remain outside the bound initially, then unwind and permit steering again.
+          angle = sign * (57.61 if frame < 20 else 49.0)
+          ci.CS.out = CarState(vEgo=13.24, vEgoRaw=13.24, steeringAngleDeg=angle)
+          self._rx(self._angle_meas_msg(angle))
           cc.latActive = frame > 0
           self.safety.set_controls_allowed(cc.latActive)
           self.safety.set_timer(frame * 10000)
           _, messages = ci.CC.update(cc.as_reader(), ci.CS, frame * 10000000)
           for addr, data, bus in messages:
             if addr == SubaruMsg.ES_LKAS_ANGLE:
+              self.assertEqual(bool(data[1] & 0x10), frame >= 22)
               self.assertTrue(self._tx(libsafety_py.make_CANPacket(addr, bus, data)), f"frame {frame}")
 
   def test_angle_cmd_when_enabled(self):
