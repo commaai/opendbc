@@ -23,14 +23,17 @@ class TestSubaruFingerprint(unittest.TestCase):
 
 
 class TestSubaruAngleLimits(unittest.TestCase):
+  def setUp(self):
+    self.limits = CarControllerParams(get_safety_CP())
+
   def test_engagement_outside_max_angle_is_rate_limited(self):
     speed = 13.24
     angle_last = -57.61
     vm = VehicleModel(get_safety_CP())
 
-    angle = apply_subaru_angle_limits(-51.60, angle_last, speed, angle_last, True, vm)
+    angle = apply_subaru_angle_limits(-51.60, angle_last, speed, angle_last, True, self.limits, vm)
 
-    self.assertAlmostEqual(angle - angle_last, get_max_angle_delta_vm(speed, vm, CarControllerParams))
+    self.assertAlmostEqual(angle - angle_last, get_max_angle_delta_vm(speed, vm, self.limits))
     self.assertGreater(abs(angle), get_max_angle_vm(speed, vm, CarControllerParams))
 
   def test_low_speed_deadband(self):
@@ -58,7 +61,7 @@ class TestSubaruAngleLimits(unittest.TestCase):
           self.assertLessEqual(accel, CarControllerParams.ANGLE_LIMITS.MAX_LATERAL_ACCEL + 1e-6)
 
   def test_recover_from_reduced_max_angle(self):
-    limits = CarControllerParams
+    limits = self.limits
     vm = VehicleModel(get_safety_CP())
     for speed in (10, 20, 30, 40):
       bound = get_max_angle_vm(speed, vm, limits)
@@ -67,7 +70,7 @@ class TestSubaruAngleLimits(unittest.TestCase):
         last = sign * min(bound + 10, limits.ANGLE_LIMITS.STEER_ANGLE_MAX)
         with self.subTest(speed=speed, sign=sign):
           for _ in range(2000):
-            angle = apply_subaru_angle_limits(sign * bound * 2, last, speed, last, True, vm)
+            angle = apply_subaru_angle_limits(sign * bound * 2, last, speed, last, True, self.limits, vm)
             self.assertLessEqual(abs(angle - last), delta + 1e-9)
             self.assertLessEqual(abs(angle), abs(last) + 1e-9)
             last = angle
@@ -79,7 +82,7 @@ class TestSubaruAngleLimits(unittest.TestCase):
     vm = VehicleModel(get_safety_CP())
     for measured in (-100, 0, 100):
       with self.subTest(measured=measured):
-        self.assertEqual(apply_subaru_angle_limits(0, 0, 30, measured, False, vm), measured)
+        self.assertEqual(apply_subaru_angle_limits(0, 0, 30, measured, False, self.limits, vm), measured)
 
 
 class TestSubaruCruiseState(unittest.TestCase):

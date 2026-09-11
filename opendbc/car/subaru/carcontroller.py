@@ -20,11 +20,11 @@ def get_safety_CP():
   return CarInterface.get_non_essential_params(CAR.SUBARU_ASCENT)
 
 
-def apply_subaru_angle_limits(apply_angle, apply_angle_last, speed, steering_angle, lat_active, VM):
-  angle = apply_steer_angle_limits_vm(apply_angle, apply_angle_last, speed, steering_angle, lat_active, CarControllerParams, VM)
+def apply_subaru_angle_limits(apply_angle, apply_angle_last, speed, steering_angle, lat_active, limits, VM):
+  angle = apply_steer_angle_limits_vm(apply_angle, apply_angle_last, speed, steering_angle, lat_active, limits, VM)
   if lat_active:
     # Preserve the jerk limit when engagement or a speed increase puts the previous angle outside the accel bound.
-    max_delta = min(get_max_angle_delta_vm(max(speed, 1), VM, CarControllerParams), CarControllerParams.ANGLE_LIMITS.MAX_ANGLE_RATE)
+    max_delta = min(get_max_angle_delta_vm(max(speed, 1), VM, limits), limits.ANGLE_LIMITS.MAX_ANGLE_RATE)
     angle = float(np.clip(angle, apply_angle_last - max_delta, apply_angle_last + max_delta))
   return angle
 
@@ -61,7 +61,7 @@ class CarController(CarControllerBase):
         # Filter wheel-speed quantization before applying the dynamic max-angle limit. A raw speed step can move the
         # limit by more than the per-frame jerk allowance, causing panda to block consecutive LKAS commands.
         self.apply_angle_last = apply_subaru_angle_limits(apply_angle, self.apply_angle_last, CS.out.vEgo,
-                                                         CS.out.steeringAngleDeg, CC.latActive, self.VM)
+                                                         CS.out.steeringAngleDeg, CC.latActive, self.p, self.VM)
         can_sends.append(subarucan.create_steering_control_angle(self.packer, self.apply_angle_last, CC.latActive))
       else:
         apply_torque = int(round(actuators.torque * self.p.STEER_MAX))

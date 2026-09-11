@@ -180,6 +180,7 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
     super().setUp()
     from opendbc.car.subaru.carcontroller import get_safety_CP
     self.VM = VehicleModel(get_safety_CP())
+    self.limits = CarControllerParams(get_safety_CP())
 
   def _speed_msg(self, speed):
     # speed is in m/s for angle tests, convert to kph for DBC
@@ -250,7 +251,7 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
       limit_speed = max(self.safety.get_vehicle_speed_min() - 1, 1)
       for sign in (-1, 1):
         for jerk in (False, True):
-          limit = (get_max_angle_delta_vm if jerk else get_max_angle_vm)(limit_speed, self.VM, CarControllerParams)
+          limit = (get_max_angle_delta_vm if jerk else get_max_angle_vm)(limit_speed, self.VM, self.limits)
           # Bracket the boundary with room for C float rounding and the one CAN-unit tolerance.
           for offset, allowed in ((-1, True), (2, False)):
             angle_can = int(limit * self.DEG_TO_CAN) + offset
