@@ -6,8 +6,9 @@ import numpy as np
 from functools import partial
 
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
-from opendbc.car.subaru.values import CarControllerParams, SubaruSafetyFlags
-from opendbc.car.structs import CarParams
+from opendbc.car.subaru.values import CAR, CarControllerParams, SubaruSafetyFlags
+from opendbc.car.subaru.interface import CarInterface
+from opendbc.car.structs import CarParams, CarControl, CarState
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
@@ -23,6 +24,7 @@ class SubaruMsg(enum.IntEnum):
   ES_LKAS           = 0x122
   ES_LKAS_ANGLE     = 0x124
   ES_Brake          = 0x220
+  ES_Status         = 0x222
   ES_Distance       = 0x221
   ES_DashStatus     = 0x321
   ES_LKAS_State     = 0x322
@@ -198,7 +200,44 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
 
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_safety("ES_Brake", self.ALT_MAIN_BUS, values)
+    return self.packer.make_can_msg_safety("ES_Status", self.ALT_MAIN_BUS, values)
+
+  def test_stale_es_brake_cannot_engage(self):
+    self._rx(self._speed_msg(0))
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self._rx(self._user_brake_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._pcm_status_msg(False))
+    self._rx(self._user_brake_msg(False))
+    # ES_Brake may remain high after ACC cancels at a stop.
+    self._rx(self.packer.make_can_msg_safety("ES_Brake", self.ALT_MAIN_BUS, {"Cruise_Activated": 1}))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_controller_curve_engagement(self):
+    platform = CAR.SUBARU_CROSSTREK_2025 if self.FLAGS & SubaruSafetyFlags.GEN2 else CAR.SUBARU_FORESTER_2022
+    for sign in (-1, 1):
+      with self.subTest(sign=sign):
+        self.setUp()
+        ci = CarInterface(CarInterface.get_non_essential_params(platform))
+        ci.update([])
+        angle = sign * 57.61
+        ci.CS.out = CarState(vEgo=13.24, vEgoRaw=13.24, steeringAngleDeg=angle)
+        self._reset_speed_measurement(13.24)
+        for _ in range(6):
+          self._rx(self._angle_meas_msg(angle))
+        cc = CarControl()
+        cc.actuators.steeringAngleDeg = sign * 51.60
+        for frame in range(100):
+          cc.latActive = frame > 0
+          self.safety.set_controls_allowed(cc.latActive)
+          self.safety.set_timer(frame * 10000)
+          _, messages = ci.CC.update(cc.as_reader(), ci.CS, frame * 10000000)
+          for addr, data, bus in messages:
+            if addr == SubaruMsg.ES_LKAS_ANGLE:
+              self.assertTrue(self._tx(libsafety_py.make_CANPacket(addr, bus, data)), f"frame {frame}")
 
   def test_angle_cmd_when_enabled(self):
     # VM-based limits are tested below
