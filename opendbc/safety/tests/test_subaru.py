@@ -279,5 +279,16 @@ class TestSubaruGen2LongitudinalDisabled(TestSubaruGen2TorqueStockLongitudinalSa
   FLAGS = SubaruSafetyFlags.GEN2 | SubaruSafetyFlags.LONG
 
 
+class TestSubaruReleaseSafety(unittest.TestCase):
+  def test_angle_commands_blocked(self):
+    safety = libsafety_py.ffi.dlopen(libsafety_py._build_libsafety(release=True))
+    for gen2 in (0, SubaruSafetyFlags.GEN2):
+      with self.subTest(gen2=bool(gen2)):
+        self.assertEqual(safety.set_safety_hooks(CarParams.SafetyModel.subaru, gen2 | SubaruSafetyFlags.LKAS_ANGLE), 0)
+        safety.init_tests()
+        safety.set_controls_allowed(True)
+        self.assertFalse(safety.safety_tx_hook(libsafety_py.make_CANPacket(SubaruMsg.ES_LKAS_ANGLE, SUBARU_MAIN_BUS, b"\x00" * 8)))
+
+
 if __name__ == "__main__":
   unittest.main()

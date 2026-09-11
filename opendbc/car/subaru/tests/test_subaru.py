@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from opendbc.car import Bus, structs
+from opendbc.car import Bus, gen_empty_fingerprint, structs
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.subaru.carcontroller import apply_subaru_angle_limits, get_safety_CP
 from opendbc.car.subaru.carstate import CarState
@@ -100,3 +100,14 @@ class TestSubaruCruiseState(unittest.TestCase):
         with self.subTest(platform=platform, enabled=enabled):
           cruise_parser.vl["ES_Brake"]["Cruise_Activated"] = enabled
           self.assertEqual(cs.update(parsers).cruiseState.enabled, enabled)
+
+
+class TestSubaruAvailability(unittest.TestCase):
+  def test_angle_control_is_development_only(self):
+    for platform in CAR:
+      if not platform.config.flags & SubaruFlags.LKAS_ANGLE:
+        continue
+      for is_release in (False, True):
+        with self.subTest(platform=platform, is_release=is_release):
+          cp = CarInterface.get_params(platform, gen_empty_fingerprint(), [], False, is_release, False)
+          self.assertEqual(cp.dashcamOnly, is_release or platform != CAR.SUBARU_CROSSTREK_2025)

@@ -47,19 +47,15 @@
 #define SUBARU_COMMON_TX_MSGS(alt_bus) \
   {MSG_SUBARU_ES_Distance, alt_bus, 8, .check_relay = false}, \
 
-#define SUBARU_COMMON_RX_CHECKS(alt_bus)                                                                                                         \
+#define SUBARU_COMMON_RX_CHECKS(alt_bus, cruise_msg)                                                                                           \
   {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
   {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_CruiseControl,   alt_bus,         8, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
+  {.msg = {{cruise_msg,                alt_bus,         8, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
-#define SUBARU_LKAS_ANGLE_RX_CHECKS(alt_bus)                                                                                                    \
-  {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_ES_Status,       alt_bus,         8, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
+#define SUBARU_LKAS_ANGLE_RX_CHECKS(alt_bus) \
+  SUBARU_COMMON_RX_CHECKS(alt_bus, MSG_SUBARU_ES_Status) \
   {.msg = {{MSG_SUBARU_Steering_2,      SUBARU_MAIN_BUS, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
 static bool subaru_gen2 = false;
@@ -219,10 +215,12 @@ static safety_config subaru_init(uint16_t param) {
   };
 
   const uint16_t SUBARU_PARAM_GEN2 = 1;
-  const uint16_t SUBARU_PARAM_LKAS_ANGLE = 8;
 
   subaru_gen2 = GET_FLAG(param, SUBARU_PARAM_GEN2);
+#ifdef ALLOW_DEBUG
+  const uint16_t SUBARU_PARAM_LKAS_ANGLE = 8;
   subaru_lkas_angle = GET_FLAG(param, SUBARU_PARAM_LKAS_ANGLE);
+#endif
 
   // TODO: re-enable once more work is done on the limits
   // revert this in the PR that re-enables Subaru longitudinal: https://github.com/commaai/opendbc/pull/3689
@@ -239,12 +237,12 @@ static safety_config subaru_init(uint16_t param) {
                         BUILD_SAFETY_CFG(subaru_lkas_angle_rx_checks, SUBARU_LKAS_ANGLE_TX_MSGS);
   } else if (subaru_gen2) {
     static RxCheck subaru_gen2_rx_checks[] = {
-      SUBARU_COMMON_RX_CHECKS(SUBARU_ALT_BUS)
+      SUBARU_COMMON_RX_CHECKS(SUBARU_ALT_BUS, MSG_SUBARU_CruiseControl)
     };
     ret = BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_TX_MSGS);
   } else {
     static RxCheck subaru_rx_checks[] = {
-      SUBARU_COMMON_RX_CHECKS(SUBARU_MAIN_BUS)
+      SUBARU_COMMON_RX_CHECKS(SUBARU_MAIN_BUS, MSG_SUBARU_CruiseControl)
     };
     ret = BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_TX_MSGS);
   }
