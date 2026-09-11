@@ -1,9 +1,13 @@
+import math
 import unittest
+
+import numpy as np
 
 from opendbc.car.lateral import apply_steer_angle_limits_vm, get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.subaru.carcontroller import get_safety_CP
 from opendbc.car.subaru.fingerprints import FW_VERSIONS
-from opendbc.car.subaru.values import CarControllerParams
+from opendbc.car.subaru.interface import CarInterface
+from opendbc.car.subaru.values import CAR, CarControllerParams, SubaruFlags
 from opendbc.car.vehicle_model import VehicleModel
 
 
@@ -26,3 +30,15 @@ class TestSubaruAngleLimits(unittest.TestCase):
 
     self.assertAlmostEqual(angle - angle_last, get_max_angle_delta_vm(speed, vm, CarControllerParams))
     self.assertGreater(abs(angle), get_max_angle_vm(speed, vm, CarControllerParams))
+
+  def test_safety_model_is_conservative(self):
+    safety_vm = VehicleModel(get_safety_CP())
+    for platform in CAR:
+      if not platform.config.flags & SubaruFlags.LKAS_ANGLE:
+        continue
+      vm = VehicleModel(CarInterface.get_non_essential_params(platform))
+      for speed in np.linspace(1, 60, 120):
+        with self.subTest(platform=platform, speed=speed):
+          angle = min(get_max_angle_vm(speed, safety_vm, CarControllerParams), CarControllerParams.ANGLE_LIMITS.STEER_ANGLE_MAX)
+          accel = vm.calc_curvature(math.radians(angle), speed, 0) * speed ** 2
+          self.assertLessEqual(accel, CarControllerParams.ANGLE_LIMITS.MAX_LATERAL_ACCEL + 1e-6)

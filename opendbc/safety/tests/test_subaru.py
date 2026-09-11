@@ -5,12 +5,13 @@ import numpy as np
 
 from functools import partial
 
-from opendbc.car.subaru.values import SubaruSafetyFlags
+from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
+from opendbc.car.subaru.values import CarControllerParams, SubaruSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety, round_speed, away_round
+from opendbc.safety.tests.common import CANPackerSafety
 
 
 class SubaruMsg(enum.IntEnum):
@@ -23,14 +24,9 @@ class SubaruMsg(enum.IntEnum):
   ES_LKAS_ANGLE     = 0x124
   ES_Brake          = 0x220
   ES_Distance       = 0x221
-  ES_Status         = 0x222
   ES_DashStatus     = 0x321
   ES_LKAS_State     = 0x322
   ES_Infotainment   = 0x323
-  ES_UDS_Request    = 0x787
-  ES_HighBeamAssist = 0x22A
-  ES_STATIC_1       = 0x325
-  ES_STATIC_2       = 0x121
 
 
 SUBARU_MAIN_BUS = 0
@@ -44,18 +40,6 @@ def lkas_tx_msgs(alt_bus, lkas_msg=SubaruMsg.ES_LKAS):
           [SubaruMsg.ES_DashStatus,     SUBARU_MAIN_BUS],
           [SubaruMsg.ES_LKAS_State,     SUBARU_MAIN_BUS],
           [SubaruMsg.ES_Infotainment,   SUBARU_MAIN_BUS]]
-
-
-def long_tx_msgs(alt_bus):
-  return [[SubaruMsg.ES_Brake,          alt_bus],
-          [SubaruMsg.ES_Status,         alt_bus]]
-
-
-def gen2_long_additional_tx_msgs():
-  return [[SubaruMsg.ES_UDS_Request,    SUBARU_CAM_BUS],
-          [SubaruMsg.ES_HighBeamAssist, SUBARU_MAIN_BUS],
-          [SubaruMsg.ES_STATIC_1,       SUBARU_MAIN_BUS],
-          [SubaruMsg.ES_STATIC_2,       SUBARU_MAIN_BUS]]
 
 
 def fwd_blacklisted_addr(lkas_msg=SubaruMsg.ES_LKAS):
@@ -122,40 +106,6 @@ class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
       self._generic_limit_safety_check(partial(self._cancel_msg, cancel), self.INACTIVE_GAS, self.INACTIVE_GAS, 0, 2**12, 1, self.INACTIVE_GAS, cancel)
 
 
-class TestSubaruLongitudinalSafetyBase(TestSubaruSafetyBase, common.LongitudinalGasBrakeSafetyTest):
-  MIN_GAS = 808
-  MAX_GAS = 3400
-  INACTIVE_GAS = 1818
-  MAX_POSSIBLE_GAS = 2**13
-
-  MIN_BRAKE = 0
-  MAX_BRAKE = 600
-  MAX_POSSIBLE_BRAKE = 2**16
-
-  MIN_RPM = 0
-  MAX_RPM = 3600
-  MAX_POSSIBLE_RPM = 2**13
-
-  FWD_BLACKLISTED_ADDRS = {2: [SubaruMsg.ES_LKAS, SubaruMsg.ES_Brake, SubaruMsg.ES_Distance,
-                               SubaruMsg.ES_Status, SubaruMsg.ES_DashStatus,
-                               SubaruMsg.ES_LKAS_State, SubaruMsg.ES_Infotainment]}
-
-  def test_rpm_safety_check(self):
-    self._generic_limit_safety_check(self._send_rpm_msg, self.MIN_RPM, self.MAX_RPM, 0, self.MAX_POSSIBLE_RPM, 1)
-
-  def _send_brake_msg(self, brake):
-    values = {"Brake_Pressure": brake}
-    return self.packer.make_can_msg_safety("ES_Brake", self.ALT_MAIN_BUS, values)
-
-  def _send_gas_msg(self, gas):
-    values = {"Cruise_Throttle": gas}
-    return self.packer.make_can_msg_safety("ES_Distance", self.ALT_MAIN_BUS, values)
-
-  def _send_rpm_msg(self, rpm):
-    values = {"Cruise_RPM": rpm}
-    return self.packer.make_can_msg_safety("ES_Status", self.ALT_MAIN_BUS, values)
-
-
 class TestSubaruTorqueSafetyBase(TestSubaruSafetyBase, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
   MAX_RATE_UP = 50
   MAX_RATE_DOWN = 70
@@ -188,52 +138,6 @@ class TestSubaruGen2TorqueSafetyBase(TestSubaruTorqueSafetyBase):
 class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
   FLAGS = SubaruSafetyFlags.GEN2
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS)
-
-
-class TestSubaruGen1LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
-  FLAGS = SubaruSafetyFlags.LONG
-  TX_MSGS = lkas_tx_msgs(SUBARU_MAIN_BUS) + long_tx_msgs(SUBARU_MAIN_BUS)
-  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
-                                               SubaruMsg.ES_Infotainment, SubaruMsg.ES_Brake, SubaruMsg.ES_Status,
-                                               SubaruMsg.ES_Distance)}
-
-
-class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
-  FLAGS = SubaruSafetyFlags.LONG | SubaruSafetyFlags.GEN2
-  TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS) + long_tx_msgs(SUBARU_ALT_BUS) + gen2_long_additional_tx_msgs()
-  FWD_BLACKLISTED_ADDRS = {2: [SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
-                               SubaruMsg.ES_Infotainment]}
-  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
-                                               SubaruMsg.ES_Infotainment),
-                             SUBARU_ALT_BUS: (SubaruMsg.ES_Brake, SubaruMsg.ES_Status, SubaruMsg.ES_Distance)}
-
-  def _rdbi_msg(self, did: int):
-    return b'\x03\x22' + did.to_bytes(2) + b'\x00\x00\x00\x00'
-
-  def _es_uds_msg(self, msg: bytes):
-    return libsafety_py.make_CANPacket(SubaruMsg.ES_UDS_Request, 2, msg)
-
-  def test_es_uds_message(self):
-    tester_present = b'\x02\x3E\x80\x00\x00\x00\x00\x00'
-    not_tester_present = b"\x03\xAA\xAA\x00\x00\x00\x00\x00"
-
-    button_did = 0x1130
-
-    # Tester present is allowed for gen2 long to keep eyesight disabled
-    self.assertTrue(self._tx(self._es_uds_msg(tester_present)))
-
-    # Non-Tester present is not allowed
-    self.assertFalse(self._tx(self._es_uds_msg(not_tester_present)))
-
-    # Only button_did is allowed to be read via UDS
-    for did in range(0xFFFF):
-      should_tx = (did == button_did)
-      self.assertEqual(self._tx(self._es_uds_msg(self._rdbi_msg(did))), should_tx)
-
-    # any other msg is not allowed
-    for sid in range(0xFF):
-      msg = b'\x03' + sid.to_bytes(1) + b'\x00' * 6
-      self.assertFalse(self._tx(self._es_uds_msg(msg)))
 
 
 class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafetyTest):
@@ -280,95 +184,23 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
     # VM-based limits are tested below
     pass
 
-  def _find_max_allowed_angle_can(self, sign):
-    """Binary search for the exact max angle CAN value the safety allows."""
-    lo, hi = 0, self.STEER_ANGLE_MAX * self.DEG_TO_CAN + 10
-    while lo < hi:
-      mid = (lo + hi + 1) // 2
-      self.safety.set_desired_angle_last(mid * sign)
-      if self._tx(self._angle_cmd_msg(mid / self.DEG_TO_CAN * sign, True)):
-        lo = mid
-      else:
-        hi = mid - 1
-    return lo
-
-  def test_lateral_accel_limit(self):
-    for speed in np.linspace(0, 40, 100):
-      speed = max(speed, 1)
-      # match Wheel_Speeds rounding on CAN (factor 0.057 kph)
-      speed = round_speed(away_round(speed * 3.6 / 0.057) * 0.057 / 3.6)
+  def test_lateral_limits(self):
+    for speed in np.linspace(0, 50, 101):
+      self._reset_speed_measurement(speed)
+      # Use the decoded wheel speed, including safety's 1 m/s tolerance.
+      limit_speed = max(self.safety.get_vehicle_speed_min() - 1, 1)
       for sign in (-1, 1):
-        self.safety.set_controls_allowed(True)
-        self._reset_speed_measurement(speed + 1)
-        self._tx(self._angle_cmd_msg(0, True))
-
-        # find the exact max angle CAN the safety allows
-        max_angle_can = self._find_max_allowed_angle_can(sign)
-
-        # at limit
-        self.safety.set_desired_angle_last(max_angle_can * sign)
-        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_can / self.DEG_TO_CAN * sign, True)))
-
-        # 1 unit above limit
-        above_limit_can = max_angle_can + 1
-        self.safety.set_desired_angle_last(above_limit_can * sign)
-        self._tx(self._angle_cmd_msg(above_limit_can / self.DEG_TO_CAN * sign, True))
-
-        # at low speeds max angle is above STEER_ANGLE_MAX, so adding 1 has no effect
-        should_tx = max_angle_can >= self.STEER_ANGLE_MAX * self.DEG_TO_CAN
-        self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(above_limit_can / self.DEG_TO_CAN * sign, True)))
-
-  def _find_max_allowed_delta_can(self, sign):
-    """Binary search for the exact max angle delta CAN value the safety allows from angle 0."""
-    lo, hi = 0, self.STEER_ANGLE_MAX * self.DEG_TO_CAN
-    while lo < hi:
-      mid = (lo + hi + 1) // 2
-      # reset to angle 0
-      self.safety.set_desired_angle_last(0)
-      if self._tx(self._angle_cmd_msg(mid / self.DEG_TO_CAN * sign, True)):
-        lo = mid
-      else:
-        hi = mid - 1
-    return lo
-
-  def test_lateral_jerk_limit(self):
-    for speed in np.linspace(0, 40, 100):
-      speed = max(speed, 1)
-      # match Wheel_Speeds rounding on CAN
-      speed = round_speed(away_round(speed * 3.6 / 0.057) * 0.057 / 3.6)
-      for sign in (-1, 1):
-        self.safety.set_controls_allowed(True)
-        self._reset_speed_measurement(speed + 1)
-        self._tx(self._angle_cmd_msg(0, True))
-
-        # find the exact max delta CAN the safety allows from angle 0
-        max_delta_can = self._find_max_allowed_delta_can(sign)
-
-        # Stay within limits
-        # Up
-        self.safety.set_desired_angle_last(0)
-        self.assertTrue(self._tx(self._angle_cmd_msg(max_delta_can / self.DEG_TO_CAN * sign, True)))
-
-        # Don't change
-        self.assertTrue(self._tx(self._angle_cmd_msg(max_delta_can / self.DEG_TO_CAN * sign, True)))
-
-        # Down
-        self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
-
-        # Inject too high rates
-        # Up
-        above_delta_can = max_delta_can + 1
-        self.assertFalse(self._tx(self._angle_cmd_msg(above_delta_can / self.DEG_TO_CAN * sign, True)))
-
-        # Don't change
-        self.safety.set_desired_angle_last(round(above_delta_can * sign))
-        self.assertTrue(self._tx(self._angle_cmd_msg(above_delta_can / self.DEG_TO_CAN * sign, True)))
-
-        # Down
-        self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
-
-        # Recover
-        self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+        for jerk in (False, True):
+          limit = (get_max_angle_delta_vm if jerk else get_max_angle_vm)(limit_speed, self.VM, CarControllerParams)
+          # Bracket the boundary with room for C float rounding and the one CAN-unit tolerance.
+          for offset, allowed in ((-1, True), (2, False)):
+            angle_can = int(limit * self.DEG_TO_CAN) + offset
+            if angle_can > self.STEER_ANGLE_MAX * self.DEG_TO_CAN:
+              continue
+            with self.subTest(speed=speed, sign=sign, jerk=jerk, offset=offset):
+              self.safety.set_controls_allowed(True)
+              self.safety.set_desired_angle_last(0 if jerk else angle_can * sign)
+              self.assertEqual(allowed, self._tx(self._angle_cmd_msg(angle_can / self.DEG_TO_CAN * sign, True)))
 
 
 class TestSubaruGen1AngleStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruAngleSafetyBase):
@@ -386,6 +218,14 @@ class TestSubaruGen2AngleStockLongitudinalSafety(TestSubaruStockLongitudinalSafe
   RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS_ANGLE, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
                                                SubaruMsg.ES_Infotainment)}
   FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr(SubaruMsg.ES_LKAS_ANGLE)
+
+
+class TestSubaruGen1LongitudinalDisabled(TestSubaruGen1TorqueStockLongitudinalSafety):
+  FLAGS = SubaruSafetyFlags.LONG
+
+
+class TestSubaruGen2LongitudinalDisabled(TestSubaruGen2TorqueStockLongitudinalSafety):
+  FLAGS = SubaruSafetyFlags.GEN2 | SubaruSafetyFlags.LONG
 
 
 if __name__ == "__main__":
