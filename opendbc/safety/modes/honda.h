@@ -206,6 +206,14 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     if (honda_fwd_brake) {
       tx = false;
     }
+
+    // AEB: block all actuation. stock AEB messages are forwarded from the camera instead
+    bool aeb_req = GET_BIT(msg, 29U);  // AEB_REQ_1
+    int aeb_req_2 = msg->data[3] & 0x7U;  // AEB_REQ_2
+    int aeb_status = msg->data[5] & 0x3U;  // AEB_STATUS
+    if (aeb_req || (aeb_req_2 != 0) || (aeb_status != 0)) {
+      tx = false;
+    }
   }
 
   // BRAKE/GAS: safety check (bosch)
@@ -219,6 +227,11 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     bool violation = false;
     violation |= longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
     violation |= longitudinal_gas_checks(gas, HONDA_BOSCH_LONG_LIMITS);
+
+    // AEB: block all actuation
+    violation |= GET_BIT(msg, 33U);  // AEB_STATUS
+    violation |= GET_BIT(msg, 43U);  // AEB_PREPARE
+    violation |= GET_BIT(msg, 47U);  // AEB_BRAKING
     if (violation) {
       tx = false;
     }
@@ -231,6 +244,11 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
     bool violation = false;
     violation |= longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
+
+    // AEB: block all actuation
+    violation |= GET_BIT(msg, 33U);  // AEB_STATUS
+    violation |= GET_BIT(msg, 43U);  // AEB_PREPARE
+    violation |= GET_BIT(msg, 47U);  // AEB_BRAKING
     if (violation) {
       tx = false;
     }
