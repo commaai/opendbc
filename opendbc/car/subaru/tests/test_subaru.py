@@ -4,8 +4,8 @@ import unittest
 import numpy as np
 
 from opendbc.car import Bus, structs
-from opendbc.car.lateral import apply_steer_angle_limits_vm, get_max_angle_delta_vm, get_max_angle_vm
-from opendbc.car.subaru.carcontroller import get_safety_CP
+from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
+from opendbc.car.subaru.carcontroller import apply_subaru_angle_limits, get_safety_CP
 from opendbc.car.subaru.carstate import CarState
 from opendbc.car.subaru.fingerprints import FW_VERSIONS
 from opendbc.car.subaru.interface import CarInterface
@@ -28,7 +28,7 @@ class TestSubaruAngleLimits(unittest.TestCase):
     angle_last = -57.61
     vm = VehicleModel(get_safety_CP())
 
-    angle = apply_steer_angle_limits_vm(-51.60, angle_last, speed, angle_last, True, CarControllerParams, vm)
+    angle = apply_subaru_angle_limits(-51.60, angle_last, speed, angle_last, True, vm)
 
     self.assertAlmostEqual(angle - angle_last, get_max_angle_delta_vm(speed, vm, CarControllerParams))
     self.assertGreater(abs(angle), get_max_angle_vm(speed, vm, CarControllerParams))
@@ -56,6 +56,30 @@ class TestSubaruAngleLimits(unittest.TestCase):
           angle = min(get_max_angle_vm(speed, safety_vm, CarControllerParams), CarControllerParams.ANGLE_LIMITS.STEER_ANGLE_MAX)
           accel = vm.calc_curvature(math.radians(angle), speed, 0) * speed ** 2
           self.assertLessEqual(accel, CarControllerParams.ANGLE_LIMITS.MAX_LATERAL_ACCEL + 1e-6)
+
+  def test_recover_from_reduced_max_angle(self):
+    limits = CarControllerParams
+    vm = VehicleModel(get_safety_CP())
+    for speed in (10, 20, 30, 40):
+      bound = get_max_angle_vm(speed, vm, limits)
+      delta = min(get_max_angle_delta_vm(speed, vm, limits), limits.ANGLE_LIMITS.MAX_ANGLE_RATE)
+      for sign in (-1, 1):
+        last = sign * min(bound + 10, limits.ANGLE_LIMITS.STEER_ANGLE_MAX)
+        with self.subTest(speed=speed, sign=sign):
+          for _ in range(2000):
+            angle = apply_subaru_angle_limits(sign * bound * 2, last, speed, last, True, vm)
+            self.assertLessEqual(abs(angle - last), delta + 1e-9)
+            self.assertLessEqual(abs(angle), abs(last) + 1e-9)
+            last = angle
+            if abs(angle) <= bound + 1e-9:
+              break
+          self.assertAlmostEqual(abs(last), bound)
+
+  def test_inactive_tracks_measured_angle(self):
+    vm = VehicleModel(get_safety_CP())
+    for measured in (-100, 0, 100):
+      with self.subTest(measured=measured):
+        self.assertEqual(apply_subaru_angle_limits(0, 0, 30, measured, False, vm), measured)
 
 
 class TestSubaruCruiseState(unittest.TestCase):

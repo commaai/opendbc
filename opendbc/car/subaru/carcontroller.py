@@ -1,7 +1,8 @@
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, make_tester_present_msg
-from opendbc.car.lateral import apply_center_deadzone, apply_driver_steer_torque_limits, apply_steer_angle_limits_vm, common_fault_avoidance
+from opendbc.car.lateral import (apply_center_deadzone, apply_driver_steer_torque_limits, apply_steer_angle_limits_vm,
+                                 common_fault_avoidance, get_max_angle_delta_vm)
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import CAR, DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
@@ -17,6 +18,15 @@ def get_safety_CP():
   # Use the Ascent for lateral limiting to match safety (most restrictive slip factor)
   from opendbc.car.subaru.interface import CarInterface
   return CarInterface.get_non_essential_params(CAR.SUBARU_ASCENT)
+
+
+def apply_subaru_angle_limits(apply_angle, apply_angle_last, speed, steering_angle, lat_active, VM):
+  angle = apply_steer_angle_limits_vm(apply_angle, apply_angle_last, speed, steering_angle, lat_active, CarControllerParams, VM)
+  if lat_active:
+    # Preserve the jerk limit when engagement or a speed increase puts the previous angle outside the accel bound.
+    max_delta = min(get_max_angle_delta_vm(max(speed, 1), VM, CarControllerParams), CarControllerParams.ANGLE_LIMITS.MAX_ANGLE_RATE)
+    angle = float(np.clip(angle, apply_angle_last - max_delta, apply_angle_last + max_delta))
+  return angle
 
 
 class CarController(CarControllerBase):
@@ -50,8 +60,8 @@ class CarController(CarControllerBase):
           apply_angle = self.apply_angle_last + apply_center_deadzone(apply_angle - self.apply_angle_last, 1.0)
         # Filter wheel-speed quantization before applying the dynamic max-angle limit. A raw speed step can move the
         # limit by more than the per-frame jerk allowance, causing panda to block consecutive LKAS commands.
-        self.apply_angle_last = apply_steer_angle_limits_vm(apply_angle, self.apply_angle_last, CS.out.vEgo,
-                                                            CS.out.steeringAngleDeg, CC.latActive, CarControllerParams, self.VM)
+        self.apply_angle_last = apply_subaru_angle_limits(apply_angle, self.apply_angle_last, CS.out.vEgo,
+                                                         CS.out.steeringAngleDeg, CC.latActive, self.VM)
         can_sends.append(subarucan.create_steering_control_angle(self.packer, self.apply_angle_last, CC.latActive))
       else:
         apply_torque = int(round(actuators.torque * self.p.STEER_MAX))
