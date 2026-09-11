@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, DT_CTRL, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
@@ -20,6 +20,42 @@ class CarControllerParams:
   STEER_DRIVER_MULTIPLIER = 1     # weight driver torque
   STEER_DRIVER_FACTOR = 1         # from dbc
   STEER_STEP = 1  # 100 Hz
+
+  ACCEL_MAX = 2.0   # m/s²
+  ACCEL_MIN = -3.5  # m/s²
+
+  LONG_STEP = 2        # CRZ_INFO and CRZ_CTRL at 50 Hz
+  RADAR_STEP = 10      # radar static and track frames at 10 Hz
+  RADAR_UDS_STEP = 50  # session control and tester present at 2 Hz
+
+  FSC_SETTLE_T = 10.0
+  STOCK_RADAR_ALIVE_T = 0.05
+  PANDA_RADAR_SILENT_T = 1.0
+  STOCK_RADAR_GUARD_MARGIN_T = 0.2
+  STOCK_RADAR_GUARD_T = STOCK_RADAR_ALIVE_T + LONG_STEP * DT_CTRL + PANDA_RADAR_SILENT_T + STOCK_RADAR_GUARD_MARGIN_T
+  RADAR_SESSION_LIMIT_T = 10.0
+  CAM_LANEINFO_FRESH_T = 1.5
+  CANCEL_CONTEXT_T = 0.5
+
+  RELEASE_DEBOUNCE_T = 0.2
+  RESUME_UNLATCH_LATCHED_T = 0.18
+  RESUME_REPULSE_T = 1.0
+
+  ACCEL_HOLD_LATCHED = -0.001
+  ACCEL_RESUME_PULSE_MAX = 0.25
+  ACCEL_RELEASE_BAND = -0.26
+  ACCEL_RELEASE_RAMP = 1.25
+  ACCEL_BREAKAWAY_MAX = 1.45
+  ACCEL_BREAKAWAY_T = 3.0
+  ACCEL_BREAKAWAY_OVERSHOOT = 0.75
+  ACCEL_WINDUP_LIMIT = 4.0 * DT_CTRL
+  ACCEL_WINDDOWN_LIMIT = -10.0 * DT_CTRL
+
+  ACCEL_CEILING_BP = [0., 4., 9., 14., 18., 25.]
+  ACCEL_CEILING_V = [1.5, 1.75, 1.45, 1.05, 0.85, 0.65]
+  ACCEL_BUILD_BP = [3., 6.]
+  ACCEL_BUILD_V = [1.25, 0.8]
+  ACCEL_LIFT_LIMIT = -2.0
 
   def __init__(self, CP):
     pass
@@ -40,6 +76,10 @@ class MazdaFlags(IntFlag):
   # Static flags
   # Gen 1 hardware: same CAN messages and same camera
   GEN1 = 1
+
+
+class MazdaSafetyFlags(IntFlag):
+  LONG = 1
 
 
 @dataclass

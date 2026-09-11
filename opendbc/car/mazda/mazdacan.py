@@ -1,4 +1,67 @@
+from opendbc.car.can_definitions import CanData
 from opendbc.car.mazda.values import Buttons, MazdaFlags
+
+
+RADAR_STATIC_MSG = (0x499, bytes.fromhex("0008c00000000000"))
+RADAR_TRACK_MSGS = {
+  0x361: bytes.fromhex("fff7fefe1fc00080"),
+  0x362: bytes.fromhex("fff7fefe1fc78c80"),
+  0x363: bytes.fromhex("fff7fefe1fc00000"),
+  0x364: bytes.fromhex("fff7fefe1fc00000"),
+  0x365: bytes.fromhex("fff7fe7ffbff3fc0"),
+  0x366: bytes.fromhex("fff7fe7ffbff3fc0"),
+}
+
+
+def crz_info_checksum(dat: bytes) -> int:
+  return (0xFF - ((sum(dat[:7]) - (dat[5] & 0x04) - (dat[6] & 0x40)) & 0xFF)) & 0xFF
+
+
+def create_acc_command(packer, bus, counter, accel, *, long_active, acc_available,
+                       brake_pressed=False, stopping=False, resume_unlatching=False):
+  values = {
+    "ERROR_STATUS": 1,
+    "STATIC_1": 0x7ff,
+    "CTR": counter % 16,
+    "ACCEL_CMD": accel if long_active else 4.094,
+    "NEW_SIGNAL_7": int(long_active or acc_available),
+  }
+  if long_active:
+    values.update({
+      "ACC_ACTIVE": 1,
+      "ACC_SET_ALLOWED": 1,
+      "STOPPING": int(stopping),
+      "STOPPING_2": int(stopping),
+      "RESUME_UNLATCHING": int(resume_unlatching),
+    })
+  elif acc_available:
+    values["ACC_SET_ALLOWED"] = int(not brake_pressed)
+
+  dat = packer.make_can_msg("CRZ_INFO", bus, values)[1]
+  values["CHKSUM"] = crz_info_checksum(dat)
+  return packer.make_can_msg("CRZ_INFO", bus, values)
+
+
+def create_crz_ctrl(packer, bus, long_active, acc_available, gap_setting, acc_active_2):
+  values = {
+    "MSG_1_INV": 1,
+    "MSG_1_INV_COPY": 1,
+    "NEW_SIGNAL_8": 1,
+    "CRZ_ACTIVE": int(long_active),
+    "CRZ_AVAILABLE": int(long_active or acc_available),
+    "DISTANCE_SETTING": gap_setting,
+    "RADAR_HAS_LEAD": 0,
+    "RADAR_LEAD_RELATIVE_DISTANCE": 0,
+    "ACC_ACTIVE_2": int(acc_active_2),
+  }
+  return packer.make_can_msg("CRZ_CTRL", bus, values)
+
+
+def create_radar_frames(bus, counter):
+  frames = [CanData(RADAR_STATIC_MSG[0], RADAR_STATIC_MSG[1], bus)]
+  for addr, dat in RADAR_TRACK_MSGS.items():
+    frames.append(CanData(addr, dat[:7] + bytes([(dat[7] & 0xF0) | (counter % 16)]), bus))
+  return frames
 
 
 def create_steering_control(packer, CP, frame, apply_torque, lkas):
