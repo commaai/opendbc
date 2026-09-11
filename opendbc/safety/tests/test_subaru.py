@@ -212,33 +212,32 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
     self._rx(self._pcm_status_msg(True))
     self.assertTrue(self.safety.get_controls_allowed())
 
-  def test_controller_curve_engagement(self):
+  def test_controller_angle_continuity(self):
     platform = CAR.SUBARU_CROSSTREK_2025 if self.FLAGS & SubaruSafetyFlags.GEN2 else CAR.SUBARU_FORESTER_2022
-    for sign in (-1, 1):
-      with self.subTest(sign=sign):
-        self.setUp()
-        ci = CarInterface(CarInterface.get_non_essential_params(platform))
-        ci.update([])
-        angle = sign * 57.61
-        ci.CS.out = CarState(vEgo=13.24, vEgoRaw=13.24, steeringAngleDeg=angle)
-        self._reset_speed_measurement(13.24)
-        for _ in range(6):
-          self._rx(self._angle_meas_msg(angle))
-        cc = CarControl()
-        cc.actuators.steeringAngleDeg = sign * 51.60
-        for frame in range(100):
-          # Remain outside the bound initially, then unwind and permit steering again.
-          angle = sign * (57.61 if frame < 20 else 49.0)
-          ci.CS.out = CarState(vEgo=13.24, vEgoRaw=13.24, steeringAngleDeg=angle)
-          self._rx(self._angle_meas_msg(angle))
-          cc.latActive = frame > 0
-          self.safety.set_controls_allowed(cc.latActive)
-          self.safety.set_timer(frame * 10000)
-          _, messages = ci.CC.update(cc.as_reader(), ci.CS, frame * 10000000)
-          for addr, data, bus in messages:
-            if addr == SubaruMsg.ES_LKAS_ANGLE:
-              self.assertEqual(bool(data[1] & 0x10), frame >= 22)
-              self.assertTrue(self._tx(libsafety_py.make_CANPacket(addr, bus, data)), f"frame {frame}")
+    # Engagement above the nominal bound, and a speed increase that lowers the bound.
+    for start_speed, end_speed, measured, desired in ((13.24, 13.24, 57.61, 51.60), (13.0, 13.5, 52.2, 52.2)):
+      for sign in (-1, 1):
+        with self.subTest(sign=sign, start_speed=start_speed, end_speed=end_speed):
+          self.setUp()
+          ci = CarInterface(CarInterface.get_non_essential_params(platform))
+          ci.update([])
+          angle = sign * measured
+          for _ in range(6):
+            self._rx(self._angle_meas_msg(angle))
+          cc = CarControl()
+          cc.actuators.steeringAngleDeg = sign * desired
+          for frame in range(100):
+            speed = start_speed if frame < 20 else end_speed
+            ci.CS.out = CarState(vEgo=speed, vEgoRaw=speed, steeringAngleDeg=angle)
+            self._reset_speed_measurement(speed)
+            cc.latActive = frame not in (0, 50)
+            self.safety.set_controls_allowed(cc.latActive)
+            self.safety.set_timer(frame * 10000)
+            _, messages = ci.CC.update(cc.as_reader(), ci.CS, frame * 10000000)
+            for addr, data, bus in messages:
+              if addr == SubaruMsg.ES_LKAS_ANGLE:
+                self.assertEqual(bool(data[1] & 0x10), cc.latActive)
+                self.assertTrue(self._tx(libsafety_py.make_CANPacket(addr, bus, data)), f"frame {frame}")
 
   def test_angle_cmd_when_enabled(self):
     for speed in np.linspace(0, 50, 101):
