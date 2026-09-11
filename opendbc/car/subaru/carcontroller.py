@@ -2,7 +2,7 @@ import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, make_tester_present_msg
 from opendbc.car.lateral import (apply_center_deadzone, apply_driver_steer_torque_limits, apply_steer_angle_limits_vm,
-                                 common_fault_avoidance, get_max_angle_delta_vm)
+                               common_fault_avoidance, get_max_angle_delta_vm)
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import CAR, DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
@@ -58,8 +58,7 @@ class CarController(CarControllerBase):
         # prevent small angle oscillations near standstill
         if CC.latActive and CS.out.vEgoRaw < 4.0:
           apply_angle = self.apply_angle_last + apply_center_deadzone(apply_angle - self.apply_angle_last, 1.0)
-        # Filter wheel-speed quantization before applying the dynamic max-angle limit. A raw speed step can move the
-        # limit by more than the per-frame jerk allowance, causing panda to block consecutive LKAS commands.
+        # Use filtered speed to smooth changes in the dynamic angle limit.
         self.apply_angle_last = apply_subaru_angle_limits(apply_angle, self.apply_angle_last, CS.out.vEgo,
                                                          CS.out.steeringAngleDeg, CC.latActive, self.p, self.VM)
         can_sends.append(subarucan.create_steering_control_angle(self.packer, self.apply_angle_last, CC.latActive))

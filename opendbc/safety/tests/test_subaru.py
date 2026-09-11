@@ -3,9 +3,8 @@ import enum
 import unittest
 import numpy as np
 
-from functools import partial
-
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
+from opendbc.car.subaru.carcontroller import get_safety_CP
 from opendbc.car.subaru.values import CAR, CarControllerParams, SubaruSafetyFlags
 from opendbc.car.subaru.interface import CarInterface
 from opendbc.car.structs import CarParams, CarControl, CarState
@@ -13,6 +12,7 @@ from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
+from functools import partial
 
 
 class SubaruMsg(enum.IntEnum):
@@ -23,8 +23,6 @@ class SubaruMsg(enum.IntEnum):
   Wheel_Speeds      = 0x13a
   ES_LKAS           = 0x122
   ES_LKAS_ANGLE     = 0x124
-  ES_Brake          = 0x220
-  ES_Status         = 0x222
   ES_Distance       = 0x221
   ES_DashStatus     = 0x321
   ES_LKAS_State     = 0x322
@@ -173,12 +171,9 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
 
   LATERAL_FREQUENCY = 50
 
-  cnt_angle_cmd = 0
-
   def setUp(self):
-    self.__class__.cnt_angle_cmd = 0
+    self.cnt_angle_cmd = 0
     super().setUp()
-    from opendbc.car.subaru.carcontroller import get_safety_CP
     self.VM = VehicleModel(get_safety_CP())
     self.limits = CarControllerParams(get_safety_CP())
 
@@ -192,7 +187,7 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
     values = {"LKAS_Output": angle, "LKAS_Request": enabled, "SET_3": 3}
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
-      self.__class__.cnt_angle_cmd += 1
+      self.cnt_angle_cmd += 1
     return self.packer.make_can_msg_safety("ES_LKAS_ANGLE", SUBARU_MAIN_BUS, values)
 
   def _angle_meas_msg(self, angle):
@@ -241,10 +236,6 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
               self.assertTrue(self._tx(libsafety_py.make_CANPacket(addr, bus, data)), f"frame {frame}")
 
   def test_angle_cmd_when_enabled(self):
-    # VM-based limits are tested below
-    pass
-
-  def test_lateral_limits(self):
     for speed in np.linspace(0, 50, 101):
       self._reset_speed_measurement(speed)
       # Use the decoded wheel speed, including safety's 1 m/s tolerance.

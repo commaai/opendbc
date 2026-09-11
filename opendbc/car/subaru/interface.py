@@ -19,7 +19,7 @@ class CarInterface(CarInterfaceBase):
     # - to find the Cruise_Activated bit from the car
     # - proper panda safety setup (use the correct cruise_activated bit, throttle from Throttle_Hybrid, etc)
     ret.dashcamOnly = bool(ret.flags & (SubaruFlags.PREGLOBAL | SubaruFlags.HYBRID))
-    # LKAS_ANGLE cars are dashcam-only until validated
+    # Other angle-steering models remain dashcam-only
     if ret.flags & SubaruFlags.LKAS_ANGLE and candidate != CAR.SUBARU_CROSSTREK_2025:
       ret.dashcamOnly = True
     ret.autoResumeSng = False
