@@ -94,6 +94,26 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
+  def test_rx_wrong_bus(self):
+    signals = [
+      (self._torque_driver_msg, self.safety.get_torque_driver_max),
+      (self._speed_msg, self.safety.get_vehicle_speed_max),
+      (self._user_brake_msg, self.safety.get_brake_pressed_prev),
+      (self._user_gas_msg, self.safety.get_gas_pressed_prev),
+      (self._pcm_status_msg, self.safety.get_controls_allowed),
+    ]
+    if self.FLAGS & SubaruSafetyFlags.LKAS_ANGLE:
+      signals.append((self._angle_meas_msg, self.safety.get_angle_meas_max))
+    for make_msg, get_value in signals:
+      for bus in range(3):
+        self.setUp()
+        msg = make_msg(1)
+        if bus != msg[0].bus:
+          with self.subTest(message=msg[0].addr, bus=bus):
+            msg[0].bus = bus
+            self._rx(msg)
+            self.assertEqual(get_value(), 0)
+
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
