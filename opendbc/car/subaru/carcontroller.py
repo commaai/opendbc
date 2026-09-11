@@ -45,7 +45,7 @@ class CarController(CarControllerBase):
     if (self.frame % self.p.STEER_STEP) == 0:
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
         apply_angle = actuators.steeringAngleDeg
-        # Suppress sub-degree command chatter at low speed; larger requested oscillations still pass through.
+        # prevent small angle oscillations near standstill
         if CC.latActive and CS.out.vEgoRaw < 4.0:
           apply_angle = self.apply_angle_last + apply_center_deadzone(apply_angle - self.apply_angle_last, 1.0)
         # Filter wheel-speed quantization before applying the dynamic max-angle limit. A raw speed step can move the
