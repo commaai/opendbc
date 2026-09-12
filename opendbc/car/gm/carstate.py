@@ -157,6 +157,15 @@ class CarState(CarStateBase):
     if ret.vEgo < self.CP.minSteerSpeed:
       ret.lowSpeedAlert = True
 
+    # Enabling at a standstill with brake is allowed
+    # TODO: verify 17 Volt can enable for the first time at a stop and allow for all GMs
+    # This checks a higher brake threshold at standstill to fix a fault when you engage at a stop
+    # with light brake pressure. Likely because PCM and camera have different thresholds in different
+    # scenarios (yes, stock ACC faults and so this fixes their bug).
+    ret.cruiseState.belowEngageSpeed = ret.vEgo < self.CP.minEnableSpeed and \
+      not (ret.standstill and pt_cp.vl["ECMAcceleratorPos"]["BrakePedalPos"] >= 20 and
+           self.CP.networkLocation == NetworkLocation.fwdCamera)
+
     return ret
 
   @staticmethod
