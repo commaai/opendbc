@@ -129,6 +129,7 @@ class CarState(CarStateBase):
 
         self.es_status_msg = copy.copy(cp_es_brake.vl["ES_Status"])
         self.cruise_control_msg = copy.copy(cp_cruise.vl["CruiseControl"])
+      self.brake_status_msg = copy.copy(cp_brakes.vl["Brake_Status"])
 
     if not (self.CP.flags & SubaruFlags.HYBRID):
       self.es_distance_msg = copy.copy(cp_es_distance.vl["ES_Distance"])
