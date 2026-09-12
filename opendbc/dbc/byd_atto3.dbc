@@ -36,6 +36,9 @@ BS_:
 BU_: EPS ESP_ECU BCM VCU MPC_CAM ADAS_ECU MCU BSD
 
 
+BO_ 85 POWER_VCC: 8 VCU
+ SG_ POWER_ON : 33|1@1+ (1,0) [0|1] "" MCU
+
 BO_ 287 STEER_MODULE_2: 5 EPS
  SG_ STEER_ANGLE_2 : 0|16@1- (0.1,0) [-780|780] "deg" MCU,ADAS_ECU
  SG_ DRIVER_EPS_TORQUE : 16|8@1+ (1,0) [0|255] "" MCU,ADAS_ECU
@@ -83,6 +86,9 @@ BO_ 508 STEERING_TORQUE: 8 EPS
  SG_ COUNTER : 52|4@1+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
+BO_ 536 EPB_STATUS: 8 ESP_ECU
+ SG_ EPB_APPLIED : 3|1@1+ (1,0) [0|1] "" MCU
+
 BO_ 578 DRIVE_STATE: 8 VCU
  SG_ RAW_THROTTLE : 30|7@0+ (1,0) [0|127] "" MCU
  SG_ BRAKE_PRESSED : 37|1@0+ (1,0) [0|1] "" MCU,ADAS_ECU
@@ -94,6 +100,7 @@ BO_ 660 METER_CLUSTER: 8 BCM
  SG_ BACK_LEFT_DOOR : 5|1@1+ (1,0) [0|1] "" MCU
  SG_ BACK_RIGHT_DOOR : 7|1@0+ (1,0) [0|1] "" MCU
  SG_ SEATBELT_DRIVER : 17|1@0+ (1,0) [0|1] "" MCU
+ SG_ TRUNK_OPEN : 19|1@1+ (1,0) [0|1] "" MCU
 
 BO_ 790 LKAS_HUD_ADAS: 8 MPC_CAM
  SG_ AUTO_LIGHT : 1|2@0+ (1,0) [0|3] "" XXX
@@ -112,6 +119,9 @@ BO_ 790 LKAS_HUD_ADAS: 8 MPC_CAM
  SG_ LDSW_TYPE : 49|2@0+ (1,0) [0|3] "" MCU
  SG_ COUNTER : 52|4@1+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
+
+BO_ 803 CHARGE_STATUS: 8 VCU
+ SG_ CHARGE_STATE : 0|2@1+ (1,0) [0|3] "" MCU
 
 BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
  SG_ SET_SPEED : 0|8@1+ (0.5,0) [0|127.5] "kph" MCU
@@ -162,24 +172,39 @@ BO_ 944 PCM_BUTTONS: 8 MCU
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" MCU
 
+BO_ 1031 BODY_LOCK: 8 BCM
+ SG_ LOCK_STATE : 0|8@1+ (1,0) [0|255] "" MCU
+ SG_ TRUNK_STATE : 8|8@1+ (1,0) [0|255] "" MCU
+
 BO_ 1048 BSD_RADAR: 8 BSD
  SG_ LEFT_APPROACH : 9|2@0+ (1,0) [0|3] "" MCU,ADAS_ECU
  SG_ RIGHT_APPROACH : 11|2@0+ (1,0) [0|3] "" MCU,ADAS_ECU
  SG_ APPROACH : 17|1@0+ (1,0) [0|1] "" MCU,ADAS_ECU
 
+BO_ 1050 SUNROOF_SHADE: 8 BCM
+ SG_ SUNROOF_POS : 0|8@1+ (1,0) [0|100] "%" MCU
+ SG_ SUNSHADE_POS : 8|8@1+ (1,0) [0|100] "%" MCU
+ SG_ ROOF_CHANNEL : 16|8@1+ (1,0) [0|255] "" MCU
+ SG_ ROOF_PHASE : 24|8@1+ (1,0) [0|255] "" MCU
+
+CM_ BO_ 85 "VCC / power. Byte 4 0x80 off, 0x82 on (POWER_ON bit 33).";
 CM_ BO_ 287 "EPS steering wheel angle + driver torque. Validated: angle range plausible, DRIVER_EPS_TORQUE stays near 0 when hands-off.";
 CM_ BO_ 290 "Per-wheel speed from ESP (FL/FR/BL/BR). Scale 0.1 kph/bit. Use WHEELSPEED_CLEAN (0x1F0) for the aggregated filtered value openpilot consumes.";
 CM_ BO_ 307 "Turn signal / stalk info. Validated: LEFT_BLINKER and RIGHT_BLINKER transition 0->1 during lane change events.";
 CM_ BO_ 482 "Lateral steering command sent by MPC camera/ADAS ECU to EPS. Blocked by panda on bus 2; panda injects its own on bus 0.";
 CM_ BO_ 496 "Wheel speed (cleaned average). Validated: 0-127 km/h matching driving speed.";
 CM_ BO_ 508 "Column steering torque from EPS.";
+CM_ BO_ 536 "EPB. Byte 0 0x00/0xA0 released, 0x08/0x88 applied; bit 3 is the applied flag.";
 CM_ BO_ 578 "Drivetrain state: gear, brake pressed, raw throttle.";
-CM_ BO_ 660 "Body/meter cluster: doors + seatbelt.";
+CM_ BO_ 660 "Body/meter cluster: doors, seatbelt, trunk.";
 CM_ BO_ 790 "LKAS HUD ADAS message from camera. Blocked by panda on bus 2; panda re-injects.";
+CM_ BO_ 803 "Charge state. d[0] 0 idle, 3 charging.";
 CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state).";
 CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active.";
 CM_ BO_ 834 "Gas/brake pedal percentages.";
 CM_ BO_ 944 "Steering-wheel cruise control buttons.";
+CM_ BO_ 1031 "Body lock. LOCK_STATE 0xAA locked / 0x55 unlocked; TRUNK_STATE low nibble tracks the boot.";
+CM_ BO_ 1050 "Sunroof / shade. Event-driven (~2.4 Hz idle, bursts while moving). Channel 0x55 idle / 0x95 shade / 0xA5 roof.";
 VAL_ 508 TORQUE_TEMP_FAILED 1 "TooLarge" 2 "TooFast" 3 "Both";
 VAL_ 578 GEAR 4 "D" 2 "R" 3 "N" 1 "P";
 VAL_ 790 AUTO_LIGHT 1 "OFF" 2 "ON";
@@ -190,5 +215,9 @@ VAL_ 790 SLA_STATE 0 "OFF" 1 "FUSION_MODE" 2 "VISION_MODE" 3 "NV_ONLY_MODE" 4 "D
 VAL_ 790 RIGHT_LANE_STATE 0 "OFF" 1 "GREEN" 2 "ORANGE";
 VAL_ 790 LKAS_STATE 2 "ACTIVE" 1 "OFF";
 VAL_ 790 LDSW_TYPE 0 "VIBRATE" 1 "SOUND" 2 "ALL";
+VAL_ 803 CHARGE_STATE 0 "IDLE" 3 "CHARGING";
 VAL_ 813 SET_DISTANCE 4 "4bar" 3 "3bar" 2 "2bar" 1 "1bar";
 VAL_ 813 ACC_STATE 0 "OFF" 2 "ACC_ON" 3 "ACC_ACTIVE" 5 "FORCE_ACCEL" 7 "ERROR";
+VAL_ 1031 LOCK_STATE 170 "LOCKED" 85 "UNLOCKED";
+VAL_ 1050 ROOF_CHANNEL 85 "IDLE" 149 "SHADE" 165 "ROOF";
+VAL_ 1050 ROOF_PHASE 9 "HELD" 10 "ROOF_VENTING" 11 "ROOF_OPENING" 12 "ROOF_CLOSING" 17 "SHADE_OPENING" 25 "SHADE_CLOSING";
