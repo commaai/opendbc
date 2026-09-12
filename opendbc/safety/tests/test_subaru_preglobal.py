@@ -38,10 +38,33 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {"Steer_Torque_Sensor": torque}
     return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
-  def _speed_msg(self, speed):
+  def _speed_msg(self, speed, **wheel_speeds):
     # subaru safety doesn't use the scaled value, so undo the scaling
-    values = {s: speed*0.0592 for s in ["FR", "FL", "RR", "RL"]}
+    values = {s: wheel_speeds.get(s, speed) * 0.0592 for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", 0, values)
+
+  def test_vehicle_moving_each_wheel(self):
+    # Each 16-bit wheel speed independently indicates motion, including the
+    # low bits of FL at the start of the message (there is no checksum/counter).
+    for wheel in ("FL", "FR", "RL", "RR"):
+      for speed in (0, 1, 4095, 4096, 0):
+        with self.subTest(wheel=wheel, speed=speed):
+          self.assertTrue(self._rx(self._speed_msg(0, **{wheel: speed})))
+          self.assertEqual(speed > 0, self.safety.get_vehicle_moving())
+
+  def test_brake_held_disengages_on_single_wheel_motion(self):
+    for wheel in ("FL", "FR", "RL", "RR"):
+      with self.subTest(wheel=wheel):
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertTrue(self._rx(self._user_brake_msg(True)))
+        self.safety.set_controls_allowed(True)
+        self.assertTrue(self._rx(self._user_brake_msg(True)))
+        self.assertTrue(self.safety.get_controls_allowed())
+
+        # Braking can be held while engaged at rest. Any wheel starting to move
+        # must disengage, even without a new rising edge of the brake signal.
+        self.assertTrue(self._rx(self._speed_msg(0, **{wheel: 1})))
+        self.assertFalse(self.safety.get_controls_allowed())
 
   def _user_brake_msg(self, brake):
     values = {"Brake_Pedal": brake}
