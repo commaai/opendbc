@@ -5,7 +5,7 @@ Wondering what's the DBC file format? [Here](http://www.socialledge.com/sjsu/ind
 
 ## How to start reverse engineering cars
 
-[opendbc](https://github.com/commaai/opendbc) is integrated with [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
+[opendbc](https://github.com/commaai/opendbc) is integrated with [cabana](https://github.com/commaai/openpilot/tree/master/openpilot/tools/cabana).
 
 Use [panda](https://github.com/commaai/panda) to connect your car to a computer.
 
@@ -22,7 +22,7 @@ DBC files for different models of the same brand have a lot of overlap. Therefor
     ```
     CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
     ```
-    is a comment that refers to signal `LONG_ACCEL` in message `490`. Using comments is highly recommended, especially for doubts and uncertainties. [cabana](https://community.comma.ai/cabana/) can easily display/add/edit comments to signals and messages.
+    is a comment that refers to signal `LONG_ACCEL` in message `490`. Using comments is highly recommended, especially for doubts and uncertainties. [cabana](https://commaai.github.io/cabana/?demo=1) can easily display/add/edit comments to signals and messages.
 
 - Units: when applicable, it's recommended to convert signals into physical units, by using a proper signal factor. Using a SI unit is preferred, unless a non-SI unit rounds the signal factor much better.
 For example:
