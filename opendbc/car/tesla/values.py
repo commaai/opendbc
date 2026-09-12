@@ -11,7 +11,8 @@ Ecu = CarParams.Ecu
 
 class Footnote(Enum):
   HW_TYPE = CarFootnote(
-    "Some 2023 model years have HW4. To check which hardware type your vehicle has, look for " +
+    "Model years 2023 and 2024 can have either hardware type, depending on build date and factory. " +
+    "To check which hardware type your vehicle has, look for " +
     "<b>Autopilot computer</b> under <b>Software -> Additional Vehicle Information</b> on your vehicle's touchscreen. </br></br>" +
     "See <a href=\"https://www.notateslaapp.com/news/2173/how-to-check-if-your-tesla-has-hardware-4-ai4-or-hardware-3\">this page</a> for more information.",
     Column.MODEL)
@@ -52,8 +53,8 @@ class CAR(Platforms):
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
     [
-      TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-23"),
-      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024-25"),
+      TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-24"),
+      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2023-25"),
     ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
     {Bus.party: 'tesla_model3_party', Bus.radar: 'tesla_radar_continental_generated'},
