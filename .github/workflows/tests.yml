@@ -17,7 +17,7 @@ jobs:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: commaai/timeout@v1
       with:
         timeout: ${{ github.repository == 'commaai/opendbc' && '90' || '999' }}
@@ -30,7 +30,7 @@ jobs:
     - uses: commaai/timeout@v1
       with:
         timeout: ${{ github.repository == 'commaai/opendbc' && '60' || '999' }}
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Run safety tests
       run: ./opendbc/safety/tests/test.sh
 
@@ -45,7 +45,7 @@ jobs:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run mutation tests
         run: |
           source setup.sh
@@ -57,7 +57,7 @@ jobs:
     env:
       GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
     - name: Test car diff
@@ -65,7 +65,7 @@ jobs:
       run: source setup.sh && python opendbc/car/tests/car_diff.py | tee diff.txt
     - name: Upload diff
       if: always() && github.event_name == 'pull_request'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: car_diff_${{ github.event.number }}
         path: diff.txt
@@ -74,7 +74,7 @@ jobs:
       run: source setup.sh && python opendbc/car/tests/car_diff.py --update-refs
     - name: Checkout ci-artifacts
       if: github.repository == 'commaai/opendbc' && github.ref == 'refs/heads/master'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         repository: commaai/ci-artifacts
         ssh-key: ${{ secrets.CI_ARTIFACTS_DEPLOY_KEY }}
@@ -103,11 +103,11 @@ jobs:
     env:
       CI: 1
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - run: ./setup.sh
     - name: Cache test routes
       id: routes-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: /tmp/comma_download_cache
         key: car_models-${{ hashFiles('opendbc/car/tests/test_models.py', 'opendbc/car/tests/routes.py') }}-${{ matrix.job }}

@@ -11,13 +11,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Generate Car Docs
         run: |
           pip install -e .
           python -m pip install jinja2==3.1.4
           python opendbc/car/docs.py
-      - uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842
+      - uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
         with:
           commit_message: 'docs: Scheduled auto-update CARS.md'
           file_pattern: 'docs/CARS.md'

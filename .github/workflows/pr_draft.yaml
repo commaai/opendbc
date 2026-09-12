@@ -12,7 +12,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - run: gh pr ready --undo "${{ github.event.pull_request.number }}"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
