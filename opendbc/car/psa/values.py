@@ -19,6 +19,17 @@ class CarControllerParams:
   )
   STEER_DRIVER_ALLOWANCE = 5  # Driver intervention threshold, 0.5 Nm
 
+  # T9 driver effort is only calibrated in raw units.
+  T9_STEER_DRIVER_THRESHOLD_RAW = 5
+
+  def __init__(self, CP):
+    if CP.carFingerprint == CAR.PSA_PEUGEOT_308_T9:
+      # No permitted actuation in the dashcam port. These normalized limits
+      # do not describe the EPS torque scale or a vehicle calibration.
+      self.STEER_MAX = 1
+      self.STEER_DELTA_UP = 0
+      self.STEER_DELTA_DOWN = 0
+
 
 @dataclass
 class PSACarDocs(CarDocs):
@@ -37,6 +48,13 @@ class CAR(Platforms):
   PSA_PEUGEOT_208 = PSAPlatformConfig(
     [PSACarDocs("Peugeot 208 2019-25")],
     CarSpecs(mass=1530, wheelbase=2.54, steerRatio=17.6),
+  )
+  PSA_PEUGEOT_308_T9 = PSAPlatformConfig(
+    [PSACarDocs("Peugeot 308 2018", package="Conventional cruise control", car_parts=CarParts())],
+    # Preliminary geometry inherited from the local T9 research profile.
+    # Mass and steering ratio require variant-specific validation before control.
+    CarSpecs(mass=1300, wheelbase=2.62, steerRatio=15.0),
+    dbc_dict={Bus.pt: 'psa_308_t9_2018'},
   )
 
 
