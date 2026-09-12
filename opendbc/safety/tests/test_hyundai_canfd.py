@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from opendbc.testing import parameterized_class
 import unittest
+import numpy as np
 
 from opendbc.car.hyundai.values import HyundaiSafetyFlags
 from opendbc.car.structs import CarParams
@@ -282,6 +283,87 @@ class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongB
   def test_acc_cancel(self):
     # Alt buttons does not use SCC_CONTROL to cancel if longitudinal
     pass
+
+
+class HyundaiCanfdDynamicTorqueBase:
+  MAX_TORQUE_LOOKUP = [9., 13., 17.], [310, 310, 270]
+  DYNAMIC_MAX_TORQUE = True
+  STANDSTILL_THRESHOLD = 12 * 0.03125 / 3.6
+  GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
+  SAFETY_PARAM = HyundaiSafetyFlags.EV_GAS | HyundaiSafetyFlags.CAMERA_SCC
+
+  def setUp(self):
+    super().setUp()
+    param = self.safety.get_current_safety_param() | HyundaiSafetyFlags.CANFD_DYNAMIC_TORQUE
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, param)
+    self.safety.init_tests()
+
+  def _speed_msg(self, speed):
+    # Existing Hyundai tests use raw wheel-speed counts; dynamic tests use m/s.
+    return super()._speed_msg(speed * 3.6 / 0.03125)
+
+  def _get_max_torque(self, speed):
+    # EV6 caps the generic speed/rounding tolerance at the nominal curve.
+    return round(float(np.interp(speed, self.MAX_TORQUE_LOOKUP[0], self.MAX_TORQUE_LOOKUP[1])))
+
+  def test_dynamic_torque_boundaries(self):
+    for speed, maximum in ((0., 310), (9., 310), (13., 310), (13.1, 309), (13.4, 306),
+                           (14., 300), (15., 290), (16., 280), (17., 270), (18., 270), (30., 270)):
+      self._reset_speed_measurement(speed)
+      for sign in (-1, 1):
+        for torque in (maximum, maximum + 1):
+          self.safety.set_controls_allowed(True)
+          self._set_prev_torque(sign * torque)
+          assert self._tx(self._torque_cmd_msg(sign * torque)) == (torque == maximum)
+
+  def test_dynamic_torque_flag_reset(self):
+    param = self.safety.get_current_safety_param() & ~HyundaiSafetyFlags.CANFD_DYNAMIC_TORQUE
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, param)
+    self.safety.init_tests()
+    for speed in (0., 13., 17.):
+      self._reset_speed_measurement(speed)
+      for torque in (-310, -271, -270, 270, 271, 310):
+        self.safety.set_controls_allowed(True)
+        self._set_prev_torque(torque)
+        assert self._tx(self._torque_cmd_msg(torque)) == (abs(torque) <= 270)
+
+  def test_dynamic_torque_wheel_speed_quantization(self):
+    # Four independently quantized wheels can average to quarter-count speeds.
+    for raw_sum in range(5900, 7900):
+      counts = [raw_sum // 4 + (i < raw_sum % 4) for i in range(4)]
+      values = {f"WHL_Spd{pos}Val": count * 0.03125 for pos, count in zip(("FL", "FR", "RL", "RR"), counts, strict=True)}
+      for _ in range(common.MAX_SAMPLE_VALS):
+        self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values))
+      speed = sum(values.values()) / 4 / 3.6
+      # CarState.vEgoRaw is serialized as Float32 before the controller reads it.
+      torque = self._get_max_torque(float(np.float32(speed)))
+      self.safety.set_controls_allowed(True)
+      self._set_prev_torque(torque)
+      assert self._tx(self._torque_cmd_msg(torque)), (speed, torque, self.safety.get_vehicle_speed_min())
+
+
+class TestHyundaiCanfdDynamicTorqueLFA(HyundaiCanfdDynamicTorqueBase, TestHyundaiCanfdLFASteeringBase):
+  pass
+
+
+class TestHyundaiCanfdDynamicTorqueLFAAltButtons(HyundaiCanfdDynamicTorqueBase, TestHyundaiCanfdLFASteeringAltButtonsBase):
+  pass
+
+
+class TestHyundaiCanfdDynamicTorqueLKAS(HyundaiCanfdDynamicTorqueBase, TestHyundaiCanfdLKASteeringEV):
+  pass
+
+
+class TestHyundaiCanfdDynamicTorqueLKASAlt(HyundaiCanfdDynamicTorqueBase, TestHyundaiCanfdLKASteeringAltEV):
+  pass
+
+
+class TestHyundaiCanfdDynamicTorqueLKASLong(HyundaiCanfdDynamicTorqueBase, TestHyundaiCanfdLKASteeringLongEV):
+  pass
+
+
+class TestHyundaiCanfdDynamicTorqueLFALong(HyundaiCanfdDynamicTorqueBase, TestHyundaiCanfdLFASteeringLongBase):
+  pass
 
 
 if __name__ == "__main__":
