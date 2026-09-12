@@ -81,9 +81,26 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
+                           (False, b"\x0F\x02\x3E\x00\x01\x00\x00\x00"),  # tester present with a non-zero tail
                            (True, b"\x0F\x02\x3E\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
       self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
+
+  def test_steer_angle_initializing(self):
+    # the angle is not sampled while the EPS reports it is still initializing
+    self._rx(self._angle_meas_msg(0))
+    self.safety.set_angle_meas(0, 0)
+    for _ in range(6):
+      self._rx(self._angle_meas_msg(100, steer_angle_initializing=True))
+    self.assertEqual(0, self.safety.get_angle_meas_max())
+
+  def test_block_aeb_signals(self, stock_longitudinal: bool = False):
+    # every byte but the checksum has to be zero
+    for idx in range(7):
+      dat = bytearray(7)
+      dat[idx] = 1
+      should_tx = idx == 6 and not stock_longitudinal
+      self.assertEqual(should_tx, self._tx(libsafety_py.make_CANPacket(0x283, 0, bytes(dat))), f"{idx=}")
 
   def test_block_aeb(self, stock_longitudinal: bool = False):
     for controls_allowed in (True, False):
@@ -300,6 +317,9 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
   def test_block_aeb(self, stock_longitudinal: bool = True):
     super().test_block_aeb(stock_longitudinal=stock_longitudinal)
 
+  def test_block_aeb_signals(self, stock_longitudinal: bool = True):
+    super().test_block_aeb_signals(stock_longitudinal=stock_longitudinal)
+
   def test_acc_cancel(self):
     """
       Regardless of controls allowed, never allow ACC_CONTROL if cancel bit isn't set
@@ -398,6 +418,10 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
 
   @unittest.skip("test not applicable for cars without a DSU")
   def test_block_aeb(self, stock_longitudinal: bool = False):
+    pass
+
+  @unittest.skip("test not applicable for cars without a DSU")
+  def test_block_aeb_signals(self, stock_longitudinal: bool = False):
     pass
 
   def test_343_actuation_blocked(self):

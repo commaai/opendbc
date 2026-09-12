@@ -124,6 +124,47 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     }
     return self.packer.make_can_msg_safety("DI_state", 0, values)
 
+  def test_steering_disengage_held(self):
+    # holding the override only disengages on the rising edge
+    for _ in range(2):
+      self._rx(self._angle_meas_msg(0, hands_on_level=3))
+      self.assertTrue(self.safety.get_steering_disengage_prev())
+      self.safety.set_controls_allowed(True)
+    self._rx(self._angle_meas_msg(0, hands_on_level=3))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_stock_lkas_edges(self):
+    # stock LKAS latches on a rising edge only while controls are not allowed
+    lkas = self.steer_control_types['LANE_KEEP_ASSIST']
+    none = self.steer_control_types['NONE']
+    for controls_allowed in (True, False):
+      for prev, now in ((none, none), (none, lkas), (lkas, lkas), (lkas, none)):
+        self.safety.set_controls_allowed(controls_allowed)
+        self._rx(self._angle_cmd_msg(0, prev, bus=2))
+        self._rx(self._angle_cmd_msg(0, now, bus=2))
+
+  def test_angle_meas_clamped_on_reset(self):
+    # the last commanded angle resets to the measurement, clamped to what the EPS accepts
+    for sign in (-1, 1):
+      angle = sign * self.STEER_ANGLE_MAX * 1.5
+      self._reset_angle_measurement(angle)
+      self.safety.set_controls_allowed(False)
+      self._tx(self._angle_cmd_msg(0, False))
+      self.assertEqual(sign * round(self.STEER_ANGLE_MAX * self.DEG_TO_CAN), self.safety.get_desired_angle_last())
+
+  def test_cruise_state_values(self):
+    # DI_cruiseState: ENABLED, STANDSTILL, OVERRIDE, PRE_FAULT and PRE_CANCEL all mean engaged
+    for cruise_state in range(8):
+      self._rx(self._pcm_status_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed())
+      values = {"DI_cruiseState": cruise_state, "DI_autoparkState": 0}
+      self._rx(self.packer.make_can_msg_safety("DI_state", 0, values))
+      self.assertEqual(cruise_state in (2, 3, 4, 6, 7), self.safety.get_controls_allowed(), f"{cruise_state=}")
+
+  def test_ui_warning_rx(self):
+    # UI_warning shares the counter and checksum layout with the other status messages
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("UI_warning", 0, {})))
+
   def _long_control_msg(self, set_speed, acc_state=0, jerk_limits=(0, 0), accel_limits=(0, 0), aeb_event=0, bus=0):
     values = {
       "DAS_setSpeed": set_speed,
@@ -229,6 +270,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=0, eac_status=1, eac_error_code=0)))
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
           self.assertFalse(self.safety.get_steering_disengage_prev())
+
+  def test_fwd_hook_autopark(self):
+    # the camera's park assist message is forwarded while autopark is running
+    self._rx(self._pcm_status_msg(False, self.autopark_states["SELFPARK_STARTED"]))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, MSG_APS_eacMonitor))
 
   def test_autopark_summon_while_enabled(self):
     # We should not respect Autopark that activates while controls are allowed

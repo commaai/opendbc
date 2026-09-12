@@ -43,6 +43,13 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {s: speed*0.0592 for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", 0, values)
 
+  def test_vehicle_moving_each_axle(self):
+    # the front and rear wheel speed pairs are checked separately
+    for front, rear in ((0, 0), (0, 1), (1, 0), (1, 1)):
+      values = {"FR": front, "FL": front, "RR": rear, "RL": rear}
+      self._rx(self.packer.make_can_msg_safety("Wheel_Speeds", 0, values))
+      self.assertEqual(bool(front or rear), self.safety.get_vehicle_moving())
+
   def _user_brake_msg(self, brake):
     values = {"Brake_Pedal": brake}
     return self.packer.make_can_msg_safety("Brake_Pedal", 0, values)

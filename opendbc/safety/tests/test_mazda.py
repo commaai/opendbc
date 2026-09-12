@@ -56,6 +56,12 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     values = {"PEDAL_GAS": gas}
     return self.packer.make_can_msg_safety("ENGINE_DATA", 0, values)
 
+  def test_gas_pressed_low_values(self):
+    # PEDAL_GAS is 12 bits, safety reads the two bytes separately
+    for gas in (0, 1, 15, 16, 255, 256):
+      self._rx(self._user_gas_msg(gas))
+      self.assertEqual(gas > 0, self.safety.get_gas_pressed_prev())
+
   def _pcm_status_msg(self, enable):
     values = {"CRZ_ACTIVE": enable}
     return self.packer.make_can_msg_safety("CRZ_CTRL", 0, values)

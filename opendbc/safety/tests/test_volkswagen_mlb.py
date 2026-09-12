@@ -53,6 +53,28 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
 
+  def test_tsk_status_values(self):
+    # TSK_Status_GRA_ACC_02: 1 and 2 both mean engaged
+    for acc_status in range(4):
+      self._rx(self.packer.make_can_msg_safety("TSK_04", 1, {"TSK_Status_GRA_ACC_02": 0}))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self._rx(self.packer.make_can_msg_safety("TSK_04", 1, {"TSK_Status_GRA_ACC_02": acc_status}))
+      self.assertEqual(acc_status in (1, 2), self.safety.get_controls_allowed(), f"{acc_status=}")
+
+  def test_cancel_button_not_pressed(self):
+    # LS_Abbrechen low leaves controls allowed alone
+    self.safety.set_controls_allowed(True)
+    self._rx(self._ls_01_msg(cancel=0, bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_steer_status_values(self):
+    # HCA_01_Status_HCA: 5 and 7 both request steering
+    self.safety.set_controls_allowed(True)
+    for steer_status in (5, 7):
+      values = {"HCA_01_LM_Offset": 0, "HCA_01_LM_OffSign": 0,
+                "HCA_01_Sendestatus": 1, "HCA_01_Status_HCA": steer_status}
+      self.assertTrue(self._tx(self.packer.make_can_msg_safety("HCA_01", 0, values)), f"{steer_status=}")
+
   # Driver steering input torque
   def _torque_driver_msg(self, torque):
     values = {"EPS_Lenkmoment": abs(torque), "EPS_VZ_Lenkmoment": torque < 0}

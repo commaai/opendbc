@@ -7,7 +7,7 @@ from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
-from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
+from opendbc.safety.tests.hyundai_common import Buttons, HyundaiButtonBase, HyundaiLongitudinalBase
 
 
 # 4 bit checkusm used in some hyundai messages
@@ -89,6 +89,57 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
               "AliveCounterTCS": self.cnt_brake % 8}
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("TCS13", 0, values, fix_checksum=checksum)
+
+  def test_button_tx_with_longitudinal(self):
+    # with openpilot longitudinal the buttons are not used to cancel, so they're passed through
+    if not self.safety.get_current_safety_param() & HyundaiSafetyFlags.LONG:
+      self.skipTest("only relevant with openpilot longitudinal")
+    bus = 2 if self.safety.get_current_safety_param() & HyundaiSafetyFlags.CAMERA_SCC else 0
+    for btn in range(8):
+      self.safety.set_controls_allowed(False)
+      self.assertTrue(self._tx(self._button_msg(btn, bus=bus)))
+
+  def test_cruise_engaged_held(self):
+    # only the rising edge of cruise engages
+    if self.safety.get_current_safety_param() & HyundaiSafetyFlags.LONG:
+      self.skipTest("openpilot longitudinal enables from the buttons")
+    self._rx(self._pcm_status_msg(False))
+    self._rx(self._button_msg(Buttons.RESUME))
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.safety.set_controls_allowed(False)
+    self._rx(self._pcm_status_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_gas_msg_selection(self):
+    # only the gas message matching the car's flags is read
+    for msg, sig in (("E_EMS11", "Accel_Pedal_Pos"), ("E_EMS11", "CR_Vcu_AccPedDep_Pos"),
+                     ("FCEV_ACCELERATOR", "ACCELERATOR_PEDAL"), ("EMS16", "CF_Ems_AclAct")):
+      self.safety.set_safety_hooks(self.safety.get_current_safety_mode(), self.safety.get_current_safety_param())
+      self.safety.init_tests()
+      self._rx(self.packer.make_can_msg_safety(msg, 0, {sig: 1}, fix_checksum=checksum))
+
+  def test_cruise_engaged_without_button_press(self):
+    # engaging needs a recent user button press
+    if self.safety.get_current_safety_param() & HyundaiSafetyFlags.LONG:
+      self.skipTest("openpilot longitudinal enables from the buttons")
+    for _ in range(20):
+      self._rx(self._button_msg(Buttons.NONE))
+    self.safety.set_controls_allowed(False)
+    self._rx(self._pcm_status_msg(False))
+    self._rx(self._pcm_status_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_vehicle_moving_each_corner(self):
+    # safety samples the front left and rear right wheels, either alone is enough
+    moving = (self.STANDSTILL_THRESHOLD + 0.1) / 0.03125
+    for fl, rr in ((0, 0), (0, moving), (moving, 0), (moving, moving)):
+      values = {"WHL_SPD_FL": fl, "WHL_SPD_FR": 0, "WHL_SPD_RL": 0, "WHL_SPD_RR": rr,
+                "WHL_SPD_AliveCounter_LSB": (self.cnt_speed % 16) & 0x3,
+                "WHL_SPD_AliveCounter_MSB": (self.cnt_speed % 16) >> 2}
+      self.__class__.cnt_speed += 1
+      self._rx(self.packer.make_can_msg_safety("WHL_SPD11", 0, values, fix_checksum=checksum))
+      self.assertEqual(bool(fl or rr), self.safety.get_vehicle_moving(), f"{fl=} {rr=}")
 
   def _speed_msg(self, speed):
     # safety doesn't scale, so undo the scaling

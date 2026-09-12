@@ -19,9 +19,8 @@ static uint8_t psa_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
     cnt = (msg->data[3] >> 4) & 0xFU;
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    cnt = (msg->data[5] >> 4) & 0xFU;
   } else {
+    cnt = (msg->data[5] >> 4) & 0xFU;
   }
   return cnt;
 }
@@ -50,9 +49,8 @@ static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
   uint8_t chk = 0;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
     chk = _psa_compute_checksum(msg, 0x4, 5);
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    chk = _psa_compute_checksum(msg, 0x7, 5);
   } else {
+    chk = _psa_compute_checksum(msg, 0x7, 5);
   }
   return chk;
 }
@@ -73,17 +71,15 @@ static void psa_rx_hook(const CANPacket_t *msg) {
     }
   }
 
+  // HS2_DAT_MDD_CMD_452 is the only message we check on the ADAS bus
   if (msg->bus == PSA_ADAS_BUS) {
-    if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-      pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
-    }
+    pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
   }
 
 
+  // DAT_BSI is the only message we check on the camera bus
   if (msg->bus == PSA_CAM_BUS) {
-    if (msg->addr == PSA_DAT_BSI) {
-      brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
-    }
+    brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
   }
 }
 
@@ -102,16 +98,14 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
     },
   };
 
-  // Safety check for LKA
-  if (msg->addr == PSA_LANE_KEEP_ASSIST) {
-    // SET_ANGLE
-    int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
-    // TORQUE_FACTOR
-    bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
+  // Safety check for LKA, the only message we send
+  // SET_ANGLE
+  int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
+  // TORQUE_FACTOR
+  bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
 
-    if (steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS)) {
-      tx = false;
-    }
+  if (steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS)) {
+    tx = false;
   }
   return tx;
 }

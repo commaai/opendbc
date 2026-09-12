@@ -25,46 +25,42 @@ static uint8_t mg_get_counter(const CANPacket_t *msg) {
     counter = (msg->data[0] >> 4) & 0xFU;
   } else if (msg->addr == 0x242U) {
     counter = (msg->data[0] >> 3) & 0xFU;
-  } else if (msg->addr == 0x1b6U) {
-    counter = msg->data[6] & 0xFU;
   } else {
-    // No counter for this message
+    counter = msg->data[6] & 0xFU;
   }
   return counter;
 }
 
 static void mg_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U)  {
-    // Vehicle speed
-    if (msg->addr == 0x23cU) {
-      float speed = (((msg->data[2] & 0x7FU) << 8) | msg->data[3]) * 0.015625;
-      vehicle_moving = speed > 0.0;
-      UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
-    }
+  // Vehicle speed
+  if (msg->addr == 0x23cU) {
+    float speed = (((msg->data[2] & 0x7FU) << 8) | msg->data[3]) * 0.015625;
+    vehicle_moving = speed > 0.0;
+    UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
+  }
 
-    // Gas pressed
-    if (msg->addr == 0xafU) {
-      gas_pressed = msg->data[0] != 0U;
-    }
+  // Gas pressed
+  if (msg->addr == 0xafU) {
+    gas_pressed = msg->data[0] != 0U;
+  }
 
-    // Driver torque
-    if (msg->addr == 0x1ecU) {
-      int torque_driver_new = (((msg->data[4] & 0x7U) << 8) | msg->data[5]) - 1024U;
-      update_sample(&torque_driver, torque_driver_new);
-    }
+  // Driver torque
+  if (msg->addr == 0x1ecU) {
+    int torque_driver_new = (((msg->data[4] & 0x7U) << 8) | msg->data[5]) - 1024U;
+    update_sample(&torque_driver, torque_driver_new);
+  }
 
-    // Brake pressed
-    if (msg->addr == 0x1b6U) {
-      brake_pressed = GET_BIT(msg, 10U);
-    }
+  // Brake pressed
+  if (msg->addr == 0x1b6U) {
+    brake_pressed = GET_BIT(msg, 10U);
+  }
 
-    // Cruise state
-    if (msg->addr == 0x242U) {
-      int cruise_state = (msg->data[5] & 0x38U) >> 3;
-      bool cruise_engaged = (cruise_state == 2) ||  // Active
-                            (cruise_state == 3);    // Override
-      pcm_cruise_check(cruise_engaged);
-    }
+  // Cruise state
+  if (msg->addr == 0x242U) {
+    int cruise_state = (msg->data[5] & 0x38U) >> 3;
+    bool cruise_engaged = (cruise_state == 2) ||  // Active
+                          (cruise_state == 3);    // Override
+    pcm_cruise_check(cruise_engaged);
   }
 }
 
@@ -82,13 +78,11 @@ static bool mg_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
   bool violation = false;
 
-  // Steering control
-  if (msg->addr == 0x1fdU) {
-    int desired_torque = (((msg->data[0] & 0x7U) << 8) | msg->data[1]) - 1024U;
-    bool steer_req = GET_BIT(msg, 35U);
+  // Steering control, the only message we send
+  int desired_torque = (((msg->data[0] & 0x7U) << 8) | msg->data[1]) - 1024U;
+  bool steer_req = GET_BIT(msg, 35U);
 
-    violation |= steer_torque_cmd_checks(desired_torque, steer_req, MG_STEERING_LIMITS);
-  }
+  violation |= steer_torque_cmd_checks(desired_torque, steer_req, MG_STEERING_LIMITS);
 
   if (violation) {
     tx = false;
