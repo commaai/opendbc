@@ -26,7 +26,6 @@ class CarController(CarControllerBase):
     self.apply_brake = 0
     self.last_steer_frame = 0
     self.last_button_frame = 0
-    self.cancel_counter = 0
 
     self.lka_steering_cmd_counter = 0
     self.lka_icon_status_last = (False, False)
@@ -138,13 +137,11 @@ class CarController(CarControllerBase):
         can_sends += gmcan.create_adas_keepalive(CanBus.POWERTRAIN)
 
     else:
-      # While car is braking, cancel button causes ECM to enter a soft disable state with a fault status.
-      # A delayed cancellation allows camera to cancel and avoids a fault when user depresses brake quickly
-      self.cancel_counter = self.cancel_counter + 1 if CC.cruiseControl.cancel else 0
-
       # Stock longitudinal, integrated at camera
       if (self.frame - self.last_button_frame) * DT_CTRL > 0.04:
-        if self.cancel_counter > CAMERA_CANCEL_DELAY_FRAMES:
+        # While car is braking, cancel button causes ECM to enter a soft disable state with a fault status.
+        # A delayed cancellation allows camera to cancel and avoids a fault when user depresses brake quickly
+        if self.cancel_after_delay(CC.cruiseControl.cancel, CAMERA_CANCEL_DELAY_FRAMES):
           self.last_button_frame = self.frame
           can_sends.append(gmcan.create_buttons(self.packer_pt, CanBus.CAMERA, CS.buttons_counter, CruiseButtons.CANCEL))
 
