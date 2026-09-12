@@ -108,6 +108,8 @@ class FwQueryConfig:
   # Function a brand can implement to provide better fuzzy matching. Takes in FW versions and VIN,
   # returns set of candidates. Only will match if one candidate is returned
   match_fw_to_car_fuzzy: Callable[[LiveFwVersions, str, OfflineFwVersions], set[str]] | None = None
+  # Disable the generic fallback when a brand requires ECU evidence it ignores.
+  use_generic_fuzzy: bool = True
 
   def __post_init__(self):
     # Asserts that a request exists if extra ecus are used

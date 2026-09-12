@@ -1,10 +1,12 @@
+import re
+from collections import defaultdict
 from enum import IntFlag
 from dataclasses import dataclass, field
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
+from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, p16
 
 Ecu = CarParams.Ecu
 
@@ -141,6 +143,59 @@ CHRYSLER_SOFTWARE_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTI
 
 CHRYSLER_RX_OFFSET = -0x280
 
+# Mopar part numbers end with a two-letter revision. Keep the whole part number,
+# including any hardware/model-year distinction, when matching unseen revisions.
+FW_PATTERN = re.compile(br'(?P<part_number>[0-9A-Z]{8})[A-Z]{2} ?')
+PLATFORM_CODE_ECUS = (Ecu.abs, Ecu.combinationMeter, Ecu.srs, Ecu.eps, Ecu.fwdRadar)
+OPTIONAL_CODE_ECUS = (Ecu.combinationMeter,)
+
+
+def get_platform_codes(fw_versions: list[bytes] | set[bytes]) -> set[bytes]:
+  return {match.group('part_number') for fw in fw_versions if (match := FW_PATTERN.fullmatch(fw)) is not None}
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw_versions: OfflineFwVersions) -> set[str]:
+  known_body_codes: dict[tuple[int, int | None], set[bytes]] = defaultdict(set)
+  for fws in offline_fw_versions.values():
+    for ecu, versions in fws.items():
+      if ecu[0] in OPTIONAL_CODE_ECUS:
+        known_body_codes[ecu[1:]].update(get_platform_codes(versions))
+
+  candidates = set()
+  for candidate, fws in offline_fw_versions.items():
+    expected_ecus = {ecu: versions for ecu, versions in fws.items() if ecu[0] in PLATFORM_CODE_ECUS}
+    # Require the steering ECU and independent platform evidence. A powertrain or
+    # body-module match alone cannot establish a compatible steering interface.
+    if not any(ecu[0] == Ecu.eps for ecu in expected_ecus) or len(expected_ecus) < 2:
+      continue
+
+    matched = 0
+    unseen_body = 0
+    for ecu, expected_versions in expected_ecus.items():
+      found_versions = live_fw_versions.get(ecu[1:], set())
+      # Some radar responses (e.g. 22DTRHD_AA) are not Mopar part numbers. Such
+      # responses must match exactly; do not guess how to normalize them.
+      exact = set(expected_versions) & found_versions
+      found_codes = get_platform_codes(found_versions)
+      codes = get_platform_codes(expected_versions) & found_codes
+      if exact or codes:
+        matched += 1
+        continue
+
+      # Recorded RAM HDs have new cluster part numbers with known control ECUs.
+      # Tolerate one missing/unseen cluster, never an unknown control module
+      # or a cluster part number belonging to another known platform.
+      unknown_body = not found_versions or (found_codes and not (found_codes & known_body_codes[ecu[1:]]))
+      if ecu[0] not in OPTIONAL_CODE_ECUS or not unknown_body or unseen_body:
+        break
+      unseen_body += 1
+    else:
+      if matched >= 2:
+        candidates.add(candidate)
+
+  return candidates
+
+
 FW_QUERY_CONFIG = FwQueryConfig(
   fw_version_regex=br"[A-Z0-9_]{10} ?",
   requests=[
@@ -167,6 +222,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
   extra_ecus=[
     (Ecu.abs, 0x7e4, None),  # alt address for abs on hybrids, NOTE: not on all hybrid platforms
   ],
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
+  use_generic_fuzzy=False,
 )
 
 DBC = CAR.create_dbc_map()
