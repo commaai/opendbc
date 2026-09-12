@@ -37,6 +37,12 @@ def create_lkas_hud(packer, lat_active: bool, counter: int, stock_lkas_hud: dict
     # LANE_STATE: 0=Grey, 1=Green, 2=Orange
     values["LEFT_LANE_STATE"] = 1 if hud_control.leftLaneVisible else 0
     values["RIGHT_LANE_STATE"] = 1 if hud_control.rightLaneVisible else 0
+  else:
+    # Clear our control claim; leave camera LKAS_STATE / LKS_MODE alone (driver switch).
+    values["LKAS_ACTIVE"] = 0
+    values["LKAS_REQ_PREPARE"] = 0
+    values["TJA_ICA_STATE"] = 0
+    values["LKAS_OUTPUT"] = 0
 
   if hud_control.leftLaneDepart:
     values["LEFT_LANE_STATE"] = 2
