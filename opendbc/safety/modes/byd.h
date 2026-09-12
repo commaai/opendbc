@@ -2,21 +2,29 @@
 
 #include "opendbc/safety/declarations.h"
 
+// Hard override thresholds, mirrored in carstate.py: 100.0 Nm of column torque for 100 ms
+#define BYD_DRIVER_TORQUE_DISENGAGE 1000
+#define BYD_DRIVER_TORQUE_FRAMES 5
+
+static int byd_driver_torque_frames = 0;
+
 static uint8_t byd_get_counter(const CANPacket_t *msg) {
   // Speed uses the high nibble; cruise status uses the low nibble.
   return (msg->addr == 0x1F0U) ? (msg->data[6] >> 4) : (msg->data[6] & 0xFU);
 }
 
 static uint32_t byd_get_checksum(const CANPacket_t *msg) {
-  return msg->data[7];
+  int len = GET_LEN(msg);
+  return msg->data[len - 1];
 }
 
 static uint32_t byd_compute_checksum(const CANPacket_t *msg) {
-  uint8_t sum = 0;
-  for (int i = 0; i < 7; i++) {
-    sum += msg->data[i];
+  uint8_t checksum = 0;
+  int len = GET_LEN(msg);
+  for (int i = 0; i < (len - 1); i++) {
+    checksum += msg->data[i];
   }
-  return 0xFFU - sum;
+  return (uint8_t)(~checksum);
 }
 
 static void byd_rx_hook(const CANPacket_t *msg) {
@@ -25,6 +33,21 @@ static void byd_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == 0x11FU) {
       int angle_meas_new = to_signed((msg->data[1] << 8) | msg->data[0], 16);  // STEER_ANGLE_2
       update_sample(&angle_meas, angle_meas_new);
+    }
+
+    // Column driver torque: 0.1 Nm/LSB, signed. The EPS measurement in 0x11F is attenuated
+    // too far to see an override, so the hard disengage uses this instead.
+    if (msg->addr == 0x1FCU) {
+      int driver_torque = to_signed((msg->data[1] << 4) | (msg->data[0] >> 4), 12);  // DRIVER_TORQUE
+
+      if ((driver_torque > BYD_DRIVER_TORQUE_DISENGAGE) || (driver_torque < -BYD_DRIVER_TORQUE_DISENGAGE)) {
+        if (byd_driver_torque_frames < BYD_DRIVER_TORQUE_FRAMES) {
+          byd_driver_torque_frames += 1;
+        }
+      } else {
+        byd_driver_torque_frames = 0;
+      }
+      steering_disengage = byd_driver_torque_frames >= BYD_DRIVER_TORQUE_FRAMES;
     }
 
     // Vehicle speed: 0.1 kph/LSB
@@ -92,6 +115,7 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
 
 static safety_config byd_init(uint16_t param) {
   SAFETY_UNUSED(param);
+  byd_driver_torque_frames = 0;
 
   static const CanMsg BYD_TX_MSGS[] = {
     {0x1E2, 0, 8, .check_relay = true},   // STEERING_MODULE_ADAS (lateral steering command)
@@ -101,9 +125,11 @@ static safety_config byd_init(uint16_t param) {
 
   static const RxCheck byd_rx_checks[] = {
     {.msg = {{0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_MODULE_2 (steering angle)
-    {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // WHEELSPEED_CLEAN (vehicle speed)
+    {.msg = {{0x1FC, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // STEERING_TORQUE (column driver torque)
+    {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // WHEELSPEED_CLEAN (vehicle speed)
     {.msg = {{0x242, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DRIVE_STATE (gas and brake pressed)
-    {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // ACC_HUD_ADAS (cruise state)
+    {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // ACC_HUD_ADAS (cruise state)
+  };
   };
 
   return BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);
