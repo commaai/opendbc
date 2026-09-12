@@ -33,6 +33,8 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaru)]
       if ret.flags & SubaruFlags.GLOBAL_GEN2:
         ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.GEN2.value
+      if ret.flags & SubaruFlags.LKAS_ANGLE:
+        ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.LKAS_ANGLE.value
 
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.1
