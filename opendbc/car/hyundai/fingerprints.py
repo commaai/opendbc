@@ -581,6 +581,7 @@ FW_VERSIONS = {
       b'\xf1\x00CDT LKAS AT EUR LHD 1.00 1.01 99211-J7210 521',
     ],
     (Ecu.abs, 0x7d1, None): [
+      b'\xf1\x00CD ESC \r 102\x18\x08\x05 58920-J7350',
       b'\xf1\x00CD ESC \x03 102\x18\x08\x05 58920-J7350',
       b'\xf1\x00CD ESC \x0b 101 \x10\x03 58910-J7AC0',
     ],
