@@ -86,5 +86,19 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     self.assertFalse(step(True, True))
 
 
+class TestBydDbcObserve(unittest.TestCase):
+  def test_drive_state_gear_nibble(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    _, dat, _ = packer.make_can_msg("DRIVE_STATE", 0, {"GEAR": 4})
+    self.assertEqual(dat[5] & 0x07, 4)
+
+  def test_power_on_and_epb_bits(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    _, power, _ = packer.make_can_msg("POWER_VCC", 0, {"POWER_ON": 1})
+    self.assertEqual(power[4] & 0x02, 0x02)
+    _, epb, _ = packer.make_can_msg("EPB_STATUS", 0, {"EPB_APPLIED": 1})
+    self.assertEqual(epb[0] & 0x08, 0x08)
+
+
 if __name__ == "__main__":
   unittest.main()
