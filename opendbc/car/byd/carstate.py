@@ -21,6 +21,9 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.lkas_hud = {}
+    self.eps_engaged = True
+    self.eps_target_angle = 0.0
+    self.steer_not_accepted = False
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -41,10 +44,16 @@ class CarState(CarStateBase):
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorqueEps) > CCP.STEER_DRIVER_OVERRIDE, 5)
     ret.steeringDisengage = abs(ret.steeringTorqueEps) > CCP.STEER_DRIVER_DISENGAGE
 
-    # LKAS_STATE follows the BYD TJA_STATE_* enum: 0=Off, 1=Passive, 2/3=Active, 4=Fault.
-    # LKS_PREPARED on the EPS is also 1 at route start before any engagement, so it can't be
-    # used directly as a fault flag - the camera-side fault state is the reliable indicator.
-    ret.steerFaultTemporary = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"]) == 4
+    # EPS clears LKS_PREPARED and echoes TARGET_ANGLE while it executes our request.
+    # Only trust after the first STEERING_TORQUE frame (parser defaults are 0 / "engaged").
+    if cp.ts_nanos["STEERING_TORQUE"]["LKS_PREPARED"] > 0:
+      self.eps_engaged = not cp.vl["STEERING_TORQUE"]["LKS_PREPARED"]
+      self.eps_target_angle = cp.vl["STEERING_TORQUE"]["TARGET_ANGLE"]
+
+    # LKAS_STATE 4 = limited/faulted (cluster "LKS is limited"). Also fault when we ask
+    # and the EPS stays idle for >1 s (carcontroller sets steer_not_accepted).
+    ret.steerFaultTemporary = (int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"]) == 4 or
+                               self.steer_not_accepted)
 
     # gas / brake
     ret.gasPressed = cp.vl["DRIVE_STATE"]["RAW_THROTTLE"] > 0
