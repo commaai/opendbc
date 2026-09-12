@@ -17,6 +17,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.apply_angle_last = 0.0
+    self.not_accepted_frames = 0
 
     # Vehicle model used for lateral limiting
     self.VM = VehicleModel(get_safety_CP())
@@ -33,6 +34,11 @@ class CarController(CarControllerBase):
       cntr = (self.frame // 2) % 16
       can_sends.append(bydcan.create_steering_control(self.packer, self.apply_angle_last, CC.latActive, cntr))
       can_sends.append(bydcan.create_lkas_hud(self.packer, CC.latActive, cntr, CS.lkas_hud, hud_control))
+
+      # STEER_REQ=1 while EPS reports idle (LKS_PREPARED=1) for >1 s => not accepted
+      not_accepted = CC.latActive and not CS.eps_engaged
+      self.not_accepted_frames = self.not_accepted_frames + 1 if not_accepted else 0
+      CS.steer_not_accepted = self.not_accepted_frames > 50
 
     if CC.cruiseControl.cancel and self.frame % 10 == 0:
       can_sends.append(bydcan.create_buttons(self.packer, cancel=True))
