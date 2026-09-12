@@ -28,8 +28,11 @@ class CarControllerParams:
     MAX_ANGLE_RATE=5,  # deg/20ms frame
   )
 
-  STEER_DRIVER_OVERRIDE = 10   # EPS torque threshold for soft override
-  STEER_DRIVER_DISENGAGE = 30  # EPS torque threshold for hard disengage
+  # The column attenuates driver torque ~12x before the EPS measures it, so DRIVER_EPS_TORQUE
+  # stays under 5 through deliberate wheel input and cannot be used to see an override.
+  STEER_DRIVER_OVERRIDE = 15          # column torque for soft override, Nm
+  STEER_DRIVER_DISENGAGE = 100        # column torque for hard disengage, Nm
+  STEER_DRIVER_DISENGAGE_FRAMES = 5   # 100 ms of STEERING_TORQUE, mirrored in byd.h
 
 
 @dataclass

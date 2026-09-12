@@ -21,6 +21,7 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.lkas_hud = {}
+    self.disengage_frames = 0
     self.eps_engaged = True
     self.eps_target_angle = 0.0
     self.steer_not_accepted = False
@@ -39,10 +40,17 @@ class CarState(CarStateBase):
 
     # steering wheel
     ret.steeringAngleDeg = cp.vl["STEER_MODULE_2"]["STEER_ANGLE_2"]
-    ret.steeringTorque = cp.vl["STEERING_TORQUE"]["MAIN_TORQUE"]
+    ret.steeringTorque = cp.vl["STEERING_TORQUE"]["DRIVER_TORQUE"]
     ret.steeringTorqueEps = cp.vl["STEER_MODULE_2"]["DRIVER_EPS_TORQUE"]
-    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorqueEps) > CCP.STEER_DRIVER_OVERRIDE, 5)
-    ret.steeringDisengage = abs(ret.steeringTorqueEps) > CCP.STEER_DRIVER_DISENGAGE
+    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CCP.STEER_DRIVER_OVERRIDE, 5)
+
+    # Debounced per STEERING_TORQUE frame to match byd_rx_hook, which panda runs on every frame
+    for driver_torque in cp.vl_all["STEERING_TORQUE"]["DRIVER_TORQUE"]:
+      if abs(driver_torque) > CCP.STEER_DRIVER_DISENGAGE:
+        self.disengage_frames = min(self.disengage_frames + 1, CCP.STEER_DRIVER_DISENGAGE_FRAMES)
+      else:
+        self.disengage_frames = 0
+    ret.steeringDisengage = self.disengage_frames >= CCP.STEER_DRIVER_DISENGAGE_FRAMES
 
     # EPS clears LKS_PREPARED and echoes TARGET_ANGLE while it executes our request.
     # Only trust after the first STEERING_TORQUE frame (parser defaults are 0 / "engaged").
