@@ -110,16 +110,12 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
 }
 
 static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], const int len) {
-  int addr = msg->addr;
-  int length = GET_LEN(msg);
-
   int index = -1;
   for (int i = 0; i < len; i++) {
     // if multiple msgs are allowed, determine which one is present on the bus
     if (!addr_list[i].status.msg_seen) {
       for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (addr_list[i].msg[j].addr != 0); j++) {
-        if ((addr == addr_list[i].msg[j].addr) && (msg->bus == addr_list[i].msg[j].bus) &&
-              (length == addr_list[i].msg[j].len)) {
+        if (msg_matches(msg, addr_list[i].msg[j].addr, addr_list[i].msg[j].bus, addr_list[i].msg[j].len)) {
           addr_list[i].status.index = j;
           addr_list[i].status.msg_seen = true;
           break;
@@ -129,8 +125,7 @@ static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], con
 
     if (addr_list[i].status.msg_seen) {
       int idx = addr_list[i].status.index;
-      if ((addr == addr_list[i].msg[idx].addr) && (msg->bus == addr_list[i].msg[idx].bus) &&
-          (length == addr_list[i].msg[idx].len)) {
+      if (msg_matches(msg, addr_list[i].msg[idx].addr, addr_list[i].msg[idx].bus, addr_list[i].msg[idx].len)) {
         index = i;
         break;
       }
@@ -222,12 +217,9 @@ bool safety_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[], int len) {
-  int addr = msg->addr;
-  int length = GET_LEN(msg);
-
   bool whitelisted = false;
   for (int i = 0; i < len; i++) {
-    if ((addr == msg_list[i].addr) && (msg->bus == msg_list[i].bus) && (length == msg_list[i].len)) {
+    if (msg_matches(msg, msg_list[i].addr, msg_list[i].bus, msg_list[i].len)) {
       whitelisted = true;
       break;
     }
