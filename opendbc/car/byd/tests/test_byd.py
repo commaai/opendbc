@@ -6,7 +6,8 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus
 from opendbc.car.byd import bydcan
 from opendbc.car.byd.carcontroller import CarController
-from opendbc.car.byd.values import DBC, CAR
+from opendbc.car.byd.carstate import cruise_enabled
+from opendbc.car.byd.values import DBC, CAR, CarControllerParams as CCP
 
 
 class _Hud:
@@ -86,6 +87,17 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     self.assertFalse(step(True, True))
 
 
+class TestBydCruiseGate(unittest.TestCase):
+  def test_acc_without_lkas_does_not_enable(self):
+    # LKS off (0) or limited (4): stock ACC must not engage OP.
+    self.assertFalse(cruise_enabled(acc_state=3, lkas_state=0))
+    self.assertFalse(cruise_enabled(acc_state=3, lkas_state=4))
+    # LKS on/passive (1) or active (2): ACC engages OP.
+    self.assertTrue(cruise_enabled(acc_state=3, lkas_state=1))
+    self.assertTrue(cruise_enabled(acc_state=5, lkas_state=2))
+    self.assertFalse(cruise_enabled(acc_state=2, lkas_state=1))
+
+
 class TestBydDbcObserve(unittest.TestCase):
   def test_drive_state_gear_nibble(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
@@ -98,6 +110,10 @@ class TestBydDbcObserve(unittest.TestCase):
     self.assertEqual(power[4] & 0x02, 0x02)
     _, epb, _ = packer.make_can_msg("EPB_STATUS", 0, {"EPB_APPLIED": 1})
     self.assertEqual(epb[0] & 0x08, 0x08)
+
+  def test_radar_dbc_is_mapped_but_unavailable(self):
+    self.assertEqual(DBC[CAR.BYD_ATTO_3][Bus.radar], "byd_radar_fd")
+    self.assertEqual(CCP.EPB_DEBOUNCE_FRAMES, 8)
 
 
 if __name__ == "__main__":

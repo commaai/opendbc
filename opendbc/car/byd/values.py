@@ -34,9 +34,10 @@ class CarControllerParams:
 
   # The column attenuates driver torque ~12x before the EPS measures it, so DRIVER_EPS_TORQUE
   # stays under 5 through deliberate wheel input and cannot be used to see an override.
-  STEER_DRIVER_OVERRIDE = 15          # column torque for soft override, Nm
+  STEER_DRIVER_OVERRIDE = 18          # column torque for soft override, Nm
   STEER_DRIVER_DISENGAGE = 100        # column torque for hard disengage, Nm
   STEER_DRIVER_DISENGAGE_FRAMES = 5   # 100 ms of STEERING_TORQUE, mirrored in byd.h
+  EPB_DEBOUNCE_FRAMES = 8             # ~70 ms at 120 Hz; ignore 0x09-0x12 transitions
 
 
 class WMI(StrEnum):
@@ -60,6 +61,7 @@ class BydCarDocs(CarDocs):
 class BydPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
     Bus.pt: 'byd_atto3',
+    Bus.radar: 'byd_radar_fd',
   })
   wmis: set[WMI] = field(default_factory=set)
   years: set[ModelYear] = field(default_factory=set)
