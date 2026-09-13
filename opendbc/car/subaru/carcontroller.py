@@ -48,7 +48,7 @@ class CarController(CarControllerBase):
         apply_angle = actuators.steeringAngleDeg
         # prevent small angle oscillations near standstill
         if CC.latActive and CS.out.vEgoRaw < 4.0:
-          apply_angle = self.apply_angle_last + apply_center_deadzone(apply_angle - self.apply_angle_last, 1.0)
+          apply_angle = self.apply_angle_last + apply_center_deadzone(apply_angle - self.apply_angle_last, 2.5)
         # Use filtered speed to smooth changes in the dynamic angle limit.
         apply_angle = apply_steer_angle_limits_vm(apply_angle, self.apply_angle_last, CS.out.vEgo,
                                                  CS.out.steeringAngleDeg, CC.latActive, self.p, self.VM)

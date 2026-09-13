@@ -28,7 +28,7 @@ class TestSubaruAngleLimits(unittest.TestCase):
     self.vm = VehicleModel(get_safety_CP())
 
   def test_low_speed_deadband(self):
-    for speed, desired, expected in ((3.9, 0.99, 0.0), (3.9, 1.0, 1.0), (4.0, 0.5, 0.5)):
+    for speed, desired, expected in ((3.9, 2.49, 0.0), (3.9, 2.5, 2.5), (3.9, -2.49, 0.0), (3.9, -2.5, -2.5), (4.0, 0.5, 0.5)):
       with self.subTest(speed=speed, desired=desired):
         cp = CarInterface.get_non_essential_params(CAR.SUBARU_CROSSTREK_2025)
         ci = CarInterface(cp)
