@@ -37,6 +37,9 @@ def lkas_tx_msgs(alt_bus):
 
 
 class TestSubaruSafetyBase(common.CarSafetyTest):
+  WRONG_MODE_FAMILY = "subaru"
+  WRONG_MODE_GROUP = "subaru_global"
+
   FLAGS = 0
   RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
                                                SubaruMsg.ES_Infotainment)}

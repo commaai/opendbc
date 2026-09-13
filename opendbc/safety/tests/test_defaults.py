@@ -35,6 +35,9 @@ class TestSilent(TestNoOutput):
 
 
 class TestAllOutput(TestDefaultRxHookBase):
+  # Its unrestricted TX list is not a source of wrong-mode test messages.
+  WRONG_MODE_SOURCE = False
+
   # Allow all messages
   TX_MSGS = [[addr, bus] for addr in common.SafetyTest.SCANNED_ADDRS
              for bus in range(4)]

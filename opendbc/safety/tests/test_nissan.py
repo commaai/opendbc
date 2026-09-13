@@ -9,6 +9,7 @@ from opendbc.safety.tests.common import CANPackerSafety
 
 
 class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
+  WRONG_MODE_ALLOW_OWN_TX = True
 
   TX_MSGS = [[0x169, 0], [0x2b1, 0], [0x4cc, 0], [0x20b, 2], [0x280, 2]]
   GAS_PRESSED_THRESHOLD = 3

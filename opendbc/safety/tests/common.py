@@ -5,6 +5,7 @@ import unittest
 import importlib
 import numpy as np
 from collections.abc import Callable
+from functools import cache
 
 from opendbc.can import CANPacker
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
@@ -926,7 +927,28 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.assertFalse(self._tx(self._curvature_cmd_msg(2 * max_curvature_delta, True)))
 
 
+@cache
+def discover_safety_tests():
+  test_files = [f for f in os.listdir(os.path.dirname(os.path.realpath(__file__))) if f.startswith("test_") and f.endswith(".py")]
+  test_classes = []
+  for filename in test_files:
+    module = importlib.import_module("opendbc.safety.tests." + filename[:-3])
+    for name in dir(module):
+      cls = getattr(module, name)
+      if isinstance(cls, type) and issubclass(cls, SafetyTest) and cls.TX_MSGS is not None and not name.endswith('Base'):
+        test_classes.append((name, cls))
+  return tuple(test_classes), len(test_files)
+
+
 class SafetyTest(SafetyTestBase):
+  # Variants in a compatibility group are intentionally not compared to one another.
+  WRONG_MODE_GROUP: str | None = None
+  WRONG_MODE_FAMILY: str = ""
+  WRONG_MODE_SOURCE: bool = True
+  # Source-address exclusions keyed by the receiving family's name; "*" applies to every family.
+  WRONG_MODE_EXCLUDED_ADDRS: dict[str, frozenset[int]] = {}
+  WRONG_MODE_ALLOW_OWN_TX: bool = False
+
   TX_MSGS: list[list[int]] = []
   SCANNED_ADDRS = [*range(0x800),                      # Entire 11-bit CAN address space
                    *range(0x18DA00F1, 0x18DB00F1, 0x100),   # 29-bit UDS physical addressing
@@ -977,81 +999,26 @@ class SafetyTest(SafetyTestBase):
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_tx_hook_on_wrong_safety_mode(self):
-    files = os.listdir(os.path.dirname(os.path.realpath(__file__)))
-    test_files = [f for f in files if f.startswith("test_") and f.endswith(".py")]
-
+    test_classes, test_file_count = discover_safety_tests()
     current_test = self.__class__.__name__
-
     all_tx = []
-    for tf in test_files:
-      test = importlib.import_module("opendbc.safety.tests."+tf[:-3])
-      for attr in dir(test):
-        tc = getattr(test, attr)
-        if isinstance(tc, type) and issubclass(tc, SafetyTest) and attr != current_test:
-          tx = tc.TX_MSGS
-          if tx is not None and not attr.endswith('Base'):
-            # No point in comparing different Tesla safety modes
-            if 'Tesla' in attr and 'Tesla' in current_test:
-              continue
-            # No point in comparing to ALLOUTPUT which allows all messages
-            if attr.startswith('TestAllOutput'):
-              continue
-            if attr.startswith('TestToyota') and current_test.startswith('TestToyota'):
-              continue
-            if attr.startswith('TestSubaruGen') and current_test.startswith('TestSubaruGen'):
-              continue
-            if attr.startswith('TestSubaruPreglobal') and current_test.startswith('TestSubaruPreglobal'):
-              continue
-            if {attr, current_test}.issubset({'TestVolkswagenPqSafety', 'TestVolkswagenPqStockSafety', 'TestVolkswagenPqLongSafety'}):
-              continue
-            if {attr, current_test}.issubset({'TestGmCameraSafety', 'TestGmCameraLongitudinalSafety', 'TestGmAscmSafety',
-                                              'TestGmCameraEVSafety', 'TestGmCameraLongitudinalEVSafety', 'TestGmAscmEVSafety'}):
-              continue
-            if attr.startswith('TestFord') and current_test.startswith('TestFord'):
-              continue
-            if attr.startswith('TestHyundaiCanfd') and current_test.startswith('TestHyundaiCanfd'):
-              continue
-            if {attr, current_test}.issubset({'TestHyundaiLongitudinalSafety', 'TestHyundaiLongitudinalSafetyCameraSCC', 'TestHyundaiSafetyFCEVLong'}):
-              continue
-            volkswagen_shared = ('TestVolkswagenMqb', 'TestVolkswagenMlb', 'TestVolkswagenMeb')
-            if attr.startswith(volkswagen_shared) and current_test.startswith(volkswagen_shared):
-              continue
-
-            # overlapping TX addrs, but they're not actuating messages for either car
-            if attr == 'TestHyundaiCanfdLKASteeringLongEV' and current_test.startswith('TestToyota'):
-              tx = list(filter(lambda m: m[0] not in [0x160, ], tx))
-
-            # Volkswagen MQB longitudinal actuating message overlaps with the Subaru lateral actuating message
-            if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestSubaru'):
-              tx = list(filter(lambda m: m[0] not in [0x122, ], tx))
-
-            # Volkswagen MQB and Honda Nidec ACC HUD messages overlap
-            if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestHondaNidec'):
-              tx = list(filter(lambda m: m[0] not in [0x30c, ], tx))
-
-            # Volkswagen MQB and Honda Bosch Radarless ACC HUD messages overlap
-            if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestHondaBoschRadarless'):
-              tx = list(filter(lambda m: m[0] not in [0x30c, ], tx))
-
-            # TODO: Temporary, should be fixed in panda firmware, safety_honda.h
-            if attr.startswith('TestHonda'):
-              # exceptions for common msgs across different hondas
-              tx = list(filter(lambda m: m[0] not in [0x1FA, 0x30C, 0x33D, 0x33DB], tx))
-
-            if attr.startswith('TestHyundaiLongitudinal'):
-              # exceptions for common msgs across different Hyundai CAN platforms
-              tx = list(filter(lambda m: m[0] not in [0x420, 0x50A, 0x389, 0x4A2], tx))
-            all_tx.append([[m[0], m[1], attr] for m in tx])
+    for name, cls in test_classes:
+      if name == current_test or not cls.WRONG_MODE_SOURCE:
+        continue
+      if self.WRONG_MODE_GROUP is not None and self.WRONG_MODE_GROUP == cls.WRONG_MODE_GROUP:
+        continue
+      excluded = cls.WRONG_MODE_EXCLUDED_ADDRS.get("*", frozenset()) | cls.WRONG_MODE_EXCLUDED_ADDRS.get(self.WRONG_MODE_FAMILY, frozenset())
+      all_tx.append([(addr, bus, name) for addr, bus in cls.TX_MSGS if addr not in excluded])
 
     # make sure we got all the msgs
-    self.assertTrue(len(all_tx) >= len(test_files)-1)
+    self.assertTrue(len(all_tx) >= test_file_count - 1)
 
     for tx_msgs in all_tx:
       for addr, bus, test_name in tx_msgs:
         msg = make_msg(bus, addr)
         self.safety.set_controls_allowed(1)
         # TODO: this should be blocked
-        if current_test in ["TestNissanSafety", "TestNissanSafetyAltEpsBus", "TestNissanLeafSafety"] and [addr, bus] in self.TX_MSGS:
+        if self.WRONG_MODE_ALLOW_OWN_TX and [addr, bus] in self.TX_MSGS:
           continue
         self.assertFalse(self._tx(msg), f"transmit of {addr=:#x} {bus=} from {test_name} during {current_test} was allowed")
 

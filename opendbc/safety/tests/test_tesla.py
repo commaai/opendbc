@@ -27,6 +27,8 @@ def round_angle(apply_angle, can_offset=0):
 
 
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
+  WRONG_MODE_GROUP = "tesla"
+
   SAFETY_PARAM = 0
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor)}

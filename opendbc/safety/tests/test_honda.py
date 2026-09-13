@@ -162,6 +162,9 @@ class HondaPcmEnableBase(common.CarSafetyTest):
 
 
 class HondaBase(common.CarSafetyTest):
+  # TODO: shared Honda messages should be blocked in firmware.
+  WRONG_MODE_EXCLUDED_ADDRS = {"*": frozenset({0x1FA, 0x30C, 0x33D, 0x33DB})}
+
   MAX_BRAKE = 255
   PT_BUS: int | None = None  # must be set when inherited
   STEER_BUS: int | None = None  # must be set when inherited
@@ -242,6 +245,8 @@ class HondaBase(common.CarSafetyTest):
 
 
 class TestHondaNidecSafetyBase(HondaBase):
+  WRONG_MODE_FAMILY = "honda_nidec"
+
   TX_MSGS = HONDA_N_COMMON_TX_MSGS
   FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194, 0x33D, 0x30C)}
@@ -519,6 +524,8 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
 class TestHondaBoschRadarlessSafetyBase(TestHondaBoschSafetyBase):
   """Base class for radarless Honda Bosch"""
+  WRONG_MODE_FAMILY = "honda_bosch_radarless"
+
   PT_BUS = 0
   STEER_BUS = 0
   BUTTONS_BUS = 2  # camera controls ACC, need to send buttons on bus 2

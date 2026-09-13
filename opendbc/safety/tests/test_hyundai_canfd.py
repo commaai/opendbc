@@ -23,6 +23,7 @@ ALL_GAS_EV_HYBRID_COMBOS = [
 
 
 class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+  WRONG_MODE_GROUP = "hyundai_canfd"
 
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   STANDSTILL_THRESHOLD = 12  # 0.375 kph
@@ -195,6 +196,8 @@ class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
 
 
 class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanfdLKASteeringEV):
+  # Shared non-actuating address with Toyota.
+  WRONG_MODE_EXCLUDED_ADDRS = {"toyota": frozenset({0x160})}
 
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0], [0x51, 0], [0x730, 1], [0x12a, 1], [0x160, 1],
              [0x1e0, 1], [0x1a0, 1], [0x1ea, 1], [0x200, 1], [0x345, 1], [0x1da, 1]]

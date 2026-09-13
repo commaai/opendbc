@@ -11,6 +11,8 @@ MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 
 
 class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+  WRONG_MODE_GROUP = "volkswagen_shared"
+
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02)}
 
   MAX_RATE_UP = 9

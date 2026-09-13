@@ -64,6 +64,8 @@ class Buttons:
 #  * CAN FD with openpilot longitudinal
 
 class TestFordSafetyBase(common.CarSafetyTest):
+  WRONG_MODE_GROUP = "ford"
+
   STANDSTILL_THRESHOLD = 1
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
                                  MSG_LateralMotionControl2, MSG_IPMA_Data)}

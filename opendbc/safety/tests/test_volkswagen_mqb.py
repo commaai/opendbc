@@ -20,6 +20,8 @@ MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 
 
 class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+  WRONG_MODE_GROUP = "volkswagen_shared"
+
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02), 2: (MSG_LH_EPS_03,)}
 
   MAX_RATE_UP = 4
@@ -144,6 +146,13 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
 
 
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
+  # Subaru steering and Honda HUD addresses overlap with MQB longitudinal messages.
+  WRONG_MODE_EXCLUDED_ADDRS = {
+    "subaru": frozenset({0x122}),
+    "honda_nidec": frozenset({0x30C}),
+    "honda_bosch_radarless": frozenset({0x30C}),
+  }
+
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_ACC_02, 0], [MSG_ACC_06, 0], [MSG_ACC_07, 0]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07]}
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07), 2: (MSG_LH_EPS_03,)}

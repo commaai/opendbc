@@ -9,6 +9,9 @@ from opendbc.safety.tests.common import CANPackerSafety
 
 
 class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+  WRONG_MODE_FAMILY = "subaru"
+  WRONG_MODE_GROUP = "subaru_preglobal"
+
   FLAGS = 0
   DBC = "subaru_outback_2015_generated"
   TX_MSGS = [[0x161, 0], [0x164, 0]]

@@ -192,6 +192,10 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
 
 
 class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
+  # Shared messages across Hyundai CAN platforms.
+  WRONG_MODE_EXCLUDED_ADDRS = {"*": frozenset({0x420, 0x50A, 0x389, 0x4A2})}
+  WRONG_MODE_GROUP = "hyundai_longitudinal"
+
   TX_MSGS = [[0x340, 0], [0x4F1, 0], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0], [0x38D, 0], [0x483, 0], [0x7D0, 0]]
 
   FWD_BLACKLISTED_ADDRS = {2: [0x340, 0x485, 0x421, 0x420, 0x50A, 0x389]}
@@ -241,6 +245,10 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
 
 
 class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyundaiSafety):
+  # Shared messages across Hyundai CAN platforms.
+  WRONG_MODE_EXCLUDED_ADDRS = {"*": frozenset({0x420, 0x50A, 0x389, 0x4A2})}
+  WRONG_MODE_GROUP = "hyundai_longitudinal"
+
   TX_MSGS = [[0x340, 0], [0x4F1, 2], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0]]
 
   FWD_BLACKLISTED_ADDRS = {2: [0x340, 0x485, 0x420, 0x421, 0x50A, 0x389]}
@@ -276,6 +284,9 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
 
 
 class TestHyundaiSafetyFCEVLong(TestHyundaiLongitudinalSafety, TestHyundaiSafetyFCEV):
+  # Keep full wrong-mode coverage for FCEV, without the shared-message exemptions above.
+  WRONG_MODE_EXCLUDED_ADDRS = {}
+
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_can_generated")
     self.safety = libsafety_py.libsafety

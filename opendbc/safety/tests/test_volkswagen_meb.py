@@ -31,6 +31,8 @@ MSG_LDW_02     = 0x397
 
 
 class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteeringSafetyTest):
+  WRONG_MODE_GROUP = "volkswagen_shared"
+
   STANDSTILL_THRESHOLD = 0
 
   MAX_CURVATURE = 29105

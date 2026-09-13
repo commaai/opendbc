@@ -15,6 +15,8 @@ MSG_LDW_1 = 0x5BE             # TX by OP, Lane line recognition and text alerts
 
 
 class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+  WRONG_MODE_GROUP = "volkswagen_pq"
+
   cruise_engaged = False
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1)}
