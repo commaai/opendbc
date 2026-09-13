@@ -32,29 +32,34 @@ def _decode_hud(packer_msg):
 
 
 class TestBydLkasHud(unittest.TestCase):
-  def test_idle_clears_control_claim(self):
+  def test_active_sets_green_icons(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
     stock = {
       "LKAS_STATE": 0,
-      "LKS_MODE": 2,
+      "LKS_MODE": 0,
       "LKAS_ACTIVE": 1,
-      "LKAS_REQ_PREPARE": 1,
-      "TJA_ICA_STATE": 2,
-      "LKAS_OUTPUT": 1,
-      "LEFT_LANE_STATE": 1,
-      "RIGHT_LANE_STATE": 1,
+      "LEFT_LANE_STATE": 0,
+      "RIGHT_LANE_STATE": 0,
     }
-    idle = _decode_hud(bydcan.create_lkas_hud(packer, False, 3, stock, _Hud()))
-    active = _decode_hud(bydcan.create_lkas_hud(packer, True, 3, stock, _Hud()))
-
-    self.assertEqual(idle["LKAS_ACTIVE"], 0)
-    self.assertEqual(idle["LKAS_REQ_PREPARE"], 0)
-    self.assertEqual(idle["TJA_ICA_STATE"], 0)
-    self.assertEqual(idle["LKAS_OUTPUT"], 0)
-    self.assertEqual(idle["LKAS_STATE"], stock["LKAS_STATE"])
-    self.assertEqual(idle["LKS_MODE"], stock["LKS_MODE"])
+    active = _decode_hud(bydcan.create_lkas_hud(packer, 3, stock, _Hud()))
     self.assertEqual(active["LKAS_STATE"], 2)
     self.assertEqual(active["LKS_MODE"], 2)
+
+  def test_active_preserves_unnamed_bits(self):
+    # Bits 2,3,8,9,32,33,50,51 are not in the original DBC. Without SET_ME_*
+    # the packer writes zeros and the EC sees a different 0x316 than the camera.
+    raw = bytearray([0xFF] * 7 + [0])
+    raw[7] = (~sum(raw[:7])) & 0xFF
+    raw = bytes(raw)
+    cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("LKAS_HUD_ADAS", 0)], 0)
+    cp.update([(0, [(0x316, raw, 0)])])
+    stock = dict(cp.vl["LKAS_HUD_ADAS"])
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    _addr, dat, _bus = bydcan.create_lkas_hud(packer, 3, stock, _Hud())
+    for bit in (2, 3, 8, 9, 32, 33, 50, 51):
+      self.assertEqual((dat[bit // 8] >> (bit % 8)) & 1, 1, f"bit {bit} zeroed")
+    active = _decode_hud((_addr, dat, _bus))
+    self.assertEqual(active["LKAS_STATE"], 2)
 
 
 class TestBydSteerNotAccepted(unittest.TestCase):
@@ -85,6 +90,35 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     self.assertTrue(flags[101])
 
     self.assertFalse(step(True, True))
+
+  def test_idle_does_not_tx_steer_or_hud(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+
+    def step(lat_active: bool):
+      CS = SimpleNamespace(
+        eps_engaged=True,
+        steer_not_accepted=False,
+        lkas_hud={},
+        out=SimpleNamespace(vEgoRaw=20.0, steeringAngleDeg=0.0),
+      )
+      CC = SimpleNamespace(
+        latActive=lat_active,
+        actuators=_Actuators(),
+        hudControl=_Hud(),
+        cruiseControl=SimpleNamespace(cancel=False),
+      )
+      _act, sends = ctrl.update(CC, CS, 0)
+      return [m[0] for m in sends]
+
+    step(False)
+    idle_addrs = step(False)
+    self.assertNotIn(0x1E2, idle_addrs)
+    self.assertNotIn(0x316, idle_addrs)
+
+    step(True)
+    active_addrs = step(True)
+    self.assertIn(0x1E2, active_addrs)
+    self.assertIn(0x316, active_addrs)
 
 
 class TestBydCruiseGate(unittest.TestCase):

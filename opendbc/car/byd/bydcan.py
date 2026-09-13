@@ -29,20 +29,14 @@ def create_buttons(packer, cancel: bool):
   return packer.make_can_msg("PCM_BUTTONS", 0, values)
 
 
-def create_lkas_hud(packer, lat_active: bool, counter: int, stock_lkas_hud: dict, hud_control):
+def create_lkas_hud(packer, counter: int, stock_lkas_hud: dict, hud_control):
+  # Only called while latActive. Idle HUD is camera 0x316 via panda.
   values = {**stock_lkas_hud, "COUNTER": counter, "HANDS_ON_WHEEL_REQ": 0}
-  if lat_active:
-    values["LKS_MODE"] = 2 # green lane line icon
-    values["LKAS_STATE"] = 2 # green steering wheel icon
-    # LANE_STATE: 0=Grey, 1=Green, 2=Orange
-    values["LEFT_LANE_STATE"] = 1 if hud_control.leftLaneVisible else 0
-    values["RIGHT_LANE_STATE"] = 1 if hud_control.rightLaneVisible else 0
-  else:
-    # Clear our control claim; leave camera LKAS_STATE / LKS_MODE alone (driver switch).
-    values["LKAS_ACTIVE"] = 0
-    values["LKAS_REQ_PREPARE"] = 0
-    values["TJA_ICA_STATE"] = 0
-    values["LKAS_OUTPUT"] = 0
+  values["LKS_MODE"] = 2 # green lane line icon
+  values["LKAS_STATE"] = 2 # green steering wheel icon
+  # LANE_STATE: 0=Grey, 1=Green, 2=Orange
+  values["LEFT_LANE_STATE"] = 1 if hud_control.leftLaneVisible else 0
+  values["RIGHT_LANE_STATE"] = 1 if hud_control.rightLaneVisible else 0
 
   if hud_control.leftLaneDepart:
     values["LEFT_LANE_STATE"] = 2
