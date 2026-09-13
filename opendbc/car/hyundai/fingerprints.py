@@ -374,6 +374,7 @@ FW_VERSIONS = {
       b'\xf1\x00CK__ SCC F_CUP      1.00 1.03 96400-J5100         ',
     ],
     (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00CK  MDPS R 1.00 1.02 56310-XX000 4C2VR102',
       b'\xf1\x00CK  MDPS R 1.00 1.04 57700-J5200 4C2CL104',
       b'\xf1\x00CK  MDPS R 1.00 1.04 57700-J5220 4C2VL104',
       b'\xf1\x00CK  MDPS R 1.00 1.04 57700-J5420 4C4VL104',
@@ -383,6 +384,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00CK  MFC  AT EUR LHD 1.00 1.03 95740-J5000 170822',
+      b'\xf1\x00CK  MFC  AT EUR RHD 1.00 1.02 95740-J5000 170607',
       b'\xf1\x00CK  MFC  AT KOR LHD 1.00 1.04 95740-J5000 180504',
       b'\xf1\x00CK  MFC  AT USA LHD 1.00 1.03 95740-J5000 170822',
       b'\xf1\x00CK  MFC  AT USA LHD 1.00 1.04 95740-J5000 180504',
