@@ -233,7 +233,7 @@ typedef struct {
 
 bool safety_rx_hook(const CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
-int to_signed(int d, int bits);
+int to_signed(int d, unsigned int bits);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
 int ROUND(float val);

@@ -186,6 +186,13 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM | self.EXTRA_SAFETY_PARAM)
     self.safety.init_tests()
 
+  def test_rx_buttons_do_not_enable(self):
+    for button in (Buttons.RES_ACCEL, Buttons.DECEL_SET):
+      self.safety.set_controls_allowed(False)
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": button})))
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": 1})))
+      self.assertFalse(self.safety.get_controls_allowed())
+
   def test_buttons(self):
     # Only CANCEL button is allowed while cruise is enabled
     self.safety.set_controls_allowed(0)

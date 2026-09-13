@@ -60,6 +60,15 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     values = {f"WHL_Spd{pos}Val": speed * 0.03125 for pos in ["FL", "FR", "RL", "RR"]}
     return self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values)
 
+  def test_vehicle_moving_single_wheel(self):
+    # Any wheel above the threshold must count as moving, even if the others are stopped.
+    for wheel in ("FL", "FR", "RL", "RR"):
+      for speed in (0, self.STANDSTILL_THRESHOLD, self.STANDSTILL_THRESHOLD + 1):
+        with self.subTest(wheel=wheel, speed=speed):
+          values = {f"WHL_Spd{pos}Val": (speed if pos == wheel else 0) * 0.03125 for pos in ("FL", "FR", "RL", "RR")}
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values)))
+          self.assertEqual(self.safety.get_vehicle_moving(), speed > self.STANDSTILL_THRESHOLD)
+
   def _user_brake_msg(self, brake):
     values = {"DriverBraking": brake}
     return self.packer.make_can_msg_safety("TCS", self.PT_BUS, values)
@@ -67,6 +76,18 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
   def _user_gas_msg(self, gas):
     values = {self.GAS_MSG[1]: gas}
     return self.packer.make_can_msg_safety(self.GAS_MSG[0], self.PT_BUS, values)
+
+  def test_gas_message_selection(self):
+    # All three messages are RX alternatives; flags still select which signal controls gas state.
+    param = self.safety.get_current_safety_param()
+    for name, signal in (("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"),
+                         ("ACCELERATOR", "ACCELERATOR_PEDAL"), ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL")):
+      with self.subTest(message=name):
+        self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, param)
+        self.safety.init_tests()
+        msg = self.packer.make_can_msg_safety(name, self.PT_BUS, {signal: 1})
+        self.assertTrue(self._rx(msg))
+        self.assertEqual(self.safety.get_gas_pressed_prev(), name == self.GAS_MSG[0])
 
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": 1 if enable else 0}
@@ -129,8 +150,8 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
 
-  def _acc_cancel_msg(self, cancel, accel=0):
-    values = {"ACCMode": 4 if cancel else 0, "aReqRaw": accel, "aReqValue": accel}
+  def _acc_cancel_msg(self, cancel, accel_raw=0, accel_value=0):
+    values = {"ACCMode": 4 if cancel else 0, "aReqRaw": accel_raw, "aReqValue": accel_value}
     return self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
 
   def test_button_sends(self):
@@ -147,7 +168,9 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
     for enabled in (True, False):
       self.safety.set_controls_allowed(enabled)
       self.assertTrue(self._tx(self._acc_cancel_msg(True)))
-      self.assertFalse(self._tx(self._acc_cancel_msg(True, accel=1)))
+      self.assertFalse(self._tx(self._acc_cancel_msg(True, accel_raw=1)))
+      self.assertFalse(self._tx(self._acc_cancel_msg(True, accel_value=1)))
+      self.assertFalse(self._tx(self._acc_cancel_msg(True, accel_raw=1, accel_value=1)))
       self.assertFalse(self._tx(self._acc_cancel_msg(False)))
 
 

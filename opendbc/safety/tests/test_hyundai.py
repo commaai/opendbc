@@ -84,6 +84,22 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_gas += 1
     return self.packer.make_can_msg_safety("EMS16", 0, values, fix_checksum=checksum)
 
+  def test_gas_message_selection(self):
+    # RX permits either gas message, but only the configured powertrain should update gas state.
+    mode = self.safety.get_current_safety_mode()
+    param = self.safety.get_current_safety_param()
+    electrified = bool(param & (HyundaiSafetyFlags.EV_GAS | HyundaiSafetyFlags.HYBRID_GAS))
+    for name, values, expected in (
+      ("EMS16", {"CF_Ems_AclAct": 1}, not electrified),
+      ("E_EMS11", {"Accel_Pedal_Pos": 1, "CR_Vcu_AccPedDep_Pos": 1}, electrified),
+    ):
+      with self.subTest(message=name):
+        # Each candidate must be the first received alternative in its RX check.
+        self.safety.set_safety_hooks(mode, param)
+        self.safety.init_tests()
+        self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, values, fix_checksum=checksum)))
+        self.assertEqual(self.safety.get_gas_pressed_prev(), expected)
+
   def _user_brake_msg(self, brake):
     values = {"DriverOverride": 2 if brake else random.choice((0, 1, 3)),
               "AliveCounterTCS": self.cnt_brake % 8}
@@ -226,6 +242,13 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
       "FCA_CmdAct": int(fca_aeb_req),
     }
     return self.packer.make_can_msg_safety("FCA11", 0, values)
+
+  def test_button_sends(self):
+    # Longitudinal mode manages engagement from received buttons, without restricting sent buttons.
+    for controls_allowed in (False, True):
+      self.safety.set_controls_allowed(controls_allowed)
+      for button in range(8):
+        self.assertTrue(self._tx(self._button_msg(button, bus=self.BUTTONS_TX_BUS)))
 
   def test_no_aeb_fca11(self):
     self.assertTrue(self._tx(self._fca11_msg()))

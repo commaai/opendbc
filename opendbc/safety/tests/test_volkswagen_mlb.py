@@ -124,10 +124,20 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._ls_01_msg(resume=1)))
 
+  def test_steering_status(self):
+    # Both active HCA status encodings request steering; the others do not.
+    for status in range(16):
+      self.safety.set_controls_allowed(True)
+      values = {"HCA_01_LM_Offset": 1, "HCA_01_Status_HCA": status}
+      msg = self.packer.make_can_msg_safety("HCA_01", 0, values)
+      self.assertEqual(status in (5, 7), self._tx(msg))
+
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False))
     self.safety.set_controls_allowed(1)
+    self.assertTrue(self._rx(self._ls_01_msg(cancel=False, bus=0)))
+    self.assertTrue(self.safety.get_controls_allowed())
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 

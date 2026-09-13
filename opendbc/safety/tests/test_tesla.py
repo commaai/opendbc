@@ -142,7 +142,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
   def test_rx_hook(self):
     # counter check
-    for msg_type in ("angle", "long", "speed", "speed_2"):
+    for msg_type in ("angle", "long", "speed", "speed_2", "warning"):
       # send multiple times to verify counter checks
       for i in range(10):
         if msg_type == "angle":
@@ -153,6 +153,8 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           msg = self._speed_msg(0)
         elif msg_type == "speed_2":
           msg = self._speed_msg_2(0)
+        elif msg_type == "warning":
+          msg = self.packer.make_can_msg_safety("UI_warning", 0, {})
 
         should_rx = i >= 5
         if not should_rx:
@@ -161,7 +163,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
             msg[0].data[3] = 0
           elif msg_type == "long":
             msg[0].data[7] = 0
-          elif msg_type == "speed":
+          elif msg_type in ("speed", "warning"):
             msg[0].data[0] = 0
           elif msg_type == "speed_2":
             msg[0].data[7] = 0
@@ -225,6 +227,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
           self.assertEqual(should_disengage, self.safety.get_steering_disengage_prev())
 
+          # A sustained override must continue to prevent engagement.
+          self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=hands_on_level, eac_status=eac_status,
+                                                        eac_error_code=eac_error_code)))
+          self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+
           # Should not recover
           self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=0, eac_status=1, eac_error_code=0)))
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
@@ -261,6 +268,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertNotEqual(autopark_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
       self.assertNotEqual(autopark_active or not self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
 
+      # Autopark needs the stock steering and longitudinal messages forwarded.
+      for addr in self.FWD_BLACKLISTED_ADDRS[2]:
+        self.assertEqual(0 if autopark_active else -1, self.safety.safety_fwd_hook(2, addr))
+
       # Regain controls when Autopark disables
       self._rx(self._pcm_status_msg(True, 0))
       self.assertTrue(self.safety.get_controls_allowed())
@@ -292,6 +303,28 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.assertEqual(1, self._rx(lkas_msg_cam))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
     self.assertFalse(self._tx(no_lkas_msg))
+
+  def test_cruise_states(self):
+    for state in range(8):
+      self.assertTrue(self._rx(self._pcm_status_msg(False)))
+      msg = self.packer.make_can_msg_safety("DI_state", 0, {"DI_cruiseState": state})
+      self.assertTrue(self._rx(msg))
+      self.assertEqual(state in (2, 3, 4, 6, 7), self.safety.get_controls_allowed())
+
+  def test_stock_lkas_while_enabled(self):
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    # A stock LKAS activation while engaged must not take over steering.
+    for _ in range(2):
+      self.assertTrue(self._rx(self._angle_cmd_msg(0, state=self.steer_control_types['LANE_KEEP_ASSIST'], bus=2)))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+  def test_disabled_angle_reset_clipped(self):
+    for angle in (-400, 400):
+      self.safety.set_controls_allowed(False)
+      self.assertTrue(self._rx(self._angle_meas_msg(angle)))
+      self._tx(self._angle_cmd_msg(0, False))
+      self.assertEqual(-3600 if angle < 0 else 3600, self.safety.get_desired_angle_last())
 
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below

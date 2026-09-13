@@ -156,6 +156,16 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE)
     self.safety.init_tests()
 
+  def test_initializing_angle_ignored(self):
+    # Torque control accepts the message, but must ignore an uninitialized angle.
+    for _ in range(6):
+      self.assertTrue(self._rx(self._angle_meas_msg(10)))
+    angle_min = self.safety.get_angle_meas_min()
+    angle_max = self.safety.get_angle_meas_max()
+    self.assertTrue(self._rx(self._angle_meas_msg(100, steer_angle_initializing=True)))
+    self.assertEqual(self.safety.get_angle_meas_min(), angle_min)
+    self.assertEqual(self.safety.get_angle_meas_max(), angle_max)
+
 
 class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest):
 
@@ -242,6 +252,18 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
           should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE
           self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
           self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
+
+  def test_torque_wind_down_sample_extrema(self):
+    # A recent low driver torque sample permits full torque in either direction.
+    for sign, low_torque in itertools.product((-1, 1), (self.MAX_LTA_DRIVER_TORQUE, self.MAX_LTA_DRIVER_TORQUE + 1)):
+      self.safety.set_controls_allowed(True)
+      self._reset_angle_measurement(0)
+      self._set_prev_desired_angle(0)
+      for _ in range(6):
+        self.assertTrue(self._rx(self._torque_meas_msg(0, sign * (self.MAX_LTA_DRIVER_TORQUE + 10))))
+      self.assertTrue(self._rx(self._torque_meas_msg(0, sign * low_torque)))
+      self.assertEqual(low_torque <= self.MAX_LTA_DRIVER_TORQUE, self._tx(self._lta_msg(1, 1, 0, 100)))
+      self.assertTrue(self._tx(self._lta_msg(1, 1, 0, 0)))
 
   def test_angle_measurements(self):
     """

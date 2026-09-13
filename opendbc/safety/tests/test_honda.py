@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from opendbc.car.honda.values import HondaSafetyFlags
+from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
@@ -233,9 +234,10 @@ class HondaBase(common.CarSafetyTest):
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_steer_safety_check(self):
-    self.safety.set_controls_allowed(0)
-    self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
-    self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
+    for enabled in (False, True):
+      self.safety.set_controls_allowed(enabled)
+      self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
+      self.assertEqual(enabled, self._tx(self._send_steer_msg(0x1000)))
 
 
 # ********************* Honda Nidec **********************
@@ -269,6 +271,25 @@ class TestHondaNidecSafetyBase(HondaBase):
     # Used to control ACC on Nidec without pedal
     values = {"PCM_GAS": pcm_gas, "PCM_SPEED": pcm_speed}
     return self.packer.make_can_msg_safety("ACC_HUD", 0, values)
+
+  def test_alternate_steering_message(self):
+    for enabled in (False, True):
+      self.safety.set_controls_allowed(enabled)
+      self.assertTrue(self._tx(common.make_msg(0, 0x194, dat=b'\x00' * 4)))
+      self.assertEqual(enabled, self._tx(common.make_msg(0, 0x194, dat=b'\x01\x00\x00\x00')))
+
+  def test_brake_switch_debounce(self):
+    for pressed, expected in ((False, False), (True, False), (False, False), (True, False), (True, True), (False, False)):
+      values = {"BRAKE_SWITCH": pressed, "BRAKE_PRESSED": False, "COUNTER": self.cnt_powertrain_data % 4}
+      self.__class__.cnt_powertrain_data += 1
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, values)))
+      self.assertEqual(expected, self.safety.get_brake_pressed_prev())
+
+  def test_disable_stock_aeb(self):
+    self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.DISABLE_STOCK_AEB)
+    self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=1)))
+    self.assertFalse(self.safety.get_honda_fwd_brake())
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, 0x1FA))
 
   def test_acc_hud_safety_check(self):
     for controls_allowed in [True, False]:
@@ -444,6 +465,14 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
     super().setUp()
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, 0)
     self.safety.init_tests()
+
+  def test_supplemental_control(self):
+    valid = 0x0000000010800004
+    # The last byte contains the counter/checksum, and is unconstrained here.
+    for trailer in (0, 0xFF):
+      self.assertTrue(self._tx(common.make_msg(0, 0xE5, dat=(valid | (trailer << 56)).to_bytes(8, "little"))))
+    for bit in range(56):
+      self.assertFalse(self._tx(common.make_msg(0, 0xE5, dat=(valid ^ (1 << bit)).to_bytes(8, "little"))))
 
 
 class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):
