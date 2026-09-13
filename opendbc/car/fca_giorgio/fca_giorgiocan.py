@@ -19,7 +19,8 @@ def create_lka_hud_1_control(packer, bus, lat_active):
 def create_lka_hud_2_control(packer, bus, lat_active):
   values = {
     "LKA_DISABLE": 0,
-    "NEW_SIGNAL_1": 1,  # apparently inverse of LKA_DISABLE
+    # roughly: bit 1 = lane detection on, bit 2 = right line detected, bit 4 = left line detected
+    "NEW_SIGNAL_1": 6,
     "LKA_ACTIVE": lat_active,
   }
 
