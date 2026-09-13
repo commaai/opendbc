@@ -266,7 +266,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // Bosch supplemental control check
   if (msg->addr == 0xE5U) {
-    if ((GET_BYTES(msg, 0, 4) != 0x10800004U) || ((GET_BYTES(msg, 4, 4) & 0x00FFFFFFU) != 0x0U)) {
+    if ((GET_BYTES_64(msg, 0, 8) & 0x00FFFFFFFFFFFFFFULL) != 0x0000000010800004ULL) {
       tx = false;
     }
   }
@@ -282,7 +282,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
   if (msg->addr == 0x18DAB0F1U) {
-    if ((GET_BYTES(msg, 0, 4) != 0x00803E02U) || (GET_BYTES(msg, 4, 4) != 0x0U)) {
+    if (GET_BYTES_64(msg, 0, 8) != 0x0000000000803E02ULL) {
       tx = false;
     }
   }
