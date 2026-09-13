@@ -70,8 +70,9 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
     # Rivian has a dynamic max torque limit based on speed, so it checks two sources
     return self._user_gas_msg(0, speed, quality_flag)
 
-  def _user_brake_msg(self, brake):
-    values = {"iBESP2_BrakePedalApplied": brake, "iBESP2_AliveCounter": self.cnt_brake % 15}
+  def _user_brake_msg(self, brake, quality_flag=True):
+    values = {"iBESP2_BrakePedalApplied": brake, "iBESP2_BrakePedalApplied_Q": 1 if quality_flag else 2,
+              "iBESP2_AliveCounter": self.cnt_brake % 15}
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("iBESP2", 0, values, fix_checksum=checksum)
 
@@ -132,6 +133,12 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
       msg[0].data[0] ^= 0xff
       self.assertFalse(self._rx(msg))
       self.assertFalse(self.safety.get_controls_allowed())
+
+      if make_msg == self._user_brake_msg:
+        self._reset_safety_hooks()
+        self.safety.set_controls_allowed(True)
+        self.assertFalse(self._rx(self._user_brake_msg(False, quality_flag=False)))
+        self.assertFalse(self.safety.get_controls_allowed())
 
       # A single bad counter is tolerated, but repeated bad counters must disengage.
       self._reset_safety_hooks()
