@@ -104,6 +104,10 @@ bool get_vehicle_moving(void);
 void set_timer(uint32_t t);
 
 void safety_tick_current_safety_config();
+void safety_tick_without_config(void);
+bool get_safety_rx_checks_invalid(void);
+bool safety_tick_rx_check(uint32_t frequency, uint32_t last_timestamp, bool valid_checksum, bool valid_quality_flag, int wrong_counters);
+bool rx_check_callbacks(const CANPacket_t *msg, bool has_get_checksum, bool has_compute_checksum, bool ignore_checksum, bool ignore_counter);
 bool safety_config_valid();
 
 void init_tests(void);

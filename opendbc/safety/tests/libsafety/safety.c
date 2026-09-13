@@ -17,6 +17,40 @@ void safety_tick_current_safety_config() {
   safety_tick(&current_safety_config);
 }
 
+void safety_tick_without_config(void) {
+  safety_tick(NULL);
+}
+
+bool get_safety_rx_checks_invalid(void) {
+  return safety_rx_checks_invalid;
+}
+
+bool safety_tick_rx_check(uint32_t frequency, uint32_t last_timestamp, bool valid_checksum, bool valid_quality_flag, int wrong_counters) {
+  RxCheck rx_checks[] = {
+    {.msg = {{0x123, 0, 8, .frequency = frequency}, {0}, {0}},
+     .status = {.last_timestamp = last_timestamp, .valid_checksum = valid_checksum,
+                .valid_quality_flag = valid_quality_flag, .wrong_counters = wrong_counters}},
+  };
+  const safety_config cfg = {.rx_checks = rx_checks, .rx_checks_len = 1};
+  safety_tick(&cfg);
+  return rx_checks[0].status.lagging;
+}
+
+static uint32_t zero_checksum(const CANPacket_t *msg) {
+  SAFETY_UNUSED(msg);
+  return 0U;
+}
+
+bool rx_check_callbacks(const CANPacket_t *msg, bool has_get_checksum, bool has_compute_checksum, bool ignore_checksum, bool ignore_counter) {
+  RxCheck rx_checks[] = {
+    {.msg = {{0x123, 0, 8, 50U, .ignore_checksum = ignore_checksum, .ignore_counter = ignore_counter, .ignore_quality_flag = true}, {0}, {0}}},
+  };
+  const safety_config cfg = {.rx_checks = rx_checks, .rx_checks_len = 1};
+  const safety_hooks hooks = {.get_checksum = has_get_checksum ? zero_checksum : NULL,
+                              .compute_checksum = has_compute_checksum ? zero_checksum : NULL};
+  return rx_msg_safety_check(msg, &cfg, &hooks);
+}
+
 bool safety_config_valid() {
   if (current_safety_config.rx_checks_len <= 0) {
     printf("missing RX checks\n");
