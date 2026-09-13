@@ -23,6 +23,7 @@ def _build_libsafety(release: bool = False) -> str:
   ldflags = [
     '-fsanitize=undefined', '-fno-sanitize-recover=undefined',
   ]
+  cflags += ldflags
   if not release:
     cflags += ['-DALLOW_DEBUG', '-fprofile-arcs', '-ftest-coverage']
     ldflags += ['-fprofile-arcs', '-ftest-coverage']
