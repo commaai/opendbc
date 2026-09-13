@@ -77,6 +77,16 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {s: speed for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
 
+  def test_vehicle_moving_individual_wheels(self):
+    for wheel in ["FR", "FL", "RR", "RL"]:
+      for bus in range(3):
+        with self.subTest(wheel=wheel, bus=bus):
+          self._rx(self._speed_msg(0))
+          self.assertFalse(self.safety.get_vehicle_moving())
+          msg = self.packer.make_can_msg_safety("Wheel_Speeds", bus, {wheel: 1})
+          self._rx(msg)
+          self.assertEqual(self.safety.get_vehicle_moving(), bus == self.ALT_MAIN_BUS)
+
   def _user_brake_msg(self, brake):
     values = {"Brake": brake}
     return self.packer.make_can_msg_safety("Brake_Status", self.ALT_MAIN_BUS, values)
