@@ -243,6 +243,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
   elif dbc_name.startswith("psa_"):
     return ChecksumState(SignalType.PSA_CHECKSUM, psa_checksum)
+  elif dbc_name.startswith("byd_radar"):
+    return None
   elif dbc_name.startswith("byd_"):
     return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
   elif dbc_name == "ford_lincoln_base_pt":
