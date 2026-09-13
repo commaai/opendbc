@@ -26,7 +26,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   SAFETY_MODEL = CarParams.SafetyModel.byd
 
   RELAY_MALFUNCTION_ADDRS = {0: (STEERING_MODULE_ADAS, LKAS_HUD_ADAS)}
-  FWD_BLACKLISTED_ADDRS = {2: [STEERING_MODULE_ADAS, LKAS_HUD_ADAS]}
+  # Stock 0x1E2/0x316 are forwarded until OP sends STEER_REQ=1.
+  FWD_BLACKLISTED_ADDRS: dict[int, list[int]] = {}
   TX_MSGS = [[STEERING_MODULE_ADAS, 0], [LKAS_HUD_ADAS, 0], [PCM_BUTTONS, 0]]
 
   MAIN_BUS = 0
@@ -52,7 +53,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       self.__class__.cnt_angle_cmd += 1
     return self.packer.make_can_msg_safety("STEERING_MODULE_ADAS", self.MAIN_BUS, values)
 
-  cnt_angle_cmd = 0
+  # start past t=0: byd_fwd_hook reads a zero timestamp as "openpilot never steered"
+  cnt_angle_cmd = 1
 
   def _angle_meas_msg(self, angle: float):
     values = {"STEER_ANGLE_2": angle}
@@ -181,6 +183,29 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       self.assertTrue(self._rx(msg))
 
   # BYD uses get_max_angle_delta_vm and get_max_angle_vm for lateral accel and jerk limits
+  def test_stock_steer_passthrough(self):
+    # Idle: camera steer and HUD reach the car. OP commanding blocks both.
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+    self.safety.set_controls_allowed(True)
+    self._reset_speed_measurement(10)
+    self._reset_angle_measurement(0)
+    self.safety.set_desired_angle_last(0)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+    t = (self.__class__.cnt_angle_cmd - 1) * int(1e6 / self.LATERAL_FREQUENCY)
+    self.safety.set_timer(t + 201000)
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
     pass

@@ -8,6 +8,22 @@
 #define BYD_WHEELSPEED_TO_KPH 0.072  // 0.02 m/s/LSB, mirrored in values.py
 
 static int byd_driver_torque_frames = 0;
+static bool byd_op_lat = false;
+static uint32_t byd_op_lat_ts = 0;
+
+#define BYD_OP_LAT_TIMEOUT_US 200000U
+
+static bool byd_stock_lat_allowed(void) {
+  if (!byd_op_lat) {
+    return true;
+  }
+  const uint32_t ts = microsecond_timer_get();
+  if (safety_get_ts_elapsed(ts, byd_op_lat_ts) > BYD_OP_LAT_TIMEOUT_US) {
+    byd_op_lat = false;
+    return true;
+  }
+  return false;
+}
 
 static uint8_t byd_get_counter(const CANPacket_t *msg) {
   // Speed uses the high nibble; cruise status uses the low nibble.
@@ -101,6 +117,15 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
     if (steer_angle_cmd_checks_vm(desired_angle, steer_req, BYD_STEERING_LIMITS, BYD_STEERING_PARAMS)) {
       tx = false;
     }
+
+    if (tx) {
+      if (steer_req) {
+        byd_op_lat = true;
+        byd_op_lat_ts = microsecond_timer_get();
+      } else {
+        byd_op_lat = false;
+      }
+    }
   }
 
   // Only allow cancel (ACC_ON_BTN) while stock cruise is engaged, or button release.
@@ -115,13 +140,22 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
+static bool byd_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
+  if ((bus_num == 2) && ((addr == 0x1E2) || (addr == 0x316))) {
+    block_msg = !byd_stock_lat_allowed();
+  }
+  return block_msg;
+}
+
 static safety_config byd_init(uint16_t param) {
   SAFETY_UNUSED(param);
   byd_driver_torque_frames = 0;
+  byd_op_lat = false;
 
   static const CanMsg BYD_TX_MSGS[] = {
-    {0x1E2, 0, 8, .check_relay = true},   // STEERING_MODULE_ADAS (lateral steering command)
-    {0x316, 0, 8, .check_relay = true},   // LKAS_HUD_ADAS (dash HUD)
+    {0x1E2, 0, 8, .check_relay = true, .disable_static_blocking = true},   // STEERING_MODULE_ADAS
+    {0x316, 0, 8, .check_relay = true, .disable_static_blocking = true},   // LKAS_HUD_ADAS
     {0x3B0, 0, 8, .check_relay = false},  // PCM_BUTTONS (cruise cancel button spoof)
   };
 
@@ -142,6 +176,7 @@ const safety_hooks byd_hooks = {
   .init = byd_init,
   .rx = byd_rx_hook,
   .tx = byd_tx_hook,
+  .fwd = byd_fwd_hook,
   .get_counter = byd_get_counter,
   .get_checksum = byd_get_checksum,
   .compute_checksum = byd_compute_checksum,

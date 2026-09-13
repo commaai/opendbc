@@ -117,6 +117,10 @@ BO_ 790 LKAS_HUD_ADAS: 8 MPC_CAM
  SG_ LKAS_STATE : 36|4@1+ (1,0) [0|15] "" MCU
  SG_ SPEED_LIMIT_VALUE : 40|8@1+ (5,-5) [-5|1270] "kph" MCU
  SG_ LDSW_TYPE : 49|2@0+ (1,0) [0|3] "" MCU
+ SG_ SET_ME_2 : 2|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_8 : 8|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_32 : 32|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_50 : 50|2@1+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 52|4@1+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
@@ -198,6 +202,10 @@ CM_ BO_ 536 "EPB. Byte 0 0x00/0xA0 released, 0x08/0x88 applied; bit 3 is the app
 CM_ BO_ 578 "Drivetrain state: gear, brake pressed, raw throttle.";
 CM_ BO_ 660 "Body/meter cluster: doors, seatbelt, trunk.";
 CM_ BO_ 790 "LKAS HUD ADAS message from camera. Blocked by panda on bus 2; panda re-injects.";
+CM_ SG_ 790 SET_ME_2 "Unnamed bits 2-3. Named so the packer keeps the camera values.";
+CM_ SG_ 790 SET_ME_8 "Unnamed bits 8-9. Named so the packer keeps the camera values.";
+CM_ SG_ 790 SET_ME_32 "Unnamed bits 32-33. Named so the packer keeps the camera values.";
+CM_ SG_ 790 SET_ME_50 "Unnamed bits 50-51. Named so the packer keeps the camera values.";
 CM_ BO_ 803 "Charge state. d[0] 0 idle, 3 charging.";
 CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state).";
 CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active.";
