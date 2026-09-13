@@ -31,6 +31,9 @@ static uint8_t mg_get_counter(const CANPacket_t *msg) {
   if (msg->addr == 0x1b6U) {
     counter = msg->data[6] & 0xFU;
   }
+  if (msg->addr == 0xAFU) {
+    counter = msg->data[5] >> 4U;
+  }
   return counter;
 }
 
@@ -93,7 +96,7 @@ static safety_config mg_init(uint16_t param) {
 
   static RxCheck mg_rx_checks[] = {
     {.msg = {{0x23c, 0, 8, .frequency = 50U,  .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // SCS_HSC2_FrP19 (speed)
-    {.msg = {{0xaf,  0, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // GW_HSC2_HCU_FrP00 (gas pedal)
+    {.msg = {{0xaf,  0, 8, .frequency = 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // GW_HSC2_HCU_FrP00 (gas pedal)
     {.msg = {{0x1ec, 0, 8, .frequency = 50U,  .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // EPS_HSC2_FrP03 (driver torque)
     {.msg = {{0x242, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // RADAR_HSC2_FrP00 (cruise state)
     {.msg = {{0x1b6, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // EHBS_HSC2_FrP00 (brake pedal)
