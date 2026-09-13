@@ -17,6 +17,11 @@ GEAR_MAP = {
 }
 
 
+def cruise_enabled(acc_state: int, lkas_state: int) -> bool:
+  # ACC_STATE 3/5 = stock ACC active. LKAS_STATE 1/2 = LKS master switch on.
+  return acc_state in (3, 5) and lkas_state in (1, 2)
+
+
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
@@ -25,6 +30,9 @@ class CarState(CarStateBase):
     self.eps_engaged = True
     self.eps_target_angle = 0.0
     self.steer_not_accepted = False
+    self.parking_brake = False
+    self.epb_on_frames = 0
+    self.epb_off_frames = 0
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -64,7 +72,7 @@ class CarState(CarStateBase):
                                self.steer_not_accepted)
 
     # gas / brake
-    ret.gasPressed = cp.vl["DRIVE_STATE"]["RAW_THROTTLE"] > 0
+    ret.gasPressed = cp.vl["PEDAL"]["GAS_PEDAL"] > 0
     ret.brakePressed = bool(cp.vl["DRIVE_STATE"]["BRAKE_PRESSED"])
 
     # gear
@@ -84,15 +92,35 @@ class CarState(CarStateBase):
       cp.vl["METER_CLUSTER"]["FRONT_RIGHT_DOOR"],
       cp.vl["METER_CLUSTER"]["BACK_LEFT_DOOR"],
       cp.vl["METER_CLUSTER"]["BACK_RIGHT_DOOR"],
+      cp.vl["METER_CLUSTER"]["TRUNK_OPEN"],
     ))
     ret.seatbeltUnlatched = not bool(cp.vl["METER_CLUSTER"]["SEATBELT_DRIVER"])
 
+    # EPB bit 3 is the applied flag, but d0 also walks 0x09-0x12 during motion.
+    # Hold last state until 8 consecutive frames agree (~70 ms at 120 Hz).
+    for applied in cp.vl_all["EPB_STATUS"]["EPB_APPLIED"]:
+      if applied:
+        self.epb_on_frames = min(self.epb_on_frames + 1, CCP.EPB_DEBOUNCE_FRAMES)
+        self.epb_off_frames = 0
+      else:
+        self.epb_off_frames = min(self.epb_off_frames + 1, CCP.EPB_DEBOUNCE_FRAMES)
+        self.epb_on_frames = 0
+      if self.epb_on_frames >= CCP.EPB_DEBOUNCE_FRAMES:
+        self.parking_brake = True
+      elif self.epb_off_frames >= CCP.EPB_DEBOUNCE_FRAMES:
+        self.parking_brake = False
+    ret.parkingBrake = self.parking_brake
+
     # cruise state: ACC messages come from camera bus on Atto 3
     # ACC_STATE: 0=OFF, 2=ACC_ON (available), 3=ACC_ACTIVE (enabled), 5=FORCE_ACCEL, 7=ERROR
+    # LKAS_STATE tracks the LKS master switch (0=off, 1=on/passive, 2=active, 4=limited).
+    # Follow stock ACC only when LKS is on so ACC can run without engaging OP.
+    # Reporting enabled=False while ACC is on must not trip controlsd's cancel spoof.
     ret.cruiseState.speed = cp_cam.vl["ACC_HUD_ADAS"]["SET_SPEED"] * CV.KPH_TO_MS
     acc_state = int(cp_cam.vl["ACC_HUD_ADAS"]["ACC_STATE"])
+    lkas_state = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"])
     ret.cruiseState.available = acc_state in (2, 3, 5)
-    ret.cruiseState.enabled = acc_state in (3, 5)
+    ret.cruiseState.enabled = cruise_enabled(acc_state, lkas_state)
     ret.cruiseState.standstill = bool(cp_cam.vl["ACC_CMD"]["STANDSTILL_STATE"])
 
     # forward stock LKAS HUD
@@ -102,7 +130,8 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
+    body_messages = [("EPB_STATUS", float("nan"))]
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], body_messages, 0),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
     }
