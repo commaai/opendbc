@@ -768,6 +768,29 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
         should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
+  def test_angle_rate_limit_zero_crossing(self):
+    if self.ANGLE_RATE_BP is None:
+      self.skipTest("uses vehicle model angle limits")
+
+    # At zero, both directions use the unwind limit to tolerate CAN rounding.
+    # One CAN unit away from zero must use the tighter windup limit instead.
+    self._reset_speed_measurement(max(self.ANGLE_RATE_BP) + 2)
+    self._reset_angle_measurement(0)
+    delta_up = int(self.ANGLE_RATE_UP[-1] * self.DEG_TO_CAN) + 1
+    delta_down = int(self.ANGLE_RATE_DOWN[-1] * self.DEG_TO_CAN) + 1
+
+    for last, lower, upper in ((-1, -1 - delta_up, -1 + delta_down),
+                               (0, -delta_down, delta_down),
+                               (1, 1 - delta_down, 1 + delta_up)):
+      for desired in (lower - 1, lower, upper, upper + 1):
+        with self.subTest(last=last, desired=desired):
+          self.safety.set_controls_allowed(True)
+          self._set_prev_desired_angle(0)
+          # Establish the previous command through TX and verify its CAN scaling.
+          self.assertTrue(self._tx(self._angle_cmd_msg(last / self.DEG_TO_CAN, True)))
+          self.assertEqual(self.safety.get_desired_angle_last(), last)
+          self.assertEqual(lower <= desired <= upper, self._tx(self._angle_cmd_msg(desired / self.DEG_TO_CAN, True)))
+
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while
     # steer actuation bit is 0, regardless of controls allowed.
