@@ -943,6 +943,9 @@ class SafetyTest(SafetyTestBase):
 
   # ***** standard tests for all safety modes *****
 
+  def test_rx_callbacks_required(self):
+    self.assertTrue(self.safety.safety_config_callbacks_valid())
+
   def test_tx_msg_in_scanned_range(self):
     # the relay malfunction, fwd hook, and spam can tests don't exhaustively
     # scan the entire 29-bit address space, only some known important ranges

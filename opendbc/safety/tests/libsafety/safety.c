@@ -30,19 +30,23 @@ bool safety_tick_rx_check(uint32_t frequency, uint32_t last_timestamp, bool vali
   return rx_checks[0].status.lagging;
 }
 
-static uint32_t zero_checksum(const CANPacket_t *msg) {
-  SAFETY_UNUSED(msg);
-  return 0U;
-}
-
-bool rx_check_callbacks(const CANPacket_t *msg, bool has_get_checksum, bool has_compute_checksum, bool ignore_checksum, bool ignore_counter) {
-  RxCheck rx_checks[] = {
-    {.msg = {{0x123, 0, 8, 50U, .ignore_checksum = ignore_checksum, .ignore_counter = ignore_counter, .ignore_quality_flag = true}, {0}, {0}}},
-  };
-  const safety_config cfg = {.rx_checks = rx_checks, .rx_checks_len = 1};
-  const safety_hooks hooks = {.get_checksum = has_get_checksum ? zero_checksum : NULL,
-                              .compute_checksum = has_compute_checksum ? zero_checksum : NULL};
-  return rx_msg_safety_check(msg, &cfg, &hooks);
+bool safety_config_callbacks_valid(void) {
+  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
+    for (unsigned int j = 0U; j < MAX_ADDR_CHECK_MSGS; j++) {
+      const CanMsgCheck *msg = &current_safety_config.rx_checks[i].msg[j];
+      if (msg->addr == 0) {
+        break;
+      }
+      bool checksum_valid = msg->ignore_checksum || ((current_hooks->get_checksum != NULL) && (current_hooks->compute_checksum != NULL));
+      bool counter_valid = msg->ignore_counter || ((current_hooks->get_counter != NULL) && (msg->max_counter > 0U));
+      bool quality_valid = msg->ignore_quality_flag || (current_hooks->get_quality_flag_valid != NULL);
+      if (!checksum_valid || !counter_valid || !quality_valid) {
+        printf("RX 0x%X bus %u: checksum=%d counter=%d quality=%d\n", msg->addr, msg->bus, checksum_valid, counter_valid, quality_valid);
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 bool safety_config_valid() {
