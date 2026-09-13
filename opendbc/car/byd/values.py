@@ -37,6 +37,7 @@ class CarControllerParams:
   STEER_DRIVER_OVERRIDE = 18          # column torque for soft override, Nm
   STEER_DRIVER_DISENGAGE = 100        # column torque for hard disengage, Nm
   STEER_DRIVER_DISENGAGE_FRAMES = 5   # 100 ms of STEERING_TORQUE, mirrored in byd.h
+  WHEELSPEED_TO_KPH = 0.072           # 0.02 m/s/LSB, mirrored in byd.h
   EPB_DEBOUNCE_FRAMES = 8             # ~70 ms at 120 Hz; ignore 0x09-0x12 transitions
 
 
