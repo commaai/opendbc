@@ -3,8 +3,9 @@
 #include "opendbc/safety/declarations.h"
 
 static void body_rx_hook(const CANPacket_t *msg) {
-  // The RX checks dispatch only MOTORS_DATA (0x201, bus 0) to this hook.
   SAFETY_UNUSED(msg);
+
+  // controls allowed as soon as RX is valid
   controls_allowed = true;
 }
 
