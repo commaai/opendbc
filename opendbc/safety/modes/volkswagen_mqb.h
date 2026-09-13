@@ -183,7 +183,7 @@ const safety_hooks volkswagen_mqb_hooks = {
   .init = volkswagen_mqb_init,
   .rx = volkswagen_mqb_rx_hook,
   .tx = volkswagen_mqb_tx_hook,
-  .get_counter = volkswagen_mqb_meb_get_counter,
-  .get_checksum = volkswagen_mqb_meb_get_checksum,
+  .get_counter = volkswagen_mqb_meb_mlb_get_counter,
+  .get_checksum = volkswagen_mqb_meb_mlb_get_checksum,
   .compute_checksum = volkswagen_mqb_meb_compute_crc,
 };
