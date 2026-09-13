@@ -56,14 +56,14 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == 0U)  {
     // Vehicle speed
-    if (msg->addr == 0x208U) {
+    if (msg_matches(msg, 0x208U, 0U)) {
       float speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01;
       vehicle_moving = speed > 0.0;
       UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
     }
 
     // Gas pressed and second speed source for variable torque limit
-    if (msg->addr == 0x150U) {
+    if (msg_matches(msg, 0x150U, 0U)) {
       gas_pressed = msg->data[3] | (msg->data[4] & 0xC0U);
 
       // Disable controls if speeds from VDM and ESP ECUs are too far apart.
@@ -72,20 +72,20 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
     }
 
     // Driver torque
-    if (msg->addr == 0x380U) {
+    if (msg_matches(msg, 0x380U, 0U)) {
       int torque_driver_new = (((msg->data[2] << 4) | (msg->data[3] >> 4))) - 2050U;
       update_sample(&torque_driver, torque_driver_new);
     }
 
     // Brake pressed
-    if (msg->addr == 0x38fU) {
+    if (msg_matches(msg, 0x38fU, 0U)) {
       brake_pressed = (msg->data[2] >> 7) & 1U;
     }
   }
 
   if (msg->bus == 2U) {
     // Cruise state
-    if (msg->addr == 0x100U) {
+    if (msg_matches(msg, 0x100U, 2U)) {
       const int feature_status = msg->data[2] >> 5U;
       pcm_cruise_check(feature_status == 1);
     }
@@ -119,7 +119,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == 0U) {
     // Steering control
-    if (msg->addr == 0x120U) {
+    if (msg_matches(msg, 0x120U, 0U)) {
       int desired_torque = ((msg->data[2] << 3U) | (msg->data[3] >> 5U)) - 1024U;
       bool steer_req = (msg->data[3] >> 4) & 1U;
 
@@ -129,7 +129,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
     }
 
     // Longitudinal control
-    if (msg->addr == 0x160U) {
+    if (msg_matches(msg, 0x160U, 0U)) {
       int raw_accel = ((msg->data[2] << 3) | (msg->data[3] >> 5)) - 1024U;
       if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
         tx = false;

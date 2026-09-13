@@ -37,7 +37,7 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
 static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
     // Update in-motion state by sampling wheel speeds
-    if (msg->addr == MSG_ESP_19) {
+    if (msg_matches(msg, MSG_ESP_19, 0U)) {
       // sum 4 wheel speeds
       int speed = 0;
       for (uint8_t i = 0U; i < 8U; i += 2U) {
@@ -51,11 +51,11 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // Update driver input torque samples
     // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
     // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
-    if (msg->addr == MSG_LH_EPS_03) {
+    if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
       update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
     }
 
-    if (msg->addr == MSG_TSK_06) {
+    if (msg_matches(msg, MSG_TSK_06, 0U)) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
       // Always exit controls on main switch off
       // Signal: TSK_06.TSK_Status
@@ -72,7 +72,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
       }
     }
 
-    if (msg->addr == MSG_GRA_ACC_01) {
+    if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
       // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
       // Signal: GRA_ACC_01.GRA_Tip_Setzen
       // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
@@ -93,12 +93,12 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     }
 
     // Signal: Motor_20.MO_Fahrpedalrohwert_01
-    if (msg->addr == MSG_MOTOR_20) {
+    if (msg_matches(msg, MSG_MOTOR_20, 0U)) {
       gas_pressed = ((GET_BYTES(msg, 0, 4) >> 12) & 0xFFU) != 0U;
     }
 
     // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
-    if (msg->addr == MSG_MOTOR_14) {
+    if (msg_matches(msg, MSG_MOTOR_14, 0U)) {
       volkswagen_brake_pedal_switch = GET_BIT(msg, 28U);
     }
 

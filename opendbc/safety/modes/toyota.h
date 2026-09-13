@@ -98,7 +98,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
 
     // get eps motor torque (0.66 factor in dbc)
-    if (msg->addr == 0x260U) {
+    if (msg_matches(msg, 0x260U, 0U)) {
       int torque_meas_new = (msg->data[5] << 8) | msg->data[6];
       torque_meas_new = to_signed(torque_meas_new, 16);
 
@@ -131,32 +131,32 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
     // exit controls on rising edge of gas press, if not alternative experience
     // exit controls on rising edge of brake press
     if (toyota_secoc) {
-      if (msg->addr == 0x176U) {
+      if (msg_matches(msg, 0x176U, 0U)) {
         bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
         pcm_cruise_check(cruise_engaged);
       }
-      if (msg->addr == 0x116U) {
+      if (msg_matches(msg, 0x116U, 0U)) {
         gas_pressed = msg->data[1] != 0U;  // GAS_PEDAL.GAS_PEDAL_USER
       }
-      if (msg->addr == 0x101U) {
+      if (msg_matches(msg, 0x101U, 0U)) {
         brake_pressed = GET_BIT(msg, 3U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_rav4_prime_generated.dbc)
       }
     } else {
-      if (msg->addr == 0x1D2U) {
+      if (msg_matches(msg, 0x1D2U, 0U)) {
         bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
         pcm_cruise_check(cruise_engaged);
         gas_pressed = !GET_BIT(msg, 4U);  // PCM_CRUISE.GAS_RELEASED
       }
-      if (!toyota_alt_brake && (msg->addr == 0x226U)) {
+      if (!toyota_alt_brake && msg_matches(msg, 0x226U, 0U)) {
         brake_pressed = GET_BIT(msg, 37U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_nodsu_pt_generated.dbc)
       }
-      if (toyota_alt_brake && (msg->addr == 0x224U)) {
+      if (toyota_alt_brake && msg_matches(msg, 0x224U, 0U)) {
         brake_pressed = GET_BIT(msg, 5U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_new_mc_pt_generated.dbc)
       }
     }
 
     // sample speed
-    if (msg->addr == 0xaaU) {
+    if (msg_matches(msg, 0xaaU, 0U)) {
       int speed = 0;
       // sum 4 wheel speeds. conversion: raw * 0.01 - 67.67
       for (uint8_t i = 0U; i < 8U; i += 2U) {
@@ -217,7 +217,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
   // Check if msg is sent on BUS 0
   if (msg->bus == 0U) {
     // ACCEL: safety check on byte 1-2
-    if (msg->addr == 0x343U) {
+    if (msg_matches(msg, 0x343U, 0U)) {
       int desired_accel = (msg->data[0] << 8) | msg->data[1];
       desired_accel = to_signed(desired_accel, 16);
 
@@ -244,7 +244,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       }
     }
 
-    if (msg->addr == 0x183U) {
+    if (msg_matches(msg, 0x183U, 0U)) {
       int desired_accel = (msg->data[0] << 8) | msg->data[1];
       desired_accel = to_signed(desired_accel, 16);
 
@@ -252,7 +252,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     }
 
     // AEB: block all actuation. only used when DSU is unplugged
-    if (msg->addr == 0x283U) {
+    if (msg_matches(msg, 0x283U, 0U)) {
       // only allow the checksum, which is the last byte
       bool block = (GET_BYTES(msg, 0, 4) != 0U) || (msg->data[4] != 0U) || (msg->data[5] != 0U);
       if (block) {
@@ -261,7 +261,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     }
 
     // STEERING_LTA angle steering check
-    if (msg->addr == 0x191U) {
+    if (msg_matches(msg, 0x191U, 0U)) {
       // check the STEER_REQUEST, STEER_REQUEST_2, TORQUE_WIND_DOWN, STEER_ANGLE_CMD signals
       bool lta_request = GET_BIT(msg, 0U);
       bool lta_request2 = GET_BIT(msg, 25U);
@@ -309,7 +309,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     }
 
     // STEERING_LTA_2 angle steering check (SecOC)
-    if (toyota_secoc && (msg->addr == 0x131U)) {
+    if (toyota_secoc && msg_matches(msg, 0x131U, 0U)) {
       // SecOC cars block any form of LTA actuation for now
       bool lta_request = GET_BIT(msg, 3U);  // STEERING_LTA_2.STEER_REQUEST
       bool lta_request2 = GET_BIT(msg, 0U);  // STEERING_LTA_2.STEER_REQUEST_2
@@ -323,7 +323,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     }
 
     // STEER: safety check on bytes 2-3
-    if (msg->addr == 0x2E4U) {
+    if (msg_matches(msg, 0x2E4U, 0U)) {
       int desired_torque = (msg->data[1] << 8) | msg->data[2];
       desired_torque = to_signed(desired_torque, 16);
       bool steer_req = GET_BIT(msg, 0U);

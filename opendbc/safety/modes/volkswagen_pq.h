@@ -78,7 +78,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
     // Update in-motion state from speed value.
     // Signal: Bremse_1.BR1_Rad_kmh
-    if (msg->addr == MSG_BREMSE_1) {
+    if (msg_matches(msg, MSG_BREMSE_1, 0U)) {
       int speed = ((msg->data[2] & 0xFEU) >> 1) | (msg->data[3] << 7);
       vehicle_moving = speed > 0;
     }
@@ -86,7 +86,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     // Update driver input torque samples
     // Signal: Lenkhilfe_3.LH3_LM (absolute torque)
     // Signal: Lenkhilfe_3.LH3_LMSign (direction)
-    if (msg->addr == MSG_LENKHILFE_3) {
+    if (msg_matches(msg, MSG_LENKHILFE_3, 0U)) {
       int torque_driver_new = msg->data[2] | ((msg->data[3] & 0x3U) << 8);
       int sign = (msg->data[3] & 0x4U) >> 2;
       if (sign == 1) {
@@ -96,7 +96,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     }
 
     if (volkswagen_longitudinal) {
-      if (msg->addr == MSG_MOTOR_5) {
+      if (msg_matches(msg, MSG_MOTOR_5, 0U)) {
         // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
         // Signal: Motor_5.MO5_GRA_Hauptsch
         acc_main_on = GET_BIT(msg, 50U);
@@ -105,7 +105,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
         }
       }
 
-      if (msg->addr == MSG_GRA_NEU) {
+      if (msg_matches(msg, MSG_GRA_NEU, 0U)) {
         // If ACC main switch is on, enter controls on falling edge of Set or Resume
         // Signal: GRA_Neu.GRA_Neu_Setzen
         // Signal: GRA_Neu.GRA_Neu_Recall
@@ -123,7 +123,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
         }
       }
     } else {
-      if (msg->addr == MSG_MOTOR_2) {
+      if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
         // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
         // Signal: Motor_2.MO2_Sta_GRA
         int acc_status = (msg->data[2] & 0xC0U) >> 6;
@@ -133,12 +133,12 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     }
 
     // Signal: Motor_3.MO3_Pedalwert
-    if (msg->addr == MSG_MOTOR_3) {
+    if (msg_matches(msg, MSG_MOTOR_3, 0U)) {
       gas_pressed = (msg->data[2]);
     }
 
     // Signal: Motor_2.MO2_BLS
-    if (msg->addr == MSG_MOTOR_2) {
+    if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
       brake_pressed = (msg->data[2] & 0x1U);
     }
   }

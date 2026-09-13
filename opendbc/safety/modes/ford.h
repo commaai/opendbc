@@ -98,19 +98,19 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
 static void ford_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == FORD_MAIN_BUS) {
     // Update in motion state from standstill signal
-    if (msg->addr == FORD_DesiredTorqBrk) {
+    if (msg_matches(msg, FORD_DesiredTorqBrk, FORD_MAIN_BUS)) {
       // Signal: VehStop_D_Stat
       vehicle_moving = ((msg->data[3] >> 3) & 0x3U) != 1U;
     }
 
     // Update vehicle speed
-    if (msg->addr == FORD_BrakeSysFeatures) {
+    if (msg_matches(msg, FORD_BrakeSysFeatures, FORD_MAIN_BUS)) {
       // Signal: Veh_V_ActlBrk
       UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01 * KPH_TO_MS);
     }
 
     // Check vehicle speed against a second source
-    if (msg->addr == FORD_EngVehicleSpThrottle2) {
+    if (msg_matches(msg, FORD_EngVehicleSpThrottle2, FORD_MAIN_BUS)) {
       // Disable controls if speeds from ABS and PCM ECUs are too far apart.
       // Signal: Veh_V_ActlEng
       float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
@@ -118,7 +118,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     }
 
     // Update vehicle yaw rate
-    if (msg->addr == FORD_Yaw_Data_FD1) {
+    if (msg_matches(msg, FORD_Yaw_Data_FD1, FORD_MAIN_BUS)) {
       // FIXME: safety can receive yaw before new vehicle speed, it should recompute meas on either received
       // Signal: VehYaw_W_Actl
       // TODO: we should use the speed which results in the closest angle measurement to the desired angle
@@ -129,14 +129,14 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     }
 
     // Update gas pedal
-    if (msg->addr == FORD_EngVehicleSpThrottle) {
+    if (msg_matches(msg, FORD_EngVehicleSpThrottle, FORD_MAIN_BUS)) {
       // Pedal position: (0.1 * val) in percent
       // Signal: ApedPos_Pc_ActlArb
       gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
     }
 
     // Update brake pedal and cruise state
-    if (msg->addr == FORD_EngBrakeData) {
+    if (msg_matches(msg, FORD_EngBrakeData, FORD_MAIN_BUS)) {
       // Signal: BpedDrvAppl_D_Actl
       brake_pressed = ((msg->data[0] >> 4) & 0x3U) == 2U;
 

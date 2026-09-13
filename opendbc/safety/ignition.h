@@ -4,23 +4,22 @@
 #include <stdint.h>
 
 #include "opendbc/safety/can.h"
+#include "opendbc/safety/helpers.h"
 
 bool ignition_can = false;
 uint32_t ignition_can_cnt = 0U;
 
 void ignition_can_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
-    int len = GET_LEN(msg);
-
     // GM exception
-    if ((msg->addr == 0x1F1U) && (len == 8)) {
+    if (msg_matches(msg, 0x1F1U, 0U, 8U)) {
       // SystemPowerMode (2=Run, 3=Crank Request)
       ignition_can = (msg->data[0] & 0x2U) != 0U;
       ignition_can_cnt = 0U;
     }
 
     // Rivian R1S/T GEN1 exception
-    if ((msg->addr == 0x152U) && (len == 8)) {
+    if (msg_matches(msg, 0x152U, 0U, 8U)) {
       // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
       int counter = msg->data[1] & 0xFU;  // max is only 14
 
@@ -34,7 +33,7 @@ void ignition_can_hook(const CANPacket_t *msg) {
     }
 
     // Tesla Model 3/Y exception
-    if ((msg->addr == 0x221U) && (len == 8)) {
+    if (msg_matches(msg, 0x221U, 0U, 8U)) {
       // 0x221 overlaps with Rivian which has random data on byte 0
       int counter = msg->data[6] >> 4;
 
@@ -49,13 +48,13 @@ void ignition_can_hook(const CANPacket_t *msg) {
     }
 
     // Mazda exception
-    if ((msg->addr == 0x9EU) && (len == 8)) {
+    if (msg_matches(msg, 0x9EU, 0U, 8U)) {
       ignition_can = (msg->data[0] >> 5) == 0x6U;
       ignition_can_cnt = 0U;
     }
 
     // Volkswagen MEB exception
-    if ((msg->addr == 0x3C0U) && (len == 4)) {
+    if (msg_matches(msg, 0x3C0U, 0U, 4U)) {
       int counter = msg->data[1] & 0xFU;
 
       static int prev_counter_vw_meb = -1;

@@ -110,7 +110,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == 0U) {
     // Steering angle: (0.1 * val) - 819.2 in deg.
-    if (msg->addr == 0x370U) {
+    if (msg_matches(msg, 0x370U, 0U)) {
       // Store it 1/10 deg to match steering request
       const int angle_meas_new = (((msg->data[4] & 0x3FU) << 8) | msg->data[5]) - 8192U;
       update_sample(&angle_meas, angle_meas_new);
@@ -124,31 +124,31 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     }
 
     // Vehicle speed (DI_speed)
-    if (msg->addr == 0x257U) {
+    if (msg_matches(msg, 0x257U, 0U)) {
       // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
       float speed = ((((msg->data[2] << 4) | (msg->data[1] >> 4)) * 0.08) - 40.) * KPH_TO_MS;
       UPDATE_VEHICLE_SPEED(speed);
     }
 
     // 2nd vehicle speed (ESP_B)
-    if (msg->addr == 0x155U) {
+    if (msg_matches(msg, 0x155U, 0U)) {
       // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
       float esp_speed = (((msg->data[6] & 0x0FU) << 6) | (msg->data[5] >> 2)) * 0.5 * KPH_TO_MS;
       speed_mismatch_check(esp_speed);
     }
 
     // Gas pressed
-    if (msg->addr == 0x118U) {
+    if (msg_matches(msg, 0x118U, 0U)) {
       gas_pressed = (msg->data[4] != 0U);
     }
 
     // Brake pressed
-    if (msg->addr == 0x145U) {
+    if (msg_matches(msg, 0x145U, 0U)) {
       brake_pressed = ((msg->data[3] >> 5) & 0x03U) == 2U;
     }
 
     // Cruise and Autopark/Summon state
-    if (msg->addr == 0x286U) {
+    if (msg_matches(msg, 0x286U, 0U)) {
       // Autopark state
       int autopark_state = (msg->data[3] >> 1) & 0x0FU;  // DI_autoparkState
       bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
@@ -176,20 +176,20 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       pcm_cruise_check(cruise_engaged);
     }
 
-    if (msg->addr == 0x155U) {
+    if (msg_matches(msg, 0x155U, 0U)) {
       vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
     }
   }
 
   if (msg->bus == 2U) {
     // DAS_control
-    if (msg->addr == 0x2b9U) {
+    if (msg_matches(msg, 0x2b9U, 2U)) {
       // "AEB_ACTIVE"
       tesla_stock_aeb = (msg->data[2] & 0x03U) == 1U;
     }
 
     // DAS_steeringControl
-    if (msg->addr == 0x488U) {
+    if (msg_matches(msg, 0x488U, 2U)) {
       int steering_control_type = msg->data[2] >> 6;
       bool tesla_stock_lkas_now = steering_control_type == tesla_get_steer_ctrl_type(2);  // "LANE_KEEP_ASSIST"
 

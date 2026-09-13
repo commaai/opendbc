@@ -29,7 +29,7 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
     // Check all wheel speeds for any movement
     // Signals: ESP_03.ESP_[VL|VR|HL|HR]_Radgeschw
-    if (msg->addr == MSG_ESP_03) {
+    if (msg_matches(msg, MSG_ESP_03, 0U)) {
       uint32_t speed = 0;
       speed += ((msg->data[3] & 0xFU) << 8) | msg->data[2];   // FL
       speed += (msg->data[4] << 4) | (msg->data[3] >> 4);     // FR
@@ -39,11 +39,11 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
     }
 
     // Update driver input torque
-    if (msg->addr == MSG_LH_EPS_03) {
+    if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
       update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
     }
 
-    if (msg->addr == MSG_LS_01) {
+    if (msg_matches(msg, MSG_LS_01, 0U)) {
       // Always exit controls on rising edge of Cancel
       // Signal: LS_01.LS_Abbrechen
       if (GET_BIT(msg, 13U)) {
@@ -53,12 +53,12 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
 
     // Signal: Motor_03.MO_Fahrpedalrohwert_01
     // Signal: Motor_03.MO_Fahrer_bremst
-    if (msg->addr == MSG_MOTOR_03) {
+    if (msg_matches(msg, MSG_MOTOR_03, 0U)) {
       gas_pressed = msg->data[6] != 0U;
       volkswagen_brake_pedal_switch = GET_BIT(msg, 35U);
     }
 
-    if (msg->addr == MSG_ESP_05) {
+    if (msg_matches(msg, MSG_ESP_05, 0U)) {
       volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
     }
 
@@ -67,7 +67,7 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->bus == 1U) {
-    if (msg->addr == MSG_TSK_04) {
+    if (msg_matches(msg, MSG_TSK_04, 1U)) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
       // Signal: TSK_04.TSK_Status_GRA_ACC_02
       int acc_status = (msg->data[7] & 0xC0U) >> 6;
