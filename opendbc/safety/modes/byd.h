@@ -5,6 +5,7 @@
 // Hard override thresholds, mirrored in carstate.py: 100.0 Nm of column torque for 100 ms
 #define BYD_DRIVER_TORQUE_DISENGAGE 1000
 #define BYD_DRIVER_TORQUE_FRAMES 5
+#define BYD_WHEELSPEED_TO_KPH 0.072  // 0.02 m/s/LSB, mirrored in values.py
 
 static int byd_driver_torque_frames = 0;
 
@@ -50,11 +51,10 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       steering_disengage = byd_driver_torque_frames >= BYD_DRIVER_TORQUE_FRAMES;
     }
 
-    // Vehicle speed: 0.0713 kph/LSB (0.1 reads ~40% fast vs GPS / ACC set)
     if (msg->addr == 0x1F0U) {
       int speed = (msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
       vehicle_moving = speed > 0;
-      UPDATE_VEHICLE_SPEED(speed * 0.0713 * KPH_TO_MS);
+      UPDATE_VEHICLE_SPEED(speed * BYD_WHEELSPEED_TO_KPH * KPH_TO_MS);
     }
 
     // Brake from DRIVE_STATE. Gas is PEDAL.GAS_PEDAL; RAW_THROTTLE stays high under ACC.
