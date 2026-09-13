@@ -67,8 +67,11 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     # steering torque
-    new_torque = int(round(actuators.torque * self.params.STEER_MAX))
-    apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
+    steer_max = self.params.STEER_MAX
+    if self.CP.flags & HyundaiFlags.CANFD_DYNAMIC_TORQUE:
+      steer_max = round(float(np.interp(CS.out.vEgoRaw, self.params.STEER_MAX_LOOKUP[0], self.params.STEER_MAX_LOOKUP[1])))
+    new_torque = int(round(actuators.torque * steer_max))
+    apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params, steer_max)
 
     # >90 degree steering fault prevention
     self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
@@ -118,7 +121,7 @@ class CarController(CarControllerBase):
                                             stopping, hud_control, actuators, CS, CC))
 
     new_actuators = actuators.as_builder()
-    new_actuators.torque = apply_torque / self.params.STEER_MAX
+    new_actuators.torque = apply_torque / steer_max
     new_actuators.torqueOutputCan = apply_torque
     new_actuators.accel = accel
 
