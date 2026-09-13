@@ -106,13 +106,21 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("TCS13", 0, values, fix_checksum=checksum)
 
-  def _speed_msg(self, speed):
+  def _speed_msg(self, speed, wheel=None):
     # safety doesn't scale, so undo the scaling
-    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
+    values = {f"WHL_SPD_{s}": (speed if wheel is None or s == wheel else 0) * 0.03125 for s in ("FL", "FR", "RL", "RR")}
     values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
     values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
     self.__class__.cnt_speed += 1
     return self.packer.make_can_msg_safety("WHL_SPD11", 0, values, fix_checksum=checksum)
+
+  def test_vehicle_moving_single_wheel(self):
+    # Either sampled corner must count as moving independently of the other.
+    for wheel in ("FL", "RR"):
+      for speed in (0, self.STANDSTILL_THRESHOLD, self.STANDSTILL_THRESHOLD + 1):
+        with self.subTest(wheel=wheel, speed=speed):
+          self.assertTrue(self._rx(self._speed_msg(speed, wheel=wheel)))
+          self.assertEqual(self.safety.get_vehicle_moving(), speed > self.STANDSTILL_THRESHOLD)
 
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": enable, "CR_VSM_Alive": self.cnt_cruise % 16}

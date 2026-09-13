@@ -50,6 +50,13 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     values = {"TSK_Status_GRA_ACC_02": 1 if enable else 0}
     return self.packer.make_can_msg_safety("TSK_04", 1, values)
 
+  def test_cruise_states(self):
+    for state in range(4):
+      self.assertTrue(self._rx(self._pcm_status_msg(False)))
+      msg = self.packer.make_can_msg_safety("TSK_04", 1, {"TSK_Status_GRA_ACC_02": state})
+      self.assertTrue(self._rx(msg))
+      self.assertEqual(state in (1, 2), self.safety.get_controls_allowed())
+
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
 

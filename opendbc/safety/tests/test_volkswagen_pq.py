@@ -115,6 +115,12 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenPq, 0)
     self.safety.init_tests()
 
+  def test_cruise_states(self):
+    for state in range(4):
+      self.assertTrue(self._rx(self._pcm_status_msg(False)))
+      self.assertTrue(self._rx(self._motor_2_msg(cruise_engaged=state)))
+      self.assertEqual(state in (1, 2), self.safety.get_controls_allowed())
+
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
@@ -158,6 +164,8 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
       self._rx(self._motor_5_msg(main_switch=True))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
+      self.assertTrue(self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0)))
+      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed while {button} held")
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 

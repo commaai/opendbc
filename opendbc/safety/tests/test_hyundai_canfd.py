@@ -93,6 +93,15 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     values = {"ACCMode": 1 if enable else 0}
     return self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values)
 
+  def test_cruise_engaged_prev(self):
+    super().test_cruise_engaged_prev()
+    # Driver override remains engaged; all other modes except enabled are disengaged.
+    for status in range(8):
+      with self.subTest(status=status):
+        msg = self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, {"ACCMode": status})
+        self.assertTrue(self._rx(msg))
+        self.assertEqual(self.safety.get_cruise_engaged_prev(), status in (1, 2))
+
   def _button_msg(self, buttons, main_button=0, bus=None):
     if bus is None:
       bus = self.PT_BUS
