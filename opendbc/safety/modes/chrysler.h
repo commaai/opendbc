@@ -50,36 +50,36 @@ static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
 
 static void chrysler_rx_hook(const CANPacket_t *msg) {
   // Measured EPS torque
-  if ((msg->bus == 0U) && (msg->addr == CHRYSLER_ADDR(EPS_2))) {
+  if (msg_matches(msg, CHRYSLER_ADDR(EPS_2), 0U)) {
     int torque_meas_new = ((msg->data[4] & 0x7U) << 8) + msg->data[5] - 1024U;
     update_sample(&torque_meas, torque_meas_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
   const unsigned int das_3_bus = (chrysler_platform == CHRYSLER_PACIFICA) ? 0U : 2U;
-  if ((msg->bus == das_3_bus) && (msg->addr == CHRYSLER_ADDR(DAS_3))) {
+  if (msg_matches(msg, CHRYSLER_ADDR(DAS_3), das_3_bus)) {
     bool cruise_engaged = GET_BIT(msg, 21U);
     pcm_cruise_check(cruise_engaged);
   }
 
   // TODO: use the same message for both
   // update vehicle moving
-  if ((chrysler_platform != CHRYSLER_PACIFICA) && (msg->bus == 0U) && (msg->addr == CHRYSLER_ADDR(ESP_8))) {
+  if ((chrysler_platform != CHRYSLER_PACIFICA) && msg_matches(msg, CHRYSLER_ADDR(ESP_8), 0U)) {
     vehicle_moving = ((msg->data[4] << 8) + msg->data[5]) != 0U;
   }
-  if ((chrysler_platform == CHRYSLER_PACIFICA) && (msg->bus == 0U) && (msg->addr == 514U)) {
+  if ((chrysler_platform == CHRYSLER_PACIFICA) && msg_matches(msg, 514U, 0U)) {
     int speed_l = (msg->data[0] << 4) + (msg->data[1] >> 4);
     int speed_r = (msg->data[2] << 4) + (msg->data[3] >> 4);
     vehicle_moving = (speed_l != 0) || (speed_r != 0);
   }
 
   // exit controls on rising edge of gas press
-  if ((msg->bus == 0U) && (msg->addr == CHRYSLER_ADDR(ECM_5))) {
+  if (msg_matches(msg, CHRYSLER_ADDR(ECM_5), 0U)) {
     gas_pressed = msg->data[0U] != 0U;
   }
 
   // exit controls on rising edge of brake press
-  if ((msg->bus == 0U) && (msg->addr == CHRYSLER_ADDR(ESP_1))) {
+  if (msg_matches(msg, CHRYSLER_ADDR(ESP_1), 0U)) {
     brake_pressed = ((msg->data[0U] & 0xFU) >> 2U) == 1U;
   }
 }

@@ -142,68 +142,66 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 }
 
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
-    // Update in-motion state by sampling wheel speeds
-    if (msg->addr == MSG_ESC_51) {
-      uint32_t fl = msg->data[8] | (msg->data[9] << 8);
-      uint32_t fr = msg->data[10] | (msg->data[11] << 8);
-      uint32_t rl = msg->data[12] | (msg->data[13] << 8);
-      uint32_t rr = msg->data[14] | (msg->data[15] << 8);
-      vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
-      UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
+  // Update in-motion state by sampling wheel speeds
+  if (msg_matches(msg, MSG_ESC_51, 0U)) {
+    uint32_t fl = msg->data[8] | (msg->data[9] << 8);
+    uint32_t fr = msg->data[10] | (msg->data[11] << 8);
+    uint32_t rl = msg->data[12] | (msg->data[13] << 8);
+    uint32_t rr = msg->data[14] | (msg->data[15] << 8);
+    vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
+    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
+  }
+
+  // Check vehicle speed with redundant source
+  if (msg_matches(msg, MSG_ESP_21, 0U)) {
+    // Signal: ESP_v_Signal
+    float esp_speed = ((msg->data[5] << 8) | msg->data[4]) * 0.01 * KPH_TO_MS;
+    UPDATE_VEHICLE_SPEED_2(esp_speed);
+  }
+
+  if (msg_matches(msg, MSG_QFK_01, 0U)) {
+    int current_curvature = ((msg->data[6] & 0x7FU) << 8) | msg->data[5];
+    current_curvature *= GET_BIT(msg, 55U) ? 1 : -1;
+    update_sample(&curvature_state.meas, current_curvature);
+  }
+
+  if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
+    update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
+  }
+
+  if (msg_matches(msg, MSG_Motor_51, 0U)) {
+    int acc_status = (msg->data[11] & 0x07U);
+    bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
+    acc_main_on = cruise_engaged || (acc_status == 2);
+
+    if (!acc_main_on) {
+      controls_allowed = false;
     }
 
-    // Check vehicle speed with redundant source
-    if (msg->addr == MSG_ESP_21) {
-      // Signal: ESP_v_Signal
-      float esp_speed = ((msg->data[5] << 8) | msg->data[4]) * 0.01 * KPH_TO_MS;
-      UPDATE_VEHICLE_SPEED_2(esp_speed);
+    int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
+    gas_pressed = accel_pedal_value > 0;
+  }
+
+  if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
+    // Enter controls on falling edge of Set or Resume with main switch on
+    // Signal: GRA_ACC_01.GRA_Tip_Setzen
+    // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
+    bool set_button = GET_BIT(msg, 16U);
+    bool resume_button = GET_BIT(msg, 19U);
+    if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
+      controls_allowed = acc_main_on;
     }
+    volkswagen_set_button_prev = set_button;
+    volkswagen_resume_button_prev = resume_button;
 
-    if (msg->addr == MSG_QFK_01) {
-      int current_curvature = ((msg->data[6] & 0x7FU) << 8) | msg->data[5];
-      current_curvature *= GET_BIT(msg, 55U) ? 1 : -1;
-      update_sample(&curvature_state.meas, current_curvature);
+    // Always exit controls on rising edge of Cancel
+    if (GET_BIT(msg, 13U)) {
+      controls_allowed = false;
     }
+  }
 
-    if (msg->addr == MSG_LH_EPS_03) {
-      update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
-    }
-
-    if (msg->addr == MSG_Motor_51) {
-      int acc_status = (msg->data[11] & 0x07U);
-      bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-      acc_main_on = cruise_engaged || (acc_status == 2);
-
-      if (!acc_main_on) {
-        controls_allowed = false;
-      }
-
-      int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
-      gas_pressed = accel_pedal_value > 0;
-    }
-
-    if (msg->addr == MSG_GRA_ACC_01) {
-      // Enter controls on falling edge of Set or Resume with main switch on
-      // Signal: GRA_ACC_01.GRA_Tip_Setzen
-      // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-      bool set_button = GET_BIT(msg, 16U);
-      bool resume_button = GET_BIT(msg, 19U);
-      if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-        controls_allowed = acc_main_on;
-      }
-      volkswagen_set_button_prev = set_button;
-      volkswagen_resume_button_prev = resume_button;
-
-      // Always exit controls on rising edge of Cancel
-      if (GET_BIT(msg, 13U)) {
-        controls_allowed = false;
-      }
-    }
-
-    if (msg->addr == MSG_MOTOR_14) {
-      brake_pressed = GET_BIT(msg, 28U);
-    }
+  if (msg_matches(msg, MSG_MOTOR_14, 0U)) {
+    brake_pressed = GET_BIT(msg, 28U);
   }
 }
 
