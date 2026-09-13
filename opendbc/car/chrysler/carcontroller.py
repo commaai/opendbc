@@ -72,11 +72,23 @@ class CarController(CarControllerBase):
       # steer torque
       new_torque = int(round(CC.actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
+
+      lkas_control_bit_cmd = lkas_control_bit
       if not lkas_active or not lkas_control_bit:
-        apply_torque = 0
+        if self.CP.carFingerprint in CUSW_CARS and self.apply_torque_last != 0:
+          # CUSW faults if torque is slammed to zero, ramp down at MAX_RATE_DOWN
+          if self.apply_torque_last > 0:
+            apply_torque = max(self.apply_torque_last - self.params.STEER_DELTA_DOWN, 0)
+          else:
+            apply_torque = min(self.apply_torque_last + self.params.STEER_DELTA_DOWN, 0)
+          # keep LKAS active on CAN until torque reaches zero
+          if apply_torque != 0:
+            lkas_control_bit_cmd = True
+        else:
+          apply_torque = 0
       self.apply_torque_last = apply_torque
 
-      can_sends.append(chryslercan.create_lkas_command(self.packer, self.CP, int(apply_torque), lkas_control_bit))
+      can_sends.append(chryslercan.create_lkas_command(self.packer, self.CP, int(apply_torque), lkas_control_bit_cmd))
 
     self.frame += 1
 
