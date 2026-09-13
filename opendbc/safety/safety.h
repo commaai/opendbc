@@ -180,7 +180,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
       uint8_t counter = safety_hooks->get_counter(msg);
       update_counter(&cfg->rx_checks[index], counter);
     } else {
-      cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : MAX_WRONG_COUNTERS;
+      cfg->rx_checks[index].status.wrong_counters = MAX_WRONG_COUNTERS * (int)(!cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter);
     }
 
     // quality flag check
