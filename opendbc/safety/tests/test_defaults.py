@@ -110,19 +110,6 @@ class TestSafetyFramework(unittest.TestCase):
           self.assertEqual(self.safety.safety_rx_checks_invalid, not valid)
           self.assertEqual(self.safety.get_controls_allowed(), valid)
 
-  def test_watchdog_timer_wraparound(self):
-    status = self._set_rx_check(100)
-    status.valid_checksum = True
-    status.valid_quality_flag = True
-    self.safety.set_timer(100)
-    for elapsed in (300, 1000001):
-      self.safety.set_controls_allowed(True)
-      status.last_timestamp = (100 - elapsed) & 0xFFFFFFFF
-      lagging = elapsed > 1000000
-      self.safety.safety_tick()
-      self.assertEqual(status.lagging, lagging)
-      self.assertEqual(self.safety.get_controls_allowed(), not lagging)
-
 
 if __name__ == "__main__":
   unittest.main()

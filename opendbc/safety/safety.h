@@ -102,7 +102,7 @@ uint32_t safety_mode_cnt = 0U;
 
 uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
-const safety_hooks *current_hooks = &nooutput_hooks;
+static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
 
 static void generic_rx_checks(void);

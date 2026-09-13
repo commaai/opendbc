@@ -99,19 +99,7 @@ typedef struct {
   bool disable_forwarding;
 } safety_config;
 
-typedef struct {
-  safety_config (*init)(uint16_t param);
-  void (*rx)(const CANPacket_t *msg);
-  bool (*tx)(const CANPacket_t *msg);
-  bool (*fwd)(int bus_num, int addr);
-  uint32_t (*get_checksum)(const CANPacket_t *msg);
-  uint32_t (*compute_checksum)(const CANPacket_t *msg);
-  uint8_t (*get_counter)(const CANPacket_t *msg);
-  bool (*get_quality_flag_valid)(const CANPacket_t *msg);
-} safety_hooks;
-
 extern safety_config current_safety_config;
-extern const safety_hooks *current_hooks;
 extern bool safety_rx_checks_invalid;
 
 bool safety_rx_hook(CANPacket_t *msg);
