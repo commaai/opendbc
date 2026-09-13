@@ -18,14 +18,7 @@ static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, ui
   uint8_t crc = 0;
   // Skip the checksum byte
   for (int i = 1; i < len; i++) {
-    crc ^= msg->data[i];
-    for (int j = 0; j < 8; j++) {
-      if ((crc & 0x80U) != 0U) {
-        crc = (crc << 1) ^ poly;
-      } else {
-        crc <<= 1;
-      }
-    }
+    crc = crc8_update(crc, msg->data[i], poly);
   }
   return crc ^ xor_output;
 }
