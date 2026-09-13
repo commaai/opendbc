@@ -108,100 +108,96 @@ static int tesla_get_steer_ctrl_type(const int ctrl_type) {
 
 static void tesla_rx_hook(const CANPacket_t *msg) {
 
-  if (msg->bus == 0U) {
-    // Steering angle: (0.1 * val) - 819.2 in deg.
-    if (msg->addr == 0x370U) {
-      // Store it 1/10 deg to match steering request
-      const int angle_meas_new = (((msg->data[4] & 0x3FU) << 8) | msg->data[5]) - 8192U;
-      update_sample(&angle_meas, angle_meas_new);
+  // Steering angle: (0.1 * val) - 819.2 in deg.
+  if (msg_matches(msg, 0x370U, 0U)) {
+    // Store it 1/10 deg to match steering request
+    const int angle_meas_new = (((msg->data[4] & 0x3FU) << 8) | msg->data[5]) - 8192U;
+    update_sample(&angle_meas, angle_meas_new);
 
-      const int hands_on_level = msg->data[4] >> 6;  // EPAS3S_handsOnLevel
-      const int eac_status = msg->data[6] >> 5;  // EPAS3S_eacStatus
-      const int eac_error_code = msg->data[2] >> 4;  // EPAS3S_eacErrorCode
+    const int hands_on_level = msg->data[4] >> 6;  // EPAS3S_handsOnLevel
+    const int eac_status = msg->data[6] >> 5;  // EPAS3S_eacStatus
+    const int eac_error_code = msg->data[2] >> 4;  // EPAS3S_eacErrorCode
 
-      // Disengage on normal user override, or if high angle rate fault from user overriding extremely quickly
-      steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
-    }
-
-    // Vehicle speed (DI_speed)
-    if (msg->addr == 0x257U) {
-      // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
-      float speed = ((((msg->data[2] << 4) | (msg->data[1] >> 4)) * 0.08) - 40.) * KPH_TO_MS;
-      UPDATE_VEHICLE_SPEED(speed);
-    }
-
-    // 2nd vehicle speed (ESP_B)
-    if (msg->addr == 0x155U) {
-      // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
-      float esp_speed = (((msg->data[6] & 0x0FU) << 6) | (msg->data[5] >> 2)) * 0.5 * KPH_TO_MS;
-      speed_mismatch_check(esp_speed);
-    }
-
-    // Gas pressed
-    if (msg->addr == 0x118U) {
-      gas_pressed = (msg->data[4] != 0U);
-    }
-
-    // Brake pressed
-    if (msg->addr == 0x145U) {
-      brake_pressed = ((msg->data[3] >> 5) & 0x03U) == 2U;
-    }
-
-    // Cruise and Autopark/Summon state
-    if (msg->addr == 0x286U) {
-      // Autopark state
-      int autopark_state = (msg->data[3] >> 1) & 0x0FU;  // DI_autoparkState
-      bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
-                                (autopark_state == 4) ||  // COMPLETE
-                                (autopark_state == 9);    // SELFPARK_STARTED
-
-      // Only consider rising edges while controls are not allowed
-      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
-        tesla_autopark = true;
-      }
-      if (!tesla_autopark_now) {
-        tesla_autopark = false;
-      }
-      tesla_autopark_prev = tesla_autopark_now;
-
-      // Cruise state
-      int cruise_state = (msg->data[1] >> 4) & 0x07U;
-      bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
-                            (cruise_state == 3) ||  // STANDSTILL
-                            (cruise_state == 4) ||  // OVERRIDE
-                            (cruise_state == 6) ||  // PRE_FAULT
-                            (cruise_state == 7);    // PRE_CANCEL
-      cruise_engaged = cruise_engaged && !tesla_autopark;
-
-      pcm_cruise_check(cruise_engaged);
-    }
-
-    if (msg->addr == 0x155U) {
-      vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
-    }
+    // Disengage on normal user override, or if high angle rate fault from user overriding extremely quickly
+    steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
   }
 
-  if (msg->bus == 2U) {
-    // DAS_control
-    if (msg->addr == 0x2b9U) {
-      // "AEB_ACTIVE"
-      tesla_stock_aeb = (msg->data[2] & 0x03U) == 1U;
-    }
+  // Vehicle speed (DI_speed)
+  if (msg_matches(msg, 0x257U, 0U)) {
+    // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
+    float speed = ((((msg->data[2] << 4) | (msg->data[1] >> 4)) * 0.08) - 40.) * KPH_TO_MS;
+    UPDATE_VEHICLE_SPEED(speed);
+  }
 
-    // DAS_steeringControl
-    if (msg->addr == 0x488U) {
-      int steering_control_type = msg->data[2] >> 6;
-      bool tesla_stock_lkas_now = steering_control_type == tesla_get_steer_ctrl_type(2);  // "LANE_KEEP_ASSIST"
+  // 2nd vehicle speed (ESP_B)
+  if (msg_matches(msg, 0x155U, 0U)) {
+    // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
+    float esp_speed = (((msg->data[6] & 0x0FU) << 6) | (msg->data[5] >> 2)) * 0.5 * KPH_TO_MS;
+    speed_mismatch_check(esp_speed);
+  }
 
-      // Only consider rising edges while controls are not allowed
-      if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed) {
-        tesla_stock_lkas = true;
-      }
-      if (!tesla_stock_lkas_now) {
-        tesla_stock_lkas = false;
-      }
-      tesla_stock_lkas_prev = tesla_stock_lkas_now;
+  // Gas pressed
+  if (msg_matches(msg, 0x118U, 0U)) {
+    gas_pressed = (msg->data[4] != 0U);
+  }
+
+  // Brake pressed
+  if (msg_matches(msg, 0x145U, 0U)) {
+    brake_pressed = ((msg->data[3] >> 5) & 0x03U) == 2U;
+  }
+
+  // Cruise and Autopark/Summon state
+  if (msg_matches(msg, 0x286U, 0U)) {
+    // Autopark state
+    int autopark_state = (msg->data[3] >> 1) & 0x0FU;  // DI_autoparkState
+    bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
+                              (autopark_state == 4) ||  // COMPLETE
+                              (autopark_state == 9);    // SELFPARK_STARTED
+
+    // Only consider rising edges while controls are not allowed
+    if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
+      tesla_autopark = true;
     }
+    if (!tesla_autopark_now) {
+      tesla_autopark = false;
+    }
+    tesla_autopark_prev = tesla_autopark_now;
+
+    // Cruise state
+    int cruise_state = (msg->data[1] >> 4) & 0x07U;
+    bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
+                          (cruise_state == 3) ||  // STANDSTILL
+                          (cruise_state == 4) ||  // OVERRIDE
+                          (cruise_state == 6) ||  // PRE_FAULT
+                          (cruise_state == 7);    // PRE_CANCEL
+    cruise_engaged = cruise_engaged && !tesla_autopark;
+
+    pcm_cruise_check(cruise_engaged);
+  }
+
+  if (msg_matches(msg, 0x155U, 0U)) {
+    vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
+  }
+
+  // DAS_control
+  if (msg_matches(msg, 0x2b9U, 2U)) {
+    // "AEB_ACTIVE"
+    tesla_stock_aeb = (msg->data[2] & 0x03U) == 1U;
+  }
+
+  // DAS_steeringControl
+  if (msg_matches(msg, 0x488U, 2U)) {
+    int steering_control_type = msg->data[2] >> 6;
+    bool tesla_stock_lkas_now = steering_control_type == tesla_get_steer_ctrl_type(2);  // "LANE_KEEP_ASSIST"
+
+    // Only consider rising edges while controls are not allowed
+    if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed) {
+      tesla_stock_lkas = true;
+    }
+    if (!tesla_stock_lkas_now) {
+      tesla_stock_lkas = false;
+    }
+    tesla_stock_lkas_prev = tesla_stock_lkas_now;
   }
 }
 
