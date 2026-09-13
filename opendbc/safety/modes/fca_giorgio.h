@@ -2,6 +2,7 @@
 #define SAFETY_MODES_FCA_GIORGIO_H
 
 #include "opendbc/safety/declarations.h"
+#include "opendbc/safety/modes/chrysler_common.h"
 
 #define FCA_GIORGIO_ABS_1           0xEEU
 #define FCA_GIORGIO_ABS_3           0xFAU
@@ -41,38 +42,9 @@ static safety_config fca_giorgio_init(uint16_t param) {
   return BUILD_SAFETY_CFG(fca_giorgio_rx_checks, FCA_GIORGIO_TX_MSGS);
 }
 
-static uint32_t fca_giorgio_get_checksum(const CANPacket_t *msg) {
-  uint32_t checksum_byte = GET_LEN(msg) - 1U;
-  return (uint8_t)msg->data[checksum_byte];
-}
-
 static uint8_t fca_giorgio_get_counter(const CANPacket_t *msg) {
   uint32_t counter_byte = GET_LEN(msg) - 2U;
   return (uint8_t)msg->data[counter_byte] & 0xFU;
-}
-
-static uint32_t fca_giorgio_compute_crc(const CANPacket_t *msg) {
-  uint32_t len = GET_LEN(msg);
-
-  // CRC is in the last byte, poly is same as SAE J1850 but uses a different init value and output XOR
-  uint8_t crc = 0U;
-  uint8_t final_xor = 0U;
-
-  for (uint32_t i = 0U; (i + 1U) < len; i++) {
-    // TODO: wrong poly — should be 0x1D (SAE J1850), not 0x2F (AUTOSAR)
-    crc = crc8_update(crc, msg->data[i], 0x2FU);
-  }
-
-  // TODO: fill in final XORs for RX messages (see FCA_GIORGIO_CHECKSUM_XORS in chryslercan.py):
-  //   0x0A: ABS_1 (0xEE), ENGINE_1 (0xFC), ACC_2 (0x22A)
-  //   0xF6: EPS_2 (0x106)
-  if (msg->addr == 0xFFU) {
-    final_xor = 0xFFU;
-  } else {
-    final_xor = 0x0;
-  }
-
-  return (uint8_t)(crc ^ final_xor);
 }
 
 static void fca_giorgio_rx_hook(const CANPacket_t *msg) {
@@ -153,8 +125,8 @@ const safety_hooks fca_giorgio_hooks = {
   .rx = fca_giorgio_rx_hook,
   .tx = fca_giorgio_tx_hook,
   .get_counter = fca_giorgio_get_counter,
-  .get_checksum = fca_giorgio_get_checksum,
-  .compute_checksum = fca_giorgio_compute_crc,
+  .get_checksum = chrysler_get_checksum,
+  .compute_checksum = chrysler_compute_checksum,
 };
 
 #endif  // SAFETY_MODES_FCA_GIORGIO_H
