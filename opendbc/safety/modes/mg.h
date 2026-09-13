@@ -21,14 +21,15 @@ static uint8_t mg_get_counter(const CANPacket_t *msg) {
   uint8_t counter = 0U;
   if (msg->addr == 0x23cU) {
     counter = (msg->data[4] >> 4) & 0xFU;
-  } else if (msg->addr == 0x1ecU) {
+  }
+  if (msg->addr == 0x1ecU) {
     counter = (msg->data[0] >> 4) & 0xFU;
-  } else if (msg->addr == 0x242U) {
+  }
+  if (msg->addr == 0x242U) {
     counter = (msg->data[0] >> 3) & 0xFU;
-  } else if (msg->addr == 0x1b6U) {
+  }
+  if (msg->addr == 0x1b6U) {
     counter = msg->data[6] & 0xFU;
-  } else {
-    // No counter for this message
   }
   return counter;
 }

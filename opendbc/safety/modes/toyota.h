@@ -80,7 +80,8 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
   bool valid = false;
   if (msg->addr == 0x260U) {
     valid = !GET_BIT(msg, 3U);  // STEER_TORQUE_SENSOR.STEER_ANGLE_INITIALIZING
-  } else if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
+  }
+  if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
     // each wheel speed is 1-bit fault + 15-bit speed
     valid = true;
     for (uint8_t i = 0U; i < 4U; i += 1U) {
@@ -89,7 +90,6 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
         break;
       }
     }
-  } else {
   }
   return valid;
 }
