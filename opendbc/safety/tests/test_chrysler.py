@@ -22,6 +22,7 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
   LKAS_ACTIVE_VALUE = 1
 
   DAS_BUS = 0
+  counter = 0
 
   def setUp(self):
     self.packer = CANPackerSafety("chrysler_pacifica_2017_hybrid_generated")
@@ -39,7 +40,10 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
 
   def _speed_msg(self, speed):
     values = {"SPEED_LEFT": speed, "SPEED_RIGHT": speed}
-    return self.packer.make_can_msg_safety("SPEED_1", 0, values)
+    self.__class__.counter += 1
+    msg = self.packer.make_can_msg_safety("SPEED_1", 0, values)
+    msg[0].data[5] = (msg[0].data[5] & 0xF0) | (self.counter % 16)
+    return msg
 
   def _user_gas_msg(self, gas):
     values = {"Accelerator_Position": gas}
@@ -70,6 +74,18 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
       # only one button at a time
       self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
+
+  def test_speed_counter(self):
+    if self.__class__ is not TestChryslerSafety:
+      return
+
+    for _ in range(16):
+      self.assertTrue(self._rx(self._speed_msg(0)))
+
+    msg = self._speed_msg(0)
+    for _ in range(common.MAX_WRONG_COUNTERS + 1):
+      valid = self._rx(msg)
+    self.assertFalse(valid)
 
 
 class TestChryslerRamDTSafety(TestChryslerSafety):

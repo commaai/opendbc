@@ -45,6 +45,9 @@ static ChryslerPlatform chrysler_platform;
 
 
 static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
+  if (msg_matches(msg, 514U, 0U)) {
+    return msg->data[5] & 0xFU;
+  }
   return (uint8_t)(msg->data[6] >> 4);
 }
 
@@ -156,7 +159,7 @@ static safety_config chrysler_init(uint16_t param) {
   static RxCheck chrysler_rx_checks[] = {
     {.msg = {{CHRYSLER_EPS_2, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_ESP_1, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{514, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{514, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_ECM_5, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_DAS_3, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
