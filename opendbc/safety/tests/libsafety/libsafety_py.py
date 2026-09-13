@@ -103,7 +103,7 @@ void set_cruise_engaged_prev(bool engaged);
 bool get_vehicle_moving(void);
 void set_timer(uint32_t t);
 
-void safety_tick_current_safety_config();
+void safety_tick(void);
 bool safety_config_valid();
 
 void init_tests(void);

@@ -317,27 +317,25 @@ void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
 }
 
 // 1Hz safety function called by main. Now just a check for lagging safety messages
-void safety_tick(const safety_config *cfg) {
+void safety_tick(void) {
   const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = microsecond_timer_get();
-  if (cfg != NULL) {
-    for (int i=0; i < cfg->rx_checks_len; i++) {
-      uint32_t elapsed_time = safety_get_ts_elapsed(ts, cfg->rx_checks[i].status.last_timestamp);
-      // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
-      // Quite conservative to not risk false triggers.
-      // 2s of lag is worse case, since the function is called at 1Hz
-      uint32_t frequency = cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
-      uint32_t timestep = 1e6 / frequency;
-      bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
-      cfg->rx_checks[i].status.lagging = lagging;
+  for (int i=0; i < current_safety_config.rx_checks_len; i++) {
+    uint32_t elapsed_time = safety_get_ts_elapsed(ts, current_safety_config.rx_checks[i].status.last_timestamp);
+    // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
+    // Quite conservative to not risk false triggers.
+    // 2s of lag is worse case, since the function is called at 1Hz
+    uint32_t frequency = current_safety_config.rx_checks[i].msg[current_safety_config.rx_checks[i].status.index].frequency;
+    uint32_t timestep = 1e6 / frequency;
+    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
+    current_safety_config.rx_checks[i].status.lagging = lagging;
 
-      // enforce minimum frequency for safety-relevant messages
-      bool frequency_invalid = frequency < 10U;
-      if (lagging || frequency_invalid || !is_msg_valid(cfg->rx_checks, i)) {
-        rx_checks_invalid = true;
-        controls_allowed = false;
-      }
+    // enforce minimum frequency for safety-relevant messages
+    bool frequency_invalid = frequency < 10U;
+    if (lagging || frequency_invalid || !is_msg_valid(current_safety_config.rx_checks, i)) {
+      rx_checks_invalid = true;
+      controls_allowed = false;
     }
   }
 
