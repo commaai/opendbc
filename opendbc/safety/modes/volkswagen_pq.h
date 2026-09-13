@@ -79,7 +79,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
   // Signal: Bremse_1.BR1_Rad_kmh
   if (msg_matches(msg, MSG_BREMSE_1, 0U)) {
     int speed = ((msg->data[2] & 0xFEU) >> 1) | (msg->data[3] << 7);
-    vehicle_moving = speed > 0;
+    safety_state.vehicle_moving = speed > 0;
   }
 
   // Update driver input torque samples
@@ -91,16 +91,16 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     if (sign == 1) {
       torque_driver_new *= -1;
     }
-    update_sample(&torque_driver, torque_driver_new);
+    update_sample(&safety_state.torque_driver, torque_driver_new);
   }
 
   if (volkswagen_longitudinal) {
     if (msg_matches(msg, MSG_MOTOR_5, 0U)) {
       // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
       // Signal: Motor_5.MO5_GRA_Hauptsch
-      acc_main_on = GET_BIT(msg, 50U);
-      if (!acc_main_on) {
-        controls_allowed = false;
+      safety_state.acc_main_on = GET_BIT(msg, 50U);
+      if (!safety_state.acc_main_on) {
+        safety_state.controls_allowed = false;
       }
     }
 
@@ -111,14 +111,14 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
       bool set_button = GET_BIT(msg, 16U);
       bool resume_button = GET_BIT(msg, 17U);
       if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-        controls_allowed = acc_main_on;
+        safety_state.controls_allowed = safety_state.acc_main_on;
       }
       volkswagen_set_button_prev = set_button;
       volkswagen_resume_button_prev = resume_button;
       // Exit controls on rising edge of Cancel, override Set/Resume if present simultaneously
       // Signal: GRA_ACC_01.GRA_Abbrechen
       if (GET_BIT(msg, 9U)) {
-        controls_allowed = false;
+        safety_state.controls_allowed = false;
       }
     }
   } else {
@@ -133,12 +133,12 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
 
   // Signal: Motor_3.MO3_Pedalwert
   if (msg_matches(msg, MSG_MOTOR_3, 0U)) {
-    gas_pressed = (msg->data[2]);
+    safety_state.gas_pressed = (msg->data[2]);
   }
 
   // Signal: Motor_2.MO2_BLS
   if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
-    brake_pressed = (msg->data[2] & 0x1U);
+    safety_state.brake_pressed = (msg->data[2] & 0x1U);
   }
 }
 
@@ -196,7 +196,7 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((msg->addr == MSG_GRA_NEU) && !controls_allowed) {
+  if ((msg->addr == MSG_GRA_NEU) && !safety_state.controls_allowed) {
     // Signal: GRA_Neu.GRA_Neu_Setzen
     // Signal: GRA_Neu.GRA_Neu_Recall
     if (GET_BIT(msg, 16U) || GET_BIT(msg, 17U)) {

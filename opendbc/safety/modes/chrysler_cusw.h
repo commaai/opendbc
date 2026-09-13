@@ -25,7 +25,7 @@ static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x1ECU, 0U)) {
     // Signal: EPS_STATUS.TORQUE_MOTOR
     int torque_meas_new = ((msg->data[3] & 0xFU) << 8) + msg->data[4] - 2048U;
-    update_sample(&torque_meas, torque_meas_new);
+    update_sample(&safety_state.torque_meas, torque_meas_new);
   }
 
   if (msg_matches(msg, 0x2ECU, 0U)) {
@@ -36,17 +36,17 @@ static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, 0x1E4U, 0U)) {
     // Signal: BRAKE_1.VEHICLE_SPEED
-    vehicle_moving = (((msg->data[4] & 0x7U) << 8) + msg->data[5]) != 0U;
+    safety_state.vehicle_moving = (((msg->data[4] & 0x7U) << 8) + msg->data[5]) != 0U;
   }
 
   if (msg_matches(msg, 0x1FEU, 0U)) {
     // Signal: ACCEL_GAS.GAS_HUMAN
-    gas_pressed = msg->data[1] != 0U;
+    safety_state.gas_pressed = msg->data[1] != 0U;
   }
 
   if (msg_matches(msg, 0x1E8U, 0U)) {
     // Signal: BRAKE_3.DRIVER_BRAKE_SWITCH
-    brake_pressed = GET_BIT(msg, 18U);
+    safety_state.brake_pressed = GET_BIT(msg, 18U);
   }
 }
 
@@ -81,7 +81,7 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
     // Signal: CRUISE_BUTTONS.ACC_Resume
     const bool is_cancel = GET_BIT(msg, 0U);
     const bool is_resume = GET_BIT(msg, 4U);
-    const bool allowed = is_cancel || (is_resume && controls_allowed);
+    const bool allowed = is_cancel || (is_resume && safety_state.controls_allowed);
     if (!allowed) {
       tx = false;
     }

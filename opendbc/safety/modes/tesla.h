@@ -116,14 +116,14 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x370U, 0U)) {
     // Store it 1/10 deg to match steering request
     const int angle_meas_new = (((msg->data[4] & 0x3FU) << 8) | msg->data[5]) - 8192U;
-    update_sample(&angle_meas, angle_meas_new);
+    update_sample(&safety_state.angle_meas, angle_meas_new);
 
     const int hands_on_level = msg->data[4] >> 6;  // EPAS3S_handsOnLevel
     const int eac_status = msg->data[6] >> 5;  // EPAS3S_eacStatus
     const int eac_error_code = msg->data[2] >> 4;  // EPAS3S_eacErrorCode
 
     // Disengage on normal user override, or if high angle rate fault from user overriding extremely quickly
-    steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
+    safety_state.steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
   }
 
   // Vehicle speed (DI_speed)
@@ -142,12 +142,12 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
 
   // Gas pressed
   if (msg_matches(msg, 0x118U, 0U)) {
-    gas_pressed = (msg->data[4] != 0U);
+    safety_state.gas_pressed = (msg->data[4] != 0U);
   }
 
   // Brake pressed
   if (msg_matches(msg, 0x145U, 0U)) {
-    brake_pressed = ((msg->data[3] >> 5) & 0x03U) == 2U;
+    safety_state.brake_pressed = ((msg->data[3] >> 5) & 0x03U) == 2U;
   }
 
   // Cruise and Autopark/Summon state
@@ -159,7 +159,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
                               (autopark_state == 9);    // SELFPARK_STARTED
 
     // Only consider rising edges while controls are not allowed
-    if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
+    if (tesla_autopark_now && !tesla_autopark_prev && !safety_state.cruise_engaged_prev) {
       tesla_autopark = true;
     }
     if (!tesla_autopark_now) {
@@ -180,7 +180,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, 0x155U, 0U)) {
-    vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
+    safety_state.vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
   }
 
   // DAS_control
@@ -195,7 +195,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     bool tesla_stock_lkas_now = steering_control_type == tesla_get_steer_ctrl_type(2);  // "LANE_KEEP_ASSIST"
 
     // Only consider rising edges while controls are not allowed
-    if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed) {
+    if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !safety_state.controls_allowed) {
       tesla_stock_lkas = true;
     }
     if (!tesla_stock_lkas_now) {

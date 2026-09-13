@@ -100,7 +100,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
   // Update in motion state from standstill signal
   if (msg_matches(msg, FORD_DesiredTorqBrk, FORD_MAIN_BUS)) {
     // Signal: VehStop_D_Stat
-    vehicle_moving = ((msg->data[3] >> 3) & 0x3U) != 1U;
+    safety_state.vehicle_moving = ((msg->data[3] >> 3) & 0x3U) != 1U;
   }
 
   // Update vehicle speed
@@ -123,22 +123,22 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     // Signal: VehYaw_W_Actl
     // TODO: we should use the speed which results in the closest angle measurement to the desired angle
     float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
-    float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
+    float current_curvature = ford_yaw_rate / SAFETY_MAX(safety_state.vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
     // convert current curvature into units on CAN for comparison with desired curvature
-    update_sample(&curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
+    update_sample(&safety_state.curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
   }
 
   // Update gas pedal
   if (msg_matches(msg, FORD_EngVehicleSpThrottle, FORD_MAIN_BUS)) {
     // Pedal position: (0.1 * val) in percent
     // Signal: ApedPos_Pc_ActlArb
-    gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
+    safety_state.gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
   }
 
   // Update brake pedal and cruise state
   if (msg_matches(msg, FORD_EngBrakeData, FORD_MAIN_BUS)) {
     // Signal: BpedDrvAppl_D_Actl
-    brake_pressed = ((msg->data[0] >> 4) & 0x3U) == 2U;
+    safety_state.brake_pressed = ((msg->data[0] >> 4) & 0x3U) == 2U;
 
     // Signal: CcStat_D_Actl
     unsigned int cruise_state = msg->data[1] & 0x07U;
@@ -200,8 +200,8 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     // Violation if resume button is pressed while controls not allowed, or
     // if cancel button is pressed when cruise isn't engaged.
     bool violation = false;
-    violation |= ((msg->data[1] >> 0) & 1U) && !cruise_engaged_prev;   // Signal: CcAslButtnCnclPress (cancel)
-    violation |= ((msg->data[3] >> 1) & 1U) && !controls_allowed;     // Signal: CcAsllButtnResPress (resume)
+    violation |= ((msg->data[1] >> 0) & 1U) && !safety_state.cruise_engaged_prev;   // Signal: CcAslButtnCnclPress (cancel)
+    violation |= ((msg->data[3] >> 1) & 1U) && !safety_state.controls_allowed;     // Signal: CcAsllButtnResPress (resume)
 
     if (violation) {
       tx = false;

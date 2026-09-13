@@ -52,53 +52,13 @@ uint64_t GET_BYTES_64(const CANPacket_t *msg, int start, int len) {
 
 const int MAX_WRONG_COUNTERS = 5;
 
-// This can be set by the safety hooks
-bool controls_allowed = false;
-bool relay_malfunction = false;
-bool gas_pressed = false;
-bool gas_pressed_prev = false;
-bool brake_pressed = false;
-bool brake_pressed_prev = false;
-bool regen_braking = false;
-bool regen_braking_prev = false;
-bool steering_disengage;
-bool steering_disengage_prev;
-bool cruise_engaged_prev = false;
-struct sample_t vehicle_speed;
-struct sample_t vehicle_speed_2;
-bool vehicle_moving = false;
-bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
-int cruise_button_prev = 0;
-bool safety_rx_checks_invalid = false;
+SafetyState safety_state = {0};
 
-// for safety modes with torque steering control
-int desired_torque_last = 0;       // last desired steer torque
-int rt_torque_last = 0;            // last desired torque for real time check
-int valid_steer_req_count = 0;     // counter for steer request bit matching non-zero torque
-int invalid_steer_req_count = 0;   // counter to allow multiple frames of mismatching torque request bit
-struct sample_t torque_meas;       // last 6 motor torques produced by the eps
-struct sample_t torque_driver;     // last 6 driver torques measured
-uint32_t ts_torque_check_last = 0;
-uint32_t ts_steer_req_mismatch_last = 0;  // last timestamp steer req was mismatched with torque
-
-// state for controls_allowed timeout logic
-bool heartbeat_engaged = false;             // openpilot enabled, passed in heartbeat USB command
-uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heartbeat_engaged and controls_allowed
-
-// for safety modes with angle steering control
-uint32_t rt_angle_msgs = 0;
-uint32_t ts_angle_check_last = 0;
-int desired_angle_last = 0;
-struct sample_t angle_meas;         // last 6 steer angles
-
-// for safety modes with curvature steering control
-CurvatureSteeringState curvature_state;
-
+// Heartbeat state persists across safety-mode changes.
+bool heartbeat_engaged = false;
+uint32_t heartbeat_engaged_mismatches = 0;
 
 int alternative_experience = 0;
-
-// time since safety mode has been changed
-uint32_t safety_mode_cnt = 0U;
 
 uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
@@ -113,7 +73,7 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
   if (index != -1) {
     if (!addr_list[index].status.valid_checksum || !addr_list[index].status.valid_quality_flag || (addr_list[index].status.wrong_counters >= MAX_WRONG_COUNTERS)) {
       valid = false;
-      controls_allowed = false;
+      safety_state.controls_allowed = false;
     }
   }
   return valid;
@@ -196,7 +156,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 }
 
 bool safety_rx_hook(const CANPacket_t *msg) {
-  bool controls_allowed_prev = controls_allowed;
+  bool controls_allowed_prev = safety_state.controls_allowed;
 
   bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
   bool whitelisted = get_addr_check_index(msg, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
@@ -219,7 +179,7 @@ bool safety_rx_hook(const CANPacket_t *msg) {
   }
 
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
-  if (controls_allowed && !controls_allowed_prev) {
+  if (safety_state.controls_allowed && !controls_allowed_prev) {
     heartbeat_engaged_mismatches = 0;
   }
 
@@ -248,7 +208,7 @@ bool safety_tx_hook(CANPacket_t *msg) {
     safety_allowed = current_hooks->tx(msg);
   }
 
-  return !relay_malfunction && whitelisted && safety_allowed;
+  return !safety_state.relay_malfunction && whitelisted && safety_allowed;
 }
 
 static int get_fwd_bus(int bus_num) {
@@ -264,7 +224,7 @@ static int get_fwd_bus(int bus_num) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
+  bool blocked = safety_state.relay_malfunction || current_safety_config.disable_forwarding;
 
   // Block messages that are being checked for relay malfunctions. Safety modes can opt out of this
   // in the case of selective AEB forwarding
@@ -335,37 +295,37 @@ void safety_tick(void) {
     bool frequency_invalid = frequency < 10U;
     if (lagging || frequency_invalid || !is_msg_valid(current_safety_config.rx_checks, i)) {
       rx_checks_invalid = true;
-      controls_allowed = false;
+      safety_state.controls_allowed = false;
     }
   }
 
-  safety_rx_checks_invalid = rx_checks_invalid;
+  safety_state.safety_rx_checks_invalid = rx_checks_invalid;
 }
 
 static void relay_malfunction_set(void) {
-  relay_malfunction = true;
+  safety_state.relay_malfunction = true;
 }
 
 static void generic_rx_checks(void) {
-  gas_pressed_prev = gas_pressed;
+  safety_state.gas_pressed_prev = safety_state.gas_pressed;
 
   // exit controls on rising edge of brake press
-  if (brake_pressed && (!brake_pressed_prev || vehicle_moving)) {
-    controls_allowed = false;
+  if (safety_state.brake_pressed && (!safety_state.brake_pressed_prev || safety_state.vehicle_moving)) {
+    safety_state.controls_allowed = false;
   }
-  brake_pressed_prev = brake_pressed;
+  safety_state.brake_pressed_prev = safety_state.brake_pressed;
 
   // exit controls on rising edge of regen paddle
-  if (regen_braking && (!regen_braking_prev || vehicle_moving)) {
-    controls_allowed = false;
+  if (safety_state.regen_braking && (!safety_state.regen_braking_prev || safety_state.vehicle_moving)) {
+    safety_state.controls_allowed = false;
   }
-  regen_braking_prev = regen_braking;
+  safety_state.regen_braking_prev = safety_state.regen_braking;
 
   // exit controls on rising edge of steering override/disengage
-  if (steering_disengage && !steering_disengage_prev) {
-    controls_allowed = false;
+  if (safety_state.steering_disengage && !safety_state.steering_disengage_prev) {
+    safety_state.controls_allowed = false;
   }
-  steering_disengage_prev = steering_disengage;
+  safety_state.steering_disengage_prev = safety_state.steering_disengage;
 }
 
 static void stock_ecu_check(bool stock_ecu_detected) {
@@ -373,18 +333,9 @@ static void stock_ecu_check(bool stock_ecu_detected) {
   const uint32_t RELAY_TRNS_TIMEOUT = 1U;
 
   // check if stock ECU is on bus broken by car harness
-  if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && stock_ecu_detected) {
+  if ((safety_state.safety_mode_cnt > RELAY_TRNS_TIMEOUT) && stock_ecu_detected) {
     relay_malfunction_set();
   }
-}
-
-static void relay_malfunction_reset(void) {
-  relay_malfunction = false;
-}
-
-// resets values and min/max for sample_t struct
-static void reset_sample(struct sample_t *sample) {
-  *sample = (struct sample_t){0};
 }
 
 int set_safety_hooks(uint16_t mode, uint16_t param) {
@@ -420,42 +371,8 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 #endif
   };
 
-  // reset state set by safety mode
-  safety_mode_cnt = 0U;
-  relay_malfunction = false;
-  gas_pressed = false;
-  gas_pressed_prev = false;
-  brake_pressed = false;
-  brake_pressed_prev = false;
-  regen_braking = false;
-  regen_braking_prev = false;
-  steering_disengage = false;
-  steering_disengage_prev = false;
-  cruise_engaged_prev = false;
-  vehicle_moving = false;
-  acc_main_on = false;
-  cruise_button_prev = 0;
-  desired_torque_last = 0;
-  rt_torque_last = 0;
-  rt_angle_msgs = 0;
-  ts_angle_check_last = 0;
-  desired_angle_last = 0;
-  curvature_state = (CurvatureSteeringState){0};
-  ts_torque_check_last = 0;
-  ts_steer_req_mismatch_last = 0;
-  valid_steer_req_count = 0;
-  invalid_steer_req_count = 0;
-
-  // reset samples
-  reset_sample(&vehicle_speed);
-  reset_sample(&vehicle_speed_2);
-  reset_sample(&torque_meas);
-  reset_sample(&torque_driver);
-  reset_sample(&angle_meas);
-
-  controls_allowed = false;
-  relay_malfunction_reset();
-  safety_rx_checks_invalid = false;
+  // Reset shared state before the mode's init hook applies its defaults.
+  safety_state = (SafetyState){0};
 
   current_safety_config = (safety_config){0};
 
@@ -516,20 +433,20 @@ int ROUND(float val) {
 void pcm_cruise_check(bool cruise_engaged) {
   // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
   if (!cruise_engaged) {
-    controls_allowed = false;
+    safety_state.controls_allowed = false;
   }
-  if (cruise_engaged && !cruise_engaged_prev) {
-    controls_allowed = true;
+  if (cruise_engaged && !safety_state.cruise_engaged_prev) {
+    safety_state.controls_allowed = true;
   }
-  cruise_engaged_prev = cruise_engaged;
+  safety_state.cruise_engaged_prev = cruise_engaged;
 }
 
 void speed_mismatch_check(const float speed_2) {
   // Disable controls if speeds from two sources are too far apart.
   // For safety modes that use speed to adjust torque or angle limits
   const float MAX_SPEED_DELTA = 2.0;  // m/s
-  bool is_invalid_speed = SAFETY_ABS(speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
+  bool is_invalid_speed = SAFETY_ABS(speed_2 - ((float)safety_state.vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
   if (is_invalid_speed) {
-    controls_allowed = false;
+    safety_state.controls_allowed = false;
   }
 }

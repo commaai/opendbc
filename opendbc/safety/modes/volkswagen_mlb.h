@@ -34,26 +34,26 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
     speed += (msg->data[4] << 4) | (msg->data[3] >> 4);     // FR
     speed += ((msg->data[6] & 0xFU) << 8) | msg->data[5];   // RL
     speed += (msg->data[7] << 4) | (msg->data[6] >> 4);     // RR
-    vehicle_moving = speed > 0U;
+    safety_state.vehicle_moving = speed > 0U;
   }
 
   // Update driver input torque
   if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
-    update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
+    update_sample(&safety_state.torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
   }
 
   if (msg_matches(msg, MSG_LS_01, 0U)) {
     // Always exit controls on rising edge of Cancel
     // Signal: LS_01.LS_Abbrechen
     if (GET_BIT(msg, 13U)) {
-      controls_allowed = false;
+      safety_state.controls_allowed = false;
     }
   }
 
   // Signal: Motor_03.MO_Fahrpedalrohwert_01
   // Signal: Motor_03.MO_Fahrer_bremst
   if (msg_matches(msg, MSG_MOTOR_03, 0U)) {
-    gas_pressed = msg->data[6] != 0U;
+    safety_state.gas_pressed = msg->data[6] != 0U;
     volkswagen_brake_pedal_switch = GET_BIT(msg, 35U);
   }
 
@@ -61,7 +61,7 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
     volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
   }
 
-  brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
+  safety_state.brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
 
 
   if (msg_matches(msg, MSG_TSK_04, 1U)) {
@@ -102,7 +102,7 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((msg->addr == MSG_LS_01) && !controls_allowed) {
+  if ((msg->addr == MSG_LS_01) && !safety_state.controls_allowed) {
     // disallow resume and set: bits 16 and 19
     if (GET_BIT(msg, 16U) || GET_BIT(msg, 19U)) {
       tx = false;

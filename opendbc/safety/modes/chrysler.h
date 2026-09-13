@@ -52,7 +52,7 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
   // Measured EPS torque
   if (msg_matches(msg, CHRYSLER_ADDR(EPS_2), 0U)) {
     int torque_meas_new = ((msg->data[4] & 0x7U) << 8) + msg->data[5] - 1024U;
-    update_sample(&torque_meas, torque_meas_new);
+    update_sample(&safety_state.torque_meas, torque_meas_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
@@ -65,22 +65,22 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
   // TODO: use the same message for both
   // update vehicle moving
   if ((chrysler_platform != CHRYSLER_PACIFICA) && msg_matches(msg, CHRYSLER_ADDR(ESP_8), 0U)) {
-    vehicle_moving = ((msg->data[4] << 8) + msg->data[5]) != 0U;
+    safety_state.vehicle_moving = ((msg->data[4] << 8) + msg->data[5]) != 0U;
   }
   if ((chrysler_platform == CHRYSLER_PACIFICA) && msg_matches(msg, 514U, 0U)) {
     int speed_l = (msg->data[0] << 4) + (msg->data[1] >> 4);
     int speed_r = (msg->data[2] << 4) + (msg->data[3] >> 4);
-    vehicle_moving = (speed_l | speed_r) != 0;
+    safety_state.vehicle_moving = (speed_l | speed_r) != 0;
   }
 
   // exit controls on rising edge of gas press
   if (msg_matches(msg, CHRYSLER_ADDR(ECM_5), 0U)) {
-    gas_pressed = msg->data[0U] != 0U;
+    safety_state.gas_pressed = msg->data[0U] != 0U;
   }
 
   // exit controls on rising edge of brake press
   if (msg_matches(msg, CHRYSLER_ADDR(ESP_1), 0U)) {
-    brake_pressed = ((msg->data[0U] & 0xFU) >> 2U) == 1U;
+    safety_state.brake_pressed = ((msg->data[0U] & 0xFU) >> 2U) == 1U;
   }
 }
 
@@ -133,7 +133,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == CHRYSLER_ADDR(CRUISE_BUTTONS)) {
     const bool is_cancel = msg->data[0] == 1U;
     const bool is_resume = msg->data[0] == 0x10U;
-    const bool allowed = is_cancel || (is_resume && controls_allowed);
+    const bool allowed = is_cancel || (is_resume && safety_state.controls_allowed);
     if (!allowed) {
       tx = false;
     }

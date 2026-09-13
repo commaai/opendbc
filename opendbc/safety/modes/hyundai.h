@@ -143,7 +143,7 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x251U, 0U)) {
     int torque_driver_new = (GET_BYTES(msg, 0, 2) & 0x7ffU) - 1024U;
     // update array of samples
-    update_sample(&torque_driver, torque_driver_new);
+    update_sample(&safety_state.torque_driver, torque_driver_new);
   }
 
   // ACC steering wheel buttons
@@ -155,13 +155,13 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
 
   // gas press, different for EV, hybrid, and ICE models
   if (msg_matches(msg, 0x371U, 0U) && hyundai_ev_gas_signal) {
-    gas_pressed = (((msg->data[4] & 0x7FU) << 1) | (msg->data[3] >> 7)) != 0U;
+    safety_state.gas_pressed = (((msg->data[4] & 0x7FU) << 1) | (msg->data[3] >> 7)) != 0U;
   } else if (msg_matches(msg, 0x371U, 0U) && hyundai_hybrid_gas_signal) {
-    gas_pressed = msg->data[7] != 0U;
+    safety_state.gas_pressed = msg->data[7] != 0U;
   } else if (msg_matches(msg, 0x91U, 0U) && hyundai_fcev_gas_signal) {
-    gas_pressed = msg->data[6] != 0U;
+    safety_state.gas_pressed = msg->data[6] != 0U;
   } else if (msg_matches(msg, 0x260U, 0U) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
-    gas_pressed = (msg->data[7] >> 6) != 0U;
+    safety_state.gas_pressed = (msg->data[7] >> 6) != 0U;
   } else {
   }
 
@@ -169,11 +169,11 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x386U, 0U)) {
     uint32_t front_left_speed = GET_BYTES(msg, 0, 2) & 0x3FFFU;
     uint32_t rear_right_speed = GET_BYTES(msg, 6, 2) & 0x3FFFU;
-    vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD);
+    safety_state.vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD);
   }
 
   if (msg_matches(msg, 0x394U, 0U)) {
-    brake_pressed = ((msg->data[5] >> 5U) & 0x3U) == 0x2U;
+    safety_state.brake_pressed = ((msg->data[5] >> 5U) & 0x3U) == 0x2U;
   }
 }
 
@@ -241,8 +241,8 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
   if ((msg->addr == 0x4F1U) && !hyundai_longitudinal) {
     int button = msg->data[0] & 0x7U;
 
-    bool allowed_resume = (button == 1) && controls_allowed;
-    bool allowed_cancel = (button == 4) && cruise_engaged_prev;
+    bool allowed_resume = (button == 1) && safety_state.controls_allowed;
+    bool allowed_cancel = (button == 4) && safety_state.cruise_engaged_prev;
     if (!(allowed_resume || allowed_cancel)) {
       tx = false;
     }

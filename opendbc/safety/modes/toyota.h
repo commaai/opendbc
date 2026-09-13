@@ -105,16 +105,16 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
     torque_meas_new = (torque_meas_new * toyota_dbc_eps_torque_factor) / 100;
 
     // update array of sample
-    update_sample(&torque_meas, torque_meas_new);
+    update_sample(&safety_state.torque_meas, torque_meas_new);
 
     // increase torque_meas by 1 to be conservative on rounding
-    torque_meas.min--;
-    torque_meas.max++;
+    safety_state.torque_meas.min--;
+    safety_state.torque_meas.max++;
 
     // driver torque for angle limiting
     int torque_driver_new = (msg->data[1] << 8) | msg->data[2];
     torque_driver_new = to_signed(torque_driver_new, 16);
-    update_sample(&torque_driver, torque_driver_new);
+    update_sample(&safety_state.torque_driver, torque_driver_new);
 
     // LTA request angle should match current angle while inactive, clipped to max accepted angle.
     // note that angle can be relative to init angle on some TSS2 platforms, LTA has the same offset
@@ -122,7 +122,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
     if (!steer_angle_initializing) {
       int angle_meas_new = (msg->data[3] << 8U) | msg->data[4];
       angle_meas_new = to_signed(angle_meas_new, 16);
-      update_sample(&angle_meas, angle_meas_new);
+      update_sample(&safety_state.angle_meas, angle_meas_new);
     }
   }
 
@@ -135,22 +135,22 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       pcm_cruise_check(cruise_engaged);
     }
     if (msg_matches(msg, 0x116U, 0U)) {
-      gas_pressed = msg->data[1] != 0U;  // GAS_PEDAL.GAS_PEDAL_USER
+      safety_state.gas_pressed = msg->data[1] != 0U;  // GAS_PEDAL.GAS_PEDAL_USER
     }
     if (msg_matches(msg, 0x101U, 0U)) {
-      brake_pressed = GET_BIT(msg, 3U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_rav4_prime_generated.dbc)
+      safety_state.brake_pressed = GET_BIT(msg, 3U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_rav4_prime_generated.dbc)
     }
   } else {
     if (msg_matches(msg, 0x1D2U, 0U)) {
       bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
       pcm_cruise_check(cruise_engaged);
-      gas_pressed = !GET_BIT(msg, 4U);  // PCM_CRUISE.GAS_RELEASED
+      safety_state.gas_pressed = !GET_BIT(msg, 4U);  // PCM_CRUISE.GAS_RELEASED
     }
     if (!toyota_alt_brake && msg_matches(msg, 0x226U, 0U)) {
-      brake_pressed = GET_BIT(msg, 37U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_nodsu_pt_generated.dbc)
+      safety_state.brake_pressed = GET_BIT(msg, 37U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_nodsu_pt_generated.dbc)
     }
     if (toyota_alt_brake && msg_matches(msg, 0x224U, 0U)) {
-      brake_pressed = GET_BIT(msg, 5U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_new_mc_pt_generated.dbc)
+      safety_state.brake_pressed = GET_BIT(msg, 5U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_new_mc_pt_generated.dbc)
     }
   }
 
@@ -163,7 +163,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       speed += wheel_speed - 6767;
     }
     // check that all wheel speeds are at zero value
-    vehicle_moving = speed != 0;
+    safety_state.vehicle_moving = speed != 0;
 
     UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 * KPH_TO_MS);
   }
@@ -293,12 +293,12 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       }
 
       // check if we should wind down torque
-      int driver_torque = SAFETY_MIN(SAFETY_ABS(torque_driver.min), SAFETY_ABS(torque_driver.max));
+      int driver_torque = SAFETY_MIN(SAFETY_ABS(safety_state.torque_driver.min), SAFETY_ABS(safety_state.torque_driver.max));
       if ((driver_torque > TOYOTA_LTA_MAX_DRIVER_TORQUE) && (torque_wind_down != 0)) {
         tx = false;
       }
 
-      int eps_torque = SAFETY_MIN(SAFETY_ABS(torque_meas.min), SAFETY_ABS(torque_meas.max));
+      int eps_torque = SAFETY_MIN(SAFETY_ABS(safety_state.torque_meas.min), SAFETY_ABS(safety_state.torque_meas.max));
       if ((eps_torque > TOYOTA_LTA_MAX_MEAS_TORQUE) && (torque_wind_down != 0)) {
         tx = false;
       }

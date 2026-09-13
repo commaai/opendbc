@@ -25,7 +25,7 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
     torque_driver_new = (msg->data[3] >> 5) + (msg->data[4] << 3);
     torque_driver_new = to_signed(torque_driver_new, 11);
     torque_driver_new = subaru_pg_reversed_driver_torque ? -torque_driver_new : torque_driver_new;
-    update_sample(&torque_driver, torque_driver_new);
+    update_sample(&safety_state.torque_driver, torque_driver_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
@@ -36,15 +36,15 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
 
   // update vehicle moving with any non-zero wheel speed
   if (msg_matches(msg, MSG_SUBARU_PG_Wheel_Speeds, SUBARU_PG_MAIN_BUS)) {
-    vehicle_moving = ((GET_BYTES(msg, 0, 4) >> 12) | GET_BYTES(msg, 4, 4)) != 0U;
+    safety_state.vehicle_moving = ((GET_BYTES(msg, 0, 4) >> 12) | GET_BYTES(msg, 4, 4)) != 0U;
   }
 
   if (msg_matches(msg, MSG_SUBARU_PG_Brake_Pedal, SUBARU_PG_MAIN_BUS)) {
-    brake_pressed = ((GET_BYTES(msg, 0, 4) >> 16) & 0xFFU) > 0U;
+    safety_state.brake_pressed = ((GET_BYTES(msg, 0, 4) >> 16) & 0xFFU) > 0U;
   }
 
   if (msg_matches(msg, MSG_SUBARU_PG_Throttle, SUBARU_PG_MAIN_BUS)) {
-    gas_pressed = msg->data[0] != 0U;
+    safety_state.gas_pressed = msg->data[0] != 0U;
   }
 }
 

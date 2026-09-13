@@ -76,7 +76,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0xeaU, pt_bus)) {
     int torque_driver_new = ((msg->data[11] & 0x1fU) << 8U) | msg->data[10];
     torque_driver_new -= 4095;
-    update_sample(&torque_driver, torque_driver_new);
+    update_sample(&safety_state.torque_driver, torque_driver_new);
   }
 
   // cruise buttons
@@ -96,18 +96,18 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
 
   // gas press, different for EV, hybrid, and ICE models
   if (msg_matches(msg, 0x35U, pt_bus) && hyundai_ev_gas_signal) {
-    gas_pressed = msg->data[5] != 0U;
+    safety_state.gas_pressed = msg->data[5] != 0U;
   }
   if (msg_matches(msg, 0x105U, pt_bus) && hyundai_hybrid_gas_signal) {
-    gas_pressed = ((msg->data[12] >> 7) | msg->data[13] | (msg->data[14] & 1U)) != 0U;
+    safety_state.gas_pressed = ((msg->data[12] >> 7) | msg->data[13] | (msg->data[14] & 1U)) != 0U;
   }
   if (msg_matches(msg, 0x100U, pt_bus) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
-    gas_pressed = GET_BIT(msg, 176U);
+    safety_state.gas_pressed = GET_BIT(msg, 176U);
   }
 
   // brake press
   if (msg_matches(msg, 0x175U, pt_bus)) {
-    brake_pressed = GET_BIT(msg, 81U);
+    safety_state.brake_pressed = GET_BIT(msg, 81U);
   }
 
   // vehicle moving
@@ -116,7 +116,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
     uint32_t fr = (GET_BYTES(msg, 10, 2)) & 0x3FFFU;
     uint32_t rl = (GET_BYTES(msg, 12, 2)) & 0x3FFFU;
     uint32_t rr = (GET_BYTES(msg, 14, 2)) & 0x3FFFU;
-    vehicle_moving = (fl > HYUNDAI_STANDSTILL_THRSLD) || (fr > HYUNDAI_STANDSTILL_THRSLD) ||
+    safety_state.vehicle_moving = (fl > HYUNDAI_STANDSTILL_THRSLD) || (fr > HYUNDAI_STANDSTILL_THRSLD) ||
                      (rl > HYUNDAI_STANDSTILL_THRSLD) || (rr > HYUNDAI_STANDSTILL_THRSLD);
 
     // average of all 4 wheel speeds. Conversion: raw * 0.03125 / 3.6 = m/s
@@ -169,7 +169,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
     bool is_cancel = (button == HYUNDAI_BTN_CANCEL);
     bool is_resume = (button == HYUNDAI_BTN_RESUME);
 
-    bool allowed = (is_cancel && cruise_engaged_prev) || (is_resume && controls_allowed);
+    bool allowed = (is_cancel && safety_state.cruise_engaged_prev) || (is_resume && safety_state.controls_allowed);
     if (!allowed) {
       tx = false;
     }

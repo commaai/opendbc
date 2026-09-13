@@ -20,13 +20,13 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MAZDA_ENGINE_DATA, MAZDA_MAIN)) {
     // sample speed: scale by 0.01 to get kph
     int speed = (msg->data[2] << 8) | msg->data[3];
-    vehicle_moving = speed > 10; // moving when speed > 0.1 kph
+    safety_state.vehicle_moving = speed > 10; // moving when speed > 0.1 kph
   }
 
   if (msg_matches(msg, MAZDA_STEER_TORQUE, MAZDA_MAIN)) {
     int torque_driver_new = msg->data[0] - 127U;
     // update array of samples
-    update_sample(&torque_driver, torque_driver_new);
+    update_sample(&safety_state.torque_driver, torque_driver_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
@@ -36,11 +36,11 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MAZDA_ENGINE_DATA, MAZDA_MAIN)) {
-    gas_pressed = (msg->data[4] | (msg->data[5] & 0xF0U)) != 0U;
+    safety_state.gas_pressed = (msg->data[4] | (msg->data[5] & 0xF0U)) != 0U;
   }
 
   if (msg_matches(msg, MAZDA_PEDALS, MAZDA_MAIN)) {
-    brake_pressed = (msg->data[0] & 0x10U);
+    safety_state.brake_pressed = (msg->data[0] & 0x10U);
   }
 }
 
@@ -71,7 +71,7 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
     // allow resume spamming while controls allowed, but
     // only allow cancel while controls not allowed
     bool cancel_cmd = (msg->data[0] == 0x1U);
-    if (!controls_allowed && !cancel_cmd) {
+    if (!safety_state.controls_allowed && !cancel_cmd) {
       tx = false;
     }
   }

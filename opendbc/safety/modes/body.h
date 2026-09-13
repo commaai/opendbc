@@ -6,19 +6,19 @@ static void body_rx_hook(const CANPacket_t *msg) {
   SAFETY_UNUSED(msg);
 
   // controls allowed as soon as RX is valid
-  controls_allowed = true;
+  safety_state.controls_allowed = true;
 }
 
 static bool body_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
-  if (!controls_allowed && (msg->addr != 0x1U)) {
+  if (!safety_state.controls_allowed && (msg->addr != 0x1U)) {
     tx = false;
   }
 
   // Allow going into CAN flashing mode even if controls are not allowed
   bool flash_msg = (msg->addr == 0x250U) && (GET_LEN(msg) == 8U);
-  if (!controls_allowed && flash_msg && (GET_BYTES_64(msg, 0, 8) == 0x0AB00B1EDEADFACEULL)) {
+  if (!safety_state.controls_allowed && flash_msg && (GET_BYTES_64(msg, 0, 8) == 0x0AB00B1EDEADFACEULL)) {
     tx = true;
   }
 

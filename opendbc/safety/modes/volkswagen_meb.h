@@ -138,7 +138,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     uint32_t fr = msg->data[10] | (msg->data[11] << 8);
     uint32_t rl = msg->data[12] | (msg->data[13] << 8);
     uint32_t rr = msg->data[14] | (msg->data[15] << 8);
-    vehicle_moving = (fr | rr | rl | fl) != 0U;
+    safety_state.vehicle_moving = (fr | rr | rl | fl) != 0U;
     UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
   }
 
@@ -152,24 +152,24 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_QFK_01, 0U)) {
     int current_curvature = ((msg->data[6] & 0x7FU) << 8) | msg->data[5];
     current_curvature *= GET_BIT(msg, 55U) ? 1 : -1;
-    update_sample(&curvature_state.meas, current_curvature);
+    update_sample(&safety_state.curvature_state.meas, current_curvature);
   }
 
   if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
-    update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
+    update_sample(&safety_state.torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
   }
 
   if (msg_matches(msg, MSG_Motor_51, 0U)) {
     int acc_status = (msg->data[11] & 0x07U);
     bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-    acc_main_on = cruise_engaged || (acc_status == 2);
+    safety_state.acc_main_on = cruise_engaged || (acc_status == 2);
 
-    if (!acc_main_on) {
-      controls_allowed = false;
+    if (!safety_state.acc_main_on) {
+      safety_state.controls_allowed = false;
     }
 
     int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
-    gas_pressed = accel_pedal_value > 0;
+    safety_state.gas_pressed = accel_pedal_value > 0;
   }
 
   if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
@@ -179,19 +179,19 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     bool set_button = GET_BIT(msg, 16U);
     bool resume_button = GET_BIT(msg, 19U);
     if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-      controls_allowed = acc_main_on;
+      safety_state.controls_allowed = safety_state.acc_main_on;
     }
     volkswagen_set_button_prev = set_button;
     volkswagen_resume_button_prev = resume_button;
 
     // Always exit controls on rising edge of Cancel
     if (GET_BIT(msg, 13U)) {
-      controls_allowed = false;
+      safety_state.controls_allowed = false;
     }
   }
 
   if (msg_matches(msg, MSG_MOTOR_14, 0U)) {
-    brake_pressed = GET_BIT(msg, 28U);
+    safety_state.brake_pressed = GET_BIT(msg, 28U);
   }
 }
 
@@ -210,7 +210,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     // Signal: ACC_18.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
     int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
     // MEB inactive accel is 3.01, but we also need to send 0.0 for gas override
-    bool accel_override = controls_allowed && (desired_accel == 0);
+    bool accel_override = safety_state.controls_allowed && (desired_accel == 0);
     if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
       tx = false;
     }
@@ -222,7 +222,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     uint8_t hold_type = (msg->data[9] >> 5) & 0x07U;
     bool hold_type_allowed = (hold_type == VOLKSWAGEN_MEB_HMS_KEINE_ANFORDERUNG) ||
                              (hold_type == VOLKSWAGEN_MEB_HMS_LOESEN_UEBER_RAMPE) ||
-                             (controls_allowed && ((hold_type == VOLKSWAGEN_MEB_HMS_HALTEN) ||
+                             (safety_state.controls_allowed && ((hold_type == VOLKSWAGEN_MEB_HMS_HALTEN) ||
                                                    (hold_type == VOLKSWAGEN_MEB_HMS_ANFAHREN)));
     if (!hold_type_allowed) {
       tx = false;
@@ -233,7 +233,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     // These carry the same drive off and hold requests as the hold type, so they are gated the same way
     bool acc_anfahren = GET_BIT(msg, 56U);
     bool acc_anhalten = GET_BIT(msg, 57U);
-    if ((acc_anfahren || acc_anhalten) && !controls_allowed) {
+    if ((acc_anfahren || acc_anhalten) && !safety_state.controls_allowed) {
       tx = false;
     }
 
@@ -243,7 +243,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     uint8_t acc_status = (msg->data[7] >> 4) & 0x07U;
     bool acc_status_active = (acc_status == VOLKSWAGEN_MEB_ACC_AKTIV_REGELT) ||
                              (acc_status == VOLKSWAGEN_MEB_ACC_OVERRIDE);
-    if (acc_status_active && !controls_allowed) {
+    if (acc_status_active && !safety_state.controls_allowed) {
       tx = false;
     }
   }

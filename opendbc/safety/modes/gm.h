@@ -36,14 +36,14 @@ static void gm_rx_hook(const CANPacket_t *msg) {
     int torque_driver_new = ((msg->data[6] & 0x7U) << 8) | msg->data[7];
     torque_driver_new = to_signed(torque_driver_new, 11);
     // update array of samples
-    update_sample(&torque_driver, torque_driver_new);
+    update_sample(&safety_state.torque_driver, torque_driver_new);
   }
 
   // sample rear wheel speeds
   if (msg_matches(msg, 0x34AU, 0U)) {
     int left_rear_speed = (msg->data[0] << 8) | msg->data[1];
     int right_rear_speed = (msg->data[2] << 8) | msg->data[3];
-    vehicle_moving = (left_rear_speed > GM_STANDSTILL_THRSLD) || (right_rear_speed > GM_STANDSTILL_THRSLD);
+    safety_state.vehicle_moving = (left_rear_speed > GM_STANDSTILL_THRSLD) || (right_rear_speed > GM_STANDSTILL_THRSLD);
   }
 
   // ACC steering wheel buttons (GM_CAM is tied to the PCM)
@@ -51,32 +51,32 @@ static void gm_rx_hook(const CANPacket_t *msg) {
     int button = (msg->data[5] & 0x70U) >> 4;
 
     // enter controls on falling edge of set or rising edge of resume (avoids fault)
-    bool set = (button != GM_BTN_SET) && (cruise_button_prev == GM_BTN_SET);
-    bool res = (button == GM_BTN_RESUME) && (cruise_button_prev != GM_BTN_RESUME);
+    bool set = (button != GM_BTN_SET) && (safety_state.cruise_button_prev == GM_BTN_SET);
+    bool res = (button == GM_BTN_RESUME) && (safety_state.cruise_button_prev != GM_BTN_RESUME);
     if (set || res) {
-      controls_allowed = true;
+      safety_state.controls_allowed = true;
     }
 
     // exit controls on cancel press
     if (button == GM_BTN_CANCEL) {
-      controls_allowed = false;
+      safety_state.controls_allowed = false;
     }
 
-    cruise_button_prev = button;
+    safety_state.cruise_button_prev = button;
   }
 
   // Reference for brake pressed signals:
   // https://github.com/commaai/openpilot/blob/master/selfdrive/car/gm/carstate.py
   if (msg_matches(msg, 0xBEU, 0U) && (gm_hw == GM_ASCM)) {
-    brake_pressed = msg->data[1] >= 8U;
+    safety_state.brake_pressed = msg->data[1] >= 8U;
   }
 
   if (msg_matches(msg, 0xC9U, 0U) && (gm_hw == GM_CAM)) {
-    brake_pressed = GET_BIT(msg, 40U);
+    safety_state.brake_pressed = GET_BIT(msg, 40U);
   }
 
   if (msg_matches(msg, 0x1C4U, 0U)) {
-    gas_pressed = msg->data[5] != 0U;
+    safety_state.gas_pressed = msg->data[5] != 0U;
 
     // enter controls on rising edge of ACC, exit controls when ACC off
     if (gm_pcm_cruise) {
@@ -86,7 +86,7 @@ static void gm_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, 0xBDU, 0U)) {
-    regen_braking = (msg->data[0] >> 4) != 0U;
+    safety_state.regen_braking = (msg->data[0] >> 4) != 0U;
   }
 }
 
@@ -132,7 +132,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
     bool violation = false;
     // Allow apply bit in pre-enabled and overriding states
-    violation |= !controls_allowed && apply;
+    violation |= !safety_state.controls_allowed && apply;
     violation |= longitudinal_gas_checks(gas_regen, *gm_long_limits);
 
     if (violation) {
@@ -144,7 +144,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   if ((msg->addr == 0x1E1U) && gm_pcm_cruise) {
     int button = (msg->data[5] >> 4) & 0x7U;
 
-    bool allowed_cancel = (button == 6) && cruise_engaged_prev;
+    bool allowed_cancel = (button == 6) && safety_state.cruise_engaged_prev;
     if (!allowed_cancel) {
       tx = false;
     }

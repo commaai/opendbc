@@ -59,15 +59,15 @@ static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
 
 static void psa_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, PSA_DYN_CMM, PSA_MAIN_BUS)) {
-    gas_pressed = msg->data[3] > 0U; // P002_Com_rAPP
+    safety_state.gas_pressed = msg->data[3] > 0U; // P002_Com_rAPP
   }
   if (msg_matches(msg, PSA_STEERING_ALT, PSA_MAIN_BUS)) {
     int angle_meas_new = to_signed((msg->data[0] << 8) | msg->data[1], 16); // ANGLE
-    update_sample(&angle_meas, angle_meas_new);
+    update_sample(&safety_state.angle_meas, angle_meas_new);
   }
   if (msg_matches(msg, PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS)) {
     int speed = (msg->data[0] << 8) | msg->data[1];
-    vehicle_moving = speed > 0;
+    safety_state.vehicle_moving = speed > 0;
     UPDATE_VEHICLE_SPEED(speed * 0.01 * KPH_TO_MS); // VITESSE_VEHICULE_ROUES
   }
 
@@ -77,7 +77,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
 
 
   if (msg_matches(msg, PSA_DAT_BSI, PSA_CAM_BUS)) {
-    brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
+    safety_state.brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
   }
 }
 

@@ -77,7 +77,7 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
     int torque_driver_new;
     torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
     torque_driver_new = -1 * to_signed(torque_driver_new, 11);
-    update_sample(&torque_driver, torque_driver_new);
+    update_sample(&safety_state.torque_driver, torque_driver_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
@@ -93,17 +93,17 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
     uint32_t rl = (GET_BYTES(msg, 4, 3) >> 6) & 0x1FFFU;
     uint32_t fl = (GET_BYTES(msg, 6, 2) >> 3) & 0x1FFFU;
 
-    vehicle_moving = (fr | rr | rl | fl) != 0U;
+    safety_state.vehicle_moving = (fr | rr | rl | fl) != 0U;
 
     UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 * KPH_TO_MS);
   }
 
   if (msg_matches(msg, MSG_SUBARU_Brake_Status, alt_main_bus)) {
-    brake_pressed = (msg->data[7] >> 6) & 1U;
+    safety_state.brake_pressed = (msg->data[7] >> 6) & 1U;
   }
 
   if (msg_matches(msg, MSG_SUBARU_Throttle, SUBARU_MAIN_BUS)) {
-    gas_pressed = msg->data[4] != 0U;
+    safety_state.gas_pressed = msg->data[4] != 0U;
   }
 }
 
