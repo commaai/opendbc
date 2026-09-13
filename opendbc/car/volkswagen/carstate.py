@@ -1,5 +1,5 @@
 from opendbc.can import CANParser
-from opendbc.car import Bus, structs
+from opendbc.car import Bus, DT_CTRL, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC, CanBus, NetworkLocation, TransmissionType, GearShifter, \
@@ -13,8 +13,12 @@ class CarState(CarStateBase):
     super().__init__(CP)
     self.frame = 0
     self.eps_init_complete = False
+    self.hca_active_frames = 0
+    self.hca_inactive_frames = 0
     self.tsk_recovery_timer = 0
     self.CCP = CarControllerParams(CP)
+    self.frames_steering_reset_detection = (self.CCP.STEER_TIME_RESET - self.CCP.STEER_TIME_RESET_DETECTION_BUFFER) / DT_CTRL
+    self.frames_steering_time_warning = (self.CCP.STEER_TIME_MAX_ENGAGED - self.CCP.STEER_TIME_WARNING) / DT_CTRL
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
     self.upscale_lead_car_signal = False
@@ -390,6 +394,19 @@ class CarState(CarStateBase):
 
     hca_status = self.CCP.hca_status_values.get(pt_cp.vl["LH_EPS_03"]["EPS_HCA_Status"])
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
+    if self.CP.flags & VolkswagenFlags.MLB:
+      ret.steerTimeLimit = self.steer_time_limit_warning(hca_status)
+
+  def steer_time_limit_warning(self, hca_status) -> bool:
+    # MLB steering racks have a hard 6min max engagement. After that time it will return status = 'rejected' for ~2.0s and not execute torque requests. After
+    # the ~2.0s lockout period it will return to accepting torque requests. This warning trigger gives advance notice to the driver that steering is about to
+    # become unavailable so they can take control. This should only fire very rarely as we will opportunistically reset the steering rack in HCAMitigation.
+    warning = self.hca_active_frames >= self.frames_steering_time_warning
+
+    self.hca_inactive_frames = 0 if hca_status in ("ACTIVE", "ACTIVE_MODE_7") else self.hca_inactive_frames + 1
+    self.hca_active_frames = 0 if self.hca_inactive_frames >= self.frames_steering_reset_detection else self.hca_active_frames + 1
+
+    return warning
 
   def update_hca_state(self, hca_status, in_drive=True):
     # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist

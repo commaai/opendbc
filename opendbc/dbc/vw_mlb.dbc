@@ -1766,7 +1766,7 @@ BO_ 1318 BCM: 8 XXX
  SG_ BLINKER_RIGHT : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ UNKNOWN_DRIVER_DOOR_RELATED : 43|1@0+ (1,0) [0|1] "" XXX
 
-VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" ;
+VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 7 "active_mode_7" ;
 VAL_ 269 ACC_Freigabe_Momentenanf 0 "Momanf_nicht_freigegeben" 1 "Momanf_freigegeben" ;
 VAL_ 269 ACC_Freigabe_Verzanf 0 "Verzanf_nicht_freigegeben" 1 "Verzanf_freigegeben" ;
 VAL_ 269 ACC_Getriebestellung_P 0 "P_Stellung_nicht_angefordert" 1 "Anforderung_P_Stellung" ;
