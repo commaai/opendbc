@@ -384,10 +384,7 @@ static void relay_malfunction_reset(void) {
 
 // resets values and min/max for sample_t struct
 static void reset_sample(struct sample_t *sample) {
-  for (int i = 0; i < MAX_SAMPLE_VALS; i++) {
-    sample->values[i] = 0;
-  }
-  update_sample(sample, 0);
+  *sample = (struct sample_t){0};
 }
 
 int set_safety_hooks(uint16_t mode, uint16_t param) {
@@ -443,11 +440,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   rt_angle_msgs = 0;
   ts_angle_check_last = 0;
   desired_angle_last = 0;
-  curvature_state.desired_last = 0;
-  curvature_state.rt_msgs = 0;
-  curvature_state.rt_msgs_prev = 0;
-  curvature_state.ts_check_last = 0;
-  curvature_state.steer_power_last = 0;
+  curvature_state = (CurvatureSteeringState){0};
   ts_torque_check_last = 0;
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;
@@ -459,17 +452,12 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   reset_sample(&torque_meas);
   reset_sample(&torque_driver);
   reset_sample(&angle_meas);
-  reset_sample(&curvature_state.meas);
 
   controls_allowed = false;
   relay_malfunction_reset();
   safety_rx_checks_invalid = false;
 
-  current_safety_config.rx_checks = NULL;
-  current_safety_config.rx_checks_len = 0;
-  current_safety_config.tx_msgs = NULL;
-  current_safety_config.tx_msgs_len = 0;
-  current_safety_config.disable_forwarding = false;
+  current_safety_config = (safety_config){0};
 
   int set_status = -1;  // not set
   int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
@@ -482,12 +470,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     }
   }
   if ((set_status == 0) && (current_hooks->init != NULL)) {
-    safety_config cfg = current_hooks->init(param);
-    current_safety_config.rx_checks = cfg.rx_checks;
-    current_safety_config.rx_checks_len = cfg.rx_checks_len;
-    current_safety_config.tx_msgs = cfg.tx_msgs;
-    current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
-    current_safety_config.disable_forwarding = cfg.disable_forwarding;
+    current_safety_config = current_hooks->init(param);
     // reset all dynamic fields in addr struct
     for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};
