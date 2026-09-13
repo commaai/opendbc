@@ -99,7 +99,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
     gas_pressed = msg->data[5] != 0U;
   }
   if (msg_matches(msg, 0x105U, pt_bus) && hyundai_hybrid_gas_signal) {
-    gas_pressed = GET_BIT(msg, 103U) || (msg->data[13] != 0U) || GET_BIT(msg, 112U);
+    gas_pressed = ((msg->data[12] >> 7) | msg->data[13] | (msg->data[14] & 1U)) != 0U;
   }
   if (msg_matches(msg, 0x100U, pt_bus) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
     gas_pressed = GET_BIT(msg, 176U);
