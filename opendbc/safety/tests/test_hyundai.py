@@ -84,19 +84,43 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_gas += 1
     return self.packer.make_can_msg_safety("EMS16", 0, values, fix_checksum=checksum)
 
+  def test_gas_message_selection(self):
+    # RX permits either gas message, but only the configured powertrain should update gas state.
+    mode = self.safety.get_current_safety_mode()
+    param = self.safety.get_current_safety_param()
+    electrified = bool(param & (HyundaiSafetyFlags.EV_GAS | HyundaiSafetyFlags.HYBRID_GAS))
+    for name, values, expected in (
+      ("EMS16", {"CF_Ems_AclAct": 1}, not electrified),
+      ("E_EMS11", {"Accel_Pedal_Pos": 1, "CR_Vcu_AccPedDep_Pos": 1}, electrified),
+    ):
+      with self.subTest(message=name):
+        # Each candidate must be the first received alternative in its RX check.
+        self.safety.set_safety_hooks(mode, param)
+        self.safety.init_tests()
+        self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, values, fix_checksum=checksum)))
+        self.assertEqual(self.safety.get_gas_pressed_prev(), expected)
+
   def _user_brake_msg(self, brake):
     values = {"DriverOverride": 2 if brake else random.choice((0, 1, 3)),
               "AliveCounterTCS": self.cnt_brake % 8}
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("TCS13", 0, values, fix_checksum=checksum)
 
-  def _speed_msg(self, speed):
+  def _speed_msg(self, speed, wheel=None):
     # safety doesn't scale, so undo the scaling
-    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
+    values = {f"WHL_SPD_{s}": (speed if wheel is None or s == wheel else 0) * 0.03125 for s in ("FL", "FR", "RL", "RR")}
     values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
     values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
     self.__class__.cnt_speed += 1
     return self.packer.make_can_msg_safety("WHL_SPD11", 0, values, fix_checksum=checksum)
+
+  def test_vehicle_moving_single_wheel(self):
+    # Either sampled corner must count as moving independently of the other.
+    for wheel in ("FL", "RR"):
+      for speed in (0, self.STANDSTILL_THRESHOLD, self.STANDSTILL_THRESHOLD + 1):
+        with self.subTest(wheel=wheel, speed=speed):
+          self.assertTrue(self._rx(self._speed_msg(speed, wheel=wheel)))
+          self.assertEqual(self.safety.get_vehicle_moving(), speed > self.STANDSTILL_THRESHOLD)
 
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": enable, "CR_VSM_Alive": self.cnt_cruise % 16}
@@ -226,6 +250,13 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
       "FCA_CmdAct": int(fca_aeb_req),
     }
     return self.packer.make_can_msg_safety("FCA11", 0, values)
+
+  def test_button_sends(self):
+    # Longitudinal mode manages engagement from received buttons, without restricting sent buttons.
+    for controls_allowed in (False, True):
+      self.safety.set_controls_allowed(controls_allowed)
+      for button in range(8):
+        self.assertTrue(self._tx(self._button_msg(button, bus=self.BUTTONS_TX_BUS)))
 
   def test_no_aeb_fca11(self):
     self.assertTrue(self._tx(self._fca11_msg()))

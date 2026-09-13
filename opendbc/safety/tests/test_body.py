@@ -36,6 +36,10 @@ class TestBody(common.SafetyTest):
     self.assertTrue(self._rx(self._motors_data_msg(0, 0)))
     self.assertTrue(self.safety.get_controls_allowed())
 
+    self.safety.safety_tick()
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self.safety.safety_config_valid())
+
   def test_tx_hook(self):
     self.assertFalse(self._tx(self._torque_cmd_msg(0, 0)))
     self.safety.set_controls_allowed(True)

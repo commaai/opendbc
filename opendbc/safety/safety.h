@@ -151,13 +151,11 @@ static void update_addr_timestamp(RxCheck addr_list[], int index) {
   }
 }
 
-static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
-  if (index != -1) {
-    uint8_t expected_counter = (addr_list[index].status.last_counter + 1U) % (addr_list[index].msg[addr_list[index].status.index].max_counter + 1U);
-    addr_list[index].status.wrong_counters += (expected_counter == counter) ? -1 : 1;
-    addr_list[index].status.wrong_counters = SAFETY_CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
-    addr_list[index].status.last_counter = counter;
-  }
+static void update_counter(RxCheck *check, uint8_t counter) {
+  uint8_t expected_counter = (check->status.last_counter + 1U) % (check->msg[check->status.index].max_counter + 1U);
+  check->status.wrong_counters += (expected_counter == counter) ? -1 : 1;
+  check->status.wrong_counters = SAFETY_CLAMP(check->status.wrong_counters, 0, MAX_WRONG_COUNTERS);
+  check->status.last_counter = counter;
 }
 
 static bool rx_msg_safety_check(const CANPacket_t *msg,
@@ -168,8 +166,8 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
   update_addr_timestamp(cfg->rx_checks, index);
 
   if (index != -1) {
-    // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
+    // Checksum callbacks are registered as a pair.
+    if ((safety_hooks->get_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
       uint32_t checksum = safety_hooks->get_checksum(msg);
       uint32_t checksum_comp = safety_hooks->compute_checksum(msg);
       cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
@@ -180,9 +178,9 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     // counter check
     if ((safety_hooks->get_counter != NULL) && (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U)) {
       uint8_t counter = safety_hooks->get_counter(msg);
-      update_counter(cfg->rx_checks, index, counter);
+      update_counter(&cfg->rx_checks[index], counter);
     } else {
-      cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : MAX_WRONG_COUNTERS;
+      cfg->rx_checks[index].status.wrong_counters = MAX_WRONG_COUNTERS * (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : 1);
     }
 
     // quality flag check
@@ -318,22 +316,21 @@ void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
 
 // 1Hz safety function called by main. Now just a check for lagging safety messages
 void safety_tick(void) {
-  const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = microsecond_timer_get();
   for (int i=0; i < current_safety_config.rx_checks_len; i++) {
     uint32_t elapsed_time = safety_get_ts_elapsed(ts, current_safety_config.rx_checks[i].status.last_timestamp);
-    // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
-    // Quite conservative to not risk false triggers.
-    // 2s of lag is worse case, since the function is called at 1Hz
-    uint32_t frequency = current_safety_config.rx_checks[i].msg[current_safety_config.rx_checks[i].status.index].frequency;
-    uint32_t timestep = 1e6 / frequency;
-    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
+    // Safety messages must run at >= 10 Hz, so 10 missed messages never exceed 1s.
+    // Called at 1Hz, detection can take up to 2s.
+    bool lagging = elapsed_time > 1000000U;
     current_safety_config.rx_checks[i].status.lagging = lagging;
 
     // enforce minimum frequency for safety-relevant messages
-    bool frequency_invalid = frequency < 10U;
-    if (lagging || frequency_invalid || !is_msg_valid(current_safety_config.rx_checks, i)) {
+    uint32_t frequency = current_safety_config.rx_checks[i].msg[current_safety_config.rx_checks[i].status.index].frequency;
+    bool invalid = frequency < 10U;
+    invalid |= lagging;
+    invalid |= !is_msg_valid(current_safety_config.rx_checks, i);
+    if (invalid) {
       rx_checks_invalid = true;
       controls_allowed = false;
     }
@@ -481,7 +478,8 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
       set_status = 0;  // set
     }
   }
-  if ((set_status == 0) && (current_hooks->init != NULL)) {
+  // Every registered safety mode provides an initializer.
+  if (set_status == 0) {
     safety_config cfg = current_hooks->init(param);
     current_safety_config.rx_checks = cfg.rx_checks;
     current_safety_config.rx_checks_len = cfg.rx_checks_len;
@@ -496,12 +494,13 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   return set_status;
 }
 
-// convert a trimmed integer to signed 32 bit int
-int to_signed(int d, int bits) {
+// Convert a trimmed integer to signed 32 bit int. bits must be in [1, 30].
+int to_signed(int d, unsigned int bits) {
   int d_signed = d;
-  int max_value = (1 << SAFETY_MAX((bits - 1), 0));
-  if (d >= max_value) {
-    d_signed = d - (1 << SAFETY_MAX(bits, 0));
+  const uint32_t sign_bit = (uint32_t)1U << (bits - 1U);
+  if (d >= (int)sign_bit) {
+    const uint32_t full_range = sign_bit << 1U;
+    d_signed = d - (int)full_range;
   }
   return d_signed;
 }

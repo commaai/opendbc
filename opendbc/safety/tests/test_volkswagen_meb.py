@@ -148,6 +148,16 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     values = {"TSK_Status": tsk_status}
     return self.packer.make_can_msg_safety("Motor_51", 0, values)
 
+  def test_cruise_states(self):
+    for state in range(8):
+      self.safety.set_controls_allowed(False)
+      msg = self.packer.make_can_msg_safety("Motor_51", 0, {"TSK_Status": state})
+      self.assertTrue(self._rx(msg))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.safety.set_controls_allowed(True)
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("Motor_51", 0, {"TSK_Status": state})))
+      self.assertEqual(state in (2, 3, 4, 5), self.safety.get_controls_allowed())
+
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
 
@@ -297,6 +307,8 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
       self._rx(self._tsk_status_msg(False, main_switch=True))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
+      self.assertTrue(self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0)))
+      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed while {button} held")
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 

@@ -35,6 +35,15 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     values = {"GasRegenCmd": gas}
     return self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)
 
+  def test_gas_apply(self):
+    # Even an inactive torque request must not assert apply while disengaged.
+    for enabled in (False, True):
+      self.safety.set_controls_allowed(enabled)
+      for apply in (False, True):
+        values = {"GasRegenCmd": self.INACTIVE_GAS, "GasRegenCmdActive": apply}
+        msg = self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)
+        self.assertEqual(enabled or not apply, self._tx(msg))
+
   # override these tests from CarSafetyTest, GM longitudinal uses button enable
   def _pcm_status_msg(self, enable):
     raise NotImplementedError
@@ -106,6 +115,14 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
   def _speed_msg(self, speed):
     values = {"%sWheelSpd" % s: speed for s in ["RL", "RR"]}
     return self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values)
+
+  def test_individual_wheel_moving(self):
+    for wheel in ("RL", "RR"):
+      # Wheel speed signals have a resolution of 0.0311.
+      for speed in (self.STANDSTILL_THRESHOLD - 0.0311, self.STANDSTILL_THRESHOLD, self.STANDSTILL_THRESHOLD + 0.0311):
+        values = {"RLWheelSpd": 0, "RRWheelSpd": 0, wheel + "WheelSpd": speed}
+        self.assertTrue(self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values)))
+        self.assertEqual(speed > self.STANDSTILL_THRESHOLD, self.safety.get_vehicle_moving())
 
   def _user_brake_msg(self, brake):
     # GM safety has a brake threshold of 8
@@ -185,6 +202,13 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM | self.EXTRA_SAFETY_PARAM)
     self.safety.init_tests()
+
+  def test_rx_buttons_do_not_enable(self):
+    for button in (Buttons.RES_ACCEL, Buttons.DECEL_SET):
+      self.safety.set_controls_allowed(False)
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": button})))
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": 1})))
+      self.assertFalse(self.safety.get_controls_allowed())
 
   def test_buttons(self):
     # Only CANCEL button is allowed while cruise is enabled

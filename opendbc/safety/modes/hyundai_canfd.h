@@ -124,7 +124,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   }
 
   // cruise state
-  if (msg_matches(msg, 0x1a0U, scc_bus) && !hyundai_longitudinal) {
+  if (msg_matches(msg, 0x1a0U, scc_bus)) {
     // 1=enabled, 2=driver override
     int cruise_status = ((msg->data[8] >> 4) & 0x7U);
     bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
@@ -176,7 +176,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   }
 
   // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
-  if (((msg->addr == 0x730U) && hyundai_canfd_lka_steer_msg) || ((msg->addr == 0x7D0U) && !hyundai_camera_scc)) {
+  if ((msg->addr == 0x730U) || (msg->addr == 0x7D0U)) {
     if (GET_BYTES_64(msg, 0, 8) != 0x0000000000803E02ULL) {
       tx = false;
     }
@@ -199,7 +199,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
         violation = true;
       }
 
-      if ((desired_accel_raw != 0) || (desired_accel_val != 0)) {
+      if ((desired_accel_raw | desired_accel_val) != 0) {
         violation = true;
       }
     }

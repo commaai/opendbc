@@ -58,6 +58,11 @@ class HyundaiButtonBase:
         controls_allowed = btn in ENABLE_BUTTONS or main_button
         self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
 
+        # A recent button press must not re-enable controls without a new ACC rising edge.
+        self.safety.set_controls_allowed(False)
+        self._rx(self._pcm_status_msg(True))
+        self.assertFalse(self.safety.get_controls_allowed())
+
   def test_sampling_cruise_buttons(self):
     """
       Test that we allow controls on recent button press, but not as button leaves sliding window
