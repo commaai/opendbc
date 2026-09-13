@@ -93,7 +93,7 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
     uint32_t rl = (GET_BYTES(msg, 4, 3) >> 6) & 0x1FFFU;
     uint32_t fl = (GET_BYTES(msg, 6, 2) >> 3) & 0x1FFFU;
 
-    vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
+    vehicle_moving = (fr | rr | rl | fl) != 0U;
 
     UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 * KPH_TO_MS);
   }
