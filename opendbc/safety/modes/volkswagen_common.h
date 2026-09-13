@@ -22,6 +22,7 @@ bool volkswagen_brake_pressure_detected = false;
 #define MSG_LH_EPS_03        0x09FU   // RX from EPS, for driver steering torque
 #define MSG_ESP_19           0x0B2U   // RX from ABS, for wheel speeds
 #define MSG_ESP_05           0x106U   // RX from ABS, for brake switch state
+#define MSG_ACC_01           0x109U   // TX by OP, ACC control instructions to the drivetrain coordinator
 #define MSG_TSK_06           0x120U   // RX from ECU, for ACC status from drivetrain coordinator
 #define MSG_MOTOR_20         0x121U   // RX from ECU, for driver throttle input
 #define MSG_ACC_06           0x122U   // TX by OP, ACC control instructions to the drivetrain coordinator

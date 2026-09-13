@@ -342,7 +342,7 @@ class CarState(CarStateBase):
 
     self.parse_mlb_mqb_steering_state(ret, pt_cp)
 
-    brake_pedal_pressed = bool(pt_cp.vl["Motor_03"]["MO_Fahrer_bremst"])
+    brake_pedal_pressed = bool(pt_cp.vl["Motor_03"]["MO_BLS"])
     brake_pressure_detected = bool(pt_cp.vl["ESP_05"]["ESP_Fahrer_bremst"])
     ret.brakePressed = brake_pedal_pressed or brake_pressure_detected
     ret.parkingBrake = bool(pt_cp.vl["Kombi_01"]["KBI_Handbremse"])
