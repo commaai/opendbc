@@ -12,7 +12,7 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.frame = 0
-    self.eps_init_complete = False
+    self.eps_disabled_count = 0
     self.tsk_recovery_timer = 0
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
@@ -392,11 +392,14 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
 
   def update_hca_state(self, hca_status, in_drive=True):
-    # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
     # DISABLED means the EPS hasn't been configured to support Lane Assist
-    self.eps_init_complete = self.eps_init_complete or (hca_status in ("DISABLED", "READY", "ACTIVE") or self.frame > 600)
-    perm_fault = in_drive and hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
-    temp_fault = in_drive and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
+    # we may see a few frames of DISABLED regardless of Lane Assist support
+    if hca_status == "DISABLED":
+      self.eps_disabled_count += 1
+    else:
+      self.eps_disabled_count = 0
+    perm_fault = in_drive and self.eps_disabled_count > 50
+    temp_fault = in_drive and hca_status not in ("READY", "ACTIVE") and not perm_fault
     return temp_fault, perm_fault
 
   def update_acc_fault(self, acc_fault, engine_off, long_inhibit, recovery_frames=10):
