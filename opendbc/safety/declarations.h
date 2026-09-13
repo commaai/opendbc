@@ -251,8 +251,7 @@ bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limit
 void pcm_cruise_check(bool cruise_engaged);
 void speed_mismatch_check(const float speed_2);
 
-// Requires a non-null configuration; an empty RX list is valid.
-void safety_tick(const safety_config *safety_config);
+void safety_tick(void);
 
 // This can be set by the safety hooks
 extern bool controls_allowed;

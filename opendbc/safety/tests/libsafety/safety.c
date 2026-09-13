@@ -13,10 +13,6 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
 
-void safety_tick_current_safety_config() {
-  safety_tick(&current_safety_config);
-}
-
 bool get_safety_rx_checks_invalid(void) {
   return safety_rx_checks_invalid;
 }
@@ -27,8 +23,10 @@ bool safety_tick_rx_check(uint32_t frequency, uint32_t last_timestamp, bool vali
      .status = {.last_timestamp = last_timestamp, .valid_checksum = valid_checksum,
                 .valid_quality_flag = valid_quality_flag, .wrong_counters = wrong_counters}},
   };
-  const safety_config cfg = {.rx_checks = rx_checks, .rx_checks_len = 1};
-  safety_tick(&cfg);
+  const safety_config saved_config = current_safety_config;
+  current_safety_config = (safety_config){.rx_checks = rx_checks, .rx_checks_len = 1};
+  safety_tick();
+  current_safety_config = saved_config;
   return rx_checks[0].status.lagging;
 }
 
