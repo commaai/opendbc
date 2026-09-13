@@ -1192,6 +1192,26 @@ FW_VERSIONS = {
       b'8S102-3BM-A020\x00\x00',
     ],
   },
+  CAR.HONDA_PRELUDE_6G: {
+    (Ecu.eps, 0x18da30f1, None): [
+      b'39990-36W-J020\x00\x00',
+    ],
+    (Ecu.gateway, 0x18daeff1, None): [
+      b'38897-36W-G010\x00\x00',
+    ],
+    (Ecu.srs, 0x18da53f1, None): [
+      b'77959-36W-G430\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S102-36W-J040\x00\x00',
+    ],
+    (Ecu.vsa, 0x18da28f1, None): [
+      b'57114-36W-J020\x00\x00',
+    ],
+    (Ecu.shiftByWire, 0x18da0bf1, None): [
+      b'54008-36W-A410\x00\x00',
+    ],
+  },
   CAR.ACURA_TLX_2G: {
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36802-TGV-A060\x00\x00',
