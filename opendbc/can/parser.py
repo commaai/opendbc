@@ -12,6 +12,8 @@ CAN_INVALID_CNT = 5
 
 
 def get_raw_value(dat: bytes | bytearray, sig: Signal) -> int:
+  if sig.bit_positions is not None:
+    return sum(((dat[bit // 8] >> (bit % 8)) & 1) << i for i, bit in enumerate(sig.bit_positions) if bit // 8 < len(dat))
   ret = 0
   i = sig.msb // 8
   bits = sig.size
@@ -70,7 +72,7 @@ class MessageState:
           self.rate_limited_log(nanos, f"checksum failed: received {hex(tmp)}, calculated {hex(expected_checksum)}")
 
       if not self.ignore_counter and sig.type == 1:  # COUNTER
-        if not self.update_counter(tmp, sig.size):
+        if not self.update_counter(tmp, sig.counter_modulus):
           counter_failed = True
 
       tmp_vals[i] = tmp * sig.factor + sig.offset
@@ -96,8 +98,8 @@ class MessageState:
         self.timeout_threshold = (1_000_000_000 / self.frequency) * 10
     return True
 
-  def update_counter(self, cur_count: int, cnt_size: int) -> bool:
-    if ((self.counter + 1) & ((1 << cnt_size) - 1)) != cur_count:
+  def update_counter(self, cur_count: int, modulus: int) -> bool:
+    if ((self.counter + 1) % modulus) != cur_count:
       self.counter_fail = min(self.counter_fail + 1, MAX_BAD_COUNTER)
     elif self.counter_fail > 0:
       self.counter_fail -= 1

@@ -1,12 +1,15 @@
 import re
 import os
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import cache
 
 from opendbc import DBC_PATH, get_generated_dbcs
 
 # TODO: these should just be passed in along with the DBC file
+from opendbc.car.ford.fordcan import ford_checksum
+from opendbc.car.hyundai.hyundaican import hyundai_rx_checksum
+from opendbc.car.rivian.riviancan import rivian_checksum
 from opendbc.car.honda.hondacan import honda_checksum
 from opendbc.car.toyota.toyotacan import toyota_checksum
 from opendbc.car.subaru.subarucan import subaru_checksum
@@ -34,6 +37,9 @@ class SignalType:
   TESLA_CHECKSUM = 11
   PSA_CHECKSUM = 12
   VOLKSWAGEN_MLB_CHECKSUM = 13
+  FORD_CHECKSUM = 14
+  HYUNDAI_CHECKSUM = 15
+  RIVIAN_CHECKSUM = 16
 
 
 @dataclass
@@ -49,6 +55,12 @@ class Signal:
   is_little_endian: bool
   type: int = SignalType.DEFAULT
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
+  counter_max: int | None = None
+  bit_positions: tuple[int, ...] | None = None
+
+  @property
+  def counter_modulus(self) -> int:
+    return self.counter_max + 1 if self.counter_max is not None else 1 << self.size
 
 
 @dataclass
@@ -108,7 +120,7 @@ class DBC:
     self.vals: list[Val] = []
     address = 0
     signals_temp: dict[int, dict[str, Signal]] = {}
-    for line_num, line in enumerate(lines, 1):
+    for line in lines:
       line = line.strip()
       if line.startswith("BO_ "):
         m = BO_RE.match(line)
@@ -147,7 +159,7 @@ class DBC:
           msb = start_bit
 
         sig = Signal(sig_name, start_bit, msb, lsb, size, is_signed, factor, offset_val, is_little_endian)
-        set_signal_type(sig, checksum_state, self.name, line_num)
+        set_signal_type(sig, checksum_state, address)
         signals_temp[address][sig_name] = sig
       elif line.startswith("VAL_ "):
         m = VAL_RE.search(line)
@@ -161,12 +173,21 @@ class DBC:
         val_def = " ".join(words).strip()
         self.vals.append(Val(sgname, val_addr, val_def))
     for addr, sigs in signals_temp.items():
+      if self.name == "hyundai_can_generated" and addr == 0x386:
+        # WHL_SPD11 splits each four-bit validation field across two bytes.
+        for name, source, positions in (
+          ("COUNTER", "WHL_SPD_AliveCounter_LSB", (14, 15, 30, 31)),
+          ("CHECKSUM", "WHL_SPD_Checksum_LSB", (46, 47, 62, 63)),
+        ):
+          sig = replace(sigs[source], name=name, size=4, bit_positions=positions)
+          set_signal_type(sig, checksum_state, addr)
+          sigs[name] = sig
       self.msgs[addr].sigs = sigs
 
 
 # ***** checksum functions *****
 
-def tesla_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
+def tesla_setup_signal(sig: Signal, address: int) -> None:
   if sig.name.endswith("Counter"):
     sig.type = SignalType.COUNTER
   elif sig.name.endswith("Checksum"):
@@ -174,15 +195,55 @@ def tesla_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
     sig.calc_checksum = tesla_checksum
 
 
+def ford_setup_signal(sig: Signal, address: int) -> None:
+  if address in (0x415, 0x91):
+    if sig.name.endswith("_No_Cnt"):
+      sig.type = SignalType.COUNTER
+    elif sig.name.endswith("_No_Cs"):
+      sig.type = SignalType.FORD_CHECKSUM
+      sig.calc_checksum = ford_checksum
+
+
+def hyundai_setup_signal(sig: Signal, address: int) -> None:
+  signals = {
+    0x260: ("AliveCounter", "Checksum"),
+    0x4F1: ("CF_Clu_AliveCnt1", None),
+    0x421: ("CR_VSM_Alive", "CR_VSM_ChkSum"),
+    0x394: ("AliveCounterTCS", "CheckSum_TCS3"),
+  }
+  counter, checksum = signals.get(address, (None, None))
+  if sig.name == counter:
+    sig.type = SignalType.COUNTER
+  elif sig.name == checksum:
+    sig.type = SignalType.HYUNDAI_CHECKSUM
+    sig.calc_checksum = hyundai_rx_checksum
+
+
+def rivian_setup_signal(sig: Signal, address: int) -> None:
+  if address in (0x208, 0x150, 0x38F, 0x380, 0x100):
+    if sig.name.endswith(("_Counter", "_AliveCounter")):
+      sig.type = SignalType.COUNTER
+      sig.counter_max = 14
+    elif sig.name.endswith("_Checksum"):
+      sig.type = SignalType.RIVIAN_CHECKSUM
+      sig.calc_checksum = rivian_checksum
+
+
 @dataclass
 class ChecksumState:
   checksum_type: int
   calc_checksum: Callable[[int, Signal, bytearray], int] | None
-  setup_signal: Callable[[Signal, str, int], None] | None = None
+  setup_signal: Callable[[Signal, int], None] | None = None
 
 
 def get_checksum_state(dbc_name: str) -> ChecksumState | None:
-  if dbc_name.startswith(("honda_", "acura_")):
+  if dbc_name.startswith("ford_"):
+    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, ford_setup_signal)
+  elif dbc_name == "hyundai_can_generated":
+    return ChecksumState(SignalType.HYUNDAI_CHECKSUM, hyundai_rx_checksum, hyundai_setup_signal)
+  elif dbc_name == "rivian_primary_actuator":
+    return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum, rivian_setup_signal)
+  elif dbc_name.startswith(("honda_", "acura_")):
     return ChecksumState(SignalType.HONDA_CHECKSUM, honda_checksum)
   elif dbc_name.startswith(("toyota_", "lexus_")):
     return ChecksumState(SignalType.TOYOTA_CHECKSUM, toyota_checksum)
@@ -211,11 +272,11 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
   return None
 
 
-def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_num: int) -> None:
+def set_signal_type(sig: Signal, chk: ChecksumState | None, address: int) -> None:
   sig.calc_checksum = None
   if chk:
     if chk.setup_signal:
-      chk.setup_signal(sig, dbc_name, line_num)
+      chk.setup_signal(sig, address)
     if sig.name == "CHECKSUM":
       sig.type = chk.checksum_type
       sig.calc_checksum = chk.calc_checksum

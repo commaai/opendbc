@@ -4,19 +4,34 @@
 #include "opendbc/safety/modes/volkswagen_common.h"
 
 
+static uint32_t volkswagen_mlb_compute_checksum(const CANPacket_t *msg) {
+  uint32_t checksum;
+  if (msg->addr == MSG_LS_01) {
+    checksum = 0xAU;
+    int len = GET_LEN(msg);
+    for (int i = 1; i < len; i++) {
+      checksum ^= msg->data[i];
+    }
+  } else {
+    checksum = volkswagen_mqb_meb_compute_crc(msg);
+  }
+  return checksum;
+}
+
+
 static safety_config volkswagen_mlb_init(uint16_t param) {
   // Transmit of LS_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   static const CanMsg VOLKSWAGEN_MLB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, .check_relay = true}, {MSG_LDW_02, 0, 8, .check_relay = true},
                                                         {MSG_LS_01, 0, 4, .check_relay = false}, {MSG_LS_01, 2, 4, .check_relay = false}};
 
   static RxCheck volkswagen_mlb_rx_checks[] = {
-    // TODO: implement checksum validation
+    // TODO: implement checksum validation for the remaining RX messages
     {.msg = {{MSG_ESP_03, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_ESP_05, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_TSK_04, 1, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_MOTOR_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_LS_01, 0, 4, 10U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LS_01, 0, 4, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
   SAFETY_UNUSED(param);
@@ -119,5 +134,5 @@ const safety_hooks volkswagen_mlb_hooks = {
   .tx = volkswagen_mlb_tx_hook,
   .get_counter = volkswagen_mqb_meb_get_counter,
   .get_checksum = volkswagen_mqb_meb_get_checksum,
-  .compute_checksum = volkswagen_mqb_meb_compute_crc,
+  .compute_checksum = volkswagen_mlb_compute_checksum,
 };

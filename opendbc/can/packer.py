@@ -33,7 +33,7 @@ class CANPacker:
       if address not in self.counters:
         self.counters[address] = 0
       set_value(dat, sig_counter, self.counters[address])
-      self.counters[address] = (self.counters[address] + 1) % (1 << sig_counter.size)
+      self.counters[address] = (self.counters[address] + 1) % sig_counter.counter_modulus
     sig_checksum = next((s for s in msg.sigs.values() if s.type > SignalType.COUNTER), None)
     if sig_checksum and sig_checksum.calc_checksum:
       checksum = sig_checksum.calc_checksum(address, sig_checksum, dat)
@@ -56,6 +56,12 @@ class CANPacker:
 
 
 def set_value(msg: bytearray, sig: Signal, ival: int) -> None:
+  if sig.bit_positions is not None:
+    for i, bit in enumerate(sig.bit_positions):
+      if bit // 8 < len(msg):
+        mask = 1 << (bit % 8)
+        msg[bit // 8] = (msg[bit // 8] & ~mask) | (((ival >> i) & 1) << (bit % 8))
+    return
   i = sig.lsb // 8
   bits = sig.size
   if sig.size < 64:

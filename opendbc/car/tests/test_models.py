@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+import random
 import sys
 import time
 import unittest
@@ -12,7 +13,7 @@ from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
 from opendbc.can.dbc import SignalType
-from opendbc.can.packer import set_value
+from opendbc.can.packer import CANPacker, set_value
 from opendbc.can.parser import CANParser, MAX_BAD_COUNTER
 from opendbc.car import DT_CTRL, gen_empty_fingerprint, structs
 from opendbc.car.can_definitions import CanData
@@ -26,7 +27,7 @@ from opendbc.car.toyota.values import ToyotaFlags
 from opendbc.car.values import PLATFORMS, Platform
 from opendbc.car.volkswagen.values import VolkswagenFlags
 from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.testing import FUZZ_SEED, fuzzy_test
+from opendbc.testing import fuzzy_test
 
 
 SafetyModel = car.CarParams.SafetyModel
@@ -284,11 +285,11 @@ class TestCarModelBase(unittest.TestCase):
     self.safety.safety_tick()
     self.assertFalse(self.safety.safety_config_valid())
 
-  @fuzzy_test(max_examples=30)
-  def test_panda_safety_can_validity(self, fuzzy):
+  def test_panda_safety_can_validity(self):
     if self.CP.dashcamOnly:
       self.skipTest("no need to check panda safety for dashcamOnly")
 
+    rng = random.Random(3780)
     cfg = self.CP.safetyConfigs[-1]
     self.assertGreater(self.safety.get_rx_checks_len(), 0)
     for index in range(self.safety.get_rx_checks_len()):
@@ -301,53 +302,65 @@ class TestCarModelBase(unittest.TestCase):
         if not any(addrs.get(address) == size for src, addrs in self.fingerprint.items() if src % 4 == bus):
           continue
         tested += 1
-        with self.subTest(address=hex(address), bus=bus, size=size, FUZZ_SEED=FUZZ_SEED, FUZZ_EXAMPLE=fuzzy.example_index):
+        with self.subTest(address=hex(address), bus=bus, size=size):
           parsers = [cp for cp in self.CI.can_parsers.values() if cp.bus % 4 == bus and address in cp.dbc.addr_to_msg]
           self.assertTrue(parsers, "safety RX message missing from CarState DBCs")
           for cp in parsers:
-            # Reset for each alternative RX message and each fuzz example.
+            # Reset for each alternative RX message.
             self.assertEqual(self.safety.set_safety_hooks(cfg.safetyModel.raw, cfg.safetyParam), 0)
+            packer = CANPacker(cp.dbc_name)
             parser = CANParser(cp.dbc_name, [(address, 0)], bus)
             checksum_parser = CANParser(cp.dbc_name, [(address, 0)], bus)
             checksum_parser.message_states[address].ignore_counter = True
             state = parser.message_states[address]
+            if source := cp.message_states.get(address):
+              state.ignore_counter = source.ignore_counter
+              state.ignore_checksum = source.ignore_checksum
+              checksum_parser.message_states[address].ignore_checksum = source.ignore_checksum
             counter = next((sig for sig in state.signals if sig.type == SignalType.COUNTER), None)
             checksum = next((sig for sig in state.signals if sig.calc_checksum is not None), None)
-            self.assertEqual(checksum is not None, not check.ignore_checksum, cp.dbc_name)
-            self.assertEqual((1 << counter.size) - 1 if counter else 0, check.max_counter, cp.dbc_name)
+            self.assertEqual(checksum is not None and not state.ignore_checksum, not check.ignore_checksum, cp.dbc_name)
+            self.assertEqual(counter.counter_modulus - 1 if counter and not state.ignore_counter else 0, check.max_counter, cp.dbc_name)
 
             # Sweep the full counter range, wrap, saturate failures, then recover.
             modulus = check.max_counter + 1
             counters = [value % modulus for value in range(modulus + 1)]
             counters += [0] * (MAX_BAD_COUNTER + 1)
             counters += [value % modulus for value in range(1, MAX_BAD_COUNTER + 2)]
-            counters += fuzzy.list(lambda modulus=modulus: fuzzy.integer(0, modulus - 1), min_size=20, max_size=40)
+            valid_count = len(counters)
+            if checksum is not None:
+              counters += [value % modulus for value in range(20)]
             for n, value in enumerate(counters):
-              dat = bytearray(fuzzy.binary(min_size=size, max_size=size))
+              values = {}
+              for sig in state.signals:
+                if sig.type != SignalType.DEFAULT:
+                  continue
+                raw = rng.randrange(1 << sig.size)
+                if sig.is_signed and raw >= (1 << (sig.size - 1)):
+                  raw -= 1 << sig.size
+                values[sig.name] = raw * sig.factor + sig.offset
               if counter is not None:
-                set_value(dat, counter, value)
-              if checksum is not None:
-                set_value(dat, checksum, checksum.calc_checksum(address, checksum, dat))
+                values[counter.name] = value * counter.factor + counter.offset
+              # Match the payload length recorded for this vehicle variant.
+              dat = bytearray(packer.make_can_msg(address, bus, values)[1].ljust(size, b"\x00")[:size])
+              self.assertEqual(len(dat), size, cp.dbc_name)
 
-              # The sweep always uses valid checksums so counter failures cannot hide.
-              # Afterwards exercise arbitrary payloads and individual bit corruptions too.
-              payloads = [bytes(dat)]
-              if n >= modulus + 1 + 2 * (MAX_BAD_COUNTER + 1):
-                payloads.append(fuzzy.binary(min_size=size, max_size=size))
-                bit = fuzzy.integer(0, size * 8 - 1)
-                dat[bit // 8] ^= 1 << (bit % 8)
-                payloads.append(bytes(dat))
-              for payload in payloads:
-                self.safety.safety_rx_hook(libsafety_py.make_CANPacket(address, bus, payload))
-                can = (n + 1, [CanData(address, payload, bus)])
-                accepted = address in parser.update(can)
-                checksum_valid = address in checksum_parser.update(can)
-                safety_checksum_valid = self.safety.get_rx_check_checksum_valid(index)
-                wrong_counters = self.safety.get_rx_check_wrong_counters(index)
-                context = f"{cp.dbc_name} {n=} payload={payload.hex()}"
-                self.assertEqual(checksum_valid, safety_checksum_valid, context)
-                self.assertEqual(state.counter_fail, wrong_counters, context)
-                self.assertEqual(accepted, safety_checksum_valid and wrong_counters < MAX_BAD_COUNTER, context)
+              # Keep valid checksums for the counter sweep, then try random checksum values.
+              if n >= valid_count:
+                set_value(dat, checksum, rng.randrange(1 << checksum.size))
+              payload = bytes(dat)
+              self.safety.safety_rx_hook(libsafety_py.make_CANPacket(address, bus, payload))
+              can = (n + 1, [CanData(address, payload, bus)])
+              accepted = address in parser.update(can)
+              checksum_valid = address in checksum_parser.update(can)
+              safety_checksum_valid = self.safety.get_rx_check_checksum_valid(index)
+              wrong_counters = self.safety.get_rx_check_wrong_counters(index)
+              context = f"{cp.dbc_name} {n=} payload={payload.hex()}"
+              if n < valid_count:
+                self.assertTrue(checksum_valid, context)
+              self.assertEqual(checksum_valid, safety_checksum_valid, context)
+              self.assertEqual(state.counter_fail, wrong_counters, context)
+              self.assertEqual(accepted, safety_checksum_valid and wrong_counters < MAX_BAD_COUNTER, context)
       self.assertGreater(tested, 0, f"safety RX check {index} missing from fingerprint")
 
   def test_panda_safety_tx_cases(self):

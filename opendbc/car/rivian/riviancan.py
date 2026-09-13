@@ -98,3 +98,8 @@ def create_adas_status(packer, vdm_adas_status, interface_status):
   data = packer.make_can_msg("VDM_AdasSts", 2, values)[1]
   values["VDM_AdasStatus_Checksum"] = checksum(data[1:], 0x1D, 0xD1)
   return packer.make_can_msg("VDM_AdasSts", 2, values)
+
+
+def rivian_checksum(address: int, sig, dat: bytearray) -> int:
+  xor_output = {0x208: 0xB1, 0x150: 0x9A, 0x38F: 0x37, 0x380: 0x1E, 0x100: 0x5F}
+  return checksum(dat[1:], 0x1D, xor_output[address])
