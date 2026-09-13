@@ -169,7 +169,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     }
     return self.packer.make_can_msg_safety("EngBrakeData", 0, values)
 
-  def test_cruise_state_4(self):
+  def test_enable_control_allowed_from_queue_assist(self):
     msg = self.packer.make_can_msg_safety("EngBrakeData", 0, {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": 4})
     self.assertTrue(self._rx(msg))
     self.assertTrue(self.safety.get_controls_allowed())
