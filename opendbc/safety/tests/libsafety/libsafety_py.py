@@ -56,7 +56,6 @@ class CANPacket:
   pass
 
 ffi.cdef("""
-uint64_t GET_BYTES_64(const CANPacket_t *msg, int start, int len);
 bool safety_rx_hook(CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
 int safety_fwd_hook(int bus_num, int addr);
