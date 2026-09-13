@@ -166,8 +166,8 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
   update_addr_timestamp(cfg->rx_checks, index);
 
   if (index != -1) {
-    // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
+    // Checksum callbacks are registered as a pair.
+    if ((safety_hooks->get_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
       uint32_t checksum = safety_hooks->get_checksum(msg);
       uint32_t checksum_comp = safety_hooks->compute_checksum(msg);
       cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
@@ -316,22 +316,21 @@ void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
 
 // 1Hz safety function called by main. Now just a check for lagging safety messages
 void safety_tick(void) {
-  const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = microsecond_timer_get();
   for (int i=0; i < current_safety_config.rx_checks_len; i++) {
     uint32_t elapsed_time = safety_get_ts_elapsed(ts, current_safety_config.rx_checks[i].status.last_timestamp);
-    // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
-    // Quite conservative to not risk false triggers.
-    // 2s of lag is worse case, since the function is called at 1Hz
-    uint32_t frequency = current_safety_config.rx_checks[i].msg[current_safety_config.rx_checks[i].status.index].frequency;
-    uint32_t timestep = 1e6 / frequency;
-    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
+    // Safety messages must run at >= 10 Hz, so 10 missed messages never exceed 1s.
+    // Called at 1Hz, detection can take up to 2s.
+    bool lagging = elapsed_time > 1000000U;
     current_safety_config.rx_checks[i].status.lagging = lagging;
 
     // enforce minimum frequency for safety-relevant messages
-    bool frequency_invalid = frequency < 10U;
-    if (lagging || frequency_invalid || !is_msg_valid(current_safety_config.rx_checks, i)) {
+    uint32_t frequency = current_safety_config.rx_checks[i].msg[current_safety_config.rx_checks[i].status.index].frequency;
+    bool invalid = frequency < 10U;
+    invalid |= lagging;
+    invalid |= !is_msg_valid(current_safety_config.rx_checks, i);
+    if (invalid) {
       rx_checks_invalid = true;
       controls_allowed = false;
     }
