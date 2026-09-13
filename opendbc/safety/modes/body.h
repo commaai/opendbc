@@ -2,6 +2,23 @@
 
 #include "opendbc/safety/declarations.h"
 
+static uint8_t body_get_counter(const CANPacket_t *msg) {
+  return msg->data[6] & 0xFU;
+}
+
+static uint32_t body_get_checksum(const CANPacket_t *msg) {
+  return msg->data[7];
+}
+
+static uint32_t body_compute_checksum(const CANPacket_t *msg) {
+  uint8_t checksum = 0xFFU;
+  int len = GET_LEN(msg);
+  for (int i = len - 2; i >= 0; i--) {
+    checksum = crc8_update(checksum, msg->data[i], 0xD5U);
+  }
+  return checksum;
+}
+
 static void body_rx_hook(const CANPacket_t *msg) {
   SAFETY_UNUSED(msg);
 
@@ -27,7 +44,7 @@ static bool body_tx_hook(const CANPacket_t *msg) {
 
 static safety_config body_init(uint16_t param) {
   static RxCheck body_rx_checks[] = {
-    {.msg = {{0x201, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x201, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
   static const CanMsg BODY_TX_MSGS[] = {{0x250, 0, 8, .check_relay = false}, {0x250, 0, 6, .check_relay = false}, {0x251, 0, 5, .check_relay = false},  // body
@@ -43,4 +60,7 @@ const safety_hooks body_hooks = {
   .init = body_init,
   .rx = body_rx_hook,
   .tx = body_tx_hook,
+  .get_counter = body_get_counter,
+  .get_checksum = body_get_checksum,
+  .compute_checksum = body_compute_checksum,
 };
