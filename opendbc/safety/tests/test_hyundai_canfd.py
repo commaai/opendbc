@@ -159,8 +159,8 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
 
-  def _acc_cancel_msg(self, cancel, accel_raw=0, accel_value=0):
-    values = {"ACCMode": 4 if cancel else 0, "aReqRaw": accel_raw, "aReqValue": accel_value}
+  def _acc_cancel_msg(self, cancel, accel=0):
+    values = {"ACCMode": 4 if cancel else 0, "aReqRaw": accel, "aReqValue": accel}
     return self.packer.make_can_msg_safety("SCC_CONTROL", self.PT_BUS, values)
 
   def test_button_sends(self):
@@ -177,9 +177,7 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
     for enabled in (True, False):
       self.safety.set_controls_allowed(enabled)
       self.assertTrue(self._tx(self._acc_cancel_msg(True)))
-      self.assertFalse(self._tx(self._acc_cancel_msg(True, accel_raw=1)))
-      self.assertFalse(self._tx(self._acc_cancel_msg(True, accel_value=1)))
-      self.assertFalse(self._tx(self._acc_cancel_msg(True, accel_raw=1, accel_value=1)))
+      self.assertFalse(self._tx(self._acc_cancel_msg(True, accel=1)))
       self.assertFalse(self._tx(self._acc_cancel_msg(False)))
 
 

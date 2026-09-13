@@ -199,7 +199,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
         violation = true;
       }
 
-      if ((desired_accel_raw != 0) || (desired_accel_val != 0)) {
+      if ((desired_accel_raw | desired_accel_val) != 0) {
         violation = true;
       }
     }
