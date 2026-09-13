@@ -43,6 +43,16 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {s: speed*0.0592 for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", 0, values)
 
+  def test_vehicle_moving_wrong_bus(self):
+    for bus in range(3):
+      with self.subTest(bus=bus):
+        self._rx(self._speed_msg(0))
+        self.assertFalse(self.safety.get_vehicle_moving())
+        msg = self._speed_msg(1)
+        msg[0].bus = bus
+        self._rx(msg)
+        self.assertEqual(self.safety.get_vehicle_moving(), bus == 0)
+
   def _user_brake_msg(self, brake):
     values = {"Brake_Pedal": brake}
     return self.packer.make_can_msg_safety("Brake_Pedal", 0, values)
