@@ -232,7 +232,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // UDS: Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
   if (msg->addr == 0x7D0U) {
-    if ((GET_BYTES(msg, 0, 4) != 0x00803E02U) || (GET_BYTES(msg, 4, 4) != 0x0U)) {
+    if (GET_BYTES_64(msg, 0, 8) != 0x0000000000803E02ULL) {
       tx = false;
     }
   }
