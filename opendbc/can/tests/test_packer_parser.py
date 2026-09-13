@@ -55,7 +55,7 @@ class TestCanParserPacker(unittest.TestCase):
     # The four-bit counter wraps at 14, not 15.
     for i in range(45):
       msg = packer.make_can_msg("ESP_Status", 0, {})
-      self.assertIn(0x208, parser.update((i + 1, [msg])))
+      assert 0x208 in parser.update((i + 1, [msg]))
       self.assertEqual(parser.vl["ESP_Status"]["ESP_Status_Counter"], i % 15)
       self.assertLess(state.counter_fail, 2)
 
@@ -68,7 +68,7 @@ class TestCanParserPacker(unittest.TestCase):
 
     for i in range(1, MAX_BAD_COUNTER + 1):
       msg = packer.make_can_msg("ESP_Status", 0, {"ESP_Status_Counter": i})
-      self.assertIn(0x208, parser.update((60 + i, [msg])))
+      assert 0x208 in parser.update((60 + i, [msg]))
       self.assertEqual(state.counter_fail, MAX_BAD_COUNTER - i)
 
   def test_hyundai_split_counter_checksum(self):
@@ -77,7 +77,7 @@ class TestCanParserPacker(unittest.TestCase):
     for counter in range(16):
       address, dat, bus = packer.make_can_msg("WHL_SPD11", 0, {"COUNTER": counter, "WHL_SPD_FL": 20})
       self.assertEqual((dat[1] >> 6) | ((dat[3] >> 6) << 2), counter)
-      self.assertIn(address, parser.update((counter + 1, [(address, dat, bus)])))
+      assert address in parser.update((counter + 1, [(address, dat, bus)]))
       self.assertEqual(parser.vl[address]["WHL_SPD_FL"], 20)
       self.assertEqual(parser.vl[address]["WHL_SPD_AliveCounter_LSB"], counter & 3)
       self.assertEqual(parser.vl[address]["WHL_SPD_AliveCounter_MSB"], counter >> 2)
