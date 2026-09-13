@@ -78,11 +78,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     if (volkswagen_longitudinal) {
       bool set_button = GET_BIT(msg, 16U);
       bool resume_button = GET_BIT(msg, 19U);
-      if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-        controls_allowed = acc_main_on;
-      }
-      volkswagen_set_button_prev = set_button;
-      volkswagen_resume_button_prev = resume_button;
+      volkswagen_cruise_buttons_check(set_button, resume_button);
     }
     // Always exit controls on rising edge of Cancel
     // Signal: GRA_ACC_01.GRA_Abbrechen

@@ -110,11 +110,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
       // Signal: GRA_Neu.GRA_Neu_Recall
       bool set_button = GET_BIT(msg, 16U);
       bool resume_button = GET_BIT(msg, 17U);
-      if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-        controls_allowed = acc_main_on;
-      }
-      volkswagen_set_button_prev = set_button;
-      volkswagen_resume_button_prev = resume_button;
+      volkswagen_cruise_buttons_check(set_button, resume_button);
       // Exit controls on rising edge of Cancel, override Set/Resume if present simultaneously
       // Signal: GRA_ACC_01.GRA_Abbrechen
       if (GET_BIT(msg, 9U)) {

@@ -48,6 +48,15 @@ static void volkswagen_common_init(void) {
   return;
 }
 
+// Enter controls on falling edge of Set or Resume with the ACC main switch on.
+static void volkswagen_cruise_buttons_check(bool set_button, bool resume_button) {
+  if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
+    controls_allowed = acc_main_on;
+  }
+  volkswagen_set_button_prev = set_button;
+  volkswagen_resume_button_prev = resume_button;
+}
+
 static uint32_t volkswagen_mqb_meb_get_checksum(const CANPacket_t *msg) {
   return (uint8_t)msg->data[0];
 }
