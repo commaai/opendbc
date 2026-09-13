@@ -41,9 +41,13 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
 
   cnt_speed = 0
   cnt_speed_2 = 0
+  cnt_torque = 0
+  cnt_brake = 0
+  cnt_pcm = 0
 
   def _torque_driver_msg(self, torque):
-    values = {"EPAS_TorsionBarTorque": torque / 100.0}
+    values = {"EPAS_TorsionBarTorque": torque / 100.0, "EPAS_SystemStatus_Counter": self.cnt_torque % 15}
+    self.__class__.cnt_torque += 1
     return self.packer.make_can_msg_safety("EPAS_SystemStatus", 0, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
@@ -61,7 +65,8 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
     return self._user_gas_msg(0, speed, quality_flag)
 
   def _user_brake_msg(self, brake):
-    values = {"iBESP2_BrakePedalApplied": brake}
+    values = {"iBESP2_BrakePedalApplied": brake, "iBESP2_AliveCounter": self.cnt_brake % 15}
+    self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("iBESP2", 0, values)
 
   def _user_gas_msg(self, gas, speed=0, quality_flag=True):
@@ -71,7 +76,8 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
     return self.packer.make_can_msg_safety("VDM_PropStatus", 0, values, fix_checksum=checksum)
 
   def _pcm_status_msg(self, enable):
-    values = {"ACM_FeatureStatus": enable, "ACM_Unkown1": 1}
+    values = {"ACM_FeatureStatus": enable, "ACM_Unkown1": 1, "ACM_Status_Counter": self.cnt_pcm % 15}
+    self.__class__.cnt_pcm += 1
     return self.packer.make_can_msg_safety("ACM_Status", 2, values)
 
   def _accel_msg(self, accel: float):
@@ -108,6 +114,21 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
         msg[0].data[0] = 0xff
         self.assertFalse(self._rx(msg))
         self.assertFalse(self.safety.get_controls_allowed())
+
+    # The DBC defines counters for the remaining monitored RX messages too.
+    for make_msg in (self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
+      self._reset_safety_hooks()
+      self.safety.set_controls_allowed(True)
+      for _ in range(10):
+        self.assertTrue(self._rx(make_msg(0) if make_msg == self._torque_driver_msg else make_msg(False)))
+
+      # A single bad counter is tolerated, but repeated bad counters must disengage.
+      for _ in range(7):
+        msg = make_msg(0) if make_msg == self._torque_driver_msg else make_msg(False)
+        msg[0].data[1] &= 0xf0
+        valid = self._rx(msg)
+      self.assertFalse(valid)
+      self.assertFalse(self.safety.get_controls_allowed())
 
 
 class TestRivianStockSafety(TestRivianSafetyBase):
