@@ -72,7 +72,6 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   const unsigned pt_bus = hyundai_canfd_lka_steer_msg ? 1U : 0U;
   const unsigned int scc_bus = hyundai_camera_scc ? 2U : pt_bus;
 
-  if (msg->bus == pt_bus) {
     // driver torque
     if (msg_matches(msg, 0xeaU, pt_bus)) {
       int torque_driver_new = ((msg->data[11] & 0x1fU) << 8U) | msg->data[10];
@@ -122,16 +121,12 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
       // average of all 4 wheel speeds. Conversion: raw * 0.03125 / 3.6 = m/s
       UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.03125 * KPH_TO_MS);
     }
-  }
-
-  if (msg->bus == scc_bus) {
-    // cruise state
-    if (msg_matches(msg, 0x1a0U, scc_bus) && !hyundai_longitudinal) {
+  // cruise state
+  if (msg_matches(msg, 0x1a0U, scc_bus) && !hyundai_longitudinal) {
       // 1=enabled, 2=driver override
       int cruise_status = ((msg->data[8] >> 4) & 0x7U);
       bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
       hyundai_common_cruise_state_check(cruise_engaged);
-    }
   }
 }
 

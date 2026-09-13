@@ -54,7 +54,6 @@ static bool rivian_get_quality_flag_valid(const CANPacket_t *msg) {
 
 static void rivian_rx_hook(const CANPacket_t *msg) {
 
-  if (msg->bus == 0U)  {
     // Vehicle speed
     if (msg_matches(msg, 0x208U, 0U)) {
       float speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01;
@@ -81,15 +80,11 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, 0x38fU, 0U)) {
       brake_pressed = (msg->data[2] >> 7) & 1U;
     }
-  }
-
-  if (msg->bus == 2U) {
     // Cruise state
     if (msg_matches(msg, 0x100U, 2U)) {
       const int feature_status = msg->data[2] >> 5U;
       pcm_cruise_check(feature_status == 1);
     }
-  }
 }
 
 static bool rivian_tx_hook(const CANPacket_t *msg) {
@@ -117,7 +112,6 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
 
   bool tx = true;
 
-  if (msg->bus == 0U) {
     // Steering control
     if (msg_matches(msg, 0x120U, 0U)) {
       int desired_torque = ((msg->data[2] << 3U) | (msg->data[3] >> 5U)) - 1024U;
@@ -135,8 +129,6 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
         tx = false;
       }
     }
-  }
-
   return tx;
 }
 

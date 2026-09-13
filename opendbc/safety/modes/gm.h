@@ -32,7 +32,6 @@ static bool gm_pcm_cruise = false;
 static void gm_rx_hook(const CANPacket_t *msg) {
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
 
-  if (msg->bus == 0U) {
     if (msg_matches(msg, 0x184U, 0U)) {
       int torque_driver_new = ((msg->data[6] & 0x7U) << 8) | msg->data[7];
       torque_driver_new = to_signed(torque_driver_new, 11);
@@ -89,7 +88,6 @@ static void gm_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, 0xBDU, 0U)) {
       regen_braking = (msg->data[0] >> 4) != 0U;
     }
-  }
 }
 
 static bool gm_tx_hook(const CANPacket_t *msg) {

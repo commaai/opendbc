@@ -35,7 +35,6 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
 }
 
 static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
     // Update in-motion state by sampling wheel speeds
     if (msg_matches(msg, MSG_ESP_19, 0U)) {
       // sum 4 wheel speeds
@@ -108,7 +107,6 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     }
 
     brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
-  }
 }
 
 static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {

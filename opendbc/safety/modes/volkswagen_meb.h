@@ -142,7 +142,6 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 }
 
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
     // Update in-motion state by sampling wheel speeds
     if (msg_matches(msg, MSG_ESC_51, 0U)) {
       uint32_t fl = msg->data[8] | (msg->data[9] << 8);
@@ -204,7 +203,6 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, MSG_MOTOR_14, 0U)) {
       brake_pressed = GET_BIT(msg, 28U);
     }
-  }
 }
 
 static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {

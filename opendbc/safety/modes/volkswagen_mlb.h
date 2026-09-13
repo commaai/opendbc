@@ -26,7 +26,6 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
 }
 
 static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
     // Check all wheel speeds for any movement
     // Signals: ESP_03.ESP_[VL|VR|HL|HR]_Radgeschw
     if (msg_matches(msg, MSG_ESP_03, 0U)) {
@@ -64,9 +63,6 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
 
     brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
 
-  }
-
-  if (msg->bus == 1U) {
     if (msg_matches(msg, MSG_TSK_04, 1U)) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
       // Signal: TSK_04.TSK_Status_GRA_ACC_02
@@ -75,7 +71,6 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
 
       pcm_cruise_check(cruise_engaged);
     }
-  }
 }
 
 static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {

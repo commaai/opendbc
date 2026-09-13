@@ -17,7 +17,6 @@
 
 // track msgs coming from OP so that we know what CAM msgs to drop and what to forward
 static void mazda_rx_hook(const CANPacket_t *msg) {
-  if ((int)msg->bus == MAZDA_MAIN) {
     if (msg_matches(msg, MAZDA_ENGINE_DATA, MAZDA_MAIN)) {
       // sample speed: scale by 0.01 to get kph
       int speed = (msg->data[2] << 8) | msg->data[3];
@@ -43,7 +42,6 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, MAZDA_PEDALS, MAZDA_MAIN)) {
       brake_pressed = (msg->data[0] & 0x10U);
     }
-  }
 }
 
 static bool mazda_tx_hook(const CANPacket_t *msg) {
@@ -59,7 +57,6 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
 
   bool tx = true;
   // Check if msg is sent on the main BUS
-  if (msg->bus == (unsigned char)MAZDA_MAIN) {
     // steer cmd checks
     if (msg_matches(msg, MAZDA_LKAS, MAZDA_MAIN)) {
       int desired_torque = (((msg->data[0] & 0x0FU) << 8) | msg->data[1]) - 2048U;
@@ -78,7 +75,6 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
         tx = false;
       }
     }
-  }
 
   return tx;
 }

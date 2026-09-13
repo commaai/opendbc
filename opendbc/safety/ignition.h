@@ -10,16 +10,15 @@ bool ignition_can = false;
 uint32_t ignition_can_cnt = 0U;
 
 void ignition_can_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
-    // GM exception
-    if (msg_matches(msg, 0x1F1U, 0U, 8U)) {
+  // GM exception
+  if (msg_matches(msg, 0x1F1U, 0U, 8U)) {
       // SystemPowerMode (2=Run, 3=Crank Request)
       ignition_can = (msg->data[0] & 0x2U) != 0U;
       ignition_can_cnt = 0U;
-    }
+  }
 
     // Rivian R1S/T GEN1 exception
-    if (msg_matches(msg, 0x152U, 0U, 8U)) {
+  if (msg_matches(msg, 0x152U, 0U, 8U)) {
       // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
       int counter = msg->data[1] & 0xFU;  // max is only 14
 
@@ -30,10 +29,10 @@ void ignition_can_hook(const CANPacket_t *msg) {
         ignition_can_cnt = 0U;
       }
       prev_counter_rivian = counter;
-    }
+  }
 
     // Tesla Model 3/Y exception
-    if (msg_matches(msg, 0x221U, 0U, 8U)) {
+  if (msg_matches(msg, 0x221U, 0U, 8U)) {
       // 0x221 overlaps with Rivian which has random data on byte 0
       int counter = msg->data[6] >> 4;
 
@@ -45,16 +44,16 @@ void ignition_can_hook(const CANPacket_t *msg) {
         ignition_can_cnt = 0U;
       }
       prev_counter_tesla = counter;
-    }
+  }
 
     // Mazda exception
-    if (msg_matches(msg, 0x9EU, 0U, 8U)) {
+  if (msg_matches(msg, 0x9EU, 0U, 8U)) {
       ignition_can = (msg->data[0] >> 5) == 0x6U;
       ignition_can_cnt = 0U;
-    }
+  }
 
     // Volkswagen MEB exception
-    if (msg_matches(msg, 0x3C0U, 0U, 4U)) {
+  if (msg_matches(msg, 0x3C0U, 0U, 4U)) {
       int counter = msg->data[1] & 0xFU;
 
       static int prev_counter_vw_meb = -1;
@@ -64,7 +63,6 @@ void ignition_can_hook(const CANPacket_t *msg) {
         ignition_can_cnt = 0U;
       }
       prev_counter_vw_meb = counter;
-    }
   }
 
   // TODO: this is too loose, Teslas have 0x222

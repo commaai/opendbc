@@ -135,7 +135,6 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
     hyundai_common_cruise_state_check(cruise_engaged);
   }
 
-  if (msg->bus == 0U) {
     if (msg_matches(msg, 0x251U, 0U)) {
       int torque_driver_new = (GET_BYTES(msg, 0, 2) & 0x7ffU) - 1024U;
       // update array of samples
@@ -171,7 +170,6 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, 0x394U, 0U)) {
       brake_pressed = ((msg->data[5] >> 5U) & 0x3U) == 0x2U;
     }
-  }
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *msg) {

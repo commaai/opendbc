@@ -20,7 +20,6 @@ static const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
 static void nissan_rx_hook(const CANPacket_t *msg) {
 
   // Altima: on camera bus, others: on pt bus
-  if (msg->bus == 0U) {
     if (msg_matches(msg, 0x185U, 0U)) {
       // Current steering angle
       int angle_meas_new = (msg->data[2] << 10) | (msg->data[3] << 2) | (msg->data[4] >> 6);
@@ -30,9 +29,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
       // update array of samples
       update_sample(&angle_meas, angle_meas_new);
     }
-  }
 
-  if (msg->bus == (nissan_alt_eps ? 1U : 0U)) {
     if (msg_matches(msg, 0x285U, nissan_alt_eps ? 1U : 0U)) {
       // Get current speed and standstill
       uint16_t right_rear = (msg->data[0] << 8) | (msg->data[1]);
@@ -58,7 +55,6 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
         brake_pressed = ((msg->data[4] >> 5) & 1U) != 0U;
       }
     }
-  }
 
   // Handle cruise enabled
   if (msg_matches(msg, 0x30fU, nissan_alt_eps ? 1U : 2U)) {

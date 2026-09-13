@@ -75,7 +75,6 @@ static safety_config volkswagen_pq_init(uint16_t param) {
 }
 
 static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
     // Update in-motion state from speed value.
     // Signal: Bremse_1.BR1_Rad_kmh
     if (msg_matches(msg, MSG_BREMSE_1, 0U)) {
@@ -141,7 +140,6 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
       brake_pressed = (msg->data[2] & 0x1U);
     }
-  }
 }
 
 static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {

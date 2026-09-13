@@ -95,7 +95,6 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
 }
 
 static void toyota_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
 
     // get eps motor torque (0.66 factor in dbc)
     if (msg_matches(msg, 0x260U, 0U)) {
@@ -168,7 +167,6 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
 
       UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 * KPH_TO_MS);
     }
-  }
 }
 
 static bool toyota_tx_hook(const CANPacket_t *msg) {
@@ -215,7 +213,6 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
   // Check if msg is sent on BUS 0
-  if (msg->bus == 0U) {
     // ACCEL: safety check on byte 1-2
     if (msg_matches(msg, 0x343U, 0U)) {
       int desired_accel = (msg->data[0] << 8) | msg->data[1];
@@ -338,8 +335,6 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
         }
       }
     }
-  }
-
   // UDS: Only tester present ("\x0F\x02\x3E\x00\x00\x00\x00\x00") allowed on diagnostics address
   if (msg->addr == 0x750U) {
     // this address is sub-addressed. only allow tester present to radar (0xF)

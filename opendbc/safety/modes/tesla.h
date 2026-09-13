@@ -108,7 +108,6 @@ static int tesla_get_steer_ctrl_type(const int ctrl_type) {
 
 static void tesla_rx_hook(const CANPacket_t *msg) {
 
-  if (msg->bus == 0U) {
     // Steering angle: (0.1 * val) - 819.2 in deg.
     if (msg_matches(msg, 0x370U, 0U)) {
       // Store it 1/10 deg to match steering request
@@ -179,9 +178,6 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, 0x155U, 0U)) {
       vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
     }
-  }
-
-  if (msg->bus == 2U) {
     // DAS_control
     if (msg_matches(msg, 0x2b9U, 2U)) {
       // "AEB_ACTIVE"
@@ -202,7 +198,6 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       }
       tesla_stock_lkas_prev = tesla_stock_lkas_now;
     }
-  }
 }
 
 

@@ -34,7 +34,6 @@ static uint8_t mg_get_counter(const CANPacket_t *msg) {
 }
 
 static void mg_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U)  {
     // Vehicle speed
     if (msg_matches(msg, 0x23cU, 0U)) {
       float speed = (((msg->data[2] & 0x7FU) << 8) | msg->data[3]) * 0.015625;
@@ -65,7 +64,6 @@ static void mg_rx_hook(const CANPacket_t *msg) {
                             (cruise_state == 3);    // Override
       pcm_cruise_check(cruise_engaged);
     }
-  }
 }
 
 static bool mg_tx_hook(const CANPacket_t *msg) {

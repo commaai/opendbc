@@ -96,7 +96,6 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
 };
 
 static void ford_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == FORD_MAIN_BUS) {
     // Update in motion state from standstill signal
     if (msg_matches(msg, FORD_DesiredTorqBrk, FORD_MAIN_BUS)) {
       // Signal: VehStop_D_Stat
@@ -145,7 +144,6 @@ static void ford_rx_hook(const CANPacket_t *msg) {
       bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
       pcm_cruise_check(cruise_engaged);
     }
-  }
 }
 
 static bool ford_tx_hook(const CANPacket_t *msg) {
