@@ -2,22 +2,22 @@
 
 #include "opendbc/safety/declarations.h"
 
-// Stock longitudinal
+// Common messages for stock and openpilot longitudinal
 #define TOYOTA_BASE_TX_MSGS \
   {0x191, 0, 8, .check_relay = true}, {0x412, 0, 8, .check_relay = true}, {0x1D2, 0, 8, .check_relay = false},  /* LKAS + LTA + PCM cancel cmd */  \
 
-#define TOYOTA_COMMON_TX_MSGS \
+#define TOYOTA_COMMON_TX_MSGS(longitudinal) \
   TOYOTA_BASE_TX_MSGS \
   {0x2E4, 0, 5, .check_relay = true}, \
-  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */  \
+  {0x343, 0, 8, .check_relay = (longitudinal)},  /* ACC control or cancel */  \
 
-#define TOYOTA_COMMON_SECOC_TX_MSGS \
+#define TOYOTA_COMMON_SECOC_TX_MSGS(longitudinal) \
   TOYOTA_BASE_TX_MSGS \
   {0x2E4, 0, 8, .check_relay = true}, {0x131, 0, 8, .check_relay = true}, \
-  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */ \
+  {0x343, 0, 8, .check_relay = (longitudinal)},  /* ACC control or cancel */ \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS \
-  TOYOTA_COMMON_TX_MSGS \
+  TOYOTA_COMMON_TX_MSGS(true) \
   /* DSU bus 0 */ \
   {0x283, 0, 7, .check_relay = false}, {0x2E6, 0, 8, .check_relay = false}, {0x2E7, 0, 8, .check_relay = false}, {0x33E, 0, 7, .check_relay = false}, \
   {0x344, 0, 8, .check_relay = false}, {0x365, 0, 7, .check_relay = false}, {0x366, 0, 7, .check_relay = false}, {0x4CB, 0, 8, .check_relay = false}, \
@@ -28,12 +28,9 @@
   {0x411, 0, 8, .check_relay = false}, \
   /* radar diagnostic address */       \
   {0x750, 0, 8, .check_relay = false}, \
-  /* ACC */                            \
-  {0x343, 0, 8, .check_relay = true},  \
 
 #define TOYOTA_COMMON_SECOC_LONG_TX_MSGS \
-  TOYOTA_COMMON_SECOC_TX_MSGS \
-  {0x343, 0, 8, .check_relay = true}, \
+  TOYOTA_COMMON_SECOC_TX_MSGS(true) \
   {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */ \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
@@ -350,11 +347,11 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
 
 static safety_config toyota_init(uint16_t param) {
   static const CanMsg TOYOTA_TX_MSGS[] = {
-    TOYOTA_COMMON_TX_MSGS
+    TOYOTA_COMMON_TX_MSGS(false)
   };
 
   static const CanMsg TOYOTA_SECOC_TX_MSGS[] = {
-    TOYOTA_COMMON_SECOC_TX_MSGS
+    TOYOTA_COMMON_SECOC_TX_MSGS(false)
   };
 
   static const CanMsg TOYOTA_LONG_TX_MSGS[] = {
