@@ -188,9 +188,9 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def test_lateral_accel_limit(self):
     for speed in np.linspace(0, 40, 100):
       speed = max(speed, 1)
-      # match both CAN encoding (0.0713 kph/LSB) and VEHICLE_SPEED_FACTOR=1000 rounding in UPDATE_VEHICLE_SPEED
+      # match both CAN encoding (WHEELSPEED_TO_KPH) and VEHICLE_SPEED_FACTOR=1000 rounding in UPDATE_VEHICLE_SPEED
       sent = speed + 1
-      sent_can = away_round(sent / 0.0713 * 3.6) * 0.0713 / 3.6
+      sent_can = away_round(sent / CarControllerParams.WHEELSPEED_TO_KPH * 3.6) * CarControllerParams.WHEELSPEED_TO_KPH / 3.6
       speed = round(sent_can * 1000) / 1000 - 1
       for sign in (-1, 1):
         self.safety.set_controls_allowed(True)
@@ -219,9 +219,9 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def test_lateral_jerk_limit(self):
     for speed in np.linspace(0, 40, 100):
       speed = max(speed, 1)
-      # match both CAN encoding (0.0713 kph/LSB) and VEHICLE_SPEED_FACTOR=1000 rounding in UPDATE_VEHICLE_SPEED
+      # match both CAN encoding (WHEELSPEED_TO_KPH) and VEHICLE_SPEED_FACTOR=1000 rounding in UPDATE_VEHICLE_SPEED
       sent = speed + 1
-      sent_can = away_round(sent / 0.0713 * 3.6) * 0.0713 / 3.6
+      sent_can = away_round(sent / CarControllerParams.WHEELSPEED_TO_KPH * 3.6) * CarControllerParams.WHEELSPEED_TO_KPH / 3.6
       speed = round(sent_can * 1000) / 1000 - 1
       for sign in (-1, 1):
         self.safety.set_controls_allowed(True)
