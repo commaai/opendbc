@@ -31,14 +31,19 @@ class CarController(CarControllerBase):
       self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
                                                           CS.out.steeringAngleDeg, CC.latActive, CarControllerParams, self.VM)
 
-      cntr = (self.frame // 2) % 16
-      can_sends.append(bydcan.create_steering_control(self.packer, self.apply_angle_last, CC.latActive, cntr))
-      can_sends.append(bydcan.create_lkas_hud(self.packer, CC.latActive, cntr, CS.lkas_hud, hud_control))
+      if CC.latActive:
+        cntr = (self.frame // 2) % 16
+        can_sends.append(bydcan.create_steering_control(self.packer, self.apply_angle_last, True, cntr))
+        can_sends.append(bydcan.create_lkas_hud(self.packer, cntr, CS.lkas_hud, hud_control))
 
-      # STEER_REQ=1 while EPS reports idle (LKS_PREPARED=1) for >1 s => not accepted
-      not_accepted = CC.latActive and not CS.eps_engaged
-      self.not_accepted_frames = self.not_accepted_frames + 1 if not_accepted else 0
-      CS.steer_not_accepted = self.not_accepted_frames > 50
+        # STEER_REQ=1 while EPS reports idle (LKS_PREPARED=1) for >1 s => not accepted
+        not_accepted = not CS.eps_engaged
+        self.not_accepted_frames = self.not_accepted_frames + 1 if not_accepted else 0
+        CS.steer_not_accepted = self.not_accepted_frames > 50
+      else:
+        # Panda forwards camera 0x1E2 / 0x316 so stock LKS can steer and paint the HUD.
+        self.not_accepted_frames = 0
+        CS.steer_not_accepted = False
 
     if CC.cruiseControl.cancel and self.frame % 10 == 0:
       can_sends.append(bydcan.create_buttons(self.packer, cancel=True))
