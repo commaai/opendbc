@@ -72,8 +72,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     return self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, values)
 
   def _user_gas_msg(self, gas):
-    values = {"RAW_THROTTLE": int(gas * 100)}
-    return self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, values)
+    values = {"GAS_PEDAL": gas}
+    return self.packer.make_can_msg_safety("PEDAL", self.MAIN_BUS, values)
 
   def test_cruise_buttons(self):
     buttons = ("SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN", "ACC_ON_BTN")
@@ -188,9 +188,9 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def test_lateral_accel_limit(self):
     for speed in np.linspace(0, 40, 100):
       speed = max(speed, 1)
-      # match both CAN encoding (0.1 kph/LSB) and VEHICLE_SPEED_FACTOR=1000 rounding in UPDATE_VEHICLE_SPEED
+      # match both CAN encoding (0.0713 kph/LSB) and VEHICLE_SPEED_FACTOR=1000 rounding in UPDATE_VEHICLE_SPEED
       sent = speed + 1
-      sent_can = away_round(sent / 0.1 * 3.6) * 0.1 / 3.6
+      sent_can = away_round(sent / 0.0713 * 3.6) * 0.0713 / 3.6
       speed = round(sent_can * 1000) / 1000 - 1
       for sign in (-1, 1):
         self.safety.set_controls_allowed(True)
@@ -219,9 +219,9 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def test_lateral_jerk_limit(self):
     for speed in np.linspace(0, 40, 100):
       speed = max(speed, 1)
-      # match both CAN encoding (0.1 kph/LSB) and VEHICLE_SPEED_FACTOR=1000 rounding in UPDATE_VEHICLE_SPEED
+      # match both CAN encoding (0.0713 kph/LSB) and VEHICLE_SPEED_FACTOR=1000 rounding in UPDATE_VEHICLE_SPEED
       sent = speed + 1
-      sent_can = away_round(sent / 0.1 * 3.6) * 0.1 / 3.6
+      sent_can = away_round(sent / 0.0713 * 3.6) * 0.0713 / 3.6
       speed = round(sent_can * 1000) / 1000 - 1
       for sign in (-1, 1):
         self.safety.set_controls_allowed(True)
