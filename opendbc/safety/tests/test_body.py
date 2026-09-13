@@ -46,6 +46,11 @@ class TestBody(common.SafetyTest):
     self.safety.set_controls_allowed(False)
     self.assertTrue(self._tx(common.make_msg(0, 0x1, 8)))
 
+    # Any changed signature bit must reject a correctly addressed, full-length request.
+    for bit in range(64):
+      payload = (0x0AB00B1EDEADFACE ^ (1 << bit)).to_bytes(8, "little")
+      self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=payload)))
+
     # 0xdeadfaceU allowed for CAN flashing mode
     self.assertTrue(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len

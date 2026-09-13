@@ -169,6 +169,13 @@ class TestFordSafetyBase(common.CarSafetyTest):
     }
     return self.packer.make_can_msg_safety("EngBrakeData", 0, values)
 
+  def test_cruise_states(self):
+    for state in range(8):
+      self.assertTrue(self._rx(self._pcm_status_msg(False)))
+      msg = self.packer.make_can_msg_safety("EngBrakeData", 0, {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": state})
+      self.assertTrue(self._rx(msg))
+      self.assertEqual(state in (4, 5), self.safety.get_controls_allowed())
+
   # LKAS command
   def _lkas_command_msg(self, action: int):
     values = {
