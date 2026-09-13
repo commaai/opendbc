@@ -152,7 +152,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     uint32_t fr = msg->data[10] | (msg->data[11] << 8);
     uint32_t rl = msg->data[12] | (msg->data[13] << 8);
     uint32_t rr = msg->data[14] | (msg->data[15] << 8);
-    vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
+    vehicle_moving = (fr | rr | rl | fl) != 0U;
     UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
   }
 

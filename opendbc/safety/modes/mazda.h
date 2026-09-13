@@ -36,7 +36,7 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MAZDA_ENGINE_DATA, MAZDA_MAIN)) {
-    gas_pressed = (msg->data[4] || (msg->data[5] & 0xF0U));
+    gas_pressed = (msg->data[4] | (msg->data[5] & 0xF0U)) != 0U;
   }
 
   if (msg_matches(msg, MAZDA_PEDALS, MAZDA_MAIN)) {
