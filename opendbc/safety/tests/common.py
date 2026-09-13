@@ -944,7 +944,21 @@ class SafetyTest(SafetyTestBase):
   # ***** standard tests for all safety modes *****
 
   def test_rx_callbacks_required(self):
-    self.assertTrue(self.safety.safety_config_callbacks_valid())
+    cfg = self.safety.current_safety_config
+    hooks = self.safety.current_hooks
+    for i in range(cfg.rx_checks_len):
+      for msg in cfg.rx_checks[i].msg:
+        if msg.addr == 0:
+          break
+        with self.subTest(addr=hex(msg.addr), bus=msg.bus):
+          if not msg.ignore_checksum:
+            self.assertNotEqual(hooks.get_checksum, libsafety_py.ffi.NULL)
+            self.assertNotEqual(hooks.compute_checksum, libsafety_py.ffi.NULL)
+          if not msg.ignore_counter:
+            self.assertNotEqual(hooks.get_counter, libsafety_py.ffi.NULL)
+            self.assertGreater(msg.max_counter, 0)
+          if not msg.ignore_quality_flag:
+            self.assertNotEqual(hooks.get_quality_flag_valid, libsafety_py.ffi.NULL)
 
   def test_tx_msg_in_scanned_range(self):
     # the relay malfunction, fwd hook, and spam can tests don't exhaustively

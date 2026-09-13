@@ -56,6 +56,64 @@ class CANPacket:
   pass
 
 ffi.cdef("""
+typedef struct {
+  int addr;
+  unsigned int bus;
+  int len;
+  bool check_relay;
+  bool disable_static_blocking;
+} CanMsg;
+
+typedef struct {
+  const int addr;
+  const unsigned int bus;
+  const int len;
+  const uint32_t frequency;
+  const bool ignore_checksum;
+  const bool ignore_counter;
+  const uint8_t max_counter;
+  const bool ignore_quality_flag;
+} CanMsgCheck;
+
+typedef struct {
+  bool msg_seen;
+  int index;
+  bool valid_checksum;
+  int wrong_counters;
+  bool valid_quality_flag;
+  uint8_t last_counter;
+  uint32_t last_timestamp;
+  bool lagging;
+} RxStatus;
+
+typedef struct {
+  const CanMsgCheck msg[3];
+  RxStatus status;
+} RxCheck;
+
+typedef struct {
+  RxCheck *rx_checks;
+  int rx_checks_len;
+  const CanMsg *tx_msgs;
+  int tx_msgs_len;
+  bool disable_forwarding;
+} safety_config;
+
+typedef struct {
+  safety_config (*init)(uint16_t param);
+  void (*rx)(const CANPacket_t *msg);
+  bool (*tx)(const CANPacket_t *msg);
+  bool (*fwd)(int bus_num, int addr);
+  uint32_t (*get_checksum)(const CANPacket_t *msg);
+  uint32_t (*compute_checksum)(const CANPacket_t *msg);
+  uint8_t (*get_counter)(const CANPacket_t *msg);
+  bool (*get_quality_flag_valid)(const CANPacket_t *msg);
+} safety_hooks;
+
+extern safety_config current_safety_config;
+extern const safety_hooks *current_hooks;
+extern bool safety_rx_checks_invalid;
+
 bool safety_rx_hook(CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
 int safety_fwd_hook(int bus_num, int addr);
@@ -104,9 +162,6 @@ bool get_vehicle_moving(void);
 void set_timer(uint32_t t);
 
 void safety_tick(void);
-bool get_safety_rx_checks_invalid(void);
-bool safety_tick_rx_check(uint32_t frequency, uint32_t last_timestamp, bool valid_checksum, bool valid_quality_flag, int wrong_counters);
-bool safety_config_callbacks_valid(void);
 bool safety_config_valid();
 
 void init_tests(void);

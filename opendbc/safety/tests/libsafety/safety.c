@@ -13,42 +13,6 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
 
-bool get_safety_rx_checks_invalid(void) {
-  return safety_rx_checks_invalid;
-}
-
-bool safety_tick_rx_check(uint32_t frequency, uint32_t last_timestamp, bool valid_checksum, bool valid_quality_flag, int wrong_counters) {
-  RxCheck rx_checks[] = {
-    {.msg = {{0x123, 0, 8, .frequency = frequency}, {0}, {0}},
-     .status = {.last_timestamp = last_timestamp, .valid_checksum = valid_checksum,
-                .valid_quality_flag = valid_quality_flag, .wrong_counters = wrong_counters}},
-  };
-  const safety_config saved_config = current_safety_config;
-  current_safety_config = (safety_config){.rx_checks = rx_checks, .rx_checks_len = 1};
-  safety_tick();
-  current_safety_config = saved_config;
-  return rx_checks[0].status.lagging;
-}
-
-bool safety_config_callbacks_valid(void) {
-  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
-    for (unsigned int j = 0U; j < MAX_ADDR_CHECK_MSGS; j++) {
-      const CanMsgCheck *msg = &current_safety_config.rx_checks[i].msg[j];
-      if (msg->addr == 0) {
-        break;
-      }
-      bool checksum_valid = msg->ignore_checksum || ((current_hooks->get_checksum != NULL) && (current_hooks->compute_checksum != NULL));
-      bool counter_valid = msg->ignore_counter || ((current_hooks->get_counter != NULL) && (msg->max_counter > 0U));
-      bool quality_valid = msg->ignore_quality_flag || (current_hooks->get_quality_flag_valid != NULL);
-      if (!checksum_valid || !counter_valid || !quality_valid) {
-        printf("RX 0x%X bus %u: checksum=%d counter=%d quality=%d\n", msg->addr, msg->bus, checksum_valid, counter_valid, quality_valid);
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
 bool safety_config_valid() {
   if (current_safety_config.rx_checks_len <= 0) {
     printf("missing RX checks\n");

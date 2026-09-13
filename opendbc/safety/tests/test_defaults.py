@@ -83,25 +83,44 @@ class TestSafetyFramework(unittest.TestCase):
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
 
+  def tearDown(self):
+    # Clear the config before Python releases the RX array it owns.
+    self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0)
+
+  def _set_rx_check(self, frequency):
+    self.rx_checks = libsafety_py.ffi.new("RxCheck[1]", [{"msg": [{"addr": 0x123, "len": 8, "frequency": frequency}]}])
+    self.safety.current_safety_config.rx_checks = self.rx_checks
+    self.safety.current_safety_config.rx_checks_len = 1
+    return self.rx_checks[0].status
+
   def test_watchdog_faults(self):
     for frequency, timeout in ((5, 2000000), (10, 1000000), (100, 1000000)):
+      status = self._set_rx_check(frequency)
       for elapsed, checksum, quality, wrong_counters in itertools.product((0, timeout, timeout + 1), (False, True), (False, True), (0, 5)):
         with self.subTest(frequency=frequency, elapsed=elapsed, checksum=checksum, quality=quality, wrong_counters=wrong_counters):
           self.safety.set_timer(elapsed)
           self.safety.set_controls_allowed(True)
+          status.valid_checksum = checksum
+          status.valid_quality_flag = quality
+          status.wrong_counters = wrong_counters
           lagging = elapsed > timeout
           valid = not lagging and frequency >= 10 and checksum and quality and wrong_counters < 5
-          self.assertEqual(self.safety.safety_tick_rx_check(frequency, 0, checksum, quality, wrong_counters), lagging)
-          self.assertEqual(self.safety.get_safety_rx_checks_invalid(), not valid)
+          self.safety.safety_tick()
+          self.assertEqual(status.lagging, lagging)
+          self.assertEqual(self.safety.safety_rx_checks_invalid, not valid)
           self.assertEqual(self.safety.get_controls_allowed(), valid)
 
   def test_watchdog_timer_wraparound(self):
+    status = self._set_rx_check(100)
+    status.valid_checksum = True
+    status.valid_quality_flag = True
     self.safety.set_timer(100)
     for elapsed in (300, 1000001):
       self.safety.set_controls_allowed(True)
-      last_timestamp = (100 - elapsed) & 0xFFFFFFFF
+      status.last_timestamp = (100 - elapsed) & 0xFFFFFFFF
       lagging = elapsed > 1000000
-      self.assertEqual(self.safety.safety_tick_rx_check(100, last_timestamp, True, True, 0), lagging)
+      self.safety.safety_tick()
+      self.assertEqual(status.lagging, lagging)
       self.assertEqual(self.safety.get_controls_allowed(), not lagging)
 
 
