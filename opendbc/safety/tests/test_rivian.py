@@ -18,6 +18,12 @@ def checksum(msg):
     ret[0] = _checksum(ret[1:], 0x1D, 0xB1)
   elif addr == 0x150:
     ret[0] = _checksum(ret[1:], 0x1D, 0x9A)
+  elif addr == 0x380:
+    ret[0] = _checksum(ret[1:], 0x1D, 0x1E)
+  elif addr == 0x38f:
+    ret[0] = _checksum(ret[1:], 0x1D, 0x37)
+  elif addr == 0x100:
+    ret[0] = _checksum(ret[1:], 0x1D, 0x5F)
 
   return addr, ret, bus
 
@@ -48,7 +54,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
   def _torque_driver_msg(self, torque):
     values = {"EPAS_TorsionBarTorque": torque / 100.0, "EPAS_SystemStatus_Counter": self.cnt_torque % 15}
     self.__class__.cnt_torque += 1
-    return self.packer.make_can_msg_safety("EPAS_SystemStatus", 0, values)
+    return self.packer.make_can_msg_safety("EPAS_SystemStatus", 0, values, fix_checksum=checksum)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"ACM_lkaStrToqReq": torque, "ACM_lkaActToi": steer_req}
@@ -67,7 +73,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
   def _user_brake_msg(self, brake):
     values = {"iBESP2_BrakePedalApplied": brake, "iBESP2_AliveCounter": self.cnt_brake % 15}
     self.__class__.cnt_brake += 1
-    return self.packer.make_can_msg_safety("iBESP2", 0, values)
+    return self.packer.make_can_msg_safety("iBESP2", 0, values, fix_checksum=checksum)
 
   def _user_gas_msg(self, gas, speed=0, quality_flag=True):
     values = {"VDM_AcceleratorPedalPosition": gas, "VDM_VehicleSpeed": speed * 3.6,
@@ -78,7 +84,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
   def _pcm_status_msg(self, enable):
     values = {"ACM_FeatureStatus": enable, "ACM_Unkown1": 1, "ACM_Status_Counter": self.cnt_pcm % 15}
     self.__class__.cnt_pcm += 1
-    return self.packer.make_can_msg_safety("ACM_Status", 2, values)
+    return self.packer.make_can_msg_safety("ACM_Status", 2, values, fix_checksum=checksum)
 
   def _accel_msg(self, accel: float):
     values = {"ACM_AccelerationRequest": accel}
@@ -122,7 +128,14 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
       for _ in range(10):
         self.assertTrue(self._rx(make_msg(0) if make_msg == self._torque_driver_msg else make_msg(False)))
 
+      msg = make_msg(0) if make_msg == self._torque_driver_msg else make_msg(False)
+      msg[0].data[0] ^= 0xff
+      self.assertFalse(self._rx(msg))
+      self.assertFalse(self.safety.get_controls_allowed())
+
       # A single bad counter is tolerated, but repeated bad counters must disengage.
+      self._reset_safety_hooks()
+      self.safety.set_controls_allowed(True)
       for _ in range(7):
         msg = make_msg(0) if make_msg == self._torque_driver_msg else make_msg(False)
         msg[0].data[1] &= 0xf0
