@@ -317,6 +317,15 @@ class TestFordSafetyBase(common.CarSafetyTest):
                                     curvature=float(curvature)):
                     self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(steer_control_enabled, path_offset, path_angle, curvature, curvature_rate)))
 
+  def test_invalid_lateral_fields_reset_curvature_state(self):
+    # Rejected auxiliary fields must not skip the disabled steering state reset.
+    for path_offset, path_angle, curvature_rate in ((1, 0, 0), (0, 0.1, 0), (0, 0, 0.001)):
+      with self.subTest(path_offset=path_offset, path_angle=path_angle, curvature_rate=curvature_rate):
+        self.safety.set_controls_allowed(False)
+        self.safety.set_desired_curvature_last(100)
+        self.assertFalse(self._tx(self._lat_ctl_msg(False, path_offset, path_angle, 0, curvature_rate)))
+        self.assertEqual(self.safety.get_desired_curvature_last(), 0)
+
   def test_curvature_rate_limits(self):
     """
     When the curvature error is exceeded, commanded curvature must start moving towards meas respecting rate limits.
