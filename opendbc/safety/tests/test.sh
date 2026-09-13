@@ -6,6 +6,7 @@ cd $DIR
 
 source ../../../setup.sh
 
+# TODO: get UBSan and coverage without running the tests twice.
 # Run UBSan separately so its checks do not count as coverage branches.
 SAFETY_COVERAGE=0 python -m unittest discover -s .
 
