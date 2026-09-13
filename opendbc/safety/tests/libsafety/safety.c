@@ -17,10 +17,6 @@ void safety_tick_current_safety_config() {
   safety_tick(&current_safety_config);
 }
 
-void safety_tick_without_config(void) {
-  safety_tick(NULL);
-}
-
 bool get_safety_rx_checks_invalid(void) {
   return safety_rx_checks_invalid;
 }

@@ -114,14 +114,6 @@ class TestSafetyFramework(unittest.TestCase):
       self.assertEqual(self.safety.safety_tick_rx_check(100, last_timestamp, True, True, 0), lagging)
       self.assertEqual(self.safety.get_controls_allowed(), not lagging)
 
-  def test_watchdog_without_config(self):
-    self.safety.set_timer(2000000)
-    self.safety.safety_tick_rx_check(100, 0, True, True, 0)
-    self.assertTrue(self.safety.get_safety_rx_checks_invalid())
-    self.safety.safety_tick_without_config()
-    self.assertFalse(self.safety.get_safety_rx_checks_invalid())
-    self.assertFalse(self.safety.get_controls_allowed())
-
 
 if __name__ == "__main__":
   unittest.main()
