@@ -21,19 +21,22 @@ static uint8_t tesla_get_counter(const CANPacket_t *msg) {
   if (msg->addr == 0x2b9U) {
     // Signal: DAS_controlCounter
     cnt = msg->data[6] >> 5;
-  } else if (msg->addr == 0x488U) {
+  }
+  if (msg->addr == 0x488U) {
     // Signal: DAS_steeringControlCounter
     cnt = msg->data[2] & 0x0FU;
-  } else if ((msg->addr == 0x257U) || (msg->addr == 0x118U) || (msg->addr == 0x145U) || (msg->addr == 0x286U) || (msg->addr == 0x311U)) {
+  }
+  if ((msg->addr == 0x257U) || (msg->addr == 0x118U) || (msg->addr == 0x145U) || (msg->addr == 0x286U) || (msg->addr == 0x311U)) {
     // Signal: DI_speedCounter, DI_systemStatusCounter, ESP_statusCounter, DI_locStatusCounter, UI_warningCounter
     cnt = msg->data[1] & 0x0FU;
-  } else if (msg->addr == 0x155U) {
+  }
+  if (msg->addr == 0x155U) {
     // Signal: ESP_wheelRotationCounter
     cnt = msg->data[6] >> 4;
-  } else if (msg->addr == 0x370U) {
+  }
+  if (msg->addr == 0x370U) {
     // Signal: EPAS3S_sysStatusCounter
     cnt = msg->data[6] & 0x0FU;
-  } else {
   }
   return cnt;
 }
@@ -43,13 +46,14 @@ static int _tesla_get_checksum_byte(const int addr) {
   if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
     // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
     checksum_byte = 7;
-  } else if (addr == 0x488) {
+  }
+  if (addr == 0x488) {
     // Signal: DAS_steeringControlChecksum
     checksum_byte = 3;
-  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x145) || (addr == 0x286) || (addr == 0x311)) {
+  }
+  if ((addr == 0x257) || (addr == 0x118) || (addr == 0x145) || (addr == 0x286) || (addr == 0x311)) {
     // Signal: DI_speedChecksum, DI_systemStatusChecksum, ESP_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
     checksum_byte = 0;
-  } else {
   }
   return checksum_byte;
 }
@@ -84,10 +88,10 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
   bool valid = false;
   if (msg->addr == 0x155U) {
     valid = (msg->data[5] & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
-  } else if (msg->addr == 0x145U) {
+  }
+  if (msg->addr == 0x145U) {
     int user_brake_status = (msg->data[3] >> 5) & 0x03U;
     valid = (user_brake_status != 0) && (user_brake_status != 3);  // ESP_driverBrakeApply=NotInit_orOff, Faulty_SNA
-  } else {
   }
   return valid;
 }
@@ -98,9 +102,9 @@ static int tesla_get_steer_ctrl_type(const int ctrl_type) {
   if (tesla_fsd_14) {
     if (ctrl_type == 1) {
       steer_ctrl_type = 2;
-    } else if (ctrl_type == 2) {
+    }
+    if (ctrl_type == 2) {
       steer_ctrl_type = 1;
-    } else {
     }
   }
   return steer_ctrl_type;
