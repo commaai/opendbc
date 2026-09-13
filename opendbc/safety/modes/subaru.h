@@ -33,10 +33,9 @@
 
 #define SUBARU_MAIN_BUS 0U
 #define SUBARU_ALT_BUS  1U
-#define SUBARU_CAM_BUS  2U
 
-#define SUBARU_BASE_TX_MSGS(alt_bus, lkas_msg) \
-  {lkas_msg,                     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
+#define SUBARU_BASE_TX_MSGS \
+  {MSG_SUBARU_ES_LKAS,           SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8, .check_relay = true},  \
@@ -111,15 +110,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits SUBARU_STEERING_LIMITS      = SUBARU_STEERING_LIMITS_GENERATOR(2047, 50, 70);
   const TorqueSteeringLimits SUBARU_GEN2_STEERING_LIMITS = SUBARU_STEERING_LIMITS_GENERATOR(1000, 40, 40);
 
-  const LongitudinalLimits SUBARU_LONG_LIMITS = {
-    .min_gas = 808,       // appears to be engine braking
-    .max_gas = 3400,      // approx  2 m/s^2 when maxing cruise_rpm and cruise_throttle
-    .inactive_gas = 1818, // this is zero acceleration
-    .max_brake = 600,     // approx -3.5 m/s^2
-
-    .min_transmission_rpm = 0,
-    .max_transmission_rpm = 3600,
-  };
+  const int SUBARU_INACTIVE_THROTTLE = 1818;  // zero acceleration
 
   bool tx = true;
   bool violation = false;
@@ -142,7 +133,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
     // If openpilot is not controlling long, only allow ES_Distance for cruise cancel requests,
     // (when Cruise_Cancel is true, and Cruise_Throttle is inactive)
-    violation |= (cruise_throttle != SUBARU_LONG_LIMITS.inactive_gas);
+    violation |= (cruise_throttle != SUBARU_INACTIVE_THROTTLE);
     violation |= (!cruise_cancel);
   }
 
@@ -154,12 +145,12 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
 static safety_config subaru_init(uint16_t param) {
   static const CanMsg SUBARU_TX_MSGS[] = {
-    SUBARU_BASE_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
+    SUBARU_BASE_TX_MSGS
     SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS)
   };
 
   static const CanMsg SUBARU_GEN2_TX_MSGS[] = {
-    SUBARU_BASE_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
+    SUBARU_BASE_TX_MSGS
     SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS)
   };
 

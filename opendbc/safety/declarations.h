@@ -164,11 +164,6 @@ typedef struct {
   const int inactive_gas;
   const int max_brake;
 
-  // transmission rpm limits
-  const int max_transmission_rpm;
-  const int min_transmission_rpm;
-  const int inactive_transmission_rpm;
-
   // speed cmd limits
   const int inactive_speed;
 } LongitudinalLimits;
