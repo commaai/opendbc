@@ -8,7 +8,6 @@ static uint8_t rivian_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t rivian_get_checksum(const CANPacket_t *msg) {
-  // All monitored Rivian messages store the checksum in byte 0.
   return msg->data[0];
 }
 
