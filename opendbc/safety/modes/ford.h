@@ -21,64 +21,6 @@
 #define FORD_MAIN_BUS 0U
 #define FORD_CAM_BUS  2U
 
-static uint8_t ford_get_counter(const CANPacket_t *msg) {
-  uint8_t cnt = 0;
-  if (msg->addr == FORD_BrakeSysFeatures) {
-    // Signal: VehVActlBrk_No_Cnt
-    cnt = (msg->data[2] >> 2) & 0xFU;
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
-    // Signal: VehRollYaw_No_Cnt
-    cnt = msg->data[5];
-  } else {
-  }
-  return cnt;
-}
-
-static uint32_t ford_get_checksum(const CANPacket_t *msg) {
-  uint8_t chksum = 0;
-  if (msg->addr == FORD_BrakeSysFeatures) {
-    // Signal: VehVActlBrk_No_Cs
-    chksum = msg->data[3];
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
-    // Signal: VehRollYawW_No_Cs
-    chksum = msg->data[4];
-  } else {
-  }
-  return chksum;
-}
-
-static uint32_t ford_compute_checksum(const CANPacket_t *msg) {
-  uint8_t chksum = 0;
-  if (msg->addr == FORD_BrakeSysFeatures) {
-    chksum += msg->data[0] + msg->data[1];  // Veh_V_ActlBrk
-    chksum += msg->data[2] >> 6;                    // VehVActlBrk_D_Qf
-    chksum += (msg->data[2] >> 2) & 0xFU;           // VehVActlBrk_No_Cnt
-    chksum = 0xFFU - chksum;
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
-    chksum += msg->data[0] + msg->data[1];  // VehRol_W_Actl
-    chksum += msg->data[2] + msg->data[3];  // VehYaw_W_Actl
-    chksum += msg->data[5];                         // VehRollYaw_No_Cnt
-    chksum += msg->data[6] >> 6;                    // VehRolWActl_D_Qf
-    chksum += (msg->data[6] >> 4) & 0x3U;           // VehYawWActl_D_Qf
-    chksum = 0xFFU - chksum;
-  } else {
-  }
-  return chksum;
-}
-
-static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
-  bool valid = false;
-  if (msg->addr == FORD_BrakeSysFeatures) {
-    valid = (msg->data[2] >> 6) == 0x3U;           // VehVActlBrk_D_Qf
-  } else if (msg->addr == FORD_EngVehicleSpThrottle2) {
-    valid = ((msg->data[4] >> 5) & 0x3U) == 0x3U;  // VehVActlEng_D_Qf
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
-    valid = ((msg->data[6] >> 4) & 0x3U) == 0x3U;  // VehYawWActl_D_Qf
-  } else {
-  }
-  return valid;
-}
-
 #define FORD_INACTIVE_CURVATURE 1000U
 #define FORD_INACTIVE_CURVATURE_RATE 4096U
 #define FORD_INACTIVE_PATH_OFFSET 512U
@@ -94,6 +36,36 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
   .curvature_error_min_speed = 10.0,  // m/s
   .max_steer_power = 0,               // disabled, Ford has no steed power signal
 };
+
+static uint32_t ford_brake_sys_features_checksum(const CANPacket_t *msg) {
+  uint8_t chksum = 0;
+  chksum += msg->data[0] + msg->data[1];  // Veh_V_ActlBrk
+  chksum += msg->data[2] >> 6;           // VehVActlBrk_D_Qf
+  chksum += (msg->data[2] >> 2) & 0xFU;  // VehVActlBrk_No_Cnt
+  return (uint8_t)(0xFFU - chksum);
+}
+
+static uint32_t ford_yaw_data_checksum(const CANPacket_t *msg) {
+  uint8_t chksum = 0;
+  chksum += msg->data[0] + msg->data[1];  // VehRol_W_Actl
+  chksum += msg->data[2] + msg->data[3];  // VehYaw_W_Actl
+  chksum += msg->data[5];               // VehRollYaw_No_Cnt
+  chksum += msg->data[6] >> 6;           // VehRolWActl_D_Qf
+  chksum += (msg->data[6] >> 4) & 0x3U;  // VehYawWActl_D_Qf
+  return (uint8_t)(0xFFU - chksum);
+}
+
+static bool ford_brake_sys_features_quality(const CANPacket_t *msg) {
+  return (msg->data[2] >> 6) == 0x3U;  // VehVActlBrk_D_Qf
+}
+
+static bool ford_engine_speed_quality(const CANPacket_t *msg) {
+  return ((msg->data[4] >> 5) & 0x3U) == 0x3U;  // VehVActlEng_D_Qf
+}
+
+static bool ford_yaw_data_quality(const CANPacket_t *msg) {
+  return ((msg->data[6] >> 4) & 0x3U) == 0x3U;  // VehYawWActl_D_Qf
+}
 
 static void ford_rx_hook(const CANPacket_t *msg) {
   // Update in motion state from standstill signal
@@ -265,15 +237,33 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config ford_init(uint16_t param) {
+  static const RxMsgChecks ford_brake_sys_features_checks = {
+    .counter = {.byte = 2, .shift = 2, .mask = 0xFU},
+    .checksum = {.byte = 3, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = ford_brake_sys_features_checksum,
+    .get_quality_flag_valid = ford_brake_sys_features_quality,
+  };
+
+  static const RxMsgChecks ford_engine_speed_checks = {
+    .get_quality_flag_valid = ford_engine_speed_quality,
+  };
+
+  static const RxMsgChecks ford_yaw_data_checks = {
+    .counter = {.byte = 5, .shift = 0, .mask = 0xFFU},
+    .checksum = {.byte = 4, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = ford_yaw_data_checksum,
+    .get_quality_flag_valid = ford_yaw_data_quality,
+  };
+
   // warning: quality flags are not yet checked in openpilot's CAN parser,
   // this may be the cause of blocked messages
   static RxCheck ford_rx_checks[] = {
-    {.msg = {{FORD_BrakeSysFeatures, 0, 8, 50U, .max_counter = 15U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_BrakeSysFeatures, 0, 8, 50U, .max_counter = 15U, .checks = &ford_brake_sys_features_checks}, { 0 }, { 0 }}},
     // FORD_EngVehicleSpThrottle2 has a counter that either randomly skips or by 2, likely ECU bug
     // Some hybrid models also experience a bug where this checksum mismatches for one or two frames under heavy acceleration with ACC
     // It has been confirmed that the Bronco Sport's camera only disallows ACC for bad quality flags, not counters or checksums, so we match that
-    {.msg = {{FORD_EngVehicleSpThrottle2, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},
-    {.msg = {{FORD_Yaw_Data_FD1, 0, 8, 100U, .max_counter = 255U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngVehicleSpThrottle2, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .checks = &ford_engine_speed_checks}, { 0 }, { 0 }}},
+    {.msg = {{FORD_Yaw_Data_FD1, 0, 8, 100U, .max_counter = 255U, .checks = &ford_yaw_data_checks}, { 0 }, { 0 }}},
     // These messages have no counter or checksum
     {.msg = {{FORD_EngBrakeData, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FORD_EngVehicleSpThrottle, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -328,8 +318,4 @@ const safety_hooks ford_hooks = {
   .init = ford_init,
   .rx = ford_rx_hook,
   .tx = ford_tx_hook,
-  .get_counter = ford_get_counter,
-  .get_checksum = ford_get_checksum,
-  .compute_checksum = ford_compute_checksum,
-  .get_quality_flag_valid = ford_get_quality_flag_valid,
 };

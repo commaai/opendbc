@@ -34,6 +34,54 @@ bool safety_config_valid() {
   return true;
 }
 
+static bool rx_field_valid(RxMsgField field, int len) {
+  if (field.shift >= 8U) {
+    return false;
+  }
+  uint32_t bits = (uint32_t)field.mask << field.shift;
+  return (bits <= 0xFFFFU) &&
+         ((field.mask & (field.mask + 1U)) == 0U) &&
+         ((field.byte + ((bits > 0xFFU) ? 2 : 1)) <= len);
+}
+
+bool safety_rx_checks_metadata_valid(void) {
+  static const RxMsgChecks no_checks = {0};
+  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
+    for (uint8_t j = 0U; j < MAX_ADDR_CHECK_MSGS; j++) {
+      const CanMsgCheck *msg = &current_safety_config.rx_checks[i].msg[j];
+      if (msg->addr == 0) {
+        continue;
+      }
+      const RxMsgChecks *checks = (msg->checks != NULL) ? msg->checks : &no_checks;
+      if (((checks->counter.mask != 0U) && ((checks->get_counter != NULL) || (checks->counter.mask > 0xFFU) || !rx_field_valid(checks->counter, msg->len))) ||
+          ((checks->checksum.mask != 0U) && ((checks->get_checksum != NULL) || !rx_field_valid(checks->checksum, msg->len)))) {
+        return false;
+      }
+      if ((!msg->ignore_checksum && ((checks->compute_checksum == NULL) || ((checks->checksum.mask == 0U) && (checks->get_checksum == NULL)))) ||
+          (((msg->max_counter > 0U) || !msg->ignore_counter) && ((msg->max_counter == 0U) || ((checks->counter.mask == 0U) && (checks->get_counter == NULL)))) ||
+          (!msg->ignore_quality_flag && (checks->get_quality_flag_valid == NULL))) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+uint32_t get_rx_msg_field(const CANPacket_t *msg, uint8_t byte, uint8_t shift, uint16_t mask) {
+  return rx_get_field(msg, (RxMsgField){.byte = byte, .shift = shift, .mask = mask});
+}
+
+bool rx_check_missing_metadata(const CANPacket_t *msg, bool descriptor_present, bool ignore_checksum,
+                               bool ignore_counter, uint8_t max_counter, bool ignore_quality_flag) {
+  const RxMsgChecks no_checks = {0};
+  RxCheck rx_checks[] = {
+    {.msg = {{0x123, 0, 8, 50U, .ignore_checksum = ignore_checksum, .ignore_counter = ignore_counter,
+              .max_counter = max_counter, .ignore_quality_flag = ignore_quality_flag, .checks = descriptor_present ? &no_checks : NULL}, {0}, {0}}},
+  };
+  const safety_config cfg = {.rx_checks = rx_checks, .rx_checks_len = 1};
+  return rx_msg_safety_check(msg, &cfg);
+}
+
 void set_controls_allowed(bool c){
   controls_allowed = c;
 }

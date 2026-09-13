@@ -2,16 +2,6 @@
 
 #include "opendbc/safety/declarations.h"
 
-static uint8_t rivian_get_counter(const CANPacket_t *msg) {
-  // Signal: ESP_Status_Counter, VDM_PropStatus_Counter
-  return msg->data[1] & 0xFU;
-}
-
-static uint32_t rivian_get_checksum(const CANPacket_t *msg) {
-  // Signal: ESP_Status_Checksum, VDM_PropStatus_Checksum
-  return msg->data[0];
-}
-
 static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, uint8_t xor_output) {
   int len = GET_LEN(msg);
 
@@ -30,26 +20,20 @@ static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, ui
   return crc ^ xor_output;
 }
 
-static uint32_t rivian_compute_checksum(const CANPacket_t *msg) {
-  uint8_t chksum = 0;
-  if (msg->addr == 0x208U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0xB1);
-  } else if (msg->addr == 0x150U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x9A);
-  } else {
-  }
-  return chksum;
+static uint32_t rivian_esp_status_checksum(const CANPacket_t *msg) {
+  return _rivian_compute_checksum(msg, 0x1D, 0xB1);
 }
 
-static bool rivian_get_quality_flag_valid(const CANPacket_t *msg) {
-  bool valid = false;
-  if (msg->addr == 0x208U) {
-    valid = ((msg->data[3] >> 3) & 0x3U) == 0x1U;  // ESP_Vehicle_Speed_Q
-  } else if (msg->addr == 0x150U) {
-    valid = (msg->data[1] >> 6) == 0x1U;  // VDM_VehicleSpeedQ
-  } else {
-  }
-  return valid;
+static bool rivian_esp_status_quality(const CANPacket_t *msg) {
+  return ((msg->data[3] >> 3) & 0x3U) == 0x1U;  // ESP_Vehicle_Speed_Q
+}
+
+static uint32_t rivian_vdm_prop_status_checksum(const CANPacket_t *msg) {
+  return _rivian_compute_checksum(msg, 0x1D, 0x9A);
+}
+
+static bool rivian_vdm_prop_status_quality(const CANPacket_t *msg) {
+  return (msg->data[1] >> 6) == 0x1U;  // VDM_VehicleSpeedQ
 }
 
 static void rivian_rx_hook(const CANPacket_t *msg) {
@@ -135,6 +119,20 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config rivian_init(uint16_t param) {
+  static const RxMsgChecks rivian_esp_status_checks = {
+    .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = rivian_esp_status_checksum,
+    .get_quality_flag_valid = rivian_esp_status_quality,
+  };
+
+  static const RxMsgChecks rivian_vdm_prop_status_checks = {
+    .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = rivian_vdm_prop_status_checksum,
+    .get_quality_flag_valid = rivian_vdm_prop_status_quality,
+  };
+
   // SCCM_WheelTouch: for hiding hold wheel alert
   // VDM_AdasSts: for canceling stock ACC
   // 0x120 = ACM_lkaHbaCmd, 0x321 = SCCM_WheelTouch, 0x162 = VDM_AdasSts
@@ -143,8 +141,8 @@ static safety_config rivian_init(uint16_t param) {
   static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8, .check_relay = true}, {0x321, 2, 7, .check_relay = true}, {0x160, 0, 5, .check_relay = true}};
 
   static RxCheck rivian_rx_checks[] = {
-    {.msg = {{0x208, 0, 8, 50U, .max_counter = 14U}, { 0 }, { 0 }}},                                                             // ESP_Status (speed)
-    {.msg = {{0x150, 0, 7, 50U, .max_counter = 14U}, { 0 }, { 0 }}},                                                             // VDM_PropStatus (gas pedal & 2nd speed)
+    {.msg = {{0x208, 0, 8, 50U, .max_counter = 14U, .checks = &rivian_esp_status_checks}, { 0 }, { 0 }}},                                                             // ESP_Status (speed)
+    {.msg = {{0x150, 0, 7, 50U, .max_counter = 14U, .checks = &rivian_vdm_prop_status_checks}, { 0 }, { 0 }}},                                                             // VDM_PropStatus (gas pedal & 2nd speed)
     {.msg = {{0x380, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // EPAS_SystemStatus (driver torque)
     {.msg = {{0x38f, 0, 6, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // iBESP2 (brakes)
     {.msg = {{0x100, 2, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // ACM_Status (cruise state)
@@ -169,8 +167,4 @@ const safety_hooks rivian_hooks = {
   .init = rivian_init,
   .rx = rivian_rx_hook,
   .tx = rivian_tx_hook,
-  .get_counter = rivian_get_counter,
-  .get_checksum = rivian_get_checksum,
-  .compute_checksum = rivian_compute_checksum,
-  .get_quality_flag_valid = rivian_get_quality_flag_valid,
 };

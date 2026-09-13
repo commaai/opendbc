@@ -1,10 +1,5 @@
 #pragma once
 
-static uint32_t chrysler_get_checksum(const CANPacket_t *msg) {
-  int checksum_byte = GET_LEN(msg) - 1U;
-  return (uint8_t)(msg->data[checksum_byte]);
-}
-
 static uint32_t chrysler_compute_checksum(const CANPacket_t *msg) {
   // TODO: clean this up
   // http://illmatics.com/Remote%20Car%20Hacking.pdf

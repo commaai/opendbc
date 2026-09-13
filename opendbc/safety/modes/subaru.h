@@ -45,21 +45,13 @@
   {MSG_SUBARU_ES_Distance, alt_bus, 8, .check_relay = false}, \
 
 #define SUBARU_COMMON_RX_CHECKS(alt_bus)                                                                                                         \
-  {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_CruiseControl,   alt_bus,         8, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &subaru_8_checks}, { 0 }, { 0 }}}, \
+  {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &subaru_8_checks}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &subaru_8_checks}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &subaru_8_checks}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_CruiseControl,   alt_bus,         8, 20U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &subaru_8_checks}, { 0 }, { 0 }}},  \
 
 static bool subaru_gen2 = false;
-
-static uint32_t subaru_get_checksum(const CANPacket_t *msg) {
-  return (uint8_t)msg->data[0];
-}
-
-static uint8_t subaru_get_counter(const CANPacket_t *msg) {
-  return (uint8_t)(msg->data[1] & 0xFU);
-}
 
 static uint32_t subaru_compute_checksum(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
@@ -153,6 +145,12 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config subaru_init(uint16_t param) {
+  static const RxMsgChecks subaru_8_checks = {
+    .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = subaru_compute_checksum,
+  };
+
   static const CanMsg SUBARU_TX_MSGS[] = {
     SUBARU_BASE_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
     SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS)
@@ -189,7 +187,4 @@ const safety_hooks subaru_hooks = {
   .init = subaru_init,
   .rx = subaru_rx_hook,
   .tx = subaru_tx_hook,
-  .get_counter = subaru_get_counter,
-  .get_checksum = subaru_get_checksum,
-  .compute_checksum = subaru_compute_checksum,
 };

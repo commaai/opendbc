@@ -172,6 +172,30 @@ typedef struct {
   const int inactive_speed;
 } LongitudinalLimits;
 
+typedef uint32_t (*get_checksum_t)(const CANPacket_t *msg);
+typedef uint32_t (*compute_checksum_t)(const CANPacket_t *msg);
+typedef uint8_t (*get_counter_t)(const CANPacket_t *msg);
+typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *msg);
+
+// Little-endian field of up to 16 bits. mask applies after shifting; zero means absent.
+// shift is less than 8; the shifted mask must fit in two bytes within the RX entry's exact length.
+typedef struct {
+  uint8_t byte;
+  uint8_t shift;
+  uint16_t mask;
+} RxMsgField;
+
+// Shared read-only validation metadata. Custom getters are only needed for split fields.
+// A missing provider does not disable a check: that requires the RX entry's ignore flag.
+typedef struct {
+  RxMsgField counter;
+  RxMsgField checksum;
+  get_counter_t get_counter;
+  get_checksum_t get_checksum;
+  compute_checksum_t compute_checksum;
+  get_quality_flag_valid_t get_quality_flag_valid;
+} RxMsgChecks;
+
 typedef struct {
   const int addr;
   const unsigned int bus;
@@ -181,6 +205,7 @@ typedef struct {
   const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool ignore_quality_flag;    // true if quality flag check is skipped
+  const RxMsgChecks *checks;         // validation metadata for this address, bus and length
 } CanMsgCheck;
 
 typedef struct {
@@ -209,11 +234,6 @@ typedef struct {
   bool disable_forwarding;
 } safety_config;
 
-typedef uint32_t (*get_checksum_t)(const CANPacket_t *msg);
-typedef uint32_t (*compute_checksum_t)(const CANPacket_t *msg);
-typedef uint8_t (*get_counter_t)(const CANPacket_t *msg);
-typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *msg);
-
 typedef safety_config (*safety_hook_init)(uint16_t param);
 typedef void (*rx_hook)(const CANPacket_t *msg);
 typedef bool (*tx_hook)(const CANPacket_t *msg);  // returns true if the message is allowed
@@ -224,10 +244,6 @@ typedef struct {
   rx_hook rx;
   tx_hook tx;
   fwd_hook fwd;
-  get_checksum_t get_checksum;
-  compute_checksum_t compute_checksum;
-  get_counter_t get_counter;
-  get_quality_flag_valid_t get_quality_flag_valid;
 } safety_hooks;
 
 bool safety_rx_hook(const CANPacket_t *msg);

@@ -4,10 +4,6 @@
 
 static uint8_t mg_crc_lut[256];
 
-static uint32_t mg_get_checksum(const CANPacket_t *msg) {
-  return msg->data[7];
-}
-
 static uint32_t mg_compute_checksum(const CANPacket_t *msg) {
   uint8_t checksum = 0xFFU;
   for (int i = 0; i < 7; i++) {
@@ -15,22 +11,6 @@ static uint32_t mg_compute_checksum(const CANPacket_t *msg) {
     checksum = mg_crc_lut[checksum];
   }
   return checksum ^ 0xFFU;
-}
-
-static uint8_t mg_get_counter(const CANPacket_t *msg) {
-  uint8_t counter = 0U;
-  if (msg->addr == 0x23cU) {
-    counter = (msg->data[4] >> 4) & 0xFU;
-  } else if (msg->addr == 0x1ecU) {
-    counter = (msg->data[0] >> 4) & 0xFU;
-  } else if (msg->addr == 0x242U) {
-    counter = (msg->data[0] >> 3) & 0xFU;
-  } else if (msg->addr == 0x1b6U) {
-    counter = msg->data[6] & 0xFU;
-  } else {
-    // No counter for this message
-  }
-  return counter;
 }
 
 static void mg_rx_hook(const CANPacket_t *msg) {
@@ -96,6 +76,26 @@ static bool mg_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config mg_init(uint16_t param) {
+  static const RxMsgChecks mg_0x23c_checks = {
+    .counter = {.byte = 4, .shift = 4, .mask = 0xFU},
+  };
+
+  static const RxMsgChecks mg_0x1ec_checks = {
+    .counter = {.byte = 0, .shift = 4, .mask = 0xFU},
+  };
+
+  static const RxMsgChecks mg_0x242_checks = {
+    .counter = {.byte = 0, .shift = 3, .mask = 0xFU},
+    .checksum = {.byte = 7, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = mg_compute_checksum,
+  };
+
+  static const RxMsgChecks mg_0x1b6_checks = {
+    .counter = {.byte = 6, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 7, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = mg_compute_checksum,
+  };
+
   SAFETY_UNUSED(param);
 
   gen_crc_lookup_table_8(0x1DU, mg_crc_lut);
@@ -103,11 +103,11 @@ static safety_config mg_init(uint16_t param) {
   static const CanMsg MG_TX_MSGS[] = {{0x1fd, 0, 8, .check_relay = true}};
 
   static RxCheck mg_rx_checks[] = {
-    {.msg = {{0x23c, 0, 8, .frequency = 50U,  .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // SCS_HSC2_FrP19 (speed)
+    {.msg = {{0x23c, 0, 8, .frequency = 50U,  .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true, .checks = &mg_0x23c_checks}, { 0 }, { 0 }}},   // SCS_HSC2_FrP19 (speed)
     {.msg = {{0xaf,  0, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // GW_HSC2_HCU_FrP00 (gas pedal)
-    {.msg = {{0x1ec, 0, 8, .frequency = 50U,  .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // EPS_HSC2_FrP03 (driver torque)
-    {.msg = {{0x242, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // RADAR_HSC2_FrP00 (cruise state)
-    {.msg = {{0x1b6, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // EHBS_HSC2_FrP00 (brake pedal)
+    {.msg = {{0x1ec, 0, 8, .frequency = 50U,  .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true, .checks = &mg_0x1ec_checks}, { 0 }, { 0 }}},   // EPS_HSC2_FrP03 (driver torque)
+    {.msg = {{0x242, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true, .checks = &mg_0x242_checks}, { 0 }, { 0 }}},   // RADAR_HSC2_FrP00 (cruise state)
+    {.msg = {{0x1b6, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true, .checks = &mg_0x1b6_checks}, { 0 }, { 0 }}},   // EHBS_HSC2_FrP00 (brake pedal)
   };
 
   safety_config ret;
@@ -120,7 +120,4 @@ const safety_hooks mg_hooks = {
   .init = mg_init,
   .rx = mg_rx_hook,
   .tx = mg_tx_hook,
-  .get_checksum = mg_get_checksum,
-  .compute_checksum = mg_compute_checksum,
-  .get_counter = mg_get_counter,
 };

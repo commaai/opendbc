@@ -26,78 +26,16 @@
 static bool volkswagen_meb_alt_crc = false;
 
 #define VOLKSWAGEN_MEB_COMMON_RX_CHECKS \
-  {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_MOTOR_14, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_GRA_ACC_01, 0, 8, 33U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_QFK_01, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_ESP_21, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+  {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_lh_eps_03_checks}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_MOTOR_14, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_meb_motor_14_checks}, { 0 }, { 0 }}}, \
+  {.msg = {{MSG_GRA_ACC_01, 0, 8, 33U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_gra_acc_01_checks}, { 0 }, { 0 }}}, \
+  {.msg = {{MSG_QFK_01, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_meb_qfk_01_checks}, { 0 }, { 0 }}},    \
+  {.msg = {{MSG_ESP_21, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_meb_esp_21_checks}, { 0 }, { 0 }}},
 
-static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
-  int len = GET_LEN(msg);
-
-  uint8_t crc = 0xFFU;
-  for (int i = 1; i < len; i++) {
-    crc ^= (uint8_t)msg->data[i];
-    crc = volkswagen_crc8_lut_8h2f[crc];
-  }
-
-  uint8_t counter = volkswagen_mqb_meb_get_counter(msg);
-  if (msg->addr == MSG_LH_EPS_03) {
-    crc ^= (uint8_t[]){0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5}[counter];
-  } else if (msg->addr == MSG_MOTOR_14) {
-    crc ^= (uint8_t[]){0x1F, 0x28, 0xC6, 0x85, 0xE6, 0xF8, 0xB0, 0x19, 0x5B, 0x64, 0x35, 0x21, 0xE4, 0xF7, 0x9C, 0x24}[counter];
-  } else if (msg->addr == MSG_GRA_ACC_01) {
-    crc ^= (uint8_t[]){0x6A, 0x38, 0xB4, 0x27, 0x22, 0xEF, 0xE1, 0xBB, 0xF8, 0x80, 0x84, 0x49, 0xC7, 0x9E, 0x1E, 0x2B}[counter];
-  } else if (msg->addr == MSG_QFK_01) {
-    crc ^= (uint8_t[]){0x20, 0xCA, 0x68, 0xD5, 0x1B, 0x31, 0xE2, 0xDA, 0x08, 0x0A, 0xD4, 0xDE, 0x9C, 0xE4, 0x35, 0x5B}[counter];
-  } else if (msg->addr == MSG_ESC_51) {
-    crc ^= (uint8_t[]){0x77, 0x5C, 0xA0, 0x89, 0x4B, 0x7C, 0xBB, 0xD6, 0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD}[counter];
-  } else if (msg->addr == MSG_ESP_21) {
-    crc ^= (uint8_t[]){0xB4, 0xEF, 0xF8, 0x49, 0x1E, 0xE5, 0xC2, 0xC0, 0x97, 0x19, 0x3C, 0xC9, 0xF1, 0x98, 0xD6, 0x61}[counter];
-  } else if (msg->addr == MSG_Motor_51) {
-    crc ^= (uint8_t[]){0x77, 0x5C, 0xA0, 0x89, 0x4B, 0x7C, 0xBB, 0xD6, 0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD}[counter];
-  } else {
-    // Undefined CAN message, CRC check expected to fail
-  }
-  crc = volkswagen_crc8_lut_8h2f[crc];
-
-  return (uint8_t)(crc ^ 0xFFU);
-}
-
-static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
-  uint32_t ret = volkswagen_meb_compute_crc(msg);
-  int len = 0;
+static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg, const uint8_t data_ids[16], const uint8_t alt_data_ids[16], int alt_len) {
+  uint32_t ret = volkswagen_compute_crc(msg, GET_LEN(msg), data_ids);
   if (volkswagen_meb_alt_crc) {
-    if (msg->addr == MSG_QFK_01) {
-      len = 28;
-    } else if (msg->addr == MSG_ESC_51) {
-      len = 60;
-    } else if (msg->addr == MSG_Motor_51) {
-      len = 44;
-    } else {
-      len = 0;
-    }
-  }
-
-  if (len > 0) {
-    uint8_t crc = 0xFFU;
-    for (int i = 1; i < len; i++) {
-      crc ^= (uint8_t)msg->data[i];
-      crc = volkswagen_crc8_lut_8h2f[crc];
-    }
-
-    uint8_t counter = volkswagen_mqb_meb_get_counter(msg);
-    if (msg->addr == MSG_QFK_01) {
-      crc ^= (uint8_t[]){0x18, 0x71, 0x10, 0x8D, 0xD7, 0xAA, 0xB0, 0x78, 0xAC, 0x12, 0xAE, 0x0C, 0xDD, 0xF1, 0x85, 0x68}[counter];
-    } else if (msg->addr == MSG_ESC_51) {
-      crc ^= (uint8_t[]){0x69, 0xDC, 0xF9, 0x64, 0x6A, 0xCE, 0x55, 0x2C, 0xC4, 0x38, 0x8F, 0xD1, 0xC6, 0x43, 0xB4, 0xB1}[counter];
-    } else if (msg->addr == MSG_Motor_51) {
-      crc ^= (uint8_t[]){0x2C, 0xB1, 0x1A, 0x75, 0xBB, 0x65, 0x79, 0x47, 0x81, 0x2B, 0xCC, 0x96, 0x17, 0xDB, 0xC0, 0x94}[counter];
-    } else {
-      // Undefined CAN message, CRC check expected to fail
-    }
-
-    crc = (uint8_t)(volkswagen_crc8_lut_8h2f[crc] ^ 0xFFU);
+    uint32_t crc = volkswagen_compute_crc(msg, alt_len, alt_data_ids);
     if (crc == msg->data[0]) {
       ret = crc;
     }
@@ -105,7 +43,65 @@ static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
   return ret;
 }
 
+static uint32_t volkswagen_meb_motor_14_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0x1F, 0x28, 0xC6, 0x85, 0xE6, 0xF8, 0xB0, 0x19, 0x5B, 0x64, 0x35, 0x21, 0xE4, 0xF7, 0x9C, 0x24};
+  return volkswagen_compute_crc(msg, GET_LEN(msg), data_ids);
+}
+
+static uint32_t volkswagen_meb_qfk_01_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0x20, 0xCA, 0x68, 0xD5, 0x1B, 0x31, 0xE2, 0xDA, 0x08, 0x0A, 0xD4, 0xDE, 0x9C, 0xE4, 0x35, 0x5B};
+  static const uint8_t alt_data_ids[16] = {0x18, 0x71, 0x10, 0x8D, 0xD7, 0xAA, 0xB0, 0x78, 0xAC, 0x12, 0xAE, 0x0C, 0xDD, 0xF1, 0x85, 0x68};
+  return volkswagen_meb_compute_crc(msg, data_ids, alt_data_ids, 28);
+}
+
+static uint32_t volkswagen_meb_esc_51_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0x77, 0x5C, 0xA0, 0x89, 0x4B, 0x7C, 0xBB, 0xD6, 0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD};
+  static const uint8_t alt_data_ids[16] = {0x69, 0xDC, 0xF9, 0x64, 0x6A, 0xCE, 0x55, 0x2C, 0xC4, 0x38, 0x8F, 0xD1, 0xC6, 0x43, 0xB4, 0xB1};
+  return volkswagen_meb_compute_crc(msg, data_ids, alt_data_ids, 60);
+}
+
+static uint32_t volkswagen_meb_esp_21_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0xB4, 0xEF, 0xF8, 0x49, 0x1E, 0xE5, 0xC2, 0xC0, 0x97, 0x19, 0x3C, 0xC9, 0xF1, 0x98, 0xD6, 0x61};
+  return volkswagen_compute_crc(msg, GET_LEN(msg), data_ids);
+}
+
+static uint32_t volkswagen_meb_motor_51_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0x77, 0x5C, 0xA0, 0x89, 0x4B, 0x7C, 0xBB, 0xD6, 0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD};
+  static const uint8_t alt_data_ids[16] = {0x2C, 0xB1, 0x1A, 0x75, 0xBB, 0x65, 0x79, 0x47, 0x81, 0x2B, 0xCC, 0x96, 0x17, 0xDB, 0xC0, 0x94};
+  return volkswagen_meb_compute_crc(msg, data_ids, alt_data_ids, 44);
+}
+
 static safety_config volkswagen_meb_init(uint16_t param) {
+  static const RxMsgChecks volkswagen_meb_esp_21_checks = {
+    .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = volkswagen_meb_esp_21_checksum,
+  };
+
+  static const RxMsgChecks volkswagen_meb_qfk_01_checks = {
+    .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = volkswagen_meb_qfk_01_checksum,
+  };
+
+  static const RxMsgChecks volkswagen_meb_motor_14_checks = {
+    .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = volkswagen_meb_motor_14_checksum,
+  };
+
+  static const RxMsgChecks volkswagen_meb_motor_51_checks = {
+    .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = volkswagen_meb_motor_51_checksum,
+  };
+
+  static const RxMsgChecks volkswagen_meb_esc_51_checks = {
+    .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = volkswagen_meb_esc_51_checksum,
+  };
+
   static const CanMsg VOLKSWAGEN_MEB_TX_MSGS[] = {
     {MSG_HCA_03, 0, 24, .check_relay = true},
     {MSG_LDW_02, 0, 8, .check_relay = true},
@@ -124,16 +120,16 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   if (volkswagen_meb_alt_crc) {
     static RxCheck volkswagen_meb_gen2_rx_checks[] = {
       VOLKSWAGEN_MEB_COMMON_RX_CHECKS
-      {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-      {.msg = {{MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+      {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_meb_motor_51_checks}, { 0 }, { 0 }}},
+      {.msg = {{MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_meb_esc_51_checks}, { 0 }, { 0 }}},
     };
 
     ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   } else {
     static RxCheck volkswagen_meb_rx_checks[] = {
       VOLKSWAGEN_MEB_COMMON_RX_CHECKS
-      {.msg = {{MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-      {.msg = {{MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+      {.msg = {{MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_meb_motor_51_checks}, { 0 }, { 0 }}},
+      {.msg = {{MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_meb_esc_51_checks}, { 0 }, { 0 }}},
     };
 
     ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
@@ -290,7 +286,4 @@ const safety_hooks volkswagen_meb_hooks = {
   .init = volkswagen_meb_init,
   .rx = volkswagen_meb_rx_hook,
   .tx = volkswagen_meb_tx_hook,
-  .get_counter = volkswagen_mqb_meb_get_counter,
-  .get_checksum = volkswagen_mqb_meb_get_checksum,
-  .compute_checksum = volkswagen_meb_alt_crc_compute,
 };

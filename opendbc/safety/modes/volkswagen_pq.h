@@ -14,39 +14,44 @@
 #define MSG_ACC_GRA_ANZEIGE     0x56AU   // TX by OP, ACC HUD
 #define MSG_LDW_1               0x5BEU   // TX by OP, Lane line recognition and text alerts
 
-static uint32_t volkswagen_pq_get_checksum(const CANPacket_t *msg) {
-  return (uint32_t)msg->data[(msg->addr == MSG_MOTOR_5) ? 7 : 0];
-}
-
-static uint8_t volkswagen_pq_get_counter(const CANPacket_t *msg) {
-  uint8_t counter = 0U;
-
-  if (msg->addr == MSG_LENKHILFE_3) {
-    counter = (uint8_t)(msg->data[1] & 0xF0U) >> 4;
-  } else if (msg->addr == MSG_GRA_NEU) {
-    counter = (uint8_t)(msg->data[2] & 0xF0U) >> 4;
-  } else {
-  }
-
-  return counter;
-}
-
-static uint32_t volkswagen_pq_compute_checksum(const CANPacket_t *msg) {
+static uint32_t volkswagen_pq_compute_checksum(const CANPacket_t *msg, int checksum_byte) {
   int len = GET_LEN(msg);
   uint8_t checksum = 0U;
-  int checksum_byte = (msg->addr == MSG_MOTOR_5) ? 7 : 0;
-
   // Simple XOR over the payload, except for the byte where the checksum lives.
   for (int i = 0; i < len; i++) {
     if (i != checksum_byte) {
       checksum ^= (uint8_t)msg->data[i];
     }
   }
-
   return checksum;
 }
 
+static uint32_t volkswagen_pq_checksum_byte_0(const CANPacket_t *msg) {
+  return volkswagen_pq_compute_checksum(msg, 0);
+}
+
+static uint32_t volkswagen_pq_checksum_byte_7(const CANPacket_t *msg) {
+  return volkswagen_pq_compute_checksum(msg, 7);
+}
+
 static safety_config volkswagen_pq_init(uint16_t param) {
+  static const RxMsgChecks volkswagen_pq_lenkhilfe_checks = {
+    .counter = {.byte = 1, .shift = 4, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = volkswagen_pq_checksum_byte_0,
+  };
+
+  static const RxMsgChecks volkswagen_pq_motor_5_checks = {
+    .checksum = {.byte = 7, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = volkswagen_pq_checksum_byte_7,
+  };
+
+  static const RxMsgChecks volkswagen_pq_gra_checks = {
+    .counter = {.byte = 2, .shift = 4, .mask = 0xFU},
+    .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = volkswagen_pq_checksum_byte_0,
+  };
+
   // Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   static const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5, .check_relay = true}, {MSG_LDW_1, 0, 8, .check_relay = true},
                                                 {MSG_GRA_NEU, 0, 4, .check_relay = false}, {MSG_GRA_NEU, 2, 4, .check_relay = false}};
@@ -55,12 +60,12 @@ static safety_config volkswagen_pq_init(uint16_t param) {
                                                 {MSG_ACC_SYSTEM, 0, 8, .check_relay = true}, {MSG_ACC_GRA_ANZEIGE, 0, 8, .check_relay = true}};
 
   static RxCheck volkswagen_pq_rx_checks[] = {
-    {.msg = {{MSG_LENKHILFE_3, 0, 6, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LENKHILFE_3, 0, 6, 100U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_pq_lenkhilfe_checks}, { 0 }, { 0 }}},
     {.msg = {{MSG_BREMSE_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_MOTOR_2, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_MOTOR_3, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_5, 0, 8, 50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{MSG_GRA_NEU, 0, 4, 30U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_5, 0, 8, 50U, .ignore_counter = true, .ignore_quality_flag = true, .checks = &volkswagen_pq_motor_5_checks}, { 0 }, { 0 }}},
+    {.msg = {{MSG_GRA_NEU, 0, 4, 30U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &volkswagen_pq_gra_checks}, { 0 }, { 0 }}},
   };
 
   volkswagen_common_init();
@@ -211,7 +216,4 @@ const safety_hooks volkswagen_pq_hooks = {
   .init = volkswagen_pq_init,
   .rx = volkswagen_pq_rx_hook,
   .tx = volkswagen_pq_tx_hook,
-  .get_counter = volkswagen_pq_get_counter,
-  .get_checksum = volkswagen_pq_get_checksum,
-  .compute_checksum = volkswagen_pq_compute_checksum,
 };

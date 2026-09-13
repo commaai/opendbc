@@ -48,45 +48,54 @@ static void volkswagen_common_init(void) {
   return;
 }
 
-static uint32_t volkswagen_mqb_meb_get_checksum(const CANPacket_t *msg) {
-  return (uint8_t)msg->data[0];
-}
-
-static uint8_t volkswagen_mqb_meb_get_counter(const CANPacket_t *msg) {
-  // MQB/MEB message counters are consistently found at LSB 8.
-  return (uint8_t)msg->data[1] & 0xFU;
-}
-
-static uint32_t volkswagen_mqb_meb_compute_crc(const CANPacket_t *msg) {
-  int len = GET_LEN(msg);
-
-  // This is CRC-8H2F/AUTOSAR with a twist. See the opendbc/car/volkswagen/ implementation
-  // of this algorithm for a version with explanatory comments.
-
+static uint32_t volkswagen_compute_crc(const CANPacket_t *msg, int len, const uint8_t data_ids[16]) {
+  // CRC-8H2F/AUTOSAR, with a message-specific data ID selected by the counter.
   uint8_t crc = 0xFFU;
   for (int i = 1; i < len; i++) {
     crc ^= (uint8_t)msg->data[i];
     crc = volkswagen_crc8_lut_8h2f[crc];
   }
-
-  uint8_t counter = volkswagen_mqb_meb_get_counter(msg);
-  if (msg->addr == MSG_LH_EPS_03) {
-    crc ^= (uint8_t[]){0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5}[counter];
-  } else if (msg->addr == MSG_ESP_05) {
-    crc ^= (uint8_t[]){0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07}[counter];
-  } else if (msg->addr == MSG_TSK_06) {
-    crc ^= (uint8_t[]){0xC4, 0xE2, 0x4F, 0xE4, 0xF8, 0x2F, 0x56, 0x81, 0x9F, 0xE5, 0x83, 0x44, 0x05, 0x3F, 0x97, 0xDF}[counter];
-  } else if (msg->addr == MSG_MOTOR_20) {
-    crc ^= (uint8_t[]){0xE9, 0x65, 0xAE, 0x6B, 0x7B, 0x35, 0xE5, 0x5F, 0x4E, 0xC7, 0x86, 0xA2, 0xBB, 0xDD, 0xEB, 0xB4}[counter];
-  } else if (msg->addr == MSG_GRA_ACC_01) {
-    crc ^= (uint8_t[]){0x6A, 0x38, 0xB4, 0x27, 0x22, 0xEF, 0xE1, 0xBB, 0xF8, 0x80, 0x84, 0x49, 0xC7, 0x9E, 0x1E, 0x2B}[counter];
-  } else {
-    // Undefined CAN message, CRC check expected to fail
-  }
-  crc = volkswagen_crc8_lut_8h2f[crc];
-
-  return (uint8_t)(crc ^ 0xFFU);
+  uint8_t counter = msg->data[1] & 0xFU;
+  crc ^= data_ids[counter];
+  return (uint8_t)(volkswagen_crc8_lut_8h2f[crc] ^ 0xFFU);
 }
+
+static uint32_t volkswagen_lh_eps_03_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5};
+  return volkswagen_compute_crc(msg, GET_LEN(msg), data_ids);
+}
+
+static const RxMsgChecks volkswagen_lh_eps_03_checks = {
+  .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+  .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+  .compute_checksum = volkswagen_lh_eps_03_checksum,
+};
+
+static uint32_t volkswagen_esp_05_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07};
+  return volkswagen_compute_crc(msg, GET_LEN(msg), data_ids);
+}
+
+static uint32_t volkswagen_tsk_06_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0xC4, 0xE2, 0x4F, 0xE4, 0xF8, 0x2F, 0x56, 0x81, 0x9F, 0xE5, 0x83, 0x44, 0x05, 0x3F, 0x97, 0xDF};
+  return volkswagen_compute_crc(msg, GET_LEN(msg), data_ids);
+}
+
+static uint32_t volkswagen_motor_20_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0xE9, 0x65, 0xAE, 0x6B, 0x7B, 0x35, 0xE5, 0x5F, 0x4E, 0xC7, 0x86, 0xA2, 0xBB, 0xDD, 0xEB, 0xB4};
+  return volkswagen_compute_crc(msg, GET_LEN(msg), data_ids);
+}
+
+static uint32_t volkswagen_gra_acc_01_checksum(const CANPacket_t *msg) {
+  static const uint8_t data_ids[16] = {0x6A, 0x38, 0xB4, 0x27, 0x22, 0xEF, 0xE1, 0xBB, 0xF8, 0x80, 0x84, 0x49, 0xC7, 0x9E, 0x1E, 0x2B};
+  return volkswagen_compute_crc(msg, GET_LEN(msg), data_ids);
+}
+
+static const RxMsgChecks volkswagen_gra_acc_01_checks = {
+  .counter = {.byte = 1, .shift = 0, .mask = 0xFU},
+  .checksum = {.byte = 0, .shift = 0, .mask = 0xFFU},
+  .compute_checksum = volkswagen_gra_acc_01_checksum,
+};
 
 static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
   // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)

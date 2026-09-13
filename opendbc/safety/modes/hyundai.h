@@ -39,15 +39,15 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {0x4A2, 0,       2, .check_relay = false},  /* FRT_RADAR11 Bus 0 */ \
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                                                                               \
-  {.msg = {{0x260, 0, 8, 100U, .max_counter = 3U, .ignore_quality_flag = true},                                                                                           \
-           {0x371, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},                                                    \
-  {.msg = {{0x386, 0, 8, 100U, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (legacy) ? 0U : 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{0x394, 0, 8, 100U, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (legacy) ? 0U : 7U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{0x251, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                                              \
-  {.msg = {{0x4F1, 0, 4, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                                                  \
+  {.msg = {{0x260, 0, 8, 100U, .max_counter = 3U, .ignore_quality_flag = true, .checks = &hyundai_ems16_checks},                                                                                                  \
+           {0x371, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},                                                                                            \
+  {.msg = {{0x386, 0, 8, 100U, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (legacy) ? 0U : 15U, .ignore_quality_flag = true, .checks = &hyundai_wheel_speeds_checks}, { 0 }, { 0 }}}, \
+  {.msg = {{0x394, 0, 8, 100U, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (legacy) ? 0U : 7U, .ignore_quality_flag = true, .checks = &hyundai_tcs13_checks}, { 0 }, { 0 }}},         \
+  {.msg = {{0x251, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                                                                                      \
+  {.msg = {{0x4F1, 0, 4, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true, .checks = &hyundai_clu11_checks}, { 0 }, { 0 }}},                                                         \
 
 #define HYUNDAI_SCC12_ADDR_CHECK(scc_bus)                                                                            \
-  {.msg = {{0x421, (scc_bus), 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
+  {.msg = {{0x421, (scc_bus), 8, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &hyundai_scc12_checks}, { 0 }, { 0 }}}, \
 
 #define HYUNDAI_FCEV_GAS_ADDR_CHECK \
   {.msg = {{0x91,  0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
@@ -58,73 +58,81 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 
 static bool hyundai_legacy = false;
 
-static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
-
-  uint8_t cnt = 0;
-  if (msg->addr == 0x260U) {
-    cnt = (msg->data[7] >> 4) & 0x3U;
-  } else if (msg->addr == 0x386U) {
-    cnt = ((msg->data[3] >> 6) << 2) | (msg->data[1] >> 6);
-  } else if (msg->addr == 0x394U) {
-    cnt = (msg->data[1] >> 5) & 0x7U;
-  } else if (msg->addr == 0x421U) {
-    cnt = msg->data[7] & 0xFU;
-  } else if (msg->addr == 0x4F1U) {
-    cnt = (msg->data[3] >> 4) & 0xFU;
-  } else {
-  }
-  return cnt;
+static uint8_t hyundai_wheel_speeds_counter(const CANPacket_t *msg) {
+  return ((msg->data[3] >> 6) << 2) | (msg->data[1] >> 6);
 }
 
-static uint32_t hyundai_get_checksum(const CANPacket_t *msg) {
+static uint32_t hyundai_wheel_speeds_checksum(const CANPacket_t *msg) {
+  return ((msg->data[7] >> 6) << 2) | (msg->data[5] >> 6);
+}
 
+static uint32_t hyundai_wheel_speeds_compute_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
-  if (msg->addr == 0x260U) {
-    chksum = msg->data[7] & 0xFU;
-  } else if (msg->addr == 0x386U) {
-    chksum = ((msg->data[7] >> 6) << 2) | (msg->data[5] >> 6);
-  } else if (msg->addr == 0x394U) {
-    chksum = msg->data[6] & 0xFU;
-  } else if (msg->addr == 0x421U) {
-    chksum = msg->data[7] >> 4;
-  } else {
+  // Count the bits, excluding the split checksum and counter.
+  for (int i = 0; i < 8; i++) {
+    uint8_t b = msg->data[i];
+    for (int j = 0; j < 8; j++) {
+      uint8_t bit = 0;
+      if (((i != 1) || (j < 6)) && ((i != 3) || (j < 6)) && ((i != 5) || (j < 6)) && ((i != 7) || (j < 6))) {
+        bit = (b >> (uint8_t)j) & 1U;
+      }
+      chksum += bit;
+    }
   }
-  return chksum;
+  return (chksum ^ 9U) & 15U;
 }
 
-static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
+static uint32_t hyundai_nibble_checksum(const CANPacket_t *msg, int len, int checksum_byte, uint8_t checksum_mask) {
   uint8_t chksum = 0;
-  if (msg->addr == 0x386U) {
-    // count the bits
-    for (int i = 0; i < 8; i++) {
-      uint8_t b = msg->data[i];
-      for (int j = 0; j < 8; j++) {
-        uint8_t bit = 0;
-        // exclude checksum and counter
-        if (((i != 1) || (j < 6)) && ((i != 3) || (j < 6)) && ((i != 5) || (j < 6)) && ((i != 7) || (j < 6))) {
-          bit = (b >> (uint8_t)j) & 1U;
-        }
-        chksum += bit;
-      }
+  for (int i = 0; i < len; i++) {
+    uint8_t b = msg->data[i];
+    if (i == checksum_byte) {
+      b &= ~checksum_mask;
     }
-    chksum = (chksum ^ 9U) & 15U;
-  } else {
-    // sum of nibbles
-    for (int i = 0; i < 8; i++) {
-      if ((msg->addr == 0x394U) && (i == 7)) {
-        continue; // exclude
-      }
-      uint8_t b = msg->data[i];
-      if (((msg->addr == 0x260U) && (i == 7)) || ((msg->addr == 0x394U) && (i == 6)) || ((msg->addr == 0x421U) && (i == 7))) {
-        b &= (msg->addr == 0x421U) ? 0x0FU : 0xF0U; // remove checksum
-      }
-      chksum += (b % 16U) + (b / 16U);
-    }
-    chksum = (16U - (chksum %  16U)) % 16U;
+    chksum += (b % 16U) + (b / 16U);
   }
-
-  return chksum;
+  return (16U - (chksum % 16U)) % 16U;
 }
+
+static uint32_t hyundai_ems16_checksum(const CANPacket_t *msg) {
+  return hyundai_nibble_checksum(msg, 8, 7, 0x0F);
+}
+
+static uint32_t hyundai_tcs13_checksum(const CANPacket_t *msg) {
+  return hyundai_nibble_checksum(msg, 7, 6, 0x0F);
+}
+
+static uint32_t hyundai_scc12_checksum(const CANPacket_t *msg) {
+  return hyundai_nibble_checksum(msg, 8, 7, 0xF0);
+}
+
+static const RxMsgChecks hyundai_ems16_checks = {
+  .counter = {.byte = 7, .shift = 4, .mask = 0x3U},
+  .checksum = {.byte = 7, .shift = 0, .mask = 0xFU},
+  .compute_checksum = hyundai_ems16_checksum,
+};
+
+static const RxMsgChecks hyundai_wheel_speeds_checks = {
+  .compute_checksum = hyundai_wheel_speeds_compute_checksum,
+  .get_counter = hyundai_wheel_speeds_counter,
+  .get_checksum = hyundai_wheel_speeds_checksum,
+};
+
+static const RxMsgChecks hyundai_tcs13_checks = {
+  .counter = {.byte = 1, .shift = 5, .mask = 0x7U},
+  .checksum = {.byte = 6, .shift = 0, .mask = 0xFU},
+  .compute_checksum = hyundai_tcs13_checksum,
+};
+
+static const RxMsgChecks hyundai_scc12_checks = {
+  .counter = {.byte = 7, .shift = 0, .mask = 0xFU},
+  .checksum = {.byte = 7, .shift = 4, .mask = 0xFU},
+  .compute_checksum = hyundai_scc12_checksum,
+};
+
+static const RxMsgChecks hyundai_clu11_checks = {
+  .counter = {.byte = 3, .shift = 4, .mask = 0xFU},
+};
 
 static void hyundai_rx_hook(const CANPacket_t *msg) {
 
@@ -335,16 +343,10 @@ const safety_hooks hyundai_hooks = {
   .init = hyundai_init,
   .rx = hyundai_rx_hook,
   .tx = hyundai_tx_hook,
-  .get_counter = hyundai_get_counter,
-  .get_checksum = hyundai_get_checksum,
-  .compute_checksum = hyundai_compute_checksum,
 };
 
 const safety_hooks hyundai_legacy_hooks = {
   .init = hyundai_legacy_init,
   .rx = hyundai_rx_hook,
   .tx = hyundai_tx_hook,
-  .get_counter = hyundai_get_counter,
-  .get_checksum = hyundai_get_checksum,
-  .compute_checksum = hyundai_compute_checksum,
 };

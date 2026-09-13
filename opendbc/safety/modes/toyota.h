@@ -37,22 +37,22 @@
   {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */ \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
-  {.msg = {{ 0xaa, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},      \
-  {.msg = {{0x260, 0, 8, 50U, .ignore_counter = true, .ignore_quality_flag=!(lta)}, { 0 }, { 0 }}},  \
+  {.msg = {{ 0xaa, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true, .checks = &toyota_wheel_speeds_checks}, { 0 }, { 0 }}}, \
+  {.msg = {{0x260, 0, 8, 50U, .ignore_counter = true, .ignore_quality_flag=!(lta), .checks = &toyota_steering_checks}, { 0 }, { 0 }}}, \
 
 #define TOYOTA_RX_CHECKS(lta)                                                                                                               \
-  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                              \
-  {.msg = {{0x1D2, 0, 8, 33U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            \
-  {.msg = {{0x226, 0, 8, 40U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},  { 0 }, { 0 }}},  \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                \
+  {.msg = {{0x1D2, 0, 8, 33U, .ignore_counter = true, .ignore_quality_flag = true, .checks = &toyota_checks}, { 0 }, { 0 }}}, \
+  {.msg = {{0x226, 0, 8, 40U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},  { 0 }, { 0 }}}, \
 
 #define TOYOTA_ALT_BRAKE_RX_CHECKS(lta)                                                                                                    \
-  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                             \
-  {.msg = {{0x1D2, 0, 8, 33U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                           \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                \
+  {.msg = {{0x1D2, 0, 8, 33U, .ignore_counter = true, .ignore_quality_flag = true, .checks = &toyota_checks}, { 0 }, { 0 }}}, \
   {.msg = {{0x224, 0, 8, 40U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
 #define TOYOTA_SECOC_RX_CHECKS                                                                                                             \
-  TOYOTA_COMMON_RX_CHECKS(false)                                                                                                           \
-  {.msg = {{0x176, 0, 8, 32U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                           \
+  TOYOTA_COMMON_RX_CHECKS(false)                                                                                              \
+  {.msg = {{0x176, 0, 8, 32U, .ignore_counter = true, .ignore_quality_flag = true, .checks = &toyota_checks}, { 0 }, { 0 }}}, \
   {.msg = {{0x116, 0, 8, 42U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
   {.msg = {{0x101, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
@@ -71,25 +71,18 @@ static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
   return checksum;
 }
 
-static uint32_t toyota_get_checksum(const CANPacket_t *msg) {
-  int checksum_byte = GET_LEN(msg) - 1U;
-  return (uint8_t)(msg->data[checksum_byte]);
+static bool toyota_steering_quality(const CANPacket_t *msg) {
+  return !GET_BIT(msg, 3U);  // STEER_TORQUE_SENSOR.STEER_ANGLE_INITIALIZING
 }
 
-static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
-  bool valid = false;
-  if (msg->addr == 0x260U) {
-    valid = !GET_BIT(msg, 3U);  // STEER_TORQUE_SENSOR.STEER_ANGLE_INITIALIZING
-  } else if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
-    // each wheel speed is 1-bit fault + 15-bit speed
-    valid = true;
-    for (uint8_t i = 0U; i < 4U; i += 1U) {
-      if (GET_BIT(msg, (i * 16U) + 7U)) {  // WHEEL_SPEED_xx_FAULT
-        valid = false;
-        break;
-      }
+static bool toyota_wheel_speeds_quality(const CANPacket_t *msg) {
+  // each wheel speed is 1-bit fault + 15-bit speed
+  bool valid = true;
+  for (uint8_t i = 0U; i < 4U; i += 1U) {
+    if (GET_BIT(msg, (i * 16U) + 7U)) {  // WHEEL_SPEED_xx_FAULT
+      valid = false;
+      break;
     }
-  } else {
   }
   return valid;
 }
@@ -349,6 +342,21 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config toyota_init(uint16_t param) {
+  static const RxMsgChecks toyota_checks = {
+    .checksum = {.byte = 7, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = toyota_compute_checksum,
+  };
+
+  static const RxMsgChecks toyota_steering_checks = {
+    .checksum = {.byte = 7, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = toyota_compute_checksum,
+    .get_quality_flag_valid = toyota_steering_quality,
+  };
+
+  static const RxMsgChecks toyota_wheel_speeds_checks = {
+    .get_quality_flag_valid = toyota_wheel_speeds_quality,
+  };
+
   static const CanMsg TOYOTA_TX_MSGS[] = {
     TOYOTA_COMMON_TX_MSGS
   };
@@ -433,7 +441,4 @@ const safety_hooks toyota_hooks = {
   .init = toyota_init,
   .rx = toyota_rx_hook,
   .tx = toyota_tx_hook,
-  .get_checksum = toyota_get_checksum,
-  .compute_checksum = toyota_compute_checksum,
-  .get_quality_flag_valid = toyota_get_quality_flag_valid,
 };

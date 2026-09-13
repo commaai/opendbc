@@ -150,36 +150,42 @@ static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
   }
 }
 
-static bool rx_msg_safety_check(const CANPacket_t *msg,
-                                const safety_config *cfg,
-                                const safety_hooks *safety_hooks) {
+static uint32_t rx_get_field(const CANPacket_t *msg, RxMsgField field) {
+  int len = (((uint32_t)field.mask << field.shift) > 0xFFU) ? 2 : 1;
+  return (GET_BYTES(msg, field.byte, len) >> field.shift) & field.mask;
+}
 
+static bool rx_msg_safety_check(const CANPacket_t *msg, const safety_config *cfg) {
   int index = get_addr_check_index(msg, cfg->rx_checks, cfg->rx_checks_len);
   update_addr_timestamp(cfg->rx_checks, index);
 
   if (index != -1) {
+    const CanMsgCheck *check = &cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index];
+    static const RxMsgChecks no_checks = {0};
+    const RxMsgChecks *checks = (check->checks != NULL) ? check->checks : &no_checks;
+    RxStatus *status = &cfg->rx_checks[index].status;
+
     // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
-      uint32_t checksum = safety_hooks->get_checksum(msg);
-      uint32_t checksum_comp = safety_hooks->compute_checksum(msg);
-      cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
+    if (!check->ignore_checksum && (checks->compute_checksum != NULL) && ((checks->checksum.mask != 0U) || (checks->get_checksum != NULL))) {
+      uint32_t checksum = (checks->get_checksum != NULL) ? checks->get_checksum(msg) : rx_get_field(msg, checks->checksum);
+      status->valid_checksum = checks->compute_checksum(msg) == checksum;
     } else {
-      cfg->rx_checks[index].status.valid_checksum = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum;
+      status->valid_checksum = check->ignore_checksum;
     }
 
     // counter check
-    if ((safety_hooks->get_counter != NULL) && (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U)) {
-      uint8_t counter = safety_hooks->get_counter(msg);
+    if ((check->max_counter > 0U) && ((checks->counter.mask != 0U) || (checks->get_counter != NULL))) {
+      uint8_t counter = (checks->get_counter != NULL) ? checks->get_counter(msg) : (uint8_t)rx_get_field(msg, checks->counter);
       update_counter(cfg->rx_checks, index, counter);
     } else {
-      cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : MAX_WRONG_COUNTERS;
+      status->wrong_counters = check->ignore_counter ? 0 : MAX_WRONG_COUNTERS;
     }
 
     // quality flag check
-    if ((safety_hooks->get_quality_flag_valid != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_quality_flag) {
-      cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(msg);
+    if (!check->ignore_quality_flag && (checks->get_quality_flag_valid != NULL)) {
+      status->valid_quality_flag = checks->get_quality_flag_valid(msg);
     } else {
-      cfg->rx_checks[index].status.valid_quality_flag = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_quality_flag;
+      status->valid_quality_flag = check->ignore_quality_flag;
     }
   }
   return is_msg_valid(cfg->rx_checks, index);
@@ -188,7 +194,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 bool safety_rx_hook(const CANPacket_t *msg) {
   bool controls_allowed_prev = controls_allowed;
 
-  bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
+  bool valid = rx_msg_safety_check(msg, &current_safety_config);
   bool whitelisted = get_addr_check_index(msg, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
   if (valid && whitelisted) {
     current_hooks->rx(msg);

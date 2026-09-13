@@ -81,6 +81,9 @@ class SafetyTestBase(unittest.TestCase):
       cls.safety = None
       raise unittest.SkipTest
 
+  def test_rx_checks_metadata(self):
+    self.assertTrue(self.safety.safety_rx_checks_metadata_valid())
+
   def _reset_safety_hooks(self):
     self.safety.set_safety_hooks(self.safety.get_current_safety_mode(),
                                  self.safety.get_current_safety_param())

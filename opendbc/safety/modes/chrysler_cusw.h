@@ -1,7 +1,18 @@
 #include "opendbc/safety/modes/chrysler_common.h"
 
-
 static safety_config chrysler_cusw_init(uint16_t param) {
+  static const RxMsgChecks chrysler_cusw_8_checks = {
+    .counter = {.byte = 6, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 7, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = chrysler_compute_checksum,
+  };
+
+  static const RxMsgChecks chrysler_cusw_5_checks = {
+    .counter = {.byte = 3, .shift = 0, .mask = 0xFU},
+    .checksum = {.byte = 4, .shift = 0, .mask = 0xFFU},
+    .compute_checksum = chrysler_compute_checksum,
+  };
+
   SAFETY_UNUSED(param);
 
   static const CanMsg CHRYSLER_CUSW_TX_MSGS[] = {
@@ -11,11 +22,11 @@ static safety_config chrysler_cusw_init(uint16_t param) {
   };
 
   static RxCheck chrysler_cusw_rx_checks[] = {
-    {.msg = {{0x1E4U, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{0x1E8U, 0, 5, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{0x1ECU, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{0x1FEU, 0, 5, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{0x2ECU, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x1E4U, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &chrysler_cusw_8_checks}, { 0 }, { 0 }}},
+    {.msg = {{0x1E8U, 0, 5, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &chrysler_cusw_5_checks}, { 0 }, { 0 }}},
+    {.msg = {{0x1ECU, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &chrysler_cusw_8_checks}, { 0 }, { 0 }}},
+    {.msg = {{0x1FEU, 0, 5, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &chrysler_cusw_5_checks}, { 0 }, { 0 }}},
+    {.msg = {{0x2ECU, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &chrysler_cusw_8_checks}, { 0 }, { 0 }}},
   };
 
   return BUILD_SAFETY_CFG(chrysler_cusw_rx_checks, CHRYSLER_CUSW_TX_MSGS);
@@ -90,16 +101,8 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-static uint8_t chrysler_cusw_get_counter(const CANPacket_t *msg) {
-  int counter_byte = GET_LEN(msg) - 2U;
-  return (uint8_t)(msg->data[counter_byte] & 0xFU);
-}
-
 const safety_hooks chrysler_cusw_hooks = {
   .init = chrysler_cusw_init,
   .rx = chrysler_cusw_rx_hook,
   .tx = chrysler_cusw_tx_hook,
-  .get_counter = chrysler_cusw_get_counter,
-  .get_checksum = chrysler_get_checksum,
-  .compute_checksum = chrysler_compute_checksum,
 };

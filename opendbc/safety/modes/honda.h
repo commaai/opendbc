@@ -4,18 +4,18 @@
 
 // All common address checks except SCM_BUTTONS which isn't on one Nidec safety configuration
 #define HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                      \
-  {.msg = {{0x1A6, (pt_bus), 8, 25U, .max_counter = 3U, .ignore_quality_flag = true},                  /* SCM_BUTTONS */       \
-           {0x296, (pt_bus), 4, 25U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }}},                                 \
-  {.msg = {{0x158, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* ENGINE_DATA */      \
-  {.msg = {{0x17C, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* POWERTRAIN_DATA */  \
+  {.msg = {{0x1A6, (pt_bus), 8, 25U, .max_counter = 3U, .ignore_quality_flag = true, .checks = &honda_8_checks},                  /* SCM_BUTTONS */      \
+           {0x296, (pt_bus), 4, 25U, .max_counter = 3U, .ignore_quality_flag = true, .checks = &honda_4_checks}, { 0 }}},                                \
+  {.msg = {{0x158, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true, .checks = &honda_8_checks}, { 0 }, { 0 }}},  /* ENGINE_DATA */     \
+  {.msg = {{0x17C, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true, .checks = &honda_8_checks}, { 0 }, { 0 }}},  /* POWERTRAIN_DATA */ \
 
 #define HONDA_COMMON_RX_CHECKS(pt_bus)                                                                                                  \
-  HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                        \
-  {.msg = {{0x326, (pt_bus), 8, 10U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* SCM_FEEDBACK */  \
+  HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                                     \
+  {.msg = {{0x326, (pt_bus), 8, 10U, .max_counter = 3U, .ignore_quality_flag = true, .checks = &honda_8_checks}, { 0 }, { 0 }}},  /* SCM_FEEDBACK */ \
 
 // Alternate brake message is used on some Honda Bosch, and Honda Bosch radarless (where PT bus is 0)
 #define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                                              \
-  {.msg = {{0x1BE, (pt_bus), 3, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
+  {.msg = {{0x1BE, (pt_bus), 3, 50U, .max_counter = 3U, .ignore_quality_flag = true, .checks = &honda_3_checks}, { 0 }, { 0 }}},  /* BRAKE_MODULE */ \
 
 enum {
   HONDA_BTN_NONE = 0,
@@ -40,11 +40,6 @@ static unsigned int honda_get_pt_bus(void) {
   return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless && !honda_bosch_canfd) ? 1U : 0U;
 }
 
-static uint32_t honda_get_checksum(const CANPacket_t *msg) {
-  int checksum_byte = GET_LEN(msg) - 1U;
-  return (uint8_t)(msg->data[checksum_byte]) & 0xFU;
-}
-
 static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
   uint8_t checksum = 0U;
@@ -62,10 +57,17 @@ static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
   return (uint8_t)((8U - checksum) & 0xFU);
 }
 
-static uint8_t honda_get_counter(const CANPacket_t *msg) {
-  int counter_byte = GET_LEN(msg) - 1U;
-  return (msg->data[counter_byte] >> 4U) & 0x3U;
-}
+static const RxMsgChecks honda_8_checks = {
+  .counter = {.byte = 7, .shift = 4, .mask = 0x3U},
+  .checksum = {.byte = 7, .shift = 0, .mask = 0xFU},
+  .compute_checksum = honda_compute_checksum,
+};
+
+static const RxMsgChecks honda_4_checks = {
+  .counter = {.byte = 3, .shift = 4, .mask = 0x3U},
+  .checksum = {.byte = 3, .shift = 0, .mask = 0xFU},
+  .compute_checksum = honda_compute_checksum,
+};
 
 static void honda_rx_hook(const CANPacket_t *msg) {
   const bool pcm_cruise = ((honda_hw == HONDA_BOSCH) && !honda_bosch_long) || (honda_hw == HONDA_NIDEC);
@@ -316,7 +318,7 @@ static safety_config honda_nidec_init(uint16_t param) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
     static RxCheck honda_nidec_alt_rx_checks[] = {
       HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
-      {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
+      {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true, .checks = &honda_8_checks}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
 
     SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
@@ -324,7 +326,7 @@ static safety_config honda_nidec_init(uint16_t param) {
     // Nidec includes BRAKE_COMMAND
     static RxCheck honda_nidec_common_rx_checks[] = {
       HONDA_COMMON_RX_CHECKS(0)
-      {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
+      {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true, .checks = &honda_8_checks}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
 
     SET_RX_CHECKS(honda_nidec_common_rx_checks, ret);
@@ -336,6 +338,12 @@ static safety_config honda_nidec_init(uint16_t param) {
 }
 
 static safety_config honda_bosch_init(uint16_t param) {
+  static const RxMsgChecks honda_3_checks = {
+    .counter = {.byte = 2, .shift = 4, .mask = 0x3U},
+    .checksum = {.byte = 2, .shift = 0, .mask = 0xFU},
+    .compute_checksum = honda_compute_checksum,
+  };
+
   static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = true}, {0x296, 1, 4, .check_relay = false},
                                          {0x33D, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = true}, {0x33DA, 0, 5, .check_relay = true}, {0x33DB, 0, 8, .check_relay = true}};  // Bosch
 
@@ -439,16 +447,10 @@ const safety_hooks honda_nidec_hooks = {
   .rx = honda_rx_hook,
   .tx = honda_tx_hook,
   .fwd = honda_nidec_fwd_hook,
-  .get_counter = honda_get_counter,
-  .get_checksum = honda_get_checksum,
-  .compute_checksum = honda_compute_checksum,
 };
 
 const safety_hooks honda_bosch_hooks = {
   .init = honda_bosch_init,
   .rx = honda_rx_hook,
   .tx = honda_tx_hook,
-  .get_counter = honda_get_counter,
-  .get_checksum = honda_get_checksum,
-  .compute_checksum = honda_compute_checksum,
 };

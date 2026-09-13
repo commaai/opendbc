@@ -105,6 +105,10 @@ void set_timer(uint32_t t);
 
 void safety_tick_current_safety_config();
 bool safety_config_valid();
+bool safety_rx_checks_metadata_valid(void);
+uint32_t get_rx_msg_field(const CANPacket_t *msg, uint8_t byte, uint8_t shift, uint16_t mask);
+bool rx_check_missing_metadata(const CANPacket_t *msg, bool descriptor_present, bool ignore_checksum,
+                               bool ignore_counter, uint8_t max_counter, bool ignore_quality_flag);
 
 void init_tests(void);
 

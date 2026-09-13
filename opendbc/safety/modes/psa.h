@@ -15,21 +15,6 @@
 #define PSA_ADAS_BUS 1U
 #define PSA_CAM_BUS  2U
 
-static uint8_t psa_get_counter(const CANPacket_t *msg) {
-  uint8_t cnt = 0;
-  if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    cnt = (msg->data[3] >> 4) & 0xFU;
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    cnt = (msg->data[5] >> 4) & 0xFU;
-  } else {
-  }
-  return cnt;
-}
-
-static uint32_t psa_get_checksum(const CANPacket_t *msg) {
-  return msg->data[5] & 0xFU;
-}
-
 static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, int chk_pos) {
   int len = GET_LEN(msg);
 
@@ -46,15 +31,12 @@ static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, in
   return (chk_ini - sum) & 0xFU;
 }
 
-static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
-  uint8_t chk = 0;
-  if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    chk = _psa_compute_checksum(msg, 0x4, 5);
-  } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    chk = _psa_compute_checksum(msg, 0x7, 5);
-  } else {
-  }
-  return chk;
+static uint32_t psa_mdd_cmd_checksum(const CANPacket_t *msg) {
+  return _psa_compute_checksum(msg, 4, 5);
+}
+
+static uint32_t psa_dyn_abr_checksum(const CANPacket_t *msg) {
+  return _psa_compute_checksum(msg, 7, 5);
 }
 
 static void psa_rx_hook(const CANPacket_t *msg) {
@@ -111,14 +93,26 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config psa_init(uint16_t param) {
+  static const RxMsgChecks psa_mdd_cmd_checks = {
+    .counter = {.byte = 3, .shift = 4, .mask = 0xFU},
+    .checksum = {.byte = 5, .shift = 0, .mask = 0xFU},
+    .compute_checksum = psa_mdd_cmd_checksum,
+  };
+
+  static const RxMsgChecks psa_dyn_abr_checks = {
+    .counter = {.byte = 5, .shift = 4, .mask = 0xFU},
+    .checksum = {.byte = 5, .shift = 0, .mask = 0xFU},
+    .compute_checksum = psa_dyn_abr_checksum,
+  };
+
   SAFETY_UNUSED(param);
   static const CanMsg PSA_TX_MSGS[] = {
     {PSA_LANE_KEEP_ASSIST, PSA_MAIN_BUS, 8, .check_relay = true}, // EPS steering
   };
 
   static RxCheck psa_rx_checks[] = {
-    {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                        // cruise state
-    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS, 8, 25U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            // speed
+    {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &psa_mdd_cmd_checks}, { 0 }, { 0 }}},                        // cruise state
+    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS, 8, 25U, .max_counter = 15U, .ignore_quality_flag = true, .checks = &psa_dyn_abr_checks}, { 0 }, { 0 }}},                            // speed
     {.msg = {{PSA_STEERING_ALT, PSA_MAIN_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // steering angle
     {.msg = {{PSA_STEERING, PSA_MAIN_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},     // driver torque
     {.msg = {{PSA_DYN_CMM, PSA_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},      // gas pedal
@@ -132,7 +126,4 @@ const safety_hooks psa_hooks = {
   .init = psa_init,
   .rx = psa_rx_hook,
   .tx = psa_tx_hook,
-  .get_counter = psa_get_counter,
-  .get_checksum = psa_get_checksum,
-  .compute_checksum = psa_compute_checksum,
 };
