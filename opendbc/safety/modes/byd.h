@@ -50,17 +50,19 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       steering_disengage = byd_driver_torque_frames >= BYD_DRIVER_TORQUE_FRAMES;
     }
 
-    // Vehicle speed: 0.1 kph/LSB
+    // Vehicle speed: 0.0713 kph/LSB (0.1 reads ~40% fast vs GPS / ACC set)
     if (msg->addr == 0x1F0U) {
       int speed = (msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
       vehicle_moving = speed > 0;
-      UPDATE_VEHICLE_SPEED(speed * 0.1 * KPH_TO_MS);
+      UPDATE_VEHICLE_SPEED(speed * 0.0713 * KPH_TO_MS);
     }
 
-    // Gas and brake pressed
+    // Brake from DRIVE_STATE. Gas is PEDAL.GAS_PEDAL; RAW_THROTTLE stays high under ACC.
     if (msg->addr == 0x242U) {
       brake_pressed = (msg->data[4] >> 5) & 0x1U;   // BRAKE_PRESSED
-      gas_pressed = (msg->data[3] & 0x7FU) > 0U;    // RAW_THROTTLE
+    }
+    if (msg->addr == 0x342U) {
+      gas_pressed = msg->data[0] > 0U;              // GAS_PEDAL
     }
   }
 
@@ -128,6 +130,7 @@ static safety_config byd_init(uint16_t param) {
     {.msg = {{0x1FC, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // STEERING_TORQUE (column driver torque)
     {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // WHEELSPEED_CLEAN (vehicle speed)
     {.msg = {{0x242, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DRIVE_STATE (gas and brake pressed)
+    {.msg = {{0x342, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // PEDAL (accelerator pedal)
     {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // ACC_HUD_ADAS (cruise state)
   };
   };
