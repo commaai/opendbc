@@ -108,10 +108,10 @@ safety_config current_safety_config;
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
 
-static bool is_msg_valid(RxCheck addr_list[], int index) {
+static bool is_msg_valid(const RxCheck *check) {
   bool valid = true;
-  if (index != -1) {
-    if (!addr_list[index].status.valid_checksum || !addr_list[index].status.valid_quality_flag || (addr_list[index].status.wrong_counters >= MAX_WRONG_COUNTERS)) {
+  if (check != NULL) {
+    if (!check->status.valid_checksum || !check->status.valid_quality_flag || (check->status.wrong_counters >= MAX_WRONG_COUNTERS)) {
       valid = false;
       controls_allowed = false;
     }
@@ -119,8 +119,8 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
   return valid;
 }
 
-static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], const int len) {
-  int index = -1;
+static RxCheck *get_rx_check(const CANPacket_t *msg, RxCheck addr_list[], const int len) {
+  RxCheck *check = NULL;
   for (int i = 0; i < len; i++) {
     // if multiple msgs are allowed, determine which one is present on the bus
     if (!addr_list[i].status.msg_seen) {
@@ -136,71 +136,63 @@ static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], con
     if (addr_list[i].status.msg_seen) {
       int idx = addr_list[i].status.index;
       if (msg_matches(msg, addr_list[i].msg[idx].addr, addr_list[i].msg[idx].bus, addr_list[i].msg[idx].len)) {
-        index = i;
+        check = &addr_list[i];
         break;
       }
     }
   }
-  return index;
+  return check;
 }
 
-static void update_addr_timestamp(RxCheck addr_list[], int index) {
-  if (index != -1) {
-    uint32_t ts = microsecond_timer_get();
-    addr_list[index].status.last_timestamp = ts;
-  }
-}
-
-static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
-  if (index != -1) {
-    uint8_t expected_counter = (addr_list[index].status.last_counter + 1U) % (addr_list[index].msg[addr_list[index].status.index].max_counter + 1U);
-    addr_list[index].status.wrong_counters += (expected_counter == counter) ? -1 : 1;
-    addr_list[index].status.wrong_counters = SAFETY_CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
-    addr_list[index].status.last_counter = counter;
-  }
+static void update_counter(RxStatus *status, uint8_t max_counter, uint8_t counter) {
+  uint8_t expected_counter = (status->last_counter + 1U) % (max_counter + 1U);
+  status->wrong_counters += (expected_counter == counter) ? -1 : 1;
+  status->wrong_counters = SAFETY_CLAMP(status->wrong_counters, 0, MAX_WRONG_COUNTERS);
+  status->last_counter = counter;
 }
 
 static bool rx_msg_safety_check(const CANPacket_t *msg,
-                                const safety_config *cfg,
+                                RxCheck *check,
                                 const safety_hooks *safety_hooks) {
 
-  int index = get_addr_check_index(msg, cfg->rx_checks, cfg->rx_checks_len);
-  update_addr_timestamp(cfg->rx_checks, index);
+  if (check != NULL) {
+    const CanMsgCheck *msg_check = &check->msg[check->status.index];
+    RxStatus *status = &check->status;
+    status->last_timestamp = microsecond_timer_get();
 
-  if (index != -1) {
     // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
+    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !msg_check->ignore_checksum) {
       uint32_t checksum = safety_hooks->get_checksum(msg);
       uint32_t checksum_comp = safety_hooks->compute_checksum(msg);
-      cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
+      status->valid_checksum = checksum_comp == checksum;
     } else {
-      cfg->rx_checks[index].status.valid_checksum = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum;
+      status->valid_checksum = msg_check->ignore_checksum;
     }
 
     // counter check
-    if ((safety_hooks->get_counter != NULL) && (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U)) {
+    if ((safety_hooks->get_counter != NULL) && (msg_check->max_counter > 0U)) {
       uint8_t counter = safety_hooks->get_counter(msg);
-      update_counter(cfg->rx_checks, index, counter);
+      update_counter(status, msg_check->max_counter, counter);
     } else {
-      cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : MAX_WRONG_COUNTERS;
+      status->wrong_counters = msg_check->ignore_counter ? 0 : MAX_WRONG_COUNTERS;
     }
 
     // quality flag check
-    if ((safety_hooks->get_quality_flag_valid != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_quality_flag) {
-      cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(msg);
+    if ((safety_hooks->get_quality_flag_valid != NULL) && !msg_check->ignore_quality_flag) {
+      status->valid_quality_flag = safety_hooks->get_quality_flag_valid(msg);
     } else {
-      cfg->rx_checks[index].status.valid_quality_flag = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_quality_flag;
+      status->valid_quality_flag = msg_check->ignore_quality_flag;
     }
   }
-  return is_msg_valid(cfg->rx_checks, index);
+  return is_msg_valid(check);
 }
 
 bool safety_rx_hook(const CANPacket_t *msg) {
   bool controls_allowed_prev = controls_allowed;
 
-  bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
-  bool whitelisted = get_addr_check_index(msg, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
-  if (valid && whitelisted) {
+  RxCheck *check = get_rx_check(msg, current_safety_config.rx_checks, current_safety_config.rx_checks_len);
+  bool valid = rx_msg_safety_check(msg, check, current_hooks);
+  if (valid && (check != NULL)) {
     current_hooks->rx(msg);
   }
 
@@ -333,7 +325,7 @@ void safety_tick(void) {
 
     // enforce minimum frequency for safety-relevant messages
     bool frequency_invalid = frequency < 10U;
-    if (lagging || frequency_invalid || !is_msg_valid(current_safety_config.rx_checks, i)) {
+    if (lagging || frequency_invalid || !is_msg_valid(&current_safety_config.rx_checks[i])) {
       rx_checks_invalid = true;
       controls_allowed = false;
     }
