@@ -109,6 +109,14 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_GRA_NEU, 0], [MSG_GRA_NEU, 2], [MSG_LDW_1, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1]}
 
+  def test_cruise_states(self):
+    for state in range(4):
+      with self.subTest(state=state):
+        self.assertTrue(self._rx(self._pcm_status_msg(False)))
+        self.assertTrue(self._rx(self._motor_2_msg(cruise_engaged=state)))
+        self.assertEqual(state in (1, 2), self.safety.get_controls_allowed())
+        self.assertEqual(state in (1, 2), self.safety.get_cruise_engaged_prev())
+
   def setUp(self):
     self.packer = CANPackerSafety("vw_pq")
     self.safety = libsafety_py.libsafety
@@ -158,6 +166,8 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
       self._rx(self._motor_5_msg(main_switch=True))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
+      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
+      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed while holding {button}")
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 

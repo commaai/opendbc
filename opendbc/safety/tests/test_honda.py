@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from opendbc.car.honda.values import HondaSafetyFlags
+from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
@@ -175,7 +176,7 @@ class HondaBase(common.CarSafetyTest):
   cnt_powertrain_data = 0
   cnt_acc_state = 0
 
-  def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None):
+  def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None, brake_switch=False):
     # preserve the state
     if cruise_on is None:
       # or'd with controls allowed since the tests use it to "enable" cruise
@@ -188,6 +189,7 @@ class HondaBase(common.CarSafetyTest):
     values = {
       "ACC_STATUS": cruise_on,
       "BRAKE_PRESSED": brake_pressed,
+      "BRAKE_SWITCH": brake_switch,
       "PEDAL_GAS": gas_pressed,
       "COUNTER": self.cnt_powertrain_data % 4
     }
@@ -232,10 +234,31 @@ class HondaBase(common.CarSafetyTest):
     self._rx(self._user_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_brake_switch_debounce(self):
+    if self.safety.get_current_safety_param() & HondaSafetyFlags.ALT_BRAKE:
+      self.skipTest("This configuration uses the separate driver brake message")
+    self.assertTrue(self._rx(self._speed_msg(1)))
+    # A one-frame switch pulse is ignored; consecutive frames detect braking
+    # before the delayed BRAKE_PRESSED signal. A release resets the debounce.
+    for switch, pressed in ((False, False), (True, False), (False, False),
+                            (True, False), (True, True), (True, True), (False, False)):
+      self.safety.set_controls_allowed(True)
+      self.assertTrue(self._rx(self._powertrain_data_msg(brake_pressed=False, brake_switch=switch)))
+      self.assertEqual(pressed, self.safety.get_brake_pressed_prev())
+      self.assertEqual(not pressed, self.safety.get_controls_allowed())
+
   def test_steer_safety_check(self):
-    self.safety.set_controls_allowed(0)
-    self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
-    self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
+    # Both steering addresses are admitted on Nidec. Nonzero bytes must be
+    # blocked when disabled, regardless of which byte carries the torque.
+    for addr, length in ((0xE4, 5), (0x194, 4)):
+      if [addr, self.STEER_BUS] not in self.TX_MSGS:
+        continue
+      for enabled in (False, True):
+        self.safety.set_controls_allowed(enabled)
+        for torque in (0, 1, 0x100, 0x1000):
+          with self.subTest(addr=addr, enabled=enabled, torque=torque):
+            data = torque.to_bytes(2, "big") + bytes(length - 2)
+            self.assertEqual(enabled or torque == 0, self._tx(libsafety_py.make_CANPacket(addr, self.STEER_BUS, data)))
 
 
 # ********************* Honda Nidec **********************
@@ -312,6 +335,17 @@ class TestHondaNidecSafetyBase(HondaBase):
 
     self.assertTrue(self._rx(self._rx_brake_msg(0, aeb_req=0)))
     self.assertFalse(self.safety.get_honda_fwd_brake())
+
+  def test_disable_stock_aeb(self):
+    for disable_aeb in (False, True):
+      self.setUp()
+      self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.DISABLE_STOCK_AEB if disable_aeb else 0)
+      self.safety.set_controls_allowed(True)
+      self.assertTrue(self._tx(self._send_brake_msg(10)))
+      self.assertTrue(self._rx(self._rx_brake_msg(20, aeb_req=1)))
+      self.assertEqual(not disable_aeb, self.safety.get_honda_fwd_brake())
+      self.assertEqual(-1 if disable_aeb else 0, self.safety.safety_fwd_hook(2, 0x1FA))
+      self.assertEqual(disable_aeb, self._tx(self._send_brake_msg(10)))
 
   def test_brake_safety_check(self):
     for fwd_brake in [False, True]:
@@ -445,6 +479,18 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, 0)
     self.safety.init_tests()
 
+  def test_supplemental_control_payload(self):
+    valid = b"\x04\x00\x80\x10\x00\x00\x00\x00"
+    self.assertTrue(self._tx(libsafety_py.make_CANPacket(0xE5, self.STEER_BUS, valid)))
+    for byte in range(7):
+      with self.subTest(byte=byte):
+        malformed = bytearray(valid)
+        malformed[byte] ^= 1
+        self.assertFalse(self._tx(libsafety_py.make_CANPacket(0xE5, self.STEER_BUS, malformed)))
+    # The final byte carries the counter/checksum, not actuation fields.
+    for counter_checksum in (0, 0x55, 0xFF):
+      self.assertTrue(self._tx(libsafety_py.make_CANPacket(0xE5, self.STEER_BUS, valid[:7] + bytes([counter_checksum]))))
+
 
 class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):
   """
@@ -490,6 +536,12 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
     not_tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")
     self.assertFalse(self._tx(not_tester_present))
+
+    # Reject mutations to every byte, including padding after the UDS request.
+    for byte in range(8):
+      malformed = bytearray(b"\x02\x3E\x80\x00\x00\x00\x00\x00")
+      malformed[byte] ^= 1
+      self.assertFalse(self._tx(libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, malformed)))
 
   def test_gas_safety_check(self):
     for controls_allowed in [True, False]:

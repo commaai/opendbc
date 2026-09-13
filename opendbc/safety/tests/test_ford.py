@@ -169,6 +169,15 @@ class TestFordSafetyBase(common.CarSafetyTest):
     }
     return self.packer.make_can_msg_safety("EngBrakeData", 0, values)
 
+  def test_cruise_states(self):
+    for state in range(8):
+      with self.subTest(state=state):
+        self.assertTrue(self._rx(self._pcm_status_msg(False)))
+        values = {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": state}
+        self.assertTrue(self._rx(self.packer.make_can_msg_safety("EngBrakeData", 0, values)))
+        self.assertEqual(state in (4, 5), self.safety.get_controls_allowed())
+        self.assertEqual(state in (4, 5), self.safety.get_cruise_engaged_prev())
+
   # LKAS command
   def _lkas_command_msg(self, action: int):
     values = {
@@ -529,6 +538,17 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
           should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
           should_tx = should_tx and (controls_allowed or not brake_actuation)
           self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, brake_actuation)))
+
+  def test_brake_request_bits(self):
+    for controls_allowed in (False, True):
+      for precharge in (False, True):
+        for decel in (False, True):
+          with self.subTest(controls_allowed=controls_allowed, precharge=precharge, decel=decel):
+            self.safety.set_controls_allowed(controls_allowed)
+            values = {"AccPrpl_A_Rq": self.INACTIVE_GAS, "AccPrpl_A_Pred": self.INACTIVE_GAS,
+                      "AccBrkTot_A_Rq": self.INACTIVE_ACCEL, "AccBrkPrchg_B_Rq": precharge, "AccBrkDecel_B_Rq": decel}
+            msg = self.packer.make_can_msg_safety("ACCDATA", 0, values)
+            self.assertEqual(controls_allowed or not (precharge or decel), self._tx(msg))
 
 
 class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):

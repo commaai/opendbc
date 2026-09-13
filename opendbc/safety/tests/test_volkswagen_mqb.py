@@ -127,6 +127,29 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02]}
 
+  def test_cruise_states(self):
+    for state in range(8):
+      with self.subTest(state=state):
+        self.assertTrue(self._rx(self._pcm_status_msg(False)))
+        msg = self.packer.make_can_msg_safety("TSK_06", 0, {"TSK_Status": state})
+        self.assertTrue(self._rx(msg))
+        self.assertEqual(state in (3, 4, 5), self.safety.get_controls_allowed())
+        self.assertEqual(state in (3, 4, 5), self.safety.get_cruise_engaged_prev())
+
+  def test_stock_cruise_buttons_do_not_enable(self):
+    self.assertTrue(self._rx(self._tsk_status_msg(False)))
+    for button in ("GRA_Tip_Setzen", "GRA_Tip_Wiederaufnahme"):
+      for pressed in (True, False):
+        msg = self.packer.make_can_msg_safety("GRA_ACC_01", 0, {button: pressed})
+        self.assertTrue(self._rx(msg))
+        self.assertFalse(self.safety.get_controls_allowed())
+
+    self.assertTrue(self._rx(self._tsk_status_msg(True)))
+    self.assertTrue(self.safety.get_controls_allowed())
+    msg = self.packer.make_can_msg_safety("GRA_ACC_01", 0, {"GRA_Abbrechen": True})
+    self.assertTrue(self._rx(msg))
+    self.assertFalse(self.safety.get_controls_allowed())
+
   def setUp(self):
     self.packer = CANPackerSafety("vw_mqb")
     self.safety = libsafety_py.libsafety
@@ -175,6 +198,8 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
       self._rx(self._tsk_status_msg(False, main_switch=True))
       self._rx(self._gra_acc_01_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
+      self._rx(self._gra_acc_01_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
+      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed while holding {button}")
       self._rx(self._gra_acc_01_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 

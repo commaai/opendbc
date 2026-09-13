@@ -71,6 +71,15 @@ class HyundaiButtonBase:
       self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
       self._rx(self._button_msg(Buttons.NONE))
 
+  def test_active_cruise_does_not_reenable(self):
+    self.assertTrue(self._rx(self._pcm_status_msg(False)))
+    self.assertTrue(self._rx(self._button_msg(Buttons.SET)))
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
 
 class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
@@ -94,6 +103,9 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     pass
 
   def test_cruise_engaged_prev(self):
+    pass
+
+  def test_active_cruise_does_not_reenable(self):
     pass
 
   def test_button_sends(self):
@@ -138,6 +150,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
     addr, bus = self.DISABLED_ECU_UDS_MSG
     for should_tx, msg in ((True, b"\x02\x3E\x80\x00\x00\x00\x00\x00"),
+                           (False, b"\x02\x3E\x80\x00\x00\x00\x00\x01"),
                            (False, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(addr, bus, msg)
       self.assertEqual(should_tx and ecu_disable, self._tx(tester_present))

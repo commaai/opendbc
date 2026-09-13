@@ -60,6 +60,7 @@ bool safety_rx_hook(CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
 int safety_fwd_hook(int bus_num, int addr);
 int set_safety_hooks(uint16_t mode, uint16_t param);
+int to_signed(int d, int bits);
 
 void set_controls_allowed(bool c);
 bool get_controls_allowed(void);
@@ -105,6 +106,13 @@ void set_timer(uint32_t t);
 
 void safety_tick_current_safety_config();
 bool safety_config_valid();
+void safety_test_configure_rx(uint32_t frequency, bool ignore_checksum, bool ignore_counter,
+                              bool ignore_quality_flag, uint8_t max_counter, uint8_t callbacks);
+unsigned int safety_test_get_rx_count(void);
+bool get_safety_rx_checks_invalid(void);
+void safety_test_tick_null(void);
+float safety_test_interpolate(float x, float midpoint);
+bool safety_test_dynamic_torque_limit(float torque);
 
 void init_tests(void);
 

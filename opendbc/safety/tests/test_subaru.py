@@ -73,9 +73,19 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Steer_Torque_Sensor": torque}
     return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
-  def _speed_msg(self, speed):
-    values = {s: speed for s in ["FR", "FL", "RR", "RL"]}
+  def _speed_msg(self, speed, **wheel_speeds):
+    values = {s: wheel_speeds.get(s, speed) for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
+
+  def test_vehicle_moving_single_wheel(self):
+    for wheel in ("FR", "FL", "RR", "RL"):
+      with self.subTest(wheel=wheel):
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
+        self.assertTrue(self._rx(self._speed_msg(0, **{wheel: 1})))
+        self.assertTrue(self.safety.get_vehicle_moving())
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertFalse(self.safety.get_vehicle_moving())
 
   def _user_brake_msg(self, brake):
     values = {"Brake": brake}

@@ -94,6 +94,15 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.__class__.cnt_epas += 1
     return self.packer.make_can_msg_safety("EPAS3S_sysStatus", 0, values)
 
+  def test_inactive_angle_reset_clips_measurement(self):
+    for angle in (-self.STEER_ANGLE_MAX - 1, 0, self.STEER_ANGLE_MAX + 1):
+      with self.subTest(angle=angle):
+        self.safety.set_controls_allowed(False)
+        self._reset_angle_measurement(angle)
+        clipped_angle = min(max(angle, -self.STEER_ANGLE_MAX), self.STEER_ANGLE_MAX)
+        self.assertTrue(self._tx(self._angle_cmd_msg(clipped_angle, False)))
+        self.assertEqual(round(clipped_angle * self.DEG_TO_CAN), self.safety.get_desired_angle_last())
+
   def _user_brake_msg(self, brake, quality_flag: bool = True):
     values = {"ESP_driverBrakeApply": 2 if brake else 1}
     if not quality_flag:
@@ -123,6 +132,15 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       "DI_autoparkState": autopark_state,
     }
     return self.packer.make_can_msg_safety("DI_state", 0, values)
+
+  def test_cruise_states(self):
+    for state in range(8):
+      with self.subTest(state=state):
+        self.assertTrue(self._rx(self._pcm_status_msg(False)))
+        msg = self.packer.make_can_msg_safety("DI_state", 0, {"DI_cruiseState": state})
+        self.assertTrue(self._rx(msg))
+        self.assertEqual(state in (2, 3, 4, 6, 7), self.safety.get_controls_allowed())
+        self.assertEqual(state in (2, 3, 4, 6, 7), self.safety.get_cruise_engaged_prev())
 
   def _long_control_msg(self, set_speed, acc_state=0, jerk_limits=(0, 0), accel_limits=(0, 0), aeb_event=0, bus=0):
     values = {
@@ -292,6 +310,44 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.assertEqual(1, self._rx(lkas_msg_cam))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
     self.assertFalse(self._tx(no_lkas_msg))
+
+  def test_stock_lkas_rising_edge_while_disengaged(self):
+    def receive_lkas(active):
+      state = self.steer_control_types["LANE_KEEP_ASSIST"] if active else self.steer_control_types["NONE"]
+      self.assertTrue(self._rx(self._angle_cmd_msg(0, state=state, bus=2)))
+
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    receive_lkas(False)
+    receive_lkas(True)
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+    # Disengaging while stock LKAS is already active must not latch passthrough.
+    self.assertTrue(self._rx(self._pcm_status_msg(False)))
+    receive_lkas(True)
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+
+    # A fresh activation while disengaged does latch it until stock LKAS exits.
+    receive_lkas(False)
+    for _ in range(2):
+      receive_lkas(True)
+      self.assertEqual(0, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+      self.assertFalse(self._tx(self._angle_cmd_msg(0, False)))
+    receive_lkas(False)
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+
+  def test_autopark_forwards_stock_commands(self):
+    for state in self.active_autopark_states:
+      self.assertTrue(self._rx(self._pcm_status_msg(False)))
+      self.assertTrue(self._rx(self._pcm_status_msg(False, state)))
+      for addr in (MSG_DAS_steeringControl, MSG_APS_eacMonitor, MSG_DAS_Control):
+        self.assertEqual(0, self.safety.safety_fwd_hook(2, addr))
+      self.assertTrue(self._rx(self._pcm_status_msg(False)))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_APS_eacMonitor))
+      self.assertEqual(-1 if self.LONGITUDINAL else 0, self.safety.safety_fwd_hook(2, MSG_DAS_Control))
 
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below

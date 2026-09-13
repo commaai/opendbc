@@ -72,6 +72,15 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
     values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
     return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values, fix_checksum=checksum)
 
+  def test_cruise_states(self):
+    for state in range(8):
+      with self.subTest(state=state):
+        self.assertTrue(self._rx(self._pcm_status_msg(False)))
+        values = {"ACCSysSts_RadarHSC2": state, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
+        self.assertTrue(self._rx(self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values, fix_checksum=checksum)))
+        self.assertEqual(state in (2, 3), self.safety.get_controls_allowed())
+        self.assertEqual(state in (2, 3), self.safety.get_cruise_engaged_prev())
+
 
 if __name__ == "__main__":
   unittest.main()

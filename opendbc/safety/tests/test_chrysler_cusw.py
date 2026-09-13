@@ -62,6 +62,9 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
       # can always cancel
       self.assertTrue(self._tx(self._button_msg(cancel=True)))
 
+      # A frame with no requested button is not a cancel or resume command.
+      self.assertFalse(self._tx(self._button_msg()))
+
   def test_rx_hook(self):
     for count in range(20):
       self.assertTrue(self._rx(self._speed_msg(0)), f"{count=}")

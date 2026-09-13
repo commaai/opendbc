@@ -53,6 +53,15 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
 
+  def test_cruise_states(self):
+    for state in range(4):
+      with self.subTest(state=state):
+        self.assertTrue(self._rx(self._pcm_status_msg(False)))
+        msg = self.packer.make_can_msg_safety("TSK_04", 1, {"TSK_Status_GRA_ACC_02": state})
+        self.assertTrue(self._rx(msg))
+        self.assertEqual(state in (1, 2), self.safety.get_controls_allowed())
+        self.assertEqual(state in (1, 2), self.safety.get_cruise_engaged_prev())
+
   # Driver steering input torque
   def _torque_driver_msg(self, torque):
     values = {"EPS_Lenkmoment": abs(torque), "EPS_VZ_Lenkmoment": torque < 0}
@@ -128,8 +137,19 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False))
     self.safety.set_controls_allowed(1)
+    self.assertTrue(self._rx(self._ls_01_msg(bus=0)))
+    self.assertTrue(self.safety.get_controls_allowed())
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
+
+  def test_steering_status(self):
+    for status in range(16):
+      with self.subTest(status=status):
+        self.safety.set_controls_allowed(True)
+        self._set_prev_torque(0)
+        values = {"HCA_01_LM_Offset": 1, "HCA_01_Status_HCA": status}
+        msg = self.packer.make_can_msg_safety("HCA_01", 0, values)
+        self.assertEqual(status in (5, 7), self._tx(msg))
 
 
 if __name__ == "__main__":
