@@ -53,7 +53,6 @@ class CAR(Platforms):
       CommunityCarDocs("Honda Clarity 2018-21"),
       CommunityCarDocs("Honda Pilot 2026"),
       GMSecurityCarDocs("Honda Prologue 2024-26"),
-      CommunityCarDocs("Honda Ridgeline 2026"),
     ],
   )
 
