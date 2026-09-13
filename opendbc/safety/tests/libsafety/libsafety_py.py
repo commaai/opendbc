@@ -20,13 +20,14 @@ def _build_libsafety(release: bool = False) -> str:
     '-std=gnu11', '-Wfatal-errors', '-Wno-pointer-to-int-cast',
     '-g', '-O0', '-fno-omit-frame-pointer',
   ]
-  ldflags = [
-    '-fsanitize=undefined', '-fno-sanitize-recover=undefined',
-  ]
+  # Coverage must exclude the branches inserted by UBSan.
+  if os.environ.get("SAFETY_COVERAGE") == "1":
+    ldflags = ['-fprofile-arcs', '-ftest-coverage'] if not release else []
+  else:
+    ldflags = ['-fsanitize=undefined', '-fno-sanitize-recover=undefined']
   cflags += ldflags
   if not release:
-    cflags += ['-DALLOW_DEBUG', '-fprofile-arcs', '-ftest-coverage']
-    ldflags += ['-fprofile-arcs', '-ftest-coverage']
+    cflags += ['-DALLOW_DEBUG']
 
   fd, safety_os = tempfile.mkstemp(suffix='.os', dir=libsafety_dir)
   os.close(fd)
