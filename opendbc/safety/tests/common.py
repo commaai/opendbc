@@ -1239,8 +1239,12 @@ class CarSafetyTest(SafetyTest):
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_safety_tick(self):
-    self.safety.set_timer(int(2e6))
-    self.safety.set_controls_allowed(True)
-    self.safety.safety_tick()
-    self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.safety_config_valid())
+    # Missing valid RX messages must disable controls even before they time out.
+    for elapsed in (0, int(2e6)):
+      with self.subTest(elapsed=elapsed):
+        self._reset_safety_hooks()
+        self.safety.set_timer(elapsed)
+        self.safety.set_controls_allowed(True)
+        self.safety.safety_tick()
+        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertFalse(self.safety.safety_config_valid())
