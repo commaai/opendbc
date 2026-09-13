@@ -39,6 +39,7 @@ jobs:
       if: github.event.pull_request.head.repo.full_name != 'commaai/opendbc'
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
+        issue_message: "This workflow does not handle issues."
         pr_message: |
             <!-- _(run_id **${{ github.run_id }}**)_ -->
             Thanks for contributing to opendbc! In order for us to review your PR as quickly as possible, check the following:
