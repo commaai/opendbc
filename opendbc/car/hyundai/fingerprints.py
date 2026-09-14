@@ -542,6 +542,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00RG3 MFC  AT USA LHD 1.00 1.01 99211-T1200 230607',
+      b'\xf1\x00RG3 MFC  AT USA LHD 1.00 1.01 99211-T1210 230607',
     ],
   },
   CAR.GENESIS_G90: {
