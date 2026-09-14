@@ -260,17 +260,6 @@ BO_ 1095 NEW_MSG_447: 6 XXX
  SG_ COUNTER : 35|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 1194 CAM_UNKNOWN_2: 8 CAMERA
-
-BO_ 1198 LKA_HUD_1: 8 CAMERA
- SG_ NEW_SIGNAL_1 : 4|5@0+ (1,0) [0|31] "" XXX
- SG_ NEW_SIGNAL_3 : 12|5@0+ (1,0) [0|31] "" XXX
- SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_5 : 29|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_4 : 38|3@0+ (1,0) [0|7] "" XXX
- SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
 BO_ 1199 ACC_3: 8 RADAR
  SG_ CRUISE_STATUS : 11|1@0+ (1,0) [0|1] "" XXX
 
@@ -309,7 +298,6 @@ CM_ SG_ 278 FORWARD_1 "probably per-axle";
 CM_ SG_ 278 REVERSE_1 "probably per-axle";
 CM_ SG_ 278 FORWARD_2 "probably per-axle";
 CM_ SG_ 278 REVERSE_2 "probably per-axle";
-CM_ BO_ 1198 "Definite LKA activity, probably contains lane-line recognition and lane departure signals, indicator of LKA vs TJA, perhaps indicator of active assist in map-permitted areas";
 VAL_ 262 LKA_STATUS 0 "standby" 2 "lka_active";
 VAL_ 1449 GEAR 1 "park" 2 "reverse" 3 "neutral" 4 "drive" 6 "drive manual";
 VAL_ 1508 CRUISE_MODE 0 "off" 3 "manual" 2 "acc-available" 4 "acc-enabled" 6 "acc-override";

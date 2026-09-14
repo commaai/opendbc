@@ -36,8 +36,6 @@ class CarController(CarControllerBase):
 
     # **** HUD Controls ***************************************************** #
 
-    # if self.frame % self.CCP.HUD_1_STEP == 0:
-    #   can_sends.append(fca_giorgiocan.create_lka_hud_1_control(self.packer_pt, self.CANBUS.pt, CC.latActive))
     if self.frame % self.CCP.HUD_2_STEP == 0:
       can_sends.append(fca_giorgiocan.create_lka_hud_2_control(self.packer_pt, self.CANBUS.pt, CC.latActive))
     lat_active_rising = CC.latActive and not self.lat_active_last
