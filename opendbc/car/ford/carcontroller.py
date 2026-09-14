@@ -94,7 +94,7 @@ class CarController(CarControllerBase):
 
       if self.CP.flags & FordFlags.CANFD:
         # TODO: extended mode
-        # Ford uses four individual signals to dictate how to drive to the car. Curvature alone (limited to 0.02m/s^2)
+        # Ford uses four individual signals to dictate how to drive to the car. Curvature alone (limited to 0.02 m^-1)
         # can actuate the steering for a large portion of any lateral movements. However, in order to get further control on
         # steer actuation, the other three signals are necessary. Ford controls vehicles differently than most other makes.
         # A detailed explanation on ford control can be found here:

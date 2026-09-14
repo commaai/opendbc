@@ -5,12 +5,7 @@ from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 
-MSG_LH_EPS_03 = 0x9F    # RX from EPS, for driver steering torque
-MSG_ESP_03 = 0x103      # RX from ABS, for wheel speeds
-MSG_MOTOR_03 = 0x105    # RX from ECU, for driver throttle input and driver brake input
-MSG_ESP_05 = 0x106      # RX from ABS, for brake light state
 MSG_LS_01 = 0x10B       # TX by OP, ACC control buttons for cancel/resume
-MSG_TSK_04 = 0x10E      # RX from ECU, for ACC status from drivetrain coordinator
 MSG_HCA_01 = 0x126      # TX by OP, Heading Control Assist steering torque
 MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 

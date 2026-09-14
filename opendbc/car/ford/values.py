@@ -274,6 +274,7 @@ def ford_asbuilt_block_response(block_id: int):
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[A-HJ-NP-VX-Z][0-9A-HJ-NP-VX-Z]{3}-[0-9A-HJ-NP-VX-Z]{5,6}-[A-HJ-NP-VX-Z]{2,}\x00*",
   requests=[
     # CAN and CAN FD queries are combined.
     # FIXME: For CAN FD, ECUs respond with frames larger than 8 bytes on the powertrain bus
