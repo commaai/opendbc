@@ -6,7 +6,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus
 from opendbc.car.byd import bydcan
 from opendbc.car.byd.carcontroller import CarController
-from opendbc.car.byd.carstate import cruise_enabled
+from opendbc.car.byd.carstate import cruise_enabled, lkas_limited
 from opendbc.car.byd.values import DBC, CAR, CarControllerParams as CCP
 
 
@@ -74,6 +74,7 @@ class TestBydSteerNotAccepted(unittest.TestCase):
         out=SimpleNamespace(vEgoRaw=20.0, steeringAngleDeg=0.0),
       )
       CC = SimpleNamespace(
+        enabled=lat_active,
         latActive=lat_active,
         actuators=_Actuators(),
         hudControl=_Hud(),
@@ -94,42 +95,67 @@ class TestBydSteerNotAccepted(unittest.TestCase):
   def test_idle_does_not_tx_steer_or_hud(self):
     ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
 
-    def step(lat_active: bool):
+    def step(enabled: bool, lat_active: bool):
       CS = SimpleNamespace(
         eps_engaged=True,
         steer_not_accepted=False,
         lkas_hud={},
-        out=SimpleNamespace(vEgoRaw=20.0, steeringAngleDeg=0.0),
+        out=SimpleNamespace(vEgoRaw=20.0, steeringAngleDeg=12.0),
       )
       CC = SimpleNamespace(
+        enabled=enabled,
         latActive=lat_active,
         actuators=_Actuators(),
         hudControl=_Hud(),
         cruiseControl=SimpleNamespace(cancel=False),
       )
       _act, sends = ctrl.update(CC, CS, 0)
-      return [m[0] for m in sends]
+      return {m[0]: m for m in sends}
 
-    step(False)
-    idle_addrs = step(False)
-    self.assertNotIn(0x1E2, idle_addrs)
-    self.assertNotIn(0x316, idle_addrs)
+    # disengaged: the camera owns 0x1E2 and 0x316
+    step(False, False)
+    idle = step(False, False)
+    self.assertNotIn(0x1E2, idle)
+    self.assertNotIn(0x316, idle)
 
-    step(True)
-    active_addrs = step(True)
-    self.assertIn(0x1E2, active_addrs)
-    self.assertIn(0x316, active_addrs)
+    # engaged without lateral: idle heartbeat at the measured angle, stock HUD
+    step(True, False)
+    heartbeat = step(True, False)
+    self.assertNotIn(0x316, heartbeat)
+    cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("STEERING_MODULE_ADAS", 0)], 0)
+    cp.update([(0, [(0x1E2, heartbeat[0x1E2][1], 0)])])
+    self.assertEqual(cp.vl["STEERING_MODULE_ADAS"]["STEER_REQ"], 0)
+    self.assertAlmostEqual(cp.vl["STEERING_MODULE_ADAS"]["STEER_ANGLE"], 12.0, places=1)
+
+    step(True, True)
+    active = step(True, True)
+    self.assertIn(0x1E2, active)
+    self.assertIn(0x316, active)
+    cp.update([(0, [(0x1E2, active[0x1E2][1], 0)])])
+    self.assertEqual(cp.vl["STEERING_MODULE_ADAS"]["STEER_REQ"], 1)
 
 
 class TestBydCruiseGate(unittest.TestCase):
   def test_acc_without_lkas_does_not_enable(self):
-    # LKS off (0) or limited (4): stock ACC must not engage OP.
+    # LKS switched off (0): stock ACC must not engage OP.
     self.assertFalse(cruise_enabled(acc_state=3, lkas_state=0))
-    self.assertFalse(cruise_enabled(acc_state=3, lkas_state=4))
-    # LKS on/passive (1) or active (2): ACC engages OP.
+    # LKS on: ACC engages OP. 3 and 4 are camera states, not the switch, so they
+    # must not disengage mid-drive. Same gate as byd_rx_hook.
     self.assertTrue(cruise_enabled(acc_state=3, lkas_state=1))
     self.assertTrue(cruise_enabled(acc_state=5, lkas_state=2))
+    self.assertTrue(cruise_enabled(acc_state=3, lkas_state=3))
+    self.assertTrue(cruise_enabled(acc_state=3, lkas_state=4))
     self.assertFalse(cruise_enabled(acc_state=2, lkas_state=1))
+
+
+class TestBydLkasLimited(unittest.TestCase):
+  def test_state4_only_while_acc_engaged(self):
+    self.assertTrue(lkas_limited(acc_state=3, lkas_state=4))
+    self.assertTrue(lkas_limited(acc_state=5, lkas_state=4))
+    self.assertFalse(lkas_limited(acc_state=0, lkas_state=4))
+    self.assertFalse(lkas_limited(acc_state=2, lkas_state=4))
+    self.assertFalse(lkas_limited(acc_state=3, lkas_state=1))
+    self.assertFalse(lkas_limited(acc_state=3, lkas_state=2))
 
 
 class TestBydDbcObserve(unittest.TestCase):
