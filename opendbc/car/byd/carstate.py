@@ -18,8 +18,15 @@ GEAR_MAP = {
 
 
 def cruise_enabled(acc_state: int, lkas_state: int) -> bool:
-  # ACC_STATE 3/5 = stock ACC active. LKAS_STATE 1/2 = LKS master switch on.
-  return acc_state in (3, 5) and lkas_state in (1, 2)
+  # ACC_STATE 3/5 = stock ACC active. LKAS_STATE only reads 0 when the driver switches
+  # LKS off with 0x3B0 LKAS_ON_BTN; its other values are camera states, not the switch.
+  # Mirrored by byd_rx_hook so panda and openpilot enable on the same edge.
+  return acc_state in (3, 5) and lkas_state != 0
+
+
+def lkas_limited(acc_state: int, lkas_state: int) -> bool:
+  # Camera LKAS_STATE 4 after ACC-off is a handoff blip, not an OP steer fault.
+  return acc_state in (3, 5) and lkas_state == 4
 
 
 class CarState(CarStateBase):
@@ -66,10 +73,12 @@ class CarState(CarStateBase):
       self.eps_engaged = not cp.vl["STEERING_TORQUE"]["LKS_PREPARED"]
       self.eps_target_angle = cp.vl["STEERING_TORQUE"]["TARGET_ANGLE"]
 
-    # LKAS_STATE 4 = limited/faulted (cluster "LKS is limited"). Also fault when we ask
+    acc_state = int(cp_cam.vl["ACC_HUD_ADAS"]["ACC_STATE"])
+    lkas_state = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"])
+
+    # LKAS_STATE 4 while ACC is still 3/5 is "LKS is limited". Also fault when we ask
     # and the EPS stays idle for >1 s (carcontroller sets steer_not_accepted).
-    ret.steerFaultTemporary = (int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"]) == 4 or
-                               self.steer_not_accepted)
+    ret.steerFaultTemporary = lkas_limited(acc_state, lkas_state) or self.steer_not_accepted
 
     # gas / brake
     ret.gasPressed = cp.vl["PEDAL"]["GAS_PEDAL"] > 0
@@ -113,12 +122,10 @@ class CarState(CarStateBase):
 
     # cruise state: ACC messages come from camera bus on Atto 3
     # ACC_STATE: 0=OFF, 2=ACC_ON (available), 3=ACC_ACTIVE (enabled), 5=FORCE_ACCEL, 7=ERROR
-    # LKAS_STATE tracks the LKS master switch (0=off, 1=on/passive, 2=active, 4=limited).
+    # LKAS_STATE: 0=LKS switched off, 1=on/passive, 2=active, 3/4=camera states.
     # Follow stock ACC only when LKS is on so ACC can run without engaging OP.
     # Reporting enabled=False while ACC is on must not trip controlsd's cancel spoof.
     ret.cruiseState.speed = cp_cam.vl["ACC_HUD_ADAS"]["SET_SPEED"] * CV.KPH_TO_MS
-    acc_state = int(cp_cam.vl["ACC_HUD_ADAS"]["ACC_STATE"])
-    lkas_state = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"])
     ret.cruiseState.available = acc_state in (2, 3, 5)
     ret.cruiseState.enabled = cruise_enabled(acc_state, lkas_state)
     ret.cruiseState.standstill = bool(cp_cam.vl["ACC_CMD"]["STANDSTILL_STATE"])

@@ -8,21 +8,31 @@
 #define BYD_WHEELSPEED_TO_KPH 0.072  // 0.02 m/s/LSB, mirrored in values.py
 
 static int byd_driver_torque_frames = 0;
-static bool byd_op_lat = false;
+static bool byd_lks_on = false;
+static uint32_t byd_op_steer_ts = 0;
 static uint32_t byd_op_lat_ts = 0;
 
-#define BYD_OP_LAT_TIMEOUT_US 200000U
+#define BYD_OP_STEER_TIMEOUT_US 200000U
+#define BYD_OP_HUD_TIMEOUT_US 2000000U
 
+// openpilot sends 0x1E2 for its whole engagement, STEER_REQ=0 included, so stock LKS
+// gets the EPS back only once openpilot stops talking to it. Timing the handback off
+// the last accepted STEER_REQ=1 instead put the camera on 0x1E2 mid-engagement, since
+// rate limited commands leave gaps.
 static bool byd_stock_lat_allowed(void) {
-  if (!byd_op_lat) {
-    return true;
+  bool allowed = true;
+  if (byd_op_steer_ts != 0U) {
+    allowed = safety_get_ts_elapsed(microsecond_timer_get(), byd_op_steer_ts) > BYD_OP_STEER_TIMEOUT_US;
   }
-  const uint32_t ts = microsecond_timer_get();
-  if (safety_get_ts_elapsed(ts, byd_op_lat_ts) > BYD_OP_LAT_TIMEOUT_US) {
-    byd_op_lat = false;
-    return true;
+  return allowed;
+}
+
+static bool byd_stock_hud_allowed(void) {
+  bool allowed = true;
+  if (byd_op_lat_ts != 0U) {
+    allowed = safety_get_ts_elapsed(microsecond_timer_get(), byd_op_lat_ts) > BYD_OP_HUD_TIMEOUT_US;
   }
-  return false;
+  return allowed;
 }
 
 static uint8_t byd_get_counter(const CANPacket_t *msg) {
@@ -83,12 +93,19 @@ static void byd_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->bus == 2U) {
+    // LKS master switch, same gate as carstate.cruise_enabled. Only the driver's
+    // 0x3B0 LKAS_ON_BTN takes LKAS_STATE to 0; its other values are camera states,
+    // so they must not drop controls mid-drive.
+    if (msg->addr == 0x316U) {
+      byd_lks_on = ((msg->data[4] >> 4) & 0xFU) != 0U;
+    }
+
     // Cruise state
     if (msg->addr == 0x32DU) {
       // ACC_STATE: 0=OFF, 2=ACC_ON, 3=ACC_ACTIVE, 5=FORCE_ACCEL, 7=ERROR
       uint8_t acc_state = (msg->data[2] >> 3) & 0x7U;
       bool acc_on = (acc_state == 3U) || (acc_state == 5U);
-      pcm_cruise_check(acc_on);
+      pcm_cruise_check(acc_on && byd_lks_on);
     }
   }
 }
@@ -114,17 +131,15 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
     int desired_angle = to_signed((msg->data[4] << 8) | msg->data[3], 16);  // STEER_ANGLE
     bool steer_req = ((msg->data[2] >> 5) & 0x1U) != 0U;                    // STEER_REQ
 
-    if (steer_angle_cmd_checks_vm(desired_angle, steer_req, BYD_STEERING_LIMITS, BYD_STEERING_PARAMS)) {
-      tx = false;
+    // Ownership tracks the request, not the result: a rate limited angle is still
+    // openpilot driving. The HUD hold only extends while it asks for torque.
+    byd_op_steer_ts = microsecond_timer_get();
+    if (steer_req) {
+      byd_op_lat_ts = byd_op_steer_ts;
     }
 
-    if (tx) {
-      if (steer_req) {
-        byd_op_lat = true;
-        byd_op_lat_ts = microsecond_timer_get();
-      } else {
-        byd_op_lat = false;
-      }
+    if (steer_angle_cmd_checks_vm(desired_angle, steer_req, BYD_STEERING_LIMITS, BYD_STEERING_PARAMS)) {
+      tx = false;
     }
   }
 
@@ -142,8 +157,14 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
 
 static bool byd_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
-  if ((bus_num == 2) && ((addr == 0x1E2) || (addr == 0x316))) {
-    block_msg = !byd_stock_lat_allowed();
+  if (bus_num == 2) {
+    if (addr == 0x1E2) {
+      block_msg = !byd_stock_lat_allowed();
+    } else if (addr == 0x316) {
+      // Camera paints LKAS_STATE=4 for ~0.5s after OP drops STEER_REQ.
+      block_msg = !byd_stock_hud_allowed();
+    } else {
+    }
   }
   return block_msg;
 }
@@ -151,7 +172,9 @@ static bool byd_fwd_hook(int bus_num, int addr) {
 static safety_config byd_init(uint16_t param) {
   SAFETY_UNUSED(param);
   byd_driver_torque_frames = 0;
-  byd_op_lat = false;
+  byd_lks_on = false;
+  byd_op_steer_ts = 0;
+  byd_op_lat_ts = 0;
 
   static const CanMsg BYD_TX_MSGS[] = {
     {0x1E2, 0, 8, .check_relay = true, .disable_static_blocking = true},   // STEERING_MODULE_ADAS
@@ -166,6 +189,7 @@ static safety_config byd_init(uint16_t param) {
     {.msg = {{0x242, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DRIVE_STATE (gas and brake pressed)
     {.msg = {{0x342, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // PEDAL (accelerator pedal)
     {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // ACC_HUD_ADAS (cruise state)
+    {.msg = {{0x316, 2, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // LKAS_HUD_ADAS (LKS switch)
   };
   };
 
