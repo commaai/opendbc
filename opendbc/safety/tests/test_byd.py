@@ -45,6 +45,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def setUp(self):
     super().setUp()
     self.VM = VehicleModel(get_safety_CP())
+    # stock ACC only engages openpilot while the LKS switch is on
+    self._rx(self._lkas_hud_msg(1))
 
   def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     values = {"STEER_ANGLE": angle, "STEER_REQ": 1 if enabled else 0, "STEER_REQ_ACTIVE_LOW": 0 if enabled else 1}
@@ -64,6 +66,10 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     # ACC_STATE: 0=OFF, 3=ACC_ACTIVE
     values = {"ACC_STATE": 3 if enable else 0}
     return self.packer.make_can_msg_safety("ACC_HUD_ADAS", self.CAM_BUS, values)
+
+  def _lkas_hud_msg(self, lkas_state: int):
+    values = {"LKAS_STATE": lkas_state}
+    return self.packer.make_can_msg_safety("LKAS_HUD_ADAS", self.CAM_BUS, values)
 
   def _speed_msg(self, speed):
     values = {"WHEELSPEED_CLEAN": speed * 3.6}
@@ -167,6 +173,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       self._driver_torque_msg(0),
       self._speed_msg(0),
       self._pcm_status_msg(False),
+      self._lkas_hud_msg(1),
     )
     for msg in checked:
       self.assertTrue(self._rx(msg))
@@ -184,7 +191,10 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
   # BYD uses get_max_angle_delta_vm and get_max_angle_vm for lateral accel and jerk limits
   def test_stock_steer_passthrough(self):
-    # Idle: camera steer and HUD reach the car. OP commanding blocks both.
+    # Idle: camera steer and HUD reach the car. Any OP 0x1E2 takes the steer away
+    # from the camera, and the idle STEER_REQ=0 heartbeat holds it for the whole
+    # engagement. HUD stays blocked ~2s after OP's last STEER_REQ=1 so a camera
+    # LKAS_STATE=4 blip does not paint the cluster.
     self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
 
@@ -196,15 +206,84 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.assertEqual(-1, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
     self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
 
-    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
-    self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
-    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    # lateral off but still engaged: the heartbeat keeps the camera off the EPS
+    for _ in range(25):
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
 
-    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
     t = (self.__class__.cnt_angle_cmd - 1) * int(1e6 / self.LATERAL_FREQUENCY)
     self.safety.set_timer(t + 201000)
     self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self.safety.set_timer(t + 2001000)
     self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+  def test_rejected_steer_keeps_camera_blocked(self):
+    # A rate limited request still owns lateral; the camera must not steer bus 0 meanwhile.
+    self.safety.set_controls_allowed(True)
+    self._reset_speed_measurement(10)
+    self._reset_angle_measurement(0)
+    self.safety.set_desired_angle_last(0)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+
+    # way past the jerk limit, so every one of these is refused
+    for _ in range(25):
+      self.assertFalse(self._tx(self._angle_cmd_msg(self.STEER_ANGLE_MAX, True)))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+
+  def test_camera_blocked_when_controls_not_allowed(self):
+    # Toggling LKS while ACC already holds gives openpilot an enable that panda
+    # does not see, so it asks to steer with controls_allowed false. Every frame is
+    # refused, but the camera must not pick up LKS behind openpilot's back.
+    self.safety.set_controls_allowed(False)
+    self._reset_speed_measurement(10)
+    self._reset_angle_measurement(0)
+    for _ in range(25):
+      self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+
+  def test_lks_switch_gates_controls(self):
+    # ACC holding with LKS off must not allow controls, and switching LKS on has to
+    # be a rising edge here too, matching carstate.
+    self.assertTrue(self._rx(self._lkas_hud_msg(0)))
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    self.assertTrue(self._rx(self._lkas_hud_msg(1)))
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # switching LKS off drops controls without touching ACC
+    self.assertTrue(self._rx(self._lkas_hud_msg(0)))
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_camera_lkas_states_keep_controls(self):
+    # The camera walks LKAS_STATE 1-2-3-4 on its own, most visibly on a standstill
+    # resume. Only 0 is the driver's switch, so the rest must not disengage.
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    for state in (2, 3, 1, 4, 1, 3, 2):
+      self.assertTrue(self._rx(self._lkas_hud_msg(state)))
+      self.assertTrue(self._rx(self._pcm_status_msg(True)))
+      self.assertTrue(self.safety.get_controls_allowed(), f"LKAS_STATE {state} dropped controls")
+
+  def test_idle_heartbeat_tracks_angle(self):
+    # The STEER_REQ=0 heartbeat carries the measured angle, so panda's rate limit
+    # reference follows the wheel while lateral is off instead of going stale.
+    self.safety.set_controls_allowed(True)
+    self._reset_speed_measurement(10)
+    self.safety.set_desired_angle_last(0)
+
+    for angle in (0, 30, 90, -90, 0):
+      self._reset_angle_measurement(angle)
+      self.assertTrue(self._tx(self._angle_cmd_msg(angle, False)))
+      self.assertEqual(angle * self.DEG_TO_CAN, self.safety.get_desired_angle_last())
+
+    # so the first frame after lateral comes back is within one jerk step
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
 
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
