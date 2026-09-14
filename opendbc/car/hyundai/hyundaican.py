@@ -155,9 +155,6 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
     scc12_values["CF_VSM_ConfMode"] = 1
     scc12_values["AEB_Status"] = 1  # AEB disabled
 
-  scc12_dat = packer.make_can_msg("SCC12", 0, scc12_values)[1]
-  scc12_values["CR_VSM_ChkSum"] = 0x10 - sum(sum(divmod(i, 16)) for i in scc12_dat) % 0x10
-
   commands.append(packer.make_can_msg("SCC12", 0, scc12_values))
 
   scc14_values = {
@@ -215,3 +212,14 @@ def create_frt_radar_opt(packer):
     "CF_FCA_Equip_Front_Radar": 1,
   }
   return packer.make_can_msg("FRT_RADAR11", 0, frt_radar11_values)
+
+
+def hyundai_rx_checksum(address: int, sig, dat: bytearray) -> int:
+  if address == 0x386:  # WHL_SPD11: bit count excluding the split counter and checksum
+    return (sum((byte & (0x3F if i % 2 else 0xFF)).bit_count() for i, byte in enumerate(dat)) ^ 9) & 0xF
+
+  # EMS16, TCS13, and SCC12 use a nibble sum, excluding the checksum nibble.
+  checksum_byte = 6 if address == 0x394 else 7
+  total = sum((byte >> 4) + (byte & 0xF) for byte in dat[:checksum_byte])
+  total += (dat[checksum_byte] & 0xF) if address == 0x421 else (dat[checksum_byte] >> 4)
+  return -total & 0xF

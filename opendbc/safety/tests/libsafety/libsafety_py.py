@@ -58,6 +58,22 @@ class CANPacket:
   pass
 
 ffi.cdef("""
+typedef struct {
+  const int addr;
+  const unsigned int bus;
+  const int len;
+  const uint32_t frequency;
+  const bool ignore_checksum;
+  const bool ignore_counter;
+  const uint8_t max_counter;
+  const bool ignore_quality_flag;
+} CanMsgCheck;
+
+int get_rx_checks_len(void);
+const CanMsgCheck *get_rx_check(int index, unsigned int msg_index);
+bool get_rx_check_checksum_valid(int index);
+int get_rx_check_wrong_counters(int index);
+
 bool safety_rx_hook(CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
 int safety_fwd_hook(int bus_num, int addr);

@@ -126,6 +126,9 @@ uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
   crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((address >> 0U) & 0xFFU)];
   crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((address >> 8U) & 0xFFU)];
 
+  if (len == 16) {
+    crc ^= 0x041dU;
+  }
   if (len == 24) {
     crc ^= 0x819dU;
   }

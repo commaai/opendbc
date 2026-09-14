@@ -13,6 +13,26 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
 
+int get_rx_checks_len(void) {
+  return current_safety_config.rx_checks_len;
+}
+
+const CanMsgCheck *get_rx_check(int index, unsigned int msg_index) {
+  if ((index < 0) || (index >= current_safety_config.rx_checks_len) || (msg_index >= MAX_ADDR_CHECK_MSGS)) {
+    return NULL;
+  }
+  const CanMsgCheck *msg = &current_safety_config.rx_checks[index].msg[msg_index];
+  return msg->addr != 0 ? msg : NULL;
+}
+
+bool get_rx_check_checksum_valid(int index) {
+  return current_safety_config.rx_checks[index].status.valid_checksum;
+}
+
+int get_rx_check_wrong_counters(int index) {
+  return current_safety_config.rx_checks[index].status.wrong_counters;
+}
+
 bool safety_config_valid() {
   if (current_safety_config.rx_checks_len <= 0) {
     printf("missing RX checks\n");

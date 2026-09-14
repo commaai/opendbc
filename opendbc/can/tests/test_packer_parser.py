@@ -47,6 +47,47 @@ class TestCanParserPacker(unittest.TestCase):
       parser.update([0, [msg]])
       assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == ((cnt + i) % 256)
 
+  def test_rivian_counter(self):
+    packer = CANPacker("rivian_primary_actuator")
+    parser = CANParser("rivian_primary_actuator", [("ESP_Status", 50)], 0)
+    state = parser.message_states[0x208]
+
+    # The four-bit counter wraps at 14, not 15.
+    for i in range(45):
+      msg = packer.make_can_msg("ESP_Status", 0, {})
+      assert 0x208 in parser.update((i + 1, [msg]))
+      self.assertEqual(parser.vl["ESP_Status"]["ESP_Status_Counter"], i % 15)
+      self.assertLess(state.counter_fail, 2)
+
+    # The reserved value is still encodable, but repeated invalid counters must reject.
+    for i in range(MAX_BAD_COUNTER):
+      msg = packer.make_can_msg("ESP_Status", 0, {"ESP_Status_Counter": 15})
+      updated = parser.update((46 + i, [msg]))
+    self.assertNotIn(0x208, updated)
+    self.assertEqual(state.counter_fail, MAX_BAD_COUNTER)
+
+    for i in range(1, MAX_BAD_COUNTER + 1):
+      msg = packer.make_can_msg("ESP_Status", 0, {"ESP_Status_Counter": i})
+      assert 0x208 in parser.update((60 + i, [msg]))
+      self.assertEqual(state.counter_fail, MAX_BAD_COUNTER - i)
+
+  def test_hyundai_split_counter_checksum(self):
+    packer = CANPacker("hyundai_can_generated")
+    parser = CANParser("hyundai_can_generated", [("WHL_SPD11", 50)], 0)
+    for counter in range(16):
+      address, dat, bus = packer.make_can_msg("WHL_SPD11", 0, {"COUNTER": counter, "WHL_SPD_FL": 20})
+      self.assertEqual((dat[1] >> 6) | ((dat[3] >> 6) << 2), counter)
+      assert address in parser.update((counter + 1, [(address, dat, bus)]))
+      self.assertEqual(parser.vl[address]["WHL_SPD_FL"], 20)
+      self.assertEqual(parser.vl[address]["WHL_SPD_AliveCounter_LSB"], counter & 3)
+      self.assertEqual(parser.vl[address]["WHL_SPD_AliveCounter_MSB"], counter >> 2)
+
+    # Both halves of the checksum must be validated.
+    for byte in (5, 7):
+      corrupted = bytearray(dat)
+      corrupted[byte] ^= 0x40
+      self.assertNotIn(address, parser.update((20 + byte, [(address, bytes(corrupted), bus)])))
+
   def test_parser_can_valid(self):
     msgs = [("CAN_FD_MESSAGE", 10), ]
     packer = CANPacker(TEST_DBC)

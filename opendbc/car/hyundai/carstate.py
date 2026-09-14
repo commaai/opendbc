@@ -310,7 +310,19 @@ class CarState(CarStateBase):
     if CP.flags & HyundaiFlags.CANFD:
       return self.get_can_parsers_canfd(CP)
 
-    return {
+    parsers = {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
     }
+    if CP.flags & HyundaiFlags.LEGACY:
+      # These vehicles do not have the WHL_SPD11/TCS13 counters and checksums.
+      for name in ("WHL_SPD11", "TCS13"):
+        parsers[Bus.pt]._add_message(name)
+        state = parsers[Bus.pt].message_states[parsers[Bus.pt].dbc.name_to_msg[name].address]
+        state.ignore_counter = True
+        state.ignore_checksum = True
+    if CP.carFingerprint == CAR.KIA_OPTIMA_H:
+      # This dashcam-only platform does not use the standard SCC12 checksum.
+      parsers[Bus.pt]._add_message("SCC12")
+      parsers[Bus.pt].message_states[0x421].ignore_checksum = True
+    return parsers
