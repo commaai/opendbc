@@ -22,7 +22,7 @@ DBC files for different models of the same brand have a lot of overlap. Therefor
     ```
     CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
     ```
-    is a comment that refers to signal `LONG_ACCEL` in message `490`. Using comments is highly recommended, especially for doubts and uncertainties. [cabana](https://commaai.github.io/cabana/?demo=1) can easily display/add/edit comments to signals and messages.
+    is a comment that refers to signal `LONG_ACCEL` in message `490`. Using comments is highly recommended, especially for doubts and uncertainties. [cabana]([https://commaai.github.io/cabana/?demo=1](https://github.com/commaai/openpilot/tree/master/openpilot/tools/cabana)) can easily display/add/edit comments to signals and messages.
 
 - Units: when applicable, it's recommended to convert signals into physical units, by using a proper signal factor. Using a SI unit is preferred, unless a non-SI unit rounds the signal factor much better.
 For example:
