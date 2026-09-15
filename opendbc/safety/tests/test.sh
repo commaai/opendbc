@@ -6,17 +6,23 @@ cd $DIR
 
 source ../../../setup.sh
 
-# reset coverage data and generate gcc note file
-rm -f ./libsafety/*.gcda
-scons -j$(nproc) -D
+# TODO: get UBSan and coverage without running the tests twice.
+# Run UBSan separately so its checks do not count as coverage branches.
+SAFETY_COVERAGE=0 python -m unittest discover -s .
+
+# reset coverage data, including metadata from previous builds
+rm -f ./libsafety/*.gcda ./libsafety/*.gcno
 
 # run safety tests and generate coverage data
-pytest -n8 --ignore-glob=misra/*
+SAFETY_COVERAGE=1 python -m unittest discover -s .
 
+# NOTE: we accept that these tools will have slight differences,
+# and in return, we get to use the stock toolchain instead of
+# installing LLVM on all users' machines
 if [ "$(uname)" = "Darwin" ]; then
-  GCOV_EXEC="/opt/homebrew/opt/llvm@18/bin/llvm-cov gcov"
+  GCOV_EXEC="llvm-cov gcov"
 else
-  GCOV_EXEC="llvm-cov-18 gcov"
+  GCOV_EXEC="gcov"
 fi
 
 # generate and open report

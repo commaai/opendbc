@@ -1,13 +1,11 @@
 import random
-from collections.abc import Iterable
-
-from hypothesis import settings, given, strategies as st
-from parameterized import parameterized
+import unittest
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes
 from opendbc.car.ford.fingerprints import FW_VERSIONS
+from opendbc.testing import fuzzy_test, parameterized
 
 Ecu = CarParams.Ecu
 
@@ -40,15 +38,15 @@ ECU_PART_NUMBER = {
 }
 
 
-class TestFordFW:
+class TestFordFW(unittest.TestCase):
   def test_fw_query_config(self):
     for (ecu, addr, subaddr) in FW_QUERY_CONFIG.extra_ecus:
       assert ecu in ECU_ADDRESSES, "Unknown ECU"
       assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
       assert subaddr is None, "Unexpected ECU subaddress"
 
-  @parameterized.expand(FW_VERSIONS.items())
-  def test_fw_versions(self, car_model: str, fw_versions: dict[tuple[int, int, int | None], Iterable[bytes]]):
+  @parameterized("car_model, fw_versions", FW_VERSIONS.items())
+  def test_fw_versions(self, car_model, fw_versions):
     for (ecu, addr, subaddr), fws in fw_versions.items():
       assert ecu in ECU_PART_NUMBER, "Unexpected ECU"
       assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"
@@ -66,13 +64,10 @@ class TestFordFW:
         codes = get_platform_codes([fw])
         assert 1 == len(codes), f"Unable to parse FW: {fw!r}"
 
-  @settings(max_examples=100)
-  @given(data=st.data())
-  def test_platform_codes_fuzzy_fw(self, data):
+  @fuzzy_test(max_examples=100)
+  def test_platform_codes_fuzzy_fw(self, fuzzy):
     """Ensure function doesn't raise an exception"""
-    fw_strategy = st.lists(st.binary())
-    fws = data.draw(fw_strategy)
-    get_platform_codes(fws)
+    get_platform_codes(fuzzy.list(fuzzy.binary))
 
   def test_platform_codes_spot_check(self):
     # Asserts basic platform code parsing behavior for a few cases

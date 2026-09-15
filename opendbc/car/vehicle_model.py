@@ -111,7 +111,7 @@ class VehicleModel:
       u: Speed [m/s]
 
     Returns:
-      Roll compensation curvature [rad]
+      Roll compensation curvature [1/m]
     """
     sf = calc_slip_factor(self)
 

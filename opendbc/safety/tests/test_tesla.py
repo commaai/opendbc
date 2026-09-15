@@ -456,5 +456,36 @@ class TestTeslaFSD14LongitudinalSafety(TestTeslaLongitudinalSafety):
   SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL | TeslaSafetyFlags.FSD_14
 
 
+class TestTeslaIgnition(unittest.TestCase):
+  TX_MSGS: list = []
+
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.init_tests()
+    self.packer = CANPackerSafety("tesla_model3_party")
+
+  def _msg(self, counter, state):
+    return self.packer.make_can_msg_safety("VCFRONT_LVPowerState", 0,
+                                           {"VCFRONT_LVPowerStateCounter": counter,
+                                            "VCFRONT_vehiclePowerState": state})
+
+  # VEHICLE_POWER_STATE_DRIVE=3 (counter-gated)
+  def test_ignition_on(self):
+    for i in range(16):
+      self.safety.init_tests()
+      self.safety.ignition_can_hook(self._msg(i, 3))
+      self.assertFalse(self.safety.get_ignition_can())
+      self.safety.ignition_can_hook(self._msg((i + 1) % 16, 3))
+      self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    self.safety.ignition_can_hook(self._msg(0, 3))
+    self.safety.ignition_can_hook(self._msg(1, 3))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(2, 2))
+    self.safety.ignition_can_hook(self._msg(3, 2))
+    self.assertFalse(self.safety.get_ignition_can())
+
+
 if __name__ == "__main__":
   unittest.main()

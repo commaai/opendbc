@@ -26,10 +26,12 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= SubaruFlags.SEND_INFOTAINMENT.value
 
     if ret.flags & SubaruFlags.PREGLOBAL:
-      ret.enableBsm = 0x25c in fingerprint[0]
+      if 0x25c in fingerprint[0]:
+        ret.flags |= SubaruFlags.HAS_BSM.value
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaruPreglobal)]
     else:
-      ret.enableBsm = 0x228 in fingerprint[0]
+      if 0x228 in fingerprint[0]:
+        ret.flags |= SubaruFlags.HAS_BSM.value
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaru)]
       if ret.flags & SubaruFlags.GLOBAL_GEN2:
         ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.GEN2.value
@@ -37,12 +39,13 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.1
 
-    if ret.flags & SubaruFlags.LKAS_ANGLE:
-      ret.steerControlType = structs.CarParams.SteerControlType.angle
-    else:
+    if not (ret.flags & SubaruFlags.LKAS_ANGLE):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
-    if candidate in (CAR.SUBARU_ASCENT, CAR.SUBARU_ASCENT_2023):
+    if ret.flags & SubaruFlags.LKAS_ANGLE:
+      ret.steerControlType = structs.CarParams.SteerControlType.angle
+
+    elif candidate == CAR.SUBARU_ASCENT:
       ret.steerActuatorDelay = 0.3  # end-to-end angle controller
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kf = 0.00003
@@ -65,13 +68,13 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_CROSSTREK_HYBRID:
       ret.steerActuatorDelay = 0.1
 
-    elif candidate in (CAR.SUBARU_FORESTER, CAR.SUBARU_FORESTER_2022, CAR.SUBARU_FORESTER_HYBRID):
+    elif candidate in (CAR.SUBARU_FORESTER, CAR.SUBARU_FORESTER_HYBRID):
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kf = 0.000038
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 14., 23.], [0., 14., 23.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.01, 0.065, 0.2], [0.001, 0.015, 0.025]]
 
-    elif candidate in (CAR.SUBARU_OUTBACK, CAR.SUBARU_LEGACY, CAR.SUBARU_OUTBACK_2023):
+    elif candidate in (CAR.SUBARU_OUTBACK, CAR.SUBARU_LEGACY):
       ret.steerActuatorDelay = 0.1
 
     elif candidate in (CAR.SUBARU_FORESTER_PREGLOBAL, CAR.SUBARU_OUTBACK_PREGLOBAL_2018):
@@ -86,8 +89,9 @@ class CarInterface(CarInterfaceBase):
     else:
       raise ValueError(f"unknown car: {candidate}")
 
-    ret.alphaLongitudinalAvailable = not (ret.flags & (SubaruFlags.GLOBAL_GEN2 | SubaruFlags.PREGLOBAL |
-                                                       SubaruFlags.LKAS_ANGLE | SubaruFlags.HYBRID))
+    # TODO: the longitudinal limits need to be speed-dependent, so alpha long is disabled for now
+    # revert this in the PR that re-enables Subaru longitudinal: https://github.com/commaai/opendbc/pull/3689
+    ret.alphaLongitudinalAvailable = False
     ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
 
     if ret.flags & SubaruFlags.GLOBAL_GEN2 and ret.openpilotLongitudinalControl:

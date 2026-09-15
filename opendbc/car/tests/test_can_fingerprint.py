@@ -1,11 +1,12 @@
-import pytest
+import unittest
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint
 from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
+from opendbc.testing import parameterized
 
 
-class TestCanFingerprint:
-  @pytest.mark.parametrize("car_model, fingerprints", FINGERPRINTS.items())
+class TestCanFingerprint(unittest.TestCase):
+  @parameterized("car_model, fingerprints", FINGERPRINTS.items())
   def test_can_fingerprint(self, car_model, fingerprints):
     """Tests online fingerprinting function on offline fingerprints"""
 
@@ -21,7 +22,7 @@ class TestCanFingerprint:
       assert finger[1] == fingerprint
       assert finger[2] == {}
 
-  def test_timing(self, subtests):
+  def test_timing(self):
     # just pick any CAN fingerprinting car
     car_model = "CHEVROLET_BOLT_EUV"
     fingerprint = FINGERPRINTS[car_model][0]
@@ -42,7 +43,7 @@ class TestCanFingerprint:
     cases.append((FRAME_FINGERPRINT * 2, None, can))
 
     for expected_frames, car_model, can in cases:
-      with subtests.test(expected_frames=expected_frames, car_model=car_model):
+      with self.subTest(expected_frames=expected_frames, car_model=car_model):
         frames = 0
 
         def can_recv(**kwargs):

@@ -228,5 +228,28 @@ class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVS
   pass
 
 
+class TestGmIgnition(unittest.TestCase):
+  TX_MSGS: list = []
+
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.init_tests()
+    self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
+
+  def _msg(self, mode):
+    return self.packer.make_can_msg_safety("BCMGeneralPlatformStatus", 0, {"SystemPowerMode": mode})
+
+  # SystemPowerMode 2=Run, 3=Crank Request
+  def test_ignition_on(self):
+    self.safety.ignition_can_hook(self._msg(2))
+    self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    self.safety.ignition_can_hook(self._msg(2))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0))
+    self.assertFalse(self.safety.get_ignition_can())
+
+
 if __name__ == "__main__":
   unittest.main()
