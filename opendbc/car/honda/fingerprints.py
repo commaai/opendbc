@@ -249,6 +249,7 @@ FW_VERSIONS = {
     ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-TBA-A060\x00\x00',
+      b'77959-TBF-A030\x00\x00',
       b'77959-TBG-A050\x00\x00',
       b'77959-TBJ-A030\x00\x00',
       b'77959-TEA-G020\x00\x00',
@@ -266,6 +267,7 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36802-TBA-A150\x00\x00',
       b'36802-TBA-A160\x00\x00',
+      b'36802-TBJ-A020\x00\x00',
       b'36802-TFJ-G060\x00\x00',
       b'36802-TGG-A050\x00\x00',
       b'36802-TGG-A060\x00\x00',
