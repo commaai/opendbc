@@ -1,0 +1,23 @@
+{
+  "format": "RX-only live CAN, 10 allowlisted messages, timestamps relative to window start; no VIN, diagnostics, location or session metadata. Payloads are unchanged.",
+  "captures": [
+    {
+      "file": "stationary.csv",
+      "source_session": "learn-20260811T170039Z-e1fe3ff3",
+      "source_sha256": "7896b885c5f0bd7643a928fa4cef72771fc0ecb36a4fc984ddd46a89b7adca2d",
+      "source_start_us": 1514235,
+      "duration_us": 2000000,
+      "frames": 1120,
+      "fixture_sha256": "7cc30050d9f54e75ebd3d1ed781e41ce4868cfeba603ad13fd708a3deadc4010"
+    },
+    {
+      "file": "moving.csv",
+      "source_session": "learn-20260822T183431Z-34fe1801",
+      "source_sha256": "0aae0913f50e1df156b823215c83b45c111bca3af278194ef97d0422b2a3d45a",
+      "source_start_us": 1560482,
+      "duration_us": 2000000,
+      "frames": 1140,
+      "fixture_sha256": "48aada653dca7e9eb5c1cca466807505b2874c5b7cba3904bd52ea0977fda392"
+    }
+  ]
+}

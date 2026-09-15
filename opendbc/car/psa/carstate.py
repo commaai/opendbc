@@ -1,13 +1,16 @@
 from opendbc.car import structs, Bus
 from opendbc.can.parser import CANParser
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.psa.values import DBC, CarControllerParams
+from opendbc.car.psa.values import CAR, DBC, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
 
 GearShifter = structs.CarState.GearShifter
 
 class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
+    if self.CP.carFingerprint == CAR.PSA_PEUGEOT_308_T9:
+      return self._update_t9(can_parsers[Bus.main])
+
     cp = can_parsers[Bus.main]
     cp_adas = can_parsers[Bus.adas]
     cp_cam = can_parsers[Bus.cam]
@@ -62,8 +65,70 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = cp_cam.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
     return ret
 
+  def _update_t9(self, cp) -> structs.CarState:
+    ret = structs.CarState()
+    self.parse_wheel_speeds(ret,
+      cp.vl['T9_WHEEL_SPEEDS_30D']['WheelSpeedFrontLeftKph'],
+      cp.vl['T9_WHEEL_SPEEDS_30D']['WheelSpeedFrontRightKph'],
+      cp.vl['T9_WHEEL_SPEEDS_30D']['WheelSpeedRearLeftKph'],
+      cp.vl['T9_WHEEL_SPEEDS_30D']['WheelSpeedRearRightKph'],
+    )
+    ret.standstill = ret.vEgoRaw < 0.1
+    ret.yawRate = cp.vl['T9_BRAKE_DYNAMICS_3CD']['YawRateDegS'] * CV.DEG_TO_RAD
+    ret.gasPressed = cp.vl['T9_ENGINE_DYNAMICS_208']['AcceleratorPositionPct'] > 0
+    ret.brakePressed = bool(cp.vl['T9_BODY_STATUS_412']['BrakePedalActive'])
+    # The 0x412 parking-brake bit never became active in the local corpus.
+    ret.parkingBrake = cp.vl['T9_EASY_MOVE_3AD']['ParkingBrakeState'] == 1
+
+    ret.steeringAngleDeg = cp.vl['T9_STEERING_DYNAMICS_305']['SteeringAngleDeg']
+    rate = cp.vl['T9_STEERING_DYNAMICS_305']['SteeringRateMagnitudeDegS']
+    rate_sign = cp.vl['T9_STEERING_DYNAMICS_305']['SteeringRateSign']
+    ret.steeringRateDeg = rate * (1 if rate_sign == 0 else -1)
+    ret.steeringTorque = cp.vl['T9_STEERING_TORQUE_2F5']['DriverTorqueRaw']
+    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.T9_STEER_DRIVER_THRESHOLD_RAW, 5)
+
+    # 0x208 carries the persistent RVV state; 0x452 carries a request, not a latch.
+    cruise_mode = cp.vl['T9_CRUISE_SETPOINT_50E']['CruiseMode']
+    ret.cruiseState.available = cruise_mode == 1
+    ret.cruiseState.enabled = cruise_mode == 1 and cp.vl['T9_ENGINE_DYNAMICS_208']['CruiseStateCandidate'] == 2
+    setpoint = cp.vl['T9_CRUISE_SETPOINT_50E']['CruiseSetpointKph']
+    ret.cruiseState.speed = setpoint * CV.KPH_TO_MS if cruise_mode == 1 and setpoint < 255 else 0.
+    # Only the conventional-cruise reference vehicle is covered.
+    ret.cruiseState.nonAdaptive = True
+
+    reverse = bool(cp.vl['T9_BODY_STATUS_412']['ReverseGearActive'])
+    # The candidate gear field in 0x348 stays zero even in the moving capture.
+    # Only the independent reverse indication is used until gear is validated.
+    ret.gearShifter = GearShifter.reverse if reverse else GearShifter.unknown
+
+    blinker = cp.vl['T9_DRIVER_CRUISE_COMMAND_452']['TurnSignalStatus']
+    ret.leftBlinker = blinker in (2, 3)
+    ret.rightBlinker = blinker in (1, 3)
+    ret.doorOpen = any(cp.vl['T9_BODY_STATUS_412'][signal] for signal in (
+      'DriverDoorOpen', 'PassengerDoorOpen', 'RearLeftDoorOpen', 'RearRightDoorOpen',
+    ))
+    ret.seatbeltUnlatched = cp.vl['T9_RESTRAINTS_572']['DriverSeatbeltState'] != 2
+    return ret
+
   @staticmethod
   def get_can_parsers(CP):
+    if CP.carFingerprint == CAR.PSA_PEUGEOT_308_T9:
+      # Only the observed live CAN stream is mapped to logical bus 0.
+      # A split camera/powertrain harness topology has not been validated.
+      messages = [
+        ('T9_ENGINE_DYNAMICS_208', 100),
+        ('T9_STEERING_TORQUE_2F5', 100),
+        ('T9_STEERING_DYNAMICS_305', 100),
+        ('T9_WHEEL_SPEEDS_30D', 50),
+        ('T9_EASY_MOVE_3AD', 50),
+        ('T9_BRAKE_DYNAMICS_3CD', 100),
+        ('T9_BODY_STATUS_412', 20),
+        ('T9_DRIVER_CRUISE_COMMAND_452', 20),
+        ('T9_CRUISE_SETPOINT_50E', 10),
+        ('T9_RESTRAINTS_572', 10),
+      ]
+      return {Bus.main: CANParser(DBC[CP.carFingerprint][Bus.pt], messages, 0)}
+
     return {
       Bus.main: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
       Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 1),

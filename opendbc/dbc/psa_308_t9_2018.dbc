@@ -1,0 +1,89 @@
+VERSION "Peugeot 308 T9 2018 - passive CarState subset"
+
+NS_ :
+	CM_
+	VAL_
+
+BS_:
+
+BU_: ENGINE ABS_ESP BSI STEERING Vector__XXX
+
+BO_ 520 T9_ENGINE_DYNAMICS_208: 8 ENGINE
+ SG_ AcceleratorPositionPct : 24|8@1+ (0.5,0) [0|100] "%" Vector__XXX
+ SG_ CruiseStateCandidate : 34|2@1+ (1,0) [0|3] "state" Vector__XXX
+
+BO_ 757 T9_STEERING_TORQUE_2F5: 7 STEERING
+ SG_ COUNTER : 3|4@0+ (1,0) [0|15] "raw" Vector__XXX
+ SG_ CHECKSUM : 7|4@0+ (1,0) [0|15] "raw" Vector__XXX
+ SG_ DriverTorqueRaw : 15|8@0- (1,0) [-128|127] "raw" Vector__XXX
+
+BO_ 773 T9_STEERING_DYNAMICS_305: 7 STEERING
+ SG_ SteeringAngleDeg : 7|16@0- (0.1,0) [-1080|1080] "deg" Vector__XXX
+ SG_ SteeringRateMagnitudeDegS : 23|8@0+ (1,0) [0|255] "deg/s" Vector__XXX
+ SG_ SteeringRateSign : 31|1@0+ (1,0) [0|1] "state" Vector__XXX
+
+BO_ 781 T9_WHEEL_SPEEDS_30D: 8 ABS_ESP
+ SG_ WheelSpeedFrontLeftKph : 7|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ WheelSpeedFrontRightKph : 23|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ WheelSpeedRearLeftKph : 39|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ WheelSpeedRearRightKph : 55|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+
+BO_ 941 T9_EASY_MOVE_3AD: 8 ABS_ESP
+ SG_ ParkingBrakeState : 24|3@1+ (1,0) [0|3] "state" Vector__XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "raw" Vector__XXX
+ SG_ COUNTER : 63|4@0+ (1,0) [0|15] "raw" Vector__XXX
+
+BO_ 973 T9_BRAKE_DYNAMICS_3CD: 8 ABS_ESP
+ SG_ YawRateDegS : 23|16@0- (0.1,0) [-3276.8|3276.7] "deg/s" Vector__XXX
+ SG_ CHECKSUM : 63|4@0+ (1,0) [0|15] "raw" Vector__XXX
+ SG_ COUNTER : 59|4@0+ (1,0) [0|15] "raw" Vector__XXX
+
+BO_ 1042 T9_BODY_STATUS_412: 8 BSI
+ SG_ ReverseGearActive : 2|1@1+ (1,0) [0|1] "state" Vector__XXX
+ SG_ BrakePedalActive : 5|1@1+ (1,0) [0|1] "state" Vector__XXX
+ SG_ DriverDoorOpen : 51|1@0+ (1,0) [0|1] "state" Vector__XXX
+ SG_ PassengerDoorOpen : 52|1@0+ (1,0) [0|1] "state" Vector__XXX
+ SG_ RearLeftDoorOpen : 53|1@1+ (1,0) [0|1] "state" Vector__XXX
+ SG_ RearRightDoorOpen : 54|1@1+ (1,0) [0|1] "state" Vector__XXX
+
+BO_ 1106 T9_DRIVER_CRUISE_COMMAND_452: 6 BSI
+ SG_ TurnSignalStatus : 5|2@0+ (1,0) [0|3] "state" Vector__XXX
+
+BO_ 1294 T9_CRUISE_SETPOINT_50E: 8 BSI
+ SG_ CruiseSetpointKph : 48|8@1+ (1,0) [0|255] "km/h" Vector__XXX
+ SG_ CruiseMode : 61|2@1+ (1,0) [0|3] "state" Vector__XXX
+
+BO_ 1394 T9_RESTRAINTS_572: 8 BSI
+ SG_ DriverSeatbeltState : 7|2@0+ (1,0) [0|3] "state" Vector__XXX
+
+CM_ "Receive-only subset from local T9 captures. Signal layouts partly derived from commaai/opendbc psa_aee2010_r3.dbc revision a0febba355168a5cb6168b535144c8c41a5ce323, Copyright (c) 2020 Comma.ai, Inc., MIT License.";
+CM_ SG_ 520 AcceleratorPositionPct "Validated against the independent 0x228 accelerator channel.";
+CM_ SG_ 520 CruiseStateCandidate "Vehicle-observed state. Active is derived as raw value 2; it is not an official PSA enum.";
+CM_ BO_ 757 "Steering torque frame protection was validated over 933226 local frames: checksum in byte 0 high nibble, rolling counter in byte 0 low nibble, CHK_INI=0xB, zero mismatches.";
+CM_ SG_ 757 DriverTorqueRaw "Direction and dynamics validated on the vehicle. No physical Nm scale has been established, therefore the unit remains raw.";
+CM_ SG_ 773 SteeringAngleDeg "Scale and direction validated on the vehicle.";
+CM_ SG_ 773 SteeringRateMagnitudeDegS "Validated rate magnitude. Signed steering rate must be derived using SteeringRateSign: sign 1 means negative in the local replay.";
+CM_ BO_ 781 "All four wheel speeds validated together over a road capture; mean inter-wheel spread 0.86 km/h.";
+CM_ BO_ 941 "ESP EasyMove frame. ParkingBrakeState and frame protection are source-confirmed and locally observed. CHECKSUM/COUNTER: 480554 frames, CHK_INI=0xD, zero mismatches.";
+CM_ SG_ 941 ParkingBrakeState "Observed counts over the checksum-valid corpus: state 0=405148, 1=74389, 2=496, 3=521. Source semantics confirm 0 released, 1 applied and 3 actuator moving; state 2 remains reserved/transition.";
+CM_ SG_ 973 YawRateDegS "Scale and direction validated against steering and wheel-speed differential.";
+CM_ BO_ 973 "Brake dynamics protection was checked over 961914 local frames with CHK_INI=0x3; 961913 passed and one isolated frame was a corrupt/outlier.";
+CM_ SG_ 1042 DriverDoorOpen "Source-confirmed at Dat_BSI.DRIVER_DOOR (byte 6 mask 0x08). Both closed and open states were observed locally; five learn sessions contain transitions.";
+CM_ SG_ 1042 RearLeftDoorOpen "Undocumented byte 6 mask 0x20, confirmed by repeated closed-open-closed tests on the rear-left door.";
+CM_ SG_ 1042 RearRightDoorOpen "Undocumented byte 6 mask 0x40, confirmed by repeated closed-open-closed tests on the rear-right door.";
+CM_ SG_ 1294 CruiseSetpointKph "Confirmed over five cruise engagements in four independent tests. Raw 255 means inactive/unavailable.";
+CM_ SG_ 1294 CruiseMode "Validated during learn-20260805T065418Z-fca10a57: the selector sequence cruise-off-limiter-off-cruise produced 1-0-2-0-1.";
+CM_ SG_ 1394 DriverSeatbeltState "Vehicle-validated on learn-20260805T154951Z-57acfc99 at standstill: 2-1-2-1-2 while DriverDoorOpen and ParkingBrakeActive stayed false. Seven local sessions contain 1/2 transitions; road captures support 1=unlatched and 2=latched. Values 0 and 3 remain reserved/unknown.";
+VAL_ 520 CruiseStateCandidate 0 "Inactive_observed" 2 "Active_observed" 3 "Transient_observed";
+VAL_ 773 SteeringRateSign 0 "Positive_local_replay" 1 "Negative_local_replay";
+VAL_ 1042 ReverseGearActive 0 "Inactive" 1 "Active";
+VAL_ 1042 BrakePedalActive 0 "Released" 1 "Pressed";
+VAL_ 1042 DriverDoorOpen 0 "Closed" 1 "Open";
+VAL_ 1042 PassengerDoorOpen 0 "Closed" 1 "Open";
+VAL_ 1042 RearLeftDoorOpen 0 "Closed" 1 "Open";
+VAL_ 1042 RearRightDoorOpen 0 "Closed" 1 "Open";
+VAL_ 941 ParkingBrakeState 0 "Released" 1 "Applied" 2 "Reserved_or_transition" 3 "Actuator_moving";
+VAL_ 1106 TurnSignalStatus 0 "Off" 1 "Right" 2 "Left" 3 "Hazard";
+VAL_ 1294 CruiseSetpointKph 255 "Inactive_or_unavailable";
+VAL_ 1294 CruiseMode 0 "Off" 1 "Cruise_RVV" 2 "Limiter_LVV" 3 "Reserved";
+VAL_ 1394 DriverSeatbeltState 0 "Unknown_or_reserved" 1 "Unlatched" 2 "Latched" 3 "Unknown_or_reserved";
