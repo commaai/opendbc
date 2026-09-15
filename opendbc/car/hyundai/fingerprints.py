@@ -814,6 +814,17 @@ FW_VERSIONS = {
       b'\xf1\x00DEhe SCC FHCUP      1.00 1.01 99110-G5000         ',
     ],
   },
+  CAR.KIA_NIRO_PLUS_EV: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00DEev SCC FHCUP      1.00 1.00 99110-Q4510         ',
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00DE  MDPS C 1.00 1.06 56310Q4200\x00 4DEEC106',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00DEE MFC  AT KOR LHD 1.00 1.00 99211-DB100 211206',
+    ],
+  },
   CAR.KIA_SELTOS: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00SP2_ SCC FHCUP      1.01 1.05 99110-Q5100         ',
