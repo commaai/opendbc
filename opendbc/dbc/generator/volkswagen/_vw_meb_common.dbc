@@ -445,7 +445,7 @@ BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Same_Lane_02_ObjectID : 34|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
  SG_ Left_Lane_02_ObjectID : 40|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
  SG_ Right_Lane_02_ObjectID : 46|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
- SG_ Unknown_02 : 52|2@1+ (1,0) [0|3] "" XXX
+ SG_ Steering_Wheel_Side : 52|2@1+ (1,0) [0|3] "" XXX
  SG_ Unknown_03 : 54|10@1+ (1,0) [0|3] "" XXX
  SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.0625,-3.75) [0|300] "Unit_Meter" XXX
  SG_ Same_Lane_01_Lat_Distance : 76|10@1+ (0.065,-33.28) [-50|50] "Unit_Meter" XXX
@@ -1945,6 +1945,7 @@ BO_ 316495015 VZE_04: 32 XXX
  SG_ VZE_Verkehrszeichen_4 : 75|8@1+ (1,0) [0|31] "" XXX
  SG_ VZE_Verkehrszeichen_6 : 92|7@1+ (1,0) [0|7] "" XXX
  SG_ VZE_Baustelle : 110|1@0+ (1,0) [0|1] "" XXX
+ SG_ Traffic_Side : 206|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 316495049 SAL_01: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
@@ -2218,6 +2219,7 @@ VAL_ 496 STP_Primaeranz 0 "keine_Anzeige" 1 "Verfuegbar" 2 "Aktiv" 3 "Uebernahme
 VAL_ 496 EA_Bremslichtblinken 0 "kein_Blinken" 1 "Anforderung_Bremslichtblinken";
 VAL_ 496 EA_Blinken 0 "Kein_Blinken" 1 "Wechselblinken_links" 2 "Wechselblinken_rechts" 3 "Warnblinken" 4 "Warnblinken_Taster";
 VAL_ 591 Distance_Status 0 "Valid" 3 "Invalid";
+VAL_ 591 Steering_Wheel_Side 0 "Unavailable" 1 "Right_Hand_Drive" 2 "Left_Hand_Drive" 3 "Invalid";
 VAL_ 619 Travel_Assist_Status 4 "enabled" 0 "disabled" 2 "ready" 3 "pre_ready";
 VAL_ 619 Travel_Assist_Request 4 "enable" 3 "disable" 0 "no_request" 1 "error";
 VAL_ 619 Travel_Assist_Available 0 "not_available" 1 "available";
@@ -3313,6 +3315,7 @@ VAL_ 1714 Kombi_02_alt 0 "aktuell" 1 "veraltet";
 VAL_ 1714 Uhrzeit_01_alt 0 "aktuell" 1 "veraltet";
 VAL_ 441800114 Temperature_Status_Charge 0 "init" 1 "temp under optimal" 2 "temp optimal" 3 "temp over optimal" 7 "fault";
 VAL_ 316495015 VZE_Anzeigemodus 0 "EU_RDW" 1 "USA" 2 "Canada" 3 "China";
+VAL_ 316495015 Traffic_Side 0 "Unavailable" 1 "Left_Hand_Traffic" 2 "Right_Hand_Traffic" 3 "Invalid";
 VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_3 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
 VAL_ 316495015 VZE_Anzeigeunterdrueck_Zeichen_2 0 "anzeigerelevant" 1 "nicht_anzeigerelevant";
 VAL_ 316495015 VZE_Verkehrszeichen_1 0 "kein_Verkehrszeichen" 520 "Unbegrenzt";
