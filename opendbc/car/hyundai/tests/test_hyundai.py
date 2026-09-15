@@ -6,7 +6,7 @@ from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
-from opendbc.car.hyundai.values import CAR, DATE_FW_ECUS, FW_QUERY_CONFIG, CANFD_FUZZY_WHITELIST, \
+from opendbc.car.hyundai.values import CAR, CarControllerParams, DATE_FW_ECUS, FW_QUERY_CONFIG, CANFD_FUZZY_WHITELIST, \
                                          PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
                                          HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
@@ -75,6 +75,25 @@ class TestHyundaiFingerprint(unittest.TestCase):
     for car_model in CAR:
       CP = CarInterface.get_params(car_model, fingerprint, [], False, False, False)
       assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.ALT_LIMITS)
+
+  def test_niro_phev_2020_features(self):
+    fingerprint = gen_empty_fingerprint()
+    older = CarInterface.get_params(CAR.KIA_NIRO_PHEV, fingerprint, [], True, False, False)
+    premium_2020 = CarInterface.get_params(CAR.KIA_NIRO_PHEV_2020, fingerprint, [], True, False, False)
+
+    assert older.flags & HyundaiFlags.UNSUPPORTED_LONGITUDINAL
+    assert older.flags & HyundaiFlags.MIN_STEER_32_MPH
+    assert older.minSteerSpeed > 10.
+    assert not older.alphaLongitudinalAvailable
+
+    assert not premium_2020.flags & HyundaiFlags.UNSUPPORTED_LONGITUDINAL
+    assert not premium_2020.flags & HyundaiFlags.MIN_STEER_32_MPH
+    assert premium_2020.minSteerSpeed == 0.
+    assert premium_2020.alphaLongitudinalAvailable
+    assert premium_2020.openpilotLongitudinalControl
+
+    assert CarControllerParams(older).STEER_MAX == 255
+    assert CarControllerParams(premium_2020).STEER_MAX == 255
 
   def test_can_features(self):
     for car_model in CAR:
