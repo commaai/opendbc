@@ -1,12 +1,14 @@
-from opendbc.car import get_safety_config, structs
+from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.volkswagen.carcontroller import CarController
 from opendbc.car.volkswagen.carstate import CarState
-from opendbc.car.volkswagen.values import CanBus, CAR, NetworkLocation, TransmissionType, VolkswagenFlags, VolkswagenSafetyFlags
+from opendbc.car.volkswagen.radar_interface import RadarInterface
+from opendbc.car.volkswagen.values import CanBus, CAR, DBC, NetworkLocation, TransmissionType, VolkswagenFlags, VolkswagenSafetyFlags
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
+  RadarInterface = RadarInterface
 
   DRIVABLE_GEARS = (structs.CarState.GearShifter.eco, structs.CarState.GearShifter.sport,
                     structs.CarState.GearShifter.manumatic)
@@ -14,12 +16,13 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "volkswagen"
-    ret.radarUnavailable = True
+    ret.radarUnavailable = Bus.radar not in DBC[candidate]
 
     if ret.flags & VolkswagenFlags.PQ:
       # Set global PQ35/PQ46/NMS parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenPq)]
-      ret.enableBsm = 0x3BA in fingerprint[0]  # SWA_1
+      if 0x3BA in fingerprint[0]:  # SWA_1
+        ret.flags |= VolkswagenFlags.HAS_BSM.value
 
       if 0x440 in fingerprint[0] or docs:  # Getriebe_1
         ret.transmissionType = TransmissionType.automatic
@@ -36,14 +39,50 @@ class CarInterface(CarInterfaceBase):
     elif ret.flags & VolkswagenFlags.MLB:
       # Set global MLB parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMlb)]
-      ret.enableBsm = 0x30F in fingerprint[0]  # SWA_01
+      if 0x30F in fingerprint[0]:  # SWA_01
+        ret.flags |= VolkswagenFlags.HAS_BSM.value
       ret.networkLocation = NetworkLocation.gateway
       ret.dashcamOnly = is_release  # Release support needs HCA timeout fix, safety validation, revised J533 harness
+
+    elif ret.flags & VolkswagenFlags.MEB:
+      # Set global MEB parameters
+      safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
+      if ret.flags & VolkswagenFlags.MEB_GEN2:
+        safety_configs[0].safetyParam |= VolkswagenSafetyFlags.MEB_ALT_CRC.value
+
+      ret.transmissionType = TransmissionType.direct
+      ret.steerControlType = structs.CarParams.SteerControlType.curvature
+      ret.steerAtStandstill = True
+
+      ret.lateralTuning.init('pid')
+      ret.lateralTuning.pid.kpBP = [10., 40.]
+      ret.lateralTuning.pid.kpV = [0., 1.45]
+      ret.lateralTuning.pid.kiBP = [10., 40.]
+      ret.lateralTuning.pid.kiV = [0., 0.12]
+      ret.lateralTuning.pid.kf = 1.
+
+      if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, QFK_01
+        ret.networkLocation = NetworkLocation.gateway
+      else:
+        ret.networkLocation = NetworkLocation.fwdCamera
+        ret.radarUnavailable = True
+
+      if 0x24C in fingerprint[0]:  # MEB_Side_Assist_01
+        ret.flags |= VolkswagenFlags.HAS_BSM.value
+
+      if 0x25D in fingerprint[0]:  # KLR_01
+        ret.flags |= VolkswagenFlags.STOCK_KLR_PRESENT.value
+      if 0x3DC in fingerprint[0]:  # Gateway_73
+        ret.flags |= VolkswagenFlags.ALT_GEAR.value
+
+      # only allow gateway harness to escalate Emergency Assist
+      ret.dashcamOnly = ret.networkLocation == NetworkLocation.fwdCamera and not docs
 
     else:
       # Set global MQB parameters
       safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagen)]
-      ret.enableBsm = 0x30F in fingerprint[0]  # SWA_01
+      if 0x30F in fingerprint[0]:  # SWA_01
+        ret.flags |= VolkswagenFlags.HAS_BSM.value
 
       if 0xAD in fingerprint[0] or docs:  # Getriebe_11
         ret.transmissionType = TransmissionType.automatic
@@ -68,6 +107,8 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & VolkswagenFlags.PQ or ret.flags & VolkswagenFlags.MLB:
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+    elif ret.flags & VolkswagenFlags.MEB:
+      ret.steerActuatorDelay = 0.3
     else:
       ret.steerActuatorDelay = 0.1
       ret.lateralTuning.pid.kpBP = [0.]
@@ -78,13 +119,16 @@ class CarInterface(CarInterfaceBase):
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
-    ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
-    if alpha_long:
-      # Proof-of-concept, prep for E2E only. No radar points available. Panda ALLOW_DEBUG firmware required.
+    if ret.flags & VolkswagenFlags.MEB:
       ret.openpilotLongitudinalControl = True
-      safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
-      if ret.transmissionType == TransmissionType.manual:
-        ret.minEnableSpeed = 4.5
+      ret.longitudinalActuatorDelay = 0.3
+    else:
+      ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
+      if alpha_long:
+        ret.openpilotLongitudinalControl = True
+        safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value
+        if ret.transmissionType == TransmissionType.manual:
+          ret.minEnableSpeed = 4.5
 
     # Per-vehicle overrides
 
@@ -93,8 +137,6 @@ class CarInterface(CarInterfaceBase):
 
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     ret.stopAccel = -0.55
-    ret.vEgoStarting = 0.1
-    ret.vEgoStopping = 0.5
     ret.autoResumeSng = ret.minEnableSpeed == -1
 
     CAN = CanBus(fingerprint=fingerprint)

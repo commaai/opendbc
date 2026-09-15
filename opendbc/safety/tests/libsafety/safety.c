@@ -13,10 +13,6 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
 
-void safety_tick_current_safety_config() {
-  safety_tick(&current_safety_config);
-}
-
 bool safety_config_valid() {
   if (current_safety_config.rx_checks_len <= 0) {
     printf("missing RX checks\n");
@@ -175,6 +171,27 @@ int get_angle_meas_min(void){
 
 int get_angle_meas_max(void){
   return angle_meas.max;
+}
+
+void set_desired_curvature_last(int t){
+  curvature_state.desired_last = t;
+}
+
+int get_desired_curvature_last(void){
+  return curvature_state.desired_last;
+}
+
+void set_curvature_meas(int min, int max){
+  curvature_state.meas.min = min;
+  curvature_state.meas.max = max;
+}
+
+int get_curvature_meas_min(void){
+  return curvature_state.meas.min;
+}
+
+int get_curvature_meas_max(void){
+  return curvature_state.meas.max;
 }
 
 

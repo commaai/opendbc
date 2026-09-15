@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 import random
+import re
 import time
 from collections import defaultdict
 
@@ -105,6 +106,14 @@ class TestFwFingerprint(unittest.TestCase):
             duplicates = {fw for fw in ecu_fw if ecu_fw.count(fw) > 1}
             assert not len(duplicates), f'{car_model}: Duplicate FW versions: Ecu.{ecu[0]}, {duplicates}'
             assert len(ecu_fw) > 0, f'{car_model}: No FW versions: Ecu.{ecu[0]}'
+
+  def test_fw_version_format(self):
+    for brand, config in FW_QUERY_CONFIGS.items():
+      for car_model, ecus in VERSIONS[brand].items():
+        for ecu, fw_versions in ecus.items():
+          for fw in fw_versions:
+            with self.subTest(brand=brand, car_model=car_model.value, ecu=ecu, fw=fw):
+              assert re.fullmatch(config.fw_version_regex, fw) is not None, fw
 
   def test_all_addrs_map_to_one_ecu(self):
     for brand, cars in VERSIONS.items():
@@ -232,7 +241,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
     return self.total_time / self.N
 
   def _assert_timing(self, avg_time, ref_time):
-    assert avg_time < ref_time + self.TOL
+    assert avg_time < ref_time + self.TOL, avg_time
     assert avg_time > ref_time - self.TOL, "Performance seems to have improved, update test refs."
 
   def test_startup_timing(self):
@@ -262,7 +271,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
         print(f'get_vin {name} case, query time={self.total_time / self.N} seconds')
 
   def test_fw_query_timing(self):
-    total_ref_time = 7.4
+    total_ref_time = 8.3
     brand_ref_times = {
       'gm': 1.0,
       'body': 0.1,
@@ -271,13 +280,14 @@ class TestFwFingerprintTiming(unittest.TestCase):
       'honda': 0.45,
       'hyundai': 0.65,
       'mazda': 0.1,
-      'nissan': 0.8,
+      'nissan': 1.6,
       'subaru': 0.65,
       'tesla': 0.1,
       'toyota': 0.7,
       'volkswagen': 0.65,
       'rivian': 0.3,
       'psa': 0.1,
+      'mg': 0.1,
     }
 
     total_times = 0.0

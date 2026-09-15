@@ -327,6 +327,15 @@ class TestHondaNidecSafetyBase(HondaBase):
             send = brake == 0
           self.assertEqual(send, self._tx(self._send_brake_msg(brake)))
 
+  def test_block_aeb(self):
+    for controls_allowed in [True, False]:
+      self.safety.set_controls_allowed(controls_allowed)
+      for aeb_signals in ({"AEB_REQ_1": 1}, {"AEB_REQ_2": 1}, {"AEB_STATUS": 1}):
+        values = {"COMPUTER_BRAKE": 0, **aeb_signals}
+        msg = self.packer.make_can_msg_safety("BRAKE_COMMAND", self.PT_BUS, values)
+        self.assertFalse(self._tx(msg), msg=aeb_signals)
+      self.assertTrue(self._tx(self._send_brake_msg(0)))
+
 
 class TestHondaNidecPcmSafety(HondaPcmEnableBase, TestHondaNidecSafetyBase):
   """
@@ -498,6 +507,15 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
         send = self.MIN_ACCEL <= accel <= self.MAX_ACCEL if controls_allowed else accel == 0
         self.assertEqual(send, self._tx(self._send_gas_brake_msg(self.NO_GAS, accel)), (controls_allowed, accel))
 
+  def test_block_aeb(self):
+    for controls_allowed in [True, False]:
+      self.safety.set_controls_allowed(controls_allowed)
+      for aeb_signals in ({"AEB_STATUS": 1}, {"AEB_PREPARE": 1}, {"AEB_BRAKING": 1}):
+        values = {"GAS_COMMAND": self.NO_GAS, "ACCEL_COMMAND": 0, **aeb_signals}
+        msg = self.packer.make_can_msg_safety("ACC_CONTROL", self.PT_BUS, values)
+        self.assertFalse(self._tx(msg), msg=aeb_signals)
+      self.assertTrue(self._tx(self._send_gas_brake_msg(self.NO_GAS, 0)))
+
 
 class TestHondaBoschRadarlessSafetyBase(TestHondaBoschSafetyBase):
   """Base class for radarless Honda Bosch"""
@@ -555,6 +573,15 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
       "ACCEL_COMMAND": accel,
     }
     return self.packer.make_can_msg_safety("ACC_CONTROL", self.PT_BUS, values)
+
+  def test_block_aeb(self):
+    for controls_allowed in [True, False]:
+      self.safety.set_controls_allowed(controls_allowed)
+      for aeb_signals in ({"AEB_STATUS": 1}, {"AEB_PREPARE": 1}, {"AEB_BRAKING": 1}):
+        values = {"ACCEL_COMMAND": 0, **aeb_signals}
+        msg = self.packer.make_can_msg_safety("ACC_CONTROL", self.PT_BUS, values)
+        self.assertFalse(self._tx(msg), msg=aeb_signals)
+      self.assertTrue(self._tx(self._accel_msg(0)))
 
   # Longitudinal doesn't need to send buttons
   def test_spam_cancel_safety_check(self):
