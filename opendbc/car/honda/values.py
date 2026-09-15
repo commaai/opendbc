@@ -76,7 +76,7 @@ class HondaFlags(IntFlag):
 
   HAS_ALL_DOOR_STATES = 256  # Some Hondas have all door states, others only driver door
   BOSCH_ALT_RADAR = 512
-  # 1024 is available
+  HAS_BSM = 1024  # blind spot monitoring
   HYBRID = 2048
   BOSCH_TJA_CONTROL = 4096
 
