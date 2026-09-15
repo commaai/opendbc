@@ -251,7 +251,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
   // AEB: block all actuation. only used when DSU is unplugged
   if (msg_matches(msg, 0x283U, 0U)) {
     // only allow the checksum, which is the last byte
-    bool block = GET_BYTES_64(msg, 0, 6) != 0U;
+    bool block = GET_BYTES_64_LE(msg, 0, 6) != 0U;
     if (block) {
       tx = false;
     }
@@ -339,7 +339,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
   // UDS: Only tester present ("\x0F\x02\x3E\x00\x00\x00\x00\x00") allowed on diagnostics address
   if (msg->addr == 0x750U) {
     // this address is sub-addressed. only allow tester present to radar (0xF)
-    bool invalid_uds_msg = GET_BYTES_64(msg, 0, 8) != 0x00000000003E020FULL;
+    bool invalid_uds_msg = GET_BYTES_64_LE(msg, 0, 8) != 0x00000000003E020FULL;
     if (invalid_uds_msg) {
       tx = false;
     }

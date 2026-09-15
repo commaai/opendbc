@@ -35,7 +35,7 @@ static bool body_tx_hook(const CANPacket_t *msg) {
 
   // Allow going into CAN flashing mode even if controls are not allowed
   bool flash_msg = (msg->addr == 0x250U) && (GET_LEN(msg) == 8U);
-  if (!controls_allowed && flash_msg && (GET_BYTES_64(msg, 0, 8) == 0x0AB00B1EDEADFACEULL)) {
+  if (!controls_allowed && flash_msg && (GET_BYTES_64_LE(msg, 0, 8) == 0x0AB00B1EDEADFACEULL)) {
     tx = true;
   }
 

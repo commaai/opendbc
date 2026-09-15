@@ -93,7 +93,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
 
   // Signal: Motor_20.MO_Fahrpedalrohwert_01
   if (msg_matches(msg, MSG_MOTOR_20, 0U)) {
-    gas_pressed = ((GET_BYTES(msg, 0, 4) >> 12) & 0xFFU) != 0U;
+    gas_pressed = ((GET_BYTES_LE(msg, 0, 4) >> 12) & 0xFFU) != 0U;
   }
 
   // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)

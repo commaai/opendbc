@@ -258,7 +258,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       .max_steer_power = 125,
     };
 
-    int desired_curvature_raw = GET_BYTES(msg, 3, 2) & 0x7FFFU;
+    int desired_curvature_raw = GET_BYTES_LE(msg, 3, 2) & 0x7FFFU;
 
     bool desired_curvature_sign = GET_BIT(msg, 39U);
     if (!desired_curvature_sign) {
