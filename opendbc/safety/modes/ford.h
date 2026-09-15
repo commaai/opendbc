@@ -26,10 +26,10 @@ static uint8_t ford_get_counter(const CANPacket_t *msg) {
   if (msg->addr == FORD_BrakeSysFeatures) {
     // Signal: VehVActlBrk_No_Cnt
     cnt = (msg->data[2] >> 2) & 0xFU;
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
+  }
+  if (msg->addr == FORD_Yaw_Data_FD1) {
     // Signal: VehRollYaw_No_Cnt
     cnt = msg->data[5];
-  } else {
   }
   return cnt;
 }
@@ -39,10 +39,10 @@ static uint32_t ford_get_checksum(const CANPacket_t *msg) {
   if (msg->addr == FORD_BrakeSysFeatures) {
     // Signal: VehVActlBrk_No_Cs
     chksum = msg->data[3];
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
+  }
+  if (msg->addr == FORD_Yaw_Data_FD1) {
     // Signal: VehRollYawW_No_Cs
     chksum = msg->data[4];
-  } else {
   }
   return chksum;
 }
@@ -54,14 +54,14 @@ static uint32_t ford_compute_checksum(const CANPacket_t *msg) {
     chksum += msg->data[2] >> 6;                    // VehVActlBrk_D_Qf
     chksum += (msg->data[2] >> 2) & 0xFU;           // VehVActlBrk_No_Cnt
     chksum = 0xFFU - chksum;
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
+  }
+  if (msg->addr == FORD_Yaw_Data_FD1) {
     chksum += msg->data[0] + msg->data[1];  // VehRol_W_Actl
     chksum += msg->data[2] + msg->data[3];  // VehYaw_W_Actl
     chksum += msg->data[5];                         // VehRollYaw_No_Cnt
     chksum += msg->data[6] >> 6;                    // VehRolWActl_D_Qf
     chksum += (msg->data[6] >> 4) & 0x3U;           // VehYawWActl_D_Qf
     chksum = 0xFFU - chksum;
-  } else {
   }
   return chksum;
 }
@@ -70,11 +70,12 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
   bool valid = false;
   if (msg->addr == FORD_BrakeSysFeatures) {
     valid = (msg->data[2] >> 6) == 0x3U;           // VehVActlBrk_D_Qf
-  } else if (msg->addr == FORD_EngVehicleSpThrottle2) {
+  }
+  if (msg->addr == FORD_EngVehicleSpThrottle2) {
     valid = ((msg->data[4] >> 5) & 0x3U) == 0x3U;  // VehVActlEng_D_Qf
-  } else if (msg->addr == FORD_Yaw_Data_FD1) {
+  }
+  if (msg->addr == FORD_Yaw_Data_FD1) {
     valid = ((msg->data[6] >> 4) & 0x3U) == 0x3U;  // VehYawWActl_D_Qf
-  } else {
   }
   return valid;
 }
@@ -86,79 +87,63 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
 
 #define FORD_CANFD_INACTIVE_CURVATURE_RATE 1024U
 
-// Curvature rate limits
-#define FORD_LIMITS(limit_lateral_acceleration) {                                               \
-  .max_angle = 1000,          /* 0.02 curvature */                                              \
-  .angle_deg_to_can = 50000,  /* 1 / (2e-5) rad to can */                                       \
-  .max_angle_error = 100,     /* 0.002 * FORD_STEERING_LIMITS.angle_deg_to_can */               \
-  .angle_rate_up_lookup = {                                                                     \
-    {5., 25., 25.},                                                                             \
-    {0.00045, 0.0001, 0.0001}                                                                   \
-  },                                                                                            \
-  .angle_rate_down_lookup = {                                                                   \
-    {5., 25., 25.},                                                                             \
-    {0.00045, 0.00015, 0.00015}                                                                 \
-  },                                                                                            \
-                                                                                                \
-  /* no blending at low speed due to lack of torque wind-up and inaccurate current curvature */ \
-  .angle_error_min_speed = 10.0,    /* m/s */                                                   \
-                                                                                                \
-  .angle_is_curvature = (limit_lateral_acceleration),                                           \
-  .enforce_angle_error = true,                                                                  \
-  .inactive_angle_is_zero = true,                                                               \
-}
-
-static const AngleSteeringLimits FORD_STEERING_LIMITS = FORD_LIMITS(false);
+static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
+  .max_curvature = 1000,              // 0.02 rad/m * curvature_to_can
+  .curvature_to_can = 50000,          // CAN units per rad/m
+  .frequency = 20,                    // Hz
+  .max_curvature_error = 100,         // 0.002 rad/m * curvature_to_can
+  .curvature_error_min_speed = 10.0,  // m/s
+  .max_steer_power = 0,               // disabled, Ford has no steed power signal
+};
 
 static void ford_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == FORD_MAIN_BUS) {
-    // Update in motion state from standstill signal
-    if (msg->addr == FORD_DesiredTorqBrk) {
-      // Signal: VehStop_D_Stat
-      vehicle_moving = ((msg->data[3] >> 3) & 0x3U) != 1U;
-    }
+  // Update in motion state from standstill signal
+  if (msg_matches(msg, FORD_DesiredTorqBrk, FORD_MAIN_BUS)) {
+    // Signal: VehStop_D_Stat
+    vehicle_moving = ((msg->data[3] >> 3) & 0x3U) != 1U;
+  }
 
-    // Update vehicle speed
-    if (msg->addr == FORD_BrakeSysFeatures) {
-      // Signal: Veh_V_ActlBrk
-      UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01 * KPH_TO_MS);
-    }
+  // Update vehicle speed
+  if (msg_matches(msg, FORD_BrakeSysFeatures, FORD_MAIN_BUS)) {
+    // Signal: Veh_V_ActlBrk
+    UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01 * KPH_TO_MS);
+  }
 
-    // Check vehicle speed against a second source
-    if (msg->addr == FORD_EngVehicleSpThrottle2) {
-      // Disable controls if speeds from ABS and PCM ECUs are too far apart.
-      // Signal: Veh_V_ActlEng
-      float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
-      speed_mismatch_check(filtered_pcm_speed);
-    }
+  // Check vehicle speed against a second source
+  if (msg_matches(msg, FORD_EngVehicleSpThrottle2, FORD_MAIN_BUS)) {
+    // Disable controls if speeds from ABS and PCM ECUs are too far apart.
+    // Signal: Veh_V_ActlEng
+    float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
+    UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
+  }
 
-    // Update vehicle yaw rate
-    if (msg->addr == FORD_Yaw_Data_FD1) {
-      // Signal: VehYaw_W_Actl
-      // TODO: we should use the speed which results in the closest angle measurement to the desired angle
-      float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
-      float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
-      // convert current curvature into units on CAN for comparison with desired curvature
-      update_sample(&angle_meas, ROUND(current_curvature * FORD_STEERING_LIMITS.angle_deg_to_can));
-    }
+  // Update vehicle yaw rate
+  if (msg_matches(msg, FORD_Yaw_Data_FD1, FORD_MAIN_BUS)) {
+    // FIXME: safety can receive yaw before new vehicle speed, it should recompute meas on either received
+    // Signal: VehYaw_W_Actl
+    // TODO: we should use the speed which results in the closest angle measurement to the desired angle
+    float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
+    float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
+    // convert current curvature into units on CAN for comparison with desired curvature
+    update_sample(&curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
+  }
 
-    // Update gas pedal
-    if (msg->addr == FORD_EngVehicleSpThrottle) {
-      // Pedal position: (0.1 * val) in percent
-      // Signal: ApedPos_Pc_ActlArb
-      gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
-    }
+  // Update gas pedal
+  if (msg_matches(msg, FORD_EngVehicleSpThrottle, FORD_MAIN_BUS)) {
+    // Pedal position: (0.1 * val) in percent
+    // Signal: ApedPos_Pc_ActlArb
+    gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
+  }
 
-    // Update brake pedal and cruise state
-    if (msg->addr == FORD_EngBrakeData) {
-      // Signal: BpedDrvAppl_D_Actl
-      brake_pressed = ((msg->data[0] >> 4) & 0x3U) == 2U;
+  // Update brake pedal and cruise state
+  if (msg_matches(msg, FORD_EngBrakeData, FORD_MAIN_BUS)) {
+    // Signal: BpedDrvAppl_D_Actl
+    brake_pressed = ((msg->data[0] >> 4) & 0x3U) == 2U;
 
-      // Signal: CcStat_D_Actl
-      unsigned int cruise_state = msg->data[1] & 0x07U;
-      bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
-      pcm_cruise_check(cruise_engaged);
-    }
+    // Signal: CcStat_D_Actl
+    unsigned int cruise_state = msg->data[1] & 0x07U;
+    bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
+    pcm_cruise_check(cruise_engaged);
   }
 }
 
@@ -191,7 +176,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     bool cmbb_deny = (msg->data[4] >> 5) & 1U;
 
     // Signal: AccBrkPrchg_B_Rq & AccBrkDecel_B_Rq
-    bool brake_actuation = ((msg->data[6] >> 6) & 1U) || ((msg->data[6] >> 7) & 1U);
+    bool brake_actuation = (msg->data[6] & 0xC0U) != 0U;
 
     bool violation = false;
     violation |= longitudinal_accel_checks(accel, FORD_LONG_LIMITS);
@@ -248,8 +233,8 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     bool violation = (raw_curvature_rate != FORD_INACTIVE_CURVATURE_RATE) || (raw_path_angle != FORD_INACTIVE_PATH_ANGLE) || (raw_path_offset != FORD_INACTIVE_PATH_OFFSET);
 
     // Check angle error and steer_control_enabled
-    int desired_curvature = raw_curvature - FORD_INACTIVE_CURVATURE;  // /FORD_STEERING_LIMITS.angle_deg_to_can to get real curvature
-    violation |= steer_angle_cmd_checks(desired_curvature, steer_control_enabled, FORD_STEERING_LIMITS);
+    int desired_curvature = raw_curvature - FORD_INACTIVE_CURVATURE;  // /FORD_STEERING_LIMITS.curvature_to_can to get real curvature
+    violation |= steer_curvature_cmd_checks(desired_curvature, 0, steer_control_enabled, FORD_STEERING_LIMITS);
 
     if (violation) {
       tx = false;
@@ -258,8 +243,6 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
 
   // Safety check for LateralMotionControl2 action
   if (msg->addr == FORD_LateralMotionControl2) {
-    static const AngleSteeringLimits FORD_CANFD_STEERING_LIMITS = FORD_LIMITS(true);
-
     // Signal: LatCtl_D2_Rq
     bool steer_control_enabled = ((msg->data[0] >> 4) & 0x7U) != 0U;
     unsigned int raw_curvature = (msg->data[2] << 3) | (msg->data[3] >> 5);
@@ -271,8 +254,8 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     bool violation = (raw_curvature_rate != FORD_CANFD_INACTIVE_CURVATURE_RATE) || (raw_path_angle != FORD_INACTIVE_PATH_ANGLE) || (raw_path_offset != FORD_INACTIVE_PATH_OFFSET);
 
     // Check angle error and steer_control_enabled
-    int desired_curvature = raw_curvature - FORD_INACTIVE_CURVATURE;  // /FORD_STEERING_LIMITS.angle_deg_to_can to get real curvature
-    violation |= steer_angle_cmd_checks(desired_curvature, steer_control_enabled, FORD_CANFD_STEERING_LIMITS);
+    int desired_curvature = raw_curvature - FORD_INACTIVE_CURVATURE;  // /FORD_STEERING_LIMITS.curvature_to_can to get real curvature
+    violation |= steer_curvature_cmd_checks(desired_curvature, 0, steer_control_enabled, FORD_STEERING_LIMITS);
 
     if (violation) {
       tx = false;
@@ -305,11 +288,13 @@ static safety_config ford_init(uint16_t param) {
     {FORD_Lane_Assist_Data1, 0, 8, .check_relay = true},  \
     {FORD_IPMA_Data, 0, 8, .check_relay = true},          \
 
+#ifdef ALLOW_DEBUG
   static const CanMsg FORD_CANFD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
     {FORD_ACCDATA, 0, 8, .check_relay = true},
     {FORD_LateralMotionControl2, 0, 8, .check_relay = true},
   };
+#endif
 
   static const CanMsg FORD_CANFD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
@@ -325,20 +310,15 @@ static safety_config ford_init(uint16_t param) {
   const uint16_t FORD_PARAM_CANFD = 2;
   const bool ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
 
-  bool ford_longitudinal = false;
-
-#ifdef ALLOW_DEBUG
-  const uint16_t FORD_PARAM_LONGITUDINAL = 1;
-  ford_longitudinal = GET_FLAG(param, FORD_PARAM_LONGITUDINAL);
-#endif
-
-  // Longitudinal is the default for CAN, and optional for CAN FD w/ ALLOW_DEBUG
-  ford_longitudinal = !ford_canfd || ford_longitudinal;
-
   safety_config ret;
   if (ford_canfd) {
-    ret = ford_longitudinal ? BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_LONG_TX_MSGS) : \
-                              BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_STOCK_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_STOCK_TX_MSGS);
+#ifdef ALLOW_DEBUG
+    const uint16_t FORD_PARAM_LONGITUDINAL = 1;
+    if (GET_FLAG(param, FORD_PARAM_LONGITUDINAL)) {
+      ret = BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_LONG_TX_MSGS);
+    }
+#endif
   } else {
     ret = BUILD_SAFETY_CFG(ford_rx_checks, FORD_LONG_TX_MSGS);
   }

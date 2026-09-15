@@ -1,14 +1,12 @@
 import unittest
 
-from hypothesis import given, settings, strategies as st
-
 from opendbc.car import Bus
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.toyota.fingerprints import FW_VERSIONS
-from opendbc.car.toyota.values import CAR, DBC, TSS2_CAR, ANGLE_CONTROL_CAR, RADAR_ACC_CAR, SECOC_CAR, \
-                                                  FW_QUERY_CONFIG, PLATFORM_CODE_ECUS, FUZZY_EXCLUDED_PLATFORMS, \
-                                                  get_platform_codes
+from opendbc.car.toyota.values import CAR, DBC, ToyotaFlags, FW_QUERY_CONFIG, PLATFORM_CODE_ECUS, \
+                                                  FUZZY_EXCLUDED_PLATFORMS, get_platform_codes
+from opendbc.testing import fuzzy_test
 
 Ecu = CarParams.Ecu
 
@@ -18,21 +16,24 @@ def check_fw_version(fw_version: bytes) -> bool:
   return b'?' not in fw_version and b'!' not in fw_version
 
 
+def cars_with(flags):
+  return {c for c in CAR if c.config.flags & flags}
+
+
 class TestToyotaInterfaces(unittest.TestCase):
-  def test_car_sets(self):
+  def test_car_flags(self):
     # Angle and radar-ACC cars are always TSS2 cars
-    assert len(ANGLE_CONTROL_CAR - TSS2_CAR) == 0
-    assert len(RADAR_ACC_CAR - TSS2_CAR) == 0
+    assert not (cars_with(ToyotaFlags.ANGLE_CONTROL | ToyotaFlags.RADAR_ACC) - cars_with(ToyotaFlags.TSS2))
 
   def test_lta_platforms(self):
     # At this time, only RAV4 2023 is expected to use LTA/angle control
-    assert ANGLE_CONTROL_CAR == {CAR.TOYOTA_RAV4_TSS2_2023}
+    assert cars_with(ToyotaFlags.ANGLE_CONTROL) == {CAR.TOYOTA_RAV4_TSS2_2023}
 
   def test_tss2_dbc(self):
     # We make some assumptions about TSS2 platforms,
     # like looking up certain signals only in this DBC
     for car_model, dbc in DBC.items():
-      if car_model in TSS2_CAR and car_model not in SECOC_CAR:
+      if car_model.config.flags & ToyotaFlags.TSS2 and not (car_model.config.flags & ToyotaFlags.SECOC):
         assert dbc[Bus.pt] == "toyota_nodsu_pt_generated"
 
   def test_essential_ecus(self):
@@ -74,12 +75,9 @@ class TestToyotaFingerprint(unittest.TestCase):
 
   # Tests for part numbers, platform codes, and sub-versions which Toyota will use to fuzzy
   # fingerprint in the absence of full FW matches:
-  @settings(max_examples=100)
-  @given(data=st.data())
-  def test_platform_codes_fuzzy_fw(self, data):
-    fw_strategy = st.lists(st.binary())
-    fws = data.draw(fw_strategy)
-    get_platform_codes(fws)
+  @fuzzy_test(max_examples=100)
+  def test_platform_codes_fuzzy_fw(self, fuzzy):
+    get_platform_codes(fuzzy.list(fuzzy.binary))
 
   def test_platform_code_ecus_available(self):
     # Asserts ECU keys essential for fuzzy fingerprinting are available on all platforms

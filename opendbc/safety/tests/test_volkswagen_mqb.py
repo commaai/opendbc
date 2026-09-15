@@ -10,11 +10,7 @@ from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 MAX_ACCEL = 2.0
 MIN_ACCEL = -3.5
 
-MSG_ESP_19 = 0xB2       # RX from ABS, for wheel speeds
 MSG_LH_EPS_03 = 0x9F    # RX from EPS, for driver steering torque
-MSG_ESP_05 = 0x106      # RX from ABS, for brake light state
-MSG_TSK_06 = 0x120      # RX from ECU, for ACC status from drivetrain coordinator
-MSG_MOTOR_20 = 0x121    # RX from ECU, for driver throttle input
 MSG_ACC_06 = 0x122      # TX by OP, ACC control instructions to the drivetrain coordinator
 MSG_HCA_01 = 0x126      # TX by OP, Heading Control Assist steering torque
 MSG_GRA_ACC_01 = 0x12B  # TX by OP, ACC control buttons for cancel/resume
