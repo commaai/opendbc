@@ -147,6 +147,8 @@ class HyundaiFlags(IntFlag):
 
   ALT_LIMITS_2 = 2 ** 26
 
+  HAS_BSM = 2 ** 27  # blind spot monitoring
+
 
 @dataclass
 class HyundaiCarDocs(CarDocs):
