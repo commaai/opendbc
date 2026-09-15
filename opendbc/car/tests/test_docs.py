@@ -2,7 +2,7 @@ from collections import defaultdict
 import unittest
 
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.docs import get_all_car_docs
+from opendbc.car.docs import get_all_car_docs, get_params_for_docs
 from opendbc.car.docs_definitions import Cable, Column, PartType, Star, SupportType
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.values import PLATFORMS
@@ -64,6 +64,17 @@ class TestCarDocs(unittest.TestCase):
           raise unittest.SkipTest
 
         assert car.years and car.year_list, f"Format years correctly: {car.name}"
+
+  def test_stop_and_go_detail_sentence(self):
+    odyssey_cp = get_params_for_docs(PLATFORMS["HONDA_ODYSSEY"])
+    odyssey = next(car for car in self.all_cars if car.name == "Honda Odyssey 2018-20")
+    self.assertFalse(odyssey_cp.autoResumeSng)
+    self.assertNotIn("Traffic light and stop sign handling", odyssey.detail_sentence)
+
+    civic_cp = get_params_for_docs(PLATFORMS["HONDA_CIVIC"])
+    civic = next(car for car in self.all_cars if car.name == "Honda Civic 2016-18")
+    self.assertTrue(civic_cp.autoResumeSng)
+    self.assertIn("Traffic light and stop sign handling", civic.detail_sentence)
 
   def test_harnesses(self):
     for car in self.all_cars:
