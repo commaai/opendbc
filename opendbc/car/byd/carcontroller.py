@@ -18,6 +18,8 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.apply_angle_last = 0.0
     self.not_accepted_frames = 0
+    self.lks_neutralize_pulse = 0
+    self.lks_neutralize_cooldown = 0
 
     # Vehicle model used for lateral limiting
     self.VM = VehicleModel(get_safety_CP())
@@ -38,19 +40,35 @@ class CarController(CarControllerBase):
       # the first frame after lateral comes back is not rate limited against a stale angle.
       if CC.enabled:
         can_sends.append(bydcan.create_steering_control(self.packer, self.apply_angle_last, CC.latActive, cntr))
+        # HUD for the whole engagement so TAKE CONTROL can paint the cluster after
+        # latActive drops. Panda keeps camera 0x316 off while we still send 0x1E2.
+        can_sends.append(bydcan.create_lkas_hud(self.packer, cntr, CS.lkas_hud, hud_control, CC.latActive))
 
       if CC.latActive:
-        can_sends.append(bydcan.create_lkas_hud(self.packer, cntr, CS.lkas_hud, hud_control))
-
-        # STEER_REQ=1 while EPS reports idle (LKS_PREPARED=1) for >1 s => not accepted
+        # STEER_REQ=1 while EPS reports idle (LKS_PREPARED=1) for 200 ms => not accepted
         not_accepted = not CS.eps_engaged
         self.not_accepted_frames = self.not_accepted_frames + 1 if not_accepted else 0
-        CS.steer_not_accepted = self.not_accepted_frames > 50
+        CS.steer_not_accepted = self.not_accepted_frames >= CarControllerParams.STEER_NOT_ACCEPTED_FRAMES
       else:
-        # Camera 0x316 comes back once the HUD hold expires; its 0x1E2 comes back only
-        # after openpilot stops sending, i.e. once we are no longer engaged.
         self.not_accepted_frames = 0
         CS.steer_not_accepted = False
+
+    # Camera LKS is a toggle. Pulse bus 2 only while our latch is on and the
+    # camera still thinks LKS is on, so we turn it off without flipping it back.
+    if CS.lks_enabled and CS.camera_lkas_state != 0:
+      if self.lks_neutralize_pulse == 0 and self.lks_neutralize_cooldown == 0:
+        self.lks_neutralize_pulse = 4
+    else:
+      self.lks_neutralize_pulse = 0
+
+    if self.frame % 5 == 0:
+      if self.lks_neutralize_pulse > 0:
+        can_sends.append(bydcan.create_buttons(self.packer, lkas=True, bus=2))
+        self.lks_neutralize_pulse -= 1
+        if self.lks_neutralize_pulse == 0:
+          self.lks_neutralize_cooldown = 10
+      elif self.lks_neutralize_cooldown > 0:
+        self.lks_neutralize_cooldown -= 1
 
     if CC.cruiseControl.cancel and self.frame % 10 == 0:
       can_sends.append(bydcan.create_buttons(self.packer, cancel=True))
