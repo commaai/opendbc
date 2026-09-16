@@ -57,7 +57,7 @@ cd opendbc
 ./test.sh
 
 # here are the individual commands it runs
-pip3 install -e .[testing,docs]  # install dependencies
+pip3 install -e .[testing]  # install dependencies
 scons -j8                        # build with 8 cores
 unittest-parallel                # run the tests
 lefthook run lint                # run the linter

@@ -113,6 +113,10 @@ class CarControllerParams:
       self.CURVATURE_MAX = 0.195          # Max curvature for steering command, m^-1
       self.CURVATURE_LIMITS = CurvatureSteeringLimits(self.CURVATURE_MAX)
 
+      # Longitudinal constants
+      self.ACCEL_INACTIVE = 3.01  # m/s^2
+      self.JERK_LIMIT = 4.0  # m/s^3
+
       self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
       self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]
 
@@ -219,6 +223,7 @@ class VolkswagenFlags(IntFlag):
   KOMBI_PRESENT = 4
   ALT_GEAR = 32
   STOCK_KLR_PRESENT = 64
+  HAS_BSM = 256  # blind spot monitoring
 
   # Static flags
   PQ = 2
@@ -382,14 +387,14 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_ID4_MK1 = VolkswagenMEBPlatformConfig(
     [
-      VWCarDocs("Volkswagen ID.4 2021-23"),
+      VWCarDocs("Volkswagen ID.4 2021-23", car_parts=CarParts.common([CarHarness.vw_meb]), footnotes=[]),
     ],
     VolkswagenCarSpecs(mass=2224, wheelbase=2.77),
     chassis_codes={"E2"},
     wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_EUROPE_SUV},
   )
   VOLKSWAGEN_ID4_MK2 = VolkswagenMEBPlatformConfig(
-    [VWCarDocs("Volkswagen ID.4 2024-25")],
+    [VWCarDocs("Volkswagen ID.4 2024-25", car_parts=CarParts.common([CarHarness.vw_meb]), footnotes=[])],
     VolkswagenCarSpecs(mass=2224, wheelbase=2.77),
     chassis_codes={"E8"},
     wmis={WMI.VOLKSWAGEN_USA_SUV, WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_EUROPE_SUV},
@@ -532,7 +537,7 @@ class CAR(Platforms):
     wmis={WMI.SEAT},
   )
   CUPRA_BORN_MK1 = VolkswagenMEBPlatformConfig(
-    [VWCarDocs("CUPRA Born 2021-23"),],
+    [VWCarDocs("CUPRA Born 2021-23", car_parts=CarParts.common([CarHarness.vw_meb]), footnotes=[])],
     VolkswagenCarSpecs(mass=1956, wheelbase=2.766),
     chassis_codes={"K1"},
     wmis={WMI.SEAT},
@@ -642,6 +647,7 @@ VOLKSWAGEN_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 
 VOLKSWAGEN_RX_OFFSET = 0x6a
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"\xf1\x87[\x00-\xff]{17,58}",
   requests=[request for bus, obd_multiplexing in [(1, True), (1, False), (0, False)] for request in [
     Request(
       [VOLKSWAGEN_VERSION_REQUEST_MULTI],

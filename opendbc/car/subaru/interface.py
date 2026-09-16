@@ -26,10 +26,12 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= SubaruFlags.SEND_INFOTAINMENT.value
 
     if ret.flags & SubaruFlags.PREGLOBAL:
-      ret.enableBsm = 0x25c in fingerprint[0]
+      if 0x25c in fingerprint[0]:
+        ret.flags |= SubaruFlags.HAS_BSM.value
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaruPreglobal)]
     else:
-      ret.enableBsm = 0x228 in fingerprint[0]
+      if 0x228 in fingerprint[0]:
+        ret.flags |= SubaruFlags.HAS_BSM.value
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaru)]
       if ret.flags & SubaruFlags.GLOBAL_GEN2:
         ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.GEN2.value
@@ -87,8 +89,9 @@ class CarInterface(CarInterfaceBase):
     else:
       raise ValueError(f"unknown car: {candidate}")
 
-    ret.alphaLongitudinalAvailable = not (ret.flags & (SubaruFlags.GLOBAL_GEN2 | SubaruFlags.PREGLOBAL |
-                                                       SubaruFlags.LKAS_ANGLE | SubaruFlags.HYBRID))
+    # TODO: the longitudinal limits need to be speed-dependent, so alpha long is disabled for now
+    # revert this in the PR that re-enables Subaru longitudinal: https://github.com/commaai/opendbc/pull/3689
+    ret.alphaLongitudinalAvailable = False
     ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
 
     if ret.flags & SubaruFlags.GLOBAL_GEN2 and ret.openpilotLongitudinalControl:
