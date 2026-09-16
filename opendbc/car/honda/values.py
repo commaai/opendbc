@@ -49,7 +49,7 @@ class CarControllerParams:
     elif CP.carFingerprint in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CIVIC_2022, CAR.HONDA_ACCORD,
                                CAR.HONDA_CRV_HYBRID, CAR.HONDA_FIT, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.HONDA_HRV_3G,
                                CAR.HONDA_ODYSSEY, CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE, CAR.HONDA_INSIGHT, CAR.HONDA_NBOX_2G,
-                               CAR.HONDA_E, CAR.HONDA_E_ADVANCE):
+                               CAR.HONDA_E, CAR.HONDA_E_ADVANCE, CAR.HONDA_PRELUDE_6G):
       # TODO: determine if there is a dead zone at the top end (except HONDA_FREED, HONDA_HRV, HONDA_HRV_3G)
       self.STEER_MAX = 4096
     elif CP.carFingerprint == CAR.HONDA_ODYSSEY_TWN:
@@ -293,6 +293,12 @@ class CAR(Platforms):
   HONDA_PASSPORT_4G = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Honda Passport 2026", "All")],
     CarSpecs(mass=4620 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=18.5),
+  )
+  HONDA_PRELUDE_6G = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda Prelude 2026", "All")],
+    CarSpecs(mass=1480, wheelbase=2.605, steerRatio=13.65, centerToFrontRatio=0.37),
+    {Bus.pt: 'honda_bosch_radarless_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS,
   )
   ACURA_MDX_4G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura MDX 2022-24", "All", min_steer_speed=70. * CV.KPH_TO_MS)],
