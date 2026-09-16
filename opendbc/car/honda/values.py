@@ -56,6 +56,8 @@ class CarControllerParams:
       self.STEER_MAX = 32767  # TODO: determine if there is a dead zone at the top end
     elif CP.carFingerprint == CAR.HONDA_PILOT_4G_MMR:
       self.STEER_MAX = 3628
+    else:
+      self.STEER_MAX = 2560
 
 
 class HondaSafetyFlags(IntFlag):
