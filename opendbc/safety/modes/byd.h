@@ -6,9 +6,12 @@
 #define BYD_DRIVER_TORQUE_DISENGAGE 1000
 #define BYD_DRIVER_TORQUE_FRAMES 5
 #define BYD_WHEELSPEED_TO_KPH 0.072  // 0.02 m/s/LSB, mirrored in values.py
+#define BYD_PARAM_LKS_ON 2U
 
 static int byd_driver_torque_frames = 0;
 static bool byd_lks_on = false;
+static bool byd_lks_btn_last = false;
+static bool byd_acc_on = false;
 static uint32_t byd_op_steer_ts = 0;
 static uint32_t byd_op_lat_ts = 0;
 
@@ -29,8 +32,10 @@ static bool byd_stock_lat_allowed(void) {
 
 static bool byd_stock_hud_allowed(void) {
   bool allowed = true;
-  if (byd_op_lat_ts != 0U) {
-    allowed = safety_get_ts_elapsed(microsecond_timer_get(), byd_op_lat_ts) > BYD_OP_HUD_TIMEOUT_US;
+  // Same ownership as 0x1E2: any OP 0x1E2 (heartbeat included) holds the HUD
+  // so TAKE CONTROL bits we paint are not overwritten by the camera.
+  if (byd_op_steer_ts != 0U) {
+    allowed = safety_get_ts_elapsed(microsecond_timer_get(), byd_op_steer_ts) > BYD_OP_HUD_TIMEOUT_US;
   }
   return allowed;
 }
@@ -90,22 +95,26 @@ static void byd_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == 0x342U) {
       gas_pressed = msg->data[0] > 0U;              // GAS_PEDAL
     }
+
+    // Driver LKS button. Camera LKAS_STATE 0/4 are not this switch. Bus 2 spoofs
+    // must not land here or we would toggle our own latch.
+    if (msg->addr == 0x3B0U) {
+      const bool btn = GET_BIT(msg, 6U);
+      if (btn && (!byd_lks_btn_last)) {
+        byd_lks_on = !byd_lks_on;
+        pcm_cruise_check(byd_acc_on && byd_lks_on);
+      }
+      byd_lks_btn_last = btn;
+    }
   }
 
   if (msg->bus == 2U) {
-    // LKS master switch, same gate as carstate.cruise_enabled. Only the driver's
-    // 0x3B0 LKAS_ON_BTN takes LKAS_STATE to 0; its other values are camera states,
-    // so they must not drop controls mid-drive.
-    if (msg->addr == 0x316U) {
-      byd_lks_on = ((msg->data[4] >> 4) & 0xFU) != 0U;
-    }
-
     // Cruise state
     if (msg->addr == 0x32DU) {
       // ACC_STATE: 0=OFF, 2=ACC_ON, 3=ACC_ACTIVE, 5=FORCE_ACCEL, 7=ERROR
       uint8_t acc_state = (msg->data[2] >> 3) & 0x7U;
-      bool acc_on = (acc_state == 3U) || (acc_state == 5U);
-      pcm_cruise_check(acc_on && byd_lks_on);
+      byd_acc_on = (acc_state == 3U) || (acc_state == 5U);
+      pcm_cruise_check(byd_acc_on && byd_lks_on);
     }
   }
 }
@@ -143,13 +152,18 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
     }
   }
 
-  // Only allow cancel (ACC_ON_BTN) while stock cruise is engaged, or button release.
+  // Bus 0: only cancel (ACC_ON_BTN) while stock cruise is engaged, or button release.
+  // Bus 2: only LKAS_ON_BTN, the camera LKS spoof. It never reaches bus 0 or our latch.
   if (msg->addr == 0x3B0U) {
-    bool other_buttons = ((msg->data[0] & 0x58U) != 0U) ||  // SET, RES, LKAS_ON
-                         ((msg->data[1] & 0x80U) != 0U) ||  // DEC_DISTANCE
-                         ((msg->data[2] & 0x1U) != 0U);     // INC_DISTANCE
-    bool cancel = (msg->data[2] & 0x8U) != 0U;             // ACC_ON_BTN
-    tx = !other_buttons && (!cancel || cruise_engaged_prev);
+    bool set_res = (msg->data[0] & 0x18U) != 0U;                                          // SET, RES
+    bool lkas_on = (msg->data[0] & 0x40U) != 0U;                                          // LKAS_ON
+    bool distance = ((msg->data[1] & 0x80U) != 0U) || ((msg->data[2] & 0x1U) != 0U);     // DEC, INC_DISTANCE
+    bool cancel = (msg->data[2] & 0x8U) != 0U;                                            // ACC_ON_BTN
+    if (msg->bus == 2U) {
+      tx = !set_res && !distance && !cancel;
+    } else {
+      tx = !set_res && !lkas_on && !distance && (!cancel || cruise_engaged_prev);
+    }
   }
 
   return tx;
@@ -161,7 +175,6 @@ static bool byd_fwd_hook(int bus_num, int addr) {
     if (addr == 0x1E2) {
       block_msg = !byd_stock_lat_allowed();
     } else if (addr == 0x316) {
-      // Camera paints LKAS_STATE=4 for ~0.5s after OP drops STEER_REQ.
       block_msg = !byd_stock_hud_allowed();
     } else {
     }
@@ -170,9 +183,10 @@ static bool byd_fwd_hook(int bus_num, int addr) {
 }
 
 static safety_config byd_init(uint16_t param) {
-  SAFETY_UNUSED(param);
   byd_driver_torque_frames = 0;
-  byd_lks_on = false;
+  byd_lks_on = GET_FLAG(param, BYD_PARAM_LKS_ON);
+  byd_lks_btn_last = false;
+  byd_acc_on = false;
   byd_op_steer_ts = 0;
   byd_op_lat_ts = 0;
 
@@ -180,6 +194,7 @@ static safety_config byd_init(uint16_t param) {
     {0x1E2, 0, 8, .check_relay = true, .disable_static_blocking = true},   // STEERING_MODULE_ADAS
     {0x316, 0, 8, .check_relay = true, .disable_static_blocking = true},   // LKAS_HUD_ADAS
     {0x3B0, 0, 8, .check_relay = false},  // PCM_BUTTONS (cruise cancel button spoof)
+    {0x3B0, 2, 8, .check_relay = false},  // PCM_BUTTONS (camera LKS neutralize)
   };
 
   static const RxCheck byd_rx_checks[] = {
@@ -190,6 +205,8 @@ static safety_config byd_init(uint16_t param) {
     {.msg = {{0x342, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // PEDAL (accelerator pedal)
     {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // ACC_HUD_ADAS (cruise state)
     {.msg = {{0x316, 2, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // LKAS_HUD_ADAS (LKS switch)
+    {.msg = {{0x3B0, 0, 8,  20U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // PCM_BUTTONS (LKS latch)
+  };
   };
   };
 

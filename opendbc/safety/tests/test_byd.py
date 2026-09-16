@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from opendbc.car.byd.carcontroller import get_safety_CP
-from opendbc.car.byd.values import CarControllerParams
+from opendbc.car.byd.values import BydSafetyFlags, CarControllerParams
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
@@ -24,11 +24,12 @@ def safety_max_can(max_angle_float, can_offset=0):
 class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   DBC = "byd_atto3"
   SAFETY_MODEL = CarParams.SafetyModel.byd
+  SAFETY_PARAM = int(BydSafetyFlags.LKS_ON)
 
   RELAY_MALFUNCTION_ADDRS = {0: (STEERING_MODULE_ADAS, LKAS_HUD_ADAS)}
   # Stock 0x1E2/0x316 are forwarded until OP sends STEER_REQ=1.
   FWD_BLACKLISTED_ADDRS: dict[int, list[int]] = {}
-  TX_MSGS = [[STEERING_MODULE_ADAS, 0], [LKAS_HUD_ADAS, 0], [PCM_BUTTONS, 0]]
+  TX_MSGS = [[STEERING_MODULE_ADAS, 0], [LKAS_HUD_ADAS, 0], [PCM_BUTTONS, 0], [PCM_BUTTONS, 2]]
 
   MAIN_BUS = 0
   CAM_BUS = 2
@@ -45,8 +46,6 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def setUp(self):
     super().setUp()
     self.VM = VehicleModel(get_safety_CP())
-    # stock ACC only engages openpilot while the LKS switch is on
-    self._rx(self._lkas_hud_msg(1))
 
   def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     values = {"STEER_ANGLE": angle, "STEER_REQ": 1 if enabled else 0, "STEER_REQ_ACTIVE_LOW": 0 if enabled else 1}
@@ -71,6 +70,10 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"LKAS_STATE": lkas_state}
     return self.packer.make_can_msg_safety("LKAS_HUD_ADAS", self.CAM_BUS, values)
 
+  def _lks_btn_msg(self, pressed: bool, bus=None):
+    values = {"LKAS_ON_BTN": 1 if pressed else 0, "SET_ME_1_1": 1, "SET_ME_1_2": 1}
+    return self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS if bus is None else bus, values)
+
   def _speed_msg(self, speed):
     values = {"WHEELSPEED_CLEAN": speed * 3.6}
     return self.packer.make_can_msg_safety("WHEELSPEED_CLEAN", self.MAIN_BUS, values)
@@ -91,9 +94,15 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       for pressed in itertools.product((False, True), repeat=len(buttons)):
         values = dict(zip(buttons, pressed, strict=True))
         values.update(SET_ME_1_1=1, SET_ME_1_2=1)
+        set_res, lkas_on, dec, inc, cancel = pressed[0] or pressed[1], pressed[2], pressed[3], pressed[4], pressed[5]
         with self.subTest(cruise_engaged=cruise_engaged, controls_allowed=controls_allowed, buttons=pressed):
+          # bus 0: cancel only while stock cruise is engaged
           msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, values)
-          should_tx = not any(pressed[:-1]) and (not pressed[-1] or cruise_engaged)
+          should_tx = not (set_res or lkas_on or dec or inc) and (not cancel or cruise_engaged)
+          self.assertEqual(should_tx, self._tx(msg))
+          # bus 2: only the camera LKS spoof
+          msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, values)
+          should_tx = not (set_res or dec or inc or cancel)
           self.assertEqual(should_tx, self._tx(msg))
 
   def test_rx_checksums(self):
@@ -193,8 +202,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def test_stock_steer_passthrough(self):
     # Idle: camera steer and HUD reach the car. Any OP 0x1E2 takes the steer away
     # from the camera, and the idle STEER_REQ=0 heartbeat holds it for the whole
-    # engagement. HUD stays blocked ~2s after OP's last STEER_REQ=1 so a camera
-    # LKAS_STATE=4 blip does not paint the cluster.
+    # engagement. HUD stays blocked ~2s after the last OP 0x1E2 so our cluster
+    # nag bits are not overwritten by the camera.
     self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
 
@@ -244,31 +253,41 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       self.assertEqual(-1, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
 
   def test_lks_switch_gates_controls(self):
-    # ACC holding with LKS off must not allow controls, and switching LKS on has to
-    # be a rising edge here too, matching carstate.
-    self.assertTrue(self._rx(self._lkas_hud_msg(0)))
-    self.assertTrue(self._rx(self._pcm_status_msg(True)))
-    self.assertFalse(self.safety.get_controls_allowed())
-
-    self.assertTrue(self._rx(self._lkas_hud_msg(1)))
+    # Latch starts on from safetyParam. ACC holding enables. The driver LKS
+    # button on bus 0 is a rising-edge toggle; camera LKAS_STATE is ignored.
     self.assertTrue(self._rx(self._pcm_status_msg(True)))
     self.assertTrue(self.safety.get_controls_allowed())
 
-    # switching LKS off drops controls without touching ACC
-    self.assertTrue(self._rx(self._lkas_hud_msg(0)))
+    self.assertTrue(self._rx(self._lks_btn_msg(True)))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._lks_btn_msg(False)))
     self.assertTrue(self._rx(self._pcm_status_msg(True)))
     self.assertFalse(self.safety.get_controls_allowed())
+
+    self.assertTrue(self._rx(self._lks_btn_msg(True)))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_lks_button_on_camera_bus_does_not_toggle(self):
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._lks_btn_msg(True, bus=self.CAM_BUS)))
+    self.assertTrue(self.safety.get_controls_allowed())
 
   def test_camera_lkas_states_keep_controls(self):
-    # The camera walks LKAS_STATE 1-2-3-4 on its own, most visibly on a standstill
-    # resume. Only 0 is the driver's switch, so the rest must not disengage.
+    # Camera LKAS_STATE 0/4 are moods, not the switch.
     self.assertTrue(self._rx(self._pcm_status_msg(True)))
     self.assertTrue(self.safety.get_controls_allowed())
 
-    for state in (2, 3, 1, 4, 1, 3, 2):
+    for state in (2, 3, 1, 4, 0, 1, 3, 2):
       self.assertTrue(self._rx(self._lkas_hud_msg(state)))
       self.assertTrue(self._rx(self._pcm_status_msg(True)))
       self.assertTrue(self.safety.get_controls_allowed(), f"LKAS_STATE {state} dropped controls")
+
+  def test_lks_off_param_blocks_acc(self):
+    self.safety.set_safety_hooks(CarParams.SafetyModel.byd, 0)
+    self.safety.init_tests()
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    self.assertFalse(self.safety.get_controls_allowed())
 
   def test_idle_heartbeat_tracks_angle(self):
     # The STEER_REQ=0 heartbeat carries the measured angle, so panda's rate limit
