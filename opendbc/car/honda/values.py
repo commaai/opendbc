@@ -44,7 +44,7 @@ class CarControllerParams:
     if CP.carFingerprint in (CAR.HONDA_CRV, CAR.HONDA_CRV_EU, CAR.ACURA_RDX):
       self.STEER_MAX = 1000  # TODO: determine if there is a dead zone at the top end
     elif CP.carFingerprint in (CAR.ACURA_ILX, CAR.HONDA_CRV_5G, CAR.ACURA_RDX_3G, CAR.ACURA_TLX_2G_MMR, CAR.ACURA_MDX_4G,
-                               CAR.HONDA_ODYSSEY_5G_MMR):
+                               CAR.ACURA_ADX, CAR.HONDA_ODYSSEY_5G_MMR):
       self.STEER_MAX = 3840  # TODO: determine if there is a dead zone at the top end (ACURA_ILX)
     elif CP.carFingerprint in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CIVIC_2022, CAR.HONDA_ACCORD,
                                CAR.HONDA_CRV_HYBRID, CAR.HONDA_FIT, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.HONDA_HRV_3G,
@@ -54,6 +54,8 @@ class CarControllerParams:
       self.STEER_MAX = 4096
     else: # (HONDA_ODYSSEY_TWN)
       self.STEER_MAX = 32767  # TODO: determine if there is a dead zone at the top end
+    elif CP.carFingerprint == CAR.HONDA_PILOT_4G_MMR:
+      self.STEER_MAX = 3628
 
 
 class HondaSafetyFlags(IntFlag):
@@ -277,6 +279,11 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Pilot 2023-25", "All")],
     CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=17.5),
   )
+  # Mid-Model Refresh has more powerful EPS
+  HONDA_PILOT_4G_MMR = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Honda Pilot 2026", "All")],
+    CarSpecs(mass=4528 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=19.2),
+  )
   HONDA_PASSPORT_4G = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Honda Passport 2026", "All")],
     CarSpecs(mass=4620 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=18.5),
@@ -308,6 +315,12 @@ class CAR(Platforms):
   ACURA_TLX_2G_MMR = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Acura TLX 2025", "All")],
     CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.87, centerToFrontRatio=0.43, steerRatio=13.7),
+  )
+  ACURA_ADX = HondaBoschPlatformConfig(
+    [HondaCarDocs("Acura ADX 2025-26", "All")],
+    CarSpecs(mass=3578 * CV.LB_TO_KG, wheelbase=2.65, steerRatio=17.6, centerToFrontRatio=0.43),
+    {Bus.pt: 'honda_bosch_radarless_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS
   )
 
   # Nidec Cars
@@ -403,6 +416,7 @@ STEER_THRESHOLD = {
   CAR.HONDA_CRV_EU: 400,
   CAR.HONDA_ACCORD_11G: 600,
   CAR.HONDA_PILOT_4G: 600,
+  CAR.HONDA_PILOT_4G_MMR: 600,
   CAR.HONDA_PASSPORT_4G: 600,
   CAR.ACURA_MDX_4G_MMR: 600,
   CAR.HONDA_CRV_6G: 600,
