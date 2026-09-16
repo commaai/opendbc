@@ -2,6 +2,23 @@
 
 #include "opendbc/safety/declarations.h"
 
+static uint8_t byd_get_counter(const CANPacket_t *msg) {
+  // Speed uses the high nibble; cruise status uses the low nibble.
+  return (msg->addr == 0x1F0U) ? (msg->data[6] >> 4) : (msg->data[6] & 0xFU);
+}
+
+static uint32_t byd_get_checksum(const CANPacket_t *msg) {
+  return msg->data[7];
+}
+
+static uint32_t byd_compute_checksum(const CANPacket_t *msg) {
+  uint8_t sum = 0;
+  for (int i = 0; i < 7; i++) {
+    sum += msg->data[i];
+  }
+  return 0xFFU - sum;
+}
+
 static void byd_rx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == 0U) {
@@ -63,6 +80,15 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+  // Only allow cancel (ACC_ON_BTN) while stock cruise is engaged, or button release.
+  if (msg->addr == 0x3B0U) {
+    bool other_buttons = ((msg->data[0] & 0x58U) != 0U) ||  // SET, RES, LKAS_ON
+                         ((msg->data[1] & 0x80U) != 0U) ||  // DEC_DISTANCE
+                         ((msg->data[2] & 0x1U) != 0U);     // INC_DISTANCE
+    bool cancel = (msg->data[2] & 0x8U) != 0U;             // ACC_ON_BTN
+    tx = !other_buttons && (!cancel || cruise_engaged_prev);
+  }
+
   return tx;
 }
 
@@ -77,9 +103,9 @@ static safety_config byd_init(uint16_t param) {
 
   static RxCheck byd_rx_checks[] = {
     {.msg = {{0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_MODULE_2 (steering angle)
-    {.msg = {{0x1F0, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // WHEELSPEED_CLEAN (vehicle speed)
+    {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // WHEELSPEED_CLEAN (vehicle speed)
     {.msg = {{0x242, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DRIVE_STATE (gas and brake pressed)
-    {.msg = {{0x32D, 2, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // ACC_HUD_ADAS (cruise state)
+    {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // ACC_HUD_ADAS (cruise state)
   };
 
   return BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);
@@ -89,4 +115,7 @@ const safety_hooks byd_hooks = {
   .init = byd_init,
   .rx = byd_rx_hook,
   .tx = byd_tx_hook,
+  .get_counter = byd_get_counter,
+  .get_checksum = byd_get_checksum,
+  .compute_checksum = byd_compute_checksum,
 };

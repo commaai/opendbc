@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import itertools
 import unittest
 import numpy as np
 
@@ -79,6 +80,62 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def _user_gas_msg(self, gas):
     values = {"RAW_THROTTLE": int(gas * 100)}
     return self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, values)
+
+  def test_cruise_buttons(self):
+    buttons = ("SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN", "ACC_ON_BTN")
+    for cruise_engaged, controls_allowed in itertools.product((False, True), repeat=2):
+      self.assertTrue(self._rx(self._pcm_status_msg(cruise_engaged)))
+      self.safety.set_controls_allowed(controls_allowed)
+      for pressed in itertools.product((False, True), repeat=len(buttons)):
+        values = dict(zip(buttons, pressed, strict=True))
+        values.update(SET_ME_1_1=1, SET_ME_1_2=1)
+        with self.subTest(cruise_engaged=cruise_engaged, controls_allowed=controls_allowed, buttons=pressed):
+          msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, values)
+          should_tx = not any(pressed[:-1]) and (not pressed[-1] or cruise_engaged)
+          self.assertEqual(should_tx, self._tx(msg))
+
+  def test_rx_checksums(self):
+    for name, bus, signal, initial, corrupt in (
+      ("WHEELSPEED_CLEAN", self.MAIN_BUS, "WHEELSPEED_CLEAN", 72, 0),
+      ("ACC_HUD_ADAS", self.CAM_BUS, "ACC_STATE", 0, 3),
+    ):
+      for byte in range(8):
+        with self.subTest(message=name, byte=byte):
+          self.safety.set_safety_hooks(CarParams.SafetyModel.byd, 0)
+          self.safety.init_tests()
+          for counter in range(1, 17):
+            msg = self.packer.make_can_msg_safety(name, bus, {signal: initial, "COUNTER": counter % 16})
+            self.assertTrue(self._rx(msg))
+          speed_min = self.safety.get_vehicle_speed_min()
+          speed_max = self.safety.get_vehicle_speed_max()
+          msg = self.packer.make_can_msg_safety(name, bus, {signal: corrupt, "COUNTER": 1})
+          msg[0].data[byte] ^= 0xFF
+          self.safety.set_controls_allowed(name == "WHEELSPEED_CLEAN")
+          self.assertFalse(self._rx(msg))
+          self.assertFalse(self.safety.get_controls_allowed())
+          self.assertEqual(speed_min, self.safety.get_vehicle_speed_min())
+          self.assertEqual(speed_max, self.safety.get_vehicle_speed_max())
+
+  def test_rx_counters(self):
+    for name, bus, signal, value in (
+      ("WHEELSPEED_CLEAN", self.MAIN_BUS, "WHEELSPEED_CLEAN", 72),
+      ("ACC_HUD_ADAS", self.CAM_BUS, "ACC_STATE", 3),
+    ):
+      with self.subTest(message=name):
+        # Check both counter locations and rollover with valid checksums.
+        for counter in range(1, 33):
+          msg = self.packer.make_can_msg_safety(name, bus, {signal: value, "COUNTER": counter % 16})
+          self.assertTrue(self._rx(msg))
+        self.safety.set_controls_allowed(True)
+        # Replayed frames are rejected after the common counter tolerance.
+        for i in range(common.MAX_WRONG_COUNTERS + 1):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+          self.assertEqual(should_rx, self.safety.get_controls_allowed())
+        # A valid sequence clears the counter faults.
+        for counter in range(1, common.MAX_WRONG_COUNTERS + 1):
+          msg = self.packer.make_can_msg_safety(name, bus, {signal: 0, "COUNTER": counter})
+          self.assertTrue(self._rx(msg))
 
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
