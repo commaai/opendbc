@@ -496,7 +496,6 @@ struct CarParams {
   tireStiffnessRear @24 :Float32;    # [N/rad] rear tire coeff of stiff
 
   longitudinalTuning @25 :LongitudinalPIDTuning;
-  lateralParams @48 :LateralParams;
   lateralTuning :union {
     pid @26 :LateralPIDTuning;
     indiDEPRECATED @27 :LateralINDITuningDEPRECATED;
@@ -725,6 +724,7 @@ struct CarParams {
   }
 
   deprecated :group {
+    lateralParams @48 :LateralParams;
     enableGasInterceptor @2 :Bool;
     enableCamera @4 :Bool;
     enableApgs @6 :Bool;
