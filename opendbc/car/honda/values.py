@@ -52,7 +52,7 @@ class CarControllerParams:
                                CAR.HONDA_E, CAR.HONDA_E_ADVANCE):
       # TODO: determine if there is a dead zone at the top end (except HONDA_FREED, HONDA_HRV, HONDA_HRV_3G)
       self.STEER_MAX = 4096
-    else: # (HONDA_ODYSSEY_TWN)
+    elif CP.carFingerprint == CAR.HONDA_ODYSSEY_TWN:
       self.STEER_MAX = 32767  # TODO: determine if there is a dead zone at the top end
     elif CP.carFingerprint == CAR.HONDA_PILOT_4G_MMR:
       self.STEER_MAX = 3628
