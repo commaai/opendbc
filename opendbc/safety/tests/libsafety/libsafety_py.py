@@ -20,12 +20,14 @@ def _build_libsafety(release: bool = False) -> str:
     '-std=gnu11', '-Wfatal-errors', '-Wno-pointer-to-int-cast',
     '-g', '-O0', '-fno-omit-frame-pointer',
   ]
-  ldflags = [
-    '-fsanitize=undefined', '-fno-sanitize-recover=undefined',
-  ]
+  # Coverage must exclude the branches inserted by UBSan.
+  if os.environ.get("SAFETY_COVERAGE") == "1":
+    ldflags = ['-fprofile-arcs', '-ftest-coverage'] if not release else []
+  else:
+    ldflags = ['-fsanitize=undefined', '-fno-sanitize-recover=undefined']
+  cflags += ldflags
   if not release:
-    cflags += ['-DALLOW_DEBUG', '-fprofile-arcs', '-ftest-coverage']
-    ldflags += ['-fprofile-arcs', '-ftest-coverage']
+    cflags += ['-DALLOW_DEBUG']
 
   fd, safety_os = tempfile.mkstemp(suffix='.os', dir=libsafety_dir)
   os.close(fd)
@@ -103,7 +105,7 @@ void set_cruise_engaged_prev(bool engaged);
 bool get_vehicle_moving(void);
 void set_timer(uint32_t t);
 
-void safety_tick_current_safety_config();
+void safety_tick(void);
 bool safety_config_valid();
 
 void init_tests(void);
