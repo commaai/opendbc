@@ -61,6 +61,7 @@ class ToyotaSafetyFlags(IntFlag):
 class ToyotaFlags(IntFlag):
   # Detected flags
   HYBRID = 1
+  HAS_BSM = 2  # blind spot monitoring
   DISABLE_RADAR = 4
 
   # Static flags

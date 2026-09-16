@@ -70,6 +70,7 @@ class SubaruFlags(IntFlag):
   # Detected flags
   SEND_INFOTAINMENT = 1
   DISABLE_EYESIGHT = 2
+  HAS_BSM = 128  # blind spot monitoring
 
   # Static flags
   GLOBAL_GEN2 = 4
