@@ -90,7 +90,7 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[],
-  fw_version_regex=br"PLACEHOLDER_FOR_VIN_FINGERPRINT",
+  fw_version_regex=b"",
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 

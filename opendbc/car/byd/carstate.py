@@ -48,7 +48,6 @@ class CarState(CarStateBase):
 
     # gas / brake
     ret.gasPressed = cp.vl["DRIVE_STATE"]["RAW_THROTTLE"] > 0
-    ret.brake = cp.vl["PEDAL"]["BRAKE_PEDAL"]
     ret.brakePressed = bool(cp.vl["DRIVE_STATE"]["BRAKE_PRESSED"])
 
     # gear
