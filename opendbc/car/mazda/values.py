@@ -90,6 +90,7 @@ class Buttons:
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[A-Z0-9-]{11,16}\x00{8,13}",
   requests=[
     # TODO: check data to ensure ABS does not skip ISO-TP frames on bus 0
     Request(

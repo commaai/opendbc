@@ -1,6 +1,6 @@
 from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs
-from opendbc.car.chrysler.values import CUSW_CARS, DBC, STEER_THRESHOLD, RAM_CARS
+from opendbc.car.chrysler.values import CUSW_CARS, DBC, STEER_THRESHOLD, RAM_CARS, ChryslerFlags
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 
@@ -44,7 +44,6 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = cp.vl["ORC_1"]["SEATBELT_DRIVER_UNLATCHED"] == 1
 
     # brake pedal
-    ret.brake = 0
     ret.brakePressed = cp.vl["ESP_1"]['Brake_Pedal_State'] == 1  # Physical brake pedal switch
 
     # gas pedal
@@ -91,7 +90,7 @@ class CarState(CarStateBase):
       ret.steerFaultPermanent = cp.vl["EPS_2"]["LKAS_STATE"] == 4
 
     # blindspot sensors
-    if self.CP.enableBsm:
+    if self.CP.flags & ChryslerFlags.HAS_BSM:
       ret.leftBlindspot = cp.vl["BSM_1"]["LEFT_STATUS"] == 1
       ret.rightBlindspot = cp.vl["BSM_1"]["RIGHT_STATUS"] == 1
 
@@ -112,7 +111,6 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_UNLATCHED"])
 
     ret.brakePressed = bool(cp.vl["BRAKE_3"]["DRIVER_BRAKE_SWITCH"])
-    ret.brake = cp.vl["BRAKE_1"]["DRIVER_BRAKE_PRESSURE"]
     ret.gasPressed = cp.vl["ACCEL_GAS"]["GAS_HUMAN"] > 0
 
     ret.espDisabled = bool(cp.vl["TRACTION_BUTTON"]["TRACTION_OFF"])
@@ -142,7 +140,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
     ret.steerFaultPermanent = bool(cp.vl["EPS_STATUS"]["LKAS_FAULT"])
 
-    if self.CP.enableBsm:
+    if self.CP.flags & ChryslerFlags.HAS_BSM:
       ret.leftBlindspot = bool(cp.vl["BSM_LEFT"]["LEFT_DETECTED"])
       ret.rightBlindspot = bool(cp.vl["BSM_RIGHT"]["RIGHT_DETECTED"])
 

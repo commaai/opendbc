@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import IntFlag, StrEnum
 
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
-from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
+from opendbc.car.lateral import AngleSteeringLimitsVM, ISO_LATERAL_ACCEL
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig
 from opendbc.car.vin import Vin
@@ -20,12 +20,8 @@ class CarControllerParams:
   # On a fault STEERING_TORQUE.LKS_PREPARED goes from 0 to 1.
   # STEERING_TORQUE.MAIN_TORQUE is saturated at -300 for around 900ms,
   # while the wheel sits 15-26 deg past the commanded TARGET_ANGLE.
-  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+  ANGLE_LIMITS: AngleSteeringLimitsVM = AngleSteeringLimitsVM(
     390,  # deg
-    # BYD uses a vehicle model instead, check carcontroller.py for details
-    ([], []),
-    ([], []),
-
     # Vehicle model angle limits
     # Add extra tolerance for average banked road since safety doesn't have the roll
     MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
@@ -94,6 +90,7 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[],
+  fw_version_regex=br"PLACEHOLDER_FOR_VIN_FINGERPRINT",
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 

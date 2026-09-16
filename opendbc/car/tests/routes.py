@@ -17,6 +17,7 @@ from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
 from opendbc.car.body.values import CAR as COMMA
 from opendbc.car.byd.values import CAR as BYD
 from opendbc.car.psa.values import CAR as PSA
+from opendbc.car.mg.values import CAR as MG
 
 # FIXME: add routes for these cars
 non_tested_cars = [
@@ -125,6 +126,7 @@ routes = [
   CarTestRoute("f44aa96ace22f34a/2021-12-22--06-22-31", HONDA.HONDA_CIVIC_2022),
   CarTestRoute("1f032f5173c8ad99/00000006--573b3fcaf5", HONDA.HONDA_CIVIC_2022),  # Civic Type R with manual transmission
   CarTestRoute("b1c832ad56b6bc9d/00000010--debfcf5867", HONDA.HONDA_CIVIC_2022),  # 2025 Civic Hatch Hybrid with new eCVT transmission
+  CarTestRoute("49d0fc1df3e7320b/00000002--d2df953add", HONDA.HONDA_PRELUDE_6G),  # EU-market e:HEV
   CarTestRoute("f9c43864cf057d05/2024-01-15--23-01-20", HONDA.HONDA_PILOT_4G),  # TODO: Replace with a newer route
   CarTestRoute("f39cf149898833ff/0000002b--54f3fae045", HONDA.HONDA_ACCORD_11G),
   CarTestRoute("56b2cf1dacdcd033/00000017--d24ffdb376", HONDA.HONDA_CITY_7G),  # Brazilian model
@@ -134,6 +136,8 @@ routes = [
   CarTestRoute("ad9840558640c31d/0000001a--d6cd4871c2", HONDA.ACURA_MDX_4G_MMR),  # 2025 MDX
   CarTestRoute("ad9840558640c31d/000001f2--026c4f6275", HONDA.ACURA_TLX_2G_MMR),
   CarTestRoute("619b464263ab23f2/00000025--ece505fdfc", HONDA.ACURA_MDX_4G),
+  CarTestRoute("f2d6180c6007adc2/00000041--75a01c0fb1", HONDA.ACURA_ADX),
+  CarTestRoute("023b97f3d8c08c33/00000007--18cc650bdd", HONDA.HONDA_PILOT_4G_MMR),
 
   CarTestRoute("87d7f06ade479c2e/2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
   CarTestRoute("66189dd8ec7b50e6/2023-09-20--07-02-12", HYUNDAI.HYUNDAI_AZERA_HEV_6TH_GEN),
@@ -154,6 +158,7 @@ routes = [
   CarTestRoute("de59124955b921d8/2023-06-24--00-12-50", HYUNDAI.KIA_CARNIVAL_4TH_GEN),
   CarTestRoute("409c9409979a8abc/2023-07-11--09-06-44", HYUNDAI.KIA_CARNIVAL_4TH_GEN),  # Chinese model
   CarTestRoute("e0e98335f3ebc58f/2021-03-07--16-38-29", HYUNDAI.KIA_CEED),
+  CarTestRoute("26064e18b24ae44c/00000000--4eb95fc137", HYUNDAI.KIA_CEED_PHEV),
   CarTestRoute("7653b2bce7bcfdaa/2020-03-04--15-34-32", HYUNDAI.KIA_OPTIMA_G4),
   CarTestRoute("018654717bc93d7d/2022-09-19--23-11-10", HYUNDAI.KIA_OPTIMA_G4_FL, segment=0),
   CarTestRoute("f9716670b2481438/2023-08-23--14-49-50", HYUNDAI.KIA_OPTIMA_H),
@@ -278,6 +283,8 @@ routes = [
   CarTestRoute("6719965b0e1d1737/2023-08-29--06-40-05", TOYOTA.TOYOTA_CHR_TSS2),  # hybrid, openpilot longitudinal, radar disabled
   CarTestRoute("14623aae37e549f3/2021-10-24--01-20-49", TOYOTA.TOYOTA_PRIUS_V),
 
+  CarTestRoute("aebd8f1d4ea16066/00000009--b31e222338", VOLKSWAGEN.VOLKSWAGEN_ID4_MK1),
+  CarTestRoute("f73c01590368ee5b/00000aea--dc31ef6d5f", VOLKSWAGEN.VOLKSWAGEN_ID4_MK2),
   CarTestRoute("202c40641158a6e5/2021-09-21--09-43-24", VOLKSWAGEN.VOLKSWAGEN_ARTEON_MK1),
   CarTestRoute("2c68dda277d887ac/2021-05-11--15-22-20", VOLKSWAGEN.VOLKSWAGEN_ATLAS_MK1),
   CarTestRoute("ffcd23abbbd02219/2024-02-28--14-59-38", VOLKSWAGEN.VOLKSWAGEN_CADDY_MK3),
@@ -301,6 +308,7 @@ routes = [
   CarTestRoute("5432d2499e17e646/00000001--a99353214f", VOLKSWAGEN.AUDI_Q5_MK1),
   CarTestRoute("8f205bdd11bcbb65/2021-03-26--01-00-17", VOLKSWAGEN.SEAT_ATECA_MK1),
   CarTestRoute("fc6b6c9a3471c846/2021-05-27--13-39-56", VOLKSWAGEN.SEAT_ATECA_MK1),  # Leon
+  CarTestRoute("d4dd69160a48f11f/00000003--9cfe00cb74", VOLKSWAGEN.CUPRA_BORN_MK1),
   CarTestRoute("0bbe367c98fa1538/2023-03-04--17-46-11", VOLKSWAGEN.SKODA_FABIA_MK4),
   CarTestRoute("12d6ae3057c04b0d/2021-09-15--00-04-07", VOLKSWAGEN.SKODA_KAMIQ_MK1),
   CarTestRoute("12d6ae3057c04b0d/2021-09-04--21-21-21", VOLKSWAGEN.SKODA_KAROQ_MK1),
@@ -351,6 +359,8 @@ routes = [
   CarTestRoute("c8a98e58647765ad/00000002--84e4746136", TESLA.TESLA_MODEL_Y),
   CarTestRoute("2c912ca5de3b1ee9/0000025d--6eb6bcbca4", TESLA.TESLA_MODEL_Y, segment=4),
   CarTestRoute("bdda168c0c35fad7/00000001--5c5a36ec06", TESLA.TESLA_MODEL_X), # openpilot longitudinal
+
+  CarTestRoute("5d61e2f6e1f247f3/00000054--d3dfb01b34", MG.MG_5_EV),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold
