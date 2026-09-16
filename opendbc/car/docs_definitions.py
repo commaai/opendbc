@@ -112,6 +112,7 @@ class CarHarness(EnumBase):
   ram = BaseCarHarness("Ram connector")
   vw_a = BaseCarHarness("VW A connector")
   vw_j533 = BaseCarHarness("VW J533 connector", parts=[Accessory.harness_box, Cable.long_obdc_cable])
+  vw_meb = BaseCarHarness("VW MEB connector", parts=[Accessory.harness_box, Cable.long_obdc_cable])
   hyundai_a = BaseCarHarness("Hyundai A connector")
   hyundai_b = BaseCarHarness("Hyundai B connector")
   hyundai_c = BaseCarHarness("Hyundai C connector")
@@ -241,6 +242,8 @@ class CarDocs:
 
   # all the parts needed for the supported car
   car_parts: CarParts = field(default_factory=CarParts)
+  # Mazda requires comma power
+  requires_comma_power: bool = False
 
   merged: bool = True
   support_type: SupportType = SupportType.UPSTREAM
@@ -357,7 +360,7 @@ class CarDocs:
 
       # experimental mode
       exp_link = "<a href='https://blog.comma.ai/090release/#experimental-mode' target='_blank' class='highlight'>Experimental mode</a>"
-      if CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable:
+      if CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable and CP.autoResumeSng:
         sentence_builder += f" Traffic light and stop sign handling is also available in {exp_link}."
 
       return sentence_builder.format(car_model=f"{self.make} {self.model}", alc=alc, acc=acc)

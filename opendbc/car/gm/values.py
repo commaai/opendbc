@@ -65,6 +65,11 @@ class GMSafetyFlags(IntFlag):
   EV = 4
 
 
+class GMFlags(IntFlag):
+  # Detected flags
+  HAS_BSM = 1  # blind spot monitoring
+
+
 class Footnote(Enum):
   SETUP = CarFootnote(
     "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/gm\" target=\"_blank\">GM</a>.",
@@ -257,6 +262,7 @@ GM_FW_REQUESTS = [
 GM_RX_OFFSET = 0x400
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[\x00-\xff]+",
   requests=[request for req in GM_FW_REQUESTS for request in [
     Request(
       [StdQueries.SHORT_TESTER_PRESENT_REQUEST, req],

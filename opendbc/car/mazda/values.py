@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
-from enum import IntFlag
+from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -29,6 +29,14 @@ class CarControllerParams:
 class MazdaCarDocs(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.mazda]))
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.COMMA_POWER_REQUIRED])
+  requires_comma_power: bool = True
+
+
+class Footnote(Enum):
+  COMMA_POWER_REQUIRED = CarFootnote(
+    "Mazda vehicles <b>require</b> comma power installation.",
+    Column.MAKE, setup_note=True)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -90,6 +98,7 @@ class Buttons:
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[A-Z0-9-]{11,16}\x00{8,13}",
   requests=[
     # TODO: check data to ensure ABS does not skip ISO-TP frames on bus 0
     Request(

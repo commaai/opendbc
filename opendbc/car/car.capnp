@@ -469,7 +469,6 @@ struct CarParams {
   notCar @66 :Bool;  # flag for non-car robotics platforms
 
   pcmCruise @3 :Bool;        # is openpilot's state tied to the PCM's cruise state?
-  enableBsm @56 :Bool;       # blind spot monitoring
   flags @64 :UInt32;         # flags for car specific quirks
   alphaLongitudinalAvailable @71 :Bool;
 
@@ -497,7 +496,6 @@ struct CarParams {
   tireStiffnessRear @24 :Float32;    # [N/rad] rear tire coeff of stiff
 
   longitudinalTuning @25 :LongitudinalPIDTuning;
-  lateralParams @48 :LateralParams;
   lateralTuning :union {
     pid @26 :LateralPIDTuning;
     indiDEPRECATED @27 :LateralINDITuningDEPRECATED;
@@ -568,8 +566,6 @@ struct CarParams {
   }
 
   struct LongitudinalPIDTuning {
-    kpBP @0 :List(Float32);
-    kpV @1 :List(Float32);
     kiBP @2 :List(Float32);
     kiV @3 :List(Float32);
 
@@ -577,6 +573,8 @@ struct CarParams {
       kf @6 :Float32;
       deadzoneBP @4 :List(Float32);
       deadzoneV @5 :List(Float32);
+      kpBP @0 :List(Float32);
+      kpV @1 :List(Float32);
     }
   }
 
@@ -648,6 +646,10 @@ struct CarParams {
     fcaGiorgio @32;
     rivian @33;
     volkswagenMeb @34;
+    byd @35;
+    volvo @36;
+    bmw @37;
+    mg @38;
   }
 
   enum SteerControlType {
@@ -722,6 +724,7 @@ struct CarParams {
   }
 
   deprecated :group {
+    lateralParams @48 :LateralParams;
     enableGasInterceptor @2 :Bool;
     enableCamera @4 :Bool;
     enableApgs @6 :Bool;
@@ -747,6 +750,7 @@ struct CarParams {
     stoppingControl @31 :Bool; # Does the car allow full control even at lows speeds when stopping
     radarTimeStep @45: Float32 = 0.05;  # time delta between radar updates, 20Hz is very standard
     enableDsu @5 :Bool;        # driving support unit
+    enableBsm @56 :Bool;       # blind spot monitoring
     vEgoStarting @59 :Float32; # Speed at which the car goes into starting state
     startAccel @32 :Float32; # Required acceleration to get car moving
     startingState @70 :Bool; # Does this car make use of special starting state
