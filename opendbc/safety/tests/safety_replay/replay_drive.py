@@ -32,7 +32,7 @@ def replay_drive(msgs, safety_mode, param, alternative_experience):
 
     # skip start and end of route, warm up/down period
     if msg.logMonoTime - start_t > 1e9 and end_t - msg.logMonoTime > 1e9:
-      safety.safety_tick_current_safety_config()
+      safety.safety_tick()
       safety_tick_rx_invalid |= not safety.safety_config_valid() or safety_tick_rx_invalid
 
     if msg.which() == 'sendcan':

@@ -32,63 +32,61 @@ static bool gm_pcm_cruise = false;
 static void gm_rx_hook(const CANPacket_t *msg) {
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
 
-  if (msg->bus == 0U) {
-    if (msg->addr == 0x184U) {
-      int torque_driver_new = ((msg->data[6] & 0x7U) << 8) | msg->data[7];
-      torque_driver_new = to_signed(torque_driver_new, 11);
-      // update array of samples
-      update_sample(&torque_driver, torque_driver_new);
+  if (msg_matches(msg, 0x184U, 0U)) {
+    int torque_driver_new = ((msg->data[6] & 0x7U) << 8) | msg->data[7];
+    torque_driver_new = to_signed(torque_driver_new, 11);
+    // update array of samples
+    update_sample(&torque_driver, torque_driver_new);
+  }
+
+  // sample rear wheel speeds
+  if (msg_matches(msg, 0x34AU, 0U)) {
+    int left_rear_speed = (msg->data[0] << 8) | msg->data[1];
+    int right_rear_speed = (msg->data[2] << 8) | msg->data[3];
+    vehicle_moving = (left_rear_speed > GM_STANDSTILL_THRSLD) || (right_rear_speed > GM_STANDSTILL_THRSLD);
+  }
+
+  // ACC steering wheel buttons (GM_CAM is tied to the PCM)
+  if (msg_matches(msg, 0x1E1U, 0U) && !gm_pcm_cruise) {
+    int button = (msg->data[5] & 0x70U) >> 4;
+
+    // enter controls on falling edge of set or rising edge of resume (avoids fault)
+    bool set = (button != GM_BTN_SET) && (cruise_button_prev == GM_BTN_SET);
+    bool res = (button == GM_BTN_RESUME) && (cruise_button_prev != GM_BTN_RESUME);
+    if (set || res) {
+      controls_allowed = true;
     }
 
-    // sample rear wheel speeds
-    if (msg->addr == 0x34AU) {
-      int left_rear_speed = (msg->data[0] << 8) | msg->data[1];
-      int right_rear_speed = (msg->data[2] << 8) | msg->data[3];
-      vehicle_moving = (left_rear_speed > GM_STANDSTILL_THRSLD) || (right_rear_speed > GM_STANDSTILL_THRSLD);
+    // exit controls on cancel press
+    if (button == GM_BTN_CANCEL) {
+      controls_allowed = false;
     }
 
-    // ACC steering wheel buttons (GM_CAM is tied to the PCM)
-    if ((msg->addr == 0x1E1U) && !gm_pcm_cruise) {
-      int button = (msg->data[5] & 0x70U) >> 4;
+    cruise_button_prev = button;
+  }
 
-      // enter controls on falling edge of set or rising edge of resume (avoids fault)
-      bool set = (button != GM_BTN_SET) && (cruise_button_prev == GM_BTN_SET);
-      bool res = (button == GM_BTN_RESUME) && (cruise_button_prev != GM_BTN_RESUME);
-      if (set || res) {
-        controls_allowed = true;
-      }
+  // Reference for brake pressed signals:
+  // https://github.com/commaai/openpilot/blob/master/selfdrive/car/gm/carstate.py
+  if (msg_matches(msg, 0xBEU, 0U) && (gm_hw == GM_ASCM)) {
+    brake_pressed = msg->data[1] >= 8U;
+  }
 
-      // exit controls on cancel press
-      if (button == GM_BTN_CANCEL) {
-        controls_allowed = false;
-      }
+  if (msg_matches(msg, 0xC9U, 0U) && (gm_hw == GM_CAM)) {
+    brake_pressed = GET_BIT(msg, 40U);
+  }
 
-      cruise_button_prev = button;
+  if (msg_matches(msg, 0x1C4U, 0U)) {
+    gas_pressed = msg->data[5] != 0U;
+
+    // enter controls on rising edge of ACC, exit controls when ACC off
+    if (gm_pcm_cruise) {
+      bool cruise_engaged = (msg->data[1] >> 5) != 0U;
+      pcm_cruise_check(cruise_engaged);
     }
+  }
 
-    // Reference for brake pressed signals:
-    // https://github.com/commaai/openpilot/blob/master/selfdrive/car/gm/carstate.py
-    if ((msg->addr == 0xBEU) && (gm_hw == GM_ASCM)) {
-      brake_pressed = msg->data[1] >= 8U;
-    }
-
-    if ((msg->addr == 0xC9U) && (gm_hw == GM_CAM)) {
-      brake_pressed = GET_BIT(msg, 40U);
-    }
-
-    if (msg->addr == 0x1C4U) {
-      gas_pressed = msg->data[5] != 0U;
-
-      // enter controls on rising edge of ACC, exit controls when ACC off
-      if (gm_pcm_cruise) {
-        bool cruise_engaged = (msg->data[1] >> 5) != 0U;
-        pcm_cruise_check(cruise_engaged);
-      }
-    }
-
-    if (msg->addr == 0xBDU) {
-      regen_braking = (msg->data[0] >> 4) != 0U;
-    }
+  if (msg_matches(msg, 0xBDU, 0U)) {
+    regen_braking = (msg->data[0] >> 4) != 0U;
   }
 }
 
@@ -181,9 +179,11 @@ static safety_config gm_init(uint16_t param) {
     .max_brake = 400,
   };
 
+#ifdef ALLOW_DEBUG
   // block PSCMStatus (0x184); forwarded through openpilot to hide an alert from the camera
   static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4, .check_relay = true}, {0x315, 0, 5, .check_relay = true}, {0x2CB, 0, 8, .check_relay = true}, {0x370, 0, 6, .check_relay = true},  // pt bus
                                                {0x184, 2, 8, .check_relay = true}};  // camera bus
+#endif
 
 
   static RxCheck gm_rx_checks[] = {
@@ -206,20 +206,19 @@ static safety_config gm_init(uint16_t param) {
     gm_long_limits = &GM_ASCM_LONG_LIMITS;
   }
 
-  bool gm_cam_long = false;
-
-#ifdef ALLOW_DEBUG
-  const uint16_t GM_PARAM_HW_CAM_LONG = 2;
-  gm_cam_long = GET_FLAG(param, GM_PARAM_HW_CAM_LONG);
-#endif
-  gm_pcm_cruise = (gm_hw == GM_CAM) && !gm_cam_long;
+  gm_pcm_cruise = (gm_hw == GM_CAM);
 
   safety_config ret;
   if (gm_hw == GM_CAM) {
-    // FIXME: cppcheck thinks that gm_cam_long is always false. This is not true
-    // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
-    // cppcheck-suppress knownConditionTrueFalse
-    ret = gm_cam_long ? BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS) : BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
+#ifdef ALLOW_DEBUG
+    const uint16_t GM_PARAM_HW_CAM_LONG = 2;
+    const bool gm_cam_long = GET_FLAG(param, GM_PARAM_HW_CAM_LONG);
+    gm_pcm_cruise = !gm_cam_long;
+    if (gm_cam_long) {
+      ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS);
+    }
+#endif
   } else {
     ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
   }

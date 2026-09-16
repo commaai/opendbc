@@ -9,6 +9,7 @@ from collections.abc import Callable
 from opendbc.can import CANPacker
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
+from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 
 MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
@@ -568,23 +569,18 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
           self.assertEqual(send, self._tx(self._torque_cmd_msg(torque)))
 
   def test_non_realtime_limit_down(self):
-    self.safety.set_controls_allowed(True)
-
     for speed in self._torque_speed_range:
       self._reset_speed_measurement(speed)
       max_torque = self._get_max_torque(speed)
-
       torque_meas = max_torque - self.MAX_TORQUE_ERROR - 50
 
-      self.safety.set_rt_torque_last(max_torque)
-      self.safety.set_torque_meas(torque_meas, torque_meas)
-      self.safety.set_desired_torque_last(max_torque)
-      self.assertTrue(self._tx(self._torque_cmd_msg(max_torque - self.MAX_RATE_DOWN)))
-
-      self.safety.set_rt_torque_last(max_torque)
-      self.safety.set_torque_meas(torque_meas, torque_meas)
-      self.safety.set_desired_torque_last(max_torque)
-      self.assertFalse(self._tx(self._torque_cmd_msg(max_torque - self.MAX_RATE_DOWN + 1)))
+      for sign in (-1, 1):
+        for delta in (self.MAX_RATE_DOWN, self.MAX_RATE_DOWN - 1):
+          self.safety.set_controls_allowed(True)
+          self.safety.set_rt_torque_last(sign * max_torque)
+          self.safety.set_torque_meas(sign * torque_meas, sign * torque_meas)
+          self.safety.set_desired_torque_last(sign * max_torque)
+          self.assertEqual(delta == self.MAX_RATE_DOWN, self._tx(self._torque_cmd_msg(sign * (max_torque - delta))))
 
   def test_exceed_torque_sensor(self):
     self.safety.set_controls_allowed(True)
@@ -822,6 +818,114 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
 
+class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
+  MAX_CURVATURE: float
+  MAX_CURVATURE_TEST: float
+  CURVATURE_TO_CAN: float
+  SEND_RATE: float
+
+  @classmethod
+  def setUpClass(cls):
+    if cls.__name__ == "CurvatureSteeringSafetyTest":
+      cls.safety = None
+      raise unittest.SkipTest
+
+  @abc.abstractmethod
+  def _curvature_cmd_msg(self, curvature: float, steer_req: bool):
+    pass
+
+  @abc.abstractmethod
+  def _curvature_meas_msg(self, curvature: float):
+    pass
+
+  def _set_prev_desired_curvature(self, curvature: float):
+    curvature_can = int(round(curvature * self.CURVATURE_TO_CAN))
+    self.safety.set_desired_curvature_last(curvature_can)
+
+  def _reset_curvature_measurement(self, curvature: float):
+    for _ in range(MAX_SAMPLE_VALS):
+      self._rx(self._curvature_meas_msg(curvature))
+
+  def _reset_speed_measurement(self, speed: float):
+    for _ in range(MAX_SAMPLE_VALS):
+      self._rx(self._speed_msg(speed))
+      self._rx(self._speed_msg_2(speed))
+
+  def test_curvature_measurements(self):
+    self._common_measurement_test(self._curvature_meas_msg, -self.MAX_CURVATURE, self.MAX_CURVATURE, self.CURVATURE_TO_CAN,
+                                  self.safety.get_curvature_meas_min, self.safety.get_curvature_meas_max)
+
+  def test_curvature_limit(self):
+    v = 1
+    for sign in (1, -1):
+      max_curvature = self.MAX_CURVATURE_TEST * sign
+      max_curvature_rate = MAX_LATERAL_JERK / v**2
+      max_curvature_delta = max_curvature_rate * self.SEND_RATE * sign
+
+      self._reset_speed_measurement(v)
+      self.safety.set_controls_allowed(True)
+      self._set_prev_desired_curvature(max_curvature)
+
+      self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature, True)), f"{v} {max_curvature} {max_curvature_delta}")
+      self.assertTrue(self.safety.get_controls_allowed())
+
+      self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature - max_curvature_delta, True)), f"{v} {max_curvature} {max_curvature_delta}")
+      self.assertTrue(self.safety.get_controls_allowed())
+
+      self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature, True)), f"{v} {max_curvature} {max_curvature_delta}")
+      self.assertTrue(self.safety.get_controls_allowed())
+
+      self.assertFalse(self._tx(self._curvature_cmd_msg(max_curvature + max_curvature_delta, True)), f"{v} {max_curvature} {max_curvature_delta}")
+
+  def test_iso_accel_limit(self):
+    speeds = [2., 5., 10., 15., 50.]
+    for v in speeds:
+      for sign in (1, -1):
+        max_curvature = np.clip(((MAX_LATERAL_ACCEL / (v - 1)**2) * sign), -self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST)
+        max_curvature_rate = MAX_LATERAL_JERK / (v - 1)**2
+        max_curvature_delta = max_curvature_rate * self.SEND_RATE * sign
+
+        self._reset_speed_measurement(v)
+        self.safety.set_controls_allowed(True)
+        self._set_prev_desired_curvature(max_curvature)
+
+        self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature, True)), f"{v} {max_curvature} {max_curvature_delta}")
+        self.assertTrue(self.safety.get_controls_allowed())
+
+        self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature - max_curvature_delta, True)), f"{v} {max_curvature} {max_curvature_delta}")
+        self.assertTrue(self.safety.get_controls_allowed())
+
+        self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature, True)), f"{v} {max_curvature} {max_curvature_delta}")
+        self.assertTrue(self.safety.get_controls_allowed())
+
+        self.assertFalse(self._tx(self._curvature_cmd_msg(max_curvature + max_curvature_delta, True)), f"{v} {max_curvature} {max_curvature_delta}")
+
+  def test_iso_jerk_limit(self):
+    speeds = [2., 5., 10., 15., 50.]
+    for v in speeds:
+      max_curvature_rate = MAX_LATERAL_JERK / (v - 1)**2
+      max_curvature_delta = max_curvature_rate * self.SEND_RATE
+
+      self._reset_speed_measurement(v)
+      self.safety.set_controls_allowed(True)
+      self._set_prev_desired_curvature(max_curvature_delta)
+
+      self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature_delta, True)))
+      self.assertTrue(self.safety.get_controls_allowed())
+
+      self.assertTrue(self._tx(self._curvature_cmd_msg(0, True)))
+      self.assertTrue(self.safety.get_controls_allowed())
+
+      self.assertTrue(self._tx(self._curvature_cmd_msg(-max_curvature_delta, True)))
+      self.assertTrue(self.safety.get_controls_allowed())
+
+      self.assertFalse(self._tx(self._curvature_cmd_msg(max_curvature_delta, True)))
+
+      # after violation, prev is reset to 0, going past the jerk limit must fail
+      self.safety.set_controls_allowed(True)
+      self.assertFalse(self._tx(self._curvature_cmd_msg(2 * max_curvature_delta, True)))
+
+
 class SafetyTest(SafetyTestBase):
   TX_MSGS: list[list[int]] = []
   SCANNED_ADDRS = [*range(0x800),                      # Entire 11-bit CAN address space
@@ -882,8 +986,8 @@ class SafetyTest(SafetyTestBase):
     for tf in test_files:
       test = importlib.import_module("opendbc.safety.tests."+tf[:-3])
       for attr in dir(test):
-        if attr.startswith("Test") and attr != current_test:
-          tc = getattr(test, attr)
+        tc = getattr(test, attr)
+        if isinstance(tc, type) and issubclass(tc, SafetyTest) and attr != current_test:
           tx = tc.TX_MSGS
           if tx is not None and not attr.endswith('Base'):
             # No point in comparing different Tesla safety modes
@@ -909,7 +1013,7 @@ class SafetyTest(SafetyTestBase):
               continue
             if {attr, current_test}.issubset({'TestHyundaiLongitudinalSafety', 'TestHyundaiLongitudinalSafetyCameraSCC', 'TestHyundaiSafetyFCEVLong'}):
               continue
-            volkswagen_shared = ('TestVolkswagenMqb', 'TestVolkswagenMlb')
+            volkswagen_shared = ('TestVolkswagenMqb', 'TestVolkswagenMlb', 'TestVolkswagenMeb')
             if attr.startswith(volkswagen_shared) and current_test.startswith(volkswagen_shared):
               continue
 
@@ -1135,8 +1239,12 @@ class CarSafetyTest(SafetyTest):
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_safety_tick(self):
-    self.safety.set_timer(int(2e6))
-    self.safety.set_controls_allowed(True)
-    self.safety.safety_tick_current_safety_config()
-    self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.safety_config_valid())
+    # Missing valid RX messages must disable controls even before they time out.
+    for elapsed in (0, int(2e6)):
+      with self.subTest(elapsed=elapsed):
+        self._reset_safety_hooks()
+        self.safety.set_timer(elapsed)
+        self.safety.set_controls_allowed(True)
+        self.safety.safety_tick()
+        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertFalse(self.safety.safety_config_valid())
