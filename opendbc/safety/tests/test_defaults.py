@@ -70,5 +70,18 @@ class TestAllOutputPassthrough(TestAllOutput):
     self.safety.init_tests()
 
 
+class TestSafetyFramework(unittest.TestCase):
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0)
+    self.safety.init_tests()
+
+  def test_unsupported_safety_mode(self):
+    self.safety.set_controls_allowed(True)
+    self.assertEqual(self.safety.set_safety_hooks(0xFFFF, 0), -1)
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
+
+
 if __name__ == "__main__":
   unittest.main()
