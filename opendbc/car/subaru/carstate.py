@@ -84,11 +84,9 @@ class CarState(CarStateBase):
     cp_es_brake = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp_cam
 
     if self.CP.flags & (SubaruFlags.HYBRID | SubaruFlags.LKAS_ANGLE):
-      # ES_DashStatus->Cruise_Activated_Dash falls during gas override and standstill.
-      # ES_Brake can stay high after braking cancels ACC at standstill; ES_Status falls correctly.
-      # Angle cars use ES_Status; hybrids retain ES_Brake because ES_Status is missing there.
-      # TODO: Investigate hybrid cruise state separately; ES_Status/Signal7 are missing or always zero.
-      #  0x27 and 0x225 may be alternatives, but have not been validated.
+      # ES_DashStatus falls during gas override and standstill.
+      # ES_Brake stays high after a stopped brake press on angle cars.
+      # Hybrids use ES_Brake because they lack ES_Status.
       cruise_msg = "ES_Status" if self.CP.flags & SubaruFlags.LKAS_ANGLE else "ES_Brake"
       ret.cruiseState.enabled = cp_es_brake.vl[cruise_msg]['Cruise_Activated'] != 0
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0

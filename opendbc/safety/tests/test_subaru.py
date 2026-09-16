@@ -164,7 +164,6 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
   STEER_ANGLE_MAX = 190
   DEG_TO_CAN = 100
 
-  # VM-based limits, not breakpoint-based
   ANGLE_RATE_BP = None
   ANGLE_RATE_UP = None
   ANGLE_RATE_DOWN = None
@@ -174,11 +173,11 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
   def setUp(self):
     self.cnt_angle_cmd = 0
     super().setUp()
-    self.VM = VehicleModel(get_safety_CP())
-    self.limits = CarControllerParams(get_safety_CP())
+    cp = get_safety_CP()
+    self.VM = VehicleModel(cp)
+    self.limits = CarControllerParams(cp)
 
   def _speed_msg(self, speed):
-    # speed is in m/s for angle tests, convert to kph for DBC
     speed_kph = speed * 3.6
     values = {s: speed_kph for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
@@ -249,7 +248,8 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
       limit_speed = max(self.safety.get_vehicle_speed_min() - 1, 1)
       for sign in (-1, 1):
         for jerk in (False, True):
-          limit = (get_max_angle_delta_vm if jerk else get_max_angle_vm)(limit_speed, self.VM, self.limits)
+          get_limit = get_max_angle_delta_vm if jerk else get_max_angle_vm
+          limit = get_limit(limit_speed, self.VM, self.limits)
           # Bracket the boundary with room for C float rounding and the one CAN-unit tolerance.
           for offset, allowed in ((-1, True), (2, False)):
             angle_can = int(limit * self.DEG_TO_CAN) + offset

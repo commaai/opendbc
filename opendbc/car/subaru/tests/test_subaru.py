@@ -1,3 +1,4 @@
+import itertools
 import math
 import unittest
 
@@ -24,8 +25,9 @@ class TestSubaruFingerprint(unittest.TestCase):
 
 class TestSubaruAngleLimits(unittest.TestCase):
   def setUp(self):
-    self.limits = CarControllerParams(get_safety_CP())
-    self.vm = VehicleModel(get_safety_CP())
+    cp = get_safety_CP()
+    self.limits = CarControllerParams(cp)
+    self.vm = VehicleModel(cp)
 
   def test_low_speed_deadband(self):
     for speed, desired, expected in ((3.9, 2.49, 0.0), (3.9, 2.5, 2.5), (3.9, -2.49, 0.0), (3.9, -2.5, -2.5), (4.0, 0.5, 0.5)):
@@ -60,14 +62,13 @@ class TestSubaruCruiseState(unittest.TestCase):
       cs = CarState(cp)
       parsers = cs.get_can_parsers(cp)
       cruise_parser = parsers[Bus.alt if cp.flags & SubaruFlags.GLOBAL_GEN2 else Bus.cam]
-      for brake_pressed in (False, True):
-        parsers[Bus.alt if cp.flags & SubaruFlags.GLOBAL_GEN2 else Bus.pt].vl["Brake_Status"]["Brake"] = brake_pressed
-        for status in (False, True):
-          for brake_status in (False, True):
-            with self.subTest(platform=platform, brake=brake_pressed, status=status, es_brake=brake_status):
-              cruise_parser.vl["ES_Status"]["Cruise_Activated"] = status
-              cruise_parser.vl["ES_Brake"]["Cruise_Activated"] = brake_status
-              self.assertEqual(cs.update(parsers).cruiseState.enabled, status)
+      brake_parser = parsers[Bus.alt if cp.flags & SubaruFlags.GLOBAL_GEN2 else Bus.pt]
+      for brake_pressed, status, brake_status in itertools.product((False, True), repeat=3):
+        with self.subTest(platform=platform, brake=brake_pressed, status=status, es_brake=brake_status):
+          brake_parser.vl["Brake_Status"]["Brake"] = brake_pressed
+          cruise_parser.vl["ES_Status"]["Cruise_Activated"] = status
+          cruise_parser.vl["ES_Brake"]["Cruise_Activated"] = brake_status
+          self.assertEqual(cs.update(parsers).cruiseState.enabled, status)
 
   def test_hybrid_cruise_uses_es_brake(self):
     for platform in CAR:
