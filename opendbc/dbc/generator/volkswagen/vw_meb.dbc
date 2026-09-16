@@ -59,19 +59,6 @@ BO_ 496 EA_02: 8 Gateway
  SG_ EA_Blinken : 32|3@1+ (1,0) [0|7] "" Vector__XXX
  SG_ EA_Unknown : 60|3@0+ (1,0) [0|7] "" XXX
 
-BO_ 588 MEB_Side_Assist_01: 16 XXX
- SG_ Blind_Spot_Right : 12|7@1+ (1,0) [0|15] "" XXX
- SG_ Blind_Spot_Left : 19|7@1+ (1,0) [0|15] "" XXX
- SG_ Blind_Spot_Info_Right : 26|1@0+ (1,0) [0|1] "" XXX
- SG_ Blind_Spot_Warn_Right : 27|1@0+ (1,0) [0|1] "" XXX
- SG_ Blind_Spot_Info_Left : 29|1@0+ (1,0) [0|1] "" XXX
- SG_ Blind_Spot_Warn_Left : 30|1@0+ (1,0) [0|1] "" XXX
- SG_ Lower_Speed_01 : 32|1@0+ (1,0) [0|1] "" XXX
- SG_ Higher_Speed_01 : 33|1@0+ (1,0) [0|1] "" XXX
- SG_ Higher_Speed_02 : 83|1@0+ (1,0) [0|1] "" XXX
- SG_ Lower_Speed_02 : 84|1@0+ (1,0) [0|1] "" XXX
- SG_ Standstill : 86|1@0+ (1,0) [0|1] "" XXX
-
 BO_ 619 TA_01: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX

@@ -34,8 +34,8 @@ CM_ SG_ 419 REGEN_STAGE_SELECTION "Driver-selected regenerative braking threshol
 CM_ SG_ 419 REGEN_MEMORY "Driver-selected persistence setting, M shown in instrument cluster";
 CM_ SG_ 419 REGEN_UNKNOWN "Both bits set when user enables regen, otherwise zero";
 
-VAL_ 401 GEAR_SHIFTER 1 "P" 2 "R" 3 "N" 4 "D" 7 "L" 10 "S";
-VAL_ 419 GEAR_SHIFTER 1 "P" 2 "R" 3 "N" 4 "D" 7 "L" 10 "S";
+VAL_ 401 GEAR_SHIFTER 1 "P" 2 "R" 3 "N" 4 "D" 7 "L" 10 "S" 11 "B";
+VAL_ 419 GEAR_SHIFTER 1 "P" 2 "R" 3 "N" 4 "D" 7 "L" 10 "S" 11 "B";
 VAL_ 419 TRANS_TARGET_GEAR 0 "None / Neutral / Park" 1 "1st" 2 "2nd" 3 "3rd" 4 "4th" 5 "5th" 6 "6th" 7 "7th" 8 "8th" 9 "9th" 10 "10th" 13 "Reverse";
 VAL_ 419 REGEN_STAGE_SELECTION 0 "disabled" 1 "stage_1" 2 "stage_2" 3 "stage_3" 4 "stage_4" 5 "stage_5" 6 "stage_6";
 VAL_ 419 REGEN_MEMORY 0 "disabled" 1 "persistent";

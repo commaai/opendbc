@@ -17,6 +17,7 @@ class ChryslerSafetyFlags(IntFlag):
 class ChryslerFlags(IntFlag):
   # Detected flags
   HIGHER_MIN_STEERING_SPEED = 1
+  HAS_BSM = 2  # blind spot monitoring
 
 
 @dataclass
@@ -78,7 +79,7 @@ class CAR(Platforms):
   )
 
   JEEP_GRAND_CHEROKEE_2019 = ChryslerPlatformConfig(  # includes 2020 Trailhawk
-    [ChryslerCarDocs("Jeep Grand Cherokee 2019-21", video="https://www.youtube.com/watch?v=jBe4lWnRSu4")],
+    [ChryslerCarDocs("Jeep Grand Cherokee 2019-21")],
     JEEP_GRAND_CHEROKEE.specs,
   )
 
@@ -142,6 +143,7 @@ CHRYSLER_SOFTWARE_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTI
 CHRYSLER_RX_OFFSET = -0x280
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[A-Z0-9_]{10} ?",
   requests=[
     Request(
       [CHRYSLER_VERSION_REQUEST],

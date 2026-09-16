@@ -380,6 +380,7 @@ FW_VERSIONS = {
   },
   CAR.VOLKSWAGEN_ID4_MK2: {
     (Ecu.fwdRadar, 0x757, None): [
+      b'\xf1\x871EA907567C \xf1\x890099',
       b'\xf1\x871EA907567D \xf1\x890250',
     ],
   },
@@ -481,6 +482,7 @@ FW_VERSIONS = {
       b'\xf1\x870D9300014L \xf1\x895002',
       b'\xf1\x870D9300018C \xf1\x895297',
       b'\xf1\x870D9300041A \xf1\x894801',
+      b'\xf1\x870D9300041H \xf1\x894905',
       b'\xf1\x870D9300042H \xf1\x894901',
       b'\xf1\x870DD300045T \xf1\x891601',
       b'\xf1\x870DD300046B \xf1\x891601',
