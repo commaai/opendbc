@@ -6,9 +6,8 @@ from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
-from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
-                                         HYBRID_CAR, EV_CAR, FW_QUERY_CONFIG, LEGACY_SAFETY_MODE_CAR, CANFD_FUZZY_WHITELIST, \
-                                         UNSUPPORTED_LONGITUDINAL_CAR, PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
+from opendbc.car.hyundai.values import CAR, DATE_FW_ECUS, FW_QUERY_CONFIG, CANFD_FUZZY_WHITELIST, \
+                                         PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
                                          HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 from opendbc.testing import fuzzy_test
@@ -41,6 +40,15 @@ NO_DATES_PLATFORMS = {
 
 CANFD_EXPECTED_ECUS = {Ecu.fwdCamera, Ecu.fwdRadar}
 
+# CAN-only feature flags that should not appear on CAN FD platforms
+CAN_FEATURE_FLAGS = (HyundaiFlags.CLUSTER_GEARS | HyundaiFlags.TCU_GEARS | HyundaiFlags.CHECKSUM_CRC8 |
+                     HyundaiFlags.CHECKSUM_6B | HyundaiFlags.LEGACY | HyundaiFlags.UNSUPPORTED_LONGITUDINAL |
+                     HyundaiFlags.CAMERA_SCC)
+
+
+def cars_with(flags):
+  return {c for c in CAR if c.config.flags & flags}
+
 
 class TestHyundaiFingerprint(unittest.TestCase):
   def test_feature_detection(self):
@@ -69,22 +77,28 @@ class TestHyundaiFingerprint(unittest.TestCase):
       assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.ALT_LIMITS)
 
   def test_can_features(self):
-    # Test no EV/HEV in any gear lists (should all use ELECT_GEAR)
-    assert set.union(*CAN_GEARS.values()) & (HYBRID_CAR | EV_CAR) == set()
+    for car_model in CAR:
+      flags = car_model.config.flags
+      # Test no EV/HEV with cluster/TCU gears (should all use ELECT_GEAR)
+      if flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
+        assert not (flags & (HyundaiFlags.CLUSTER_GEARS | HyundaiFlags.TCU_GEARS))
 
-    # Test CAN FD car not in CAN feature lists
-    can_specific_feature_list = set.union(*CAN_GEARS.values(), *CHECKSUM.values(), LEGACY_SAFETY_MODE_CAR,
-                                          *UNSUPPORTED_LONGITUDINAL_CAR.values(), CAMERA_SCC_CAR)
-    for car_model in CANFD_CAR:
-      assert car_model not in can_specific_feature_list, "CAN FD car unexpectedly found in a CAN feature list"
+      # Test CAN FD car not in CAN feature lists
+      if flags & HyundaiFlags.CANFD:
+        assert not (flags & CAN_FEATURE_FLAGS), "CAN FD car unexpectedly has a CAN feature flag"
 
-  def test_hybrid_ev_sets(self):
-    assert HYBRID_CAR & EV_CAR == set(), "Shared cars between hybrid and EV"
-    assert CANFD_CAR & HYBRID_CAR == set(), "Hard coding CAN FD cars as hybrid is no longer supported"
+  def test_hybrid_ev_flags(self):
+    for car_model in CAR:
+      flags = car_model.config.flags
+      assert not (flags & HyundaiFlags.HYBRID and flags & HyundaiFlags.EV), "Shared cars between hybrid and EV"
+      assert not (flags & HyundaiFlags.CANFD and flags & HyundaiFlags.HYBRID), \
+        "Hard coding CAN FD cars as hybrid is no longer supported"
 
   def test_canfd_ecu_whitelist(self):
     # Asserts only expected Ecus can exist in database for CAN-FD cars
-    for car_model in CANFD_CAR:
+    for car_model in CAR:
+      if not (car_model.config.flags & HyundaiFlags.CANFD):
+        continue
       ecus = {fw[0] for fw in FW_VERSIONS[car_model].keys()}
       ecus_not_in_whitelist = ecus - CANFD_EXPECTED_ECUS
       ecu_strings = ", ".join([f"Ecu.{ecu}" for ecu in ecus_not_in_whitelist])
@@ -143,7 +157,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
   # fingerprint in the absence of full FW matches:
   def test_platform_code_ecus_available(self):
     # TODO: add queries for these non-CAN FD cars to get EPS
-    no_eps_platforms = CANFD_CAR | {CAR.KIA_SORENTO, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL, CAR.KIA_OPTIMA_H, CAR.KIA_K7_2017,
+    no_eps_platforms = cars_with(HyundaiFlags.CANFD) | {CAR.KIA_SORENTO, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL, CAR.KIA_OPTIMA_H, CAR.KIA_K7_2017,
                                     CAR.KIA_OPTIMA_H_G4_FL, CAR.HYUNDAI_SONATA_LF, CAR.HYUNDAI_TUCSON, CAR.GENESIS_G90, CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA}
 
     # Asserts ECU keys essential for fuzzy fingerprinting are available on all platforms
@@ -222,7 +236,7 @@ class TestHyundaiFingerprint(unittest.TestCase):
       CAR.GENESIS_G70,            # shared platform code, part number, and date
       CAR.GENESIS_G70_2020,
     }
-    excluded_platforms |= CANFD_CAR - EV_CAR - CANFD_FUZZY_WHITELIST  # shared platform codes
+    excluded_platforms |= cars_with(HyundaiFlags.CANFD) - cars_with(HyundaiFlags.EV) - CANFD_FUZZY_WHITELIST  # shared platform codes
     excluded_platforms |= NO_DATES_PLATFORMS  # date codes are required to match
 
     platforms_with_shared_codes = set()

@@ -59,24 +59,6 @@ def create_lka_hud_control(packer, bus, ldw_stock_values, lat_active, steering_p
   return packer.make_can_msg("LDW_02", bus, values)
 
 
-def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resume=False, up=False, down=False):
-  values = {s: gra_stock_values[s] for s in [
-    "GRA_Hauptschalter",           # ACC button, on/off
-    "GRA_Typ_Hauptschalter",       # ACC main button type
-    "GRA_Codierung",               # ACC button configuration/coding
-    "GRA_Tip_Stufe_2",             # unknown related to stalk type
-    "GRA_ButtonTypeInfo",          # unknown related to stalk type
-  ]}
-
-  values.update({
-    "COUNTER": (gra_stock_values["COUNTER"] + 1) % 16,
-    "GRA_Abbrechen": cancel,
-    "GRA_Tip_Wiederaufnahme": resume or up,
-    "GRA_Tip_Setzen": down,
-  })
-  return packer.make_can_msg("GRA_ACC_01", bus, values)
-
-
 ACC_HUD_ERROR    = 6
 ACC_HUD_OVERRIDE = 4
 ACC_HUD_ACTIVE   = 3
@@ -153,7 +135,7 @@ class MebLongStateMachine:
 
     return acc_hold_type
 
-  def update(self, CS, CC, accel) -> tuple[float, int, int, bool]:
+  def update(self, CS, CC, accel) -> tuple[float, int, int, bool, bool]:
     acc_status = self._get_acc_status(CS, CC)
     acc_hold_type = self._get_hold_type(CS, CC)
 
@@ -166,13 +148,16 @@ class MebLongStateMachine:
     # hold requested but the car hasn't reached standstill yet
     braking_to_stop = requesting_hold and not CS.esp_hold_confirmation
 
+    # driving off from a hold
+    leaving_standstill = acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
+
     self.prev_acc_hold_type = acc_hold_type
     self.acc_status = acc_status
-    return accel, acc_status, acc_hold_type, braking_to_stop
+    return accel, acc_status, acc_hold_type, braking_to_stop, leaving_standstill
 
 
 def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc_status, acc_hold_type,
-                             braking_to_stop, speed, travel_assist_available):
+                             braking_to_stop, leaving_standstill, speed, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechanism
   # error mitigation when stopping or stopped: (newer gen cars can be very sensitive)
   # - send 0 m stopping distance for cars in kind of parameterized stopping mode (stopping accel -0.2 seen for those cars)
@@ -194,7 +179,8 @@ def create_acc_accel_control(packer, bus, CCP, acc_type, acc_enabled, accel, acc
     "ACC_zul_Regelabw_oben":      0,
     "ACC_neg_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.ACCEL_INACTIVE else 0,
     "ACC_pos_Sollbeschl_Grad_02": CCP.JERK_LIMIT if accel != CCP.ACCEL_INACTIVE else 0,
-    "ACC_Anfahren":               0,  # always zero, stock uses ACC_Anforderung_HMS
+    # NOTE: gen1 stock sets this while launching, gen2 stock never does
+    "ACC_Anfahren":               1 if leaving_standstill else 0,
     "ACC_Anhalten":               1 if braking_to_stop else 0,
     "ACC_Anhalteweg":             terminal_rollout if braking_to_stop else 20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
