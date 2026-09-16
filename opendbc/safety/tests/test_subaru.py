@@ -94,26 +94,6 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
-  def test_rx_wrong_bus(self):
-    signals = [
-      (self._torque_driver_msg, self.safety.get_torque_driver_max),
-      (self._speed_msg, self.safety.get_vehicle_speed_max),
-      (self._user_brake_msg, self.safety.get_brake_pressed_prev),
-      (self._user_gas_msg, self.safety.get_gas_pressed_prev),
-      (self._pcm_status_msg, self.safety.get_controls_allowed),
-    ]
-    if self.FLAGS & SubaruSafetyFlags.LKAS_ANGLE:
-      signals.append((self._angle_meas_msg, self.safety.get_angle_meas_max))
-    for make_msg, get_value in signals:
-      for bus in range(3):
-        self.setUp()
-        msg = make_msg(1)
-        if bus != msg[0].bus:
-          with self.subTest(message=msg[0].addr, bus=bus):
-            msg[0].bus = bus
-            self._rx(msg)
-            self.assertEqual(get_value(), 0)
-
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
@@ -162,7 +142,6 @@ class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSaf
 
 class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafetyTest):
   STEER_ANGLE_MAX = 190
-  DEG_TO_CAN = 100
 
   ANGLE_RATE_BP = None
   ANGLE_RATE_UP = None
@@ -196,6 +175,18 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("ES_Status", self.ALT_MAIN_BUS, values)
+
+  def test_rx_wrong_bus(self):
+    for make_msg, get_value in ((self._angle_meas_msg, self.safety.get_angle_meas_max),
+                                (self._pcm_status_msg, self.safety.get_controls_allowed)):
+      for bus in range(3):
+        with self.subTest(message=make_msg.__name__, bus=bus):
+          self.setUp()
+          msg = make_msg(1)
+          if bus != msg[0].bus:
+            msg[0].bus = bus
+            self._rx(msg)
+            self.assertEqual(get_value(), 0)
 
   def test_stale_es_brake_cannot_engage(self):
     self._rx(self._speed_msg(0))
@@ -276,14 +267,6 @@ class TestSubaruGen2AngleStockLongitudinalSafety(TestSubaruStockLongitudinalSafe
   RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS_ANGLE, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
                                                SubaruMsg.ES_Infotainment)}
   FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr(SubaruMsg.ES_LKAS_ANGLE)
-
-
-class TestSubaruGen1LongitudinalDisabled(TestSubaruGen1TorqueStockLongitudinalSafety):
-  FLAGS = SubaruSafetyFlags.LONG
-
-
-class TestSubaruGen2LongitudinalDisabled(TestSubaruGen2TorqueStockLongitudinalSafety):
-  FLAGS = SubaruSafetyFlags.GEN2 | SubaruSafetyFlags.LONG
 
 
 class TestSubaruReleaseSafety(unittest.TestCase):

@@ -19,7 +19,6 @@ class CarInterface(CarInterfaceBase):
     # - to find the Cruise_Activated bit from the car
     # - proper panda safety setup (use the correct cruise_activated bit, throttle from Throttle_Hybrid, etc)
     ret.dashcamOnly = bool(ret.flags & (SubaruFlags.PREGLOBAL | SubaruFlags.HYBRID))
-    # Crosstrek angle control is available for validation on non-release builds.
     if ret.flags & SubaruFlags.LKAS_ANGLE:
       ret.dashcamOnly = is_release or candidate != CAR.SUBARU_CROSSTREK_2025
     ret.autoResumeSng = False
