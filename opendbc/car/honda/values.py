@@ -41,13 +41,21 @@ class CarControllerParams:
   STEER_GLOBAL_MIN_SPEED = 3 * CV.MPH_TO_MS
 
   def __init__(self, CP):
-    self.STEER_MAX = CP.lateralParams.torqueBP[-1]
-    # mirror of list (assuming first item is zero) for interp of signed request
-    # values and verify that both arrays begin at zero
-    assert CP.lateralParams.torqueBP[0] == 0
-    assert CP.lateralParams.torqueV[0] == 0
-    self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
-    self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
+    if CP.carFingerprint in (CAR.HONDA_CRV, CAR.HONDA_CRV_EU, CAR.ACURA_RDX):
+      self.STEER_MAX = 1000  # TODO: determine if there is a dead zone at the top end
+    elif CP.carFingerprint in (CAR.ACURA_ILX, CAR.HONDA_CRV_5G, CAR.ACURA_RDX_3G, CAR.ACURA_TLX_2G_MMR, CAR.ACURA_MDX_4G):
+      self.STEER_MAX = 3840  # TODO: determine if there is a dead zone at the top end (ACURA_ILX)
+    elif CP.carFingerprint in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CIVIC_2022, CAR.HONDA_ACCORD,
+                               CAR.HONDA_CRV_HYBRID, CAR.HONDA_FIT, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.HONDA_HRV_3G,
+                               CAR.HONDA_ODYSSEY, CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE, CAR.HONDA_INSIGHT, CAR.HONDA_NBOX_2G,
+                               CAR.HONDA_E, CAR.HONDA_E_ADVANCE):
+      # TODO: determine if there is a dead zone at the top end (except HONDA_FREED, HONDA_HRV, HONDA_HRV_3G)
+      self.STEER_MAX = 4096
+    elif CP.carFingerprint == CAR.HONDA_ODYSSEY_TWN:
+      self.STEER_MAX = 32767  # TODO: determine if there is a dead zone at the top end
+    else:
+      # Odyssey MMR uses up to 2560 for LKA; higher RDM commands are nonlinear and also apply brake drag.
+      self.STEER_MAX = 2560
 
 
 class HondaSafetyFlags(IntFlag):
