@@ -972,7 +972,7 @@ CM_ SG_ 3221225472 P084_CoDT_trqGearbxDes "P084  Vorweggenommenes Drehmoment";
 CM_ SG_ 3221225472 P087_Com_stClth "Clutch signal for AM6";
 CM_ SG_ 3221225472 P093_Temp_aval_FAP "P093  FAP-Temperatur";
 CM_ SG_ 3221225472 P101_Com_mAddPmpTot "P101: absolute Menge des eingespritztem Additivs (Cerium)";
-CM_ SG_ 3221225472 P107_Com_stAddPmpLvl "P107 Minimum of FAP additive exeeded";
+CM_ SG_ 3221225472 P107_Com_stAddPmpLvl "P107 Minimum of FAP additive exceeded";
 CM_ SG_ 3221225472 P227_Pwr_Gen_Support_state "P165: Water in fuel indication (1 = water in fueel detected / 0 = no water in fuel)";
 CM_ SG_ 3221225472 P243_FrmMng_stFlCnsmp_mp "P155: Preparation of glow activation.";
 CM_ SG_ 3221225472 P248_StarterStopReq "starter stop request";
