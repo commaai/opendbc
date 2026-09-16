@@ -247,7 +247,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
   def test_startup_timing(self):
     # Tests worse-case VIN query time and typical present ECU query time
     vin_ref_times = {'worst': 1.6, 'best': 0.8}  # best assumes we go through all queries to get a match
-    present_ecu_ref_time = 0.45
+    present_ecu_ref_time = 0.65  # +0.20: TSS3 adds two OBD-II (bus 1) Toyota requests
 
     def fake_get_ecu_addrs(*_, timeout):
       self.total_time += timeout
@@ -271,7 +271,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
         print(f'get_vin {name} case, query time={self.total_time / self.N} seconds')
 
   def test_fw_query_timing(self):
-    total_ref_time = 8.3
+    total_ref_time = 8.7  # +0.4: TSS3 adds two OBD-II (bus 1) Toyota requests
     brand_ref_times = {
       'gm': 1.0,
       'body': 0.1,
@@ -283,7 +283,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
       'nissan': 1.6,
       'subaru': 0.65,
       'tesla': 0.1,
-      'toyota': 0.7,
+      'toyota': 1.1,  # +0.4: TSS3 adds two OBD-II (bus 1) requests (engine via OBD mode 09, abs/eps/fwdRadar via UDS)
       'volkswagen': 0.65,
       'rivian': 0.3,
       'psa': 0.1,

@@ -42,7 +42,13 @@ class TestToyotaInterfaces(unittest.TestCase):
     for car_model, ecus in FW_VERSIONS.items():
       with self.subTest(car_model=car_model.value):
         present_ecus = {ecu[0] for ecu in ecus}
-        missing_ecus = common_ecus - present_ecus
+        expected_ecus = common_ecus
+        # TSS 3.0: the fwdCamera is on the ADAS CAN-FD bus and does not answer
+        # diagnostics over the OBD-II port (the gateway routes OBD-II diagnostics
+        # only to the powertrain ECUs), so it is absent from this FW set.
+        if car_model in (CAR.TOYOTA_COROLLA_TSS3,):
+          expected_ecus = expected_ecus - {Ecu.fwdCamera}
+        missing_ecus = expected_ecus - present_ecus
         assert len(missing_ecus) == 0
 
         # Some exceptions for other common ECUs
@@ -87,6 +93,10 @@ class TestToyotaFingerprint(unittest.TestCase):
           if platform_code_ecu == Ecu.eps and car_model in (CAR.TOYOTA_PRIUS_V, CAR.LEXUS_CTH,):
             continue
           if platform_code_ecu == Ecu.abs and car_model in (CAR.TOYOTA_ALPHARD_TSS2,):
+            continue
+          # TSS 3.0: fwdCamera is on the ADAS bus, not queryable over OBD-II (see
+          # test_essential_ecus); the eps + fwdRadar platform codes are sufficient.
+          if platform_code_ecu == Ecu.fwdCamera and car_model in (CAR.TOYOTA_COROLLA_TSS3,):
             continue
           assert platform_code_ecu in [e[0] for e in ecus]
 

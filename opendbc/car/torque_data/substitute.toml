@@ -10,6 +10,11 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "TOYOTA_ALPHARD_TSS2" = "TOYOTA_SIENNA"
 "TOYOTA_PRIUS_V" = "TOYOTA_PRIUS"
 "TOYOTA_SIENNA_4TH_GEN" = "TOYOTA_RAV4_PRIME"
+# Placeholder. Phase 1 for this platform is read-only -- there is no lateral
+# control path at all -- so these values are never used to actuate. Borrowed
+# from the TSS2 Corolla as the closest measured car. Must be measured before
+# any steering is ever enabled (which is blocked on the CA2 tap regardless).
+"TOYOTA_COROLLA_TSS3" = "TOYOTA_COROLLA_TSS2"
 "LEXUS_IS" = "LEXUS_NX"
 "LEXUS_CTH" = "LEXUS_NX"
 "LEXUS_ES" = "TOYOTA_CAMRY"

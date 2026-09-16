@@ -121,6 +121,51 @@ class CarInterface(CarInterfaceBase):
       if ret.flags & ToyotaFlags.HYBRID.value:
         ret.longitudinalActuatorDelay = 0.05
 
+    # TSS 3.0 (CAN FD) -- Phase 1, read only. This must come LAST so it overrides
+    # every default set above, in particular openpilotLongitudinalControl, which
+    # the TSS2 rule turns on for this platform.
+    #
+    # noOutput is "like silent but without silent CAN TXs": the panda receives
+    # everything and transmits nothing. Combined with dashcamOnly staying False,
+    # this is exactly the port doc's section 7 item 5 -- the driving model runs
+    # and renders lanes/path, and no actuation is physically possible.
+    if ret.flags & ToyotaFlags.CAN_FD.value:
+      # Lateral is impossible on this car regardless of any toggle: the
+      # camera->EPS command rides on the untapped CA2 bus and does not exist in
+      # this DBC. Longitudinal (0x13C) IS plaintext on an already-tapped bus, so
+      # it is offered as opt-in behind the standard Alpha Longitudinal toggle --
+      # a param, so sunnylink can set it like any other.
+      # The toggle is only offered once the path is at least in shadow mode --
+      # a toggle that does nothing is worse than no toggle.
+      # NO STOP-AND-GO. The platform inherits stop_and_go from the TSS2 flag,
+      # which would set minEnableSpeed = -1 and let openpilot drive the car to a
+      # standstill -- but the ACC standstill/hold state is not decoded yet
+      # (cruiseState.standstill is hardcoded False, port doc 12.2 item 1).
+      # Capping the low end is what makes longitudinal usable WITHOUT it:
+      # car_events.py raises belowEngageSpeed under minEnableSpeed and
+      # speedTooLow (which disengages) if the planner still wants throttle, so
+      # openpilot hands back before standstill is ever reached and
+      # cruiseState.standstill is never consulted.
+      # 19 mph == Toyota MIN_ACC_SPEED, and matches this car's own set-speed floor.
+      ret.minEnableSpeed = MIN_ACC_SPEED
+
+      # TSS3 longitudinal rides on the camera-origin 0x160 modify-and-forward path, so
+      # openpilot longitudinal is always available here (not gated behind the alpha-
+      # longitudinal param, which is auto-deleted offroad).
+      ret.alphaLongitudinalAvailable = False
+      ret.openpilotLongitudinalControl = True
+      ret.autoResumeSng = False
+      # Lateral: angle control via the LTA path (steer request in 0x160 bytes 22-23).
+      ret.steerControlType = SteerControlType.angle
+
+      # Toyota safety with the TSS3 flag, which permits the 0x160 modify-and-forward tx
+      # (see opendbc/safety/modes/toyota.h). The carcontroller only substitutes into
+      # 0x160 while the stock ACC is engaged (cruiseState.enabled == the panda's
+      # controls_allowed source); otherwise it relays the camera's own frame. Requires
+      # a panda built with ALLOW_DEBUG (the TSS3 param is debug-gated, like SECOC).
+      ret.safetyConfigs[0].safetyParam &= ~ToyotaSafetyFlags.STOCK_LONGITUDINAL.value
+      ret.safetyConfigs[0].safetyParam |= ToyotaSafetyFlags.TSS3.value
+
     return ret
 
   @staticmethod

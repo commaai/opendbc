@@ -2,6 +2,8 @@ from opendbc.car.structs import CarParams
 
 SteerControlType = CarParams.SteerControlType
 
+from opendbc.car.toyota.e2e import apply_e2e_160, apply_e2e_1a0
+from opendbc.car.can_definitions import CanData
 
 def create_steer_command(packer, steer, steer_req):
   """Creates a CAN message for the Toyota Steer Command."""
@@ -164,3 +166,94 @@ def toyota_checksum(address: int, sig, d: bytearray) -> int:
   for i in range(len(d) - 1):
     s += d[i]
   return s & 0xFF
+
+
+TSS3_ADAS_ACC_REQUEST = 0x160
+TSS3_ACCEL_SCALE = 0.001            # m/s^2 per count, verified r=0.992 vs 0x13C
+# LATERAL: the camera's STEER REQUEST rides in 0x160 too -- bytes 22-23, 16-bit BE
+# signed, zero-centered (~49 counts at 0 deg), saturating +/-32768 (~+/-60 deg
+# authority). Route 23: r=0.995 vs the gateway 0x1A0 command, LEADS it by ~0.10s;
+# neutral when LTA is off -> it is the camera->gateway request, not telemetry. The
+# gateway turns it into 0x1A0 for the EPS. Since openpilot is the sole writer of
+# 0x160, biasing this field steers the car -- no 0x1A0 injection (that is gateway-
+# native on bus0 and trips relayMalfunction). Scale is in the 0x1A0-derived degree;
+# the real wheel-angle deg/count is calibrated on-car (relay-first, then nudge).
+TSS3_STEER_160_SCALE = 537.7        # counts per degree (bytes 22-23)
+
+
+def modify_160(template: bytes, accel, angle, counter: int):
+  """TSS 3.0 combined ADAS request: openpilot is the SOLE emitter of the camera's
+  0x160 the entire time it is engaged -- there is NO CAN-level handoff to the
+  camera (handoffs at stops / low-speed engage tripped the gateway).
+
+  Takes the camera's own live frame (template, captured on the cam bus) and:
+    - byte 2: re-stamps the rolling counter (the camera's own value, so the E2E
+      sequence is byte-identical to what the camera would have sent).
+    - bytes 0-1: recomputes the AUTOSAR E2E CRC.
+    - ACCEL_REQ (byte4 bits 6..0 + byte5, 15-bit signed, 0.001 m/s^2):
+        accel is None  -> RELAY the camera's accel; float -> SUBSTITUTE.
+      byte4 bit7 (0x80) is a constant flag ABOVE the field and is preserved.
+    - STEER_REQ (bytes 22-23, 16-bit BE signed, ~537.7 counts/deg):
+        angle is None  -> RELAY the camera's steer request (transparent; stock LTA
+                          drives when the driver has it on).
+        angle is float -> SUBSTITUTE openpilot's target angle.
+
+  Every other byte -- including the steer-request companion fields (bytes 8-17)
+  and the sub-counters -- passes through as the camera set it, so substituting only
+  b22:24 biases the angle within the camera's own live request. 0x160 is keyless
+  (E2E, not SecOC), so this is a gateway-valid frame with no key. CanData bus 0.
+  """
+  buf = bytearray(template)
+  if accel is not None:
+    raw = int(round(accel / TSS3_ACCEL_SCALE))
+    raw = max(-16384, min(16383, raw)) & 0x7FFF   # 15-bit two's complement
+    buf[4] = (buf[4] & 0x80) | ((raw >> 8) & 0x7F)
+    buf[5] = raw & 0xFF
+  if angle is not None:
+    sraw = int(round(angle * TSS3_STEER_160_SCALE))
+    sraw = max(-32768, min(32767, sraw)) & 0xFFFF  # 16-bit two's complement
+    buf[22] = (sraw >> 8) & 0xFF
+    buf[23] = sraw & 0xFF
+  buf[2] = counter & 0xFF
+  out = apply_e2e_160(bytes(buf))               # sets bytes 0-1 CRC
+  return CanData(TSS3_ADAS_ACC_REQUEST, out, 0)
+
+
+def modify_accel_160(template: bytes, accel, counter: int):
+  """Back-compat longitudinal-only wrapper (relays the camera's steer request)."""
+  return modify_160(template, accel, None, counter)
+
+
+TSS3_ADAS_STEER_COMMAND = 0x1A0
+TSS3_STEER_ANGLE_SCALE = 0.0148     # deg/count (byte 11-12, 16-bit signed BE)
+
+
+def modify_steer_1a0(template: bytes, angle, steer_request: bool, counter: int):
+  """TSS 3.0 LATERAL by MODIFY-AND-FORWARD of the gateway's 0x1A0 LTA steering
+  command (48-byte, ADAS relayed bus). Mirrors modify_accel_160:
+
+    - byte 2   : re-stamps the E2E counter (gateway's own value -> seamless).
+    - bytes 0-1: recomputes the keyless E2E CRC (DataID 0xBEA8).
+    - STEER_ANGLE_CMD (bytes 11-12, 16-bit signed BE, ~0.0148 deg/count):
+        angle is None  -> RELAY (leave the gateway's command untouched).
+        angle is float -> SUBSTITUTE openpilot's target angle.
+
+  There is NO openpilot steer-request bit. Route 23 confirmed LTA steered the
+  whole drive with byte6-bit6 reading 0, and byte6 is in fact a slow group-
+  counter (values 3..10, each held for 256 frames of the byte-2 counter) -- so
+  forcing byte6-bit6 corrupts a live counter and the EPS would reject the E2E
+  sequence. LTA is enabled by the DRIVER; that state rides through untouched in
+  the template. openpilot only biases the angle. Every other byte -- byte6 and
+  the byte3/byte7 sub-counters included -- passes through verbatim from the
+  template (the camera's own current values, so the sequence stays seamless).
+  steer_request is retained for API symmetry but no longer touches the frame.
+  """
+  buf = bytearray(template)
+  if angle is not None:
+    raw = int(round(angle / TSS3_STEER_ANGLE_SCALE))
+    raw = max(-32768, min(32767, raw)) & 0xFFFF
+    buf[11] = (raw >> 8) & 0xFF
+    buf[12] = raw & 0xFF
+  buf[2] = counter & 0xFF
+  out = apply_e2e_1a0(bytes(buf))
+  return CanData(TSS3_ADAS_STEER_COMMAND, out, 0)

@@ -56,6 +56,10 @@ class ToyotaSafetyFlags(IntFlag):
   STOCK_LONGITUDINAL = (2 << 8)
   LTA = (4 << 8)
   SECOC = (8 << 8)
+  # TSS 3.0. Selects the CAN FD longitudinal-only tx/rx set in the panda safety
+  # mode. Requires the matching change in opendbc/safety/modes/toyota.h plus a
+  # firmware reflash -- see port/PANDA_TSS3_SAFETY.md. Ignored by stock firmware.
+  TSS3 = (16 << 8)
 
 
 class ToyotaFlags(IntFlag):
@@ -74,6 +78,8 @@ class ToyotaFlags(IntFlag):
   # these cars can utilize 2.0 m/s^2
   RAISED_ACCEL_LIMIT = 1024
   SECOC = 2048
+  # CAN FD powertrain bus (TSS 3.0). New for Toyota -- no other Toyota is CAN FD.
+  CAN_FD = 4096
 
   # deprecated flags
   # these cars are speculated to allow stop and go when the DSU is unplugged
@@ -124,6 +130,16 @@ class ToyotaSecOCPlatformConfig(PlatformConfig):
 
     if self.flags & ToyotaFlags.RADAR_ACC:
       self.dbc_dict = {Bus.pt: 'toyota_secoc_pt_generated'}
+
+
+@dataclass
+class ToyotaCanFDSecOCPlatformConfig(PlatformConfig):
+  """TSS 3.0: CAN FD + SecOC. Not a variant of ToyotaSecOCPlatformConfig -- that
+  one loads an 8-byte DBC and a radar bus, neither of which applies here."""
+  dbc_dict: dict = field(default_factory=lambda: {Bus.pt: 'toyota_corolla_tss3_pt'})
+
+  def init(self):
+    self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC | ToyotaFlags.CAN_FD
 
 
 class CAR(Platforms):
@@ -209,6 +225,25 @@ class CAR(Platforms):
       ToyotaCarDocs("Toyota Corolla Cross Hybrid (Non-US only) 2020-22", min_enable_speed=7.5),
       ToyotaCarDocs("Lexus UX Hybrid 2019-24"),
     ],
+    CarSpecs(mass=3060. * CV.LB_TO_KG, wheelbase=2.67, steerRatio=13.9, tireStiffnessFactor=0.444),
+  )
+  TOYOTA_COROLLA_TSS3 = ToyotaCanFDSecOCPlatformConfig(
+    [ToyotaSecOcCarDocs("Toyota Corolla 2023", min_enable_speed=MIN_ACC_SPEED)],
+    # Same specs opendbc already uses for the E210 Corolla (TOYOTA_COROLLA_TSS2),
+    # which is the vetted middle ground between the 2.70 m sedan and the 2.64 m
+    # hatchback. The VIN (WMI 5YF = Toyota Motor Manufacturing Mississippi)
+    # indicates the US-built sedan.
+    #
+    # WHEELBASE AND THE DBC STEER_ANGLE FACTOR ARE COUPLED. The passive-log fit
+    # pinned only scale/steerRatio = 0.061 deg/count AT L = 2.64 m. Since
+    # delta = yaw * L / v, the inferred scale moves with the wheelbase:
+    #     L = 2.64 -> 0.0610/ratio -> 0.848 deg/count at steerRatio 13.9
+    #     L = 2.67 -> 0.0617/ratio -> 0.858 deg/count   <- used, see the DBC
+    #     L = 2.70 -> 0.0624/ratio -> 0.867 deg/count
+    # Change wheelbase or steerRatio here and you must rescale STEER_ANGLE in
+    # toyota_corolla_tss3_pt.dbc to match, or the angle reads wrong while still
+    # correlating perfectly with curvature. Settle it on the car instead: hold a
+    # known wheel angle and read the decoded value.
     CarSpecs(mass=3060. * CV.LB_TO_KG, wheelbase=2.67, steerRatio=13.9, tireStiffnessFactor=0.444),
   )
   TOYOTA_HIGHLANDER = PlatformConfig(
@@ -542,6 +577,27 @@ FW_QUERY_CONFIG = FwQueryConfig(
                       Ecu.hybrid, Ecu.srs, Ecu.transmission, Ecu.hvac],
       bus=0,
     ),
+    # TSS 3.0 (CAN FD + SecOC) platforms: the powertrain ECUs are NOT reachable for
+    # diagnostics on bus 0 -- that is the ADAS CAN-FD bus, and the gateway routes
+    # UDS/OBD diagnostics only to the OBD-II port. So two of the Toyota queries are
+    # repeated on bus 1, which triggers OBD multiplexing (bus % 4 == 1 in
+    # fw_versions.py) and reaches engine (OBD mode 09) and abs/eps/fwdRadar (UDS)
+    # over the OBD-II connector. Harmless on TSS2: those ECUs answer identically on
+    # bus 0, and a duplicate FW at the same address is deduped and never invalidates
+    # a match. The ADAS fwdCamera stays on the CAN-FD bus and is not queried here.
+    Request(
+      [StdQueries.SHORT_TESTER_PRESENT_REQUEST, StdQueries.OBD_VERSION_REQUEST],
+      [StdQueries.SHORT_TESTER_PRESENT_RESPONSE, StdQueries.OBD_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.engine, Ecu.hybrid, Ecu.srs, Ecu.transmission, Ecu.hvac],
+      bus=1,
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.DEFAULT_DIAGNOSTIC_REQUEST, StdQueries.EXTENDED_DIAGNOSTIC_REQUEST, StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.DEFAULT_DIAGNOSTIC_RESPONSE, StdQueries.EXTENDED_DIAGNOSTIC_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.engine, Ecu.fwdRadar, Ecu.fwdCamera, Ecu.abs, Ecu.eps,
+                      Ecu.hybrid, Ecu.srs, Ecu.transmission, Ecu.hvac],
+      bus=1,
+    ),
   ],
   non_essential_ecus={
     # FIXME: On some models, abs can sometimes be missing
@@ -587,5 +643,31 @@ STEER_THRESHOLD = 100
 # These cars have non-standard EPS torque scale factors. All others are 73
 EPS_SCALE = defaultdict(lambda: 73,
                         {CAR.TOYOTA_PRIUS: 66, CAR.TOYOTA_COROLLA: 88, CAR.LEXUS_IS: 77, CAR.LEXUS_RC: 77, CAR.LEXUS_CTH: 100, CAR.TOYOTA_PRIUS_V: 100})
+
+# --- TSS 3.0 (CAN FD + SecOC) tuning constants ---
+
+# openpilot's own commanded steering-angle clamp for the 0x160 steer field (bytes
+# 22-23, ~537.7 counts/deg, confirmed 1:1 on-car). The field is 16-bit signed, so it
+# saturates at 32767/537.7 = 60.94 deg (== the stock LTA authority); the panda enforces
+# only a per-frame rate cap (no peak-angle limit), so this clamp is the sole peak limit.
+# Set at the field ceiling for maximum LTA authority; turns sharper than the field max
+# are beyond LTA and are the driver's job, same as stock LTA.
+TSS3_MAX_STEER_ANGLE = 60.9  # deg (field maximum)
+
+# Driver-override threshold for the 0xDA STEER_TORQUE_SENSOR driver-torque signal
+# (TORQUE_3). abs(driver_torque) above this => steeringPressed => openpilot lateral
+# pauses for the driver. On-car calibration: resting ~50-100, active inputs 300-500,
+# firm/parking inputs 800-1795.
+TSS3_STEER_THRESHOLD = 350
+
+# The TSS 3.0 powertrain CAN lands on this panda bus (bus 1, unrelayed) with the stock
+# camera-connector wiring; the relayed pair (bus 0 <-> 2) carries the ADAS CAN FD bus.
+TSS3_PT_BUS = 1
+
+# Below this speed openpilot hands longitudinal back to the stock system so Toyota's own
+# standstill-hold does the final stop and hold (openpilot cannot signal the hold through
+# 0x160). The stock ACC_ENGAGED signal stays asserted to 0.0 mph, so the panda permits
+# openpilot's 0x160 all the way down to here. ~1 mph.
+TSS3_MIN_OVERRIDE_SPEED = 0.45  # m/s
 
 DBC = CAR.create_dbc_map()

@@ -36,6 +36,15 @@
   {0x343, 0, 8, .check_relay = true}, \
   {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */ \
 
+// TSS 3.0 (CAN FD + SecOC): 0x160 is the combined camera->gateway ADAS request,
+// carrying BOTH accel (bytes 4-5) and steer (bytes 22-23) in one 32-byte frame on
+// bus 0. openpilot is the sole writer; the camera's copy is dynamically blocked by
+// the fwd hook while longitudinal is allowed (disable_static_blocking lets the hook
+// decide, gap-free). There is no separate 0x1A0 tx: 0x1A0 is gateway-native on bus0
+// and would trip relay_malfunction.
+#define TOYOTA_TSS3_LONG_TX_MSGS \
+  {0x160, 0, 32, .check_relay = true, .disable_static_blocking = true},  /* ADAS_ACC_REQUEST (TSS3) accel + steer */ \
+
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
   {.msg = {{ 0xaa, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},      \
   {.msg = {{0x260, 0, 8, 50U, .ignore_counter = true, .ignore_quality_flag=!(lta)}, { 0 }, { 0 }}},  \
@@ -56,10 +65,21 @@
   {.msg = {{0x116, 0, 8, 42U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
   {.msg = {{0x101, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
+// TSS 3.0 safety inputs on the POWERTRAIN bus (bus 1, unrelayed with stock wiring):
+//   0xAA WHEEL_SPEEDS, 0x8A STEER_ANGLE_ACC_STATUS (cruise-engaged bit), 0x101
+//   BRAKE_MODULE, 0x116 GAS_PEDAL. Addresses/bits decoded from the port logs.
+#define TOYOTA_TSS3_RX_CHECKS                                                                                                       \
+  {.msg = {{ 0xaa, 1, 8, 80U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},                                     \
+  {.msg = {{ 0x8a, 1, 32, 40U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},       \
+  {.msg = {{0x101, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},        \
+  {.msg = {{0x116, 1, 8, 42U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},        \
+
 static bool toyota_secoc = false;
 static bool toyota_alt_brake = false;
 static bool toyota_stock_longitudinal = false;
 static bool toyota_lta = false;
+static bool toyota_tss3 = false;
+static bool tss3_steer_angle_inited = false;  // seed the steer rate baseline on the engage edge
 static int toyota_dbc_eps_torque_factor = 100;   // conversion factor for STEER_TORQUE_EPS in %: see dbc file
 
 static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
@@ -167,6 +187,49 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
 
     UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 * KPH_TO_MS);
   }
+
+  // TSS 3.0: engage/speed/brake/gas inputs are on the powertrain bus (bus 1) with
+  // stock wiring, not bus 0. Mirrors the bus-0 handling above.
+  if (toyota_tss3 && (msg->bus == 1U)) {
+    // 0x8A STEER_ANGLE_ACC_STATUS: cruise engaged = byte 22 bit 4 (bit index 180).
+    if (msg->addr == 0x8AU) {
+      bool cruise_engaged = GET_BIT(msg, 180U);
+      pcm_cruise_check(cruise_engaged);
+      acc_main_on = msg->data[7] != 0U;  // ACC_STATE byte 7 != 0 => system on
+
+      // Track measured steering angle for state consistency. STEER_ANGLE is bytes 18-19
+      // (16-bit signed BE) at 0.061 deg/count; the Toyota safety framework expresses
+      // angle_meas in 0.0573 deg/count units (angle_deg_to_can = 17.452), so scale by
+      // 0.061/0.0573 = 610/573. Not consumed by any TSS3 tx check (the 0x160 steer check
+      // rate-limits the command itself); kept so angle_meas matches CarState.steeringAngleDeg.
+      int angle_meas_new = (msg->data[18] << 8U) | msg->data[19];
+      angle_meas_new = to_signed(angle_meas_new, 16);
+      angle_meas_new = (angle_meas_new * 610) / 573;
+      update_sample(&angle_meas, angle_meas_new);
+    }
+    // 0xAA WHEEL_SPEEDS: same layout/scale as classic Toyota (raw*0.01 - 67.67).
+    if (msg->addr == 0xAAU) {
+      int speed = 0;
+      for (uint8_t i = 0U; i < 8U; i += 2U) {
+        int wheel_speed = ((msg->data[i] & 0x7FU) << 8U) | msg->data[(i + 1U)];
+        speed += wheel_speed - 6767;
+      }
+      vehicle_moving = speed != 0;
+      UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 * KPH_TO_MS);
+      // while disengaged openpilot does not emit 0x160 (the camera's own frame passes
+      // through), so clear the steer rate baseline; it re-seeds from the first frame
+      // openpilot sends on the engage edge (see the 0x160 tx check).
+      if (!controls_allowed) { tss3_steer_angle_inited = false; }
+    }
+    // 0x101 BRAKE_MODULE: brake pressed = bit 3.
+    if (msg->addr == 0x101U) {
+      brake_pressed = GET_BIT(msg, 3U);
+    }
+    // 0x116 GAS_PEDAL: driver gas = byte 1 != 0.
+    if (msg->addr == 0x116U) {
+      gas_pressed = msg->data[1] != 0U;
+    }
+  }
 }
 
 static bool toyota_tx_hook(const CANPacket_t *msg) {
@@ -209,6 +272,20 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     .max_accel = 2000,   // 2.0 m/s2
     .min_accel = -3500,  // -3.5 m/s2
   };
+
+  // TSS 3.0 0x160 accel envelope = STOCK Toyota range, because openpilot RELAYS the
+  // camera's own 0x160 verbatim when it is not actively controlling (the camera
+  // brakes to ~-3.3 m/s^2 at stops); a tighter limit would block those relayed
+  // frames. openpilot's OWN commanded accel is separately clamped in the carcontroller.
+  const LongitudinalLimits TOYOTA_TSS3_LONG_LIMITS = {
+    .max_accel = 2000,
+    .min_accel = -3500,
+  };
+  // TSS 3.0 steer field (0x160 bytes 22-23, ~537.7 counts/deg) per-frame rate cap.
+  // The absolute range is the full stock-LTA field (relay must pass); the rate cap is
+  // the backstop against a snapped command. Generous so relaying stock LTA never
+  // glitches; openpilot's own angle is clamped tighter in the carcontroller. TUNE.
+  const int TOYOTA_TSS3_MAX_STEER_DELTA = 1500;  // counts/frame
 
   bool tx = true;
 
@@ -255,6 +332,34 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     if (block) {
       tx = false;
     }
+  }
+
+  // TSS 3.0 ADAS_ACC_REQUEST (0x160): bound BOTH accel and steer, which share this
+  // one combined camera->gateway frame.
+  //   ACCEL_REQ = byte4 bits 6..0 + byte5, 15-bit signed BE (byte4 bit7 0x80 is a
+  //               constant flag above the field, masked off).
+  //   STEER_REQ = bytes 22-23, 16-bit signed BE (~537.7 counts/deg).
+  // openpilot is the sole writer and relays the camera's own steer when not actively
+  // steering, so allow the full field and rely on the per-frame rate cap (seeded on
+  // the engage edge via the rx 0xAA reset). openpilot only emits 0x160 while engaged.
+  if (toyota_tss3 && (msg->bus == 0U) && (msg->addr == 0x160U)) {
+    int desired_accel = ((msg->data[4] & 0x7FU) << 8) | msg->data[5];
+    desired_accel = to_signed(desired_accel, 15);
+    bool violation = longitudinal_accel_checks(desired_accel, TOYOTA_TSS3_LONG_LIMITS);
+
+    int desired_steer = (msg->data[22] << 8) | msg->data[23];
+    desired_steer = to_signed(desired_steer, 16);
+    if (controls_allowed) {
+      static int tss3_last_steer_angle = 0;   // last accepted 0x160 steer field, for the rate limit
+      if (tss3_steer_angle_inited) {
+        if ((desired_steer - tss3_last_steer_angle) > TOYOTA_TSS3_MAX_STEER_DELTA) { violation = true; }
+        if ((tss3_last_steer_angle - desired_steer) > TOYOTA_TSS3_MAX_STEER_DELTA) { violation = true; }
+      }
+      tss3_steer_angle_inited = true;
+      tss3_last_steer_angle = desired_steer;   // track for rate limiting
+    }
+
+    tx = !violation;
   }
 
   // STEERING_LTA angle steering check
@@ -365,6 +470,10 @@ static safety_config toyota_init(uint16_t param) {
     TOYOTA_COMMON_SECOC_LONG_TX_MSGS
   };
 
+  static const CanMsg TOYOTA_TSS3_LONG_TX_MSGS_ARR[] = {
+    TOYOTA_TSS3_LONG_TX_MSGS
+  };
+
   // safety param flags
   // first byte is for EPS factor, second is for flags
   const uint32_t TOYOTA_PARAM_OFFSET = 8U;
@@ -376,6 +485,8 @@ static safety_config toyota_init(uint16_t param) {
 #ifdef ALLOW_DEBUG
   const uint32_t TOYOTA_PARAM_SECOC = 8UL << TOYOTA_PARAM_OFFSET;
   toyota_secoc = GET_FLAG(param, TOYOTA_PARAM_SECOC);
+  const uint32_t TOYOTA_PARAM_TSS3 = 16UL << TOYOTA_PARAM_OFFSET;
+  toyota_tss3 = GET_FLAG(param, TOYOTA_PARAM_TSS3);
 #endif
 
   toyota_alt_brake = GET_FLAG(param, TOYOTA_PARAM_ALT_BRAKE);
@@ -384,7 +495,10 @@ static safety_config toyota_init(uint16_t param) {
   toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
 
   safety_config ret;
-  if (toyota_secoc) {
+  if (toyota_tss3) {
+    // TSS 3.0: openpilot's only tx is the combined 0x160 (accel + steer).
+    SET_TX_MSGS(TOYOTA_TSS3_LONG_TX_MSGS_ARR, ret);
+  } else if (toyota_secoc) {
     if (toyota_stock_longitudinal) {
       SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
     } else {
@@ -398,7 +512,13 @@ static safety_config toyota_init(uint16_t param) {
     }
   }
 
-  if (toyota_secoc) {
+  if (toyota_tss3) {
+    static RxCheck toyota_tss3_rx_checks[] = {
+      TOYOTA_TSS3_RX_CHECKS
+    };
+
+    SET_RX_CHECKS(toyota_tss3_rx_checks, ret);
+  } else if (toyota_secoc) {
     static RxCheck toyota_secoc_rx_checks[] = {
       TOYOTA_SECOC_RX_CHECKS
     };
@@ -429,10 +549,24 @@ static safety_config toyota_init(uint16_t param) {
   return ret;
 }
 
+static bool toyota_fwd_hook(int bus_num, int addr) {
+  bool block = false;
+  // TSS 3.0: 0x160 (camera-origin, bus 2) carries openpilot's combined accel+steer.
+  // Block the camera's copy from forwarding 2->0 exactly when openpilot is emitting
+  // its own (longitudinal allowed), so the gateway sees one writer; forward it
+  // otherwise so the ADAS stream stays alive (gap-free, incl. gas override). The
+  // tx entry sets disable_static_blocking so this hook owns the decision.
+  if (toyota_tss3 && (bus_num == 2) && (addr == 0x160)) {
+    block = get_longitudinal_allowed();
+  }
+  return block;
+}
+
 const safety_hooks toyota_hooks = {
   .init = toyota_init,
   .rx = toyota_rx_hook,
   .tx = toyota_tx_hook,
+  .fwd = toyota_fwd_hook,
   .get_checksum = toyota_get_checksum,
   .compute_checksum = toyota_compute_checksum,
   .get_quality_flag_valid = toyota_get_quality_flag_valid,

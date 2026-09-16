@@ -630,6 +630,26 @@ FW_VERSIONS = {
       b'\x028646F7605100\x00\x00\x00\x008646G3304000\x00\x00\x00\x00',
     ],
   },
+  CAR.TOYOTA_COROLLA_TSS3: {
+    # 2023 Corolla (TSS 3.0, CAN FD + SecOC). VIN 5YFS4MCE3PP163477 (US-built sedan).
+    # Captured over the OBD-II port with OBD multiplexing (the gateway gates
+    # diagnostics off the camera-connector buses); fwdCamera is on the ADAS bus and
+    # does not answer over OBD-II, so it is not part of this fingerprint.
+    (Ecu.engine, 0x700, None): [
+      b'\x018A2220212400\x00\x00\x00\x00',
+    ],
+    (Ecu.abs, 0x7b0, None): [
+      b'\x01F152612A5400\x00\x00\x00\x00',
+    ],
+    (Ecu.eps, 0x7a1, None): [
+      b'\x028965F1208000\x00\x00\x00\x008A3111202000\x00\x00\x00\x00',
+    ],
+    # (srs 0x780 answers too, but it is a brand-wide data-collection ECU -- see
+    # FW_QUERY_CONFIG.extra_ecus -- so it is intentionally not in the match set.)
+    (Ecu.fwdRadar, 0x750, 0xf): [
+      b'\x018821F7801200\x00\x00\x00\x00',
+    ],
+  },
   CAR.TOYOTA_HIGHLANDER: {
     (Ecu.engine, 0x700, None): [
       b'\x01896630E09000\x00\x00\x00\x00',

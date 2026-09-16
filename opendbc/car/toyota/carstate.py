@@ -5,7 +5,8 @@ from opendbc.car import Bus, DT_CTRL, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, EPS_SCALE
+from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, EPS_SCALE, \
+                                                  TSS3_PT_BUS, TSS3_STEER_THRESHOLD
 
 ButtonType = structs.CarState.ButtonEvent.Type
 SteerControlType = structs.CarParams.SteerControlType
@@ -30,7 +31,7 @@ class CarState(CarStateBase):
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
     self.cluster_min_speed = CV.KPH_TO_MS / 2.
 
-    if CP.flags & ToyotaFlags.SECOC.value:
+    if CP.flags & ToyotaFlags.SECOC.value and not CP.flags & ToyotaFlags.CAN_FD.value:
       self.shifter_values = can_define.dv["GEAR_PACKET_HYBRID"]["GEAR"]
     else:
       self.shifter_values = can_define.dv["GEAR_PACKET"]["GEAR"]
@@ -51,7 +52,19 @@ class CarState(CarStateBase):
     self.gvc = 0.0
     self.secoc_synchronization = None
 
+    # TSS 3.0 (modify-and-forward): the camera's live 0x160 frame, captured on the
+    # cam bus, is the template the carcontroller edits (accel bytes 4-5 and steer
+    # bytes 22-23). tss3_camera_accel is what the camera itself requested;
+    # tss3_stock_lon_active gates override on the stock ACC actually controlling.
+    self.tss3_accel_template = None
+    self.tss3_camera_accel = 0.0
+    self.tss3_stock_lon_active = False
+    self.tss3_steer_template = None
+
   def update(self, can_parsers) -> structs.CarState:
+    if self.CP.flags & ToyotaFlags.CAN_FD.value:
+      return self.update_tss3(can_parsers)
+
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
 
@@ -201,8 +214,157 @@ class CarState(CarStateBase):
     ret.buttonEvents = buttonEvents
     return ret
 
+  def update_tss3(self, can_parsers) -> structs.CarState:
+    """TSS 3.0 (CAN FD + SecOC) -- Phase 1, READ ONLY.
+
+    Every signal here is decoded from passive rlogs and has never been validated
+    on the car. cruiseState is hard-stubbed off so openpilot cannot believe it is
+    allowed to engage; there is no carcontroller path for this platform.
+    """
+    cp = can_parsers[Bus.pt]
+
+    ret = structs.CarState()
+
+    # parse_wheel_speeds sets vEgoRaw/vEgo/aEgo. It does not populate
+    # ret.wheelSpeeds.* -- nothing in the Toyota path does. Default unit is
+    # CV.KPH_TO_MS, which matches this DBC's km/h.
+    self.parse_wheel_speeds(ret,
+      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
+      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"],
+      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RL"],
+      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RR"],
+    )
+    ret.standstill = abs(ret.vEgoRaw) < 1e-3
+
+    # Positive = left (verified in logs). No STEER_FRACTION/STEER_RATE decoded,
+    # so the classic angle-offset cross-check does not apply here.
+    ret.steeringAngleDeg = cp.vl["STEER_ANGLE_ACC_STATUS"]["STEER_ANGLE"]
+    ret.steeringRateDeg = 0.
+    ret.yawRate = cp.vl["KINEMATICS"]["YAW_RATE"]
+
+    # 0xDA STEER_TORQUE_SENSOR carries four int16s. Identified on-car: TORQUE_3 is the
+    # DRIVER torque (bidirectional, spikes at takeovers/lane-change nudges, low correlation
+    # with steering angle), TORQUE_1 tracks steering effort (EPS/column). steeringPressed
+    # enables driver override so retaking the wheel pauses openpilot lateral rather than
+    # fighting it. TSS3_STEER_THRESHOLD calibrated on-car.
+    ret.steeringTorque = cp.vl["STEER_TORQUE_SENSOR"]["TORQUE_3"]
+    ret.steeringTorqueEps = cp.vl["STEER_TORQUE_SENSOR"]["TORQUE_1"]
+    ret.steeringPressed = abs(ret.steeringTorque) > TSS3_STEER_THRESHOLD
+
+    ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
+    # 0x116 byte 1, driver gas pedal. Rest is a true 0 (100% zero while
+    # braking), so != 0 matches the panda's own gas check exactly.
+    ret.gasPressed = cp.vl["GAS_PEDAL"]["GAS_PEDAL_USER"] != 0
+
+    ret.gearShifter = self.parse_gear_shifter(
+      self.shifter_values.get(int(cp.vl["GEAR_PACKET"]["GEAR"]), None))
+
+    # ACC state from 0x8A, 40 Hz. DECODED FROM A REAL DRIVE 2026-09-09:
+    #   ACC_STATE  byte 7  : 0x12 = on but not engaged, 0x47 = engaged
+    #   ACC_ENGAGED byte 22 mask 0x10 : the clean engaged bit
+    # Both are INDEPENDENT of 0x13C and lead it by ~100ms, so they report the
+    # DRIVER'S intent, not the command. That is what makes LIVE possible: when
+    # openpilot transmits 0x13C these still report engage and cancel correctly.
+    # ACC_STATE is BINARY on this car: 0x12 (not engaged) or 0x47 (engaged),
+    # and nothing else across 7232 frames covering three engagements. There is
+    # no "powered on but not engaged" standby state, because the ACC main
+    # button engages directly at the current speed -- confirmed by the owner,
+    # and consistent with every transition being a single 0x12 -> 0x47 step
+    # with no intermediate value.
+    #
+    # So `available` is not a state this car reports: the system is offerable
+    # whenever it is responding at all. Guarding on != 0 keeps a fault (no
+    # frames -> 0) from reading as available.
+    acc_state = int(cp.vl["STEER_ANGLE_ACC_STATUS"]["ACC_STATE"])
+    ret.cruiseState.available = acc_state != 0
+    ret.cruiseState.enabled = bool(cp.vl["STEER_ANGLE_ACC_STATUS"]["ACC_ENGAGED"])
+
+    # 0x251 byte 2, increments exactly one per +/- press. CONFIRMED mph against
+    # the dash on 2026-09-09, factor 1.0 (the raw byte IS the displayed number).
+    ret.cruiseState.speed = cp.vl["ACC_HUD"]["SET_SPEED"] * CV.MPH_TO_MS
+    # 0x8A byte 7 mask 0x20: engaged and holding at a stop behind a lead car.
+    # Captured 2026-09-09 (492 frames at 0.0 kph). openpilot uses this to raise
+    # resumeRequired instead of assuming it may just drive off.
+    ret.cruiseState.standstill = bool(cp.vl["STEER_ANGLE_ACC_STATUS"]["ACC_STANDSTILL"])
+
+    # Turn signals: BODY_CONTROL_STATE (0x614), byte3 bits 4-5 (TURN_SIGNALS) == 1 left,
+    # 2 right, 3 off (standard Toyota code). Confirmed on-car.
+    ret.leftBlinker = cp.vl["BODY_CONTROL_STATE"]["TURN_SIGNALS"] == 1
+    ret.rightBlinker = cp.vl["BODY_CONTROL_STATE"]["TURN_SIGNALS"] == 2
+
+    # LTA hands-off: LKAS_HUD (0x412) escalates byte1=0x0c (hands-on nag) then byte2 bit6
+    # = LTA_DISABLE when the driver keeps hands off; the EPS then stops applying the 0x160
+    # steer. Report the disable as a temporary steer fault so openpilot alerts and hands
+    # back instead of silently commanding a dead EPS. Confirmed on-car (only ever on true
+    # hands-off, never in normal driving).
+    ret.steerFaultTemporary = bool(cp.vl["LKAS_HUD"]["LTA_DISABLE"])
+    ret.steerFaultPermanent = False
+
+    # Not decoded on this platform -- inert rather than guessed.
+    ret.doorOpen = False
+    ret.seatbeltUnlatched = False
+    ret.buttonEvents = []
+
+    # Kept for a future Phase 2. Note opendbc's add_mac() only handles 8-byte
+    # SecOC frames; every signed message here except 0x0F is 32-byte CAN FD.
+    self.secoc_synchronization = copy.copy(cp.vl["SECOC_SYNCHRONIZATION"])
+
+    # ---- TSS 3.0 longitudinal template capture (read-only) ----------------
+    # Reconstruct the camera's exact 0x160 frame from the cam-bus parser so the
+    # carcontroller can modify-and-forward it. 0x160 is E2E-protected (keyless
+    # CRC + counter), so this is all openpilot needs to regenerate valid frames.
+    cam = can_parsers[Bus.cam]
+    adas = cam.vl["ADAS_ACC_REQUEST"]
+    self.tss3_accel_template = bytes(int(adas[f"BYTE{k:02d}"]) & 0xFF for k in range(32))
+    self.tss3_camera_accel = float(adas["ACCEL_REQ"])
+    # Lateral rides in 0x160 too (bytes 22-23), so the 0x160 template above is all
+    # openpilot needs for BOTH accel and steer. The gateway's 0x1A0 is NOT read:
+    # it is gateway-native on bus0 and only reaches bus2 as low-rate forwarded
+    # copies once the relay closes, so requiring it at 50 Hz tripped canError.
+    # 0x13C on the powertrain bus reports whether the STOCK ACC is actively
+    # controlling. v1 only overrides accel while this is true -- the driver
+    # engages with the stalk exactly as stock; openpilot rides that engagement.
+    self.tss3_stock_lon_active = bool(cp.vl["ACC_CONTROL"]["LON_ACTIVE"])
+
+    return ret
+
   @staticmethod
   def get_can_parsers(CP):
+    if CP.flags & ToyotaFlags.CAN_FD.value:
+      # float('nan') sets ignore_alive=True: no liveness check. Used for every
+      # message whose rate is not stated in the port doc -- guessing a rate
+      # would make CANParser mark the message not-valid and block engagement.
+      # Replace each nan with the measured rate as it is confirmed from an rlog.
+      tss3_messages = [
+        ("WHEEL_SPEEDS", float('nan')),
+        ("STEER_ANGLE_ACC_STATUS", 40),     # measured
+        ("STEER_ANGLE_SENSOR", float('nan')),
+        ("KINEMATICS", float('nan')),
+        ("STEER_TORQUE_SENSOR", 42),        # measured
+        ("BRAKE_MODULE", float('nan')),
+        ("GEAR_PACKET", float('nan')),
+        ("SECOC_SYNCHRONIZATION", 10),      # measured
+        ("ACC_CONTROL", 20),                # measured: 20 Hz, plaintext, bus 0
+        ("GAS_PEDAL", float('nan')),        # 0x116, driver gas pedal on bus 1
+        ("ACC_HUD", float('nan')),          # 0x251, ~1.3 Hz cluster msg (set speed)
+        ("BODY_CONTROL_STATE", float('nan')),  # 0x614, turn signals (bus 1)
+        ("LKAS_HUD", float('nan')),            # 0x412, LTA hands-on nag / disable (bus 1)
+      ]
+      # With STOCK harness wiring the powertrain lands on TSS3_PT_BUS (bus 1,
+      # unrelayed) and the relayed pair (bus 0 <-> bus 2) carries the ADAS CAN FD
+      # bus instead. None of the messages in this DBC exist there, so the cam
+      # parser is empty -- it exists only to satisfy the expected shape.
+      # The camera's 0x160 ACC request rides the ADAS bus (relayed pair). Read
+      # it on bus 2 (the camera side) so the template is the genuine camera frame
+      # even once the relay opens and bus 0 carries openpilot's replacement.
+      tss3_cam_messages = [
+        ("ADAS_ACC_REQUEST", 40),   # 0x160: carries BOTH accel and the steer request
+      ]
+      return {
+        Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], tss3_messages, TSS3_PT_BUS),
+        Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], tss3_cam_messages, 2),
+      }
+
     pt_messages = [
       ("BLINKERS_STATE", float('nan')),
     ]

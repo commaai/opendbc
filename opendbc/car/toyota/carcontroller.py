@@ -8,7 +8,8 @@ from opendbc.car.common.pid import PIDController
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
-from opendbc.car.toyota.values import CAR, CarControllerParams, ToyotaFlags
+from opendbc.car.toyota.values import CAR, CarControllerParams, ToyotaFlags, \
+                                        TSS3_MIN_OVERRIDE_SPEED, TSS3_MAX_STEER_ANGLE
 from opendbc.can import CANPacker
 
 Ecu = structs.CarParams.Ecu
@@ -75,6 +76,13 @@ class CarController(CarControllerBase):
     self.secoc_acc_message_counter = 0
     self.secoc_prev_reset_counter = 0
 
+    # TSS 3.0: the 0x160 rolling counter openpilot transmits. Seeded from the
+    # camera's live counter each cycle we are NOT overriding, so continuity holds
+    # across the moment override starts.
+    self.tss3_accel_counter = 0
+    self.tss3_last_cam_counter = None
+    self.tss3_last_steer_counter = None
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     stopping = actuators.longControlState == LongCtrlState.stopping
@@ -88,6 +96,88 @@ class CarController(CarControllerBase):
 
     # *** control msgs ***
     can_sends = []
+
+    # TSS 3.0 (CAN FD) is a Phase 1 READ-ONLY platform: return before building
+    # any command, so nothing can be transmitted on either axis.
+    #  - lateral: the camera->EPS steering command rides on the camera's CA2 bus
+    #    (T21 pins 1/2), which the comma harness passes straight through. It has
+    #    never been observed, so STEERING_LKA / STEERING_LTA do not exist in this
+    #    car's DBC and packing them would emit garbage.
+    #  - longitudinal: 0x13C IS decoded and plaintext on bus 0, but must not be
+    #    sent until its validation gate passes (see the port notes).
+    # This is defense in depth: the panda safety mode is what actually blocks tx.
+    if self.CP.flags & ToyotaFlags.CAN_FD.value:
+      tss3_sends = []
+      template = CS.tss3_accel_template
+
+      # Lateral is never sent on this platform under any mode: the camera->EPS
+      # command rides on the untapped CA2 bus and does not exist in this DBC.
+      #
+      # Longitudinal is MODIFY-AND-FORWARD of the camera's 0x160 ACC request.
+      # The 0x160 E2E protection has a rolling byte-2 counter that the gateway
+      # tracks for freshness. We STAMP THE CAMERA'S OWN COUNTER (template[2])
+      # onto our frame rather than maintaining a separate one: that way our
+      # counter is always byte-identical to what the camera would have sent, so
+      # override<->passthrough handoffs are seamless by construction and can
+      # never drift or jump (a self-maintained counter drifted to 56 vs the
+      # camera's 210 on the first LIVE run, causing an E2E jump at the handback).
+      # We emit exactly one frame per NEW camera frame (native ~40 Hz).
+      #
+      # STANDSTILL: below TSS3_MIN_OVERRIDE_SPEED we stop overriding and let the
+      # camera's 0x160 pass through natively (panda fwd hook), so Toyota's own
+      # standstill-hold mechanism brings the car to rest and holds it. openpilot
+      # cannot signal that hold through 0x160 (the camera uses a separate path),
+      # and commanding accel into a stop never reaches the stock 0x67 hold state.
+      cam_counter = template[2] if template is not None else None
+
+      # NO HANDOFF. Whenever the stock ACC is engaged, openpilot is the SOLE
+      # emitter of 0x160 -- it never goes silent and lets the camera resume,
+      # because that CAN-level handoff (at stops and low-speed engage) is what
+      # tripped the gateway. We emit one frame per NEW camera frame (40 Hz),
+      # always stamped with the camera's own counter (seamless E2E).
+      #   - actively controlling (longActive, above min speed, no gas): SUBSTITUTE
+      #     openpilot's clamped accel.
+      #   - otherwise (standstill / below min speed / gas override): RELAY the
+      #     camera's frame verbatim, so Toyota's own request -- including its
+      #     standstill hold -- drives the car while openpilot keeps the stream
+      #     alive. accel=None tells modify_accel_160 to keep the camera's accel.
+      engaged = (self.CP.openpilotLongitudinalControl
+                 and CS.out.cruiseState.enabled   # == the panda's controls_allowed source (0x8A)
+                 and not CS.out.gasPressed
+                 and template is not None)
+      controlling = engaged and CC.longActive and CS.out.vEgo > TSS3_MIN_OVERRIDE_SPEED
+
+      # --- LATERAL rides in the SAME 0x160 frame. The steer request lives in
+      # 0x160 bytes 22-23 (camera-origin, so openpilot is the sole writer via the
+      # longitudinal gate -- no 0x1A0 injection, which is gateway-native and trips
+      # relayMalfunction). So lateral REQUIRES the longitudinal emit (LONG live):
+      # openpilot is already sole writer of 0x160, and steering is just another
+      # substituted field. Substitute openpilot's target angle when actively steering;
+      # relay the camera's own steer request (angle=None) otherwise, so stock LTA drives
+      # when the driver has it on. Lateral follows openpilot's own latActive -- blinker /
+      # lane-change behavior is owned by the lateral planner (blinkers are wired in
+      # carstate), NOT a handback here.
+      lat_controlling = CC.latActive
+      steer_angle_cmd = 0.
+
+      if engaged and cam_counter != self.tss3_last_cam_counter:
+        self.tss3_last_cam_counter = cam_counter
+        accel = float(np.clip(actuators.accel, -1.5, 1.5)) if controlling else None
+        if lat_controlling:
+          steer_angle_cmd = float(np.clip(actuators.steeringAngleDeg,
+                                          -TSS3_MAX_STEER_ANGLE, TSS3_MAX_STEER_ANGLE))
+          angle = steer_angle_cmd
+        else:
+          angle = None   # relay the camera's own steer request (stock LTA)
+        tss3_sends.append(toyotacan.modify_160(template, accel, angle, cam_counter))
+      elif not engaged:
+        self.tss3_last_cam_counter = cam_counter
+
+      new_actuators = actuators.as_builder()
+      new_actuators.steeringAngleDeg = steer_angle_cmd if lat_controlling else 0.
+      new_actuators.accel = float(np.clip(actuators.accel, -1.5, 1.5)) if controlling else 0.
+      self.frame += 1
+      return new_actuators, tss3_sends
 
     # *** handle secoc reset counter increase ***
     if self.CP.flags & ToyotaFlags.SECOC.value:
