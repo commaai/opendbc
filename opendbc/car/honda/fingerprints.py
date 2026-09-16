@@ -1250,6 +1250,7 @@ FW_VERSIONS = {
     ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-3BH-A830\x00\x00',
+    ],
   },
   CAR.ACURA_INTEGRA: {
     (Ecu.eps, 0x18da30f1, None): [
