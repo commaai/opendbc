@@ -223,6 +223,7 @@ class VolkswagenFlags(IntFlag):
   KOMBI_PRESENT = 4
   ALT_GEAR = 32
   STOCK_KLR_PRESENT = 64
+  HAS_BSM = 256  # blind spot monitoring
 
   # Static flags
   PQ = 2

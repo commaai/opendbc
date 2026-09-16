@@ -11,7 +11,7 @@ def checksum(msg):
   addr, dat, bus = msg
   ret = bytearray(dat)
 
-  if addr in (0x1b6, 0x242):
+  if addr in (0x1b6, 0x1ec, 0x23c, 0x242):
     crc = 0xFF
     for byte in ret[:-1]:
       crc ^= byte
@@ -42,6 +42,7 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
     self.safety.set_safety_hooks(CarParams.SafetyModel.mg, 0)
     self.safety.init_tests()
     self.counters = {addr: 0 for addr in (0x1b6, 0x1ec, 0x23c, 0x242)}
+    self.gas_counter = 0
 
   def _counter(self, addr):
     counter = self.counters[addr]
@@ -54,11 +55,11 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   def _speed_msg(self, speed):
     values = {"VehSpdAvgHSC2": speed * 3.6, "VehSpdAvgAlvRCHSC2": self._counter(0x23c)}
-    return self.packer.make_can_msg_safety("SCS_HSC2_FrP19", 0, values)
+    return self.packer.make_can_msg_safety("SCS_HSC2_FrP19", 0, values, fix_checksum=checksum)
 
   def _torque_driver_msg(self, torque):
     values = {"DrvrStrgDlvrdToqHSC2": torque * 0.01, "ChLKAAlvRCHSC2": self._counter(0x1ec)}
-    return self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values)
+    return self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values, fix_checksum=checksum)
 
   def _user_brake_msg(self, brake):
     values = {"BrkPdlAppdHSC2": 1 if brake else 0, "BrkPdlAppdRCHSC2": self._counter(0x1b6)}
@@ -66,11 +67,33 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   def _user_gas_msg(self, gas):
     values = {"EPTAccelActuPosHSC2": 100 if gas else 0}
-    return self.packer.make_can_msg_safety("GW_HSC2_HCU_FrP00", 0, values)
+    msg = self.packer.make_can_msg_safety("GW_HSC2_HCU_FrP00", 0, values)
+    msg[0].data[5] = (msg[0].data[5] & 0x0F) | ((self.gas_counter % 16) << 4)
+    self.gas_counter += 1
+    return msg
 
   def _pcm_status_msg(self, enable):
     values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
     return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values, fix_checksum=checksum)
+
+  def test_gas_counter(self):
+    self._reset_safety_hooks()
+    for _ in range(16):
+      self.assertTrue(self._rx(self._user_gas_msg(0)))
+
+    msg = self._user_gas_msg(0)
+    for _ in range(common.MAX_WRONG_COUNTERS + 1):
+      valid = self._rx(msg)
+    self.assertFalse(valid)
+
+  def test_rx_checksums(self):
+    for make_msg in (self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
+      self._reset_safety_hooks()
+      self.assertTrue(self._rx(make_msg(0)))
+
+      msg = make_msg(0)
+      msg[0].data[7] ^= 0xff
+      self.assertFalse(self._rx(msg))
 
 
 if __name__ == "__main__":

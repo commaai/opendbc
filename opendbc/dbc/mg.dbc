@@ -115,6 +115,7 @@ BO_ 481 GW_HSC2_FrP04: 7 GW
  SG_ CCSwStsDistIncSwA_h2HSC2 : 19|1@0+ (1,0) [0|1] "" FDR
 
 BO_ 492 EPS_HSC2_FrP03: 8 EPS
+ SG_ ChLKAChksmHSC2 : 63|8@0+ (1,0) [0|255] "" EPS
  SG_ ChLKAAlvRCHSC2 : 7|4@0+ (1,0) [0|15] ""  FVCM
  SG_ ChLKACtrlStsHSC2 : 54|3@0+ (1,0) [0|7] ""  FVCM
  SG_ ChLKARespToqHSC2 : 2|11@0+ (0.01,-10.24) [-10.24|10.23] "Nm"  FVCM
@@ -140,6 +141,7 @@ BO_ 532 SCS_HSC2_FrP09: 6 SCSABS
  SG_ BrkPdlDrvrAppdPrsVHSC2 : 0|1@0+ (1,0) [0|1] ""  FVCM
 
 BO_ 572 SCS_HSC2_FrP19: 8 SCSABS
+ SG_ VehSpdAvgChksmHSC2 : 63|8@0+ (1,0) [0|255] "" SCSABS
  SG_ VehSpdAvgHSC2 : 22|15@0+ (0.015625,0) [0|511.984] "km/h"  FVCM,FDR
  SG_ VehSpdAvgAlvRCHSC2 : 39|4@0+ (1,0) [0|15] ""  FVCM,FDR
  SG_ VehSpdAvgPVHSC2 : 7|16@0+ (1,0) [0|65535] ""  FVCM,FDR
