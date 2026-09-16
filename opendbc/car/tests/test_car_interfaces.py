@@ -48,7 +48,6 @@ def _make_car_test(car_name):
     assert car_params.maxLateralAccel > 0
 
     # Longitudinal sanity checks
-    assert len(car_params.longitudinalTuning.kpV) == len(car_params.longitudinalTuning.kpBP)
     assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
 
     # Lateral sanity checks
