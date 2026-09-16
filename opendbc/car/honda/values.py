@@ -43,7 +43,8 @@ class CarControllerParams:
   def __init__(self, CP):
     if CP.carFingerprint in (CAR.HONDA_CRV, CAR.HONDA_CRV_EU, CAR.ACURA_RDX):
       self.STEER_MAX = 1000  # TODO: determine if there is a dead zone at the top end
-    elif CP.carFingerprint in (CAR.ACURA_ILX, CAR.HONDA_CRV_5G, CAR.ACURA_RDX_3G, CAR.ACURA_TLX_2G_MMR, CAR.ACURA_MDX_4G):
+    elif CP.carFingerprint in (CAR.ACURA_ILX, CAR.HONDA_CRV_5G, CAR.ACURA_RDX_3G, CAR.ACURA_TLX_2G_MMR, CAR.ACURA_MDX_4G,
+                               CAR.ACURA_RDX_3G_MMR):
       self.STEER_MAX = 3840  # TODO: determine if there is a dead zone at the top end (ACURA_ILX)
     elif CP.carFingerprint in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CIVIC_2022, CAR.HONDA_ACCORD,
                                CAR.HONDA_CRV_HYBRID, CAR.HONDA_FIT, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.HONDA_HRV_3G,
