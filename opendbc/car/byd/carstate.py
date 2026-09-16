@@ -17,16 +17,10 @@ GEAR_MAP = {
 }
 
 
-def cruise_enabled(acc_state: int, lkas_state: int) -> bool:
-  # ACC_STATE 3/5 = stock ACC active. LKAS_STATE only reads 0 when the driver switches
-  # LKS off with 0x3B0 LKAS_ON_BTN; its other values are camera states, not the switch.
+def cruise_enabled(acc_state: int, lks_enabled: bool) -> bool:
+  # ACC_STATE 3/5 = stock ACC active. LKS is our latch, not camera LKAS_STATE.
   # Mirrored by byd_rx_hook so panda and openpilot enable on the same edge.
-  return acc_state in (3, 5) and lkas_state != 0
-
-
-def lkas_limited(acc_state: int, lkas_state: int) -> bool:
-  # Camera LKAS_STATE 4 after ACC-off is a handoff blip, not an OP steer fault.
-  return acc_state in (3, 5) and lkas_state == 4
+  return acc_state in (3, 5) and lks_enabled
 
 
 class CarState(CarStateBase):
@@ -40,6 +34,10 @@ class CarState(CarStateBase):
     self.parking_brake = False
     self.epb_on_frames = 0
     self.epb_off_frames = 0
+    # First-boot default ON. card.py overwrites from BydLksEnabled before onroad.
+    self.lks_enabled = True
+    self.lks_btn_last = False
+    self.camera_lkas_state = 0
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -74,11 +72,17 @@ class CarState(CarStateBase):
       self.eps_target_angle = cp.vl["STEERING_TORQUE"]["TARGET_ANGLE"]
 
     acc_state = int(cp_cam.vl["ACC_HUD_ADAS"]["ACC_STATE"])
-    lkas_state = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"])
+    self.camera_lkas_state = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"])
 
-    # LKAS_STATE 4 while ACC is still 3/5 is "LKS is limited". Also fault when we ask
-    # and the EPS stays idle for >1 s (carcontroller sets steer_not_accepted).
-    ret.steerFaultTemporary = lkas_limited(acc_state, lkas_state) or self.steer_not_accepted
+    # Driver LKS button is bus 0 only. Bus 2 spoofs must not flip this latch.
+    for btn in cp.vl_all["PCM_BUTTONS"]["LKAS_ON_BTN"]:
+      pressed = bool(btn)
+      if pressed and not self.lks_btn_last:
+        self.lks_enabled = not self.lks_enabled
+      self.lks_btn_last = pressed
+
+    # Camera LKAS_STATE 0/4 are moods, not the switch. Fault only if EPS stays idle.
+    ret.steerFaultTemporary = self.steer_not_accepted
 
     # gas / brake
     ret.gasPressed = cp.vl["PEDAL"]["GAS_PEDAL"] > 0
@@ -122,12 +126,11 @@ class CarState(CarStateBase):
 
     # cruise state: ACC messages come from camera bus on Atto 3
     # ACC_STATE: 0=OFF, 2=ACC_ON (available), 3=ACC_ACTIVE (enabled), 5=FORCE_ACCEL, 7=ERROR
-    # LKAS_STATE: 0=LKS switched off, 1=on/passive, 2=active, 3/4=camera states.
-    # Follow stock ACC only when LKS is on so ACC can run without engaging OP.
+    # Follow stock ACC only when our LKS latch is on so ACC can run without engaging OP.
     # Reporting enabled=False while ACC is on must not trip controlsd's cancel spoof.
     ret.cruiseState.speed = cp_cam.vl["ACC_HUD_ADAS"]["SET_SPEED"] * CV.KPH_TO_MS
     ret.cruiseState.available = acc_state in (2, 3, 5)
-    ret.cruiseState.enabled = cruise_enabled(acc_state, lkas_state)
+    ret.cruiseState.enabled = cruise_enabled(acc_state, self.lks_enabled)
     ret.cruiseState.standstill = bool(cp_cam.vl["ACC_CMD"]["STANDSTILL_STATE"])
 
     # forward stock LKAS HUD
@@ -137,7 +140,10 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    body_messages = [("EPB_STATUS", float("nan"))]
+    body_messages = [
+      ("EPB_STATUS", float("nan")),
+      ("PCM_BUTTONS", 20),
+    ]
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], body_messages, 0),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
