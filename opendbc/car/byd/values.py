@@ -41,10 +41,21 @@ class CarControllerParams:
   WHEELSPEED_TO_KPH = 0.072           # 0.02 m/s/LSB, mirrored in byd.h
   EPB_DEBOUNCE_FRAMES = 8             # ~70 ms at 120 Hz; ignore 0x09-0x12 transitions
 
+  # panda rate limits the first STEER_REQ=1 against our last 0x1E2, however old. After a
+  # TX gap send REQ=0 at the measured angle first so that reference is fresh.
+  STEER_WARMUP_FRAMES = 2             # 50 Hz frames
+
+  # EPS standby (LKS_PREPARED=1 with CRUISE_ACTIVATED=1, after >200 ms without 0x1E2)
+  # ignores STEER_REQ until it sees the camera's REQ=0 / ACTIVE_LOW=0 ack. We send it.
+  STEER_ACK_PERIOD = 10               # 50 Hz frames between ack pairs
+  STEER_ACK_ATTEMPTS = 3              # then steerFaultTemporary until disengage
+
   # Camera LKS is a toggle on bus 2. Meaning A: off while we are enabled, on
   # again 2 s after we drop (panda HUD hold), off if our latch is off.
-  LKS_PULSE_TICKS = 4                 # LKAS_ON_BTN at 20 Hz (~200 ms)
-  LKS_PULSE_PERIOD = 5                # send on frame % 5 == 0
+  # The camera checks the 0x3B0 counter: one frame mirroring the car's latest
+  # 0x3B0 toggles it; anything out of sequence faults ACC within ~4 frames.
+  LKS_PULSE_TICKS = 1                 # LKAS_ON_BTN frames per pulse
+  LKS_PULSE_PERIOD = 5                # fallback slot if no fresh stock 0x3B0 arrives
   LKS_CONFIRM_FRAMES = 40             # 400 ms before one retry
   LKS_LOCKOUT_FRAMES = 50             # 500 ms after a real bus-0 press
   LKS_HUD_QUIET_FRAMES = 200          # 2 s, matches BYD_OP_HUD_TIMEOUT_US
