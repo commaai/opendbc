@@ -218,6 +218,67 @@ class TestBydLksCamera(unittest.TestCase):
     pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + 20, enabled=False, cam=0, lks=False)
     self.assertEqual(pulses, 0)
 
+  def test_latch_off_turns_camera_off_at_idle(self):
+    # Persist off + stock camera still on: snap camera off without waiting for engage.
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=2, lks=False)
+    self.assertGreater(pulses, 0)
+
+  def test_failed_camera_off_retries_after_recover(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses = 0
+    quiet = 0
+    # First snap+retry, then a full quiet recover gap, then another snap.
+    for _ in range(800):
+      n, _ = _step(ctrl, 1, enabled=False, cam=2, lks=False)
+      if n:
+        pulses += n
+        quiet = 0
+      else:
+        quiet += 1
+      if pulses >= CCP.LKS_PULSE_TICKS * 2 and quiet == CCP.LKS_CONFIRM_FRAMES + CCP.LKS_RECOVER_FRAMES - 1:
+        break
+    else:
+      self.fail("did not reach recover quiet")
+    self.assertLessEqual(pulses, CCP.LKS_PULSE_TICKS * 2)
+    more, _ = _step(ctrl, CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=2, lks=False)
+    self.assertGreater(more, 0)
+
+  def test_rapid_lks_presses_snap_once_after_lockout(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    lks = True
+    pulses = 0
+    for i in range(30):
+      rising = i % 3 == 0
+      if rising:
+        lks = not lks
+      CS = _cs(lks_enabled=lks, camera_lkas_state=2 if lks else 0, lks_btn_rising=rising)
+      _act, sends = ctrl.update(_cc(enabled=True, lat_active=True), CS, 0)
+      pulses += len(_bus2_lks(sends))
+    self.assertEqual(pulses, 0)
+    # Last press left latch off, camera on. After lockout, one snap off.
+    settle = CCP.LKS_LOCKOUT_FRAMES + CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_TICKS * CCP.LKS_PULSE_PERIOD + 5
+    more, _ = _step(ctrl, settle, enabled=True, cam=2, lks=False)
+    self.assertGreater(more, 0)
+    self.assertLessEqual(more, CCP.LKS_PULSE_TICKS * 2)
+
+  def test_rapid_acc_does_not_restore_or_storm(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses = 0
+    for i in range(80):
+      enabled = (i % 10) < 5
+      CS = _cs(lks_enabled=True, camera_lkas_state=2)
+      _act, sends = ctrl.update(_cc(enabled=enabled, lat_active=enabled), CS, 0)
+      pulses += len(_bus2_lks(sends))
+    self.assertLessEqual(pulses, CCP.LKS_PULSE_TICKS * 2)
+
+  def test_acc_back_on_aborts_restore(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES - 1, enabled=False, cam=0, lks=True)
+    _step(ctrl, CCP.LKS_PULSE_PERIOD, enabled=False, cam=0, lks=True)
+    pulses_on, _ = _step(ctrl, CCP.LKS_PULSE_TICKS * CCP.LKS_PULSE_PERIOD + 10, enabled=True, cam=0, lks=True)
+    self.assertEqual(pulses_on, 0)
+
   def test_button_lockout_then_snap_camera_off(self):
     ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
     _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=True, cam=0, lks=True)
