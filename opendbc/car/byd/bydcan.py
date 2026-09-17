@@ -26,8 +26,8 @@ def create_steering_control(packer, apply_angle: float, lat_active: bool, counte
 
 
 def create_buttons(packer, cancel=False, lkas=False, bus=0):
-  # Cancel is bus 0 ACC_ON_BTN only. Camera LKS neutralize is bus 2 LKAS_ON_BTN
-  # only. Never set both: a cancel spoof must not toggle our LKS latch.
+  # Cancel is bus 0 ACC_ON_BTN only. Camera LKS neutralize/restore is bus 2
+  # LKAS_ON_BTN only. Never set both: a cancel spoof must not toggle our latch.
   values = {
     "SET_ME_1_1": 1,
     "SET_ME_1_2": 1,

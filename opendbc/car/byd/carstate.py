@@ -37,6 +37,7 @@ class CarState(CarStateBase):
     # First-boot default ON. card.py overwrites from BydLksEnabled before onroad.
     self.lks_enabled = True
     self.lks_btn_last = False
+    self.lks_btn_rising = False
     self.camera_lkas_state = 0
 
   def update(self, can_parsers) -> structs.CarState:
@@ -75,10 +76,12 @@ class CarState(CarStateBase):
     self.camera_lkas_state = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"])
 
     # Driver LKS button is bus 0 only. Bus 2 spoofs must not flip this latch.
+    self.lks_btn_rising = False
     for btn in cp.vl_all["PCM_BUTTONS"]["LKAS_ON_BTN"]:
       pressed = bool(btn)
       if pressed and not self.lks_btn_last:
         self.lks_enabled = not self.lks_enabled
+        self.lks_btn_rising = True
       self.lks_btn_last = pressed
 
     # Camera LKAS_STATE 0/4 are moods, not the switch. Fault only if EPS stays idle.
