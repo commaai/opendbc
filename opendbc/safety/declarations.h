@@ -34,6 +34,7 @@
 #define SAFETY_PSA 31U
 #define SAFETY_RIVIAN 33U
 #define SAFETY_VOLKSWAGEN_MEB 34U
+#define SAFETY_BYD 35U
 #define SAFETY_MG 38U
 
 #define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
@@ -59,7 +60,8 @@
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 #define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
-uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
+uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len);
+uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);
 
 extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
@@ -246,12 +248,11 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
 bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limits);
 bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
-bool longitudinal_transmission_rpm_checks(int desired_transmission_rpm, const LongitudinalLimits limits);
 bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits);
 void pcm_cruise_check(bool cruise_engaged);
 void speed_mismatch_check(const float speed_2);
 
-void safety_tick(const safety_config *safety_config);
+void safety_tick(void);
 
 // This can be set by the safety hooks
 extern bool controls_allowed;
@@ -363,4 +364,5 @@ extern const safety_hooks volkswagen_meb_hooks;
 extern const safety_hooks volkswagen_pq_hooks;
 extern const safety_hooks rivian_hooks;
 extern const safety_hooks psa_hooks;
+extern const safety_hooks byd_hooks;
 extern const safety_hooks mg_hooks;
