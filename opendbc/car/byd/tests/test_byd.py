@@ -319,6 +319,18 @@ class TestBydDbcObserve(unittest.TestCase):
     self.assertEqual(power[4] & 0x02, 0x02)
     _, epb, _ = packer.make_can_msg("EPB_STATUS", 0, {"EPB_APPLIED": 1})
     self.assertEqual(epb[0] & 0x08, 0x08)
+  def test_charge_status_layout(self):
+    # 03 32 09 93 .. = charging, 50 %, 12-bit 777, flags 9
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    values = {"CHARGE_STATE": 3, "CHARGE_SOC": 50, "CHARGE_UNKNOWN_12BIT": 777, "CHARGE_SESSION_FLAGS": 9, "COUNTER": 0}
+    _, dat, _ = packer.make_can_msg("CHARGE_STATUS", 0, values)
+    self.assertEqual(bytes(dat[:4]), bytes.fromhex("03320993"))
+    self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
+    _, power, _ = packer.make_can_msg("POWER_VCC", 0, {"CHARGE_PLUGGED": 1})
+    self.assertEqual(power[0] & 0x20, 0x20)
+    _, sess, _ = packer.make_can_msg("CHARGE_SESSION", 0, {"CHARGE_SESSION_ACTIVE": 3})
+    self.assertEqual(sess[6] & 0x03, 0x03)
+
 
   def test_radar_dbc_is_mapped_but_unavailable(self):
     self.assertEqual(DBC[CAR.BYD_ATTO_3][Bus.radar], "byd_radar_fd")
