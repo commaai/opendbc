@@ -41,6 +41,15 @@ class CarControllerParams:
   WHEELSPEED_TO_KPH = 0.072           # 0.02 m/s/LSB, mirrored in byd.h
   EPB_DEBOUNCE_FRAMES = 8             # ~70 ms at 120 Hz; ignore 0x09-0x12 transitions
 
+  # Camera LKS is a toggle on bus 2. Meaning A: off while we are enabled, on
+  # again 2 s after we drop (panda HUD hold), off if our latch is off.
+  LKS_PULSE_TICKS = 4                 # LKAS_ON_BTN at 20 Hz (~200 ms)
+  LKS_PULSE_PERIOD = 5                # send on frame % 5 == 0
+  LKS_CONFIRM_FRAMES = 40             # 400 ms before one retry
+  LKS_LOCKOUT_FRAMES = 50             # 500 ms after a real bus-0 press
+  LKS_HUD_QUIET_FRAMES = 200          # 2 s, matches BYD_OP_HUD_TIMEOUT_US
+  LKS_CAM_DEBOUNCE_FRAMES = 20        # 200 ms; treat 4 as still on
+
 
 class BydSafetyFlags(IntFlag):
   LKS_ON = 2

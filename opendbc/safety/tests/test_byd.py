@@ -176,13 +176,15 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         self.assertEqual(not should_disengage, self.safety.get_controls_allowed())
 
   def test_rx_checksum(self):
-    # 8-byte BYD frames use (~sum) in the last byte. STEER_MODULE_2 is 4-bit and
-    # DRIVE_STATE has no checksum, so those stay ignored.
+    # 8-byte BYD frames use (~sum) in the last byte. STEER_MODULE_2 is 4-bit, so that stays ignored.
     checked = (
       self._driver_torque_msg(0),
       self._speed_msg(0),
       self._pcm_status_msg(False),
       self._lkas_hud_msg(1),
+      self._lks_btn_msg(False),
+      self._user_gas_msg(0),
+      self._user_brake_msg(False),
     )
     for msg in checked:
       self.assertTrue(self._rx(msg))
@@ -191,7 +193,6 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
     ignored = (
       self._angle_meas_msg(0),
-      self._user_brake_msg(False),
     )
     for msg in ignored:
       self.assertTrue(self._rx(msg))
