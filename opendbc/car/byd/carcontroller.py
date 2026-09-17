@@ -25,21 +25,32 @@ class CarController(CarControllerBase):
     self.cam_stable_frames = 0
     self.quiet_frames = 0
     self.lks_lockout = 0
-    self.lks_pending = False
     self.lks_pulse = 0
     self.lks_confirm = 0
     self.lks_retries = 0
     self.lks_want = None
     self.lks_give_up_want = None
+    self.lks_recover_frames = 0
     self.hold_steer = 0
 
     # Vehicle model used for lateral limiting
     self.VM = VehicleModel(get_safety_CP())
 
+  def _forget_camera(self):
+    self.camera_on = None
+    self.cam_raw_last = None
+    self.cam_stable_frames = 0
+
   def _abort_lks_pulse(self):
+    if self.lks_pulse > 0 or self.lks_confirm > 0:
+      self._forget_camera()
     self.lks_pulse = 0
     self.lks_confirm = 0
     self.lks_retries = 0
+    self.lks_want = None
+
+  def _hold_for(self, frames):
+    self.hold_steer = max(self.hold_steer, frames)
 
   def _update_camera_on(self, state):
     raw = state != 0
@@ -62,9 +73,22 @@ class CarController(CarControllerBase):
       return True
     return None
 
+  def _pulse_hold(self):
+    return (CarControllerParams.LKS_PULSE_TICKS * CarControllerParams.LKS_PULSE_PERIOD +
+            CarControllerParams.LKS_CONFIRM_FRAMES)
+
+  def _start_pulse(self, want):
+    self.lks_pulse = CarControllerParams.LKS_PULSE_TICKS
+    self.lks_want = want
+    self.lks_retries = 0
+    self.lks_confirm = 0
+    if not want:
+      self._hold_for(self._pulse_hold())
+
   def _update_lks_camera(self, CC, CS, can_sends):
-    # Meaning A: one bus-2 toggle toward want, then confirm. A real bus-0
-    # press is lockout then snap. Never TX LKS on bus 0.
+    # Latch on bus 0 is the count of real presses. Camera is a toggle we may
+    # have desynced. After lockout + debounce, snap camera to want. Never TX LKS
+    # on bus 0.
     self._update_camera_on(CS.camera_lkas_state)
 
     if CC.enabled:
@@ -73,40 +97,45 @@ class CarController(CarControllerBase):
       self.quiet_frames += 1
 
     if CS.lks_btn_rising:
+      camera_was_off = self.camera_on is False or self.cam_raw_last is False
       self._abort_lks_pulse()
       self.lks_lockout = CarControllerParams.LKS_LOCKOUT_FRAMES
-      self.lks_pending = True
       self.lks_give_up_want = None
-      if not CS.lks_enabled:
-        self.hold_steer = CarControllerParams.LKS_LOCKOUT_FRAMES + CarControllerParams.LKS_CONFIRM_FRAMES
+      self._forget_camera()
+      # Press turns the camera. Keep 0x1E2 up if OP was on or the camera was off
+      # (it is about to come on) so stock LKS cannot grab the wheel.
+      if (not CS.lks_enabled) or CC.enabled or self.enabled_last or camera_was_off:
+        self._hold_for(CarControllerParams.LKS_LOCKOUT_FRAMES + CarControllerParams.LKS_CONFIRM_FRAMES)
 
-    if CC.enabled and not self.enabled_last:
-      self.lks_pending = True
-      self.lks_give_up_want = None
-    if (not CC.enabled) and CS.lks_enabled and self.quiet_frames == CarControllerParams.LKS_HUD_QUIET_FRAMES:
-      self.lks_pending = True
-      self.lks_give_up_want = None
-
-    self.enabled_last = CC.enabled
     want = self._want_camera(CC.enabled, CS.lks_enabled)
+    if want is not None and self.camera_on is not None and self.camera_on == want:
+      self.lks_give_up_want = None
+      self.lks_recover_frames = 0
     if want is not None and want != self.lks_give_up_want:
       self.lks_give_up_want = None
+    if want is not None and self.lks_want is not None and want != self.lks_want:
+      if self.lks_pulse > 0 or self.lks_confirm > 0:
+        self._abort_lks_pulse()
+
+    # Failed camera-off is unsafe. Retry every 2 s from live CAN. Failed
+    # restore stays given up until want changes so we do not spam LDW on.
+    if self.lks_give_up_want is False and want is False:
+      if self.lks_lockout == 0 and self.lks_pulse == 0 and self.lks_confirm == 0:
+        self.lks_recover_frames += 1
+        if self.lks_recover_frames >= CarControllerParams.LKS_RECOVER_FRAMES:
+          self.lks_give_up_want = None
+          self.lks_recover_frames = 0
+    else:
+      self.lks_recover_frames = 0
+
+    self.enabled_last = CC.enabled
 
     if self.lks_lockout > 0:
       self.lks_lockout -= 1
-    elif self.lks_pending and self.lks_pulse == 0 and self.lks_confirm == 0:
-      if want is None or self.camera_on is None:
-        pass
-      elif self.camera_on != want:
-        self.lks_pulse = CarControllerParams.LKS_PULSE_TICKS
-        self.lks_want = want
-        self.lks_retries = 0
-        self.lks_pending = False
-        if not want:
-          self.hold_steer = max(self.hold_steer, CarControllerParams.LKS_PULSE_TICKS * CarControllerParams.LKS_PULSE_PERIOD +
-                                CarControllerParams.LKS_CONFIRM_FRAMES)
-      else:
-        self.lks_pending = False
+    elif self.lks_pulse == 0 and self.lks_confirm == 0:
+      if want is not None and self.camera_on is not None and self.camera_on != want:
+        if want != self.lks_give_up_want:
+          self._start_pulse(want)
 
     if self.lks_pulse > 0 and self.frame % CarControllerParams.LKS_PULSE_PERIOD == 0:
       can_sends.append(bydcan.create_buttons(self.packer, lkas=True, bus=2))
@@ -119,11 +148,10 @@ class CarController(CarControllerBase):
       if self.lks_confirm == 0:
         if self.camera_on is not None and self.lks_want is not None and self.camera_on != self.lks_want:
           if self.lks_retries < 1:
-            self.lks_pulse = CarControllerParams.LKS_PULSE_TICKS
             self.lks_retries += 1
+            self.lks_pulse = CarControllerParams.LKS_PULSE_TICKS
             if not self.lks_want:
-              self.hold_steer = max(self.hold_steer, CarControllerParams.LKS_PULSE_TICKS * CarControllerParams.LKS_PULSE_PERIOD +
-                                    CarControllerParams.LKS_CONFIRM_FRAMES)
+              self._hold_for(self._pulse_hold())
           else:
             self.lks_give_up_want = self.lks_want
 
