@@ -18,7 +18,7 @@ class CarInterface(CarInterfaceBase):
     # LKS_ON matches first-boot persist. card.py clears/sets it from BydLksEnabled.
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.byd, int(BydSafetyFlags.LKS_ON))]
 
-    ret.dashcamOnly = True
+    ret.dashcamOnly = False
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.2
