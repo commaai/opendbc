@@ -37,6 +37,7 @@ BU_: EPS ESP_ECU BCM VCU MPC_CAM ADAS_ECU MCU BSD
 
 
 BO_ 85 POWER_VCC: 8 VCU
+ SG_ CHARGE_PLUGGED : 5|1@1+ (1,0) [0|1] "" MCU
  SG_ POWER_ON : 33|1@1+ (1,0) [0|1] "" MCU
 
 BO_ 287 STEER_MODULE_2: 5 EPS
@@ -126,7 +127,12 @@ BO_ 790 LKAS_HUD_ADAS: 8 MPC_CAM
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
 BO_ 803 CHARGE_STATUS: 8 VCU
- SG_ CHARGE_STATE : 0|2@1+ (1,0) [0|3] "" MCU
+ SG_ CHARGE_STATE : 0|8@1+ (1,0) [0|255] "" MCU
+ SG_ CHARGE_SOC : 8|8@1+ (1,0) [0|255] "%" MCU
+ SG_ CHARGE_UNKNOWN_12BIT : 16|12@1+ (1,0) [0|4095] "" MCU
+ SG_ CHARGE_SESSION_FLAGS : 28|4@1+ (1,0) [0|15] "" MCU
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
 BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
  SG_ SET_SPEED : 0|8@1+ (0.5,0) [0|127.5] "kph" MCU
@@ -165,6 +171,9 @@ BO_ 834 PEDAL: 8 VCU
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
+BO_ 836 CHARGE_SESSION: 8 VCU
+ SG_ CHARGE_SESSION_ACTIVE : 48|2@1+ (1,0) [0|3] "" MCU
+
 BO_ 944 PCM_BUTTONS: 8 MCU
  SG_ SET_ME_1_1 : 2|1@0+ (1,0) [0|1] "" MCU
  SG_ SET_BTN : 3|1@0+ (1,0) [0|1] "" MCU
@@ -192,7 +201,7 @@ BO_ 1050 SUNROOF_SHADE: 8 BCM
  SG_ ROOF_CHANNEL : 16|8@1+ (1,0) [0|255] "" MCU
  SG_ ROOF_PHASE : 24|8@1+ (1,0) [0|255] "" MCU
 
-CM_ BO_ 85 "VCC / power. Byte 4 0x80 off, 0x82 on (POWER_ON bit 33).";
+CM_ BO_ 85 "VCC / power. Byte 4 0x80 off, 0x82 on (POWER_ON bit 33). CHARGE_PLUGGED set while a charge connector is in, 1 Hz.";
 CM_ BO_ 287 "EPS steering wheel angle + driver torque. Validated: angle range plausible, DRIVER_EPS_TORQUE stays near 0 when hands-off.";
 CM_ BO_ 290 "Per-wheel speed from ESP (FL/FR/BL/BR). 0.072 kph/LSB (0.02 m/s/LSB). Use WHEELSPEED_CLEAN (0x1F0) for the aggregated filtered value openpilot consumes.";
 CM_ BO_ 307 "Turn signal / stalk info. Validated: LEFT_BLINKER and RIGHT_BLINKER transition 0->1 during lane change events.";
@@ -207,10 +216,11 @@ CM_ SG_ 790 SET_ME_2 "Unnamed bits 2-3. Named so the packer keeps the camera val
 CM_ SG_ 790 SET_ME_8 "Unnamed bits 8-9. Named so the packer keeps the camera values.";
 CM_ SG_ 790 SET_ME_32 "Unnamed bits 32-33. Named so the packer keeps the camera values.";
 CM_ SG_ 790 SET_ME_50 "Unnamed bits 50-51. Named so the packer keeps the camera values.";
-CM_ BO_ 803 "Charge state. d[0] 0 idle, 3 charging.";
+CM_ BO_ 803 "Charging session, 10 Hz. CHARGE_SOC is 0xFF outside a session. CHARGE_UNKNOWN_12BIT reads 0xFFE unplugged, 500 plugged idle, 583-778 during DC charging; scale not established.";
 CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state).";
 CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active.";
 CM_ BO_ 834 "Gas/brake pedal percentages.";
+CM_ BO_ 836 "Charging session flags, 10 Hz. Byte 6 0x0B while a session is active, 0x08 otherwise.";
 CM_ BO_ 944 "Steering-wheel cruise control buttons.";
 CM_ BO_ 1031 "Body lock. LOCK_STATE 0xAA locked / 0x55 unlocked; TRUNK_STATE low nibble tracks the boot.";
 CM_ BO_ 1050 "Sunroof / shade. Event-driven (~2.4 Hz idle, bursts while moving). Channel 0x55 idle / 0x95 shade / 0xA5 roof.";
@@ -224,7 +234,7 @@ VAL_ 790 SLA_STATE 0 "OFF" 1 "FUSION_MODE" 2 "VISION_MODE" 3 "NV_ONLY_MODE" 4 "D
 VAL_ 790 RIGHT_LANE_STATE 0 "OFF" 1 "GREEN" 2 "ORANGE";
 VAL_ 790 LKAS_STATE 2 "ACTIVE" 1 "OFF";
 VAL_ 790 LDSW_TYPE 0 "VIBRATE" 1 "SOUND" 2 "ALL";
-VAL_ 803 CHARGE_STATE 0 "IDLE" 3 "CHARGING";
+VAL_ 803 CHARGE_STATE 0 "IDLE" 2 "PREPARING" 3 "CHARGING" 4 "FINISHING";
 VAL_ 813 SET_DISTANCE 4 "4bar" 3 "3bar" 2 "2bar" 1 "1bar";
 VAL_ 813 ACC_STATE 0 "OFF" 2 "ACC_ON" 3 "ACC_ACTIVE" 5 "FORCE_ACCEL" 7 "ERROR";
 VAL_ 1031 LOCK_STATE 170 "LOCKED" 85 "UNLOCKED";
