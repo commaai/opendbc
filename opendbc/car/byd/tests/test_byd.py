@@ -90,12 +90,13 @@ class TestBydLkasHud(unittest.TestCase):
     self.assertEqual(out["SET_ME_50"], 0)
 
 
-def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0):
+def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_btn_rising=False):
   return SimpleNamespace(
     eps_engaged=eps_engaged,
     steer_not_accepted=False,
     lkas_hud={},
     lks_enabled=lks_enabled,
+    lks_btn_rising=lks_btn_rising,
     camera_lkas_state=camera_lkas_state,
     out=SimpleNamespace(vEgoRaw=20.0, steeringAngleDeg=angle),
   )
@@ -166,25 +167,73 @@ class TestBydCruiseGate(unittest.TestCase):
     self.assertFalse(cruise_enabled(acc_state=2, lks_enabled=True))
 
 
-class TestBydLksNeutralize(unittest.TestCase):
-  def test_pulses_lks_button_on_bus2_when_camera_on(self):
+def _bus2_lks(sends):
+  return [m for m in sends if m[0] == 0x3B0 and m[2] == 2]
+
+
+def _step(ctrl, n, enabled=True, lat=False, cam=0, lks=True, rising=False):
+  pulses = 0
+  last = []
+  for i in range(n):
+    CS = _cs(lks_enabled=lks, camera_lkas_state=cam, lks_btn_rising=rising and i == 0)
+    _act, last = ctrl.update(_cc(enabled=enabled, lat_active=lat), CS, 0)
+    pulses += len(_bus2_lks(last))
+  return pulses, last
+
+
+class TestBydLksCamera(unittest.TestCase):
+  def test_neutralize_on_enabled_when_camera_on(self):
     ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
-    CS = _cs(lks_enabled=True, camera_lkas_state=2)
-    _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), CS, 0)
-    bus2 = [m for m in sends if m[0] == 0x3B0]
-    self.assertEqual(len(bus2), 1)
-    self.assertEqual(bus2[0][2], 2)
+    seen = None
+    for _ in range(CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD + 2):
+      CS = _cs(lks_enabled=True, camera_lkas_state=2)
+      _act, sends = ctrl.update(_cc(enabled=True, lat_active=False), CS, 0)
+      bus2 = _bus2_lks(sends)
+      if bus2:
+        seen = bus2[0]
+    self.assertIsNotNone(seen)
     cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("PCM_BUTTONS", 0)], 0)
-    cp.update([(0, [(0x3B0, bus2[0][1], 0)])])
+    cp.update([(0, [(0x3B0, seen[1], 0)])])
     self.assertEqual(cp.vl["PCM_BUTTONS"]["LKAS_ON_BTN"], 1)
     self.assertEqual(cp.vl["PCM_BUTTONS"]["ACC_ON_BTN"], 0)
 
-  def test_no_pulse_when_latch_off_or_camera_off(self):
+  def test_no_pulse_when_camera_already_off(self):
     ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
-    for lks, cam in ((False, 2), (True, 0)):
-      CS = _cs(lks_enabled=lks, camera_lkas_state=cam)
-      _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), CS, 0)
-      self.assertFalse(any(m[0] == 0x3B0 for m in sends), (lks, cam))
+    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 10, enabled=True, lat=True, cam=0)
+    self.assertEqual(pulses, 0)
+
+  def test_no_immediate_restore_or_idle_glitch(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES - 1, enabled=False, cam=2, lks=True)
+    self.assertEqual(pulses, 0)
+
+  def test_restore_after_hud_quiet_when_latch_on(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=False, cam=0, lks=True)
+    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=0, lks=True)
+    self.assertGreater(pulses, 0)
+
+  def test_no_restore_when_latch_off(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + 20, enabled=False, cam=0, lks=False)
+    self.assertEqual(pulses, 0)
+
+  def test_button_lockout_then_snap_camera_off(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=True, cam=0, lks=True)
+    pulses_lock, last_lock = _step(ctrl, CCP.LKS_LOCKOUT_FRAMES, enabled=False, cam=2, lks=False, rising=True)
+    self.assertEqual(pulses_lock, 0)
+    self.assertIn(0x1E2, {m[0] for m in last_lock})
+    pulses_snap, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=2, lks=False)
+    self.assertGreater(pulses_snap, 0)
+
+  def test_one_retry_then_stop(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_TICKS * CCP.LKS_PULSE_PERIOD * 2 +
+                      CCP.LKS_CONFIRM_FRAMES * 2 + 20, enabled=True, cam=2)
+    # 4 ticks per pulse, two pulses (first + one retry), at most a leftover tick
+    self.assertGreaterEqual(pulses, CCP.LKS_PULSE_TICKS)
+    self.assertLessEqual(pulses, CCP.LKS_PULSE_TICKS * 2)
 
   def test_cancel_does_not_set_lks_button(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
@@ -201,6 +250,7 @@ class TestBydDbcObserve(unittest.TestCase):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
     _, dat, _ = packer.make_can_msg("DRIVE_STATE", 0, {"GEAR": 4})
     self.assertEqual(dat[5] & 0x07, 4)
+    self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
 
   def test_power_on_and_epb_bits(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
