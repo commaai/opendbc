@@ -14,7 +14,6 @@ capnp_log = capnp.load(os.path.join(BASEDIR, "rlog.capnp"), imports=[BASEDIR])
 
 def decompress_stream(data: bytes):
   dctx = zstd.ZstdDecompressor()
-  decompressed_data = b""
 
   with dctx.stream_reader(data) as reader:
     decompressed_data = reader.read()
