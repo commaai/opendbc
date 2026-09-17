@@ -7,12 +7,13 @@ def byd_checksum(address: int, sig, d: bytearray) -> int:
   return (~sum(d[:7])) & 0xFF
 
 
-def create_steering_control(packer, apply_angle: float, lat_active: bool, counter: int):
-  # Stock saturates the rate limits at +/-299 when engaged, 0 when disengaged
+def create_steering_control(packer, apply_angle: float, lat_active: bool, counter: int, ack: bool = False):
+  # Stock saturates the rate limits at +/-299 when engaged, 0 when disengaged.
+  # ack is the camera's STEER_REQ=0 / ACTIVE_LOW=0 frame that takes the EPS out of standby.
   rate_limit = 299 if lat_active else 0
   values = {
     "STEER_REQ": 1 if lat_active else 0,
-    "STEER_REQ_ACTIVE_LOW": 0 if lat_active else 1,
+    "STEER_REQ_ACTIVE_LOW": 0 if (lat_active or ack) else 1,
     "STEER_ANGLE": apply_angle,
     "ANGLE_RATE_LIMIT_UPPER": rate_limit,
     "ANGLE_RATE_LIMIT_LOWER": -rate_limit,
@@ -25,12 +26,19 @@ def create_steering_control(packer, apply_angle: float, lat_active: bool, counte
   return packer.make_can_msg("STEERING_MODULE_ADAS", 0, values)
 
 
-def create_buttons(packer, cancel=False, lkas=False, bus=0):
-  # Cancel is bus 0 ACC_ON_BTN only. Camera LKS neutralize/restore is bus 2
-  # LKAS_ON_BTN only. Never set both: a cancel spoof must not toggle our latch.
+def create_buttons(packer, stock_values: dict, cancel=False, lkas=False, bus=0):
+  # The car's latest 0x3B0 with one button added, COUNTER included: the camera
+  # faults ACC on an out of sequence 0x3B0 counter. Cancel is bus 0 ACC_ON_BTN
+  # only. Camera LKS neutralize/restore is bus 2 LKAS_ON_BTN only. Never set
+  # both: a cancel spoof must not toggle our latch.
   values = {
     "SET_ME_1_1": 1,
     "SET_ME_1_2": 1,
+    **stock_values,
+    "SET_BTN": 0,
+    "RES_BTN": 0,
+    "DEC_DISTANCE_BTN": 0,
+    "INC_DISTANCE_BTN": 0,
     "ACC_ON_BTN": 1 if cancel else 0,
     "LKAS_ON_BTN": 1 if lkas else 0,
   }
