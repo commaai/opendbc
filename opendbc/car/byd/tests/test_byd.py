@@ -90,16 +90,27 @@ class TestBydLkasHud(unittest.TestCase):
     self.assertEqual(out["SET_ME_50"], 0)
 
 
-def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_btn_rising=False):
+def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_btn_rising=False, eps_standby=False,
+        buttons=None, buttons_ts=0):
   return SimpleNamespace(
     eps_engaged=eps_engaged,
+    eps_standby=eps_standby,
     steer_not_accepted=False,
     lkas_hud={},
     lks_enabled=lks_enabled,
     lks_btn_rising=lks_btn_rising,
     camera_lkas_state=camera_lkas_state,
+    pcm_buttons_stock=buttons if buttons is not None else {},
+    pcm_buttons_ts=buttons_ts,
     out=SimpleNamespace(vEgoRaw=20.0, steeringAngleDeg=angle),
   )
+
+
+def _decode(name, packer_msg):
+  addr, dat, _bus = packer_msg
+  cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [(name, 0)], 0)
+  cp.update([(0, [(addr, dat, 0)])])
+  return dict(cp.vl[name])
 
 
 def _cc(enabled=True, lat_active=True, cancel=False):
@@ -112,6 +123,21 @@ def _cc(enabled=True, lat_active=True, cancel=False):
   )
 
 
+def _steer_frames(ctrl, n, enabled=True, lat=True, eps_engaged=True, eps_standby=False, angle=0.0, desired=0.0):
+  # Returns the decoded 0x1E2 sent on each 50 Hz slot (None if none) and the last CS.
+  frames = []
+  CS = None
+  for _ in range(n):
+    CS = _cs(eps_engaged=eps_engaged, eps_standby=eps_standby, angle=angle)
+    CC = _cc(enabled=enabled, lat_active=lat)
+    CC.actuators.steeringAngleDeg = desired
+    _act, sends = ctrl.update(CC, CS, 0)
+    if ctrl.frame % 2 == 0:  # frame already advanced: odd frames carry the steer slot
+      steer = [m for m in sends if m[0] == 0x1E2]
+      frames.append(_decode("STEERING_MODULE_ADAS", steer[0]) if steer else None)
+  return frames, CS
+
+
 class TestBydSteerNotAccepted(unittest.TestCase):
   def test_debounce_fires_after_200ms(self):
     ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
@@ -121,10 +147,11 @@ class TestBydSteerNotAccepted(unittest.TestCase):
       ctrl.update(_cc(enabled=lat_active, lat_active=lat_active), CS, 0)
       return CS.steer_not_accepted
 
-    # Steer path runs on odd frames (frame % 2). 10 odd ticks is 200 ms.
-    flags = [step(True, False) for _ in range(22)]
-    self.assertFalse(flags[17])
-    self.assertTrue(flags[19])
+    # Steer path runs on odd frames (frame % 2). Two warm-up slots first, then 10 REQ=1 slots is 200 ms.
+    warmup = CCP.STEER_WARMUP_FRAMES * 2
+    flags = [step(True, False) for _ in range(22 + warmup)]
+    self.assertFalse(flags[17 + warmup])
+    self.assertTrue(flags[19 + warmup])
 
     self.assertFalse(step(True, True))
 
@@ -146,17 +173,91 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     step(True, False)
     heartbeat = step(True, False)
     self.assertIn(0x316, heartbeat)
-    cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("STEERING_MODULE_ADAS", 0)], 0)
-    cp.update([(0, [(0x1E2, heartbeat[0x1E2][1], 0)])])
-    self.assertEqual(cp.vl["STEERING_MODULE_ADAS"]["STEER_REQ"], 0)
-    self.assertAlmostEqual(cp.vl["STEERING_MODULE_ADAS"]["STEER_ANGLE"], 12.0, places=1)
+    steer = _decode("STEERING_MODULE_ADAS", heartbeat[0x1E2])
+    self.assertEqual(steer["STEER_REQ"], 0)
+    self.assertEqual(steer["STEER_REQ_ACTIVE_LOW"], 1)
+    self.assertAlmostEqual(steer["STEER_ANGLE"], 12.0, places=1)
 
-    step(True, True)
-    active = step(True, True)
-    self.assertIn(0x1E2, active)
-    self.assertIn(0x316, active)
-    cp.update([(0, [(0x1E2, active[0x1E2][1], 0)])])
-    self.assertEqual(cp.vl["STEERING_MODULE_ADAS"]["STEER_REQ"], 1)
+    # lateral comes on: the heartbeat above was warm-up slot one, the rest follow, then REQ=1
+    reqs = []
+    for _ in range(2 * (CCP.STEER_WARMUP_FRAMES + 1)):
+      active = step(True, True)
+      if 0x1E2 in active:
+        self.assertIn(0x316, active)
+        reqs.append(_decode("STEERING_MODULE_ADAS", active[0x1E2])["STEER_REQ"])
+    self.assertEqual(reqs, [0] * (CCP.STEER_WARMUP_FRAMES - 1) + [1, 1])
+
+  def test_warmup_then_first_req_repeats_angle(self):
+    # After a TX gap: REQ=0 at the measured angle, then the first REQ=1 at that same angle,
+    # then the ramp toward the desired angle.
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    frames, _ = _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 3), angle=5.0, desired=20.0)
+    self.assertEqual([f["STEER_REQ"] for f in frames], [0] * CCP.STEER_WARMUP_FRAMES + [1, 1, 1])
+    for f in frames[:CCP.STEER_WARMUP_FRAMES + 1]:
+      self.assertAlmostEqual(f["STEER_ANGLE"], 5.0, places=1)
+    self.assertGreater(frames[CCP.STEER_WARMUP_FRAMES + 1]["STEER_ANGLE"], 5.0)
+    self.assertGreater(frames[CCP.STEER_WARMUP_FRAMES + 2]["STEER_ANGLE"], frames[CCP.STEER_WARMUP_FRAMES + 1]["STEER_ANGLE"])
+
+    # A lateral pause resyncs the same way: REQ=0 at measured, then REQ=1 without a step
+    frames, _ = _steer_frames(ctrl, 2, lat=False, angle=7.0, desired=20.0)
+    self.assertEqual(frames[0]["STEER_REQ"], 0)
+    self.assertAlmostEqual(frames[0]["STEER_ANGLE"], 7.0, places=1)
+    frames, _ = _steer_frames(ctrl, 4, angle=7.0, desired=20.0)
+    self.assertEqual(frames[0]["STEER_REQ"], 1)
+    self.assertAlmostEqual(frames[0]["STEER_ANGLE"], 7.0, places=1)
+    self.assertGreater(frames[1]["STEER_ANGLE"], 7.0)
+
+  def test_standby_ack_pair_then_resume(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=3.0, desired=3.0)
+
+    # EPS drops to standby while we steer: seen on two slots, then idle frame + ack, then REQ=1 again
+    frames, CS = _steer_frames(ctrl, 2 * 4, eps_engaged=False, eps_standby=True, angle=3.0, desired=3.0)
+    reqs = [(f["STEER_REQ"], f["STEER_REQ_ACTIVE_LOW"]) for f in frames]
+    self.assertEqual(reqs, [(1, 0), (0, 1), (0, 0), (1, 0)])
+    for f in frames[1:3]:
+      self.assertAlmostEqual(f["STEER_ANGLE"], 3.0, places=1)
+      self.assertEqual(f["ANGLE_RATE_LIMIT_UPPER"], 0)
+      self.assertEqual(f["ANGLE_RATE_LIMIT_LOWER"], 0)
+    self.assertFalse(CS.steer_not_accepted)
+
+    # EPS acks: REQ=1 resumes at the same angle, no second pair inside the period
+    frames, CS = _steer_frames(ctrl, 2 * CCP.STEER_ACK_PERIOD, angle=3.0, desired=3.0)
+    self.assertEqual({f["STEER_REQ"] for f in frames}, {1})
+    self.assertAlmostEqual(frames[0]["STEER_ANGLE"], 3.0, places=1)
+    self.assertFalse(CS.steer_not_accepted)
+
+  def test_standby_acks_are_rate_limited_then_fault_latches(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=0.0)
+
+    acks = 0
+    latched_at = None
+    for i in range(2 * CCP.STEER_ACK_PERIOD * (CCP.STEER_ACK_ATTEMPTS + 2)):
+      frames, CS = _steer_frames(ctrl, 1, eps_engaged=False, eps_standby=True)
+      if frames and frames[0] is not None and frames[0]["STEER_REQ"] == 0 and frames[0]["STEER_REQ_ACTIVE_LOW"] == 0:
+        acks += 1
+      if CS.steer_not_accepted and ctrl.steer_fault_latched and latched_at is None:
+        latched_at = i
+    self.assertEqual(acks, CCP.STEER_ACK_ATTEMPTS)
+    self.assertIsNotNone(latched_at)
+
+    # Latched: no more acks, fault stays while enabled, clears on disengage
+    frames, CS = _steer_frames(ctrl, 2 * CCP.STEER_ACK_PERIOD, eps_engaged=False, eps_standby=True)
+    self.assertFalse(any(f["STEER_REQ"] == 0 and f["STEER_REQ_ACTIVE_LOW"] == 0 for f in frames))
+    self.assertTrue(CS.steer_not_accepted)
+    _frames, CS = _steer_frames(ctrl, 2, enabled=False, lat=False, eps_engaged=False, eps_standby=True)
+    self.assertFalse(CS.steer_not_accepted)
+    self.assertEqual(ctrl.ack_attempts, 0)
+
+  def test_not_accepted_counts_only_sent_req_frames(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    # warm-up slots with the EPS idle do not count
+    _steer_frames(ctrl, 2 * CCP.STEER_WARMUP_FRAMES, eps_engaged=False)
+    self.assertEqual(ctrl.not_accepted_frames, 0)
+    # standby ack slots do not count either
+    _steer_frames(ctrl, 2 * 4, eps_engaged=False, eps_standby=True)
+    self.assertEqual(ctrl.not_accepted_frames, 2)
 
 
 class TestBydCruiseGate(unittest.TestCase):
@@ -290,20 +391,62 @@ class TestBydLksCamera(unittest.TestCase):
 
   def test_one_retry_then_stop(self):
     ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
-    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_TICKS * CCP.LKS_PULSE_PERIOD * 2 +
+    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + (CCP.LKS_PULSE_PERIOD + 1) * 2 +
                       CCP.LKS_CONFIRM_FRAMES * 2 + 20, enabled=True, cam=2)
-    # 4 ticks per pulse, two pulses (first + one retry), at most a leftover tick
-    self.assertGreaterEqual(pulses, CCP.LKS_PULSE_TICKS)
-    self.assertLessEqual(pulses, CCP.LKS_PULSE_TICKS * 2)
+    # one tick per pulse, two pulses (first + one retry), then give up
+    self.assertEqual(pulses, CCP.LKS_PULSE_TICKS * 2)
+
+  def test_tick_mirrors_stock_frame_right_after_it(self):
+    # Our bus-2 frame is the car's latest 0x3B0 (same COUNTER) with only LKAS_ON_BTN added,
+    # sent on the frame the car's 0x3B0 arrived.
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    stock = {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "SET_BTN": 1, "RES_BTN": 0, "LKAS_ON_BTN": 0,
+             "DEC_DISTANCE_BTN": 0, "INC_DISTANCE_BTN": 0, "ACC_ON_BTN": 1, "COUNTER": 11, "CHECKSUM": 0}
+    sent = []
+    for i in range(CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD * 3):
+      fresh = i % CCP.LKS_PULSE_PERIOD == 3
+      if fresh:
+        stock = {**stock, "COUNTER": (stock["COUNTER"] + 1) % 16}
+      # pcm_buttons_ts only moves on the frames a stock 0x3B0 arrived
+      CS = _cs(camera_lkas_state=2, buttons=stock, buttons_ts=(i - 3) // CCP.LKS_PULSE_PERIOD)
+      _act, sends = ctrl.update(_cc(enabled=True, lat_active=False), CS, 0)
+      for m in _bus2_lks(sends):
+        sent.append((i, fresh, stock["COUNTER"], _decode("PCM_BUTTONS", m), m[1]))
+    self.assertEqual(len(sent), 1)
+    i, fresh, counter, values, dat = sent[0]
+    self.assertTrue(fresh)
+    self.assertEqual(values["COUNTER"], counter)
+    self.assertEqual(values["LKAS_ON_BTN"], 1)
+    self.assertEqual(values["ACC_ON_BTN"], 0)
+    self.assertEqual(values["SET_BTN"], 0)
+    self.assertEqual(values["SET_ME_1_1"], 1)
+    self.assertEqual(values["SET_ME_1_2"], 1)
+    self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
+
+  def test_tick_falls_back_without_fresh_stock_frame(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD + 2, enabled=True, cam=2)
+    self.assertEqual(pulses, 1)
+
+  def test_no_tick_while_eps_standby(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses = 0
+    for _ in range(CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD * 4):
+      CS = _cs(camera_lkas_state=2, eps_standby=True)
+      _act, sends = ctrl.update(_cc(enabled=True, lat_active=False), CS, 0)
+      pulses += len(_bus2_lks(sends))
+    self.assertEqual(pulses, 0)
+    more, _ = _step(ctrl, CCP.LKS_PULSE_PERIOD + 2, enabled=True, cam=2)
+    self.assertEqual(more, 1)
 
   def test_cancel_does_not_set_lks_button(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
-    _addr, dat, bus = bydcan.create_buttons(packer, cancel=True)
+    _addr, dat, bus = bydcan.create_buttons(packer, {"COUNTER": 7, "LKAS_ON_BTN": 1}, cancel=True)
     self.assertEqual(bus, 0)
-    cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("PCM_BUTTONS", 0)], 0)
-    cp.update([(0, [(0x3B0, dat, 0)])])
-    self.assertEqual(cp.vl["PCM_BUTTONS"]["ACC_ON_BTN"], 1)
-    self.assertEqual(cp.vl["PCM_BUTTONS"]["LKAS_ON_BTN"], 0)
+    values = _decode("PCM_BUTTONS", (_addr, dat, bus))
+    self.assertEqual(values["ACC_ON_BTN"], 1)
+    self.assertEqual(values["LKAS_ON_BTN"], 0)
+    self.assertEqual(values["COUNTER"], 7)
 
 
 class TestBydDbcObserve(unittest.TestCase):
@@ -319,6 +462,7 @@ class TestBydDbcObserve(unittest.TestCase):
     self.assertEqual(power[4] & 0x02, 0x02)
     _, epb, _ = packer.make_can_msg("EPB_STATUS", 0, {"EPB_APPLIED": 1})
     self.assertEqual(epb[0] & 0x08, 0x08)
+
   def test_charge_status_layout(self):
     # 03 32 09 93 .. = charging, 50 %, 12-bit 777, flags 9
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
@@ -330,7 +474,6 @@ class TestBydDbcObserve(unittest.TestCase):
     self.assertEqual(power[0] & 0x20, 0x20)
     _, sess, _ = packer.make_can_msg("CHARGE_SESSION", 0, {"CHARGE_SESSION_ACTIVE": 3})
     self.assertEqual(sess[6] & 0x03, 0x03)
-
 
   def test_radar_dbc_is_mapped_but_unavailable(self):
     self.assertEqual(DBC[CAR.BYD_ATTO_3][Bus.radar], "byd_radar_fd")

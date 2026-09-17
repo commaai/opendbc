@@ -29,7 +29,10 @@ class CarState(CarStateBase):
     self.lkas_hud = {}
     self.disengage_frames = 0
     self.eps_engaged = True
+    self.eps_standby = False
     self.eps_target_angle = 0.0
+    self.pcm_buttons_stock = {}
+    self.pcm_buttons_ts = 0
     self.steer_not_accepted = False
     self.parking_brake = False
     self.epb_on_frames = 0
@@ -68,8 +71,10 @@ class CarState(CarStateBase):
 
     # EPS clears LKS_PREPARED and echoes TARGET_ANGLE while it executes our request.
     # Only trust after the first STEERING_TORQUE frame (parser defaults are 0 / "engaged").
+    # Idle with CRUISE_ACTIVATED set is standby: the EPS ignores STEER_REQ until acked.
     if cp.ts_nanos["STEERING_TORQUE"]["LKS_PREPARED"] > 0:
       self.eps_engaged = not cp.vl["STEERING_TORQUE"]["LKS_PREPARED"]
+      self.eps_standby = not self.eps_engaged and bool(cp.vl["STEERING_TORQUE"]["CRUISE_ACTIVATED"])
       self.eps_target_angle = cp.vl["STEERING_TORQUE"]["TARGET_ANGLE"]
 
     acc_state = int(cp_cam.vl["ACC_HUD_ADAS"]["ACC_STATE"])
@@ -83,6 +88,9 @@ class CarState(CarStateBase):
         self.lks_enabled = not self.lks_enabled
         self.lks_btn_rising = True
       self.lks_btn_last = pressed
+    # Button spoofs are built on the car's latest 0x3B0 so the counter stays in sequence
+    self.pcm_buttons_stock = copy.copy(cp.vl["PCM_BUTTONS"])
+    self.pcm_buttons_ts = cp.ts_nanos["PCM_BUTTONS"]["COUNTER"]
 
     # Camera LKAS_STATE 0/4 are moods, not the switch. Fault only if EPS stays idle.
     ret.steerFaultTemporary = self.steer_not_accepted
