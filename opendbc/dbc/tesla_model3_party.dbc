@@ -208,6 +208,10 @@ BO_ 1160 DAS_steeringControl: 4 PARTY
  SG_ DAS_steeringAngleRequest : 6|15@0+ (0.1,-1638.35) [-1638.35|1638.35] "deg"  aps
  SG_ DAS_steeringHapticRequest : 7|1@0+ (1,0) [0|1] ""  aps
 
+BO_ 1161 NEW_MSG_489: 8 XXX
+ SG_ NEW_MSG_489_Checksum : 7|8@0+ (1,0) [0|31] "" XXX
+ SG_ NEW_MSG_489_Counter : 11|4@0+ (1,0) [0|15] "" XXX
+
 BO_ 297 SCCM_steeringAngleSensor: 8 PARTY
  SG_ SCCM_steeringAngleSensorReservd3 : 56|8@1+ (1,0) [0|255] ""  X
  SG_ SCCM_steeringAngleSensorReservd2 : 48|8@1+ (1,0) [0|255] ""  X
