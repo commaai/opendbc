@@ -191,7 +191,7 @@ BO_ 545 VCFRONT_LVPowerState: 8 CH
  SG_ VCFRONT_LVPowerStateIndex M : 0|5@1+ (1,0) [0|1] ""  epas3s
 
 BO_ 599 DI_speed: 8 PARTY
- SG_ DI_uiSpeedUnits : 32|1@1+ (1,0) [0|1] ""  das
+ SG_ DI_uiSpeedUnits : 33|1@1+ (1,0) [0|1] ""  das
  SG_ DI_uiSpeed : 24|8@1+ (1,0) [0|254] ""  das
  SG_ DI_vehicleSpeed : 12|12@1+ (0.08,-40) [-40|285] "kph"  park
  SG_ DI_speedCounter : 8|4@1+ (1,0) [0|15] ""  park
