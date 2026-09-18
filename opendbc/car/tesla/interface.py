@@ -23,6 +23,9 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
 
+    if 0x000 not in fingerprint[CANBUS.autopilot_party]:
+      ret.flags |= TeslaFlags.HW_2_5
+
     # Model X and HW 2.5 vehicles are missing DAS_settings
     if 0x293 not in fingerprint[CANBUS.autopilot_party]:
       ret.flags |= TeslaFlags.MISSING_DAS_SETTINGS.value
@@ -30,8 +33,8 @@ class CarInterface(CarInterfaceBase):
     # Tesla expanded DAS_steeringControl->DAS_steeringControlType to 3 bits around 10-26-2025 with the FSD 14 update to HW4 vehicles.
     # HW3 vehicles then got an update around XX-XX-XXXX to also use this new 3-bit signal definition.
     # Checking 0x489 existence seems to detect the new signal definition
-    # TODO: need another message id for HW2.5 which lacks 0x489
-    if 0x489 in fingerprint[CANBUS.autopilot_party]:
+    # 0x054 detects HW2.5 vehicles with the 3-bit definition
+    if 0x489 in fingerprint[CANBUS.autopilot_party] or 0x054 in fingerprint[CANBUS.party]:
       ret.flags |= TeslaFlags._3_BIT_STEER_TYPE.value
 
     # Radar support is intended to work for:
