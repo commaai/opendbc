@@ -32,8 +32,8 @@ class CarInterface(CarInterfaceBase):
 
     # Tesla expanded DAS_steeringControl->DAS_steeringControlType to 3 bits: first in the FSD 14 builds for HW4 around 10-26-2025,
     # then in the other HW4 builds around 03-02-2026, and for HW3 and HW2.5 with 2026.8.6 around 04-03-2026.
-    # - 0x489 is only sent by HW3/HW4 Autopilot computers on the 3-bit firmware
-    # - 0x054 is sent by the car on the 3-bit firmware, so it also detects HW2.5 vehicles
+    # - DAS_redundantBrakingControl (0x489) is only sent by HW3/HW4 Autopilot computers on the 3-bit firmware
+    # - DI_autonomyHealth (0x054) is sent by the car on the 3-bit firmware, so it also detects HW2.5 vehicles
     if 0x489 in fingerprint[CANBUS.autopilot_party] or 0x054 in fingerprint[CANBUS.party]:
       ret.flags |= TeslaFlags.DAS_STEERING_3_BIT.value
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.DAS_STEERING_3_BIT.value

@@ -110,6 +110,15 @@ class CarState(CarStateBase):
       steer_control_type >>= 1  # legacy firmware uses a 2-bit field, one bit up from the 3-bit signal
     ret.stockLkas = steer_control_type == 2  # LANE_KEEP_ASSIST
 
+    # Double-check 3-bit DAS_steeringControlType existence messages in case we missed them during startup window.
+    das_steering_3_bit = (cp_ap_party.ts_nanos["DAS_redundantBrakingControl"]["DAS_redundantBrakingControlCounter"] > 0 or
+                          cp_party.ts_nanos["DI_autonomyHealth"]["DI_autonomyBehavior"] > 0)
+    if not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT:
+      if das_steering_3_bit and not self.das_steering_3_bit_seen:
+        carlog.error("3-bit DAS_steeringControlType detected after fingerprinting")
+        self.das_steering_3_bit_seen = True
+      ret.steerFaultPermanent = ret.steerFaultPermanent or self.das_steering_3_bit_seen
+
     # Stock Autosteer should be off (includes FSD)
     # TODO: find for TESLA_MODEL_X and HW2.5 vehicles
     if not (self.CP.flags & TeslaFlags.MISSING_DAS_SETTINGS):
