@@ -27,6 +27,9 @@ class CarInterface(CarInterfaceBase):
     if 0x293 not in fingerprint[CANBUS.autopilot_party]:
       ret.flags |= TeslaFlags.MISSING_DAS_SETTINGS.value
 
+    if 0x489 in fingerprint[CANBUS.autopilot_party]:
+      ret.flags |= TeslaFlags._3_BIT_STEER_TYPE.value
+
     # Radar support is intended to work for:
     # - Tesla Model 3 vehicles built approximately mid-2017 through early-2021
     # - Tesla Model Y vehicles built approximately mid-2020 through early-2021

@@ -130,8 +130,9 @@ class TeslaSafetyFlags(IntFlag):
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
-  FSD_14 = 2
+  FSD_14 = 2  # TODO: DEPRECATE
   MISSING_DAS_SETTINGS = 4
+  _3_BIT_STEER_TYPE = 8
 
 
 DBC = CAR.create_dbc_map()
