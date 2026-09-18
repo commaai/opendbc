@@ -33,6 +33,11 @@ Ecu = CarParams.Ecu
 # Example full parse of 'TeMYG4_Main_0.0.0 (78),E4HP015.05.0':
 #   unknown_prefix='TeMYG4_Main_0.0.0 (78)'
 #   platform=E  variant_code=4HP015  software_major=05  software_minor=0
+#
+# Each OTA brings new EPS FW, and the DAS_steeringControlType width can't be inferred from the FW string's parts,
+# so interface.py detects it from CAN:
+#   - variant_code and software_major don't split it: HW3 'E014.20.2' and HW4 'Y4S002.27.0' are 3-bit, while 'Y4OC003.04.3' is 2-bit
+#   - the (build) number isn't monotonic across updates: '(36) XPR003.10.0' (2-bit) -> '(34) XPR003.9.2' (3-bit)
 FW_RE = re.compile(
   rb'^(?P<unknown_prefix>.+),' +
   rb'(?P<platform>[EYX])' +
