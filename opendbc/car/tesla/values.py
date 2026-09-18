@@ -75,8 +75,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
   ]
 )
 
-# Cars with this EPS FW have FSD 14 and use TeslaFlags.FSD_14
-FSD_14_FW = {
+# Cars with this EPS FW have a 3-bit DAS_steeringControlType and use TeslaFlags.DAS_STEERING_3_BIT
+DAS_STEERING_3_BIT_FW = {
   CAR.TESLA_MODEL_3: [
     b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
     b'TeMYG4_Main_0.0.0 (78),E4HP015.05.0',
@@ -125,12 +125,12 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
-  FSD_14 = 2
+  DAS_STEERING_3_BIT = 2
 
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
-  FSD_14 = 2
+  DAS_STEERING_3_BIT = 2
   MISSING_DAS_SETTINGS = 4
 
 
