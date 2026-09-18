@@ -110,15 +110,14 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
-  FSD_14 = 2
+  DAS_STEERING_3_BIT = 2
 
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
-  FSD_14 = 2  # TODO: DEPRECATE
+  DAS_STEERING_3_BIT = 2
   MISSING_DAS_SETTINGS = 4
-  _3_BIT_STEER_TYPE = 8
-  HW_2_5 = 16  # HW2.5, missing DAS_settings and 0x489 for 3-bit steering control signal detection
+  HW_2_5 = 8  # HW2.5, missing DAS_settings and 0x489 for 3-bit steering control signal detection
 
 
 DBC = CAR.create_dbc_map()

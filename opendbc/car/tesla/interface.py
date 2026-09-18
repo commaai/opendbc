@@ -30,12 +30,13 @@ class CarInterface(CarInterfaceBase):
     if 0x293 not in fingerprint[CANBUS.autopilot_party]:
       ret.flags |= TeslaFlags.MISSING_DAS_SETTINGS.value
 
-    # Tesla expanded DAS_steeringControl->DAS_steeringControlType to 3 bits around 10-26-2025 with the FSD 14 update to HW4 vehicles.
-    # HW3 vehicles then got an update around XX-XX-XXXX to also use this new 3-bit signal definition.
-    # Checking 0x489 existence seems to detect the new signal definition
-    # 0x054 detects HW2.5 vehicles with the 3-bit definition
+    # Tesla expanded DAS_steeringControl->DAS_steeringControlType to 3 bits: first in the FSD 14 builds for HW4 around 10-26-2025,
+    # then in the other HW4 builds around 03-02-2026, and for HW3 and HW2.5 with 2026.8.6 around 04-03-2026.
+    # - 0x489 is only sent by HW3/HW4 Autopilot computers on the 3-bit firmware
+    # - 0x054 is sent by the car on the 3-bit firmware, so it also detects HW2.5 vehicles
     if 0x489 in fingerprint[CANBUS.autopilot_party] or 0x054 in fingerprint[CANBUS.party]:
-      ret.flags |= TeslaFlags._3_BIT_STEER_TYPE.value
+      ret.flags |= TeslaFlags.DAS_STEERING_3_BIT.value
+      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.DAS_STEERING_3_BIT.value
 
     # Radar support is intended to work for:
     # - Tesla Model 3 vehicles built approximately mid-2017 through early-2021
@@ -48,14 +49,6 @@ class CarInterface(CarInterfaceBase):
     if alpha_long:
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LONG_CONTROL.value
-
-    # fsd_14 = any(fw.ecu == Ecu.eps and fw.fwVersion in FSD_14_FW.get(candidate, []) for fw in car_fw)
-    # if fsd_14:
-    #   ret.flags |= TeslaFlags.FSD_14.value
-    #   ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FSD_14.value
-
-    if ret.flags & TeslaFlags._3_BIT_STEER_TYPE.value:
-      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FSD_14.value
 
     ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
 
