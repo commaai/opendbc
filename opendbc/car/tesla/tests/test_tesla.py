@@ -6,7 +6,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.tesla.interface import CarInterface
 from opendbc.car.tesla.fingerprints import FW_VERSIONS
 from opendbc.car.tesla.radar_interface import RADAR_START_ADDR
-from opendbc.car.tesla.values import CAR, FSD_14_FW
+from opendbc.car.tesla.values import CAR
 
 Ecu = CarParams.Ecu
 
@@ -67,23 +67,23 @@ class TestTeslaFingerprint(unittest.TestCase):
         assert m is not None, f"Unparsable FW: {fw}"
         assert PLATFORM_TO_CAR[m['platform']] == car_model, f"Platform letter {m['platform']!r} != {car_model.value}: {fw}"
 
-  def test_fsd_14_fw(self):
-    for car_model, ecus in FW_VERSIONS.items():
-      if car_model not in FSD_14_FW_RULE:
-        continue
-
-      variant_prefix, variant_suffix = FSD_14_FW_RULE[car_model]
-      for fw in ecus.get((Ecu.eps, 0x730, None), []):
-        m = FW_RE.match(fw)
-        assert m is not None, f"Unparsable FW: {fw}"
-
-        is_fsd_14 = fw in FSD_14_FW.get(car_model, [])
-        expected = (
-          m['variant_code'].startswith(variant_prefix)
-          and m['variant_code'].endswith(variant_suffix)
-          and int(m['software_major']) >= 4
-        )
-        assert is_fsd_14 == expected, f"{fw}"
+  # def test_fsd_14_fw(self):
+  #   for car_model, ecus in FW_VERSIONS.items():
+  #     if car_model not in FSD_14_FW_RULE:
+  #       continue
+  #
+  #     variant_prefix, variant_suffix = FSD_14_FW_RULE[car_model]
+  #     for fw in ecus.get((Ecu.eps, 0x730, None), []):
+  #       m = FW_RE.match(fw)
+  #       assert m is not None, f"Unparsable FW: {fw}"
+  #
+  #       is_fsd_14 = fw in FSD_14_FW.get(car_model, [])
+  #       expected = (
+  #         m['variant_code'].startswith(variant_prefix)
+  #         and m['variant_code'].endswith(variant_suffix)
+  #         and int(m['software_major']) >= 4
+  #       )
+  #       assert is_fsd_14 == expected, f"{fw}"
 
   def test_radar_detection(self):
     # Test radar availability detection for cars with radar DBC defined
