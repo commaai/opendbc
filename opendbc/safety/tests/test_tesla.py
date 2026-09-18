@@ -266,6 +266,21 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
       self.assertEqual(self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
 
+  def test_das_steering_3_bit_seen(self):
+    # 3-bit DAS_steeringControlType messages on a car configured for the legacy encoding disallow controls until reset
+    legacy = not self.safety.get_current_safety_param() & TeslaSafetyFlags.DAS_STEERING_3_BIT
+    for bus, addr in ((2, 0x489), (0, 0x054)):
+      self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, self.SAFETY_PARAM)
+      self.safety.set_controls_allowed(True)
+      self.safety.safety_fwd_hook(bus, addr)  # these aren't rx checked, every message passes through the fwd hook
+      self._rx(self._speed_msg(0))
+      self.assertEqual(not legacy, self.safety.get_controls_allowed())
+
+      # stays latched through a cruise engagement
+      self._rx(self._pcm_status_msg(False))
+      self._rx(self._pcm_status_msg(True))
+      self.assertEqual(not legacy, self.safety.get_controls_allowed())
+
   def test_steering_control_type(self):
     # Only angle control is allowed (no LANE_KEEP_ASSIST, EMERGENCY_LANE_KEEP, or FSD)
     self.safety.set_controls_allowed(True)
