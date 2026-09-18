@@ -108,7 +108,7 @@ class CarState(CarStateBase):
     # LKAS
     steer_control_type = int(cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"])
     if not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT:
-      steer_control_type >>= 1  # legacy firmware uses a 2-bit field, one bit up from the 3-bit signal
+      steer_control_type >>= 1  # legacy firmware only uses the top 2 bits of the 3-bit signal
     ret.stockLkas = steer_control_type == 2  # LANE_KEEP_ASSIST
 
     # Double-check 3-bit DAS_steeringControlType existence messages in case we missed them during startup window.

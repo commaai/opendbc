@@ -3,7 +3,7 @@ from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
 
 
 def get_steer_ctrl_type(flags: int, ctrl_type: int) -> int:
-  # Legacy firmware uses a 2-bit DAS_steeringControlType, one bit up from the 3-bit signal.
+  # Legacy firmware only uses the top 2 bits of the 3-bit DAS_steeringControlType
   # Prevents accidentally sending LANE_KEEP_ASSIST which allows user overriding, but can be unstable and jerks back to target
   if flags & TeslaFlags.DAS_STEERING_3_BIT:
     return ctrl_type
