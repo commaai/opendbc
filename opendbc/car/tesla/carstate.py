@@ -16,12 +16,12 @@ class CarState(CarStateBase):
     self.autopark = False
     self.autopark_prev = False
     self.cruise_enabled_prev = False
-    self.fsd14_error_logged = False
-    self.suspected_fsd14 = False
 
     self.hands_on_level = 0
     self.das_control = None
     self.das_steering_3_bit_seen = False
+    self.eps_mismatch_frames = 0
+    self.eps_mismatch = False
 
   def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
     autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
@@ -35,6 +35,7 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp_party = can_parsers[Bus.party]
     cp_ap_party = can_parsers[Bus.ap_party]
+    cp_loopback = can_parsers[Bus.loopback]
     ret = structs.CarState()
 
     # Vehicle speed
@@ -111,7 +112,7 @@ class CarState(CarStateBase):
       steer_control_type >>= 1  # legacy firmware only uses the top 2 bits of the 3-bit signal
     ret.stockLkas = steer_control_type == 2  # LANE_KEEP_ASSIST
 
-    # Double-check 3-bit DAS_steeringControlType existence messages in case we missed them during startup window.
+    # Double-check 3-bit DAS_steeringControlType existence messages in case we missed them during startup window
     das_steering_3_bit = (cp_ap_party.ts_nanos["DAS_redundantBrakingControl"]["DAS_redundantBrakingControlCounter"] > 0 or
                           cp_party.ts_nanos["DI_autonomyHealth"]["DI_autonomyBehavior"] > 0)
     if not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT:
@@ -120,23 +121,21 @@ class CarState(CarStateBase):
         self.das_steering_3_bit_seen = True
       ret.steerFaultPermanent = ret.steerFaultPermanent or self.das_steering_3_bit_seen
 
+    # The EPS must be in ANGLE_CONTROL while it receives ANGLE_CONTROL from bus 128 (us or forwarded LKA events).
+    # Anything else means our DAS_steeringControlType encoding is wrong for this car
+    angle_control = get_steer_ctrl_type(self.CP.flags, 1)
+    eps_angle_control = eac_status in ("ACTIVE", "INHIBITED", "FAULT") and not epas_status["EPAS3S_driverlessState"]  # INHIBITED/FAULT are steer faults
+    for steer_control_type in cp_loopback.vl_all["DAS_steeringControl"]["DAS_steeringControlType"]:
+      self.eps_mismatch_frames = self.eps_mismatch_frames + 1 if steer_control_type == angle_control and not eps_angle_control else 0
+    if self.eps_mismatch_frames >= 25 and not self.eps_mismatch:  # 0.5 s at 50 Hz
+      carlog.error(f"EPS not in ANGLE_CONTROL: {eac_status=}, driverlessState={epas_status['EPAS3S_driverlessState']}")
+      self.eps_mismatch = True
+    ret.steerFaultPermanent = ret.steerFaultPermanent or self.eps_mismatch
+
     # Stock Autosteer should be off (includes FSD)
     # TODO: find for TESLA_MODEL_X and HW2.5 vehicles
     if not (self.CP.flags & TeslaFlags.MISSING_DAS_SETTINGS):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
-
-      # # Because we don't have FSD 14 detection outside of a set of FW, we should check if this FW is accidentally missing from FSD_14_FW
-      # # 1. If in Autosteer or FSD, already caught by invalidLkasSetting
-      # # 2. If in TACC and DAS ever sends ANGLE_CONTROL (1), we can infer it's trying to do LKAS on FSD 14+
-      # angle_control = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 1  # ANGLE_CONTROL
-      # if not ret.invalidLkasSetting and angle_control and not self.CP.flags & TeslaFlags.FSD_14:
-      #   self.suspected_fsd14 = True
-      #
-      # if self.suspected_fsd14:
-      #   ret.invalidLkasSetting = True
-      #   if not self.fsd14_error_logged:
-      #     carlog.error("FSD 14 detected, but FW not in FSD_14_FW set")
-      #     self.fsd14_error_logged = True
 
     # Buttons # ToDo: add Gap adjust button
 
@@ -156,6 +155,7 @@ class CarState(CarStateBase):
     ]
 
     return {
-      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.party),
-      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.autopilot_party)
+      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.party),
+      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], ap_party_messages, CANBUS.autopilot_party),
+      Bus.loopback: CANParser(DBC[CP.carFingerprint][Bus.party], [("DAS_steeringControl", float('nan'))], 128),
     }

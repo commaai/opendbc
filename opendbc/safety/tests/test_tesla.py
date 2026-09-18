@@ -77,11 +77,8 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
-    # If FSD 14, translate steer control type to new flipped definition
-    if self.safety.get_current_safety_param() & TeslaSafetyFlags.FSD_14:
-      state = get_steer_ctrl_type(TeslaFlags.FSD_14, int(state))
-
-    values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
+    flags = TeslaFlags.DAS_STEERING_3_BIT if self.safety.get_current_safety_param() & TeslaSafetyFlags.DAS_STEERING_3_BIT else 0
+    values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": get_steer_ctrl_type(flags, int(state))}
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
       self.__class__.cnt_angle_cmd += 1
@@ -270,9 +267,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertEqual(self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
 
   def test_steering_control_type(self):
-    # Only angle control is allowed (no LANE_KEEP_ASSIST or EMERGENCY_LANE_KEEP)
+    # Only angle control is allowed (no LANE_KEEP_ASSIST, EMERGENCY_LANE_KEEP, or FSD)
     self.safety.set_controls_allowed(True)
-    for steer_control_type in range(4):
+    num_steer_control_types = 8 if self.safety.get_current_safety_param() & TeslaSafetyFlags.DAS_STEERING_3_BIT else 4
+    for steer_control_type in range(num_steer_control_types):
       should_tx = steer_control_type in (self.steer_control_types["NONE"],
                                          self.steer_control_types["ANGLE_CONTROL"])
       self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)))
@@ -400,8 +398,8 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
     self.assertFalse(self._tx(no_aeb_msg))
 
 
-class TestTeslaFSD14StockSafety(TestTeslaStockSafety):
-  SAFETY_PARAM = TeslaSafetyFlags.FSD_14
+class TestTesla3BitStockSafety(TestTeslaStockSafety):
+  SAFETY_PARAM = TeslaSafetyFlags.DAS_STEERING_3_BIT
 
 
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
@@ -452,8 +450,8 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
     self.assertFalse(self._tx(self._long_control_msg(set_speed=0, accel_limits=(-0.1, -0.1))))
 
 
-class TestTeslaFSD14LongitudinalSafety(TestTeslaLongitudinalSafety):
-  SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL | TeslaSafetyFlags.FSD_14
+class TestTesla3BitLongitudinalSafety(TestTeslaLongitudinalSafety):
+  SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL | TeslaSafetyFlags.DAS_STEERING_3_BIT
 
 
 class TestTeslaIgnition(unittest.TestCase):

@@ -523,6 +523,31 @@ BO_ 2047 GTW_carConfig: 8 XXX
  SG_ GTW_narrowWipingSupported m7 : 63|1@1+ (1,0) [0|1] "" XXX
  SG_ GTW_windshieldWiperHeaterEnabled m6 : 63|1@1+ (1,0) [0|1] "" XXX
 
+BO_ 1861 DI_chassisControl2: 8 XXX
+ SG_ DI_gradeAngle : 0|6@1- (0.01,0) [-0.32|0.31] "" XXX
+ SG_ DI_bankAngle : 6|6@1- (0.01,0) [-0.32|0.31] "" XXX
+ SG_ DI_chassisControlVideoRequest : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ DI_eepDeliveryBitStatus : 16|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_tireUtilizationRatioFrL : 17|5@1+ (0.0625,0) [0|1.9375] "" XXX
+ SG_ DI_tireUtilizationRatioFrR : 22|5@1+ (0.0625,0) [0|1.9375] "" XXX
+ SG_ DI_tireUtilizationRatioReL : 27|5@1+ (0.0625,0) [0|1.9375] "" XXX
+ SG_ DI_tireUtilizationRatioReR : 32|5@1+ (0.0625,0) [0|1.9375] "" XXX
+ SG_ DI_counterSteerTarget : 37|2@1+ (1,0) [0|3] "" XXX
+ SG_ DI_splitMuProbability : 39|2@1+ (0.334,0) [0|1.002] "" XXX
+ SG_ DI_mzError : 41|2@1+ (1667,0) [0|5001] "" XXX
+ SG_ DI_slipDifferenceFrontRear : 43|3@1- (0.133,0) [-0.532|0.399] "" XXX
+ SG_ DI_highFreqYawRate : 46|2@1+ (0.334,0) [0|1.002] "" XXX
+ SG_ DI_turnDirection : 48|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_absolutePreControlRequest : 49|2@1+ (5000,0) [0|15000] "" XXX
+ SG_ DI_oppositeBuildDirFrontAxle : 51|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_oppositeBuildDirRearAxle : 52|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_saturatedEffectiveness : 53|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_driverPanicIndex : 54|2@1+ (0.334,0) [0|1.002] "" XXX
+ SG_ DI_learnDownMu : 56|2@1+ (0.334,0) [0|1.002] "" XXX
+ SG_ DI_preControlOpposingTurnDir : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_driverFxError : 59|2@1+ (1000,0) [0|3000] "" XXX
+ SG_ DI_targetSaturation : 61|3@1+ (0.572,0) [0|4.004] "" XXX
+
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 
 CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
@@ -537,6 +562,7 @@ CM_ BO_ 2047 "Sent on the party bus by HW3/HW4 cars, not seen on HW2.5";
 CM_ SG_ 2047 GTW_dasHw "5 (TESLA_AP4) observed on HW4 cars, not in the source DBC";
 CM_ SG_ 1160 DAS_steeringControlType "Legacy firmware only uses the top 2 bits, so its values read shifted left by 1";
 CM_ SG_ 880 EPAS3S_driverlessState "Set while the EPS executes an FSD (DAS_steeringControlType 4) request, 3-bit firmware only";
+CM_ SG_ 1861 DI_eepDeliveryBitStatus "Set by the update that brought the 3-bit DAS_steeringControlType on most cars (not all), never set on older firmware";
 VAL_ 545 VCFRONT_uiAudioLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_uiHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_vcrightHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
@@ -791,3 +817,9 @@ VAL_ 2047 GTW_interiorTrimType 0 "BLACK" 1 "WHITE" 4 "WALNUT_CREAM" 5 "WALNUT_WH
 VAL_ 2047 GTW_radarHeaterType 0 "NONE" 3 "MODELS_BACKER_THIN_3M" 4 "MODELX_BACKER_THIN_3M" ;
 VAL_ 2047 GTW_steeringHeaterType 0 "NONE" 4 "ZF_ROUND" 5 "ZF_YOKE" ;
 VAL_ 2047 GTW_numberHVILNodes 0 "0" 2 "2" 3 "3" ;
+VAL_ 1861 DI_counterSteerTarget 0 "INACTIVE" 1 "ACTIVE" 2 "EXPIRED" ;
+VAL_ 1861 DI_turnDirection 0 "RIGHT" 1 "LEFT" ;
+VAL_ 1861 DI_oppositeBuildDirFrontAxle 0 "FALSE" 1 "TRUE" ;
+VAL_ 1861 DI_oppositeBuildDirRearAxle 0 "FALSE" 1 "TRUE" ;
+VAL_ 1861 DI_saturatedEffectiveness 0 "FALSE" 1 "TRUE" ;
+VAL_ 1861 DI_preControlOpposingTurnDir 0 "FALSE" 1 "TRUE" ;
