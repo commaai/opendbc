@@ -21,6 +21,7 @@ class CarState(CarStateBase):
 
     self.hands_on_level = 0
     self.das_control = None
+    self.das_steering_3_bit_seen = False
 
   def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
     autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
@@ -146,6 +147,14 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
+    # Only sent by some firmware versions
+    party_messages = [
+      ("DI_autonomyHealth", float('nan')),
+    ]
+    ap_party_messages = [
+      ("DAS_redundantBrakingControl", float('nan')),
+    ]
+
     return {
       Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.party),
       Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.autopilot_party)
