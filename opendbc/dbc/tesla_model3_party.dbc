@@ -142,6 +142,7 @@ BO_ 880 EPAS3S_sysStatus: 8 PARTY
  SG_ EPAS3S_sysStatusChecksum : 56|8@1+ (1,0) [0|255] ""  park
  SG_ EPAS3S_sysStatusCounter : 48|4@1+ (1,0) [0|15] ""  gtw
  SG_ EPAS3S_eacStatus : 55|3@0+ (1,0) [0|7] ""  das
+ SG_ EPAS3S_driverlessState : 52|1@0+ (1,0) [0|1] ""  das
  SG_ EPAS3S_internalSAS : 37|14@0+ (0.1,-819.2) [-819.2|819] "deg"  das
  SG_ EPAS3S_handsOnLevel : 39|2@0+ (1,0) [0|3] ""  das
  SG_ EPAS3S_torsionBarTorque : 19|12@0+ (0.01,-20.5) [-20.5|20.45] "Nm"  das
@@ -208,9 +209,17 @@ BO_ 1160 DAS_steeringControl: 4 PARTY
  SG_ DAS_steeringAngleRequest : 6|15@0+ (0.1,-1638.35) [-1638.35|1638.35] "deg"  aps
  SG_ DAS_steeringHapticRequest : 7|1@0+ (1,0) [0|1] ""  aps
 
-BO_ 1161 NEW_MSG_489: 8 XXX
- SG_ NEW_MSG_489_Checksum : 7|8@0+ (1,0) [0|31] "" XXX
- SG_ NEW_MSG_489_Counter : 11|4@0+ (1,0) [0|15] "" XXX
+BO_ 1161 DAS_redundantBrakingControl: 8 XXX
+ SG_ DAS_redundantBrakingControlChecksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ DAS_redundantBrakingControlCounter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ DAS_useDasFallbackBrakeCommands : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ DAS_brakeTorqueCommand : 13|13@1+ (3,0) [0|24573] "" XXX
+ SG_ DAS_brakeTorqueRequestActive : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ DAS_miaBrakeTorqueCommand : 27|13@1+ (3,0) [0|24573] "" XXX
+ SG_ DAS_preAbbaBrakeTorqueDebug : 40|13@1+ (3,0) [0|24573] "" XXX
+ SG_ DAS_abbaStateDebug : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ DAS_abbaESPMiaBit : 60|1@1+ (1,0) [0|1] "" XXX
+ SG_ DAS_abbaLongStabilityIsUnavailableBit : 61|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 297 SCCM_steeringAngleSensor: 8 PARTY
  SG_ SCCM_steeringAngleSensorReservd3 : 56|8@1+ (1,0) [0|255] ""  X
@@ -322,6 +331,198 @@ BO_ 325 ESP_status: 8 PARTY
  SG_ ESP_steeringAngleQF : 27|1@1+ (1,0) [0|0] ""  X
  SG_ ESP_yawRateQF : 26|1@1+ (1,0) [0|0] ""  X
 
+BO_ 84 DI_autonomyHealth: 8 XXX
+ SG_ DI_ah_vehicleSpeedLimit : 0|9@1+ (1,0) [0|511] "" XXX
+ SG_ DI_ah_vehicleReverseSpeedLimit : 9|5@1+ (1,0) [0|31] "" XXX
+ SG_ DI_autonomyBehavior : 14|2@1+ (1,0) [0|3] "" XXX
+ SG_ DI_ah_vehicleNoGradeAccelMax : 16|8@1+ (0.04,0) [0|10.2] "" XXX
+ SG_ DI_ah_vehicleNoGradeDecelMax : 24|9@1+ (0.04,0) [0|20.44] "" XXX
+ SG_ DI_ah_timeToNoPropulsion : 33|12@1+ (1,0) [0|4095] "" XXX
+ SG_ DI_ah_dGearAvailable : 45|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_ah_rGearAvailable : 46|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_ah_pGearAvailable : 47|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_loncDegradedAvailable : 48|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_loncDegradedReason : 49|4@1+ (1,0) [0|15] "" XXX
+ SG_ DI_epbUnavailable : 53|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_opdAvailableForPedalInterface : 54|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_loncInPreFaultStopping : 55|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 521 DAS_longControl: 8 XXX
+ SG_ DAS_longControlChecksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ DAS_longControlCounter : 8|3@1+ (1,0) [0|7] "" XXX
+ SG_ DAS_gearRequest : 11|2@1+ (1,0) [0|3] "" XXX
+ SG_ DAS_velocityProfile_accelFwd_t0 m3 : 13|11@1- (0.012,-0.216) [-12.504|12.06] "" XXX
+ SG_ DAS_torqueProfiler_accelMinPed m2 : 14|9@1+ (0.04,-15) [-15|5.44] "" XXX
+ SG_ DAS_aebControl_active m4 : 16|2@1+ (1,0) [0|3] "" XXX
+ SG_ DAS_pedalControl_accelPedalPos m5 : 16|12@1+ (0.025,0) [0|102.375] "" XXX
+ SG_ DAS_torqueControl_sysTorqueCommandFwd m6 : 16|15@1- (2,0) [-32768|32766] "" XXX
+ SG_ DAS_aebControl_targetAccelDis m4 : 18|11@1- (0.01,-7.5) [-17.74|2.73] "" XXX
+ SG_ DAS_torqueProfiler_accelMaxPed m2 : 23|9@1+ (0.04,-15) [-15|5.44] "" XXX
+ SG_ DAS_velocityProfile_jerkFwd_t0t1 m3 : 24|8@1- (0.12,0) [-15.36|15.24] "" XXX
+ SG_ DAS_pedalControl_brakeTorqueCommand m5 : 32|13@1+ (3.5,0) [0|28668.5] "" XXX
+ SG_ DAS_torqueControl_standstillRequest m6 : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ DAS_torqueProfiler_targetSpeedPed m2 : 32|12@1+ (0.1,0) [0|409.5] "" XXX
+ SG_ DAS_velocityProfile_futureTargetSpeedFwd m3 : 32|12@1- (0.08,80.08) [-83.76|243.84] "" XXX
+ SG_ DAS_torqueProfiler_jerkMinPed m2 : 44|9@1+ (0.03,-15.232) [-15.232|0.098] "" XXX
+ SG_ DAS_velocityProfile_jerkFwd_t1t2 m3 : 44|8@1- (0.12,0) [-15.36|15.24] "" XXX
+ SG_ DAS_pedalControl_noGradeAccelMax m5 : 45|6@1+ (0.25,0) [0|15.75] "" XXX
+ SG_ DAS_pedalControl_speedMax m5 : 51|8@1+ (1,0) [0|255] "" XXX
+ SG_ DAS_velocityProfile_maxAllowedTargetErrorReg m3 : 52|6@1- (0.1,1.1) [-2.1|4.2] "" XXX
+ SG_ DAS_torqueProfiler_jerkMaxPed m2 : 53|8@1+ (0.059,0) [0|15.045] "" XXX
+ SG_ DAS_velocityProfile_calcDelay m3 : 58|3@1+ (0.006666666666666667,0) [0|0.046667] "" XXX
+ SG_ DAS_longControlStack M : 61|3@1+ (1,0) [0|7] "" XXX
+
+BO_ 2047 GTW_carConfig: 8 XXX
+ SG_ GTW_carConfigMultiplexer M : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ GTW_birthday m4 : 8|32@1+ (1,0) [0|4294967295] "" XXX
+ SG_ GTW_deliveryStatus m1 : 8|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_exteriorTrimType m2 : 8|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_gloveboxUSBType m5 : 8|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_mapRegion m3 : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_rcmUndersideAbuseZThreshold m9 : 8|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_fasciaType m7 : 9|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_frontSeatHeaters m2 : 9|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_wiperMotorType m6 : 9|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_cabinPTCHeaterType m1 : 10|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_coolantPumpType m5 : 10|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_frontOverheadConsoleType m6 : 10|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_rearSeatHeaters m2 : 10|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_sohRegulatoryStatus m8 : 10|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_rcmUndersideAbuseYThreshold m9 : 11|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_rightHandDrive m1 : 11|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_eCallAntennaHW m2 : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_performancePackage m3 : 12|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_rearLightType m1 : 12|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_shifterType m6 : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_compressorType m6 : 13|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_epblHwType m5 : 13|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_homelinkType m2 : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_powerSteeringColumn m7 : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_frontSeatHeaterType m7 : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_headlamps m1 : 14|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_rcmUndersideAbuseWindow m9 : 14|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_vdcType m2 : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_softPerformanceLimit m7 : 15|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_country m1 : 16|16@1+ (1,0) [0|65535] "" XXX
+ SG_ GTW_epbrHwType m5 : 17|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_m3yBusArchitecture m8 : 17|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_memoryMirrors m2 : 17|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_twelveVBatteryType m6 : 17|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_chassisType m3 : 18|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_powerLiftgateType m2 : 18|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_efuseSWConfig m6 : 20|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_lumbarECUType m2 : 20|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_blowerMotorType m5 : 21|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_interiorUpperTrimType m8 : 21|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_airSuspension m3 : 22|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_alcoholInterlockType m7 : 22|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_blindSpotIndicatorLightType m8 : 22|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_immersiveAudio m7 : 23|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_bleEndpointUpdateMethod m6 : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_centerConsoleControllerType m3 : 24|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_powerMirrorFoldType m5 : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_rearSeatHeaterType m2 : 24|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_wiperMotorAsicType m8 : 24|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_steeringWheelControllerType m6 : 25|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_autopilotCameraType m3 : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_auxParkLamps m2 : 26|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_passengerOccupancySensorType m7 : 26|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_connectivityPackage m3 : 27|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_frontUsbHubType m5 : 27|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_interiorCabinRadarType m2 : 28|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_plcSupportType m3 : 28|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_gloveboxActuatorType m6 : 29|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_hvacPanelVaneType m2 : 29|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_badgingVersion m3 : 30|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_packPerformanceDeviation m7 : 30|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_superManifoldType m5 : 30|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_rduCableType m8 : 31|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_eBuckConfig m2 : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_epasType m6 : 32|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_packEnergy m3 : 32|5@1+ (1,0) [0|31] "" XXX
+ SG_ GTW_parkTelltaleBehaviorType m8 : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_rcmLocation m5 : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_tireType m1 : 32|6@1+ (1,0) [0|63] "" XXX
+ SG_ GTW_autopilotExteriorCameraType m5 : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_epasSubType m9 : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_steeringHeaterEnabled m2 : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_activeHighBeam m2 : 34|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_airbagCutoffSwitch m2 : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_frontFogLamps m7 : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_wiperSupplyChainOrigin m9 : 35|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_homologationRegionOverride m6 : 36|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_intrusionSensorType m2 : 36|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_audioType m7 : 37|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_frontSeatReclinerHardware m3 : 37|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_sirenType m5 : 37|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_spoilerType m2 : 37|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_hornType m5 : 38|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_roofGlassType m1 : 38|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_windowCommandsPermissionType m6 : 38|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_brakeLineSwitchType m3 : 39|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_interiorCameraType m8 : 39|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_rearFogLamps m2 : 39|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_dasHw m1 : 40|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_eCallEnabled m4 : 40|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_espValveType m3 : 40|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_mRecordVersion m9 : 40|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_roofType m2 : 40|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_frontFasciaCameraType m8 : 41|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_autopilot m2 : 42|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_headlightStepperStallDetectMode m6 : 42|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_parkAssistECUType m4 : 42|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_softRange m3 : 42|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_steeringColumnMotorType m5 : 42|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_brakeHWType m1 : 43|5@1+ (1,0) [0|31] "" XXX
+ SG_ GTW_rgbInteriorLightingEnabled m6 : 43|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_passengerAirbagType m4 : 44|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_interiorCamFanType m8 : 45|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_refrigerantType m3 : 45|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_superchargingAccess m2 : 45|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_windshieldWiperHeaterType m6 : 45|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_forwardRadarHw m4 : 46|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_frontControllerArchitectureType m7 : 46|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_driveInterfaceType m6 : 47|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_exteriorColor m2 : 48|5@1+ (1,0) [0|31] "" XXX
+ SG_ GTW_frontSeatType m4 : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_refrigACLineType m5 : 48|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_restraintsHardwareType m1 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ GTW_wheelType m3 : 48|7@1+ (1,0) [0|127] "" XXX
+ SG_ GTW_efficiencyPackage m6 : 49|6@1+ (1,0) [0|63] "" XXX
+ SG_ GTW_tpmsType m7 : 49|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_refrigFilterType m5 : 50|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_authenticationEndpointLayout m7 : 52|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_diBurnInType m5 : 52|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_pedestrianWarningSound m2 : 53|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_specialBadgingType m5 : 53|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_wirelessPhoneChargerType m4 : 53|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_chassisSubType m5 : 55|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_ethernetTunerType m4 : 55|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_ptcControlMode m3 : 55|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_steeringColumnUJointType m2 : 55|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_visorLightType m6 : 55|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_bPillarNFCParam m2 : 56|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_drivetrainType m1 : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_brakeActuationType m3 : 57|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_frontSeatVentilationType m5 : 57|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_interiorLighting m2 : 57|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_socSleepOverride m7 : 57|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_gnssAntennaType m6 : 58|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_towPackage m5 : 58|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_v2xEnabled m9 : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_r79BehaviorOverride m7 : 59|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_headlightLevelerType m2 : 60|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_interiorTrimType m4 : 60|4@1+ (1,0) [0|15] "" XXX
+ SG_ GTW_radarHeaterType m1 : 60|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_repeaterAeroRibType m8 : 60|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_steeringHeaterType m7 : 60|3@1+ (1,0) [0|7] "" XXX
+ SG_ GTW_restraintControlsType m5 : 61|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_caliperColorType m5 : 62|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_frontSeatHeatersEnabled m6 : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_numberHVILNodes m2 : 62|2@1+ (1,0) [0|3] "" XXX
+ SG_ GTW_narrowWipingSupported m7 : 63|1@1+ (1,0) [0|1] "" XXX
+ SG_ GTW_windshieldWiperHeaterEnabled m6 : 63|1@1+ (1,0) [0|1] "" XXX
+
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 
 CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
@@ -329,6 +530,12 @@ CM_ SG_ 785 leftBlinkerOn "only describes stalk position if half pressed without
 CM_ SG_ 785 rightBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
 CM_ SG_ 785 scrollWheelPressed "captures either scroll wheel left, right or down press";
 
+CM_ BO_ 1161 "Sent by HW3/HW4 Autopilot computers only on firmware with the 3-bit DAS_steeringControlType (not by HW2.5)";
+CM_ BO_ 84 "Appears with the 3-bit DAS_steeringControlType firmware on all Autopilot hardware, including HW2.5";
+CM_ BO_ 521 "Sent by HW3/HW4 Autopilot computers, not by HW2.5";
+CM_ BO_ 2047 "Sent on the party bus by HW3/HW4 cars, not seen on HW2.5";
+CM_ SG_ 2047 GTW_dasHw "5 (TESLA_AP4) observed on HW4 cars, not in the source DBC";
+CM_ SG_ 880 EPAS3S_driverlessState "Set while the EPS executes an FSD (DAS_steeringControlType 4) request, 3-bit firmware only";
 VAL_ 545 VCFRONT_uiAudioLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_uiHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_vcrightHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
@@ -417,7 +624,7 @@ VAL_ 969 APS_appStatusMonitorState 1 "STATUS_MONITOR_STATE_PWR_OFF" 2 "STATUS_MO
 VAL_ 925 IBST_internalState 5 "TRANSITION_TO_IDLE" 0 "NO_MODE_ACTIVE" 4 "DIAGNOSTIC" 6 "POST_DRIVE_CHECK" 1 "PRE_DRIVE_CHECK" 3 "EXTERNAL_BRAKE_REQUEST" 2 "LOCAL_BRAKE_REQUEST" ;
 VAL_ 925 IBST_driverBrakeApply 1 "BRAKES_NOT_APPLIED" 2 "DRIVER_APPLYING_BRAKES" 3 "FAULT" 0 "NOT_INIT_OR_OFF" ;
 VAL_ 925 IBST_iBoosterStatus 6 "IBOOSTER_ACTUATION" 4 "IBOOSTER_ACTIVE_GOOD_CHECK" 2 "IBOOSTER_FAILURE" 5 "IBOOSTER_READY" 3 "IBOOSTER_DIAGNOSTIC" 0 "IBOOSTER_OFF" 1 "IBOOSTER_INIT" ;
-VAL_ 880 EPAS3S_eacStatus 7 "SNA" 2 "EAC_ACTIVE" 4 "LANE_KEEP_ASSIST" 3 "EAC_FAULT" 1 "EAC_AVAILABLE" 5 "EMERGENCY_LANE_KEEP" 0 "EAC_INHIBITED" ;
+VAL_ 880 EPAS3S_eacStatus 0 "INHIBITED" 1 "AVAILABLE" 2 "ACTIVE" 3 "FAULT" 4 "LKA_ELK_AVAILABLE" 5 "LKA_ACTIVE" 6 "ELK_AVAILABLE" 7 "ELK_ACTIVE" ;
 VAL_ 880 EPAS3S_handsOnLevel 1 "LEVEL_1" 0 "LEVEL_0" 3 "LEVEL_3" 2 "LEVEL_2" ;
 VAL_ 880 EPAS3S_torsionBarTorque 4095 "SNA" 4094 "UNDEFINABLE_DATA" ;
 VAL_ 880 EPAS3S_eacErrorCode 15 "SNA" 11 "EAC_ERROR_HIGH_TORSION_SAFETY" 4 "EAC_ERROR_TMP_FAULT" 2 "EAC_ERROR_MAX_SPEED" 7 "EAC_ERROR_HIGH_ANGLE_RATE_REQ" 0 "EAC_ERROR_IDLE" 10 "EAC_ERROR_HIGH_MMOT_SAFETY" 6 "EAC_ERROR_HIGH_ANGLE_REQ" 8 "EAC_ERROR_HIGH_ANGLE_SAFETY" 5 "EAR_ERROR_MAX_STEER_DELTA" 13 "EAC_ERROR_PINION_VEL_DIFF" 1 "EAC_ERROR_MIN_SPEED" 14 "EAC_EXTERNAL_MONITOR_INHIBIT" 12 "EAC_ERROR_LOW_ASSIST" 9 "EAC_ERROR_HIGH_ANGLE_RATE_SAFETY" 3 "EAC_ERROR_HANDS_ON" ;
@@ -490,3 +697,96 @@ VAL_ 325 ESP_ptcTargetState 0 "FAULT" 1 "BACKUP" 2 "ON" 3 "SNA";
 VAL_ 325 ESP_stabilityControlSts2 0 "INIT" 1 "ON" 2 "ENGAGED" 3 "FAULTED";
 VAL_ 325 ESP_steeringAngleQF 0 "UNDEFINABLE_ACCURACY" 1 "IN_SPEC";
 VAL_ 325 ESP_yawRateQF 0 "UNDEFINABLE_ACCURACY" 1 "IN_SPEC";
+VAL_ 84 DI_ah_vehicleSpeedLimit 511 "SNA" ;
+VAL_ 521 DAS_gearRequest 0 "IDLE_SNA" 1 "PARK" 2 "REVERSE" 3 "NEUTRAL" 4 "DRIVE" ;
+VAL_ 521 DAS_pedalControl_accelPedalPos 255 "SNA" ;
+VAL_ 2047 GTW_deliveryStatus 0 "NOT_DELIVERED" 1 "DELIVERED" ;
+VAL_ 2047 GTW_exteriorTrimType 0 "STANDARD_CHROME" 1 "SATIN_BLACK" ;
+VAL_ 2047 GTW_gloveboxUSBType 1 "TSC_USB3_A" ;
+VAL_ 2047 GTW_mapRegion 0 "US" 1 "EU" 2 "NONE" 3 "CN" 4 "AU" 5 "JP" 6 "TW" 7 "KR" 8 "ME" 9 "HK" 10 "MO" 11 "SE" ;
+VAL_ 2047 GTW_frontSeatHeaters 0 "NONE" 1 "KONGSBERG_LOW_POWER" ;
+VAL_ 2047 GTW_cabinPTCHeaterType 1 "NONE" ;
+VAL_ 2047 GTW_coolantPumpType 3 "SM6PHAN_OFFBOARD4PSAN" 5 "DUAL_MIX" ;
+VAL_ 2047 GTW_rearSeatHeaters 0 "NONE" 1 "KONGSBERG_LOW_POWER" ;
+VAL_ 2047 GTW_rightHandDrive 0 "LEFT" 1 "RIGHT" ;
+VAL_ 2047 GTW_eCallAntennaHW 0 "BACKUP_OR_MAIN_ANT" 1 "MAIN_ANT_ONLY" ;
+VAL_ 2047 GTW_performancePackage 0 "BASE" ;
+VAL_ 2047 GTW_rearLightType 0 "NA" 2 "GLOBAL" ;
+VAL_ 2047 GTW_compressorType 2 "41CC_11K" 4 "11K_COP1_ENABLED" ;
+VAL_ 2047 GTW_epblHwType 6 "MANDO_P2" ;
+VAL_ 2047 GTW_homelinkType 0 "NONE" 1 "HOMELINK_V_OPT_2" ;
+VAL_ 2047 GTW_powerSteeringColumn 0 "NOT_INSTALLED" 1 "TK" ;
+VAL_ 2047 GTW_headlamps 1 "PREMIUM" 2 "GLOBAL" ;
+VAL_ 2047 GTW_vdcType 0 "BOSCH_VDC" 1 "TESLA_VDC" ;
+VAL_ 2047 GTW_epbrHwType 6 "MANDO_P2" ;
+VAL_ 2047 GTW_memoryMirrors 0 "NOT_INSTALLED" 1 "SMR" ;
+VAL_ 2047 GTW_twelveVBatteryType 2 "CATL_LI_ION" ;
+VAL_ 2047 GTW_chassisType 0 "S_CHASSIS" 1 "X_CHASSIS" ;
+VAL_ 2047 GTW_powerLiftgateType 0 "NOT_INSTALLED" 1 "TESLA_REV1" ;
+VAL_ 2047 GTW_lumbarECUType 0 "NONE" 1 "ALFMEIER" ;
+VAL_ 2047 GTW_blowerMotorType 0 "SHINANO" 1 "DELTA" ;
+VAL_ 2047 GTW_airSuspension 2 "TESLA_ADAPTIVE" ;
+VAL_ 2047 GTW_immersiveAudio 2 "PREMIUM" ;
+VAL_ 2047 GTW_autopilotCameraType 0 "RCCB_CAMERAS" ;
+VAL_ 2047 GTW_auxParkLamps 1 "NA_PREMIUM" 2 "EU" ;
+VAL_ 2047 GTW_passengerOccupancySensorType 2 "IEE_OCS" ;
+VAL_ 2047 GTW_connectivityPackage 0 "BASE" 1 "PREMIUM" ;
+VAL_ 2047 GTW_frontUsbHubType 0 "2" 4 "NO_DATA" ;
+VAL_ 2047 GTW_plcSupportType 0 "NONE" 1 "ONBOARD_ADAPTER" 2 "NATIVE_CHARGE_PORT" ;
+VAL_ 2047 GTW_gloveboxActuatorType 0 "SOLENOID" 1 "SMA" ;
+VAL_ 2047 GTW_hvacPanelVaneType 0 "PARALLEL_V1" 1 "CONVERGENT_V1" ;
+VAL_ 2047 GTW_badgingVersion 0 "0" 1 "1" ;
+VAL_ 2047 GTW_superManifoldType 0 "TYPE0" 1 "TYPE1" 2 "TYPE2" ;
+VAL_ 2047 GTW_eBuckConfig 0 "NONE" 1 "DEV_BUCK" ;
+VAL_ 2047 GTW_epasType 1 "MANDO_VGR66_GEN3" ;
+VAL_ 2047 GTW_packEnergy 3 "P2" ;
+VAL_ 2047 GTW_tireType 0 "UNKNOWN" 1 "MICHELIN_ALL_SEASON_18" 2 "MICHELIN_SUMMER_18" 3 "HANKOOK_SUMMER_19" 4 "CONTI_ALL_SEASON_19" 5 "MICHELIN_SUMMER_20" 17 "GOODYEAR_ALL_SEASON_20" 18 "PIRELLI_SUMMER_21" 19 "MICHELIN_ALL_SEASON_21" 20 "PIRELLI_SUMMER_19" 21 "PIRELLI_SUMMER_20" 22 "MICHELIN_SUMMER_21" 23 "CONTI_ALL_SEASON_20" 24 "CONTI_SUMMER_22" 25 "PIRELLI_ALL_SEASON_22" 26 "HANKOOK_ALL_SEASON_18" ;
+VAL_ 2047 GTW_steeringHeaterEnabled 0 "DISABLED" 1 "ENABLED" ;
+VAL_ 2047 GTW_activeHighBeam 0 "NOT_ACTIVE" 1 "ACTIVE" ;
+VAL_ 2047 GTW_airbagCutoffSwitch 0 "DISABLED" 1 "ENABLED" ;
+VAL_ 2047 GTW_frontFogLamps 0 "NOT_INSTALLED" 1 "INSTALLED" ;
+VAL_ 2047 GTW_intrusionSensorType 0 "NOT_INSTALLED" 1 "VODAFONE" ;
+VAL_ 2047 GTW_audioType 1 "PREMIUM" ;
+VAL_ 2047 GTW_frontSeatReclinerHardware 0 "STANDARD_RANGE" 1 "RIGHT_SEAT_REDUCED_RANGE" 2 "LEFT_SEAT_REDUCED_RANGE" 3 "LEFT_RIGHT_SEAT_REDUCED_RANGE" ;
+VAL_ 2047 GTW_spoilerType 0 "NOT_INSTALLED" 1 "PASSIVE" ;
+VAL_ 2047 GTW_hornType 0 "TRUMPET" 1 "EXT_SPEAKER_V2" ;
+VAL_ 2047 GTW_roofGlassType 0 "TSA3_PET" 1 "TSA5_NOPET" ;
+VAL_ 2047 GTW_brakeLineSwitchType 0 "DI_VC_SHARED" 1 "VC_ONLY" ;
+VAL_ 2047 GTW_interiorCameraType 1 "VD6763" ;
+VAL_ 2047 GTW_rearFogLamps 0 "NOT_INSTALLED" 1 "INSTALLED" ;
+VAL_ 2047 GTW_dasHw 3 "PARKER_PASCAL_2_5" 4 "TESLA_AP3" 5 "TESLA_AP4" ;
+VAL_ 2047 GTW_eCallEnabled 0 "DISABLED" 1 "ENABLED_OHC_SOS" 2 "ENABLED_UI_SOS" ;
+VAL_ 2047 GTW_espValveType 0 "UNKNOWN" 1 "VALVE_TYPE_1" 2 "VALVE_TYPE_2" ;
+VAL_ 2047 GTW_roofType 1 "FIXED_GLASS" ;
+VAL_ 2047 GTW_autopilot 0 "NONE" 1 "HIGHWAY" 2 "ENHANCED" 3 "SELF_DRIVING" 4 "BASIC" ;
+VAL_ 2047 GTW_parkAssistECUType 0 "VALEO" 1 "TESLA" ;
+VAL_ 2047 GTW_softRange 0 "STANDARD" ;
+VAL_ 2047 GTW_steeringColumnMotorType 0 "BOSCH" 1 "JE" ;
+VAL_ 2047 GTW_brakeHWType 4 "D380_MANDO1_43_D365" 5 "D395_MANDO1_43_D365" ;
+VAL_ 2047 GTW_passengerAirbagType 0 "FULL_SUPPRESSION" 1 "SAFETY_VENT" 2 "EUROW" ;
+VAL_ 2047 GTW_interiorCamFanType 1 "SLEEVE" 2 "FDB" ;
+VAL_ 2047 GTW_refrigerantType 0 "Default" 1 "R134A" 2 "R1234YF" ;
+VAL_ 2047 GTW_superchargingAccess 0 "NOT_ALLOWED" 1 "ALLOWED" 2 "PAY_AS_YOU_GO" ;
+VAL_ 2047 GTW_forwardRadarHw 0 "CONTI_ARS410" 2 "NONE" ;
+VAL_ 2047 GTW_exteriorColor 0 "RED_MULTICOAT" 1 "SOLID_BLACK" 3 "MIDNIGHT_SILVER" 5 "DEEP_BLUE" 6 "PEARL_WHITE" ;
+VAL_ 2047 GTW_frontSeatType 0 "BASE_TESLA" 1 "PREMIUM_TESLA" 2 "PREMIUM_L_YANFENG_R_TESLA" 3 "PREMIUM_L_TESLA_R_YANFENG" 4 "PREMIUM_YANFENG" ;
+VAL_ 2047 GTW_refrigACLineType 0 "UNLIMITED" 1 "SAAA_LIMITED" 2 "CONTI_LIMITED" ;
+VAL_ 2047 GTW_restraintsHardwareType 101 "MXP2" 104 "MXP2_YOKE" 171 "MSP2" 174 "MSP2_YOKE" ;
+VAL_ 2047 GTW_wheelType 25 "CARDENIO_19" 26 "NEW_TURBINE_22_BLACK" 28 "CYBERSTREAM_20" 29 "ARACHNID_21" ;
+VAL_ 2047 GTW_efficiencyPackage 0 "DEFAULT" ;
+VAL_ 2047 GTW_tpmsType 1 "TESLA_BLE" ;
+VAL_ 2047 GTW_refrigFilterType 0 "UNBLOCKED" 1 "BLOCKED_V1" ;
+VAL_ 2047 GTW_diBurnInType 0 "NONE" 1 "ENABLED_V1" ;
+VAL_ 2047 GTW_pedestrianWarningSound 0 "NONE" 1 "SPEAKER" 2 "EXT_SPEAKER_V2" ;
+VAL_ 2047 GTW_wirelessPhoneChargerType 2 "FRONT_AND_REAR_LIN" ;
+VAL_ 2047 GTW_ethernetTunerType 0 "HARMAN" 1 "NONE" ;
+VAL_ 2047 GTW_steeringColumnUJointType 0 "B_SAMPLE_PHASING" 1 "C_SAMPLE_PHASING" ;
+VAL_ 2047 GTW_bPillarNFCParam 0 "3" 1 "Y" ;
+VAL_ 2047 GTW_drivetrainType 1 "AWD" 2 "AWD_DUAL_REAR" ;
+VAL_ 2047 GTW_interiorLighting 0 "BASE" 1 "PREMIUM" ;
+VAL_ 2047 GTW_towPackage 0 "NONE" 1 "TESLA_REV1" ;
+VAL_ 2047 GTW_headlightLevelerType 0 "NONE" 1 "GEN1" 2 "VIRTUAL_PITCH_SENSOR" ;
+VAL_ 2047 GTW_interiorTrimType 0 "BLACK" 1 "WHITE" 4 "WALNUT_CREAM" 5 "WALNUT_WHITE" 6 "EBONY_BLACK" 7 "CARBON_CREAM" 8 "CARBON_WHITE" 9 "CARBON_BLACK" ;
+VAL_ 2047 GTW_radarHeaterType 0 "NONE" 3 "MODELS_BACKER_THIN_3M" 4 "MODELX_BACKER_THIN_3M" ;
+VAL_ 2047 GTW_steeringHeaterType 0 "NONE" 4 "ZF_ROUND" 5 "ZF_YOKE" ;
+VAL_ 2047 GTW_numberHVILNodes 0 "0" 2 "2" 3 "3" ;
