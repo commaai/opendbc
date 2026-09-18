@@ -24,7 +24,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerControlType = structs.CarParams.SteerControlType.angle
 
     if 0x209 not in fingerprint[CANBUS.autopilot_party] and 0x7ff not in fingerprint[CANBUS.autopilot_party]:
-      ret.flags |= TeslaFlags.HW_2_5
+      ret.flags |= TeslaFlags.HW_2_5.value
 
     # Model X and HW 2.5 vehicles are missing DAS_settings
     if 0x293 not in fingerprint[CANBUS.autopilot_party]:
