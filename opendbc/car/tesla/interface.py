@@ -27,6 +27,10 @@ class CarInterface(CarInterfaceBase):
     if 0x293 not in fingerprint[CANBUS.autopilot_party]:
       ret.flags |= TeslaFlags.MISSING_DAS_SETTINGS.value
 
+    # Tesla expanded DAS_steeringControl->DAS_steeringControlType to 3 bits around 10-26-2025 with the FSD 14 update to HW4 vehicles.
+    # HW3 vehicles then got an update around XX-XX-XXXX to also use this new 3-bit signal definition.
+    # Checking 0x489 existence seems to detect the new signal definition
+    # TODO: need another message id for HW2.5 which lacks 0x489
     if 0x489 in fingerprint[CANBUS.autopilot_party]:
       ret.flags |= TeslaFlags._3_BIT_STEER_TYPE.value
 
