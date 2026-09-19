@@ -45,13 +45,24 @@ def create_buttons(packer, stock_values: dict, cancel=False, lkas=False, bus=0):
   return packer.make_can_msg("PCM_BUTTONS", bus, values)
 
 
-def create_lkas_hud(packer, counter: int, stock_lkas_hud: dict, hud_control, lat_active: bool):
+def create_lkas_hud(packer, counter: int, stock_lkas_hud: dict, hud_control, lat_active: bool, lks_on: bool = True):
   # Called for the whole engagement. Cluster wheel follows our lateral state,
   # not the camera: 2 while we steer, 1 while we only heartbeat.
   # Cluster nag bits are ours: do not pass the camera's hands-off timer through.
   # steerRequired is TAKE CONTROL / DM; SET_ME_50=2 is the chime stage, not 3
   # (stock's last step before it drops ACC).
+  # LKS off: we still own 0x316 until panda's 2 s HUD hold, so paint the icon
+  # off immediately. LKAS_STATE 1 is the standby wheel, not off.
   values = {**stock_lkas_hud, "COUNTER": counter}
+  if not lks_on:
+    values["LKS_MODE"] = 0
+    values["LKAS_STATE"] = 0
+    values["LEFT_LANE_STATE"] = 0
+    values["RIGHT_LANE_STATE"] = 0
+    values["HANDS_ON_WHEEL_REQ"] = 0
+    values["SET_ME_50"] = 0
+    return packer.make_can_msg("LKAS_HUD_ADAS", 0, values)
+
   values["LKS_MODE"] = 2  # green lane line icon
   values["LKAS_STATE"] = 2 if lat_active else 1
   # LANE_STATE: 0=Grey, 1=Green, 2=Orange

@@ -60,7 +60,7 @@ class TestBydLkasHud(unittest.TestCase):
     stock = dict(cp.vl["LKAS_HUD_ADAS"])
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
     _addr, dat, _bus = bydcan.create_lkas_hud(packer, 3, stock, _Hud(), True)
-    for bit in (2, 3, 8, 9, 32, 33):
+    for bit in (0, 1, 2, 3, 8, 9, 15, 32, 33):
       self.assertEqual((dat[bit // 8] >> (bit % 8)) & 1, 1, f"bit {bit} zeroed")
     active = _decode_hud((_addr, dat, _bus))
     self.assertEqual(active["LKAS_STATE"], 2)
@@ -88,6 +88,47 @@ class TestBydLkasHud(unittest.TestCase):
     out = _decode_hud(bydcan.create_lkas_hud(packer, 3, {"LKAS_STATE": 0, "LKS_MODE": 0}, hud, False))
     self.assertEqual(out["HANDS_ON_WHEEL_REQ"], 1)
     self.assertEqual(out["SET_ME_50"], 0)
+
+  def test_lks_off_paints_icon_off(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    hud = _Hud()
+    hud.visualAlert = VisualAlert.steerRequired
+    out = _decode_hud(bydcan.create_lkas_hud(packer, 3, {"LKAS_STATE": 2, "LKS_MODE": 2}, hud, True, lks_on=False))
+    self.assertEqual(out["LKAS_STATE"], 0)
+    self.assertEqual(out["LKS_MODE"], 0)
+    self.assertEqual(out["HANDS_ON_WHEEL_REQ"], 0)
+    self.assertEqual(out["SET_ME_50"], 0)
+
+
+def _decode_bsd(dat: bytes) -> dict:
+  cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("BSD_RADAR", 0)], 0)
+  cp.update([(0, [(0x418, dat, 0)])])
+  return dict(cp.vl["BSD_RADAR"])
+
+
+class TestBydRcta(unittest.TestCase):
+  def test_rcta_prefix_not_bsm(self):
+    idle = _decode_bsd(bytes.fromhex("fd8156c0f5c81f8c"))
+    self.assertEqual(idle["RCTA_LEFT"], 0)
+    self.assertEqual(idle["RCTA_LEFT_2"], 0)
+    self.assertEqual(idle["RCTA_RIGHT"], 0)
+    self.assertEqual(idle["RCTA_RIGHT_2"], 0)
+    rcta = _decode_bsd(bytes.fromhex("fd8166d0f5c81f8c"))
+    self.assertEqual(rcta["RCTA_LEFT"], 1)
+    self.assertEqual(rcta["RCTA_LEFT_2"], 1)
+    self.assertEqual(rcta["RCTA_RIGHT"], 0)
+    bsm = _decode_bsd(bytes.fromhex("fd8456c0f5c81f8c"))
+    self.assertEqual(bsm["RCTA_LEFT"], 0)
+    self.assertEqual(bsm["RCTA_LEFT_2"], 0)
+    right = _decode_bsd(bytes.fromhex("fd9059c0f5c81f8c"))
+    self.assertEqual(right["RCTA_RIGHT"], 1)
+    self.assertEqual(right["RCTA_RIGHT_2"], 0)
+    self.assertEqual(right["RCTA_LEFT"], 0)
+    sib = _decode_bsd(bytes.fromhex("fda059c0f5c81f8c"))
+    self.assertEqual(sib["RCTA_RIGHT"], 1)
+    park = _decode_bsd(bytes.fromhex("fd8095c4f5c81f8c"))
+    self.assertEqual(park["RCTA_RIGHT"], 0)
+    self.assertEqual(park["RCTA_RIGHT_2"], 1)
 
 
 def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_btn_rising=False, eps_standby=False,
@@ -187,6 +228,20 @@ class TestBydSteerNotAccepted(unittest.TestCase):
         self.assertIn(0x316, active)
         reqs.append(_decode("STEERING_MODULE_ADAS", active[0x1E2])["STEER_REQ"])
     self.assertEqual(reqs, [0] * (CCP.STEER_WARMUP_FRAMES - 1) + [1, 1])
+
+  def test_lks_off_hold_sends_icon_off(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    CS = _cs(lks_enabled=False, lks_btn_rising=True, camera_lkas_state=2)
+    ctrl.update(_cc(enabled=False, lat_active=False), CS, 0)
+    hud = None
+    for _ in range(4):
+      _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), _cs(lks_enabled=False, camera_lkas_state=2), 0)
+      for m in sends:
+        if m[0] == 0x316:
+          hud = _decode("LKAS_HUD_ADAS", m)
+    self.assertIsNotNone(hud)
+    self.assertEqual(hud["LKAS_STATE"], 0)
+    self.assertEqual(hud["LKS_MODE"], 0)
 
   def test_warmup_then_first_req_repeats_angle(self):
     # After a TX gap: REQ=0 at the measured angle, then the first REQ=1 at that same angle,
