@@ -30,6 +30,7 @@ class CarState(CarStateBase):
     self.disengage_frames = 0
     self.eps_engaged = True
     self.eps_standby = False
+    self.eps_idle = False
     self.eps_target_angle = 0.0
     self.pcm_buttons_stock = {}
     self.pcm_buttons_ts = 0
@@ -75,6 +76,8 @@ class CarState(CarStateBase):
     if cp.ts_nanos["STEERING_TORQUE"]["LKS_PREPARED"] > 0:
       self.eps_engaged = not cp.vl["STEERING_TORQUE"]["LKS_PREPARED"]
       self.eps_standby = not self.eps_engaged and bool(cp.vl["STEERING_TORQUE"]["CRUISE_ACTIVATED"])
+      # PREP=1 CRUISE=0. Standby (PREP=1 CRUISE=1) is not idle; LKS pulses there flash LKAS 4.
+      self.eps_idle = (not self.eps_engaged) and (not self.eps_standby)
       self.eps_target_angle = cp.vl["STEERING_TORQUE"]["TARGET_ANGLE"]
 
     acc_state = int(cp_cam.vl["ACC_HUD_ADAS"]["ACC_STATE"])

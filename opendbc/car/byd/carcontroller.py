@@ -42,6 +42,7 @@ class CarController(CarControllerBase):
     self.lks_recover_frames = 0
     self.pcm_buttons_ts_last = 0
     self.hold_steer = 0
+    self.eps_idle_frames = 0
 
     # Vehicle model used for lateral limiting
     self.VM = VehicleModel(get_safety_CP())
@@ -87,6 +88,17 @@ class CarController(CarControllerBase):
     return (CarControllerParams.LKS_PULSE_TICKS * CarControllerParams.LKS_PULSE_PERIOD +
             CarControllerParams.LKS_CONFIRM_FRAMES)
 
+  def _pulse_blocked(self, CS, want):
+    # Standby + LKS faults the camera, and LKAS 4 (TAKE CONTROL) gets worse with pulses.
+    # Restore (want on) only after EPS is idle, including PREP=0 CRUISE=0 which standby misses.
+    if CS.eps_standby:
+      return True
+    if CS.camera_lkas_state == 4:
+      return True
+    if want and self.eps_idle_frames < CarControllerParams.LKS_EPS_IDLE_FRAMES:
+      return True
+    return False
+
   def _start_pulse(self, want):
     self.lks_pulse = CarControllerParams.LKS_PULSE_TICKS
     self.lks_pulse_wait = 0
@@ -99,8 +111,7 @@ class CarController(CarControllerBase):
   def _update_lks_camera(self, CC, CS, can_sends):
     # Latch on bus 0 is the count of real presses. Camera is a toggle we may
     # have desynced. After lockout + debounce, snap camera to want. Never TX LKS
-    # on bus 0. Never tick while the EPS is in standby: LKS coming on then faults
-    # the camera.
+    # on bus 0. Never tick while EPS standby, LKAS 4, or (restore) EPS not idle.
     self._update_camera_on(CS.camera_lkas_state)
     fresh_buttons = CS.pcm_buttons_ts != self.pcm_buttons_ts_last
     self.pcm_buttons_ts_last = CS.pcm_buttons_ts
@@ -120,6 +131,11 @@ class CarController(CarControllerBase):
       # (it is about to come on) so stock LKS cannot grab the wheel.
       if (not CS.lks_enabled) or CC.enabled or self.enabled_last or camera_was_off:
         self._hold_for(CarControllerParams.LKS_LOCKOUT_FRAMES + CarControllerParams.LKS_CONFIRM_FRAMES)
+
+    if getattr(CS, "eps_idle", False):
+      self.eps_idle_frames += 1
+    else:
+      self.eps_idle_frames = 0
 
     want = self._want_camera(CC.enabled, CS.lks_enabled)
     if want is not None and self.camera_on is not None and self.camera_on == want:
@@ -146,13 +162,13 @@ class CarController(CarControllerBase):
 
     if self.lks_lockout > 0:
       self.lks_lockout -= 1
-    elif self.lks_pulse == 0 and self.lks_confirm == 0 and not CS.eps_standby:
+    elif self.lks_pulse == 0 and self.lks_confirm == 0:
       if want is not None and self.camera_on is not None and self.camera_on != want:
-        if want != self.lks_give_up_want:
+        if want != self.lks_give_up_want and not self._pulse_blocked(CS, want):
           self._start_pulse(want)
 
     # Send right after the car's 0x3B0 so ours carries the same counter while it is current
-    if self.lks_pulse > 0 and not CS.eps_standby:
+    if self.lks_pulse > 0 and not self._pulse_blocked(CS, self.lks_want):
       self.lks_pulse_wait += 1
       if fresh_buttons or self.lks_pulse_wait > CarControllerParams.LKS_PULSE_PERIOD:
         can_sends.append(bydcan.create_buttons(self.packer, CS.pcm_buttons_stock, lkas=True, bus=2))
@@ -167,7 +183,7 @@ class CarController(CarControllerBase):
       self.lks_confirm -= 1
       if self.lks_confirm == 0:
         if self.camera_on is not None and self.lks_want is not None and self.camera_on != self.lks_want:
-          if CS.eps_standby:
+          if self._pulse_blocked(CS, self.lks_want):
             self.lks_confirm = 1
           elif self.lks_retries < 1:
             self.lks_retries += 1
