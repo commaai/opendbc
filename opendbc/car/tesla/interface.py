@@ -2,7 +2,7 @@ from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.tesla.carcontroller import CarController
 from opendbc.car.tesla.carstate import CarState
-from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CANBUS, CAR, DBC, DAS_STEERING_3_BIT_FW, Ecu
+from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CANBUS, CAR, DBC, FSD_14_FW, Ecu
 from opendbc.car.tesla.radar_interface import RadarInterface, RADAR_START_ADDR
 
 
@@ -39,8 +39,8 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LONG_CONTROL.value
 
-    das_steering_3_bit = any(fw.ecu == Ecu.eps and fw.fwVersion in DAS_STEERING_3_BIT_FW.get(candidate, []) for fw in car_fw)
-    if das_steering_3_bit:
+    fsd_14 = any(fw.ecu == Ecu.eps and fw.fwVersion in FSD_14_FW.get(candidate, []) for fw in car_fw)
+    if fsd_14:
       ret.flags |= TeslaFlags.DAS_STEERING_3_BIT.value
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.DAS_STEERING_3_BIT.value
 

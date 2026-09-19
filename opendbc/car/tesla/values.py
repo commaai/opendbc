@@ -76,7 +76,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
 )
 
 # Cars with this EPS FW have a 3-bit DAS_steeringControlType and use TeslaFlags.DAS_STEERING_3_BIT
-DAS_STEERING_3_BIT_FW = {
+FSD_14_FW = {
   CAR.TESLA_MODEL_3: [
     b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
     b'TeMYG4_Main_0.0.0 (78),E4HP015.05.0',
@@ -130,6 +130,10 @@ class TeslaSafetyFlags(IntFlag):
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
+  # Newer firmware widened DAS_steeringControlType from 2 to 3 bits, first in the FSD 14 builds, then in all builds from 2026.8.6.
+  # The values kept their numbers (0 NONE, 1 ANGLE_CONTROL, 2 LANE_KEEP_ASSIST, 3 EMERGENCY_LANE_KEEP) and 4 FSD was added,
+  # but legacy firmware only uses the top 2 bits, so its values read shifted left by 1. Mixing them up is dangerous:
+  # legacy ANGLE_CONTROL (0b01) sent to a 3-bit car is 0b010, LANE_KEEP_ASSIST
   DAS_STEERING_3_BIT = 2
   MISSING_DAS_SETTINGS = 4
 
