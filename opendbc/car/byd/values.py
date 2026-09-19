@@ -60,6 +60,7 @@ class CarControllerParams:
   LKS_LOCKOUT_FRAMES = 50             # 500 ms after a real bus-0 press
   LKS_HUD_QUIET_FRAMES = 200          # 2 s, matches BYD_OP_HUD_TIMEOUT_US
   LKS_CAM_DEBOUNCE_FRAMES = 20        # 200 ms; treat 4 as still on
+  LKS_EPS_IDLE_FRAMES = 20            # 200 ms PREP=1 CRUISE=0 before restore
   LKS_RECOVER_FRAMES = 200            # 2 s; retry want-off if a snap failed
 
 
