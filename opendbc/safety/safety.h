@@ -342,6 +342,9 @@ void safety_tick(void) {
   safety_rx_checks_invalid = rx_checks_invalid;
 }
 
+// hackathon: compat for panda master, which still calls safety_tick(&current_safety_config)
+#define safety_tick(...) (safety_tick)()
+
 static void relay_malfunction_set(void) {
   relay_malfunction = true;
 }
