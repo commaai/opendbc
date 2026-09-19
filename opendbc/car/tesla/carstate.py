@@ -123,7 +123,7 @@ class CarState(CarStateBase):
       if self.suspected_das_steering_3_bit:
         ret.invalidLkasSetting = True
         if not self.das_steering_3_bit_error_logged:
-          carlog.error("3-bit DAS_steeringControlType detected, but FW not in FSD_14_FW")
+          carlog.error("3-bit DAS_steeringControlType detected, but FW not in FSD_14_FW set")
           self.das_steering_3_bit_error_logged = True
 
     # Buttons # ToDo: add Gap adjust button

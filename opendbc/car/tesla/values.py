@@ -130,7 +130,7 @@ class TeslaSafetyFlags(IntFlag):
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
-  # Newer firmware widened DAS_steeringControlType from 2 to 3 bits by adding a bit below it, first in the FSD 14 builds,
+  # Newer firmware widened DAS_steeringControlType from 2 to 3 bits (byte 2 bits 7:6 -> 7:5), first in the FSD 14 builds,
   # then in all builds from 2026.8.6. The values kept their numbers (0 NONE, 1 ANGLE_CONTROL, 2 LANE_KEEP_ASSIST,
   # 3 EMERGENCY_LANE_KEEP) and 4 FSD was added. The DBC still reads the top 2 bits, which on 3-bit firmware
   # are 1 for LANE_KEEP_ASSIST (0b010) and 2 for FSD (0b100)
