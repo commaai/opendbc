@@ -1,25 +1,11 @@
 import unittest
-from unittest.mock import Mock, patch
 from opendbc.car.can_definitions import CanData
-from opendbc.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint, get_car
+from opendbc.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint
 from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
-from opendbc.car.structs import CarParams
 from opendbc.testing import parameterized
 
 
 class TestCanFingerprint(unittest.TestCase):
-  def test_fixed_pinball_without_can(self):
-    can_recv = Mock(side_effect=AssertionError("Must not wait for CAN"))
-    can_send = Mock(side_effect=AssertionError("Must not query firmware"))
-    obd = Mock()
-    with patch.dict("os.environ", {"FINGERPRINT": "COMMA_PINBALL", "SKIP_FW_QUERY": ""}):
-      interface = get_car(can_recv, can_send, obd, False, False)
-    self.assertEqual(interface.CP.carFingerprint, "COMMA_PINBALL")
-    self.assertEqual(interface.CP.fingerprintSource, CarParams.FingerprintSource.fixed)
-    can_recv.assert_not_called()
-    can_send.assert_not_called()
-    obd.assert_called_once_with(False)
-
   @parameterized("car_model, fingerprints", FINGERPRINTS.items())
   def test_can_fingerprint(self, car_model, fingerprints):
     """Tests online fingerprinting function on offline fingerprints"""

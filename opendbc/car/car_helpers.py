@@ -84,12 +84,6 @@ def can_fingerprint(can_recv: CanRecvCallable) -> tuple[str | None, dict[int, di
 def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback,
                 cached_params: CarParamsT | None) -> tuple[str | None, dict, str, list[CarParams.CarFw], CarParams.FingerprintSource, bool]:
   fixed_fingerprint = os.environ.get('FINGERPRINT', "")
-  if fixed_fingerprint == "COMMA_PINBALL":
-    # Pinball has no VIN/FW discovery and may be silent during startup.
-    set_obd_multiplexing(False)
-    carlog.warning("Using fixed fingerprint %s without CAN discovery", fixed_fingerprint)
-    return fixed_fingerprint, gen_empty_fingerprint(), VIN_UNKNOWN, [], CarParams.FingerprintSource.fixed, True
-
   skip_fw_query = os.environ.get('SKIP_FW_QUERY', False)
   disable_fw_cache = os.environ.get('DISABLE_FW_CACHE', False)
   ecu_rx_addrs = set()
