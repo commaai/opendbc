@@ -4,6 +4,7 @@ from opendbc.car import Bus, structs
 from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
+from opendbc.car.tesla.teslacan import get_steer_ctrl_type
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, TeslaFlags
 
 class CarState(CarStateBase):
@@ -104,20 +105,19 @@ class CarState(CarStateBase):
     ret.stockAeb = cp_ap_party.vl["DAS_control"]["DAS_aebEvent"] == 1
 
     # LKAS
-    steer_control_type = int(cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"])
-    if not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT:
-      steer_control_type >>= 1  # legacy firmware only uses the top 2 bits of the 3-bit signal
-    ret.stockLkas = steer_control_type == 2  # LANE_KEEP_ASSIST
+    lkas_ctrl_type = get_steer_ctrl_type(self.CP.flags, 2)
+    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == lkas_ctrl_type  # LANE_KEEP_ASSIST
 
     # Stock Autosteer should be off (includes FSD)
     # TODO: find for TESLA_MODEL_X and HW2.5 vehicles
     if not (self.CP.flags & TeslaFlags.MISSING_DAS_SETTINGS):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
 
-      # Because we don't have 3-bit detection outside of a set of FW, check if this FW is accidentally missing from FSD_14_FW
+      # Because we don't have 3-bit detection outside of a set of FW, we should check if this FW is accidentally missing from FSD_14_FW
       # 1. If in Autosteer or FSD, already caught by invalidLkasSetting
-      # 2. If in TACC and DAS ever sends legacy ANGLE_CONTROL (1), it's actually a 3-bit LANE_KEEP_ASSIST
-      if not ret.invalidLkasSetting and not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT and steer_control_type == 1:
+      # 2. If in TACC and DAS ever sends ANGLE_CONTROL (1), it's actually LANE_KEEP_ASSIST on 3-bit firmware
+      angle_control = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 1  # ANGLE_CONTROL
+      if not ret.invalidLkasSetting and angle_control and not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT:
         self.suspected_das_steering_3_bit = True
 
       if self.suspected_das_steering_3_bit:
