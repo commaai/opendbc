@@ -98,7 +98,7 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
 
 static int tesla_get_steer_ctrl_type(const int ctrl_type) {
   // On 3-bit firmware, 1 and 2 in the 2-bit signal are LANE_KEEP_ASSIST and FSD,
-  // so openpilot steers with FSD there, and stock LANE_KEEP_ASSIST reads as 1
+  // so openpilot steers with FSD here, and stock LANE_KEEP_ASSIST reads as 1
   int steer_ctrl_type = ctrl_type;
   if (tesla_das_steering_3_bit) {
     if (ctrl_type == 1) {
