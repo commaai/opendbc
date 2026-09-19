@@ -41,8 +41,8 @@ class CarInterface(CarInterfaceBase):
 
     fsd_14 = any(fw.ecu == Ecu.eps and fw.fwVersion in FSD_14_FW.get(candidate, []) for fw in car_fw)
     if fsd_14:
-      ret.flags |= TeslaFlags.FSD_14.value
-      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FSD_14.value
+      ret.flags |= TeslaFlags.DAS_STEERING_3_BIT.value
+      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.DAS_STEERING_3_BIT.value
 
     ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
 

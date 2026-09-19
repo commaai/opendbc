@@ -321,6 +321,7 @@ BO_ 325 ESP_status: 8 PARTY
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 
 CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
+CM_ SG_ 1160 DAS_steeringControlType "Newer firmware widens this to 3 bits (byte 2 bits 7:5) with 4 = FSD. There, this reads 1 for LANE_KEEP_ASSIST and 2 for FSD";
 CM_ SG_ 785 leftBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
 CM_ SG_ 785 rightBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
 CM_ SG_ 785 scrollWheelPressed "captures either scroll wheel left, right or down press";

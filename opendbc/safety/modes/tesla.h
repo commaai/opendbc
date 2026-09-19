@@ -3,7 +3,7 @@
 #include "opendbc/safety/declarations.h"
 
 static bool tesla_longitudinal = false;
-static bool tesla_fsd_14 = false;
+static bool tesla_das_steering_3_bit = false;
 static bool tesla_stock_aeb = false;
 
 // Only rising edges while controls are not allowed are considered for these systems:
@@ -97,9 +97,10 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
 }
 
 static int tesla_get_steer_ctrl_type(const int ctrl_type) {
-  // Returns ANGLE_CONTROL-equivalent control type for FSD 14
+  // On 3-bit firmware, 1 and 2 in the 2-bit signal are LANE_KEEP_ASSIST and FSD,
+  // so openpilot steers with FSD here, and stock LANE_KEEP_ASSIST reads as 1
   int steer_ctrl_type = ctrl_type;
-  if (tesla_fsd_14) {
+  if (tesla_das_steering_3_bit) {
     if (ctrl_type == 1) {
       steer_ctrl_type = 2;
     }
@@ -344,8 +345,8 @@ static safety_config tesla_init(uint16_t param) {
     {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},  // APS_eacMonitor
   };
 
-  const uint16_t TESLA_FLAG_FSD_14 = 2;
-  tesla_fsd_14 = GET_FLAG(param, TESLA_FLAG_FSD_14);
+  const uint16_t TESLA_FLAG_DAS_STEERING_3_BIT = 2;
+  tesla_das_steering_3_bit = GET_FLAG(param, TESLA_FLAG_DAS_STEERING_3_BIT);
 
 #ifdef ALLOW_DEBUG
   const uint16_t TESLA_FLAG_LONGITUDINAL_CONTROL = 1;

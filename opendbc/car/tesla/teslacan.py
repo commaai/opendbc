@@ -3,8 +3,9 @@ from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
 
 
 def get_steer_ctrl_type(flags: int, ctrl_type: int) -> int:
-  # Returns the flipped signal value for DAS_steeringControlType on FSD 14
-  if flags & TeslaFlags.FSD_14:
+  # On 3-bit firmware, 1 and 2 in the 2-bit signal are LANE_KEEP_ASSIST and FSD (see TeslaFlags.DAS_STEERING_3_BIT),
+  # so openpilot steers with FSD here, and stock LANE_KEEP_ASSIST reads as 1
+  if flags & TeslaFlags.DAS_STEERING_3_BIT:
     return {1: 2, 2: 1}.get(ctrl_type, ctrl_type)
   else:
     return ctrl_type
@@ -16,10 +17,6 @@ class TeslaCAN:
     self.packer = packer
 
   def create_steering_control(self, angle, enabled):
-    # On FSD 14+, ANGLE_CONTROL behavior changed to allow user winddown while actuating.
-    # with openpilot, after overriding w/ ANGLE_CONTROL the wheel snaps back to the original angle abruptly
-    # so we now use LANE_KEEP_ASSIST to match stock FSD.
-    # see carstate.py for more details
     values = {
       "DAS_steeringAngleRequest": -angle,
       "DAS_steeringHapticRequest": 0,
