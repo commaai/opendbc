@@ -105,12 +105,12 @@ BO_ 660 METER_CLUSTER: 8 BCM
  SG_ TRUNK_OPEN : 19|1@1+ (1,0) [0|1] "" MCU
 
 BO_ 790 LKAS_HUD_ADAS: 8 MPC_CAM
- SG_ AUTO_LIGHT : 1|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_0 : 0|2@1+ (1,0) [0|3] "" XXX
  SG_ LEFT_LANE_STATE : 4|2@1+ (1,0) [0|3] "" MCU
  SG_ LKS_MODE : 6|2@1+ (1,0) [0|3] "" MCU
  SG_ HANDS_ON_WHEEL_REQ : 10|1@1+ (1,0) [0|1] "" MCU
  SG_ TJA_ICA_STATE : 11|4@1+ (1,0) [0|15] "" MCU
- SG_ HMA_ON_OFF : 15|1@0+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_15 : 15|1@1+ (1,0) [0|1] "" XXX
  SG_ LKAS_OUTPUT : 16|11@1- (1,0) [-1024|1023] "" MCU
  SG_ LKAS_REQ_PREPARE : 27|1@1+ (1,0) [0|1] "" MCU
  SG_ LKAS_ACTIVE : 28|1@1+ (1,0) [0|1] "" MCU
@@ -194,6 +194,10 @@ BO_ 1048 BSD_RADAR: 8 BSD
  SG_ LEFT_APPROACH : 9|2@0+ (1,0) [0|3] "" MCU,ADAS_ECU
  SG_ RIGHT_APPROACH : 11|2@0+ (1,0) [0|3] "" MCU,ADAS_ECU
  SG_ APPROACH : 17|1@0+ (1,0) [0|1] "" MCU,ADAS_ECU
+ SG_ RCTA_LEFT : 21|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
+ SG_ RCTA_LEFT_2 : 28|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
+ SG_ RCTA_RIGHT : 19|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
+ SG_ RCTA_RIGHT_2 : 26|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
 
 BO_ 1050 SUNROOF_SHADE: 8 BCM
  SG_ SUNROOF_POS : 0|8@1+ (1,0) [0|100] "%" MCU
@@ -212,10 +216,17 @@ CM_ BO_ 536 "EPB. Byte 0 0x00/0xA0 released, 0x08/0x88 applied; bit 3 is the app
 CM_ BO_ 578 "Drivetrain state: gear, brake pressed, raw throttle.";
 CM_ BO_ 660 "Body/meter cluster: doors, seatbelt, trunk.";
 CM_ BO_ 790 "LKAS HUD ADAS message from camera. Blocked by panda on bus 2; panda re-injects.";
+CM_ SG_ 790 SET_ME_0 "Was AUTO_LIGHT. Not headlights or HMA. Packer keeps camera values.";
 CM_ SG_ 790 SET_ME_2 "Unnamed bits 2-3. Named so the packer keeps the camera values.";
 CM_ SG_ 790 SET_ME_8 "Unnamed bits 8-9. Named so the packer keeps the camera values.";
+CM_ SG_ 790 SET_ME_15 "Was HMA_ON_OFF. Always 0. Packer keeps camera values.";
 CM_ SG_ 790 SET_ME_32 "Unnamed bits 32-33. Named so the packer keeps the camera values.";
 CM_ SG_ 790 SET_ME_50 "Unnamed bits 50-51. Named so the packer keeps the camera values.";
+CM_ BO_ 1048 "BSD / RCTA. LEFT/RIGHT_APPROACH are adjacent BSM nibbles. RCTA extra bits are a mirrored pair. Observe only.";
+CM_ SG_ 1048 RCTA_LEFT "Byte 2 bit 5. Rear-left HUD. Observe only.";
+CM_ SG_ 1048 RCTA_LEFT_2 "Byte 3 bit 4. Travels with RCTA_LEFT. Observe only.";
+CM_ SG_ 1048 RCTA_RIGHT "Byte 2 bit 3. Nibble mirror of RCTA_LEFT. Set in reverse. Observe only.";
+CM_ SG_ 1048 RCTA_RIGHT_2 "Byte 3 bit 2. Nibble mirror of RCTA_LEFT_2. Not paired with RCTA_RIGHT. Observe only.";
 CM_ BO_ 803 "Charging session, 10 Hz. CHARGE_SOC is 0xFF outside a session. CHARGE_UNKNOWN_12BIT reads 0xFFE unplugged, 500 plugged idle, 583-778 during DC charging; scale not established.";
 CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state).";
 CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active.";
@@ -226,7 +237,6 @@ CM_ BO_ 1031 "Body lock. LOCK_STATE 0xAA locked / 0x55 unlocked; TRUNK_STATE low
 CM_ BO_ 1050 "Sunroof / shade. Event-driven (~2.4 Hz idle, bursts while moving). Channel 0x55 idle / 0x95 shade / 0xA5 roof.";
 VAL_ 508 TORQUE_TEMP_FAILED 1 "TooLarge" 2 "TooFast" 3 "Both";
 VAL_ 578 GEAR 4 "D" 2 "R" 3 "N" 1 "P";
-VAL_ 790 AUTO_LIGHT 1 "OFF" 2 "ON";
 VAL_ 790 LEFT_LANE_STATE 0 "OFF" 1 "GREEN" 2 "ORANGE";
 VAL_ 790 LKS_MODE 0 "OFF" 1 "DIVERGE" 2 "KEEPING" 3 "ALL";
 VAL_ 790 TJA_ICA_STATE 0 "OFF" 1 "PASSIVE" 2 "ACTIVE1" 3 "ACTIVE2" 4 "FAULT";
