@@ -44,7 +44,7 @@ class CarControllerParams:
     if CP.carFingerprint in (CAR.HONDA_CRV, CAR.HONDA_CRV_EU, CAR.ACURA_RDX):
       self.STEER_MAX = 1000  # TODO: determine if there is a dead zone at the top end
     elif CP.carFingerprint in (CAR.ACURA_ILX, CAR.HONDA_CRV_5G, CAR.ACURA_RDX_3G, CAR.ACURA_TLX_2G_MMR, CAR.ACURA_MDX_4G,
-                               CAR.ACURA_ADX):
+                               CAR.ACURA_ADX, CAR.HONDA_FIT_4G):
       self.STEER_MAX = 3840  # TODO: determine if there is a dead zone at the top end (ACURA_ILX)
     elif CP.carFingerprint in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CIVIC_2022, CAR.HONDA_ACCORD,
                                CAR.HONDA_CRV_HYBRID, CAR.HONDA_FIT, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.HONDA_HRV_3G,
@@ -330,6 +330,16 @@ class CAR(Platforms):
     CarSpecs(mass=3578 * CV.LB_TO_KG, wheelbase=2.65, steerRatio=17.6, centerToFrontRatio=0.43),
     {Bus.pt: 'honda_bosch_radarless_generated'},
     flags=HondaFlags.BOSCH_RADARLESS
+  )
+  HONDA_FIT_4G = HondaBoschPlatformConfig(
+    [
+      HondaCarDocs("Honda Fit (Taiwan) 2021", "All"),
+      # TODO: add 2022-2023 fingerprints
+      HondaCarDocs("Honda Fit (Taiwan) 2024-25", "All"),
+    ],
+    CarSpecs(mass=1229, wheelbase=2.53, steerRatio=19.7, centerToFrontRatio=0.39, minSteerSpeed=23. * CV.KPH_TO_MS),
+    {Bus.pt: 'honda_bosch_radarless_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS,
   )
 
   # Nidec Cars
