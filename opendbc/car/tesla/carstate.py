@@ -1,6 +1,7 @@
 import copy
 from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, structs
+from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, TeslaFlags
@@ -14,6 +15,8 @@ class CarState(CarStateBase):
     self.autopark = False
     self.autopark_prev = False
     self.cruise_enabled_prev = False
+    self.das_steering_3_bit_error_logged = False
+    self.suspected_das_steering_3_bit = False
 
     self.hands_on_level = 0
     self.das_control = None
@@ -110,6 +113,18 @@ class CarState(CarStateBase):
     # TODO: find for TESLA_MODEL_X and HW2.5 vehicles
     if not (self.CP.flags & TeslaFlags.MISSING_DAS_SETTINGS):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
+
+      # Because we don't have 3-bit detection outside of a set of FW, check if this FW is accidentally missing from DAS_STEERING_3_BIT_FW
+      # 1. If in Autosteer or FSD, already caught by invalidLkasSetting
+      # 2. If in TACC and DAS ever sends legacy ANGLE_CONTROL (1), it's actually a 3-bit LANE_KEEP_ASSIST
+      if not ret.invalidLkasSetting and not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT and steer_control_type == 1:
+        self.suspected_das_steering_3_bit = True
+
+      if self.suspected_das_steering_3_bit:
+        ret.invalidLkasSetting = True
+        if not self.das_steering_3_bit_error_logged:
+          carlog.error("3-bit DAS_steeringControlType detected, but FW not in DAS_STEERING_3_BIT_FW")
+          self.das_steering_3_bit_error_logged = True
 
     # Buttons # ToDo: add Gap adjust button
 

@@ -1,12 +1,13 @@
 import re
 import unittest
 
-from opendbc.car import gen_empty_fingerprint
+from opendbc.can import CANPacker
+from opendbc.car import Bus, gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.tesla.interface import CarInterface
 from opendbc.car.tesla.fingerprints import FW_VERSIONS
 from opendbc.car.tesla.radar_interface import RADAR_START_ADDR
-from opendbc.car.tesla.values import CAR, DAS_STEERING_3_BIT_FW
+from opendbc.car.tesla.values import CAR, CANBUS, DBC, DAS_STEERING_3_BIT_FW, TeslaFlags
 
 Ecu = CarParams.Ecu
 
@@ -102,3 +103,21 @@ class TestTeslaFingerprint(unittest.TestCase):
         fingerprint[1][RADAR_START_ADDR] = 8
       CP = CarInterface.get_params(CAR.TESLA_MODEL_X, fingerprint, [], False, False, False)
       assert CP.radarUnavailable  # Always unavailable since no radar DBC
+
+  def test_suspected_3_bit_das_steering(self):
+    # In TACC, stock LANE_KEEP_ASSIST on a 3-bit car reads as ANGLE_CONTROL with the legacy encoding
+    packer = CANPacker(DBC[CAR.TESLA_MODEL_Y][Bus.party])
+    for das_steering_3_bit in (False, True):
+      fingerprint = gen_empty_fingerprint()
+      fingerprint[CANBUS.autopilot_party][0x293] = 8  # DAS_settings
+      CP = CarInterface.get_params(CAR.TESLA_MODEL_Y, fingerprint, [], False, False, False)
+      if das_steering_3_bit:
+        CP.flags |= TeslaFlags.DAS_STEERING_3_BIT.value
+      CI = CarInterface(CP)
+      for i in range(5):
+        msgs = [
+          packer.make_can_msg("DAS_steeringControl", CANBUS.autopilot_party, {"DAS_steeringControlType": 2, "DAS_steeringControlCounter": i}),
+          packer.make_can_msg("DAS_settings", CANBUS.autopilot_party, {"DAS_autosteerEnabled": 0}),
+        ]
+        CS = CI.update([(i * 20_000_000, msgs)])
+      assert CS.invalidLkasSetting != das_steering_3_bit

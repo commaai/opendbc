@@ -76,9 +76,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, self.SAFETY_PARAM)
     self.safety.init_tests()
 
-  def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
+  def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0, raw_state: bool = False):
     flags = TeslaFlags.DAS_STEERING_3_BIT if self.safety.get_current_safety_param() & TeslaSafetyFlags.DAS_STEERING_3_BIT else 0
-    values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": get_steer_ctrl_type(flags, int(state))}
+    steer_control_type = int(state) if raw_state else get_steer_ctrl_type(flags, int(state))
+    values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": steer_control_type}
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
       self.__class__.cnt_angle_cmd += 1
@@ -267,13 +268,13 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertEqual(self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
 
   def test_steering_control_type(self):
-    # Only angle control is allowed (no LANE_KEEP_ASSIST, EMERGENCY_LANE_KEEP, or FSD)
+    # Only angle control is allowed (no LANE_KEEP_ASSIST, EMERGENCY_LANE_KEEP, or FSD), checking all 3 bits of the raw signal
     self.safety.set_controls_allowed(True)
-    num_steer_control_types = 8 if self.safety.get_current_safety_param() & TeslaSafetyFlags.DAS_STEERING_3_BIT else 4
-    for steer_control_type in range(num_steer_control_types):
-      should_tx = steer_control_type in (self.steer_control_types["NONE"],
-                                         self.steer_control_types["ANGLE_CONTROL"])
-      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)))
+    flags = TeslaFlags.DAS_STEERING_3_BIT if self.safety.get_current_safety_param() & TeslaSafetyFlags.DAS_STEERING_3_BIT else 0
+    allowed = (get_steer_ctrl_type(flags, self.steer_control_types["NONE"]), get_steer_ctrl_type(flags, self.steer_control_types["ANGLE_CONTROL"]))
+    for steer_control_type in range(8):
+      should_tx = steer_control_type in allowed
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type, raw_state=True)))
 
   def test_stock_lkas_passthrough(self):
     # TODO: make these generic passthrough tests
