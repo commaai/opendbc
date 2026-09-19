@@ -95,6 +95,7 @@ def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_
   return SimpleNamespace(
     eps_engaged=eps_engaged,
     eps_standby=eps_standby,
+    eps_idle=(not eps_engaged) and (not eps_standby),
     steer_not_accepted=False,
     lkas_hud={},
     lks_enabled=lks_enabled,
@@ -272,11 +273,13 @@ def _bus2_lks(sends):
   return [m for m in sends if m[0] == 0x3B0 and m[2] == 2]
 
 
-def _step(ctrl, n, enabled=True, lat=False, cam=0, lks=True, rising=False):
+def _step(ctrl, n, enabled=True, lat=False, cam=0, lks=True, rising=False,
+          eps_engaged=True, eps_standby=False):
   pulses = 0
   last = []
   for i in range(n):
-    CS = _cs(lks_enabled=lks, camera_lkas_state=cam, lks_btn_rising=rising and i == 0)
+    CS = _cs(lks_enabled=lks, camera_lkas_state=cam, lks_btn_rising=rising and i == 0,
+             eps_engaged=eps_engaged, eps_standby=eps_standby)
     _act, last = ctrl.update(_cc(enabled=enabled, lat_active=lat), CS, 0)
     pulses += len(_bus2_lks(last))
   return pulses, last
@@ -310,9 +313,32 @@ class TestBydLksCamera(unittest.TestCase):
 
   def test_restore_after_hud_quiet_when_latch_on(self):
     ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
-    _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=False, cam=0, lks=True)
-    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=0, lks=True)
+    _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=False, cam=0, lks=True, eps_engaged=False)
+    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + CCP.LKS_PULSE_PERIOD + 2,
+                      enabled=False, cam=0, lks=True, eps_engaged=False)
     self.assertGreater(pulses, 0)
+
+  def test_no_restore_while_eps_engaged(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + CCP.LKS_PULSE_PERIOD + 2,
+                      enabled=False, cam=0, lks=True, eps_engaged=True)
+    self.assertEqual(pulses, 0)
+
+  def test_restore_after_eps_idle_stable(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_HUD_QUIET_FRAMES,
+          enabled=False, cam=0, lks=True, eps_engaged=True)
+    short, _ = _step(ctrl, CCP.LKS_EPS_IDLE_FRAMES - 1, enabled=False, cam=0, lks=True, eps_engaged=False)
+    self.assertEqual(short, 0)
+    more, _ = _step(ctrl, CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=0, lks=True, eps_engaged=False)
+    self.assertGreater(more, 0)
+
+  def test_no_tick_while_lkas_state_4(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD * 4, enabled=True, cam=4)
+    self.assertEqual(pulses, 0)
+    more, _ = _step(ctrl, CCP.LKS_PULSE_PERIOD + 2, enabled=True, cam=2)
+    self.assertEqual(more, 1)
 
   def test_no_restore_when_latch_off(self):
     ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
