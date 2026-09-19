@@ -15,11 +15,11 @@ class CarController(CarControllerBase):
     start = 0
 
     if CC.enabled:
-      # Separate joystick axes allow both flippers at once; negative accel starts.
-      left = int(CC.actuators.accel > 0.5)    # W key → left flipper
-      right = int(CC.actuators.torque > 0.5)  # A key → right flipper
-      start = int(CC.actuators.accel < -0.5)  # S key → start button
-      # Keyboard axes accumulate with each key press; R resets all outputs.
+      # Connect's default wideRoad view sends A as positive steering and W/S
+      # as positive/negative acceleration. A and S can activate both paddles.
+      left = int(CC.actuators.torque > 0.5)    # A: left paddle
+      right = int(CC.actuators.accel < -0.5)   # S: right paddle
+      start = int(CC.actuators.accel > 0.5)    # W: middle servo (SOLENOID_START)
 
     can_sends = [pinballcan.create_solenoid_cmd(self.packer, left, right, start)]
 
