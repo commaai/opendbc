@@ -109,9 +109,12 @@ class CarState(CarStateBase):
     ret.leftBlinker = bool(cp.vl["STALKS"]["LEFT_BLINKER"])
     ret.rightBlinker = bool(cp.vl["STALKS"]["RIGHT_BLINKER"])
 
-    # blind spot monitor
-    ret.leftBlindspot = cp.vl["BSD_RADAR"]["LEFT_APPROACH"] != 0
-    ret.rightBlindspot = cp.vl["BSD_RADAR"]["RIGHT_APPROACH"] != 0
+    # cereal has no RCTA field; Subaru folds it into the blindspot hooks.
+    # RCTA_RIGHT_2 shows up without RCTA_RIGHT; do not OR it.
+    rcta_left = bool(cp.vl["BSD_RADAR"]["RCTA_LEFT"] or cp.vl["BSD_RADAR"]["RCTA_LEFT_2"])
+    rcta_right = bool(cp.vl["BSD_RADAR"]["RCTA_RIGHT"])
+    ret.leftBlindspot = (cp.vl["BSD_RADAR"]["LEFT_APPROACH"] != 0) or rcta_left
+    ret.rightBlindspot = (cp.vl["BSD_RADAR"]["RIGHT_APPROACH"] != 0) or rcta_right
 
     # doors / belt
     ret.doorOpen = any((

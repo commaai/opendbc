@@ -255,7 +255,7 @@ class CarController(CarControllerBase):
         can_sends.append(bydcan.create_steering_control(self.packer, self.apply_angle_last, lat_send, cntr, ack))
         # HUD for the whole engagement so TAKE CONTROL can paint the cluster after
         # latActive drops. Panda keeps camera 0x316 off while we still send 0x1E2.
-        can_sends.append(bydcan.create_lkas_hud(self.packer, cntr, CS.lkas_hud, hud_control, CC.latActive))
+        can_sends.append(bydcan.create_lkas_hud(self.packer, cntr, CS.lkas_hud, hud_control, CC.latActive, CS.lks_enabled))
 
       # STEER_REQ=1 while EPS reports idle (LKS_PREPARED=1) for 200 ms => not accepted.
       # Only frames we actually sent with STEER_REQ=1 count.
