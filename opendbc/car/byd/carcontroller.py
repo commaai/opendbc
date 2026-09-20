@@ -43,6 +43,7 @@ class CarController(CarControllerBase):
     self.pcm_buttons_ts_last = 0
     self.hold_steer = 0
     self.eps_idle_frames = 0
+    self.yield_hold = 0
 
     # Vehicle model used for lateral limiting
     self.VM = VehicleModel(get_safety_CP())
@@ -221,18 +222,33 @@ class CarController(CarControllerBase):
       if send_op and not self.sending_last:
         self.warmup_left = CarControllerParams.STEER_WARMUP_FRAMES
 
+      # Hands on the wheel: keep 0x1E2 (camera stays blocked) but drop STEER_REQ. A yank
+      # faster than the rate limit idles the EPS, and each REQ 0->1 against the driver is a
+      # TORQUE_TEMP_FAILED; a few in a second mean standby. Hold the yield past the last press.
+      if CS.out.steeringPressed:
+        self.yield_hold = CarControllerParams.STEER_YIELD_HOLD_SLOTS
+      elif self.yield_hold > 0:
+        self.yield_hold -= 1
+      driver_yield = self.yield_hold > 0
+
       # EPS standby ignores STEER_REQ until it sees the camera's ack. Replay what
       # precedes every logged exit: one idle frame, then REQ=0 with ACTIVE_LOW=0.
       # panda keeps the camera blocked meanwhile. Give up on it after a few tries.
-      self.standby_slots = self.standby_slots + 1 if (send_op and CS.eps_standby) else 0
-      self.ack_cooldown = max(self.ack_cooldown - 1, 0)
-      if CC.latActive and self.warmup_left == 0 and self.ack_slots == 0 and self.ack_cooldown == 0 and self.standby_slots >= 2:
-        if self.ack_attempts < CarControllerParams.STEER_ACK_ATTEMPTS:
-          self.ack_slots = 2
-          self.ack_cooldown = CarControllerParams.STEER_ACK_PERIOD
-          self.ack_attempts += 1
-        else:
-          self.steer_fault_latched = True
+      if driver_yield:
+        self.standby_slots = 0
+        self.ack_slots = 0
+        self.ack_cooldown = 0
+        self.ack_attempts = 0
+      else:
+        self.standby_slots = self.standby_slots + 1 if (send_op and CS.eps_standby) else 0
+        self.ack_cooldown = max(self.ack_cooldown - 1, 0)
+        if CC.latActive and self.warmup_left == 0 and self.ack_slots == 0 and self.ack_cooldown == 0 and self.standby_slots >= 2:
+          if self.ack_attempts < CarControllerParams.STEER_ACK_ATTEMPTS:
+            self.ack_slots = 2
+            self.ack_cooldown = CarControllerParams.STEER_ACK_PERIOD
+            self.ack_attempts += 1
+          else:
+            self.steer_fault_latched = True
 
       ack = False
       if self.warmup_left > 0:
@@ -243,7 +259,7 @@ class CarController(CarControllerBase):
         ack = self.ack_slots == 1
         self.ack_slots -= 1
       else:
-        lat_send = CC.latActive
+        lat_send = CC.latActive and not driver_yield
 
       # The first REQ=1 repeats the angle of the REQ=0 frame panda just took as reference
       first_req = lat_send and not self.lat_send_last
@@ -261,7 +277,7 @@ class CarController(CarControllerBase):
       # Only frames we actually sent with STEER_REQ=1 count.
       if lat_send:
         self.not_accepted_frames = self.not_accepted_frames + 1 if not CS.eps_engaged else 0
-      elif not CC.latActive:
+      elif not CC.latActive or driver_yield:
         self.not_accepted_frames = 0
       CS.steer_not_accepted = self.steer_fault_latched or self.not_accepted_frames >= CarControllerParams.STEER_NOT_ACCEPTED_FRAMES
 
