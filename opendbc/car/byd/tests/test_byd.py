@@ -93,9 +93,12 @@ class TestBydLkasHud(unittest.TestCase):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
     hud = _Hud()
     hud.visualAlert = VisualAlert.steerRequired
-    out = _decode_hud(bydcan.create_lkas_hud(packer, 3, {"LKAS_STATE": 2, "LKS_MODE": 2}, hud, True, lks_on=False))
+    stock = {"LKAS_STATE": 2, "LKS_MODE": 2, "LEFT_LANE_STATE": 1, "RIGHT_LANE_STATE": 1}
+    out = _decode_hud(bydcan.create_lkas_hud(packer, 3, stock, hud, True, lks_on=False))
     self.assertEqual(out["LKAS_STATE"], 0)
-    self.assertEqual(out["LKS_MODE"], 0)
+    self.assertEqual(out["LKS_MODE"], 2)
+    self.assertEqual(out["LEFT_LANE_STATE"], 1)
+    self.assertEqual(out["RIGHT_LANE_STATE"], 1)
     self.assertEqual(out["HANDS_ON_WHEEL_REQ"], 0)
     self.assertEqual(out["SET_ME_50"], 0)
 
@@ -231,17 +234,22 @@ class TestBydSteerNotAccepted(unittest.TestCase):
 
   def test_lks_off_hold_sends_icon_off(self):
     ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    cam = {"LKAS_STATE": 2, "LKS_MODE": 2, "LEFT_LANE_STATE": 1, "RIGHT_LANE_STATE": 1}
     CS = _cs(lks_enabled=False, lks_btn_rising=True, camera_lkas_state=2)
+    CS.lkas_hud = cam
     ctrl.update(_cc(enabled=False, lat_active=False), CS, 0)
     hud = None
     for _ in range(4):
-      _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), _cs(lks_enabled=False, camera_lkas_state=2), 0)
+      hold = _cs(lks_enabled=False, camera_lkas_state=2)
+      hold.lkas_hud = cam
+      _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), hold, 0)
       for m in sends:
         if m[0] == 0x316:
           hud = _decode("LKAS_HUD_ADAS", m)
     self.assertIsNotNone(hud)
     self.assertEqual(hud["LKAS_STATE"], 0)
-    self.assertEqual(hud["LKS_MODE"], 0)
+    self.assertEqual(hud["LKS_MODE"], 2)
+    self.assertEqual(hud["LEFT_LANE_STATE"], 1)
 
   def test_warmup_then_first_req_repeats_angle(self):
     # After a TX gap: REQ=0 at the measured angle, then the first REQ=1 at that same angle,
