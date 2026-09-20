@@ -147,6 +147,8 @@ class HyundaiFlags(IntFlag):
 
   ALT_LIMITS_2 = 2 ** 26
 
+  HAS_BSM = 2 ** 27  # blind spot monitoring
+
 
 @dataclass
 class HyundaiCarDocs(CarDocs):
@@ -497,6 +499,7 @@ class CAR(Platforms):
     [
       HyundaiCarDocs("Kia Sportage 2023-24", car_parts=CarParts.common([CarHarness.hyundai_n])),
       HyundaiCarDocs("Kia Sportage Hybrid 2023", car_parts=CarParts.common([CarHarness.hyundai_n])),
+      HyundaiCarDocs("Kia Sportage Plug-in Hybrid 2023", car_parts=CarParts.common([CarHarness.hyundai_n])),
     ],
     # weight from SX and above trims, average of FWD and AWD version, steering ratio according to Kia News https://www.kiamedia.com/us/en/models/sportage/2023/specifications
     CarSpecs(mass=1725, wheelbase=2.756, steerRatio=13.6),
@@ -536,6 +539,11 @@ class CAR(Platforms):
     [HyundaiCarDocs("Kia Ceed 2019-21", car_parts=CarParts.common([CarHarness.hyundai_e]))],
     CarSpecs(mass=1450, wheelbase=2.65, steerRatio=13.75, tireStiffnessFactor=0.5),
     flags=HyundaiFlags.LEGACY,
+  )
+  KIA_CEED_PHEV = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Kia Ceed Plug-in Hybrid 2021", car_parts=CarParts.common([CarHarness.hyundai_b]))],
+    CarSpecs(mass=1450, wheelbase=2.65, steerRatio=13.75, tireStiffnessFactor=0.5),
+    flags=HyundaiFlags.LEGACY | HyundaiFlags.HYBRID,
   )
   KIA_EV6 = HyundaiCanFDPlatformConfig(
     [
