@@ -40,12 +40,11 @@ class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
     return MqbLongStateMachine(vehicle_mass=1540.0, accel_min=CCP.ACCEL_MIN)
 
   def _cs(self, *, esp_hold_confirmation=False, esp_stopping=False, rolling_backward=False,
-          rolling_forward=False, brake_pressed=False, gas_pressed=False, standstill=True, v_ego=0.0,
-          sum_wegimpulse=0):
+          rolling_forward=False, brake_pressed=False, gas_pressed=False, standstill=True, v_ego=0.0):
     out = SimpleNamespace(brakePressed=brake_pressed, gasPressed=gas_pressed, standstill=standstill, vEgo=v_ego)
     return SimpleNamespace(out=out, acc_type=1, esp_hold_confirmation=esp_hold_confirmation,
                            esp_stopping=esp_stopping, rolling_backward=rolling_backward,
-                           rolling_forward=rolling_forward, sum_wegimpulse=sum_wegimpulse)
+                           rolling_forward=rolling_forward)
 
   def _run(self, mgr, cs, *, long_active=True, accel=0.0, stopping=False, starting=False,
            max_planned_speed=0.0, grade_pct=0.0, tsk_brake_torque=0.0):
@@ -106,19 +105,19 @@ class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
     self._run(mgr, self._cs(rolling_backward=True))
     _, accel, stopping, starting, _ = self._run(mgr, self._cs(), accel=0.5)
     assert accel == CCP.ACCEL_MIN
-    assert stopping
-    assert not starting
+    assert not stopping
+    assert starting
 
   # ── safe speed braking ───────────────────────────────────────────────────────
 
   def test_flat_ground_passes_raw_accel(self):
-    """Flat ground has no rollback-risk speed threshold, so accel/states pass through."""
+    """Flat ground passes raw accel while keeping TSK starting during hold acquisition."""
     mgr = self._mgr()
     _, accel, stopping, starting, _ = self._run(mgr, self._cs(v_ego=0.0), accel=-0.55,
                                                 stopping=True, starting=False, grade_pct=0.0)
     assert accel == -0.55
-    assert stopping
-    assert not starting
+    assert not stopping
+    assert starting
 
   def test_current_brake_torque_reduces_safe_speed(self):
     """Current TSK brake torque reduces the rollback-risk speed threshold."""
@@ -144,8 +143,8 @@ class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
     _, accel, stopping, starting, esp_override = self._run(mgr, self._cs(esp_stopping=True, v_ego=0.2), accel=-0.55,
                                                            stopping=True, starting=False)
     assert accel == -0.55
-    assert stopping
-    assert not starting
+    assert not stopping
+    assert starting
     assert esp_override == ESPOverride.START
 
   def test_below_safe_speed_blends_brake(self):
@@ -157,30 +156,30 @@ class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
     _, accel, stopping, starting, _ = self._run(mgr, self._cs(v_ego=safe_speed * 0.5), accel=-0.55,
                                                 grade_pct=grade, tsk_brake_torque=required_torque * 0.5)
     assert CCP.ACCEL_MIN < accel < -0.55
-    assert stopping
-    assert not starting
+    assert not stopping
+    assert starting
 
   def test_sufficient_brake_torque_passes_raw_accel(self):
-    """When current TSK brake torque covers rollback risk, raw openpilot accel/states pass through."""
+    """Sufficient brake torque preserves raw accel while TSK stays starting during hold acquisition."""
     mgr = self._mgr()
     grade = 20.0
     safe_speed = self._safe_speed(mgr, grade)
     _, accel, stopping, starting, _ = self._run(mgr, self._cs(v_ego=safe_speed * 0.5), accel=-0.2,
                                                 stopping=True, starting=False, grade_pct=grade, tsk_brake_torque=10000.0)
     assert accel == -0.2
-    assert stopping
-    assert not starting
+    assert not stopping
+    assert starting
 
   def test_below_safe_speed_with_low_planned_speed_uses_blended_braking(self):
-    """Below safe speed with low planned speed keeps stopping behavior and uses blended braking."""
+    """Low planned speed keeps blended braking while TSK stays starting during hold acquisition."""
     mgr = self._mgr()
     grade = 20.0
     safe_speed = self._safe_speed(mgr, grade)
     _, accel, stopping, starting, _ = self._run(mgr, self._cs(v_ego=safe_speed * 0.5), accel=-0.55,
                                                 max_planned_speed=safe_speed * 0.5, grade_pct=grade)
     assert CCP.ACCEL_MIN <= accel < -0.55
-    assert stopping
-    assert not starting
+    assert not stopping
+    assert starting
 
   def test_below_safe_speed_with_high_planned_speed_and_negative_accel_uses_blended_braking(self):
     """Below safe speed, planned drive-away intent still brakes until openpilot requests positive accel."""
@@ -190,8 +189,8 @@ class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
     _, accel, stopping, starting, _ = self._run(mgr, self._cs(v_ego=safe_speed * 0.5), accel=-0.55,
                                                 max_planned_speed=safe_speed * 2.0, grade_pct=grade)
     assert CCP.ACCEL_MIN <= accel < -0.55
-    assert stopping
-    assert not starting
+    assert not stopping
+    assert starting
 
   def test_below_safe_speed_with_high_planned_speed_and_positive_accel_uses_hill_takeoff(self):
     """Below safe speed, positive openpilot accel with planned drive-away intent uses hill launch."""
@@ -261,9 +260,12 @@ class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
     """can_stop_forever continues returning ESPOverride.START once latched, without esp_stopping."""
     mgr = self._mgr()
     self._run(mgr, self._cs(esp_stopping=True), accel=-1.0, stopping=True)
-    *_, esp_override = self._run(mgr, self._cs(), accel=-1.0, stopping=True)
+    _, accel, stopping, starting, esp_override = self._run(mgr, self._cs(), accel=-1.0, stopping=True)
     assert mgr.can_stop_forever
     assert esp_override == ESPOverride.START
+    assert accel == -1.0
+    assert stopping
+    assert not starting
 
   def test_can_stop_forever_cleared_by_hold_confirmation(self):
     """can_stop_forever is cleared when ESP confirms a hold."""
@@ -279,20 +281,19 @@ class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
     grade = 20.0
     safe_speed = self._safe_speed(mgr, grade)
 
-    *_, esp_override = self._run(mgr, self._cs(esp_hold_confirmation=True, sum_wegimpulse=0), accel=0.0,
-                                 grade_pct=grade)
+    *_, esp_override = self._run(mgr, self._cs(esp_hold_confirmation=True), accel=0.0, grade_pct=grade)
     assert mgr.start_commit_active
     assert mgr.hold_recovery_active
     assert esp_override == ESPOverride.START
 
-    *_, esp_override = self._run(mgr, self._cs(v_ego=safe_speed * 2.0, standstill=False, sum_wegimpulse=1), accel=0.0,
+    *_, esp_override = self._run(mgr, self._cs(v_ego=safe_speed * 2.0, standstill=False), accel=0.0,
                                  grade_pct=grade)
     assert not mgr.start_commit_active
     assert mgr.hold_recovery_active
     assert esp_override == ESPOverride.STOP
 
-    *_, esp_override = self._run(mgr, self._cs(esp_stopping=True, v_ego=safe_speed * 2.0, standstill=False,
-                                               sum_wegimpulse=2), accel=0.0, grade_pct=grade)
+    *_, esp_override = self._run(mgr, self._cs(esp_stopping=True, v_ego=safe_speed * 2.0, standstill=False),
+                                 accel=0.0, grade_pct=grade)
     assert mgr.can_stop_forever
     assert not mgr.hold_recovery_active
     assert esp_override == ESPOverride.START
@@ -313,58 +314,52 @@ class TestVolkswagenMqbLongStateMachine(unittest.TestCase):
     self._run(mgr, self._cs(), long_active=False)
     assert not mgr.can_stop_forever
 
-  def test_esp_override_stop_at_standstill(self):
-    """ESPOverride.STOP is requested once wheel impulses have been still long enough."""
-    mgr = self._mgr()
-    esp_override = None
-    for _ in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES + 1):
-      *_, esp_override = self._run(mgr, self._cs(sum_wegimpulse=0), accel=-1.0, stopping=True)
-    assert esp_override == ESPOverride.STOP
+  def test_esp_override_stop_below_override_speed(self):
+    """Below 9.5 kph, acquire the ESP hold grant without changing requested acceleration."""
+    for v_ego in (0.0, 1.0, MqbLongStateMachine.ESP_OVERRIDE_SPEED - 0.01):
+      for requested_accel in (-1.0, 0.5):
+        with self.subTest(v_ego=v_ego, accel=requested_accel):
+          mgr = self._mgr()
+          _, accel, stopping, starting, esp_override = self._run(
+            mgr, self._cs(v_ego=v_ego, standstill=v_ego == 0.0), accel=requested_accel,
+            stopping=requested_accel < 0, starting=requested_accel > 0, max_planned_speed=10.0)
+          assert esp_override == ESPOverride.STOP
+          assert accel == requested_accel
+          assert not stopping
+          assert starting
 
   def test_esp_override_stop_persists_at_standstill(self):
-    """ESPOverride.STOP remains requested while wheel impulses are still and no hold procedure is detected."""
+    """ESPOverride.STOP remains requested until a hold procedure is detected."""
     mgr = self._mgr()
-    for _ in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES + 1):
-      self._run(mgr, self._cs(sum_wegimpulse=0), accel=-1.0, stopping=True)
-    *_, esp_override = self._run(mgr, self._cs(sum_wegimpulse=0), accel=-1.0, stopping=True)
-    assert esp_override == ESPOverride.STOP
+    for _ in range(2):
+      *_, esp_override = self._run(mgr, self._cs(), accel=-1.0, stopping=True)
+      assert not mgr.can_stop_forever
+      assert esp_override == ESPOverride.STOP
 
   def test_esp_override_stop_not_sent_while_esp_stopping(self):
     """Once ESP reports stopping, START is sent instead of another STOP pulse."""
     mgr = self._mgr()
-    *_, esp_override = self._run(mgr, self._cs(esp_stopping=True, sum_wegimpulse=0),
-                                 accel=-1.0, stopping=True)
+    *_, esp_override = self._run(mgr, self._cs(esp_stopping=True), accel=-1.0, stopping=True)
     assert mgr.can_stop_forever
     assert esp_override == ESPOverride.START
 
-  def test_esp_override_stop_not_requested_while_moving(self):
-    """Below 10 kph, ESPOverride.START is the default while wheel impulses are changing."""
-    mgr = self._mgr()
-    esp_override = None
-    for sum_wegimpulse in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES + 1):
-      *_, esp_override = self._run(mgr, self._cs(sum_wegimpulse=sum_wegimpulse), accel=-1.0, stopping=True)
-    assert esp_override == ESPOverride.START
+  def test_esp_override_not_requested_at_or_above_override_speed(self):
+    """At or above 9.5 kph, a fresh controller leaves ESP and TSK states unchanged."""
+    for v_ego in (MqbLongStateMachine.ESP_OVERRIDE_SPEED, MqbLongStateMachine.ESP_OVERRIDE_SPEED + 0.01):
+      with self.subTest(v_ego=v_ego):
+        mgr = self._mgr()
+        _, accel, stopping, starting, esp_override = self._run(
+          mgr, self._cs(v_ego=v_ego, standstill=False), accel=-1.0, stopping=True)
+        assert esp_override is None
+        assert accel == -1.0
+        assert stopping
+        assert not starting
 
-  def test_esp_override_none_when_inactive(self):
-    """Below 10 kph, ESPOverride.START remains the default even when long control is inactive."""
+  def test_esp_override_start_when_inactive(self):
+    """Below 9.5 kph, ESPOverride.START remains the default when long control is inactive."""
     mgr = self._mgr()
     *_, esp_override = self._run(mgr, self._cs(), long_active=False)
     assert esp_override == ESPOverride.START
-
-  def test_wegimpulse_at_standstill_after_stillness_frames(self):
-    """Wheel impulse stillness is tracked after WEGIMPULSE_STILLNESS_FRAMES with constant sum_wegimpulse."""
-    mgr = self._mgr()
-    for _ in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES + 1):
-      self._run(mgr, self._cs(sum_wegimpulse=0))
-    assert mgr.frames_since_last_wheel_pulse >= MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES
-
-  def test_wegimpulse_resets_on_change(self):
-    """Wheel impulse stillness resets when sum_wegimpulse changes."""
-    mgr = self._mgr()
-    for _ in range(MqbLongStateMachine.WEGIMPULSE_STILLNESS_FRAMES):
-      self._run(mgr, self._cs(sum_wegimpulse=0))
-    self._run(mgr, self._cs(sum_wegimpulse=1))
-    assert mgr.frames_since_last_wheel_pulse == 0
 
 class TestVolkswagenPlatformConfigs(unittest.TestCase):
   def test_spare_part_fw_pattern(self):

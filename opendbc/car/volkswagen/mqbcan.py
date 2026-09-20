@@ -22,7 +22,6 @@ class MqbLongStateMachine:
   BRAKE_TORQUE_RAMP_RATE = 2000.0     # Nm/s
   ASSUMED_WHEEL_RADIUS = 0.328        # m, typical MQB tire rolling radius
   GRAVITY = 9.81                      # m/s^2
-  WEGIMPULSE_STILLNESS_FRAMES = 5     # frames of no wheel tick change before assuming standstill
   ESP_OVERRIDE_SPEED = 9.5 * CV.KPH_TO_MS
   MAX_SAFE_STOPPING_SPEED = 10.0 * CV.KPH_TO_MS
   STARTING_SPEED = 0.25
@@ -33,8 +32,6 @@ class MqbLongStateMachine:
     self.can_stop_forever = False
     self.rollback_detected = False
     self.start_commit_active = False
-    self.frames_since_last_wheel_pulse = 0
-    self.prev_sum_wegimpulse: int | None = None
     self.prev_accel = 0
     self.hold_recovery_active = False
 
@@ -92,6 +89,7 @@ class MqbLongStateMachine:
     if CS.acc_type != 1:
       return long_active, accel, stopping, starting, None
 
+    # bunch of extracted math for readableness
     pitch = CC.orientationNED[1] if len(CC.orientationNED) == 3 else 0.0
     safe_stopping_speed = self.get_safe_speed_for_brake_torque(pitch, 0.0)
     below_safe_stop_speed = CS.out.vEgo < safe_stopping_speed
@@ -105,41 +103,34 @@ class MqbLongStateMachine:
     elif CS.rolling_forward:
       self.rollback_detected = False
 
-    wheel_did_pulse = CS.sum_wegimpulse != self.prev_sum_wegimpulse
-    self.prev_sum_wegimpulse = CS.sum_wegimpulse
-    if wheel_did_pulse:
-      self.frames_since_last_wheel_pulse = 0
-    else:
-      self.frames_since_last_wheel_pulse += 1
-    # this is far more sensitive than CS.out.standstill
-    # we want to trigger this *right before* the car itself thinks it's at a standstill
-    # vEgo lags behind the actual impulse signals and is too delayed for us to use here
-    near_standstill = self.frames_since_last_wheel_pulse >= self.WEGIMPULSE_STILLNESS_FRAMES
-
     # acc type 1 is sensitive to control signals when brake is pressed (when preEnabled)
     if CS.out.brakePressed:
       long_active = False
 
-    # manage takeoff behavior
+    # when the car drives off, force positive accel to prevent indecision from causing scary rollback
+    # to prevent danger, we only do this when the model is planning to hit a certain speed
     if long_active and not CS.out.gasPressed:
-      # this only happens if the user preEnables, we must handle it to prevent faulting
+      # if esp_hold_confirmation, it means the user preEnabled and then took their foot of the brake
+      # we must attempt to drive in this scenario to avoid faulting
       if CS.esp_hold_confirmation:
         self.start_commit_active = True
       # trigger a start commit when openpilot wants to drive
       if can_accelerate and below_safe_stop_speed and accel > 0:
         self.start_commit_active = True
-      # start commit ends when we exceed safe stop speed
+      # start commit ends when we exceed safe stop speed (which might be zero)
       elif self.start_commit_active:
         if CS.out.vEgo > safe_stopping_speed:
           self.start_commit_active = False
     else:
       self.start_commit_active = False
 
-    # apply acceleration adjustments based on our current rollback prevention state
+    # apply acceleration adjustments to prevent rollback
     if long_active:
       raw_accel = accel
       if self.start_commit_active:
         accel = max(accel, takeoff_acceleration)
+        # these stopping adjustments are not for infinite long - rather they align the stopping/starting bits
+        # with the acceleration value for the TSK to read from. they are maybe redundant.
         stopping = False
         starting = True
       elif self.rollback_detected:
@@ -151,13 +142,7 @@ class MqbLongStateMachine:
         if accel < raw_accel:
           stopping = True
           starting = False
-      # during our (short) stopping procedure, there's a short moment where we have no brake at all
-      # prime the TSK so that it resumes at a reasonable level when the procedure ends
-      if near_standstill and accel < 0 and CS.tsk_brake_torque == 0:
-        accel = self.accel_min
-        stopping = True
-        starting = False
-      # latch after we've settled to avoid oscillation
+      # latch after we've settled to avoid oscillation as brake torque settles
       if CS.out.standstill and accel < 0:
         accel = min(accel, self.prev_accel)
 
@@ -171,6 +156,10 @@ class MqbLongStateMachine:
       if CS.esp_hold_confirmation:
         self.can_stop_forever = False
         self.hold_recovery_active = True
+      # prevent brake torque from zeroing itself out by keeping TSK in starting state while we acquire hold grant
+      if CS.out.vEgo < self.ESP_OVERRIDE_SPEED and not self.can_stop_forever:
+          stopping = False
+          starting = True
 
       # force ESP into starting state during a start commit
       if self.start_commit_active:
@@ -183,7 +172,7 @@ class MqbLongStateMachine:
       elif self.can_stop_forever:
         esp_override = ESPOverride.START
       # trigger a stopping procedure
-      elif near_standstill:
+      elif CS.out.vEgo < self.ESP_OVERRIDE_SPEED:
         esp_override = ESPOverride.STOP
       # recover from hold confirmations while moving to prevent reconfirming them
       elif self.hold_recovery_active and not CS.out.standstill:
