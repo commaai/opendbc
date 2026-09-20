@@ -44,6 +44,9 @@ class CarControllerParams:
   # panda rate limits the first STEER_REQ=1 against our last 0x1E2, however old. After a
   # TX gap send REQ=0 at the measured angle first so that reference is fresh.
   STEER_WARMUP_FRAMES = 2             # 50 Hz frames
+  # Re-engaging the EPS against a driver still on the wheel sets TORQUE_TEMP_FAILED;
+  # a few within a second drop it to standby.
+  STEER_YIELD_HOLD_SLOTS = 25         # 50 Hz frames, 0.5 s
 
   # EPS standby (LKS_PREPARED=1 with CRUISE_ACTIVATED=1, after >200 ms without 0x1E2)
   # ignores STEER_REQ until it sees the camera's REQ=0 / ACTIVE_LOW=0 ack. We send it.
