@@ -135,7 +135,7 @@ class TestBydRcta(unittest.TestCase):
 
 
 def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_btn_rising=False, eps_standby=False,
-        buttons=None, buttons_ts=0):
+        buttons=None, buttons_ts=0, steering_pressed=False):
   return SimpleNamespace(
     eps_engaged=eps_engaged,
     eps_standby=eps_standby,
@@ -147,7 +147,7 @@ def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_
     camera_lkas_state=camera_lkas_state,
     pcm_buttons_stock=buttons if buttons is not None else {},
     pcm_buttons_ts=buttons_ts,
-    out=SimpleNamespace(vEgoRaw=20.0, steeringAngleDeg=angle),
+    out=SimpleNamespace(vEgoRaw=20.0, steeringAngleDeg=angle, steeringPressed=steering_pressed),
   )
 
 
@@ -168,12 +168,13 @@ def _cc(enabled=True, lat_active=True, cancel=False):
   )
 
 
-def _steer_frames(ctrl, n, enabled=True, lat=True, eps_engaged=True, eps_standby=False, angle=0.0, desired=0.0):
+def _steer_frames(ctrl, n, enabled=True, lat=True, eps_engaged=True, eps_standby=False, angle=0.0, desired=0.0,
+                  pressed=False):
   # Returns the decoded 0x1E2 sent on each 50 Hz slot (None if none) and the last CS.
   frames = []
   CS = None
   for _ in range(n):
-    CS = _cs(eps_engaged=eps_engaged, eps_standby=eps_standby, angle=angle)
+    CS = _cs(eps_engaged=eps_engaged, eps_standby=eps_standby, angle=angle, steering_pressed=pressed)
     CC = _cc(enabled=enabled, lat_active=lat)
     CC.actuators.steeringAngleDeg = desired
     _act, sends = ctrl.update(CC, CS, 0)
@@ -322,6 +323,54 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     # standby ack slots do not count either
     _steer_frames(ctrl, 2 * 4, eps_engaged=False, eps_standby=True)
     self.assertEqual(ctrl.not_accepted_frames, 2)
+
+  def test_pressed_yields_req_and_skips_standby_fault(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=10.0, desired=10.0)
+
+    frames, CS = _steer_frames(ctrl, 2 * 6, angle=40.0, desired=10.0, pressed=True)
+    self.assertTrue(all(f["STEER_REQ"] == 0 for f in frames))
+    self.assertTrue(all(f["STEER_REQ_ACTIVE_LOW"] == 1 for f in frames))
+    self.assertFalse(any(f["STEER_REQ"] == 0 and f["STEER_REQ_ACTIVE_LOW"] == 0 for f in frames))
+    for f in frames:
+      self.assertAlmostEqual(f["STEER_ANGLE"], 40.0, places=1)
+    self.assertEqual(ctrl.not_accepted_frames, 0)
+    self.assertFalse(CS.steer_not_accepted)
+
+    frames, CS = _steer_frames(ctrl, 2 * CCP.STEER_ACK_PERIOD * (CCP.STEER_ACK_ATTEMPTS + 2),
+                               eps_engaged=False, eps_standby=True, angle=40.0, desired=10.0, pressed=True)
+    self.assertTrue(all(f["STEER_REQ"] == 0 for f in frames))
+    self.assertFalse(any(f["STEER_REQ"] == 0 and f["STEER_REQ_ACTIVE_LOW"] == 0 for f in frames))
+    self.assertEqual(ctrl.ack_attempts, 0)
+    self.assertFalse(ctrl.steer_fault_latched)
+    self.assertFalse(CS.steer_not_accepted)
+
+    # hands off: REQ stays 0 through the yield hold, then comes back at the held angle
+    frames, CS = _steer_frames(ctrl, 2 * (CCP.STEER_YIELD_HOLD_SLOTS - 1), angle=40.0, desired=40.0)
+    self.assertTrue(all(f["STEER_REQ"] == 0 for f in frames))
+    frames, CS = _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=40.0, desired=40.0)
+    self.assertEqual(frames[0]["STEER_REQ"], 1)
+    self.assertAlmostEqual(frames[0]["STEER_ANGLE"], 40.0, places=1)
+    self.assertFalse(CS.steer_not_accepted)
+
+  def test_yield_hold_after_release(self):
+    ctrl = CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, SimpleNamespace())
+    warm, _ = _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2))
+    self.assertEqual(warm[-1]["STEER_REQ"], 1)
+    pressed, _ = _steer_frames(ctrl, 4, pressed=True)
+    self.assertEqual([f["STEER_REQ"] for f in pressed], [0, 0])
+    self.assertEqual([f["STEER_REQ_ACTIVE_LOW"] for f in pressed], [1, 1])
+    held, _ = _steer_frames(ctrl, 2 * (CCP.STEER_YIELD_HOLD_SLOTS - 1))
+    self.assertEqual(len(held), CCP.STEER_YIELD_HOLD_SLOTS - 1)
+    self.assertEqual([f["STEER_REQ"] for f in held], [0] * len(held))
+    back, _ = _steer_frames(ctrl, 4)
+    self.assertEqual([f["STEER_REQ"] for f in back], [1, 1])
+    # chatter inside the hold does not re-engage
+    _steer_frames(ctrl, 2, pressed=True)
+    for _ in range(3):
+      a, _ = _steer_frames(ctrl, 10)
+      b, _ = _steer_frames(ctrl, 2, pressed=True)
+      self.assertEqual([f["STEER_REQ"] for f in a + b], [0] * 6)
 
 
 class TestBydCruiseGate(unittest.TestCase):
