@@ -51,14 +51,12 @@ def create_lkas_hud(packer, counter: int, stock_lkas_hud: dict, hud_control, lat
   # Cluster nag bits are ours: do not pass the camera's hands-off timer through.
   # steerRequired is TAKE CONTROL / DM; SET_ME_50=2 is the chime stage, not 3
   # (stock's last step before it drops ACC).
-  # LKS off: we still own 0x316 until panda's 2 s HUD hold, so paint the icon
-  # off immediately. LKAS_STATE 1 is the standby wheel, not off.
+  # LKS off: we still own 0x316 until panda's 2 s HUD hold, so paint the
+  # wheel off immediately. LKAS_STATE 1 is the standby wheel, not off.
+  # LKS_MODE / lane bits are the car (LKA) icon -- leave the camera's.
   values = {**stock_lkas_hud, "COUNTER": counter}
   if not lks_on:
-    values["LKS_MODE"] = 0
     values["LKAS_STATE"] = 0
-    values["LEFT_LANE_STATE"] = 0
-    values["RIGHT_LANE_STATE"] = 0
     values["HANDS_ON_WHEEL_REQ"] = 0
     values["SET_ME_50"] = 0
     return packer.make_can_msg("LKAS_HUD_ADAS", 0, values)
