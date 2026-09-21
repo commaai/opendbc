@@ -157,9 +157,9 @@ class MqbLongStateMachine:
         self.can_stop_forever = False
         self.hold_recovery_active = True
       # prevent brake torque from zeroing itself out by keeping TSK in starting state while we acquire hold grant
-      if CS.out.vEgo < self.ESP_OVERRIDE_SPEED and (not self.can_stop_forever or CS.esp_stopping):
-          stopping = False
-          starting = True
+      if CS.esp_stopping or (CS.out.vEgo < self.ESP_OVERRIDE_SPEED and not self.can_stop_forever):
+        stopping = False
+        starting = True
 
       # force ESP into starting state during a start commit
       if self.start_commit_active:
