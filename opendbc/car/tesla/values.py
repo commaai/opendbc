@@ -76,6 +76,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
   ]
 )
 
+
 class CANBUS:
   party = 0
   vehicle = 1
