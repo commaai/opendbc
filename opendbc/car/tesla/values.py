@@ -109,13 +109,18 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
+
+  # deprecated flags
   DAS_STEERING_3_BIT_DEPRECATED = 2
 
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
-  DAS_STEERING_3_BIT_DEPRECATED = 2
   MISSING_DAS_SETTINGS = 4
+
+  # deprecated flags
+  # old 2-bit FW is dashcammed, so this is always true
+  DAS_STEERING_3_BIT_DEPRECATED = 2
 
 
 DBC = CAR.create_dbc_map()
