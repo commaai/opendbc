@@ -109,10 +109,12 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
+  DAS_STEERING_3_BIT_DEPRECATED = 2
 
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
+  DAS_STEERING_3_BIT_DEPRECATED = 2
   MISSING_DAS_SETTINGS = 4
 
 
