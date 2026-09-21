@@ -7,8 +7,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.tesla.interface import CarInterface
 from opendbc.car.tesla.fingerprints import FW_VERSIONS
 from opendbc.car.tesla.radar_interface import RADAR_START_ADDR
-from opendbc.car.tesla.teslacan import get_steer_ctrl_type
-from opendbc.car.tesla.values import CAR, CANBUS, DBC, TeslaFlags
+from opendbc.car.tesla.values import CAR, CANBUS, DBC
 
 Ecu = CarParams.Ecu
 
@@ -82,46 +81,29 @@ class TestTeslaFingerprint(unittest.TestCase):
       CP = CarInterface.get_params(CAR.TESLA_MODEL_X, fingerprint, [], False, False, False)
       assert CP.radarUnavailable  # Always unavailable since no radar DBC
 
-  def test_das_steering_3_bit_fingerprint(self):
-    # 0x489 is sent by HW3/HW4 Autopilot computers, 0x054 by the car (covers HW2.5)
+  def test_2_bit_das_steering_dashcam(self):
+    # Firmware with the 2-bit DAS_steeringControlType isn't supported. Only 3-bit firmware sends 0x489 (HW3/HW4 Autopilot computers)
+    # and 0x054 (the car, covers HW2.5)
     for bus, addr in ((None, None), (CANBUS.autopilot_party, 0x489), (CANBUS.party, 0x054)):
       fingerprint = gen_empty_fingerprint()
       if addr is not None:
         fingerprint[bus][addr] = 8
       CP = CarInterface.get_params(CAR.TESLA_MODEL_Y, fingerprint, [], False, False, False)
-      assert bool(CP.flags & TeslaFlags.DAS_STEERING_3_BIT) == (addr is not None)
+      assert CP.dashcamOnly == (addr is None)
 
-  def test_das_steering_3_bit_after_fingerprint(self):
-    # A car fingerprinted as legacy must fault as soon as any 3-bit indicator shows up, and stay faulted
-    packer = CANPacker(DBC[CAR.TESLA_MODEL_Y][Bus.party])
-    indicators = [
-      packer.make_can_msg("DAS_redundantBrakingControl", CANBUS.autopilot_party, {}),
-      packer.make_can_msg("DI_autonomyHealth", CANBUS.party, {}),
-    ]
-    no_indicator = packer.make_can_msg("DI_speed", CANBUS.party, {})
-
-    for das_steering_3_bit in (False, True):
-      fingerprint = gen_empty_fingerprint()
-      if das_steering_3_bit:
-        fingerprint[CANBUS.autopilot_party][0x489] = 8
-      CP = CarInterface.get_params(CAR.TESLA_MODEL_Y, fingerprint, [], False, False, False)
-
-      for indicator in indicators:
-        CI = CarInterface(CP)
-        assert not CI.update([(0, [no_indicator])]).steerFaultPermanent
-        assert CI.update([(10_000_000, [indicator])]).steerFaultPermanent != das_steering_3_bit
-        assert CI.update([(20_000_000, [no_indicator])]).steerFaultPermanent != das_steering_3_bit
+    assert not CarInterface.get_params(CAR.TESLA_MODEL_Y, gen_empty_fingerprint(), [], False, False, True).dashcamOnly
 
   def test_eps_angle_control_mismatch(self):
     # The EPS must be in ANGLE_CONTROL while it receives ANGLE_CONTROL, otherwise fault after 0.5 s
     packer = CANPacker(DBC[CAR.TESLA_MODEL_Y][Bus.party])
-    CP = CarInterface.get_params(CAR.TESLA_MODEL_Y, gen_empty_fingerprint(), [], False, False, False)
+    fingerprint = gen_empty_fingerprint()
+    fingerprint[CANBUS.party][0x054] = 8
+    CP = CarInterface.get_params(CAR.TESLA_MODEL_Y, fingerprint, [], False, False, False)
     for eac_status, mismatch in ((2, False), (5, True)):  # ACTIVE, LKA_ACTIVE
       CI = CarInterface(CP)
       for frame in range(50):
         msgs = [
-          packer.make_can_msg("DAS_steeringControl", 128, {"DAS_steeringControlType": get_steer_ctrl_type(CP.flags, 1),
-                                                           "DAS_steeringControlCounter": frame % 16}),
+          packer.make_can_msg("DAS_steeringControl", 128, {"DAS_steeringControlType": 1, "DAS_steeringControlCounter": frame % 16}),
           packer.make_can_msg("EPAS3S_sysStatus", CANBUS.party, {"EPAS3S_eacStatus": eac_status, "EPAS3S_sysStatusCounter": frame % 16}),
         ]
         fault = CI.update([(frame * 20_000_000, msgs)]).steerFaultPermanent

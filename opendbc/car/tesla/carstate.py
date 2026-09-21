@@ -4,7 +4,6 @@ from opendbc.car import Bus, structs
 from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.teslacan import get_steer_ctrl_type
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, TeslaFlags
 
 class CarState(CarStateBase):
@@ -19,7 +18,6 @@ class CarState(CarStateBase):
 
     self.hands_on_level = 0
     self.das_control = None
-    self.das_steering_3_bit_seen = False
     self.eps_mismatch_frames = 0
     self.eps_mismatch = False
 
@@ -107,26 +105,13 @@ class CarState(CarStateBase):
     ret.stockAeb = cp_ap_party.vl["DAS_control"]["DAS_aebEvent"] == 1
 
     # LKAS
-    steer_control_type = int(cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"])
-    if not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT:
-      steer_control_type >>= 1  # legacy firmware only uses the top 2 bits of the 3-bit signal
-    ret.stockLkas = steer_control_type == 2  # LANE_KEEP_ASSIST
-
-    # Double-check 3-bit DAS_steeringControlType existence messages in case we missed them during startup window
-    das_steering_3_bit = (cp_ap_party.ts_nanos["DAS_redundantBrakingControl"]["DAS_redundantBrakingControlCounter"] > 0 or
-                          cp_party.ts_nanos["DI_autonomyHealth"]["DI_autonomyBehavior"] > 0)
-    if not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT:
-      if das_steering_3_bit and not self.das_steering_3_bit_seen:
-        carlog.error("3-bit DAS_steeringControlType detected after fingerprinting")
-        self.das_steering_3_bit_seen = True
-      ret.steerFaultPermanent = ret.steerFaultPermanent or self.das_steering_3_bit_seen
+    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
 
     # The EPS must be in ANGLE_CONTROL while it receives ANGLE_CONTROL from bus 128 (us or forwarded LKA events).
-    # Anything else means our DAS_steeringControlType encoding is wrong for this car
-    angle_control = get_steer_ctrl_type(self.CP.flags, 1)
+    # Anything else means the car reads DAS_steeringControlType differently, e.g. 2-bit firmware reads it as NONE
     eps_angle_control = eac_status in ("ACTIVE", "INHIBITED", "FAULT") and not epas_status["EPAS3S_driverlessState"]  # INHIBITED/FAULT are steer faults
     for steer_control_type in cp_loopback.vl_all["DAS_steeringControl"]["DAS_steeringControlType"]:
-      self.eps_mismatch_frames = self.eps_mismatch_frames + 1 if steer_control_type == angle_control and not eps_angle_control else 0
+      self.eps_mismatch_frames = self.eps_mismatch_frames + 1 if steer_control_type == 1 and not eps_angle_control else 0  # ANGLE_CONTROL
     if self.eps_mismatch_frames >= 25 and not self.eps_mismatch:  # 0.5 s at 50 Hz
       carlog.error(f"EPS not in ANGLE_CONTROL: {eac_status=}, driverlessState={epas_status['EPAS3S_driverlessState']}")
       self.eps_mismatch = True
@@ -146,16 +131,8 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    # Only sent by some firmware versions
-    party_messages = [
-      ("DI_autonomyHealth", float('nan')),
-    ]
-    ap_party_messages = [
-      ("DAS_redundantBrakingControl", float('nan')),
-    ]
-
     return {
-      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.party),
-      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], ap_party_messages, CANBUS.autopilot_party),
+      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.party),
+      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.autopilot_party),
       Bus.loopback: CANParser(DBC[CP.carFingerprint][Bus.party], [("DAS_steeringControl", float('nan'))], 128),
     }

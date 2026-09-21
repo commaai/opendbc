@@ -3,8 +3,6 @@
 #include "opendbc/safety/declarations.h"
 
 static bool tesla_longitudinal = false;
-static bool tesla_das_steering_3_bit = false;
-static bool tesla_das_steering_3_bit_seen = false;
 static bool tesla_stock_aeb = false;
 
 // Only rising edges while controls are not allowed are considered for these systems:
@@ -97,15 +95,6 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
   return valid;
 }
 
-static int tesla_get_steer_ctrl_type(const CANPacket_t *msg) {
-  // DAS_steeringControlType is 3 bits (7:5). Legacy firmware only uses the top 2 bits (7:6)
-  int steer_ctrl_type = msg->data[2] >> 5;
-  if (!tesla_das_steering_3_bit) {
-    steer_ctrl_type = msg->data[2] >> 6;
-  }
-  return steer_ctrl_type;
-}
-
 static void tesla_rx_hook(const CANPacket_t *msg) {
 
   // Steering angle: (0.1 * val) - 819.2 in deg.
@@ -187,7 +176,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
 
   // DAS_steeringControl
   if (msg_matches(msg, 0x488U, 2U)) {
-    int steering_control_type = tesla_get_steer_ctrl_type(msg);
+    int steering_control_type = msg->data[2] >> 5;  // DAS_steeringControlType
     bool tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
 
     // Only consider rising edges while controls are not allowed
@@ -198,11 +187,6 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
       tesla_stock_lkas = false;
     }
     tesla_stock_lkas_prev = tesla_stock_lkas_now;
-  }
-
-  // Legacy DAS_steeringControlType encoding on a car with the 3-bit signal requests LANE_KEEP_ASSIST
-  if (tesla_das_steering_3_bit_seen && !tesla_das_steering_3_bit) {
-    controls_allowed = false;
   }
 }
 
@@ -240,7 +224,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((msg->data[0] & 0x7FU) << 8) | msg->data[1];
     int desired_angle = raw_angle_can - 16384;
-    int steer_control_type = tesla_get_steer_ctrl_type(msg);
+    int steer_control_type = msg->data[2] >> 5;  // DAS_steeringControlType
     bool steer_control_enabled = steer_control_type == 1;  // ANGLE_CONTROL
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS, TESLA_STEERING_PARAMS)) {
@@ -308,12 +292,6 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
 static bool tesla_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
-  // DAS_redundantBrakingControl and DI_autonomyHealth are only sent on firmware with the 3-bit DAS_steeringControlType.
-  // Older firmware doesn't send them so they can't be rx checked, but every message on buses 0 and 2 passes through here
-  if (((bus_num == 2) && (addr == 0x489)) || ((bus_num == 0) && (addr == 0x54))) {
-    tesla_das_steering_3_bit_seen = true;
-  }
-
   if (bus_num == 2) {
     if (!tesla_autopark) {
       // APS_eacMonitor
@@ -350,15 +328,12 @@ static safety_config tesla_init(uint16_t param) {
     {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},  // APS_eacMonitor
   };
 
-  const uint16_t TESLA_FLAG_DAS_STEERING_3_BIT = 2;
-  tesla_das_steering_3_bit = GET_FLAG(param, TESLA_FLAG_DAS_STEERING_3_BIT);
-
+  SAFETY_UNUSED(param);
 #ifdef ALLOW_DEBUG
   const uint16_t TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
   tesla_longitudinal = GET_FLAG(param, TESLA_FLAG_LONGITUDINAL_CONTROL);
 #endif
 
-  tesla_das_steering_3_bit_seen = false;
   tesla_stock_aeb = false;
   tesla_stock_lkas = false;
   tesla_stock_lkas_prev = false;

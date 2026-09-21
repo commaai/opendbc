@@ -1,13 +1,5 @@
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
-
-
-def get_steer_ctrl_type(flags: int, ctrl_type: int) -> int:
-  # Legacy firmware only uses the top 2 bits of the 3-bit DAS_steeringControlType
-  # Prevents accidentally sending LANE_KEEP_ASSIST which allows user overriding, but can be unstable and jerks back to target
-  if flags & TeslaFlags.DAS_STEERING_3_BIT:
-    return ctrl_type
-  return ctrl_type << 1
+from opendbc.car.tesla.values import CANBUS, CarControllerParams
 
 
 class TeslaCAN:
@@ -19,7 +11,7 @@ class TeslaCAN:
     values = {
       "DAS_steeringAngleRequest": -angle,
       "DAS_steeringHapticRequest": 0,
-      "DAS_steeringControlType": get_steer_ctrl_type(self.CP.flags, 1 if enabled else 0),  # ANGLE_CONTROL
+      "DAS_steeringControlType": 1 if enabled else 0,  # ANGLE_CONTROL
     }
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)

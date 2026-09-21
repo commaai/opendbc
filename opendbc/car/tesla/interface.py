@@ -32,11 +32,10 @@ class CarInterface(CarInterfaceBase):
 
     # Tesla expanded DAS_steeringControl->DAS_steeringControlType to 3 bits: first in the FSD 14 builds for HW4 around 10-26-2025,
     # then in the other HW4 builds around 03-02-2026, and for HW3 and HW2.5 with 2026.8.6 around 04-03-2026.
+    # The values kept their numbers and 4 = FSD was added, but older firmware only used the top 2 bits, so it isn't supported.
     # - DAS_redundantBrakingControl (0x489) is only sent by HW3/HW4 Autopilot computers on the 3-bit firmware
     # - DI_autonomyHealth (0x054) is sent by the car on the 3-bit firmware, so it also detects HW2.5 vehicles
-    if 0x489 in fingerprint[CANBUS.autopilot_party] or 0x054 in fingerprint[CANBUS.party]:
-      ret.flags |= TeslaFlags.DAS_STEERING_3_BIT.value
-      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.DAS_STEERING_3_BIT.value
+    das_steering_3_bit = 0x489 in fingerprint[CANBUS.autopilot_party] or 0x054 in fingerprint[CANBUS.party]
 
     # Radar support is intended to work for:
     # - Tesla Model 3 vehicles built approximately mid-2017 through early-2021
@@ -51,5 +50,6 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LONG_CONTROL.value
 
     ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
+    ret.dashcamOnly = ret.dashcamOnly or (not das_steering_3_bit and not docs)  # older firmware, the car's software needs to be updated
 
     return ret

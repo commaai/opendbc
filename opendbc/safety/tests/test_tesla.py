@@ -4,8 +4,7 @@ import unittest
 import numpy as np
 
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
-from opendbc.car.tesla.teslacan import get_steer_ctrl_type
-from opendbc.car.tesla.values import CarControllerParams, TeslaSafetyFlags, TeslaFlags
+from opendbc.car.tesla.values import CarControllerParams, TeslaSafetyFlags
 from opendbc.car.tesla.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
@@ -77,8 +76,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
-    flags = TeslaFlags.DAS_STEERING_3_BIT if self.safety.get_current_safety_param() & TeslaSafetyFlags.DAS_STEERING_3_BIT else 0
-    values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": get_steer_ctrl_type(flags, int(state))}
+    values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": int(state)}
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
       self.__class__.cnt_angle_cmd += 1
@@ -266,26 +264,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
       self.assertEqual(self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
 
-  def test_das_steering_3_bit_seen(self):
-    # 3-bit DAS_steeringControlType messages on a car configured for the legacy encoding disallow controls until reset
-    legacy = not self.safety.get_current_safety_param() & TeslaSafetyFlags.DAS_STEERING_3_BIT
-    for bus, addr in ((2, 0x489), (0, 0x054)):
-      self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, self.SAFETY_PARAM)
-      self.safety.set_controls_allowed(True)
-      self.safety.safety_fwd_hook(bus, addr)  # these aren't rx checked, every message passes through the fwd hook
-      self._rx(self._speed_msg(0))
-      self.assertEqual(not legacy, self.safety.get_controls_allowed())
-
-      # stays latched through a cruise engagement
-      self._rx(self._pcm_status_msg(False))
-      self._rx(self._pcm_status_msg(True))
-      self.assertEqual(not legacy, self.safety.get_controls_allowed())
-
   def test_steering_control_type(self):
     # Only angle control is allowed (no LANE_KEEP_ASSIST, EMERGENCY_LANE_KEEP, or FSD)
     self.safety.set_controls_allowed(True)
-    num_steer_control_types = 8 if self.safety.get_current_safety_param() & TeslaSafetyFlags.DAS_STEERING_3_BIT else 4
-    for steer_control_type in range(num_steer_control_types):
+    for steer_control_type in range(8):
       should_tx = steer_control_type in (self.steer_control_types["NONE"],
                                          self.steer_control_types["ANGLE_CONTROL"])
       self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)))
@@ -413,10 +395,6 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
     self.assertFalse(self._tx(no_aeb_msg))
 
 
-class TestTesla3BitStockSafety(TestTeslaStockSafety):
-  SAFETY_PARAM = TeslaSafetyFlags.DAS_STEERING_3_BIT
-
-
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
   SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL
 
@@ -463,10 +441,6 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
     self.assertFalse(self._tx(self._long_control_msg(set_speed=10, accel_limits=(-1.1, -0.6))))
     self.assertFalse(self._tx(self._long_control_msg(set_speed=0, accel_limits=(-0.6, -1.1))))
     self.assertFalse(self._tx(self._long_control_msg(set_speed=0, accel_limits=(-0.1, -0.1))))
-
-
-class TestTesla3BitLongitudinalSafety(TestTeslaLongitudinalSafety):
-  SAFETY_PARAM = TeslaSafetyFlags.LONG_CONTROL | TeslaSafetyFlags.DAS_STEERING_3_BIT
 
 
 class TestTeslaIgnition(unittest.TestCase):

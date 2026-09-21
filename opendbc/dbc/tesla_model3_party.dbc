@@ -551,7 +551,6 @@ BO_ 1861 DI_chassisControl2: 8 XXX
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 
 CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
-CM_ SG_ 1160 DAS_steeringControlType "Newer firmware widens this to 3 bits (byte 2 bits 7:5) with 4 = FSD. There, this reads 1 for LANE_KEEP_ASSIST and 2 for FSD";
 CM_ SG_ 785 leftBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
 CM_ SG_ 785 rightBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
 CM_ SG_ 785 scrollWheelPressed "captures either scroll wheel left, right or down press";
@@ -561,7 +560,7 @@ CM_ BO_ 84 "Appears with the 3-bit DAS_steeringControlType firmware on all Autop
 CM_ BO_ 521 "Sent by HW3/HW4 Autopilot computers, not by HW2.5";
 CM_ BO_ 2047 "Sent on the party bus by HW3/HW4 cars, not seen on HW2.5";
 CM_ SG_ 2047 GTW_dasHw "5 (TESLA_AP4) observed on HW4 cars, not in the source DBC";
-CM_ SG_ 1160 DAS_steeringControlType "Legacy firmware only uses the top 2 bits, so its values read shifted left by 1";
+CM_ SG_ 1160 DAS_steeringControlType "Older firmware only used the top 2 bits, and is not supported";
 CM_ SG_ 880 EPAS3S_driverlessState "Set while the EPS executes an FSD (DAS_steeringControlType 4) request, 3-bit firmware only";
 CM_ SG_ 1861 DI_eepDeliveryBitStatus "Set by the update that brought the 3-bit DAS_steeringControlType on most cars (not all), never set on older firmware";
 VAL_ 545 VCFRONT_uiAudioLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
