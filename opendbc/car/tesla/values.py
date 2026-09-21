@@ -119,7 +119,7 @@ class TeslaFlags(IntFlag):
   MISSING_DAS_SETTINGS = 4
 
   # deprecated flags
-  # old 2-bit FW is dashcammed, so this is always true
+  # old 2-bit FW is now dashcammed
   DAS_STEERING_3_BIT_DEPRECATED = 2
 
 
