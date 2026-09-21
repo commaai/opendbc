@@ -4,7 +4,6 @@ from opendbc.car import Bus, structs
 from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.teslacan import get_steer_ctrl_type
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, TeslaFlags
 
 class CarState(CarStateBase):
@@ -16,11 +15,11 @@ class CarState(CarStateBase):
     self.autopark = False
     self.autopark_prev = False
     self.cruise_enabled_prev = False
-    self.das_steering_3_bit_error_logged = False
-    self.suspected_das_steering_3_bit = False
 
     self.hands_on_level = 0
     self.das_control = None
+    self.eps_mismatch_frames = 0
+    self.eps_mismatch = False
 
   def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
     autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
@@ -34,6 +33,7 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp_party = can_parsers[Bus.party]
     cp_ap_party = can_parsers[Bus.ap_party]
+    cp_loopback = can_parsers[Bus.loopback]
     ret = structs.CarState()
 
     # Vehicle speed
@@ -57,12 +57,12 @@ class CarState(CarStateBase):
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > STEER_THRESHOLD, 5)
 
     eac_status = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacStatus"].get(int(epas_status["EPAS3S_eacStatus"]), None)
-    ret.steerFaultPermanent = eac_status == "EAC_FAULT"
-    ret.steerFaultTemporary = eac_status == "EAC_INHIBITED"
+    ret.steerFaultPermanent = eac_status == "FAULT"
+    ret.steerFaultTemporary = eac_status == "INHIBITED"
 
     # FSD disengages using union of handsOnLevel (slow overrides) and high angle rate faults (fast overrides, high speed)
     eac_error_code = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacErrorCode"].get(int(epas_status["EPAS3S_eacErrorCode"]), None)
-    ret.steeringDisengage = self.hands_on_level >= 3 or (eac_status == "EAC_INHIBITED" and
+    ret.steeringDisengage = self.hands_on_level >= 3 or (eac_status == "INHIBITED" and
                                                          eac_error_code == "EAC_ERROR_HIGH_ANGLE_RATE_SAFETY")
 
     # Cruise state
@@ -105,26 +105,22 @@ class CarState(CarStateBase):
     ret.stockAeb = cp_ap_party.vl["DAS_control"]["DAS_aebEvent"] == 1
 
     # LKAS
-    lkas_ctrl_type = get_steer_ctrl_type(self.CP.flags, 2)
-    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == lkas_ctrl_type  # LANE_KEEP_ASSIST
+    ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
+
+    # The EPS must be in ANGLE_CONTROL while it receives ANGLE_CONTROL from bus 128 (us or forwarded LKA events).
+    # Anything else means the car reads DAS_steeringControlType differently, e.g. 2-bit firmware reads it as NONE
+    eps_angle_control = eac_status in ("ACTIVE", "INHIBITED", "FAULT") and not epas_status["EPAS3S_driverlessState"]  # INHIBITED/FAULT are steer faults
+    for steer_control_type in cp_loopback.vl_all["DAS_steeringControl"]["DAS_steeringControlType"]:
+      self.eps_mismatch_frames = self.eps_mismatch_frames + 1 if steer_control_type == 1 and not eps_angle_control else 0  # ANGLE_CONTROL
+    if self.eps_mismatch_frames >= 25 and not self.eps_mismatch:  # 0.5 s at 50 Hz
+      carlog.error(f"EPS not in ANGLE_CONTROL: {eac_status=}, driverlessState={epas_status['EPAS3S_driverlessState']}")
+      self.eps_mismatch = True
+    ret.steerFaultPermanent = ret.steerFaultPermanent or self.eps_mismatch
 
     # Stock Autosteer should be off (includes FSD)
     # TODO: find for TESLA_MODEL_X and HW2.5 vehicles
     if not (self.CP.flags & TeslaFlags.MISSING_DAS_SETTINGS):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
-
-      # Because we don't have 3-bit detection outside of a set of FW, we should check if this FW is accidentally missing from FSD_14_FW
-      # 1. If in Autosteer or FSD, already caught by invalidLkasSetting
-      # 2. If in TACC and DAS ever sends ANGLE_CONTROL (1), it's actually LANE_KEEP_ASSIST on 3-bit firmware
-      angle_control = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 1  # ANGLE_CONTROL
-      if not ret.invalidLkasSetting and angle_control and not self.CP.flags & TeslaFlags.DAS_STEERING_3_BIT:
-        self.suspected_das_steering_3_bit = True
-
-      if self.suspected_das_steering_3_bit:
-        ret.invalidLkasSetting = True
-        if not self.das_steering_3_bit_error_logged:
-          carlog.error("3-bit DAS_steeringControlType detected, but FW not in FSD_14_FW set")
-          self.das_steering_3_bit_error_logged = True
 
     # Buttons # ToDo: add Gap adjust button
 
@@ -137,5 +133,6 @@ class CarState(CarStateBase):
   def get_can_parsers(CP):
     return {
       Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.party),
-      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.autopilot_party)
+      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.autopilot_party),
+      Bus.loopback: CANParser(DBC[CP.carFingerprint][Bus.party], [("DAS_steeringControl", float('nan'))], 128),
     }
