@@ -2,7 +2,7 @@ from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.tesla.carcontroller import CarController
 from opendbc.car.tesla.carstate import CarState
-from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CANBUS, CAR, DBC, FSD_14_FW, Ecu
+from opendbc.car.tesla.values import TeslaSafetyFlags, TeslaFlags, CANBUS, CAR, DBC
 from opendbc.car.tesla.radar_interface import RadarInterface, RADAR_START_ADDR
 
 
@@ -39,11 +39,12 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LONG_CONTROL.value
 
-    fsd_14 = any(fw.ecu == Ecu.eps and fw.fwVersion in FSD_14_FW.get(candidate, []) for fw in car_fw)
-    if fsd_14:
-      ret.flags |= TeslaFlags.DAS_STEERING_3_BIT.value
-      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.DAS_STEERING_3_BIT.value
+    # Firmware with the 2-bit DAS_steeringControlType isn't supported, these messages are only sent by 3-bit firmware:
+    # - DAS_redundantBrakingControl (0x489) is only sent by HW3/HW4 Autopilot computers
+    # - DI_autonomyHealth (0x054) is sent by the car, so it also covers HW2.5 vehicles
+    das_steering_3_bit = 0x489 in fingerprint[CANBUS.autopilot_party] or 0x054 in fingerprint[CANBUS.party]
 
     ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
+    ret.dashcamOnly = ret.dashcamOnly or (not das_steering_3_bit and not docs)  # the car's software needs to be updated
 
     return ret
