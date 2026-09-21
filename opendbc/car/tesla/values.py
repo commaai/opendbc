@@ -11,7 +11,7 @@ Ecu = CarParams.Ecu
 
 class Footnote(Enum):
   HW_TYPE = CarFootnote(
-    "Model years 2023 and 2024 can have either hardware type, depending on build date and factory. " +
+    "Model year 2019 can have HW2.5 or HW3, and model years 2023 and 2024 can have HW3 or HW4, depending on build date and factory. " +
     "To check which hardware type your vehicle has, look for " +
     "<b>Autopilot computer</b> under <b>Software -> Additional Vehicle Information</b> on your vehicle's touchscreen. </br></br>" +
     "See <a href=\"https://www.notateslaapp.com/news/2173/how-to-check-if-your-tesla-has-hardware-4-ai4-or-hardware-3\">this page</a> for more information.",
@@ -44,6 +44,7 @@ class TeslaPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
     [
+      TeslaCarDocsHW3("Tesla Model 3 (with HW2.5) 2019"),
       TeslaCarDocsHW3("Tesla Model 3 (with HW3) 2019-23"),
       TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024-25"),
     ],
