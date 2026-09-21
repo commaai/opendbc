@@ -41,7 +41,7 @@ class CarInterface(CarInterfaceBase):
 
     # Tesla expanded DAS_steeringControl->DAS_steeringControlType to 3 bits: first in the FSD 14 builds for HW4 around 10-26-2025,
     # then in the other HW4 builds around 03-02-2026, and for HW3 and HW2.5 with 2026.8.6 around 04-03-2026.
-    # The values were just pushed to the right by 1 bit and kept the same definitions, plus 4 = FSD was added.
+    # The values were pushed to the right by 1 bit and kept the same definitions, plus 4 = FSD was added.
     # These messages are only sent by the 3-bit firmware:
     # - HW3/HW4: DAS_redundantBrakingControl (0x489)
     # - HW2.5/HW3/HW4: DI_autonomyHealth (0x054)
