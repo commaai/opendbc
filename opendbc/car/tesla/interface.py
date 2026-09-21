@@ -39,9 +39,12 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LONG_CONTROL.value
 
-    # Firmware with the 2-bit DAS_steeringControlType isn't supported, these messages are only sent by 3-bit firmware:
-    # - DAS_redundantBrakingControl (0x489) is only sent by HW3/HW4 Autopilot computers
-    # - DI_autonomyHealth (0x054) is sent by the car, so it also covers HW2.5 vehicles
+    # Tesla expanded DAS_steeringControl->DAS_steeringControlType to 3 bits: first in the FSD 14 builds for HW4 around 10-26-2025,
+    # then in the other HW4 builds around 03-02-2026, and for HW3 and HW2.5 with 2026.8.6 around 04-03-2026.
+    # The values were just pushed over by 1 bit and kept the same definitions, plus 4 = FSD was added.
+    # These messages are only sent by the 3-bit firmware:
+    # - HW3/HW4: DAS_redundantBrakingControl (0x489)
+    # - HW2.5/HW3/HW4: DI_autonomyHealth (0x054)
     das_steering_3_bit = 0x489 in fingerprint[CANBUS.autopilot_party] or 0x054 in fingerprint[CANBUS.party]
 
     ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
