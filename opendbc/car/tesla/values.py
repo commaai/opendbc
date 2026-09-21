@@ -11,7 +11,7 @@ Ecu = CarParams.Ecu
 
 class Footnote(Enum):
   HW_TYPE = CarFootnote(
-    "Model years 2023 and 2024 can have either hardware type, depending on build date and factory. " +
+    "Model year 2019 can have HW2.5 or HW3, and model years 2023 and 2024 can have HW3 or HW4, depending on build date and factory. " +
     "To check which hardware type your vehicle has, look for " +
     "<b>Autopilot computer</b> under <b>Software -> Additional Vehicle Information</b> on your vehicle's touchscreen. </br></br>" +
     "See <a href=\"https://www.notateslaapp.com/news/2173/how-to-check-if-your-tesla-has-hardware-4-ai4-or-hardware-3\">this page</a> for more information.",
@@ -44,6 +44,7 @@ class TeslaPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
     [
+      TeslaCarDocsHW3("Tesla Model 3 (with HW2.5) 2019"),
       TeslaCarDocsHW3("Tesla Model 3 (with HW3) 2019-23"),
       TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024-25"),
     ],
@@ -74,22 +75,6 @@ FW_QUERY_CONFIG = FwQueryConfig(
     )
   ]
 )
-
-# Cars with this EPS FW have FSD 14 and use TeslaFlags.FSD_14
-FSD_14_FW = {
-  CAR.TESLA_MODEL_3: [
-    b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
-    b'TeMYG4_Main_0.0.0 (78),E4HP015.05.0',
-    b'TeMYG4_Main_0.0.0 (77),E4H015.04.5',
-    b'TeMYG4_Main_0.0.0 (78),E4H015.05.0',
-  ],
-  CAR.TESLA_MODEL_Y: [
-    b'TeMYG4_Legacy3Y_0.0.0 (6),Y4003.04.0',
-    b'TeMYG4_Main_0.0.0 (77),Y4003.05.4',
-    b'TeMYG4_Main_0.0.0 (78),Y4003.06.0',
-    b'TeMYG4_Main_0.0.0 (87),Y4003.09.3',
-  ]
-}
 
 
 class CANBUS:
@@ -125,13 +110,18 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
-  FSD_14 = 2
+
+  # deprecated flags
+  DAS_STEERING_3_BIT_DEPRECATED = 2
 
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
-  FSD_14 = 2
   MISSING_DAS_SETTINGS = 4
+
+  # deprecated flags
+  # old 2-bit FW is now dashcammed
+  DAS_STEERING_3_BIT_DEPRECATED = 2
 
 
 DBC = CAR.create_dbc_map()
