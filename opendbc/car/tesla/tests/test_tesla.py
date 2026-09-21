@@ -47,6 +47,7 @@ PLATFORM_TO_CAR = {
   b'X': CAR.TESLA_MODEL_X,
 }
 
+
 class TestTeslaFingerprint(unittest.TestCase):
   def test_fw_platform_code(self):
     # Every EPS FW must parse and its platform letter must match the car it's filed under.
