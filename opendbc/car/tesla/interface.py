@@ -47,7 +47,7 @@ class CarInterface(CarInterfaceBase):
     # - HW2.5/HW3/HW4: DI_autonomyHealth (0x054)
     das_steering_3_bit = 0x489 in fingerprint[CANBUS.autopilot_party] or 0x054 in fingerprint[CANBUS.party]
 
-    ret.dashcamOnly = candidate in (CAR.TESLA_MODEL_X,)  # dashcam only, pending find invalidLkasSetting signal
-    ret.dashcamOnly = ret.dashcamOnly or (not das_steering_3_bit and not docs)  # the car's software needs to be updated
+    ret.dashcamOnly = (candidate in (CAR.TESLA_MODEL_X,) or  # dashcam only, pending find invalidLkasSetting signal
+                       (not das_steering_3_bit and not docs))  # the car's software needs to be updated
 
     return ret
