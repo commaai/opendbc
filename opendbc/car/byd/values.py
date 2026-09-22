@@ -101,7 +101,7 @@ class BydPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   BYD_ATTO_3 = BydPlatformConfig(
     [BydCarDocs("BYD Atto 3 2022-25")],
-    CarSpecs(wheelbase=2.72, steerRatio=14.8),
+    CarSpecs(wheelbase=2.72, steerRatio=17.5),
     wmis={WMI.BYD_AUTO},
     years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024, ModelYear.S_2025},
   )
