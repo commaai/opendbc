@@ -28,6 +28,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerControlType = structs.CarParams.SteerControlType.torque
     ret.radarUnavailable = True
 
+    # TODO is GEN2 the same?
     ret.alphaLongitudinalAvailable = docs or not (ret.flags & RivianFlags.GEN2)
     if alpha_long and ret.alphaLongitudinalAvailable:
       ret.openpilotLongitudinalControl = True
