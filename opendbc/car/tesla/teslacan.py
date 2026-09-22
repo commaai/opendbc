@@ -1,5 +1,14 @@
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.tesla.values import CANBUS, CarControllerParams
+from opendbc.car.tesla.values import CANBUS, CarControllerParams, TeslaFlags
+
+
+def get_steer_ctrl_type(flags: int, ctrl_type: int) -> int:
+  # On 3-bit firmware, 1 and 2 in the 2-bit signal are LANE_KEEP_ASSIST and FSD (see TeslaFlags.DAS_STEERING_3_BIT),
+  # so openpilot steers with FSD here, and stock LANE_KEEP_ASSIST reads as 1
+  if flags & TeslaFlags.DAS_STEERING_3_BIT:
+    return {1: 2, 2: 1}.get(ctrl_type, ctrl_type)
+  else:
+    return ctrl_type
 
 
 class TeslaCAN:
@@ -11,7 +20,7 @@ class TeslaCAN:
     values = {
       "DAS_steeringAngleRequest": -angle,
       "DAS_steeringHapticRequest": 0,
-      "DAS_steeringControlType": 1 if enabled else 0,  # ANGLE_CONTROL
+      "DAS_steeringControlType": get_steer_ctrl_type(self.CP.flags, 1 if enabled else 0),
     }
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
