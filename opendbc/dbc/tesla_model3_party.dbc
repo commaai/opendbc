@@ -36,6 +36,22 @@ BS_:
 BU_: CH DIPF DIPR ETH FC HVI HVS PARTY SDCV VEH VIRT
 
 
+BO_ 84 DI_autonomyHealth: 8 XXX
+ SG_ DI_ah_vehicleSpeedLimit : 0|9@1+ (1,0) [0|511] "" XXX
+ SG_ DI_ah_vehicleReverseSpeedLimit : 9|5@1+ (1,0) [0|31] "" XXX
+ SG_ DI_autonomyBehavior : 14|2@1+ (1,0) [0|3] "" XXX
+ SG_ DI_ah_vehicleNoGradeAccelMax : 16|8@1+ (0.04,0) [0|10.2] "" XXX
+ SG_ DI_ah_vehicleNoGradeDecelMax : 24|9@1+ (0.04,0) [0|20.44] "" XXX
+ SG_ DI_ah_timeToNoPropulsion : 33|12@1+ (1,0) [0|4095] "" XXX
+ SG_ DI_ah_dGearAvailable : 45|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_ah_rGearAvailable : 46|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_ah_pGearAvailable : 47|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_loncDegradedAvailable : 48|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_loncDegradedReason : 49|4@1+ (1,0) [0|15] "" XXX
+ SG_ DI_epbUnavailable : 53|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_opdAvailableForPedalInterface : 54|1@1+ (1,0) [0|1] "" XXX
+ SG_ DI_loncInPreFaultStopping : 55|1@1+ (1,0) [0|1] "" XXX
+
 BO_ 905 DAS_status2: 8 PARTY
  SG_ DAS_status2Checksum : 56|8@1+ (1,0) [0|255] ""  aps
  SG_ DAS_status2Counter : 52|4@1+ (1,0) [0|15] ""  aps
@@ -204,9 +220,21 @@ BO_ 605 DAS_road: 6 XXX
 BO_ 1160 DAS_steeringControl: 4 PARTY
  SG_ DAS_steeringControlChecksum : 24|8@1+ (1,0) [0|255] ""  aps
  SG_ DAS_steeringControlCounter : 16|4@1+ (1,0) [0|15] ""  aps
- SG_ DAS_steeringControlType : 23|2@0+ (1,0) [0|3] ""  aps
+ SG_ DAS_steeringControlType : 23|3@0+ (1,0) [0|7] ""  aps
  SG_ DAS_steeringAngleRequest : 6|15@0+ (0.1,-1638.35) [-1638.35|1638.35] "deg"  aps
  SG_ DAS_steeringHapticRequest : 7|1@0+ (1,0) [0|1] ""  aps
+
+BO_ 1161 DAS_redundantBrakingControl: 8 XXX
+ SG_ DAS_redundantBrakingControlChecksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ DAS_redundantBrakingControlCounter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ DAS_useDasFallbackBrakeCommands : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ DAS_brakeTorqueCommand : 13|13@1+ (3,0) [0|24573] "" XXX
+ SG_ DAS_brakeTorqueRequestActive : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ DAS_miaBrakeTorqueCommand : 27|13@1+ (3,0) [0|24573] "" XXX
+ SG_ DAS_preAbbaBrakeTorqueDebug : 40|13@1+ (3,0) [0|24573] "" XXX
+ SG_ DAS_abbaStateDebug : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ DAS_abbaESPMiaBit : 60|1@1+ (1,0) [0|1] "" XXX
+ SG_ DAS_abbaLongStabilityIsUnavailableBit : 61|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 297 SCCM_steeringAngleSensor: 8 PARTY
  SG_ SCCM_steeringAngleSensorReservd3 : 56|8@1+ (1,0) [0|255] ""  X
@@ -320,12 +348,15 @@ BO_ 325 ESP_status: 8 PARTY
 
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 
+CM_ BO_ 84 "Appears with the 3-bit DAS_steeringControlType firmware on all Autopilot hardware, including HW2.5";
 CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
-CM_ SG_ 1160 DAS_steeringControlType "Newer firmware widens this to 3 bits (byte 2 bits 7:5) with 4 = FSD. There, this reads 1 for LANE_KEEP_ASSIST and 2 for FSD";
+CM_ SG_ 1160 DAS_steeringControlType "Older firmware only used the top 2 bits (bits 7:6), and is not supported";
+CM_ BO_ 1161 "Sent by HW3/HW4 Autopilot computers only on firmware with the 3-bit DAS_steeringControlType (not by HW2.5)";
 CM_ SG_ 785 leftBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
 CM_ SG_ 785 rightBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
 CM_ SG_ 785 scrollWheelPressed "captures either scroll wheel left, right or down press";
 
+VAL_ 84 DI_ah_vehicleSpeedLimit 511 "SNA" ;
 VAL_ 545 VCFRONT_uiAudioLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_uiHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_vcrightHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
@@ -427,7 +458,7 @@ VAL_ 599 DI_uiSpeedUnits 0 "DI_SPEED_MPH" 1 "DI_SPEED_KPH" ;
 VAL_ 599 DI_uiSpeed 255 "DI_UI_SPEED_SNA" ;
 VAL_ 599 DI_vehicleSpeed 4095 "SNA" ;
 VAL_ 637 APS_eacAllow 0 "INHIBIT" 1 "ALLOW" 2 "RESERVED" 3 "SNA";
-VAL_ 1160 DAS_steeringControlType 2 "LANE_KEEP_ASSIST" 0 "NONE" 1 "ANGLE_CONTROL" 3 "EMERGENCY_LANE_KEEP" ;
+VAL_ 1160 DAS_steeringControlType 2 "LANE_KEEP_ASSIST" 0 "NONE" 1 "ANGLE_CONTROL" 3 "EMERGENCY_LANE_KEEP" 4 "FSD" ;
 VAL_ 1160 DAS_steeringAngleRequest 16384 "ZERO_ANGLE" ;
 VAL_ 297 SCCM_steeringAngleValidity 3 "SNA" 2 "INIT" 0 "INVALID" 1 "VALID" ;
 VAL_ 297 SCCM_steeringAngleSensorStatus 0 "OK" 1 "INIT" 2 "ERROR" 3 "ERROR_INIT" ;

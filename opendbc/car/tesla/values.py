@@ -76,22 +76,6 @@ FW_QUERY_CONFIG = FwQueryConfig(
   ]
 )
 
-# Cars with this EPS FW have the 3-bit DAS_steeringControlType and use TeslaFlags.DAS_STEERING_3_BIT
-FSD_14_FW = {
-  CAR.TESLA_MODEL_3: [
-    b'TeMYG4_Main_0.0.0 (77),E4HP015.04.5',
-    b'TeMYG4_Main_0.0.0 (78),E4HP015.05.0',
-    b'TeMYG4_Main_0.0.0 (77),E4H015.04.5',
-    b'TeMYG4_Main_0.0.0 (78),E4H015.05.0',
-  ],
-  CAR.TESLA_MODEL_Y: [
-    b'TeMYG4_Legacy3Y_0.0.0 (6),Y4003.04.0',
-    b'TeMYG4_Main_0.0.0 (77),Y4003.05.4',
-    b'TeMYG4_Main_0.0.0 (78),Y4003.06.0',
-    b'TeMYG4_Main_0.0.0 (87),Y4003.09.3',
-  ]
-}
-
 
 class CANBUS:
   party = 0
@@ -126,17 +110,18 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
-  DAS_STEERING_3_BIT = 2
+
+  # deprecated flags
+  DAS_STEERING_3_BIT_DEPRECATED = 2
 
 
 class TeslaFlags(IntFlag):
   LONG_CONTROL = 1
-  # Newer firmware widened DAS_steeringControlType from 2 to 3 bits (byte 2 bits 7:6 -> 7:5), first in the FSD 14 builds,
-  # then in all builds from 2026.8.6. The values kept their numbers (0 NONE, 1 ANGLE_CONTROL, 2 LANE_KEEP_ASSIST,
-  # 3 EMERGENCY_LANE_KEEP) and 4 FSD was added. The DBC still reads the top 2 bits, which on 3-bit firmware
-  # are 1 for LANE_KEEP_ASSIST (0b010) and 2 for FSD (0b100)
-  DAS_STEERING_3_BIT = 2
   MISSING_DAS_SETTINGS = 4
+
+  # deprecated flags
+  # old 2-bit FW is now dashcammed
+  DAS_STEERING_3_BIT_DEPRECATED = 2
 
 
 DBC = CAR.create_dbc_map()
