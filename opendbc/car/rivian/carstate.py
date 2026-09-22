@@ -1,7 +1,7 @@
 import copy
 from opendbc.can import CANParser
 from opendbc.car import Bus, structs
-from opendbc.car.interfaces import CarStateBase, V_CRUISE_MAX
+from opendbc.car.interfaces import CarStateBase
 from opendbc.car.rivian.values import DBC, GEAR_MAP, RivianFlags
 from opendbc.car.common.conversions import Conversions as CV
 
@@ -11,6 +11,7 @@ GearShifter = structs.CarState.GearShifter
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
+    self.last_speed = 30
 
     self.acm_lka_hba_cmd: dict | None = None
     self.sccm_wheel_touch: dict | None = None
@@ -44,9 +45,13 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = cp.vl["EPAS_AdasStatus"]["EPAS_EacErrorCode"] != 0
 
     # Cruise state
+    speed = min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
+    self.last_speed = speed if speed != 0 else self.last_speed
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] == 1
-    # Set speed and wheel buttons are unavailable with the standard harness.
-    ret.cruiseState.speed = V_CRUISE_MAX * CV.KPH_TO_MS if self.CP.openpilotLongitudinalControl else -1
+    # TODO: find cruise set speed on CAN
+    ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
+    if not self.CP.openpilotLongitudinalControl:
+      ret.cruiseState.speed = -1
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasVehicleHoldStatus"] == 1
 
