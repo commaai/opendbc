@@ -98,11 +98,11 @@ static bool fca_giorgio_tx_hook(const CANPacket_t *msg) {
   // lateral limits
   const TorqueSteeringLimits FCA_GIORGIO_STEERING_LIMITS = {
     .max_torque = 300,
-    .max_rt_delta = 150,
-    .max_rate_up = 4,
-    .max_rate_down = 4,
+    .max_rt_delta = 75,
+    .max_rate_up = 2,
+    .max_rate_down = 2,
     .driver_torque_allowance = 80,
-    .driver_torque_multiplier = 3,
+    .driver_torque_multiplier = 2,
     .type = TorqueDriverLimited,
   };
 

@@ -44,7 +44,8 @@ class FcaGiorgioPlatformConfig(PlatformConfig):
 @dataclass(frozen=True, kw_only=True)
 class FcaGiorgioCarSpecs(CarSpecs):
   centerToFrontRatio: float = 0.45
-  steerRatio: float = 14.2
+  steerRatio: float = 16
+  # minSteerSpeed: float = 13.8 # m/s
 
 
 @dataclass
