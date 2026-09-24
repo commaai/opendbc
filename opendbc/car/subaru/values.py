@@ -221,7 +221,7 @@ class CAR(Platforms):
   )
   SUBARU_CROSSTREK_2025 = SubaruGen2PlatformConfig(
     [SubaruCarDocs("Subaru Crosstrek 2025", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
-    CarSpecs(mass=1529, wheelbase=2.67, steerRatio=17),
+    CarSpecs(mass=1529, wheelbase=2.67, steerRatio=13),
     flags=SubaruFlags.LKAS_ANGLE,
   )
 
