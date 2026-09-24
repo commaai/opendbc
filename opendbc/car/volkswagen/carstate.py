@@ -97,7 +97,7 @@ class CarState(CarStateBase):
                         pt_cp.vl["Gateway_72"]["ZV_HBFS_offen"],
                         pt_cp.vl["Gateway_72"]["ZV_HD_offen"]])
 
-    if self.CP.enableBsm:
+    if self.CP.flags & VolkswagenFlags.HAS_BSM:
       # Infostufe: BSM LED on, Warnung: BSM LED flashing
       ret.leftBlindspot = bool(ext_cp.vl["SWA_01"]["SWA_Infostufe_SWA_li"]) or bool(ext_cp.vl["SWA_01"]["SWA_Warnung_SWA_li"])
       ret.rightBlindspot = bool(ext_cp.vl["SWA_01"]["SWA_Infostufe_SWA_re"]) or bool(ext_cp.vl["SWA_01"]["SWA_Warnung_SWA_re"])
@@ -188,7 +188,7 @@ class CarState(CarStateBase):
 
     # Consume blind-spot monitoring info/warning LED states, if available.
     # Infostufe: BSM LED on, Warnung: BSM LED flashing
-    if self.CP.enableBsm:
+    if self.CP.flags & VolkswagenFlags.HAS_BSM:
       ret.leftBlindspot = bool(ext_cp.vl["SWA_1"]["SWA_Infostufe_SWA_li"]) or bool(ext_cp.vl["SWA_1"]["SWA_Warnung_SWA_li"])
       ret.rightBlindspot = bool(ext_cp.vl["SWA_1"]["SWA_Infostufe_SWA_re"]) or bool(ext_cp.vl["SWA_1"]["SWA_Warnung_SWA_re"])
 
@@ -302,7 +302,7 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(240, pt_cp.vl["SMLS_01"]["BH_Blinker_li"],
                                                                             pt_cp.vl["SMLS_01"]["BH_Blinker_re"])
 
-    if self.CP.enableBsm:
+    if self.CP.flags & VolkswagenFlags.HAS_BSM:
       bsm_cp = pt_cp if self.CP.flags & VolkswagenFlags.MEB_GEN2 else ext_cp
       ret.leftBlindspot = (bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Driver"]) or
                            bool(bsm_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Driver"]))
@@ -359,7 +359,7 @@ class CarState(CarStateBase):
 
     # Consume blind-spot monitoring info/warning LED states, if available.
     # Infostufe: BSM LED on, Warnung: BSM LED flashing
-    if self.CP.enableBsm:
+    if self.CP.flags & VolkswagenFlags.HAS_BSM:
       ret.leftBlindspot = bool(ext_cp.vl["SWA_01"]["SWA_Infostufe_SWA_li"]) or bool(ext_cp.vl["SWA_01"]["SWA_Warnung_SWA_li"])
       ret.rightBlindspot = bool(ext_cp.vl["SWA_01"]["SWA_Infostufe_SWA_re"]) or bool(ext_cp.vl["SWA_01"]["SWA_Warnung_SWA_re"])
 
