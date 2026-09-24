@@ -165,6 +165,9 @@ BO_ 814 ACC_CMD: 8 ADAS_ECU
  SG_ SET_ME_XF : 55|4@0+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
+BO_ 815 PCW_ADAS: 8 ADAS_ECU
+ SG_ PCW_STATE : 16|8@1+ (1,0) [0|255] "" MCU
+
 BO_ 834 PEDAL: 8 VCU
  SG_ GAS_PEDAL : 0|8@1+ (0.01,0) [0|2.55] "" MCU
  SG_ BRAKE_PEDAL : 8|8@1+ (0.01,0) [0|2.55] "" MCU
@@ -194,8 +197,8 @@ BO_ 1048 BSD_RADAR: 8 BSD
  SG_ LEFT_APPROACH : 9|2@0+ (1,0) [0|3] "" MCU,ADAS_ECU
  SG_ RIGHT_APPROACH : 11|2@0+ (1,0) [0|3] "" MCU,ADAS_ECU
  SG_ APPROACH : 17|1@0+ (1,0) [0|1] "" MCU,ADAS_ECU
- SG_ RCTA_LEFT : 21|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
- SG_ RCTA_LEFT_2 : 28|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
+ SG_ RCW : 21|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
+ SG_ RCW_2 : 28|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
  SG_ RCTA_RIGHT : 19|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
  SG_ RCTA_RIGHT_2 : 26|1@1+ (1,0) [0|1] "" MCU,ADAS_ECU
 
@@ -222,11 +225,13 @@ CM_ SG_ 790 SET_ME_8 "Unnamed bits 8-9. Named so the packer keeps the camera val
 CM_ SG_ 790 SET_ME_15 "Was HMA_ON_OFF. Always 0. Packer keeps camera values.";
 CM_ SG_ 790 SET_ME_32 "Unnamed bits 32-33. Named so the packer keeps the camera values.";
 CM_ SG_ 790 SET_ME_50 "Unnamed bits 50-51. Named so the packer keeps the camera values.";
-CM_ BO_ 1048 "BSD / RCTA. LEFT/RIGHT_APPROACH are adjacent BSM nibbles. RCTA extra bits are a mirrored pair. Observe only.";
-CM_ SG_ 1048 RCTA_LEFT "Byte 2 bit 5. Rear-left HUD. Observe only.";
-CM_ SG_ 1048 RCTA_LEFT_2 "Byte 3 bit 4. Travels with RCTA_LEFT. Observe only.";
-CM_ SG_ 1048 RCTA_RIGHT "Byte 2 bit 3. Nibble mirror of RCTA_LEFT. Set in reverse. Observe only.";
-CM_ SG_ 1048 RCTA_RIGHT_2 "Byte 3 bit 2. Nibble mirror of RCTA_LEFT_2. Not paired with RCTA_RIGHT. Observe only.";
+CM_ BO_ 1048 "BSD / RCW / RCTA. LEFT/RIGHT_APPROACH are the BSM side. RCW HUD+chime is side-agnostic; the side is the approach nibble. RCTA_RIGHT is reverse-only. Observe only.";
+CM_ SG_ 1048 RCW "Byte 2 bit 5. HUD+chime. Observe only.";
+CM_ SG_ 1048 RCW_2 "Byte 3 bit 4. Travels with RCW. Observe only.";
+CM_ SG_ 1048 RCTA_RIGHT "Byte 2 bit 3. Set in reverse. Not right RCW. Observe only.";
+CM_ SG_ 1048 RCTA_RIGHT_2 "Byte 3 bit 2. Not paired with RCTA_RIGHT. Observe only.";
+CM_ BO_ 815 "Predictive Collision Warning from camera. Byte 2 0x36 is pre-warning. Observe only.";
+CM_ SG_ 815 PCW_STATE "Byte 2. 0x02 idle, 0x36 pre-warning.";
 CM_ BO_ 803 "Charging session, 10 Hz. CHARGE_SOC is 0xFF outside a session. CHARGE_UNKNOWN_12BIT reads 0xFFE unplugged, 500 plugged idle, 583-778 during DC charging; scale not established.";
 CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state).";
 CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active.";
@@ -247,6 +252,7 @@ VAL_ 790 LDSW_TYPE 0 "VIBRATE" 1 "SOUND" 2 "ALL";
 VAL_ 803 CHARGE_STATE 0 "IDLE" 2 "PREPARING" 3 "CHARGING" 4 "FINISHING";
 VAL_ 813 SET_DISTANCE 4 "4bar" 3 "3bar" 2 "2bar" 1 "1bar";
 VAL_ 813 ACC_STATE 0 "OFF" 2 "ACC_ON" 3 "ACC_ACTIVE" 5 "FORCE_ACCEL" 7 "ERROR";
+VAL_ 815 PCW_STATE 2 "Idle" 54 "PreWarn";
 VAL_ 1031 LOCK_STATE 170 "LOCKED" 85 "UNLOCKED";
 VAL_ 1050 ROOF_CHANNEL 85 "IDLE" 149 "SHADE" 165 "ROOF";
 VAL_ 1050 ROOF_PHASE 9 "HELD" 10 "ROOF_VENTING" 11 "ROOF_OPENING" 12 "ROOF_CLOSING" 17 "SHADE_OPENING" 25 "SHADE_CLOSING";
