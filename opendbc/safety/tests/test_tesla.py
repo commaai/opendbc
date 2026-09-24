@@ -225,8 +225,8 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
           self.assertFalse(self.safety.get_steering_disengage_prev())
 
-  def test_autopark_summon_while_enabled(self):
-    # We should not respect Autopark that activates while controls are allowed
+  def test_summon_while_enabled(self):
+    # We should not respect Summon that activates while controls are allowed
     self._rx(self._pcm_status_msg(True, 0))
 
     self._rx(self._pcm_status_msg(True, self.autopark_states["SELFPARK_STARTED"]))
@@ -234,29 +234,29 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
     self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
 
-    # We should still not respect Autopark if we disengage cruise
+    # We should still not respect Summon if we disengage cruise
     self._rx(self._pcm_status_msg(False, self.autopark_states["SELFPARK_STARTED"]))
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
     self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
 
-  def test_autopark_summon_behavior(self):
+  def test_summon_behavior(self):
     for autopark_state in range(16):
       self._rx(self._pcm_status_msg(False, 0))
 
-      # We shouldn't allow controls if Autopark is an active state
-      autopark_active = autopark_state in self.active_autopark_states
+      # We shouldn't allow controls if Summon is an active state
+      summon_active = autopark_state in self.active_autopark_states
       self._rx(self._pcm_status_msg(False, autopark_state))
       self._rx(self._pcm_status_msg(True, autopark_state))
-      self.assertNotEqual(autopark_active, self.safety.get_controls_allowed())
+      self.assertNotEqual(summon_active, self.safety.get_controls_allowed())
 
       # We should also start blocking all inactive/active openpilot msgs
-      self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, False)))
-      self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, True)))
-      self.assertNotEqual(autopark_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
-      self.assertNotEqual(autopark_active or not self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
+      self.assertNotEqual(summon_active, self._tx(self._angle_cmd_msg(0, False)))
+      self.assertNotEqual(summon_active, self._tx(self._angle_cmd_msg(0, True)))
+      self.assertNotEqual(summon_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+      self.assertNotEqual(summon_active or not self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
 
-      # Regain controls when Autopark disables
+      # Regain controls when Summon disables
       self._rx(self._pcm_status_msg(True, 0))
       self.assertTrue(self.safety.get_controls_allowed())
       self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
@@ -272,21 +272,34 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
                                          self.steer_control_types["ANGLE_CONTROL"])
       self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)))
 
-  def test_stock_lkas_passthrough(self):
-    # TODO: make these generic passthrough tests
-    no_lkas_msg = self._angle_cmd_msg(0, state=False)
-    no_lkas_msg_cam = self._angle_cmd_msg(0, state=True, bus=2)
-    lkas_msg_cam = self._angle_cmd_msg(0, state=self.steer_control_types['LANE_KEEP_ASSIST'], bus=2)
+  def test_stock_steering_control_passthrough(self):
+    no_steer_msg = self._angle_cmd_msg(0, state=False)
 
-    # stock system sends no LKAS -> no forwarding, and OP is allowed to TX
-    self.assertEqual(1, self._rx(no_lkas_msg_cam))
-    self.assertEqual(-1, self.safety.safety_fwd_hook(2, no_lkas_msg_cam.addr))
-    self.assertTrue(self._tx(no_lkas_msg))
+    for steer_control_type in range(8):
+      # stock system sends no steering control -> no forwarding, and OP is allowed to TX
+      self.assertEqual(1, self._rx(self._angle_cmd_msg(0, state=self.steer_control_types["NONE"], bus=2)))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+      self.assertTrue(self._tx(no_steer_msg))
 
-    # stock system sends LKAS -> forwarding, and OP is not allowed to TX
-    self.assertEqual(1, self._rx(lkas_msg_cam))
-    self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
-    self.assertFalse(self._tx(no_lkas_msg))
+      # stock system sends any steering control (LKAS, emergency LKAS, Autopark) -> forwarding, and OP is not allowed to TX
+      stock_steering = steer_control_type != self.steer_control_types["NONE"]
+      self.assertEqual(1, self._rx(self._angle_cmd_msg(0, state=steer_control_type, bus=2)))
+      self.assertEqual(0 if stock_steering else -1, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+      self.assertEqual(not stock_steering, self._tx(no_steer_msg))
+
+  def test_stock_steering_control_while_enabled(self):
+    # We should not respect stock steering control that activates while controls are allowed
+    self.safety.set_controls_allowed(True)
+    self._rx(self._angle_cmd_msg(0, state=self.steer_control_types["NONE"], bus=2))
+    self._rx(self._angle_cmd_msg(0, state=self.steer_control_types["ANGLE_CONTROL"], bus=2))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+    # We should still not respect it after controls are disallowed, until a new rising edge
+    self.safety.set_controls_allowed(False)
+    self._rx(self._angle_cmd_msg(0, state=self.steer_control_types["ANGLE_CONTROL"], bus=2))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
 
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
