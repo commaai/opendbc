@@ -37,7 +37,6 @@ non_tested_cars = [
   TOYOTA.TOYOTA_RAV4H,
 
   # These are on the 2-bit DAS_steeringControlType firmware, which is dashcam only, need new routes
-  TESLA.TESLA_MODEL_3,
   TESLA.TESLA_MODEL_X,
 
 ]
@@ -359,6 +358,7 @@ routes = [
   CarTestRoute("bc095dc92e101734/000000db--ee9fe46e57", RIVIAN.RIVIAN_R1),
   CarTestRoute("c70d59e4150956fc/0000006e--48bfbfda01", RIVIAN.RIVIAN_R1), # GEN2
 
+  CarTestRoute("79d0f04c82980004/00000003--fb0b5d9cfc", TESLA.TESLA_MODEL_3), # HW4 2025
   CarTestRoute("aebd8f1d4ea16066/000002d8--5850d3ea5c", TESLA.TESLA_MODEL_Y), # openpilot longitudinal
 
   CarTestRoute("5d61e2f6e1f247f3/00000054--d3dfb01b34", MG.MG_5_EV),
