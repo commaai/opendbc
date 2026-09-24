@@ -109,29 +109,55 @@ def _decode_bsd(dat: bytes) -> dict:
   return dict(cp.vl["BSD_RADAR"])
 
 
-class TestBydRcta(unittest.TestCase):
-  def test_rcta_prefix_not_bsm(self):
+def _decode_pcw(dat: bytes) -> dict:
+  cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("PCW_ADAS", 0)], 0)
+  cp.update([(0, [(0x32F, dat, 0)])])
+  return dict(cp.vl["PCW_ADAS"])
+
+
+class TestBydRcw(unittest.TestCase):
+  def test_rcw_side_agnostic_not_bsm(self):
     idle = _decode_bsd(bytes.fromhex("fd8156c0f5c81f8c"))
-    self.assertEqual(idle["RCTA_LEFT"], 0)
-    self.assertEqual(idle["RCTA_LEFT_2"], 0)
+    self.assertEqual(idle["RCW"], 0)
+    self.assertEqual(idle["RCW_2"], 0)
     self.assertEqual(idle["RCTA_RIGHT"], 0)
     self.assertEqual(idle["RCTA_RIGHT_2"], 0)
-    rcta = _decode_bsd(bytes.fromhex("fd8166d0f5c81f8c"))
-    self.assertEqual(rcta["RCTA_LEFT"], 1)
-    self.assertEqual(rcta["RCTA_LEFT_2"], 1)
-    self.assertEqual(rcta["RCTA_RIGHT"], 0)
+    # left HUD+chime
+    left = _decode_bsd(bytes.fromhex("fd8166d0f5c81f8c"))
+    self.assertEqual(left["RCW"], 1)
+    self.assertEqual(left["RCW_2"], 1)
+    self.assertEqual(left["RCTA_RIGHT"], 0)
+    self.assertNotEqual(left["LEFT_APPROACH"], 0)
+    self.assertEqual(left["RIGHT_APPROACH"], 0)
+    # right HUD+chime (XOR vs left is only byte 1)
+    right_rcw = _decode_bsd(bytes.fromhex("fd8466d0f5c81f8c"))
+    self.assertEqual(right_rcw["RCW"], 1)
+    self.assertEqual(right_rcw["RCW_2"], 1)
+    self.assertEqual(right_rcw["RCTA_RIGHT"], 0)
+    self.assertEqual(right_rcw["LEFT_APPROACH"], 0)
+    self.assertNotEqual(right_rcw["RIGHT_APPROACH"], 0)
     bsm = _decode_bsd(bytes.fromhex("fd8456c0f5c81f8c"))
-    self.assertEqual(bsm["RCTA_LEFT"], 0)
-    self.assertEqual(bsm["RCTA_LEFT_2"], 0)
+    self.assertEqual(bsm["RCW"], 0)
+    self.assertEqual(bsm["RCW_2"], 0)
+    self.assertNotEqual(bsm["RIGHT_APPROACH"], 0)
+    # reverse-only RCTA_RIGHT
     right = _decode_bsd(bytes.fromhex("fd9059c0f5c81f8c"))
     self.assertEqual(right["RCTA_RIGHT"], 1)
     self.assertEqual(right["RCTA_RIGHT_2"], 0)
-    self.assertEqual(right["RCTA_LEFT"], 0)
+    self.assertEqual(right["RCW"], 0)
     sib = _decode_bsd(bytes.fromhex("fda059c0f5c81f8c"))
     self.assertEqual(sib["RCTA_RIGHT"], 1)
     park = _decode_bsd(bytes.fromhex("fd8095c4f5c81f8c"))
     self.assertEqual(park["RCTA_RIGHT"], 0)
     self.assertEqual(park["RCTA_RIGHT_2"], 1)
+
+
+class TestBydPcw(unittest.TestCase):
+  def test_pcw_prewarn_byte2(self):
+    idle = _decode_pcw(bytes.fromhex("0580020ce57f0000"))
+    self.assertEqual(idle["PCW_STATE"], 0x02)
+    warn = _decode_pcw(bytes.fromhex("0580360ce57f0000"))
+    self.assertEqual(warn["PCW_STATE"], 0x36)
 
 
 def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_btn_rising=False, eps_standby=False,
