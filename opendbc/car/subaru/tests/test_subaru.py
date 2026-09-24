@@ -29,17 +29,52 @@ class TestSubaruAngleLimits(unittest.TestCase):
     self.limits = CarControllerParams(cp)
     self.vm = VehicleModel(cp)
 
-  def test_low_speed_deadband(self):
-    for speed, desired, expected in ((3.9, 2.49, 0.0), (3.9, 2.5, 2.5), (3.9, -2.49, 0.0), (3.9, -2.5, -2.5), (4.0, 0.5, 0.5)):
-      with self.subTest(speed=speed, desired=desired):
-        cp = CarInterface.get_non_essential_params(CAR.SUBARU_CROSSTREK_2025)
-        ci = CarInterface(cp)
-        ci.update([])
-        ci.CS.out = structs.CarState(vEgo=speed, vEgoRaw=speed)
+  def make_angle_controller(self, speed):
+    cp = CarInterface.get_non_essential_params(CAR.SUBARU_CROSSTREK_2025)
+    ci = CarInterface(cp)
+    ci.update([])
+    ci.CS.out = structs.CarState(vEgo=speed, vEgoRaw=speed)
+    return ci
+
+  def test_angle_filter_speed_schedule(self):
+    for speed, tau in ((0.0, 0.3), (5.0, 0.3), (7.5, 0.2), (10.0, 0.1), (15.0, 0.05), (20.0, 0.0), (25.0, 0.0)):
+      with self.subTest(speed=speed):
+        ci = self.make_angle_controller(speed)
+        cc = structs.CarControl(latActive=True)
+        cc.actuators.steeringAngleDeg = 0.1
+        actuators, _ = ci.CC.update(cc.as_reader(), ci.CS, 0)
+        self.assertAlmostEqual(actuators.steeringAngleDeg, 0.1 * 0.01 / (tau + 0.01))
+
+  def test_small_angle_converges_without_deadband(self):
+    for desired in (-1.0, 1.0):
+      with self.subTest(desired=desired):
+        ci = self.make_angle_controller(3.0)
         cc = structs.CarControl(latActive=True)
         cc.actuators.steeringAngleDeg = desired
-        actuators, _ = ci.CC.update(cc.as_reader(), ci.CS, 0)
-        self.assertAlmostEqual(actuators.steeringAngleDeg, expected)
+        for frame in range(151):
+          actuators, _ = ci.CC.update(cc.as_reader(), ci.CS, frame * 10_000_000)
+        self.assertAlmostEqual(actuators.steeringAngleDeg, desired, delta=0.01)
+
+  def test_angle_filter_updates_between_steering_messages(self):
+    ci = self.make_angle_controller(3.0)
+    cc = structs.CarControl(latActive=True)
+    cc.actuators.steeringAngleDeg = 1.0
+    values = [ci.CC.update(cc.as_reader(), ci.CS, frame * 10_000_000)[0].steeringAngleDeg for frame in range(3)]
+    self.assertEqual(values[0], values[1])
+    self.assertAlmostEqual(values[2], 1.0 - (0.3 / 0.31) ** 3)
+
+  def test_angle_filter_resets_while_inactive(self):
+    ci = self.make_angle_controller(3.0)
+    cc = structs.CarControl(latActive=True)
+    cc.actuators.steeringAngleDeg = 1.0
+    ci.CC.update(cc.as_reader(), ci.CS, 0)
+    cc.latActive = False
+    cc.actuators.steeringAngleDeg = -1.0
+    ci.CC.update(cc.as_reader(), ci.CS, 10_000_000)
+    cc.latActive = True
+    cc.actuators.steeringAngleDeg = 0.0
+    actuators, _ = ci.CC.update(cc.as_reader(), ci.CS, 20_000_000)
+    self.assertAlmostEqual(actuators.steeringAngleDeg, -0.3 / 0.31)
 
   def test_safety_model_is_conservative(self):
     for platform in CAR:

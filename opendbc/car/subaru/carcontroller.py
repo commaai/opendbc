@@ -1,7 +1,8 @@
 import numpy as np
 from opendbc.can import CANPacker
-from opendbc.car import Bus, make_tester_present_msg, rate_limit
-from opendbc.car.lateral import (apply_center_deadzone, apply_driver_steer_torque_limits, apply_steer_angle_limits_vm,
+from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, rate_limit
+from opendbc.car.common.filter_simple import FirstOrderFilter
+from opendbc.car.lateral import (apply_driver_steer_torque_limits, apply_steer_angle_limits_vm,
                                common_fault_avoidance, get_max_angle_delta_vm)
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
@@ -34,6 +35,7 @@ class CarController(CarControllerBase):
 
     if CP.flags & SubaruFlags.LKAS_ANGLE:
       self.VM = VehicleModel(get_safety_CP())
+      self.angle_filter = FirstOrderFilter(0.0, 0.3, DT_CTRL)
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -43,12 +45,17 @@ class CarController(CarControllerBase):
     can_sends = []
 
     # *** steering ***
+    if self.CP.flags & SubaruFlags.LKAS_ANGLE:
+      # Filter at the control-loop rate, including frames without a steering CAN message.
+      if CC.latActive:
+        self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5.0, 10.0, 20.0], [0.3, 0.1, 0.0])))
+        self.angle_filter.update(actuators.steeringAngleDeg)
+      else:
+        self.angle_filter.x = actuators.steeringAngleDeg
+
     if (self.frame % self.p.STEER_STEP) == 0:
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
-        apply_angle = actuators.steeringAngleDeg
-        # prevent small angle oscillations near standstill
-        if CC.latActive and CS.out.vEgoRaw < 4.0:
-          apply_angle = self.apply_angle_last + apply_center_deadzone(apply_angle - self.apply_angle_last, 2.5)
+        apply_angle = self.angle_filter.x
         # Use filtered speed to smooth changes in the dynamic angle limit.
         apply_angle = apply_steer_angle_limits_vm(apply_angle, self.apply_angle_last, CS.out.vEgo,
                                                  CS.out.steeringAngleDeg, CC.latActive, self.p, self.VM)
