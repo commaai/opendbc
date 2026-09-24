@@ -14,10 +14,10 @@ class CarControllerParams:
 
   STEER_MAX = 300
   STEER_DRIVER_ALLOWANCE = 80
-  STEER_DRIVER_MULTIPLIER = 3  # weight driver torque heavily
+  STEER_DRIVER_MULTIPLIER = 2
   STEER_DRIVER_FACTOR = 1  # from dbc
-  STEER_DELTA_UP = 4
-  STEER_DELTA_DOWN = 4
+  STEER_DELTA_UP = 2
+  STEER_DELTA_DOWN = 2
 
   def __init__(self, CP):
     pass
