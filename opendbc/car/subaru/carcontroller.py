@@ -34,6 +34,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
     self.apply_angle_last = 0
+    self.lat_active_last = False
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
@@ -63,16 +64,22 @@ class CarController(CarControllerBase):
 
     if (self.frame % self.p.STEER_STEP) == 0:
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
+        # Panda resets its reference to its newest angle sample on inactive frames sent before it sees the
+        # ES_Status engage edge, which may be newer than CarState. Send one more inactive frame after engaging,
+        # so panda's reference is this frame's angle, the same one openpilot rate limits from.
+        lat_active = CC.latActive and self.lat_active_last
+        self.lat_active_last = CC.latActive
+
         apply_angle = self.angle_filter.x
         # Use filtered speed to smooth changes in the dynamic angle limit.
         apply_angle = apply_steer_angle_limits_vm(apply_angle, self.apply_angle_last, CS.out.vEgo,
-                                                 CS.out.steeringAngleDeg, CC.latActive, self.p, self.VM)
-        if CC.latActive:
+                                                 CS.out.steeringAngleDeg, lat_active, self.p, self.VM)
+        if lat_active:
           # Preserve the jerk limit when the previous angle is outside the acceleration bound.
           max_delta = min(get_max_angle_delta_vm(max(CS.out.vEgo, 1), self.VM, self.p), self.p.ANGLE_LIMITS.MAX_ANGLE_RATE)
           apply_angle = rate_limit(apply_angle, self.apply_angle_last, -max_delta, max_delta)
         self.apply_angle_last = apply_angle
-        can_sends.append(subarucan.create_steering_control_angle(self.packer, self.apply_angle_last, CC.latActive))
+        can_sends.append(subarucan.create_steering_control_angle(self.packer, self.apply_angle_last, lat_active))
       else:
         apply_torque = int(round(actuators.torque * self.p.STEER_MAX))
 

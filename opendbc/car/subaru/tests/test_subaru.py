@@ -40,6 +40,7 @@ class TestSubaruAngleLimits(unittest.TestCase):
     for speed, tau in ((0.0, 0.3), (5.0, 0.3), (7.5, 0.2), (10.0, 0.1), (15.0, 0.05), (20.0, 0.0), (25.0, 0.0)):
       with self.subTest(speed=speed):
         ci = self.make_angle_controller(speed)
+        ci.CC.lat_active_last = True  # skip the inactive frame sent after engaging
         cc = structs.CarControl(latActive=True)
         cc.actuators.steeringAngleDeg = 0.1
         actuators, _ = ci.CC.update(cc.as_reader(), ci.CS, 0)
