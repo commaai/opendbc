@@ -95,7 +95,7 @@ class TestSignerTransport(unittest.TestCase):
     self.step()
     bad = dict(response(1), SIGNER_SEQUENCE_INVERTED=0)
     self.assertEqual(published(self.step(state([bad, response(99)]))), [])
-    self.assertIn(1, self.signer.pending)
+    assert 1 in self.signer.pending
     self.step(state([response(1, status=5)]))
     self.assertNotIn(1, self.signer.pending)
 
@@ -106,7 +106,7 @@ class TestSignerTransport(unittest.TestCase):
         self.step()
         self.step(state([response(1)]))
         sends = self.step(**release)
-        self.assertIn((0x777, RELEASE, TSS3_AUX_BUS), sends)
+        assert (0x777, RELEASE, TSS3_AUX_BUS) in sends
         self.assertEqual((self.signer.active, len(self.signer.pending)), (False, 0))
 
     self.setUp()
@@ -114,7 +114,7 @@ class TestSignerTransport(unittest.TestCase):
     self.step(state([response(1)]))
     for _ in range(SIGNER_TIMEOUT_NS // (10 * MS) + 1):
       sends = self.step()
-    self.assertIn((0x777, RELEASE, TSS3_AUX_BUS), sends)
+    assert (0x777, RELEASE, TSS3_AUX_BUS) in sends
 
   def test_rejected_publication_releases_and_rearms(self):
     self.step()
@@ -123,7 +123,7 @@ class TestSignerTransport(unittest.TestCase):
     sends = self.step(state([response(2)], control_request_rejected=True))
     self.assertEqual([dat for addr, dat, _ in sends if addr == 0x777 and dat[0] == 0x07], [RELEASE])
     self.step()
-    self.assertIn((0x777, ARM, TSS3_AUX_BUS), self.step(state([response(4)])))
+    assert (0x777, ARM, TSS3_AUX_BUS) in self.step(state([response(4)]))
 
   def test_angle_reference_reset(self):
     self.assertTrue(self.signer.angle_reference_reset(self.t))

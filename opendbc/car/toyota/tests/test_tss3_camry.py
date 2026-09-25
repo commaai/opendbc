@@ -173,15 +173,15 @@ class TestToyotaCamryTSS3(unittest.TestCase):
   def test_cancel_and_hud(self):
     update_state(self.ci, x412=bytes.fromhex("1000002200ee9307"))
     _, sends = self.apply(control(cancel=True))
-    self.assertIn((0x101, bytes.fromhex("8800000100000093"), 2), sends)
-    self.assertIn((0x412, bytes.fromhex("1400004401ee9307"), 0), sends)
+    assert (0x101, bytes.fromhex("8800000100000093"), 2) in sends
+    assert (0x412, bytes.fromhex("1400004401ee9307"), 0) in sends
 
     # 5 Hz, and immediately on alert edges
     for _ in range(19):
       self.assertFalse(any(addr == 0x412 for addr, _, _ in self.apply(control())[1]))
-    self.assertIn((0x412, bytes.fromhex("1400004401ee9307"), 0), self.apply(control())[1])
-    self.assertIn((0x412, bytes.fromhex("140c004401ee9307"), 0), self.apply(control(steer_alert=True))[1])
-    self.assertIn((0x412, bytes.fromhex("1400004401ee9307"), 0), self.apply(control())[1])
+    assert (0x412, bytes.fromhex("1400004401ee9307"), 0) in self.apply(control())[1]
+    assert (0x412, bytes.fromhex("140c004401ee9307"), 0) in self.apply(control(steer_alert=True))[1]
+    assert (0x412, bytes.fromhex("1400004401ee9307"), 0) in self.apply(control())[1]
 
   def test_lta_switch_button_events(self):
     self.assertEqual(list(update_state(self.ci, x412=bytes.fromhex("1200002202ee9307")).buttonEvents), [])

@@ -96,7 +96,7 @@ class TestToyotaTss3CamrySafety(Tss3SafetyHelpers, common.CarSafetyTest, common.
     self.CP = CarInterface.get_params(CAR.TOYOTA_CAMRY_TSS3, fingerprint, [], True, False, False)
     self.VM = VehicleModel(get_safety_CP())
     self.params = CarControllerParams(self.CP)
-    self.params.STEER_STEP = 1 / (0.01 * self.LATERAL_FREQUENCY)
+    self.params.STEER_STEP = int(1 / (0.01 * self.LATERAL_FREQUENCY))
 
   def _tx(self, msg):
     # like the transport: a CONTROL_REQUEST is first approved by sending it to the signer, then published

@@ -23,7 +23,7 @@ class CarControllerParams:
   TSS3_TARGET_ANGLE_SCALE_DEG = 1024 / 17870
 
   # Lane Tracing Assist (LTA) control limits
-  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+  ANGLE_LIMITS: AngleSteeringLimits | AngleSteeringLimitsVM = AngleSteeringLimits(
     # EPS ignores commands above this angle and causes PCS to fault
     94.9461,  # deg
     # Assuming a steering ratio of 13.7:
