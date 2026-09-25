@@ -20,6 +20,7 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 
 # Toyota LTA also has torque
 "TOYOTA_RAV4_TSS2_2023" = [nan, 3.0, nan]
+"TOYOTA_CAMRY_TSS3" = [nan, 3.0, nan]
 
 # Tesla angle based controllers
 "TESLA_MODEL_3" = [nan, 2.5, nan]
