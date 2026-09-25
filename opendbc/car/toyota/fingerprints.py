@@ -5,6 +5,17 @@ from opendbc.car.toyota.values import CAR
 Ecu = CarParams.Ecu
 
 FW_VERSIONS = {
+  CAR.TOYOTA_CAMRY_TSS3: {
+    (Ecu.eps, 0x7a1, None): [
+      b'\x028965F3307000\x00\x00\x00\x008A3113303100\x00\x00\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x792, None): [
+      b'\x018646F3315000\x00\x00\x00\x00',
+    ],
+    (Ecu.abs, 0x7b0, None): [
+      b'\x01F152633K0000\x00\x00\x00\x00',
+    ],
+  },
   CAR.TOYOTA_AVALON: {
     (Ecu.abs, 0x7b0, None): [
       b'F152607060\x00\x00\x00\x00\x00\x00',
