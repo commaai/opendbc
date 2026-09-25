@@ -289,6 +289,8 @@ class TestCarModelBase(unittest.TestCase):
       self.skipTest("skipping test for notCar")
     if self.CP.flags & ToyotaFlags.SECOC:
       self.skipTest("SecOC transmit tests require the vehicle key")
+    if self.CP.flags & ToyotaFlags.TSS3:
+      self.skipTest("TSS3 commands are built from live CAN and signer responses")
 
     controller_params = self.CP
     if self.CP.brand == "volkswagen" and self.CP.flags & VolkswagenFlags.MLB and self.CP.openpilotLongitudinalControl:
