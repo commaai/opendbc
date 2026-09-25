@@ -228,9 +228,43 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
             for addr, data, bus in messages:
               if addr == SubaruMsg.ES_LKAS_ANGLE:
                 angle_messages += 1
-                self.assertEqual(bool(data[1] & 0x10), cc.latActive)
+                # The first frame after engaging is inactive
+                self.assertEqual(bool(data[1] & 0x10), cc.latActive and frame not in (2, 52))
                 self.assertTrue(self._tx(libsafety_py.make_CANPacket(addr, bus, data)), f"frame {frame}")
           self.assertEqual(angle_messages, 50)
+
+  def test_engage_while_steering(self):
+    # Panda receives each Steering_2 sample before openpilot's CarState does. When the driver is turning while
+    # engaging, panda's latest angle is one sample ahead of the angle openpilot rate limits from.
+    platform = CAR.SUBARU_CROSSTREK_2025 if self.FLAGS & SubaruSafetyFlags.GEN2 else CAR.SUBARU_FORESTER_2022
+    engage_frame, total_frames = 51, 150
+    for speed in (5., 15., 26., 35.):
+      for rate in (-100., -16., 16., 100.):
+        with self.subTest(speed=speed, rate=rate):
+          self.setUp()
+          ci = CarInterface(CarInterface.get_non_essential_params(platform))
+          ci.update([])
+          self._reset_speed_measurement(speed)
+          cc = CarControl()
+          # The driver turns for 0.1 s up to the engage, crossing center to stay within the lateral accel limit
+          angle = angle_prev = -rate * 0.05
+          for frame in range(total_frames):
+            # Steering_2 is 50 Hz
+            if frame % 2 == 0:
+              angle_prev = angle
+              if engage_frame - 10 <= frame < engage_frame:
+                angle += rate * 0.02
+              self._rx(self._angle_meas_msg(angle))
+            ci.CS.out = CarState(vEgo=speed, vEgoRaw=speed, steeringAngleDeg=angle_prev)
+            # openpilot engages on the same ES_Status edge panda does
+            cc.latActive = frame >= engage_frame
+            cc.actuators.steeringAngleDeg = angle_prev
+            self.safety.set_controls_allowed(cc.latActive)
+            self.safety.set_timer(frame * 10000)
+            _, messages = ci.CC.update(cc.as_reader(), ci.CS, frame * 10000000)
+            for addr, data, bus in messages:
+              if addr == SubaruMsg.ES_LKAS_ANGLE:
+                self.assertTrue(self._tx(libsafety_py.make_CANPacket(addr, bus, data)), f"frame {frame}")
 
   def test_angle_cmd_when_enabled(self):
     for speed in np.linspace(0, 50, 101):
