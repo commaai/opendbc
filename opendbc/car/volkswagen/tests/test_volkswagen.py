@@ -23,11 +23,48 @@ class TestVolkswagenHCAMitigation(unittest.TestCase):
     hca_mitigation = HCAMitigation(CCP)
 
     for actuator_value in (-CCP.STEER_MAX, -1, 0, 1, CCP.STEER_MAX):
-      hca_mitigation.update(0, 0)  # Reset mitigation state
+      hca_mitigation.update(0, 0, 0)  # Reset mitigation state
       for frame in range(self.STUCK_TORQUE_FRAMES + 2):
         should_nudge = actuator_value != 0 and frame == self.STUCK_TORQUE_FRAMES
         expected_torque = actuator_value - (1, -1)[actuator_value < 0] if should_nudge else actuator_value
-        assert hca_mitigation.update(actuator_value, actuator_value) == expected_torque, f"{frame=}"
+        assert hca_mitigation.update(actuator_value, actuator_value, actuator_value) == expected_torque, f"{frame=}"
+
+  def test_eps_timer_reset(self):
+    """The mitigation respects start time threshold, aborts on real steering requests, and resets when expected."""
+    hca_mitigation = HCAMitigation(CCP, steer_timer_mitigation=True)
+    mitigation_start_calls = round(CCP.STEER_TIME_MITIGATION_START / (DT_CTRL * CCP.STEER_STEP))
+    low_torque_calls = round(CCP.STEER_TIME_LOW_TORQUE_TIME / (DT_CTRL * CCP.STEER_STEP))
+    reset_calls = round(CCP.STEER_TIME_RESET / (DT_CTRL * CCP.STEER_STEP))
+
+    low_torque = CCP.STEER_TIME_LOW_TORQUE
+    apply_torque = 0
+
+    for _ in range(mitigation_start_calls):
+      apply_torque = hca_mitigation.update(low_torque, apply_torque, low_torque)
+      assert apply_torque != 0, "mitigation must not engage before STEER_TIME_MITIGATION_START"
+
+    # Reset aborted due to desired torque above threshold
+    for _ in range(reset_calls - 1):
+      apply_torque = hca_mitigation.update(low_torque, apply_torque, low_torque)
+      assert apply_torque == 0, "sustained low torque should start reset"
+    apply_torque = hca_mitigation.update(low_torque, apply_torque, low_torque + 1)
+    assert apply_torque != 0, "reset must abort when desired torque is above threshold"
+
+    # Reset should not start during torque above threshold
+    for _ in range(low_torque_calls + 1):
+      apply_torque = hca_mitigation.update(low_torque + 1, apply_torque, low_torque + 1)
+      assert apply_torque != 0, "reset must not trigger while the model is requesting high torque"
+
+    # Reset successful
+    for _ in range(low_torque_calls):
+      apply_torque = hca_mitigation.update(low_torque, apply_torque, low_torque)
+      assert apply_torque != 0, "reset should not start until low torque is observed for required period"
+    for _ in range(reset_calls):
+      apply_torque = hca_mitigation.update(low_torque, apply_torque, low_torque)
+      assert apply_torque == 0, "sustained low torque should zero the output to reset the EPS timer"
+    apply_torque = hca_mitigation.update(low_torque, apply_torque, low_torque)
+    assert apply_torque == low_torque, "EPS timer reset should complete and release steering"
+
 
 class TestVolkswagenPlatformConfigs(unittest.TestCase):
   def test_spare_part_fw_pattern(self):
