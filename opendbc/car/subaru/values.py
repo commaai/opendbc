@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import AngleSteeringLimitsVM
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -10,6 +11,11 @@ Ecu = CarParams.Ecu
 
 
 class CarControllerParams:
+  ANGLE_LIMITS: AngleSteeringLimitsVM = AngleSteeringLimitsVM(
+    190,  # deg, EPS faults above ~200
+    MAX_ANGLE_RATE=5,  # deg/frame, comfort rate limit
+  )
+
   def __init__(self, CP):
     self.STEER_STEP = 2                # how often we update the steer cmd
     self.STEER_DELTA_UP = 50           # torque increase per refresh, 0.8s to max
@@ -57,6 +63,7 @@ class SubaruSafetyFlags(IntFlag):
   GEN2 = 1
   LONG = 2
   PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
+  LKAS_ANGLE = 8
 
 
 class SubaruFlags(IntFlag):
@@ -210,6 +217,11 @@ class CAR(Platforms):
   SUBARU_ASCENT_2023 = SubaruGen2PlatformConfig(
     [SubaruCarDocs("Subaru Ascent 2023", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
     SUBARU_ASCENT.specs,
+    flags=SubaruFlags.LKAS_ANGLE,
+  )
+  SUBARU_CROSSTREK_2025 = SubaruGen2PlatformConfig(
+    [SubaruCarDocs("Subaru Crosstrek 2025", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
+    CarSpecs(mass=1529, wheelbase=2.67, steerRatio=13),
     flags=SubaruFlags.LKAS_ANGLE,
   )
 
