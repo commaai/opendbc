@@ -1,3 +1,6 @@
+import copy
+
+from opendbc.car.crc import CRC16_XMODEM
 from opendbc.car.structs import CarParams
 
 SteerControlType = CarParams.SteerControlType
@@ -61,6 +64,92 @@ def create_accel_command_2(packer, accel):
     "ACCEL_CMD": accel,
   }
   return packer.make_can_msg("ACC_CONTROL_2", 0, values)
+
+
+def create_tss3_brake_cancel_command(packer, stock_brake, bus):
+  """Clone live 0x101 state and assert only the native brake-cancel bit."""
+  values = {
+    "SET_ME_1": stock_brake["SET_ME_1"],
+    "BRAKE_PRESSED": 1,
+    "BRAKE_BYTE_1": stock_brake["BRAKE_BYTE_1"],
+    "BRAKE_BYTE_3": stock_brake["BRAKE_BYTE_3"],
+  }
+  return packer.make_can_msg("BRAKE_MODULE", bus, values)
+
+
+def create_tss3_control_request_values(stock_request, lat_active: bool, angle_raw: int, long_active: bool, accel: float,
+                                       set_speed_kph: float, request_sequence: int):
+  """CONTROL_REQUEST signals, with stock longitudinal only the lateral request and sequence of the FRC's are replaced."""
+  lateral = {
+    "LATERAL_REQUEST_PINION_ANGLE": angle_raw * 0.001000121519,
+    "LATERAL_REQUEST_ID": 11 if lat_active else 0,  # LTA/LCA
+    "LATERAL_ASSIST_GAIN": 1.0 if lat_active else 0.5,
+    "LATERAL_DAMPING_GAIN": 0,
+    "REQUEST_SEQUENCE": request_sequence,
+  }
+  if stock_request is not None:
+    return {**stock_request, **lateral}
+
+  accel = accel if long_active else 0.0
+  return {
+    "CRUISE_OPERATING_LATCH": 1,
+    "SET_ME_1": 1,
+    "LONGITUDINAL_REQUEST_ID_UPPER": 11,
+    "LONGITUDINAL_ALLOCATION_METHOD_UPPER": 1,  # engine and brake
+    "LONGITUDINAL_REQUEST_ID_LOWER": 17,
+    "LONGITUDINAL_ALLOCATION_METHOD_LOWER": 3,  # brake only
+    "LONGITUDINAL_REQUEST_ACCEL_UPPER": accel,
+    "LONGITUDINAL_REQUEST_ACCEL_LOWER": accel,
+    "SET_SPEED": min(max(round(set_speed_kph), 0), 255),
+    "SET_ME_X7FFF": 0x7FFF,
+    "SET_ME_X7FFF_2": 0x7FFF,
+    "CRUISE_STATE_MIRROR": 3,
+    "CRUISE_REQUEST_ACTIVE": 1,
+    **lateral,
+  }
+
+
+def create_tss3_signer_requests(packer, bus: int, signer_sequence: int, application: bytes):
+  # four fragments of the 28-byte request, headers alternate the low and high nibble of the sequence
+  nibbles = (signer_sequence & 0xF, signer_sequence >> 4)
+  msgs = []
+  for fragment in range(4):
+    data = application[fragment * 7:(fragment + 1) * 7]
+    msgs.append(packer.make_can_msg("SIGNER_REQUEST", bus, {
+      "HEADER": 0x80 | (fragment << 4) | nibbles[fragment % 2],
+      "DATA_1": int.from_bytes(data[:3], "big"),
+      "DATA_2": int.from_bytes(data[3:], "big"),
+    }))
+  return msgs
+
+
+def create_tss3_signer_arm(packer, bus: int, arm: bool):
+  # arm: panda publishes openpilot's CONTROL_REQUEST instead of the FRC's, release: the FRC's again
+  return packer.make_can_msg("SIGNER_REQUEST", bus, {"HEADER": 0x07, "DATA_1": 0xC9A800 | int(arm)})
+
+
+def create_tss3_lkas_hud(packer, bus, stock_hud, left_line: bool, right_line: bool, lat_active: bool, steer_alert: bool):
+  values = copy.copy(stock_hud)
+
+  # forward startup and unknown states untouched
+  if values["LTA_MODE"] in (0x10, 0x12, 0x14) and values["LTA_INDICATOR"] in (0, 1, 2):
+    line = 4 if lat_active else 1
+    if left_line == right_line:
+      values["LANE_LINE_1"] = values["LANE_LINE_2"] = line if left_line else 2
+    else:
+      # which line is left is unknown, so only update the stock visible lines
+      for sig in ("LANE_LINE_1", "LANE_LINE_2"):
+        if values[sig] in (1, 4):
+          values[sig] = line
+
+    values.update({
+      "LTA_MODE": 0x14 if lat_active else 0x12,
+      "LTA_INDICATOR": 1 if lat_active else 2,
+      "HANDS_ON_WARNING": 3 if steer_alert else 0,
+      "HANDS_ON_WARNING_2": 0,
+    })
+
+  return packer.make_can_msg("LKAS_HUD", bus, values)
 
 
 def create_pcs_commands(packer, accel, active, mass):
@@ -164,3 +253,11 @@ def toyota_checksum(address: int, sig, d: bytearray) -> int:
   for i in range(len(d) - 1):
     s += d[i]
   return s & 0xFF
+
+
+def toyota_e2e_checksum(address: int, sig, d: bytearray) -> int:
+  # AUTOSAR E2E profile 5: CRC-16/CCITT over the payload after the checksum, then the address as the data ID
+  crc = 0xFFFF
+  for byte in (*d[2:], address & 0xFF, (address >> 8) & 0xFF):
+    crc = ((crc << 8) ^ CRC16_XMODEM[((crc >> 8) ^ byte) & 0xFF]) & 0xFFFF
+  return crc
