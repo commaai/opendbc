@@ -106,7 +106,6 @@ class MebLongStateMachine:
 
     if not long_active:
       # Stock goes to RAMP for as long as TSK_Status is 5 usually, 100ms seems fine to mimic that behavior.
-      # Stock stays active for gas press, but we go inactive
       if self.disengage_ramp_counter > 0:
         acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
         self.disengage_ramp_counter -= 1

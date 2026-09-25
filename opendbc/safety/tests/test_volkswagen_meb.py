@@ -268,7 +268,6 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03, MSG_LDW_02, MSG_ACC_19, MSG_ACC_18, MSG_TA_01),
                              2: (MSG_KLR_01,)}
 
-  ACCEL_OVERRIDE = 0
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):
@@ -324,10 +323,13 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
         self.assertEqual(send, self._tx(self._accel_msg(accel)), (controls_allowed, accel))
 
   def test_accel_override_with_gas(self):
+    # positive accel is allowed during a gas override, braking is not
     self.safety.set_controls_allowed(True)
-    self.safety.set_gas_pressed_prev(True)
-    self.assertTrue(self._tx(self._accel_msg(self.ACCEL_OVERRIDE)))
-    self.assertFalse(self._tx(self._accel_msg(MAX_ACCEL)))
+    self.safety.set_gas_pressed(True)
+    self.assertTrue(self._tx(self._accel_msg(0)))
+    self.assertTrue(self._tx(self._accel_msg(MAX_ACCEL)))
+    self.assertFalse(self._tx(self._accel_msg(-0.01)))
+    self.assertFalse(self._tx(self._accel_msg(MIN_ACCEL)))
 
   def test_hold_type_safety_check(self):
     # PARKEN engages the EPB and HALTEN holds the car, both with ACC disengaged. KEINE_ANFORDERUNG and

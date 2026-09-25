@@ -65,13 +65,14 @@ int set_safety_hooks(uint16_t mode, uint16_t param);
 
 void set_controls_allowed(bool c);
 bool get_controls_allowed(void);
-bool get_longitudinal_allowed(void);
+bool get_longitudinal_gas_allowed(void);
+bool get_longitudinal_brake_allowed(void);
 void set_alternative_experience(int mode);
 int get_alternative_experience(void);
 void set_relay_malfunction(bool c);
 bool get_relay_malfunction(void);
-bool get_gas_pressed_prev(void);
-void set_gas_pressed_prev(bool);
+bool get_gas_pressed(void);
+void set_gas_pressed(bool);
 bool get_brake_pressed_prev(void);
 bool get_regen_braking_prev(void);
 bool get_steering_disengage_prev(void);

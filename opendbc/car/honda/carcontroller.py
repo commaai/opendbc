@@ -114,9 +114,12 @@ class CarController(CarControllerBase):
     hud_v_cruise = hud_control.setSpeed / CS.v_cruise_factor if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
-    if CC.longActive:
-      accel = actuators.accel
-      gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP)
+    # Nidec regulates with a speed target, which for now is treated as braking, so it goes inactive during a gas override
+    long_active = CC.longActive and not (CC.cruiseControl.override and not self.CP.flags & HondaFlags.BOSCH)
+    if long_active:
+      # braking isn't allowed during a gas override
+      accel = max(actuators.accel, 0.) if CC.cruiseControl.override else actuators.accel
+      gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP)
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
@@ -162,7 +165,7 @@ class CarController(CarControllerBase):
                     0.5]
     # The Honda ODYSSEY seems to have different PCM_ACCEL
     # msgs, is it other cars too?
-    if not CC.longActive:
+    if not long_active:
       pcm_speed = 0.0
       pcm_accel = int(0.0)
     elif self.CP.flags & HondaFlags.NIDEC_ALT_PCM_ACCEL:
@@ -200,7 +203,7 @@ class CarController(CarControllerBase):
 
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
-          can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
+          can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, long_active, self.accel, self.gas,
                                                         self.stopping_counter, self.CP))
         else:
           apply_brake = np.clip(self.brake_last - wind_brake, 0.0, 1.0)

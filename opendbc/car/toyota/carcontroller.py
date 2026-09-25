@@ -194,8 +194,12 @@ class CarController(CarControllerBase):
             self.distance_button = 0
 
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
+        # during a gas override, pass through the requested accel without rate limiting or PID. braking isn't allowed
+        long_override = CC.longActive and CC.cruiseControl.override
         pcm_accel_cmd = actuators.accel
-        if CC.longActive:
+        if long_override:
+          pcm_accel_cmd = max(pcm_accel_cmd, 0.)
+        elif CC.longActive:
           pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT)
         self.prev_accel = pcm_accel_cmd
 
@@ -219,7 +223,7 @@ class CarController(CarControllerBase):
         future_t = float(np.interp(CS.out.vEgo, [2., 5.], [0.25, 0.5]))
         a_ego_future = a_ego_blended + j_ego * future_t
 
-        if CC.longActive:
+        if CC.longActive and not long_override:
           # constantly slowly unwind integral to recover from large temporary errors
           self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
 
@@ -242,7 +246,7 @@ class CarController(CarControllerBase):
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
         net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, net_acceleration_request)
-        if net_acceleration_request_min < 0.2 or stopping or not CC.longActive:
+        if net_acceleration_request_min < 0.2 or stopping or not CC.longActive or long_override:
           self.permit_braking = True
         elif net_acceleration_request_min > 0.3:
           self.permit_braking = False

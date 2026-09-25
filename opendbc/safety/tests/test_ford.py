@@ -493,6 +493,7 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   MAX_GAS = 2.0
   MIN_GAS = -0.5
   INACTIVE_GAS = -5.0
+  ZERO_GAS = 0.0
 
   # ACC command
   def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False):
@@ -518,22 +519,30 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
 
   def test_gas_safety_check(self):
     for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
-      for gas in np.concatenate((np.arange(self.MIN_GAS - 2, self.MAX_GAS + 2, 0.05), [self.INACTIVE_GAS])):
-        gas = round(gas, 2)  # floats might not hit exact boundary conditions without rounding
-        should_tx = (controls_allowed and self.MIN_GAS <= gas <= self.MAX_GAS) or gas == self.INACTIVE_GAS
-        self.assertEqual(should_tx, self._tx(self._acc_command_msg(gas, self.INACTIVE_ACCEL, controls_allowed)))
+      for gas_pressed in (True, False):
+        self.safety.set_controls_allowed(controls_allowed)
+        self.safety.set_gas_pressed(gas_pressed)
+        for gas in np.concatenate((np.arange(self.MIN_GAS - 2, self.MAX_GAS + 2, 0.05), [self.INACTIVE_GAS])):
+          gas = round(gas, 2)  # floats might not hit exact boundary conditions without rounding
+          # negative gas requests are engine braking, which isn't allowed while the driver is on the gas
+          allowed = controls_allowed and (gas >= self.ZERO_GAS or not gas_pressed)
+          should_tx = (allowed and self.MIN_GAS <= gas <= self.MAX_GAS) or gas == self.INACTIVE_GAS
+          self.assertEqual(should_tx, self._tx(self._acc_command_msg(gas, self.INACTIVE_ACCEL, False)), (controls_allowed, gas_pressed, gas))
 
   def test_brake_safety_check(self):
     brake_values = self._boundary_values([self.MIN_ACCEL, self.MAX_ACCEL, self.INACTIVE_ACCEL],
                                          self.MIN_ACCEL - 2, self.MAX_ACCEL + 2, 0.05)
     for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
-      for brake_actuation in (True, False):
-        for brake in brake_values:
-          should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
-          should_tx = should_tx and (controls_allowed or not brake_actuation)
-          self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, brake_actuation)))
+      for gas_pressed in (True, False):
+        self.safety.set_controls_allowed(controls_allowed)
+        self.safety.set_gas_pressed(gas_pressed)
+        brake_allowed = controls_allowed and not gas_pressed
+        for brake_actuation in (True, False):
+          for brake in brake_values:
+            allowed = controls_allowed if brake >= 0 else brake_allowed
+            should_tx = (allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
+            should_tx = should_tx and (brake_allowed or not brake_actuation)
+            self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, brake_actuation)), (controls_allowed, gas_pressed, brake))
 
 
 class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):

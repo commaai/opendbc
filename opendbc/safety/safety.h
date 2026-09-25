@@ -58,6 +58,7 @@ bool controls_allowed = false;
 bool relay_malfunction = false;
 bool gas_pressed = false;
 bool gas_pressed_prev = false;
+uint32_t gas_pressed_ts = 0;
 bool brake_pressed = false;
 bool brake_pressed_prev = false;
 bool regen_braking = false;
@@ -348,6 +349,9 @@ static void relay_malfunction_set(void) {
 }
 
 static void generic_rx_checks(void) {
+  if (gas_pressed && !gas_pressed_prev) {
+    gas_pressed_ts = microsecond_timer_get();
+  }
   gas_pressed_prev = gas_pressed;
 
   // exit controls on rising edge of brake press
@@ -427,6 +431,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   relay_malfunction = false;
   gas_pressed = false;
   gas_pressed_prev = false;
+  gas_pressed_ts = 0;
   brake_pressed = false;
   brake_pressed_prev = false;
   regen_braking = false;

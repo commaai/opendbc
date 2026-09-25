@@ -112,10 +112,11 @@ class CarController(CarControllerBase):
     ### longitudinal control ###
     # send acc msg at 50Hz
     if self.CP.openpilotLongitudinalControl and (self.frame % CarControllerParams.ACC_CONTROL_STEP) == 0:
-      accel = actuators.accel
+      long_override = CC.longActive and CC.cruiseControl.override
+      accel = max(actuators.accel, 0.) if long_override else actuators.accel
       gas = accel
 
-      if CC.longActive:
+      if CC.longActive and not long_override:
         # Compensate for engine creep at low speed.
         # Either the ABS does not account for engine creep, or the correction is very slow
         # TODO: verify this applies to EV/hybrid
@@ -138,7 +139,7 @@ class CarController(CarControllerBase):
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
 
       accel_pitch_compensated = accel + accel_due_to_pitch
-      if accel_pitch_compensated > 0.3 or not CC.longActive:
+      if accel_pitch_compensated > 0.3 or not CC.longActive or long_override:
         self.brake_request = False
       elif accel_pitch_compensated < 0.0:
         self.brake_request = True
