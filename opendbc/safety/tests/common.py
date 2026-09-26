@@ -12,6 +12,7 @@ from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 
 MAX_WRONG_COUNTERS = 5
+GAS_PRESS_BRAKE_GRACE_US = 20000  # matches get_longitudinal_brake_allowed() in longitudinal.h
 MAX_SAMPLE_VALS = 6
 VEHICLE_SPEED_FACTOR = 1000
 RT_INTERVAL = 250000  # 250ms
@@ -178,14 +179,19 @@ class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
       for accel in np.concatenate((np.arange(min_accel - 1, max_accel + 1, 0.05), [0, self.INACTIVE_ACCEL])):
         accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
         for controls_allowed in [True, False]:
-          self.safety.set_controls_allowed(controls_allowed)
-          self.safety.set_alternative_experience(alternative_experience)
-          if self.LONGITUDINAL:
-            should_tx = controls_allowed and min_accel <= accel <= max_accel
-            should_tx = should_tx or accel == self.INACTIVE_ACCEL
-          else:
-            should_tx = False
-          self.assertEqual(should_tx, self._tx(self._accel_msg(accel)))
+          for gas_pressed in [True, False]:
+            self.safety.set_controls_allowed(controls_allowed)
+            self.safety.set_gas_pressed(gas_pressed)
+            self.safety.set_alternative_experience(alternative_experience)
+            if self.LONGITUDINAL:
+              gas_allowed = controls_allowed
+              brake_allowed = controls_allowed and not gas_pressed
+              longitudinal_allowed = gas_allowed if accel >= 0 else brake_allowed
+              should_tx = longitudinal_allowed and min_accel <= accel <= max_accel
+              should_tx = should_tx or accel == self.INACTIVE_ACCEL
+            else:
+              should_tx = False
+            self.assertEqual(should_tx, self._tx(self._accel_msg(accel)))
 
 
 class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
@@ -197,6 +203,7 @@ class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
   MIN_GAS: int = 0
   MAX_GAS: int | None = None
   INACTIVE_GAS = 0
+  ZERO_GAS = 0  # gas below this is regen or engine braking
   MIN_POSSIBLE_GAS: int = 0
   MAX_POSSIBLE_GAS: int | None = None
 
@@ -221,6 +228,18 @@ class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
 
   def test_gas_safety_check(self):
     self._generic_limit_safety_check(self._send_gas_msg, self.MIN_GAS, self.MAX_GAS, self.MIN_POSSIBLE_GAS, self.MAX_POSSIBLE_GAS, 1, self.INACTIVE_GAS)
+
+  def test_gas_brake_during_gas_override(self):
+    # while the driver is on the gas, positive accel is allowed but braking (including regen or engine braking) is not
+    self.safety.set_controls_allowed(True)
+    self.safety.set_gas_pressed(True)
+    for gas in self._boundary_values([self.MIN_GAS, self.MAX_GAS, self.ZERO_GAS, self.INACTIVE_GAS],
+                                     self.MIN_POSSIBLE_GAS, self.MAX_POSSIBLE_GAS):
+      should_tx = (self.ZERO_GAS <= gas <= self.MAX_GAS) or gas == self.INACTIVE_GAS
+      self.assertEqual(should_tx, self._tx(self._send_gas_msg(gas)), gas)
+
+    for brake in self._boundary_values([self.MIN_BRAKE, self.MAX_BRAKE], 0, self.MAX_POSSIBLE_BRAKE):
+      self.assertEqual(brake == 0, self._tx(self._send_brake_msg(brake)), brake)
 
 
 class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
@@ -1117,10 +1136,10 @@ class CarSafetyTest(SafetyTest):
         self.assertEqual(-1, self.safety.safety_fwd_hook(bus, addr))
 
   def test_prev_gas(self):
-    self.assertFalse(self.safety.get_gas_pressed_prev())
+    self.assertFalse(self.safety.get_gas_pressed())
     for pressed in [self.GAS_PRESSED_THRESHOLD + 1, 0]:
       self._rx(self._user_gas_msg(pressed))
-      self.assertEqual(bool(pressed), self.safety.get_gas_pressed_prev())
+      self.assertEqual(bool(pressed), self.safety.get_gas_pressed())
 
   def test_allow_engage_with_gas_pressed(self):
     self._rx(self._user_gas_msg(1))
@@ -1134,12 +1153,37 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._user_gas_msg(0))
     self.safety.set_controls_allowed(True)
     self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
-    # Test we allow lateral, but not longitudinal
+    self.safety.set_timer(GAS_PRESS_BRAKE_GRACE_US + 1)
+    # Test we allow lateral and positive longitudinal, but not braking
     self.assertTrue(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.get_longitudinal_allowed())
+    self.assertFalse(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
     # Make sure we can re-gain longitudinal actuation
     self._rx(self._user_gas_msg(0))
-    self.assertTrue(self.safety.get_longitudinal_allowed())
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
+
+  def test_gas_press_brake_grace(self):
+    # braking commands already in flight when the gas is pressed are allowed for a short grace period
+    self.safety.set_controls_allowed(True)
+    self._rx(self._user_gas_msg(0))
+    self.safety.set_timer(1000000)
+    self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.safety.set_timer(1000000 + GAS_PRESS_BRAKE_GRACE_US)
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.safety.set_timer(1000000 + GAS_PRESS_BRAKE_GRACE_US + 1)
+    self.assertFalse(self.safety.get_longitudinal_brake_allowed())
+
+    # holding the gas doesn't restart the grace period
+    self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+    self.assertFalse(self.safety.get_longitudinal_brake_allowed())
+
+    # releasing the gas allows braking immediately, and the next press starts a new grace period
+    self._rx(self._user_gas_msg(0))
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
 
   def test_prev_user_brake(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:
@@ -1181,14 +1225,17 @@ class CarSafetyTest(SafetyTest):
     self.safety.set_controls_allowed(1)
     self._rx(_user_brake_msg(1))
     self.assertTrue(self.safety.get_controls_allowed())
-    self.assertTrue(self.safety.get_longitudinal_allowed())
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
     self._rx(_user_brake_msg(0))
     self.assertTrue(self.safety.get_controls_allowed())
-    self.assertTrue(self.safety.get_longitudinal_allowed())
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
     # rising edge of brake should disengage
     self._rx(_user_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.get_longitudinal_allowed())
+    self.assertFalse(self.safety.get_longitudinal_brake_allowed())
+    self.assertFalse(self.safety.get_longitudinal_gas_allowed())
     self._rx(_user_brake_msg(0))  # reset no brakes
 
   def test_not_allow_user_brake_when_moving(self, _user_brake_msg=None, get_brake_pressed_prev=None):
@@ -1201,11 +1248,13 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._vehicle_moving_msg(self.STANDSTILL_THRESHOLD))
     self._rx(_user_brake_msg(1))
     self.assertTrue(self.safety.get_controls_allowed())
-    self.assertTrue(self.safety.get_longitudinal_allowed())
+    self.assertTrue(self.safety.get_longitudinal_brake_allowed())
+    self.assertTrue(self.safety.get_longitudinal_gas_allowed())
     self._rx(self._vehicle_moving_msg(self.STANDSTILL_THRESHOLD + 1))
     self._rx(_user_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.get_longitudinal_allowed())
+    self.assertFalse(self.safety.get_longitudinal_brake_allowed())
+    self.assertFalse(self.safety.get_longitudinal_gas_allowed())
     self._rx(self._vehicle_moving_msg(0))
 
   def test_vehicle_moving(self):

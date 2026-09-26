@@ -59,7 +59,9 @@ class CarController(CarControllerBase):
 
     # *** longitudinal ***
 
-    if CC.longActive:
+    # Subaru doesn't support gas overrides yet, go inactive
+    long_active = CC.longActive and not CC.cruiseControl.override
+    if long_active:
       apply_throttle = int(round(np.interp(actuators.accel, CarControllerParams.THROTTLE_LOOKUP_BP, CarControllerParams.THROTTLE_LOOKUP_V)))
       apply_rpm = int(round(np.interp(actuators.accel, CarControllerParams.RPM_LOOKUP_BP, CarControllerParams.RPM_LOOKUP_V)))
       apply_brake = int(round(np.interp(actuators.accel, CarControllerParams.BRAKE_LOOKUP_BP, CarControllerParams.BRAKE_LOOKUP_V)))
@@ -96,7 +98,7 @@ class CarController(CarControllerBase):
     else:
       if self.frame % 10 == 0:
         can_sends.append(subarucan.create_es_dashstatus(self.packer, self.frame // 10, CS.es_dashstatus_msg, CC.enabled,
-                                                        self.CP.openpilotLongitudinalControl, CC.longActive, hud_control.leadVisible))
+                                                        self.CP.openpilotLongitudinalControl, long_active, hud_control.leadVisible))
 
         can_sends.append(subarucan.create_es_lkas_state(self.packer, self.frame // 10, CS.es_lkas_state_msg, CC.enabled, hud_control.visualAlert,
                                                         hud_control.leftLaneVisible, hud_control.rightLaneVisible,
@@ -108,10 +110,10 @@ class CarController(CarControllerBase):
       if self.CP.openpilotLongitudinalControl:
         if self.frame % 5 == 0:
           can_sends.append(subarucan.create_es_status(self.packer, self.frame // 5, CS.es_status_msg,
-                                                      self.CP.openpilotLongitudinalControl, CC.longActive, cruise_rpm))
+                                                      self.CP.openpilotLongitudinalControl, long_active, cruise_rpm))
 
           can_sends.append(subarucan.create_es_brake(self.packer, self.frame // 5, CS.es_brake_msg,
-                                                     self.CP.openpilotLongitudinalControl, CC.longActive, cruise_brake))
+                                                     self.CP.openpilotLongitudinalControl, long_active, cruise_brake))
 
           can_sends.append(subarucan.create_es_distance(self.packer, self.frame // 5, CS.es_distance_msg, 0, pcm_cancel_cmd,
                                                         self.CP.openpilotLongitudinalControl, cruise_brake > 0, cruise_throttle))

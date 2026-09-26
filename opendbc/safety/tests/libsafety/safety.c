@@ -62,12 +62,15 @@ bool get_relay_malfunction(void){
   return relay_malfunction;
 }
 
-bool get_gas_pressed_prev(void){
-  return gas_pressed_prev;
+bool get_gas_pressed(void){
+  return gas_pressed;
 }
 
-void set_gas_pressed_prev(bool c){
+void set_gas_pressed(bool c){
+  // models the gas being held past the brake grace period
+  gas_pressed = c;
   gas_pressed_prev = c;
+  gas_pressed_ts = microsecond_timer_get() - 1000000U;
 }
 
 bool get_brake_pressed_prev(void){

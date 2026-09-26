@@ -114,6 +114,16 @@ class CarInterfaceBase(ABC):
   def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     if now_nanos is None:
       now_nanos = int(time.monotonic() * 1e9)
+
+    # CarControl lags CarState by a frame or two, but safety blocks braking as soon as it sees the gas pressed.
+    # Respond to a gas override on the same frame the car reports it to avoid blocked messages
+    if self.CP.openpilotLongitudinalControl and c.longActive and not c.cruiseControl.override and self.CS.out.gasPressed:
+      c = c.as_builder()
+      c.cruiseControl.override = True
+      c.actuators.accel = max(c.actuators.accel, 0.)
+      c.actuators.longControlState = structs.CarControl.Actuators.LongControlState.overriding
+      c = c.as_reader()
+
     return self.CC.update(c, self.CS, now_nanos)
 
   @staticmethod

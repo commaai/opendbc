@@ -183,7 +183,7 @@ class HondaBase(common.CarSafetyTest):
     if brake_pressed is None:
       brake_pressed = self.safety.get_brake_pressed_prev()
     if gas_pressed is None:
-      gas_pressed = self.safety.get_gas_pressed_prev()
+      gas_pressed = self.safety.get_gas_pressed()
 
     values = {
       "ACC_STATUS": cruise_on,
@@ -493,19 +493,25 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
   def test_gas_safety_check(self):
     for controls_allowed in [True, False]:
-      for gas in np.arange(self.NO_GAS, self.MAX_GAS + 2000, 100):
-        accel = 0 if gas < 0 else gas / 1000
-        self.safety.set_controls_allowed(controls_allowed)
-        send = (controls_allowed and 0 <= gas <= self.MAX_GAS) or gas == self.NO_GAS
-        self.assertEqual(send, self._tx(self._send_gas_brake_msg(gas, accel)), (controls_allowed, gas, accel))
+      for gas_pressed in [True, False]:
+        for gas in np.arange(self.NO_GAS, self.MAX_GAS + 2000, 100):
+          accel = 0 if gas < 0 else gas / 1000
+          self.safety.set_controls_allowed(controls_allowed)
+          self.safety.set_gas_pressed(gas_pressed)
+          # positive gas and accel are allowed during a gas override
+          send = (controls_allowed and 0 <= gas <= self.MAX_GAS) or gas == self.NO_GAS
+          self.assertEqual(send, self._tx(self._send_gas_brake_msg(gas, accel)), (controls_allowed, gas_pressed, gas, accel))
 
   def test_brake_safety_check(self):
     for controls_allowed in [True, False]:
-      for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.01):
-        accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
-        self.safety.set_controls_allowed(controls_allowed)
-        send = self.MIN_ACCEL <= accel <= self.MAX_ACCEL if controls_allowed else accel == 0
-        self.assertEqual(send, self._tx(self._send_gas_brake_msg(self.NO_GAS, accel)), (controls_allowed, accel))
+      for gas_pressed in [True, False]:
+        for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.01):
+          accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
+          self.safety.set_controls_allowed(controls_allowed)
+          self.safety.set_gas_pressed(gas_pressed)
+          allowed = controls_allowed and (accel >= 0 or not gas_pressed)
+          send = self.MIN_ACCEL <= accel <= self.MAX_ACCEL if allowed else accel == 0
+          self.assertEqual(send, self._tx(self._send_gas_brake_msg(self.NO_GAS, accel)), (controls_allowed, gas_pressed, accel))
 
   def test_block_aeb(self):
     for controls_allowed in [True, False]:

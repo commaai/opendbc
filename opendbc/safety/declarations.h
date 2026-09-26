@@ -157,12 +157,14 @@ typedef struct {
   const int max_accel;
   const int min_accel;
   const int inactive_accel;
+  const int zero_accel;  // accel at or above this is gas, below is braking
 
   // gas & brake cmd limits
   // inactive and min gas are 0 on most safety modes
   const int max_gas;
   const int min_gas;
   const int inactive_gas;
+  const int zero_gas;  // gas at or above this is propulsion, below is regen/engine braking
   const int max_brake;
 
   // transmission rpm limits
@@ -236,7 +238,8 @@ bool safety_rx_hook(const CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
 int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
-bool get_longitudinal_allowed(void);
+bool get_longitudinal_gas_allowed(void);
+bool get_longitudinal_brake_allowed(void);
 int ROUND(float val);
 void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
 void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
@@ -259,6 +262,7 @@ extern bool controls_allowed;
 extern bool relay_malfunction;
 extern bool gas_pressed;
 extern bool gas_pressed_prev;
+extern uint32_t gas_pressed_ts;  // timestamp of the last rising edge of gas_pressed
 extern bool brake_pressed;
 extern bool brake_pressed_prev;
 extern bool regen_braking;

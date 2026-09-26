@@ -295,12 +295,13 @@ class TestCarModelBase(unittest.TestCase):
       # Some archived MLB routes record alpha longitudinal, which current MLB safety does not support.
       controller_params = self.CarInterface.get_params(self.platform, self.fingerprint, self.CP.carFw, False, False, docs=False)
 
-    def test_car_controller(car_control):
+    def test_car_controller(car_control, gas_pressed=False):
       now_nanos = 0
       msgs_sent = 0
       CI = self.CarInterface(controller_params)
       for _ in range(round(10.0 / DT_CTRL)):
         CI.update([])
+        CI.CS.out.gasPressed = gas_pressed
         _, sendcan = CI.apply(car_control, now_nanos)
         now_nanos += DT_CTRL * 1e9
         msgs_sent += len(sendcan)
@@ -319,6 +320,14 @@ class TestCarModelBase(unittest.TestCase):
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
 
+    # The car reports a gas press a frame or two before carControl catches up. Safety blocks braking as soon
+    # as it sees the gas pressed, so the car controller must respond to the override immediately
+    if controller_params.openpilotLongitudinalControl:
+      self.safety.set_controls_allowed(True)
+      self.safety.set_gas_pressed(True)
+      CC = structs.CarControl(enabled=True, longActive=True, actuators=structs.CarControl.Actuators(accel=-2.0))
+      test_car_controller(CC.as_reader(), gas_pressed=True)
+
   @fuzzy_test(max_examples=300)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
     if self.CP.dashcamOnly:
@@ -330,7 +339,7 @@ class TestCarModelBase(unittest.TestCase):
     vehicle_speed_seen = self.CP.steerControlType == SteerControlType.angle and not self.CP.notCar
 
     for n, dat in enumerate(msgs):
-      prev_panda_gas = self.safety.get_gas_pressed_prev()
+      prev_panda_gas = self.safety.get_gas_pressed()
       prev_panda_brake = self.safety.get_brake_pressed_prev()
       prev_panda_regen_braking = self.safety.get_regen_braking_prev()
       prev_panda_steering_disengage = self.safety.get_steering_disengage_prev()
@@ -348,8 +357,8 @@ class TestCarModelBase(unittest.TestCase):
       if n < 5:
         continue
 
-      if self.safety.get_gas_pressed_prev() != prev_panda_gas:
-        self.assertEqual(CS.gasPressed, self.safety.get_gas_pressed_prev())
+      if self.safety.get_gas_pressed() != prev_panda_gas:
+        self.assertEqual(CS.gasPressed, self.safety.get_gas_pressed())
       if self.safety.get_brake_pressed_prev() != prev_panda_brake:
         self.assertEqual(CS.brakePressed, self.safety.get_brake_pressed_prev())
       if self.safety.get_regen_braking_prev() != prev_panda_regen_braking:
@@ -400,7 +409,7 @@ class TestCarModelBase(unittest.TestCase):
           self.safety.set_controls_allowed(0)
         continue
 
-      checks["gasPressed"] += CS.gasPressed != self.safety.get_gas_pressed_prev()
+      checks["gasPressed"] += CS.gasPressed != self.safety.get_gas_pressed()
       checks["standstill"] += (CS.standstill == self.safety.get_vehicle_moving()) and not self.CP.notCar
 
       if self.safety.get_vehicle_speed_min() > 0 or self.safety.get_vehicle_speed_max() > 0:

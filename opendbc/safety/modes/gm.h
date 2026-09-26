@@ -132,7 +132,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
     bool violation = false;
     // Allow apply bit in pre-enabled and overriding states
-    violation |= !controls_allowed && apply;
+    violation |= !get_longitudinal_gas_allowed() && apply;
     violation |= longitudinal_gas_checks(gas_regen, *gm_long_limits);
 
     if (violation) {
@@ -164,6 +164,7 @@ static safety_config gm_init(uint16_t param) {
     .max_gas = 1018 * GM_GAS_TO_CAN,
     .min_gas = -650 * GM_GAS_TO_CAN,
     .inactive_gas = -650 * GM_GAS_TO_CAN,
+    .zero_gas = 0,
     .max_brake = 400,
   };
 
@@ -176,6 +177,7 @@ static safety_config gm_init(uint16_t param) {
     .max_gas = 1346 * GM_GAS_TO_CAN,
     .min_gas = -540 * GM_GAS_TO_CAN,
     .inactive_gas = -500 * GM_GAS_TO_CAN,
+    .zero_gas = 0,
     .max_brake = 400,
   };
 
