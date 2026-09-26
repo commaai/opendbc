@@ -216,10 +216,10 @@ def create_legacy_brake_command(packer, bus):
   return packer.make_can_msg("LEGACY_BRAKE_COMMAND", bus, {})
 
 
-def spam_buttons_command(packer, CAN, button_val, CP):
+def spam_buttons_command(packer, CAN, cruise_button, cruise_setting, CP):
   values = {
-    'CRUISE_BUTTONS': button_val,
-    'CRUISE_SETTING': 0,
+    'CRUISE_BUTTONS': cruise_button,
+    'CRUISE_SETTING': cruise_setting,
   }
   # send buttons to camera on radarless (camera does ACC) cars
   bus = CAN.camera if CP.flags & HondaFlags.BOSCH_RADARLESS else CAN.pt
