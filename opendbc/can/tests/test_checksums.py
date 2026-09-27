@@ -6,28 +6,6 @@ from opendbc.can.parser import get_raw_value
 
 class TestCanChecksums(unittest.TestCase):
 
-  def test_ford_captured_checksums(self):
-    # Captured CAN payloads from the 11 Ford routes in car/tests/routes.py.
-    packer = CANPacker("ford_lincoln_base_pt")
-    samples = {
-      0x7d: ("0000f0f0001c181b", "e1b63cc0d61ff801"),
-      0x91: ("7a47834d1a4ef000", "fffe80f424667000"),
-      0x92: ("6e016f7673ada002", "7178703873bdaaab"),
-      0x202: ("04000000600007f5", "0fff9000600100fb"),
-      0x214: ("000000000000f0f0", "8000000080007f00"),
-      0x3d6: ("00007ccfa5f78476", "10297caf91fe7f72"),
-      0x414: ("7cd240b000000000", "7dfa7c7800000000"),
-      0x415: ("0000c0fc07f767f7", "1d14e0c308036803"),
-      0x450: ("014101fd28000000", "a95d10f7a8000000"),
-      0x4b0: ("00ef800060063832", "ff108000600000f9"),
-    }
-    for address, payloads in samples.items():
-      sig = next(s for s in packer.dbc.addr_to_msg[address].sigs.values() if s.calc_checksum is not None)
-      for payload in payloads:
-        with self.subTest(address=hex(address), payload=payload):
-          data = bytearray.fromhex(payload)
-          self.assertEqual(sig.calc_checksum(address, sig, data), get_raw_value(data, sig))
-
   def test_rivian_captured_checksums(self):
     # Captured CAN payloads from the Gen 1 and Gen 2 Rivian routes in car/tests/routes.py.
     packer = CANPacker("rivian_primary_actuator")

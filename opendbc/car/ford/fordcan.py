@@ -105,7 +105,12 @@ def create_lat_ctl2_msg(packer, CAN: CanBus, mode: int, path_offset: float, path
     "LatCtlCrv_NoRate2_Actl": curvature_rate,   # [-0.001024|0.001023] 1/meter^2
     "HandsOffCnfm_B_Rq": 0,                     # 0=Inactive, 1=Active [0|1]
     "LatCtlPath_No_Cnt": counter,               # [0|15]
+    "LatCtlPath_No_Cs": 0,                      # [0|255]
   }
+
+  # calculate checksum
+  dat = packer.make_can_msg("LateralMotionControl2", 0, values)[1]
+  values["LatCtlPath_No_Cs"] = calculate_lat_ctl2_checksum(mode, counter, dat)
 
   return packer.make_can_msg("LateralMotionControl2", CAN.main, values)
 
@@ -333,31 +338,3 @@ def create_button_msg(packer, bus: int, stock_values: dict, cancel=False, resume
     "TjaButtnOnOffPress": 1 if tja_toggle else 0,   # LCA/TJA toggle button
   })
   return packer.make_can_msg("Steering_Data_FD1", bus, values)
-
-
-def ford_checksum(address: int, sig, d: bytearray) -> int:
-  if address == 0x91:  # Yaw_Data_FD1
-    chksum = d[0] + d[1] + d[2] + d[3] + d[5]
-    chksum += (d[6] >> 6) + ((d[6] >> 4) & 0x3)
-  elif address in (0x414, 0x415):  # BrakeSnData_6, BrakeSysFeatures
-    chksum = d[0] + d[1] + ((d[2] >> 2) & 0xF) + (d[2] >> 6)
-  elif address == 0x202:  # EngVehicleSpThrottle2
-    chksum = ((d[2] >> 3) & 0xF) + ((d[4] >> 5) & 0x3) + d[6] + d[7]
-  elif address == 0x7D:  # BrakeSnData_4: requested brake torque and counter
-    chksum = (d[0] & 0x1F) + d[1] + (d[3] >> 4)
-  elif address == 0x92:  # Accel_Data_FD1: three accelerations, quality flags, and counter
-    chksum = d[7]
-    for i in (0, 2, 4):
-      chksum += (d[i] & 0x1F) + d[i + 1] + ((d[i] >> 5) & 0x3)
-  elif address == 0x214:  # DesiredTorqBrk_2: minimum wheel torque and counter
-    chksum = d[0] + d[1] + (d[7] >> 4)
-  elif address == 0x3D6:  # LateralMotionControl2
-    return calculate_lat_ctl2_checksum((d[0] >> 4) & 0x7, (d[7] >> 1) & 0xF, d)
-  elif address == 0x450:  # DrvStatMonData: engagement level, confidence, and counter
-    chksum = ((d[1] >> 3) & 0x7) + (d[1] & 0x7) + (d[2] & 0xF)
-  elif address == 0x4B0:  # ABS_BrkBst_Data: brake hold, driver brake torque, and counter
-    torque = (d[5] << 5) | (d[6] >> 3)
-    chksum = torque + (torque >> 8) + (d[4] & 0x7) + (d[4] >> 4)
-  else:
-    raise ValueError(f"Unsupported Ford checksum address: {address:#x}")
-  return 0xFF - (chksum & 0xFF)
