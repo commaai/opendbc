@@ -83,26 +83,6 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
       self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
                        f"expected {brake_pressed=} with {motor_03_signal=} and {esp_05_signal=}")
 
-  def test_torque_measurements(self):
-    # TODO: make this test work with all cars
-    self._rx(self._torque_driver_msg(50))
-    self._rx(self._torque_driver_msg(-50))
-    self._rx(self._torque_driver_msg(0))
-    self._rx(self._torque_driver_msg(0))
-    self._rx(self._torque_driver_msg(0))
-    self._rx(self._torque_driver_msg(0))
-
-    self.assertEqual(-50, self.safety.get_torque_driver_min())
-    self.assertEqual(50, self.safety.get_torque_driver_max())
-
-    self._rx(self._torque_driver_msg(0))
-    self.assertEqual(0, self.safety.get_torque_driver_max())
-    self.assertEqual(-50, self.safety.get_torque_driver_min())
-
-    self._rx(self._torque_driver_msg(0))
-    self.assertEqual(0, self.safety.get_torque_driver_max())
-    self.assertEqual(0, self.safety.get_torque_driver_min())
-
 
 class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LS_01, 0], [MSG_LS_01, 2]]
