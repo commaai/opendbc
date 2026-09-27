@@ -5,7 +5,10 @@ from tqdm import tqdm
 
 from opendbc.car.carlog import carlog
 from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.safety.tests.safety_replay.helpers import package_can_msg
+
+
+def package_can_msg(msg):
+  return libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
 
 
 # replay a drive to check for safety violations
