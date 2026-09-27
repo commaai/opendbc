@@ -102,12 +102,12 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         with self.subTest(message=name, byte=byte):
           self.safety.set_safety_hooks(CarParams.SafetyModel.byd, 0)
           self.safety.init_tests()
-          for counter in range(1, 17):
-            msg = self.packer.make_can_msg_safety(name, bus, {signal: initial, "COUNTER": counter % 16})
+          for _ in range(16):
+            msg = self.packer.make_can_msg_safety(name, bus, {signal: initial})
             self.assertTrue(self._rx(msg))
           speed_min = self.safety.get_vehicle_speed_min()
           speed_max = self.safety.get_vehicle_speed_max()
-          msg = self.packer.make_can_msg_safety(name, bus, {signal: corrupt, "COUNTER": 1})
+          msg = self.packer.make_can_msg_safety(name, bus, {signal: corrupt})
           msg[0].data[byte] ^= 0xFF
           self.safety.set_controls_allowed(name == "WHEELSPEED_CLEAN")
           self.assertFalse(self._rx(msg))
@@ -122,8 +122,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     ):
       with self.subTest(message=name):
         # Check both counter locations and rollover with valid checksums.
-        for counter in range(1, 33):
-          msg = self.packer.make_can_msg_safety(name, bus, {signal: value, "COUNTER": counter % 16})
+        for _ in range(32):
+          msg = self.packer.make_can_msg_safety(name, bus, {signal: value})
           self.assertTrue(self._rx(msg))
         self.safety.set_controls_allowed(True)
         # Replayed frames are rejected after the common counter tolerance.
@@ -132,8 +132,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           self.assertEqual(should_rx, self._rx(msg))
           self.assertEqual(should_rx, self.safety.get_controls_allowed())
         # A valid sequence clears the counter faults.
-        for counter in range(1, common.MAX_WRONG_COUNTERS + 1):
-          msg = self.packer.make_can_msg_safety(name, bus, {signal: 0, "COUNTER": counter})
+        for _ in range(common.MAX_WRONG_COUNTERS):
+          msg = self.packer.make_can_msg_safety(name, bus, {signal: 0})
           self.assertTrue(self._rx(msg))
 
   def test_angle_cmd_when_enabled(self):

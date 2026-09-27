@@ -12,11 +12,9 @@ class TestBody(common.SafetyTest):
   TX_MSGS = [[0x250, 0], [0x251, 0],
              [0x1, 0], [0x1, 1], [0x1, 2], [0x1, 3]]
   FWD_BUS_LOOKUP = {}
-  counter = 0
 
   def _motors_data_msg(self, speed_l, speed_r):
-    values = {"SPEED_L": speed_l, "SPEED_R": speed_r, "COUNTER": self.counter % 16}
-    self.__class__.counter += 1
+    values = {"SPEED_L": speed_l, "SPEED_R": speed_r}
     return self.packer.make_can_msg_safety("MOTORS_DATA", 0, values)
 
   def _torque_cmd_msg(self, torque_l, torque_r):
