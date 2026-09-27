@@ -30,8 +30,8 @@ class TestRxBatch(unittest.TestCase):
     reset()
     expected = [bool(safety.safety_rx_hook(packet)) for packet in packets]
     expected_state = snapshot()
-    self.assertIn(False, expected)
-    self.assertIn(True, expected)
+    self.assertFalse(all(expected))
+    self.assertTrue(any(expected))
     pointers = ffi.new("CANPacket_t *[]", packets)
     valid = ffi.new("bool[]", len(packets))
     reset()
