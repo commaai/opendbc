@@ -220,11 +220,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
   elif dbc_name.startswith("byd_"):
     return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
   elif dbc_name == "ford_lincoln_base_pt":
-    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, checksum_signals={
-      0x91: "VehRollYawW_No_Cs",
-      0x415: "VehVActlBrk_No_Cs",
-      0x202: "VehVActlEng_No_Cs",
-    })
+    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum)
   elif dbc_name == "mg":
     return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum, checksum_signals={
       0x1B6: "BrkPdlAppdChksmHSC2",
@@ -233,13 +229,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
       0x242: "ACCSysChksm_SCSHSC2",
     })
   elif dbc_name == "rivian_primary_actuator":
-    return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum, checksum_signals={
-      0x208: "ESP_Status_Checksum",
-      0x150: "VDM_PropStatus_Checksum",
-      0x380: "EPAS_SytemStatus_Checksum",
-      0x38F: "iBESP2_Checksum",
-      0x100: "ACM_Status_Checksum",
-    })
+    return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum)
   return None
 
 
@@ -253,7 +243,10 @@ def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_
       return
     if chk.setup_signal:
       chk.setup_signal(sig, dbc_name, line_num)
-    if sig.name == "CHECKSUM":
+    # Only enable suffix-based checksums for messages with known algorithms.
+    if (sig.name == "CHECKSUM" or
+        (chk.checksum_type == SignalType.FORD_CHECKSUM and sig.name.endswith("_Cs") and address in (0x91, 0x415, 0x202)) or
+        (chk.checksum_type == SignalType.RIVIAN_CHECKSUM and sig.name.endswith("_Checksum") and address in (0x208, 0x150, 0x380, 0x38F, 0x100))):
       sig.type = chk.checksum_type
       sig.calc_checksum = chk.calc_checksum
     elif sig.name == "COUNTER":
