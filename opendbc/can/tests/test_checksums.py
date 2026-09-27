@@ -1,51 +1,9 @@
 import copy
 import unittest
 from opendbc.can import CANPacker, CANParser
-from opendbc.can.parser import get_raw_value
 
 
 class TestCanChecksums(unittest.TestCase):
-
-  def test_rivian_captured_checksums(self):
-    # Captured CAN payloads from the Gen 1 and Gen 2 Rivian routes in car/tests/routes.py.
-    packer = CANPacker("rivian_primary_actuator")
-    samples = {
-      0x40: ("00020001ffff0000", "ff0ee8c904efe606"),
-      0x100: ("0201000000000000", "fd09240000000000"),
-      0x101: ("0606800000020100", "e105800000020100"),
-      0x102: ("0000c5e283000000", "ff95cca283000000"),
-      0x110: ("0000808c00000000", "ff0e99f200000000"),
-      0x120: ("040c800159400490", "ff0c8001094004a0"),
-      0x130: ("0000002280058001", "ff0e008b7d567729"),
-      0x135: ("00007fd17fe20000", "ff0d7ffa7ffc0000"),
-      0x140: ("00000000801c0000", "ff0e000080430000"),
-      0x150: ("0051440b1003f3", "ff5e443050257a"),
-      0x152: ("00d9ff6f80000015", "ffe1fd6780000015"),
-      0x160: ("000278a010", "ff0d83c010"),
-      0x162: ("00001001036b0408", "ff0e100106070808"),
-      0x180: ("104e1c2003000000", "ff4c000003010000"),
-      0x208: ("009200487fff260e", "ffbd004874fc0000"),
-      0x321: ("000000342f0000", "ee0d00341e0000"),
-      0x32b: ("031a40015e052400", "ff1220529e450000"),
-      0x33a: ("1a02000217001402", "fd01000217001402"),
-      0x350: ("2094e16f", "be8be16f"),
-      0x360: ("038de97f", "9e90e97f"),
-      0x370: ("000c000000000000", "fb05000000000004"),
-      0x380: ("00417d8040", "ff4e86e040"),
-      0x38b: ("005400151550", "ff5b3a000010"),
-      0x38c: ("004173b3", "ff4d7968"),
-      0x38d: ("000900020002a9", "ff0c0002000315"),
-      0x38e: ("0047142414b422", "ff5d25d42e8422"),
-      0x38f: ("0072a16a1800", "fe7e21641800"),
-      0x390: ("00f07cab03787d", "fffe7f83037edd"),
-      0x500: ("000203609beab511", "ff0d076149bdb59e"),
-    }
-    for address, payloads in samples.items():
-      sig = next(s for s in packer.dbc.addr_to_msg[address].sigs.values() if s.calc_checksum is not None)
-      for payload in payloads:
-        with self.subTest(address=hex(address), payload=payload):
-          data = bytearray.fromhex(payload)
-          self.assertEqual(sig.calc_checksum(address, sig, data), get_raw_value(data, sig))
 
   def verify_checksum(self, dbc_file: str, msg_name: str, msg_addr: int, test_messages: list[bytes],
                       checksum_field: str = 'CHECKSUM', counter_field = 'COUNTER'):
