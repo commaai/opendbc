@@ -5,27 +5,30 @@
 static uint8_t mg_crc_lut[256];
 
 static uint32_t mg_get_checksum(const CANPacket_t *msg) {
+  uint32_t checksum = msg->data[7];
   if (msg->addr == 0x1ecU) {
-    return ((msg->data[2] & 0x7FU) << 8) | msg->data[3];
+    checksum = ((msg->data[2] & 0x7FU) << 8) | msg->data[3];
   }
-  return msg->data[7];
+  return checksum;
 }
 
 static uint32_t mg_compute_checksum(const CANPacket_t *msg) {
+  uint32_t checksum;
   if (msg->addr == 0x1ecU) {
     uint32_t torque = ((msg->data[0] & 0x7U) << 8) | msg->data[1];
     uint32_t valid = (msg->data[0] >> 3) & 1U;
     uint32_t status = (msg->data[6] >> 4) & 0x7U;
     uint32_t counter = msg->data[0] >> 4;
-    return (0U - ((torque << 1) + (status << 12) + valid + counter)) & 0x7FFFU;
+    checksum = (0U - ((torque << 1) + (status << 12) + valid + counter)) & 0x7FFFU;
+  } else {
+    checksum = 0xFFU;
+    for (int i = 0; i < 7; i++) {
+      checksum ^= msg->data[i];
+      checksum = mg_crc_lut[checksum];
+    }
+    checksum ^= 0xFFU;
   }
-
-  uint8_t checksum = 0xFFU;
-  for (int i = 0; i < 7; i++) {
-    checksum ^= msg->data[i];
-    checksum = mg_crc_lut[checksum];
-  }
-  return checksum ^ 0xFFU;
+  return checksum;
 }
 
 static uint8_t mg_get_counter(const CANPacket_t *msg) {
