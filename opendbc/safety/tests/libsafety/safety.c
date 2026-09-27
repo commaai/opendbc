@@ -173,6 +173,36 @@ int get_angle_meas_max(void){
   return angle_meas.max;
 }
 
+typedef struct {
+  bool gas_pressed;
+  bool brake_pressed;
+  bool regen_braking;
+  bool steering_disengage;
+  bool vehicle_moving;
+  bool controls_allowed;
+  bool cruise_engaged;
+  bool acc_main_on;
+  float vehicle_speed_min;
+  float vehicle_speed_max;
+  int angle_min;
+  int angle_max;
+} SafetyState;
+
+void get_safety_state(SafetyState *state) {
+  state->gas_pressed = get_gas_pressed_prev();
+  state->brake_pressed = get_brake_pressed_prev();
+  state->regen_braking = get_regen_braking_prev();
+  state->steering_disengage = get_steering_disengage_prev();
+  state->vehicle_moving = get_vehicle_moving();
+  state->controls_allowed = get_controls_allowed();
+  state->cruise_engaged = get_cruise_engaged_prev();
+  state->acc_main_on = get_acc_main_on();
+  state->vehicle_speed_min = get_vehicle_speed_min();
+  state->vehicle_speed_max = get_vehicle_speed_max();
+  state->angle_min = get_angle_meas_min();
+  state->angle_max = get_angle_meas_max();
+}
+
 void set_desired_curvature_last(int t){
   curvature_state.desired_last = t;
 }

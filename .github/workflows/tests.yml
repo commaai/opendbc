@@ -101,12 +101,18 @@ jobs:
     steps:
     - uses: actions/checkout@v7
     - run: ./setup.sh
+    - name: Fixture cache version
+      id: fixture-version
+      run: |
+        fixture_version=$(.venv/bin/python -c 'from opendbc.car.tests.test_models import DATA_CACHE_VERSION; print(DATA_CACHE_VERSION)')
+        echo "version=$fixture_version" >> "$GITHUB_OUTPUT"
     - name: Cache test routes
       id: routes-cache
       uses: actions/cache@v6
       with:
-        path: /tmp/comma_download_cache/model_data
-        key: car_models-${{ hashFiles('opendbc/car/tests/test_models.py', 'opendbc/car/tests/routes.py', 'opendbc/car/logreader.py', 'opendbc/car/can_definitions.py', 'opendbc/car/*.capnp') }}-data
+        path: /tmp/comma_download_cache/model_data/${{ steps.fixture-version.outputs.version }}
+        key: car_models-data-${{ steps.fixture-version.outputs.version }}-${{ hashFiles('opendbc/car/tests/routes.py') }}
+        restore-keys: car_models-data-${{ steps.fixture-version.outputs.version }}-
     - name: Test car models
       timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.routes-cache.outputs.cache-hit == 'true') && 3 || 6 }}
       run: source .venv/bin/activate && MAX_EXAMPLES=1 opendbc/car/tests/test_models.py

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import hashlib
+import inspect
 import json
 import os
 import pickle
@@ -44,11 +45,6 @@ NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
 JOB_ID = int(os.environ.get("JOB_ID", "0"))
 RELAY_TRANSITION_TIMEOUT_US = 10_000_000
 DOWNLOAD_CACHE_ROOT = Path(os.environ.get("COMMA_CACHE", "/tmp/comma_download_cache"))
-DATA_CACHE_VERSION = hashlib.sha256(b"".join(
-  path.read_bytes() for path in [Path(__file__), Path(__file__).parents[1] / "logreader.py",
-                                Path(__file__).parents[1] / "can_definitions.py", *sorted(Path(__file__).parents[1].glob("*.capnp"))]
-)).hexdigest()
-MODEL_DATA_CACHE_ROOT = DOWNLOAD_CACHE_ROOT / "model_data" / DATA_CACHE_VERSION
 OPENPILOT_CI_URL = "https://commadataci.blob.core.windows.net/openpilotci"
 COMMA_API_URL = "https://api.commadotai.com"
 
@@ -414,6 +410,7 @@ class TestCarModelBase(unittest.TestCase):
       raw, _ = self.safety_can[idx]
       self.safety.safety_rx_hook_batch(raw, len(raw), libsafety_py.ffi.NULL)
 
+    safety_state = libsafety_py.ffi.new("SafetyState *")
     controls_allowed_prev = False
     CS_prev = car.CarState.new_message()
     checks = defaultdict(int)
@@ -432,48 +429,58 @@ class TestCarModelBase(unittest.TestCase):
           self.safety.set_controls_allowed(0)
         continue
 
-      checks["gasPressed"] += CS.gasPressed != self.safety.get_gas_pressed_prev()
-      checks["standstill"] += (CS.standstill == self.safety.get_vehicle_moving()) and not self.CP.notCar
+      self.safety.get_safety_state(safety_state)
+      checks["gasPressed"] += CS.gasPressed != safety_state.gas_pressed
+      checks["standstill"] += (CS.standstill == safety_state.vehicle_moving) and not self.CP.notCar
 
-      if self.safety.get_vehicle_speed_min() > 0 or self.safety.get_vehicle_speed_max() > 0:
+      if safety_state.vehicle_speed_min > 0 or safety_state.vehicle_speed_max > 0:
         vehicle_speed_seen = True
       if vehicle_speed_seen:
         v_ego_raw = CS.vEgoRaw / self.CP.wheelSpeedFactor
-        checks["vEgoRaw"] += (v_ego_raw > self.safety.get_vehicle_speed_max() + 1e-3 or
-                              v_ego_raw < self.safety.get_vehicle_speed_min() - 1e-3)
+        checks["vEgoRaw"] += (v_ego_raw > safety_state.vehicle_speed_max + 1e-3 or
+                              v_ego_raw < safety_state.vehicle_speed_min - 1e-3)
 
       if self.CP.steerControlType == SteerControlType.angle and not self.CP.notCar and self.CP.brand not in ("ford", "volkswagen"):
         angle_can = (CS.steeringAngleDeg + CS.steeringAngleOffsetDeg) * ANGLE_DEG_TO_CAN[self.CP.brand]
-        checks["steeringAngleDeg"] += (angle_can > self.safety.get_angle_meas_max() + 1 or
-                                       angle_can < self.safety.get_angle_meas_min() - 1)
+        checks["steeringAngleDeg"] += (angle_can > safety_state.angle_max + 1 or
+                                       angle_can < safety_state.angle_min - 1)
 
-      checks["brakePressed"] += CS.brakePressed != self.safety.get_brake_pressed_prev()
-      checks["regenBraking"] += CS.regenBraking != self.safety.get_regen_braking_prev()
-      checks["steeringDisengage"] += CS.steeringDisengage != self.safety.get_steering_disengage_prev()
+      checks["brakePressed"] += CS.brakePressed != safety_state.brake_pressed
+      checks["regenBraking"] += CS.regenBraking != safety_state.regen_braking
+      checks["steeringDisengage"] += CS.steeringDisengage != safety_state.steering_disengage
 
       if self.CP.pcmCruise:
         if self.CP.brand == "honda" and not (self.CP.flags & HondaFlags.BOSCH):
           if CS.cruiseState.enabled and not CS_prev.cruiseState.enabled:
-            checks["controlsAllowed"] += not self.safety.get_controls_allowed()
+            checks["controlsAllowed"] += not safety_state.controls_allowed
         else:
-          checks["controlsAllowed"] += not CS.cruiseState.enabled and self.safety.get_controls_allowed()
+          checks["controlsAllowed"] += not CS.cruiseState.enabled and safety_state.controls_allowed
         if not self.CP.notCar:
-          checks["cruiseState"] += CS.cruiseState.enabled != self.safety.get_cruise_engaged_prev()
+          checks["cruiseState"] += CS.cruiseState.enabled != safety_state.cruise_engaged
       else:
         button_enable = CS.buttonEnable and (not CS.brakePressed or CS.standstill)
-        mismatch = button_enable != (self.safety.get_controls_allowed() and not controls_allowed_prev)
+        mismatch = button_enable != (safety_state.controls_allowed and not controls_allowed_prev)
         checks["controlsAllowed"] += mismatch
-        controls_allowed_prev = self.safety.get_controls_allowed()
+        controls_allowed_prev = safety_state.controls_allowed
         if button_enable and not mismatch:
           self.safety.set_controls_allowed(False)
 
       if self.CP.brand == "honda":
-        checks["mainOn"] += CS.cruiseState.available != self.safety.get_acc_main_on()
+        checks["mainOn"] += CS.cruiseState.available != safety_state.acc_main_on
       CS_prev = CS
 
     failed_checks = {key: value for key, value in checks.items() if value > 0}
     self.assertFalse(failed_checks, f"panda safety doesn't agree with CarState: {failed_checks}")
 
+
+# Changes to the input reader or schema invalidate fixtures; changes to tests do not.
+DATA_CACHE_VERSION = hashlib.sha256(
+  inspect.getsource(TestCarModelBase.get_testing_data_from_logreader).encode() +
+  inspect.getsource(TestCarModelBase.get_testing_data).encode() +
+  b"".join(path.read_bytes() for path in [Path(__file__).parents[1] / "logreader.py",
+                                       Path(__file__).parents[1] / "can_definitions.py", *sorted(Path(__file__).parents[1].glob("*.capnp"))])
+).hexdigest()
+MODEL_DATA_CACHE_ROOT = DOWNLOAD_CACHE_ROOT / "model_data" / DATA_CACHE_VERSION
 
 DIRECTLY_CALLED = Path(sys.argv[0]).resolve() == Path(__file__).resolve()
 

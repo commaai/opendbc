@@ -24,6 +24,24 @@ class TestRxBatch(unittest.TestCase):
       safety.init_tests()
 
     def snapshot():
+      state = ffi.new("SafetyState *")
+      safety.get_safety_state(state)
+      getters = {
+        "gas_pressed": safety.get_gas_pressed_prev,
+        "brake_pressed": safety.get_brake_pressed_prev,
+        "regen_braking": safety.get_regen_braking_prev,
+        "steering_disengage": safety.get_steering_disengage_prev,
+        "vehicle_moving": safety.get_vehicle_moving,
+        "controls_allowed": safety.get_controls_allowed,
+        "cruise_engaged": safety.get_cruise_engaged_prev,
+        "acc_main_on": safety.get_acc_main_on,
+        "vehicle_speed_min": safety.get_vehicle_speed_min,
+        "vehicle_speed_max": safety.get_vehicle_speed_max,
+        "angle_min": safety.get_angle_meas_min,
+        "angle_max": safety.get_angle_meas_max,
+      }
+      for field, getter in getters.items():
+        self.assertEqual(getattr(state, field), getter(), field)
       return (safety.get_controls_allowed(), safety.get_gas_pressed_prev(), safety.get_brake_pressed_prev(),
               safety.get_cruise_engaged_prev(), safety.get_relay_malfunction(), safety.safety_config_valid())
 
