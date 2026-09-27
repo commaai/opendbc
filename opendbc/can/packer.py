@@ -28,13 +28,13 @@ class CANPacker:
       if sig.type == SignalType.COUNTER or sig.name == "COUNTER":
         self.counters[address] = int(value)
         counter_set = True
-    sig_counter = next((s for s in msg.sigs.values() if s.type == SignalType.COUNTER or s.name == "COUNTER"), None)
+    sig_counter = msg.counter
     if sig_counter and not counter_set:
       if address not in self.counters:
         self.counters[address] = 0
       set_value(dat, sig_counter, self.counters[address])
       self.counters[address] = (self.counters[address] + 1) % (1 << sig_counter.size)
-    sig_checksum = next((s for s in msg.sigs.values() if s.type > SignalType.COUNTER), None)
+    sig_checksum = msg.checksum
     if sig_checksum and sig_checksum.calc_checksum:
       checksum = sig_checksum.calc_checksum(address, sig_checksum, dat)
       set_value(dat, sig_checksum, checksum)
@@ -57,6 +57,20 @@ class CANPacker:
 
 def set_value(msg: bytearray, sig: Signal, ival: int) -> None:
   i = sig.lsb // 8
+  shift = sig.lsb % 8
+  if 0 <= i < len(msg) and sig.size + shift <= 8:
+    mask = ((1 << sig.size) - 1) << shift
+    msg[i] = (msg[i] & ~mask) | ((ival << shift) & mask)
+    return
+
+  shift = sig.lsb if sig.is_little_endian else len(msg) * 8 - (sig.msb ^ 7) - sig.size
+  if shift >= 0 and sig.msb < len(msg) * 8:
+    endian = "little" if sig.is_little_endian else "big"
+    mask = (1 << sig.size) - 1
+    data = (int.from_bytes(msg, endian) & ~(mask << shift)) | ((ival & mask) << shift)
+    msg[:] = data.to_bytes(len(msg), endian)
+    return
+
   bits = sig.size
   if sig.size < 64:
     ival &= (1 << sig.size) - 1

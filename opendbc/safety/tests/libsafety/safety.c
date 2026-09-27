@@ -13,6 +13,18 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
 
+int safety_rx_hook_batch(CANPacket_t **packets, int count, bool *valid) {
+  int failures = 0;
+  for (int i = 0; i < count; i++) {
+    bool accepted = safety_rx_hook(packets[i]);
+    if (valid != NULL) {
+      valid[i] = accepted;
+    }
+    failures += !accepted;
+  }
+  return failures;
+}
+
 bool safety_config_valid() {
   if (current_safety_config.rx_checks_len <= 0) {
     printf("missing RX checks\n");

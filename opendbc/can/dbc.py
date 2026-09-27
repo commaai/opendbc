@@ -2,7 +2,7 @@ import re
 import os
 from collections.abc import Callable
 from dataclasses import dataclass
-from functools import cache
+from functools import cache, cached_property
 
 from opendbc import DBC_PATH, get_generated_dbcs
 
@@ -59,6 +59,14 @@ class Msg:
   address: int
   size: int
   sigs: dict[str, Signal]
+
+  @cached_property
+  def counter(self) -> Signal | None:
+    return next((sig for sig in self.sigs.values() if sig.type == SignalType.COUNTER or sig.name == "COUNTER"), None)
+
+  @cached_property
+  def checksum(self) -> Signal | None:
+    return next((sig for sig in self.sigs.values() if sig.type > SignalType.COUNTER), None)
 
 
 @dataclass

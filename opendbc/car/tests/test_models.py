@@ -3,10 +3,13 @@
 import hashlib
 import json
 import os
+import pickle
 import sys
 import time
 import unittest
+import zstandard as zstd
 from collections import Counter, defaultdict
+from functools import cache
 from pathlib import Path
 from urllib.parse import quote, urlparse
 from urllib.request import urlopen
@@ -41,6 +44,11 @@ NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
 JOB_ID = int(os.environ.get("JOB_ID", "0"))
 RELAY_TRANSITION_TIMEOUT_US = 10_000_000
 DOWNLOAD_CACHE_ROOT = Path(os.environ.get("COMMA_CACHE", "/tmp/comma_download_cache"))
+DATA_CACHE_VERSION = hashlib.sha256(b"".join(
+  path.read_bytes() for path in [Path(__file__), Path(__file__).parents[1] / "logreader.py",
+                                Path(__file__).parents[1] / "can_definitions.py", *sorted(Path(__file__).parents[1].glob("*.capnp"))]
+)).hexdigest()
+MODEL_DATA_CACHE_ROOT = DOWNLOAD_CACHE_ROOT / "model_data" / DATA_CACHE_VERSION
 OPENPILOT_CI_URL = "https://commadataci.blob.core.windows.net/openpilotci"
 COMMA_API_URL = "https://api.commadotai.com"
 
@@ -90,7 +98,7 @@ def get_cached_url(url: str) -> Path:
 def normalize_can_buses(can: tuple[int, list[CanData]], raw_can_keys: set[tuple[int, int]]) -> tuple[int, list[CanData]]:
   timestamp, messages = can
   return timestamp, [
-    CanData(msg.address, msg.dat, msg.src % 128) for msg in messages
+    msg if msg.src < 128 else CanData(msg.address, msg.dat, msg.src % 128) for msg in messages
     if msg.src < 128 or (msg.address, msg.src % 128) not in raw_can_keys
   ]
 
@@ -148,13 +156,29 @@ class TestCarModelBase(unittest.TestCase):
 
   @classmethod
   def get_testing_data(cls):
+    cache_key = hashlib.sha256(f"{cls.platform}:{cls.test_route}".encode()).hexdigest()
+    cache_path = MODEL_DATA_CACHE_ROOT / f"{cache_key}.pkl.zst"
+    if cache_path.exists():
+      car_fw, can_msgs, alpha_long, cls.fingerprint, cls.elm_frame, cls.car_safety_mode_frame, cls.platform = pickle.loads(
+        zstd.decompress(cache_path.read_bytes()))
+      return structs.CarParams.from_bytes_packed(car_fw).carFw, can_msgs, alpha_long
+
     test_segments = (2, 1, 0) if cls.test_route.segment is None else (cls.test_route.segment,)
     for segment in test_segments:
       try:
         log_path = get_cached_segment(cls.test_route.route, segment)
-        return cls.get_testing_data_from_logreader(LogReader(str(log_path), only_union_types=True, sort_by_time=True))
+        car_fw, can_msgs, alpha_long = cls.get_testing_data_from_logreader(LogReader(str(log_path), only_union_types=True, sort_by_time=True))
       except (OSError, AssertionError):
-        pass
+        continue
+
+      # Cache only the input fixture; parameters, interfaces and safety are rerun on every test.
+      data = (structs.CarParams.new_message(carFw=car_fw).to_bytes_packed(), can_msgs, alpha_long,
+              cls.fingerprint, cls.elm_frame, cls.car_safety_mode_frame, cls.platform)
+      cache_path.parent.mkdir(parents=True, exist_ok=True)
+      tmp_path = cache_path.with_suffix(f".{os.getpid()}.tmp")
+      tmp_path.write_bytes(zstd.compress(pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL), 1))
+      tmp_path.replace(cache_path)
+      return car_fw, can_msgs, alpha_long
 
     raise Exception(f"Route: {cls.test_route.route!r} with segments: {test_segments} not found or no CAN messages found")
 
@@ -170,6 +194,15 @@ class TestCarModelBase(unittest.TestCase):
 
     car_fw, cls.can_msgs, alpha_long = cls.get_testing_data()
     cls.raw_can_keys = {(msg.address, msg.src) for _, messages in cls.can_msgs for msg in messages if msg.src < 128}
+    # RX hooks take const packets: share their input buffers across replay tests,
+    # while still running every hook in order on every replay.
+    cls.replay_packet = staticmethod(cache(libsafety_py.make_CANPacket))
+    cls.safety_can = [(
+      libsafety_py.ffi.new("CANPacket_t *[]", [cls.replay_packet(msg.address, msg.src % 4, msg.dat) for msg in messages if msg.src < 64]),
+      libsafety_py.ffi.new("CANPacket_t *[]", [cls.replay_packet(msg.address, msg.src % 4, msg.dat) for msg in messages
+                                             if msg.src >= 128 and (msg.address, msg.src % 128) not in cls.raw_can_keys]),
+    ) for _, messages in cls.can_msgs]
+    cls.safety_rx_valid = libsafety_py.ffi.new("bool[]", max(len(raw) for raw, _ in cls.safety_can))
     cls.CarInterface = interfaces[cls.platform]
     cls.CP = cls.CarInterface.get_params(cls.platform, cls.fingerprint, car_fw, alpha_long, False, docs=False)
     assert cls.CP
@@ -178,6 +211,9 @@ class TestCarModelBase(unittest.TestCase):
   @classmethod
   def tearDownClass(cls):
     del cls.can_msgs
+    del cls.safety_can
+    del cls.safety_rx_valid
+    del cls.replay_packet
 
   def setUp(self):
     self.CI = self.CarInterface(self.CP.copy())
@@ -240,20 +276,16 @@ class TestCarModelBase(unittest.TestCase):
       t = (can[0] - start_ts) / 1e3
       self.safety.set_timer(int(t))
 
-      for msg in can[1]:
-        if msg.src >= 64:
-          continue
-        packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
-        if self.safety.safety_rx_hook(packet) != 1:
-          failed_addrs[hex(msg.address)] += 1
+      raw, returned = self.safety_can[can_idx]
+      if self.safety.safety_rx_hook_batch(raw, len(raw), self.safety_rx_valid):
+        for i, packet in enumerate(raw):
+          if not self.safety_rx_valid[i]:
+            failed_addrs[hex(packet.addr)] += 1
 
       # Some logs contain a bus only as panda's returned bus (bus + 128).
       # Replay returned-only messages, but ignore rejected TX echoes.
       relay_malfunction = self.safety.get_relay_malfunction()
-      for msg in can[1]:
-        if msg.src >= 128 and (msg.address, msg.src % 128) not in self.raw_can_keys:
-          packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
-          self.safety.safety_rx_hook(packet)
+      self.safety.safety_rx_hook_batch(returned, len(returned), libsafety_py.ffi.NULL)
       self.safety.set_relay_malfunction(relay_malfunction)
 
       self.safety.safety_tick()
@@ -299,8 +331,8 @@ class TestCarModelBase(unittest.TestCase):
       now_nanos = 0
       msgs_sent = 0
       CI = self.CarInterface(controller_params)
+      CI.update([])
       for _ in range(round(10.0 / DT_CTRL)):
-        CI.update([])
         _, sendcan = CI.apply(car_control, now_nanos)
         now_nanos += DT_CTRL * 1e9
         msgs_sent += len(sendcan)
@@ -377,10 +409,10 @@ class TestCarModelBase(unittest.TestCase):
     if self.CP.dashcamOnly:
       self.skipTest("no need to check panda safety for dashcamOnly")
 
-    for can in self.can_msgs[:300]:
+    for idx, can in enumerate(self.can_msgs[:300]):
       self.CI.update(can)
-      for msg in (msg for msg in can[1] if msg.src < 64):
-        self.safety.safety_rx_hook(libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat))
+      raw, _ = self.safety_can[idx]
+      self.safety.safety_rx_hook_batch(raw, len(raw), libsafety_py.ffi.NULL)
 
     controls_allowed_prev = False
     CS_prev = car.CarState.new_message()
@@ -389,10 +421,10 @@ class TestCarModelBase(unittest.TestCase):
 
     for idx, can in enumerate(self.can_msgs):
       CS = self.CI.update(can).as_reader()
-      for msg in (msg for msg in can[1] if msg.src < 64):
-        packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
-        ret = self.safety.safety_rx_hook(packet)
-        self.assertEqual(1, ret, f"safety RX failed ({ret=}): {(msg.address, msg.src % 4)}")
+      raw, _ = self.safety_can[idx]
+      if self.safety.safety_rx_hook_batch(raw, len(raw), self.safety_rx_valid):
+        failed = [(packet.addr, packet.bus) for i, packet in enumerate(raw) if not self.safety_rx_valid[i]]
+        self.fail(f"safety RX failed: {failed}")
 
       if idx == 0:
         CS_prev = CS

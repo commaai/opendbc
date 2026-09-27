@@ -105,8 +105,8 @@ jobs:
       id: routes-cache
       uses: actions/cache@v6
       with:
-        path: /tmp/comma_download_cache
-        key: car_models-${{ hashFiles('opendbc/car/tests/test_models.py', 'opendbc/car/tests/routes.py') }}-all
+        path: /tmp/comma_download_cache/model_data
+        key: car_models-${{ hashFiles('opendbc/car/tests/test_models.py', 'opendbc/car/tests/routes.py', 'opendbc/car/logreader.py', 'opendbc/car/can_definitions.py', 'opendbc/car/*.capnp') }}-data
     - name: Test car models
       timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.routes-cache.outputs.cache-hit == 'true') && 3 || 6 }}
       run: source .venv/bin/activate && MAX_EXAMPLES=1 opendbc/car/tests/test_models.py
