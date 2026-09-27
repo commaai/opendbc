@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 import enum
 import unittest
+import numpy as np
 
-from opendbc.car.subaru.values import SubaruSafetyFlags
-from opendbc.car.structs import CarParams
+from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
+from opendbc.car.subaru.carcontroller import get_safety_CP
+from opendbc.car.subaru.values import CAR, CarControllerParams, SubaruSafetyFlags
+from opendbc.car.subaru.interface import CarInterface
+from opendbc.car.structs import CarParams, CarControl, CarState
+from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
@@ -133,6 +138,180 @@ class TestSubaruGen2TorqueSafetyBase(TestSubaruTorqueSafetyBase):
 class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
   FLAGS = SubaruSafetyFlags.GEN2
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS)
+
+
+class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafetyTest):
+  STEER_ANGLE_MAX = 190
+
+  ANGLE_RATE_BP = None
+  ANGLE_RATE_UP = None
+  ANGLE_RATE_DOWN = None
+
+  LATERAL_FREQUENCY = 50
+
+  def setUp(self):
+    self.cnt_angle_cmd = 0
+    super().setUp()
+    cp = get_safety_CP()
+    self.VM = VehicleModel(cp)
+    self.limits = CarControllerParams(cp)
+
+  def _speed_msg(self, speed):
+    speed_kph = speed * 3.6
+    values = {s: speed_kph for s in ["FR", "FL", "RR", "RL"]}
+    return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
+
+  def _angle_cmd_msg(self, angle, enabled, increment_timer=True):
+    values = {"LKAS_Output": angle, "LKAS_Request": enabled, "SET_3": 3}
+    if increment_timer:
+      self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      self.cnt_angle_cmd += 1
+    return self.packer.make_can_msg_safety("ES_LKAS_ANGLE", SUBARU_MAIN_BUS, values)
+
+  def _angle_meas_msg(self, angle):
+    values = {"Steering_Angle": angle}
+    return self.packer.make_can_msg_safety("Steering_2", SUBARU_MAIN_BUS, values)
+
+  def _pcm_status_msg(self, enable):
+    values = {"Cruise_Activated": enable}
+    return self.packer.make_can_msg_safety("ES_Status", self.ALT_MAIN_BUS, values)
+
+  def test_rx_wrong_bus(self):
+    for make_msg, get_value in ((self._angle_meas_msg, self.safety.get_angle_meas_max),
+                                (self._pcm_status_msg, self.safety.get_controls_allowed)):
+      for bus in range(3):
+        with self.subTest(message=make_msg.__name__, bus=bus):
+          self.setUp()
+          msg = make_msg(1)
+          if bus != msg[0].bus:
+            msg[0].bus = bus
+            self._rx(msg)
+            self.assertEqual(get_value(), 0)
+
+  def test_stale_es_brake_cannot_engage(self):
+    self._rx(self._speed_msg(0))
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self._rx(self._user_brake_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._pcm_status_msg(False))
+    self._rx(self._user_brake_msg(False))
+    # ES_Brake may remain high after ACC cancels at a stop.
+    self._rx(self.packer.make_can_msg_safety("ES_Brake", self.ALT_MAIN_BUS, {"Cruise_Activated": 1}))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_controller_angle_continuity(self):
+    platform = CAR.SUBARU_CROSSTREK_2025 if self.FLAGS & SubaruSafetyFlags.GEN2 else CAR.SUBARU_FORESTER_2022
+    # Engagement above the nominal bound, and a speed increase that lowers the bound.
+    for start_speed, end_speed, measured, desired in ((13.24, 13.24, 51.59, 46.21), (13.0, 13.5, 46.75, 46.75)):
+      for sign in (-1, 1):
+        with self.subTest(sign=sign, start_speed=start_speed, end_speed=end_speed):
+          self.setUp()
+          ci = CarInterface(CarInterface.get_non_essential_params(platform))
+          ci.update([])
+          angle = sign * measured
+          for _ in range(6):
+            self._rx(self._angle_meas_msg(angle))
+          cc = CarControl()
+          cc.actuators.steeringAngleDeg = sign * desired
+          angle_messages = 0
+          for frame in range(100):
+            speed = start_speed if frame < 20 else end_speed
+            ci.CS.out = CarState(vEgo=speed, vEgoRaw=speed, steeringAngleDeg=angle)
+            self._reset_speed_measurement(speed)
+            cc.latActive = frame not in (0, 50)
+            self.safety.set_controls_allowed(cc.latActive)
+            self.safety.set_timer(frame * 10000)
+            _, messages = ci.CC.update(cc.as_reader(), ci.CS, frame * 10000000)
+            for addr, data, bus in messages:
+              if addr == SubaruMsg.ES_LKAS_ANGLE:
+                angle_messages += 1
+                # The first frame after engaging is inactive
+                self.assertEqual(bool(data[1] & 0x10), cc.latActive and frame not in (2, 52))
+                self.assertTrue(self._tx(libsafety_py.make_CANPacket(addr, bus, data)), f"frame {frame}")
+          self.assertEqual(angle_messages, 50)
+
+  def test_engage_while_steering(self):
+    # Panda receives each Steering_2 sample before openpilot's CarState does. When the driver is turning while
+    # engaging, panda's latest angle is one sample ahead of the angle openpilot rate limits from.
+    platform = CAR.SUBARU_CROSSTREK_2025 if self.FLAGS & SubaruSafetyFlags.GEN2 else CAR.SUBARU_FORESTER_2022
+    engage_frame, total_frames = 51, 150
+    for speed in (5., 15., 26., 35.):
+      for rate in (-100., -16., 16., 100.):
+        with self.subTest(speed=speed, rate=rate):
+          self.setUp()
+          ci = CarInterface(CarInterface.get_non_essential_params(platform))
+          ci.update([])
+          self._reset_speed_measurement(speed)
+          cc = CarControl()
+          # The driver turns for 0.1 s up to the engage, crossing center to stay within the lateral accel limit
+          angle = angle_prev = -rate * 0.05
+          for frame in range(total_frames):
+            # Steering_2 is 50 Hz
+            if frame % 2 == 0:
+              angle_prev = angle
+              if engage_frame - 10 <= frame < engage_frame:
+                angle += rate * 0.02
+              self._rx(self._angle_meas_msg(angle))
+            ci.CS.out = CarState(vEgo=speed, vEgoRaw=speed, steeringAngleDeg=angle_prev)
+            # openpilot engages on the same ES_Status edge panda does
+            cc.latActive = frame >= engage_frame
+            cc.actuators.steeringAngleDeg = angle_prev
+            self.safety.set_controls_allowed(cc.latActive)
+            self.safety.set_timer(frame * 10000)
+            _, messages = ci.CC.update(cc.as_reader(), ci.CS, frame * 10000000)
+            for addr, data, bus in messages:
+              if addr == SubaruMsg.ES_LKAS_ANGLE:
+                self.assertTrue(self._tx(libsafety_py.make_CANPacket(addr, bus, data)), f"frame {frame}")
+
+  def test_angle_cmd_when_enabled(self):
+    for speed in np.linspace(0, 50, 101):
+      self._reset_speed_measurement(speed)
+      # Use the decoded wheel speed, including safety's 1 m/s tolerance.
+      limit_speed = max(self.safety.get_vehicle_speed_min() - 1, 1)
+      for sign in (-1, 1):
+        for jerk in (False, True):
+          get_limit = get_max_angle_delta_vm if jerk else get_max_angle_vm
+          limit = get_limit(limit_speed, self.VM, self.limits)
+          # Bracket the boundary with room for C float rounding and the one CAN-unit tolerance.
+          for offset, allowed in ((-1, True), (2, False)):
+            angle_can = int(limit * self.DEG_TO_CAN) + offset
+            if angle_can > self.STEER_ANGLE_MAX * self.DEG_TO_CAN:
+              continue
+            with self.subTest(speed=speed, sign=sign, jerk=jerk, offset=offset):
+              self.safety.set_controls_allowed(True)
+              self.safety.set_desired_angle_last(0 if jerk else angle_can * sign)
+              self.assertEqual(allowed, self._tx(self._angle_cmd_msg(angle_can / self.DEG_TO_CAN * sign, True)))
+
+
+class TestSubaruGen1AngleStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruAngleSafetyBase):
+  FLAGS = SubaruSafetyFlags.LKAS_ANGLE
+  TX_MSGS = lkas_tx_msgs(SUBARU_MAIN_BUS, SubaruMsg.ES_LKAS_ANGLE)
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS_ANGLE, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                                               SubaruMsg.ES_Infotainment)}
+  FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr(SubaruMsg.ES_LKAS_ANGLE)
+
+
+class TestSubaruGen2AngleStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruAngleSafetyBase):
+  ALT_MAIN_BUS = SUBARU_ALT_BUS
+  FLAGS = SubaruSafetyFlags.GEN2 | SubaruSafetyFlags.LKAS_ANGLE
+  TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS, SubaruMsg.ES_LKAS_ANGLE)
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS_ANGLE, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                                               SubaruMsg.ES_Infotainment)}
+  FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr(SubaruMsg.ES_LKAS_ANGLE)
+
+
+class TestSubaruReleaseSafety(unittest.TestCase):
+  def test_angle_commands_blocked(self):
+    safety = libsafety_py.ffi.dlopen(libsafety_py._build_libsafety(release=True))
+    for gen2 in (0, SubaruSafetyFlags.GEN2):
+      with self.subTest(gen2=bool(gen2)):
+        self.assertEqual(safety.set_safety_hooks(CarParams.SafetyModel.subaru, gen2 | SubaruSafetyFlags.LKAS_ANGLE), 0)
+        safety.init_tests()
+        safety.set_controls_allowed(True)
+        self.assertFalse(safety.safety_tx_hook(libsafety_py.make_CANPacket(SubaruMsg.ES_LKAS_ANGLE, SUBARU_MAIN_BUS, b"\x00" * 8)))
 
 
 if __name__ == "__main__":
