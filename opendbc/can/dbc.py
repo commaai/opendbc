@@ -187,7 +187,8 @@ class ChecksumState:
   checksum_type: int
   calc_checksum: Callable[[int, Signal, bytearray], int] | None
   setup_signal: Callable[[Signal, str, int], None] | None = None
-  checksum_signals: dict[int, str] | None = None
+  checksum_pattern: str = r"^CHECKSUM$"
+  checksum_addresses: tuple[int, ...] | None = None
 
 
 def get_checksum_state(dbc_name: str) -> ChecksumState | None:
@@ -220,33 +221,24 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
   elif dbc_name.startswith("byd_"):
     return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
   elif dbc_name == "ford_lincoln_base_pt":
-    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum)
+    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum,
+                         checksum_pattern=r"_Cs$", checksum_addresses=(0x91, 0x415, 0x202))
   elif dbc_name == "mg":
-    return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum, checksum_signals={
-      0x1B6: "BrkPdlAppdChksmHSC2",
-      0x1EC: "ChLKAChksmHSC2",
-      0x23C: "VehSpdAvgChksmHSC2",
-      0x242: "ACCSysChksm_SCSHSC2",
-    })
+    return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum,
+                         checksum_pattern=r"Chksm", checksum_addresses=(0x1B6, 0x1EC, 0x23C, 0x242))
   elif dbc_name == "rivian_primary_actuator":
-    return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum)
+    return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum,
+                         checksum_pattern=r"_Checksum$", checksum_addresses=(0x208, 0x150, 0x380, 0x38F, 0x100))
   return None
 
 
 def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_num: int, address: int) -> None:
   sig.calc_checksum = None
   if chk:
-    if chk.checksum_signals is not None:
-      if sig.name == chk.checksum_signals.get(address):
-        sig.type = chk.checksum_type
-        sig.calc_checksum = chk.calc_checksum
-      return
     if chk.setup_signal:
       chk.setup_signal(sig, dbc_name, line_num)
-    # Only enable suffix-based checksums for messages with known algorithms.
-    if (sig.name == "CHECKSUM" or
-        (chk.checksum_type == SignalType.FORD_CHECKSUM and sig.name.endswith("_Cs") and address in (0x91, 0x415, 0x202)) or
-        (chk.checksum_type == SignalType.RIVIAN_CHECKSUM and sig.name.endswith("_Checksum") and address in (0x208, 0x150, 0x380, 0x38F, 0x100))):
+    if (re.search(chk.checksum_pattern, sig.name) and
+        (chk.checksum_addresses is None or address in chk.checksum_addresses)):
       sig.type = chk.checksum_type
       sig.calc_checksum = chk.calc_checksum
     elif sig.name == "COUNTER":
