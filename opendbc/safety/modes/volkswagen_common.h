@@ -48,12 +48,12 @@ static void volkswagen_common_init(void) {
   return;
 }
 
-static uint32_t volkswagen_mqb_meb_get_checksum(const CANPacket_t *msg) {
+static uint32_t volkswagen_mxb_get_checksum(const CANPacket_t *msg) {
   return (uint8_t)msg->data[0];
 }
 
-static uint8_t volkswagen_mqb_meb_get_counter(const CANPacket_t *msg) {
-  // MQB/MEB message counters are consistently found at LSB 8.
+static uint8_t volkswagen_mxb_get_counter(const CANPacket_t *msg) {
+  // MQB/MLB/MEB message counters are consistently found at LSB 8.
   return (uint8_t)msg->data[1] & 0xFU;
 }
 
@@ -68,9 +68,9 @@ static uint8_t volkswagen_compute_crc(const CANPacket_t *msg, int len, uint8_t s
   return volkswagen_crc8_lut_8h2f[crc ^ salt] ^ 0xFFU;
 }
 
-static uint32_t volkswagen_mqb_meb_compute_crc(const CANPacket_t *msg) {
+static uint32_t volkswagen_mxb_compute_crc(const CANPacket_t *msg) {
   uint8_t salt = 0;
-  uint8_t counter = volkswagen_mqb_meb_get_counter(msg);
+  uint8_t counter = volkswagen_mxb_get_counter(msg);
   if (msg->addr == MSG_LH_EPS_03) {
     salt = 0xF5U;
   }
