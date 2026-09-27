@@ -19,6 +19,7 @@ from opendbc.car.body.bodycan import body_checksum
 from opendbc.car.byd.bydcan import byd_checksum
 from opendbc.car.psa.psacan import psa_checksum
 from opendbc.car.rivian.riviancan import rivian_checksum
+from opendbc.car.ford.fordcan import ford_checksum
 
 
 class SignalType:
@@ -38,6 +39,7 @@ class SignalType:
   VOLKSWAGEN_MLB_CHECKSUM = 13
   BYD_CHECKSUM = 14
   RIVIAN_CHECKSUM = 15
+  FORD_CHECKSUM = 16
 
 
 @dataclass
@@ -151,7 +153,7 @@ class DBC:
           msb = start_bit
 
         sig = Signal(sig_name, start_bit, msb, lsb, size, is_signed, factor, offset_val, is_little_endian)
-        set_signal_type(sig, checksum_state, self.name, line_num)
+        set_signal_type(sig, checksum_state, self.name, line_num, address)
         signals_temp[address][sig_name] = sig
       elif line.startswith("VAL_ "):
         m = VAL_RE.search(line)
@@ -184,6 +186,7 @@ class ChecksumState:
   calc_checksum: Callable[[int, Signal, bytearray], int] | None
   setup_signal: Callable[[Signal, str, int], None] | None = None
   checksum_pattern: str = r"^CHECKSUM$"
+  checksum_addresses: tuple[int, ...] | None = None
 
 
 def get_checksum_state(dbc_name: str) -> ChecksumState | None:
@@ -215,17 +218,22 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.PSA_CHECKSUM, psa_checksum)
   elif dbc_name.startswith("byd_"):
     return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
+  elif dbc_name == "ford_lincoln_base_pt":
+    # Other _Cs fields are optional or use model-specific checksum algorithms.
+    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, checksum_pattern=r"_Cs$",
+                         checksum_addresses=(0x7D, 0x91, 0x92, 0x202, 0x214, 0x3D6, 0x414, 0x415, 0x450, 0x4B0))
   elif dbc_name == "rivian_primary_actuator":
     return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum, checksum_pattern=r"_Checksum$")
   return None
 
 
-def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_num: int) -> None:
+def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_num: int, address: int) -> None:
   sig.calc_checksum = None
   if chk:
     if chk.setup_signal:
       chk.setup_signal(sig, dbc_name, line_num)
-    if re.search(chk.checksum_pattern, sig.name):
+    if (re.search(chk.checksum_pattern, sig.name) and
+        (chk.checksum_addresses is None or address in chk.checksum_addresses)):
       sig.type = chk.checksum_type
       sig.calc_checksum = chk.calc_checksum
     elif sig.name == "COUNTER":

@@ -20,36 +20,6 @@ MSG_LateralMotionControl2 = 0x3D6  # TX by OP, alternate Lateral Control message
 MSG_IPMA_Data = 0x3D8              # TX by OP, IPMA and LKAS user interface
 
 
-def checksum(msg):
-  addr, dat, bus = msg
-  ret = bytearray(dat)
-
-  if addr == MSG_Yaw_Data_FD1:
-    chksum = dat[0] + dat[1]  # VehRol_W_Actl
-    chksum += dat[2] + dat[3]  # VehYaw_W_Actl
-    chksum += dat[5]  # VehRollYaw_No_Cnt
-    chksum += dat[6] >> 6  # VehRolWActl_D_Qf
-    chksum += (dat[6] >> 4) & 0x3  # VehYawWActl_D_Qf
-    chksum = 0xff - (chksum & 0xff)
-    ret[4] = chksum
-
-  elif addr == MSG_BrakeSysFeatures:
-    chksum = dat[0] + dat[1]  # Veh_V_ActlBrk
-    chksum += (dat[2] >> 2) & 0xf  # VehVActlBrk_No_Cnt
-    chksum += dat[2] >> 6  # VehVActlBrk_D_Qf
-    chksum = 0xff - (chksum & 0xff)
-    ret[3] = chksum
-
-  elif addr == MSG_EngVehicleSpThrottle2:
-    chksum = (dat[2] >> 3) & 0xf  # VehVActlEng_No_Cnt
-    chksum += (dat[4] >> 5) & 0x3  # VehVActlEng_D_Qf
-    chksum += dat[6] + dat[7]  # Veh_V_ActlEng
-    chksum = 0xff - (chksum & 0xff)
-    ret[1] = chksum
-
-  return addr, ret, bus
-
-
 class Buttons:
   CANCEL = 0
   RESUME = 1
@@ -130,14 +100,14 @@ class TestFordSafetyBase(common.CarSafetyTest):
   def _speed_msg(self, speed: float, quality_flag=True):
     values = {"Veh_V_ActlBrk": speed * 3.6, "VehVActlBrk_D_Qf": 3 if quality_flag else 0, "VehVActlBrk_No_Cnt": self.cnt_speed % 16}
     self.__class__.cnt_speed += 1
-    return self.packer.make_can_msg_safety("BrakeSysFeatures", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("BrakeSysFeatures", 0, values)
 
   # PCM vehicle speed
   def _speed_msg_2(self, speed: float, quality_flag=True):
     # Ford relies on speed for driver curvature limiting, so it checks two sources
     values = {"Veh_V_ActlEng": speed * 3.6, "VehVActlEng_D_Qf": 3 if quality_flag else 0, "VehVActlEng_No_Cnt": self.cnt_speed_2 % 16}
     self.__class__.cnt_speed_2 += 1
-    return self.packer.make_can_msg_safety("EngVehicleSpThrottle2", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("EngVehicleSpThrottle2", 0, values)
 
   # Standstill state
   def _vehicle_moving_msg(self, speed: float):
@@ -149,7 +119,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     values = {"VehYaw_W_Actl": curvature * speed, "VehYawWActl_D_Qf": 3 if quality_flag else 0,
               "VehRollYaw_No_Cnt": self.cnt_yaw_rate % 256}
     self.__class__.cnt_yaw_rate += 1
-    return self.packer.make_can_msg_safety("Yaw_Data_FD1", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("Yaw_Data_FD1", 0, values)
 
   # Drive throttle input
   def _user_gas_msg(self, gas: float):
