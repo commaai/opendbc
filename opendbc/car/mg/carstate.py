@@ -69,10 +69,7 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    cp = CANParser(DBC[CP.carFingerprint][Bus.pt], [("EPS_HSC2_FrP03", 0)], 0)
-    # The MG5 EV can omit the EPS checksum.
-    cp.message_states[0x1EC].ignore_checksum = True
     return {
-      Bus.pt: cp,
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
     }

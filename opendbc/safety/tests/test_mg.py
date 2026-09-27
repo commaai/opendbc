@@ -3,6 +3,7 @@ import unittest
 
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
+from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
@@ -69,13 +70,27 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
       valid = self._rx(msg)
     self.assertFalse(valid)
 
+  def test_eps_checksum(self):
+    # Captured EPS frame: the PV field is 0x37f5; byte 7 is unused.
+    dat = bytes.fromhex("b40037f553f54000")
+    values = {"ChLKAAlvRCHSC2": 11, "ChLKACtrlStsHSC2": 4, "ChLKARespToqHSC2": 0}
+    packed = self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values)
+    self.assertEqual(bytes(packed[0].data)[2:4], dat[2:4])
+
+    for byte, bit in ((0, 0), (0, 3), (0, 4), (1, 0), (2, 0), (3, 0), (6, 4)):
+      self._reset_safety_hooks()
+      self.assertTrue(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, dat)))
+      corrupt = bytearray(dat)
+      corrupt[byte] ^= 1 << bit
+      self.assertFalse(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, corrupt)))
+
   def test_rx_checksums(self):
     for make_msg in (self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
       self._reset_safety_hooks()
       self.assertTrue(self._rx(make_msg(0)))
 
       msg = make_msg(0)
-      msg[0].data[7] ^= 0xff
+      msg[0].data[3 if make_msg == self._torque_driver_msg else 7] ^= 0xff
       self.assertFalse(self._rx(msg))
 
 
