@@ -5,21 +5,6 @@ from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 
 
-def checksum(msg):
-  addr, dat, bus = msg
-  ret = bytearray(dat)
-
-  if addr in (0x1b6, 0x1ec, 0x23c, 0x242):
-    crc = 0xFF
-    for byte in ret[:-1]:
-      crc ^= byte
-      for _ in range(8):
-        crc = ((crc << 1) ^ 0x1D) & 0xFF if crc & 0x80 else (crc << 1) & 0xFF
-    ret[-1] = crc ^ 0xFF
-
-  return addr, ret, bus
-
-
 class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   DBC = "mg"
@@ -53,15 +38,15 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   def _speed_msg(self, speed):
     values = {"VehSpdAvgHSC2": speed * 3.6, "VehSpdAvgAlvRCHSC2": self._counter(0x23c)}
-    return self.packer.make_can_msg_safety("SCS_HSC2_FrP19", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("SCS_HSC2_FrP19", 0, values)
 
   def _torque_driver_msg(self, torque):
     values = {"DrvrStrgDlvrdToqHSC2": torque * 0.01, "ChLKAAlvRCHSC2": self._counter(0x1ec)}
-    return self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values)
 
   def _user_brake_msg(self, brake):
     values = {"BrkPdlAppdHSC2": 1 if brake else 0, "BrkPdlAppdRCHSC2": self._counter(0x1b6)}
-    return self.packer.make_can_msg_safety("EHBS_HSC2_FrP00", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("EHBS_HSC2_FrP00", 0, values)
 
   def _user_gas_msg(self, gas):
     values = {"EPTAccelActuPosHSC2": 100 if gas else 0}
@@ -72,7 +57,7 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   def _pcm_status_msg(self, enable):
     values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
-    return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values)
 
   def test_gas_counter(self):
     self._reset_safety_hooks()
