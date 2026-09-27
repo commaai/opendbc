@@ -82,8 +82,7 @@ def create_adas_status(packer, vdm_adas_status, interface_status):
 
 
 def rivian_checksum(address: int, sig, d: bytearray) -> int:
-  # CRC-8 with the little-endian CAN address prepended to the payload. This
-  # replaces the equivalent per-message XOR constants used by the controller.
+  # CRC-8 with the little-endian CAN address prepended to the payload.
   crc = 0
   for byte in address.to_bytes(2, "little") + d[1:]:
     crc = CRC8J1850[crc ^ byte]
