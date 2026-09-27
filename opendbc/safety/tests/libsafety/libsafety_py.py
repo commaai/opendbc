@@ -67,7 +67,6 @@ void set_controls_allowed(bool c);
 bool get_controls_allowed(void);
 bool get_longitudinal_allowed(void);
 void set_alternative_experience(int mode);
-int get_alternative_experience(void);
 void set_relay_malfunction(bool c);
 bool get_relay_malfunction(void);
 bool get_gas_pressed_prev(void);
@@ -90,7 +89,6 @@ int get_torque_driver_max(void);
 void set_desired_torque_last(int t);
 void set_rt_torque_last(int t);
 void set_desired_angle_last(int t);
-int get_desired_angle_last();
 void set_angle_meas(int min, int max);
 int get_angle_meas_min(void);
 int get_angle_meas_max(void);
@@ -113,15 +111,11 @@ void init_tests(void);
 void set_honda_fwd_brake(bool c);
 bool get_honda_fwd_brake(void);
 void set_honda_alt_brake_msg(bool c);
-void set_honda_bosch_long(bool c);
-int get_honda_hw(void);
 
 void mutation_set_active_mutant(int id);
-int mutation_get_active_mutant(void);
 
 void ignition_can_hook(const CANPacket_t *msg);
 bool get_ignition_can(void);
-void set_ignition_can(bool c);
 """)
 
 class LibSafety:
