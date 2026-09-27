@@ -10,15 +10,13 @@ GM_CAMERA_DIAG_ADDR = 0x24B
 
 
 class TestElm327(TestDefaultRxHookBase):
+  SAFETY_MODEL = CarParams.SafetyModel.elm327
+
   TX_MSGS = [[addr, bus] for addr in [GM_CAMERA_DIAG_ADDR, *range(0x600, 0x800),
                                       *range(0x18DA00F1, 0x18DB00F1, 0x100),  # 29-bit UDS physical addressing
                                       *[0x18DB33F1],  # 29-bit UDS functional address
                                       ] for bus in range(4)]
   FWD_BUS_LOOKUP = {}
-
-  def setUp(self):
-    self.safety.set_safety_hooks(CarParams.SafetyModel.elm327, 0)
-    self.safety.init_tests()
 
   def test_tx_hook(self):
     # ensure we can transmit arbitrary data on allowed addresses

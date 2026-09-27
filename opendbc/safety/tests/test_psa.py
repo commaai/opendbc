@@ -3,12 +3,14 @@ import unittest
 
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 
 LANE_KEEP_ASSIST = 0x3F2
 
 
 class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
+  DBC = "psa_aee2010_r3"
+  SAFETY_MODEL = CarParams.SafetyModel.psa
+
   RELAY_MALFUNCTION_ADDRS = {0: (LANE_KEEP_ASSIST,)}
   FWD_BLACKLISTED_ADDRS = {2: [LANE_KEEP_ASSIST]}
   TX_MSGS = [[1010, 0]]
@@ -23,11 +25,6 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   ANGLE_RATE_BP = [0., 5., 25.]
   ANGLE_RATE_UP = [2.5, 1.5, .2]
   ANGLE_RATE_DOWN = [5., 2., .3]
-
-  def setUp(self):
-    self.packer = CANPackerSafety("psa_aee2010_r3")
-    self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
-    self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, enabled: bool):
     values = {"SET_ANGLE": angle, "TORQUE_FACTOR": 100 if enabled else 0}
@@ -76,11 +73,7 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
 
 class TestPsaStockSafety(TestPsaSafetyBase):
-
-  def setUp(self):
-    self.packer = CANPackerSafety("psa_aee2010_r3")
-    self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
-    self.safety.init_tests()
+  pass
 
 
 if __name__ == "__main__":

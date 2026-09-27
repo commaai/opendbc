@@ -5,7 +5,6 @@ import unittest
 from opendbc.car.subaru.values import SubaruSafetyFlags
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 from functools import partial
 
 
@@ -41,7 +40,9 @@ def fwd_blacklisted_addr(lkas_msg=SubaruMsg.ES_LKAS):
 
 
 class TestSubaruSafetyBase(common.CarSafetyTest):
-  FLAGS = 0
+  DBC = "subaru_global_2017_generated"
+  SAFETY_MODEL = CarParams.SafetyModel.subaru
+
   RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
                                                SubaruMsg.ES_Infotainment)}
   FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr()
@@ -57,11 +58,6 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
   DEG_TO_CAN = 100
 
   INACTIVE_GAS = 1818
-
-  def setUp(self):
-    self.packer = CANPackerSafety("subaru_global_2017_generated")
-    self.safety.set_safety_hooks(CarParams.SafetyModel.subaru, self.FLAGS)
-    self.safety.init_tests()
 
   def _set_prev_torque(self, t):
     self.safety.set_desired_torque_last(t)
@@ -115,7 +111,6 @@ class TestSubaruTorqueSafetyBase(TestSubaruSafetyBase, common.DriverTorqueSteeri
 
 
 class TestSubaruGen1TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
-  FLAGS = 0
   TX_MSGS = lkas_tx_msgs(SUBARU_MAIN_BUS)
 
 
@@ -129,7 +124,8 @@ class TestSubaruGen2TorqueSafetyBase(TestSubaruTorqueSafetyBase):
 
 
 class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
-  FLAGS = SubaruSafetyFlags.GEN2
+  SAFETY_PARAM = SubaruSafetyFlags.GEN2
+
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS)
 
 

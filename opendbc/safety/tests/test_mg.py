@@ -3,7 +3,6 @@ import unittest
 
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 
 
 def checksum(msg):
@@ -23,6 +22,9 @@ def checksum(msg):
 
 class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
+  DBC = "mg"
+  SAFETY_MODEL = CarParams.SafetyModel.mg
+
   TX_MSGS = [[0x1fd, 0], ]
   RELAY_MALFUNCTION_ADDRS = {0: (0x1fd,)}
   FWD_BLACKLISTED_ADDRS = {2: [0x1fd,]}
@@ -36,9 +38,7 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   DRIVER_TORQUE_FACTOR = 2
 
   def setUp(self):
-    self.packer = CANPackerSafety("mg")
-    self.safety.set_safety_hooks(CarParams.SafetyModel.mg, 0)
-    self.safety.init_tests()
+    super().setUp()
     self.counters = {addr: 0 for addr in (0x1b6, 0x1ec, 0x23c, 0x242)}
     self.gas_counter = 0
 

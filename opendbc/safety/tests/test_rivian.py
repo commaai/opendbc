@@ -3,7 +3,6 @@ import unittest
 
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.car.rivian.values import RivianSafetyFlags
 from opendbc.car.rivian.riviancan import checksum as _checksum
 
@@ -29,6 +28,9 @@ def checksum(msg):
 
 class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest,
                            common.VehicleSpeedSafetyTest):
+
+  DBC = "rivian_primary_actuator"
+  SAFETY_MODEL = CarParams.SafetyModel.rivian
 
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,), 2: (0x321, 0x162)}
@@ -154,11 +156,6 @@ class TestRivianStockSafety(TestRivianSafetyBase):
 
   LONGITUDINAL = False
 
-  def setUp(self):
-    self.packer = CANPackerSafety("rivian_primary_actuator")
-    self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
-    self.safety.init_tests()
-
   def test_adas_status(self):
     # For canceling stock ACC
     for controls_allowed in (True, False):
@@ -170,22 +167,18 @@ class TestRivianStockSafety(TestRivianSafetyBase):
 
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
 
+  SAFETY_PARAM = RivianSafetyFlags.LONG_CONTROL
+
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x160, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160), 2: (0x321,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
 
-  def setUp(self):
-    self.packer = CANPackerSafety("rivian_primary_actuator")
-    self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, RivianSafetyFlags.LONG_CONTROL)
-    self.safety.init_tests()
-
 
 class TestRivianIgnition(common.SafetyTestBase):
-  TX_MSGS: list = []
+  DBC = "rivian_primary_actuator"
+  SAFETY_MODEL = None
 
-  def setUp(self):
-    self.safety.init_tests()
-    self.packer = CANPackerSafety("rivian_primary_actuator")
+  TX_MSGS: list = []
 
   def _msg(self, counter, mode):
     return self.packer.make_can_msg_safety("VDM_OutputSignals", 0,

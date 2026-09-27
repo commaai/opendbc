@@ -2,7 +2,6 @@
 import unittest
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 
 MSG_LS_01 = 0x10B       # TX by OP, ACC control buttons for cancel/resume
 MSG_HCA_01 = 0x126      # TX by OP, Heading Control Assist steering torque
@@ -84,14 +83,12 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
 
 
 class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
+  DBC = "vw_mlb"
+  SAFETY_MODEL = CarParams.SafetyModel.volkswagenMlb
+
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LS_01, 0], [MSG_LS_01, 2]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_01, MSG_LDW_02]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
-
-  def setUp(self):
-    self.packer = CANPackerSafety("vw_mlb")
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMlb, 0)
-    self.safety.init_tests()
 
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
