@@ -18,19 +18,6 @@ class CanBus(CanBusBase):
     return self.offset + 2
 
 
-def calculate_lat_ctl2_checksum(mode: int, counter: int, dat: bytearray) -> int:
-  curvature = (dat[2] << 3) | ((dat[3]) >> 5)
-  curvature_rate = (dat[6] << 3) | ((dat[7]) >> 5)
-  path_angle = ((dat[3] & 0x1F) << 6) | ((dat[4]) >> 2)
-  path_offset = ((dat[4] & 0x3) << 8) | dat[5]
-
-  checksum = mode + counter
-  for sig_val in (curvature, curvature_rate, path_angle, path_offset):
-    checksum += sig_val + (sig_val >> 8)
-
-  return 0xFF - (checksum & 0xFF)
-
-
 def create_lka_msg(packer, CAN: CanBus):
   """
   Creates an empty CAN message for the Ford LKA Command.
@@ -335,29 +322,27 @@ def create_button_msg(packer, bus: int, stock_values: dict, cancel=False, resume
   return packer.make_can_msg("Steering_Data_FD1", bus, values)
 
 
+# Protected signals as (DBC Motorola start bit, size). All are at most 16 bits.
+FORD_CHECKSUM_FIELDS = {
+  0x7d: ((4, 13), (31, 4)),  # BrakeSnData_4
+  0x91: ((7, 16), (23, 16), (47, 8), (55, 2), (53, 2)),  # Yaw_Data_FD1
+  0x92: ((4, 13), (20, 13), (36, 13), (6, 2), (22, 2), (38, 2), (63, 8)),  # Accel_Data_FD1
+  0x202: ((55, 16), (22, 4), (38, 2)),  # EngVehicleSpThrottle2
+  0x214: ((7, 16), (63, 4)),  # DesiredTorqBrk_2
+  0x3d6: ((6, 3), (60, 4), (23, 11), (55, 11), (28, 11), (33, 10)),  # LateralMotionControl2
+  0x414: ((7, 16), (21, 4), (23, 2)),  # BrakeSnData_6
+  0x415: ((7, 16), (21, 4), (23, 2)),  # BrakeSysFeatures
+  0x450: ((13, 3), (10, 3), (19, 4)),  # DrvStatMonData
+  0x4b0: ((34, 3), (47, 13), (39, 4)),  # ABS_BrkBst_Data
+}
+
+
 def ford_checksum(address: int, sig, d: bytearray) -> int:
-  if address == 0x91:  # Yaw_Data_FD1
-    chksum = d[0] + d[1] + d[2] + d[3] + d[5]
-    chksum += (d[6] >> 6) + ((d[6] >> 4) & 0x3)
-  elif address in (0x414, 0x415):  # BrakeSnData_6, BrakeSysFeatures
-    chksum = d[0] + d[1] + ((d[2] >> 2) & 0xF) + (d[2] >> 6)
-  elif address == 0x202:  # EngVehicleSpThrottle2
-    chksum = ((d[2] >> 3) & 0xF) + ((d[4] >> 5) & 0x3) + d[6] + d[7]
-  elif address == 0x7D:  # BrakeSnData_4: requested brake torque and counter
-    chksum = (d[0] & 0x1F) + d[1] + (d[3] >> 4)
-  elif address == 0x92:  # Accel_Data_FD1: three accelerations, quality flags, and counter
-    chksum = d[7]
-    for i in (0, 2, 4):
-      chksum += (d[i] & 0x1F) + d[i + 1] + ((d[i] >> 5) & 0x3)
-  elif address == 0x214:  # DesiredTorqBrk_2: minimum wheel torque and counter
-    chksum = d[0] + d[1] + (d[7] >> 4)
-  elif address == 0x3D6:  # LateralMotionControl2
-    return calculate_lat_ctl2_checksum((d[0] >> 4) & 0x7, (d[7] >> 1) & 0xF, d)
-  elif address == 0x450:  # DrvStatMonData: engagement level, confidence, and counter
-    chksum = ((d[1] >> 3) & 0x7) + (d[1] & 0x7) + (d[2] & 0xF)
-  elif address == 0x4B0:  # ABS_BrkBst_Data: brake hold, driver brake torque, and counter
-    torque = (d[5] << 5) | (d[6] >> 3)
-    chksum = torque + (torque >> 8) + (d[4] & 0x7) + (d[4] >> 4)
-  else:
-    raise ValueError(f"Unsupported Ford checksum address: {address:#x}")
-  return 0xFF - (chksum & 0xFF)
+  data = int.from_bytes(d, "big")
+  checksum = 0
+  for start_bit, size in FORD_CHECKSUM_FIELDS[address]:
+    # Motorola bit numbering counts downward within each byte.
+    shift = len(d) * 8 - (start_bit ^ 7) - size
+    value = (data >> shift) & ((1 << size) - 1)
+    checksum += value + (value >> 8)
+  return ~checksum & 0xFF
