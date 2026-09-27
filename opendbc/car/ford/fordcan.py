@@ -322,27 +322,24 @@ def create_button_msg(packer, bus: int, stock_values: dict, cancel=False, resume
   return packer.make_can_msg("Steering_Data_FD1", bus, values)
 
 
-# Protected signals as (DBC Motorola start bit, size). All are at most 16 bits.
 FORD_CHECKSUM_FIELDS = {
-  0x7d: ((4, 13), (31, 4)),  # BrakeSnData_4
-  0x91: ((7, 16), (23, 16), (47, 8), (55, 2), (53, 2)),  # Yaw_Data_FD1
-  0x92: ((4, 13), (20, 13), (36, 13), (6, 2), (22, 2), (38, 2), (63, 8)),  # Accel_Data_FD1
-  0x202: ((55, 16), (22, 4), (38, 2)),  # EngVehicleSpThrottle2
-  0x214: ((7, 16), (63, 4)),  # DesiredTorqBrk_2
-  0x3d6: ((6, 3), (60, 4), (23, 11), (55, 11), (28, 11), (33, 10)),  # LateralMotionControl2
-  0x414: ((7, 16), (21, 4), (23, 2)),  # BrakeSnData_6
-  0x415: ((7, 16), (21, 4), (23, 2)),  # BrakeSysFeatures
-  0x450: ((13, 3), (10, 3), (19, 4)),  # DrvStatMonData
-  0x4b0: ((34, 3), (47, 13), (39, 4)),  # ABS_BrkBst_Data
+  0x7d: ("BrkTot_Tq_RqArb", "BrkTotTqRqArb_No_Cnt"),
+  0x91: ("VehRol_W_Actl", "VehYaw_W_Actl", "VehRollYaw_No_Cnt", "VehRolWActl_D_Qf", "VehYawWActl_D_Qf"),
+  0x92: ("VehLat2_A_Actl", "VehLong2_A_Actl", "VehVert2_A_Actl",
+         "VehLatAActl_D_Qf", "VehLongAActl_D_Qf", "VehVertAActl_D_Qf", "VehLatLongVert_No_Cnt"),
+  0x202: ("Veh_V_ActlEng", "VehVActlEng_No_Cnt", "VehVActlEng_D_Qf"),
+  0x214: ("PrplWhlTot_Tq_RqMn", "PrplWhlTqRqMn_No_Cnt"),
+  0x3d6: ("LatCtl_D2_Rq", "LatCtlPath_No_Cnt", "LatCtlCurv_No_Actl", "LatCtlCrv_NoRate2_Actl", "LatCtlPath_An_Actl", "LatCtlPathOffst_L_Actl"),
+  0x414: ("StePinOffst_An_Est", "StePinOffst_No_Cnt", "StePinOffst_D_Stat"),
+  0x415: ("Veh_V_ActlBrk", "VehVActlBrk_No_Cnt", "VehVActlBrk_D_Qf"),
+  0x450: ("DrvEngageLevel_D_Stat", "DrvEngLvlConfid_D_Stat", "DrvEngageLevel_No_Cnt"),
+  0x4b0: ("BrkHold_D_Stat", "BrkTot_Tq_RqDrv", "BrkTotTqRqDrv_No_Cnt"),
 }
 
 
 def ford_checksum(address: int, sig, d: bytearray) -> int:
-  data = int.from_bytes(d, "big")
   checksum = 0
-  for start_bit, size in FORD_CHECKSUM_FIELDS[address]:
-    # Motorola bit numbering counts downward within each byte.
-    shift = len(d) * 8 - (start_bit ^ 7) - size
-    value = (data >> shift) & ((1 << size) - 1)
+  for field in sig.checksum_fields:
+    value = field.get_raw_value(d)
     checksum += value + (value >> 8)
   return ~checksum & 0xFF
