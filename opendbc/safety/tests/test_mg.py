@@ -70,7 +70,7 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
       valid = self._rx(msg)
     self.assertFalse(valid)
 
-  def test_eps_checksum(self):
+  def test_rx_checksums(self):
     # Captured EPS frame: the PV field is 0x37f5; byte 7 is unused.
     dat = bytes.fromhex("b40037f553f54000")
     values = {"ChLKAAlvRCHSC2": 11, "ChLKACtrlStsHSC2": 4, "ChLKARespToqHSC2": 0}
@@ -84,7 +84,6 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
       corrupt[byte] ^= 1 << bit
       self.assertFalse(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, corrupt)))
 
-  def test_rx_checksums(self):
     for make_msg in (self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
       self._reset_safety_hooks()
       self.assertTrue(self._rx(make_msg(0)))
