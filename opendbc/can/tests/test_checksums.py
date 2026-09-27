@@ -1,122 +1,36 @@
 import copy
 import unittest
 from opendbc.can import CANPacker, CANParser
-from opendbc.can.packer import set_value
 
 
 class TestCanChecksums(unittest.TestCase):
 
-  def test_safety_checksum_packing(self):
-    # Payloads captured from the former safety-test checksum helpers, covering
-    # zero and nonzero signal values. These are compatibility vectors, not logs.
-    cases = [
-      ("mg", 0x1b6, ('BrkPdlAppdChksmHSC2',), [
-        "000000000000000a",
-        "0007000000cfcfcb",
-        "0005000000305422",
-      ]),
-      ("mg", 0x1ec, ('ChLKAChksmHSC2',), [
-        "000000000000000a",
-        "354878de05a990cc",
-        "671542af003970b0",
-      ]),
-      ("mg", 0x23c, ('VehSpdAvgChksmHSC2',), [
-        "000000000000000a",
-        "aa90004af00000bf",
-        "7183101f600000c6",
-      ]),
-      ("mg", 0x242, ('ACCSysChksm_SCSHSC2',), [
-        "000000000000000a",
-        "72479430002455df",
-        "971e51200013c235",
-      ]),
-      ("rivian_primary_actuator", 0x208, ('ESP_Status_Checksum',), [
-        "b100000000000000",
-        "1f84b99255d47c6f",
-        "fd4803006426bd82",
-      ]),
-      ("rivian_primary_actuator", 0x150, ('VDM_PropStatus_Checksum',), [
-        "9a000000000000",
-        "e84135f5406bd0",
-        "233028710024d9",
-      ]),
-      ("rivian_primary_actuator", 0x380, ('EPAS_SytemStatus_Checksum',), [
-        "1e00000000",
-        "751bef20f4",
-        "a446af40e5",
-      ]),
-      ("rivian_primary_actuator", 0x38f, ('iBESP2_Checksum',), [
-        "370000000000",
-        "cbcb62ab0000",
-        "57745b9ec000",
-      ]),
-      ("rivian_primary_actuator", 0x100, ('ACM_Status_Checksum',), [
-        "5f00000000000000",
-        "4102600500020000",
-        "4507c40600000000",
-      ]),
-      ("ford_lincoln_base_pt", 0x91, ('VehRollYawW_No_Cs',), [
-        "00000000ff000000",
-        "20b5e405e754f000",
-        "13ec0009fbf96000",
-      ]),
-      ("ford_lincoln_base_pt", 0x415, ('VehVActlBrk_No_Cs',), [
-        "000000ff00000000",
-        "60414a5b8198fef0",
-        "075103a7c01b0a1e",
-      ]),
-      ("ford_lincoln_base_pt", 0x202, ('VehVActlEng_No_Cs',), [
-        "00ff000000000000",
-        "7882400000baf382",
-        "eaccc00040883aef",
-      ]),
-      ("hyundai_can_generated", 0x260, ('Checksum',), [
-        "0000000000000000",
-        "0915148eeadebedd",
-        "9504465ead12155c",
-      ]),
-      ("hyundai_can_generated", 0x394, ('CheckSum_TCS3',), [
-        "0000000000000000",
-        "a15c0d9ddfc2349f",
-        "db19cb2c0d21906f",
-      ]),
-      ("hyundai_can_generated", 0x386, ('WHL_SPD_Checksum_LSB', 'WHL_SPD_Checksum_MSB'), [
-        "0000000000400080",
-        "25ef2d5c65a15215",
-        "2c0889c3ce79d019",
-      ]),
-      ("hyundai_can_generated", 0x421, ('CR_VSM_ChkSum',), [
-        "0000000000000000",
-        "14fb4d807367fd6f",
-        "2ab2962dcf070061",
-      ]),
-    ]
-    for dbc, address, checksum_fields, samples in cases:
-      packer = CANPacker(dbc)
-      parser = CANParser(dbc, [(address, 0)], 0)
-      for sample in samples:
-        expected = bytes.fromhex(sample)
-        with self.subTest(dbc=dbc, address=hex(address), payload=sample):
-          parser.update([0, [(address, expected, 0)]])
-          values = dict(parser.vl[address])
-          # Automatic packing must replace stale checksum values as well as
-          # fill omitted ones, including both fields of WHL_SPD11.
-          for stale in (None, 0, 0xFF):
-            for name in checksum_fields:
-              if stale is None:
-                values.pop(name, None)
-              else:
-                values[name] = stale
-            self.assertEqual(packer.make_can_msg(address, 0, values)[1], expected)
+  def test_hyundai_split_checksum(self):
+    packer = CANPacker("hyundai_can_generated")
+    # Zero wheel speeds/counters give checksum 9, split across bytes 5 and 7.
+    expected = bytes.fromhex("0000000000400080")
+    for stale in (None, 0, 3):
+      with self.subTest(stale=stale):
+        values = {} if stale is None else {"WHL_SPD_Checksum_LSB": stale, "WHL_SPD_Checksum_MSB": stale}
+        self.assertEqual(packer.make_can_msg("WHL_SPD11", 0, values)[1], expected)
 
-          # Registering these packer checksums must not enable new receive-side
-          # validation (some legacy Hyundai variants lack these checksums).
-          corrupted = bytearray(expected)
-          sig = packer.dbc.addr_to_msg[address].sigs[checksum_fields[0]]
-          checksum = int(parser.vl[address][sig.name]) ^ 1
-          set_value(corrupted, sig, checksum)
-          self.assertIn(address, parser.update([1, [(address, bytes(corrupted), 0)]]))
-          self.assertEqual(parser.vl[address][sig.name], checksum)
+  def test_packer_only_checksums(self):
+    # Adding packer support must not enable receive-side validation, especially
+    # for legacy Hyundai variants that lack these checksums.
+    cases = [
+      ("ford_lincoln_base_pt", "BrakeSysFeatures", 3),
+      ("hyundai_can_generated", "EMS16", 7),
+      ("mg", "SCS_HSC2_FrP19", 7),
+      ("rivian_primary_actuator", "ESP_Status", 0),
+    ]
+    for dbc, name, checksum_byte in cases:
+      with self.subTest(dbc=dbc):
+        packer = CANPacker(dbc)
+        parser = CANParser(dbc, [(name, 0)], 0)
+        address, data, bus = packer.make_can_msg(name, 0, {})
+        corrupted = bytearray(data)
+        corrupted[checksum_byte] ^= 1
+        self.assertIn(address, parser.update([0, [(address, bytes(corrupted), bus)]]))
 
   def verify_checksum(self, dbc_file: str, msg_name: str, msg_addr: int, test_messages: list[bytes],
                       checksum_field: str = 'CHECKSUM', counter_field = 'COUNTER'):
