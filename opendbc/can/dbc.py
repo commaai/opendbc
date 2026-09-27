@@ -216,8 +216,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
   elif dbc_name.startswith("byd_"):
     return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
   elif dbc_name == "rivian_primary_actuator":
-    return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum,
-                         checksum_pattern=r"_Checksum$")
+    return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum, checksum_pattern=r"_Checksum$")
   return None
 
 
