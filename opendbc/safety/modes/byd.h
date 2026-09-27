@@ -20,7 +20,6 @@ static uint32_t byd_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void byd_rx_hook(const CANPacket_t *msg) {
-
   if (msg->bus == 0U) {
     // Steering angle: 0.1 deg/LSB, signed
     if (msg->addr == 0x11FU) {
@@ -52,7 +51,6 @@ static void byd_rx_hook(const CANPacket_t *msg) {
     }
   }
 }
-
 
 static bool byd_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringLimits BYD_STEERING_LIMITS = {

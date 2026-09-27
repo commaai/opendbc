@@ -1,6 +1,5 @@
 #include "opendbc/safety/modes/chrysler_common.h"
 
-
 static safety_config chrysler_cusw_init(uint16_t param) {
   SAFETY_UNUSED(param);
 

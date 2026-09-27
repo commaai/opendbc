@@ -184,7 +184,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     violation |= longitudinal_gas_checks(gas_pred, FORD_LONG_LIMITS);
 
     // Safety check for stock AEB
-    violation |= cmbb_deny; // do not prevent stock AEB actuation
+    violation |= cmbb_deny;  // do not prevent stock AEB actuation
 
     violation |= !get_longitudinal_allowed() && brake_actuation;
 
