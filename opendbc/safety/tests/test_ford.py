@@ -7,8 +7,6 @@ import opendbc.safety.tests.common as common
 from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.safety.tests.common import CANPackerSafety
 
 MSG_BrakeSysFeatures = 0x415       # RX from ABS, for vehicle speed
 MSG_EngVehicleSpThrottle2 = 0x202  # RX from PCM, for second vehicle speed
@@ -64,6 +62,9 @@ class Buttons:
 #  * CAN FD with openpilot longitudinal
 
 class TestFordSafetyBase(common.CarSafetyTest):
+  DBC = "ford_lincoln_base_pt"
+  SAFETY_MODEL = CarParams.SafetyModel.ford
+
   STANDSTILL_THRESHOLD = 1
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
                                  MSG_LateralMotionControl2, MSG_IPMA_Data)}
@@ -84,9 +85,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
   cnt_speed_2 = 0
   cnt_yaw_rate = 0
   cnt_lat_ctl = 0
-
-  packer: CANPackerSafety
-  safety: libsafety_py.LibSafety
 
   def _get_max_curvature_can(self, speed):
     fudged_speed = max(speed - 1.0, 1.0)
@@ -466,6 +464,8 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
 
 class TestFordCANFDStockSafety(TestFordSafetyBase):
+  SAFETY_PARAM = FordSafetyFlags.CANFD
+
   STEER_MESSAGE = MSG_LateralMotionControl2
 
   TX_MSGS = [
@@ -477,12 +477,6 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
 
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
                                MSG_IPMA_Data]}
-
-  def setUp(self):
-    self.packer = CANPackerSafety("ford_lincoln_base_pt")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.CANFD)
-    self.safety.init_tests()
 
 
 class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
@@ -537,6 +531,8 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
 
 
 class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):
+  # Make sure we enforce long safety even without long flag for CAN
+  SAFETY_PARAM = 0
   STEER_MESSAGE = MSG_LateralMotionControl
 
   TX_MSGS = [
@@ -549,15 +545,10 @@ class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
                                MSG_IPMA_Data]}
 
-  def setUp(self):
-    self.packer = CANPackerSafety("ford_lincoln_base_pt")
-    self.safety = libsafety_py.libsafety
-    # Make sure we enforce long safety even without long flag for CAN
-    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, 0)
-    self.safety.init_tests()
-
 
 class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
+  SAFETY_PARAM = FordSafetyFlags.LONG_CONTROL | FordSafetyFlags.CANFD
+
   STEER_MESSAGE = MSG_LateralMotionControl2
 
   TX_MSGS = [
@@ -569,12 +560,6 @@ class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
 
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
                                MSG_IPMA_Data]}
-
-  def setUp(self):
-    self.packer = CANPackerSafety("ford_lincoln_base_pt")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.LONG_CONTROL | FordSafetyFlags.CANFD)
-    self.safety.init_tests()
 
 
 if __name__ == "__main__":

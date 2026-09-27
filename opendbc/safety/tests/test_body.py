@@ -3,8 +3,6 @@ import unittest
 
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.car.body.bodycan import body_checksum
 
 
@@ -16,16 +14,13 @@ def checksum(msg):
 
 
 class TestBody(common.SafetyTest):
+  DBC = "comma_body"
+  SAFETY_MODEL = CarParams.SafetyModel.body
+
   TX_MSGS = [[0x250, 0], [0x251, 0],
              [0x1, 0], [0x1, 1], [0x1, 2], [0x1, 3]]
   FWD_BUS_LOOKUP = {}
   counter = 0
-
-  def setUp(self):
-    self.packer = CANPackerSafety("comma_body")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.body, 0)
-    self.safety.init_tests()
 
   def _motors_data_msg(self, speed_l, speed_r):
     values = {"SPEED_L": speed_l, "SPEED_R": speed_r, "COUNTER": self.counter % 16}

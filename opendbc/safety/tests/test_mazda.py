@@ -2,12 +2,14 @@
 import unittest
 
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety, make_msg
+from opendbc.safety.tests.common import make_msg
 
 
 class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+
+  DBC = "mazda_2017"
+  SAFETY_MODEL = CarParams.SafetyModel.mazda
 
   TX_MSGS = [[0x243, 0], [0x09d, 0], [0x440, 0]]
   STANDSTILL_THRESHOLD = .1
@@ -25,12 +27,6 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
 
   # Mazda actually does not set any bit when requesting torque
   NO_STEER_REQ_BIT = True
-
-  def setUp(self):
-    self.packer = CANPackerSafety("mazda_2017")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.mazda, 0)
-    self.safety.init_tests()
 
   def _torque_meas_msg(self, torque):
     values = {"STEER_TORQUE_MOTOR": torque}
@@ -81,12 +77,10 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
 
-class TestMazdaIgnition(unittest.TestCase):
-  TX_MSGS: list = []
+class TestMazdaIgnition(common.SafetyTestBase):
+  SAFETY_MODEL = None
 
-  def setUp(self):
-    self.safety = libsafety_py.libsafety
-    self.safety.init_tests()
+  TX_MSGS: list = []
 
   def _msg(self, byte0):
     return make_msg(0, 0x9E, dat=bytes([byte0]) + b"\x00" * 7)
