@@ -3,7 +3,6 @@ import unittest
 
 from opendbc.car.structs import CarParams
 from opendbc.car.subaru.values import SubaruSafetyFlags
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 
@@ -26,7 +25,6 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
 
   def setUp(self):
     self.packer = CANPackerSafety(self.DBC)
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.subaruPreglobal, self.FLAGS)
     self.safety.init_tests()
 

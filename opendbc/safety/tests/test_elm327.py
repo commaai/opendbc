@@ -4,7 +4,6 @@ import unittest
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
 from opendbc.safety import DLC_TO_LEN
-from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.test_defaults import TestDefaultRxHookBase
 
 GM_CAMERA_DIAG_ADDR = 0x24B
@@ -18,7 +17,6 @@ class TestElm327(TestDefaultRxHookBase):
   FWD_BUS_LOOKUP = {}
 
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.elm327, 0)
     self.safety.init_tests()
 

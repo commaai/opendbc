@@ -3,7 +3,6 @@ import unittest
 
 from opendbc.car.chrysler.values import ChryslerSafetyFlags
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 
@@ -25,7 +24,6 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
 
   def setUp(self):
     self.packer = CANPackerSafety("chrysler_pacifica_2017_hybrid_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, 0)
     self.safety.init_tests()
 
@@ -87,7 +85,6 @@ class TestChryslerRamDTSafety(TestChryslerSafety):
 
   def setUp(self):
     self.packer = CANPackerSafety("chrysler_ram_dt_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.RAM_DT)
     self.safety.init_tests()
 
@@ -112,7 +109,6 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
 
   def setUp(self):
     self.packer = CANPackerSafety("chrysler_ram_hd_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.RAM_HD)
     self.safety.init_tests()
 

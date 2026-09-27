@@ -4,7 +4,6 @@ import unittest
 
 from opendbc.car.hyundai.values import HyundaiSafetyFlags
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
@@ -97,12 +96,10 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
     super().setUpClass()
     if cls.__name__ in ("TestHyundaiCanfdLFASteering", "TestHyundaiCanfdLFASteeringAltButtons"):
       cls.packer = None
-      cls.safety = None
       raise unittest.SkipTest
 
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
     self.safety.init_tests()
 
@@ -118,7 +115,6 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
 
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_ALT_BUTTONS | self.SAFETY_PARAM)
     self.safety.init_tests()
 
@@ -169,7 +165,6 @@ class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEER_MSG | HyundaiSafetyFlags.EV_GAS)
     self.safety.init_tests()
 
@@ -188,7 +183,6 @@ class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEER_MSG | HyundaiSafetyFlags.EV_GAS |
                                  HyundaiSafetyFlags.CANFD_LKA_STEER_MSG_ALT)
     self.safety.init_tests()
@@ -210,7 +204,6 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
 
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEER_MSG |
                                  HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.EV_GAS)
     self.safety.init_tests()
@@ -233,15 +226,8 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
   DISABLED_ECU_UDS_MSG = (0x7D0, 0)
   DISABLED_ECU_ACTUATION_MSG = (0x1a0, 0)
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestHyundaiCanfdLFASteeringLongBase":
-      cls.safety = None
-      raise unittest.SkipTest
-
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.LONG | self.SAFETY_PARAM)
     self.safety.init_tests()
 
@@ -260,8 +246,8 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
 class TestHyundaiCanfdLFASteeringLong(TestHyundaiCanfdLFASteeringLongBase):
   @classmethod
   def setUpClass(cls):
+    super().setUpClass()
     if cls.__name__ == "TestHyundaiCanfdLFASteeringLong":
-      cls.safety = None
       raise unittest.SkipTest
 
 
@@ -269,13 +255,12 @@ class TestHyundaiCanfdLFASteeringLong(TestHyundaiCanfdLFASteeringLongBase):
 class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongBase, TestHyundaiCanfdLFASteeringAltButtonsBase):
   @classmethod
   def setUpClass(cls):
+    super().setUpClass()
     if cls.__name__ == "TestHyundaiCanfdLFASteeringLongAltButtons":
-      cls.safety = None
       raise unittest.SkipTest
 
   def setUp(self):
     self.packer = CANPackerSafety("hyundai_canfd_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CANFD_ALT_BUTTONS | self.SAFETY_PARAM)
     self.safety.init_tests()
 

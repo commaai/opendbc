@@ -8,7 +8,6 @@ from opendbc.car.byd.values import CarControllerParams
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety, away_round
 
@@ -47,7 +46,6 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def setUp(self):
     self.VM = VehicleModel(get_safety_CP())
     self.packer = CANPackerSafety("byd_atto3")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.byd, 0)
     self.safety.init_tests()
 

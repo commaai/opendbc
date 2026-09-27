@@ -3,7 +3,6 @@ import unittest
 
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.car.body.bodycan import body_checksum
 
@@ -23,7 +22,6 @@ class TestBody(common.SafetyTest):
 
   def setUp(self):
     self.packer = CANPackerSafety("comma_body")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.body, 0)
     self.safety.init_tests()
 

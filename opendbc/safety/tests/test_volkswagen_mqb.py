@@ -2,7 +2,6 @@
 import unittest
 import numpy as np
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
@@ -109,7 +108,6 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("vw_mqb")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagen, 0)
     self.safety.init_tests()
 
@@ -131,7 +129,6 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("vw_mqb")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagen, VolkswagenSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
 

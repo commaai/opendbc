@@ -4,7 +4,6 @@ import unittest
 
 from opendbc.car.structs import CarParams
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 
@@ -273,7 +272,6 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("vw_meb_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, 0)
     self.safety.init_tests()
 
@@ -362,17 +360,15 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
 class TestVolkswagenMebGen2Safety(TestVolkswagenMebSafety):
   def setUp(self):
     self.packer = CANPackerSafety("vw_meb_2024_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.MEB_ALT_CRC)
     self.safety.init_tests()
 
 
 # ZAS_Kl_15=1
-class TestVolkswagenMebIgnition(unittest.TestCase):
+class TestVolkswagenMebIgnition(common.SafetyTestBase):
   TX_MSGS: list = []
 
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.init_tests()
     self.packer = CANPackerSafety("vw_meb_generated")
 

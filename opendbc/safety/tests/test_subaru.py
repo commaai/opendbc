@@ -4,7 +4,6 @@ import unittest
 
 from opendbc.car.subaru.values import SubaruSafetyFlags
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 from functools import partial
@@ -61,7 +60,6 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
 
   def setUp(self):
     self.packer = CANPackerSafety("subaru_global_2017_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.subaru, self.FLAGS)
     self.safety.init_tests()
 

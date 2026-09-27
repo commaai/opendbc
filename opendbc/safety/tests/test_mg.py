@@ -2,7 +2,6 @@
 import unittest
 
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 
@@ -38,7 +37,6 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   def setUp(self):
     self.packer = CANPackerSafety("mg")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.mg, 0)
     self.safety.init_tests()
     self.counters = {addr: 0 for addr in (0x1b6, 0x1ec, 0x23c, 0x242)}

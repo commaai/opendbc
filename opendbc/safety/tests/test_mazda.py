@@ -2,7 +2,6 @@
 import unittest
 
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety, make_msg
 
@@ -28,7 +27,6 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
 
   def setUp(self):
     self.packer = CANPackerSafety("mazda_2017")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.mazda, 0)
     self.safety.init_tests()
 
@@ -81,11 +79,10 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
 
-class TestMazdaIgnition(unittest.TestCase):
+class TestMazdaIgnition(common.SafetyTestBase):
   TX_MSGS: list = []
 
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.init_tests()
 
   def _msg(self, byte0):

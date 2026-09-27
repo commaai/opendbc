@@ -2,7 +2,6 @@
 import unittest
 
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.car.rivian.values import RivianSafetyFlags
@@ -157,7 +156,6 @@ class TestRivianStockSafety(TestRivianSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("rivian_primary_actuator")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
     self.safety.init_tests()
 
@@ -178,16 +176,14 @@ class TestRivianLongitudinalSafety(TestRivianSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("rivian_primary_actuator")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, RivianSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
 
 
-class TestRivianIgnition(unittest.TestCase):
+class TestRivianIgnition(common.SafetyTestBase):
   TX_MSGS: list = []
 
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.init_tests()
     self.packer = CANPackerSafety("rivian_primary_actuator")
 

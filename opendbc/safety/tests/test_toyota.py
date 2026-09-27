@@ -26,7 +26,6 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   EPS_SCALE = 73
 
   packer: CANPackerSafety
-  safety: libsafety_py.LibSafety
 
   def _torque_meas_msg(self, torque: int, driver_torque: int | None = None):
     values = {"STEER_TORQUE_EPS": (torque / self.EPS_SCALE) * 100.}
@@ -152,7 +151,6 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
 
   def setUp(self):
     self.packer = CANPackerSafety("toyota_nodsu_pt_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE)
     self.safety.init_tests()
 
@@ -173,7 +171,6 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
 
   def setUp(self):
     self.packer = CANPackerSafety("toyota_nodsu_pt_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.LTA)
     self.safety.init_tests()
 
@@ -272,7 +269,6 @@ class TestToyotaAltBrakeSafety(TestToyotaSafetyTorque):
 
   def setUp(self):
     self.packer = CANPackerSafety("toyota_new_mc_pt_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.ALT_BRAKE)
     self.safety.init_tests()
 
@@ -316,7 +312,6 @@ class TestToyotaStockLongitudinalTorque(TestToyotaStockLongitudinalBase, TestToy
 
   def setUp(self):
     self.packer = CANPackerSafety("toyota_nodsu_pt_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL)
     self.safety.init_tests()
 
@@ -325,7 +320,6 @@ class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyo
 
   def setUp(self):
     self.packer = CANPackerSafety("toyota_nodsu_pt_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
                                  self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.LTA)
     self.safety.init_tests()
@@ -339,7 +333,6 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("toyota_secoc_pt_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
                                  self.EPS_SCALE | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
@@ -379,7 +372,6 @@ class TestToyotaSecOcSafetyStockLongitudinal(TestToyotaSecOcSafetyBase, TestToyo
 
   def setUp(self):
     self.packer = CANPackerSafety("toyota_secoc_pt_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
                                  self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
@@ -392,7 +384,6 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("toyota_secoc_pt_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
 

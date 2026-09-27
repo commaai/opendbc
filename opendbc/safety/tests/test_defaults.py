@@ -3,7 +3,6 @@ import unittest
 
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class TestDefaultRxHookBase(common.SafetyTest):
@@ -20,7 +19,6 @@ class TestNoOutput(TestDefaultRxHookBase):
   TX_MSGS = []
 
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0)
     self.safety.init_tests()
 
@@ -29,7 +27,6 @@ class TestSilent(TestNoOutput):
   """SILENT uses same hooks as NOOUTPUT"""
 
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.silent, 0)
     self.safety.init_tests()
 
@@ -40,7 +37,6 @@ class TestAllOutput(TestDefaultRxHookBase):
              for bus in range(4)]
 
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.allOutput, 0)
     self.safety.init_tests()
 
@@ -65,14 +61,12 @@ class TestAllOutputPassthrough(TestAllOutput):
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.allOutput, 1)
     self.safety.init_tests()
 
 
-class TestSafetyFramework(unittest.TestCase):
+class TestSafetyFramework(common.SafetyTestBase):
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0)
     self.safety.init_tests()
 

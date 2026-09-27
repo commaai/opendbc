@@ -7,7 +7,6 @@ import opendbc.safety.tests.common as common
 from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import CANPackerSafety
 
 MSG_BrakeSysFeatures = 0x415       # RX from ABS, for vehicle speed
@@ -86,7 +85,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
   cnt_lat_ctl = 0
 
   packer: CANPackerSafety
-  safety: libsafety_py.LibSafety
 
   def _get_max_curvature_can(self, speed):
     fudged_speed = max(speed - 1.0, 1.0)
@@ -480,7 +478,6 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("ford_lincoln_base_pt")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.CANFD)
     self.safety.init_tests()
 
@@ -551,7 +548,6 @@ class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("ford_lincoln_base_pt")
-    self.safety = libsafety_py.libsafety
     # Make sure we enforce long safety even without long flag for CAN
     self.safety.set_safety_hooks(CarParams.SafetyModel.ford, 0)
     self.safety.init_tests()
@@ -572,7 +568,6 @@ class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("ford_lincoln_base_pt")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.LONG_CONTROL | FordSafetyFlags.CANFD)
     self.safety.init_tests()
 

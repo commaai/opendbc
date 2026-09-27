@@ -2,7 +2,6 @@
 import unittest
 
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 
@@ -27,7 +26,6 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
   def setUp(self):
     self.packer = CANPackerSafety("psa_aee2010_r3")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
     self.safety.init_tests()
 
@@ -81,7 +79,6 @@ class TestPsaStockSafety(TestPsaSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("psa_aee2010_r3")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
     self.safety.init_tests()
 

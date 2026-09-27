@@ -3,7 +3,6 @@ import unittest
 
 from opendbc.car.gm.values import GMSafetyFlags
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 
@@ -92,7 +91,6 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
   def setUp(self):
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerSafety("gm_global_a_chassis")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.gm, 0)
     self.safety.init_tests()
 
@@ -158,7 +156,6 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
   def setUp(self):
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerSafety("gm_global_a_chassis")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.gm, self.EXTRA_SAFETY_PARAM)
     self.safety.init_tests()
 
@@ -182,7 +179,6 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
   def setUp(self):
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerSafety("gm_global_a_chassis")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM | self.EXTRA_SAFETY_PARAM)
     self.safety.init_tests()
 
@@ -219,7 +215,6 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
   def setUp(self):
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerSafety("gm_global_a_chassis")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM | GMSafetyFlags.HW_CAM_LONG | self.EXTRA_SAFETY_PARAM)
     self.safety.init_tests()
 
@@ -228,11 +223,10 @@ class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVS
   pass
 
 
-class TestGmIgnition(unittest.TestCase):
+class TestGmIgnition(common.SafetyTestBase):
   TX_MSGS: list = []
 
   def setUp(self):
-    self.safety = libsafety_py.libsafety
     self.safety.init_tests()
     self.packer = CANPackerSafety("gm_global_a_powertrain_generated")
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import unittest
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
 
@@ -91,7 +90,6 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("vw_mlb")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMlb, 0)
     self.safety.init_tests()
 

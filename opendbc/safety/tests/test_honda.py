@@ -254,7 +254,6 @@ class TestHondaNidecSafetyBase(HondaBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("honda_civic_touring_2016_can_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, 0)
     self.safety.init_tests()
 
@@ -353,7 +352,6 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
   """
   def setUp(self):
     self.packer = CANPackerSafety("acura_ilx_2016_can_generated")
-    self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, HondaSafetyFlags.NIDEC_ALT)
     self.safety.init_tests()
 
@@ -383,7 +381,6 @@ class TestHondaBoschSafetyBase(HondaBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("honda_civic_hatchback_ex_2017_can_generated")
-    self.safety = libsafety_py.libsafety
 
   def _alt_brake_msg(self, brake):
     values = {"BRAKE_PRESSED": brake, "COUNTER": self.cnt_brake % 4}
@@ -529,7 +526,6 @@ class TestHondaBoschRadarlessSafetyBase(TestHondaBoschSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("honda_bosch_radarless_generated")
-    self.safety = libsafety_py.libsafety
 
 
 class TestHondaBoschRadarlessSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase):
@@ -600,7 +596,6 @@ class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
 
   def setUp(self):
     self.packer = CANPackerSafety("honda_common_canfd_generated")
-    self.safety = libsafety_py.libsafety
 
 
 class TestHondaBoschCANFDSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBase):
