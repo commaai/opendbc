@@ -48,10 +48,10 @@ static safety_config body_init(uint16_t param) {
   };
 
   static const CanMsg BODY_TX_MSGS[] = {
-    {0x250, 0, 8, .check_relay = false},  // body
-    {0x250, 0, 6, .check_relay = false},  // body
-    {0x251, 0, 5, .check_relay = false},  // body
-    {0x1, 0, 8, .check_relay = false},  // CAN flasher
+    {0x250, 0, 8, .check_relay = false},
+    {0x250, 0, 6, .check_relay = false},
+    {0x251, 0, 5, .check_relay = false},
+    {0x1, 0, 8, .check_relay = false},   // CAN flasher
   };
 
   SAFETY_UNUSED(param);
