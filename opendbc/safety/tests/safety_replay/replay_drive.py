@@ -5,7 +5,10 @@ from tqdm import tqdm
 
 from opendbc.car.carlog import carlog
 from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.safety.tests.safety_replay.helpers import package_can_msg, init_segment
+
+
+def package_can_msg(msg):
+  return libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
 
 
 # replay a drive to check for safety violations
@@ -17,7 +20,8 @@ def replay_drive(msgs, safety_mode, param, alternative_experience):
   assert err == 0, "invalid safety mode: %d" % safety_mode
   safety.set_alternative_experience(alternative_experience)
 
-  init_segment(safety, msgs, safety_mode, param)
+  if not any(m.which() == "sentinel" and m.sentinel.type == "startOfRoute" for m in msgs):
+    print("WARNING: Replay starts mid-route; missing prior safety state may cause safety violations that did not appear in the route.")
 
   rx_tot, rx_invalid, tx_tot, tx_blocked, tx_controls, tx_controls_blocked = 0, 0, 0, 0, 0, 0
   safety_tick_rx_invalid = False
