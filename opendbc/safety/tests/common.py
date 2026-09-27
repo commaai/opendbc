@@ -42,10 +42,8 @@ def make_msg(bus, addr, length=8, dat=None):
 
 
 class CANPackerSafety(CANPacker):
-  def make_can_msg_safety(self, name_or_addr, bus, values, fix_checksum=None):
+  def make_can_msg_safety(self, name_or_addr, bus, values):
     msg = self.make_can_msg(name_or_addr, bus, values)
-    if fix_checksum is not None:
-      msg = fix_checksum(msg)
     addr, dat, bus = msg
     return libsafety_py.make_CANPacket(addr, bus, dat)
 

@@ -338,3 +338,14 @@ def create_button_msg(packer, bus: int, stock_values: dict, cancel=False, resume
     "TjaButtnOnOffPress": 1 if tja_toggle else 0,   # LCA/TJA toggle button
   })
   return packer.make_can_msg("Steering_Data_FD1", bus, values)
+
+
+def ford_checksum(address: int, sig, d: bytearray) -> int:
+  if address == 0x91:  # Yaw_Data_FD1
+    chksum = d[0] + d[1] + d[2] + d[3] + d[5]
+    chksum += (d[6] >> 6) + ((d[6] >> 4) & 0x3)
+  elif address == 0x415:  # BrakeSysFeatures
+    chksum = d[0] + d[1] + ((d[2] >> 2) & 0xF) + (d[2] >> 6)
+  else:  # EngVehicleSpThrottle2
+    chksum = ((d[2] >> 3) & 0xF) + ((d[4] >> 5) & 0x3) + d[6] + d[7]
+  return 0xFF - (chksum & 0xFF)
