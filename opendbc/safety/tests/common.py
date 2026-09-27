@@ -73,13 +73,14 @@ def add_regen_tests(cls):
 
 
 class SafetyTestBase(unittest.TestCase):
-  safety: libsafety_py.LibSafety = libsafety_py.libsafety
+  safety: libsafety_py.LibSafety
   DBC: str | None = None
   packer: CANPackerSafety
   SAFETY_MODEL: int | None
   SAFETY_PARAM = 0
 
   def setUp(self):
+    self.safety = libsafety_py.libsafety
     if self.DBC is not None:
       self.packer = CANPackerSafety(self.DBC)
     if self.SAFETY_MODEL is not None:
