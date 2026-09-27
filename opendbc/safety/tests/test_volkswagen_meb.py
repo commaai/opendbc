@@ -191,19 +191,19 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     for name in ("LH_EPS_03", "Motor_14", "GRA_ACC_01", "QFK_01", "ESP_21", "Motor_51", "ESC_51"):
       with self.subTest(msg=name):
         # an expected counter sequence is always accepted, and clears the wrong counter count
-        next_counter = common.MAX_WRONG_COUNTERS + 1
-        for counter in range(next_counter):
-          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": counter})))
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, {})))
 
         # mess with the checksum to make it fail, it's the first byte of every MEB message
-        msg = self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})
+        msg = self.packer.make_can_msg_safety(name, 0, {})
         msg[0].data[0] ^= 0xFF
         self.assertFalse(self._rx(msg))
 
         # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[0] ^= 0xFF
         for i in range(common.MAX_WRONG_COUNTERS):
           should_rx = i < common.MAX_WRONG_COUNTERS - 1
-          self.assertEqual(should_rx, self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})))
+          self.assertEqual(should_rx, self._rx(msg))
 
   def test_main_switch_off_disables_controls(self):
     self.safety.set_controls_allowed(True)

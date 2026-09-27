@@ -108,11 +108,11 @@ class HondaButtonEnableBase(common.CarSafetyTest):
         self.assertFalse(self.safety.get_controls_allowed())
 
     # counter
-    # reset wrong_counters to zero by sending valid messages
+    # Skip every other counter to trigger counter faults.
     for i in range(MAX_WRONG_COUNTERS + 1):
-      self.__class__.cnt_speed += 1
-      self.__class__.cnt_button += 1
-      self.__class__.cnt_powertrain_data += 1
+      self._speed_msg(0)
+      self._button_msg(Btn.SET)
+      self._user_gas_msg(0)
       if i < MAX_WRONG_COUNTERS:
         self.safety.set_controls_allowed(1)
         self._rx(self._button_msg(Btn.SET))
@@ -169,12 +169,6 @@ class HondaBase(common.CarSafetyTest):
 
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194)}  # STEERING_CONTROL
 
-  cnt_speed = 0
-  cnt_button = 0
-  cnt_brake = 0
-  cnt_powertrain_data = 0
-  cnt_acc_state = 0
-
   def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None):
     # preserve the state
     if cruise_on is None:
@@ -189,28 +183,23 @@ class HondaBase(common.CarSafetyTest):
       "ACC_STATUS": cruise_on,
       "BRAKE_PRESSED": brake_pressed,
       "PEDAL_GAS": gas_pressed,
-      "COUNTER": self.cnt_powertrain_data % 4
     }
-    self.__class__.cnt_powertrain_data += 1
     return self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, values)
 
   def _pcm_status_msg(self, enable):
     return self._powertrain_data_msg(cruise_on=enable)
 
   def _speed_msg(self, speed):
-    values = {"XMISSION_SPEED": speed, "COUNTER": self.cnt_speed % 4}
-    self.__class__.cnt_speed += 1
+    values = {"XMISSION_SPEED": speed}
     return self.packer.make_can_msg_safety("ENGINE_DATA", self.PT_BUS, values)
 
   def _acc_state_msg(self, main_on):
-    values = {"MAIN_ON": main_on, "COUNTER": self.cnt_acc_state % 4}
-    self.__class__.cnt_acc_state += 1
+    values = {"MAIN_ON": main_on}
     return self.packer.make_can_msg_safety("SCM_FEEDBACK", self.PT_BUS, values)
 
   def _button_msg(self, buttons, main_on=False, bus=None):
     bus = self.PT_BUS if bus is None else bus
-    values = {"CRUISE_BUTTONS": buttons, "COUNTER": self.cnt_button % 4}
-    self.__class__.cnt_button += 1
+    values = {"CRUISE_BUTTONS": buttons}
     return self.packer.make_can_msg_safety("SCM_BUTTONS", bus, values)
 
   def _user_brake_msg(self, brake):
@@ -353,14 +342,12 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
   SAFETY_PARAM = HondaSafetyFlags.NIDEC_ALT
 
   def _acc_state_msg(self, main_on):
-    values = {"MAIN_ON": main_on, "COUNTER": self.cnt_acc_state % 4}
-    self.__class__.cnt_acc_state += 1
+    values = {"MAIN_ON": main_on}
     return self.packer.make_can_msg_safety("SCM_BUTTONS", self.PT_BUS, values)
 
   def _button_msg(self, buttons, main_on=False, bus=None):
     bus = self.PT_BUS if bus is None else bus
-    values = {"CRUISE_BUTTONS": buttons, "MAIN_ON": main_on, "COUNTER": self.cnt_button % 4}
-    self.__class__.cnt_button += 1
+    values = {"CRUISE_BUTTONS": buttons, "MAIN_ON": main_on}
     return self.packer.make_can_msg_safety("SCM_BUTTONS", bus, values)
 
 
@@ -380,8 +367,7 @@ class TestHondaBoschSafetyBase(HondaBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB)}  # STEERING_CONTROL, BOSCH_SUPPLEMENTAL_1
 
   def _alt_brake_msg(self, brake):
-    values = {"BRAKE_PRESSED": brake, "COUNTER": self.cnt_brake % 4}
-    self.__class__.cnt_brake += 1
+    values = {"BRAKE_PRESSED": brake}
     return self.packer.make_can_msg_safety("BRAKE_MODULE", self.PT_BUS, values)
 
   def _send_brake_msg(self, brake):

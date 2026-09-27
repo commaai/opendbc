@@ -54,7 +54,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   MIN_ACCEL = -3.48
   INACTIVE_ACCEL = 0.0
 
-  cnt_epas = 0
   cnt_angle_cmd = 0
 
   def _get_steer_cmd_angle_max(self, speed):
@@ -79,9 +78,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
   def _angle_meas_msg(self, angle: float, hands_on_level: int = 0, eac_status: int = 1, eac_error_code: int = 0):
     values = {"EPAS3S_internalSAS": angle, "EPAS3S_handsOnLevel": hands_on_level,
-              "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code,
-              "EPAS3S_sysStatusCounter": self.cnt_epas % 16}
-    self.__class__.cnt_epas += 1
+              "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code}
     return self.packer.make_can_msg_safety("EPAS3S_sysStatus", 0, values)
 
   def _user_brake_msg(self, brake, quality_flag: bool = True):
