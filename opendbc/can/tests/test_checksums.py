@@ -5,33 +5,6 @@ from opendbc.can import CANPacker, CANParser
 
 class TestCanChecksums(unittest.TestCase):
 
-  def test_hyundai_split_checksum(self):
-    packer = CANPacker("hyundai_can_generated")
-    # Zero wheel speeds/counters give checksum 9, split across bytes 5 and 7.
-    expected = bytes.fromhex("0000000000400080")
-    for stale in (None, 0, 3):
-      with self.subTest(stale=stale):
-        values = {} if stale is None else {"WHL_SPD_Checksum_LSB": stale, "WHL_SPD_Checksum_MSB": stale}
-        self.assertEqual(packer.make_can_msg("WHL_SPD11", 0, values)[1], expected)
-
-  def test_packer_only_checksums(self):
-    # Adding packer support must not enable receive-side validation, especially
-    # for legacy Hyundai variants that lack these checksums.
-    cases = [
-      ("ford_lincoln_base_pt", "BrakeSysFeatures", 3),
-      ("hyundai_can_generated", "EMS16", 7),
-      ("mg", "SCS_HSC2_FrP19", 7),
-      ("rivian_primary_actuator", "ESP_Status", 0),
-    ]
-    for dbc, name, checksum_byte in cases:
-      with self.subTest(dbc=dbc):
-        packer = CANPacker(dbc)
-        parser = CANParser(dbc, [(name, 0)], 0)
-        address, data, bus = packer.make_can_msg(name, 0, {})
-        corrupted = bytearray(data)
-        corrupted[checksum_byte] ^= 1
-        self.assertIn(address, parser.update([0, [(address, bytes(corrupted), bus)]]))
-
   def verify_checksum(self, dbc_file: str, msg_name: str, msg_addr: int, test_messages: list[bytes],
                       checksum_field: str = 'CHECKSUM', counter_field = 'COUNTER'):
     """

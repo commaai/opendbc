@@ -19,7 +19,6 @@ from opendbc.car.body.bodycan import body_checksum
 from opendbc.car.byd.bydcan import byd_checksum
 from opendbc.car.psa.psacan import psa_checksum
 from opendbc.car.ford.fordcan import ford_checksum
-from opendbc.car.hyundai.hyundaican import hyundai_classic_checksum
 from opendbc.car.mg.mgcan import mg_checksum
 from opendbc.car.rivian.riviancan import rivian_checksum
 
@@ -41,9 +40,8 @@ class SignalType:
   VOLKSWAGEN_MLB_CHECKSUM = 13
   BYD_CHECKSUM = 14
   FORD_CHECKSUM = 15
-  HYUNDAI_CHECKSUM = 16
-  MG_CHECKSUM = 17
-  RIVIAN_CHECKSUM = 18
+  MG_CHECKSUM = 16
+  RIVIAN_CHECKSUM = 17
 
 
 @dataclass
@@ -59,7 +57,6 @@ class Signal:
   is_little_endian: bool
   type: int = SignalType.DEFAULT
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
-  validate_checksum: bool = True
 
 
 @dataclass
@@ -190,8 +187,7 @@ class ChecksumState:
   checksum_type: int
   calc_checksum: Callable[[int, Signal, bytearray], int] | None
   setup_signal: Callable[[Signal, str, int], None] | None = None
-  checksum_signals: dict[int, tuple[str, ...]] | None = None
-  validate_checksum: bool = True
+  checksum_signals: dict[int, str] | None = None
 
 
 def get_checksum_state(dbc_name: str) -> ChecksumState | None:
@@ -223,36 +219,27 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.PSA_CHECKSUM, psa_checksum)
   elif dbc_name.startswith("byd_"):
     return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
-  # Add packing support without enabling new receive-side validation,
-  # including for legacy Hyundai variants that lack these checksums.
   elif dbc_name == "ford_lincoln_base_pt":
     return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, checksum_signals={
-      0x91: ("VehRollYawW_No_Cs",),
-      0x415: ("VehVActlBrk_No_Cs",),
-      0x202: ("VehVActlEng_No_Cs",),
-    }, validate_checksum=False)
-  elif dbc_name == "hyundai_can_generated":
-    return ChecksumState(SignalType.HYUNDAI_CHECKSUM, hyundai_classic_checksum, checksum_signals={
-      0x260: ("Checksum",),
-      0x394: ("CheckSum_TCS3",),
-      0x386: ("WHL_SPD_Checksum_LSB", "WHL_SPD_Checksum_MSB"),
-      0x421: ("CR_VSM_ChkSum",),
-    }, validate_checksum=False)
+      0x91: "VehRollYawW_No_Cs",
+      0x415: "VehVActlBrk_No_Cs",
+      0x202: "VehVActlEng_No_Cs",
+    })
   elif dbc_name == "mg":
     return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum, checksum_signals={
-      0x1B6: ("BrkPdlAppdChksmHSC2",),
-      0x1EC: ("ChLKAChksmHSC2",),
-      0x23C: ("VehSpdAvgChksmHSC2",),
-      0x242: ("ACCSysChksm_SCSHSC2",),
-    }, validate_checksum=False)
+      0x1B6: "BrkPdlAppdChksmHSC2",
+      0x1EC: "ChLKAChksmHSC2",
+      0x23C: "VehSpdAvgChksmHSC2",
+      0x242: "ACCSysChksm_SCSHSC2",
+    })
   elif dbc_name == "rivian_primary_actuator":
     return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum, checksum_signals={
-      0x208: ("ESP_Status_Checksum",),
-      0x150: ("VDM_PropStatus_Checksum",),
-      0x380: ("EPAS_SytemStatus_Checksum",),
-      0x38F: ("iBESP2_Checksum",),
-      0x100: ("ACM_Status_Checksum",),
-    }, validate_checksum=False)
+      0x208: "ESP_Status_Checksum",
+      0x150: "VDM_PropStatus_Checksum",
+      0x380: "EPAS_SytemStatus_Checksum",
+      0x38F: "iBESP2_Checksum",
+      0x100: "ACM_Status_Checksum",
+    })
   return None
 
 
@@ -260,10 +247,9 @@ def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_
   sig.calc_checksum = None
   if chk:
     if chk.checksum_signals is not None:
-      if sig.name in chk.checksum_signals.get(address, ()):
+      if sig.name == chk.checksum_signals.get(address):
         sig.type = chk.checksum_type
         sig.calc_checksum = chk.calc_checksum
-        sig.validate_checksum = chk.validate_checksum
       return
     if chk.setup_signal:
       chk.setup_signal(sig, dbc_name, line_num)

@@ -155,6 +155,9 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
     scc12_values["CF_VSM_ConfMode"] = 1
     scc12_values["AEB_Status"] = 1  # AEB disabled
 
+  scc12_dat = packer.make_can_msg("SCC12", 0, scc12_values)[1]
+  scc12_values["CR_VSM_ChkSum"] = 0x10 - sum(sum(divmod(i, 16)) for i in scc12_dat) % 0x10
+
   commands.append(packer.make_can_msg("SCC12", 0, scc12_values))
 
   scc14_values = {
@@ -212,20 +215,3 @@ def create_frt_radar_opt(packer):
     "CF_FCA_Equip_Front_Radar": 1,
   }
   return packer.make_can_msg("FRT_RADAR11", 0, frt_radar11_values)
-
-
-def hyundai_classic_checksum(address: int, sig, d: bytearray) -> int:
-  if address == 0x386:  # WHL_SPD11: checksum and counter occupy the top two bits of odd bytes
-    chksum = (sum((b & (0x3F if i % 2 else 0xFF)).bit_count() for i, b in enumerate(d)) ^ 9) & 0xF
-    return (chksum >> (2 if sig.name.endswith("MSB") else 0)) & 0x3
-
-  chksum = 0
-  for i, b in enumerate(d):
-    if address in (0x260, 0x421) and i == 7:
-      b &= 0x0F if address == 0x421 else 0xF0
-    elif address == 0x394 and i == 6:
-      b &= 0xF0
-    elif address == 0x394 and i == 7:
-      continue
-    chksum += sum(divmod(b, 16))
-  return -chksum % 16

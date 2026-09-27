@@ -63,7 +63,7 @@ class MessageState:
       if sig.is_signed:
         tmp -= ((tmp >> (sig.size - 1)) & 0x1) * (1 << sig.size)
 
-      if not self.ignore_checksum and sig.validate_checksum and sig.calc_checksum is not None:
+      if not self.ignore_checksum and sig.calc_checksum is not None:
         expected_checksum = sig.calc_checksum(self.address, sig, bytearray(dat))
         if tmp != expected_checksum:
           checksum_failed = True

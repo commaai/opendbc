@@ -34,10 +34,10 @@ class CANPacker:
         self.counters[address] = 0
       set_value(dat, sig_counter, self.counters[address])
       self.counters[address] = (self.counters[address] + 1) % (1 << sig_counter.size)
-    for sig_checksum in msg.sigs.values():
-      if sig_checksum.calc_checksum:
-        checksum = sig_checksum.calc_checksum(address, sig_checksum, dat)
-        set_value(dat, sig_checksum, checksum)
+    sig_checksum = next((s for s in msg.sigs.values() if s.type > SignalType.COUNTER), None)
+    if sig_checksum and sig_checksum.calc_checksum:
+      checksum = sig_checksum.calc_checksum(address, sig_checksum, dat)
+      set_value(dat, sig_checksum, checksum)
     return dat
 
   def make_can_msg(self, name_or_addr, bus: int, values: dict[str, float]):
