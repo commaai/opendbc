@@ -9,16 +9,15 @@ static const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
   .angle_deg_to_can = 100,
   .angle_rate_up_lookup = {
     {0., 5., 15.},
-    {5., .8, .15}
+    {5., .8, .15},
   },
   .angle_rate_down_lookup = {
     {0., 5., 15.},
-    {5., 3.5, .4}
+    {5., 3.5, .4},
   },
 };
 
 static void nissan_rx_hook(const CANPacket_t *msg) {
-
   // Altima: on camera bus, others: on pt bus
   if (msg_matches(msg, 0x185U, 0U)) {
     // Current steering angle
@@ -40,7 +39,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
 
   // X-Trail 0x15c, Leaf 0x239
   if (msg_matches(msg, 0x15cU, nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, nissan_alt_eps ? 1U : 0U)) {
-    if (msg->addr == 0x15cU){
+    if (msg->addr == 0x15cU) {
       gas_pressed = ((msg->data[5] << 2) | ((msg->data[6] >> 6) & 0x3U)) > 3U;
     } else {
       gas_pressed = msg->data[0] > 3U;
@@ -49,7 +48,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
 
   // X-trail 0x454, Leaf 0x239
   if (msg_matches(msg, 0x454U, nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, nissan_alt_eps ? 1U : 0U)) {
-    if (msg->addr == 0x454U){
+    if (msg->addr == 0x454U) {
       brake_pressed = (msg->data[2] & 0x80U) != 0U;
     } else {
       brake_pressed = ((msg->data[4] >> 5) & 1U) != 0U;
@@ -62,7 +61,6 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
     pcm_cruise_check(cruise_engaged);
   }
 }
-
 
 static bool nissan_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
@@ -94,7 +92,6 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-
 static safety_config nissan_init(uint16_t param) {
   static const CanMsg NISSAN_TX_MSGS[] = {
     {0x169, 0, 8, .check_relay = true},   // LKAS
@@ -102,22 +99,22 @@ static safety_config nissan_init(uint16_t param) {
     {0x4cc, 0, 8, .check_relay = true},   // PROPILOT_HUD_INFO_MSG
     {0x20b, 2, 6, .check_relay = false},  // CRUISE_THROTTLE (X-Trail)
     {0x20b, 1, 6, .check_relay = false},  // CRUISE_THROTTLE (Altima)
-    {0x280, 2, 8, .check_relay = true}    // CANCEL_MSG (Leaf)
+    {0x280, 2, 8, .check_relay = true},   // CANCEL_MSG (Leaf)
   };
 
   // Signals duplicated below due to the fact that these messages can come in on either CAN bus, depending on car model.
   static RxCheck nissan_rx_checks[] = {
     {.msg = {{0x185, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_TORQUE_SENSOR
     {.msg = {{0x285, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x285, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}}, // WHEEL_SPEEDS_REAR
+             {0x285, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},  // WHEEL_SPEEDS_REAR
     {.msg = {{0x30f, 2, 3, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x30f, 1, 3, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}}, // CRUISE_STATE
+             {0x30f, 1, 3, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},  // CRUISE_STATE
     {.msg = {{0x15c, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
              {0x15c, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x239, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}}}, // GAS_PEDAL
+             {0x239, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}}},  // GAS_PEDAL
     {.msg = {{0x454, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
              {0x454, 1, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x1cc, 0, 4, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}}}, // DOORS_LIGHTS / BRAKE
+             {0x1cc, 0, 4, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}}},  // DOORS_LIGHTS / BRAKE
   };
 
   // EPS Location. false = V-CAN, true = C-CAN
