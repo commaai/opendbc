@@ -162,6 +162,7 @@ class CANParser:
       size=msg.size,
       signals=list(msg.sigs.values()),
       ignore_alive=freq is not None and math.isnan(freq),
+      ignore_checksum=self.dbc.checksum_state.ignore_checksum if self.dbc.checksum_state else False,
     )
     if freq is not None and freq > 0:
       state.frequency = freq
