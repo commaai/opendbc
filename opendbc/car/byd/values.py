@@ -54,6 +54,10 @@ class CarControllerParams:
   # a few within a second drop it to standby.
   STEER_YIELD_HOLD_SLOTS = 25         # 50 Hz frames, 0.5 s
 
+  ACCEL_MIN = -3.5                    # m/s^2
+  ACCEL_MAX = 2.0                     # m/s^2
+  STOCK_AEB_ACCEL = -1.5              # m/s^2
+
   # EPS standby (LKS_PREPARED=1 with CRUISE_ACTIVATED=1, after >200 ms without 0x1E2)
   # ignores STEER_REQ until it sees the camera's REQ=0 / ACTIVE_LOW=0 ack. We send it.
   STEER_ACK_PERIOD = 10               # 50 Hz frames between ack pairs
@@ -75,6 +79,7 @@ class CarControllerParams:
 
 class BydSafetyFlags(IntFlag):
   LKS_ON = 2
+  LONG_CONTROL = 4  # not in byd.h yet
 
 
 class WMI(StrEnum):
