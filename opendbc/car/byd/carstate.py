@@ -43,6 +43,7 @@ class CarState(CarStateBase):
     self.lks_btn_last = False
     self.lks_btn_rising = False
     self.camera_lkas_state = 0
+    self.acc_cmd_stock = {}
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -114,8 +115,11 @@ class CarState(CarStateBase):
     ret.leftBlindspot = cp.vl["BSD_RADAR"]["LEFT_APPROACH"] != 0
     ret.rightBlindspot = (cp.vl["BSD_RADAR"]["RIGHT_APPROACH"] != 0) or bool(cp.vl["BSD_RADAR"]["RCTA_RIGHT"])
 
-    # PCW pre-warning (0x32F byte2 0x36). Silent cereal event; no stockAeb.
+    # PCW pre-warning (0x32F byte2 0x36). Silent cereal event.
     ret.stockFcw = int(cp_cam.vl["PCW_ADAS"]["PCW_STATE"]) == 0x36
+    # hard camera decel while ACC is not active
+    self.acc_cmd_stock = copy.copy(cp_cam.vl["ACC_CMD"])
+    ret.stockAeb = acc_state not in (3, 5) and cp_cam.vl["ACC_CMD"]["ACCEL_CMD"] < CCP.STOCK_AEB_ACCEL
 
     # doors / belt
     ret.doorOpen = any((
