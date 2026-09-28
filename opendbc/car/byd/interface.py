@@ -24,7 +24,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.2
     ret.steerLimitTimer = 0.4
 
-    ret.radarUnavailable = True
+    ret.radarUnavailable = False
     ret.alphaLongitudinalAvailable = False
 
     return ret

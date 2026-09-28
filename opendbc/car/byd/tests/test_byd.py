@@ -7,6 +7,7 @@ from opendbc.car import Bus
 from opendbc.car.byd import bydcan
 from opendbc.car.byd.carcontroller import CarController
 from opendbc.car.byd.carstate import cruise_enabled
+from opendbc.car.byd.interface import CarInterface
 from opendbc.car import structs
 from opendbc.car.byd.values import DBC, CAR, CarControllerParams as CCP
 
@@ -639,8 +640,10 @@ class TestBydDbcObserve(unittest.TestCase):
     _, sess, _ = packer.make_can_msg("CHARGE_SESSION", 0, {"CHARGE_SESSION_ACTIVE": 3})
     self.assertEqual(sess[6] & 0x03, 0x03)
 
-  def test_radar_dbc_is_mapped_but_unavailable(self):
+  def test_radar_dbc_is_mapped_and_available(self):
     self.assertEqual(DBC[CAR.BYD_ATTO_3][Bus.radar], "byd_radar_fd")
+    CP = CarInterface.get_params(CAR.BYD_ATTO_3, {0: {}, 1: {}, 2: {}}, [], False, False, False)
+    self.assertFalse(CP.radarUnavailable)
     self.assertEqual(CCP.EPB_DEBOUNCE_FRAMES, 8)
 
 
