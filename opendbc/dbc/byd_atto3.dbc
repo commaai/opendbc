@@ -146,7 +146,7 @@ BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
 BO_ 814 ACC_CMD: 8 ADAS_ECU
- SG_ ACCEL_CMD : 0|8@1+ (1,-100) [-100|155] "" MCU
+ SG_ ACCEL_CMD : 0|8@1+ (0.05,-5) [-5|7.75] "m/s2" MCU
  SG_ ACC_ON_1 : 9|1@0+ (1,0) [0|1] "" MCU
  SG_ SET_ME_25_1 : 10|6@1+ (1,0) [0|63] "" MCU
  SG_ ACC_ON_2 : 17|1@0+ (1,0) [0|1] "" MCU
@@ -234,7 +234,10 @@ CM_ BO_ 815 "Predictive Collision Warning from camera. Byte 2 0x36 is pre-warnin
 CM_ SG_ 815 PCW_STATE "Byte 2. 0x02 idle, 0x36 pre-warning.";
 CM_ BO_ 803 "Charging session, 10 Hz. CHARGE_SOC is 0xFF outside a session. CHARGE_UNKNOWN_12BIT reads 0xFFE unplugged, 500 plugged idle, 583-778 during DC charging; scale not established.";
 CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state).";
-CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active.";
+CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active. Idle 64 64 64 80 50 00; active bytes 1-2 are 66.";
+CM_ SG_ 814 ACCEL_CMD "0.05 m/s2 per LSB, raw 100 = 0. Stock about -4 to +1.7.";
+CM_ SG_ 814 DECEL_FACTOR "0 when ACC off, 1-3 typical while active.";
+CM_ SG_ 814 ACCEL_FACTOR "0 when ACC off, 11-14 typical while active.";
 CM_ BO_ 834 "Gas/brake pedal percentages.";
 CM_ BO_ 836 "Charging session flags, 10 Hz. Byte 6 0x0B while a session is active, 0x08 otherwise.";
 CM_ BO_ 944 "Steering-wheel cruise control buttons.";

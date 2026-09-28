@@ -26,6 +26,36 @@ def create_steering_control(packer, apply_angle: float, lat_active: bool, counte
   return packer.make_can_msg("STEERING_MODULE_ADAS", 0, values)
 
 
+def create_acc_cmd(packer, accel: float, long_active: bool, standstill: bool, counter: int):
+  # Idle 64 64 64 80 50 00. Active sets both ACC_ON bits. Hold is byte 5 0x31.
+  hold = long_active and standstill
+  values = {
+    "ACCEL_CMD": accel if long_active else 0.0,
+    "ACC_ON_1": 1 if long_active else 0,
+    "ACC_ON_2": 1 if long_active else 0,
+    "SET_ME_25_1": 25,
+    "SET_ME_25_2": 25,
+    "DECEL_FACTOR": 3 if long_active else 0,
+    "SET_ME_X8": 8,
+    "ACCEL_FACTOR": 12 if long_active else 0,
+    "CMD_REQ_ACTIVE_LOW": 0 if long_active else 1,
+    "SET_ME_1": 1,
+    "STANDSTILL_RESUME": 0,
+    "STANDSTILL_STATE": 1 if hold else 0,
+    "ACC_REQ_NOT_STANDSTILL": 1 if (long_active and not standstill) else 0,
+    "ACC_CONTROLLABLE_AND_ON": 1 if long_active else 0,
+    "ACC_OVERRIDE_OR_STANDSTILL": 1 if hold else 0,
+    "COUNTER": counter,
+    "SET_ME_XF": 0xF,
+  }
+  return packer.make_can_msg("ACC_CMD", 0, values)
+
+
+def create_acc_cmd_passthrough(packer, stock_values: dict, counter: int):
+  values = {**stock_values, "COUNTER": counter, "SET_ME_XF": 0xF}
+  return packer.make_can_msg("ACC_CMD", 0, values)
+
+
 def create_buttons(packer, stock_values: dict, cancel=False, lkas=False, bus=0):
   # The car's latest 0x3B0 with one button added, COUNTER included: the camera
   # faults ACC on an out of sequence 0x3B0 counter. Cancel is bus 0 ACC_ON_BTN
