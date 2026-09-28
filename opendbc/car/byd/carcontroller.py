@@ -1,10 +1,15 @@
+import numpy as np
+
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus
+from opendbc.car import Bus, DT_CTRL
 from opendbc.car.lateral import apply_steer_angle_limits_vm
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.byd import bydcan
 from opendbc.car.byd.values import CarControllerParams
 from opendbc.car.vehicle_model import VehicleModel
+
+
+DT_STEER = CarControllerParams.STEER_STEP * DT_CTRL
 
 
 def get_safety_CP():
@@ -17,6 +22,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.apply_angle_last = 0.0
+    self.angle_filt = 0.0
     self.not_accepted_frames = 0
     self.sending_last = False
     self.lat_send_last = False
@@ -261,10 +267,20 @@ class CarController(CarControllerBase):
       else:
         lat_send = CC.latActive and not driver_yield
 
+      tau = np.interp(CS.out.vEgoRaw, CarControllerParams.LOW_SPEED_TAU_BP, CarControllerParams.LOW_SPEED_TAU_V)
+      if not lat_send:
+        self.angle_filt = CS.out.steeringAngleDeg
+      elif tau > 0:
+        self.angle_filt += (actuators.steeringAngleDeg - self.angle_filt) * (DT_STEER / (tau + DT_STEER))
+      else:
+        self.angle_filt = actuators.steeringAngleDeg
+      rate = np.interp(CS.out.vEgoRaw, CarControllerParams.LOW_SPEED_RATE_BP, CarControllerParams.LOW_SPEED_RATE_V)
+      desired_angle = float(np.clip(self.angle_filt, self.apply_angle_last - rate, self.apply_angle_last + rate))
+
       # The first REQ=1 repeats the angle of the REQ=0 frame panda just took as reference
       first_req = lat_send and not self.lat_send_last
       if not first_req:
-        self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
+        self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last, CS.out.vEgoRaw,
                                                             CS.out.steeringAngleDeg, lat_send, CarControllerParams, self.VM)
 
       if send_op:
@@ -292,6 +308,5 @@ class CarController(CarControllerBase):
 
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = float(self.apply_angle_last)
-
     self.frame += 1
     return new_actuators, can_sends
