@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 
 import hashlib
-import inspect
 import json
 import os
-import pickle
 import sys
 import time
 import unittest
-import zstandard as zstd
 from collections import Counter, defaultdict
-from functools import cache
 from pathlib import Path
 from urllib.parse import quote, urlparse
 from urllib.request import urlopen
@@ -94,7 +90,7 @@ def get_cached_url(url: str) -> Path:
 def normalize_can_buses(can: tuple[int, list[CanData]], raw_can_keys: set[tuple[int, int]]) -> tuple[int, list[CanData]]:
   timestamp, messages = can
   return timestamp, [
-    msg if msg.src < 128 else CanData(msg.address, msg.dat, msg.src % 128) for msg in messages
+    CanData(msg.address, msg.dat, msg.src % 128) for msg in messages
     if msg.src < 128 or (msg.address, msg.src % 128) not in raw_can_keys
   ]
 
@@ -152,29 +148,13 @@ class TestCarModelBase(unittest.TestCase):
 
   @classmethod
   def get_testing_data(cls):
-    cache_key = hashlib.sha256(f"{cls.platform}:{cls.test_route}".encode()).hexdigest()
-    cache_path = MODEL_DATA_CACHE_ROOT / f"{cache_key}.pkl.zst"
-    if cache_path.exists():
-      car_fw, can_msgs, alpha_long, cls.fingerprint, cls.elm_frame, cls.car_safety_mode_frame, cls.platform = pickle.loads(
-        zstd.decompress(cache_path.read_bytes()))
-      return structs.CarParams.from_bytes_packed(car_fw).carFw, can_msgs, alpha_long
-
     test_segments = (2, 1, 0) if cls.test_route.segment is None else (cls.test_route.segment,)
     for segment in test_segments:
       try:
         log_path = get_cached_segment(cls.test_route.route, segment)
-        car_fw, can_msgs, alpha_long = cls.get_testing_data_from_logreader(LogReader(str(log_path), only_union_types=True, sort_by_time=True))
+        return cls.get_testing_data_from_logreader(LogReader(str(log_path), only_union_types=True, sort_by_time=True))
       except (OSError, AssertionError):
-        continue
-
-      # Cache only the input fixture; parameters, interfaces and safety are rerun on every test.
-      data = (structs.CarParams.new_message(carFw=car_fw).to_bytes_packed(), can_msgs, alpha_long,
-              cls.fingerprint, cls.elm_frame, cls.car_safety_mode_frame, cls.platform)
-      cache_path.parent.mkdir(parents=True, exist_ok=True)
-      tmp_path = cache_path.with_suffix(f".{os.getpid()}.tmp")
-      tmp_path.write_bytes(zstd.compress(pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL), 1))
-      tmp_path.replace(cache_path)
-      return car_fw, can_msgs, alpha_long
+        pass
 
     raise Exception(f"Route: {cls.test_route.route!r} with segments: {test_segments} not found or no CAN messages found")
 
@@ -190,15 +170,6 @@ class TestCarModelBase(unittest.TestCase):
 
     car_fw, cls.can_msgs, alpha_long = cls.get_testing_data()
     cls.raw_can_keys = {(msg.address, msg.src) for _, messages in cls.can_msgs for msg in messages if msg.src < 128}
-    # RX hooks take const packets: share their input buffers across replay tests,
-    # while still running every hook in order on every replay.
-    cls.replay_packet = staticmethod(cache(libsafety_py.make_CANPacket))
-    cls.safety_can = [(
-      libsafety_py.ffi.new("CANPacket_t *[]", [cls.replay_packet(msg.address, msg.src % 4, msg.dat) for msg in messages if msg.src < 64]),
-      libsafety_py.ffi.new("CANPacket_t *[]", [cls.replay_packet(msg.address, msg.src % 4, msg.dat) for msg in messages
-                                             if msg.src >= 128 and (msg.address, msg.src % 128) not in cls.raw_can_keys]),
-    ) for _, messages in cls.can_msgs]
-    cls.safety_rx_valid = libsafety_py.ffi.new("bool[]", max(len(raw) for raw, _ in cls.safety_can))
     cls.CarInterface = interfaces[cls.platform]
     cls.CP = cls.CarInterface.get_params(cls.platform, cls.fingerprint, car_fw, alpha_long, False, docs=False)
     assert cls.CP
@@ -207,9 +178,6 @@ class TestCarModelBase(unittest.TestCase):
   @classmethod
   def tearDownClass(cls):
     del cls.can_msgs
-    del cls.safety_can
-    del cls.safety_rx_valid
-    del cls.replay_packet
 
   def setUp(self):
     self.CI = self.CarInterface(self.CP.copy())
@@ -272,16 +240,20 @@ class TestCarModelBase(unittest.TestCase):
       t = (can[0] - start_ts) / 1e3
       self.safety.set_timer(int(t))
 
-      raw, returned = self.safety_can[can_idx]
-      if self.safety.safety_rx_hook_batch(raw, len(raw), self.safety_rx_valid):
-        for i, packet in enumerate(raw):
-          if not self.safety_rx_valid[i]:
-            failed_addrs[hex(packet.addr)] += 1
+      for msg in can[1]:
+        if msg.src >= 64:
+          continue
+        packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
+        if self.safety.safety_rx_hook(packet) != 1:
+          failed_addrs[hex(msg.address)] += 1
 
       # Some logs contain a bus only as panda's returned bus (bus + 128).
       # Replay returned-only messages, but ignore rejected TX echoes.
       relay_malfunction = self.safety.get_relay_malfunction()
-      self.safety.safety_rx_hook_batch(returned, len(returned), libsafety_py.ffi.NULL)
+      for msg in can[1]:
+        if msg.src >= 128 and (msg.address, msg.src % 128) not in self.raw_can_keys:
+          packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
+          self.safety.safety_rx_hook(packet)
       self.safety.set_relay_malfunction(relay_malfunction)
 
       self.safety.safety_tick()
@@ -327,8 +299,8 @@ class TestCarModelBase(unittest.TestCase):
       now_nanos = 0
       msgs_sent = 0
       CI = self.CarInterface(controller_params)
-      CI.update([])
       for _ in range(round(10.0 / DT_CTRL)):
+        CI.update([])
         _, sendcan = CI.apply(car_control, now_nanos)
         now_nanos += DT_CTRL * 1e9
         msgs_sent += len(sendcan)
@@ -405,12 +377,11 @@ class TestCarModelBase(unittest.TestCase):
     if self.CP.dashcamOnly:
       self.skipTest("no need to check panda safety for dashcamOnly")
 
-    for idx, can in enumerate(self.can_msgs[:300]):
+    for can in self.can_msgs[:300]:
       self.CI.update(can)
-      raw, _ = self.safety_can[idx]
-      self.safety.safety_rx_hook_batch(raw, len(raw), libsafety_py.ffi.NULL)
+      for msg in (msg for msg in can[1] if msg.src < 64):
+        self.safety.safety_rx_hook(libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat))
 
-    safety_state = libsafety_py.ffi.new("SafetyState *")
     controls_allowed_prev = False
     CS_prev = car.CarState.new_message()
     checks = defaultdict(int)
@@ -418,10 +389,10 @@ class TestCarModelBase(unittest.TestCase):
 
     for idx, can in enumerate(self.can_msgs):
       CS = self.CI.update(can).as_reader()
-      raw, _ = self.safety_can[idx]
-      if self.safety.safety_rx_hook_batch(raw, len(raw), self.safety_rx_valid):
-        failed = [(packet.addr, packet.bus) for i, packet in enumerate(raw) if not self.safety_rx_valid[i]]
-        self.fail(f"safety RX failed: {failed}")
+      for msg in (msg for msg in can[1] if msg.src < 64):
+        packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
+        ret = self.safety.safety_rx_hook(packet)
+        self.assertEqual(1, ret, f"safety RX failed ({ret=}): {(msg.address, msg.src % 4)}")
 
       if idx == 0:
         CS_prev = CS
@@ -429,58 +400,48 @@ class TestCarModelBase(unittest.TestCase):
           self.safety.set_controls_allowed(0)
         continue
 
-      self.safety.get_safety_state(safety_state)
-      checks["gasPressed"] += CS.gasPressed != safety_state.gas_pressed
-      checks["standstill"] += (CS.standstill == safety_state.vehicle_moving) and not self.CP.notCar
+      checks["gasPressed"] += CS.gasPressed != self.safety.get_gas_pressed_prev()
+      checks["standstill"] += (CS.standstill == self.safety.get_vehicle_moving()) and not self.CP.notCar
 
-      if safety_state.vehicle_speed_min > 0 or safety_state.vehicle_speed_max > 0:
+      if self.safety.get_vehicle_speed_min() > 0 or self.safety.get_vehicle_speed_max() > 0:
         vehicle_speed_seen = True
       if vehicle_speed_seen:
         v_ego_raw = CS.vEgoRaw / self.CP.wheelSpeedFactor
-        checks["vEgoRaw"] += (v_ego_raw > safety_state.vehicle_speed_max + 1e-3 or
-                              v_ego_raw < safety_state.vehicle_speed_min - 1e-3)
+        checks["vEgoRaw"] += (v_ego_raw > self.safety.get_vehicle_speed_max() + 1e-3 or
+                              v_ego_raw < self.safety.get_vehicle_speed_min() - 1e-3)
 
       if self.CP.steerControlType == SteerControlType.angle and not self.CP.notCar and self.CP.brand not in ("ford", "volkswagen"):
         angle_can = (CS.steeringAngleDeg + CS.steeringAngleOffsetDeg) * ANGLE_DEG_TO_CAN[self.CP.brand]
-        checks["steeringAngleDeg"] += (angle_can > safety_state.angle_max + 1 or
-                                       angle_can < safety_state.angle_min - 1)
+        checks["steeringAngleDeg"] += (angle_can > self.safety.get_angle_meas_max() + 1 or
+                                       angle_can < self.safety.get_angle_meas_min() - 1)
 
-      checks["brakePressed"] += CS.brakePressed != safety_state.brake_pressed
-      checks["regenBraking"] += CS.regenBraking != safety_state.regen_braking
-      checks["steeringDisengage"] += CS.steeringDisengage != safety_state.steering_disengage
+      checks["brakePressed"] += CS.brakePressed != self.safety.get_brake_pressed_prev()
+      checks["regenBraking"] += CS.regenBraking != self.safety.get_regen_braking_prev()
+      checks["steeringDisengage"] += CS.steeringDisengage != self.safety.get_steering_disengage_prev()
 
       if self.CP.pcmCruise:
         if self.CP.brand == "honda" and not (self.CP.flags & HondaFlags.BOSCH):
           if CS.cruiseState.enabled and not CS_prev.cruiseState.enabled:
-            checks["controlsAllowed"] += not safety_state.controls_allowed
+            checks["controlsAllowed"] += not self.safety.get_controls_allowed()
         else:
-          checks["controlsAllowed"] += not CS.cruiseState.enabled and safety_state.controls_allowed
+          checks["controlsAllowed"] += not CS.cruiseState.enabled and self.safety.get_controls_allowed()
         if not self.CP.notCar:
-          checks["cruiseState"] += CS.cruiseState.enabled != safety_state.cruise_engaged
+          checks["cruiseState"] += CS.cruiseState.enabled != self.safety.get_cruise_engaged_prev()
       else:
         button_enable = CS.buttonEnable and (not CS.brakePressed or CS.standstill)
-        mismatch = button_enable != (safety_state.controls_allowed and not controls_allowed_prev)
+        mismatch = button_enable != (self.safety.get_controls_allowed() and not controls_allowed_prev)
         checks["controlsAllowed"] += mismatch
-        controls_allowed_prev = safety_state.controls_allowed
+        controls_allowed_prev = self.safety.get_controls_allowed()
         if button_enable and not mismatch:
           self.safety.set_controls_allowed(False)
 
       if self.CP.brand == "honda":
-        checks["mainOn"] += CS.cruiseState.available != safety_state.acc_main_on
+        checks["mainOn"] += CS.cruiseState.available != self.safety.get_acc_main_on()
       CS_prev = CS
 
     failed_checks = {key: value for key, value in checks.items() if value > 0}
     self.assertFalse(failed_checks, f"panda safety doesn't agree with CarState: {failed_checks}")
 
-
-# Changes to the input reader or schema invalidate fixtures; changes to tests do not.
-DATA_CACHE_VERSION = hashlib.sha256(
-  inspect.getsource(TestCarModelBase.get_testing_data_from_logreader).encode() +
-  inspect.getsource(TestCarModelBase.get_testing_data).encode() +
-  b"".join(path.read_bytes() for path in [Path(__file__).parents[1] / "logreader.py",
-                                       Path(__file__).parents[1] / "can_definitions.py", *sorted(Path(__file__).parents[1].glob("*.capnp"))])
-).hexdigest()
-MODEL_DATA_CACHE_ROOT = DOWNLOAD_CACHE_ROOT / "model_data" / DATA_CACHE_VERSION
 
 DIRECTLY_CALLED = Path(sys.argv[0]).resolve() == Path(__file__).resolve()
 

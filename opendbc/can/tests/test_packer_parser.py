@@ -3,47 +3,11 @@ import random
 
 from opendbc.can import CANPacker, CANParser
 from opendbc.can.tests import TEST_DBC
-from opendbc.can.dbc import Signal
-from opendbc.can.parser import MessageState, get_raw_value
-from opendbc.can.packer import set_value
 
 MAX_BAD_COUNTER = 5
 
 
 class TestCanParserPacker(unittest.TestCase):
-  def test_signal_decoding(self):
-    rng = random.Random(0)
-    for size in (1, 8, 12, 64):
-      for little_endian in (False, True):
-        for signed in (False, True):
-          for start in range(size * 8):
-            for bits in {1, min(13, size * 8 - start), min(64, size * 8 - start)}:
-              msb = start + bits - 1 if little_endian else start ^ 7
-              lsb = start if little_endian else (start + bits - 1) ^ 7
-              sig = Signal("VALUE", lsb if little_endian else msb, msb, lsb, bits, signed, 0.5, -3.0, little_endian)
-              for message_size in {size // 2, size}:
-                state = MessageState(1, "TEST", message_size, [sig])
-                for length in {0, size // 2, size, min(size + 1, 64)}:
-                  data = rng.randbytes(length)
-                  raw = get_raw_value(data, sig)
-                  if signed and raw & (1 << (bits - 1)):
-                    raw -= 1 << bits
-                  self.assertTrue(state.parse(1, data))
-                  self.assertEqual(state.vals, [raw * 0.5 - 3.0])
-                  if length == size:
-                    value = rng.getrandbits(bits)
-                    packed = bytearray(data)
-                    set_value(packed, sig, value)
-                    self.assertEqual(get_raw_value(packed, sig), value)
-
-  def test_updated_set_does_not_own_history(self):
-    parser = CANParser(TEST_DBC, [("CAN_FD_MESSAGE", 0)], 0)
-    packer = CANPacker(TEST_DBC)
-    updated = parser.update([0, [packer.make_can_msg("CAN_FD_MESSAGE", 0, {})]])
-    updated.clear()
-    parser.update([])
-    self.assertTrue(all(not values for values in parser.vl_all["CAN_FD_MESSAGE"].values()))
-
   def test_packer(self):
     packer = CANPacker(TEST_DBC)
 

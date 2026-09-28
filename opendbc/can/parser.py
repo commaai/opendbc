@@ -2,7 +2,6 @@ import math
 import numbers
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from functools import lru_cache
 
 from opendbc.car.carlog import carlog
 from opendbc.can.dbc import DBC, Signal
@@ -46,48 +45,23 @@ class MessageState:
   first_seen_nanos: int = 0
   last_warning_log_nanos: int = 0
 
-  def __post_init__(self):
-    self.signal_names = [sig.name for sig in self.signals]
-    signal_bits = [
-      (0 if sig.is_little_endian else 1,
-       -1 if sig.msb >= self.size * 8 else sig.lsb if sig.is_little_endian else self.size * 8 - (sig.msb ^ 7) - sig.size,
-       (1 << sig.size) - 1, (1 << (sig.size - 1)) if sig.is_signed else 0)
-      for sig in self.signals
-    ]
-    signals, size = self.signals, self.size
-    self.check_signals = [(i, sig) for i, sig in enumerate(signals) if sig.calc_checksum is not None or sig.type == 1]
-
-    # Repeated payloads are common. Cache only stateless decoding, never counter,
-    # checksum, freshness or validity checks, which must run on every message.
-    @lru_cache(maxsize=128)
-    def decode(dat):
-      data = (int.from_bytes(dat, "little"), int.from_bytes(dat, "big"))
-      raw_values = []
-      values = []
-      for sig, (endian, shift, mask, sign) in zip(signals, signal_bits, strict=True):
-        raw = (data[endian] >> shift) & mask if len(dat) == size and shift >= 0 else get_raw_value(dat, sig)
-        raw = (raw ^ sign) - sign
-        raw_values.append(raw)
-        values.append(raw * sig.factor + sig.offset)
-      return raw_values, values
-
-    self.decode = decode
-
   def rate_limited_log(self, last_update_nanos: int, msg: str) -> None:
     if (last_update_nanos - self.last_warning_log_nanos) >= 1_000_000_000:
       carlog.warning(f"CANParser: {hex(self.address)} {self.name} {msg}")
       self.last_warning_log_nanos = last_update_nanos
 
   def parse(self, nanos: int, dat: bytes) -> bool:
-    raw_values, tmp_vals = self.decode(bytes(dat))
+    tmp_vals: list[float] = [0.0] * len(self.signals)
     checksum_failed = False
     counter_failed = False
 
     if self.first_seen_nanos == 0:
       self.first_seen_nanos = nanos
 
-    for i, sig in self.check_signals:
-      tmp = raw_values[i]
+    for i, sig in enumerate(self.signals):
+      tmp = get_raw_value(dat, sig)
+      if sig.is_signed:
+        tmp -= ((tmp >> (sig.size - 1)) & 0x1) * (1 << sig.size)
 
       if not self.ignore_checksum and sig.calc_checksum is not None:
         expected_checksum = sig.calc_checksum(self.address, sig, bytearray(dat))
@@ -99,6 +73,8 @@ class MessageState:
         if not self.update_counter(tmp, sig.size):
           counter_failed = True
 
+      tmp_vals[i] = tmp * sig.factor + sig.offset
+
     # must have good counter and checksum to update data
     if checksum_failed or counter_failed:
       return False
@@ -107,9 +83,9 @@ class MessageState:
       self.vals = [0.0] * len(self.signals)
       self.all_vals = [[] for _ in self.signals]
 
-    self.vals[:] = tmp_vals
-    for values, value in zip(self.all_vals, tmp_vals, strict=True):
-      values.append(value)
+    for i, v in enumerate(tmp_vals):
+      self.vals[i] = v
+      self.all_vals[i].append(v)
 
     self.timestamps.append(nanos)
 
@@ -128,7 +104,7 @@ class MessageState:
     self.counter = cur_count
     return self.counter_fail < MAX_BAD_COUNTER
 
-  def valid(self, current_nanos: int) -> bool:
+  def valid(self, current_nanos: int, bus_timeout: bool) -> bool:
     if self.ignore_alive:
       return True
     if not self.timestamps:
@@ -143,9 +119,10 @@ class VLDict(dict):
     super().__init__()
     self.parser = parser
 
-  def __missing__(self, key):
-    self.parser._add_message(key)
-    return self[key]
+  def __getitem__(self, key):
+    if key not in self:
+      self.parser._add_message(key)
+    return super().__getitem__(key)
 
 
 class CANParser:
@@ -159,7 +136,6 @@ class CANParser:
     self.ts_nanos: dict[int | str, dict[str, int]] = {}
     self.addresses: set[int] = set()
     self.message_states: dict[int, MessageState] = {}
-    self._updated_addrs: set[int] = set()
 
     for name_or_addr, freq in messages:
       if isinstance(name_or_addr, numbers.Number):
@@ -213,8 +189,6 @@ class CANParser:
 
   @property
   def bus_timeout(self) -> bool:
-    if self._last_update_nanos <= self.last_nonempty_nanos:
-      return False
     ignore_alive = all(s.ignore_alive for s in self.message_states.values())
     bus_timeout_threshold = 500 * 1_000_000
     for st in self.message_states.values():
@@ -226,11 +200,12 @@ class CANParser:
   def can_valid(self) -> bool:
     valid = True
     counters_valid = True
+    bus_timeout = self.bus_timeout
     for state in self.message_states.values():
       if state.counter_fail >= MAX_BAD_COUNTER:
         counters_valid = False
         state.rate_limited_log(self._last_update_nanos, f"counter invalid, {state.counter_fail=} {MAX_BAD_COUNTER=}")
-      if not state.valid(self._last_update_nanos):
+      if not state.valid(self._last_update_nanos, bus_timeout):
         valid = False
         state.rate_limited_log(self._last_update_nanos, "not valid (timeout or missing)")
 
@@ -242,9 +217,9 @@ class CANParser:
     if strings and not isinstance(strings[0], list | tuple):
       strings = [strings]
 
-    for addr in self._updated_addrs:
-      for vals in self.vl_all[addr].values():
-        vals.clear()
+    for addr in self.addresses:
+      for k in self.vl_all[addr]:
+        self.vl_all[addr][k].clear()
 
     updated_addrs: set[int] = set()
     for entry in strings:
@@ -261,18 +236,20 @@ class CANParser:
         if state.parse(t, dat):
           updated_addrs.add(address)
 
+          vl_addr = self.vl[address]
+          vl_all_addr = self.vl_all[address]
+          ts_addr = self.ts_nanos[address]
+
+          for i, sig in enumerate(state.signals):
+            vl_addr[sig.name] = state.vals[i]
+            vl_all_addr[sig.name] = state.all_vals[i]
+            ts_addr[sig.name] = state.timestamps[-1]
+
       if not bus_empty:
         self.last_nonempty_nanos = t
 
       self._last_update_nanos = t
 
-    for address in updated_addrs:
-      state = self.message_states[address]
-      self.vl[address].update(zip(state.signal_names, state.vals, strict=True))
-      self.vl_all[address].update(zip(state.signal_names, state.all_vals, strict=True))
-      self.ts_nanos[address].update(dict.fromkeys(state.signal_names, state.timestamps[-1]))
-
-    self._updated_addrs = updated_addrs.copy()
     return updated_addrs
 
 
