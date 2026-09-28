@@ -25,6 +25,12 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.4
 
     ret.radarUnavailable = False
+
+    # no long mode in byd.h yet
     ret.alphaLongitudinalAvailable = False
+    ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
+    ret.pcmCruise = not ret.openpilotLongitudinalControl
+    if ret.openpilotLongitudinalControl:
+      ret.safetyConfigs[0].safetyParam |= BydSafetyFlags.LONG_CONTROL
 
     return ret
