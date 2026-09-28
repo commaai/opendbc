@@ -23,6 +23,7 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.apply_angle_last = 0.0
     self.angle_filt = 0.0
+    self.accel = 0.0
     self.not_accepted_frames = 0
     self.sending_last = False
     self.lat_send_last = False
@@ -300,6 +301,17 @@ class CarController(CarControllerBase):
       self.sending_last = send_op
       self.lat_send_last = lat_send
 
+      # 50 Hz 0x32E: camera frame on stockAeb, else ours, idle when not longActive
+      if self.CP.openpilotLongitudinalControl:
+        if CS.out.stockAeb:
+          can_sends.append(bydcan.create_acc_cmd_passthrough(self.packer, CS.acc_cmd_stock, cntr))
+        else:
+          if CC.longActive:
+            self.accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+          else:
+            self.accel = 0.0
+          can_sends.append(bydcan.create_acc_cmd(self.packer, self.accel, CC.longActive, CS.out.standstill, cntr))
+
     if CC.cruiseControl.cancel and self.frame % 10 == 0:
       can_sends.append(bydcan.create_buttons(self.packer, CS.pcm_buttons_stock, cancel=True))
 
@@ -308,5 +320,8 @@ class CarController(CarControllerBase):
 
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = float(self.apply_angle_last)
+    if self.CP.openpilotLongitudinalControl:
+      new_actuators.accel = self.accel
+
     self.frame += 1
     return new_actuators, can_sends

@@ -27,6 +27,7 @@ class _Hud:
 
 class _Actuators:
   steeringAngleDeg = 0.0
+  accel = 0.0
 
   def as_builder(self):
     return self
@@ -170,7 +171,7 @@ class TestBydPcw(unittest.TestCase):
 
 
 def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_btn_rising=False, eps_standby=False,
-        buttons=None, buttons_ts=0, steering_pressed=False, v_ego=20.0):
+        buttons=None, buttons_ts=0, steering_pressed=False, stock_aeb=False, acc_cmd=None, standstill=False, v_ego=20.0):
   return SimpleNamespace(
     eps_engaged=eps_engaged,
     eps_standby=eps_standby,
@@ -182,7 +183,9 @@ def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_
     camera_lkas_state=camera_lkas_state,
     pcm_buttons_stock=buttons if buttons is not None else {},
     pcm_buttons_ts=buttons_ts,
-    out=SimpleNamespace(vEgoRaw=v_ego, steeringAngleDeg=angle, steeringPressed=steering_pressed),
+    acc_cmd_stock=acc_cmd if acc_cmd is not None else {},
+    out=SimpleNamespace(vEgoRaw=v_ego, steeringAngleDeg=angle, steeringPressed=steering_pressed, stockAeb=stock_aeb,
+                        standstill=standstill),
   )
 
 
@@ -193,10 +196,11 @@ def _decode(name, packer_msg):
   return dict(cp.vl[name])
 
 
-def _cc(enabled=True, lat_active=True, cancel=False):
+def _cc(enabled=True, lat_active=True, cancel=False, long_active=False):
   return SimpleNamespace(
     enabled=enabled,
     latActive=lat_active,
+    longActive=long_active,
     actuators=_Actuators(),
     hudControl=_Hud(),
     cruiseControl=SimpleNamespace(cancel=cancel),
@@ -701,6 +705,106 @@ class TestBydLowSpeedSmoothing(unittest.TestCase):
     self.assertAlmostEqual(angles[0], 12.0, places=1)
     for a, b in zip(angles, angles[1:], strict=False):
       self.assertLessEqual(b - a, CCP.LOW_SPEED_RATE_V[0] + 0.01)
+
+
+def _acc_frame(hex7):
+  dat = bytes.fromhex(hex7)
+  return dat + bytes([(~sum(dat)) & 0xFF])
+
+
+class TestBydAccCmd(unittest.TestCase):
+  def setUp(self):
+    self.packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+
+  def test_idle_matches_stock_template(self):
+    addr, dat, bus = bydcan.create_acc_cmd(self.packer, 0.0, False, False, 5)
+    self.assertEqual((addr, bus), (0x32E, 0))
+    self.assertEqual(bytes(dat[:6]), bytes.fromhex("646464805000"))
+    self.assertEqual(dat[6], 0xF5)
+    self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
+
+  def test_active_layout_and_scale(self):
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, -0.5, True, False, 0)
+    self.assertEqual(bytes(dat[:6]), bytes.fromhex("5a6666834c18"))
+    self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, 1.0, True, False, 0)
+    self.assertEqual(dat[0], 120)
+    self.assertAlmostEqual(_decode("ACC_CMD", (0x32E, dat, 0))["ACCEL_CMD"], 1.0, places=6)
+
+  def test_standstill_hold_bits(self):
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, -0.5, True, True, 0)
+    self.assertEqual(dat[5], 0x31)
+    values = _decode("ACC_CMD", (0x32E, dat, 0))
+    self.assertEqual(values["STANDSTILL_STATE"], 1)
+    self.assertEqual(values["ACC_REQ_NOT_STANDSTILL"], 0)
+    self.assertEqual(values["ACC_OVERRIDE_OR_STANDSTILL"], 1)
+
+  def test_stock_aeb_threshold(self):
+    idle = _decode("ACC_CMD", (0x32E, _acc_frame("646464805000f0"), 0))
+    self.assertGreaterEqual(idle["ACCEL_CMD"], CCP.STOCK_AEB_ACCEL)
+    hard = _decode("ACC_CMD", (0x32E, _acc_frame("286666834c18f0"), 0))
+    self.assertAlmostEqual(hard["ACCEL_CMD"], -3.0, places=6)
+    self.assertLess(hard["ACCEL_CMD"], CCP.STOCK_AEB_ACCEL)
+
+  def test_passthrough_keeps_stock_payload_with_our_counter(self):
+    stock = _decode("ACC_CMD", (0x32E, _acc_frame("286666834c18f3"), 0))
+    _, dat, _ = bydcan.create_acc_cmd_passthrough(self.packer, stock, 9)
+    self.assertEqual(bytes(dat[:6]), bytes.fromhex("286666834c18"))
+    self.assertEqual(dat[6], 0xF9)
+    self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
+
+
+class TestBydLongControl(unittest.TestCase):
+  def _slots(self, ctrl, n, **kw):
+    out = []
+    for _ in range(n):
+      cs_kw = {k: kw[k] for k in ("stock_aeb", "acc_cmd", "standstill") if k in kw}
+      CC = _cc(enabled=kw.get("enabled", True), lat_active=False, long_active=kw.get("long_active", False))
+      CC.actuators.accel = kw.get("accel", 0.0)
+      act, sends = ctrl.update(CC, _cs(**cs_kw), 0)
+      if ctrl.frame % 2 == 0:
+        acc = [m for m in sends if m[0] == 0x32E]
+        out.append((act, _decode("ACC_CMD", acc[0]) if acc else None))
+    return out
+
+  def test_no_acc_cmd_without_long_control(self):
+    ctrl = _ctrl(long_control=False)
+    for _act, msg in self._slots(ctrl, 4, long_active=True, accel=-1.0):
+      self.assertIsNone(msg)
+
+  def test_idle_frame_every_slot_when_not_long_active(self):
+    ctrl = _ctrl(long_control=True)
+    slots = self._slots(ctrl, 6, enabled=False, long_active=False, accel=-1.0)
+    self.assertEqual(len(slots), 3)
+    for act, msg in slots:
+      self.assertEqual(msg["ACC_ON_1"], 0)
+      self.assertEqual(msg["ACCEL_CMD"], 0.0)
+      self.assertEqual(act.accel, 0.0)
+    self.assertEqual([m["COUNTER"] for _a, m in slots], [0, 1, 2])
+
+  def test_active_clips_accel(self):
+    ctrl = _ctrl(long_control=True)
+    act, msg = self._slots(ctrl, 2, long_active=True, accel=-9.0)[0]
+    self.assertEqual(msg["ACC_ON_1"], 1)
+    self.assertEqual(msg["ACC_CONTROLLABLE_AND_ON"], 1)
+    self.assertAlmostEqual(msg["ACCEL_CMD"], CCP.ACCEL_MIN, places=6)
+    self.assertEqual(act.accel, CCP.ACCEL_MIN)
+    act, msg = self._slots(ctrl, 2, long_active=True, accel=9.0)[0]
+    self.assertAlmostEqual(msg["ACCEL_CMD"], CCP.ACCEL_MAX, places=6)
+
+  def test_standstill_sets_hold(self):
+    ctrl = _ctrl(long_control=True)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=-0.5, standstill=True)[0]
+    self.assertEqual(msg["STANDSTILL_STATE"], 1)
+    self.assertEqual(msg["ACC_REQ_NOT_STANDSTILL"], 0)
+
+  def test_stock_aeb_is_passed_through(self):
+    ctrl = _ctrl(long_control=True)
+    stock = _decode("ACC_CMD", (0x32E, _acc_frame("286666834c18f3"), 0))
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=1.0, stock_aeb=True, acc_cmd=stock)[0]
+    self.assertAlmostEqual(msg["ACCEL_CMD"], -3.0, places=6)
+    self.assertEqual(msg["ACC_ON_1"], 1)
+    self.assertEqual(msg["COUNTER"], 0)
 
 
 if __name__ == "__main__":
