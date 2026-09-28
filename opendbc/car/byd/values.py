@@ -32,6 +32,12 @@ class CarControllerParams:
     MAX_ANGLE_RATE=5,  # deg/20ms frame
   )
 
+  # Request low-pass and a tighter step below 30 kph. Breakpoints in m/s.
+  LOW_SPEED_RATE_BP = [0., 2.78, 5.56, 8.33]   # 0, 10, 20, 30 kph
+  LOW_SPEED_RATE_V = [2., 2., 3., 5.]          # deg/20ms frame
+  LOW_SPEED_TAU_BP = [0., 2.78, 5.56, 8.33]    # 0, 10, 20, 30 kph
+  LOW_SPEED_TAU_V = [0.3, 0.3, 0.15, 0.]       # s
+
   # The column attenuates driver torque ~12x before the EPS measures it, so DRIVER_EPS_TORQUE
   # stays under 5 through deliberate wheel input and cannot be used to see an override.
   STEER_DRIVER_OVERRIDE = 22          # column torque for soft override, Nm
