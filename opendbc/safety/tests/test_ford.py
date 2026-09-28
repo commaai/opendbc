@@ -51,9 +51,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
   CURVATURE_ERROR_MIN_SPEED = 10.0    # m/s
   LATERAL_FREQUENCY = 20              # Hz, for per-frame jerk limit
 
-  cnt_speed = 0
-  cnt_speed_2 = 0
-  cnt_yaw_rate = 0
   cnt_lat_ctl = 0
 
   def _get_max_curvature_can(self, speed):
@@ -98,15 +95,13 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   # ABS vehicle speed
   def _speed_msg(self, speed: float, quality_flag=True):
-    values = {"Veh_V_ActlBrk": speed * 3.6, "VehVActlBrk_D_Qf": 3 if quality_flag else 0, "VehVActlBrk_No_Cnt": self.cnt_speed % 16}
-    self.__class__.cnt_speed += 1
+    values = {"Veh_V_ActlBrk": speed * 3.6, "VehVActlBrk_D_Qf": 3 if quality_flag else 0}
     return self.packer.make_can_msg_safety("BrakeSysFeatures", 0, values)
 
   # PCM vehicle speed
   def _speed_msg_2(self, speed: float, quality_flag=True):
     # Ford relies on speed for driver curvature limiting, so it checks two sources
-    values = {"Veh_V_ActlEng": speed * 3.6, "VehVActlEng_D_Qf": 3 if quality_flag else 0, "VehVActlEng_No_Cnt": self.cnt_speed_2 % 16}
-    self.__class__.cnt_speed_2 += 1
+    values = {"Veh_V_ActlEng": speed * 3.6, "VehVActlEng_D_Qf": 3 if quality_flag else 0}
     return self.packer.make_can_msg_safety("EngVehicleSpThrottle2", 0, values)
 
   # Standstill state
@@ -116,9 +111,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   # Current curvature
   def _yaw_rate_msg(self, curvature: float, speed: float, quality_flag=True):
-    values = {"VehYaw_W_Actl": curvature * speed, "VehYawWActl_D_Qf": 3 if quality_flag else 0,
-              "VehRollYaw_No_Cnt": self.cnt_yaw_rate % 256}
-    self.__class__.cnt_yaw_rate += 1
+    values = {"VehYaw_W_Actl": curvature * speed, "VehYawWActl_D_Qf": 3 if quality_flag else 0}
     return self.packer.make_can_msg_safety("Yaw_Data_FD1", 0, values)
 
   # Drive throttle input

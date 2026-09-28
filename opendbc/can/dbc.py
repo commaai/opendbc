@@ -202,6 +202,11 @@ def tesla_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
     sig.calc_checksum = tesla_checksum
 
 
+def ford_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
+  if sig.name in ("VehVActlBrk_No_Cnt", "VehVActlEng_No_Cnt", "VehRollYaw_No_Cnt"):
+    sig.type = SignalType.COUNTER
+
+
 @dataclass
 class ChecksumState:
   checksum_type: int
@@ -242,7 +247,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
   elif dbc_name == "ford_lincoln_base_pt":
     # Other _Cs fields are optional or use model-specific checksum algorithms.
-    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, checksum_pattern=r"_Cs$",
+    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, ford_setup_signal, checksum_pattern=r"_Cs$",
                          checksum_fields=FORD_CHECKSUM_FIELDS)
   elif dbc_name == "mg":
     return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum, checksum_pattern=r"Chksm|^ChLKARespToqPVHSC2$")

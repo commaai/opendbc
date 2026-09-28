@@ -47,6 +47,30 @@ class TestCanParserPacker(unittest.TestCase):
       parser.update([0, [msg]])
       assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == ((cnt + i) % 256)
 
+  def test_ford_counters(self):
+    packer = CANPacker("ford_lincoln_base_pt")
+    messages = (
+      ("BrakeSysFeatures", "VehVActlBrk_No_Cnt", 16),
+      ("EngVehicleSpThrottle2", "VehVActlEng_No_Cnt", 16),
+      ("Yaw_Data_FD1", "VehRollYaw_No_Cnt", 256),
+    )
+    parser = CANParser("ford_lincoln_base_pt", [(name, 0) for name, _, _ in messages], 0)
+    for name, counter, modulus in messages:
+      with self.subTest(message=name):
+        signal = packer.dbc.name_to_msg[name].sigs[counter]
+        for i in range(modulus * 2):
+          msg = packer.make_can_msg(name, 0, {})
+          self.assertEqual(signal.get_raw_value(msg[1]), i % modulus)
+          self.assertEqual(parser.update([0, [msg]]), {msg[0]})
+          self.assertEqual(parser.vl[name][counter], i % modulus)
+
+        # Explicit counters still override the automatic sequence.
+        msg = packer.make_can_msg(name, 0, {counter: modulus - 1})
+        self.assertEqual(signal.get_raw_value(msg[1]), modulus - 1)
+        for expected in (modulus - 1, 0, 1):
+          msg = packer.make_can_msg(name, 0, {})
+          self.assertEqual(signal.get_raw_value(msg[1]), expected)
+
   def test_parser_can_valid(self):
     msgs = [("CAN_FD_MESSAGE", 10), ]
     packer = CANPacker(TEST_DBC)
