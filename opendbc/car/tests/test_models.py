@@ -37,8 +37,6 @@ ANGLE_DEG_TO_CAN = {
   "psa": 10,
 }
 
-NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
-JOB_ID = int(os.environ.get("JOB_ID", "0"))
 RELAY_TRANSITION_TIMEOUT_US = 10_000_000
 DOWNLOAD_CACHE_ROOT = Path(os.environ.get("COMMA_CACHE", "/tmp/comma_download_cache"))
 OPENPILOT_CI_URL = "https://commadataci.blob.core.windows.net/openpilotci"
@@ -51,9 +49,8 @@ def get_test_cases() -> list[tuple[str, CarTestRoute | None]]:
     routes_by_car[str(route.car_model)].add(route)
 
   test_cases = []
-  for i, platform in enumerate(sorted(PLATFORMS)):
-    if i % NUM_JOBS == JOB_ID:
-      test_cases.extend(sorted((platform, route) for route in routes_by_car.get(platform, (None,))))
+  for platform in sorted(PLATFORMS):
+    test_cases.extend(sorted((platform, route) for route in routes_by_car.get(platform, (None,))))
   return test_cases
 
 
