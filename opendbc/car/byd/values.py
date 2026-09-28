@@ -34,7 +34,7 @@ class CarControllerParams:
 
   # The column attenuates driver torque ~12x before the EPS measures it, so DRIVER_EPS_TORQUE
   # stays under 5 through deliberate wheel input and cannot be used to see an override.
-  STEER_DRIVER_OVERRIDE = 18          # column torque for soft override, Nm
+  STEER_DRIVER_OVERRIDE = 22          # column torque for soft override, Nm
   STEER_DRIVER_DISENGAGE = 100        # column torque for hard disengage, Nm
   STEER_DRIVER_DISENGAGE_FRAMES = 5   # 100 ms of STEERING_TORQUE, mirrored in byd.h
   STEER_NOT_ACCEPTED_FRAMES = 10      # 200 ms of 50 Hz STEER_REQ
