@@ -21,13 +21,13 @@ class CarInterface(CarInterfaceBase):
     ret.dashcamOnly = False
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
-    ret.steerActuatorDelay = 0.2
+    ret.steerActuatorDelay = 0.25
     ret.steerLimitTimer = 0.4
+    ret.longitudinalActuatorDelay = 0.5
 
     ret.radarUnavailable = False
 
-    # no long mode in byd.h yet
-    ret.alphaLongitudinalAvailable = False
+    ret.alphaLongitudinalAvailable = True
     ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     if ret.openpilotLongitudinalControl:
