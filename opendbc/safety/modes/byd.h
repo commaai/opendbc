@@ -7,11 +7,20 @@
 #define BYD_DRIVER_TORQUE_FRAMES 5
 #define BYD_WHEELSPEED_TO_KPH 0.072  // 0.02 m/s/LSB, mirrored in values.py
 #define BYD_PARAM_LKS_ON 2U
+#define BYD_PARAM_LONG_CONTROL 4U
+#define BYD_CAM_ACC_CMD_HIST 3U
 
 static int byd_driver_torque_frames = 0;
 static bool byd_lks_on = false;
 static bool byd_lks_btn_last = false;
 static bool byd_acc_on = false;
+static bool byd_longitudinal = false;
+static bool byd_set_res_last = false;
+static uint8_t byd_stock_btns = 0;
+static uint8_t byd_stock_btns_prev = 0;
+static uint8_t byd_cam_acc_cmd[BYD_CAM_ACC_CMD_HIST][6] = {{0}};
+static uint8_t byd_cam_acc_cmd_idx = 0;
+static uint8_t byd_cam_acc_cmd_count = 0;
 static uint32_t byd_op_steer_ts = 0;
 static uint32_t byd_op_lat_ts = 0;
 
@@ -38,6 +47,39 @@ static bool byd_stock_hud_allowed(void) {
     allowed = safety_get_ts_elapsed(microsecond_timer_get(), byd_op_steer_ts) > BYD_OP_HUD_TIMEOUT_US;
   }
   return allowed;
+}
+
+// SET RES DEC INC ACC_ON. LKAS_ON_BTN is not in the mask: bus 2 may still pulse it.
+static uint8_t byd_button_mask(const CANPacket_t *msg) {
+  uint8_t mask = 0;
+  if ((msg->data[0] & 0x08U) != 0U) { mask |= 0x01U; }  // SET
+  if ((msg->data[0] & 0x10U) != 0U) { mask |= 0x02U; }  // RES
+  if ((msg->data[1] & 0x80U) != 0U) { mask |= 0x04U; }  // DEC
+  if ((msg->data[2] & 0x01U) != 0U) { mask |= 0x08U; }  // INC
+  if ((msg->data[2] & 0x08U) != 0U) { mask |= 0x10U; }  // ACC_ON
+  return mask;
+}
+
+static void byd_cam_acc_cmd_push(const CANPacket_t *msg) {
+  for (int i = 0; i < 6; i++) {
+    byd_cam_acc_cmd[byd_cam_acc_cmd_idx][i] = msg->data[i];
+  }
+  byd_cam_acc_cmd_idx = (byd_cam_acc_cmd_idx + 1U) % BYD_CAM_ACC_CMD_HIST;
+  if (byd_cam_acc_cmd_count < BYD_CAM_ACC_CMD_HIST) {
+    byd_cam_acc_cmd_count += 1U;
+  }
+}
+
+static bool byd_cam_acc_cmd_match(const CANPacket_t *msg) {
+  bool matched = false;
+  for (uint8_t h = 0U; h < byd_cam_acc_cmd_count; h++) {
+    bool same = true;
+    for (int i = 0; i < 6; i++) {
+      same = same && (msg->data[i] == byd_cam_acc_cmd[h][i]);
+    }
+    matched = matched || same;
+  }
+  return matched;
 }
 
 static uint8_t byd_get_counter(const CANPacket_t *msg) {
@@ -99,12 +141,29 @@ static void byd_rx_hook(const CANPacket_t *msg) {
     // Driver LKS button. Camera LKAS_STATE 0/4 are not this switch. Bus 2 spoofs
     // must not land here or we would toggle our own latch.
     if (msg->addr == 0x3B0U) {
+      byd_stock_btns_prev = byd_stock_btns;
+      byd_stock_btns = byd_button_mask(msg);
       const bool btn = GET_BIT(msg, 6U);
       if (btn && (!byd_lks_btn_last)) {
         byd_lks_on = !byd_lks_on;
-        pcm_cruise_check(byd_acc_on && byd_lks_on);
+        if (!byd_longitudinal) {
+          pcm_cruise_check(byd_acc_on && byd_lks_on);
+        }
       }
       byd_lks_btn_last = btn;
+
+      // Long mode: falling edge of SET or RES engages. ACC_ON cancels.
+      // Brake and gas are handled by the common checks.
+      if (byd_longitudinal) {
+        const bool set_res = (byd_stock_btns & 0x03U) != 0U;
+        if (!set_res && byd_set_res_last) {
+          controls_allowed = true;
+        }
+        if ((byd_stock_btns & 0x10U) != 0U) {
+          controls_allowed = false;
+        }
+        byd_set_res_last = set_res;
+      }
     }
   }
 
@@ -114,7 +173,14 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       // ACC_STATE: 0=OFF, 2=ACC_ON, 3=ACC_ACTIVE, 5=FORCE_ACCEL, 7=ERROR
       uint8_t acc_state = (msg->data[2] >> 3) & 0x7U;
       byd_acc_on = (acc_state == 3U) || (acc_state == 5U);
-      pcm_cruise_check(byd_acc_on && byd_lks_on);
+      if (!byd_longitudinal) {
+        pcm_cruise_check(byd_acc_on && byd_lks_on);
+      }
+    }
+
+    // Last camera ACC command. A bus-0 copy of a recent one is AEB passthrough.
+    if (byd_longitudinal && (msg->addr == 0x32EU)) {
+      byd_cam_acc_cmd_push(msg);
     }
   }
 }
@@ -153,16 +219,35 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
   }
 
   // Bus 0: only cancel (ACC_ON_BTN) while stock cruise is engaged, or button release.
-  // Bus 2: only LKAS_ON_BTN, the camera LKS spoof. It never reaches bus 0 or our latch.
+  // Bus 2: SET/RES/DEC/INC/ACC_ON must be a subset of the last two stock frames.
+  // LKAS_ON_BTN stays free. Long mode never relays SET/RES/DEC/INC.
   if (msg->addr == 0x3B0U) {
-    bool set_res = (msg->data[0] & 0x18U) != 0U;                                          // SET, RES
-    bool lkas_on = (msg->data[0] & 0x40U) != 0U;                                          // LKAS_ON
-    bool distance = ((msg->data[1] & 0x80U) != 0U) || ((msg->data[2] & 0x1U) != 0U);     // DEC, INC_DISTANCE
-    bool cancel = (msg->data[2] & 0x8U) != 0U;                                            // ACC_ON_BTN
+    uint8_t mask = byd_button_mask(msg);
     if (msg->bus == 2U) {
-      tx = !set_res && !distance && !cancel;
+      bool stock_ok = (mask & ~(byd_stock_btns | byd_stock_btns_prev)) == 0U;
+      if (byd_longitudinal) {
+        stock_ok = stock_ok && ((mask & 0x0FU) == 0U);
+      }
+      tx = stock_ok;
     } else {
+      bool set_res = (msg->data[0] & 0x18U) != 0U;
+      bool lkas_on = (msg->data[0] & 0x40U) != 0U;
+      bool distance = ((msg->data[1] & 0x80U) != 0U) || ((msg->data[2] & 0x1U) != 0U);
+      bool cancel = (msg->data[2] & 0x8U) != 0U;
       tx = !set_res && !lkas_on && !distance && (!cancel || cruise_engaged_prev);
+    }
+  }
+
+  // 0x32E: our accel, or a byte-exact copy of a camera frame from the last 60 ms.
+  if (msg->addr == 0x32EU) {
+    const LongitudinalLimits BYD_LONG_LIMITS = {
+      .max_accel = 2000,
+      .min_accel = -3500,
+      .inactive_accel = 0,
+    };
+    int accel = ((int)msg->data[0] - 100) * 50;
+    if (!byd_cam_acc_cmd_match(msg) && longitudinal_accel_checks(accel, BYD_LONG_LIMITS)) {
+      tx = false;
     }
   }
 
@@ -176,8 +261,12 @@ static bool byd_fwd_hook(int bus_num, int addr) {
       block_msg = !byd_stock_lat_allowed();
     } else if (addr == 0x316) {
       block_msg = !byd_stock_hud_allowed();
+    } else if (byd_longitudinal && ((addr == 0x32E) || (addr == 0x32D))) {
+      block_msg = true;
     } else {
     }
+  } else if (byd_longitudinal && (bus_num == 0) && (addr == 0x3B0)) {
+    block_msg = true;
   }
   return block_msg;
 }
@@ -187,12 +276,32 @@ static safety_config byd_init(uint16_t param) {
   byd_lks_on = GET_FLAG(param, BYD_PARAM_LKS_ON);
   byd_lks_btn_last = false;
   byd_acc_on = false;
+  byd_set_res_last = false;
+  byd_stock_btns = 0;
+  byd_stock_btns_prev = 0;
+  byd_cam_acc_cmd_idx = 0;
+  byd_cam_acc_cmd_count = 0;
   byd_op_steer_ts = 0;
   byd_op_lat_ts = 0;
+
+#ifdef ALLOW_DEBUG
+  byd_longitudinal = GET_FLAG(param, BYD_PARAM_LONG_CONTROL);
+#else
+  byd_longitudinal = false;
+#endif
 
   static const CanMsg BYD_TX_MSGS[] = {
     {0x1E2, 0, 8, .check_relay = true, .disable_static_blocking = true},   // STEERING_MODULE_ADAS
     {0x316, 0, 8, .check_relay = true, .disable_static_blocking = true},   // LKAS_HUD_ADAS
+    {0x3B0, 0, 8, .check_relay = false},  // PCM_BUTTONS (cruise cancel button spoof)
+    {0x3B0, 2, 8, .check_relay = false},  // PCM_BUTTONS (camera LKS neutralize / restore)
+  };
+
+  static const CanMsg BYD_LONG_TX_MSGS[] = {
+    {0x1E2, 0, 8, .check_relay = true, .disable_static_blocking = true},   // STEERING_MODULE_ADAS
+    {0x316, 0, 8, .check_relay = true, .disable_static_blocking = true},   // LKAS_HUD_ADAS
+    {0x32D, 0, 8, .check_relay = true},                                    // ACC_HUD_ADAS
+    {0x32E, 0, 8, .check_relay = true},                                    // ACC_CMD
     {0x3B0, 0, 8, .check_relay = false},  // PCM_BUTTONS (cruise cancel button spoof)
     {0x3B0, 2, 8, .check_relay = false},  // PCM_BUTTONS (camera LKS neutralize / restore)
   };
@@ -208,6 +317,23 @@ static safety_config byd_init(uint16_t param) {
     {.msg = {{0x3B0, 0, 8,  20U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // PCM_BUTTONS (LKS latch)
   };
 
+  // Camera 0x32E is checked only in long mode, so a dropout there does not
+  // disengage lateral-only builds.
+  static const RxCheck byd_long_rx_checks[] = {
+    {.msg = {{0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x1FC, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x242, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x342, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x32E, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // ACC_CMD (AEB passthrough)
+    {.msg = {{0x316, 2, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{0x3B0, 0, 8,  20U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+  };
+
+  if (byd_longitudinal) {
+    return BUILD_SAFETY_CFG(byd_long_rx_checks, BYD_LONG_TX_MSGS);
+  }
   return BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);
 }
 
