@@ -131,6 +131,10 @@ class CarState(CarStateBase):
         if pressed != self.button_prev[name]:
           button_events.append(structs.CarState.ButtonEvent(pressed=pressed, type=btype))
           self.button_prev[name] = pressed
+    # LKS off is how this car leaves openpilot today. In long mode the PCM
+    # cruise line stays false, so the latch has to cancel on its own.
+    if self.lks_btn_rising and self.CP.openpilotLongitudinalControl and not self.lks_enabled:
+      button_events.append(structs.CarState.ButtonEvent(pressed=False, type=ButtonType.cancel))
     ret.buttonEvents = button_events
 
     # Camera LKAS_STATE 0/4 are moods, not the switch. Fault only if EPS stays idle.
@@ -202,6 +206,11 @@ class CarState(CarStateBase):
     self.lkas_hud = copy.copy(cp_cam.vl["LKAS_HUD_ADAS"])
 
     return ret
+
+  def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
+    if not self.lks_enabled:
+      return False
+    return super().update_button_enable(buttonEvents)
 
   @staticmethod
   def get_can_parsers(CP):

@@ -466,23 +466,136 @@ class TestBydLongitudinalSafety(TestBydSafety, common.LongitudinalAccelSafetyTes
         should_tx = not (set_res or dec or inc or cancel)
         self.assertEqual(should_tx, self._tx(msg))
 
+  def _acc_state(self, state, counter=0):
+    values = {
+      "ACC_STATE": state,
+      "ACC_ON1": 1 if state in (2, 3, 5) else 0,
+      "ACC_ON2": (state >> 1) & 1,
+      "SET_ME_B2_LO": 4,
+      "COUNTER": counter,
+    }
+    return self.packer.make_can_msg_safety("ACC_HUD_ADAS", self.CAM_BUS, values)
+
+  def _arm(self, state=2, counter=0):
+    self.assertTrue(self._rx(self._acc_state(state, counter)))
+
+  def _tap(self, **buttons):
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values(**buttons))))
+
   def test_set_resume_engage(self):
     for button in ("SET_BTN", "RES_BTN"):
       self._reset_safety_hooks()
       self.safety.init_tests()
+      self._arm()
       self.assertFalse(self.safety.get_controls_allowed())
-      self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values(**{button: 1}))))
+      self._tap(**{button: 1})
       self.assertFalse(self.safety.get_controls_allowed())
-      self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values())))
+      self._tap()
       self.assertTrue(self.safety.get_controls_allowed())
 
-    self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values(ACC_ON_BTN=1))))
+    self._tap(ACC_ON_BTN=1)
     self.assertFalse(self.safety.get_controls_allowed())
 
     self._reset_safety_hooks()
     self.safety.init_tests()
     self.assertTrue(self._rx(self._pcm_status_msg(True)))
     self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_long_engage_edges(self):
+    # SET with ACC main off does not engage.
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # Standby (state 2) is enough. Active state 3 is not required, because
+    # the camera never sees SET in long mode.
+    self._arm(2, 0)
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # Same frame as the SET release, ACC_ON wins.
+    self._tap(SET_BTN=1)
+    self._tap(ACC_ON_BTN=1)
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # Re-engage, then ACC main off drops it and blocks the next SET.
+    self._tap()
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._acc_state(0, 1)))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # State 7 is not main either.
+    self._reset_safety_hooks()
+    self.safety.init_tests()
+    self._arm(7, 0)
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # LKS off drops controls and a later SET does nothing until LKS is on again.
+    self._arm(2, 1)
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._lks_btn_msg(True)))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._lks_btn_msg(False)))
+    self.assertTrue(self._rx(self._lks_btn_msg(True)))
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # Rolling with the brake held cannot engage. Stopped with the brake held can.
+    self._reset_safety_hooks()
+    self.safety.init_tests()
+    self._arm(2, 0)
+    self.assertTrue(self._rx(self._speed_msg(10)))
+    self.assertTrue(self._rx(self._user_brake_msg(True)))
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    self._reset_safety_hooks()
+    self.safety.init_tests()
+    self._arm(2, 0)
+    self.assertTrue(self._rx(self._speed_msg(0)))
+    self.assertTrue(self._rx(self._user_brake_msg(True)))
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # Rising brake while moving disengages. Gas blocks non-zero accel only.
+    self.assertTrue(self._rx(self._user_brake_msg(False)))
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety(
+      "WHEELSPEED_CLEAN", self.MAIN_BUS, {"WHEELSPEED_CLEAN": 36, "COUNTER": 1})))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._user_brake_msg(True)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    self._reset_safety_hooks()
+    self.safety.init_tests()
+    self._arm(2, 0)
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._user_gas_msg(20)))
+    self.assertFalse(self._tx(self._accel_msg(1.0)))
+    self.assertTrue(self._tx(self._accel_msg(0.0)))
+    self.assertTrue(self._rx(self._user_gas_msg(0)))
+    self.assertTrue(self._tx(self._accel_msg(1.0)))
+    self.assertFalse(self._tx(self._accel_msg(2.05)))
+    self.assertFalse(self._tx(self._accel_msg(-3.55)))
+    self.assertTrue(self._tx(self._accel_msg(2.0)))
+    self.assertTrue(self._tx(self._accel_msg(-3.5)))
 
   def test_bus2_buttons_strip_acc(self):
     self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values(SET_BTN=1, ACC_ON_BTN=1))))
