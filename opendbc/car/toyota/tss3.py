@@ -26,6 +26,9 @@ REQUEST_INTERVAL_NS = int(DT_CTRL * 1e9)
 # stops for 100 ms, and it restarts the angle rate limit from the measured angle after a 100 ms gap in requests.
 CONTROL_REQUEST_TIMEOUT_NS = 100_000_000
 
+# LONGITUDINAL_REQUEST_ID_LOWER values of the FRC's PCS braking request
+PCS_REQUEST_IDS = (33, 34)
+
 
 def target_angle_deg_to_raw(angle_deg: float) -> int:
   return round(angle_deg / CarControllerParams.TSS3_TARGET_ANGLE_SCALE_DEG)

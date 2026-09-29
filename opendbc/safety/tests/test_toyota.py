@@ -425,12 +425,51 @@ def fix_toyota_checksum(msg):
   return address, bytes(payload), bus
 
 
+# FRC CONTROL_REQUESTs recorded around a PCS event: stock ACC braking, then both PCS braking request IDs (34, 33)
+TSS3_FRC_08A = bytes.fromhex("0000000880002d47f0605ef0607fff007fff000c4000100000000a00fc472d50")
+TSS3_FRC_PCS_08A = (bytes.fromhex("0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d"),
+                    bytes.fromhex("00000008c0002d87f0605ef0607fff007fff000d400030000000130006f38fbe"))
+
+
 class Tss3SafetyHelpers:
   signer_seq = 0
 
   @staticmethod
   def _admin_msg(arm: bool):
     return libsafety_py.make_CANPacket(0x777, 1, bytes((7, 0xC9, 0xA8, int(arm), 0, 0, 0, 0)))
+
+  def _rx_frc_08a(self, request: bytes):
+    msg = libsafety_py.make_CANPacket(0x08A, 2, request)
+    msg[0].fd = 1
+    self.assertTrue(self.safety.safety_rx_hook(msg))
+
+  def test_frc_pcs_request_is_forwarded(self):
+    stock_longitudinal = bool(self.SAFETY_PARAM & ToyotaSafetyFlags.STOCK_LONGITUDINAL)
+    for pcs in TSS3_FRC_PCS_08A:
+      with self.subTest(pcs=pcs.hex()):
+        self._rx_frc_08a(TSS3_FRC_08A)
+        self.assertTrue(self.safety.safety_tx_hook(self._admin_msg(True)))
+        request = build_host_application(stock=TSS3_FRC_08A if stock_longitudinal else None)
+        self.assertTrue(self._request(request))
+        self.assertEqual(self.safety.safety_fwd_hook(2, 0x08A), -1)
+
+        # openpilot's CONTROL_REQUEST is released until the FRC stops requesting PCS braking
+        self._rx_frc_08a(pcs)
+        self.assertEqual(self.safety.safety_fwd_hook(2, 0x08A), 0)
+        self.assertFalse(self._publish(request))
+        self.assertFalse(self.safety.safety_tx_hook(self._admin_msg(True)))
+        self._rx_frc_08a(pcs)
+        self.assertEqual(self.safety.safety_fwd_hook(2, 0x08A), 0)
+
+        self._rx_frc_08a(TSS3_FRC_08A)
+        self.assertTrue(self.safety.safety_tx_hook(self._admin_msg(True)))
+        self.assertEqual(self.safety.safety_fwd_hook(2, 0x08A), -1)
+
+        # init forgets the PCS request, stock longitudinal also needs a new FRC request to arm
+        self._rx_frc_08a(pcs)
+        self._reset_safety_hooks()
+        self.safety.set_timer(0)
+        self.assertEqual(self.safety.safety_tx_hook(self._admin_msg(True)), not stock_longitudinal)
 
   @staticmethod
   def _control_request_msg(request: bytes, fd: bool = True):
@@ -758,9 +797,7 @@ class TestToyotaTss3CamryStockLongitudinalSafety(Tss3SafetyHelpers, common.Safet
     self.safety.set_timer(0)
 
   def _rx_stock(self, stock: bytes):
-    msg = libsafety_py.make_CANPacket(0x08A, 2, stock)
-    msg[0].fd = 1
-    self.assertTrue(self.safety.safety_rx_hook(msg))
+    self._rx_frc_08a(stock)
 
   def _host_request(self, stock: bytes | None = None, request_sequence: int = 12) -> bytes:
     stock = self.STOCK_08A if stock is None else stock

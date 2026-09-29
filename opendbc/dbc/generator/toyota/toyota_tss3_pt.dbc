@@ -128,6 +128,9 @@ BO_ 1014 BSM: 8 XXX
 BO_ 1310 READY_STATUS: 8 XXX
  SG_ READY_STATUS : 7|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1454 PCS_HUD: 32 XXX
+ SG_ FCW : 18|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1552 BODY_CONTROL_STATE_2: 8 XXX
  SG_ UI_SPEED : 23|8@0+ (1,0) [0|255] "km/h" XXX
  SG_ UNITS : 63|3@0+ (1,0) [0|4] "" XXX
@@ -169,6 +172,8 @@ CM_ SG_ 48 STEERING_WHEEL_TORQUE_FINE "Driver torque = STEERING_WHEEL_TORQUE_COA
 CM_ SG_ 129 REQUEST_LOSS "Set ~90 ms after the last valid CONTROL_REQUEST, a cruise fault latches until restart if it stays set for ~1 s";
 CM_ SG_ 138 LATERAL_REQUEST_PINION_ANGLE "1024/17870 deg per count";
 CM_ SG_ 138 AUTHENTICATOR "Truncated 28-bit SecOC MAC";
+CM_ SG_ 138 LONGITUDINAL_REQUEST_ID_LOWER "33 and 34 are only seen during PCS braking";
+CM_ SG_ 1454 FCW "PCS warning";
 CM_ BO_ 1911 "Requests to the EPS-resident SecOC signer. HEADER 0x80-0xB0 | sequence nibble: fragment 0-3 of a 28-byte CONTROL_REQUEST, 0x07: arm (DATA_1 0xC9A801) or release (0xC9A800) openpilot's CONTROL_REQUEST";
 CM_ BO_ 1961 "Signer response with the SecOC trailer for the CONTROL_REQUEST with this SIGNER_SEQUENCE";
 CM_ SG_ 1042 LANE_LINE_1 "1 = recognized, 2 = missing, 4 = recognized while active";
