@@ -79,7 +79,7 @@ class CarControllerParams:
 
 class BydSafetyFlags(IntFlag):
   LKS_ON = 2
-  LONG_CONTROL = 4  # not in byd.h yet
+  LONG_CONTROL = 4
 
 
 class WMI(StrEnum):
