@@ -8,6 +8,7 @@ from opendbc.car.toyota.values import CAR, CarControllerParams, ToyotaFlags, Toy
 CAMRY_COMMON = {
   0x025: bytes.fromhex("000100005000007e0000000000000000000000000000000000000000bb6fee54"),
   0x030: bytes.fromhex("000000ffc400201b00ffc0ff9e00003f22000000ff9e007000000000b96152f6"),
+  0x081: bytes.fromhex("00000018fd8a3f670000000400000000002800490049100c00491fbcb0598655"),
   0x08A: bytes.fromhex("0000000880002d47fe462afe467fff007fffff35c000100064003c005db7797f"),
   0x0AA: bytes.fromhex("1a6f1a6f1a6f1a6f"),
   0x0FE: bytes.fromhex("567d393f0000c36200000000000000002640000000ff000000000000d54aaf10"),
@@ -91,11 +92,23 @@ class TestToyotaCamryTSS3(unittest.TestCase):
     self.assertFalse(state.carNotReady or state.steerFaultTemporary or state.steerFaultPermanent)
 
   def test_delayed_hold_standstill(self):
-    for bytes_4_7, speed, standstill in ((b"\x80\x00\x2d\x47", 0, False), (b"\xa0\x00\x2d\x67", 0, True),
-                                         (b"\xa0\x00\x2c\x66", 0, True), (b"\x80\x00\x47\x65", 5, False)):
-      with self.subTest(request=bytes_4_7.hex()):
-        request = CAMRY_COMMON[0x08A][:4] + bytes_4_7 + CAMRY_COMMON[0x08A][8:]
-        self.assertEqual(update_state(self.ci, speed_ms=speed, x08A=request).cruiseState.standstill, standstill)
+    for alpha_long in (False, True):
+      ci = CarInterface(CarInterface.get_params(CAR.TOYOTA_CAMRY_TSS3, fingerprint(), [], alpha_long, False, False))
+      for bytes_4_7, speed, hold in ((b"\x80\x00\x2d\x47", 0, False), (b"\xa0\x00\x2d\x67", 0, True),
+                                     (b"\xa0\x00\x2c\x66", 0, True), (b"\x80\x00\x47\x65", 5, False)):
+        with self.subTest(alpha_long=alpha_long, request=bytes_4_7.hex()):
+          request = CAMRY_COMMON[0x08A][:4] + bytes_4_7 + CAMRY_COMMON[0x08A][8:]
+          self.assertEqual(update_state(ci, speed_ms=speed, x08A=request).cruiseState.standstill, hold and not alpha_long)
+
+  def test_request_loss_fault(self):
+    loss = bytes.fromhex("0000001800810b2d000000140000000001210081ff000c63ff000000b0fb684e")
+    # pulses on disengagement
+    self.assertFalse(update_state(self.ci, iterations=10, x081=loss).accFaulted)
+    self.assertFalse(update_state(self.ci).accFaulted)
+
+    state = update_state(self.ci, iterations=100, x081=loss)
+    self.assertTrue(state.canValid and state.accFaulted)
+    self.assertTrue(update_state(self.ci).accFaulted)
 
   def test_eps_status(self):
     override = bytes.fromhex("12000003330930b9130330053c800e99030b0000053c07b50000000042c3b381")
