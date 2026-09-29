@@ -59,6 +59,8 @@ class CarState(CarStateBase):
     self.tss3_signer_responses = []
     self.tss3_signer_request_rejected = False
     self.tss3_control_request_rejected = False
+    self.tss3_request_loss_frames = 0
+    self.tss3_acc_faulted = False
 
   def update_tss3(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -112,6 +114,11 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) >= TSS3_STEER_DRIVER_TORQUE_THRESHOLD
     ret.steerFaultTemporary = bool(cp.vl["EPS_STATUS"]["EPS_FAULT_INHIBIT"])
 
+    # REQUEST_LOSS also pulses on disengagement, the VMC latches a cruise fault until restart if it persists for ~1 s
+    self.tss3_request_loss_frames = self.tss3_request_loss_frames + 1 if cp.vl["CONTROL_RESULT"]["REQUEST_LOSS"] else 0
+    self.tss3_acc_faulted |= self.tss3_request_loss_frames * DT_CTRL >= 1.0
+    ret.accFaulted = self.tss3_acc_faulted
+
     if self.CP.flags & ToyotaFlags.HAS_BSM:
       ret.leftBlindspot = bool(cp_cam.vl["BSM"]["L_ADJACENT"] or cp_cam.vl["BSM"]["L_APPROACHING"])
       ret.rightBlindspot = bool(cp_cam.vl["BSM"]["R_ADJACENT"] or cp_cam.vl["BSM"]["R_APPROACHING"])
@@ -148,7 +155,8 @@ class CarState(CarStateBase):
 
     request = cp_cam.vl["CONTROL_REQUEST"]
     ret.cruiseState.enabled = bool(request["CRUISE_OPERATING_LATCH"])
-    ret.cruiseState.standstill = ret.cruiseState.enabled and bool(request["DELAYED_HOLD_STATE"])
+    # with openpilot longitudinal, the VMC never receives the FRC's hold request
+    ret.cruiseState.standstill = not self.CP.openpilotLongitudinalControl and ret.cruiseState.enabled and bool(request["DELAYED_HOLD_STATE"])
     ret.cruiseState.available = bool(cp_cam.vl["CRUISE_DISPLAY"]["CRUISE_MAIN_STATE"])
     ret.cruiseState.speed = request["SET_SPEED"] * CV.KPH_TO_MS
     cluster_set_speed = cp_cam.vl["CRUISE_DISPLAY"]["UI_SET_SPEED"]
@@ -321,6 +329,7 @@ class CarState(CarStateBase):
       ("GAS_PEDAL", 40),
       ("GEAR_PACKET_HYBRID", 50),
       ("CRUISE_BUTTONS", 30),
+      ("CONTROL_RESULT", 33),
       ("READY_STATUS", 1),
       ("ESP_CONTROL", 3),
       ("BLINKERS_STATE", 1),
