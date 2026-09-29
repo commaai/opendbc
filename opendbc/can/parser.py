@@ -11,21 +11,6 @@ MAX_BAD_COUNTER = 5
 CAN_INVALID_CNT = 5
 
 
-def get_raw_value(dat: bytes | bytearray, sig: Signal) -> int:
-  ret = 0
-  i = sig.msb // 8
-  bits = sig.size
-  while 0 <= i < len(dat) and bits > 0:
-    lsb = sig.lsb if (sig.lsb // 8) == i else i * 8
-    msb = sig.msb if (sig.msb // 8) == i else (i + 1) * 8 - 1
-    size = msb - lsb + 1
-    d = (dat[i] >> (lsb - (i * 8))) & ((1 << size) - 1)
-    ret |= d << (bits - size)
-    bits -= size
-    i = i - 1 if sig.is_little_endian else i + 1
-  return ret
-
-
 @dataclass
 class MessageState:
   address: int
@@ -59,7 +44,7 @@ class MessageState:
       self.first_seen_nanos = nanos
 
     for i, sig in enumerate(self.signals):
-      tmp = get_raw_value(dat, sig)
+      tmp = sig.get_raw_value(dat)
       if sig.is_signed:
         tmp -= ((tmp >> (sig.size - 1)) & 0x1) * (1 << sig.size)
 

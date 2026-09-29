@@ -8,14 +8,16 @@ on:
 
 jobs:
   tests:
-    name: ./test.sh
+    name: ./test.sh (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+            name: Linux
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+            name: macOS
     steps:
     - uses: actions/checkout@v7
     - uses: commaai/timeout@v1
@@ -35,7 +37,7 @@ jobs:
       run: ./opendbc/safety/tests/test.sh
 
   mutation:
-    name: Safety mutation tests
+    name: Safety mutation tests (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     strategy:
@@ -43,7 +45,9 @@ jobs:
       matrix:
         include:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+            name: Linux
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+            name: macOS
     steps:
       - uses: actions/checkout@v7
       - name: Run mutation tests

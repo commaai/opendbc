@@ -8,9 +8,8 @@ from opendbc.car.byd.values import CarControllerParams
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety, away_round
+from opendbc.safety.tests.common import away_round
 
 STEERING_MODULE_ADAS = 0x1E2
 LKAS_HUD_ADAS = 0x316
@@ -23,6 +22,9 @@ def safety_max_can(max_angle_float, can_offset=0):
 
 
 class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
+  DBC = "byd_atto3"
+  SAFETY_MODEL = CarParams.SafetyModel.byd
+
   RELAY_MALFUNCTION_ADDRS = {0: (STEERING_MODULE_ADAS, LKAS_HUD_ADAS)}
   FWD_BLACKLISTED_ADDRS = {2: [STEERING_MODULE_ADAS, LKAS_HUD_ADAS]}
   TX_MSGS = [[STEERING_MODULE_ADAS, 0], [LKAS_HUD_ADAS, 0], [PCM_BUTTONS, 0]]
@@ -45,11 +47,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     return get_max_angle_vm(max(speed, 1), self.VM, CarControllerParams)
 
   def setUp(self):
+    super().setUp()
     self.VM = VehicleModel(get_safety_CP())
-    self.packer = CANPackerSafety("byd_atto3")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.byd, 0)
-    self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     values = {"STEER_ANGLE": angle, "STEER_REQ": 1 if enabled else 0, "STEER_REQ_ACTIVE_LOW": 0 if enabled else 1}
@@ -103,12 +102,12 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         with self.subTest(message=name, byte=byte):
           self.safety.set_safety_hooks(CarParams.SafetyModel.byd, 0)
           self.safety.init_tests()
-          for counter in range(1, 17):
-            msg = self.packer.make_can_msg_safety(name, bus, {signal: initial, "COUNTER": counter % 16})
+          for _ in range(16):
+            msg = self.packer.make_can_msg_safety(name, bus, {signal: initial})
             self.assertTrue(self._rx(msg))
           speed_min = self.safety.get_vehicle_speed_min()
           speed_max = self.safety.get_vehicle_speed_max()
-          msg = self.packer.make_can_msg_safety(name, bus, {signal: corrupt, "COUNTER": 1})
+          msg = self.packer.make_can_msg_safety(name, bus, {signal: corrupt})
           msg[0].data[byte] ^= 0xFF
           self.safety.set_controls_allowed(name == "WHEELSPEED_CLEAN")
           self.assertFalse(self._rx(msg))
@@ -123,8 +122,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     ):
       with self.subTest(message=name):
         # Check both counter locations and rollover with valid checksums.
-        for counter in range(1, 33):
-          msg = self.packer.make_can_msg_safety(name, bus, {signal: value, "COUNTER": counter % 16})
+        for _ in range(32):
+          msg = self.packer.make_can_msg_safety(name, bus, {signal: value})
           self.assertTrue(self._rx(msg))
         self.safety.set_controls_allowed(True)
         # Replayed frames are rejected after the common counter tolerance.
@@ -133,8 +132,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           self.assertEqual(should_rx, self._rx(msg))
           self.assertEqual(should_rx, self.safety.get_controls_allowed())
         # A valid sequence clears the counter faults.
-        for counter in range(1, common.MAX_WRONG_COUNTERS + 1):
-          msg = self.packer.make_can_msg_safety(name, bus, {signal: 0, "COUNTER": counter})
+        for _ in range(common.MAX_WRONG_COUNTERS):
+          msg = self.packer.make_can_msg_safety(name, bus, {signal: 0})
           self.assertTrue(self._rx(msg))
 
   def test_angle_cmd_when_enabled(self):

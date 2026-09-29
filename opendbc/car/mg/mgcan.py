@@ -1,3 +1,6 @@
+from opendbc.car.crc import CRC8J1850
+
+
 def calc_checksum(values):
   lka_req_toq = values['LKAReqToqHSC2'] + 0x400
   lka_req_toq_sts = values['LKAReqToqStsHSC2']
@@ -26,3 +29,17 @@ def create_lka_steering(packer, counter, apply_torque, active):
 
   values["LKAReqToqPVHSC2"] = calc_checksum(values)
   return packer.make_can_msg("FVCM_HSC2_FrP03", 0, values)
+
+
+def mg_checksum(address: int, sig, d: bytearray) -> int:
+  if address == 0x1EC:
+    torque = ((d[0] & 0x7) << 8) | d[1]
+    valid = (d[0] >> 3) & 1
+    status = (d[6] >> 4) & 0x7
+    counter = d[0] >> 4
+    return -((torque << 1) + (status << 12) + valid + counter) & 0x7FFF
+
+  crc = 0xFF
+  for byte in d[:-1]:
+    crc = CRC8J1850[crc ^ byte]
+  return crc ^ 0xFF

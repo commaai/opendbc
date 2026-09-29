@@ -95,7 +95,6 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
 }
 
 static void toyota_rx_hook(const CANPacket_t *msg) {
-
   // get eps motor torque (0.66 factor in dbc)
   if (msg_matches(msg, 0x260U, 0U)) {
     int torque_meas_new = (msg->data[5] << 8) | msg->data[6];

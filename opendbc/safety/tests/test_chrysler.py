@@ -3,12 +3,13 @@ import unittest
 
 from opendbc.car.chrysler.values import ChryslerSafetyFlags
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 
 
 class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
+  DBC = "chrysler_pacifica_2017_hybrid_generated"
+  SAFETY_MODEL = CarParams.SafetyModel.chrysler
+
   TX_MSGS = [[0x23B, 0], [0x292, 0], [0x2A6, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x292, 0x2A6)}
   FWD_BLACKLISTED_ADDRS = {2: [0x292, 0x2A6]}
@@ -22,12 +23,6 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
   LKAS_ACTIVE_VALUE = 1
 
   DAS_BUS = 0
-
-  def setUp(self):
-    self.packer = CANPackerSafety("chrysler_pacifica_2017_hybrid_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, 0)
-    self.safety.init_tests()
 
   def _button_msg(self, cancel=False, resume=False):
     values = {"ACC_Cancel": cancel, "ACC_Resume": resume}
@@ -73,6 +68,10 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
 
 
 class TestChryslerRamDTSafety(TestChryslerSafety):
+  DBC = "chrysler_ram_dt_generated"
+
+  SAFETY_PARAM = ChryslerSafetyFlags.RAM_DT
+
   TX_MSGS = [[0xB1, 2], [0xA6, 0], [0xFA, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0xA6, 0xFA)}
   FWD_BLACKLISTED_ADDRS = {2: [0xA6, 0xFA]}
@@ -85,18 +84,16 @@ class TestChryslerRamDTSafety(TestChryslerSafety):
 
   LKAS_ACTIVE_VALUE = 2
 
-  def setUp(self):
-    self.packer = CANPackerSafety("chrysler_ram_dt_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.RAM_DT)
-    self.safety.init_tests()
-
   def _speed_msg(self, speed):
     values = {"Vehicle_Speed": speed}
     return self.packer.make_can_msg_safety("ESP_8", 0, values)
 
 
 class TestChryslerRamHDSafety(TestChryslerSafety):
+  DBC = "chrysler_ram_hd_generated"
+
+  SAFETY_PARAM = ChryslerSafetyFlags.RAM_HD
+
   TX_MSGS = [[0x275, 0], [0x276, 0], [0x23A, 2]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x276, 0x275)}
   FWD_BLACKLISTED_ADDRS = {2: [0x275, 0x276]}
@@ -109,12 +106,6 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
   DAS_BUS = 2
 
   LKAS_ACTIVE_VALUE = 2
-
-  def setUp(self):
-    self.packer = CANPackerSafety("chrysler_ram_hd_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.RAM_HD)
-    self.safety.init_tests()
 
   def _speed_msg(self, speed):
     values = {"Vehicle_Speed": speed}
