@@ -23,6 +23,8 @@ class _Hud:
   leftLaneDepart = False
   rightLaneDepart = False
   visualAlert = VisualAlert.none
+  setSpeed = 0.0
+  leadDistanceBars = 0
 
 
 class _Actuators:
@@ -183,6 +185,9 @@ def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_
     camera_lkas_state=camera_lkas_state,
     pcm_buttons_stock=buttons if buttons is not None else {},
     pcm_buttons_ts=buttons_ts,
+    pcm_buttons_new=[],
+    camera_acc_state=0,
+    acc_hud_stock={},
     acc_cmd_stock=acc_cmd if acc_cmd is not None else {},
     out=SimpleNamespace(vEgoRaw=v_ego, steeringAngleDeg=angle, steeringPressed=steering_pressed, stockAeb=stock_aeb,
                         standstill=standstill),
@@ -753,6 +758,14 @@ class TestBydAccCmd(unittest.TestCase):
     self.assertEqual(dat[6], 0xF9)
     self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
 
+  def test_passthrough_roundtrip_covers_spare_bits(self):
+    for raw6 in (bytes.fromhex("286666834c18"), bytes.fromhex("ffffffffffff"), bytes.fromhex("010204081020")):
+      frame = raw6 + bytes([0xF3])
+      frame += bytes([(~sum(frame)) & 0xFF])
+      stock = _decode("ACC_CMD", (0x32E, frame, 0))
+      _, dat, _ = bydcan.create_acc_cmd_passthrough(self.packer, stock, 9)
+      self.assertEqual(bytes(dat[:6]), raw6)
+
 
 class TestBydLongControl(unittest.TestCase):
   def _slots(self, ctrl, n, **kw):
@@ -805,6 +818,186 @@ class TestBydLongControl(unittest.TestCase):
     self.assertAlmostEqual(msg["ACCEL_CMD"], -3.0, places=6)
     self.assertEqual(msg["ACC_ON_1"], 1)
     self.assertEqual(msg["COUNTER"], 0)
+
+  def test_buttons_relay_strips_acc_and_keeps_counter(self):
+    ctrl = _ctrl(long_control=True)
+    stock = {
+      "SET_BTN": 1, "RES_BTN": 1, "DEC_DISTANCE_BTN": 1, "INC_DISTANCE_BTN": 1,
+      "ACC_ON_BTN": 1, "LKAS_ON_BTN": 1, "COUNTER": 7, "SET_ME_1_1": 1, "SET_ME_1_2": 1,
+    }
+    CS = _cs()
+    CS.pcm_buttons_new = [stock]
+    _act, sends = ctrl.update(_cc(lat_active=False), CS, 0)
+    relay = [m for m in sends if m[0] == 0x3B0 and m[2] == 2]
+    self.assertEqual(len(relay), 1)
+    dec = _decode("PCM_BUTTONS", relay[0])
+    self.assertEqual(dec["SET_BTN"], 0)
+    self.assertEqual(dec["RES_BTN"], 0)
+    self.assertEqual(dec["DEC_DISTANCE_BTN"], 0)
+    self.assertEqual(dec["INC_DISTANCE_BTN"], 0)
+    self.assertEqual(dec["ACC_ON_BTN"], 1)
+    self.assertEqual(dec["LKAS_ON_BTN"], 0)
+    self.assertEqual(dec["COUNTER"], 7)
+    self.assertEqual(dec["SET_ME_1_1"], 1)
+
+  def test_lks_pulse_rides_on_relay_frame(self):
+    # Long mode: the camera sync press goes out on the relayed stock 0x3B0 (same
+    # counter, one frame), never as a second frame with a duplicate counter.
+    ctrl = _ctrl(long_control=True)
+    stock = {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "SET_BTN": 0, "RES_BTN": 0, "LKAS_ON_BTN": 0,
+             "DEC_DISTANCE_BTN": 0, "INC_DISTANCE_BTN": 0, "ACC_ON_BTN": 0, "COUNTER": 3}
+    sent = []
+    ts = 0
+    for i in range(CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD * 3):
+      fresh = i % CCP.LKS_PULSE_PERIOD == 2
+      if fresh:
+        stock = {**stock, "COUNTER": (stock["COUNTER"] + 1) % 16}
+        ts += 1
+      CS = _cs(camera_lkas_state=2, buttons=stock, buttons_ts=ts)
+      CS.pcm_buttons_new = [stock] if fresh else []
+      _act, sends = ctrl.update(_cc(enabled=True, lat_active=False), CS, 0)
+      bus2 = _bus2_lks(sends)
+      self.assertLessEqual(len(bus2), 1)
+      self.assertEqual(len(bus2), 1 if fresh else 0)
+      for m in bus2:
+        sent.append((stock["COUNTER"], _decode("PCM_BUTTONS", m)))
+    pulses = [(c, v) for c, v in sent if v["LKAS_ON_BTN"] == 1]
+    self.assertEqual(len(pulses), CCP.LKS_PULSE_TICKS)
+    counter, values = pulses[0]
+    self.assertEqual(values["COUNTER"], counter)
+    self.assertEqual(values["ACC_ON_BTN"], 0)
+    self.assertEqual(values["SET_BTN"], 0)
+
+  def test_relay_strips_driver_lks_press(self):
+    ctrl = _ctrl(long_control=True)
+    stock = {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "LKAS_ON_BTN": 1, "ACC_ON_BTN": 0, "COUNTER": 9}
+    CS = _cs(lks_enabled=False, lks_btn_rising=True, camera_lkas_state=2, buttons=stock, buttons_ts=1)
+    CS.pcm_buttons_new = [stock]
+    _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), CS, 0)
+    relay = _bus2_lks(sends)
+    self.assertEqual(len(relay), 1)
+    self.assertEqual(_decode("PCM_BUTTONS", relay[0])["LKAS_ON_BTN"], 0)
+
+  def test_no_button_relay_without_long_control(self):
+    ctrl = _ctrl(long_control=False)
+    CS = _cs()
+    CS.pcm_buttons_new = [{"SET_BTN": 1, "COUNTER": 7, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "ACC_ON_BTN": 1}]
+    _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), CS, 0)
+    self.assertFalse(any(m[0] == 0x3B0 for m in sends))
+
+  def test_acc_hud_state_speed_and_stock_bytes(self):
+    ctrl = _ctrl(long_control=True)
+    raw = bytes([0x00, 108, 4, 1, 244, 255, 0xF0])
+    raw += bytes([(~sum(raw)) & 0xFF])
+    stock = _decode("ACC_HUD_ADAS", (0x32D, raw, 2))
+    CS = _cs()
+    CS.acc_hud_stock = stock
+    CS.camera_acc_state = 2
+    CC = _cc(lat_active=False, long_active=True)
+    CC.hudControl.setSpeed = 80 / 3.6
+    CC.hudControl.leadDistanceBars = 2
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    hud = [m for m in sends if m[0] == 0x32D]
+    self.assertEqual(len(hud), 1)
+    dat = bytes(hud[0][1])
+    self.assertEqual(dat[0], 160)
+    self.assertEqual(dat[2], 0x5C)
+    self.assertEqual(dat[3:6], bytes([1, 244, 255]))
+    self.assertEqual((dat[1] ^ 108) & ~0x1C, 0)
+    dec = _decode("ACC_HUD_ADAS", hud[0])
+    self.assertEqual(dec["ACC_STATE"], 3)
+    self.assertEqual(dec["SET_DISTANCE"], 2)
+    self.assertEqual(dec["COUNTER"], 0)
+    self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
+
+    CS.camera_acc_state = 0
+    CC.hudControl.leadDistanceBars = 0
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
+    self.assertEqual(dat[2], 0x04)
+    self.assertEqual(_decode("ACC_HUD_ADAS", (0x32D, dat, 0))["SET_DISTANCE"], 3)
+
+  def test_no_cancel_spoof_in_long_control(self):
+    ctrl = _ctrl(long_control=True)
+    CS = _cs(buttons={"SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 3})
+    bus0 = []
+    for _ in range(10):
+      _act, sends = ctrl.update(_cc(cancel=True, lat_active=False), CS, 0)
+      bus0.extend(m for m in sends if m[0] == 0x3B0 and m[2] == 0)
+    self.assertEqual(bus0, [])
+
+
+class TestBydLongCarState(unittest.TestCase):
+  def setUp(self):
+    self.CP = CarInterface.get_non_essential_params("BYD_ATTO_3")
+    self.packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+
+  def _cs(self, long_control):
+    from opendbc.car.byd.carstate import CarState
+    self.CP.openpilotLongitudinalControl = long_control
+    self.CP.pcmCruise = not long_control
+    cs = CarState(self.CP)
+    parsers = cs.get_can_parsers(self.CP)
+    for bus, name in (
+      (Bus.pt, "WHEELSPEED_CLEAN"), (Bus.pt, "STEER_MODULE_2"), (Bus.pt, "STEERING_TORQUE"),
+      (Bus.pt, "PEDAL"), (Bus.pt, "DRIVE_STATE"), (Bus.pt, "STALKS"), (Bus.pt, "BSD_RADAR"),
+      (Bus.pt, "METER_CLUSTER"), (Bus.cam, "PCW_ADAS"), (Bus.cam, "ACC_CMD"),
+      (Bus.cam, "ACC_HUD_ADAS"), (Bus.cam, "LKAS_HUD_ADAS"),
+    ):
+      parsers[bus].vl[name]
+    return cs, parsers
+
+  def _feed(self, parsers, bus, name, values):
+    addr, dat, _bus = self.packer.make_can_msg(name, 0 if bus == Bus.pt else 2, values)
+    parsers[bus].update([(0, [(addr, dat, 0 if bus == Bus.pt else 2)])])
+
+  def test_button_events_and_enable_edge(self):
+    from opendbc.car import structs
+    cs, parsers = self._cs(True)
+    self._feed(parsers, Bus.cam, "ACC_HUD_ADAS", {"ACC_STATE": 2, "ACC_ON2": 1})
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 1})
+    ret = cs.update(parsers)
+    self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents],
+                     [(structs.CarState.ButtonEvent.Type.decelCruise, True)])
+    self.assertFalse(cs.update_button_enable(ret.buttonEvents))
+
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 2})
+    ret = cs.update(parsers)
+    self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents],
+                     [(structs.CarState.ButtonEvent.Type.decelCruise, False)])
+    self.assertTrue(cs.update_button_enable(ret.buttonEvents))
+    self.assertFalse(ret.cruiseState.enabled)
+    self.assertTrue(ret.cruiseState.available)
+
+  def test_cruise_follows_acc_main_and_not_active_state(self):
+    cs, parsers = self._cs(True)
+    self._feed(parsers, Bus.cam, "ACC_HUD_ADAS", {"ACC_STATE": 3, "ACC_ON2": 1, "SET_SPEED": 80})
+    ret = cs.update(parsers)
+    self.assertFalse(ret.cruiseState.enabled)
+    self.assertTrue(ret.cruiseState.available)
+    self.assertEqual(ret.cruiseState.speed, 0)
+
+    self._feed(parsers, Bus.cam, "ACC_HUD_ADAS", {"ACC_STATE": 0, "SET_SPEED": 80})
+    ret = cs.update(parsers)
+    self.assertFalse(ret.cruiseState.available)
+
+  def test_res_with_set_bit_is_accel_cruise(self):
+    from opendbc.car import structs
+    T = structs.CarState.ButtonEvent.Type
+    cs, parsers = self._cs(True)
+    self._feed(parsers, Bus.cam, "ACC_HUD_ADAS", {"ACC_STATE": 2, "ACC_ON2": 1})
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_BTN": 1, "RES_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 1})
+    ret = cs.update(parsers)
+    self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents], [(T.accelCruise, True)])
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 2})
+    ret = cs.update(parsers)
+    self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents], [(T.accelCruise, False)])
+    self.assertTrue(cs.update_button_enable(ret.buttonEvents))
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 3})
+    ret = cs.update(parsers)
+    self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents], [(T.decelCruise, True)])
 
 
 if __name__ == "__main__":
