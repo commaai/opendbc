@@ -56,6 +56,46 @@ def create_acc_cmd_passthrough(packer, stock_values: dict, counter: int):
   return packer.make_can_msg("ACC_CMD", 0, values)
 
 
+def create_acc_hud(packer, stock_values: dict, counter: int, acc_state: int, set_speed_kph: float, gap_bars: int):
+  # Fleet: byte2 is 0x04 with ACC_STATE in bits 3-5 and ACC_ON1 in bit 6.
+  # ACC_ON2 is the middle state bit; writing both keeps the packer from clearing it.
+  # SET_DISTANCE 1 is closest, 4 is farthest. 0 keeps the camera's gap.
+  if gap_bars <= 0:
+    distance = stock_values.get("SET_DISTANCE", 3)
+  else:
+    distance = min(max(int(gap_bars), 1), 4)
+  values = {
+    "SET_ME_B2_LO": 4,
+    "SET_ME_B3": 1,
+    "SET_ME_B4": 0xF4,
+    "SET_ME_XFF": 0xFF,
+    "SET_ME_XF": 0xF,
+    **stock_values,
+    "COUNTER": counter,
+    "ACC_STATE": acc_state,
+    "ACC_ON1": 1 if acc_state in (2, 3, 5) else 0,
+    "ACC_ON2": (acc_state >> 1) & 1,
+    "SET_SPEED": max(0.0, min(float(set_speed_kph), 127.5)),
+    "SET_DISTANCE": distance,
+  }
+  return packer.make_can_msg("ACC_HUD_ADAS", 0, values)
+
+
+def create_buttons_relay(packer, stock_values: dict, lkas: bool = False):
+  # Stock 0x3B0 on bus 2 with SET/RES/distance cleared. COUNTER and ACC_ON stay
+  # as the driver pressed them, so the camera counter stays in sequence. LKAS_ON
+  # is ours: the camera drops a second frame with the same counter.
+  values = {
+    **stock_values,
+    "SET_BTN": 0,
+    "RES_BTN": 0,
+    "DEC_DISTANCE_BTN": 0,
+    "INC_DISTANCE_BTN": 0,
+    "LKAS_ON_BTN": 1 if lkas else 0,
+  }
+  return packer.make_can_msg("PCM_BUTTONS", 2, values)
+
+
 def create_buttons(packer, stock_values: dict, cancel=False, lkas=False, bus=0):
   # The car's latest 0x3B0 with one button added, COUNTER included: the camera
   # faults ACC on an out of sequence 0x3B0 counter. Cancel is bus 0 ACC_ON_BTN
