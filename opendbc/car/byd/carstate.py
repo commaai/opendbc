@@ -1,6 +1,22 @@
 import copy
 
 from opendbc.car import Bus, structs
+
+ButtonType = structs.CarState.ButtonEvent.Type
+
+# One event per edge. SET is decelCruise and RES is accelCruise so the
+# standard falling-edge enable applies when pcmCruise is off.
+_BUTTONS = (
+  ("RES_BTN", ButtonType.accelCruise),
+  ("SET_BTN", ButtonType.decelCruise),
+  ("ACC_ON_BTN", ButtonType.cancel),
+  ("DEC_DISTANCE_BTN", ButtonType.gapAdjustCruise),
+  ("INC_DISTANCE_BTN", ButtonType.gapAdjustCruise),
+)
+_BUTTON_FRAME = (
+  "SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN",
+  "ACC_ON_BTN", "SET_ME_1_1", "SET_ME_1_2", "COUNTER",
+)
 from opendbc.can.parser import CANParser
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.byd.values import DBC, CarControllerParams as CCP
@@ -43,7 +59,11 @@ class CarState(CarStateBase):
     self.lks_btn_last = False
     self.lks_btn_rising = False
     self.camera_lkas_state = 0
+    self.camera_acc_state = 0
     self.acc_cmd_stock = {}
+    self.acc_hud_stock = {}
+    self.pcm_buttons_new = []
+    self.button_prev = {name: False for name, _btype in _BUTTONS}
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -82,6 +102,8 @@ class CarState(CarStateBase):
       self.eps_target_angle = cp.vl["STEERING_TORQUE"]["TARGET_ANGLE"]
 
     acc_state = int(cp_cam.vl["ACC_HUD_ADAS"]["ACC_STATE"])
+    self.camera_acc_state = acc_state
+    self.acc_hud_stock = copy.copy(cp_cam.vl["ACC_HUD_ADAS"])
     self.camera_lkas_state = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"])
 
     # Driver LKS button is bus 0 only. Bus 2 spoofs must not flip this latch.
@@ -95,6 +117,21 @@ class CarState(CarStateBase):
     # Button spoofs are built on the car's latest 0x3B0 so the counter stays in sequence
     self.pcm_buttons_stock = copy.copy(cp.vl["PCM_BUTTONS"])
     self.pcm_buttons_ts = cp.ts_nanos["PCM_BUTTONS"]["COUNTER"]
+    rows = cp.vl_all["PCM_BUTTONS"]
+    n = len(rows["SET_BTN"])
+    self.pcm_buttons_new = [{sig: rows[sig][i] for sig in _BUTTON_FRAME} for i in range(n)]
+
+    button_events = []
+    for frame in self.pcm_buttons_new:
+      for name, btype in _BUTTONS:
+        pressed = bool(frame[name])
+        # A RES press sets SET_BTN as well. Report RES alone so it does not resolve to decelCruise.
+        if name == "SET_BTN":
+          pressed = pressed and not bool(frame["RES_BTN"])
+        if pressed != self.button_prev[name]:
+          button_events.append(structs.CarState.ButtonEvent(pressed=pressed, type=btype))
+          self.button_prev[name] = pressed
+    ret.buttonEvents = button_events
 
     # Camera LKAS_STATE 0/4 are moods, not the switch. Fault only if EPS stays idle.
     ret.steerFaultTemporary = self.steer_not_accepted
@@ -150,10 +187,16 @@ class CarState(CarStateBase):
     # ACC_STATE: 0=OFF, 2=ACC_ON (available), 3=ACC_ACTIVE (enabled), 5=FORCE_ACCEL, 7=ERROR
     # Follow stock ACC only when our LKS latch is on so ACC can run without engaging OP.
     # Reporting enabled=False while ACC is on must not trip controlsd's cancel spoof.
-    ret.cruiseState.speed = cp_cam.vl["ACC_HUD_ADAS"]["SET_SPEED"] * CV.KPH_TO_MS
-    ret.cruiseState.available = acc_state in (2, 3, 5)
-    ret.cruiseState.enabled = cruise_enabled(acc_state, self.lks_enabled)
     ret.cruiseState.standstill = bool(cp_cam.vl["ACC_CMD"]["STANDSTILL_STATE"])
+    ret.cruiseState.available = acc_state in (2, 3, 5)
+    if self.CP.openpilotLongitudinalControl:
+      # Camera ACC stays in standby because SET never reaches it. Available
+      # still follows ACC main, so the stalk ACC_ON press is the arming step.
+      ret.cruiseState.enabled = False
+      ret.cruiseState.speed = 0
+    else:
+      ret.cruiseState.speed = cp_cam.vl["ACC_HUD_ADAS"]["SET_SPEED"] * CV.KPH_TO_MS
+      ret.cruiseState.enabled = cruise_enabled(acc_state, self.lks_enabled)
 
     # forward stock LKAS HUD
     self.lkas_hud = copy.copy(cp_cam.vl["LKAS_HUD_ADAS"])

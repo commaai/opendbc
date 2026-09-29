@@ -4,6 +4,7 @@ from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, DT_CTRL
 from opendbc.car.lateral import apply_steer_angle_limits_vm
 from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.byd import bydcan
 from opendbc.car.byd.values import CarControllerParams
 from opendbc.car.vehicle_model import VehicleModel
@@ -48,6 +49,7 @@ class CarController(CarControllerBase):
     self.lks_give_up_want = None
     self.lks_recover_frames = 0
     self.pcm_buttons_ts_last = 0
+    self.lks_relay_tick = False
     self.hold_steer = 0
     self.eps_idle_frames = 0
     self.yield_hold = 0
@@ -175,11 +177,16 @@ class CarController(CarControllerBase):
         if want != self.lks_give_up_want and not self._pulse_blocked(CS, want):
           self._start_pulse(want)
 
-    # Send right after the car's 0x3B0 so ours carries the same counter while it is current
+    # Send right after the car's 0x3B0 so ours carries the same counter while it is current.
+    # Long mode relays every 0x3B0: put the press on the relayed frame instead of a
+    # duplicate-counter copy, which the camera drops.
     if self.lks_pulse > 0 and not self._pulse_blocked(CS, self.lks_want):
       self.lks_pulse_wait += 1
       if fresh_buttons or self.lks_pulse_wait > CarControllerParams.LKS_PULSE_PERIOD:
-        can_sends.append(bydcan.create_buttons(self.packer, CS.pcm_buttons_stock, lkas=True, bus=2))
+        if self.CP.openpilotLongitudinalControl and CS.pcm_buttons_new:
+          self.lks_relay_tick = True
+        else:
+          can_sends.append(bydcan.create_buttons(self.packer, CS.pcm_buttons_stock, lkas=True, bus=2))
         self.lks_pulse -= 1
         self.lks_pulse_wait = 0
         if self.lks_pulse == 0:
@@ -207,7 +214,11 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
+    self.lks_relay_tick = False
     self._update_lks_camera(CC, CS, can_sends)
+    if self.CP.openpilotLongitudinalControl:
+      for frame in CS.pcm_buttons_new:
+        can_sends.append(bydcan.create_buttons_relay(self.packer, frame, lkas=self.lks_relay_tick))
     send_op = CC.enabled or self.hold_steer > 0
 
     if self.frame % 2:
@@ -311,8 +322,13 @@ class CarController(CarControllerBase):
           else:
             self.accel = 0.0
           can_sends.append(bydcan.create_acc_cmd(self.packer, self.accel, CC.longActive, CS.out.standstill, cntr))
+        acc_state = 0 if CS.camera_acc_state == 0 else (3 if CC.longActive else 2)
+        can_sends.append(bydcan.create_acc_hud(
+          self.packer, CS.acc_hud_stock, cntr, acc_state,
+          hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadDistanceBars,
+        ))
 
-    if CC.cruiseControl.cancel and self.frame % 10 == 0:
+    if CC.cruiseControl.cancel and self.frame % 10 == 0 and not self.CP.openpilotLongitudinalControl:
       can_sends.append(bydcan.create_buttons(self.packer, CS.pcm_buttons_stock, cancel=True))
 
     if self.hold_steer > 0:
