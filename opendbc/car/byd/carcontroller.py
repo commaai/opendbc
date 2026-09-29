@@ -323,9 +323,13 @@ class CarController(CarControllerBase):
             self.accel = 0.0
           can_sends.append(bydcan.create_acc_cmd(self.packer, self.accel, CC.longActive, CS.out.standstill, cntr))
         acc_state = 0 if CS.camera_acc_state == 0 else (3 if CC.longActive else 2)
+        # vCruise is 255 until the first engage initializes it. Do not paint that.
+        set_kph = hud_control.setSpeed * CV.MS_TO_KPH
+        if set_kph > 150.0:
+          set_kph = float(CS.acc_hud_stock.get("SET_SPEED", 0.0))
         can_sends.append(bydcan.create_acc_hud(
           self.packer, CS.acc_hud_stock, cntr, acc_state,
-          hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadDistanceBars,
+          set_kph, hud_control.leadDistanceBars,
         ))
 
     if CC.cruiseControl.cancel and self.frame % 10 == 0 and not self.CP.openpilotLongitudinalControl:
