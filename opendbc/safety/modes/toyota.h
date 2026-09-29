@@ -80,12 +80,17 @@ static bool toyota_tss3 = false;
 // Requests are checked when they are sent to the signer, and only approved requests can be published once signed.
 // The VMC in the brake ECU needs a continuous CONTROL_REQUEST: it sets CONTROL_RESULT.REQUEST_LOSS ~90 ms after the
 // last valid one and latches a cruise fault until restart if that persists for ~1 s.
+// PCS braking is requested in the FRC's CONTROL_REQUEST, so openpilot's is released for the FRC's to reach the VMC
+// untouched. Forwarding is decided before the RX hook sees a frame, so the first PCS request is still blocked (~25 ms
+// at 40 Hz), like Honda Nidec's stock AEB forwarding. Forwarding it too needs panda to pass the frame to the fwd hook
+// or run the RX hook first.
 #define TOYOTA_TSS3_08A_TIMEOUT_US 100000U
 #define TOYOTA_TSS3_08A_LEN 28U  // without the SecOC trailer
 #define TOYOTA_TSS3_FRAGMENT_LEN 7U
 #define TOYOTA_TSS3_APPROVED_LEN 8U
 #define TOYOTA_TSS3_STOCK_08A_HISTORY 2U
 static bool toyota_tss3_08a_active = false;
+static bool toyota_tss3_stock_pcs = false;
 static uint32_t toyota_tss3_08a_last_tx_ts = 0U;
 static uint8_t toyota_tss3_request_next_fragment = 0U;
 static uint32_t toyota_tss3_last_request_ts = 0U;
@@ -147,6 +152,12 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       }
 
       pcm_cruise_check(GET_BIT(msg, 27U));  // CONTROL_REQUEST.CRUISE_OPERATING_LATCH
+
+      const uint8_t long_request_id = msg->data[7] >> 2U;  // CONTROL_REQUEST.LONGITUDINAL_REQUEST_ID_LOWER
+      toyota_tss3_stock_pcs = (long_request_id == 33U) || (long_request_id == 34U);
+      if (toyota_tss3_stock_pcs) {
+        toyota_tss3_08a_active = false;
+      }
     }
 
     // STEER_ANGLE_SENSOR, in LATERAL_REQUEST_PINION_ANGLE units
@@ -385,7 +396,7 @@ static bool toyota_tss3_tx_hook(const CANPacket_t *msg, const LongitudinalLimits
       // with stock longitudinal, openpilot needs a recent FRC request to copy
       bool stock_08a_recent = (toyota_tss3_stock_08a_cnt > 0U) &&
                               (safety_get_ts_elapsed(now, toyota_tss3_stock_08a_last_ts) <= TOYOTA_TSS3_08A_TIMEOUT_US);
-      tx = !toyota_stock_longitudinal || stock_08a_recent;
+      tx = !toyota_tss3_stock_pcs && (!toyota_stock_longitudinal || stock_08a_recent);
       if (tx) {
         toyota_tss3_08a_active = true;
         toyota_tss3_08a_last_tx_ts = now;
@@ -661,6 +672,7 @@ static safety_config toyota_init(uint16_t param) {
   toyota_stock_longitudinal = GET_FLAG(param, TOYOTA_PARAM_STOCK_LONGITUDINAL);
   toyota_lta = GET_FLAG(param, TOYOTA_PARAM_LTA);
   toyota_tss3_08a_active = false;
+  toyota_tss3_stock_pcs = false;
   toyota_tss3_08a_last_tx_ts = 0U;
   toyota_tss3_request_next_fragment = 0U;
   toyota_tss3_last_request_ts = 0U;

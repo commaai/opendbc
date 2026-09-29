@@ -91,14 +91,16 @@ class CarController(CarControllerBase):
   def update_tss3(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
-    can_sends = self.signer.receive(CS, CC.enabled, now_nanos)
+    # panda forwards the FRC's CONTROL_REQUEST while it requests PCS braking
+    enabled = CC.enabled and not CS.tss3_stock_pcs
+    can_sends = self.signer.receive(CS, enabled, now_nanos)
 
     # *** steer angle ***
     measured_angle = CS.out.steeringAngleDeg + CS.out.steeringAngleOffsetDeg
     # the FRC cancels cruise if lateral stays active while the driver turns the wheel past what we can command
     lat_active = CC.latActive and abs(measured_angle) < self.params.ANGLE_LIMITS.STEER_ANGLE_MAX
     # only advance the rate limit when a new request will be signed, like panda
-    if not CC.enabled or self.signer.request_due(CS, CC.enabled, now_nanos):
+    if not CC.enabled or self.signer.request_due(CS, enabled, now_nanos):
       if self.signer.angle_reference_reset(now_nanos):
         self.last_angle = measured_angle
       self.last_angle = apply_steer_angle_limits_vm(actuators.steeringAngleDeg + CS.out.steeringAngleOffsetDeg, self.last_angle,
@@ -108,7 +110,7 @@ class CarController(CarControllerBase):
     long_active = self.CP.openpilotLongitudinalControl and CC.longActive
     self.accel = float(np.clip(actuators.accel, self.params.ACCEL_MIN, self.params.ACCEL_MAX)) if long_active else 0.0
 
-    can_sends.extend(self.signer.send(CS, CC.enabled, lat_active, self.last_angle, long_active, self.accel, now_nanos))
+    can_sends.extend(self.signer.send(CS, enabled, lat_active, self.last_angle, long_active, self.accel, now_nanos))
 
     if CC.cruiseControl.cancel:
       can_sends.append(toyotacan.create_tss3_brake_cancel_command(self.packer, CS.tss3_brake_module, TSS3_SOURCE_BUS))

@@ -20,12 +20,13 @@ CAMRY_COMMON = {
   0x3F6: bytes.fromhex("81ea6e0480ba4808"),
   0x412: bytes.fromhex("140c404401ee9307"),
   0x51E: bytes.fromhex("80006e0000000000"),
+  0x5AE: bytes.fromhex("240000370b080800000000001003800c19df8a40001000000000000000000000"),
   0x610: bytes.fromhex("00001d4ed0fffc00"),
   0x614: bytes.fromhex("00004a3000003303"),
   0x620: bytes.fromhex("000000008000001a"),
   0x622: bytes.fromhex("0000000000730000"),
 }
-FRC_IDS = {0x08A, 0x251, 0x3F6, 0x412}  # from the FRC on bus 2
+FRC_IDS = {0x08A, 0x251, 0x3F6, 0x412, 0x5AE}  # from the FRC on bus 2
 ANGLE_MAX = CarControllerParams.TSS3_ANGLE_LIMITS.STEER_ANGLE_MAX
 
 
@@ -109,6 +110,44 @@ class TestToyotaCamryTSS3(unittest.TestCase):
     state = update_state(self.ci, iterations=100, x081=loss)
     self.assertTrue(state.canValid and state.accFaulted)
     self.assertTrue(update_state(self.ci).accFaulted)
+
+  def test_stock_pcs(self):
+    # FRC CONTROL_REQUESTs from a PCS event: stock ACC braking at -4 m/s^2, both PCS braking request IDs, then stock ACC again
+    for request, aeb in (("0000000880002d47f0605ef0607fff007fff000c4000100000000a00fc472d50", False),
+                         ("0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d", True),
+                         ("00000008c0002d87f0605ef0607fff007fff000d400030000000130006f38fbe", True),
+                         ("0000000880002d47f1285ef1287fff007fff00174000300000001f00117281d9", False)):
+      with self.subTest(request=request):
+        state = update_state(self.ci, speed_ms=10.0, x08A=bytes.fromhex(request))
+        self.assertTrue(state.canValid)
+        self.assertEqual((state.stockAeb, state.stockFcw), (aeb, False))
+
+    warning = bytes.fromhex("240004368d080000000000001003000c11ff8a40000f80000000000000000000")
+    state = update_state(self.ci, x5AE=warning)
+    self.assertTrue(state.canValid and state.stockFcw)
+    self.assertFalse(state.stockAeb)
+    self.assertFalse(update_state(self.ci).stockFcw)
+
+  def test_stock_pcs_releases_control_request(self):
+    pcs = bytes.fromhex("0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d")
+    release = (0x777, bytes((7, 0xC9, 0xA8, 0, 0, 0, 0, 0)), 1)
+    for alpha_long in (False, True):
+      with self.subTest(alpha_long=alpha_long):
+        self.ci = CarInterface(CarInterface.get_params(CAR.TOYOTA_CAMRY_TSS3, fingerprint(), [], alpha_long, False, False))
+        update_state(self.ci, speed_ms=10.0)
+        self.assertTrue(any(address == 0x777 and bus == 0 for address, _, bus in self.apply(control())[1]))
+
+        # the FRC's request goes to the VMC, openpilot stops signing and publishing its own
+        self.ci.CC.signer.active = True
+        update_state(self.ci, speed_ms=10.0, x08A=pcs)
+        _, sends = self.apply(control())
+        self.assertTrue(release in sends)
+        for _ in range(10):
+          self.assertFalse(any(address in (0x777, 0x08A) and bus == 0 for address, _, bus in sends))
+          _, sends = self.apply(control())
+
+        update_state(self.ci, speed_ms=10.0)
+        self.assertTrue(any(address == 0x777 and bus == 0 for address, _, bus in self.apply(control())[1]))
 
   def test_eps_status(self):
     override = bytes.fromhex("12000003330930b9130330053c800e99030b0000053c07b50000000042c3b381")

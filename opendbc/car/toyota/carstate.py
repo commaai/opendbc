@@ -5,7 +5,7 @@ from opendbc.car import Bus, DT_CTRL, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.toyota.tss3 import TSS3_CHASSIS_BUS, TSS3_SOURCE_BUS
+from opendbc.car.toyota.tss3 import PCS_REQUEST_IDS, TSS3_CHASSIS_BUS, TSS3_SOURCE_BUS
 from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, EPS_SCALE, TSS3_STEER_DRIVER_TORQUE_THRESHOLD
 
 ButtonType = structs.CarState.ButtonEvent.Type
@@ -56,6 +56,7 @@ class CarState(CarStateBase):
     self.tss3_brake_module = None
     self.tss3_lkas_hud = {}
     self.tss3_stock_control_request = None
+    self.tss3_stock_pcs = False
     self.tss3_signer_responses = []
     self.tss3_signer_request_rejected = False
     self.tss3_control_request_rejected = False
@@ -163,6 +164,12 @@ class CarState(CarStateBase):
     if ret.cruiseState.speed != 0 and cluster_set_speed > 0:
       is_metric = cp.vl["BODY_CONTROL_STATE_2"]["UNITS"] in (1, 2)
       ret.cruiseState.speedCluster = cluster_set_speed * (CV.KPH_TO_MS if is_metric else CV.MPH_TO_MS)
+
+    # PCS braking is requested in the FRC's CONTROL_REQUEST, panda forwards it to the VMC untouched. its warning is on PCS_HUD
+    self.tss3_stock_pcs = request["LONGITUDINAL_REQUEST_ID_LOWER"] in PCS_REQUEST_IDS
+    ret.stockAeb = (self.tss3_stock_pcs and request["LONGITUDINAL_ALLOCATION_METHOD_LOWER"] == 3 and
+                    request["LONGITUDINAL_REQUEST_ACCEL_LOWER"] < 0)
+    ret.stockFcw = bool(cp_cam.vl["PCS_HUD"]["FCW"])
 
     return ret
 
@@ -342,6 +349,7 @@ class CarState(CarStateBase):
       ("CONTROL_REQUEST", 40),
       ("CRUISE_DISPLAY", 1),
       ("LKAS_HUD", 1),
+      ("PCS_HUD", 5),
     ]
     if CP.flags & ToyotaFlags.HAS_BSM:
       cam_messages.append(("BSM", 1))
