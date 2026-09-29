@@ -136,10 +136,16 @@ BO_ 803 CHARGE_STATUS: 8 VCU
 
 BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
  SG_ SET_SPEED : 0|8@1+ (0.5,0) [0|127.5] "kph" MCU
+ SG_ SET_ME_B1_LO : 8|2@1+ (1,0) [0|3] "" MCU
  SG_ SET_DISTANCE : 12|3@0+ (1,0) [0|7] "" MCU
+ SG_ SET_ME_B1_HI : 13|3@1+ (1,0) [0|7] "" MCU
+ SG_ SET_ME_B2_LO : 16|3@1+ (1,0) [0|7] "" MCU
  SG_ ACC_STATE : 19|3@1+ (1,0) [0|7] "" MCU
  SG_ ACC_ON2 : 20|1@0+ (1,0) [0|1] "" MCU
  SG_ ACC_ON1 : 22|1@0+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_B2_HI : 23|1@1+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_B3 : 24|8@1+ (1,0) [0|255] "" MCU
+ SG_ SET_ME_B4 : 32|8@1+ (1,0) [0|255] "" MCU
  SG_ SET_ME_XFF : 47|8@0+ (1,0) [0|255] "" MCU
  SG_ COUNTER : 48|4@1+ (1,0) [0|15] "" MCU
  SG_ SET_ME_XF : 55|4@0+ (1,0) [0|15] "" MCU
@@ -147,20 +153,25 @@ BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
 
 BO_ 814 ACC_CMD: 8 ADAS_ECU
  SG_ ACCEL_CMD : 0|8@1+ (0.05,-5) [-5|7.75] "m/s2" MCU
+ SG_ SPARE_8 : 8|1@1+ (1,0) [0|1] "" MCU
  SG_ ACC_ON_1 : 9|1@0+ (1,0) [0|1] "" MCU
  SG_ SET_ME_25_1 : 10|6@1+ (1,0) [0|63] "" MCU
+ SG_ SPARE_16 : 16|1@1+ (1,0) [0|1] "" MCU
  SG_ ACC_ON_2 : 17|1@0+ (1,0) [0|1] "" MCU
  SG_ SET_ME_25_2 : 18|6@1+ (1,0) [0|63] "" MCU
  SG_ DECEL_FACTOR : 24|4@1+ (1,0) [0|15] "" MCU
  SG_ SET_ME_X8 : 31|4@0+ (1,0) [0|15] "" MCU
  SG_ ACCEL_FACTOR : 32|4@1+ (1,0) [0|15] "" MCU
  SG_ CMD_REQ_ACTIVE_LOW : 36|1@0+ (1,0) [0|1] "" MCU
+ SG_ SPARE_37 : 37|1@1+ (1,0) [0|1] "" MCU
  SG_ SET_ME_1 : 38|1@0+ (1,0) [0|1] "" MCU
  SG_ STANDSTILL_RESUME : 39|1@0+ (1,0) [0|1] "" MCU
  SG_ STANDSTILL_STATE : 40|1@0+ (1,0) [0|1] "" MCU
+ SG_ SPARE_41 : 41|2@1+ (1,0) [0|3] "" MCU
  SG_ ACC_REQ_NOT_STANDSTILL : 43|1@0+ (1,0) [0|1] "" MCU
  SG_ ACC_CONTROLLABLE_AND_ON : 44|1@0+ (1,0) [0|1] "" MCU
  SG_ ACC_OVERRIDE_OR_STANDSTILL : 45|1@0+ (1,0) [0|1] "" MCU
+ SG_ SPARE_46 : 46|2@1+ (1,0) [0|3] "" MCU
  SG_ COUNTER : 48|4@1+ (1,0) [0|15] "" MCU
  SG_ SET_ME_XF : 55|4@0+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
