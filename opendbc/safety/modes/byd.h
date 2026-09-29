@@ -14,6 +14,7 @@ static int byd_driver_torque_frames = 0;
 static bool byd_lks_on = false;
 static bool byd_lks_btn_last = false;
 static bool byd_acc_on = false;
+static bool byd_acc_main = false;
 static bool byd_longitudinal = false;
 static bool byd_set_res_last = false;
 static uint8_t byd_stock_btns = 0;
@@ -152,14 +153,15 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       }
       byd_lks_btn_last = btn;
 
-      // Long mode: falling edge of SET or RES engages. ACC_ON cancels.
+      // Long mode: falling edge of SET or RES engages only while the LKS latch
+      // is on and the camera still reports ACC main (state 2/3/5). ACC_ON cancels.
       // Brake and gas are handled by the common checks.
       if (byd_longitudinal) {
         const bool set_res = (byd_stock_btns & 0x03U) != 0U;
-        if (!set_res && byd_set_res_last) {
+        if (!set_res && byd_set_res_last && byd_lks_on && byd_acc_main) {
           controls_allowed = true;
         }
-        if ((byd_stock_btns & 0x10U) != 0U) {
+        if (!byd_lks_on || ((byd_stock_btns & 0x10U) != 0U)) {
           controls_allowed = false;
         }
         byd_set_res_last = set_res;
@@ -173,7 +175,12 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       // ACC_STATE: 0=OFF, 2=ACC_ON, 3=ACC_ACTIVE, 5=FORCE_ACCEL, 7=ERROR
       uint8_t acc_state = (msg->data[2] >> 3) & 0x7U;
       byd_acc_on = (acc_state == 3U) || (acc_state == 5U);
-      if (!byd_longitudinal) {
+      byd_acc_main = (acc_state == 2U) || byd_acc_on;
+      if (byd_longitudinal) {
+        if (!byd_acc_main) {
+          controls_allowed = false;
+        }
+      } else {
         pcm_cruise_check(byd_acc_on && byd_lks_on);
       }
     }
@@ -276,6 +283,7 @@ static safety_config byd_init(uint16_t param) {
   byd_lks_on = GET_FLAG(param, BYD_PARAM_LKS_ON);
   byd_lks_btn_last = false;
   byd_acc_on = false;
+  byd_acc_main = false;
   byd_set_res_last = false;
   byd_stock_btns = 0;
   byd_stock_btns_prev = 0;
