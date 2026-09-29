@@ -919,6 +919,22 @@ class TestBydLongControl(unittest.TestCase):
     self.assertEqual(dat[2], 0x04)
     self.assertEqual(_decode("ACC_HUD_ADAS", (0x32D, dat, 0))["SET_DISTANCE"], 3)
 
+  def test_unset_cruise_keeps_stock_set_speed(self):
+    ctrl = _ctrl(long_control=True)
+    raw = bytes([72, 108, 4, 1, 244, 255, 0xF0])
+    raw += bytes([(~sum(raw)) & 0xFF])
+    stock = _decode("ACC_HUD_ADAS", (0x32D, raw, 2))
+    CS = _cs()
+    CS.acc_hud_stock = stock
+    CS.camera_acc_state = 2
+    CC = _cc(lat_active=False, long_active=False)
+    CC.hudControl.setSpeed = 255 / 3.6
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
+    self.assertEqual(dat[0], 72)
+    self.assertEqual(dat[2], 0x54)
+
   def test_no_cancel_spoof_in_long_control(self):
     ctrl = _ctrl(long_control=True)
     CS = _cs(buttons={"SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 3})
@@ -970,6 +986,35 @@ class TestBydLongCarState(unittest.TestCase):
     self.assertTrue(cs.update_button_enable(ret.buttonEvents))
     self.assertFalse(ret.cruiseState.enabled)
     self.assertTrue(ret.cruiseState.available)
+
+  def test_lks_off_cancels_and_blocks_enable(self):
+    from opendbc.car import structs
+    cs, parsers = self._cs(True)
+    self._feed(parsers, Bus.cam, "ACC_HUD_ADAS", {"ACC_STATE": 2, "ACC_ON2": 1, "COUNTER": 1})
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"LKAS_ON_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 1})
+    ret = cs.update(parsers)
+    self.assertFalse(cs.lks_enabled)
+    self.assertIn((structs.CarState.ButtonEvent.Type.cancel, False),
+                  [(e.type, e.pressed) for e in ret.buttonEvents])
+    self.assertFalse(cs.update_button_enable(ret.buttonEvents))
+
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_BTN": 1, "LKAS_ON_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 2})
+    ret = cs.update(parsers)
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"LKAS_ON_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 3})
+    ret = cs.update(parsers)
+    self.assertFalse(cs.update_button_enable(ret.buttonEvents))
+
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 4})
+    cs.update(parsers)
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"LKAS_ON_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 5})
+    ret = cs.update(parsers)
+    self.assertTrue(cs.lks_enabled)
+    self.assertNotIn(structs.CarState.ButtonEvent.Type.cancel, [e.type for e in ret.buttonEvents])
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_BTN": 1, "LKAS_ON_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 6})
+    cs.update(parsers)
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"LKAS_ON_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 7})
+    ret = cs.update(parsers)
+    self.assertTrue(cs.update_button_enable(ret.buttonEvents))
 
   def test_cruise_follows_acc_main_and_not_active_state(self):
     cs, parsers = self._cs(True)
