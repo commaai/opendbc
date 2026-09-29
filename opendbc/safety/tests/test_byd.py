@@ -13,6 +13,8 @@ from opendbc.safety.tests.common import away_round
 
 STEERING_MODULE_ADAS = 0x1E2
 LKAS_HUD_ADAS = 0x316
+ACC_HUD_ADAS = 0x32D
+ACC_CMD = 0x32E
 PCM_BUTTONS = 0x3B0
 
 
@@ -100,10 +102,35 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, values)
           should_tx = not (set_res or lkas_on or dec or inc) and (not cancel or cruise_engaged)
           self.assertEqual(should_tx, self._tx(msg))
-          # bus 2: only the camera LKS spoof
+          # bus 2: with no stock frame latched, only LKAS_ON_BTN
           msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, values)
           should_tx = not (set_res or dec or inc or cancel)
           self.assertEqual(should_tx, self._tx(msg))
+
+  def _button_values(self, **buttons):
+    values = {"SET_ME_1_1": 1, "SET_ME_1_2": 1}
+    values.update(buttons)
+    return values
+
+  def test_bus2_buttons_follow_stock(self):
+    # Bus 2 may repeat SET/RES/DEC/INC/ACC_ON from the last two stock frames, plus LKAS_ON_BTN.
+    stock = self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values(SET_BTN=1))
+    self.assertTrue(self._rx(stock))
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(SET_BTN=1))))
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(SET_BTN=1, LKAS_ON_BTN=1))))
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(SET_BTN=1, RES_BTN=1))))
+
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values())))
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(SET_BTN=1))))
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values())))
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(SET_BTN=1))))
+
+  def test_long_msgs_blocked_without_long(self):
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("ACC_CMD", self.MAIN_BUS, {"ACCEL_CMD": 0.0})))
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("ACC_HUD_ADAS", self.MAIN_BUS, {"ACC_STATE": 2})))
+    self.assertEqual(0, self.safety.safety_fwd_hook(self.CAM_BUS, ACC_CMD))
+    self.assertEqual(0, self.safety.safety_fwd_hook(self.CAM_BUS, ACC_HUD_ADAS))
+    self.assertEqual(2, self.safety.safety_fwd_hook(self.MAIN_BUS, PCM_BUTTONS))
 
   def test_rx_checksums(self):
     for name, bus, signal, initial, corrupt in (
@@ -381,6 +408,131 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
         # Recover
         self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+
+class TestBydLongitudinalSafety(TestBydSafety, common.LongitudinalAccelSafetyTest):
+  SAFETY_PARAM = int(BydSafetyFlags.LKS_ON | BydSafetyFlags.LONG_CONTROL)
+  TX_MSGS = [[STEERING_MODULE_ADAS, 0], [LKAS_HUD_ADAS, 0], [ACC_HUD_ADAS, 0], [ACC_CMD, 0], [PCM_BUTTONS, 0], [PCM_BUTTONS, 2]]
+  FWD_BLACKLISTED_ADDRS = {0: [PCM_BUTTONS], 2: [ACC_HUD_ADAS, ACC_CMD]}
+  RELAY_MALFUNCTION_ADDRS = {0: (STEERING_MODULE_ADAS, LKAS_HUD_ADAS, ACC_HUD_ADAS, ACC_CMD)}
+  MAX_ACCEL = 2.0
+  MIN_ACCEL = -3.5
+  INACTIVE_ACCEL = 0.0
+
+  def _accel_msg(self, accel: float):
+    values = {"ACCEL_CMD": accel, "ACC_ON_1": 1, "ACC_ON_2": 1, "SET_ME_XF": 0xF}
+    return self.packer.make_can_msg_safety("ACC_CMD", self.MAIN_BUS, values)
+
+  def _acc_cmd(self, accel, decel_factor=1, bus=None):
+    values = {"ACCEL_CMD": accel, "DECEL_FACTOR": decel_factor, "SET_ME_XF": 0xF}
+    return self.packer.make_can_msg_safety("ACC_CMD", self.CAM_BUS if bus is None else bus, values)
+
+  def test_enable_control_allowed_from_cruise(self):
+    pass
+
+  def test_disable_control_allowed_from_cruise(self):
+    pass
+
+  def test_cruise_engaged_prev(self):
+    pass
+
+  def test_lks_switch_gates_controls(self):
+    pass
+
+  def test_camera_lkas_states_keep_controls(self):
+    pass
+
+  def test_lks_button_on_camera_bus_does_not_toggle(self):
+    pass
+
+  def test_long_msgs_blocked_without_long(self):
+    pass
+
+  def test_bus2_buttons_follow_stock(self):
+    pass
+
+  def test_cruise_buttons(self):
+    # Stock cruise state does not engage, so bus 0 cancel stays blocked.
+    buttons = ("SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN", "ACC_ON_BTN")
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    for pressed in itertools.product((False, True), repeat=len(buttons)):
+      values = self._button_values(**dict(zip(buttons, pressed, strict=True)))
+      set_res, lkas_on, dec, inc, cancel = pressed[0] or pressed[1], pressed[2], pressed[3], pressed[4], pressed[5]
+      with self.subTest(buttons=pressed):
+        msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, values)
+        should_tx = not (set_res or lkas_on or dec or inc or cancel)
+        self.assertEqual(should_tx, self._tx(msg))
+        msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, values)
+        should_tx = not (set_res or dec or inc or cancel)
+        self.assertEqual(should_tx, self._tx(msg))
+
+  def test_set_resume_engage(self):
+    for button in ("SET_BTN", "RES_BTN"):
+      self._reset_safety_hooks()
+      self.safety.init_tests()
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values(**{button: 1}))))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values())))
+      self.assertTrue(self.safety.get_controls_allowed())
+
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values(ACC_ON_BTN=1))))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    self._reset_safety_hooks()
+    self.safety.init_tests()
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_bus2_buttons_strip_acc(self):
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, self._button_values(SET_BTN=1, ACC_ON_BTN=1))))
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(SET_BTN=1))))
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(RES_BTN=1))))
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(DEC_DISTANCE_BTN=1))))
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(INC_DISTANCE_BTN=1))))
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(ACC_ON_BTN=1))))
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("PCM_BUTTONS", self.CAM_BUS, self._button_values(ACC_ON_BTN=1, LKAS_ON_BTN=1))))
+
+  def test_camera_acc_cmd_passthrough(self):
+    hard = -4.5
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self._rx(self._acc_cmd(hard, 1)))
+    self.assertTrue(self._tx(self._acc_cmd(hard, 1, bus=self.MAIN_BUS)))
+    self.assertFalse(self._tx(self._acc_cmd(hard, 2, bus=self.MAIN_BUS)))
+
+    self.assertTrue(self._rx(self._acc_cmd(hard, 2)))
+    self.assertTrue(self._rx(self._acc_cmd(hard, 3)))
+    self.assertTrue(self._tx(self._acc_cmd(hard, 1, bus=self.MAIN_BUS)))
+    self.assertTrue(self._rx(self._acc_cmd(hard, 4)))
+    self.assertFalse(self._tx(self._acc_cmd(hard, 1, bus=self.MAIN_BUS)))
+
+    bad = self._acc_cmd(hard, 5)
+    bad[0].data[7] ^= 0xFF
+    self.assertFalse(self._rx(bad))
+    self.assertFalse(self._tx(self._acc_cmd(hard, 5, bus=self.MAIN_BUS)))
+
+  def test_acc_cmd_checksum_and_counter(self):
+    for _ in range(16):
+      self.assertTrue(self._rx(self._acc_cmd(0.0)))
+    msg = self._acc_cmd(-1.0)
+    msg[0].data[0] ^= 0xFF
+    self.safety.set_controls_allowed(True)
+    self.assertFalse(self._rx(msg))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    self._reset_safety_hooks()
+    self.safety.init_tests()
+    msg = None
+    for _ in range(32):
+      msg = self._acc_cmd(0.0)
+      self.assertTrue(self._rx(msg))
+    self.safety.set_controls_allowed(True)
+    for i in range(common.MAX_WRONG_COUNTERS + 1):
+      should_rx = i < common.MAX_WRONG_COUNTERS - 1
+      self.assertEqual(should_rx, self._rx(msg))
+
+  def test_acc_hud_tx(self):
+    self.assertTrue(self._tx(self.packer.make_can_msg_safety("ACC_HUD_ADAS", self.MAIN_BUS, {"ACC_STATE": 3, "SET_SPEED": 80})))
 
 
 class TestBydIgnition(common.SafetyTestBase):
