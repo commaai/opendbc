@@ -18,21 +18,33 @@ class TestToyotaTSS3Radar(unittest.TestCase):
     self.packer = CANPacker('toyota_tss3_radar_generated')
     self.t = 1_000_000_000
 
+  def geometry_msg(self, bank, objects=None):
+    geo = {}
+    for slot in range(8):
+      obj = EMPTY | (objects or {}).get(bank * 8 + slot, {})
+      geo |= {f'DIST_{slot}': obj['dist'], f'LAT_{slot}': obj['lat']}
+    return self.packer.make_can_msg(f'OBJECT_GEOMETRY_{bank}', RADAR_BUS, geo)
+
+  def motion_msg(self, bank, objects=None):
+    motion = {}
+    for slot in range(8):
+      obj = EMPTY | (objects or {}).get(bank * 8 + slot, {})
+      motion |= {f'VREL_{slot}': obj['vrel'], f'TRACK_STATE_{slot}': obj['state'],
+                 f'NEW_TRACK_{slot}': obj['new'], f'TRACK_ENDED_{slot}': obj['ended']}
+    return self.packer.make_can_msg(f'OBJECT_MOTION_{bank}', RADAR_BUS, motion)
+
+  def send(self, msgs):
+    rr = self.ri.update([(self.t, list(msgs))])
+    self.t += 50_000_000
+    return rr
+
   def update(self, objects=None, geometry=True):
     msgs = []
     for bank in range(3):
-      geo, motion = {}, {}
-      for slot in range(8):
-        obj = EMPTY | (objects or {}).get(bank * 8 + slot, {})
-        geo |= {f'DIST_{slot}': obj['dist'], f'LAT_{slot}': obj['lat']}
-        motion |= {f'VREL_{slot}': obj['vrel'], f'TRACK_STATE_{slot}': obj['state'],
-                   f'NEW_TRACK_{slot}': obj['new'], f'TRACK_ENDED_{slot}': obj['ended']}
       if geometry:
-        msgs.append(self.packer.make_can_msg(f'OBJECT_GEOMETRY_{bank}', RADAR_BUS, geo))
-      msgs.append(self.packer.make_can_msg(f'OBJECT_MOTION_{bank}', RADAR_BUS, motion))
-    rr = self.ri.update([(self.t, msgs)])
-    self.t += 50_000_000
-    return rr
+        msgs.append(self.geometry_msg(bank, objects))
+      msgs.append(self.motion_msg(bank, objects))
+    return self.send(msgs)
 
   def track_ids(self, objects=None):
     return [pt.trackId for pt in self.update(objects).points]
@@ -75,6 +87,41 @@ class TestToyotaTSS3Radar(unittest.TestCase):
     self.assertTrue(rr.errors.canError)
     self.assertEqual(len(rr.points), 0)
     self.assertEqual(self.ri.pts, {})
+
+  def test_missed_geometry(self):
+    first = self.track_ids({0: TRACK | {'new': 1}})
+    rr = self.send([self.geometry_msg(1), self.geometry_msg(2),
+                    self.motion_msg(0, {0: TRACK | {'vrel': -5}}), self.motion_msg(1), self.motion_msg(2)])
+    self.assertFalse(rr.errors.canError)
+    self.assertEqual([(p.trackId, p.dRel, p.vRel) for p in rr.points], [(first[0], 20, -1)])
+    rr = self.update({0: TRACK | {'dist': 25, 'vrel': -5}})
+    self.assertEqual([(p.trackId, p.dRel, p.vRel) for p in rr.points], [(first[0], 25, -5)])
+
+  def test_missed_motion_after_new_track(self):
+    first = self.track_ids({0: TRACK | {'new': 1}})
+    rr = self.send([self.geometry_msg(0, {0: TRACK | {'dist': 25}}), self.geometry_msg(1), self.geometry_msg(2),
+                    self.motion_msg(1), self.motion_msg(2)])
+    self.assertFalse(rr.errors.canError)
+    self.assertEqual([(p.trackId, p.dRel, p.vRel) for p in rr.points], [(first[0], 20, -1)])
+    rr = self.update({0: TRACK | {'dist': 25, 'vrel': -5}})
+    self.assertEqual([(p.trackId, p.dRel, p.vRel) for p in rr.points], [(first[0], 25, -5)])
+
+  def test_lifecycle_without_geometry_invalidates(self):
+    for event in ({'new': 1}, {'ended': 1}, {'state': 0}):
+      with self.subTest(event=event):
+        first = self.track_ids({0: TRACK})
+        rr = self.send([self.geometry_msg(1), self.geometry_msg(2),
+                        self.motion_msg(0, {0: TRACK | event}), self.motion_msg(1), self.motion_msg(2)])
+        self.assertEqual(len(rr.points), 0)
+        recovered = self.track_ids({0: TRACK})
+        self.assertEqual(len(recovered), 1)
+        self.assertNotEqual(recovered, first)
+
+  def test_split_updates(self):
+    first = self.track_ids({0: TRACK | {'new': 1}})
+    self.assertIsNone(self.send([self.geometry_msg(0, {0: TRACK | {'dist': 25}})]))
+    rr = self.send([self.motion_msg(0, {0: TRACK | {'vrel': -5}}), self.motion_msg(1), self.motion_msg(2)])
+    self.assertEqual([(p.trackId, p.dRel, p.vRel) for p in rr.points], [(first[0], 25, -5)])
 
 
 if __name__ == '__main__':
