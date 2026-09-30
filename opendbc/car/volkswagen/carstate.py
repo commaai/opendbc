@@ -17,6 +17,7 @@ class CarState(CarStateBase):
     self.CCP = CarControllerParams(CP)
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
+    self.acc_hold_confirmation = False
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
@@ -279,7 +280,11 @@ class CarState(CarStateBase):
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
 
     self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
-    self.esp_hold_confirmation = bool(pt_cp.vl["ESC_50"]["Standstill"])
+    self.esp_hold_confirmation = pt_cp.vl["ESC_50"]["Motion_State"] == 3  # stopped, not rolling back
+    self.acc_hold_confirmation = self.esp_hold_confirmation
+    if self.CP.flags & VolkswagenFlags.MEB_GEN2:
+      # the ESP can also hold on its own, TSK faults if we release the stop request before it holds for ACC
+      self.acc_hold_confirmation &= bool(pt_cp.vl["VMM_02"]["ESP_Hold"]) and pt_cp.vl["VMM_02"]["HMS_Status"] == 1
     self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
     ret.stockFcw = bool(ext_cp.vl["AWV_03"]["FCW_Active"])
     ret.stockAeb = bool(ext_cp.vl["AWV_03"]["AEB_Active"])

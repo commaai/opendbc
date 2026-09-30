@@ -139,14 +139,14 @@ class MebLongStateMachine:
     acc_status = self._get_acc_status(CS, CC)
     acc_hold_type = self._get_hold_type(CS, CC)
 
-    # transition to inactive accel and jerks as soon as we enter ESP standstill
+    # transition to inactive accel and jerks as soon as the ESP holds for us
     requesting_hold = acc_hold_type == self.acc_hold_type_vals['HALTEN']
-    held = requesting_hold and CS.esp_hold_confirmation
+    held = requesting_hold and CS.acc_hold_confirmation
     if not CC.enabled or held:
       accel = self.CCP.ACCEL_INACTIVE
 
-    # hold requested but the car hasn't reached standstill yet
-    braking_to_stop = requesting_hold and not CS.esp_hold_confirmation
+    # hold requested but the car isn't held yet
+    braking_to_stop = requesting_hold and not CS.acc_hold_confirmation
 
     # driving off from a hold
     leaving_standstill = acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
