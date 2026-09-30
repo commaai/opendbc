@@ -76,6 +76,25 @@ class TestSubaruAngleLimits(unittest.TestCase):
     actuators, _ = ci.CC.update(cc.as_reader(), ci.CS, 20_000_000)
     self.assertAlmostEqual(actuators.steeringAngleDeg, -0.3 / 0.31)
 
+  def test_wait_for_driver_release_before_steering(self):
+    ci = self.make_angle_controller(27.0)
+    cc = structs.CarControl(latActive=True)
+    cc.actuators.steeringAngleDeg = 18.0
+
+    def lkas_requests(pressed):
+      ci.CS.out.steeringPressed = pressed
+      reqs = []
+      for _ in range(10):
+        _, sends = ci.CC.update(cc.as_reader(), ci.CS, 0)
+        reqs += [(int.from_bytes(dat, 'little') >> 12) & 1 for addr, dat, _ in sends if addr == 0x124]
+      return set(reqs)
+
+    # enabling while the driver steers must not request
+    self.assertEqual(lkas_requests(True), {0})
+    self.assertEqual(lkas_requests(False), {1})
+    # once steering, driver input does not drop the request
+    self.assertEqual(lkas_requests(True), {1})
+
   def test_safety_model_is_conservative(self):
     for platform in CAR:
       if not platform.config.flags & SubaruFlags.LKAS_ANGLE:
