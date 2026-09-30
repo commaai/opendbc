@@ -12,7 +12,7 @@ from opendbc.car.byd.carstate import cruise_enabled
 from opendbc.car.byd.interface import CarInterface
 from opendbc.car.lateral import apply_steer_angle_limits_vm
 from opendbc.car import structs
-from opendbc.car.byd.values import DBC, CAR, CarControllerParams as CCP
+from opendbc.car.byd.values import DBC, CAR, BydSafetyFlags, CarControllerParams as CCP
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
@@ -662,6 +662,21 @@ class TestBydDbcObserve(unittest.TestCase):
     CP = CarInterface.get_params(CAR.BYD_ATTO_3, {0: {}, 1: {}, 2: {}}, [], False, False, False)
     self.assertFalse(CP.radarUnavailable)
     self.assertEqual(CCP.EPB_DEBOUNCE_FRAMES, 8)
+
+  def test_get_params_safety_param_alpha_long(self):
+    fp = {0: {}, 1: {}, 2: {}}
+    CP = CarInterface.get_params(CAR.BYD_ATTO_3, fp, [], False, False, False)
+    self.assertFalse(CP.openpilotLongitudinalControl)
+    self.assertTrue(CP.pcmCruise)
+    self.assertEqual(CP.safetyConfigs[0].safetyParam, int(BydSafetyFlags.LKS_ON))
+
+    CP_long = CarInterface.get_params(CAR.BYD_ATTO_3, fp, [], True, False, False)
+    self.assertTrue(CP_long.openpilotLongitudinalControl)
+    self.assertFalse(CP_long.pcmCruise)
+    self.assertEqual(
+      CP_long.safetyConfigs[0].safetyParam,
+      int(BydSafetyFlags.LKS_ON | BydSafetyFlags.LONG_CONTROL),
+    )
 
 
 class TestBydLowSpeedSmoothing(unittest.TestCase):
