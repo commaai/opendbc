@@ -31,6 +31,6 @@ class CarInterface(CarInterfaceBase):
     ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     if ret.openpilotLongitudinalControl:
-      ret.safetyConfigs[0].safetyParam |= BydSafetyFlags.LONG_CONTROL
+      ret.safetyConfigs[0].safetyParam |= BydSafetyFlags.LONG_CONTROL.value
 
     return ret
