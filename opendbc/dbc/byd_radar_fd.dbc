@@ -217,4 +217,4 @@ BO_ 649 RADAR_TRACK_09: 64 RADAR
  SG_ LAT_RELATED : 413|15@0- (0.01,0) [0|32767] "" XXX
 
 
-CM_ BO_ 640 "Veoneer private-bus track 0. LONG_DIST is ISO 8855 from rear axle; dRel = LONG_DIST - 3.60. CRC-8, not chassis checksum.";
+CM_ BO_ 640 "Veoneer private-bus track 0. LONG_DIST is ISO 8855 from rear axle; dRel = LONG_DIST - 3.60.";
