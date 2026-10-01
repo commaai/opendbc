@@ -296,6 +296,36 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     self.assertEqual(hud["LKS_MODE"], 2)
     self.assertEqual(hud["LEFT_LANE_STATE"], 1)
 
+  def _disengage_tail(self, ctrl):
+    cam = {"LKAS_STATE": 4, "LKS_MODE": 2, "LEFT_LANE_STATE": 1, "RIGHT_LANE_STATE": 1}
+    for _ in range(4):
+      ctrl.update(_cc(), _cs(camera_lkas_state=2), 0)
+    hud, steer = [], []
+    for _ in range(CCP.HUD_RELEASE_FRAMES + 4):
+      CS = _cs(camera_lkas_state=4)
+      CS.lkas_hud = cam
+      _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), CS, 0)
+      hud.append([_decode("LKAS_HUD_ADAS", m) for m in sends if m[0] == 0x316])
+      steer.append([_decode("STEERING_MODULE_ADAS", m) for m in sends if m[0] == 0x1E2])
+    return hud, steer
+
+  def test_long_control_hud_hold_after_disengage(self):
+    hud, steer = self._disengage_tail(_ctrl(long_control=True))
+    sent = [h for h in hud[:CCP.HUD_RELEASE_FRAMES] if h]
+    self.assertGreater(len(sent), CCP.HUD_RELEASE_FRAMES // 2 - 2)
+    for h in sent:
+      self.assertEqual(h[0]["LKAS_STATE"], 1)
+    for s in steer[:CCP.HUD_RELEASE_FRAMES]:
+      for f in s:
+        self.assertEqual(f["STEER_REQ"], 0)
+    self.assertFalse(any(hud[CCP.HUD_RELEASE_FRAMES + 2:]))
+    self.assertFalse(any(steer[CCP.HUD_RELEASE_FRAMES + 2:]))
+
+  def test_no_hud_hold_without_long_control(self):
+    hud, steer = self._disengage_tail(_ctrl(long_control=False))
+    self.assertFalse(any(hud[2:]))
+    self.assertFalse(any(steer[2:]))
+
   def test_warmup_then_first_req_repeats_angle(self):
     # After a TX gap: REQ=0 at the measured angle, then the first REQ=1 at that same angle,
     # then the ramp toward the desired angle.
