@@ -18,6 +18,7 @@ class CarState(CarStateBase):
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
     self.acc_hold_confirmation = False
+    self.acc_hold_available = True
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
@@ -282,9 +283,12 @@ class CarState(CarStateBase):
     self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
     self.esp_hold_confirmation = pt_cp.vl["ESC_50"]["Motion_State"] == 3  # stopped, not rolling back
     self.acc_hold_confirmation = self.esp_hold_confirmation
+    self.acc_hold_available = True
     if self.CP.flags & VolkswagenFlags.MEB_GEN2:
       # the ESP can also hold on its own, TSK faults if we release the stop request before it holds for ACC
       self.acc_hold_confirmation &= bool(pt_cp.vl["VMM_02"]["ESP_Hold"]) and pt_cp.vl["VMM_02"]["HMS_Status"] == 1
+      # holding or starting for ACC, a drive-off request without it makes the hold manager refuse ACC holds
+      self.acc_hold_available = pt_cp.vl["VMM_02"]["HMS_Status"] in (1, 5)
     self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
     ret.stockFcw = bool(ext_cp.vl["AWV_03"]["FCW_Active"])
     ret.stockAeb = bool(ext_cp.vl["AWV_03"]["AEB_Active"])
@@ -298,6 +302,9 @@ class CarState(CarStateBase):
     long_control_inhibit = pt_cp.vl["VMM_02"]["Long_Control_Inhibit"] == 2
     ret.accFaulted = (self.update_acc_fault(tsk_faulted, engine_off, long_control_inhibit) or
                       ext_cp.vl["AWV_03"]["AWV_Unavailable"] == 1)  # AEB unavailable (i.e. radar covered)
+    if self.CP.flags & VolkswagenFlags.MEB_GEN2:
+      # once refused the car is not held at a stop and rolls, hand over to the driver near standstill
+      ret.accFaulted |= bool(pt_cp.vl["VMM_02"]["HMS_Refused"]) and ret.vEgo < 5 * CV.KPH_TO_MS
 
     # TSK winds braking down through brake_only after driver brakes at low speeds. Requesting drive-off in this
     # state can fault TSK, and stock refuses to engage here as well, so block entry until it clears.

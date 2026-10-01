@@ -120,7 +120,10 @@ class MebLongStateMachine:
       if stopping:
         acc_hold_type = self.acc_hold_type_vals['HALTEN']  # stopping/stopped, allowed at any time
       elif starting:
-        acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
+        if CS.acc_hold_available or self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN']:
+          acc_hold_type = self.acc_hold_type_vals['ANFAHREN']  # resume after reaching full stop
+        else:
+          acc_hold_type = self.acc_hold_type_vals['HALTEN']  # get the ACC hold before driving off
       else:
         # After aborting a stop or finishing starting, we need to send RAMP until we hit 5 kph or go long inactive,
         # only if we didn't just re-engage
@@ -144,6 +147,8 @@ class MebLongStateMachine:
     held = requesting_hold and CS.acc_hold_confirmation
     if not CC.enabled or held:
       accel = self.CCP.ACCEL_INACTIVE
+    elif requesting_hold:
+      accel = min(accel, 0.)  # also when holding again before a drive-off
 
     # hold requested but the car isn't held yet
     braking_to_stop = requesting_hold and not CS.acc_hold_confirmation
