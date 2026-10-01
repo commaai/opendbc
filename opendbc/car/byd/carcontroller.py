@@ -53,6 +53,8 @@ class CarController(CarControllerBase):
     self.hold_steer = 0
     self.eps_idle_frames = 0
     self.yield_hold = 0
+    self.standstill_hold = False
+    self.standstill_resume = False
 
     # Vehicle model used for lateral limiting
     self.VM = VehicleModel(get_safety_CP())
@@ -319,9 +321,21 @@ class CarController(CarControllerBase):
         else:
           if CC.longActive:
             self.accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+            # Hold while stopped and the planner is not asking to go. The hold bits
+            # pin the car: a positive ACCEL_CMD under them does nothing.
+            # Release like stock: RESUME=1 with the hold bits clear, dropped once rolling.
+            hold = CS.out.standstill and self.accel <= 0.0
+            if hold or CS.out.vEgoRaw >= CarControllerParams.STANDSTILL_RESUME_CLEAR_SPEED:
+              self.standstill_resume = False
+            elif self.standstill_hold:
+              self.standstill_resume = True
+            self.standstill_hold = hold
           else:
             self.accel = 0.0
-          can_sends.append(bydcan.create_acc_cmd(self.packer, self.accel, CC.longActive, CS.out.standstill, cntr))
+            self.standstill_hold = False
+            self.standstill_resume = False
+          can_sends.append(bydcan.create_acc_cmd(self.packer, self.accel, CC.longActive, self.standstill_hold,
+                                                 self.standstill_resume, cntr))
         acc_state = 0 if CS.camera_acc_state == 0 else (3 if CC.longActive else 2)
         # vCruise is 255 until the first engage initializes it. Do not paint that.
         set_kph = hud_control.setSpeed * CV.MS_TO_KPH
