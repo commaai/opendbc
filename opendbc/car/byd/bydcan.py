@@ -1,10 +1,27 @@
 from opendbc.car import structs
+from opendbc.car.crc import CRC8J1850, mk_crc8_fun
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
+
+_crc8_j1850 = mk_crc8_fun(CRC8J1850)
+BYD_RADAR_K1 = {
+  0x280: 0x7C, 0x281: 0x08, 0x282: 0x59, 0x283: 0x2D, 0x284: 0xB1,
+  0x285: 0xC5, 0x286: 0x26, 0x287: 0x52, 0x288: 0xCE, 0x289: 0xBA,
+}
 
 
 def byd_checksum(address: int, sig, d: bytearray) -> int:
   return (~sum(d[:7])) & 0xFF
+
+
+def byd_radar_checksum(address: int, sig, d: bytearray) -> int:
+  k1 = BYD_RADAR_K1.get(address)
+  if k1 is None:
+    i = sig.start_bit // 8
+    return d[i] if i < len(d) else 0
+  if sig.start_bit == 0:
+    return _crc8_j1850(d[1:32]) ^ k1
+  return _crc8_j1850(d[33:64]) ^ k1 ^ 0x3A
 
 
 def create_steering_control(packer, apply_angle: float, lat_active: bool, counter: int, ack: bool = False):
