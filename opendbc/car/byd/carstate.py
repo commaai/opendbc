@@ -191,14 +191,16 @@ class CarState(CarStateBase):
     # ACC_STATE: 0=OFF, 2=ACC_ON (available), 3=ACC_ACTIVE (enabled), 5=FORCE_ACCEL, 7=ERROR
     # Follow stock ACC only when our LKS latch is on so ACC can run without engaging OP.
     # Reporting enabled=False while ACC is on must not trip controlsd's cancel spoof.
-    ret.cruiseState.standstill = bool(cp_cam.vl["ACC_CMD"]["STANDSTILL_STATE"])
     ret.cruiseState.available = acc_state in (2, 3, 5)
     if self.CP.openpilotLongitudinalControl:
       # Camera ACC stays in standby because SET never reaches it. Available
       # still follows ACC main, so the stalk ACC_ON press is the arming step.
+      # We hold and release the car ourselves, so no resume press is required.
       ret.cruiseState.enabled = False
       ret.cruiseState.speed = 0
+      ret.cruiseState.standstill = False
     else:
+      ret.cruiseState.standstill = bool(cp_cam.vl["ACC_CMD"]["STANDSTILL_STATE"])
       ret.cruiseState.speed = cp_cam.vl["ACC_HUD_ADAS"]["SET_SPEED"] * CV.KPH_TO_MS
       ret.cruiseState.enabled = cruise_enabled(acc_state, self.lks_enabled)
 
