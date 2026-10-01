@@ -17,6 +17,8 @@ class CarInterface(CarInterfaceBase):
   CarController = CarController
   RadarInterface = RadarInterface
 
+  DRIVABLE_GEARS = (structs.CarState.GearShifter.low, structs.CarState.GearShifter.manumatic)
+
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
     # PCM doesn't allow acceleration near cruise_speed,
@@ -88,7 +90,8 @@ class CarInterface(CarInterfaceBase):
 
     # BSM: Side_Detect_L_Stat, Side_Detect_R_Stat
     # TODO: detect bsm in car_fw?
-    ret.enableBsm = 0x3A6 in fingerprint[CAN.main] and 0x3A7 in fingerprint[CAN.main]
+    if 0x3A6 in fingerprint[CAN.main] and 0x3A7 in fingerprint[CAN.main]:
+      ret.flags |= FordFlags.HAS_BSM.value
 
     # LCA can steer down to zero
     ret.minSteerSpeed = 0.

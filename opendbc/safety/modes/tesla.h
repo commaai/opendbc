@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/declarations.h"
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
@@ -15,24 +15,26 @@ static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
 
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
-
   uint8_t cnt = 0;
   if (msg->addr == 0x2b9U) {
     // Signal: DAS_controlCounter
     cnt = msg->data[6] >> 5;
-  } else if (msg->addr == 0x488U) {
+  }
+  if (msg->addr == 0x488U) {
     // Signal: DAS_steeringControlCounter
     cnt = msg->data[2] & 0x0FU;
-  } else if ((msg->addr == 0x257U) || (msg->addr == 0x118U) || (msg->addr == 0x39dU) || (msg->addr == 0x286U) || (msg->addr == 0x311U)) {
-    // Signal: DI_speedCounter, DI_systemStatusCounter, IBST_statusCounter, DI_locStatusCounter, UI_warningCounter
+  }
+  if ((msg->addr == 0x257U) || (msg->addr == 0x118U) || (msg->addr == 0x145U) || (msg->addr == 0x286U) || (msg->addr == 0x311U)) {
+    // Signal: DI_speedCounter, DI_systemStatusCounter, ESP_statusCounter, DI_locStatusCounter, UI_warningCounter
     cnt = msg->data[1] & 0x0FU;
-  } else if (msg->addr == 0x155U) {
+  }
+  if (msg->addr == 0x155U) {
     // Signal: ESP_wheelRotationCounter
     cnt = msg->data[6] >> 4;
-  } else if (msg->addr == 0x370U) {
+  }
+  if (msg->addr == 0x370U) {
     // Signal: EPAS3S_sysStatusCounter
     cnt = msg->data[6] & 0x0FU;
-  } else {
   }
   return cnt;
 }
@@ -42,13 +44,14 @@ static int _tesla_get_checksum_byte(const int addr) {
   if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
     // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
     checksum_byte = 7;
-  } else if (addr == 0x488) {
+  }
+  if (addr == 0x488) {
     // Signal: DAS_steeringControlChecksum
     checksum_byte = 3;
-  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
-    // Signal: DI_speedChecksum, DI_systemStatusChecksum, IBST_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
+  }
+  if ((addr == 0x257) || (addr == 0x118) || (addr == 0x145) || (addr == 0x286) || (addr == 0x311)) {
+    // Signal: DI_speedChecksum, DI_systemStatusChecksum, ESP_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
     checksum_byte = 0;
-  } else {
   }
   return checksum_byte;
 }
@@ -79,114 +82,110 @@ static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
 }
 
 static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
-
   bool valid = false;
   if (msg->addr == 0x155U) {
     valid = (msg->data[5] & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
-  } else if (msg->addr == 0x39dU) {
-    int user_brake_status = msg->data[2] & 0x03U;
-    valid = (user_brake_status != 0) && (user_brake_status != 3);  // IBST_driverBrakeApply=NOT_INIT_OR_OFF, FAULT
-  } else {
+  }
+  if (msg->addr == 0x145U) {
+    int user_brake_status = (msg->data[3] >> 5) & 0x03U;
+    valid = (user_brake_status != 0) && (user_brake_status != 3);  // ESP_driverBrakeApply=NotInit_orOff, Faulty_SNA
   }
   return valid;
 }
 
 static void tesla_rx_hook(const CANPacket_t *msg) {
+  // Steering angle: (0.1 * val) - 819.2 in deg.
+  if (msg_matches(msg, 0x370U, 0U)) {
+    // Store it 1/10 deg to match steering request
+    const int angle_meas_new = (((msg->data[4] & 0x3FU) << 8) | msg->data[5]) - 8192U;
+    update_sample(&angle_meas, angle_meas_new);
 
-  if (msg->bus == 0U) {
-    // Steering angle: (0.1 * val) - 819.2 in deg.
-    if (msg->addr == 0x370U) {
-      // Store it 1/10 deg to match steering request
-      const int angle_meas_new = (((msg->data[4] & 0x3FU) << 8) | msg->data[5]) - 8192U;
-      update_sample(&angle_meas, angle_meas_new);
+    const int hands_on_level = msg->data[4] >> 6;  // EPAS3S_handsOnLevel
+    const int eac_status = msg->data[6] >> 5;  // EPAS3S_eacStatus
+    const int eac_error_code = msg->data[2] >> 4;  // EPAS3S_eacErrorCode
 
-      const int hands_on_level = msg->data[4] >> 6;  // EPAS3S_handsOnLevel
-      const int eac_status = msg->data[6] >> 5;  // EPAS3S_eacStatus
-      const int eac_error_code = msg->data[2] >> 4;  // EPAS3S_eacErrorCode
-
-      // Disengage on normal user override, or if high angle rate fault from user overriding extremely quickly
-      steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
-    }
-
-    // Vehicle speed (DI_speed)
-    if (msg->addr == 0x257U) {
-      // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
-      float speed = ((((msg->data[2] << 4) | (msg->data[1] >> 4)) * 0.08) - 40.) * KPH_TO_MS;
-      UPDATE_VEHICLE_SPEED(speed);
-    }
-
-    // 2nd vehicle speed (ESP_B)
-    if (msg->addr == 0x155U) {
-      // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
-      float esp_speed = (((msg->data[6] & 0x0FU) << 6) | (msg->data[5] >> 2)) * 0.5 * KPH_TO_MS;
-      speed_mismatch_check(esp_speed);
-    }
-
-    // Gas pressed
-    if (msg->addr == 0x118U) {
-      gas_pressed = (msg->data[4] != 0U);
-    }
-
-    // Brake pressed
-    if (msg->addr == 0x39dU) {
-      brake_pressed = (msg->data[2] & 0x03U) == 2U;
-    }
-
-    // Cruise and Autopark/Summon state
-    if (msg->addr == 0x286U) {
-      // Autopark state
-      int autopark_state = (msg->data[3] >> 1) & 0x0FU;  // DI_autoparkState
-      bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
-                                (autopark_state == 4) ||  // COMPLETE
-                                (autopark_state == 9);    // SELFPARK_STARTED
-
-      // Only consider rising edges while controls are not allowed
-      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
-        tesla_autopark = true;
-      }
-      if (!tesla_autopark_now) {
-        tesla_autopark = false;
-      }
-      tesla_autopark_prev = tesla_autopark_now;
-
-      // Cruise state
-      int cruise_state = (msg->data[1] >> 4) & 0x07U;
-      bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
-                            (cruise_state == 3) ||  // STANDSTILL
-                            (cruise_state == 4) ||  // OVERRIDE
-                            (cruise_state == 6) ||  // PRE_FAULT
-                            (cruise_state == 7);    // PRE_CANCEL
-      cruise_engaged = cruise_engaged && !tesla_autopark;
-
-      vehicle_moving = cruise_state != 3; // STANDSTILL
-      pcm_cruise_check(cruise_engaged);
-    }
+    // Disengage on normal user override, or if high angle rate fault from user overriding extremely quickly
+    steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
   }
 
-  if (msg->bus == 2U) {
-    // DAS_control
-    if (msg->addr == 0x2b9U) {
-      // "AEB_ACTIVE"
-      tesla_stock_aeb = (msg->data[2] & 0x03U) == 1U;
-    }
+  // Vehicle speed (DI_speed)
+  if (msg_matches(msg, 0x257U, 0U)) {
+    // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
+    float speed = ((((msg->data[2] << 4) | (msg->data[1] >> 4)) * 0.08) - 40.) * KPH_TO_MS;
+    UPDATE_VEHICLE_SPEED(speed);
+  }
 
-    // DAS_steeringControl
-    if (msg->addr == 0x488U) {
-      int steering_control_type = msg->data[2] >> 6;
-      bool tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
+  // 2nd vehicle speed (ESP_B)
+  if (msg_matches(msg, 0x155U, 0U)) {
+    // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
+    float esp_speed = (((msg->data[6] & 0x0FU) << 6) | (msg->data[5] >> 2)) * 0.5 * KPH_TO_MS;
+    speed_mismatch_check(esp_speed);
+  }
 
-      // Only consider rising edges while controls are not allowed
-      if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed) {
-        tesla_stock_lkas = true;
-      }
-      if (!tesla_stock_lkas_now) {
-        tesla_stock_lkas = false;
-      }
-      tesla_stock_lkas_prev = tesla_stock_lkas_now;
+  // Gas pressed
+  if (msg_matches(msg, 0x118U, 0U)) {
+    gas_pressed = (msg->data[4] != 0U);
+  }
+
+  // Brake pressed
+  if (msg_matches(msg, 0x145U, 0U)) {
+    brake_pressed = ((msg->data[3] >> 5) & 0x03U) == 2U;
+  }
+
+  // Cruise and Autopark/Summon state
+  if (msg_matches(msg, 0x286U, 0U)) {
+    // Autopark state
+    int autopark_state = (msg->data[3] >> 1) & 0x0FU;  // DI_autoparkState
+    bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
+                              (autopark_state == 4) ||  // COMPLETE
+                              (autopark_state == 9);    // SELFPARK_STARTED
+
+    // Only consider rising edges while controls are not allowed
+    if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
+      tesla_autopark = true;
     }
+    if (!tesla_autopark_now) {
+      tesla_autopark = false;
+    }
+    tesla_autopark_prev = tesla_autopark_now;
+
+    // Cruise state
+    int cruise_state = (msg->data[1] >> 4) & 0x07U;
+    bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
+                          (cruise_state == 3) ||  // STANDSTILL
+                          (cruise_state == 4) ||  // OVERRIDE
+                          (cruise_state == 6) ||  // PRE_FAULT
+                          (cruise_state == 7);    // PRE_CANCEL
+    cruise_engaged = cruise_engaged && !tesla_autopark;
+
+    pcm_cruise_check(cruise_engaged);
+  }
+
+  if (msg_matches(msg, 0x155U, 0U)) {
+    vehicle_moving = !GET_BIT(msg, 41U);  // ESP_vehicleStandstillSts
+  }
+
+  // DAS_control
+  if (msg_matches(msg, 0x2b9U, 2U)) {
+    // "AEB_ACTIVE"
+    tesla_stock_aeb = (msg->data[2] & 0x03U) == 1U;
+  }
+
+  // DAS_steeringControl
+  if (msg_matches(msg, 0x488U, 2U)) {
+    int steering_control_type = msg->data[2] >> 5;  // DAS_steeringControlType
+    bool tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
+
+    // Only consider rising edges while controls are not allowed
+    if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed) {
+      tesla_stock_lkas = true;
+    }
+    if (!tesla_stock_lkas_now) {
+      tesla_stock_lkas = false;
+    }
+    tesla_stock_lkas_prev = tesla_stock_lkas_now;
   }
 }
-
 
 static bool tesla_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringLimits TESLA_STEERING_LIMITS = {
@@ -221,7 +220,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((msg->data[0] & 0x7FU) << 8) | msg->data[1];
     int desired_angle = raw_angle_can - 16384;
-    int steer_control_type = msg->data[2] >> 6;
+    int steer_control_type = msg->data[2] >> 5;  // DAS_steeringControlType
     bool steer_control_enabled = steer_control_type == 1;  // ANGLE_CONTROL
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS, TESLA_STEERING_PARAMS)) {
@@ -312,7 +311,6 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
 }
 
 static safety_config tesla_init(uint16_t param) {
-
   static const CanMsg TESLA_M3_Y_TX_MSGS[] = {
     {0x488, 0, 4, .check_relay = true, .disable_static_blocking = true},   // DAS_steeringControl
     {0x2b9, 0, 8, .check_relay = false},                                   // DAS_control (for cancel)
@@ -325,9 +323,9 @@ static safety_config tesla_init(uint16_t param) {
     {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},  // APS_eacMonitor
   };
 
-  UNUSED(param);
+  SAFETY_UNUSED(param);
 #ifdef ALLOW_DEBUG
-  const int TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
+  const uint16_t TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
   tesla_longitudinal = GET_FLAG(param, TESLA_FLAG_LONGITUDINAL_CONTROL);
 #endif
 
@@ -346,7 +344,7 @@ static safety_config tesla_init(uint16_t param) {
     {.msg = {{0x155, 0, 8, 50U, .max_counter = 15U}, { 0 }, { 0 }}},                                // ESP_B (2nd speed in kph)
     {.msg = {{0x370, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
     {.msg = {{0x118, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
-    {.msg = {{0x39d, 0, 5, 25U, .max_counter = 15U}, { 0 }, { 0 }}},                                // IBST_status (brakes)
+    {.msg = {{0x145, 0, 8, 50U, .max_counter = 15U}, { 0 }, { 0 }}},                                // ESP_status (brakes)
     {.msg = {{0x286, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // DI_state (acc state)
     {.msg = {{0x311, 0, 7, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
   };

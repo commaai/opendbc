@@ -1,9 +1,10 @@
 import re
 import os
-from dataclasses import dataclass
 from collections.abc import Callable
+from dataclasses import dataclass
+from functools import cache
 
-from opendbc import DBC_PATH
+from opendbc import DBC_PATH, get_generated_dbcs
 
 # TODO: these should just be passed in along with the DBC file
 from opendbc.car.honda.hondacan import honda_checksum
@@ -11,9 +12,15 @@ from opendbc.car.toyota.toyotacan import toyota_checksum
 from opendbc.car.subaru.subarucan import subaru_checksum
 from opendbc.car.chrysler.chryslercan import chrysler_checksum, fca_giorgio_checksum
 from opendbc.car.hyundai.hyundaicanfd import hkg_can_fd_checksum
-from opendbc.car.volkswagen.mqbcan import volkswagen_mqb_meb_checksum, xor_checksum
+from opendbc.car.volkswagen.mlbcan import volkswagen_mlb_checksum
+from opendbc.car.volkswagen.mqbcan import volkswagen_meb_alt_crc_checksum, volkswagen_mqb_meb_checksum, xor_checksum
 from opendbc.car.tesla.teslacan import tesla_checksum
 from opendbc.car.body.bodycan import body_checksum
+from opendbc.car.byd.bydcan import byd_checksum
+from opendbc.car.psa.psacan import psa_checksum
+from opendbc.car.rivian.riviancan import rivian_checksum
+from opendbc.car.ford.fordcan import FORD_CHECKSUM_FIELDS, ford_checksum
+from opendbc.car.mg.mgcan import mg_checksum
 
 
 class SignalType:
@@ -29,6 +36,12 @@ class SignalType:
   HKG_CAN_FD_CHECKSUM = 9
   FCA_GIORGIO_CHECKSUM = 10
   TESLA_CHECKSUM = 11
+  PSA_CHECKSUM = 12
+  VOLKSWAGEN_MLB_CHECKSUM = 13
+  BYD_CHECKSUM = 14
+  RIVIAN_CHECKSUM = 15
+  FORD_CHECKSUM = 16
+  MG_CHECKSUM = 17
 
 
 @dataclass
@@ -44,6 +57,21 @@ class Signal:
   is_little_endian: bool
   type: int = SignalType.DEFAULT
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
+  checksum_fields: tuple['Signal', ...] = ()
+
+  def get_raw_value(self, dat: bytes | bytearray) -> int:
+    ret = 0
+    i = self.msb // 8
+    bits = self.size
+    while 0 <= i < len(dat) and bits > 0:
+      lsb = self.lsb if (self.lsb // 8) == i else i * 8
+      msb = self.msb if (self.msb // 8) == i else (i + 1) * 8 - 1
+      size = msb - lsb + 1
+      d = (dat[i] >> (lsb - (i * 8))) & ((1 << size) - 1)
+      ret |= d << (bits - size)
+      bits -= size
+      i = i - 1 if self.is_little_endian else i + 1
+    return ret
 
 
 @dataclass
@@ -59,7 +87,6 @@ class Val:
   name: str
   address: int
   def_val: str
-  sigs: dict[str, Signal] | None = None
 
 
 BO_RE = re.compile(r"^BO_ (\w+) (\w+) *: (\w+) (\w+)")
@@ -69,25 +96,32 @@ VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
 VAL_SPLIT_RE = re.compile(r'["]+')
 
 
-@dataclass
+@cache
 class DBC:
-  name: str
-  msgs: dict[int, Msg]
-  addr_to_msg: dict[int, Msg]
-  name_to_msg: dict[str, Msg]
-  vals: list[Val]
-
   def __init__(self, name: str):
-    dbc_path = name
-    if not os.path.exists(dbc_path):
+    if os.path.exists(name):
+      self._parse_file(name)
+    else:
       dbc_path = os.path.join(DBC_PATH, name + ".dbc")
+      if content := get_generated_dbcs().get(name):
+        self._parse_content(name, content)
+      elif os.path.exists(dbc_path):
+        self._parse_file(dbc_path)
+      else:
+        raise FileNotFoundError(f"DBC not found: {name}")
 
-    self._parse(dbc_path)
-
-  def _parse(self, path: str):
+  def _parse_file(self, path: str):
     self.name = os.path.basename(path).replace(".dbc", "")
     with open(path) as f:
       lines = f.readlines()
+    self._parse_lines(lines)
+
+  def _parse_content(self, name: str, content: str):
+    self.name = name
+    lines = content.splitlines(keepends=True)
+    self._parse_lines(lines)
+
+  def _parse_lines(self, lines: list[str]):
 
     checksum_state = get_checksum_state(self.name)
     be_bits = [j + i * 8 for i in range(64) for j in range(7, -1, -1)]
@@ -136,7 +170,7 @@ class DBC:
           msb = start_bit
 
         sig = Signal(sig_name, start_bit, msb, lsb, size, is_signed, factor, offset_val, is_little_endian)
-        set_signal_type(sig, checksum_state, self.name, line_num)
+        set_signal_type(sig, checksum_state, self.name, line_num, address)
         signals_temp[address][sig_name] = sig
       elif line.startswith("VAL_ "):
         m = VAL_RE.search(line)
@@ -151,6 +185,11 @@ class DBC:
         self.vals.append(Val(sgname, val_addr, val_def))
     for addr, sigs in signals_temp.items():
       self.msgs[addr].sigs = sigs
+      if checksum_state and checksum_state.checksum_fields and addr in checksum_state.checksum_fields:
+        fields = tuple(sigs[name] for name in checksum_state.checksum_fields[addr])
+        for sig in sigs.values():
+          if sig.calc_checksum:
+            sig.checksum_fields = fields
 
 
 # ***** checksum functions *****
@@ -163,48 +202,67 @@ def tesla_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
     sig.calc_checksum = tesla_checksum
 
 
+def ford_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
+  if sig.name in ("VehVActlBrk_No_Cnt", "VehVActlEng_No_Cnt", "VehRollYaw_No_Cnt"):
+    sig.type = SignalType.COUNTER
+
+
 @dataclass
 class ChecksumState:
-  checksum_size: int
-  counter_size: int
-  checksum_start_bit: int
-  counter_start_bit: int
-  little_endian: bool
   checksum_type: int
   calc_checksum: Callable[[int, Signal, bytearray], int] | None
   setup_signal: Callable[[Signal, str, int], None] | None = None
+  checksum_pattern: str = r"^CHECKSUM$"
+  checksum_fields: dict[int, tuple[str, ...]] | None = None
 
 
 def get_checksum_state(dbc_name: str) -> ChecksumState | None:
   if dbc_name.startswith(("honda_", "acura_")):
-    return ChecksumState(4, 2, 3, 5, False, SignalType.HONDA_CHECKSUM, honda_checksum)
+    return ChecksumState(SignalType.HONDA_CHECKSUM, honda_checksum)
   elif dbc_name.startswith(("toyota_", "lexus_")):
-    return ChecksumState(8, -1, 7, -1, False, SignalType.TOYOTA_CHECKSUM, toyota_checksum)
+    return ChecksumState(SignalType.TOYOTA_CHECKSUM, toyota_checksum)
   elif dbc_name.startswith("hyundai_canfd_generated"):
-    return ChecksumState(16, -1, 0, -1, True, SignalType.HKG_CAN_FD_CHECKSUM, hkg_can_fd_checksum)
+    return ChecksumState(SignalType.HKG_CAN_FD_CHECKSUM, hkg_can_fd_checksum)
+  elif dbc_name.startswith("vw_meb_2024"):
+    return ChecksumState(SignalType.VOLKSWAGEN_MQB_MEB_CHECKSUM, volkswagen_meb_alt_crc_checksum)
   elif dbc_name.startswith(("vw_mqb", "vw_mqbevo", "vw_meb")):
-    return ChecksumState(8, 4, 0, 0, True, SignalType.VOLKSWAGEN_MQB_MEB_CHECKSUM, volkswagen_mqb_meb_checksum)
+    return ChecksumState(SignalType.VOLKSWAGEN_MQB_MEB_CHECKSUM, volkswagen_mqb_meb_checksum)
+  elif dbc_name.startswith("vw_mlb"):
+    return ChecksumState(SignalType.VOLKSWAGEN_MLB_CHECKSUM, volkswagen_mlb_checksum)
   elif dbc_name.startswith("vw_pq"):
-    return ChecksumState(8, 4, 0, -1, True, SignalType.XOR_CHECKSUM, xor_checksum)
+    return ChecksumState(SignalType.XOR_CHECKSUM, xor_checksum)
   elif dbc_name.startswith("subaru_global_"):
-    return ChecksumState(8, -1, 0, -1, True, SignalType.SUBARU_CHECKSUM, subaru_checksum)
+    return ChecksumState(SignalType.SUBARU_CHECKSUM, subaru_checksum)
   elif dbc_name.startswith("chrysler_"):
-    return ChecksumState(8, -1, 7, -1, False, SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
+    return ChecksumState(SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
   elif dbc_name.startswith("fca_giorgio"):
-    return ChecksumState(8, -1, 7, -1, False, SignalType.FCA_GIORGIO_CHECKSUM, fca_giorgio_checksum)
+    return ChecksumState(SignalType.FCA_GIORGIO_CHECKSUM, fca_giorgio_checksum)
   elif dbc_name.startswith("comma_body"):
-    return ChecksumState(8, 4, 7, 3, False, SignalType.BODY_CHECKSUM, body_checksum)
+    return ChecksumState(SignalType.BODY_CHECKSUM, body_checksum)
   elif dbc_name.startswith("tesla_model3_party"):
-    return ChecksumState(8, -1, 0, -1, True, SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
+    return ChecksumState(SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
+  elif dbc_name.startswith("psa_"):
+    return ChecksumState(SignalType.PSA_CHECKSUM, psa_checksum)
+  elif dbc_name.startswith("byd_"):
+    return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
+  elif dbc_name == "ford_lincoln_base_pt":
+    # Other _Cs fields are optional or use model-specific checksum algorithms.
+    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, ford_setup_signal, checksum_pattern=r"_Cs$",
+                         checksum_fields=FORD_CHECKSUM_FIELDS)
+  elif dbc_name == "mg":
+    return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum, checksum_pattern=r"Chksm|^ChLKARespToqPVHSC2$")
+  elif dbc_name == "rivian_primary_actuator":
+    return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum, checksum_pattern=r"_Checksum$")
   return None
 
 
-def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_num: int) -> None:
+def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_num: int, address: int) -> None:
   sig.calc_checksum = None
   if chk:
     if chk.setup_signal:
       chk.setup_signal(sig, dbc_name, line_num)
-    if sig.name == "CHECKSUM":
+    if (re.search(chk.checksum_pattern, sig.name) and
+        (chk.checksum_fields is None or address in chk.checksum_fields)):
       sig.type = chk.checksum_type
       sig.calc_checksum = chk.calc_checksum
     elif sig.name == "COUNTER":

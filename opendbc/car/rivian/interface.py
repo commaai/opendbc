@@ -3,7 +3,7 @@ from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.rivian.carcontroller import CarController
 from opendbc.car.rivian.carstate import CarState
 from opendbc.car.rivian.radar_interface import RadarInterface
-from opendbc.car.rivian.values import RivianSafetyFlags
+from opendbc.car.rivian.values import RivianFlags, RivianSafetyFlags
 
 
 class CarInterface(CarInterfaceBase):
@@ -17,6 +17,10 @@ class CarInterface(CarInterfaceBase):
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.rivian)]
 
+    # GEN2 (2025+) doesn't have SCCM_WheelTouch on the bus
+    if 0x321 not in fingerprint[0]:
+      ret.flags |= RivianFlags.GEN2.value
+
     ret.steerActuatorDelay = 0.15
     ret.steerLimitTimer = 0.4
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
@@ -24,14 +28,13 @@ class CarInterface(CarInterfaceBase):
     ret.steerControlType = structs.CarParams.SteerControlType.torque
     ret.radarUnavailable = True
 
-    # TODO: pending finding/handling missing set speed and fixing up radar parser
-    ret.alphaLongitudinalAvailable = False
-    if alpha_long:
+    # TODO is GEN2 the same?
+    ret.alphaLongitudinalAvailable = docs or not (ret.flags & RivianFlags.GEN2)
+    if alpha_long and ret.alphaLongitudinalAvailable:
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[0].safetyParam |= RivianSafetyFlags.LONG_CONTROL.value
 
     ret.longitudinalActuatorDelay = 0.35
-    ret.vEgoStopping = 0.25
     ret.stopAccel = 0
 
     return ret

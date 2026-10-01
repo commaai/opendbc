@@ -2,12 +2,12 @@
 from opendbc.can import CANParser
 from opendbc.car import Bus
 from opendbc.car.structs import RadarData
-from opendbc.car.toyota.values import DBC, TSS2_CAR
+from opendbc.car.toyota.values import DBC, ToyotaFlags
 from opendbc.car.interfaces import RadarInterfaceBase
 
 
-def _create_radar_can_parser(car_fingerprint):
-  if car_fingerprint in TSS2_CAR:
+def _create_radar_can_parser(CP):
+  if CP.flags & ToyotaFlags.TSS2:
     RADAR_A_MSGS = list(range(0x180, 0x190))
     RADAR_B_MSGS = list(range(0x190, 0x1a0))
   else:
@@ -18,15 +18,15 @@ def _create_radar_can_parser(car_fingerprint):
   msg_b_n = len(RADAR_B_MSGS)
   messages = list(zip(RADAR_A_MSGS + RADAR_B_MSGS, [20] * (msg_a_n + msg_b_n), strict=True))
 
-  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
+  messages.append(('STATUS_MSG', 10))
+
+  return CANParser(DBC[CP.carFingerprint][Bus.radar], messages, 1)
 
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.track_id = 0
-
-    if CP.carFingerprint in TSS2_CAR:
+    if CP.flags & ToyotaFlags.TSS2:
       self.RADAR_A_MSGS = list(range(0x180, 0x190))
       self.RADAR_B_MSGS = list(range(0x190, 0x1a0))
     else:
@@ -35,7 +35,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.valid_cnt = {key: 0 for key in self.RADAR_A_MSGS}
 
-    self.rcp = None if CP.radarUnavailable else _create_radar_can_parser(CP.carFingerprint)
+    self.rcp = None if CP.radarUnavailable else _create_radar_can_parser(CP)
     self.trigger_msg = self.RADAR_B_MSGS[-1]
     self.updated_messages = set()
 
@@ -58,6 +58,9 @@ class RadarInterface(RadarInterfaceBase):
     ret = RadarData()
     if not self.rcp.can_valid:
       ret.errors.canError = True
+
+    if self.rcp.vl['STATUS_MSG']['RADAR_STATUS'] != 1 or self.rcp.vl['STATUS_MSG']['RADAR_PRE_FAULT'] != 0:
+      ret.errors.radarUnavailableTemporary = True
 
     for ii in sorted(updated_messages):
       if ii in self.RADAR_A_MSGS:
@@ -82,9 +85,6 @@ class RadarInterface(RadarInterfaceBase):
           self.pts[ii].dRel = cpt['LONG_DIST']  # from front of car
           self.pts[ii].yRel = -cpt['LAT_DIST']  # in car frame's y axis, left is positive
           self.pts[ii].vRel = cpt['REL_SPEED']
-          self.pts[ii].aRel = float('nan')
-          self.pts[ii].yvRel = float('nan')
-          self.pts[ii].measured = bool(cpt['VALID'])
         else:
           if ii in self.pts:
             del self.pts[ii]

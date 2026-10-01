@@ -1,5 +1,3 @@
-import unittest
-
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import make_msg
@@ -77,13 +75,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
   DISABLED_ECU_UDS_MSG: tuple[int, int]
   DISABLED_ECU_ACTUATION_MSG: tuple[int, int]
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "HyundaiLongitudinalBase":
-      cls.safety = None
-      raise unittest.SkipTest
-
-  # override these tests from PandaCarSafetyTest, hyundai longitudinal uses button enable
+  # override these tests from CarSafetyTest, hyundai longitudinal uses button enable
   def test_disable_control_allowed_from_cruise(self):
     pass
 

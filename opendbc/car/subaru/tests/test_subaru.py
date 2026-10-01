@@ -1,7 +1,9 @@
+import unittest
+
 from opendbc.car.subaru.fingerprints import FW_VERSIONS
 
 
-class TestSubaruFingerprint:
+class TestSubaruFingerprint(unittest.TestCase):
   def test_fw_version_format(self):
     for platform, fws_per_ecu in FW_VERSIONS.items():
       for (ecu, _, _), fws in fws_per_ecu.items():

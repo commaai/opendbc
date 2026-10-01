@@ -3,10 +3,7 @@ from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, CAR
-
-ButtonType = structs.CarState.ButtonEvent.Type
-
+from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, TeslaFlags
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -43,8 +40,7 @@ class CarState(CarStateBase):
     ret.gasPressed = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"] > 0
 
     # Brake pedal
-    ret.brake = 0
-    ret.brakePressed = cp_party.vl["IBST_status"]["IBST_driverBrakeApply"] == 2
+    ret.brakePressed = cp_party.vl["ESP_status"]["ESP_driverBrakeApply"] == 2
 
     # Steering wheel
     epas_status = cp_party.vl["EPAS3S_sysStatus"]
@@ -81,7 +77,7 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = max(cp_party.vl["DI_state"]["DI_digitalSpeed"] * CV.MPH_TO_MS, 1e-3)
     ret.cruiseState.available = cruise_state == "STANDBY" or ret.cruiseState.enabled
     ret.cruiseState.standstill = False  # This needs to be false, since we can resume from stop without sending anything special
-    ret.standstill = cruise_state == "STANDSTILL"
+    ret.standstill = cp_party.vl["ESP_B"]["ESP_vehicleStandstillSts"] == 1
     ret.accFaulted = cruise_state == "FAULT"
 
     # Gear
@@ -108,10 +104,10 @@ class CarState(CarStateBase):
     ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
 
     # Stock Autosteer should be off (includes FSD)
-    if self.CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
+    # TODO: find for TESLA_MODEL_X and HW2.5 vehicles
+    if not (self.CP.flags & TeslaFlags.MISSING_DAS_SETTINGS):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
-    else:
-      pass
+
     # Buttons # ToDo: add Gap adjust button
 
     # Messages needed by carcontroller

@@ -63,6 +63,7 @@ class SubaruFlags(IntFlag):
   # Detected flags
   SEND_INFOTAINMENT = 1
   DISABLE_EYESIGHT = 2
+  HAS_BSM = 128  # blind spot monitoring
 
   # Static flags
   GLOBAL_GEN2 = 4
@@ -226,6 +227,7 @@ SUBARU_ALT_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 
   p16(0xf100)
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"(?:[\x00-\xff]{4,5}|[\x00-\xff]{8}|[\x00-\xff]{10})",
   requests=[
     Request(
       [StdQueries.TESTER_PRESENT_REQUEST, SUBARU_VERSION_REQUEST],
@@ -273,7 +275,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
   ],
   # We don't get the EPS from non-OBD queries on GEN2 cars. Note that we still attempt to match when it exists
   non_essential_ecus={
-    Ecu.eps: list(CAR.with_flags(SubaruFlags.GLOBAL_GEN2)),
+    Ecu.eps: [c for c in CAR if c.config.flags & SubaruFlags.GLOBAL_GEN2],
   }
 )
 

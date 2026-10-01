@@ -65,6 +65,11 @@ class GMSafetyFlags(IntFlag):
   EV = 4
 
 
+class GMFlags(IntFlag):
+  # Detected flags
+  HAS_BSM = 1  # blind spot monitoring
+
+
 class Footnote(Enum):
   SETUP = CarFootnote(
     "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/gm\" target=\"_blank\">GM</a>.",
@@ -157,7 +162,7 @@ class CAR(Platforms):
   )
   CHEVROLET_BOLT_EUV = GMPlatformConfig(
     [
-      GMCarDocs("Chevrolet Bolt EUV 2022-23", "Premier or Premier Redline Trim without Super Cruise Package", video="https://youtu.be/xvwzGMUA210"),
+      GMCarDocs("Chevrolet Bolt EUV 2022-23", "Premier or Premier Redline Trim, without Super Cruise Package", video="https://youtu.be/xvwzGMUA210"),
       GMCarDocs("Chevrolet Bolt EV 2022-23", "2LT Trim with Adaptive Cruise Control Package"),
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
@@ -257,6 +262,7 @@ GM_FW_REQUESTS = [
 GM_RX_OFFSET = 0x400
 
 FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=br"[\x00-\xff]+",
   requests=[request for req in GM_FW_REQUESTS for request in [
     Request(
       [StdQueries.SHORT_TESTER_PRESENT_REQUEST, req],

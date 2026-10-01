@@ -320,7 +320,7 @@ CM_ SG_ 48 ACCStatusActive "ACC Active";
 CM_ SG_ 48 FCWSomething "All bit set during fcw";
 CM_ SG_ 48 StatusSomething "Some status changes when zeroing DTCs";
 CM_ SG_ 208 TrqLim "Used in checksum calculation, Limit directional torque based on the number.";
-CM_ SG_ 208 Checksum "Checksum calculated as a one-complement addition of LKAAngleRequest+LKADirection+Unkown, Zeros used to pad missing bits.";
+CM_ SG_ 208 Checksum "Checksum calculated as a one-complement addition of LKAAngleRequest+LKADirection+Unknown, Zeros used to pad missing bits.";
 CM_ SG_ 208 SET_X_02 "Bit 0 = Vibrate steering wheel., Bit 1 = Heartbeat";
 CM_ SG_ 352 LkaDimLine "Not true, but follows lka steer direction.";
 CM_ SG_ 352 NEW_SIGNAL_1 "Turned one. Got LKA service needed can this be the one?";

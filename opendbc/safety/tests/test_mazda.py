@@ -2,12 +2,14 @@
 import unittest
 
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import make_msg
 
 
-class TestMazdaSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+
+  DBC = "mazda_2017"
+  SAFETY_MODEL = CarParams.SafetyModel.mazda
 
   TX_MSGS = [[0x243, 0], [0x09d, 0], [0x440, 0]]
   STANDSTILL_THRESHOLD = .1
@@ -26,39 +28,33 @@ class TestMazdaSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafe
   # Mazda actually does not set any bit when requesting torque
   NO_STEER_REQ_BIT = True
 
-  def setUp(self):
-    self.packer = CANPackerPanda("mazda_2017")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.mazda, 0)
-    self.safety.init_tests()
-
   def _torque_meas_msg(self, torque):
     values = {"STEER_TORQUE_MOTOR": torque}
-    return self.packer.make_can_msg_panda("STEER_TORQUE", 0, values)
+    return self.packer.make_can_msg_safety("STEER_TORQUE", 0, values)
 
   def _torque_driver_msg(self, torque):
     values = {"STEER_TORQUE_SENSOR": torque}
-    return self.packer.make_can_msg_panda("STEER_TORQUE", 0, values)
+    return self.packer.make_can_msg_safety("STEER_TORQUE", 0, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"LKAS_REQUEST": torque}
-    return self.packer.make_can_msg_panda("CAM_LKAS", 0, values)
+    return self.packer.make_can_msg_safety("CAM_LKAS", 0, values)
 
   def _speed_msg(self, speed):
     values = {"SPEED": speed}
-    return self.packer.make_can_msg_panda("ENGINE_DATA", 0, values)
+    return self.packer.make_can_msg_safety("ENGINE_DATA", 0, values)
 
   def _user_brake_msg(self, brake):
     values = {"BRAKE_ON": brake}
-    return self.packer.make_can_msg_panda("PEDALS", 0, values)
+    return self.packer.make_can_msg_safety("PEDALS", 0, values)
 
   def _user_gas_msg(self, gas):
     values = {"PEDAL_GAS": gas}
-    return self.packer.make_can_msg_panda("ENGINE_DATA", 0, values)
+    return self.packer.make_can_msg_safety("ENGINE_DATA", 0, values)
 
   def _pcm_status_msg(self, enable):
     values = {"CRZ_ACTIVE": enable}
-    return self.packer.make_can_msg_panda("CRZ_CTRL", 0, values)
+    return self.packer.make_can_msg_safety("CRZ_CTRL", 0, values)
 
   def _button_msg(self, resume=False, cancel=False):
     values = {
@@ -67,7 +63,7 @@ class TestMazdaSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafe
       "RES": resume,
       "RES_INV": (resume + 1) % 2,
     }
-    return self.packer.make_can_msg_panda("CRZ_BTNS", 0, values)
+    return self.packer.make_can_msg_safety("CRZ_BTNS", 0, values)
 
   def test_buttons(self):
     # only cancel allows while controls not allowed
@@ -79,6 +75,26 @@ class TestMazdaSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafe
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
+
+
+class TestMazdaIgnition(common.SafetyTestBase):
+  SAFETY_MODEL = None
+
+  TX_MSGS: list = []
+
+  def _msg(self, byte0):
+    return make_msg(0, 0x9E, dat=bytes([byte0]) + b"\x00" * 7)
+
+  # 0x9E byte 0 high 3 bits == 6 (0xC0)
+  def test_ignition_on(self):
+    self.safety.ignition_can_hook(self._msg(0xC0))
+    self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    self.safety.ignition_can_hook(self._msg(0xC0))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0x20))
+    self.assertFalse(self.safety.get_ignition_can())
 
 
 if __name__ == "__main__":

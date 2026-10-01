@@ -20,7 +20,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.apply_angle_last = 0
     self.packer = CANPacker(dbc_names[Bus.party])
-    self.tesla_can = TeslaCAN(self.packer)
+    self.tesla_can = TeslaCAN(CP, self.packer)
 
     # Vehicle model used for lateral limiting
     self.VM = VehicleModel(get_safety_CP())

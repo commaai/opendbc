@@ -6,7 +6,7 @@ from opendbc.car.carlog import carlog
 from opendbc.car.fw_query_definitions import EcuAddrBusType
 
 
-def _is_tester_present_response(msg: CanData, subaddr: int = None) -> bool:
+def _is_tester_present_response(msg: CanData, subaddr: int | None = None) -> bool:
   # ISO-TP messages may use CAN frame optimization (not always 8 bytes)
   # tester present response is always a single frame
   dat_offset = 1 if subaddr is not None else 0
