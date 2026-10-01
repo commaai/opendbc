@@ -26,9 +26,12 @@ def create_steering_control(packer, apply_angle: float, lat_active: bool, counte
   return packer.make_can_msg("STEERING_MODULE_ADAS", 0, values)
 
 
-def create_acc_cmd(packer, accel: float, long_active: bool, standstill: bool, counter: int):
+def create_acc_cmd(packer, accel: float, long_active: bool, hold: bool, resume: bool, counter: int):
   # Idle 64 64 64 80 50 00. Active sets both ACC_ON bits. Hold is byte 5 0x31.
-  hold = long_active and standstill
+  # Stock drives off from a hold with STANDSTILL_RESUME=1, STANDSTILL_STATE=0 and
+  # a positive ACCEL_CMD, and keeps RESUME up until about 2 m/s.
+  hold = long_active and hold
+  resume = long_active and resume and not hold
   values = {
     "ACCEL_CMD": accel if long_active else 0.0,
     "ACC_ON_1": 1 if long_active else 0,
@@ -40,9 +43,9 @@ def create_acc_cmd(packer, accel: float, long_active: bool, standstill: bool, co
     "ACCEL_FACTOR": 12 if long_active else 0,
     "CMD_REQ_ACTIVE_LOW": 0 if long_active else 1,
     "SET_ME_1": 1,
-    "STANDSTILL_RESUME": 0,
+    "STANDSTILL_RESUME": 1 if resume else 0,
     "STANDSTILL_STATE": 1 if hold else 0,
-    "ACC_REQ_NOT_STANDSTILL": 1 if (long_active and not standstill) else 0,
+    "ACC_REQ_NOT_STANDSTILL": 1 if (long_active and not hold) else 0,
     "ACC_CONTROLLABLE_AND_ON": 1 if long_active else 0,
     "ACC_OVERRIDE_OR_STANDSTILL": 1 if hold else 0,
     "COUNTER": counter,

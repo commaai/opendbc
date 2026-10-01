@@ -737,27 +737,46 @@ class TestBydAccCmd(unittest.TestCase):
     self.packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
 
   def test_idle_matches_stock_template(self):
-    addr, dat, bus = bydcan.create_acc_cmd(self.packer, 0.0, False, False, 5)
+    addr, dat, bus = bydcan.create_acc_cmd(self.packer, 0.0, False, False, False, 5)
     self.assertEqual((addr, bus), (0x32E, 0))
     self.assertEqual(bytes(dat[:6]), bytes.fromhex("646464805000"))
     self.assertEqual(dat[6], 0xF5)
     self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
 
   def test_active_layout_and_scale(self):
-    _, dat, _ = bydcan.create_acc_cmd(self.packer, -0.5, True, False, 0)
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, -0.5, True, False, False, 0)
     self.assertEqual(bytes(dat[:6]), bytes.fromhex("5a6666834c18"))
     self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
-    _, dat, _ = bydcan.create_acc_cmd(self.packer, 1.0, True, False, 0)
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, 1.0, True, False, False, 0)
     self.assertEqual(dat[0], 120)
     self.assertAlmostEqual(_decode("ACC_CMD", (0x32E, dat, 0))["ACCEL_CMD"], 1.0, places=6)
 
   def test_standstill_hold_bits(self):
-    _, dat, _ = bydcan.create_acc_cmd(self.packer, -0.5, True, True, 0)
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, -0.5, True, True, False, 0)
     self.assertEqual(dat[5], 0x31)
     values = _decode("ACC_CMD", (0x32E, dat, 0))
     self.assertEqual(values["STANDSTILL_STATE"], 1)
     self.assertEqual(values["ACC_REQ_NOT_STANDSTILL"], 0)
     self.assertEqual(values["ACC_OVERRIDE_OR_STANDSTILL"], 1)
+    self.assertEqual(values["STANDSTILL_RESUME"], 0)
+
+  def test_resume_matches_stock_drive_off(self):
+    # hold 5a6666864131 -> 67666683ce18 (RESUME=1, hold bits clear, accel > 0)
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, 0.15, True, False, True, 0)
+    self.assertEqual(dat[4] & 0x80, 0x80)
+    self.assertEqual(dat[5], 0x18)
+    values = _decode("ACC_CMD", (0x32E, dat, 0))
+    self.assertEqual(values["STANDSTILL_RESUME"], 1)
+    self.assertEqual(values["STANDSTILL_STATE"], 0)
+    self.assertEqual(values["ACC_REQ_NOT_STANDSTILL"], 1)
+    self.assertEqual(values["ACC_OVERRIDE_OR_STANDSTILL"], 0)
+    self.assertAlmostEqual(values["ACCEL_CMD"], 0.15, places=6)
+    # hold wins over a stale resume flag; idle clears both
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, -0.5, True, True, True, 0)
+    self.assertEqual(dat[5], 0x31)
+    self.assertEqual(dat[4] & 0x80, 0)
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, 0.0, False, True, True, 0)
+    self.assertEqual(bytes(dat[:6]), bytes.fromhex("646464805000"))
 
   def test_stock_aeb_threshold(self):
     idle = _decode("ACC_CMD", (0x32E, _acc_frame("646464805000f0"), 0))
@@ -786,7 +805,7 @@ class TestBydLongControl(unittest.TestCase):
   def _slots(self, ctrl, n, **kw):
     out = []
     for _ in range(n):
-      cs_kw = {k: kw[k] for k in ("stock_aeb", "acc_cmd", "standstill") if k in kw}
+      cs_kw = {k: kw[k] for k in ("stock_aeb", "acc_cmd", "standstill", "v_ego") if k in kw}
       CC = _cc(enabled=kw.get("enabled", True), lat_active=False, long_active=kw.get("long_active", False))
       CC.actuators.accel = kw.get("accel", 0.0)
       act, sends = ctrl.update(CC, _cs(**cs_kw), 0)
@@ -825,6 +844,40 @@ class TestBydLongControl(unittest.TestCase):
     _act, msg = self._slots(ctrl, 2, long_active=True, accel=-0.5, standstill=True)[0]
     self.assertEqual(msg["STANDSTILL_STATE"], 1)
     self.assertEqual(msg["ACC_REQ_NOT_STANDSTILL"], 0)
+    self.assertEqual(msg["STANDSTILL_RESUME"], 0)
+
+  def test_standstill_hold_and_resume(self):
+    ctrl = _ctrl(long_control=True)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.5)[0]
+    self.assertEqual((msg["STANDSTILL_STATE"], msg["STANDSTILL_RESUME"]), (0, 0))
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=-2.0, standstill=True)[0]
+    self.assertEqual((msg["STANDSTILL_STATE"], msg["ACC_OVERRIDE_OR_STANDSTILL"], msg["STANDSTILL_RESUME"]), (1, 1, 0))
+    # planner says go at 0 m/s: release with RESUME, accel passes through
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.3, standstill=True, v_ego=0.0)[0]
+    self.assertEqual((msg["STANDSTILL_STATE"], msg["ACC_REQ_NOT_STANDSTILL"], msg["ACC_OVERRIDE_OR_STANDSTILL"]), (0, 1, 0))
+    self.assertEqual(msg["STANDSTILL_RESUME"], 1)
+    self.assertAlmostEqual(msg["ACCEL_CMD"], 0.3, places=6)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.8, v_ego=1.5)[0]
+    self.assertEqual((msg["STANDSTILL_STATE"], msg["STANDSTILL_RESUME"]), (0, 1))
+    # back to a stop before moving off: hold again
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=-0.5, standstill=True, v_ego=0.0)[0]
+    self.assertEqual((msg["STANDSTILL_STATE"], msg["STANDSTILL_RESUME"]), (1, 0))
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.3, standstill=True, v_ego=0.0)[0]
+    self.assertEqual(msg["STANDSTILL_RESUME"], 1)
+    # RESUME drops at the stock clearing speed and stays down
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.8, v_ego=CCP.STANDSTILL_RESUME_CLEAR_SPEED)[0]
+    self.assertEqual((msg["STANDSTILL_STATE"], msg["STANDSTILL_RESUME"]), (0, 0))
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.8, v_ego=1.0)[0]
+    self.assertEqual(msg["STANDSTILL_RESUME"], 0)
+    _act, msg = self._slots(ctrl, 2, enabled=False, long_active=False, accel=0.5, standstill=True)[0]
+    self.assertEqual((msg["ACC_ON_1"], msg["STANDSTILL_STATE"], msg["STANDSTILL_RESUME"]), (0, 0, 0))
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.5)[0]
+    self.assertEqual(msg["STANDSTILL_RESUME"], 0)
+
+  def test_zero_accel_at_standstill_holds(self):
+    ctrl = _ctrl(long_control=True)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.0, standstill=True)[0]
+    self.assertEqual(msg["STANDSTILL_STATE"], 1)
 
   def test_stock_aeb_is_passed_through(self):
     ctrl = _ctrl(long_control=True)
@@ -1058,6 +1111,14 @@ class TestBydLongCarState(unittest.TestCase):
     self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 3})
     ret = cs.update(parsers)
     self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents], [(T.decelCruise, True)])
+
+  def test_long_control_cruise_standstill_false(self):
+    cs, parsers = self._cs(True)
+    self._feed(parsers, Bus.cam, "ACC_CMD", {"STANDSTILL_STATE": 1, "SET_ME_XF": 0xF})
+    self.assertFalse(cs.update(parsers).cruiseState.standstill)
+    cs, parsers = self._cs(False)
+    self._feed(parsers, Bus.cam, "ACC_CMD", {"STANDSTILL_STATE": 1, "SET_ME_XF": 0xF})
+    self.assertTrue(cs.update(parsers).cruiseState.standstill)
 
 
 if __name__ == "__main__":
