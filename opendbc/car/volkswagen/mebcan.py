@@ -1,7 +1,7 @@
 from opendbc.car import Bus, structs
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.volkswagen.values import DBC
+from opendbc.car.volkswagen.values import DBC, VolkswagenFlags
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
@@ -68,10 +68,12 @@ ACC_HUD_DISABLED = 0
 
 class MebLongStateMachine:
   HOLD_RELEASE_SPEED = 5 * CV.KPH_TO_MS
+  HOLD_AGAIN_SPEED = 0.5  # m/s, braking below this while releasing asks for the hold again
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
+    self.gen2 = bool(CP.flags & VolkswagenFlags.MEB_GEN2)
 
     self.disengage_ramp_counter = 0  # always ramp when disengaging
 
@@ -94,7 +96,7 @@ class MebLongStateMachine:
     else:
       return self.acc_status_vals['ACC_OFF_HAUPTSCHALTER_AUS']  # disabled
 
-  def _get_hold_type(self, CS, CC) -> int:
+  def _get_hold_type(self, CS, CC, accel) -> int:
     # warning: car is reacting to hold mechanic even with long control off
     # HALTEN -> KEINE_ANFORDERUNG causes the car to fault into park, so both branches below put a ramp in
     # between: disengaging always ramps, and while engaged a release ramps until 5 kph
@@ -131,7 +133,12 @@ class MebLongStateMachine:
                                                                 self.acc_hold_type_vals['ANFAHREN'],
                                                                 self.acc_hold_type_vals['LOESEN_UEBER_RAMPE'])
 
-        if releasing and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
+        # Stock goes back to HALTEN when braking at a crawl. Stopping or rolling back in RAMP leaves the car without a hold
+        holding_again = self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN']
+        braking = accel < (0.05 if holding_again else 0.)
+        if releasing and self.gen2 and braking and CS.out.vEgo < self.HOLD_AGAIN_SPEED:
+          acc_hold_type = self.acc_hold_type_vals['HALTEN']
+        elif releasing and CS.out.vEgo < self.HOLD_RELEASE_SPEED:
           acc_hold_type = self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']  # ramp
         else:
           acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
@@ -140,7 +147,7 @@ class MebLongStateMachine:
 
   def update(self, CS, CC, accel) -> tuple[float, int, int, bool, bool]:
     acc_status = self._get_acc_status(CS, CC)
-    acc_hold_type = self._get_hold_type(CS, CC)
+    acc_hold_type = self._get_hold_type(CS, CC, accel)
 
     # transition to inactive accel and jerks as soon as the ESP holds for us
     requesting_hold = acc_hold_type == self.acc_hold_type_vals['HALTEN']
