@@ -279,7 +279,11 @@ class CarState(CarStateBase):
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
 
     self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
-    self.esp_hold_confirmation = bool(pt_cp.vl["ESC_50"]["Standstill"])
+    if self.CP.flags & VolkswagenFlags.MEB_GEN2:
+      # the hold manager confirms it holds for ACC, releasing the stop request or driving off without it faults TSK
+      self.esp_hold_confirmation = pt_cp.vl["VMM_02"]["HMS_Status"] == 1
+    else:
+      self.esp_hold_confirmation = pt_cp.vl["ESC_50"]["Motion_State"] == 3  # stopped, ESC_50.Standstill is also set rolling back
     self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
     ret.stockFcw = bool(ext_cp.vl["AWV_03"]["FCW_Active"])
     ret.stockAeb = bool(ext_cp.vl["AWV_03"]["AEB_Active"])
