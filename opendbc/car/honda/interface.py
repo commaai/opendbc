@@ -161,10 +161,6 @@ class CarInterface(CarInterfaceBase):
     elif candidate in (CAR.HONDA_E, CAR.HONDA_E_ADVANCE):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]] # TODO: can probably use some tuning
 
-    elif candidate == CAR.ACURA_INTEGRA:
-      ret.steerActuatorDelay = 0.15
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-
     elif candidate == CAR.HONDA_ODYSSEY_5G_MMR:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
       ret.steerActuatorDelay = 0.15
