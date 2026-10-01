@@ -49,7 +49,7 @@ class CarControllerParams:
     elif CP.carFingerprint in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CIVIC_2022, CAR.HONDA_ACCORD,
                                CAR.HONDA_CRV_HYBRID, CAR.HONDA_FIT, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.HONDA_HRV_3G,
                                CAR.HONDA_ODYSSEY, CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE, CAR.HONDA_INSIGHT, CAR.HONDA_NBOX_2G,
-                               CAR.HONDA_E, CAR.HONDA_E_ADVANCE, CAR.HONDA_PRELUDE_6G):
+                               CAR.HONDA_E, CAR.HONDA_E_ADVANCE, CAR.HONDA_PRELUDE_6G, CAR.ACURA_INTEGRA):
       # TODO: determine if there is a dead zone at the top end (except HONDA_FREED, HONDA_HRV, HONDA_HRV_3G)
       self.STEER_MAX = 4096
     elif CP.carFingerprint == CAR.HONDA_ODYSSEY_TWN:
@@ -67,6 +67,7 @@ class HondaSafetyFlags(IntFlag):
   NIDEC_ALT = 4
   RADARLESS = 8
   BOSCH_CANFD = 16
+  NO_ENGINE_DATA_MSG = 32
 
 
 class HondaFlags(IntFlag):
@@ -330,6 +331,12 @@ class CAR(Platforms):
     CarSpecs(mass=3578 * CV.LB_TO_KG, wheelbase=2.65, steerRatio=17.6, centerToFrontRatio=0.43),
     {Bus.pt: 'honda_bosch_radarless_generated'},
     flags=HondaFlags.BOSCH_RADARLESS
+ )
+  ACURA_INTEGRA = HondaBoschPlatformConfig(
+    [HondaCarDocs("Acura Integra 2023-26", "All")],
+    CarSpecs(mass=3338.8 * CV.LB_TO_KG, wheelbase=2.5, centerToFrontRatio=0.5, steerRatio=15.5,),
+    {Bus.pt: 'honda_bosch_radarless_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS,
   )
 
   # Nidec Cars
