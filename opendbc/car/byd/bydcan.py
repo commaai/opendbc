@@ -59,10 +59,12 @@ def create_acc_cmd_passthrough(packer, stock_values: dict, counter: int):
   return packer.make_can_msg("ACC_CMD", 0, values)
 
 
-def create_acc_hud(packer, stock_values: dict, counter: int, acc_state: int, set_speed_kph: float, gap_bars: int):
-  # Fleet: byte2 is 0x04 with ACC_STATE in bits 3-5 and ACC_ON1 in bit 6.
+def create_acc_hud(packer, stock_values: dict, counter: int, acc_state: int, set_speed_kph: float, gap_bars: int,
+                   lead_visible: bool):
+  # byte2 is 0x04 with ACC_STATE in bits 3-5 and ACC_ON1 in bit 6.
   # ACC_ON2 is the middle state bit; writing both keeps the packer from clearing it.
   # SET_DISTANCE 1 is closest, 4 is farthest. 0 keeps the camera's gap.
+  # LEAD_VISIBLE follows the lead; the camera never sets it in standby.
   if gap_bars <= 0:
     distance = stock_values.get("SET_DISTANCE", 3)
   else:
@@ -80,6 +82,7 @@ def create_acc_hud(packer, stock_values: dict, counter: int, acc_state: int, set
     "ACC_ON2": (acc_state >> 1) & 1,
     "SET_SPEED": max(0.0, min(float(set_speed_kph), 127.5)),
     "SET_DISTANCE": distance,
+    "LEAD_VISIBLE": 1 if lead_visible else 0,
   }
   return packer.make_can_msg("ACC_HUD_ADAS", 0, values)
 

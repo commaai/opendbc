@@ -136,7 +136,7 @@ BO_ 803 CHARGE_STATUS: 8 VCU
 
 BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
  SG_ SET_SPEED : 0|8@1+ (0.5,0) [0|127.5] "kph" MCU
- SG_ SET_ME_B1_LO : 8|2@1+ (1,0) [0|3] "" MCU
+ SG_ LEAD_VISIBLE : 9|1@1+ (1,0) [0|1] "" MCU
  SG_ SET_DISTANCE : 12|3@0+ (1,0) [0|7] "" MCU
  SG_ SET_ME_B1_HI : 13|3@1+ (1,0) [0|7] "" MCU
  SG_ SET_ME_B2_LO : 16|3@1+ (1,0) [0|7] "" MCU

@@ -348,7 +348,7 @@ class CarController(CarControllerBase):
           set_kph = float(CS.acc_hud_stock.get("SET_SPEED", 0.0))
         can_sends.append(bydcan.create_acc_hud(
           self.packer, CS.acc_hud_stock, cntr, acc_state,
-          set_kph, hud_control.leadDistanceBars,
+          set_kph, hud_control.leadDistanceBars, hud_control.leadVisible,
         ))
 
     if CC.cruiseControl.cancel and self.frame % 10 == 0 and not self.CP.openpilotLongitudinalControl:
