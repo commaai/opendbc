@@ -25,6 +25,7 @@ class _Hud:
   visualAlert = VisualAlert.none
   setSpeed = 0.0
   leadDistanceBars = 0
+  leadVisible = False
 
 
 class _Actuators:
@@ -1006,8 +1007,17 @@ class TestBydLongControl(unittest.TestCase):
     dec = _decode("ACC_HUD_ADAS", hud[0])
     self.assertEqual(dec["ACC_STATE"], 3)
     self.assertEqual(dec["SET_DISTANCE"], 2)
+    self.assertEqual(dec["LEAD_VISIBLE"], 0)
     self.assertEqual(dec["COUNTER"], 0)
     self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
+
+    # byte 1 0x6c -> 0x6a with a lead ahead
+    CC.hudControl.leadVisible = True
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
+    self.assertEqual(dat[1], 0x6a)
+    CC.hudControl.leadVisible = False
 
     CS.camera_acc_state = 0
     CC.hudControl.leadDistanceBars = 0
