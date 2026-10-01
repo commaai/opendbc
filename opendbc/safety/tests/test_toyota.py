@@ -676,6 +676,7 @@ class TestToyotaTss3CamrySafety(Tss3SafetyHelpers, common.CarSafetyTest, common.
   def test_request_schema(self):
     request = self._application()
     flips = [(index, 0x01) for index in (0, 1, 2, 3, 4, 5, 6, 7, 13, 14, 15, 16, 17, 20, 22, 23, 25, 27)] + [(21, 0x40), (21, 0x80)]
+    flips += [(20, 0x40), (20, 0x80), (20, 0xC0)]
     for index, bit in flips:
       data = bytearray(request)
       data[index] ^= bit

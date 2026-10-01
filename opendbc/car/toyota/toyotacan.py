@@ -103,7 +103,7 @@ def create_tss3_control_request_values(stock_request, lat_active: bool, angle_ra
     "SET_SPEED": min(max(round(set_speed_kph), 0), 255),
     "SET_ME_X7FFF": 0x7FFF,
     "SET_ME_X7FFF_2": 0x7FFF,
-    "CRUISE_STATE_MIRROR": 3,
+    "CRUISE_STATE_MIRROR": 1,  # native 0x40 policy; exact OEM meaning is unconfirmed
     "CRUISE_REQUEST_ACTIVE": 1,
     **lateral,
   }

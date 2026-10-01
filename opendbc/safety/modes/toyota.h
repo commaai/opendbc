@@ -267,7 +267,7 @@ static bool toyota_tss3_08a_match(const uint8_t request[]) {
   // only the set speed, lateral and longitudinal requests, and sequence may change
   return (request[0] == 0U) && (request[1] == 0U) && (request[2] == 0U) && (request[3] == 0x08U) &&
          (request[4] == 0x80U) && (request[5] == 0U) && (request[13] == 0x7FU) && (request[14] == 0xFFU) &&
-         (request[15] == 0U) && (request[16] == 0x7FU) && (request[17] == 0xFFU) && (request[20] == 0xC0U) &&
+         (request[15] == 0U) && (request[16] == 0x7FU) && (request[17] == 0xFFU) && (request[20] == 0x40U) &&
          ((request[21] & 0xC0U) == 0U) && (request[22] == 0x10U) && (request[23] == 0U) &&
          (request[25] == 0U) && (request[27] == 0U);
 }
