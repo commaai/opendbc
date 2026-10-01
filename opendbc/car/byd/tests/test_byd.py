@@ -1161,5 +1161,44 @@ class TestBydLongCarState(unittest.TestCase):
     self.assertTrue(cs.update(parsers).cruiseState.standstill)
 
 
+class TestBydRadarChecksum(unittest.TestCase):
+  FRAME_A = bytes.fromhex(
+    "98fb0e0029f4e4012a7f040a0120703c80000009ffea80702955002934013bfffffbfffffffffc" +
+    "030003f00000402428343005bfec38c9ffffffffffffffffff"
+  )
+  FRAME_B = bytes.fromhex(
+    "f5fc0e0029f516012a94040a2d20703c8000000a1fec20702955d02a04013bff5cfcfffffffffc" +
+    "030003f000004028283c3005ffefb9c9ffffffffffffffffff"
+  )
+
+  def test_checksum_reproduces_both_halves(self):
+    sig1 = SimpleNamespace(start_bit=0)
+    sig2 = SimpleNamespace(start_bit=256)
+    for dat in (self.FRAME_A, self.FRAME_B):
+      buf = bytearray(dat)
+      self.assertEqual(bydcan.byd_radar_checksum(0x280, sig1, buf), dat[0])
+      self.assertEqual(bydcan.byd_radar_checksum(0x280, sig2, buf), dat[32])
+    self.assertEqual(bydcan.byd_radar_checksum(0x2FF, sig1, bytearray(self.FRAME_A)), self.FRAME_A[0])
+
+  def _parse(self, dat):
+    cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.radar], [("RADAR_TRACK_00", 0)], 1)
+    cp.update([(0, [(0x280, dat, 1)])])
+    return cp
+
+  def test_parser_accepts_stock_frames(self):
+    for dat in (self.FRAME_A, self.FRAME_B):
+      vl = self._parse(dat).vl["RADAR_TRACK_00"]
+      self.assertEqual(int(vl["TRACK_ID"]), dat[2])
+      self.assertEqual(int(vl["CHECKSUM"]), dat[0])
+      self.assertEqual(int(vl["CHECKSUM_2"]), dat[32])
+
+  def test_parser_rejects_flipped_half(self):
+    for idx in (3, 40):
+      dat = bytearray(self.FRAME_A)
+      dat[idx] ^= 1
+      vl = self._parse(bytes(dat)).vl["RADAR_TRACK_00"]
+      self.assertEqual(vl["TRACK_ID"], 0.0)
+
+
 if __name__ == "__main__":
   unittest.main()
