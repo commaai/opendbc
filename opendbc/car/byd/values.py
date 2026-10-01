@@ -57,6 +57,7 @@ class CarControllerParams:
   ACCEL_MIN = -3.5                    # m/s^2
   ACCEL_MAX = 2.0                     # m/s^2
   STOCK_AEB_ACCEL = -1.5              # m/s^2
+  STANDSTILL_RESUME_CLEAR_SPEED = 2.0 # m/s; stock drops STANDSTILL_RESUME here, never set above
 
   # EPS standby (LKS_PREPARED=1 with CRUISE_ACTIVATED=1, after >200 ms without 0x1E2)
   # ignores STEER_REQ until it sees the camera's REQ=0 / ACTIVE_LOW=0 ack. We send it.
