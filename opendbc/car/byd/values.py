@@ -53,6 +53,7 @@ class CarControllerParams:
   # Re-engaging the EPS against a driver still on the wheel sets TORQUE_TEMP_FAILED;
   # a few within a second drop it to standby.
   STEER_YIELD_HOLD_SLOTS = 25         # 50 Hz frames, 0.5 s
+  HUD_RELEASE_FRAMES = 300            # 100 Hz frames, 3 s of 0x316 after disengage
 
   ACCEL_MIN = -3.5                    # m/s^2
   ACCEL_MAX = 2.0                     # m/s^2

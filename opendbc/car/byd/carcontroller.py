@@ -216,6 +216,11 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
+    # The camera flashes LKAS_STATE 4 for a few seconds after a cancel. In long mode
+    # the wheel is ours, so keep painting it until that has passed.
+    if self.CP.openpilotLongitudinalControl and self.enabled_last and not CC.enabled:
+      self._hold_for(CarControllerParams.HUD_RELEASE_FRAMES)
+
     self.lks_relay_tick = False
     self._update_lks_camera(CC, CS, can_sends)
     if self.CP.openpilotLongitudinalControl:
