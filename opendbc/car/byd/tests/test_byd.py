@@ -134,7 +134,7 @@ class TestBydLkasHud(unittest.TestCase):
     self.assertEqual(out["LEFT_LANE_STATE"], 2)
     self.assertEqual(out["RIGHT_LANE_STATE"], 0)
 
-  def test_close_follow_oranges_both_visible(self):
+  def test_both_depart_oranges_visible_lanes(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
     hud = _Hud()
     hud.leftLaneVisible = True
