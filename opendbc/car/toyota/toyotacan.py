@@ -128,23 +128,14 @@ def create_tss3_signer_arm(packer, bus: int, arm: bool):
   return packer.make_can_msg("SIGNER_REQUEST", bus, {"HEADER": 0x07, "DATA_1": 0xC9A800 | int(arm)})
 
 
-def create_tss3_lkas_hud(packer, bus, stock_hud, left_line: bool, right_line: bool, lat_active: bool, steer_alert: bool):
+def create_tss3_lkas_hud(packer, bus, stock_hud, steer_alert: bool):
   values = copy.copy(stock_hud)
 
   # forward startup and unknown states untouched
   if values["LTA_MODE"] in (0x10, 0x12, 0x14) and values["LTA_INDICATOR"] in (0, 1, 2):
-    line = 4 if lat_active else 1
-    if left_line == right_line:
-      values["LANE_LINE_1"] = values["LANE_LINE_2"] = line if left_line else 2
-    else:
-      # which line is left is unknown, so only update the stock visible lines
-      for sig in ("LANE_LINE_1", "LANE_LINE_2"):
-        if values[sig] in (1, 4):
-          values[sig] = line
-
+    # the meter always shows the FRC's own LTA state, filter the stock
+    # hands-on warning and show openpilot's own instead
     values.update({
-      "LTA_MODE": 0x14 if lat_active else 0x12,
-      "LTA_INDICATOR": 1 if lat_active else 2,
       "HANDS_ON_WARNING": 3 if steer_alert else 0,
       "HANDS_ON_WARNING_2": 0,
     })
