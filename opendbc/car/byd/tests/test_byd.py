@@ -115,6 +115,36 @@ class TestBydLkasHud(unittest.TestCase):
     self.assertEqual(out["HANDS_ON_WHEEL_REQ"], 0)
     self.assertEqual(out["SET_ME_50"], 0)
 
+  def test_visible_lanes_green(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    hud = _Hud()
+    hud.leftLaneVisible = True
+    hud.rightLaneVisible = True
+    out = _decode_hud(bydcan.create_lkas_hud(packer, 3, {"LKAS_STATE": 0, "LKS_MODE": 0}, hud, False))
+    self.assertEqual(out["LEFT_LANE_STATE"], 1)
+    self.assertEqual(out["RIGHT_LANE_STATE"], 1)
+
+  def test_depart_oranges_visible_only(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    hud = _Hud()
+    hud.leftLaneVisible = True
+    hud.leftLaneDepart = True
+    hud.rightLaneDepart = True
+    out = _decode_hud(bydcan.create_lkas_hud(packer, 3, {"LKAS_STATE": 0, "LKS_MODE": 0}, hud, False))
+    self.assertEqual(out["LEFT_LANE_STATE"], 2)
+    self.assertEqual(out["RIGHT_LANE_STATE"], 0)
+
+  def test_close_follow_oranges_both_visible(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    hud = _Hud()
+    hud.leftLaneVisible = True
+    hud.rightLaneVisible = True
+    hud.leftLaneDepart = True
+    hud.rightLaneDepart = True
+    out = _decode_hud(bydcan.create_lkas_hud(packer, 3, {"LKAS_STATE": 0, "LKS_MODE": 0}, hud, False))
+    self.assertEqual(out["LEFT_LANE_STATE"], 2)
+    self.assertEqual(out["RIGHT_LANE_STATE"], 2)
+
 
 def _decode_bsd(dat: bytes) -> dict:
   cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("BSD_RADAR", 0)], 0)
@@ -249,16 +279,23 @@ class TestBydSteerNotAccepted(unittest.TestCase):
   def test_idle_does_not_tx_steer_or_hud(self):
     ctrl = _ctrl()
 
-    def step(enabled: bool, lat_active: bool):
-      CS = _cs(angle=12.0)
+    def step(enabled: bool, lat_active: bool, lks=True):
+      CS = _cs(angle=12.0, lks_enabled=lks)
       _act, sends = ctrl.update(_cc(enabled=enabled, lat_active=lat_active), CS, 0)
       return {m[0]: m for m in sends}
 
-    # disengaged: the camera owns 0x1E2 and 0x316
-    step(False, False)
-    idle = step(False, False)
+    # LKS off + disengaged: the camera owns 0x1E2 and 0x316
+    step(False, False, lks=False)
+    idle = step(False, False, lks=False)
     self.assertNotIn(0x1E2, idle)
     self.assertNotIn(0x316, idle)
+
+    # LKS on + disengaged: idle 0x1E2 + HUD (model / close-follow lanes)
+    step(False, False, lks=True)
+    lks_idle = step(False, False, lks=True)
+    self.assertIn(0x1E2, lks_idle)
+    self.assertIn(0x316, lks_idle)
+    self.assertEqual(_decode("STEERING_MODULE_ADAS", lks_idle[0x1E2])["STEER_REQ"], 0)
 
     # engaged without lateral: idle heartbeat at the measured angle, we keep HUD
     step(True, False)
@@ -297,13 +334,14 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     self.assertEqual(hud["LKS_MODE"], 2)
     self.assertEqual(hud["LEFT_LANE_STATE"], 1)
 
-  def _disengage_tail(self, ctrl):
+  def _disengage_tail(self, ctrl, lks_after=False):
+    # lks_after=False: release to camera after the hold (legacy cancel path).
     cam = {"LKAS_STATE": 4, "LKS_MODE": 2, "LEFT_LANE_STATE": 1, "RIGHT_LANE_STATE": 1}
     for _ in range(4):
       ctrl.update(_cc(), _cs(camera_lkas_state=2), 0)
     hud, steer = [], []
     for _ in range(CCP.HUD_RELEASE_FRAMES + 4):
-      CS = _cs(camera_lkas_state=4)
+      CS = _cs(camera_lkas_state=4, lks_enabled=lks_after)
       CS.lkas_hud = cam
       _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), CS, 0)
       hud.append([_decode("LKAS_HUD_ADAS", m) for m in sends if m[0] == 0x316])
@@ -311,19 +349,28 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     return hud, steer
 
   def test_long_control_hud_hold_after_disengage(self):
-    hud, steer = self._disengage_tail(_ctrl(long_control=True))
+    # LKS off after cancel: brief hold then camera owns HUD again.
+    hud, steer = self._disengage_tail(_ctrl(long_control=True), lks_after=False)
     sent = [h for h in hud[:CCP.HUD_RELEASE_FRAMES] if h]
     self.assertGreater(len(sent), CCP.HUD_RELEASE_FRAMES // 2 - 2)
     for h in sent:
-      self.assertEqual(h[0]["LKAS_STATE"], 1)
+      self.assertEqual(h[0]["LKAS_STATE"], 0)
     for s in steer[:CCP.HUD_RELEASE_FRAMES]:
       for f in s:
         self.assertEqual(f["STEER_REQ"], 0)
     self.assertFalse(any(hud[CCP.HUD_RELEASE_FRAMES + 2:]))
     self.assertFalse(any(steer[CCP.HUD_RELEASE_FRAMES + 2:]))
 
+  def test_lks_on_keeps_hud_after_disengage(self):
+    hud, steer = self._disengage_tail(_ctrl(long_control=True), lks_after=True)
+    self.assertTrue(any(hud[CCP.HUD_RELEASE_FRAMES + 2:]))
+    self.assertTrue(any(steer[CCP.HUD_RELEASE_FRAMES + 2:]))
+    for s in steer[CCP.HUD_RELEASE_FRAMES + 2:]:
+      for f in s:
+        self.assertEqual(f["STEER_REQ"], 0)
+
   def test_no_hud_hold_without_long_control(self):
-    hud, steer = self._disengage_tail(_ctrl(long_control=False))
+    hud, steer = self._disengage_tail(_ctrl(long_control=False), lks_after=False)
     self.assertFalse(any(hud[2:]))
     self.assertFalse(any(steer[2:]))
 
