@@ -11,7 +11,7 @@ _BUTTONS = (
   ("SET_BTN", ButtonType.decelCruise),
   ("ACC_ON_BTN", ButtonType.cancel),
   ("DEC_DISTANCE_BTN", ButtonType.gapAdjustCruise),
-  ("INC_DISTANCE_BTN", ButtonType.gapAdjustCruise),
+  ("INC_DISTANCE_BTN", ButtonType.altButton2),
 )
 _BUTTON_FRAME = (
   "SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN",
@@ -64,6 +64,7 @@ class CarState(CarStateBase):
     self.acc_hud_stock = {}
     self.pcm_buttons_new = []
     self.button_prev = {name: False for name, _btype in _BUTTONS}
+    self.lks_off_alert = 0
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -136,6 +137,18 @@ class CarState(CarStateBase):
     if self.lks_btn_rising and self.CP.openpilotLongitudinalControl and not self.lks_enabled:
       button_events.append(structs.CarState.ButtonEvent(pressed=False, type=ButtonType.cancel))
     ret.buttonEvents = button_events
+
+    # Falling SET/RES with the LKS latch off. Drop it when LKS or ACC goes away.
+    acc_available = acc_state in (2, 3, 5)
+    if self.lks_enabled or not acc_available:
+      self.lks_off_alert = 0
+    else:
+      for event in button_events:
+        if not event.pressed and event.type in (ButtonType.accelCruise, ButtonType.decelCruise):
+          self.lks_off_alert = CCP.LKS_OFF_ALERT_FRAMES
+    ret.invalidLkasSetting = self.lks_off_alert > 0
+    if self.lks_off_alert > 0:
+      self.lks_off_alert -= 1
 
     # Camera LKAS_STATE 0/4 are moods, not the switch. Fault only if EPS stays idle.
     ret.steerFaultTemporary = self.steer_not_accepted
