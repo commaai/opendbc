@@ -1,6 +1,6 @@
 from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.honda.values import HondaFlags, CarControllerParams
+from opendbc.car.honda.values import HondaFlags, CarControllerParams, CAR
 
 # CAN bus layout with relay
 # 0 = ACC-CAN - radar side
