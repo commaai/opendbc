@@ -90,6 +90,9 @@ class Footnote(Enum):
   CAMRY = CarFootnote(
     "openpilot operates above 28mph for Camry 4CYL L, 4CYL LE and 4CYL SE which don't have Full-Speed Range Dynamic Radar Cruise Control.",
     Column.FSR_LONGITUDINAL)
+  RAV4_HYBRID = CarFootnote(
+    "RAV4 Hybrid support does not include the RAV4 Plug-in Hybrid (formerly RAV4 Prime).",
+    Column.MODEL)
 
 
 @dataclass
@@ -266,14 +269,14 @@ class CAR(Platforms):
   TOYOTA_RAV4_TSS2 = ToyotaTSS2PlatformConfig(
     [
       ToyotaCarDocs("Toyota RAV4 2019-21", video="https://www.youtube.com/watch?v=wJxjDd42gGA"),
-      ToyotaCarDocs("Toyota RAV4 Hybrid 2019-21"),
+      ToyotaCarDocs("Toyota RAV4 Hybrid 2019-21", footnotes=[Footnote.RAV4_HYBRID]),
     ],
     CarSpecs(mass=3585. * CV.LB_TO_KG, wheelbase=2.68986, steerRatio=14.3, tireStiffnessFactor=0.7933),
   )
   TOYOTA_RAV4_TSS2_2022 = ToyotaTSS2PlatformConfig(
     [
       ToyotaCarDocs("Toyota RAV4 2022"),
-      ToyotaCarDocs("Toyota RAV4 Hybrid 2022", video="https://youtu.be/U0nH9cnrFB0"),
+      ToyotaCarDocs("Toyota RAV4 Hybrid 2022", video="https://youtu.be/U0nH9cnrFB0", footnotes=[Footnote.RAV4_HYBRID]),
     ],
     TOYOTA_RAV4_TSS2.specs,
     flags=ToyotaFlags.RADAR_ACC,
@@ -281,7 +284,7 @@ class CAR(Platforms):
   TOYOTA_RAV4_TSS2_2023 = ToyotaTSS2PlatformConfig(
     [
       ToyotaCarDocs("Toyota RAV4 2023-25"),
-      ToyotaCarDocs("Toyota RAV4 Hybrid 2023-25", video="https://youtu.be/4eIsEq4L4Ng"),
+      ToyotaCarDocs("Toyota RAV4 Hybrid 2023-25", video="https://youtu.be/4eIsEq4L4Ng", footnotes=[Footnote.RAV4_HYBRID]),
     ],
     TOYOTA_RAV4_TSS2.specs,
     flags=ToyotaFlags.RADAR_ACC | ToyotaFlags.ANGLE_CONTROL,
