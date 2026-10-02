@@ -1124,6 +1124,52 @@ class TestBydLongCarState(unittest.TestCase):
     ret = cs.update(parsers)
     self.assertTrue(cs.update_button_enable(ret.buttonEvents))
 
+  def test_lks_off_set_holds_invalid_lkas(self):
+    cs, parsers = self._cs(True)
+    self._feed(parsers, Bus.cam, "ACC_HUD_ADAS", {"ACC_STATE": 2, "ACC_ON2": 1, "COUNTER": 1})
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"LKAS_ON_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 1})
+    cs.update(parsers)
+    self.assertFalse(cs.lks_enabled)
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 2})
+    cs.update(parsers)
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 3})
+    ret = cs.update(parsers)
+    self.assertFalse(cs.update_button_enable(ret.buttonEvents))
+    self.assertTrue(ret.invalidLkasSetting)
+    for _ in range(CCP.LKS_OFF_ALERT_FRAMES - 1):
+      ret = cs.update(parsers)
+    self.assertTrue(ret.invalidLkasSetting)
+    ret = cs.update(parsers)
+    self.assertFalse(ret.invalidLkasSetting)
+
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 4})
+    cs.update(parsers)
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 5})
+    ret = cs.update(parsers)
+    self.assertTrue(ret.invalidLkasSetting)
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"LKAS_ON_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 6})
+    ret = cs.update(parsers)
+    self.assertTrue(cs.lks_enabled)
+    self.assertFalse(ret.invalidLkasSetting)
+
+  def test_distance_buttons_split_direction(self):
+    from opendbc.car import structs
+    T = structs.CarState.ButtonEvent.Type
+    cs, parsers = self._cs(True)
+    self._feed(parsers, Bus.cam, "ACC_HUD_ADAS", {"ACC_STATE": 2, "ACC_ON2": 1, "COUNTER": 1})
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"INC_DISTANCE_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 1})
+    ret = cs.update(parsers)
+    self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents], [(T.altButton2, True)])
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 2})
+    ret = cs.update(parsers)
+    self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents], [(T.altButton2, False)])
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"DEC_DISTANCE_BTN": 1, "SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 3})
+    ret = cs.update(parsers)
+    self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents], [(T.gapAdjustCruise, True)])
+    self._feed(parsers, Bus.pt, "PCM_BUTTONS", {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "COUNTER": 4})
+    ret = cs.update(parsers)
+    self.assertEqual([(e.type, e.pressed) for e in ret.buttonEvents], [(T.gapAdjustCruise, False)])
+
   def test_cruise_follows_acc_main_and_not_active_state(self):
     cs, parsers = self._cs(True)
     self._feed(parsers, Bus.cam, "ACC_HUD_ADAS", {"ACC_STATE": 3, "ACC_ON2": 1, "SET_SPEED": 80})

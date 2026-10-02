@@ -77,6 +77,7 @@ class CarControllerParams:
   LKS_CAM_DEBOUNCE_FRAMES = 20        # 200 ms; treat 4 as still on
   LKS_EPS_IDLE_FRAMES = 20            # 200 ms PREP=1 CRUISE=0 before restore
   LKS_RECOVER_FRAMES = 200            # 2 s; retry want-off if a snap failed
+  LKS_OFF_ALERT_FRAMES = 300          # 100 Hz, 3 s after SET/RES with LKS off
 
 
 class BydSafetyFlags(IntFlag):
