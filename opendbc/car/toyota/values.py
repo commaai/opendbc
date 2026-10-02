@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms
-from opendbc.car.lateral import AngleSteeringLimits
+from opendbc.car.lateral import AngleSteeringLimits, AngleSteeringLimitsVM
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarDocs, Column, CarParts, CarHarness, SupportType
@@ -20,8 +20,10 @@ class CarControllerParams:
   STEER_MAX = 1500
   STEER_ERROR_MAX = 350     # max delta between torque cmd and torque motor
 
+  TSS3_TARGET_ANGLE_SCALE_DEG = 1024 / 17870
+
   # Lane Tracing Assist (LTA) control limits
-  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+  ANGLE_LIMITS: AngleSteeringLimits | AngleSteeringLimitsVM = AngleSteeringLimits(
     # EPS ignores commands above this angle and causes PCS to fault
     94.9461,  # deg
     # Assuming a steering ratio of 13.7:
@@ -33,9 +35,20 @@ class CarControllerParams:
     ([5, 25], [0.36, 0.26]),
   )
 
+  # TSS3 EPS clamps the LTA target to +/-1745 raw and permits 78 raw counts per
+  # sequence step. At 100 Hz, 39 raw per frame keeps a 2x margin to that bound;
+  # the vehicle-model jerk limit is usually tighter.
+  TSS3_ANGLE_LIMITS: AngleSteeringLimitsVM = AngleSteeringLimitsVM(
+    1745 * TSS3_TARGET_ANGLE_SCALE_DEG,
+    MAX_ANGLE_RATE=39 * TSS3_TARGET_ANGLE_SCALE_DEG,
+  )
+
   MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
 
   def __init__(self, CP):
+    if CP.flags & ToyotaFlags.TSS3:
+      self.ANGLE_LIMITS = self.TSS3_ANGLE_LIMITS
+
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
       self.ACCEL_MAX = 2.0
     else:
@@ -56,6 +69,7 @@ class ToyotaSafetyFlags(IntFlag):
   STOCK_LONGITUDINAL = (2 << 8)
   LTA = (4 << 8)
   SECOC = (8 << 8)
+  TSS3 = (16 << 8)
 
 
 class ToyotaFlags(IntFlag):
@@ -74,6 +88,7 @@ class ToyotaFlags(IntFlag):
   # these cars can utilize 2.0 m/s^2
   RAISED_ACCEL_LIMIT = 1024
   SECOC = 2048
+  TSS3 = 4096
 
   # deprecated flags
   # these cars are speculated to allow stop and go when the DSU is unplugged
@@ -126,6 +141,21 @@ class ToyotaSecOCPlatformConfig(PlatformConfig):
       self.dbc_dict = {Bus.pt: 'toyota_secoc_pt_generated'}
 
 
+@dataclass
+class ToyotaTSS3CarDocs(ToyotaCarDocs):
+  support_type: SupportType = SupportType.CUSTOM
+  support_link: str | None = None
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.toyota_b]))
+
+
+@dataclass
+class ToyotaTSS3PlatformConfig(PlatformConfig):
+  dbc_dict: dict = field(default_factory=lambda: dbc_dict('toyota_tss3_pt_generated', 'toyota_tss3_radar_generated'))
+
+  def init(self):
+    self.flags |= ToyotaFlags.TSS3
+
+
 class CAR(Platforms):
   # Toyota
   TOYOTA_ALPHARD_TSS2 = ToyotaTSS2PlatformConfig(
@@ -174,6 +204,13 @@ class CAR(Platforms):
       ToyotaCarDocs("Toyota Camry Hybrid 2021-24"),
     ],
     TOYOTA_CAMRY.specs,
+  )
+  TOYOTA_CAMRY_TSS3 = ToyotaTSS3PlatformConfig(
+    [ToyotaTSS3CarDocs("Toyota Camry Hybrid 2026")],
+    # XV80: lightest (LE FWD) curb weight and 2,825 mm wheelbase from Toyota's 2025 product information.
+    # Steer ratio is learned from routes; the Toyota stiffness factor remains paramsd's baseline.
+    CarSpecs(mass=3450. * CV.LB_TO_KG, wheelbase=2.825, steerRatio=15.3, tireStiffnessFactor=0.7933),
+    flags=ToyotaFlags.HYBRID | ToyotaFlags.RAISED_ACCEL_LIMIT,
   )
   TOYOTA_CHR = PlatformConfig(
     [
@@ -542,10 +579,23 @@ FW_QUERY_CONFIG = FwQueryConfig(
                       Ecu.hybrid, Ecu.srs, Ecu.transmission, Ecu.hvac],
       bus=0,
     ),
+    # Stock Toyota-B exposes the TSS3 EPS and ABS diagnostic endpoints on bus
+    # 1. Query both so an exact ABS identity can still resolve a car whose EPS
+    # diagnostic endpoint is unavailable.
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.DEFAULT_DIAGNOSTIC_REQUEST, StdQueries.EXTENDED_DIAGNOSTIC_REQUEST, StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.DEFAULT_DIAGNOSTIC_RESPONSE, StdQueries.EXTENDED_DIAGNOSTIC_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.eps, Ecu.abs],
+      bus=1,
+      obd_multiplexing=False,
+    ),
   ],
   non_essential_ecus={
     # FIXME: On some models, abs can sometimes be missing
     Ecu.abs: [CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_SIENNA, CAR.LEXUS_IS, CAR.TOYOTA_ALPHARD_TSS2],
+    # EPS can miss the FW query during startup on TSS3 Camry
+    Ecu.eps: [CAR.TOYOTA_CAMRY_TSS3],
+    Ecu.fwdCamera: [CAR.TOYOTA_CAMRY_TSS3],
     # On some models, the engine can show on two different addresses
     Ecu.engine: [CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_CAMRY, CAR.TOYOTA_COROLLA_TSS2, CAR.TOYOTA_CHR, CAR.TOYOTA_CHR_TSS2, CAR.LEXUS_IS,
                  CAR.LEXUS_IS_TSS2, CAR.LEXUS_RC, CAR.LEXUS_NX, CAR.LEXUS_NX_TSS2, CAR.LEXUS_RX, CAR.LEXUS_RX_TSS2],
@@ -583,6 +633,9 @@ FW_QUERY_CONFIG = FwQueryConfig(
 )
 
 STEER_THRESHOLD = 100
+
+# Nm, physical steering wheel torque
+TSS3_STEER_DRIVER_TORQUE_THRESHOLD = 0.6
 
 # These cars have non-standard EPS torque scale factors. All others are 73
 EPS_SCALE = defaultdict(lambda: 73,
