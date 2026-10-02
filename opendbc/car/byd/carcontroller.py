@@ -27,6 +27,7 @@ class CarController(CarControllerBase):
     self.accel = 0.0
     self.not_accepted_frames = 0
     self.sending_last = False
+    self.send_op_last = False
     self.lat_send_last = False
     self.warmup_left = 0
     self.standby_slots = 0
@@ -226,7 +227,9 @@ class CarController(CarControllerBase):
     if self.CP.openpilotLongitudinalControl:
       for frame in CS.pcm_buttons_new:
         can_sends.append(bydcan.create_buttons_relay(self.packer, frame, lkas=self.lks_relay_tick))
+    # Engaged or post-LKS hold: full control path. LKS armed only: idle 0x1E2 + HUD.
     send_op = CC.enabled or self.hold_steer > 0
+    send_hud = send_op or CS.lks_enabled
 
     if self.frame % 2:
       cntr = (self.frame // 2) % 16
@@ -244,7 +247,8 @@ class CarController(CarControllerBase):
       # gap the first frames are REQ=0 and the first REQ=1 repeats the angle.
       # hold_steer keeps that block for a few hundred ms after a real LKS press so the
       # camera cannot grab the wheel before we snap it back off.
-      if send_op and not self.sending_last:
+      # Warmup on engage edge only (not when LKS-only HUD was already up).
+      if send_op and not self.send_op_last:
         self.warmup_left = CarControllerParams.STEER_WARMUP_FRAMES
 
       # Hands on the wheel: keep 0x1E2 (camera stays blocked) but drop STEER_REQ. A yank
@@ -302,22 +306,22 @@ class CarController(CarControllerBase):
         self.apply_angle_last = apply_steer_angle_limits_vm(desired_angle, self.apply_angle_last, CS.out.vEgoRaw,
                                                             CS.out.steeringAngleDeg, lat_send, CarControllerParams, self.VM)
 
-      if send_op:
-        can_sends.append(bydcan.create_steering_control(self.packer, self.apply_angle_last, lat_send, cntr, ack))
-        # HUD for the whole engagement so TAKE CONTROL can paint the cluster after
-        # latActive drops. Panda keeps camera 0x316 off while we still send 0x1E2.
+      if send_hud:
+        req = lat_send if send_op else False
+        can_sends.append(bydcan.create_steering_control(self.packer, self.apply_angle_last, req, cntr, ack if send_op else False))
         can_sends.append(bydcan.create_lkas_hud(self.packer, cntr, CS.lkas_hud, hud_control, CC.latActive, CS.lks_enabled))
 
       # STEER_REQ=1 while EPS reports idle (LKS_PREPARED=1) for 200 ms => not accepted.
       # Only frames we actually sent with STEER_REQ=1 count.
-      if lat_send:
+      if lat_send and send_op:
         self.not_accepted_frames = self.not_accepted_frames + 1 if not CS.eps_engaged else 0
       elif not CC.latActive or driver_yield:
         self.not_accepted_frames = 0
       CS.steer_not_accepted = self.steer_fault_latched or self.not_accepted_frames >= CarControllerParams.STEER_NOT_ACCEPTED_FRAMES
 
-      self.sending_last = send_op
-      self.lat_send_last = lat_send
+      self.sending_last = send_hud
+      self.send_op_last = send_op
+      self.lat_send_last = lat_send if send_op else False
 
       # 50 Hz 0x32E: camera frame on stockAeb, else ours, idle when not longActive
       if self.CP.openpilotLongitudinalControl:
