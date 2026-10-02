@@ -89,7 +89,7 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
   if CP.flags & HondaFlags.BOSCH_RADARLESS:
     acc_control_values.update({
       "CONTROL_ON": enabled,
-      "IDLESTOP_ALLOW": braking if CP.car_fingerprint == CAR.ACURA_INTEGRA else stopping_counter > 200,  # allow idle stop after 4 seconds (50 Hz)
+      "IDLESTOP_ALLOW": braking if CP.carFingerprint == CAR.ACURA_INTEGRA else stopping_counter > 200,  # allow idle stop after 4 seconds (50 Hz)
     })
   else:
     acc_control_values.update({
