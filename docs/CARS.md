@@ -24,7 +24,7 @@
 |Acura|TLX 2023|All|[Community](#community)|
 |Acura|TLX 2025|All|[Upstream](#upstream)|
 |Acura|ZDX 2024|All|[Not compatible](#can-bus-security)|
-|Audi|A3 2014-19|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Audi|A3 2014-20|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|A3 Sportback e-tron 2017-18|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|A4 2016-24|All|[Not compatible](#flexray)|
 |Audi|A5 2016-24|All|[Not compatible](#flexray)|
