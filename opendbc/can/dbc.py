@@ -207,6 +207,11 @@ def ford_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
     sig.type = SignalType.COUNTER
 
 
+def mg_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
+  if sig.name in ("VehSpdAvgAlvRCHSC2", "ChLKAAlvRCHSC2", "BrkPdlAppdRCHSC2", "ACCSysAlvRlngCtr_SCSHSC2"):
+    sig.type = SignalType.COUNTER
+
+
 @dataclass
 class ChecksumState:
   checksum_type: int
@@ -250,7 +255,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, ford_setup_signal, checksum_pattern=r"_Cs$",
                          checksum_fields=FORD_CHECKSUM_FIELDS)
   elif dbc_name == "mg":
-    return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum, checksum_pattern=r"Chksm|^ChLKARespToqPVHSC2$")
+    return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum, mg_setup_signal, checksum_pattern=r"Chksm|^ChLKARespToqPVHSC2$")
   elif dbc_name == "rivian_primary_actuator":
     return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum, checksum_pattern=r"_Checksum$")
   return None
