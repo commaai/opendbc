@@ -160,9 +160,9 @@ def create_lkas_hud(packer, counter: int, stock_lkas_hud: dict, hud_control, lat
   values["LEFT_LANE_STATE"] = 1 if hud_control.leftLaneVisible else 0
   values["RIGHT_LANE_STATE"] = 1 if hud_control.rightLaneVisible else 0
 
-  if hud_control.leftLaneDepart:
+  if hud_control.leftLaneVisible and hud_control.leftLaneDepart:
     values["LEFT_LANE_STATE"] = 2
-  if hud_control.rightLaneDepart:
+  if hud_control.rightLaneVisible and hud_control.rightLaneDepart:
     values["RIGHT_LANE_STATE"] = 2
 
   take_control = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
