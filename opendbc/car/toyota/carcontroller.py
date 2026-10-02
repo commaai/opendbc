@@ -121,8 +121,7 @@ class CarController(CarControllerBase):
     send_ui = steer_alert != self.alert_active
     self.alert_active = steer_alert
     if CS.tss3_lkas_hud and (self.frame % 20 == 0 or send_ui):
-      can_sends.append(toyotacan.create_tss3_lkas_hud(self.packer, TSS3_CHASSIS_BUS, CS.tss3_lkas_hud, hud_control.leftLaneVisible,
-                                                      hud_control.rightLaneVisible, CC.latActive, steer_alert))
+      can_sends.append(toyotacan.create_tss3_lkas_hud(self.packer, TSS3_CHASSIS_BUS, CS.tss3_lkas_hud, steer_alert))
 
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.last_angle
