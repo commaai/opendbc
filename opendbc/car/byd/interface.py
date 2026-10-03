@@ -19,6 +19,7 @@ class CarInterface(CarInterfaceBase):
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.byd, int(BydSafetyFlags.LKS_ON))]
 
     ret.dashcamOnly = False
+    ret.hudLaneFromModel = True
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.25
