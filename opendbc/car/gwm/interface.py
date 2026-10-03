@@ -12,38 +12,43 @@ class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
 
+  # frames between synthetic gap button pulses, so openpilot's personality
+  # feedback (hudControl.leadDistanceBars) can round-trip before pulsing again
+  GAC_SYNC_INTERVAL = 25
+
   def __init__(self, CP):
-      super().__init__(CP)
-      self.lat_active = False
-      self.isEPSobeying = True
-      self.steer_fault_temporary_counter = 0
-      self.current_personality = 0
-      self.pcm_follow_distance = 0
-      self.press_gac_button = False
+    super().__init__(CP)
+    self.current_personality = 0
+    self.pcm_follow_distance = 0
+    self.press_gac_button = False
+    self.frame = 0
+    self.last_gac_press_frame = -self.GAC_SYNC_INTERVAL
 
   def apply(self, CC, now_nanos):
-    self.lat_active = CC.latActive
-    hud_control = CC.hudControl
-    self.current_personality = hud_control.leadDistanceBars
+    self.current_personality = CC.hudControl.leadDistanceBars
     return super().apply(CC, now_nanos)
 
   def update(self, can_packets):
-    cp = self.can_parsers[Bus.main]
-    self.isEPSobeying = cp.vl["RX_STEER_RELATED"]["A_RX_STEER_REQUESTED"] == 1
-    self.steer_fault_temporary_counter = (self.steer_fault_temporary_counter + 1) if (self.lat_active and not self.isEPSobeying) \
-                                          else 0
-
-    cp_cam = self.can_parsers[Bus.cam]
-    self.pcm_follow_distance = cp_cam.vl["ACC"]["CAR_DISTANCE_SELECTION"]
+    self.pcm_follow_distance = self.can_parsers[Bus.cam].vl["ACC"]["CAR_DISTANCE_SELECTION"]
 
     ret = super().update(can_packets)
-    ret.steerFaultTemporary |= self.steer_fault_temporary_counter > 100
-    if (self.pcm_follow_distance == 4 and self.current_personality != 3) or \
-       (self.pcm_follow_distance == 3 and self.current_personality != 3) or \
-       (self.pcm_follow_distance == 2 and self.current_personality != 2) or \
-       (self.pcm_follow_distance == 1 and self.current_personality != 1):
-      self.press_gac_button = not self.press_gac_button
-    ret.buttonEvents = create_button_events(self.press_gac_button, True, {1: ButtonType.gapAdjustCruise})
+
+    # The stock ACC cycles through 4 follow distances while openpilot cycles through 3
+    # personalities (distances 3 and 4 both map to the farthest personality). While they
+    # disagree, pulse gap-adjust button presses so openpilot cycles its personality to
+    # match the distance selected on the stalk.
+    prev_gac_button = self.press_gac_button
+    if self.press_gac_button:
+      # openpilot cycles personality on button release, so always complete a press
+      self.press_gac_button = False
+    else:
+      target_personality = min(int(self.pcm_follow_distance), 3)
+      out_of_sync = self.pcm_follow_distance > 0 and target_personality != self.current_personality
+      if out_of_sync and (self.frame - self.last_gac_press_frame) >= self.GAC_SYNC_INTERVAL:
+        self.press_gac_button = True
+        self.last_gac_press_frame = self.frame
+    ret.buttonEvents = create_button_events(int(self.press_gac_button), int(prev_gac_button), {1: ButtonType.gapAdjustCruise})
+    self.frame += 1
 
     return ret
 

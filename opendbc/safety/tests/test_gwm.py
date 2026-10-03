@@ -39,6 +39,12 @@ def checksum(msg):
     ret[0] = _checksum(ret[1:], 0x2D)
   elif addr == 0x13B: # WHEEL_SPEEDS
     ret[0] = _checksum(ret[1:8], 0x7F)
+  elif addr == 0x147: # RX_STEER_RELATED, block B
+    ret[8] = _checksum(ret[9:16], 0x61)
+  elif addr == 0x120: # BRAKE2, block A
+    ret[0] = _checksum(ret[1:8], 0xEE)
+  elif addr == 0x60: # CAR_OVERALL_SIGNALS2 (gas), block B
+    ret[8] = _checksum(ret[9:16], 0x95)
 
   return addr, ret, bus
 
@@ -64,6 +70,8 @@ class TestGwmSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, 
   MAX_BRAKE = 107
   MAX_POSSIBLE_BRAKE = 180
 
+  cnt_torque_meas = 0
+
   def setUp(self):
     self.packer = CANPackerSafety(opendbc)
     self.safety = libsafety_py.libsafety
@@ -72,24 +80,20 @@ class TestGwmSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, 
 
   def _user_gas_msg(self, gas):
     values = {"GAS_POSITION": gas}
-    return self.packer.make_can_msg_safety("CAR_OVERALL_SIGNALS2", 0, values)
+    return self.packer.make_can_msg_safety("CAR_OVERALL_SIGNALS2", 0, values, fix_checksum=checksum)
 
   def _user_brake_msg(self, brake):
     values = {"PEDAL_BRAKE_PRESSED": brake}
-    return self.packer.make_can_msg_safety("BRAKE2", 0, values)
+    return self.packer.make_can_msg_safety("BRAKE2", 0, values, fix_checksum=checksum)
 
   def _speed_msg(self, speed):
     values = {f"{pos}_WHEEL_SPEED": speed * 1.0 for pos in ["FRONT_LEFT", "FRONT_RIGHT", "REAR_LEFT", "REAR_RIGHT"]}
     return self.packer.make_can_msg_safety("WHEEL_SPEEDS", 0, values, fix_checksum=checksum)
 
   def _pcm_status_msg(self, enable):
-    values = {"AP_ENABLE_COMMAND": enable, "AP_CANCEL_COMMAND": not enable}
-    return self.packer.make_can_msg_safety("STEER_AND_AP_STALK", 0, values, fix_checksum=checksum)
-
-  def test_main_cancel_button(self):
-    self.safety.set_controls_allowed(True)
-    self._rx(self.packer.make_can_msg_safety("STEER_AND_AP_STALK", 0, {"AP_CANCEL_COMMAND": 1}, fix_checksum=checksum))
-    self.assertFalse(self.safety.get_controls_allowed())
+    # CRUISE_STATE_2: 0-2 = deactivated, >2 = active
+    values = {"CRUISE_STATE_2": 5 if enable else 0}
+    return self.packer.make_can_msg_safety("ACC", 2, values)
 
   def _torque_meas_msg(self, torque):
     # 11-bit signed signal clip to not produce errors on test
@@ -97,8 +101,9 @@ class TestGwmSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, 
     min_torque, max_torque = get_signal_range(torque_signal)
     torque = max(min(torque, max_torque), min_torque)
 
-    values = {"B_RX_EPS_TORQUE": torque}
-    return self.packer.make_can_msg_safety("RX_STEER_RELATED", 0, values)
+    values = {"B_RX_EPS_TORQUE": torque, "B_COUNTER": self.cnt_torque_meas % 16}
+    self.__class__.cnt_torque_meas += 1
+    return self.packer.make_can_msg_safety("RX_STEER_RELATED", 0, values, fix_checksum=checksum)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     # 10-bit signed signal clip to not produce errors on test
@@ -125,11 +130,23 @@ class TestGwmSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, 
     msg[0].data[0] = 0xFF
     self.assertFalse(self._rx(msg))
 
-    # cruise
-    self.assertTrue(self._rx(self._pcm_status_msg(0)))
+    # eps torque feedback (block B checksum)
+    self.assertTrue(self._rx(self._torque_meas_msg(0)))
     # invalidate checksum
-    msg = self._pcm_status_msg(0)
-    msg[0].data[0] = 0xFF
+    msg = self._torque_meas_msg(0)
+    msg[0].data[8] ^= 0xFF
+    self.assertFalse(self._rx(msg))
+
+    # brake (block A checksum)
+    self.assertTrue(self._rx(self._user_brake_msg(0)))
+    msg = self._user_brake_msg(0)
+    msg[0].data[0] ^= 0xFF
+    self.assertFalse(self._rx(msg))
+
+    # gas (block B checksum)
+    self.assertTrue(self._rx(self._user_gas_msg(0)))
+    msg = self._user_gas_msg(0)
+    msg[0].data[8] ^= 0xFF
     self.assertFalse(self._rx(msg))
 
 
