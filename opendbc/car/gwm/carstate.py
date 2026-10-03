@@ -57,7 +57,7 @@ class CarState(CarStateBase):
     # 1-2: standby, 3: engaged, 5: engaged with driver overriding
     cruise_state = cp_cam.vl["ACC"]["CRUISE_STATE_2"]
     ret.cruiseState.available = cruise_state != 0
-    ret.cruiseState.enabled = cruise_state > 2
+    ret.cruiseState.enabled = cruise_state in (3, 5)
     ret.cruiseState.speed = cp_cam.vl["ACC"]["ACC_SPEED_SELECTION"] * CV.KPH_TO_MS
 
     ret.doorOpen = any([cp.vl["DOOR_DRIVER"]["DOOR_REAR_RIGHT_OPEN"],

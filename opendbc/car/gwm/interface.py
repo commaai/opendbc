@@ -13,6 +13,7 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "gwm"
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.gwm)]
+    ret.dashcamOnly = True  # safety is behind ALLOW_DEBUG until it's validated
 
     ret.steerControlType = structs.CarParams.SteerControlType.torque
     ret.steerActuatorDelay = 0.3

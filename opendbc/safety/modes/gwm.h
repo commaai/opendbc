@@ -103,7 +103,7 @@ static void gwm_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == GWM_ACC) {
       // CRUISE_STATE_2: 1-2 standby, 3 engaged, 5 engaged with driver overriding
       uint8_t cruise_state = (msg->data[18] >> 3) & 0x7U;
-      pcm_cruise_check(cruise_state > 2U);
+      pcm_cruise_check((cruise_state == 3U) || (cruise_state == 5U));
     }
   }
 }
@@ -128,9 +128,16 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
   if (msg->addr == GWM_STEER_CMD) {
-    int desired_torque = to_signed(((msg->data[12] & 0x7FU) << 3) | (msg->data[13] >> 5), 10) + 1;  // TORQUE_CMD
+    uint32_t torque_raw = ((msg->data[12] & 0x7FU) << 3) | (msg->data[13] >> 5);  // TORQUE_CMD
+    uint32_t torque_reflected = ((msg->data[9] & 0x3U) << 6) | (msg->data[10] >> 2);  // TORQUE_REFLECTED
+    int desired_torque = to_signed(torque_raw, 10) + 1;
     bool steer_req = GET_BIT(msg, 125U);  // STEER_REQUEST
-    if (steer_torque_cmd_checks(desired_torque, steer_req, GWM_STEERING_LIMITS)) {
+    bool invert_direction = GET_BIT(msg, 103U);  // INVERT_DIRECTION
+
+    // the direction bit and reflected torque must agree with the commanded torque
+    bool valid_direction = invert_direction == (steer_req && (desired_torque > 0));
+    bool valid_reflected = ((torque_raw + torque_reflected) & 0xFFU) == 0U;
+    if (!valid_direction || !valid_reflected || steer_torque_cmd_checks(desired_torque, steer_req, GWM_STEERING_LIMITS)) {
       tx = false;
     }
   }
@@ -138,7 +145,8 @@ static bool gwm_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == GWM_ACC_CMD) {
     int brake = 181 - (int)msg->data[13];  // BRAKE_CMD
     int gas = (((msg->data[27] & 0x1FU) << 8) | msg->data[28]) - 192U;  // GAS_CMD
-    if (longitudinal_brake_checks(brake, GWM_LONG_LIMITS) || longitudinal_gas_checks(gas, GWM_LONG_LIMITS)) {
+    // brake commands below 0 are never sent
+    if ((brake < 0) || longitudinal_brake_checks(brake, GWM_LONG_LIMITS) || longitudinal_gas_checks(gas, GWM_LONG_LIMITS)) {
       tx = false;
     }
   }

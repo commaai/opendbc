@@ -69,13 +69,19 @@ class TestGwmSafetyBase(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTe
     values = {"CRUISE_STATE_2": 3 if enable else 2, "COUNTER2": self._counter(0x2ab)}
     return self.packer.make_can_msg_safety("ACC", 2, values, fix_checksum=checksum)
 
-  def _torque_cmd_msg(self, torque, steer_req=1):
+  def _torque_cmd_msg(self, torque, steer_req=1, invert_direction=None, reflected=None):
     # TORQUE_CMD is 10 bits, clip to not overflow it
-    values = {"TORQUE_CMD": np.clip(torque, -511, 512), "STEER_REQUEST": steer_req}
+    torque = np.clip(torque, -511, 512)
+    values = {
+      "TORQUE_CMD": torque,
+      "STEER_REQUEST": steer_req,
+      "INVERT_DIRECTION": (steer_req and torque > 0) if invert_direction is None else invert_direction,
+      "TORQUE_REFLECTED": -torque if reflected is None else reflected,
+    }
     return self.packer.make_can_msg_safety("STEER_CMD", 0, values)
 
-  def _button_msg(self, cancel=False, enable=False):
-    values = {"AP_CANCEL_COMMAND": cancel, "AP_ENABLE_COMMAND": enable}
+  def _button_msg(self, **buttons):
+    values = {f"AP_{name.upper()}_COMMAND": pressed for name, pressed in buttons.items()}
     return self.packer.make_can_msg_safety("STEER_AND_AP_STALK", 2, values)
 
   def _rx_check_msgs(self):
@@ -119,12 +125,22 @@ class TestGwmSafetyBase(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTe
       self.assertFalse(valid)
 
   def test_buttons(self):
+    other_buttons = ("enable", "reduce_distance", "increase_distance", "decrease_speed", "increase_speed")
     for engaged in (True, False):
       self.safety.set_cruise_engaged_prev(engaged)
       self.assertTrue(self._tx(self._button_msg()))
       self.assertEqual(engaged, self._tx(self._button_msg(cancel=True)))
-      self.assertFalse(self._tx(self._button_msg(enable=True)))
-      self.assertFalse(self._tx(self._button_msg(cancel=True, enable=True)))
+      for button in other_buttons:
+        self.assertFalse(self._tx(self._button_msg(**{button: True})))
+        self.assertFalse(self._tx(self._button_msg(cancel=True, **{button: True})))
+
+  def test_steer_direction_bits(self):
+    self.safety.set_controls_allowed(True)
+    for torque in (-3, 0, 1, 3):
+      self._set_prev_torque(torque)
+      self.assertTrue(self._tx(self._torque_cmd_msg(torque)))
+      self.assertFalse(self._tx(self._torque_cmd_msg(torque, invert_direction=torque <= 0)))
+      self.assertFalse(self._tx(self._torque_cmd_msg(torque, reflected=1 - torque)))
 
 
 class TestGwmStockSafety(TestGwmSafetyBase):
@@ -154,6 +170,12 @@ class TestGwmLongSafety(TestGwmSafetyBase, common.LongitudinalGasBrakeSafetyTest
   def _send_gas_msg(self, gas):
     values = {"GAS_CMD": gas, "BRAKE_CMD": 0}
     return self.packer.make_can_msg_safety("ACC_CMD", 0, values)
+
+  def test_negative_brake(self):
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      for brake in (-1, -74):
+        self.assertFalse(self._tx(self._send_brake_msg(brake)))
 
 
 if __name__ == "__main__":
