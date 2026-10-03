@@ -23,7 +23,7 @@ static uint8_t byd_cam_acc_cmd[BYD_CAM_ACC_CMD_HIST][6] = {{0}};
 static uint8_t byd_cam_acc_cmd_idx = 0;
 static uint8_t byd_cam_acc_cmd_count = 0;
 static uint32_t byd_op_steer_ts = 0;
-static uint32_t byd_op_lat_ts = 0;
+static uint32_t byd_op_hud_ts = 0;
 
 #define BYD_OP_STEER_TIMEOUT_US 200000U
 #define BYD_OP_HUD_TIMEOUT_US 2000000U
@@ -41,11 +41,15 @@ static bool byd_stock_lat_allowed(void) {
 }
 
 static bool byd_stock_hud_allowed(void) {
+  // Camera 0x316 stays blocked while either OP 0x1E2 or OP 0x316 is recent, so a
+  // HUD-only hold (long-mode release) keeps our cluster bits without idle 0x1E2.
+  const uint32_t now = microsecond_timer_get();
   bool allowed = true;
-  // Same ownership as 0x1E2: any OP 0x1E2 (heartbeat included) holds the HUD
-  // so TAKE CONTROL bits we paint are not overwritten by the camera.
   if (byd_op_steer_ts != 0U) {
-    allowed = safety_get_ts_elapsed(microsecond_timer_get(), byd_op_steer_ts) > BYD_OP_HUD_TIMEOUT_US;
+    allowed = allowed && (safety_get_ts_elapsed(now, byd_op_steer_ts) > BYD_OP_HUD_TIMEOUT_US);
+  }
+  if (byd_op_hud_ts != 0U) {
+    allowed = allowed && (safety_get_ts_elapsed(now, byd_op_hud_ts) > BYD_OP_HUD_TIMEOUT_US);
   }
   return allowed;
 }
@@ -214,15 +218,17 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
     bool steer_req = ((msg->data[2] >> 5) & 0x1U) != 0U;                    // STEER_REQ
 
     // Ownership tracks any OP 0x1E2, heartbeat included. A rate limited angle is
-    // still openpilot driving. HUD stay is 2 s after the last such frame.
+    // still openpilot driving.
     byd_op_steer_ts = microsecond_timer_get();
-    if (steer_req) {
-      byd_op_lat_ts = byd_op_steer_ts;
-    }
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_req, BYD_STEERING_LIMITS, BYD_STEERING_PARAMS)) {
       tx = false;
     }
+  }
+
+  // HUD stay: any OP 0x316 holds camera 0x316 for 2 s (see byd_stock_hud_allowed).
+  if (msg->addr == 0x316U) {
+    byd_op_hud_ts = microsecond_timer_get();
   }
 
   // Bus 0: only cancel (ACC_ON_BTN) while stock cruise is engaged, or button release.
@@ -290,7 +296,7 @@ static safety_config byd_init(uint16_t param) {
   byd_cam_acc_cmd_idx = 0;
   byd_cam_acc_cmd_count = 0;
   byd_op_steer_ts = 0;
-  byd_op_lat_ts = 0;
+  byd_op_hud_ts = 0;
 
 #ifdef ALLOW_DEBUG
   byd_longitudinal = GET_FLAG(param, BYD_PARAM_LONG_CONTROL);
@@ -315,13 +321,13 @@ static safety_config byd_init(uint16_t param) {
   };
 
   static const RxCheck byd_rx_checks[] = {
-    {.msg = {{0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_MODULE_2 (steering angle)
-    {.msg = {{0x1FC, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // STEERING_TORQUE (column driver torque)
-    {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // WHEELSPEED_CLEAN (vehicle speed)
-    {.msg = {{0x242, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // DRIVE_STATE (gas and brake pressed)
-    {.msg = {{0x342, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // PEDAL (accelerator pedal)
-    {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // ACC_HUD_ADAS (cruise state)
-    {.msg = {{0x316, 2, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // LKAS_HUD_ADAS (LKS switch)
+    {.msg = {{0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_MODULE_2 (4-bit checksum)
+    {.msg = {{0x1FC, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // STEERING_TORQUE
+    {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // WHEELSPEED_CLEAN
+    {.msg = {{0x242, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // DRIVE_STATE
+    {.msg = {{0x342, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // PEDAL
+    {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                              // ACC_HUD_ADAS
+    {.msg = {{0x316, 2, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // LKAS_HUD_ADAS
     {.msg = {{0x3B0, 0, 8,  20U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // PCM_BUTTONS (LKS latch)
   };
 
