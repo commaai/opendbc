@@ -227,6 +227,12 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       self.assertTrue(self._rx(msg))
 
   # BYD uses get_max_angle_delta_vm and get_max_angle_vm for lateral accel and jerk limits
+  def _lkas_hud_tx(self, increment_timer: bool = True):
+    if increment_timer:
+      self.safety.set_timer(self.__class__.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      self.__class__.cnt_angle_cmd += 1
+    return self.packer.make_can_msg_safety("LKAS_HUD_ADAS", self.MAIN_BUS, {"LKAS_STATE": 1})
+
   def test_stock_steer_passthrough(self):
     # Idle: camera steer and HUD reach the car. Any OP 0x1E2 takes the steer away
     # from the camera, and the idle STEER_REQ=0 heartbeat holds it for the whole
@@ -253,6 +259,66 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
     self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
     self.safety.set_timer(t + 2001000)
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+  def test_hud_only_tx_blocks_hud_not_steer(self):
+    # Long-mode HUD hold: OP paints 0x316 only so camera 0x1E2 can reach the EPS.
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self.assertTrue(self._tx(self._lkas_hud_tx()))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    t = (self.__class__.cnt_angle_cmd - 1) * int(1e6 / self.LATERAL_FREQUENCY)
+    self.safety.set_timer(t + 2001000)
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+  def test_hud_tx_extends_hud_block_after_steer(self):
+    # After the last OP 0x1E2, 50 Hz 0x316 keeps camera HUD blocked through the
+    # hold while camera 0x1E2 unblocks at 200 ms.
+    self.safety.set_controls_allowed(True)
+    self._reset_speed_measurement(10)
+    self._reset_angle_measurement(0)
+    self.safety.set_desired_angle_last(0)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+    t_steer = (self.__class__.cnt_angle_cmd - 1) * int(1e6 / self.LATERAL_FREQUENCY)
+    controls_allowed = self.safety.get_controls_allowed()
+    cruise = self.safety.get_cruise_engaged_prev()
+
+    for _ in range(150):  # 3 s at 50 Hz
+      self.assertTrue(self._tx(self._lkas_hud_tx()))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    t_hud = (self.__class__.cnt_angle_cmd - 1) * int(1e6 / self.LATERAL_FREQUENCY)
+
+    self.safety.set_timer(t_steer + 201000)
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
+    self.assertEqual(cruise, self.safety.get_cruise_engaged_prev())
+
+    self.safety.set_timer(t_hud + 2001000)
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+  def test_steer_tx_still_blocks_hud(self):
+    # OP 0x1E2 alone still blocks camera HUD for 2 s (superset of the old rule).
+    self.safety.set_controls_allowed(True)
+    self._reset_speed_measurement(10)
+    self._reset_angle_measurement(0)
+    self.safety.set_desired_angle_last(0)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+    t = (self.__class__.cnt_angle_cmd - 1) * int(1e6 / self.LATERAL_FREQUENCY)
+    self.safety.set_timer(t + 201000)
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self.safety.set_timer(t + 2001000)
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+  def test_hud_timers_reset_on_init(self):
+    self.assertTrue(self._tx(self._lkas_hud_tx()))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self.safety.set_safety_hooks(CarParams.SafetyModel.byd, self.SAFETY_PARAM)
+    self.safety.init_tests()
+    self.__class__.cnt_angle_cmd = 1
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
 
   def test_rejected_steer_keeps_camera_blocked(self):
