@@ -139,14 +139,15 @@ def create_buttons(packer, stock_values: dict, cancel=False, lkas=False, bus=0):
 
 
 def create_lkas_hud(packer, counter: int, stock_lkas_hud: dict, hud_control, lat_active: bool, lks_on: bool = True):
-  # Called for the whole engagement. Cluster wheel follows our lateral state,
-  # not the camera: 2 while we steer, 1 while we only heartbeat.
+  # Called while we own 0x316 (engaged or LKS hold). Cluster wheel follows our
+  # lateral state, not the camera: 2 while we steer, 1 while idle.
   # Cluster nag bits are ours: do not pass the camera's hands-off timer through.
   # steerRequired is TAKE CONTROL / DM; SET_ME_50=2 is the chime stage, not 3
   # (stock's last step before it drops ACC).
   # LKS off: we still own 0x316 until panda's 2 s HUD hold, so paint the
   # wheel off immediately. LKAS_STATE 1 is the standby wheel, not off.
-  # LKS_MODE / lane bits are the car (LKA) icon -- leave the camera's.
+  # Lane bits and LKS_MODE stay the camera's only on that early return;
+  # with lks_on we set them below.
   values = {**stock_lkas_hud, "COUNTER": counter}
   if not lks_on:
     values["LKAS_STATE"] = 0
