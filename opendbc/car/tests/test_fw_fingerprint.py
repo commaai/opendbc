@@ -289,6 +289,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
       'rivian': 0.3,
       'psa': 0.1,
       'mg': 0.1,
+      'gwm': 0.65,
     }
 
     total_times = 0.0
