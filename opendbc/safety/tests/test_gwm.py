@@ -154,10 +154,10 @@ class TestGwmLongSafety(TestGwmSafetyBase, common.LongitudinalGasBrakeSafetyTest
   RELAY_MALFUNCTION_ADDRS = {0: (0x12b, 0x23d, 0x143), 2: (0x147,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x147], 2: [0x12b, 0x23d, 0x143]}
 
-  MIN_GAS = -10
+  MIN_GAS = -192
   MAX_GAS = 4577
-  MIN_POSSIBLE_GAS = -11
-  MAX_POSSIBLE_GAS = 4600  # reasonably excessive limits, not signal max
+  MIN_POSSIBLE_GAS = -192  # signal min
+  MAX_POSSIBLE_GAS = 4808  # reasonably excessive limits, not signal max
   INACTIVE_GAS = 0
 
   MAX_BRAKE = 107

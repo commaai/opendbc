@@ -1,5 +1,3 @@
-import numpy as np
-
 from opendbc.car.crc import CRC8J1850
 
 # 64-byte messages are split into 8-byte blocks, each protected by its own CRC8 (first byte) and
@@ -43,7 +41,7 @@ def create_steer_command(packer, stock_values, steer: int, steer_req: bool):
   return packer.make_can_msg("STEER_CMD", 0, values)
 
 
-def create_longitudinal_command(packer, stock_values, accel: float, active: bool, standstill: bool):
+def create_longitudinal_command(packer, stock_values, gas: float, brake: float, braking: bool, active: bool, standstill: bool):
   values = {s: stock_values[s] for s in (
     "BRAKE_OR_GAS_REQ",
     "BYPASSME_1",
@@ -63,11 +61,10 @@ def create_longitudinal_command(packer, stock_values, accel: float, active: bool
     "GAS_CMD": 0,
   }
 
-  # accel is normalized to [-1, 1]
-  if active and accel < 0:
+  if active and braking:
     values |= {
       "BRAKE_OR_GAS_REQ": 13,
-      "BRAKE_CMD": accel * (107 - 41) - 41,
+      "BRAKE_CMD": -brake,
       "STANDSTILL_1": standstill,
       "STANDSTILL_2": 3 if standstill else 4,
       "STANDSTILL_3": 0 if standstill else 1,
@@ -75,7 +72,7 @@ def create_longitudinal_command(packer, stock_values, accel: float, active: bool
   elif active:
     values |= {
       "BRAKE_OR_GAS_REQ": 12,
-      "GAS_CMD": np.interp(accel, [0.25, 1], [0, 4577]),
+      "GAS_CMD": gas,
       "STANDSTILL_1": 0,
       "STANDSTILL_2": 4,
       "STANDSTILL_3": 1,

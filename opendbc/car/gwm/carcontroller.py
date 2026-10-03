@@ -16,6 +16,7 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.apply_torque_last = 0
     self.accel = 0.0
+    self.braking = False
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
@@ -41,10 +42,16 @@ class CarController(CarControllerBase):
 
       if self.CP.openpilotLongitudinalControl:
         self.accel = float(np.clip(actuators.accel, self.params.ACCEL_MIN, self.params.ACCEL_MAX))
-        # normalize braking and acceleration by their own limits
-        accel = self.accel / abs(self.params.ACCEL_MIN if self.accel < 0 else self.params.ACCEL_MAX)
+        if self.accel < self.params.BRAKE_ENTER_ACCEL:
+          self.braking = True
+        elif self.accel > self.params.BRAKE_EXIT_ACCEL or not CC.longActive:
+          self.braking = False
+
+        gas = max(self.accel * self.params.GAS_PER_ACCEL, self.params.GAS_MIN)
+        brake = self.params.BRAKE_ZERO + max(-self.accel, 0.) * self.params.BRAKE_PER_ACCEL
         stopping = actuators.longControlState == LongCtrlState.stopping
-        can_sends.append(gwmcan.create_longitudinal_command(self.packer, CS.acc_stock_values, accel, CC.longActive, stopping))
+        can_sends.append(gwmcan.create_longitudinal_command(self.packer, CS.acc_stock_values, gas, brake, self.braking,
+                                                            CC.longActive, stopping))
 
     if self.frame % 5 == 0:
       can_sends.append(gwmcan.create_hud_command(self.packer, CS.hud_stock_values, CC.latActive))
