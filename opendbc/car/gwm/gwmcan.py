@@ -66,8 +66,9 @@ def create_longitudinal_command(packer, stock_values, gas: float, brake: float, 
       "BRAKE_OR_GAS_REQ": 13,
       "BRAKE_CMD": -brake,
       "STANDSTILL_1": standstill,
-      "STANDSTILL_2": 3 if standstill else 4,
-      "STANDSTILL_3": 0 if standstill else 1,
+      # the stock camera always sends these while braking, not only at standstill
+      "STANDSTILL_2": 3,
+      "STANDSTILL_3": 0,
     }
   elif active:
     values |= {

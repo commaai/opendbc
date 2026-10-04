@@ -22,14 +22,14 @@ class CarControllerParams:
   ACCEL_MAX = 2.0  # m/s^2
   ACCEL_MIN = -3.5  # m/s^2
 
-  # ACC_CMD gas is a powertrain torque request, negative values regen like the stock ACC does.
+  # ACC_CMD gas is a powertrain torque request, negative values reduce it to coasting like the stock ACC does.
   # Brakes start acting around 41. Both gains fit from engaged drives
   GAS_PER_ACCEL = 1900
   GAS_MIN = -192
   BRAKE_ZERO = 41
   BRAKE_PER_ACCEL = (107 - 41) / 3.5
   # switching between powertrain and brakes releases and reapplies brake pressure, add hysteresis
-  BRAKE_ENTER_ACCEL = GAS_MIN / GAS_PER_ACCEL  # once regen is saturated
+  BRAKE_ENTER_ACCEL = GAS_MIN / GAS_PER_ACCEL  # once gas is at its minimum
   BRAKE_EXIT_ACCEL = 0.1
 
   def __init__(self, CP):

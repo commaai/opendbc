@@ -1,6 +1,8 @@
+import math
 import numpy as np
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, DT_CTRL, Bus, structs
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.lateral import apply_meas_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.gwm import gwmcan
@@ -17,11 +19,15 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.accel = 0.0
     self.braking = False
+    self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
     actuators = CC.actuators
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < self.params.STEER_DRIVER_ALLOWANCE
+
+    if len(CC.orientationNED) == 3:
+      self.pitch.update(CC.orientationNED[1])
 
     if CC.cruiseControl.cancel:
       can_sends.append(gwmcan.create_buttons_command(self.packer, CS.stalk_stock_values, cancel=True))
@@ -42,13 +48,17 @@ class CarController(CarControllerBase):
 
       if self.CP.openpilotLongitudinalControl:
         self.accel = float(np.clip(actuators.accel, self.params.ACCEL_MIN, self.params.ACCEL_MAX))
-        if self.accel < self.params.BRAKE_ENTER_ACCEL:
+        # gas and brake act on top of gravity, otherwise light braking downhill isn't enough and oscillates.
+        # downhill only, like Toyota, to not reduce braking when stopping uphill
+        accel_due_to_pitch = math.sin(min(self.pitch.x, 0.0)) * ACCELERATION_DUE_TO_GRAVITY
+        net_accel = float(np.clip(self.accel + accel_due_to_pitch, self.params.ACCEL_MIN, self.params.ACCEL_MAX))
+        if net_accel < self.params.BRAKE_ENTER_ACCEL:
           self.braking = True
-        elif self.accel > self.params.BRAKE_EXIT_ACCEL or not CC.longActive:
+        elif net_accel > self.params.BRAKE_EXIT_ACCEL or not CC.longActive:
           self.braking = False
 
-        gas = max(self.accel * self.params.GAS_PER_ACCEL, self.params.GAS_MIN)
-        brake = self.params.BRAKE_ZERO + max(-self.accel, 0.) * self.params.BRAKE_PER_ACCEL
+        gas = max(net_accel * self.params.GAS_PER_ACCEL, self.params.GAS_MIN)
+        brake = self.params.BRAKE_ZERO + max(-net_accel, 0.) * self.params.BRAKE_PER_ACCEL
         stopping = actuators.longControlState == LongCtrlState.stopping
         can_sends.append(gwmcan.create_longitudinal_command(self.packer, CS.acc_stock_values, gas, brake, self.braking,
                                                             CC.longActive, stopping))
