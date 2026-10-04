@@ -354,7 +354,8 @@ routes = [
 
   CarTestRoute("6a7075a4fdd765ee/0000004e--1f612006dd", PSA.PSA_PEUGEOT_208),
   CarTestRoute("5046371b6e9f0f3e/0000006f--fed43edbf9", GWM.GWM_HAVAL_H6),
-  CarTestRoute("756ee253ae4159bc/00000001--89e6d44254", GWM.GWM_HAVAL_H6),  # openpilot longitudinal enabled
+  CarTestRoute("756ee253ae4159bc/0000000d--7104b6ebf0", GWM.GWM_HAVAL_H6, segment=10),
+  CarTestRoute("756ee253ae4159bc/0000000f--e351b12a40", GWM.GWM_HAVAL_H6, segment=3),  # openpilot longitudinal enabled
 
   CarTestRoute("148fa33c79475c93/00000002--bb5e1aa449", BYD.BYD_ATTO_3),
 
