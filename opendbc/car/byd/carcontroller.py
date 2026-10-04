@@ -346,14 +346,18 @@ class CarController(CarControllerBase):
             self.standstill_resume = False
           can_sends.append(bydcan.create_acc_cmd(self.packer, self.accel, CC.longActive, self.standstill_hold,
                                                  self.standstill_resume, cntr))
-        acc_state = 0 if CS.camera_acc_state == 0 else (3 if CC.longActive else 2)
+        acc_state = 0 if CS.camera_acc_state == 0 else (5 if CC.enabled and CS.out.gasPressed and not CC.longActive else
+                                                       (3 if CC.longActive else 2))
         # vCruise is 255 until the first engage initializes it. Do not paint that.
         set_kph = hud_control.setSpeed * CV.MS_TO_KPH
         if set_kph > 150.0:
           set_kph = float(CS.acc_hud_stock.get("SET_SPEED", 0.0))
+        # Paint the true gap whenever the icon is shown; shading never appears without the icon.
+        lead_follow_status = hud_control.leadFollowStatus if hud_control.leadVisible else 0
         can_sends.append(bydcan.create_acc_hud(
           self.packer, CS.acc_hud_stock, cntr, acc_state,
           set_kph, hud_control.leadDistanceBars, hud_control.leadVisible,
+          acc_state == 5, lead_follow_status,
         ))
 
     if CC.cruiseControl.cancel and self.frame % 10 == 0 and not self.CP.openpilotLongitudinalControl:
