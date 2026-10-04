@@ -138,13 +138,14 @@ BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
  SG_ SET_SPEED : 0|8@1+ (0.5,0) [0|127.5] "kph" MCU
  SG_ LEAD_VISIBLE : 9|1@1+ (1,0) [0|1] "" MCU
  SG_ SET_DISTANCE : 12|3@0+ (1,0) [0|7] "" MCU
- SG_ SET_ME_B1_HI : 13|3@1+ (1,0) [0|7] "" MCU
+ SG_ LEAD_SHADING : 13|3@1+ (1,0) [0|7] "" MCU
  SG_ SET_ME_B2_LO : 16|3@1+ (1,0) [0|7] "" MCU
  SG_ ACC_STATE : 19|3@1+ (1,0) [0|7] "" MCU
  SG_ ACC_ON2 : 20|1@0+ (1,0) [0|1] "" MCU
  SG_ ACC_ON1 : 22|1@0+ (1,0) [0|1] "" MCU
  SG_ SET_ME_B2_HI : 23|1@1+ (1,0) [0|1] "" MCU
- SG_ SET_ME_B3 : 24|8@1+ (1,0) [0|255] "" MCU
+ SG_ SET_ME_B3 : 24|5@1+ (1,0) [0|31] "" MCU
+ SG_ ACC_OVERRIDE : 29|1@1+ (1,0) [0|1] "" MCU
  SG_ SET_ME_B4 : 32|8@1+ (1,0) [0|255] "" MCU
  SG_ SET_ME_XFF : 47|8@0+ (1,0) [0|255] "" MCU
  SG_ COUNTER : 48|4@1+ (1,0) [0|15] "" MCU
@@ -244,7 +245,8 @@ CM_ SG_ 1048 RCTA_RIGHT_2 "Byte 3 bit 2. Not paired with RCTA_RIGHT. Observe onl
 CM_ BO_ 815 "Predictive Collision Warning from camera. Byte 2 0x36 is pre-warning. Observe only.";
 CM_ SG_ 815 PCW_STATE "Byte 2. 0x02 idle, 0x36 pre-warning.";
 CM_ BO_ 803 "Charging session, 10 Hz. CHARGE_SOC is 0xFF outside a session. CHARGE_UNKNOWN_12BIT reads 0xFFE unplugged, 500 plugged idle, 583-778 during DC charging; scale not established.";
-CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state).";
+CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state, lead shading).";
+CM_ SG_ 813 LEAD_SHADING "Trail between ego and lead: 3 green, 2 closer than the gap, 1 too close. Gas override turns the trail red with ACC_OVERRIDE.";
 CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active. Idle 64 64 64 80 50 00; active bytes 1-2 are 66.";
 CM_ SG_ 814 ACCEL_CMD "0.05 m/s2 per LSB, raw 100 = 0. Stock about -4 to +1.7.";
 CM_ SG_ 814 DECEL_FACTOR "0 when ACC off, 1-3 typical while active.";
@@ -261,6 +263,7 @@ VAL_ 790 LKS_MODE 0 "OFF" 1 "DIVERGE" 2 "KEEPING" 3 "ALL";
 VAL_ 790 TJA_ICA_STATE 0 "OFF" 1 "PASSIVE" 2 "ACTIVE1" 3 "ACTIVE2" 4 "FAULT";
 VAL_ 790 SLA_STATE 0 "OFF" 1 "FUSION_MODE" 2 "VISION_MODE" 3 "NV_ONLY_MODE" 4 "DEFECT";
 VAL_ 790 RIGHT_LANE_STATE 0 "OFF" 1 "GREEN" 2 "ORANGE";
+VAL_ 813 LEAD_SHADING 3 "GREEN" 2 "CLOSER" 1 "TOO_CLOSE";
 VAL_ 790 LKAS_STATE 2 "ACTIVE" 1 "OFF";
 VAL_ 790 LDSW_TYPE 0 "VIBRATE" 1 "SOUND" 2 "ALL";
 VAL_ 803 CHARGE_STATE 0 "IDLE" 2 "PREPARING" 3 "CHARGING" 4 "FINISHING";
