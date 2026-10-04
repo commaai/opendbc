@@ -26,6 +26,7 @@ class _Hud:
   setSpeed = 0.0
   leadDistanceBars = 0
   leadVisible = False
+  leadFollowStatus = 0
 
 
 class _Actuators:
@@ -204,7 +205,8 @@ class TestBydPcw(unittest.TestCase):
 
 
 def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_btn_rising=False, eps_standby=False,
-        buttons=None, buttons_ts=0, steering_pressed=False, stock_aeb=False, acc_cmd=None, standstill=False, v_ego=20.0):
+        buttons=None, buttons_ts=0, steering_pressed=False, stock_aeb=False, acc_cmd=None, standstill=False, v_ego=20.0,
+        gas_pressed=False):
   return SimpleNamespace(
     eps_engaged=eps_engaged,
     eps_standby=eps_standby,
@@ -221,7 +223,7 @@ def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_
     acc_hud_stock={},
     acc_cmd_stock=acc_cmd if acc_cmd is not None else {},
     out=SimpleNamespace(vEgoRaw=v_ego, steeringAngleDeg=angle, steeringPressed=steering_pressed, stockAeb=stock_aeb,
-                        standstill=standstill),
+                        standstill=standstill, gasPressed=gas_pressed),
   )
 
 
@@ -818,6 +820,7 @@ class TestBydDbcObserve(unittest.TestCase):
     self.assertFalse(CP.openpilotLongitudinalControl)
     self.assertTrue(CP.pcmCruise)
     self.assertTrue(CP.hudLaneFromModel)
+    self.assertTrue(CP.hudLeadShading)
     self.assertEqual(CP.safetyConfigs[0].safetyParam, int(BydSafetyFlags.LKS_ON))
 
     CP_long = CarInterface.get_params(CAR.BYD_ATTO_3, fp, [], True, False, False)
@@ -1161,6 +1164,104 @@ class TestBydLongControl(unittest.TestCase):
     dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
     self.assertEqual(dat[0], 72)
     self.assertEqual(dat[2], 0x54)
+
+  def test_acc_hud_shading_and_override(self):
+    ctrl = _ctrl(long_control=True)
+    # stock byte3 carries transitional mirrors; override must still send 0x21
+    raw = bytes([0x00, 108, 4, 0x19, 244, 255, 0xF0])
+    raw += bytes([(~sum(raw)) & 0xFF])
+    stock = _decode("ACC_HUD_ADAS", (0x32D, raw, 2))
+    CS = _cs()
+    CS.camera_acc_state = 3
+    CS.acc_hud_stock = stock
+    CS.out.gasPressed = True
+    CC = _cc(lat_active=False, long_active=False)
+    CC.hudControl.leadVisible = True
+    CC.hudControl.leadFollowStatus = 3
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
+    dec = _decode("ACC_HUD_ADAS", (0x32D, dat, 0))
+    self.assertEqual(dec["ACC_STATE"], 5)
+    self.assertEqual(dat[3], 0x21)
+    self.assertEqual(dec["LEAD_SHADING"], 1)
+    self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
+
+    # release: back to active, byte3 passthrough, shading from the status
+    CS.out.gasPressed = False
+    CC.longActive = True
+    CC.hudControl.leadFollowStatus = 2
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
+    dec = _decode("ACC_HUD_ADAS", (0x32D, dat, 0))
+    self.assertEqual(dec["ACC_STATE"], 3)
+    self.assertEqual(dec["ACC_OVERRIDE"], 0)
+    self.assertEqual(dec["LEAD_SHADING"], 2)
+
+    # camera off: display off, no override bit even with gas held
+    CS.camera_acc_state = 0
+    CS.out.gasPressed = True
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
+    dec = _decode("ACC_HUD_ADAS", (0x32D, dat, 0))
+    self.assertEqual(dec["ACC_STATE"], 0)
+    self.assertEqual(dec["ACC_OVERRIDE"], 0)
+
+    # standby: shading from the status while the lead icon is shown
+    CS.camera_acc_state = 2
+    CS.out.gasPressed = False
+    CC.longActive = False
+    CC.hudControl.leadFollowStatus = 2
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
+    dec = _decode("ACC_HUD_ADAS", (0x32D, dat, 0))
+    self.assertEqual(dec["ACC_STATE"], 2)
+    self.assertEqual(dec["ACC_OVERRIDE"], 0)
+    self.assertEqual(dec["LEAD_SHADING"], 2)
+
+  def test_acc_hud_status_zero_keeps_stock_shading(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    raw = bytes([0x00, 0x6A, 4, 1, 244, 255, 0xF0])
+    raw += bytes([(~sum(raw)) & 0xFF])
+    stock = _decode("ACC_HUD_ADAS", (0x32D, raw, 2))
+    _addr, dat, _bus = bydcan.create_acc_hud(packer, stock, 0, 3, 80.0, 2, True)
+    dec = _decode("ACC_HUD_ADAS", (0x32D, dat, 0))
+    self.assertEqual(dec["LEAD_SHADING"], 3)
+    _addr, dat, _bus = bydcan.create_acc_hud(packer, stock, 0, 3, 80.0, 2, True, False, 0)
+    self.assertEqual(_decode("ACC_HUD_ADAS", (0x32D, dat, 0))["LEAD_SHADING"], 3)
+    _addr, dat, _bus = bydcan.create_acc_hud(packer, stock, 0, 3, 80.0, 2, True, False, 1)
+    self.assertEqual(_decode("ACC_HUD_ADAS", (0x32D, dat, 0))["LEAD_SHADING"], 3)
+    self.assertEqual(bytes(dat)[3], 0x01)
+
+  def test_acc_hud_standby_paints_shading_with_lead(self):
+    ctrl = _ctrl(long_control=True)
+    raw = bytes([0x00, 0x6A, 4, 1, 244, 255, 0xF0])
+    raw += bytes([(~sum(raw)) & 0xFF])
+    stock = _decode("ACC_HUD_ADAS", (0x32D, raw, 2))
+    CS = _cs()
+    CS.camera_acc_state = 2
+    CS.acc_hud_stock = stock
+    CS.out.gasPressed = False
+    CC = _cc(enabled=False, lat_active=False, long_active=False)
+    CC.hudControl.leadVisible = True
+    CC.hudControl.leadFollowStatus = 2
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
+    dec = _decode("ACC_HUD_ADAS", (0x32D, dat, 0))
+    self.assertEqual(dec["ACC_STATE"], 2)
+    self.assertEqual(dec["ACC_OVERRIDE"], 0)
+    self.assertEqual(dec["LEAD_SHADING"], 2)
+    # no lead: stock shading untouched
+    CC.hudControl.leadVisible = False
+    ctrl.update(CC, CS, 0)
+    _act, sends = ctrl.update(CC, CS, 0)
+    dat = bytes([m for m in sends if m[0] == 0x32D][0][1])
+    dec = _decode("ACC_HUD_ADAS", (0x32D, dat, 0))
+    self.assertEqual(dec["LEAD_SHADING"], int(stock["LEAD_SHADING"]))
 
   def test_no_cancel_spoof_in_long_control(self):
     ctrl = _ctrl(long_control=True)

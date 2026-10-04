@@ -20,6 +20,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.dashcamOnly = False
     ret.hudLaneFromModel = True
+    ret.hudLeadShading = True
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.25
