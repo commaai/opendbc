@@ -19,6 +19,7 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.accel = 0.0
     self.braking = False
+    self.brake_accel_last = 0.0
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
   def update(self, CC, CS, now_nanos):
@@ -56,6 +57,10 @@ class CarController(CarControllerBase):
           self.braking = True
         elif net_accel > self.params.BRAKE_EXIT_ACCEL or not CC.longActive:
           self.braking = False
+
+        if self.braking and net_accel > self.params.BRAKE_RAMP_MIN_ACCEL:
+          net_accel = max(net_accel, self.brake_accel_last - self.params.BRAKE_RAMP_RATE * DT_CTRL * self.params.STEER_STEP)
+        self.brake_accel_last = net_accel if self.braking else min(net_accel, 0.)
 
         gas = max(net_accel * self.params.GAS_PER_ACCEL, self.params.GAS_MIN)
         brake = self.params.BRAKE_ZERO + max(-net_accel, 0.) * self.params.BRAKE_PER_ACCEL

@@ -31,6 +31,9 @@ class CarControllerParams:
   # switching between powertrain and brakes releases and reapplies brake pressure, add hysteresis
   BRAKE_ENTER_ACCEL = GAS_MIN / GAS_PER_ACCEL  # once gas is at its minimum
   BRAKE_EXIT_ACCEL = 0.1
+  # like the stock ACC, apply moderate braking slowly enough for regen to take it instead of the friction brakes
+  BRAKE_RAMP_RATE = 1.0  # m/s^3
+  BRAKE_RAMP_MIN_ACCEL = -1.0  # harder braking isn't limited
 
   def __init__(self, CP):
     pass
