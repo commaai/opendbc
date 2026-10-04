@@ -25,8 +25,7 @@ def byd_radar_checksum(address: int, sig, d: bytearray) -> int:
 
 
 def create_steering_control(packer, apply_angle: float, lat_active: bool, counter: int, ack: bool = False):
-  # Stock saturates the rate limits at +/-299 when engaged, 0 when disengaged.
-  # ack is the camera's STEER_REQ=0 / ACTIVE_LOW=0 frame that takes the EPS out of standby.
+  # Stock rate limits +/-299 engaged, 0 disengaged. ack = camera standby wake (REQ=0, ACTIVE_LOW=0).
   rate_limit = 299 if lat_active else 0
   values = {
     "STEER_REQ": 1 if lat_active else 0,
@@ -44,9 +43,7 @@ def create_steering_control(packer, apply_angle: float, lat_active: bool, counte
 
 
 def create_acc_cmd(packer, accel: float, long_active: bool, hold: bool, resume: bool, counter: int):
-  # Idle 64 64 64 80 50 00. Active sets both ACC_ON bits. Hold is byte 5 0x31.
-  # Stock drives off from a hold with STANDSTILL_RESUME=1, STANDSTILL_STATE=0 and
-  # a positive ACCEL_CMD, and keeps RESUME up until about 2 m/s.
+  # Idle 64 64 64 80 50 00. Hold byte5 0x31. Stock leave-hold: RESUME=1, STATE=0, clear RESUME ~2 m/s.
   hold = long_active and hold
   resume = long_active and resume and not hold
   values = {
@@ -77,11 +74,8 @@ def create_acc_cmd_passthrough(packer, stock_values: dict, counter: int):
 
 
 def create_acc_hud(packer, stock_values: dict, counter: int, acc_state: int, set_speed_kph: float, gap_bars: int,
-                   lead_visible: bool):
-  # byte2 is 0x04 with ACC_STATE in bits 3-5 and ACC_ON1 in bit 6.
-  # ACC_ON2 is the middle state bit; writing both keeps the packer from clearing it.
-  # SET_DISTANCE 1 is closest, 4 is farthest. 0 keeps the camera's gap.
-  # LEAD_VISIBLE follows the lead; the camera never sets it in standby.
+                   lead_visible: bool, gas_override: bool = False, lead_follow_status: int = 0):
+  # SET_DISTANCE 1=closest..4=farthest; 0 keeps camera gap. ACC_ON1/ON2 both set with ACC_STATE.
   if gap_bars <= 0:
     distance = stock_values.get("SET_DISTANCE", 3)
   else:
@@ -101,13 +95,18 @@ def create_acc_hud(packer, stock_values: dict, counter: int, acc_state: int, set
     "SET_DISTANCE": distance,
     "LEAD_VISIBLE": 1 if lead_visible else 0,
   }
+  # Override: stock holds byte3 at 0x21.
+  if gas_override:
+    values["ACC_OVERRIDE"] = 1
+    values["SET_ME_B3"] = 1
+  # LEAD_SHADING inverse of leadFollowStatus (wire green=3).
+  if lead_follow_status > 0:
+    values["LEAD_SHADING"] = 4 - lead_follow_status
   return packer.make_can_msg("ACC_HUD_ADAS", 0, values)
 
 
 def create_buttons_relay(packer, stock_values: dict, lkas: bool = False):
-  # Stock 0x3B0 on bus 2 with SET/RES/distance cleared. COUNTER and ACC_ON stay
-  # as the driver pressed them, so the camera counter stays in sequence. LKAS_ON
-  # is ours: the camera drops a second frame with the same counter.
+  # Bus 2 relay: clear SET/RES/distance; keep COUNTER/ACC_ON. Optional LKAS_ON pulse.
   values = {
     **stock_values,
     "SET_BTN": 0,
@@ -120,10 +119,7 @@ def create_buttons_relay(packer, stock_values: dict, lkas: bool = False):
 
 
 def create_buttons(packer, stock_values: dict, cancel=False, lkas=False, bus=0):
-  # The car's latest 0x3B0 with one button added, COUNTER included: the camera
-  # faults ACC on an out of sequence 0x3B0 counter. Cancel is bus 0 ACC_ON_BTN
-  # only. Camera LKS neutralize/restore is bus 2 LKAS_ON_BTN only. Never set
-  # both: a cancel spoof must not toggle our latch.
+  # Keep stock COUNTER. Cancel = bus 0 ACC_ON only; LKS pulse = bus 2 LKAS_ON only (never both).
   values = {
     "SET_ME_1_1": 1,
     "SET_ME_1_2": 1,
@@ -139,15 +135,7 @@ def create_buttons(packer, stock_values: dict, cancel=False, lkas=False, bus=0):
 
 
 def create_lkas_hud(packer, counter: int, stock_lkas_hud: dict, hud_control, lat_active: bool, lks_on: bool = True):
-  # Called while we own 0x316 (engaged or LKS hold). Cluster wheel follows our
-  # lateral state, not the camera: 2 while we steer, 1 while idle.
-  # Cluster nag bits are ours: do not pass the camera's hands-off timer through.
-  # steerRequired is TAKE CONTROL / DM; SET_ME_50=2 is the chime stage, not 3
-  # (stock's last step before it drops ACC).
-  # LKS off: we still own 0x316 until panda's 2 s HUD hold, so paint the
-  # wheel off immediately. LKAS_STATE 1 is the standby wheel, not off.
-  # Lane bits and LKS_MODE stay the camera's only on that early return;
-  # with lks_on we set them below.
+  # Own 0x316: wheel 2=steer / 1=idle / 0=LKS off. SET_ME_50=2 for steerRequired chime (not 3).
   values = {**stock_lkas_hud, "COUNTER": counter}
   if not lks_on:
     values["LKAS_STATE"] = 0
