@@ -30,6 +30,9 @@ non_tested_cars = [
   SUBARU.SUBARU_FORESTER_HYBRID,
   VOLKSWAGEN.PORSCHE_MACAN_MK1,
   HONDA.ACURA_TLX_2G,
+  # No known firmware versions yet, so this platform cannot be fingerprinted and has no route.
+  # A route from the car is needed before it can leave this list.
+  HONDA.HONDA_ODYSSEY_CHN,
 
   # These had their DSUs unplugged, need new routes
   # TOYOTA.LEXUS_ES  # hybrid
