@@ -60,7 +60,6 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
-    self.cancel_counter = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -101,10 +100,6 @@ class CarController(CarControllerBase):
       if self.CP.flags & HyundaiFlags.CANFD_ENABLE_BLINKERS:
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
-    # Delay the cancel button send so the brake can disengage factory SCC first.
-    # Reset whenever openpilot is no longer requesting cancel.
-    self.cancel_counter = self.cancel_counter + 1 if CC.cruiseControl.cancel else 0
-
     # *** CAN/CAN FD specific ***
     if self.CP.flags & HyundaiFlags.CANFD:
       can_sends.extend(self.create_canfd_msgs(apply_steer_req, apply_torque, set_speed_in_units, accel,
@@ -139,7 +134,9 @@ class CarController(CarControllerBase):
 
     # Button messages
     if not self.CP.openpilotLongitudinalControl:
-      if self.cancel_counter > CANCEL_BUTTON_DELAY_FRAMES:
+      # Delay the cancel button send so the brake can disengage factory SCC first.
+      # Reset whenever openpilot is no longer requesting cancel.
+      if self.cancel_after_delay(CC.cruiseControl.cancel, CANCEL_BUTTON_DELAY_FRAMES):
         can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP))
       elif CC.cruiseControl.resume:
         # send resume at a max freq of 10Hz
@@ -211,7 +208,9 @@ class CarController(CarControllerBase):
           if self.CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS:
             can_sends.append(hyundaicanfd.create_acc_cancel(self.packer, self.CP, self.CAN, CS.cruise_info))
             self.last_button_frame = self.frame
-          elif self.cancel_counter > CANCEL_BUTTON_DELAY_FRAMES:
+          # Delay the cancel button send so the brake can disengage factory SCC first.
+          # Reset whenever openpilot is no longer requesting cancel.
+          elif self.cancel_after_delay(True, CANCEL_BUTTON_DELAY_FRAMES):
             for _ in range(20):
               can_sends.append(hyundaicanfd.create_buttons(self.packer, self.CP, self.CAN, CS.buttons_counter + 1, Buttons.CANCEL))
             self.last_button_frame = self.frame
