@@ -1011,10 +1011,6 @@ class SafetyTest(SafetyTestBase):
               # exceptions for common msgs across different hondas
               tx = list(filter(lambda m: m[0] not in [0x1FA, 0x30C, 0x33D, 0x33DB], tx))
 
-            if attr.startswith('TestHondaNidec') and current_test.startswith('TestHondaNidec'):
-              # the Nidec variants share their lateral messages and differ only in whether they
-              # own the longitudinal ones, which each variant's own tests check
-              continue
 
             if attr.startswith('TestHyundaiLongitudinal'):
               # exceptions for common msgs across different Hyundai CAN platforms
