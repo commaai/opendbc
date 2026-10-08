@@ -4,7 +4,7 @@ from opendbc.car import Bus, DT_CTRL, structs
 from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.volkswagen import mebcan, mlbcan, mqbcan, pqcan
+from opendbc.car.volkswagen import meb_repro, mebcan, mlbcan, mqbcan, pqcan
 from opendbc.car.volkswagen.values import CanBus, CarControllerParams, VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -43,6 +43,7 @@ class CarController(CarControllerBase):
 
     if CP.flags & VolkswagenFlags.MEB:
       self.meb_long_state = mebcan.MebLongStateMachine(self.CP, self.CCP)
+      self.meb_repro = meb_repro.MebHoldRepro(self.CCP.ACC_CONTROL_STEP)  # REPRO ONLY, do not merge
 
     if CP.flags & VolkswagenFlags.PQ:
       self.CCS = pqcan
@@ -135,10 +136,16 @@ class CarController(CarControllerBase):
     # **** Acceleration Controls ******************************************** #
 
     if self.CP.openpilotLongitudinalControl:
+      if self.CP.flags & VolkswagenFlags.MEB:
+        self.meb_repro.observe(CS, CC)  # REPRO ONLY
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         if self.CP.flags & VolkswagenFlags.MEB:
           accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
-          accel, acc_status, acc_hold_type, braking_to_stop, leaving_standstill = self.meb_long_state.update(CS, CC, accel)
+          accel, long_CC = self.meb_repro.update(CS, CC, accel)  # REPRO ONLY
+          accel = float(np.clip(accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX))
+          if not self.meb_repro.hold_fix:  # REPRO ONLY: master's hold logic, Standstill as hold confirmation
+            CS.esp_hold_confirmation = CS.esp_standstill
+          accel, acc_status, acc_hold_type, braking_to_stop, leaving_standstill = self.meb_long_state.update(CS, long_CC, accel)
           can_sends.extend(mebcan.create_acc_accel_control(self.packer_pt, self.CAN.pt, self.CCP, CS.acc_type, CC.enabled,
                                                            accel, acc_status, acc_hold_type, braking_to_stop, leaving_standstill,
                                                            CS.out.vEgoRaw * CV.MS_TO_KPH, CS.travel_assist_available))
