@@ -62,7 +62,8 @@ class CarControllerParams:
   # EPS standby (LKS_PREPARED=1 with CRUISE_ACTIVATED=1, after >200 ms without 0x1E2)
   # ignores STEER_REQ until it sees the camera's REQ=0 / ACTIVE_LOW=0 ack. We send it.
   STEER_ACK_PERIOD = 10               # 50 Hz frames between ack pairs
-  STEER_ACK_ATTEMPTS = 3              # then steerFaultTemporary until disengage
+  STEER_ACK_ATTEMPTS = 3              # then steerFaultTemporary and retries slow down
+  STEER_ACK_RETRY_PERIOD = 50         # 50 Hz frames, 1 s between slow retries
 
   # Camera LKS is a toggle on bus 2. Meaning A: off while we are enabled, on
   # again 2 s after we drop (panda HUD hold), off if our latch is off.
