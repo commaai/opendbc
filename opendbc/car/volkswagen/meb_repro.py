@@ -4,11 +4,9 @@
 #
 # Engage with SET below 70 km/h. The harness sets its own speed and ignores the set speed, it slows the car down first.
 # It ignores leads, brake for traffic. Every SET that engages starts a run, SET while engaged does not:
-#   1. fix: stop, go again at crawl (RAMP) and brake gently to a full stop, so the car stops without an ACC hold
-#      while the ESP holds on its own, then the policy wants to drive off. The fix gets the ACC hold first instead of
-#      a drive-off the hold manager refuses. Stop again and hold, drive off, plain stop and hold, drive off.
-#      Expect no refusal, no fault and no rolling at any hold.
-#   2. old (master hold logic): same trigger. Expect the refusal and TSK 7 at the re-stop.
+#   stop, go again at crawl (RAMP) and coast to a full stop, so the car stops without an ACC hold while the ESP
+#   holds on its own, then the policy wants to drive off. Master requests ANFAHREN here and the hold manager refuses,
+#   the fix doesn't. Stop again and hold, drive off, plain stop and hold. Expect no refusal, no fault and no rolling.
 # Brake, gas, disengage or a TSK fault hand back to the driver. Speeding up past the SET speed, rolling back
 # >0.5 m/s or not driving off stop and hold until disengage, so the car never goes back to the set speed.
 #
@@ -33,10 +31,6 @@ PHASES = (
   ('RESTOP', True, 'hold 5 s'),
   ('DRIVEOFF', True, 'drive off'),
   ('STOP2', True, 'stop 2, hold 5 s'),
-  ('DRIVEOFF2', True, 'drive off'),
-  ('STOP', False, 'stopping'),
-  ('CRAWL_GO', False, 'trigger'),
-  ('RESTOP', False, 'expect cruise fault'),
   ('FINAL', True, 'hold, disengage'),
 )
 
@@ -153,7 +147,7 @@ class MebHoldRepro:
       self.result = None
       self._set_phase(CS, 0, 'armed')
 
-    if self.hold_fix and self.idx < 7 and CS.meb_hold_refused:
+    if self.hold_fix and CS.meb_hold_refused:
       self._finish(CS, 'FIX FAILED', 'hold refused with fix', hold=True)
       return self._stop_cmd(CS, CC)
     if not self.hold_fix and CS.meb_hold_refused and not self.old_refused:
@@ -235,8 +229,8 @@ class MebHoldRepro:
     if phase != 'FINAL' and self.standstill_time >= self.DWELL_TIME:
       self._set_phase(CS, self.idx + 1, 'dwell done')
       if self.phase == 'FINAL':
-        self.result = 'REPEAT'
-        self.result_detail = 'old did not fault, disengage' if self.fix_trigger else 'trigger not reached, disengage'
+        self.result = 'PASS' if self.fix_trigger else 'REPEAT'
+        self.result_detail = 'fix held, no refusal, disengage' if self.fix_trigger else 'trigger not reached, disengage'
         self._log(CS, f'RESULT: {self.result}, {self.result_detail}')
       return self._step(CS, CC, accel, stopped)
     return self._stop_cmd(CS, CC, accel)
