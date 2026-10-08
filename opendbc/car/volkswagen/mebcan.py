@@ -101,7 +101,8 @@ class MebLongStateMachine:
     # NOTE: ANFAHREN faults TSK if the hold manager isn't holding
     # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
-    driving_off = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.out.standstill
+    # HMS_Status leaves holding as soon as we send anfahren, so keep driving off until we leave standstill
+    driving_off = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.esp_standstill
     starting = CC.actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or driving_off)
     long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
