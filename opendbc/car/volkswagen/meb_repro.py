@@ -58,7 +58,7 @@ class MebHoldRepro:
   ROLLBACK_ABORT = 0.5     # m/s while Motion_State is reversing
   CRUISE_SPEED = 1.5       # m/s, speed before each stop
   CRAWL_SPEED = 0.12       # m/s, go again while still rolling forward, like 18/6 at 0.06-0.16 m/s
-  CRAWL_STOP_ACCEL = -0.2  # m/s^2, brake to a full stop during RAMP, without a hold request
+  CRAWL_STOP_ACCEL = 0.0   # m/s^2, coast to a full stop during RAMP, like the natural stops in RAMP (p10 -0.02, p50 +0.12), braking here shut TSK down in 35
   CRAWL_ACCEL = 0.15       # m/s^2, the policy wants to go again once stopped, like 18/6
   ANFAHREN_TIME = 0.9      # s of weak ANFAHREN at standstill, 18/6 sent 0.93 s
   CRAWL_TIMEOUT = 3.0      # s to reach standstill during CRAWL_GO
