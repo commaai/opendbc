@@ -480,13 +480,28 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     self.assertEqual(acks, CCP.STEER_ACK_ATTEMPTS)
     self.assertIsNotNone(latched_at)
 
-    # Latched: no more acks, fault stays while enabled, clears on disengage
-    frames, CS = _steer_frames(ctrl, 2 * CCP.STEER_ACK_PERIOD, eps_engaged=False, eps_standby=True)
-    self.assertFalse(any(f["STEER_REQ"] == 0 and f["STEER_REQ_ACTIVE_LOW"] == 0 for f in frames))
+    # Latched: slow retries continue, fault stays while the EPS refuses, clears on disengage
+    frames, CS = _steer_frames(ctrl, 3 * CCP.STEER_ACK_RETRY_PERIOD, eps_engaged=False, eps_standby=True)
+    self.assertTrue(any(f["STEER_REQ"] == 0 and f["STEER_REQ_ACTIVE_LOW"] == 0 for f in frames))
     self.assertTrue(CS.steer_not_accepted)
     _frames, CS = _steer_frames(ctrl, 2, enabled=False, lat=False, eps_engaged=False, eps_standby=True)
     self.assertFalse(CS.steer_not_accepted)
     self.assertEqual(ctrl.ack_attempts, 0)
+
+  def test_standby_retry_recovers_when_eps_reengages(self):
+    ctrl = _ctrl()
+    _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=0.0)
+    for _ in range(2 * CCP.STEER_ACK_PERIOD * (CCP.STEER_ACK_ATTEMPTS + 2)):
+      _steer_frames(ctrl, 1, eps_engaged=False, eps_standby=True)
+    self.assertTrue(ctrl.steer_fault_latched)
+
+    # EPS takes a slow retry: latch clears, REQ=1 resumes, fault drops
+    frames, CS = _steer_frames(ctrl, 3 * CCP.STEER_ACK_RETRY_PERIOD, eps_engaged=False, eps_standby=True)
+    self.assertTrue(any(f["STEER_REQ"] == 0 and f["STEER_REQ_ACTIVE_LOW"] == 0 for f in frames))
+    frames, CS = _steer_frames(ctrl, 2 * 4, eps_engaged=True, angle=0.0, desired=0.0)
+    self.assertFalse(ctrl.steer_fault_latched)
+    self.assertFalse(CS.steer_not_accepted)
+    self.assertEqual([f["STEER_REQ"] for f in frames], [1, 1, 1, 1])
 
   def test_not_accepted_counts_only_sent_req_frames(self):
     ctrl = _ctrl()
