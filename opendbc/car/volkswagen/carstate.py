@@ -20,6 +20,7 @@ class CarState(CarStateBase):
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
+    self.acc_hold_type = 0
     self.travel_assist_available = False
     self.curvature_meas = 0.
 
@@ -279,6 +280,7 @@ class CarState(CarStateBase):
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
 
     self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
+    self.acc_hold_type = ext_cp.vl["ACC_18"]["ACC_Anforderung_HMS"]
     self.esp_hold_confirmation = bool(pt_cp.vl["ESC_50"]["Standstill"])
     self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
     ret.stockFcw = bool(ext_cp.vl["AWV_03"]["FCW_Active"])
