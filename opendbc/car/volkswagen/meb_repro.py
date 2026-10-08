@@ -156,8 +156,11 @@ class MebHoldRepro:
     if self.hold_fix and self.idx < 7 and CS.meb_hold_refused:
       self._finish(CS, 'FIX FAILED', 'hold refused with fix', hold=True)
       return self._stop_cmd(CS, CC)
-    if not self.hold_fix and CS.meb_hold_refused:
+    if not self.hold_fix and CS.meb_hold_refused and not self.old_refused:
+      # master got refused: the car is no longer held for ACC and rolls on its own after ~1 s, end the run right away
       self.old_refused = True
+      self._finish(CS, 'PASS' if self.fix_trigger else 'REPEAT', 'old refused, BRAKE NOW', hold=True)
+      return self._stop_cmd(CS, CC)
 
     # driver and fault aborts hand back to the driver, the others stop and hold
     holding = self.phase == 'FINAL'
@@ -250,7 +253,7 @@ class MebHoldRepro:
     # on its own. Then it wants to go: master requests ANFAHREN without an ACC hold, the fix gets the hold first
     if self.standstill_time > 0. and not self.crawl_stopped:
       self.crawl_stopped = True
-      self.fix_trigger |= self.hold_fix  # master stops in RAMP here, without a hold
+      self.fix_trigger |= self.hold_fix and CS.meb_hms_status != 1  # stopped without an ACC hold, master requests ANFAHREN here
       self._log(CS, 'stopped after braking in the crawl')
     if self.standstill_time >= self.ANFAHREN_TIME:
       self._set_phase(CS, self.idx + 1, 'anfahren without movement done')
