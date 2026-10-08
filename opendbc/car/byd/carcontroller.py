@@ -241,6 +241,9 @@ class CarController(CarControllerBase):
         self.ack_cooldown = 0
         self.ack_attempts = 0
         self.steer_fault_latched = False
+      elif self.steer_fault_latched and CS.eps_engaged:
+        self.steer_fault_latched = False
+        self.ack_attempts = 0
 
       # 0x1E2 while own_steer: STEER_REQ=0 carries the measured angle so the EPS and
       # panda angle reference stay synced. hold_steer blocks the camera after an LKS
@@ -259,7 +262,8 @@ class CarController(CarControllerBase):
 
       # EPS standby ignores STEER_REQ until it sees the camera's ack. Replay what
       # precedes every logged exit: one idle frame, then REQ=0 with ACTIVE_LOW=0.
-      # panda keeps the camera blocked meanwhile. Give up on it after a few tries.
+      # panda keeps the camera blocked meanwhile. After the fast attempts, keep
+      # retrying at a slow cadence; a driver mid-turn can hold the EPS there.
       if driver_yield:
         self.standby_slots = 0
         self.ack_slots = 0
@@ -268,13 +272,17 @@ class CarController(CarControllerBase):
       else:
         self.standby_slots = self.standby_slots + 1 if (own_steer and CS.eps_standby) else 0
         self.ack_cooldown = max(self.ack_cooldown - 1, 0)
-        if CC.latActive and self.warmup_left == 0 and self.ack_slots == 0 and self.ack_cooldown == 0 and self.standby_slots >= 2:
+        if own_steer and self.warmup_left == 0 and self.ack_slots == 0 and self.ack_cooldown == 0 and self.standby_slots >= 2:
           if self.ack_attempts < CarControllerParams.STEER_ACK_ATTEMPTS:
             self.ack_slots = 2
             self.ack_cooldown = CarControllerParams.STEER_ACK_PERIOD
             self.ack_attempts += 1
-          else:
+          elif not self.steer_fault_latched:
             self.steer_fault_latched = True
+            self.ack_cooldown = CarControllerParams.STEER_ACK_RETRY_PERIOD
+          else:
+            self.ack_slots = 2
+            self.ack_cooldown = CarControllerParams.STEER_ACK_RETRY_PERIOD
 
       ack = False
       if not own_steer:
