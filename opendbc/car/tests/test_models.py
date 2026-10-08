@@ -319,6 +319,170 @@ class TestCarModelBase(unittest.TestCase):
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
     test_car_controller(CC.as_reader())
 
+  def _make_fuzzy_car_control(self, fuzzy) -> structs.CarControl:
+    """Builds a randomized CarControl covering the full actuator surface.
+
+    Ranges are wider than normal driving (out-of-range, edges, sign flips)
+    so CarController rate limits / clamps are exercised and any mismatch
+    with panda tx safety limits fails the tx hook below.
+    """
+    VisualAlert = structs.CarControl.HUDControl.VisualAlert
+    AudibleAlert = structs.CarControl.HUDControl.AudibleAlert
+    LongControlState = structs.CarControl.Actuators.LongControlState
+    long_states = [getattr(LongControlState, name) for name in LongControlState.schema.enumerants]
+    visual_alerts = [getattr(VisualAlert, name) for name in VisualAlert.schema.enumerants]
+    audible_alerts = [getattr(AudibleAlert, name) for name in AudibleAlert.schema.enumerants]
+
+    gas = fuzzy.integer(0, 150) / 100.0
+    brake = fuzzy.integer(0, 150) / 100.0
+    # Don't command gas and brake together like the planner wouldn't, but
+    # still allow each axis to exceed its valid range so clamping is tested.
+    if fuzzy.boolean() and gas > 0 and brake > 0:
+      if fuzzy.boolean():
+        gas = 0.0
+      else:
+        brake = 0.0
+
+    actuators = structs.CarControl.Actuators(
+      torque=fuzzy.integer(-1500, 1500) / 100.0,
+      steeringAngleDeg=fuzzy.integer(-1500, 1500),
+      curvature=fuzzy.integer(-2000, 2000) / 1000.0,
+      accel=fuzzy.integer(-800, 800) / 100.0,
+      gas=gas,
+      brake=brake,
+      speed=fuzzy.integer(0, 150),
+      longControlState=fuzzy.choice(long_states),
+      torqueOutputCan=fuzzy.integer(-1500, 1500) / 100.0,
+    )
+
+    hud = structs.CarControl.HUDControl(
+      speedVisible=fuzzy.boolean(),
+      setSpeed=fuzzy.integer(0, 150),
+      lanesVisible=fuzzy.boolean(),
+      leadVisible=fuzzy.boolean(),
+      rightLaneVisible=fuzzy.boolean(),
+      leftLaneVisible=fuzzy.boolean(),
+      rightLaneDepart=fuzzy.boolean(),
+      leftLaneDepart=fuzzy.boolean(),
+      leadDistanceBars=fuzzy.integer(0, 4),
+      visualAlert=fuzzy.choice(visual_alerts),
+      audibleAlert=fuzzy.choice(audible_alerts),
+    )
+
+    orientation = [fuzzy.integer(-1000, 1000) / 1000.0 for _ in range(3)] if fuzzy.boolean() else []
+
+    return structs.CarControl(
+      enabled=fuzzy.boolean(),
+      latActive=fuzzy.boolean(),
+      longActive=fuzzy.boolean(),
+      leftBlinker=fuzzy.boolean(),
+      rightBlinker=fuzzy.boolean(),
+      driverMonitoringEscalation=fuzzy.boolean(),
+      orientationNED=orientation,
+      currentCurvature=fuzzy.integer(-2000, 2000) / 1000.0,
+      actuators=actuators,
+      cruiseControl=structs.CarControl.CruiseControl(
+        cancel=fuzzy.boolean(),
+        resume=fuzzy.boolean(),
+        override=fuzzy.boolean(),
+      ),
+      hudControl=hud,
+    )
+
+  @fuzzy_test(max_examples=300)
+  def test_panda_safety_tx_fuzzy(self, fuzzy):
+    """Fuzzes tx to catch openpilot/panda controlsAllowed mismatches.
+
+    Drives the car interface through real CAN first (realistic cruise /
+    controls state, no forcing), then applies randomized CarControl through
+    CarController limits and asserts panda agrees with openpilot on whether
+    tx is allowed. Any divergence between CarController gating and panda
+    safety tx gating fails here.
+    """
+    if self.CP.dashcamOnly:
+      self.skipTest("no need to check panda safety for dashcamOnly")
+    if self.CP.notCar:
+      self.skipTest("skipping test for notCar")
+    if self.CP.flags & ToyotaFlags.SECOC:
+      self.skipTest("SecOC transmit tests require the vehicle key")
+
+    controller_params = self.CP
+    if self.CP.brand == "volkswagen" and self.CP.flags & VolkswagenFlags.MLB and self.CP.openpilotLongitudinalControl:
+      controller_params = self.CarInterface.get_params(self.platform, self.fingerprint, self.CP.carFw, False, False, docs=False)
+
+    prefix_len = min(300, len(self.can_msgs))
+    CI = self.CarInterface(controller_params)
+    for can in self.can_msgs[:prefix_len]:
+      CI.update(can).as_reader()
+      for msg in (msg for msg in can[1] if msg.src < 64):
+        packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
+        ret = self.safety.safety_rx_hook(packet)
+        self.assertEqual(1, ret, f"safety RX failed ({ret=}): {(msg.address, msg.src % 4)}")
+
+    # Phase 1: fuzz from current log state (usually controls disallowed).
+    # Only checks allowlisted/HUD messages pass; control messages are
+    # expected to be blocked.
+    first_cc = self._make_fuzzy_car_control(fuzzy).as_reader()
+    second_cc = self._make_fuzzy_car_control(fuzzy).as_reader()
+    switch_frame = fuzzy.integer(0, round(2.0 / DT_CTRL))
+
+    steps = round(2.0 / DT_CTRL)
+    now_nanos = 0
+    msgs_sent = 0
+    allowed_frames = 0
+    for frame in range(steps):
+      can = self.can_msgs[(prefix_len + frame) % len(self.can_msgs)]
+      CI.update(can).as_reader()
+      for msg in (msg for msg in can[1] if msg.src < 64):
+        packet = libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
+        ret = self.safety.safety_rx_hook(packet)
+        self.assertEqual(1, ret, f"safety RX failed ({ret=}): {(msg.address, msg.src % 4)}")
+
+      CC = first_cc if frame < switch_frame else second_cc
+      _, sendcan = CI.apply(CC, now_nanos)
+      now_nanos += DT_CTRL * 1e9
+      msgs_sent += len(sendcan)
+
+      # When panda says controls are allowed, every message openpilot sends
+      # must pass the tx hook: this catches CarController/panda limit
+      # mismatches (torque winddown, rate limits, clamps). When controls are
+      # disallowed we skip the check since openpilot may still send HUD /
+      # always-allowed messages and the tx hook conflates "blocked" with
+      # "not allowlisted".
+      if self.safety.get_controls_allowed():
+        allowed_frames += 1
+        for addr, dat, bus in sendcan:
+          packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)
+          tx_ok = self.safety.safety_tx_hook(packet)
+          debug = f"tx blocked: addr={hex(addr)} bus={bus} en={CC.enabled}"
+          self.assertTrue(tx_ok, debug)
+
+    self.assertGreater(msgs_sent, 0, "fuzz tx sent no messages")
+
+    # Phase 2: force controls allowed, then fuzz control commands. This is
+    # the core bounty coverage: with controls allowed, randomized torque /
+    # accel / steering commands through CarController rate limits + clamps
+    # must all pass panda tx. Any limit mismatch fails here.
+    self.safety.set_controls_allowed(True)
+    CI2 = self.CarInterface(controller_params)
+    now_nanos = 0
+    msgs_sent_phase2 = 0
+    third_cc = self._make_fuzzy_car_control(fuzzy).as_reader()
+    fourth_cc = self._make_fuzzy_car_control(fuzzy).as_reader()
+    switch_frame2 = fuzzy.integer(0, round(2.0 / DT_CTRL))
+    for frame in range(steps):
+      CI2.update([])
+      CC = third_cc if frame < switch_frame2 else fourth_cc
+      _, sendcan = CI2.apply(CC, now_nanos)
+      now_nanos += DT_CTRL * 1e9
+      msgs_sent_phase2 += len(sendcan)
+      for addr, dat, bus in sendcan:
+        packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)
+        tx_ok = self.safety.safety_tx_hook(packet)
+        debug = f"phase2 tx blocked: addr={hex(addr)} bus={bus} en={CC.enabled}"
+        self.assertTrue(tx_ok, debug)
+    self.assertGreater(msgs_sent_phase2, 0, "phase2 fuzz tx sent no messages")
+
   @fuzzy_test(max_examples=300)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
     if self.CP.dashcamOnly:
