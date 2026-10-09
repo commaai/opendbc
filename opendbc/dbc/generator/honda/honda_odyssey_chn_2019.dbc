@@ -1,0 +1,53 @@
+CM_ "IMPORT _honda_common.dbc";
+CM_ "IMPORT _nidec_common.dbc";
+CM_ "IMPORT _lkas_hud_5byte.dbc";
+CM_ "IMPORT _steering_sensors_c.dbc";
+CM_ "IMPORT _steering_control_c.dbc";
+CM_ "IMPORT _gearbox_common.dbc";
+
+CM_ "China-market 5th-gen Odyssey Hybrid (Guangzhou Honda, registration model GHA6480BAC6BHEV).";
+CM_ "Legacy platform string on the comma two: HONDA ODYSSEY CHN 2019.";
+CM_ "This file differs from honda_odyssey_twn_2018.dbc in exactly one respect: this car's";
+CM_ "SCM_BUTTONS (0x1A6) has no PARKING_BRAKE_ON and no REVERSE_LIGHT. Those two signals are";
+CM_ "binary-confirmed absent from the legacy China platform DBC recovered out of the Golden C2";
+CM_ "libdbc.so, so _nidec_scm_group_a.dbc is not imported here and the two messages it carries";
+CM_ "are defined below with the recovered bit positions.";
+CM_ "The two 0x1A6 signals that ARE present are bit-identical to _nidec_scm_group_a.dbc:";
+CM_ "CRUISE_BUTTONS 7|3, LIGHTS_SETTING 1|2, CRUISE_SETTING 43|2, MAIN_ON 47|1,";
+CM_ "DRIVERS_DOOR_OPEN 63|1, COUNTER 61|2, CHECKSUM 59|4. 0x294 SCM_FEEDBACK is byte-for-byte";
+CM_ "the group_a definition and is repeated only because the two messages share one file.";
+CM_ "Measured against the legacy China DBC, the remaining imported files needed no change:";
+CM_ "0x194 STEERING_CONTROL matches _steering_control_c.dbc bit for bit (DLC 4, STEER_TORQUE";
+CM_ "7|16@0-, STEER_TORQUE_REQUEST 23|1, SET_ME_X00 22|7); 0x156 STEERING_SENSORS matches";
+CM_ "_steering_sensors_c.dbc bit for bit; 0x18F STEER_STATUS matches the _steering_control_c.dbc";
+CM_ "definition; 0x33D LKAS_HUD matches _lkas_hud_5byte.dbc (DLC 5).";
+CM_ "0x309 is the message the legacy China platform called LOCK_STATUS. _honda_common.dbc defines";
+CM_ "the same address as CAR_SPEED, and its LOCK_STATUS signal at 55|2 covers exactly the two";
+CM_ "bits the legacy platform used (55 DOORS_LOCKED, 54 DOORS_UNLOCKED). CarState does not read";
+CM_ "the CAR_SPEED signals on this platform; see carstate.py.";
+CM_ "0x1C2 EPB_STATUS comes from _honda_common.dbc; the parking brake is read from its EPB_STATE";
+CM_ "signal, which is what the legacy China platform did.";
+CM_ "0x191 GEARBOX_CVT is imported from _gearbox_common.dbc but has NOT been observed on this";
+CM_ "vehicle: only 0x1A3 GEARBOX_AUTO is present, which is what selects TransmissionType";
+CM_ "automatic in interface.py. The 0x191 definition is inherited so that GEARBOX_CVT resolves if";
+CM_ "a future fingerprint contains it; it is not evidence about this car.";
+
+BO_ 660 SCM_FEEDBACK: 8 SCM
+ SG_ RIGHT_BLINKER : 6|1@0+ (1,0) [0|1] "" EON
+ SG_ LEFT_BLINKER : 5|1@0+ (1,0) [0|1] "" EON
+ SG_ WIPERS_SPEED : 4|2@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
+BO_ 422 SCM_BUTTONS: 8 SCM
+ SG_ CRUISE_BUTTONS : 7|3@0+ (1,0) [0|7] "" EON
+ SG_ LIGHTS_SETTING : 1|2@0+ (1,0) [0|3] "" EON
+ SG_ MAIN_ON : 47|1@0+ (1,0) [0|1] "" EON
+ SG_ CRUISE_SETTING : 43|2@0+ (1,0) [0|3] "" EON
+ SG_ DRIVERS_DOOR_OPEN : 63|1@0+ (1,0) [0|1] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
+VAL_ 422 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
+VAL_ 422 LIGHTS_SETTING 3 "high_beam" 2 "low_beam" 1 "position" 0 "no_lights" ;
+VAL_ 422 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;

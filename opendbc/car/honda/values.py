@@ -52,7 +52,7 @@ class CarControllerParams:
                                CAR.HONDA_E, CAR.HONDA_E_ADVANCE, CAR.HONDA_PRELUDE_6G):
       # TODO: determine if there is a dead zone at the top end (except HONDA_FREED, HONDA_HRV, HONDA_HRV_3G)
       self.STEER_MAX = 4096
-    elif CP.carFingerprint == CAR.HONDA_ODYSSEY_TWN:
+    elif CP.carFingerprint in (CAR.HONDA_ODYSSEY_TWN, CAR.HONDA_ODYSSEY_CHN):
       self.STEER_MAX = 32767  # TODO: determine if there is a dead zone at the top end
     elif CP.carFingerprint == CAR.HONDA_PILOT_4G_MMR:
       self.STEER_MAX = 3628
@@ -67,6 +67,7 @@ class HondaSafetyFlags(IntFlag):
   NIDEC_ALT = 4
   RADARLESS = 8
   BOSCH_CANFD = 16
+  NIDEC_STOCK_LONG = 32
 
 
 class HondaFlags(IntFlag):
@@ -385,6 +386,31 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1865, wheelbase=2.9, steerRatio=14.35, centerToFrontRatio=0.44, tireStiffnessFactor=0.82),
     radar_dbc_dict('honda_odyssey_twn_2018_generated'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
+  )
+  HONDA_ODYSSEY_CHN = HondaNidecPlatformConfig(
+    # No HondaCarDocs: this platform has no ECU firmware data, so it is absent from the
+    # supported-car docs. It is reachable by CAN fingerprint -- see
+    # car/honda/fingerprints.py.
+    #
+    # CAN fingerprinting CAN IDENTIFY THE VEHICLE MODEL WHEN NO FIRMWARE DATA EXISTS. It is
+    # NOT ECU firmware evidence, and must not be described or relied on as such. carFw = []
+    # means exactly that: no firmware evidence was ever recorded for this car.
+    #
+    # Measured 2026-09-30: neither can_fingerprint() nor get_params() gates on is_release
+    # for this platform (the only is_release use in Honda is dashcamOnly for
+    # ACURA_RDX_3G_MMR), so a release build identifies it exactly as a dev build does.
+    [],
+    # Every field here is taken from the legacy comma two runtime CarParams for
+    # "HONDA ODYSSEY CHN 2019" and reproduces them through the modern derivations: with
+    # mass=1849.2 the interface adds STD_CARGO_KG (136) to reach the recorded 1985.2 kg, and
+    # centerToFrontRatio 0.41 x wheelbase 2.9 reproduces the recorded 1.189 m. tireStiffnessFactor
+    # 0.82 reproduces the recorded 210383.6 / 231110.5 N/rad front/rear through
+    # scale_tire_stiffness. None of these has been re-measured on the car itself.
+    CarSpecs(mass=1849.2, wheelbase=2.9, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
+    # Distinct from the Taiwan/Singapore DBC: this car's SCM_BUTTONS (0x1A6) carries neither
+    # PARKING_BRAKE_ON nor REVERSE_LIGHT. See honda_odyssey_chn_2019.dbc.
+    radar_dbc_dict('honda_odyssey_chn_2019_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
   ACURA_RDX = HondaNidecPlatformConfig(

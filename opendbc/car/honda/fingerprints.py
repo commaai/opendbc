@@ -4,6 +4,44 @@ from opendbc.car.honda.values import CAR
 
 Ecu = CarParams.Ecu
 
+# CAN fingerprints. Honda is fingerprinted by exact ECU firmware strings above; this
+# dict exists only for the one platform that has no firmware evidence at all.
+#
+# HONDA_ODYSSEY_CHN (China-market 5th-gen Odyssey Hybrid): the car was driven for years on
+# a comma two whose recorded CarParams carry `carFw = []` and `carVin = '00000000000000000'`
+# with `fingerprintSource = can` -- i.e. it was identified purely by CAN, and no ECU
+# firmware version was ever captured for it. Without an entry here the platform is
+# unreachable: `can_fingerprint()` only considers platforms that define FINGERPRINTS, and
+# no Honda platform does.
+#
+# The sets below are the two variants the legacy comma-two table shipped for the platform
+# string "HONDA ODYSSEY CHN 2019" (selfdrive/car/honda/values.py in the Golden C2 tree).
+# They are NOT reconstructed: replaying this car's own recorded frames through
+# `is_valid_for_fingerprint` across all 12 legacy Honda platforms leaves exactly these two
+# and eliminates the other 11. The legacy table's third variant (49 addresses) is omitted
+# deliberately -- this car is eliminated by it, so including it would widen acceptance
+# beyond the recorded evidence.
+#
+# Scope limit: validated against the recorded bus arrangement only. Whether a given
+# physical install presents the same addresses on the same interfaces is not established
+# by this data.
+FINGERPRINTS = {
+  CAR.HONDA_ODYSSEY_CHN: [
+    {
+      141: 2, 145: 8, 342: 6, 344: 8, 380: 8, 387: 8, 388: 8, 392: 6, 398: 3, 399: 7, 404: 4, 411: 5, 419: 8, 420: 8, 422: 8, 432: 7, 450: 8, 464: 8,
+      476: 8, 506: 8, 507: 1, 530: 8, 531: 8, 532: 8, 533: 8, 534: 8, 535: 8, 537: 8, 545: 6, 558: 8, 559: 3, 597: 8, 620: 7, 622: 5, 660: 8, 773: 7,
+      780: 8, 800: 8, 804: 8, 808: 8, 815: 8, 829: 5, 832: 3, 833: 6, 862: 8, 882: 4, 891: 8, 905: 8, 906: 4, 918: 7, 920: 8, 921: 8, 923: 2, 927: 8,
+      929: 8, 954: 2, 976: 8, 1092: 1, 1108: 8, 1113: 8, 1341: 5, 1604: 5, 1605: 8, 1606: 5, 1607: 8, 1608: 5, 1609: 8
+    },
+    {
+      141: 2, 145: 8, 342: 6, 344: 8, 380: 8, 387: 8, 388: 8, 392: 6, 398: 3, 399: 7, 404: 4, 408: 6, 411: 5, 419: 8, 420: 8, 422: 8, 432: 7, 450: 8,
+      464: 8, 476: 8, 506: 8, 507: 1, 530: 8, 531: 8, 532: 8, 533: 8, 534: 8, 535: 8, 537: 8, 545: 6, 558: 8, 559: 3, 597: 8, 620: 7, 622: 5, 660: 8,
+      773: 7, 780: 8, 800: 8, 804: 8, 808: 8, 815: 8, 829: 5, 832: 3, 833: 6, 862: 8, 882: 4, 891: 8, 905: 8, 906: 4, 918: 7, 920: 8, 921: 8, 923: 2,
+      927: 8, 929: 8, 954: 2, 976: 8, 1092: 1, 1108: 8, 1113: 8, 1341: 5, 1604: 5, 1605: 8, 1606: 5, 1607: 8, 1608: 5, 1609: 8
+    },
+  ],
+}
+
 # Modified FW can be identified by the second dash being replaced by a comma
 # For example: `b'39990-TVA,A150\x00\x00'`
 #
