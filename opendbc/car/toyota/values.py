@@ -579,9 +579,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
                       Ecu.hybrid, Ecu.srs, Ecu.transmission, Ecu.hvac],
       bus=0,
     ),
-    # Stock Toyota-B exposes the TSS3 EPS and ABS diagnostic endpoints on bus
-    # 1. Query both so an exact ABS identity can still resolve a car whose EPS
-    # diagnostic endpoint is unavailable.
+    # Additional EPS/ABS queries for the observed stock Toyota-B bus-1 route.
     Request(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.DEFAULT_DIAGNOSTIC_REQUEST, StdQueries.EXTENDED_DIAGNOSTIC_REQUEST, StdQueries.UDS_VERSION_REQUEST],
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.DEFAULT_DIAGNOSTIC_RESPONSE, StdQueries.EXTENDED_DIAGNOSTIC_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
@@ -593,9 +591,6 @@ FW_QUERY_CONFIG = FwQueryConfig(
   non_essential_ecus={
     # FIXME: On some models, abs can sometimes be missing
     Ecu.abs: [CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_SIENNA, CAR.LEXUS_IS, CAR.TOYOTA_ALPHARD_TSS2],
-    # EPS can miss the FW query during startup on TSS3 Camry
-    Ecu.eps: [CAR.TOYOTA_CAMRY_TSS3],
-    Ecu.fwdCamera: [CAR.TOYOTA_CAMRY_TSS3],
     # On some models, the engine can show on two different addresses
     Ecu.engine: [CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_CAMRY, CAR.TOYOTA_COROLLA_TSS2, CAR.TOYOTA_CHR, CAR.TOYOTA_CHR_TSS2, CAR.LEXUS_IS,
                  CAR.LEXUS_IS_TSS2, CAR.LEXUS_RC, CAR.LEXUS_NX, CAR.LEXUS_NX_TSS2, CAR.LEXUS_RX, CAR.LEXUS_RX_TSS2],
