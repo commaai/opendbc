@@ -134,9 +134,10 @@ class CarInterface(CarInterfaceBase):
     # to a negative value, so it won't matter.
     ret.minEnableSpeed = -1. if stop_and_go else MIN_ACC_SPEED
 
-    if ret.flags & ToyotaFlags.TSS2:
+    if ret.flags & (ToyotaFlags.TSS2 | ToyotaFlags.TSS3):
       ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
 
+    if ret.flags & ToyotaFlags.TSS2:
       # Hybrids have much quicker longitudinal actuator response
       if ret.flags & ToyotaFlags.HYBRID.value:
         ret.longitudinalActuatorDelay = 0.05

@@ -210,7 +210,7 @@ class CAR(Platforms):
     # XV80: lightest (LE FWD) curb weight and 2,825 mm wheelbase from Toyota's 2025 product information.
     # Steer ratio is learned from routes; the Toyota stiffness factor remains paramsd's baseline.
     CarSpecs(mass=3450. * CV.LB_TO_KG, wheelbase=2.825, steerRatio=15.3, tireStiffnessFactor=0.7933),
-    flags=ToyotaFlags.HYBRID | ToyotaFlags.RAISED_ACCEL_LIMIT,
+    flags=ToyotaFlags.HYBRID,
   )
   TOYOTA_CHR = PlatformConfig(
     [
