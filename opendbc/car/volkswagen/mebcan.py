@@ -98,10 +98,12 @@ class MebLongStateMachine:
     # warning: car is reacting to hold mechanic even with long control off
     # HALTEN -> KEINE_ANFORDERUNG causes the car to fault into park, so both branches below put a ramp in
     # between: disengaging always ramps, and while engaged a release ramps until 5 kph
-    # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
+    # NOTE: ANFAHREN faults TSK if the hold manager isn't holding
     # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
-    starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
+    # HMS_Status leaves holding as soon as we send anfahren, so keep driving off until we leave standstill
+    driving_off = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.esp_standstill
+    starting = CC.actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or driving_off)
     long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
     if not long_active:
