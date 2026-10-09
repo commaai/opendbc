@@ -154,6 +154,8 @@ class CarSpecs:
   minSteerSpeed: float = 0.0  # m/s
   minEnableSpeed: float = -1.0  # m/s
   tireStiffnessFactor: float = 1.0
+  tireStiffnessFront: float = 0.0  # N/rad
+  tireStiffnessRear: float = 0.0  # N/rad
 
   def override(self, **kwargs):
     return replace(self, **kwargs)
