@@ -2,9 +2,7 @@
 import unittest
 import numpy as np
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 
 MAX_ACCEL = 2.0
@@ -95,37 +93,14 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
       self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
                        f"expected {brake_pressed=} with {motor_03_signal=} and {esp_05_signal=}")
 
-  def test_torque_measurements(self):
-    # TODO: make this test work with all cars
-    self._rx(self._torque_driver_msg(50))
-    self._rx(self._torque_driver_msg(-50))
-    self._rx(self._torque_driver_msg(0))
-    self._rx(self._torque_driver_msg(0))
-    self._rx(self._torque_driver_msg(0))
-    self._rx(self._torque_driver_msg(0))
-
-    self.assertEqual(-50, self.safety.get_torque_driver_min())
-    self.assertEqual(50, self.safety.get_torque_driver_max())
-
-    self._rx(self._torque_driver_msg(0))
-    self.assertEqual(0, self.safety.get_torque_driver_max())
-    self.assertEqual(-50, self.safety.get_torque_driver_min())
-
-    self._rx(self._torque_driver_msg(0))
-    self.assertEqual(0, self.safety.get_torque_driver_max())
-    self.assertEqual(0, self.safety.get_torque_driver_min())
-
 
 class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
+  DBC = "vw_mlb"
+  SAFETY_MODEL = CarParams.SafetyModel.volkswagenMlb
+
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LS_01, 0], [MSG_LS_01, 2]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_01, MSG_LDW_02]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
-
-  def setUp(self):
-    self.packer = CANPackerSafety("vw_mlb")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMlb, 0)
-    self.safety.init_tests()
 
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
@@ -145,16 +120,14 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
 
 
 class TestVolkswagenMlbLongSafety(TestVolkswagenMlbSafetyBase):
+  DBC = "vw_mlb"
+  SAFETY_MODEL = CarParams.SafetyModel.volkswagenMlb
+  SAFETY_PARAM = VolkswagenSafetyFlags.LONG_CONTROL
+
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LS_01, 0], [MSG_LS_01, 2], [MSG_LDW_02, 0],
              [MSG_ACC_02, 0], [MSG_ACC_01, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_01]}
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_01)}
-
-  def setUp(self):
-    self.packer = CANPackerSafety("vw_mlb")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMlb, VolkswagenSafetyFlags.LONG_CONTROL)
-    self.safety.init_tests()
 
   # Acceleration request to drivetrain coordinator
   def _acc_01_msg(self, accel, acc_status=0):

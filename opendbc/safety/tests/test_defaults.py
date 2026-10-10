@@ -3,7 +3,6 @@ import unittest
 
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class TestDefaultRxHookBase(common.SafetyTest):
@@ -17,32 +16,22 @@ class TestDefaultRxHookBase(common.SafetyTest):
 
 
 class TestNoOutput(TestDefaultRxHookBase):
-  TX_MSGS = []
+  SAFETY_MODEL = CarParams.SafetyModel.noOutput
 
-  def setUp(self):
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0)
-    self.safety.init_tests()
+  TX_MSGS = []
 
 
 class TestSilent(TestNoOutput):
   """SILENT uses same hooks as NOOUTPUT"""
-
-  def setUp(self):
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.silent, 0)
-    self.safety.init_tests()
+  SAFETY_MODEL = CarParams.SafetyModel.silent
 
 
 class TestAllOutput(TestDefaultRxHookBase):
+  SAFETY_MODEL = CarParams.SafetyModel.allOutput
+
   # Allow all messages
   TX_MSGS = [[addr, bus] for addr in common.SafetyTest.SCANNED_ADDRS
              for bus in range(4)]
-
-  def setUp(self):
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.allOutput, 0)
-    self.safety.init_tests()
 
   def test_spam_can_buses(self):
     # asserts tx allowed for all scanned addrs
@@ -61,13 +50,20 @@ class TestAllOutput(TestDefaultRxHookBase):
 
 
 class TestAllOutputPassthrough(TestAllOutput):
+  SAFETY_PARAM = 1
+
   FWD_BLACKLISTED_ADDRS = {}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
-  def setUp(self):
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.allOutput, 1)
-    self.safety.init_tests()
+
+class TestSafetyFramework(common.SafetyTestBase):
+  SAFETY_MODEL = CarParams.SafetyModel.noOutput
+
+  def test_unsupported_safety_mode(self):
+    self.safety.set_controls_allowed(True)
+    self.assertEqual(self.safety.set_safety_hooks(0xFFFF, 0), -1)
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
 
 
 if __name__ == "__main__":

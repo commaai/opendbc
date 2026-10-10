@@ -13,10 +13,6 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
 
-void safety_tick_current_safety_config() {
-  safety_tick(&current_safety_config);
-}
-
 bool safety_config_valid() {
   if (current_safety_config.rx_checks_len <= 0) {
     printf("missing RX checks\n");
@@ -46,20 +42,12 @@ void set_relay_malfunction(bool c){
   relay_malfunction = c;
 }
 
-void set_ignition_can(bool c){
-  ignition_can = c;
-}
-
 bool get_controls_allowed(void){
   return controls_allowed;
 }
 
 bool get_ignition_can(void){
   return ignition_can;
-}
-
-int get_alternative_experience(void){
-  return alternative_experience;
 }
 
 bool get_relay_malfunction(void){
@@ -160,10 +148,6 @@ void set_desired_angle_last(int t){
   desired_angle_last = t;
 }
 
-int get_desired_angle_last(void){
-  return desired_angle_last;
-}
-
 void set_angle_meas(int min, int max){
   angle_meas.min = min;
   angle_meas.max = max;
@@ -203,14 +187,6 @@ int get_curvature_meas_max(void){
 
 void set_honda_alt_brake_msg(bool c){
   honda_alt_brake_msg = c;
-}
-
-void set_honda_bosch_long(bool c){
-  honda_bosch_long = c;
-}
-
-int get_honda_hw(void) {
-  return honda_hw;
 }
 
 void set_honda_fwd_brake(bool c){

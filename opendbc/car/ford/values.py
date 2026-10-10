@@ -45,6 +45,9 @@ class FordSafetyFlags(IntFlag):
 
 
 class FordFlags(IntFlag):
+  # Detected flags
+  HAS_BSM = 2  # blind spot monitoring
+
   # Static flags
   CANFD = 1
 

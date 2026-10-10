@@ -87,10 +87,10 @@ BO_ 304 PLA_01: 8 XXX
  SG_ PLA_LW_Soll : 16|13@1+ (0.1,0) [0.0|819.1] "Unit_DegreOfArc"  XXX
  SG_ PLA_VZ_LW_Soll : 31|1@1+ (1.0,0.0) [0.0|1] ""  XXX
  SG_ PLA_Status_PLA_EPS : 32|4@1+ (1.0,0.0) [0.0|15] ""  XXX
- SG_ PLA_Bremsmoment : 36|13@1+ (4,0) [0|32760] "Unit_NewtoMeter"  XXX
- SG_ PLA_Bremsverzoegerung : 36|7@1+ (0.1,0) [0.0|12.0] "Unit_MeterPerSeconSquar"  XXX
- SG_ PLA_Anf_Bremsverzoegerung : 43|1@1+ (1.0,0.0) [0.0|1] ""  XXX
- SG_ PLA_BremsMom_Verzoeg : 50|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ PLA_Bremsmoment m0 : 36|13@1+ (4,0) [0|32760] "Unit_NewtoMeter" XXX
+ SG_ PLA_Bremsverzoegerung m1 : 36|7@1+ (0.1,0) [0|12] "Unit_MeterPerSeconSquar" XXX
+ SG_ PLA_Anf_Bremsverzoegerung m1 : 43|1@1+ (1,0) [0|1] "" XXX
+ SG_ PLA_BremsMom_Verzoeg M : 50|1@1+ (1,0) [0|1] "" XXX
  SG_ PLA_Anhalten : 51|1@1+ (1.0,0.0) [0.0|1] ""  XXX
  SG_ PLA_Anhalteweg : 52|11@1+ (0.01,0) [0.01|20.45] "Unit_Meter"  XXX
  SG_ PLA_01_Signal_red_cyclic : 63|1@1+ (1.0,0.0) [0.0|1] ""  XXX
@@ -1633,6 +1633,7 @@ CM_ SG_ 302 ACC_Freewheel_Request "Active request for DSG sailing/coasting in AC
 CM_ SG_ 302 ACC_Hold_Release "Request to ABS to release brake hold";
 CM_ SG_ 302 ACC_Accel_Secondary "Target acceleration of the secondary controller";
 CM_ SG_ 302 ACC_Accel_TSK "Mirror of request to TSK to implement a target acceleration";
+CM_ SG_ 304 PLA_BremsMom_Verzoeg "0=PLA_Bremsmoment, 1=PLA_Bremsverzoegerung/PLA_Anf_Bremsverzoegerung.";
 CM_ SG_ 870 Hazard_Switch "Four-way flashers active";
 CM_ SG_ 870 Comfort_Signal_Left "Comfort turn signal active, left";
 CM_ SG_ 870 Comfort_Signal_Right "Comfort turn signal active, right";

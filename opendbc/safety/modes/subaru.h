@@ -73,36 +73,36 @@ static uint32_t subaru_compute_checksum(const CANPacket_t *msg) {
 static void subaru_rx_hook(const CANPacket_t *msg) {
   const unsigned int alt_main_bus = subaru_gen2 ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
 
-  if ((msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
+  if (msg_matches(msg, MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS)) {
     int torque_driver_new;
-    torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
+    torque_driver_new = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0x7FFU);
     torque_driver_new = -1 * to_signed(torque_driver_new, 11);
     update_sample(&torque_driver, torque_driver_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
-  if ((msg->addr == MSG_SUBARU_CruiseControl) && (msg->bus == alt_main_bus)) {
+  if (msg_matches(msg, MSG_SUBARU_CruiseControl, alt_main_bus)) {
     bool cruise_engaged = (msg->data[5] >> 1) & 1U;
     pcm_cruise_check(cruise_engaged);
   }
 
   // update vehicle moving with any non-zero wheel speed
-  if ((msg->addr == MSG_SUBARU_Wheel_Speeds) && (msg->bus == alt_main_bus)) {
-    uint32_t fr = (GET_BYTES(msg, 1, 3) >> 4) & 0x1FFFU;
-    uint32_t rr = (GET_BYTES(msg, 3, 3) >> 1) & 0x1FFFU;
-    uint32_t rl = (GET_BYTES(msg, 4, 3) >> 6) & 0x1FFFU;
-    uint32_t fl = (GET_BYTES(msg, 6, 2) >> 3) & 0x1FFFU;
+  if (msg_matches(msg, MSG_SUBARU_Wheel_Speeds, alt_main_bus)) {
+    uint32_t fr = (GET_BYTES_LE(msg, 1, 3) >> 4) & 0x1FFFU;
+    uint32_t rr = (GET_BYTES_LE(msg, 3, 3) >> 1) & 0x1FFFU;
+    uint32_t rl = (GET_BYTES_LE(msg, 4, 3) >> 6) & 0x1FFFU;
+    uint32_t fl = (GET_BYTES_LE(msg, 6, 2) >> 3) & 0x1FFFU;
 
-    vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
+    vehicle_moving = (fr | rr | rl | fl) != 0U;
 
     UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 * KPH_TO_MS);
   }
 
-  if ((msg->addr == MSG_SUBARU_Brake_Status) && (msg->bus == alt_main_bus)) {
+  if (msg_matches(msg, MSG_SUBARU_Brake_Status, alt_main_bus)) {
     brake_pressed = (msg->data[7] >> 6) & 1U;
   }
 
-  if ((msg->addr == MSG_SUBARU_Throttle) && (msg->bus == SUBARU_MAIN_BUS)) {
+  if (msg_matches(msg, MSG_SUBARU_Throttle, SUBARU_MAIN_BUS)) {
     gas_pressed = msg->data[4] != 0U;
   }
 }
@@ -114,7 +114,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
   const LongitudinalLimits SUBARU_LONG_LIMITS = {
     .min_gas = 808,       // appears to be engine braking
     .max_gas = 3400,      // approx  2 m/s^2 when maxing cruise_rpm and cruise_throttle
-    .inactive_gas = 1818, // this is zero acceleration
+    .inactive_gas = 1818,  // this is zero acceleration
     .max_brake = 600,     // approx -3.5 m/s^2
 
     .min_transmission_rpm = 0,
@@ -126,7 +126,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
   // steer cmd checks
   if (msg->addr == MSG_SUBARU_ES_LKAS) {
-    int desired_torque = ((GET_BYTES(msg, 0, 4) >> 16) & 0x1FFFU);
+    int desired_torque = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0x1FFFU);
     desired_torque = -1 * to_signed(desired_torque, 13);
 
     bool steer_req = (msg->data[3] >> 5) & 1U;
@@ -137,7 +137,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
   // check es_distance cruise_throttle limits
   if (msg->addr == MSG_SUBARU_ES_Distance) {
-    int cruise_throttle = (GET_BYTES(msg, 2, 2) & 0x1FFFU);
+    int cruise_throttle = (GET_BYTES_LE(msg, 2, 2) & 0x1FFFU);
     bool cruise_cancel = (msg->data[7] >> 0) & 1U;
 
     // If openpilot is not controlling long, only allow ES_Distance for cruise cancel requests,
@@ -146,9 +146,10 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     violation |= (!cruise_cancel);
   }
 
-  if (violation){
+  if (violation) {
     tx = false;
   }
+
   return tx;
 }
 

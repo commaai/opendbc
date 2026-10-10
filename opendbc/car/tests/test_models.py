@@ -256,7 +256,7 @@ class TestCarModelBase(unittest.TestCase):
           self.safety.safety_rx_hook(packet)
       self.safety.set_relay_malfunction(relay_malfunction)
 
-      self.safety.safety_tick_current_safety_config()
+      self.safety.safety_tick()
       if t > 1e6:
         self.assertTrue(self.safety.safety_config_valid())
 
@@ -278,7 +278,7 @@ class TestCarModelBase(unittest.TestCase):
 
     self.assertFalse(failed_addrs, f"panda safety RX check failed: {failed_addrs}")
     self.safety.set_timer(int(t + 2e6))
-    self.safety.safety_tick_current_safety_config()
+    self.safety.safety_tick()
     self.assertFalse(self.safety.safety_config_valid())
 
   def test_panda_safety_tx_cases(self):

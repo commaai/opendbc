@@ -14,7 +14,7 @@ jobs:
     permissions:
       id-token: write  # trusted publishing
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build distribution
         run: |
@@ -25,10 +25,10 @@ jobs:
 
       - name: Publish to Test PyPI
         if: github.event_name == 'workflow_dispatch'
-        uses: pypa/gh-action-pypi-publish@v1.12.4
+        uses: pypa/gh-action-pypi-publish@v1.14.2
         with:
           repository-url: https://test.pypi.org/legacy/
 
       - name: Publish to Production PyPI
         if: github.event_name == 'release'
-        uses: pypa/gh-action-pypi-publish@v1.12.4
+        uses: pypa/gh-action-pypi-publish@v1.14.2
