@@ -1,0 +1,35 @@
+name: MISRA tool experiment
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  misra:
+    name: MISRA tool (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7
+      - name: Analyze safety code
+        shell: bash
+        run: |
+          set +e
+          ./opendbc/safety/tests/misra/test_tool.sh --format json > misra-findings.json
+          status=$?
+          cat misra-findings.json
+          # Findings are expected during development; incomplete analysis is a failure.
+          if [ "$status" -ne 0 ] && [ "$status" -ne 1 ]; then
+            exit "$status"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: misra-findings-${{ matrix.os }}
+          path: misra-findings.json
