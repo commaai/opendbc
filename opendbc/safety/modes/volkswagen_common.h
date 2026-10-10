@@ -110,3 +110,18 @@ static int volkswagen_mlb_mqb_steering_control_torque(const CANPacket_t *msg) {
   }
   return desired_torque;
 }
+
+// XOR over the payload, skipping the byte the checksum itself lives in.
+// Mirrors xor_checksum() in opendbc/car/volkswagen/
+static uint8_t volkswagen_xor_checksum(const CANPacket_t *msg, unsigned int checksum_byte, uint8_t initial_value) {
+  unsigned int len = GET_LEN(msg);
+  uint8_t checksum = initial_value;
+
+  for (unsigned int i = 0U; i < len; i++) {
+    if (i != checksum_byte) {
+      checksum ^= (uint8_t)msg->data[i];
+    }
+  }
+
+  return checksum;
+}
