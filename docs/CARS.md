@@ -111,7 +111,7 @@
 |Honda|CR-V 2017-22|Honda Sensing|[Upstream](#upstream)|
 |Honda|CR-V 2023-26|All|[Upstream](#upstream)|
 |Honda|CR-V Hybrid 2017-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|CR-V Hybrid 2023-26|All|[Upstream](#upstream)|
+|Honda|CR-V Hybrid 2023-27|All|[Upstream](#upstream)|
 |Honda|e 2020|All|[Upstream](#upstream)|
 |Honda|Fit 2018-20|Honda Sensing|[Upstream](#upstream)|
 |Honda|Freed 2020|Honda Sensing|[Upstream](#upstream)|

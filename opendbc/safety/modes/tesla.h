@@ -15,7 +15,6 @@ static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
 
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
-
   uint8_t cnt = 0;
   if (msg->addr == 0x2b9U) {
     // Signal: DAS_controlCounter
@@ -83,7 +82,6 @@ static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
 }
 
 static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
-
   bool valid = false;
   if (msg->addr == 0x155U) {
     valid = (msg->data[5] & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
@@ -96,7 +94,6 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
 }
 
 static void tesla_rx_hook(const CANPacket_t *msg) {
-
   // Steering angle: (0.1 * val) - 819.2 in deg.
   if (msg_matches(msg, 0x370U, 0U)) {
     // Store it 1/10 deg to match steering request
@@ -189,7 +186,6 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     tesla_stock_lkas_prev = tesla_stock_lkas_now;
   }
 }
-
 
 static bool tesla_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringLimits TESLA_STEERING_LIMITS = {
@@ -315,7 +311,6 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
 }
 
 static safety_config tesla_init(uint16_t param) {
-
   static const CanMsg TESLA_M3_Y_TX_MSGS[] = {
     {0x488, 0, 4, .check_relay = true, .disable_static_blocking = true},   // DAS_steeringControl
     {0x2b9, 0, 8, .check_relay = false},                                   // DAS_control (for cancel)

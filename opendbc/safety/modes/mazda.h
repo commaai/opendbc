@@ -20,7 +20,7 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MAZDA_ENGINE_DATA, MAZDA_MAIN)) {
     // sample speed: scale by 0.01 to get kph
     int speed = (msg->data[2] << 8) | msg->data[3];
-    vehicle_moving = speed > 10; // moving when speed > 0.1 kph
+    vehicle_moving = speed > 10;  // moving when speed > 0.1 kph
   }
 
   if (msg_matches(msg, MAZDA_STEER_TORQUE, MAZDA_MAIN)) {
@@ -80,7 +80,11 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config mazda_init(uint16_t param) {
-  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8, .check_relay = true}, {MAZDA_CRZ_BTNS, 0, 8, .check_relay = false}, {MAZDA_LKAS_HUD, 0, 8, .check_relay = true}};
+  static const CanMsg MAZDA_TX_MSGS[] = {
+    {MAZDA_LKAS, 0, 8, .check_relay = true},
+    {MAZDA_CRZ_BTNS, 0, 8, .check_relay = false},
+    {MAZDA_LKAS_HUD, 0, 8, .check_relay = true},
+  };
 
   static RxCheck mazda_rx_checks[] = {
     {.msg = {{MAZDA_CRZ_CTRL,     0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},

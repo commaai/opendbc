@@ -18,19 +18,6 @@ class CanBus(CanBusBase):
     return self.offset + 2
 
 
-def calculate_lat_ctl2_checksum(mode: int, counter: int, dat: bytearray) -> int:
-  curvature = (dat[2] << 3) | ((dat[3]) >> 5)
-  curvature_rate = (dat[6] << 3) | ((dat[7]) >> 5)
-  path_angle = ((dat[3] & 0x1F) << 6) | ((dat[4]) >> 2)
-  path_offset = ((dat[4] & 0x3) << 8) | dat[5]
-
-  checksum = mode + counter
-  for sig_val in (curvature, curvature_rate, path_angle, path_offset):
-    checksum += sig_val + (sig_val >> 8)
-
-  return 0xFF - (checksum & 0xFF)
-
-
 def create_lka_msg(packer, CAN: CanBus):
   """
   Creates an empty CAN message for the Ford LKA Command.
@@ -105,12 +92,7 @@ def create_lat_ctl2_msg(packer, CAN: CanBus, mode: int, path_offset: float, path
     "LatCtlCrv_NoRate2_Actl": curvature_rate,   # [-0.001024|0.001023] 1/meter^2
     "HandsOffCnfm_B_Rq": 0,                     # 0=Inactive, 1=Active [0|1]
     "LatCtlPath_No_Cnt": counter,               # [0|15]
-    "LatCtlPath_No_Cs": 0,                      # [0|255]
   }
-
-  # calculate checksum
-  dat = packer.make_can_msg("LateralMotionControl2", 0, values)[1]
-  values["LatCtlPath_No_Cs"] = calculate_lat_ctl2_checksum(mode, counter, dat)
 
   return packer.make_can_msg("LateralMotionControl2", CAN.main, values)
 
@@ -338,3 +320,26 @@ def create_button_msg(packer, bus: int, stock_values: dict, cancel=False, resume
     "TjaButtnOnOffPress": 1 if tja_toggle else 0,   # LCA/TJA toggle button
   })
   return packer.make_can_msg("Steering_Data_FD1", bus, values)
+
+
+FORD_CHECKSUM_FIELDS = {
+  0x7d: ("BrkTot_Tq_RqArb", "BrkTotTqRqArb_No_Cnt"),
+  0x91: ("VehRol_W_Actl", "VehYaw_W_Actl", "VehRollYaw_No_Cnt", "VehRolWActl_D_Qf", "VehYawWActl_D_Qf"),
+  0x92: ("VehLat2_A_Actl", "VehLong2_A_Actl", "VehVert2_A_Actl",
+         "VehLatAActl_D_Qf", "VehLongAActl_D_Qf", "VehVertAActl_D_Qf", "VehLatLongVert_No_Cnt"),
+  0x202: ("Veh_V_ActlEng", "VehVActlEng_No_Cnt", "VehVActlEng_D_Qf"),
+  0x214: ("PrplWhlTot_Tq_RqMn", "PrplWhlTqRqMn_No_Cnt"),
+  0x3d6: ("LatCtl_D2_Rq", "LatCtlPath_No_Cnt", "LatCtlCurv_No_Actl", "LatCtlCrv_NoRate2_Actl", "LatCtlPath_An_Actl", "LatCtlPathOffst_L_Actl"),
+  0x414: ("StePinOffst_An_Est", "StePinOffst_No_Cnt", "StePinOffst_D_Stat"),
+  0x415: ("Veh_V_ActlBrk", "VehVActlBrk_No_Cnt", "VehVActlBrk_D_Qf"),
+  0x450: ("DrvEngageLevel_D_Stat", "DrvEngLvlConfid_D_Stat", "DrvEngageLevel_No_Cnt"),
+  0x4b0: ("BrkHold_D_Stat", "BrkTot_Tq_RqDrv", "BrkTotTqRqDrv_No_Cnt"),
+}
+
+
+def ford_checksum(address: int, sig, d: bytearray) -> int:
+  checksum = 0
+  for field in sig.checksum_fields:
+    value = field.get_raw_value(d)
+    checksum += value + (value >> 8)
+  return ~checksum & 0xFF

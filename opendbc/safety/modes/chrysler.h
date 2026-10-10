@@ -43,7 +43,6 @@ static ChryslerPlatform chrysler_platform;
 #define CHRYSLER_ADDR(name) ((uint32_t)((chrysler_platform == CHRYSLER_RAM_DT) ? CHRYSLER_RAM_DT_##name : \
                                         ((chrysler_platform == CHRYSLER_RAM_HD) ? CHRYSLER_RAM_HD_##name : CHRYSLER_##name)))
 
-
 static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
   return (uint8_t)(msg->data[6] >> 4);
 }

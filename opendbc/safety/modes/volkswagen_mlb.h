@@ -9,7 +9,7 @@ static uint32_t volkswagen_mlb_compute_checksum(const CANPacket_t *msg) {
   uint32_t result;
 
   if (msg->addr == MSG_LH_EPS_03) {
-    result = volkswagen_mqb_meb_compute_crc(msg);
+    result = volkswagen_mxb_compute_crc(msg);
   } else {
     uint8_t seed = (uint8_t)(((msg->addr >> 8) & 0xFFU) ^ (msg->addr & 0xFFU));
     result = volkswagen_xor_checksum(msg, 0U, seed);
@@ -19,8 +19,12 @@ static uint32_t volkswagen_mlb_compute_checksum(const CANPacket_t *msg) {
 
 static safety_config volkswagen_mlb_init(uint16_t param) {
   // Transmit of LS_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_MLB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, .check_relay = true}, {MSG_LDW_02, 0, 8, .check_relay = true},
-                                                        {MSG_LS_01, 0, 4, .check_relay = false}, {MSG_LS_01, 2, 4, .check_relay = false}};
+  static const CanMsg VOLKSWAGEN_MLB_STOCK_TX_MSGS[] = {
+    {MSG_HCA_01, 0, 8, .check_relay = true},
+    {MSG_LDW_02, 0, 8, .check_relay = true},
+    {MSG_LS_01, 0, 4, .check_relay = false},
+    {MSG_LS_01, 2, 4, .check_relay = false},
+  };
 
   static RxCheck volkswagen_mlb_rx_checks[] = {
     {.msg = {{MSG_ESP_03, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -75,7 +79,6 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
 
   brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
 
-
   if (msg_matches(msg, MSG_TSK_04, 1U)) {
     // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
     // Signal: TSK_04.TSK_Status_GRA_ACC_02
@@ -124,12 +127,11 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-// TODO: rename these functions to MXB or something
 const safety_hooks volkswagen_mlb_hooks = {
   .init = volkswagen_mlb_init,
   .rx = volkswagen_mlb_rx_hook,
   .tx = volkswagen_mlb_tx_hook,
-  .get_counter = volkswagen_mqb_meb_mlb_get_counter,
-  .get_checksum = volkswagen_mqb_meb_mlb_get_checksum,
+  .get_counter = volkswagen_mxb_get_counter,
+  .get_checksum = volkswagen_mxb_get_checksum,
   .compute_checksum = volkswagen_mlb_compute_checksum,
 };

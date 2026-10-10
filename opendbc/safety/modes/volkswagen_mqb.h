@@ -6,11 +6,22 @@
 static safety_config volkswagen_mqb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   // MSG_LH_EPS_03: openpilot needs to replace apparent driver steering input torque to pacify VW Emergency Assist
-  static const CanMsg VOLKSWAGEN_MQB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, .check_relay = true}, {MSG_GRA_ACC_01, 0, 8, .check_relay = false}, {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
-                                                        {MSG_LDW_02, 0, 8, .check_relay = true}, {MSG_LH_EPS_03, 2, 8, .check_relay = true}};
+  static const CanMsg VOLKSWAGEN_MQB_STOCK_TX_MSGS[] = {
+    {MSG_HCA_01, 0, 8, .check_relay = true},
+    {MSG_GRA_ACC_01, 0, 8, .check_relay = false},
+    {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
+    {MSG_LDW_02, 0, 8, .check_relay = true},
+    {MSG_LH_EPS_03, 2, 8, .check_relay = true},
+  };
 
-  static const CanMsg VOLKSWAGEN_MQB_LONG_TX_MSGS[] = {{MSG_HCA_01, 0, 8, .check_relay = true}, {MSG_LDW_02, 0, 8, .check_relay = true}, {MSG_LH_EPS_03, 2, 8, .check_relay = true},
-                                                       {MSG_ACC_02, 0, 8, .check_relay = true}, {MSG_ACC_06, 0, 8, .check_relay = true}, {MSG_ACC_07, 0, 8, .check_relay = true}};
+  static const CanMsg VOLKSWAGEN_MQB_LONG_TX_MSGS[] = {
+    {MSG_HCA_01, 0, 8, .check_relay = true},
+    {MSG_LDW_02, 0, 8, .check_relay = true},
+    {MSG_LH_EPS_03, 2, 8, .check_relay = true},
+    {MSG_ACC_02, 0, 8, .check_relay = true},
+    {MSG_ACC_06, 0, 8, .check_relay = true},
+    {MSG_ACC_07, 0, 8, .check_relay = true},
+  };
 
   static RxCheck volkswagen_mqb_rx_checks[] = {
     {.msg = {{MSG_ESP_19, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -181,7 +192,7 @@ const safety_hooks volkswagen_mqb_hooks = {
   .init = volkswagen_mqb_init,
   .rx = volkswagen_mqb_rx_hook,
   .tx = volkswagen_mqb_tx_hook,
-  .get_counter = volkswagen_mqb_meb_mlb_get_counter,
-  .get_checksum = volkswagen_mqb_meb_mlb_get_checksum,
-  .compute_checksum = volkswagen_mqb_meb_compute_crc,
+  .get_counter = volkswagen_mxb_get_counter,
+  .get_checksum = volkswagen_mxb_get_checksum,
+  .compute_checksum = volkswagen_mxb_compute_crc,
 };
