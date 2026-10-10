@@ -16,7 +16,11 @@ from opendbc.car.volkswagen.mlbcan import volkswagen_mlb_checksum
 from opendbc.car.volkswagen.mqbcan import volkswagen_meb_alt_crc_checksum, volkswagen_mqb_meb_checksum, xor_checksum
 from opendbc.car.tesla.teslacan import tesla_checksum
 from opendbc.car.body.bodycan import body_checksum
+from opendbc.car.byd.bydcan import byd_checksum
 from opendbc.car.psa.psacan import psa_checksum
+from opendbc.car.rivian.riviancan import rivian_checksum
+from opendbc.car.ford.fordcan import FORD_CHECKSUM_FIELDS, ford_checksum
+from opendbc.car.mg.mgcan import mg_checksum
 
 
 class SignalType:
@@ -34,6 +38,10 @@ class SignalType:
   TESLA_CHECKSUM = 11
   PSA_CHECKSUM = 12
   VOLKSWAGEN_MLB_CHECKSUM = 13
+  BYD_CHECKSUM = 14
+  RIVIAN_CHECKSUM = 15
+  FORD_CHECKSUM = 16
+  MG_CHECKSUM = 17
 
 
 @dataclass
@@ -49,6 +57,21 @@ class Signal:
   is_little_endian: bool
   type: int = SignalType.DEFAULT
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
+  checksum_fields: tuple['Signal', ...] = ()
+
+  def get_raw_value(self, dat: bytes | bytearray) -> int:
+    ret = 0
+    i = self.msb // 8
+    bits = self.size
+    while 0 <= i < len(dat) and bits > 0:
+      lsb = self.lsb if (self.lsb // 8) == i else i * 8
+      msb = self.msb if (self.msb // 8) == i else (i + 1) * 8 - 1
+      size = msb - lsb + 1
+      d = (dat[i] >> (lsb - (i * 8))) & ((1 << size) - 1)
+      ret |= d << (bits - size)
+      bits -= size
+      i = i - 1 if self.is_little_endian else i + 1
+    return ret
 
 
 @dataclass
@@ -147,7 +170,7 @@ class DBC:
           msb = start_bit
 
         sig = Signal(sig_name, start_bit, msb, lsb, size, is_signed, factor, offset_val, is_little_endian)
-        set_signal_type(sig, checksum_state, self.name, line_num)
+        set_signal_type(sig, checksum_state, self.name, line_num, address)
         signals_temp[address][sig_name] = sig
       elif line.startswith("VAL_ "):
         m = VAL_RE.search(line)
@@ -162,6 +185,11 @@ class DBC:
         self.vals.append(Val(sgname, val_addr, val_def))
     for addr, sigs in signals_temp.items():
       self.msgs[addr].sigs = sigs
+      if checksum_state and checksum_state.checksum_fields and addr in checksum_state.checksum_fields:
+        fields = tuple(sigs[name] for name in checksum_state.checksum_fields[addr])
+        for sig in sigs.values():
+          if sig.calc_checksum:
+            sig.checksum_fields = fields
 
 
 # ***** checksum functions *****
@@ -174,11 +202,18 @@ def tesla_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
     sig.calc_checksum = tesla_checksum
 
 
+def ford_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
+  if sig.name in ("VehVActlBrk_No_Cnt", "VehVActlEng_No_Cnt", "VehRollYaw_No_Cnt"):
+    sig.type = SignalType.COUNTER
+
+
 @dataclass
 class ChecksumState:
   checksum_type: int
   calc_checksum: Callable[[int, Signal, bytearray], int] | None
   setup_signal: Callable[[Signal, str, int], None] | None = None
+  checksum_pattern: str = r"^CHECKSUM$"
+  checksum_fields: dict[int, tuple[str, ...]] | None = None
 
 
 def get_checksum_state(dbc_name: str) -> ChecksumState | None:
@@ -208,15 +243,26 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
   elif dbc_name.startswith("psa_"):
     return ChecksumState(SignalType.PSA_CHECKSUM, psa_checksum)
+  elif dbc_name.startswith("byd_"):
+    return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
+  elif dbc_name == "ford_lincoln_base_pt":
+    # Other _Cs fields are optional or use model-specific checksum algorithms.
+    return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, ford_setup_signal, checksum_pattern=r"_Cs$",
+                         checksum_fields=FORD_CHECKSUM_FIELDS)
+  elif dbc_name == "mg":
+    return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum, checksum_pattern=r"Chksm|^ChLKARespToqPVHSC2$")
+  elif dbc_name == "rivian_primary_actuator":
+    return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum, checksum_pattern=r"_Checksum$")
   return None
 
 
-def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_num: int) -> None:
+def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_num: int, address: int) -> None:
   sig.calc_checksum = None
   if chk:
     if chk.setup_signal:
       chk.setup_signal(sig, dbc_name, line_num)
-    if sig.name == "CHECKSUM":
+    if (re.search(chk.checksum_pattern, sig.name) and
+        (chk.checksum_fields is None or address in chk.checksum_fields)):
       sig.type = chk.checksum_type
       sig.calc_checksum = chk.calc_checksum
     elif sig.name == "COUNTER":

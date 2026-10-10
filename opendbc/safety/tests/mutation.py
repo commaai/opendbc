@@ -452,7 +452,6 @@ def compile_mutated_library(preprocessed_source, sites, output_so):
   prelude = """
     static int __mutation_active_id = -1;
     void mutation_set_active_mutant(int id) { __mutation_active_id = id; }
-    int mutation_get_active_mutant(void) { return __mutation_active_id; }
   """
   marker_re = re.compile(r'^\s*#\s+\d+\s+"[^\n]*\n?', re.MULTILINE)
   instrumented = prelude + marker_re.sub("", instrumented)

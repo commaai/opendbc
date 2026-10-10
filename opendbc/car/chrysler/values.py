@@ -17,6 +17,7 @@ class ChryslerSafetyFlags(IntFlag):
 class ChryslerFlags(IntFlag):
   # Detected flags
   HIGHER_MIN_STEERING_SPEED = 1
+  HAS_BSM = 2  # blind spot monitoring
 
 
 @dataclass

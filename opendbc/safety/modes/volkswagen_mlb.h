@@ -3,11 +3,14 @@
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/volkswagen_common.h"
 
-
 static safety_config volkswagen_mlb_init(uint16_t param) {
   // Transmit of LS_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_MLB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, .check_relay = true}, {MSG_LDW_02, 0, 8, .check_relay = true},
-                                                        {MSG_LS_01, 0, 4, .check_relay = false}, {MSG_LS_01, 2, 4, .check_relay = false}};
+  static const CanMsg VOLKSWAGEN_MLB_STOCK_TX_MSGS[] = {
+    {MSG_HCA_01, 0, 8, .check_relay = true},
+    {MSG_LDW_02, 0, 8, .check_relay = true},
+    {MSG_LS_01, 0, 4, .check_relay = false},
+    {MSG_LS_01, 2, 4, .check_relay = false},
+  };
 
   static RxCheck volkswagen_mlb_rx_checks[] = {
     // TODO: implement checksum validation
@@ -26,55 +29,50 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
 }
 
 static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
-    // Check all wheel speeds for any movement
-    // Signals: ESP_03.ESP_[VL|VR|HL|HR]_Radgeschw
-    if (msg->addr == MSG_ESP_03) {
-      uint32_t speed = 0;
-      speed += ((msg->data[3] & 0xFU) << 8) | msg->data[2];   // FL
-      speed += (msg->data[4] << 4) | (msg->data[3] >> 4);     // FR
-      speed += ((msg->data[6] & 0xFU) << 8) | msg->data[5];   // RL
-      speed += (msg->data[7] << 4) | (msg->data[6] >> 4);     // RR
-      vehicle_moving = speed > 0U;
-    }
-
-    // Update driver input torque
-    if (msg->addr == MSG_LH_EPS_03) {
-      update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
-    }
-
-    if (msg->addr == MSG_LS_01) {
-      // Always exit controls on rising edge of Cancel
-      // Signal: LS_01.LS_Abbrechen
-      if (GET_BIT(msg, 13U)) {
-        controls_allowed = false;
-      }
-    }
-
-    // Signal: Motor_03.MO_Fahrpedalrohwert_01
-    // Signal: Motor_03.MO_Fahrer_bremst
-    if (msg->addr == MSG_MOTOR_03) {
-      gas_pressed = msg->data[6] != 0U;
-      volkswagen_brake_pedal_switch = GET_BIT(msg, 35U);
-    }
-
-    if (msg->addr == MSG_ESP_05) {
-      volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
-    }
-
-    brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
-
+  // Check all wheel speeds for any movement
+  // Signals: ESP_03.ESP_[VL|VR|HL|HR]_Radgeschw
+  if (msg_matches(msg, MSG_ESP_03, 0U)) {
+    uint32_t speed = 0;
+    speed += ((msg->data[3] & 0xFU) << 8) | msg->data[2];   // FL
+    speed += (msg->data[4] << 4) | (msg->data[3] >> 4);     // FR
+    speed += ((msg->data[6] & 0xFU) << 8) | msg->data[5];   // RL
+    speed += (msg->data[7] << 4) | (msg->data[6] >> 4);     // RR
+    vehicle_moving = speed > 0U;
   }
 
-  if (msg->bus == 1U) {
-    if (msg->addr == MSG_TSK_04) {
-      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
-      // Signal: TSK_04.TSK_Status_GRA_ACC_02
-      int acc_status = (msg->data[7] & 0xC0U) >> 6;
-      bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
+  // Update driver input torque
+  if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
+    update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
+  }
 
-      pcm_cruise_check(cruise_engaged);
+  if (msg_matches(msg, MSG_LS_01, 0U)) {
+    // Always exit controls on rising edge of Cancel
+    // Signal: LS_01.LS_Abbrechen
+    if (GET_BIT(msg, 13U)) {
+      controls_allowed = false;
     }
+  }
+
+  // Signal: Motor_03.MO_Fahrpedalrohwert_01
+  // Signal: Motor_03.MO_Fahrer_bremst
+  if (msg_matches(msg, MSG_MOTOR_03, 0U)) {
+    gas_pressed = msg->data[6] != 0U;
+    volkswagen_brake_pedal_switch = GET_BIT(msg, 35U);
+  }
+
+  if (msg_matches(msg, MSG_ESP_05, 0U)) {
+    volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
+  }
+
+  brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
+
+  if (msg_matches(msg, MSG_TSK_04, 1U)) {
+    // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
+    // Signal: TSK_04.TSK_Status_GRA_ACC_02
+    int acc_status = (msg->data[7] & 0xC0U) >> 6;
+    bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
+
+    pcm_cruise_check(cruise_engaged);
   }
 }
 
@@ -116,12 +114,11 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-// TODO: rename these functions to MXB or something
 const safety_hooks volkswagen_mlb_hooks = {
   .init = volkswagen_mlb_init,
   .rx = volkswagen_mlb_rx_hook,
   .tx = volkswagen_mlb_tx_hook,
-  .get_counter = volkswagen_mqb_meb_get_counter,
-  .get_checksum = volkswagen_mqb_meb_get_checksum,
-  .compute_checksum = volkswagen_mqb_meb_compute_crc,
+  .get_counter = volkswagen_mxb_get_counter,
+  .get_checksum = volkswagen_mxb_get_checksum,
+  .compute_checksum = volkswagen_mxb_compute_crc,
 };
