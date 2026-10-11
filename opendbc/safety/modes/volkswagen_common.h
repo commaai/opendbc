@@ -1,23 +1,14 @@
 #pragma once
 
-extern const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL;
-const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
+static const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
 
-static uint8_t volkswagen_crc8_lut_8h2f[256];  // Static lookup table for CRC8 poly 0x2F, aka 8H2F/AUTOSAR
+static uint8_t volkswagen_crc8_lut_8h2f[256] = {0};  // Static lookup table for CRC8 poly 0x2F, aka 8H2F/AUTOSAR
 
-extern bool volkswagen_longitudinal;
-bool volkswagen_longitudinal = false;
-
-extern bool volkswagen_set_button_prev;
-bool volkswagen_set_button_prev = false;
-
-extern bool volkswagen_resume_button_prev;
-bool volkswagen_resume_button_prev = false;
-
-extern bool volkswagen_brake_pedal_switch;
-extern bool volkswagen_brake_pressure_detected;
-bool volkswagen_brake_pedal_switch = false;
-bool volkswagen_brake_pressure_detected = false;
+static bool volkswagen_longitudinal = false;
+static bool volkswagen_set_button_prev = false;
+static bool volkswagen_resume_button_prev = false;
+static bool volkswagen_brake_pedal_switch = false;
+static bool volkswagen_brake_pressure_detected = false;
 
 #define MSG_LH_EPS_03        0x09FU   // RX from EPS, for driver steering torque
 #define MSG_ESP_19           0x0B2U   // RX from ABS, for wheel speeds
@@ -86,13 +77,14 @@ static uint32_t volkswagen_mxb_compute_crc(const CANPacket_t *msg) {
   if (msg->addr == MSG_GRA_ACC_01) {
     salt = (uint8_t[]){0x6A, 0x38, 0xB4, 0x27, 0x22, 0xEF, 0xE1, 0xBB, 0xF8, 0x80, 0x84, 0x49, 0xC7, 0x9E, 0x1E, 0x2B}[counter];
   }
-  return volkswagen_compute_crc(msg, GET_LEN(msg), salt);
+  return volkswagen_compute_crc(msg, (int)GET_LEN(msg), salt);
 }
 
 static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
   // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
   // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
-  int torque_driver_new = msg->data[5] | ((msg->data[6] & 0x1FU) << 8);
+  uint32_t torque_driver_raw = msg->data[5] | (((uint32_t)msg->data[6] & 0x1FU) << 8);
+  int torque_driver_new = (int)torque_driver_raw;
   bool sign = GET_BIT(msg, 55U);
   if (sign) {
     torque_driver_new *= -1;
@@ -103,7 +95,8 @@ static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
 static int volkswagen_mlb_mqb_steering_control_torque(const CANPacket_t *msg) {
   // Signal: HCA_01.HCA_01_LM_Offset (absolute torque)
   // Signal: HCA_01.HCA_01_LM_OffSign (direction)
-  int desired_torque = msg->data[2] | ((msg->data[3] & 0x1U) << 8);
+  uint32_t desired_torque_raw = msg->data[2] | (((uint32_t)msg->data[3] & 0x1U) << 8);
+  int desired_torque = (int)desired_torque_raw;
   bool sign = GET_BIT(msg, 31U);
   if (sign) {
     desired_torque *= -1;

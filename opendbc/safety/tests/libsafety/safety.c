@@ -1,25 +1,20 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-// TODO: time should just be passed into the hooks we expose
-uint32_t timer_cnt = 0;
-uint32_t microsecond_timer_get(void);
-uint32_t microsecond_timer_get(void) {
-  return timer_cnt;
-}
-
+#include "opendbc/safety/tests/libsafety/libsafety.h"
 #include "opendbc/safety/can.h"
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
 
-bool safety_config_valid() {
-  if (current_safety_config.rx_checks_len <= 0) {
-    printf("missing RX checks\n");
+// TODO: time should just be passed into the hooks we expose
+uint32_t timer_cnt = 0;
+uint32_t microsecond_timer_get(void) {
+  return timer_cnt;
+}
+
+bool safety_config_valid(void) {
+  if (current_safety_config.rx_checks_len == 0U) {
     return false;
   }
 
-  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
+  for (unsigned int i = 0U; i < current_safety_config.rx_checks_len; i++) {
     const RxCheck addr = current_safety_config.rx_checks[i];
     bool valid = addr.status.msg_seen && !addr.status.lagging && addr.status.valid_checksum && (addr.status.wrong_counters < MAX_WRONG_COUNTERS) && addr.status.valid_quality_flag;
     if (!valid) {
@@ -91,19 +86,19 @@ bool get_acc_main_on(void){
 }
 
 float get_vehicle_speed_min(void){
-  return vehicle_speed.min / VEHICLE_SPEED_FACTOR;
+  return (float)((double)vehicle_speed.min / VEHICLE_SPEED_FACTOR);
 }
 
 float get_vehicle_speed_max(void){
-  return vehicle_speed.max / VEHICLE_SPEED_FACTOR;
+  return (float)((double)vehicle_speed.max / VEHICLE_SPEED_FACTOR);
 }
 
 int get_current_safety_mode(void){
-  return current_safety_mode;
+  return (int)current_safety_mode;
 }
 
 int get_current_safety_param(void){
-  return current_safety_param;
+  return (int)current_safety_param;
 }
 
 void set_timer(uint32_t t){

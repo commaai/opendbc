@@ -4,7 +4,7 @@
 
 // GCOV_EXCL_START
 // Unreachable by design (doesn't define any rx msgs)
-void default_rx_hook(const CANPacket_t *msg) {
+static void default_rx_hook(const CANPacket_t *msg) {
   SAFETY_UNUSED(msg);
 }
 // GCOV_EXCL_STOP
@@ -24,9 +24,9 @@ static bool nooutput_tx_hook(const CANPacket_t *msg) {
 // GCOV_EXCL_STOP
 
 const safety_hooks nooutput_hooks = {
-  .init = nooutput_init,
-  .rx = default_rx_hook,
-  .tx = nooutput_tx_hook,
+  .init = &nooutput_init,
+  .rx = &default_rx_hook,
+  .tx = &nooutput_tx_hook,
 };
 
 // *** all output safety mode ***
@@ -44,7 +44,7 @@ static bool alloutput_tx_hook(const CANPacket_t *msg) {
 }
 
 const safety_hooks alloutput_hooks = {
-  .init = alloutput_init,
-  .rx = default_rx_hook,
-  .tx = alloutput_tx_hook,
+  .init = &alloutput_init,
+  .rx = &default_rx_hook,
+  .tx = &alloutput_tx_hook,
 };
