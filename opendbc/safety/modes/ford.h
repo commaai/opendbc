@@ -132,7 +132,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, FORD_EngVehicleSpThrottle, FORD_MAIN_BUS)) {
     // Pedal position: (0.1 * val) in percent
     // Signal: ApedPos_Pc_ActlArb
-    gas_pressed = ((msg->data[0] & 0x03U) | msg->data[1]) != 0U;
+    gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) != 0U;
   }
 
   // Update brake pedal and cruise state

@@ -33,9 +33,8 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
     // Get current speed and standstill
     uint16_t right_rear = (msg->data[0] << 8) | (msg->data[1]);
     uint16_t left_rear = (msg->data[2] << 8) | (msg->data[3]);
-    uint32_t speed_sum = (uint32_t)right_rear + left_rear;
-    vehicle_moving = speed_sum != 0U;
-    UPDATE_VEHICLE_SPEED(speed_sum / 2.0 * 0.005 * KPH_TO_MS);
+    vehicle_moving = (right_rear | left_rear) != 0U;
+    UPDATE_VEHICLE_SPEED((right_rear + left_rear) / 2.0 * 0.005 * KPH_TO_MS);
   }
 
   // X-Trail 0x15c, Leaf 0x239

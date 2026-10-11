@@ -199,6 +199,35 @@ def _is_constant_arithmetic(node):
   return all(op is not None and _unparenthesize(op).type == "number_literal" for op in operands)
 
 
+def _is_unit_literal(node):
+  node = _unparenthesize(node)
+  if node.type == "unary_expression" and node.child_by_field_name("operator").type == "-":
+    node = _unparenthesize(node.child_by_field_name("argument"))
+  if node.type == "conditional_expression":
+    return all(_is_unit_literal(node.child_by_field_name(field)) for field in ("consequence", "alternative"))
+  return node.type == "number_literal" and re.fullmatch(r"-?1[uUlL]*", node.text.decode()) is not None
+
+
+def _is_unit_scale(node):
+  """x * 1, x *= -1, x / -1, x *= sign ? 1 : -1, ...: swapping * and / is equivalent for a 1 or -1."""
+  return node.child_by_field_name("operator").type in ("*", "/", "*=", "/=") and _is_unit_literal(node.child_by_field_name("right"))
+
+
+def _is_shift_in_nonzero_test(literal):
+  """The 8 in ((a << 8) | b) != 0: shifting by more or less never changes whether any bit is set."""
+  shift = literal.parent
+  if shift.type != "binary_expression" or shift.child_by_field_name("operator").type != "<<" or shift.child_by_field_name("right") != literal:
+    return False
+  node = shift
+  while node.parent.type == "parenthesized_expression" or (node.parent.type == "binary_expression" and node.parent.child_by_field_name("operator").type == "|"):
+    node = node.parent
+  cmp = node.parent
+  if cmp.type != "binary_expression" or cmp.child_by_field_name("operator").type not in ("==", "!="):
+    return False
+  other = _unparenthesize(cmp.child_by_field_name("right") if cmp.child_by_field_name("left") == node else cmp.child_by_field_name("left"))
+  return other.type == "number_literal" and re.fullmatch(r"0[uUlL]*", other.text.decode()) is not None
+
+
 def _is_null_pointer(literal):
   """The 0 in NULL, ((void *)0). No other pointer value compares equal, so (void *)1 is equivalent."""
   cast = literal.parent
@@ -307,8 +336,11 @@ def enumerate_sites(txt):
       continue
 
     for mutator, (node_type, op_map) in OPERATOR_MUTATORS.items():
-      if node.type == node_type and op.type in op_map and not (node.type == "binary_expression" and _is_constant_arithmetic(node)):
-        add_site(mutator, op.type, op_map[op.type], node, op.start_byte, op.end_byte, context=node)
+      if node.type != node_type or op.type not in op_map:
+        continue
+      if (node.type == "binary_expression" and _is_constant_arithmetic(node)) or _is_unit_scale(node):
+        continue
+      add_site(mutator, op.type, op_map[op.type], node, op.start_byte, op.end_byte, context=node)
 
     # boundary: integer literals anywhere inside the operands of a comparison
     if node.type == "binary_expression" and op.type in COMPARISON_OPERATORS:
@@ -316,7 +348,9 @@ def enumerate_sites(txt):
       while operands:
         n = operands.pop()
         operands.extend(n.children)
-        if n.type != "number_literal" or (n.start_byte, n.end_byte) in seen_literals or _is_null_pointer(n):
+        if n.type != "number_literal" or (n.start_byte, n.end_byte) in seen_literals:
+          continue
+        if _is_null_pointer(n) or _is_shift_in_nonzero_test(n):
           continue
         seen_literals.add((n.start_byte, n.end_byte))
         token = txt[n.start_byte:n.end_byte]

@@ -39,9 +39,17 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"CRUISE_ENABLED": enable}
     return self.packer.make_can_msg_safety("CRUISE_STATE", self.CRUISE_BUS, values)
 
-  def _speed_msg(self, speed):
-    values = {"WHEEL_SPEED_%s" % s: speed * 3.6 for s in ["RR", "RL"]}
+  def _speed_msg(self, speed, wheels=("RR", "RL")):
+    values = {f"WHEEL_SPEED_{s}": speed * 3.6 if s in wheels else 0 for s in ["RR", "RL"]}
     return self.packer.make_can_msg_safety("WHEEL_SPEEDS_REAR", self.EPS_BUS, values)
+
+  def test_vehicle_moving_any_wheel(self):
+    # any single wheel reporting a non-zero speed means the vehicle is moving
+    for wheel in ["RR", "RL"]:
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self._speed_msg(1, wheels=(wheel,)))
+      self.assertTrue(self.safety.get_vehicle_moving())
 
   def _user_brake_msg(self, brake):
     values = {"USER_BRAKE_PRESSED": brake}

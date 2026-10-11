@@ -73,12 +73,14 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
   // TODO: use the same message for both
   // update vehicle moving
   if ((chrysler_platform != CHRYSLER_PACIFICA) && msg_matches(msg, chrysler_addrs->ESP_8, 0U)) {
-    // Signal: ESP_8.VEHICLE_SPEED, moving if any bit is set
-    vehicle_moving = (msg->data[4] | msg->data[5]) != 0U;
+    // Signal: ESP_8.VEHICLE_SPEED
+    vehicle_moving = ((msg->data[4] << 8) | msg->data[5]) != 0U;
   }
   if ((chrysler_platform == CHRYSLER_PACIFICA) && msg_matches(msg, 514U, 0U)) {
-    // Signals: SPEED_1.SPEED_LEFT and SPEED_RIGHT, moving if any bit of either is set
-    vehicle_moving = (msg->data[0] | (msg->data[1] >> 4) | msg->data[2] | (msg->data[3] >> 4)) != 0U;
+    // Signals: SPEED_1.SPEED_LEFT and SPEED_RIGHT
+    int speed_l = (msg->data[0] << 4) | (msg->data[1] >> 4);
+    int speed_r = (msg->data[2] << 4) | (msg->data[3] >> 4);
+    vehicle_moving = (speed_l | speed_r) != 0;
   }
 
   // exit controls on rising edge of gas press

@@ -94,10 +94,18 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))      # steady power
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))   # decreasing power
 
-  def _speed_msg(self, speed_mps: float):
+  def _speed_msg(self, speed_mps: float, wheels=("VL", "VR", "HL", "HR")):
     spd_kph = speed_mps * 3.6
-    values = {f"{s}_Radgeschw": spd_kph for s in ("VL", "VR", "HL", "HR")}
+    values = {f"{s}_Radgeschw": spd_kph if s in wheels else 0 for s in ("VL", "VR", "HL", "HR")}
     return self.packer.make_can_msg_safety("ESC_51", 0, values)
+
+  def test_vehicle_moving_any_wheel(self):
+    # any single wheel reporting a non-zero speed means the vehicle is moving
+    for wheel in ("VL", "VR", "HL", "HR"):
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self._speed_msg(1, wheels=(wheel,)))
+      self.assertTrue(self.safety.get_vehicle_moving())
 
   def _speed_msg_2(self, speed_mps: float):
     values = {"ESP_v_Signal": speed_mps * 3.6}
