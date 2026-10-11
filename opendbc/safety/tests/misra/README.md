@@ -1,32 +1,35 @@
-# MISRA tool experiment
+# MISRA C:2025 check
 
-Run the experimental standalone MISRA C:2012 analyzer from any directory:
+[misrable](https://github.com/adeebshihadeh/misrable) checks the safety code
+against MISRA C:2025. It needs no compiler or toolchain: the target is fixed
+to the 32-bit ARM the firmware runs on, and the program it analyzes is
+libsafety (`tests/libsafety/safety.c` and everything it includes), the same
+code the Python safety tests exercise.
 
 ```sh
-./opendbc/safety/tests/misra/test_tool.sh
-./opendbc/safety/tests/misra/test_tool.sh --format json > misra-findings.json
-./opendbc/safety/tests/misra/test_tool.sh --rules 15.6,14.4
+./opendbc/safety/tests/misra/test_tool.sh                 # all rules
+./opendbc/safety/tests/misra/test_tool.sh --rules 10.3    # one rule
+./opendbc/safety/tests/misra/test_tool.sh --list-rules    # rules and their limitations
 ```
 
-The entry point includes the safety headers with `ALLOW_DEBUG` enabled, including
-debug safety modes. Analysis uses the tool's `arm-none-eabi` target and fallback
-standard headers; it does not reproduce every firmware compiler option.
+Exit code 0 means no findings, 1 means findings, 2 means the analysis is
+incomplete. CI requires 0. There are no suppressions: every finding is fixed
+in the code. The one language extension that cannot be removed is the
+`__attribute__((packed, aligned(4)))` on `CANPacket_t`, which defines the
+wire format shared with panda; it is reported under Directive 1.2.
 
-Exit codes are 0 for no findings, 1 for findings, and 2 for incomplete analysis or
-invalid configuration. CI saves JSON reports on Linux and macOS, allowing findings
-while failing incomplete analysis. The existing Cppcheck check is still available
-through `test_misra.sh`.
+`--external-api` names the files whose declarations are used outside the C
+program: `can.h`, `declarations.h`, `ignition.h` and `safety.c` are read by
+`libsafety_py.py` to build the cffi interface, so their functions, objects
+and macros count as used.
 
-The checks are experimental and partial; a clean run is not proof of MISRA
-compliance. Use `bin/misra-<os>-<arch> --list-rules` to inspect check limitations.
-
-The checked-in binaries temporarily replace distribution. They were built from
-the misrable source tree at commit
-`b886409012fa495980cc735a541e700b08a97f35`, with Go 1.27.1:
+The checked-in binaries in `bin/` were built from misrable commit
+`352ea38a44a07d799bfe751a5e711c9e2341459e` with Go 1.27.1:
 
 ```sh
 CGO_ENABLED=0 GOOS=<linux|darwin> GOARCH=<amd64|arm64> \
   go build -trimpath -ldflags='-s -w' -o <opendbc>/opendbc/safety/tests/misra/bin/misra-<os>-<arch> ./cmd/misrable
 ```
 
-Refresh all four binaries together as the analyzer changes.
+Refresh all four binaries together when the analyzer changes. The existing
+cppcheck check (`test_misra.sh`) still runs as well.

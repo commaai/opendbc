@@ -16,5 +16,11 @@ case "$(uname -m)" in
 esac
 
 cd "$ROOT"
-exec "$DIR/bin/misra-$OS-$ARCH" --target arm-none-eabi -I . -D ALLOW_DEBUG "$@" \
-  opendbc/safety/tests/misra/tool_main.c
+# libsafety is the analyzed program. Everything declared in the external-api
+# files is used from Python through cffi (see libsafety/libsafety_py.py).
+exec "$DIR/bin/misra-$OS-$ARCH" -I . -D ALLOW_DEBUG -D __GNUC__=9 \
+  --external-api opendbc/safety/can.h \
+  --external-api opendbc/safety/declarations.h \
+  --external-api opendbc/safety/ignition.h \
+  --external-api opendbc/safety/tests/libsafety/safety.c \
+  "$@" opendbc/safety/tests/libsafety/safety.c
