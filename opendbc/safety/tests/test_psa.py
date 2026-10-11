@@ -47,8 +47,16 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     return self.packer.make_can_msg_safety("Dat_BSI", self.CAM_BUS, values)
 
   def _user_gas_msg(self, gas):
-    values = {"P002_Com_rAPP": int(gas * 100)}
+    values = {"P002_Com_rAPP": gas * 0.5}  # 0.5 % per LSB
     return self.packer.make_can_msg_safety("Dyn_CMM", self.MAIN_BUS, values)
+
+  def test_vehicle_moving(self):
+    super().test_vehicle_moving()
+
+    # moving at any nonzero speed, 0.01 kph per LSB
+    for raw in range(50):
+      self._rx(self._speed_msg(raw * 0.01 / 3.6))
+      self.assertEqual(raw > 0, self.safety.get_vehicle_moving())
 
   def test_rx_hook(self):
     # speed

@@ -32,12 +32,11 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
   // Check all wheel speeds for any movement
   // Signals: ESP_03.ESP_[VL|VR|HL|HR]_Radgeschw
   if (msg_matches(msg, MSG_ESP_03, 0U)) {
-    uint32_t speed = 0;
-    speed += ((msg->data[3] & 0xFU) << 8) | msg->data[2];   // FL
-    speed += (msg->data[4] << 4) | (msg->data[3] >> 4);     // FR
-    speed += ((msg->data[6] & 0xFU) << 8) | msg->data[5];   // RL
-    speed += (msg->data[7] << 4) | (msg->data[6] >> 4);     // RR
-    vehicle_moving = speed > 0U;
+    uint32_t fl = ((msg->data[3] & 0xFU) << 8) | msg->data[2];
+    uint32_t fr = (msg->data[4] << 4) | (msg->data[3] >> 4);
+    uint32_t rl = ((msg->data[6] & 0xFU) << 8) | msg->data[5];
+    uint32_t rr = (msg->data[7] << 4) | (msg->data[6] >> 4);
+    vehicle_moving = (fl | fr | rl | rr) != 0U;
   }
 
   // Update driver input torque

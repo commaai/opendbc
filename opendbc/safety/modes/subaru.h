@@ -94,8 +94,6 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
     uint32_t fl = (GET_BYTES_LE(msg, 6, 2) >> 3) & 0x1FFFU;
 
     vehicle_moving = (fr | rr | rl | fl) != 0U;
-
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 * KPH_TO_MS);
   }
 
   if (msg_matches(msg, MSG_SUBARU_Brake_Status, alt_main_bus)) {

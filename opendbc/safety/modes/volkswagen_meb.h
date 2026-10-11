@@ -59,37 +59,33 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   return volkswagen_compute_crc(msg, GET_LEN(msg), salt);
 }
 
+// Newer MEB cars sign some messages with a CRC over a shorter payload and a different data ID. Accept
+// either form of CRC for those messages when the MEB_ALT_CRC flag is set.
 static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
   uint32_t ret = volkswagen_meb_compute_crc(msg);
-  int len = 0;
-  if (volkswagen_meb_alt_crc) {
-    if (msg->addr == MSG_QFK_01) {
-      len = 28;
-    }
-    if (msg->addr == MSG_ESC_51) {
-      len = 60;
-    }
-    if (msg->addr == MSG_Motor_51) {
-      len = 44;
-    }
-  }
 
-  if (len > 0) {
+  if (volkswagen_meb_alt_crc) {
+    int len = 0;
     uint8_t salt = 0;
     uint8_t counter = volkswagen_mxb_get_counter(msg);
     if (msg->addr == MSG_QFK_01) {
+      len = 28;
       salt = (uint8_t[]){0x18, 0x71, 0x10, 0x8D, 0xD7, 0xAA, 0xB0, 0x78, 0xAC, 0x12, 0xAE, 0x0C, 0xDD, 0xF1, 0x85, 0x68}[counter];
     }
     if (msg->addr == MSG_ESC_51) {
+      len = 60;
       salt = (uint8_t[]){0x69, 0xDC, 0xF9, 0x64, 0x6A, 0xCE, 0x55, 0x2C, 0xC4, 0x38, 0x8F, 0xD1, 0xC6, 0x43, 0xB4, 0xB1}[counter];
     }
     if (msg->addr == MSG_Motor_51) {
+      len = 44;
       salt = (uint8_t[]){0x2C, 0xB1, 0x1A, 0x75, 0xBB, 0x65, 0x79, 0x47, 0x81, 0x2B, 0xCC, 0x96, 0x17, 0xDB, 0xC0, 0x94}[counter];
     }
 
-    uint8_t crc = volkswagen_compute_crc(msg, len, salt);
-    if (crc == msg->data[0]) {
-      ret = crc;
+    if (len > 0) {
+      uint8_t crc = volkswagen_compute_crc(msg, len, salt);
+      if (crc == msg->data[0]) {
+        ret = crc;
+      }
     }
   }
   return ret;
@@ -138,8 +134,9 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     uint32_t fr = msg->data[10] | (msg->data[11] << 8);
     uint32_t rl = msg->data[12] | (msg->data[13] << 8);
     uint32_t rr = msg->data[14] | (msg->data[15] << 8);
-    vehicle_moving = (fr | rr | rl | fl) != 0U;
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
+    uint32_t speed_sum = fl + fr + rl + rr;
+    vehicle_moving = speed_sum != 0U;
+    UPDATE_VEHICLE_SPEED(speed_sum / 4.0 * 0.0075 * KPH_TO_MS);
   }
 
   // Check vehicle speed with redundant source
@@ -151,8 +148,8 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, MSG_QFK_01, 0U)) {
     int current_curvature = ((msg->data[6] & 0x7FU) << 8) | msg->data[5];
-    current_curvature *= GET_BIT(msg, 55U) ? 1 : -1;
-    update_sample(&curvature_state.meas, current_curvature);
+    bool sign = GET_BIT(msg, 55U);
+    update_sample(&curvature_state.meas, sign ? current_curvature : -current_curvature);
   }
 
   if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
@@ -259,11 +256,8 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     };
 
     int desired_curvature_raw = GET_BYTES_LE(msg, 3, 2) & 0x7FFFU;
-
     bool desired_curvature_sign = GET_BIT(msg, 39U);
-    if (!desired_curvature_sign) {
-      desired_curvature_raw *= -1;
-    }
+    desired_curvature_raw = desired_curvature_sign ? desired_curvature_raw : -desired_curvature_raw;
 
     bool steer_req = (((msg->data[1] >> 4) & 0x0FU) == 4U);
     int steer_power = msg->data[2];

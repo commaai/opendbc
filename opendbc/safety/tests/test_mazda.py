@@ -65,6 +65,19 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     }
     return self.packer.make_can_msg_safety("CRZ_BTNS", 0, values)
 
+  def test_vehicle_moving(self):
+    super().test_vehicle_moving()
+
+    # speed resolution is 0.01 kph, moving as soon as the threshold is exceeded
+    self._rx(self._speed_msg(self.STANDSTILL_THRESHOLD + 0.01))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+  def test_gas_pressed(self):
+    # any non-zero pedal position counts as gas pressed
+    for gas in range(101):
+      self._rx(self._user_gas_msg(gas))
+      self.assertEqual(gas > 0, self.safety.get_gas_pressed_prev())
+
   def test_buttons(self):
     # only cancel allows while controls not allowed
     self.safety.set_controls_allowed(0)

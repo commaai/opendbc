@@ -56,19 +56,29 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
     self.gas_counter += 1
     return msg
 
-  def _pcm_status_msg(self, enable):
-    values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
+  def _cruise_state_msg(self, state):
+    values = {"ACCSysSts_RadarHSC2": state, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
     return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values)
 
-  def test_gas_counter(self):
-    self._reset_safety_hooks()
-    for _ in range(16):
-      self.assertTrue(self._rx(self._user_gas_msg(0)))
+  def _pcm_status_msg(self, enable):
+    return self._cruise_state_msg(2 if enable else 1)
 
-    msg = self._user_gas_msg(0)
-    for _ in range(common.MAX_WRONG_COUNTERS + 1):
-      valid = self._rx(msg)
-    self.assertFalse(valid)
+  def test_cruise_states(self):
+    # only Active (2) and Override (3) count as cruise engaged
+    for state in range(8):
+      self._rx(self._cruise_state_msg(state))
+      self.assertEqual(state in (2, 3), self.safety.get_cruise_engaged_prev())
+
+  def test_rx_counters(self):
+    for make_msg in (self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg, self._user_gas_msg):
+      self._reset_safety_hooks()
+      for _ in range(16):
+        self.assertTrue(self._rx(make_msg(0)))
+
+      msg = make_msg(0)
+      for _ in range(common.MAX_WRONG_COUNTERS + 1):
+        valid = self._rx(msg)
+      self.assertFalse(valid)
 
   def test_rx_checksums(self):
     # Captured EPS frame: the PV field is 0x37f5; byte 7 is unused.
@@ -83,6 +93,13 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
       corrupt = bytearray(dat)
       corrupt[byte] ^= 1 << bit
       self.assertFalse(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, corrupt)))
+
+    # the EPS checksum also covers the control status and torque valid bit
+    for status in range(8):
+      for valid in (0, 1):
+        self._reset_safety_hooks()
+        values = {"ChLKACtrlStsHSC2": status, "ChLKARespToqVHSC2": valid, "ChLKAAlvRCHSC2": self._counter(0x1ec)}
+        self.assertTrue(self._rx(self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values)))
 
     for make_msg in (self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
       self._reset_safety_hooks()

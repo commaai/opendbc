@@ -40,7 +40,7 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MSG_SUBARU_PG_Brake_Pedal, SUBARU_PG_MAIN_BUS)) {
-    brake_pressed = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0xFFU) > 0U;
+    brake_pressed = msg->data[2] != 0U;
   }
 
   if (msg_matches(msg, MSG_SUBARU_PG_Throttle, SUBARU_PG_MAIN_BUS)) {

@@ -27,3 +27,4 @@ cppcheck-addon-ctu-file-list
 opendbc/safety/tests/coverage-out
 
 .mull/
+opendbc/safety/tests/.mutation_killers.json

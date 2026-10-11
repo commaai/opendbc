@@ -95,11 +95,8 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
   // Signal: Lenkhilfe_3.LH3_LMSign (direction)
   if (msg_matches(msg, MSG_LENKHILFE_3, 0U)) {
     int torque_driver_new = msg->data[2] | ((msg->data[3] & 0x3U) << 8);
-    int sign = (msg->data[3] & 0x4U) >> 2;
-    if (sign == 1) {
-      torque_driver_new *= -1;
-    }
-    update_sample(&torque_driver, torque_driver_new);
+    bool sign = GET_BIT(msg, 26U);
+    update_sample(&torque_driver, sign ? -torque_driver_new : torque_driver_new);
   }
 
   if (volkswagen_longitudinal) {
@@ -178,10 +175,8 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == MSG_HCA_1) {
     int desired_torque = msg->data[2] | ((msg->data[3] & 0x7FU) << 8);
     desired_torque = desired_torque / 32;  // DBC scale from PQ network to centi-Nm
-    int sign = (msg->data[3] & 0x80U) >> 7;
-    if (sign == 1) {
-      desired_torque *= -1;
-    }
+    bool sign = GET_BIT(msg, 31U);
+    desired_torque = sign ? -desired_torque : desired_torque;
 
     uint32_t hca_status = ((msg->data[1] >> 4) & 0xFU);
     bool steer_req = ((hca_status == 5U) || (hca_status == 7U));

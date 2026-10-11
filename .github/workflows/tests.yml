@@ -50,6 +50,12 @@ jobs:
             name: macOS
     steps:
       - uses: actions/checkout@v7
+      # which test killed each mutant last time; a stale or missing cache only costs time
+      - uses: actions/cache@v4
+        with:
+          path: opendbc/safety/tests/.mutation_killers.json
+          key: mutation-killers-${{ matrix.name }}-${{ github.run_id }}
+          restore-keys: mutation-killers-${{ matrix.name }}-
       - name: Run mutation tests
         run: |
           source setup.sh

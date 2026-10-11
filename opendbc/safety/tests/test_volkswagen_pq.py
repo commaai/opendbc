@@ -82,6 +82,23 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
     values = {"GRA_Neu_Setzen": _set, "GRA_Recall": resume, "GRA_Abbrechen": cancel}
     return self.packer.make_can_msg_safety("GRA_Neu", bus, values)
 
+  def test_rx_hook(self):
+    # checksum checks, the XOR checksum is in the first byte except for Motor_5, where it's the last
+    for name, checksum_byte in (("Lenkhilfe_3", 0), ("GRA_Neu", 0), ("Motor_5", 7)):
+      with self.subTest(msg=name):
+        self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, {})))
+
+        msg = self.packer.make_can_msg_safety(name, 0, {})
+        msg[0].data[checksum_byte] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
+  def test_vehicle_moving_min_speed(self):
+    # the smallest speed the ABS reports already means the vehicle is moving
+    self._rx(self._speed_msg(0))
+    self.assertFalse(self.safety.get_vehicle_moving())
+    self._rx(self._speed_msg(0.01))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
 
 class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
   # Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
@@ -98,6 +115,15 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
     # do not block resume if we are engaged already
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=True)))
+
+  def test_cruise_engaged_states(self):
+    # GRA active (1) and driver override (2) are the engaged states, off (0) and fault (3) are not
+    for acc_status in range(4):
+      self._rx(self._motor_2_msg(cruise_engaged=0))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self._rx(self._motor_2_msg(cruise_engaged=acc_status))
+      self.assertEqual(acc_status in (1, 2), self.safety.get_controls_allowed(), f"{acc_status=}")
+      self.assertEqual(acc_status in (1, 2), self.safety.get_cruise_engaged_prev(), f"{acc_status=}")
 
 
 class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.LongitudinalAccelSafetyTest):

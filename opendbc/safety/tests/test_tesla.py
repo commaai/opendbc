@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import random
 import unittest
 import numpy as np
 
@@ -64,6 +63,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.VM = VehicleModel(get_safety_CP())
     self.define = CANDefine(self.DBC)
     self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
+    self.cruise_states = {d: v for v, d in self.define.dv["DI_state"]["DI_cruiseState"].items()}
     self.autopark_states = {d: v for v, d in self.define.dv["DI_state"]["DI_autoparkState"].items()}
     self.active_autopark_states = [self.autopark_states[s] for s in ('ACTIVE', 'COMPLETE', 'SELFPARK_STARTED')]
 
@@ -81,10 +81,9 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
               "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code}
     return self.packer.make_can_msg_safety("EPAS3S_sysStatus", 0, values)
 
-  def _user_brake_msg(self, brake, quality_flag: bool = True):
-    values = {"ESP_driverBrakeApply": 2 if brake else 1}
-    if not quality_flag:
-      values["ESP_driverBrakeApply"] = random.choice((0, 3))  # NotInit_orOff, Faulty_SNA
+  def _user_brake_msg(self, brake, quality_flag: bool = True, invalid_status: int = 0):
+    # invalid statuses: 0=NotInit_orOff, 3=Faulty_SNA
+    values = {"ESP_driverBrakeApply": (2 if brake else 1) if quality_flag else invalid_status}
     return self.packer.make_can_msg_safety("ESP_status", 0, values)
 
   def _speed_msg(self, speed):
@@ -111,6 +110,9 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     }
     return self.packer.make_can_msg_safety("DI_state", 0, values)
 
+  def _ui_warning_msg(self):
+    return self.packer.make_can_msg_safety("UI_warning", 0, {})
+
   def _long_control_msg(self, set_speed, acc_state=0, jerk_limits=(0, 0), accel_limits=(0, 0), aeb_event=0, bus=0):
     values = {
       "DAS_setSpeed": set_speed,
@@ -128,40 +130,37 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     return self._long_control_msg(10, accel_limits=(accel, max(accel, 0)))
 
   def test_rx_hook(self):
-    # counter check
-    for msg_type in ("angle", "long", "speed", "speed_2"):
+    # checksum and counter checks for every message with an rx check: (message, checksum byte)
+    rx_msgs = {
+      "angle": (lambda: self._angle_cmd_msg(0, True, bus=2), 3),
+      "long": (lambda: self._long_control_msg(0, bus=2), 7),
+      "speed": (lambda: self._speed_msg(0), 0),
+      "speed_2": (lambda: self._speed_msg_2(0), 7),
+      "angle_meas": (lambda: self._angle_meas_msg(0), 7),
+      "gas": (lambda: self._user_gas_msg(0), 0),
+      "brake": (lambda: self._user_brake_msg(False), 0),
+      "pcm": (lambda: self._pcm_status_msg(True), 0),
+      "ui_warning": (self._ui_warning_msg, 0),
+    }
+    for msg_type, (msg_func, checksum_byte) in rx_msgs.items():
       # send multiple times to verify counter checks
       for i in range(10):
-        if msg_type == "angle":
-          msg = self._angle_cmd_msg(0, True, bus=2)
-        elif msg_type == "long":
-          msg = self._long_control_msg(0, bus=2)
-        elif msg_type == "speed":
-          msg = self._speed_msg(0)
-        elif msg_type == "speed_2":
-          msg = self._speed_msg_2(0)
+        msg = msg_func()
 
         should_rx = i >= 5
         if not should_rx:
           # mess with checksums
-          if msg_type == "angle":
-            msg[0].data[3] = 0
-          elif msg_type == "long":
-            msg[0].data[7] = 0
-          elif msg_type == "speed":
-            msg[0].data[0] = 0
-          elif msg_type == "speed_2":
-            msg[0].data[7] = 0
+          msg[0].data[checksum_byte] ^= 0xFF
 
         self.safety.set_controls_allowed(True)
-        self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
+        self.assertEqual(should_rx, self._rx(msg), msg=f"{msg_type=}")
+        self.assertEqual(should_rx, self.safety.get_controls_allowed(), msg=f"{msg_type=}")
 
       # Send static counters
       for i in range(MAX_WRONG_COUNTERS + 1):
         should_rx = i + 1 < MAX_WRONG_COUNTERS
-        self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
+        self.assertEqual(should_rx, self._rx(msg), msg=f"{msg_type=}")
+        self.assertEqual(should_rx, self.safety.get_controls_allowed(), msg=f"{msg_type=}")
 
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
@@ -194,9 +193,9 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
   def test_user_brake_quality_flag(self):
-    for quality_flag in (True, False):
-      msg = self._user_brake_msg(True, quality_flag=quality_flag)
-      self.assertEqual(quality_flag, self._rx(msg))
+    self.assertTrue(self._rx(self._user_brake_msg(True)))
+    for invalid_status in (0, 3):
+      self.assertFalse(self._rx(self._user_brake_msg(True, quality_flag=False, invalid_status=invalid_status)))
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
@@ -242,6 +241,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self._rx(self._pcm_status_msg(True, autopark_state))
       self.assertNotEqual(autopark_active, self.safety.get_controls_allowed())
 
+      # Also when Autopark becomes active on the same frame as cruise engages
+      self._rx(self._pcm_status_msg(False, 0))
+      self._rx(self._pcm_status_msg(True, autopark_state))
+      self.assertNotEqual(autopark_active, self.safety.get_controls_allowed())
+
       # We should also start blocking all inactive/active openpilot msgs
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, False)))
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, True)))
@@ -255,6 +259,15 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
       self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
       self.assertEqual(self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
+
+  def test_cruise_state(self):
+    # Every cruise state where ACC is still in control of the car counts as engaged
+    engaged_states = [self.cruise_states[s] for s in ("ENABLED", "STANDSTILL", "OVERRIDE", "PRE_FAULT", "PRE_CANCEL")]
+    for cruise_state in range(8):
+      self._rx(self._pcm_status_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self._rx(self.packer.make_can_msg_safety("DI_state", 0, {"DI_cruiseState": cruise_state}))
+      self.assertEqual(cruise_state in engaged_states, self.safety.get_controls_allowed(), msg=f"{cruise_state=}")
 
   def test_steering_control_type(self):
     # Only angle control is allowed (no LANE_KEEP_ASSIST, EMERGENCY_LANE_KEEP, or FSD)

@@ -29,10 +29,13 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 3
 
-  # Wheel speeds _esp_19_msg
-  def _speed_msg(self, speed):
-    values = {"ESP_%s_Radgeschw_02" % s: speed for s in ["HL", "HR", "VL", "VR"]}
+  # Wheel speeds
+  def _esp_19_msg(self, speeds: dict[str, float]):
+    values = {f"ESP_{s}_Radgeschw_02": speed for s, speed in speeds.items()}
     return self.packer.make_can_msg_safety("ESP_19", 0, values)
+
+  def _speed_msg(self, speed):
+    return self._esp_19_msg(dict.fromkeys(("HL", "HR", "VL", "VR"), speed))
 
   # Driver brake pressure over threshold
   def _esp_05_msg(self, brake):
@@ -53,13 +56,16 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self.packer.make_can_msg_safety("Motor_20", 0, values)
 
   # ACC engagement status
+  def _tsk_06_msg(self, tsk_status):
+    values = {"TSK_Status": tsk_status}
+    return self.packer.make_can_msg_safety("TSK_06", 0, values)
+
   def _tsk_status_msg(self, enable, main_switch=True):
     if main_switch:
       tsk_status = 3 if enable else 2
     else:
       tsk_status = 0
-    values = {"TSK_Status": tsk_status}
-    return self.packer.make_can_msg_safety("TSK_06", 0, values)
+    return self._tsk_06_msg(tsk_status)
 
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
@@ -100,6 +106,33 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
       self._rx(self._esp_05_msg(esp_05_signal))
       self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
                        f"expected {brake_pressed=} with {motor_14_signal=} and {esp_05_signal=}")
+
+  def test_vehicle_moving_any_wheel(self):
+    # any single wheel turning, at the smallest speed the ABS reports, means the vehicle is moving
+    for wheel in ("HL", "HR", "VL", "VR"):
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self._esp_19_msg({wheel: 0.0075}))
+      self.assertTrue(self.safety.get_vehicle_moving(), f"vehicle not moving with only {wheel} turning")
+
+  def test_tsk_status(self):
+    # 2 is standby with the main switch on and 3 to 5 are the regulating states. The other states
+    # (init, disabled and the faults) mean the main switch is off, which must exit controls.
+    # Stock ACC additionally follows the regulating states, openpilot longitudinal only needs the main switch
+    longitudinal = bool(self.SAFETY_PARAM & VolkswagenSafetyFlags.LONG_CONTROL)
+    for tsk_status in range(8):
+      self._rx(self._tsk_06_msg(0))
+      self.safety.set_controls_allowed(True)
+      self._rx(self._tsk_06_msg(tsk_status))
+      main_switch_on = tsk_status in (2, 3, 4, 5)
+      cruise_engaged = tsk_status in (3, 4, 5)
+      self.assertEqual(main_switch_on, self.safety.get_acc_main_on(), f"{tsk_status=}")
+      self.assertEqual(main_switch_on if longitudinal else cruise_engaged, self.safety.get_controls_allowed(), f"{tsk_status=}")
+
+  def test_gas_pressed_min_increment(self):
+    # the smallest pedal position the ECU reports already counts as gas pressed
+    self._rx(self._user_gas_msg(0.4))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
 
 
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):

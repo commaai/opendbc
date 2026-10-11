@@ -117,9 +117,6 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
     uint32_t rr = (GET_BYTES_LE(msg, 14, 2)) & 0x3FFFU;
     vehicle_moving = (fl > HYUNDAI_STANDSTILL_THRSLD) || (fr > HYUNDAI_STANDSTILL_THRSLD) ||
                      (rl > HYUNDAI_STANDSTILL_THRSLD) || (rr > HYUNDAI_STANDSTILL_THRSLD);
-
-    // average of all 4 wheel speeds. Conversion: raw * 0.03125 / 3.6 = m/s
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.03125 * KPH_TO_MS);
   }
 
   // cruise state

@@ -5,7 +5,8 @@ import unittest
 from opendbc.car.hyundai.values import HyundaiSafetyFlags
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
+from opendbc.safety.tests.common import MAX_WRONG_COUNTERS
+from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiGasBase, HyundaiLongitudinalBase
 
 
 # 4 bit checkusm used in some hyundai messages
@@ -43,7 +44,8 @@ def checksum(msg):
   return addr, ret, bus
 
 
-class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+class TestHyundaiSafety(HyundaiButtonBase, HyundaiGasBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest,
+                        common.SteerRequestCutSafetyTest):
   DBC = "hyundai_can_generated"
   SAFETY_MODEL = CarParams.SafetyModel.hyundai
 
@@ -51,6 +53,7 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
   STANDSTILL_THRESHOLD = 12  # 0.375 kph
   RELAY_MALFUNCTION_ADDRS = {0: (0x340, 0x485)}  # LKAS11
   FWD_BLACKLISTED_ADDRS = {2: [0x340, 0x485]}
+  GAS_MSG = ("EMS16", "CF_Ems_AclAct")
 
   MAX_RATE_UP = 3
   MAX_RATE_DOWN = 7
@@ -106,6 +109,41 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
 
+  def test_rx_hook(self):
+    # checksum and counter checks
+    legacy = self.SAFETY_MODEL == CarParams.SafetyModel.hyundaiLegacy
+    longitudinal = self.SAFETY_PARAM & HyundaiSafetyFlags.LONG
+    for name, msg_func, checked in (
+      ("EMS16", lambda: self._user_gas_msg(0), self.GAS_MSG[0] == "EMS16"),
+      ("WHL_SPD11", lambda: self._speed_msg(0), not legacy),
+      ("TCS13", lambda: self._user_brake_msg(False), not legacy),
+      ("SCC12", lambda: self._pcm_status_msg(False), not longitudinal),
+    ):
+      if not checked:
+        continue
+
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted
+        for _ in range(MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(msg_func()))
+
+        # a stuck counter fails after the counter tolerance, its checksum is still correct
+        msg = msg_func()
+        for i in range(MAX_WRONG_COUNTERS + 1):
+          should_rx = i < MAX_WRONG_COUNTERS
+          self.assertEqual(should_rx, self._rx(msg), i)
+
+        # a valid sequence clears the counter faults
+        for _ in range(MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(msg_func()))
+
+        # corrupting any byte fails the checksum, except the last byte of TCS13 which it doesn't cover
+        for byte in range(8):
+          msg = msg_func()
+          msg[0].data[byte] ^= 0x1
+          covered = not (name == "TCS13" and byte == 7)
+          self.assertEqual(not covered, self._rx(msg), byte)
+
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   SAFETY_PARAM = HyundaiSafetyFlags.ALT_LIMITS
@@ -129,6 +167,7 @@ class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
 
 class TestHyundaiSafetyFCEV(TestHyundaiSafety):
   SAFETY_PARAM = HyundaiSafetyFlags.FCEV_GAS
+  GAS_MSG = ("FCEV_ACCELERATOR", "ACCELERATOR_PEDAL")
 
   def _user_gas_msg(self, gas):
     values = {"ACCELERATOR_PEDAL": gas}
@@ -142,19 +181,21 @@ class TestHyundaiLegacySafety(TestHyundaiSafety):
 class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
   SAFETY_MODEL = CarParams.SafetyModel.hyundaiLegacy
   SAFETY_PARAM = HyundaiSafetyFlags.EV_GAS
+  GAS_MSG = ("E_EMS11", "Accel_Pedal_Pos")
 
   def _user_gas_msg(self, gas):
     values = {"Accel_Pedal_Pos": gas}
-    return self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("E_EMS11", 0, values)
 
 
 class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
   SAFETY_MODEL = CarParams.SafetyModel.hyundaiLegacy
   SAFETY_PARAM = HyundaiSafetyFlags.HYBRID_GAS
+  GAS_MSG = ("E_EMS11", "CR_Vcu_AccPedDep_Pos")
 
   def _user_gas_msg(self, gas):
     values = {"CR_Vcu_AccPedDep_Pos": gas}
-    return self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("E_EMS11", 0, values)
 
 
 class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
@@ -169,10 +210,10 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
   DISABLED_ECU_UDS_MSG = (0x7D0, 0)
   DISABLED_ECU_ACTUATION_MSG = (0x421, 0)
 
-  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False):
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False, accel_value=None):
     values = {
       "aReqRaw": accel,
-      "aReqValue": accel,
+      "aReqValue": accel if accel_value is None else accel_value,
       "AEB_CmdAct": int(aeb_req),
       "AEB_StopReq": int(aeb_stop_req),
       "CR_VSM_DecCmd": aeb_decel,
@@ -210,10 +251,10 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
   FWD_BLACKLISTED_ADDRS = {2: [0x340, 0x485, 0x420, 0x421, 0x50A, 0x389]}
   RELAY_MALFUNCTION_ADDRS = {0: (0x340, 0x485, 0x421, 0x420, 0x50A, 0x389)}  # LKAS11, LFAHDA_MFC, SCC12, SCC11, SCC13, SCC14
 
-  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False):
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False, accel_value=None):
     values = {
       "aReqRaw": accel,
-      "aReqValue": accel,
+      "aReqValue": accel if accel_value is None else accel_value,
       "AEB_CmdAct": int(aeb_req),
       "AEB_StopReq": int(aeb_stop_req),
       "CR_VSM_DecCmd": aeb_decel,

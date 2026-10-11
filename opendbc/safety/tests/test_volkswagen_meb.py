@@ -3,6 +3,7 @@ import numpy as np
 import unittest
 
 from opendbc.car.structs import CarParams
+from opendbc.car.volkswagen.mqbcan import VOLKSWAGEN_MEB_ALT_CRC_CONSTANTS, volkswagen_mqb_meb_dyn_len_checksum
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 import opendbc.safety.tests.common as common
 
@@ -109,9 +110,12 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   def _user_brake_msg(self, brake):
     return self._motor_14_msg(brake)
 
-  def _user_gas_msg(self, gas):
-    values = {"Accel_Pedal_Pressure": 1 if gas else 0, "TSK_Status": 3}
+  def _motor_51_msg(self, tsk_status=3, gas=0):
+    values = {"Accel_Pedal_Pressure": gas, "TSK_Status": tsk_status}
     return self.packer.make_can_msg_safety("Motor_51", 0, values)
+
+  def _user_gas_msg(self, gas):
+    return self._motor_51_msg(gas=gas)
 
   def _vehicle_moving_msg(self, speed_mps: float):
     return self._speed_msg(speed_mps)
@@ -143,8 +147,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
       tsk_status = 3 if enable else 2
     else:
       tsk_status = 0
-    values = {"TSK_Status": tsk_status}
-    return self.packer.make_can_msg_safety("Motor_51", 0, values)
+    return self._motor_51_msg(tsk_status=tsk_status)
 
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
@@ -204,6 +207,36 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
         for i in range(common.MAX_WRONG_COUNTERS):
           should_rx = i < common.MAX_WRONG_COUNTERS - 1
           self.assertEqual(should_rx, self._rx(msg))
+
+  def test_rx_hook_alt_crc(self):
+    # newer MEB cars sign these messages with a CRC over a shorter payload and a different data ID,
+    # which only the MEB_ALT_CRC variant accepts. The standard CRC is accepted either way, see test_rx_hook
+    alt_crc = self.SAFETY_PARAM == VolkswagenSafetyFlags.MEB_ALT_CRC
+    payloads = {"QFK_01": {"Curvature": 0.05}, "ESC_51": {"VL_Radgeschw": 10}, "Motor_51": {"TSK_Status": 3}}
+    for name, values in payloads.items():
+      with self.subTest(msg=name):
+        # every counter selects a different data ID
+        for _ in range(16):
+          addr, dat, bus = self.packer.make_can_msg(name, 0, values)
+          dat = bytearray(dat)
+          length, const = VOLKSWAGEN_MEB_ALT_CRC_CONSTANTS[addr]
+          dat[0] = volkswagen_mqb_meb_dyn_len_checksum(addr, None, dat, length, const)
+          self.assertEqual(alt_crc, self._rx(common.make_msg(bus, addr, len(dat), bytes(dat))))
+
+  def test_tsk_status(self):
+    # 2 is standby with the main switch on and 3 to 5 are the regulating states. The other states
+    # (init, disabled and the faults) mean the main switch is off, which must exit controls
+    for tsk_status in range(8):
+      self.safety.set_controls_allowed(True)
+      self._rx(self._motor_51_msg(tsk_status=tsk_status))
+      main_switch_on = tsk_status in (2, 3, 4, 5)
+      self.assertEqual(main_switch_on, self.safety.get_acc_main_on(), f"{tsk_status=}")
+      self.assertEqual(main_switch_on, self.safety.get_controls_allowed(), f"{tsk_status=}")
+
+  def test_gas_pressed_min_increment(self):
+    # the smallest pedal position the ECU reports already counts as gas pressed
+    self._rx(self._user_gas_msg(0.4))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
 
   def test_main_switch_off_disables_controls(self):
     self.safety.set_controls_allowed(True)

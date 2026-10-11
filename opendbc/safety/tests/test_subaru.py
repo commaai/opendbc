@@ -67,8 +67,8 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Steer_Torque_Sensor": torque}
     return self.packer.make_can_msg_safety("Steering_Torque", 0, values)
 
-  def _speed_msg(self, speed):
-    values = {s: speed for s in ["FR", "FL", "RR", "RL"]}
+  def _speed_msg(self, speed, wheels=("FR", "FL", "RR", "RL")):
+    values = {s: speed if s in wheels else 0 for s in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
 
   def _user_brake_msg(self, brake):
@@ -82,6 +82,14 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
+
+  def test_vehicle_moving_any_wheel(self):
+    # any single wheel reporting a non-zero speed means the vehicle is moving
+    for wheel in ["FR", "FL", "RR", "RL"]:
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self._speed_msg(1, wheels=(wheel,)))
+      self.assertTrue(self.safety.get_vehicle_moving())
 
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
