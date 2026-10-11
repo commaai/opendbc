@@ -60,7 +60,7 @@ PROCESS_TIMEOUT_SEC = 600.0
 KILLER_HINTS = 10
 # The test that killed each mutant last run, keyed by file, mutator and mutated expression. Run first next time.
 KILLER_CACHE = SAFETY_TESTS_DIR / ".mutation_killers.json"
-# Mutants that cannot change observable behaviour, keyed the same way, with the reason next to them
+# Mutants that cannot change observable behavior, keyed the same way, with the reason next to them
 EQUIVALENT_MUTANTS = SAFETY_TESTS_DIR / "mutation_equivalents.txt"
 
 ANSI_RESET = "\033[0m"
@@ -153,15 +153,22 @@ def format_mutation(site):
 
 # ***** site discovery *****
 
-def _parse_int_literal(token):
-  m = re.fullmatch(r"([0-9][0-9a-fA-FxX]*)([uUlL]*)", token)
-  if m is None:
-    return None
-  body, suffix = m.groups()
+def _int_value(token):
+  """Value of a C integer literal, or None if the token isn't one."""
+  m = re.fullmatch(r"([0-9][0-9a-fA-FxX]*)[uUlL]*", token)
   try:
-    value = int(body, 0)
+    return int(m.group(1), 0) if m else None
   except ValueError:
     return None
+
+
+def _parse_int_literal(token):
+  """The token with its value incremented, keeping the base and suffix."""
+  m = re.fullmatch(r"([0-9][0-9a-fA-FxX]*)([uUlL]*)", token)
+  value = _int_value(token)
+  if value is None:
+    return None
+  body, suffix = m.groups()
   if body.lower().startswith("0x"):
     return f"0x{value + 1:X}{suffix}"
   return f"{value + 1}{suffix}"
@@ -187,6 +194,10 @@ def _unparenthesize(node):
   while node.type == "parenthesized_expression":
     node = node.named_children[0]
   return node
+
+
+def _is_binary(node, operators):
+  return node.type == "binary_expression" and node.child_by_field_name("operator").type in operators
 
 
 def _is_constant_arithmetic(node):
@@ -219,10 +230,10 @@ def _is_shift_in_nonzero_test(literal):
   if shift.type != "binary_expression" or shift.child_by_field_name("operator").type != "<<" or shift.child_by_field_name("right") != literal:
     return False
   node = shift
-  while node.parent.type == "parenthesized_expression" or (node.parent.type == "binary_expression" and node.parent.child_by_field_name("operator").type == "|"):
+  while node.parent.type == "parenthesized_expression" or _is_binary(node.parent, ("|",)):
     node = node.parent
   cmp = node.parent
-  if cmp.type != "binary_expression" or cmp.child_by_field_name("operator").type not in ("==", "!="):
+  if not _is_binary(cmp, ("==", "!=")):
     return False
   other = _unparenthesize(cmp.child_by_field_name("right") if cmp.child_by_field_name("left") == node else cmp.child_by_field_name("left"))
   return other.type == "number_literal" and re.fullmatch(r"0[uUlL]*", other.text.decode()) is not None
@@ -232,6 +243,71 @@ def _is_null_pointer(literal):
   """The 0 in NULL, ((void *)0). No other pointer value compares equal, so (void *)1 is equivalent."""
   cast = literal.parent
   return cast is not None and cast.type == "cast_expression" and b"*" in cast.child_by_field_name("type").text
+
+
+def _is_loop_condition(cmp):
+  """i < 8 in a for or while loop: one more iteration only steps past the end of whatever the loop walks.
+
+  That is an out-of-bounds access or a read of the zero padding after a frame, so the result is undefined
+  rather than a behavior the tests could pin down.
+  """
+  node = cmp
+  while node.parent.type == "parenthesized_expression" or _is_binary(node.parent, ("&&", "||")):
+    node = node.parent
+  loop = node.parent
+  return loop.type in ("for_statement", "while_statement", "do_statement") and loop.child_by_field_name("condition") == node
+
+
+def _is_full_width_read(literal):
+  """The len in GET_BYTES_LE(msg, 0, 4) or GET_BYTES_64_LE(msg, 0, 8): one more byte is shifted past the width of the result."""
+  args = literal.parent
+  if args.type != "argument_list" or args.named_children[-1] != literal:
+    return False
+  width = {b"GET_BYTES_LE": 4, b"GET_BYTES_64_LE": 8}.get(args.parent.child_by_field_name("function").text)
+  return width is not None and _int_value(literal.text.decode()) == width
+
+
+_CONSTANT_OPERATORS = {
+  "+": lambda a, b: a + b, "-": lambda a, b: a - b, "*": lambda a, b: a * b, "/": lambda a, b: a // b, "%": lambda a, b: a % b,
+  "<<": lambda a, b: a << b, ">>": lambda a, b: a >> b, "&": lambda a, b: a & b, "|": lambda a, b: a | b, "^": lambda a, b: a ^ b,
+}
+
+
+def _constant_value(node, replaced=None):
+  """Value of an expression made only of integer literals, with one literal optionally replaced by another token."""
+  node = _unparenthesize(node)
+  if node.type == "number_literal":
+    return _int_value(replaced[1] if replaced and node == replaced[0] else node.text.decode())
+  if node.type != "binary_expression" or node.child_by_field_name("operator").type not in _CONSTANT_OPERATORS:
+    return None
+  operands = [_constant_value(node.child_by_field_name(field), replaced) for field in ("left", "right")]
+  if None in operands:
+    return None
+  try:
+    return _CONSTANT_OPERATORS[node.child_by_field_name("operator").type](*operands)
+  except (ZeroDivisionError, ValueError):
+    return None
+
+
+def _folds_to_same_constant(literal, mutated):
+  """250000U / 2U: the mutated literal folds to the same value (250001U / 2U) at compile time."""
+  top = literal
+  while top.parent.type == "parenthesized_expression" or (top.parent.type == "binary_expression" and _constant_value(top.parent) is not None):
+    top = top.parent
+  return top != literal and _constant_value(top) == _constant_value(top, (literal, mutated))
+
+
+def _is_in_helper_macro(node):
+  """Inside a GNU statement expression ({ ... }), which only the helper macros use (SAFETY_ABS and friends).
+
+  Their bodies are expanded at every use site. The 0 in SAFETY_ABS is the one literal: abs(1) == -1
+  only matters next to a threshold below 1, which the safety code doesn't have.
+  """
+  while node.type not in ("function_definition", "translation_unit"):
+    if node.type == "compound_statement" and node.parent.type == "parenthesized_expression":
+      return True
+    node = node.parent
+  return False
 
 
 def _prepare_for_parsing(txt):
@@ -343,20 +419,21 @@ def enumerate_sites(txt):
       add_site(mutator, op.type, op_map[op.type], node, op.start_byte, op.end_byte, context=node)
 
     # boundary: integer literals anywhere inside the operands of a comparison
-    if node.type == "binary_expression" and op.type in COMPARISON_OPERATORS:
+    if node.type == "binary_expression" and op.type in COMPARISON_OPERATORS and not _is_loop_condition(node):
       operands = [node.child_by_field_name(field) for field in ("left", "right")]
       while operands:
         n = operands.pop()
         operands.extend(n.children)
         if n.type != "number_literal" or (n.start_byte, n.end_byte) in seen_literals:
           continue
-        if _is_null_pointer(n) or _is_shift_in_nonzero_test(n):
-          continue
         seen_literals.add((n.start_byte, n.end_byte))
         token = txt[n.start_byte:n.end_byte]
         mutated = _parse_int_literal(token)
-        if mutated is not None:
-          add_site("boundary", token, mutated, n, n.start_byte, n.end_byte, context=node)
+        if mutated is None:
+          continue
+        if _is_null_pointer(n) or _is_shift_in_nonzero_test(n) or _is_full_width_read(n) or _folds_to_same_constant(n, mutated) or _is_in_helper_macro(n):
+          continue
+        add_site("boundary", token, mutated, n, n.start_byte, n.end_byte, context=node)
 
   sites.sort(key=lambda s: (s.op_start, s.mutator))
   sites = [replace(s, site_id=i) for i, s in enumerate(sites)]
@@ -453,7 +530,7 @@ def load_tests():
     # base classes imported from another test module are picked up twice; keep the first
     tests[test_file.name] = [t for t in _flatten(suite) if isinstance(t, SafetyTestBase) and t.id() not in seen]
     seen.update(t.id() for t in tests[test_file.name])
-  assert not loader.errors, "\n".join(loader.errors)
+  assert not loader.errors, "\n".join(map(str, loader.errors))
   return tests
 
 
@@ -705,7 +782,7 @@ def main():
       # Baseline: the whole suite must pass against the instrumented library with no mutant active.
       # Otherwise a kill could come from the harness rather than the mutant. Split by class to run in parallel.
       classes = sorted({(module, type(t).__name__) for module, ts_ in tests.items() for t in ts_})
-      baseline = [fut.result() for fut in as_completed([pool.submit(eval_baseline, *c) for c in classes])]
+      baseline = [fut.result() for fut in as_completed([pool.submit(eval_baseline, module, class_name) for module, class_name in classes])]
       baseline_failures = [b for b in baseline if b.outcome != SURVIVED]
       if baseline_failures:
         print("Baseline failed with no mutant active; aborting to avoid false kills.", flush=True)

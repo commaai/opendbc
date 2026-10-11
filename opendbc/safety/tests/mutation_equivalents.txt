@@ -1,33 +1,6 @@
-# Mutants that survive because they cannot change observable behaviour, grouped by reason.
+# Mutants that survive because they cannot change observable behavior, grouped by reason.
 # One per line, as `<file> <mutator> <mutated expression>` exactly as mutation.py prints it.
 # mutation.py fails if an entry no longer exists or gets killed, so the list can't go stale.
-
-# byte 8 is zero padding in an 8-byte frame, and shifting a uint64_t by 64 is undefined behaviour
-opendbc/safety/modes/honda.h boundary GET_BYTES_64_LE(msg, 0, [[8->9]] ) != 0x0000000000803E02ULL
-opendbc/safety/modes/toyota.h boundary GET_BYTES_64_LE(msg, 0, [[8->9]] ) != 0x00000000003E020FULL
-opendbc/safety/modes/hyundai.h boundary GET_BYTES_64_LE(msg, 0, [[8->9]] ) != 0x0000000000803E02ULL
-opendbc/safety/modes/body.h boundary GET_BYTES_64_LE(msg, 0, [[8->9]] ) == 0x0AB00B1EDEADFACEULL
-opendbc/safety/modes/hyundai_canfd.h boundary GET_BYTES_64_LE(msg, 0, [[8->9]] ) != 0x0000000000803E02ULL
-
-# the extra iteration reads byte 8, zero padding in an 8-byte frame
-opendbc/safety/modes/hyundai.h boundary i < [[8->9]]
-opendbc/safety/modes/hyundai.h boundary j < [[8->9]]
-opendbc/safety/modes/volkswagen_mqb.h boundary i < [[8U->9U]]
-
-# SAFETY_ABS of an int only differs for a value of exactly 1, far below the threshold it is compared to
-opendbc/safety/modes/toyota.h boundary ({ int _a = (torque_driver.min); (_a > [[0->1]] ) ? _a : (-_a); }) > TOYOTA_LTA_MAX_DRIVER_TORQUE
-opendbc/safety/modes/toyota.h boundary ({ int _a = (torque_driver.max); (_a > [[0->1]] ) ? _a : (-_a); }) > TOYOTA_LTA_MAX_DRIVER_TORQUE
-opendbc/safety/modes/toyota.h boundary ({ int _a = (torque_meas.min); (_a > [[0->1]] ) ? _a : (-_a); }) > TOYOTA_LTA_MAX_MEAS_TORQUE
-opendbc/safety/modes/toyota.h boundary ({ int _a = (torque_meas.max); (_a > [[0->1]] ) ? _a : (-_a); }) > TOYOTA_LTA_MAX_MEAS_TORQUE
-opendbc/safety/safety.h boundary ({ int _a = (speed_2 - ((float)vehicle_speed.values[0] / 1000.0)); (_a > [[0->1]] ) ? _a : (-_a); }) > MAX_SPEED_DELTA
-
-# byte 4 is shifted by 32, undefined behaviour for a uint32_t
-opendbc/safety/modes/subaru_preglobal.h boundary ((GET_BYTES_LE(msg, 0, [[4->5]] ) >> 12) | GET_BYTES_LE(msg, 4, 4)) != 0U
-opendbc/safety/modes/subaru_preglobal.h boundary ((GET_BYTES_LE(msg, 0, 4) >> 12) | GET_BYTES_LE(msg, 4, [[4->5]] )) != 0U
-opendbc/safety/modes/volkswagen_mqb.h boundary ((GET_BYTES_LE(msg, 0, [[4->5]] ) >> 12) & 0xFFU) != 0U
-
-# 250001U / 2U == 250000U / 2U
-opendbc/safety/lateral.h boundary safety_get_ts_elapsed(ts, curvature_state.ts_check_last) >= ( [[250000U->250001U]] / 2U)
 
 # the added bit is not part of the signal and is never set in frames openpilot or the car sends
 opendbc/safety/modes/ford.h boundary (msg->data[6] & [[0xC0U->0xC1U]] ) != 0U
@@ -41,11 +14,6 @@ opendbc/safety/modes/subaru_preglobal.h boundary ((GET_BYTES_LE(msg, 0, 4) >> [[
 
 # len is only ever 0, 28, 44 or 60
 opendbc/safety/modes/volkswagen_meb.h boundary len > [[0->1]]
-
-# out-of-bounds reads of the array that follows; undefined behaviour with no in-range difference
-opendbc/safety/safety.h boundary j < [[3U->4U]]
-opendbc/safety/safety.h boundary i <= [[0xFFU->0x100U]]
-opendbc/safety/safety.h boundary i < [[6->7]]
 
 # only resets heartbeat_engaged_mismatches, which panda consumes and libsafety does not expose
 opendbc/safety/safety.h remove_negation [[!->]] controls_allowed_prev
