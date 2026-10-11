@@ -21,13 +21,12 @@ The checks are experimental and partial; a clean run is not proof of MISRA
 compliance. Use `bin/misra-<os>-<arch> --list-rules` to inspect check limitations.
 
 The checked-in binaries temporarily replace distribution. They were built from
-the local misra development tree at commit
-`1f85bdeeea9c8e89d364292f668db391cfff7eb9`, including uncommitted development
-changes, with Go 1.27.1:
+the misrable source tree at commit
+`b886409012fa495980cc735a541e700b08a97f35`, with Go 1.27.1:
 
 ```sh
 CGO_ENABLED=0 GOOS=<linux|darwin> GOARCH=<amd64|arm64> \
-  go build -trimpath -ldflags='-s -w' -o <opendbc>/opendbc/safety/tests/misra/bin/misra-<os>-<arch> ./cmd/misra
+  go build -trimpath -ldflags='-s -w' -o <opendbc>/opendbc/safety/tests/misra/bin/misra-<os>-<arch> ./cmd/misrable
 ```
 
 Refresh all four binaries together as the analyzer changes.
