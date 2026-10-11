@@ -131,9 +131,8 @@ BO_ 502 LKA_COMMAND: 4 CAMERA
 BO_ 506 NEW_MSG_1FA: 8 XXX
  SG_ BRAKE_ACTIVE : 25|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 554 ACC_2: 8 RADAR
- SG_ HUD_SPEED : 7|8@0+ (1,0) [0|255] "km/h" XXX
- SG_ TARGET_SPEED : 15|8@0- (0.443,0) [0|255] "" XXX
+BO_ 554 ACC_2: 8 CAMERA
+ SG_ ACC_TORQUE_REQUEST : 7|16@0+ (1,0) [0|65535] "" XXX
  SG_ CRUISE_STATUS : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
@@ -158,7 +157,7 @@ BO_ 762 ACC_BUTTON: 4 XXX
  SG_ DIST_PLUS : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 23|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 896 NEW_MSG_380: 8 XXX
+BO_ 896 NEW_MSG_380: 8 CAMERA
  SG_ NEW_SIGNAL_1 : 4|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 900 BCM_3: 8 XXX
@@ -261,7 +260,7 @@ BO_ 1095 NEW_MSG_447: 6 XXX
  SG_ COUNTER : 35|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 1199 ACC_3: 8 RADAR
+BO_ 1199 ACC_3: 8 XXX
  SG_ CRUISE_STATUS : 11|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1351 LKA_HUD_2: 8 CAMERA
@@ -281,7 +280,7 @@ BO_ 1445 NEW_MSG_5A5: 8 XXX
 BO_ 1449 ENGINE_3: 8 XXX
  SG_ GEAR : 23|3@0+ (1,0) [0|7] "" XXX
 
-BO_ 1508 ACC_4: 8 XXX
+BO_ 1508 ACC_4: 8 CAMERA
  SG_ ACC_SET_SPEED_KPH : 31|8@0+ (1,0) [0|255] "km/h" XXX
  SG_ ACC_SET_SPEED_MPH : 39|8@0+ (1,0) [0|255] "mph" XXX
  SG_ CRUISE_MODE : 61|3@0+ (1,0) [0|3] "" XXX
@@ -303,6 +302,7 @@ CM_ SG_ 278 FORWARD_1 "probably per-axle";
 CM_ SG_ 278 REVERSE_1 "probably per-axle";
 CM_ SG_ 278 FORWARD_2 "probably per-axle";
 CM_ SG_ 278 REVERSE_2 "probably per-axle";
+CM_ SG_ 554 ACC_TORQUE_REQUEST "scale and offset unknown, 0 when cruise is off";
 VAL_ 262 LKA_STATUS 0 "standby" 2 "lka_active";
 VAL_ 1449 GEAR 1 "park" 2 "reverse" 3 "neutral" 4 "drive" 6 "drive manual";
 VAL_ 1508 CRUISE_MODE 0 "off" 3 "manual" 2 "acc-available" 4 "acc-enabled" 6 "acc-override";
