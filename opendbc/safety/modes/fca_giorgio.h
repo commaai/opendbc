@@ -4,9 +4,9 @@
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/chrysler_common.h"
 
+#define FCA_GIORGIO_ENGINE_2        0xDCU
 #define FCA_GIORGIO_ABS_1           0xEEU
 #define FCA_GIORGIO_ABS_3           0xFAU
-#define FCA_GIORGIO_ENGINE_1        0xFCU
 #define FCA_GIORGIO_EPS_2           0x106U
 #define FCA_GIORGIO_LKA_COMMAND     0x1F6U
 #define FCA_GIORGIO_LKA_COMMAND_2   0x117U
@@ -28,13 +28,12 @@ static safety_config fca_giorgio_init(uint16_t param) {
     {FCA_GIORGIO_LKA_HUD_3, 0, 8, .check_relay = true},
   };
 
-  // TODO: need to find a message for driver gas
   // TODO: re-enable checksums/counters
   static const RxCheck fca_giorgio_rx_checks[] = {
     {.msg = {{FCA_GIORGIO_ACC_2, 2, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ABS_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_ABS_3, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{FCA_GIORGIO_ENGINE_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{FCA_GIORGIO_ENGINE_2, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_GIORGIO_EPS_2, 0, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
@@ -72,9 +71,9 @@ static void fca_giorgio_rx_hook(const CANPacket_t *msg) {
       update_sample(&safety.torque_driver, torque_driver_new);
     }
 
-    // Signal: ENGINE_1.ACCEL_PEDAL
-    if (msg->addr == FCA_GIORGIO_ENGINE_1) {
-      safety.gas_pressed = ((GET_BYTES_BE(msg, 2, 2) >> 5) & 0xFFU) > 0U;
+    // Signal: ENGINE_2.ACCEL_PEDAL_USER
+    if (msg->addr == FCA_GIORGIO_ENGINE_2) {
+      safety.gas_pressed = msg->data[2] > 0U;
     }
 
     // Signal: ABS_3.BRAKE_PEDAL_SWITCH

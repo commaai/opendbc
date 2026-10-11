@@ -38,7 +38,7 @@ class CarState(CarStateBase):
     ret.steerFaultPermanent = bool(pt_cp.vl["EPS_2"]["LKA_FAULT"])
     self.lka_status = pt_cp.vl["EPS_2"]["LKA_STATUS"]
 
-    ret.gasPressed = pt_cp.vl["ENGINE_1"]["ACCEL_PEDAL"] > 0
+    ret.gasPressed = pt_cp.vl["ENGINE_2"]["ACCEL_PEDAL_USER"] > 0
     ret.brakePressed = bool(pt_cp.vl["ABS_3"]["BRAKE_PEDAL_SWITCH"])
     #ret.parkingBrake = TODO
 
