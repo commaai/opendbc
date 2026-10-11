@@ -47,12 +47,10 @@ class CarState(CarStateBase):
     else:
       ret.gearShifter = GearShifter.drive
 
-    # TODO: is it ok that speed is gated by "enabled"?
-    # TODO: correct units on speed?
     # NOTE: CRUISE_MODE glitches to zero for a frame on ACC enable
     ret.cruiseState.enabled = bool(pt_cam.vl["ACC_2"]["CRUISE_STATUS"])
     ret.cruiseState.available = pt_cam.vl["ACC_4"]["CRUISE_MODE"] == 2 or ret.cruiseState.enabled
-    ret.cruiseState.speed = pt_cam.vl["ACC_2"]["HUD_SPEED"] * CV.KPH_TO_MS
+    ret.cruiseState.speed = pt_cam.vl["ACC_4"]["ACC_SET_SPEED_KPH"] * CV.KPH_TO_MS
 
     ret.leftBlinker = bool(pt_cp.vl["BCM_1"]["LEFT_TURN_STALK"])
     ret.rightBlinker = bool(pt_cp.vl["BCM_1"]["RIGHT_TURN_STALK"])
