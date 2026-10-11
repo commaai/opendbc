@@ -5,10 +5,10 @@ BO_ 218 NEW_MSG_DA: 8 XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 220 NEW_MSG_DC: 8 XXX
+BO_ 220 ENGINE_2: 8 ENGINE
  SG_ NEW_SIGNAL_1 : 4|13@0+ (1,0) [0|8191] "" XXX
  SG_ NEW_SIGNAL_4 : 7|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ ACCEL_PEDAL_USER : 23|8@0+ (0.4,0) [0|255] "percent" XXX
  SG_ NEW_SIGNAL_2 : 36|13@0+ (1,0) [0|8191] "" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
@@ -47,7 +47,7 @@ BO_ 250 ABS_3: 8 ABS
 
 BO_ 252 ENGINE_1: 8 ENGINE
  SG_ ENGINE_RPM : 7|14@0+ (1,0) [0|255] "rev/min" XXX
- SG_ ACCEL_PEDAL : 20|8@0+ (0.4,0) [0|255] "percent" XXX
+ SG_ ACCEL_PEDAL_COMBO : 20|8@0+ (0.4,0) [0|255] "percent" XXX
  SG_ REVERSE : 26|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 47|11@0+ (1,0) [0|2047] "" XXX
@@ -278,7 +278,7 @@ BO_ 1445 NEW_MSG_5A5: 8 XXX
  SG_ NEW_SIGNAL_3 : 44|3@0+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_1 : 50|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 1449 ENGINE_2: 8 XXX
+BO_ 1449 ENGINE_3: 8 XXX
  SG_ GEAR : 23|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 1508 ACC_4: 8 XXX
@@ -291,6 +291,8 @@ BO_ 1854 BCM_1: 4 BCM
 
 BO_ 506855454 CAM_UNKNOWN_6: 1 CAMERA
 
+CM_ SG_ 220 ACCEL_PEDAL_USER "driver pedal only";
+CM_ SG_ 252 ACCEL_PEDAL_COMBO "driver pedal and ACC demand combined";
 CM_ SG_ 254 LONG_ACCEL "scale TBD";
 CM_ SG_ 254 LATERAL_ACCEL "scale TBD";
 CM_ SG_ 254 YAW_RATE "scale estimated";
