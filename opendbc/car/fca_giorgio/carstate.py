@@ -57,8 +57,8 @@ class CarState(CarStateBase):
     # ret.buttonEvents = TODO
     # ret.espDisabled = TODO
 
-    # ret.leftBlindspot = bool(pt_cp.vl["BLIND_SPOT"]["BLIND_SPOT_LEFT"])
-    # ret.rightBlindspot = bool(pt_cp.vl["BLIND_SPOT"]["BLIND_SPOT_RIGHT"])
+    ret.leftBlindspot = bool(pt_cp.vl["BCM_4"]["BLIND_SPOT_LEFT"])
+    ret.rightBlindspot = bool(pt_cp.vl["BCM_4"]["BLIND_SPOT_RIGHT"])
 
     # ret.doorOpen = bool(pt_cp.vl["BCM_2"]["DOOR_OPEN_FL"])
     ret.seatbeltUnlatched = bool(pt_cp.vl["BCM_2"]["SEATBELT_UNBUCKLED_FL"])
@@ -71,6 +71,9 @@ class CarState(CarStateBase):
 
     # manually configure some optional and variable-rate/edge-triggered messages
     pt_messages, cam_messages = [], []
+    pt_messages += [
+      ("BCM_4", 1),  # 1Hz, with extra frames when a signal changes
+    ]
 
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
