@@ -43,7 +43,8 @@ BO_ 265 ACC_01: 8 Gateway_B8
  SG_ ACC_neg_Sollbeschl_Grad : 40|8@1+ (0.05,0) [0|12.7] "Unit_MeterPerCubicSecon"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
  SG_ ACC_pos_Sollbeschl_Grad : 48|8@1+ (0.05,0) [0|12.7] "Unit_MeterPerCubicSecon"  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
  SG_ ACC_Dynamik : 58|2@1+ (1,0) [0|3] ""  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
- SG_ ACC_Anhalten : 56|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Anfahren : 56|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Anhalten : 57|1@1+ (1,0) [0|1] ""  XXX
  SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] ""  XXX
  SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] ""  Motor_MLB_AU48_AU416_Diesel,Motor_MLB_B8_Q5_Otto,Motor_MLB_Q5_Hybrid
 
