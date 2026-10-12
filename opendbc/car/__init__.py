@@ -44,7 +44,7 @@ def gen_empty_fingerprint():
 
 # these params were derived for the Civic and used to calculate params for other cars
 class VehicleDynamicsParams:
-  MASS = 1462.  # kg, reference mass used to derive the normalized parameters
+  MASS = 1462.  # kg, reference Civic curb mass (1326) plus cargo (136)
   WHEELBASE = 2.70
   CENTER_TO_FRONT = WHEELBASE * 0.4
   CENTER_TO_REAR = WHEELBASE - CENTER_TO_FRONT
