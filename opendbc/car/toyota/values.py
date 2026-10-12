@@ -112,7 +112,7 @@ class ToyotaTSS2PlatformConfig(PlatformConfig):
     self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_DSU
 
     if self.flags & ToyotaFlags.RADAR_ACC:
-      self.dbc_dict = {Bus.pt: 'toyota_nodsu_pt_generated'}
+      self.dbc_dict = dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_ars510')
 
 
 @dataclass
@@ -123,7 +123,7 @@ class ToyotaSecOCPlatformConfig(PlatformConfig):
     self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC
 
     if self.flags & ToyotaFlags.RADAR_ACC:
-      self.dbc_dict = {Bus.pt: 'toyota_secoc_pt_generated'}
+      self.dbc_dict = dbc_dict('toyota_secoc_pt_generated', 'toyota_tss2_ars510')
 
 
 class CAR(Platforms):
