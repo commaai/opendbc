@@ -27,6 +27,9 @@ class VehicleModel:
       CP: Car Parameters
     """
     # for math readability, convert long names car params into short names
+    # Tire stiffness and rotational inertia are already divided by vehicle mass, which cancels out of the model.
+    # Use unit mass to preserve the standard bicycle-model equations below.
+    self.m: float = 1.0
     self.j: float = CP.rotationalInertiaPerMass
     self.l: float = CP.wheelbase
     self.aF: float = CP.centerToFront
@@ -181,19 +184,20 @@ def create_dyn_state_matrices(u: float, VM: VehicleModel) -> tuple[np.ndarray, n
     cR: Tire stiffness rear per unit mass [N/(rad*kg)]
     aF: Distance from CG to front wheels [m]
     aR: Distance from CG to rear wheels [m]
+    m: Unit mass (1); stiffness and inertia are mass-normalized
     j: Rotational inertia per unit mass [m^2]
     sR: Steering ratio [-]
     chi: Steer ratio rear [-]
   """
   A = np.zeros((2, 2))
   B = np.zeros((2, 2))
-  A[0, 0] = - (VM.cF + VM.cR) / u
-  A[0, 1] = - (VM.cF * VM.aF - VM.cR * VM.aR) / u - u
+  A[0, 0] = - (VM.cF + VM.cR) / (VM.m * u)
+  A[0, 1] = - (VM.cF * VM.aF - VM.cR * VM.aR) / (VM.m * u) - u
   A[1, 0] = - (VM.cF * VM.aF - VM.cR * VM.aR) / (VM.j * u)
   A[1, 1] = - (VM.cF * VM.aF**2 + VM.cR * VM.aR**2) / (VM.j * u)
 
   # Steering input
-  B[0, 0] = (VM.cF + VM.chi * VM.cR) / VM.sR
+  B[0, 0] = (VM.cF + VM.chi * VM.cR) / VM.m / VM.sR
   B[1, 0] = (VM.cF * VM.aF - VM.chi * VM.cR * VM.aR) / VM.j / VM.sR
 
   # Roll input
@@ -224,4 +228,4 @@ def calc_slip_factor(VM: VehicleModel) -> float:
   """The slip factor is a measure of how the curvature changes with speed
   it's positive for Oversteering vehicle, negative (usual case) otherwise.
   """
-  return (VM.cF * VM.aF - VM.cR * VM.aR) / (VM.l**2 * VM.cF * VM.cR)
+  return VM.m * (VM.cF * VM.aF - VM.cR * VM.aR) / (VM.l**2 * VM.cF * VM.cR)
