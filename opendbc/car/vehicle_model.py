@@ -32,6 +32,7 @@ class VehicleModel:
     self.l: float = CP.wheelbase
     self.aF: float = CP.centerToFront
     self.aR: float = CP.wheelbase - CP.centerToFront
+    self.chi: float = 0.  # no rear steering
 
     self.cF_orig: float = CP.tireStiffnessFront
     self.cR_orig: float = CP.tireStiffnessRear
@@ -86,7 +87,7 @@ class VehicleModel:
       Curvature factor [1/m]
     """
     sf = calc_slip_factor(self)
-    return 1. / (1. - sf * u**2) / self.l
+    return (1. - self.chi) / (1. - sf * u**2) / self.l
 
   def get_steer_from_curvature(self, curv: float, u: float, roll: float) -> float:
     """Calculates the required steering wheel angle for a given curvature
@@ -184,6 +185,7 @@ def create_dyn_state_matrices(u: float, VM: VehicleModel) -> tuple[np.ndarray, n
     m: Mass [kg]
     j: Rotational inertia [kg m^2]
     sR: Steering ratio [-]
+    chi: Steer ratio rear [-]
   """
   A = np.zeros((2, 2))
   B = np.zeros((2, 2))
@@ -193,8 +195,8 @@ def create_dyn_state_matrices(u: float, VM: VehicleModel) -> tuple[np.ndarray, n
   A[1, 1] = - (VM.cF * VM.aF**2 + VM.cR * VM.aR**2) / (VM.j * u)
 
   # Steering input
-  B[0, 0] = VM.cF / VM.m / VM.sR
-  B[1, 0] = VM.cF * VM.aF / VM.j / VM.sR
+  B[0, 0] = (VM.cF + VM.chi * VM.cR) / VM.m / VM.sR
+  B[1, 0] = (VM.cF * VM.aF - VM.chi * VM.cR * VM.aR) / VM.j / VM.sR
 
   # Roll input
   B[0, 1] = -ACCELERATION_DUE_TO_GRAVITY
