@@ -12,9 +12,9 @@ whole suite is first run against the instrumented library with no mutant active.
 import argparse
 import ctypes
 import hashlib
-import json
 import os
 import pickle
+import random
 import re
 import resource
 import select
@@ -59,8 +59,6 @@ TEST_TIMEOUT_MIN_SEC = 5.0
 PROCESS_TIMEOUT_SEC = 600.0
 # Tests that killed earlier mutants in the same file are run first; this many of them
 KILLER_HINTS = 10
-# The test that killed each mutant last run, keyed by file, mutator and mutated expression. Run first next time.
-KILLER_CACHE = SAFETY_TESTS_DIR / ".mutation_killers.json"
 # Known surviving mutants, keyed the same way, with equivalent or deferred coverage reasons next to them
 EQUIVALENT_MUTANTS = SAFETY_TESTS_DIR / "mutation_equivalents.txt"
 
@@ -629,6 +627,8 @@ class _TestResult(unittest.TestResult):
 
   def startTest(self, test):
     super().startTest(test)
+    # Randomized fixtures must exercise the same inputs in every run and test order.
+    random.seed(test.id())
     self._t0 = time.perf_counter()
     signal.setitimer(signal.ITIMER_REAL, self.test_timeout_sec)
 
@@ -843,7 +843,6 @@ def main():
       results = []
       counts = Counter({o: 0 for o in OUTCOMES})
       killers = defaultdict(Counter)  # origin file -> tests that killed its mutants
-      cached_killers = json.loads(KILLER_CACHE.read_text()) if KILLER_CACHE.exists() else {}
       # Sites in shared code may need the whole suite, so start them first to avoid a long tail. Interleave files,
       # so the tests that kill a file's first mutants are known by the time the rest of that file is submitted.
       position_in_file = {site.site_id: i for file_sites in sites_by_file(sites).values() for i, site in enumerate(file_sites)}
@@ -855,8 +854,6 @@ def main():
         while pending and len(running) < args.j + 2:
           site = pending.popleft()
           first_tests = [test_id for test_id, _ in killers[site.origin_file].most_common(KILLER_HINTS)]
-          if site.cache_key in cached_killers:
-            first_tests.insert(0, cached_killers[site.cache_key])
           running.add(pool.submit(eval_mutant, site, test_timeout_sec, first_tests))
         done, running = wait(running, return_when=FIRST_COMPLETED)
         for fut in done:
@@ -867,14 +864,7 @@ def main():
           counts[res.outcome.outcome] += 1
           print_live_status(render_progress(counts, len(sites), time.perf_counter() - start), final=len(results) == len(sites))
 
-    # remember what killed each mutant; a full run also forgets mutants that no longer exist
     site_keys = {s.cache_key for s in sites}
-    if not args.filter and args.max_mutants == 0:
-      cached_killers = {k: v for k, v in cached_killers.items() if k in site_keys}
-    cached_killers.update({r.site.cache_key: r.outcome.test_id for r in results if r.outcome.outcome == KILLED})
-    cache_tmp = KILLER_CACHE.with_suffix(".tmp")
-    cache_tmp.write_text(json.dumps(dict(sorted(cached_killers.items())), indent=0) + "\n")
-    os.replace(cache_tmp, KILLER_CACHE)  # atomic, so concurrent runs never read a torn file
 
     by_outcome = {o: [r for r in results if r.outcome.outcome == o] for o in OUTCOMES}
     equivalents = load_equivalent_mutants()

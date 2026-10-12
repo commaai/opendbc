@@ -1,6 +1,7 @@
+import random
 import unittest
 
-from opendbc.safety.tests.mutation import SAFETY_DIR, enumerate_sites
+from opendbc.safety.tests.mutation import SAFETY_DIR, _TestResult, enumerate_sites
 
 
 class TestMutationKeys(unittest.TestCase):
@@ -41,6 +42,24 @@ class TestMutationKeys(unittest.TestCase):
     comparisons = [s for s in sites if s.mutator == 'comparison']
     self.assertEqual(comparisons[0].snippet, comparisons[1].snippet)
     self.assertNotEqual(comparisons[0].cache_key, comparisons[1].cache_key)
+
+  def test_repeatable_random_fixtures(self):
+    result = _TestResult(5)
+
+    def sample():
+      result.startTest(self)
+      try:
+        return [random.getrandbits(32) for _ in range(5)]
+      finally:
+        result.stopTest(self)
+
+    state = random.getstate()
+    try:
+      first = sample()
+      random.seed(42)
+      self.assertEqual(first, sample())
+    finally:
+      random.setstate(state)
 
 
 if __name__ == '__main__':
