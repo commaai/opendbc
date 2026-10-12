@@ -44,7 +44,7 @@ class CarControllerParams:
     if CP.carFingerprint in (CAR.HONDA_CRV, CAR.HONDA_CRV_EU, CAR.ACURA_RDX):
       self.STEER_MAX = 1000  # TODO: determine if there is a dead zone at the top end
     elif CP.carFingerprint in (CAR.ACURA_ILX, CAR.HONDA_CRV_5G, CAR.ACURA_RDX_3G, CAR.ACURA_TLX_2G_MMR, CAR.ACURA_MDX_4G,
-                               CAR.ACURA_ADX):
+                               CAR.ACURA_ADX, CAR.ACURA_RDX_3G_MMR):
       self.STEER_MAX = 3840  # TODO: determine if there is a dead zone at the top end (ACURA_ILX)
     elif CP.carFingerprint in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CIVIC_2022, CAR.HONDA_ACCORD,
                                CAR.HONDA_CRV_HYBRID, CAR.HONDA_FIT, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.HONDA_HRV_3G,
@@ -258,7 +258,11 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   ACURA_RDX_3G_MMR = HondaBoschPlatformConfig(
-    [HondaCarDocs("Acura RDX 2022-24", "All", min_steer_speed=70. * CV.KPH_TO_MS)],
+    [
+      HondaCarDocs("Acura RDX 2022-24", "All", min_steer_speed=70. * CV.KPH_TO_MS),
+      # excluding 2025 due to inability to validate NHTSA 25V582 recall completion
+      HondaCarDocs("Acura RDX 2026", "All", min_steer_speed=70. * CV.KPH_TO_MS)
+    ],
     CarSpecs(mass=4079 * CV.LB_TO_KG, wheelbase=2.75, centerToFrontRatio=0.41, steerRatio=16.2),
     {Bus.pt: 'acura_rdx_2020_can_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE | HondaFlags.BOSCH_ALT_RADAR,
