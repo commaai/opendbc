@@ -486,7 +486,6 @@ struct CarParams {
   wheelbase @18 :Float32;       # [m] distance from rear axle to front axle
   centerToFront @19 :Float32;   # [m] distance from center of mass to front axle
   steerRatio @20 :Float32;      # [] ratio of steering wheel angle to front wheel angle
-  steerRatioRear @21 :Float32;  # [] ratio of steering wheel angle to rear wheel angle (usually 0)
 
   # mass-normalized vehicle dynamics parameters
   rotationalInertiaPerMass @22 :Float32;  # [m^2] rotational inertia per unit mass
@@ -724,6 +723,7 @@ struct CarParams {
 
   deprecated :group {
     mass @17 :Float32;
+    steerRatioRear @21 :Float32;
     lateralParams @48 :LateralParams;
     enableGasInterceptor @2 :Bool;
     enableCamera @4 :Bool;

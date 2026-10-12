@@ -34,7 +34,7 @@ class VehicleModel:
     self.l: float = CP.wheelbase
     self.aF: float = CP.centerToFront
     self.aR: float = CP.wheelbase - CP.centerToFront
-    self.chi: float = CP.steerRatioRear
+    self.chi: float = 0.  # no rear steering
 
     self.cF_orig: float = CP.tireStiffnessFrontPerMass
     self.cR_orig: float = CP.tireStiffnessRearPerMass
