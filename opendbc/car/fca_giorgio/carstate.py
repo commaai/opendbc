@@ -13,6 +13,7 @@ class CarState(CarStateBase):
     self.frame = 0
     self.CCP = CarControllerParams(CP)
     self.lka_status = 0
+    self.button_counter = 0
 
   def update(self, can_parsers) -> structs.CarState:
     pt_cp = can_parsers[Bus.pt]
@@ -55,6 +56,7 @@ class CarState(CarStateBase):
     ret.leftBlinker = bool(pt_cp.vl["BCM_1"]["LEFT_TURN_STALK"])
     ret.rightBlinker = bool(pt_cp.vl["BCM_1"]["RIGHT_TURN_STALK"])
     # ret.buttonEvents = TODO
+    self.button_counter = pt_cp.vl["ACC_BUTTON"]["COUNTER"]
     # ret.espDisabled = TODO
 
     ret.leftBlindspot = bool(pt_cp.vl["BCM_4"]["BLIND_SPOT_LEFT"])

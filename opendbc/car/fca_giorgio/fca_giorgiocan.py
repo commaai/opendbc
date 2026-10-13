@@ -25,3 +25,14 @@ def create_lka_hud_3_control(packer, bus, lat_active):
   }
 
   return packer.make_can_msg("LKA_HUD_3", bus, values)
+
+
+def create_acc_button_control(packer, bus, counter, cancel=False):
+  values = {
+    "CANCEL": cancel,
+    "COUNTER": counter % 0x10,
+    "UNKNOWN_1": 3,
+    "UNKNOWN_2": 0x0E,
+  }
+
+  return packer.make_can_msg("ACC_BUTTON", bus, values)
