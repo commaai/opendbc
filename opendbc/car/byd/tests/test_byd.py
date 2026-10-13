@@ -1442,6 +1442,36 @@ class TestBydLongCarState(unittest.TestCase):
     self.assertTrue(cs.update(parsers).cruiseState.standstill)
 
 
+class TestBydClusterDisplay(unittest.TestCase):
+  def test_odometer_page5_little_endian(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    addr, dat, _bus = packer.make_can_msg("CLUSTER_DISPLAY", 0, {"CLUSTER_MUX": 5, "ODOMETER": 3187.1})
+    self.assertEqual(addr, 985)
+    self.assertEqual(dat[0], 5)
+    self.assertEqual(dat[1] | (dat[2] << 8), 31871)
+
+  def test_odometer_gated_to_mux5(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("CLUSTER_DISPLAY", 0)], 0)
+    _, dat, _ = packer.make_can_msg("CLUSTER_DISPLAY", 0, {"CLUSTER_MUX": 5, "ODOMETER": 3187.1})
+    cp.update([(0, [(985, dat, 0)])])
+    self.assertAlmostEqual(cp.vl["CLUSTER_DISPLAY"]["ODOMETER"], 3187.1, places=3)
+    other = bytes([4]) + dat[1:]
+    cp.update([(0, [(985, other, 0)])])
+    self.assertAlmostEqual(cp.vl["CLUSTER_DISPLAY"]["ODOMETER"], 3187.1, places=3)
+
+  def test_hv_drive_state_and_current(self):
+    packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
+    addr, dat, _bus = packer.make_can_msg("HV_DRIVE", 0, {"DRIVE_STATE": 0x36, "MOTOR_CURRENT": 200})
+    self.assertEqual(addr, 544)
+    self.assertEqual(dat[1], 0x36)
+    self.assertEqual(dat[3], 200)
+    cp = CANParser(DBC[CAR.BYD_ATTO_3][Bus.pt], [("HV_DRIVE", 0)], 0)
+    cp.update([(0, [(addr, dat, 0)])])
+    self.assertEqual(cp.vl["HV_DRIVE"]["DRIVE_STATE"], 54.0)
+    self.assertEqual(cp.vl["HV_DRIVE"]["MOTOR_CURRENT"], 200.0)
+
+
 class TestBydRadarChecksum(unittest.TestCase):
   FRAME_A = bytes.fromhex(
     "98fb0e0029f4e4012a7f040a0120703c80000009ffea80702955002934013bfffffbfffffffffc" +
