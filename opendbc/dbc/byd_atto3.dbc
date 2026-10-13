@@ -90,6 +90,10 @@ BO_ 508 STEERING_TORQUE: 8 EPS
 BO_ 536 EPB_STATUS: 8 ESP_ECU
  SG_ EPB_APPLIED : 3|1@1+ (1,0) [0|1] "" MCU
 
+BO_ 544 HV_DRIVE: 8 VCU
+ SG_ DRIVE_STATE : 8|8@1+ (1,0) [0|255] "" MCU
+ SG_ MOTOR_CURRENT : 24|8@1+ (1,0) [0|255] "" MCU
+
 BO_ 578 DRIVE_STATE: 8 VCU
  SG_ RAW_THROTTLE : 30|7@0+ (1,0) [0|127] "" MCU
  SG_ BRAKE_PRESSED : 37|1@0+ (1,0) [0|1] "" MCU,ADAS_ECU
@@ -201,6 +205,10 @@ BO_ 944 PCM_BUTTONS: 8 MCU
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" MCU
 
+BO_ 985 CLUSTER_DISPLAY: 8 BCM
+ SG_ CLUSTER_MUX : 0|8@1+ (1,0) [0|255] "" MCU
+ SG_ ODOMETER m5 : 8|16@1+ (0.1,0) [0|6553.5] "km" MCU
+
 BO_ 1031 BODY_LOCK: 8 BCM
  SG_ LOCK_STATE : 0|8@1+ (1,0) [0|255] "" MCU
  SG_ TRUNK_STATE : 8|8@1+ (1,0) [0|255] "" MCU
@@ -237,6 +245,11 @@ CM_ SG_ 790 SET_ME_8 "Unnamed bits 8-9. Named so the packer keeps the camera val
 CM_ SG_ 790 SET_ME_15 "Was HMA_ON_OFF. Always 0. Packer keeps camera values.";
 CM_ SG_ 790 SET_ME_32 "Unnamed bits 32-33. Named so the packer keeps the camera values.";
 CM_ SG_ 790 SET_ME_50 "Unnamed bits 50-51. Named so the packer keeps the camera values.";
+CM_ BO_ 544 "HV drive state, 100 Hz. Byte 1 is the drive state, byte 3 tracks torque demand. Observe only.";
+CM_ SG_ 544 DRIVE_STATE "0x36 accelerating, 0x32 coasting, 0x22 braking/regen. 0x26/0x27 appear in between.";
+CM_ SG_ 544 MOTOR_CURRENT "Rises with power demand, falls to ~140 at zero. Scale not established.";
+CM_ BO_ 985 "Cluster display multiplexer, 1 Hz per page. Byte 0 selects the page. Observe only.";
+CM_ SG_ 985 ODOMETER "Page 5. 0.1 km per LSB, little endian. Continuous across drives.";
 CM_ BO_ 1048 "BSD / RCW / RCTA. LEFT/RIGHT_APPROACH are the BSM side. RCW HUD+chime is side-agnostic; the side is the approach nibble. RCTA_RIGHT is reverse-only. Observe only.";
 CM_ SG_ 1048 RCW "Byte 2 bit 5. HUD+chime. Observe only.";
 CM_ SG_ 1048 RCW_2 "Byte 3 bit 4. Travels with RCW. Observe only.";
@@ -273,3 +286,5 @@ VAL_ 815 PCW_STATE 2 "Idle" 54 "PreWarn";
 VAL_ 1031 LOCK_STATE 170 "LOCKED" 85 "UNLOCKED";
 VAL_ 1050 ROOF_CHANNEL 85 "IDLE" 149 "SHADE" 165 "ROOF";
 VAL_ 1050 ROOF_PHASE 9 "HELD" 10 "ROOF_VENTING" 11 "ROOF_OPENING" 12 "ROOF_CLOSING" 17 "SHADE_OPENING" 25 "SHADE_CLOSING";
+VAL_ 544 DRIVE_STATE 54 "ACCEL" 50 "COAST" 34 "REGEN";
+VAL_ 985 CLUSTER_MUX 5 "ODO_PAGE";
