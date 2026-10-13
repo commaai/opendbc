@@ -130,6 +130,30 @@ class BydPlatformConfig(PlatformConfig):
     self.flags |= BydFlags.ANGLE_CONTROL | BydFlags.EPS_ACK | BydFlags.LKS_HUD_CONTROL
 
 
+@dataclass(frozen=True)
+class SafetyPlatformParams:
+  # Mirrored in safety/modes/byd.h, selected by the safetyParam platform bit.
+  # STEER_ANGLE_MAX is the EPS fault limit. ACCEL bounds feed byd_tx_hook.
+  wheelbase: float
+  steer_ratio: float
+  steer_angle_max: float  # deg
+  accel_min: float  # m/s^2
+  accel_max: float  # m/s^2
+  safety_param: int  # high-byte platform bit, BYD_PARAM_PLATFORM_*
+
+
+SAFETY_PLATFORM_PARAMS: dict[str, SafetyPlatformParams] = {
+  "BYD_ATTO_3": SafetyPlatformParams(
+    wheelbase=2.72,
+    steer_ratio=17.5,
+    steer_angle_max=390.,  # deg, EPS fault limit
+    accel_min=-3.5,
+    accel_max=2.0,
+    safety_param=0x100,  # BYD_PARAM_PLATFORM_ATTO3, 1U << 8
+  ),
+}
+
+
 class CAR(Platforms):
   BYD_ATTO_3 = BydPlatformConfig(
     [BydCarDocs("BYD Atto 3 2022-25")],

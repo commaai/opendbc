@@ -3,7 +3,7 @@ from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.byd.carcontroller import CarController
 from opendbc.car.byd.carstate import CarState
 from opendbc.car.byd.radar_interface import RadarInterface
-from opendbc.car.byd.values import BydSafetyFlags
+from opendbc.car.byd.values import BydSafetyFlags, SAFETY_PLATFORM_PARAMS
 
 
 class CarInterface(CarInterfaceBase):
@@ -16,7 +16,9 @@ class CarInterface(CarInterfaceBase):
     ret.brand = "byd"
 
     # LKS_ON matches first-boot persist. card.py clears/sets it from BydLksEnabled.
-    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.byd, int(BydSafetyFlags.LKS_ON))]
+    # The platform bit selects this platform's steering/long limits in byd_init.
+    safety_param = int(BydSafetyFlags.LKS_ON) | SAFETY_PLATFORM_PARAMS[candidate].safety_param
+    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.byd, safety_param)]
 
     ret.dashcamOnly = False
     ret.hudLaneFromModel = True
