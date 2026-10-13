@@ -12,7 +12,9 @@ from opendbc.car.byd.carstate import cruise_enabled
 from opendbc.car.byd.interface import CarInterface
 from opendbc.car.lateral import apply_steer_angle_limits_vm
 from opendbc.car import structs
-from opendbc.car.byd.values import DBC, CAR, BydSafetyFlags, CarControllerParams as CCP
+from opendbc.car.byd.values import DBC, CAR, BydFlags, BydSafetyFlags, CarControllerParams as CCP
+
+CCP_INSTANCE = CCP(CarInterface.get_non_essential_params(CAR.BYD_ATTO_3))
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
@@ -38,7 +40,9 @@ class _Actuators:
 
 
 def _ctrl(long_control=False):
-  CP = SimpleNamespace(openpilotLongitudinalControl=long_control)
+  CP = CarInterface.get_non_essential_params(CAR.BYD_ATTO_3)
+  CP.openpilotLongitudinalControl = long_control
+  CP.pcmCruise = not long_control
   return CarController({Bus.pt: DBC[CAR.BYD_ATTO_3][Bus.pt]}, CP)
 
 
@@ -271,7 +275,7 @@ class TestBydSteerNotAccepted(unittest.TestCase):
       return CS.steer_not_accepted
 
     # Steer path runs on odd frames (frame % 2). Two warm-up slots first, then 10 REQ=1 slots is 200 ms.
-    warmup = CCP.STEER_WARMUP_FRAMES * 2
+    warmup = CCP_INSTANCE.STEER_WARMUP_FRAMES * 2
     flags = [step(True, False) for _ in range(22 + warmup)]
     self.assertFalse(flags[17 + warmup])
     self.assertTrue(flags[19 + warmup])
@@ -304,12 +308,12 @@ class TestBydSteerNotAccepted(unittest.TestCase):
 
     # lateral comes on: the heartbeat above was warm-up slot one, the rest follow, then REQ=1
     reqs = []
-    for _ in range(2 * (CCP.STEER_WARMUP_FRAMES + 1)):
+    for _ in range(2 * (CCP_INSTANCE.STEER_WARMUP_FRAMES + 1)):
       active = step(True, True)
       if 0x1E2 in active:
         self.assertIn(0x316, active)
         reqs.append(_decode("STEERING_MODULE_ADAS", active[0x1E2])["STEER_REQ"])
-    self.assertEqual(reqs, [0] * (CCP.STEER_WARMUP_FRAMES - 1) + [1, 1])
+    self.assertEqual(reqs, [0] * (CCP_INSTANCE.STEER_WARMUP_FRAMES - 1) + [1, 1])
 
   def test_lks_off_hold_sends_icon_off(self):
     ctrl = _ctrl()
@@ -334,7 +338,7 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     # Engage with camera already off, then wait out any hold_steer.
     for _ in range(4):
       ctrl.update(_cc(), _cs(camera_lkas_state=0), 0)
-    for _ in range(CCP.LKS_CONFIRM_FRAMES + 20):
+    for _ in range(CCP_INSTANCE.LKS_CONFIRM_FRAMES + 20):
       ctrl.update(_cc(enabled=False, lat_active=False),
                   _cs(camera_lkas_state=0, lks_enabled=lks_enabled), 0)
 
@@ -351,7 +355,7 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     ctrl = _ctrl(long_control=True)
     self._drain_claim(ctrl, lks_enabled=False)
     seen_steer = False
-    for i in range(CCP.LKS_LOCKOUT_FRAMES + CCP.LKS_CONFIRM_FRAMES + 4):
+    for i in range(CCP_INSTANCE.LKS_LOCKOUT_FRAMES + CCP_INSTANCE.LKS_CONFIRM_FRAMES + 4):
       CS = _cs(camera_lkas_state=0, lks_enabled=False, lks_btn_rising=(i == 0), angle=7.0)
       CS.lkas_hud = {"LKAS_STATE": 0, "LKS_MODE": 0}
       _act, sends = ctrl.update(_cc(enabled=False, lat_active=False), CS, 0)
@@ -372,8 +376,8 @@ class TestBydSteerNotAccepted(unittest.TestCase):
   def test_reengage_after_disengage_warms_up(self):
     ctrl = _ctrl(long_control=True)
     self._drain_claim(ctrl, lks_enabled=True)
-    frames, _ = _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), enabled=True, lat=True, angle=3.0, desired=3.0)
-    self.assertEqual([f["STEER_REQ"] for f in frames], [0] * CCP.STEER_WARMUP_FRAMES + [1, 1])
+    frames, _ = _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_WARMUP_FRAMES + 2), enabled=True, lat=True, angle=3.0, desired=3.0)
+    self.assertEqual([f["STEER_REQ"] for f in frames], [0] * CCP_INSTANCE.STEER_WARMUP_FRAMES + [1, 1])
 
   def test_lks_on_does_not_claim_after_disengage(self):
     ctrl = _ctrl(long_control=True)
@@ -429,12 +433,12 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     # After a TX gap: REQ=0 at the measured angle, then the first REQ=1 at that same angle,
     # then the ramp toward the desired angle.
     ctrl = _ctrl()
-    frames, _ = _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 3), angle=5.0, desired=20.0)
-    self.assertEqual([f["STEER_REQ"] for f in frames], [0] * CCP.STEER_WARMUP_FRAMES + [1, 1, 1])
-    for f in frames[:CCP.STEER_WARMUP_FRAMES + 1]:
+    frames, _ = _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_WARMUP_FRAMES + 3), angle=5.0, desired=20.0)
+    self.assertEqual([f["STEER_REQ"] for f in frames], [0] * CCP_INSTANCE.STEER_WARMUP_FRAMES + [1, 1, 1])
+    for f in frames[:CCP_INSTANCE.STEER_WARMUP_FRAMES + 1]:
       self.assertAlmostEqual(f["STEER_ANGLE"], 5.0, places=1)
-    self.assertGreater(frames[CCP.STEER_WARMUP_FRAMES + 1]["STEER_ANGLE"], 5.0)
-    self.assertGreater(frames[CCP.STEER_WARMUP_FRAMES + 2]["STEER_ANGLE"], frames[CCP.STEER_WARMUP_FRAMES + 1]["STEER_ANGLE"])
+    self.assertGreater(frames[CCP_INSTANCE.STEER_WARMUP_FRAMES + 1]["STEER_ANGLE"], 5.0)
+    self.assertGreater(frames[CCP_INSTANCE.STEER_WARMUP_FRAMES + 2]["STEER_ANGLE"], frames[CCP_INSTANCE.STEER_WARMUP_FRAMES + 1]["STEER_ANGLE"])
 
     # A lateral pause resyncs the same way: REQ=0 at measured, then REQ=1 without a step
     frames, _ = _steer_frames(ctrl, 2, lat=False, angle=7.0, desired=20.0)
@@ -447,7 +451,7 @@ class TestBydSteerNotAccepted(unittest.TestCase):
 
   def test_standby_ack_pair_then_resume(self):
     ctrl = _ctrl()
-    _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=3.0, desired=3.0)
+    _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_WARMUP_FRAMES + 2), angle=3.0, desired=3.0)
 
     # EPS drops to standby while we steer: seen on two slots, then idle frame + ack, then REQ=1 again
     frames, CS = _steer_frames(ctrl, 2 * 4, eps_engaged=False, eps_standby=True, angle=3.0, desired=3.0)
@@ -460,28 +464,28 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     self.assertFalse(CS.steer_not_accepted)
 
     # EPS acks: REQ=1 resumes at the same angle, no second pair inside the period
-    frames, CS = _steer_frames(ctrl, 2 * CCP.STEER_ACK_PERIOD, angle=3.0, desired=3.0)
+    frames, CS = _steer_frames(ctrl, 2 * CCP_INSTANCE.STEER_ACK_PERIOD, angle=3.0, desired=3.0)
     self.assertEqual({f["STEER_REQ"] for f in frames}, {1})
     self.assertAlmostEqual(frames[0]["STEER_ANGLE"], 3.0, places=1)
     self.assertFalse(CS.steer_not_accepted)
 
   def test_standby_acks_are_rate_limited_then_fault_latches(self):
     ctrl = _ctrl()
-    _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=0.0)
+    _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_WARMUP_FRAMES + 2), angle=0.0)
 
     acks = 0
     latched_at = None
-    for i in range(2 * CCP.STEER_ACK_PERIOD * (CCP.STEER_ACK_ATTEMPTS + 2)):
+    for i in range(2 * CCP_INSTANCE.STEER_ACK_PERIOD * (CCP_INSTANCE.STEER_ACK_ATTEMPTS + 2)):
       frames, CS = _steer_frames(ctrl, 1, eps_engaged=False, eps_standby=True)
       if frames and frames[0] is not None and frames[0]["STEER_REQ"] == 0 and frames[0]["STEER_REQ_ACTIVE_LOW"] == 0:
         acks += 1
       if CS.steer_not_accepted and ctrl.steer_fault_latched and latched_at is None:
         latched_at = i
-    self.assertEqual(acks, CCP.STEER_ACK_ATTEMPTS)
+    self.assertEqual(acks, CCP_INSTANCE.STEER_ACK_ATTEMPTS)
     self.assertIsNotNone(latched_at)
 
     # Latched: slow retries continue, fault stays while the EPS refuses, clears on disengage
-    frames, CS = _steer_frames(ctrl, 3 * CCP.STEER_ACK_RETRY_PERIOD, eps_engaged=False, eps_standby=True)
+    frames, CS = _steer_frames(ctrl, 3 * CCP_INSTANCE.STEER_ACK_RETRY_PERIOD, eps_engaged=False, eps_standby=True)
     self.assertTrue(any(f["STEER_REQ"] == 0 and f["STEER_REQ_ACTIVE_LOW"] == 0 for f in frames))
     self.assertTrue(CS.steer_not_accepted)
     _frames, CS = _steer_frames(ctrl, 2, enabled=False, lat=False, eps_engaged=False, eps_standby=True)
@@ -490,13 +494,13 @@ class TestBydSteerNotAccepted(unittest.TestCase):
 
   def test_standby_retry_recovers_when_eps_reengages(self):
     ctrl = _ctrl()
-    _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=0.0)
-    for _ in range(2 * CCP.STEER_ACK_PERIOD * (CCP.STEER_ACK_ATTEMPTS + 2)):
+    _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_WARMUP_FRAMES + 2), angle=0.0)
+    for _ in range(2 * CCP_INSTANCE.STEER_ACK_PERIOD * (CCP_INSTANCE.STEER_ACK_ATTEMPTS + 2)):
       _steer_frames(ctrl, 1, eps_engaged=False, eps_standby=True)
     self.assertTrue(ctrl.steer_fault_latched)
 
     # EPS takes a slow retry: latch clears, REQ=1 resumes, fault drops
-    frames, CS = _steer_frames(ctrl, 3 * CCP.STEER_ACK_RETRY_PERIOD, eps_engaged=False, eps_standby=True)
+    frames, CS = _steer_frames(ctrl, 3 * CCP_INSTANCE.STEER_ACK_RETRY_PERIOD, eps_engaged=False, eps_standby=True)
     self.assertTrue(any(f["STEER_REQ"] == 0 and f["STEER_REQ_ACTIVE_LOW"] == 0 for f in frames))
     frames, CS = _steer_frames(ctrl, 2 * 4, eps_engaged=True, angle=0.0, desired=0.0)
     self.assertFalse(ctrl.steer_fault_latched)
@@ -506,7 +510,7 @@ class TestBydSteerNotAccepted(unittest.TestCase):
   def test_not_accepted_counts_only_sent_req_frames(self):
     ctrl = _ctrl()
     # warm-up slots with the EPS idle do not count
-    _steer_frames(ctrl, 2 * CCP.STEER_WARMUP_FRAMES, eps_engaged=False)
+    _steer_frames(ctrl, 2 * CCP_INSTANCE.STEER_WARMUP_FRAMES, eps_engaged=False)
     self.assertEqual(ctrl.not_accepted_frames, 0)
     # standby ack slots do not count either
     _steer_frames(ctrl, 2 * 4, eps_engaged=False, eps_standby=True)
@@ -514,7 +518,7 @@ class TestBydSteerNotAccepted(unittest.TestCase):
 
   def test_pressed_yields_req_and_skips_standby_fault(self):
     ctrl = _ctrl()
-    _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=10.0, desired=10.0)
+    _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_WARMUP_FRAMES + 2), angle=10.0, desired=10.0)
 
     frames, CS = _steer_frames(ctrl, 2 * 6, angle=40.0, desired=10.0, pressed=True)
     self.assertTrue(all(f["STEER_REQ"] == 0 for f in frames))
@@ -525,7 +529,7 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     self.assertEqual(ctrl.not_accepted_frames, 0)
     self.assertFalse(CS.steer_not_accepted)
 
-    frames, CS = _steer_frames(ctrl, 2 * CCP.STEER_ACK_PERIOD * (CCP.STEER_ACK_ATTEMPTS + 2),
+    frames, CS = _steer_frames(ctrl, 2 * CCP_INSTANCE.STEER_ACK_PERIOD * (CCP_INSTANCE.STEER_ACK_ATTEMPTS + 2),
                                eps_engaged=False, eps_standby=True, angle=40.0, desired=10.0, pressed=True)
     self.assertTrue(all(f["STEER_REQ"] == 0 for f in frames))
     self.assertFalse(any(f["STEER_REQ"] == 0 and f["STEER_REQ_ACTIVE_LOW"] == 0 for f in frames))
@@ -534,22 +538,22 @@ class TestBydSteerNotAccepted(unittest.TestCase):
     self.assertFalse(CS.steer_not_accepted)
 
     # hands off: REQ stays 0 through the yield hold, then comes back at the held angle
-    frames, CS = _steer_frames(ctrl, 2 * (CCP.STEER_YIELD_HOLD_SLOTS - 1), angle=40.0, desired=40.0)
+    frames, CS = _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_YIELD_HOLD_SLOTS - 1), angle=40.0, desired=40.0)
     self.assertTrue(all(f["STEER_REQ"] == 0 for f in frames))
-    frames, CS = _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2), angle=40.0, desired=40.0)
+    frames, CS = _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_WARMUP_FRAMES + 2), angle=40.0, desired=40.0)
     self.assertEqual(frames[0]["STEER_REQ"], 1)
     self.assertAlmostEqual(frames[0]["STEER_ANGLE"], 40.0, places=1)
     self.assertFalse(CS.steer_not_accepted)
 
   def test_yield_hold_after_release(self):
     ctrl = _ctrl()
-    warm, _ = _steer_frames(ctrl, 2 * (CCP.STEER_WARMUP_FRAMES + 2))
+    warm, _ = _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_WARMUP_FRAMES + 2))
     self.assertEqual(warm[-1]["STEER_REQ"], 1)
     pressed, _ = _steer_frames(ctrl, 4, pressed=True)
     self.assertEqual([f["STEER_REQ"] for f in pressed], [0, 0])
     self.assertEqual([f["STEER_REQ_ACTIVE_LOW"] for f in pressed], [1, 1])
-    held, _ = _steer_frames(ctrl, 2 * (CCP.STEER_YIELD_HOLD_SLOTS - 1))
-    self.assertEqual(len(held), CCP.STEER_YIELD_HOLD_SLOTS - 1)
+    held, _ = _steer_frames(ctrl, 2 * (CCP_INSTANCE.STEER_YIELD_HOLD_SLOTS - 1))
+    self.assertEqual(len(held), CCP_INSTANCE.STEER_YIELD_HOLD_SLOTS - 1)
     self.assertEqual([f["STEER_REQ"] for f in held], [0] * len(held))
     back, _ = _steer_frames(ctrl, 4)
     self.assertEqual([f["STEER_REQ"] for f in back], [1, 1])
@@ -589,7 +593,7 @@ class TestBydLksCamera(unittest.TestCase):
   def test_neutralize_on_enabled_when_camera_on(self):
     ctrl = _ctrl()
     seen = None
-    for _ in range(CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD + 2):
+    for _ in range(CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD + 2):
       CS = _cs(lks_enabled=True, camera_lkas_state=2)
       _act, sends = ctrl.update(_cc(enabled=True, lat_active=False), CS, 0)
       bus2 = _bus2_lks(sends)
@@ -603,74 +607,74 @@ class TestBydLksCamera(unittest.TestCase):
 
   def test_no_pulse_when_camera_already_off(self):
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 10, enabled=True, lat=True, cam=0)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + 10, enabled=True, lat=True, cam=0)
     self.assertEqual(pulses, 0)
 
   def test_no_immediate_restore_or_idle_glitch(self):
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES - 1, enabled=False, cam=2, lks=True)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_HUD_QUIET_FRAMES - 1, enabled=False, cam=2, lks=True)
     self.assertEqual(pulses, 0)
 
   def test_restore_after_hud_quiet_when_latch_on(self):
     ctrl = _ctrl()
-    _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=False, cam=0, lks=True, eps_engaged=False)
-    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + CCP.LKS_PULSE_PERIOD + 2,
+    _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=False, cam=0, lks=True, eps_engaged=False)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_HUD_QUIET_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD + 2,
                       enabled=False, cam=0, lks=True, eps_engaged=False)
     self.assertGreater(pulses, 0)
 
   def test_no_restore_while_eps_engaged(self):
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + CCP.LKS_PULSE_PERIOD + 2,
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_HUD_QUIET_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD + 2,
                       enabled=False, cam=0, lks=True, eps_engaged=True)
     self.assertEqual(pulses, 0)
 
   def test_restore_after_eps_idle_stable(self):
     ctrl = _ctrl()
-    _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_HUD_QUIET_FRAMES,
+    _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_HUD_QUIET_FRAMES,
           enabled=False, cam=0, lks=True, eps_engaged=True)
-    short, _ = _step(ctrl, CCP.LKS_EPS_IDLE_FRAMES - 1, enabled=False, cam=0, lks=True, eps_engaged=False)
+    short, _ = _step(ctrl, CCP_INSTANCE.LKS_EPS_IDLE_FRAMES - 1, enabled=False, cam=0, lks=True, eps_engaged=False)
     self.assertEqual(short, 0)
-    more, _ = _step(ctrl, CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=0, lks=True, eps_engaged=False)
+    more, _ = _step(ctrl, CCP_INSTANCE.LKS_PULSE_PERIOD + 2, enabled=False, cam=0, lks=True, eps_engaged=False)
     self.assertGreater(more, 0)
 
   def test_neutralize_while_lkas_state_4(self):
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD * 4, enabled=True, cam=4)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD * 4, enabled=True, cam=4)
     self.assertGreater(pulses, 0)
 
   def test_no_restore_while_lkas_state_4(self):
     ctrl = _ctrl()
-    _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=False, cam=4, lks=True, eps_engaged=False)
-    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + CCP.LKS_PULSE_PERIOD * 4,
+    _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=False, cam=4, lks=True, eps_engaged=False)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_HUD_QUIET_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD * 4,
                       enabled=False, cam=4, lks=True, eps_engaged=False)
     self.assertEqual(pulses, 0)
 
   def test_no_neutralize_in_standby_even_if_state_4(self):
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD * 4,
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD * 4,
                       enabled=True, cam=4, eps_engaged=False, eps_standby=True)
     self.assertEqual(pulses, 0)
 
   def test_engage_retries_failed_camera_off(self):
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + (CCP.LKS_PULSE_PERIOD + 1) * 2 +
-                      CCP.LKS_CONFIRM_FRAMES * 2 + 20, enabled=True, cam=2)
-    self.assertEqual(pulses, CCP.LKS_PULSE_TICKS * 2)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + (CCP_INSTANCE.LKS_PULSE_PERIOD + 1) * 2 +
+                      CCP_INSTANCE.LKS_CONFIRM_FRAMES * 2 + 20, enabled=True, cam=2)
+    self.assertEqual(pulses, CCP_INSTANCE.LKS_PULSE_TICKS * 2)
     more, _ = _step(ctrl, 10, enabled=True, cam=2)
     self.assertEqual(more, 0)
     _step(ctrl, 2, enabled=False, cam=2)
-    again, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD + 2, enabled=True, cam=2)
+    again, _ = _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD + 2, enabled=True, cam=2)
     self.assertGreater(again, 0)
 
   def test_no_restore_when_latch_off(self):
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES + 20, enabled=False, cam=0, lks=False)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_HUD_QUIET_FRAMES + 20, enabled=False, cam=0, lks=False)
     self.assertEqual(pulses, 0)
 
   def test_latch_off_turns_camera_off_at_idle(self):
     # Persist off + stock camera still on: snap camera off without waiting for engage.
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=2, lks=False)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD + 2, enabled=False, cam=2, lks=False)
     self.assertGreater(pulses, 0)
 
   def test_failed_camera_off_retries_after_recover(self):
@@ -685,12 +689,12 @@ class TestBydLksCamera(unittest.TestCase):
         quiet = 0
       else:
         quiet += 1
-      if pulses >= CCP.LKS_PULSE_TICKS * 2 and quiet == CCP.LKS_CONFIRM_FRAMES + CCP.LKS_RECOVER_FRAMES - 1:
+      if pulses >= CCP_INSTANCE.LKS_PULSE_TICKS * 2 and quiet == CCP_INSTANCE.LKS_CONFIRM_FRAMES + CCP_INSTANCE.LKS_RECOVER_FRAMES - 1:
         break
     else:
       self.fail("did not reach recover quiet")
-    self.assertLessEqual(pulses, CCP.LKS_PULSE_TICKS * 2)
-    more, _ = _step(ctrl, CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=2, lks=False)
+    self.assertLessEqual(pulses, CCP_INSTANCE.LKS_PULSE_TICKS * 2)
+    more, _ = _step(ctrl, CCP_INSTANCE.LKS_PULSE_PERIOD + 2, enabled=False, cam=2, lks=False)
     self.assertGreater(more, 0)
 
   def test_rapid_lks_presses_snap_once_after_lockout(self):
@@ -706,10 +710,10 @@ class TestBydLksCamera(unittest.TestCase):
       pulses += len(_bus2_lks(sends))
     self.assertEqual(pulses, 0)
     # Last press left latch off, camera on. After lockout, one snap off.
-    settle = CCP.LKS_LOCKOUT_FRAMES + CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_TICKS * CCP.LKS_PULSE_PERIOD + 5
+    settle = CCP_INSTANCE.LKS_LOCKOUT_FRAMES + CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_TICKS * CCP_INSTANCE.LKS_PULSE_PERIOD + 5
     more, _ = _step(ctrl, settle, enabled=True, cam=2, lks=False)
     self.assertGreater(more, 0)
-    self.assertLessEqual(more, CCP.LKS_PULSE_TICKS * 2)
+    self.assertLessEqual(more, CCP_INSTANCE.LKS_PULSE_TICKS * 2)
 
   def test_rapid_acc_does_not_restore_or_storm(self):
     ctrl = _ctrl()
@@ -719,30 +723,30 @@ class TestBydLksCamera(unittest.TestCase):
       CS = _cs(lks_enabled=True, camera_lkas_state=2)
       _act, sends = ctrl.update(_cc(enabled=enabled, lat_active=enabled), CS, 0)
       pulses += len(_bus2_lks(sends))
-    self.assertLessEqual(pulses, CCP.LKS_PULSE_TICKS * 2)
+    self.assertLessEqual(pulses, CCP_INSTANCE.LKS_PULSE_TICKS * 2)
 
   def test_acc_back_on_aborts_restore(self):
     ctrl = _ctrl()
-    _step(ctrl, CCP.LKS_HUD_QUIET_FRAMES - 1, enabled=False, cam=0, lks=True)
-    _step(ctrl, CCP.LKS_PULSE_PERIOD, enabled=False, cam=0, lks=True)
-    pulses_on, _ = _step(ctrl, CCP.LKS_PULSE_TICKS * CCP.LKS_PULSE_PERIOD + 10, enabled=True, cam=0, lks=True)
+    _step(ctrl, CCP_INSTANCE.LKS_HUD_QUIET_FRAMES - 1, enabled=False, cam=0, lks=True)
+    _step(ctrl, CCP_INSTANCE.LKS_PULSE_PERIOD, enabled=False, cam=0, lks=True)
+    pulses_on, _ = _step(ctrl, CCP_INSTANCE.LKS_PULSE_TICKS * CCP_INSTANCE.LKS_PULSE_PERIOD + 10, enabled=True, cam=0, lks=True)
     self.assertEqual(pulses_on, 0)
 
   def test_button_lockout_then_snap_camera_off(self):
     ctrl = _ctrl()
-    _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=True, cam=0, lks=True)
-    pulses_lock, last_lock = _step(ctrl, CCP.LKS_LOCKOUT_FRAMES, enabled=False, cam=2, lks=False, rising=True)
+    _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + 2, enabled=True, cam=0, lks=True)
+    pulses_lock, last_lock = _step(ctrl, CCP_INSTANCE.LKS_LOCKOUT_FRAMES, enabled=False, cam=2, lks=False, rising=True)
     self.assertEqual(pulses_lock, 0)
     self.assertIn(0x1E2, {m[0] for m in last_lock})
-    pulses_snap, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD + 2, enabled=False, cam=2, lks=False)
+    pulses_snap, _ = _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD + 2, enabled=False, cam=2, lks=False)
     self.assertGreater(pulses_snap, 0)
 
   def test_one_retry_then_stop(self):
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + (CCP.LKS_PULSE_PERIOD + 1) * 2 +
-                      CCP.LKS_CONFIRM_FRAMES * 2 + 20, enabled=True, cam=2)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + (CCP_INSTANCE.LKS_PULSE_PERIOD + 1) * 2 +
+                      CCP_INSTANCE.LKS_CONFIRM_FRAMES * 2 + 20, enabled=True, cam=2)
     # one tick per pulse, two pulses (first + one retry), then give up
-    self.assertEqual(pulses, CCP.LKS_PULSE_TICKS * 2)
+    self.assertEqual(pulses, CCP_INSTANCE.LKS_PULSE_TICKS * 2)
 
   def test_tick_mirrors_stock_frame_right_after_it(self):
     # Our bus-2 frame is the car's latest 0x3B0 (same COUNTER) with only LKAS_ON_BTN added,
@@ -751,12 +755,12 @@ class TestBydLksCamera(unittest.TestCase):
     stock = {"SET_ME_1_1": 1, "SET_ME_1_2": 1, "SET_BTN": 1, "RES_BTN": 0, "LKAS_ON_BTN": 0,
              "DEC_DISTANCE_BTN": 0, "INC_DISTANCE_BTN": 0, "ACC_ON_BTN": 1, "COUNTER": 11, "CHECKSUM": 0}
     sent = []
-    for i in range(CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD * 3):
-      fresh = i % CCP.LKS_PULSE_PERIOD == 3
+    for i in range(CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD * 3):
+      fresh = i % CCP_INSTANCE.LKS_PULSE_PERIOD == 3
       if fresh:
         stock = {**stock, "COUNTER": (stock["COUNTER"] + 1) % 16}
       # pcm_buttons_ts only moves on the frames a stock 0x3B0 arrived
-      CS = _cs(camera_lkas_state=2, buttons=stock, buttons_ts=(i - 3) // CCP.LKS_PULSE_PERIOD)
+      CS = _cs(camera_lkas_state=2, buttons=stock, buttons_ts=(i - 3) // CCP_INSTANCE.LKS_PULSE_PERIOD)
       _act, sends = ctrl.update(_cc(enabled=True, lat_active=False), CS, 0)
       for m in _bus2_lks(sends):
         sent.append((i, fresh, stock["COUNTER"], _decode("PCM_BUTTONS", m), m[1]))
@@ -773,18 +777,18 @@ class TestBydLksCamera(unittest.TestCase):
 
   def test_tick_falls_back_without_fresh_stock_frame(self):
     ctrl = _ctrl()
-    pulses, _ = _step(ctrl, CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD + 2, enabled=True, cam=2)
+    pulses, _ = _step(ctrl, CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD + 2, enabled=True, cam=2)
     self.assertEqual(pulses, 1)
 
   def test_no_tick_while_eps_standby(self):
     ctrl = _ctrl()
     pulses = 0
-    for _ in range(CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD * 4):
+    for _ in range(CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD * 4):
       CS = _cs(camera_lkas_state=2, eps_standby=True)
       _act, sends = ctrl.update(_cc(enabled=True, lat_active=False), CS, 0)
       pulses += len(_bus2_lks(sends))
     self.assertEqual(pulses, 0)
-    more, _ = _step(ctrl, CCP.LKS_PULSE_PERIOD + 2, enabled=True, cam=2)
+    more, _ = _step(ctrl, CCP_INSTANCE.LKS_PULSE_PERIOD + 2, enabled=True, cam=2)
     self.assertEqual(more, 1)
 
   def test_cancel_does_not_set_lks_button(self):
@@ -827,7 +831,7 @@ class TestBydDbcObserve(unittest.TestCase):
     self.assertEqual(DBC[CAR.BYD_ATTO_3][Bus.radar], "byd_radar_fd")
     CP = CarInterface.get_params(CAR.BYD_ATTO_3, {0: {}, 1: {}, 2: {}}, [], False, False, False)
     self.assertFalse(CP.radarUnavailable)
-    self.assertEqual(CCP.EPB_DEBOUNCE_FRAMES, 8)
+    self.assertEqual(CCP_INSTANCE.EPB_DEBOUNCE_FRAMES, 8)
 
   def test_get_params_safety_param_alpha_long(self):
     fp = {0: {}, 1: {}, 2: {}}
@@ -848,7 +852,7 @@ class TestBydDbcObserve(unittest.TestCase):
 
 
 class TestBydLowSpeedSmoothing(unittest.TestCase):
-  LEAD = CCP.STEER_WARMUP_FRAMES + 1  # warmup REQ=0 plus the first REQ=1
+  LEAD = CCP_INSTANCE.STEER_WARMUP_FRAMES + 1  # warmup REQ=0 plus the first REQ=1
 
   def _angles(self, frames):
     return [f["STEER_ANGLE"] for f in frames if f is not None]
@@ -858,8 +862,8 @@ class TestBydLowSpeedSmoothing(unittest.TestCase):
     frames, _ = _steer_frames(ctrl, 2 * (self.LEAD + 150), angle=0.0, desired=30.0, v_ego=1.5)
     angles = self._angles(frames)[self.LEAD:]
     steps = [b - a for a, b in zip(angles, angles[1:], strict=False)]
-    self.assertAlmostEqual(max(steps), CCP.LOW_SPEED_RATE_V[0], delta=0.01)
-    self.assertLess(steps[10], CCP.LOW_SPEED_RATE_V[0])
+    self.assertAlmostEqual(max(steps), CCP_INSTANCE.LOW_SPEED_RATE_V[0], delta=0.01)
+    self.assertLess(steps[10], CCP_INSTANCE.LOW_SPEED_RATE_V[0])
     self.assertGreater(angles[-1], 29.5)
 
   def test_crawl_chatter_is_filtered(self):
@@ -872,8 +876,8 @@ class TestBydLowSpeedSmoothing(unittest.TestCase):
 
   def test_identity_from_30_kph(self):
     v = 9.0
-    self.assertEqual(float(np.interp(v, CCP.LOW_SPEED_TAU_BP, CCP.LOW_SPEED_TAU_V)), 0.0)
-    self.assertEqual(float(np.interp(v, CCP.LOW_SPEED_RATE_BP, CCP.LOW_SPEED_RATE_V)), CCP.ANGLE_LIMITS.MAX_ANGLE_RATE)
+    self.assertEqual(float(np.interp(v, CCP_INSTANCE.LOW_SPEED_TAU_BP, CCP_INSTANCE.LOW_SPEED_TAU_V)), 0.0)
+    self.assertEqual(float(np.interp(v, CCP_INSTANCE.LOW_SPEED_RATE_BP, CCP_INSTANCE.LOW_SPEED_RATE_V)), CCP_INSTANCE.ANGLE_LIMITS.MAX_ANGLE_RATE)
     ctrl = _ctrl()
     req = lambda f: 2.0 if (f // 2) % 2 else -2.0  # noqa: E731
     frames, _ = _steer_frames(ctrl, 2 * (self.LEAD + 40), angle=0.0, desired=req, v_ego=v)
@@ -892,7 +896,7 @@ class TestBydLowSpeedSmoothing(unittest.TestCase):
     angles = self._angles(frames)
     self.assertAlmostEqual(angles[0], 12.0, places=1)
     for a, b in zip(angles, angles[1:], strict=False):
-      self.assertLessEqual(b - a, CCP.LOW_SPEED_RATE_V[0] + 0.01)
+      self.assertLessEqual(b - a, CCP_INSTANCE.LOW_SPEED_RATE_V[0] + 0.01)
 
 
 def _acc_frame(hex7):
@@ -948,10 +952,10 @@ class TestBydAccCmd(unittest.TestCase):
 
   def test_stock_aeb_threshold(self):
     idle = _decode("ACC_CMD", (0x32E, _acc_frame("646464805000f0"), 0))
-    self.assertGreaterEqual(idle["ACCEL_CMD"], CCP.STOCK_AEB_ACCEL)
+    self.assertGreaterEqual(idle["ACCEL_CMD"], CCP_INSTANCE.STOCK_AEB_ACCEL)
     hard = _decode("ACC_CMD", (0x32E, _acc_frame("286666834c18f0"), 0))
     self.assertAlmostEqual(hard["ACCEL_CMD"], -3.0, places=6)
-    self.assertLess(hard["ACCEL_CMD"], CCP.STOCK_AEB_ACCEL)
+    self.assertLess(hard["ACCEL_CMD"], CCP_INSTANCE.STOCK_AEB_ACCEL)
 
   def test_passthrough_keeps_stock_payload_with_our_counter(self):
     stock = _decode("ACC_CMD", (0x32E, _acc_frame("286666834c18f3"), 0))
@@ -1033,7 +1037,7 @@ class TestBydLongControl(unittest.TestCase):
     _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.3, standstill=True, v_ego=0.0)[0]
     self.assertEqual(msg["STANDSTILL_RESUME"], 1)
     # RESUME drops at the stock clearing speed and stays down
-    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.8, v_ego=CCP.STANDSTILL_RESUME_CLEAR_SPEED)[0]
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.8, v_ego=CCP_INSTANCE.STANDSTILL_RESUME_CLEAR_SPEED)[0]
     self.assertEqual((msg["STANDSTILL_STATE"], msg["STANDSTILL_RESUME"]), (0, 0))
     _act, msg = self._slots(ctrl, 2, long_active=True, accel=0.8, v_ego=1.0)[0]
     self.assertEqual(msg["STANDSTILL_RESUME"], 0)
@@ -1084,8 +1088,8 @@ class TestBydLongControl(unittest.TestCase):
              "DEC_DISTANCE_BTN": 0, "INC_DISTANCE_BTN": 0, "ACC_ON_BTN": 0, "COUNTER": 3}
     sent = []
     ts = 0
-    for i in range(CCP.LKS_CAM_DEBOUNCE_FRAMES + CCP.LKS_PULSE_PERIOD * 3):
-      fresh = i % CCP.LKS_PULSE_PERIOD == 2
+    for i in range(CCP_INSTANCE.LKS_CAM_DEBOUNCE_FRAMES + CCP_INSTANCE.LKS_PULSE_PERIOD * 3):
+      fresh = i % CCP_INSTANCE.LKS_PULSE_PERIOD == 2
       if fresh:
         stock = {**stock, "COUNTER": (stock["COUNTER"] + 1) % 16}
         ts += 1
@@ -1098,7 +1102,7 @@ class TestBydLongControl(unittest.TestCase):
       for m in bus2:
         sent.append((stock["COUNTER"], _decode("PCM_BUTTONS", m)))
     pulses = [(c, v) for c, v in sent if v["LKAS_ON_BTN"] == 1]
-    self.assertEqual(len(pulses), CCP.LKS_PULSE_TICKS)
+    self.assertEqual(len(pulses), CCP_INSTANCE.LKS_PULSE_TICKS)
     counter, values = pulses[0]
     self.assertEqual(values["COUNTER"], counter)
     self.assertEqual(values["ACC_ON_BTN"], 0)
@@ -1371,7 +1375,7 @@ class TestBydLongCarState(unittest.TestCase):
     ret = cs.update(parsers)
     self.assertFalse(cs.update_button_enable(ret.buttonEvents))
     self.assertTrue(ret.invalidLkasSetting)
-    for _ in range(CCP.LKS_OFF_ALERT_FRAMES - 1):
+    for _ in range(CCP_INSTANCE.LKS_OFF_ALERT_FRAMES - 1):
       ret = cs.update(parsers)
     self.assertTrue(ret.invalidLkasSetting)
     ret = cs.update(parsers)
@@ -1440,6 +1444,35 @@ class TestBydLongCarState(unittest.TestCase):
     cs, parsers = self._cs(False)
     self._feed(parsers, Bus.cam, "ACC_CMD", {"STANDSTILL_STATE": 1, "SET_ME_XF": 0xF})
     self.assertTrue(cs.update(parsers).cruiseState.standstill)
+
+
+class TestBydPlatformConfig(unittest.TestCase):
+  def test_atto3_flags(self):
+    config = CAR.BYD_ATTO_3.config
+    self.assertEqual(config.flags, int(BydFlags.ANGLE_CONTROL | BydFlags.EPS_ACK | BydFlags.LKS_HUD_CONTROL))
+
+  def test_instance_params(self):
+    CP = CarInterface.get_non_essential_params(CAR.BYD_ATTO_3)
+    params = CCP(CP)
+    # car-side tunables live on the instance; byd.h mirrors stay class-level
+    self.assertEqual(params.LKS_PULSE_TICKS, 1)
+    self.assertEqual(params.LKS_PULSE_PERIOD, 5)
+    self.assertEqual(params.LKS_CONFIRM_FRAMES, 40)
+    self.assertEqual(params.LKS_LOCKOUT_FRAMES, 50)
+    self.assertEqual(params.LKS_HUD_QUIET_FRAMES, 200)
+    self.assertEqual(params.LKS_CAM_DEBOUNCE_FRAMES, 20)
+    self.assertEqual(params.LKS_EPS_IDLE_FRAMES, 20)
+    self.assertEqual(params.LKS_RECOVER_FRAMES, 200)
+    self.assertEqual(params.LKS_OFF_ALERT_FRAMES, 300)
+    self.assertEqual(params.STEER_ACK_PERIOD, 10)
+    self.assertEqual(params.STEER_ACK_ATTEMPTS, 3)
+    self.assertEqual(params.STEER_ACK_RETRY_PERIOD, 50)
+    self.assertEqual(params.STEER_WARMUP_FRAMES, 2)
+    self.assertEqual(params.STEER_YIELD_HOLD_SLOTS, 25)
+    self.assertEqual(params.STEER_NOT_ACCEPTED_FRAMES, 10)
+    self.assertEqual(params.EPB_DEBOUNCE_FRAMES, 8)
+    self.assertEqual(params.STOCK_AEB_ACCEL, -1.5)
+    self.assertEqual(params.STANDSTILL_RESUME_CLEAR_SPEED, 2.0)
 
 
 class TestBydClusterDisplay(unittest.TestCase):

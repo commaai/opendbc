@@ -4,8 +4,7 @@ from opendbc.car import Bus, structs
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
-# One event per edge. SET is decelCruise and RES is accelCruise so the
-# standard falling-edge enable applies when pcmCruise is off.
+# One event per edge. SET=decelCruise, RES=accelCruise for falling-edge enable.
 _BUTTONS = (
   ("RES_BTN", ButtonType.accelCruise),
   ("SET_BTN", ButtonType.decelCruise),
@@ -34,14 +33,14 @@ GEAR_MAP = {
 
 
 def cruise_enabled(acc_state: int, lks_enabled: bool) -> bool:
-  # ACC_STATE 3/5 = stock ACC active. LKS is our latch, not camera LKAS_STATE.
-  # Mirrored by byd_rx_hook so panda and openpilot enable on the same edge.
+  # ACC_STATE 3/5 + our LKS latch (not camera LKAS_STATE). Same edge as byd_rx_hook.
   return acc_state in (3, 5) and lks_enabled
 
 
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
+    self.CCP = CCP(CP)
     self.lkas_hud = {}
     self.disengage_frames = 0
     self.eps_engaged = True
@@ -54,7 +53,7 @@ class CarState(CarStateBase):
     self.parking_brake = False
     self.epb_on_frames = 0
     self.epb_off_frames = 0
-    # First-boot default ON. card.py overwrites from BydLksEnabled before onroad.
+    # Default ON; card.py loads BydLksEnabled before onroad.
     self.lks_enabled = True
     self.lks_btn_last = False
     self.lks_btn_rising = False
@@ -84,7 +83,7 @@ class CarState(CarStateBase):
     ret.steeringTorqueEps = cp.vl["STEER_MODULE_2"]["DRIVER_EPS_TORQUE"]
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CCP.STEER_DRIVER_OVERRIDE, 5)
 
-    # Debounced per STEERING_TORQUE frame to match byd_rx_hook, which panda runs on every frame
+    # Debounce per STEERING_TORQUE frame to match byd_rx_hook.
     for driver_torque in cp.vl_all["STEERING_TORQUE"]["DRIVER_TORQUE"]:
       if abs(driver_torque) > CCP.STEER_DRIVER_DISENGAGE:
         self.disengage_frames = min(self.disengage_frames + 1, CCP.STEER_DRIVER_DISENGAGE_FRAMES)
@@ -92,13 +91,11 @@ class CarState(CarStateBase):
         self.disengage_frames = 0
     ret.steeringDisengage = self.disengage_frames >= CCP.STEER_DRIVER_DISENGAGE_FRAMES
 
-    # EPS clears LKS_PREPARED and echoes TARGET_ANGLE while it executes our request.
-    # Only trust after the first STEERING_TORQUE frame (parser defaults are 0 / "engaged").
-    # Idle with CRUISE_ACTIVATED set is standby: the EPS ignores STEER_REQ until acked.
+    # After first STEERING_TORQUE sample: engaged=PREP clear; standby=PREP+CRUISE (needs ack).
     if cp.ts_nanos["STEERING_TORQUE"]["LKS_PREPARED"] > 0:
       self.eps_engaged = not cp.vl["STEERING_TORQUE"]["LKS_PREPARED"]
       self.eps_standby = not self.eps_engaged and bool(cp.vl["STEERING_TORQUE"]["CRUISE_ACTIVATED"])
-      # PREP=1 CRUISE=0. Standby (PREP=1 CRUISE=1) is not idle; LKS pulses there flash LKAS 4.
+      # Idle = PREP=1 CRUISE=0. Do not pulse LKS in standby (flashes LKAS 4).
       self.eps_idle = (not self.eps_engaged) and (not self.eps_standby)
       self.eps_target_angle = cp.vl["STEERING_TORQUE"]["TARGET_ANGLE"]
 
@@ -107,7 +104,7 @@ class CarState(CarStateBase):
     self.acc_hud_stock = copy.copy(cp_cam.vl["ACC_HUD_ADAS"])
     self.camera_lkas_state = int(cp_cam.vl["LKAS_HUD_ADAS"]["LKAS_STATE"])
 
-    # Driver LKS button is bus 0 only. Bus 2 spoofs must not flip this latch.
+    # LKS latch from bus 0 only (ignore bus 2 spoofs).
     self.lks_btn_rising = False
     for btn in cp.vl_all["PCM_BUTTONS"]["LKAS_ON_BTN"]:
       pressed = bool(btn)
@@ -115,7 +112,7 @@ class CarState(CarStateBase):
         self.lks_enabled = not self.lks_enabled
         self.lks_btn_rising = True
       self.lks_btn_last = pressed
-    # Button spoofs are built on the car's latest 0x3B0 so the counter stays in sequence
+    # Latest 0x3B0 for counter-matched spoofs.
     self.pcm_buttons_stock = copy.copy(cp.vl["PCM_BUTTONS"])
     self.pcm_buttons_ts = cp.ts_nanos["PCM_BUTTONS"]["COUNTER"]
     rows = cp.vl_all["PCM_BUTTONS"]
@@ -126,31 +123,30 @@ class CarState(CarStateBase):
     for frame in self.pcm_buttons_new:
       for name, btype in _BUTTONS:
         pressed = bool(frame[name])
-        # A RES press sets SET_BTN as well. Report RES alone so it does not resolve to decelCruise.
+        # RES also sets SET_BTN; report RES alone.
         if name == "SET_BTN":
           pressed = pressed and not bool(frame["RES_BTN"])
         if pressed != self.button_prev[name]:
           button_events.append(structs.CarState.ButtonEvent(pressed=pressed, type=btype))
           self.button_prev[name] = pressed
-    # LKS off is how this car leaves openpilot today. In long mode the PCM
-    # cruise line stays false, so the latch has to cancel on its own.
+    # Long mode: LKS-off must cancel (pcmCruise stays false).
     if self.lks_btn_rising and self.CP.openpilotLongitudinalControl and not self.lks_enabled:
       button_events.append(structs.CarState.ButtonEvent(pressed=False, type=ButtonType.cancel))
     ret.buttonEvents = button_events
 
-    # Falling SET/RES with the LKS latch off. Drop it when LKS or ACC goes away.
+    # SET/RES while LKS off -> invalidLkasSetting alert.
     acc_available = acc_state in (2, 3, 5)
     if self.lks_enabled or not acc_available:
       self.lks_off_alert = 0
     else:
       for event in button_events:
         if not event.pressed and event.type in (ButtonType.accelCruise, ButtonType.decelCruise):
-          self.lks_off_alert = CCP.LKS_OFF_ALERT_FRAMES
+          self.lks_off_alert = self.CCP.LKS_OFF_ALERT_FRAMES
     ret.invalidLkasSetting = self.lks_off_alert > 0
     if self.lks_off_alert > 0:
       self.lks_off_alert -= 1
 
-    # Camera LKAS_STATE 0/4 are moods, not the switch. Fault only if EPS stays idle.
+    # Camera LKAS_STATE is not the LKS switch; fault only if EPS ignores us.
     ret.steerFaultTemporary = self.steer_not_accepted
 
     # gas / brake
@@ -164,16 +160,15 @@ class CarState(CarStateBase):
     ret.leftBlinker = bool(cp.vl["STALKS"]["LEFT_BLINKER"])
     ret.rightBlinker = bool(cp.vl["STALKS"]["RIGHT_BLINKER"])
 
-    # Side is LEFT/RIGHT_APPROACH. RCW is side-agnostic HUD+chime and RCTA_RIGHT_2 shows up
-    # without RCTA_RIGHT; neither marks a side. RCTA_RIGHT is reverse-only.
+    # BSD sides from APPROACH; RCTA_RIGHT is reverse-only (not RCW / RCTA_RIGHT_2).
     ret.leftBlindspot = cp.vl["BSD_RADAR"]["LEFT_APPROACH"] != 0
     ret.rightBlindspot = (cp.vl["BSD_RADAR"]["RIGHT_APPROACH"] != 0) or bool(cp.vl["BSD_RADAR"]["RCTA_RIGHT"])
 
-    # PCW pre-warning (0x32F byte2 0x36). Silent cereal event.
+    # PCW pre-warning (0x32F byte2 0x36).
     ret.stockFcw = int(cp_cam.vl["PCW_ADAS"]["PCW_STATE"]) == 0x36
-    # hard camera decel while ACC is not active
+    # Hard camera decel while ACC not active.
     self.acc_cmd_stock = copy.copy(cp_cam.vl["ACC_CMD"])
-    ret.stockAeb = acc_state not in (3, 5) and cp_cam.vl["ACC_CMD"]["ACCEL_CMD"] < CCP.STOCK_AEB_ACCEL
+    ret.stockAeb = acc_state not in (3, 5) and cp_cam.vl["ACC_CMD"]["ACCEL_CMD"] < self.CCP.STOCK_AEB_ACCEL
 
     # doors / belt
     ret.doorOpen = any((
@@ -185,30 +180,25 @@ class CarState(CarStateBase):
     ))
     ret.seatbeltUnlatched = not bool(cp.vl["METER_CLUSTER"]["SEATBELT_DRIVER"])
 
-    # EPB bit 3 is the applied flag, but d0 also walks 0x09-0x12 during motion.
-    # Hold last state until 8 consecutive frames agree (~70 ms at 120 Hz).
+    # EPB bit 3 applied; d0 also walks 0x09-0x12 in motion - debounce ~70 ms.
     for applied in cp.vl_all["EPB_STATUS"]["EPB_APPLIED"]:
       if applied:
-        self.epb_on_frames = min(self.epb_on_frames + 1, CCP.EPB_DEBOUNCE_FRAMES)
+        self.epb_on_frames = min(self.epb_on_frames + 1, self.CCP.EPB_DEBOUNCE_FRAMES)
         self.epb_off_frames = 0
       else:
-        self.epb_off_frames = min(self.epb_off_frames + 1, CCP.EPB_DEBOUNCE_FRAMES)
+        self.epb_off_frames = min(self.epb_off_frames + 1, self.CCP.EPB_DEBOUNCE_FRAMES)
         self.epb_on_frames = 0
-      if self.epb_on_frames >= CCP.EPB_DEBOUNCE_FRAMES:
+      if self.epb_on_frames >= self.CCP.EPB_DEBOUNCE_FRAMES:
         self.parking_brake = True
-      elif self.epb_off_frames >= CCP.EPB_DEBOUNCE_FRAMES:
+      elif self.epb_off_frames >= self.CCP.EPB_DEBOUNCE_FRAMES:
         self.parking_brake = False
     ret.parkingBrake = self.parking_brake
 
-    # cruise state: ACC messages come from camera bus on Atto 3
-    # ACC_STATE: 0=OFF, 2=ACC_ON (available), 3=ACC_ACTIVE (enabled), 5=FORCE_ACCEL, 7=ERROR
-    # Follow stock ACC only when our LKS latch is on so ACC can run without engaging OP.
-    # Reporting enabled=False while ACC is on must not trip controlsd's cancel spoof.
+    # Camera ACC. Lat-only: enable only with LKS latch (ACC can run without OP).
+    # ACC_STATE: 0=OFF, 2=ACC_ON, 3=ACC_ACTIVE, 5=FORCE_ACCEL, 7=ERROR
     ret.cruiseState.available = acc_state in (2, 3, 5)
     if self.CP.openpilotLongitudinalControl:
-      # Camera ACC stays in standby because SET never reaches it. Available
-      # still follows ACC main, so the stalk ACC_ON press is the arming step.
-      # We hold and release the car ourselves, so no resume press is required.
+      # Long: camera ACC stays standby (SET blocked); we hold/release ourselves.
       ret.cruiseState.enabled = False
       ret.cruiseState.speed = 0
       ret.cruiseState.standstill = False
@@ -217,7 +207,6 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = cp_cam.vl["ACC_HUD_ADAS"]["SET_SPEED"] * CV.KPH_TO_MS
       ret.cruiseState.enabled = cruise_enabled(acc_state, self.lks_enabled)
 
-    # forward stock LKAS HUD
     self.lkas_hud = copy.copy(cp_cam.vl["LKAS_HUD_ADAS"])
 
     return ret
