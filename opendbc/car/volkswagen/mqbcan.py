@@ -178,7 +178,7 @@ def volkswagen_mqb_meb_checksum(address: int, sig, d: bytearray) -> int:
     crc ^= d[i]
     crc = CRC8H2F[crc]
   counter = d[1] & 0x0F
-  const = VOLKSWAGEN_MQB_MEB_CONSTANTS.get(address)
+  const = VOLKSWAGEN_MQB_MEB_MLB_CONSTANTS.get(address)
   if const:
     crc ^= const[counter]
     crc = CRC8H2F[crc]
@@ -217,7 +217,7 @@ def xor_checksum(address: int, sig, d: bytearray, initial_value: int = 0) -> int
   return checksum
 
 
-VOLKSWAGEN_MQB_MEB_CONSTANTS: dict[int, list[int]] = {
+VOLKSWAGEN_MQB_MEB_MLB_CONSTANTS: dict[int, list[int]] = {
     0x40:  [0x40] * 16,  # Airbag_01
     0x86:  [0x86] * 16,  # LWI_01
     0x9F:  [0xF5] * 16,  # LH_EPS_03
@@ -237,6 +237,8 @@ VOLKSWAGEN_MQB_MEB_CONSTANTS: dict[int, list[int]] = {
             0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD],  # Motor_51
     0x116: [0xAC] * 16,  # ESP_10
     0x117: [0x16] * 16,  # ACC_10
+    0x11D: [0x1C] * 16,  # LH_EPS_02 (MLB)
+    0x11E: [0xD2] * 16,  # ESP_08 (MLB)
     0x120: [0xC4, 0xE2, 0x4F, 0xE4, 0xF8, 0x2F, 0x56, 0x81,
             0x9F, 0xE5, 0x83, 0x44, 0x05, 0x3F, 0x97, 0xDF],  # TSK_06
     0x121: [0xE9, 0x65, 0xAE, 0x6B, 0x7B, 0x35, 0xE5, 0x5F,
@@ -273,6 +275,7 @@ VOLKSWAGEN_MQB_MEB_CONSTANTS: dict[int, list[int]] = {
     0x30C: [0x0F] * 16,  # ACC_02
     0x30F: [0x0C] * 16,  # SWA_01
     0x324: [0x27] * 16,  # ACC_04
+    0x32A: [0x29] * 16,  # LH_EPS_01 (MLB)
     0x3BE: [0x1F, 0x28, 0xC6, 0x85, 0xE6, 0xF8, 0xB0, 0x19,
             0x5B, 0x64, 0x35, 0x21, 0xE4, 0xF7, 0x9C, 0x24],  # Motor_14
     0x3C0: [0xC3] * 16,  # Klemmen_Status_01

@@ -32,18 +32,8 @@ static uint8_t volkswagen_pq_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t volkswagen_pq_compute_checksum(const CANPacket_t *msg) {
-  int len = GET_LEN(msg);
-  uint8_t checksum = 0U;
-  int checksum_byte = (msg->addr == MSG_MOTOR_5) ? 7 : 0;
-
-  // Simple XOR over the payload, except for the byte where the checksum lives.
-  for (int i = 0; i < len; i++) {
-    if (i != checksum_byte) {
-      checksum ^= (uint8_t)msg->data[i];
-    }
-  }
-
-  return checksum;
+  unsigned int checksum_byte = (msg->addr == MSG_MOTOR_5) ? 7U : 0U;
+  return volkswagen_xor_checksum(msg, checksum_byte, 0U);
 }
 
 static safety_config volkswagen_pq_init(uint16_t param) {
