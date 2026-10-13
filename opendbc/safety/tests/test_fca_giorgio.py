@@ -17,14 +17,14 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSaf
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 2
 
-  TX_MSGS = [[0x117, 0], [0x1F6, 0], [0x4AE, 0], [0x547, 0], [0x5A2, 0]]
+  TX_MSGS = [[0x117, 0], [0x1F6, 0], [0x4AE, 0], [0x547, 0], [0x5A2, 0], [0x2FA, 2]]
   STANDSTILL_THRESHOLD = 0
   FWD_BLACKLISTED_ADDRS = {2: [0x117, 0x1F6, 0x4AE, 0x547, 0x5A2]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   def _button_msg(self, cancel=False, resume=False):
-    values = {"CANCEL": cancel, "RESUME": resume}
-    return self.packer.make_can_msg_safety("ACC_BUTTON", 0, values)
+    values = {"CANCEL": cancel, "RESUME": resume, "UNKNOWN_1": 3, "UNKNOWN_2": 0x0E}
+    return self.packer.make_can_msg_safety("ACC_BUTTON", 2, values)
 
   def _pcm_status_msg(self, enable):
     values = {"CRUISE_STATUS": enable}
@@ -49,6 +49,16 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSaf
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"LKA_TORQUE": torque, "LKA_ACTIVE": steer_req}
     return self.packer.make_can_msg_safety("LKA_COMMAND", 0, values)
+
+  def test_buttons(self):
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+
+      # only cancel is allowed, regardless of controls allowed
+      self.assertTrue(self._tx(self._button_msg(cancel=True)))
+      self.assertFalse(self._tx(self._button_msg(resume=True)))
+      self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
+      self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
 
   def test_rx_hook(self):
     for count in range(20):

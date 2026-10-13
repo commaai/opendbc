@@ -54,6 +54,14 @@ class TestCanChecksums(unittest.TestCase):
       b'\xad\x63\x20\x31\x50\x00\x02\xe1',
     ])
 
+  def test_fca_giorgio_acc_button(self):
+    # checksum is followed by an unprotected byte
+    self.verify_fca_giorgio_crc("ACC_BUTTON", 0x2FA, [
+      b'\x00\x30\xf4\x0e',
+      b'\x80\x31\x20\x0e',
+      b'\x08\x32\x94\x0e',
+    ])
+
   def test_honda_checksum(self):
     """Test checksums for Honda standard and extended CAN ids"""
     # TODO: refactor to use self.verify_checksum()

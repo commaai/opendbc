@@ -15,6 +15,7 @@ class CarController(CarControllerBase):
 
     self.apply_torque_last = 0
     self.lat_active_last = False
+    self.button_counter_last = 0
     self.frame = 0
 
   def update(self, CC, CS, now_nanos):
@@ -42,6 +43,14 @@ class CarController(CarControllerBase):
     if self.frame % self.CCP.HUD_3_STEP == 0 or lat_active_rising:
       can_sends.append(fca_giorgiocan.create_lka_hud_3_control(self.packer_pt, self.CANBUS.pt, CC.latActive))
     self.lat_active_last = CC.latActive
+
+    # **** ACC Button Controls ********************************************** #
+
+    # the ACC ECU sees the stock buttons forwarded from the pt bus, so follow each stock message with a cancel
+    if CS.button_counter != self.button_counter_last:
+      self.button_counter_last = CS.button_counter
+      if CC.cruiseControl.cancel:
+        can_sends.append(fca_giorgiocan.create_acc_button_control(self.packer_pt, self.CANBUS.cam, CS.button_counter + 1, cancel=True))
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = self.apply_torque_last / self.CCP.STEER_MAX
