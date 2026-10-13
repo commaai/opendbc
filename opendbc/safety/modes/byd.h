@@ -8,6 +8,8 @@
 #define BYD_WHEELSPEED_TO_KPH 0.072  // 0.02 m/s/LSB, mirrored in values.py
 #define BYD_PARAM_LKS_ON 2U
 #define BYD_PARAM_LONG_CONTROL 4U
+// Platform bit (high byte). Sync with SAFETY_PLATFORM_PARAMS in car/byd/values.py.
+#define BYD_PARAM_PLATFORM_ATTO3 (1U << 8)
 #define BYD_CAM_ACC_CMD_HIST 3U
 
 static int byd_driver_torque_frames = 0;
@@ -25,13 +27,31 @@ static uint8_t byd_cam_acc_cmd_count = 0;
 static uint32_t byd_op_steer_ts = 0;
 static uint32_t byd_op_hud_ts = 0;
 
+static const AngleSteeringParams BYD_STEERING_PARAMS_ATTO3 = {
+  .slip_factor = -0.0006166479109059387,  // calc_slip_factor(VM)
+  .steer_ratio = 17.5,
+  .wheelbase = 2.72,
+};
+static const AngleSteeringLimits BYD_STEERING_LIMITS_ATTO3 = {
+  .max_angle = 3900,  // 390 deg
+  .angle_deg_to_can = 10,
+  .frequency = 50U,
+};
+static const LongitudinalLimits BYD_LONG_LIMITS_ATTO3 = {
+  .max_accel = 2000,
+  .min_accel = -3500,
+  .inactive_accel = 0,
+};
+
+static const AngleSteeringParams *byd_steer_params = &BYD_STEERING_PARAMS_ATTO3;
+static const AngleSteeringLimits *byd_steer_limits = &BYD_STEERING_LIMITS_ATTO3;
+static const LongitudinalLimits *byd_long_limits = &BYD_LONG_LIMITS_ATTO3;
+static bool byd_platform_known = true;
+
 #define BYD_OP_STEER_TIMEOUT_US 200000U
 #define BYD_OP_HUD_TIMEOUT_US 2000000U
 
-// openpilot sends 0x1E2 for its whole engagement, STEER_REQ=0 included, so stock LKS
-// gets the EPS back only once openpilot stops talking to it. Timing the handback off
-// the last accepted STEER_REQ=1 instead put the camera on 0x1E2 mid-engagement, since
-// rate limited commands leave gaps.
+// Stock LKS reclaims EPS after OP stops sending 0x1E2 (including STEER_REQ=0).
 static bool byd_stock_lat_allowed(void) {
   bool allowed = true;
   if (byd_op_steer_ts != 0U) {
@@ -40,9 +60,8 @@ static bool byd_stock_lat_allowed(void) {
   return allowed;
 }
 
+// Block camera 0x316 while OP 0x1E2 or 0x316 is recent (HUD-only hold needs no idle 0x1E2).
 static bool byd_stock_hud_allowed(void) {
-  // Camera 0x316 stays blocked while either OP 0x1E2 or OP 0x316 is recent, so a
-  // HUD-only hold (long-mode release) keeps our cluster bits without idle 0x1E2.
   const uint32_t now = microsecond_timer_get();
   bool allowed = true;
   if (byd_op_steer_ts != 0U) {
@@ -54,7 +73,7 @@ static bool byd_stock_hud_allowed(void) {
   return allowed;
 }
 
-// SET RES DEC INC ACC_ON. LKAS_ON_BTN is not in the mask: bus 2 may still pulse it.
+// SET/RES/DEC/INC/ACC_ON. LKAS_ON_BTN omitted so bus 2 may still pulse it.
 static uint8_t byd_button_mask(const CANPacket_t *msg) {
   uint8_t mask = 0;
   if ((msg->data[0] & 0x08U) != 0U) { mask |= 0x01U; }  // SET
@@ -114,8 +133,7 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       update_sample(&angle_meas, angle_meas_new);
     }
 
-    // Column driver torque: 0.1 Nm/LSB, signed. The EPS measurement in 0x11F is attenuated
-    // too far to see an override, so the hard disengage uses this instead.
+    // Column torque 0.1 Nm/LSB; 0x11F EPS torque is too attenuated for override.
     if (msg->addr == 0x1FCU) {
       int driver_torque = to_signed((msg->data[1] << 4) | (msg->data[0] >> 4), 12);  // DRIVER_TORQUE
 
@@ -135,7 +153,7 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       UPDATE_VEHICLE_SPEED(speed * BYD_WHEELSPEED_TO_KPH * KPH_TO_MS);
     }
 
-    // Brake from DRIVE_STATE. Gas is PEDAL.GAS_PEDAL; RAW_THROTTLE stays high under ACC.
+    // Brake from DRIVE_STATE. Gas is PEDAL; RAW_THROTTLE stays high under ACC.
     if (msg->addr == 0x242U) {
       brake_pressed = (msg->data[4] >> 5) & 0x1U;   // BRAKE_PRESSED
     }
@@ -143,8 +161,7 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       gas_pressed = msg->data[0] > 0U;              // GAS_PEDAL
     }
 
-    // Driver LKS button. Camera LKAS_STATE 0/4 are not this switch. Bus 2 spoofs
-    // must not land here or we would toggle our own latch.
+    // Driver LKS button on bus 0 only (not camera LKAS_STATE; ignore bus 2 spoofs).
     if (msg->addr == 0x3B0U) {
       byd_stock_btns_prev = byd_stock_btns;
       byd_stock_btns = byd_button_mask(msg);
@@ -157,9 +174,7 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       }
       byd_lks_btn_last = btn;
 
-      // Long mode: falling edge of SET or RES engages only while the LKS latch
-      // is on and the camera still reports ACC main (state 2/3/5). ACC_ON cancels.
-      // Brake and gas are handled by the common checks.
+      // Long: falling SET/RES engages with LKS latch + ACC main; ACC_ON cancels.
       if (byd_longitudinal) {
         const bool set_res = (byd_stock_btns & 0x03U) != 0U;
         if (!set_res && byd_set_res_last && byd_lks_on && byd_acc_main) {
@@ -174,7 +189,6 @@ static void byd_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->bus == 2U) {
-    // Cruise state
     if (msg->addr == 0x32DU) {
       // ACC_STATE: 0=OFF, 2=ACC_ON, 3=ACC_ACTIVE, 5=FORCE_ACCEL, 7=ERROR
       uint8_t acc_state = (msg->data[2] >> 3) & 0x7U;
@@ -189,7 +203,7 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       }
     }
 
-    // Last camera ACC command. A bus-0 copy of a recent one is AEB passthrough.
+    // Camera ACC_CMD history for AEB byte-exact passthrough on bus 0.
     if (byd_longitudinal && (msg->addr == 0x32EU)) {
       byd_cam_acc_cmd_push(msg);
     }
@@ -197,43 +211,29 @@ static void byd_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool byd_tx_hook(const CANPacket_t *msg) {
-  const AngleSteeringLimits BYD_STEERING_LIMITS = {
-    .max_angle = 3900,  // 390 deg
-    .angle_deg_to_can = 10,
-    .frequency = 50U,
-  };
-
-  // NOTE: based off BYD_ATTO_3 to match openpilot
-  const AngleSteeringParams BYD_STEERING_PARAMS = {
-    .slip_factor = -0.0006166479109059387,  // calc_slip_factor(VM)
-    .steer_ratio = 17.5,
-    .wheelbase = 2.72,
-  };
-
   bool tx = true;
 
-  // Steering control: 0.1 deg/LSB, signed
+  // Steering: 0.1 deg/LSB, signed
   if (msg->addr == 0x1E2U) {
+    if (!byd_platform_known) {
+      return false;
+    }
     int desired_angle = to_signed((msg->data[4] << 8) | msg->data[3], 16);  // STEER_ANGLE
     bool steer_req = ((msg->data[2] >> 5) & 0x1U) != 0U;                    // STEER_REQ
 
-    // Ownership tracks any OP 0x1E2, heartbeat included. A rate limited angle is
-    // still openpilot driving.
+    // Any OP 0x1E2 (incl. STEER_REQ=0) owns the EPS until timeout.
     byd_op_steer_ts = microsecond_timer_get();
 
-    if (steer_angle_cmd_checks_vm(desired_angle, steer_req, BYD_STEERING_LIMITS, BYD_STEERING_PARAMS)) {
+    if (steer_angle_cmd_checks_vm(desired_angle, steer_req, *byd_steer_limits, *byd_steer_params)) {
       tx = false;
     }
   }
 
-  // HUD stay: any OP 0x316 holds camera 0x316 for 2 s (see byd_stock_hud_allowed).
   if (msg->addr == 0x316U) {
     byd_op_hud_ts = microsecond_timer_get();
   }
 
-  // Bus 0: only cancel (ACC_ON_BTN) while stock cruise is engaged, or button release.
-  // Bus 2: SET/RES/DEC/INC/ACC_ON must be a subset of the last two stock frames.
-  // LKAS_ON_BTN stays free. Long mode never relays SET/RES/DEC/INC.
+  // Bus 0: cancel-only while engaged. Bus 2: subset of last two stock frames; long blocks SET/RES/DEC/INC.
   if (msg->addr == 0x3B0U) {
     uint8_t mask = byd_button_mask(msg);
     if (msg->bus == 2U) {
@@ -251,16 +251,15 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
     }
   }
 
-  // 0x32E: our accel, or a byte-exact copy of a camera frame from the last 60 ms.
+  // 0x32E: our accel, or a recent camera frame (AEB passthrough).
   if (msg->addr == 0x32EU) {
-    const LongitudinalLimits BYD_LONG_LIMITS = {
-      .max_accel = 2000,
-      .min_accel = -3500,
-      .inactive_accel = 0,
-    };
-    int accel = ((int)msg->data[0] - 100) * 50;
-    if (!byd_cam_acc_cmd_match(msg) && longitudinal_accel_checks(accel, BYD_LONG_LIMITS)) {
+    if (!byd_platform_known) {
       tx = false;
+    } else {
+      int accel = ((int)msg->data[0] - 100) * 50;
+      if (!byd_cam_acc_cmd_match(msg) && longitudinal_accel_checks(accel, *byd_long_limits)) {
+        tx = false;
+      }
     }
   }
 
@@ -298,6 +297,27 @@ static safety_config byd_init(uint16_t param) {
   byd_op_steer_ts = 0;
   byd_op_hud_ts = 0;
 
+  // No platform bit -> Atto 3. Any other high byte denies steer.
+  if ((param & 0xFF00U) == 0U) {
+    byd_steer_params = &BYD_STEERING_PARAMS_ATTO3;
+    byd_steer_limits = &BYD_STEERING_LIMITS_ATTO3;
+    byd_long_limits = &BYD_LONG_LIMITS_ATTO3;
+    byd_platform_known = true;
+  } else if ((param & 0xFF00U) == BYD_PARAM_PLATFORM_ATTO3) {
+    byd_steer_params = &BYD_STEERING_PARAMS_ATTO3;
+    byd_steer_limits = &BYD_STEERING_LIMITS_ATTO3;
+    byd_long_limits = &BYD_LONG_LIMITS_ATTO3;
+    byd_platform_known = true;
+  } else {
+    static const AngleSteeringParams BYD_STEERING_PARAMS_ZERO = { 0 };
+    static const AngleSteeringLimits BYD_STEERING_LIMITS_ZERO = { 0 };
+    static const LongitudinalLimits BYD_LONG_LIMITS_ZERO = { 0 };
+    byd_steer_params = &BYD_STEERING_PARAMS_ZERO;
+    byd_steer_limits = &BYD_STEERING_LIMITS_ZERO;
+    byd_long_limits = &BYD_LONG_LIMITS_ZERO;
+    byd_platform_known = false;
+  }
+
 #ifdef ALLOW_DEBUG
   byd_longitudinal = GET_FLAG(param, BYD_PARAM_LONG_CONTROL);
 #else
@@ -331,8 +351,7 @@ static safety_config byd_init(uint16_t param) {
     {.msg = {{0x3B0, 0, 8,  20U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                          // PCM_BUTTONS (LKS latch)
   };
 
-  // Camera 0x32E is checked only in long mode, so a dropout there does not
-  // disengage lateral-only builds.
+  // 0x32E RX only in long mode (lat-only must not fault on ACC_CMD dropout).
   static const RxCheck byd_long_rx_checks[] = {
     {.msg = {{0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{0x1FC, 0, 8,  50U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
