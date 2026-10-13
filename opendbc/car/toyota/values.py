@@ -207,9 +207,9 @@ class CAR(Platforms):
   )
   TOYOTA_CAMRY_TSS3 = ToyotaTSS3PlatformConfig(
     [ToyotaTSS3CarDocs("Toyota Camry Hybrid 2026")],
-    # XV80: lightest (LE FWD) curb weight and 2,825 mm wheelbase from Toyota's 2025 product information.
+    # XV80: 2,825 mm wheelbase from Toyota's 2025 product information.
     # Steer ratio is learned from routes; the Toyota stiffness factor remains paramsd's baseline.
-    CarSpecs(mass=3450. * CV.LB_TO_KG, wheelbase=2.825, steerRatio=15.3, tireStiffnessFactor=0.7933),
+    CarSpecs(wheelbase=2.825, steerRatio=15.3, tireStiffnessFactor=0.7933),
     flags=ToyotaFlags.HYBRID,
   )
   TOYOTA_CHR = PlatformConfig(
