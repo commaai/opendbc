@@ -13,9 +13,11 @@ from opendbc.car.vehicle_model import VehicleModel
 DT_STEER = CarControllerParams.STEER_STEP * DT_CTRL
 
 
-def get_safety_CP():
+def get_safety_CP(car_fingerprint="BYD_ATTO_3"):
+  # Matches the platform bit sent in safetyParam so this VM and byd_tx_hook's
+  # steering params use the same geometry.
   from opendbc.car.byd.interface import CarInterface
-  return CarInterface.get_non_essential_params("BYD_ATTO_3")
+  return CarInterface.get_non_essential_params(car_fingerprint)
 
 
 class CarController(CarControllerBase):
@@ -59,7 +61,7 @@ class CarController(CarControllerBase):
     self.standstill_resume = False
 
     # Vehicle model used for lateral limiting
-    self.VM = VehicleModel(get_safety_CP())
+    self.VM = VehicleModel(get_safety_CP(CP.carFingerprint))
 
   def _forget_camera(self):
     self.camera_on = None
