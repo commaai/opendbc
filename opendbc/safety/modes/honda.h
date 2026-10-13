@@ -262,9 +262,9 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     }
   }
 
-  // Bosch supplemental control check
+  // Bosch supplemental control check: only the stock inactive message is allowed, the last byte is the counter and checksum
   if (msg->addr == 0xE5U) {
-    if ((GET_BYTES_64_LE(msg, 0, 8) & 0x00FFFFFFFFFFFFFFULL) != 0x0000000010800004ULL) {
+    if (GET_BYTES_64_LE(msg, 0, 7) != 0x0000000010800004ULL) {
       tx = false;
     }
   }

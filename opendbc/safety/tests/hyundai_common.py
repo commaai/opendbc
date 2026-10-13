@@ -70,6 +70,21 @@ class HyundaiButtonBase:
       self._rx(self._button_msg(Buttons.NONE))
 
 
+class HyundaiGasBase:
+  GAS_MSG: tuple[str, str]  # message and signal name of the gas pedal
+
+  def test_gas_signal_bits(self):
+    """
+      Gas pedal signals span byte boundaries, every bit of the signal must register as gas pressed
+    """
+    sig = self.packer.dbc.name_to_msg[self.GAS_MSG[0]].sigs[self.GAS_MSG[1]]
+    for bit in range(sig.size):
+      self._rx(self._user_gas_msg((1 << bit) * sig.factor))
+      self.assertTrue(self.safety.get_gas_pressed_prev())
+      self._rx(self._user_gas_msg(0))
+      self.assertFalse(self.safety.get_gas_pressed_prev())
+
+
 class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
   DISABLED_ECU_UDS_MSG: tuple[int, int]
@@ -94,8 +109,18 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
   def _pcm_status_msg(self, enable):
     raise Exception
 
-  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, accel_value=None):
     raise NotImplementedError
+
+  def test_accel_raw_and_value_limits(self):
+    """
+      aReqRaw and aReqValue are limited independently, either one out of range blocks the message
+    """
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._tx(self._accel_msg(self.MAX_ACCEL, accel_value=self.MIN_ACCEL)))
+    for accel in (self.MAX_ACCEL + 1, self.MIN_ACCEL - 1):
+      self.assertFalse(self._tx(self._accel_msg(accel, accel_value=self.INACTIVE_ACCEL)))
+      self.assertFalse(self._tx(self._accel_msg(self.INACTIVE_ACCEL, accel_value=accel)))
 
   def test_set_resume_buttons(self):
     """

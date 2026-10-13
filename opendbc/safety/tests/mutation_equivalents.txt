@@ -1,0 +1,19 @@
+# Mutants that survive because they cannot change observable behavior, grouped by reason.
+# One per line, as `<file> <mutator> <mutated expression>` exactly as mutation.py prints it.
+# mutation.py fails if an entry no longer exists or gets killed, so the list can't go stale.
+
+# the added bit is not part of the signal and is never set in frames openpilot or the car sends
+opendbc/safety/modes/ford.h boundary (msg->data[6] & [[0xC0U->0xC1U]] ) != 0U
+opendbc/safety/modes/mazda.h boundary (msg->data[4] | (msg->data[5] & [[0xF0U->0xF1U]] )) != 0U
+opendbc/safety/modes/byd.h boundary (msg->data[0] & [[0x58U->0x59U]] ) != 0U
+opendbc/safety/modes/byd.h boundary (msg->data[1] & [[0x80U->0x81U]] ) != 0U
+opendbc/safety/modes/byd.h boundary (msg->data[2] & [[0x8U->0x9U]] ) != 0U
+
+# the >> 12 is a copy of the global-platform layout; preglobal FL only differs above ~242 km/h with every other wheel at zero
+opendbc/safety/modes/subaru_preglobal.h boundary ((GET_BYTES_LE(msg, 0, 4) >> [[12->13]] ) | GET_BYTES_LE(msg, 4, 4)) != 0U
+
+# len is only ever 0, 28, 44 or 60
+opendbc/safety/modes/volkswagen_meb.h boundary len > [[0->1]]
+
+# only resets heartbeat_engaged_mismatches, which panda consumes and libsafety does not expose
+opendbc/safety/safety.h remove_negation [[!->]] controls_allowed_prev

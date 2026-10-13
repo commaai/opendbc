@@ -19,10 +19,13 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
   DRIVER_TORQUE_ALLOWANCE = 60
   DRIVER_TORQUE_FACTOR = 3
 
-  # Wheel speeds _esp_03_msg
-  def _speed_msg(self, speed):
-    values = {"ESP_%s_Radgeschw" % s: speed for s in ["HL", "HR", "VL", "VR"]}
+  # Wheel speeds
+  def _esp_03_msg(self, speeds: dict[str, float]):
+    values = {f"ESP_{s}_Radgeschw": speed for s, speed in speeds.items()}
     return self.packer.make_can_msg_safety("ESP_03", 0, values)
+
+  def _speed_msg(self, speed):
+    return self._esp_03_msg(dict.fromkeys(("HL", "HR", "VL", "VR"), speed))
 
   # Driver brake pressure over threshold
   def _esp_05_msg(self, brake):
@@ -44,9 +47,12 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self._motor_03_msg(gas_signal=gas)
 
   # ACC engagement status
-  def _tsk_status_msg(self, enable):
-    values = {"TSK_Status_GRA_ACC_02": 1 if enable else 0}
+  def _tsk_04_msg(self, tsk_status):
+    values = {"TSK_Status_GRA_ACC_02": tsk_status}
     return self.packer.make_can_msg_safety("TSK_04", 1, values)
+
+  def _tsk_status_msg(self, enable):
+    return self._tsk_04_msg(1 if enable else 0)
 
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
@@ -57,11 +63,11 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self.packer.make_can_msg_safety("LH_EPS_03", 0, values)
 
   # openpilot steering output torque
-  def _torque_cmd_msg(self, torque, steer_req=1):
+  def _torque_cmd_msg(self, torque, steer_req=1, hca_status=7):
     values = {"HCA_01_LM_Offset": abs(torque),
               "HCA_01_LM_OffSign": torque < 0,
               "HCA_01_Sendestatus": steer_req,
-              "HCA_01_Status_HCA": 7 if steer_req else 3}
+              "HCA_01_Status_HCA": hca_status if steer_req else 3}
     return self.packer.make_can_msg_safety("HCA_01", 0, values)
 
   # Cruise control buttons
@@ -80,6 +86,32 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
       self._rx(self._esp_05_msg(esp_05_signal))
       self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
                        f"expected {brake_pressed=} with {motor_03_signal=} and {esp_05_signal=}")
+
+  def test_vehicle_moving_any_wheel(self):
+    # any single wheel turning, at the smallest speed the ABS reports, means the vehicle is moving
+    for wheel in ("HL", "HR", "VL", "VR"):
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self._esp_03_msg({wheel: 0.1}))
+      self.assertTrue(self.safety.get_vehicle_moving(), f"vehicle not moving with only {wheel} turning")
+
+  def test_tsk_status(self):
+    # ACC active (1) and driver override (2) are the engaged states, off (0) and fault (3) are not
+    for tsk_status in range(4):
+      self._rx(self._tsk_04_msg(0))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self._rx(self._tsk_04_msg(tsk_status))
+      self.assertEqual(tsk_status in (1, 2), self.safety.get_controls_allowed(), f"{tsk_status=}")
+      self.assertEqual(tsk_status in (1, 2), self.safety.get_cruise_engaged_prev(), f"{tsk_status=}")
+
+  def test_torque_cmd_enable_variants(self):
+    # The EPS rack accepts either 5 or 7 for an enabled status, torque with any other status is blocked
+    for hca_status in range(16):
+      self.safety.set_controls_allowed(True)
+      self._set_prev_torque(0)
+      should_tx = hca_status in (5, 7)
+      self.assertEqual(should_tx, self._tx(self._torque_cmd_msg(self.MAX_RATE_UP, hca_status=hca_status)),
+                       f"torque cmd with {hca_status=}")
 
 
 class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
@@ -103,6 +135,8 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False))
     self.safety.set_controls_allowed(1)
+    self._rx(self._ls_01_msg(bus=0))
+    self.assertTrue(self.safety.get_controls_allowed(), "controls not allowed without cancel")
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 

@@ -1,6 +1,7 @@
 import os
 import abc
 import math
+import random
 import unittest
 import importlib
 import numpy as np
@@ -80,6 +81,7 @@ class SafetyTestBase(unittest.TestCase):
   SAFETY_PARAM = 0
 
   def setUp(self):
+    random.seed(0)  # some message helpers pick values at random; keep every test deterministic
     self.safety = libsafety_py.libsafety
     if self.DBC is not None:
       self.packer = CANPackerSafety(self.DBC)
@@ -750,6 +752,30 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
         should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
+  def test_angle_cmd_rate_limits_at_zero(self):
+    # Both directions from zero get the down (unwind) rate limit, since small floats from openpilot are rounded to 0.
+    # One CAN unit off zero, moving away from zero is limited by the up (windup) rate again.
+    if self.ANGLE_RATE_BP is None:
+      raise unittest.SkipTest("No angle rate limit lookup")
+
+    one_unit = 1 / self.DEG_TO_CAN
+    for s in (0., 1., 5., 10., 15., 50.):
+      max_delta_up = np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
+      max_delta_down = np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN)
+      self._reset_angle_measurement(0)
+      self._reset_speed_measurement(s)
+
+      for sign in (1, -1):
+        for angle, should_tx in ((max_delta_down, True), (max_delta_down + 1.1, False)):
+          self.safety.set_controls_allowed(True)
+          self._set_prev_desired_angle(0)
+          self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(sign * angle, True)), (s, sign, angle))
+
+        for angle, should_tx in ((one_unit + max_delta_up, True), (one_unit + max_delta_up + 1.1, False)):
+          self.safety.set_controls_allowed(True)
+          self._set_prev_desired_angle(sign * one_unit)
+          self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(sign * angle, True)), (s, sign, angle))
+
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while
     # steer actuation bit is 0, regardless of controls allowed.
@@ -1207,6 +1233,14 @@ class CarSafetyTest(SafetyTest):
 
         within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
+
+  def test_rx_unmonitored_msg(self):
+    # Frames that aren't in the RX checks are valid and leave controls alone. This includes the empty frame,
+    # which must not be mistaken for the unused (zeroed) slots of an RX check.
+    self.safety.set_controls_allowed(True)
+    for bus in range(4):
+      self.assertTrue(self._rx(make_msg(bus, 0, 0)))
+    self.assertTrue(self.safety.get_controls_allowed())
 
   def test_safety_tick(self):
     # Missing valid RX messages must disable controls even before they time out.

@@ -5,7 +5,7 @@ import unittest
 from opendbc.car.hyundai.values import HyundaiSafetyFlags
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
+from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiGasBase, HyundaiLongitudinalBase
 
 # All combinations of radar/camera-SCC and gas/hybrid/EV cars
 ALL_GAS_EV_HYBRID_COMBOS = [
@@ -20,7 +20,8 @@ ALL_GAS_EV_HYBRID_COMBOS = [
 ]
 
 
-class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+class TestHyundaiCanfdBase(HyundaiButtonBase, HyundaiGasBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest,
+                           common.SteerRequestCutSafetyTest):
 
   DBC = "hyundai_canfd_generated"
   SAFETY_MODEL = CarParams.SafetyModel.hyundaiCanfd
@@ -81,6 +82,15 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
       "ADAPTIVE_CRUISE_MAIN_BTN": main_button,
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
+
+  def test_cruise_engaged_prev(self):
+    super().test_cruise_engaged_prev()
+
+    # 1=enabled, 2=driver override, both keep cruise engaged
+    for acc_mode in range(8):
+      values = {"ACCMode": acc_mode}
+      self._rx(self.packer.make_can_msg_safety("SCC_CONTROL", self.SCC_BUS, values))
+      self.assertEqual(acc_mode in (1, 2), self.safety.get_cruise_engaged_prev())
 
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
@@ -197,10 +207,10 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
   GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
   STEER_BUS = 1
 
-  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, accel_value=None):
     values = {
       "aReqRaw": accel,
-      "aReqValue": accel,
+      "aReqValue": accel if accel_value is None else accel_value,
     }
     return self.packer.make_can_msg_safety("SCC_CONTROL", 1, values)
 
@@ -219,10 +229,10 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
   def SAFETY_PARAM(self):
     return HyundaiSafetyFlags.LONG | self.EXTRA_SAFETY_PARAM
 
-  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, accel_value=None):
     values = {
       "aReqRaw": accel,
-      "aReqValue": accel,
+      "aReqValue": accel if accel_value is None else accel_value,
     }
     return self.packer.make_can_msg_safety("SCC_CONTROL", 0, values)
 

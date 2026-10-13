@@ -32,9 +32,11 @@ class TestElm327(TestDefaultRxHookBase):
 
     # TODO: perform this check for all addresses
     # 4 to 15 are reserved ISO-TP frame types (https://en.wikipedia.org/wiki/ISO_15765-2)
-    for byte in range(0xff):
+    for byte in range(0x100):
+      # the frame type is the high nibble of the first byte, the rest of the payload is unconstrained
       should_tx = (byte >> 4) <= 3
-      self.assertEqual(should_tx, self._tx(common.make_msg(0, GM_CAMERA_DIAG_ADDR, dat=bytes([byte] * 8))))
+      self.assertEqual(should_tx, self._tx(common.make_msg(0, GM_CAMERA_DIAG_ADDR, dat=bytes([byte] + [0] * 7))))
+      self.assertTrue(self._tx(common.make_msg(0, GM_CAMERA_DIAG_ADDR, dat=bytes([0] + [byte] * 7))))
 
     # test GM camera diagnostic address with malformed length
     self.assertEqual(False, self._tx(common.make_msg(0, GM_CAMERA_DIAG_ADDR, dat=bytes([0x00] * 7))))

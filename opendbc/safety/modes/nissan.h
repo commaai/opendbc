@@ -40,7 +40,9 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   // X-Trail 0x15c, Leaf 0x239
   if (msg_matches(msg, 0x15cU, nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x15cU) {
-      gas_pressed = ((msg->data[5] << 2) | ((msg->data[6] >> 6) & 0x3U)) > 3U;
+      // GAS_PEDAL is a 10-bit signal (data[5] and the top two bits of data[6]); pressed when > 3,
+      // which is exactly when its upper 8 bits are non-zero
+      gas_pressed = msg->data[5] != 0U;
     } else {
       gas_pressed = msg->data[0] > 3U;
     }
@@ -49,9 +51,9 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   // X-trail 0x454, Leaf 0x239
   if (msg_matches(msg, 0x454U, nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x454U) {
-      brake_pressed = (msg->data[2] & 0x80U) != 0U;
+      brake_pressed = GET_BIT(msg, 23U);
     } else {
-      brake_pressed = ((msg->data[4] >> 5) & 1U) != 0U;
+      brake_pressed = GET_BIT(msg, 37U);
     }
   }
 

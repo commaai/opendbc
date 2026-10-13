@@ -59,6 +59,14 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
       # can always cancel
       self.assertTrue(self._tx(self._button_msg(cancel=True)))
 
+  def test_vehicle_moving(self):
+    super().test_vehicle_moving()
+
+    # moving at any nonzero speed, 0.0174 m/s per LSB over 12 bits
+    for raw in range(1 << 12):
+      self._rx(self._speed_msg(raw * 0.0174))
+      self.assertEqual(raw > 0, self.safety.get_vehicle_moving())
+
   def test_rx_hook(self):
     for count in range(20):
       self.assertTrue(self._rx(self._speed_msg(0)), f"{count=}")

@@ -35,7 +35,7 @@ static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, 0x1E4U, 0U)) {
     // Signal: BRAKE_1.VEHICLE_SPEED
-    vehicle_moving = (((msg->data[4] & 0x7U) << 8) + msg->data[5]) != 0U;
+    vehicle_moving = (((msg->data[4] & 0xFU) << 8) | msg->data[5]) != 0U;
   }
 
   if (msg_matches(msg, 0x1FEU, 0U)) {

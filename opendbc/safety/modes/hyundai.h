@@ -67,7 +67,7 @@ static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
     cnt = ((msg->data[3] >> 6) << 2) | (msg->data[1] >> 6);
   }
   if (msg->addr == 0x394U) {
-    cnt = (msg->data[1] >> 5) & 0x7U;
+    cnt = msg->data[1] >> 5;
   }
   if (msg->addr == 0x421U) {
     cnt = msg->data[7] & 0xFU;

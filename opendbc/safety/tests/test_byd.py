@@ -77,8 +77,24 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     return self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, values)
 
   def _user_gas_msg(self, gas):
-    values = {"RAW_THROTTLE": int(gas * 100)}
+    values = {"RAW_THROTTLE": gas}
     return self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, values)
+
+  def test_vehicle_moving(self):
+    super().test_vehicle_moving()
+
+    # moving at any nonzero speed, 0.1 kph per LSB
+    for raw in range(50):
+      self._rx(self._speed_msg(raw * 0.1 / 3.6))
+      self.assertEqual(raw > 0, self.safety.get_vehicle_moving())
+
+  def test_acc_state(self):
+    # ACC_STATE: 0=OFF, 2=ACC_ON, 3=ACC_ACTIVE, 5=FORCE_ACCEL, 7=ERROR
+    for acc_state in range(8):
+      self._rx(self._pcm_status_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self._rx(self.packer.make_can_msg_safety("ACC_HUD_ADAS", self.CAM_BUS, {"ACC_STATE": acc_state}))
+      self.assertEqual(acc_state in (3, 5), self.safety.get_controls_allowed())
 
   def test_cruise_buttons(self):
     buttons = ("SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN", "ACC_ON_BTN")

@@ -58,10 +58,9 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def _accel_msg(self, accel, cancel_req=0):
     return self._accel_msg_343(accel, cancel_req)
 
-  def _speed_msg(self, speed, quality_flag=True):
+  def _speed_msg(self, speed, fault_wheels=()):
     values = {("WHEEL_SPEED_%s" % n): speed * 3.6 for n in ["FR", "FL", "RR", "RL"]}
-    if not quality_flag:
-      values |= {"WHEEL_SPEED_%s_FAULT" % n: 1.0 for n in ["FR", "FL", "RR", "RL"]}
+    values |= {"WHEEL_SPEED_%s_FAULT" % n: 1.0 for n in fault_wheels}
     return self.packer.make_can_msg_safety("WHEEL_SPEEDS", 0, values)
 
   def _user_brake_msg(self, brake):
@@ -123,12 +122,10 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       self.assertFalse(self._rx(msg))
       self.assertFalse(self.safety.get_controls_allowed())
 
-    # quality flag tests
-    msg = self._speed_msg(0)
-    self.assertTrue(self._rx(msg))
-
-    msg = self._speed_msg(0, quality_flag=False)
-    self.assertFalse(self._rx(msg))
+    # quality flag tests: a fault on any single wheel speed invalidates the message
+    self.assertTrue(self._rx(self._speed_msg(0)))
+    for wheel in ("FR", "FL", "RR", "RL"):
+      self.assertFalse(self._rx(self._speed_msg(0, fault_wheels=(wheel,))))
 
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 72.22_ is the max speed in m/s

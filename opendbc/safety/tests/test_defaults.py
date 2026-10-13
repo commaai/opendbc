@@ -66,5 +66,38 @@ class TestSafetyFramework(common.SafetyTestBase):
     self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
 
 
+class TestSafetyTick(common.SafetyTestBase):
+  """safety_tick drops controls once a monitored message goes stale. Uses the body safety mode, which monitors one message."""
+  DBC = "comma_body"
+  SAFETY_MODEL = CarParams.SafetyModel.body
+
+  MAX_RX_LAG = int(1e6)  # us
+
+  def _rx_motors_data(self, ts):
+    self.safety.set_timer(ts)
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("MOTORS_DATA", 0, {})))
+
+  def test_rx_lagging(self):
+    # fresh and valid RX keeps controls allowed, up to and including the lag threshold
+    for ts in (0, self.MAX_RX_LAG // 2, self.MAX_RX_LAG):
+      with self.subTest(elapsed=ts):
+        self._rx_motors_data(0)
+        self.safety.set_timer(ts)
+        self.safety.safety_tick()
+        self.assertTrue(self.safety.get_controls_allowed())
+        self.assertTrue(self.safety.safety_config_valid())
+
+    # stale RX disables controls and marks the config invalid until the message is seen again
+    self.safety.set_timer(self.MAX_RX_LAG + 1)
+    self.safety.safety_tick()
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self.safety.safety_config_valid())
+
+    self._rx_motors_data(self.MAX_RX_LAG + 1)
+    self.safety.safety_tick()
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self.safety.safety_config_valid())
+
+
 if __name__ == "__main__":
   unittest.main()

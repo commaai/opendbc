@@ -30,9 +30,16 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     values = {"FrictionBrakeCmd": -brake}
     return self.packer_chassis.make_can_msg_safety("EBCMFrictionBrakeCmd", self.BRAKE_BUS, values)
 
-  def _send_gas_msg(self, gas):
-    values = {"GasRegenCmd": gas}
+  def _send_gas_msg(self, gas, apply=False):
+    values = {"GasRegenCmd": gas, "GasRegenCmdActive": apply}
     return self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)
+
+  def test_gas_apply_bit(self):
+    # the apply bit is only allowed while controls are allowed, even with inactive gas
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      for apply in (True, False):
+        self.assertEqual(controls_allowed or not apply, self._tx(self._send_gas_msg(self.INACTIVE_GAS, apply)))
 
   # override these tests from CarSafetyTest, GM longitudinal uses button enable
   def _pcm_status_msg(self, enable):
@@ -106,6 +113,15 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"%sWheelSpd" % s: speed for s in ["RL", "RR"]}
     return self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values)
 
+  def test_vehicle_moving(self):
+    super().test_vehicle_moving()
+
+    # moving if either rear wheel is turning
+    for wheel in ["RL", "RR"]:
+      values = {"%sWheelSpd" % s: self.STANDSTILL_THRESHOLD + 1 if s == wheel else 0 for s in ["RL", "RR"]}
+      self._rx(self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values))
+      self.assertTrue(self.safety.get_vehicle_moving())
+
   def _user_brake_msg(self, brake):
     # GM safety has a brake threshold of 8
     values = {"BrakePedalPos": 8 if brake else 0}
@@ -139,6 +155,12 @@ class TestGmEVSafetyBase(TestGmSafetyBase):
   def _user_regen_msg(self, regen):
     values = {"RegenPaddle": 2 if regen else 0}
     return self.packer.make_can_msg_safety("EBCMRegenPaddle", 0, values)
+
+  def test_regen_paddle(self):
+    # any nonzero paddle position is regen braking
+    for paddle in range(1 << 4):
+      self._rx(self.packer.make_can_msg_safety("EBCMRegenPaddle", 0, {"RegenPaddle": paddle}))
+      self.assertEqual(paddle > 0, self.safety.get_regen_braking_prev())
 
 
 class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
@@ -227,16 +249,18 @@ class TestGmIgnition(common.SafetyTestBase):
   def _msg(self, mode):
     return self.packer.make_can_msg_safety("BCMGeneralPlatformStatus", 0, {"SystemPowerMode": mode})
 
-  # SystemPowerMode 2=Run, 3=Crank Request
+  # SystemPowerMode 0=Off, 1=Accessory, 2=Run, 3=Crank Request
   def test_ignition_on(self):
-    self.safety.ignition_can_hook(self._msg(2))
-    self.assertTrue(self.safety.get_ignition_can())
+    for mode in (2, 3):
+      self.safety.ignition_can_hook(self._msg(mode))
+      self.assertTrue(self.safety.get_ignition_can())
 
   def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(2))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(0))
-    self.assertFalse(self.safety.get_ignition_can())
+    for mode in (0, 1):
+      self.safety.ignition_can_hook(self._msg(2))
+      self.assertTrue(self.safety.get_ignition_can())
+      self.safety.ignition_can_hook(self._msg(mode))
+      self.assertFalse(self.safety.get_ignition_can())
 
 
 if __name__ == "__main__":

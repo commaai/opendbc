@@ -79,13 +79,6 @@ class HondaButtonEnableBase(common.CarSafetyTest):
       self._rx(self._button_msg(btn, main_on=True))
       self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_disengage_on_main(self):
-    self.safety.set_controls_allowed(1)
-    self._rx(self._acc_state_msg(True))
-    self.assertTrue(self.safety.get_controls_allowed())
-    self._rx(self._acc_state_msg(False))
-    self.assertFalse(self.safety.get_controls_allowed())
-
   def test_rx_hook(self):
 
     # TODO: move this test to common
@@ -221,6 +214,22 @@ class HondaBase(common.CarSafetyTest):
     self._rx(self._user_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_disengage_on_main(self):
+    self.safety.set_controls_allowed(1)
+    self._rx(self._acc_state_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self._rx(self._acc_state_msg(False))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_acc_state_rx_hook(self):
+    # the ACC main state message is checksum checked in every configuration
+    self.safety.set_controls_allowed(1)
+    msg = self._acc_state_msg(True)
+    self.assertTrue(self._rx(msg))
+    msg[0].data[0] ^= 0x01  # invalidate checksum
+    self.assertFalse(self._rx(msg))
+    self.assertFalse(self.safety.get_controls_allowed())
+
   def test_steer_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
@@ -255,6 +264,14 @@ class TestHondaNidecSafetyBase(HondaBase):
     # Used to control ACC on Nidec without pedal
     values = {"PCM_GAS": pcm_gas, "PCM_SPEED": pcm_speed}
     return self.packer.make_can_msg_safety("ACC_HUD", 0, values)
+
+  def test_steer_safety_check(self):
+    super().test_steer_safety_check()
+
+    # CR-V and RDX send steering control on 0x194 instead of 0xE4
+    self.safety.set_controls_allowed(0)
+    self.assertTrue(self._tx(libsafety_py.make_CANPacket(0x194, 0, b"\x00\x00\x00\x00")))
+    self.assertFalse(self._tx(libsafety_py.make_CANPacket(0x194, 0, b"\x10\x00\x00\x00")))
 
   def test_acc_hud_safety_check(self):
     for controls_allowed in [True, False]:
@@ -381,6 +398,19 @@ class TestHondaBoschSafetyBase(HondaBase):
     # do not block resume if we are engaged already
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(Btn.RESUME, bus=self.BUTTONS_BUS)))
+
+  def test_bosch_supplemental(self):
+    # BOSCH_SUPPLEMENTAL_1 may only be sent as the stock inactive message, the last byte is the counter and checksum
+    stock_inactive = b"\x04\x00\x80\x10\x00\x00\x00"
+    supplemental_allowed = [0xE5, 0] in self.TX_MSGS
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      for last_byte in range(256):
+        self.assertEqual(supplemental_allowed, self._tx(libsafety_py.make_CANPacket(0xE5, 0, stock_inactive + bytes([last_byte]))))
+      for byte in range(len(stock_inactive)):
+        actuation = bytearray(stock_inactive + b"\x00")
+        actuation[byte] ^= 0x01
+        self.assertFalse(self._tx(libsafety_py.make_CANPacket(0xE5, 0, bytes(actuation))))
 
 
 class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):

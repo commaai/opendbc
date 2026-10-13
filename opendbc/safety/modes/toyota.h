@@ -82,14 +82,8 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
     valid = !GET_BIT(msg, 3U);  // STEER_TORQUE_SENSOR.STEER_ANGLE_INITIALIZING
   }
   if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
-    // each wheel speed is 1-bit fault + 15-bit speed
-    valid = true;
-    for (uint8_t i = 0U; i < 4U; i += 1U) {
-      if (GET_BIT(msg, (i * 16U) + 7U)) {  // WHEEL_SPEED_xx_FAULT
-        valid = false;
-        break;
-      }
-    }
+    // each wheel speed is 1-bit fault + 15-bit speed, the fault bit is the MSB of each wheel's first byte
+    valid = ((msg->data[0] | msg->data[2] | msg->data[4] | msg->data[6]) & 0x80U) == 0U;  // WHEEL_SPEED_xx_FAULT
   }
   return valid;
 }
@@ -291,14 +285,16 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
         tx = false;
       }
 
-      // check if we should wind down torque
-      int driver_torque = SAFETY_MIN(SAFETY_ABS(torque_driver.min), SAFETY_ABS(torque_driver.max));
-      if ((driver_torque > TOYOTA_LTA_MAX_DRIVER_TORQUE) && (torque_wind_down != 0)) {
+      // check if we should wind down torque: full torque is blocked once all recent samples are above the threshold
+      bool driver_torque_high = (SAFETY_ABS(torque_driver.min) > TOYOTA_LTA_MAX_DRIVER_TORQUE) &&
+                                (SAFETY_ABS(torque_driver.max) > TOYOTA_LTA_MAX_DRIVER_TORQUE);
+      if (driver_torque_high && (torque_wind_down != 0)) {
         tx = false;
       }
 
-      int eps_torque = SAFETY_MIN(SAFETY_ABS(torque_meas.min), SAFETY_ABS(torque_meas.max));
-      if ((eps_torque > TOYOTA_LTA_MAX_MEAS_TORQUE) && (torque_wind_down != 0)) {
+      bool eps_torque_high = (SAFETY_ABS(torque_meas.min) > TOYOTA_LTA_MAX_MEAS_TORQUE) &&
+                             (SAFETY_ABS(torque_meas.max) > TOYOTA_LTA_MAX_MEAS_TORQUE);
+      if (eps_torque_high && (torque_wind_down != 0)) {
         tx = false;
       }
     }
