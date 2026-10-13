@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from opendbc.car.byd.carcontroller import get_safety_CP
-from opendbc.car.byd.values import BydSafetyFlags, CarControllerParams
+from opendbc.car.byd.values import BydSafetyFlags, CarControllerParams, SAFETY_PLATFORM_PARAMS
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
@@ -26,7 +26,7 @@ def safety_max_can(max_angle_float, can_offset=0):
 class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   DBC = "byd_atto3"
   SAFETY_MODEL = CarParams.SafetyModel.byd
-  SAFETY_PARAM = int(BydSafetyFlags.LKS_ON)
+  SAFETY_PARAM = int(BydSafetyFlags.LKS_ON) | int(SAFETY_PLATFORM_PARAMS["BYD_ATTO_3"].safety_param)
 
   RELAY_MALFUNCTION_ADDRS = {0: (STEERING_MODULE_ADAS, LKAS_HUD_ADAS)}
   # Stock 0x1E2/0x316 are forwarded until OP sends STEER_REQ=1.
@@ -44,6 +44,24 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
   def _get_steer_cmd_angle_max(self, speed):
     return get_max_angle_vm(max(speed, 1), self.VM, CarControllerParams)
+
+  def _reinit_with_param(self, param):
+    self.safety.set_safety_hooks(self.SAFETY_MODEL, param)
+    self.safety.init_tests()
+    self.safety.set_controls_allowed(True)
+    self._reset_speed_measurement(10)
+    self._reset_angle_measurement(50)
+    self._set_prev_desired_angle(50)
+
+  def test_platform_bit_default_falls_back_to_atto3(self):
+    # No platform bit keeps today's limits
+    self._reinit_with_param(int(BydSafetyFlags.LKS_ON))
+    self.assertTrue(self._tx(self._angle_cmd_msg(50, True)))
+    self.assertFalse(self._tx(self._angle_cmd_msg(391, True)))
+
+  def test_platform_bit_unknown_denies_steer(self):
+    self._reinit_with_param(int(BydSafetyFlags.LKS_ON) | 0x200)
+    self.assertFalse(self._tx(self._angle_cmd_msg(50, True)))
 
   def setUp(self):
     super().setUp()
