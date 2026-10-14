@@ -11,8 +11,9 @@ Repeat applicable checks for each supported hardware variant and control mode (s
   - [ ] Record make, model, year, trim, market, and relevant driver assistance options in values.py.
     - If all variants in the US market come equipped with the necessary ADAS package, no package documentation is required.
     - If a vehicle varies in features in another market, add a new CarDocs entry.
-  - [ ] Record ECU firmware versions, harness, device, and software revisions used for validation.
+  - [ ] Add every observed ECU firmware version to `fingerprints.py`.
   - [ ] Identify differences from related supported cars; verify reused signals and commands on this variant.
+    - Gas, gear, and brake signals often move between ICE, hybrid, and EV variants (e.g. Hyundai, Subaru, Toyota SecOC).
 
 - Harness and CAN topology
 
@@ -22,7 +23,7 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 - Stock behavior and power lifecycle
 
   - [ ] Record baseline stock LKAS, ACC, stop-and-go, and driver override behavior for reference when writing the port.
-    - Stock behavior should be matched when possible, i.e. how stock ACC commands standstill and resume.
+    - Stock behavior should be matched when possible, e.g. how stock ACC commands standstill and resume.
   - [ ] Verify ignition detection, startup, shutdown, and vehicle sleep with the device connected.
 
 ## Identification and parameters
@@ -31,9 +32,9 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 - [ ] Firmware queries use the correct ECU addresses and buses without causing any DTCs on the dashboard.
 - [ ] Exact and fuzzy fingerprinting distinguish variants that need different control or safety behavior.
 - [ ] Unknown or ambiguous firmware does not silently select an incompatible platform.
-  - A vehicle variant we do not support but has identical firmware (such as lacking ACC or LKAS hardware) should be detected with a CAN signal in interface.py or carstate.py depending on what we can check.
+  - A vehicle variant we do not support that has identical firmware (such as lacking ACC or LKAS hardware) should be detected with a CAN signal in interface.py or carstate.py depending on what we can check, and set `dashcamOnly`.
 - [ ] Reliable source for wheelbase, steering ratio, and other vehicle model parameters.
-- [ ] Minimum steering/engagement speeds and stop-and-go capability in `carParams` match observed behavior.
+- [ ] `minSteerSpeed`, `minEnableSpeed`, `autoResumeSng`, and `steerAtStandstill` in `carParams` match observed behavior.
 
 ## CAN parsing and message construction
 
@@ -42,6 +43,8 @@ Repeat applicable checks for each supported hardware variant and control mode (s
   - [ ] Message addresses, lengths, buses, frequencies, endianness, signedness, scales, and units are verified.
   - [ ] Checksums and counters validate against real captures, including counter wraparound.
   - [ ] Missing, stale, malformed, or checksum-invalid messages produce the expected invalid CAN state.
+  - [ ] Variable-rate or intermittent messages have an explicit frequency in `get_can_parsers` so they don't cause false CAN errors.
+    - For example, VW `Blinkmodi_02`, `HCA_01`, and `AWV_03` are 1 Hz when inactive and 50 Hz when active.
   - [ ] Startup defaults and invalid signal values cannot look like valid engagement conditions.
 
 - Outgoing messages and forwarding
@@ -65,7 +68,7 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 - Gears
 
   - [ ] Gear selection: ideally we parse park, reverse, neutral, drive, and alternate drive modes such as sport, B (brake) gear on hybrids, etc.
-    - If we cannot parse all gears, ensure we can disengage cruise on non-drive/sport gears. Anything that stock ACC would normally disengage for.
+    - If we cannot parse all gears, ensure we can disengage cruise on non-drive/sport gears, or anything that stock ACC would normally disengage for.
   - [ ] Unknown gear values are handled explicitly instead of defaulting to drive.
 
 - Pedals and regen
@@ -73,7 +76,7 @@ Repeat applicable checks for each supported hardware variant and control mode (s
   - [ ] Brake pedal: light press, firm press, hold, and release update `brakePressed` reliably.
   - [ ] Accelerator pedal: press and release update `gasPressed`, including while cruise is active.
   - [ ] Driver pedal signals are distinguished from braking or acceleration commanded by ACC/openpilot.
-    - In the past, we found some accelerator signals either activate when stock ACC accelerates, or don't activate when the user's gas was under the stock ACC request. This needs to describe if the user is pressing the gas pedal any amount, in any state.
+    - In the past, we found some accelerator signals either activate when stock ACC accelerates, or don't activate when the user's gas was under the stock ACC request. `gasPressed` must be true whenever the user is pressing the gas pedal any amount, in any state.
   - [ ] Regen paddles or other driver regen controls update `regenBraking`, if applicable.
 
 - Parking brake and auto hold
@@ -84,6 +87,8 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 - Speed and standstill
 
   - [ ] Vehicle speed and individual wheel speeds have correct units and plausible values.
+  - [ ] Speed and `standstill` use the same signals as the safety model.
+    - For example, Nissan and GM use the rear wheel speeds to match safety.
   - [ ] `standstill` distinguishes a complete stop from slow creep and updates promptly on drive-off.
   - [ ] Cluster speed and cruise set speed agree with the car in both metric and imperial settings.
 
@@ -97,22 +102,28 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 - Blinkers and blind spots
 
   - [ ] Left/right blinkers are reported correctly.
-    - If we only have lamp state (blinks), use `CS.update_blinker_from_lamp`.
+    - If we only have lamp state, use `CS.update_blinker_from_lamp` so it doesn't oscillate with the blinker.
+    - If we only have stalk position, use `CS.update_blinker_from_stalk` so short taps are held.
   - [ ] Left/right blind spot indications are mapped correctly and clear when the stock indication clears.
 
 - Faults and stock system state
 
   - [ ] Temporary and permanent steering faults are logged correctly and recover only when the fault clears.
-  - [ ] ACC faults, invalid vehicle sensors, and transient not-ready states are reported correctly.
+    - EPS initializing states at startup are not permanent faults (e.g. VW, BYD).
+    - Expected low-speed steering lockouts should set `lowSpeedAlert` instead of a fault, usually with hysteresis.
+  - [ ] `accFaulted`, `carFaultedNonCritical`, `carNotReady`, and `vehicleSensorsInvalid` are reported correctly.
   - [ ] ESP disabled/active states and stock AEB/FCW states are parsed where available.
-  - [ ] Stock LKAS settings and conventional/non-adaptive cruise modes are detected where relevant.
+  - [ ] Stock LKAS settings (`invalidLkasSetting`) and conventional/non-adaptive cruise modes (`cruiseState.nonAdaptive`) are detected where relevant.
+    - For example, Nissan requires stock LKAS off, Mazda requires it on, and Tesla requires Autosteer off.
 
 ## Buttons and cruise state
 
 - [ ] Set, resume, cancel, main cruise, speed up/down, gap, and LKAS buttons are mapped where present.
 - [ ] Button press and release edges each occur once; held buttons do not cause unintended repeated engagement.
-- [ ] Short presses, long presses, and simultaneous button pressed are handled correctly.
+- [ ] Short presses, long presses, and simultaneous button presses are handled correctly.
 - [ ] Cruise available, enabled, standstill, and set speed are parsed properly and match stock behavior.
+  - Cruise enabled should stay true during driver accelerator override and at standstill. Some dash signals fall in these states (e.g. Subaru).
+  - `cruiseState.standstill` should only be true if the car requires a resume press to drive off.
 - [ ] Cruise main on/off and ACC standby/active transitions are parsed properly.
 - [ ] Set speed changes, unit changes, and minimum/maximum set speeds behave correctly.
 
@@ -120,7 +131,7 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 
 - Engagement conditions
 
-  - [ ] The intended set/resume action engages once, only when the car is ready.
+  - [ ] The intended set/resume action engages once, only when the car is ready (`carNotReady`).
   - [ ] Engagement refusal and disengagement for seatbelt, doors, gear, parking brake, and faults match the intended policy.
   - [ ] Engagement at, below, and above minimum speed behaves correctly.
 
@@ -130,18 +141,19 @@ Repeat applicable checks for each supported hardware variant and control mode (s
   - [ ] If stock ACC is controlling longitudinal, verify our cancel message stops commanding acceleration.
   - [ ] Software cancellation works in each supported cruise state, including standstill and driver accelerator override.
   - [ ] Cancel wins over simultaneous set/resume requests; repeated cancel requests do not resume or re-enable cruise.
+    - If the cancel button can toggle pause/resume or the main button can engage, use `blockPcmEnable` to only allow PCM enable after a real user button press (e.g. Hyundai).
   - [ ] Cruise main off disengages and prevents unintended re-engagement.
 
 - Driver overrides
 
   - [ ] Brake press disengages as intended while moving as well as while at a standstill.
-  - [ ] Accelerator override and release behave correctly, i.e. we command 0 m/s^2 acceleration while continuing to steer.
+  - [ ] Accelerator override and release behave correctly, i.e. we stop requesting acceleration (inactive, or 0 m/s^2) while continuing to steer.
   - [ ] Steering override works in both directions; any steering-based disengagement matches the platform policy.
-    - Tesla has a locked-in, no-override stock policy, here steering override disengages steering as well as cruise.
+    - Some platforms disengage both steering and cruise on a steering override (e.g. Tesla); use `steeringDisengage` for this.
 
 - Disengagement and recovery
 
-  - [ ] Releasing a pedal, closing a door, buckling a belt, or clearing a fault does not unexpectedly re-engage unless we are still in soft-disable grade period.
+  - [ ] Releasing a pedal, closing a door, buckling a belt, or clearing a fault does not unexpectedly re-engage unless we are still in the soft-disable grace period.
   - [ ] Stock ACC disengagement/fault causes the expected openpilot response when using stock longitudinal control.
   - [ ] Lateral-only and longitudinal-active states set their respective actuation request bits correctly.
     - For example, `CC.enabled` should be used when keeping the car's cruise engaged during a longitudinal override while `CC.longActive` falls.
@@ -157,7 +169,7 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 - Low-speed behavior
 
   - [ ] Steering behaves correctly around the minimum steering speed, including crossing it in both directions.
-  - [ ] Some cars have problems with oscillation at lower speeds, flag if this is the case and we can come up with solutions. One solution is to low pass filter the request under a certain speed.
+  - [ ] Check for low-speed oscillation and flag it if present. One solution is to low-pass filter the request below a certain speed.
 
 - Faults and recovery
 
@@ -181,7 +193,8 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 - Acceleration, braking, and driver override
 
   - [ ] Acceleration and braking command signs, scales, limits, and rate limits are verified.
-  - [ ] Acceleration, coasting, and braking transitions are smooth and free of conflicting requests. Some cars may accept gas and brake signals separately.
+  - [ ] Acceleration, coasting, and braking transitions are smooth and free of conflicting requests.
+    - Some cars accept gas and brake commands separately; never request both at once.
   - [ ] Driver accelerator and brake inputs retain their intended priority over commanded actuation.
 
 - Stopping, holding, and resuming
@@ -191,6 +204,7 @@ Repeat applicable checks for each supported hardware variant and control mode (s
   - [ ] Resume/drive-off releases hold in the correct sequence without unintended acceleration.
   - [ ] Resume is sent only when requested and supported.
   - [ ] Stops and starts on grades behave correctly without unexpected rollback or parking brake/gear transitions.
+  - [ ] `stopAccel`, `vEgoStopping`, `vEgoStarting`, `startingState`, and `startAccel` are tuned if needed.
 
 - Powertrain states and faults
 
@@ -199,7 +213,7 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 
 - Tuning and stock safety features
 
-  - [ ] Longitudinal delay and tuning are evaluated across representative speeds, following, stops, and starts.
+  - [ ] `longitudinalActuatorDelay` and tuning are evaluated across representative speeds, following, stops, and starts.
   - [ ] Stock AEB/FCW interaction and any feature loss from ECU disabling are understood and documented.
 
 ## Radar, alerts, and stock features
@@ -208,6 +222,7 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 
   - [ ] Radar distance, lateral position, relative velocity, signs, units, and track IDs are verified, if supported.
   - [ ] Radar track creation, updates, disappearance, invalid targets, and timeouts behave correctly.
+  - [ ] `radarDelay` is set if known.
 
 - HUD and alerts
 
@@ -254,7 +269,7 @@ Repeat applicable checks for each supported hardware variant and control mode (s
   - [ ] Add or update tests for fingerprinting, parsing, command construction, and discovered edge cases.
   - [ ] Run applicable [car interface tests](../opendbc/car/tests/) and [safety tests](../opendbc/safety/tests/).
   - [ ] Replay recorded drives to check CAN validity and safety acceptance of intended commands.
-  - [ ] Run the repository checks in [`test.sh`](../test.sh) and fix any unresolved failures.
+  - [ ] Run the repository checks in [`test.sh`](../test.sh) and fix any failures.
 
 - Regression validation
 
@@ -263,5 +278,4 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 
 - Documentation and evidence
 
-  - [ ] Update car documentation with supported years/trims, required hardware, control modes, and limitations.
-  - [ ] Record evidence for completed checks and explicitly list untested behavior or unsupported features.
+  - [ ] Record evidence for completed checks and explicitly list limitations, untested behavior, and unsupported features.
