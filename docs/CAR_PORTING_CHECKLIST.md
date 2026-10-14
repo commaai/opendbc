@@ -8,7 +8,7 @@ Repeat applicable checks for each supported variant and control mode (stock ACC 
 
 - Vehicle details
 
-  - [ ] Record make, model, year, trim, market, and relevant driver assistance options in values.py.
+  - [ ] Record make, model, year, trim, market, and relevant driver assistance options in `values.py`.
     - If all variants in the US market come equipped with the necessary ADAS package, no package documentation is required.
     - If a vehicle varies in features in another market, add a new CarDocs entry.
   - [ ] Add every observed ECU firmware version to `fingerprints.py`.
@@ -32,7 +32,7 @@ Repeat applicable checks for each supported variant and control mode (stock ACC 
 - [ ] Firmware queries use the correct ECU addresses and buses without causing any DTCs on the dashboard.
 - [ ] Exact and fuzzy fingerprinting distinguish variants that need different control or safety behavior.
 - [ ] Unknown or ambiguous firmware does not silently select an incompatible platform.
-  - A vehicle variant we do not support that has identical firmware (such as lacking ACC or LKAS hardware) should be detected with a CAN signal in interface.py or carstate.py depending on what we can check, and set `dashcamOnly`.
+  - A vehicle variant we do not support that has identical firmware (such as lacking ACC or LKAS hardware) should be detected with a CAN signal in `interface.py` or `carstate.py` depending on what we can check, and set `dashcamOnly`.
 - [ ] Reliable source for wheelbase, steering ratio, and other vehicle model parameters.
 - [ ] `minSteerSpeed`, `minEnableSpeed`, `autoResumeSng`, and `steerAtStandstill` in `carParams` match observed behavior.
 
@@ -126,7 +126,7 @@ Repeat applicable checks for each supported variant and control mode (stock ACC 
   - `cruiseState.standstill` should only be true if the car requires a resume press to drive off.
 - [ ] Set speed changes, unit changes, and minimum/maximum set speeds behave correctly.
 
-## Engagement, cancellation, and overrides
+## Engagement and cancellation
 
 - Engagement conditions
 
