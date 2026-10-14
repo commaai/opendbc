@@ -84,7 +84,9 @@ class MebLongStateMachine:
 
     # DO NOT MERGE: hold fuzzing variants, set every cycle by openpilot's meb_fuzz harness
     # fuzz_hold_source: 'hms' holds once the hold manager confirms (#3861), 'standstill' on ESC_50.Standstill (old)
-    # fuzz_starting: 'master' drives off on Standstill, 'stock' drives off once the hold manager holds (#3846)
+    # fuzz_starting: 'master' drives off on Standstill, 'stock' drives off once the hold manager holds (#3846),
+    #   'hold_first' is 'stock' plus re-acquiring the hold before driving off when stopped without one, and no
+    #   negative accel while stopped without a hold
     self.fuzz_hold_source = 'hms'
     self.fuzz_starting = 'master'
 
@@ -107,9 +109,12 @@ class MebLongStateMachine:
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
     # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
-    if self.fuzz_starting == 'stock':
+    if self.fuzz_starting in ('stock', 'hold_first'):
       driving_off = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.esp_hold_confirmation
       starting = CC.actuators.longControlState == LongCtrlState.pid and (CS.acc_hold_confirmation or driving_off)
+      if self.fuzz_starting == 'hold_first':
+        # stopped without a hold and asked to go: get the hold first, the drive off request comes from a hold
+        stopping = stopping or (CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation and not starting)
     else:
       starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
     long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
@@ -159,6 +164,10 @@ class MebLongStateMachine:
 
     # hold requested but the hold manager isn't holding the car yet
     braking_to_stop = requesting_hold and not hold_confirmation
+
+    # stopped without a hold: a negative accel drives the car backwards and a positive one faults the camera
+    if self.fuzz_starting == 'hold_first' and braking_to_stop and CS.esp_hold_confirmation:
+      accel = 0.0
 
     # driving off from a hold
     leaving_standstill = acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
