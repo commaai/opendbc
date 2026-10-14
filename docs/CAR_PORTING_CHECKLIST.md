@@ -1,6 +1,6 @@
 # Car porting checklist
 
-This checklist covers the common issues we find in new ports and many of the things we check before merging one. Working through it will help you build a high-quality port and get it reviewed faster, whether it's a new car or an improvement to an existing one.
+This checklist covers common issues we find in new car ports and many of the things we check before merging them. Use it as a guide to help you write a high-quality port and get it reviewed faster.
 
 Not everything will apply to your car. If something can't be tested, let us know what and why. Where it applies, check each supported variant and both stock ACC and openpilot longitudinal. Some checks need the full openpilot stack, not just opendbc.
 
