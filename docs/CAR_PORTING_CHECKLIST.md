@@ -2,7 +2,7 @@
 
 This checklist covers common issues we find in new car ports and many of the things we check before merging them. Use it as a guide to help you write a high-quality port and get it reviewed faster.
 
-Not everything will apply to your car. If something can't be tested, let us know what and why. Where it applies, check each supported variant and both stock ACC and openpilot longitudinal. Some checks need the full openpilot stack, not just opendbc.
+Not everything will apply to your car. If something can't be tested, let us know what and why. Where it applies, check each supported variant and both stock ACC and openpilot longitudinal. Some checks need the full openpilot stack, not just opendbc. Field names like `accFaulted` are defined in [`car.capnp`](../opendbc/car/car.capnp).
 
 ## Vehicle and setup
 
@@ -10,7 +10,7 @@ Not everything will apply to your car. If something can't be tested, let us know
 
   - [ ] Record make, model, year, trim, market, and relevant driver assistance options in `values.py`.
     - If all variants in the US market come equipped with the necessary ADAS package, no package documentation is required.
-    - If a vehicle varies in features in another market, add a new CarDocs entry.
+    - If a vehicle varies in features in another market, add a new [`CarDocs`](../opendbc/car/docs_definitions.py) entry.
   - [ ] Add every observed ECU firmware version to `fingerprints.py`.
   - [ ] Identify differences from related supported cars; verify reused signals and commands on this variant.
     - Gas, gear, and brake signals often move between ICE, hybrid, and EV variants (e.g. Hyundai, Subaru, Toyota SecOC).
@@ -19,6 +19,7 @@ Not everything will apply to your car. If something can't be tested, let us know
 
   - [ ] Confirm harness pinout, CAN bus assignments, bitrate, and CAN/CAN FD configuration.
   - [ ] Identify which ECUs send, receive, and forward each relevant message.
+    - This is useful to know which messages we need to forward and block in safety.
 
 - Stock behavior and power lifecycle
 
@@ -29,8 +30,8 @@ Not everything will apply to your car. If something can't be tested, let us know
 ## Identification and parameters
 
 - [ ] The car identifies correctly on repeated cold starts without a manually forced fingerprint or fingerprint cache.
-- [ ] Firmware queries use the correct ECU addresses and buses without causing any DTCs on the dashboard.
-- [ ] Exact and fuzzy fingerprinting distinguish variants that need different control or safety behavior.
+- [ ] [Firmware queries](../opendbc/car/fw_versions.py) use the correct ECU addresses and buses without causing any DTCs on the dashboard.
+- [ ] Exact and [fuzzy fingerprinting](../opendbc/car/fw_versions.py) distinguish variants that need different control or safety behavior.
 - [ ] Unknown or ambiguous firmware does not silently select an incompatible platform.
   - A vehicle variant we do not support that has identical firmware (such as lacking ACC or LKAS hardware) should be detected with a CAN signal in `interface.py` or `carstate.py` depending on what we can check, and set `dashcamOnly`.
 - [ ] Reliable source for wheelbase, steering ratio, and other vehicle model parameters.
@@ -43,7 +44,7 @@ Not everything will apply to your car. If something can't be tested, let us know
   - [ ] Message addresses, lengths, buses, frequencies, endianness, signedness, scales, and units are verified.
   - [ ] Checksums and counters validate against real captures, including counter wraparound.
   - [ ] Missing, stale, malformed, or checksum-invalid messages produce the expected invalid CAN state.
-  - [ ] Variable-rate or intermittent messages have an explicit frequency in `get_can_parsers` so they don't cause false CAN errors.
+  - [ ] Variable-rate or intermittent messages have an [explicit frequency](../opendbc/can/parser.py) in `get_can_parsers` so they don't cause false CAN errors.
     - For example, VW `Blinkmodi_02`, `HCA_01`, and `AWV_03` are 1 Hz when inactive and 50 Hz when active.
   - [ ] Startup defaults and invalid signal values cannot look like valid engagement conditions.
 
@@ -55,7 +56,7 @@ Not everything will apply to your car. If something can't be tested, let us know
 
 - Diagnostics
 
-  - [ ] Diagnostic sessions, ECU disabling, and keepalives work across startup, restart, and shutdown, if used.
+  - [ ] Diagnostic sessions, [ECU disabling](../opendbc/car/disable_ecu.py), and keepalives work across startup, restart, and shutdown, if used.
     - This is for disabling an ECU, such as to gain longitudinal control. Some ports do not require this.
 
 ## Vehicle state: basics
@@ -97,13 +98,13 @@ Not everything will apply to your car. If something can't be tested, let us know
   - [ ] Steering angle has the correct sign, scale, center offset, and behavior through its full range.
   - [ ] Steering torque has the correct sign and scale; driver torque and EPS torque are not confused.
   - [ ] `steeringPressed` detects driver input in both directions without triggering on normal commanded steering.
-    - Use `CS.update_steering_pressed` if the signal is noisy.
+    - Use [`CS.update_steering_pressed`](../opendbc/car/interfaces.py) if the signal is noisy.
 
 - Blinkers and blind spots
 
   - [ ] Left/right blinkers are reported correctly.
-    - If we only have lamp state, use `CS.update_blinker_from_lamp` so it doesn't oscillate with the blinker.
-    - If we only have stalk position, use `CS.update_blinker_from_stalk` so short taps are held.
+    - If we only have lamp state, use [`CS.update_blinker_from_lamp`](../opendbc/car/interfaces.py) so it doesn't oscillate with the blinker.
+    - If we only have stalk position, use [`CS.update_blinker_from_stalk`](../opendbc/car/interfaces.py) so short taps are held.
   - [ ] Left/right blind spot indications are mapped correctly and clear when the stock indication clears.
 
 - Faults and stock system state
@@ -236,7 +237,7 @@ Not everything will apply to your car. If something can't be tested, let us know
 
   - [ ] The selected safety mode permits only intended transmit addresses, buses, and message lengths.
   - [ ] Safety engagement/disengagement agrees with the car interface for cruise, buttons, pedals, and motion state.
-  - [ ] Non-zero actuation or active request bits are rejected when safety's `controls_allowed` is false.
+  - [ ] Non-zero actuation or active request bits are rejected when safety's [`controls_allowed`](../opendbc/safety/safety.h) is false.
   - [ ] Any messages permitted while disengaged are limited to their intended inactive/cancel behavior.
 
 - Actuation limits
