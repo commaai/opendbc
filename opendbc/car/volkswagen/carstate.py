@@ -281,10 +281,11 @@ class CarState(CarStateBase):
 
     self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
     self.esp_hold_confirmation = bool(pt_cp.vl["ESC_50"]["Standstill"])
-    # ESC_50.Standstill can be set while the hold manager isn't holding, gen1 doesn't report hold manager status
+    # ESC_50.Standstill can be set while the hold manager isn't holding
     if self.CP.flags & VolkswagenFlags.MEB_GEN2:
       self.acc_hold_confirmation = pt_cp.vl["VMM_02"]["HMS_Status"] == 1
     else:
+      # TODO: switch to VMM_01.HMS_Status, some gen1 cars don't send VMM_01
       self.acc_hold_confirmation = self.esp_hold_confirmation
     self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
     ret.stockFcw = bool(ext_cp.vl["AWV_03"]["FCW_Active"])
