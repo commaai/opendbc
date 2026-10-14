@@ -133,7 +133,6 @@ Not everything will apply to your car. If something can't be tested, let us know
 
   - [ ] The intended set/resume action engages once, only when the car is ready (`carNotReady`).
   - [ ] Engagement refusal and disengagement for seatbelt, doors, gear, parking brake, and faults match the intended policy.
-  - [ ] Engagement at, below, and above minimum speed behaves correctly.
 
 - Cancellation
 
@@ -262,14 +261,10 @@ Not everything will apply to your car. If something can't be tested, let us know
   - [ ] Add representative routes to the [car test routes](../opendbc/car/tests/routes.py), covering relevant variants and modes.
   - [ ] Add or update tests for fingerprinting, parsing, command construction, and discovered edge cases.
   - [ ] Run applicable [car interface tests](../opendbc/car/tests/) and [safety tests](../opendbc/safety/tests/).
-  - [ ] Replay recorded drives to check CAN validity and safety acceptance of intended commands.
+  - [ ] [`test_models.py`](../opendbc/car/tests/test_models.py) passes on the new routes; it replays them to check CAN validity and that safety agrees with carstate and accepts our commands.
   - [ ] Run the repository checks in [`test.sh`](../test.sh) and fix any failures.
 
 - Regression validation
 
   - [ ] Recheck related existing cars affected by shared DBC, controller, interface, or safety changes.
   - [ ] Repeat startup, engagement, cancellation, and shutdown over multiple drives and ignition cycles.
-
-- Documentation and evidence
-
-  - [ ] Record evidence for completed checks and explicitly list limitations, untested behavior, and unsupported features.
