@@ -17,7 +17,7 @@ Not everything will apply to your car. If something can't be tested, let us know
 
 - Harness and CAN topology
 
-  - [ ] Confirm harness pinout, CAN bus assignments, bitrate, and CAN/CAN FD configuration.
+  - [ ] Confirm harness pinout, CAN bus assignments, and CAN/CAN FD configuration.
   - [ ] Identify which ECUs send, receive, and forward each relevant message.
     - This is useful to know which messages we need to forward and block in safety.
 
