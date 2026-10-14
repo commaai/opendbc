@@ -109,6 +109,10 @@ Start off by recording a route with lots of interesting events: enable LKAS and 
 
 Use the [longitudinal maneuvers](https://github.com/commaai/openpilot/tree/master/tools/longitudinal_maneuvers) report to evaluate your car's longitudinal control and tune it.
 
+### Validation
+
+Before submitting a port, go through the [car porting checklist](docs/CAR_PORTING_CHECKLIST.md).
+
 ## Contributing
 
 All opendbc development is coordinated on GitHub and [Discord](https://discord.comma.ai). Check out the `#dev-opendbc-cars` channel and `Vehicle Specific` section.
