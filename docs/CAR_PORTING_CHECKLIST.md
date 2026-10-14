@@ -1,8 +1,8 @@
 # Car porting checklist
 
-Use this checklist for a new port or when extending an existing one. Check items only after verifying them; mark unsupported or inapplicable items `N/A` with a reason. Record routes, timestamps, test results, and known limitations alongside the relevant items. Distinguish behavior observed on the car from behavior inferred from logs or tested in simulation.
+Use this checklist for a new port or when extending an existing one. Check items only after verifying them on the car; mark inapplicable items `N/A` with a reason.
 
-Repeat applicable checks for each supported hardware variant and control mode (stock ACC and openpilot longitudinal). Some checks require the full openpilot integration, beyond opendbc alone. Use bench tests or replay for fault injection, stationary checks for doors/seatbelts/gears, and a controlled environment for actuation checks.
+Repeat applicable checks for each supported variant and control mode (stock ACC and openpilot longitudinal). Some checks require running the full openpilot stack, not just opendbc.
 
 ## Vehicle and setup
 
@@ -121,10 +121,9 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 - [ ] Set, resume, cancel, main cruise, speed up/down, gap, and LKAS buttons are mapped where present.
 - [ ] Button press and release edges each occur once; held buttons do not cause unintended repeated engagement.
 - [ ] Short presses, long presses, and simultaneous button presses are handled correctly.
-- [ ] Cruise available, enabled, standstill, and set speed are parsed properly and match stock behavior.
+- [ ] Cruise available (main), enabled, standstill, and set speed are parsed properly and match stock behavior.
   - Cruise enabled should stay true during driver accelerator override and at standstill. Some dash signals fall in these states (e.g. Subaru).
   - `cruiseState.standstill` should only be true if the car requires a resume press to drive off.
-- [ ] Cruise main on/off and ACC standby/active transitions are parsed properly.
 - [ ] Set speed changes, unit changes, and minimum/maximum set speeds behave correctly.
 
 ## Engagement, cancellation, and overrides
@@ -144,13 +143,6 @@ Repeat applicable checks for each supported hardware variant and control mode (s
     - If the cancel button can toggle pause/resume or the main button can engage, use `blockPcmEnable` to only allow PCM enable after a real user button press (e.g. Hyundai).
   - [ ] Cruise main off disengages and prevents unintended re-engagement.
 
-- Driver overrides
-
-  - [ ] Brake press disengages as intended while moving as well as while at a standstill.
-  - [ ] Accelerator override and release behave correctly, i.e. we stop requesting acceleration (inactive, or 0 m/s^2) while continuing to steer.
-  - [ ] Steering override works in both directions; any steering-based disengagement matches the platform policy.
-    - Some platforms disengage both steering and cruise on a steering override (e.g. Tesla); use `steeringDisengage` for this.
-
 - Disengagement and recovery
 
   - [ ] Releasing a pedal, closing a door, buckling a belt, or clearing a fault does not unexpectedly re-engage unless we are still in the soft-disable grace period.
@@ -164,7 +156,8 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 
   - [ ] Small left/right commands produce the expected steering direction.
   - [ ] Command magnitude and rate limits match the platform and safety implementation.
-  - [ ] Driver override reduces or cancels openpilot steering assistance as intended.
+  - [ ] Driver override reduces or cancels openpilot steering assistance as intended, in both directions.
+    - Some platforms disengage both steering and cruise on a steering override (e.g. Tesla); use `steeringDisengage` for this.
 
 - Low-speed behavior
 
@@ -195,7 +188,8 @@ Repeat applicable checks for each supported hardware variant and control mode (s
   - [ ] Acceleration and braking command signs, scales, limits, and rate limits are verified.
   - [ ] Acceleration, coasting, and braking transitions are smooth and free of conflicting requests.
     - Some cars accept gas and brake commands separately; never request both at once.
-  - [ ] Driver accelerator and brake inputs retain their intended priority over commanded actuation.
+  - [ ] Brake press disengages while moving as well as while at a standstill.
+  - [ ] Accelerator override and release behave correctly, i.e. we stop requesting acceleration (inactive, or 0 m/s^2) while continuing to steer.
 
 - Stopping, holding, and resuming
 
@@ -255,7 +249,6 @@ Repeat applicable checks for each supported hardware variant and control mode (s
 
   - [ ] Invalid counters/checksums, missing required input messages, and stale state disable control as intended.
   - [ ] Relay malfunction detection and forwarding restrictions cover the actual harness topology.
-  - [ ] Restart and recovery require valid state and do not unexpectedly restore actuation.
 
 - Test coverage
 
