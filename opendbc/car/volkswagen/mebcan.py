@@ -82,6 +82,12 @@ class MebLongStateMachine:
     self.prev_acc_hold_type = self.acc_hold_type_vals['KEINE_ANFORDERUNG']  # no request
     self.acc_status = self.acc_status_vals['ACC_OFF_HAUPTSCHALTER_AUS']  # last acc status, read by HUD msg
 
+    # DO NOT MERGE: hold fuzzing variants, set every cycle by openpilot's meb_fuzz harness
+    # fuzz_hold_source: 'hms' holds once the hold manager confirms (#3861), 'standstill' on ESC_50.Standstill (old)
+    # fuzz_starting: 'master' drives off on Standstill, 'stock' drives off once the hold manager holds (#3846)
+    self.fuzz_hold_source = 'hms'
+    self.fuzz_starting = 'master'
+
   def _get_acc_status(self, CS, CC) -> int:
     # stateless
     # NOTE: stock TSK and camera goes to 5 on disengage independently which we don't model, but hasn't been shown to fault without it
@@ -101,7 +107,11 @@ class MebLongStateMachine:
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
     # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
-    starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
+    if self.fuzz_starting == 'stock':
+      driving_off = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.esp_hold_confirmation
+      starting = CC.actuators.longControlState == LongCtrlState.pid and (CS.acc_hold_confirmation or driving_off)
+    else:
+      starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
     long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
     if not long_active:
@@ -142,12 +152,13 @@ class MebLongStateMachine:
     # transition to inactive accel and jerks once the hold manager is holding the car,
     # going inactive before then permanently faults TSK
     requesting_hold = acc_hold_type == self.acc_hold_type_vals['HALTEN']
-    held = requesting_hold and CS.acc_hold_confirmation
+    hold_confirmation = CS.esp_hold_confirmation if self.fuzz_hold_source == 'standstill' else CS.acc_hold_confirmation
+    held = requesting_hold and hold_confirmation
     if not CC.enabled or held:
       accel = self.CCP.ACCEL_INACTIVE
 
     # hold requested but the hold manager isn't holding the car yet
-    braking_to_stop = requesting_hold and not CS.acc_hold_confirmation
+    braking_to_stop = requesting_hold and not hold_confirmation
 
     # driving off from a hold
     leaving_standstill = acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
