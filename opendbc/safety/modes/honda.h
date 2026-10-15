@@ -317,7 +317,7 @@ static safety_config honda_nidec_init(uint16_t param) {
 
   if (enable_nidec_alt) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
-    static RxCheck honda_nidec_alt_rx_checks[] = {
+    static const RxCheck honda_nidec_alt_rx_checks[] = {
       HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
       {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
@@ -325,7 +325,7 @@ static safety_config honda_nidec_init(uint16_t param) {
     SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
   } else {
     // Nidec includes BRAKE_COMMAND
-    static RxCheck honda_nidec_common_rx_checks[] = {
+    static const RxCheck honda_nidec_common_rx_checks[] = {
       HONDA_COMMON_RX_CHECKS(0)
       {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
@@ -391,21 +391,21 @@ static safety_config honda_bosch_init(uint16_t param) {
   const uint16_t HONDA_PARAM_BOSCH_CANFD = 16;
 
   // Bosch radarless has the powertrain bus on bus 0
-  static RxCheck honda_bosch_pt0_rx_checks[] = {
+  static const RxCheck honda_bosch_pt0_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(0)
   };
 
-  static RxCheck honda_bosch_pt0_alt_brake_rx_checks[] = {
+  static const RxCheck honda_bosch_pt0_alt_brake_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(0)
     HONDA_ALT_BRAKE_ADDR_CHECK(0)
   };
 
   // Bosch has powertrain on bus 1, verified 0x1A6 does not exist
-  static RxCheck honda_bosch_pt1_rx_checks[] = {
+  static const RxCheck honda_bosch_pt1_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(1)
   };
 
-  static RxCheck honda_bosch_pt1_alt_brake_rx_checks[] = {
+  static const RxCheck honda_bosch_pt1_alt_brake_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(1)
     HONDA_ALT_BRAKE_ADDR_CHECK(1)
   };

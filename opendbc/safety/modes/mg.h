@@ -124,7 +124,7 @@ static safety_config mg_init(uint16_t param) {
 
   static const CanMsg MG_TX_MSGS[] = {{0x1fd, 0, 8, .check_relay = true}};
 
-  static RxCheck mg_rx_checks[] = {
+  static const RxCheck mg_rx_checks[] = {
     {.msg = {{0x23c, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // SCS_HSC2_FrP19 (speed)
     {.msg = {{0xaf,  0, 8, .frequency = 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // GW_HSC2_HCU_FrP00 (gas pedal)
     {.msg = {{0x1ec, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // EPS_HSC2_FrP03 (driver torque)
