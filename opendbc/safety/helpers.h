@@ -56,11 +56,10 @@ static bool msg_matches_addr_bus(const CANPacket_t *msg, uint32_t addr, uint32_t
   return actual == expected;
 }
 
-// Compare address, bus, and decoded byte length as one key.
+// Compare address, bus, and decoded byte length with one comparison: all three match when no bit differs.
 static bool msg_matches_addr_bus_len(const CANPacket_t *msg, uint32_t addr, uint32_t bus, uint32_t len) {
-  uint64_t actual = ((uint64_t)msg->addr << 10) | ((uint64_t)msg->bus << 7) | (uint64_t)dlc_to_len[msg->data_len_code];
-  uint64_t expected = ((uint64_t)addr << 10) | ((uint64_t)bus << 7) | (uint64_t)len;
-  return actual == expected;
+  uint32_t diff = ((uint32_t)msg->addr ^ addr) | ((uint32_t)msg->bus ^ bus) | ((uint32_t)dlc_to_len[msg->data_len_code] ^ len);
+  return diff == 0U;
 }
 
 #define MSG_MATCHES_SELECT(_msg, _addr, _bus, _len, NAME, ...) NAME
