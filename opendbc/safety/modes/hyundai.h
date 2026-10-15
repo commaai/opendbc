@@ -270,11 +270,11 @@ static safety_config hyundai_init(uint16_t param) {
   safety_config ret;
   if (hyundai_longitudinal) {
     // Use CLU11 (buttons) to manage controls allowed instead of SCC cruise state
-    static RxCheck hyundai_long_rx_checks[] = {
+    static const RxCheck hyundai_long_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
     };
 
-    static RxCheck hyundai_fcev_long_rx_checks[] = {
+    static const RxCheck hyundai_fcev_long_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
       HYUNDAI_FCEV_GAS_ADDR_CHECK
     };
@@ -290,19 +290,19 @@ static safety_config hyundai_init(uint16_t param) {
       SET_TX_MSGS(HYUNDAI_LONG_TX_MSGS, ret);
     }
   } else if (hyundai_camera_scc) {
-    static RxCheck hyundai_cam_scc_rx_checks[] = {
+    static const RxCheck hyundai_cam_scc_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
       HYUNDAI_SCC12_ADDR_CHECK(2)
     };
 
     ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
   } else {
-    static RxCheck hyundai_rx_checks[] = {
+    static const RxCheck hyundai_rx_checks[] = {
        HYUNDAI_COMMON_RX_CHECKS(false)
        HYUNDAI_SCC12_ADDR_CHECK(0)
     };
 
-    static RxCheck hyundai_fcev_rx_checks[] = {
+    static const RxCheck hyundai_fcev_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
       HYUNDAI_SCC12_ADDR_CHECK(0)
       HYUNDAI_FCEV_GAS_ADDR_CHECK
@@ -320,7 +320,7 @@ static safety_config hyundai_init(uint16_t param) {
 
 static safety_config hyundai_legacy_init(uint16_t param) {
   // older hyundai models have less checks due to missing counters and checksums
-  static RxCheck hyundai_legacy_rx_checks[] = {
+  static const RxCheck hyundai_legacy_rx_checks[] = {
     HYUNDAI_COMMON_RX_CHECKS(true)
     HYUNDAI_SCC12_ADDR_CHECK(0)
   };

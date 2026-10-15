@@ -1,7 +1,7 @@
 from opendbc.car import Bus, structs
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.volkswagen.values import DBC
+from opendbc.car.volkswagen.values import DBC, VolkswagenFlags
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
@@ -71,6 +71,7 @@ class MebLongStateMachine:
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
+    self.gen1 = not bool(CP.flags & VolkswagenFlags.MEB_GEN2) #todo: see if this is the right place to put this
     self.RAMP_FRAMES = 10 // CCP.ACC_CONTROL_STEP  # 100 ms
 
     self.disengage_ramp_counter = 0  # always ramp when disengaging
@@ -98,18 +99,15 @@ class MebLongStateMachine:
     # warning: car is reacting to hold mechanic even with long control off
     # HALTEN -> KEINE_ANFORDERUNG causes the car to fault into park, so both branches below put a ramp in
     # between: disengaging always ramps, and while engaged a release ramps until 5 kph
-    # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
+    # NOTE: ANFAHREN faults TSK if the hold manager isn't holding
     # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
-    starting = (
-      CC.actuators.longControlState == LongCtrlState.pid
-      and (
-        CS.esp_hold_confirmation
-        or (self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and CS.out.vEgoRaw < 0.1)
-        or (self.prev_acc_hold_type == self.acc_hold_type_vals['LOESEN_UEBER_RAMPE'] and CS.out.vEgoRaw < 0.05)
-        or (self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.out.vEgoRaw < 0.25)
-      )
-    )
+    # HMS_Status leaves holding as soon as we send anfahren, so keep driving off until we leave standstill
+    driving_off = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.esp_standstill
+    gen1_early_driveoff = ((self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN'] and CS.out.vEgoRaw < 0.1)
+      or (self.prev_acc_hold_type == self.acc_hold_type_vals['LOESEN_UEBER_RAMPE'] and CS.out.vEgoRaw < 0.05)
+      or (self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.out.vEgoRaw < 0.25))
+    starting = CC.actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or driving_off or (self.gen1 and gen1_early_driveoff))
     long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
     if not long_active:
