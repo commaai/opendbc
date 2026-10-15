@@ -6,7 +6,7 @@ from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.common import MAX_WRONG_COUNTERS
+from opendbc.safety.tests.common import MAX_WRONG_COUNTERS, CANPackerSafety
 
 HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 
@@ -349,6 +349,134 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
     bus = self.PT_BUS if bus is None else bus
     values = {"CRUISE_BUTTONS": buttons, "MAIN_ON": main_on}
     return self.packer.make_can_msg_safety("SCM_BUTTONS", bus, values)
+
+
+class TestHondaNidecStockLongSafety(TestHondaNidecPcmAltSafety):
+  """
+    Covers the Honda Nidec safety mode when the car keeps its stock ACC. openpilot is lateral-only
+    there, so it owns neither 0x1FA nor 0x30C and must leave both to the stock chain.
+
+    NIDEC_STOCK_LONG is orthogonal to NIDEC_ALT; this inherits the alt SCM helpers because that
+    is the combination the platform using it (HONDA_ODYSSEY_CHN) configures, and packs from that
+    platform's own DBC so the addresses under test are the ones it actually emits: STEERING_CONTROL
+    at 0x194/DLC 4 and LKAS_HUD at 0x33D/DLC 5, both on bus 0.
+  """
+
+  TX_MSGS = [[0x194, 0], [0x33D, 0]]
+  # only the messages we still own keep a static forwarding block and a relay check
+  FWD_BLACKLISTED_ADDRS = {2: [0x194, 0x33D]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x194, 0x33D)}
+
+  def setUp(self):
+    self.packer = CANPackerSafety("honda_odyssey_chn_2019_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, HondaSafetyFlags.NIDEC_ALT | HondaSafetyFlags.NIDEC_STOCK_LONG)
+    self.safety.init_tests()
+
+  # the ACC HUD is longitudinal ownership, so it is never whitelisted, in either controls state
+  def test_acc_hud_safety_check(self):
+    for controls_allowed in [True, False]:
+      self.safety.set_controls_allowed(controls_allowed)
+      for pcm_gas in (0, 1, self.MAX_GAS, 255):
+        for pcm_speed in (0, 1, 50, 99):
+          msg = self._send_acc_hud_msg(pcm_gas, pcm_speed)
+          self.assertFalse(self._tx(msg), f"{controls_allowed=} {pcm_gas=} {pcm_speed=}")
+
+  # same for the brake command, including the all-zero frame and the AEB-flagged ones
+  def test_brake_safety_check(self):
+    for controls_allowed in [True, False]:
+      self.safety.set_controls_allowed(controls_allowed)
+      for brake in np.arange(0, self.MAX_BRAKE + 10, 1):
+        for aeb_req in (0, 1):
+          msg = self._send_brake_msg(brake, aeb_req=aeb_req)
+          self.assertFalse(self._tx(msg), f"{controls_allowed=} {brake=} {aeb_req=}")
+
+  def test_longitudinal_messages_rejected_on_every_bus(self):
+    self.safety.set_controls_allowed(True)
+    for addr, dlc in ((0x30C, 8), (0x1FA, 8)):
+      for bus in range(4):
+        self.assertFalse(self._tx(common.make_msg(bus, addr, dlc)), f"{addr=:#x} {bus=}")
+
+  # stock AEB reaches the car on the same frame as the ordinary stock brake command, so keeping
+  # that frame forwarded keeps the whole stock chain, AEB included, intact
+  def test_block_aeb(self):
+    for controls_allowed in [True, False]:
+      self.safety.set_controls_allowed(controls_allowed)
+      for aeb_signals in ({"AEB_REQ_1": 1}, {"AEB_REQ_2": 1}, {"AEB_STATUS": 1}):
+        values = {"COMPUTER_BRAKE": 0, **aeb_signals}
+        msg = self.packer.make_can_msg_safety("BRAKE_COMMAND", self.PT_BUS, values)
+        self.assertFalse(self._tx(msg), msg=aeb_signals)
+
+        # and none of them may stop the stock frame from being forwarded
+        self.assertFalse(self.safety.safety_fwd_hook(2, 0x1FA), msg=aeb_signals)
+
+  def test_stock_brake_command_always_forwarded(self):
+    # the stock brake command is not ours, so it forwards whatever the AEB latch says
+    for fwd_brake in [False, True]:
+      self.safety.set_honda_fwd_brake(fwd_brake)
+      for aeb_req in (0, 1):
+        self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=aeb_req)))
+        self.assertFalse(self.safety.safety_fwd_hook(2, 0x1FA), f"{fwd_brake=} {aeb_req=}")
+
+  def test_stock_brake_command_forwarded_at_every_brake_level(self):
+    self.safety.set_honda_fwd_brake(False)
+    for stock_brake in np.arange(0, self.MAX_BRAKE + 1, 1):
+      self.assertTrue(self._rx(self._rx_brake_msg(stock_brake, aeb_req=0)))
+      self.assertFalse(self.safety.safety_fwd_hook(2, 0x1FA), f"{stock_brake=}")
+
+  # the latch is still computed, but nothing may consult it here: openpilot sends no brake command
+  # for it to arbitrate against, so it must not become a forwarding gate
+  def test_honda_fwd_brake_latching(self):
+    self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=0)))
+    self.assertFalse(self.safety.get_honda_fwd_brake())
+    self.assertFalse(self.safety.safety_fwd_hook(2, 0x1FA))
+
+    self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=1)))
+    self.assertTrue(self.safety.get_honda_fwd_brake())
+    self.assertFalse(self.safety.safety_fwd_hook(2, 0x1FA))
+
+  def test_stock_acc_hud_does_not_trip_relay_malfunction(self):
+    # 0x30C is not ours, so the stock ACC HUD arriving on the bus we transmit on is expected
+    self.assertFalse(self.safety.get_relay_malfunction())
+    for _ in range(5):
+      self.assertTrue(self._rx(self._send_acc_hud_msg(0, 0)))
+    self.assertFalse(self.safety.get_relay_malfunction())
+
+  def test_steering_is_still_owned(self):
+    # 0x194 keeps the stock steering safety and its relay protection
+    for controls_allowed in [True, False]:
+      self.safety.set_controls_allowed(controls_allowed)
+      self.assertTrue(self._tx(self._send_steer_msg(0)))
+      self.assertEqual(controls_allowed, self._tx(self._send_steer_msg(0x1000)))
+
+    self.assertFalse(self.safety.get_relay_malfunction())
+    self.assertTrue(self._rx(common.make_msg(0, 0x194, 4)))
+    self.assertTrue(self.safety.get_relay_malfunction())
+
+  def test_fwd_hook(self):
+    # the stock brake command is forwarded in both AEB latch states
+    for fwd_brake in [False, True]:
+      self.safety.set_honda_fwd_brake(fwd_brake)
+      self.assertFalse(self.safety.safety_fwd_hook(2, 0x1FA), f"{fwd_brake=}")
+
+    self.safety.set_honda_fwd_brake(False)
+    common.SafetyTest.test_fwd_hook(self)
+
+  def test_default_nidec_config_is_unchanged_by_this_flag(self):
+    # the flag is additive: the same hooks without it must still own the longitudinal messages
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, HondaSafetyFlags.NIDEC_ALT)
+    self.safety.init_tests()
+
+    self.safety.set_controls_allowed(True)
+    for addr, dlc in ((0x194, 4), (0x1FA, 8), (0x30C, 8), (0x33D, 5)):
+      self.assertTrue(self._tx(common.make_msg(0, addr, dlc)), f"{addr=:#x}")
+
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, 0x30C))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, 0x1FA))
+
+    self.assertFalse(self.safety.get_relay_malfunction())
+    self.assertTrue(self._rx(common.make_msg(0, 0x30C, 8)))
+    self.assertTrue(self.safety.get_relay_malfunction())
 
 
 # ********************* Honda Bosch **********************
