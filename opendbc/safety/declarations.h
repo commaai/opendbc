@@ -180,14 +180,14 @@ typedef struct {
 } LongitudinalLimits;
 
 typedef struct {
-  const int addr;
-  const uint8_t bus;
-  const uint8_t len;
-  const uint16_t frequency;          // expected frequency of the message [Hz]
-  const bool ignore_checksum;        // checksum check is not performed when set to true
-  const bool ignore_counter;         // counter check is not performed when set to true
-  const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
-  const bool ignore_quality_flag;    // true if quality flag check is skipped
+  const unsigned int addr : 29;
+  const unsigned int bus : 3;
+  const unsigned int len : 7;
+  const unsigned int frequency : 7;   // expected frequency of the message [Hz]
+  const bool ignore_checksum : 1;     // checksum check is not performed when set to true
+  const bool ignore_counter : 1;      // counter check is not performed when set to true
+  const unsigned int max_counter : 8; // maximum value of the counter. 0 means that the counter check is skipped
+  const bool ignore_quality_flag : 1; // true if quality flag check is skipped
 } CanMsgCheck;
 
 // dynamic state of an RX check, reset on safety mode init
