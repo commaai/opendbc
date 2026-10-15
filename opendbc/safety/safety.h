@@ -287,36 +287,6 @@ int safety_fwd_hook(int bus_num, int addr) {
   return blocked ? -1 : destination_bus;
 }
 
-// Given a CRC-8 poly, generate a static lookup table to use with a fast CRC-8
-// algorithm. Called at init time for safety modes using CRC-8.
-void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]) {
-  for (uint16_t i = 0U; i <= 0xFFU; i++) {
-    uint8_t crc = (uint8_t)i;
-    for (int j = 0; j < 8; j++) {
-      if ((crc & 0x80U) != 0U) {
-        crc = (uint8_t)((crc << 1) ^ poly);
-      } else {
-        crc <<= 1;
-      }
-    }
-    crc_lut[i] = crc;
-  }
-}
-
-void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
-  for (uint16_t i = 0; i < 256U; i++) {
-    uint16_t crc = i << 8U;
-    for (uint16_t j = 0; j < 8U; j++) {
-      if ((crc & 0x8000U) != 0U) {
-        crc = (uint16_t)((crc << 1) ^ poly);
-      } else {
-        crc <<= 1;
-      }
-    }
-    crc_lut[i] = crc;
-  }
-}
-
 // 1Hz safety function called by main. Now just a check for lagging safety messages
 void safety_tick(void) {
   const uint8_t MAX_MISSED_MSGS = 10U;
