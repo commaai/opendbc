@@ -326,8 +326,8 @@ void safety_tick(void) {
     // Quite conservative to not risk false triggers.
     // 2s of lag is worse case, since the function is called at 1Hz
     uint32_t frequency = current_safety_config.rx_checks[i].msg[status->index].frequency;
-    uint32_t timestep = 1e6 / frequency;
-    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
+    uint32_t timestep = 1000000U / SAFETY_MAX(frequency, 1U);  // frequency < 10Hz is invalid below
+    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1000000U);
     status->lagging = lagging;
 
     // enforce minimum frequency for safety-relevant messages
