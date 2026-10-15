@@ -128,7 +128,7 @@ static int get_addr_check_index(const CANPacket_t *msg, const RxCheck addr_list[
     RxStatus *status = &rx_status[i];
     // if multiple msgs are allowed, determine which one is present on the bus
     if (!status->msg_seen) {
-      for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (addr_list[i].msg[j].addr != 0); j++) {
+      for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (addr_list[i].msg[j].addr != 0U); j++) {
         if (msg_matches(msg, addr_list[i].msg[j].addr, addr_list[i].msg[j].bus, addr_list[i].msg[j].len)) {
           status->index = j;
           status->msg_seen = true;
