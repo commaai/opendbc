@@ -398,23 +398,23 @@ static safety_config toyota_init(uint16_t param) {
   }
 
   if (toyota_secoc) {
-    static RxCheck toyota_secoc_rx_checks[] = {
+    static const RxCheck toyota_secoc_rx_checks[] = {
       TOYOTA_SECOC_RX_CHECKS
     };
 
     SET_RX_CHECKS(toyota_secoc_rx_checks, ret);
   } else if (toyota_lta) {
     // Check the quality flag for angle measurement when using LTA, since it's not set on TSS-P cars
-    static RxCheck toyota_lta_rx_checks[] = {
+    static const RxCheck toyota_lta_rx_checks[] = {
       TOYOTA_RX_CHECKS(true)
     };
 
     SET_RX_CHECKS(toyota_lta_rx_checks, ret);
   } else {
-    static RxCheck toyota_lka_rx_checks[] = {
+    static const RxCheck toyota_lka_rx_checks[] = {
       TOYOTA_RX_CHECKS(false)
     };
-    static RxCheck toyota_lka_alt_brake_rx_checks[] = {
+    static const RxCheck toyota_lka_alt_brake_rx_checks[] = {
       TOYOTA_ALT_BRAKE_RX_CHECKS(false)
     };
 

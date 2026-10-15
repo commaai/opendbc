@@ -173,12 +173,12 @@ static safety_config subaru_init(uint16_t param) {
 
   safety_config ret;
   if (subaru_gen2) {
-    static RxCheck subaru_gen2_rx_checks[] = {
+    static const RxCheck subaru_gen2_rx_checks[] = {
       SUBARU_COMMON_RX_CHECKS(SUBARU_ALT_BUS)
     };
     ret = BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_TX_MSGS);
   } else {
-    static RxCheck subaru_rx_checks[] = {
+    static const RxCheck subaru_rx_checks[] = {
       SUBARU_COMMON_RX_CHECKS(SUBARU_MAIN_BUS)
     };
     ret = BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_TX_MSGS);

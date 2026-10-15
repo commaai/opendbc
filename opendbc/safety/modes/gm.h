@@ -198,11 +198,11 @@ static safety_config gm_init(uint16_t param) {
   };
 #endif
 
-  static RxCheck gm_rx_checks[] = {
+  static const RxCheck gm_rx_checks[] = {
     GM_COMMON_RX_CHECKS
   };
 
-  static RxCheck gm_ev_rx_checks[] = {
+  static const RxCheck gm_ev_rx_checks[] = {
     GM_COMMON_RX_CHECKS
     {.msg = {{0xBD, 0, 7, 40U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
