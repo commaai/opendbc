@@ -68,6 +68,8 @@ ACC_HUD_DISABLED = 0
 
 class MebLongStateMachine:
   HOLD_RELEASE_SPEED = 5 * CV.KPH_TO_MS
+  DRIVE_OFF_MIN_ACCEL = 0.3  # DO NOT MERGE: hold_first3
+  DRIVE_OFF_MIN_ACCEL_SPEED = 0.5
 
   def __init__(self, CP, CCP):
     self.CCP = CCP
@@ -110,7 +112,7 @@ class MebLongStateMachine:
     # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
     # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
-    if self.fuzz_starting == 'hold_first2':
+    if self.fuzz_starting in ('hold_first2', 'hold_first3'):
       wants_go = CC.actuators.longControlState == LongCtrlState.pid and CC.actuators.accel > 0
       driving_off = (self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.esp_hold_confirmation and
                      CS.hms_status in (5, 6))
@@ -175,8 +177,14 @@ class MebLongStateMachine:
     braking_to_stop = requesting_hold and not hold_confirmation
 
     # stopped without a hold: a negative accel drives the car backwards and a positive one faults the camera
-    if self.fuzz_starting in ('hold_first', 'hold_first2') and braking_to_stop and CS.esp_hold_confirmation:
+    if self.fuzz_starting in ('hold_first', 'hold_first2', 'hold_first3') and braking_to_stop and CS.esp_hold_confirmation:
       accel = 0.0
+
+    # 'hold_first3': drive off decisively like stock (+0.27-0.43), a release that stalls into a crawl without a hold
+    # faults the camera like a standstill without one
+    if self.fuzz_starting == 'hold_first3' and acc_hold_type in (self.acc_hold_type_vals['ANFAHREN'], self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']) and \
+       CC.enabled and accel > 0. and CS.out.vEgo < self.DRIVE_OFF_MIN_ACCEL_SPEED:
+      accel = max(accel, self.DRIVE_OFF_MIN_ACCEL)
 
     # driving off from a hold
     leaving_standstill = acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
