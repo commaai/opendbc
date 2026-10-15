@@ -18,6 +18,7 @@ class CarState(CarStateBase):
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
     self.acc_hold_confirmation = False
+    self.hms_status = 0  # DO NOT MERGE: hold fuzzing, raw gen2 hold manager status
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
@@ -284,6 +285,7 @@ class CarState(CarStateBase):
     # ESC_50.Standstill can be set while the hold manager isn't holding
     if self.CP.flags & VolkswagenFlags.MEB_GEN2:
       self.acc_hold_confirmation = pt_cp.vl["VMM_02"]["HMS_Status"] == 1
+      self.hms_status = int(pt_cp.vl["VMM_02"]["HMS_Status"])
     else:
       # TODO: switch to VMM_01.HMS_Status, some gen1 cars don't send VMM_01
       self.acc_hold_confirmation = self.esp_hold_confirmation
