@@ -100,10 +100,10 @@ static safety_config byd_init(uint16_t param) {
   };
 
   static const RxCheck byd_rx_checks[] = {
-    {.msg = {{0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_MODULE_2 (steering angle)
-    {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // WHEELSPEED_CLEAN (vehicle speed)
-    {.msg = {{0x242, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DRIVE_STATE (gas and brake pressed)
-    {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // ACC_HUD_ADAS (cruise state)
+    {.msg = {0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}},  // STEER_MODULE_2 (steering angle)
+    {.msg = {0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}},  // WHEELSPEED_CLEAN (vehicle speed)
+    {.msg = {0x242, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}},  // DRIVE_STATE (gas and brake pressed)
+    {.msg = {0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}},  // ACC_HUD_ADAS (cruise state)
   };
 
   return BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);

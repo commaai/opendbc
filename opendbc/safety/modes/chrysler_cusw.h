@@ -10,11 +10,11 @@ static safety_config chrysler_cusw_init(uint16_t param) {
   };
 
   static const RxCheck chrysler_cusw_rx_checks[] = {
-    {.msg = {{0x1E4U, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{0x1E8U, 0, 5, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{0x1ECU, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{0x1FEU, 0, 5, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-    {.msg = {{0x2ECU, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {0x1E4U, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}},
+    {.msg = {0x1E8U, 0, 5, 50U, .max_counter = 15U, .ignore_quality_flag = true}},
+    {.msg = {0x1ECU, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}},
+    {.msg = {0x1FEU, 0, 5, 50U, .max_counter = 15U, .ignore_quality_flag = true}},
+    {.msg = {0x2ECU, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}},
   };
 
   return BUILD_SAFETY_CFG(chrysler_cusw_rx_checks, CHRYSLER_CUSW_TX_MSGS);

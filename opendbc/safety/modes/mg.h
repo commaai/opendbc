@@ -125,11 +125,11 @@ static safety_config mg_init(uint16_t param) {
   static const CanMsg MG_TX_MSGS[] = {{0x1fd, 0, 8, .check_relay = true}};
 
   static const RxCheck mg_rx_checks[] = {
-    {.msg = {{0x23c, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // SCS_HSC2_FrP19 (speed)
-    {.msg = {{0xaf,  0, 8, .frequency = 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // GW_HSC2_HCU_FrP00 (gas pedal)
-    {.msg = {{0x1ec, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // EPS_HSC2_FrP03 (driver torque)
-    {.msg = {{0x242, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // RADAR_HSC2_FrP00 (cruise state)
-    {.msg = {{0x1b6, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // EHBS_HSC2_FrP00 (brake pedal)
+    {.msg = {0x23c, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}},   // SCS_HSC2_FrP19 (speed)
+    {.msg = {0xaf,  0, 8, .frequency = 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}},   // GW_HSC2_HCU_FrP00 (gas pedal)
+    {.msg = {0x1ec, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}},   // EPS_HSC2_FrP03 (driver torque)
+    {.msg = {0x242, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}},   // RADAR_HSC2_FrP00 (cruise state)
+    {.msg = {0x1b6, 0, 8, .frequency = 50U,  .max_counter = 15U, .ignore_quality_flag = true}},   // EHBS_HSC2_FrP00 (brake pedal)
   };
 
   safety_config ret;

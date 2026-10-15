@@ -154,11 +154,11 @@ static safety_config rivian_init(uint16_t param) {
   };
 
   static const RxCheck rivian_rx_checks[] = {
-    {.msg = {{0x208, 0, 8, 50U, .max_counter = 14U}, { 0 }, { 0 }}},   // ESP_Status (speed)
-    {.msg = {{0x150, 0, 7, 50U, .max_counter = 14U}, { 0 }, { 0 }}},   // VDM_PropStatus (gas pedal & 2nd speed)
-    {.msg = {{0x38f, 0, 6, 50U, .max_counter = 14U}, { 0 }, { 0 }}},   // iBESP2 (brakes)
-    {.msg = {{0x380, 0, 5, 100U, .max_counter = 14U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // EPAS_SystemStatus (driver torque)
-    {.msg = {{0x100, 2, 8, 100U, .max_counter = 14U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // ACM_Status (cruise state)
+    {.msg = {0x208, 0, 8, 50U, .max_counter = 14U}},   // ESP_Status (speed)
+    {.msg = {0x150, 0, 7, 50U, .max_counter = 14U}},   // VDM_PropStatus (gas pedal & 2nd speed)
+    {.msg = {0x38f, 0, 6, 50U, .max_counter = 14U}},   // iBESP2 (brakes)
+    {.msg = {0x380, 0, 5, 100U, .max_counter = 14U, .ignore_quality_flag = true}},  // EPAS_SystemStatus (driver torque)
+    {.msg = {0x100, 2, 8, 100U, .max_counter = 14U, .ignore_quality_flag = true}},  // ACM_Status (cruise state)
   };
 
   bool rivian_longitudinal = false;

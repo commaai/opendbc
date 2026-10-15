@@ -93,6 +93,26 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config nissan_init(uint16_t param) {
+  static const CanMsgCheck nissan_wheel_speeds_rx_alternatives[MAX_ADDR_CHECK_MSGS - 1U] = {
+    {0x285, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
+    { 0 }
+  };
+
+  static const CanMsgCheck nissan_cruise_rx_alternatives[MAX_ADDR_CHECK_MSGS - 1U] = {
+    {0x30f, 1, 3, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
+    { 0 }
+  };
+
+  static const CanMsgCheck nissan_gas_rx_alternatives[MAX_ADDR_CHECK_MSGS - 1U] = {
+    {0x15c, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
+    {0x239, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}
+  };
+
+  static const CanMsgCheck nissan_brake_rx_alternatives[MAX_ADDR_CHECK_MSGS - 1U] = {
+    {0x454, 1, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
+    {0x1cc, 0, 4, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}
+  };
+
   static const CanMsg NISSAN_TX_MSGS[] = {
     {0x169, 0, 8, .check_relay = true},   // LKAS
     {0x2b1, 0, 8, .check_relay = true},   // PROPILOT_HUD
@@ -104,17 +124,11 @@ static safety_config nissan_init(uint16_t param) {
 
   // Signals duplicated below due to the fact that these messages can come in on either CAN bus, depending on car model.
   static const RxCheck nissan_rx_checks[] = {
-    {.msg = {{0x185, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_TORQUE_SENSOR
-    {.msg = {{0x285, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x285, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},  // WHEEL_SPEEDS_REAR
-    {.msg = {{0x30f, 2, 3, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x30f, 1, 3, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},  // CRUISE_STATE
-    {.msg = {{0x15c, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x15c, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x239, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}}},  // GAS_PEDAL
-    {.msg = {{0x454, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x454, 1, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
-             {0x1cc, 0, 4, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}}},  // DOORS_LIGHTS / BRAKE
+    {.msg = {0x185, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}},  // STEER_TORQUE_SENSOR
+    {.msg = {0x285, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, .alternatives = nissan_wheel_speeds_rx_alternatives},  // WHEEL_SPEEDS_REAR
+    {.msg = {0x30f, 2, 3, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, .alternatives = nissan_cruise_rx_alternatives},  // CRUISE_STATE
+    {.msg = {0x15c, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, .alternatives = nissan_gas_rx_alternatives},  // GAS_PEDAL
+    {.msg = {0x454, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, .alternatives = nissan_brake_rx_alternatives},  // DOORS_LIGHTS / BRAKE
   };
 
   // EPS Location. false = V-CAN, true = C-CAN

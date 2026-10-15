@@ -26,11 +26,11 @@
 static bool volkswagen_meb_alt_crc = false;
 
 #define VOLKSWAGEN_MEB_COMMON_RX_CHECKS \
-  {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_MOTOR_14, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_GRA_ACC_01, 0, 8, 33U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_QFK_01, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_ESP_21, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+  {.msg = {MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}}, \
+  {.msg = {MSG_MOTOR_14, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}}, \
+  {.msg = {MSG_GRA_ACC_01, 0, 8, 33U, .max_counter = 15U, .ignore_quality_flag = true}}, \
+  {.msg = {MSG_QFK_01, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}}, \
+  {.msg = {MSG_ESP_21, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}},
 
 static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   uint8_t salt = 0;
@@ -114,16 +114,16 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   if (volkswagen_meb_alt_crc) {
     static const RxCheck volkswagen_meb_gen2_rx_checks[] = {
       VOLKSWAGEN_MEB_COMMON_RX_CHECKS
-      {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-      {.msg = {{MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+      {.msg = {MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}},
+      {.msg = {MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true}},
     };
 
     ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   } else {
     static const RxCheck volkswagen_meb_rx_checks[] = {
       VOLKSWAGEN_MEB_COMMON_RX_CHECKS
-      {.msg = {{MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
-      {.msg = {{MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+      {.msg = {MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}},
+      {.msg = {MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}},
     };
 
     ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);

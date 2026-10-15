@@ -122,14 +122,19 @@ static bool is_msg_valid(int index) {
   return valid;
 }
 
+static const CanMsgCheck *get_rx_msg(const RxCheck *check, uint8_t index) {
+  return (index == 0U) ? &check->msg : ((check->alternatives != NULL) ? &check->alternatives[index - 1U] : NULL);
+}
+
 static int get_addr_check_index(const CANPacket_t *msg, const RxCheck addr_list[], const int len) {
   int index = -1;
   for (int i = 0; i < len; i++) {
     RxStatus *status = &rx_status[i];
     // if multiple msgs are allowed, determine which one is present on the bus
     if (!status->msg_seen) {
-      for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (addr_list[i].msg[j].addr != 0); j++) {
-        if (msg_matches(msg, addr_list[i].msg[j].addr, addr_list[i].msg[j].bus, addr_list[i].msg[j].len)) {
+      for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (get_rx_msg(&addr_list[i], j) != NULL) && (get_rx_msg(&addr_list[i], j)->addr != 0); j++) {
+        const CanMsgCheck *m = get_rx_msg(&addr_list[i], j);
+        if (msg_matches(msg, m->addr, m->bus, m->len)) {
           status->index = j;
           status->msg_seen = true;
           break;
@@ -138,7 +143,7 @@ static int get_addr_check_index(const CANPacket_t *msg, const RxCheck addr_list[
     }
 
     if (status->msg_seen) {
-      const CanMsgCheck *m = &addr_list[i].msg[status->index];
+      const CanMsgCheck *m = get_rx_msg(&addr_list[i], status->index);
       if (msg_matches(msg, m->addr, m->bus, m->len)) {
         index = i;
         break;
@@ -163,7 +168,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 
   if (index != -1) {
     RxStatus *status = &rx_status[index];
-    const CanMsgCheck *m = &cfg->rx_checks[index].msg[status->index];
+    const CanMsgCheck *m = get_rx_msg(&cfg->rx_checks[index], status->index);
     status->last_timestamp = microsecond_timer_get();
 
     // checksum check
@@ -295,7 +300,7 @@ void safety_tick(void) {
     // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
     // Quite conservative to not risk false triggers.
     // 2s of lag is worse case, since the function is called at 1Hz
-    uint32_t frequency = current_safety_config.rx_checks[i].msg[status->index].frequency;
+    uint32_t frequency = get_rx_msg(&current_safety_config.rx_checks[i], status->index)->frequency;
     uint32_t timestep = 1000000U / SAFETY_MAX(frequency, 1U);  // frequency < 10Hz is invalid below
     bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1000000U);
     status->lagging = lagging;

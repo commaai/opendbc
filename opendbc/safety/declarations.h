@@ -194,7 +194,7 @@ typedef struct {
 typedef struct {
   uint32_t last_timestamp;           // micro-s
   int wrong_counters;                // counter of wrong counters, saturated between 0 and MAX_WRONG_COUNTERS
-  uint8_t index;                     // if multiple messages are allowed to be checked, this stores the index of the first one seen. only msg[msg_index] will be used
+  uint8_t index;                     // if multiple messages are allowed, this stores the index of the first one seen; only that message is checked
   uint8_t last_counter;              // last counter value
   bool msg_seen;
   bool valid_checksum;               // true if and only if checksum check is passed
@@ -205,7 +205,8 @@ typedef struct {
 // params and flags about checksum, counter and frequency checks for each monitored address.
 // constant: the state of the current safety config's checks is in rx_status, indexed alike
 typedef struct {
-  const CanMsgCheck msg[MAX_ADDR_CHECK_MSGS];  // check either messages (e.g. honda steer)
+  const CanMsgCheck msg;
+  const CanMsgCheck *alternatives;  // Optional alternative messages, padded to MAX_ADDR_CHECK_MSGS - 1 slots
 } RxCheck;
 
 extern RxStatus rx_status[MAX_RX_CHECKS];
