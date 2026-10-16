@@ -779,23 +779,22 @@ class TestBydIgnition(common.SafetyTestBase):
 
   TX_MSGS: list = []
 
-  def _msg(self, gear, bus=0):
-    return self.packer.make_can_msg_safety("DRIVE_STATE", bus, {"GEAR": gear})
+  def _msg(self, d4, bus=0):
+    dat = bytes([0, 0, 0, 0, d4, 0, 0, 0])
+    return common.make_msg(bus, 0x055, dat=dat)
 
-  def test_ignition_on_for_every_valid_gear(self):
-    for gear in (1, 2, 3, 4):
-      self.safety.ignition_can_hook(self._msg(gear))
-      self.assertTrue(self.safety.get_ignition_can(), f"gear {gear}")
+  def test_ignition_on_for_0x82(self):
+    self.safety.ignition_can_hook(self._msg(0x82))
+    self.assertTrue(self.safety.get_ignition_can())
 
-  def test_ignition_stays_on_when_gear_zero(self):
-    # Off is the 2s timeout, not GEAR==0
-    self.safety.ignition_can_hook(self._msg(4))
+  def test_ignition_off_for_0x80(self):
+    self.safety.ignition_can_hook(self._msg(0x82))
     self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(0))
-    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0x80))
+    self.assertFalse(self.safety.get_ignition_can())
 
   def test_ignition_ignores_other_bus(self):
-    self.safety.ignition_can_hook(self._msg(4, bus=2))
+    self.safety.ignition_can_hook(self._msg(0x82, bus=2))
     self.assertFalse(self.safety.get_ignition_can())
 
 
