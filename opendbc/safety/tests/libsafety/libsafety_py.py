@@ -78,11 +78,13 @@ def __getattr__(name):
     return libsafety
   raise AttributeError(name)
 
+CANPacket_ptr = ffi.typeof('CANPacket_t *')
+
 def make_CANPacket(addr: int, bus: int, dat):
-  ret = ffi.new('CANPacket_t *')
-  ret[0].extended = 1 if addr >= 0x800 else 0
-  ret[0].addr = addr
-  ret[0].data_len_code = LEN_TO_DLC[len(dat)]
-  ret[0].bus = bus
-  ret[0].data = bytes(dat)
+  ret = ffi.new(CANPacket_ptr)
+  ret.extended = addr >= 0x800
+  ret.addr = addr
+  ret.data_len_code = LEN_TO_DLC[len(dat)]
+  ret.bus = bus
+  ret.data = bytes(dat)
   return ret
