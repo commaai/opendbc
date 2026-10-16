@@ -65,12 +65,9 @@ void ignition_can_hook(const CANPacket_t *msg) {
     prev_counter_vw_meb = counter;
   }
 
-  // BYD Atto 3: DRIVE_STATE.GEAR 40|3@1+ (data[5] & 0x07). Off is 2s timeout.
-  if (msg_matches(msg, 0x242U, 0U, 8U)) {
-    uint8_t gear = msg->data[5] & 0x07U;
-    if ((gear >= 1U) && (gear <= 4U)) {
-      ignition_can = true;
-      ignition_can_cnt = 0U;
-    }
+  // BYD Atto 3: POWER_VCC 0x055 d[4] 0x82=on 0x80=off.
+  if (msg_matches(msg, 0x055U, 0U, 8U)) {
+    ignition_can = (msg->data[4] == 0x82U);
+    ignition_can_cnt = 0U;
   }
 }
