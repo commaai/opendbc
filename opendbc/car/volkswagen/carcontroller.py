@@ -15,13 +15,24 @@ class HCAMitigation:
   """
   Manages HCA fault mitigations for VW/Audi EPS racks:
     * Reduces torque by 1 for a single frame after commanding the same torque value for too long
+    * For MLB racks: opportunistically disables HCA during low-torque periods before the 6-minute EPS lockout
   """
 
-  def __init__(self, CCP):
+  def __init__(self, CCP, steer_timer_mitigation=False):
     self._max_same_torque_frames = CCP.STEER_TIME_STUCK_TORQUE / (DT_CTRL * CCP.STEER_STEP)
     self._same_torque_frames = 0
 
-  def update(self, apply_torque, apply_torque_last):
+    self._steer_timer_mitigation = steer_timer_mitigation
+    if steer_timer_mitigation:
+      self._hca_active_frames = 0
+      self._hca_inactive_frames = 0
+      self._low_torque_frames = 0
+      self._low_torque_threshold = CCP.STEER_TIME_LOW_TORQUE
+      self._frames_mitigation_start = CCP.STEER_TIME_MITIGATION_START / (DT_CTRL * CCP.STEER_STEP)
+      self._frames_low_torque = CCP.STEER_TIME_LOW_TORQUE_TIME / (DT_CTRL * CCP.STEER_STEP)
+      self._frames_reset = CCP.STEER_TIME_RESET / (DT_CTRL * CCP.STEER_STEP)
+
+  def update(self, apply_torque, apply_torque_last, desired_torque):
     if apply_torque != 0 and apply_torque_last == apply_torque:
       self._same_torque_frames += 1
       if self._same_torque_frames > self._max_same_torque_frames:
@@ -29,6 +40,22 @@ class HCAMitigation:
         self._same_torque_frames = 0
     else:
       self._same_torque_frames = 0
+
+    # Disabling lateral controls for ~1.1s will reset the max steer timer on MLB. This reset is done opportunistically
+    # during sustained periods of low desired torque. In the rare case that no such low desired torque period exists
+    # there is a warning triggered prior to the hard lockout by CarState.steer_time_limit_warning().
+    if self._steer_timer_mitigation:
+      if self._hca_inactive_frames >= self._frames_reset:
+        self._hca_active_frames = 0
+
+      low_torque = abs(desired_torque) <= self._low_torque_threshold
+
+      if low_torque and self._low_torque_frames >= self._frames_low_torque and self._hca_active_frames >= self._frames_mitigation_start:
+        apply_torque = 0
+
+      self._low_torque_frames = self._low_torque_frames + 1 if low_torque else 0
+      self._hca_inactive_frames = self._hca_inactive_frames + 1 if apply_torque == 0 else 0
+      self._hca_active_frames += 1
 
     return apply_torque
 
@@ -58,7 +85,7 @@ class CarController(CarControllerBase):
     self.lead_distance_bars_last = None
     self.distance_bar_frame = 0
     self.gra_acc_counter_last = None
-    self.hca_mitigation = HCAMitigation(self.CCP)
+    self.hca_mitigation = HCAMitigation(self.CCP, steer_timer_mitigation=bool(CP.flags & VolkswagenFlags.MLB))
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -104,11 +131,12 @@ class CarController(CarControllerBase):
         self.steering_power_last = steering_power
 
       else:
+        new_torque = 0
         if CC.latActive:
           new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
           apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
 
-        apply_torque = self.hca_mitigation.update(apply_torque, self.apply_torque_last)
+        apply_torque = self.hca_mitigation.update(apply_torque, self.apply_torque_last, new_torque)
         hca_enabled = apply_torque != 0
         self.apply_torque_last = apply_torque
         can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_torque, hca_enabled))
