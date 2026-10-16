@@ -29,7 +29,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   SAFETY_PARAM = int(BydSafetyFlags.LKS_ON) | int(SAFETY_PLATFORM_PARAMS["BYD_ATTO_3"].safety_param)
 
   RELAY_MALFUNCTION_ADDRS = {0: (STEERING_MODULE_ADAS, LKAS_HUD_ADAS)}
-  # Stock 0x1E2/0x316 are forwarded until OP sends STEER_REQ=1.
+  # Stock 0x1E2/0x316 are forwarded until OP sends any 0x1E2 (heartbeat included).
   FWD_BLACKLISTED_ADDRS: dict[int, list[int]] = {}
   TX_MSGS = [[STEERING_MODULE_ADAS, 0], [LKAS_HUD_ADAS, 0], [PCM_BUTTONS, 0], [PCM_BUTTONS, 2]]
 
@@ -62,6 +62,11 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def test_platform_bit_unknown_denies_steer(self):
     self._reinit_with_param(int(BydSafetyFlags.LKS_ON) | 0x200)
     self.assertFalse(self._tx(self._angle_cmd_msg(50, True)))
+
+  def test_platform_bit_atto3_explicit(self):
+    self._reinit_with_param(int(BydSafetyFlags.LKS_ON) | int(SAFETY_PLATFORM_PARAMS["BYD_ATTO_3"].safety_param))
+    self.assertTrue(self._tx(self._angle_cmd_msg(50, True)))
+    self.assertFalse(self._tx(self._angle_cmd_msg(391, True)))
 
   def setUp(self):
     super().setUp()
@@ -401,6 +406,15 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.assertTrue(self._rx(self._pcm_status_msg(True)))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_acc_states_gate_controls(self):
+    # ACC_STATE 2 is main (standby), not active - does not enable.
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("ACC_HUD_ADAS", self.CAM_BUS, {"ACC_STATE": 2})))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # ACC_STATE 5 (FORCE_ACCEL) enables like state 3 when LKS is on.
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("ACC_HUD_ADAS", self.CAM_BUS, {"ACC_STATE": 5})))
+    self.assertTrue(self.safety.get_controls_allowed())
+
   def test_idle_heartbeat_tracks_angle(self):
     # The STEER_REQ=0 heartbeat carries the measured angle, so panda's rate limit
     # reference follows the wheel while lateral is off instead of going stale.
@@ -445,8 +459,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         over_can = safety_max_can(max_angle_float, 1)
         over_can_clipped = min(over_can, self.STEER_ANGLE_MAX * self.DEG_TO_CAN)
         over_angle = sign * over_can_clipped / self.DEG_TO_CAN
-        self._tx(self._angle_cmd_msg(over_angle, True))
-
+        self.safety.set_desired_angle_last(sign * max_angle_can)
         # at low speeds max angle is above STEER_ANGLE_MAX, so adding 1 has no effect
         should_tx = over_can >= self.STEER_ANGLE_MAX * self.DEG_TO_CAN
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(over_angle, True)))
@@ -495,7 +508,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
 
 class TestBydLongitudinalSafety(TestBydSafety, common.LongitudinalAccelSafetyTest):
-  SAFETY_PARAM = int(BydSafetyFlags.LKS_ON | BydSafetyFlags.LONG_CONTROL)
+  SAFETY_PARAM = int(BydSafetyFlags.LKS_ON | BydSafetyFlags.LONG_CONTROL) | int(SAFETY_PLATFORM_PARAMS["BYD_ATTO_3"].safety_param)
   TX_MSGS = [[STEERING_MODULE_ADAS, 0], [LKAS_HUD_ADAS, 0], [ACC_HUD_ADAS, 0], [ACC_CMD, 0], [PCM_BUTTONS, 0], [PCM_BUTTONS, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [PCM_BUTTONS], 2: [ACC_HUD_ADAS, ACC_CMD]}
   RELAY_MALFUNCTION_ADDRS = {0: (STEERING_MODULE_ADAS, LKAS_HUD_ADAS, ACC_HUD_ADAS, ACC_CMD)}
@@ -523,10 +536,8 @@ class TestBydLongitudinalSafety(TestBydSafety, common.LongitudinalAccelSafetyTes
   def test_lks_switch_gates_controls(self):
     pass
 
-  def test_camera_lkas_states_keep_controls(self):
-    pass
-
-  def test_lks_button_on_camera_bus_does_not_toggle(self):
+  def test_acc_states_gate_controls(self):
+    # Long mode does not engage from ACC rising edge.
     pass
 
   def test_long_msgs_blocked_without_long(self):
@@ -534,6 +545,28 @@ class TestBydLongitudinalSafety(TestBydSafety, common.LongitudinalAccelSafetyTes
 
   def test_bus2_buttons_follow_stock(self):
     pass
+
+  def test_platform_bit_unknown_denies_accel(self):
+    self._reinit_with_param(int(BydSafetyFlags.LKS_ON | BydSafetyFlags.LONG_CONTROL) | 0x200)
+    self.assertFalse(self._tx(self._accel_msg(0.0)))
+
+  def test_lks_button_on_camera_bus_does_not_toggle(self):
+    self._arm(2, 0)
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._rx(self._lks_btn_msg(True, bus=self.CAM_BUS)))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_camera_lkas_states_keep_controls(self):
+    self._arm(2, 0)
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertTrue(self.safety.get_controls_allowed())
+    for i, state in enumerate((2, 3, 1, 4, 0, 1, 3, 2)):
+      self.assertTrue(self._rx(self._lkas_hud_msg(state)))
+      self._arm(3, i + 1)
+      self.assertTrue(self.safety.get_controls_allowed(), f"LKAS_STATE {state} dropped controls")
 
   def test_cruise_buttons(self):
     # Stock cruise state does not engage, so bus 0 cancel stays blocked.
@@ -621,6 +654,14 @@ class TestBydLongitudinalSafety(TestBydSafety, common.LongitudinalAccelSafetyTes
     self._tap(SET_BTN=1)
     self._tap()
     self.assertFalse(self.safety.get_controls_allowed())
+
+    # State 5 (FORCE_ACCEL) is main and allows SET engage.
+    self._reset_safety_hooks()
+    self.safety.init_tests()
+    self._arm(5, 0)
+    self._tap(SET_BTN=1)
+    self._tap()
+    self.assertTrue(self.safety.get_controls_allowed())
 
     # LKS off drops controls and a later SET does nothing until LKS is on again.
     self._arm(2, 1)
