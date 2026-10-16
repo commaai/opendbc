@@ -119,6 +119,7 @@ class CarControllerParams:
 
       self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
       self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]
+      self.steering_wheel_side_values = {v: k for k, v in can_define.dv["MEB_Distance_01"]["Steering_Wheel_Side"].items()}
 
       self.BUTTONS = [
         Button(structs.CarState.ButtonEvent.Type.setCruise, "GRA_ACC_01", "GRA_Tip_Setzen", [1]),
