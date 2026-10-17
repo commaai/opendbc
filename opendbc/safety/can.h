@@ -15,7 +15,6 @@ typedef struct {
   unsigned int addr : 29;
   unsigned char checksum;
   unsigned char data[CANPACKET_DATA_SIZE_MAX];
-// cppcheck-suppress misra-c2012-1.2; packed wire format shared with panda
 } __attribute__((packed, aligned(4))) CANPacket_t;
 
 #define GET_LEN(msg) (dlc_to_len[(msg)->data_len_code])
