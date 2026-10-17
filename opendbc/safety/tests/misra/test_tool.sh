@@ -23,4 +23,5 @@ exec "$DIR/bin/misra-$OS-$ARCH" -I . -D ALLOW_DEBUG -D __GNUC__=9 \
   --external-api opendbc/safety/declarations.h \
   --external-api opendbc/safety/ignition.h \
   --external-api opendbc/safety/tests/libsafety/safety.c \
+  --inline-suppr --suppressions-list opendbc/safety/tests/misra/suppressions.txt \
   "$@" opendbc/safety/tests/libsafety/safety.c
