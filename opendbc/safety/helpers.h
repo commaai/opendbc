@@ -2,44 +2,36 @@
 
 #include "opendbc/safety/declarations.h"
 
-// The locals get a unique suffix so that nested uses don't hide each other's locals (Rule 5.3)
-#define SAFETY_UNIQUE(name, n) name##n
-
-#define SAFETY_MIN(a, b) SAFETY_MIN_IMPL(a, b, __COUNTER__)
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_MIN_IMPL(a, b, n) ({ \
-  __typeof__(a) SAFETY_UNIQUE(_a, n) = (a); \
-  __typeof__(b) SAFETY_UNIQUE(_b, n) = (b); \
-  (SAFETY_UNIQUE(_a, n) < SAFETY_UNIQUE(_b, n)) ? SAFETY_UNIQUE(_a, n) : SAFETY_UNIQUE(_b, n); \
+#define SAFETY_MIN(a, b) ({ \
+  __typeof__(a) _a = (a); \
+  __typeof__(b) _b = (b); \
+  (_a < _b) ? _a : _b; \
 })
 
-#define SAFETY_MAX(a, b) SAFETY_MAX_IMPL(a, b, __COUNTER__)
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_MAX_IMPL(a, b, n) ({ \
-  __typeof__(a) SAFETY_UNIQUE(_a, n) = (a); \
-  __typeof__(b) SAFETY_UNIQUE(_b, n) = (b); \
-  (SAFETY_UNIQUE(_a, n) > SAFETY_UNIQUE(_b, n)) ? SAFETY_UNIQUE(_a, n) : SAFETY_UNIQUE(_b, n); \
+#define SAFETY_MAX(a, b) ({ \
+  __typeof__(a) _a = (a); \
+  __typeof__(b) _b = (b); \
+  (_a > _b) ? _a : _b; \
 })
 
-#define SAFETY_CLAMP(x, low, high) SAFETY_CLAMP_IMPL(x, low, high, __COUNTER__)
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_CLAMP_IMPL(x, low, high, n) ({ \
-  __typeof__(x) SAFETY_UNIQUE(_x, n) = (x); \
-  __typeof__(low) SAFETY_UNIQUE(_low, n) = (low); \
-  __typeof__(high) SAFETY_UNIQUE(_high, n) = (high); \
-  (SAFETY_UNIQUE(_x, n) > SAFETY_UNIQUE(_high, n)) ? SAFETY_UNIQUE(_high, n) : \
-    ((SAFETY_UNIQUE(_x, n) < SAFETY_UNIQUE(_low, n)) ? SAFETY_UNIQUE(_low, n) : SAFETY_UNIQUE(_x, n)); \
+#define SAFETY_CLAMP(x, low, high) ({ \
+  __typeof__(x) _x = (x); \
+  __typeof__(low) _low = (low);\
+  __typeof__(high) _high = (high);\
+  (_x > _high) ? _high : ((_x < _low) ? _low : _x); \
 })
 
-#define SAFETY_ABS(a) SAFETY_ABS_IMPL(a, __COUNTER__)
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_ABS_IMPL(a, n) ({ \
-  __typeof__(a) SAFETY_UNIQUE(_a, n) = (a); \
-  (SAFETY_UNIQUE(_a, n) > 0) ? SAFETY_UNIQUE(_a, n) : (-SAFETY_UNIQUE(_a, n)); \
+#define SAFETY_ABS(a) ({ \
+  __typeof__(a) _a = (a); \
+  (_a > 0) ? _a : (-_a); \
 })
 
 // Truncate (val + offset) toward zero, with the sum evaluated in double: this is the implicit
