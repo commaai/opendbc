@@ -498,7 +498,7 @@ void speed_mismatch_check(const float speed_2) {
   // Disable controls if speeds from two sources are too far apart.
   // For safety modes that use speed to adjust torque or angle limits
   // compared in vehicle_speed's integer units, so the limit is exact
-  const int MAX_SPEED_DELTA = 2000;  // 2 m/s
+  const int MAX_SPEED_DELTA = 2 * VEHICLE_SPEED_FACTOR;  // 2 m/s
   bool is_invalid_speed = SAFETY_ABS(ROUND(speed_2 * VEHICLE_SPEED_FACTOR) - vehicle_speed.values[0]) > MAX_SPEED_DELTA;
   if (is_invalid_speed) {
     controls_allowed = false;
