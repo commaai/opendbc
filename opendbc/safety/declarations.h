@@ -42,7 +42,8 @@
 
 // length of an RX check array; fails to compile if it has more checks than rx_status can track
 #define RX_CHECKS_LEN(rx) ((sizeof((rx)) / sizeof((rx)[0])) + \
-                           (0U * sizeof(char[((sizeof((rx)) / sizeof((rx)[0])) <= MAX_RX_CHECKS) ? 1 : -1])))
+                           (0U * sizeof(struct { _Static_assert((sizeof((rx)) / sizeof((rx)[0])) <= MAX_RX_CHECKS, \
+                                                                "too many RX checks"); char c; })))
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), RX_CHECKS_LEN(rx), \
                                                   (tx), (sizeof((tx)) / sizeof((tx)[0])), \
                                                   false})
