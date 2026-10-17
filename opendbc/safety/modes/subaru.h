@@ -74,7 +74,7 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
   const unsigned int alt_main_bus = subaru_gen2 ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
 
   if (msg_matches(msg, MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS)) {
-    const uint32_t torque_driver_raw = (GET_BYTES_LE(msg, 0, 4) >> 16) & 0x7FFU;
+    uint32_t torque_driver_raw = (GET_BYTES_LE(msg, 0, 4) >> 16) & 0x7FFU;
     int torque_driver_new = -1 * to_signed((int)torque_driver_raw, 11);
     update_sample(&torque_driver, torque_driver_new);
   }
@@ -94,7 +94,7 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
 
     vehicle_moving = (fr | rr | rl | fl) != 0U;
 
-    const uint32_t speed_sum = fr + rr + rl + fl;
+    uint32_t speed_sum = fr + rr + rl + fl;
     UPDATE_VEHICLE_SPEED((float)speed_sum / 4.0f * 0.057f * KPH_TO_MS);
   }
 
@@ -126,7 +126,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
   // steer cmd checks
   if (msg->addr == MSG_SUBARU_ES_LKAS) {
-    const uint32_t desired_torque_raw = (GET_BYTES_LE(msg, 0, 4) >> 16) & 0x1FFFU;
+    uint32_t desired_torque_raw = (GET_BYTES_LE(msg, 0, 4) >> 16) & 0x1FFFU;
     int desired_torque = -1 * to_signed((int)desired_torque_raw, 13);
 
     bool steer_req = ((msg->data[3] >> 5) & 1U) != 0U;
@@ -137,7 +137,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
   // check es_distance cruise_throttle limits
   if (msg->addr == MSG_SUBARU_ES_Distance) {
-    const uint32_t cruise_throttle_raw = GET_BYTES_LE(msg, 2, 2) & 0x1FFFU;
+    uint32_t cruise_throttle_raw = GET_BYTES_LE(msg, 2, 2) & 0x1FFFU;
     int cruise_throttle = (int)cruise_throttle_raw;
     bool cruise_cancel = ((msg->data[7] >> 0) & 1U) != 0U;
 

@@ -24,7 +24,7 @@ void ignition_can_hook(const CANPacket_t *msg) {
   // Rivian R1S/T GEN1 exception
   if (msg_matches(msg, 0x152U, 0U, 8U)) {
     // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
-    const uint8_t counter_raw = msg->data[1] & 0xFU;  // max is only 14
+    uint8_t counter_raw = msg->data[1] & 0xFU;  // max is only 14
     int counter = (int)counter_raw;
 
     static int prev_counter_rivian = -1;
@@ -39,13 +39,13 @@ void ignition_can_hook(const CANPacket_t *msg) {
   // Tesla Model 3/Y exception
   if (msg_matches(msg, 0x221U, 0U, 8U)) {
     // 0x221 overlaps with Rivian which has random data on byte 0
-    const uint8_t counter_raw = msg->data[6] >> 4;
+    uint8_t counter_raw = msg->data[6] >> 4;
     int counter = (int)counter_raw;
 
     static int prev_counter_tesla = -1;
     if ((counter == ((prev_counter_tesla + 1) % 16)) && (prev_counter_tesla != -1)) {
       // VCFRONT_LVPowerState->VCFRONT_vehiclePowerState
-      const uint8_t power_state = (msg->data[0] >> 5U) & 0x3U;
+      uint8_t power_state = (msg->data[0] >> 5U) & 0x3U;
       ignition_can = power_state == 0x3U;  // VEHICLE_POWER_STATE_DRIVE=3
       ignition_can_cnt = 0U;
     }
@@ -60,7 +60,7 @@ void ignition_can_hook(const CANPacket_t *msg) {
 
   // Volkswagen MEB exception
   if (msg_matches(msg, 0x3C0U, 0U, 4U)) {
-    const uint8_t counter_raw = msg->data[1] & 0xFU;
+    uint8_t counter_raw = msg->data[1] & 0xFU;
     int counter = (int)counter_raw;
 
     static int prev_counter_vw_meb = -1;

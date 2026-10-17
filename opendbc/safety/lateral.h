@@ -72,8 +72,8 @@ bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSte
     int max_torque = limits.max_torque;
     if (limits.dynamic_max_torque) {
       const float fudged_speed = ((float)vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0f;
-      const float max_torque_interp = safety_interpolate(limits.max_torque_lookup, fudged_speed) + 1.0f;
-      max_torque = SAFETY_CLAMP((int)max_torque_interp, -limits.max_torque, limits.max_torque);
+      max_torque = TRUNC(safety_interpolate(limits.max_torque_lookup, fudged_speed) + 1.0f);
+      max_torque = SAFETY_CLAMP(max_torque, -limits.max_torque, limits.max_torque);
     }
 
     // *** global torque limit check ***
@@ -161,8 +161,7 @@ static bool rt_angle_rate_limit_check(AngleSteeringLimits limits) {
   uint32_t ts = microsecond_timer_get();
 
   // *** angle real time rate limit check ***
-  const float max_rt_msgs_buffered = ((float)limits.frequency * (float)MAX_RT_INTERVAL / 1e6f * 1.2f) + 1.0f;  // 1.2x buffer
-  int max_rt_msgs = (int)max_rt_msgs_buffered;
+  int max_rt_msgs = TRUNC(((float)limits.frequency * (float)MAX_RT_INTERVAL / 1e6f * 1.2f) + 1.0f);  // 1.2x buffer
   if ((int)rt_angle_msgs > max_rt_msgs) {
     violation = true;
   }
@@ -184,8 +183,7 @@ static bool rt_curvature_rate_limit_check(CurvatureSteeringLimits limits) {
   uint32_t ts = microsecond_timer_get();
 
   // *** curvature real time rate limit check ***
-  const float max_rt_msgs_buffered = ((float)limits.frequency * (float)MAX_RT_INTERVAL / 1e6f * 1.2f) + 1.0f;  // 1.2x buffer
-  int max_rt_msgs = (int)max_rt_msgs_buffered;
+  int max_rt_msgs = TRUNC(((float)limits.frequency * (float)MAX_RT_INTERVAL / 1e6f * 1.2f) + 1.0f);  // 1.2x buffer
   uint32_t rt_msgs = curvature_state.rt_msgs + curvature_state.rt_msgs_prev;
   if ((int)rt_msgs > max_rt_msgs) {
     violation = true;
@@ -218,10 +216,8 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     // always slightly above openpilot's in case we read an updated speed in between angle commands
     // TODO: this speed fudge can be much lower, look at data to determine the lowest reasonable offset
     const float fudged_speed = ((float)vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0f;
-    const float delta_angle_up_f = (safety_interpolate(limits.angle_rate_up_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.0f;
-    const float delta_angle_down_f = (safety_interpolate(limits.angle_rate_down_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.0f;
-    int delta_angle_up = (int)delta_angle_up_f;
-    int delta_angle_down = (int)delta_angle_down_f;
+    int delta_angle_up = TRUNC((safety_interpolate(limits.angle_rate_up_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.0f);
+    int delta_angle_down = TRUNC((safety_interpolate(limits.angle_rate_down_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.0f);
 
     // allow down limits at zero since small floats from openpilot will be rounded to 0
     // TODO: openpilot should be cognizant of this and not send small floats
@@ -269,15 +265,13 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
 
     // *** ISO lateral accel limit ***
     const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
-    const float max_curvature_can_f = (max_curvature * limits.curvature_to_can) + 1.0f;
-    const int max_curvature_can = (int)max_curvature_can_f;
+    const int max_curvature_can = TRUNC((max_curvature * limits.curvature_to_can) + 1.0f);
     violation = safety_max_limit_check(desired_curvature, max_curvature_can, -max_curvature_can) || violation;
 
     // *** ISO lateral jerk limit ***
     const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
     const float max_curvature_delta = max_curvature_rate_sec / (float)limits.frequency;
-    const float max_curvature_delta_can_f = (max_curvature_delta * limits.curvature_to_can) + 1.0f;
-    const int max_curvature_delta_can = (int)max_curvature_delta_can_f;
+    const int max_curvature_delta_can = TRUNC((max_curvature_delta * limits.curvature_to_can) + 1.0f);
 
     int highest_desired_curvature = curvature_state.desired_last + max_curvature_delta_can;
     int lowest_desired_curvature = curvature_state.desired_last - max_curvature_delta_can;
@@ -288,13 +282,11 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
       // flipped fudge to avoid false positives
       const float fudged_speed_error = ((float)vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.0f;
       const float max_curvature_rate_sec_relaxed = MAX_LATERAL_JERK / (fudged_speed_error * fudged_speed_error);
-      const float max_curvature_delta_relaxed_can_f = (max_curvature_rate_sec_relaxed / (float)limits.frequency * limits.curvature_to_can) - 1.0f;
-      const int max_curvature_delta_relaxed_can = (int)max_curvature_delta_relaxed_can_f;
+      const int max_curvature_delta_relaxed_can = TRUNC((max_curvature_rate_sec_relaxed / (float)limits.frequency * limits.curvature_to_can) - 1.0f);
 
       // openpilot clips its command to the lateral accel limit and to what the EPS accepts,
       // so requiring more curvature than either can never be met
-      const float max_curvature_accel_can_f = (MAX_LATERAL_ACCEL / (fudged_speed_error * fudged_speed_error) * limits.curvature_to_can) - 1.0f;
-      const int max_curvature_accel_can = (int)max_curvature_accel_can_f;
+      const int max_curvature_accel_can = TRUNC((MAX_LATERAL_ACCEL / (fudged_speed_error * fudged_speed_error) * limits.curvature_to_can) - 1.0f);
       const int max_curvature_relaxed_can = SAFETY_MIN(max_curvature_accel_can, limits.max_curvature);
 
       // the minimum and maximum curvature allowed based on the measured curvature
@@ -386,8 +378,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
     // finally get max angle delta per frame
     const float max_angle_delta = max_angle_rate_sec / (float)limits.frequency;
-    const float max_angle_delta_can_f = (max_angle_delta * limits.angle_deg_to_can) + 1.0f;
-    const int max_angle_delta_can = (int)max_angle_delta_can_f;
+    const int max_angle_delta_can = TRUNC((max_angle_delta * limits.angle_deg_to_can) + 1.0f);
 
     // NOTE: symmetric up and down limits
     const int highest_desired_angle = desired_angle_last + max_angle_delta_can;
@@ -398,8 +389,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     // *** ISO lateral accel limit ***
     const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
     const float max_angle = get_angle_from_curvature(max_curvature, curvature_factor, params);
-    const float max_angle_can_f = (max_angle * limits.angle_deg_to_can) + 1.0f;
-    const int max_angle_can = (int)max_angle_can_f;
+    const int max_angle_can = TRUNC((max_angle * limits.angle_deg_to_can) + 1.0f);
 
     violation = safety_max_limit_check(desired_angle, max_angle_can, -max_angle_can) || violation;
 

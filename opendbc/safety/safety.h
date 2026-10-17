@@ -452,10 +452,10 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 // convert a trimmed integer to signed 32 bit int
 int to_signed(int d, int bits) {
   int d_signed = d;
-  const uint32_t half_range = (uint32_t)1U << (uint32_t)SAFETY_MAX(bits - 1, 0);
+  uint32_t half_range = (uint32_t)1U << (uint32_t)SAFETY_MAX(bits - 1, 0);
   int max_value = (int)half_range;
   if (d >= max_value) {
-    const uint32_t full_range = (uint32_t)1U << (uint32_t)SAFETY_MAX(bits, 0);
+    uint32_t full_range = (uint32_t)1U << (uint32_t)SAFETY_MAX(bits, 0);
     d_signed = d - (int)full_range;
   }
   return d_signed;
@@ -481,9 +481,13 @@ void update_sample(struct sample_t *sample, int sample_new) {
   }
 }
 
+// float to int conversion, truncating toward zero
+int TRUNC(float val) {
+  return (int)val;
+}
+
 int ROUND(float val) {
-  const float rounded = val + ((val > 0.0f) ? 0.5f : -0.5f);
-  return (int)rounded;
+  return TRUNC(val + ((val > 0.0f) ? 0.5f : -0.5f));
 }
 
 void pcm_cruise_check(bool cruise_engaged) {

@@ -187,9 +187,9 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   // ACCEL: safety check
   if (msg->addr == 0x1a0U) {
     uint32_t accel_raw = (((uint32_t)msg->data[17] & 0x7U) << 8) | msg->data[16];
-    uint32_t accel_val = ((uint32_t)msg->data[18] << 4) | ((uint32_t)msg->data[17] >> 4);
+    uint32_t accel_val_raw = ((uint32_t)msg->data[18] << 4) | ((uint32_t)msg->data[17] >> 4);
     int desired_accel_raw = (int)accel_raw - 1023;
-    int desired_accel_val = (int)accel_val - 1023;
+    int desired_accel_val = (int)accel_val_raw - 1023;
 
     bool violation = false;
 

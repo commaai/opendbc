@@ -19,9 +19,8 @@
 static void mazda_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MAZDA_ENGINE_DATA, MAZDA_MAIN)) {
     // sample speed: scale by 0.01 to get kph
-    uint32_t speed_raw = ((uint32_t)msg->data[2] << 8) | msg->data[3];
-    int speed = (int)speed_raw;
-    vehicle_moving = speed > 10;  // moving when speed > 0.1 kph
+    uint32_t speed = ((uint32_t)msg->data[2] << 8) | msg->data[3];
+    vehicle_moving = speed > 10U;  // moving when speed > 0.1 kph
   }
 
   if (msg_matches(msg, MAZDA_STEER_TORQUE, MAZDA_MAIN)) {

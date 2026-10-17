@@ -22,8 +22,7 @@ static bool subaru_pg_reversed_driver_torque = false;
 static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS)) {
     uint32_t torque_driver_raw = ((uint32_t)msg->data[3] >> 5) + ((uint32_t)msg->data[4] << 3);
-    int torque_driver_new = (int)torque_driver_raw;
-    torque_driver_new = to_signed(torque_driver_new, 11);
+    int torque_driver_new = to_signed((int)torque_driver_raw, 11);
     torque_driver_new = subaru_pg_reversed_driver_torque ? -torque_driver_new : torque_driver_new;
     update_sample(&torque_driver, torque_driver_new);
   }
@@ -64,10 +63,9 @@ static bool subaru_preglobal_tx_hook(const CANPacket_t *msg) {
   // steer cmd checks
   if (msg->addr == MSG_SUBARU_PG_ES_LKAS) {
     uint32_t desired_torque_raw = (GET_BYTES_LE(msg, 0, 4) >> 8) & 0x1FFFU;
-    int desired_torque = (int)desired_torque_raw;
-    desired_torque = -1 * to_signed(desired_torque, 13);
+    int desired_torque = -1 * to_signed((int)desired_torque_raw, 13);
 
-    bool steer_req = GET_BIT(msg, 24U);
+    bool steer_req = ((msg->data[3] >> 0) & 1U) != 0U;
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, SUBARU_PG_STEERING_LIMITS)) {
       tx = false;

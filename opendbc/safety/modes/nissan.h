@@ -21,11 +21,10 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   // Altima: on camera bus, others: on pt bus
   if (msg_matches(msg, 0x185U, 0U)) {
     // Current steering angle
-    uint32_t raw_angle_meas = ((uint32_t)msg->data[2] << 10) | ((uint32_t)msg->data[3] << 2) | ((uint32_t)msg->data[4] >> 6);
-    int angle_meas_new = (int)raw_angle_meas;
+    uint32_t angle_meas_raw = ((uint32_t)msg->data[2] << 10) | ((uint32_t)msg->data[3] << 2) | ((uint32_t)msg->data[4] >> 6);
+    int angle_meas_new = (int)angle_meas_raw;
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    const float angle_offset = 1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can;
-    angle_meas_new = -angle_meas_new + (int)angle_offset;
+    angle_meas_new = -angle_meas_new + TRUNC(1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
 
     // update array of samples
     update_sample(&angle_meas, angle_meas_new);
@@ -71,13 +70,12 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
 
   // steer cmd checks
   if (msg->addr == 0x169U) {
-    uint32_t raw_desired_angle = ((uint32_t)msg->data[0] << 10) | ((uint32_t)msg->data[1] << 2) | (((uint32_t)msg->data[2] >> 6) & 0x3U);
-    int desired_angle = (int)raw_desired_angle;
+    uint32_t desired_angle_raw = ((uint32_t)msg->data[0] << 10) | ((uint32_t)msg->data[1] << 2) | (((uint32_t)msg->data[2] >> 6) & 0x3U);
+    int desired_angle = (int)desired_angle_raw;
     bool lka_active = ((msg->data[6] >> 4) & 1U) != 0U;
 
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    const float angle_offset = 1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can;
-    desired_angle = -desired_angle + (int)angle_offset;
+    desired_angle = -desired_angle + TRUNC(1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
 
     if (steer_angle_cmd_checks(desired_angle, lka_active, NISSAN_STEERING_LIMITS)) {
       violation = true;

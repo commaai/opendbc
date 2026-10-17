@@ -30,9 +30,8 @@ static void byd_rx_hook(const CANPacket_t *msg) {
 
     // Vehicle speed: 0.1 kph/LSB
     if (msg->addr == 0x1F0U) {
-      uint32_t speed_raw = ((uint32_t)msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
-      int speed = (int)speed_raw;
-      vehicle_moving = speed > 0;
+      uint32_t speed = ((uint32_t)msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
+      vehicle_moving = speed > 0U;
       UPDATE_VEHICLE_SPEED((float)speed * 0.1f * KPH_TO_MS);
     }
 

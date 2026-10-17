@@ -72,7 +72,7 @@ static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
 }
 
 static uint32_t toyota_get_checksum(const CANPacket_t *msg) {
-  uint8_t checksum_byte = GET_LEN(msg) - 1U;
+  int checksum_byte = (int)GET_LEN(msg) - 1;
   return (uint8_t)(msg->data[checksum_byte]);
 }
 
@@ -385,8 +385,8 @@ static safety_config toyota_init(uint16_t param) {
   toyota_alt_brake = GET_FLAG(param, TOYOTA_PARAM_ALT_BRAKE);
   toyota_stock_longitudinal = GET_FLAG(param, TOYOTA_PARAM_STOCK_LONGITUDINAL);
   toyota_lta = GET_FLAG(param, TOYOTA_PARAM_LTA);
-  const uint32_t toyota_eps_factor = param & TOYOTA_EPS_FACTOR;
-  toyota_dbc_eps_torque_factor = (int)toyota_eps_factor;
+  uint32_t eps_factor_raw = param & TOYOTA_EPS_FACTOR;
+  toyota_dbc_eps_torque_factor = (int)eps_factor_raw;
 
   safety_config ret;
   if (toyota_secoc) {
