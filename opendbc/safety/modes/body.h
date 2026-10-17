@@ -43,7 +43,7 @@ static bool body_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config body_init(uint16_t param) {
-  static RxCheck body_rx_checks[] = {
+  static const RxCheck body_rx_checks[] = {
     {.msg = {{0x201, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
