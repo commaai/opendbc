@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -37,7 +38,7 @@
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
 
-#define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
+#define GET_BIT(msg, b) ((((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U) != 0U)
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
 
 // length of an RX check array; fails to compile if it has more checks than rx_status can track
@@ -61,8 +62,8 @@
     (config).disable_forwarding = false; \
   } while (0);
 
-#define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
-#define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
+#define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((float)((val_ms) * VEHICLE_SPEED_FACTOR))))
+#define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&vehicle_speed_2, ROUND((float)((val_ms) * VEHICLE_SPEED_FACTOR))))
 
 uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len);
 uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);
@@ -93,7 +94,7 @@ struct lookup_t {
 };
 
 typedef struct {
-  int addr;
+  unsigned int addr;
   uint8_t bus;
   uint8_t len;
   bool check_relay;              // if true, trigger relay malfunction if existence on destination bus and block forwarding to destination bus
@@ -213,9 +214,9 @@ extern RxStatus rx_status[MAX_RX_CHECKS];
 
 typedef struct {
   const RxCheck *rx_checks;
-  int rx_checks_len;
+  unsigned int rx_checks_len;
   const CanMsg *tx_msgs;
-  int tx_msgs_len;
+  unsigned int tx_msgs_len;
   bool disable_forwarding;
 } safety_config;
 
@@ -246,7 +247,7 @@ int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
 int ROUND(float val);
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
+bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSteeringLimits limits);
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params);

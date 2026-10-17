@@ -30,25 +30,26 @@ static GmHardware gm_hw = GM_ASCM;
 static bool gm_pcm_cruise = false;
 
 static void gm_rx_hook(const CANPacket_t *msg) {
-  const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
+  const uint32_t GM_STANDSTILL_THRSLD = 10U;  // 0.311kph
 
   if (msg_matches(msg, 0x184U, 0U)) {
-    int torque_driver_new = ((msg->data[6] & 0x7U) << 8) | msg->data[7];
-    torque_driver_new = to_signed(torque_driver_new, 11);
+    uint32_t torque_driver_raw = (((uint32_t)msg->data[6] & 0x7U) << 8) | msg->data[7];
+    int torque_driver_new = to_signed((int)torque_driver_raw, 11);
     // update array of samples
     update_sample(&torque_driver, torque_driver_new);
   }
 
   // sample rear wheel speeds
   if (msg_matches(msg, 0x34AU, 0U)) {
-    int left_rear_speed = (msg->data[0] << 8) | msg->data[1];
-    int right_rear_speed = (msg->data[2] << 8) | msg->data[3];
+    uint32_t left_rear_speed = ((uint32_t)msg->data[0] << 8) | msg->data[1];
+    uint32_t right_rear_speed = ((uint32_t)msg->data[2] << 8) | msg->data[3];
     vehicle_moving = (left_rear_speed > GM_STANDSTILL_THRSLD) || (right_rear_speed > GM_STANDSTILL_THRSLD);
   }
 
   // ACC steering wheel buttons (GM_CAM is tied to the PCM)
   if (msg_matches(msg, 0x1E1U, 0U) && !gm_pcm_cruise) {
-    int button = (msg->data[5] & 0x70U) >> 4;
+    uint8_t button_raw = (msg->data[5] & 0x70U) >> 4;
+    int button = (int)button_raw;
 
     // enter controls on falling edge of set or rising edge of resume (avoids fault)
     bool set = (button != GM_BTN_SET) && (cruise_button_prev == GM_BTN_SET);
@@ -105,8 +106,9 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
   // BRAKE: safety check
   if (msg->addr == 0x315U) {
-    int brake = ((msg->data[0] & 0xFU) << 8) + msg->data[1];
-    brake = (0x1000 - brake) & 0xFFF;
+    uint32_t brake_raw = (((uint32_t)msg->data[0] & 0xFU) << 8) + msg->data[1];
+    brake_raw = (0x1000U - brake_raw) & 0xFFFU;
+    int brake = (int)brake_raw;
     if (longitudinal_brake_checks(brake, *gm_long_limits)) {
       tx = false;
     }
@@ -114,8 +116,8 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
   // LKA STEER: safety check
   if (msg->addr == 0x180U) {
-    int desired_torque = ((msg->data[0] & 0x7U) << 8) + msg->data[1];
-    desired_torque = to_signed(desired_torque, 11);
+    uint32_t desired_torque_raw = (((uint32_t)msg->data[0] & 0x7U) << 8) + msg->data[1];
+    int desired_torque = to_signed((int)desired_torque_raw, 11);
 
     bool steer_req = GET_BIT(msg, 3U);
 
@@ -128,7 +130,8 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == 0x2CBU) {
     bool apply = GET_BIT(msg, 0U);
     // convert float CAN signal to an int for gas checks: 22534 / 0.125 = 180272
-    int gas_regen = (((msg->data[1] & 0x7U) << 16) | (msg->data[2] << 8) | msg->data[3]) - 180272U;
+    uint32_t gas_regen_raw = (((uint32_t)msg->data[1] & 0x7U) << 16) | ((uint32_t)msg->data[2] << 8) | msg->data[3];
+    int gas_regen = (int)gas_regen_raw - 180272;
 
     // Allow apply bit in pre-enabled and overriding states
     bool violation = !controls_allowed && apply;
@@ -141,9 +144,9 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
   // BUTTONS: used for resume spamming and cruise cancellation with stock longitudinal
   if ((msg->addr == 0x1E1U) && gm_pcm_cruise) {
-    int button = (msg->data[5] >> 4) & 0x7U;
+    uint8_t button = (msg->data[5] >> 4) & 0x7U;
 
-    bool allowed_cancel = (button == 6) && cruise_engaged_prev;
+    bool allowed_cancel = (button == 6U) && cruise_engaged_prev;
     if (!allowed_cancel) {
       tx = false;
     }

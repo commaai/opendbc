@@ -49,13 +49,13 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state by sampling wheel speeds
   if (msg_matches(msg, MSG_ESP_19, 0U)) {
     // sum 4 wheel speeds
-    int speed = 0;
+    uint32_t speed = 0;
     for (uint8_t i = 0U; i < 8U; i += 2U) {
-      int wheel_speed = msg->data[i] | (msg->data[i + 1U] << 8);
+      uint32_t wheel_speed = msg->data[i] | ((uint32_t)msg->data[i + 1U] << 8);
       speed += wheel_speed;
     }
     // Check all wheel speeds for any movement
-    vehicle_moving = speed > 0;
+    vehicle_moving = speed > 0U;
   }
 
   // Update driver input torque samples
@@ -69,9 +69,9 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
     // Always exit controls on main switch off
     // Signal: TSK_06.TSK_Status
-    int acc_status = (msg->data[3] & 0x7U);
-    bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-    acc_main_on = cruise_engaged || (acc_status == 2);
+    uint8_t acc_status = msg->data[3] & 0x7U;
+    bool cruise_engaged = (acc_status == 3U) || (acc_status == 4U) || (acc_status == 5U);
+    acc_main_on = cruise_engaged || (acc_status == 2U);
 
     if (!volkswagen_longitudinal) {
       pcm_cruise_check(cruise_engaged);
@@ -160,13 +160,15 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
 
     if (msg->addr == MSG_ACC_06) {
       // Signal: ACC_06.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-      desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
+      uint32_t desired_accel_raw = (((uint32_t)msg->data[4] & 0x7U) << 8) | msg->data[3];
+      desired_accel = ((int)desired_accel_raw * 5) - 7220;
     } else {
       // Signal: ACC_07.ACC_Folgebeschl (acceleration in m/s2, scale 0.03, offset -4.6)
-      int secondary_accel = (msg->data[4] * 30U) - 4600U;
-      violation |= (secondary_accel != 3020);  // enforce always inactive (one increment above max range) at this time
+      int secondary_accel = ((int)msg->data[4] * 30) - 4600;
+      violation = secondary_accel != 3020;  // enforce always inactive (one increment above max range) at this time
       // Signal: ACC_07.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-      desired_accel = (((msg->data[7] << 3) | ((msg->data[6] & 0xE0U) >> 5)) * 5U) - 7220U;
+      uint32_t desired_accel_raw = ((uint32_t)msg->data[7] << 3) | (((uint32_t)msg->data[6] & 0xE0U) >> 5);
+      desired_accel = ((int)desired_accel_raw * 5) - 7220;
     }
 
     violation = longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MQB_LONG_LIMITS) || violation;

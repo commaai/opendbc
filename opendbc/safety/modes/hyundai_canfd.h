@@ -63,7 +63,7 @@ static uint8_t hyundai_canfd_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t hyundai_canfd_get_checksum(const CANPacket_t *msg) {
-  uint32_t chksum = msg->data[0] | (msg->data[1] << 8);
+  uint32_t chksum = msg->data[0] | ((uint32_t)msg->data[1] << 8);
   return chksum;
 }
 
@@ -73,8 +73,8 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
 
   // driver torque
   if (msg_matches(msg, 0xeaU, pt_bus)) {
-    int torque_driver_new = ((msg->data[11] & 0x1fU) << 8U) | msg->data[10];
-    torque_driver_new -= 4095;
+    uint32_t torque_driver_raw = (((uint32_t)msg->data[11] & 0x1fU) << 8U) | msg->data[10];
+    int torque_driver_new = (int)torque_driver_raw - 4095;
     update_sample(&torque_driver, torque_driver_new);
   }
 
@@ -82,7 +82,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   const unsigned int button_addr = hyundai_canfd_alt_buttons ? 0x1aaU : 0x1cfU;
   if (msg_matches(msg, button_addr, pt_bus)) {
     bool main_button = false;
-    int cruise_button = 0;
+    uint8_t cruise_button = 0;
     if (msg_matches(msg, 0x1cfU, pt_bus)) {
       cruise_button = msg->data[2] & 0x7U;
       main_button = GET_BIT(msg, 19U);
@@ -90,7 +90,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
       cruise_button = (msg->data[4] >> 4) & 0x7U;
       main_button = GET_BIT(msg, 34U);
     }
-    hyundai_common_cruise_buttons_check(cruise_button, main_button);
+    hyundai_common_cruise_buttons_check((int)cruise_button, main_button);
   }
 
   // gas press, different for EV, hybrid, and ICE models
@@ -119,14 +119,15 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
                      (rl > HYUNDAI_STANDSTILL_THRSLD) || (rr > HYUNDAI_STANDSTILL_THRSLD);
 
     // average of all 4 wheel speeds. Conversion: raw * 0.03125 / 3.6 = m/s
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.03125 * KPH_TO_MS);
+    uint32_t speed_sum = fr + rr + rl + fl;
+    UPDATE_VEHICLE_SPEED((float)speed_sum / 4.0 * 0.03125 * KPH_TO_MS);
   }
 
   // cruise state
   if (msg_matches(msg, 0x1a0U, scc_bus) && !hyundai_longitudinal) {
     // 1=enabled, 2=driver override
-    int cruise_status = ((msg->data[8] >> 4) & 0x7U);
-    bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
+    uint8_t cruise_status = ((msg->data[8] >> 4) & 0x7U);
+    bool cruise_engaged = (cruise_status == 1U) || (cruise_status == 2U);
     hyundai_common_cruise_state_check(cruise_engaged);
   }
 }
@@ -154,7 +155,8 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   // steering
   const unsigned int steer_addr = (hyundai_canfd_lka_steer_msg && !hyundai_longitudinal) ? hyundai_canfd_get_lka_addr() : 0x12aU;
   if (msg->addr == steer_addr) {
-    int desired_torque = (((msg->data[6] & 0xFU) << 7U) | (msg->data[5] >> 1U)) - 1024U;
+    uint32_t desired_torque_raw = (((uint32_t)msg->data[6] & 0xFU) << 7U) | ((uint32_t)msg->data[5] >> 1U);
+    int desired_torque = (int)desired_torque_raw - 1024;
     bool steer_req = GET_BIT(msg, 52U);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
@@ -164,7 +166,8 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
 
   // cruise buttons check
   if (msg->addr == 0x1cfU) {
-    int button = msg->data[2] & 0x7U;
+    uint8_t button_raw = msg->data[2] & 0x7U;
+    int button = (int)button_raw;
     bool is_cancel = (button == HYUNDAI_BTN_CANCEL);
     bool is_resume = (button == HYUNDAI_BTN_RESUME);
 
@@ -183,8 +186,10 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check
   if (msg->addr == 0x1a0U) {
-    int desired_accel_raw = (((msg->data[17] & 0x7U) << 8) | msg->data[16]) - 1023U;
-    int desired_accel_val = ((msg->data[18] << 4) | (msg->data[17] >> 4)) - 1023U;
+    uint32_t accel_raw = (((uint32_t)msg->data[17] & 0x7U) << 8) | msg->data[16];
+    uint32_t accel_val = ((uint32_t)msg->data[18] << 4) | ((uint32_t)msg->data[17] >> 4);
+    int desired_accel_raw = (int)accel_raw - 1023;
+    int desired_accel_val = (int)accel_val - 1023;
 
     bool violation = false;
 
@@ -193,8 +198,8 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
       violation = longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS) || violation;
     } else {
       // only used to cancel on here
-      const int acc_mode = (msg->data[8] >> 4) & 0x7U;
-      if (acc_mode != 4) {
+      const uint8_t acc_mode = (msg->data[8] >> 4) & 0x7U;
+      if (acc_mode != 4U) {
         violation = true;
       }
 

@@ -42,6 +42,13 @@
   (SAFETY_UNIQUE(_a, n) > 0) ? SAFETY_UNIQUE(_a, n) : (-SAFETY_UNIQUE(_a, n)); \
 })
 
+// Truncate (val + offset) toward zero, with the sum evaluated in double: this is the implicit
+// float -> double -> int conversion sequence of `(float_expr) + 1.` assigned to an int, made explicit.
+static inline int safety_float_offset_to_int(float val, double offset) {
+  const double sum = val + offset;
+  return (int)sum;
+}
+
 #define SAFETY_UNUSED(x) ((void)(x))
 
 // Update an MSB-first CRC8 with one byte; callers choose the initial value and final XOR.
@@ -86,8 +93,8 @@ static bool safety_max_limit_check(int val, const int MAX_VAL, const int MIN_VAL
 
 // interp function that holds extreme values
 static float safety_interpolate(struct lookup_t xy, float x) {
-  int size = sizeof(xy.x) / sizeof(xy.x[0]);
-  float ret = xy.y[size - 1];  // default output is last point
+  unsigned int size = sizeof(xy.x) / sizeof(xy.x[0]);
+  float ret = xy.y[size - 1U];  // default output is last point
 
   // x is lower than the first point in the x array. Return the first point
   if (x <= xy.x[0]) {
@@ -95,14 +102,14 @@ static float safety_interpolate(struct lookup_t xy, float x) {
 
   } else {
     // find the index such that (xy.x[i] <= x < xy.x[i+1]) and linearly interp
-    for (int i=0; i < (size - 1); i++) {
-      if (x < xy.x[i+1]) {
+    for (unsigned int i = 0U; i < (size - 1U); i++) {
+      if (x < xy.x[i+1U]) {
         float x0 = xy.x[i];
         float y0 = xy.y[i];
-        float dx = xy.x[i+1] - x0;
-        float dy = xy.y[i+1] - y0;
+        float dx = xy.x[i+1U] - x0;
+        float dy = xy.y[i+1U] - y0;
         // dx should not be zero as xy.x is supposed to be monotonic
-        dx = SAFETY_MAX(dx, 0.0001);
+        dx = SAFETY_MAX(dx, 0.0001f);
         ret = (dy * (x - x0) / dx) + y0;
         break;
       }

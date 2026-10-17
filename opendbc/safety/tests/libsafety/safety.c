@@ -19,7 +19,7 @@ bool safety_config_valid() {
     return false;
   }
 
-  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
+  for (unsigned int i = 0U; i < current_safety_config.rx_checks_len; i++) {
     const RxStatus status = rx_status[i];
     bool valid = status.msg_seen && !status.lagging && status.valid_checksum && (status.wrong_counters < MAX_WRONG_COUNTERS) && status.valid_quality_flag;
     if (!valid) {
@@ -91,19 +91,19 @@ bool get_acc_main_on(void){
 }
 
 float get_vehicle_speed_min(void){
-  return vehicle_speed.min / VEHICLE_SPEED_FACTOR;
+  return (float)((double)vehicle_speed.min / VEHICLE_SPEED_FACTOR);
 }
 
 float get_vehicle_speed_max(void){
-  return vehicle_speed.max / VEHICLE_SPEED_FACTOR;
+  return (float)((double)vehicle_speed.max / VEHICLE_SPEED_FACTOR);
 }
 
 int get_current_safety_mode(void){
-  return current_safety_mode;
+  return (int)current_safety_mode;
 }
 
 int get_current_safety_param(void){
-  return current_safety_param;
+  return (int)current_safety_param;
 }
 
 void set_timer(uint32_t t){

@@ -141,21 +141,22 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
   if (msg_matches(msg, 0x421U, hyundai_camera_scc ? 2U : 0U)) {
     // 2 bits: 13-14
-    int cruise_engaged = (GET_BYTES_LE(msg, 0, 4) >> 13) & 0x3U;
-    hyundai_common_cruise_state_check(cruise_engaged);
+    uint32_t cruise_engaged = (GET_BYTES_LE(msg, 0, 4) >> 13) & 0x3U;
+    hyundai_common_cruise_state_check(cruise_engaged != 0U);
   }
 
   if (msg_matches(msg, 0x251U, 0U)) {
-    int torque_driver_new = (GET_BYTES_LE(msg, 0, 2) & 0x7ffU) - 1024U;
+    uint32_t torque_driver_raw = GET_BYTES_LE(msg, 0, 2) & 0x7ffU;
+    int torque_driver_new = (int)torque_driver_raw - 1024;
     // update array of samples
     update_sample(&torque_driver, torque_driver_new);
   }
 
   // ACC steering wheel buttons
   if (msg_matches(msg, 0x4F1U, 0U)) {
-    int cruise_button = msg->data[0] & 0x7U;
+    uint8_t cruise_button = msg->data[0] & 0x7U;
     bool main_button = GET_BIT(msg, 3U);
-    hyundai_common_cruise_buttons_check(cruise_button, main_button);
+    hyundai_common_cruise_buttons_check((int)cruise_button, main_button);
   }
 
   // gas press, different for EV, hybrid, and ICE models
@@ -191,7 +192,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // FCA11: Block any potential actuation
   if (msg->addr == 0x38DU) {
-    int CR_VSM_DecCmd = msg->data[1];
+    int CR_VSM_DecCmd = (int)msg->data[1];
     bool FCA_CmdAct = GET_BIT(msg, 20U);
     bool CF_VSM_DecCmdAct = GET_BIT(msg, 31U);
 
@@ -202,10 +203,12 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check
   if (msg->addr == 0x421U) {
-    int desired_accel_raw = (((msg->data[4] & 0x7U) << 8) | msg->data[3]) - 1023U;
-    int desired_accel_val = ((msg->data[5] << 3) | (msg->data[4] >> 5)) - 1023U;
+    uint32_t accel_raw = (((uint32_t)msg->data[4] & 0x7U) << 8) | msg->data[3];
+    uint32_t accel_val = ((uint32_t)msg->data[5] << 3) | ((uint32_t)msg->data[4] >> 5);
+    int desired_accel_raw = (int)accel_raw - 1023;
+    int desired_accel_val = (int)accel_val - 1023;
 
-    int aeb_decel_cmd = msg->data[2];
+    int aeb_decel_cmd = (int)msg->data[2];
     bool aeb_req = GET_BIT(msg, 54U);
     bool aeb_stop_req = GET_BIT(msg, 55U);
 
@@ -222,7 +225,8 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // LKA STEER: safety check
   if (msg->addr == 0x340U) {
-    int desired_torque = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0x7ffU) - 1024U;
+    uint32_t desired_torque_raw = (GET_BYTES_LE(msg, 0, 4) >> 16) & 0x7ffU;
+    int desired_torque = (int)desired_torque_raw - 1024;
     bool steer_req = GET_BIT(msg, 27U);
 
     const TorqueSteeringLimits limits = hyundai_alt_limits_2 ? HYUNDAI_STEERING_LIMITS_ALT_2 :
@@ -242,10 +246,10 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // BUTTONS: used for resume spamming and cruise cancellation
   if ((msg->addr == 0x4F1U) && !hyundai_longitudinal) {
-    int button = msg->data[0] & 0x7U;
+    uint8_t button = msg->data[0] & 0x7U;
 
-    bool allowed_resume = (button == 1) && controls_allowed;
-    bool allowed_cancel = (button == 4) && cruise_engaged_prev;
+    bool allowed_resume = (button == 1U) && controls_allowed;
+    bool allowed_cancel = (button == 4U) && cruise_engaged_prev;
     if (!(allowed_resume || allowed_cancel)) {
       tx = false;
     }

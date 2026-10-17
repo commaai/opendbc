@@ -58,7 +58,7 @@ static int _tesla_get_checksum_byte(const int addr) {
 
 static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
-  int checksum_byte = _tesla_get_checksum_byte(msg->addr);
+  int checksum_byte = _tesla_get_checksum_byte((int)msg->addr);
   if (checksum_byte != -1) {
     chksum = msg->data[checksum_byte];
   }
@@ -67,11 +67,11 @@ static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
 
 static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
-  int checksum_byte = _tesla_get_checksum_byte(msg->addr);
+  int checksum_byte = _tesla_get_checksum_byte((int)msg->addr);
 
   if (checksum_byte != -1) {
     chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
-    int len = GET_LEN(msg);
+    int len = (int)GET_LEN(msg);
     for (int i = 0; i < len; i++) {
       if (i != checksum_byte) {
         chksum += msg->data[i];
@@ -87,8 +87,8 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
     valid = (msg->data[5] & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
   }
   if (msg->addr == 0x145U) {
-    int user_brake_status = (msg->data[3] >> 5) & 0x03U;
-    valid = (user_brake_status != 0) && (user_brake_status != 3);  // ESP_driverBrakeApply=NotInit_orOff, Faulty_SNA
+    uint32_t user_brake_status = ((uint32_t)msg->data[3] >> 5) & 0x03U;
+    valid = (user_brake_status != 0U) && (user_brake_status != 3U);  // ESP_driverBrakeApply=NotInit_orOff, Faulty_SNA
   }
   return valid;
 }
@@ -97,28 +97,31 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
   // Steering angle: (0.1 * val) - 819.2 in deg.
   if (msg_matches(msg, 0x370U, 0U)) {
     // Store it 1/10 deg to match steering request
-    const int angle_meas_new = (((msg->data[4] & 0x3FU) << 8) | msg->data[5]) - 8192U;
+    const uint32_t raw_angle_meas = (((uint32_t)msg->data[4] & 0x3FU) << 8) | msg->data[5];
+    const int angle_meas_new = (int)raw_angle_meas - 8192;
     update_sample(&angle_meas, angle_meas_new);
 
-    const int hands_on_level = msg->data[4] >> 6;  // EPAS3S_handsOnLevel
-    const int eac_status = msg->data[6] >> 5;  // EPAS3S_eacStatus
-    const int eac_error_code = msg->data[2] >> 4;  // EPAS3S_eacErrorCode
+    const uint32_t hands_on_level = (uint32_t)msg->data[4] >> 6;  // EPAS3S_handsOnLevel
+    const uint32_t eac_status = (uint32_t)msg->data[6] >> 5;  // EPAS3S_eacStatus
+    const uint32_t eac_error_code = (uint32_t)msg->data[2] >> 4;  // EPAS3S_eacErrorCode
 
     // Disengage on normal user override, or if high angle rate fault from user overriding extremely quickly
-    steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
+    steering_disengage = (hands_on_level >= 3U) || ((eac_status == 0U) && (eac_error_code == 9U));
   }
 
   // Vehicle speed (DI_speed)
   if (msg_matches(msg, 0x257U, 0U)) {
     // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
-    float speed = ((((msg->data[2] << 4) | (msg->data[1] >> 4)) * 0.08) - 40.) * KPH_TO_MS;
+    uint32_t raw_speed = ((uint32_t)msg->data[2] << 4) | ((uint32_t)msg->data[1] >> 4);
+    float speed = (float)((((float)raw_speed * 0.08) - 40.) * KPH_TO_MS);
     UPDATE_VEHICLE_SPEED(speed);
   }
 
   // 2nd vehicle speed (ESP_B)
   if (msg_matches(msg, 0x155U, 0U)) {
     // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
-    float esp_speed = (((msg->data[6] & 0x0FU) << 6) | (msg->data[5] >> 2)) * 0.5 * KPH_TO_MS;
+    uint32_t raw_esp_speed = (((uint32_t)msg->data[6] & 0x0FU) << 6) | ((uint32_t)msg->data[5] >> 2);
+    float esp_speed = (float)((float)raw_esp_speed * 0.5 * KPH_TO_MS);
     speed_mismatch_check(esp_speed);
   }
 
@@ -135,10 +138,10 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
   // Cruise and Autopark/Summon state
   if (msg_matches(msg, 0x286U, 0U)) {
     // Autopark state
-    int autopark_state = (msg->data[3] >> 1) & 0x0FU;  // DI_autoparkState
-    bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
-                              (autopark_state == 4) ||  // COMPLETE
-                              (autopark_state == 9);    // SELFPARK_STARTED
+    uint32_t autopark_state = ((uint32_t)msg->data[3] >> 1) & 0x0FU;  // DI_autoparkState
+    bool tesla_autopark_now = (autopark_state == 3U) ||  // ACTIVE
+                              (autopark_state == 4U) ||  // COMPLETE
+                              (autopark_state == 9U);    // SELFPARK_STARTED
 
     // Only consider rising edges while controls are not allowed
     if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
@@ -150,12 +153,12 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     tesla_autopark_prev = tesla_autopark_now;
 
     // Cruise state
-    int cruise_state = (msg->data[1] >> 4) & 0x07U;
-    bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
-                          (cruise_state == 3) ||  // STANDSTILL
-                          (cruise_state == 4) ||  // OVERRIDE
-                          (cruise_state == 6) ||  // PRE_FAULT
-                          (cruise_state == 7);    // PRE_CANCEL
+    uint32_t cruise_state = ((uint32_t)msg->data[1] >> 4) & 0x07U;
+    bool cruise_engaged = (cruise_state == 2U) ||  // ENABLED
+                          (cruise_state == 3U) ||  // STANDSTILL
+                          (cruise_state == 4U) ||  // OVERRIDE
+                          (cruise_state == 6U) ||  // PRE_FAULT
+                          (cruise_state == 7U);    // PRE_CANCEL
     cruise_engaged = cruise_engaged && !tesla_autopark;
 
     pcm_cruise_check(cruise_engaged);
@@ -173,8 +176,8 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
 
   // DAS_steeringControl
   if (msg_matches(msg, 0x488U, 2U)) {
-    int steering_control_type = msg->data[2] >> 5;  // DAS_steeringControlType
-    bool tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
+    uint32_t steering_control_type = (uint32_t)msg->data[2] >> 5;  // DAS_steeringControlType
+    bool tesla_stock_lkas_now = steering_control_type == 2U;  // "LANE_KEEP_ASSIST"
 
     // Only consider rising edges while controls are not allowed
     if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed) {
@@ -190,15 +193,15 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
 static bool tesla_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringLimits TESLA_STEERING_LIMITS = {
     .max_angle = 3600,  // 360 deg, EPAS faults above this
-    .angle_deg_to_can = 10,
+    .angle_deg_to_can = 10.0f,
     .frequency = 50U,
   };
 
   // NOTE: based off TESLA_MODEL_Y to match openpilot
   const AngleSteeringParams TESLA_STEERING_PARAMS = {
-    .slip_factor = -0.000580374383851451,  // calc_slip_factor(VM)
-    .steer_ratio = 12.,
-    .wheelbase = 2.89,
+    .slip_factor = -0.000580374383851451f,  // calc_slip_factor(VM)
+    .steer_ratio = 12.0f,
+    .wheelbase = 2.89f,
   };
 
   const LongitudinalLimits TESLA_LONG_LIMITS = {
@@ -218,17 +221,17 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   // Steering control: (0.1 * val) - 1638.35 in deg.
   if (msg->addr == 0x488U) {
     // We use 1/10 deg as a unit here
-    int raw_angle_can = ((msg->data[0] & 0x7FU) << 8) | msg->data[1];
-    int desired_angle = raw_angle_can - 16384;
-    int steer_control_type = msg->data[2] >> 5;  // DAS_steeringControlType
-    bool steer_control_enabled = steer_control_type == 1;  // ANGLE_CONTROL
+    uint32_t raw_angle_can = (((uint32_t)msg->data[0] & 0x7FU) << 8) | msg->data[1];
+    int desired_angle = (int)raw_angle_can - 16384;
+    uint32_t steer_control_type = (uint32_t)msg->data[2] >> 5;  // DAS_steeringControlType
+    bool steer_control_enabled = steer_control_type == 1U;  // ANGLE_CONTROL
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS, TESLA_STEERING_PARAMS)) {
       violation = true;
     }
 
-    bool valid_steer_control_type = (steer_control_type == 0) ||  // NONE
-                                    (steer_control_type == 1);    // ANGLE_CONTROL
+    bool valid_steer_control_type = (steer_control_type == 0U) ||  // NONE
+                                    (steer_control_type == 1U);    // ANGLE_CONTROL
     if (!valid_steer_control_type) {
       violation = true;
     }
@@ -242,8 +245,8 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   // DAS_control: longitudinal control message
   if (msg->addr == 0x2b9U) {
     // No AEB events may be sent by openpilot
-    int aeb_event = msg->data[2] & 0x03U;
-    if (aeb_event != 0) {
+    uint32_t aeb_event = (uint32_t)msg->data[2] & 0x03U;
+    if (aeb_event != 0U) {
       violation = true;
     }
 
@@ -252,9 +255,11 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
       violation = true;
     }
 
-    int raw_accel_max = ((msg->data[6] & 0x1FU) << 4) | (msg->data[5] >> 4);
-    int raw_accel_min = ((msg->data[5] & 0x0FU) << 5) | (msg->data[4] >> 3);
-    int acc_state = msg->data[1] >> 4;
+    uint32_t accel_max_bits = (((uint32_t)msg->data[6] & 0x1FU) << 4) | ((uint32_t)msg->data[5] >> 4);
+    uint32_t accel_min_bits = (((uint32_t)msg->data[5] & 0x0FU) << 5) | ((uint32_t)msg->data[4] >> 3);
+    int raw_accel_max = (int)accel_max_bits;
+    int raw_accel_min = (int)accel_min_bits;
+    uint32_t acc_state = (uint32_t)msg->data[1] >> 4;
 
     if (tesla_longitudinal) {
       // Prevent both acceleration from being negative, as this could cause the car to reverse after coming to standstill
@@ -267,7 +272,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
       violation = longitudinal_accel_checks(raw_accel_min, TESLA_LONG_LIMITS) || violation;
     } else {
       // Can only send cancel longitudinal messages when not controlling longitudinal
-      if (acc_state != 13) {  // ACC_CANCEL_GENERIC_SILENT
+      if (acc_state != 13U) {  // ACC_CANCEL_GENERIC_SILENT
         violation = true;
       }
 

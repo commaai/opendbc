@@ -50,7 +50,8 @@ static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
 static void chrysler_rx_hook(const CANPacket_t *msg) {
   // Measured EPS torque
   if (msg_matches(msg, CHRYSLER_ADDR(EPS_2), 0U)) {
-    int torque_meas_new = ((msg->data[4] & 0x7U) << 8) + msg->data[5] - 1024U;
+    uint32_t torque_meas_raw = (((uint32_t)msg->data[4] & 0x7U) << 8) + msg->data[5];
+    int torque_meas_new = (int)torque_meas_raw - 1024;
     update_sample(&torque_meas, torque_meas_new);
   }
 
@@ -64,12 +65,12 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
   // TODO: use the same message for both
   // update vehicle moving
   if ((chrysler_platform != CHRYSLER_PACIFICA) && msg_matches(msg, CHRYSLER_ADDR(ESP_8), 0U)) {
-    vehicle_moving = ((msg->data[4] << 8) + msg->data[5]) != 0U;
+    vehicle_moving = (((uint32_t)msg->data[4] << 8) + msg->data[5]) != 0U;
   }
   if ((chrysler_platform == CHRYSLER_PACIFICA) && msg_matches(msg, 514U, 0U)) {
-    int speed_l = (msg->data[0] << 4) + (msg->data[1] >> 4);
-    int speed_r = (msg->data[2] << 4) + (msg->data[3] >> 4);
-    vehicle_moving = (speed_l | speed_r) != 0;
+    uint32_t speed_l = ((uint32_t)msg->data[0] << 4) + ((uint32_t)msg->data[1] >> 4);
+    uint32_t speed_r = ((uint32_t)msg->data[2] << 4) + ((uint32_t)msg->data[3] >> 4);
+    vehicle_moving = (speed_l | speed_r) != 0U;
   }
 
   // exit controls on rising edge of gas press
@@ -116,13 +117,13 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   // STEERING
   if (msg->addr == CHRYSLER_ADDR(LKAS_COMMAND)) {
     int start_byte = (chrysler_platform == CHRYSLER_PACIFICA) ? 0 : 1;
-    int desired_torque = ((msg->data[start_byte] & 0x7U) << 8) | msg->data[start_byte + 1];
-    desired_torque -= 1024;
+    uint32_t desired_torque_raw = (((uint32_t)msg->data[start_byte] & 0x7U) << 8) | msg->data[start_byte + 1];
+    int desired_torque = (int)desired_torque_raw - 1024;
 
     const TorqueSteeringLimits limits = (chrysler_platform == CHRYSLER_PACIFICA) ? CHRYSLER_STEERING_LIMITS :
                                         (chrysler_platform == CHRYSLER_RAM_DT) ? CHRYSLER_RAM_DT_STEERING_LIMITS : CHRYSLER_RAM_HD_STEERING_LIMITS;
 
-    bool steer_req = (chrysler_platform == CHRYSLER_PACIFICA) ? GET_BIT(msg, 4U) : (msg->data[3] & 0x7U) == 2U;
+    bool steer_req = (chrysler_platform == CHRYSLER_PACIFICA) ? GET_BIT(msg, 4U) : ((msg->data[3] & 0x7U) == 2U);
     if (steer_torque_cmd_checks(desired_torque, steer_req, limits)) {
       tx = false;
     }

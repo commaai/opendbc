@@ -12,7 +12,7 @@ static uint32_t body_get_checksum(const CANPacket_t *msg) {
 
 static uint32_t body_compute_checksum(const CANPacket_t *msg) {
   uint8_t checksum = 0xFFU;
-  int len = GET_LEN(msg);
+  int len = (int)GET_LEN(msg);
   for (int i = len - 2; i >= 0; i--) {
     checksum = crc8_update(checksum, msg->data[i], 0xD5U);
   }
