@@ -19,19 +19,19 @@
 static void mazda_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MAZDA_ENGINE_DATA, MAZDA_MAIN)) {
     // sample speed: scale by 0.01 to get kph
-    int speed = (msg->data[2] << 8) | msg->data[3];
-    vehicle_moving = speed > 10;  // moving when speed > 0.1 kph
+    uint32_t speed = ((uint32_t)msg->data[2] << 8) | msg->data[3];
+    vehicle_moving = speed > 10U;  // moving when speed > 0.1 kph
   }
 
   if (msg_matches(msg, MAZDA_STEER_TORQUE, MAZDA_MAIN)) {
-    int torque_driver_new = msg->data[0] - 127U;
+    int torque_driver_new = (int)msg->data[0] - 127;
     // update array of samples
     update_sample(&torque_driver, torque_driver_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
   if (msg_matches(msg, MAZDA_CRZ_CTRL, MAZDA_MAIN)) {
-    bool cruise_engaged = msg->data[0] & 0x8U;
+    bool cruise_engaged = (msg->data[0] & 0x8U) != 0U;
     pcm_cruise_check(cruise_engaged);
   }
 
@@ -40,7 +40,7 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MAZDA_PEDALS, MAZDA_MAIN)) {
-    brake_pressed = (msg->data[0] & 0x10U);
+    brake_pressed = (msg->data[0] & 0x10U) != 0U;
   }
 }
 
@@ -59,9 +59,10 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
   // Check if msg is sent on the main BUS
   // steer cmd checks
   if (msg_matches(msg, MAZDA_LKAS, MAZDA_MAIN)) {
-    int desired_torque = (((msg->data[0] & 0x0FU) << 8) | msg->data[1]) - 2048U;
+    uint32_t desired_torque_raw = (((uint32_t)msg->data[0] & 0x0FU) << 8) | msg->data[1];
+    int desired_torque = (int)desired_torque_raw - 2048;
 
-    if (steer_torque_cmd_checks(desired_torque, -1, MAZDA_STEERING_LIMITS)) {
+    if (steer_torque_cmd_checks(desired_torque, true, MAZDA_STEERING_LIMITS)) {
       tx = false;
     }
   }

@@ -27,11 +27,11 @@ static uint8_t psa_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t psa_get_checksum(const CANPacket_t *msg) {
-  return msg->data[5] & 0xFU;
+  return (uint32_t)msg->data[5] & 0xFU;
 }
 
 static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, int chk_pos) {
-  int len = GET_LEN(msg);
+  int len = (int)GET_LEN(msg);
 
   uint8_t sum = 0;
   for (int i = 0; i < len; i++) {
@@ -62,41 +62,43 @@ static void psa_rx_hook(const CANPacket_t *msg) {
     gas_pressed = msg->data[3] > 0U;  // P002_Com_rAPP
   }
   if (msg_matches(msg, PSA_STEERING_ALT, PSA_MAIN_BUS)) {
-    int angle_meas_new = to_signed((msg->data[0] << 8) | msg->data[1], 16);  // ANGLE
+    uint32_t angle_meas_raw = ((uint32_t)msg->data[0] << 8) | msg->data[1];  // ANGLE
+    int angle_meas_new = to_signed((int)angle_meas_raw, 16);
     update_sample(&angle_meas, angle_meas_new);
   }
   if (msg_matches(msg, PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS)) {
-    int speed = (msg->data[0] << 8) | msg->data[1];
-    vehicle_moving = speed > 0;
-    UPDATE_VEHICLE_SPEED(speed * 0.01 * KPH_TO_MS);  // VITESSE_VEHICULE_ROUES
+    uint32_t speed = ((uint32_t)msg->data[0] << 8) | msg->data[1];
+    vehicle_moving = speed > 0U;
+    UPDATE_VEHICLE_SPEED((float)speed * 0.01f * KPH_TO_MS);  // VITESSE_VEHICULE_ROUES
   }
 
   if (msg_matches(msg, PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS)) {
-    pcm_cruise_check((msg->data[2U] >> 7U) & 1U);  // RVV_ACC_ACTIVATION_REQ
+    pcm_cruise_check(((msg->data[2U] >> 7U) & 1U) != 0U);  // RVV_ACC_ACTIVATION_REQ
   }
 
   if (msg_matches(msg, PSA_DAT_BSI, PSA_CAM_BUS)) {
-    brake_pressed = (msg->data[0U] >> 5U) & 1U;  // P013_MainBrake
+    brake_pressed = ((msg->data[0U] >> 5U) & 1U) != 0U;  // P013_MainBrake
   }
 }
 
 static bool psa_tx_hook(const CANPacket_t *msg) {
   static const AngleSteeringLimits PSA_STEERING_LIMITS = {
     .max_angle = 3900,
-    .angle_deg_to_can = 10,
+    .angle_deg_to_can = 10.0f,
     .angle_rate_up_lookup = {
-      {0., 5., 25.},
-      {2.5, 1.5, .2},
+      {0.0f, 5.0f, 25.0f},
+      {2.5f, 1.5f, 0.2f},
     },
     .angle_rate_down_lookup = {
-      {0., 5., 25.},
-      {5., 2., .3},
+      {0.0f, 5.0f, 25.0f},
+      {5.0f, 2.0f, 0.3f},
     },
   };
 
   // The TX list dispatches only PSA_LANE_KEEP_ASSIST on PSA_MAIN_BUS to this hook.
   // SET_ANGLE
-  int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
+  uint32_t desired_angle_raw = ((uint32_t)msg->data[6] << 6) | (((uint32_t)msg->data[7] & 0xFCU) >> 2);
+  int desired_angle = to_signed((int)desired_angle_raw, 14);
   // TORQUE_FACTOR
   bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
 

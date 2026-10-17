@@ -37,10 +37,11 @@
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
 
-#define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
+#define GET_BIT(msg, b) ((((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U) != 0U)
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
 
 // length of an RX check array; fails to compile if it has more checks than rx_status can track
+// cppcheck-suppress-macro misra-c2012-14.3; the invariant condition is the compile-time check
 #define RX_CHECKS_LEN(rx) ((sizeof((rx)) / sizeof((rx)[0])) + \
                            (0U * sizeof(char[((sizeof((rx)) / sizeof((rx)[0])) <= MAX_RX_CHECKS) ? 1 : -1])))
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), RX_CHECKS_LEN(rx), \
@@ -51,14 +52,14 @@
     (config).rx_checks = (rx); \
     (config).rx_checks_len = RX_CHECKS_LEN(rx); \
     (config).disable_forwarding = false; \
-  } while (0);
+  } while (false);
 
 #define SET_TX_MSGS(tx, config) \
   do { \
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
     (config).disable_forwarding = false; \
-  } while (0);
+  } while (false);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 #define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
@@ -72,11 +73,11 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_RX_CHECKS 12U
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
-#define VEHICLE_SPEED_FACTOR 1000.0
+#define VEHICLE_SPEED_FACTOR 1000.0f
 #define MAX_RT_INTERVAL 250000U
 
 // Conversions
-#define KPH_TO_MS (1.0 / 3.6)
+#define KPH_TO_MS (1.0f / 3.6f)
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {
@@ -92,7 +93,7 @@ struct lookup_t {
 };
 
 typedef struct {
-  int addr;
+  unsigned int addr;
   uint8_t bus;
   uint8_t len;
   bool check_relay;              // if true, trigger relay malfunction if existence on destination bus and block forwarding to destination bus
@@ -212,9 +213,9 @@ extern RxStatus rx_status[MAX_RX_CHECKS];
 
 typedef struct {
   const RxCheck *rx_checks;
-  int rx_checks_len;
+  unsigned int rx_checks_len;
   const CanMsg *tx_msgs;
-  int tx_msgs_len;
+  unsigned int tx_msgs_len;
   bool disable_forwarding;
 } safety_config;
 
@@ -244,8 +245,9 @@ bool safety_tx_hook(CANPacket_t *msg);
 int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
+int TRUNC(float val);
 int ROUND(float val);
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
+bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSteeringLimits limits);
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params);

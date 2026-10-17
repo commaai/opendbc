@@ -23,7 +23,8 @@ static safety_config chrysler_cusw_init(uint16_t param) {
 static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x1ECU, 0U)) {
     // Signal: EPS_STATUS.TORQUE_MOTOR
-    int torque_meas_new = ((msg->data[3] & 0xFU) << 8) + msg->data[4] - 2048U;
+    uint32_t torque_meas_raw = (((uint32_t)msg->data[3] & 0xFU) << 8) + msg->data[4];
+    int torque_meas_new = (int)torque_meas_raw - 2048;
     update_sample(&torque_meas, torque_meas_new);
   }
 
@@ -35,7 +36,7 @@ static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, 0x1E4U, 0U)) {
     // Signal: BRAKE_1.VEHICLE_SPEED
-    vehicle_moving = (((msg->data[4] & 0x7U) << 8) + msg->data[5]) != 0U;
+    vehicle_moving = ((((uint32_t)msg->data[4] & 0x7U) << 8) + msg->data[5]) != 0U;
   }
 
   if (msg_matches(msg, 0x1FEU, 0U)) {
@@ -63,8 +64,8 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
 
   if (msg->addr == 0x1F6U) {
     // Signal: LKAS_COMMAND.STEERING_TORQUE
-    int desired_torque = ((msg->data[0]) << 3) | ((msg->data[1] & 0xE0U) >> 5);
-    desired_torque -= 1024;
+    uint32_t desired_torque_raw = ((uint32_t)msg->data[0] << 3) | (((uint32_t)msg->data[1] & 0xE0U) >> 5);
+    int desired_torque = (int)desired_torque_raw - 1024;
 
     // Signal: LKAS_COMMAND.LKAS_CONTROL_BIT
     const bool steer_req = GET_BIT(msg, 12U);
@@ -90,7 +91,7 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
 }
 
 static uint8_t chrysler_cusw_get_counter(const CANPacket_t *msg) {
-  int counter_byte = GET_LEN(msg) - 2U;
+  int counter_byte = (int)GET_LEN(msg) - 2;
   return (uint8_t)(msg->data[counter_byte] & 0xFU);
 }
 

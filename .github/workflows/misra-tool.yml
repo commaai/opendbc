@@ -1,0 +1,21 @@
+name: MISRA C:2025
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  misra:
+    name: misrable (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7
+      - name: Analyze safety code
+        run: ./opendbc/safety/tests/misra/test_tool.sh

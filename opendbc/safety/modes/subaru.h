@@ -62,7 +62,7 @@ static uint8_t subaru_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t subaru_compute_checksum(const CANPacket_t *msg) {
-  int len = GET_LEN(msg);
+  int len = (int)GET_LEN(msg);
   uint8_t checksum = (uint8_t)(msg->addr) + (uint8_t)((unsigned int)(msg->addr) >> 8U);
   for (int i = 1; i < len; i++) {
     checksum += (uint8_t)msg->data[i];
@@ -74,15 +74,14 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
   const unsigned int alt_main_bus = subaru_gen2 ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
 
   if (msg_matches(msg, MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS)) {
-    int torque_driver_new;
-    torque_driver_new = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0x7FFU);
-    torque_driver_new = -1 * to_signed(torque_driver_new, 11);
+    uint32_t torque_driver_raw = (GET_BYTES_LE(msg, 0, 4) >> 16) & 0x7FFU;
+    int torque_driver_new = -1 * to_signed((int)torque_driver_raw, 11);
     update_sample(&torque_driver, torque_driver_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
   if (msg_matches(msg, MSG_SUBARU_CruiseControl, alt_main_bus)) {
-    bool cruise_engaged = (msg->data[5] >> 1) & 1U;
+    bool cruise_engaged = ((msg->data[5] >> 1) & 1U) != 0U;
     pcm_cruise_check(cruise_engaged);
   }
 
@@ -95,11 +94,12 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
 
     vehicle_moving = (fr | rr | rl | fl) != 0U;
 
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 * KPH_TO_MS);
+    uint32_t speed_sum = fr + rr + rl + fl;
+    UPDATE_VEHICLE_SPEED((float)speed_sum / 4.0f * 0.057f * KPH_TO_MS);
   }
 
   if (msg_matches(msg, MSG_SUBARU_Brake_Status, alt_main_bus)) {
-    brake_pressed = (msg->data[7] >> 6) & 1U;
+    brake_pressed = ((msg->data[7] >> 6) & 1U) != 0U;
   }
 
   if (msg_matches(msg, MSG_SUBARU_Throttle, SUBARU_MAIN_BUS)) {
@@ -126,24 +126,25 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
   // steer cmd checks
   if (msg->addr == MSG_SUBARU_ES_LKAS) {
-    int desired_torque = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0x1FFFU);
-    desired_torque = -1 * to_signed(desired_torque, 13);
+    uint32_t desired_torque_raw = (GET_BYTES_LE(msg, 0, 4) >> 16) & 0x1FFFU;
+    int desired_torque = -1 * to_signed((int)desired_torque_raw, 13);
 
-    bool steer_req = (msg->data[3] >> 5) & 1U;
+    bool steer_req = ((msg->data[3] >> 5) & 1U) != 0U;
 
     const TorqueSteeringLimits limits = subaru_gen2 ? SUBARU_GEN2_STEERING_LIMITS : SUBARU_STEERING_LIMITS;
-    violation |= steer_torque_cmd_checks(desired_torque, steer_req, limits);
+    violation = steer_torque_cmd_checks(desired_torque, steer_req, limits);
   }
 
   // check es_distance cruise_throttle limits
   if (msg->addr == MSG_SUBARU_ES_Distance) {
-    int cruise_throttle = (GET_BYTES_LE(msg, 2, 2) & 0x1FFFU);
-    bool cruise_cancel = (msg->data[7] >> 0) & 1U;
+    uint32_t cruise_throttle_raw = GET_BYTES_LE(msg, 2, 2) & 0x1FFFU;
+    int cruise_throttle = (int)cruise_throttle_raw;
+    bool cruise_cancel = ((msg->data[7] >> 0) & 1U) != 0U;
 
     // If openpilot is not controlling long, only allow ES_Distance for cruise cancel requests,
     // (when Cruise_Cancel is true, and Cruise_Throttle is inactive)
-    violation |= (cruise_throttle != SUBARU_LONG_LIMITS.inactive_gas);
-    violation |= (!cruise_cancel);
+    violation = (cruise_throttle != SUBARU_LONG_LIMITS.inactive_gas) || violation;
+    violation = !cruise_cancel || violation;
   }
 
   if (violation) {
