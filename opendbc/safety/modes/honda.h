@@ -187,9 +187,8 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     int pcm_speed = (msg->data[0] << 8) | msg->data[1];
     int pcm_gas = msg->data[2];
 
-    bool violation = false;
-    violation |= longitudinal_speed_checks(pcm_speed, HONDA_NIDEC_LONG_LIMITS);
-    violation |= longitudinal_gas_checks(pcm_gas, HONDA_NIDEC_LONG_LIMITS);
+    bool violation = longitudinal_speed_checks(pcm_speed, HONDA_NIDEC_LONG_LIMITS);
+    violation = longitudinal_gas_checks(pcm_gas, HONDA_NIDEC_LONG_LIMITS) || violation;
     if (violation) {
       tx = false;
     }
@@ -222,14 +221,13 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     int gas = (msg->data[0] << 8) | msg->data[1];
     gas = to_signed(gas, 16);
 
-    bool violation = false;
-    violation |= longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
-    violation |= longitudinal_gas_checks(gas, HONDA_BOSCH_LONG_LIMITS);
+    bool violation = longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
+    violation = longitudinal_gas_checks(gas, HONDA_BOSCH_LONG_LIMITS) || violation;
 
     // AEB: block all actuation
-    violation |= GET_BIT(msg, 33U);  // AEB_STATUS
-    violation |= GET_BIT(msg, 43U);  // AEB_PREPARE
-    violation |= GET_BIT(msg, 47U);  // AEB_BRAKING
+    violation = GET_BIT(msg, 33U) || violation;  // AEB_STATUS
+    violation = GET_BIT(msg, 43U) || violation;  // AEB_PREPARE
+    violation = GET_BIT(msg, 47U) || violation;  // AEB_BRAKING
     if (violation) {
       tx = false;
     }
@@ -240,13 +238,12 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     int accel = (msg->data[0] << 4) | (msg->data[1] >> 4);
     accel = to_signed(accel, 12);
 
-    bool violation = false;
-    violation |= longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
+    bool violation = longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
 
     // AEB: block all actuation
-    violation |= GET_BIT(msg, 33U);  // AEB_STATUS
-    violation |= GET_BIT(msg, 43U);  // AEB_PREPARE
-    violation |= GET_BIT(msg, 47U);  // AEB_BRAKING
+    violation = GET_BIT(msg, 33U) || violation;  // AEB_STATUS
+    violation = GET_BIT(msg, 43U) || violation;  // AEB_PREPARE
+    violation = GET_BIT(msg, 47U) || violation;  // AEB_BRAKING
     if (violation) {
       tx = false;
     }

@@ -82,7 +82,7 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
   // acc button check, only allow cancel button to be sent
   if (msg->addr == 0x20bU) {
     // Violation of any button other than cancel is pressed
-    violation |= ((msg->data[1] & 0x3dU) > 0U);
+    violation = ((msg->data[1] & 0x3dU) > 0U) || violation;
   }
 
   if (violation) {

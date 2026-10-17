@@ -71,21 +71,21 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
     }
 
     // *** global torque limit check ***
-    violation |= safety_max_limit_check(desired_torque, max_torque, -max_torque);
+    violation = safety_max_limit_check(desired_torque, max_torque, -max_torque);
 
     // *** torque rate limit check ***
     if (limits.type == TorqueDriverLimited) {
-      violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
-                                      max_torque, limits.max_rate_up, limits.max_rate_down,
-                                      limits.driver_torque_allowance, limits.driver_torque_multiplier);
+      violation = driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
+                                     max_torque, limits.max_rate_up, limits.max_rate_down,
+                                     limits.driver_torque_allowance, limits.driver_torque_multiplier) || violation;
     } else {
-      violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
-                                      limits.max_rate_up, limits.max_rate_down, limits.max_torque_error);
+      violation = dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
+                                     limits.max_rate_up, limits.max_rate_down, limits.max_torque_error) || violation;
     }
     desired_torque_last = desired_torque;
 
     // *** torque real time rate limit check ***
-    violation |= rt_torque_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta);
+    violation = rt_torque_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta) || violation;
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = safety_get_ts_elapsed(ts, ts_torque_check_last);
@@ -219,18 +219,18 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
 
     // check for violation;
-    violation |= safety_max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+    violation = safety_max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
   }
   desired_angle_last = desired_angle;
 
   // Angle should be close to current angle while not steering
   if (!steer_control_enabled) {
-    violation |= steer_angle_cmd_inactive_check(desired_angle, limits.max_angle);
+    violation = steer_angle_cmd_inactive_check(desired_angle, limits.max_angle) || violation;
   }
 
   // No angle control allowed when controls are not allowed
   if (!controls_allowed) {
-    violation |= steer_control_enabled;
+    violation = steer_control_enabled || violation;
   }
 
   // reset to current angle if either controls is not allowed or there's a violation
@@ -255,7 +255,7 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
 
   if (controls_allowed && steer_control_enabled) {
     // *** absolute curvature cap ***
-    violation |= safety_max_limit_check(desired_curvature, limits.max_curvature, -limits.max_curvature);
+    violation = safety_max_limit_check(desired_curvature, limits.max_curvature, -limits.max_curvature);
 
     // *** ISO lateral accel limit ***
     const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
@@ -305,28 +305,28 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
         lowest_desired_curvature = SAFETY_MAX(lowest_desired_curvature, lowest_desired_curvature_error);
       }
     }
-    violation |= safety_max_limit_check(desired_curvature, highest_desired_curvature, lowest_desired_curvature);
+    violation = safety_max_limit_check(desired_curvature, highest_desired_curvature, lowest_desired_curvature) || violation;
 
     // *** real time rate limit check ***
-    violation |= rt_curvature_rate_limit_check(limits);
+    violation = rt_curvature_rate_limit_check(limits) || violation;
   }
   curvature_state.desired_last = desired_curvature;
 
   // Curvature must be 0 while not steering
   if (!steer_control_enabled) {
-    violation |= desired_curvature != 0;
+    violation = (desired_curvature != 0) || violation;
   }
 
   // *** steer power check ***
   // allow power winddown after disengage to prevent EPS fault
   if (limits.max_steer_power != 0) {
-    violation |= safety_max_limit_check(steer_power, limits.max_steer_power, 0);
-    violation |= (steer_power != 0) && !steer_control_enabled;
-    violation |= !controls_allowed && (steer_power != 0) && (steer_power >= curvature_state.steer_power_last);
+    violation = safety_max_limit_check(steer_power, limits.max_steer_power, 0) || violation;
+    violation = ((steer_power != 0) && !steer_control_enabled) || violation;
+    violation = (!controls_allowed && (steer_power != 0) && (steer_power >= curvature_state.steer_power_last)) || violation;
     curvature_state.steer_power_last = steer_power;
   } else {
     // No curvature control allowed when controls are not allowed
-    violation |= !controls_allowed && steer_control_enabled;
+    violation = (!controls_allowed && steer_control_enabled) || violation;
   }
 
   if (violation) {
@@ -376,28 +376,28 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     const int highest_desired_angle = desired_angle_last + max_angle_delta_can;
     const int lowest_desired_angle = desired_angle_last - max_angle_delta_can;
 
-    violation |= safety_max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+    violation = safety_max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
 
     // *** ISO lateral accel limit ***
     const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
     const float max_angle = get_angle_from_curvature(max_curvature, curvature_factor, params);
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
-    violation |= safety_max_limit_check(desired_angle, max_angle_can, -max_angle_can);
+    violation = safety_max_limit_check(desired_angle, max_angle_can, -max_angle_can) || violation;
 
     // *** angle real time rate limit check ***
-    violation |= rt_angle_rate_limit_check(limits);
+    violation = rt_angle_rate_limit_check(limits) || violation;
   }
   desired_angle_last = desired_angle;
 
   // Angle should either be 0 or same as current angle while not steering
   if (!steer_control_enabled) {
-    violation |= steer_angle_cmd_inactive_check(desired_angle, limits.max_angle);
+    violation = steer_angle_cmd_inactive_check(desired_angle, limits.max_angle) || violation;
   }
 
   // No angle control allowed when controls are not allowed
   if (!controls_allowed) {
-    violation |= steer_control_enabled;
+    violation = steer_control_enabled || violation;
   }
 
   // reset to current angle if either controls is not allowed or there's a violation

@@ -189,8 +189,8 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
     bool violation = false;
 
     if (hyundai_longitudinal) {
-      violation |= longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
-      violation |= longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
+      violation = longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
+      violation = longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS) || violation;
     } else {
       // only used to cancel on here
       const int acc_mode = (msg->data[8] >> 4) & 0x7U;

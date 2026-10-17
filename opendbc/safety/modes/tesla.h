@@ -263,8 +263,8 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
       }
 
       // Don't allow any acceleration limits above the safety limits
-      violation |= longitudinal_accel_checks(raw_accel_max, TESLA_LONG_LIMITS);
-      violation |= longitudinal_accel_checks(raw_accel_min, TESLA_LONG_LIMITS);
+      violation = longitudinal_accel_checks(raw_accel_max, TESLA_LONG_LIMITS) || violation;
+      violation = longitudinal_accel_checks(raw_accel_min, TESLA_LONG_LIMITS) || violation;
     } else {
       // Can only send cancel longitudinal messages when not controlling longitudinal
       if (acc_state != 13) {  // ACC_CANCEL_GENERIC_SILENT

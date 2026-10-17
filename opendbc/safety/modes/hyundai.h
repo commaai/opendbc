@@ -209,13 +209,11 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
     bool aeb_req = GET_BIT(msg, 54U);
     bool aeb_stop_req = GET_BIT(msg, 55U);
 
-    bool violation = false;
-
-    violation |= longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
-    violation |= longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
-    violation |= (aeb_decel_cmd != 0);
-    violation |= aeb_req;
-    violation |= aeb_stop_req;
+    bool violation = longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
+    violation = longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS) || violation;
+    violation = (aeb_decel_cmd != 0) || violation;
+    violation = aeb_req || violation;
+    violation = aeb_stop_req || violation;
 
     if (violation) {
       tx = false;

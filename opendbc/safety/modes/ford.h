@@ -178,15 +178,14 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     // Signal: AccBrkPrchg_B_Rq & AccBrkDecel_B_Rq
     bool brake_actuation = (msg->data[6] & 0xC0U) != 0U;
 
-    bool violation = false;
-    violation |= longitudinal_accel_checks(accel, FORD_LONG_LIMITS);
-    violation |= longitudinal_gas_checks(gas, FORD_LONG_LIMITS);
-    violation |= longitudinal_gas_checks(gas_pred, FORD_LONG_LIMITS);
+    bool violation = longitudinal_accel_checks(accel, FORD_LONG_LIMITS);
+    violation = longitudinal_gas_checks(gas, FORD_LONG_LIMITS) || violation;
+    violation = longitudinal_gas_checks(gas_pred, FORD_LONG_LIMITS) || violation;
 
     // Safety check for stock AEB
-    violation |= cmbb_deny;  // do not prevent stock AEB actuation
+    violation = cmbb_deny || violation;  // do not prevent stock AEB actuation
 
-    violation |= !get_longitudinal_allowed() && brake_actuation;
+    violation = (!get_longitudinal_allowed() && brake_actuation) || violation;
 
     if (violation) {
       tx = false;
@@ -199,9 +198,8 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == FORD_Steering_Data_FD1) {
     // Violation if resume button is pressed while controls not allowed, or
     // if cancel button is pressed when cruise isn't engaged.
-    bool violation = false;
-    violation |= ((msg->data[1] >> 0) & 1U) && !cruise_engaged_prev;   // Signal: CcAslButtnCnclPress (cancel)
-    violation |= ((msg->data[3] >> 1) & 1U) && !controls_allowed;     // Signal: CcAsllButtnResPress (resume)
+    bool violation = (((msg->data[1] >> 0) & 1U) != 0U) && !cruise_engaged_prev;  // Signal: CcAslButtnCnclPress (cancel)
+    violation = ((((msg->data[3] >> 1) & 1U) != 0U) && !controls_allowed) || violation;  // Signal: CcAsllButtnResPress (resume)
 
     if (violation) {
       tx = false;

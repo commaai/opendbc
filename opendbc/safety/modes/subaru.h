@@ -132,7 +132,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     bool steer_req = (msg->data[3] >> 5) & 1U;
 
     const TorqueSteeringLimits limits = subaru_gen2 ? SUBARU_GEN2_STEERING_LIMITS : SUBARU_STEERING_LIMITS;
-    violation |= steer_torque_cmd_checks(desired_torque, steer_req, limits);
+    violation = steer_torque_cmd_checks(desired_torque, steer_req, limits);
   }
 
   // check es_distance cruise_throttle limits
@@ -142,8 +142,8 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
     // If openpilot is not controlling long, only allow ES_Distance for cruise cancel requests,
     // (when Cruise_Cancel is true, and Cruise_Throttle is inactive)
-    violation |= (cruise_throttle != SUBARU_LONG_LIMITS.inactive_gas);
-    violation |= (!cruise_cancel);
+    violation = (cruise_throttle != SUBARU_LONG_LIMITS.inactive_gas) || violation;
+    violation = !cruise_cancel || violation;
   }
 
   if (violation) {
