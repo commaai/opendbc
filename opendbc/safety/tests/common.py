@@ -1200,6 +1200,9 @@ class CarSafetyTest(SafetyTest):
     for speed in np.arange(0, 40, 0.5):
       for speed_delta in np.arange(-5, 5, 0.1):
         speed_2 = round(max(speed + speed_delta, 0), 1)
+        # exactly at the limit, the result depends on float rounding
+        if abs(abs(speed - speed_2) - MAX_SPEED_DELTA) < 1e-3:
+          continue
         # Set controls allowed in between rx since first message can reset it
         self._rx(self._speed_msg(speed))
         self.safety.set_controls_allowed(True)
