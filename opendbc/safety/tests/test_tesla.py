@@ -171,6 +171,9 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       for speed_delta in np.arange(-5, 5, 0.1):
         speed_2 = max(speed + speed_delta, 0)
         speed_2 = away_round(speed_2 * 2 * 3.6) / 2 / 3.6
+        # exactly at the limit, the result depends on float rounding
+        if abs(abs(speed - speed_2) - MAX_SPEED_DELTA) < 1e-3:
+          continue
 
         # Set controls allowed in between rx since first message can reset it
         self.assertTrue(self._rx(self._speed_msg(speed)))

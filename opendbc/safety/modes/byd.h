@@ -61,9 +61,9 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
 
   // NOTE: based off BYD_ATTO_3 to match openpilot
   const AngleSteeringParams BYD_STEERING_PARAMS = {
-    .slip_factor = -0.0006166479109059387,  // calc_slip_factor(VM)
-    .steer_ratio = 14.8,
-    .wheelbase = 2.72,
+    .slip_factor = -0.0006166479109059387f,  // calc_slip_factor(VM)
+    .steer_ratio = 14.8f,
+    .wheelbase = 2.72f,
   };
 
   bool tx = true;
