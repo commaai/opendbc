@@ -12,7 +12,7 @@ static uint32_t rivian_get_checksum(const CANPacket_t *msg) {
 }
 
 static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, uint8_t xor_output) {
-  int len = (int)GET_LEN(msg);
+  int len = GET_LEN(msg);
 
   uint8_t crc = 0;
   // Skip the checksum byte
@@ -59,38 +59,35 @@ static bool rivian_get_quality_flag_valid(const CANPacket_t *msg) {
 static void rivian_rx_hook(const CANPacket_t *msg) {
   // Vehicle speed
   if (msg_matches(msg, 0x208U, 0U)) {
-    uint32_t speed_raw = ((uint32_t)msg->data[6] << 8) | msg->data[7];
-    float speed = (float)((double)speed_raw * 0.01);
+    float speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01;
     vehicle_moving = speed > 0.0;
     UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
   }
 
   // Gas pressed and second speed source for variable torque limit
   if (msg_matches(msg, 0x150U, 0U)) {
-    gas_pressed = (msg->data[3] | (msg->data[4] & 0xC0U)) != 0U;
+    gas_pressed = msg->data[3] | (msg->data[4] & 0xC0U);
 
     // Disable controls if speeds from VDM and ESP ECUs are too far apart.
-    uint32_t vdm_speed_raw = ((uint32_t)msg->data[5] << 8) | msg->data[6];
-    float vdm_speed = (float)((double)vdm_speed_raw * 0.01 * KPH_TO_MS);
+    float vdm_speed = ((msg->data[5] << 8) | msg->data[6]) * 0.01 * KPH_TO_MS;
     speed_mismatch_check(vdm_speed);
   }
 
   // Driver torque
   if (msg_matches(msg, 0x380U, 0U)) {
-    uint32_t torque_driver_raw = ((uint32_t)msg->data[2] << 4) | ((uint32_t)msg->data[3] >> 4);
-    int torque_driver_new = (int)torque_driver_raw - 2050;
+    int torque_driver_new = (((msg->data[2] << 4) | (msg->data[3] >> 4))) - 2050U;
     update_sample(&torque_driver, torque_driver_new);
   }
 
   // Brake pressed
   if (msg_matches(msg, 0x38fU, 0U)) {
-    brake_pressed = ((msg->data[2] >> 7) & 1U) != 0U;
+    brake_pressed = (msg->data[2] >> 7) & 1U;
   }
 
   // Cruise state
   if (msg_matches(msg, 0x100U, 2U)) {
-    const uint8_t feature_status = msg->data[2] >> 5U;
-    pcm_cruise_check(feature_status == 1U);
+    const int feature_status = msg->data[2] >> 5U;
+    pcm_cruise_check(feature_status == 1);
   }
 }
 
@@ -100,8 +97,8 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
     .max_torque = 350,
     .dynamic_max_torque = true,
     .max_torque_lookup = {
-      {9.0f, 17.0f, 17.0f},
-      {350.0f, 250.0f, 250.0f},
+      {9., 17., 17.},
+      {350, 250, 250},
     },
     .max_rate_up = 3,
     .max_rate_down = 5,
@@ -121,9 +118,8 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
 
   // Steering control
   if (msg_matches(msg, 0x120U, 0U)) {
-    uint32_t desired_torque_raw = ((uint32_t)msg->data[2] << 3U) | ((uint32_t)msg->data[3] >> 5U);
-    int desired_torque = (int)desired_torque_raw - 1024;
-    bool steer_req = ((msg->data[3] >> 4) & 1U) != 0U;
+    int desired_torque = ((msg->data[2] << 3U) | (msg->data[3] >> 5U)) - 1024U;
+    bool steer_req = (msg->data[3] >> 4) & 1U;
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, RIVIAN_STEERING_LIMITS)) {
       tx = false;
@@ -132,8 +128,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
 
   // Longitudinal control
   if (msg_matches(msg, 0x160U, 0U)) {
-    uint32_t raw_accel_u = ((uint32_t)msg->data[2] << 3) | ((uint32_t)msg->data[3] >> 5);
-    int raw_accel = (int)raw_accel_u - 1024;
+    int raw_accel = ((msg->data[2] << 3) | (msg->data[3] >> 5)) - 1024U;
     if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
       tx = false;
     }
@@ -170,7 +165,7 @@ static safety_config rivian_init(uint16_t param) {
 
   SAFETY_UNUSED(param);
   #ifdef ALLOW_DEBUG
-    const uint32_t FLAG_RIVIAN_LONG_CONTROL = 1U;
+    const int FLAG_RIVIAN_LONG_CONTROL = 1;
     rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);
   #endif
 
@@ -182,11 +177,11 @@ static safety_config rivian_init(uint16_t param) {
 }
 
 const safety_hooks rivian_hooks = {
-  .init = &rivian_init,
-  .rx = &rivian_rx_hook,
-  .tx = &rivian_tx_hook,
-  .get_counter = &rivian_get_counter,
-  .get_checksum = &rivian_get_checksum,
-  .compute_checksum = &rivian_compute_checksum,
-  .get_quality_flag_valid = &rivian_get_quality_flag_valid,
+  .init = rivian_init,
+  .rx = rivian_rx_hook,
+  .tx = rivian_tx_hook,
+  .get_counter = rivian_get_counter,
+  .get_checksum = rivian_get_checksum,
+  .compute_checksum = rivian_compute_checksum,
+  .get_quality_flag_valid = rivian_get_quality_flag_valid,
 };

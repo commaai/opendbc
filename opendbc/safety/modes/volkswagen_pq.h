@@ -32,7 +32,7 @@ static uint8_t volkswagen_pq_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t volkswagen_pq_compute_checksum(const CANPacket_t *msg) {
-  int len = (int)GET_LEN(msg);
+  int len = GET_LEN(msg);
   uint8_t checksum = 0U;
   int checksum_byte = (msg->addr == MSG_MOTOR_5) ? 7 : 0;
 
@@ -86,18 +86,17 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state from speed value.
   // Signal: Bremse_1.BR1_Rad_kmh
   if (msg_matches(msg, MSG_BREMSE_1, 0U)) {
-    uint32_t speed = (((uint32_t)msg->data[2] & 0xFEU) >> 1) | ((uint32_t)msg->data[3] << 7);
-    vehicle_moving = speed > 0U;
+    int speed = ((msg->data[2] & 0xFEU) >> 1) | (msg->data[3] << 7);
+    vehicle_moving = speed > 0;
   }
 
   // Update driver input torque samples
   // Signal: Lenkhilfe_3.LH3_LM (absolute torque)
   // Signal: Lenkhilfe_3.LH3_LMSign (direction)
   if (msg_matches(msg, MSG_LENKHILFE_3, 0U)) {
-    uint32_t torque_driver_raw = msg->data[2] | (((uint32_t)msg->data[3] & 0x3U) << 8);
-    int torque_driver_new = (int)torque_driver_raw;
-    uint8_t sign = (msg->data[3] & 0x4U) >> 2;
-    if (sign == 1U) {
+    int torque_driver_new = msg->data[2] | ((msg->data[3] & 0x3U) << 8);
+    int sign = (msg->data[3] & 0x4U) >> 2;
+    if (sign == 1) {
       torque_driver_new *= -1;
     }
     update_sample(&torque_driver, torque_driver_new);
@@ -134,20 +133,20 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
       // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
       // Signal: Motor_2.MO2_Sta_GRA
-      uint8_t acc_status = (msg->data[2] & 0xC0U) >> 6;
-      bool cruise_engaged = (acc_status == 1U) || (acc_status == 2U);
+      int acc_status = (msg->data[2] & 0xC0U) >> 6;
+      bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
       pcm_cruise_check(cruise_engaged);
     }
   }
 
   // Signal: Motor_3.MO3_Pedalwert
   if (msg_matches(msg, MSG_MOTOR_3, 0U)) {
-    gas_pressed = msg->data[2] != 0U;
+    gas_pressed = (msg->data[2]);
   }
 
   // Signal: Motor_2.MO2_BLS
   if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
-    brake_pressed = (msg->data[2] & 0x1U) != 0U;
+    brake_pressed = (msg->data[2] & 0x1U);
   }
 }
 
@@ -177,16 +176,15 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
   // Signal: HCA_1.LM_Offset (absolute torque)
   // Signal: HCA_1.LM_Offsign (direction)
   if (msg->addr == MSG_HCA_1) {
-    uint32_t desired_torque_raw = msg->data[2] | (((uint32_t)msg->data[3] & 0x7FU) << 8);
-    int desired_torque = (int)desired_torque_raw;
+    int desired_torque = msg->data[2] | ((msg->data[3] & 0x7FU) << 8);
     desired_torque = desired_torque / 32;  // DBC scale from PQ network to centi-Nm
-    uint8_t sign = (msg->data[3] & 0x80U) >> 7;
-    if (sign == 1U) {
+    int sign = (msg->data[3] & 0x80U) >> 7;
+    if (sign == 1) {
       desired_torque *= -1;
     }
 
-    uint8_t hca_status = (msg->data[1] >> 4) & 0xFU;
-    bool steer_req = (hca_status == 5U) || (hca_status == 7U);
+    uint32_t hca_status = ((msg->data[1] >> 4) & 0xFU);
+    bool steer_req = ((hca_status == 5U) || (hca_status == 7U));
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_PQ_STEERING_LIMITS)) {
       tx = false;
@@ -197,8 +195,7 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
   // To avoid floating point math, scale upward and compare to pre-scaled safety m/s2 boundaries
   if (msg->addr == MSG_ACC_SYSTEM) {
     // Signal: ACC_System.ACS_Sollbeschl (acceleration in m/s2, scale 0.005, offset -7.22)
-    uint32_t desired_accel_raw = (((uint32_t)msg->data[4] & 0x7U) << 8) | msg->data[3];
-    int desired_accel = ((int)desired_accel_raw * 5) - 7220;
+    int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
 
     if (longitudinal_accel_checks(desired_accel, VOLKSWAGEN_PQ_LONG_LIMITS)) {
       tx = false;
@@ -219,10 +216,10 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
 }
 
 const safety_hooks volkswagen_pq_hooks = {
-  .init = &volkswagen_pq_init,
-  .rx = &volkswagen_pq_rx_hook,
-  .tx = &volkswagen_pq_tx_hook,
-  .get_counter = &volkswagen_pq_get_counter,
-  .get_checksum = &volkswagen_pq_get_checksum,
-  .compute_checksum = &volkswagen_pq_compute_checksum,
+  .init = volkswagen_pq_init,
+  .rx = volkswagen_pq_rx_hook,
+  .tx = volkswagen_pq_tx_hook,
+  .get_counter = volkswagen_pq_get_counter,
+  .get_checksum = volkswagen_pq_get_checksum,
+  .compute_checksum = volkswagen_pq_compute_checksum,
 };

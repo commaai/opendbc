@@ -2,11 +2,13 @@
 
 #include "opendbc/safety/declarations.h"
 
-static uint16_t hyundai_canfd_crc_lut[256] = {0};
+extern uint16_t hyundai_canfd_crc_lut[256];
+uint16_t hyundai_canfd_crc_lut[256];
 
 static const uint8_t HYUNDAI_PREV_BUTTON_SAMPLES = 8;  // roughly 160 ms
 
-static const uint32_t HYUNDAI_STANDSTILL_THRSLD = 12;  // 0.375 kph
+extern const uint32_t HYUNDAI_STANDSTILL_THRSLD;
+const uint32_t HYUNDAI_STANDSTILL_THRSLD = 12;  // 0.375 kph
 
 enum {
   HYUNDAI_BTN_NONE = 0,
@@ -16,25 +18,33 @@ enum {
 };
 
 // common state
-static bool hyundai_ev_gas_signal = false;
+extern bool hyundai_ev_gas_signal;
+bool hyundai_ev_gas_signal = false;
 
-static bool hyundai_hybrid_gas_signal = false;
+extern bool hyundai_hybrid_gas_signal;
+bool hyundai_hybrid_gas_signal = false;
 
-static bool hyundai_longitudinal = false;
+extern bool hyundai_longitudinal;
+bool hyundai_longitudinal = false;
 
-static bool hyundai_camera_scc = false;
+extern bool hyundai_camera_scc;
+bool hyundai_camera_scc = false;
 
-static bool hyundai_canfd_lka_steer_msg = false;
+extern bool hyundai_canfd_lka_steer_msg;
+bool hyundai_canfd_lka_steer_msg = false;
 
-static bool hyundai_alt_limits = false;
+extern bool hyundai_alt_limits;
+bool hyundai_alt_limits = false;
 
-static bool hyundai_fcev_gas_signal = false;
+extern bool hyundai_fcev_gas_signal;
+bool hyundai_fcev_gas_signal = false;
 
-static bool hyundai_alt_limits_2 = false;
+extern bool hyundai_alt_limits_2;
+bool hyundai_alt_limits_2 = false;
 
-static uint8_t hyundai_last_button_interaction = 0;  // button messages since the user pressed an enable button
+static uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 
-static void hyundai_common_init(uint16_t param) {
+void hyundai_common_init(uint16_t param) {
   const uint16_t HYUNDAI_PARAM_EV_GAS = 1;
   const uint16_t HYUNDAI_PARAM_HYBRID_GAS = 2;
   const uint16_t HYUNDAI_PARAM_CAMERA_SCC = 8;
@@ -61,7 +71,7 @@ static void hyundai_common_init(uint16_t param) {
 #endif
 }
 
-static void hyundai_common_cruise_state_check(const bool cruise_engaged) {
+void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   // some newer HKG models can re-enable after spamming cancel button,
   // so keep track of user button presses to deny engagement if no interaction
 
@@ -78,13 +88,11 @@ static void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   }
 }
 
-static void hyundai_common_cruise_buttons_check(const int cruise_button, const bool main_button) {
+void hyundai_common_cruise_buttons_check(const int cruise_button, const bool main_button) {
   if ((cruise_button == HYUNDAI_BTN_RESUME) || (cruise_button == HYUNDAI_BTN_SET) || (cruise_button == HYUNDAI_BTN_CANCEL) || main_button) {
     hyundai_last_button_interaction = 0U;
   } else {
-    if (hyundai_last_button_interaction < HYUNDAI_PREV_BUTTON_SAMPLES) {
-      hyundai_last_button_interaction += 1U;
-    }
+    hyundai_last_button_interaction = SAFETY_MIN(hyundai_last_button_interaction + 1U, HYUNDAI_PREV_BUTTON_SAMPLES);
   }
 
   if (hyundai_longitudinal) {
@@ -104,8 +112,8 @@ static void hyundai_common_cruise_buttons_check(const int cruise_button, const b
   }
 }
 
-static uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
-  int len = (int)GET_LEN(msg);
+uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
+  int len = GET_LEN(msg);
   uint32_t address = msg->addr;
 
   uint16_t crc = 0;
@@ -115,10 +123,8 @@ static uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
   }
 
   // Add address to crc
-  uint8_t address_lo = (uint8_t)(address & 0xFFU);
-  uint8_t address_hi = (uint8_t)((address >> 8U) & 0xFFU);
-  crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ address_lo];
-  crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ address_hi];
+  crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((address >> 0U) & 0xFFU)];
+  crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((address >> 8U) & 0xFFU)];
 
   if (len == 24) {
     crc ^= 0x819dU;

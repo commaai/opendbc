@@ -6,14 +6,14 @@ static bool nissan_alt_eps = false;
 
 static const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
   .max_angle = 60000,  // 600 deg, reasonable limit
-  .angle_deg_to_can = 100.0f,
+  .angle_deg_to_can = 100,
   .angle_rate_up_lookup = {
-    {0.0f, 5.0f, 15.0f},
-    {5.0f, 0.8f, 0.15f},
+    {0., 5., 15.},
+    {5., .8, .15},
   },
   .angle_rate_down_lookup = {
-    {0.0f, 5.0f, 15.0f},
-    {5.0f, 3.5f, 0.4f},
+    {0., 5., 15.},
+    {5., 3.5, .4},
   },
 };
 
@@ -21,11 +21,9 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   // Altima: on camera bus, others: on pt bus
   if (msg_matches(msg, 0x185U, 0U)) {
     // Current steering angle
-    uint32_t raw_angle_meas = ((uint32_t)msg->data[2] << 10) | ((uint32_t)msg->data[3] << 2) | ((uint32_t)msg->data[4] >> 6);
-    int angle_meas_new = (int)raw_angle_meas;
+    int angle_meas_new = (msg->data[2] << 10) | (msg->data[3] << 2) | (msg->data[4] >> 6);
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    const float angle_offset = 1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can;
-    angle_meas_new = -angle_meas_new + (int)angle_offset;
+    angle_meas_new = -angle_meas_new + (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
 
     // update array of samples
     update_sample(&angle_meas, angle_meas_new);
@@ -33,11 +31,10 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, 0x285U, nissan_alt_eps ? 1U : 0U)) {
     // Get current speed and standstill
-    uint16_t right_rear = ((uint16_t)msg->data[0] << 8) | (msg->data[1]);
-    uint16_t left_rear = ((uint16_t)msg->data[2] << 8) | (msg->data[3]);
+    uint16_t right_rear = (msg->data[0] << 8) | (msg->data[1]);
+    uint16_t left_rear = (msg->data[2] << 8) | (msg->data[3]);
     vehicle_moving = (right_rear | left_rear) != 0U;
-    uint32_t rear_speed_sum = (uint32_t)right_rear + left_rear;
-    UPDATE_VEHICLE_SPEED((float)rear_speed_sum / 2.0 * 0.005 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED((right_rear + left_rear) / 2.0 * 0.005 * KPH_TO_MS);
   }
 
   // X-Trail 0x15c, Leaf 0x239
@@ -60,7 +57,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
 
   // Handle cruise enabled
   if (msg_matches(msg, 0x30fU, nissan_alt_eps ? 1U : 2U)) {
-    bool cruise_engaged = ((msg->data[0] >> 3) & 1U) != 0U;
+    bool cruise_engaged = (msg->data[0] >> 3) & 1U;
     pcm_cruise_check(cruise_engaged);
   }
 }
@@ -71,13 +68,11 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
 
   // steer cmd checks
   if (msg->addr == 0x169U) {
-    uint32_t raw_desired_angle = ((uint32_t)msg->data[0] << 10) | ((uint32_t)msg->data[1] << 2) | (((uint32_t)msg->data[2] >> 6) & 0x3U);
-    int desired_angle = (int)raw_desired_angle;
-    bool lka_active = ((msg->data[6] >> 4) & 1U) != 0U;
+    int desired_angle = ((msg->data[0] << 10) | (msg->data[1] << 2) | ((msg->data[2] >> 6) & 0x3U));
+    bool lka_active = (msg->data[6] >> 4) & 1U;
 
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    const float angle_offset = 1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can;
-    desired_angle = -desired_angle + (int)angle_offset;
+    desired_angle = -desired_angle + (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
 
     if (steer_angle_cmd_checks(desired_angle, lka_active, NISSAN_STEERING_LIMITS)) {
       violation = true;
@@ -87,9 +82,7 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
   // acc button check, only allow cancel button to be sent
   if (msg->addr == 0x20bU) {
     // Violation of any button other than cancel is pressed
-    if ((msg->data[1] & 0x3dU) > 0U) {
-      violation = true;
-    }
+    violation |= ((msg->data[1] & 0x3dU) > 0U);
   }
 
   if (violation) {
@@ -132,7 +125,7 @@ static safety_config nissan_init(uint16_t param) {
 }
 
 const safety_hooks nissan_hooks = {
-  .init = &nissan_init,
-  .rx = &nissan_rx_hook,
-  .tx = &nissan_tx_hook,
+  .init = nissan_init,
+  .rx = nissan_rx_hook,
+  .tx = nissan_tx_hook,
 };

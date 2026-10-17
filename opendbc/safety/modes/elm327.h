@@ -7,10 +7,10 @@ static bool elm327_tx_hook(const CANPacket_t *msg) {
   const unsigned int GM_CAMERA_DIAG_ADDR = 0x24BU;
 
   bool tx = true;
-  unsigned int len = GET_LEN(msg);
+  int len = GET_LEN(msg);
 
   // All ISO 15765-4 messages must be 8 bytes long
-  if (len != 8U) {
+  if (len != 8) {
     tx = false;
   }
 
@@ -23,7 +23,7 @@ static bool elm327_tx_hook(const CANPacket_t *msg) {
   }
 
   // GM camera uses non-standard diagnostic address, this has no control message address collisions
-  if ((msg->addr == GM_CAMERA_DIAG_ADDR) && (len == 8U)) {
+  if ((msg->addr == GM_CAMERA_DIAG_ADDR) && (len == 8)) {
     // Only allow known frame types for ISO 15765-2
     if ((msg->data[0] & 0xF0U) > 0x30U) {
       tx = false;
@@ -35,7 +35,7 @@ static bool elm327_tx_hook(const CANPacket_t *msg) {
 
 // If safety_param == 0, bus 1 is multiplexed to the OBD-II port
 const safety_hooks elm327_hooks = {
-  .init = &nooutput_init,
-  .rx = &default_rx_hook,
-  .tx = &elm327_tx_hook,
+  .init = nooutput_init,
+  .rx = default_rx_hook,
+  .tx = elm327_tx_hook,
 };

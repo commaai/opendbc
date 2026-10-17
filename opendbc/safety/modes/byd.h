@@ -16,29 +16,27 @@ static uint32_t byd_compute_checksum(const CANPacket_t *msg) {
   for (int i = 0; i < 7; i++) {
     sum += msg->data[i];
   }
-  return 0xFFU - (uint32_t)sum;
+  return 0xFFU - sum;
 }
 
 static void byd_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
     // Steering angle: 0.1 deg/LSB, signed
     if (msg->addr == 0x11FU) {
-      uint32_t angle_meas_raw = ((uint32_t)msg->data[1] << 8) | msg->data[0];  // STEER_ANGLE_2
-      int angle_meas_new = to_signed((int)angle_meas_raw, 16);
+      int angle_meas_new = to_signed((msg->data[1] << 8) | msg->data[0], 16);  // STEER_ANGLE_2
       update_sample(&angle_meas, angle_meas_new);
     }
 
     // Vehicle speed: 0.1 kph/LSB
     if (msg->addr == 0x1F0U) {
-      uint32_t speed_raw = ((uint32_t)msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
-      int speed = (int)speed_raw;
+      int speed = (msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
       vehicle_moving = speed > 0;
-      UPDATE_VEHICLE_SPEED((float)speed * 0.1 * KPH_TO_MS);
+      UPDATE_VEHICLE_SPEED(speed * 0.1 * KPH_TO_MS);
     }
 
     // Gas and brake pressed
     if (msg->addr == 0x242U) {
-      brake_pressed = ((msg->data[4] >> 5) & 0x1U) != 0U;   // BRAKE_PRESSED
+      brake_pressed = (msg->data[4] >> 5) & 0x1U;   // BRAKE_PRESSED
       gas_pressed = (msg->data[3] & 0x7FU) > 0U;    // RAW_THROTTLE
     }
   }
@@ -57,23 +55,22 @@ static void byd_rx_hook(const CANPacket_t *msg) {
 static bool byd_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringLimits BYD_STEERING_LIMITS = {
     .max_angle = 3900,  // 390 deg
-    .angle_deg_to_can = 10.0f,
+    .angle_deg_to_can = 10,
     .frequency = 50U,
   };
 
   // NOTE: based off BYD_ATTO_3 to match openpilot
   const AngleSteeringParams BYD_STEERING_PARAMS = {
-    .slip_factor = -0.0006166479109059387f,  // calc_slip_factor(VM)
-    .steer_ratio = 14.8f,
-    .wheelbase = 2.72f,
+    .slip_factor = -0.0006166479109059387,  // calc_slip_factor(VM)
+    .steer_ratio = 14.8,
+    .wheelbase = 2.72,
   };
 
   bool tx = true;
 
   // Steering control: 0.1 deg/LSB, signed
   if (msg->addr == 0x1E2U) {
-    uint32_t desired_angle_raw = ((uint32_t)msg->data[4] << 8) | msg->data[3];  // STEER_ANGLE
-    int desired_angle = to_signed((int)desired_angle_raw, 16);
+    int desired_angle = to_signed((msg->data[4] << 8) | msg->data[3], 16);  // STEER_ANGLE
     bool steer_req = ((msg->data[2] >> 5) & 0x1U) != 0U;                    // STEER_REQ
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_req, BYD_STEERING_LIMITS, BYD_STEERING_PARAMS)) {
@@ -113,10 +110,10 @@ static safety_config byd_init(uint16_t param) {
 }
 
 const safety_hooks byd_hooks = {
-  .init = &byd_init,
-  .rx = &byd_rx_hook,
-  .tx = &byd_tx_hook,
-  .get_counter = &byd_get_counter,
-  .get_checksum = &byd_get_checksum,
-  .compute_checksum = &byd_compute_checksum,
+  .init = byd_init,
+  .rx = byd_rx_hook,
+  .tx = byd_tx_hook,
+  .get_counter = byd_get_counter,
+  .get_checksum = byd_get_checksum,
+  .compute_checksum = byd_compute_checksum,
 };

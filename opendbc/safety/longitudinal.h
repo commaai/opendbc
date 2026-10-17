@@ -23,11 +23,7 @@ bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits) {
 
 bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits) {
   bool violation = false;
-  if (!get_longitudinal_allowed() && (desired_brake != 0)) {
-    violation = true;
-  }
-  if (desired_brake > limits.max_brake) {
-    violation = true;
-  }
+  violation |= !get_longitudinal_allowed() && (desired_brake != 0);
+  violation |= desired_brake > limits.max_brake;
   return violation;
 }

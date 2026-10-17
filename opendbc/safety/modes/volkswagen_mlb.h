@@ -33,10 +33,10 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
   // Signals: ESP_03.ESP_[VL|VR|HL|HR]_Radgeschw
   if (msg_matches(msg, MSG_ESP_03, 0U)) {
     uint32_t speed = 0;
-    speed += (((uint32_t)msg->data[3] & 0xFU) << 8) | msg->data[2];          // FL
-    speed += ((uint32_t)msg->data[4] << 4) | ((uint32_t)msg->data[3] >> 4);   // FR
-    speed += (((uint32_t)msg->data[6] & 0xFU) << 8) | msg->data[5];          // RL
-    speed += ((uint32_t)msg->data[7] << 4) | ((uint32_t)msg->data[6] >> 4);   // RR
+    speed += ((msg->data[3] & 0xFU) << 8) | msg->data[2];   // FL
+    speed += (msg->data[4] << 4) | (msg->data[3] >> 4);     // FR
+    speed += ((msg->data[6] & 0xFU) << 8) | msg->data[5];   // RL
+    speed += (msg->data[7] << 4) | (msg->data[6] >> 4);     // RR
     vehicle_moving = speed > 0U;
   }
 
@@ -69,8 +69,8 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_TSK_04, 1U)) {
     // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
     // Signal: TSK_04.TSK_Status_GRA_ACC_02
-    uint8_t acc_status = (msg->data[7] & 0xC0U) >> 6;
-    bool cruise_engaged = (acc_status == 1U) || (acc_status == 2U);
+    int acc_status = (msg->data[7] & 0xC0U) >> 6;
+    bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
 
     pcm_cruise_check(cruise_engaged);
   }
@@ -94,8 +94,8 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == MSG_HCA_01) {
     int desired_torque = volkswagen_mlb_mqb_steering_control_torque(msg);
 
-    uint8_t steer_status = msg->data[4] & 0xFU;
-    bool steer_req = (steer_status == 5U) || (steer_status == 7U);
+    int steer_status = msg->data[4] & 0xFU;
+    bool steer_req = (steer_status == 5) || (steer_status == 7);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_MLB_STEERING_LIMITS)) {
       tx = false;
@@ -115,10 +115,10 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
 }
 
 const safety_hooks volkswagen_mlb_hooks = {
-  .init = &volkswagen_mlb_init,
-  .rx = &volkswagen_mlb_rx_hook,
-  .tx = &volkswagen_mlb_tx_hook,
-  .get_counter = &volkswagen_mxb_get_counter,
-  .get_checksum = &volkswagen_mxb_get_checksum,
-  .compute_checksum = &volkswagen_mxb_compute_crc,
+  .init = volkswagen_mlb_init,
+  .rx = volkswagen_mlb_rx_hook,
+  .tx = volkswagen_mlb_tx_hook,
+  .get_counter = volkswagen_mxb_get_counter,
+  .get_checksum = volkswagen_mxb_get_checksum,
+  .compute_checksum = volkswagen_mxb_compute_crc,
 };

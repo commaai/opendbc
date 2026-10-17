@@ -56,7 +56,7 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
   if (msg->addr == MSG_Motor_51) {
     salt = (uint8_t[]){0x77, 0x5C, 0xA0, 0x89, 0x4B, 0x7C, 0xBB, 0xD6, 0x1F, 0x6C, 0x4F, 0xF6, 0x20, 0x2B, 0x43, 0xDD}[counter];
   }
-  return volkswagen_compute_crc(msg, (int)GET_LEN(msg), salt);
+  return volkswagen_compute_crc(msg, GET_LEN(msg), salt);
 }
 
 static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
@@ -134,26 +134,23 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state by sampling wheel speeds
   if (msg_matches(msg, MSG_ESC_51, 0U)) {
-    uint32_t fl = msg->data[8] | ((uint32_t)msg->data[9] << 8);
-    uint32_t fr = msg->data[10] | ((uint32_t)msg->data[11] << 8);
-    uint32_t rl = msg->data[12] | ((uint32_t)msg->data[13] << 8);
-    uint32_t rr = msg->data[14] | ((uint32_t)msg->data[15] << 8);
+    uint32_t fl = msg->data[8] | (msg->data[9] << 8);
+    uint32_t fr = msg->data[10] | (msg->data[11] << 8);
+    uint32_t rl = msg->data[12] | (msg->data[13] << 8);
+    uint32_t rr = msg->data[14] | (msg->data[15] << 8);
     vehicle_moving = (fr | rr | rl | fl) != 0U;
-    uint32_t speed_sum = fr + rr + rl + fl;
-    UPDATE_VEHICLE_SPEED((float)speed_sum / 4.0 * 0.0075 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
   }
 
   // Check vehicle speed with redundant source
   if (msg_matches(msg, MSG_ESP_21, 0U)) {
     // Signal: ESP_v_Signal
-    uint32_t esp_speed_raw = ((uint32_t)msg->data[5] << 8) | msg->data[4];
-    float esp_speed = (float)((float)esp_speed_raw * 0.01 * KPH_TO_MS);
+    float esp_speed = ((msg->data[5] << 8) | msg->data[4]) * 0.01 * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED_2(esp_speed);
   }
 
   if (msg_matches(msg, MSG_QFK_01, 0U)) {
-    uint32_t current_curvature_raw = (((uint32_t)msg->data[6] & 0x7FU) << 8) | msg->data[5];
-    int current_curvature = (int)current_curvature_raw;
+    int current_curvature = ((msg->data[6] & 0x7FU) << 8) | msg->data[5];
     current_curvature *= GET_BIT(msg, 55U) ? 1 : -1;
     update_sample(&curvature_state.meas, current_curvature);
   }
@@ -163,16 +160,16 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MSG_Motor_51, 0U)) {
-    uint8_t acc_status = msg->data[11] & 0x07U;
-    bool cruise_engaged = (acc_status == 3U) || (acc_status == 4U) || (acc_status == 5U);
-    acc_main_on = cruise_engaged || (acc_status == 2U);
+    int acc_status = (msg->data[11] & 0x07U);
+    bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
+    acc_main_on = cruise_engaged || (acc_status == 2);
 
     if (!acc_main_on) {
       controls_allowed = false;
     }
 
-    uint32_t accel_pedal_value = (((uint32_t)msg->data[1] >> 4) & 0x0FU) | (((uint32_t)msg->data[2] & 0x1FU) << 4);
-    gas_pressed = accel_pedal_value > 0U;
+    int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
+    gas_pressed = accel_pedal_value > 0;
   }
 
   if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
@@ -211,8 +208,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
   // Safety check for MSG_ACC_18 acceleration requests
   if (msg->addr == MSG_ACC_18) {
     // Signal: ACC_18.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-    uint32_t desired_accel_raw = (((uint32_t)msg->data[4] & 0x7U) << 8) | msg->data[3];
-    int desired_accel = ((int)desired_accel_raw * 5) - 7220;
+    int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
     // MEB inactive accel is 3.01, but we also need to send 0.0 for gas override
     bool accel_override = controls_allowed && (desired_accel == 0);
     if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
@@ -258,12 +254,11 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       .curvature_to_can = 149253.7313f,
       .frequency = 50,                   // Hz
       .max_curvature_error = 0,          // disabled, MEB doesn't track rack
-      .curvature_error_min_speed = 0.0f, // disabled
+      .curvature_error_min_speed = 0.0,  // disabled
       .max_steer_power = 125,
     };
 
-    uint32_t desired_curvature_abs = GET_BYTES_LE(msg, 3, 2) & 0x7FFFU;
-    int desired_curvature_raw = (int)desired_curvature_abs;
+    int desired_curvature_raw = GET_BYTES_LE(msg, 3, 2) & 0x7FFFU;
 
     bool desired_curvature_sign = GET_BIT(msg, 39U);
     if (!desired_curvature_sign) {
@@ -271,7 +266,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     }
 
     bool steer_req = (((msg->data[1] >> 4) & 0x0FU) == 4U);
-    int steer_power = (int)msg->data[2];
+    int steer_power = msg->data[2];
 
     if (steer_curvature_cmd_checks(desired_curvature_raw, steer_power, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
       tx = false;
@@ -282,10 +277,10 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
 }
 
 const safety_hooks volkswagen_meb_hooks = {
-  .init = &volkswagen_meb_init,
-  .rx = &volkswagen_meb_rx_hook,
-  .tx = &volkswagen_meb_tx_hook,
-  .get_counter = &volkswagen_mxb_get_counter,
-  .get_checksum = &volkswagen_mxb_get_checksum,
-  .compute_checksum = &volkswagen_meb_alt_crc_compute,
+  .init = volkswagen_meb_init,
+  .rx = volkswagen_meb_rx_hook,
+  .tx = volkswagen_meb_tx_hook,
+  .get_counter = volkswagen_mxb_get_counter,
+  .get_checksum = volkswagen_mxb_get_checksum,
+  .compute_checksum = volkswagen_meb_alt_crc_compute,
 };
