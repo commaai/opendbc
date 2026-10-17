@@ -6,6 +6,10 @@
 #include "opendbc/safety/can.h"
 #include "opendbc/safety/helpers.h"
 
+extern bool ignition_can;
+extern uint32_t ignition_can_cnt;
+void ignition_can_hook(const CANPacket_t *msg);
+
 bool ignition_can = false;
 uint32_t ignition_can_cnt = 0U;
 

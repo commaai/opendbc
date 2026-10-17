@@ -1,21 +1,12 @@
 #pragma once
 
-extern const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL;
-const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
+static const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
 
-extern bool volkswagen_longitudinal;
-bool volkswagen_longitudinal = false;
-
-extern bool volkswagen_set_button_prev;
-bool volkswagen_set_button_prev = false;
-
-extern bool volkswagen_resume_button_prev;
-bool volkswagen_resume_button_prev = false;
-
-extern bool volkswagen_brake_pedal_switch;
-extern bool volkswagen_brake_pressure_detected;
-bool volkswagen_brake_pedal_switch = false;
-bool volkswagen_brake_pressure_detected = false;
+static bool volkswagen_longitudinal = false;
+static bool volkswagen_set_button_prev = false;
+static bool volkswagen_resume_button_prev = false;
+static bool volkswagen_brake_pedal_switch = false;
+static bool volkswagen_brake_pressure_detected = false;
 
 #define MSG_LH_EPS_03        0x09FU   // RX from EPS, for driver steering torque
 #define MSG_ESP_19           0x0B2U   // RX from ABS, for wheel speeds

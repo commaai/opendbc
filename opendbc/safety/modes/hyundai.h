@@ -19,8 +19,7 @@
   .has_steer_req_tolerance = true, \
 }
 
-extern const LongitudinalLimits HYUNDAI_LONG_LIMITS;
-const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
+static const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   .max_accel = 200,   // 1/100 m/s2
   .min_accel = -350,  // 1/100 m/s2
 };
