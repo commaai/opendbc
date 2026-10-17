@@ -120,7 +120,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
 
     // average of all 4 wheel speeds. Conversion: raw * 0.03125 / 3.6 = m/s
     uint32_t speed_sum = fr + rr + rl + fl;
-    UPDATE_VEHICLE_SPEED((float)speed_sum / 4.0 * 0.03125 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED((float)speed_sum / 4.0f * 0.03125f * KPH_TO_MS);
   }
 
   // cruise state

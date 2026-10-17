@@ -140,14 +140,14 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     uint32_t rr = msg->data[14] | ((uint32_t)msg->data[15] << 8);
     vehicle_moving = (fr | rr | rl | fl) != 0U;
     uint32_t speed_sum = fr + rr + rl + fl;
-    UPDATE_VEHICLE_SPEED((float)speed_sum / 4.0 * 0.0075 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED((float)speed_sum / 4.0f * 0.0075f * KPH_TO_MS);
   }
 
   // Check vehicle speed with redundant source
   if (msg_matches(msg, MSG_ESP_21, 0U)) {
     // Signal: ESP_v_Signal
     uint32_t esp_speed_raw = ((uint32_t)msg->data[5] << 8) | msg->data[4];
-    float esp_speed = (float)((float)esp_speed_raw * 0.01 * KPH_TO_MS);
+    float esp_speed = (float)esp_speed_raw * 0.01f * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED_2(esp_speed);
   }
 

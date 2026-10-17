@@ -69,7 +69,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS)) {
     uint32_t speed = ((uint32_t)msg->data[0] << 8) | msg->data[1];
     vehicle_moving = speed > 0U;
-    UPDATE_VEHICLE_SPEED((float)speed * 0.01 * KPH_TO_MS);  // VITESSE_VEHICULE_ROUES
+    UPDATE_VEHICLE_SPEED((float)speed * 0.01f * KPH_TO_MS);  // VITESSE_VEHICULE_ROUES
   }
 
   if (msg_matches(msg, PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS)) {

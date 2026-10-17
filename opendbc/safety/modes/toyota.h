@@ -165,7 +165,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
     // check that all wheel speeds are at zero value
     vehicle_moving = speed != 0;
 
-    UPDATE_VEHICLE_SPEED((float)speed / 4.0 * 0.01 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED((float)speed / 4.0f * 0.01f * KPH_TO_MS);
   }
 }
 

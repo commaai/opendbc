@@ -62,8 +62,8 @@
     (config).disable_forwarding = false; \
   } while (false);
 
-#define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((float)((val_ms) * VEHICLE_SPEED_FACTOR))))
-#define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&vehicle_speed_2, ROUND((float)((val_ms) * VEHICLE_SPEED_FACTOR))))
+#define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
+#define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
 uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len);
 uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);
@@ -74,11 +74,11 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_RX_CHECKS 12U
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
-#define VEHICLE_SPEED_FACTOR 1000.0
+#define VEHICLE_SPEED_FACTOR 1000.0f
 #define MAX_RT_INTERVAL 250000U
 
 // Conversions
-#define KPH_TO_MS (1.0 / 3.6)
+#define KPH_TO_MS (1.0f / 3.6f)
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {

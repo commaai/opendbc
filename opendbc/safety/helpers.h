@@ -34,13 +34,6 @@
   (_a > 0) ? _a : (-_a); \
 })
 
-// Truncate (val + offset) toward zero, with the sum evaluated in double: this is the implicit
-// float -> double -> int conversion sequence of `(float_expr) + 1.` assigned to an int, made explicit.
-static inline int safety_float_offset_to_int(float val, double offset) {
-  const double sum = val + offset;
-  return (int)sum;
-}
-
 #define SAFETY_UNUSED(x) ((void)(x))
 
 // Update an MSB-first CRC8 with one byte; callers choose the initial value and final XOR.

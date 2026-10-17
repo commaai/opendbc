@@ -107,7 +107,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, FORD_BrakeSysFeatures, FORD_MAIN_BUS)) {
     // Signal: Veh_V_ActlBrk
     uint32_t raw_speed = ((uint32_t)msg->data[0] << 8) | msg->data[1];
-    UPDATE_VEHICLE_SPEED((float)raw_speed * 0.01 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED((float)raw_speed * 0.01f * KPH_TO_MS);
   }
 
   // Check vehicle speed against a second source
@@ -115,7 +115,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     // Disable controls if speeds from ABS and PCM ECUs are too far apart.
     // Signal: Veh_V_ActlEng
     uint32_t raw_pcm_speed = ((uint32_t)msg->data[6] << 8) | msg->data[7];
-    float filtered_pcm_speed = (float)((float)raw_pcm_speed * 0.01 * KPH_TO_MS);
+    float filtered_pcm_speed = (float)raw_pcm_speed * 0.01f * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
   }
 
@@ -125,8 +125,8 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     // Signal: VehYaw_W_Actl
     // TODO: we should use the speed which results in the closest angle measurement to the desired angle
     uint32_t raw_yaw_rate = ((uint32_t)msg->data[2] << 8U) | msg->data[3];
-    float ford_yaw_rate = (float)(((float)raw_yaw_rate * 0.0002) - 6.5);
-    float current_curvature = (float)(ford_yaw_rate / SAFETY_MAX((double)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1));
+    float ford_yaw_rate = ((float)raw_yaw_rate * 0.0002f) - 6.5f;
+    float current_curvature = ford_yaw_rate / SAFETY_MAX((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1f);
     // convert current curvature into units on CAN for comparison with desired curvature
     update_sample(&curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
   }

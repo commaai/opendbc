@@ -60,8 +60,8 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
   // Vehicle speed
   if (msg_matches(msg, 0x208U, 0U)) {
     uint32_t speed_raw = ((uint32_t)msg->data[6] << 8) | msg->data[7];
-    float speed = (float)((double)speed_raw * 0.01);
-    vehicle_moving = speed > 0.0;
+    float speed = (float)speed_raw * 0.01f;
+    vehicle_moving = speed > 0.0f;
     UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
   }
 
@@ -71,7 +71,7 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
 
     // Disable controls if speeds from VDM and ESP ECUs are too far apart.
     uint32_t vdm_speed_raw = ((uint32_t)msg->data[5] << 8) | msg->data[6];
-    float vdm_speed = (float)((double)vdm_speed_raw * 0.01 * KPH_TO_MS);
+    float vdm_speed = (float)vdm_speed_raw * 0.01f * KPH_TO_MS;
     speed_mismatch_check(vdm_speed);
   }
 

@@ -113,7 +113,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x257U, 0U)) {
     // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
     uint32_t raw_speed = ((uint32_t)msg->data[2] << 4) | ((uint32_t)msg->data[1] >> 4);
-    float speed = (float)((((float)raw_speed * 0.08) - 40.) * KPH_TO_MS);
+    float speed = (((float)raw_speed * 0.08f) - 40.0f) * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED(speed);
   }
 
@@ -121,7 +121,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x155U, 0U)) {
     // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
     uint32_t raw_esp_speed = (((uint32_t)msg->data[6] & 0x0FU) << 6) | ((uint32_t)msg->data[5] >> 2);
-    float esp_speed = (float)((float)raw_esp_speed * 0.5 * KPH_TO_MS);
+    float esp_speed = (float)raw_esp_speed * 0.5f * KPH_TO_MS;
     speed_mismatch_check(esp_speed);
   }
 

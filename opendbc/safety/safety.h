@@ -482,7 +482,7 @@ void update_sample(struct sample_t *sample, int sample_new) {
 }
 
 int ROUND(float val) {
-  const double rounded = val + ((val > 0.0) ? 0.5 : -0.5);
+  const float rounded = val + ((val > 0.0f) ? 0.5f : -0.5f);
   return (int)rounded;
 }
 
@@ -501,7 +501,7 @@ void speed_mismatch_check(const float speed_2) {
   // Disable controls if speeds from two sources are too far apart.
   // For safety modes that use speed to adjust torque or angle limits
   const float MAX_SPEED_DELTA = 2.0f;  // m/s
-  const double speed_delta = speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR);
+  const float speed_delta = speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR);
   bool is_invalid_speed = (speed_delta > MAX_SPEED_DELTA) || (speed_delta < -MAX_SPEED_DELTA);
   if (is_invalid_speed) {
     controls_allowed = false;

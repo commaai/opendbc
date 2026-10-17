@@ -33,7 +33,7 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       uint32_t speed_raw = ((uint32_t)msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
       int speed = (int)speed_raw;
       vehicle_moving = speed > 0;
-      UPDATE_VEHICLE_SPEED((float)speed * 0.1 * KPH_TO_MS);
+      UPDATE_VEHICLE_SPEED((float)speed * 0.1f * KPH_TO_MS);
     }
 
     // Gas and brake pressed

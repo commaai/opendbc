@@ -37,7 +37,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
     uint16_t left_rear = ((uint16_t)msg->data[2] << 8) | (msg->data[3]);
     vehicle_moving = (right_rear | left_rear) != 0U;
     uint32_t rear_speed_sum = (uint32_t)right_rear + left_rear;
-    UPDATE_VEHICLE_SPEED((float)rear_speed_sum / 2.0 * 0.005 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED((float)rear_speed_sum / 2.0f * 0.005f * KPH_TO_MS);
   }
 
   // X-Trail 0x15c, Leaf 0x239
