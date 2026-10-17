@@ -221,8 +221,8 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   // Steering control: (0.1 * val) - 1638.35 in deg.
   if (msg->addr == 0x488U) {
     // We use 1/10 deg as a unit here
-    uint32_t desired_angle_raw = (((uint32_t)msg->data[0] & 0x7FU) << 8) | msg->data[1];
-    int desired_angle = (int)desired_angle_raw - 16384;
+    uint32_t raw_angle_can = (((uint32_t)msg->data[0] & 0x7FU) << 8) | msg->data[1];
+    int desired_angle = (int)raw_angle_can - 16384;
     uint8_t steer_control_type = msg->data[2] >> 5;  // DAS_steeringControlType
     bool steer_control_enabled = steer_control_type == 1U;  // ANGLE_CONTROL
 
@@ -255,10 +255,10 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
       violation = true;
     }
 
-    uint32_t accel_max_raw = (((uint32_t)msg->data[6] & 0x1FU) << 4) | ((uint32_t)msg->data[5] >> 4);
-    uint32_t accel_min_raw = (((uint32_t)msg->data[5] & 0x0FU) << 5) | ((uint32_t)msg->data[4] >> 3);
-    int raw_accel_max = (int)accel_max_raw;
-    int raw_accel_min = (int)accel_min_raw;
+    uint32_t raw_accel_max_bits = (((uint32_t)msg->data[6] & 0x1FU) << 4) | ((uint32_t)msg->data[5] >> 4);
+    uint32_t raw_accel_min_bits = (((uint32_t)msg->data[5] & 0x0FU) << 5) | ((uint32_t)msg->data[4] >> 3);
+    int raw_accel_max = (int)raw_accel_max_bits;
+    int raw_accel_min = (int)raw_accel_min_bits;
     uint8_t acc_state = msg->data[1] >> 4;
 
     if (tesla_longitudinal) {

@@ -17,10 +17,8 @@ static bool dist_to_meas_check(int val, int val_last, struct sample_t *val_meas,
   // if we've exceeded the meas val, we must start moving toward 0
   int highest_meas = SAFETY_MAX(val_meas->max, 0) + MAX_ERROR;
   int lowest_meas = SAFETY_MIN(val_meas->min, 0) - MAX_ERROR;
-  int highest_wind_down = SAFETY_MAX(val_last - MAX_RATE_DOWN, highest_meas);
-  int lowest_wind_down = SAFETY_MIN(val_last + MAX_RATE_DOWN, lowest_meas);
-  int highest_allowed = SAFETY_MIN(highest_allowed_rl, highest_wind_down);
-  int lowest_allowed = SAFETY_MAX(lowest_allowed_rl, lowest_wind_down);
+  int highest_allowed = SAFETY_MIN(highest_allowed_rl, SAFETY_MAX(val_last - MAX_RATE_DOWN, highest_meas));
+  int lowest_allowed = SAFETY_MAX(lowest_allowed_rl, SAFETY_MIN(val_last + MAX_RATE_DOWN, lowest_meas));
 
   // check for violation
   return safety_max_limit_check(val, highest_allowed, lowest_allowed);
@@ -42,10 +40,8 @@ static bool driver_limit_check(int val, int val_last, const struct sample_t *val
   // if we've exceeded the applied torque, we must start moving toward 0
   int highest_driver = SAFETY_MAX(driver_max_limit, 0);
   int lowest_driver = SAFETY_MIN(driver_min_limit, 0);
-  int highest_wind_down = SAFETY_MAX(val_last - MAX_RATE_DOWN, highest_driver);
-  int lowest_wind_down = SAFETY_MIN(val_last + MAX_RATE_DOWN, lowest_driver);
-  int highest_allowed = SAFETY_MIN(highest_allowed_rl, highest_wind_down);
-  int lowest_allowed = SAFETY_MAX(lowest_allowed_rl, lowest_wind_down);
+  int highest_allowed = SAFETY_MIN(highest_allowed_rl, SAFETY_MAX(val_last - MAX_RATE_DOWN, highest_driver));
+  int lowest_allowed = SAFETY_MAX(lowest_allowed_rl, SAFETY_MIN(val_last + MAX_RATE_DOWN, lowest_driver));
 
   // check for violation
   return safety_max_limit_check(val, highest_allowed, lowest_allowed);
@@ -80,6 +76,7 @@ bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSte
     violation = safety_max_limit_check(desired_torque, max_torque, -max_torque);
 
     // *** torque rate limit check ***
+    // the check goes before "|| violation" so it is always evaluated, several checks update state
     if (limits.type == TorqueDriverLimited) {
       violation = driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
                                      max_torque, limits.max_rate_up, limits.max_rate_down,

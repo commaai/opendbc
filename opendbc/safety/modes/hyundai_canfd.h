@@ -82,7 +82,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   const unsigned int button_addr = hyundai_canfd_alt_buttons ? 0x1aaU : 0x1cfU;
   if (msg_matches(msg, button_addr, pt_bus)) {
     bool main_button = false;
-    uint8_t cruise_button = 0;
+    uint8_t cruise_button = 0U;
     if (msg_matches(msg, 0x1cfU, pt_bus)) {
       cruise_button = msg->data[2] & 0x7U;
       main_button = GET_BIT(msg, 19U);
@@ -186,10 +186,10 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check
   if (msg->addr == 0x1a0U) {
-    uint32_t accel_raw = (((uint32_t)msg->data[17] & 0x7U) << 8) | msg->data[16];
-    uint32_t accel_val_raw = ((uint32_t)msg->data[18] << 4) | ((uint32_t)msg->data[17] >> 4);
-    int desired_accel_raw = (int)accel_raw - 1023;
-    int desired_accel_val = (int)accel_val_raw - 1023;
+    uint32_t desired_accel_raw_bits = (((uint32_t)msg->data[17] & 0x7U) << 8) | msg->data[16];
+    uint32_t desired_accel_val_bits = ((uint32_t)msg->data[18] << 4) | ((uint32_t)msg->data[17] >> 4);
+    int desired_accel_raw = (int)desired_accel_raw_bits - 1023;
+    int desired_accel_val = (int)desired_accel_val_bits - 1023;
 
     bool violation = false;
 

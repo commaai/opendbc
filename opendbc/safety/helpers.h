@@ -5,9 +5,9 @@
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_MIN(a, b) ({ \
-  __typeof__(a) _a = (a); \
-  __typeof__(b) _b = (b); \
-  (_a < _b) ? _a : _b; \
+  __typeof__(a) _min_a = (a); \
+  __typeof__(b) _min_b = (b); \
+  (_min_a < _min_b) ? _min_a : _min_b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
@@ -30,8 +30,8 @@
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_ABS(a) ({ \
-  __typeof__(a) _a = (a); \
-  (_a > 0) ? _a : (-_a); \
+  __typeof__(a) _abs = (a); \
+  (_abs > 0) ? _abs : (-_abs); \
 })
 
 #define SAFETY_UNUSED(x) ((void)(x))

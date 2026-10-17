@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #include "opendbc/safety/helpers.h"
 #include "opendbc/safety/lateral.h"
 #include "opendbc/safety/longitudinal.h"
@@ -481,7 +483,7 @@ void update_sample(struct sample_t *sample, int sample_new) {
   }
 }
 
-// float to int conversion, truncating toward zero
+// explicit float -> int truncation; a cast of a composite float expression would violate MISRA 10.8
 int TRUNC(float val) {
   return (int)val;
 }

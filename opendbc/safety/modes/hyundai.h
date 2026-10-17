@@ -37,22 +37,13 @@ static const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {0x389, 0,       8, .check_relay = true},   /* SCC14 Bus 0       */ \
   {0x4A2, 0,       2, .check_relay = false},  /* FRT_RADAR11 Bus 0 */ \
 
-#define HYUNDAI_COMMON_RX_CHECKS                                                                                                           \
-  {.msg = {{0x260, 0, 8, 100U, .max_counter = 3U, .ignore_quality_flag = true},                                                            \
-           {0x371, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},                     \
-  {.msg = {{0x386, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                                           \
-  {.msg = {{0x394, 0, 8, 100U, .max_counter = 7U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                                            \
-  {.msg = {{0x251, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},               \
-  {.msg = {{0x4F1, 0, 4, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                   \
-
-// older hyundai models have less checks due to missing counters and checksums on 0x386 and 0x394
-#define HYUNDAI_LEGACY_COMMON_RX_CHECKS                                                                                                    \
-  {.msg = {{0x260, 0, 8, 100U, .max_counter = 3U, .ignore_quality_flag = true},                                                            \
-           {0x371, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},                     \
-  {.msg = {{0x386, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},              \
-  {.msg = {{0x394, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},              \
-  {.msg = {{0x251, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},               \
-  {.msg = {{0x4F1, 0, 4, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                   \
+#define HYUNDAI_COMMON_RX_CHECKS(legacy, max_counter_386, max_counter_394)                                                                                                             \
+  {.msg = {{0x260, 0, 8, 100U, .max_counter = 3U, .ignore_quality_flag = true},                                                                                           \
+           {0x371, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},                                                    \
+  {.msg = {{0x386, 0, 8, 100U, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (max_counter_386), .ignore_quality_flag = true}, { 0 }, { 0 }}},   \
+  {.msg = {{0x394, 0, 8, 100U, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (max_counter_394), .ignore_quality_flag = true}, { 0 }, { 0 }}},   \
+  {.msg = {{0x251, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                                              \
+  {.msg = {{0x4F1, 0, 4, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                                                  \
 
 #define HYUNDAI_SCC12_ADDR_CHECK(scc_bus)                                                                            \
   {.msg = {{0x421, (scc_bus), 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
@@ -204,10 +195,10 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check
   if (msg->addr == 0x421U) {
-    uint32_t accel_raw = (((uint32_t)msg->data[4] & 0x7U) << 8) | msg->data[3];
-    uint32_t accel_val_raw = ((uint32_t)msg->data[5] << 3) | ((uint32_t)msg->data[4] >> 5);
-    int desired_accel_raw = (int)accel_raw - 1023;
-    int desired_accel_val = (int)accel_val_raw - 1023;
+    uint32_t desired_accel_raw_bits = (((uint32_t)msg->data[4] & 0x7U) << 8) | msg->data[3];
+    uint32_t desired_accel_val_bits = ((uint32_t)msg->data[5] << 3) | ((uint32_t)msg->data[4] >> 5);
+    int desired_accel_raw = (int)desired_accel_raw_bits - 1023;
+    int desired_accel_val = (int)desired_accel_val_bits - 1023;
 
     int aeb_decel_cmd = (int)msg->data[2];
     bool aeb_req = GET_BIT(msg, 54U);
@@ -282,11 +273,11 @@ static safety_config hyundai_init(uint16_t param) {
   if (hyundai_longitudinal) {
     // Use CLU11 (buttons) to manage controls allowed instead of SCC cruise state
     static const RxCheck hyundai_long_rx_checks[] = {
-      HYUNDAI_COMMON_RX_CHECKS
+      HYUNDAI_COMMON_RX_CHECKS(false, 15U, 7U)
     };
 
     static const RxCheck hyundai_fcev_long_rx_checks[] = {
-      HYUNDAI_COMMON_RX_CHECKS
+      HYUNDAI_COMMON_RX_CHECKS(false, 15U, 7U)
       HYUNDAI_FCEV_GAS_ADDR_CHECK
     };
 
@@ -302,19 +293,19 @@ static safety_config hyundai_init(uint16_t param) {
     }
   } else if (hyundai_camera_scc) {
     static const RxCheck hyundai_cam_scc_rx_checks[] = {
-      HYUNDAI_COMMON_RX_CHECKS
+      HYUNDAI_COMMON_RX_CHECKS(false, 15U, 7U)
       HYUNDAI_SCC12_ADDR_CHECK(2)
     };
 
     ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
   } else {
     static const RxCheck hyundai_rx_checks[] = {
-       HYUNDAI_COMMON_RX_CHECKS
+       HYUNDAI_COMMON_RX_CHECKS(false, 15U, 7U)
        HYUNDAI_SCC12_ADDR_CHECK(0)
     };
 
     static const RxCheck hyundai_fcev_rx_checks[] = {
-      HYUNDAI_COMMON_RX_CHECKS
+      HYUNDAI_COMMON_RX_CHECKS(false, 15U, 7U)
       HYUNDAI_SCC12_ADDR_CHECK(0)
       HYUNDAI_FCEV_GAS_ADDR_CHECK
     };
@@ -332,7 +323,7 @@ static safety_config hyundai_init(uint16_t param) {
 static safety_config hyundai_legacy_init(uint16_t param) {
   // older hyundai models have less checks due to missing counters and checksums
   static const RxCheck hyundai_legacy_rx_checks[] = {
-    HYUNDAI_LEGACY_COMMON_RX_CHECKS
+    HYUNDAI_COMMON_RX_CHECKS(true, 0U, 0U)
     HYUNDAI_SCC12_ADDR_CHECK(0)
   };
 

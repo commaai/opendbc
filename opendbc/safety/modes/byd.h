@@ -37,8 +37,8 @@ static void byd_rx_hook(const CANPacket_t *msg) {
 
     // Gas and brake pressed
     if (msg->addr == 0x242U) {
-      brake_pressed = ((msg->data[4] >> 5) & 0x1U) != 0U;   // BRAKE_PRESSED
-      gas_pressed = (msg->data[3] & 0x7FU) > 0U;    // RAW_THROTTLE
+      brake_pressed = ((msg->data[4] >> 5) & 0x1U) != 0U;  // BRAKE_PRESSED
+      gas_pressed = (msg->data[3] & 0x7FU) > 0U;           // RAW_THROTTLE
     }
   }
 
@@ -73,7 +73,7 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == 0x1E2U) {
     uint32_t desired_angle_raw = ((uint32_t)msg->data[4] << 8) | msg->data[3];  // STEER_ANGLE
     int desired_angle = to_signed((int)desired_angle_raw, 16);
-    bool steer_req = ((msg->data[2] >> 5) & 0x1U) != 0U;                    // STEER_REQ
+    bool steer_req = ((msg->data[2] >> 5) & 0x1U) != 0U;                        // STEER_REQ
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_req, BYD_STEERING_LIMITS, BYD_STEERING_PARAMS)) {
       tx = false;

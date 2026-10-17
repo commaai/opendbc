@@ -132,9 +132,9 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
 
   // Longitudinal control
   if (msg_matches(msg, 0x160U, 0U)) {
-    uint32_t accel_raw = ((uint32_t)msg->data[2] << 3) | ((uint32_t)msg->data[3] >> 5);
-    int raw_accel = (int)accel_raw - 1024;
-    if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
+    uint32_t desired_accel_raw = ((uint32_t)msg->data[2] << 3) | ((uint32_t)msg->data[3] >> 5);
+    int desired_accel = (int)desired_accel_raw - 1024;
+    if (longitudinal_accel_checks(desired_accel, RIVIAN_LONG_LIMITS)) {
       tx = false;
     }
   }
