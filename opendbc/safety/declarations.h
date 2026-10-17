@@ -72,11 +72,11 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_RX_CHECKS 12U
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
-#define VEHICLE_SPEED_FACTOR 1000.0
+#define VEHICLE_SPEED_FACTOR 1000.0f
 #define MAX_RT_INTERVAL 250000U
 
 // Conversions
-#define KPH_TO_MS (1.0 / 3.6)
+#define KPH_TO_MS (1.0f / 3.6f)
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {

@@ -1,10 +1,10 @@
 #include "opendbc/safety/declarations.h"
 
 // ISO 11270
-static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
+static const float ISO_LATERAL_ACCEL = 3.0f;  // m/s^2
 
-static const float EARTH_G = 9.81;
-static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
+static const float EARTH_G = 9.81f;
+static const float AVERAGE_ROAD_ROLL = 0.06f;  // ~3.4 degrees, 6% superelevation
 
 // check that commanded torque value isn't too far from measured
 static bool dist_to_meas_check(int val, int val_last, struct sample_t *val_meas,
@@ -246,7 +246,7 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
   static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
   // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
-  static const float MAX_LATERAL_JERK = 3.0 + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
+  static const float MAX_LATERAL_JERK = 3.0f + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
 
   const float fudged_speed = SAFETY_MAX((vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0, 1.0);
   bool violation = false;
@@ -343,7 +343,7 @@ static float get_curvature_factor(const float speed, const AngleSteeringParams p
 
 static float get_angle_from_curvature(const float curvature, const float curvature_factor, const AngleSteeringParams params) {
   // Matches VehicleModel.get_steer_from_curvature()
-  static const float RAD_TO_DEG = 57.29577951308232;
+  static const float RAD_TO_DEG = 57.29577951308232f;
   return curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 }
 
@@ -355,7 +355,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
   static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
   // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
-  static const float MAX_LATERAL_JERK = 3.0 + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
+  static const float MAX_LATERAL_JERK = 3.0f + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
 
   const float fudged_speed = SAFETY_MAX((vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0, 1.0);
   const float curvature_factor = get_curvature_factor(fudged_speed, params);

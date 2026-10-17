@@ -60,7 +60,7 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
   // Vehicle speed
   if (msg_matches(msg, 0x208U, 0U)) {
     float speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01;
-    vehicle_moving = speed > 0.0;
+    vehicle_moving = speed > 0.0f;
     UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
   }
 
