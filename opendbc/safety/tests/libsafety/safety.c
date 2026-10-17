@@ -1,21 +1,16 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-// TODO: time should just be passed into the hooks we expose
-uint32_t timer_cnt = 0;
-uint32_t microsecond_timer_get(void);
-uint32_t microsecond_timer_get(void) {
-  return timer_cnt;
-}
-
+#include "opendbc/safety/tests/libsafety/libsafety.h"
 #include "opendbc/safety/can.h"
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
 
-bool safety_config_valid() {
-  if (current_safety_config.rx_checks_len <= 0) {
-    printf("missing RX checks\n");
+// TODO: time should just be passed into the hooks we expose
+uint32_t timer_cnt = 0;
+uint32_t microsecond_timer_get(void) {
+  return timer_cnt;
+}
+
+bool safety_config_valid(void) {
+  if (current_safety_config.rx_checks_len == 0U) {
     return false;
   }
 

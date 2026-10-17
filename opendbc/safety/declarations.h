@@ -53,14 +53,14 @@
     (config).rx_checks = (rx); \
     (config).rx_checks_len = RX_CHECKS_LEN(rx); \
     (config).disable_forwarding = false; \
-  } while (0);
+  } while (false);
 
 #define SET_TX_MSGS(tx, config) \
   do { \
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
     (config).disable_forwarding = false; \
-  } while (0);
+  } while (false);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((float)((val_ms) * VEHICLE_SPEED_FACTOR))))
 #define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&vehicle_speed_2, ROUND((float)((val_ms) * VEHICLE_SPEED_FACTOR))))

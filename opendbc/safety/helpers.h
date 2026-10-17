@@ -78,7 +78,7 @@ static bool msg_matches_addr_bus_len(const CANPacket_t *msg, uint32_t addr, uint
   return actual == expected;
 }
 
-#define MSG_MATCHES_SELECT(_msg, _addr, _bus, _len, NAME, ...) NAME
+#define MSG_MATCHES_SELECT(_msg, _addr, _bus, _len, NAME, ...) (NAME)
 #define msg_matches(...) MSG_MATCHES_SELECT(__VA_ARGS__, msg_matches_addr_bus_len, msg_matches_addr_bus)(__VA_ARGS__)
 
 // compute the time elapsed (in microseconds) from 2 counter samples
