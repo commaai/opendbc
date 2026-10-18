@@ -50,7 +50,7 @@ class CarControllerParams:
     self.STEER_NOT_ACCEPTED_FRAMES = 10      # 200 ms of 50 Hz STEER_REQ
     self.EPB_DEBOUNCE_FRAMES = 8             # ~70 ms at 120 Hz
 
-    self.STEER_WARMUP_FRAMES = 2             # 50 Hz; REQ=0 before first REQ=1
+    self.STEER_WARM_UP_FRAMES = 2            # 50 Hz; REQ=0 before first REQ=1
     self.STEER_YIELD_HOLD_SLOTS = 25         # 50 Hz, 0.5 s after driver torque
 
     self.STOCK_AEB_ACCEL = -1.5              # m/s^2
