@@ -202,7 +202,7 @@ class CarController(CarControllerBase):
     self.not_accepted_frames = 0
     self.send_op_last = False
     self.lat_send_last = False
-    self.warmup_left = 0
+    self.warm_up_left = 0
     self.standby_slots = 0
     self.ack_slots = 0
     self.ack_cooldown = 0
@@ -225,9 +225,9 @@ class CarController(CarControllerBase):
       self.steer_fault_latched = False
       self.ack_attempts = 0
 
-    # Warmup: REQ=0 at measured angle before first REQ=1 (panda rate-limit ref).
+    # Warm-up: REQ=0 at measured angle before first REQ=1 (panda rate-limit ref).
     if own_steer and not self.send_op_last:
-      self.warmup_left = self.CCP.STEER_WARMUP_FRAMES
+      self.warm_up_left = self.CCP.STEER_WARM_UP_FRAMES
 
     # Keep 0x1E2; drop STEER_REQ while driver torque is high.
     if CS.out.steeringPressed:
@@ -250,7 +250,7 @@ class CarController(CarControllerBase):
       # Standby: camera-style REQ=0 / ACTIVE_LOW=0 ack before STEER_REQ.
       self.standby_slots = self.standby_slots + 1 if (own_steer and CS.eps_standby) else 0
       self.ack_cooldown = max(self.ack_cooldown - 1, 0)
-      if own_steer and self.warmup_left == 0 and self.ack_slots == 0 and self.ack_cooldown == 0 and self.standby_slots >= 2:
+      if own_steer and self.warm_up_left == 0 and self.ack_slots == 0 and self.ack_cooldown == 0 and self.standby_slots >= 2:
         if self.ack_attempts < self.CCP.STEER_ACK_ATTEMPTS:
           self.ack_slots = 2
           self.ack_cooldown = self.CCP.STEER_ACK_PERIOD
@@ -265,9 +265,9 @@ class CarController(CarControllerBase):
     ack = False
     if not own_steer:
       lat_send = False
-    elif self.warmup_left > 0:
+    elif self.warm_up_left > 0:
       lat_send = False
-      self.warmup_left -= 1
+      self.warm_up_left -= 1
     elif self.ack_slots > 0:
       lat_send = False
       ack = self.ack_slots == 1
