@@ -35,6 +35,7 @@ ANGLE_DEG_TO_CAN = {
   "toyota": 17.452007,
   "nissan": 100,
   "psa": 10,
+  "byd": 10,
 }
 
 NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
@@ -309,7 +310,12 @@ class TestCarModelBase(unittest.TestCase):
           self.assertTrue(self.safety.safety_tx_hook(packet), (addr, dat, bus))
       self.assertGreater(msgs_sent, 50)
 
-    test_car_controller(structs.CarControl().as_reader())
+    # BYD does not TX 0x1E2 while disengaged; engage so the baseline loop sends frames.
+    if self.CP.brand == "byd":
+      CC = structs.CarControl(enabled=True, latActive=True)
+      test_car_controller(CC.as_reader())
+    else:
+      test_car_controller(structs.CarControl().as_reader())
 
     self.safety.set_cruise_engaged_prev(True)
     CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(cancel=True))
