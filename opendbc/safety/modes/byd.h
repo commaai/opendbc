@@ -9,7 +9,7 @@
 #define BYD_PARAM_LKS_ON 2U
 #define BYD_PARAM_LONG_CONTROL 4U
 // Platform bit (high byte). Sync with SAFETY_PLATFORM_PARAMS in car/byd/values.py.
-#define BYD_PARAM_PLATFORM_ATTO3 (1U << 8)
+#define BYD_PARAM_PLATFORM_ATTO3 0x0100U
 #define BYD_CAM_ACC_CMD_HIST 3U
 
 static int byd_driver_torque_frames = 0;
@@ -21,31 +21,15 @@ static bool byd_longitudinal = false;
 static bool byd_set_res_last = false;
 static uint8_t byd_stock_btns = 0;
 static uint8_t byd_stock_btns_prev = 0;
-static uint8_t byd_cam_acc_cmd[BYD_CAM_ACC_CMD_HIST][6] = {{0}};
+static uint8_t byd_cam_acc_cmd[BYD_CAM_ACC_CMD_HIST][6];
 static uint8_t byd_cam_acc_cmd_idx = 0;
 static uint8_t byd_cam_acc_cmd_count = 0;
 static uint32_t byd_op_steer_ts = 0;
 static uint32_t byd_op_hud_ts = 0;
 
-static const AngleSteeringParams BYD_STEERING_PARAMS_ATTO3 = {
-  .slip_factor = -0.0006166479109059387,  // calc_slip_factor(VM)
-  .steer_ratio = 17.5,
-  .wheelbase = 2.72,
-};
-static const AngleSteeringLimits BYD_STEERING_LIMITS_ATTO3 = {
-  .max_angle = 3900,  // 390 deg
-  .angle_deg_to_can = 10,
-  .frequency = 50U,
-};
-static const LongitudinalLimits BYD_LONG_LIMITS_ATTO3 = {
-  .max_accel = 2000,
-  .min_accel = -3500,
-  .inactive_accel = 0,
-};
-
-static const AngleSteeringParams *byd_steer_params = &BYD_STEERING_PARAMS_ATTO3;
-static const AngleSteeringLimits *byd_steer_limits = &BYD_STEERING_LIMITS_ATTO3;
-static const LongitudinalLimits *byd_long_limits = &BYD_LONG_LIMITS_ATTO3;
+static const AngleSteeringParams *byd_steer_params = NULL;
+static const AngleSteeringLimits *byd_steer_limits = NULL;
+static const LongitudinalLimits *byd_long_limits = NULL;
 static bool byd_platform_known = true;
 
 #define BYD_OP_STEER_TIMEOUT_US 200000U
@@ -63,14 +47,11 @@ static bool byd_stock_lat_allowed(void) {
 // Block camera 0x316 while OP 0x1E2 or 0x316 is recent (HUD-only hold needs no idle 0x1E2).
 static bool byd_stock_hud_allowed(void) {
   const uint32_t now = microsecond_timer_get();
-  bool allowed = true;
-  if (byd_op_steer_ts != 0U) {
-    allowed = allowed && (safety_get_ts_elapsed(now, byd_op_steer_ts) > BYD_OP_HUD_TIMEOUT_US);
-  }
-  if (byd_op_hud_ts != 0U) {
-    allowed = allowed && (safety_get_ts_elapsed(now, byd_op_hud_ts) > BYD_OP_HUD_TIMEOUT_US);
-  }
-  return allowed;
+  const bool steer_ok = (byd_op_steer_ts == 0U) ||
+                        (safety_get_ts_elapsed(now, byd_op_steer_ts) > BYD_OP_HUD_TIMEOUT_US);
+  const bool hud_ok = (byd_op_hud_ts == 0U) ||
+                      (safety_get_ts_elapsed(now, byd_op_hud_ts) > BYD_OP_HUD_TIMEOUT_US);
+  return steer_ok && hud_ok;
 }
 
 // SET/RES/DEC/INC/ACC_ON. LKAS_ON_BTN omitted so bus 2 may still pulse it.
@@ -216,16 +197,17 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
   // Steering: 0.1 deg/LSB, signed
   if (msg->addr == 0x1E2U) {
     if (!byd_platform_known) {
-      return false;
-    }
-    int desired_angle = to_signed((msg->data[4] << 8) | msg->data[3], 16);  // STEER_ANGLE
-    bool steer_req = ((msg->data[2] >> 5) & 0x1U) != 0U;                    // STEER_REQ
-
-    // Any OP 0x1E2 (incl. STEER_REQ=0) owns the EPS until timeout.
-    byd_op_steer_ts = microsecond_timer_get();
-
-    if (steer_angle_cmd_checks_vm(desired_angle, steer_req, *byd_steer_limits, *byd_steer_params)) {
       tx = false;
+    } else {
+      int desired_angle = to_signed((msg->data[4] << 8) | msg->data[3], 16);  // STEER_ANGLE
+      bool steer_req = ((msg->data[2] >> 5) & 0x1U) != 0U;                    // STEER_REQ
+
+      // Any OP 0x1E2 (incl. STEER_REQ=0) owns the EPS until timeout.
+      byd_op_steer_ts = microsecond_timer_get();
+
+      if (steer_angle_cmd_checks_vm(desired_angle, steer_req, *byd_steer_limits, *byd_steer_params)) {
+        tx = false;
+      }
     }
   }
 
@@ -237,11 +219,12 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == 0x3B0U) {
     uint8_t mask = byd_button_mask(msg);
     if (msg->bus == 2U) {
-      bool stock_ok = (mask & ~(byd_stock_btns | byd_stock_btns_prev)) == 0U;
-      if (byd_longitudinal) {
-        stock_ok = stock_ok && ((mask & 0x0FU) == 0U);
+      const uint8_t stock_bits = byd_stock_btns | byd_stock_btns_prev;
+      uint8_t stock_ok = ((mask & (uint8_t)(~stock_bits)) == 0U) ? 1U : 0U;
+      if (byd_longitudinal && ((mask & 0x0FU) != 0U)) {
+        stock_ok = 0U;
       }
-      tx = stock_ok;
+      tx = (stock_ok != 0U);
     } else {
       bool set_res = (msg->data[0] & 0x18U) != 0U;
       bool lkas_on = (msg->data[0] & 0x40U) != 0U;
@@ -273,17 +256,34 @@ static bool byd_fwd_hook(int bus_num, int addr) {
       block_msg = !byd_stock_lat_allowed();
     } else if (addr == 0x316) {
       block_msg = !byd_stock_hud_allowed();
-    } else if (byd_longitudinal && ((addr == 0x32E) || (addr == 0x32D))) {
-      block_msg = true;
     } else {
+      block_msg = false;
     }
   } else if (byd_longitudinal && (bus_num == 0) && (addr == 0x3B0)) {
     block_msg = true;
+  } else {
+    block_msg = false;
   }
   return block_msg;
 }
 
 static safety_config byd_init(uint16_t param) {
+  static const AngleSteeringParams BYD_STEERING_PARAMS_ATTO3 = {
+    .slip_factor = -0.0006166479109059387,  // calc_slip_factor(VM)
+    .steer_ratio = 17.5,
+    .wheelbase = 2.72,
+  };
+  static const AngleSteeringLimits BYD_STEERING_LIMITS_ATTO3 = {
+    .max_angle = 3900,  // 390 deg
+    .angle_deg_to_can = 10,
+    .frequency = 50U,
+  };
+  static const LongitudinalLimits BYD_LONG_LIMITS_ATTO3 = {
+    .max_accel = 2000,
+    .min_accel = -3500,
+    .inactive_accel = 0,
+  };
+
   byd_driver_torque_frames = 0;
   byd_lks_on = GET_FLAG(param, BYD_PARAM_LKS_ON);
   byd_lks_btn_last = false;
@@ -296,6 +296,11 @@ static safety_config byd_init(uint16_t param) {
   byd_cam_acc_cmd_count = 0;
   byd_op_steer_ts = 0;
   byd_op_hud_ts = 0;
+  for (uint8_t i = 0U; i < BYD_CAM_ACC_CMD_HIST; i++) {
+    for (int j = 0; j < 6; j++) {
+      byd_cam_acc_cmd[i][j] = 0U;
+    }
+  }
 
   // No platform bit -> Atto 3. Any other high byte denies steer.
   if ((param & 0xFF00U) == 0U) {
@@ -320,8 +325,6 @@ static safety_config byd_init(uint16_t param) {
 
 #ifdef ALLOW_DEBUG
   byd_longitudinal = GET_FLAG(param, BYD_PARAM_LONG_CONTROL);
-#else
-  byd_longitudinal = false;
 #endif
 
   static const CanMsg BYD_TX_MSGS[] = {
@@ -364,10 +367,15 @@ static safety_config byd_init(uint16_t param) {
     {.msg = {{0x3B0, 0, 8,  20U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
+  // cppcheck thinks byd_longitudinal is always false when run without ALLOW_DEBUG
+  // cppcheck-suppress knownConditionTrueFalse
+  safety_config ret;
   if (byd_longitudinal) {
-    return BUILD_SAFETY_CFG(byd_long_rx_checks, BYD_LONG_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(byd_long_rx_checks, BYD_LONG_TX_MSGS);
+  } else {
+    ret = BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);
   }
-  return BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);
+  return ret;
 }
 
 const safety_hooks byd_hooks = {
