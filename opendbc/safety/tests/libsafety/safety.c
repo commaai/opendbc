@@ -32,6 +32,15 @@ bool safety_config_valid() {
 
 void set_controls_allowed(bool c){
   controls_allowed = c;
+  safety_state_sync();
+}
+
+void set_controls_allowed_inv(bool c){
+  controls_allowed_inv = c;
+}
+
+bool get_safety_state_invalid(void){
+  return safety_state_invalid;
 }
 
 void set_alternative_experience(int mode){
@@ -199,6 +208,7 @@ bool get_honda_fwd_brake(void){
 
 void init_tests(void){
   safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
+  safety_state_invalid = false;
   alternative_experience = 0;
   set_timer(0);
   ts_steer_req_mismatch_last = 0;

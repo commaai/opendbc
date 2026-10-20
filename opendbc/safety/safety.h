@@ -103,12 +103,39 @@ uint32_t safety_mode_cnt = 0U;
 
 uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
+
+// inverted copies, checked when entering and synced when leaving the safety hooks
+static bool controls_allowed_inv = true;
+static uint16_t current_safety_mode_inv = 0xFFFFU;  // ~SAFETY_SILENT
+static uint16_t current_safety_param_inv = 0xFFFFU;
+bool safety_state_invalid = false;
 static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
 RxStatus rx_status[MAX_RX_CHECKS];  // dynamic state of current_safety_config.rx_checks
 
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
+
+static void safety_state_sync(void) {
+  controls_allowed_inv = !controls_allowed;
+  current_safety_mode_inv = (uint16_t)~current_safety_mode;
+  current_safety_param_inv = (uint16_t)~current_safety_param;
+}
+
+// latches on any mismatch, controls stay disallowed until reset
+static bool safety_state_valid(void) {
+  bool valid = (controls_allowed == !controls_allowed_inv) &&
+               (current_safety_mode == (uint16_t)~current_safety_mode_inv) &&
+               (current_safety_param == (uint16_t)~current_safety_param_inv);
+  safety_state_invalid = safety_state_invalid || !valid;
+  controls_allowed = controls_allowed && !safety_state_invalid;
+  return !safety_state_invalid;
+}
+
+void clear_controls_allowed(void) {
+  controls_allowed = false;
+  controls_allowed_inv = true;
+}
 
 static bool is_msg_valid(int index) {
   bool valid = true;
@@ -194,6 +221,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 }
 
 bool safety_rx_hook(const CANPacket_t *msg) {
+  (void)safety_state_valid();
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
@@ -221,6 +249,7 @@ bool safety_rx_hook(const CANPacket_t *msg) {
     heartbeat_engaged_mismatches = 0;
   }
 
+  safety_state_sync();
   return valid;
 }
 
@@ -235,18 +264,29 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
   return whitelisted;
 }
 
-bool safety_tx_hook(CANPacket_t *msg) {
-  bool whitelisted = tx_msg_safety_check(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
-  if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
-    whitelisted = true;
+// same check as tx_msg_safety_check through a different path
+static bool tx_msg_safety_check_rev(const CANPacket_t *msg, const CanMsg msg_list[], int len) {
+  bool whitelisted = false;
+  for (int i = len - 1; i >= 0; i--) {
+    whitelisted = whitelisted || msg_matches(msg, msg_list[i].addr, msg_list[i].bus, msg_list[i].len);
   }
+  return whitelisted;
+}
+
+bool safety_tx_hook(CANPacket_t *msg) {
+  bool state_valid = safety_state_valid();
+  bool any_output = (current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327);
+  bool whitelisted = any_output || tx_msg_safety_check(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool whitelisted_rev = any_output || tx_msg_safety_check_rev(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  safety_state_invalid = safety_state_invalid || (whitelisted != whitelisted_rev);
 
   bool safety_allowed = false;
   if (whitelisted) {
     safety_allowed = current_hooks->tx(msg);
   }
 
-  return !relay_malfunction && whitelisted && safety_allowed;
+  safety_state_sync();
+  return state_valid && !safety_state_invalid && !relay_malfunction && whitelisted && whitelisted_rev && safety_allowed;
 }
 
 static int get_fwd_bus(int bus_num) {
@@ -286,6 +326,7 @@ int safety_fwd_hook(int bus_num, int addr) {
 
 // 1Hz safety function called by main. Now just a check for lagging safety messages
 void safety_tick(void) {
+  (void)safety_state_valid();
   const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = microsecond_timer_get();
@@ -309,6 +350,7 @@ void safety_tick(void) {
   }
 
   safety_rx_checks_invalid = rx_checks_invalid;
+  safety_state_sync();
 }
 
 static void relay_malfunction_set(void) {
@@ -446,6 +488,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
       rx_status[j] = (RxStatus){0};
     }
   }
+  safety_state_sync();
   return set_status;
 }
 
