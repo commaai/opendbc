@@ -244,6 +244,7 @@ struct CarState {
     available @2 :Bool;
     standstill @4 :Bool;
     nonAdaptive @5 :Bool;
+    belowEngageSpeed @7 :Bool;
 
     deprecated :group {
       speedOffset @3 :Float32;
