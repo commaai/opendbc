@@ -261,6 +261,8 @@ void safety_tick(void);
 
 // This can be set by the safety hooks
 extern bool controls_allowed;
+extern bool safety_state_invalid;
+void clear_controls_allowed(void);
 extern bool relay_malfunction;
 extern bool gas_pressed;
 extern bool gas_pressed_prev;
