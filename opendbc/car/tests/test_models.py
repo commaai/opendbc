@@ -281,6 +281,83 @@ class TestCarModelBase(unittest.TestCase):
     self.safety.safety_tick()
     self.assertFalse(self.safety.safety_config_valid())
 
+  @fuzzy_test(max_examples=300)
+  def test_panda_safety_tx_fuzzy(self, fuzzy):
+    """Fuzzes CarControl actuator targets through the CarController and asserts
+    panda safety allows the resulting tx messages once controls are engaged.
+
+    Catches tx-side mismatches between openpilot and panda (e.g. commaai/panda#1948,
+    where panda's torque winddown state diverged from openpilot's after oscillating
+    torque samples): the target is ramped over multiple frames exactly as the
+    control loop would, so panda's rate-limit state tracks openpilot's, and any
+    blocked message indicates a genuine limit/state mismatch rather than a step.
+    """
+    if self.CP.dashcamOnly:
+      self.skipTest("no need to check panda safety for dashcamOnly")
+    if self.CP.notCar:
+      self.skipTest("skipping test for notCar")
+    if self.CP.flags & ToyotaFlags.SECOC:
+      self.skipTest("SecOC transmit tests require the vehicle key")
+
+    # Fresh controller + panda state per example: samples (torque_meas, driver
+    # torque, desired_torque_last, rt windows) otherwise leak across examples
+    self.CI = self.CarInterface(self.CP.copy())
+    cfg = self.CP.safetyConfigs[-1]
+    self.safety.set_safety_hooks(cfg.safetyModel.raw, cfg.safetyParam)
+    self.safety.init_tests()
+
+    # Prime CarState and panda safety from the same RX frames so both agree
+    # on measured state (e.g. driver torque samples used by tx rate checks)
+    for can in self.can_msgs[:10]:
+      self.CI.update(can)
+      for msg in (msg for msg in can[1] if msg.src < 64):
+        self.safety.safety_rx_hook(libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat))
+    self.safety.set_alternative_experience(self.CP.alternativeExperience)
+    self.safety.safety_tick()
+    # Re-assert controls allowed AFTER the RX prime: safety state machines
+    # (e.g. Honda Nidec cruise/button logic) may clear it from route traffic
+    self.safety.set_controls_allowed(True)
+    # Feed forwarded (relay-open) copies of the same RX traffic so panda sees
+    # stock ECUs on the bus and doesn't trip check_relay tx blocks
+    for can in self.can_msgs[:10]:
+      for msg in (msg for msg in can[1] if msg.src < 64):
+        self.safety.safety_fwd_hook(msg.src, msg.address)
+
+    lat_active = fuzzy.boolean()
+    long_active = fuzzy.boolean()
+    target_torque = fuzzy.integer(-1000, 1000) / 1000.0
+    target_angle = fuzzy.integer(-900, 900) / 10.0
+    target_accel = fuzzy.integer(-400, 300) / 100.0
+
+    msgs_sent = 0
+    now_nanos = 0
+    # Ramp from neutral so panda's torque/accel rate-limit state tracks the
+    # controller instead of tripping on a single-frame step from zero.
+    # Advance panda's clock past the 250ms RT window each frame so the
+    # real-time rate-limit baseline follows the ramp (as on a live panda).
+    ramp_frames = round(2.0 / DT_CTRL)
+    for frame in range(ramp_frames):  # ramp up like the control loop
+      ramp = (frame + 1) / ramp_frames
+      CC = structs.CarControl(
+        enabled=True,
+        latActive=lat_active,
+        longActive=long_active,
+        actuators=structs.CarControl.Actuators(
+          torque=target_torque * ramp,
+          steeringAngleDeg=target_angle * ramp,
+          accel=target_accel * ramp,
+        ),
+      )
+      _, sendcan = self.CI.apply(CC.as_reader(), now_nanos)
+      now_nanos += DT_CTRL * 1e9
+      self.safety.set_timer(int((now_nanos // 1000) % 0xFFFFFFFF))
+      msgs_sent += len(sendcan)
+      for addr, dat, bus in sendcan:
+        packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)
+        self.assertTrue(self.safety.safety_tx_hook(packet), (addr, dat, bus))
+    if msgs_sent == 0:
+      self.skipTest("CarController sent nothing (e.g. waiting on loopback sync)")
+
   def test_panda_safety_tx_cases(self):
     """Asserts we can transmit common messages."""
     if self.CP.dashcamOnly:
