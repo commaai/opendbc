@@ -53,7 +53,11 @@ class CarInterface(CarInterfaceBase):
       ret.pcmCruise = not ret.openpilotLongitudinalControl
     else:
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
-      ret.openpilotLongitudinalControl = True
+      # HONDA_ODYSSEY_CHN stays lateral-only. Both of the open questions about this car are on
+      # the longitudinal path: where its stock 0x30C is received and relayed, and what the
+      # Nidec dynamic hook does to its ordinary stock 0x1FA. Until those are answered the stock
+      # ACC keeps longitudinal control, so openpilot must not transmit 0x1FA or 0x30C at all.
+      ret.openpilotLongitudinalControl = candidate != CAR.HONDA_ODYSSEY_CHN
 
       ret.pcmCruise = True
 
@@ -146,7 +150,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.HONDA_ODYSSEY:
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.28], [0.08]]
 
-    elif candidate == CAR.HONDA_ODYSSEY_TWN:
+    elif candidate in (CAR.HONDA_ODYSSEY_TWN, CAR.HONDA_ODYSSEY_CHN):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.28], [0.08]]
 
     elif candidate == CAR.HONDA_PILOT:
@@ -186,6 +190,13 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.ALT_BRAKE.value
     if ret.flags & HondaFlags.NIDEC_ALT_SCM_MESSAGES:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.NIDEC_ALT.value
+    # A Nidec car that keeps its stock ACC must not own the longitudinal messages. This is a
+    # property of the hardware, not of one platform: any Nidec platform openpilot is lateral-only
+    # on needs it, otherwise the safety model still claims 0x1FA/0x30C and its relay checks trip
+    # on the stock frames the car keeps sending. No Nidec platform is lateral-only today, so this
+    # changes nothing that already exists
+    if not ret.openpilotLongitudinalControl and not (ret.flags & HondaFlags.BOSCH):
+      ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.NIDEC_STOCK_LONG.value
     if ret.openpilotLongitudinalControl and ret.flags & HondaFlags.BOSCH:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.BOSCH_LONG.value
     if ret.flags & HondaFlags.BOSCH_RADARLESS:
@@ -201,6 +212,11 @@ class CarInterface(CarInterfaceBase):
       ret.minEnableSpeed = -1.
     elif candidate == CAR.HONDA_ODYSSEY_TWN:
       ret.minEnableSpeed = 19. * CV.MPH_TO_MS
+    elif candidate == CAR.HONDA_ODYSSEY_CHN:
+      # The Taiwan 19 mph floor is contradicted by this car's own data: across one auditable
+      # capture there were six cruise engagement rising edges, five of them below 19 mph and
+      # the lowest near 7 mph. The legacy comma two ran this platform with -1.0.
+      ret.minEnableSpeed = -1.
     else:
       ret.minEnableSpeed = 25.51 * CV.MPH_TO_MS
 
