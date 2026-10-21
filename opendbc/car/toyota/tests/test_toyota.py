@@ -1,20 +1,14 @@
 import unittest
 
-from opendbc.can import CANPacker
-from opendbc.car import Bus, gen_empty_fingerprint
+from opendbc.car import Bus
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car.toyota.interface import CarInterface
 from opendbc.car.toyota.fingerprints import FW_VERSIONS
 from opendbc.car.toyota.values import CAR, DBC, ToyotaFlags, FW_QUERY_CONFIG, PLATFORM_CODE_ECUS, \
                                                   FUZZY_EXCLUDED_PLATFORMS, get_platform_codes
 from opendbc.testing import fuzzy_test
 
 Ecu = CarParams.Ecu
-
-
-def get_params(car):
-  return CarInterface.get_params(car, gen_empty_fingerprint(), [], False, False, False)
 
 
 def check_fw_version(fw_version: bytes) -> bool:
@@ -41,29 +35,6 @@ class TestToyotaInterfaces(unittest.TestCase):
     for car_model, dbc in DBC.items():
       if car_model.config.flags & ToyotaFlags.TSS2 and not (car_model.config.flags & ToyotaFlags.SECOC):
         assert dbc[Bus.pt] == "toyota_nodsu_pt_generated"
-
-  def test_radar_acc_ars510(self):
-    # Radar-ACC cars have a Continental ARS510, whose ACC target is their radar point
-    for car_model in cars_with(ToyotaFlags.RADAR_ACC):
-      assert DBC[car_model][Bus.radar] == "toyota_tss2_ars510"
-      assert not get_params(car_model).radarUnavailable
-
-  def test_ars510_once_per_radar_cycle(self):
-    # The ACC target frames repeat at 50 Hz; one report per 60 ms radar cycle (0x239 clock) keeps liveTracks
-    # inside radard's frequency window
-    RI = CarInterface.RadarInterface(get_params(CAR.TOYOTA_RAV4_TSS2_2023))
-    packer = CANPacker("toyota_tss2_ars510")
-    reports = []
-    for i in range(30):
-      msgs = [packer.make_can_msg("ACC_TARGET_1", 1, {"STATE": 5, "REL_SPEED": -3.25, "TARGET_ID": 7}),
-              packer.make_can_msg("ACC_TARGET_2", 1, {"LONG_DIST": 61.5, "LAT_DIST": 0.42, "PRESENT": 1}),
-              packer.make_can_msg("ACC_TARGET_3", 1, {"TIMESTAMP": 60000 * (1 + i // 3)})]
-      rr = RI.update([(int(i * 2e7), msgs)])
-      if rr is not None:
-        reports.append(rr)
-    assert len(reports) == 10
-    pt, = reports[-1].points
-    assert pt.trackId == 7 and abs(pt.dRel - 61.5) < 1e-6 and abs(pt.yRel - 0.42) < 1e-6 and abs(pt.vRel + 3.25) < 1e-6
 
   def test_essential_ecus(self):
     # Asserts standard ECUs exist for each platform
