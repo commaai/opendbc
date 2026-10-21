@@ -36,6 +36,7 @@ BS_:
 BU_: XXX
 BO_ 256 PCS_STATE: 7 XXX
  SG_ PCS_ALARM : 1|1@0+ (1,0) [0|1] "" XXX
+ SG_ POWER_UP : 15|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 400 RADAR_CYCLE: 7 XXX
  SG_ SUMMARY_COUNT : 3|2@0+ (1,0) [0|3] "" XXX
@@ -133,8 +134,9 @@ BO_ 1664 OBJECT_STREAM: 8 XXX
  SG_ LAT_SPEED : 55|8@0+ (0.15,-19.2) [-19.2|19.05] "m/s" XXX
 
 CM_ "Continental ARS510 front radar, radar bus. Used on the radar-ACC platforms: RAV4 2022-25 (fwdRadar 8821F0R01100, 8821F0R03100), C-HR 2021-22 (8821FF4102xx-0500) and Yaris (8821F0D0xxxx). The 0x80 object list and 0x85 metadata record are ISO-TP transfers (740 and 144 bytes, CRC32-protected; flow control on 0x81 / 0x86) and are not described here; neither are values that need a computation across frames or signals (a summary's speed from its range slope, LAT_DIST's hidden 13th bit), which the comments explain instead. The radar interface reads ACC_TARGET_1-3 (STATE, REL_SPEED, TARGET_ID, LONG_DIST, LAT_DIST, PRESENT, TIMESTAMP); the other messages and signals are documented for completeness, decoded from recorded drives on two RAV4s and checked on the C-HR and Yaris test routes. Comments say where a unit or meaning is approximate. Camera-sent frames on this bus (0x101, 0x102, 0x180, 0x197, 0x210, 0x240-0x248, 0x24D, 0x500, 0x501) and the constant 0x103, 0x198 and 0x23D (all zero) are left out.";
-CM_ BO_ 256 "Radar PCS state, 10 Hz. The first frame after power-up is FF FF (ignore it); zero otherwise, except PCS_ALARM.";
+CM_ BO_ 256 "Radar PCS state, 10 Hz. The first frame after power-up is FF FF (POWER_UP = 255; ignore it); zero otherwise, except PCS_ALARM.";
 CM_ SG_ 256 PCS_ALARM "Pre-collision alarm: 1 from the same CAN frame as the car-bus PCS alarm (0x283 PCSNOCHG, 0x411 FCW) until it ends; seen in 8 stock alarms on 7 cars, never otherwise.";
+CM_ SG_ 256 POWER_UP "255 on the first frame after power-up, when every bit is set; 0 otherwise.";
 CM_ BO_ 514 "Radar alive frame, 16.7 Hz. Bytes 2-4 are constant (03 6D 80) on every recorded car; the first frame after power-up differs.";
 CM_ SG_ 514 CHECK_BYTE "Depends only on COUNTER.";
 CM_ SG_ 514 COUNTER "+1 per frame, mod 16.";
