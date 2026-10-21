@@ -25,28 +25,22 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   def setUp(self):
     super().setUp()
-    self.counters = {addr: 0 for addr in (0x1b6, 0x1ec, 0x23c, 0x242)}
     self.gas_counter = 0
-
-  def _counter(self, addr):
-    counter = self.counters[addr]
-    self.counters[addr] = (counter + 1) % 16
-    return counter
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"LKAReqToqHSC2": torque, "LKAReqToqStsHSC2": steer_req}
     return self.packer.make_can_msg_safety("FVCM_HSC2_FrP03", 0, values)
 
   def _speed_msg(self, speed):
-    values = {"VehSpdAvgHSC2": speed * 3.6, "VehSpdAvgAlvRCHSC2": self._counter(0x23c)}
+    values = {"VehSpdAvgHSC2": speed * 3.6}
     return self.packer.make_can_msg_safety("SCS_HSC2_FrP19", 0, values)
 
   def _torque_driver_msg(self, torque):
-    values = {"DrvrStrgDlvrdToqHSC2": torque * 0.01, "ChLKAAlvRCHSC2": self._counter(0x1ec)}
+    values = {"DrvrStrgDlvrdToqHSC2": torque * 0.01}
     return self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values)
 
   def _user_brake_msg(self, brake):
-    values = {"BrkPdlAppdHSC2": 1 if brake else 0, "BrkPdlAppdRCHSC2": self._counter(0x1b6)}
+    values = {"BrkPdlAppdHSC2": 1 if brake else 0}
     return self.packer.make_can_msg_safety("EHBS_HSC2_FrP00", 0, values)
 
   def _user_gas_msg(self, gas):
@@ -57,7 +51,7 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
     return msg
 
   def _pcm_status_msg(self, enable):
-    values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
+    values = {"ACCSysSts_RadarHSC2": 2 if enable else 1}
     return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values)
 
   def test_gas_counter(self):
