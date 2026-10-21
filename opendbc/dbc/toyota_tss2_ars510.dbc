@@ -77,7 +77,7 @@ BO_ 405 EVENT_OBJECT: 8 XXX
  SG_ OBJECT_DIST : 50|11@0+ (0.05,0) [0|102.35] "m" XXX
 
 BO_ 406 EVENT_STATE: 8 XXX
- SG_ REQUIRED_DECEL : 7|8@0- (0.1,0) [-12.8|12.7] "m/s^2" XXX
+ SG_ REQUIRED_DECEL : 7|8@0- (0.095,0) [-12.16|12.065] "m/s^2" XXX
  SG_ RADAR_FAULT : 8|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 514 RADAR_ALIVE: 5 XXX
@@ -133,7 +133,7 @@ BO_ 1664 OBJECT_STREAM: 8 XXX
  SG_ SEEN_MOVING : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ LAT_SPEED : 55|8@0+ (0.15,-19.2) [-19.2|19.05] "m/s" XXX
 
-CM_ "Continental ARS510 front radar, radar bus. Used on the radar-ACC platforms: RAV4 2022-25 (fwdRadar 8821F0R01100, 8821F0R03100), C-HR 2021-22 (8821FF4102xx-0500) and Yaris (8821F0D0xxxx). The 0x80 object list and 0x85 metadata record are ISO-TP transfers (740 and 144 bytes, CRC32-protected; flow control on 0x81 / 0x86) and are not described here; neither are values that need a computation across frames or signals (a summary's speed from its range slope, LAT_DIST's hidden 13th bit), which the comments explain instead. The radar interface reads ACC_TARGET_1-3 (STATE, REL_SPEED, TARGET_ID, LONG_DIST, LAT_DIST, PRESENT, TIMESTAMP); the other messages and signals are documented for completeness, decoded from recorded drives on two RAV4s and checked on the C-HR and Yaris test routes. Comments say where a unit or meaning is approximate. Camera-sent frames on this bus (0x101, 0x102, 0x180, 0x197, 0x210, 0x240-0x248, 0x24D, 0x500, 0x501) and the constant 0x103, 0x198 and 0x23D (all zero) are left out.";
+CM_ "Continental ARS510 front radar, radar bus. Used on the radar-ACC platforms: RAV4 2022-25 (fwdRadar 8821F0R01100, 8821F0R03100), C-HR 2021-22 (8821FF4102xx-0500) and Yaris (8821F0D0xxxx). The 0x80 object list and 0x85 metadata record are ISO-TP transfers (740 and 144 bytes, CRC32-protected; flow control on 0x81 / 0x86) and are not described here; neither are values that need a computation across frames or signals (a summary's speed from its range slope, LAT_DIST's hidden 13th bit), which the comments explain instead. The radar interface reads ACC_TARGET_1-3 (STATE, REL_SPEED, TARGET_ID, LONG_DIST, LAT_DIST, PRESENT, TIMESTAMP); the other messages and signals are documented for completeness, decoded from recorded drives on two RAV4s and checked on the C-HR and Yaris test routes. Comments say where a unit or meaning is approximate. Camera-sent frames on this bus (0x101, 0x102, 0x180, 0x197, 0x210, 0x240-0x248, 0x24D, 0x500, 0x501) and the constant 0x103 and 0x23D (all zero) and 0x198 (0x10; 0x90 while RADAR_FAULT is set) are left out.";
 CM_ BO_ 256 "Radar PCS state, 10 Hz. The first frame after power-up is FF FF (POWER_UP = 255; ignore it); zero otherwise, except PCS_ALARM.";
 CM_ SG_ 256 PCS_ALARM "Pre-collision alarm: 1 from the same CAN frame as the car-bus PCS alarm (0x283 PCSNOCHG, 0x411 FCW) until it ends; seen in 8 stock alarms on 7 cars, never otherwise.";
 CM_ SG_ 256 POWER_UP "255 on the first frame after power-up, when every bit is set; 0 otherwise.";
@@ -166,8 +166,8 @@ CM_ SG_ 405 OBJECT_SPEED "Object longitudinal over-ground speed.";
 CM_ SG_ 405 EGO_TRAVEL_TO_TTC "Ego's predicted travel until the time to collision (v T + a T^2 / 2, T = distance / closing speed), clamped at 0.";
 CM_ SG_ 405 OBJECT_DIST "Object distance; on the ACC car the ACC distance rounded down to 0.05 m. 0 when idle.";
 CM_ BO_ 406 "Event state, paired with EVENT_OBJECT.";
-CM_ SG_ 406 REQUIRED_DECEL "Required deceleration for the event object while active (about 0.1 m/s^2 per code, approximate).";
-CM_ SG_ 406 RADAR_FAULT "Radar fault: sets 0.3-0.4 s after the object list stops and clears with it; also set for the first cycle after power-up, so require two or more consecutive cycles.";
+CM_ SG_ 406 REQUIRED_DECEL "Required deceleration for the event object while active: floor(a_req / 0.095) of a lead-moving / lead-stops formula with a 1.75 m margin.";
+CM_ SG_ 406 RADAR_FAULT "Radar fault: held while the radar declares itself blocked (car-bus 0x411 dust state; the object list keeps running) and after some object-list outages; also set for the single first cycle after power-up, so require two or more consecutive cycles.";
 CM_ BO_ 565 "ACC target, part 1: 50 Hz, content updated once per 60 ms radar cycle.";
 CM_ SG_ 565 CHECK_BYTE "CRC-8 (polynomial 0x1D, MSB first) over the frame's signals serialized as zero-padded 8, 16 or 32-bit integers, not over the raw bytes; linear, so a 56-column table over payload bits plus a constant computes it.";
 CM_ SG_ 565 STATE "5 = target present, 1 = idle (bytes 2-7 64 80 0B 24 00 FF), 15 = start-up.";
