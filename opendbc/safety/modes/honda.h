@@ -35,7 +35,6 @@ static bool honda_bosch_canfd = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
 
-
 static unsigned int honda_get_pt_bus(void) {
   return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless && !honda_bosch_canfd) ? 1U : 0U;
 }
@@ -163,7 +162,6 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool honda_tx_hook(const CANPacket_t *msg) {
-
   const LongitudinalLimits HONDA_BOSCH_LONG_LIMITS = {
     .max_accel = 200,   // accel is used for brakes
     .min_accel = -350,
@@ -294,8 +292,13 @@ static safety_config honda_nidec_init(uint16_t param) {
   // 0x1FA is dynamically forwarded based on stock AEB
   // 0xE4 is steering on all cars except CRV and RDX, 0x194 for CRV and RDX,
   // 0x1FA is brake control, 0x30C is acc hud, 0x33D is lkas hud
-  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x194, 0, 4, .check_relay = true}, {0x1FA, 0, 8, .check_relay = false},
-                                     {0x30C, 0, 8, .check_relay = true}, {0x33D, 0, 5, .check_relay = true}};
+  static const CanMsg HONDA_N_TX_MSGS[] = {
+    {0xE4, 0, 5, .check_relay = true},
+    {0x194, 0, 4, .check_relay = true},
+    {0x1FA, 0, 8, .check_relay = false},
+    {0x30C, 0, 8, .check_relay = true},
+    {0x33D, 0, 5, .check_relay = true},
+  };
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
 
@@ -314,7 +317,7 @@ static safety_config honda_nidec_init(uint16_t param) {
 
   if (enable_nidec_alt) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
-    static RxCheck honda_nidec_alt_rx_checks[] = {
+    static const RxCheck honda_nidec_alt_rx_checks[] = {
       HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
       {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
@@ -322,7 +325,7 @@ static safety_config honda_nidec_init(uint16_t param) {
     SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
   } else {
     // Nidec includes BRAKE_COMMAND
-    static RxCheck honda_nidec_common_rx_checks[] = {
+    static const RxCheck honda_nidec_common_rx_checks[] = {
       HONDA_COMMON_RX_CHECKS(0)
       {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
@@ -336,42 +339,73 @@ static safety_config honda_nidec_init(uint16_t param) {
 }
 
 static safety_config honda_bosch_init(uint16_t param) {
-  static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = true}, {0x296, 1, 4, .check_relay = false},
-                                         {0x33D, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = true}, {0x33DA, 0, 5, .check_relay = true}, {0x33DB, 0, 8, .check_relay = true}};  // Bosch
+  // Bosch
+  static const CanMsg HONDA_BOSCH_TX_MSGS[] = {
+    {0xE4, 0, 5, .check_relay = true},
+    {0xE5, 0, 8, .check_relay = true},
+    {0x296, 1, 4, .check_relay = false},
+    {0x33D, 0, 5, .check_relay = true},
+    {0x33D, 0, 8, .check_relay = true},
+    {0x33DA, 0, 5, .check_relay = true},
+    {0x33DB, 0, 8, .check_relay = true},
+  };
 
-  static CanMsg HONDA_BOSCH_LONG_TX_MSGS[] = {{0xE4, 1, 5, .check_relay = true}, {0x1DF, 1, 8, .check_relay = true}, {0x1EF, 1, 8, .check_relay = false},
-                                              {0x1FA, 1, 8, .check_relay = false}, {0x30C, 1, 8, .check_relay = false}, {0x33D, 1, 5, .check_relay = true}, {0x33D, 1, 8, .check_relay = true},
-                                              {0x33DA, 1, 5, .check_relay = true}, {0x33DB, 1, 8, .check_relay = true}, {0x39F, 1, 8, .check_relay = false},
-                                              {0x18DAB0F1, 1, 8, .check_relay = false}};  // Bosch w/ gas and brakes
+  // Bosch w/ gas and brakes
+  static const CanMsg HONDA_BOSCH_LONG_TX_MSGS[] = {
+    {0xE4, 1, 5, .check_relay = true},
+    {0x1DF, 1, 8, .check_relay = true},
+    {0x1EF, 1, 8, .check_relay = false},
+    {0x1FA, 1, 8, .check_relay = false},
+    {0x30C, 1, 8, .check_relay = false},
+    {0x33D, 1, 5, .check_relay = true},
+    {0x33D, 1, 8, .check_relay = true},
+    {0x33DA, 1, 5, .check_relay = true},
+    {0x33DB, 1, 8, .check_relay = true},
+    {0x39F, 1, 8, .check_relay = false},
+    {0x18DAB0F1, 1, 8, .check_relay = false},
+  };
 
-  static CanMsg HONDA_RADARLESS_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x296, 2, 4, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}};  // Bosch radarless
+  // Bosch radarless
+  static const CanMsg HONDA_RADARLESS_TX_MSGS[] = {
+    {0xE4, 0, 5, .check_relay = true},
+    {0x296, 2, 4, .check_relay = false},
+    {0x33D, 0, 8, .check_relay = true},
+  };
 
-  static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = true}, {0x1C8, 0, 8, .check_relay = true},
-                                                  {0x30C, 0, 8, .check_relay = true}};  // Bosch radarless w/ gas and brakes
+  // Bosch radarless w/ gas and brakes
+  static const CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {
+    {0xE4, 0, 5, .check_relay = true},
+    {0x33D, 0, 8, .check_relay = true},
+    {0x1C8, 0, 8, .check_relay = true},
+    {0x30C, 0, 8, .check_relay = true},
+  };
 
-  static CanMsg HONDA_CANFD_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x296, 0, 4, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}};
-
+  static const CanMsg HONDA_CANFD_TX_MSGS[] = {
+    {0xE4, 0, 5, .check_relay = true},
+    {0x296, 0, 4, .check_relay = false},
+    {0x33D, 0, 8, .check_relay = true},
+  };
 
   const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
   const uint16_t HONDA_PARAM_RADARLESS = 8;
   const uint16_t HONDA_PARAM_BOSCH_CANFD = 16;
 
   // Bosch radarless has the powertrain bus on bus 0
-  static RxCheck honda_bosch_pt0_rx_checks[] = {
+  static const RxCheck honda_bosch_pt0_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(0)
   };
 
-  static RxCheck honda_bosch_pt0_alt_brake_rx_checks[] = {
+  static const RxCheck honda_bosch_pt0_alt_brake_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(0)
     HONDA_ALT_BRAKE_ADDR_CHECK(0)
   };
 
   // Bosch has powertrain on bus 1, verified 0x1A6 does not exist
-  static RxCheck honda_bosch_pt1_rx_checks[] = {
+  static const RxCheck honda_bosch_pt1_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(1)
   };
 
-  static RxCheck honda_bosch_pt1_alt_brake_rx_checks[] = {
+  static const RxCheck honda_bosch_pt1_alt_brake_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(1)
     HONDA_ALT_BRAKE_ADDR_CHECK(1)
   };

@@ -20,7 +20,6 @@ static uint32_t byd_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void byd_rx_hook(const CANPacket_t *msg) {
-
   if (msg->bus == 0U) {
     // Steering angle: 0.1 deg/LSB, signed
     if (msg->addr == 0x11FU) {
@@ -52,7 +51,6 @@ static void byd_rx_hook(const CANPacket_t *msg) {
     }
   }
 }
-
 
 static bool byd_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringLimits BYD_STEERING_LIMITS = {
@@ -101,7 +99,7 @@ static safety_config byd_init(uint16_t param) {
     {0x3B0, 0, 8, .check_relay = false},  // PCM_BUTTONS (cruise cancel button spoof)
   };
 
-  static RxCheck byd_rx_checks[] = {
+  static const RxCheck byd_rx_checks[] = {
     {.msg = {{0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_MODULE_2 (steering angle)
     {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // WHEELSPEED_CLEAN (vehicle speed)
     {.msg = {{0x242, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DRIVE_STATE (gas and brake pressed)

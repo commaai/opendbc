@@ -114,7 +114,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
   const LongitudinalLimits SUBARU_LONG_LIMITS = {
     .min_gas = 808,       // appears to be engine braking
     .max_gas = 3400,      // approx  2 m/s^2 when maxing cruise_rpm and cruise_throttle
-    .inactive_gas = 1818, // this is zero acceleration
+    .inactive_gas = 1818,  // this is zero acceleration
     .max_brake = 600,     // approx -3.5 m/s^2
 
     .min_transmission_rpm = 0,
@@ -146,9 +146,10 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     violation |= (!cruise_cancel);
   }
 
-  if (violation){
+  if (violation) {
     tx = false;
   }
+
   return tx;
 }
 
@@ -172,12 +173,12 @@ static safety_config subaru_init(uint16_t param) {
 
   safety_config ret;
   if (subaru_gen2) {
-    static RxCheck subaru_gen2_rx_checks[] = {
+    static const RxCheck subaru_gen2_rx_checks[] = {
       SUBARU_COMMON_RX_CHECKS(SUBARU_ALT_BUS)
     };
     ret = BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_TX_MSGS);
   } else {
-    static RxCheck subaru_rx_checks[] = {
+    static const RxCheck subaru_rx_checks[] = {
       SUBARU_COMMON_RX_CHECKS(SUBARU_MAIN_BUS)
     };
     ret = BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_TX_MSGS);

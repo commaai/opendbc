@@ -43,12 +43,16 @@ static bool body_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config body_init(uint16_t param) {
-  static RxCheck body_rx_checks[] = {
+  static const RxCheck body_rx_checks[] = {
     {.msg = {{0x201, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  static const CanMsg BODY_TX_MSGS[] = {{0x250, 0, 8, .check_relay = false}, {0x250, 0, 6, .check_relay = false}, {0x251, 0, 5, .check_relay = false},  // body
-                                        {0x1, 0, 8, .check_relay = false}};  // CAN flasher
+  static const CanMsg BODY_TX_MSGS[] = {
+    {0x250, 0, 8, .check_relay = false},
+    {0x250, 0, 6, .check_relay = false},
+    {0x251, 0, 5, .check_relay = false},
+    {0x1, 0, 8, .check_relay = false},   // CAN flasher
+  };
 
   SAFETY_UNUSED(param);
   safety_config ret = BUILD_SAFETY_CFG(body_rx_checks, BODY_TX_MSGS);
