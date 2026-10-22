@@ -209,7 +209,7 @@ class CAR(Platforms):
     [ToyotaTSS3CarDocs("Toyota Camry Hybrid 2026")],
     # XV80: 2,825 mm wheelbase from Toyota's 2025 product information.
     # Steer ratio is learned from routes; the Toyota stiffness factor remains paramsd's baseline.
-    CarSpecs(wheelbase=2.825, steerRatio=15.3, tireStiffnessFactor=0.7933),
+    CarSpecs(wheelbase=2.82448, steerRatio=15.3, tireStiffnessFactor=0.7933),
     flags=ToyotaFlags.HYBRID,
   )
   TOYOTA_CHR = PlatformConfig(
