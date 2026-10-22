@@ -45,13 +45,12 @@ BO_ 138 CONTROL_REQUEST: 32 XXX
  SG_ CRUISE_OPERATING_LATCH : 27|1@0+ (1,0) [0|1] "" XXX
  SG_ UNKNOWN_2 : 26|3@0+ (1,0) [0|7] "" XXX
  SG_ SET_ME_1 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ UNKNOWN_3 : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ PCS_BRAKE_REQUEST : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ DELAYED_HOLD_STATE : 37|1@0+ (1,0) [0|1] "" XXX
  SG_ UNKNOWN_4 : 36|13@0+ (1,0) [0|8191] "" XXX
  SG_ LONGITUDINAL_REQUEST_ID_UPPER : 55|6@0+ (1,0) [0|63] "" XXX
  SG_ LONGITUDINAL_ALLOCATION_METHOD_UPPER : 49|2@0+ (1,0) [0|3] "" XXX
- SG_ LONGITUDINAL_REQUEST_ID_LOWER : 63|6@0+ (1,0) [0|63] "" XXX
- SG_ LONGITUDINAL_ALLOCATION_METHOD_LOWER : 57|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ LONGITUDINAL_REQUEST_ACCEL_UPPER : 71|16@0- (0.001,0) [-32.768|32.767] "m/s^2" XXX
  SG_ SET_SPEED : 87|8@0+ (1,0) [0|255] "km/h" XXX
  SG_ LONGITUDINAL_REQUEST_ACCEL_LOWER : 95|16@0- (0.001,0) [-32.768|32.767] "m/s^2" XXX
@@ -176,13 +175,11 @@ VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
 VAL_ 636 CRUISE_MODE 0 "UNSPECIFIED" 1 "ADAPTIVE" 2 "CONVENTIONAL";
 VAL_ 138 LATERAL_REQUEST_ID 27 "Remote Parking" 25 "AP" 19 "PDA" 18 "SDG" 11 "LTA/LCA" 10 "Hands Off LTA" 4 "LDA" 1 "PCS" 0 "No Request";
 VAL_ 138 LONGITUDINAL_ALLOCATION_METHOD_UPPER 3 "Brake Only" 2 "Engine and Brake 2" 1 "Engine and Brake 1" 0 "Engine Only";
-VAL_ 138 LONGITUDINAL_ALLOCATION_METHOD_LOWER 3 "Brake Only" 2 "Engine and Brake 2" 1 "Engine and Brake 1" 0 "Engine Only";
-
 CM_ SG_ 48 STEERING_WHEEL_TORQUE_FINE "Driver torque = STEERING_WHEEL_TORQUE_COARSE + STEERING_WHEEL_TORQUE_FINE";
 CM_ SG_ 129 REQUEST_LOSS "Set ~90 ms after the last valid CONTROL_REQUEST, a cruise fault latches until restart if it stays set for ~1 s";
 CM_ SG_ 138 LATERAL_REQUEST_PINION_ANGLE "1024/17870 deg per count";
 CM_ SG_ 138 AUTHENTICATOR "Truncated 28-bit SecOC MAC";
-CM_ SG_ 138 LONGITUDINAL_REQUEST_ID_LOWER "33 and 34 are only seen during PCS braking";
+CM_ SG_ 138 PCS_BRAKE_REQUEST "Set only in the FRC's PCS braking requests";
 CM_ SG_ 636 CRUISE_MODE "Selected mode, independent of cruise-main and engagement. Zero observed during startup";
 CM_ SG_ 1454 FCW "PCS warning";
 CM_ BO_ 1911 "Requests to the EPS-resident SecOC signer. HEADER 0x80-0xB0 | sequence nibble: fragment 0-3 of a 28-byte CONTROL_REQUEST, 0x07: arm (DATA_1 0xC9A801) or release (0xC9A800) openpilot's CONTROL_REQUEST";

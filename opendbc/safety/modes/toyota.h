@@ -156,15 +156,16 @@ static uint8_t toyota_tss3_stock_08a_cnt = 0U;
 static int toyota_dbc_eps_torque_factor =
     100; // conversion factor for STEER_TORQUE_EPS in %: see dbc file
 
-static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
-  int len = GET_LEN(msg);
-  uint8_t checksum = (uint8_t)(msg->addr) +
-                     (uint8_t)((unsigned int)(msg->addr) >> 8U) +
-                     (uint8_t)(len);
+static uint8_t toyota_checksum(const uint8_t data[], int len, uint32_t addr) {
+  uint8_t checksum = (uint8_t)addr + (uint8_t)(addr >> 8U) + (uint8_t)len;
   for (int i = 0; i < (len - 1); i++) {
-    checksum += (uint8_t)msg->data[i];
+    checksum += data[i];
   }
   return checksum;
+}
+
+static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
+  return toyota_checksum(msg->data, GET_LEN(msg), msg->addr);
 }
 
 static uint32_t toyota_get_checksum(const CANPacket_t *msg) {
@@ -209,10 +210,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       pcm_cruise_check(
           GET_BIT(msg, 27U)); // CONTROL_REQUEST.CRUISE_OPERATING_LATCH
 
-      const uint8_t long_request_id =
-          msg->data[7] >> 2U; // CONTROL_REQUEST.LONGITUDINAL_REQUEST_ID_LOWER
-      toyota_tss3_stock_pcs =
-          (long_request_id == 33U) || (long_request_id == 34U);
+      toyota_tss3_stock_pcs = GET_BIT(msg, 38U); // CONTROL_REQUEST.PCS_BRAKE_REQUEST
       if (toyota_tss3_stock_pcs) {
         toyota_tss3_08a_active = false;
       }
@@ -364,6 +362,9 @@ static bool toyota_tss3_request_valid(const uint8_t request[],
                    ? toyota_tss3_stock_08a_match(request, now)
                    : toyota_tss3_08a_match(request);
 
+  // CONTROL_REQUEST's Toyota checksum covers its first 8 bytes.
+  valid = valid && (request[7] == toyota_checksum(request, 8, 0x8AU));
+
   // LATERAL_REQUEST_ID and LATERAL_ASSIST_GAIN
   const uint8_t lat_id = request[21] & 0x3FU;
   const bool lat_active = (lat_id == 11U) && (request[24] == 100U);
@@ -396,11 +397,11 @@ static bool toyota_tss3_request_valid(const uint8_t request[],
     }
 
     if (!toyota_stock_longitudinal) {
-      // LONGITUDINAL_REQUEST_ID/ALLOCATION_METHOD and
+      // LONGITUDINAL_REQUEST_ID_UPPER/ALLOCATION_METHOD_UPPER and
       // LONGITUDINAL_REQUEST_ACCEL_UPPER/LOWER
       int accel_upper = to_signed((request[8] << 8U) | request[9], 16);
       int accel_lower = to_signed((request[11] << 8U) | request[12], 16);
-      violation = violation || (request[6] != 0x2DU) || (request[7] != 0x47U) ||
+      violation = violation || (request[6] != 0x2DU) ||
                   (accel_upper != accel_lower);
 
       // No gas pressed check: the motion controller in the brake ECU arbitrates

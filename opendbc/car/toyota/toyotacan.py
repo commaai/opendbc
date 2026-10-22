@@ -96,8 +96,6 @@ def create_tss3_control_request_values(stock_request, lat_active: bool, angle_ra
     "SET_ME_1": 1,
     "LONGITUDINAL_REQUEST_ID_UPPER": 11,
     "LONGITUDINAL_ALLOCATION_METHOD_UPPER": 1,  # engine and brake
-    "LONGITUDINAL_REQUEST_ID_LOWER": 17,
-    "LONGITUDINAL_ALLOCATION_METHOD_LOWER": 3,  # brake only
     "LONGITUDINAL_REQUEST_ACCEL_UPPER": accel,
     "LONGITUDINAL_REQUEST_ACCEL_LOWER": accel,
     "SET_SPEED": min(max(round(set_speed_kph), 0), 255),

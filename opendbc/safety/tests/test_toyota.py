@@ -425,7 +425,7 @@ def fix_toyota_checksum(msg):
   return address, bytes(payload), bus
 
 
-# FRC CONTROL_REQUESTs recorded around a PCS event: stock ACC braking, then both PCS braking request IDs (34, 33)
+# FRC CONTROL_REQUESTs recorded around a PCS event: stock ACC braking, then two PCS braking frames
 TSS3_FRC_08A = bytes.fromhex("0000000880002d47f0605ef0607fff007fff000c4000100000000a00fc472d50")
 TSS3_FRC_PCS_08A = (bytes.fromhex("0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d"),
                     bytes.fromhex("00000008c0002d87f0605ef0607fff007fff000d400030000000130006f38fbe"))
@@ -445,11 +445,24 @@ class Tss3SafetyHelpers:
 
   def test_frc_pcs_request_is_forwarded(self):
     stock_longitudinal = bool(self.SAFETY_PARAM & ToyotaSafetyFlags.STOCK_LONGITUDINAL)
-    for pcs in TSS3_FRC_PCS_08A:
+    parser = CANParser(TSS3_DBC, [("CONTROL_REQUEST", float("nan"))], 2)
+    parser.update([(0, [(0x08A, TSS3_FRC_08A, 2)])])
+    values = dict(parser.vl["CONTROL_REQUEST"])
+    requests = [(TSS3_FRC_08A, pcs) for pcs in TSS3_FRC_PCS_08A]
+    # Vary the header independently of PCS, including a non-PCS checksum of 0x87.
+    for overrides in (
+      {"CRUISE_OPERATING_LATCH": 0, "LONGITUDINAL_REQUEST_ID_UPPER": 0, "LONGITUDINAL_ALLOCATION_METHOD_UPPER": 0},
+      {"DELAYED_HOLD_STATE": 1},
+      {"UNKNOWN_4": 64},
+      {"LONGITUDINAL_REQUEST_ID_UPPER": 13, "UNKNOWN_4": 4},
+    ):
+      requests.append(tuple(TSS3_PACKER.make_can_msg("CONTROL_REQUEST", 2, values | overrides | {"PCS_BRAKE_REQUEST": pcs})[1]
+                            for pcs in (False, True)))
+    for normal, pcs in requests:
       with self.subTest(pcs=pcs.hex()):
-        self._rx_frc_08a(TSS3_FRC_08A)
+        self._rx_frc_08a(normal)
         self.assertTrue(self.safety.safety_tx_hook(self._admin_msg(True)))
-        request = build_host_application(stock=TSS3_FRC_08A if stock_longitudinal else None)
+        request = build_host_application(stock=normal if stock_longitudinal else None)
         self.assertTrue(self._request(request))
         self.assertEqual(self.safety.safety_fwd_hook(2, 0x08A), -1)
 
@@ -461,7 +474,7 @@ class Tss3SafetyHelpers:
         self._rx_frc_08a(pcs)
         self.assertEqual(self.safety.safety_fwd_hook(2, 0x08A), 0)
 
-        self._rx_frc_08a(TSS3_FRC_08A)
+        self._rx_frc_08a(normal)
         self.assertTrue(self.safety.safety_tx_hook(self._admin_msg(True)))
         self.assertEqual(self.safety.safety_fwd_hook(2, 0x08A), -1)
 
@@ -470,6 +483,20 @@ class Tss3SafetyHelpers:
         self._reset_safety_hooks()
         self.safety.set_timer(0)
         self.assertEqual(self.safety.safety_tx_hook(self._admin_msg(True)), not stock_longitudinal)
+
+  def test_request_checksum(self):
+    stock_longitudinal = bool(self.SAFETY_PARAM & ToyotaSafetyFlags.STOCK_LONGITUDINAL)
+    request = build_host_application(stock=TSS3_FRC_08A if stock_longitudinal else None)
+    for valid in (True, False, True):
+      with self.subTest(valid=valid):
+        data = bytearray(request)
+        if not valid:
+          data[7] ^= 1
+        # Match the received stock request even when its checksum is invalid.
+        self._rx_frc_08a(bytes(data) + TSS3_TRAILER)
+        self.assertTrue(self.safety.safety_tx_hook(self._admin_msg(True)))
+        self.assertEqual(self._request(bytes(data)), valid)
+        self.assertEqual(self._publish(bytes(data)), valid)
 
   @staticmethod
   def _control_request_msg(request: bytes, fd: bool = True):

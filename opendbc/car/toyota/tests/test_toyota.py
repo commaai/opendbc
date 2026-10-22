@@ -332,10 +332,12 @@ class TestToyotaTSS3CarInterface(unittest.TestCase):
     for alpha_long in (False, True):
       ci = self.interface(alpha_long)
       for bytes_4_7, speed, hold in ((b"\x80\x00\x2d\x47", 0, False), (b"\xa0\x00\x2d\x67", 0, True),
-                                     (b"\xa0\x00\x2c\x66", 0, True), (b"\x80\x00\x47\x65", 5, False)):
+                                     (b"\xa0\x00\x2c\x66", 0, True), (b"\x80\x00\x2d\x47", 5, False)):
         with self.subTest(alpha_long=alpha_long, request=bytes_4_7.hex()):
           request = TSS3_MSGS[0x08A][:4] + bytes_4_7 + TSS3_MSGS[0x08A][8:]
-          self.assertEqual(self.update(ci, speed_ms=speed, x08A=request).cruiseState.standstill, hold and not alpha_long)
+          state = self.update(ci, speed_ms=speed, x08A=request)
+          self.assertTrue(state.canValid)
+          self.assertEqual(state.cruiseState.standstill, hold and not alpha_long)
 
   def test_request_loss_fault(self):
     loss = bytes.fromhex("0000001800810b2d000000140000000001210081ff000c63ff000000b0fb684e")
@@ -348,7 +350,7 @@ class TestToyotaTSS3CarInterface(unittest.TestCase):
     self.assertTrue(self.update().accFaulted)
 
   def test_stock_pcs(self):
-    # FRC CONTROL_REQUESTs from a PCS event: stock ACC braking at -4 m/s^2, both PCS braking request IDs, then stock ACC again
+    # FRC CONTROL_REQUESTs from a PCS event: stock ACC braking at -4 m/s^2, PCS braking, then stock ACC again
     for request, aeb in (("0000000880002d47f0605ef0607fff007fff000c4000100000000a00fc472d50", False),
                          ("0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d", True),
                          ("00000008c0002d87f0605ef0607fff007fff000d400030000000130006f38fbe", True),
@@ -363,6 +365,32 @@ class TestToyotaTSS3CarInterface(unittest.TestCase):
     self.assertTrue(state.canValid and state.stockFcw)
     self.assertFalse(state.stockAeb)
     self.assertFalse(self.update().stockFcw)
+
+  def test_pcs_request_independent_of_header(self):
+    packer = CANPacker(DBC[self.car_model][Bus.pt])
+    values = {"CRUISE_OPERATING_LATCH": 1, "SET_ME_1": 1,
+              "LONGITUDINAL_REQUEST_ID_UPPER": 11, "LONGITUDINAL_ALLOCATION_METHOD_UPPER": 1}
+    for overrides in (
+      {"CRUISE_OPERATING_LATCH": 0, "LONGITUDINAL_REQUEST_ID_UPPER": 0, "LONGITUDINAL_ALLOCATION_METHOD_UPPER": 0},
+      {"DELAYED_HOLD_STATE": 1},
+      {"UNKNOWN_4": 64},
+      {"LONGITUDINAL_REQUEST_ID_UPPER": 13, "UNKNOWN_4": 4},
+    ):
+      for pcs, accel in ((False, -4), (True, -4), (True, 0), (True, 1), (False, -4)):
+        with self.subTest(overrides=overrides, pcs=pcs, accel=accel):
+          signals = values | overrides | {"PCS_BRAKE_REQUEST": pcs, "LONGITUDINAL_REQUEST_ACCEL_LOWER": accel}
+          _, data, _ = packer.make_can_msg("CONTROL_REQUEST", TSS3_SOURCE_BUS, signals)
+          state = self.update(x08A=data)
+          self.assertTrue(state.canValid)
+          self.assertEqual(self.ci.CS.tss3_stock_pcs, pcs)
+          self.assertEqual(state.stockAeb, pcs and accel < 0)
+
+  def test_control_request_checksum(self):
+    self.assertTrue(self.update().canValid)
+    request = bytearray(TSS3_MSGS[0x08A])
+    request[7] ^= 1
+    self.assertFalse(self.update(iterations=40, x08A=bytes(request)).canValid)
+    self.assertTrue(self.update().canValid)
 
   def test_stock_pcs_releases_control_request(self):
     pcs = bytes.fromhex("0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d")
