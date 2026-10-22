@@ -236,12 +236,14 @@ def create_ui_command(packer, steer, chime, left_line, right_line, left_lane_dep
 
 
 def toyota_checksum(address: int, sig, d: bytearray) -> int:
-  s = len(d)
+  # covers the frame up to the checksum byte, which isn't always the last one (TSS3 EPS_STATUS has it in byte 7 of 32)
+  length = min(sig.msb // 8 + 1, len(d))
+  s = length
   addr = address
   while addr:
     s += addr & 0xFF
     addr >>= 8
-  for i in range(len(d) - 1):
+  for i in range(length - 1):
     s += d[i]
   return s & 0xFF
 

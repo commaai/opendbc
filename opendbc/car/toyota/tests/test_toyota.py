@@ -9,6 +9,7 @@ from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.toyota.fingerprints import FW_VERSIONS
 from opendbc.car.toyota.interface import CarInterface
 from opendbc.car.toyota.radar_interface import TSS3_DIST_INVALID, TSS3_GEOMETRY_MSGS, TSS3_SLOTS, RadarInterface
+from opendbc.car.toyota.toyotacan import toyota_checksum
 from opendbc.car.toyota.tss3 import SIGNER_MAX_PENDING, SIGNER_TIMEOUT_NS, TSS3_AUX_BUS, TSS3_CHASSIS_BUS, TSS3_SOURCE_BUS, \
                                     SignerTransport
 from opendbc.car.toyota.values import CAR, DBC, CarControllerParams, ToyotaFlags, ToyotaSafetyFlags, FW_QUERY_CONFIG, \
@@ -127,6 +128,12 @@ class TestToyotaInterfaces(unittest.TestCase):
       with self.subTest(car_model=car_model.value):
         assert DBC[car_model] == {Bus.pt: TSS3_PT_DBC, Bus.radar: TSS3_RADAR_DBC}
         assert not car_model.config.flags & (ToyotaFlags.TSS2 | ToyotaFlags.SECOC | ToyotaFlags.NO_DSU)
+
+  def test_checksum_truncated_frame(self):
+    # a frame ending before the bytes the CHECKSUM covers must be rejected, not raise
+    parser = CANParser(TSS3_PT_DBC, [("EPS_STATUS", float("nan"))], TSS3_CHASSIS_BUS)
+    self.assertEqual(parser.update([(0, [(0x030, TSS3_MSGS[0x030][:6], TSS3_CHASSIS_BUS)])]), set())
+    self.assertEqual(parser.update([(0, [(0x030, TSS3_MSGS[0x030], TSS3_CHASSIS_BUS)])]), {0x030})
 
   def test_essential_ecus(self):
     # Asserts standard ECUs exist for each platform
@@ -379,8 +386,9 @@ class TestToyotaTSS3CarInterface(unittest.TestCase):
         self.assertTrue(any(address == 0x777 and bus == TSS3_CHASSIS_BUS for address, _, bus in self.apply(tss3_control())[1]))
 
   def test_eps_status(self):
-    override = bytes.fromhex("12000003330930b9130330053c800e99030b0000053c07b50000000042c3b381")
-    initializing = bytes.fromhex("00000000170000500000100026820000000000010000ffff00000000b280595f")
+    # recorded with 1.57 Nm of driver torque, and at startup with angle control inhibited
+    override = bytes.fromhex("0f0000001501207d10001000230001d7020d0000002301d2000000005c6941f3")
+    initializing = bytes.fromhex("00000000000008400000080000100000000000010000000000000000a44271be")
     for eps, pressed in ((override, True), (initializing, False)):
       state = self.update(speed_ms=5, x030=eps)
       self.assertTrue(state.canValid)
@@ -388,11 +396,18 @@ class TestToyotaTSS3CarInterface(unittest.TestCase):
       self.assertFalse(state.steerFaultTemporary or state.steerFaultPermanent or state.vehicleSensorsInvalid)
 
     # byte 6 holds EPS_FAULT_INHIBIT (0x04) and DRIVER_TORQUE_INVALID (0x01), 0xF2 sets only the undecoded bits
+    checksum = CANPacker(TSS3_PT_DBC).dbc.name_to_msg["EPS_STATUS"].sigs["CHECKSUM"]
     for status, fault in ((0x04, True), (0, False), (0xF2, False)):
       eps = bytearray(TSS3_MSGS[0x030])
       eps[6] = status
+      eps[7] = toyota_checksum(0x030, checksum, eps)
       state = self.update(x030=bytes(eps))
+      self.assertTrue(state.canValid)
       self.assertEqual((state.steerFaultTemporary, state.steerFaultPermanent), (fault, False))
+
+    eps = bytearray(TSS3_MSGS[0x030])
+    eps[7] ^= 0xFF
+    self.assertFalse(self.update(x030=bytes(eps)).canValid)
 
   def test_signer_state_from_can(self):
     self.update(extra=[CanData(0x7A9, bytes.fromhex("c90500fa12345678"), 0), CanData(0x777, b"\xb5" + bytes(7), 192),
