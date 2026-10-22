@@ -100,6 +100,9 @@ BO_ 593 CRUISE_DISPLAY: 8 XXX
  SG_ UI_SET_SPEED : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_VEHICLE_INTERVAL_TIME : 47|3@0+ (1,0) [1|4] "" XXX
 
+BO_ 636 CRUISE_STATUS: 8 XXX
+ SG_ CRUISE_MODE : 1|2@0+ (1,0) [0|3] "" XXX
+
 BO_ 741 SEATBELT_STATUS: 8 XXX
  SG_ SEATBELT_DRIVER_UNLATCHED : 22|1@0+ (1,0) [0|1] "" XXX
 
@@ -167,6 +170,7 @@ BO_ 1961 SIGNER_RESPONSE: 8 EPS
  SG_ AUTHENTICATOR : 35|28@0+ (1,0) [0|268435455] "" XXX
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B" ;
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
+VAL_ 636 CRUISE_MODE 0 "UNSPECIFIED" 1 "ADAPTIVE" 2 "CONVENTIONAL";
 VAL_ 138 LATERAL_REQUEST_ID 27 "Remote Parking" 25 "AP" 19 "PDA" 18 "SDG" 11 "LTA/LCA" 10 "Hands Off LTA" 4 "LDA" 1 "PCS" 0 "No Request";
 VAL_ 138 LONGITUDINAL_ALLOCATION_METHOD_UPPER 3 "Brake Only" 2 "Engine and Brake 2" 1 "Engine and Brake 1" 0 "Engine Only";
 VAL_ 138 LONGITUDINAL_ALLOCATION_METHOD_LOWER 3 "Brake Only" 2 "Engine and Brake 2" 1 "Engine and Brake 1" 0 "Engine Only";
@@ -176,6 +180,7 @@ CM_ SG_ 129 REQUEST_LOSS "Set ~90 ms after the last valid CONTROL_REQUEST, a cru
 CM_ SG_ 138 LATERAL_REQUEST_PINION_ANGLE "1024/17870 deg per count";
 CM_ SG_ 138 AUTHENTICATOR "Truncated 28-bit SecOC MAC";
 CM_ SG_ 138 LONGITUDINAL_REQUEST_ID_LOWER "33 and 34 are only seen during PCS braking";
+CM_ SG_ 636 CRUISE_MODE "Selected mode, independent of cruise-main and engagement. Zero observed during startup";
 CM_ SG_ 1454 FCW "PCS warning";
 CM_ BO_ 1911 "Requests to the EPS-resident SecOC signer. HEADER 0x80-0xB0 | sequence nibble: fragment 0-3 of a 28-byte CONTROL_REQUEST, 0x07: arm (DATA_1 0xC9A801) or release (0xC9A800) openpilot's CONTROL_REQUEST";
 CM_ BO_ 1961 "Signer response with the SecOC trailer for the CONTROL_REQUEST with this SIGNER_SEQUENCE";

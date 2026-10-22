@@ -17,6 +17,7 @@ CAMRY_COMMON = {
   0x116: bytes.fromhex("000000007b4b235a"),
   0x127: bytes.fromhex("00100000003e8d0b"),
   0x251: bytes.fromhex("c01015908030a080"),
+  0x27C: bytes.fromhex("91db10c040004000"),
   0x2E5: bytes.fromhex("0000154000000000"),
   0x3B7: bytes.fromhex("0000000020000008"),
   0x3F6: bytes.fromhex("81ea6e0480ba4808"),
@@ -28,7 +29,7 @@ CAMRY_COMMON = {
   0x620: bytes.fromhex("000000008000001a"),
   0x622: bytes.fromhex("0000000000730000"),
 }
-FRC_IDS = {0x08A, 0x251, 0x3F6, 0x412, 0x5AE}  # from the FRC on bus 2
+FRC_IDS = {0x08A, 0x251, 0x27C, 0x3F6, 0x412, 0x5AE}  # from the FRC on bus 2
 ANGLE_MAX = CarControllerParams.TSS3_ANGLE_LIMITS.STEER_ANGLE_MAX
 
 
