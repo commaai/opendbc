@@ -102,7 +102,7 @@ class CarState(CarStateBase):
     ret.rightBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 2
     ret.doorOpen = any(cp.vl["BODY_CONTROL_STATE"][door] for door in
                        ("DOOR_OPEN_FL", "DOOR_OPEN_FR", "DOOR_OPEN_RL", "DOOR_OPEN_RR"))
-    ret.seatbeltUnlatched = cp.vl["BODY_CONTROL_STATE"]["SEATBELT_DRIVER_UNLATCHED"] != 0
+    ret.seatbeltUnlatched = cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_UNLATCHED"] != 0
     ret.parkingBrake = cp.vl["BODY_CONTROL_STATE"]["PARKING_BRAKE"] == 1
     ret.brakeHoldActive = cp.vl["ESP_CONTROL"]["BRAKE_HOLD_ACTIVE"] == 1
     ret.espDisabled = cp.vl["ESP_CONTROL"]["TC_DISABLED"] != 0
@@ -142,6 +142,12 @@ class CarState(CarStateBase):
       3: ButtonType.accelCruise,
       4: ButtonType.mainCruise,
     })
+
+    prev_distance = self.pcm_follow_distance
+    self.pcm_follow_distance = cp_cam.vl["CRUISE_DISPLAY"]["SET_VEHICLE_INTERVAL_TIME"]
+    if 1 <= prev_distance <= 4 and 1 <= self.pcm_follow_distance <= 4 and prev_distance != self.pcm_follow_distance:
+      button_events.extend(create_button_events(1, 0, {1: ButtonType.gapAdjustCruise}) +
+                           create_button_events(0, 1, {1: ButtonType.gapAdjustCruise}))
 
     # LTA toggle: HUD mode 0x10 is off, 0x12/0x14 are available/active
     hud_mode = self.tss3_lkas_hud.get("LTA_MODE", 0)
@@ -341,6 +347,7 @@ class CarState(CarStateBase):
       ("ESP_CONTROL", 3),
       ("BLINKERS_STATE", 1),
       ("BODY_CONTROL_STATE", 3),
+      ("SEATBELT_STATUS", 3),
       ("BODY_CONTROL_STATE_2", 3),
       ("LIGHT_STALK", 1),
       ("SIGNER_RESPONSE", float('nan')),

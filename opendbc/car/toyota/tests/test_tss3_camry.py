@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 
+from opendbc.can import CANPacker
 from opendbc.car import Bus, CanData, structs
 from opendbc.car.toyota.interface import CarInterface
 from opendbc.car.toyota.values import CAR, CarControllerParams, ToyotaFlags, ToyotaSafetyFlags
@@ -16,6 +17,7 @@ CAMRY_COMMON = {
   0x116: bytes.fromhex("000000007b4b235a"),
   0x127: bytes.fromhex("00100000003e8d0b"),
   0x251: bytes.fromhex("c01015908030a080"),
+  0x2E5: bytes.fromhex("0000154000000000"),
   0x3B7: bytes.fromhex("0000000020000008"),
   0x3F6: bytes.fromhex("81ea6e0480ba4808"),
   0x412: bytes.fromhex("140c404401ee9307"),
@@ -91,6 +93,13 @@ class TestToyotaCamryTSS3(unittest.TestCase):
     self.assertEqual(state.gearShifter, structs.CarState.GearShifter.drive)
     self.assertTrue(state.cruiseState.available and state.cruiseState.enabled)
     self.assertFalse(state.carNotReady or state.steerFaultTemporary or state.steerFaultPermanent)
+
+  def test_seatbelt(self):
+    for payload, unlatched in (("0000154000000000", False), ("0000554000000000", True), ("0000154000000000", False)):
+      with self.subTest(unlatched=unlatched):
+        state = update_state(self.ci, x2E5=bytes.fromhex(payload))
+        self.assertTrue(state.canValid)
+        self.assertEqual(state.seatbeltUnlatched, unlatched)
 
   def test_delayed_hold_standstill(self):
     for alpha_long in (False, True):
@@ -251,6 +260,16 @@ class TestToyotaCamryTSS3(unittest.TestCase):
     state = update_state(self.ci, iterations=1, x412=bytes.fromhex("1000002200ee9307"))
     self.assertEqual([(e.type, e.pressed) for e in state.buttonEvents],
                      [(structs.CarState.ButtonEvent.Type.lkas, True), (structs.CarState.ButtonEvent.Type.lkas, False)])
+
+  def test_gap_button_events(self):
+    packer = CANPacker("toyota_tss3_pt_generated")
+    for gap, pressed in ((0, False), (1, False), (2, True), (2, False), (0, False), (3, False), (1, True), (7, False)):
+      with self.subTest(gap=gap, pressed=pressed):
+        _, data, _ = packer.make_can_msg("CRUISE_DISPLAY", 2, {"SET_VEHICLE_INTERVAL_TIME": gap})
+        state = update_state(self.ci, iterations=1, x251=data)
+        expected = [(structs.CarState.ButtonEvent.Type.gapAdjustCruise, True),
+                    (structs.CarState.ButtonEvent.Type.gapAdjustCruise, False)] if pressed else []
+        self.assertEqual([(e.type, e.pressed) for e in state.buttonEvents], expected)
 
 
 if __name__ == "__main__":
