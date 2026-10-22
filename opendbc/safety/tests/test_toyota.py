@@ -489,8 +489,8 @@ class Tss3SafetyHelpers:
     return self.safety.safety_tx_hook(self._control_request_msg(request))
 
 
-class TestToyotaTss3CamrySafety(Tss3SafetyHelpers, common.CarSafetyTest, common.AngleSteeringSafetyTest,
-                                common.LongitudinalAccelSafetyTest):
+class TestToyotaTss3Safety(Tss3SafetyHelpers, common.CarSafetyTest, common.AngleSteeringSafetyTest,
+                           common.LongitudinalAccelSafetyTest):
 
   DBC = TSS3_DBC
   SAFETY_MODEL = CarParams.SafetyModel.toyota
@@ -783,7 +783,7 @@ class TestToyotaTss3CamrySafety(Tss3SafetyHelpers, common.CarSafetyTest, common.
     return self.packer.make_can_msg_safety("CONTROL_REQUEST", 2, {"CRUISE_OPERATING_LATCH": enable})
 
 
-class TestToyotaTss3CamryStockLongitudinalSafety(Tss3SafetyHelpers, common.SafetyTestBase):
+class TestToyotaTss3SafetyStockLongitudinal(Tss3SafetyHelpers, common.SafetyTestBase):
 
   SAFETY_MODEL = CarParams.SafetyModel.toyota
   SAFETY_PARAM = EPS_SCALE[CAR.TOYOTA_CAMRY_TSS3] | ToyotaSafetyFlags.TSS3 | ToyotaSafetyFlags.STOCK_LONGITUDINAL
