@@ -135,12 +135,12 @@ def create_buttons(packer, stock_values: dict, cancel=False, lkas=False, bus=0):
 
 
 def create_lkas_hud(packer, counter: int, stock_lkas_hud: dict, hud_control, lat_active: bool, lks_on: bool = True):
-  # Own 0x316: wheel 2=steer / 1=idle / 0=LKS off. SET_ME_50=2 for steerRequired chime (not 3).
+  # Own 0x316: wheel 2=steer / 1=idle / 0=LKS off. STEER_TAKEOVER=2 for steerRequired (not 3).
   values = {**stock_lkas_hud, "COUNTER": counter}
   if not lks_on:
     values["LKAS_STATE"] = 0
     values["HANDS_ON_WHEEL_REQ"] = 0
-    values["SET_ME_50"] = 0
+    values["STEER_TAKEOVER"] = 0
     return packer.make_can_msg("LKAS_HUD_ADAS", 0, values)
 
   values["LKS_MODE"] = 2  # green lane line icon
@@ -156,6 +156,6 @@ def create_lkas_hud(packer, counter: int, stock_lkas_hud: dict, hud_control, lat
 
   take_control = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
   values["HANDS_ON_WHEEL_REQ"] = 1 if take_control else 0
-  values["SET_ME_50"] = 2 if hud_control.visualAlert == VisualAlert.steerRequired else 0
+  values["STEER_TAKEOVER"] = 2 if hud_control.visualAlert == VisualAlert.steerRequired else 0
 
   return packer.make_can_msg("LKAS_HUD_ADAS", 0, values)
