@@ -68,7 +68,7 @@ class TestBydLkasHud(unittest.TestCase):
     self.assertEqual(active["LKS_MODE"], 2)
 
   def test_active_preserves_unnamed_bits(self):
-    # Bits 2,3,8,9,32,33,50,51 are not in the original DBC. Without SET_ME_*
+    # Bits 2,3,8,9,32,33 stay with the camera. Without SET_ME_*
     # the packer writes zeros and the EC sees a different 0x316 than the camera.
     raw = bytearray([0xFF] * 7 + [0])
     raw[7] = (~sum(raw[:7])) & 0xFF
@@ -83,7 +83,7 @@ class TestBydLkasHud(unittest.TestCase):
     active = _decode_hud((_addr, dat, _bus))
     self.assertEqual(active["LKAS_STATE"], 2)
     self.assertEqual(active["HANDS_ON_WHEEL_REQ"], 0)
-    self.assertEqual(active["SET_ME_50"], 0)
+    self.assertEqual(active["STEER_TAKEOVER"], 0)
 
   def test_steer_required_sets_cluster_nag(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
@@ -91,7 +91,7 @@ class TestBydLkasHud(unittest.TestCase):
     hud.visualAlert = VisualAlert.steerRequired
     out = _decode_hud(bydcan.create_lkas_hud(packer, 3, {"LKAS_STATE": 0, "LKS_MODE": 0}, hud, True))
     self.assertEqual(out["HANDS_ON_WHEEL_REQ"], 1)
-    self.assertEqual(out["SET_ME_50"], 2)
+    self.assertEqual(out["STEER_TAKEOVER"], 2)
 
   def test_heartbeat_hud_is_standby_wheel(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
@@ -105,7 +105,7 @@ class TestBydLkasHud(unittest.TestCase):
     hud.visualAlert = VisualAlert.ldw
     out = _decode_hud(bydcan.create_lkas_hud(packer, 3, {"LKAS_STATE": 0, "LKS_MODE": 0}, hud, False))
     self.assertEqual(out["HANDS_ON_WHEEL_REQ"], 1)
-    self.assertEqual(out["SET_ME_50"], 0)
+    self.assertEqual(out["STEER_TAKEOVER"], 0)
 
   def test_lks_off_paints_icon_off(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
@@ -118,7 +118,7 @@ class TestBydLkasHud(unittest.TestCase):
     self.assertEqual(out["LEFT_LANE_STATE"], 1)
     self.assertEqual(out["RIGHT_LANE_STATE"], 1)
     self.assertEqual(out["HANDS_ON_WHEEL_REQ"], 0)
-    self.assertEqual(out["SET_ME_50"], 0)
+    self.assertEqual(out["STEER_TAKEOVER"], 0)
 
   def test_visible_lanes_green(self):
     packer = CANPacker(DBC[CAR.BYD_ATTO_3][Bus.pt])
