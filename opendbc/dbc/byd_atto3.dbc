@@ -126,7 +126,7 @@ BO_ 790 LKAS_HUD_ADAS: 8 MPC_CAM
  SG_ SET_ME_2 : 2|2@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_8 : 8|2@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_32 : 32|2@1+ (1,0) [0|3] "" XXX
- SG_ SET_ME_50 : 50|2@1+ (1,0) [0|3] "" XXX
+ SG_ STEER_TAKEOVER : 50|2@1+ (1,0) [0|3] "" MCU
  SG_ COUNTER : 52|4@1+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
@@ -244,7 +244,7 @@ CM_ SG_ 790 SET_ME_2 "Unnamed bits 2-3. Named so the packer keeps the camera val
 CM_ SG_ 790 SET_ME_8 "Unnamed bits 8-9. Named so the packer keeps the camera values.";
 CM_ SG_ 790 SET_ME_15 "Was HMA_ON_OFF. Always 0. Packer keeps camera values.";
 CM_ SG_ 790 SET_ME_32 "Unnamed bits 32-33. Named so the packer keeps the camera values.";
-CM_ SG_ 790 SET_ME_50 "Unnamed bits 50-51. Named so the packer keeps the camera values.";
+CM_ SG_ 790 STEER_TAKEOVER "Takeover nag on the hands-off timer. 1 please take over the wheel, 2 second stage, 3 final. Clearing hides the text and does not drop ACC.";
 CM_ BO_ 544 "HV drive state, 100 Hz. Byte 1 is the drive state, byte 3 tracks torque demand. Observe only.";
 CM_ SG_ 544 DRIVE_STATE "0x36 accelerating, 0x32 coasting, 0x22 braking/regen. 0x26/0x27 appear in between.";
 CM_ SG_ 544 MOTOR_CURRENT "Rises with power demand, falls to ~140 at zero. Scale not established.";
@@ -279,6 +279,7 @@ VAL_ 790 RIGHT_LANE_STATE 0 "OFF" 1 "GREEN" 2 "ORANGE";
 VAL_ 813 LEAD_SHADING 3 "GREEN" 2 "CLOSER" 1 "TOO_CLOSE";
 VAL_ 790 LKAS_STATE 2 "ACTIVE" 1 "OFF";
 VAL_ 790 LDSW_TYPE 0 "VIBRATE" 1 "SOUND" 2 "ALL";
+VAL_ 790 STEER_TAKEOVER 0 "OFF" 1 "TAKE_OVER" 2 "SECOND" 3 "FINAL";
 VAL_ 803 CHARGE_STATE 0 "IDLE" 2 "PREPARING" 3 "CHARGING" 4 "FINISHING";
 VAL_ 813 SET_DISTANCE 4 "4bar" 3 "3bar" 2 "2bar" 1 "1bar";
 VAL_ 813 ACC_STATE 0 "OFF" 2 "ACC_ON" 3 "ACC_ACTIVE" 5 "FORCE_ACCEL" 7 "ERROR";
