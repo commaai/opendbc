@@ -64,4 +64,10 @@ void ignition_can_hook(const CANPacket_t *msg) {
     }
     prev_counter_vw_meb = counter;
   }
+
+  // BYD Atto 3: POWER_VCC 0x055 d[4] 0x82=on 0x80=off.
+  if (msg_matches(msg, 0x055U, 0U, 8U)) {
+    ignition_can = (msg->data[4] == 0x82U);
+    ignition_can_cnt = 0U;
+  }
 }
