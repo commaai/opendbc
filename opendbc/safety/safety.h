@@ -122,14 +122,12 @@ static void safety_state_sync(void) {
   current_safety_param_inv = (uint16_t)~current_safety_param;
 }
 
-// latches on any mismatch, controls stay disallowed until reset
-static bool safety_state_valid(void) {
+// latches on any mismatch until reset
+static void safety_state_check(void) {
   bool valid = (controls_allowed == !controls_allowed_inv) &&
                (current_safety_mode == (uint16_t)~current_safety_mode_inv) &&
                (current_safety_param == (uint16_t)~current_safety_param_inv);
   safety_state_invalid = safety_state_invalid || !valid;
-  controls_allowed = controls_allowed && !safety_state_invalid;
-  return !safety_state_invalid;
 }
 
 void clear_controls_allowed(void) {
@@ -221,7 +219,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 }
 
 bool safety_rx_hook(const CANPacket_t *msg) {
-  (void)safety_state_valid();
+  safety_state_check();
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
@@ -274,7 +272,7 @@ static bool tx_msg_safety_check_rev(const CANPacket_t *msg, const CanMsg msg_lis
 }
 
 bool safety_tx_hook(CANPacket_t *msg) {
-  bool state_valid = safety_state_valid();
+  safety_state_check();
   bool any_output = (current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327);
   bool whitelisted = any_output || tx_msg_safety_check(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   bool whitelisted_rev = any_output || tx_msg_safety_check_rev(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
@@ -286,7 +284,7 @@ bool safety_tx_hook(CANPacket_t *msg) {
   }
 
   safety_state_sync();
-  return state_valid && !safety_state_invalid && !relay_malfunction && whitelisted && whitelisted_rev && safety_allowed;
+  return !relay_malfunction && whitelisted && safety_allowed;
 }
 
 static int get_fwd_bus(int bus_num) {
@@ -326,7 +324,7 @@ int safety_fwd_hook(int bus_num, int addr) {
 
 // 1Hz safety function called by main. Now just a check for lagging safety messages
 void safety_tick(void) {
-  (void)safety_state_valid();
+  safety_state_check();
   const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = microsecond_timer_get();

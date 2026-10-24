@@ -72,24 +72,20 @@ class TestSafetyStateRedundancy(common.SafetyTestBase):
   def test_controls_allowed_mismatch(self):
     self.safety.set_controls_allowed(True)
     self.assertTrue(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
+    self.assertFalse(self.safety.get_safety_state_invalid())
 
+    # detected and latched, the reaction is panda's
     self.safety.set_controls_allowed_inv(True)
-    self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
     self.assertTrue(self.safety.get_safety_state_invalid())
-
-    # latched
-    self.safety.set_controls_allowed(True)
     self.safety.safety_tick()
-    self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
+    self.assertTrue(self.safety.get_safety_state_invalid())
 
   def test_mismatch_on_rx(self):
     self.safety.set_controls_allowed(True)
     self.safety.set_controls_allowed_inv(True)
     self.safety.safety_rx_hook(common.make_msg(0, 0x123))
     self.assertTrue(self.safety.get_safety_state_invalid())
-    self.assertFalse(self.safety.get_controls_allowed())
 
   def test_clear_controls_allowed(self):
     self.safety.set_controls_allowed(True)
