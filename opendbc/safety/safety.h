@@ -122,7 +122,6 @@ static void safety_state_sync(void) {
   current_safety_param_inv = (uint16_t)~current_safety_param;
 }
 
-// latches on any mismatch until reset
 static void safety_state_check(void) {
   bool valid = (controls_allowed == !controls_allowed_inv) &&
                (current_safety_mode == (uint16_t)~current_safety_mode_inv) &&
