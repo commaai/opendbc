@@ -32,15 +32,11 @@ bool safety_config_valid() {
 
 void set_controls_allowed(bool c){
   controls_allowed = c;
-  safety_state_sync();
+  controls_allowed_inv = !c;
 }
 
 void set_controls_allowed_inv(bool c){
   controls_allowed_inv = c;
-}
-
-bool get_safety_state_invalid(void){
-  return safety_state_invalid;
 }
 
 void set_alternative_experience(int mode){
@@ -61,6 +57,10 @@ bool get_ignition_can(void){
 
 bool get_relay_malfunction(void){
   return relay_malfunction;
+}
+
+bool get_safety_state_invalid(void){
+  return safety_state_invalid;
 }
 
 bool get_gas_pressed_prev(void){

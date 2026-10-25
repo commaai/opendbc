@@ -71,6 +71,7 @@ bool vehicle_moving = false;
 bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
 bool safety_rx_checks_invalid = false;
+bool safety_state_invalid = false;
 
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
@@ -108,7 +109,7 @@ uint16_t current_safety_param = 0;
 static bool controls_allowed_inv = true;
 static uint16_t current_safety_mode_inv = 0xFFFFU;  // ~SAFETY_SILENT
 static uint16_t current_safety_param_inv = 0xFFFFU;
-bool safety_state_invalid = false;
+
 static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
 RxStatus rx_status[MAX_RX_CHECKS];  // dynamic state of current_safety_config.rx_checks
@@ -126,7 +127,9 @@ static void safety_state_check(void) {
   bool valid = (controls_allowed == !controls_allowed_inv) &&
                (current_safety_mode == (uint16_t)~current_safety_mode_inv) &&
                (current_safety_param == (uint16_t)~current_safety_param_inv);
-  safety_state_invalid = safety_state_invalid || !valid;
+  if (!valid) {
+    safety_state_invalid = true;
+  }
 }
 
 void clear_controls_allowed(void) {
@@ -261,21 +264,26 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
   return whitelisted;
 }
 
-// same check as tx_msg_safety_check through a different path
+// whitelist lookup again in reverse, UM2331 CPU_SM_2
 static bool tx_msg_safety_check_rev(const CANPacket_t *msg, const CanMsg msg_list[], int len) {
   bool whitelisted = false;
-  for (int i = len - 1; (i >= 0) && !whitelisted; i--) {
-    whitelisted = msg_matches(msg, msg_list[i].addr, msg_list[i].bus, msg_list[i].len);
+  for (int i = len - 1; i >= 0; i--) {
+    if (msg_matches(msg, msg_list[i].addr, msg_list[i].bus, msg_list[i].len)) {
+      whitelisted = true;
+      break;
+    }
   }
   return whitelisted;
 }
 
 bool safety_tx_hook(CANPacket_t *msg) {
   safety_state_check();
-  bool any_output = (current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327);
-  bool whitelisted = any_output || tx_msg_safety_check(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
-  bool whitelisted_rev = any_output || tx_msg_safety_check_rev(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool whitelisted = tx_msg_safety_check(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool whitelisted_rev = tx_msg_safety_check_rev(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   safety_state_invalid = safety_state_invalid || (whitelisted != whitelisted_rev);
+  if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
+    whitelisted = true;
+  }
 
   bool safety_allowed = false;
   if (whitelisted) {
