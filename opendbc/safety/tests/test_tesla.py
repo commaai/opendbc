@@ -55,6 +55,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
   def setUp(self):
     super().setUp()
+    self.assertTrue(self._rx(self._pcm_status_msg(False)))
     self.VM = VehicleModel(get_safety_CP())
     self.define = CANDefine(self.DBC)
     self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
@@ -147,7 +148,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           elif msg_type == "speed_2":
             msg[0].data[7] = 0
 
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         self.assertEqual(should_rx, self._rx(msg))
         self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
@@ -174,7 +175,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
         # Set controls allowed in between rx since first message can reset it
         self.assertTrue(self._rx(self._speed_msg(speed)))
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         self.assertTrue(self._rx(self._speed_msg_2(speed_2)))
 
         within_delta = speeds_within_delta(speed, speed_2)
@@ -182,7 +183,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
     # Test ESP_B quality flag
     for quality_flag in (True, False):
-      self.safety.set_controls_allowed(True)
+      self._set_controls_allowed(True)
       self.assertTrue(self._rx(self._speed_msg(0)))
       self.assertEqual(quality_flag, self._rx(self._speed_msg_2(0, quality_flag=quality_flag)))
       self.assertEqual(quality_flag, self.safety.get_controls_allowed())
@@ -198,7 +199,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     for hands_on_level in range(4):
       for eac_status in range(8):
         for eac_error_code in range(16):
-          self.safety.set_controls_allowed(True)
+          self._set_controls_allowed(True)
 
           should_disengage = hands_on_level >= 3 or (eac_status == 0 and eac_error_code == 9)
           self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=hands_on_level, eac_status=eac_status,
@@ -252,7 +253,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
   def test_steering_control_type(self):
     # Only angle control is allowed (no LANE_KEEP_ASSIST, EMERGENCY_LANE_KEEP, or FSD)
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
     for steer_control_type in range(8):
       should_tx = steer_control_type in (self.steer_control_types["NONE"],
                                          self.steer_control_types["ANGLE_CONTROL"])
@@ -286,7 +287,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
       for sign in (-1, 1):
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
 
         # angle signal can't represent 0, so it biases one unit down
@@ -295,7 +296,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         # at limit (safety tolerance adds 1)
         max_angle = round_angle(get_max_angle_vm(speed, self.VM, CarControllerParams), angle_unit_offset + 1) * sign
         max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-        self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
+        self._set_prev_desired_angle(max_angle)
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
@@ -314,7 +315,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
       for sign in (-1, 1):  # (-1, 1):
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
         self._tx(self._angle_cmd_msg(0, True))
 
@@ -338,7 +339,8 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
-        self.safety.set_desired_angle_last(round(max_angle_delta * self.DEG_TO_CAN))
+        self._set_prev_desired_angle(max_angle_delta)
+        self._reset_angle_measurement(0)
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Down
@@ -354,7 +356,7 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 
   def test_cancel(self):
     for acc_state in range(16):
-      self.safety.set_controls_allowed(True)
+      self._set_controls_allowed(True)
       should_tx = acc_state == self.acc_states["ACC_CANCEL_GENERIC_SILENT"]
       self.assertFalse(self._tx(self._long_control_msg(0, acc_state=acc_state, accel_limits=(self.MIN_ACCEL, self.MAX_ACCEL))))
       self.assertEqual(should_tx, self._tx(self._long_control_msg(0, acc_state=acc_state)))
@@ -410,7 +412,7 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
 
   def test_prevent_reverse(self):
     # Note: Tesla can reverse while at a standstill if both accel_min and accel_max are negative.
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
 
     # accel_min and accel_max are positive
     self.assertTrue(self._tx(self._long_control_msg(set_speed=10, accel_limits=(1.1, 0.8))))

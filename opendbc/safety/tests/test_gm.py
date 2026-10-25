@@ -26,6 +26,13 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
 
   PCM_CRUISE = False  # openpilot can control the PCM state if longitudinal
 
+  def _engage(self):
+    self.assertTrue(self._rx(self._button_msg(Buttons.UNPRESS)))
+    self.assertTrue(self._rx(self._button_msg(Buttons.RES_ACCEL)))
+
+  def _disengage(self):
+    self.assertTrue(self._rx(self._button_msg(Buttons.CANCEL)))
+
   def _send_brake_msg(self, brake):
     values = {"FrictionBrakeCmd": -brake}
     return self.packer_chassis.make_can_msg_safety("EBCMFrictionBrakeCmd", self.BRAKE_BUS, values)
@@ -55,7 +62,9 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
       for btn_cur in range(8):
         with self.subTest(btn_prev=btn_prev, btn_cur=btn_cur):
           self._rx(self._button_msg(btn_prev))
-          self.safety.set_controls_allowed(0)
+          # A pedal edge disables without changing the button history under test.
+          self._rx(self._user_brake_msg(True))
+          self._rx(self._user_brake_msg(False))
           for _ in range(10):
             self._rx(self._button_msg(btn_cur))
 
@@ -65,7 +74,7 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
           self.assertEqual(should_enable, self.safety.get_controls_allowed())
 
   def test_cancel_button(self):
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
@@ -97,7 +106,8 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
 
   def _pcm_status_msg(self, enable):
     if self.PCM_CRUISE:
-      values = {"CruiseState": enable}
+      self._cruise_on = enable
+      values = {"CruiseState": enable, "AcceleratorPedal2": getattr(self, "_gas_pressed", False)}
       return self.packer.make_can_msg_safety("AcceleratorPedal2", 0, values)
     else:
       raise NotImplementedError
@@ -112,10 +122,11 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     return self.packer.make_can_msg_safety("ECMAcceleratorPos", 0, values)
 
   def _user_gas_msg(self, gas):
+    self._gas_pressed = gas
     values = {"AcceleratorPedal2": 1 if gas else 0}
     if self.PCM_CRUISE:
       # Fill CruiseState with expected value if the safety mode reads cruise state from gas msg
-      values["CruiseState"] = self.safety.get_controls_allowed()
+      values["CruiseState"] = getattr(self, "_cruise_on", False)
     return self.packer.make_can_msg_safety("AcceleratorPedal2", 0, values)
 
   def _torque_driver_msg(self, torque):
@@ -181,13 +192,14 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
 
   def test_buttons(self):
     # Only CANCEL button is allowed while cruise is enabled
-    self.safety.set_controls_allowed(0)
+    self._set_controls_allowed(0)
     for btn in range(8):
       self.assertFalse(self._tx(self._button_msg(btn)))
 
-    self.safety.set_controls_allowed(1)
+    # PCM engagement also enables cruise, so CANCEL is permitted in this reachable state.
+    self._set_controls_allowed(1)
     for btn in range(8):
-      self.assertFalse(self._tx(self._button_msg(btn)))
+      self.assertEqual(btn == Buttons.CANCEL, self._tx(self._button_msg(btn)))
 
     for enabled in (True, False):
       self._rx(self._pcm_status_msg(enabled))

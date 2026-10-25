@@ -67,12 +67,12 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
 
   def test_buttons(self):
     # only cancel allows while controls not allowed
-    self.safety.set_controls_allowed(0)
+    self._set_controls_allowed(False)
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertFalse(self._tx(self._button_msg(resume=True)))
 
     # do not block resume if we are engaged already
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(True)
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 

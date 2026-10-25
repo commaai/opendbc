@@ -30,6 +30,7 @@ bool safety_config_valid() {
   return true;
 }
 
+// Retained for opendbc/car/tests/test_models.py; safety tests drive state through CAN.
 void set_controls_allowed(bool c){
   controls_allowed = c;
 }
@@ -38,6 +39,7 @@ void set_alternative_experience(int mode){
   alternative_experience = mode;
 }
 
+// Retained for opendbc/car/tests/test_models.py.
 void set_relay_malfunction(bool c){
   relay_malfunction = c;
 }
@@ -58,10 +60,6 @@ bool get_gas_pressed_prev(void){
   return gas_pressed_prev;
 }
 
-void set_gas_pressed_prev(bool c){
-  gas_pressed_prev = c;
-}
-
 bool get_brake_pressed_prev(void){
   return brake_pressed_prev;
 }
@@ -78,6 +76,7 @@ bool get_cruise_engaged_prev(void){
   return cruise_engaged_prev;
 }
 
+// Retained for opendbc/car/tests/test_models.py.
 void set_cruise_engaged_prev(bool engaged){
   cruise_engaged_prev = engaged;
 }
@@ -110,9 +109,8 @@ void set_timer(uint32_t t){
   timer_cnt = t;
 }
 
-void set_torque_meas(int min, int max){
-  torque_meas.min = min;
-  torque_meas.max = max;
+uint32_t get_timer(void){
+  return timer_cnt;
 }
 
 int get_torque_meas_min(void){
@@ -123,34 +121,12 @@ int get_torque_meas_max(void){
   return torque_meas.max;
 }
 
-void set_torque_driver(int min, int max){
-  torque_driver.min = min;
-  torque_driver.max = max;
-}
-
 int get_torque_driver_min(void){
   return torque_driver.min;
 }
 
 int get_torque_driver_max(void){
   return torque_driver.max;
-}
-
-void set_rt_torque_last(int t){
-  rt_torque_last = t;
-}
-
-void set_desired_torque_last(int t){
-  desired_torque_last = t;
-}
-
-void set_desired_angle_last(int t){
-  desired_angle_last = t;
-}
-
-void set_angle_meas(int min, int max){
-  angle_meas.min = min;
-  angle_meas.max = max;
 }
 
 int get_angle_meas_min(void){
@@ -161,17 +137,8 @@ int get_angle_meas_max(void){
   return angle_meas.max;
 }
 
-void set_desired_curvature_last(int t){
-  curvature_state.desired_last = t;
-}
-
 int get_desired_curvature_last(void){
   return curvature_state.desired_last;
-}
-
-void set_curvature_meas(int min, int max){
-  curvature_state.meas.min = min;
-  curvature_state.meas.max = max;
 }
 
 int get_curvature_meas_min(void){
@@ -185,28 +152,15 @@ int get_curvature_meas_max(void){
 
 // ***** car specific helpers *****
 
-void set_honda_alt_brake_msg(bool c){
-  honda_alt_brake_msg = c;
-}
-
-void set_honda_fwd_brake(bool c){
-  honda_fwd_brake = c;
-}
-
 bool get_honda_fwd_brake(void){
   return honda_fwd_brake;
 }
 
 void init_tests(void){
-  safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
+  // Firmware lifecycle input: the relay transition grace period has elapsed.
+  safety_mode_cnt = 2U;
   alternative_experience = 0;
   set_timer(0);
-  ts_steer_req_mismatch_last = 0;
-  valid_steer_req_count = 0;
-  invalid_steer_req_count = 0;
-
-  // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
-  tesla_autopark = false;
 
   ignition_can = false;
   ignition_can_cnt = 0U;

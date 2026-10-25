@@ -91,18 +91,18 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   def test_spam_cancel_safety_check(self):
-    self.safety.set_controls_allowed(0)
+    self._set_controls_allowed(0)
     self.assertTrue(self._tx(self._ls_01_msg(cancel=1)))
     self.assertFalse(self._tx(self._ls_01_msg(resume=1)))
     self.assertFalse(self._tx(self._ls_01_msg(_set=1)))
     # do not block resume if we are engaged already
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self.assertTrue(self._tx(self._ls_01_msg(resume=1)))
 
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False))
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
