@@ -36,7 +36,7 @@ def device_step(remote=False):
   ]
   if remote:
     body.insert(0, "Route the long OBD-C cable from the harness box to the windshield. Keep it clear of pedals, moving parts, and airbag deployment paths.")
-  return step("device", "Plug in OBD-C and mount the device", body, "device")
+  return step("device", "Plug in OBD-C and mount the device", body, "device-remote" if remote else "device")
 
 
 def camera_steps():
@@ -203,10 +203,12 @@ def get_setup_guide(car: CarDocs | None = None) -> dict:
     ], "Autopilot computer", "glovebox")
     guide["power"] = "included"
   elif harness in (CarHarness.rivian_a, CarHarness.rivian_b):
-    refs = [source("Rivian installation", WIKI + "Rivian")]
+    refs = [source("Rivian installation", WIKI + "Rivian"),
+            source("Rivian Gen 1 preparation and installation",
+                   "https://docs.google.com/document/d/1clodGRssTx-dSPSUrQITq_vqumgWcpSUw83zdcAZR-A/edit")]
     remote = ("AXM in the passenger footwell", [
-      "Remove the passenger footwell trim to reach the AXM driver-assistance module.",
-      "Follow the Rivian installation reference to prepare the vehicle and identify the connector before unplugging it.",
+      "Before removing trim or unplugging the module, follow the vehicle sleep procedure in the Rivian Gen 1 preparation reference.",
+      "Remove the passenger footwell trim to reach the AXM driver-assistance module and identify its connector using the reference photos.",
     ], "AXM", "footwell")
   elif harness == CarHarness.gmsdgm:
     refs = [source("GM installation", WIKI + "GM")]
@@ -217,6 +219,10 @@ def get_setup_guide(car: CarDocs | None = None) -> dict:
 
   if remote:
     guide["steps"] = remote_steps(*remote, refs)
+    if harness == CarHarness.vw_j533:
+      guide["steps"][0]["body"].insert(0, "Turn the vehicle off before disconnecting the gateway.")
+      guide["steps"][1]["body"].insert(0,
+        "Plug the harness's integrated RJ45 lead into the harness box if disconnected. Check that the harness connector is seated in the box too.")
     guide["summary"] = f"Your {harness.value.name} connects at the {remote[2]}. Follow the vehicle-specific steps below."
   guide["sources"] = [SETUP, *refs]
   if guide.get("video") and not any(s["url"] == guide["video"] for s in guide["sources"]):

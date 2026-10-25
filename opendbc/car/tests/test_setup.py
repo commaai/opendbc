@@ -34,6 +34,7 @@ class TestSetupGuides(unittest.TestCase):
           guide = self.guides[car.name]
           self.assertFalse(any(s["media"].startswith("camera-") for s in guide["steps"]))
           self.assertIn("long OBD-C cable", " ".join(guide["steps"][3]["body"]))
+          self.assertEqual(guide["steps"][3]["media"], "device-remote")
 
   def test_model_locations(self):
     cases = {"Ford F-150 2021-23": "footwell", "Ford Mustang Mach-E 2021-24": "cargo",
