@@ -4,8 +4,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
-from opendbc.car.nissan.setup import configure_setup
+from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column, WIKI, source, apply_remote_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -45,7 +44,35 @@ class NissanCarDocs(CarDocs):
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.SETUP])
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    refs = [source(f"{self.make} installation reference", WIKI + 'nissan')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    harness = next(p for p in self.car_parts.all_parts() if isinstance(p, CarHarness))
+    remote = None
+    if harness in (CarHarness.nissan_a, CarHarness.nissan_b):
+      refs = [source("Nissan ADAS installation locations", WIKI + "nissan")]
+      if self.model.startswith("Leaf"):
+        remote = ("ADAS module behind the glovebox", [
+          "Remove the glovebox to look for the ADAS module above it.",
+          "Some Leaf variants place the module behind the instrument cluster instead. " +
+          "Check the reference photos: other nearby connectors also fit the harness.",
+        ], "ADAS module", "glovebox")
+      elif self.model.startswith("Altima"):
+        remote = ("ADAS module behind the glovebox", [
+          "Look for the ADAS module behind the glovebox on the right side.",
+          "Use the Nissan reference photos to identify the ADAS module before disconnecting its wiring.",
+        ], "ADAS module", "glovebox")
+      elif self.model.startswith("Rogue"):
+        remote = ("ADAS module in the cargo area", [
+          "Lift the luggage floor cover to expose the spare-tire area and locate the ADAS module.",
+          "Check that your cable reaches the windshield before routing it behind trim.",
+        ], "ADAS module", "cargo")
+      else:
+        remote = ("ADAS module", ["Locate the ADAS module using the Nissan installation reference for your model and market.",
+                                    "The Nissan harness connects to this separate module, not the windshield camera."], "ADAS module", "module")
+    if remote:
+      apply_remote_setup(guide, harness, *remote, refs)
 
 
 @dataclass(frozen=True)

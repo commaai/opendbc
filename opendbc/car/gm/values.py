@@ -3,8 +3,7 @@ from enum import Enum, IntFlag
 
 from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
-from opendbc.car.gm.setup import configure_setup
+from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column, WIKI, source, step, apply_remote_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -92,7 +91,24 @@ class GMCarDocs(CarDocs):
       self.car_parts = CarParts.common([CarHarness.obd_ii])
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    refs = [source(f"{self.make} installation reference", WIKI + 'GM')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Remove the cover behind the rearview mirror to expose the front camera connector.',
+      'Leave the camera mounted to the windshield.',
+    ], "camera-access", refs)
+    harness = next(p for p in self.car_parts.all_parts() if isinstance(p, CarHarness))
+    remote = None
+    if harness == CarHarness.gmsdgm:
+      refs = [source("GM installation", WIKI + "GM")]
+      remote = ("serial data gateway", [
+        "Locate the serial data gateway using the installation reference for your vehicle and remove the surrounding trim.",
+        "The GM SDGM harness connects at this gateway rather than the windshield camera.",
+      ], "serial data gateway", "footwell")
+    if remote:
+      apply_remote_setup(guide, harness, *remote, refs)
 
 
 @dataclass(frozen=True, kw_only=True)

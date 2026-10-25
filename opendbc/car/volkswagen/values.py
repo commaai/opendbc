@@ -6,8 +6,7 @@ from opendbc.car import Bus, CanBusBase, CarSpecs, DbcDict, PlatformConfig, Plat
 from opendbc.car.lateral import CurvatureSteeringLimits
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.volkswagen.setup import configure_setup
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, WIKI, source, apply_remote_setup
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 from opendbc.car.vin import Vin
 
@@ -319,7 +318,37 @@ class VWCarDocs(CarDocs):
       self.min_steer_speed = 0
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    refs = [source(f"{self.make} installation reference", WIKI + 'volkswagen')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    harness = next(p for p in self.car_parts.all_parts() if isinstance(p, CarHarness))
+    remote = None
+    if harness in (CarHarness.vw_j533, CarHarness.vw_meb):
+      refs = [source("Volkswagen gateway installation", "https://docs.howtocomma.com/docs/j533-harness-install")]
+      if harness == CarHarness.vw_meb:
+        refs = [source("Volkswagen MEB installation", WIKI + "Volkswagen")]
+        remote = ("MEB gateway", [
+          "Locate the MEB gateway using the installation reference for your vehicle before removing trim.",
+          "Use your VW MEB connector at the gateway. The J533 connector is a different harness.",
+        ], "MEB gateway", "module")
+      elif self.model.startswith(("Caravelle", "California")):
+        remote = ("gateway behind the instrument cluster", [
+          "Remove the instrument-cluster trim to reach the J533 gateway behind the cluster.",
+          "Use the gateway reference to identify the module before unplugging its connector.",
+        ], "J533 gateway", "cluster")
+      else:
+        remote = ("gateway under the dashboard", [
+          "Remove the lower dashboard trim in the driver's footwell to reach the gateway.",
+          "Identify the gateway and release its connector locking mechanism before unplugging it.",
+        ], "gateway", "footwell")
+      guide["power"] = "included"
+    if remote:
+      apply_remote_setup(guide, harness, *remote, refs)
+      if harness == CarHarness.vw_j533:
+        guide["steps"][0]["body"].insert(0, "Turn the vehicle off before disconnecting the gateway.")
+        guide["steps"][1]["body"].insert(0,
+          "Plug the harness's integrated RJ45 lead into the harness box if disconnected. Check that the harness connector is seated in the box too.")
 
 
 # Check the 7th and 8th characters of the VIN before adding a new CAR. If the

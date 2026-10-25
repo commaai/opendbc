@@ -3,8 +3,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.lateral import AngleSteeringLimitsVM
 from opendbc.car.structs import CarParams, CarState
-from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
-from opendbc.car.tesla.setup import configure_setup
+from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column, WIKI, source, apply_remote_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -23,6 +22,25 @@ class Footnote(Enum):
     Column.MAKE, setup_note=True)
 
 
+def _configure_setup(car, guide):
+  refs = [source(f"{car.make} installation reference", WIKI + 'tesla')]
+  if car.setup_video:
+    refs.append(source("Vehicle installation video", car.setup_video))
+  guide["sources"][1:] = refs
+  harness = next(p for p in car.car_parts.all_parts() if isinstance(p, CarHarness))
+  remote = None
+  if harness in (CarHarness.tesla_a, CarHarness.tesla_b):
+    refs = [source("Tesla HW3 / HW4 installation", "https://wiki.xnor.shop/docs/tesla/hw3-hw4/")]
+    remote = ("Autopilot computer behind the glovebox", [
+      "Follow the Tesla reference to power down the vehicle before disconnecting the Autopilot computer.",
+      "Remove the passenger footwell trim to reach the Autopilot computer behind the glovebox.",
+      "Use the Tesla connector supplied for the hardware generation in your selected vehicle.",
+    ], "Autopilot computer", "glovebox")
+    guide["power"] = "included"
+  if remote:
+    apply_remote_setup(guide, harness, *remote, refs)
+
+
 @dataclass
 class TeslaCarDocsHW3(CarDocs):
   package: str = "All"
@@ -30,7 +48,7 @@ class TeslaCarDocsHW3(CarDocs):
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE, Footnote.SETUP])
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    _configure_setup(self, guide)
 
 
 @dataclass
@@ -40,7 +58,7 @@ class TeslaCarDocsHW4(CarDocs):
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE, Footnote.SETUP])
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    _configure_setup(self, guide)
 
 
 @dataclass

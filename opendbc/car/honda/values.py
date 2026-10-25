@@ -3,8 +3,7 @@ from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.honda.setup import configure_setup
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, WIKI, source, step
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
 Ecu = structs.CarParams.Ecu
@@ -127,7 +126,14 @@ class HondaCarDocs(CarDocs):
       self.footnotes.append(Footnote.HONDA_ALPHALONG)
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    refs = [source(f"{self.make} installation reference", WIKI + 'Honda-Acura')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Release the plastic cover behind the rearview mirror to reach the driver-assistance camera.',
+      "Release the cover's clips carefully; leave the camera attached to the windshield.",
+    ], "camera-access", refs)
 
 class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(

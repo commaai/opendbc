@@ -5,8 +5,7 @@ from enum import IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.hyundai.setup import configure_setup
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, WIKI, source, step
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
@@ -156,7 +155,14 @@ class HyundaiCarDocs(CarDocs):
   package: str = "Smart Cruise Control (SCC)"
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    refs = [source(f"{self.make} installation reference", WIKI + 'Hyundai-Kia-Genesis')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Remove the cover behind the rearview mirror to expose the forward-facing camera connector.',
+      'Use the harness selected for your vehicle; HDA II and other camera systems use different connectors.',
+    ], "camera-access", refs)
 
 
 @dataclass

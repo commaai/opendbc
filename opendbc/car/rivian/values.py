@@ -2,8 +2,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.rivian.setup import configure_setup
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, WIKI, source, apply_remote_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 from opendbc.car.vin import Vin
 
@@ -31,7 +30,22 @@ class RivianCarDocs(CarDocs):
   package: str = "All"
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    refs = [source(f"{self.make} installation reference", WIKI + 'rivian')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    harness = next(p for p in self.car_parts.all_parts() if isinstance(p, CarHarness))
+    remote = None
+    if harness in (CarHarness.rivian_a, CarHarness.rivian_b):
+      refs = [source("Rivian installation", WIKI + "Rivian"),
+              source("Rivian Gen 1 preparation and installation",
+                     "https://docs.google.com/document/d/1clodGRssTx-dSPSUrQITq_vqumgWcpSUw83zdcAZR-A/edit")]
+      remote = ("AXM in the passenger footwell", [
+        "Before removing trim or unplugging the module, follow the vehicle sleep procedure in the Rivian Gen 1 preparation reference.",
+        "Remove the passenger footwell trim to reach the AXM driver-assistance module and identify its connector using the reference photos.",
+      ], "AXM", "footwell")
+    if remote:
+      apply_remote_setup(guide, harness, *remote, refs)
 
 
 @dataclass

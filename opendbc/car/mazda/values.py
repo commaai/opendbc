@@ -3,8 +3,7 @@ from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.mazda.setup import configure_setup
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, WIKI, source, step
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -33,7 +32,14 @@ class MazdaCarDocs(CarDocs):
   requires_comma_power: bool = True
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    refs = [source(f"{self.make} installation reference", WIKI + 'Mazda')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Separate the cover around the rearview mirror to expose the forward-facing camera connector.',
+      'This installation also needs comma power, connected in the power step below.',
+    ], "camera-access", refs)
 
 
 class Footnote(Enum):

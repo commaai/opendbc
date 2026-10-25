@@ -3,8 +3,7 @@ from dataclasses import dataclass, field
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.chrysler.setup import configure_setup
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, WIKI, source, step
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
@@ -27,7 +26,14 @@ class ChryslerCarDocs(CarDocs):
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.fca]))
 
   def init_setup(self, guide):
-    configure_setup(self, guide)
+    refs = [source(f"{self.make} installation reference", WIKI + 'FCA')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Remove the cover behind the rearview mirror to reach the driver-assistance camera.',
+      'Leave the camera and mirror attached while you install the harness.',
+    ], "camera-access", refs)
 
 
 @dataclass
