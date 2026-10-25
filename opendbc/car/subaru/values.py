@@ -106,23 +106,59 @@ class SubaruCarDocs(CarDocs):
       self.footnotes.append(Footnote.EXP_LONG)
 
   def init_setup(self, guide):
-    refs = [source(f"{self.make} installation reference", WIKI + 'Subaru')]
+    refs = [
+      source(f"{self.make} installation reference", WIKI + 'Subaru'),
+      source("Subaru EyeSight precautions", "https://techinfo.subaru.com/stis/doc/ownerManual/MSA5B1913A_STIS.pdf"),
+    ]
+    access = [
+      "Check the cover removal procedure for your model year before pulling on the overhead EyeSight cover. " +
+      "Remove its retaining bolts before releasing the clips and hooks; their locations vary by cover.",
+      "Use a plastic trim tool and the listed 8 mm deep socket. Leave the camera assembly installed. " +
+      "Do not touch or attempt to clean the EyeSight lenses; keep tools and loose wiring away from them.",
+    ]
+    if self.name in ("Subaru Impreza 2017-19", "Subaru Crosstrek 2018-19"):
+      refs.append(source("2019 Impreza/Crosstrek cover access (pages 22–23)",
+                         "https://www.subaru.ca/content/7907/media/en-ca/accessory/installation-guide/H501SSG203_ENG.pdf"))
+      access.append("For the 2019 Impreza and Crosstrek: remove the retaining-bolt access panel with a plastic trim tool, " +
+                    "then remove the two 8 mm bolts with a ratchet and extension. Release the front retaining tab before " +
+                    "pulling the cover down and releasing its four clips. See the illustrated reference for the tab location.")
+    if self.name == "Subaru Forester 2019-21":
+      refs.append(source("2019 Forester cover removal and installation",
+                         "https://static.nhtsa.gov/odi/tsbs/2019/MC-10162999-9999.pdf"))
+      access.append("For the 2019 Forester: remove the two bolts by the map lights. Lower the rear edge only enough to " +
+                    "release the rear clips, release the side clips with a plastic trim tool, then slide the cover forward " +
+                    "to release the front hooks. Pulling the cover down too far can break the hooks.")
     if self.setup_video:
       refs.append(source("Vehicle installation video", self.setup_video))
     guide["sources"][1:] = refs
     steps = guide["steps"]
-    steps[0] = step("access", "Remove the EyeSight cover", [
-      "Remove the overhead EyeSight cover to reach its wiring connector. Use a trim tool and the socket listed in your parts.",
-      "Leave the EyeSight cameras in place and avoid touching their lenses.",
-    ], "overhead", refs)
+    steps[0] = step("access", "Remove the EyeSight cover", access, "overhead", refs)
     steps[1]["title"] = "Connect the harness to EyeSight"
-    steps[1]["body"][0] = "Disconnect the EyeSight wiring connector and plug it into the matching end of the Subaru harness."
-    steps[1]["body"][1] = "Connect the other end of the harness back to EyeSight."
+    steps[1]["body"][0] = ("Confirm the harness matches the one listed for your exact vehicle. Subaru A and B have the same " +
+                           "connector housings but different wiring, so physical fit alone is not enough. Release the " +
+                           "EyeSight connector latch and connect the vehicle wiring to the harness.")
+    steps[1]["body"][1] = "Connect the other end back to EyeSight and make sure both connector locks are fully engaged."
+    steps[1]["sources"] = refs + [
+      source("Subaru A wiring", "https://github.com/commaai/neo/blob/master/car_harness/v3/Subaru_A_Harness.pdf"),
+      source("Subaru B wiring", "https://github.com/commaai/neo/blob/master/car_harness/v3/Subaru_B_Harness.pdf"),
+    ]
     steps[1]["media"] = "overhead"
+    steps[2]["body"].insert(0, "Before peeling the mount backing, hold comma four and its cable in position. Keep both " +
+                             "EyeSight cameras' views clear and check the prohibited accessory areas in your vehicle's " +
+                             "EyeSight manual. Leave room to remove the EyeSight cover later.")
+    steps[2]["sources"] += refs
     steps[4] = step("close", "Reinstall the EyeSight cover", [
-      "Secure the harness clear of the EyeSight cameras and make sure the cover fits without pinching the cable.",
+      "Secure the harness clear of the EyeSight cameras, cover fasteners, and moving sunroof components. " +
+      "Keep wiring away from bolt holes and make sure the cover fits without pinching any cables.",
       "Route the OBD-C cable toward the comma four and reinstall the cover.",
+      "Check that the cover sits evenly around both camera lenses and confirm normal EyeSight operation after installation.",
     ], "overhead", refs)
+    if self.name == "Subaru Forester 2019-21":
+      steps[4]["body"].insert(1, "For the 2019 Forester, engage the front hooks first, followed by the side and rear clips. " +
+                                "Check that no wiring is trapped between the cover's bolt bosses and the vehicle body.")
+    guide["notes"] = ["Cover clips and bolt access vary by model year. Detailed procedures labeled 2019 apply only to " +
+                      "the named 2019 models; use your model year's illustrated procedure for other covers. " +
+                      "The wiki's modern Subaru D harness instructions do not describe the Subaru A/B installation."]
     guide["video_is_reference"] = True
 
 

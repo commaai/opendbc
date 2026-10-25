@@ -39,13 +39,39 @@ class RivianCarDocs(CarDocs):
     if harness in (CarHarness.rivian_a, CarHarness.rivian_b):
       refs = [source("Rivian installation", WIKI + "Rivian"),
               source("Rivian Gen 1 preparation and installation",
-                     "https://docs.google.com/document/d/1clodGRssTx-dSPSUrQITq_vqumgWcpSUw83zdcAZR-A/edit")]
+                     "https://docs.google.com/document/d/1clodGRssTx-dSPSUrQITq_vqumgWcpSUw83zdcAZR-A/edit"),
+              source("Rivian harness installation", "https://wiki.xnor.shop/docs/rivian/installation/"),
+              source("Rivian cable routing", "https://wiki.xnor.shop/docs/rivian/cable-routing/"),
+              source("Rivian power configurations", "https://wiki.xnor.shop/docs/rivian/power/")]
       remote = ("AXM in the passenger footwell", [
-        "Before removing trim or unplugging the module, follow the vehicle sleep procedure in the Rivian Gen 1 preparation reference.",
+        "Put the Rivian to sleep before unplugging any connectors. Turn off Gear Guard, open the passenger door, " +
+        "lock the vehicle, and leave the door ajar.",
+        "Turn off your phone's Bluetooth and disconnect it from the vehicle's Wi-Fi hotspot. Keep the key fob out of range " +
+        "and walk away for 15–20 minutes.",
+        "Return from the passenger side. Verify that all screens remain off during harness installation, " +
+        "and do not put weight on either front seat.",
         "Remove the passenger footwell trim to reach the AXM driver-assistance module and identify its connector using the reference photos.",
+        "The white connector in front of the AXM can be temporarily disconnected for access; it is separate from the harness connection.",
       ], "AXM", "footwell")
     if remote:
       apply_remote_setup(guide, harness, *remote, refs)
+      guide["power"] = "included"
+      guide["notes"] = [
+        "The comma Rivian harness receives power at the AXM. Before adding comma power, ask comma support to verify the power " +
+        "configuration for your harness revision. The linked installation references disagree about whether AXM power must be " +
+        "isolated when using comma power; the preparation reference warns of electrical backfeeding when both sources are connected.",
+      ]
+      guide["steps"][1]["body"].append(
+        "Reconnect any connector temporarily removed for access, including the white connector, and check all connector locks. " +
+        "Once the vehicle connections are restored, wake the Rivian before connecting the comma four.")
+      guide["steps"][2]["body"].insert(2,
+        "Center the device below the rearview mirror itself, not the larger Mobileye housing, which is offset.")
+      guide["steps"][2]["sources"].extend(refs[:3])
+      guide["steps"][3]["body"][0] = (
+        "Route the long OBD-C cable from the passenger footwell through the dash side-panel opening, " +
+        "along the windshield side of the A-pillar trim, and toward the windshield mount. " +
+        "Keep it clear of pedals, moving parts, and airbag deployment paths.")
+      guide["steps"][3]["sources"].append(refs[3])
 
 
 @dataclass

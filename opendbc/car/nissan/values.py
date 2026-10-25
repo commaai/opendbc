@@ -53,26 +53,41 @@ class NissanCarDocs(CarDocs):
     if harness in (CarHarness.nissan_a, CarHarness.nissan_b):
       refs = [source("Nissan ADAS installation locations", WIKI + "nissan")]
       if self.model.startswith("Leaf"):
-        remote = ("ADAS module behind the glovebox", [
-          "Remove the glovebox to look for the ADAS module above it.",
-          "Some Leaf variants place the module behind the instrument cluster instead. " +
-          "Check the reference photos: other nearby connectors also fit the harness.",
-        ], "ADAS module", "glovebox")
+        refs = [source("Leaf ADAS module locations", WIKI + "nissan#leaf-2018-20")]
+        remote = ("ADAS module", [
+          "The ADAS module can be above the glovebox or behind the instrument cluster, depending on the variant. " +
+          "Check the reference photos before removing trim or disconnecting wiring; other nearby connectors also fit the harness.",
+          "For the glovebox location, remove the glovebox screws above and below it, then gently pull it out to access the module above.",
+          "For the instrument-cluster location, follow the linked access reference. " +
+          "Move the instrument cluster aside without unplugging it; its cable is long enough.",
+        ], "ADAS module", "module")
       elif self.model.startswith("Altima"):
-        remote = ("ADAS module behind the glovebox", [
-          "Look for the ADAS module behind the glovebox on the right side.",
-          "Use the Nissan reference photos to identify the ADAS module before disconnecting its wiring.",
-        ], "ADAS module", "glovebox")
+        refs = [source("Altima ADAS module locations", WIKI + "nissan#altima-2019-2026"),
+                source("Instrument-cluster location reference", WIKI + "nissan#instrument-cluster-including-leaf-g-cars-built-in-japan")]
+        remote = ("ADAS module", [
+          "A known ADAS module location is behind the glovebox on the right side. " +
+          "Other variants may use an instrument-cluster location; check the references before removing trim.",
+          "Identify the ADAS module using the reference photos before disconnecting its wiring.",
+        ], "ADAS module", "module")
       elif self.model.startswith("Rogue"):
+        refs = [source("Rogue cargo-area ADAS module location", WIKI + "nissan#rogue-2018-19")]
         remote = ("ADAS module in the cargo area", [
-          "Lift the luggage floor cover to expose the spare-tire area and locate the ADAS module.",
-          "Check that your cable reaches the windshield before routing it behind trim.",
+          "The documented 2018-19 location is in the spare-tire area. Lift the luggage floor cover and identify the ADAS module.",
+          "Lay out the long OBD-C cable along the intended route to the windshield before routing it behind trim. " +
+          "If it cannot reach without tension, contact comma support for a compatible cable solution.",
         ], "ADAS module", "cargo")
+        guide["notes"] = ["The cargo-area ADAS location has not been independently verified for the 2020 Rogue. " +
+                          "Confirm the module location using vehicle service information or comma support before disconnecting wiring."]
       else:
-        remote = ("ADAS module", ["Locate the ADAS module using the Nissan installation reference for your model and market.",
-                                    "The Nissan harness connects to this separate module, not the windshield camera."], "ADAS module", "module")
+        refs = [source("Nissan ADAS installation overview", WIKI + "nissan#install-locations")]
+        remote = ("ADAS module", [
+          "Identify the ADAS module using vehicle service information or comma support before removing trim or disconnecting wiring.",
+        ], "ADAS module", "module")
+        guide["notes"] = ["An exact installation location for the 2017 X-Trail has not been verified. " +
+                          "The Nissan wiki does not provide an X-Trail-specific module location."]
     if remote:
       apply_remote_setup(guide, harness, *remote, refs)
+      guide["steps"][0]["body"].insert(0, "The Nissan harness connects to the separate ADAS module, not the windshield camera.")
 
 
 @dataclass(frozen=True)

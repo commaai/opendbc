@@ -38,7 +38,7 @@ class TestSetupGuides(unittest.TestCase):
 
   def test_model_locations(self):
     cases = {"Ford F-150 2021-23": "footwell", "Ford Mustang Mach-E 2021-24": "cargo",
-             "Ford Ranger 2024": "cluster", "Nissan Leaf 2018-23": "glovebox",
+             "Ford Ranger 2024": "cluster", "Nissan Leaf 2018-23": "module",
              "Nissan Rogue 2018-20": "cargo", "Volkswagen Caravelle 2020": "cluster",
              "Volkswagen Golf 2015-20": "footwell"}
     for name, media in cases.items():
@@ -76,7 +76,7 @@ class TestSetupGuides(unittest.TestCase):
   def test_video_applicability(self):
     self.assertEqual(self.guides["default"]["video"], SETUP_VIDEO)
     self.assertFalse(self.guides["default"]["video_is_reference"])
-    self.assertFalse(self.guides["Honda Accord 2018-22"]["video_is_reference"])
+    self.assertTrue(self.guides["Honda Accord 2018-22"]["video_is_reference"])
     for name in ("Volkswagen Golf 2015-20", "Subaru Outback 2020-22", "Mazda CX-5 2022-25"):
       with self.subTest(car=name):
         self.assertEqual(self.guides[name]["video"], SETUP_VIDEO)
@@ -85,3 +85,15 @@ class TestSetupGuides(unittest.TestCase):
     self.assertIn("AR4_eTF3b_A", ford["video"])
     self.assertTrue(ford["video_is_reference"])
     self.assertTrue(all(g["video"] for g in self.guides.values()))
+
+  def test_harness_box_connection(self):
+    for name, guide in self.guides.items():
+      with self.subTest(car=name):
+        connect = next(s for s in guide["steps"] if s["id"] == "connect")
+        self.assertIn("small car-harness connector to the harness box", " ".join(connect["body"]))
+
+  def test_power_restrictions(self):
+    for name in ("Rivian R1S 2022-24", "Rivian R1T 2022-24"):
+      self.assertEqual(self.guides[name]["power"], "included")
+      self.assertIn("harness revision", " ".join(self.guides[name]["notes"]))
+    self.assertNotIn("RJ45", json.dumps(self.guides["Volkswagen Golf 2015-20"]))

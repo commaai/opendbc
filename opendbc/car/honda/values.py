@@ -126,7 +126,7 @@ class HondaCarDocs(CarDocs):
       self.footnotes.append(Footnote.HONDA_ALPHALONG)
 
   def init_setup(self, guide):
-    refs = [source(f"{self.make} installation reference", WIKI + 'Honda-Acura')]
+    refs = [source("Honda/Acura background information", WIKI + 'Honda-Acura')]
     if self.setup_video:
       refs.append(source("Vehicle installation video", self.setup_video))
     guide["sources"][1:] = refs
@@ -134,6 +134,11 @@ class HondaCarDocs(CarDocs):
       'Release the plastic cover behind the rearview mirror to reach the driver-assistance camera.',
       "Release the cover's clips carefully; leave the camera attached to the windshield.",
     ], "camera-access", refs)
+    guide["steps"][1]["body"][:2] = [
+      'Locate the connector plugged directly into the factory driver-assistance camera. Other mirror and sensor connectors may be nearby.',
+      'Release the connector locking tab and unplug it from the camera, then plug it into the car harness.',
+      'Connect the harness back into the camera. Do not force a connector that does not match; check the selected harness and connection point.',
+    ]
 
 class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(

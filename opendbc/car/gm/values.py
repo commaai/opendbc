@@ -91,7 +91,7 @@ class GMCarDocs(CarDocs):
       self.car_parts = CarParts.common([CarHarness.obd_ii])
 
   def init_setup(self, guide):
-    refs = [source(f"{self.make} installation reference", WIKI + 'GM')]
+    refs = [source("GM compatibility and hardware background", WIKI + 'GM')]
     if self.setup_video:
       refs.append(source("Vehicle installation video", self.setup_video))
     guide["sources"][1:] = refs
@@ -100,6 +100,20 @@ class GMCarDocs(CarDocs):
       'Leave the camera mounted to the windshield.',
     ], "camera-access", refs)
     harness = next(p for p in self.car_parts.all_parts() if isinstance(p, CarHarness))
+    if harness == CarHarness.gm:
+      guide["notes"] = [
+        "Your comma four receives power through the GM camera harness. A separate comma power connection is not required.",
+        "Camera cover access varies by model. The GM wiki includes other hardware configurations and is not a model-specific installation guide.",
+        "If the connector lock is inaccessible with the camera mounted, obtain a model-specific access procedure before proceeding.",
+      ]
+      if self.model == "Bolt EUV" and "2023" in self.year_list:
+        lock_source = source("2023 Bolt EUV owner connector-lock reference",
+                             "https://www.reddit.com/r/Comma_ai/comments/1auwa3a/23_bolt_euv_and_comma3_3x_question/")
+        guide["steps"][1]["body"].insert(0,
+          "On the 2023 Bolt EUV, release the camera connector's white secondary lock before depressing the connector latch. " +
+          "Pull on the connector housing, not the wires. Do not force a connector that remains locked.")
+        guide["steps"][1]["sources"].append(lock_source)
+        guide["sources"].append(lock_source)
     remote = None
     if harness == CarHarness.gmsdgm:
       refs = [source("GM installation", WIKI + "GM")]

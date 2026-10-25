@@ -261,12 +261,13 @@ def device_step(remote=False):
 def camera_steps():
   return [
     step("access", "Remove the rearview mirror cover trim", [
-      "Removal method varies by car. The plastic often needs a firm tug on Hondas; Toyotas often need a slide outward.",
-      "Use a vehicle-specific installation video to check how the cover releases.",
+      "Check the cover release method for your model and year before removing it. Keep the camera attached to the windshield.",
+      "The photos show an example installation; covers and connector positions vary by vehicle.",
     ], "camera-access"),
     step("connect", "Connect car harness into the camera", [
       "Unplug the existing LKAS camera connector and plug it into the harness.",
       "Connect the other end of the harness back into the LKAS camera.",
+      "Connect the small car-harness connector to the harness box and make sure it is fully seated.",
       "Find a spot for the harness box so the trim can still fit over it. Peel off the adhesive backing and attach the box in place.",
     ], "camera-connect"),
     mount_step(), device_step(),
@@ -283,6 +284,7 @@ def remote_steps(location, access, module, media, sources):
     step("connect", f"Connect the harness at the {module}", [
       f"Unplug the vehicle connector at the {module} and plug it into the matching end of your car harness.",
       f"Plug the other end of the harness back into the {module}. Make sure the connector locks are fully engaged.",
+      "Connect the small car-harness connector to the harness box and make sure it is fully seated.",
       "Secure the harness box where the trim can fit back in place without pinching any cables.",
     ], media, sources),
     mount_step(), device_step(remote=True),
@@ -297,7 +299,11 @@ def get_default_setup_guide() -> dict:
   """Return independent JSON-ready default installation content."""
   guide = {
     "id": "default", "title": "comma four setup", "summary": "Install your comma four in five steps.",
-    "steps": camera_steps(), "power": "optional",
+    "steps": camera_steps(), "power": "optional", "notes": [], "power_notes": [],
+    "power_instructions": [
+      "Plug comma power into the vehicle's OBD-II port. Route its cable clear of pedals and airbag deployment paths.",
+      "Connect its small 4-pin plug to the matching socket on the harness box.",
+    ],
     "parts": ["comma four", "mount", "OBD-C cable", "car harness", "harness box", "comma power"],
     "sources": [dict(SETUP)], "video": SETUP_VIDEO, "video_is_reference": False,
   }
@@ -349,7 +355,8 @@ class CarDocs:
     harness = next((p for p in parts if isinstance(p, CarHarness)), None)
     if harness is None:
       raise ValueError(f"No installation harness for {self.name}")
-    guide.update(id=self.name, title=f"{self.make} {self.model}", parts=list(dict.fromkeys(p.value.name for p in parts)))
+    part_names = ("supplied short OBD-C cable" if p == Cable.obd_c_cable_2ft else p.value.name for p in parts)
+    guide.update(id=self.name, title=f"{self.make} {self.model}", parts=list(dict.fromkeys(part_names)))
     guide["video"] = self.setup_video or SETUP_VIDEO
     guide["summary"] = f"Install your comma four with the {harness.value.name}."
     guide["sources"].append(source(f"{self.make} installation reference", WIKI + getattr(self, "brand", "")))
@@ -361,13 +368,13 @@ class CarDocs:
     if self.requires_comma_power:
       guide["power"] = "required"
       guide["steps"].insert(2, step("power", "Connect comma power", [
-        "Connect comma power to the vehicle's OBD-II port and connect its cable to the harness box.",
+        *guide["power_instructions"],
         "Your vehicle needs this power connection. Route the cable clear of pedals and airbag deployment paths.",
       ], "power", guide["sources"][1:]))
     elif Accessory.comma_power not in parts:
       guide["power"] = "included"
     # CAN networkLocation does not describe physical access or the video's hardware generation.
-    guide["video_is_reference"] |= self.requires_comma_power or guide["video"] != SETUP_VIDEO
+    guide["video_is_reference"] = True
     return guide
 
   def init(self, CP: CarParams, all_footnotes=None):

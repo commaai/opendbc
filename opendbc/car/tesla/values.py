@@ -28,17 +28,53 @@ def _configure_setup(car, guide):
     refs.append(source("Vehicle installation video", car.setup_video))
   guide["sources"][1:] = refs
   harness = next(p for p in car.car_parts.all_parts() if isinstance(p, CarHarness))
-  remote = None
-  if harness in (CarHarness.tesla_a, CarHarness.tesla_b):
-    refs = [source("Tesla HW3 / HW4 installation", "https://wiki.xnor.shop/docs/tesla/hw3-hw4/")]
-    remote = ("Autopilot computer behind the glovebox", [
-      "Follow the Tesla reference to power down the vehicle before disconnecting the Autopilot computer.",
-      "Remove the passenger footwell trim to reach the Autopilot computer behind the glovebox.",
-      "Use the Tesla connector supplied for the hardware generation in your selected vehicle.",
-    ], "Autopilot computer", "glovebox")
-    guide["power"] = "included"
-  if remote:
-    apply_remote_setup(guide, harness, *remote, refs)
+  if harness not in (CarHarness.tesla_a, CarHarness.tesla_b):
+    return
+
+  is_hw4 = harness == CarHarness.tesla_b
+  generation = "HW4" if is_hw4 else "HW3"
+  connector_image = "X121.jpg" if is_hw4 else "X120.jpg"
+  refs = [
+    source("Tesla HW3 / HW4 installation", "https://wiki.xnor.shop/docs/tesla/hw3-hw4/"),
+    source(f"Model 3/Y {generation} connection reference", "https://wiki.xnor.shop/images/" + connector_image),
+  ]
+  guide["notes"] = [
+    "Before unplugging the Autopilot computer, confirm the shutdown and electrical isolation procedure for your exact model and " +
+    "hardware with the harness maker or Tesla service documentation. The linked harness overview does not provide that procedure; " +
+    "the touchscreen Power Off command is not confirmation of electrical isolation.",
+    "Skip the installation video's A-pillar diagnostic-connector connection. It is for an optional Vehicle CAN add-on, " +
+    "not the standard Tesla A/B harness.",
+    "The connection illustrations show Model 3/Y installations. Right-hand-drive connector access has not been independently verified.",
+  ]
+  if "HW2.5" in car.name:
+    guide["notes"].append("This HW2.5 vehicle uses Tesla A, but the linked HW3 reference does not separately document HW2.5 access. " +
+                          "Confirm the connector location for your hardware before unplugging it.")
+  if "Model X" in car.name:
+    guide["notes"].append("The Model 3/Y connection illustrations do not document Model X access. Confirm the Model X HW4 " +
+                          "footwell and footrest-panel access procedure before starting.")
+
+  apply_remote_setup(guide, harness, "Autopilot computer in the passenger footwell", [
+    "Confirm the shutdown and isolation procedure described in the installation notes before disconnecting any computer connectors.",
+    "Use the model-specific reference to remove the passenger footwell trim and any adjoining panels needed for access. " +
+    "Keep track of electrical connections removed with the panels so they can be restored.",
+    f"Use the {harness.value.name} supplied for your selected vehicle and the {generation} connection reference below.",
+  ], "Autopilot computer", "glovebox", refs)
+  guide["power"] = "included"
+  guide["steps"][1]["body"] = [
+    f"Identify the connection shown in the {generation} reference before unplugging it. " +
+    "The Tesla A and Tesla B connection locations differ.",
+    "Release the connector lock and insert the matching car harness between the vehicle connector and the Autopilot computer. " +
+    "Make sure both connector locks are fully engaged.",
+    "Connect the small car-harness connector to the harness box and make sure it is fully seated.",
+    "Restore any adjacent connectors removed for access. Secure the harness box where the trim can fit without pinching cables.",
+  ]
+  guide["steps"][-1]["body"] = [
+    "Restore all electrical connections removed for access, including any footwell-panel connections.",
+    "Follow the confirmed model-specific procedure to restore power and wake the vehicle. Before reinstalling the trim, " +
+    "verify that comma four starts and the vehicle reports no new errors.",
+    "Secure excess cable clear of pedals, seat rails, moving parts, and airbag deployment paths. " +
+    "Check that the harness and cable fit behind the panels, then reinstall the trim.",
+  ]
 
 
 @dataclass

@@ -327,19 +327,35 @@ class VWCarDocs(CarDocs):
     if harness in (CarHarness.vw_j533, CarHarness.vw_meb):
       refs = [source("Volkswagen gateway installation", "https://docs.howtocomma.com/docs/j533-harness-install")]
       if harness == CarHarness.vw_meb:
-        refs = [source("Volkswagen MEB installation", WIKI + "Volkswagen")]
+        refs = [source("VW MEB harness selection", "https://comma.ai/shop/car-harness")]
+        guide["notes"] = [
+          "Gateway access and connector identification have not yet been verified for your exact model, year, and steering configuration. " +
+          "The harness selection reference does not provide a gateway installation procedure.",
+        ]
         remote = ("MEB gateway", [
-          "Locate the MEB gateway using the installation reference for your vehicle before removing trim.",
+          "Confirm the gateway location and access procedure for your exact vehicle before removing trim or unplugging a connector.",
           "Use your VW MEB connector at the gateway. The J533 connector is a different harness.",
         ], "MEB gateway", "module")
       elif self.model.startswith(("Caravelle", "California")):
+        refs.append(source("Transporter / California gateway location",
+                           WIKI + "VW-J533-%28Gateway%29-Cable#vw-transporter--california-j533-gateway-location"))
         remote = ("gateway behind the instrument cluster", [
-          "Remove the instrument-cluster trim to reach the J533 gateway behind the cluster.",
+          "The J533 gateway is behind the instrument cluster. Follow the linked cluster-removal reference for your vehicle before accessing it.",
           "Use the gateway reference to identify the module before unplugging its connector.",
         ], "J533 gateway", "cluster")
+      elif self.make == "MAN" or self.model.startswith(("Crafter", "e-Crafter", "Grand California")):
+        guide["notes"] = [
+          "The gateway location and access procedure have not yet been verified for this model and steering configuration. " +
+          "The linked guide shows other Volkswagen vehicles.",
+        ]
+        remote = ("J533 gateway", [
+          "Confirm the gateway location and access procedure for your exact vehicle before removing trim.",
+          "Identify the gateway and release its connector locking mechanism before unplugging it.",
+        ], "J533 gateway", "module")
       else:
+        guide["notes"] = ["Gateway access can vary by model and steering configuration; right-hand-drive access has not been verified for every model."]
         remote = ("gateway under the dashboard", [
-          "Remove the lower dashboard trim in the driver's footwell to reach the gateway.",
+          "The J533 gateway is usually above the driver's footwell. Confirm its location for your vehicle; remove the lower dashboard trim only if needed.",
           "Identify the gateway and release its connector locking mechanism before unplugging it.",
         ], "gateway", "footwell")
       guide["power"] = "included"
@@ -347,8 +363,6 @@ class VWCarDocs(CarDocs):
       apply_remote_setup(guide, harness, *remote, refs)
       if harness == CarHarness.vw_j533:
         guide["steps"][0]["body"].insert(0, "Turn the vehicle off before disconnecting the gateway.")
-        guide["steps"][1]["body"].insert(0,
-          "Plug the harness's integrated RJ45 lead into the harness box if disconnected. Check that the harness connector is seated in the box too.")
 
 
 # Check the 7th and 8th characters of the VIN before adding a new CAR. If the

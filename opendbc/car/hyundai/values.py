@@ -155,14 +155,20 @@ class HyundaiCarDocs(CarDocs):
   package: str = "Smart Cruise Control (SCC)"
 
   def init_setup(self, guide):
-    refs = [source(f"{self.make} installation reference", WIKI + 'Hyundai-Kia-Genesis')]
+    refs = [source(f"{self.make} harness guide", WIKI + 'Hyundai-Kia-Genesis#harness-guide')]
     if self.setup_video:
       refs.append(source("Vehicle installation video", self.setup_video))
     guide["sources"][1:] = refs
     guide["steps"][0] = step("access", 'Remove the camera cover', [
       'Remove the cover behind the rearview mirror to expose the forward-facing camera connector.',
-      'Use the harness selected for your vehicle; HDA II and other camera systems use different connectors.',
+      'Use the harness listed for your exact model, year, region, and HDA II equipment.',
+      'Some Hyundai harnesses fit the same connector but have different wiring; do not substitute one based on appearance alone.',
     ], "camera-access", refs)
+    guide["steps"][1]["body"][0:1] = [
+      'Locate the connector plugged directly into the forward-facing lane-keeping camera.',
+      'Release its locking tab, unplug it from the camera, and plug it into the harness.',
+    ]
+    guide["steps"][1]["sources"].extend(refs)
 
 
 @dataclass
