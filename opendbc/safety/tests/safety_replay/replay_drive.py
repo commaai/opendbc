@@ -38,6 +38,7 @@ def replay_drive(msgs, safety_mode, param, alternative_experience):
     if msg.logMonoTime - start_t > 1e9 and end_t - msg.logMonoTime > 1e9:
       safety.safety_tick()
       safety_tick_rx_invalid |= not safety.safety_config_valid() or safety_tick_rx_invalid
+      safety_tick_rx_invalid |= safety.get_safety_state_invalid()
 
     if msg.which() == 'sendcan':
       for canmsg in msg.sendcan:

@@ -69,6 +69,10 @@ class TestSafetyFramework(common.SafetyTestBase):
 class TestSafetyStateRedundancy(common.SafetyTestBase):
   SAFETY_MODEL = CarParams.SafetyModel.allOutput
 
+  # these tests set the flag on purpose
+  def tearDown(self):
+    self.safety.init_tests()
+
   def test_controls_allowed_mismatch(self):
     self.safety.set_controls_allowed(True)
     self.assertTrue(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))

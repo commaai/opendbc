@@ -258,11 +258,10 @@ void pcm_cruise_check(bool cruise_engaged);
 void speed_mismatch_check(const float speed_2);
 
 void safety_tick(void);
+void clear_controls_allowed(void);
 
 // This can be set by the safety hooks
 extern bool controls_allowed;
-extern bool safety_state_invalid;
-void clear_controls_allowed(void);
 extern bool relay_malfunction;
 extern bool gas_pressed;
 extern bool gas_pressed_prev;
@@ -279,6 +278,7 @@ extern bool vehicle_moving;
 extern bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
 extern int cruise_button_prev;
 extern bool safety_rx_checks_invalid;
+extern bool safety_state_invalid;
 
 // for safety modes with torque steering control
 extern int desired_torque_last;       // last desired steer torque

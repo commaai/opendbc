@@ -264,8 +264,8 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
 // same check as tx_msg_safety_check through a different path
 static bool tx_msg_safety_check_rev(const CANPacket_t *msg, const CanMsg msg_list[], int len) {
   bool whitelisted = false;
-  for (int i = len - 1; i >= 0; i--) {
-    whitelisted = whitelisted || msg_matches(msg, msg_list[i].addr, msg_list[i].bus, msg_list[i].len);
+  for (int i = len - 1; (i >= 0) && !whitelisted; i--) {
+    whitelisted = msg_matches(msg, msg_list[i].addr, msg_list[i].bus, msg_list[i].len);
   }
   return whitelisted;
 }
@@ -428,6 +428,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_ALLOUTPUT, &alloutput_hooks},
 #endif
   };
+  safety_state_check();
 
   // reset state set by safety mode
   safety_mode_cnt = 0U;
