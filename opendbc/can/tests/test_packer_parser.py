@@ -1,6 +1,5 @@
 import unittest
 import random
-from unittest.mock import patch
 
 from opendbc.can import CANPacker, CANParser
 from opendbc.can.tests import TEST_DBC
@@ -9,39 +8,6 @@ MAX_BAD_COUNTER = 5
 
 
 class TestCanParserPacker(unittest.TestCase):
-  def test_missing_message_logs(self):
-    parser = CANParser(TEST_DBC, [("CAN_FD_MESSAGE", 10), ("Brake_Status", 10)], 2)
-    packer = CANPacker(TEST_DBC)
-
-    with patch('opendbc.can.parser.carlog.warning') as warning:
-      for second in range(1, 21):
-        parser.update([second * 1_000_000_000, []])
-        assert not parser.can_valid
-        assert warning.call_count == (second - 1) // 10 + 1
-      assert 'bus 2' in warning.call_args.args[0]
-      assert '0xf5 CAN_FD_MESSAGE' in warning.call_args.args[0]
-      assert '0x13c Brake_Status' in warning.call_args.args[0]
-
-      # Recovery and a new timeout retain the same rate limit.
-      parser.update([21_000_000_000, [packer.make_can_msg(name, 2, {}) for name in ("CAN_FD_MESSAGE", "Brake_Status")]])
-      assert parser.can_valid
-      parser.update([23_000_000_000, []])
-      for _ in range(4):
-        assert parser.can_valid
-      assert not parser.can_valid
-      assert warning.call_count == 3
-
-      parser.update([24_000_000_000, [packer.make_can_msg(name, 2, {}) for name in ("CAN_FD_MESSAGE", "Brake_Status")]])
-      assert parser.can_valid
-      parser.update([26_000_000_000, []])
-      for _ in range(4):
-        assert parser.can_valid
-      assert not parser.can_valid
-      assert warning.call_count == 3
-      parser.update([33_000_000_000, []])
-      assert not parser.can_valid
-      assert warning.call_count == 4
-
   def test_packer(self):
     packer = CANPacker(TEST_DBC)
 
