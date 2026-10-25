@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.chrysler.setup import configure_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
@@ -24,6 +25,9 @@ class ChryslerFlags(IntFlag):
 class ChryslerCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC)"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.fca]))
+
+  def init_setup(self, guide):
+    configure_setup(self, guide)
 
 
 @dataclass

@@ -1,9 +1,9 @@
+from copy import deepcopy
 import json
 import unittest
 
-from opendbc.car.docs import get_all_car_docs
-from opendbc.car.docs_definitions import CarHarness, SupportType
-from opendbc.car.setup import SETUP_VIDEO, get_setup_guide, get_setup_guides
+from opendbc.car.docs import get_all_car_docs, get_setup_guides
+from opendbc.car.docs_definitions import CarHarness, SupportType, SETUP_VIDEO, get_default_setup_guide
 
 
 class TestSetupGuides(unittest.TestCase):
@@ -53,10 +53,25 @@ class TestSetupGuides(unittest.TestCase):
         self.assertIn("power", [s["id"] for s in guide["steps"]])
 
   def test_default_and_independent_content(self):
-    default = get_setup_guide()
+    default = get_default_setup_guide()
     self.assertEqual(len(default["steps"]), 5)
     default["steps"][0]["body"].append("changed")
-    self.assertNotIn("changed", get_setup_guide()["steps"][0]["body"])
+    self.assertNotIn("changed", get_default_setup_guide()["steps"][0]["body"])
+
+  def test_car_docs_guides_are_independent(self):
+    for car in self.cars:
+      if car.name not in self.guides:
+        continue
+      with self.subTest(car=car.name):
+        guide = car.get_setup_guide()
+        self.assertEqual(guide, self.guides[car.name])
+        original = deepcopy(guide)
+        guide["steps"][0]["body"].append("changed")
+        guide["steps"][0]["sources"][0]["title"] = "changed"
+        guide["sources"][0]["url"] = "changed"
+        guide["parts"].clear()
+        self.assertEqual(car.get_setup_guide(), original)
+    self.assertEqual(get_setup_guides(self.cars), self.guides)
 
   def test_video_applicability(self):
     self.assertEqual(self.guides["default"]["video"], SETUP_VIDEO)

@@ -4,6 +4,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
+from opendbc.car.gm.setup import configure_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -89,6 +90,9 @@ class GMCarDocs(CarDocs):
     else:
       self.footnotes.insert(0, Footnote.SETUP)
       self.car_parts = CarParts.common([CarHarness.obd_ii])
+
+  def init_setup(self, guide):
+    configure_setup(self, guide)
 
 
 @dataclass(frozen=True, kw_only=True)

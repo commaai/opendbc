@@ -4,6 +4,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.mazda.setup import configure_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -30,6 +31,9 @@ class MazdaCarDocs(CarDocs):
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.mazda]))
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.COMMA_POWER_REQUIRED])
   requires_comma_power: bool = True
+
+  def init_setup(self, guide):
+    configure_setup(self, guide)
 
 
 class Footnote(Enum):

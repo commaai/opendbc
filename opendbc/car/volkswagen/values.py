@@ -7,6 +7,7 @@ from opendbc.car.lateral import CurvatureSteeringLimits
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.volkswagen.setup import configure_setup
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 from opendbc.car.vin import Vin
 
@@ -316,6 +317,9 @@ class VWCarDocs(CarDocs):
 
     if abs(CP.minSteerSpeed - CarControllerParams.DEFAULT_MIN_STEER_SPEED) < 1e-3:
       self.min_steer_speed = 0
+
+  def init_setup(self, guide):
+    configure_setup(self, guide)
 
 
 # Check the 7th and 8th characters of the VIN before adding a new CAR. If the

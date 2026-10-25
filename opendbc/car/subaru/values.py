@@ -4,6 +4,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.subaru.setup import configure_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
 Ecu = CarParams.Ecu
@@ -104,6 +105,9 @@ class SubaruCarDocs(CarDocs):
   def init_make(self, CP: CarParams):
     if CP.alphaLongitudinalAvailable:
       self.footnotes.append(Footnote.EXP_LONG)
+
+  def init_setup(self, guide):
+    configure_setup(self, guide)
 
 
 @dataclass

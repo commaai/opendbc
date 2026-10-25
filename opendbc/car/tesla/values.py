@@ -4,6 +4,7 @@ from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.lateral import AngleSteeringLimitsVM
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
+from opendbc.car.tesla.setup import configure_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -28,12 +29,18 @@ class TeslaCarDocsHW3(CarDocs):
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_a]))
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE, Footnote.SETUP])
 
+  def init_setup(self, guide):
+    configure_setup(self, guide)
+
 
 @dataclass
 class TeslaCarDocsHW4(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_b]))
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE, Footnote.SETUP])
+
+  def init_setup(self, guide):
+    configure_setup(self, guide)
 
 
 @dataclass

@@ -3,6 +3,7 @@ from enum import StrEnum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.rivian.setup import configure_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 from opendbc.car.vin import Vin
 
@@ -28,6 +29,9 @@ class ModelYear(StrEnum):
 @dataclass
 class RivianCarDocs(CarDocs):
   package: str = "All"
+
+  def init_setup(self, guide):
+    configure_setup(self, guide)
 
 
 @dataclass
