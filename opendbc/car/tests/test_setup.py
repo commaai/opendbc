@@ -3,7 +3,7 @@ import unittest
 
 from opendbc.car.docs import get_all_car_docs
 from opendbc.car.docs_definitions import CarHarness, SupportType
-from opendbc.car.setup import get_setup_guide, get_setup_guides
+from opendbc.car.setup import SETUP_VIDEO, get_setup_guide, get_setup_guides
 
 
 class TestSetupGuides(unittest.TestCase):
@@ -57,3 +57,16 @@ class TestSetupGuides(unittest.TestCase):
     self.assertEqual(len(default["steps"]), 5)
     default["steps"][0]["body"].append("changed")
     self.assertNotIn("changed", get_setup_guide()["steps"][0]["body"])
+
+  def test_video_applicability(self):
+    self.assertEqual(self.guides["default"]["video"], SETUP_VIDEO)
+    self.assertFalse(self.guides["default"]["video_is_reference"])
+    self.assertFalse(self.guides["Honda Accord 2018-22"]["video_is_reference"])
+    for name in ("Volkswagen Golf 2015-20", "Subaru Outback 2020-22", "Mazda CX-5 2022-25"):
+      with self.subTest(car=name):
+        self.assertEqual(self.guides[name]["video"], SETUP_VIDEO)
+        self.assertTrue(self.guides[name]["video_is_reference"])
+    ford = self.guides["Ford Mustang Mach-E 2021-24"]
+    self.assertIn("AR4_eTF3b_A", ford["video"])
+    self.assertTrue(ford["video_is_reference"])
+    self.assertTrue(all(g["video"] for g in self.guides.values()))

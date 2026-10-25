@@ -8,6 +8,7 @@ Source links document access procedures, including videos made with older device
 from opendbc.car.docs_definitions import Accessory, CarDocs, CarHarness, SupportType
 
 SETUP = {"title": "comma four setup", "url": "https://comma.ai/setup"}
+SETUP_VIDEO = "https://www.youtube.com/watch?v=Us4FodlaQ74"
 WIKI = "https://github.com/commaai/openpilot/wiki/"
 
 
@@ -99,7 +100,7 @@ def get_setup_guide(car: CarDocs | None = None) -> dict:
     "id": "default", "title": "comma four setup", "summary": "Install your comma four in five steps.",
     "steps": camera_steps(), "power": "optional",
     "parts": ["comma four", "mount", "OBD-C cable", "car harness", "harness box", "comma power"],
-    "sources": [SETUP],
+    "sources": [SETUP], "video": SETUP_VIDEO, "video_is_reference": False,
   }
   if car is None:
     return guide
@@ -225,7 +226,7 @@ def get_setup_guide(car: CarDocs | None = None) -> dict:
         "Plug the harness's integrated RJ45 lead into the harness box if disconnected. Check that the harness connector is seated in the box too.")
     guide["summary"] = f"Your {harness.value.name} connects at the {remote[2]}. Follow the vehicle-specific steps below."
   guide["sources"] = [SETUP, *refs]
-  if guide.get("video") and not any(s["url"] == guide["video"] for s in guide["sources"]):
+  if guide["video"] != SETUP_VIDEO and not any(s["url"] == guide["video"] for s in guide["sources"]):
     guide["sources"].append(source("Vehicle installation video", guide["video"]))
   if car.requires_comma_power:
     guide["power"] = "required"
@@ -235,6 +236,9 @@ def get_setup_guide(car: CarDocs | None = None) -> dict:
     ], "power", refs))
   elif Accessory.comma_power not in parts:
     guide["power"] = "included"
+  # CAN networkLocation does not describe physical access or the video's hardware generation.
+  # Nonstandard installs and vehicle videos are useful references, not exact comma four walkthroughs.
+  guide["video_is_reference"] = bool(remote or brand == "subaru" or car.requires_comma_power or guide["video"] != SETUP_VIDEO)
   return guide
 
 
