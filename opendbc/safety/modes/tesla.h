@@ -172,7 +172,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     tesla_stock_aeb = (msg->data[2] & 0x03U) == 1U;
 
     // Stalkless cars send the steering wheel cancel button through DAS_control, but we block this message
-    // with openpilot longitudinal. Exit controls on edges of ACC_CANCEL_GENERIC_SILENT
+    // with openpilot longitudinal. Exit controls on any change of ACC_CANCEL_GENERIC_SILENT
     int acc_state = msg->data[1] >> 4;  // DAS_accState
     bool acc_cancel_changed = (acc_state == 13) != (tesla_acc_state_prev == 13);  // ACC_CANCEL_GENERIC_SILENT
     if (tesla_longitudinal && acc_cancel_changed) {
