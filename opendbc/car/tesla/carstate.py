@@ -19,7 +19,7 @@ class CarState(CarStateBase):
     self.cruise_enabled_prev = False
 
     self.hands_on_level = 0
-    self.prev_acc_state = 0
+    self.acc_cancel_prev = False
     self.das_control = None
 
   def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
@@ -85,15 +85,9 @@ class CarState(CarStateBase):
     ret.accFaulted = cruise_state == "FAULT"
 
     # needed for stalkless vehicles, steering button cancel request routes through AP computer
-    acc_state = cp_ap_party.vl["DAS_control"]["DAS_accState"]
-    ret.buttonEvents = [
-      *create_button_events(
-        acc_state,
-        self.prev_acc_state,
-        {13: ButtonType.cancel},
-      ),
-    ]
-    self.prev_acc_state = acc_state
+    acc_cancel = cp_ap_party.vl["DAS_control"]["DAS_accState"] == 13  # ACC_CANCEL_GENERIC_SILENT
+    ret.buttonEvents = create_button_events(acc_cancel, self.acc_cancel_prev, {1: ButtonType.cancel})
+    self.acc_cancel_prev = acc_cancel
 
     # Gear
     ret.gearShifter = GEAR_MAP[self.can_define.dv["DI_systemStatus"]["DI_gear"].get(int(cp_party.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
