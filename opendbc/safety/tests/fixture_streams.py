@@ -5,7 +5,9 @@ backend owns timing and counter phase, including explicit stream injections.
 """
 from collections import deque
 from collections.abc import Callable
+from contextlib import contextmanager
 from dataclasses import dataclass
+from math import lcm
 from functools import partial, wraps
 
 from opendbc.can import CANPacker
@@ -76,6 +78,7 @@ class _Bridge:
     self.keys = {}
     self.last_injected = {}
     self.suspended = set()
+    self.cycles = {}
     self.invalidated = set()
     for descriptor in descriptors:
       builder = (getattr(self.encoder, descriptor.method) if isinstance(descriptor.method, str)
@@ -134,8 +137,11 @@ class _Bridge:
     descriptor = self.descriptors[name]
     packer = CANPacker(self.case.DBC)
     frames = []
-    for message, bus, template, checksum in self.templates[name]:
-      values = template | self.values[name]
+    templates = self.templates[name]
+    samples = self.cycles.get(name, [{}])
+    for index in range(lcm(len(templates), len(samples))):
+      message, bus, template, checksum = templates[index % len(templates)]
+      values = template | self.values[name] | samples[index % len(samples)]
       frame = packer.make_can_msg(message, bus, values)
       if checksum is not None:
         frame = checksum(frame)
@@ -152,6 +158,7 @@ class _Bridge:
     if captured is None or captured[1] != frame or not captured[3]:
       # Manual packets and post-encoding corruption are deliberate raw injections.
       return frame, [], None
+    assert name not in self.cycles, f'Incidental capture during periodic speed window: {name}'
     # A packet is a one-shot encoder event. Replaying the same object must
     # exercise a stuck counter, rather than acquire a fresh stream counter.
     self.case.packer.pending.remove(captured)
@@ -362,3 +369,79 @@ def suspend_required_streams(case, *names):
       if name not in bridge.invalidated:
         case._drop_required_stream(name)
       bridge.suspended.add(name)
+
+
+@contextmanager
+def periodic_speed_window(case, builders, values):
+  """Rivian-only ordered payload evidence, not per-frame timing or full-cycle loss proof."""
+  assert case.SAFETY_MODEL == CarParams.SafetyModel.rivian and len(values) == 6
+  bridge, backend = case._fixture_stream_bridge, case.backend
+  assert not bridge.cycles
+  names = []
+  try:
+    for builder in builders:
+      captures = []
+      for value in values:
+        packet = builder(value)
+        entry = next(entry for entry in reversed(case.packer.pending) if entry[0] is packet)
+        case.packer.pending.remove(entry)
+        frame, fields = entry[1:3]
+        name = bridge.keys[(frame[0], frame[2])]
+        descriptor = bridge.descriptors[name]
+        assert all(fields.get(field) in allowed for field, allowed in descriptor.quality_values)
+        captures.append({key: value for key, value in fields.items() if key not in descriptor.counters})
+      assert name not in names
+      names.append(name)
+      varying = {key for key in captures[0] if any(sample[key] != captures[0][key] for sample in captures)}
+      bridge.cycles[name] = [{key: sample[key] for key in varying} for sample in captures]
+    specs = [bridge.spec(name) for name in names]
+    cursor = len(backend.transport_observations)
+    phases, counts = {}, dict.fromkeys(names, 0)
+    cycles = {spec['name']: [tuple(frame) for frame in spec['frames']] for spec in specs}
+    assert all(len(set(cycle)) == len(cycle) for cycle in cycles.values()), 'Ambiguous Rivian cycle'
+    old = {}
+    # Existing ordinary payloads may already be queued when replacement starts.
+    for name in names:
+      samples = bridge.cycles.pop(name)
+      old[name] = [tuple(frame) for frame in bridge.spec(name)['frames']]
+      bridge.cycles[name] = samples
+    backend.streams(specs)
+
+    def checkpoint():
+      nonlocal cursor
+      backend.wait(0)
+      for record in backend.transport_observations[cursor:]:
+        if record['endpoint'] != 'dut':
+          continue
+        for raw in record.get('frames', []):
+          frame = tuple(raw)
+          for name in names:
+            cycle = cycles[name]
+            if (frame[0], frame[2]) != (cycle[0][0], cycle[0][2]):
+              continue
+            if name not in phases and frame in old[name]:
+              continue
+            assert frame in cycle, f'Unexpected periodic speed payload: {name}'
+            phase = cycle.index(frame)
+            assert name not in phases or phase == (phases[name] + 1) % len(cycle), f'Periodic speed discontinuity: {name}'
+            phases[name] = phase
+            counts[name] += 1
+      cursor = len(backend.transport_observations)
+
+    for _ in range(50):
+      checkpoint()
+      if min(counts.values()) >= 6:
+        break
+      backend.wait(.02)
+    assert min(counts.values()) >= 6, 'Periodic speed activation missing six ordered deliveries'
+    activated = counts.copy()
+    try:
+      yield checkpoint
+    finally:
+      checkpoint()
+      assert all(counts[name] > activated[name] for name in names), 'Periodic speed made no progress'
+  finally:
+    for name in names:
+      bridge.cycles.pop(name, None)
+    if names:
+      backend.streams([bridge.spec(name) for name in names])

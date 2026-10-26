@@ -14,6 +14,7 @@ libsafety_py.ffi.cdef('extern bool ignition_can; extern uint32_t ignition_can_cn
 class SimulatedBackend:
   def __init__(self):
     self.safety = libsafety_py.libsafety
+    self.transport_observations = []
     self.scan_observations = []
     self.rx_group_observations = []
     self.reset(0)
@@ -122,6 +123,8 @@ class SimulatedBackend:
     del self.active_streams[name]
 
   def rx(self, frame):
+    self.transport_observations.append({'endpoint': 'dut', 'frames': [list(frame)],
+                                        'source': 'simulated_virtual_time', 'physical': False})
     packet = self._packet(frame)
     accepted = bool(self.safety.safety_rx_hook(packet))
     self.safety.ignition_can_hook(packet)

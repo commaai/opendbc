@@ -1267,8 +1267,16 @@ class VehicleSpeedSafetyTest(SafetyTestBase):
         # keep the helper's default monotonic wall clock without an override.
         hold_options['clock'] = lambda: self.backend.now / 1_000_000
 
+    periodic_speed = self.backend is not None and torque and self.SAFETY_MODEL == CarParams.SafetyModel.rivian
+
     @contextmanager
     def window(val, builders):
+      if periodic_speed:
+        from opendbc.safety.tests.fixture_streams import periodic_speed_window
+        with periodic_speed_window(self, builders, [val + i * 0.1 for i in range(MAX_SAMPLE_VALS)]) as checkpoint:
+          self._set_controls_allowed(True)
+          yield checkpoint
+        return
       # Engagement and command-baseline setup run with periodic RX active.
       # Hold only while injecting the six samples and probing their boundary.
       with ExitStack() as stack:
@@ -1297,17 +1305,31 @@ class VehicleSpeedSafetyTest(SafetyTestBase):
         if torque:
           self._set_controls_allowed(False)
           self.assertTrue(self._tx(self._torque_cmd_msg(0)))
-          self._set_controls_allowed(True)
+          if not periodic_speed:
+            self._set_controls_allowed(True)
           with window(val, builders) as samples:
             current = 0
+            frames = []
+            if periodic_speed:
+              samples()
             while current < accepted:
               current = min(current + self.MAX_RATE_UP, accepted)
+              if periodic_speed:
+                frames.append(self._raw_frame(self._torque_cmd_msg(sign * current)))
+                continue
               samples()
               if self.backend is None:
                 self._advance_torque_time()
               else:
                 self._wait(max(0.01, (RT_INTERVAL + 1) / 1_000_000 * self.MAX_RATE_UP / (0.8 * self.MAX_RT_DELTA)))
               self.assertTrue(self._tx(self._torque_cmd_msg(sign * current)), (val, sign, current))
+            if frames:
+              cadence = max(0.01, (RT_INTERVAL + 1) / 1_000_000 * self.MAX_RATE_UP / (0.8 * self.MAX_RT_DELTA))
+              cadence_us = int(np.ceil(cadence * 1_000_000))
+              # accepted_ramp dispatches immediately; retain the first step's wait.
+              self._wait(cadence_us / 1_000_000)
+              result = self.backend.accepted_ramp(frames, cadence_us)
+              self.assertEqual(result['verdicts'], [True] * len(frames))
             samples()
             self._advance_torque_time()
             self.assertTrue(self._tx(self._torque_cmd_msg(sign * accepted)))

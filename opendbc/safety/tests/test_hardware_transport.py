@@ -92,6 +92,128 @@ def station(fd=True):
 
 
 class TestHardwareTransport(unittest.TestCase):
+
+  def rivian_speed_window(self):
+    from opendbc.safety.tests.test_rivian import TestRivianLongitudinalSafety
+    case = type('RivianPeriodicFixture', (TestRivianLongitudinalSafety,), {})(methodName='runTest')
+    self.addCleanup(case.doCleanups)
+    with patch.dict(os.environ, SAFETY_BACKEND='simulated'):
+      case.setUp()
+    return case, case.backend
+
+  def test_periodic_speed_wrap_and_cleanup(self):
+    from opendbc.safety.tests.fixture_streams import periodic_speed_window
+    case, backend = self.rivian_speed_window()
+    bridge = case._fixture_stream_bridge
+    ordinary = [bridge.spec(name) for name in ('speed', 'gas_speed')]
+    before = {name: (backend.active_streams[name]['index'], backend.active_streams[name]['next']) for name in ('speed', 'gas_speed')}
+    replacements = []
+    streams = backend.streams
+
+    def replace(specs):
+      state = {name: (stream['index'], stream['next']) for name, stream in backend.active_streams.items()}
+      if len(specs[0]['frames']) == 30:
+        # A drain after replacement can contain an already queued old prefix.
+        backend.transport_observations.append({'endpoint': 'dut', 'frames': [ordinary[0]['frames'][0]],
+                                               'physical': False, 'source': 'simulated_virtual_time'})
+      streams(specs)
+      for name in state:
+        self.assertEqual(state[name], (backend.active_streams[name]['index'], backend.active_streams[name]['next']))
+      replacements.append(specs)
+
+    with patch.object(backend, 'streams', side_effect=replace):
+      with periodic_speed_window(case, [case._speed_msg, case._speed_msg_2], [10 + i * .1 for i in range(6)]) as checkpoint:
+        for name, samples in bridge.cycles.items():
+          self.assertEqual(len(samples), 6)
+          self.assertEqual(len(bridge.spec(name)['frames']), 30)
+        backend.wait(.7)  # Cross the 30-frame wrap without resetting either phase.
+        checkpoint()
+        with self.assertRaisesRegex(AssertionError, 'Incidental capture'):
+          prepare_rx(case, case._speed_msg(20))
+    self.assertFalse(bridge.cycles)
+    self.assertEqual(replacements[-1], ordinary)
+    self.assertTrue(all(backend.active_streams[name]['index'] > before[name][0] + 30 for name in before))
+    self.assertTrue(all(record['physical'] is False for record in backend.transport_observations))
+
+  def test_periodic_speed_engages_after_activation(self):
+    from opendbc.safety.tests.test_rivian import TestRivianStockSafety
+
+    def run_phase(phase):
+      case = TestRivianStockSafety('test_vehicle_speed_measurements')
+      self.addCleanup(case.doCleanups)
+      with patch.dict(os.environ, SAFETY_BACKEND='simulated'):
+        case.setUp()
+      backend = case.backend
+      streams, engage = backend.streams, case._engage
+      activations = engagements = 0
+      cursor = 0
+
+      def replace(specs):
+        nonlocal activations, cursor
+        if any(len(spec['frames']) == 30 for spec in specs):
+          self.assertFalse(case._controls_allowed())
+          backend.active_streams['gas_speed']['next'] = backend.active_streams['speed']['next'] + phase
+          cursor = len(backend.transport_observations)
+          activations += 1
+        streams(specs)
+
+      def engage_after_activation():
+        nonlocal engagements
+        if not case._fixture_stream_bridge.cycles:
+          return engage()  # Existing post-reset neutral guard.
+        self.assertEqual(activations, engagements + 1)
+        for name in ('speed', 'gas_speed'):
+          frames = case._fixture_stream_bridge.spec(name)['frames']
+          deliveries = [record['frames'][0] for record in backend.transport_observations[cursor:] if record['frames'][0] in frames]
+          self.assertGreaterEqual(len(deliveries), 6)
+        engagements += 1
+        engage()
+
+      with patch.object(backend, 'streams', side_effect=replace), patch.object(case, '_engage', side_effect=engage_after_activation):
+        case.test_vehicle_speed_measurements()
+      self.assertEqual((activations, engagements), (160 * 2, 160 * 2))
+
+    for phase in (-10000, 0, 10000):
+      with self.subTest(secondary_phase_us=phase):
+        run_phase(phase)
+
+  def test_periodic_speed_missing_or_duplicate_payload(self):
+    from opendbc.safety.tests.fixture_streams import periodic_speed_window
+    for duplicate in (False, True):
+      with self.subTest(duplicate=duplicate):
+        case, backend = self.rivian_speed_window()
+        with self.assertRaisesRegex(AssertionError, 'discontinuity'):
+          with periodic_speed_window(case, [case._speed_msg, case._speed_msg_2], [10 + i * .1 for i in range(6)]) as checkpoint:
+            start = len(backend.transport_observations)
+            backend.wait(.7)
+            records = backend.transport_observations
+            index = next(i for i in range(start, len(records)) if records[i]['frames'][0] == case._fixture_stream_bridge.spec('speed')['frames'][0])
+            if duplicate:
+              records.insert(index, records[index])
+            else:
+              records.pop(index)
+            checkpoint()
+        self.assertFalse(case._fixture_stream_bridge.cycles)
+        self.assertEqual(len(backend.active_streams['speed']['frames']), 15)
+
+  def test_periodic_speed_activation_and_exception_cleanup(self):
+    from opendbc.safety.tests.fixture_streams import periodic_speed_window
+    case, backend = self.rivian_speed_window()
+    with self.assertRaisesRegex(RuntimeError, 'probe failure'):
+      with periodic_speed_window(case, [case._speed_msg, case._speed_msg_2], [10 + i * .1 for i in range(6)]):
+        for name in ('speed', 'gas_speed'):
+          frames = backend.active_streams[name]['frames']
+          deliveries = [raw for record in backend.transport_observations for raw in record['frames'] if raw in frames]
+          self.assertGreaterEqual(len(deliveries), 6)
+        backend.wait(.02)
+        raise RuntimeError('probe failure')
+    self.assertFalse(case._fixture_stream_bridge.cycles)
+    with patch.object(backend, 'wait'):
+      with self.assertRaisesRegex(AssertionError, 'activation missing'):
+        with periodic_speed_window(case, [case._speed_msg, case._speed_msg_2], [10 + i * .1 for i in range(6)]):
+          self.fail('Unactivated window reached probe')
+    self.assertFalse(case._fixture_stream_bridge.cycles)
+
   def test_fd_wire_layout(self):
     for length in CANFD_LENGTHS:
       with self.subTest(length=length):
