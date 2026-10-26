@@ -84,7 +84,7 @@ class CarState(CarStateBase):
     ret.standstill = cp_party.vl["ESP_B"]["ESP_vehicleStandstillSts"] == 1
     ret.accFaulted = cruise_state == "FAULT"
 
-    # needed for stalkless vehicles, steering button cancel routes through AP computer
+    # stalkless cars send the cancel button through the AP's DAS_control, which we block with openpilot longitudinal
     acc_cancel = cp_ap_party.vl["DAS_control"]["DAS_accState"] == 13  # ACC_CANCEL_GENERIC_SILENT
     if self.CP.openpilotLongitudinalControl:
       ret.buttonEvents = create_button_events(acc_cancel, self.acc_cancel_prev, {1: ButtonType.cancel})

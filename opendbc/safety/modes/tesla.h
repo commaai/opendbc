@@ -4,6 +4,7 @@
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
+static int tesla_acc_state_prev = 0;
 
 // Only rising edges while controls are not allowed are considered for these systems:
 // TODO: Only LKAS (non-emergency) is currently supported since we've only seen it
@@ -169,6 +170,15 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x2b9U, 2U)) {
     // "AEB_ACTIVE"
     tesla_stock_aeb = (msg->data[2] & 0x03U) == 1U;
+
+    // Stalkless cars send the steering wheel cancel button through the AP computer, and we block its DAS_control
+    // with openpilot longitudinal. Exit controls on any change of ACC_CANCEL_GENERIC_SILENT
+    int acc_state = msg->data[1] >> 4;  // DAS_accState
+    bool acc_cancel_changed = (acc_state == 13) != (tesla_acc_state_prev == 13);  // ACC_CANCEL_GENERIC_SILENT
+    if (tesla_longitudinal && acc_cancel_changed) {
+      controls_allowed = false;
+    }
+    tesla_acc_state_prev = acc_state;
   }
 
   // DAS_steeringControl
@@ -330,6 +340,7 @@ static safety_config tesla_init(uint16_t param) {
 #endif
 
   tesla_stock_aeb = false;
+  tesla_acc_state_prev = 0;
   tesla_stock_lkas = false;
   tesla_stock_lkas_prev = false;
   // we need to assume Autopark/Summon on startup since DI_state is a low freq msg.
