@@ -96,8 +96,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           should_tx = not any(pressed[:-1]) and (not pressed[-1] or cruise_engaged)
           self.assertEqual(should_tx, self._tx(msg))
 
-  @coverage('Fault rejection, disengagement and consumed-speed jerk probes',
-            host=('Exact stored speed min/max preservation after rejected frames',))
+  @coverage('Checksum rejection, controls-off observations, and high-speed jerk checks after recovery',
+            host=('Exact stored speed min/max preservation across rejected frames and unreseeded high-speed jerk check',))
   def test_rx_checksums(self):
     for name, bus, signal, initial, corrupt in (
       ("WHEELSPEED_CLEAN", self.MAIN_BUS, "WHEELSPEED_CLEAN", 72, 0),
@@ -121,16 +121,24 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           if self.backend is not None:
             from opendbc.safety.tests.fixture_streams import suspend_required_streams
             # A checksum fault can also change the counter tracker. Keep the
-            # exact faulty frame and its consequences isolated until the next
-            # explicit reset, rather than healing it with periodic valid input.
+            # exact faulty frame isolated through rejection and controls-off
+            # observations; the speed case explicitly ends isolation below.
             suspend_required_streams(self, 'speed' if name == "WHEELSPEED_CLEAN" else 'pcm')
           self.assertFalse(self._rx(msg, raw=True))
           self.assertFalse(self._controls_allowed())
-          if self.backend is None:  # Supplement the shared rejection and disengagement probes.
+          if self.backend is None:  # Exact speed retention across the rejected frame, before any recovery.
             self.assertEqual(speed_min, self.safety.get_vehicle_speed_min())
             self.assertEqual(speed_max, self.safety.get_vehicle_speed_max())
           if name == "WHEELSPEED_CLEAN":
-            # A corrupt zero-speed frame must not relax the high-speed jerk gate.
+            if self.backend is not None:
+              # End raw-fault isolation before the healthy jerk probe. Reinstall
+              # the same high speed and let the 1 Hz RX watchdog recover.
+              self._update_required_streams(self.required_streams())
+              for _ in range(16):
+                self.assertTrue(self._rx(self._speed_msg(initial / 3.6)))
+              self._wait(1.1)
+            # Host checks retained speed without reseeding after the corrupt frame;
+            # backend checks the jerk gate at the restored healthy high speed.
             # Re-engage via CAN, then seed zero command without changing speed.
             self._set_controls_allowed(True)
             self._set_prev_desired_angle(0)
