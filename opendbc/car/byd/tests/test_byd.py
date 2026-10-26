@@ -210,7 +210,7 @@ class TestBydPcw(unittest.TestCase):
 
 def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_btn_rising=False, eps_standby=False,
         buttons=None, buttons_ts=0, steering_pressed=False, stock_aeb=False, acc_cmd=None, standstill=False, v_ego=20.0,
-        gas_pressed=False):
+        gas_pressed=False, camera_acc_state=0):
   return SimpleNamespace(
     eps_engaged=eps_engaged,
     eps_standby=eps_standby,
@@ -220,10 +220,10 @@ def _cs(eps_engaged=True, lks_enabled=True, camera_lkas_state=0, angle=0.0, lks_
     lks_enabled=lks_enabled,
     lks_btn_rising=lks_btn_rising,
     camera_lkas_state=camera_lkas_state,
+    camera_acc_state=camera_acc_state,
     pcm_buttons_stock=buttons if buttons is not None else {},
     pcm_buttons_ts=buttons_ts,
     pcm_buttons_new=[],
-    camera_acc_state=0,
     acc_hud_stock={},
     acc_cmd_stock=acc_cmd if acc_cmd is not None else {},
     out=SimpleNamespace(vEgoRaw=v_ego, steeringAngleDeg=angle, steeringPressed=steering_pressed, stockAeb=stock_aeb,
@@ -951,6 +951,20 @@ class TestBydAccCmd(unittest.TestCase):
     _, dat, _ = bydcan.create_acc_cmd(self.packer, 0.0, False, True, True, 0)
     self.assertEqual(bytes(dat[:6]), bytes.fromhex("646464805000"))
 
+  def test_gas_override_frame(self):
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, -1.0, False, False, False, 0, gas_override=True)
+    self.assertEqual(bytes(dat[:6]), bytes.fromhex("646666834c28"))
+    self.assertEqual(dat[7], (~sum(dat[:7])) & 0xFF)
+    values = _decode("ACC_CMD", (0x32E, dat, 0))
+    self.assertEqual(values["ACCEL_CMD"], 0.0)
+    self.assertEqual(values["ACC_ON_1"], 1)
+    self.assertEqual(values["ACC_REQ_NOT_STANDSTILL"], 1)
+    self.assertEqual(values["ACC_CONTROLLABLE_AND_ON"], 0)
+    self.assertEqual(values["ACC_OVERRIDE_OR_STANDSTILL"], 1)
+    self.assertEqual(values["STANDSTILL_STATE"], 0)
+    _, dat, _ = bydcan.create_acc_cmd(self.packer, -0.5, True, False, False, 0, gas_override=True)
+    self.assertEqual(bytes(dat[:6]), bytes.fromhex("5a6666834c18"))
+
   def test_stock_aeb_threshold(self):
     idle = _decode("ACC_CMD", (0x32E, _acc_frame("646464805000f0"), 0))
     self.assertGreaterEqual(idle["ACCEL_CMD"], CCP_INSTANCE.STOCK_AEB_ACCEL)
@@ -978,7 +992,7 @@ class TestBydLongControl(unittest.TestCase):
   def _slots(self, ctrl, n, **kw):
     out = []
     for _ in range(n):
-      cs_kw = {k: kw[k] for k in ("stock_aeb", "acc_cmd", "standstill", "v_ego") if k in kw}
+      cs_kw = {k: kw[k] for k in ("stock_aeb", "acc_cmd", "standstill", "v_ego", "gas_pressed", "camera_acc_state") if k in kw}
       CC = _cc(enabled=kw.get("enabled", True), lat_active=False, long_active=kw.get("long_active", False))
       CC.actuators.accel = kw.get("accel", 0.0)
       act, sends = ctrl.update(CC, _cs(**cs_kw), 0)
@@ -1059,6 +1073,68 @@ class TestBydLongControl(unittest.TestCase):
     self.assertAlmostEqual(msg["ACCEL_CMD"], -3.0, places=6)
     self.assertEqual(msg["ACC_ON_1"], 1)
     self.assertEqual(msg["COUNTER"], 0)
+
+  def test_gas_override_and_resume(self):
+    ctrl = _ctrl(long_control=True)
+    _act, msg = self._slots(ctrl, 2, long_active=False, gas_pressed=True, camera_acc_state=3, accel=-1.2)[0]
+    self.assertEqual(msg["ACCEL_CMD"], 0.0)
+    self.assertEqual(msg["ACC_ON_1"], 1)
+    self.assertEqual(msg["ACC_CONTROLLABLE_AND_ON"], 0)
+    self.assertEqual(msg["ACC_OVERRIDE_OR_STANDSTILL"], 1)
+    cmds = []
+    for _ in range(12):
+      _act, msg = self._slots(ctrl, 2, long_active=True, accel=-0.4, camera_acc_state=3)[0]
+      cmds.append(round(msg["ACCEL_CMD"], 2))
+    self.assertEqual(cmds[:9], [0.0, -0.05, -0.1, -0.15, -0.2, -0.25, -0.3, -0.35, -0.4])
+    self.assertEqual(cmds[-1], -0.4)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=-0.9, camera_acc_state=3)[0]
+    self.assertAlmostEqual(msg["ACCEL_CMD"], -0.9, places=6)
+
+  def test_gas_override_hard_step(self):
+    ctrl = _ctrl(long_control=True)
+    self._slots(ctrl, 2, long_active=False, gas_pressed=True, camera_acc_state=3)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=-2.0, camera_acc_state=3)[0]
+    self.assertEqual(msg["ACCEL_CMD"], 0.0)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=-2.0, camera_acc_state=3)[0]
+    self.assertAlmostEqual(msg["ACCEL_CMD"], -CCP.GAS_RESUME_STEP_HARD, places=6)
+
+  def test_gas_override_standstill_snaps(self):
+    ctrl = _ctrl(long_control=True)
+    self._slots(ctrl, 2, long_active=False, gas_pressed=True, camera_acc_state=3, standstill=True, v_ego=0.0)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=-0.5, camera_acc_state=3, standstill=True, v_ego=0.0)[0]
+    self.assertAlmostEqual(msg["ACCEL_CMD"], -0.5, places=6)
+    self.assertEqual(msg["STANDSTILL_STATE"], 1)
+
+  def test_disengage_and_camera_off_stay_idle(self):
+    ctrl = _ctrl(long_control=True)
+    _act, msg = self._slots(ctrl, 2, enabled=False, long_active=False, gas_pressed=True, camera_acc_state=3)[0]
+    self.assertEqual(msg["ACC_ON_1"], 0)
+    self.assertEqual(msg["ACCEL_CMD"], 0.0)
+    ctrl = _ctrl(long_control=True)
+    _act, msg = self._slots(ctrl, 2, long_active=False, gas_pressed=True, camera_acc_state=0)[0]
+    self.assertEqual(msg["ACC_ON_1"], 0)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=-0.4, camera_acc_state=0)[0]
+    self.assertAlmostEqual(msg["ACCEL_CMD"], -0.4, places=6)
+
+  def test_gas_between_slots_does_not_step(self):
+    ctrl = _ctrl(long_control=True)
+    CC = _cc(enabled=True, lat_active=False, long_active=False)
+    ctrl.update(CC, _cs(gas_pressed=True, camera_acc_state=3), 0)
+    CC = _cc(enabled=True, lat_active=False, long_active=True)
+    CC.actuators.accel = -0.4
+    _act, sends = ctrl.update(CC, _cs(gas_pressed=False, camera_acc_state=3), 0)
+    msg = _decode("ACC_CMD", [m for m in sends if m[0] == 0x32E][0])
+    self.assertEqual(msg["ACCEL_CMD"], 0.0)
+    self.assertEqual(msg["ACC_CONTROLLABLE_AND_ON"], 1)
+
+  def test_aeb_clears_gas_resume(self):
+    ctrl = _ctrl(long_control=True)
+    self._slots(ctrl, 2, long_active=False, gas_pressed=True, camera_acc_state=3)
+    stock = _decode("ACC_CMD", (0x32E, _acc_frame("286666834c18f3"), 0))
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=1.0, stock_aeb=True, acc_cmd=stock)[0]
+    self.assertAlmostEqual(msg["ACCEL_CMD"], -3.0, places=6)
+    _act, msg = self._slots(ctrl, 2, long_active=True, accel=-0.4, camera_acc_state=3)[0]
+    self.assertAlmostEqual(msg["ACCEL_CMD"], -0.4, places=6)
 
   def test_buttons_relay_strips_acc_and_keeps_counter(self):
     ctrl = _ctrl(long_control=True)

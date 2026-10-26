@@ -524,6 +524,13 @@ class TestBydLongitudinalSafety(TestBydSafety, common.LongitudinalAccelSafetyTes
     values = {"ACCEL_CMD": accel, "DECEL_FACTOR": decel_factor, "SET_ME_XF": 0xF}
     return self.packer.make_can_msg_safety("ACC_CMD", self.CAM_BUS if bus is None else bus, values)
 
+  def test_gas_pressed_blocks_accel(self):
+    self.safety.set_controls_allowed(True)
+    self.safety.set_gas_pressed_prev(True)
+    self.assertTrue(self._tx(self._accel_msg(0.0)))
+    self.assertFalse(self._tx(self._accel_msg(-0.5)))
+    self.assertFalse(self._tx(self._accel_msg(0.5)))
+
   def test_enable_control_allowed_from_cruise(self):
     pass
 

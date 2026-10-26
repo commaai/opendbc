@@ -211,6 +211,8 @@ class CarController(CarControllerBase):
     self.yield_hold = 0
     self.standstill_hold = False
     self.standstill_resume = False
+    self.gas_override = False
+    self.gas_resume_wait = False
 
     self.VM = VehicleModel(get_safety_CP(CP.carFingerprint))
 
@@ -311,12 +313,31 @@ class CarController(CarControllerBase):
     self.send_op_last = own_steer
     self.lat_send_last = lat_send if own_steer else False
 
+  def _apply_accel(self, target, standstill):
+    if self.gas_override and not standstill:
+      if self.gas_resume_wait:
+        self.accel = 0.0
+        self.gas_resume_wait = False
+        return
+      step = self.CCP.GAS_RESUME_STEP_HARD if target <= self.CCP.GAS_RESUME_HARD else self.CCP.GAS_RESUME_STEP
+      gap = target - self.accel
+      if abs(gap) <= step:
+        self.accel = target
+        self.gas_override = False
+      else:
+        self.accel += float(np.copysign(step, gap))
+      return
+    self.accel = target
+    self.gas_override = False
+    self.gas_resume_wait = False
+
   def _update_long(self, CC, CS, cntr, can_sends, actuators, hud_control):
     if CS.out.stockAeb:
       can_sends.append(bydcan.create_acc_cmd_passthrough(self.packer, CS.acc_cmd_stock, cntr))
     else:
       if CC.longActive:
-        self.accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+        target = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+        self._apply_accel(target, CS.out.standstill)
         # Standstill hold bits; RESUME clears once rolling.
         hold = CS.out.standstill and self.accel <= 0.0
         if hold or CS.out.vEgoRaw >= self.CCP.STANDSTILL_RESUME_CLEAR_SPEED:
@@ -329,7 +350,8 @@ class CarController(CarControllerBase):
         self.standstill_hold = False
         self.standstill_resume = False
       can_sends.append(bydcan.create_acc_cmd(self.packer, self.accel, CC.longActive, self.standstill_hold,
-                                             self.standstill_resume, cntr))
+                                             self.standstill_resume, cntr,
+                                             gas_override=self.gas_override and not CC.longActive))
     acc_state = 0 if CS.camera_acc_state == 0 else (5 if CC.enabled and CS.out.gasPressed and not CC.longActive else
                                                    (3 if CC.longActive else 2))
     # vCruise is 255 until first engage; do not paint that.
@@ -347,6 +369,16 @@ class CarController(CarControllerBase):
     can_sends = []
     actuators = CC.actuators
     hud_control = CC.hudControl
+
+    # 0x32E is 50 Hz.
+    if self.CP.openpilotLongitudinalControl:
+      override = CC.enabled and (not CC.longActive) and CS.out.gasPressed and CS.camera_acc_state != 0
+      if not CC.enabled or CS.out.stockAeb or (not CC.longActive and not override):
+        self.gas_override = False
+        self.gas_resume_wait = False
+      elif override:
+        self.gas_override = True
+        self.gas_resume_wait = True
 
     self.lks.lks_relay_tick = False
     if self.CP.flags & BydFlags.LKS_HUD_CONTROL:

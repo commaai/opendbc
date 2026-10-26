@@ -34,6 +34,9 @@ class CarControllerParams:
 
   ACCEL_MIN = -3.5                    # m/s^2
   ACCEL_MAX = 2.0                     # m/s^2
+  GAS_RESUME_HARD = -1.0              # m/s^2, faster step at or below this
+  GAS_RESUME_STEP = 0.05              # m/s^2 per 50 Hz slot
+  GAS_RESUME_STEP_HARD = 0.10
 
   # Column torque; EPS DRIVER_EPS_TORQUE is attenuated ~12x and unusable for override
   STEER_DRIVER_OVERRIDE = 22          # Nm soft override
