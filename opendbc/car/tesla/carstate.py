@@ -5,6 +5,9 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, TeslaFlags
 
+ButtonType = structs.CarState.ButtonEvent.Type
+
+
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
