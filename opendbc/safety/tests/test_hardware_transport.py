@@ -14,7 +14,7 @@ from opendbc.safety.tests.fixture_streams import prepare_rx
 
 def health_snapshot(**changes):
   health = dict(safety_mode=1, safety_param=0, controls_allowed=False, safety_rx_checks_invalid=False,
-                safety_rx_invalid=0, rx_buffer_overflow=0, tx_buffer_overflow=0, faults=0)
+                safety_rx_invalid=0, rx_buffer_overflow=0, tx_buffer_overflow=0, faults=0, alternative_experience=0)
   health.update(changes)
   return health
 
@@ -175,7 +175,7 @@ class TestHardwareTransport(unittest.TestCase):
     with patch('opendbc.safety.tests.hardware.time.sleep'):
       backend.reset(1)
     self.assertIs(backend.transport_observations, records)
-    self.assertEqual(len(records), 7)  # Failed validation, reset baseline, reset check.
+    self.assertEqual(len(records), 8)  # Failed validation, configuration readback, reset baseline/check.
     self.assertEqual(records[-2]['health']['rx_buffer_overflow'], 1)
 
   def rivian_speed_window(self):
@@ -379,18 +379,23 @@ class TestHardwareTransport(unittest.TestCase):
     service.error = None
     service.configuration = {}
     service.fd_buses = set()
-    service.panda = Mock(spec=['set_alternative_experience'])
+    service.panda = Mock(spec=['set_alternative_experience', 'health'])
     for value in (0, 4, 65535):
       with self.subTest(value=value):
+        service.panda.health.return_value = {'alternative_experience': value}
         service.dispatch({'op': 'configure', 'setting': 'alternative_experience', 'value': value})
         service.panda.set_alternative_experience.assert_called_with(value)
-        self.assertEqual(service.configuration, {'alternative_experience': {'value': value}})
+        self.assertEqual(service.configuration, {'alternative_experience': {'value': value, 'verified': True}})
     service.panda.set_alternative_experience.reset_mock()
     for value in (-1, 65536, True, 1.0, '4'):
       with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'Invalid alternative experience'):
         service.dispatch({'op': 'configure', 'setting': 'alternative_experience', 'value': value})
     service.panda.set_alternative_experience.assert_not_called()
-    self.assertEqual(service.configuration, {'alternative_experience': {'value': 65535}})
+    self.assertEqual(service.configuration, {'alternative_experience': {'value': 65535, 'verified': True}})
+    service.panda.health.return_value = {'alternative_experience': 0}
+    with self.assertRaises(AssertionError):
+      service.dispatch({'op': 'configure', 'setting': 'alternative_experience', 'value': 8})
+    self.assertEqual(service.configuration, {'alternative_experience': {'value': 65535, 'verified': True}})
     for api in (Mock(spec=[]), Mock(set_alternative_experience=None)):
       service.panda = api
       with self.assertRaisesRegex(ValueError, 'lacks set_alternative_experience'):
@@ -540,6 +545,7 @@ class TestHardwareTransport(unittest.TestCase):
     backend.safety.get_current_safety_param.return_value = 0
     backend.safety.get_controls_allowed.return_value = False
     backend.safety.safety_rx_checks_invalid = False
+    backend.safety.alternative_experience = 0
     backend.safety.get_relay_malfunction.return_value = False
     backend.safety.safety_fwd_hook.side_effect = lambda bus, addr: events.append('forward') or 2
     backend.safety.safety_rx_hook.side_effect = lambda packet: events.append('rx') or False
@@ -1562,6 +1568,105 @@ class TestHardwareTransport(unittest.TestCase):
     del health['car_harness_status']
     with self.assertRaisesRegex(AssertionError, 'DUT harness status changed: 0 -> None'):
       backend.health()
+
+  def test_alternative_experience_reset_configures_before_car_mode_and_clears_leakage(self):
+    backend = hardware_backend()
+    health = health_snapshot(car_harness_status=0)
+    writes = []
+
+    def call(op, **kwargs):
+      if op == 'mode':
+        health.update(safety_mode=kwargs['mode'], safety_param=kwargs.get('param', 0), safety_rx_invalid=0)
+      elif op == 'configure':
+        self.assertEqual(health['safety_mode'], 0)
+        writes.append(kwargs['value'])
+        health['alternative_experience'] = kwargs['value']
+      elif op == 'health':
+        return dict(health)
+
+    backend.dut.call.side_effect = call
+    with patch('opendbc.safety.tests.hardware.time.sleep'):
+      backend.reset(20, 10, alternative_experience=8)
+      self.assertEqual(backend.health()['alternative_experience'], 8)
+      self.assertEqual((backend.mode, backend.param), (20, 10))
+      backend.reset(20, 10)
+    self.assertEqual(writes, [8, 0])
+    self.assertEqual(backend.health()['alternative_experience'], 0)
+    # An active-car write is never repaired by a hidden mode transition.
+    backend.dut.call.reset_mock()
+    backend.dut.call.side_effect = lambda op, **kwargs: dict(health) if op == 'health' else None
+    with self.assertRaises(AssertionError):
+      backend.set_alternative_experience(8)
+    self.assertEqual([c.args[0] for c in backend.dut.call.call_args_list], ['configure', 'health'])
+
+  def test_alternative_experience_phases_preserve_honda_probe_domain_with_c_hooks(self):
+    import numpy as np
+    from opendbc.safety.tests.test_honda import TestHondaBoschRadarlessLongSafety
+
+    case = type('HondaAlternativeExperienceFixture', (TestHondaBoschRadarlessLongSafety,), {})(methodName='runTest')
+    self.addCleanup(case.doCleanups)
+    with patch.dict(os.environ, SAFETY_BACKEND='simulated'):
+      case.setUp()
+    backend = case.backend
+    writes, phases, probes = [], [], []
+    configure, setup, encode = backend.set_alternative_experience, case._setup_alternative_experience_phase, case._accel_msg
+
+    def restricted_write(value):
+      self.assertEqual(backend.health()['safety_mode'], 0)
+      writes.append(value)
+      configure(value)
+
+    def phase(value):
+      setup(value)
+      self.assertTrue(backend.active_streams)
+      self.assertGreaterEqual(backend.now, 1_100_000)
+      self.assertFalse(backend.health()['controls_allowed'])
+      self.assertFalse(backend.health()['safety_rx_checks_invalid'])
+      self.assertEqual((backend.health()['safety_mode'], backend.health()['safety_param']), (20, 10))
+      phases.append(value)
+
+    def accel(value):
+      health = backend.health()
+      probes.append((health['alternative_experience'], value, health['controls_allowed']))
+      return encode(value)
+
+    with patch.object(backend, 'set_alternative_experience', side_effect=restricted_write), \
+         patch.object(case, '_setup_alternative_experience_phase', side_effect=phase), \
+         patch.object(case, '_accel_msg', side_effect=accel):
+      case.test_accel_actuation_limits()
+    grid = [round(a, 2) for a in np.concatenate((np.arange(case.MIN_ACCEL - 1, case.MAX_ACCEL + 1, .05), [0, case.INACTIVE_ACCEL]))]
+    self.assertEqual(phases, [0, 8])
+    self.assertEqual(writes, [0, 8])
+    self.assertEqual(probes, [(p, a, c) for p in (0, 8) for a in grid for c in (True, False)])
+    self.assertEqual(len(probes), 608)
+    # Simulation enforces stock's car-mode restriction, using actual C readback.
+    with self.assertRaises(AssertionError):
+      backend.set_alternative_experience(0)
+    backend.reset(20, 10)
+    self.assertEqual(backend.health()['alternative_experience'], 0)
+
+  def test_alternative_experience_reset_rejects_failed_write_or_lost_retention(self):
+    for failure in ('write', 'retention'):
+      with self.subTest(failure=failure):
+        backend = hardware_backend()
+        health = health_snapshot()
+
+        def call(op, failure=failure, health=health, **kwargs):
+          if op == 'mode':
+            health.update(safety_mode=kwargs['mode'], safety_param=kwargs.get('param', 0))
+            if failure == 'retention' and kwargs['mode'] == 20:
+              health['alternative_experience'] = 0
+          elif op == 'configure' and failure != 'write':
+            health['alternative_experience'] = kwargs['value']
+          elif op == 'health':
+            return dict(health)
+
+        backend.dut.call.side_effect = call
+        with patch('opendbc.safety.tests.hardware.time.sleep'), self.assertRaises(AssertionError):
+          backend.reset(20, 10, alternative_experience=8)
+        self.assertEqual(backend.transport_observations[-1]['health']['alternative_experience'], 0)
+        if failure == 'write':
+          self.assertFalse(any(c.args[0] == 'mode' and c.kwargs['mode'] == 20 for c in backend.dut.call.call_args_list))
 
 
 if __name__ == '__main__':

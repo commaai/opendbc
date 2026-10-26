@@ -193,7 +193,9 @@ class Service:
         if not callable(fn):
           raise ValueError('Installed stock Panda API lacks set_alternative_experience')
         fn(value)
-        self.configuration['alternative_experience'] = {'value': value}
+        health = self.panda.health()
+        assert health['alternative_experience'] == value, health
+        self.configuration['alternative_experience'] = {'value': value, 'verified': True}
         return
       if op == 'recv':
         frames = list(self.queue)

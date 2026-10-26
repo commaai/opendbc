@@ -211,13 +211,16 @@ class HardwareBackend:
       self.station.call('clear')
       return result
 
-  def reset(self, mode, param=0):
+  def reset(self, mode, param=0, *, alternative_experience=0):
     # Configuration may drain stale traffic from the preceding mode. Establish
     # evidence baselines only after that lifecycle transition has settled.
     self.station.call('clear', reset_stats=True)
     self._station_streams = {}
     self.dut.call('mode', mode=0)
     self.dut.call('clear')
+    self.dut.call('configure', setting='alternative_experience', value=int(alternative_experience))
+    health = self._transport_call('dut', 'health')
+    assert health['alternative_experience'] == alternative_experience, health
     self.dut.call('mode', mode=int(mode), param=int(param))
     time.sleep(.1)
     self.dut.call('clear')
@@ -228,7 +231,8 @@ class HardwareBackend:
     self._overflow_baseline = {key: health[key] for key in ('rx_buffer_overflow', 'tx_buffer_overflow')}
     self._expected_rx_invalid = health['safety_rx_invalid']
     self.mode, self.param = int(mode), int(param)
-    self._check(None, False)
+    health = self._check(None, False)
+    assert health['alternative_experience'] == alternative_experience, health
 
   def _check(self, controls, healthy):
     health = self.health()

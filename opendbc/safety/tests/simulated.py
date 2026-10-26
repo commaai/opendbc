@@ -8,7 +8,8 @@ from opendbc.safety.tests.libsafety import libsafety_py
 
 
 # init_tests resets these firmware globals; changing safety mode must preserve them.
-libsafety_py.ffi.cdef('extern bool ignition_can; extern uint32_t ignition_can_cnt;')
+libsafety_py.ffi.cdef('extern bool ignition_can; extern uint32_t ignition_can_cnt; extern int alternative_experience;')
+libsafety_py.ffi.cdef('extern uint32_t safety_mode_cnt;')
 
 
 class SimulatedBackend:
@@ -26,10 +27,15 @@ class SimulatedBackend:
     self.safety = libsafety_py.ffi.dlopen(libsafety_py._build_libsafety())
     self.reset(0)
 
-  def reset(self, mode, param=0):
-    assert self.safety.set_safety_hooks(mode, param) == 0
+  def reset(self, mode, param=0, *, alternative_experience=0):
+    assert self.safety.set_safety_hooks(0, 0) == 0
     ignition = (self.safety.ignition_can, self.safety.ignition_can_cnt) if hasattr(self, 'now') else None
     self.safety.init_tests()
+    self.set_alternative_experience(alternative_experience)
+    assert self.safety.set_safety_hooks(mode, param) == 0
+    assert int(self.safety.alternative_experience) == alternative_experience
+    # Preserve init_tests' existing elapsed relay-grace model after selection.
+    self.safety.safety_mode_cnt = 2
     if ignition is not None:
       self.safety.ignition_can, self.safety.ignition_can_cnt = ignition
     self.now = 0
@@ -136,11 +142,15 @@ class SimulatedBackend:
             'safety_param': int(self.safety.get_current_safety_param()),
             'ignition_can': bool(self.safety.get_ignition_can()),
             'controls_allowed': bool(self.safety.get_controls_allowed()),
+            'alternative_experience': int(self.safety.alternative_experience),
             'safety_rx_checks_invalid': bool(self.safety.safety_rx_checks_invalid),
             'safety_rx_invalid': self.invalid, 'faults': int(self.safety.get_relay_malfunction())}
 
   def set_alternative_experience(self, value):
-    self.safety.set_alternative_experience(value)
+    # Match stock 0xdf: active car modes silently ignore configuration writes.
+    if self.safety.get_current_safety_mode() in (0, 3, 17, 19):
+      self.safety.set_alternative_experience(value)
+    assert int(self.safety.alternative_experience) == value
 
   def set_safety_mode(self, mode, param=0):
     self.safety.set_safety_hooks(mode, param)

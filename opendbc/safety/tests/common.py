@@ -196,8 +196,8 @@ class SafetyTestBase(unittest.TestCase):
     from opendbc.safety.tests.fixture_streams import required_streams
     return required_streams(self)
 
-  def _reset_backend(self):
-    self.backend.reset(self._safety_model(), self.SAFETY_PARAM)
+  def _reset_backend(self, alternative_experience=ALTERNATIVE_EXPERIENCE.DEFAULT):
+    self.backend.reset(self._safety_model(), self.SAFETY_PARAM, alternative_experience=alternative_experience)
     self._update_required_streams(self.required_streams())
     # Stock RX watchdog health is published by its independent 1 Hz tick.
     self.backend.wait(1.1)
@@ -420,17 +420,26 @@ class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
     self.assertGreater(self.MAX_ACCEL, 0)
     self.assertLess(self.MIN_ACCEL, 0)
 
+  def _setup_alternative_experience_phase(self, value):
+    # Stock firmware accepts configuration only outside a car safety mode.
+    # Rebuild periodic inputs after the explicit reset; probes engage via CAN.
+    self._reset_backend(value)
+    self.assertEqual(self.backend.health()['alternative_experience'], value)
+
   def test_accel_actuation_limits(self):
     limits = ((self.MIN_ACCEL, self.MAX_ACCEL, ALTERNATIVE_EXPERIENCE.DEFAULT),
               (self.MIN_ACCEL, self.MAX_ACCEL, ALTERNATIVE_EXPERIENCE.RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX))
 
     for min_accel, max_accel, alternative_experience in limits:
+      if self.backend is not None:
+        self._setup_alternative_experience_phase(alternative_experience)
       # enforce we don't skip over 0 or inactive accel
       for accel in np.concatenate((np.arange(min_accel - 1, max_accel + 1, 0.05), [0, self.INACTIVE_ACCEL])):
         accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
         for controls_allowed in [True, False]:
           self._set_controls_allowed(controls_allowed)
-          self._set_alternative_experience(alternative_experience)
+          if self.backend is None:
+            self._set_alternative_experience(alternative_experience)
           if self.LONGITUDINAL:
             should_tx = controls_allowed and min_accel <= accel <= max_accel
             should_tx = should_tx or accel == self.INACTIVE_ACCEL
