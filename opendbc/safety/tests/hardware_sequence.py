@@ -171,3 +171,92 @@ def execute_sequence(service, events, *, exclusive_commands=False, max_lateness_
     report['error'] = f'{type(exc).__name__}: {exc}'
   report['elapsed_ns'] = clock() - budget_start
   return report
+
+
+def execute_rx_group(service, events, *, clock=time.monotonic_ns, sleep=time.sleep):
+  """Emit <=32 all-valid RX inputs; coordinator owns physical evidence/verdicts.
+
+  Existing stream dispatch preserves counter phase and replacement semantics.
+  Queues are retained. Runtime errors return partial ordered frames and timing;
+  the caller must reject incomplete groups and resume streams in its finally.
+  """
+  if service.role != 'station':
+    raise ValueError('rx_group is station-only')
+  if not isinstance(events, list) or not 1 <= len(events) <= 32:
+    raise ValueError('rx_group requires 1..32 events')
+  with service.lock:
+    if not service.streams_paused:
+      raise ValueError('rx_group requires globally paused streams')
+    for event in events:
+      if set(event) != {'frame', 'updates', 'stream_name'}:
+        raise ValueError('Invalid rx_group event schema')
+      name = event['stream_name']
+      if name is not None and (not isinstance(name, str) or name not in service.streams):
+        raise ValueError('rx_group stream must already exist')
+      if event['frame'] is not None or name is None:
+        _frame(event['frame'])
+      if not isinstance(event['updates'], list):
+        raise ValueError('rx_group updates must be stream specs')
+      for spec in event['updates']:
+        if spec['name'] not in service.streams:
+          raise ValueError('rx_group cannot create streams')
+        period = spec['period']
+        if type(period) not in (int, float) or not 0 < period < float('inf') or not spec['frames']:
+          raise ValueError('Invalid rx_group stream spec')
+        for frame in spec['frames']:
+          _frame(frame)
+  report = {'complete': False, 'frames': [], 'events': [], 'start_ns': clock()}
+  deadline = report['start_ns'] + 1000000000
+
+  def check():
+    if clock() >= deadline:
+      raise RuntimeError('rx_group overall deadline exceeded')
+    if not service.streams_paused:
+      raise RuntimeError('rx_group requires globally paused streams')
+    if service.error or service.stopped.is_set():
+      raise RuntimeError('CAN worker failed/stopped: ' + str(service.error))
+
+  def wait_until(target):
+    while clock() < target:
+      with service.lock:
+        check()
+      remaining = target - clock()
+      if remaining > 0:
+        sleep(min(remaining / 1e9, .001))
+
+  try:
+    for event in events:
+      if report['events']:
+        wait_until(report['events'][-1]['send_end_ns'] + 1000000)
+      with service.lock:
+        check()
+        service.check_transport()
+        # Recheck admission under lock before replacement: never initialize a
+        # stream if another producer removed it while the scheduler waited.
+        if any(spec['name'] not in service.streams for spec in event['updates']):
+          raise RuntimeError('rx_group stream removed during group')
+        emitted = service.dispatch({'op': 'streams', 'streams': event['updates']})
+        if emitted:
+          raise RuntimeError('rx_group unexpectedly initialized streams')
+        check()
+        timing = {'send_start_ns': clock()}
+        report['events'].append(timing)
+        if event['stream_name'] is None:
+          frame = list(_frame(event['frame']))
+          service.dispatch({'op': 'send', 'frame': frame})
+        else:
+          frame = service.dispatch({'op': 'rx_stream', 'name': event['stream_name']})
+        report['frames'].append(list(frame))
+        timing['send_end_ns'] = clock()
+        check()
+    wait_until(report['events'][-1]['send_end_ns'] + 20000000)
+    with service.lock:
+      check()
+      service.check_transport()
+      check()
+    report['quiet_end_ns'] = clock()
+    report['complete'] = True
+  except Exception as exc:
+    report['error'] = f'{type(exc).__name__}: {exc}'
+  report['elapsed_ns'] = clock() - report['start_ns']
+  return report

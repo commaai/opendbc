@@ -1,6 +1,7 @@
 """Physical CAN backend. Every verdict comes from stock firmware and wire evidence."""
 import collections
 import json
+import math
 import queue
 import shlex
 import subprocess
@@ -66,6 +67,34 @@ def _accepted_ramp_batches(frames, spacing_us):
           for chunk in chunks for start in range(0, len(chunk), limit)]
 
 
+def _rx_group_plan(events, sources):
+  events = list(events)
+  if not 1 <= len(events) <= 32:
+    raise ValueError('RX group requires 1..32 events')
+  plan, cycles = [], dict(sources)
+  for event in events:
+    if set(event) != {'frame', 'updates', 'stream_name'}:
+      raise ValueError('RX group event requires frame, updates, stream_name')
+    frame = None if event['frame'] is None and event['stream_name'] is not None else \
+      _steering_plan([{'offset_us': 0, 'frame': event['frame']}], 2000)[0]['frame']
+    updates = []
+    for spec in event['updates']:
+      if set(spec) != {'name', 'period', 'frames'} or spec['name'] not in cycles:
+        raise ValueError('RX group updates require existing streams')
+      if type(spec['period']) not in (int, float) or not math.isfinite(spec['period']) or spec['period'] <= 0:
+        raise ValueError('RX group stream period must be positive and finite')
+      frames = [_steering_plan([{'offset_us': 0, 'frame': raw}], 2000)[0]['frame'] for raw in spec['frames']]
+      if not frames:
+        raise ValueError('RX group stream requires frames')
+      updates.append(dict(spec, frames=frames))
+      cycles[spec['name']] = frames
+    name = event['stream_name']
+    if name is not None and name not in cycles:
+      raise ValueError('RX group injection requires existing stream')
+    plan.append({'frame': frame, 'updates': updates, 'stream_name': name})
+  return plan
+
+
 def _identity(frame):
   addr, data, bus = frame
   return addr, bytes.fromhex(data).hex(), bus
@@ -129,6 +158,8 @@ class HardwareBackend:
     self._station_streams = {}
     self.sequence_observations = []
     self.scan_observations = []
+    self.rx_group_observations = []
+    self.transport_observations = []
     self.mode = None
     self.param = 0
     self.evidence = {'rx_physical': 0, 'tx_physical': 0, 'tx_rejected': 0,
@@ -214,11 +245,25 @@ class HardwareBackend:
       raise ValueError('No physical CAN bus ' + str(bus))
     return [int(addr), data, int(bus)]
 
+  def _recv(self, endpoint):
+    """Drain without losing raw traffic unrelated to the current verdict."""
+    if not hasattr(self, 'transport_observations'):
+      self.transport_observations = []
+    record = {'endpoint': endpoint}
+    try:
+      record['frames'] = (self.dut if endpoint == 'dut' else self.station).call('recv')
+      return record['frames']
+    except Exception as exc:
+      record['error'] = f'{type(exc).__name__}: {exc}'
+      raise
+    finally:
+      self.transport_observations.append(record)
+
   def _receive(self, expected):
     pending = list(expected)
     deadline = time.monotonic() + self.timeout
     while pending and time.monotonic() < deadline:
-      for frame in self.dut.call('recv'):
+      for frame in self._recv('dut'):
         if frame in pending:
           pending.remove(frame)
           self.evidence['rx_physical'] += 1
@@ -229,7 +274,8 @@ class HardwareBackend:
     return list(expected)
 
   def streams(self, streams):
-    self.dut.call('recv')
+    self._recv('dut')
+    self._recv('station')
     before = self.health()['safety_rx_invalid']
     emitted = self.station.call('streams', streams=streams)
     for spec in streams:
@@ -237,6 +283,7 @@ class HardwareBackend:
     observed = self._receive(emitted)
     after = self.health()['safety_rx_invalid']
     assert after == before, f'Stream update rejected by safety RX: {before} -> {after}'
+    self._recv('station')
     return observed
 
   def pause_stream(self, name):
@@ -252,6 +299,61 @@ class HardwareBackend:
   def rx(self, frame):
     return self._rx(frame=self._frame(frame))
 
+  def rx_group(self, events):
+    """All-valid RX only: exact emitted multiplicity and per-bus ordering."""
+    plan = _rx_group_plan(events, self._station_streams)
+    with self._command_lock:
+      self.station.call('pause')
+      record = {'events': plan, 'collection_errors': []}
+      self.rx_group_observations.append(record)
+
+      def collect(stage):
+        record[stage] = {}
+        for endpoint in ('dut', 'station'):
+          try:
+            record[stage][endpoint] = self._recv(endpoint)
+          except Exception as exc:
+            record['collection_errors'].append({'stage': stage, 'endpoint': endpoint, 'error': f'{type(exc).__name__}: {exc}'})
+            raise
+
+      try:
+        time.sleep(.020)
+        collect('baseline')
+        before = self._check(None, True)
+        record['health_before'] = before
+        # A partial failure can leave any submitted update active. Retain the
+        # union conservatively for collision guards until reset or replacement.
+        cycles = dict(self._station_streams)
+        allowed = []
+        for event in plan:
+          for spec in event['updates']:
+            cycles[spec['name']] = spec['frames']
+            self._station_streams[spec['name']] = self._station_streams[spec['name']] + spec['frames']
+          allowed.append(cycles[event['stream_name']] if event['stream_name'] is not None else [event['frame']])
+        report = self.station.call('rx_group', events=plan)
+        record['timing'] = report
+        collect('received')
+        record['health_after'] = self.dut.call('health')
+        assert report['complete'] is True, f'Incomplete RX group: {report}'
+        self._station_streams = cycles
+        emitted = [_identity(frame) for frame in report['frames']]
+        assert len(emitted) == len(plan), 'RX group emitted unexpected frame count'
+        for actual, candidates in zip(emitted, allowed, strict=True):
+          assert actual in map(_identity, candidates), f'Unrequested RX group frame: {actual}'
+        physical = [_identity(frame) for frame in record['received']['dut'] if frame[2] in (0, 1, 2)]
+        assert collections.Counter(physical) == collections.Counter(emitted), 'RX group physical multiplicity mismatch'
+        for bus in range(3):
+          assert [frame for frame in physical if frame[2] == bus] == [frame for frame in emitted if frame[2] == bus], 'RX group bus order mismatch'
+        after = record['health_after']
+        self._validate_health(after)
+        self._check_snapshot(after, None, True)
+        assert after['safety_rx_invalid'] == before['safety_rx_invalid'], 'RX group contains invalid input'
+        self._check(None, True)
+        self.evidence['rx_physical'] += len(emitted)
+        return True
+      finally:
+        self.station.call('resume')
+
   def rx_stream(self, name):
     return self._rx(stream=name)
 
@@ -261,13 +363,15 @@ class HardwareBackend:
       # Let already transmitted periodic inputs finish crossing the physical
       # link before attributing an invalid-counter change to this injection.
       time.sleep(.020)
-      self.dut.call('recv')
+      self._recv('dut')
+      self._recv('station')
       before = self.health()['safety_rx_invalid']
       if stream is None:
         self.station.call('send', frame=frame)
       else:
         frame = self.station.call('rx_stream', name=stream)
       self._receive([frame])
+      self._recv('station')
       health = self.dut.call('health')
       delta = health['safety_rx_invalid'] - before
       assert delta in (0, 1), f'Ambiguous safety RX invalid delta: {delta}'
@@ -284,18 +388,18 @@ class HardwareBackend:
   def _tx(self, frame, controls, healthy):
     frame = self._frame(frame)
     before = self._check(controls, healthy)
-    self.dut.call('recv')
-    self.station.call('recv')
+    self._recv('dut')
+    self._recv('station')
     self.dut.call('send', frame=frame)
     addr, data, bus = frame
     accepted = observed = rejected = False
     quiet_deadline = None
     deadline = time.monotonic() + self.timeout
     while time.monotonic() < deadline:
-      received = self.dut.call('recv')
+      received = self._recv('dut')
       accepted |= [addr, data, 128 + bus] in received
       rejected |= [addr, data, 192 + bus] in received
-      observed |= frame in self.station.call('recv')
+      observed |= frame in self._recv('station')
       assert not (rejected and (accepted or observed)), 'Rejected TX also had physical or accepted evidence'
       if rejected and quiet_deadline is None:
         quiet_deadline = time.monotonic() + .020
@@ -324,7 +428,7 @@ class HardwareBackend:
     with self._command_lock:
       before = self._check(True, True)
       time.sleep(.020)
-      baseline = {'dut': self.dut.call('recv'), 'station': self.station.call('recv')}
+      baseline = {'dut': self._recv('dut'), 'station': self._recv('station')}
       record = {'baseline': baseline}
       self.sequence_observations.append(record)
       receipt_ids = {(a, d, bus + flag) for a, d, bus in identities for flag in (128, 192)}
@@ -336,7 +440,7 @@ class HardwareBackend:
       report = self.dut.call('sequence', events=plan, exclusive_commands=True, max_lateness_us=max_lateness_us, **options)
       record['timing'] = report
       # Always drain and retain post-run evidence, including failed/partial runs.
-      received = {'dut': self.dut.call('recv'), 'station': self.station.call('recv')}
+      received = {'dut': self._recv('dut'), 'station': self._recv('station')}
       record['received'] = received
       assert report['complete'] is True, f'Incomplete steering sequence: {report}'
       for health in (report['health_before'], report['health_after']):
@@ -412,7 +516,7 @@ class HardwareBackend:
         time.sleep(.020)
         final = self._check(None, False)
         for chunk in chunks:
-          baseline = {'dut': self.dut.call('recv'), 'station': self.station.call('recv')}
+          baseline = {'dut': self._recv('dut'), 'station': self._recv('station')}
           before = self._check(None, False)
           record = {'kind': kind, 'frames': chunk, 'baseline': baseline, 'health_before': before}
           self.scan_observations.append(record)
@@ -422,7 +526,7 @@ class HardwareBackend:
           report = sender.call('sequence', events=events, exclusive_commands=True,
                                scheduling='paced_scan', max_duration_us=8000000)
           record['timing'] = report
-          received = {'dut': self.dut.call('recv'), 'station': self.station.call('recv')}
+          received = {'dut': self._recv('dut'), 'station': self._recv('station')}
           record['received'] = received
           health = self.dut.call('health')
           record['health_after'] = health
@@ -484,15 +588,15 @@ class HardwareBackend:
     try:
       time.sleep(.020)
       before = self._check(controls, healthy)
-      self.dut.call('recv')
-      self.station.call('recv')
+      self._recv('dut')
+      self._recv('station')
       self.station.call('send', frame=frame)
       self._receive([frame])
       observed = set()
       deadline = time.monotonic() + (.020 if expected_bus is None else self.timeout)
       quiet_deadline = None
       while True:
-        for addr, data, bus in self.station.call('recv'):
+        for addr, data, bus in self._recv('station'):
           if [addr, data] == frame[:2] and bus != frame[2]:
             observed.add(bus)
         expected = set() if expected_bus is None else {expected_bus}
@@ -518,7 +622,19 @@ class HardwareBackend:
       self.station.call('resume')
 
   def wait(self, seconds):
-    time.sleep(seconds)
+    if not math.isfinite(seconds) or seconds < 0:
+      raise ValueError('Wait duration must be finite and nonnegative')
+    deadline = time.monotonic() + seconds
+    while True:
+      # Both service workers continue receiving while the caller waits. Keep
+      # their bounded queues drained, with every batch retained for audit.
+      with self._command_lock:
+        self._recv('dut')
+        self._recv('station')
+      remaining = deadline - time.monotonic()
+      if remaining <= 0:
+        break
+      time.sleep(min(remaining, .1))
     self.health()
 
   def close(self):

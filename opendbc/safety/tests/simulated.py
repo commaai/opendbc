@@ -3,7 +3,7 @@
 Time and health adaptation live here; observable scenarios never inspect private
 safety state or manipulate the firmware clock.
 """
-from opendbc.safety.tests.hardware import _accepted_ramp_batches, _identity, _scan_chunks, _steering_plan
+from opendbc.safety.tests.hardware import _accepted_ramp_batches, _identity, _rx_group_plan, _scan_chunks, _steering_plan
 from opendbc.safety.tests.libsafety import libsafety_py
 
 
@@ -15,6 +15,7 @@ class SimulatedBackend:
   def __init__(self):
     self.safety = libsafety_py.libsafety
     self.scan_observations = []
+    self.rx_group_observations = []
     self.reset(0)
 
   def restart(self):
@@ -56,6 +57,51 @@ class SimulatedBackend:
       self.active_streams[spec['name']] = dict(spec, index=index,
                                              next=previous['next'] if previous else self.now + round(spec['period'] * 1_000_000),
                                              paused=previous.get('paused', False) if previous else False)
+
+  def rx_group(self, events):
+    plan = _rx_group_plan(events, {name: stream['frames'] for name, stream in self.active_streams.items()})
+    # The station worker runs independently between RPCs. Give already-due
+    # background inputs that same opportunity before the next global pause.
+    # Do not advance time or dispatch held/future inputs.
+    if not self.streams_paused:
+      self.wait(0)
+    paused = self.streams_paused
+    self.streams_paused = True
+    record = {'events': plan, 'frames': [], 'complete': False, 'source': 'simulated_virtual_time', 'physical': False}
+    self.rx_group_observations.append(record)
+    try:
+      self.wait(.020)
+      before = self._guard(None, True)
+      record['health_before'] = before
+      for index, event in enumerate(plan):
+        if index:
+          self.wait(.001)
+        self.streams(event['updates'])
+        name = event['stream_name']
+        if name is None:
+          frame = event['frame']
+        else:
+          stream = self.active_streams[name]
+          frame = stream['frames'][stream['index'] % len(stream['frames'])]
+        self.safety.safety_fwd_hook(frame[2], frame[0])
+        valid = self.rx(frame) if name is None else self.rx_stream(name)
+        record['frames'].append(list(frame))
+        assert valid, f'RX group contains invalid input: {frame}'
+      self.wait(.020)
+      after = self._guard(None, True)
+      record['health_after'] = after
+      assert after['safety_rx_invalid'] == before['safety_rx_invalid'], 'RX group invalid counter changed'
+      record['complete'] = True
+      return True
+    except Exception as exc:
+      record['error'] = f'{type(exc).__name__}: {exc}'
+      raise
+    finally:
+      self.streams_paused = paused
+      if not paused:
+        for stream in self.active_streams.values():
+          if not stream.get('paused', False):
+            stream['next'] = max(self.now, stream['next'])
 
   def rx_stream(self, name):
     stream = self.active_streams[name]

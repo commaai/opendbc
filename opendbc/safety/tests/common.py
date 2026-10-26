@@ -263,6 +263,24 @@ class SafetyTestBase(unittest.TestCase):
     self._update_required_streams(updates)
     return self.backend.rx(frame) if stream_name is None else self.backend.rx_stream(stream_name)
 
+  def _rx_valid_group(self, messages):
+    """Group only contiguous valid measurement inputs, never faults or TX barriers."""
+    if self.backend is None:
+      for message in messages:
+        self.assertTrue(self._rx(message))
+      return
+    from opendbc.safety.tests.fixture_streams import prepare_rx
+    events = []
+    for message in messages:
+      self._raw_frame(message)  # Reject USB-only metadata before interpreting it.
+      frame, updates, stream_name = prepare_rx(self, message)
+      events.append({'frame': frame, 'updates': updates, 'stream_name': stream_name})
+      self.assertLessEqual(len(events), 32, 'Measurement group exceeds the backend limit')
+    self.assertTrue(events, 'Empty measurement group')
+    # Plans are sequential test inputs; the service applies each replacement
+    # immediately before consuming that stream's real next counter phase.
+    self.assertIs(self.backend.rx_group(events), True)
+
   def _tx(self, msg, *, healthy=True):
     # Disabled controls are ordinary test inputs; watchdog/transport faults are
     # not. Fault scenarios must explicitly opt out of the stream health guard.
@@ -438,13 +456,15 @@ class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
     pass
 
   def _reset_speed_measurement(self, speed):
-    for _ in range(MAX_SAMPLE_VALS):
-      self.assertTrue(self._rx(self._speed_msg(speed)))
-      secondary = getattr(self, '_speed_msg_2', None)
-      if secondary is not None:
-        message = secondary(speed)
-        if message is not None:
-          self.assertTrue(self._rx(message))
+    def messages():
+      for _ in range(MAX_SAMPLE_VALS):
+        yield self._speed_msg(speed)
+        secondary = getattr(self, '_speed_msg_2', None)
+        if secondary is not None:
+          message = secondary(speed)
+          if message is not None:
+            yield message
+    self._rx_valid_group(messages())
 
   def _advance_torque_time(self):
     self._wait((RT_INTERVAL + 1) / 1_000_000)
@@ -659,7 +679,7 @@ class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
       self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_TORQUE, 1)))
 
 
-def hold_measurement_stream(case, packet, max_idle_seconds=1.0):
+def hold_measurement_stream(case, packet, max_idle_seconds=1.0, *, clock=None):
   """Hold only this measurement's periodic input; explicit RX still advances it.
 
   Call the yielded guard immediately BEFORE each explicit RX. The guard imposes
@@ -668,6 +688,8 @@ def hold_measurement_stream(case, packet, max_idle_seconds=1.0):
   """
   from contextlib import contextmanager
   import time
+
+  clock = time.monotonic if clock is None else clock
 
   @contextmanager
   def hold():
@@ -678,18 +700,18 @@ def hold_measurement_stream(case, packet, max_idle_seconds=1.0):
     bridge = case._fixture_stream_bridge
     name = bridge.keys.get((frame[0], frame[2]))
     case.assertIsNotNone(name, f'No required measurement stream for {frame[0]:#x} bus {frame[2]}')
-    last_refresh = time.monotonic()
+    last_refresh = clock()
 
     def refresh():
       nonlocal last_refresh
-      now = time.monotonic()
+      now = clock()
       case.assertLess(now - last_refresh, max_idle_seconds, 'Measurement hold exceeded refresh deadline')
       last_refresh = now
 
     case.backend.pause_stream(name)
     try:
       yield refresh
-      case.assertLess(time.monotonic() - last_refresh, max_idle_seconds, 'Measurement probes exceeded refresh deadline')
+      case.assertLess(clock() - last_refresh, max_idle_seconds, 'Measurement probes exceeded refresh deadline')
     finally:
       case.backend.resume_stream(name)
 
@@ -821,8 +843,7 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
     pass
 
   def _reset_torque_driver_measurement(self, torque):
-    for _ in range(MAX_SAMPLE_VALS):
-      self.assertTrue(self._rx(self._torque_driver_msg(torque)))
+    self._rx_valid_group(self._torque_driver_msg(torque) for _ in range(MAX_SAMPLE_VALS))
 
   def _set_prev_torque(self, torque):
     self._reset_torque_driver_measurement(0)
@@ -881,6 +902,11 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
     for speed in self._torque_speed_range:
       self._reset_speed_measurement(speed)
+      if self.backend is not None:
+        # Changing two live speed sources can transiently cancel engagement.
+        # Re-establish the test precondition after both sources match, before
+        # torque setup preserves the current controls state.
+        self._set_controls_allowed(True)
       max_torque = self._get_max_torque(speed)
 
       # Cannot stay at MAX_TORQUE if above DRIVER_TORQUE_ALLOWANCE
@@ -993,8 +1019,7 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
     pass
 
   def _reset_torque_measurement(self, torque):
-    for _ in range(MAX_SAMPLE_VALS):
-      self.assertTrue(self._rx(self._torque_meas_msg(torque)))
+    self._rx_valid_group(self._torque_meas_msg(torque) for _ in range(MAX_SAMPLE_VALS))
 
   def _prepare_torque_measurement(self, torque):
     self.assertTrue(self._rx(self._torque_meas_msg(torque)))
@@ -1152,7 +1177,7 @@ class VehicleSpeedSafetyTest(SafetyTestBase):
       # the consumed minimum below, not the unconsumed maximum/sample layout.
       self._common_measurement_test(self._speed_msg, 0, 80, 1, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
-    from contextlib import ExitStack
+    from contextlib import ExitStack, contextmanager
     from opendbc.car.lateral import get_max_angle_delta_vm
 
     torque = getattr(self, 'DYNAMIC_MAX_TORQUE', False)
@@ -1178,33 +1203,46 @@ class VehicleSpeedSafetyTest(SafetyTestBase):
       params = importlib.import_module(type(self).__module__).CarControllerParams
       return int(get_max_angle_delta_vm(max(speed - 1, 1), self.VM, params) * self.DEG_TO_CAN) + 1
 
-    for val in np.arange(0, 80, 0.5):
-      self._set_controls_allowed(True)
-      with ExitStack() as stack:
-        builders = [self._speed_msg]
-        secondary = getattr(self, '_speed_msg_2', None)
-        if secondary is not None and secondary(val) is not None:
-          builders.append(secondary)
-        refreshers = [stack.enter_context(hold_measurement_stream(self, builder(val))) for builder in builders]
+    hold_options = {}
+    if self.backend is not None:
+      from opendbc.safety.tests.simulated import SimulatedBackend
+      if isinstance(self.backend, SimulatedBackend):
+        # CPU scheduling cannot advance simulated C time. Physical backends
+        # keep the helper's default monotonic wall clock without an override.
+        hold_options['clock'] = lambda: self.backend.now / 1_000_000
 
-        def samples(val=val, builders=builders, refreshers=refreshers):
-          # Keep all six original values, including while a torque ramp advances
-          # real time. Only these measurement streams are held; watchdogs run.
-          for i in range(MAX_SAMPLE_VALS):
-            for builder, refresh in zip(builders, refreshers, strict=True):
-              refresh()
-              self.assertTrue(self._rx(builder(val + i * 0.1)))
+    @contextmanager
+    def window(val, builders):
+      # Engagement and command-baseline setup run with periodic RX active.
+      # Hold only while injecting the six samples and probing their boundary.
+      with ExitStack() as stack:
+        refreshers = [stack.enter_context(hold_measurement_stream(self, builder(val), **hold_options)) for builder in builders]
+
+        def samples():
+          for refresh in refreshers:
+            refresh()
+          self._rx_valid_group(builder(val + i * 0.1) for i in range(MAX_SAMPLE_VALS) for builder in builders)
+          for refresh in refreshers:
+            refresh()
 
         samples()
-        # Preserve the original 0.1 m/s parser tolerance. Adjacent CAN commands
-        # bracket its possible consumed limits; no test cache is a DUT reading.
-        bounds = [limit(max(val + offset, 0)) for offset in (-0.1, 0, 0.1)]
-        accepted, rejected = min(bounds), max(bounds) + 1
-        for sign in (-1, 1):
-          if torque:
-            self._set_controls_allowed(False)
-            self.assertTrue(self._tx(self._torque_cmd_msg(0)))
-            self._set_controls_allowed(True)
+        yield samples
+
+    for val in np.arange(0, 80, 0.5):
+      builders = [self._speed_msg]
+      secondary = getattr(self, '_speed_msg_2', None)
+      if secondary is not None and secondary(val) is not None:
+        builders.append(secondary)
+      # Preserve the original 0.1 m/s parser tolerance. Adjacent CAN commands
+      # bracket its possible consumed limits; no test cache is a DUT reading.
+      bounds = [limit(max(val + offset, 0)) for offset in (-0.1, 0, 0.1)]
+      accepted, rejected = min(bounds), max(bounds) + 1
+      for sign in (-1, 1):
+        if torque:
+          self._set_controls_allowed(False)
+          self.assertTrue(self._tx(self._torque_cmd_msg(0)))
+          self._set_controls_allowed(True)
+          with window(val, builders) as samples:
             current = 0
             while current < accepted:
               current = min(current + self.MAX_RATE_UP, accepted)
@@ -1225,19 +1263,21 @@ class VehicleSpeedSafetyTest(SafetyTestBase):
                 break
             else:
               self.fail(f'No consumed-speed torque boundary at {val=} {sign=}')
-          else:
+        else:
+          for allowed, delta in ((True, accepted), (False, rejected)):
             self._set_controls_allowed(True)
             if curvature:
               self.assertTrue(self._tx(self._curvature_cmd_msg(0, True)))
-              self.assertTrue(self._tx(self._curvature_cmd_msg(sign * accepted / self.CURVATURE_TO_CAN, True)), (val, sign))
-              self.assertTrue(self._tx(self._curvature_cmd_msg(0, True)))
-              self.assertFalse(self._tx(self._curvature_cmd_msg(sign * rejected / self.CURVATURE_TO_CAN, True)), (val, sign))
+              command = sign * delta / self.CURVATURE_TO_CAN
             else:
               anchor = sign * 10 if hasattr(self, 'ANGLE_RATE_BP') else 0
               self._set_prev_desired_angle(anchor)
-              self.assertTrue(self._tx(self._angle_cmd_msg(anchor + sign * accepted / self.DEG_TO_CAN, True)), (val, sign))
-              self._set_prev_desired_angle(anchor)
-              self.assertFalse(self._tx(self._angle_cmd_msg(anchor + sign * rejected / self.DEG_TO_CAN, True)), (val, sign))
+              command = anchor + sign * delta / self.DEG_TO_CAN
+            with window(val, builders):
+              packet = self._curvature_cmd_msg(command, True) if curvature else self._angle_cmd_msg(command, True)
+              self.assertEqual(allowed, bool(self._tx(packet)), (val, sign, delta))
+              if curvature and allowed:
+                self.assertTrue(self._tx(self._curvature_cmd_msg(0, True)))
       self._reset_safety_hooks()
       self._set_controls_allowed(True)
       # Narrow reset observation: neutral TX after normal RX warmup. This does
@@ -1271,12 +1311,10 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
     self.assertTrue(self._tx(self._angle_cmd_msg(t, False)))
 
   def _reset_angle_measurement(self, angle):
-    for _ in range(MAX_SAMPLE_VALS):
-      self.assertTrue(self._rx(self._angle_meas_msg(angle)))
+    self._rx_valid_group(self._angle_meas_msg(angle) for _ in range(MAX_SAMPLE_VALS))
 
   def _reset_speed_measurement(self, speed):
-    for _ in range(MAX_SAMPLE_VALS):
-      self.assertTrue(self._rx(self._speed_msg(speed)))
+    self._rx_valid_group(self._speed_msg(speed) for _ in range(MAX_SAMPLE_VALS))
 
   def _inactive_angle_probe_msg(self, angle):
     import inspect
@@ -1543,9 +1581,7 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   def _reset_speed_measurement(self, speed: float):
     self._issued_speed = speed
-    for _ in range(MAX_SAMPLE_VALS):
-      self.assertTrue(self._rx(self._speed_msg(speed)))
-      self.assertTrue(self._rx(self._speed_msg_2(speed)))
+    self._rx_valid_group(builder(speed) for _ in range(MAX_SAMPLE_VALS) for builder in (self._speed_msg, self._speed_msg_2))
 
   @coverage('No backend measurement-window replacement implemented',
             host=('Exact curvature extrema and immediate reset',), relation='host-only')
@@ -2120,6 +2156,11 @@ class CarSafetyTest(SafetyTest):
         speed_2 = round(max(speed + speed_delta, 0), 1)
         # Set controls allowed in between rx since first message can reset it
         self._rx(self._speed_msg(speed))
+        if self.backend is not None:
+          # Periodic secondary traffic still carries the previous pair's fault.
+          # Restore a matching baseline before engagement; inject this pair's
+          # intended mismatch only after controls have been verified allowed.
+          self.assertTrue(self._rx(self._speed_msg_2(speed)))
         self._set_controls_allowed(True)
         self._rx(self._speed_msg_2(speed_2))
 

@@ -5,8 +5,9 @@ import struct
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
-from opendbc.safety.tests.hardware_sequence import execute_sequence
+from opendbc.safety.tests.hardware_sequence import execute_rx_group, execute_sequence
 from opendbc.safety.tests.hardware_service import Service
 
 
@@ -301,6 +302,129 @@ class TestSequence(unittest.TestCase):
         self.assertEqual(list(obj.panda.receipts), [(0x123, b'\x00', 128)])
       if failure == 'stale':
         self.assertEqual(result['events'], [])
+
+  def test_rx_group_phase_replacements_duplicates_and_no_extra_emission(self):
+    obj = service()
+    obj.role = 'station'
+    obj.net_stats = {}
+    obj.streams_paused = True
+    local, peer = socket.socketpair(type=socket.SOCK_DGRAM)
+    peer.setblocking(False)
+    obj.sockets = [local]
+    cycle = [[1, bytes([i]).hex(), 0] for i in range(4)]
+    replacement = [[1, bytes([i + 10]).hex(), 0] for i in range(4)]
+    obj.streams = {'measurement': {'frames': cycle, 'period': .1, 'index': 5, 'next': 123, 'paused': True},
+                   'other': {'frames': cycle, 'period': .1, 'index': 7, 'next': 456, 'paused': False}}
+    now = [0]
+    sent_at = []
+    original_send = obj.send
+
+    def send(frame):
+      sent_at.append(now[0])
+      original_send(frame)
+
+    def sleep(seconds):
+      self.assertFalse(obj.lock._is_owned())
+      now[0] += round(seconds * 1e9)
+    obj.send = send
+    spec = {'name': 'measurement', 'frames': replacement, 'period': .2}
+    other = {'name': 'other', 'frames': replacement, 'period': .3}
+    batch = [{'frame': cycle[0], 'updates': [spec, other], 'stream_name': 'measurement'},
+             {'frame': cycle[0], 'updates': [], 'stream_name': 'measurement'},
+             {'frame': replacement[2], 'updates': [], 'stream_name': None}]
+    try:
+      result = execute_rx_group(obj, batch, clock=lambda: now[0], sleep=sleep)
+      self.assertTrue(result['complete'], result)
+      self.assertEqual(result['frames'], [replacement[1], replacement[2], replacement[2]])
+      self.assertEqual(sent_at, [0, 1000000, 2000000])
+      self.assertEqual(obj.streams['measurement']['index'], 7)
+      self.assertTrue(obj.streams['measurement']['paused'])
+      self.assertEqual(obj.streams['other']['index'], 7)
+      self.assertEqual(obj.streams['other']['next'], 456)
+      self.assertFalse(obj.streams['other']['paused'])
+      self.assertTrue(obj.streams_paused)
+      packets = [struct.unpack('=IB3x8s', peer.recv(16)) for _ in batch]
+      self.assertEqual([packet[2][0] for packet in packets], [11, 12, 12])
+      with self.assertRaises(BlockingIOError):
+        peer.recv(16)
+    finally:
+      local.close()
+      peer.close()
+
+  def test_rx_group_rpc_allows_worker_to_receive(self):
+    obj = service()
+    obj.role = 'station'
+    obj.net_stats = {}
+    obj.streams_paused = True
+    local, peer = socket.socketpair(type=socket.SOCK_DGRAM)
+    local.setblocking(False)
+    obj.sockets = [local]
+    worker = threading.Thread(target=obj.run)
+    worker.start()
+    try:
+      peer.send(struct.pack('=IB3x8s', 55, 1, b'a'))
+      result = obj.dispatch({'op': 'rx_group', 'events': [
+        {'frame': [1, '00', 0], 'updates': [], 'stream_name': None} for _ in range(4)]})
+      self.assertTrue(result['complete'], result)
+      self.assertEqual(result['frames'], [[1, '00', 0]] * 4)
+      self.assertEqual(list(obj.queue), [[55, '61', 0]])
+      for previous, current in zip(result['events'][:-1], result['events'][1:], strict=True):
+        self.assertGreaterEqual(current['send_start_ns'] - previous['send_end_ns'], 1000000)
+    finally:
+      obj.stopped.set()
+      worker.join(timeout=2)
+      local.close()
+      peer.close()
+
+  def test_rx_group_partial_failure_timeout_and_pause_guard(self):
+    for failure in ('send', 'loss', 'resume', 'timeout'):
+      obj = service()
+      obj.role = 'station'
+      obj.streams_paused = True
+      now = [0]
+      sent = []
+
+      def send(frame, sent=sent, now=now, failure=failure):
+        if sent and failure == 'send':
+          raise RuntimeError('send failed')
+        sent.append(frame)
+        if failure == 'timeout':
+          now[0] += 1000000001
+
+      def check_transport(sent=sent, failure=failure):
+        if sent and failure == 'loss':
+          raise RuntimeError('Station transport loss')
+
+      def sleep(seconds, obj=obj, now=now, failure=failure):
+        now[0] += round(seconds * 1e9)
+        if failure == 'resume':
+          obj.streams_paused = False
+      obj.send = send
+      obj.check_transport = check_transport
+      result = execute_rx_group(obj, [{'frame': [1, '00', 0], 'updates': [], 'stream_name': None}] * 3,
+                                clock=lambda now=now: now[0], sleep=sleep)
+      self.assertFalse(result['complete'])
+      self.assertIn('error', result)
+      self.assertEqual(result['frames'], [[1, '00', 0]])
+      self.assertEqual(len(sent), 1)
+
+  def test_rx_group_admission_rejects_new_streams_and_unpaused_or_large_groups(self):
+    event = {'frame': [1, '00', 0], 'updates': [], 'stream_name': None}
+    obj = service()
+    with self.assertRaisesRegex(ValueError, 'station-only'):
+      execute_rx_group(obj, [event])
+    obj.role = 'station'
+    with self.assertRaisesRegex(ValueError, 'paused'):
+      execute_rx_group(obj, [event])
+    obj.streams_paused = True
+    for batch in ([], [event] * 33, [dict(event, extra=True)],
+                  [dict(event, stream_name='missing')],
+                  [dict(event, updates=[{'name': 'new', 'frames': [[1, '00', 0]], 'period': .1}])]):
+      with patch.object(obj, 'send') as send:
+        with self.assertRaises(ValueError):
+          execute_rx_group(obj, batch)
+        send.assert_not_called()
+    self.assertEqual(obj.streams, {})
 
   def test_validation_before_any_send(self):
     invalid = [events(1) * 2, [], [{'offset_us': 0, 'frame': [1, '00', 0], 'kind': 'rx'}],

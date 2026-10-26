@@ -235,6 +235,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
         # Set controls allowed in between rx since first message can reset it
         self.assertTrue(self._rx(self._speed_msg(speed)))
+        if self.backend is not None:
+          # Clear the previous case's conflicting periodic input through CAN
+          # before engagement. The original mismatch is still injected below.
+          self.assertTrue(self._rx(self._speed_msg_2(speed)))
         self._set_controls_allowed(True)
         self.assertTrue(self._rx(self._speed_msg_2(speed_2)))
 
@@ -243,6 +247,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
     # Test ESP_B quality flag
     for quality_flag in (True, False):
+      if self.backend is not None:
+        # The last speed-delta case also leaves a mismatch before this section.
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertTrue(self._rx(self._speed_msg_2(0)))
       self._set_controls_allowed(True)
       self.assertTrue(self._rx(self._speed_msg(0)))
       self.assertEqual(quality_flag, self._rx(self._speed_msg_2(0, quality_flag=quality_flag)))

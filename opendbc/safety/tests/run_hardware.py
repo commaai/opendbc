@@ -198,7 +198,9 @@ def main(argv=None):
                  # Backend retains these append-only lists across reset/grace
                  # transitions, including partial evidence on failed scans.
                  'scan_observations': getattr(backend, 'scan_observations', []),
-                 'sequence_observations': getattr(backend, 'sequence_observations', [])})
+                 'sequence_observations': getattr(backend, 'sequence_observations', []),
+                 'rx_group_observations': getattr(backend, 'rx_group_observations', []),
+                 'transport_observations': getattr(backend, 'transport_observations', [])})
     return backend
 
   def legacy_backend(case, selection):

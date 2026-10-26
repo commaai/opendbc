@@ -164,6 +164,12 @@ class Service:
       self.error = str(exc)
 
   def dispatch(self, req):
+    if req['op'] == 'rx_group':
+      if __package__:
+        from .hardware_sequence import execute_rx_group
+      else:
+        from hardware_sequence import execute_rx_group
+      return execute_rx_group(self, req['events'])
     if req['op'] == 'sequence':
       # Do not hold the dispatch RLock across waits: the worker must continue
       # draining Panda RX and servicing its heartbeat throughout the batch.
