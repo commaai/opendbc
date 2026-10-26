@@ -93,8 +93,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.__class__.cnt_epas += 1
     return self.packer.make_can_msg_safety("EPAS3S_sysStatus", 0, values)
 
-  def _user_brake_msg(self, brake):
-    values = {"ESP_driverBrakeApply": 2 if brake else 1}
+  def _user_brake_msg(self, brake, status: int | None = None):
+    if status is None:
+      status = 2 if brake else 1
+    values = {"ESP_driverBrakeApply": status}
     return self.packer.make_can_msg_safety("ESP_status", 0, values)
 
   def _speed_msg(self, speed):
@@ -204,9 +206,9 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
   def test_user_brake_quality_flag(self):
-    # NotInit_orOff and Faulty_SNA are invalid
+    # 0=NotInit_orOff and 3=Faulty_SNA are invalid
     for status, valid in ((0, False), (1, True), (2, True), (3, False)):
-      msg = self.packer.make_can_msg_safety("ESP_status", 0, {"ESP_driverBrakeApply": status})
+      msg = self._user_brake_msg(False, status=status)
       self.assertEqual(valid, self._rx(msg))
 
   def test_steering_wheel_disengage(self):
