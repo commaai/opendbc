@@ -171,9 +171,7 @@ class HardwareBackend:
                      'forward_physical': 0, 'forward_blocked': 0}
 
   def health(self):
-    health = self.dut.call('health')
-    self._validate_health(health)
-    return health
+    return self._transport_call('dut', 'health', validate_health=True)
 
   def _validate_health(self, health):
     if hasattr(self, '_overflow_baseline'):
@@ -220,7 +218,7 @@ class HardwareBackend:
     time.sleep(.1)
     self.dut.call('clear')
     self.station.call('clear', reset_stats=True)
-    health = self.dut.call('health')
+    health = self._transport_call('dut', 'health')
     self._overflow_baseline = {key: health[key] for key in ('rx_buffer_overflow', 'tx_buffer_overflow')}
     self._expected_rx_invalid = health['safety_rx_invalid']
     self.mode, self.param = int(mode), int(param)
@@ -252,16 +250,25 @@ class HardwareBackend:
 
   def _recv(self, endpoint):
     """Drain without losing raw traffic unrelated to the current verdict."""
+    return self._transport_call(endpoint, 'recv')
+
+  def _transport_call(self, endpoint, operation, validate_health=False):
+    # Host RPC bounds only: neither wire arrival nor MCU execution timestamps.
     if not hasattr(self, 'transport_observations'):
       self.transport_observations = []
-    record = {'endpoint': endpoint}
+    record = {'endpoint': endpoint, 'operation': operation, 'clock_scope': 'coordinator_monotonic',
+              'start_monotonic_s': time.monotonic(), 'frames': []}
     try:
-      record['frames'] = (self.dut if endpoint == 'dut' else self.station).call('recv')
-      return record['frames']
+      result = (self.dut if endpoint == 'dut' else self.station).call(operation)
+      record['frames' if operation == 'recv' else 'health'] = result
+      if validate_health:
+        self._validate_health(result)
+      return result
     except Exception as exc:
       record['error'] = f'{type(exc).__name__}: {exc}'
       raise
     finally:
+      record['end_monotonic_s'] = time.monotonic()
       self.transport_observations.append(record)
 
   def _collect(self, record, stage):
@@ -339,7 +346,7 @@ class HardwareBackend:
         report = self.station.call('rx_group', events=plan)
         record['timing'] = report
         self._collect(record, 'received')
-        record['health_after'] = self.dut.call('health')
+        record['health_after'] = self._transport_call('dut', 'health')
         assert report['complete'] is True, f'Incomplete RX group: {report}'
         self._station_streams = cycles
         emitted = [_identity(frame) for frame in report['frames']]
@@ -378,7 +385,7 @@ class HardwareBackend:
         frame = self.station.call('rx_stream', name=stream)
       self._receive([frame])
       self._recv('station')
-      health = self.dut.call('health')
+      health = self._transport_call('dut', 'health')
       delta = health['safety_rx_invalid'] - before
       assert delta in (0, 1), f'Ambiguous safety RX invalid delta: {delta}'
       self._expected_rx_invalid = before + delta
@@ -525,7 +532,7 @@ class HardwareBackend:
                                scheduling='paced_scan', max_duration_us=8000000)
           record['timing'] = report
           received = self._collect(record, 'received')
-          health = self.dut.call('health')
+          health = self._transport_call('dut', 'health')
           record['health_after'] = health
           assert report['complete'] is True, f'Incomplete {kind} scan: {report}'
           self._check_snapshot(health, None, False)
@@ -602,7 +609,7 @@ class HardwareBackend:
         if expected_bus is not None and observed == expected and quiet_deadline is None:
           quiet_deadline = now + .020
         if (expected_bus is None and now >= deadline) or (quiet_deadline is not None and now >= quiet_deadline):
-          health = self.dut.call('health')
+          health = self._transport_call('dut', 'health')
           delta = health['safety_rx_invalid'] - before['safety_rx_invalid']
           assert delta in (0, 1), f'Ambiguous safety RX invalid delta: {delta}'
           self._expected_rx_invalid = before['safety_rx_invalid'] + delta

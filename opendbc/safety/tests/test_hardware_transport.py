@@ -93,6 +93,42 @@ def station(fd=True):
 
 class TestHardwareTransport(unittest.TestCase):
 
+  def test_host_rpc_timing_retains_results_and_errors(self):
+    backend = hardware_backend()
+    raw = health_snapshot(controls_allowed=True, safety_rx_checks_invalid=True)
+    backend.dut.call.return_value = raw
+    with patch('opendbc.safety.tests.hardware.time.monotonic', side_effect=[10., 12., 13., 17., 18., 19., 20., 21.]):
+      self.assertIs(backend.health(), raw)
+      backend.dut.call.side_effect = RuntimeError('health failed')
+      with self.assertRaisesRegex(RuntimeError, 'health failed'):
+        backend.health()
+      backend.station.call.return_value = [[0x123, '01', 2]]
+      self.assertEqual(backend._recv('station'), [[0x123, '01', 2]])
+      backend.station.call.side_effect = RuntimeError('recv failed')
+      with self.assertRaisesRegex(RuntimeError, 'recv failed'):
+        backend._recv('station')
+    records = backend.transport_observations
+    self.assertEqual([(r['start_monotonic_s'], r['end_monotonic_s']) for r in records],
+                     [(10., 12.), (13., 17.), (18., 19.), (20., 21.)])
+    self.assertTrue(all(r['clock_scope'] == 'coordinator_monotonic' for r in records))
+    self.assertEqual([r['operation'] for r in records], ['health', 'health', 'recv', 'recv'])
+    self.assertIs(records[0]['health'], raw)
+    self.assertEqual(records[0]['frames'], [])
+    self.assertEqual(records[1]['error'], 'RuntimeError: health failed')
+    self.assertEqual(records[3]['error'], 'RuntimeError: recv failed')
+    backend.dut.call.side_effect = None
+    backend.station.call.side_effect = None
+    raw['rx_buffer_overflow'] = 1
+    with self.assertRaisesRegex(AssertionError, 'rx_buffer_overflow changed'):
+      backend.health()
+    self.assertIs(records[-1]['health'], raw)
+    self.assertIn('AssertionError:', records[-1]['error'])
+    with patch('opendbc.safety.tests.hardware.time.sleep'):
+      backend.reset(1)
+    self.assertIs(backend.transport_observations, records)
+    self.assertEqual(len(records), 7)  # Failed validation, reset baseline, reset check.
+    self.assertEqual(records[-2]['health']['rx_buffer_overflow'], 1)
+
   def rivian_speed_window(self):
     from opendbc.safety.tests.test_rivian import TestRivianLongitudinalSafety
     case = type('RivianPeriodicFixture', (TestRivianLongitudinalSafety,), {})(methodName='runTest')
