@@ -4,8 +4,12 @@
 #include <stdbool.h>
 
 // all mutable safety state, copied to compute every safety decision twice
+#ifdef __APPLE__
+#define SAFETY_STATE __attribute__((section("__DATA,safety_state")))
+#else
 // cppcheck-suppress-macro misra-c2012-1.2; allow section attribute extension
 #define SAFETY_STATE __attribute__((section("safety_state")))
+#endif
 
 // from cereal.car.CarParams.SafetyModel
 #define SAFETY_SILENT 0U

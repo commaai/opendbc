@@ -103,7 +103,7 @@ SAFETY_STATE uint32_t safety_mode_cnt = 0U;
 
 SAFETY_STATE uint16_t current_safety_mode = SAFETY_SILENT;
 SAFETY_STATE uint16_t current_safety_param = 0;
-static const safety_hooks *current_hooks = &nooutput_hooks;
+SAFETY_STATE static const safety_hooks *current_hooks = &nooutput_hooks;
 SAFETY_STATE safety_config current_safety_config;
 SAFETY_STATE RxStatus rx_status[MAX_RX_CHECKS];  // dynamic state of current_safety_config.rx_checks
 
@@ -314,8 +314,13 @@ static void safety_tick_once(void) {
 // UM2331 CPU_SM_2: each safety decision is computed twice from the same state and time
 #define SAFETY_STATE_MAX_WORDS 256U
 // linker symbols, the bounds of the safety_state section
+#ifdef __APPLE__
+extern uint32_t __start_safety_state __asm("section$start$__DATA$safety_state");
+extern uint32_t __stop_safety_state __asm("section$end$__DATA$safety_state");
+#else
 extern uint32_t __start_safety_state;
 extern uint32_t __stop_safety_state;
+#endif
 static uint32_t safety_state_in[SAFETY_STATE_MAX_WORDS];
 static uint32_t safety_state_out[SAFETY_STATE_MAX_WORDS];
 bool safety_compute_mismatch = false;
@@ -419,7 +424,7 @@ static void reset_sample(struct sample_t *sample) {
   *sample = (struct sample_t){0};
 }
 
-int set_safety_hooks(uint16_t mode, uint16_t param) {
+static int set_safety_hooks_once(uint16_t mode, uint16_t param) {
   const safety_hook_config safety_hook_registry[] = {
     {SAFETY_SILENT, &nooutput_hooks},
     {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
@@ -509,6 +514,14 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
       rx_status[j] = (RxStatus){0};
     }
   }
+  return set_status;
+}
+
+int set_safety_hooks(uint16_t mode, uint16_t param) {
+  safety_compute_start();
+  int set_status = set_safety_hooks_once(mode, param);
+  safety_compute_again();
+  safety_compute_check(set_safety_hooks_once(mode, param) == set_status);
   return set_status;
 }
 
