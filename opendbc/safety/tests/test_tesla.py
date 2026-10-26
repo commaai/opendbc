@@ -207,7 +207,8 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
   def test_user_brake_quality_flag(self):
     # 0=NotInit_orOff and 3=Faulty_SNA are invalid
-    for status, valid in ((0, False), (1, True), (2, True), (3, False)):
+    for status in range(4):
+      valid = status not in (0, 3)
       msg = self._user_brake_msg(False, status=status)
       self.assertEqual(valid, self._rx(msg))
 
