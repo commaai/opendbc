@@ -156,6 +156,14 @@ class HondaButtonEnableBase(common.CarSafetyTest):
 
 class HondaPcmEnableBase(common.CarSafetyTest):
 
+  def _engage(self):
+    if self.backend is not None:
+      # Release the periodic CANCEL input before the PCM cruise rising edge.
+      # TX encodings may leave a counter gap; the second RX updates the stream.
+      for _ in range(2):
+        self.assertTrue(self._rx(self._button_msg(Btn.NONE, main_on=True)))
+    super()._engage()
+
   def _disengage(self):
     self.assertTrue(self._rx(self._button_msg(Btn.CANCEL, main_on=True)))
 
