@@ -1196,9 +1196,15 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         target = sign * (self.MAX_TORQUE_ERROR + 50)
         self._set_controls_allowed(True)
         self._set_prev_torque(target)
-        for t in np.linspace(-self.MAX_TORQUE, self.MAX_TORQUE, MAX_SAMPLE_VALS):
-          self.assertTrue(self._rx(self._torque_meas_msg(t)))
-        self.assertTrue(self._tx(self._torque_cmd_msg(target)))
+        samples = np.linspace(-self.MAX_TORQUE, self.MAX_TORQUE, MAX_SAMPLE_VALS)
+        first = self._torque_meas_msg(samples[0])
+        # Keep periodic inputs from evicting the loaded motor samples
+        # while the physical RX calls run. Other streams and guards stay active.
+        with hold_measurement_stream(self, first) as refresh:
+          for index, torque in enumerate(samples):
+            refresh()
+            self.assertTrue(self._rx(first if index == 0 else self._torque_meas_msg(torque)))
+          self.assertTrue(self._tx(self._torque_cmd_msg(target)))
         self._reset_safety_hooks()
         self._set_controls_allowed(True)
         # Warmup replaces samples: this probes the neutral-input boundary, not immediate sample_t reset.
