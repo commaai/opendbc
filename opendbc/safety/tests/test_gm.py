@@ -138,8 +138,8 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"LKASteeringCmd": torque, "LKASteeringCmdActive": steer_req}
     return self.packer.make_can_msg_safety("ASCMLKASteeringCmd", 0, values)
 
-  def _button_msg(self, buttons):
-    values = {"ACCButtons": buttons}
+  def _button_msg(self, buttons, counter=0):
+    values = {"ACCButtons": buttons, "RollingCounter": counter}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
 
 
@@ -191,19 +191,21 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
     return GMSafetyFlags.HW_CAM | self.EXTRA_SAFETY_PARAM
 
   def test_buttons(self):
+    # Bus-0 periodic buttons are forwarded to bus 2 with counter 0. Distinguish
+    # these TX candidates so forwarded UNPRESS cannot masquerade as accepted TX.
     # Only CANCEL button is allowed while cruise is enabled
     self._set_controls_allowed(0)
     for btn in range(8):
-      self.assertFalse(self._tx(self._button_msg(btn)))
+      self.assertFalse(self._tx(self._button_msg(btn, counter=1)))
 
     # PCM engagement also enables cruise, so CANCEL is permitted in this reachable state.
     self._set_controls_allowed(1)
     for btn in range(8):
-      self.assertEqual(btn == Buttons.CANCEL, self._tx(self._button_msg(btn)))
+      self.assertEqual(btn == Buttons.CANCEL, self._tx(self._button_msg(btn, counter=1)))
 
     for enabled in (True, False):
       self._rx(self._pcm_status_msg(enabled))
-      self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
+      self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL, counter=1)))
 
 
 class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
