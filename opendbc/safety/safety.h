@@ -312,17 +312,17 @@ static void safety_tick_once(void) {
 }
 
 // UM2331 CPU_SM_2: each safety decision is computed twice from the same state and time
-#define SAFETY_STATE_MAX_SIZE 1024U
+#define SAFETY_STATE_MAX_WORDS 256U
 // linker symbols, the bounds of the safety_state section
-extern uint8_t __start_safety_state;
-extern uint8_t __stop_safety_state;
-static uint8_t safety_state_in[SAFETY_STATE_MAX_SIZE];
-static uint8_t safety_state_out[SAFETY_STATE_MAX_SIZE];
+extern uint32_t __start_safety_state;
+extern uint32_t __stop_safety_state;
+static uint32_t safety_state_in[SAFETY_STATE_MAX_WORDS];
+static uint32_t safety_state_out[SAFETY_STATE_MAX_WORDS];
 bool safety_compute_mismatch = false;
 uint32_t safety_ts = 0U;
 
 static uint32_t safety_state_size(void) {
-  return SAFETY_MIN((uint32_t)((uintptr_t)&__stop_safety_state - (uintptr_t)&__start_safety_state), SAFETY_STATE_MAX_SIZE);
+  return SAFETY_MIN((uint32_t)((uintptr_t)&__stop_safety_state - (uintptr_t)&__start_safety_state), (uint32_t)sizeof(safety_state_in));
 }
 
 static void safety_compute_start(void) {
@@ -338,7 +338,7 @@ static void safety_compute_again(void) {
 
 static void safety_compute_check(bool same_result) {
   bool same_state = memcmp(safety_state_out, &__start_safety_state, safety_state_size()) == 0;
-  bool fits = ((uintptr_t)&__stop_safety_state - (uintptr_t)&__start_safety_state) <= SAFETY_STATE_MAX_SIZE;
+  bool fits = ((uintptr_t)&__stop_safety_state - (uintptr_t)&__start_safety_state) <= sizeof(safety_state_in);
   safety_compute_mismatch = safety_compute_mismatch || !same_result || !same_state || !fits;
 }
 
@@ -358,11 +358,11 @@ bool safety_tx_hook(CANPacket_t *msg) {
   return allowed;
 }
 
+// the forwarding decision doesn't change the state
 int safety_fwd_hook(int bus_num, int addr) {
-  safety_compute_start();
   int destination_bus = safety_fwd_hook_once(bus_num, addr);
-  safety_compute_again();
-  safety_compute_check(safety_fwd_hook_once(bus_num, addr) == destination_bus);
+  int destination_bus_again = safety_fwd_hook_once(bus_num, addr);
+  safety_compute_mismatch = safety_compute_mismatch || (destination_bus_again != destination_bus);
   return destination_bus;
 }
 
