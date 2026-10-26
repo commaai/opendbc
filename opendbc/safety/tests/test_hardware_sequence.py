@@ -86,11 +86,14 @@ class TestSequence(unittest.TestCase):
     obj.send = lambda frame: sent.append(list(frame))
     obj.receive = list
     deadlines = []
+    before_pause_sends = 0
     cycles = 90
 
-    with patch('opendbc.safety.tests.hardware_service.time.monotonic', side_effect=lambda: now.ns / 1e9):
+    with patch('opendbc.safety.tests.hardware_service.time.monotonic', side_effect=lambda now=now: now.ns / 1e9):
       for i in range(cycles):
+        start = len(sent)
         obj.dispatch({'op': 'pause'})
+        before_pause_sends += len(sent) - start
         now.sleep(.04)
         injected = (names[i % 3], 'held')
         expected = [stream['frames'][stream['index'] % 16] for name in injected for stream in [obj.streams[name]]]
@@ -131,7 +134,7 @@ class TestSequence(unittest.TestCase):
     self.assertEqual(obj.streams['future'], future)
     self.assertTrue(obj.streams['held']['paused'])
     self.assertEqual(obj.streams['held']['index'], cycles)
-    self.assertEqual(len(sent), cycles * 3)
+    self.assertEqual(len(sent), cycles * 3 + before_pause_sends)
     for i, name in enumerate(names):
       samples = [frame[1] for frame in sent if frame[0] == 0x100 + i]
       self.assertEqual(samples, [bytes([counter % 16]).hex() for counter in range(obj.streams[name]['index'])], name)
@@ -141,6 +144,85 @@ class TestSequence(unittest.TestCase):
 
   def test_repeated_rx_groups_preserve_due_stream_progress(self):
     self._assert_repeated_resume_progress(grouped=True)
+
+  def test_pause_services_only_entry_due_streams_at_send_completion(self):
+    obj = service('station')
+    now = Clock(obj)
+    obj.streams = {
+      name: {'frames': [[i + 1, '00', 0], [i + 1, '01', 0]], 'period': .1,
+             'index': 1, 'next': deadline, 'paused': name == 'held'}
+      for i, (name, deadline) in enumerate((('oldest', -2.), ('due', 0.), ('future', .0005), ('held', -3.)))
+    }
+    untouched = {name: dict(obj.streams[name]) for name in ('held', 'future')}
+    sent = []
+
+    def send(frame):
+      self.assertFalse(obj.streams_paused)
+      sent.append((list(frame), now.ns))
+      now.ns += 2000000
+
+    obj.send = send
+    with patch('opendbc.safety.tests.hardware_service.time.monotonic', side_effect=lambda now=now: now.ns / 1e9), \
+         patch('opendbc.safety.tests.hardware_service.time.sleep', side_effect=lambda seconds, now=now: setattr(now, 'ns', now.ns + round(seconds * 1e9))):
+      obj.dispatch({'op': 'pause'})
+      self.assertEqual(sent, [([1, '01', 0], 0), ([2, '01', 0], 3000000)])
+      self.assertAlmostEqual(obj.streams['oldest']['next'], .102)
+      self.assertAlmostEqual(obj.streams['due']['next'], .105)
+      for name in ('oldest', 'due'):
+        self.assertEqual(obj.streams[name]['index'], 2)
+      now.ns += 1000000000
+      obj.dispatch({'op': 'pause'})  # Already globally paused, even newly due inputs stay out.
+      self.assertEqual(len(sent), 2)
+    for name, original in untouched.items():
+      self.assertEqual(obj.streams[name], original)
+
+  def test_repeated_injections_service_due_inputs_without_worker_opportunities(self):
+    for grouped in (False, True):
+      with self.subTest(grouped=grouped):
+        obj = service('station')
+        now = Clock(obj)
+        addresses = (0x165, 0x204, 0x213, 0x91, 0x555)
+        names = ('pcm', 'gas', 'moving', 'held', 'future')
+        obj.streams = {
+          name: {'frames': [[addr, bytes([i]).hex(), 0] for i in range(16)], 'period': .04,
+                 'index': 0, 'next': 1000. if name == 'future' else 0., 'paused': name == 'held'}
+          for name, addr in zip(names, addresses, strict=True)
+        }
+        future = dict(obj.streams['future'])
+        sent = []
+        obj.send = lambda frame, sent=sent, now=now: sent.append((list(frame), now.ns))
+        raw_fault = [0x415, '0000000000000000', 0]
+        with patch('opendbc.safety.tests.hardware_service.time.monotonic', side_effect=lambda now=now: now.ns / 1e9), \
+             patch('opendbc.safety.tests.hardware_service.time.sleep',
+                   side_effect=lambda seconds, now=now: setattr(now, 'ns', now.ns + round(seconds * 1e9))):
+          for cycle in range(30):
+            start = len(sent)
+            obj.dispatch({'op': 'pause'})
+            # Every due background input precedes the coordinator's baseline.
+            self.assertEqual([frame[0] for frame, _ in sent[start:]], list(addresses[:3]))
+            baseline = len(sent)
+            now.sleep(.18)  # Model paused RPC work, with NO worker iterations.
+            obj.dispatch({'op': 'pause'})
+            self.assertEqual(len(sent), baseline)
+            expected = [0x91, bytes([cycle % 16]).hex(), 0]
+            if grouped:
+              report = execute_rx_group(obj, [{'frame': None, 'updates': [], 'stream_name': 'held'}],
+                                        clock=now, sleep=now.sleep)
+              self.assertTrue(report['complete'], report)
+              self.assertEqual(report['frames'], [expected])
+            else:
+              self.assertEqual(obj.dispatch({'op': 'rx_stream', 'name': 'held'}), expected)
+            obj.dispatch({'op': 'send', 'frame': raw_fault})
+            self.assertEqual([frame for frame, _ in sent[baseline:]], [expected, raw_fault])
+            obj.dispatch({'op': 'resume'})
+        for name, addr in zip(names[:4], addresses[:4], strict=True):
+          samples = [(frame[1], timestamp) for frame, timestamp in sent if frame[0] == addr]
+          self.assertEqual([data for data, _ in samples], [bytes([i % 16]).hex() for i in range(30)])
+          self.assertEqual(obj.streams[name]['index'], 30)
+          self.assertLess(max(b[1] - a[1] for a, b in zip(samples[:-1], samples[1:], strict=True)), 1000000000)
+        self.assertEqual(obj.streams['future'], future)
+        self.assertTrue(obj.streams['held']['paused'])
+        self.assertEqual(len(sent), 30 * 5)
 
   def test_service_pipeline_keeps_worker_heartbeat_and_receipts(self):
     obj = service()

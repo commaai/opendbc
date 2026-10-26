@@ -459,6 +459,16 @@ class TestHardwareTransport(unittest.TestCase):
         service.dispatch({'op': 'rx_stream', 'name': 'counter'})
       service.sockets[0].send.assert_not_called()
       service.dispatch({'op': 'pause'})
+      service.sockets[0].send.assert_called_once()
+      packet = service.sockets[0].send.call_args.args[0]
+      self.assertEqual(struct.unpack('=IBB2x64s', packet), (0x123, 1, 0, bytes(64)))
+      self.assertEqual(service.streams['counter']['index'], 1)
+      self.assertEqual(service.streams['counter']['next'], 10.01)
+      self.assertEqual(service.streams['other']['index'], 0)
+      self.assertEqual(service.streams['other']['next'], 10.001)
+    # Pre-pause traffic belongs to the baseline, not the isolated injection.
+    service.sockets[0].send.reset_mock()
+    deadline = service.streams['counter']['next']
     service.streams['counter']['index'] = 7
     other_before = dict(service.streams['other'])
     with patch('opendbc.safety.tests.hardware_service.time.monotonic', return_value=20):
@@ -466,7 +476,7 @@ class TestHardwareTransport(unittest.TestCase):
       self.assertEqual(service.dispatch({'op': 'streams', 'streams': [spec, new]}), new['frames'])
       service.sockets[0].send.assert_not_called()
       self.assertEqual(service.streams['counter']['index'], 7)
-      self.assertEqual(service.streams['counter']['next'], 10)
+      self.assertEqual(service.streams['counter']['next'], deadline)
       self.assertEqual(service.dispatch({'op': 'rx_stream', 'name': 'counter'}), frames[3])
       self.run_one_iteration(service)
     service.sockets[0].send.assert_called_once()

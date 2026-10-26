@@ -128,6 +128,11 @@ class Service:
           break
     return frames
 
+  def _send_stream(self, stream):
+    self.send(stream['frames'][stream['index'] % len(stream['frames'])])
+    stream['index'] += 1
+    stream['next'] = time.monotonic() + stream['period']
+
   def run(self):
     heartbeat = 0
     try:
@@ -144,9 +149,7 @@ class Service:
           # periodic inputs into a burst that overruns the receiving controller.
           stream = min((s for s in self.streams.values() if not s.get('paused', False)), key=lambda s: s['next'], default=None)
           if not self.streams_paused and stream is not None and now >= stream['next']:
-            self.send(stream['frames'][stream['index'] % len(stream['frames'])])
-            stream['index'] += 1
-            stream['next'] = time.monotonic() + stream['period']
+            self._send_stream(stream)
           frames = self.receive()
           if len(self.queue) + len(frames) > 100000:
             raise RuntimeError('Physical receive queue overflow')
@@ -232,6 +235,16 @@ class Service:
       elif op == 'drop' and self.role == 'station':
         del self.streams[req['name']]
       elif op == 'pause' and self.role == 'station':
+        if not self.streams_paused:
+          # Give already-due inputs progress before the caller's baseline drain.
+          # Snapshot once: held/future inputs and missed-period catch-up stay out.
+          now = time.monotonic()
+          due = sorted((s for s in self.streams.values() if not s.get('paused', False) and s['next'] <= now),
+                       key=lambda s: s['next'])
+          for i, stream in enumerate(due):
+            if i:
+              time.sleep(.001)  # Match the worker's inter-frame pacing.
+            self._send_stream(stream)
         self.streams_paused = True
       elif op == 'resume' and self.role == 'station':
         # Preserve overdue priority across repeated pauses; the worker still
