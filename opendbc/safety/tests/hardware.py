@@ -417,6 +417,7 @@ class HardwareBackend:
     self.dut.call('send', frame=frame)
     addr, data, bus = frame
     accepted = observed = rejected = False
+    rejection_observed = None
     quiet_deadline = None
     deadline = time.monotonic() + self.timeout
     while time.monotonic() < deadline:
@@ -426,7 +427,9 @@ class HardwareBackend:
       observed |= frame in self._recv('station')
       assert not (rejected and (accepted or observed)), 'Rejected TX also had physical or accepted evidence'
       if rejected and quiet_deadline is None:
-        quiet_deadline = time.monotonic() + .020
+        # Coordinator observation after both polls, not an MCU arrival stamp.
+        rejection_observed = time.monotonic()
+        quiet_deadline = rejection_observed + .020
       if (accepted and observed) or (quiet_deadline is not None and time.monotonic() >= quiet_deadline):
         after = self._check(controls, healthy)
         if healthy:
@@ -437,6 +440,9 @@ class HardwareBackend:
     record = {'endpoint': 'dut', 'operation': 'tx_timeout', 'frames': [], 'frame': frame, 'receipt_bus': 128 + bus,
               'rejection_bus': 192 + bus, 'wire_bus': bus,
               'accepted': accepted, 'rejected': rejected, 'observed': observed,
+              'clock_scope': 'coordinator_monotonic', 'deadline_monotonic_s': deadline,
+              'rejection_observed_monotonic_s': rejection_observed, 'quiet_deadline_monotonic_s': quiet_deadline,
+              'timeout_monotonic_s': time.monotonic(),
               'receive_span': [receive_start, len(self.transport_observations)]}
     self.transport_observations.append(record)
     try:

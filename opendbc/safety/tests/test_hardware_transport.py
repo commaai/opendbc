@@ -394,7 +394,7 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(list(service.queue), [])
 
   def test_tx_timeout_retains_candidate_partial_evidence_and_health(self):
-    for partial in ('accepted', 'observed', 'neither'):
+    for partial in ('accepted', 'observed', 'neither', 'late_rejected'):
       for health_failure in (False, True):
         with self.subTest(partial=partial, health_failure=health_failure):
           self.check_tx_timeout_evidence(partial, health_failure)
@@ -415,6 +415,8 @@ class TestHardwareTransport(unittest.TestCase):
       if op == 'send':
         self.assertEqual(kwargs['frame'], frame)
         sent = True
+      if op == 'recv' and sent and partial == 'late_rejected' and now[0] >= .001:
+        return [[frame[0], frame[1], 193]]
       return [[frame[0], frame[1], 129]] if op == 'recv' and sent and partial == 'accepted' else []
 
     backend.dut.call.side_effect = dut_call
@@ -429,7 +431,18 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(record['frame'], frame)
     self.assertEqual((record['receipt_bus'], record['rejection_bus'], record['wire_bus']), (129, 193, 1))
     self.assertEqual((record['accepted'], record['rejected'], record['observed']),
-                     (partial == 'accepted', False, partial == 'observed'))
+                     (partial == 'accepted', partial == 'late_rejected', partial == 'observed'))
+    self.assertEqual(record['clock_scope'], 'coordinator_monotonic')
+    self.assertEqual(record['deadline_monotonic_s'], .002)
+    self.assertEqual(record['timeout_monotonic_s'], .002)
+    if partial == 'late_rejected':
+      self.assertEqual(record['rejection_observed_monotonic_s'], .001)
+      self.assertEqual(record['quiet_deadline_monotonic_s'], .021)
+      self.assertLess(record['timeout_monotonic_s'], record['quiet_deadline_monotonic_s'])
+      self.assertIn([frame[0], frame[1], 193], [f for r in records for f in r['frames']])
+    else:
+      self.assertIsNone(record['rejection_observed_monotonic_s'])
+      self.assertIsNone(record['quiet_deadline_monotonic_s'])
     start, end = record['receive_span']
     self.assertEqual((start, end), (3, len(records) - 2))
     self.assertEqual([r['operation'] for r in records[start:end]], ['recv', 'recv'] * 2)
