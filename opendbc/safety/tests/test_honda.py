@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import unittest
+from opendbc.safety.tests.coverage import coverage
 import numpy as np
 
 from opendbc.car.honda.values import HondaSafetyFlags
@@ -7,6 +8,7 @@ from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.common import MAX_WRONG_COUNTERS
+from opendbc.safety.tests.fixture_streams import suspend_required_streams
 
 HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 
@@ -53,7 +55,7 @@ class HondaButtonEnableBase(common.CarSafetyTest):
       self._set_controls_allowed(1)
       self._rx(self._acc_state_msg(False))
       self._rx(self._button_msg(btn, main_on=False))
-      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertFalse(self._controls_allowed())
 
   def test_set_resume_buttons(self):
     """
@@ -67,7 +69,7 @@ class HondaButtonEnableBase(common.CarSafetyTest):
           self._set_controls_allowed(0)
           for _ in range(10):
             self._rx(self._button_msg(btn_prev))
-            self.assertFalse(self.safety.get_controls_allowed())
+            self.assertFalse(self._controls_allowed())
 
           # should enter controls allowed on falling edge and not transitioning to cancel or main
           should_enable = (main_on and
@@ -76,7 +78,7 @@ class HondaButtonEnableBase(common.CarSafetyTest):
                            btn_cur not in (Btn.CANCEL, Btn.MAIN))
 
           self._rx(self._button_msg(btn_cur, main_on=main_on))
-          self.assertEqual(should_enable, self.safety.get_controls_allowed(), msg=f"{main_on=} {btn_prev=} {btn_cur=}")
+          self.assertEqual(should_enable, self._controls_allowed(), msg=f"{main_on=} {btn_prev=} {btn_cur=}")
 
   def test_main_cancel_buttons(self):
     """
@@ -85,14 +87,14 @@ class HondaButtonEnableBase(common.CarSafetyTest):
     for btn in (Btn.MAIN, Btn.CANCEL):
       self._set_controls_allowed(1)
       self._rx(self._button_msg(btn, main_on=True))
-      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertFalse(self._controls_allowed())
 
   def test_disengage_on_main(self):
     self._set_controls_allowed(1)
     self._rx(self._acc_state_msg(True))
-    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._controls_allowed())
     self._rx(self._acc_state_msg(False))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
 
   def test_rx_hook(self):
 
@@ -113,9 +115,18 @@ class HondaButtonEnableBase(common.CarSafetyTest):
         msg[0].data[6] = 0
         msg[0].data[7] = 0
         self.assertFalse(self._rx(msg))
-        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertFalse(self._controls_allowed())
 
+    # Own the exact wire counters for this fault scenario. Periodic good frames
+    # must not heal intentionally skipped counters, nor may rx_stream replace them.
+    self._reset_safety_hooks()
     self._set_controls_allowed(True)
+    if self.backend is not None:
+      suspend_required_streams(self)
+    for _ in range(2):
+      self.assertTrue(self._rx(self._button_msg(Btn.NONE), raw=True))
+      self.assertTrue(self._rx(self._speed_msg(0), raw=True))
+      self.assertTrue(self._rx(self._user_gas_msg(0), raw=True))
 
     # counter
     # Skip every other counter to trigger counter faults.
@@ -124,26 +135,34 @@ class HondaButtonEnableBase(common.CarSafetyTest):
       self._button_msg(Btn.SET)
       self._user_gas_msg(0)
       if i < MAX_WRONG_COUNTERS:
-        self._rx(self._button_msg(Btn.SET))
-        self._rx(self._speed_msg(0))
-        self._rx(self._user_gas_msg(0))
+        self._rx(self._button_msg(Btn.SET), raw=True)
+        self._rx(self._speed_msg(0), raw=True)
+        self._rx(self._user_gas_msg(0), raw=True)
       else:
-        self.assertFalse(self._rx(self._button_msg(Btn.SET)))
-        self.assertFalse(self._rx(self._speed_msg(0)))
-        self.assertFalse(self._rx(self._user_gas_msg(0)))
-        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertFalse(self._rx(self._button_msg(Btn.SET), raw=True))
+        self.assertFalse(self._rx(self._speed_msg(0), raw=True))
+        self.assertFalse(self._rx(self._user_gas_msg(0), raw=True))
+        self.assertFalse(self._controls_allowed())
 
     # restore counters for future tests with a couple of good messages
     for _ in range(2):
-      self._set_controls_allowed(1)
-      self._rx(self._button_msg(Btn.SET, main_on=True))
-      self._rx(self._speed_msg(0))
-      self._rx(self._user_gas_msg(0))
-    self._rx(self._button_msg(Btn.SET, main_on=True))
-    self.assertTrue(self.safety.get_controls_allowed())
+      self._rx(self._button_msg(Btn.SET, main_on=True), raw=True)
+      self._rx(self._speed_msg(0), raw=True)
+      self._rx(self._user_gas_msg(0), raw=True)
+    self._rx(self._button_msg(Btn.SET, main_on=True), raw=True)
+    self._set_controls_allowed(True)
+    self.assertTrue(self._controls_allowed())
 
 
 class HondaPcmEnableBase(common.CarSafetyTest):
+
+  def _engage(self):
+    if self.backend is not None:
+      # Release the periodic CANCEL input before the PCM cruise rising edge.
+      # TX encodings may leave a counter gap; the second RX updates the stream.
+      for _ in range(2):
+        self.assertTrue(self._rx(self._button_msg(Btn.NONE, main_on=True)))
+    super()._engage()
 
   def _disengage(self):
     self.assertTrue(self._rx(self._button_msg(Btn.CANCEL, main_on=True)))
@@ -168,9 +187,9 @@ class HondaPcmEnableBase(common.CarSafetyTest):
           self._rx(self._button_msg(Btn.NONE, main_on=main_on))
 
           if btn == Btn.CANCEL:
-            self.assertFalse(self.safety.get_controls_allowed())
+            self.assertFalse(self._controls_allowed())
           else:
-            self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
+            self.assertEqual(controls_allowed, self._controls_allowed())
 
 
 class HondaBase(common.CarSafetyTest):
@@ -233,7 +252,7 @@ class HondaBase(common.CarSafetyTest):
   def test_disengage_on_brake(self):
     self._set_controls_allowed(1)
     self._rx(self._user_brake_msg(1))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
 
   def test_steer_safety_check(self):
     self._set_controls_allowed(0)
@@ -278,40 +297,77 @@ class TestHondaNidecSafetyBase(HondaBase):
           send = (controls_allowed and pcm_gas <= self.MAX_GAS) or (pcm_gas == 0 and pcm_speed == 0)
           self.assertEqual(send, self._tx(self._send_acc_hud_msg(pcm_gas, pcm_speed)))
 
+  def _reset_relay_test(self):
+    super()._reset_relay_test()
+    if hasattr(self, '_fwd_scan_aeb'):
+      # Exhaustive forwarding resets at relay boundaries. Restore this phase's
+      # dynamic routing input after each existing reset, before scanning resumes.
+      self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE if self._fwd_scan_aeb else 0,
+                                                aeb_req=self._fwd_scan_aeb)))
+
   def test_fwd_hook(self):
-    # normal operation, not forwarding AEB
-    self.FWD_BLACKLISTED_ADDRS[2].append(0x1FA)
-    self._rx(self._rx_brake_msg(0, aeb_req=0))
-    super().test_fwd_hook()
+    original_blacklist = self.FWD_BLACKLISTED_ADDRS
+    try:
+      for aeb in (False, True):
+        self._fwd_scan_aeb = aeb
+        self.FWD_BLACKLISTED_ADDRS = {bus: list(addrs) for bus, addrs in original_blacklist.items()}
+        if not aeb:
+          self.FWD_BLACKLISTED_ADDRS[2].append(0x1FA)
+        self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE if aeb else 0, aeb_req=aeb)))
+        super().test_fwd_hook()
+    finally:
+      del self._fwd_scan_aeb
+      self.FWD_BLACKLISTED_ADDRS = original_blacklist
 
-    # forwarding AEB brake signal
-    self.FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
-    self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=1))
-    super().test_fwd_hook()
+  def _latch_brake_msg(self, brake, aeb_req):
+    # Test-owned input counter, independent of the outgoing brake command packer.
+    values = {"COMPUTER_BRAKE": brake, "AEB_REQ_1": aeb_req, "COUNTER": self._latch_brake_counter}
+    self._latch_brake_counter = (self._latch_brake_counter + 1) % 4
+    return self.packer.make_can_msg_safety("BRAKE_COMMAND", 2, values)
 
+  def _assert_fwd_brake(self, expected, brake, aeb_req):
+    # Physical forwarding is decided before RX updates the latch. Repeat the
+    # current input with a fresh valid counter so RX preserves that same latch.
+    packet = self._latch_brake_msg(brake, aeb_req)
+    if self.backend is None:
+      self.assertEqual(0 if expected else -1, self.safety.safety_fwd_hook(2, 0x1FA))
+      self.assertTrue(self._rx(packet, raw=True))
+      # Supplement the same observable probe with exact host latch identity.
+      self.assertEqual(expected, self.safety.get_honda_fwd_brake())
+    else:
+      self.assertTrue(self.backend.forward(self._raw_frame(packet), 0 if expected else None,
+                                           controls=None, healthy=True, rx_valid=True))
+
+  @coverage('Stock-brake forwarding decisions',
+            host=('Exact private Honda forwarding-brake latch identity',))
   def test_honda_fwd_brake_latching(self):
-    # Shouldn't fwd stock Honda requesting brake without AEB
-    self.assertTrue(self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=0)))
-    self.assertFalse(self.safety.get_honda_fwd_brake())
+    if self.backend is not None:
+      # Finish CAN engagement while all watchdog-required streams are live.
+      # The initial AEB-off forwarding decision is independent of controls.
+      self._set_controls_allowed(True)
+      suspend_required_streams(self, 'stock_brake')
+    # Suspension is not a delivery barrier: late startup frames can cause
+    # tolerated counter mismatches. Test inputs then advance modulo four.
+    self._latch_brake_counter = 1
+    self.assertTrue(self._rx(self._latch_brake_msg(self.MAX_BRAKE, 0), raw=True))
+    self._assert_fwd_brake(False, self.MAX_BRAKE, 0)
 
-    # Now allow controls and request some brake
     openpilot_brake = round(self.MAX_BRAKE / 2.0)
-    self._set_controls_allowed(True)
+    if self.backend is None:
+      self._set_controls_allowed(True)
     self.assertTrue(self._tx(self._send_brake_msg(openpilot_brake)))
 
-    # Still shouldn't fwd stock Honda brake until it's more than openpilot's
     for stock_honda_brake in range(self.MAX_BRAKE + 1):
-      self.assertTrue(self._rx(self._rx_brake_msg(stock_honda_brake, aeb_req=1)))
+      self.assertTrue(self._rx(self._latch_brake_msg(stock_honda_brake, 1), raw=True))
       should_fwd_brake = stock_honda_brake >= openpilot_brake
-      self.assertEqual(should_fwd_brake, self.safety.get_honda_fwd_brake())
+      self._assert_fwd_brake(should_fwd_brake, stock_honda_brake, 1)
 
-    # Shouldn't stop fwding until AEB event is over
     for stock_honda_brake in range(self.MAX_BRAKE + 1)[::-1]:
-      self.assertTrue(self._rx(self._rx_brake_msg(stock_honda_brake, aeb_req=1)))
-      self.assertTrue(self.safety.get_honda_fwd_brake())
+      self.assertTrue(self._rx(self._latch_brake_msg(stock_honda_brake, 1), raw=True))
+      self._assert_fwd_brake(True, stock_honda_brake, 1)
 
-    self.assertTrue(self._rx(self._rx_brake_msg(0, aeb_req=0)))
-    self.assertFalse(self.safety.get_honda_fwd_brake())
+    self.assertTrue(self._rx(self._latch_brake_msg(0, 0), raw=True))
+    self._assert_fwd_brake(False, 0, 0)
 
   def test_brake_safety_check(self):
     for fwd_brake in [False, True]:
@@ -414,18 +470,31 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
     self.assertTrue(self._rx(msg))
     msg[0].data[2] = msg[0].data[2] & 0xF0  # invalidate checksum
     self.assertFalse(self._rx(msg))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
 
   def test_alt_disengage_on_brake(self):
     self._set_controls_allowed(1)
     self._rx(self._alt_brake_msg(1))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
 
-    self.safety.set_safety_hooks(self.SAFETY_MODEL, self.SAFETY_PARAM & ~HondaSafetyFlags.ALT_BRAKE)
-    self.safety.init_tests()
-    self._set_controls_allowed(1)
-    self._rx(self._alt_brake_msg(1))
-    self.assertTrue(self.safety.get_controls_allowed())
+    original_param = self.SAFETY_PARAM
+    try:
+      self.SAFETY_PARAM = original_param & ~HondaSafetyFlags.ALT_BRAKE
+      if self.backend is None:
+        self.safety.set_safety_hooks(self.SAFETY_MODEL, self.SAFETY_PARAM)
+        self.safety.init_tests()
+      else:
+        self._reset_safety_hooks()
+      self._set_controls_allowed(1)
+      self._rx(self._alt_brake_msg(1))
+      self.assertTrue(self._controls_allowed())
+    finally:
+      self.SAFETY_PARAM = original_param
+      if self.backend is None:
+        self.safety.set_safety_hooks(self.SAFETY_MODEL, self.SAFETY_PARAM)
+        self.safety.init_tests()
+      else:
+        self._reset_safety_hooks()
 
 
 class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):

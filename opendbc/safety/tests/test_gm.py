@@ -71,12 +71,12 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
           should_enable = btn_cur != Buttons.DECEL_SET and btn_prev == Buttons.DECEL_SET
           should_enable = should_enable or (btn_cur == Buttons.RES_ACCEL and btn_prev != Buttons.RES_ACCEL)
           should_enable = should_enable and btn_cur != Buttons.CANCEL
-          self.assertEqual(should_enable, self.safety.get_controls_allowed())
+          self.assertEqual(should_enable, self._controls_allowed())
 
   def test_cancel_button(self):
     self._set_controls_allowed(1)
     self._rx(self._button_msg(Buttons.CANCEL))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
 
 
 class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
@@ -138,8 +138,8 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"LKASteeringCmd": torque, "LKASteeringCmdActive": steer_req}
     return self.packer.make_can_msg_safety("ASCMLKASteeringCmd", 0, values)
 
-  def _button_msg(self, buttons):
-    values = {"ACCButtons": buttons}
+  def _button_msg(self, buttons, counter=0):
+    values = {"ACCButtons": buttons, "RollingCounter": counter}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
 
 
@@ -191,19 +191,21 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
     return GMSafetyFlags.HW_CAM | self.EXTRA_SAFETY_PARAM
 
   def test_buttons(self):
+    # Bus-0 periodic buttons are forwarded to bus 2 with counter 0. Distinguish
+    # these TX candidates so forwarded UNPRESS cannot masquerade as accepted TX.
     # Only CANCEL button is allowed while cruise is enabled
     self._set_controls_allowed(0)
     for btn in range(8):
-      self.assertFalse(self._tx(self._button_msg(btn)))
+      self.assertFalse(self._tx(self._button_msg(btn, counter=1)))
 
     # PCM engagement also enables cruise, so CANCEL is permitted in this reachable state.
     self._set_controls_allowed(1)
     for btn in range(8):
-      self.assertEqual(btn == Buttons.CANCEL, self._tx(self._button_msg(btn)))
+      self.assertEqual(btn == Buttons.CANCEL, self._tx(self._button_msg(btn, counter=1)))
 
     for enabled in (True, False):
       self._rx(self._pcm_status_msg(enabled))
-      self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
+      self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL, counter=1)))
 
 
 class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
@@ -232,7 +234,8 @@ class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVS
 
 class TestGmIgnition(common.SafetyTestBase):
   DBC = "gm_global_a_powertrain_generated"
-  SAFETY_MODEL = None
+  SAFETY_MODEL = CarParams.SafetyModel.noOutput
+  IGNITION_ONLY = True
 
   TX_MSGS: list = []
 
@@ -241,14 +244,14 @@ class TestGmIgnition(common.SafetyTestBase):
 
   # SystemPowerMode 2=Run, 3=Crank Request
   def test_ignition_on(self):
-    self.safety.ignition_can_hook(self._msg(2))
-    self.assertTrue(self.safety.get_ignition_can())
+    self._ignition_rx(self._msg(2))
+    self.assertTrue(self._ignition_can())
 
   def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(2))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(0))
-    self.assertFalse(self.safety.get_ignition_can())
+    self._ignition_rx(self._msg(2))
+    self.assertTrue(self._ignition_can())
+    self._ignition_rx(self._msg(0))
+    self.assertFalse(self._ignition_can())
 
 
 if __name__ == "__main__":

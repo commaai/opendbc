@@ -2,6 +2,7 @@
 import numpy as np
 import random
 import unittest
+from opendbc.safety.tests.coverage import coverage
 
 import opendbc.safety.tests.common as common
 from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
@@ -73,7 +74,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     return min(max_curvature_accel_can, round(self.MAX_CURVATURE * self.DEG_TO_CAN))
 
   def _set_prev_desired_angle(self, t):
-    controls_allowed = self.safety.get_controls_allowed()
+    controls_allowed = self._controls_allowed()
     speed = getattr(self, "_last_speed", 0)
     speed_2 = getattr(self, "_last_speed_2", 0)
     curvature = getattr(self, "_last_curvature", 0)
@@ -149,7 +150,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
   def test_enable_control_allowed_from_queue_assist(self):
     msg = self.packer.make_can_msg_safety("EngBrakeData", 0, {"BpedDrvAppl_D_Actl": 1, "CcStat_D_Actl": 4})
     self.assertTrue(self._rx(msg))
-    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._controls_allowed())
 
   # LKAS command
   def _lkas_command_msg(self, action: int):
@@ -162,7 +163,10 @@ class TestFordSafetyBase(common.CarSafetyTest):
   def _lat_ctl_msg(self, enabled: bool, path_offset: float, path_angle: float, curvature: float, curvature_rate: float,
                    increment_timer: bool = True):
     if increment_timer:
-      self.safety.set_timer(self.lat_ctl_frame * int(1e6 / self.LATERAL_FREQUENCY))
+      if self.backend is None:
+        self.safety.set_timer(self.lat_ctl_frame * int(1e6 / self.LATERAL_FREQUENCY))
+      else:
+        self._wait(1 / self.LATERAL_FREQUENCY)
       self.__class__.lat_ctl_frame += 1
     if self.STEER_MESSAGE == MSG_LateralMotionControl:
       values = {
@@ -202,13 +206,21 @@ class TestFordSafetyBase(common.CarSafetyTest):
         self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0))
 
         within_delta = common.speeds_within_delta(speed, speed_2)
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
+        self.assertEqual(self._controls_allowed(), within_delta)
 
   def test_rx_hook(self):
     # checksum, counter, and quality flag checks
     for quality_flag in [True, False]:
       for msg_type in ["speed", "speed_2", "yaw"]:
+        if self.backend is not None:
+          from opendbc.safety.tests.fixture_streams import suspend_required_streams
+          # Each message/quality case establishes its own engagement state.
+          # Reset only at this boundary, never between a fault and its observation.
+          self._reset_backend()
         self._set_controls_allowed(True)
+        if self.backend is not None:
+          # Preserve raw probe counters without interleaved periodic copies.
+          suspend_required_streams(self, msg_type)
         # send multiple times to verify counter checks
         for _ in range(10):
           if msg_type == "speed":
@@ -219,32 +231,62 @@ class TestFordSafetyBase(common.CarSafetyTest):
             msg = self._yaw_rate_msg(0, 0, quality_flag=quality_flag)
 
           self.assertEqual(quality_flag, self._rx(msg))
-          self.assertEqual(quality_flag, self.safety.get_controls_allowed())
+          self.assertEqual(quality_flag, self._controls_allowed())
 
         # Mess with checksum to make it fail, checksum is not checked for 2nd speed
         msg[0].data[3] = 0  # Speed checksum & half of yaw signal
         should_rx = msg_type == "speed_2" and quality_flag
         self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
+        self.assertEqual(should_rx, self._controls_allowed())
 
+  @coverage('Signed curvature error-boundary and eviction probes',
+            host=('Full numeric curvature-window grid and integer extrema',))
   def test_angle_measurements(self):
     """Tests rx hook correctly parses the curvature measurement from the vehicle speed and yaw rate"""
+    # A held command exposes both signed sample extrema and their expiry through
+    # the curvature error gate. Exact integer parsing below remains a host supplement.
+    for sign in (-1, 1):
+      speed = 20
+      command = sign * 0.003
+      self._reset_curvature_measurement(0, speed)
+      self._set_controls_allowed(True)
+      self._set_prev_desired_angle(command)
+      if self.backend is not None:
+        self.backend.pause_stream('yaw')
+      try:
+        for curvature in (sign * 0.004, 0, 0, 0, 0, 0):
+          self.assertTrue(self._rx(self._yaw_rate_msg(curvature, speed)))
+        # Keep normal 50 ms command spacing. Only automatic yaw RX is held:
+        # each explicit sample refreshes its 100 ms watchdog deadline, and the
+        # seventh explicit sample, rather than a periodic zero, expires the peak.
+        self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, command, 0)))
+        self.assertTrue(self._rx(self._yaw_rate_msg(0, speed)))
+        self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, command, 0)))
+      finally:
+        if self.backend is not None:
+          self.backend.resume_stream('yaw')
     for speed in np.arange(0.5, 40, 0.5):
       for curvature in np.arange(0, self.MAX_CURVATURE * 2, 2e-3):
-        self._rx(self._speed_msg(speed))
+        self.assertTrue(self._rx(self._speed_msg(speed)))
         for c in (curvature, -curvature, 0, 0, 0, 0):
-          self._rx(self._yaw_rate_msg(c, speed))
+          self.assertTrue(self._rx(self._yaw_rate_msg(c, speed)))
 
-        self.assertEqual(self.safety.get_curvature_meas_min(), round(-curvature * self.DEG_TO_CAN))
-        self.assertEqual(self.safety.get_curvature_meas_max(), round(curvature * self.DEG_TO_CAN))
+        if self.backend is None:  # Exact sample-window inspection is a host supplement.
+          self.assertEqual(self.safety.get_curvature_meas_min(), round(-curvature * self.DEG_TO_CAN))
+        if self.backend is None:  # Exact sample-window inspection is a host supplement.
+          self.assertEqual(self.safety.get_curvature_meas_max(), round(curvature * self.DEG_TO_CAN))
 
-        self._rx(self._yaw_rate_msg(0, speed))
-        self.assertEqual(self.safety.get_curvature_meas_min(), round(-curvature * self.DEG_TO_CAN))
-        self.assertEqual(self.safety.get_curvature_meas_max(), 0)
+        self.assertTrue(self._rx(self._yaw_rate_msg(0, speed)))
+        if self.backend is None:  # Exact sample-window inspection is a host supplement.
+          self.assertEqual(self.safety.get_curvature_meas_min(), round(-curvature * self.DEG_TO_CAN))
+        if self.backend is None:  # Exact sample-window inspection is a host supplement.
+          self.assertEqual(self.safety.get_curvature_meas_max(), 0)
 
-        self._rx(self._yaw_rate_msg(0, speed))
-        self.assertEqual(self.safety.get_curvature_meas_min(), 0)
-        self.assertEqual(self.safety.get_curvature_meas_max(), 0)
+        self.assertTrue(self._rx(self._yaw_rate_msg(0, speed)))
+        if self.backend is None:  # Exact sample-window inspection is a host supplement.
+          self.assertEqual(self.safety.get_curvature_meas_min(), 0)
+        if self.backend is None:  # Exact sample-window inspection is a host supplement.
+          self.assertEqual(self.safety.get_curvature_meas_max(), 0)
 
   def test_max_lateral_acceleration(self):
     # Ford CAN FD can achieve a higher max lateral acceleration than CAN so we limit curvature based on speed
@@ -390,7 +432,69 @@ class TestFordSafetyBase(common.CarSafetyTest):
     self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, max_delta_can / self.DEG_TO_CAN, 0)))
     self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 2 * max_delta_can / self.DEG_TO_CAN, 0)))
 
+  @coverage('Scheduled burst rejection and recovery',
+            host=('Exact rolling-bucket alignment, half-window and MCU clock edges',))
   def test_rt_limits(self):
+    if self.backend is not None:
+      # Coarse burst/recovery evidence, not exact rolling-bucket alignment. Keep
+      # the original half-window and exact clock-edge assertions below on host.
+      def run_sequence(packets, budget):
+        max_lateness_us = 10_000
+        events = [{'offset_us': i * 6000, 'frame': self._raw_frame(packet)} for i, packet in enumerate(packets)]
+        self.assertEqual(len({tuple(event['frame']) for event in events}), len(events), 'Nonunique burst identity')
+        result = self.backend.steering_sequence(events, max_lateness_us=max_lateness_us)
+        timing = result['timing']
+        self.assertIs(timing['complete'], True, timing)
+        self.assertEqual(len(result['verdicts']), len(events), result)
+        self.assertEqual(len(timing['events']), len(events), timing)
+        if timing.get('physical') is False:
+          from opendbc.safety.tests.simulated import SimulatedBackend
+          self.assertIsInstance(self.backend, SimulatedBackend)
+          self.assertEqual(timing['source'], 'simulated_virtual_time')
+          elapsed = timing['quiet_end_us'] - timing['start_us']
+          self.assertEqual(timing['events'], events)
+        else:
+          self.assertLessEqual(timing['max_jitter_ns'], max_lateness_us * 1000, timing)
+          origin = timing['events'][0]['send_start_ns']
+          for planned, actual in zip(events, timing['events'], strict=True):
+            self.assertEqual(actual['offset_us'], planned['offset_us'], timing)
+            self.assertEqual(tuple(actual['frame']), tuple(planned['frame']), timing)
+            deadline = timing['start_ns'] + planned['offset_us'] * 1000
+            self.assertGreaterEqual(actual['send_start_ns'], deadline, timing)
+            self.assertGreaterEqual(actual['send_end_ns'], actual['send_start_ns'], timing)
+            self.assertLessEqual(actual['send_end_ns'] - deadline, max_lateness_us * 1000, timing)
+          elapsed = (timing['receipts_observed_ns'] - origin) / 1000
+        self.assertLess(elapsed, budget, timing)
+        return result['verdicts']
+
+      self._reset_safety_hooks()
+      self._set_controls_allowed(True)
+      self._reset_curvature_measurement(0, 0)
+      max_rt_msgs = int(self.LATERAL_FREQUENCY * common.RT_INTERVAL / 1e6 * 1.2 + 1)
+      curves = [i / self.DEG_TO_CAN for i in range(1, 2 * max_rt_msgs + 1)]
+
+      def command(curvature, enabled=True):
+        return self._lat_ctl_msg(enabled, 0, 0, curvature, 0, increment_timer=False)
+
+      for curvature in curves:
+        self.assertTrue(self._tx(command(0, False)))
+        self._wait((common.RT_INTERVAL + 50_000) / 1_000_000)
+        self.assertTrue(self._tx(command(curvature)))
+      self.assertTrue(self._tx(command(0, False)))
+      self._wait((common.RT_INTERVAL + 50_000) / 1_000_000)
+      # Each slow positive control leaves one message in the previous bucket.
+      # The anchor rolls again, retaining exactly itself. No second roll can
+      # occur during this batch, including its bounded observation interval.
+      verdicts = run_sequence([command(0)] + [command(curvature) for curvature in curves], common.RT_INTERVAL // 2)
+      self.assertEqual(verdicts, [True] + [i < max_rt_msgs for i in range(len(curves))])
+      # Roll the overflowing current bucket, then roll that previous bucket out.
+      # Both transition frames check before rolling, so both must reject.
+      for _ in range(2):
+        self._wait((common.RT_INTERVAL + 50_000) / 1_000_000)
+        self.assertFalse(self._tx(command(0)))
+      self.assertTrue(self._tx(command(0)))
+      self.assertTrue(self._tx(command(curves[0])))
+      return
     # send rate is limited over a rolling 250ms window split into two half-interval buckets
     self._set_controls_allowed(True)
     self._reset_curvature_measurement(0, 0)

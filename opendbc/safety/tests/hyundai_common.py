@@ -55,23 +55,26 @@ class HyundaiButtonBase:
           self._rx(self._button_msg(Buttons.NONE))
 
         self._rx(self._pcm_status_msg(False))
-        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertFalse(self._controls_allowed())
         self._rx(self._button_msg(btn, main_button=main_button))
         self._rx(self._pcm_status_msg(True))
         controls_allowed = btn in ENABLE_BUTTONS or main_button
-        self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
+        self.assertEqual(controls_allowed, self._controls_allowed())
 
   def test_sampling_cruise_buttons(self):
     """
       Test that we allow controls on recent button press, but not as button leaves sliding window
     """
+    if self.backend is not None:
+      from opendbc.safety.tests.fixture_streams import suspend_required_streams
+      suspend_required_streams(self, 'buttons')
     self._rx(self._button_msg(Buttons.SET))
     for i in range(2 * PREV_BUTTON_SAMPLES):
       self._rx(self._pcm_status_msg(False))
-      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertFalse(self._controls_allowed())
       self._rx(self._pcm_status_msg(True))
       controls_allowed = i < PREV_BUTTON_SAMPLES
-      self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
+      self.assertEqual(controls_allowed, self._controls_allowed())
       self._rx(self._button_msg(Buttons.NONE))
 
 
@@ -119,7 +122,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self._set_controls_allowed(0)
         for _ in range(10):
           self._rx(self._button_msg(btn_prev))
-          self.assertFalse(self.safety.get_controls_allowed())
+          self.assertFalse(self._controls_allowed())
 
         # should enter controls allowed on falling edge and not transitioning to cancel
         should_enable = btn_cur != btn_prev and \
@@ -127,12 +130,12 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
                         btn_prev in (Buttons.RESUME, Buttons.SET)
 
         self._rx(self._button_msg(btn_cur))
-        self.assertEqual(should_enable, self.safety.get_controls_allowed())
+        self.assertEqual(should_enable, self._controls_allowed())
 
   def test_cancel_button(self):
     self._set_controls_allowed(1)
     self._rx(self._button_msg(Buttons.CANCEL))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     """
@@ -152,6 +155,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     """
 
     addr, bus = self.DISABLED_ECU_ACTUATION_MSG
-    self.assertFalse(self.safety.get_relay_malfunction())
+    self._reset_relay_test()
+    self.assertFalse(self._relay_fault_observed())
     self._rx(make_msg(bus, addr, 8))
-    self.assertTrue(self.safety.get_relay_malfunction())
+    self.assertTrue(self._relay_fault_observed())

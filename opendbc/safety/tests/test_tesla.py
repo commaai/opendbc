@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import random
 import unittest
+from opendbc.safety.tests.coverage import coverage
 import numpy as np
 
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
@@ -66,8 +67,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": int(state)}
-    if increment_timer:
-      self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+    if increment_timer and bus == 0:
+      if self.backend is None:
+        self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      else:
+        self._wait(1 / self.LATERAL_FREQUENCY)
       self.__class__.cnt_angle_cmd += 1
     return self.packer.make_can_msg_safety("DAS_steeringControl", bus, values)
 
@@ -87,8 +91,15 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     return self.packer.make_can_msg_safety("DI_speed", 0, values)
 
   def _speed_msg_2(self, speed, quality_flag=True):
-    values = {"ESP_vehicleSpeed": speed * 3.6, "ESP_wheelSpeedsQF": quality_flag}
+    values = {"ESP_vehicleSpeed": speed * 3.6, "ESP_wheelSpeedsQF": quality_flag,
+              "ESP_vehicleStandstillSts": 1 if speed <= self.STANDSTILL_THRESHOLD else 0}
     return self.packer.make_can_msg_safety("ESP_B", 0, values)
+
+  def _reset_speed_measurement(self, speed):
+    # Keep both actual CAN speed sources consistent before command builders wait
+    # for the next TX slot; otherwise periodic ESP_B reports the old speed.
+    super()._reset_speed_measurement(speed)
+    self.assertTrue(self._rx(self._speed_msg_2(speed)))
 
   def _vehicle_moving_msg(self, speed: float, quality_flag=True):
     values = {"ESP_vehicleStandstillSts": 1 if speed <= self.STANDSTILL_THRESHOLD else 0,
@@ -123,6 +134,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     return self._long_control_msg(10, accel_limits=(accel, max(accel, 0)))
 
   def test_rx_hook(self):
+    if self.backend is not None:
+      from opendbc.safety.tests.fixture_streams import suspend_required_streams
+      # These are exact fault/recovery/replay sequences. Background frames must
+      # neither heal the injected faults nor acquire a conflicting counter phase.
+      suspend_required_streams(self, 'camera_angle', 'camera_long', 'speed', 'speed_2')
     # counter check
     for msg_type in ("angle", "long", "speed", "speed_2"):
       # send multiple times to verify counter checks
@@ -149,19 +165,63 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
             msg[0].data[7] = 0
 
         self._set_controls_allowed(True)
-        self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
+        self.assertEqual(should_rx, self._rx(msg, raw=True))
+        self.assertEqual(should_rx, self._controls_allowed())
 
       # Send static counters
       for i in range(MAX_WRONG_COUNTERS + 1):
         should_rx = i + 1 < MAX_WRONG_COUNTERS
-        self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
+        self.assertEqual(should_rx, self._rx(msg, raw=True))
+        self.assertEqual(should_rx, self._controls_allowed())
 
+  @coverage('Speed mismatch and consumed-minimum steering boundaries',
+            host=('Exact numeric speed extrema, unconsumed maximum and immediate reset',))
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
-    self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,
-                                  self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+    # Independently encoded speed sources expose parsing through the mismatch gate.
+    # Run this probe on host too; private sample extrema below are supplementary.
+    for speed in np.arange(0, 285 / 3.6, 0.5):
+      for delta in (0, 5):
+        self.assertTrue(self._rx(self._speed_msg(speed)))
+        self._set_controls_allowed(True)
+        self.assertTrue(self._rx(self._speed_msg_2(speed + delta)))
+        self.assertEqual(delta == 0, self._controls_allowed())
+    # Steering consumes vehicle_speed.min, unlike the newest-sample mismatch
+    # gate above. Exercise that minimum over the original six-sample windows.
+    for speed in np.arange(0, 285 / 3.6, 0.5):
+      # Include DI_vehicleSpeed's -40 kph offset before rounding, exactly as
+      # CANPacker does; dropping the offset changes some half-unit ties.
+      speed_can = int(np.floor((speed * 3.6 + 40) / 0.08 + 0.5))
+      minimum = round_speed((speed_can * 0.08 - 40) / 3.6)
+      for sign in (-1, 1):
+        self.assertTrue(self._rx(self._speed_msg_2(speed)))
+        if self.backend is not None:
+          self.backend.pause_stream('speed')
+        try:
+          for i in range(common.MAX_SAMPLE_VALS):
+            self.assertTrue(self._rx(self._speed_msg(speed + i * 0.1)))
+          self._set_controls_allowed(True)
+          # Match the signed steering encoding and the firmware's one-unit
+          # tolerance, as in test_lateral_accel_limit.
+          offset = -1 if sign == -1 else 0
+          limit = get_max_angle_vm(max(minimum - 1, 1), self.VM, CarControllerParams)
+          at_limit = round_angle(limit, offset + 1) * sign
+          at_limit = float(np.clip(at_limit, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX))
+          self._set_prev_desired_angle(at_limit)
+          self.assertTrue(self._tx(self._angle_cmd_msg(at_limit, True)))
+          over_limit = round_angle(limit, offset + 2) * sign
+          command = float(np.clip(over_limit, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX))
+          self.assertEqual(abs(over_limit) >= self.STEER_ANGLE_MAX,
+                           bool(self._tx(self._angle_cmd_msg(command, True))), (speed, sign))
+        finally:
+          if self.backend is not None:
+            self.backend.resume_stream('speed')
+    # The maximum is not consumed by Tesla safety. Exact max values and reset
+    # zeroing remain host-only; backend reset warmup replaces the old window and
+    # cannot prove that safety initialization itself cleared it.
+    if self.backend is None:
+      self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,
+                                    self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
   def test_rx_hook_speed_mismatch(self):
     # TODO: overridden because of custom rounding
@@ -175,24 +235,34 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
         # Set controls allowed in between rx since first message can reset it
         self.assertTrue(self._rx(self._speed_msg(speed)))
+        if self.backend is not None:
+          # Clear the previous case's conflicting periodic input through CAN
+          # before engagement. The original mismatch is still injected below.
+          self.assertTrue(self._rx(self._speed_msg_2(speed)))
         self._set_controls_allowed(True)
         self.assertTrue(self._rx(self._speed_msg_2(speed_2)))
 
         within_delta = speeds_within_delta(speed, speed_2)
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
+        self.assertEqual(self._controls_allowed(), within_delta)
 
     # Test ESP_B quality flag
     for quality_flag in (True, False):
+      if self.backend is not None:
+        # The last speed-delta case also leaves a mismatch before this section.
+        self.assertTrue(self._rx(self._speed_msg(0)))
+        self.assertTrue(self._rx(self._speed_msg_2(0)))
       self._set_controls_allowed(True)
       self.assertTrue(self._rx(self._speed_msg(0)))
       self.assertEqual(quality_flag, self._rx(self._speed_msg_2(0, quality_flag=quality_flag)))
-      self.assertEqual(quality_flag, self.safety.get_controls_allowed())
+      self.assertEqual(quality_flag, self._controls_allowed())
 
   def test_user_brake_quality_flag(self):
     for quality_flag in (True, False):
       msg = self._user_brake_msg(True, quality_flag=quality_flag)
       self.assertEqual(quality_flag, self._rx(msg))
 
+  @coverage('Steering override disengagement and recovery behavior',
+            host=('Exact steering-disengage latch identity',))
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
     # Either when the hands on level is high, or if there is a high angle rate fault
@@ -204,26 +274,28 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           should_disengage = hands_on_level >= 3 or (eac_status == 0 and eac_error_code == 9)
           self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=hands_on_level, eac_status=eac_status,
                                                         eac_error_code=eac_error_code)))
-          self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
-          self.assertEqual(should_disengage, self.safety.get_steering_disengage_prev())
+          self.assertNotEqual(should_disengage, self._controls_allowed())
+          if self.backend is None:  # Exact latch identity supplements the public disengagement checks.
+            self.assertEqual(should_disengage, self.safety.get_steering_disengage_prev())
 
           # Should not recover
           self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=0, eac_status=1, eac_error_code=0)))
-          self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
-          self.assertFalse(self.safety.get_steering_disengage_prev())
+          self.assertNotEqual(should_disengage, self._controls_allowed())
+          if self.backend is None:  # Recovery above is checked through public controls health.
+            self.assertFalse(self.safety.get_steering_disengage_prev())
 
   def test_autopark_summon_while_enabled(self):
     # We should not respect Autopark that activates while controls are allowed
     self._rx(self._pcm_status_msg(True, 0))
 
     self._rx(self._pcm_status_msg(True, self.autopark_states["SELFPARK_STARTED"]))
-    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._controls_allowed())
     self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
     self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
 
     # We should still not respect Autopark if we disengage cruise
     self._rx(self._pcm_status_msg(False, self.autopark_states["SELFPARK_STARTED"]))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
     self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
     self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
 
@@ -235,7 +307,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       autopark_active = autopark_state in self.active_autopark_states
       self._rx(self._pcm_status_msg(False, autopark_state))
       self._rx(self._pcm_status_msg(True, autopark_state))
-      self.assertNotEqual(autopark_active, self.safety.get_controls_allowed())
+      self.assertNotEqual(autopark_active, self._controls_allowed())
 
       # We should also start blocking all inactive/active openpilot msgs
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, False)))
@@ -245,7 +317,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
       # Regain controls when Autopark disables
       self._rx(self._pcm_status_msg(True, 0))
-      self.assertTrue(self.safety.get_controls_allowed())
+      self.assertTrue(self._controls_allowed())
       self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
       self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
@@ -267,12 +339,12 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
     # stock system sends no LKAS -> no forwarding, and OP is allowed to TX
     self.assertEqual(1, self._rx(no_lkas_msg_cam))
-    self.assertEqual(-1, self.safety.safety_fwd_hook(2, no_lkas_msg_cam.addr))
+    self._assert_forward(2, no_lkas_msg_cam.addr, -1)
     self.assertTrue(self._tx(no_lkas_msg))
 
     # stock system sends LKAS -> forwarding, and OP is not allowed to TX
     self.assertEqual(1, self._rx(lkas_msg_cam))
-    self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
+    self._assert_forward(2, lkas_msg_cam.addr, 0)
     self.assertFalse(self._tx(no_lkas_msg))
 
   # Tesla uses get_max_angle_delta_vm and get_max_angle_vm for real lateral accel and jerk limits
@@ -376,12 +448,12 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 
     # stock system sends no AEB -> no forwarding, and OP is allowed to TX
     self.assertEqual(1, self._rx(no_aeb_msg_cam))
-    self.assertEqual(0, self.safety.safety_fwd_hook(2, no_aeb_msg_cam.addr))
+    self._assert_forward(2, no_aeb_msg_cam.addr, 0)
     self.assertTrue(self._tx(no_aeb_msg))
 
     # stock system sends AEB -> forwarding, and OP is not allowed to TX
     self.assertEqual(1, self._rx(aeb_msg_cam))
-    self.assertEqual(0, self.safety.safety_fwd_hook(2, aeb_msg_cam.addr))
+    self._assert_forward(2, aeb_msg_cam.addr, 0)
     self.assertFalse(self._tx(no_aeb_msg))
 
 
@@ -402,12 +474,12 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
 
     # stock system sends no AEB -> no forwarding, and OP is allowed to TX
     self.assertEqual(1, self._rx(no_aeb_msg_cam))
-    self.assertEqual(-1, self.safety.safety_fwd_hook(2, no_aeb_msg_cam.addr))
+    self._assert_forward(2, no_aeb_msg_cam.addr, -1)
     self.assertTrue(self._tx(no_aeb_msg))
 
     # stock system sends AEB -> forwarding, and OP is not allowed to TX
     self.assertEqual(1, self._rx(aeb_msg_cam))
-    self.assertEqual(0, self.safety.safety_fwd_hook(2, aeb_msg_cam.addr))
+    self._assert_forward(2, aeb_msg_cam.addr, 0)
     self.assertFalse(self._tx(no_aeb_msg))
 
   def test_prevent_reverse(self):
@@ -435,7 +507,8 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
 
 class TestTeslaIgnition(common.SafetyTestBase):
   DBC = "tesla_model3_party"
-  SAFETY_MODEL = None
+  SAFETY_MODEL = CarParams.SafetyModel.noOutput
+  IGNITION_ONLY = True
 
   TX_MSGS: list = []
 
@@ -447,19 +520,19 @@ class TestTeslaIgnition(common.SafetyTestBase):
   # VEHICLE_POWER_STATE_DRIVE=3 (counter-gated)
   def test_ignition_on(self):
     for i in range(16):
-      self.safety.init_tests()
-      self.safety.ignition_can_hook(self._msg(i, 3))
-      self.assertFalse(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._msg((i + 1) % 16, 3))
-      self.assertTrue(self.safety.get_ignition_can())
+      self._reset_ignition()
+      self._ignition_rx(self._msg(i, 3))
+      self.assertFalse(self._ignition_can())
+      self._ignition_rx(self._msg((i + 1) % 16, 3))
+      self.assertTrue(self._ignition_can())
 
   def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0, 3))
-    self.safety.ignition_can_hook(self._msg(1, 3))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(2, 2))
-    self.safety.ignition_can_hook(self._msg(3, 2))
-    self.assertFalse(self.safety.get_ignition_can())
+    self._ignition_rx(self._msg(0, 3))
+    self._ignition_rx(self._msg(1, 3))
+    self.assertTrue(self._ignition_can())
+    self._ignition_rx(self._msg(2, 2))
+    self._ignition_rx(self._msg(3, 2))
+    self.assertFalse(self._ignition_can())
 
 
 if __name__ == "__main__":

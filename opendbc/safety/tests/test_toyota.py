@@ -2,6 +2,7 @@
 import numpy as np
 import random
 import unittest
+from opendbc.safety.tests.coverage import coverage
 import itertools
 
 from opendbc.car.toyota.values import ToyotaSafetyFlags
@@ -97,12 +98,20 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
           msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
           self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
 
+    # A single actuation byte must suffice to block AEB, even if all others are zero.
+    self._set_controls_allowed(True)
+    self.assertEqual(not stock_longitudinal, self._tx(libsafety_py.make_CANPacket(0x283, 0, bytes(7))))
+    for byte in range(6):
+      payload = bytearray(7)
+      payload[byte] = 1
+      self.assertFalse(self._tx(libsafety_py.make_CANPacket(0x283, 0, payload)))
+
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
     for engaged, req, req2, torque_wind_down, angle in itertools.product([True, False],
                                                                   [0, 1], [0, 1],
                                                                   [0, 50, 100],
-                                                                  np.linspace(-20, 20, 5)):
+                                                                  (*np.linspace(-20, 20, 5), -1, 1)):
       self._set_controls_allowed(engaged)
 
       should_tx = not req and not req2 and angle == 0 and torque_wind_down == 0
@@ -123,7 +132,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       msg[0].data[6] = 0
       msg[0].data[7] = 0
       self.assertFalse(self._rx(msg))
-      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertFalse(self._controls_allowed())
 
     # quality flag tests
     msg = self._speed_msg(0)
@@ -132,13 +141,34 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     msg = self._speed_msg(0, quality_flag=False)
     self.assertFalse(self._rx(msg))
 
+  @coverage('Held-brake disengagement across encoded speeds',
+            host=('Exact numeric speed min/max',))
   def test_vehicle_speed_measurements(self):
-    # OVERRIDDEN: 72.22_ is the max speed in m/s
-    self._common_measurement_test(self._speed_msg, 0, 259 / 3.6, 1,
-                                  self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+    # OVERRIDDEN: 72.22_ is the max speed in m/s. Exercise the speed RX
+    # decision through held-brake disengagement on every backend. Exact numeric
+    # sample extrema are supplementary host checks: torque Toyota has no
+    # speed-dependent TX limit that could expose their numeric values.
+    for val in np.arange(0, 259 / 3.6, 0.5):
+      self.assertTrue(self._rx(self._speed_msg(0)))
+      self.assertTrue(self._rx(self._user_brake_msg(True)))
+      self._set_controls_allowed(True)
+      self.assertTrue(self._rx(self._user_brake_msg(True)))
+      self.assertTrue(self._controls_allowed())
+      for i in range(common.MAX_SAMPLE_VALS):
+        self.assertTrue(self._rx(self._speed_msg(val + i * 0.1)))
+      self.assertTrue(self._rx(self._user_brake_msg(True)))
+      self.assertFalse(self._controls_allowed())
+      if self.backend is None:
+        self.assertAlmostEqual(self.safety.get_vehicle_speed_min(), val, delta=0.1)
+        self.assertAlmostEqual(self.safety.get_vehicle_speed_max() - 0.5, val, delta=0.1)
+      self.assertTrue(self._rx(self._user_brake_msg(False)))
+      self._reset_safety_hooks()
+      if self.backend is None:
+        self.assertEqual(self.safety.get_vehicle_speed_min(), 0)
+        self.assertEqual(self.safety.get_vehicle_speed_max(), 0)
 
 
-class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+class TestToyotaSafetyTorqueBase(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
 
   MAX_RATE_UP = 15
   MAX_RATE_DOWN = 25
@@ -238,6 +268,8 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
           self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
           self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
 
+  @coverage('Inactive LTA bounds and sample eviction with EPS clipping',
+            host=('Exact unclipped angle extrema beyond observable EPS clipping',))
   def test_angle_measurements(self):
     """
     * Tests angle meas quality flag dictates whether angle measurement is parsed, and if rx is valid
@@ -251,19 +283,29 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
                            self._rx(self._angle_meas_msg(a, steer_angle_initializing)))
 
         final_angle = 0 if steer_angle_initializing else round(angle * self.DEG_TO_CAN)
-        self.assertEqual(self.safety.get_angle_meas_min(), -final_angle)
-        self.assertEqual(self.safety.get_angle_meas_max(), final_angle)
+        self._assert_inactive_angle_window(-final_angle, final_angle)
 
         self._rx(self._angle_meas_msg(0))
-        self.assertEqual(self.safety.get_angle_meas_min(), -final_angle)
-        self.assertEqual(self.safety.get_angle_meas_max(), 0)
+        self._assert_inactive_angle_window(-final_angle, 0)
 
         self._rx(self._angle_meas_msg(0))
-        self.assertEqual(self.safety.get_angle_meas_min(), 0)
-        self.assertEqual(self.safety.get_angle_meas_max(), 0)
+        self._assert_inactive_angle_window(0, 0)
+
+  def _assert_inactive_angle_window(self, minimum, maximum):
+    # Inactive LTA permits the measured sample window, clipped to the EPS limit,
+    # with one CAN unit of rounding tolerance. Probe both sides of each boundary.
+    lower = max(-1657, min(1657, minimum)) - 1
+    upper = max(-1657, min(1657, maximum)) + 1
+    for raw, allowed in ((lower - 1, False), (lower, True), (upper, True), (upper + 1, False)):
+      self.assertEqual(allowed, self._tx(self._lta_msg(0, 0, raw / self.DEG_TO_CAN, 0)), (minimum, maximum, raw))
+    if self.backend is None:
+      # Exact unclipped samples are supplementary host evidence: commands cannot
+      # distinguish measured angles beyond the EPS clipping limit.
+      self.assertEqual(self.safety.get_angle_meas_min(), minimum)
+      self.assertEqual(self.safety.get_angle_meas_max(), maximum)
 
 
-class TestToyotaAltBrakeSafety(TestToyotaSafetyTorque):
+class TestToyotaAltBrakeSafety(TestToyotaSafetyTorqueBase):
 
   DBC = "toyota_new_mc_pt_generated"
 
@@ -307,7 +349,7 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel, cancel_req=1)))
 
 
-class TestToyotaStockLongitudinalTorque(TestToyotaStockLongitudinalBase, TestToyotaSafetyTorque):
+class TestToyotaStockLongitudinalTorque(TestToyotaStockLongitudinalBase, TestToyotaSafetyTorqueBase):
 
   @property
   def SAFETY_PARAM(self):
@@ -395,6 +437,13 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
         should_tx = np.isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel)))
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel, cancel_req=1)))
+
+
+class TestToyotaSafetyTorque(common.PeriodicSafetyTest, TestToyotaSafetyTorqueBase):
+  PERIODIC_TIMEOUT_STREAM = "torque"
+
+  def _checksum_fault_msg(self):
+    return self._torque_meas_msg(0)
 
 
 if __name__ == "__main__":

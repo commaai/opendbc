@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import itertools
 import unittest
+from opendbc.safety.tests.coverage import coverage
 import numpy as np
 
 from opendbc.car.byd.carcontroller import get_safety_CP
@@ -48,7 +49,10 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     values = {"STEER_ANGLE": angle, "STEER_REQ": 1 if enabled else 0, "STEER_REQ_ACTIVE_LOW": 0 if enabled else 1}
     if increment_timer:
-      self.safety.set_timer(self.__class__.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      if self.backend is None:
+        self.safety.set_timer(self.__class__.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      else:
+        self._wait(1 / self.LATERAL_FREQUENCY)
       self.__class__.cnt_angle_cmd += 1
     return self.packer.make_can_msg_safety("STEERING_MODULE_ADAS", self.MAIN_BUS, values)
 
@@ -92,6 +96,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           should_tx = not any(pressed[:-1]) and (not pressed[-1] or cruise_engaged)
           self.assertEqual(should_tx, self._tx(msg))
 
+  @coverage('Checksum rejection, controls-off observations, and high-speed jerk checks after recovery',
+            host=('Exact stored speed min/max preservation across rejected frames and unreseeded high-speed jerk check',))
   def test_rx_checksums(self):
     for name, bus, signal, initial, corrupt in (
       ("WHEELSPEED_CLEAN", self.MAIN_BUS, "WHEELSPEED_CLEAN", 72, 0),
@@ -99,20 +105,47 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     ):
       for byte in range(8):
         with self.subTest(message=name, byte=byte):
-          self.safety.set_safety_hooks(CarParams.SafetyModel.byd, 0)
-          self.safety.init_tests()
+          self._reset_safety_hooks()
+          if self.backend is None:
+            self.safety.init_tests()
           for _ in range(16):
-            msg = self.packer.make_can_msg_safety(name, bus, {signal: initial})
+            # Valid setup must also update the test-owned periodic input.
+            msg = self._speed_msg(initial / 3.6) if name == "WHEELSPEED_CLEAN" else self._pcm_status_msg(False)
             self.assertTrue(self._rx(msg))
-          speed_min = self.safety.get_vehicle_speed_min()
-          speed_max = self.safety.get_vehicle_speed_max()
+          if self.backend is None:  # Exact sample preservation has no public getter.
+            speed_min = self.safety.get_vehicle_speed_min()
+            speed_max = self.safety.get_vehicle_speed_max()
           msg = self.packer.make_can_msg_safety(name, bus, {signal: corrupt})
           msg[0].data[byte] ^= 0xFF
           self._set_controls_allowed(name == "WHEELSPEED_CLEAN")
-          self.assertFalse(self._rx(msg))
-          self.assertFalse(self.safety.get_controls_allowed())
-          self.assertEqual(speed_min, self.safety.get_vehicle_speed_min())
-          self.assertEqual(speed_max, self.safety.get_vehicle_speed_max())
+          if self.backend is not None:
+            from opendbc.safety.tests.fixture_streams import suspend_required_streams
+            # A checksum fault can also change the counter tracker. Keep the
+            # exact faulty frame isolated through rejection and controls-off
+            # observations; the speed case explicitly ends isolation below.
+            suspend_required_streams(self, 'speed' if name == "WHEELSPEED_CLEAN" else 'pcm')
+          self.assertFalse(self._rx(msg, raw=True))
+          self.assertFalse(self._controls_allowed())
+          if self.backend is None:  # Exact speed retention across the rejected frame, before any recovery.
+            self.assertEqual(speed_min, self.safety.get_vehicle_speed_min())
+            self.assertEqual(speed_max, self.safety.get_vehicle_speed_max())
+          if name == "WHEELSPEED_CLEAN":
+            if self.backend is not None:
+              # End raw-fault isolation before the healthy jerk probe. Reinstall
+              # the same high speed and let the 1 Hz RX watchdog recover.
+              self._update_required_streams(self.required_streams())
+              for _ in range(16):
+                self.assertTrue(self._rx(self._speed_msg(initial / 3.6)))
+              self._wait(1.1)
+            # Host checks retained speed without reseeding after the corrupt frame;
+            # backend checks the jerk gate at the restored healthy high speed.
+            # Re-engage via CAN, then seed zero command without changing speed.
+            self._set_controls_allowed(True)
+            self._set_prev_desired_angle(0)
+            self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+            limit = get_max_angle_delta_vm(19, self.VM, CarControllerParams)
+            over_limit = safety_max_can(limit, 1) / self.DEG_TO_CAN
+            self.assertFalse(self._tx(self._angle_cmd_msg(over_limit, True)))
 
   def test_rx_counters(self):
     for name, bus, signal, value in (
@@ -120,7 +153,13 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       ("ACC_HUD_ADAS", self.CAM_BUS, "ACC_STATE", 3),
     ):
       with self.subTest(message=name):
+        if self.backend is not None:
+          self._reset_safety_hooks()
         self._set_controls_allowed(True)
+        if self.backend is not None:
+          from opendbc.safety.tests.fixture_streams import suspend_required_streams
+          # Keep background counters from colliding with or healing the raw sequence.
+          suspend_required_streams(self, 'speed' if name == "WHEELSPEED_CLEAN" else 'pcm')
         # Check both counter locations and rollover with valid checksums.
         for _ in range(32):
           msg = self.packer.make_can_msg_safety(name, bus, {signal: value})
@@ -128,8 +167,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         # Replayed frames are rejected after the common counter tolerance.
         for i in range(common.MAX_WRONG_COUNTERS + 1):
           should_rx = i < common.MAX_WRONG_COUNTERS - 1
-          self.assertEqual(should_rx, self._rx(msg))
-          self.assertEqual(should_rx, self.safety.get_controls_allowed())
+          self.assertEqual(should_rx, self._rx(msg, raw=True))
+          self.assertEqual(should_rx, self._controls_allowed())
         # A valid sequence clears the counter faults.
         for _ in range(common.MAX_WRONG_COUNTERS):
           msg = self.packer.make_can_msg_safety(name, bus, {signal: 0})

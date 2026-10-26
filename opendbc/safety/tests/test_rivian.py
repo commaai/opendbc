@@ -49,7 +49,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
 
   def _speed_msg_2(self, speed, quality_flag=True):
     # Rivian has a dynamic max torque limit based on speed, so it checks two sources
-    return self._user_gas_msg(0, speed, quality_flag)
+    return self._user_gas_msg(speed=speed, quality_flag=quality_flag)
 
   def _user_brake_msg(self, brake, quality_flag=True):
     values = {"iBESP2_BrakePedalApplied": brake, "iBESP2_BrakePedalApplied_Q": 1 if quality_flag else 2,
@@ -57,8 +57,14 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("iBESP2", 0, values)
 
-  def _user_gas_msg(self, gas, speed=0, quality_flag=True):
-    values = {"VDM_AcceleratorPedalPosition": gas, "VDM_VehicleSpeed": speed * 3.6,
+  def _user_gas_msg(self, gas=None, speed=None, quality_flag=True):
+    # VDM carries both inputs: updating one must preserve the other encoder input.
+    if gas is not None:
+      self._vdm_gas = gas
+    if speed is not None:
+      self._vdm_speed = speed
+    values = {"VDM_AcceleratorPedalPosition": getattr(self, "_vdm_gas", 0),
+              "VDM_VehicleSpeed": getattr(self, "_vdm_speed", 0) * 3.6,
               "VDM_PropStatus_Counter": self.cnt_speed_2 % 15, "VDM_VehicleSpeedQ": 1 if quality_flag else 0}
     self.__class__.cnt_speed_2 += 1
     return self.packer.make_can_msg_safety("VDM_PropStatus", 0, values)
@@ -96,12 +102,12 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
             msg = self._speed_msg_2(0, quality_flag=quality_flag)
 
           self.assertEqual(quality_flag, self._rx(msg))
-          self.assertEqual(quality_flag, self.safety.get_controls_allowed())
+          self.assertEqual(quality_flag, self._controls_allowed())
 
         # Mess with checksum to make it fail
         msg[0].data[0] = 0xff
         self.assertFalse(self._rx(msg))
-        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertFalse(self._controls_allowed())
 
     # The DBC defines counters for the remaining monitored RX messages too.
     for make_msg in (self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
@@ -113,13 +119,13 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
       msg = make_msg(0) if make_msg == self._torque_driver_msg else make_msg(False)
       msg[0].data[0] ^= 0xff
       self.assertFalse(self._rx(msg))
-      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertFalse(self._controls_allowed())
 
       if make_msg == self._user_brake_msg:
         self._reset_safety_hooks()
         self._set_controls_allowed(True)
         self.assertFalse(self._rx(self._user_brake_msg(False, quality_flag=False)))
-        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertFalse(self._controls_allowed())
 
       # A single bad counter is tolerated, but repeated bad counters must disengage.
       self._reset_safety_hooks()
@@ -129,7 +135,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
         msg[0].data[1] &= 0xf0
         valid = self._rx(msg)
       self.assertFalse(valid)
-      self.assertFalse(self.safety.get_controls_allowed())
+      self.assertFalse(self._controls_allowed())
 
 
 class TestRivianStockSafety(TestRivianSafetyBase):
@@ -156,7 +162,8 @@ class TestRivianLongitudinalSafety(TestRivianSafetyBase):
 
 class TestRivianIgnition(common.SafetyTestBase):
   DBC = "rivian_primary_actuator"
-  SAFETY_MODEL = None
+  SAFETY_MODEL = CarParams.SafetyModel.noOutput
+  IGNITION_ONLY = True
 
   TX_MSGS: list = []
 
@@ -168,19 +175,19 @@ class TestRivianIgnition(common.SafetyTestBase):
   # VDM_EpasPowerMode_Drive_On=1
   def test_ignition_on(self):
     for i in range(15):
-      self.safety.init_tests()
-      self.safety.ignition_can_hook(self._msg(i, 1))
-      self.assertFalse(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._msg((i + 1) % 15, 1))
-      self.assertTrue(self.safety.get_ignition_can())
+      self._reset_ignition()
+      self._ignition_rx(self._msg(i, 1))
+      self.assertFalse(self._ignition_can())
+      self._ignition_rx(self._msg((i + 1) % 15, 1))
+      self.assertTrue(self._ignition_can())
 
   def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0, 1))
-    self.safety.ignition_can_hook(self._msg(1, 1))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(2, 0))
-    self.safety.ignition_can_hook(self._msg(3, 0))
-    self.assertFalse(self.safety.get_ignition_can())
+    self._ignition_rx(self._msg(0, 1))
+    self._ignition_rx(self._msg(1, 1))
+    self.assertTrue(self._ignition_can())
+    self._ignition_rx(self._msg(2, 0))
+    self._ignition_rx(self._msg(3, 0))
+    self.assertFalse(self._ignition_can())
 
 
 if __name__ == "__main__":

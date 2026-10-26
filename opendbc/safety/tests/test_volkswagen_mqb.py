@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import unittest
+from opendbc.safety.tests.coverage import coverage
 import numpy as np
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
@@ -90,16 +91,31 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self.packer.make_can_msg_safety("ACC_07", 0, values)
 
   # Verify brake_pressed is true if either the switch or pressure threshold signals are true
+  @coverage('Redundant-brake disengagement and torque inhibition',
+            host=('Exact private brake OR-state identity',))
   def test_redundant_brake_signals(self):
     test_combinations = [(True, True, True), (True, True, False), (True, False, True), (False, False, False)]
     for brake_pressed, motor_14_signal, esp_05_signal in test_combinations:
       self._rx(self._motor_14_msg(False))
       self._rx(self._esp_05_msg(False))
-      self.assertFalse(self.safety.get_brake_pressed_prev())
+      if self.backend is None:
+        # Supplement the observable disengagement probe with exact host state.
+        self.assertFalse(self.safety.get_brake_pressed_prev())
+      self._rx(self._speed_msg(10))
+      self._set_controls_allowed(True)
+      self.assertTrue(self._controls_allowed())
+      self.assertTrue(self._tx(self._torque_cmd_msg(1)))
       self._rx(self._motor_14_msg(motor_14_signal))
       self._rx(self._esp_05_msg(esp_05_signal))
-      self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
-                       f"expected {brake_pressed=} with {motor_14_signal=} and {esp_05_signal=}")
+      self.assertEqual(not brake_pressed, self._controls_allowed(),
+                       f"expected {brake_pressed=} to inhibit controls")
+      # Zero torque stays legal in both states; active torque proves inhibition.
+      self.assertTrue(self._tx(self._torque_cmd_msg(0)))
+      self.assertEqual(not brake_pressed, bool(self._tx(self._torque_cmd_msg(1))))
+      if self.backend is None:
+        # Exact internal OR state is supplementary deterministic coverage.
+        self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
+                         f"expected {brake_pressed=} with {motor_14_signal=} and {esp_05_signal=}")
 
 
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
@@ -153,26 +169,26 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
       self._set_controls_allowed(0)
       self._rx(self._tsk_status_msg(False, main_switch=False))
       self._rx(self._gra_acc_01_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
-      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} with main switch off")
+      self.assertFalse(self._controls_allowed(), f"controls allowed on {button} with main switch off")
       self._rx(self._tsk_status_msg(False, main_switch=True))
       self._rx(self._gra_acc_01_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
-      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
+      self.assertFalse(self._controls_allowed(), f"controls allowed on {button} rising edge")
       self._rx(self._gra_acc_01_msg(bus=0))
-      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
+      self.assertTrue(self._controls_allowed(), f"controls not allowed on {button} falling edge")
 
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False, main_switch=True))
     self._set_controls_allowed(1)
     self._rx(self._gra_acc_01_msg(cancel=True, bus=0))
-    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
+    self.assertFalse(self._controls_allowed(), "controls allowed after cancel")
 
   def test_main_switch(self):
     # Disable as soon as main switch turns off
     self._rx(self._tsk_status_msg(False, main_switch=True))
     self._set_controls_allowed(1)
     self._rx(self._tsk_status_msg(False, main_switch=False))
-    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after ACC main switch off")
+    self.assertFalse(self._controls_allowed(), "controls allowed after ACC main switch off")
 
   def test_accel_safety_check(self):
     for controls_allowed in [True, False]:
