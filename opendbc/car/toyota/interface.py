@@ -85,7 +85,8 @@ class CarInterface(CarInterfaceBase):
 
     # TODO: Some TSS-P platforms have BSM, but are flipped based on region or driving direction.
     # Detect flipped signals and enable for C-HR and others
-    ret.enableBsm = 0x3F6 in fingerprint[0] and bool(ret.flags & ToyotaFlags.TSS2)
+    if 0x3F6 in fingerprint[0] and ret.flags & ToyotaFlags.TSS2:
+      ret.flags |= ToyotaFlags.HAS_BSM.value
 
     ret.radarUnavailable = Bus.radar not in DBC[candidate]
 

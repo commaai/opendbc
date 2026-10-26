@@ -516,6 +516,7 @@ FW_VERSIONS = {
       b'\xe2"`q\x07',
       b'\xe2"`t\x07',
       b'\xe2,\xa0p\x07',
+      b'\xe2,\xa0@\x07',
       b'\xe3,\xa0@\x07',
     ],
     (Ecu.transmission, 0x7e1, None): [

@@ -73,28 +73,12 @@ def create_cruise_buttons(packer, frame, bus, cancel=False, resume=False):
 
 
 def chrysler_checksum(address: int, sig, d: bytearray) -> int:
-  checksum = 0xFF
-  for j in range(len(d) - 1):
-    curr = d[j]
-    shift = 0x80
-    for _ in range(8):
-      bit_sum = curr & shift
-      temp_chk = checksum & 0x80
-      if bit_sum:
-        bit_sum = 0x1C
-        if temp_chk:
-          bit_sum = 1
-        checksum = (checksum << 1) & 0xFF
-        temp_chk = checksum | 1
-        bit_sum ^= temp_chk
-      else:
-        if temp_chk:
-          bit_sum = 0x1D
-        checksum = (checksum << 1) & 0xFF
-        bit_sum ^= checksum
-      checksum = bit_sum & 0xFF
-      shift >>= 1
-  return (~checksum) & 0xFF
+  # standard CRC-8 SAE J1850 (poly 0x1D, init 0xFF, final XOR 0xFF)
+  crc = 0xFF
+  for i in range(len(d) - 1):
+    crc ^= d[i]
+    crc = CRC8J1850[crc]
+  return crc ^ 0xFF
 
 
 def fca_giorgio_checksum(address: int, sig, d: bytearray) -> int:

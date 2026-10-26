@@ -6,11 +6,15 @@ cd $DIR
 
 source ../../../setup.sh
 
-# reset coverage data
-rm -f ./libsafety/*.gcda
+# TODO: get UBSan and coverage without running the tests twice.
+# Run UBSan separately so its checks do not count as coverage branches.
+SAFETY_COVERAGE=0 python -m unittest discover -s .
+
+# reset coverage data, including metadata from previous builds
+rm -f ./libsafety/*.gcda ./libsafety/*.gcno
 
 # run safety tests and generate coverage data
-python -m unittest discover -s .
+SAFETY_COVERAGE=1 python -m unittest discover -s .
 
 # NOTE: we accept that these tools will have slight differences,
 # and in return, we get to use the stock toolchain instead of

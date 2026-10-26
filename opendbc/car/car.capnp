@@ -469,7 +469,6 @@ struct CarParams {
   notCar @66 :Bool;  # flag for non-car robotics platforms
 
   pcmCruise @3 :Bool;        # is openpilot's state tied to the PCM's cruise state?
-  enableBsm @56 :Bool;       # blind spot monitoring
   flags @64 :UInt32;         # flags for car specific quirks
   alphaLongitudinalAvailable @71 :Bool;
 
@@ -484,20 +483,17 @@ struct CarParams {
   autoResumeSng @69 :Bool;               # describes whether car can resume from a stop automatically
 
   # things about the car in the manual
-  mass @17 :Float32;            # [kg] curb weight: all fluids no cargo
   wheelbase @18 :Float32;       # [m] distance from rear axle to front axle
   centerToFront @19 :Float32;   # [m] distance from center of mass to front axle
   steerRatio @20 :Float32;      # [] ratio of steering wheel angle to front wheel angle
-  steerRatioRear @21 :Float32;  # [] ratio of steering wheel angle to rear wheel angle (usually 0)
 
-  # things we can derive
-  rotationalInertia @22 :Float32;    # [kg*m2] body rotational inertia
+  # mass-normalized vehicle dynamics parameters
+  rotationalInertiaPerMass @22 :Float32;  # [m^2] rotational inertia per unit mass
   tireStiffnessFactor @72 :Float32;  # scaling factor used in calculating tireStiffness[Front,Rear]
-  tireStiffnessFront @23 :Float32;   # [N/rad] front tire coeff of stiff
-  tireStiffnessRear @24 :Float32;    # [N/rad] rear tire coeff of stiff
+  tireStiffnessFrontPerMass @23 :Float32;  # [N/(rad*kg)] front tire stiffness per unit mass
+  tireStiffnessRearPerMass @24 :Float32;   # [N/(rad*kg)] rear tire stiffness per unit mass
 
   longitudinalTuning @25 :LongitudinalPIDTuning;
-  lateralParams @48 :LateralParams;
   lateralTuning :union {
     pid @26 :LateralPIDTuning;
     indiDEPRECATED @27 :LateralINDITuningDEPRECATED;
@@ -522,7 +518,7 @@ struct CarParams {
 
   radarDelay @74 :Float32;
   fingerprintSource @49: FingerprintSource;
-  networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
+  networkLocation @50 :NetworkLocation;     # where our hardware is integrated into the car's CAN network
 
   wheelSpeedFactor @63 :Float32; # Multiplier on wheels speeds to computer actual speeds
 
@@ -726,6 +722,9 @@ struct CarParams {
   }
 
   deprecated :group {
+    mass @17 :Float32;
+    steerRatioRear @21 :Float32;
+    lateralParams @48 :LateralParams;
     enableGasInterceptor @2 :Bool;
     enableCamera @4 :Bool;
     enableApgs @6 :Bool;
@@ -751,6 +750,7 @@ struct CarParams {
     stoppingControl @31 :Bool; # Does the car allow full control even at lows speeds when stopping
     radarTimeStep @45: Float32 = 0.05;  # time delta between radar updates, 20Hz is very standard
     enableDsu @5 :Bool;        # driving support unit
+    enableBsm @56 :Bool;       # blind spot monitoring
     vEgoStarting @59 :Float32; # Speed at which the car goes into starting state
     startAccel @32 :Float32; # Required acceleration to get car moving
     startingState @70 :Bool; # Does this car make use of special starting state

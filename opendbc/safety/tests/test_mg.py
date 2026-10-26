@@ -2,27 +2,14 @@
 import unittest
 
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
-
-
-def checksum(msg):
-  addr, dat, bus = msg
-  ret = bytearray(dat)
-
-  if addr in (0x1b6, 0x242):
-    crc = 0xFF
-    for byte in ret[:-1]:
-      crc ^= byte
-      for _ in range(8):
-        crc = ((crc << 1) ^ 0x1D) & 0xFF if crc & 0x80 else (crc << 1) & 0xFF
-    ret[-1] = crc ^ 0xFF
-
-  return addr, ret, bus
+from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+
+  DBC = "mg"
+  SAFETY_MODEL = CarParams.SafetyModel.mg
 
   TX_MSGS = [[0x1fd, 0], ]
   RELAY_MALFUNCTION_ADDRS = {0: (0x1fd,)}
@@ -37,11 +24,9 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   DRIVER_TORQUE_FACTOR = 2
 
   def setUp(self):
-    self.packer = CANPackerSafety("mg")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.mg, 0)
-    self.safety.init_tests()
+    super().setUp()
     self.counters = {addr: 0 for addr in (0x1b6, 0x1ec, 0x23c, 0x242)}
+    self.gas_counter = 0
 
   def _counter(self, addr):
     counter = self.counters[addr]
@@ -62,15 +47,50 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   def _user_brake_msg(self, brake):
     values = {"BrkPdlAppdHSC2": 1 if brake else 0, "BrkPdlAppdRCHSC2": self._counter(0x1b6)}
-    return self.packer.make_can_msg_safety("EHBS_HSC2_FrP00", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("EHBS_HSC2_FrP00", 0, values)
 
   def _user_gas_msg(self, gas):
     values = {"EPTAccelActuPosHSC2": 100 if gas else 0}
-    return self.packer.make_can_msg_safety("GW_HSC2_HCU_FrP00", 0, values)
+    msg = self.packer.make_can_msg_safety("GW_HSC2_HCU_FrP00", 0, values)
+    msg[0].data[5] = (msg[0].data[5] & 0x0F) | ((self.gas_counter % 16) << 4)
+    self.gas_counter += 1
+    return msg
 
   def _pcm_status_msg(self, enable):
     values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
-    return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values)
+
+  def test_gas_counter(self):
+    self._reset_safety_hooks()
+    for _ in range(16):
+      self.assertTrue(self._rx(self._user_gas_msg(0)))
+
+    msg = self._user_gas_msg(0)
+    for _ in range(common.MAX_WRONG_COUNTERS + 1):
+      valid = self._rx(msg)
+    self.assertFalse(valid)
+
+  def test_rx_checksums(self):
+    # Captured EPS frame: the PV field is 0x37f5; byte 7 is unused.
+    dat = bytes.fromhex("b40037f553f54000")
+    values = {"ChLKAAlvRCHSC2": 11, "ChLKACtrlStsHSC2": 4, "ChLKARespToqHSC2": 0}
+    packed = self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values)
+    self.assertEqual(bytes(packed[0].data)[2:4], dat[2:4])
+
+    for byte, bit in ((0, 0), (0, 3), (0, 4), (1, 0), (2, 0), (3, 0), (6, 4)):
+      self._reset_safety_hooks()
+      self.assertTrue(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, dat)))
+      corrupt = bytearray(dat)
+      corrupt[byte] ^= 1 << bit
+      self.assertFalse(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, corrupt)))
+
+    for make_msg in (self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
+      self._reset_safety_hooks()
+      self.assertTrue(self._rx(make_msg(0)))
+
+      msg = make_msg(0)
+      msg[0].data[3 if make_msg == self._torque_driver_msg else 7] ^= 0xff
+      self.assertFalse(self._rx(msg))
 
 
 if __name__ == "__main__":

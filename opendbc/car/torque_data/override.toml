@@ -10,6 +10,9 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 # PSA angle based controllers
 "PSA_PEUGEOT_208" = [nan, 2.0, nan]
 
+# BYD angle based controllers
+"BYD_ATTO_3" = [nan, 2.0, nan]
+
 # New subarus angle based controllers
 "SUBARU_FORESTER_2022" = [nan, 3.0, nan]
 "SUBARU_OUTBACK_2023" = [nan, 3.0, nan]
@@ -105,6 +108,8 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "JEEP_CHEROKEE_5TH_GEN" = [1.5, 1.5, 0.15]
 "ACURA_MDX_4G" = [1.4, 1.4, 0.17]
 "ACURA_RDX_3G_MMR" = [1.5, 1.5, 0.16]
+"ACURA_ADX" = [1.5, 1.5, 0.22]
+"HONDA_PILOT_4G_MMR" = [2.0, 2.0, 0.13]
 
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]

@@ -3,12 +3,13 @@ import unittest
 
 from opendbc.car.nissan.values import NissanSafetyFlags
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 
 
 class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
+
+  DBC = "nissan_x_trail_2017_generated"
+  SAFETY_MODEL = CarParams.SafetyModel.nissan
 
   TX_MSGS = [[0x169, 0], [0x2b1, 0], [0x4cc, 0], [0x20b, 2], [0x280, 2]]
   GAS_PRESSED_THRESHOLD = 3
@@ -25,12 +26,6 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   ANGLE_RATE_BP = [0., 5., 15.]
   ANGLE_RATE_UP = [5., .8, .15]  # windup limit
   ANGLE_RATE_DOWN = [5., 3.5, .4]  # unwind limit
-
-  def setUp(self):
-    self.packer = CANPackerSafety("nissan_x_trail_2017_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
-    self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, enabled: bool):
     values = {"DESIRED_ANGLE": angle, "LKA_ACTIVE": 1 if enabled else 0}
@@ -82,24 +77,14 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
 class TestNissanSafetyAltEpsBus(TestNissanSafety):
   """Altima uses different buses"""
+  SAFETY_PARAM = NissanSafetyFlags.ALT_EPS_BUS
 
   EPS_BUS = 1
   CRUISE_BUS = 1
 
-  def setUp(self):
-    self.packer = CANPackerSafety("nissan_x_trail_2017_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, NissanSafetyFlags.ALT_EPS_BUS)
-    self.safety.init_tests()
-
-
 class TestNissanLeafSafety(TestNissanSafety):
 
-  def setUp(self):
-    self.packer = CANPackerSafety("nissan_leaf_2018_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
-    self.safety.init_tests()
+  DBC = "nissan_leaf_2018_generated"
 
   def _user_brake_msg(self, brake):
     values = {"USER_BRAKE_PRESSED": brake}
