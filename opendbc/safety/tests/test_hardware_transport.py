@@ -1517,6 +1517,52 @@ class TestHardwareTransport(unittest.TestCase):
     service.run()
     self.assertEqual(service.error, 'Physical receive queue overflow')
 
+  def test_harness_continuity_rejects_same_mode_transition(self):
+    for invalid in (0, 1):
+      with self.subTest(invalid=invalid):
+        backend = hardware_backend()
+        health = health_snapshot(car_harness_status=0, safety_rx_invalid=1)
+        backend.dut.call.side_effect = lambda op, health=health, **kwargs: dict(health) if op == 'health' else None
+        with patch('opendbc.safety.tests.hardware.time.sleep'):
+          backend.reset(1)
+        health.update(car_harness_status=1, safety_rx_invalid=invalid)
+        with self.assertRaisesRegex(AssertionError, 'DUT harness status changed: 0 -> 1'):
+          backend.health()
+        self.assertEqual(backend._expected_rx_invalid, 1)
+        self.assertEqual(backend._harness_baseline, 0)
+        record = backend.transport_observations[-1]
+        self.assertEqual(record['health'], health)
+        self.assertIn('DUT harness status changed', record['error'])
+
+  def test_harness_continuity_stable_and_explicit_reset_renews_baseline(self):
+    backend = hardware_backend()
+    health = health_snapshot(car_harness_status=0, safety_rx_invalid=1)
+    backend.dut.call.side_effect = lambda op, **kwargs: dict(health) if op == 'health' else None
+    with patch('opendbc.safety.tests.hardware.time.sleep'):
+      backend.reset(1)
+      self.assertEqual(backend.health(), health)
+      health.update(car_harness_status=1, safety_rx_invalid=0)
+      backend.reset(1)
+    self.assertEqual(backend._harness_baseline, 1)
+    self.assertEqual(backend._expected_rx_invalid, 0)
+    self.assertEqual(backend.health(), health)
+    health['safety_rx_invalid'] = 1
+    with self.assertRaises(AssertionError):
+      backend.health()
+
+  def test_harness_continuity_missing_field_compatibility(self):
+    backend = hardware_backend()
+    health = health_snapshot()
+    backend.dut.call.side_effect = lambda op, **kwargs: dict(health) if op == 'health' else None
+    with patch('opendbc.safety.tests.hardware.time.sleep'):
+      backend.reset(1)
+      self.assertEqual(backend.health(), health)
+      health['car_harness_status'] = 0
+      backend.reset(1)
+    del health['car_harness_status']
+    with self.assertRaisesRegex(AssertionError, 'DUT harness status changed: 0 -> None'):
+      backend.health()
+
 
 if __name__ == '__main__':
   unittest.main()

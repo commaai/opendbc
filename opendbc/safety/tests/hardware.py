@@ -174,6 +174,10 @@ class HardwareBackend:
     return self._transport_call('dut', 'health', validate_health=True)
 
   def _validate_health(self, health):
+    if getattr(self, '_harness_baseline', None) is not None:
+      # Harness changes reapply even the same safety mode and reset its state.
+      assert health.get('car_harness_status') == self._harness_baseline, \
+        f'DUT harness status changed: {self._harness_baseline} -> {health.get("car_harness_status")}'
     if hasattr(self, '_overflow_baseline'):
       for key, baseline in self._overflow_baseline.items():
         assert health[key] == baseline, f'DUT {key} changed: {baseline} -> {health[key]}'
@@ -200,7 +204,7 @@ class HardwareBackend:
       self.station.call('clear')
       self._station_streams.clear()
       result = self.dut.call('restart', rpc_timeout=30)
-      for name in ('_overflow_baseline', '_expected_rx_invalid'):
+      for name in ('_overflow_baseline', '_expected_rx_invalid', '_harness_baseline'):
         if hasattr(self, name):
           delattr(self, name)
       self.mode, self.param = None, 0
@@ -219,6 +223,8 @@ class HardwareBackend:
     self.dut.call('clear')
     self.station.call('clear', reset_stats=True)
     health = self._transport_call('dut', 'health')
+    # Older mocks omit this field; once reported, later omission is also fatal.
+    self._harness_baseline = health.get('car_harness_status')
     self._overflow_baseline = {key: health[key] for key in ('rx_buffer_overflow', 'tx_buffer_overflow')}
     self._expected_rx_invalid = health['safety_rx_invalid']
     self.mode, self.param = int(mode), int(param)
