@@ -403,6 +403,7 @@ class HardwareBackend:
     before = self._check(controls, healthy)
     self._recv('dut')
     self._recv('station')
+    receive_start = len(self.transport_observations)
     self.dut.call('send', frame=frame)
     addr, data, bus = frame
     accepted = observed = rejected = False
@@ -423,6 +424,15 @@ class HardwareBackend:
         self.evidence['tx_rejected' if rejected else 'tx_physical'] += 1
         return not rejected
       time.sleep(.001)
+    record = {'endpoint': 'dut', 'operation': 'tx_timeout', 'frames': [], 'frame': frame, 'receipt_bus': 128 + bus,
+              'rejection_bus': 192 + bus, 'wire_bus': bus,
+              'accepted': accepted, 'rejected': rejected, 'observed': observed,
+              'receive_span': [receive_start, len(self.transport_observations)]}
+    self.transport_observations.append(record)
+    try:
+      self.health()
+    except Exception as exc:
+      record['health_error'] = f'{type(exc).__name__}: {exc}'
     raise TimeoutError('TX lacks rejection receipt or accepted receipt plus physical observation')
 
   def steering_sequence(self, events, max_lateness_us=2000):

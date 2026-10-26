@@ -93,6 +93,55 @@ def station(fd=True):
 
 class TestHardwareTransport(unittest.TestCase):
 
+  def test_tx_timeout_retains_candidate_partial_evidence_and_health(self):
+    for partial in ('accepted', 'observed', 'neither'):
+      for health_failure in (False, True):
+        with self.subTest(partial=partial, health_failure=health_failure):
+          self.check_tx_timeout_evidence(partial, health_failure)
+
+  def check_tx_timeout_evidence(self, partial, health_failure):
+    backend = hardware_backend(tx_physical=0, tx_rejected=0)
+    backend.timeout = .002
+    frame = [0x24B, '0000000000000000', 1]
+    now = [0.]
+    sent = False
+
+    def dut_call(op, **kwargs):
+      nonlocal sent
+      if op == 'health':
+        if sent and health_failure:
+          raise RuntimeError('timeout health unavailable')
+        return health_snapshot()
+      if op == 'send':
+        self.assertEqual(kwargs['frame'], frame)
+        sent = True
+      return [[frame[0], frame[1], 129]] if op == 'recv' and sent and partial == 'accepted' else []
+
+    backend.dut.call.side_effect = dut_call
+    backend.station.call.side_effect = lambda op: [frame] if sent and partial == 'observed' else []
+    with patch('opendbc.safety.tests.hardware.time.monotonic', side_effect=lambda: now[0]), \
+         patch('opendbc.safety.tests.hardware.time.sleep', side_effect=lambda seconds: now.__setitem__(0, now[0] + seconds)):
+      with self.assertRaisesRegex(TimeoutError, '^TX lacks rejection receipt or accepted receipt plus physical observation$'):
+        backend._tx(frame, controls=None, healthy=True)
+    records = backend.transport_observations
+    record = records[-2]
+    self.assertEqual(record['operation'], 'tx_timeout')
+    self.assertEqual(record['frame'], frame)
+    self.assertEqual((record['receipt_bus'], record['rejection_bus'], record['wire_bus']), (129, 193, 1))
+    self.assertEqual((record['accepted'], record['rejected'], record['observed']),
+                     (partial == 'accepted', False, partial == 'observed'))
+    start, end = record['receive_span']
+    self.assertEqual((start, end), (3, len(records) - 2))
+    self.assertEqual([r['operation'] for r in records[start:end]], ['recv', 'recv'] * 2)
+    self.assertEqual(records[-1]['operation'], 'health')
+    if health_failure:
+      self.assertEqual(record['health_error'], 'RuntimeError: timeout health unavailable')
+      self.assertEqual(records[-1]['error'], record['health_error'])
+    else:
+      self.assertEqual(records[-1]['health'], health_snapshot())
+      self.assertNotIn('health_error', record)
+    self.assertEqual(backend.evidence, {'tx_physical': 0, 'tx_rejected': 0})
+
   def test_host_rpc_timing_retains_results_and_errors(self):
     backend = hardware_backend()
     raw = health_snapshot(controls_allowed=True, safety_rx_checks_invalid=True)
