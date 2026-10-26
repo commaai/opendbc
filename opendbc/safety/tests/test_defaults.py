@@ -65,6 +65,11 @@ class TestSafetyFramework(common.SafetyTestBase):
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
 
+  def test_compute_mismatch(self):
+    self.safety.safety_compute_inject()
+    self.assertTrue(self.safety.get_safety_compute_mismatch())
+    self.safety.init_tests()
+
 
 if __name__ == "__main__":
   unittest.main()

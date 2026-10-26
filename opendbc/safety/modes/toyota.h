@@ -56,11 +56,11 @@
   {.msg = {{0x116, 0, 8, 42U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
   {.msg = {{0x101, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
-static bool toyota_secoc = false;
-static bool toyota_alt_brake = false;
-static bool toyota_stock_longitudinal = false;
-static bool toyota_lta = false;
-static int toyota_dbc_eps_torque_factor = 100;   // conversion factor for STEER_TORQUE_EPS in %: see dbc file
+SAFETY_STATE static bool toyota_secoc = false;
+SAFETY_STATE static bool toyota_alt_brake = false;
+SAFETY_STATE static bool toyota_stock_longitudinal = false;
+SAFETY_STATE static bool toyota_lta = false;
+SAFETY_STATE static int toyota_dbc_eps_torque_factor = 100;   // conversion factor for STEER_TORQUE_EPS in %: see dbc file
 
 static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
   int len = GET_LEN(msg);

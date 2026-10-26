@@ -54,58 +54,58 @@ uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
 const int MAX_WRONG_COUNTERS = 5;
 
 // This can be set by the safety hooks
-bool controls_allowed = false;
-bool relay_malfunction = false;
-bool gas_pressed = false;
-bool gas_pressed_prev = false;
-bool brake_pressed = false;
-bool brake_pressed_prev = false;
-bool regen_braking = false;
-bool regen_braking_prev = false;
-bool steering_disengage;
-bool steering_disengage_prev;
-bool cruise_engaged_prev = false;
-struct sample_t vehicle_speed;
-struct sample_t vehicle_speed_2;
-bool vehicle_moving = false;
-bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
-int cruise_button_prev = 0;
-bool safety_rx_checks_invalid = false;
+SAFETY_STATE bool controls_allowed = false;
+SAFETY_STATE bool relay_malfunction = false;
+SAFETY_STATE bool gas_pressed = false;
+SAFETY_STATE bool gas_pressed_prev = false;
+SAFETY_STATE bool brake_pressed = false;
+SAFETY_STATE bool brake_pressed_prev = false;
+SAFETY_STATE bool regen_braking = false;
+SAFETY_STATE bool regen_braking_prev = false;
+SAFETY_STATE bool steering_disengage;
+SAFETY_STATE bool steering_disengage_prev;
+SAFETY_STATE bool cruise_engaged_prev = false;
+SAFETY_STATE struct sample_t vehicle_speed;
+SAFETY_STATE struct sample_t vehicle_speed_2;
+SAFETY_STATE bool vehicle_moving = false;
+SAFETY_STATE bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
+SAFETY_STATE int cruise_button_prev = 0;
+SAFETY_STATE bool safety_rx_checks_invalid = false;
 
 // for safety modes with torque steering control
-int desired_torque_last = 0;       // last desired steer torque
-int rt_torque_last = 0;            // last desired torque for real time check
-int valid_steer_req_count = 0;     // counter for steer request bit matching non-zero torque
-int invalid_steer_req_count = 0;   // counter to allow multiple frames of mismatching torque request bit
-struct sample_t torque_meas;       // last 6 motor torques produced by the eps
-struct sample_t torque_driver;     // last 6 driver torques measured
-uint32_t ts_torque_check_last = 0;
-uint32_t ts_steer_req_mismatch_last = 0;  // last timestamp steer req was mismatched with torque
+SAFETY_STATE int desired_torque_last = 0;       // last desired steer torque
+SAFETY_STATE int rt_torque_last = 0;            // last desired torque for real time check
+SAFETY_STATE int valid_steer_req_count = 0;     // counter for steer request bit matching non-zero torque
+SAFETY_STATE int invalid_steer_req_count = 0;   // counter to allow multiple frames of mismatching torque request bit
+SAFETY_STATE struct sample_t torque_meas;       // last 6 motor torques produced by the eps
+SAFETY_STATE struct sample_t torque_driver;     // last 6 driver torques measured
+SAFETY_STATE uint32_t ts_torque_check_last = 0;
+SAFETY_STATE uint32_t ts_steer_req_mismatch_last = 0;  // last timestamp steer req was mismatched with torque
 
 // state for controls_allowed timeout logic
-bool heartbeat_engaged = false;             // openpilot enabled, passed in heartbeat USB command
-uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heartbeat_engaged and controls_allowed
+SAFETY_STATE bool heartbeat_engaged = false;             // openpilot enabled, passed in heartbeat USB command
+SAFETY_STATE uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
-uint32_t rt_angle_msgs = 0;
-uint32_t ts_angle_check_last = 0;
-int desired_angle_last = 0;
-struct sample_t angle_meas;         // last 6 steer angles
+SAFETY_STATE uint32_t rt_angle_msgs = 0;
+SAFETY_STATE uint32_t ts_angle_check_last = 0;
+SAFETY_STATE int desired_angle_last = 0;
+SAFETY_STATE struct sample_t angle_meas;         // last 6 steer angles
 
 // for safety modes with curvature steering control
-CurvatureSteeringState curvature_state;
+SAFETY_STATE CurvatureSteeringState curvature_state;
 
 
-int alternative_experience = 0;
+SAFETY_STATE int alternative_experience = 0;
 
 // time since safety mode has been changed
-uint32_t safety_mode_cnt = 0U;
+SAFETY_STATE uint32_t safety_mode_cnt = 0U;
 
-uint16_t current_safety_mode = SAFETY_SILENT;
-uint16_t current_safety_param = 0;
+SAFETY_STATE uint16_t current_safety_mode = SAFETY_SILENT;
+SAFETY_STATE uint16_t current_safety_param = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
-safety_config current_safety_config;
-RxStatus rx_status[MAX_RX_CHECKS];  // dynamic state of current_safety_config.rx_checks
+SAFETY_STATE safety_config current_safety_config;
+SAFETY_STATE RxStatus rx_status[MAX_RX_CHECKS];  // dynamic state of current_safety_config.rx_checks
 
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
@@ -164,7 +164,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
   if (index != -1) {
     RxStatus *status = &rx_status[index];
     const CanMsgCheck *m = &cfg->rx_checks[index].msg[status->index];
-    status->last_timestamp = microsecond_timer_get();
+    status->last_timestamp = safety_ts;
 
     // checksum check
     if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !m->ignore_checksum) {
@@ -193,7 +193,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
   return is_msg_valid(index);
 }
 
-bool safety_rx_hook(const CANPacket_t *msg) {
+static bool safety_rx_hook_once(const CANPacket_t *msg) {
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
@@ -235,7 +235,7 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
   return whitelisted;
 }
 
-bool safety_tx_hook(CANPacket_t *msg) {
+static bool safety_tx_hook_once(CANPacket_t *msg) {
   bool whitelisted = tx_msg_safety_check(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
     whitelisted = true;
@@ -261,7 +261,7 @@ static int get_fwd_bus(int bus_num) {
   return destination_bus;
 }
 
-int safety_fwd_hook(int bus_num, int addr) {
+static int safety_fwd_hook_once(int bus_num, int addr) {
   bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
 
   // Block messages that are being checked for relay malfunctions. Safety modes can opt out of this
@@ -285,10 +285,10 @@ int safety_fwd_hook(int bus_num, int addr) {
 }
 
 // 1Hz safety function called by main. Now just a check for lagging safety messages
-void safety_tick(void) {
+static void safety_tick_once(void) {
   const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
-  uint32_t ts = microsecond_timer_get();
+  uint32_t ts = safety_ts;
   for (int i=0; i < current_safety_config.rx_checks_len; i++) {
     RxStatus *status = &rx_status[i];
     uint32_t elapsed_time = safety_get_ts_elapsed(ts, status->last_timestamp);
@@ -309,6 +309,69 @@ void safety_tick(void) {
   }
 
   safety_rx_checks_invalid = rx_checks_invalid;
+}
+
+// UM2331 CPU_SM_2: each safety decision is computed twice from the same state and time
+#define SAFETY_STATE_MAX_SIZE 1024U
+// linker symbols, the bounds of the safety_state section
+extern uint8_t __start_safety_state;
+extern uint8_t __stop_safety_state;
+static uint8_t safety_state_in[SAFETY_STATE_MAX_SIZE];
+static uint8_t safety_state_out[SAFETY_STATE_MAX_SIZE];
+bool safety_compute_mismatch = false;
+uint32_t safety_ts = 0U;
+
+static uint32_t safety_state_size(void) {
+  return SAFETY_MIN((uint32_t)((uintptr_t)&__stop_safety_state - (uintptr_t)&__start_safety_state), SAFETY_STATE_MAX_SIZE);
+}
+
+static void safety_compute_start(void) {
+  safety_ts = microsecond_timer_get();
+  (void)memcpy(safety_state_in, &__start_safety_state, safety_state_size());
+}
+
+// keep the state of the first computation, then start the second one from the same state
+static void safety_compute_again(void) {
+  (void)memcpy(safety_state_out, &__start_safety_state, safety_state_size());
+  (void)memcpy(&__start_safety_state, safety_state_in, safety_state_size());
+}
+
+static void safety_compute_check(bool same_result) {
+  bool same_state = memcmp(safety_state_out, &__start_safety_state, safety_state_size()) == 0;
+  bool fits = ((uintptr_t)&__stop_safety_state - (uintptr_t)&__start_safety_state) <= SAFETY_STATE_MAX_SIZE;
+  safety_compute_mismatch = safety_compute_mismatch || !same_result || !same_state || !fits;
+}
+
+bool safety_rx_hook(const CANPacket_t *msg) {
+  safety_compute_start();
+  bool valid = safety_rx_hook_once(msg);
+  safety_compute_again();
+  safety_compute_check(safety_rx_hook_once(msg) == valid);
+  return valid;
+}
+
+bool safety_tx_hook(CANPacket_t *msg) {
+  safety_compute_start();
+  bool allowed = safety_tx_hook_once(msg);
+  safety_compute_again();
+  safety_compute_check(safety_tx_hook_once(msg) == allowed);
+  return allowed;
+}
+
+int safety_fwd_hook(int bus_num, int addr) {
+  safety_compute_start();
+  int destination_bus = safety_fwd_hook_once(bus_num, addr);
+  safety_compute_again();
+  safety_compute_check(safety_fwd_hook_once(bus_num, addr) == destination_bus);
+  return destination_bus;
+}
+
+void safety_tick(void) {
+  safety_compute_start();
+  safety_tick_once();
+  safety_compute_again();
+  safety_tick_once();
+  safety_compute_check(true);
 }
 
 static void relay_malfunction_set(void) {

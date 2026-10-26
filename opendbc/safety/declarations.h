@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// all mutable safety state, copied to compute every safety decision twice
+// cppcheck-suppress-macro misra-c2012-1.2; allow section attribute extension
+#define SAFETY_STATE __attribute__((section("safety_state")))
+
 // from cereal.car.CarParams.SafetyModel
 #define SAFETY_SILENT 0U
 #define SAFETY_HONDA_NIDEC 1U
@@ -258,6 +262,11 @@ void pcm_cruise_check(bool cruise_engaged);
 void speed_mismatch_check(const float speed_2);
 
 void safety_tick(void);
+
+// set when the two computations of a safety decision differ
+extern bool safety_compute_mismatch;
+// time of the safety decision being computed
+extern uint32_t safety_ts;
 
 // This can be set by the safety hooks
 extern bool controls_allowed;
