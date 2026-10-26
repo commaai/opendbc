@@ -65,6 +65,9 @@ class HyundaiButtonBase:
     """
       Test that we allow controls on recent button press, but not as button leaves sliding window
     """
+    if self.backend is not None:
+      from opendbc.safety.tests.fixture_streams import suspend_required_streams
+      suspend_required_streams(self, 'buttons')
     self._rx(self._button_msg(Buttons.SET))
     for i in range(2 * PREV_BUTTON_SAMPLES):
       self._rx(self._pcm_status_msg(False))
