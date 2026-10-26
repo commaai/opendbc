@@ -234,11 +234,9 @@ class Service:
       elif op == 'pause' and self.role == 'station':
         self.streams_paused = True
       elif op == 'resume' and self.role == 'station':
+        # Preserve overdue priority across repeated pauses; the worker still
+        # sends only one frame per iteration and schedules from its send time.
         self.streams_paused = False
-        now = time.monotonic()
-        for stream in self.streams.values():
-          if not stream.get('paused', False):
-            stream['next'] = max(now, stream['next'])
       elif op == 'clear':
         if self.role == 'station':
           self.streams.clear()

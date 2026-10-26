@@ -71,6 +71,77 @@ def events(count=38):
 
 
 class TestSequence(unittest.TestCase):
+  def _assert_repeated_resume_progress(self, grouped):
+    obj = service('station')
+    now = Clock(obj)
+    names = ('speed', 'speed_2', 'yaw', 'pcm', 'gas', 'moving', 'held', 'future')
+    obj.streams = {
+      name: {'frames': [[0x100 + i, bytes([counter]).hex(), 0] for counter in range(16)],
+             'period': .02 if i < 3 else .04, 'index': 0, 'next': 0., 'paused': name == 'held'}
+      for i, name in enumerate(names)
+    }
+    obj.streams['future']['next'] = 1000.
+    future = dict(obj.streams['future'])
+    sent = []
+    obj.send = lambda frame: sent.append(list(frame))
+    obj.receive = list
+    deadlines = []
+    cycles = 90
+
+    with patch('opendbc.safety.tests.hardware_service.time.monotonic', side_effect=lambda: now.ns / 1e9):
+      for i in range(cycles):
+        obj.dispatch({'op': 'pause'})
+        now.sleep(.04)
+        injected = (names[i % 3], 'held')
+        expected = [stream['frames'][stream['index'] % 16] for name in injected for stream in [obj.streams[name]]]
+        start = len(sent)
+        if grouped:
+          report = execute_rx_group(obj, [{'frame': None, 'updates': [], 'stream_name': name} for name in injected],
+                                    clock=now, sleep=now.sleep)
+          self.assertTrue(report['complete'], report)
+          self.assertEqual(report['frames'], expected)
+        else:
+          for name, frame in zip(injected, expected, strict=True):
+            self.assertEqual(obj.dispatch({'op': 'rx_stream', 'name': name}), frame)
+        self.assertEqual(sent[start:], expected)
+        # Even a running worker must not add measurements during global pause.
+        with patch.object(obj.stopped, 'is_set', side_effect=[False, True]), patch.object(obj.stopped, 'wait') as wait:
+          obj.run()
+          wait.assert_called_once_with(.001)
+        self.assertIsNone(obj.error)
+        self.assertEqual(sent[start:], expected)
+        before = {name: stream['next'] for name, stream in obj.streams.items()}
+        obj.dispatch({'op': 'resume'})
+        deadlines.append((before, {name: stream['next'] for name, stream in obj.streams.items()}))
+        # Allow exactly one real worker iteration between successive pauses.
+        # Resetting overdue deadlines here repeatedly favors early dict entries.
+        start = len(sent)
+        with patch.object(obj.stopped, 'is_set', side_effect=[False, True]), patch.object(obj.stopped, 'wait') as wait:
+          obj.run()
+          wait.assert_called_once_with(.001)
+        self.assertIsNone(obj.error)
+        self.assertEqual(len(sent) - start, 1)  # No catch-up burst.
+
+    for name in names[3:6]:
+      self.assertGreater(obj.streams[name]['index'], 0, name)
+    for name in names[:3]:
+      self.assertGreaterEqual(obj.streams[name]['index'], cycles // 3, name)
+    for before, after in deadlines:
+      self.assertEqual(after, before)
+    self.assertEqual(obj.streams['future'], future)
+    self.assertTrue(obj.streams['held']['paused'])
+    self.assertEqual(obj.streams['held']['index'], cycles)
+    self.assertEqual(len(sent), cycles * 3)
+    for i, name in enumerate(names):
+      samples = [frame[1] for frame in sent if frame[0] == 0x100 + i]
+      self.assertEqual(samples, [bytes([counter % 16]).hex() for counter in range(obj.streams[name]['index'])], name)
+
+  def test_repeated_pause_resume_preserves_due_stream_progress(self):
+    self._assert_repeated_resume_progress(grouped=False)
+
+  def test_repeated_rx_groups_preserve_due_stream_progress(self):
+    self._assert_repeated_resume_progress(grouped=True)
+
   def test_service_pipeline_keeps_worker_heartbeat_and_receipts(self):
     obj = service()
     worker = threading.Thread(target=obj.run)
