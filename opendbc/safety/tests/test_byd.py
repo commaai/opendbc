@@ -153,7 +153,13 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       ("ACC_HUD_ADAS", self.CAM_BUS, "ACC_STATE", 3),
     ):
       with self.subTest(message=name):
+        if self.backend is not None:
+          self._reset_safety_hooks()
         self._set_controls_allowed(True)
+        if self.backend is not None:
+          from opendbc.safety.tests.fixture_streams import suspend_required_streams
+          # Keep background counters from colliding with or healing the raw sequence.
+          suspend_required_streams(self, 'speed' if name == "WHEELSPEED_CLEAN" else 'pcm')
         # Check both counter locations and rollover with valid checksums.
         for _ in range(32):
           msg = self.packer.make_can_msg_safety(name, bus, {signal: value})
@@ -161,7 +167,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         # Replayed frames are rejected after the common counter tolerance.
         for i in range(common.MAX_WRONG_COUNTERS + 1):
           should_rx = i < common.MAX_WRONG_COUNTERS - 1
-          self.assertEqual(should_rx, self._rx(msg))
+          self.assertEqual(should_rx, self._rx(msg, raw=True))
           self.assertEqual(should_rx, self._controls_allowed())
         # A valid sequence clears the counter faults.
         for _ in range(common.MAX_WRONG_COUNTERS):
