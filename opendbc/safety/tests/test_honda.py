@@ -342,15 +342,19 @@ class TestHondaNidecSafetyBase(HondaBase):
             host=('Exact private Honda forwarding-brake latch identity',))
   def test_honda_fwd_brake_latching(self):
     if self.backend is not None:
+      # Finish CAN engagement while all watchdog-required streams are live.
+      # The initial AEB-off forwarding decision is independent of controls.
+      self._set_controls_allowed(True)
       suspend_required_streams(self, 'stock_brake')
-    # The first checked RX establishes our counter baseline after suspension;
-    # every subsequent RX and forwarding probe advances it modulo four.
+    # Suspension is not a delivery barrier: late startup frames can cause
+    # tolerated counter mismatches. Test inputs then advance modulo four.
     self._latch_brake_counter = 1
     self.assertTrue(self._rx(self._latch_brake_msg(self.MAX_BRAKE, 0), raw=True))
     self._assert_fwd_brake(False, self.MAX_BRAKE, 0)
 
     openpilot_brake = round(self.MAX_BRAKE / 2.0)
-    self._set_controls_allowed(True)
+    if self.backend is None:
+      self._set_controls_allowed(True)
     self.assertTrue(self._tx(self._send_brake_msg(openpilot_brake)))
 
     for stock_honda_brake in range(self.MAX_BRAKE + 1):
