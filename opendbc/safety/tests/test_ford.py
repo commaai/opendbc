@@ -212,7 +212,15 @@ class TestFordSafetyBase(common.CarSafetyTest):
     # checksum, counter, and quality flag checks
     for quality_flag in [True, False]:
       for msg_type in ["speed", "speed_2", "yaw"]:
+        if self.backend is not None:
+          from opendbc.safety.tests.fixture_streams import suspend_required_streams
+          # Each message/quality case establishes its own engagement state.
+          # Reset only at this boundary, never between a fault and its observation.
+          self._reset_backend()
         self._set_controls_allowed(True)
+        if self.backend is not None:
+          # Preserve raw probe counters without interleaved periodic copies.
+          suspend_required_streams(self, msg_type)
         # send multiple times to verify counter checks
         for _ in range(10):
           if msg_type == "speed":
