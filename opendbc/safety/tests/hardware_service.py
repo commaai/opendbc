@@ -17,9 +17,60 @@ CAN_MTU = 16
 CANFD_MTU = 72
 CANFD_LENGTHS = (*range(9), 12, 16, 20, 24, 32, 48, 64)
 CAN_RAW_FD_FRAMES = getattr(socket, 'CAN_RAW_FD_FRAMES', 5)
+# Diagnostic filter only, not a timeout or scheduling budget. Normal phases stay silent.
+SLOW_PHASE_NS = 250_000_000
+DIAGNOSTIC_QUEUE_SIZE = 64
 
 
 class Service:
+  def _init_diagnostics(self):
+    self._diagnostics = collections.deque()
+    self._diagnostic_lock = threading.Lock()
+    # Single-writer slots: CAN worker, request thread, diagnostic writer.
+    self._diagnostic_drops = [0, 0, 0]
+    self._diagnostic_closed = False
+    self._diagnostic_sink = sys.stderr
+
+  def _write_diagnostics(self):
+    while not self._diagnostic_closed:
+      with self._diagnostic_lock:
+        record = self._diagnostics.popleft() if self._diagnostics else None
+      if record is None:
+        time.sleep(.05)
+        continue
+      record['diagnostic_dropped'] = sum(self._diagnostic_drops)
+      try:
+        print(json.dumps(record, separators=(',', ':')), file=self._diagnostic_sink, flush=True)
+      except (OSError, ValueError):
+        self._diagnostic_drops[2] += 1
+
+  @contextlib.contextmanager
+  def _timing(self, phase, *, start=None, **fields):
+    # Same-process monotonic stamps; never subtract station and DUT clocks.
+    start = time.monotonic_ns() if start is None else start
+    request = getattr(self, '_request_id', 0)
+    try:
+      yield
+    finally:
+      end = time.monotonic_ns()
+      if end - start >= SLOW_PHASE_NS and hasattr(self, '_diagnostics'):
+        worker = phase.startswith('worker_')
+        # Worker observes the latest request at phase entry, not causal ownership.
+        correlation = {'latest_request' if worker else 'request': request}
+        record = dict(event='hardware_service_slow', role=self.role, phase=phase, **correlation,
+                      start_monotonic_ns=start, end_monotonic_ns=end, failed=sys.exc_info()[0] is not None, **fields)
+        slot = 0 if worker else 1
+        if self._diagnostic_closed or not self._diagnostic_lock.acquire(blocking=False):
+          self._diagnostic_drops[slot] += 1
+        else:
+          try:
+            if len(self._diagnostics) < DIAGNOSTIC_QUEUE_SIZE:
+              self._diagnostics.append(record)
+            else:
+              self._diagnostic_drops[slot] += 1
+          finally:
+            self._diagnostic_lock.release()
+
   def __init__(self, role, serial=None, interfaces='can2,can3,can0', fd_buses=()):
     self.role = role
     self.fd_buses = frozenset(fd_buses)
@@ -59,6 +110,9 @@ class Service:
         for counter in ('rx_errors', 'rx_dropped', 'tx_errors', 'tx_dropped'):
           path = Path('/sys/class/net') / interface / 'statistics' / counter
           self.net_stats[path] = int(path.read_text())
+    self._init_diagnostics()
+    self._diagnostic_writer = threading.Thread(target=self._write_diagnostics, daemon=True)
+    self._diagnostic_writer.start()
     self.worker = threading.Thread(target=self.run, daemon=True)
     self.worker.start()
 
@@ -135,25 +189,31 @@ class Service:
 
   def run(self):
     heartbeat = 0
+    iteration = 0
     try:
       while not self.stopped.is_set():
+        iteration += 1
         with self.lock:
           now = time.monotonic()
           if self.role == 'dut' and now >= heartbeat:
-            health = self.panda.health()
+            with self._timing('worker_health', iteration=iteration):
+              health = self.panda.health()
             if health.get('heartbeat_disabled', False):
               raise RuntimeError('Firmware heartbeat checks disabled')
-            self.panda.send_heartbeat(bool(health['controls_allowed']))
+            with self._timing('worker_heartbeat', iteration=iteration):
+              self.panda.send_heartbeat(bool(health['controls_allowed']))
             heartbeat = now + .1
           # Pace even overdue streams: scheduler jitter must not turn separate
           # periodic inputs into a burst that overruns the receiving controller.
           stream = min((s for s in self.streams.values() if not s.get('paused', False)), key=lambda s: s['next'], default=None)
           if not self.streams_paused and stream is not None and now >= stream['next']:
             self._send_stream(stream)
-          frames = self.receive()
-          if len(self.queue) + len(frames) > 100000:
-            raise RuntimeError('Physical receive queue overflow')
-          self.queue.extend(frames)
+          with self._timing('worker_receive', iteration=iteration):
+            frames = self.receive()
+          with self._timing('worker_publish', iteration=iteration, frames=len(frames)):
+            if len(self.queue) + len(frames) > 100000:
+              raise RuntimeError('Physical receive queue overflow')
+            self.queue.extend(frames)
         self.stopped.wait(.001)
     except Exception as exc:
       self.error = str(exc)
@@ -176,7 +236,10 @@ class Service:
                               max_lateness_us=req.get('max_lateness_us', 2000),
                               scheduling=req.get('scheduling', 'strict'), max_duration_us=req.get('max_duration_us', 8000000),
                               receipt_timeout_us=req.get('receipt_timeout_us', 1000000))
+    start = time.monotonic_ns()
     with self.lock:
+      with self._timing('request_lock_wait', start=start):
+        pass
       if self.error:
         raise RuntimeError('CAN worker failed: ' + self.error)
       op = req['op']
@@ -198,8 +261,9 @@ class Service:
         self.configuration['alternative_experience'] = {'value': value, 'verified': True}
         return
       if op == 'recv':
-        frames = list(self.queue)
-        self.queue.clear()
+        with self._timing('request_snapshot', queued=len(self.queue)):
+          frames = list(self.queue)
+          self.queue.clear()
         self.check_transport()
         return frames
       if op == 'send':
@@ -287,6 +351,7 @@ class Service:
         raise ValueError('Unsupported operation: ' + op)
 
   def close(self):
+    self._diagnostic_closed = True  # No join: a blocked diagnostic sink cannot delay cleanup.
     self.stopped.set()
     self.worker.join(timeout=2)
     if self.role == 'dut':
@@ -308,14 +373,17 @@ def main():
   with contextlib.redirect_stdout(sys.stderr):
     service = Service(args.role, args.serial, args.interfaces, tuple(int(bus) for bus in args.fd_buses.split(',') if bus))
   try:
-    for line in sys.stdin:
+    for request, line in enumerate(sys.stdin, 1):
+      service._request_id = request
       try:
         with contextlib.redirect_stdout(sys.stderr):
-          result = service.dispatch(json.loads(line))
+          with service._timing('request_dispatch'):
+            result = service.dispatch(json.loads(line))
         response = {'ok': True, 'result': result}
       except Exception as exc:
         response = {'ok': False, 'error': f'{type(exc).__name__}: {exc}'}
-      print(json.dumps(response), flush=True)
+      with service._timing('response_flush'):
+        print(json.dumps(response), flush=True)
   finally:
     service.close()
 

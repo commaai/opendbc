@@ -1,13 +1,17 @@
 """Wire-level tests independent of physical hardware and Panda installation."""
 import collections
+import io
+import json
 import os
 import socket
 import struct
+import subprocess
+import sys
 import threading
 import unittest
 from unittest.mock import Mock, patch
 
-from opendbc.safety.tests.hardware_service import CANFD_LENGTHS, CAN_RAW_FD_FRAMES, SO_RXQ_OVFL, Service
+from opendbc.safety.tests.hardware_service import CANFD_LENGTHS, CAN_RAW_FD_FRAMES, DIAGNOSTIC_QUEUE_SIZE, SO_RXQ_OVFL, Service
 from opendbc.safety.tests.simulated import SimulatedBackend
 from opendbc.safety.tests.fixture_streams import prepare_rx
 
@@ -78,6 +82,7 @@ def receiving_endpoint(health, queue):
 def station(fd=True):
   service = Service.__new__(Service)
   service.role = 'station'
+  service._init_diagnostics()
   service.fd_buses = {0} if fd else set()
   service.sockets = [Mock()]
   service.net_stats = {}
@@ -92,6 +97,301 @@ def station(fd=True):
 
 
 class TestHardwareTransport(unittest.TestCase):
+  def test_slow_worker_phases_keep_panda_serialization_and_snapshot_order(self):
+    for blocked in ('health', 'heartbeat', 'receive'):
+      with self.subTest(blocked=blocked):
+        service = station()
+        service.role = 'dut'
+        service._request_id = 7
+        service.stopped = threading.Event()
+        service.queue.append([1, 'aa', 0])
+        entered, release, waiting = threading.Event(), threading.Event(), threading.Event()
+        clock = [0]
+        calls, result = [], []
+        stderr = io.StringIO()
+
+        def now(waiting=waiting, clock=clock):
+          if threading.current_thread().name == 'snapshot':
+            waiting.set()
+          return clock[0]
+
+        def operation(name, service=service, calls=calls, blocked=blocked, entered=entered, release=release):
+          self.assertTrue(service.lock._is_owned())
+          calls.append(name)
+          if name == blocked:
+            entered.set()
+            self.assertTrue(release.wait(2))
+          if name == 'health':
+            return {'controls_allowed': True}
+          if name == 'receive':
+            service.stopped.set()
+            return [(2, b'\xbb', 0)]
+
+        service.panda = Mock()
+        service.panda.health.side_effect = lambda: operation('health')
+        service.panda.send_heartbeat.side_effect = lambda enabled: operation('heartbeat')
+        service.panda.can_recv.side_effect = lambda: operation('receive')
+
+        def snapshot(service=service, result=result):
+          service._request_id = 8
+          result.extend(service.dispatch({'op': 'recv'}))
+
+        with patch('opendbc.safety.tests.hardware_service.time.monotonic_ns', side_effect=now), \
+             patch('opendbc.safety.tests.hardware_service.sys.stderr', stderr):
+          worker = threading.Thread(target=service.run)
+          reader = threading.Thread(target=snapshot, name='snapshot')
+          worker.start()
+          try:
+            self.assertTrue(entered.wait(2))
+            reader.start()
+            self.assertTrue(waiting.wait(2))
+            self.assertEqual(result, [])
+            clock[0] = 300_000_000
+          finally:
+            release.set()
+            worker.join(2)
+            if reader.ident is not None:
+              reader.join(2)
+        self.assertFalse(worker.is_alive())
+        self.assertFalse(reader.is_alive())
+        self.assertIsNone(service.error)
+        self.assertEqual(calls, ['health', 'heartbeat', 'receive'])
+        service.panda.send_heartbeat.assert_called_once_with(True)
+        self.assertEqual(result, [[1, 'aa', 0], [2, 'bb', 0]])
+        records = list(service._diagnostics)
+        self.assertEqual({r['phase'] for r in records}, {'worker_' + blocked, 'request_lock_wait'})
+        for record in records:
+          if record['phase'].startswith('worker_'):
+            self.assertEqual(record['latest_request'], 7)
+            self.assertNotIn('request', record)
+          else:
+            self.assertEqual(record['request'], 8)
+          self.assertEqual(record['start_monotonic_ns'], 0)
+          self.assertEqual(record['end_monotonic_ns'], 300_000_000)
+          self.assertFalse(record['failed'])
+        self.assertEqual(next(r for r in records if r['phase'].startswith('worker_'))['iteration'], 1)
+
+  def test_slow_worker_failure_keeps_original_error_and_queue(self):
+    for failed in ('health', 'heartbeat', 'receive'):
+      with self.subTest(failed=failed):
+        service = station()
+        service.role = 'dut'
+        service.stopped = threading.Event()
+        service.queue.append([1, 'aa', 0])
+        clock = [0]
+        stderr = io.StringIO()
+
+        def operation(name, failed=failed, clock=clock):
+          if name == failed:
+            clock[0] += 300_000_000
+            raise RuntimeError('original failure')
+          return {'controls_allowed': False}
+
+        service.panda = Mock()
+        service.panda.health.side_effect = lambda: operation('health')
+        service.panda.send_heartbeat.side_effect = lambda enabled: operation('heartbeat')
+        service.panda.can_recv.side_effect = lambda: operation('receive')
+        with patch('opendbc.safety.tests.hardware_service.time.monotonic_ns', side_effect=lambda clock=clock: clock[0]), \
+             patch('opendbc.safety.tests.hardware_service.sys.stderr', stderr):
+          service.run()
+        self.assertEqual(service.error, 'original failure')
+        self.assertEqual(list(service.queue), [[1, 'aa', 0]])
+        record, = service._diagnostics
+        self.assertEqual(record['phase'], 'worker_' + failed)
+        self.assertTrue(record['failed'])
+        self.assertNotIn('original failure', stderr.getvalue())
+        with self.assertRaisesRegex(RuntimeError, 'CAN worker failed: original failure'):
+          service.dispatch({'op': 'recv'})
+
+  def test_slow_publication_and_snapshot_retain_frames(self):
+    service = station()
+    clock = [0]
+    stderr = io.StringIO()
+
+    class SlowQueue(collections.deque):
+      def extend(self, frames):
+        clock[0] += 300_000_000
+        super().extend(frames)
+
+      def __iter__(self):
+        clock[0] += 300_000_000
+        return super().__iter__()
+
+    service.queue = SlowQueue([[1, 'aa', 0]])
+    service.receive = lambda: [[2, 'bb', 0]]
+    with patch('opendbc.safety.tests.hardware_service.time.monotonic_ns', side_effect=lambda clock=clock: clock[0]), \
+         patch('opendbc.safety.tests.hardware_service.sys.stderr', stderr):
+      self.run_one_iteration(service)
+      self.assertEqual(service.dispatch({'op': 'recv'}), [[1, 'aa', 0], [2, 'bb', 0]])
+      self.assertEqual(service.dispatch({'op': 'recv'}), [])
+    records = list(service._diagnostics)
+    self.assertEqual([r['phase'] for r in records], ['worker_publish', 'request_snapshot', 'request_snapshot'])
+    self.assertEqual(records[0]['frames'], 1)
+    self.assertEqual([r['queued'] for r in records[1:]], [2, 0])
+
+  def test_service_main_slow_dispatch_and_flush_keep_response_schema(self):
+    from opendbc.safety.tests.hardware_service import main
+
+    service = station()
+    service.close = Mock()
+    clock = [0]
+    stderr = io.StringIO()
+
+    class SlowOutput(io.StringIO):
+      def write(self, value):
+        if value.startswith('{"ok"'):
+          clock[0] += 300_000_000
+        return super().write(value)
+
+    stdout = SlowOutput()
+
+    def dispatch(req):
+      clock[0] += 300_000_000
+      if req['op'] == 'fail':
+        raise RuntimeError('original failure')
+      return []
+
+    service.dispatch = dispatch
+    with patch('opendbc.safety.tests.hardware_service.Service', return_value=service), \
+         patch('opendbc.safety.tests.hardware_service.time.monotonic_ns', side_effect=lambda clock=clock: clock[0]), \
+         patch.object(sys, 'argv', ['service', 'station']), \
+         patch.object(sys, 'stdin', io.StringIO('{"op":"recv"}\n{"op":"fail"}\n')), \
+         patch.object(sys, 'stdout', stdout), patch.object(sys, 'stderr', stderr):
+      main()
+    self.assertEqual([json.loads(line) for line in stdout.getvalue().splitlines()],
+                     [{'ok': True, 'result': []}, {'ok': False, 'error': 'RuntimeError: original failure'}])
+    records = list(service._diagnostics)
+    self.assertEqual([(r['request'], r['phase'], r['failed']) for r in records],
+                     [(1, 'request_dispatch', False), (1, 'response_flush', False),
+                      (2, 'request_dispatch', True), (2, 'response_flush', False)])
+    service.close.assert_called_once_with()
+
+  def test_rpc_service_stderr_is_inherited_and_protocol_stays_clean(self):
+    child = "import sys; sys.stdin.readline(); print('diagnostic-marker', file=sys.stderr, flush=True); print('{\"ok\":true,\"result\":[]}')"
+    script = ('import sys; from opendbc.safety.tests.hardware import RPC; ' +
+              f'rpc=RPC([sys.executable,"-u","-c",{child!r}]); assert rpc.call("recv")==[]; rpc.close()')
+    result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True, check=True)
+    self.assertEqual(result.stdout, '')
+    self.assertEqual(result.stderr, 'diagnostic-marker\n')
+
+  def test_service_timing_filter_and_contended_queue_preserve_exception(self):
+    service = station()
+    stderr = io.StringIO()
+    with patch('opendbc.safety.tests.hardware_service.time.monotonic_ns', side_effect=[0, 249_999_999]), \
+         patch('opendbc.safety.tests.hardware_service.sys.stderr', stderr):
+      with service._timing('normal'):
+        pass
+    self.assertEqual(stderr.getvalue(), '')
+    with patch('opendbc.safety.tests.hardware_service.time.monotonic_ns', side_effect=[0, 250_000_000]), \
+         patch('opendbc.safety.tests.hardware_service.sys.stderr', stderr):
+      with service._timing('threshold'):
+        pass
+    self.assertEqual(service._diagnostics[0]['phase'], 'threshold')
+    with service._diagnostic_lock:
+      with patch('opendbc.safety.tests.hardware_service.time.monotonic_ns', side_effect=[0, 300_000_000]):
+        with self.assertRaisesRegex(RuntimeError, 'original failure'), service._timing('failure'):
+          raise RuntimeError('original failure')
+    self.assertEqual(service._diagnostic_drops, [0, 1, 0])
+
+  def test_blocked_diagnostic_sink_keeps_can_requests_heartbeat_and_close_running(self):
+    service = station()
+    service.role = 'dut'
+    service.stopped = threading.Event()
+    service.panda = Mock()
+    entered, release = threading.Event(), threading.Event()
+    clock = [0]
+    count = [0]
+
+    class BlockedSink:
+      def write(self, value):
+        entered.set()
+        release.wait(2)
+
+      def flush(self):
+        pass
+
+    service._diagnostic_sink = BlockedSink()
+
+    def health():
+      self.assertTrue(service.lock._is_owned())
+      clock[0] += 300_000_000
+      return {'controls_allowed': True}
+
+    def heartbeat(enabled):
+      self.assertTrue(service.lock._is_owned())
+      self.assertTrue(enabled)
+      clock[0] += 300_000_000
+
+    def receive():
+      self.assertTrue(service.lock._is_owned())
+      clock[0] += 300_000_000
+      count[0] += 1
+      if count[0] == 40:
+        service.stopped.set()
+      return [(count[0], b'\xaa', 0)]
+
+    service.panda.health.side_effect = health
+    service.panda.send_heartbeat.side_effect = heartbeat
+    service.panda.can_recv.side_effect = receive
+    with patch('opendbc.safety.tests.hardware_service.time.monotonic_ns', side_effect=lambda: clock[0]), \
+         patch('opendbc.safety.tests.hardware_service.time.monotonic', side_effect=lambda: clock[0] / 1e9):
+      with service._timing('initial'):
+        clock[0] += 300_000_000
+      writer = threading.Thread(target=service._write_diagnostics, daemon=True)
+      writer.start()
+      try:
+        self.assertTrue(entered.wait(2))
+        service.worker = threading.Thread(target=service.run)
+        service.worker.start()
+        service.worker.join(1)
+        self.assertFalse(service.worker.is_alive())
+        self.assertIsNone(service.error)
+        result = []
+        reader = threading.Thread(target=lambda: result.extend(service.dispatch({'op': 'recv'})))
+        reader.start()
+        reader.join(1)
+        self.assertFalse(reader.is_alive())
+        self.assertEqual(result, [[i, 'aa', 0] for i in range(1, 41)])
+        self.assertEqual(service.panda.send_heartbeat.call_count, 40)
+        self.assertEqual(len(service._diagnostics), DIAGNOSTIC_QUEUE_SIZE)
+        self.assertEqual(service._diagnostic_drops, [120 - DIAGNOSTIC_QUEUE_SIZE, 0, 0])
+        self.assertTrue(writer.is_alive())
+        service._diagnostic_writer = writer
+        with patch.object(writer, 'join', side_effect=AssertionError('must not join diagnostic writer')):
+          service.close()
+        service.panda.close.assert_called_once_with()
+      finally:
+        service._diagnostic_closed = True
+        service.stopped.set()
+        release.set()
+        writer.join(2)
+    self.assertFalse(writer.is_alive())
+
+  def test_diagnostic_writer_reports_only_diagnostic_drops_and_sink_errors(self):
+    service = station()
+    service._diagnostics.append({'phase': 'test'})
+    service._diagnostic_drops = [2, 3, 1]
+    sink = io.StringIO()
+
+    def flush():
+      service._diagnostic_closed = True
+
+    service._diagnostic_sink = Mock(wraps=sink)
+    service._diagnostic_sink.flush.side_effect = flush
+    service._write_diagnostics()
+    self.assertEqual(json.loads(sink.getvalue()), {'phase': 'test', 'diagnostic_dropped': 6})
+    service._diagnostic_closed = False
+    service._diagnostics.append({'phase': 'test'})
+
+    def broken(value):
+      service._diagnostic_closed = True
+      raise OSError('closed diagnostic sink')
+
+    service._diagnostic_sink.write.side_effect = broken
+    service._write_diagnostics()
+    self.assertEqual(service._diagnostic_drops, [2, 3, 2])
+    self.assertIsNone(service.error)
+    self.assertEqual(list(service.queue), [])
 
   def test_tx_timeout_retains_candidate_partial_evidence_and_health(self):
     for partial in ('accepted', 'observed', 'neither'):
