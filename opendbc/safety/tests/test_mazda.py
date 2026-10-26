@@ -78,7 +78,8 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
 
 
 class TestMazdaIgnition(common.SafetyTestBase):
-  SAFETY_MODEL = None
+  SAFETY_MODEL = CarParams.SafetyModel.noOutput
+  IGNITION_ONLY = True
 
   TX_MSGS: list = []
 
@@ -87,14 +88,14 @@ class TestMazdaIgnition(common.SafetyTestBase):
 
   # 0x9E byte 0 high 3 bits == 6 (0xC0)
   def test_ignition_on(self):
-    self.safety.ignition_can_hook(self._msg(0xC0))
-    self.assertTrue(self.safety.get_ignition_can())
+    self._ignition_rx(self._msg(0xC0))
+    self.assertTrue(self._ignition_can())
 
   def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0xC0))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(0x20))
-    self.assertFalse(self.safety.get_ignition_can())
+    self._ignition_rx(self._msg(0xC0))
+    self.assertTrue(self._ignition_can())
+    self._ignition_rx(self._msg(0x20))
+    self.assertFalse(self._ignition_can())
 
 
 if __name__ == "__main__":

@@ -134,26 +134,26 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
       self._rx(self._motor_5_msg(main_switch=False))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self._rx(self._button_msg(bus=0))
-      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} with main switch off")
+      self.assertFalse(self._controls_allowed(), f"controls allowed on {button} with main switch off")
       self._rx(self._motor_5_msg(main_switch=True))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
-      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
+      self.assertFalse(self._controls_allowed(), f"controls allowed on {button} rising edge")
       self._rx(self._button_msg(bus=0))
-      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
+      self.assertTrue(self._controls_allowed(), f"controls not allowed on {button} falling edge")
 
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._motor_5_msg(main_switch=True))
     self._set_controls_allowed(1)
     self._rx(self._button_msg(cancel=True, bus=0))
-    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
+    self.assertFalse(self._controls_allowed(), "controls allowed after cancel")
 
   def test_main_switch(self):
     # Disable as soon as main switch turns off
     self._rx(self._motor_5_msg(main_switch=True))
     self._set_controls_allowed(1)
     self._rx(self._motor_5_msg(main_switch=False))
-    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after ACC main switch off")
+    self.assertFalse(self._controls_allowed(), "controls allowed after ACC main switch off")
 
   def test_torque_cmd_enable_variants(self):
     # The EPS rack accepts either 5 or 7 for an enabled status, with different low speed tuning behavior

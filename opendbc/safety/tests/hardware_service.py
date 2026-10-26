@@ -3,6 +3,7 @@ import argparse
 import collections
 import contextlib
 import json
+import inspect
 from pathlib import Path
 import socket
 import struct
@@ -12,11 +13,28 @@ import time
 
 # Linux asm-generic/socket.h; Python does not expose this on every platform.
 SO_RXQ_OVFL = getattr(socket, 'SO_RXQ_OVFL', 40)
+CAN_MTU = 16
+CANFD_MTU = 72
+CANFD_LENGTHS = (*range(9), 12, 16, 20, 24, 32, 48, 64)
+CAN_RAW_FD_FRAMES = getattr(socket, 'CAN_RAW_FD_FRAMES', 5)
+CONFIG_METHODS = {
+  'alternative_experience': ('set_alternative_experience', ('value',)),
+  'can_speed_kbps': ('set_can_speed_kbps', ('bus', 'speed')),
+  'can_data_speed_kbps': ('set_can_data_speed_kbps', ('bus', 'speed')),
+  'canfd_non_iso': ('set_canfd_non_iso', ('bus', 'enabled')),
+  'canfd_auto': ('set_canfd_auto', ('bus', 'enabled')),
+  'obd': ('set_obd', ('enabled',)),
+}
 
 
 class Service:
-  def __init__(self, role, serial=None, interfaces='can2,can3,can0'):
+  def __init__(self, role, serial=None, interfaces='can2,can3,can0', fd_buses=()):
     self.role = role
+    self.fd_buses = frozenset(fd_buses)
+    self.configuration = {}
+    self.interfaces = interfaces.split(',')
+    if not self.fd_buses <= set(range(len(self.interfaces))):
+      raise ValueError('FD bus index outside station interfaces')
     self.lock = threading.RLock()
     self.queue = collections.deque()
     self.streams = {}
@@ -37,9 +55,11 @@ class Service:
     else:
       self.sockets = []
       self.net_stats = {}
-      for interface in interfaces.split(','):
+      for bus, interface in enumerate(self.interfaces):
         sock = socket.socket(socket.PF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
         sock.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_RECV_OWN_MSGS, 0)
+        if bus in self.fd_buses:
+          sock.setsockopt(socket.SOL_CAN_RAW, CAN_RAW_FD_FRAMES, 1)
         sock.setsockopt(socket.SOL_SOCKET, SO_RXQ_OVFL, 1)
         sock.bind((interface,))
         sock.setblocking(False)
@@ -60,13 +80,27 @@ class Service:
   def send(self, frame):
     addr, data, bus = frame
     data = bytes.fromhex(data)
+    if type(addr) is not int or not 0 <= addr <= 0x1FFFFFFF:
+      raise ValueError('Invalid CAN address')
+    if type(bus) is not int or not 0 <= bus < (3 if self.role == 'dut' else len(self.sockets)):
+      raise ValueError('Invalid CAN bus')
+    if len(data) not in CANFD_LENGTHS:
+      raise ValueError('Payload length is not representable on CAN/CAN FD')
     if self.role == 'dut':
-      self.panda.can_send(addr, data, bus)
+      if len(data) > 8 or bus in self.fd_buses:
+        if 'fd' not in inspect.signature(self.panda.can_send).parameters:
+          raise ValueError('Installed stock Panda API lacks explicit CAN FD send')
+        self.panda.can_send(addr, data, bus, fd=True)
+      else:
+        self.panda.can_send(addr, data, bus)
     else:
-      if len(data) > 8:
-        raise ValueError('Station transport supports classic CAN only')
+      fd = bus in self.fd_buses
+      if len(data) > 8 and not fd:
+        raise ValueError('CAN FD requires explicit station bus opt-in')
       addr |= 0x80000000 if addr >= 0x800 else 0
-      self.sockets[bus].send(struct.pack('=IB3x8s', addr, len(data), data))
+      packet = struct.pack('=IBB2x64s', addr, len(data), 0, data) if fd else struct.pack('=IB3x8s', addr, len(data), data)
+      if self.sockets[bus].send(packet) != len(packet):
+        raise RuntimeError('Short SocketCAN write')
 
   def receive(self):
     if self.role == 'dut':
@@ -75,13 +109,28 @@ class Service:
     for bus, sock in enumerate(self.sockets):
       while True:
         try:
-          packet, ancillary, flags, _ = sock.recvmsg(16, socket.CMSG_SPACE(4))
+          packet, ancillary, flags, _ = sock.recvmsg(CANFD_MTU, socket.CMSG_SPACE(4))
           if flags & (socket.MSG_TRUNC | socket.MSG_CTRUNC):
             raise RuntimeError('Truncated SocketCAN receive evidence')
           for level, kind, value in ancillary:
             if level == socket.SOL_SOCKET and kind == SO_RXQ_OVFL and struct.unpack('=I', value)[0]:
               raise RuntimeError('SocketCAN kernel receive queue overflow')
-          addr, length, data = struct.unpack('=IB3x8s', packet)
+          # MSG_DONTROUTE marks locally generated traffic, including echoes
+          # from other sockets. MSG_CONFIRM additionally identifies own TX.
+          if flags & (socket.MSG_DONTROUTE | socket.MSG_CONFIRM):
+            continue
+          if len(packet) == CAN_MTU:
+            addr, length, data = struct.unpack('=IB3x8s', packet)
+            if length > 8:
+              raise RuntimeError('Invalid classic CAN payload length')
+          elif len(packet) == CANFD_MTU and bus in self.fd_buses:
+            addr, length, fd_flags, data = struct.unpack('=IBB2x64s', packet)
+            if length not in CANFD_LENGTHS or fd_flags & ~7:
+              raise RuntimeError('Invalid CAN FD receive evidence')
+          else:
+            raise RuntimeError('Unexpected SocketCAN frame size or CAN FD bus')
+          if addr & 0x60000000:
+            raise RuntimeError('Remote/error CAN frame is not physical data evidence')
           frames.append([addr & 0x1FFFFFFF, data[:length].hex(), bus])
         except BlockingIOError:
           break
@@ -101,7 +150,7 @@ class Service:
             heartbeat = now + .1
           # Pace even overdue streams: scheduler jitter must not turn separate
           # periodic inputs into a burst that overruns the receiving controller.
-          stream = min(self.streams.values(), key=lambda s: s['next'], default=None)
+          stream = min((s for s in self.streams.values() if not s.get('paused', False)), key=lambda s: s['next'], default=None)
           if not self.streams_paused and stream is not None and now >= stream['next']:
             self.send(stream['frames'][stream['index'] % len(stream['frames'])])
             stream['index'] += 1
@@ -115,6 +164,17 @@ class Service:
       self.error = str(exc)
 
   def dispatch(self, req):
+    if req['op'] == 'sequence':
+      # Do not hold the dispatch RLock across waits: the worker must continue
+      # draining Panda RX and servicing its heartbeat throughout the batch.
+      if __package__:
+        from .hardware_sequence import execute_sequence
+      else:
+        from hardware_sequence import execute_sequence
+      return execute_sequence(self, req['events'], exclusive_commands=req.get('exclusive_commands', False),
+                              max_lateness_us=req.get('max_lateness_us', 2000),
+                              scheduling=req.get('scheduling', 'strict'), max_duration_us=req.get('max_duration_us', 8000000),
+                              receipt_timeout_us=req.get('receipt_timeout_us', 1000000))
     with self.lock:
       if self.error:
         raise RuntimeError('CAN worker failed: ' + self.error)
@@ -122,6 +182,39 @@ class Service:
       reset_stats = op == 'clear' and req.get('reset_stats', False) and self.role == 'station'
       if not reset_stats:
         self.check_transport()
+      if op == 'capabilities':
+        return {'transport': 'panda' if self.role == 'dut' else 'socketcan',
+                'max_payload': 64 if self.role == 'dut' or self.fd_buses else 8,
+                'physical_fd_support': 'verify Panda hardware type and bus health' if self.role == 'dut' else 'external link configuration',
+                'station_fd_tx_flags': 0,
+                'configuration_api': 'stock Panda Python public methods',
+                'fd_buses': sorted(self.fd_buses),
+                'panda_explicit_fd_send': self.role == 'dut' and 'fd' in inspect.signature(self.panda.can_send).parameters,
+                'configuration': {name: method for name, (method, _) in CONFIG_METHODS.items()
+                                  if self.role == 'dut' and callable(getattr(self.panda, method, None))},
+                'configuration_applied': dict(self.configuration),
+                'station_link_configuration': 'external: configure interface bitrate, dbitrate, fd and non-iso before opening'}
+      if op == 'configure' and self.role == 'dut':
+        name = req['setting']
+        if name not in CONFIG_METHODS:
+          raise ValueError('Unsupported Panda setting: ' + name)
+        method, fields = CONFIG_METHODS[name]
+        fn = getattr(self.panda, method, None)
+        if not callable(fn):
+          raise ValueError('Installed stock Panda API lacks ' + method)
+        values = [req[field] for field in fields]
+        for field, value in zip(fields, values, strict=True):
+          if field == 'enabled' and type(value) is not bool:
+            raise ValueError('enabled must be boolean')
+          if field == 'bus' and (type(value) is not int or not 0 <= value < 3):
+            raise ValueError('Invalid Panda bus')
+          if field == 'speed' and (type(value) not in (int, float) or not 0 < value <= 6553.5 or value * 10 != int(value * 10)):
+            raise ValueError('Speed must be positive kbps representable by stock Panda')
+          if field == 'value' and (type(value) is not int or not 0 <= value <= 65535):
+            raise ValueError('Invalid alternative experience')
+        fn(*values)
+        self.configuration[name + (':' + str(req['bus']) if 'bus' in fields else '')] = dict(zip(fields, values, strict=True))
+        return
       if op == 'recv':
         frames = list(self.queue)
         self.queue.clear()
@@ -129,6 +222,15 @@ class Service:
         return frames
       if op == 'send':
         self.send(req['frame'])
+      elif op == 'rx_stream' and self.role == 'station':
+        stream = self.streams[req['name']]
+        if not self.streams_paused and not stream.get('paused', False):
+          raise ValueError('Isolated stream injection requires paused streams')
+        frame = stream['frames'][stream['index'] % len(stream['frames'])]
+        self.send(frame)
+        stream['index'] += 1
+        stream['next'] = time.monotonic() + stream['period']
+        return frame
       elif op == 'streams' and self.role == 'station':
         emitted = []
         start = time.monotonic()
@@ -136,17 +238,30 @@ class Service:
           if not spec['frames'] or spec['period'] <= 0:
             raise ValueError('Streams require frames and a positive period')
           name = spec['name']
-          index = self.streams.get(name, {}).get('index', 0)
+          previous = self.streams.get(name)
+          index = previous['index'] if previous else 0
           frame = spec['frames'][index % len(spec['frames'])]
-          emitted.append(frame)
-          self.streams[name] = dict(spec, index=index, next=start + phase * .001)
+          if previous is None:
+            emitted.append(frame)
+          self.streams[name] = dict(spec, index=index, next=previous['next'] if previous else start + phase * .001,
+                                    paused=previous.get('paused', False) if previous else False)
         return emitted
+      elif op == 'pause_stream' and self.role == 'station':
+        self.streams[req['name']]['paused'] = True
+      elif op == 'resume_stream' and self.role == 'station':
+        stream = self.streams[req['name']]
+        stream['paused'] = False
+        stream['next'] = max(time.monotonic(), stream['next'])
       elif op == 'drop' and self.role == 'station':
         del self.streams[req['name']]
       elif op == 'pause' and self.role == 'station':
         self.streams_paused = True
       elif op == 'resume' and self.role == 'station':
         self.streams_paused = False
+        now = time.monotonic()
+        for stream in self.streams.values():
+          if not stream.get('paused', False):
+            stream['next'] = max(now, stream['next'])
       elif op == 'clear':
         if self.role == 'station':
           self.streams.clear()
@@ -161,9 +276,21 @@ class Service:
           self.net_stats = {path: int(path.read_text()) for path in self.net_stats}
       elif op == 'health' and self.role == 'dut':
         return self.panda.health()
+      elif op == 'restart' and self.role == 'dut':
+        version = self.panda.get_version()
+        self.panda.reset(enter_bootstub=False, enter_bootloader=False, reconnect=True)
+        self.panda.set_power_save(False)
+        if self.panda.get_version() != version:
+          raise RuntimeError('Firmware changed across normal MCU restart')
+        self.queue.clear()
+        self.configuration.clear()
+      elif op == 'provenance' and self.role == 'station':
+        return {'transport': 'socketcan', 'interfaces': self.interfaces, 'fd_buses': sorted(self.fd_buses),
+                'fd_tx_flags': 0, 'link_configuration': 'external', 'local_tx_evidence': 'excluded'}
       elif op == 'provenance' and self.role == 'dut':
         return {'firmware_version': self.panda.get_version(), 'serial': self.panda.get_serial()[0],
-                'hardware_type': self.panda.get_type().hex(), 'transport': 'spi' if self.panda.is_connected_spi() else 'usb'}
+                'hardware_type': self.panda.get_type().hex(), 'transport': 'spi' if self.panda.is_connected_spi() else 'usb',
+                'configuration_applied': dict(self.configuration)}
       elif op == 'mode' and self.role == 'dut':
         self.panda.set_safety_mode(req['mode'], req.get('param', 0))
       else:
@@ -185,9 +312,11 @@ def main():
   parser.add_argument('role', choices=['dut', 'station'])
   parser.add_argument('--serial')
   parser.add_argument('--interfaces', default='can2,can3,can0', help='Station interfaces for DUT buses 0,1,2')
+  parser.add_argument('--fd-buses', default='',
+                      help='Bus indices using CAN FD, including short frames; Panda payloads over 8 bytes also set fd=True')
   args = parser.parse_args()
   with contextlib.redirect_stdout(sys.stderr):
-    service = Service(args.role, args.serial, args.interfaces)
+    service = Service(args.role, args.serial, args.interfaces, tuple(int(bus) for bus in args.fd_buses.split(',') if bus))
   try:
     for line in sys.stdin:
       try:

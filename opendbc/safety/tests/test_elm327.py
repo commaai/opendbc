@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import unittest
+from opendbc.safety.tests.coverage import coverage
 
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
 from opendbc.safety import DLC_TO_LEN
-from opendbc.safety.tests.test_defaults import TestDefaultRxHookBase
+from opendbc.safety.tests.test_defaults import TestDefaultRxHookBase, _test_buses
 
 GM_CAMERA_DIAG_ADDR = 0x24B
 
@@ -18,9 +19,15 @@ class TestElm327(TestDefaultRxHookBase):
                                       ] for bus in range(4)]
   FWD_BUS_LOOKUP = {}
 
+  # The bus-3 rows in TX_MSGS and the host sweep remain intact. Hardware covers
+  # only buses 0..2; this is a documented domain reduction, not a bus-3 verdict.
+  # Rejected 12..64-byte DLC probes still require a transport accepting CAN FD
+  # candidates; transport inability must error rather than omit these lengths.
+  @coverage('Diagnostic TX address, payload and length decisions on buses 0..2',
+            host=('Original logical-bus-3 TX domain',))
   def test_tx_hook(self):
     # ensure we can transmit arbitrary data on allowed addresses
-    for bus in range(4):
+    for bus in _test_buses(self):
       for addr in self.SCANNED_ADDRS:
         should_tx = [addr, bus] in self.TX_MSGS
         self.assertEqual(should_tx, self._tx(common.make_msg(bus, addr, 8)))

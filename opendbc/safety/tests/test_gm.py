@@ -71,12 +71,12 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
           should_enable = btn_cur != Buttons.DECEL_SET and btn_prev == Buttons.DECEL_SET
           should_enable = should_enable or (btn_cur == Buttons.RES_ACCEL and btn_prev != Buttons.RES_ACCEL)
           should_enable = should_enable and btn_cur != Buttons.CANCEL
-          self.assertEqual(should_enable, self.safety.get_controls_allowed())
+          self.assertEqual(should_enable, self._controls_allowed())
 
   def test_cancel_button(self):
     self._set_controls_allowed(1)
     self._rx(self._button_msg(Buttons.CANCEL))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
 
 
 class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
@@ -232,7 +232,8 @@ class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVS
 
 class TestGmIgnition(common.SafetyTestBase):
   DBC = "gm_global_a_powertrain_generated"
-  SAFETY_MODEL = None
+  SAFETY_MODEL = CarParams.SafetyModel.noOutput
+  IGNITION_ONLY = True
 
   TX_MSGS: list = []
 
@@ -241,14 +242,14 @@ class TestGmIgnition(common.SafetyTestBase):
 
   # SystemPowerMode 2=Run, 3=Crank Request
   def test_ignition_on(self):
-    self.safety.ignition_can_hook(self._msg(2))
-    self.assertTrue(self.safety.get_ignition_can())
+    self._ignition_rx(self._msg(2))
+    self.assertTrue(self._ignition_can())
 
   def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(2))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(0))
-    self.assertFalse(self.safety.get_ignition_can())
+    self._ignition_rx(self._msg(2))
+    self.assertTrue(self._ignition_can())
+    self._ignition_rx(self._msg(0))
+    self.assertFalse(self._ignition_can())
 
 
 if __name__ == "__main__":

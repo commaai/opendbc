@@ -1,109 +1,170 @@
-# Observable safety tests on hardware
+# Safety tests on stock hardware
 
-`test_observable.py` runs the same CAN scenarios against host C safety hooks and
-an unmodified stock Panda. Supported profiles are Toyota LKA torque (safety model
-2, parameter 73) and classic Hyundai torque (model 8, parameter 0). This workflow
-selects safety modes through the normal Panda API; it does not flash firmware.
-The installed firmware must support the selected mode and the health fields used
-by the runner. Results record the DUT firmware version and hardware type.
+The existing platform tests can use the common harness with host hooks, the
+simulated observable backend, or a stock Panda and a physical CAN station.
+The hardware route reuses their test IDs, fixture encoders and expected verdicts;
+CAN setup, public health and observed command consequences replace private-state
+access where implemented. This is not proof that the whole exact suite has passed
+physically: the host supplements and unsupported requirements below remain explicit.
 
-The shared scenarios cover engagement, disengagement, brake behavior, positive
-and negative steering torque limits, steering requests, opposing measured torque,
-relay, stream timeout and checksum faults, recovery, rejected buses/addresses, and CAN
-forwarding. Toyota additionally checks acceleration boundaries and gas inhibition,
-diagnostic payloads, blocked AEB actuation and inactive LTA commands. Hyundai
-additionally checks cruise button transmit rules and the enable-button requirement.
-These profiles and observable scenarios are shared; legacy platform tests have
-not all been migrated. Exact microsecond boundaries, internal state manipulation
-and malformed USB metadata remain host coverage. The shared realtime-window
-scenario checks valid rollover after a generous wait; exact rejection boundaries
-remain in the supplemental host suite.
+The services use normal Panda APIs, including safety-mode selection, configuration
+and MCU reset for ignition tests. They do not flash or modify firmware. Installed
+firmware and the Panda Python package must support the selected modes, public
+health fields and configuration methods. Heartbeat checks stay enabled.
 
-## Equipment and dependencies
+## Choose and run tests
 
-- **Runner host:** this opendbc checkout with its Python dependencies installed,
-  plus SSH access to the service hosts. Fixture encoders require the normal
-  opendbc Python dependencies, but the hardware path does not compile or load
-  libsafety.
-- **DUT service host:** Python, `hardware_service.py` and the Panda Python package, with
-  USB or SPI access to the stock Panda. Use a compatible Panda package and firmware.
-- **CAN station:** Linux, Python and `hardware_service.py`, with three configured
-  SocketCAN interfaces physically connected to the corresponding DUT CAN buses.
-  Set the interfaces up with the bitrate and termination required by the bench
-  before running. The station service uses the Python standard library and
-  supports classic CAN frames only (up to eight data bytes).
+Run commands from the checkout root with the normal opendbc dependencies installed.
+The default remains the deterministic host suite. Compare it with the same test
+class through the observable simulation boundary:
 
-The service hosts can be the same machine. Use an isolated bench with the DUT
-and station as its CAN participants. Each service owns its transport for the run.
-No service runs on the Panda MCU; the DUT service uses its normal USB or SPI API.
+```sh
+python -m unittest opendbc.safety.tests.test_toyota.TestToyotaSafetyTorque
+SAFETY_BACKEND=simulated python -m unittest opendbc.safety.tests.test_toyota.TestToyotaSafetyTorque
+```
 
-## Run
+List the legacy runner's discovered IDs without opening hardware, then select a
+full test ID with `--test` (repeatable). Omitting `--test` selects all discovered
+tests, including explicitly unsupported host/tooling tests.
 
-First run the shared scenarios against the host hooks from the checkout root:
+```sh
+python -m opendbc.safety.tests.run_hardware --suite legacy --list
+python -m opendbc.safety.tests.run_hardware \
+  --suite legacy \
+  --test opendbc.safety.tests.test_toyota.TestToyotaSafetyTorque.test_non_realtime_limit_up \
+  --dut-command "ssh dut-host 'cd /path/to/opendbc && python -m opendbc.safety.tests.hardware_service dut --serial PANDA_SERIAL'" \
+  --station-command "ssh station-host 'cd /path/to/opendbc && python -m opendbc.safety.tests.hardware_service station --interfaces can2,can3,can0'" \
+  --json-output safety-hardware.json
+```
+
+Use `--failfast` to stop on the first failure. Service commands can also run
+locally. Do not use an SSH pseudo-terminal: stdout carries JSON-line RPC.
+`--serial` may be omitted only when exactly one Panda is available.
+
+Required-RX profiles currently cover Toyota (including LTA/SecOC variants),
+Hyundai classic/legacy and CAN FD, Honda Nidec/Bosch, Chrysler/CUSW, GM, Mazda,
+MG, Rivian, Subaru/global and preglobal, Volkswagen MQB/PQ/MLB/MEB, Ford,
+Tesla, Nissan, BYD and PSA. Concrete fixture parameters choose message/bus/counter
+variants. Body, ELM327, default modes and ignition-only fixtures also have stream
+handling, including explicitly empty profiles where appropriate. A stream profile
+is an input declaration, not a guarantee that every test or firmware mode is
+physically supported; undeclared profiles fail explicitly.
+
+The separate, smaller `test_observable.py` scenario suite remains available:
 
 ```sh
 python -m unittest opendbc.safety.tests.test_observable
 ```
 
-For hardware, install the required dependencies on each service host. The runner
-starts both services using the command strings below. These module commands use
-a checkout on each service host and run from a directory where `opendbc` is
-importable. Replace the example host names, checkout paths and serial with your
-bench values:
+For hardware, replace `--suite legacy --test ...` above with
+`--suite observable --profile toyota`, `--profile hyundai`, or `--profile all`.
+The runner defaults to this observable suite; `--profile` does not select legacy
+platform fixtures.
+
+## Bench and CAN FD setup
+
+Use an isolated bench with three correctly terminated CAN links. The station is
+Linux with SocketCAN; the DUT service needs the Panda Python package and USB/SPI
+access. Service hosts may be the same machine. `--interfaces can2,can3,can0` maps
+those interfaces, in that order, to DUT buses 0, 1 and 2. Interface names alone do
+not determine wiring. Configure every link's nominal bitrate before running.
+
+For example, on the station, configure one classic link or one FD link as follows
+(repeat for the mapped interfaces, using the bench's actual rates):
 
 ```sh
-python -m opendbc.safety.tests.run_hardware \
-  --profile toyota \
-  --dut-command "ssh dut-host 'cd /path/to/opendbc && python -m opendbc.safety.tests.hardware_service dut --serial PANDA_SERIAL'" \
-  --station-command "ssh station-host 'cd /path/to/opendbc && python -m opendbc.safety.tests.hardware_service station --interfaces can2,can3,can0'" \
-  --json-output toyota-hardware.json
+sudo ip link set can2 down
+sudo ip link set can2 type can bitrate 500000
+sudo ip link set can2 up
+
+# Alternative for CAN FD at 500 kbit/s nominal, 2 Mbit/s data:
+sudo ip link set can2 down
+sudo ip link set can2 type can bitrate 500000 dbitrate 2000000 fd on
+sudo ip link set can2 up
 ```
 
-Alternatively, copy just `opendbc/safety/tests/hardware_service.py` to each
-service host; neither remote service imports opendbc. Replace each remote module
-command with its standalone script invocation:
+Match the DUT's nominal/data rates through the stock Panda API
+(`set_can_speed_kbps(bus, 500)` and `set_can_data_speed_kbps(bus, 2000)` for this
+example), and match FD ISO/non-ISO settings where required. The service also
+exposes these stock configuration methods through its `configure` RPC; the runner
+has no bitrate CLI. A reset may require reapplying bench configuration.
+
+For FD fixtures such as Hyundai CAN FD, Ford CAN FD and Volkswagen MEB, both the
+Panda hardware/firmware and station adapters must support FD. Add
+`--fd-buses 0,1,2` to **both** service commands when all three links use FD; use
+only the appropriate DUT bus indices for a mixed bench. This flag explicitly
+selects FD even for payloads of eight bytes or fewer; it does not configure link
+bitrates. The installed Panda API must support `can_send(..., fd=True)`.
+
+For standalone remote deployment, copy **both** `hardware_service.py` and
+`hardware_sequence.py` from this directory into the same remote directory on
+each service host. No remote opendbc installation is needed. For example, replace
+the module commands above with:
 
 ```sh
-python -m opendbc.safety.tests.run_hardware \
-  --profile toyota \
-  --dut-command "ssh dut-host 'python /path/to/hardware_service.py dut --serial PANDA_SERIAL'" \
-  --station-command "ssh station-host 'python /path/to/hardware_service.py station --interfaces can2,can3,can0'" \
-  --json-output toyota-hardware.json
+ssh dut-host 'python /path/to/hardware_service.py dut --serial PANDA_SERIAL --fd-buses 0,1,2'
+ssh station-host 'python /path/to/hardware_service.py station --interfaces can2,can3,can0 --fd-buses 0,1,2'
 ```
 
-The standalone DUT service still requires the Panda Python package and USB
-permissions. The runner host still requires the checkout and its dependencies.
+Pass these strings as `--dut-command` and `--station-command`; the runner starts
+and owns the services. The standalone DUT still needs the Panda package, and the
+runner still needs this checkout and its dependencies.
 
-Omit `--profile` to run the entire shared suite, or use `--profile hyundai` for
-the Hyundai scenarios. `--serial` selects a particular
-Panda and can be omitted when selection is unambiguous. Commands may also start
-services locally, for example
-`--dut-command 'python -m opendbc.safety.tests.hardware_service dut'`.
-Do not use an SSH pseudo-terminal: service stdout carries the JSON-line protocol.
+## Evidence and execution limits
 
-`--interfaces` is an ordered physical bus map: its first interface connects to
-DUT bus 0, its second to bus 1, and its third to bus 2. Thus the example maps
-`can2 → 0`, `can3 → 1`, and `can0 → 2`. Adapt the order to actual wiring; interface
-names alone do not imply a DUT bus number. Required vehicle RX streams in both
-profiles use DUT bus 0. The three-bus mapping also supports wrong-bus rejection
-checks.
+Required streams run continuously during RPC calls, preserving counter phase
+when payloads change. Fixture profiles generally use bounded 25 Hz state and
+50 Hz measurement cadences; individual declarations determine the actual rates.
+Deliberate checksum, counter and timeout tests can suspend streams so background
+traffic cannot silently repair their faults. The DUT service sends heartbeats
+using observed controls state.
 
-The station continuously transmits every required RX stream at its configured
-period, including while SSH requests are in flight. Sends are staggered to avoid
-overrunning station receive FIFOs. State changes replace
-payload cycles while retaining stream counter positions. The DUT service sends
-heartbeats every 100 ms using the observed controls state; firmware heartbeat
-checks remain enabled. Individual timeout and checksum scenarios deliberately
-interrupt or corrupt a required stream.
+TX acceptance requires a stock accepted receipt plus matching station wire
+observation. Rejection requires a rejected receipt without matching wire traffic.
+RX is physically observed and checked against invalid-RX counters. Exhaustive
+scans use paced batches, retain the address domain on physical buses 0..2, and
+check exact receipt/wire counts; RX scan invalid counts are aggregate evidence,
+not invented per-frame verdicts. Relay-triggering scan inputs require clean resets.
+Missing, conflicting, partial or overflowed evidence fails the run.
 
-Both backends use 25 Hz state streams and 50 Hz torque measurements. These test
-cadences preserve stock RX watchdogs and settle the six-sample torque windows
-without overwhelming the station receiver.
+Timing-sensitive steering sequences execute near the DUT through
+`hardware_sequence.py`, avoiding an SSH round trip per command. They record
+bounded host-dispatch lateness and verify receipts/wire counts with health guards.
+The service observes every command receipt before recording its processing cutoff;
+coarse timing assertions use that conservative bound. Accepted setup ramps and
+exhaustive scans use completion-relative pacing, with no catch-up bursts, while
+timing tests retain bounded dispatch deadlines and receipt-window checks.
+Those timestamps are not wire or MCU timestamps and cannot establish arbitrary
+microsecond edges. Scans and real-time waits can make full runs lengthy.
 
-A successful TX assertion requires both the DUT's accepted receipt and a matching
-frame physically observed by the station. Rejection assertions require the DUT's
-rejected receipt and no matching station observation. RX injection is confirmed
-in the DUT receive stream and checked against its invalid-RX counter. Missing or
-ambiguous evidence fails the run. The optional JSON report contains test results,
-checkout revision, DUT provenance and physical evidence counts. On cleanup the
-runner stops station streams and returns the DUT to silent mode.
+The JSON report records discovered, selected, executed and unexecuted IDs,
+per-execution status, fixture events, revision/dirty-tree state, firmware/hardware
+provenance and evidence counts. A backend being created does not itself prove
+physical CAN coverage. Method-level contracts separately describe shared assertions
+and host supplements; undeclared assertion coverage remains `unclassified`.
+Setup traffic alone cannot establish original-assertion equivalence. Raw scan and
+sequence audits retain partial evidence on failures. The runner returns failure for skips, expected failures,
+collection errors or unexecuted selected tests as well as ordinary failures.
+Cleanup stops streams and returns the DUT to silent mode.
+
+Retain the default host runs as supplements for exact private sample extrema and
+immediate reset state, private pedal/cruise/relay latch identity, unconsumed
+longitudinal flags, exact MCU clock/tick edges and wraparound, malformed USB-only
+packet metadata, logical bus 3, and the exact unsupported-mode C return code.
+Observable probes test downstream behavior, not equality with those private
+values. Build tests, direct-hook scenarios outside `SafetyTestBase`, and internal
+runner/tooling tests are classified explicitly as unsupported by the legacy
+physical runner rather than silently executed on host hooks.
+
+Original semantic skips remain: examples include absent regen messages, steering
+request bits, second speed messages or realtime limits, inapplicable Hyundai
+variants, and Toyota's no-DSU diagnostic test. Shared helper/base classes are also
+excluded by their original unittest class setup. These are distinct from missing
+physical capability, but the strict runner still reports skips as unsuccessful.
+
+Silent-mode tests currently fail on the two-participant bench: a silent DUT does
+not ACK station traffic. They need a verified independent ACK participant plus
+bounded retransmission/RX evidence. Running noOutput does not prove silent-mode
+behavior. Unsupported stock firmware modes, missing public APIs, incompatible FD
+links and unavailable timing guarantees likewise fail explicitly; none constitutes
+an automatic skip or evidence that the entire physical suite passed.

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import unittest
+from opendbc.safety.tests.coverage import coverage
 
 from opendbc.car.structs import CarParams
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
@@ -43,7 +44,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
 
   def _set_prev_desired_power(self, power: int):
     # init with local tx sequence
-    prev_allowed = self.safety.get_controls_allowed()
+    prev_allowed = self._controls_allowed()
     self._set_controls_allowed(True)
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=power)))
     self._set_controls_allowed(prev_allowed)
@@ -55,21 +56,21 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self._set_controls_allowed(True)
 
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))
-    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._controls_allowed())
 
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power + 1)))
 
     self._set_controls_allowed(True)
 
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))
-    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._controls_allowed())
 
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=max_power)))
 
     self._set_controls_allowed(True)
 
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))
-    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._controls_allowed())
 
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=-max_power)))
 
@@ -111,8 +112,9 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
 
   def _user_gas_msg(self, gas):
     self._gas_pressed = bool(gas)
-    values = {"Accel_Pedal_Pressure": 1 if gas else 0, "TSK_Status": 3}
-    return self.packer.make_can_msg_safety("Motor_51", 0, values)
+    # Gas and PCM share Motor_51. Use the captured PCM encoder so periodic
+    # traffic preserves this input and consumes the same stream counter slot.
+    return self._tsk_status_msg(True)
 
   def _vehicle_moving_msg(self, speed_mps: float):
     return self._speed_msg(speed_mps)
@@ -123,7 +125,10 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
 
   def _curvature_cmd_msg(self, curvature, steer_req=1, power=50, increment_timer=True):
     if increment_timer:
-      self.safety.set_timer(max(self.safety.get_timer(), self.cnt_curvature_cmd * int(1e6 / self.LATERAL_FREQUENCY)))
+      if self.backend is None:
+        self.safety.set_timer(max(self.safety.get_timer(), self.cnt_curvature_cmd * int(1e6 / self.LATERAL_FREQUENCY)))
+      else:
+        self._wait(1 / self.LATERAL_FREQUENCY)
       self.__class__.cnt_curvature_cmd += 1
     values = {
       "Curvature": abs(curvature),
@@ -158,30 +163,49 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume}
     return self.packer.make_can_msg_safety("GRA_ACC_01", bus, values)
 
+  @coverage('Curvature RX acceptance only; measured-curvature gate is disabled',
+            host=('Exact curvature extrema and eviction; no downstream gate consumes them',), relation='rx-only')
   def test_curvature_measurements(self):
-    self._rx(self._curvature_meas_msg(0.15))
-    self._rx(self._curvature_meas_msg(-0.1))
-    self._rx(self._curvature_meas_msg(0))
-    self._rx(self._curvature_meas_msg(0))
-    self._rx(self._curvature_meas_msg(0))
-    self._rx(self._curvature_meas_msg(0))
+    # MEB disables the measured-curvature error gate: no TX decision exposes
+    # sample extrema. Wire RX is shared; exact sample contents are host-only.
+    self.assertTrue(self._rx(self._curvature_meas_msg(0.15)))
+    self.assertTrue(self._rx(self._curvature_meas_msg(-0.1)))
+    self.assertTrue(self._rx(self._curvature_meas_msg(0)))
+    self.assertTrue(self._rx(self._curvature_meas_msg(0)))
+    self.assertTrue(self._rx(self._curvature_meas_msg(0)))
+    self.assertTrue(self._rx(self._curvature_meas_msg(0)))
 
-    self.assertEqual(int(-0.1 * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_min())
-    self.assertEqual(int(0.15 * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_max())
+    if self.backend is None:  # Exact sample-window inspection is a host supplement.
+      self.assertEqual(int(-0.1 * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_min())
+    if self.backend is None:  # Exact sample-window inspection is a host supplement.
+      self.assertEqual(int(0.15 * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_max())
 
-    self._rx(self._curvature_meas_msg(0))
-    self.assertEqual(0, self.safety.get_curvature_meas_max())
-    self.assertEqual(int(-0.1 * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_min())
+    self.assertTrue(self._rx(self._curvature_meas_msg(0)))
+    if self.backend is None:  # Exact sample-window inspection is a host supplement.
+      self.assertEqual(0, self.safety.get_curvature_meas_max())
+    if self.backend is None:  # Exact sample-window inspection is a host supplement.
+      self.assertEqual(int(-0.1 * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_min())
 
-    self._rx(self._curvature_meas_msg(0))
-    self.assertEqual(0, self.safety.get_curvature_meas_max())
-    self.assertEqual(0, self.safety.get_curvature_meas_min())
+    self.assertTrue(self._rx(self._curvature_meas_msg(0)))
+    if self.backend is None:  # Exact sample-window inspection is a host supplement.
+      self.assertEqual(0, self.safety.get_curvature_meas_max())
+    if self.backend is None:  # Exact sample-window inspection is a host supplement.
+      self.assertEqual(0, self.safety.get_curvature_meas_min())
 
+  @coverage('Brake disengagement behavior',
+            host=('Exact brake-latch identity',))
   def test_brake_signal(self):
-    self._rx(self._user_brake_msg(False))
-    self.assertFalse(self.safety.get_brake_pressed_prev())
-    self._rx(self._user_brake_msg(True))
-    self.assertTrue(self.safety.get_brake_pressed_prev())
+    self.assertTrue(self._rx(self._user_brake_msg(False)))
+    self._set_controls_allowed(True)
+    self.assertTrue(self._controls_allowed())
+    self.assertTrue(self._rx(self._user_brake_msg(True)))
+    self.assertFalse(self._controls_allowed())
+    if self.backend is None:  # Exact pedal latch supplements observable disengagement.
+      self.assertTrue(self.safety.get_brake_pressed_prev())
+    self.assertTrue(self._rx(self._user_brake_msg(False)))
+    self.assertFalse(self._controls_allowed())
+    if self.backend is None:
+      self.assertFalse(self.safety.get_brake_pressed_prev())
 
   def test_torque_driver_measurements(self):
     for t in (0, 100, -100, 250, -250):
@@ -209,12 +233,12 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   def test_main_switch_off_disables_controls(self):
     self._set_controls_allowed(True)
     self._rx(self._tsk_status_msg(False, main_switch=False))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
 
   def test_cancel_button_rising_edge(self):
     self._set_controls_allowed(True)
     self._rx(self._button_msg(cancel=1, bus=0))
-    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._controls_allowed())
 
   def test_rx_hook_speed_mismatch(self):
     for speed in np.arange(0, 40, 0.5):
@@ -226,8 +250,11 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
         self._tx(self._curvature_cmd_msg(0, steer_req=True))
 
         within_delta = common.speeds_within_delta(speed, speed_2)
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
+        self.assertEqual(self._controls_allowed(), within_delta)
 
+  @coverage('Rejected curvature command and accepted zero recovery',
+            host=('Exact private desired-curvature zeroing',),
+            uses=(common.CurvatureSteeringSafetyTest._set_prev_desired_curvature,))
   def test_curvature_violation(self):
     # if violation occurs, desired_curvature_last is reset to 0
     meas = self.MAX_CURVATURE_TEST / 4
@@ -239,8 +266,12 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertFalse(self._tx(self._curvature_cmd_msg(self.MAX_CURVATURE_TEST, steer_req=True, power=50)))
 
     # prev should be reset to 0
-    self.assertEqual(0, self.safety.get_desired_curvature_last())
+    if self.backend is None:  # Exact state supplements the recovery command below.
+      self.assertEqual(0, self.safety.get_desired_curvature_last())
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=50)))
 
+  @coverage('Inactive curvature command decisions',
+            uses=(common.CurvatureSteeringSafetyTest._set_prev_desired_curvature,))
   def test_curvature_cmd_when_not_steering(self):
     # Tests that only a zero curvature is allowed while the steer
     # actuation bit is 0, regardless of controls allowed or meas
@@ -300,26 +331,26 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
       self._set_controls_allowed(0)
       self._rx(self._tsk_status_msg(False, main_switch=False))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
-      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} with main switch off")
+      self.assertFalse(self._controls_allowed(), f"controls allowed on {button} with main switch off")
       self._rx(self._tsk_status_msg(False, main_switch=True))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
-      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
+      self.assertFalse(self._controls_allowed(), f"controls allowed on {button} rising edge")
       self._rx(self._button_msg(bus=0))
-      self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
+      self.assertTrue(self._controls_allowed(), f"controls not allowed on {button} falling edge")
 
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False, main_switch=True))
     self._set_controls_allowed(1)
     self._rx(self._button_msg(cancel=True, bus=0))
-    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
+    self.assertFalse(self._controls_allowed(), "controls allowed after cancel")
 
   def test_main_switch(self):
     # Disable as soon as main switch turns off
     self._rx(self._tsk_status_msg(False, main_switch=True))
     self._set_controls_allowed(1)
     self._rx(self._tsk_status_msg(False, main_switch=False))
-    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after ACC main switch off")
+    self.assertFalse(self._controls_allowed(), "controls allowed after ACC main switch off")
 
   def test_accel_safety_check(self):
     for controls_allowed in [True, False]:
@@ -375,7 +406,8 @@ class TestVolkswagenMebGen2Safety(TestVolkswagenMebSafety):
 # ZAS_Kl_15=1
 class TestVolkswagenMebIgnition(common.SafetyTestBase):
   DBC = "vw_meb_generated"
-  SAFETY_MODEL = None
+  SAFETY_MODEL = CarParams.SafetyModel.noOutput
+  IGNITION_ONLY = True
 
   TX_MSGS: list = []
 
@@ -386,19 +418,19 @@ class TestVolkswagenMebIgnition(common.SafetyTestBase):
 
   def test_ignition_on(self):
     for i in range(16):
-      self.safety.init_tests()
-      self.safety.ignition_can_hook(self._msg(i, 1))
-      self.assertFalse(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._msg((i + 1) % 16, 1))
-      self.assertTrue(self.safety.get_ignition_can())
+      self._reset_ignition()
+      self._ignition_rx(self._msg(i, 1))
+      self.assertFalse(self._ignition_can())
+      self._ignition_rx(self._msg((i + 1) % 16, 1))
+      self.assertTrue(self._ignition_can())
 
   def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0, 1))
-    self.safety.ignition_can_hook(self._msg(1, 1))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(2, 0))
-    self.safety.ignition_can_hook(self._msg(3, 0))
-    self.assertFalse(self.safety.get_ignition_can())
+    self._ignition_rx(self._msg(0, 1))
+    self._ignition_rx(self._msg(1, 1))
+    self.assertTrue(self._ignition_can())
+    self._ignition_rx(self._msg(2, 0))
+    self._ignition_rx(self._msg(3, 0))
+    self.assertFalse(self._ignition_can())
 
 
 if __name__ == "__main__":
