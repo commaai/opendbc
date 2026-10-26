@@ -1,4 +1,4 @@
-"""Run observable or legacy safety tests on stock Panda and a CAN station."""
+"""Run the original safety tests on stock Panda and a CAN station."""
 import argparse
 from collections import Counter, defaultdict, deque
 import copy
@@ -12,7 +12,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from opendbc.safety.tests import common, test_observable
+from opendbc.safety.tests import common
 from opendbc.safety.tests.hardware import HardwareBackend
 from opendbc.safety.tests.coverage import method_coverage
 
@@ -120,33 +120,21 @@ class _RecordedResult(unittest.TextTestResult):
 
 def main(argv=None):
   parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument('--suite', default='observable', choices=['legacy', 'observable'])
+  parser.add_argument('--suite', default='legacy', choices=['legacy'], help='Compatibility option; the original suite is always selected')
   parser.add_argument('--test', action='append', default=[], help='Full legacy unittest test ID (repeatable)')
   parser.add_argument('--list', action='store_true', help='List selected test IDs without opening hardware')
   parser.add_argument('--dut-command', help='JSON-line hardware_service dut command (SSH permitted)')
   parser.add_argument('--station-command', help='JSON-line hardware_service station command')
-  parser.add_argument('--profile', choices=['all', 'toyota', 'hyundai'])
   parser.add_argument('--failfast', action='store_true', help='Stop on the first test or transport failure')
   parser.add_argument('--json-output', help='Write results and run provenance to this file')
   args = parser.parse_args(argv)
-  if args.suite == 'legacy' and args.profile is not None:
-    parser.error('--profile is only available with --suite observable')
-  if args.suite == 'observable' and args.test:
-    parser.error('--test requires --suite legacy')
   if not args.list and (not args.dut_command or not args.station_command):
     parser.error('--dut-command and --station-command are required unless --list is used')
 
   loader = unittest.TestLoader()
-  if args.suite == 'legacy':
-    directory = Path(__file__).resolve().parent
-    discovered = list(_cases(loader.discover(str(directory), pattern='test_*.py',
-                                           top_level_dir=str(directory.parents[2]))))
-  else:
-    if args.profile in (None, 'all'):
-      discovered = list(_cases(loader.loadTestsFromModule(test_observable)))
-    else:
-      case = test_observable.TestToyotaObservable if args.profile == 'toyota' else test_observable.TestHyundaiObservable
-      discovered = list(_cases(loader.loadTestsFromTestCase(case)))
+  directory = Path(__file__).resolve().parent
+  discovered = list(_cases(loader.discover(str(directory), pattern='test_*.py',
+                                         top_level_dir=str(directory.parents[2]))))
   discovered_ids = [test.id() for test in discovered]
   if args.test:
     unknown = set(args.test) - set(discovered_ids)
@@ -171,11 +159,11 @@ def main(argv=None):
   classifications = {}
   runnable = []
   for test in selected:
-    if args.suite == 'legacy' and not isinstance(test, common.SafetyTestBase):
+    if not isinstance(test, common.SafetyTestBase):
       module = type(test).__module__
       kind = ('host-only-build' if module.endswith('.test_release_build') else
               'unmigrated-direct-hooks' if module.endswith('.test_can_scenarios') else
-              'observable-separate-suite' if module.endswith('.test_observable') else 'host-only-internal-tooling')
+              'host-only-internal-tooling')
       reason = f'{kind}: cannot execute physically through the legacy SafetyTestBase backend'
       classifications[test.id()] = {'kind': kind, 'reason': reason}
       # Preserve unittest's original import/collection error rather than hiding it.
@@ -218,8 +206,7 @@ def main(argv=None):
   # Scoped overrides avoid credentials in environment variables and restore all
   # hooks even if discovery/execution fails in a caller using main repeatedly.
   with patch.dict(os.environ, {'SAFETY_BACKEND': 'hardware'}), \
-       patch.object(common.SafetyTestBase, 'backend_factory', legacy_backend), \
-       patch.object(test_observable, 'backend_factory', make_backend):
+       patch.object(common.SafetyTestBase, 'backend_factory', legacy_backend):
     result = unittest.TextTestRunner(verbosity=2, failfast=args.failfast, resultclass=Result).run(unittest.TestSuite(runnable))
   executed_ids = result.executed_ids
   successful = (result.wasSuccessful() and not result.skipped and not result.expectedFailures and not loader.errors
@@ -273,7 +260,7 @@ def main(argv=None):
                       'can_evidence_observed': can_observed})
     selected_records = [record for record in records if record['selected']]
     selected_equivalence = successful and all(record['original_assertion_equivalence'] for record in selected_records)
-    report = {'suite': args.suite, 'profile': args.profile or 'all' if args.suite == 'observable' else None,
+    report = {'suite': args.suite, 'profile': None,
               'backend': 'stock-panda', 'started': started, 'revision': revision, 'dirty_tree': dirty,
               'python': platform.python_version(), 'discovered_ids': discovered_ids, 'requested_ids': requested_ids,
               'definition_inventory': definition_inventory, 'excluded_definitions': excluded_definitions,

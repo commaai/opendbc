@@ -3,7 +3,7 @@
 Time and health adaptation live here; observable scenarios never inspect private
 safety state or manipulate the firmware clock.
 """
-from opendbc.safety.tests.hardware import _accepted_ramp_batches, _identity, _rx_group_plan, _scan_chunks, _steering_plan
+from opendbc.safety.tests.hardware import _accepted_ramp_batches, _forward_scan_plan, _identity, _rx_group_plan, _scan_chunks, _steering_plan
 from opendbc.safety.tests.libsafety import libsafety_py
 
 
@@ -201,14 +201,7 @@ class SimulatedBackend:
     return self._scan(frames, 'rx')[0]
 
   def forward_scan(self, cases):
-    cases = list(cases)
-    frames, targets = [], []
-    for frame, target in cases:
-      normalized = _steering_plan([{'offset_us': 0, 'frame': frame}], 10000)[0]['frame']
-      if target is not None and (type(target) is not int or target not in (0, 1, 2) or target == normalized[2]):
-        raise ValueError('Forwarding target must be a different physical bus')
-      frames.append(normalized)
-      targets.append(target)
+    frames, targets = _forward_scan_plan(cases)
     self._scan(frames, 'forward', targets)
     return True
 

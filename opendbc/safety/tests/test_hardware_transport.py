@@ -1,5 +1,6 @@
 """Wire-level tests independent of physical hardware and Panda installation."""
 import collections
+import os
 import socket
 import struct
 import threading
@@ -7,6 +8,71 @@ import unittest
 from unittest.mock import Mock, patch
 
 from opendbc.safety.tests.hardware_service import CANFD_LENGTHS, CAN_RAW_FD_FRAMES, SO_RXQ_OVFL, Service
+from opendbc.safety.tests.simulated import SimulatedBackend
+from opendbc.safety.tests.fixture_streams import prepare_rx
+
+
+def health_snapshot(**changes):
+  health = dict(safety_mode=1, safety_param=0, controls_allowed=False, safety_rx_checks_invalid=False,
+                safety_rx_invalid=0, rx_buffer_overflow=0, tx_buffer_overflow=0, faults=0)
+  health.update(changes)
+  return health
+
+
+def drain(queue):
+  frames = list(queue)
+  queue.clear()
+  return frames
+
+
+def measurement(torque):
+  data = bytearray(8)
+  data[5:7] = torque.to_bytes(2, 'big', signed=True)
+  data[7] = (0x62 + len(data) + sum(data[:7])) & 0xff
+  return [0x260, data.hex(), 0]
+
+
+def live_fixture(owner, name, engage=False, extra_streams=()):
+  from opendbc.safety.tests.test_hyundai import TestHyundaiSafety
+  from opendbc.safety.tests.test_toyota import TestToyotaSafetyTorque
+
+  fixture = {'toyota': TestToyotaSafetyTorque, 'hyundai': TestHyundaiSafety}[name]
+  # Encoders keep counters on the class; isolate them from collected tests.
+  case = type(f'{name}TransportFixture', (fixture,), {})(methodName='runTest')
+  owner.addCleanup(case.doCleanups)
+  required_streams = case.required_streams
+  with patch.dict(os.environ, SAFETY_BACKEND='simulated'), \
+       patch.object(case, 'required_streams', side_effect=lambda: required_streams() + list(extra_streams)):
+    case.setUp()
+  backend = case.backend
+  if engage:
+    # Preserve the three original state changes and 150ms settling per step.
+    encoders = ([lambda: case._button_msg(2), lambda: case._pcm_status_msg(True), lambda: case._button_msg(0)]
+                if name == 'hyundai' else [None, lambda: case._pcm_status_msg(True), None])
+    for encode in encoders:
+      if encode is not None:
+        _, updates, _ = prepare_rx(case, encode())
+        backend.streams(updates)
+      backend.wait(.15)
+  return backend, case
+
+
+def hardware_backend(**evidence):
+  from opendbc.safety.tests.hardware import HardwareBackend
+
+  backend = HardwareBackend.__new__(HardwareBackend)
+  backend.dut, backend.station = Mock(), Mock()
+  backend.mode, backend.param = 1, 0
+  backend._overflow_baseline = {'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0}
+  backend._expected_rx_invalid = 0
+  backend.evidence = evidence
+  return backend
+
+
+def receiving_endpoint(health, queue):
+  def call(op, **kwargs):
+    return dict(health) if op == 'health' else drain(queue)
+  return call
 
 
 def station(fd=True):
@@ -15,6 +81,11 @@ def station(fd=True):
   service.fd_buses = {0} if fd else set()
   service.sockets = [Mock()]
   service.net_stats = {}
+  service.lock = threading.RLock()
+  service.error = None
+  service.streams = {}
+  service.streams_paused = False
+  service.queue = collections.deque()
   service.sockets[0].send.side_effect = len
   service.sockets[0].recvmsg.side_effect = BlockingIOError
   return service
@@ -101,26 +172,24 @@ class TestHardwareTransport(unittest.TestCase):
     service.error = None
     service.configuration = {}
     service.fd_buses = set()
-    service.panda = Mock(spec=['set_alternative_experience', 'set_can_speed_kbps', 'set_can_data_speed_kbps',
-                               'set_canfd_auto', 'set_canfd_non_iso', 'set_obd', 'can_send'])
-    for setting, args, method, values in (
-      ('alternative_experience', {'value': 4}, 'set_alternative_experience', (4,)),
-      ('can_speed_kbps', {'bus': 0, 'speed': 500}, 'set_can_speed_kbps', (0, 500)),
-      ('can_data_speed_kbps', {'bus': 1, 'speed': 2000}, 'set_can_data_speed_kbps', (1, 2000)),
-      ('canfd_auto', {'bus': 1, 'enabled': False}, 'set_canfd_auto', (1, False)),
-      ('canfd_non_iso', {'bus': 1, 'enabled': True}, 'set_canfd_non_iso', (1, True)),
-      ('obd', {'enabled': True}, 'set_obd', (True,)),
-    ):
-      service.dispatch({'op': 'configure', 'setting': setting, **args})
-      getattr(service.panda, method).assert_called_once_with(*values)
-    caps = service.dispatch({'op': 'capabilities'})
-    self.assertEqual(len(caps['configuration_applied']), 6)
-    del service.panda.set_obd
-    self.assertNotIn('obd', service.dispatch({'op': 'capabilities'})['configuration'])
-    with self.assertRaisesRegex(ValueError, 'lacks'):
+    service.panda = Mock(spec=['set_alternative_experience'])
+    for value in (0, 4, 65535):
+      with self.subTest(value=value):
+        service.dispatch({'op': 'configure', 'setting': 'alternative_experience', 'value': value})
+        service.panda.set_alternative_experience.assert_called_with(value)
+        self.assertEqual(service.configuration, {'alternative_experience': {'value': value}})
+    service.panda.set_alternative_experience.reset_mock()
+    for value in (-1, 65536, True, 1.0, '4'):
+      with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'Invalid alternative experience'):
+        service.dispatch({'op': 'configure', 'setting': 'alternative_experience', 'value': value})
+    service.panda.set_alternative_experience.assert_not_called()
+    self.assertEqual(service.configuration, {'alternative_experience': {'value': 65535}})
+    for api in (Mock(spec=[]), Mock(set_alternative_experience=None)):
+      service.panda = api
+      with self.assertRaisesRegex(ValueError, 'lacks set_alternative_experience'):
+        service.dispatch({'op': 'configure', 'setting': 'alternative_experience', 'value': 4})
+    with self.assertRaisesRegex(ValueError, 'Unsupported Panda setting'):
       service.dispatch({'op': 'configure', 'setting': 'obd', 'enabled': True})
-    with self.assertRaises(ValueError):
-      service.dispatch({'op': 'configure', 'setting': 'canfd_auto', 'bus': 0, 'enabled': 1})
 
   def test_panda_long_frames_request_fd(self):
     service = station()
@@ -139,16 +208,6 @@ class TestHardwareTransport(unittest.TestCase):
       service.send([1, bytes(12).hex(), 0])
 
   @staticmethod
-  def stream_station():
-    service = station()
-    service.lock = threading.RLock()
-    service.error = None
-    service.streams = {}
-    service.streams_paused = False
-    service.queue = collections.deque()
-    return service
-
-  @staticmethod
   def run_one_iteration(service):
     service.stopped = Mock()
     service.stopped.is_set.side_effect = [False, True]
@@ -157,7 +216,7 @@ class TestHardwareTransport(unittest.TestCase):
       raise AssertionError(service.error)
 
   def test_stream_replacement_preserves_counter_and_deadline(self):
-    service = self.stream_station()
+    service = station()
     frames = [[0x123, bytes([counter]).hex(), 0] for counter in range(4)]
     spec = {'name': 'counter', 'frames': frames, 'period': .01}
     with patch('opendbc.safety.tests.hardware_service.time.monotonic', return_value=10):
@@ -183,7 +242,7 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(service.streams['counter']['index'], 2)
 
   def test_paused_injection_emits_exactly_one_without_incidental_streams(self):
-    service = self.stream_station()
+    service = station()
     frames = [[0x123, bytes([counter]).hex(), 0] for counter in range(4)]
     spec = {'name': 'counter', 'frames': frames, 'period': .01}
     other = {'name': 'other', 'frames': [[0x124, 'ff', 0]], 'period': .02}
@@ -211,8 +270,6 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(service.streams['new']['index'], 0)
 
   def test_simulated_replacement_preserves_counter_and_deadline(self):
-    from opendbc.safety.tests.simulated import SimulatedBackend
-
     backend = SimulatedBackend()
     backend.rx = Mock(return_value=True)
     frames = [[0x123, bytes([counter]).hex(), 0] for counter in range(4)]
@@ -238,16 +295,9 @@ class TestHardwareTransport(unittest.TestCase):
 
   def test_simulated_replacement_does_not_add_c_measurement_sample(self):
     from opendbc.car.structs import CarParams
-    from opendbc.safety.tests.simulated import SimulatedBackend
 
     backend = SimulatedBackend()
     backend.reset(CarParams.SafetyModel.toyota, 100)
-
-    def measurement(torque):
-      data = bytearray(8)
-      data[5:7] = torque.to_bytes(2, 'big', signed=True)
-      data[7] = (0x02 + 0x60 + len(data) + sum(data[:7])) & 0xff
-      return [0x260, data.hex(), 0]
 
     # The C measurement window has six slots. The high sample must survive
     # replacement, then expire on exactly the next real receive hook call.
@@ -266,8 +316,6 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(backend.safety.get_torque_meas_max(), 1)
 
   def test_simulated_forward_orders_hooks_and_allows_invalid_rx(self):
-    from opendbc.safety.tests.simulated import SimulatedBackend
-
     backend = SimulatedBackend()
     events = []
     backend.safety = Mock()
@@ -292,7 +340,6 @@ class TestHardwareTransport(unittest.TestCase):
 
   def test_simulated_c_forward_precedes_relay_fault_and_invalid_rx(self):
     from opendbc.car.structs import CarParams
-    from opendbc.safety.tests.simulated import SimulatedBackend
 
     backend = SimulatedBackend()
     backend.reset(CarParams.SafetyModel.toyota, 100)
@@ -307,8 +354,6 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertTrue(backend.forward([0x123, '00', 0], None, healthy=False))
 
   def test_simulated_ignition_hook_and_mode_reset_preserves_state(self):
-    from opendbc.safety.tests.simulated import SimulatedBackend
-
     backend = SimulatedBackend()
     try:
       backend.rx([0x1f1, '0200000000000000', 0])
@@ -325,16 +370,9 @@ class TestHardwareTransport(unittest.TestCase):
 
   @staticmethod
   def forwarding_hardware(delta=1, overflow=0, faults=0):
-    from opendbc.safety.tests.hardware import HardwareBackend
-
-    backend = HardwareBackend.__new__(HardwareBackend)
-    backend.dut, backend.station = Mock(), Mock()
-    backend.mode, backend.param, backend.timeout = 1, 0, .1
-    backend._overflow_baseline = {'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0}
-    backend._expected_rx_invalid = 0
-    backend.evidence = {'rx_physical': 0, 'forward_physical': 0, 'forward_blocked': 0}
-    base = {'safety_mode': 1, 'safety_param': 0, 'controls_allowed': False, 'safety_rx_checks_invalid': False,
-            'safety_rx_invalid': 0, 'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0, 'faults': 0}
+    backend = hardware_backend(rx_physical=0, forward_physical=0, forward_blocked=0)
+    backend.timeout = .1
+    base = health_snapshot()
     after = dict(base, safety_rx_invalid=delta, rx_buffer_overflow=overflow, faults=faults)
     frame = [0x123, '00', 0]
     reads = iter([[], [frame]])
@@ -426,19 +464,11 @@ class TestHardwareTransport(unittest.TestCase):
 
   @staticmethod
   def sequence_hardware(receipts=None, wire=None, baseline=None, complete=True):
-    from opendbc.safety.tests.hardware import HardwareBackend
-
-    backend = HardwareBackend.__new__(HardwareBackend)
-    backend.dut, backend.station = Mock(), Mock()
-    backend.mode, backend.param = 1, 0
+    backend = hardware_backend(tx_physical=0, tx_rejected=0)
     backend._command_lock = threading.Lock()
     backend._station_streams = {}
     backend.sequence_observations = []
-    backend._overflow_baseline = {'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0}
-    backend._expected_rx_invalid = 0
-    backend.evidence = {'tx_physical': 0, 'tx_rejected': 0}
-    health = {'safety_mode': 1, 'safety_param': 0, 'controls_allowed': True, 'safety_rx_checks_invalid': False,
-              'safety_rx_invalid': 0, 'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0, 'faults': 0}
+    health = health_snapshot(controls_allowed=True)
     report = {'complete': complete, 'health_before': dict(health), 'health_after': dict(health),
               'start_ns': 123, 'events': [], 'quiet_end_ns': 20000123}
     events = [{'offset_us': 0, 'frame': [0x123, 'AA', 0]}, {'offset_us': 6000, 'frame': [0x123, 'bb', 0]}]
@@ -512,20 +542,10 @@ class TestHardwareTransport(unittest.TestCase):
           self.assertFalse(any(call.args[0] == 'sequence' for call in backend.dut.call.call_args_list))
 
   def test_simulated_sequence_uses_c_verdicts_and_virtual_input_time(self):
-    from opendbc.safety.tests.simulated import SimulatedBackend
-    from opendbc.safety.tests.vehicle import get_vehicle_profile
-
-    backend = SimulatedBackend()
-    vehicle = get_vehicle_profile('hyundai')
-    backend.reset(vehicle.safety_model, vehicle.safety_param)
-    backend.streams(vehicle.streams())
-    backend.wait(1.1)
-    for changes in vehicle.engage_sequence():
-      backend.streams(vehicle.update(**changes))
-      backend.wait(.15)
+    backend, case = live_fixture(self, 'hyundai', engage=True)
     start = backend.now
     counter = backend.active_streams['driver_torque']['index']
-    events = [{'offset_us': i * 6000, 'frame': vehicle.torque(torque)} for i, torque in enumerate((1, 1000, 0))]
+    events = [{'offset_us': i * 6000, 'frame': case._raw_frame(case._torque_cmd_msg(torque))} for i, torque in enumerate((1, 1000, 0))]
     result = backend.steering_sequence(events)
     self.assertEqual(result['verdicts'], [True, False, True])
     self.assertFalse(result['timing']['physical'])
@@ -535,8 +555,6 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(backend.health()['safety_rx_invalid'], 0)
 
   def test_restart_lifecycle_and_bounded_rpc_timeout(self):
-    from opendbc.safety.tests.simulated import SimulatedBackend
-
     backend, _, _ = self.sequence_hardware()
     backend.dut.call.side_effect = None
     backend.dut.call.return_value = {'firmware_version': 'unchanged'}
@@ -558,7 +576,7 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(simulated.safety.get_current_safety_mode(), 0)
 
   def test_per_stream_station_pause_replacement_global_resume_and_injection(self):
-    service = self.stream_station()
+    service = station()
     measurement = {'name': 'measurement', 'frames': [[0x123, '01', 0], [0x123, '02', 0]], 'period': .01}
     other = {'name': 'other', 'frames': [[0x124, 'ff', 0]], 'period': .02}
     with patch('opendbc.safety.tests.hardware_service.time.monotonic', return_value=10):
@@ -594,16 +612,9 @@ class TestHardwareTransport(unittest.TestCase):
 
   def test_paused_simulated_measurement_window_has_no_incidental_c_samples(self):
     from opendbc.car.structs import CarParams
-    from opendbc.safety.tests.simulated import SimulatedBackend
 
     backend = SimulatedBackend()
     backend.reset(CarParams.SafetyModel.toyota, 100)
-
-    def measurement(torque):
-      data = bytearray(8)
-      data[5:7] = torque.to_bytes(2, 'big', signed=True)
-      data[7] = (0x62 + len(data) + sum(data[:7])) & 0xff
-      return [0x260, data.hex(), 0]
 
     self.assertTrue(backend.rx(measurement(600)))
     stream = {'name': 'measurement', 'frames': [measurement(0)], 'period': .02}
@@ -635,17 +646,7 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(backend.active_streams['measurement']['next'], backend.now + 10000)
 
   def test_paused_measurement_watchdog_fails_tx_health_guard(self):
-    from opendbc.safety.tests.simulated import SimulatedBackend
-    from opendbc.safety.tests.vehicle import get_vehicle_profile
-
-    backend = SimulatedBackend()
-    vehicle = get_vehicle_profile('toyota')
-    backend.reset(vehicle.safety_model, vehicle.safety_param)
-    backend.streams(vehicle.streams())
-    backend.wait(1.1)
-    for changes in vehicle.engage_sequence():
-      backend.streams(vehicle.update(**changes))
-      backend.wait(.15)
+    backend, case = live_fixture(self, 'toyota', engage=True)
     backend.pause_stream('torque')
     other_index = backend.active_streams['speed']['index']
     # Stock safety_tick uses max(10 periods, 1 second), checked at 1 Hz.
@@ -653,7 +654,7 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertGreater(backend.active_streams['speed']['index'], other_index)
     self.assertTrue(backend.health()['safety_rx_checks_invalid'])
     with self.assertRaises(AssertionError):
-      backend.tx(vehicle.torque(1000))
+      backend.tx(case._raw_frame(case._torque_cmd_msg(1000)))
 
   def test_hardware_stream_pause_rpc_and_restart_timeout_transport(self):
     from opendbc.safety.tests.hardware import RPC
@@ -677,8 +678,7 @@ class TestHardwareTransport(unittest.TestCase):
     backend, frame, _ = self.forwarding_hardware(delta=0)
     backend._command_lock = threading.Lock()
     backend.evidence.update(tx_physical=0, tx_rejected=0)
-    base = {'safety_mode': 1, 'safety_param': 0, 'controls_allowed': False, 'safety_rx_checks_invalid': False,
-            'safety_rx_invalid': 0, 'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0, 'faults': 0}
+    base = health_snapshot()
     healths = iter([base, dict(base, safety_rx_checks_invalid=True)])
     reads = iter([[], [[frame[0], frame[1], 192]]])
     backend.dut.call.side_effect = lambda op, **kwargs: next(healths) if op == 'health' else next(reads, []) if op == 'recv' else None
@@ -696,8 +696,8 @@ class TestHardwareTransport(unittest.TestCase):
     backend, _, _ = TestHardwareTransport.sequence_hardware()
     backend.scan_observations = []
     backend.evidence.update(rx_physical=0, forward_physical=0, forward_blocked=0)
-    health = {'safety_mode': 1, 'safety_param': 0, 'controls_allowed': accepted_setup, 'safety_rx_checks_invalid': not accepted_setup,
-              'safety_rx_invalid': 0, 'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0, 'faults': 0 if accepted_setup else 1}
+    health = health_snapshot(controls_allowed=accepted_setup, safety_rx_checks_invalid=not accepted_setup,
+                             faults=0 if accepted_setup else 1)
     dut_queue, wire_queue, calls = [], [], []
 
     def run_sequence(events, **kwargs):
@@ -748,9 +748,7 @@ class TestHardwareTransport(unittest.TestCase):
         return dict(health)
       if op == 'recv':
         queued = dut_queue if role == 'dut' else wire_queue
-        result = list(queued)
-        queued.clear()
-        return result
+        return drain(queued)
       return None
 
     backend.dut.call.side_effect = lambda op, **kwargs: call('dut', op, **kwargs)
@@ -824,7 +822,6 @@ class TestHardwareTransport(unittest.TestCase):
 
   def test_simulated_scans_use_real_hooks_and_pause_inputs_without_resets(self):
     from opendbc.car.structs import CarParams
-    from opendbc.safety.tests.simulated import SimulatedBackend
 
     backend = SimulatedBackend()
     backend.reset(CarParams.SafetyModel.toyota, 100)
@@ -846,7 +843,6 @@ class TestHardwareTransport(unittest.TestCase):
 
   def test_simulated_scan_audit_survives_mode_resets(self):
     from opendbc.car.structs import CarParams
-    from opendbc.safety.tests.simulated import SimulatedBackend
 
     backend = SimulatedBackend()
     backend.reset(CarParams.SafetyModel.noOutput)
@@ -933,19 +929,9 @@ class TestHardwareTransport(unittest.TestCase):
         self.assertEqual(batches, [])
 
   def test_simulated_accepted_ramp_real_c_with_live_inputs(self):
-    from opendbc.safety.tests.simulated import SimulatedBackend
-    from opendbc.safety.tests.vehicle import get_vehicle_profile
-
-    backend = SimulatedBackend()
-    vehicle = get_vehicle_profile('hyundai')
-    backend.reset(vehicle.safety_model, vehicle.safety_param)
-    backend.streams(vehicle.streams())
-    backend.wait(1.1)
-    for changes in vehicle.engage_sequence():
-      backend.streams(vehicle.update(**changes))
-      backend.wait(.15)
+    backend, case = live_fixture(self, 'hyundai', engage=True)
     before = backend.active_streams['driver_torque']['index']
-    frames = [vehicle.torque(torque) for torque in range(1, 16)]
+    frames = [case._raw_frame(case._torque_cmd_msg(torque)) for torque in range(1, 16)]
     result = backend.accepted_ramp(frames, 10000)
     self.assertEqual(result['verdicts'], [True] * len(frames))
     self.assertGreater(backend.active_streams['driver_torque']['index'], before)
@@ -953,7 +939,7 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(result['timing'][0]['scheduling'], 'paced_scan')
     self.assertEqual([event['frame'] for event in result['timing'][0]['events']], frames)
     with self.assertRaisesRegex(AssertionError, 'ramp command rejected'):
-      backend.accepted_ramp([vehicle.torque(1000)], 10000)
+      backend.accepted_ramp([case._raw_frame(case._torque_cmd_msg(1000))], 10000)
 
   @staticmethod
   def group_hardware(corruption=None):
@@ -963,16 +949,8 @@ class TestHardwareTransport(unittest.TestCase):
     backend._station_streams = {'measurement': [[0x123, f'{i:02x}', 0] for i in range(3)]}
     cycles = dict(backend._station_streams)
     phase = {'measurement': 1}
-    health = {'safety_mode': 1, 'safety_param': 0, 'controls_allowed': False, 'safety_rx_checks_invalid': False,
-              'safety_rx_invalid': 0, 'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0, 'faults': 0}
+    health = health_snapshot()
     incoming = []
-
-    def dut_call(op, **kwargs):
-      if op == 'health':
-        return dict(health)
-      result = list(incoming)
-      incoming.clear()
-      return result
 
     def station_call(op, **kwargs):
       if op == 'recv':
@@ -1010,7 +988,7 @@ class TestHardwareTransport(unittest.TestCase):
         health['safety_mode'] = 2
       return {'complete': corruption != 'incomplete', 'frames': frames, 'events': kwargs['events']}
 
-    backend.dut.call.side_effect = dut_call
+    backend.dut.call.side_effect = receiving_endpoint(health, incoming)
     backend.station.call.side_effect = station_call
     return backend
 
@@ -1087,6 +1065,39 @@ class TestHardwareTransport(unittest.TestCase):
         self.assertEqual(backend.evidence['rx_physical'], 0)
         self.assertEqual(backend.station.call.call_args_list[-1], unittest.mock.call('resume'))
 
+  def test_sequence_and_scan_retain_dut_evidence_when_station_collection_fails(self):
+    for kind in ('sequence', 'scan'):
+      with self.subTest(kind=kind):
+        expected = [[0x123, 'aa', 128]]
+        backend, events, report = self.sequence_hardware(receipts=expected, complete=False)
+        if kind == 'scan':
+          backend.scan_observations = []
+        station_reads = iter([[], RuntimeError('Station transport loss')])
+
+        def station(op, station_reads=station_reads, **kwargs):
+          if op == 'recv':
+            result = next(station_reads)
+            if isinstance(result, Exception):
+              raise result
+            return result
+          return None
+
+        backend.station.call.side_effect = station
+        with patch('opendbc.safety.tests.hardware.time.sleep'), self.assertRaisesRegex(RuntimeError, 'Station transport loss'):
+          if kind == 'sequence':
+            backend.steering_sequence(events)
+          else:
+            backend.tx_scan([event['frame'] for event in events])
+        records = backend.sequence_observations if kind == 'sequence' else backend.scan_observations
+        self.assertIs(records[0]['timing'], report)
+        self.assertFalse(records[0]['timing']['complete'])
+        self.assertEqual(records[0]['received'], {'dut': expected})
+        self.assertEqual(records[0]['collection_errors'], [
+          {'stage': 'received', 'endpoint': 'station', 'error': 'RuntimeError: Station transport loss'}])
+        self.assertEqual(backend.evidence, {'tx_physical': 0, 'tx_rejected': 0})
+        if kind == 'scan':
+          backend.station.call.assert_called_with('resume')
+
   def test_rx_group_admits_existing_streams_only_before_io(self):
     for scenario in ('empty', 'oversize', 'unknown_injection', 'unknown_update'):
       with self.subTest(scenario=scenario):
@@ -1106,16 +1117,9 @@ class TestHardwareTransport(unittest.TestCase):
 
   def test_simulated_rx_group_real_c_window_without_initial_sample(self):
     from opendbc.car.structs import CarParams
-    from opendbc.safety.tests.simulated import SimulatedBackend
 
     backend = SimulatedBackend()
     backend.reset(CarParams.SafetyModel.toyota, 100)
-
-    def measurement(torque):
-      data = bytearray(8)
-      data[5:7] = torque.to_bytes(2, 'big', signed=True)
-      data[7] = (0x62 + len(data) + sum(data[:7])) & 0xff
-      return [0x260, data.hex(), 0]
 
     zero = measurement(0)
     spec = {'name': 'measurement', 'frames': [zero], 'period': .02}
@@ -1139,7 +1143,6 @@ class TestHardwareTransport(unittest.TestCase):
 
   def test_simulated_rx_group_keeps_counter_phase_through_updates(self):
     from opendbc.car.structs import CarParams
-    from opendbc.safety.tests.simulated import SimulatedBackend
 
     backend = SimulatedBackend()
     backend.reset(CarParams.SafetyModel.noOutput)
@@ -1153,15 +1156,8 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertTrue(backend.active_streams['measurement']['paused'])
 
   def test_repeated_simulated_groups_service_due_inputs_without_extra_measurements(self):
-    from opendbc.safety.tests.simulated import SimulatedBackend
-    from opendbc.safety.tests.vehicle import get_vehicle_profile
-
-    backend = SimulatedBackend()
-    vehicle = get_vehicle_profile('toyota')
-    backend.reset(vehicle.safety_model, vehicle.safety_param)
-    backend.streams(vehicle.streams())
-    backend.streams([{'name': 'future', 'period': 1000, 'frames': [[0x555, '00', 0]]}])
-    backend.wait(1.1)
+    backend, _ = live_fixture(self, 'toyota', extra_streams=[
+      {'name': 'future', 'period': 1000, 'frames': [[0x555, '00', 0]]}])
     backend.pause_stream('torque')
     indices = {name: stream['index'] for name, stream in backend.active_streams.items()}
     start = backend.now
@@ -1182,14 +1178,7 @@ class TestHardwareTransport(unittest.TestCase):
     self.assertEqual(backend.health()['safety_rx_invalid'], 0)
 
   def test_group_worker_opportunity_does_not_bypass_stale_held_input_guard(self):
-    from opendbc.safety.tests.simulated import SimulatedBackend
-    from opendbc.safety.tests.vehicle import get_vehicle_profile
-
-    backend = SimulatedBackend()
-    vehicle = get_vehicle_profile('toyota')
-    backend.reset(vehicle.safety_model, vehicle.safety_param)
-    backend.streams(vehicle.streams())
-    backend.wait(1.1)
+    backend, _ = live_fixture(self, 'toyota')
     backend.pause_stream('torque')
     backend.wait(2.1)
     self.assertTrue(backend.health()['safety_rx_checks_invalid'])
@@ -1209,19 +1198,11 @@ class TestHardwareTransport(unittest.TestCase):
         backend, _, _ = self.sequence_hardware()
         backend.timeout = 1
         backend.evidence['rx_physical'] = 0
-        station_service = self.stream_station()
+        station_service = station()
         forwarded = [0x456, '01', 2]
         station_service.receive = Mock(return_value=[forwarded] * 1000)
-        health = {'safety_mode': 1, 'safety_param': 0, 'controls_allowed': False, 'safety_rx_checks_invalid': False,
-                  'safety_rx_invalid': 0, 'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0, 'faults': 0}
+        health = health_snapshot()
         incoming, max_queue = [], 0
-
-        def dut_call(op, incoming=incoming, health=health, **kwargs):
-          if op == 'health':
-            return dict(health)
-          result = list(incoming)
-          incoming.clear()
-          return result
 
         def station_call(op, station_service=station_service, incoming=incoming, **kwargs):
           nonlocal max_queue
@@ -1236,7 +1217,7 @@ class TestHardwareTransport(unittest.TestCase):
             incoming.append(kwargs['frame'])
           return result
 
-        backend.dut.call.side_effect = dut_call
+        backend.dut.call.side_effect = receiving_endpoint(health, incoming)
         backend.station.call.side_effect = station_call
         if not drain_station:
           # Model the reviewed path: normal RX never called station recv.
@@ -1264,8 +1245,7 @@ class TestHardwareTransport(unittest.TestCase):
 
   def test_hardware_wait_drains_both_queues_retains_frames_and_propagates_loss(self):
     backend, _, _ = self.sequence_hardware()
-    health = {'safety_mode': 1, 'safety_param': 0, 'controls_allowed': False, 'safety_rx_checks_invalid': False,
-              'safety_rx_invalid': 0, 'rx_buffer_overflow': 0, 'tx_buffer_overflow': 0, 'faults': 0}
+    health = health_snapshot()
     now, dut_reads, station_reads = [0.0], [], []
 
     def dut_call(op, **kwargs):
@@ -1314,10 +1294,7 @@ class TestHardwareTransport(unittest.TestCase):
 
   def test_queue_overflow_stays_fatal(self):
     service = station()
-    service.lock = threading.RLock()
     service.stopped = threading.Event()
-    service.streams = {}
-    service.streams_paused = False
     service.queue = collections.deque([None] * 100000)
     service.receive = Mock(return_value=[[1, '', 0]])
     service.run()

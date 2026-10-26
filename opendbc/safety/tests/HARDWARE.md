@@ -7,8 +7,8 @@ CAN setup, public health and observed command consequences replace private-state
 access where implemented. This is not proof that the whole exact suite has passed
 physically: the host supplements and unsupported requirements below remain explicit.
 
-The services use normal Panda APIs, including safety-mode selection, configuration
-and MCU reset for ignition tests. They do not flash or modify firmware. Installed
+The services use normal Panda APIs, including safety-mode selection, alternative
+experience and MCU reset for ignition tests. They do not flash or modify firmware. Installed
 firmware and the Panda Python package must support the selected modes, public
 health fields and configuration methods. Heartbeat checks stay enabled.
 
@@ -23,7 +23,8 @@ python -m unittest opendbc.safety.tests.test_toyota.TestToyotaSafetyTorque
 SAFETY_BACKEND=simulated python -m unittest opendbc.safety.tests.test_toyota.TestToyotaSafetyTorque
 ```
 
-List the legacy runner's discovered IDs without opening hardware, then select a
+The hardware runner defaults to the original suite; `--suite legacy` remains a
+compatibility option. List its discovered IDs without opening hardware, then select a
 full test ID with `--test` (repeatable). Omitting `--test` selects all discovered
 tests, including explicitly unsupported host/tooling tests.
 
@@ -50,16 +51,11 @@ handling, including explicitly empty profiles where appropriate. A stream profil
 is an input declaration, not a guarantee that every test or firmware mode is
 physically supported; undeclared profiles fail explicitly.
 
-The separate, smaller `test_observable.py` scenario suite remains available:
-
-```sh
-python -m unittest opendbc.safety.tests.test_observable
-```
-
-For hardware, replace `--suite legacy --test ...` above with
-`--suite observable --profile toyota`, `--profile hyundai`, or `--profile all`.
-The runner defaults to this observable suite; `--profile` does not select legacy
-platform fixtures.
+Continuous-traffic health, checksum recovery and zero-to-opposite-sign torque
+regressions live in `TestToyotaSafetyTorque` and `TestHyundaiSafety`. Their default
+host runs use the simulated periodic transport; `SAFETY_BACKEND=simulated` and the
+hardware runner exercise the same methods through the selected backend. Other
+original methods retain their deterministic host execution.
 
 ## Bench and CAN FD setup
 
@@ -85,9 +81,11 @@ sudo ip link set can2 up
 
 Match the DUT's nominal/data rates through the stock Panda API
 (`set_can_speed_kbps(bus, 500)` and `set_can_data_speed_kbps(bus, 2000)` for this
-example), and match FD ISO/non-ISO settings where required. The service also
-exposes these stock configuration methods through its `configure` RPC; the runner
-has no bitrate CLI. A reset may require reapplying bench configuration.
+example), and match FD ISO/non-ISO settings where required. Configure OBD routing
+externally through the stock Panda API when the bench requires it. Nominal/data
+bitrates, ISO/non-ISO mode and OBD routing are external bench prerequisites; the
+service's `configure` RPC only selects alternative experience. A reset may require
+reapplying bench configuration.
 
 For FD fixtures such as Hyundai CAN FD, Ford CAN FD and Volkswagen MEB, both the
 Panda hardware/firmware and station adapters must support FD. Add

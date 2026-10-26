@@ -8,6 +8,8 @@ import subprocess
 import threading
 import time
 
+from opendbc.safety.tests.hardware_sequence import _frame as _sequence_frame
+
 
 def _steering_plan(events, max_lateness_us):
   if type(max_lateness_us) is not int or not 0 <= max_lateness_us <= 10000:
@@ -19,15 +21,7 @@ def _steering_plan(events, max_lateness_us):
     offset = event['offset_us']
     if type(offset) is not int or not 0 <= offset <= 5000000 or (plan and offset <= plan[-1]['offset_us']):
       raise ValueError('Offsets must strictly increase within five seconds')
-    addr, data, bus = event['frame']
-    if type(addr) is not int or not 0 <= addr <= 0x1fffffff or type(bus) is not int or bus not in (0, 1, 2):
-      raise ValueError('Invalid sequence CAN address/bus')
-    if not isinstance(data, str):
-      raise ValueError('Sequence payload must be hex text')
-    payload = bytes.fromhex(data)
-    if len(payload) not in (*range(9), 12, 16, 20, 24, 32, 48, 64):
-      raise ValueError('Invalid CAN payload length')
-    frame = (addr, payload.hex(), bus)
+    frame = _sequence_frame(event['frame'])
     if frame in identities:
       raise ValueError('Duplicate sequence command identity')
     identities.add(frame)
@@ -43,7 +37,7 @@ def _scan_chunks(frames):
   """Normalize the whole domain before I/O; repeated identities start a new batch."""
   chunks, chunk, identities = [], [], set()
   for raw in frames:
-    frame = _steering_plan([{'offset_us': 0, 'frame': raw}], 10000)[0]['frame']
+    frame = list(_sequence_frame(raw))
     identity = _identity(frame)
     if len(chunk) == 256 or identity in identities:
       chunks.append(chunk)
@@ -76,14 +70,14 @@ def _rx_group_plan(events, sources):
     if set(event) != {'frame', 'updates', 'stream_name'}:
       raise ValueError('RX group event requires frame, updates, stream_name')
     frame = None if event['frame'] is None and event['stream_name'] is not None else \
-      _steering_plan([{'offset_us': 0, 'frame': event['frame']}], 2000)[0]['frame']
+      list(_sequence_frame(event['frame']))
     updates = []
     for spec in event['updates']:
       if set(spec) != {'name', 'period', 'frames'} or spec['name'] not in cycles:
         raise ValueError('RX group updates require existing streams')
       if type(spec['period']) not in (int, float) or not math.isfinite(spec['period']) or spec['period'] <= 0:
         raise ValueError('RX group stream period must be positive and finite')
-      frames = [_steering_plan([{'offset_us': 0, 'frame': raw}], 2000)[0]['frame'] for raw in spec['frames']]
+      frames = [list(_sequence_frame(raw)) for raw in spec['frames']]
       if not frames:
         raise ValueError('RX group stream requires frames')
       updates.append(dict(spec, frames=frames))
@@ -93,6 +87,17 @@ def _rx_group_plan(events, sources):
       raise ValueError('RX group injection requires existing stream')
     plan.append({'frame': frame, 'updates': updates, 'stream_name': name})
   return plan
+
+
+def _forward_scan_plan(cases):
+  frames, targets = [], []
+  for frame, target in cases:
+    normalized = list(_sequence_frame(frame))
+    if target is not None and (type(target) is not int or target not in (0, 1, 2) or target == normalized[2]):
+      raise ValueError('Forwarding target must be a different physical bus')
+    frames.append(normalized)
+    targets.append(target)
+  return frames, targets
 
 
 def _identity(frame):
@@ -259,6 +264,16 @@ class HardwareBackend:
     finally:
       self.transport_observations.append(record)
 
+  def _collect(self, record, stage):
+    record[stage] = {}
+    for endpoint in ('dut', 'station'):
+      try:
+        record[stage][endpoint] = self._recv(endpoint)
+      except Exception as exc:
+        record.setdefault('collection_errors', []).append({'stage': stage, 'endpoint': endpoint, 'error': f'{type(exc).__name__}: {exc}'})
+        raise
+    return record[stage]
+
   def _receive(self, expected):
     pending = list(expected)
     deadline = time.monotonic() + self.timeout
@@ -307,18 +322,9 @@ class HardwareBackend:
       record = {'events': plan, 'collection_errors': []}
       self.rx_group_observations.append(record)
 
-      def collect(stage):
-        record[stage] = {}
-        for endpoint in ('dut', 'station'):
-          try:
-            record[stage][endpoint] = self._recv(endpoint)
-          except Exception as exc:
-            record['collection_errors'].append({'stage': stage, 'endpoint': endpoint, 'error': f'{type(exc).__name__}: {exc}'})
-            raise
-
       try:
         time.sleep(.020)
-        collect('baseline')
+        self._collect(record, 'baseline')
         before = self._check(None, True)
         record['health_before'] = before
         # A partial failure can leave any submitted update active. Retain the
@@ -332,7 +338,7 @@ class HardwareBackend:
           allowed.append(cycles[event['stream_name']] if event['stream_name'] is not None else [event['frame']])
         report = self.station.call('rx_group', events=plan)
         record['timing'] = report
-        collect('received')
+        self._collect(record, 'received')
         record['health_after'] = self.dut.call('health')
         assert report['complete'] is True, f'Incomplete RX group: {report}'
         self._station_streams = cycles
@@ -440,8 +446,7 @@ class HardwareBackend:
       report = self.dut.call('sequence', events=plan, exclusive_commands=True, max_lateness_us=max_lateness_us, **options)
       record['timing'] = report
       # Always drain and retain post-run evidence, including failed/partial runs.
-      received = {'dut': self._recv('dut'), 'station': self._recv('station')}
-      record['received'] = received
+      received = self._collect(record, 'received')
       assert report['complete'] is True, f'Incomplete steering sequence: {report}'
       for health in (report['health_before'], report['health_after']):
         self._validate_health(health)
@@ -493,15 +498,8 @@ class HardwareBackend:
     return self._scan(frames, 'rx')[0]
 
   def forward_scan(self, cases):
-    cases = list(cases)
-    frames, expected = [], []
-    for frame, target in cases:
-      normalized = _steering_plan([{'offset_us': 0, 'frame': frame}], 10000)[0]['frame']
-      if target is not None and (type(target) is not int or target not in (0, 1, 2) or target == normalized[2]):
-        raise ValueError('Forwarding target must be a different physical bus')
-      frames.append(normalized)
-      expected.append(target)
-    self._scan(frames, 'forward', expected)
+    frames, targets = _forward_scan_plan(cases)
+    self._scan(frames, 'forward', targets)
     return True
 
   def tx_scan(self, frames):
@@ -526,8 +524,7 @@ class HardwareBackend:
           report = sender.call('sequence', events=events, exclusive_commands=True,
                                scheduling='paced_scan', max_duration_us=8000000)
           record['timing'] = report
-          received = {'dut': self._recv('dut'), 'station': self._recv('station')}
-          record['received'] = received
+          received = self._collect(record, 'received')
           health = self.dut.call('health')
           record['health_after'] = health
           assert report['complete'] is True, f'Incomplete {kind} scan: {report}'

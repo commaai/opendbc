@@ -98,12 +98,20 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
           msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
           self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
 
+    # A single actuation byte must suffice to block AEB, even if all others are zero.
+    self._set_controls_allowed(True)
+    self.assertEqual(not stock_longitudinal, self._tx(libsafety_py.make_CANPacket(0x283, 0, bytes(7))))
+    for byte in range(6):
+      payload = bytearray(7)
+      payload[byte] = 1
+      self.assertFalse(self._tx(libsafety_py.make_CANPacket(0x283, 0, payload)))
+
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
     for engaged, req, req2, torque_wind_down, angle in itertools.product([True, False],
                                                                   [0, 1], [0, 1],
                                                                   [0, 50, 100],
-                                                                  np.linspace(-20, 20, 5)):
+                                                                  (*np.linspace(-20, 20, 5), -1, 1)):
       self._set_controls_allowed(engaged)
 
       should_tx = not req and not req2 and angle == 0 and torque_wind_down == 0
@@ -160,7 +168,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
         self.assertEqual(self.safety.get_vehicle_speed_max(), 0)
 
 
-class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+class TestToyotaSafetyTorqueBase(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
 
   MAX_RATE_UP = 15
   MAX_RATE_DOWN = 25
@@ -297,7 +305,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
       self.assertEqual(self.safety.get_angle_meas_max(), maximum)
 
 
-class TestToyotaAltBrakeSafety(TestToyotaSafetyTorque):
+class TestToyotaAltBrakeSafety(TestToyotaSafetyTorqueBase):
 
   DBC = "toyota_new_mc_pt_generated"
 
@@ -341,7 +349,7 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel, cancel_req=1)))
 
 
-class TestToyotaStockLongitudinalTorque(TestToyotaStockLongitudinalBase, TestToyotaSafetyTorque):
+class TestToyotaStockLongitudinalTorque(TestToyotaStockLongitudinalBase, TestToyotaSafetyTorqueBase):
 
   @property
   def SAFETY_PARAM(self):
@@ -429,6 +437,13 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
         should_tx = np.isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel)))
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel, cancel_req=1)))
+
+
+class TestToyotaSafetyTorque(common.PeriodicSafetyTest, TestToyotaSafetyTorqueBase):
+  PERIODIC_TIMEOUT_STREAM = "torque"
+
+  def _checksum_fault_msg(self):
+    return self._torque_meas_msg(0)
 
 
 if __name__ == "__main__":

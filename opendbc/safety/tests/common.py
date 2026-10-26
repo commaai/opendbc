@@ -83,6 +83,62 @@ def add_regen_tests(cls):
   return cls
 
 
+class PeriodicSafetyTest:
+  """Continuous-traffic regressions for the two concrete smoke-tested fixtures."""
+
+  def _periodic_backend(self):
+    if self.backend is None:
+      # The default host run needs periodic scheduling for these new tests too.
+      self.backend = self.backend_factory('simulated')
+      self.addCleanup(self.backend.close)
+      self.safety = _UnavailableDeterministicHost()
+      self._reset_backend()
+
+  @coverage('Continuous RX health and accepted neutral commands over three watchdog ticks', relation='equivalent')
+  def test_sustained_health_and_controls(self):
+    self._periodic_backend()
+    self._set_controls_allowed(True)
+    for _ in range(3):
+      self._wait(1.05)
+      self.assertTrue(self.backend.tx(self._raw_frame(self._torque_cmd_msg(0))))
+
+  @coverage('One missing torque stream inhibits TX while all other periodic inputs continue', relation='equivalent')
+  def test_required_stream_timeout(self):
+    self._periodic_backend()
+    self._set_controls_allowed(True)
+    self.assertTrue(self.backend.tx(self._raw_frame(self._torque_cmd_msg(1))))
+    self.backend.drop_stream(self.PERIODIC_TIMEOUT_STREAM)
+    self._wait(2.2)
+    self.assertTrue(self.backend.health()['safety_rx_checks_invalid'])
+    self.assertFalse(self.backend.health()['faults'])
+    self.assertFalse(self.backend.tx(self._raw_frame(self._torque_cmd_msg(1)), controls=False, healthy=False))
+
+  @coverage('Checksum rejection, inhibition and recovery while other periodic traffic continues', relation='equivalent')
+  def test_corrupt_checksum_and_recovery(self):
+    self._periodic_backend()
+    self._set_controls_allowed(True)
+    frame = self._raw_frame(self._checksum_fault_msg())
+    data = bytearray.fromhex(frame[1])
+    data[-1] ^= 0xff
+    frame[1] = data.hex()
+    self.assertFalse(self.backend.rx(frame))
+    self.assertFalse(self.backend.health()['faults'])
+    self.assertFalse(self.backend.tx(self._raw_frame(self._torque_cmd_msg(1)), controls=False, healthy=False))
+    self._wait(1.1)
+    self.assertFalse(self.backend.health()['safety_rx_checks_invalid'])
+    self._set_controls_allowed(True)
+    self.assertTrue(self.backend.tx(self._raw_frame(self._torque_cmd_msg(1))))
+
+  @coverage('Zero command resets the rate baseline before an opposite-sign command', relation='equivalent')
+  def test_zero_then_opposite_sign_rate_boundary(self):
+    self._periodic_backend()
+    self._set_controls_allowed(True)
+    for step in range(1, 6):
+      self.assertTrue(self.backend.tx(self._raw_frame(self._torque_cmd_msg(step * self.MAX_RATE_UP))))
+    self.assertTrue(self.backend.tx(self._raw_frame(self._torque_cmd_msg(0))))
+    self.assertFalse(self.backend.tx(self._raw_frame(self._torque_cmd_msg(-self.MAX_RATE_UP - 1))))
+
+
 class _UnavailableDeterministicHost:
   def __getattr__(self, name):
     raise AssertionError(f"{name} requires deterministic host state; no stock-hardware equivalent implemented")
@@ -1540,39 +1596,31 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
   @coverage('Accepted CAN curvature setup',
             host=('Private desired-curvature equality after every setup ramp step',))
   def _set_prev_desired_curvature(self, curvature: float):
+    enabled = self._controls_allowed()
+    self._set_controls_allowed(True)
     if self.backend is not None:
-      enabled = self._controls_allowed()
-      self._set_controls_allowed(True)
       # A zero command may first violate the previous rate boundary. Establish
       # zero through a subsequent accepted command, without reading private state
       # or assuming the fixture's default steer power is valid while inactive.
       self._tx(self._curvature_cmd_msg(0, True))
       self._wait((RT_INTERVAL + 1) / 1_000_000)
       self.assertTrue(self._tx(self._curvature_cmd_msg(0, True)))
-      self._issued_curvature = 0  # planning only, never firmware-state evidence
       self._reset_curvature_measurement(curvature)
-      speed = max(getattr(self, '_issued_speed', 0) - 1, 1)
-      delta = max(1, int(MAX_LATERAL_JERK / speed**2 * self.SEND_RATE * self.CURVATURE_TO_CAN))
-      target = round(curvature * self.CURVATURE_TO_CAN)
-      while self._issued_curvature != target:
-        command = self._issued_curvature + int(np.clip(target - self._issued_curvature, -delta, delta))
-        self._wait((RT_INTERVAL + 1) / 1_000_000)
-        self.assertTrue(self._tx(self._curvature_cmd_msg(command / self.CURVATURE_TO_CAN, True)))
-        self._issued_curvature = command
-      self._set_controls_allowed(enabled)
-      return
-    enabled = self._controls_allowed()
-    self._set_controls_allowed(True)
-    self._reset_curvature_measurement(curvature)
-    speed = max(self.safety.get_vehicle_speed_min() - 1, 1)
+      current = 0  # planning only, never firmware-state evidence
+      speed = getattr(self, '_issued_speed', 0)
+    else:
+      self._reset_curvature_measurement(curvature)
+      speed = self.safety.get_vehicle_speed_min()
+      current = self.safety.get_desired_curvature_last()
+    speed = max(speed - 1, 1)
     delta = max(1, int(MAX_LATERAL_JERK / speed**2 * self.SEND_RATE * self.CURVATURE_TO_CAN))
     target = round(curvature * self.CURVATURE_TO_CAN)
-    current = self.safety.get_desired_curvature_last()
     for _ in range(math.ceil(abs(target - current) / delta)):
       current += int(np.clip(target - current, -delta, delta))
-      self.safety.set_timer((self.safety.get_timer() + RT_INTERVAL + 1) % 2**32)
+      self._wait((RT_INTERVAL + 1) / 1_000_000)
       self.assertTrue(self._tx(self._curvature_cmd_msg(current / self.CURVATURE_TO_CAN, True)))
-      self.assertEqual(current, self.safety.get_desired_curvature_last())
+      if self.backend is None:
+        self.assertEqual(current, self.safety.get_desired_curvature_last())
     self._set_controls_allowed(enabled)
 
   def _reset_curvature_measurement(self, curvature: float):
@@ -1591,6 +1639,15 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
     self._common_measurement_test(self._curvature_meas_msg, -self.MAX_CURVATURE, self.MAX_CURVATURE, self.CURVATURE_TO_CAN,
                                   self.safety.get_curvature_meas_min, self.safety.get_curvature_meas_max)
 
+  def _check_curvature_limit(self, speed, curvature, delta):
+    self._reset_speed_measurement(speed)
+    self._set_controls_allowed(True)
+    self._set_prev_desired_curvature(curvature)
+    for command in (curvature, curvature - delta, curvature):
+      self.assertTrue(self._tx(self._curvature_cmd_msg(command, True)), f"{speed} {curvature} {delta}")
+      self.assertTrue(self._controls_allowed())
+    self.assertFalse(self._tx(self._curvature_cmd_msg(curvature + delta, True)), f"{speed} {curvature} {delta}")
+
   @coverage('Curvature command limit probes',
             host=(),
             uses=(_set_prev_desired_curvature,))
@@ -1601,20 +1658,7 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
       max_curvature_rate = MAX_LATERAL_JERK / v**2
       max_curvature_delta = max_curvature_rate * self.SEND_RATE * sign
 
-      self._reset_speed_measurement(v)
-      self._set_controls_allowed(True)
-      self._set_prev_desired_curvature(max_curvature)
-
-      self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature, True)), f"{v} {max_curvature} {max_curvature_delta}")
-      self.assertTrue(self._controls_allowed())
-
-      self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature - max_curvature_delta, True)), f"{v} {max_curvature} {max_curvature_delta}")
-      self.assertTrue(self._controls_allowed())
-
-      self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature, True)), f"{v} {max_curvature} {max_curvature_delta}")
-      self.assertTrue(self._controls_allowed())
-
-      self.assertFalse(self._tx(self._curvature_cmd_msg(max_curvature + max_curvature_delta, True)), f"{v} {max_curvature} {max_curvature_delta}")
+      self._check_curvature_limit(v, max_curvature, max_curvature_delta)
 
   @coverage('ISO lateral-acceleration command limit probes',
             host=(),
@@ -1627,20 +1671,7 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
         max_curvature_rate = MAX_LATERAL_JERK / (v - 1)**2
         max_curvature_delta = max_curvature_rate * self.SEND_RATE * sign
 
-        self._reset_speed_measurement(v)
-        self._set_controls_allowed(True)
-        self._set_prev_desired_curvature(max_curvature)
-
-        self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature, True)), f"{v} {max_curvature} {max_curvature_delta}")
-        self.assertTrue(self._controls_allowed())
-
-        self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature - max_curvature_delta, True)), f"{v} {max_curvature} {max_curvature_delta}")
-        self.assertTrue(self._controls_allowed())
-
-        self.assertTrue(self._tx(self._curvature_cmd_msg(max_curvature, True)), f"{v} {max_curvature} {max_curvature_delta}")
-        self.assertTrue(self._controls_allowed())
-
-        self.assertFalse(self._tx(self._curvature_cmd_msg(max_curvature + max_curvature_delta, True)), f"{v} {max_curvature} {max_curvature_delta}")
+        self._check_curvature_limit(v, max_curvature, max_curvature_delta)
 
   @coverage('ISO lateral-jerk command limit probes',
             host=(),

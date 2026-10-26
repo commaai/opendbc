@@ -17,14 +17,6 @@ CAN_MTU = 16
 CANFD_MTU = 72
 CANFD_LENGTHS = (*range(9), 12, 16, 20, 24, 32, 48, 64)
 CAN_RAW_FD_FRAMES = getattr(socket, 'CAN_RAW_FD_FRAMES', 5)
-CONFIG_METHODS = {
-  'alternative_experience': ('set_alternative_experience', ('value',)),
-  'can_speed_kbps': ('set_can_speed_kbps', ('bus', 'speed')),
-  'can_data_speed_kbps': ('set_can_data_speed_kbps', ('bus', 'speed')),
-  'canfd_non_iso': ('set_canfd_non_iso', ('bus', 'enabled')),
-  'canfd_auto': ('set_canfd_auto', ('bus', 'enabled')),
-  'obd': ('set_obd', ('enabled',)),
-}
 
 
 class Service:
@@ -188,38 +180,17 @@ class Service:
       reset_stats = op == 'clear' and req.get('reset_stats', False) and self.role == 'station'
       if not reset_stats:
         self.check_transport()
-      if op == 'capabilities':
-        return {'transport': 'panda' if self.role == 'dut' else 'socketcan',
-                'max_payload': 64 if self.role == 'dut' or self.fd_buses else 8,
-                'physical_fd_support': 'verify Panda hardware type and bus health' if self.role == 'dut' else 'external link configuration',
-                'station_fd_tx_flags': 0,
-                'configuration_api': 'stock Panda Python public methods',
-                'fd_buses': sorted(self.fd_buses),
-                'panda_explicit_fd_send': self.role == 'dut' and 'fd' in inspect.signature(self.panda.can_send).parameters,
-                'configuration': {name: method for name, (method, _) in CONFIG_METHODS.items()
-                                  if self.role == 'dut' and callable(getattr(self.panda, method, None))},
-                'configuration_applied': dict(self.configuration),
-                'station_link_configuration': 'external: configure interface bitrate, dbitrate, fd and non-iso before opening'}
       if op == 'configure' and self.role == 'dut':
-        name = req['setting']
-        if name not in CONFIG_METHODS:
-          raise ValueError('Unsupported Panda setting: ' + name)
-        method, fields = CONFIG_METHODS[name]
-        fn = getattr(self.panda, method, None)
+        if req['setting'] != 'alternative_experience':
+          raise ValueError('Unsupported Panda setting: ' + req['setting'])
+        value = req['value']
+        if type(value) is not int or not 0 <= value <= 65535:
+          raise ValueError('Invalid alternative experience')
+        fn = getattr(self.panda, 'set_alternative_experience', None)
         if not callable(fn):
-          raise ValueError('Installed stock Panda API lacks ' + method)
-        values = [req[field] for field in fields]
-        for field, value in zip(fields, values, strict=True):
-          if field == 'enabled' and type(value) is not bool:
-            raise ValueError('enabled must be boolean')
-          if field == 'bus' and (type(value) is not int or not 0 <= value < 3):
-            raise ValueError('Invalid Panda bus')
-          if field == 'speed' and (type(value) not in (int, float) or not 0 < value <= 6553.5 or value * 10 != int(value * 10)):
-            raise ValueError('Speed must be positive kbps representable by stock Panda')
-          if field == 'value' and (type(value) is not int or not 0 <= value <= 65535):
-            raise ValueError('Invalid alternative experience')
-        fn(*values)
-        self.configuration[name + (':' + str(req['bus']) if 'bus' in fields else '')] = dict(zip(fields, values, strict=True))
+          raise ValueError('Installed stock Panda API lacks set_alternative_experience')
+        fn(value)
+        self.configuration['alternative_experience'] = {'value': value}
         return
       if op == 'recv':
         frames = list(self.queue)

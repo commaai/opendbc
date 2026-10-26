@@ -36,18 +36,34 @@ class PandaTransport:
     return result
 
 
-def service():
+def service(role='dut', paused=False):
   obj = Service.__new__(Service)
-  obj.role = 'dut'
+  obj.role = role
   obj.lock = threading.RLock()
   obj.stopped = threading.Event()
   obj.error = None
-  obj.panda = PandaTransport()
+  if role == 'dut':
+    obj.panda = PandaTransport()
   obj.fd_buses = set()
   obj.queue = collections.deque()
   obj.streams = {}
-  obj.streams_paused = False
+  obj.streams_paused = paused
+  obj.net_stats = {}
   return obj
+
+
+class Clock:
+  def __init__(self, obj):
+    self.ns = 0
+    self.obj = obj
+
+  def __call__(self):
+    return self.ns
+
+  def sleep(self, seconds):
+    # Every deterministic scheduler wait must release the service lock.
+    assert not self.obj.lock._is_owned()
+    self.ns += round(seconds * 1e9)
 
 
 def events(count=38):
@@ -80,26 +96,25 @@ class TestSequence(unittest.TestCase):
 
   def test_deterministic_six_ms_schedule_and_timestamps(self):
     obj = service()
-    now = [0]
+    now = Clock(obj)
 
     def sleep(seconds):
-      # Verify scheduler never sleeps with Service.lock held.
-      self.assertFalse(obj.lock._is_owned())
-      now[0] += round(seconds * 1e9)
+      now.sleep(seconds)
       obj.queue.extend(obj.receive())
-    result = execute_sequence(obj, events(), exclusive_commands=True, clock=lambda: now[0], sleep=sleep)
+    result = execute_sequence(obj, events(), exclusive_commands=True, clock=now, sleep=sleep)
     self.assertTrue(result['complete'])
     self.assertEqual([event['send_start_ns'] for event in result['events']], [i * 6000000 for i in range(38)])
     self.assertEqual(result['max_jitter_ns'], 0)
-    self.assertEqual(now[0], 243000000)
+    self.assertEqual(now.ns, 243000000)
 
   def test_late_schedule_aborts_without_retiming(self):
     obj = service()
-    now = [0]
+    now = Clock(obj)
 
     def sleep(seconds):
-      now[0] += round(seconds * 1e9) + 10000000
-    result = execute_sequence(obj, events(3), exclusive_commands=True, clock=lambda: now[0], sleep=sleep)
+      now.sleep(seconds)
+      now.ns += 10000000
+    result = execute_sequence(obj, events(3), exclusive_commands=True, clock=now, sleep=sleep)
     self.assertFalse(result['complete'])
     self.assertIn('Late sequence', result['error'])
     self.assertEqual(len(result['events']), 1)
@@ -108,26 +123,22 @@ class TestSequence(unittest.TestCase):
   def test_send_delay_and_worker_failure_abort(self):
     for failure in ('send', 'worker'):
       obj = service()
-      now = [0]
+      now = Clock(obj)
       original = obj.send
 
       def send(frame, original=original, failure=failure, now=now, obj=obj):
         original(frame)
         if failure == 'send':
-          now[0] += 3000000
+          now.ns += 3000000
         else:
           obj.error = 'receive queue overflow'
       obj.send = send
-      result = execute_sequence(obj, events(3), exclusive_commands=True, clock=lambda now=now: now[0])
+      result = execute_sequence(obj, events(3), exclusive_commands=True, clock=now)
       self.assertFalse(result['complete'])
       self.assertEqual(len(result['events']), 1)
 
   def test_station_socket_batch_keeps_worker_polling_and_streams_paused(self):
-    obj = service()
-    obj.role = 'station'
-    del obj.panda  # Station execution must never access Panda health.
-    obj.streams_paused = True
-    obj.net_stats = {}
+    obj = service('station', paused=True)
     local, peer = socket.socketpair(type=socket.SOCK_DGRAM)
     local.setblocking(False)
     peer.settimeout(.5)
@@ -157,42 +168,35 @@ class TestSequence(unittest.TestCase):
       peer.close()
 
   def test_station_scan_preserves_500_addresses_at_100hz(self):
-    obj = service()
-    obj.role = 'station'
-    obj.streams_paused = True
-    del obj.panda
-    now = [0]
+    obj = service('station', paused=True)
+    now = Clock(obj)
     sent = []
     checks = []
-    obj.check_transport = lambda: checks.append(now[0])
+    obj.check_transport = lambda: checks.append(now.ns)
     obj.send = lambda frame: sent.append(frame)
     batch = [{'offset_us': i * 10000, 'frame': [0x1000 + i, '00', i % 3]} for i in range(500)]
 
-    def sleep(seconds):
-      self.assertFalse(obj.lock._is_owned())
-      now[0] += round(seconds * 1e9)
-    result = execute_sequence(obj, batch, exclusive_commands=True, clock=lambda: now[0], sleep=sleep)
+    result = execute_sequence(obj, batch, exclusive_commands=True, clock=now, sleep=now.sleep)
     self.assertTrue(result['complete'], result)
     self.assertEqual(sent, [tuple(event['frame']) for event in batch])
     self.assertEqual(len(checks), 502)
-    self.assertEqual(now[0], 5010000000)
+    self.assertEqual(now.ns, 5010000000)
 
   def test_station_pause_and_transport_guards(self):
-    obj = service()
-    obj.role = 'station'
+    obj = service('station')
     with self.assertRaisesRegex(ValueError, 'paused'):
       execute_sequence(obj, events(1), exclusive_commands=True)
     obj.streams_paused = True
     with self.assertRaisesRegex(ValueError, 'spacing'):
       execute_sequence(obj, events(2), exclusive_commands=True)
-    now = [0]
+    now = Clock(obj)
     obj.check_transport = lambda: None
     obj.send = lambda frame: None
 
     def sleep(seconds):
-      now[0] += round(seconds * 1e9)
+      now.sleep(seconds)
       obj.streams_paused = False
-    result = execute_sequence(obj, events(1), exclusive_commands=True, clock=lambda: now[0], sleep=sleep)
+    result = execute_sequence(obj, events(1), exclusive_commands=True, clock=now, sleep=sleep)
     self.assertFalse(result['complete'])
     self.assertIn('resumed', result['error'])
     obj.streams_paused = True
@@ -207,26 +211,23 @@ class TestSequence(unittest.TestCase):
 
   def test_paced_scan_accepts_slow_sends_and_jitter_without_catchup(self):
     for role in ('dut', 'station'):
-      obj = service()
-      obj.role = role
-      obj.streams_paused = True
-      obj.net_stats = {}
-      now = [0]
+      obj = service(role, paused=True)
+      now = Clock(obj)
       sent = []
 
       def send(frame, now=now, sent=sent, obj=obj):
-        sent.append((now[0], frame))
+        sent.append((now.ns, frame))
         if obj.role == 'dut':
           obj.queue.append([frame[0], frame[1], frame[2] + 128])
-        now[0] += 15000000  # Normal USB stalls exceed steering's 2ms budget.
+        now.ns += 15000000  # Normal USB stalls exceed steering's 2ms budget.
 
       def sleep(seconds, now=now, obj=obj):
-        self.assertFalse(obj.lock._is_owned())
-        now[0] += round(seconds * 1e9) + 4000000
+        now.sleep(seconds)
+        now.ns += 4000000
       obj.send = send
       batch = [{'offset_us': i * 10000, 'frame': [i, '00', 0]} for i in range(12)]
       result = execute_sequence(obj, batch, exclusive_commands=True, scheduling='paced_scan',
-                                clock=lambda now=now: now[0], sleep=sleep)
+                                clock=now, sleep=sleep)
       self.assertTrue(result['complete'], result)
       self.assertEqual([frame for _, frame in sent], [tuple(event['frame']) for event in batch])
       self.assertGreater(result['max_jitter_ns'], 10000000)
@@ -237,43 +238,38 @@ class TestSequence(unittest.TestCase):
 
   def test_paced_scan_overall_deadline_and_transport_loss_still_fail(self):
     for failure in ('deadline', 'transport'):
-      obj = service()
-      obj.role = 'station'
-      obj.streams_paused = True
-      now = [0]
+      obj = service('station', paused=True)
+      now = Clock(obj)
       calls = []
 
       def send(frame, now=now, calls=calls):
         calls.append(frame)
-        now[0] += 25000000
+        now.ns += 25000000
 
       def check_transport(failure=failure, calls=calls):
         if failure == 'transport' and calls:
           raise RuntimeError('Station transport loss')
 
-      def sleep(seconds, now=now):
-        now[0] += round(seconds * 1e9)
       obj.send = send
       obj.check_transport = check_transport
       result = execute_sequence(obj, [{'offset_us': i * 10000, 'frame': [i, '00', 0]} for i in range(5)],
                                 exclusive_commands=True, scheduling='paced_scan', max_duration_us=60000,
-                                clock=lambda now=now: now[0], sleep=sleep)
+                                clock=now, sleep=now.sleep)
       self.assertFalse(result['complete'])
       self.assertIn('deadline' if failure == 'deadline' else 'transport loss', result['error'])
       self.assertLess(len(calls), 5)
 
   def test_dut_cutoff_waits_for_delayed_local_receipts_and_retains_queue(self):
     obj = service()
-    now = [0]
+    now = Clock(obj)
     obj.queue.append([99, 'aa', 0])
     batch = [{'offset_us': 0, 'frame': [1, '00', 0]}, {'offset_us': 6000, 'frame': [2, 'ff', 0]}]
 
     def sleep(seconds):
-      self.assertFalse(obj.lock._is_owned())
-      now[0] += round(seconds * 1e9)
-      if now[0] >= 80000000:
+      now.sleep(seconds)
+      if now.ns >= 80000000:
         obj.queue.extend(obj.receive())
-    result = execute_sequence(obj, batch, exclusive_commands=True, clock=lambda: now[0], sleep=sleep)
+    result = execute_sequence(obj, batch, exclusive_commands=True, clock=now, sleep=sleep)
     self.assertTrue(result['complete'], result)
     self.assertEqual(result['receipts_observed_ns'], 80000000)
     self.assertGreaterEqual(result['quiet_end_ns'], 100000000)
@@ -283,31 +279,28 @@ class TestSequence(unittest.TestCase):
   def test_missing_duplicate_and_stale_local_receipts_fail_without_rejection(self):
     for failure in ('missing', 'duplicate', 'stale'):
       obj = service()
-      now = [0]
+      now = Clock(obj)
       if failure == 'stale':
         obj.queue.append([0x123, '00', 128])
 
       def sleep(seconds, obj=obj, now=now, failure=failure):
-        now[0] += round(seconds * 1e9)
+        now.sleep(seconds)
         if failure == 'duplicate' and not obj.queue:
           receipts = obj.receive()
           obj.queue.extend(receipts + receipts)
       result = execute_sequence(obj, events(1), exclusive_commands=True, receipt_timeout_us=30000,
-                                clock=lambda now=now: now[0], sleep=sleep)
+                                clock=now, sleep=sleep)
       self.assertFalse(result['complete'])
       self.assertNotIn('quiet_end_ns', result)
       self.assertIn({'missing': 'timed out', 'duplicate': 'Duplicate', 'stale': 'Stale'}[failure], result['error'])
       if failure == 'missing':
-        self.assertEqual(now[0], 30000000)
+        self.assertEqual(now.ns, 30000000)
         self.assertEqual(list(obj.panda.receipts), [(0x123, b'\x00', 128)])
       if failure == 'stale':
         self.assertEqual(result['events'], [])
 
   def test_rx_group_phase_replacements_duplicates_and_no_extra_emission(self):
-    obj = service()
-    obj.role = 'station'
-    obj.net_stats = {}
-    obj.streams_paused = True
+    obj = service('station', paused=True)
     local, peer = socket.socketpair(type=socket.SOCK_DGRAM)
     peer.setblocking(False)
     obj.sockets = [local]
@@ -315,17 +308,14 @@ class TestSequence(unittest.TestCase):
     replacement = [[1, bytes([i + 10]).hex(), 0] for i in range(4)]
     obj.streams = {'measurement': {'frames': cycle, 'period': .1, 'index': 5, 'next': 123, 'paused': True},
                    'other': {'frames': cycle, 'period': .1, 'index': 7, 'next': 456, 'paused': False}}
-    now = [0]
+    now = Clock(obj)
     sent_at = []
     original_send = obj.send
 
     def send(frame):
-      sent_at.append(now[0])
+      sent_at.append(now.ns)
       original_send(frame)
 
-    def sleep(seconds):
-      self.assertFalse(obj.lock._is_owned())
-      now[0] += round(seconds * 1e9)
     obj.send = send
     spec = {'name': 'measurement', 'frames': replacement, 'period': .2}
     other = {'name': 'other', 'frames': replacement, 'period': .3}
@@ -333,7 +323,7 @@ class TestSequence(unittest.TestCase):
              {'frame': cycle[0], 'updates': [], 'stream_name': 'measurement'},
              {'frame': replacement[2], 'updates': [], 'stream_name': None}]
     try:
-      result = execute_rx_group(obj, batch, clock=lambda: now[0], sleep=sleep)
+      result = execute_rx_group(obj, batch, clock=now, sleep=now.sleep)
       self.assertTrue(result['complete'], result)
       self.assertEqual(result['frames'], [replacement[1], replacement[2], replacement[2]])
       self.assertEqual(sent_at, [0, 1000000, 2000000])
@@ -352,10 +342,7 @@ class TestSequence(unittest.TestCase):
       peer.close()
 
   def test_rx_group_rpc_allows_worker_to_receive(self):
-    obj = service()
-    obj.role = 'station'
-    obj.net_stats = {}
-    obj.streams_paused = True
+    obj = service('station', paused=True)
     local, peer = socket.socketpair(type=socket.SOCK_DGRAM)
     local.setblocking(False)
     obj.sockets = [local]
@@ -378,10 +365,8 @@ class TestSequence(unittest.TestCase):
 
   def test_rx_group_partial_failure_timeout_and_pause_guard(self):
     for failure in ('send', 'loss', 'resume', 'timeout'):
-      obj = service()
-      obj.role = 'station'
-      obj.streams_paused = True
-      now = [0]
+      obj = service('station', paused=True)
+      now = Clock(obj)
       sent = []
 
       def send(frame, sent=sent, now=now, failure=failure):
@@ -389,20 +374,20 @@ class TestSequence(unittest.TestCase):
           raise RuntimeError('send failed')
         sent.append(frame)
         if failure == 'timeout':
-          now[0] += 1000000001
+          now.ns += 1000000001
 
       def check_transport(sent=sent, failure=failure):
         if sent and failure == 'loss':
           raise RuntimeError('Station transport loss')
 
       def sleep(seconds, obj=obj, now=now, failure=failure):
-        now[0] += round(seconds * 1e9)
+        now.sleep(seconds)
         if failure == 'resume':
           obj.streams_paused = False
       obj.send = send
       obj.check_transport = check_transport
       result = execute_rx_group(obj, [{'frame': [1, '00', 0], 'updates': [], 'stream_name': None}] * 3,
-                                clock=lambda now=now: now[0], sleep=sleep)
+                                clock=now, sleep=sleep)
       self.assertFalse(result['complete'])
       self.assertIn('error', result)
       self.assertEqual(result['frames'], [[1, '00', 0]])

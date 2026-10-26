@@ -43,7 +43,7 @@ def checksum(msg):
   return addr, ret, bus
 
 
-class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+class TestHyundaiSafetyBase(HyundaiButtonBase, common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
   DBC = "hyundai_can_generated"
   SAFETY_MODEL = CarParams.SafetyModel.hyundai
 
@@ -107,27 +107,27 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
 
 
-class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
+class TestHyundaiSafetyAltLimits(TestHyundaiSafetyBase):
   SAFETY_PARAM = HyundaiSafetyFlags.ALT_LIMITS
 
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
   MAX_TORQUE_LOOKUP = [0], [270]
 
-class TestHyundaiSafetyAltLimits2(TestHyundaiSafety):
+class TestHyundaiSafetyAltLimits2(TestHyundaiSafetyBase):
   SAFETY_PARAM = HyundaiSafetyFlags.ALT_LIMITS_2
 
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
   MAX_TORQUE_LOOKUP = [0], [170]
 
-class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
+class TestHyundaiSafetyCameraSCC(TestHyundaiSafetyBase):
   SAFETY_PARAM = HyundaiSafetyFlags.CAMERA_SCC
 
   BUTTONS_TX_BUS = 2  # tx on 2, rx on 0
   SCC_BUS = 2  # rx on 2
 
-class TestHyundaiSafetyFCEV(TestHyundaiSafety):
+class TestHyundaiSafetyFCEV(TestHyundaiSafetyBase):
   SAFETY_PARAM = HyundaiSafetyFlags.FCEV_GAS
 
   def _user_gas_msg(self, gas):
@@ -135,11 +135,11 @@ class TestHyundaiSafetyFCEV(TestHyundaiSafety):
     return self.packer.make_can_msg_safety("FCEV_ACCELERATOR", 0, values)
 
 
-class TestHyundaiLegacySafety(TestHyundaiSafety):
+class TestHyundaiLegacySafety(TestHyundaiSafetyBase):
   SAFETY_MODEL = CarParams.SafetyModel.hyundaiLegacy
 
 
-class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
+class TestHyundaiLegacySafetyEV(TestHyundaiSafetyBase):
   SAFETY_MODEL = CarParams.SafetyModel.hyundaiLegacy
   SAFETY_PARAM = HyundaiSafetyFlags.EV_GAS
 
@@ -148,7 +148,7 @@ class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
     return self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum)
 
 
-class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
+class TestHyundaiLegacySafetyHEV(TestHyundaiSafetyBase):
   SAFETY_MODEL = CarParams.SafetyModel.hyundaiLegacy
   SAFETY_PARAM = HyundaiSafetyFlags.HYBRID_GAS
 
@@ -157,7 +157,7 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
     return self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum)
 
 
-class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
+class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafetyBase):
   SAFETY_PARAM = HyundaiSafetyFlags.LONG
 
   TX_MSGS = [[0x340, 0], [0x4F1, 0], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0], [0x38D, 0], [0x483, 0], [0x7D0, 0]]
@@ -202,7 +202,7 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
     self.assertFalse(self._tx(self._accel_msg(0, aeb_stop_req=True)))
 
 
-class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyundaiSafety):
+class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyundaiSafetyBase):
   SAFETY_PARAM = HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CAMERA_SCC
 
   TX_MSGS = [[0x340, 0], [0x4F1, 2], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0]]
@@ -235,6 +235,13 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
 
 class TestHyundaiSafetyFCEVLong(TestHyundaiLongitudinalSafety, TestHyundaiSafetyFCEV):
   SAFETY_PARAM = HyundaiSafetyFlags.FCEV_GAS | HyundaiSafetyFlags.LONG
+
+
+class TestHyundaiSafety(common.PeriodicSafetyTest, TestHyundaiSafetyBase):
+  PERIODIC_TIMEOUT_STREAM = "driver_torque"
+
+  def _checksum_fault_msg(self):
+    return self._user_gas_msg(False)
 
 
 if __name__ == "__main__":
