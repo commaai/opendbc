@@ -2,17 +2,17 @@
 
 #include "opendbc/safety/declarations.h"
 
-static bool tesla_longitudinal = false;
-static bool tesla_stock_aeb = false;
+SAFETY_STATE static bool tesla_longitudinal = false;
+SAFETY_STATE static bool tesla_stock_aeb = false;
 
 // Only rising edges while controls are not allowed are considered for these systems:
 // TODO: Only LKAS (non-emergency) is currently supported since we've only seen it
-static bool tesla_stock_lkas = false;
-static bool tesla_stock_lkas_prev = false;
+SAFETY_STATE static bool tesla_stock_lkas = false;
+SAFETY_STATE static bool tesla_stock_lkas_prev = false;
 
 // Only Summon is currently supported due to Autopark not setting Autopark state properly
-static bool tesla_autopark = false;
-static bool tesla_autopark_prev = false;
+SAFETY_STATE static bool tesla_autopark = false;
+SAFETY_STATE static bool tesla_autopark_prev = false;
 
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;

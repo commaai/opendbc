@@ -25,15 +25,15 @@ enum {
   HONDA_BTN_RESUME = 4,
 };
 
-static int honda_brake = 0;
-static bool honda_brake_switch_prev = false;
-static bool honda_alt_brake_msg = false;
-static bool honda_fwd_brake = false;
-static bool honda_bosch_long = false;
-static bool honda_bosch_radarless = false;
-static bool honda_bosch_canfd = false;
+SAFETY_STATE static int honda_brake = 0;
+SAFETY_STATE static bool honda_brake_switch_prev = false;
+SAFETY_STATE static bool honda_alt_brake_msg = false;
+SAFETY_STATE static bool honda_fwd_brake = false;
+SAFETY_STATE static bool honda_bosch_long = false;
+SAFETY_STATE static bool honda_bosch_radarless = false;
+SAFETY_STATE static bool honda_bosch_canfd = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
-static HondaHw honda_hw = HONDA_NIDEC;
+SAFETY_STATE static HondaHw honda_hw = HONDA_NIDEC;
 
 static unsigned int honda_get_pt_bus(void) {
   return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless && !honda_bosch_canfd) ? 1U : 0U;

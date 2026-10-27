@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
+import os
+import re
+import subprocess
+import sys
 import unittest
+from unittest import mock
 
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
+from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class TestDefaultRxHookBase(common.SafetyTest):
@@ -64,6 +70,25 @@ class TestSafetyFramework(common.SafetyTestBase):
     self.assertEqual(self.safety.set_safety_hooks(0xFFFF, 0), -1)
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
+
+  def test_compute_mismatch(self):
+    self.safety.safety_compute_inject()
+    self.assertTrue(self.safety.get_safety_compute_mismatch())
+    self.safety.init_tests()
+
+  @unittest.skipIf(sys.platform == "darwin", "reads ELF sections")
+  def test_safety_state_tagged(self):
+    # writable globals outside the safety_state section aren't computed twice
+    not_state = {"ignition_can", "ignition_can_cnt", "prev_counter_rivian", "prev_counter_tesla", "prev_counter_vw_meb",
+                 "safety_compute_mismatch", "safety_state_in", "safety_state_out", "safety_ts", "timer_cnt"}
+    # without the coverage runtime's globals
+    with mock.patch.dict(os.environ, {"SAFETY_COVERAGE": "0"}):
+      lib = libsafety_py._build_libsafety()
+    out = subprocess.check_output(["nm", "-f", "sysv", "--defined-only", lib], text=True)
+    for line in out.splitlines():
+      fields = [f.strip() for f in line.split("|")]
+      if len(fields) == 7 and fields[6] in (".data", ".bss") and not fields[0].startswith("_") and fields[0] != "completed.0":
+        self.assertIn(re.sub(r"\.\d+$", "", fields[0]), not_state)
 
 
 if __name__ == "__main__":

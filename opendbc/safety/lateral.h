@@ -59,7 +59,7 @@ static bool rt_torque_rate_limit_check(int val, int val_last, const int MAX_RT_D
 // Safety checks for torque-based steering commands
 bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits) {
   bool violation = false;
-  uint32_t ts = microsecond_timer_get();
+  uint32_t ts = safety_ts;
 
   if (controls_allowed) {
     // Some safety models support variable torque limit based on vehicle speed
@@ -152,7 +152,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
 static bool rt_angle_rate_limit_check(AngleSteeringLimits limits) {
   bool violation = false;
-  uint32_t ts = microsecond_timer_get();
+  uint32_t ts = safety_ts;
 
   // *** angle real time rate limit check ***
   int max_rt_msgs = ((float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2) + 1;  // 1.2x buffer
@@ -174,7 +174,7 @@ static bool rt_angle_rate_limit_check(AngleSteeringLimits limits) {
 
 static bool rt_curvature_rate_limit_check(CurvatureSteeringLimits limits) {
   bool violation = false;
-  uint32_t ts = microsecond_timer_get();
+  uint32_t ts = safety_ts;
 
   // *** curvature real time rate limit check ***
   int max_rt_msgs = ((float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2) + 1;  // 1.2x buffer

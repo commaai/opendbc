@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 // TODO: time should just be passed into the hooks we expose
 uint32_t timer_cnt = 0;
@@ -44,6 +45,18 @@ void set_relay_malfunction(bool c){
 
 bool get_controls_allowed(void){
   return controls_allowed;
+}
+
+bool get_safety_compute_mismatch(void){
+  return safety_compute_mismatch;
+}
+
+// the state changes between the two computations
+void safety_compute_inject(void){
+  safety_compute_start();
+  controls_allowed = !controls_allowed;
+  safety_compute_again();
+  safety_compute_check(true);
 }
 
 bool get_ignition_can(void){
@@ -210,4 +223,5 @@ void init_tests(void){
 
   ignition_can = false;
   ignition_can_cnt = 0U;
+  safety_compute_mismatch = false;
 }

@@ -13,7 +13,7 @@
     {.msg = {{0x1C4, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
     {.msg = {{0xC9, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
-static const LongitudinalLimits *gm_long_limits;
+SAFETY_STATE static const LongitudinalLimits *gm_long_limits;
 
 enum {
   GM_BTN_UNPRESS = 1,
@@ -26,8 +26,8 @@ typedef enum {
   GM_ASCM,
   GM_CAM
 } GmHardware;
-static GmHardware gm_hw = GM_ASCM;
-static bool gm_pcm_cruise = false;
+SAFETY_STATE static GmHardware gm_hw = GM_ASCM;
+SAFETY_STATE static bool gm_pcm_cruise = false;
 
 static void gm_rx_hook(const CANPacket_t *msg) {
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
