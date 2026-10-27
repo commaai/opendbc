@@ -315,10 +315,10 @@ static void safety_tick_once(void) {
 #define SAFETY_STATE_MAX_WORDS 256U
 // linker symbols, the bounds of the safety_state section
 #ifdef __APPLE__
-extern uint32_t __start_safety_state __asm("section$start$__DATA$safety_state");
+extern uint32_t __start_safety_state[SAFETY_STATE_MAX_WORDS] __asm("section$start$__DATA$safety_state");
 extern uint32_t __stop_safety_state __asm("section$end$__DATA$safety_state");
 #else
-extern uint32_t __start_safety_state;
+extern uint32_t __start_safety_state[SAFETY_STATE_MAX_WORDS];
 extern uint32_t __stop_safety_state;
 #endif
 static uint32_t safety_state_in[SAFETY_STATE_MAX_WORDS];
@@ -326,24 +326,27 @@ static uint32_t safety_state_out[SAFETY_STATE_MAX_WORDS];
 bool safety_compute_mismatch = false;
 uint32_t safety_ts = 0U;
 
+static uint32_t safety_state_span(void) {
+  return (uint32_t)(((uintptr_t)&__stop_safety_state) - ((uintptr_t)__start_safety_state));
+}
 static uint32_t safety_state_size(void) {
-  return SAFETY_MIN((uint32_t)((uintptr_t)&__stop_safety_state - (uintptr_t)&__start_safety_state), (uint32_t)sizeof(safety_state_in));
+  return SAFETY_MIN(safety_state_span(), (uint32_t)sizeof(safety_state_in));
 }
 
 static void safety_compute_start(void) {
   safety_ts = microsecond_timer_get();
-  (void)memcpy(safety_state_in, &__start_safety_state, safety_state_size());
+  (void)memcpy(safety_state_in, __start_safety_state, safety_state_size());
 }
 
 // keep the state of the first computation, then start the second one from the same state
 static void safety_compute_again(void) {
-  (void)memcpy(safety_state_out, &__start_safety_state, safety_state_size());
-  (void)memcpy(&__start_safety_state, safety_state_in, safety_state_size());
+  (void)memcpy(safety_state_out, __start_safety_state, safety_state_size());
+  (void)memcpy(__start_safety_state, safety_state_in, safety_state_size());
 }
 
 static void safety_compute_check(bool same_result) {
-  bool same_state = memcmp(safety_state_out, &__start_safety_state, safety_state_size()) == 0;
-  bool fits = ((uintptr_t)&__stop_safety_state - (uintptr_t)&__start_safety_state) <= sizeof(safety_state_in);
+  bool same_state = memcmp(safety_state_out, __start_safety_state, safety_state_size()) == 0;
+  bool fits = safety_state_span() <= sizeof(safety_state_in);
   safety_compute_mismatch = safety_compute_mismatch || !same_result || !same_state || !fits;
 }
 

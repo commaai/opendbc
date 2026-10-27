@@ -85,10 +85,12 @@ class TestSafetyFramework(common.SafetyTestBase):
     with mock.patch.dict(os.environ, {"SAFETY_COVERAGE": "0"}):
       lib = libsafety_py._build_libsafety()
     out = subprocess.check_output(["nm", "-f", "sysv", "--defined-only", lib], text=True)
+    names = set()
     for line in out.splitlines():
       fields = [f.strip() for f in line.split("|")]
       if len(fields) == 7 and fields[6] in (".data", ".bss") and not fields[0].startswith("_") and fields[0] != "completed.0":
-        self.assertIn(re.sub(r"\.\d+$", "", fields[0]), not_state)
+        names.add(re.sub(r"\.\d+$", "", fields[0]))
+    self.assertEqual(names - not_state, set())
 
 
 if __name__ == "__main__":
