@@ -12,4 +12,3 @@ SAFETY_UNUSED(safety_tx_hook);
 SAFETY_UNUSED(safety_fwd_hook);
 SAFETY_UNUSED(safety_tick);
 SAFETY_UNUSED(set_safety_hooks);
-SAFETY_UNUSED(clear_controls_allowed);
