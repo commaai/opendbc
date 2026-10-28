@@ -35,6 +35,7 @@ ANGLE_DEG_TO_CAN = {
   "toyota": 17.452007,
   "nissan": 100,
   "psa": 10,
+  "byd": 10,
 }
 
 NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
@@ -295,11 +296,13 @@ class TestCarModelBase(unittest.TestCase):
       # Some archived MLB routes record alpha longitudinal, which current MLB safety does not support.
       controller_params = self.CarInterface.get_params(self.platform, self.fingerprint, self.CP.carFw, False, False, docs=False)
 
-    def test_car_controller(car_control):
+    def test_car_controller(car_control, on_frame=None):
       now_nanos = 0
       msgs_sent = 0
       CI = self.CarInterface(controller_params)
-      for _ in range(round(10.0 / DT_CTRL)):
+      for i in range(round(10.0 / DT_CTRL)):
+        if on_frame is not None:
+          on_frame(self.safety, i)
         CI.update([])
         _, sendcan = CI.apply(car_control, now_nanos)
         now_nanos += DT_CTRL * 1e9
@@ -309,15 +312,10 @@ class TestCarModelBase(unittest.TestCase):
           self.assertTrue(self.safety.safety_tx_hook(packet), (addr, dat, bus))
       self.assertGreater(msgs_sent, 50)
 
-    test_car_controller(structs.CarControl().as_reader())
-
-    self.safety.set_cruise_engaged_prev(True)
-    CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(cancel=True))
-    test_car_controller(CC.as_reader())
-
-    self.safety.set_controls_allowed(True)
-    CC = structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True))
-    test_car_controller(CC.as_reader())
+    for case in self.CarInterface.panda_safety_tx_test_cases(self.CP, self.safety):
+      if case.setup is not None:
+        case.setup(self.safety)
+      test_car_controller(case.car_control.as_reader(), case.on_frame)
 
   @fuzzy_test(max_examples=300)
   def test_panda_safety_carstate_fuzzy(self, fuzzy):
