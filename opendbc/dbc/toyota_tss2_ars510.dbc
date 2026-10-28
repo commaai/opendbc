@@ -1,0 +1,210 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: XXX
+BO_ 256 PCS_STATE: 7 XXX
+ SG_ PCS_ALARM : 1|1@0+ (1,0) [0|1] "" XXX
+ SG_ POWER_UP : 15|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 400 RADAR_CYCLE: 7 XXX
+ SG_ SUMMARY_COUNT : 3|2@0+ (1,0) [0|3] "" XXX
+ SG_ TIMESTAMP : 23|32@0+ (1,0) [0|4294967295] "us" XXX
+ SG_ CYCLE_COUNTER : 52|4@1+ (1,0) [0|15] "" XXX
+
+BO_ 401 TARGET_SUMMARY_A_INFO: 8 XXX
+ SG_ SCORE : 1|7@1+ (1,0) [0|127] "" XXX
+ SG_ AGE : 9|7@1+ (1,0) [0|127] "" XXX
+ SG_ TRACK_CODE : 26|6@1+ (1,0) [0|63] "" XXX
+ SG_ WIDTH : 34|6@1+ (0.1,0) [0|6.3] "m" XXX
+ SG_ AGE_COUNTER : 43|5@1+ (1,0) [0|31] "" XXX
+ SG_ HEIGHT : 49|7@1+ (0.1,0) [0|12.7] "m" XXX
+ SG_ LENGTH : 56|8@1+ (0.1,0) [0|25.5] "m" XXX
+
+BO_ 402 TARGET_SUMMARY_A_POS: 4 XXX
+ SG_ LONG_DIST : 4|13@0+ (0.0625,-10) [-10|501.9375] "m" XXX
+ SG_ LAT_DIST : 20|13@0+ (0.015,-30.72) [-30.72|92.145] "m" XXX
+
+BO_ 403 TARGET_SUMMARY_B_INFO: 8 XXX
+ SG_ SCORE : 1|7@1+ (1,0) [0|127] "" XXX
+ SG_ AGE : 9|7@1+ (1,0) [0|127] "" XXX
+ SG_ TRACK_CODE : 26|6@1+ (1,0) [0|63] "" XXX
+ SG_ WIDTH : 34|6@1+ (0.1,0) [0|6.3] "m" XXX
+ SG_ AGE_COUNTER : 43|5@1+ (1,0) [0|31] "" XXX
+ SG_ HEIGHT : 49|7@1+ (0.1,0) [0|12.7] "m" XXX
+ SG_ LENGTH : 56|8@1+ (0.1,0) [0|25.5] "m" XXX
+
+BO_ 404 TARGET_SUMMARY_B_POS: 4 XXX
+ SG_ LONG_DIST : 4|13@0+ (0.0625,-10) [-10|501.9375] "m" XXX
+ SG_ LAT_DIST : 20|13@0+ (0.015,-30.72) [-30.72|92.145] "m" XXX
+
+BO_ 405 EVENT_OBJECT: 8 XXX
+ SG_ PATH_CURVATURE : 7|16@0+ (7.5e-06,-0.24576) [-0.24576|0.2457525] "1/m" XXX
+ SG_ OBJECT_ACCEL : 23|12@0+ (0.03125,-16) [-16|111.96875] "m/s^2" XXX
+ SG_ OBJECT_SPEED : 27|12@0+ (0.0625,0) [0|255.9375] "m/s" XXX
+ SG_ EGO_TRAVEL_TO_TTC : 46|11@0+ (0.05,0) [0|102.35] "m" XXX
+ SG_ OBJECT_DIST : 50|11@0+ (0.05,0) [0|102.35] "m" XXX
+
+BO_ 406 EVENT_STATE: 8 XXX
+ SG_ REQUIRED_DECEL : 7|8@0- (0.095,0) [-12.16|12.065] "m/s^2" XXX
+ SG_ RADAR_FAULT : 8|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 514 RADAR_ALIVE: 5 XXX
+ SG_ CHECK_BYTE : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 565 ACC_TARGET_1: 8 XXX
+ SG_ CHECK_BYTE : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ STATE : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ REL_ACCEL : 23|8@0+ (0.125,-12.5) [-12.5|19.375] "m/s^2" XXX
+ SG_ REL_SPEED : 31|11@0+ (0.125,-128) [-128|127.875] "m/s" XXX
+ SG_ LAT_ACCEL : 34|8@0+ (0.125,-12.5) [-12.5|19.375] "m/s^2" XXX
+ SG_ LAT_SPEED : 42|11@0+ (0.0125,-12.8) [-12.8|12.7875] "m/s" XXX
+ SG_ TARGET_ID : 61|6@0+ (1,0) [0|63] "" XXX
+
+BO_ 567 ACC_TARGET_2: 8 XXX
+ SG_ CHECK_BYTE : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ LONG_DIST : 11|13@0+ (0.025,0) [0|204.775] "m" XXX
+ SG_ LAT_DIST : 30|12@0+ (0.01,-20) [-20|20.95] "m" XXX
+ SG_ TRACKER_A : 34|8@0+ (1,0) [0|255] "" XXX
+ SG_ TRACKER_B : 42|8@0+ (1,0) [0|255] "" XXX
+ SG_ IN_PATH : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ PRESENT : 50|1@0+ (1,0) [0|1] "" XXX
+ SG_ IN_PATH_LEVEL : 62|3@0+ (1,0) [0|7] "" XXX
+ SG_ IN_PATH_CANDIDATE : 63|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 569 ACC_TARGET_3: 8 XXX
+ SG_ CHECK_BYTE : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ CLASS : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ STATE : 23|2@0+ (1,0) [0|3] "" XXX
+ SG_ IN_OBJECT_LIST : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ PRESENT : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ TIMESTAMP : 26|32@0+ (1,0) [0|4294967295] "us" XXX
+
+BO_ 571 ACC_TARGET_4: 3 XXX
+ SG_ CHECK_BYTE : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ WIDTH : 11|12@0+ (1,0) [0|4095] "cm" XXX
+
+BO_ 591 RADAR_BOOT: 1 XXX
+ SG_ RADAR_RUNNING : 6|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1664 OBJECT_STREAM: 8 XXX
+ SG_ SELECTOR : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ LONG_DIST : 15|13@0+ (0.03125,0) [0|255.96875] "m" XXX
+ SG_ LAT_DIST : 18|11@0- (0.015,0) [-15.36|15.345] "m" XXX
+ SG_ SPEED : 39|10@0+ (0.15,-76.8) [-76.8|76.65] "m/s" XXX
+ SG_ STATIONARY : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ ONCOMING : 41|1@0+ (1,0) [0|1] "" XXX
+ SG_ SEEN_MOVING : 43|1@0+ (1,0) [0|1] "" XXX
+ SG_ LAT_SPEED : 55|8@0+ (0.15,-19.2) [-19.2|19.05] "m/s" XXX
+
+CM_ "Continental ARS510 front radar, radar bus. Used on the radar-ACC platforms: RAV4 2022-25 (fwdRadar 8821F0R01100, 8821F0R03100), C-HR 2021-22 (8821FF4102xx-0500) and Yaris (8821F0D0xxxx). The 0x80 object list and 0x85 metadata record are ISO-TP transfers (740 and 144 bytes, CRC32-protected; flow control on 0x81 / 0x86) and are not described here; neither are values that need a computation across frames or signals (a summary's speed from its range slope, LAT_DIST's hidden 13th bit), which the comments explain instead. The radar interface reads ACC_TARGET_1-3 (STATE, REL_SPEED, TARGET_ID, LONG_DIST, LAT_DIST, PRESENT, TIMESTAMP); the other messages and signals are documented for completeness, decoded from recorded drives on two RAV4s and checked on the C-HR and Yaris test routes. Comments say where a unit or meaning is approximate. Camera-sent frames on this bus (0x101, 0x102, 0x180, 0x197, 0x210, 0x240-0x248, 0x24D, 0x500, 0x501) and the constant 0x103 and 0x23D (all zero) and 0x198 (0x10; 0x90 while RADAR_FAULT is set) are left out.";
+CM_ BO_ 256 "Radar PCS state, 10 Hz. The first frame after power-up is FF FF (POWER_UP = 255; ignore it); zero otherwise, except PCS_ALARM.";
+CM_ SG_ 256 PCS_ALARM "Pre-collision alarm: 1 from the same CAN frame as the car-bus PCS alarm (0x283 PCSNOCHG, 0x411 FCW) until it ends; seen in 8 stock alarms on 7 cars, never otherwise.";
+CM_ SG_ 256 POWER_UP "255 on the first frame after power-up, when every bit is set; 0 otherwise.";
+CM_ BO_ 514 "Radar alive frame, 16.7 Hz. Bytes 2-4 are constant (03 6D 80) on every recorded car; the first frame after power-up differs.";
+CM_ SG_ 514 CHECK_BYTE "Depends only on COUNTER.";
+CM_ SG_ 514 COUNTER "+1 per frame, mod 16.";
+CM_ BO_ 591 "Radar start-up frame, 33 Hz.";
+CM_ SG_ 591 RADAR_RUNNING "0 while the radar boots, 1 once running; stays 1 (booted, not healthy). RADAR_FAULT in EVENT_STATE reports object-list loss.";
+CM_ BO_ 400 "Radar cycle header, once per 60 ms radar cycle, before the target summaries.";
+CM_ SG_ 400 SUMMARY_COUNT "Number of target summaries this cycle (0-2); TARGET_SUMMARY_A fills first.";
+CM_ SG_ 400 TIMESTAMP "Radar cycle clock.";
+CM_ SG_ 400 CYCLE_COUNTER "Cycle counter mod 16, +3 per radar cycle; a different step means a dropped cycle.";
+CM_ BO_ 401 "Target summary A: one target of the radar's internal tracker (the tracker behind the ACC target): the ACC car or one of the two nearest other moving vehicles. Sentinel FE FE FE FC FC FF FE FF = no target.";
+CM_ SG_ 401 SCORE "91-100 while a target is present, 127 in the sentinel. Rises with the target's own over-ground speed (95 at 1-5 m/s, 99 at 10-15, 100 above about 15 m/s) and slightly with track age: a moving-vehicle confidence, too coarse for a speed.";
+CM_ SG_ 401 AGE "Target age in radar cycles, saturates at 126.";
+CM_ SG_ 401 TRACK_CODE "Track code; stays with a track and can move between summaries A and B.";
+CM_ SG_ 401 WIDTH "Class template width: 1.8 car, 2.2 truck.";
+CM_ SG_ 401 AGE_COUNTER "Grows with target age, saturates at 30.";
+CM_ SG_ 401 HEIGHT "Class template height-like size: 1.5 car, 2.3 truck.";
+CM_ SG_ 401 LENGTH "Class template length: 4.5 car, 12.0 truck.";
+CM_ BO_ 402 "Target summary A position. Sentinel 00 FF 00 FF = no target. On the ACC car the distance is the ACC distance rounded down to 1/16 m. No speed is sent; the slope of LONG_DIST per track gives one.";
+CM_ SG_ 402 LONG_DIST "Distance from the radar.";
+CM_ SG_ 402 LAT_DIST "Lateral position, left positive.";
+CM_ BO_ 403 "Target summary B: same layout as TARGET_SUMMARY_A_INFO.";
+CM_ BO_ 404 "Target summary B position: same layout as TARGET_SUMMARY_A_POS.";
+CM_ BO_ 405 "Event object: idle (exact payload) except in short time-to-collision states (0.5 % of moving cycles); then one object of the radar's tracker, usually the ACC car.";
+CM_ SG_ 405 PATH_CURVATURE "Ego path curvature, left positive (about 1/133,000 per m per code).";
+CM_ SG_ 405 OBJECT_ACCEL "Object over-ground acceleration (about 1/32 m/s^2 per code, approximate).";
+CM_ SG_ 405 OBJECT_SPEED "Object longitudinal over-ground speed.";
+CM_ SG_ 405 EGO_TRAVEL_TO_TTC "Ego's predicted travel until the time to collision (v T + a T^2 / 2, T = distance / closing speed), clamped at 0.";
+CM_ SG_ 405 OBJECT_DIST "Object distance; on the ACC car the ACC distance rounded down to 0.05 m. 0 when idle.";
+CM_ BO_ 406 "Event state, paired with EVENT_OBJECT.";
+CM_ SG_ 406 REQUIRED_DECEL "Required deceleration for the event object while active: floor(a_req / 0.095) of a lead-moving / lead-stops formula with a 1.75 m margin.";
+CM_ SG_ 406 RADAR_FAULT "Radar fault: held while the radar declares itself blocked (car-bus 0x411 dust state; the object list keeps running) and after some object-list outages; also set for the single first cycle after power-up, so require two or more consecutive cycles.";
+CM_ BO_ 565 "ACC target, part 1: 50 Hz, content updated once per 60 ms radar cycle.";
+CM_ SG_ 565 CHECK_BYTE "CRC-8 (polynomial 0x1D, MSB first) over the frame's signals serialized as zero-padded 8, 16 or 32-bit integers, not over the raw bytes; linear, so a 56-column table over payload bits plus a constant computes it.";
+CM_ SG_ 565 STATE "5 = target present, 1 = idle (bytes 2-7 64 80 0B 24 00 FF), 15 = start-up.";
+CM_ SG_ 565 REL_ACCEL "Target acceleration relative to ego, positive = opening.";
+CM_ SG_ 565 REL_SPEED "Closing speed relative to ego, negative = closing.";
+CM_ SG_ 565 LAT_ACCEL "Relative lateral acceleration, left positive (nominal unit). Mostly minus ego's own lateral acceleration.";
+CM_ SG_ 565 LAT_SPEED "Lateral speed of the target relative to ego in the rotating ego frame, left positive (about 0.0125 m/s per code). Wraps above the top code (crossing traffic); the check byte then differs by 0x9C.";
+CM_ SG_ 565 TARGET_ID "The radar tracker's track number: changes when the radar switches to a different target, kept when it re-acquires the same one. 32-63 occur on a C-HR radar (8821FF410300); the RAV4 radars sent 0-31 in every recorded drive. 63 in the idle payload.";
+CM_ BO_ 567 "ACC target, part 2: 50 Hz.";
+CM_ SG_ 567 CHECK_BYTE "CRC-8 like ACC_TARGET_1's, over this frame's signals.";
+CM_ SG_ 567 LONG_DIST "Distance from the radar.";
+CM_ SG_ 567 LAT_DIST "Lateral position, left positive. Holds the low 12 bits of a 13-bit value: beyond +20.95 m (targets 21-53 m to the left in turns and at junctions) it wraps by 40.96 m, and the check byte then differs from the CRC of the visible bits by 0x14. Stops at -20.00 m on the right.";
+CM_ SG_ 567 TRACKER_A "Raw tracker byte: about 35 on a steady target, higher while it accelerates or brakes.";
+CM_ SG_ 567 TRACKER_B "Raw tracker byte: about 86 for a stopped target, 128-135 for a steady mover, rises (and wraps) while it accelerates or brakes.";
+CM_ SG_ 567 IN_PATH "1 while the target is confirmed in the path (level 5).";
+CM_ SG_ 567 PRESENT "1 = target present.";
+CM_ SG_ 567 IN_PATH_LEVEL "In-path level 5, 4, 3, 2; steps to the neighboring level only; lower levels sit farther from the path.";
+CM_ SG_ 567 IN_PATH_CANDIDATE "1 while the target is a candidate (levels 4-2).";
+CM_ BO_ 569 "ACC target, part 3: 50 Hz.";
+CM_ SG_ 569 CHECK_BYTE "CRC-8 like ACC_TARGET_1's, over this frame's signals.";
+CM_ SG_ 569 CLASS "Target class: 1 car, 2 truck; likely 0 narrow and 6 wide stationary object, 4 unclassified object, 5 crossing object; 7 idle, 15 start-up; 3 never seen.";
+CM_ SG_ 569 STATE "1 with an ACC target, 2 idle.";
+CM_ SG_ 569 IN_OBJECT_LIST "1 while the target also has an object in the 0x80 object list.";
+CM_ SG_ 569 PRESENT "1 = target present.";
+CM_ SG_ 569 TIMESTAMP "Radar cycle clock: changes once per 60 ms radar cycle, when the ACC target is recomputed.";
+CM_ BO_ 571 "ACC target, part 4: 50 Hz, 3 bytes.";
+CM_ SG_ 571 CHECK_BYTE "CRC-8 SAE J1850 (polynomial 0x1D, init 0xFF, final xor 0xFF) over the bytes 0x00, COUNTER, WIDTH as 16 bits.";
+CM_ SG_ 571 WIDTH "Target width: 0 while idle, 140-220 cm for the car class, 200-280 cm for the truck class.";
+CM_ BO_ 1664 "One object from the radar's tracker every 0.5 s: its track number 0, which is the ACC target whenever TARGET_ID is 0 and otherwise mostly a stationary roadside object.";
+CM_ SG_ 1664 SELECTOR "0 / 1 mostly stationary objects, 3 mostly same-direction vehicles.";
+CM_ SG_ 1664 LONG_DIST "Longitudinal distance.";
+CM_ SG_ 1664 LAT_DIST "Lateral position, left positive; covers +-15.36 m.";
+CM_ SG_ 1664 SPEED "Speed over ground; 0 for stationary objects.";
+CM_ SG_ 1664 STATIONARY "1 for a stationary object.";
+CM_ SG_ 1664 ONCOMING "1 for an oncoming object.";
+CM_ SG_ 1664 SEEN_MOVING "1 once the object has been seen moving (with STATIONARY: a stopped vehicle).";
+CM_ SG_ 1664 LAT_SPEED "Lateral speed over ground, left positive (about 0.13-0.18 m/s per code, nominal 0.15).";
+VAL_ 565 STATE 15 "STARTUP" 5 "TARGET" 1 "NO_TARGET" ;
+VAL_ 569 CLASS 0 "STATIONARY_NARROW" 1 "CAR" 2 "TRUCK" 4 "UNCLASSIFIED" 5 "CROSSING" 6 "STATIONARY_WIDE" 7 "NO_TARGET" 15 "STARTUP" ;
+VAL_ 569 STATE 1 "TARGET" 2 "NO_TARGET" ;
