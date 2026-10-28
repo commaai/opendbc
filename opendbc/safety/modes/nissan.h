@@ -2,7 +2,7 @@
 
 #include "opendbc/safety/declarations.h"
 
-static bool nissan_alt_eps = false;
+SAFETY_STATE static bool nissan_alt_eps = false;
 
 static const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
   .max_angle = 60000,  // 600 deg, reasonable limit

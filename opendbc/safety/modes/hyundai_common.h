@@ -44,30 +44,30 @@ enum {
 
 // common state
 extern bool hyundai_ev_gas_signal;
-bool hyundai_ev_gas_signal = false;
+SAFETY_STATE bool hyundai_ev_gas_signal = false;
 
 extern bool hyundai_hybrid_gas_signal;
-bool hyundai_hybrid_gas_signal = false;
+SAFETY_STATE bool hyundai_hybrid_gas_signal = false;
 
 extern bool hyundai_longitudinal;
-bool hyundai_longitudinal = false;
+SAFETY_STATE bool hyundai_longitudinal = false;
 
 extern bool hyundai_camera_scc;
-bool hyundai_camera_scc = false;
+SAFETY_STATE bool hyundai_camera_scc = false;
 
 extern bool hyundai_canfd_lka_steer_msg;
-bool hyundai_canfd_lka_steer_msg = false;
+SAFETY_STATE bool hyundai_canfd_lka_steer_msg = false;
 
 extern bool hyundai_alt_limits;
-bool hyundai_alt_limits = false;
+SAFETY_STATE bool hyundai_alt_limits = false;
 
 extern bool hyundai_fcev_gas_signal;
-bool hyundai_fcev_gas_signal = false;
+SAFETY_STATE bool hyundai_fcev_gas_signal = false;
 
 extern bool hyundai_alt_limits_2;
-bool hyundai_alt_limits_2 = false;
+SAFETY_STATE bool hyundai_alt_limits_2 = false;
 
-static uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
+SAFETY_STATE static uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 
 void hyundai_common_init(uint16_t param) {
   const uint16_t HYUNDAI_PARAM_EV_GAS = 1;

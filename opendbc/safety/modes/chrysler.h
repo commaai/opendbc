@@ -38,7 +38,7 @@ typedef enum {
   CHRYSLER_RAM_HD,
   CHRYSLER_PACIFICA,  // plus Jeep
 } ChryslerPlatform;
-static ChryslerPlatform chrysler_platform;
+SAFETY_STATE static ChryslerPlatform chrysler_platform;
 
 #define CHRYSLER_ADDR(name) ((uint32_t)((chrysler_platform == CHRYSLER_RAM_DT) ? CHRYSLER_RAM_DT_##name : \
                                         ((chrysler_platform == CHRYSLER_RAM_HD) ? CHRYSLER_RAM_HD_##name : CHRYSLER_##name)))

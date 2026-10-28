@@ -56,7 +56,7 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
   HYUNDAI_COMMON_TX_MSGS(0)
 };
 
-static bool hyundai_legacy = false;
+SAFETY_STATE static bool hyundai_legacy = false;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;
