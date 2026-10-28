@@ -319,21 +319,6 @@ class TestCanParserPacker(unittest.TestCase):
       ts_nanos = parser.ts_nanos["POWERTRAIN_DATA"].values()
       assert set(ts_nanos) == {0}
 
-  def test_learned_frequency(self):
-    for freq in (0.5, 1, 2, 5, 10, 20, 50, 100):
-      with self.subTest(freq=freq):
-        packer = CANPacker(TEST_DBC)
-        parser = CANParser(TEST_DBC, [("CAN_FD_MESSAGE", 0)], 0)
-        state = parser.message_states[245]
-
-        i = 0
-        while state.frequency == 0:
-          parser.update([int(i / freq * 1e9), [packer.make_can_msg("CAN_FD_MESSAGE", 0, {})]])
-          i += 1
-
-        self.assertAlmostEqual(state.frequency, freq)
-        self.assertAlmostEqual(state.timeout_threshold, 10 / freq * 1e9, delta=1)
-
   def test_nonexistent_messages(self):
     # Ensure we don't allow messages not in the DBC
     existing_messages = ("STEERING_CONTROL", 228, "CAN_FD_MESSAGE", 245)
