@@ -3,7 +3,7 @@ from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, WIKI, source, step
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
 Ecu = structs.CarParams.Ecu
@@ -124,6 +124,21 @@ class HondaCarDocs(CarDocs):
 
     if CP.alphaLongitudinalAvailable:
       self.footnotes.append(Footnote.HONDA_ALPHALONG)
+
+  def init_setup(self, guide):
+    refs = [source("Honda/Acura background information", WIKI + 'Honda-Acura')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Release the plastic cover behind the rearview mirror to reach the driver-assistance camera.',
+      "Release the cover's clips carefully; leave the camera attached to the windshield.",
+    ], "camera-access", refs)
+    guide["steps"][1]["body"][:2] = [
+      'Locate the connector plugged directly into the factory driver-assistance camera. Other mirror and sensor connectors may be nearby.',
+      'Release the connector locking tab and unplug it from the camera, then plug it into the car harness.',
+      'Connect the harness back into the camera. Do not force a connector that does not match; check the selected harness and connection point.',
+    ]
 
 class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(

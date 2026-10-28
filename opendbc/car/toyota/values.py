@@ -7,7 +7,7 @@ from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms
 from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarFootnote, CarDocs, Column, CarParts, CarHarness, SupportType
+from opendbc.car.docs_definitions import CarFootnote, CarDocs, Column, CarParts, CarHarness, SupportType, WIKI, source, step
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -96,6 +96,18 @@ class Footnote(Enum):
 class ToyotaCarDocs(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.toyota_a]))
+
+  def init_setup(self, guide):
+    refs = [source(f"{self.make} camera cover removal reference", WIKI + 'Toyota-Lexus#how-do-i-remove-the-camera-cover-in-my-car')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Check the cover layout behind the rearview mirror against the removal reference; cover designs vary by model.',
+      'For the two-piece cover shown in the reference, release the small upper cover first, releasing its two clips together.',
+      'Then slide the main camera cover parallel to the windshield to release its clips and guides.',
+      'Keep the camera attached to the windshield while fitting the harness.',
+    ], "camera-access", refs)
 
 
 @dataclass

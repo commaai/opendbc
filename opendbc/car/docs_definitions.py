@@ -225,6 +225,98 @@ def split_name(name: str) -> tuple[str, str, str]:
   return make, model, years
 
 
+SETUP = {"title": "comma four setup", "url": "https://comma.ai/setup"}
+SETUP_VIDEO = "https://www.youtube.com/watch?v=Us4FodlaQ74"
+WIKI = "https://github.com/commaai/openpilot/wiki/"
+
+
+def source(title, url):
+  return {"title": title, "url": url}
+
+
+def step(step_id, title, body, media, sources=None):
+  return {"id": step_id, "title": title, "body": body, "media": media, "sources": sources or [dict(SETUP)]}
+
+
+def mount_step():
+  return step("mount", "Place mount high and centered on the windshield", [
+    "Clean the mounting area with the included alcohol wipe and let it dry.",
+    "Leave enough room for the cable when the device is mounted, and make sure you can see the screen from a seated position.",
+    "Center the mount horizontally so the device can properly center in the lane.",
+    "Peel off the mount's tape cover. Press firmly in the center, then the edges. Make sure no bubbles form.",
+  ], "mount")
+
+
+def device_step(remote=False):
+  body = [
+    "Plug the OBD-C cable into the harness box. Make sure the cable is fully seated.",
+    "Plug the OBD-C cable into the comma four. Make sure the cable is all the way in.",
+    "Slide the device onto the mount until it is fully seated.",
+  ]
+  if remote:
+    body.insert(0, "Route the long OBD-C cable from the harness box to the windshield. Keep it clear of pedals, moving parts, and airbag deployment paths.")
+  return step("device", "Plug in OBD-C and mount the device", body, "device-remote" if remote else "device")
+
+
+def camera_steps():
+  return [
+    step("access", "Remove the rearview mirror cover trim", [
+      "Check the cover release method for your model and year before removing it. Keep the camera attached to the windshield.",
+      "The photos show an example installation; covers and connector positions vary by vehicle.",
+    ], "camera-access"),
+    step("connect", "Connect car harness into the camera", [
+      "Unplug the existing LKAS camera connector and plug it into the harness.",
+      "Connect the other end of the harness back into the LKAS camera.",
+      "Connect the small car-harness connector to the harness box and make sure it is fully seated.",
+      "Find a spot for the harness box so the trim can still fit over it. Peel off the adhesive backing and attach the box in place.",
+    ], "camera-connect"),
+    mount_step(), device_step(),
+    step("close", "Reinstall the rearview mirror cover trim", [
+      "Make sure the car harness fully fits inside the trim.",
+      "Generally, it is best to have the OBD-C cable come out of the top.",
+    ], "camera-close"),
+  ]
+
+
+def remote_steps(location, access, module, media, sources):
+  return [
+    step("access", f"Access the {location}", access, media, sources),
+    step("connect", f"Connect the harness at the {module}", [
+      f"Unplug the vehicle connector at the {module} and plug it into the matching end of your car harness.",
+      f"Plug the other end of the harness back into the {module}. Make sure the connector locks are fully engaged.",
+      "Connect the small car-harness connector to the harness box and make sure it is fully seated.",
+      "Secure the harness box where the trim can fit back in place without pinching any cables.",
+    ], media, sources),
+    mount_step(), device_step(remote=True),
+    step("close", "Secure the cable and reinstall the trim", [
+      "Secure excess cable so it cannot move into pedals, seat rails, or other moving parts. Keep airbag deployment paths clear.",
+      "Check that the harness and cable fit behind the panels, then reinstall the trim you removed.",
+    ], media, sources),
+  ]
+
+
+def get_default_setup_guide() -> dict:
+  """Return independent JSON-ready default installation content."""
+  guide = {
+    "id": "default", "title": "comma four setup", "summary": "Install your comma four in five steps.",
+    "steps": camera_steps(), "power": "optional", "notes": [], "power_notes": [],
+    "power_instructions": [
+      "Plug comma power into the vehicle's OBD-II port. Route its cable clear of pedals and airbag deployment paths.",
+      "Connect its small 4-pin plug to the matching socket on the harness box.",
+    ],
+    "parts": ["comma four", "mount", "OBD-C cable", "car harness", "harness box", "comma power"],
+    "sources": [dict(SETUP)], "video": SETUP_VIDEO, "video_is_reference": False,
+  }
+  return guide
+
+
+def apply_remote_setup(guide, harness, location, access, module, media, sources):
+  guide["steps"] = remote_steps(location, access, module, media, sources)
+  guide["summary"] = f"Your {harness.value.name} connects at the {module}. Follow the vehicle-specific steps below."
+  guide["sources"] = [dict(SETUP), *sources]
+  guide["video_is_reference"] = True
+
+
 @dataclass
 class CarDocs:
   # make + model + model years
@@ -252,6 +344,38 @@ class CarDocs:
   def __post_init__(self):
     self.make, self.model, self.years = split_name(self.name)
     self.year_list = get_year_list(self.years)
+
+  def init_setup(self, guide):
+    """Customize installation content in the brand's CarDocs subclass."""
+
+  def get_setup_guide(self) -> dict:
+    """Build independent installation content for this initialized CarDocs entry."""
+    guide = get_default_setup_guide()
+    parts = self.car_parts.all_parts()
+    harness = next((p for p in parts if isinstance(p, CarHarness)), None)
+    if harness is None:
+      raise ValueError(f"No installation harness for {self.name}")
+    part_names = ("supplied short OBD-C cable" if p == Cable.obd_c_cable_2ft else p.value.name for p in parts)
+    guide.update(id=self.name, title=f"{self.make} {self.model}", parts=list(dict.fromkeys(part_names)))
+    guide["video"] = self.setup_video or SETUP_VIDEO
+    guide["summary"] = f"Install your comma four with the {harness.value.name}."
+    guide["sources"].append(source(f"{self.make} installation reference", WIKI + getattr(self, "brand", "")))
+    if self.setup_video:
+      guide["sources"].append(source("Vehicle installation video", self.setup_video))
+    self.init_setup(guide)
+    if guide["video"] != SETUP_VIDEO and not any(s["url"] == guide["video"] for s in guide["sources"]):
+      guide["sources"].append(source("Vehicle installation video", guide["video"]))
+    if self.requires_comma_power:
+      guide["power"] = "required"
+      guide["steps"].insert(2, step("power", "Connect comma power", [
+        *guide["power_instructions"],
+        "Your vehicle needs this power connection. Route the cable clear of pedals and airbag deployment paths.",
+      ], "power", guide["sources"][1:]))
+    elif Accessory.comma_power not in parts:
+      guide["power"] = "included"
+    # CAN networkLocation does not describe physical access or the video's hardware generation.
+    guide["video_is_reference"] = True
+    return guide
 
   def init(self, CP: CarParams, all_footnotes=None):
     self.brand = CP.brand
