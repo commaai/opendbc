@@ -69,7 +69,7 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     ]
     for controls_allowed in (True, False):
       for btn, should_tx in btns:
-        self.safety.set_controls_allowed(controls_allowed)
+        self._set_controls_allowed(controls_allowed)
         args = {} if btn is None else {btn: 1}
         tx = self._tx(self._acc_button_cmd(**args))
         self.assertEqual(tx, should_tx)

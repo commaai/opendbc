@@ -18,17 +18,22 @@ class HyundaiButtonBase:
   BUTTONS_TX_BUS = 0  # tx on this bus, rx on 0
   SCC_BUS = 0  # rx on this bus
 
+  def _engage(self):
+    self.assertTrue(self._rx(self._button_msg(Buttons.SET)))
+    self.assertTrue(self._rx(self._pcm_status_msg(False)))
+    self.assertTrue(self._rx(self._pcm_status_msg(True)))
+
   def test_button_sends(self):
     """
       Only RES and CANCEL buttons are allowed
       - RES allowed while controls allowed
       - CANCEL allowed while cruise is enabled
     """
-    self.safety.set_controls_allowed(0)
+    self._set_controls_allowed(0)
     self.assertFalse(self._tx(self._button_msg(Buttons.RESUME, bus=self.BUTTONS_TX_BUS)))
     self.assertFalse(self._tx(self._button_msg(Buttons.SET, bus=self.BUTTONS_TX_BUS)))
 
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(Buttons.RESUME, bus=self.BUTTONS_TX_BUS)))
     self.assertFalse(self._tx(self._button_msg(Buttons.SET, bus=self.BUTTONS_TX_BUS)))
 
@@ -72,6 +77,13 @@ class HyundaiButtonBase:
 
 class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
+  def _engage(self):
+    self.assertTrue(self._rx(self._button_msg(Buttons.SET)))
+    self.assertTrue(self._rx(self._button_msg(Buttons.NONE)))
+
+  def _disengage(self):
+    self.assertTrue(self._rx(self._button_msg(Buttons.CANCEL)))
+
   DISABLED_ECU_UDS_MSG: tuple[int, int]
   DISABLED_ECU_ACTUATION_MSG: tuple[int, int]
 
@@ -104,7 +116,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     for btn_prev in range(8):
       for btn_cur in range(8):
         self._rx(self._button_msg(Buttons.NONE))
-        self.safety.set_controls_allowed(0)
+        self._set_controls_allowed(0)
         for _ in range(10):
           self._rx(self._button_msg(btn_prev))
           self.assertFalse(self.safety.get_controls_allowed())
@@ -118,7 +130,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self.assertEqual(should_enable, self.safety.get_controls_allowed())
 
   def test_cancel_button(self):
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
