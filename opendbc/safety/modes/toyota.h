@@ -84,7 +84,7 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
   if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
     // each wheel speed is 1-bit fault + 15-bit speed
     valid = true;
-    for (uint8_t i = 0U; i < 4U; i += 1U) {
+    for (uint32_t i = 0U; i < 4U; i += 1U) {
       if (GET_BIT(msg, (i * 16U) + 7U)) {  // WHEEL_SPEED_xx_FAULT
         valid = false;
         break;
@@ -157,7 +157,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0xaaU, 0U)) {
     int speed = 0;
     // sum 4 wheel speeds. conversion: raw * 0.01 - 67.67
-    for (uint8_t i = 0U; i < 8U; i += 2U) {
+    for (uint32_t i = 0U; i < 8U; i += 2U) {
       int wheel_speed = ((msg->data[i] & 0x7FU) << 8U) | msg->data[(i + 1U)];
       speed += wheel_speed - 6767;
     }
