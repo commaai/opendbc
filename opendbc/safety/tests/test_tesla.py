@@ -212,6 +212,20 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
           self.assertFalse(self.safety.get_steering_disengage_prev())
 
+  def test_acc_cancel(self):
+    # disallow controls on any change of ACC_CANCEL_GENERIC_SILENT with openpilot longitudinal
+    cancel = self.acc_states["ACC_CANCEL_GENERIC_SILENT"]
+    for acc_state in range(16):
+      for new_acc_state in range(16):
+        self._rx(self._long_control_msg(0, acc_state=acc_state, bus=2))
+        self._rx(self._pcm_status_msg(False))
+        self._rx(self._pcm_status_msg(True))
+        self.assertTrue(self.safety.get_controls_allowed())
+
+        self._rx(self._long_control_msg(0, acc_state=new_acc_state, bus=2))
+        should_disengage = self.LONGITUDINAL and ((acc_state == cancel) != (new_acc_state == cancel))
+        self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+
   def test_autopark_summon_while_enabled(self):
     # We should not respect Autopark that activates while controls are allowed
     self._rx(self._pcm_status_msg(True, 0))
