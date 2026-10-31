@@ -248,6 +248,7 @@ FW_VERSIONS = {
       b'\xf1\x00TM__ SCC F-CUP      1.00 1.01 99110-S2000         ',
       b'\xf1\x00TM__ SCC F-CUP      1.00 1.02 99110-S2000         ',
       b'\xf1\x00TM__ SCC F-CUP      1.00 1.03 99110-S2000         ',
+      b'\xf1\x00TM__ SCC FHCUP      1.00 1.02 99110-S1100         ',
     ],
     (Ecu.abs, 0x7d1, None): [
       b'\xf1\x00TM ESC \x02 100\x18\x030 58910-S2600',
@@ -270,6 +271,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00TM  MFC  AT EUR LHD 1.00 1.01 99211-S1010 181207',
+      b'\xf1\x00TM  MFC  AT KOR LHD 1.00 1.00 99211-S1010 180412',
       b'\xf1\x00TM  MFC  AT USA LHD 1.00 1.00 99211-S2000 180409',
     ],
   },
