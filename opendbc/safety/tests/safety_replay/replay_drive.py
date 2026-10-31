@@ -73,8 +73,9 @@ def replay_drive(msgs, safety_mode, param, alternative_experience):
   print("blocked msgs:", tx_blocked)
   print("blocked with controls allowed:", tx_controls_blocked)
   print("blocked addrs:", blocked_addrs)
+  print("safety compute mismatch:", safety.get_safety_compute_mismatch())
 
-  return tx_controls_blocked == 0 and rx_invalid == 0 and not safety_tick_rx_invalid
+  return tx_controls_blocked == 0 and rx_invalid == 0 and not safety_tick_rx_invalid and not safety.get_safety_compute_mismatch()
 
 
 if __name__ == "__main__":

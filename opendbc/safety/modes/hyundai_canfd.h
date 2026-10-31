@@ -45,8 +45,8 @@
 #define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                                                            \
   {.msg = {{0x1a0, (scc_bus), 32, 50U, .max_counter = 0xffU, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
-static bool hyundai_canfd_alt_buttons = false;
-static bool hyundai_canfd_lka_steer_msg_alt = false;
+SAFETY_STATE static bool hyundai_canfd_alt_buttons = false;
+SAFETY_STATE static bool hyundai_canfd_lka_steer_msg_alt = false;
 
 static unsigned int hyundai_canfd_get_lka_addr(void) {
   return hyundai_canfd_lka_steer_msg_alt ? 0x110U : 0x50U;

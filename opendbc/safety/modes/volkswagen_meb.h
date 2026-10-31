@@ -23,7 +23,7 @@
 #define VOLKSWAGEN_MEB_ACC_AKTIV_REGELT        3U
 #define VOLKSWAGEN_MEB_ACC_OVERRIDE            4U
 
-static bool volkswagen_meb_alt_crc = false;
+SAFETY_STATE static bool volkswagen_meb_alt_crc = false;
 
 #define VOLKSWAGEN_MEB_COMMON_RX_CHECKS \
   {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \

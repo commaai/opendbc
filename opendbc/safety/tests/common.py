@@ -93,6 +93,9 @@ class SafetyTestBase(unittest.TestCase):
       self.safety.set_safety_hooks(self.SAFETY_MODEL, self.SAFETY_PARAM)
     self.safety.init_tests()
 
+  def tearDown(self):
+    self.assertFalse(self.safety.get_safety_compute_mismatch())
+
   @classmethod
   def setUpClass(cls):
     # Classes defined in this module and classes named *Base are shared test helpers.
