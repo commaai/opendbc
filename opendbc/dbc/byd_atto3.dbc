@@ -138,6 +138,15 @@ BO_ 803 CHARGE_STATUS: 8 VCU
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
+BO_ 906 ADAS_STATUS: 8 ADAS_ECU
+ SG_ GAS_PRESSED : 11|1@1+ (1,0) [0|1] "" MCU
+ SG_ DRIVE_FLAG : 13|1@1+ (1,0) [0|1] "" MCU
+ SG_ SET_ME_38A_MODE : 32|2@1+ (1,0) [0|3] "" XXX
+ SG_ TRACK_STATUS : 34|2@1+ (1,0) [0|3] "" XXX
+ SG_ ADAS_ACTIVE : 36|1@1+ (1,0) [0|1] "" MCU
+ SG_ LEFT_BLINKER : 37|1@1+ (1,0) [0|1] "" MCU
+ SG_ RIGHT_BLINKER : 38|1@1+ (1,0) [0|1] "" MCU
+
 BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
  SG_ SET_SPEED : 0|8@1+ (0.5,0) [0|127.5] "kph" MCU
  SG_ LEAD_VISIBLE : 9|1@1+ (1,0) [0|1] "" MCU
@@ -258,6 +267,14 @@ CM_ SG_ 1048 RCTA_RIGHT_2 "Byte 3 bit 2. Not paired with RCTA_RIGHT. Observe onl
 CM_ BO_ 815 "Predictive Collision Warning from camera. Byte 2 0x36 is pre-warning. Observe only.";
 CM_ SG_ 815 PCW_STATE "Byte 2. 0x02 idle, 0x36 pre-warning.";
 CM_ BO_ 803 "Charging session, 10 Hz. CHARGE_SOC is 0xFF outside a session. CHARGE_UNKNOWN_12BIT reads 0xFFE unplugged, 500 plugged idle, 583-778 during DC charging; scale not established.";
+CM_ BO_ 906 "ADAS ECU status, ~1 Hz, observe only. Byte 7 is an inverted-sum checksum: (~sum(bytes 0-6)) & 0xFF.";
+CM_ SG_ 906 GAS_PRESSED "Byte 1 bit 3. Tracks the throttle pedal.";
+CM_ SG_ 906 DRIVE_FLAG "Byte 1 bit 5. 1 driving, 0 standstill.";
+CM_ SG_ 906 SET_ME_38A_MODE "Byte 4 bits 0-1. Status toggle, alternates 1/2. Not a range value.";
+CM_ SG_ 906 TRACK_STATUS "Byte 4 bits 2-3. Mode bits, 01 typical. Not tied to lead kinematics.";
+CM_ SG_ 906 ADAS_ACTIVE "Byte 4 bit 4. On while the system runs. Clears during an alert.";
+CM_ SG_ 906 LEFT_BLINKER "Byte 4 bit 5. Mirrors the left turn signal.";
+CM_ SG_ 906 RIGHT_BLINKER "Byte 4 bit 6. Mirrors the right turn signal.";
 CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state, lead shading).";
 CM_ SG_ 813 LEAD_SHADING "Trail between ego and lead: 3 green, 2 closer than the gap, 1 too close. Gas override turns the trail red with ACC_OVERRIDE.";
 CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active. Idle 64 64 64 80 50 00; active bytes 1-2 are 66.";
