@@ -134,14 +134,14 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
       No button send allowed with alt buttons.
     """
     for enabled in (True, False):
+      self._set_controls_allowed(enabled)
       for btn in range(8):
-        self.safety.set_controls_allowed(enabled)
         self.assertFalse(self._tx(self._button_msg(btn)))
 
   def test_acc_cancel(self):
     # FIXME: the CANFD_ALT_BUTTONS cars are the only ones that use SCC_CONTROL to cancel, why can't we use buttons?
     for enabled in (True, False):
-      self.safety.set_controls_allowed(enabled)
+      self._set_controls_allowed(enabled)
       self.assertTrue(self._tx(self._acc_cancel_msg(True)))
       self.assertFalse(self._tx(self._acc_cancel_msg(True, accel=1)))
       self.assertFalse(self._tx(self._acc_cancel_msg(False)))

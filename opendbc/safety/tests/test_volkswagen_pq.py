@@ -26,10 +26,6 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 3
 
-  def _set_prev_torque(self, t):
-    self.safety.set_desired_torque_last(t)
-    self.safety.set_rt_torque_last(t)
-
   # Ego speed (Bremse_1)
   def _speed_msg(self, speed):
     values = {"BR1_Rad_kmh": speed}
@@ -38,12 +34,14 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
   # Brake light switch (shared message Motor_2)
   def _user_brake_msg(self, brake):
     # since this signal is used for engagement status, preserve current state
-    return self._motor_2_msg(brake_pressed=brake, cruise_engaged=self.safety.get_controls_allowed())
+    self._brake_pressed = brake
+    return self._motor_2_msg(brake_pressed=brake, cruise_engaged=getattr(self, "_cruise_enabled", False))
 
   # ACC engaged status (shared message Motor_2)
   def _pcm_status_msg(self, enable):
     self.__class__.cruise_engaged = enable
-    return self._motor_2_msg(cruise_engaged=enable)
+    self._cruise_enabled = enable
+    return self._motor_2_msg(brake_pressed=getattr(self, "_brake_pressed", False), cruise_engaged=enable)
 
   # Acceleration request to drivetrain coordinator
   def _accel_msg(self, accel):
@@ -91,12 +89,12 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1]}
 
   def test_spam_cancel_safety_check(self):
-    self.safety.set_controls_allowed(0)
+    self._set_controls_allowed(0)
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertFalse(self._tx(self._button_msg(resume=True)))
     self.assertFalse(self._tx(self._button_msg(_set=True)))
     # do not block resume if we are engaged already
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
 
@@ -108,6 +106,16 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1, MSG_ACC_SYSTEM, MSG_ACC_GRA_ANZEIGE]}
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1, MSG_ACC_SYSTEM, MSG_ACC_GRA_ANZEIGE)}
   INACTIVE_ACCEL = 3.01
+
+  def _engage(self):
+    self.assertTrue(self._rx(self._motor_5_msg(main_switch=True)))
+    self.assertTrue(self._rx(self._button_msg(bus=0)))
+    self.assertTrue(self._rx(self._button_msg(_set=True, bus=0)))
+    self.assertTrue(self._rx(self._button_msg(bus=0)))
+
+  def _disengage(self):
+    self.assertTrue(self._rx(self._button_msg(cancel=True, bus=0)))
+    self.assertTrue(self._rx(self._button_msg(bus=0)))
 
   # stock cruise controls are entirely bypassed under openpilot longitudinal control
   def test_disable_control_allowed_from_cruise(self):
@@ -122,7 +130,7 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
   def test_set_and_resume_buttons(self):
     for button in ["set", "resume"]:
       # ACC main switch must be on, engage on falling edge
-      self.safety.set_controls_allowed(0)
+      self._set_controls_allowed(0)
       self._rx(self._motor_5_msg(main_switch=False))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self._rx(self._button_msg(bus=0))
@@ -136,20 +144,20 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._motor_5_msg(main_switch=True))
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._button_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
   def test_main_switch(self):
     # Disable as soon as main switch turns off
     self._rx(self._motor_5_msg(main_switch=True))
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._motor_5_msg(main_switch=False))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after ACC main switch off")
 
   def test_torque_cmd_enable_variants(self):
     # The EPS rack accepts either 5 or 7 for an enabled status, with different low speed tuning behavior
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     for enabled_status in (5, 7):
       self.assertTrue(self._tx(self._torque_cmd_msg(self.MAX_RATE_UP, steer_req=1, hca_status=enabled_status)),
                       f"torque cmd rejected with {enabled_status=}")

@@ -109,12 +109,12 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02]}
 
   def test_spam_cancel_safety_check(self):
-    self.safety.set_controls_allowed(0)
+    self._set_controls_allowed(0)
     self.assertTrue(self._tx(self._gra_acc_01_msg(cancel=1)))
     self.assertFalse(self._tx(self._gra_acc_01_msg(resume=1)))
     self.assertFalse(self._tx(self._gra_acc_01_msg(_set=1)))
     # do not block resume if we are engaged already
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self.assertTrue(self._tx(self._gra_acc_01_msg(resume=1)))
 
 
@@ -126,6 +126,16 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07]}
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07), 2: (MSG_LH_EPS_03,)}
   INACTIVE_ACCEL = 3.01
+
+  def _engage(self):
+    self.assertTrue(self._rx(self._tsk_status_msg(False, main_switch=True)))
+    self.assertTrue(self._rx(self._gra_acc_01_msg(bus=0)))
+    self.assertTrue(self._rx(self._gra_acc_01_msg(_set=True, bus=0)))
+    self.assertTrue(self._rx(self._gra_acc_01_msg(bus=0)))
+
+  def _disengage(self):
+    self.assertTrue(self._rx(self._gra_acc_01_msg(cancel=True, bus=0)))
+    self.assertTrue(self._rx(self._gra_acc_01_msg(bus=0)))
 
   # stock cruise controls are entirely bypassed under openpilot longitudinal control
   def test_disable_control_allowed_from_cruise(self):
@@ -140,7 +150,7 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   def test_set_and_resume_buttons(self):
     for button in ["set", "resume"]:
       # ACC main switch must be on, engage on falling edge
-      self.safety.set_controls_allowed(0)
+      self._set_controls_allowed(0)
       self._rx(self._tsk_status_msg(False, main_switch=False))
       self._rx(self._gra_acc_01_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} with main switch off")
@@ -153,14 +163,14 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False, main_switch=True))
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._gra_acc_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
   def test_main_switch(self):
     # Disable as soon as main switch turns off
     self._rx(self._tsk_status_msg(False, main_switch=True))
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._tsk_status_msg(False, main_switch=False))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after ACC main switch off")
 
@@ -171,7 +181,7 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
         accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
         is_inactive_accel = accel == self.INACTIVE_ACCEL
         send = (controls_allowed and MIN_ACCEL <= accel <= MAX_ACCEL) or is_inactive_accel
-        self.safety.set_controls_allowed(controls_allowed)
+        self._set_controls_allowed(controls_allowed)
         # primary accel request used by ECU
         self.assertEqual(send, self._tx(self._acc_06_msg(accel)), (controls_allowed, accel))
         # additional accel request used by ABS/ESP

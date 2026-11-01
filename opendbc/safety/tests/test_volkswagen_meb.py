@@ -44,29 +44,29 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   def _set_prev_desired_power(self, power: int):
     # init with local tx sequence
     prev_allowed = self.safety.get_controls_allowed()
-    self.safety.set_controls_allowed(True)
-    self._tx(self._curvature_cmd_msg(0, steer_req=True, power=power))
-    self.safety.set_controls_allowed(prev_allowed)
+    self._set_controls_allowed(True)
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=power)))
+    self._set_controls_allowed(prev_allowed)
 
   def test_power_limit(self):
     max_power_can = self.MAX_POWER
     max_power = self.MAX_POWER_TEST
     self._set_prev_desired_power(max_power_can)
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
 
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))
     self.assertTrue(self.safety.get_controls_allowed())
 
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power + 1)))
 
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
 
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))
     self.assertTrue(self.safety.get_controls_allowed())
 
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=max_power)))
 
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
 
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))
     self.assertTrue(self.safety.get_controls_allowed())
@@ -77,7 +77,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     max_power_can = self.MAX_POWER
     max_power = self.MAX_POWER_TEST
     self._set_prev_desired_power(max_power_can)
-    self.safety.set_controls_allowed(False)
+    self._set_controls_allowed(False)
 
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=max_power)))
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=False, power=0)))
@@ -110,6 +110,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     return self._motor_14_msg(brake)
 
   def _user_gas_msg(self, gas):
+    self._gas_pressed = bool(gas)
     values = {"Accel_Pedal_Pressure": 1 if gas else 0, "TSK_Status": 3}
     return self.packer.make_can_msg_safety("Motor_51", 0, values)
 
@@ -122,7 +123,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
 
   def _curvature_cmd_msg(self, curvature, steer_req=1, power=50, increment_timer=True):
     if increment_timer:
-      self.safety.set_timer(self.cnt_curvature_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      self.safety.set_timer(max(self.safety.get_timer(), self.cnt_curvature_cmd * int(1e6 / self.LATERAL_FREQUENCY)))
       self.__class__.cnt_curvature_cmd += 1
     values = {
       "Curvature": abs(curvature),
@@ -143,7 +144,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
       tsk_status = 3 if enable else 2
     else:
       tsk_status = 0
-    values = {"TSK_Status": tsk_status}
+    values = {"TSK_Status": tsk_status, "Accel_Pedal_Pressure": getattr(self, "_gas_pressed", False)}
     return self.packer.make_can_msg_safety("Motor_51", 0, values)
 
   def _pcm_status_msg(self, enable):
@@ -206,12 +207,12 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
           self.assertEqual(should_rx, self._rx(msg))
 
   def test_main_switch_off_disables_controls(self):
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
     self._rx(self._tsk_status_msg(False, main_switch=False))
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_cancel_button_rising_edge(self):
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
     self._rx(self._button_msg(cancel=1, bus=0))
     self.assertFalse(self.safety.get_controls_allowed())
 
@@ -221,7 +222,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
         speed_2 = round(max(speed + speed_delta, 0), 1)
         self._rx(self._speed_msg(speed))
         self._rx(self._speed_msg_2(speed_2))
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         self._tx(self._curvature_cmd_msg(0, steer_req=True))
 
         within_delta = common.speeds_within_delta(speed, speed_2)
@@ -230,7 +231,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   def test_curvature_violation(self):
     # if violation occurs, desired_curvature_last is reset to 0
     meas = self.MAX_CURVATURE_TEST / 4
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
     self._reset_curvature_measurement(meas)
     self._set_prev_desired_curvature(0)
 
@@ -244,7 +245,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     # Tests that only a zero curvature is allowed while the steer
     # actuation bit is 0, regardless of controls allowed or meas
     for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
 
       for steer_req in (True, False):
         for curvature_meas in np.arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST / 5):
@@ -252,6 +253,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
 
           for curvature_cmd in np.arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST / 5):
             self._set_prev_desired_curvature(curvature_cmd)
+            self._set_controls_allowed(controls_allowed)
 
             # controls_allowed is checked if actuation bit is 1, else the curvature must be zero (inactive)
             should_tx = controls_allowed if steer_req else round(curvature_cmd * self.CURVATURE_TO_CAN) == 0
@@ -272,6 +274,16 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
   ACCEL_OVERRIDE = 0
   INACTIVE_ACCEL = 3.01
 
+  def _engage(self):
+    self.assertTrue(self._rx(self._tsk_status_msg(False, main_switch=True)))
+    self.assertTrue(self._rx(self._button_msg(bus=0)))
+    self.assertTrue(self._rx(self._button_msg(_set=True, bus=0)))
+    self.assertTrue(self._rx(self._button_msg(bus=0)))
+
+  def _disengage(self):
+    self.assertTrue(self._rx(self._button_msg(cancel=True, bus=0)))
+    self.assertTrue(self._rx(self._button_msg(bus=0)))
+
   # stock cruise controls are entirely bypassed under openpilot longitudinal control
   def test_disable_control_allowed_from_cruise(self):
     pass
@@ -285,7 +297,7 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
   def test_set_and_resume_buttons(self):
     for button in ["set", "resume"]:
       # ACC main switch must be on, engage on falling edge
-      self.safety.set_controls_allowed(0)
+      self._set_controls_allowed(0)
       self._rx(self._tsk_status_msg(False, main_switch=False))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} with main switch off")
@@ -298,14 +310,14 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False, main_switch=True))
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._button_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
   def test_main_switch(self):
     # Disable as soon as main switch turns off
     self._rx(self._tsk_status_msg(False, main_switch=True))
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._tsk_status_msg(False, main_switch=False))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after ACC main switch off")
 
@@ -315,12 +327,12 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
         accel = round(accel, 2)
         is_inactive_accel = accel == self.INACTIVE_ACCEL
         send = (controls_allowed and MIN_ACCEL <= accel <= MAX_ACCEL) or is_inactive_accel
-        self.safety.set_controls_allowed(controls_allowed)
+        self._set_controls_allowed(controls_allowed)
         self.assertEqual(send, self._tx(self._accel_msg(accel)), (controls_allowed, accel))
 
   def test_accel_override_with_gas(self):
-    self.safety.set_controls_allowed(True)
-    self.safety.set_gas_pressed_prev(True)
+    self._set_controls_allowed(True)
+    self.assertTrue(self._rx(self._user_gas_msg(True)))
     self.assertTrue(self._tx(self._accel_msg(self.ACCEL_OVERRIDE)))
     self.assertFalse(self._tx(self._accel_msg(MAX_ACCEL)))
 
@@ -329,7 +341,7 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
     # LOESEN_UEBER_RAMPE stay unconditional, the disengage ramp sends the latter once disallowed
     for controls_allowed in (True, False):
       for hold_type in range(8):
-        self.safety.set_controls_allowed(controls_allowed)
+        self._set_controls_allowed(controls_allowed)
         send = (hold_type in (HMS_KEINE_ANFORDERUNG, HMS_LOESEN_UEBER_RAMPE) or
                 (controls_allowed and hold_type in (HMS_HALTEN, HMS_ANFAHREN)))
         self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, hold_type=hold_type)))
@@ -339,7 +351,7 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
     for controls_allowed in (True, False):
       for acc_anfahren in (0, 1):
         for acc_anhalten in (0, 1):
-          self.safety.set_controls_allowed(controls_allowed)
+          self._set_controls_allowed(controls_allowed)
           send = controls_allowed or not (acc_anfahren or acc_anhalten)
           self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, acc_anfahren=acc_anfahren,
                                                           acc_anhalten=acc_anhalten)))
@@ -349,7 +361,7 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
     # standby, off and the fault state stay available for the HUD with controls disallowed
     for controls_allowed in (True, False):
       for acc_status in range(8):
-        self.safety.set_controls_allowed(controls_allowed)
+        self._set_controls_allowed(controls_allowed)
         send = controls_allowed or acc_status not in (ACC_AKTIV_REGELT, ACC_OVERRIDE)
         self.assertEqual(send, self._tx(self._accel_msg(self.INACTIVE_ACCEL, acc_status=acc_status)))
 
