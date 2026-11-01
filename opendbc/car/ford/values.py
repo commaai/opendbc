@@ -6,7 +6,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.lateral import CurvatureSteeringLimits
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, WIKI, source, step, apply_remote_setup
 from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries, p16
 
 Ecu = CarParams.Ecu
@@ -80,6 +80,53 @@ class FordCarDocs(CarDocs):
 
     if CP.carFingerprint in (CAR.FORD_F_150_MK14, CAR.FORD_F_150_LIGHTNING_MK1, CAR.FORD_EXPEDITION_MK4):
       self.setup_video = "https://www.youtube.com/watch?v=MewJc9LYp9M"
+
+  def init_setup(self, guide):
+    refs = [source(f"{self.make} installation reference", WIKI + 'ford')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Remove the plastic cover behind the rearview mirror to expose the camera connector.',
+      'The Ford Q3 harness connects to the 12-pin camera/IPMA connector here.',
+    ], "camera-access", refs)
+    harness = next(p for p in self.car_parts.all_parts() if isinstance(p, CarHarness))
+    remote = None
+    if harness == CarHarness.ford_q4:
+      refs = [source("Ford installation locations", "https://github.com/BluePilotDev/bluepilot#-installation"),
+              source("Ford Q4 connector identification", WIKI + "Ford#ford-q4--bluecruise--can-fd-20-pin"),
+              source("Ford Q4 IPMA port video", "https://www.youtube.com/watch?v=uUGkH6C_EQU")]
+      videos = {"Mustang Mach-E": "AR4_eTF3b_A", "Escape": "M6uXf4b2SHM", "Ranger": "2oJlXCKYOy0"}
+      for model, video_id in videos.items():
+        if self.model.startswith(model):
+          guide["video"] = "https://www.youtube.com/watch?v=" + video_id
+      if self.model.startswith(("F-150", "Expedition")):
+        remote = ("IPMA in the driver's footwell", ["Remove the driver's lower dash panel to reach the IPMA module above the pedals."], "IPMA", "footwell")
+      elif self.model.startswith(("Mustang Mach-E", "Escape")):
+        remote = ("IPMA in the cargo area", ["Open the cargo area and remove the trim covering the IPMA module.",
+                                               "Use the vehicle installation reference to identify the IPMA before disconnecting it."], "IPMA", "cargo")
+      elif self.model.startswith("Ranger"):
+        refs.append(source("Ranger harness installation, part 2", "https://www.youtube.com/watch?v=c5ZmMHuJ1Os"))
+        remote = ("IPMA behind the instrument cluster", [
+          "Follow both Ranger installation videos for the full instrument-cluster access procedure to reach the IPMA.",
+        ], "IPMA", "cluster")
+      else:
+        remote = ("IPMA module", ["Confirm the separate IPMA module location using service information for your vehicle.",
+                                   "The Q4 harness connects at this module; its location varies by model and market."], "IPMA", "module")
+      if self.model.startswith("Kuga"):
+        guide["notes"] = ["Exact IPMA module access for this Kuga has not yet been verified. " +
+                          "Consult vehicle service information or comma support before disconnecting any connectors."]
+      if self.model.startswith("Mustang Mach-E"):
+        guide["power_notes"] = ["For optional comma power, check the distance from the OBD-II port to the rear harness box before reinstalling trim. " +
+                                "A comma power extension may be needed; this is separate from the long OBD-C cable to the device."]
+    if remote:
+      apply_remote_setup(guide, harness, *remote, refs)
+      guide["steps"][1]["body"][:2] = [
+        "Identify the grey 20-pin IPMA connector C4242B using the connector reference and port video. " +
+        "This is the second IPMA port shown in the video; do not select a port by position alone.",
+        "Disconnect only this vehicle connector and plug it into the matching end of the Ford Q4 harness. " +
+        "Plug the other end back into the same IPMA port and fully engage both locks. Leave the other IPMA connectors connected.",
+      ]
 
 
 @dataclass
