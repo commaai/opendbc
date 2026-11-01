@@ -1,0 +1,234 @@
+# Known surviving mutants: equivalent mutations and coverage gaps deferred to a follow-up PR.
+# One per line, as `<file> <mutator> <context key> <mutated expression>` from mutation.py's `ignore:` output.
+# Keys use file, mutator, function, statement tokens and expression; no line numbers or mutant IDs.
+# Whitespace and comments in statement fingerprints are ignored; identical macro expansions use an occurrence suffix.
+# mutation.py fails if an entry no longer exists or gets killed, so the list can't go stale.
+
+# the added bit is not part of the signal and is never set in frames openpilot or the car sends
+opendbc/safety/modes/ford.h boundary ford_tx_hook:2928557076d4afb5:1 (msg->data[6] & [[0xC0U->0xC1U]] ) != 0U
+opendbc/safety/modes/mazda.h boundary mazda_rx_hook:2312b2d9e778625f:1 (msg->data[4] | (msg->data[5] & [[0xF0U->0xF1U]] )) != 0U
+opendbc/safety/modes/byd.h boundary byd_tx_hook:a723c0fcf4657b91:1 (msg->data[0] & [[0x58U->0x59U]] ) != 0U
+opendbc/safety/modes/byd.h boundary byd_tx_hook:a723c0fcf4657b91:1 (msg->data[1] & [[0x80U->0x81U]] ) != 0U
+opendbc/safety/modes/byd.h boundary byd_tx_hook:8c3e4ba79e3be3c9:1 (msg->data[2] & [[0x8U->0x9U]] ) != 0U
+
+# the >> 12 is a copy of the global-platform layout; preglobal FL only differs above ~242 km/h with every other wheel at zero
+opendbc/safety/modes/subaru_preglobal.h boundary subaru_preglobal_rx_hook:6246081225f0d56d:1 ((GET_BYTES_LE(msg, 0, 4) >> [[12->13]] ) | GET_BYTES_LE(msg, 4, 4)) != 0U
+
+# len is only ever 0, 28, 44 or 60
+opendbc/safety/modes/volkswagen_meb.h boundary volkswagen_meb_alt_crc_compute:329b13d4abc8c6ea:1 len > [[0->1]]
+
+# only resets heartbeat_engaged_mismatches, which panda consumes and libsafety does not expose
+opendbc/safety/safety.h remove_negation safety_rx_hook:7a47ff27aa8e8fb8:1 [[!->]] controls_allowed_prev
+
+# TODO: fix these surviving mutants separately; keep detecting any new survivors.
+
+# opendbc/safety/ignition.h
+opendbc/safety/ignition.h boundary ignition_can_hook:97b7ce25a30eaba8:1 (msg->data[0] & [[0x2U->0x3U]] ) != 0U
+
+# opendbc/safety/lateral.h
+opendbc/safety/lateral.h boundary steer_angle_cmd_checks:2eca22874161f6f3:1 desired_angle_last >= [[0->1]]
+opendbc/safety/lateral.h boundary steer_angle_cmd_checks:bbaa153526919c49:1 desired_angle_last > [[0->1]]
+
+# opendbc/safety/modes/byd.h
+opendbc/safety/modes/byd.h boundary byd_rx_hook:5e9e9d8e6da6f35d:1 acc_state == [[5U->6U]]
+opendbc/safety/modes/byd.h boundary byd_rx_hook:8f0ff23e3e54f010:1 (msg->data[3] & 0x7FU) > [[0U->1U]]
+opendbc/safety/modes/byd.h boundary byd_rx_hook:cd2c764e732c9035:1 speed > [[0->1]]
+
+# opendbc/safety/modes/chrysler.h
+opendbc/safety/modes/chrysler.h arithmetic chrysler_rx_hook:175dd785115cd055:1 (msg->data[2] << 4) [[+->-]] (msg->data[3] >> 4)
+opendbc/safety/modes/chrysler.h arithmetic chrysler_rx_hook:6a24e3c17df80cc2:1 (msg->data[4] << 8) [[+->-]] msg->data[5]
+opendbc/safety/modes/chrysler.h arithmetic chrysler_rx_hook:d8891c5d57b90ab1:1 (msg->data[0] << 4) [[+->-]] (msg->data[1] >> 4)
+opendbc/safety/modes/chrysler.h bitwise chrysler_rx_hook:e6eed4ecbf7fba16:1 speed_l [[|->&]] speed_r
+opendbc/safety/modes/chrysler.h boundary chrysler_rx_hook:6a24e3c17df80cc2:1 ((msg->data[ [[4->5]] ] << 8) + msg->data[5]) != 0U
+opendbc/safety/modes/chrysler.h boundary chrysler_rx_hook:6a24e3c17df80cc2:1 ((msg->data[4] << [[8->9]] ) + msg->data[5]) != 0U
+opendbc/safety/modes/chrysler.h comparison chrysler_rx_hook:21dc4a5dea4f8c90:1 chrysler_platform [[==->!=]] CHRYSLER_RAM_HD
+opendbc/safety/modes/chrysler.h comparison chrysler_rx_hook:4d468f0ce221353c:1 chrysler_platform [[==->!=]] CHRYSLER_RAM_HD
+opendbc/safety/modes/chrysler.h comparison chrysler_rx_hook:76034467afe0812a:1 chrysler_platform [[==->!=]] CHRYSLER_RAM_HD
+opendbc/safety/modes/chrysler.h comparison chrysler_rx_hook:b191c399592045d8:1 chrysler_platform [[==->!=]] CHRYSLER_RAM_HD
+opendbc/safety/modes/chrysler.h comparison chrysler_rx_hook:e2bb9d29922af219:1 chrysler_platform [[==->!=]] CHRYSLER_RAM_HD
+
+# opendbc/safety/modes/chrysler_cusw.h
+opendbc/safety/modes/chrysler_cusw.h arithmetic chrysler_cusw_rx_hook:96381816db972096:1 ((msg->data[4] & 0x7U) << 8) [[+->-]] msg->data[5]
+opendbc/safety/modes/chrysler_cusw.h boundary chrysler_cusw_rx_hook:96381816db972096:1 (((msg->data[ [[4->5]] ] & 0x7U) << 8) + msg->data[5]) != 0U
+opendbc/safety/modes/chrysler_cusw.h boundary chrysler_cusw_rx_hook:96381816db972096:1 (((msg->data[4] & 0x7U) << [[8->9]] ) + msg->data[5]) != 0U
+opendbc/safety/modes/chrysler_cusw.h boundary chrysler_cusw_rx_hook:96381816db972096:1 (((msg->data[4] & [[0x7U->0x8U]] ) << 8) + msg->data[5]) != 0U
+
+# opendbc/safety/modes/elm327.h
+opendbc/safety/modes/elm327.h boundary elm327_tx_hook:832ef92131cff8f0:1 (msg->data[ [[0->1]] ] & 0xF0U) > 0x30U
+opendbc/safety/modes/elm327.h boundary elm327_tx_hook:832ef92131cff8f0:1 (msg->data[0] & 0xF0U) > [[0x30U->0x31U]]
+
+# opendbc/safety/modes/ford.h
+opendbc/safety/modes/ford.h arithmetic ford_compute_checksum:017fb98ddab6f5e3:2 msg->data[0] [[+->-]] msg->data[1]
+opendbc/safety/modes/ford.h arithmetic_assignment ford_compute_checksum:017fb98ddab6f5e3:2 chksum [[+=->-=]] msg->data[0] + msg->data[1]
+opendbc/safety/modes/ford.h arithmetic_assignment ford_compute_checksum:c9c19b8b1dbfb7c3:1 chksum [[+=->-=]] msg->data[6] >> 6
+opendbc/safety/modes/ford.h bitwise ford_compute_checksum:1ceffde5494b953e:1 (msg->data[6] >> 4) [[&->|]] 0x3U
+opendbc/safety/modes/ford.h bitwise ford_tx_hook:1ff34042c03fc921:1 ((msg->data[6] & 0x3U) << 8) [[|->&]] msg->data[7]
+opendbc/safety/modes/ford.h bitwise ford_tx_hook:8e835dded1d592fd:1 ((msg->data[2] & 0x3U) << 8) [[|->&]] msg->data[3]
+opendbc/safety/modes/ford.h boundary ford_rx_hook:1492ec6e241337b2:1 (((msg->data[ [[0->1]] ] & 0x03U) << 8) | msg->data[1]) > 0U
+opendbc/safety/modes/ford.h boundary ford_rx_hook:1492ec6e241337b2:1 (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > [[0U->1U]]
+opendbc/safety/modes/ford.h boundary ford_rx_hook:1492ec6e241337b2:1 (((msg->data[0] & 0x03U) << [[8->9]] ) | msg->data[1]) > 0U
+opendbc/safety/modes/ford.h boundary ford_rx_hook:1492ec6e241337b2:1 (((msg->data[0] & [[0x03U->0x4U]] ) << 8) | msg->data[1]) > 0U
+
+# opendbc/safety/modes/gm.h
+opendbc/safety/modes/gm.h bitwise gm_rx_hook:87f8890340c7d3bd:1 (msg->data[0] << 8) [[|->&]] msg->data[1]
+opendbc/safety/modes/gm.h bitwise gm_rx_hook:f0053af33f9b6c8c:1 (msg->data[2] << 8) [[|->&]] msg->data[3]
+opendbc/safety/modes/gm.h bitwise_assignment gm_tx_hook:bf743e16e1933d9c:1 violation [[|=->&=]] !controls_allowed && apply
+opendbc/safety/modes/gm.h boundary gm_rx_hook:bbab90696eadc01e:1 (msg->data[0] >> [[4->5]] ) != 0U
+opendbc/safety/modes/gm.h remove_negation gm_tx_hook:bf743e16e1933d9c:1 [[!->]] controls_allowed
+
+# opendbc/safety/modes/honda.h
+opendbc/safety/modes/honda.h bitwise honda_nidec_init:f79fe46a8d345256:1 (param) [[&->|]] (HONDA_PARAM_NIDEC_ALT)
+opendbc/safety/modes/honda.h bitwise honda_tx_hook:ee1f0eca283f8751:1 GET_BYTES_64_LE(msg, 0, 8) [[&->|]] 0x00FFFFFFFFFFFFFFULL
+opendbc/safety/modes/honda.h boundary honda_rx_hook:76e5d1ebb0eb46d7:1 msg->addr == [[0x1A6U->0x1A7U]]
+opendbc/safety/modes/honda.h boundary honda_tx_hook:bf3abf608fac607f:1 msg->addr == [[0x194U->0x195U]]
+opendbc/safety/modes/honda.h boundary honda_tx_hook:ee1f0eca283f8751:1 (GET_BYTES_64_LE(msg, 0, 8) & 0x00FFFFFFFFFFFFFFULL) != [[0x0000000010800004ULL->0x10800005ULL]]
+opendbc/safety/modes/honda.h boundary honda_tx_hook:ee1f0eca283f8751:1 (GET_BYTES_64_LE(msg, 0, 8) & [[0x00FFFFFFFFFFFFFFULL->0x100000000000000ULL]] ) != 0x0000000010800004ULL
+opendbc/safety/modes/honda.h boundary honda_tx_hook:ee1f0eca283f8751:1 (GET_BYTES_64_LE(msg, [[0->1]] , 8) & 0x00FFFFFFFFFFFFFFULL) != 0x0000000010800004ULL
+opendbc/safety/modes/honda.h comparison honda_nidec_init:f79fe46a8d345256:1 ((param) & (HONDA_PARAM_NIDEC_ALT)) [[==->!=]] (HONDA_PARAM_NIDEC_ALT)
+
+# opendbc/safety/modes/hyundai.h
+opendbc/safety/modes/hyundai.h bitwise hyundai_get_counter:915734d971ae4cd8:1 (msg->data[7] >> 4) [[&->|]] 0x3U
+opendbc/safety/modes/hyundai.h bitwise hyundai_get_counter:acc1b433dc0bc96b:1 (msg->data[1] >> 5) [[&->|]] 0x7U
+opendbc/safety/modes/hyundai.h bitwise_assignment hyundai_tx_hook:0da38054e27ea654:1 violation [[|=->&=]] longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS)
+opendbc/safety/modes/hyundai.h bitwise_assignment hyundai_tx_hook:c95fc19c66c179fe:1 violation [[|=->&=]] longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS)
+opendbc/safety/modes/hyundai.h boundary hyundai_compute_checksum:2300de5efaaa3980:1 i == [[7->8]]
+opendbc/safety/modes/hyundai.h boundary hyundai_compute_checksum:2300de5efaaa3980:1 msg->addr == [[0x394U->0x395U]]
+opendbc/safety/modes/hyundai.h boundary hyundai_get_counter:b0011801d6cbbba8:1 msg->addr == [[0x260U->0x261U]]
+opendbc/safety/modes/hyundai.h boundary hyundai_get_counter:b69bf2cd5391db6a:1 msg->addr == [[0x394U->0x395U]]
+opendbc/safety/modes/hyundai.h boundary hyundai_rx_hook:168a95318f3acab8:1 (((msg->data[ [[4->5]] ] & 0x7FU) << 1) | (msg->data[3] >> 7)) != 0U
+opendbc/safety/modes/hyundai.h boundary hyundai_rx_hook:168a95318f3acab8:1 (((msg->data[4] & [[0x7FU->0x80U]] ) << 1) | (msg->data[3] >> 7)) != 0U
+opendbc/safety/modes/hyundai.h comparison hyundai_get_counter:b0011801d6cbbba8:1 msg->addr [[==->!=]] 0x260U
+
+# opendbc/safety/modes/hyundai_canfd.h
+opendbc/safety/modes/hyundai_canfd.h arithmetic hyundai_canfd_rx_hook:a3f77ad54ddece73:1 ((fr + rr + rl + fl) / 4.0 * 0.03125 * (1.0 / 3.6)) [[*->/]] 1000.0
+opendbc/safety/modes/hyundai_canfd.h arithmetic hyundai_canfd_rx_hook:a3f77ad54ddece73:1 (fr + rr + rl + fl) / 4.0 * 0.03125 [[*->/]] (1.0 / 3.6)
+opendbc/safety/modes/hyundai_canfd.h arithmetic hyundai_canfd_rx_hook:a3f77ad54ddece73:1 (fr + rr + rl + fl) / 4.0 [[*->/]] 0.03125
+opendbc/safety/modes/hyundai_canfd.h arithmetic hyundai_canfd_rx_hook:a3f77ad54ddece73:1 (fr + rr + rl + fl) [[/->*]] 4.0
+opendbc/safety/modes/hyundai_canfd.h arithmetic hyundai_canfd_rx_hook:a3f77ad54ddece73:1 fr + rr + rl [[+->-]] fl
+opendbc/safety/modes/hyundai_canfd.h arithmetic hyundai_canfd_rx_hook:a3f77ad54ddece73:1 fr + rr [[+->-]] rl
+opendbc/safety/modes/hyundai_canfd.h arithmetic hyundai_canfd_rx_hook:a3f77ad54ddece73:1 fr [[+->-]] rr
+opendbc/safety/modes/hyundai_canfd.h bitwise_assignment hyundai_canfd_tx_hook:0da38054e27ea654:1 violation [[|=->&=]] longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS)
+opendbc/safety/modes/hyundai_canfd.h bitwise_assignment hyundai_canfd_tx_hook:c95fc19c66c179fe:1 violation [[|=->&=]] longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS)
+opendbc/safety/modes/hyundai_canfd.h boundary hyundai_canfd_rx_hook:54bf89e84b76c89b:1 ((msg->data[ [[12->13]] ] >> 7) | msg->data[13] | (msg->data[14] & 1U)) != 0U
+opendbc/safety/modes/hyundai_canfd.h boundary hyundai_canfd_rx_hook:54bf89e84b76c89b:1 ((msg->data[12] >> 7) | msg->data[13] | (msg->data[ [[14->15]] ] & 1U)) != 0U
+opendbc/safety/modes/hyundai_canfd.h boundary hyundai_canfd_rx_hook:54bf89e84b76c89b:1 ((msg->data[12] >> 7) | msg->data[13] | (msg->data[14] & [[1U->2U]] )) != 0U
+opendbc/safety/modes/hyundai_canfd.h boundary hyundai_canfd_rx_hook:54bf89e84b76c89b:1 ((msg->data[12] >> [[7->8]] ) | msg->data[13] | (msg->data[14] & 1U)) != 0U
+opendbc/safety/modes/hyundai_canfd.h boundary hyundai_canfd_rx_hook:a393f4701ee34f7d:1 cruise_status == [[2->3]]
+
+# opendbc/safety/modes/mazda.h
+opendbc/safety/modes/mazda.h boundary mazda_rx_hook:2312b2d9e778625f:1 (msg->data[ [[4->5]] ] | (msg->data[5] & 0xF0U)) != 0U
+opendbc/safety/modes/mazda.h boundary mazda_rx_hook:538a35b99bcf1b02:1 speed > [[10->11]]
+
+# opendbc/safety/modes/mg.h
+opendbc/safety/modes/mg.h arithmetic mg_compute_checksum:0020e2cf53fdb0c4:1 (torque << 1) + (status << 12) [[+->-]] valid
+opendbc/safety/modes/mg.h arithmetic mg_compute_checksum:0020e2cf53fdb0c4:1 (torque << 1) [[+->-]] (status << 12)
+opendbc/safety/modes/mg.h arithmetic mg_rx_hook:260d0ed2d9e9a6b2:1 (((msg->data[2] & 0x7FU) << 8) | msg->data[3]) [[*->/]] 0.015625
+opendbc/safety/modes/mg.h arithmetic mg_rx_hook:3e5457a62b2c27ca:1 (speed * (1.0 / 3.6)) [[*->/]] 1000.0
+opendbc/safety/modes/mg.h arithmetic mg_rx_hook:3e5457a62b2c27ca:1 speed [[*->/]] (1.0 / 3.6)
+opendbc/safety/modes/mg.h bitwise mg_get_counter:0182ae58d20fdb32:1 (msg->data[0] >> 3) [[&->|]] 0xFU
+opendbc/safety/modes/mg.h bitwise mg_get_counter:618ff047ae402fc9:1 msg->data[6] [[&->|]] 0xFU
+opendbc/safety/modes/mg.h boundary mg_get_counter:6e6e54d6a8890de8:1 msg->addr == [[0x242U->0x243U]]
+opendbc/safety/modes/mg.h boundary mg_get_counter:8459354f9d67d966:1 msg->addr == [[0x1b6U->0x1B7U]]
+opendbc/safety/modes/mg.h boundary mg_rx_hook:b0457a1af5c85319:1 cruise_state == [[3->4]]
+
+# opendbc/safety/modes/nissan.h
+opendbc/safety/modes/nissan.h bitwise nissan_rx_hook:2e3f26b1544dca2c:1 right_rear [[|->&]] left_rear
+opendbc/safety/modes/nissan.h bitwise nissan_rx_hook:45c92bcce55aa117:1 (msg->data[6] >> 6) [[&->|]] 0x3U
+opendbc/safety/modes/nissan.h boundary nissan_rx_hook:45c92bcce55aa117:1 ((msg->data[5] << 2) | ((msg->data[ [[6->7]] ] >> 6) & 0x3U)) > 3U
+opendbc/safety/modes/nissan.h boundary nissan_rx_hook:45c92bcce55aa117:1 ((msg->data[5] << 2) | ((msg->data[6] >> 6) & [[0x3U->0x4U]] )) > 3U
+opendbc/safety/modes/nissan.h boundary nissan_rx_hook:45c92bcce55aa117:1 ((msg->data[5] << 2) | ((msg->data[6] >> [[6->7]] ) & 0x3U)) > 3U
+opendbc/safety/modes/nissan.h boundary nissan_rx_hook:45c92bcce55aa117:1 ((msg->data[5] << [[2->3]] ) | ((msg->data[6] >> 6) & 0x3U)) > 3U
+opendbc/safety/modes/nissan.h boundary nissan_rx_hook:dd1fb9573eed2710:1 (msg->data[2] & [[0x80U->0x81U]] ) != 0U
+
+# opendbc/safety/modes/psa.h
+opendbc/safety/modes/psa.h boundary psa_rx_hook:894fd8bcf810be55:1 msg->data[3] > [[0U->1U]]
+opendbc/safety/modes/psa.h boundary psa_rx_hook:cd2c764e732c9035:1 speed > [[0->1]]
+opendbc/safety/modes/psa.h boundary psa_tx_hook:d3edd70465152029:1 ((msg->data[5] & [[0xFEU->0xFFU]] ) >> 1) == 100U
+
+# opendbc/safety/modes/subaru.h
+opendbc/safety/modes/subaru.h arithmetic subaru_rx_hook:108311ed87106047:1 ((fr + rr + rl + fl) / 4.0 * 0.057 * (1.0 / 3.6)) [[*->/]] 1000.0
+opendbc/safety/modes/subaru.h arithmetic subaru_rx_hook:108311ed87106047:1 (fr + rr + rl + fl) / 4.0 * 0.057 [[*->/]] (1.0 / 3.6)
+opendbc/safety/modes/subaru.h arithmetic subaru_rx_hook:108311ed87106047:1 (fr + rr + rl + fl) / 4.0 [[*->/]] 0.057
+opendbc/safety/modes/subaru.h arithmetic subaru_rx_hook:108311ed87106047:1 (fr + rr + rl + fl) [[/->*]] 4.0
+opendbc/safety/modes/subaru.h arithmetic subaru_rx_hook:108311ed87106047:1 fr + rr + rl [[+->-]] fl
+opendbc/safety/modes/subaru.h arithmetic subaru_rx_hook:108311ed87106047:1 fr + rr [[+->-]] rl
+opendbc/safety/modes/subaru.h arithmetic subaru_rx_hook:108311ed87106047:1 fr [[+->-]] rr
+opendbc/safety/modes/subaru.h bitwise subaru_rx_hook:b41597353a93cf7d:1 fr [[|->&]] rr
+opendbc/safety/modes/subaru.h bitwise subaru_rx_hook:b41597353a93cf7d:1 fr | rr [[|->&]] rl
+opendbc/safety/modes/subaru.h bitwise subaru_rx_hook:b41597353a93cf7d:1 fr | rr | rl [[|->&]] fl
+
+# opendbc/safety/modes/subaru_preglobal.h
+opendbc/safety/modes/subaru_preglobal.h boundary subaru_preglobal_rx_hook:6246081225f0d56d:1 ((GET_BYTES_LE(msg, 0, 4) >> 12) | GET_BYTES_LE(msg, [[4->5]] , 4)) != 0U
+opendbc/safety/modes/subaru_preglobal.h boundary subaru_preglobal_rx_hook:6246081225f0d56d:1 ((GET_BYTES_LE(msg, [[0->1]] , 4) >> 12) | GET_BYTES_LE(msg, 4, 4)) != 0U
+
+# opendbc/safety/modes/tesla.h
+opendbc/safety/modes/tesla.h boundary _tesla_get_checksum_byte:76bd69410abc8571:1 addr == [[0x370->0x371]]
+opendbc/safety/modes/tesla.h boundary _tesla_get_checksum_byte:c9155beb7b4ec111:1 addr == [[0x118->0x119]]
+opendbc/safety/modes/tesla.h boundary _tesla_get_checksum_byte:c9155beb7b4ec111:1 addr == [[0x145->0x146]]
+opendbc/safety/modes/tesla.h boundary _tesla_get_checksum_byte:c9155beb7b4ec111:1 addr == [[0x286->0x287]]
+opendbc/safety/modes/tesla.h boundary _tesla_get_checksum_byte:c9155beb7b4ec111:1 addr == [[0x311->0x312]]
+opendbc/safety/modes/tesla.h boundary tesla_get_counter:c2fc0ca65949f3a3:1 msg->addr == [[0x118U->0x119U]]
+opendbc/safety/modes/tesla.h boundary tesla_get_counter:c2fc0ca65949f3a3:1 msg->addr == [[0x145U->0x146U]]
+opendbc/safety/modes/tesla.h boundary tesla_get_counter:c2fc0ca65949f3a3:1 msg->addr == [[0x311U->0x312U]]
+opendbc/safety/modes/tesla.h boundary tesla_rx_hook:802b8b6b13235b45:1 cruise_state == [[3->4]]
+opendbc/safety/modes/tesla.h boundary tesla_rx_hook:802b8b6b13235b45:1 cruise_state == [[4->5]]
+opendbc/safety/modes/tesla.h boundary tesla_rx_hook:802b8b6b13235b45:1 cruise_state == [[6->7]]
+opendbc/safety/modes/tesla.h boundary tesla_rx_hook:802b8b6b13235b45:1 cruise_state == [[7->8]]
+opendbc/safety/modes/tesla.h comparison _tesla_get_checksum_byte:76bd69410abc8571:1 addr [[==->!=]] 0x370
+opendbc/safety/modes/tesla.h remove_negation tesla_rx_hook:2181602dcee6edd8:1 [[!->]] tesla_autopark_prev
+
+# opendbc/safety/modes/toyota.h
+opendbc/safety/modes/toyota.h arithmetic toyota_get_quality_flag_valid:3b395b51e356e397:1 i [[*->/]] 16U
+opendbc/safety/modes/toyota.h arithmetic toyota_get_quality_flag_valid:3b395b51e356e397:2 i [[*->/]] 16U
+opendbc/safety/modes/toyota.h arithmetic_assignment toyota_get_quality_flag_valid:e3770e98286a73af:1 i [[+=->-=]] 1U
+opendbc/safety/modes/toyota.h comparison toyota_tx_hook:dfe84ecd94f55b2e:1 _a [[<->>=]] _b
+
+# opendbc/safety/modes/volkswagen_meb.h
+opendbc/safety/modes/volkswagen_meb.h bitwise volkswagen_meb_rx_hook:b41597353a93cf7d:1 fr [[|->&]] rr
+opendbc/safety/modes/volkswagen_meb.h bitwise volkswagen_meb_rx_hook:b41597353a93cf7d:1 fr | rr [[|->&]] rl
+opendbc/safety/modes/volkswagen_meb.h bitwise volkswagen_meb_rx_hook:b41597353a93cf7d:1 fr | rr | rl [[|->&]] fl
+opendbc/safety/modes/volkswagen_meb.h boundary volkswagen_meb_alt_crc_compute:675fcbf3a7cdaa2b:1 msg->addr == [[0x13DU->0x13EU]]
+opendbc/safety/modes/volkswagen_meb.h boundary volkswagen_meb_alt_crc_compute:675fcbf3a7cdaa2b:2 msg->addr == [[0x13DU->0x13EU]]
+opendbc/safety/modes/volkswagen_meb.h boundary volkswagen_meb_alt_crc_compute:ea5f755b2a140dee:1 msg->addr == [[0x10BU->0x10CU]]
+opendbc/safety/modes/volkswagen_meb.h boundary volkswagen_meb_alt_crc_compute:ea5f755b2a140dee:2 msg->addr == [[0x10BU->0x10CU]]
+opendbc/safety/modes/volkswagen_meb.h boundary volkswagen_meb_rx_hook:618eb97d792972a4:1 acc_status == [[4->5]]
+opendbc/safety/modes/volkswagen_meb.h boundary volkswagen_meb_rx_hook:618eb97d792972a4:1 acc_status == [[5->6]]
+opendbc/safety/modes/volkswagen_meb.h boundary volkswagen_meb_rx_hook:f73482b92c281a6e:1 accel_pedal_value > [[0->1]]
+opendbc/safety/modes/volkswagen_meb.h comparison volkswagen_meb_alt_crc_compute:675fcbf3a7cdaa2b:1 msg->addr [[==->!=]] 0x13DU
+opendbc/safety/modes/volkswagen_meb.h comparison volkswagen_meb_alt_crc_compute:675fcbf3a7cdaa2b:2 msg->addr [[==->!=]] 0x13DU
+
+# opendbc/safety/modes/volkswagen_mlb.h
+opendbc/safety/modes/volkswagen_mlb.h arithmetic_assignment volkswagen_mlb_rx_hook:45216efd038fc2b6:1 speed [[+=->-=]] ((msg->data[6] & 0xFU) << 8) | msg->data[5]
+opendbc/safety/modes/volkswagen_mlb.h arithmetic_assignment volkswagen_mlb_rx_hook:4dab5fcd84caa315:1 speed [[+=->-=]] (msg->data[7] << 4) | (msg->data[6] >> 4)
+opendbc/safety/modes/volkswagen_mlb.h arithmetic_assignment volkswagen_mlb_rx_hook:977632959a49629c:1 speed [[+=->-=]] (msg->data[4] << 4) | (msg->data[3] >> 4)
+opendbc/safety/modes/volkswagen_mlb.h arithmetic_assignment volkswagen_mlb_rx_hook:e1477ccf2f6dd8b1:1 speed [[+=->-=]] ((msg->data[3] & 0xFU) << 8) | msg->data[2]
+opendbc/safety/modes/volkswagen_mlb.h bitwise volkswagen_mlb_rx_hook:45216efd038fc2b6:1 ((msg->data[6] & 0xFU) << 8) [[|->&]] msg->data[5]
+opendbc/safety/modes/volkswagen_mlb.h bitwise volkswagen_mlb_rx_hook:4dab5fcd84caa315:1 (msg->data[7] << 4) [[|->&]] (msg->data[6] >> 4)
+opendbc/safety/modes/volkswagen_mlb.h bitwise volkswagen_mlb_rx_hook:82ff724a56c327b2:1 ((msg)->data[((13U) / 8U)] >> ((13U) % 8U)) [[&->|]] 0x1U
+opendbc/safety/modes/volkswagen_mlb.h bitwise volkswagen_mlb_rx_hook:977632959a49629c:1 (msg->data[4] << 4) [[|->&]] (msg->data[3] >> 4)
+opendbc/safety/modes/volkswagen_mlb.h bitwise volkswagen_mlb_rx_hook:e1477ccf2f6dd8b1:1 ((msg->data[3] & 0xFU) << 8) [[|->&]] msg->data[2]
+opendbc/safety/modes/volkswagen_mlb.h boundary volkswagen_mlb_rx_hook:275c3983ab709756:1 acc_status == [[2->3]]
+opendbc/safety/modes/volkswagen_mlb.h boundary volkswagen_mlb_rx_hook:8f8741711872311f:1 speed > [[0U->1U]]
+opendbc/safety/modes/volkswagen_mlb.h boundary volkswagen_mlb_tx_hook:ebb1c2260ecb311d:1 steer_status == [[5->6]]
+
+# opendbc/safety/modes/volkswagen_mqb.h
+opendbc/safety/modes/volkswagen_mqb.h arithmetic_assignment volkswagen_mqb_rx_hook:16f78bd9f47bfe62:1 i [[+=->-=]] 2U
+opendbc/safety/modes/volkswagen_mqb.h boundary volkswagen_mqb_rx_hook:404a805565933f03:1 ((GET_BYTES_LE(msg, 0, 4) >> [[12->13]] ) & 0xFFU) != 0U
+opendbc/safety/modes/volkswagen_mqb.h boundary volkswagen_mqb_rx_hook:618eb97d792972a4:1 acc_status == [[4->5]]
+opendbc/safety/modes/volkswagen_mqb.h boundary volkswagen_mqb_rx_hook:618eb97d792972a4:1 acc_status == [[5->6]]
+opendbc/safety/modes/volkswagen_mqb.h boundary volkswagen_mqb_rx_hook:cd2c764e732c9035:1 speed > [[0->1]]
+
+# opendbc/safety/modes/volkswagen_pq.h
+opendbc/safety/modes/volkswagen_pq.h boundary volkswagen_pq_rx_hook:275c3983ab709756:1 acc_status == [[2->3]]
+opendbc/safety/modes/volkswagen_pq.h boundary volkswagen_pq_rx_hook:cd2c764e732c9035:1 speed > [[0->1]]
+opendbc/safety/modes/volkswagen_pq.h comparison volkswagen_pq_compute_checksum:25a149271c711a87:1 i [[!=->==]] checksum_byte
+
+# opendbc/safety/safety.h
+opendbc/safety/safety.h arithmetic safety_tick:2fe1d1d112e7c165:1 timestep [[*->/]] MAX_MISSED_MSGS
+opendbc/safety/safety.h arithmetic safety_tick:527fbee073397680:1 1e6 [[/->*]] frequency
+opendbc/safety/safety.h boundary rx_msg_safety_check:52b015d4a103d3c4:1 cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > [[0U->1U]]
+opendbc/safety/safety.h boundary safety_tick:820c3c3317c1b87e:1 frequency < [[10U->11U]]
+opendbc/safety/safety.h comparison safety_tick:2fe1d1d112e7c165:1 _a [[>-><=]] _b
+opendbc/safety/safety.h comparison safety_tick:2fe1d1d112e7c165:1 elapsed_time [[>-><=]] ({ int _a = (timestep * MAX_MISSED_MSGS); int _b = (1e6); (_a > _b) ? _a : _b; }...
+opendbc/safety/safety.h comparison safety_tick:820c3c3317c1b87e:1 frequency [[<->>=]] 10U
+opendbc/safety/safety.h remove_negation safety_tick:b58739815a1eb8ba:1 [[!->]] is_msg_valid(current_safety_config.rx_checks, i)
