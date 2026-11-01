@@ -97,10 +97,65 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
     raise NotImplementedError
 
+  def test_main_button(self):
+    self.assertFalse(self.safety.get_acc_main_on())
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # rising edge toggles main on, does not enable controls
+    for _ in range(5):
+      self._rx(self._button_msg(Buttons.NONE, main_button=1))
+      self.assertTrue(self.safety.get_acc_main_on())
+      self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+    self.assertTrue(self.safety.get_acc_main_on())
+
+    # enable controls with SET
+    self._rx(self._button_msg(Buttons.SET))
+    self._rx(self._button_msg(Buttons.NONE))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # rising edge toggles main off and exits controls
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self.assertFalse(self.safety.get_acc_main_on())
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+
+    # safety mode init resets main_button_prev and cruise_speed_set
+    self._rx(self._button_msg(Buttons.SET, main_button=1))
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self.assertTrue(self.safety.get_acc_main_on())
+    self.assertTrue(self.safety.get_controls_allowed())
+    self._reset_safety_hooks()
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self.assertTrue(self.safety.get_acc_main_on())
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.RESUME, main_button=0))
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+    self.assertFalse(self.safety.get_controls_allowed())
+
   def test_set_resume_buttons(self):
     """
-      SET and RESUME enter controls allowed on their falling edge.
+      SET and RESUME enter controls allowed on their falling edge when main is on.
+      RESUME only enters controls allowed after SET has set a cruise speed since main was turned on.
     """
+    # buttons ignored while main is off
+    for btn in (Buttons.SET, Buttons.RESUME):
+      self._rx(self._button_msg(btn))
+      self._rx(self._button_msg(Buttons.NONE))
+      self.assertFalse(self.safety.get_controls_allowed())
+
+    # turn main on: RESUME blocked before first SET
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+    self._rx(self._button_msg(Buttons.RESUME))
+    self._rx(self._button_msg(Buttons.NONE))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # first SET enables controls and sets cruise speed
+    self._rx(self._button_msg(Buttons.SET))
+    self._rx(self._button_msg(Buttons.NONE))
+    self.assertTrue(self.safety.get_controls_allowed())
+
     for btn_prev in range(8):
       for btn_cur in range(8):
         self._rx(self._button_msg(Buttons.NONE))
@@ -117,10 +172,35 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self._rx(self._button_msg(btn_cur))
         self.assertEqual(should_enable, self.safety.get_controls_allowed())
 
+    # toggling main off clears stored cruise speed so RESUME is blocked again
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+    self._rx(self._button_msg(Buttons.RESUME))
+    self._rx(self._button_msg(Buttons.NONE))
+    self.assertFalse(self.safety.get_controls_allowed())
+
   def test_cancel_button(self):
-    self.safety.set_controls_allowed(1)
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+    self._rx(self._button_msg(Buttons.SET))
+    self._rx(self._button_msg(Buttons.NONE))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # cancel exits controls without clearing stored cruise speed or main
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self.safety.get_acc_main_on())
+    self._rx(self._button_msg(Buttons.NONE))
+    self._rx(self._button_msg(Buttons.CANCEL))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.NONE))
+
+    # RESUME re-enables controls after cancel
+    self._rx(self._button_msg(Buttons.RESUME))
+    self._rx(self._button_msg(Buttons.NONE))
+    self.assertTrue(self.safety.get_controls_allowed())
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     """
@@ -143,3 +223,90 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     self.assertFalse(self.safety.get_relay_malfunction())
     self._rx(make_msg(bus, addr, 8))
     self.assertTrue(self.safety.get_relay_malfunction())
+
+
+class HyundaiLongitudinalPauseResumeBase(HyundaiLongitudinalBase):
+  def test_main_button(self):
+    self.assertFalse(self.safety.get_acc_main_on())
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # rising edge toggles main on and immediately enables controls
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self.assertTrue(self.safety.get_acc_main_on())
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # holding main does not re-enable after disengage
+    self.safety.set_controls_allowed(0)
+    for _ in range(5):
+      self._rx(self._button_msg(Buttons.NONE, main_button=1))
+      self.assertTrue(self.safety.get_acc_main_on())
+      self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+
+    # RESUME (+ button) enables controls without needing a prior SET press
+    self._rx(self._button_msg(Buttons.RESUME))
+    self._rx(self._button_msg(Buttons.NONE))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # rising edge toggles main off and exits controls
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self.assertFalse(self.safety.get_acc_main_on())
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_set_resume_buttons(self):
+    # buttons ignored while main is off
+    for btn in (Buttons.SET, Buttons.RESUME, Buttons.CANCEL):
+      self._rx(self._button_msg(btn))
+      self._rx(self._button_msg(Buttons.NONE))
+      self.assertFalse(self.safety.get_controls_allowed())
+
+    # turn main on
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+
+    for btn_prev in range(8):
+      if btn_prev == Buttons.CANCEL:
+        continue
+      for btn_cur in range(8):
+        self._rx(self._button_msg(Buttons.NONE))
+        self.safety.set_controls_allowed(0)
+        for _ in range(10):
+          self._rx(self._button_msg(btn_prev))
+          self.assertFalse(self.safety.get_controls_allowed())
+
+        if btn_cur == Buttons.CANCEL:
+          should_enable = btn_prev not in (Buttons.RESUME, Buttons.SET)
+        else:
+          should_enable = btn_cur != btn_prev and btn_prev in (Buttons.RESUME, Buttons.SET)
+
+        self._rx(self._button_msg(btn_cur))
+        self.assertEqual(should_enable, self.safety.get_controls_allowed())
+
+  def test_cancel_button(self):
+    # pause/resume does not enable when main is off, and still disables if controls_allowed was set
+    self._rx(self._button_msg(Buttons.CANCEL))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.NONE))
+    self.safety.set_controls_allowed(1)
+    self._rx(self._button_msg(Buttons.CANCEL))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.NONE))
+
+    # turn main on -> controls enabled
+    self._rx(self._button_msg(Buttons.NONE, main_button=1))
+    self._rx(self._button_msg(Buttons.NONE, main_button=0))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # first pause/resume rising edge pauses (disables controls), holding does not re-toggle
+    for _ in range(5):
+      self._rx(self._button_msg(Buttons.CANCEL))
+      self.assertFalse(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.NONE))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # second pause/resume rising edge resumes (enables controls), holding does not re-toggle
+    for _ in range(5):
+      self._rx(self._button_msg(Buttons.CANCEL))
+      self.assertTrue(self.safety.get_controls_allowed())
+    self._rx(self._button_msg(Buttons.NONE))
+    self.assertTrue(self.safety.get_controls_allowed())

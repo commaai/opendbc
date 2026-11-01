@@ -63,6 +63,9 @@ class CarController(CarControllerBase):
     self.cancel_counter = 0
 
   def update(self, CC, CS, now_nanos):
+    CS.cc_enabled = CC.enabled
+    CS.cc_seen = True
+
     actuators = CC.actuators
     hud_control = CC.hudControl
 

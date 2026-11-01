@@ -135,6 +135,8 @@ class CarInterface(CarInterfaceBase):
 
     if ret.openpilotLongitudinalControl:
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.LONG.value
+    if ret.flags & HyundaiFlags.PAUSE_RESUME:
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.PAUSE_RESUME.value
     if ret.flags & HyundaiFlags.HYBRID:
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.HYBRID_GAS.value
     elif ret.flags & HyundaiFlags.EV:
