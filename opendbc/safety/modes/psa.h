@@ -23,36 +23,53 @@ static uint8_t psa_get_counter(const CANPacket_t *msg) {
   if (msg->addr == PSA_HS2_DYN_ABR_38D) {
     cnt = (msg->data[5] >> 4) & 0xFU;
   }
+  if (msg->addr == PSA_STEERING) {
+    cnt = msg->data[0] & 0xFU;
+  }
+  if (msg->addr == PSA_STEERING_ALT) {
+    cnt = msg->data[4] & 0xFU;
+  }
   return cnt;
 }
 
 static uint32_t psa_get_checksum(const CANPacket_t *msg) {
-  return msg->data[5] & 0xFU;
+  uint8_t chk = msg->data[5] & 0xFU;
+  if (msg->addr == PSA_STEERING) {
+    chk = msg->data[0] >> 4;
+  }
+  if (msg->addr == PSA_STEERING_ALT) {
+    chk = msg->data[4] >> 4;
+  }
+  return chk;
 }
 
-static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, int chk_pos) {
+static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini) {
   int len = GET_LEN(msg);
 
   uint8_t sum = 0;
   for (int i = 0; i < len; i++) {
-    uint8_t b = msg->data[i];
-
-    if (i == chk_pos) {
-      // set checksum in low nibble to 0
-      b &= 0xF0U;
-    }
-    sum += (b >> 4) + (b & 0xFU);
+    sum += (msg->data[i] >> 4) + (msg->data[i] & 0xFU);
   }
+  // the checksum nibble itself isn't part of the sum
+  sum -= psa_get_checksum(msg);
   return (chk_ini - sum) & 0xFU;
 }
 
 static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
   uint8_t chk = 0;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    chk = _psa_compute_checksum(msg, 0x4, 5);
+    chk = _psa_compute_checksum(msg, 0x4);
   }
   if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    chk = _psa_compute_checksum(msg, 0x7, 5);
+    chk = _psa_compute_checksum(msg, 0x7);
+  }
+  if (msg->addr == PSA_STEERING) {
+    chk = _psa_compute_checksum(msg, 0xB);
+  }
+  if (msg->addr == PSA_STEERING_ALT) {
+    // xor checksum
+    uint8_t x = msg->data[0] ^ msg->data[1] ^ msg->data[2] ^ msg->data[3] ^ (msg->data[4] & 0x0FU);
+    chk = (x ^ (x >> 4)) & 0xFU;
   }
   return chk;
 }
@@ -112,8 +129,8 @@ static safety_config psa_init(uint16_t param) {
   static const RxCheck psa_rx_checks[] = {
     {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                        // cruise state
     {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS, 8, 25U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            // speed
-    {.msg = {{PSA_STEERING_ALT, PSA_MAIN_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // steering angle
-    {.msg = {{PSA_STEERING, PSA_MAIN_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},     // driver torque
+    {.msg = {{PSA_STEERING_ALT, PSA_MAIN_BUS, 7, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                             // steering angle
+    {.msg = {{PSA_STEERING, PSA_MAIN_BUS, 7, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                                 // driver torque
     {.msg = {{PSA_DYN_CMM, PSA_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},      // gas pedal
     {.msg = {{PSA_DAT_BSI, PSA_CAM_BUS, 8, 20U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},        // brake
   };

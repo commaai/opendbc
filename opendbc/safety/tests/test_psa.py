@@ -71,6 +71,14 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     msg[0].data[6] = 0xAB
     self.assertTrue(self._rx(msg))
 
+    # steering angle and driver torque, checksum in the high nibble
+    for name, byte in (("STEERING_ALT", 4), ("STEERING", 0)):
+      for _ in range(10):
+        self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, self.MAIN_BUS, {})))
+      msg = self.packer.make_can_msg_safety(name, self.MAIN_BUS, {})
+      msg[0].data[byte] ^= 0x10
+      self.assertFalse(self._rx(msg))
+
 
 class TestPsaStockSafety(TestPsaSafetyBase):
   pass

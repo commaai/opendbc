@@ -2,6 +2,9 @@ def psa_checksum(address: int, sig, d: bytearray) -> int:
   chk_ini = {0x452: 0x4, 0x38D: 0x7, 0x42D: 0xC}.get(address, 0xB)
   byte = sig.start_bit // 8
   d[byte] &= 0x0F if sig.start_bit % 8 >= 4 else 0xF0
+  if address == 0x305:  # STEERING_ALT uses an xor checksum
+    x = d[0] ^ d[1] ^ d[2] ^ d[3] ^ d[4]
+    return (x ^ (x >> 4)) & 0xF
   checksum = sum((b >> 4) + (b & 0xF) for b in d)
   return (chk_ini - checksum) & 0xF
 
