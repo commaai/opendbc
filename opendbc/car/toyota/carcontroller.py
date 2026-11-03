@@ -32,6 +32,8 @@ MAX_STEER_RATE_FRAMES = 17  # tx control frames needed before torque can be cut
 # EPS allows user torque above threshold for 50 frames before permanently faulting
 MAX_USER_TORQUE = 500
 
+CRUISE_CANCEL_DELAY_FRAMES = 10
+
 
 def get_long_tune(CP, params):
   if CP.flags & ToyotaFlags.TSS2:
@@ -57,6 +59,7 @@ class CarController(CarControllerBase):
     self.permit_braking = True
     self.steer_rate_counter = 0
     self.distance_button = 0
+    self.cancel_counter = 0
 
     # *** start long control state ***
     self.long_pid = get_long_tune(self.CP, self.params)
@@ -79,7 +82,8 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     stopping = actuators.longControlState == LongCtrlState.stopping
     hud_control = CC.hudControl
-    pcm_cancel_cmd = CC.cruiseControl.cancel
+    self.cancel_counter = self.cancel_counter + 1 if CC.cruiseControl.cancel else 0
+    pcm_cancel_cmd = self.cancel_counter > CRUISE_CANCEL_DELAY_FRAMES
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
 
     if len(CC.orientationNED) == 3:
