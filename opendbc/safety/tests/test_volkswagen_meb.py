@@ -90,8 +90,31 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     # wind-down at disengagement) is permitted so the EPS torque authority ramps to zero
     self._set_prev_desired_power(max_power - 1)
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))      # rising power
-    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))      # steady power
-    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))   # decreasing power
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))  # steady power
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 2)))   # decreasing power
+
+  def test_rejected_power_does_not_allow_increase(self):
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, power=50)))
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, power=49.6)))
+
+  def test_power_winddown_after_rejected_command(self):
+    self._set_prev_desired_power(25)
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, power=50)))
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, power=49.6)))
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, power=25)))
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, power=24.6)))
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, power=0, steer_req=False)))
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, power=0.4)))
+
+  def test_rejected_curvature_does_not_raise_power(self):
+    self._set_prev_desired_power(25)
+    self.safety.set_controls_allowed(True)
+    self.assertFalse(self._tx(self._curvature_cmd_msg(self.MAX_CURVATURE_TEST, power=50)))
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(self._curvature_cmd_msg(0, power=49.6)))
+    self.assertTrue(self._tx(self._curvature_cmd_msg(0, power=24.6)))
 
   def _speed_msg(self, speed_mps: float):
     spd_kph = speed_mps * 3.6
