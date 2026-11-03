@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import random
 import unittest
 import numpy as np
 
@@ -75,10 +74,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
               "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code}
     return self.packer.make_can_msg_safety("EPAS3S_sysStatus", 0, values)
 
-  def _user_brake_msg(self, brake, quality_flag: bool = True):
-    values = {"ESP_driverBrakeApply": 2 if brake else 1}
-    if not quality_flag:
-      values["ESP_driverBrakeApply"] = random.choice((0, 3))  # NotInit_orOff, Faulty_SNA
+  def _user_brake_msg(self, brake, status: int | None = None):
+    if status is None:
+      status = 2 if brake else 1
+    values = {"ESP_driverBrakeApply": status}
     return self.packer.make_can_msg_safety("ESP_status", 0, values)
 
   def _speed_msg(self, speed):
@@ -188,9 +187,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
   def test_user_brake_quality_flag(self):
-    for quality_flag in (True, False):
-      msg = self._user_brake_msg(True, quality_flag=quality_flag)
-      self.assertEqual(quality_flag, self._rx(msg))
+    # 0=NotInit_orOff and 3=Faulty_SNA are invalid
+    for status in range(4):
+      valid = status not in (0, 3)
+      msg = self._user_brake_msg(False, status=status)
+      self.assertEqual(valid, self._rx(msg))
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
