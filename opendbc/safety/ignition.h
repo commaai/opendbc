@@ -52,6 +52,34 @@ void ignition_can_hook(const CANPacket_t *msg) {
     ignition_can_cnt = 0U;
   }
 
+  // PSA exception
+  // 0x348 has no counter on most cars and overlaps with VW cameras and Tesla Model S,
+  // only trust it after consecutive valid frames of Dyn_EasyMove 0x3AD
+  static int prev_counter_psa = -1;
+  static uint8_t valid_cnt_psa = 0U;
+  if (msg_matches(msg, 0x3ADU, 0U, 8U)) {
+    int counter = msg->data[7] >> 4;
+    uint8_t sum = 3U;
+    for (int i = 0; i < 8; i++) {
+      sum += (msg->data[i] >> 4) + (msg->data[i] & 0xFU);
+    }
+
+    if ((counter == ((prev_counter_psa + 1) % 16)) && (prev_counter_psa != -1) && ((sum & 0xFU) == 0U)) {
+      if (valid_cnt_psa < 3U) {
+        valid_cnt_psa++;
+      }
+    } else {
+      valid_cnt_psa = 0U;
+    }
+    prev_counter_psa = counter;
+  }
+
+  if (msg_matches(msg, 0x348U, 0U, 8U) && (valid_cnt_psa >= 3U)) {
+    // Dyn2_CMM, bit 41: EV running, bit 42: ICE running
+    ignition_can = (msg->data[5] & 0x6U) != 0U;
+    ignition_can_cnt = 0U;
+  }
+
   // Volkswagen MEB exception
   if (msg_matches(msg, 0x3C0U, 0U, 4U)) {
     int counter = msg->data[1] & 0xFU;

@@ -3,6 +3,7 @@ import unittest
 
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
+from opendbc.safety.tests.libsafety import libsafety_py
 
 LANE_KEEP_ASSIST = 0x3F2
 
@@ -74,6 +75,55 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
 class TestPsaStockSafety(TestPsaSafetyBase):
   pass
+
+
+class TestPsaIgnition(common.SafetyTestBase):
+  DBC = "psa_aee2010_r3"
+  SAFETY_MODEL = None
+
+  TX_MSGS: list = []
+
+  def setUp(self):
+    super().setUp()
+    self.counter = 0
+    # a bad Dyn_EasyMove resets the check, its state is static
+    self.safety.ignition_can_hook(self._easy_move_msg(valid=False))
+
+  # Dyn_EasyMove, counter and checksum in byte 7
+  def _easy_move_msg(self, valid=True):
+    self.counter = (self.counter + 1) % 16
+    dat = bytearray(8)
+    dat[7] = self.counter << 4
+    dat[7] |= (-(3 + sum((b >> 4) + (b & 0xF) for b in dat)) + (0 if valid else 1)) & 0xF
+    return libsafety_py.make_CANPacket(0x3AD, 0, bytes(dat))
+
+  # Dyn2_CMM, bit 41: EV running, bit 42: ICE running
+  def _msg(self, byte5):
+    return libsafety_py.make_CANPacket(0x348, 0, bytes([0, 0, 0, 0, 0, byte5, 0, 0]))
+
+  def test_ignition_on(self):
+    for _ in range(3):
+      self.safety.ignition_can_hook(self._msg(0x3))
+      self.assertFalse(self.safety.get_ignition_can())
+      self.safety.ignition_can_hook(self._easy_move_msg())
+    self.safety.ignition_can_hook(self._msg(0x3))
+    self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    for _ in range(3):
+      self.safety.ignition_can_hook(self._easy_move_msg())
+    self.safety.ignition_can_hook(self._msg(0x3))
+    self.assertTrue(self.safety.get_ignition_can())
+    self.safety.ignition_can_hook(self._msg(0x1))
+    self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_bad_easy_move(self):
+    for _ in range(3):
+      self.safety.ignition_can_hook(self._easy_move_msg())
+    self.safety.ignition_can_hook(self._easy_move_msg(valid=False))
+    # VW camera 0x348 seen on bus 0 while the harness relay is open
+    self.safety.ignition_can_hook(self._msg(0xFF))
+    self.assertFalse(self.safety.get_ignition_can())
 
 
 if __name__ == "__main__":
