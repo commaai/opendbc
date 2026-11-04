@@ -50,6 +50,8 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = cp.vl["EPAS_INFO"]["EPAS_Failure"] == 1
     ret.steerFaultPermanent = cp.vl["EPAS_INFO"]["EPAS_Failure"] in (2, 3)
     ret.espDisabled = cp.vl["Cluster_Info1_FD1"]["DrvSlipCtlMde_D_Rq"] != 0  # 0 is default mode
+    # the PSCM stops lane assist (LaActAvail_D_Actl -> 0) when ABS is active
+    ret.espActive = bool(cp.vl["DesiredTorqBrk"]["AbsActv_B_Actl"])
 
     if self.CP.flags & FordFlags.CANFD:
       # this signal is always 0 on non-CAN FD cars
