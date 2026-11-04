@@ -69,12 +69,14 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     return self.packer.make_can_msg_safety("BRAKE_MODULE", 0, values)
 
   def _user_gas_msg(self, gas):
-    cruise_active = self.safety.get_controls_allowed()
+    self._gas_pressed = gas
+    cruise_active = getattr(self, "_cruise_on", False)
     values = {"GAS_RELEASED": not gas, "CRUISE_ACTIVE": cruise_active}
     return self.packer.make_can_msg_safety("PCM_CRUISE", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"CRUISE_ACTIVE": enable}
+    self._cruise_on = enable
+    values = {"CRUISE_ACTIVE": enable, "GAS_RELEASED": not getattr(self, "_gas_pressed", False)}
     return self.packer.make_can_msg_safety("PCM_CRUISE", 0, values)
 
   def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
@@ -88,7 +90,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     for controls_allowed in (True, False):
       for bad in (True, False):
         for _ in range(10):
-          self.safety.set_controls_allowed(controls_allowed)
+          self._set_controls_allowed(controls_allowed)
           dat = [random.randint(1, 255) for _ in range(7)]
           if not bad:
             dat = [0]*6 + dat[-1:]
@@ -101,7 +103,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
                                                                   [0, 1], [0, 1],
                                                                   [0, 50, 100],
                                                                   np.linspace(-20, 20, 5)):
-      self.safety.set_controls_allowed(engaged)
+      self._set_controls_allowed(engaged)
 
       should_tx = not req and not req2 and angle == 0 and torque_wind_down == 0
       self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)),
@@ -110,7 +112,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def test_rx_hook(self):
     # checksum checks
     for msg in ["trq", "pcm"]:
-      self.safety.set_controls_allowed(1)
+      self._set_controls_allowed(1)
       if msg == "trq":
         msg = self._torque_meas_msg(0)
       if msg == "pcm":
@@ -177,11 +179,9 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
     for engaged, steer_req, torque in itertools.product([True, False],
                                                         [0, 1],
                                                         np.linspace(-1500, 1500, 7)):
-      self.safety.set_controls_allowed(engaged)
+      self._set_controls_allowed(engaged)
       torque = int(torque)
-      self.safety.set_rt_torque_last(torque)
-      self.safety.set_torque_meas(torque, torque)
-      self.safety.set_desired_torque_last(torque)
+      self._rx(self._torque_meas_msg(torque))
 
       should_tx = not steer_req and torque == 0
       self.assertEqual(should_tx, self._tx(self._torque_cmd_msg(torque, steer_req)))
@@ -199,7 +199,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
     """
     for controls_allowed in (True, False):
       for angle in np.arange(-90, 90, 1):
-        self.safety.set_controls_allowed(controls_allowed)
+        self._set_controls_allowed(controls_allowed)
         self._reset_angle_measurement(angle)
         self._set_prev_desired_angle(angle)
 
@@ -219,7 +219,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
 
     # Test max EPS torque and driver override thresholds (independent of angle, test a few representative angles)
     for angle in (-89, 0, 89):
-      self.safety.set_controls_allowed(True)
+      self._set_controls_allowed(True)
       self._reset_angle_measurement(angle)
       self._set_prev_desired_angle(angle)
 
@@ -300,7 +300,7 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
       Regardless of controls allowed, never allow ACC_CONTROL if cancel bit isn't set
     """
     for controls_allowed in [True, False]:
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.1):
         self.assertFalse(self._tx(self._accel_msg_343(accel)))
         should_tx = np.isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
@@ -342,6 +342,10 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
     values = {"GAS_PEDAL_USER": gas}
     return self.packer.make_can_msg_safety("GAS_PEDAL", 0, values)
 
+  def _pcm_status_msg(self, enable):
+    self._cruise_on = enable
+    return self.packer.make_can_msg_safety("PCM_CRUISE", 0, {"CRUISE_ACTIVE": enable})
+
   # This platform sends both STEERING_LTA (same as other Toyota) and STEERING_LTA_2 (SecOC signed)
   # STEERING_LTA is checked for no-actuation by the base class, STEERING_LTA_2 is checked for no-actuation below
 
@@ -351,7 +355,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
 
   def test_lta_2_steer_cmd(self):
     for engaged, req, req2, angle in itertools.product([True, False], [0, 1], [0, 1], np.linspace(-20, 20, 5)):
-      self.safety.set_controls_allowed(engaged)
+      self._set_controls_allowed(engaged)
 
       should_tx = not req and not req2 and angle == 0
       self.assertEqual(should_tx, self._tx(self._lta_2_msg(req, req2, angle)), f"{req=} {req2=} {angle=}")
@@ -386,7 +390,7 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
     data remains in ACC_CONTROL. Verify no actuation is sent via ACC_CONTROL.
     """
     for controls_allowed in [True, False]:
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.1):
         should_tx = np.isclose(accel, self.INACTIVE_ACCEL, atol=0.0001)
         self.assertEqual(should_tx, self._tx(self._accel_msg_343(accel)))

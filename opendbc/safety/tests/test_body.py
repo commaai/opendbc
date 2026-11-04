@@ -13,6 +13,12 @@ class TestBody(common.SafetyTest):
              [0x1, 0], [0x1, 1], [0x1, 2], [0x1, 3]]
   FWD_BUS_LOOKUP = {}
 
+  def _engage(self):
+    self.assertTrue(self._rx(self._motors_data_msg(0, 0)))
+
+  def _disengage(self):
+    self._reset_safety_hooks()
+
   def _motors_data_msg(self, speed_l, speed_r):
     values = {"SPEED_L": speed_l, "SPEED_R": speed_r}
     return self.packer.make_can_msg_safety("MOTORS_DATA", 0, values)
@@ -50,12 +56,12 @@ class TestBody(common.SafetyTest):
 
   def test_tx_hook(self):
     self.assertFalse(self._tx(self._torque_cmd_msg(0, 0)))
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
     self.assertTrue(self._tx(self._torque_cmd_msg(0, 0)))
 
   def test_can_flasher(self):
     # CAN flasher always allowed
-    self.safety.set_controls_allowed(False)
+    self._set_controls_allowed(False)
     self.assertTrue(self._tx(common.make_msg(0, 0x1, 8)))
 
     # 0xdeadfaceU allowed for CAN flashing mode

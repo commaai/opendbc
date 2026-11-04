@@ -77,9 +77,13 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
   def test_cruise_buttons(self):
     buttons = ("SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN", "ACC_ON_BTN")
-    for cruise_engaged, controls_allowed in itertools.product((False, True), repeat=2):
-      self.assertTrue(self._rx(self._pcm_status_msg(cruise_engaged)))
-      self.safety.set_controls_allowed(controls_allowed)
+    # Cruise off cannot coexist with controls allowed. Gas can disengage controls
+    # while cruise remains active, which independently exercises the button gate.
+    for cruise_engaged, controls_allowed in ((False, False), (True, True), (True, False)):
+      self.assertTrue(self._rx(self._user_gas_msg(0)))
+      self._set_controls_allowed(cruise_engaged)
+      if cruise_engaged and not controls_allowed:
+        self.assertTrue(self._rx(self._user_gas_msg(1)))
       for pressed in itertools.product((False, True), repeat=len(buttons)):
         values = dict(zip(buttons, pressed, strict=True))
         values.update(SET_ME_1_1=1, SET_ME_1_2=1)
@@ -104,7 +108,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           speed_max = self.safety.get_vehicle_speed_max()
           msg = self.packer.make_can_msg_safety(name, bus, {signal: corrupt})
           msg[0].data[byte] ^= 0xFF
-          self.safety.set_controls_allowed(name == "WHEELSPEED_CLEAN")
+          self._set_controls_allowed(name == "WHEELSPEED_CLEAN")
           self.assertFalse(self._rx(msg))
           self.assertFalse(self.safety.get_controls_allowed())
           self.assertEqual(speed_min, self.safety.get_vehicle_speed_min())
@@ -116,11 +120,11 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       ("ACC_HUD_ADAS", self.CAM_BUS, "ACC_STATE", 3),
     ):
       with self.subTest(message=name):
+        self._set_controls_allowed(True)
         # Check both counter locations and rollover with valid checksums.
         for _ in range(32):
           msg = self.packer.make_can_msg_safety(name, bus, {signal: value})
           self.assertTrue(self._rx(msg))
-        self.safety.set_controls_allowed(True)
         # Replayed frames are rejected after the common counter tolerance.
         for i in range(common.MAX_WRONG_COUNTERS + 1):
           should_rx = i < common.MAX_WRONG_COUNTERS - 1
@@ -144,7 +148,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       sent_can = away_round(sent / 0.1 * 3.6) * 0.1 / 3.6
       speed = round(sent_can * 1000) / 1000 - 1
       for sign in (-1, 1):
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
 
         max_angle_float = get_max_angle_vm(speed, self.VM, CarControllerParams)
@@ -153,7 +157,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         max_angle_can = safety_max_can(max_angle_float)
         max_angle_can = min(max_angle_can, self.STEER_ANGLE_MAX * self.DEG_TO_CAN)
         max_angle = sign * max_angle_can / self.DEG_TO_CAN
-        self.safety.set_desired_angle_last(sign * max_angle_can)
+        self._set_prev_desired_angle(max_angle)
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
@@ -175,7 +179,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       sent_can = away_round(sent / 0.1 * 3.6) * 0.1 / 3.6
       speed = round(sent_can * 1000) / 1000 - 1
       for sign in (-1, 1):
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
         self._tx(self._angle_cmd_msg(0, True))
 
@@ -200,7 +204,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
-        self.safety.set_desired_angle_last(sign * over_delta_can)
+        self._set_prev_desired_angle(max_angle_delta)
+        self._reset_angle_measurement(0)
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Down

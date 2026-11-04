@@ -11,6 +11,7 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
+from opendbc.can import CANPacker
 from opendbc.car import DT_CTRL, gen_empty_fingerprint, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
@@ -289,6 +290,12 @@ class TestCarModelBase(unittest.TestCase):
       self.skipTest("skipping test for notCar")
     if self.CP.flags & ToyotaFlags.SECOC:
       self.skipTest("SecOC transmit tests require the vehicle key")
+
+    if self.CP.brand == "tesla":
+      # Safety assumes Autopark is active until DI_state arrives.
+      packer = CANPacker("tesla_model3_party")
+      addr, dat, bus = packer.make_can_msg("DI_state", 0, {"DI_cruiseState": 0, "DI_autoparkState": 0})
+      self.assertTrue(self.safety.safety_rx_hook(libsafety_py.make_CANPacket(addr, bus, dat)))
 
     controller_params = self.CP
     if self.CP.brand == "volkswagen" and self.CP.flags & VolkswagenFlags.MLB and self.CP.openpilotLongitudinalControl:

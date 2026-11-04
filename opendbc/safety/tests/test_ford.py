@@ -73,20 +73,32 @@ class TestFordSafetyBase(common.CarSafetyTest):
     return min(max_curvature_accel_can, round(self.MAX_CURVATURE * self.DEG_TO_CAN))
 
   def _set_prev_desired_angle(self, t):
-    t = round(t * self.DEG_TO_CAN)
-    self.safety.set_desired_curvature_last(t)
+    controls_allowed = self.safety.get_controls_allowed()
+    speed = getattr(self, "_last_speed", 0)
+    speed_2 = getattr(self, "_last_speed_2", 0)
+    curvature = getattr(self, "_last_curvature", 0)
+    self._reset_curvature_measurement(0, 0)
+    self._set_controls_allowed(False)
+    self.assertTrue(self._tx(self._lat_ctl_msg(False, 0, 0, 0, 0)))
+    self._set_controls_allowed(True)
+    self.assertLessEqual(abs(t), self.MAX_CURVATURE)
+    self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, t, 0)))
+    self._reset_curvature_measurement(curvature, speed)
+    self.assertTrue(self._rx(self._speed_msg_2(speed_2)))
+    self._set_controls_allowed(controls_allowed)
 
   def _reset_curvature_measurement(self, curvature, speed):
     for _ in range(6):
-      self._rx(self._speed_msg(speed))
-      self._rx(self._speed_msg_2(speed))
-      self._rx(self._yaw_rate_msg(curvature, speed))
+      self.assertTrue(self._rx(self._speed_msg(speed)))
+      self.assertTrue(self._rx(self._speed_msg_2(speed)))
+      self.assertTrue(self._rx(self._yaw_rate_msg(curvature, speed)))
 
   # Driver brake pedal
   def _user_brake_msg(self, brake: bool):
     # brake pedal and cruise state share same message, so we have to send
     # the other signal too
-    enable = self.safety.get_controls_allowed()
+    self._brake_pressed = brake
+    enable = getattr(self, "_cruise_enabled", False)
     values = {
       "BpedDrvAppl_D_Actl": 2 if brake else 1,
       "CcStat_D_Actl": 5 if enable else 0,
@@ -95,12 +107,14 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   # ABS vehicle speed
   def _speed_msg(self, speed: float, quality_flag=True):
+    self._last_speed = speed
     values = {"Veh_V_ActlBrk": speed * 3.6, "VehVActlBrk_D_Qf": 3 if quality_flag else 0}
     return self.packer.make_can_msg_safety("BrakeSysFeatures", 0, values)
 
   # PCM vehicle speed
   def _speed_msg_2(self, speed: float, quality_flag=True):
     # Ford relies on speed for driver curvature limiting, so it checks two sources
+    self._last_speed_2 = speed
     values = {"Veh_V_ActlEng": speed * 3.6, "VehVActlEng_D_Qf": 3 if quality_flag else 0}
     return self.packer.make_can_msg_safety("EngVehicleSpThrottle2", 0, values)
 
@@ -111,6 +125,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   # Current curvature
   def _yaw_rate_msg(self, curvature: float, speed: float, quality_flag=True):
+    self._last_curvature = curvature
     values = {"VehYaw_W_Actl": curvature * speed, "VehYawWActl_D_Qf": 3 if quality_flag else 0}
     return self.packer.make_can_msg_safety("Yaw_Data_FD1", 0, values)
 
@@ -123,7 +138,8 @@ class TestFordSafetyBase(common.CarSafetyTest):
   def _pcm_status_msg(self, enable: bool):
     # brake pedal and cruise state share same message, so we have to send
     # the other signal too
-    brake = self.safety.get_brake_pressed_prev()
+    self._cruise_enabled = enable
+    brake = getattr(self, "_brake_pressed", False)
     values = {
       "BpedDrvAppl_D_Actl": 2 if brake else 1,
       "CcStat_D_Actl": 5 if enable else 0,
@@ -182,7 +198,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
         speed_2 = round(max(speed + speed_delta, 0), 1)
         self._rx(self._speed_msg(speed))
         self._rx(self._speed_msg_2(speed_2))
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0))
 
         within_delta = common.speeds_within_delta(speed, speed_2)
@@ -192,7 +208,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     # checksum, counter, and quality flag checks
     for quality_flag in [True, False]:
       for msg_type in ["speed", "speed_2", "yaw"]:
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         # send multiple times to verify counter checks
         for _ in range(10):
           if msg_type == "speed":
@@ -241,8 +257,9 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
         for sign in (-1, 1):
           signed_curvature = sign * curvature
-          self.safety.set_controls_allowed(True)
-          self._set_prev_desired_angle(signed_curvature)
+          self._set_controls_allowed(True)
+          # Test out-of-range commands from the nearest reachable baseline.
+          self._set_prev_desired_angle(float(np.clip(signed_curvature, -self.MAX_CURVATURE, self.MAX_CURVATURE)))
           self._reset_curvature_measurement(signed_curvature, speed)
 
           should_tx = abs(curvature_can) <= max_can
@@ -263,8 +280,8 @@ class TestFordSafetyBase(common.CarSafetyTest):
             for path_angle in path_angles:
               for curvature_rate in curvature_rates:
                 for curvature in curvatures:
-                  self.safety.set_controls_allowed(controls_allowed)
-                  self._set_prev_desired_angle(curvature)
+                  self._set_controls_allowed(controls_allowed)
+                  self._set_prev_desired_angle(float(np.clip(curvature, -self.MAX_CURVATURE, self.MAX_CURVATURE)))
                   self._reset_curvature_measurement(curvature, speed)
 
                   should_tx = path_offset == 0 and path_angle == 0 and curvature_rate == 0
@@ -283,7 +300,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
     When the curvature error is exceeded, commanded curvature must start moving towards meas respecting rate limits.
     Since safety allows higher rate limits to avoid false positives, we need to allow a lower rate to move towards meas.
     """
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
     # safety fudges the speed (1 m/s) and rate limits (1 CAN unit) to avoid false positives
     small_curvature = 1 / self.DEG_TO_CAN  # significant small amount of curvature to cross boundary
 
@@ -345,7 +362,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
             # can not send if the curvature is above the max lateral acceleration
             should_tx = should_tx and abs(desired_curvature) <= curvature_accel_limit
 
-            self._set_prev_desired_angle(sign * initial_curvature)
+            self._set_prev_desired_angle(sign * min(initial_curvature, self.MAX_CURVATURE))
             self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * desired_curvature, 0)))
 
     # the newest speed sample gates the check, not the whole sample window
@@ -358,7 +375,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def test_curvature_violation(self):
     # If violation occurs, curvature cmd is blocked until reset to 0
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
     speed = 25.
     max_delta_can = self._get_max_curvature_delta_can(speed)
     self._reset_curvature_measurement(0, speed)
@@ -375,7 +392,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def test_rt_limits(self):
     # send rate is limited over a rolling 250ms window split into two half-interval buckets
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
     self._reset_curvature_measurement(0, 0)
     max_rt_msgs = int(self.LATERAL_FREQUENCY * common.RT_INTERVAL / 1e6 * 1.2 + 1)
     half = common.RT_INTERVAL // 2
@@ -402,21 +419,21 @@ class TestFordSafetyBase(common.CarSafetyTest):
       self.assertTrue(self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0, increment_timer=False)))
 
   def test_prevent_lkas_action(self):
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self.assertFalse(self._tx(self._lkas_command_msg(1)))
 
-    self.safety.set_controls_allowed(0)
+    self._set_controls_allowed(0)
     self.assertFalse(self._tx(self._lkas_command_msg(1)))
 
   def test_acc_buttons(self):
     for allowed in (0, 1):
-      self.safety.set_controls_allowed(allowed)
+      self._set_controls_allowed(allowed)
       for enabled in (True, False):
         self._rx(self._pcm_status_msg(enabled))
         self.assertTrue(self._tx(self._acc_button_msg(Buttons.TJA_TOGGLE, 2)))
 
     for allowed in (0, 1):
-      self.safety.set_controls_allowed(allowed)
+      self._set_controls_allowed(allowed)
       for bus in (0, 2):
         self.assertEqual(allowed, self._tx(self._acc_button_msg(Buttons.RESUME, bus)))
 
@@ -466,7 +483,7 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   def test_stock_aeb(self):
     # Test that CmbbDeny_B_Actl is never 1, it prevents the ABS module from actuating AEB requests from ACCDATA_2
     for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for cmbb_deny in (True, False):
         should_tx = not cmbb_deny
         self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, self.INACTIVE_ACCEL, controls_allowed, cmbb_deny)))
@@ -475,7 +492,7 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
 
   def test_gas_safety_check(self):
     for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for gas in np.concatenate((np.arange(self.MIN_GAS - 2, self.MAX_GAS + 2, 0.05), [self.INACTIVE_GAS])):
         gas = round(gas, 2)  # floats might not hit exact boundary conditions without rounding
         should_tx = (controls_allowed and self.MIN_GAS <= gas <= self.MAX_GAS) or gas == self.INACTIVE_GAS
@@ -485,7 +502,7 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
     brake_values = self._boundary_values([self.MIN_ACCEL, self.MAX_ACCEL, self.INACTIVE_ACCEL],
                                          self.MIN_ACCEL - 2, self.MAX_ACCEL + 2, 0.05)
     for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for brake_actuation in (True, False):
         for brake in brake_values:
           should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL

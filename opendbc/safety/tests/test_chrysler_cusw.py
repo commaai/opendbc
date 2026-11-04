@@ -49,7 +49,7 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
 
   def test_buttons(self):
     for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
 
       self.assertFalse(self._tx(self._button_msg()))
 

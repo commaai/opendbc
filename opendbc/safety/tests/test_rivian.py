@@ -75,7 +75,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
   def test_wheel_touch(self):
     # For hiding hold wheel alert on engage
     for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       values = {
         "SCCM_WheelTouch_HandsOn": 1 if controls_allowed else 0,
         "SCCM_WheelTouch_CapacitiveValue": 100 if controls_allowed else 0,
@@ -87,7 +87,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
     # checksum, counter, and quality flag checks
     for quality_flag in (True, False):
       for msg_type in ("speed", "speed_2"):
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         # send multiple times to verify counter checks
         for _ in range(10):
           if msg_type == "speed":
@@ -106,7 +106,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
     # The DBC defines counters for the remaining monitored RX messages too.
     for make_msg in (self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
       self._reset_safety_hooks()
-      self.safety.set_controls_allowed(True)
+      self._set_controls_allowed(True)
       for _ in range(10):
         self.assertTrue(self._rx(make_msg(0) if make_msg == self._torque_driver_msg else make_msg(False)))
 
@@ -117,13 +117,13 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
 
       if make_msg == self._user_brake_msg:
         self._reset_safety_hooks()
-        self.safety.set_controls_allowed(True)
+        self._set_controls_allowed(True)
         self.assertFalse(self._rx(self._user_brake_msg(False, quality_flag=False)))
         self.assertFalse(self.safety.get_controls_allowed())
 
       # A single bad counter is tolerated, but repeated bad counters must disengage.
       self._reset_safety_hooks()
-      self.safety.set_controls_allowed(True)
+      self._set_controls_allowed(True)
       for _ in range(7):
         msg = make_msg(0) if make_msg == self._torque_driver_msg else make_msg(False)
         msg[0].data[1] &= 0xf0
@@ -139,7 +139,7 @@ class TestRivianStockSafety(TestRivianSafetyBase):
   def test_adas_status(self):
     # For canceling stock ACC
     for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for interface_status in range(4):
         values = {"VDM_AdasInterfaceStatus": interface_status}
         self.assertTrue(self._tx(self.packer.make_can_msg_safety("VDM_AdasSts", 2, values)))

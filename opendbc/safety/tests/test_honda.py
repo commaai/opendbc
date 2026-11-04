@@ -30,6 +30,14 @@ class Btn:
 
 class HondaButtonEnableBase(common.CarSafetyTest):
 
+  def _engage(self):
+    self.assertTrue(self._rx(self._acc_state_msg(True)))
+    self.assertTrue(self._rx(self._button_msg(Btn.SET, main_on=True)))
+    self.assertTrue(self._rx(self._button_msg(Btn.NONE, main_on=True)))
+
+  def _disengage(self):
+    self.assertTrue(self._rx(self._button_msg(Btn.CANCEL, main_on=True)))
+
   # override these inherited tests since we're using button enable
   def test_disable_control_allowed_from_cruise(self):
     pass
@@ -42,7 +50,7 @@ class HondaButtonEnableBase(common.CarSafetyTest):
 
   def test_buttons_with_main_off(self):
     for btn in (Btn.SET, Btn.RESUME, Btn.CANCEL):
-      self.safety.set_controls_allowed(1)
+      self._set_controls_allowed(1)
       self._rx(self._acc_state_msg(False))
       self._rx(self._button_msg(btn, main_on=False))
       self.assertFalse(self.safety.get_controls_allowed())
@@ -56,7 +64,7 @@ class HondaButtonEnableBase(common.CarSafetyTest):
       for btn_prev in range(8):
         for btn_cur in range(8):
           self._rx(self._button_msg(Btn.NONE))
-          self.safety.set_controls_allowed(0)
+          self._set_controls_allowed(0)
           for _ in range(10):
             self._rx(self._button_msg(btn_prev))
             self.assertFalse(self.safety.get_controls_allowed())
@@ -75,12 +83,12 @@ class HondaButtonEnableBase(common.CarSafetyTest):
       Both MAIN and CANCEL should exit controls immediately.
     """
     for btn in (Btn.MAIN, Btn.CANCEL):
-      self.safety.set_controls_allowed(1)
+      self._set_controls_allowed(1)
       self._rx(self._button_msg(btn, main_on=True))
       self.assertFalse(self.safety.get_controls_allowed())
 
   def test_disengage_on_main(self):
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._acc_state_msg(True))
     self.assertTrue(self.safety.get_controls_allowed())
     self._rx(self._acc_state_msg(False))
@@ -91,7 +99,7 @@ class HondaButtonEnableBase(common.CarSafetyTest):
     # TODO: move this test to common
     # checksum checks
     for msg_type in ["btn", "gas", "speed"]:
-      self.safety.set_controls_allowed(1)
+      self._set_controls_allowed(1)
       if msg_type == "btn":
         msg = self._button_msg(Btn.SET)
       if msg_type == "gas":
@@ -107,6 +115,8 @@ class HondaButtonEnableBase(common.CarSafetyTest):
         self.assertFalse(self._rx(msg))
         self.assertFalse(self.safety.get_controls_allowed())
 
+    self._set_controls_allowed(True)
+
     # counter
     # Skip every other counter to trigger counter faults.
     for i in range(MAX_WRONG_COUNTERS + 1):
@@ -114,7 +124,6 @@ class HondaButtonEnableBase(common.CarSafetyTest):
       self._button_msg(Btn.SET)
       self._user_gas_msg(0)
       if i < MAX_WRONG_COUNTERS:
-        self.safety.set_controls_allowed(1)
         self._rx(self._button_msg(Btn.SET))
         self._rx(self._speed_msg(0))
         self._rx(self._user_gas_msg(0))
@@ -126,7 +135,7 @@ class HondaButtonEnableBase(common.CarSafetyTest):
 
     # restore counters for future tests with a couple of good messages
     for _ in range(2):
-      self.safety.set_controls_allowed(1)
+      self._set_controls_allowed(1)
       self._rx(self._button_msg(Btn.SET, main_on=True))
       self._rx(self._speed_msg(0))
       self._rx(self._user_gas_msg(0))
@@ -135,6 +144,9 @@ class HondaButtonEnableBase(common.CarSafetyTest):
 
 
 class HondaPcmEnableBase(common.CarSafetyTest):
+
+  def _disengage(self):
+    self.assertTrue(self._rx(self._button_msg(Btn.CANCEL, main_on=True)))
 
   def test_buttons(self):
     """
@@ -148,7 +160,7 @@ class HondaPcmEnableBase(common.CarSafetyTest):
           continue
 
         for btn in (Btn.SET, Btn.RESUME, Btn.CANCEL):
-          self.safety.set_controls_allowed(controls_allowed)
+          self._set_controls_allowed(controls_allowed)
           self._rx(self._acc_state_msg(main_on))
 
           # btn + none for falling edge
@@ -172,13 +184,15 @@ class HondaBase(common.CarSafetyTest):
   def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None):
     # preserve the state
     if cruise_on is None:
-      # or'd with controls allowed since the tests use it to "enable" cruise
-      cruise_on = self.safety.get_cruise_engaged_prev() or self.safety.get_controls_allowed()
+      cruise_on = getattr(self, "_cruise_on", False)
     if brake_pressed is None:
-      brake_pressed = self.safety.get_brake_pressed_prev()
+      brake_pressed = getattr(self, "_brake_pressed", False)
     if gas_pressed is None:
-      gas_pressed = self.safety.get_gas_pressed_prev()
+      gas_pressed = getattr(self, "_gas_pressed", False)
 
+    self._cruise_on = cruise_on
+    self._brake_pressed = brake_pressed
+    self._gas_pressed = gas_pressed
     values = {
       "ACC_STATUS": cruise_on,
       "BRAKE_PRESSED": brake_pressed,
@@ -217,12 +231,12 @@ class HondaBase(common.CarSafetyTest):
     raise NotImplementedError
 
   def test_disengage_on_brake(self):
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._user_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_steer_safety_check(self):
-    self.safety.set_controls_allowed(0)
+    self._set_controls_allowed(0)
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
     self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
 
@@ -258,7 +272,7 @@ class TestHondaNidecSafetyBase(HondaBase):
 
   def test_acc_hud_safety_check(self):
     for controls_allowed in [True, False]:
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for pcm_gas in range(255):
         for pcm_speed in range(100):
           send = (controls_allowed and pcm_gas <= self.MAX_GAS) or (pcm_gas == 0 and pcm_speed == 0)
@@ -267,12 +281,12 @@ class TestHondaNidecSafetyBase(HondaBase):
   def test_fwd_hook(self):
     # normal operation, not forwarding AEB
     self.FWD_BLACKLISTED_ADDRS[2].append(0x1FA)
-    self.safety.set_honda_fwd_brake(False)
+    self._rx(self._rx_brake_msg(0, aeb_req=0))
     super().test_fwd_hook()
 
     # forwarding AEB brake signal
     self.FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
-    self.safety.set_honda_fwd_brake(True)
+    self._rx(self._rx_brake_msg(self.MAX_BRAKE, aeb_req=1))
     super().test_fwd_hook()
 
   def test_honda_fwd_brake_latching(self):
@@ -282,7 +296,7 @@ class TestHondaNidecSafetyBase(HondaBase):
 
     # Now allow controls and request some brake
     openpilot_brake = round(self.MAX_BRAKE / 2.0)
-    self.safety.set_controls_allowed(True)
+    self._set_controls_allowed(True)
     self.assertTrue(self._tx(self._send_brake_msg(openpilot_brake)))
 
     # Still shouldn't fwd stock Honda brake until it's more than openpilot's
@@ -301,10 +315,12 @@ class TestHondaNidecSafetyBase(HondaBase):
 
   def test_brake_safety_check(self):
     for fwd_brake in [False, True]:
-      self.safety.set_honda_fwd_brake(fwd_brake)
+      self._rx(self._rx_brake_msg(0, aeb_req=0))
+      self._tx(self._send_brake_msg(0))
+      self._rx(self._rx_brake_msg(self.MAX_BRAKE if fwd_brake else 0, aeb_req=fwd_brake))
       for brake in np.arange(0, self.MAX_BRAKE + 10, 1):
         for controls_allowed in [True, False]:
-          self.safety.set_controls_allowed(controls_allowed)
+          self._set_controls_allowed(controls_allowed)
           if fwd_brake:
             send = False  # block openpilot brake msg when fwd'ing stock msg
           elif controls_allowed:
@@ -315,7 +331,7 @@ class TestHondaNidecSafetyBase(HondaBase):
 
   def test_block_aeb(self):
     for controls_allowed in [True, False]:
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for aeb_signals in ({"AEB_REQ_1": 1}, {"AEB_REQ_2": 1}, {"AEB_STATUS": 1}):
         values = {"COMPUTER_BRAKE": 0, **aeb_signals}
         msg = self.packer.make_can_msg_safety("BRAKE_COMMAND", self.PT_BUS, values)
@@ -374,12 +390,12 @@ class TestHondaBoschSafetyBase(HondaBase):
     pass
 
   def test_spam_cancel_safety_check(self):
-    self.safety.set_controls_allowed(0)
+    self._set_controls_allowed(0)
     self.assertTrue(self._tx(self._button_msg(Btn.CANCEL, bus=self.BUTTONS_BUS)))
     self.assertFalse(self._tx(self._button_msg(Btn.RESUME, bus=self.BUTTONS_BUS)))
     self.assertFalse(self._tx(self._button_msg(Btn.SET, bus=self.BUTTONS_BUS)))
     # do not block resume if we are engaged already
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(Btn.RESUME, bus=self.BUTTONS_BUS)))
 
 
@@ -393,8 +409,7 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
     return self._alt_brake_msg(brake)
 
   def test_alt_brake_rx_hook(self):
-    self.safety.set_honda_alt_brake_msg(1)
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     msg = self._alt_brake_msg(0)
     self.assertTrue(self._rx(msg))
     msg[0].data[2] = msg[0].data[2] & 0xF0  # invalidate checksum
@@ -402,13 +417,13 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_alt_disengage_on_brake(self):
-    self.safety.set_honda_alt_brake_msg(1)
-    self.safety.set_controls_allowed(1)
+    self._set_controls_allowed(1)
     self._rx(self._alt_brake_msg(1))
     self.assertFalse(self.safety.get_controls_allowed())
 
-    self.safety.set_honda_alt_brake_msg(0)
-    self.safety.set_controls_allowed(1)
+    self.safety.set_safety_hooks(self.SAFETY_MODEL, self.SAFETY_PARAM & ~HondaSafetyFlags.ALT_BRAKE)
+    self.safety.init_tests()
+    self._set_controls_allowed(1)
     self._rx(self._alt_brake_msg(1))
     self.assertTrue(self.safety.get_controls_allowed())
 
@@ -465,7 +480,7 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
     for controls_allowed in [True, False]:
       for gas in np.arange(self.NO_GAS, self.MAX_GAS + 2000, 100):
         accel = 0 if gas < 0 else gas / 1000
-        self.safety.set_controls_allowed(controls_allowed)
+        self._set_controls_allowed(controls_allowed)
         send = (controls_allowed and 0 <= gas <= self.MAX_GAS) or gas == self.NO_GAS
         self.assertEqual(send, self._tx(self._send_gas_brake_msg(gas, accel)), (controls_allowed, gas, accel))
 
@@ -473,13 +488,13 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
     for controls_allowed in [True, False]:
       for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.01):
         accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
-        self.safety.set_controls_allowed(controls_allowed)
+        self._set_controls_allowed(controls_allowed)
         send = self.MIN_ACCEL <= accel <= self.MAX_ACCEL if controls_allowed else accel == 0
         self.assertEqual(send, self._tx(self._send_gas_brake_msg(self.NO_GAS, accel)), (controls_allowed, accel))
 
   def test_block_aeb(self):
     for controls_allowed in [True, False]:
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for aeb_signals in ({"AEB_STATUS": 1}, {"AEB_PREPARE": 1}, {"AEB_BRAKING": 1}):
         values = {"GAS_COMMAND": self.NO_GAS, "ACCEL_COMMAND": 0, **aeb_signals}
         msg = self.packer.make_can_msg_safety("ACC_CONTROL", self.PT_BUS, values)
@@ -533,7 +548,7 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
 
   def test_block_aeb(self):
     for controls_allowed in [True, False]:
-      self.safety.set_controls_allowed(controls_allowed)
+      self._set_controls_allowed(controls_allowed)
       for aeb_signals in ({"AEB_STATUS": 1}, {"AEB_PREPARE": 1}, {"AEB_BRAKING": 1}):
         values = {"ACCEL_COMMAND": 0, **aeb_signals}
         msg = self.packer.make_can_msg_safety("ACC_CONTROL", self.PT_BUS, values)

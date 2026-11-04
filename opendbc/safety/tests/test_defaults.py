@@ -60,7 +60,10 @@ class TestSafetyFramework(common.SafetyTestBase):
   SAFETY_MODEL = CarParams.SafetyModel.noOutput
 
   def test_unsupported_safety_mode(self):
-    self.safety.set_controls_allowed(True)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.body, 0)
+    packer = common.CANPackerSafety("comma_body")
+    self.assertTrue(self._rx(packer.make_can_msg_safety("MOTORS_DATA", 0, {"SPEED_L": 0, "SPEED_R": 0})))
+    self.assertTrue(self.safety.get_controls_allowed())
     self.assertEqual(self.safety.set_safety_hooks(0xFFFF, 0), -1)
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
