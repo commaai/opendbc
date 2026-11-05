@@ -30,6 +30,21 @@ bool safety_config_valid() {
   return true;
 }
 
+int get_rx_checks_len(void) {
+  return current_safety_config.rx_checks_len;
+}
+
+// all RX checks valid, check stale last received age us ago
+void set_rx_checks_received(int stale, uint32_t age) {
+  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
+    rx_status[i].msg_seen = true;
+    rx_status[i].valid_checksum = true;
+    rx_status[i].valid_quality_flag = true;
+    rx_status[i].wrong_counters = 0;
+    rx_status[i].last_timestamp = (i == stale) ? (timer_cnt - age) : timer_cnt;
+  }
+}
+
 void set_controls_allowed(bool c){
   controls_allowed = c;
 }

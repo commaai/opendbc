@@ -1224,3 +1224,18 @@ class CarSafetyTest(SafetyTest):
         self.safety.safety_tick()
         self.assertFalse(self.safety.get_controls_allowed())
         self.assertFalse(self.safety.safety_config_valid())
+
+  def test_rx_lagging(self):
+    # a check lags after 10 missed messages or 1 s, whichever is longer. checks are at least 10 Hz, so it is always 1 s
+    lag_us = 1000000
+    self.assertGreater(self.safety.get_rx_checks_len(), 0)
+    for stale in range(self.safety.get_rx_checks_len()):
+      for age, allowed in ((lag_us, True), (lag_us + 1, False)):
+        with self.subTest(stale=stale, age=age):
+          self._reset_safety_hooks()
+          self.safety.set_timer(2 * lag_us)
+          self.safety.set_rx_checks_received(stale, age)
+          self.assertTrue(self.safety.safety_config_valid())
+          self.safety.set_controls_allowed(True)
+          self.safety.safety_tick()
+          self.assertEqual(allowed, self.safety.get_controls_allowed())
