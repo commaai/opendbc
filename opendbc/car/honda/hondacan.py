@@ -89,7 +89,8 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
   if CP.flags & HondaFlags.BOSCH_RADARLESS:
     acc_control_values.update({
       "CONTROL_ON": enabled,
-      "IDLESTOP_ALLOW": stopping_counter > 200,  # allow idle stop after 4 seconds (50 Hz)
+      # required whenever braking for Hybrid and Bosch Alt Brake vehicles, allow idle stop after 4 seconds (50 Hz) for other vehicles
+      "COMPUTER_BRAKE_ASSIST": braking if CP.flags & (HondaFlags.HYBRID | HondaFlags.BOSCH_ALT_BRAKE) else stopping_counter > 200,
     })
   else:
     acc_control_values.update({
