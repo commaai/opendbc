@@ -35,11 +35,6 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   STEER_ANGLE_MAX = 390  # deg, EPS fault limit
   DEG_TO_CAN = 10
 
-  # BYD uses get_max_angle_delta_vm and get_max_angle_vm for lateral accel and jerk limits
-  ANGLE_RATE_BP = None
-  ANGLE_RATE_UP = None
-  ANGLE_RATE_DOWN = None
-
   # Real time limits
   LATERAL_FREQUENCY = 50  # Hz
 
@@ -136,6 +131,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           msg = self.packer.make_can_msg_safety(name, bus, {signal: 0})
           self.assertTrue(self._rx(msg))
 
+  # BYD uses get_max_angle_delta_vm and get_max_angle_vm for lateral accel and jerk limits
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
     pass

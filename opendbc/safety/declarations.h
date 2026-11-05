@@ -40,13 +40,16 @@
 #define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
 
-#define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), (sizeof((rx)) / sizeof((rx)[0])), \
+// length of an RX check array; fails to compile if it has more checks than rx_status can track
+#define RX_CHECKS_LEN(rx) ((sizeof((rx)) / sizeof((rx)[0])) + \
+                           (0U * sizeof(char[((sizeof((rx)) / sizeof((rx)[0])) <= MAX_RX_CHECKS) ? 1 : -1])))
+#define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), RX_CHECKS_LEN(rx), \
                                                   (tx), (sizeof((tx)) / sizeof((tx)[0])), \
                                                   false})
 #define SET_RX_CHECKS(rx, config) \
   do { \
     (config).rx_checks = (rx); \
-    (config).rx_checks_len = sizeof((rx)) / sizeof((rx)[0]); \
+    (config).rx_checks_len = RX_CHECKS_LEN(rx); \
     (config).disable_forwarding = false; \
   } while (0);
 
@@ -65,6 +68,8 @@ uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);
 
 extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
+// max number of RX checks in a safety config; their dynamic state is shared by all safety modes
+#define MAX_RX_CHECKS 12U
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
@@ -88,8 +93,8 @@ struct lookup_t {
 
 typedef struct {
   int addr;
-  unsigned int bus;
-  int len;
+  uint8_t bus;
+  uint8_t len;
   bool check_relay;              // if true, trigger relay malfunction if existence on destination bus and block forwarding to destination bus
   bool disable_static_blocking;  // if true, static blocking is disabled so safety mode can dynamically handle it (e.g. selective AEB pass-through)
 } CanMsg;
@@ -175,36 +180,38 @@ typedef struct {
 } LongitudinalLimits;
 
 typedef struct {
-  const int addr;
-  const unsigned int bus;
-  const int len;
-  const uint32_t frequency;          // expected frequency of the message [Hz]
-  const bool ignore_checksum;        // checksum check is not performed when set to true
-  const bool ignore_counter;         // counter check is not performed when set to true
-  const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
-  const bool ignore_quality_flag;    // true if quality flag check is skipped
+  const unsigned int addr : 29;
+  const unsigned int bus : 3;
+  const unsigned int len : 7;
+  const unsigned int frequency : 7;   // expected frequency of the message [Hz]
+  const bool ignore_checksum : 1;     // checksum check is not performed when set to true
+  const bool ignore_counter : 1;      // counter check is not performed when set to true
+  const unsigned int max_counter : 8; // maximum value of the counter. 0 means that the counter check is skipped
+  const bool ignore_quality_flag : 1; // true if quality flag check is skipped
 } CanMsgCheck;
 
+// dynamic state of an RX check, reset on safety mode init
 typedef struct {
-  // dynamic flags, reset on safety mode init
-  bool msg_seen;
-  int index;                         // if multiple messages are allowed to be checked, this stores the index of the first one seen. only msg[msg_index] will be used
-  bool valid_checksum;               // true if and only if checksum check is passed
-  int wrong_counters;                // counter of wrong counters, saturated between 0 and MAX_WRONG_COUNTERS
-  bool valid_quality_flag;           // true if the message's quality/health/status signals are valid
-  uint8_t last_counter;              // last counter value
   uint32_t last_timestamp;           // micro-s
+  int wrong_counters;                // counter of wrong counters, saturated between 0 and MAX_WRONG_COUNTERS
+  uint8_t index;                     // if multiple messages are allowed to be checked, this stores the index of the first one seen. only msg[msg_index] will be used
+  uint8_t last_counter;              // last counter value
+  bool msg_seen;
+  bool valid_checksum;               // true if and only if checksum check is passed
+  bool valid_quality_flag;           // true if the message's quality/health/status signals are valid
   bool lagging;                      // true if and only if the time between updates is excessive
 } RxStatus;
 
-// params and flags about checksum, counter and frequency checks for each monitored address
+// params and flags about checksum, counter and frequency checks for each monitored address.
+// constant: the state of the current safety config's checks is in rx_status, indexed alike
 typedef struct {
   const CanMsgCheck msg[MAX_ADDR_CHECK_MSGS];  // check either messages (e.g. honda steer)
-  RxStatus status;
 } RxCheck;
 
+extern RxStatus rx_status[MAX_RX_CHECKS];
+
 typedef struct {
-  RxCheck *rx_checks;
+  const RxCheck *rx_checks;
   int rx_checks_len;
   const CanMsg *tx_msgs;
   int tx_msgs_len;
@@ -238,8 +245,6 @@ int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
 int ROUND(float val);
-void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
-void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
 bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,

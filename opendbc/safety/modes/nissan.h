@@ -103,7 +103,7 @@ static safety_config nissan_init(uint16_t param) {
   };
 
   // Signals duplicated below due to the fact that these messages can come in on either CAN bus, depending on car model.
-  static RxCheck nissan_rx_checks[] = {
+  static const RxCheck nissan_rx_checks[] = {
     {.msg = {{0x185, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_TORQUE_SENSOR
     {.msg = {{0x285, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true},
              {0x285, 1, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }}},  // WHEEL_SPEEDS_REAR

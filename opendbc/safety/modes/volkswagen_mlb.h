@@ -12,7 +12,7 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
     {MSG_LS_01, 2, 4, .check_relay = false},
   };
 
-  static RxCheck volkswagen_mlb_rx_checks[] = {
+  static const RxCheck volkswagen_mlb_rx_checks[] = {
     // TODO: implement checksum validation
     {.msg = {{MSG_ESP_03, 0, 8, 50U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .ignore_checksum = true, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},

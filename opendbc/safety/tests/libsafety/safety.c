@@ -20,14 +20,29 @@ bool safety_config_valid() {
   }
 
   for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
-    const RxCheck addr = current_safety_config.rx_checks[i];
-    bool valid = addr.status.msg_seen && !addr.status.lagging && addr.status.valid_checksum && (addr.status.wrong_counters < MAX_WRONG_COUNTERS) && addr.status.valid_quality_flag;
+    const RxStatus status = rx_status[i];
+    bool valid = status.msg_seen && !status.lagging && status.valid_checksum && (status.wrong_counters < MAX_WRONG_COUNTERS) && status.valid_quality_flag;
     if (!valid) {
-      // printf("i %d seen %d lagging %d valid checksum %d wrong counters %d valid quality flag %d\n", i, addr.status.msg_seen, addr.status.lagging, addr.status.valid_checksum, addr.status.wrong_counters, addr.status.valid_quality_flag);
+      // printf("i %d seen %d lagging %d valid checksum %d wrong counters %d valid quality flag %d\n", i, status.msg_seen, status.lagging, status.valid_checksum, status.wrong_counters, status.valid_quality_flag);
       return false;
     }
   }
   return true;
+}
+
+int get_rx_checks_len(void) {
+  return current_safety_config.rx_checks_len;
+}
+
+// all RX checks valid, check stale last received age us ago
+void set_rx_checks_received(int stale, uint32_t age) {
+  for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
+    rx_status[i].msg_seen = true;
+    rx_status[i].valid_checksum = true;
+    rx_status[i].valid_quality_flag = true;
+    rx_status[i].wrong_counters = 0;
+    rx_status[i].last_timestamp = (i == stale) ? (timer_cnt - age) : timer_cnt;
+  }
 }
 
 void set_controls_allowed(bool c){

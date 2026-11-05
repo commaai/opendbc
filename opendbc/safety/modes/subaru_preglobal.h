@@ -83,7 +83,7 @@ static safety_config subaru_preglobal_init(uint16_t param) {
   };
 
   // TODO: do checksum and counter checks after adding the signals to the outback dbc file
-  static RxCheck subaru_preglobal_rx_checks[] = {
+  static const RxCheck subaru_preglobal_rx_checks[] = {
     {.msg = {{MSG_SUBARU_PG_Throttle,       SUBARU_PG_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_SUBARU_PG_CruiseControl,   SUBARU_PG_MAIN_BUS, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
