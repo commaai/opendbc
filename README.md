@@ -140,6 +140,8 @@ When a [panda](https://comma.ai/shop/panda) powers up with [opendbc safety firmw
 
 Safety modes optionally support `controls_allowed`, which allows or blocks a subset of messages based on a customizable state in the board.
 
+When curvature steering permits power wind-down after disengagement, rejected curvature or power commands must not change the wind-down reference.
+
 ## Code Rigor
 
 The opendbc safety firmware is written for its use in conjunction with [openpilot](https://github.com/commaai/openpilot) and [panda](https://github.com/commaai/panda). The safety firmware, through its safety model, provides and enforces the

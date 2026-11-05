@@ -323,7 +323,9 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
     violation |= safety_max_limit_check(steer_power, limits.max_steer_power, 0);
     violation |= (steer_power != 0) && !steer_control_enabled;
     violation |= !controls_allowed && (steer_power != 0) && (steer_power >= curvature_state.steer_power_last);
-    curvature_state.steer_power_last = steer_power;
+    if (!violation) {
+      curvature_state.steer_power_last = steer_power;
+    }
   } else {
     // No curvature control allowed when controls are not allowed
     violation |= !controls_allowed && steer_control_enabled;
