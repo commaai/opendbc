@@ -337,7 +337,7 @@ static safety_config tesla_init(uint16_t param) {
   tesla_autopark = true;
   tesla_autopark_prev = false;
 
-  static RxCheck tesla_model3_y_rx_checks[] = {
+  static const RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, 25U, .max_counter = 7U, .ignore_quality_flag = true}, { 0 }, { 0 }}},    // DAS_control
     {.msg = {{0x488, 2, 4, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // DAS_steeringControl
     {.msg = {{0x257, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // DI_speed (speed in kph)

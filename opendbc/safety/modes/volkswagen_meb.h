@@ -112,7 +112,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
   safety_config ret;
   if (volkswagen_meb_alt_crc) {
-    static RxCheck volkswagen_meb_gen2_rx_checks[] = {
+    static const RxCheck volkswagen_meb_gen2_rx_checks[] = {
       VOLKSWAGEN_MEB_COMMON_RX_CHECKS
       {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
       {.msg = {{MSG_ESC_51, 0, 64, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -120,7 +120,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
     ret = BUILD_SAFETY_CFG(volkswagen_meb_gen2_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   } else {
-    static RxCheck volkswagen_meb_rx_checks[] = {
+    static const RxCheck volkswagen_meb_rx_checks[] = {
       VOLKSWAGEN_MEB_COMMON_RX_CHECKS
       {.msg = {{MSG_Motor_51, 0, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
       {.msg = {{MSG_ESC_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},

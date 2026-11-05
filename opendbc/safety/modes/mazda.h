@@ -86,7 +86,7 @@ static safety_config mazda_init(uint16_t param) {
     {MAZDA_LKAS_HUD, 0, 8, .check_relay = true},
   };
 
-  static RxCheck mazda_rx_checks[] = {
+  static const RxCheck mazda_rx_checks[] = {
     {.msg = {{MAZDA_CRZ_CTRL,     0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MAZDA_CRZ_BTNS,     0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MAZDA_STEER_TORQUE, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},

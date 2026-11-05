@@ -35,6 +35,12 @@ def round_speed(v):
   return round(v * VEHICLE_SPEED_FACTOR) / VEHICLE_SPEED_FACTOR
 
 
+def speeds_within_delta(speed, speed_2):
+  # safety compares the speeds in integer VEHICLE_SPEED_FACTOR units
+  delta = away_round(speed * VEHICLE_SPEED_FACTOR) - away_round(speed_2 * VEHICLE_SPEED_FACTOR)
+  return abs(delta) <= MAX_SPEED_DELTA * VEHICLE_SPEED_FACTOR
+
+
 def make_msg(bus, addr, length=8, dat=None):
   if dat is None:
     dat = b'\x00' * length
@@ -339,7 +345,9 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         - We can always recover from violations if steer_req=1
     """
 
-    for min_valid_steer_frames in range(self.MIN_VALID_STEERING_FRAMES * 2):
+    # dense around the threshold, sparse elsewhere (the valid frame counter saturates at MIN_VALID_STEERING_FRAMES)
+    valid_frames = self._boundary_values([self.MIN_VALID_STEERING_FRAMES], 0, self.MIN_VALID_STEERING_FRAMES * 2, sparse_count=10)
+    for min_valid_steer_frames in map(int, valid_frames):
       # Reset match count and rt timer to allow cut (valid_steer_req_count, ts_steer_req_mismatch_last)
       self.safety.init_tests()
       self.safety.set_timer(self.MIN_VALID_STEERING_RT_INTERVAL)
@@ -357,7 +365,7 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         self.assertEqual(should_tx and idx < self.MAX_INVALID_STEERING_FRAMES, tx)
 
       # Keep blocking after one steer_req mismatch
-      for _ in range(100):
+      for _ in range(10):
         self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_TORQUE, steer_req=0)))
 
       # Make sure we can recover
@@ -415,7 +423,7 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         self.assertEqual(should_tx, self._tx(self._torque_cmd_msg(self.MAX_TORQUE, steer_req=0)))
 
       # Keep blocking after one steer_req mismatch
-      for _ in range(100):
+      for _ in range(10):
         self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_TORQUE, steer_req=0)))
 
       # Make sure we can recover
@@ -935,9 +943,10 @@ class SafetyTest(SafetyTestBase):
         self.assertEqual(fwd_bus, self.safety.safety_fwd_hook(bus, addr), f"{addr=:#x} from {bus=} to {fwd_bus=}")
 
   def test_spam_can_buses(self):
+    tx_msgs = {(addr, bus) for addr, bus in self.TX_MSGS}
     for bus in range(4):
       for addr in self.SCANNED_ADDRS:
-        if [addr, bus] not in self.TX_MSGS:
+        if (addr, bus) not in tx_msgs:
           self.assertFalse(self._tx(make_msg(bus, addr, 8)), f"allowed TX {addr=} {bus=}")
 
   def test_default_controls_not_allowed(self):
@@ -1202,7 +1211,7 @@ class CarSafetyTest(SafetyTest):
         self.safety.set_controls_allowed(True)
         self._rx(self._speed_msg_2(speed_2))
 
-        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
+        within_delta = speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_safety_tick(self):
@@ -1215,3 +1224,18 @@ class CarSafetyTest(SafetyTest):
         self.safety.safety_tick()
         self.assertFalse(self.safety.get_controls_allowed())
         self.assertFalse(self.safety.safety_config_valid())
+
+  def test_rx_lagging(self):
+    # a check lags after 10 missed messages or 1 s, whichever is longer. checks are at least 10 Hz, so it is always 1 s
+    lag_us = 1000000
+    self.assertGreater(self.safety.get_rx_checks_len(), 0)
+    for stale in range(self.safety.get_rx_checks_len()):
+      for age, allowed in ((lag_us, True), (lag_us + 1, False)):
+        with self.subTest(stale=stale, age=age):
+          self._reset_safety_hooks()
+          self.safety.set_timer(2 * lag_us)
+          self.safety.set_rx_checks_received(stale, age)
+          self.assertTrue(self.safety.safety_config_valid())
+          self.safety.set_controls_allowed(True)
+          self.safety.safety_tick()
+          self.assertEqual(allowed, self.safety.get_controls_allowed())

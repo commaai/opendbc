@@ -23,7 +23,7 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
     {MSG_ACC_07, 0, 8, .check_relay = true},
   };
 
-  static RxCheck volkswagen_mqb_rx_checks[] = {
+  static const RxCheck volkswagen_mqb_rx_checks[] = {
     {.msg = {{MSG_ESP_19, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_ESP_05, 0, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},

@@ -185,7 +185,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
         self.safety.set_controls_allowed(True)
         self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0))
 
-        within_delta = abs(speed - speed_2) <= common.MAX_SPEED_DELTA
+        within_delta = common.speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_rx_hook(self):
