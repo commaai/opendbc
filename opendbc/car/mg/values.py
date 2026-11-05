@@ -17,7 +17,7 @@ class MgPlatformConfig(PlatformConfig):
 
 
 class CAR(Platforms):
-  MG_5_EV = MgPlatformConfig([MgCarDocs("MG 5 EV 2021")], CarSpecs(mass=1640., wheelbase=2.66, steerRatio=15.8))
+  MG_5_EV = MgPlatformConfig([MgCarDocs("MG 5 EV 2021")], CarSpecs(wheelbase=2.66, steerRatio=15.8))
 
 
 FW_QUERY_CONFIG = FwQueryConfig(

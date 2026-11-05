@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import random
 import unittest
 import numpy as np
 
@@ -10,7 +9,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANDefine
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import MAX_SPEED_DELTA, MAX_WRONG_COUNTERS, away_round, round_speed
+from opendbc.safety.tests.common import MAX_WRONG_COUNTERS, away_round, round_speed, speeds_within_delta
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
@@ -39,12 +38,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   # Angle control limits
   STEER_ANGLE_MAX = 360  # deg
   DEG_TO_CAN = 10
-
-  # Tesla uses get_max_angle_delta_vm and get_max_angle_vm for real lateral accel and jerk limits
-  # TODO: integrate this into AngleSteeringSafetyTest
-  ANGLE_RATE_BP = None
-  ANGLE_RATE_UP = None
-  ANGLE_RATE_DOWN = None
 
   # Real time limits
   LATERAL_FREQUENCY = 50  # Hz
@@ -81,10 +74,10 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
               "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code}
     return self.packer.make_can_msg_safety("EPAS3S_sysStatus", 0, values)
 
-  def _user_brake_msg(self, brake, quality_flag: bool = True):
-    values = {"ESP_driverBrakeApply": 2 if brake else 1}
-    if not quality_flag:
-      values["ESP_driverBrakeApply"] = random.choice((0, 3))  # NotInit_orOff, Faulty_SNA
+  def _user_brake_msg(self, brake, status: int | None = None):
+    if status is None:
+      status = 2 if brake else 1
+    values = {"ESP_driverBrakeApply": status}
     return self.packer.make_can_msg_safety("ESP_status", 0, values)
 
   def _speed_msg(self, speed):
@@ -183,7 +176,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         self.safety.set_controls_allowed(True)
         self.assertTrue(self._rx(self._speed_msg_2(speed_2)))
 
-        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
+        within_delta = speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
     # Test ESP_B quality flag
@@ -194,9 +187,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
   def test_user_brake_quality_flag(self):
-    for quality_flag in (True, False):
-      msg = self._user_brake_msg(True, quality_flag=quality_flag)
-      self.assertEqual(quality_flag, self._rx(msg))
+    # 0=NotInit_orOff and 3=Faulty_SNA are invalid
+    for status in range(4):
+      valid = status not in (0, 3)
+      msg = self._user_brake_msg(False, status=status)
+      self.assertEqual(valid, self._rx(msg))
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
@@ -280,6 +275,8 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
     self.assertFalse(self._tx(no_lkas_msg))
 
+  # Tesla uses get_max_angle_delta_vm and get_max_angle_vm for real lateral accel and jerk limits
+  # TODO: integrate this into AngleSteeringSafetyTest
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
     pass
