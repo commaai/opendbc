@@ -59,7 +59,8 @@ class RadarInterface(RadarInterfaceBase):
     if not self.rcp.can_valid:
       ret.errors.canError = True
 
-    if self.rcp.vl['STATUS_MSG']['RADAR_STATUS'] != 1 or self.rcp.vl['STATUS_MSG']['RADAR_PRE_FAULT'] != 0:
+    # RADAR_PRE_FAULT is not checked: it can be set while the radar keeps tracking normally (#3738)
+    if self.rcp.vl['STATUS_MSG']['RADAR_STATUS'] != 1:
       ret.errors.radarUnavailableTemporary = True
 
     for ii in sorted(updated_messages):
