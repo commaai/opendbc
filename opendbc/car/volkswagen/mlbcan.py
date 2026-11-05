@@ -53,19 +53,14 @@ def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance
   return packer.make_can_msg("ACC_02", bus, values)
 
 def volkswagen_mlb_checksum(address: int, sig, d: bytearray) -> int:
-  xor_starting_value = {
-    0x109: 0x08, # ACC_01
-    0x111: 0x10, # TSK_05
-    0x30C: 0x0F, # ACC_02
-    0x324: 0x27, # ACC_04
-    0x10B: 0xA,  # LS_01
-    0x10D: 0x0C, # ACC_05
-    0x10F: 0x0E, # ACC_0x10F
-    0x311: 0x12, # ACC_0x311
-    0x397: 0x94, # LDW_02
-    0x10C: 0x0D, # TSK_02
-  }
-  if address in xor_starting_value:
-    return xor_checksum(address, sig, d, xor_starting_value[address])
-  else:
+
+  # LH_EPS_03, ACC_10, LH_EPS_02, ESP_08, HCA_01, LH_EPS_01
+  if address in {0x9F, 0x117, 0x11D, 0x11E, 0x126, 0x32A}:
     return volkswagen_mqb_meb_checksum(address, sig, d)
+
+  # XOR checksum is seeded with the CAN address high byte XOR low byte.
+  seed = (address >> 8) ^ (address & 0xFF)
+  if address in (0x100, 0x101): # ESP_01, ESP_02 special case
+    seed ^= 0xAA
+
+  return xor_checksum(address, sig, d, initial_value=seed)
