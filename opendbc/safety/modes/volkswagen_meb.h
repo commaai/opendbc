@@ -24,6 +24,7 @@
 #define VOLKSWAGEN_MEB_ACC_OVERRIDE            4U
 
 static bool volkswagen_meb_alt_crc = false;
+static bool volkswagen_meb_travel_assist_button_prev = false;
 
 #define VOLKSWAGEN_MEB_COMMON_RX_CHECKS \
   {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
@@ -107,6 +108,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   };
 
   volkswagen_common_init();
+  volkswagen_meb_travel_assist_button_prev = false;
   const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
   volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
 
@@ -173,16 +175,20 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
-    // Enter controls on falling edge of Set or Resume with main switch on
+    // Enter controls on falling edge of Set, Resume or Travel Assist with main switch on
     // Signal: GRA_ACC_01.GRA_Tip_Setzen
     // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
+    // Signal: GRA_ACC_01.GRA_TravelAssist
     bool set_button = GET_BIT(msg, 16U);
     bool resume_button = GET_BIT(msg, 19U);
-    if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
+    bool travel_assist_button = GET_BIT(msg, 30U);
+    if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button) ||
+        (volkswagen_meb_travel_assist_button_prev && !travel_assist_button)) {
       controls_allowed = acc_main_on;
     }
     volkswagen_set_button_prev = set_button;
     volkswagen_resume_button_prev = resume_button;
+    volkswagen_meb_travel_assist_button_prev = travel_assist_button;
 
     // Always exit controls on rising edge of Cancel
     if (GET_BIT(msg, 13U)) {
