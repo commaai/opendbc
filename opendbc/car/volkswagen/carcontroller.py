@@ -70,14 +70,8 @@ class CarController(CarControllerBase):
     if self.frame % self.CCP.STEER_STEP == 0:
       apply_torque = 0
       if self.CP.flags & VolkswagenFlags.MEB:
-        # Logic to avoid HCA refused state:
-        #   * steering power as counter and near zero before OP lane assist deactivation
-        # MEB rack can be used continuously without time limits
-        # maximum real steering angle change ~ 120-130 deg/s
-
         if CC.latActive:
           hca_enabled = True
-          # compensate the gap between measured and current curvature
           apply_curvature = actuators.curvature + (CS.curvature_meas - CC.currentCurvature)
           apply_curvature = self.CCP.CURVATURE_LIMITS.apply_limits(apply_curvature, self.apply_curvature_last, CS.out.vEgoRaw, CS.curvature_meas,
                                                                    CC.latActive, self.CCP.STEER_STEP)
@@ -92,7 +86,10 @@ class CarController(CarControllerBase):
         else:
           if self.steering_power_last > 0:  # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
-            apply_curvature = float(np.clip(CS.curvature_meas, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX))
+            # HCA stays enabled here, so safety keeps rate limiting the curvature: ramp to the measured
+            # value instead of stepping to it, which safety rejects while we are still engaged
+            apply_curvature = self.CCP.CURVATURE_LIMITS.apply_limits(CS.curvature_meas, self.apply_curvature_last, CS.out.vEgoRaw,
+                                                                     CS.curvature_meas, True, self.CCP.STEER_STEP)
             steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEP, 0)
           else:
             hca_enabled = False
@@ -114,9 +111,6 @@ class CarController(CarControllerBase):
         can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_torque, hca_enabled))
 
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
-        # Pacify VW Emergency Assist driver inactivity detection by changing its view of driver steering input torque
-        # to the greatest of actual driver input or 2x openpilot's output (1x openpilot output is not enough to
-        # consistently reset inactivity detection on straight level roads). See commaai/openpilot#23274 for background.
         ea_simulated_torque = float(np.clip(apply_torque * 2, -self.CCP.STEER_MAX, self.CCP.STEER_MAX))
         if abs(CS.out.steeringTorque) > abs(ea_simulated_torque):
           ea_simulated_torque = CS.out.steeringTorque
@@ -124,9 +118,6 @@ class CarController(CarControllerBase):
 
     # Emergency Assist intervention
     if self.CP.flags & VolkswagenFlags.MEB and self.CP.flags & VolkswagenFlags.STOCK_KLR_PRESENT:
-      # send capacitive steering wheel hands-on message to keep ACC resume active and control Emergency Assist
-      # MEB Emergency Assist brake jerks after 30s of continued hands-off time.
-      # We send the stock wheeltouch message to start the stock DM timer when openpilot latches the critical driver monitoring alert
       if self.frame % self.CCP.KLR_01_STEP == 0:
         lat_active = CC.latActive and not CC.driverMonitoringEscalation
         can_sends.append(mebcan.create_capacitive_wheel_touch(self.packer_pt, self.CAN.cam, lat_active, CS.klr_stock_values))
@@ -153,12 +144,6 @@ class CarController(CarControllerBase):
 
         self.accel_last = accel
 
-      #if self.aeb_available:
-      #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:
-      #    can_sends.append(self.CCS.create_aeb_control(self.packer_pt, False, False, 0.0))
-      #  if self.frame % self.CCP.AEB_HUD_STEP == 0:
-      #    can_sends.append(self.CCS.create_aeb_hud(self.packer_pt, False, False))
-
     # **** HUD Controls ***************************************************** #
 
     if self.frame % self.CCP.LDW_STEP == 0:
@@ -184,11 +169,9 @@ class CarController(CarControllerBase):
 
       else:
         lead_distance = 0
-        if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:  # Don't display lead until we know the scaling factor
+        if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:
           lead_distance = 512 if CS.upscale_lead_car_signal else 8
         acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
-        # FIXME: PQ may need to use the on-the-wire mph/kmh toggle to fix rounding errors
-        # FIXME: Detect clusters with vEgoCluster offsets and apply an identical vCruiseCluster offset
         set_speed = hud_control.setSpeed * CV.MS_TO_KPH
         can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_hud_status, set_speed,
                                                          lead_distance, hud_control.leadDistanceBars))
