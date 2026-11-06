@@ -1,17 +1,21 @@
 import unittest
 
-from opendbc.car import gen_empty_fingerprint
+from opendbc.can import CANPacker
+from opendbc.car import Bus, CanData, gen_empty_fingerprint, structs
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
-from opendbc.car.hyundai.values import CAR, DATE_FW_ECUS, FW_QUERY_CONFIG, CANFD_FUZZY_WHITELIST, \
+from opendbc.car.hyundai.values import CAR, DBC, DATE_FW_ECUS, FW_QUERY_CONFIG, CANFD_FUZZY_WHITELIST, \
                                          PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
-                                         HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
+                                         Buttons, HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+from opendbc.safety.tests.libsafety import libsafety_py
+from opendbc.safety.tests.test_hyundai import checksum as hyundai_can_checksum
 from opendbc.testing import fuzzy_test
 
+ButtonType = structs.CarState.ButtonEvent.Type
 Ecu = CarParams.Ecu
 
 # Some platforms have date codes in a different format we don't yet parse (or are missing).
@@ -76,6 +80,14 @@ class TestHyundaiFingerprint(unittest.TestCase):
     for car_model in CAR:
       CP = CarInterface.get_params(car_model, fingerprint, [], False, False, False)
       assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.ALT_LIMITS)
+
+  def test_pause_resume_flag(self):
+    fingerprint = gen_empty_fingerprint()
+    for car_model in CAR:
+      CP = CarInterface.get_params(car_model, fingerprint, [], True, False, False)
+      assert bool(CP.flags & HyundaiFlags.PAUSE_RESUME) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.PAUSE_RESUME)
+      if CP.flags & HyundaiFlags.CANFD:
+        assert bool(CP.flags & HyundaiFlags.PAUSE_RESUME)
 
   def test_can_features(self):
     for car_model in CAR:
@@ -257,3 +269,185 @@ class TestHyundaiFingerprint(unittest.TestCase):
         platforms_with_shared_codes.add(platform)
 
     assert platforms_with_shared_codes == excluded_platforms
+
+
+class _ButtonHarness:
+  def __init__(self, car_model: CAR, use_cc: bool = False):
+    fingerprint = gen_empty_fingerprint()
+    car_fw = []
+    if car_model.config.flags & HyundaiFlags.CANFD:
+      fingerprint[0][0x1cf] = 8
+      fingerprint[2][0x50] = 16
+      car_fw.append(CarParams.CarFw(ecu=Ecu.adas, fwVersion=b"\xf1\x00test", address=0x730))
+
+    self.CP = CarInterface.get_params(car_model, fingerprint, car_fw, alpha_long=True, is_release=False, docs=False)
+    assert self.CP.openpilotLongitudinalControl
+    self.CI = CarInterface(self.CP)
+    self.canfd = bool(self.CP.flags & HyundaiFlags.CANFD)
+    self.pt_bus = CanBus(self.CP).ECAN if self.canfd else 0
+    self.packer = CANPacker(DBC[car_model][Bus.pt])
+
+    self.safety = libsafety_py.libsafety
+    cfg = self.CP.safetyConfigs[-1]
+    self.safety.set_safety_hooks(cfg.safetyModel.raw, cfg.safetyParam)
+    self.safety.init_tests()
+
+    self.use_cc = use_cc
+    self.cc_enabled = False
+    self.cnt = 0
+    self.nanos = 0
+
+  def step(self, samples: list[tuple[int, int]], brake: bool = False, speed_kph: float = 20.0) -> structs.CarState:
+    can_msgs: list[CanData] = []
+    if self.canfd:
+      whl_msg = self.packer.make_can_msg("WHEEL_SPEEDS", self.pt_bus, {f"WHL_Spd{p}Val": speed_kph for p in ("FL", "FR", "RL", "RR")})
+      tcs_msg = self.packer.make_can_msg("TCS", self.pt_bus, {"DriverBraking": int(brake)})
+      can_msgs.extend([CanData(*whl_msg), CanData(*tcs_msg)])
+      for cruise_btn, main_btn in samples:
+        btn_msg = self.packer.make_can_msg("CRUISE_BUTTONS", self.pt_bus, {
+          "CRUISE_BUTTONS": cruise_btn,
+          "ADAPTIVE_CRUISE_MAIN_BTN": main_btn,
+        })
+        can_msgs.append(CanData(*btn_msg))
+    else:
+      whl_vals: dict[str, float] = {f"WHL_SPD_{p}": speed_kph for p in ("FL", "FR", "RL", "RR")}
+      whl_vals["WHL_SPD_AliveCounter_LSB"] = (self.cnt % 16) & 0x3
+      whl_vals["WHL_SPD_AliveCounter_MSB"] = (self.cnt % 16) >> 2
+      whl_msg = hyundai_can_checksum(self.packer.make_can_msg("WHL_SPD11", 0, whl_vals))
+      tcs_msg = hyundai_can_checksum(self.packer.make_can_msg("TCS13", 0, {
+        "DriverOverride": 2 if brake else 0,
+        "AliveCounterTCS": self.cnt % 8,
+      }))
+      can_msgs.extend([CanData(*whl_msg), CanData(*tcs_msg)])
+      for cruise_btn, main_btn in samples:
+        btn_msg = self.packer.make_can_msg("CLU11", 0, {
+          "CF_Clu_CruiseSwState": cruise_btn,
+          "CF_Clu_CruiseSwMain": main_btn,
+          "CF_Clu_AliveCnt1": self.cnt % 16,
+        })
+        self.cnt += 1
+        can_msgs.append(CanData(*btn_msg))
+      if not samples:
+        self.cnt += 1
+
+    for m in can_msgs:
+      self.safety.safety_rx_hook(libsafety_py.make_CANPacket(m.address, m.src, m.dat))
+
+    self.nanos += 10_000_000
+    cs = self.CI.update([(self.nanos, can_msgs)])
+
+    if self.use_cc:
+      if not cs.cruiseState.available or (cs.brakePressed and not cs.standstill):
+        self.cc_enabled = False
+      if any(b.type == ButtonType.cancel for b in cs.buttonEvents):
+        self.cc_enabled = False
+      elif cs.buttonEnable:
+        self.cc_enabled = True
+      CC = structs.CarControl(enabled=self.cc_enabled)
+      self.CI.apply(CC.as_reader(), self.nanos)
+
+    assert cs.cruiseState.available == bool(self.safety.get_acc_main_on())
+    return cs
+
+
+class TestHyundaiButtonLogic(unittest.TestCase):
+  def test_classic_button_logic(self):
+    h = _ButtonHarness(CAR.HYUNDAI_SONATA)
+    assert not (h.CP.flags & HyundaiFlags.PAUSE_RESUME)
+
+    # buttons ignored while main is off
+    for btn in (Buttons.SET_DECEL, Buttons.RES_ACCEL):
+      assert not h.step([(btn, 0)]).buttonEnable
+      assert not h.step([(Buttons.NONE, 0)]).buttonEnable
+      assert not h.safety.get_controls_allowed()
+
+    # main rising edge enables availability only; RESUME blocked before first SET
+    cs = h.step([(Buttons.NONE, 1)])
+    assert cs.cruiseState.available and not cs.buttonEnable and not h.safety.get_controls_allowed()
+    h.step([(Buttons.NONE, 0)])
+    assert not h.step([(Buttons.RES_ACCEL, 0)]).buttonEnable
+    assert not h.step([(Buttons.NONE, 0)]).buttonEnable
+    assert not h.safety.get_controls_allowed()
+
+    # SET falling edge sets cruise speed and enables
+    assert not h.step([(Buttons.SET_DECEL, 0)]).buttonEnable
+    assert not h.safety.get_controls_allowed()
+    cs = h.step([(Buttons.NONE, 0)])
+    assert cs.buttonEnable and h.safety.get_controls_allowed()
+
+    # CANCEL disables controls while preserving availability and stored cruise speed
+    cs = h.step([(Buttons.CANCEL, 0)])
+    assert not cs.buttonEnable and not h.safety.get_controls_allowed() and cs.cruiseState.available
+    assert any(b.type == ButtonType.cancel and b.pressed for b in cs.buttonEvents)
+    h.step([(Buttons.NONE, 0)])
+
+    # RESUME falling edge now enables
+    assert not h.step([(Buttons.RES_ACCEL, 0)]).buttonEnable
+    cs = h.step([(Buttons.NONE, 0)])
+    assert cs.buttonEnable and h.safety.get_controls_allowed()
+
+    # toggling main off disables controls and clears stored cruise speed
+    cs = h.step([(Buttons.NONE, 1)])
+    assert not cs.cruiseState.available and not cs.buttonEnable and not h.safety.get_controls_allowed()
+    h.step([(Buttons.NONE, 0)])
+    h.step([(Buttons.NONE, 1)])
+    h.step([(Buttons.NONE, 0)])
+    assert not h.step([(Buttons.RES_ACCEL, 0)]).buttonEnable
+    assert not h.step([(Buttons.NONE, 0)]).buttonEnable
+    assert not h.safety.get_controls_allowed()
+
+  def test_pause_resume_button_logic(self):
+    for car_model in (CAR.HYUNDAI_ELANTRA_2021, CAR.KIA_EV6):
+      for use_cc in (False, True):
+        with self.subTest(car_model=car_model, use_cc=use_cc):
+          h = _ButtonHarness(car_model, use_cc=use_cc)
+          assert bool(h.CP.flags & HyundaiFlags.PAUSE_RESUME)
+
+          # buttons ignored while main is off
+          for btn in (Buttons.SET_DECEL, Buttons.RES_ACCEL, Buttons.CANCEL):
+            assert not h.step([(btn, 0)]).buttonEnable
+            assert not h.step([(Buttons.NONE, 0)]).buttonEnable
+            assert not h.safety.get_controls_allowed()
+
+          # main rising edge immediately enables cruise
+          cs = h.step([(Buttons.NONE, 1)])
+          assert cs.cruiseState.available and cs.buttonEnable and h.safety.get_controls_allowed()
+          assert any(b.type == ButtonType.mainCruise and b.pressed for b in cs.buttonEvents)
+          cs = h.step([(Buttons.NONE, 0)])
+          assert cs.cruiseState.available and not cs.buttonEnable and h.safety.get_controls_allowed()
+
+          # first pause/resume press disengages with cancel event on both press and release
+          cs = h.step([(Buttons.CANCEL, 0)])
+          assert not cs.buttonEnable and not h.safety.get_controls_allowed()
+          assert [(b.type, b.pressed) for b in cs.buttonEvents] == [(ButtonType.cancel, True)]
+          cs = h.step([(Buttons.NONE, 0)])
+          assert not cs.buttonEnable and not h.safety.get_controls_allowed()
+          assert [(b.type, b.pressed) for b in cs.buttonEvents] == [(ButtonType.cancel, False)]
+
+          # second pause/resume press resumes on rising edge and latches resumeCruise through release
+          cs = h.step([(Buttons.CANCEL, 0)])
+          assert cs.buttonEnable and h.safety.get_controls_allowed()
+          assert [(b.type, b.pressed) for b in cs.buttonEvents] == [(ButtonType.resumeCruise, True)]
+          cs = h.step([(Buttons.NONE, 0)])
+          assert not cs.buttonEnable and h.safety.get_controls_allowed()
+          assert [(b.type, b.pressed) for b in cs.buttonEvents] == [(ButtonType.resumeCruise, False)]
+
+          # brake disengage followed by pause/resume press resumes instead of canceling
+          h.step([(Buttons.NONE, 0)], brake=True)
+          assert not h.safety.get_controls_allowed()
+          h.step([(Buttons.NONE, 0)], brake=False)
+          cs = h.step([(Buttons.CANCEL, 0)])
+          assert cs.buttonEnable and h.safety.get_controls_allowed()
+          assert [(b.type, b.pressed) for b in cs.buttonEvents] == [(ButtonType.resumeCruise, True)]
+          h.step([(Buttons.NONE, 0)])
+
+          # pause then multi-sample + (RES_ACCEL) press+release in a single 10ms step enables
+          h.step([(Buttons.CANCEL, 0)])
+          h.step([(Buttons.NONE, 0)])
+          assert not h.safety.get_controls_allowed()
+          cs = h.step([(Buttons.RES_ACCEL, 0), (Buttons.NONE, 0)])
+          assert cs.buttonEnable and h.safety.get_controls_allowed()
+
+          # toggling main off disables availability and controls
+          cs = h.step([(Buttons.NONE, 1)])
+          assert not cs.cruiseState.available and not cs.buttonEnable and not h.safety.get_controls_allowed()
