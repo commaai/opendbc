@@ -1,9 +1,12 @@
 import copy
 from opendbc.can import CANDefine, CANParser
-from opendbc.car import Bus, structs
+from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, TeslaFlags
+
+ButtonType = structs.CarState.ButtonEvent.Type
+
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -16,6 +19,7 @@ class CarState(CarStateBase):
     self.cruise_enabled_prev = False
 
     self.hands_on_level = 0
+    self.acc_cancel_prev = False
     self.das_control = None
 
   def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
@@ -79,6 +83,12 @@ class CarState(CarStateBase):
     ret.cruiseState.standstill = False  # This needs to be false, since we can resume from stop without sending anything special
     ret.standstill = cp_party.vl["ESP_B"]["ESP_vehicleStandstillSts"] == 1
     ret.accFaulted = cruise_state == "FAULT"
+
+    # stalkless cars send the cancel button through the AP's DAS_control, which we block with openpilot longitudinal
+    acc_cancel = cp_ap_party.vl["DAS_control"]["DAS_accState"] == 13  # ACC_CANCEL_GENERIC_SILENT
+    if self.CP.openpilotLongitudinalControl:
+      ret.buttonEvents = create_button_events(acc_cancel, self.acc_cancel_prev, {1: ButtonType.cancel})
+    self.acc_cancel_prev = acc_cancel
 
     # Gear
     ret.gearShifter = GEAR_MAP[self.can_define.dv["DI_systemStatus"]["DI_gear"].get(int(cp_party.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
