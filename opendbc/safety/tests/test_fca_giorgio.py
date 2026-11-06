@@ -9,10 +9,10 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSaf
 
   RELAY_MALFUNCTION_ADDRS = {0: (0x117, 0x1F6, 0x4AE, 0x547, 0x5A2)}
 
-  MAX_RATE_UP = 2
-  MAX_RATE_DOWN = 2
+  MAX_RATE_UP = 3
+  MAX_RATE_DOWN = 3
   MAX_TORQUE_LOOKUP = [0], [300]
-  MAX_RT_DELTA = 75
+  MAX_RT_DELTA = 112
 
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 2
