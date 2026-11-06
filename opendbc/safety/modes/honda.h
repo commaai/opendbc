@@ -300,9 +300,6 @@ static safety_config honda_nidec_init(uint16_t param) {
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
 
   honda_hw = HONDA_NIDEC;
-  safety.honda_brake = 0;
-  safety.honda_brake_switch_prev = false;
-  safety.honda_fwd_brake = false;
   honda_alt_brake_msg = false;
   honda_bosch_long = false;
   honda_bosch_radarless = false;
@@ -408,7 +405,6 @@ static safety_config honda_bosch_init(uint16_t param) {
   };
 
   honda_hw = HONDA_BOSCH;
-  safety.honda_brake_switch_prev = false;
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
   honda_bosch_canfd = GET_FLAG(param, HONDA_PARAM_BOSCH_CANFD);
   // Checking for alternate brake override from safety parameter

@@ -257,7 +257,7 @@ void speed_mismatch_check(const float speed_2);
 
 void safety_tick(void);
 
-// all mutable safety state
+// all mutable safety state, zeroed on every safety mode change except the openpilot heartbeat
 typedef struct {
   // *** reported by the car, decoded in the safety mode's rx hook ***
   bool gas_pressed;
