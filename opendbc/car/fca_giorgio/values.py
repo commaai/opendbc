@@ -17,8 +17,8 @@ class CarControllerParams:
   STEER_DRIVER_ALLOWANCE = 80
   STEER_DRIVER_MULTIPLIER = 2
   STEER_DRIVER_FACTOR = 1  # from dbc
-  STEER_DELTA_UP = 2
-  STEER_DELTA_DOWN = 2
+  STEER_DELTA_UP = 3  # stock LKA ramps at up to 3/frame
+  STEER_DELTA_DOWN = 3
   STEER_RELEASE_HOLD_FRAMES = 3  # frames to keep LKA_ACTIVE at zero torque before releasing
 
   def __init__(self, CP):
@@ -46,7 +46,7 @@ class FcaGiorgioPlatformConfig(PlatformConfig):
 @dataclass(frozen=True, kw_only=True)
 class FcaGiorgioCarSpecs(CarSpecs):
   centerToFrontRatio: float = 0.45
-  steerRatio: float = 16
+  steerRatio: float = 19.7  # learned (paramsd), stable across drives
   # minSteerSpeed: float = 13.8 # m/s
 
 
