@@ -401,6 +401,14 @@ void pcm_cruise_check(bool cruise_engaged) {
   safety.cruise_engaged_prev = cruise_engaged;
 }
 
+void acc_main_on_check(bool acc_main_on) {
+  // exit controls immediately on main switch off, callers only enter controls with it on
+  safety.acc_main_on = acc_main_on;
+  if (!acc_main_on) {
+    safety.controls_allowed = false;
+  }
+}
+
 void speed_mismatch_check(const float speed_2) {
   // Disable controls if speeds from two sources are too far apart.
   // For safety modes that use speed to adjust torque or angle limits
