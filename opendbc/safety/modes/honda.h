@@ -75,10 +75,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   // check ACC main state
   // 0x326 for all Bosch and some Nidec, 0x1A6 for some Nidec
   if ((msg->addr == 0x326U) || (msg->addr == 0x1A6U)) {
-    safety.acc_main_on = GET_BIT(msg, ((msg->addr == 0x326U) ? 28U : 47U));
-    if (!safety.acc_main_on) {
-      safety.controls_allowed = false;
-    }
+    acc_main_on_check(GET_BIT(msg, ((msg->addr == 0x326U) ? 28U : 47U)));
   }
 
   // enter controls when PCM enters cruise state

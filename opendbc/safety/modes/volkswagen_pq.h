@@ -104,25 +104,14 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
 
   if (volkswagen_longitudinal) {
     if (msg_matches(msg, MSG_MOTOR_5, 0U)) {
-      // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
       // Signal: Motor_5.MO5_GRA_Hauptsch
-      safety.acc_main_on = GET_BIT(msg, 50U);
-      if (!safety.acc_main_on) {
-        safety.controls_allowed = false;
-      }
+      acc_main_on_check(GET_BIT(msg, 50U));
     }
 
     if (msg_matches(msg, MSG_GRA_NEU, 0U)) {
-      // If ACC main switch is on, enter controls on falling edge of Set or Resume
       // Signal: GRA_Neu.GRA_Neu_Setzen
       // Signal: GRA_Neu.GRA_Neu_Recall
-      bool set_button = GET_BIT(msg, 16U);
-      bool resume_button = GET_BIT(msg, 17U);
-      if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {
-        safety.controls_allowed = safety.acc_main_on;
-      }
-      safety.volkswagen_set_button_prev = set_button;
-      safety.volkswagen_resume_button_prev = resume_button;
+      volkswagen_set_resume_check(GET_BIT(msg, 16U), GET_BIT(msg, 17U));
       // Exit controls on rising edge of Cancel, override Set/Resume if present simultaneously
       // Signal: GRA_ACC_01.GRA_Abbrechen
       if (GET_BIT(msg, 9U)) {

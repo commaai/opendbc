@@ -162,27 +162,16 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_Motor_51, 0U)) {
     int acc_status = (msg->data[11] & 0x07U);
     bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-    safety.acc_main_on = cruise_engaged || (acc_status == 2);
-
-    if (!safety.acc_main_on) {
-      safety.controls_allowed = false;
-    }
+    acc_main_on_check(cruise_engaged || (acc_status == 2));
 
     int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
     safety.gas_pressed = accel_pedal_value > 0;
   }
 
   if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
-    // Enter controls on falling edge of Set or Resume with main switch on
     // Signal: GRA_ACC_01.GRA_Tip_Setzen
     // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-    bool set_button = GET_BIT(msg, 16U);
-    bool resume_button = GET_BIT(msg, 19U);
-    if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {
-      safety.controls_allowed = safety.acc_main_on;
-    }
-    safety.volkswagen_set_button_prev = set_button;
-    safety.volkswagen_resume_button_prev = resume_button;
+    volkswagen_set_resume_check(GET_BIT(msg, 16U), GET_BIT(msg, 19U));
 
     // Always exit controls on rising edge of Cancel
     if (GET_BIT(msg, 13U)) {

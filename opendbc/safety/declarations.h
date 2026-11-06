@@ -253,6 +253,7 @@ bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limit
 bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
 bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits);
 void pcm_cruise_check(bool cruise_engaged);
+void acc_main_on_check(bool acc_main_on);
 void speed_mismatch_check(const float speed_2);
 
 void safety_tick(void);
