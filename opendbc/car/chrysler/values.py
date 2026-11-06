@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, step
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
@@ -24,6 +24,18 @@ class ChryslerFlags(IntFlag):
 class ChryslerCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC)"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.fca]))
+
+  def init_setup(self, guide):
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Locate the driver-assistance camera behind the rearview mirror.',
+      'Check the cover-release method for your model and year before removing trim; the example photos may show a different vehicle.',
+      'Leave the camera and mirror attached while you install the harness.',
+    ], "camera-access")
+    guide["steps"][1]["body"][0:2] = [
+      'Release the camera connector latch before unplugging it. Hold the connector housing rather than pulling on its wires.',
+      'Plug the original camera connector into the harness, then connect the other end of the harness to the camera.',
+      'Check that both camera-harness connections are fully seated before reinstalling the trim.',
+    ]
 
 
 @dataclass

@@ -3,7 +3,7 @@ from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, WIKI, source, step
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -30,6 +30,26 @@ class MazdaCarDocs(CarDocs):
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.mazda]))
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.COMMA_POWER_REQUIRED])
   requires_comma_power: bool = True
+
+  def init_setup(self, guide):
+    refs = [source(f"{self.make} installation reference", WIKI + 'Mazda')]
+    if self.setup_video:
+      refs.append(source("Vehicle installation video", self.setup_video))
+    guide["sources"][1:] = refs
+    guide["steps"][0] = step("access", 'Remove the camera cover', [
+      'Locate the Forward Sensing Camera (FSC) behind the windshield near the rearview mirror.',
+      'Carefully separate the surrounding trim to expose the camera connector. Cover clips and removal methods vary by model.',
+      'Do not force the cover toward the windshield.',
+      'Leave the factory camera attached to the windshield and do not change its position.',
+      'This installation also needs comma power, connected in the power step below.',
+    ], "camera-access", refs)
+    guide["steps"][1]["body"][0] = (
+      'Release the latch on the Forward Sensing Camera (FSC) connector, unplug it, and connect it to the Mazda harness.'
+    )
+    guide["steps"][1]["body"][1] = 'Connect the other end of the Mazda harness back into the Forward Sensing Camera.'
+    next(s for s in guide["steps"] if s["id"] == "mount")["body"].append(
+      'Keep the factory Forward Sensing Camera view through the windshield clear of the device, mount, and cables.'
+    )
 
 
 class Footnote(Enum):

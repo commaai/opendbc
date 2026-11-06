@@ -1,0 +1,99 @@
+from copy import deepcopy
+import json
+import unittest
+
+from opendbc.car.docs import get_all_car_docs, get_setup_guides
+from opendbc.car.docs_definitions import CarHarness, SupportType, SETUP_VIDEO, get_default_setup_guide
+
+
+class TestSetupGuides(unittest.TestCase):
+  @classmethod
+  def setUpClass(cls):
+    cls.cars = get_all_car_docs()
+    cls.guides = get_setup_guides(cls.cars)
+
+  def test_selector_coverage(self):
+    expected = {c.name for c in self.cars if c.support_type == SupportType.UPSTREAM and c.name != "comma body"}
+    self.assertEqual(set(self.guides) - {"default"}, expected)
+    json.dumps(self.guides)
+    for name, guide in self.guides.items():
+      with self.subTest(car=name):
+        self.assertTrue(guide["parts"])
+        self.assertTrue(guide["sources"])
+        self.assertEqual(len({s["id"] for s in guide["steps"]}), len(guide["steps"]))
+        for step in guide["steps"]:
+          self.assertTrue(step["body"])
+          self.assertTrue(step["sources"])
+
+  def test_remote_harnesses_never_show_camera_install(self):
+    remote = {CarHarness.vw_j533, CarHarness.vw_meb, CarHarness.ford_q4, CarHarness.nissan_a,
+              CarHarness.nissan_b, CarHarness.tesla_a, CarHarness.tesla_b, CarHarness.rivian_a, CarHarness.gmsdgm}
+    for car in self.cars:
+      if car.name in self.guides and any(p in remote for p in car.car_parts.parts):
+        with self.subTest(car=car.name):
+          guide = self.guides[car.name]
+          self.assertFalse(any(s["media"].startswith("camera-") for s in guide["steps"]))
+          self.assertIn("long OBD-C cable", " ".join(guide["steps"][3]["body"]))
+          self.assertEqual(guide["steps"][3]["media"], "device-remote")
+
+  def test_model_locations(self):
+    cases = {"Ford F-150 2021-23": "footwell", "Ford Mustang Mach-E 2021-24": "cargo",
+             "Ford Ranger 2024": "cluster", "Nissan Leaf 2018-23": "module",
+             "Nissan Rogue 2018-20": "cargo", "Volkswagen Caravelle 2020": "cluster",
+             "Volkswagen Golf 2015-20": "footwell"}
+    for name, media in cases.items():
+      with self.subTest(car=name):
+        self.assertEqual(self.guides[name]["steps"][0]["media"], media)
+
+  def test_required_power_is_a_step(self):
+    for car in self.cars:
+      if car.name in self.guides and car.requires_comma_power:
+        guide = self.guides[car.name]
+        self.assertEqual(guide["power"], "required")
+        self.assertIn("power", [s["id"] for s in guide["steps"]])
+
+  def test_default_and_independent_content(self):
+    default = get_default_setup_guide()
+    self.assertEqual(len(default["steps"]), 5)
+    default["steps"][0]["body"].append("changed")
+    self.assertNotIn("changed", get_default_setup_guide()["steps"][0]["body"])
+
+  def test_car_docs_guides_are_independent(self):
+    for car in self.cars:
+      if car.name not in self.guides:
+        continue
+      with self.subTest(car=car.name):
+        guide = car.get_setup_guide()
+        self.assertEqual(guide, self.guides[car.name])
+        original = deepcopy(guide)
+        guide["steps"][0]["body"].append("changed")
+        guide["steps"][0]["sources"][0]["title"] = "changed"
+        guide["sources"][0]["url"] = "changed"
+        guide["parts"].clear()
+        self.assertEqual(car.get_setup_guide(), original)
+    self.assertEqual(get_setup_guides(self.cars), self.guides)
+
+  def test_video_applicability(self):
+    self.assertEqual(self.guides["default"]["video"], SETUP_VIDEO)
+    self.assertFalse(self.guides["default"]["video_is_reference"])
+    self.assertTrue(self.guides["Honda Accord 2018-22"]["video_is_reference"])
+    for name in ("Volkswagen Golf 2015-20", "Subaru Outback 2020-22", "Mazda CX-5 2022-25"):
+      with self.subTest(car=name):
+        self.assertEqual(self.guides[name]["video"], SETUP_VIDEO)
+        self.assertTrue(self.guides[name]["video_is_reference"])
+    ford = self.guides["Ford Mustang Mach-E 2021-24"]
+    self.assertIn("AR4_eTF3b_A", ford["video"])
+    self.assertTrue(ford["video_is_reference"])
+    self.assertTrue(all(g["video"] for g in self.guides.values()))
+
+  def test_harness_box_connection(self):
+    for name, guide in self.guides.items():
+      with self.subTest(car=name):
+        connect = next(s for s in guide["steps"] if s["id"] == "connect")
+        self.assertIn("small car-harness connector to the harness box", " ".join(connect["body"]))
+
+  def test_power_restrictions(self):
+    for name in ("Rivian R1S 2022-24", "Rivian R1T 2022-24"):
+      self.assertEqual(self.guides[name]["power"], "included")
+      self.assertIn("harness revision", " ".join(self.guides[name]["notes"]))
+    self.assertNotIn("RJ45", json.dumps(self.guides["Volkswagen Golf 2015-20"]))
