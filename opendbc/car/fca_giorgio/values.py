@@ -19,6 +19,7 @@ class CarControllerParams:
   STEER_DRIVER_FACTOR = 1  # from dbc
   STEER_DELTA_UP = 2
   STEER_DELTA_DOWN = 2
+  STEER_RELEASE_HOLD_FRAMES = 3  # frames to keep LKA_ACTIVE at zero torque before releasing
 
   def __init__(self, CP):
     pass
