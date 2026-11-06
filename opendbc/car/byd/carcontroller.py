@@ -213,6 +213,8 @@ class CarController(CarControllerBase):
     self.standstill_resume = False
     self.gas_override = False
     self.gas_resume_wait = False
+    self.owned_steer = False
+    self.standby_paint = 0
 
     self.VM = VehicleModel(get_safety_CP(CP.carFingerprint))
 
@@ -279,7 +281,7 @@ class CarController(CarControllerBase):
 
     return lat_send, ack, driver_yield
 
-  def _update_steering(self, CC, CS, cntr, can_sends, own_steer, actuators, hud_control):
+  def _update_steering(self, CC, CS, cntr, can_sends, own_steer, paint_standby, actuators, hud_control):
     lat_send, ack, driver_yield = self._steer_tx(CC, CS, own_steer)
 
     tau = np.interp(CS.out.vEgoRaw, self.CCP.LOW_SPEED_TAU_BP, self.CCP.LOW_SPEED_TAU_V)
@@ -303,6 +305,9 @@ class CarController(CarControllerBase):
         self.packer, self.apply_angle_last, lat_send, cntr, ack))
       can_sends.append(bydcan.create_lkas_hud(
         self.packer, cntr, CS.lkas_hud, hud_control, CC.latActive, CS.lks_enabled))
+    elif paint_standby:
+      can_sends.append(bydcan.create_lkas_hud(
+        self.packer, cntr, CS.lkas_hud, hud_control, False, True))
 
     if lat_send and own_steer:
       self.not_accepted_frames = self.not_accepted_frames + 1 if not CS.eps_engaged else 0
@@ -388,10 +393,20 @@ class CarController(CarControllerBase):
         can_sends.append(bydcan.create_buttons_relay(self.packer, frame, lkas=self.lks.lks_relay_tick))
 
     own_steer = CC.enabled or self.lks.hold_steer > 0
+    paint_standby = False
+    if self.CP.flags & BydFlags.LKS_HUD_CONTROL:
+      if own_steer or not CS.lks_enabled or CS.camera_lkas_state != 0:
+        self.standby_paint = 0
+        self.owned_steer = own_steer
+      elif self.owned_steer and self.standby_paint < self.CCP.LKS_STANDBY_PAINT_FRAMES:
+        self.standby_paint += 1
+        paint_standby = True
+      else:
+        self.owned_steer = False
 
     if self.frame % self.CCP.STEER_STEP:
       cntr = (self.frame // self.CCP.STEER_STEP) % 16
-      self._update_steering(CC, CS, cntr, can_sends, own_steer, actuators, hud_control)
+      self._update_steering(CC, CS, cntr, can_sends, own_steer, paint_standby, actuators, hud_control)
       if self.CP.openpilotLongitudinalControl:
         self._update_long(CC, CS, cntr, can_sends, actuators, hud_control)
 

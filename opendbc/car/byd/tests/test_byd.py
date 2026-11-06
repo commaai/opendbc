@@ -387,6 +387,31 @@ class TestBydSteerNotAccepted(unittest.TestCase):
                                 _cs(camera_lkas_state=0, lks_enabled=True), 0)
       self.assertFalse(any(m[0] in (0x1E2, 0x316) for m in sends))
 
+  def test_standby_paint_while_camera_off(self):
+    ctrl = _ctrl(long_control=True)
+    for _ in range(4):
+      ctrl.update(_cc(enabled=True, lat_active=True), _cs(camera_lkas_state=0, lks_enabled=True), 0)
+    states = []
+    for _ in range(CCP_INSTANCE.LKS_STANDBY_PAINT_FRAMES):
+      _act, sends = ctrl.update(_cc(enabled=False, lat_active=False),
+                                _cs(camera_lkas_state=0, lks_enabled=True), 0)
+      self.assertFalse(any(m[0] == 0x1E2 for m in sends))
+      for m in sends:
+        if m[0] == 0x316:
+          states.append(_decode_hud(m)["LKAS_STATE"])
+    self.assertGreater(len(states), 0)
+    self.assertTrue(all(state == 1 for state in states))
+    for _ in range(2):
+      _act, sends = ctrl.update(_cc(enabled=False, lat_active=False),
+                                _cs(camera_lkas_state=0, lks_enabled=True), 0)
+      self.assertFalse(any(m[0] == 0x316 for m in sends))
+    ctrl2 = _ctrl(long_control=True)
+    for _ in range(4):
+      ctrl2.update(_cc(enabled=True, lat_active=True), _cs(camera_lkas_state=0, lks_enabled=True), 0)
+    ctrl2.update(_cc(enabled=False, lat_active=False), _cs(camera_lkas_state=0, lks_enabled=True), 0)
+    _act, sends = ctrl2.update(_cc(enabled=False, lat_active=False), _cs(camera_lkas_state=1, lks_enabled=True), 0)
+    self.assertFalse(any(m[0] == 0x316 for m in sends))
+
   def test_no_claim_after_lat_disengage(self):
     ctrl = _ctrl(long_control=False)
     self._drain_claim(ctrl, lks_enabled=False)
@@ -1537,6 +1562,7 @@ class TestBydPlatformConfig(unittest.TestCase):
     self.assertEqual(params.LKS_CONFIRM_FRAMES, 40)
     self.assertEqual(params.LKS_LOCKOUT_FRAMES, 50)
     self.assertEqual(params.LKS_HUD_QUIET_FRAMES, 200)
+    self.assertEqual(params.LKS_STANDBY_PAINT_FRAMES, 50)
     self.assertEqual(params.LKS_CAM_DEBOUNCE_FRAMES, 20)
     self.assertEqual(params.LKS_EPS_IDLE_FRAMES, 20)
     self.assertEqual(params.LKS_RECOVER_FRAMES, 200)

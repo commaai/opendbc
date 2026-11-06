@@ -70,6 +70,7 @@ class CarControllerParams:
       self.LKS_CONFIRM_FRAMES = 40             # 400 ms before one retry
       self.LKS_LOCKOUT_FRAMES = 50             # 500 ms after bus-0 press
       self.LKS_HUD_QUIET_FRAMES = 200          # 2 s, matches BYD_OP_HUD_TIMEOUT_US
+      self.LKS_STANDBY_PAINT_FRAMES = 50       # 0.5 s LKAS_STATE 1 while camera state is 0
       self.LKS_CAM_DEBOUNCE_FRAMES = 20        # 200 ms; treat state 4 as on
       self.LKS_EPS_IDLE_FRAMES = 20            # 200 ms PREP=1 CRUISE=0 before restore
       self.LKS_RECOVER_FRAMES = 200            # 2 s; retry failed want-off
