@@ -3,6 +3,7 @@ import numpy as np
 import time
 import tomllib
 from abc import abstractmethod, ABC
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 from collections.abc import Callable
@@ -43,6 +44,16 @@ GEAR_SHIFTER_MAP: dict[str, structs.CarState.GearShifter] = {
 
 TorqueFromLateralAccelCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning], float]
 LateralAccelFromTorqueCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning], float]
+
+PandaSafetyTxSetup = Callable[[Any], None]  # (libsafety) -> None
+PandaSafetyTxOnFrame = Callable[[Any, int], None]  # (libsafety, frame) -> None
+
+
+@dataclass(frozen=True)
+class PandaSafetyTxTestCase:
+  car_control: structs.CarControl
+  setup: PandaSafetyTxSetup | None = None
+  on_frame: PandaSafetyTxOnFrame | None = None
 
 
 @cache
@@ -163,6 +174,23 @@ class CarInterfaceBase(ABC):
   @staticmethod
   def deinit(CP: structs.CarParams, can_recv: CanRecvCallable, can_send: CanSendCallable):
     """Used to re-enable longitudinal ECUs as needed"""
+
+  @classmethod
+  def panda_safety_tx_test_cases(cls, CP: structs.CarParams, safety: Any) -> list[PandaSafetyTxTestCase]:
+    """CarControl sequences for test_models.test_panda_safety_tx_cases (apply -> safety_tx_hook)."""
+    def setup_cancel(s):
+      s.set_cruise_engaged_prev(True)
+
+    def setup_resume(s):
+      s.set_controls_allowed(True)
+
+    return [
+      PandaSafetyTxTestCase(structs.CarControl()),
+      PandaSafetyTxTestCase(structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(cancel=True)),
+                            setup=setup_cancel),
+      PandaSafetyTxTestCase(structs.CarControl(cruiseControl=structs.CarControl.CruiseControl(resume=True)),
+                            setup=setup_resume),
+    ]
 
   @staticmethod
   def get_steer_feedforward_default(desired_angle, v_ego):
