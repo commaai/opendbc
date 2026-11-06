@@ -29,6 +29,7 @@ static int honda_brake = 0;
 static bool honda_brake_switch_prev = false;
 static bool honda_alt_brake_msg = false;
 static bool honda_fwd_brake = false;
+static bool honda_nidec_stock_long = false;
 static bool honda_bosch_long = false;
 static bool honda_bosch_radarless = false;
 static bool honda_bosch_canfd = false;
@@ -300,13 +301,21 @@ static safety_config honda_nidec_init(uint16_t param) {
     {0x33D, 0, 5, .check_relay = true},
   };
 
+  // Stock longitudinal: the stock ACC keeps longitudinal control, so we don't own 0x1FA or
+  // 0x30C and must neither transmit them nor claim their relay checks. Leaving both out of the
+  // TX list also drops their static forwarding block and their relay check, so the stock brake
+  // command and ACC HUD keep flowing whichever bus they natively arrive on
+  static CanMsg HONDA_N_STOCK_LONG_TX_MSGS[] = {{0x194, 0, 4, .check_relay = true}, {0x33D, 0, 5, .check_relay = true}};
+
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
+  const uint16_t HONDA_PARAM_NIDEC_STOCK_LONG = 32;
 
   honda_hw = HONDA_NIDEC;
   honda_brake = 0;
   honda_brake_switch_prev = false;
   honda_fwd_brake = false;
   honda_alt_brake_msg = false;
+  honda_nidec_stock_long = false;
   honda_bosch_long = false;
   honda_bosch_radarless = false;
   honda_bosch_canfd = false;
@@ -314,6 +323,7 @@ static safety_config honda_nidec_init(uint16_t param) {
   safety_config ret;
 
   bool enable_nidec_alt = GET_FLAG(param, HONDA_PARAM_NIDEC_ALT);
+  honda_nidec_stock_long = GET_FLAG(param, HONDA_PARAM_NIDEC_STOCK_LONG);
 
   if (enable_nidec_alt) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
@@ -333,7 +343,11 @@ static safety_config honda_nidec_init(uint16_t param) {
     SET_RX_CHECKS(honda_nidec_common_rx_checks, ret);
   }
 
-  SET_TX_MSGS(HONDA_N_TX_MSGS, ret);
+  if (honda_nidec_stock_long) {
+    SET_TX_MSGS(HONDA_N_STOCK_LONG_TX_MSGS, ret);
+  } else {
+    SET_TX_MSGS(HONDA_N_TX_MSGS, ret);
+  }
 
   return ret;
 }
@@ -461,7 +475,10 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 2) {
     // forwarded if stock AEB is active
-    bool is_brake_msg = addr == 0x1FA;
+    // Stock longitudinal: we don't own 0x1FA, so the stock brake command is always forwarded. The
+    // AEB latch only decides whether the stock frame replaces our own brake command, which this
+    // mode never sends, so it must not gate forwarding here
+    bool is_brake_msg = (addr == 0x1FA) && !honda_nidec_stock_long;
     block_msg = is_brake_msg && !honda_fwd_brake;
   }
 

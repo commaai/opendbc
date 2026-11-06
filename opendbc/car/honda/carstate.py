@@ -34,6 +34,14 @@ class CarState(CarStateBase):
 
     self.brake_error_msg = "HYBRID_BRAKE_ERROR" if CP.flags & HondaFlags.HYBRID else "STANDSTILL"
 
+    # HONDA_ODYSSEY_CHN with stock longitudinal (STOCK_LONG) carries its stock ACC_HUD (0x30C)
+    # on the powertrain bus, not the camera bus. This matters twice over: CANParser.vl is a
+    # VLDict that registers a message as REQUIRED on first access, so reading
+    # cp_cam.vl["ACC_HUD"] both reads the wrong bus and makes the camera parser wait for a
+    # message that never arrives there -- which leaves CS.canValid permanently False and raises
+    # EventName.canError ("Unknown Vehicle Variant"). Every other Honda keeps the old source.
+    self.acc_hud_on_pt = (CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN) and not CP.openpilotLongitudinalControl
+
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
 
     self.brake_switch_prev = False
@@ -53,6 +61,9 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
+    # ACC_HUD comes from the powertrain parser only on the platform described above; the
+    # camera parser is untouched everywhere else, and LKAS_HUD/BRAKE_COMMAND stay on cp_cam.
+    cp_acc_hud = cp if self.acc_hud_on_pt else cp_cam
     if self.CP.flags & HondaFlags.HAS_BSM:
       cp_body = can_parsers[Bus.body]
 
@@ -70,7 +81,10 @@ class CarState(CarStateBase):
 
     # used for car hud message
     # TODO: find CAR_SPEED for HONDA_ODYSSEY_TWN or use ACC_HUD w/ detection
-    self.is_metric = self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_TWN,) or not cp.vl["CAR_SPEED"]["IMPERIAL_UNIT"]
+    # HONDA_ODYSSEY_CHN doesn't read CAR_SPEED either: 0x309 is the message the legacy China
+    # platform called LOCK_STATUS, and nothing establishes that its IMPERIAL_UNIT bit carries
+    # the same meaning here. The `in` test short-circuits, so CAR_SPEED is never consulted.
+    self.is_metric = self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_TWN, CAR.HONDA_ODYSSEY_CHN) or not cp.vl["CAR_SPEED"]["IMPERIAL_UNIT"]
     self.v_cruise_factor = CV.MPH_TO_MS if self.dynamic_v_cruise_units and not self.is_metric else CV.KPH_TO_MS
 
     # ******************* parse out can *******************
@@ -132,11 +146,11 @@ class CarState(CarStateBase):
 
       # Log non-critical stock ACC/LKAS faults if Nidec (camera)
       if not (self.CP.flags & HondaFlags.BOSCH):
-        ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"] or cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"])
+        ret.carFaultedNonCritical = bool(cp_acc_hud.vl["ACC_HUD"]["ACC_PROBLEM"] or cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"])
 
     ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
 
-    if self.CP.carFingerprint not in (CAR.HONDA_ODYSSEY_TWN,):
+    if self.CP.carFingerprint not in (CAR.HONDA_ODYSSEY_TWN, CAR.HONDA_ODYSSEY_CHN):
       self.dash_speed_seen = self.dash_speed_seen or cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] > 1e-3
       if self.dash_speed_seen:
         conversion = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
@@ -148,10 +162,18 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(
       250, cp.vl["SCM_FEEDBACK"]["LEFT_BLINKER"], cp.vl["SCM_FEEDBACK"]["RIGHT_BLINKER"])
     ret.brakeHoldActive = cp.vl["VSA_STATUS"]["BRAKE_HOLD_ACTIVE"] == 1
-    ret.parkingBrake = bool(cp.vl[self.car_state_scm_msg]["PARKING_BRAKE_ON"])
+    if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
+      # This car's SCM_BUTTONS carries no PARKING_BRAKE_ON, so read the electronic park brake
+      # state instead, which is what the legacy China platform did.
+      ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
+    else:
+      ret.parkingBrake = bool(cp.vl[self.car_state_scm_msg]["PARKING_BRAKE_ON"])
 
     if self.CP.transmissionType == TransmissionType.manual:
-      ret.gearShifter = GearShifter.reverse if bool(cp.vl[self.car_state_scm_msg]["REVERSE_LIGHT"]) else GearShifter.drive
+      # .get() because HONDA_ODYSSEY_CHN's SCM_BUTTONS has no REVERSE_LIGHT either. Every other
+      # car here carries the signal, so this is a no-op for them; on China it avoids a KeyError
+      # if a fingerprint carrying neither 0x191 nor 0x1A3 is ever presented.
+      ret.gearShifter = GearShifter.reverse if bool(cp.vl[self.car_state_scm_msg].get("REVERSE_LIGHT", 0)) else GearShifter.drive
     else:
       gear_position = self.shifter_values.get(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"], None)
       ret.gearShifter = self.parse_gear_shifter(gear_position)
@@ -207,7 +229,7 @@ class CarState(CarStateBase):
     self.lkas_hud = False
     if not (self.CP.flags & HondaFlags.BOSCH):
       ret.stockFcw = cp_cam.vl["BRAKE_COMMAND"]["FCW"] != 0
-      self.acc_hud = cp_cam.vl["ACC_HUD"]
+      self.acc_hud = cp_acc_hud.vl["ACC_HUD"]
       self.stock_brake = cp_cam.vl["BRAKE_COMMAND"]
     if self.CP.flags & HondaFlags.BOSCH_RADARLESS:
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]

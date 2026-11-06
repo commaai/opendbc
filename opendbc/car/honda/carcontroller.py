@@ -181,13 +181,19 @@ class CarController(CarControllerBase):
       pcm_accel = int(np.clip((accel / 1.44) / max_accel, 0.0, 1.0) * self.params.NIDEC_GAS_MAX)
 
     if not self.CP.openpilotLongitudinalControl:
-      if self.frame % 2 == 0 and not (self.CP.flags & (HondaFlags.BOSCH_RADARLESS | HondaFlags.BOSCH_CANFD)):
-        can_sends.append(hondacan.create_bosch_supplemental_1(self.packer, self.CAN))
-      # If using stock ACC, spam cancel command to kill gas when OP disengages.
-      if pcm_cancel_cmd:
-        can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.CANCEL, self.CP))
-      elif CC.cruiseControl.resume:
-        can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.RES_ACCEL, self.CP))
+      # Both messages below are Bosch-only: BOSCH_SUPPLEMENTAL_1 is not defined in any Nidec
+      # DBC, and no Nidec safety model whitelists SCM_BUTTONS for TX. Every Bosch car that
+      # reaches this branch keeps its current behavior, so this is a no-op for them.
+      # HONDA_ODYSSEY_CHN is the only Nidec car here and must not emit frames the panda
+      # would reject.
+      if self.CP.flags & HondaFlags.BOSCH:
+        if self.frame % 2 == 0 and not (self.CP.flags & (HondaFlags.BOSCH_RADARLESS | HondaFlags.BOSCH_CANFD)):
+          can_sends.append(hondacan.create_bosch_supplemental_1(self.packer, self.CAN))
+        # If using stock ACC, spam cancel command to kill gas when OP disengages.
+        if pcm_cancel_cmd:
+          can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.CANCEL, self.CP))
+        elif CC.cruiseControl.resume:
+          can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.RES_ACCEL, self.CP))
 
     else:
       # Send gas and brake commands.
