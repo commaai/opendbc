@@ -15,6 +15,7 @@ class CarController(CarControllerBase):
 
     self.apply_torque_last = 0
     self.lat_active_last = False
+    self.release_hold_frames = 0
     self.button_counter_last = 0
     self.frame = 0
 
@@ -31,9 +32,19 @@ class CarController(CarControllerBase):
       else:
         apply_torque = 0
 
+      # Stock LKA ramps torque down to zero and holds LKA_ACTIVE at zero torque for a few frames before
+      # releasing; it never drops LKA_ACTIVE with torque applied. We can't ramp down on disengage (safety
+      # requires zero torque immediately), but we can hold LKA_ACTIVE briefly. An abrupt release with
+      # torque applied is suspected of causing a latched EPS LKA_FAULT.
+      if CC.latActive:
+        self.release_hold_frames = self.CCP.STEER_RELEASE_HOLD_FRAMES
+      elif self.release_hold_frames > 0:
+        self.release_hold_frames -= 1
+      lka_active = CC.latActive or self.release_hold_frames > 0
+
       self.apply_torque_last = apply_torque
-      can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND", apply_torque, CC.latActive))
-      can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND_2", apply_torque * 4, CC.latActive))
+      can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND", apply_torque, lka_active))
+      can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND_2", apply_torque * 4, lka_active))
 
     # **** HUD Controls ***************************************************** #
 
