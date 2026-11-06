@@ -71,6 +71,26 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     msg[0].data[6] = 0xAB
     self.assertTrue(self._rx(msg))
 
+  def _ign_msg(self, bus, counter, ign):
+    return common.make_msg(bus, 0x432, dat=bytes([0, counter, 0, 0, 0, 0, ign, 0]))
+
+  def test_ignition_on(self):
+    for bus in (0, 2):
+      for i in range(16):
+        self.safety.init_tests()
+        self.safety.ignition_can_hook(self._ign_msg(bus, i, 1))
+        self.assertFalse(self.safety.get_ignition_can())
+        self.safety.ignition_can_hook(self._ign_msg(bus, (i + 1) % 16, 1))
+        self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    for bus in (0, 2):
+      self.safety.ignition_can_hook(self._ign_msg(bus, 0, 1))
+      self.safety.ignition_can_hook(self._ign_msg(bus, 1, 1))
+      self.assertTrue(self.safety.get_ignition_can())
+      self.safety.ignition_can_hook(self._ign_msg(bus, 2, 0))
+      self.assertFalse(self.safety.get_ignition_can())
+
 
 class TestPsaStockSafety(TestPsaSafetyBase):
   pass
