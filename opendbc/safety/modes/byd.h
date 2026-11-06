@@ -24,20 +24,20 @@ static void byd_rx_hook(const CANPacket_t *msg) {
     // Steering angle: 0.1 deg/LSB, signed
     if (msg->addr == 0x11FU) {
       int angle_meas_new = to_signed((msg->data[1] << 8) | msg->data[0], 16);  // STEER_ANGLE_2
-      update_sample(&angle_meas, angle_meas_new);
+      update_sample(&safety.angle_meas, angle_meas_new);
     }
 
     // Vehicle speed: 0.1 kph/LSB
     if (msg->addr == 0x1F0U) {
       int speed = (msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
-      vehicle_moving = speed > 0;
+      safety.vehicle_moving = speed > 0;
       UPDATE_VEHICLE_SPEED(speed * 0.1 * KPH_TO_MS);
     }
 
     // Gas and brake pressed
     if (msg->addr == 0x242U) {
-      brake_pressed = (msg->data[4] >> 5) & 0x1U;   // BRAKE_PRESSED
-      gas_pressed = (msg->data[3] & 0x7FU) > 0U;    // RAW_THROTTLE
+      safety.brake_pressed = (msg->data[4] >> 5) & 0x1U;   // BRAKE_PRESSED
+      safety.gas_pressed = (msg->data[3] & 0x7FU) > 0U;    // RAW_THROTTLE
     }
   }
 
@@ -84,7 +84,7 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
                          ((msg->data[1] & 0x80U) != 0U) ||  // DEC_DISTANCE
                          ((msg->data[2] & 0x1U) != 0U);     // INC_DISTANCE
     bool cancel = (msg->data[2] & 0x8U) != 0U;             // ACC_ON_BTN
-    tx = !other_buttons && (!cancel || cruise_engaged_prev);
+    tx = !other_buttons && (!cancel || safety.cruise_engaged_prev);
   }
 
   return tx;
