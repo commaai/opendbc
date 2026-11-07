@@ -153,6 +153,11 @@ class CarState(CarStateBase):
       self.acc_type = cp_acc.vl["ACC_CONTROL"]["ACC_TYPE"]
       ret.stockFcw = bool(cp_acc.vl["PCS_HUD"]["FCW"])
 
+    # radar-ACC cars: the radar also reports its PCS alarm on its own bus, which keeps running when openpilot disables the radar
+    if self.CP.flags & ToyotaFlags.RADAR_ACC:
+      pcs = can_parsers[Bus.radar].vl["PCS_STATE"]
+      ret.stockFcw = ret.stockFcw or bool(pcs["PCS_ALARM"] and pcs["POWER_UP"] == 0)
+
     # some TSS2 cars have low speed lockout permanently set, so ignore on those cars
     # these cars are identified by an ACC_TYPE value of 2.
     # TODO: it is possible to avoid the lockout and gain stop and go if you
@@ -207,7 +212,11 @@ class CarState(CarStateBase):
       ("BLINKERS_STATE", float('nan')),
     ]
 
-    return {
+    parsers = {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
     }
+    if CP.flags & ToyotaFlags.RADAR_ACC:
+      # not required (nan), so a quiet radar bus never makes CAN invalid
+      parsers[Bus.radar] = CANParser(DBC[CP.carFingerprint][Bus.radar], [("PCS_STATE", float('nan'))], 1)
+    return parsers
