@@ -425,8 +425,7 @@ class IsoTpMessage:
     # <= 127, separation time in milliseconds
     # 0xF1 to 0xF9 UF, 100 to 900 microseconds
     if 1e-4 <= separation_time <= 9e-4:
-      offset = int(round(separation_time, 4) * 1e4) - 1
-      separation_time = 0xF1 + offset
+      separation_time = 0xF0 + round(separation_time * 1e4)
     elif 0 <= separation_time <= 0.127:
       separation_time = round(separation_time * 1000)
     else:
@@ -558,10 +557,15 @@ class IsoTpMessage:
       assert rx_data[0] == 0x30 or rx_data[0] == 0x31, "isotp - rx: flow-control transfer state indicator invalid"
       if rx_data[0] == 0x30:
         carlog.debug(f"ISO-TP: RX - flow control continue - {hex(self._can_client.tx_addr)}")
-        delay_ts = rx_data[2] & 0x7F
-        # scale is 1 milliseconds if first bit == 0, 100 micro seconds if first bit == 1
-        delay_div = 1000. if rx_data[2] & 0x80 == 0 else 10000.
-        delay_sec = delay_ts / delay_div
+        # 0x00-0x7F: 0-127 milliseconds, 0xF1-0xF9: 100-900 microseconds
+        # reserved values must be treated as the longest separation time, 127 milliseconds
+        st_min = rx_data[2]
+        if st_min <= 0x7F:
+          delay_sec = st_min / 1000.
+        elif 0xF1 <= st_min <= 0xF9:
+          delay_sec = (st_min - 0xF0) / 10000.
+        else:
+          delay_sec = 0.127
 
         # first frame = 6 bytes, each consecutive frame = 7 bytes
         num_bytes = self.max_len - 1
