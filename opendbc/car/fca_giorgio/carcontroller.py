@@ -28,6 +28,7 @@ class CarController(CarControllerBase):
     if self.frame % self.CCP.STEER_STEP == 0:
       if CC.latActive and CS.lka_status == 2:  # "lka_active" per DBC
         new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
+        new_torque = max(-self.CCP.STEER_TORQUE_CAP, min(self.CCP.STEER_TORQUE_CAP, new_torque))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
       else:
         apply_torque = 0

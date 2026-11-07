@@ -13,6 +13,9 @@ class CarControllerParams:
   HUD_3_STEP = 100
 
   STEER_MAX = 300
+  # Temporary cap below STEER_MAX: an EPS LKA_FAULT occurred while commanding up to 116 (at 4/frame); 75 is the
+  # most seen without a fault. Kept separate from STEER_MAX so LAT_ACCEL_FACTOR keeps its meaning.
+  STEER_TORQUE_CAP = 75
   STEER_THRESHOLD = 140
   STEER_DRIVER_ALLOWANCE = 80
   STEER_DRIVER_MULTIPLIER = 2
