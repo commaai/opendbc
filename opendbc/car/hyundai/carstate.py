@@ -30,6 +30,13 @@ class CarState(CarStateBase):
     self.main_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
     self.lda_button = 0
 
+    self.main_enabled = False
+    self.cruise_speed_set = False
+    self.pause_resume_button_type = ButtonType.cancel
+    self.button_enable = False
+    self.cc_enabled = False
+    self.cc_seen = False
+
     self.gear_msg_canfd = "ACCELERATOR" if CP.flags & HyundaiFlags.EV else \
                           "GEAR_ALT" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS else \
                           "GEAR_ALT_2" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS_2 else \
@@ -119,7 +126,6 @@ class CarState(CarStateBase):
     # cruise state
     if self.CP.openpilotLongitudinalControl:
       # These are not used for engage/disengage since openpilot keeps track of state using the buttons
-      ret.cruiseState.available = cp.vl["TCS13"]["ACCEnable"] == 0
       ret.cruiseState.enabled = cp.vl["TCS13"]["ACC_REQ"] == 1
       ret.cruiseState.standstill = False
       ret.cruiseState.nonAdaptive = False
@@ -179,17 +185,9 @@ class CarState(CarStateBase):
     self.lkas11 = copy.copy(cp_cam.vl["LKAS11"])
     self.clu11 = copy.copy(cp.vl["CLU11"])
     self.steer_state = cp.vl["MDPS12"]["CF_Mdps_ToiActive"]  # 0 NOT ACTIVE, 1 ACTIVE
-    prev_cruise_buttons = self.cruise_buttons[-1]
-    prev_main_buttons = self.main_buttons[-1]
-    prev_lda_button = self.lda_button
-    self.cruise_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwState"])
-    self.main_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"])
-    if self.CP.flags & HyundaiFlags.HAS_LDA_BUTTON:
-      self.lda_button = cp.vl["BCM_PO_11"]["LDA_BTN"]
-
-    ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
-                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
-                        *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+    lda_button = cp.vl["BCM_PO_11"]["LDA_BTN"] if self.CP.flags & HyundaiFlags.HAS_LDA_BUTTON else 0
+    self.update_cruise_buttons(ret, cp.vl_all["CLU11"]["CF_Clu_CruiseSwState"],
+                               cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"], lda_button)
 
     ret.blockPcmEnable = not self.recent_button_interaction()
 
@@ -252,14 +250,13 @@ class CarState(CarStateBase):
       ret.rightBlindspot = bool(cp.vl["ADAS_CMD_50_50ms"]["BCW_RtIndSta"])
 
     # cruise state
-    # CAN FD cars enable on main button press, set available if no TCS faults preventing engagement
-    ret.cruiseState.available = cp.vl["TCS"]["ACCEnable"] == 0
     if self.CP.openpilotLongitudinalControl:
       # These are not used for engage/disengage since openpilot keeps track of state using the buttons
       ret.cruiseState.enabled = cp.vl["TCS"]["ACC_REQ"] == 1
       ret.cruiseState.standstill = False
     else:
       cp_cruise_info = cp_cam if self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC else cp
+      ret.cruiseState.available = cp.vl["TCS"]["ACCEnable"] == 0
       ret.cruiseState.enabled = cp_cruise_info.vl["SCC_CONTROL"]["ACCMode"] in (1, 2)
       ret.cruiseState.standstill = cp_cruise_info.vl["SCC_CONTROL"]["CRUISE_STANDSTILL"] == 1
       ret.cruiseState.speed = cp_cruise_info.vl["SCC_CONTROL"]["VSetDis"] * speed_factor
@@ -272,12 +269,6 @@ class CarState(CarStateBase):
     if self.CP.flags & HyundaiFlags.EV:
       ret.cruiseState.nonAdaptive = cp.vl["MANUAL_SPEED_LIMIT_ASSIST"]["MSLA_ENABLED"] == 1
 
-    prev_cruise_buttons = self.cruise_buttons[-1]
-    prev_main_buttons = self.main_buttons[-1]
-    prev_lda_button = self.lda_button
-    self.cruise_buttons.extend(cp.vl_all[self.cruise_btns_msg_canfd]["CRUISE_BUTTONS"])
-    self.main_buttons.extend(cp.vl_all[self.cruise_btns_msg_canfd]["ADAPTIVE_CRUISE_MAIN_BTN"])
-    self.lda_button = cp.vl[self.cruise_btns_msg_canfd]["LDA_BTN"]
     self.buttons_counter = cp.vl[self.cruise_btns_msg_canfd]["COUNTER"]
     ret.accFaulted = cp.vl["TCS"]["ACCEnable"] != 0  # 0 ACC CONTROL ENABLED, 1-3 ACC CONTROL DISABLED
 
@@ -285,13 +276,91 @@ class CarState(CarStateBase):
       self.lfa_block_msg = copy.copy(cp_cam.vl["CAM_0x362"] if self.CP.flags & HyundaiFlags.CANFD_LKA_STEER_MSG_ALT
                                           else cp_cam.vl["CAM_0x2a4"])
 
-    ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
-                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
-                        *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+    self.update_cruise_buttons(ret, cp.vl_all[self.cruise_btns_msg_canfd]["CRUISE_BUTTONS"],
+                               cp.vl_all[self.cruise_btns_msg_canfd]["ADAPTIVE_CRUISE_MAIN_BTN"],
+                               cp.vl[self.cruise_btns_msg_canfd]["LDA_BTN"])
 
     ret.blockPcmEnable = not self.recent_button_interaction()
 
     return ret
+
+  def update_cruise_buttons(self, ret: structs.CarState, cruise_buttons, main_buttons, lda_button) -> None:
+    prev_cruise_buttons = self.cruise_buttons[-1]
+    prev_main_buttons = self.main_buttons[-1]
+    prev_lda_button = self.lda_button
+    self.cruise_buttons.extend(cruise_buttons)
+    self.main_buttons.extend(main_buttons)
+    self.lda_button = lda_button
+
+    if not self.CP.openpilotLongitudinalControl:
+      ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
+                          *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
+                          *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+      return
+
+    brake_disengage = ret.brakePressed and (not self.out.brakePressed or not ret.standstill)
+    if not self.cc_seen and brake_disengage:
+      self.cc_enabled = False
+
+    pause_resume = bool(self.CP.flags & HyundaiFlags.PAUSE_RESUME)
+    engaged = self.cc_enabled
+    button_enable = False
+    button_events: list[structs.CarState.ButtonEvent] = []
+    prev_cruise_btn = prev_cruise_buttons
+    prev_main_btn = prev_main_buttons
+
+    for raw_cruise_btn, raw_main_btn in zip(cruise_buttons, main_buttons, strict=True):
+      cruise_btn = int(raw_cruise_btn)
+      main_btn = int(raw_main_btn)
+
+      if main_btn and not prev_main_btn:
+        self.main_enabled = not self.main_enabled
+        engaged = self.main_enabled and pause_resume
+        button_enable = engaged
+        self.cruise_speed_set = engaged
+
+      set_btn = cruise_btn != Buttons.SET_DECEL and prev_cruise_btn == Buttons.SET_DECEL
+      res_btn = cruise_btn != Buttons.RES_ACCEL and prev_cruise_btn == Buttons.RES_ACCEL
+      if self.main_enabled:
+        if set_btn:
+          self.cruise_speed_set = True
+        if (set_btn or res_btn) and self.cruise_speed_set:
+          button_enable = True
+          engaged = True
+
+      if pause_resume:
+        if cruise_btn == Buttons.CANCEL and prev_cruise_btn != Buttons.CANCEL:
+          if not engaged and self.main_enabled:
+            self.pause_resume_button_type = ButtonType.resumeCruise
+            button_enable = True
+            engaged = True
+          else:
+            self.pause_resume_button_type = ButtonType.cancel
+            button_enable = False
+            engaged = False
+        buttons_dict = {**BUTTONS_DICT, Buttons.CANCEL: self.pause_resume_button_type}
+      else:
+        if cruise_btn == Buttons.CANCEL:
+          button_enable = False
+          engaged = False
+        buttons_dict = BUTTONS_DICT
+
+      button_events.extend(create_button_events(cruise_btn, prev_cruise_btn, buttons_dict))
+      button_events.extend(create_button_events(main_btn, prev_main_btn, {1: ButtonType.mainCruise}))
+      prev_cruise_btn = cruise_btn
+      prev_main_btn = main_btn
+
+    button_events.extend(create_button_events(int(self.lda_button), int(prev_lda_button), {1: ButtonType.lkas}))
+
+    if not self.cc_seen:
+      self.cc_enabled = engaged and not brake_disengage
+
+    self.button_enable = button_enable
+    ret.cruiseState.available = self.main_enabled
+    ret.buttonEvents = button_events
+
+  def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]) -> bool:
+    return not self.CP.pcmCruise and self.button_enable
 
   def get_can_parsers_canfd(self, CP):
     msgs = []

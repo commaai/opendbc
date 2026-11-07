@@ -335,6 +335,8 @@ typedef struct {
   bool honda_fwd_brake;
 
   uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
+  bool hyundai_main_button_prev;
+  bool hyundai_cruise_speed_set;
 
   bool tesla_stock_aeb;
   // Only rising edges while controls are not allowed are considered for these systems:
@@ -378,6 +380,7 @@ typedef struct {
   bool hyundai_alt_limits;
   bool hyundai_fcev_gas_signal;
   bool hyundai_alt_limits_2;
+  bool hyundai_pause_resume;
   bool hyundai_legacy;
   bool hyundai_canfd_alt_buttons;
   bool hyundai_canfd_lka_steer_msg_alt;
