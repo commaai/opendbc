@@ -41,10 +41,11 @@ class TestCanChecksums(unittest.TestCase):
     ])
 
   def test_fca_giorgio_eps_2(self):
+    # RAM ProMaster samples (route 57a1cc884d1e5a8b|00000003--126efcc96b)
     self.verify_fca_giorgio_crc("EPS_2", 0x106, [
-      b'\x7c\x43\x57\x60\x00\x00\xa1',
-      b'\x7c\x63\x58\xe0\x00\x01\xd5',
-      b'\x7c\x63\x58\xe0\x00\x02\xf2',
+      b'\x00\x00\x7d\x00\x40\x00\xa8',
+      b'\x00\x00\x7c\xe0\x40\x01\xb8',
+      b'\x00\x00\x7c\xa0\x40\x02\xff',
     ])
 
   def test_fca_giorgio_abs_2(self):
