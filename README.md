@@ -72,6 +72,12 @@ lefthook run lint                # run the linter
 * [`opendbc/car/`](opendbc/car/) is a high-level library for interfacing with cars using Python
 * [`opendbc/safety/`](opendbc/safety/) is the functional safety for all the cars supported by `opendbc/car/`
 
+### Diagnostics
+
+`opendbc.car.uds` provides UDS requests over ISO-TP. Received frames are checked for payload length and sequence before updating a transfer.
+Short single frames, flow control frames, and final consecutive frames are supported. Run the transport regression tests with
+`python -m unittest opendbc.car.tests.test_uds`.
+
 ## How to Port a Car
 
 This guide covers everything from adding support to a new car all the way to improving existing cars (e.g. adding longitudinal control or radar parsing). If similar cars to yours are already compatible, most of this work is likely already done for you.
