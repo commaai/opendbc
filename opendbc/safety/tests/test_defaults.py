@@ -103,10 +103,11 @@ class TestSafetyRedundancy(common.SafetyTestBase):
     self._assert_fault()
 
   def test_state_mismatch(self):
-    # the tick rewrites safety_rx_checks_invalid in both copies
-    rewritten = ffi.offsetof("SafetyState", "safety_rx_checks_invalid")
-    for byte in range(ffi.sizeof("SafetyState")):
-      if byte != rewritten:
+    # the tick rewrites safety_rx_checks_invalid in both copies, and a nonzero rx_checks_len makes it read the NULL rx_checks
+    rewritten = ffi.offsetof("SafetyCopy", "state") + ffi.offsetof("SafetyState", "safety_rx_checks_invalid")
+    rx_checks_len = ffi.offsetof("SafetyCopy", "cfg") + ffi.offsetof("SafetyConfig", "current_safety_config") + ffi.offsetof("safety_config", "rx_checks_len")
+    for byte in range(ffi.sizeof("SafetyCopy")):
+      if byte != rewritten and not (rx_checks_len <= byte < rx_checks_len + ffi.sizeof("int")):
         self.safety.set_controls_allowed(True)
         self._flip_b(byte * 8)
         self.safety.safety_tick()
@@ -127,7 +128,7 @@ class TestSafetyRedundancy(common.SafetyTestBase):
         self.safety.safety_rx_hook(common.make_msg(0, 0x4F1, 4))
         self.safety.set_controls_allowed(True)
         self.safety.safety_tx_hook(msg)
-        self.assertEqual(ts_last(self.safety.safety_a), 1000002)
+        self.assertEqual(ts_last(self.safety.safety_a.state), 1000002)
 
 
 class TestHeartbeat(common.SafetyTestBase):

@@ -36,12 +36,12 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
   volkswagen_common_init();
 
 #ifdef ALLOW_DEBUG
-  volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
+  safety_cfg.volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
 #else
   SAFETY_UNUSED(param);
 #endif
 
-  return volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_LONG_TX_MSGS) : \
+  return safety_cfg.volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_LONG_TX_MSGS) : \
                                    BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_STOCK_TX_MSGS);
 }
 
@@ -73,7 +73,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
     safety.acc_main_on = cruise_engaged || (acc_status == 2);
 
-    if (!volkswagen_longitudinal) {
+    if (!safety_cfg.volkswagen_longitudinal) {
       pcm_cruise_check(cruise_engaged);
     }
 
@@ -86,7 +86,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
     // Signal: GRA_ACC_01.GRA_Tip_Setzen
     // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-    if (volkswagen_longitudinal) {
+    if (safety_cfg.volkswagen_longitudinal) {
       bool set_button = GET_BIT(msg, 16U);
       bool resume_button = GET_BIT(msg, 19U);
       if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {

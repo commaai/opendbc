@@ -2,8 +2,6 @@
 
 #include "opendbc/safety/declarations.h"
 
-static bool tesla_longitudinal = false;
-
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;
   if (msg->addr == 0x2b9U) {
@@ -246,7 +244,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
     int raw_accel_min = ((msg->data[5] & 0x0FU) << 5) | (msg->data[4] >> 3);
     int acc_state = msg->data[1] >> 4;
 
-    if (tesla_longitudinal) {
+    if (safety_cfg.tesla_longitudinal) {
       // Prevent both acceleration from being negative, as this could cause the car to reverse after coming to standstill
       if ((raw_accel_max < TESLA_LONG_LIMITS.inactive_accel) && (raw_accel_min < TESLA_LONG_LIMITS.inactive_accel)) {
         violation = true;
@@ -291,7 +289,7 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
       }
 
       // DAS_control
-      if (tesla_longitudinal && (addr == 0x2b9) && !safety.tesla_stock_aeb) {
+      if (safety_cfg.tesla_longitudinal && (addr == 0x2b9) && !safety.tesla_stock_aeb) {
         block_msg = true;
       }
     }
@@ -316,7 +314,7 @@ static safety_config tesla_init(uint16_t param) {
   SAFETY_UNUSED(param);
 #ifdef ALLOW_DEBUG
   const uint16_t TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
-  tesla_longitudinal = GET_FLAG(param, TESLA_FLAG_LONGITUDINAL_CONTROL);
+  safety_cfg.tesla_longitudinal = GET_FLAG(param, TESLA_FLAG_LONGITUDINAL_CONTROL);
 #endif
 
   // we need to assume Autopark/Summon on startup since DI_state is a low freq msg.
@@ -336,7 +334,7 @@ static safety_config tesla_init(uint16_t param) {
   };
 
   safety_config ret;
-  if (tesla_longitudinal) {
+  if (safety_cfg.tesla_longitudinal) {
     ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_LONG_TX_MSGS);
   } else {
     ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_TX_MSGS);

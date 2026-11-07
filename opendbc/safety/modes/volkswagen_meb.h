@@ -23,8 +23,6 @@
 #define VOLKSWAGEN_MEB_ACC_AKTIV_REGELT        3U
 #define VOLKSWAGEN_MEB_ACC_OVERRIDE            4U
 
-static bool volkswagen_meb_alt_crc = false;
-
 #define VOLKSWAGEN_MEB_COMMON_RX_CHECKS \
   {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
   {.msg = {{MSG_MOTOR_14, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
@@ -62,7 +60,7 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
   uint32_t ret = volkswagen_meb_compute_crc(msg);
   int len = 0;
-  if (volkswagen_meb_alt_crc) {
+  if (safety_cfg.volkswagen_meb_alt_crc) {
     if (msg->addr == MSG_QFK_01) {
       len = 28;
     }
@@ -108,10 +106,10 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
   volkswagen_common_init();
   const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
-  volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
+  safety_cfg.volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
 
   safety_config ret;
-  if (volkswagen_meb_alt_crc) {
+  if (safety_cfg.volkswagen_meb_alt_crc) {
     static const RxCheck volkswagen_meb_gen2_rx_checks[] = {
       VOLKSWAGEN_MEB_COMMON_RX_CHECKS
       {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},

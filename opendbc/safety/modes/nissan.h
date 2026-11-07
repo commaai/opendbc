@@ -2,8 +2,6 @@
 
 #include "opendbc/safety/declarations.h"
 
-static bool nissan_alt_eps = false;
-
 static const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
   .max_angle = 60000,  // 600 deg, reasonable limit
   .angle_deg_to_can = 100,
@@ -29,7 +27,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
     update_sample(&safety.angle_meas, angle_meas_new);
   }
 
-  if (msg_matches(msg, 0x285U, nissan_alt_eps ? 1U : 0U)) {
+  if (msg_matches(msg, 0x285U, safety_cfg.nissan_alt_eps ? 1U : 0U)) {
     // Get current speed and standstill
     uint16_t right_rear = (msg->data[0] << 8) | (msg->data[1]);
     uint16_t left_rear = (msg->data[2] << 8) | (msg->data[3]);
@@ -38,7 +36,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   }
 
   // X-Trail 0x15c, Leaf 0x239
-  if (msg_matches(msg, 0x15cU, nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, nissan_alt_eps ? 1U : 0U)) {
+  if (msg_matches(msg, 0x15cU, safety_cfg.nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, safety_cfg.nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x15cU) {
       safety.gas_pressed = ((msg->data[5] << 2) | ((msg->data[6] >> 6) & 0x3U)) > 3U;
     } else {
@@ -47,7 +45,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   }
 
   // X-trail 0x454, Leaf 0x239
-  if (msg_matches(msg, 0x454U, nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, nissan_alt_eps ? 1U : 0U)) {
+  if (msg_matches(msg, 0x454U, safety_cfg.nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, safety_cfg.nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x454U) {
       safety.brake_pressed = (msg->data[2] & 0x80U) != 0U;
     } else {
@@ -56,7 +54,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   }
 
   // Handle cruise enabled
-  if (msg_matches(msg, 0x30fU, nissan_alt_eps ? 1U : 2U)) {
+  if (msg_matches(msg, 0x30fU, safety_cfg.nissan_alt_eps ? 1U : 2U)) {
     bool cruise_engaged = (msg->data[0] >> 3) & 1U;
     pcm_cruise_check(cruise_engaged);
   }
@@ -120,7 +118,7 @@ static safety_config nissan_init(uint16_t param) {
   // EPS Location. false = V-CAN, true = C-CAN
   const uint16_t NISSAN_PARAM_ALT_EPS_BUS = 1;
 
-  nissan_alt_eps = GET_FLAG(param, NISSAN_PARAM_ALT_EPS_BUS);
+  safety_cfg.nissan_alt_eps = GET_FLAG(param, NISSAN_PARAM_ALT_EPS_BUS);
   return BUILD_SAFETY_CFG(nissan_rx_checks, NISSAN_TX_MSGS);
 }
 

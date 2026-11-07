@@ -13,21 +13,12 @@
     {.msg = {{0x1C4, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
     {.msg = {{0xC9, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
-static const LongitudinalLimits *gm_long_limits;
-
 enum {
   GM_BTN_UNPRESS = 1,
   GM_BTN_RESUME = 2,
   GM_BTN_SET = 3,
   GM_BTN_CANCEL = 6,
 };
-
-typedef enum {
-  GM_ASCM,
-  GM_CAM
-} GmHardware;
-static GmHardware gm_hw = GM_ASCM;
-static bool gm_pcm_cruise = false;
 
 static void gm_rx_hook(const CANPacket_t *msg) {
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
@@ -47,7 +38,7 @@ static void gm_rx_hook(const CANPacket_t *msg) {
   }
 
   // ACC steering wheel buttons (GM_CAM is tied to the PCM)
-  if (msg_matches(msg, 0x1E1U, 0U) && !gm_pcm_cruise) {
+  if (msg_matches(msg, 0x1E1U, 0U) && !safety_cfg.gm_pcm_cruise) {
     int button = (msg->data[5] & 0x70U) >> 4;
 
     // enter controls on falling edge of set or rising edge of resume (avoids fault)
@@ -67,11 +58,11 @@ static void gm_rx_hook(const CANPacket_t *msg) {
 
   // Reference for brake pressed signals:
   // https://github.com/commaai/openpilot/blob/master/selfdrive/car/gm/carstate.py
-  if (msg_matches(msg, 0xBEU, 0U) && (gm_hw == GM_ASCM)) {
+  if (msg_matches(msg, 0xBEU, 0U) && (safety_cfg.gm_hw == GM_ASCM)) {
     safety.brake_pressed = msg->data[1] >= 8U;
   }
 
-  if (msg_matches(msg, 0xC9U, 0U) && (gm_hw == GM_CAM)) {
+  if (msg_matches(msg, 0xC9U, 0U) && (safety_cfg.gm_hw == GM_CAM)) {
     safety.brake_pressed = GET_BIT(msg, 40U);
   }
 
@@ -79,7 +70,7 @@ static void gm_rx_hook(const CANPacket_t *msg) {
     safety.gas_pressed = msg->data[5] != 0U;
 
     // enter controls on rising edge of ACC, exit controls when ACC off
-    if (gm_pcm_cruise) {
+    if (safety_cfg.gm_pcm_cruise) {
       bool cruise_engaged = (msg->data[1] >> 5) != 0U;
       pcm_cruise_check(cruise_engaged);
     }
@@ -107,7 +98,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == 0x315U) {
     int brake = ((msg->data[0] & 0xFU) << 8) + msg->data[1];
     brake = (0x1000 - brake) & 0xFFF;
-    if (longitudinal_brake_checks(brake, *gm_long_limits)) {
+    if (longitudinal_brake_checks(brake, *safety_cfg.gm_long_limits)) {
       tx = false;
     }
   }
@@ -133,7 +124,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
     bool violation = false;
     // Allow apply bit in pre-enabled and overriding states
     violation |= !safety.controls_allowed && apply;
-    violation |= longitudinal_gas_checks(gas_regen, *gm_long_limits);
+    violation |= longitudinal_gas_checks(gas_regen, *safety_cfg.gm_long_limits);
 
     if (violation) {
       tx = false;
@@ -141,7 +132,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   }
 
   // BUTTONS: used for resume spamming and cruise cancellation with stock longitudinal
-  if ((msg->addr == 0x1E1U) && gm_pcm_cruise) {
+  if ((msg->addr == 0x1E1U) && safety_cfg.gm_pcm_cruise) {
     int button = (msg->data[5] >> 4) & 0x7U;
 
     bool allowed_cancel = (button == 6) && safety.cruise_engaged_prev;
@@ -214,22 +205,22 @@ static safety_config gm_init(uint16_t param) {
   };
 
   if (GET_FLAG(param, GM_PARAM_HW_CAM)) {
-    gm_hw = GM_CAM;
-    gm_long_limits = &GM_CAM_LONG_LIMITS;
+    safety_cfg.gm_hw = GM_CAM;
+    safety_cfg.gm_long_limits = &GM_CAM_LONG_LIMITS;
   } else {
-    gm_hw = GM_ASCM;
-    gm_long_limits = &GM_ASCM_LONG_LIMITS;
+    safety_cfg.gm_hw = GM_ASCM;
+    safety_cfg.gm_long_limits = &GM_ASCM_LONG_LIMITS;
   }
 
-  gm_pcm_cruise = (gm_hw == GM_CAM);
+  safety_cfg.gm_pcm_cruise = (safety_cfg.gm_hw == GM_CAM);
 
   safety_config ret;
-  if (gm_hw == GM_CAM) {
+  if (safety_cfg.gm_hw == GM_CAM) {
     ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
 #ifdef ALLOW_DEBUG
     const uint16_t GM_PARAM_HW_CAM_LONG = 2;
     const bool gm_cam_long = GET_FLAG(param, GM_PARAM_HW_CAM_LONG);
-    gm_pcm_cruise = !gm_cam_long;
+    safety_cfg.gm_pcm_cruise = !gm_cam_long;
     if (gm_cam_long) {
       ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS);
     }
@@ -244,7 +235,7 @@ static safety_config gm_init(uint16_t param) {
   }
 
   // ASCM does not forward any messages
-  if (gm_hw == GM_ASCM) {
+  if (safety_cfg.gm_hw == GM_ASCM) {
     ret.disable_forwarding = true;
   }
   return ret;

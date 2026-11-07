@@ -258,6 +258,20 @@ void speed_mismatch_check(const float speed_2);
 void safety_tick(void);
 void safety_heartbeat(bool engaged);
 void safety_heartbeat_check(void);
+void safety_alternative_experience(int alt_exp);
+
+typedef enum {
+  CHRYSLER_RAM_DT,
+  CHRYSLER_RAM_HD,
+  CHRYSLER_PACIFICA,  // plus Jeep
+} ChryslerPlatform;
+
+typedef enum {
+  GM_ASCM,
+  GM_CAM
+} GmHardware;
+
+typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 
 // for safety modes with curvature steering control
 typedef struct {
@@ -337,10 +351,64 @@ typedef struct {
   bool volkswagen_brake_pressure_detected;
 } SafetyState;
 
-extern SafetyState safety_a;
-extern SafetyState safety_b;
-extern SafetyState *safety_cur;
-#define safety (*safety_cur)
+typedef struct {
+  uint16_t current_safety_mode;
+  uint16_t current_safety_param;
+  const safety_hooks *current_hooks;
+  safety_config current_safety_config;
+  int alternative_experience;
+
+  ChryslerPlatform chrysler_platform;
+
+  GmHardware gm_hw;
+  const LongitudinalLimits *gm_long_limits;
+  bool gm_pcm_cruise;
+
+  bool honda_alt_brake_msg;
+  bool honda_bosch_long;
+  bool honda_bosch_radarless;
+  bool honda_bosch_canfd;
+  HondaHw honda_hw;
+
+  bool hyundai_ev_gas_signal;
+  bool hyundai_hybrid_gas_signal;
+  bool hyundai_longitudinal;
+  bool hyundai_camera_scc;
+  bool hyundai_canfd_lka_steer_msg;
+  bool hyundai_alt_limits;
+  bool hyundai_fcev_gas_signal;
+  bool hyundai_alt_limits_2;
+  bool hyundai_legacy;
+  bool hyundai_canfd_alt_buttons;
+  bool hyundai_canfd_lka_steer_msg_alt;
+
+  bool nissan_alt_eps;
+
+  bool subaru_gen2;
+  bool subaru_pg_reversed_driver_torque;
+
+  bool tesla_longitudinal;
+
+  bool toyota_secoc;
+  bool toyota_alt_brake;
+  bool toyota_stock_longitudinal;
+  bool toyota_lta;
+  int toyota_dbc_eps_torque_factor;   // conversion factor for STEER_TORQUE_EPS in %: see dbc file
+
+  bool volkswagen_longitudinal;
+  bool volkswagen_meb_alt_crc;
+} SafetyConfig;
+
+typedef struct {
+  SafetyState state;
+  SafetyConfig cfg;
+} SafetyCopy;
+
+extern SafetyCopy safety_a;
+extern SafetyCopy safety_b;
+extern SafetyCopy *safety_cur;
+#define safety (safety_cur->state)
+#define safety_cfg (safety_cur->cfg)
 
 extern uint32_t safety_now;
 extern bool safety_redundancy_fault;
@@ -363,16 +431,10 @@ extern bool safety_redundancy_fault;
 // This flag allows AEB to be commanded from openpilot.
 #define ALT_EXP_ALLOW_AEB 16
 
-extern int alternative_experience;
-
 typedef struct {
   uint16_t id;
   const safety_hooks *hooks;
 } safety_hook_config;
-
-extern uint16_t current_safety_mode;
-extern uint16_t current_safety_param;
-extern safety_config current_safety_config;
 
 int safety_fwd_hook(int bus_num, int addr);
 int set_safety_hooks(uint16_t mode, uint16_t param);

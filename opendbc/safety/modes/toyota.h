@@ -56,12 +56,6 @@
   {.msg = {{0x116, 0, 8, 42U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
   {.msg = {{0x101, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
-static bool toyota_secoc = false;
-static bool toyota_alt_brake = false;
-static bool toyota_stock_longitudinal = false;
-static bool toyota_lta = false;
-static int toyota_dbc_eps_torque_factor = 100;   // conversion factor for STEER_TORQUE_EPS in %: see dbc file
-
 static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
   uint8_t checksum = (uint8_t)(msg->addr) + (uint8_t)((unsigned int)(msg->addr) >> 8U) + (uint8_t)(len);
@@ -101,7 +95,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
     torque_meas_new = to_signed(torque_meas_new, 16);
 
     // scale by dbc_factor
-    torque_meas_new = (torque_meas_new * toyota_dbc_eps_torque_factor) / 100;
+    torque_meas_new = (torque_meas_new * safety_cfg.toyota_dbc_eps_torque_factor) / 100;
 
     // update array of sample
     update_sample(&safety.torque_meas, torque_meas_new);
@@ -128,7 +122,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
   // enter controls on rising edge of ACC, exit controls on ACC off
   // exit controls on rising edge of gas press, if not alternative experience
   // exit controls on rising edge of brake press
-  if (toyota_secoc) {
+  if (safety_cfg.toyota_secoc) {
     if (msg_matches(msg, 0x176U, 0U)) {
       bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
       pcm_cruise_check(cruise_engaged);
@@ -145,10 +139,10 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       pcm_cruise_check(cruise_engaged);
       safety.gas_pressed = !GET_BIT(msg, 4U);  // PCM_CRUISE.GAS_RELEASED
     }
-    if (!toyota_alt_brake && msg_matches(msg, 0x226U, 0U)) {
+    if (!safety_cfg.toyota_alt_brake && msg_matches(msg, 0x226U, 0U)) {
       safety.brake_pressed = GET_BIT(msg, 37U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_nodsu_pt_generated.dbc)
     }
-    if (toyota_alt_brake && msg_matches(msg, 0x224U, 0U)) {
+    if (safety_cfg.toyota_alt_brake && msg_matches(msg, 0x224U, 0U)) {
       safety.brake_pressed = GET_BIT(msg, 5U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_new_mc_pt_generated.dbc)
     }
   }
@@ -218,14 +212,14 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     desired_accel = to_signed(desired_accel, 16);
 
     bool violation = false;
-    if (toyota_secoc) {
+    if (safety_cfg.toyota_secoc) {
       // SecOC cars move accel to 0x183. Only allow inactive accel on 0x343 to match stock behavior
       violation = desired_accel != TOYOTA_LONG_LIMITS.inactive_accel;
     }
     violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
 
     // only ACC messages that cancel are allowed when openpilot is not controlling longitudinal
-    if (toyota_stock_longitudinal) {
+    if (safety_cfg.toyota_stock_longitudinal) {
       bool cancel_req = GET_BIT(msg, 24U);
       if (!cancel_req) {
         violation = true;
@@ -266,7 +260,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     lta_angle = to_signed(lta_angle, 16);
 
     bool steer_control_enabled = lta_request || lta_request2;
-    if (!toyota_lta) {
+    if (!safety_cfg.toyota_lta) {
       // using torque (LKA), block LTA msgs with actuation requests
       if (steer_control_enabled || (lta_angle != 0) || (torque_wind_down != 0)) {
         tx = false;
@@ -305,7 +299,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
   }
 
   // STEERING_LTA_2 angle steering check (SecOC)
-  if (toyota_secoc && msg_matches(msg, 0x131U, 0U)) {
+  if (safety_cfg.toyota_secoc && msg_matches(msg, 0x131U, 0U)) {
     // SecOC cars block any form of LTA actuation for now
     bool lta_request = GET_BIT(msg, 3U);  // STEERING_LTA_2.STEER_REQUEST
     bool lta_request2 = GET_BIT(msg, 0U);  // STEERING_LTA_2.STEER_REQUEST_2
@@ -324,7 +318,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     desired_torque = to_signed(desired_torque, 16);
     bool steer_req = GET_BIT(msg, 0U);
     // When using LTA (angle control), assert no actuation on LKA message
-    if (!toyota_lta) {
+    if (!safety_cfg.toyota_lta) {
       if (steer_torque_cmd_checks(desired_torque, steer_req, TOYOTA_TORQUE_STEERING_LIMITS)) {
         tx = false;
       }
@@ -374,36 +368,36 @@ static safety_config toyota_init(uint16_t param) {
 
 #ifdef ALLOW_DEBUG
   const uint32_t TOYOTA_PARAM_SECOC = 8UL << TOYOTA_PARAM_OFFSET;
-  toyota_secoc = GET_FLAG(param, TOYOTA_PARAM_SECOC);
+  safety_cfg.toyota_secoc = GET_FLAG(param, TOYOTA_PARAM_SECOC);
 #endif
 
-  toyota_alt_brake = GET_FLAG(param, TOYOTA_PARAM_ALT_BRAKE);
-  toyota_stock_longitudinal = GET_FLAG(param, TOYOTA_PARAM_STOCK_LONGITUDINAL);
-  toyota_lta = GET_FLAG(param, TOYOTA_PARAM_LTA);
-  toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
+  safety_cfg.toyota_alt_brake = GET_FLAG(param, TOYOTA_PARAM_ALT_BRAKE);
+  safety_cfg.toyota_stock_longitudinal = GET_FLAG(param, TOYOTA_PARAM_STOCK_LONGITUDINAL);
+  safety_cfg.toyota_lta = GET_FLAG(param, TOYOTA_PARAM_LTA);
+  safety_cfg.toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
 
   safety_config ret;
-  if (toyota_secoc) {
-    if (toyota_stock_longitudinal) {
+  if (safety_cfg.toyota_secoc) {
+    if (safety_cfg.toyota_stock_longitudinal) {
       SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
     } else {
       SET_TX_MSGS(TOYOTA_SECOC_LONG_TX_MSGS, ret);
     }
   } else {
-    if (toyota_stock_longitudinal) {
+    if (safety_cfg.toyota_stock_longitudinal) {
       SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
     } else {
       SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
     }
   }
 
-  if (toyota_secoc) {
+  if (safety_cfg.toyota_secoc) {
     static const RxCheck toyota_secoc_rx_checks[] = {
       TOYOTA_SECOC_RX_CHECKS
     };
 
     SET_RX_CHECKS(toyota_secoc_rx_checks, ret);
-  } else if (toyota_lta) {
+  } else if (safety_cfg.toyota_lta) {
     // Check the quality flag for angle measurement when using LTA, since it's not set on TSS-P cars
     static const RxCheck toyota_lta_rx_checks[] = {
       TOYOTA_RX_CHECKS(true)
@@ -418,7 +412,7 @@ static safety_config toyota_init(uint16_t param) {
       TOYOTA_ALT_BRAKE_RX_CHECKS(false)
     };
 
-    if (!toyota_alt_brake) {
+    if (!safety_cfg.toyota_alt_brake) {
       SET_RX_CHECKS(toyota_lka_rx_checks, ret);
     } else {
       SET_RX_CHECKS(toyota_lka_alt_brake_rx_checks, ret);
