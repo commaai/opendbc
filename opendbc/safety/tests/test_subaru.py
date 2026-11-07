@@ -83,6 +83,26 @@ class TestSubaruSafetyBase(common.CarSafetyTest):
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", self.ALT_MAIN_BUS, values)
 
+  def test_rx_hook(self):
+    # checksum and counter checks
+    for name, bus in (("Throttle", 0), ("Steering_Torque", 0), ("Wheel_Speeds", self.ALT_MAIN_BUS),
+                      ("Brake_Status", self.ALT_MAIN_BUS), ("CruiseControl", self.ALT_MAIN_BUS)):
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, bus, {})))
+
+        # mess with the checksum to make it fail
+        msg = self.packer.make_can_msg_safety(name, bus, {})
+        msg[0].data[0] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[0] ^= 0xFF
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):

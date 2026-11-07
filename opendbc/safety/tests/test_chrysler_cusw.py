@@ -67,6 +67,24 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
       self.assertTrue(self._rx(self._user_gas_msg(0)), f"{count=}")
       self.assertTrue(self._rx(self._pcm_status_msg(False)), f"{count=}")
 
+    # checksum and counter checks
+    for name, checksum_byte in (("BRAKE_1", 7), ("BRAKE_3", 4), ("EPS_STATUS", 7), ("ACCEL_GAS", 4), ("ACC_CONTROL", 7)):
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, {})))
+
+        # mess with the checksum to make it fail
+        msg = self.packer.make_can_msg_safety(name, 0, {})
+        msg[0].data[checksum_byte] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[checksum_byte] ^= 0xFF
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
 
 if __name__ == "__main__":
   unittest.main()

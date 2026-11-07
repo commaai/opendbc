@@ -82,6 +82,31 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
     values = {"GRA_Neu_Setzen": _set, "GRA_Recall": resume, "GRA_Abbrechen": cancel}
     return self.packer.make_can_msg_safety("GRA_Neu", bus, values)
 
+  def test_rx_hook(self):
+    # checksum and counter checks
+    for name in ("Lenkhilfe_3", "GRA_Neu"):
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, {})))
+
+        # mess with the checksum to make it fail
+        msg = self.packer.make_can_msg_safety(name, 0, {})
+        msg[0].data[0] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[0] ^= 0xFF
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
+    # Motor_5 has no counter, its checksum is the last byte
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("Motor_5", 0, {})))
+    msg = self.packer.make_can_msg_safety("Motor_5", 0, {})
+    msg[0].data[7] ^= 0xFF
+    self.assertFalse(self._rx(msg))
+
 
 class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
   # Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration

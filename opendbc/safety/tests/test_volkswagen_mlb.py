@@ -81,6 +81,21 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
       self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
                        f"expected {brake_pressed=} with {motor_03_signal=} and {esp_05_signal=}")
 
+  def test_rx_hook(self):
+    # checksum and counter checks
+    # MLB checksums are not checked
+    for name, bus in (("ESP_03", 0), ("LH_EPS_03", 0), ("ESP_05", 0), ("TSK_04", 1), ("Motor_03", 0), ("LS_01", 0)):
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          msg = self.packer.make_can_msg_safety(name, bus, {})
+          self.assertTrue(self._rx(msg))
+
+        # a stuck counter fails
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
 
 class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
   DBC = "vw_mlb"

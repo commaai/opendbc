@@ -156,6 +156,26 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         self.assertEqual(should_rx, self._rx(msg))
         self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
+    # checksum and counter checks
+    # ESP_status needs a valid ESP_driverBrakeApply for its quality flag check
+    for name, values, checksum_byte in (("EPAS3S_sysStatus", {}, 7), ("DI_systemStatus", {}, 0), ("ESP_status", {"ESP_driverBrakeApply": 1}, 0),
+                                        ("DI_state", {}, 0), ("UI_warning", {}, 0)):
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, values)))
+
+        # mess with the checksum to make it fail
+        msg = self.packer.make_can_msg_safety(name, 0, values)
+        msg[0].data[checksum_byte] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[checksum_byte] ^= 0xFF
+        for i in range(MAX_WRONG_COUNTERS):
+          should_rx = i < MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,

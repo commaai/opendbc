@@ -211,6 +211,13 @@ class TestFordSafetyBase(common.CarSafetyTest):
         self.assertEqual(should_rx, self._rx(msg))
         self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
+    # a stuck counter fails
+    for msg in (self._speed_msg(0), self._yaw_rate_msg(0, 0)):
+      self.assertTrue(self._rx(msg))
+      for i in range(common.MAX_WRONG_COUNTERS):
+        should_rx = i < common.MAX_WRONG_COUNTERS - 1
+        self.assertEqual(should_rx, self._rx(msg))
+
   def test_angle_measurements(self):
     """Tests rx hook correctly parses the curvature measurement from the vehicle speed and yaw rate"""
     for speed in np.arange(0.5, 40, 0.5):
