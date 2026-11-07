@@ -39,9 +39,9 @@ class CarController(CarControllerBase):
       # torque applied is suspected of causing a latched EPS LKA_FAULT.
       if CC.latActive:
         self.release_hold_frames = self.CCP.STEER_RELEASE_HOLD_FRAMES
-      elif self.release_hold_frames > 0:
-        self.release_hold_frames -= 1
       lka_active = CC.latActive or self.release_hold_frames > 0
+      if not CC.latActive and self.release_hold_frames > 0:
+        self.release_hold_frames -= 1
 
       self.apply_torque_last = apply_torque
       can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND", apply_torque, lka_active))
