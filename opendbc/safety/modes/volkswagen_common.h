@@ -27,10 +27,6 @@ bool volkswagen_longitudinal = false;
 
 static void volkswagen_common_init(void) {
   volkswagen_longitudinal = false;
-  safety.volkswagen_set_button_prev = false;
-  safety.volkswagen_resume_button_prev = false;
-  safety.volkswagen_brake_pedal_switch = false;
-  safety.volkswagen_brake_pressure_detected = false;
   return;
 }
 
