@@ -303,15 +303,6 @@ static void stock_ecu_check(bool stock_ecu_detected) {
   }
 }
 
-static void relay_malfunction_reset(void) {
-  safety.relay_malfunction = false;
-}
-
-// resets values and min/max for sample_t struct
-static void reset_sample(struct sample_t *sample) {
-  *sample = (struct sample_t){0};
-}
-
 int set_safety_hooks(uint16_t mode, uint16_t param) {
   const safety_hook_config safety_hook_registry[] = {
     {SAFETY_SILENT, &nooutput_hooks},
@@ -347,41 +338,10 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   };
 
   // reset state set by safety mode
-  safety.safety_mode_cnt = 0U;
-  safety.relay_malfunction = false;
-  safety.gas_pressed = false;
-  safety.gas_pressed_prev = false;
-  safety.brake_pressed = false;
-  safety.brake_pressed_prev = false;
-  safety.regen_braking = false;
-  safety.regen_braking_prev = false;
-  safety.steering_disengage = false;
-  safety.steering_disengage_prev = false;
-  safety.cruise_engaged_prev = false;
-  safety.vehicle_moving = false;
-  safety.acc_main_on = false;
-  safety.cruise_button_prev = 0;
-  safety.desired_torque_last = 0;
-  safety.rt_torque_last = 0;
-  safety.rt_angle_msgs = 0;
-  safety.ts_angle_check_last = 0;
-  safety.desired_angle_last = 0;
-  safety.curvature_state = (CurvatureSteeringState){0};
-  safety.ts_torque_check_last = 0;
-  safety.ts_steer_req_mismatch_last = 0;
-  safety.valid_steer_req_count = 0;
-  safety.invalid_steer_req_count = 0;
-
-  // reset samples
-  reset_sample(&safety.vehicle_speed);
-  reset_sample(&safety.vehicle_speed_2);
-  reset_sample(&safety.torque_meas);
-  reset_sample(&safety.torque_driver);
-  reset_sample(&safety.angle_meas);
-
-  safety.controls_allowed = false;
-  relay_malfunction_reset();
-  safety.safety_rx_checks_invalid = false;
+  safety = (SafetyState){
+    .heartbeat_engaged = safety.heartbeat_engaged,
+    .heartbeat_engaged_mismatches = safety.heartbeat_engaged_mismatches,
+  };
 
   current_safety_config = (safety_config){0};
 
@@ -397,10 +357,6 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   }
   if ((set_status == 0) && (current_hooks->init != NULL)) {
     current_safety_config = current_hooks->init(param);
-    // reset all dynamic fields in addr struct
-    for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
-      safety.rx_status[j] = (RxStatus){0};
-    }
   }
   return set_status;
 }
