@@ -23,7 +23,7 @@ const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
 #define MSG_TSK_04      0x10EU   // RX from ECU, for ACC status from drivetrain coordinator
 
 static void volkswagen_common_init(void) {
-  safety_cfg.volkswagen_longitudinal = false;
+  safety_setup.volkswagen_longitudinal = false;
   return;
 }
 

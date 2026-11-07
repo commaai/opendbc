@@ -22,7 +22,7 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
     int torque_driver_new;
     torque_driver_new = (msg->data[3] >> 5) + (msg->data[4] << 3);
     torque_driver_new = to_signed(torque_driver_new, 11);
-    torque_driver_new = safety_cfg.subaru_pg_reversed_driver_torque ? -torque_driver_new : torque_driver_new;
+    torque_driver_new = safety_setup.subaru_pg_reversed_driver_torque ? -torque_driver_new : torque_driver_new;
     update_sample(&safety.torque_driver, torque_driver_new);
   }
 
@@ -91,7 +91,7 @@ static safety_config subaru_preglobal_init(uint16_t param) {
 
   const uint16_t SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE = 4;
 
-  safety_cfg.subaru_pg_reversed_driver_torque = GET_FLAG(param, SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE);
+  safety_setup.subaru_pg_reversed_driver_torque = GET_FLAG(param, SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE);
   return BUILD_SAFETY_CFG(subaru_preglobal_rx_checks, SUBARU_PG_TX_MSGS);
 }
 

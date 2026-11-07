@@ -51,21 +51,21 @@ void hyundai_common_init(uint16_t param) {
   const uint16_t HYUNDAI_PARAM_FCEV_GAS = 256;
   const uint16_t HYUNDAI_PARAM_ALT_LIMITS_2 = 512;
 
-  safety_cfg.hyundai_ev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_EV_GAS);
-  safety_cfg.hyundai_hybrid_gas_signal = !safety_cfg.hyundai_ev_gas_signal && GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
-  safety_cfg.hyundai_camera_scc = GET_FLAG(param, HYUNDAI_PARAM_CAMERA_SCC);
-  safety_cfg.hyundai_canfd_lka_steer_msg = GET_FLAG(param, HYUNDAI_PARAM_CANFD_LKA_STEER_MSG);
-  safety_cfg.hyundai_alt_limits = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS);
-  safety_cfg.hyundai_fcev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_FCEV_GAS);
-  safety_cfg.hyundai_alt_limits_2 = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS_2);
+  safety_setup.hyundai_ev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_EV_GAS);
+  safety_setup.hyundai_hybrid_gas_signal = !safety_setup.hyundai_ev_gas_signal && GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
+  safety_setup.hyundai_camera_scc = GET_FLAG(param, HYUNDAI_PARAM_CAMERA_SCC);
+  safety_setup.hyundai_canfd_lka_steer_msg = GET_FLAG(param, HYUNDAI_PARAM_CANFD_LKA_STEER_MSG);
+  safety_setup.hyundai_alt_limits = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS);
+  safety_setup.hyundai_fcev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_FCEV_GAS);
+  safety_setup.hyundai_alt_limits_2 = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS_2);
 
   safety.hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
 
 #ifdef ALLOW_DEBUG
   const uint16_t HYUNDAI_PARAM_LONGITUDINAL = 4;
-  safety_cfg.hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
+  safety_setup.hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
 #else
-  safety_cfg.hyundai_longitudinal = false;
+  safety_setup.hyundai_longitudinal = false;
 #endif
 }
 
@@ -74,7 +74,7 @@ void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   // so keep track of user button presses to deny engagement if no interaction
 
   // enter controls on rising edge of ACC and recent user button press, exit controls when ACC off
-  if (!safety_cfg.hyundai_longitudinal) {
+  if (!safety_setup.hyundai_longitudinal) {
     if (cruise_engaged && !safety.cruise_engaged_prev && (safety.hyundai_last_button_interaction < HYUNDAI_PREV_BUTTON_SAMPLES)) {
       safety.controls_allowed = true;
     }
@@ -93,7 +93,7 @@ void hyundai_common_cruise_buttons_check(const int cruise_button, const bool mai
     safety.hyundai_last_button_interaction = SAFETY_MIN(safety.hyundai_last_button_interaction + 1U, HYUNDAI_PREV_BUTTON_SAMPLES);
   }
 
-  if (safety_cfg.hyundai_longitudinal) {
+  if (safety_setup.hyundai_longitudinal) {
     // enter controls on falling edge of resume or set
     bool set = (cruise_button != HYUNDAI_BTN_SET) && (safety.cruise_button_prev == HYUNDAI_BTN_SET);
     bool res = (cruise_button != HYUNDAI_BTN_RESUME) && (safety.cruise_button_prev == HYUNDAI_BTN_RESUME);

@@ -22,12 +22,12 @@ uint32_t microsecond_timer_get(void) {
 #include "opendbc/safety/ignition.h"
 
 bool safety_config_valid() {
-  if (safety_cfg.current_safety_config.rx_checks_len <= 0) {
+  if (safety_setup.current_safety_config.rx_checks_len <= 0) {
     printf("missing RX checks\n");
     return false;
   }
 
-  for (int i = 0; i < safety_cfg.current_safety_config.rx_checks_len; i++) {
+  for (int i = 0; i < safety_setup.current_safety_config.rx_checks_len; i++) {
     const RxStatus status = safety.rx_status[i];
     bool valid = status.msg_seen && !status.lagging && status.valid_checksum && (status.wrong_counters < MAX_WRONG_COUNTERS) && status.valid_quality_flag;
     if (!valid) {
@@ -39,12 +39,12 @@ bool safety_config_valid() {
 }
 
 int get_rx_checks_len(void) {
-  return safety_cfg.current_safety_config.rx_checks_len;
+  return safety_setup.current_safety_config.rx_checks_len;
 }
 
 // all RX checks valid, check stale last received age us ago
 void set_rx_checks_received(int stale, uint32_t age) {
-  for (int i = 0; i < safety_cfg.current_safety_config.rx_checks_len; i++) {
+  for (int i = 0; i < safety_setup.current_safety_config.rx_checks_len; i++) {
     SAFETY_SET(rx_status[i].msg_seen, true);
     SAFETY_SET(rx_status[i].valid_checksum, true);
     SAFETY_SET(rx_status[i].valid_quality_flag, true);
@@ -122,11 +122,11 @@ float get_vehicle_speed_max(void){
 }
 
 int get_current_safety_mode(void){
-  return safety_cfg.current_safety_mode;
+  return safety_setup.current_safety_mode;
 }
 
 int get_current_safety_param(void){
-  return safety_cfg.current_safety_param;
+  return safety_setup.current_safety_param;
 }
 
 void set_timer(uint32_t t){
@@ -213,8 +213,8 @@ int get_curvature_meas_max(void){
 // ***** car specific helpers *****
 
 void set_honda_alt_brake_msg(bool c){
-  safety_a.cfg.honda_alt_brake_msg = c;
-  safety_b.cfg.honda_alt_brake_msg = c;
+  safety_a.setup.honda_alt_brake_msg = c;
+  safety_b.setup.honda_alt_brake_msg = c;
 }
 
 void set_honda_fwd_brake(bool c){

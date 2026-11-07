@@ -54,8 +54,8 @@ uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
 const int MAX_WRONG_COUNTERS = 5;
 
 // UM2331 CPU_SM_2 and RAM_SM_3: rx, tx, fwd and tick run on two copies of the state and config and compare the decisions, the tick also compares the copies
-SafetyCopy safety_a = {.cfg = {.current_hooks = &nooutput_hooks}};
-SafetyCopy safety_b = {.cfg = {.current_hooks = &nooutput_hooks}};
+SafetyCopy safety_a = {.setup = {.current_hooks = &nooutput_hooks}};
+SafetyCopy safety_b = {.setup = {.current_hooks = &nooutput_hooks}};
 SafetyCopy *current_copy = &safety_a;
 uint32_t safety_ts;
 bool safety_redundancy_fault = false;
@@ -170,10 +170,10 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 static bool rx_hook_copy(const CANPacket_t *msg) {
   bool controls_allowed_prev = safety.controls_allowed;
 
-  bool valid = rx_msg_safety_check(msg, &safety_cfg.current_safety_config, safety_cfg.current_hooks);
-  bool whitelisted = get_addr_check_index(msg, safety_cfg.current_safety_config.rx_checks, safety_cfg.current_safety_config.rx_checks_len) != -1;
+  bool valid = rx_msg_safety_check(msg, &safety_setup.current_safety_config, safety_setup.current_hooks);
+  bool whitelisted = get_addr_check_index(msg, safety_setup.current_safety_config.rx_checks, safety_setup.current_safety_config.rx_checks_len) != -1;
   if (valid && whitelisted) {
-    safety_cfg.current_hooks->rx(msg);
+    safety_setup.current_hooks->rx(msg);
   }
 
   // Handles gas, brake, and regen paddle
@@ -183,8 +183,8 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
   // check all applicable tx msgs for liveness on sending bus.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
   const int addr = msg->addr;
-  for (int i = 0; i < safety_cfg.current_safety_config.tx_msgs_len; i++) {
-    const CanMsg *m = &safety_cfg.current_safety_config.tx_msgs[i];
+  for (int i = 0; i < safety_setup.current_safety_config.tx_msgs_len; i++) {
+    const CanMsg *m = &safety_setup.current_safety_config.tx_msgs[i];
     if (m->check_relay) {
       stock_ecu_check((m->addr == addr) && (m->bus == msg->bus));
     }
@@ -210,14 +210,14 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
 }
 
 static bool tx_hook_copy(CANPacket_t *msg) {
-  bool whitelisted = tx_msg_safety_check(msg, safety_cfg.current_safety_config.tx_msgs, safety_cfg.current_safety_config.tx_msgs_len);
-  if ((safety_cfg.current_safety_mode == SAFETY_ALLOUTPUT) || (safety_cfg.current_safety_mode == SAFETY_ELM327)) {
+  bool whitelisted = tx_msg_safety_check(msg, safety_setup.current_safety_config.tx_msgs, safety_setup.current_safety_config.tx_msgs_len);
+  if ((safety_setup.current_safety_mode == SAFETY_ALLOUTPUT) || (safety_setup.current_safety_mode == SAFETY_ELM327)) {
     whitelisted = true;
   }
 
   bool safety_allowed = false;
   if (whitelisted) {
-    safety_allowed = safety_cfg.current_hooks->tx(msg);
+    safety_allowed = safety_setup.current_hooks->tx(msg);
   }
 
   return !safety.relay_malfunction && whitelisted && safety_allowed;
@@ -236,14 +236,14 @@ static int get_fwd_bus(int bus_num) {
 }
 
 static int fwd_hook_copy(int bus_num, int addr) {
-  bool blocked = safety.relay_malfunction || safety_cfg.current_safety_config.disable_forwarding;
+  bool blocked = safety.relay_malfunction || safety_setup.current_safety_config.disable_forwarding;
 
   // Block messages that are being checked for relay malfunctions. Safety modes can opt out of this
   // in the case of selective AEB forwarding
   const int destination_bus = get_fwd_bus(bus_num);
   if (!blocked) {
-    for (int i = 0; i < safety_cfg.current_safety_config.tx_msgs_len; i++) {
-      const CanMsg *m = &safety_cfg.current_safety_config.tx_msgs[i];
+    for (int i = 0; i < safety_setup.current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &safety_setup.current_safety_config.tx_msgs[i];
       if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == (unsigned int)destination_bus)) {
         blocked = true;
         break;
@@ -251,8 +251,8 @@ static int fwd_hook_copy(int bus_num, int addr) {
     }
   }
 
-  if (!blocked && (safety_cfg.current_hooks->fwd != NULL)) {
-    blocked = safety_cfg.current_hooks->fwd(bus_num, addr);
+  if (!blocked && (safety_setup.current_hooks->fwd != NULL)) {
+    blocked = safety_setup.current_hooks->fwd(bus_num, addr);
   }
 
   return blocked ? -1 : destination_bus;
@@ -264,13 +264,13 @@ static void tick_copy(void) {
   const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = safety_ts;
-  for (int i=0; i < safety_cfg.current_safety_config.rx_checks_len; i++) {
+  for (int i=0; i < safety_setup.current_safety_config.rx_checks_len; i++) {
     RxStatus *status = &safety.rx_status[i];
     uint32_t elapsed_time = safety_get_ts_elapsed(ts, status->last_timestamp);
     // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
     // Quite conservative to not risk false triggers.
     // 2s of lag is worse case, since the function is called at 1Hz
-    uint32_t frequency = safety_cfg.current_safety_config.rx_checks[i].msg[status->index].frequency;
+    uint32_t frequency = safety_setup.current_safety_config.rx_checks[i].msg[status->index].frequency;
     uint32_t timestep = 1000000U / SAFETY_MAX(frequency, 1U);  // frequency < 10Hz is invalid below
     bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1000000U);
     status->lagging = lagging;
@@ -380,22 +380,22 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
   int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
   for (int i = 0; i < hook_config_count; i++) {
     if (safety_hook_registry[i].id == mode) {
-      safety_cfg.current_hooks = safety_hook_registry[i].hooks;
-      safety_cfg.current_safety_mode = mode;
-      safety_cfg.current_safety_param = param;
+      safety_setup.current_hooks = safety_hook_registry[i].hooks;
+      safety_setup.current_safety_mode = mode;
+      safety_setup.current_safety_param = param;
       set_status = 0;  // set
     }
   }
-  if ((set_status == 0) && (safety_cfg.current_hooks->init != NULL)) {
-    cfg = safety_cfg.current_hooks->init(param);
+  if ((set_status == 0) && (safety_setup.current_hooks->init != NULL)) {
+    cfg = safety_setup.current_hooks->init(param);
   }
 
   // by field, the copies are compared by byte and the padding of cfg is unspecified
-  safety_cfg.current_safety_config.rx_checks = cfg.rx_checks;
-  safety_cfg.current_safety_config.rx_checks_len = cfg.rx_checks_len;
-  safety_cfg.current_safety_config.tx_msgs = cfg.tx_msgs;
-  safety_cfg.current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
-  safety_cfg.current_safety_config.disable_forwarding = cfg.disable_forwarding;
+  safety_setup.current_safety_config.rx_checks = cfg.rx_checks;
+  safety_setup.current_safety_config.rx_checks_len = cfg.rx_checks_len;
+  safety_setup.current_safety_config.tx_msgs = cfg.tx_msgs;
+  safety_setup.current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
+  safety_setup.current_safety_config.disable_forwarding = cfg.disable_forwarding;
   return set_status;
 }
 
@@ -442,8 +442,8 @@ void safety_heartbeat(bool engaged) {
 }
 
 void safety_alternative_experience(int alt_exp) {
-  safety_a.cfg.alternative_experience = alt_exp;
-  safety_b.cfg.alternative_experience = alt_exp;
+  safety_a.setup.alternative_experience = alt_exp;
+  safety_b.setup.alternative_experience = alt_exp;
 }
 
 void safety_heartbeat_check(void) {

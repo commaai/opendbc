@@ -397,18 +397,18 @@ typedef struct {
 
   bool volkswagen_longitudinal;
   bool volkswagen_meb_alt_crc;
-} SafetyConfig;
+} SafetySetup;
 
 typedef struct {
   SafetyState state;
-  SafetyConfig cfg;
+  SafetySetup setup;
 } SafetyCopy;
 
 extern SafetyCopy safety_a;
 extern SafetyCopy safety_b;
 extern SafetyCopy *current_copy;
 #define safety (current_copy->state)
-#define safety_cfg (current_copy->cfg)
+#define safety_setup (current_copy->setup)
 
 extern uint32_t safety_ts;
 extern bool safety_redundancy_fault;
