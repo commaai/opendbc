@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import math
 import os
 import sys
 import time
@@ -13,7 +14,6 @@ from urllib.request import urlopen
 
 from opendbc.can.dbc import DBC, SignalType
 from opendbc.can.packer import CANPacker
-from opendbc.can.parser import get_raw_value
 from opendbc.car import DT_CTRL, gen_empty_fingerprint, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
@@ -206,7 +206,7 @@ def decode_frame(dbc, address: int, dat: bytes) -> dict[str, float]:
   for sig in dbc.addr_to_msg[address].sigs.values():
     if sig.type != SignalType.DEFAULT:
       continue
-    raw = get_raw_value(dat, sig)
+    raw = sig.get_raw_value(dat)
     if sig.is_signed and raw >= 1 << (sig.size - 1):
       raw -= 1 << sig.size
     values[sig.name] = raw * sig.factor + sig.offset
