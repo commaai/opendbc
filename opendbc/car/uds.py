@@ -347,6 +347,9 @@ class CanClient:
     self.bus = bus
 
   def _recv_filter(self, bus: int, addr: int) -> bool:
+    if bus != self.bus:
+      return False
+
     # handle functional addresses (switch to first addr to respond)
     if self.tx_addr == 0x7DF:
       is_response = addr >= 0x7E8 and addr <= 0x7EF
@@ -371,7 +374,7 @@ class CanClient:
         self.rx_buff.clear()
       else:
         for rx_addr, rx_data, rx_bus in msgs or []:
-          if self._recv_filter(rx_bus, rx_addr) and len(rx_data) > 0:
+          if len(rx_data) > 0 and self._recv_filter(rx_bus, rx_addr):
             rx_data = bytes(rx_data)  # convert bytearray to bytes
 
             carlog.debug(f"CAN-RX: {hex(rx_addr)} - 0x{bytes.hex(rx_data)}")
@@ -440,7 +443,7 @@ class IsoTpMessage:
 
   def send(self, dat: bytes, setup_only: bool = False) -> None:
     # throw away any stale data
-    self._can_client.recv(drain=True)
+    list(self._can_client.recv(drain=True))
 
     self.tx_dat = dat
     self.tx_len = len(dat)
@@ -496,9 +499,7 @@ class IsoTpMessage:
         carlog.debug(f"ISO-TP: RESPONSE - {hex(self._can_client.rx_addr)} 0x{bytes.hex(self.rx_dat)}")
 
   def _isotp_rx_next(self, rx_data: bytes) -> ISOTP_FRAME_TYPE:
-    # TODO: Handle CAN frame data optimization, which is allowed with some frame types
-    # # ISO 15765-2 specifies an eight byte CAN frame for ISO-TP communication
-    # assert len(rx_data) == self.max_len, f"isotp - rx: invalid CAN frame length: {len(rx_data)}"
+    assert len(rx_data) > 0, "isotp - rx: empty CAN frame"
 
     if rx_data[0] >> 4 == ISOTP_FRAME_TYPE.SINGLE:
       assert self.rx_dat == b"" or self.rx_done, "isotp - rx: single frame with active frame"
@@ -506,16 +507,18 @@ class IsoTpMessage:
       # "if the first byte is 0x00, then it's a CAN-FD SF, and the second byte specifies the size of the data."
       # - https://en.wikipedia.org/wiki/CAN_FD
       if rx_data[0] & 0x0F == 0 and len(rx_data) > 8:
-        self.rx_len = rx_data[1]
+        rx_len = rx_data[1]
         offset = 2
         # TODO: update self.max_len for CAN FD
         max_len = 62 if self._can_client.sub_addr is None else 61
-        assert self.rx_len <= max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
       else:
-        self.rx_len = rx_data[0] & 0x0F
+        rx_len = rx_data[0] & 0x0F
         offset = 1
-        assert self.rx_len < self.max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
+        max_len = self.max_len - 1
+      assert 0 < rx_len <= max_len, f"isotp - rx: invalid single frame length: {rx_len}"
+      assert offset + rx_len <= len(rx_data) <= offset + max_len, f"isotp - rx: invalid CAN frame length: {len(rx_data)}"
 
+      self.rx_len = rx_len
       self.rx_dat = rx_data[offset:offset + self.rx_len]
       self.rx_idx = 0
       self.rx_done = True
@@ -526,9 +529,10 @@ class IsoTpMessage:
       # TODO: support CAN FD first frames
       # Once a first frame is received, further frames must be consecutive
       assert self.rx_dat == b"" or self.rx_done, "isotp - rx: first frame with active frame"
-      self.rx_len = ((rx_data[0] & 0x0F) << 8) + rx_data[1]
-      assert self.rx_len >= self.max_len, f"isotp - rx: invalid first frame length: {self.rx_len}"
       assert len(rx_data) == self.max_len, f"isotp - rx: invalid CAN frame length: {len(rx_data)}"
+      rx_len = ((rx_data[0] & 0x0F) << 8) + rx_data[1]
+      assert rx_len >= self.max_len, f"isotp - rx: invalid first frame length: {rx_len}"
+      self.rx_len = rx_len
       self.rx_dat = rx_data[2:]
       self.rx_idx = 0
       self.rx_done = False
@@ -539,10 +543,12 @@ class IsoTpMessage:
       return ISOTP_FRAME_TYPE.FIRST
 
     elif rx_data[0] >> 4 == ISOTP_FRAME_TYPE.CONSECUTIVE:
-      assert not self.rx_done, "isotp - rx: consecutive frame with no active frame"
+      assert self.rx_len > 0 and not self.rx_done, "isotp - rx: consecutive frame with no active frame"
+      assert (self.rx_idx + 1) & 0xF == rx_data[0] & 0xF, "isotp - rx: invalid consecutive frame index"
+      rx_size = min(self.rx_len - len(self.rx_dat), self.max_len - 1)
+      # Only the last consecutive frame may omit unused data bytes.
+      assert rx_size + 1 <= len(rx_data) <= self.max_len, f"isotp - rx: invalid CAN frame length: {len(rx_data)}"
       self.rx_idx += 1
-      assert self.rx_idx & 0xF == rx_data[0] & 0xF, "isotp - rx: invalid consecutive frame index"
-      rx_size = self.rx_len - len(self.rx_dat)
       self.rx_dat += rx_data[1:1 + rx_size]
       if self.rx_len == len(self.rx_dat):
         self.rx_done = True
@@ -553,6 +559,7 @@ class IsoTpMessage:
       return ISOTP_FRAME_TYPE.CONSECUTIVE
 
     elif rx_data[0] >> 4 == ISOTP_FRAME_TYPE.FLOW:
+      assert 3 <= len(rx_data) <= self.max_len, f"isotp - rx: invalid CAN frame length: {len(rx_data)}"
       assert not self.tx_done, "isotp - rx: flow control with no active frame"
       assert rx_data[0] != 0x32, "isotp - rx: flow-control overflow/abort"
       assert rx_data[0] == 0x30 or rx_data[0] == 0x31, "isotp - rx: flow-control transfer state indicator invalid"
