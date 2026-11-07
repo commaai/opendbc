@@ -56,8 +56,8 @@ const int MAX_WRONG_COUNTERS = 5;
 // UM2331 CPU_SM_2 and RAM_SM_3: rx, tx, fwd and tick run on two copies of the state and config and compare the decisions, the tick also compares the copies
 SafetyCopy safety_a = {.cfg = {.current_hooks = &nooutput_hooks}};
 SafetyCopy safety_b = {.cfg = {.current_hooks = &nooutput_hooks}};
-SafetyCopy *safety_cur = &safety_a;
-uint32_t safety_now;
+SafetyCopy *current_copy = &safety_a;
+uint32_t safety_ts;
 bool safety_redundancy_fault = false;
 
 static void generic_rx_checks(void);
@@ -138,7 +138,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
   if (index != -1) {
     RxStatus *status = &safety.rx_status[index];
     const CanMsgCheck *m = &cfg->rx_checks[index].msg[status->index];
-    status->last_timestamp = safety_now;
+    status->last_timestamp = safety_ts;
 
     // checksum check
     if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !m->ignore_checksum) {
@@ -263,7 +263,7 @@ static void tick_copy(void) {
 
   const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
-  uint32_t ts = safety_now;
+  uint32_t ts = safety_ts;
   for (int i=0; i < safety_cfg.current_safety_config.rx_checks_len; i++) {
     RxStatus *status = &safety.rx_status[i];
     uint32_t elapsed_time = safety_get_ts_elapsed(ts, status->last_timestamp);
@@ -401,37 +401,37 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
 
 // B runs first, so safety is A again once a hook returns
 bool safety_rx_hook(const CANPacket_t *msg) {
-  safety_now = microsecond_timer_get();
-  safety_cur = &safety_b;
+  safety_ts = microsecond_timer_get();
+  current_copy = &safety_b;
   bool valid_b = rx_hook_copy(msg);
-  safety_cur = &safety_a;
+  current_copy = &safety_a;
   bool valid = rx_hook_copy(msg);
   return safety_redundancy_check(valid == valid_b) && valid;
 }
 
 bool safety_tx_hook(CANPacket_t *msg) {
-  safety_now = microsecond_timer_get();
-  safety_cur = &safety_b;
+  safety_ts = microsecond_timer_get();
+  current_copy = &safety_b;
   bool allowed_b = tx_hook_copy(msg);
-  safety_cur = &safety_a;
+  current_copy = &safety_a;
   bool allowed = tx_hook_copy(msg);
   return safety_redundancy_check(allowed == allowed_b) && allowed;
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  safety_cur = &safety_b;
+  current_copy = &safety_b;
   int destination_bus_b = fwd_hook_copy(bus_num, addr);
-  safety_cur = &safety_a;
+  current_copy = &safety_a;
   int destination_bus = fwd_hook_copy(bus_num, addr);
   return safety_redundancy_check(destination_bus == destination_bus_b) ? destination_bus : -1;
 }
 
 // 1Hz safety function called by main
 void safety_tick(void) {
-  safety_now = microsecond_timer_get();
-  safety_cur = &safety_b;
+  safety_ts = microsecond_timer_get();
+  current_copy = &safety_b;
   tick_copy();
-  safety_cur = &safety_a;
+  current_copy = &safety_a;
   tick_copy();
   (void)safety_redundancy_check(safety_states_equal());
 }
@@ -447,16 +447,16 @@ void safety_alternative_experience(int alt_exp) {
 }
 
 void safety_heartbeat_check(void) {
-  safety_cur = &safety_b;
+  current_copy = &safety_b;
   heartbeat_check_copy();
-  safety_cur = &safety_a;
+  current_copy = &safety_a;
   heartbeat_check_copy();
 }
 
 int set_safety_hooks(uint16_t mode, uint16_t param) {
-  safety_cur = &safety_b;
+  current_copy = &safety_b;
   (void)set_hooks_copy(mode, param);
-  safety_cur = &safety_a;
+  current_copy = &safety_a;
   return set_hooks_copy(mode, param);
 }
 

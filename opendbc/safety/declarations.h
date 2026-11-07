@@ -406,11 +406,11 @@ typedef struct {
 
 extern SafetyCopy safety_a;
 extern SafetyCopy safety_b;
-extern SafetyCopy *safety_cur;
-#define safety (safety_cur->state)
-#define safety_cfg (safety_cur->cfg)
+extern SafetyCopy *current_copy;
+#define safety (current_copy->state)
+#define safety_cfg (current_copy->cfg)
 
-extern uint32_t safety_now;
+extern uint32_t safety_ts;
 extern bool safety_redundancy_fault;
 
 // Alt experiences can be set with a USB command

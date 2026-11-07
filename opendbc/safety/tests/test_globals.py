@@ -29,7 +29,7 @@ class TestGlobals(unittest.TestCase):
         # ELF and Mach-O writable sections, ltmp are Mach-O section labels
         names = re.findall(r" O (?:\.data|\.bss|__DATA,__data|__DATA,__bss|__DATA,__common)\s.*?(\S+)$", symbols, re.MULTILINE)
         writable = {n.removeprefix("_") for n in names if not n.startswith("ltmp")}
-        self.assertEqual(writable, {"safety_a", "safety_b", "safety_cur", "safety_now", "safety_redundancy_fault"})
+        self.assertEqual(writable, {"safety_a", "safety_b", "current_copy", "safety_ts", "safety_redundancy_fault"})
 
 
 if __name__ == "__main__":
