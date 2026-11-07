@@ -73,6 +73,8 @@ class Fuzzy:
     if min_size == max_size:
       return min_size
 
+    # The larger unbounded edges cover inputs that are rare with a geometric
+    # distribution while keeping bounded draws inside their requested range.
     offsets = (0, 1, 2, 4, 8, 16, 32, 64, 128, 256)
     edges = tuple(min_size + offset for offset in offsets if max_size is None or min_size + offset <= max_size)
 
@@ -101,6 +103,11 @@ class Fuzzy:
 
 
 def fuzzy_test(max_examples: int) -> Callable[[Callable[..., None]], Callable[..., None]]:
+  """Repeat a unittest with reproducible fuzzy data.
+
+  MAX_EXAMPLES overrides the decorator default. A failure can be replayed with
+  the FUZZ_SEED and FUZZ_EXAMPLE values included in its exception note.
+  """
   max_examples = int(os.environ.get("MAX_EXAMPLES", max_examples))
   if max_examples < 1:
     raise ValueError("max_examples must be at least one")
@@ -126,6 +133,15 @@ def fuzzy_test(max_examples: int) -> Callable[[Callable[..., None]], Callable[..
 
 
 def parameterized(argnames, argvalues):
+  """Method decorator that runs a test once per parameter set using subTest.
+
+  Usage:
+    @parameterized("x, y", [(1, 2), (3, 4)])
+    def test_add(self, x, y): ...
+
+    @parameterized("car_model, fingerprints", FINGERPRINTS.items())
+    def test_fw(self, car_model, fingerprints): ...
+  """
   if isinstance(argnames, str):
     argnames = [a.strip() for a in argnames.split(',')]
 
@@ -146,6 +162,12 @@ def parameterized(argnames, argvalues):
 
 
 def parameterized_class(attrs, values=None):
+  """Class decorator that generates subclasses with different class attributes.
+
+  Usage:
+    @parameterized_class([{"x": 1}, {"x": 2}])
+    @parameterized_class('x', [(1,), (2,)])
+  """
   if isinstance(attrs, str):
     attrs = [attrs]
     params = [dict(zip(attrs, v, strict=True)) for v in values]
