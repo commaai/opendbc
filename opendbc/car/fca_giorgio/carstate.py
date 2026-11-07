@@ -32,10 +32,14 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = pt_cp.vl["EPS_1"]["STEERING_ANGLE"]
     ret.steeringRateDeg = pt_cp.vl["EPS_1"]["STEERING_RATE"]
+    # DRIVER_TORQUE is torsion bar torque, so it includes the reaction to our own LKA torque (about -1 to -2
+    # counts per LKA_TORQUE count, opposite sign, also seen with stock LKA). Commanding ~70+ can trip
+    # steeringPressed and the driver torque limiter (STEER_DRIVER_ALLOWANCE) without any driver input.
     ret.steeringTorque = pt_cp.vl["EPS_2"]["DRIVER_TORQUE"]
     # ret.steeringTorqueEps = ...
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_THRESHOLD
     ret.yawRate = pt_cp.vl["ABS_2"]["YAW_RATE"]
+    # LKA_FAULT latches until the car is restarted
     ret.steerFaultPermanent = bool(pt_cp.vl["EPS_2"]["LKA_FAULT"])
     self.lka_status = pt_cp.vl["EPS_2"]["LKA_STATUS"]
 
