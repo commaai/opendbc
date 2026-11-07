@@ -53,7 +53,12 @@ uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
 
 const int MAX_WRONG_COUNTERS = 5;
 
-SafetyState safety;
+// UM2331 CPU_SM_2 and RAM_SM_3: rx, tx, fwd and tick run on two state copies and compare the decisions, the tick also compares the states
+SafetyState safety_a;
+SafetyState safety_b;
+SafetyState *safety_cur = &safety_a;
+uint32_t safety_now;
+bool safety_redundancy_fault = false;
 
 
 int alternative_experience = 0;
@@ -65,6 +70,27 @@ safety_config current_safety_config;
 
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
+
+static bool safety_states_equal(void) {
+  const uint8_t *a = (const uint8_t *)&safety_a;
+  const uint8_t *b = (const uint8_t *)&safety_b;
+  bool equal = true;
+  for (uint32_t i = 0U; i < sizeof(SafetyState); i++) {
+    if (a[i] != b[i]) {
+      equal = false;
+    }
+  }
+  return equal;
+}
+
+static bool safety_redundancy_check(bool same) {
+  if (!same) {
+    safety_a.controls_allowed = false;
+    safety_b = safety_a;
+    safety_redundancy_fault = true;
+  }
+  return same;
+}
 
 static bool is_msg_valid(int index) {
   bool valid = true;
@@ -120,7 +146,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
   if (index != -1) {
     RxStatus *status = &safety.rx_status[index];
     const CanMsgCheck *m = &cfg->rx_checks[index].msg[status->index];
-    status->last_timestamp = microsecond_timer_get();
+    status->last_timestamp = safety_now;
 
     // checksum check
     if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !m->ignore_checksum) {
@@ -149,7 +175,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
   return is_msg_valid(index);
 }
 
-bool safety_rx_hook(const CANPacket_t *msg) {
+static bool rx_hook_copy(const CANPacket_t *msg) {
   bool controls_allowed_prev = safety.controls_allowed;
 
   bool valid = rx_msg_safety_check(msg, &current_safety_config, current_hooks);
@@ -191,7 +217,7 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
   return whitelisted;
 }
 
-bool safety_tx_hook(CANPacket_t *msg) {
+static bool tx_hook_copy(CANPacket_t *msg) {
   bool whitelisted = tx_msg_safety_check(msg, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
     whitelisted = true;
@@ -217,7 +243,7 @@ static int get_fwd_bus(int bus_num) {
   return destination_bus;
 }
 
-int safety_fwd_hook(int bus_num, int addr) {
+static int fwd_hook_copy(int bus_num, int addr) {
   bool blocked = safety.relay_malfunction || current_safety_config.disable_forwarding;
 
   // Block messages that are being checked for relay malfunctions. Safety modes can opt out of this
@@ -240,11 +266,12 @@ int safety_fwd_hook(int bus_num, int addr) {
   return blocked ? -1 : destination_bus;
 }
 
-// 1Hz safety function called by main. Now just a check for lagging safety messages
-void safety_tick(void) {
+static void tick_copy(void) {
+  safety.safety_mode_cnt += 1U;
+
   const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
-  uint32_t ts = microsecond_timer_get();
+  uint32_t ts = safety_now;
   for (int i=0; i < current_safety_config.rx_checks_len; i++) {
     RxStatus *status = &safety.rx_status[i];
     uint32_t elapsed_time = safety_get_ts_elapsed(ts, status->last_timestamp);
@@ -265,6 +292,18 @@ void safety_tick(void) {
   }
 
   safety.safety_rx_checks_invalid = rx_checks_invalid;
+}
+
+static void heartbeat_check_copy(void) {
+  // exit controls allowed if unused by openpilot for a few seconds
+  if (safety.controls_allowed && !safety.heartbeat_engaged) {
+    safety.heartbeat_engaged_mismatches += 1U;
+    if (safety.heartbeat_engaged_mismatches >= 3U) {
+      safety.controls_allowed = false;
+    }
+  } else {
+    safety.heartbeat_engaged_mismatches = 0U;
+  }
 }
 
 static void relay_malfunction_set(void) {
@@ -303,7 +342,7 @@ static void stock_ecu_check(bool stock_ecu_detected) {
   }
 }
 
-int set_safety_hooks(uint16_t mode, uint16_t param) {
+static int set_hooks_copy(uint16_t mode, uint16_t param) {
   const safety_hook_config safety_hook_registry[] = {
     {SAFETY_SILENT, &nooutput_hooks},
     {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
@@ -359,6 +398,62 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     current_safety_config = current_hooks->init(param);
   }
   return set_status;
+}
+
+// B runs first, so safety is A again once a hook returns
+bool safety_rx_hook(const CANPacket_t *msg) {
+  safety_now = microsecond_timer_get();
+  safety_cur = &safety_b;
+  bool valid_b = rx_hook_copy(msg);
+  safety_cur = &safety_a;
+  bool valid = rx_hook_copy(msg);
+  return safety_redundancy_check(valid == valid_b) && valid;
+}
+
+bool safety_tx_hook(CANPacket_t *msg) {
+  safety_now = microsecond_timer_get();
+  safety_cur = &safety_b;
+  bool allowed_b = tx_hook_copy(msg);
+  safety_cur = &safety_a;
+  bool allowed = tx_hook_copy(msg);
+  return safety_redundancy_check(allowed == allowed_b) && allowed;
+}
+
+int safety_fwd_hook(int bus_num, int addr) {
+  safety_cur = &safety_b;
+  int destination_bus_b = fwd_hook_copy(bus_num, addr);
+  safety_cur = &safety_a;
+  int destination_bus = fwd_hook_copy(bus_num, addr);
+  return safety_redundancy_check(destination_bus == destination_bus_b) ? destination_bus : -1;
+}
+
+// 1Hz safety function called by main
+void safety_tick(void) {
+  safety_now = microsecond_timer_get();
+  safety_cur = &safety_b;
+  tick_copy();
+  safety_cur = &safety_a;
+  tick_copy();
+  (void)safety_redundancy_check(safety_states_equal());
+}
+
+void safety_heartbeat(bool engaged) {
+  safety_a.heartbeat_engaged = engaged;
+  safety_b.heartbeat_engaged = engaged;
+}
+
+void safety_heartbeat_check(void) {
+  safety_cur = &safety_b;
+  heartbeat_check_copy();
+  safety_cur = &safety_a;
+  heartbeat_check_copy();
+}
+
+int set_safety_hooks(uint16_t mode, uint16_t param) {
+  safety_cur = &safety_b;
+  (void)set_hooks_copy(mode, param);
+  safety_cur = &safety_a;
+  return set_hooks_copy(mode, param);
 }
 
 // convert a trimmed integer to signed 32 bit int

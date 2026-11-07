@@ -256,6 +256,8 @@ void pcm_cruise_check(bool cruise_engaged);
 void speed_mismatch_check(const float speed_2);
 
 void safety_tick(void);
+void safety_heartbeat(bool engaged);
+void safety_heartbeat_check(void);
 
 // for safety modes with curvature steering control
 typedef struct {
@@ -334,7 +336,14 @@ typedef struct {
   bool volkswagen_brake_pedal_switch;
   bool volkswagen_brake_pressure_detected;
 } SafetyState;
-extern SafetyState safety;
+
+extern SafetyState safety_a;
+extern SafetyState safety_b;
+extern SafetyState *safety_cur;
+#define safety (*safety_cur)
+
+extern uint32_t safety_now;
+extern bool safety_redundancy_fault;
 
 // Alt experiences can be set with a USB command
 // It enables features that allow alternative experiences, like not disengaging on gas press
