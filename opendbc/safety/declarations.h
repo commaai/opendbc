@@ -60,8 +60,8 @@
     (config).disable_forwarding = false; \
   } while (0);
 
-#define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
-#define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
+#define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&safety.vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
+#define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&safety.vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
 uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len);
 uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);
@@ -208,8 +208,6 @@ typedef struct {
   const CanMsgCheck msg[MAX_ADDR_CHECK_MSGS];  // check either messages (e.g. honda steer)
 } RxCheck;
 
-extern RxStatus rx_status[MAX_RX_CHECKS];
-
 typedef struct {
   const RxCheck *rx_checks;
   int rx_checks_len;
@@ -259,45 +257,6 @@ void speed_mismatch_check(const float speed_2);
 
 void safety_tick(void);
 
-// This can be set by the safety hooks
-extern bool controls_allowed;
-extern bool relay_malfunction;
-extern bool gas_pressed;
-extern bool gas_pressed_prev;
-extern bool brake_pressed;
-extern bool brake_pressed_prev;
-extern bool regen_braking;
-extern bool regen_braking_prev;
-extern bool steering_disengage;
-extern bool steering_disengage_prev;
-extern bool cruise_engaged_prev;
-extern struct sample_t vehicle_speed;
-extern struct sample_t vehicle_speed_2;
-extern bool vehicle_moving;
-extern bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
-extern int cruise_button_prev;
-extern bool safety_rx_checks_invalid;
-
-// for safety modes with torque steering control
-extern int desired_torque_last;       // last desired steer torque
-extern int rt_torque_last;            // last desired torque for real time check
-extern int valid_steer_req_count;     // counter for steer request bit matching non-zero torque
-extern int invalid_steer_req_count;   // counter to allow multiple frames of mismatching torque request bit
-extern struct sample_t torque_meas;       // last 6 motor torques produced by the eps
-extern struct sample_t torque_driver;     // last 6 driver torques measured
-extern uint32_t ts_torque_check_last;
-extern uint32_t ts_steer_req_mismatch_last;  // last timestamp steer req was mismatched with torque
-
-// state for controls_allowed timeout logic
-extern bool heartbeat_engaged;             // openpilot enabled, passed in heartbeat USB command
-extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between heartbeat_engaged and controls_allowed
-
-// for safety modes with angle steering control
-extern uint32_t rt_angle_msgs;
-extern uint32_t ts_angle_check_last;
-extern int desired_angle_last;
-extern struct sample_t angle_meas;         // last 6 steer angles
-
 // for safety modes with curvature steering control
 typedef struct {
   int desired_last;
@@ -307,7 +266,75 @@ typedef struct {
   int steer_power_last;
   struct sample_t meas;          // last 6 steer curvatures
 } CurvatureSteeringState;
-extern CurvatureSteeringState curvature_state;
+
+typedef struct {
+  // This can be set by the safety hooks
+  bool controls_allowed;
+  bool relay_malfunction;
+  bool gas_pressed;
+  bool gas_pressed_prev;
+  bool brake_pressed;
+  bool brake_pressed_prev;
+  bool regen_braking;
+  bool regen_braking_prev;
+  bool steering_disengage;
+  bool steering_disengage_prev;
+  bool cruise_engaged_prev;
+  struct sample_t vehicle_speed;
+  struct sample_t vehicle_speed_2;
+  bool vehicle_moving;
+  bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
+  int cruise_button_prev;
+  bool safety_rx_checks_invalid;
+
+  // for safety modes with torque steering control
+  int desired_torque_last;       // last desired steer torque
+  int rt_torque_last;            // last desired torque for real time check
+  int valid_steer_req_count;     // counter for steer request bit matching non-zero torque
+  int invalid_steer_req_count;   // counter to allow multiple frames of mismatching torque request bit
+  struct sample_t torque_meas;       // last 6 motor torques produced by the eps
+  struct sample_t torque_driver;     // last 6 driver torques measured
+  uint32_t ts_torque_check_last;
+  uint32_t ts_steer_req_mismatch_last;  // last timestamp steer req was mismatched with torque
+
+  // state for controls_allowed timeout logic
+  bool heartbeat_engaged;             // openpilot enabled, passed in heartbeat USB command
+  uint32_t heartbeat_engaged_mismatches;  // count of mismatches between heartbeat_engaged and controls_allowed
+
+  // for safety modes with angle steering control
+  uint32_t rt_angle_msgs;
+  uint32_t ts_angle_check_last;
+  int desired_angle_last;
+  struct sample_t angle_meas;         // last 6 steer angles
+
+  CurvatureSteeringState curvature_state;
+
+  // time since safety mode has been changed
+  uint32_t safety_mode_cnt;
+
+  RxStatus rx_status[MAX_RX_CHECKS];  // dynamic state of current_safety_config.rx_checks
+
+  int honda_brake;
+  bool honda_brake_switch_prev;
+  bool honda_fwd_brake;
+
+  uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
+
+  bool tesla_stock_aeb;
+  // Only rising edges while controls are not allowed are considered for these systems:
+  // TODO: Only LKAS (non-emergency) is currently supported since we've only seen it
+  bool tesla_stock_lkas;
+  bool tesla_stock_lkas_prev;
+  // Only Summon is currently supported due to Autopark not setting Autopark state properly
+  bool tesla_autopark;
+  bool tesla_autopark_prev;
+
+  bool volkswagen_set_button_prev;
+  bool volkswagen_resume_button_prev;
+  bool volkswagen_brake_pedal_switch;
+  bool volkswagen_brake_pressure_detected;
+} SafetyState;
+extern SafetyState safety;
 
 // Alt experiences can be set with a USB command
 // It enables features that allow alternative experiences, like not disengaging on gas press
@@ -328,9 +355,6 @@ extern CurvatureSteeringState curvature_state;
 #define ALT_EXP_ALLOW_AEB 16
 
 extern int alternative_experience;
-
-// time since safety mode has been changed
-extern uint32_t safety_mode_cnt;
 
 typedef struct {
   uint16_t id;

@@ -25,10 +25,7 @@ enum {
   HONDA_BTN_RESUME = 4,
 };
 
-static int honda_brake = 0;
-static bool honda_brake_switch_prev = false;
 static bool honda_alt_brake_msg = false;
-static bool honda_fwd_brake = false;
 static bool honda_bosch_long = false;
 static bool honda_bosch_radarless = false;
 static bool honda_bosch_canfd = false;
@@ -72,15 +69,15 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 
   // sample speed
   if (msg->addr == 0x158U) {
-    vehicle_moving = msg->data[0] | msg->data[1];
+    safety.vehicle_moving = msg->data[0] | msg->data[1];
   }
 
   // check ACC main state
   // 0x326 for all Bosch and some Nidec, 0x1A6 for some Nidec
   if ((msg->addr == 0x326U) || (msg->addr == 0x1A6U)) {
-    acc_main_on = GET_BIT(msg, ((msg->addr == 0x326U) ? 28U : 47U));
-    if (!acc_main_on) {
-      controls_allowed = false;
+    safety.acc_main_on = GET_BIT(msg, ((msg->addr == 0x326U) ? 28U : 47U));
+    if (!safety.acc_main_on) {
+      safety.controls_allowed = false;
     }
   }
 
@@ -88,16 +85,16 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   if (pcm_cruise && (msg->addr == 0x17CU)) {
     const bool cruise_engaged = GET_BIT(msg, 38U);
     // engage on rising edge
-    if (cruise_engaged && !cruise_engaged_prev) {
-      controls_allowed = true;
+    if (cruise_engaged && !safety.cruise_engaged_prev) {
+      safety.controls_allowed = true;
     }
 
     // Since some Nidec cars can brake down to 0 after the PCM disengages,
     // we don't disengage when the PCM does.
     if (!cruise_engaged && (honda_hw != HONDA_NIDEC)) {
-      controls_allowed = false;
+      safety.controls_allowed = false;
     }
-    cruise_engaged_prev = cruise_engaged;
+    safety.cruise_engaged_prev = cruise_engaged;
   }
 
   // state machine to enter and exit controls for button enabling
@@ -106,17 +103,17 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     int button = (msg->data[0] & 0xE0U) >> 5;
 
     // enter controls on the falling edge of set or resume
-    bool set = (button != HONDA_BTN_SET) && (cruise_button_prev == HONDA_BTN_SET);
-    bool res = (button != HONDA_BTN_RESUME) && (cruise_button_prev == HONDA_BTN_RESUME);
-    if (acc_main_on && !pcm_cruise && (set || res)) {
-      controls_allowed = true;
+    bool set = (button != HONDA_BTN_SET) && (safety.cruise_button_prev == HONDA_BTN_SET);
+    bool res = (button != HONDA_BTN_RESUME) && (safety.cruise_button_prev == HONDA_BTN_RESUME);
+    if (safety.acc_main_on && !pcm_cruise && (set || res)) {
+      safety.controls_allowed = true;
     }
 
     // exit controls once main or cancel are pressed
     if ((button == HONDA_BTN_MAIN) || (button == HONDA_BTN_CANCEL)) {
-      controls_allowed = false;
+      safety.controls_allowed = false;
     }
-    cruise_button_prev = button;
+    safety.cruise_button_prev = button;
   }
 
   // user brake signal on 0x17C reports applied brake from computer brake on accord
@@ -127,19 +124,19 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   // accord, crv: 0x1BE
   if (honda_alt_brake_msg) {
     if (msg->addr == 0x1BEU) {
-      brake_pressed = GET_BIT(msg, 4U);
+      safety.brake_pressed = GET_BIT(msg, 4U);
     }
   } else {
     if (msg->addr == 0x17CU) {
       // also if brake switch is 1 for two CAN frames, as brake pressed is delayed
       const bool brake_switch = GET_BIT(msg, 32U);
-      brake_pressed = (GET_BIT(msg, 53U)) || (brake_switch && honda_brake_switch_prev);
-      honda_brake_switch_prev = brake_switch;
+      safety.brake_pressed = (GET_BIT(msg, 53U)) || (brake_switch && safety.honda_brake_switch_prev);
+      safety.honda_brake_switch_prev = brake_switch;
     }
   }
 
   if (msg->addr == 0x17CU) {
-    gas_pressed = msg->data[0] != 0U;
+    safety.gas_pressed = msg->data[0] != 0U;
   }
 
   // disable stock Honda AEB in alternative experience
@@ -151,9 +148,9 @@ static void honda_rx_hook(const CANPacket_t *msg) {
       // Forward AEB when stock braking is higher than openpilot braking
       // only stop forwarding when AEB event is over
       if (!honda_stock_aeb) {
-        honda_fwd_brake = false;
-      } else if (honda_stock_brake >= honda_brake) {
-        honda_fwd_brake = true;
+        safety.honda_fwd_brake = false;
+      } else if (honda_stock_brake >= safety.honda_brake) {
+        safety.honda_fwd_brake = true;
       } else {
         // Leave Honda forward brake as is
       }
@@ -197,11 +194,11 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // BRAKE: safety check (nidec)
   if (msg_matches(msg, 0x1FAU, bus_pt)) {
-    honda_brake = (msg->data[0] << 2) + ((msg->data[1] >> 6) & 0x3U);
-    if (longitudinal_brake_checks(honda_brake, HONDA_NIDEC_LONG_LIMITS)) {
+    safety.honda_brake = (msg->data[0] << 2) + ((msg->data[1] >> 6) & 0x3U);
+    if (longitudinal_brake_checks(safety.honda_brake, HONDA_NIDEC_LONG_LIMITS)) {
       tx = false;
     }
-    if (honda_fwd_brake) {
+    if (safety.honda_fwd_brake) {
       tx = false;
     }
 
@@ -254,7 +251,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // STEER: safety check
   if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
-    if (!controls_allowed) {
+    if (!safety.controls_allowed) {
       bool steer_applied = msg->data[0] | msg->data[1];
       if (steer_applied) {
         tx = false;
@@ -272,7 +269,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   // FORCE CANCEL: safety check only relevant when spamming the cancel button in Bosch HW
   // ensuring that only the cancel button press is sent (VAL 2) when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if (msg_matches(msg, 0x296U, bus_buttons) && !controls_allowed) {
+  if (msg_matches(msg, 0x296U, bus_buttons) && !safety.controls_allowed) {
     if (((msg->data[0] >> 5) & 0x7U) != 2U) {
       tx = false;
     }
@@ -303,9 +300,9 @@ static safety_config honda_nidec_init(uint16_t param) {
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
 
   honda_hw = HONDA_NIDEC;
-  honda_brake = 0;
-  honda_brake_switch_prev = false;
-  honda_fwd_brake = false;
+  safety.honda_brake = 0;
+  safety.honda_brake_switch_prev = false;
+  safety.honda_fwd_brake = false;
   honda_alt_brake_msg = false;
   honda_bosch_long = false;
   honda_bosch_radarless = false;
@@ -411,7 +408,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   };
 
   honda_hw = HONDA_BOSCH;
-  honda_brake_switch_prev = false;
+  safety.honda_brake_switch_prev = false;
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
   honda_bosch_canfd = GET_FLAG(param, HONDA_PARAM_BOSCH_CANFD);
   // Checking for alternate brake override from safety parameter
@@ -462,7 +459,7 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
   if (bus_num == 2) {
     // forwarded if stock AEB is active
     bool is_brake_msg = addr == 0x1FA;
-    block_msg = is_brake_msg && !honda_fwd_brake;
+    block_msg = is_brake_msg && !safety.honda_fwd_brake;
   }
 
   return block_msg;
