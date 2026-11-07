@@ -47,6 +47,10 @@ def make_msg(bus, addr, length=8, dat=None):
   return libsafety_py.make_CANPacket(addr, bus, dat)
 
 
+def state_buffer(copy):
+  return libsafety_py.ffi.buffer(libsafety_py.ffi.addressof(libsafety_py.libsafety, copy))
+
+
 class CANPackerSafety(CANPacker):
   def make_can_msg_safety(self, name_or_addr, bus, values, fix_checksum=None):
     msg = self.make_can_msg(name_or_addr, bus, values)
@@ -92,6 +96,10 @@ class SafetyTestBase(unittest.TestCase):
     if self.SAFETY_MODEL is not None:
       self.safety.set_safety_hooks(self.SAFETY_MODEL, self.SAFETY_PARAM)
     self.safety.init_tests()
+
+  def tearDown(self):
+    self.assertFalse(self.safety.safety_redundancy_fault)
+    self.assertEqual(state_buffer("safety_a")[:], state_buffer("safety_b")[:])
 
   @classmethod
   def setUpClass(cls):

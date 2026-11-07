@@ -2,10 +2,18 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define SAFETY_SET(field, val) \
+  do { \
+    (safety_a.field) = (val); \
+    (safety_b.field) = (safety_a.field); \
+  } while (0)
+
 // TODO: time should just be passed into the hooks we expose
 uint32_t timer_cnt = 0;
+uint32_t timer_step = 0;
 uint32_t microsecond_timer_get(void);
 uint32_t microsecond_timer_get(void) {
+  timer_cnt += timer_step;
   return timer_cnt;
 }
 
@@ -37,16 +45,16 @@ int get_rx_checks_len(void) {
 // all RX checks valid, check stale last received age us ago
 void set_rx_checks_received(int stale, uint32_t age) {
   for (int i = 0; i < current_safety_config.rx_checks_len; i++) {
-    safety.rx_status[i].msg_seen = true;
-    safety.rx_status[i].valid_checksum = true;
-    safety.rx_status[i].valid_quality_flag = true;
-    safety.rx_status[i].wrong_counters = 0;
-    safety.rx_status[i].last_timestamp = (i == stale) ? (timer_cnt - age) : timer_cnt;
+    SAFETY_SET(rx_status[i].msg_seen, true);
+    SAFETY_SET(rx_status[i].valid_checksum, true);
+    SAFETY_SET(rx_status[i].valid_quality_flag, true);
+    SAFETY_SET(rx_status[i].wrong_counters, 0);
+    SAFETY_SET(rx_status[i].last_timestamp, (i == stale) ? (timer_cnt - age) : timer_cnt);
   }
 }
 
 void set_controls_allowed(bool c){
-  safety.controls_allowed = c;
+  SAFETY_SET(controls_allowed, c);
 }
 
 void set_alternative_experience(int mode){
@@ -54,7 +62,7 @@ void set_alternative_experience(int mode){
 }
 
 void set_relay_malfunction(bool c){
-  safety.relay_malfunction = c;
+  SAFETY_SET(relay_malfunction, c);
 }
 
 bool get_controls_allowed(void){
@@ -74,7 +82,7 @@ bool get_gas_pressed_prev(void){
 }
 
 void set_gas_pressed_prev(bool c){
-  safety.gas_pressed_prev = c;
+  SAFETY_SET(gas_pressed_prev, c);
 }
 
 bool get_brake_pressed_prev(void){
@@ -94,7 +102,7 @@ bool get_cruise_engaged_prev(void){
 }
 
 void set_cruise_engaged_prev(bool engaged){
-  safety.cruise_engaged_prev = engaged;
+  SAFETY_SET(cruise_engaged_prev, engaged);
 }
 
 bool get_vehicle_moving(void){
@@ -125,9 +133,13 @@ void set_timer(uint32_t t){
   timer_cnt = t;
 }
 
+void set_timer_step(uint32_t s){
+  timer_step = s;
+}
+
 void set_torque_meas(int min, int max){
-  safety.torque_meas.min = min;
-  safety.torque_meas.max = max;
+  SAFETY_SET(torque_meas.min, min);
+  SAFETY_SET(torque_meas.max, max);
 }
 
 int get_torque_meas_min(void){
@@ -139,8 +151,8 @@ int get_torque_meas_max(void){
 }
 
 void set_torque_driver(int min, int max){
-  safety.torque_driver.min = min;
-  safety.torque_driver.max = max;
+  SAFETY_SET(torque_driver.min, min);
+  SAFETY_SET(torque_driver.max, max);
 }
 
 int get_torque_driver_min(void){
@@ -152,20 +164,20 @@ int get_torque_driver_max(void){
 }
 
 void set_rt_torque_last(int t){
-  safety.rt_torque_last = t;
+  SAFETY_SET(rt_torque_last, t);
 }
 
 void set_desired_torque_last(int t){
-  safety.desired_torque_last = t;
+  SAFETY_SET(desired_torque_last, t);
 }
 
 void set_desired_angle_last(int t){
-  safety.desired_angle_last = t;
+  SAFETY_SET(desired_angle_last, t);
 }
 
 void set_angle_meas(int min, int max){
-  safety.angle_meas.min = min;
-  safety.angle_meas.max = max;
+  SAFETY_SET(angle_meas.min, min);
+  SAFETY_SET(angle_meas.max, max);
 }
 
 int get_angle_meas_min(void){
@@ -177,7 +189,7 @@ int get_angle_meas_max(void){
 }
 
 void set_desired_curvature_last(int t){
-  safety.curvature_state.desired_last = t;
+  SAFETY_SET(curvature_state.desired_last, t);
 }
 
 int get_desired_curvature_last(void){
@@ -185,8 +197,8 @@ int get_desired_curvature_last(void){
 }
 
 void set_curvature_meas(int min, int max){
-  safety.curvature_state.meas.min = min;
-  safety.curvature_state.meas.max = max;
+  SAFETY_SET(curvature_state.meas.min, min);
+  SAFETY_SET(curvature_state.meas.max, max);
 }
 
 int get_curvature_meas_min(void){
@@ -205,7 +217,7 @@ void set_honda_alt_brake_msg(bool c){
 }
 
 void set_honda_fwd_brake(bool c){
-  safety.honda_fwd_brake = c;
+  SAFETY_SET(honda_fwd_brake, c);
 }
 
 bool get_honda_fwd_brake(void){
@@ -213,15 +225,16 @@ bool get_honda_fwd_brake(void){
 }
 
 void init_tests(void){
-  safety.safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
+  SAFETY_SET(safety_mode_cnt, 2U);  // avoid ignoring relay_malfunction logic
   alternative_experience = 0;
   set_timer(0);
-  safety.ts_steer_req_mismatch_last = 0;
-  safety.valid_steer_req_count = 0;
-  safety.invalid_steer_req_count = 0;
+  timer_step = 0;
+  SAFETY_SET(ts_steer_req_mismatch_last, 0);
+  SAFETY_SET(valid_steer_req_count, 0);
+  SAFETY_SET(invalid_steer_req_count, 0);
 
   // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
-  safety.tesla_autopark = false;
+  SAFETY_SET(tesla_autopark, false);
 
   ignition_can = false;
   ignition_can_cnt = 0U;
