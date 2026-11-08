@@ -63,8 +63,8 @@ BO_ 254 ABS_2: 8 ABS
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 257 ABS_6: 8 ABS
- SG_ MAYBE_ACC_BRAKE : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ VEHICLE_SPEED : 0|12@0+ (0.017,0) [0|4095] "" XXX
+ SG_ MAYBE_ACC_BRAKE : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_PRESSURE_1 : 20|11@0+ (1,0) [0|2047] "" XXX
  SG_ NEW_SIGNAL_1 : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
@@ -309,10 +309,10 @@ CM_ SG_ 278 FORWARD_1 "probably per-axle";
 CM_ SG_ 278 REVERSE_1 "probably per-axle";
 CM_ SG_ 278 FORWARD_2 "probably per-axle";
 CM_ SG_ 278 REVERSE_2 "probably per-axle";
+CM_ SG_ 554 ACC_TORQUE_REQUEST "scale and offset unknown, 0 when cruise is off";
 CM_ SG_ 762 UNKNOWN_1 "always 3";
 CM_ SG_ 762 CHECKSUM "covers the first two bytes only";
 CM_ SG_ 762 UNKNOWN_2 "always 0x0E, not covered by checksum";
-CM_ SG_ 554 ACC_TORQUE_REQUEST "scale and offset unknown, 0 when cruise is off";
 VAL_ 262 LKA_STATUS 0 "standby" 2 "lka_active";
 VAL_ 1449 GEAR 1 "park" 2 "reverse" 3 "neutral" 4 "drive" 6 "drive manual";
 VAL_ 1508 CRUISE_MODE 0 "off" 3 "manual" 2 "acc-available" 4 "acc-enabled" 6 "acc-override";
