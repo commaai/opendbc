@@ -76,6 +76,7 @@ class TestSafetyRedundancy(common.SafetyTestBase):
 
   def _assert_fault(self):
     self.assertTrue(self.safety.safety_redundancy_fault)
+    self.assertFalse(self.safety.get_controls_allowed())
     self.assertEqual(common.state_buffer("safety_a")[:], common.state_buffer("safety_b")[:])
     self.safety.safety_redundancy_fault = False
 
@@ -85,20 +86,20 @@ class TestSafetyRedundancy(common.SafetyTestBase):
     self.safety.set_controls_allowed(True)
     for i in range(self.safety.get_rx_checks_len()):
       self._flip_b(ffi.offsetof("SafetyState", "rx_status", i, "wrong_counters") * 8 + 3)
-    self.assertTrue(self.safety.safety_rx_hook(common.make_msg(0, 0x4F1, 4)))
+    self.assertFalse(self.safety.safety_rx_hook(common.make_msg(0, 0x4F1, 4)))
     self._assert_fault()
 
   def test_tx_decision_mismatch(self):
     self.safety.set_controls_allowed(True)
     self._flip_b(ffi.offsetof("SafetyState", "relay_malfunction") * 8)
-    self.assertTrue(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
+    self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
     self._assert_fault()
 
   def test_fwd_decision_mismatch(self):
     self.safety.set_safety_hooks(CarParams.SafetyModel.allOutput, 1)
     self.assertEqual(self.safety.safety_fwd_hook(0, 0x123), 2)
     self._flip_b(ffi.offsetof("SafetyState", "relay_malfunction") * 8)
-    self.assertEqual(self.safety.safety_fwd_hook(0, 0x123), 2)
+    self.assertEqual(self.safety.safety_fwd_hook(0, 0x123), -1)
     self._assert_fault()
 
   def test_state_mismatch(self):
