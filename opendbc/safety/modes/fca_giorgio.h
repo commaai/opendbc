@@ -117,6 +117,27 @@ static bool fca_giorgio_tx_hook(const CANPacket_t *msg) {
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, FCA_GIORGIO_STEERING_LIMITS)) {
       tx = false;
+      safety.fca_giorgio_lka_torque_last = 0;
+      safety.fca_giorgio_lka_steer_req_last = false;
+    } else {
+      safety.fca_giorgio_lka_torque_last = desired_torque;
+      safety.fca_giorgio_lka_steer_req_last = steer_req;
+    }
+  }
+
+  // LKA_COMMAND_2 is a 4x scaled copy of LKA_COMMAND. The EPS is suspected to listen only to LKA_COMMAND_2: it
+  // engaged and steered with LKA_COMMAND_2 alone, and stock sends LKA_COMMAND one frame later as a rounded copy
+  // of LKA_COMMAND_2 / 4, so the two aren't exact 4x matches in stock routes. Rather than running the
+  // shared torque rate-limit state twice per frame, only allow an exact copy of the last allowed LKA_COMMAND
+  // (which openpilot sends first each frame). After a blocked LKA_COMMAND, only zero torque is allowed.
+  if (msg->addr == FCA_GIORGIO_LKA_COMMAND_2) {
+    // Signal: LKA_COMMAND_2.LKA_TORQUE
+    int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 4, 2048);
+    // Signal: LKA_COMMAND_2.LKA_ACTIVE
+    bool steer_req = GET_BIT(msg, 11U);
+
+    if ((desired_torque != (safety.fca_giorgio_lka_torque_last * 4)) || (steer_req != safety.fca_giorgio_lka_steer_req_last)) {
+      tx = false;
     }
   }
 
