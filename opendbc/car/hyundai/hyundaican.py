@@ -43,6 +43,9 @@ def create_lkas11(packer, frame, CP, apply_torque, steer_req,
     values["CF_Lkas_LdwsActivemode"] = int(left_lane) + (int(right_lane) << 1)
     values["CF_Lkas_LdwsOpt_USM"] = 2
 
+    # Some cars show an FCA fault when forwarding CF_Lkas_FusionState. Hide FCA Fault:
+    values["CF_Lkas_FusionState"] = 0
+
     # FcwOpt_USM 5 = Orange blinking car + lanes
     # FcwOpt_USM 4 = Orange car + lanes
     # FcwOpt_USM 3 = Green blinking car + lanes
