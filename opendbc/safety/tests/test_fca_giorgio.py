@@ -50,6 +50,41 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSaf
     values = {"LKA_TORQUE": torque, "LKA_ACTIVE": steer_req}
     return self.packer.make_can_msg_safety("LKA_COMMAND", 0, values)
 
+  def _torque_cmd_2_msg(self, torque, steer_req=1):
+    values = {"LKA_TORQUE": torque, "LKA_ACTIVE": steer_req}
+    return self.packer.make_can_msg_safety("LKA_COMMAND_2", 0, values)
+
+  def test_lka_command_2_mirrors_lka_command(self):
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(0)
+    self._rx(self._torque_driver_msg(0))
+    for torque in (0, 3, 6, 3, 0, -3, -6):
+      self.assertTrue(self._tx(self._torque_cmd_msg(torque)))
+      # exact 4x copy is allowed
+      self.assertTrue(self._tx(self._torque_cmd_2_msg(torque * 4)))
+      # anything else is blocked: different torque, or mismatched LKA_ACTIVE
+      self.assertFalse(self._tx(self._torque_cmd_2_msg(torque * 4 + 4)))
+      self.assertFalse(self._tx(self._torque_cmd_2_msg(torque * 4 + 1)))
+      self.assertFalse(self._tx(self._torque_cmd_2_msg(torque * 4, steer_req=0)))
+
+  def test_lka_command_2_zero_after_blocked_lka_command(self):
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(0)
+    self._rx(self._torque_driver_msg(0))
+    self.assertTrue(self._tx(self._torque_cmd_msg(3)))
+    # rate limit violation blocks LKA_COMMAND; LKA_COMMAND_2 can't carry that torque or the last allowed one
+    self.assertFalse(self._tx(self._torque_cmd_msg(3 + self.MAX_RATE_UP + 1)))
+    self.assertFalse(self._tx(self._torque_cmd_2_msg((3 + self.MAX_RATE_UP + 1) * 4)))
+    self.assertFalse(self._tx(self._torque_cmd_2_msg(3 * 4)))
+    self.assertTrue(self._tx(self._torque_cmd_2_msg(0, steer_req=0)))
+
+  def test_lka_command_2_without_controls(self):
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(self._torque_cmd_2_msg(100)))
+    self.assertTrue(self._tx(self._torque_cmd_msg(0, steer_req=0)))
+    self.assertTrue(self._tx(self._torque_cmd_2_msg(0, steer_req=0)))
+    self.assertFalse(self._tx(self._torque_cmd_2_msg(4, steer_req=0)))
+
   def test_buttons(self):
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)

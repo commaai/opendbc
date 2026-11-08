@@ -343,6 +343,10 @@ typedef struct {
   bool volkswagen_resume_button_prev;
   bool volkswagen_brake_pedal_switch;
   bool volkswagen_brake_pressure_detected;
+
+  // Last LKA_COMMAND allowed by the fca_giorgio tx hook. LKA_COMMAND_2 must mirror it (the EPS can steer from LKA_COMMAND_2 alone).
+  int fca_giorgio_lka_torque_last;
+  bool fca_giorgio_lka_steer_req_last;
 } SafetyState;
 
 typedef struct {

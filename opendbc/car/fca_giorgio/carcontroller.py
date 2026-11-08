@@ -43,6 +43,8 @@ class CarController(CarControllerBase):
         self.release_hold_frames -= 1
 
       self.apply_torque_last = apply_torque
+      # The EPS is suspected to listen only to LKA_COMMAND_2 (4x scale). Panda safety requires it to be an exact
+      # 4x copy of LKA_COMMAND, sent after it in the same frame.
       can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND", apply_torque, lka_active))
       can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND_2", apply_torque * 4, lka_active))
 
