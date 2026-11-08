@@ -66,6 +66,29 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
       self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
 
+  def test_rx_hook(self):
+    # checksum and counter checks
+    msgs = [("EPS_2", 0), ("ESP_1", 0), ("ECM_5", 0), ("DAS_3", self.DAS_BUS)]
+    if self.DAS_BUS == 2:
+      msgs.append(("ESP_8", 0))
+
+    for name, bus in msgs:
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, bus, {})))
+
+        # mess with the checksum to make it fail
+        msg = self.packer.make_can_msg_safety(name, bus, {})
+        msg[0].data[7] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[7] ^= 0xFF
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
 
 class TestChryslerRamDTSafety(TestChryslerSafety):
   DBC = "chrysler_ram_dt_generated"

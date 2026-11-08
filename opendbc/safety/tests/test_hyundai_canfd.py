@@ -82,6 +82,40 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
 
+  def test_rx_hook(self):
+    # checksum and counter checks
+    msgs = [(name, self.PT_BUS) for name in ("WHEEL_SPEEDS", "MDPS", "TCS", "ACCELERATOR", "ACCELERATOR_BRAKE_ALT", "ACCELERATOR_ALT")]
+    if not isinstance(self, HyundaiLongitudinalBase):
+      msgs.append(("SCC_CONTROL", self.SCC_BUS))
+
+    for name, bus in msgs:
+      with self.subTest(msg=name):
+        # the gas messages share one check which follows the first one seen
+        self._reset_safety_hooks()
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, bus, {})))
+
+        # mess with the checksum to make it fail
+        msg = self.packer.make_can_msg_safety(name, bus, {})
+        msg[0].data[0] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[0] ^= 0xFF
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
+    # the cruise buttons have a counter but no checksum
+    for _ in range(common.MAX_WRONG_COUNTERS + 1):
+      msg = self._button_msg(0)
+      self.assertTrue(self._rx(msg))
+
+    for i in range(common.MAX_WRONG_COUNTERS):
+      should_rx = i < common.MAX_WRONG_COUNTERS - 1
+      self.assertEqual(should_rx, self._rx(msg))
+
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 

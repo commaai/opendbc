@@ -226,6 +226,35 @@ class HondaBase(common.CarSafetyTest):
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
     self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
 
+  def test_rx_checksum_counter(self):
+    # checksum and counter checks
+    msgs = [("ENGINE_DATA", self.PT_BUS), ("POWERTRAIN_DATA", self.PT_BUS), ("SCM_BUTTONS", self.PT_BUS)]
+    if not self.SAFETY_PARAM & HondaSafetyFlags.NIDEC_ALT:
+      msgs.append(("SCM_FEEDBACK", self.PT_BUS))
+    if self.SAFETY_MODEL == CarParams.SafetyModel.hondaNidec:
+      msgs.append(("BRAKE_COMMAND", 2))
+    if self.SAFETY_PARAM & HondaSafetyFlags.ALT_BRAKE:
+      msgs.append(("BRAKE_MODULE", self.PT_BUS))
+
+    for name, bus in msgs:
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, bus, {})))
+
+        # mess with the checksum to make it fail
+        # only the low nibble of the last byte, the counter shares the byte
+        msg = self.packer.make_can_msg_safety(name, bus, {})
+        checksum_byte = self.packer.dbc.name_to_msg[name].size - 1
+        msg[0].data[checksum_byte] ^= 0x0F
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[checksum_byte] ^= 0x0F
+        for i in range(MAX_WRONG_COUNTERS):
+          should_rx = i < MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
 
 # ********************* Honda Nidec **********************
 

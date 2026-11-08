@@ -71,6 +71,19 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     msg[0].data[6] = 0xAB
     self.assertTrue(self._rx(msg))
 
+    # checksum and counter checks
+    for make_msg in (self._speed_msg, self._pcm_status_msg):
+      with self.subTest(msg=make_msg.__name__):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          msg = make_msg(0)
+          self.assertTrue(self._rx(msg))
+
+        # a stuck counter fails
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
   def _ign_msg(self, bus, counter, ign):
     return common.make_msg(bus, 0x432, dat=bytes([0, counter, 0, 0, 0, 0, ign, 0]))
 

@@ -75,6 +75,9 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     return self.packer.make_can_msg_safety("CLU11", bus, values)
 
   def _user_gas_msg(self, gas):
+    return self._ems16_msg(gas)
+
+  def _ems16_msg(self, gas):
     values = {"CF_Ems_AclAct": gas, "AliveCounter": self.cnt_gas % 4}
     self.__class__.cnt_gas += 1
     return self.packer.make_can_msg_safety("EMS16", 0, values, fix_checksum=checksum)
@@ -105,6 +108,41 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
+
+  def test_rx_hook(self):
+    # checksum and counter checks
+    msgs = [(self._ems16_msg, 7, 0x0F)]
+    if self.SAFETY_MODEL != CarParams.SafetyModel.hyundaiLegacy:
+      msgs += [(self._speed_msg, 7, 0xC0), (self._user_brake_msg, 6, 0x0F)]
+    if not isinstance(self, HyundaiLongitudinalBase):
+      msgs.append((self._pcm_status_msg, 7, 0xF0))
+
+    for make_msg, checksum_byte, checksum_mask in msgs:
+      with self.subTest(msg=make_msg.__name__):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(make_msg(0)))
+
+        # mess with the checksum to make it fail
+        # only the checksum bits, the counter can share the byte
+        msg = make_msg(0)
+        msg[0].data[checksum_byte] ^= checksum_mask
+        self.assertFalse(self._rx(msg))
+
+        # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[checksum_byte] ^= checksum_mask
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
+    # CLU11 has a counter but no checksum
+    for _ in range(common.MAX_WRONG_COUNTERS + 1):
+      msg = self._button_msg(0)
+      self.assertTrue(self._rx(msg))
+
+    for i in range(common.MAX_WRONG_COUNTERS):
+      should_rx = i < common.MAX_WRONG_COUNTERS - 1
+      self.assertEqual(should_rx, self._rx(msg))
 
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):

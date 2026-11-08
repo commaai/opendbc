@@ -131,6 +131,20 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
       self.assertFalse(valid)
       self.assertFalse(self.safety.get_controls_allowed())
 
+    # checksum and counter checks
+    for make_msg in (self._speed_msg, self._user_gas_msg, self._torque_driver_msg, self._pcm_status_msg):
+      with self.subTest(msg=make_msg.__name__):
+        self._reset_safety_hooks()
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          msg = make_msg(0)
+          self.assertTrue(self._rx(msg))
+
+        # a stuck counter fails
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
 
 class TestRivianStockSafety(TestRivianSafetyBase):
 

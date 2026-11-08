@@ -60,15 +60,17 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
     values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
     return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values)
 
-  def test_gas_counter(self):
-    self._reset_safety_hooks()
-    for _ in range(16):
-      self.assertTrue(self._rx(self._user_gas_msg(0)))
+  def test_rx_counters(self):
+    for make_msg in (self._user_gas_msg, self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
+      with self.subTest(msg=make_msg.__name__):
+        self._reset_safety_hooks()
+        for _ in range(16):
+          self.assertTrue(self._rx(make_msg(0)))
 
-    msg = self._user_gas_msg(0)
-    for _ in range(common.MAX_WRONG_COUNTERS + 1):
-      valid = self._rx(msg)
-    self.assertFalse(valid)
+        msg = make_msg(0)
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          valid = self._rx(msg)
+        self.assertFalse(valid)
 
   def test_rx_checksums(self):
     # Captured EPS frame: the PV field is 0x37f5; byte 7 is unused.
