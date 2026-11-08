@@ -270,7 +270,7 @@
 |Ram|1500 2019-24|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |Ram|2500 2020-24|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
 |Ram|3500 2019-22|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
-|RAM|ProMaster 2024-26|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Ram|ProMaster 2022-26|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Rivian|R1S 2022-24|All|[Upstream](#upstream)|
 |Rivian|R1T 2022-24|All|[Upstream](#upstream)|
 |SEAT|Alhambra 2018-20|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|

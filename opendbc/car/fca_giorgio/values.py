@@ -67,7 +67,7 @@ class CAR(Platforms):
   # )
 
   RAM_PROMASTER = FcaGiorgioPlatformConfig(
-    [FcaGiorgioCarDocs("RAM ProMaster 2024-26")],
+    [FcaGiorgioCarDocs("Ram ProMaster 2022-26")],
     # 136" wheelbase. Other wheelbases are left to paramsd, which should learn about
     # steerRatio * wheelbase / 136 if the steering rack is shared (~19.7 for 159").
     FcaGiorgioCarSpecs(wheelbase=3.45),
