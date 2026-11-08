@@ -82,6 +82,19 @@ FW_QUERY_CONFIG = FwQueryConfig(
       whitelist_ecus=[Ecu.eps],
       bus=0,
     ),
+    # Data collection: the ADAS camera and ACC radar, at their Fiat node addresses (0x31, 0x2A).
+    # Logging them from vans with and without ACC should show whether they can gate fingerprinting.
+    Request(
+      [StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.UDS_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.fwdCamera, Ecu.fwdRadar],
+      bus=0,
+      logging=True,
+    ),
+  ],
+  extra_ecus=[
+    (Ecu.fwdCamera, 0x18da31f1, None),
+    (Ecu.fwdRadar, 0x18da2af1, None),
   ],
 )
 
