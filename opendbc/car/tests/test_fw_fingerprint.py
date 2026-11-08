@@ -271,7 +271,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
         print(f'get_vin {name} case, query time={self.total_time / self.N} seconds')
 
   def test_fw_query_timing(self):
-    total_ref_time = 8.4
+    total_ref_time = 8.5
     brand_ref_times = {
       'gm': 1.0,
       'body': 0.1,
@@ -289,7 +289,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
       'rivian': 0.3,
       'psa': 0.1,
       'mg': 0.1,
-      'fca_giorgio': 0.1,  # FIXME: Placeholder, adjust timing when FCA Giorgio UDS is implemented
+      'fca_giorgio': 0.2,
     }
 
     total_times = 0.0
