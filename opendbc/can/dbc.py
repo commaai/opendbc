@@ -58,6 +58,8 @@ class Signal:
   type: int = SignalType.DEFAULT
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
   checksum_fields: tuple['Signal', ...] = ()
+  # (byte index, shift, bit count, byte mask) for each byte the signal spans, least significant bits first
+  segments: tuple[tuple[int, int, int, int], ...] = ()
 
   def get_raw_value(self, dat: bytes | bytearray) -> int:
     ret = 0
@@ -80,6 +82,21 @@ class Msg:
   address: int
   size: int
   sigs: dict[str, Signal]
+  counter_sig: Signal | None = None
+  checksum_sig: Signal | None = None
+
+
+def _segments(sig: Signal, msg_size: int) -> tuple[tuple[int, int, int, int], ...]:
+  segments = []
+  i = sig.lsb // 8
+  bits = sig.size
+  while 0 <= i < msg_size and bits > 0:
+    shift = sig.lsb % 8 if i == sig.lsb // 8 else 0
+    size = min(bits, 8 - shift)
+    segments.append((i, shift, size, ((1 << size) - 1) << shift))
+    bits -= size
+    i = i + 1 if sig.is_little_endian else i - 1
+  return tuple(segments)
 
 
 @dataclass
@@ -184,7 +201,12 @@ class DBC:
         val_def = " ".join(words).strip()
         self.vals.append(Val(sgname, val_addr, val_def))
     for addr, sigs in signals_temp.items():
-      self.msgs[addr].sigs = sigs
+      msg = self.msgs[addr]
+      msg.sigs = sigs
+      msg.counter_sig = next((s for s in sigs.values() if s.type == SignalType.COUNTER or s.name == "COUNTER"), None)
+      msg.checksum_sig = next((s for s in sigs.values() if s.type > SignalType.COUNTER), None)
+      for sig in sigs.values():
+        sig.segments = _segments(sig, msg.size)
       if checksum_state and checksum_state.checksum_fields and addr in checksum_state.checksum_fields:
         fields = tuple(sigs[name] for name in checksum_state.checksum_fields[addr])
         for sig in sigs.values():
