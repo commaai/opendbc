@@ -46,7 +46,9 @@ class FcaGiorgioPlatformConfig(PlatformConfig):
 @dataclass(frozen=True, kw_only=True)
 class FcaGiorgioCarSpecs(CarSpecs):
   centerToFrontRatio: float = 0.45
-  steerRatio: float = 19.7  # learned (paramsd), stable across drives
+  # paramsd learned 19.7 at wheelbase 3.45 on a 159" (4.04 m) Thor Tellaro 20K. It fits steerRatio * wheelbase,
+  # so that van's ratio is 19.7 * 3.45 / 4.04 = 16.8, which also applies at 136" if the steering rack is shared.
+  steerRatio: float = 16.8
   # minSteerSpeed: float = 13.8 # m/s
 
 
@@ -66,7 +68,8 @@ class CAR(Platforms):
 
   RAM_PROMASTER = FcaGiorgioPlatformConfig(
     [FcaGiorgioCarDocs("RAM ProMaster 2024-26")],
-    # rough specs for Promaster 2500 with medium wheelbase
+    # 136" wheelbase. Other wheelbases are left to paramsd, which should learn about
+    # steerRatio * wheelbase / 136 if the steering rack is shared (~19.7 for 159").
     FcaGiorgioCarSpecs(wheelbase=3.45),
   )
 
