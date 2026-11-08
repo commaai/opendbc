@@ -11,7 +11,7 @@ from enum import Enum
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs, ExtraCarsColumn, CommonFootnote
+from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs, ExtraCarsColumn, CommonFootnote, SupportType, get_default_setup_guide
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.interfaces import get_interface_attr
 from opendbc.car.values import Platform
@@ -115,6 +115,14 @@ def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str, **kwargs) ->
   )
   # Match historical output: no trailing newline at EOF
   return cars_md.rstrip("\n")
+
+
+def get_setup_guides(all_car_docs: list[CarDocs]) -> dict:
+  """Match the website's supported-vehicle selector, excluding community/custom installs."""
+  return {"default": get_default_setup_guide(), **{
+    car.name: car.get_setup_guide() for car in all_car_docs
+    if car.support_type == SupportType.UPSTREAM and car.name != "comma body"
+  }}
 
 
 if __name__ == "__main__":
