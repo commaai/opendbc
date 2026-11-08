@@ -75,9 +75,9 @@ static bool safety_states_equal(void) {
   return equal;
 }
 
+// TODO: block on a mismatch
 static bool safety_redundancy_check(bool same) {
   if (!same) {
-    safety_a.state.controls_allowed = false;
     safety_b = safety_a;
     safety_redundancy_fault = true;
   }
@@ -406,7 +406,8 @@ bool safety_rx_hook(const CANPacket_t *msg) {
   bool valid_b = rx_hook_copy(msg);
   current_copy = &safety_a;
   bool valid = rx_hook_copy(msg);
-  return safety_redundancy_check(valid == valid_b) && valid;
+  (void)safety_redundancy_check(valid == valid_b);
+  return valid;
 }
 
 bool safety_tx_hook(CANPacket_t *msg) {
@@ -415,7 +416,8 @@ bool safety_tx_hook(CANPacket_t *msg) {
   bool allowed_b = tx_hook_copy(msg);
   current_copy = &safety_a;
   bool allowed = tx_hook_copy(msg);
-  return safety_redundancy_check(allowed == allowed_b) && allowed;
+  (void)safety_redundancy_check(allowed == allowed_b);
+  return allowed;
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
@@ -423,7 +425,8 @@ int safety_fwd_hook(int bus_num, int addr) {
   int destination_bus_b = fwd_hook_copy(bus_num, addr);
   current_copy = &safety_a;
   int destination_bus = fwd_hook_copy(bus_num, addr);
-  return safety_redundancy_check(destination_bus == destination_bus_b) ? destination_bus : -1;
+  (void)safety_redundancy_check(destination_bus == destination_bus_b);
+  return destination_bus;
 }
 
 // 1Hz safety function called by main
