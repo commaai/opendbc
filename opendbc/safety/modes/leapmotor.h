@@ -15,7 +15,7 @@
 #define LEAPMOTOR_MAIN_BUS 0U
 #define LEAPMOTOR_CAM_BUS  2U
 
-// Steering angle is 0.02 deg per bit with the centre at raw 32490. Raw rises to the right, so the angle is
+// Steering angle is 0.02 deg per bit with the center at raw 32490. Raw rises to the right, so the angle is
 // negated to match openpilot's convention (positive = left).
 #define LEAPMOTOR_ANGLE_CENTER 32490
 
