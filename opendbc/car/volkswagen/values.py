@@ -6,7 +6,7 @@ from opendbc.car import Bus, CanBusBase, CarSpecs, DbcDict, PlatformConfig, Plat
 from opendbc.car.lateral import CurvatureSteeringLimits
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, SupportType
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 from opendbc.car.vin import Vin
 
@@ -385,6 +385,13 @@ class CAR(Platforms):
     chassis_codes={"5G", "AU", "BA", "BE"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
   )
+  VOLKSWAGEN_ID3_MK2 = VolkswagenMEBPlatformConfig(
+    [VWCarDocs("Volkswagen ID.3 2024-25", car_parts=CarParts.common([CarHarness.vw_meb]), footnotes=[], support_type=SupportType.REVIEW)],
+    VolkswagenCarSpecs(wheelbase=2.77),
+    chassis_codes={"E9"},
+    wmis={WMI.SAIC_VOLKSWAGEN},
+    flags=VolkswagenFlags.MEB_GEN2,
+  )
   VOLKSWAGEN_ID4_MK1 = VolkswagenMEBPlatformConfig(
     [
       VWCarDocs("Volkswagen ID.4 2021-23", car_parts=CarParts.common([CarHarness.vw_meb]), footnotes=[]),
@@ -668,6 +675,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
   non_essential_ecus={Ecu.eps: list(CAR)},
   extra_ecus=[(Ecu.fwdCamera, 0x74f, None)],
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
+  disambiguate_exact_with_fuzzy=True,
 )
 
 DBC = CAR.create_dbc_map()

@@ -2,10 +2,12 @@ import random
 import re
 import unittest
 
-from opendbc.car import DT_CTRL
+from opendbc.car import Bus, DT_CTRL
+from opendbc.car.fw_versions import match_fw_to_car
 from opendbc.car.structs import CarParams
 from opendbc.car.volkswagen.carcontroller import HCAMitigation
-from opendbc.car.volkswagen.values import CAR, CarControllerParams as CCP, FW_QUERY_CONFIG, WMI
+from opendbc.car.volkswagen.interface import CarInterface
+from opendbc.car.volkswagen.values import CAR, DBC, CarControllerParams as CCP, FW_QUERY_CONFIG, WMI, VolkswagenFlags, VolkswagenSafetyFlags
 from opendbc.car.volkswagen.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
@@ -13,6 +15,46 @@ Ecu = CarParams.Ecu
 CHASSIS_CODE_PATTERN = re.compile('[A-Z0-9]{2}')
 # TODO: determine the unknown groups
 SPARE_PART_FW_PATTERN = re.compile(b'\xf1\x87(?P<gateway>[0-9][0-9A-Z]{2})(?P<unknown>[0-9][0-9A-Z][0-9])(?P<unknown2>[0-9A-Z]{2}[0-9])([A-Z0-9]| )')
+
+
+class TestVolkswagenID3MEBGen2(unittest.TestCase):
+  def test_shared_radar_fingerprint(self):
+    # The original upstream ID.4 MK2 port also uses this radar firmware.
+    radar_fw = b'\xf1\x871EA907567D \xf1\x890250'
+    car_fw = [CarParams.CarFw(ecu=Ecu.fwdRadar, fwVersion=radar_fw, brand="volkswagen", address=0x757)]
+    for vin, expected in (
+      ("LSV000E9000000000", {CAR.VOLKSWAGEN_ID3_MK2}),
+      ("1V2000E8000000000", {CAR.VOLKSWAGEN_ID4_MK2}),
+      ("WVW000E9000000000", {CAR.VOLKSWAGEN_ID3_MK2, CAR.VOLKSWAGEN_ID4_MK2}),
+      ("00000000000000000", {CAR.VOLKSWAGEN_ID3_MK2, CAR.VOLKSWAGEN_ID4_MK2}),
+    ):
+      with self.subTest(vin=vin):
+        self.assertEqual(match_fw_to_car(car_fw, vin, log=False), (True, expected))
+
+  def test_unique_id4_radar_without_vin(self):
+    radar_fw = b'\xf1\x871EA907567C \xf1\x890099'
+    car_fw = [CarParams.CarFw(ecu=Ecu.fwdRadar, fwVersion=radar_fw, brand="volkswagen", address=0x757)]
+    self.assertEqual(match_fw_to_car(car_fw, "00000000000000000", log=False), (True, {CAR.VOLKSWAGEN_ID4_MK2}))
+
+  def test_id3_vin_without_known_radar(self):
+    car_fw = [CarParams.CarFw(ecu=Ecu.fwdRadar, fwVersion=b"unknown", brand="volkswagen", address=0x757)]
+    self.assertEqual(match_fw_to_car(car_fw, "LSV000E9000000000", log=False), (True, set()))
+
+  def test_gateway_parameters(self):
+    platform = CAR.VOLKSWAGEN_ID3_MK2
+    fingerprint = {0: {0x25D: 8, 0x3DC: 8}, 1: {0x520: 8}, 2: {}}
+    for is_release in (False, True):
+      with self.subTest(is_release=is_release):
+        cp = CarInterface.get_params(platform, fingerprint, [], False, is_release, False)
+        self.assertEqual(cp.carFingerprint, platform)
+        self.assertEqual(cp.networkLocation, CarParams.NetworkLocation.gateway)
+        self.assertEqual(cp.steerControlType, CarParams.SteerControlType.curvature)
+        self.assertTrue(cp.flags & VolkswagenFlags.MEB_GEN2)
+        self.assertTrue(cp.openpilotLongitudinalControl)
+        self.assertEqual(cp.dashcamOnly, is_release)
+        self.assertEqual(cp.safetyConfigs[-1].safetyModel, CarParams.SafetyModel.volkswagenMeb)
+        self.assertEqual(cp.safetyConfigs[-1].safetyParam, VolkswagenSafetyFlags.MEB_ALT_CRC)
+        self.assertEqual(DBC[platform][Bus.pt], "vw_meb_2024_generated")
 
 
 class TestVolkswagenHCAMitigation(unittest.TestCase):

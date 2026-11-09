@@ -27,6 +27,7 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "TESLA_MODEL_X" = [nan, 2.5, nan]
 
 # Guess
+"VOLKSWAGEN_ID3_MK2" = [nan, 2.5, nan]
 "VOLKSWAGEN_ID4_MK1" = [nan, 2.5, nan]
 "VOLKSWAGEN_ID4_MK2" = [nan, 2.5, nan]
 "CUPRA_BORN_MK1" = [nan, 2.5, nan]
