@@ -150,6 +150,10 @@ class CAR(Platforms):
     [FordCarDocs("Ford Expedition 2022-24", "Co-Pilot360 Assist 2.0", hybrid=False)],
     CarSpecs(wheelbase=3.69, steerRatio=17.0),
   )
+  LINCOLN_NAVIGATOR_MK4 = FordCANFDPlatformConfig(
+    [],
+    CarSpecs(wheelbase=3.1115, steerRatio=19.6),  # TODO: verify steering ratio
+  )
   FORD_F_150_MK14 = FordCANFDPlatformConfig(
     [FordCarDocs("Ford F-150 2021-23", "Co-Pilot360 Assist 2.0", hybrid=True)],
     CarSpecs(wheelbase=3.69, steerRatio=17.0),
