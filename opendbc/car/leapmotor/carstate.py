@@ -15,6 +15,7 @@ class CarState(CarStateBase):
     self.lcc_state = 7
     self.adas_lka: dict | None = None
     self.lka_received_seen = False
+    self.driver_override_frames = 0
     self.powertrain_state: dict | None = None
 
   def update(self, can_parsers) -> structs.CarState:
@@ -45,7 +46,10 @@ class CarState(CarStateBase):
     self.steering_angle_last = angle
     ret.steeringTorque = cp.vl['EPS_STEERING']['STEER_TORQUE_DRIVER']
     ret.steeringTorqueEps = cp.vl['EPS_STEERING']['STEER_TORQUE_EPS']
-    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)
+    # the torque reading is coarse: during an LCC override it only reached 2-3, but the EPS flagged the override itself
+    self.driver_override_frames = self.driver_override_frames + 1 if cp.vl['EPS_STEERING']['DRIVER_OVERRIDE'] else 0
+    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5) or \
+                          self.driver_override_frames >= 2
     # The EPS reports whether it receives ADAS_LKA (0x83): losing it after it was received means our steering frame is
     # missing or rejected (camera-unplug test). Not set before the camera's first frame after ignition.
     lka_received = bool(cp.vl['EPS_STEERING']['ADAS_LKA_RECEIVED'])
