@@ -42,6 +42,7 @@
 #define SAFETY_PSA 31U
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
+#define SAFETY_LEAPMOTOR 39U
 #endif
 
 #define GET_BIT(msg, b) ((((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U) != 0U)
@@ -421,5 +422,6 @@ extern const safety_hooks volkswagen_pq_hooks;
 extern const safety_hooks psa_hooks;
 extern const safety_hooks byd_hooks;
 extern const safety_hooks mg_hooks;
+extern const safety_hooks leapmotor_hooks;
 
 #endif  // SAFETY_DECLARATIONS_H
