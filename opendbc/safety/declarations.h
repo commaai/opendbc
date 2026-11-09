@@ -42,6 +42,7 @@
 #define SAFETY_PSA 31U
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
+#define SAFETY_LEAPMOTOR 39U
 #endif
 
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
@@ -420,5 +421,6 @@ extern const safety_hooks volkswagen_pq_hooks;
 extern const safety_hooks psa_hooks;
 extern const safety_hooks byd_hooks;
 extern const safety_hooks mg_hooks;
+extern const safety_hooks leapmotor_hooks;
 
 #endif  // SAFETY_DECLARATIONS_H

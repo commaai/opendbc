@@ -1,0 +1,206 @@
+VERSION ""
+
+NS_ :
+
+BS_:
+
+BU_: XXX
+
+BO_ 388 WHEEL_SPEEDS: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ WHEEL_SPEED_FL : 16|16@1+ (0.01,0) [0|0] "km/h" XXX
+ SG_ WHEEL_SPEED_FR : 32|16@1+ (0.01,0) [0|0] "km/h" XXX
+ SG_ WHEEL_SPEED_RL : 48|16@1+ (0.01,0) [0|0] "km/h" XXX
+ SG_ WHEEL_SPEED_RR : 64|16@1+ (0.01,0) [0|0] "km/h" XXX
+
+BO_ 563 IMU: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ YAW_RATE : 41|13@1+ (0.02,-81.92) [0|0] "deg/s" XXX
+
+BO_ 397 EPS_STEERING: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ STEER_ANGLE : 24|16@1+ (-0.02,649.8) [-661|650] "deg" XXX
+ SG_ STEER_SPEED_ABS : 40|8@1+ (4,0) [0|1020] "deg/s" XXX
+ SG_ ADAS_LKA_RECEIVED : 66|1@1+ (1,0) [0|1] "" XXX
+ SG_ LCC_STEERING_ACTIVE : 67|1@1+ (1,0) [0|1] "" XXX
+ SG_ ADAS_LKA_TIMEOUT : 120|2@1+ (1,0) [0|3] "" XXX
+ SG_ STEER_TORQUE_DRIVER : 80|8@1+ (-1,78) [0|0] "raw" XXX
+ SG_ STEER_TORQUE_EPS : 168|16@1+ (1,-1000) [0|0] "raw" XXX
+
+BO_ 131 ADAS_LKA: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACC_STATE : 25|2@1+ (1,0) [0|3] "" XXX
+ SG_ UNKNOWN_27 : 27|3@1+ (1,0) [0|7] "" XXX
+ SG_ UNKNOWN_30 : 30|1@1+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN_31 : 31|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_ACCEL_REQ : 32|8@1+ (0.05,-5) [-5|7.75] "m/s^2" XXX
+ SG_ ASSIST_OFF : 40|1@1+ (1,0) [0|1] "" XXX
+ SG_ ASSIST_OFF_2 : 44|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_SET_SPEED : 46|11@1+ (0.2,0) [0|409.4] "km/h" XXX
+ SG_ UNKNOWN_60 : 60|1@1+ (1,0) [0|1] "" XXX
+ SG_ CONSTANT_72 : 72|8@1+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_81 : 81|4@1+ (1,0) [0|15] "" XXX
+ SG_ UNKNOWN_88 : 88|1@1+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN_90 : 90|5@1+ (1,0) [0|31] "" XXX
+ SG_ UNKNOWN_96 : 96|3@1+ (1,0) [0|7] "" XXX
+ SG_ LCC_STEERING_ACTIVE_COPY : 99|1@1+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN_100 : 100|2@1+ (1,0) [0|3] "" XXX
+ SG_ STEER_ANGLE_REQ : 104|16@1+ (-0.02,649.8) [-661|650] "deg" XXX
+ SG_ LCC_UNKNOWN_128 : 128|7@1+ (1,0) [0|127] "" XXX
+ SG_ LCC_UNKNOWN_136 : 136|4@1+ (1,0) [0|15] "" XXX
+ SG_ LCC_STATE : 140|4@1+ (1,0) [0|15] "" XXX
+ SG_ UNKNOWN_147 : 147|1@1+ (1,0) [0|1] "" XXX
+ SG_ CONSTANT_152 : 152|8@1+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_176 : 176|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACC_OVERRIDE : 179|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 389 VEHICLE_ACCEL: 16 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ LONG_ACCEL : 48|10@1+ (0.03125,-16) [-16|15.97] "m/s^2" XXX
+ SG_ SEATBELT_BUCKLED : 83|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 656 BODY_CONTROL: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ BLINKER_LEFT : 24|1@1+ (1,0) [0|0] "" XXX
+ SG_ BLINKER_RIGHT : 25|1@1+ (1,0) [0|0] "" XXX
+ SG_ DRIVER_DOOR_OPEN : 44|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 183 POWERTRAIN_STATE: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ ASSIST_ENGAGED : 30|1@1+ (1,0) [0|1] "" XXX
+ SG_ STALK_PUSH : 40|2@1+ (1,0) [0|3] "" XXX
+ SG_ TORQUE_DEMAND : 56|8@1+ (1,0) [0|0] "raw" XXX
+ SG_ UNKNOWN_18 : 18|1@1+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN_26 : 26|4@1+ (1,0) [0|15] "" XXX
+ SG_ UNKNOWN_33 : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN_36 : 36|2@1+ (1,0) [0|3] "" XXX
+ SG_ UNKNOWN_42 : 42|3@1+ (1,0) [0|7] "" XXX
+ SG_ UNKNOWN_50 : 50|4@1+ (1,0) [0|15] "" XXX
+ SG_ UNKNOWN_55 : 55|1@1+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN_64 : 64|11@1+ (1,0) [0|2047] "" XXX
+ SG_ UNKNOWN_80 : 80|11@1+ (1,0) [0|2047] "" XXX
+ SG_ UNKNOWN_95 : 95|1@1+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN_97 : 97|10@1+ (1,0) [0|1023] "" XXX
+ SG_ UNKNOWN_112 : 112|11@1+ (1,0) [0|2047] "" XXX
+ SG_ UNKNOWN_128 : 128|7@1+ (1,0) [0|127] "" XXX
+ SG_ UNKNOWN_136 : 136|11@1+ (1,0) [0|2047] "" XXX
+ SG_ UNKNOWN_151 : 151|2@1+ (1,0) [0|3] "" XXX
+ SG_ UNKNOWN_154 : 154|14@1+ (1,0) [0|16383] "" XXX
+ SG_ UNKNOWN_169 : 169|12@1+ (1,0) [0|4095] "" XXX
+
+BO_ 182 VEHICLE_STATE: 16 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACCEL_PEDAL : 88|8@1+ (0.4,0) [0|102] "%" XXX
+ SG_ BRAKE_PRESSED : 99|1@1+ (1,0) [0|1] "" XXX
+ SG_ GEAR : 101|2@1+ (1,0) [0|3] "" XXX
+
+BO_ 390 BRAKE_PRESSURE: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ BRAKE_PRESSURE : 16|8@1+ (1,0) [0|0] "raw" XXX
+
+BO_ 322 ROAD_SIGNS: 16 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ SPEED_LIMIT : 72|8@1+ (1,0) [0|255] "km/h" XXX
+
+BO_ 552 BSD_LEFT: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ OBJECT_DETECTED : 17|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 554 BSD_RIGHT: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ OBJECT_DETECTED : 17|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 589 CLUSTER: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ DISPLAY_SPEED : 80|8@1+ (1,0) [0|255] "km/h" XXX
+ SG_ ASSIST_ENGAGED_COPY : 131|1@1+ (1,0) [0|1] "" XXX
+ SG_ LCC_ENGAGED : 132|1@1+ (1,0) [0|1] "" XXX
+
+CM_ "DRAFT for Leapmotor B10. Checksums: see CHECKSUM comments and checksum_constants.json. Reverse engineered from comma rlogs. Each signal comment says CONFIRMED (matched filmed actions), INFERRED or WEAK. Receive only: do not use for transmit.";
+CM_ SG_ 388 WHEEL_SPEED_FL "CONFIRMED: positions from filmed figure-eights: front/rear rises from 1.02 straight to 1.27 near lock, and the left wheels run faster when steering right. Scale matches GPS within 0.1 km/h at a filmed steady 30 km/h. within about 1% of GPS above 60 km/h up to 126 km/h. Width at least 14 bits; no wrap in about 11 hours of logs.";
+CM_ SG_ 388 WHEEL_SPEED_FR "CONFIRMED: positions from filmed figure-eights: front/rear rises from 1.02 straight to 1.27 near lock, and the left wheels run faster when steering right. Scale matches GPS within 0.1 km/h at a filmed steady 30 km/h. within about 1% of GPS above 60 km/h up to 126 km/h. Width at least 14 bits; no wrap in about 11 hours of logs.";
+CM_ SG_ 388 WHEEL_SPEED_RL "CONFIRMED: positions from filmed figure-eights: front/rear rises from 1.02 straight to 1.27 near lock, and the left wheels run faster when steering right. Scale matches GPS within 0.1 km/h at a filmed steady 30 km/h. within about 1% of GPS above 60 km/h up to 126 km/h. Width at least 14 bits; no wrap in about 11 hours of logs.";
+CM_ SG_ 388 WHEEL_SPEED_RR "CONFIRMED: positions from filmed figure-eights: front/rear rises from 1.02 straight to 1.27 near lock, and the left wheels run faster when steering right. Scale matches GPS within 0.1 km/h at a filmed steady 30 km/h. within about 1% of GPS above 60 km/h up to 126 km/h. Width at least 14 bits; no wrap in about 11 hours of logs.";
+CM_ SG_ 563 YAW_RATE "INFERRED scale, sign CONFIRMED: positive = turning left (openpilot convention); raw rises when turning right, r +0.994 to +1.000 against the comma gyro (livePose.angularVelocityDevice.z, positive right) on 3 traces. R2 0.993-0.999 against livePose on 5 datasets. Fit gives 0.0196; 0.02 assumed.";
+CM_ SG_ 389 LONG_ACCEL "INFERRED: R2 0.70-0.95 against livePose on 5 datasets. Same encoding as the Leapmotor T03 DBC (10 bits, offset -16), which matches the earlier 9-bit signed reading over the logged range. No wrap down to -6.8 m/s^2.";
+CM_ SG_ 589 DISPLAY_SPEED "CONFIRMED: equal to the filmed dashboard speed in 6 of 6 checks (50, 70, 100 km/h). Reads about 3.5 percent above the wheel speeds, as dashboards do.";
+CM_ BO_ 552 "Rear-left blind-spot radar (20 Hz, silent when stopped). Bytes 8-15 carry object data when something is detected.";
+CM_ SG_ 552 OBJECT_DETECTED "CONFIRMED on video: on 3 of 3 checked episodes a car appeared in the left lane beside the B10 in the road camera within 1 s of the flag clearing. Set in 8.5% of driving above 50 km/h, less often while signalling left (drivers wait for a clear lane).";
+CM_ BO_ 554 "Rear-right blind-spot radar, same layout as BSD_LEFT (0x228).";
+CM_ SG_ 554 OBJECT_DETECTED "INFERRED by symmetry with BSD_LEFT: same layout, set in 0.7% of driving above 50 km/h (in right-hand traffic you are rarely overtaken on the right). The one checked episode was not conclusive on video.";
+CM_ SG_ 397 ADAS_LKA_RECEIVED "CONFIRMED by the camera-unplug test: 1 while the EPS receives ADAS_LKA (0x83) from the camera, 0 with the camera unplugged (and for the first 0.2 s after ignition, before the camera starts). Bit 60 sets at the same time. Used as a temporary steering fault: the EPS is not receiving a valid steering frame.";
+CM_ SG_ 397 ADAS_LKA_TIMEOUT "CONFIRMED by the camera-unplug test: 3 with the camera unplugged (no ADAS_LKA), 0 when it is received; also 3 for the first second after ignition.";
+CM_ SG_ 397 STEER_ANGLE "CONFIRMED by filmed holds: raw moves about 4450 per 90 deg and 9000 per 180 deg. Sign CONFIRMED: positive = left (openpilot convention); raw rises to the right (r +0.98 against the comma gyro in the figure-eights). Factor is negative so openpilot reads left-positive. Lock is about -515/+522 deg, or 2.9 turns, which the driver confirmed. Centre 32490 from the filmed centre holds; a few counts may remain.";
+CM_ SG_ 397 STEER_SPEED_ABS "INFERRED: one count is about 202 raw per second, or 4.04 deg/s, R2 0.99 or better on 5 datasets; 4 assumed, the same as the Leapmotor T03 DBC. Magnitude only, no sign.";
+CM_ SG_ 397 STEER_TORQUE_DRIVER "INFERRED: driver steering torque, positive = left (openpilot convention). Raw 57 and 100 while held still at left and right lock, exactly 78 hands off; raw rises when steering right (r +0.54 to +0.81 with the steering rate on 3 traces). Hands-off LCC never exceeds 3, manual steering while moving reaches 7 (p90) to 20. Unit unknown.";
+CM_ BO_ 131 "Layout INFERRED from 396,908 frames on 16 traces (5 days): 166 of 256 bits never change; every bit that is not always zero is defined here, so unpack-then-pack reproduces recorded frames exactly. 50 Hz, sent by the ADAS unit.";
+CM_ SG_ 131 ACC_STATE "INFERRED, strong: 3 while ACC/LCC engaged, 2 when ACC is ready, 1 when not ready (Park, brake pressed) or overridden by the accelerator while engaged (96-100% of those frames have the pedal pressed, on 8 traces).";
+CM_ SG_ 131 ACC_ACCEL_REQ "INFERRED, strong: the ACC acceleration request. Leads the measured acceleration (0x185 LONG_ACCEL) by about 250 ms, r +0.85 to +0.96 on 8 traces; fit gives zero at raw 99.9 and 0.045 m/s^2 per step (0.05 used, residual 0.08 m/s^2). Raw 100 (0) whenever not engaged.";
+CM_ SG_ 131 ACC_OVERRIDE "INFERRED: set exactly when ACC_STATE drops to 1 while engaged, i.e. accelerator override (frame-for-frame match on 8 traces).";
+CM_ SG_ 131 ASSIST_OFF_2 "INFERRED: identical to ASSIST_OFF on every frame.";
+CM_ SG_ 131 CONSTANT_72 "CONSTANT: 125 (0x7D) on every recorded frame. Meaning unknown; must be sent as-is.";
+CM_ SG_ 131 CONSTANT_152 "CONSTANT: 125 (0x7D) on every recorded frame. Meaning unknown; must be sent as-is.";
+CM_ SG_ 131 LCC_UNKNOWN_128 "UNKNOWN: 1 except while LCC steers, then varies (57 values). Weak, inconsistent correlation with speed and angle; not a steering-torque request. Copied from the camera frame.";
+CM_ SG_ 131 LCC_UNKNOWN_136 "UNKNOWN: 8 except while LCC steers, then varies. Copied from the camera frame.";
+CM_ SG_ 131 UNKNOWN_90 "UNKNOWN: 28 on nearly every frame; a handful of other values. Copied from the camera frame.";
+CM_ SG_ 131 STEER_ANGLE_REQ "INFERRED, strong: the LCC steering angle request, same encoding as STEER_ANGLE (positive = left; r 1.000 with it). On 5 routes it leads the measured angle (0x18D) by 70-100 ms while LCC steers, and the request-minus-measured gap tracks the LCC torque (r +0.35 to +0.59). In manual driving it lags by 20-30 ms, so it echoes the measured angle when not steering. Sent by the ADAS unit (its own clock, with 0x142/0x229/0x2D1/0x2D5). No torque request found in this frame. Whether the camera sends it, so a camera harness can replace it, is not yet confirmed: see the planned unplug test.";
+CM_ SG_ 389 SEATBELT_BUCKLED "CONFIRMED by the filmed belt step: the driver started unbuckled, buckled, then unbuckled, and this is 1 for those 9.4 s. Mirrored on 0x2A3 bit 31, 0x229 bits 33 and 35, 0x24D bit 146.";
+CM_ SG_ 656 BLINKER_LEFT "CONFIRMED by filmed step order: left, right, then hazards. Flips every 0.40 s. Both blinker bits on means hazards.";
+CM_ SG_ 656 BLINKER_RIGHT "CONFIRMED by filmed step order: left, right, then hazards. Flips every 0.40 s.";
+CM_ SG_ 656 DRIVER_DOOR_OPEN "CONFIRMED once by filmed door opening; 1 for 11.5 s. Bit 46 did the same, so one may be another door or a lamp.";
+CM_ BO_ 183 "Bits 16 and 28 set when the camera is unplugged (probably ADAS unavailable). Every bit that is not always zero is defined (UNKNOWN_* fields copied as-is), so unpack-then-pack reproduces recorded frames exactly; needed to send the camera a cancel copy of this frame.";
+CM_ SG_ 183 STALK_PUSH "CONFIRMED by stated order, parked: 1 is a single push (ACC), 2 is a double push (LCC, passing through 1 first), each held about 1 s. INFERRED: 3 is pushing the stalk up, which the driver says cancels assist. All 14 logged value-3 pushes during assist ended it within about 0.25 s.";
+CM_ SG_ 183 TORQUE_DEMAND "WEAK: rises with acceleration (r 0.78-0.84), but stayed at 0 during 3 filmed accelerator presses in Park. Probably torque demand. Drops to 0 whenever the accelerator is released, even while slowing at -1.5 m/s^2, so it carries no regen.";
+CM_ SG_ 182 ACCEL_PEDAL "CONFIRMED by 3 filmed presses in Park, peak 254 each. Scale 0.4 percent per count as in the Leapmotor T03 DBC, so 254 is about 100 percent. One-pedal mode was off for this test.";
+CM_ SG_ 182 BRAKE_PRESSED "CONFIRMED by 3 filmed presses in Park. Ends assist, as the driver says: both logged cases within 0.01 s. One-pedal mode was off for this test. Rarely on while slowing on earlier routes, which the driver says were almost always in one-pedal mode.";
+CM_ SG_ 182 GEAR "CONFIRMED by filmed shifts and the dashboard. Earlier routes agree: 1 moves only backward, 0 and 2 never move, 3 only forward.";
+CM_ SG_ 390 BRAKE_PRESSURE "INFERRED: bytes 2-5 are identical, peaks 51-57 on 3 filmed presses, near 0 otherwise. In filmed braking tests it stayed near 0 for much of the time the pedal was pressed, which suggests blended braking (regen first, friction later). Unit unknown.";
+CM_ SG_ 183 ASSIST_ENGAGED "INFERRED: 1 in all 15 assist periods on 5 routes, including 1 ACC-only period, 0 elsewhere while driving. Also matched a route not used in the search: on 0.6 s after the push, off 0.6 s after the cancel.";
+CM_ SG_ 589 ASSIST_ENGAGED_COPY "INFERRED: same behaviour as 0xB7 bit 30.";
+CM_ SG_ 131 ASSIST_OFF "INFERRED: exact inverse of ASSIST_ENGAGED on 5 routes. Bit 44 behaves the same.";
+CM_ SG_ 589 LCC_ENGAGED "INFERRED: on 95-100% of LCC periods, off in the ACC-only period and when not engaged. Only 1 ACC-only period tested.";
+CM_ SG_ 397 LCC_STEERING_ACTIVE "INFERRED: never on outside LCC, on for 54-100% of it, so possibly when LCC is steering. Not checked against the dashboard.";
+CM_ SG_ 131 LCC_STEERING_ACTIVE_COPY "INFERRED: same behaviour as 0x18D bit 67.";
+CM_ SG_ 397 STEER_TORQUE_EPS "INFERRED: exactly 1000 raw when LCC is not steering on most routes, 939-1074 when it is, follows byte 10 (r 0.82-0.91). Possibly the torque applied by LCC. Unit and sign unknown. Also moved during a probable lane-departure correction with assist off.";
+CM_ SG_ 322 SPEED_LIMIT "CONFIRMED against filmed road-sign icons (90, 110): matches once a 1-2 s video timing difference is allowed. Values 20-130 in tens. A brief 50 lasting 0.6 s was not seen on the dashboard. 0 and 255 appear rarely and may mean none or invalid.";
+CM_ SG_ 131 LCC_STATE "INFERRED: 7 when off and during ACC-only; about 0.3 s of 6 when LCC engages, then mostly 5. 4 held for about 15 s while LCC steered through a filmed long curve, and stayed 5 during filmed hands-on warnings. 14 appeared once with assist off, together with EPS torque, when the dashboard showed a red lane edge: probably a lane-departure correction.";
+CM_ SG_ 131 ACC_SET_SPEED "CONFIRMED: equal to the filmed green ACC badge in 6 of 6 checks (50, 70, 100 km/h), steps with knob rotation. Scale 0.2 km/h, unlike the 0.1 of the Leapmotor T03.";
+CM_ SG_ 388 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 388 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 563 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 563 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 397 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 397 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 131 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 131 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 389 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 389 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 656 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 656 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 183 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 183 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 182 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 182 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 390 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 390 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 322 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 322 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+CM_ SG_ 589 CHECKSUM "CONFIRMED: AUTOSAR E2E Profile 2, as opendbc volkswagen_mqb_meb_checksum: crc=0xFF; for bytes 1..end: crc=CRC8H2F[crc^b]; crc^=K[counter]; crc=CRC8H2F[crc]; checksum=crc^0xFF. K is a 16-entry table per message in checksum_constants.json, learned on route 0000022d and exact on every tested frame of 3 other routes from 2 other days.";
+CM_ SG_ 589 COUNTER "CONFIRMED: rolling 0-15, one step per frame.";
+VAL_ 182 GEAR 0 "P" 1 "R" 2 "N" 3 "D" ;
+VAL_ 183 STALK_PUSH 0 "NONE" 1 "SINGLE" 2 "DOUBLE" 3 "UP_CANCEL" ;
+VAL_ 131 ACC_STATE 1 "NOT_READY_INFERRED" 2 "READY_INFERRED" 3 "ENGAGED_INFERRED" ;
+VAL_ 131 LCC_STATE 4 "CURVE_INFERRED" 5 "ACTIVE_INFERRED" 6 "ENGAGING_INFERRED" 7 "OFF_INFERRED" 14 "LANE_DEPARTURE_INFERRED" ;
