@@ -157,12 +157,17 @@ def match_fw_to_car(fw_versions: list[CarParams.CarFw], vin: str, allow_exact: b
     matches: set[str] = set()
     for brand in VERSIONS.keys():
       fw_versions_dict = build_fw_dict(fw_versions, filter_brand=brand)
-      matches |= match_func(fw_versions_dict, match_brand=brand, log=log)
-
-      # If specified and no matches so far, fall back to brand's fuzzy fingerprinting function
+      brand_matches = match_func(fw_versions_dict, match_brand=brand, log=log)
       config = FW_QUERY_CONFIGS[brand]
-      if not exact_match and not len(matches) and config.match_fw_to_car_fuzzy is not None:
-        matches |= config.match_fw_to_car_fuzzy(fw_versions_dict, vin, VERSIONS[brand])
+      if config.match_fw_to_car_fuzzy is not None:
+        if exact_match and config.disambiguate_exact_with_fuzzy and len(brand_matches) > 1:
+          # A VIN can resolve the tie, but must not introduce a candidate that didn't match the firmware.
+          narrowed = brand_matches & config.match_fw_to_car_fuzzy(fw_versions_dict, vin, VERSIONS[brand])
+          if len(narrowed) == 1:
+            brand_matches = narrowed
+        elif not exact_match and not (matches or brand_matches):
+          brand_matches = config.match_fw_to_car_fuzzy(fw_versions_dict, vin, VERSIONS[brand])
+      matches |= brand_matches
 
     if len(matches):
       return exact_match, matches

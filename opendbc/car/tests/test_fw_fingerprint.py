@@ -12,6 +12,7 @@ from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
                                     match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
 from opendbc.car.vin import get_vin
+from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
 from opendbc.testing import parameterized
 
 CarFw = CarParams.CarFw
@@ -31,6 +32,9 @@ class TestFwFingerprint(unittest.TestCase):
   def test_exact_match(self, brand, car_model, ecus, test_non_essential):
     config = FW_QUERY_CONFIGS[brand]
     CP = CarParams()
+    if brand == "volkswagen":
+      platform = VOLKSWAGEN(car_model)
+      CP.carVin = f"{min(platform.config.wmis)}000{min(platform.config.chassis_codes)}000000000"
     for _ in range(20):
       fw = []
       for ecu, fw_versions in ecus.items():
