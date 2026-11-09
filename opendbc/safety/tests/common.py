@@ -1023,6 +1023,10 @@ class SafetyTest(SafetyTestBase):
             if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestHondaBoschRadarless'):
               tx = list(filter(lambda m: m[0] not in [0x30c, ], tx))
 
+            # Leapmotor's steering angle request overlaps Ford's Steering_Data_FD1 (buttons, not actuating)
+            if attr == 'TestLeapmotorSafety' and current_test.startswith('TestFord'):
+              tx = list(filter(lambda m: m[0] not in [0x83, ], tx))
+
             # TODO: Temporary, should be fixed in panda firmware, safety_honda.h
             if attr.startswith('TestHonda'):
               # exceptions for common msgs across different hondas
