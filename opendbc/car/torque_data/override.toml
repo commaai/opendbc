@@ -111,8 +111,11 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "ACURA_ADX" = [1.5, 1.5, 0.22]
 "HONDA_PILOT_4G_MMR" = [2.0, 2.0, 0.13]
 "ALFA_ROMEO_STELVIO_1ST_GEN" = [1.9, 1.9, 0.11]
-# LAT_ACCEL_FACTOR: provisional torqued fit was 3.7 (route 57a1cc884d1e5a8b|00000003--126efcc96b, center buckets only); 2.5 is a cautious step
-"RAM_PROMASTER" = [2.5, 1.045, 0.173]
+# LAT_ACCEL_FACTOR: steady curve torque on route 57a1cc884d1e5a8b|00000001--b4954b76a0 was ~17 counts per m/s^2
+# (factor ~16-18); 10 is a step toward that. MAX_LAT_ACCEL_MEASURED is capped at 3.0 by tests (true value likely higher).
+# FRICTION: 0.173 (borrowed from Renegade) drove a ~1.2 Hz oscillation against the torque rate limit; 0.11 is the
+# original value, and simulation favors 0.10-0.12.
+"RAM_PROMASTER" = [10.0, 3.0, 0.11]
 
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]
