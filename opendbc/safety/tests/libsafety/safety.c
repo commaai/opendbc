@@ -29,6 +29,11 @@ bool safety_config_valid() {
 
   for (int i = 0; i < safety_setup.current_safety_config.rx_checks_len; i++) {
     const RxStatus status = safety.rx_status[i];
+    // an event-driven message, like a button that is only sent while held, may never have been sent,
+    // and then there is nothing to validate yet
+    if (safety_setup.current_safety_config.rx_checks[i].msg[status.index].non_periodic && !status.msg_seen) {
+      continue;
+    }
     bool valid = status.msg_seen && !status.lagging && status.valid_checksum && (status.wrong_counters < MAX_WRONG_COUNTERS) && status.valid_quality_flag;
     if (!valid) {
       // printf("i %d seen %d lagging %d valid checksum %d wrong counters %d valid quality flag %d\n", i, status.msg_seen, status.lagging, status.valid_checksum, status.wrong_counters, status.valid_quality_flag);
@@ -169,6 +174,14 @@ void set_rt_torque_last(int t){
 
 void set_desired_torque_last(int t){
   SAFETY_SET(desired_torque_last, t);
+}
+
+void set_heartbeat_engaged_mismatches(uint32_t c){
+  SAFETY_SET(heartbeat_engaged_mismatches, c);
+}
+
+uint32_t get_heartbeat_engaged_mismatches(void){
+  return safety.heartbeat_engaged_mismatches;
 }
 
 void set_desired_angle_last(int t){

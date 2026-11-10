@@ -18,10 +18,12 @@ from opendbc.car.body.values import CAR as COMMA
 from opendbc.car.byd.values import CAR as BYD
 from opendbc.car.psa.values import CAR as PSA
 from opendbc.car.mg.values import CAR as MG
+from opendbc.car.leapmotor.values import CAR as LEAPMOTOR
 
 # FIXME: add routes for these cars
 non_tested_cars = [
   MOCK.MOCK,
+  LEAPMOTOR.LEAPMOTOR_T03,
   GM.CADILLAC_ATS,
   GM.HOLDEN_ASTRA,
   GM.CHEVROLET_MALIBU,

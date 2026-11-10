@@ -36,6 +36,7 @@
 #define SAFETY_VOLKSWAGEN_MEB 34U
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
+#define SAFETY_LEAPMOTOR 39U
 
 #define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
@@ -188,6 +189,9 @@ typedef struct {
   const bool ignore_counter : 1;      // counter check is not performed when set to true
   const unsigned int max_counter : 8; // maximum value of the counter. 0 means that the counter check is skipped
   const bool ignore_quality_flag : 1; // true if quality flag check is skipped
+  const bool non_periodic : 1;        // true if the message is only sent on an event, e.g. a button that is
+                                      // only sent while held. Frequency and lag are not checked, so the
+                                      // message is still passed to the safety mode while it isn't being sent
 } CanMsgCheck;
 
 // dynamic state of an RX check, reset on safety mode init
@@ -336,6 +340,11 @@ typedef struct {
 
   uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 
+  // right roller double tap: a tap is pending, its last press frame, and its first press frame
+  bool leapmotor_tap_seen;
+  uint32_t leapmotor_tap_ts;
+  uint32_t leapmotor_tap_start_ts;
+
   bool tesla_stock_aeb;
   // Only rising edges while controls are not allowed are considered for these systems:
   // TODO: Only LKAS (non-emergency) is currently supported since we've only seen it
@@ -466,3 +475,4 @@ extern const safety_hooks rivian_hooks;
 extern const safety_hooks psa_hooks;
 extern const safety_hooks byd_hooks;
 extern const safety_hooks mg_hooks;
+extern const safety_hooks leapmotor_hooks;

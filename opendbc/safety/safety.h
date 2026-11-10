@@ -30,6 +30,7 @@
 #include "opendbc/safety/modes/body.h"
 #include "opendbc/safety/modes/psa.h"
 #include "opendbc/safety/modes/byd.h"
+#include "opendbc/safety/modes/leapmotor.h"
 #include "opendbc/safety/modes/hyundai_canfd.h"
 
 uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len) {
@@ -272,12 +273,16 @@ static void tick_copy(void) {
     // 2s of lag is worse case, since the function is called at 1Hz
     uint32_t frequency = safety_setup.current_safety_config.rx_checks[i].msg[status->index].frequency;
     uint32_t timestep = 1000000U / SAFETY_MAX(frequency, 1U);  // frequency < 10Hz is invalid below
-    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1000000U);
+    // event-driven messages are not sent at all most of the time, so they have no frequency to check,
+    // and one that has never been sent has nothing to validate yet
+    bool non_periodic = safety_setup.current_safety_config.rx_checks[i].msg[status->index].non_periodic;
+    bool unseen = non_periodic && !status->msg_seen;
+    bool lagging = !non_periodic && (elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1000000U));
     status->lagging = lagging;
 
     // enforce minimum frequency for safety-relevant messages
-    bool frequency_invalid = frequency < 10U;
-    if (lagging || frequency_invalid || !is_msg_valid(i)) {
+    bool frequency_invalid = !non_periodic && (frequency < 10U);
+    if (lagging || frequency_invalid || (!unseen && !is_msg_valid(i))) {
       rx_checks_invalid = true;
       safety.controls_allowed = false;
     }
@@ -361,6 +366,7 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
     {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
     {SAFETY_PSA, &psa_hooks},
     {SAFETY_BYD, &byd_hooks},
+    {SAFETY_LEAPMOTOR, &leapmotor_hooks},
     {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
     {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
     {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
