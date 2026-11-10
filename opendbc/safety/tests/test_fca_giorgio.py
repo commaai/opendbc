@@ -85,6 +85,96 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSaf
     self.assertTrue(self._tx(self._torque_cmd_2_msg(0, steer_req=0)))
     self.assertFalse(self._tx(self._torque_cmd_2_msg(4, steer_req=0)))
 
+  WINDDOWN_MAX_US = 1500000
+  WINDDOWN_MAX_GAP_US = 50000
+
+  def _engage_with_torque(self, torque):
+    self.safety.set_controls_allowed(True)
+    self._rx(self._torque_driver_msg(0))
+    self._set_prev_torque(torque)
+    self.assertTrue(self._tx(self._torque_cmd_msg(torque)))
+
+  def test_winddown_after_disengage(self):
+    for sign in (1, -1):
+      self.safety.init_tests()
+      self._engage_with_torque(sign * 30)
+      self.safety.set_controls_allowed(False)
+      # magnitude may hold or shrink, never grow
+      self.assertTrue(self._tx(self._torque_cmd_msg(sign * 30)))
+      self.assertFalse(self._tx(self._torque_cmd_msg(sign * 31)))
+      for torque in range(27, 0, -3):
+        self.assertTrue(self._tx(self._torque_cmd_msg(sign * torque)))
+      # winddown ends at zero
+      self.assertTrue(self._tx(self._torque_cmd_msg(0)))
+      self.assertFalse(self._tx(self._torque_cmd_msg(sign * 3)))
+
+  def test_winddown_limits(self):
+    # no sign change, and LKA_ACTIVE must stay set
+    self._engage_with_torque(30)
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(self._torque_cmd_msg(-3)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(27, steer_req=0)))
+    # blocked frames don't end the winddown (openpilot may send a frame or two before it sees the brake)
+    self.assertTrue(self._tx(self._torque_cmd_msg(27)))
+
+  def test_winddown_time_limit(self):
+    for elapsed in (self.WINDDOWN_MAX_US, self.WINDDOWN_MAX_US + 1):
+      self.safety.init_tests()
+      self._engage_with_torque(300)
+      self.safety.set_controls_allowed(False)
+      # keep frames coming within the gap limit
+      t = 0
+      while t + self.WINDDOWN_MAX_GAP_US < elapsed:
+        t += self.WINDDOWN_MAX_GAP_US
+        self.safety.set_timer(t)
+        self.assertTrue(self._tx(self._torque_cmd_msg(300)))
+      self.safety.set_timer(elapsed)
+      self.assertEqual(elapsed <= self.WINDDOWN_MAX_US, self._tx(self._torque_cmd_msg(300)))
+
+  def test_winddown_gap_limit(self):
+    for gap in (self.WINDDOWN_MAX_GAP_US, self.WINDDOWN_MAX_GAP_US + 1):
+      self.safety.init_tests()
+      self._engage_with_torque(30)
+      self.safety.set_controls_allowed(False)
+      self.safety.set_timer(gap // 2)
+      # a blocked frame doesn't restart the gap timer
+      self.assertFalse(self._tx(self._torque_cmd_msg(33)))
+      self.safety.set_timer(gap)
+      self.assertEqual(gap <= self.WINDDOWN_MAX_GAP_US, self._tx(self._torque_cmd_msg(27)))
+
+  def test_no_winddown_after_violation(self):
+    self._engage_with_torque(30)
+    # rate limit violation while engaged
+    self.assertFalse(self._tx(self._torque_cmd_msg(30 + self.MAX_RATE_UP + 1)))
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(self._torque_cmd_msg(27)))
+
+  def test_no_winddown_without_prior_torque(self):
+    self._engage_with_torque(0)
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(self._torque_cmd_msg(3)))
+
+  def test_winddown_on_brake(self):
+    self._rx(self._speed_msg(100))
+    self._rx(self._user_brake_msg(False))
+    self._engage_with_torque(30)
+    self._rx(self._user_brake_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self._tx(self._torque_cmd_msg(33)))
+    for torque in range(30, -1, -3):
+      self.assertTrue(self._tx(self._torque_cmd_msg(torque)))
+      self.assertTrue(self._tx(self._torque_cmd_2_msg(torque * 4)))
+      self.assertFalse(self._tx(self._torque_cmd_2_msg(torque * 4 + 4)))
+
+  def test_reengage_during_winddown(self):
+    self._engage_with_torque(30)
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self._tx(self._torque_cmd_msg(27)))
+    self.safety.set_controls_allowed(True)
+    # rate limits continue from the last winddown frame
+    self.assertTrue(self._tx(self._torque_cmd_msg(27 + self.MAX_RATE_UP)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(30 + self.MAX_RATE_UP + 1)))
+
   def test_buttons(self):
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)

@@ -29,17 +29,19 @@ class CarController(CarControllerBase):
       if CC.latActive and CS.lka_status == 2:  # "lka_active" per DBC
         new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
+      elif CS.lka_status == 2:
+        # Stock LKA never cuts torque in one step: it ramps to zero, then holds LKA_ACTIVE at zero torque for a few
+        # frames before releasing. An abrupt release with torque applied is suspected of latching EPS LKA_FAULT.
+        # Panda safety allows this winddown after a disengage (torque magnitude may not grow, for a limited time).
+        torque_mag = max(abs(self.apply_torque_last) - self.CCP.STEER_DELTA_DOWN, 0)
+        apply_torque = torque_mag if self.apply_torque_last > 0 else -torque_mag
       else:
         apply_torque = 0
 
-      # Stock LKA ramps torque down to zero and holds LKA_ACTIVE at zero torque for a few frames before
-      # releasing; it never drops LKA_ACTIVE with torque applied. We can't ramp down on disengage (safety
-      # requires zero torque immediately), but we can hold LKA_ACTIVE briefly. An abrupt release with
-      # torque applied is suspected of causing a latched EPS LKA_FAULT.
-      if CC.latActive:
+      if CC.latActive or apply_torque != 0:
         self.release_hold_frames = self.CCP.STEER_RELEASE_HOLD_FRAMES
       lka_active = CC.latActive or self.release_hold_frames > 0
-      if not CC.latActive and self.release_hold_frames > 0:
+      if not CC.latActive and apply_torque == 0 and self.release_hold_frames > 0:
         self.release_hold_frames -= 1
 
       self.apply_torque_last = apply_torque

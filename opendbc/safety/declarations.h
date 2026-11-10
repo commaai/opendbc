@@ -346,6 +346,9 @@ typedef struct {
   // Last LKA_COMMAND allowed by the fca_giorgio tx hook. LKA_COMMAND_2 must mirror it (the EPS can steer from LKA_COMMAND_2 alone).
   int fca_giorgio_lka_torque_last;
   bool fca_giorgio_lka_steer_req_last;
+  int fca_giorgio_winddown_torque;  // torque the EPS last received; 0 when winddown isn't possible
+  uint32_t fca_giorgio_ts_lka_last;  // time of the last allowed LKA_COMMAND
+  uint32_t fca_giorgio_ts_controls_last;  // time of the last allowed LKA_COMMAND while controls were allowed
 } SafetyState;
 
 typedef struct {

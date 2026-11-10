@@ -17,6 +17,12 @@
 #define FCA_GIORGIO_ACC_2           0x22AU
 #define FCA_GIORGIO_ACC_BUTTON      0x2FAU
 
+// Torque winddown after controls are lost (e.g. brake press). Cutting torque to zero in one frame is suspected of
+// latching EPS LKA_FAULT, and stock LKA always ramps down. After a disengage, allow torque that never grows in
+// magnitude or changes sign, with LKA_ACTIVE set, for a limited time. Like volkswagen_meb's steer power winddown.
+#define FCA_GIORGIO_WINDDOWN_MAX_US 1500000U  // STEER_MAX at 3/frame takes 1 s
+#define FCA_GIORGIO_WINDDOWN_MAX_GAP_US 50000U  // longest gap since the last allowed frame (blocked frames don't count)
+
 static safety_config fca_giorgio_init(uint16_t param) {
   SAFETY_UNUSED(param);
 
@@ -94,6 +100,17 @@ static void fca_giorgio_rx_hook(const CANPacket_t *msg) {
   }
 }
 
+static bool fca_giorgio_winddown_allowed(int desired_torque, bool steer_req, uint32_t ts) {
+  bool allowed = !safety.controls_allowed && steer_req && (desired_torque != 0) && (safety.fca_giorgio_winddown_torque != 0);
+  // same sign, magnitude not growing
+  allowed = allowed && ((desired_torque > 0) == (safety.fca_giorgio_winddown_torque > 0));
+  allowed = allowed && (safety_max_int(desired_torque, -desired_torque) <=
+                        safety_max_int(safety.fca_giorgio_winddown_torque, -safety.fca_giorgio_winddown_torque));
+  allowed = allowed && (safety_get_ts_elapsed(ts, safety.fca_giorgio_ts_lka_last) <= FCA_GIORGIO_WINDDOWN_MAX_GAP_US);
+  allowed = allowed && (safety_get_ts_elapsed(ts, safety.fca_giorgio_ts_controls_last) <= FCA_GIORGIO_WINDDOWN_MAX_US);
+  return allowed;
+}
+
 static bool fca_giorgio_tx_hook(const CANPacket_t *msg) {
   // lateral limits
   const TorqueSteeringLimits FCA_GIORGIO_STEERING_LIMITS = {
@@ -115,13 +132,33 @@ static bool fca_giorgio_tx_hook(const CANPacket_t *msg) {
     // Signal: LKA_COMMAND.LKA_ACTIVE
     bool steer_req = GET_BIT(msg, 12U);
 
-    if (steer_torque_cmd_checks(desired_torque, steer_req, FCA_GIORGIO_STEERING_LIMITS)) {
+    uint32_t ts = safety_ts;
+    bool allowed;
+    if (fca_giorgio_winddown_allowed(desired_torque, steer_req, ts)) {
+      allowed = true;
+      // re-engaging mid-winddown continues the rate limits from here
+      safety.desired_torque_last = desired_torque;
+    } else {
+      allowed = !steer_torque_cmd_checks(desired_torque, steer_req, FCA_GIORGIO_STEERING_LIMITS);
+      if (!allowed && safety.controls_allowed) {
+        // no winddown after a violation; a frame blocked after controls are lost (e.g. one openpilot sent before
+        // it saw the brake) doesn't end the winddown
+        safety.fca_giorgio_winddown_torque = 0;
+      }
+    }
+
+    if (allowed) {
+      safety.fca_giorgio_lka_torque_last = desired_torque;
+      safety.fca_giorgio_lka_steer_req_last = steer_req;
+      safety.fca_giorgio_winddown_torque = desired_torque;
+      safety.fca_giorgio_ts_lka_last = ts;
+      if (safety.controls_allowed) {
+        safety.fca_giorgio_ts_controls_last = ts;
+      }
+    } else {
       tx = false;
       safety.fca_giorgio_lka_torque_last = 0;
       safety.fca_giorgio_lka_steer_req_last = false;
-    } else {
-      safety.fca_giorgio_lka_torque_last = desired_torque;
-      safety.fca_giorgio_lka_steer_req_last = steer_req;
     }
   }
 
