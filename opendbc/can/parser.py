@@ -36,6 +36,10 @@ class MessageState:
       self.last_warning_log_nanos = last_update_nanos
 
   def parse(self, nanos: int, dat: bytes) -> bool:
+    if len(dat) < self.size:
+      self.rate_limited_log(nanos, f"frame truncated: received {len(dat)} bytes, expected {self.size}")
+      return False
+
     tmp_vals: list[float] = [0.0] * len(self.signals)
     checksum_failed = False
     counter_failed = False
@@ -144,8 +148,10 @@ class CANParser:
       msg = self.dbc.addr_to_msg.get(int(name_or_addr))
     else:
       msg = self.dbc.name_to_msg.get(name_or_addr)
-    assert msg is not None
-    assert msg.address not in self.addresses
+    if msg is None:
+      raise RuntimeError(f"could not find message {name_or_addr!r} in DBC {self.dbc_name}")
+    if msg.address in self.addresses:
+      raise RuntimeError(f"Duplicate Message Check: {msg.address}")
 
     self.addresses.add(msg.address)
     signal_names = list(msg.sigs.keys())
@@ -224,7 +230,10 @@ class CANParser:
           continue
         bus_empty = False
         state = self.message_states.get(address)
-        if state is None or len(dat) > 64:
+        if state is None or not isinstance(dat, (bytes, bytearray)) or len(dat) > 64:
+          continue
+        if len(dat) < state.size:
+          state.rate_limited_log(t, f"frame truncated: received {len(dat)} bytes, expected {state.size}")
           continue
         if state.parse(t, dat):
           updated_addrs.add(address)
