@@ -151,7 +151,7 @@ class CAR(Platforms):
     CarSpecs(wheelbase=3.69, steerRatio=17.0),
   )
   LINCOLN_NAVIGATOR_MK4 = FordCANFDPlatformConfig(
-    [],
+    [FordCarDocs("Lincoln Navigator 2023", "Lincoln Co-Pilot360 2.0")],
     # Standard-wheelbase Navigator. The Navigator L has a longer wheelbase.
     CarSpecs(wheelbase=3.1115, steerRatio=19.6),
   )
