@@ -31,11 +31,13 @@ def replay_drive(msgs, safety_mode, param, alternative_experience):
   can_msgs = [m for m in msgs if m.which() in ('can', 'sendcan')]
   start_t = can_msgs[0].logMonoTime
   end_t = can_msgs[-1].logMonoTime
+  last_tick_t = start_t
   for msg in tqdm(can_msgs):
     safety.set_timer((msg.logMonoTime // 1000) % 0xFFFFFFFF)
 
     # skip start and end of route, warm up/down period
-    if msg.logMonoTime - start_t > 1e9 and end_t - msg.logMonoTime > 1e9:
+    if msg.logMonoTime - last_tick_t >= 1e9 and end_t - msg.logMonoTime > 1e9:
+      last_tick_t = msg.logMonoTime
       safety.safety_tick()
       safety_tick_rx_invalid |= not safety.safety_config_valid() or safety_tick_rx_invalid
 
