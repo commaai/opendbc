@@ -63,7 +63,7 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl['BODY_CONTROL']['BLINKER_LEFT'] == 1,
                                                                       cp.vl['BODY_CONTROL']['BLINKER_RIGHT'] == 1)
     ret.doorOpen = bool(cp.vl['BODY_CONTROL']['DRIVER_DOOR_OPEN'])
-    ret.seatbeltUnlatched = not bool(cp.vl['VEHICLE_ACCEL']['SEATBELT_BUCKLED'])
+    ret.seatbeltUnlatched = bool(cp.vl['SEATBELT']['DRIVER_SEATBELT_UNLATCHED'])
 
     # blind-spot radars: silent when stopped, so they are not timeout-checked (see get_can_parsers)
     ret.leftBlindspot = bool(cp.vl['BSD_LEFT']['OBJECT_DETECTED'])
