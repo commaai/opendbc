@@ -63,6 +63,10 @@ mg:
   - changed-files:
     - any-glob-to-any-file: 'opendbc/car/mg/**'
 
+leapmotor:
+  - changed-files:
+    - any-glob-to-any-file: 'opendbc/car/leapmotor/**'
+
 subaru:
   - changed-files:
     - any-glob-to-any-file: 'opendbc/car/subaru/**'

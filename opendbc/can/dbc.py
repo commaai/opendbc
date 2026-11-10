@@ -21,6 +21,7 @@ from opendbc.car.psa.psacan import psa_checksum
 from opendbc.car.rivian.riviancan import rivian_checksum
 from opendbc.car.ford.fordcan import FORD_CHECKSUM_FIELDS, ford_checksum
 from opendbc.car.mg.mgcan import mg_checksum
+from opendbc.car.leapmotor.leapmotorcan import leapmotor_checksum
 
 
 class SignalType:
@@ -42,6 +43,7 @@ class SignalType:
   RIVIAN_CHECKSUM = 15
   FORD_CHECKSUM = 16
   MG_CHECKSUM = 17
+  LEAPMOTOR_CHECKSUM = 18
 
 
 @dataclass
@@ -253,6 +255,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.MG_CHECKSUM, mg_checksum, checksum_pattern=r"Chksm|^ChLKARespToqPVHSC2$")
   elif dbc_name == "rivian_primary_actuator":
     return ChecksumState(SignalType.RIVIAN_CHECKSUM, rivian_checksum, checksum_pattern=r"_Checksum$")
+  elif dbc_name.startswith("leapmotor_"):
+    return ChecksumState(SignalType.LEAPMOTOR_CHECKSUM, leapmotor_checksum)
   return None
 
 
