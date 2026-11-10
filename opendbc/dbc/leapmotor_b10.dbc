@@ -63,7 +63,7 @@ BO_ 389 VEHICLE_ACCEL: 16 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ LONG_ACCEL : 48|10@1+ (0.03125,-16) [-16|15.97] "m/s^2" XXX
- SG_ SEATBELT_BUCKLED : 83|1@1+ (1,0) [0|1] "" XXX
+ SG_ SEATBELT_REMINDER : 83|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 656 BODY_CONTROL: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -123,6 +123,11 @@ BO_ 554 BSD_RIGHT: 32 XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ OBJECT_DETECTED : 17|1@1+ (1,0) [0|1] "" XXX
 
+BO_ 675 SEATBELT: 16 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ DRIVER_SEATBELT_UNLATCHED : 31|1@1+ (1,0) [0|1] "" XXX
+
 BO_ 589 CLUSTER: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
@@ -130,7 +135,7 @@ BO_ 589 CLUSTER: 32 XXX
  SG_ ASSIST_ENGAGED_COPY : 131|1@1+ (1,0) [0|1] "" XXX
  SG_ LCC_ENGAGED : 132|1@1+ (1,0) [0|1] "" XXX
 
-CM_ "DRAFT for Leapmotor B10. Checksums: see CHECKSUM comments and checksum_constants.json. Reverse engineered from comma rlogs. Each signal comment says CONFIRMED (matched filmed actions), INFERRED or WEAK. Receive only: do not use for transmit.";
+CM_ "Leapmotor B10 (2025, global market), reverse engineered from comma rlogs. Checksums are AUTOSAR E2E Profile 2 with per-message constants (see CHECKSUM comments). Each signal comment says CONFIRMED (matched filmed actions or a dedicated test), INFERRED or WEAK.";
 CM_ SG_ 388 WHEEL_SPEED_FL "CONFIRMED: positions from filmed figure-eights: front/rear rises from 1.02 straight to 1.27 near lock, and the left wheels run faster when steering right. Scale matches GPS within 0.1 km/h at a filmed steady 30 km/h. within about 1% of GPS above 60 km/h up to 126 km/h. Width at least 14 bits; no wrap in about 11 hours of logs.";
 CM_ SG_ 388 WHEEL_SPEED_FR "CONFIRMED: positions from filmed figure-eights: front/rear rises from 1.02 straight to 1.27 near lock, and the left wheels run faster when steering right. Scale matches GPS within 0.1 km/h at a filmed steady 30 km/h. within about 1% of GPS above 60 km/h up to 126 km/h. Width at least 14 bits; no wrap in about 11 hours of logs.";
 CM_ SG_ 388 WHEEL_SPEED_RL "CONFIRMED: positions from filmed figure-eights: front/rear rises from 1.02 straight to 1.27 near lock, and the left wheels run faster when steering right. Scale matches GPS within 0.1 km/h at a filmed steady 30 km/h. within about 1% of GPS above 60 km/h up to 126 km/h. Width at least 14 bits; no wrap in about 11 hours of logs.";
@@ -138,6 +143,7 @@ CM_ SG_ 388 WHEEL_SPEED_RR "CONFIRMED: positions from filmed figure-eights: fron
 CM_ SG_ 563 YAW_RATE "INFERRED scale, sign CONFIRMED: positive = turning left (openpilot convention); raw rises when turning right, r +0.994 to +1.000 against the comma gyro (livePose.angularVelocityDevice.z, positive right) on 3 traces. R2 0.993-0.999 against livePose on 5 datasets. Fit gives 0.0196; 0.02 assumed.";
 CM_ SG_ 389 LONG_ACCEL "INFERRED: R2 0.70-0.95 against livePose on 5 datasets. Same encoding as the Leapmotor T03 DBC (10 bits, offset -16), which matches the earlier 9-bit signed reading over the logged range. No wrap down to -6.8 m/s^2.";
 CM_ SG_ 589 DISPLAY_SPEED "CONFIRMED: equal to the filmed dashboard speed in 6 of 6 checks (50, 70, 100 km/h). Reads about 3.5 percent above the wheel speeds, as dashboards do.";
+CM_ SG_ 675 DRIVER_SEATBELT_UNLATCHED "CONFIRMED: 1 when the driver belt is unbuckled. Followed 4 of 4 buckle actions in a live capture (cluster warning 0x24D bit 146 0.5 s later), the filmed belt step of recording 1, and read 0 (buckled) at every seatbeltNotLatched refusal caused by the old signal. Constant over whole drives with the belt on.";
 CM_ BO_ 552 "Rear-left blind-spot radar (20 Hz, silent when stopped). Bytes 8-15 carry object data when something is detected.";
 CM_ SG_ 552 OBJECT_DETECTED "CONFIRMED on video: on 3 of 3 checked episodes a car appeared in the left lane beside the B10 in the road camera within 1 s of the flag clearing. Set in 8.5% of driving above 50 km/h, less often while signalling left (drivers wait for a clear lane).";
 CM_ BO_ 554 "Rear-right blind-spot radar, same layout as BSD_LEFT (0x228).";
@@ -159,7 +165,7 @@ CM_ SG_ 131 LCC_UNKNOWN_128 "UNKNOWN: 1 except while LCC steers, then varies (57
 CM_ SG_ 131 LCC_UNKNOWN_136 "UNKNOWN: 8 except while LCC steers, then varies. Copied from the camera frame.";
 CM_ SG_ 131 UNKNOWN_90 "UNKNOWN: 28 on nearly every frame; a handful of other values. Copied from the camera frame.";
 CM_ SG_ 131 STEER_ANGLE_REQ "INFERRED, strong: the LCC steering angle request, same encoding as STEER_ANGLE (positive = left; r 1.000 with it). On 5 routes it leads the measured angle (0x18D) by 70-100 ms while LCC steers, and the request-minus-measured gap tracks the LCC torque (r +0.35 to +0.59). In manual driving it lags by 20-30 ms, so it echoes the measured angle when not steering. Sent by the ADAS unit (its own clock, with 0x142/0x229/0x2D1/0x2D5). No torque request found in this frame. Whether the camera sends it, so a camera harness can replace it, is not yet confirmed: see the planned unplug test.";
-CM_ SG_ 389 SEATBELT_BUCKLED "CONFIRMED by the filmed belt step: the driver started unbuckled, buckled, then unbuckled, and this is 1 for those 9.4 s. Mirrored on 0x2A3 bit 31, 0x229 bits 33 and 35, 0x24D bit 146.";
+CM_ SG_ 389 SEATBELT_REMINDER "INFERRED, NOT the belt state: matches the belt only before READY. While driving it follows standstill (0 when stopped, 1 when moving) with the belt buckled, which made openpilot refuse to engage from a stop. Use SEATBELT.DRIVER_SEATBELT_UNLATCHED.";
 CM_ SG_ 656 BLINKER_LEFT "CONFIRMED by filmed step order: left, right, then hazards. Flips every 0.40 s. Both blinker bits on means hazards.";
 CM_ SG_ 656 BLINKER_RIGHT "CONFIRMED by filmed step order: left, right, then hazards. Flips every 0.40 s.";
 CM_ SG_ 656 DRIVER_DOOR_OPEN "CONFIRMED once by filmed door opening; 1 for 11.5 s. Bit 46 did the same, so one may be another door or a lamp.";
