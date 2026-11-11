@@ -421,6 +421,7 @@ bool safety_tx_hook(CANPacket_t *msg) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
+  safety_ts = microsecond_timer_get();
   current_copy = &safety_b;
   int destination_bus_b = fwd_hook_copy(bus_num, addr);
   current_copy = &safety_a;
