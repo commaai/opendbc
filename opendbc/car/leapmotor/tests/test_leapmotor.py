@@ -23,7 +23,7 @@ REAL_ADAS_LKA = {
     "4008004464918900007D0070002D7E000178007D000000000000000000000000",
   ],
 }
-STEERING_BYTES = {12, 13, 14, 17}  # LCC_STEERING_ACTIVE_COPY (bit 99), STEER_ANGLE_REQ (104|16), LCC_STATE (140|4)
+STEERING_BYTES = {12, 13, 14, 16, 17}  # LCC_STEERING_ACTIVE_COPY (bit 99), STEER_ANGLE_REQ (104|16), LCC_RAMP (128|16)
 
 # Real POWERTRAIN_STATE (0xB7) frames while driving with ACC engaged
 REAL_POWERTRAIN_STATE = [
@@ -88,7 +88,8 @@ class TestLeapmotorCan(unittest.TestCase):
         for lat_active, angle in ((False, camera["STEER_ANGLE_REQ"]), (True, -123.46), (True, 456.78)):
           with self.subTest(kind=kind, lat_active=lat_active, angle=angle):
             packer = CANPacker("leapmotor_b10")
-            addr, out, bus = leapmotorcan.create_steering_control(packer, camera, angle, lat_active)
+            ramp = 0x6B0F  # a value in the middle of the stock ramp
+            addr, out, bus = leapmotorcan.create_steering_control(packer, camera, angle, lat_active, ramp)
             self.assertEqual((addr, bus), (0x83, 0))
             self.assertEqual(out[0], leapmotor_checksum(0x83, None, bytearray(out)))
             for i in range(2, len(dat)):
@@ -97,13 +98,27 @@ class TestLeapmotorCan(unittest.TestCase):
             got = self.unpack(bytes(out))
             self.assertAlmostEqual(got["STEER_ANGLE_REQ"], angle, delta=0.011)
             self.assertEqual(got["LCC_STEERING_ACTIVE_COPY"], int(lat_active))
-            expected_state = camera["LCC_STATE"]
-            if lat_active and camera["LCC_STATE"] not in leapmotorcan.LCC_STATES_STEERING:
-              expected_state = leapmotorcan.LCC_STATE_ACTIVE
-            self.assertEqual(got["LCC_STATE"], expected_state)
+            # LCC_RAMP: openpilot's ramp while steering, the camera's otherwise
+            self.assertEqual(got["LCC_RAMP"], ramp if lat_active else camera["LCC_RAMP"])
             # the ACC fields pass through untouched
             for sig in ("ACC_STATE", "ACC_ACCEL_REQ", "ACC_SET_SPEED", "ASSIST_OFF", "CONSTANT_72", "CONSTANT_152"):
               self.assertEqual(got[sig], camera[sig], sig)
+
+  def test_lcc_ramp_matches_stock(self):
+    # stock LCC engagement: LCC_RAMP goes 0x7801, 0x7703, 0x7605, ... down by 254 per frame, then jumps back
+    word, seen = leapmotorcan.LCC_RAMP_IDLE, []
+    for _ in range(40):
+      word = leapmotorcan.lcc_ramp_next(word, True)
+      seen.append(word)
+    self.assertEqual(seen[:3], [0x7703, 0x7605, 0x7507])
+    self.assertEqual(seen.index(leapmotorcan.LCC_RAMP_STEER), 29)  # 30 frames at 50 Hz, about 0.6 s
+    self.assertEqual(seen[-1], leapmotorcan.LCC_RAMP_STEER)
+    self.assertEqual(leapmotorcan.lcc_ramp_next(seen[-1], False), leapmotorcan.LCC_RAMP_IDLE)
+    # the real stock frames agree: idle when not steering, inside the stock range while steering
+    for hexdata in REAL_ADAS_LKA["acc"] + REAL_ADAS_LKA["off"]:
+      self.assertEqual(self.unpack(bytes.fromhex(hexdata))["LCC_RAMP"], leapmotorcan.LCC_RAMP_IDLE)
+    for hexdata in REAL_ADAS_LKA["lcc"]:
+      self.assertTrue(0x5000 <= self.unpack(bytes.fromhex(hexdata))["LCC_RAMP"] < 0x6000)
 
 
 if __name__ == "__main__":
