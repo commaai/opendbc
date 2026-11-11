@@ -193,6 +193,26 @@ class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSaf
       self.assertTrue(self._rx(self._user_gas_msg(0)), f"{count=}")
       self.assertTrue(self._rx(self._pcm_status_msg(False)), f"{count=}")
 
+  def test_rx_checksum_counter(self):
+    for name, bus, length in (("ABS_1", 0, 8), ("ABS_3", 0, 8), ("ENGINE_2", 0, 8), ("EPS_2", 0, 7), ("ACC_2", 2, 8)):
+      with self.subTest(msg=name):
+        # an expected counter sequence is always accepted, and clears the wrong counter count
+        for _ in range(common.MAX_WRONG_COUNTERS + 1):
+          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, bus, {})))
+
+        # a bad checksum (the last byte) fails, and disables controls
+        self.safety.set_controls_allowed(True)
+        msg = self.packer.make_can_msg_safety(name, bus, {})
+        msg[0].data[length - 1] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+        self.assertFalse(self.safety.get_controls_allowed())
+
+        # a stuck counter fails as well, its checksum is still correct
+        msg[0].data[length - 1] ^= 0xFF
+        for i in range(common.MAX_WRONG_COUNTERS):
+          should_rx = i < common.MAX_WRONG_COUNTERS - 1
+          self.assertEqual(should_rx, self._rx(msg))
+
 
 if __name__ == "__main__":
   unittest.main()
