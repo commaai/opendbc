@@ -8,11 +8,16 @@ def create_steering_control(packer, bus, msg, apply_steer, lat_active):
 
 
 def create_lka_hud_2_control(packer, bus, lat_active):
+  # Cluster lane display. Stock values (NEW_SIGNAL_1, LKA_ACTIVE) seen with the dash video:
+  #   (6, 0) white lines, green curve: lane assist ready
+  #   (1, 0) white lines: lane assist not ready
+  #   (2, 1), (4, 1) right line yellow; (0, 1), (3, 1) left line yellow: correcting a lane departure
+  # Stock sets LKA_ACTIVE only during a short correction. Holding it for a whole engagement showed a
+  # yellow line and curve, and is suspected of the "Stay in Lane" nag. It doesn't affect the EPS.
   values = {
     "LKA_DISABLE": 0,
-    # roughly: bit 1 = lane detection on, bit 2 = right line detected, bit 4 = left line detected
-    "NEW_SIGNAL_1": 6,
-    "LKA_ACTIVE": lat_active,
+    "NEW_SIGNAL_1": 6 if lat_active else 1,
+    "LKA_ACTIVE": 0,
   }
 
   return packer.make_can_msg("LKA_HUD_2", bus, values)
