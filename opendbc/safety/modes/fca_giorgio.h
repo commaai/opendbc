@@ -11,7 +11,6 @@
 #define FCA_GIORGIO_LKA_COMMAND     0x1F6U
 #define FCA_GIORGIO_LKA_COMMAND_2   0x117U
 // TODO: this isn't actually an LKA message on promester, coming from radar ECU
-#define FCA_GIORGIO_LKA_HUD_1       0x4AEU
 #define FCA_GIORGIO_LKA_HUD_2       0x547U
 #define FCA_GIORGIO_LKA_HUD_3       0x5A2U
 #define FCA_GIORGIO_ACC_2           0x22AU
@@ -29,7 +28,6 @@ static safety_config fca_giorgio_init(uint16_t param) {
   static const CanMsg FCA_GIORGIO_TX_MSGS[] = {
     {FCA_GIORGIO_LKA_COMMAND, 0, 4, .check_relay = true},
     {FCA_GIORGIO_LKA_COMMAND_2, 0, 4, .check_relay = true},
-    {FCA_GIORGIO_LKA_HUD_1, 0, 8, .check_relay = true},
     {FCA_GIORGIO_LKA_HUD_2, 0, 8, .check_relay = true},
     {FCA_GIORGIO_LKA_HUD_3, 0, 8, .check_relay = true},
     {FCA_GIORGIO_ACC_BUTTON, 2, 4, .check_relay = false},
