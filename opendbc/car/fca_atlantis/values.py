@@ -13,22 +13,23 @@ class CarControllerParams:
   HUD_2_STEP = 25
   HUD_3_STEP = 100
 
-  STEER_MAX = 300
+  # Torque values are in LKA_COMMAND_2 units, 4x the LKA_COMMAND scale. Driver torque values are in EPS_2 units.
+  STEER_MAX = 1200
   STEER_THRESHOLD = 140
   STEER_DRIVER_ALLOWANCE = 80
-  STEER_DRIVER_MULTIPLIER = 2
+  STEER_DRIVER_MULTIPLIER = 8
   STEER_DRIVER_FACTOR = 1  # from dbc
-  STEER_DELTA_UP = 3  # stock LKA ramps at up to 3/frame
-  STEER_DELTA_DOWN = 3
+  STEER_DELTA_UP = 12  # stock LKA ramps at up to 12/frame
+  STEER_DELTA_DOWN = 12
   STEER_RELEASE_HOLD_FRAMES = 3  # frames to keep LKA_ACTIVE at zero torque before releasing
-  # Steering friction compensation added to the PID controller's output, up to the measured friction (9-11 counts).
+  # Steering friction compensation added to the PID controller's output, up to the measured friction (36-44 counts).
   # The full push is kept down to walking pace so the wheel breaks loose instead of sticking. Below ~35 mph the band
   # widens instead, keeping the response to small angle errors near the torque controller at lateral accel factor 10
-  # (about 3-7 counts/deg), the only tune known to be calm on the van at low speed: the planner reacts to the van's
+  # (about 12-28 counts/deg), the only tune known to be calm on the van at low speed: the planner reacts to the van's
   # motion with ~0.5 s lag, so a stiffer response risks a ~1 Hz oscillation through it.
-  # STEER_FRICTION 9-11 considered: higher means less low-speed stick-slip and tighter tracking, but more torque jitter
-  #   and low-speed gain (oscillation risk). Starting at 9; raise if stick-slip remains.
-  STEER_FRICTION = 9  # counts
+  # STEER_FRICTION 36-44 considered: higher means less low-speed stick-slip and tighter tracking, but more torque jitter
+  #   and low-speed gain (oscillation risk). Starting at 36; raise if stick-slip remains.
+  STEER_FRICTION = 36  # counts
   STEER_FRICTION_FADE_BP = [1., 3.]  # m/s: full push above
   STEER_FRICTION_BAND_BP = [5., 15.]  # m/s
   STEER_FRICTION_BAND_V = [3.0, 1.0]  # angle error (deg) for full push

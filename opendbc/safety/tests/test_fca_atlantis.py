@@ -2,6 +2,7 @@
 import itertools
 import unittest
 from opendbc.car.structs import CarParams
+from opendbc.car.fca_atlantis.fca_atlantiscan import lka_command_torque
 import opendbc.safety.tests.common as common
 
 class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
@@ -10,13 +11,14 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
 
   RELAY_MALFUNCTION_ADDRS = {0: (0x117, 0x1F6, 0x547, 0x5A2)}
 
-  MAX_RATE_UP = 3
-  MAX_RATE_DOWN = 3
-  MAX_TORQUE_LOOKUP = [0], [300]
-  MAX_RT_DELTA = 112
+  # LKA_COMMAND_2 units (4x LKA_COMMAND)
+  MAX_RATE_UP = 12
+  MAX_RATE_DOWN = 12
+  MAX_TORQUE_LOOKUP = [0], [1200]
+  MAX_RT_DELTA = 448
 
   DRIVER_TORQUE_ALLOWANCE = 80
-  DRIVER_TORQUE_FACTOR = 2
+  DRIVER_TORQUE_FACTOR = 8
 
   TX_MSGS = [[0x117, 0], [0x1F6, 0], [0x547, 0], [0x5A2, 0], [0x2FA, 2]]
   STANDSTILL_THRESHOLD = 0
@@ -49,41 +51,57 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"LKA_TORQUE": torque, "LKA_ACTIVE": steer_req}
-    return self.packer.make_can_msg_safety("LKA_COMMAND", 0, values)
-
-  def _torque_cmd_2_msg(self, torque, steer_req=1):
-    values = {"LKA_TORQUE": torque, "LKA_ACTIVE": steer_req}
     return self.packer.make_can_msg_safety("LKA_COMMAND_2", 0, values)
 
-  def test_lka_command_2_mirrors_lka_command(self):
+  def _torque_cmd_1_msg(self, torque, steer_req=1):
+    values = {"LKA_TORQUE": torque, "LKA_ACTIVE": steer_req}
+    return self.packer.make_can_msg_safety("LKA_COMMAND", 0, values)
+
+  TORQUES = (0, 5, 6, 12, 22, 10, 0, -2, -6, -12, -22)
+
+  def test_lka_command_mirrors_lka_command_2(self):
     self.safety.set_controls_allowed(True)
     self._set_prev_torque(0)
     self._rx(self._torque_driver_msg(0))
-    for torque in (0, 3, 6, 3, 0, -3, -6):
+    for torque in self.TORQUES:
       self.assertTrue(self._tx(self._torque_cmd_msg(torque)))
-      # anything but an exact 4x copy is blocked, and leaves the copy allowed: different torque, or LKA_ACTIVE
-      self.assertFalse(self._tx(self._torque_cmd_2_msg(torque * 4 + 4)))
-      self.assertFalse(self._tx(self._torque_cmd_2_msg(torque * 4 + 1)))
-      self.assertFalse(self._tx(self._torque_cmd_2_msg(torque * 4, steer_req=0)))
-      self.assertTrue(self._tx(self._torque_cmd_2_msg(torque * 4)))
+      # anything but LKA_COMMAND_2 / 4 (rounded either way) is blocked, and leaves the copy allowed
+      for torque_1 in range(torque // 4 - 2, torque // 4 + 3):
+        if abs(torque_1 * 4 - torque) > 2:
+          self.assertFalse(self._tx(self._torque_cmd_1_msg(torque_1)), f"{torque=} {torque_1=}")
+      self.assertFalse(self._tx(self._torque_cmd_1_msg(lka_command_torque(torque), steer_req=0)))
+      # what carcontroller sends is allowed, once
+      self.assertTrue(self._tx(self._torque_cmd_1_msg(lka_command_torque(torque))))
+      self.assertFalse(self._tx(self._torque_cmd_1_msg(lka_command_torque(torque))))
 
-  def test_lka_command_2_zero_after_blocked_lka_command(self):
+  def test_lka_command_rounding(self):
+    # either rounding direction is allowed
     self.safety.set_controls_allowed(True)
     self._set_prev_torque(0)
     self._rx(self._torque_driver_msg(0))
-    self.assertTrue(self._tx(self._torque_cmd_msg(3)))
-    # rate limit violation blocks LKA_COMMAND; LKA_COMMAND_2 can't carry that torque or the last allowed one
-    self.assertFalse(self._tx(self._torque_cmd_msg(3 + self.MAX_RATE_UP + 1)))
-    self.assertFalse(self._tx(self._torque_cmd_2_msg((3 + self.MAX_RATE_UP + 1) * 4)))
-    self.assertFalse(self._tx(self._torque_cmd_2_msg(3 * 4)))
-    self.assertTrue(self._tx(self._torque_cmd_2_msg(0, steer_req=0)))
+    for torque in self.TORQUES:
+      for torque_1 in range(torque // 4 - 2, torque // 4 + 3):
+        if abs(torque_1 * 4 - torque) <= 2:
+          self.assertTrue(self._tx(self._torque_cmd_msg(torque)))
+          self.assertTrue(self._tx(self._torque_cmd_1_msg(torque_1)), f"{torque=} {torque_1=}")
 
-  def test_lka_command_2_without_controls(self):
+  def test_lka_command_zero_after_blocked_lka_command_2(self):
+    self.safety.set_controls_allowed(True)
+    self._set_prev_torque(0)
+    self._rx(self._torque_driver_msg(0))
+    self.assertTrue(self._tx(self._torque_cmd_msg(12)))
+    # rate limit violation blocks LKA_COMMAND_2; LKA_COMMAND can't carry that torque or the last allowed one
+    self.assertFalse(self._tx(self._torque_cmd_msg(12 + self.MAX_RATE_UP + 4)))
+    self.assertFalse(self._tx(self._torque_cmd_1_msg((12 + self.MAX_RATE_UP + 4) // 4)))
+    self.assertFalse(self._tx(self._torque_cmd_1_msg(12 // 4)))
+    self.assertTrue(self._tx(self._torque_cmd_1_msg(0, steer_req=0)))
+
+  def test_lka_command_without_controls(self):
     self.safety.set_controls_allowed(False)
-    self.assertFalse(self._tx(self._torque_cmd_2_msg(100)))
+    self.assertFalse(self._tx(self._torque_cmd_1_msg(25)))
     self.assertTrue(self._tx(self._torque_cmd_msg(0, steer_req=0)))
-    self.assertTrue(self._tx(self._torque_cmd_2_msg(0, steer_req=0)))
-    self.assertFalse(self._tx(self._torque_cmd_2_msg(4, steer_req=0)))
+    self.assertTrue(self._tx(self._torque_cmd_1_msg(0, steer_req=0)))
+    self.assertFalse(self._tx(self._torque_cmd_1_msg(1, steer_req=0)))
 
   def _engage_with_torque(self, torque):
     self.safety.set_controls_allowed(True)
@@ -95,87 +113,87 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
     for sign in (1, -1):
       self._reset_safety_hooks()
       self.safety.init_tests()
-      self._engage_with_torque(sign * 30)
+      self._engage_with_torque(sign * 120)
       self.safety.set_controls_allowed(False)
       # magnitude may hold or shrink, never grow
-      self.assertTrue(self._tx(self._torque_cmd_msg(sign * 30)))
-      self.assertFalse(self._tx(self._torque_cmd_msg(sign * 31)))
-      for torque in range(27, 0, -3):
+      self.assertTrue(self._tx(self._torque_cmd_msg(sign * 120)))
+      self.assertFalse(self._tx(self._torque_cmd_msg(sign * 121)))
+      for torque in range(108, 0, -12):
         self.assertTrue(self._tx(self._torque_cmd_msg(sign * torque)))
       # down to the smallest torque, which may also hold
-      for torque in (2, 1, 1):
+      for torque in (8, 4, 1, 1):
         self.assertTrue(self._tx(self._torque_cmd_msg(sign * torque)))
       # winddown ends at zero
       self.assertTrue(self._tx(self._torque_cmd_msg(0)))
-      self.assertFalse(self._tx(self._torque_cmd_msg(sign * 3)))
+      self.assertFalse(self._tx(self._torque_cmd_msg(sign * 12)))
 
   def test_winddown_limits(self):
     # no sign change, and LKA_ACTIVE must stay set
-    self._engage_with_torque(30)
+    self._engage_with_torque(120)
     self.safety.set_controls_allowed(False)
-    self.assertFalse(self._tx(self._torque_cmd_msg(-3)))
-    self.assertFalse(self._tx(self._torque_cmd_msg(27, steer_req=0)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(-12)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(108, steer_req=0)))
     # blocked frames don't end the winddown (openpilot may send a frame or two before it sees the brake)
-    self.assertTrue(self._tx(self._torque_cmd_msg(27)))
+    self.assertTrue(self._tx(self._torque_cmd_msg(108)))
 
   def test_winddown_limit_over_time(self):
     # the limit falls from the last torque allowed while engaged, MAX_RATE_DOWN per frame after the slack,
     # and reaches zero by itself
-    self._engage_with_torque(300)
+    self._engage_with_torque(1200)
     self.safety.set_controls_allowed(False)
     frame = 1
     while True:
-      limit = min(300, 300 - self.MAX_RATE_DOWN * (frame - self.WINDDOWN_SLACK_FRAMES))
+      limit = min(1200, 1200 - self.MAX_RATE_DOWN * (frame - self.WINDDOWN_SLACK_FRAMES))
       t = frame * self.FRAME_US
       self.assertFalse(self._tx_frame(t, limit + 1), f"{frame=}")
       if limit <= 0:
         break
       self.assertTrue(self._tx_frame(t, limit), f"{frame=}")
       frame += 1
-    self.assertEqual(frame, 300 // self.MAX_RATE_DOWN + self.WINDDOWN_SLACK_FRAMES)
+    self.assertEqual(frame, 1200 // self.MAX_RATE_DOWN + self.WINDDOWN_SLACK_FRAMES)
 
   def test_winddown_tolerates_late_frames(self):
     # frames up to the slack late (e.g. openpilot stalls), then on schedule again, are still allowed
-    self._engage_with_torque(300)
+    self._engage_with_torque(1200)
     self.safety.set_controls_allowed(False)
-    for frame, torque in enumerate(range(297, 0, -self.MAX_RATE_DOWN), start=1 + self.WINDDOWN_SLACK_FRAMES):
+    for frame, torque in enumerate(range(1188, 0, -self.MAX_RATE_DOWN), start=1 + self.WINDDOWN_SLACK_FRAMES):
       self.assertTrue(self._tx_frame(frame * self.FRAME_US, torque), f"{torque=}")
 
   def test_no_winddown_after_violation(self):
-    self._engage_with_torque(30)
+    self._engage_with_torque(120)
     # rate limit violation while engaged
-    self.assertFalse(self._tx(self._torque_cmd_msg(30 + self.MAX_RATE_UP + 1)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(120 + self.MAX_RATE_UP + 1)))
     self.safety.set_controls_allowed(False)
-    self.assertFalse(self._tx(self._torque_cmd_msg(27)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(108)))
 
   def test_no_winddown_without_prior_torque(self):
     self._engage_with_torque(0)
     self.safety.set_controls_allowed(False)
-    self.assertFalse(self._tx(self._torque_cmd_msg(3)))
+    self.assertFalse(self._tx(self._torque_cmd_msg(12)))
 
   def test_winddown_on_brake(self):
     self._rx(self._speed_msg(100))
     self._rx(self._user_brake_msg(False))
-    self._engage_with_torque(30)
+    self._engage_with_torque(120)
     self._rx(self._user_brake_msg(True))
     self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self._tx(self._torque_cmd_msg(33)))
-    for torque in range(30, -1, -3):
+    self.assertFalse(self._tx(self._torque_cmd_msg(132)))
+    for torque in range(120, -1, -12):
       self.assertTrue(self._tx(self._torque_cmd_msg(torque)))
-      self.assertTrue(self._tx(self._torque_cmd_2_msg(torque * 4)))
-      self.assertFalse(self._tx(self._torque_cmd_2_msg(torque * 4 + 4)))
+      self.assertFalse(self._tx(self._torque_cmd_1_msg(torque // 4 + 1)))
+      self.assertTrue(self._tx(self._torque_cmd_1_msg(torque // 4)))
 
   def test_reengage_during_winddown(self):
     for sign in (1, -1):
       self._reset_safety_hooks()
       self.safety.init_tests()
-      self._engage_with_torque(sign * 30)
+      self._engage_with_torque(sign * 120)
       self.safety.set_controls_allowed(False)
-      self.assertTrue(self._tx(self._torque_cmd_msg(sign * 27)))
+      self.assertTrue(self._tx(self._torque_cmd_msg(sign * 108)))
       self.safety.set_controls_allowed(True)
       # rate limits continue from the last winddown frame
-      self.assertTrue(self._tx(self._torque_cmd_msg(sign * (27 + self.MAX_RATE_UP))))
-      self.assertFalse(self._tx(self._torque_cmd_msg(sign * (30 + self.MAX_RATE_UP + 1))))
+      self.assertTrue(self._tx(self._torque_cmd_msg(sign * (108 + self.MAX_RATE_UP))))
+      self.assertFalse(self._tx(self._torque_cmd_msg(sign * (120 + self.MAX_RATE_UP + 1))))
 
   # Known bugs. Frames are 10 ms apart, as openpilot sends them.
   FRAME_US = 10000
@@ -189,29 +207,29 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
     # limits in a state where re-engaging mid-winddown, still above MAX_RT_DELTA, is blocked indefinitely.
     self._rx(self._speed_msg(100))
     self._rx(self._user_brake_msg(False))
-    self._engage_with_torque(200)
+    self._engage_with_torque(800)
     self._rx(self._user_brake_msg(True))
     t = self.FRAME_US
-    self.assertFalse(self._tx_frame(t, 203))
-    for torque in (200, 197, 194, 191):
+    self.assertFalse(self._tx_frame(t, 812))
+    for torque in (800, 788, 776, 764):
       t += self.FRAME_US
       self.assertTrue(self._tx_frame(t, torque))
     self._rx(self._user_brake_msg(False))
     self.safety.set_controls_allowed(True)
     # openpilot ramps back up from its last torque
-    for torque in (194, 197, 200, 200, 200):
+    for torque in (776, 788, 800, 800, 800):
       t += self.FRAME_US
       self.assertTrue(self._tx_frame(t, torque), f"{torque=}")
 
   def test_winddown_state_expires(self):
     # The winddown must not leave rate limit state behind: after openpilot goes silent, re-engaging must start
     # from zero torque, not continue from the last winddown frame.
-    self._engage_with_torque(200)
+    self._engage_with_torque(800)
     self.safety.set_controls_allowed(False)
-    self.assertTrue(self._tx_frame(self.FRAME_US, 200))
+    self.assertTrue(self._tx_frame(self.FRAME_US, 800))
     self.safety.set_controls_allowed(True)
     t = 5_000_000
-    self.assertFalse(self._tx_frame(t, 200))
+    self.assertFalse(self._tx_frame(t, 800))
     self.assertTrue(self._tx_frame(t + self.FRAME_US, self.MAX_RATE_UP))
 
   WINDDOWN_SLACK_FRAMES = 5  # frames of delay tolerated before torque must fall
@@ -221,30 +239,30 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
     for sign in (1, -1):
       self._reset_safety_hooks()
       self.safety.init_tests()
-      self._engage_with_torque(sign * 300)
+      self._engage_with_torque(sign * 1200)
       self.safety.set_controls_allowed(False)
       # it may hold within the slack (openpilot may not have seen the disengage yet, or be late), then not
       for frame in range(1, self.WINDDOWN_SLACK_FRAMES + 1):
-        self.assertTrue(self._tx_frame(frame * self.FRAME_US, sign * 300), f"{frame=}")
-      self.assertFalse(self._tx_frame((self.WINDDOWN_SLACK_FRAMES + 1) * self.FRAME_US, sign * 300))
+        self.assertTrue(self._tx_frame(frame * self.FRAME_US, sign * 1200), f"{frame=}")
+      self.assertFalse(self._tx_frame((self.WINDDOWN_SLACK_FRAMES + 1) * self.FRAME_US, sign * 1200))
 
       # the full ramp is allowed, down to zero within about a second
       self._reset_safety_hooks()
       self.safety.init_tests()
-      self._engage_with_torque(sign * 300)
+      self._engage_with_torque(sign * 1200)
       self.safety.set_controls_allowed(False)
-      for frame, torque in enumerate(range(297, 0, -self.MAX_RATE_DOWN), start=1):
+      for frame, torque in enumerate(range(1188, 0, -self.MAX_RATE_DOWN), start=1):
         self.assertTrue(self._tx_frame(frame * self.FRAME_US, sign * torque), f"{torque=}")
 
-  def test_lka_command_2_once_per_lka_command(self):
-    # Each allowed LKA_COMMAND allows one LKA_COMMAND_2 copy. The EPS can steer from LKA_COMMAND_2 alone, so
-    # repeating a copy must not keep torque applied after openpilot stops sending LKA_COMMAND.
-    self._engage_with_torque(30)
-    self.assertTrue(self._tx(self._torque_cmd_2_msg(30 * 4)))
-    self.assertFalse(self._tx(self._torque_cmd_2_msg(30 * 4)))
+  def test_lka_command_once_per_lka_command_2(self):
+    # Each allowed LKA_COMMAND_2 allows one LKA_COMMAND copy, so repeating a copy can't keep torque applied after
+    # openpilot stops sending LKA_COMMAND_2.
+    self._engage_with_torque(120)
+    self.assertTrue(self._tx(self._torque_cmd_1_msg(30)))
+    self.assertFalse(self._tx(self._torque_cmd_1_msg(30)))
     self.safety.set_controls_allowed(False)
     for _ in range(10):
-      self.assertFalse(self._tx(self._torque_cmd_2_msg(30 * 4)))
+      self.assertFalse(self._tx(self._torque_cmd_1_msg(30)))
 
   def test_buttons(self):
     for controls_allowed in (True, False):

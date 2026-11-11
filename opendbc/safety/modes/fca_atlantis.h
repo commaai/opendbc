@@ -19,8 +19,8 @@
 // latching EPS LKA_FAULT, and stock LKA always ramps down. After a disengage, allow torque with LKA_ACTIVE set that
 // never grows in magnitude or changes sign, and stays under a limit that falls at FCA_ATLANTIS_MAX_RATE_DOWN per
 // frame from the last torque allowed while engaged. The limit depends only on time, so it ends by itself.
-#define FCA_ATLANTIS_MAX_RATE_DOWN 3
-#define FCA_ATLANTIS_FRAME_US 10000U  // LKA_COMMAND is sent at 100 Hz
+#define FCA_ATLANTIS_MAX_RATE_DOWN 12
+#define FCA_ATLANTIS_FRAME_US 10000U  // LKA_COMMAND_2 is sent at 100 Hz
 #define FCA_ATLANTIS_WINDDOWN_SLACK_FRAMES 5  // frames of delay tolerated before the limit starts falling
 
 static safety_config fca_atlantis_init(uint16_t param) {
@@ -112,14 +112,14 @@ static bool fca_atlantis_winddown_allowed(int desired_torque, bool steer_req, ui
 }
 
 static bool fca_atlantis_tx_hook(const CANPacket_t *msg) {
-  // lateral limits
+  // lateral limits, in LKA_COMMAND_2 units (4x LKA_COMMAND)
   const TorqueSteeringLimits FCA_ATLANTIS_STEERING_LIMITS = {
-    .max_torque = 300,
-    .max_rt_delta = 112,
-    .max_rate_up = 3,
+    .max_torque = 1200,
+    .max_rt_delta = 448,
+    .max_rate_up = 12,
     .max_rate_down = FCA_ATLANTIS_MAX_RATE_DOWN,
     .driver_torque_allowance = 80,
-    .driver_torque_multiplier = 2,
+    .driver_torque_multiplier = 8,
     // use TorqueMotorLimited if we can find EPS torque or some EPS limit signal?
     .type = TorqueDriverLimited,
   };
@@ -127,11 +127,11 @@ static bool fca_atlantis_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
   // Safety check for commanded steering torque
-  if (msg->addr == FCA_ATLANTIS_LKA_COMMAND) {
-    // Signal: LKA_COMMAND.LKA_TORQUE
-    int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 5, 1024);
-    // Signal: LKA_COMMAND.LKA_ACTIVE
-    bool steer_req = GET_BIT(msg, 12U);
+  if (msg->addr == FCA_ATLANTIS_LKA_COMMAND_2) {
+    // Signal: LKA_COMMAND_2.LKA_TORQUE
+    int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 4, 2048);
+    // Signal: LKA_COMMAND_2.LKA_ACTIVE
+    bool steer_req = GET_BIT(msg, 11U);
 
     uint32_t ts = safety_ts;
     bool allowed;
@@ -166,30 +166,30 @@ static bool fca_atlantis_tx_hook(const CANPacket_t *msg) {
       }
     }
 
-    // LKA_COMMAND_2 may carry one copy of this frame. After a blocked frame, only zero torque.
-    safety.fca_atlantis_lka_2_pending = true;
-    safety.fca_atlantis_lka_2_torque = allowed ? desired_torque : 0;
-    safety.fca_atlantis_lka_2_steer_req = allowed && steer_req;
+    // LKA_COMMAND may carry one copy of this frame. After a blocked frame, only zero torque.
+    safety.fca_atlantis_lka_copy_pending = true;
+    safety.fca_atlantis_lka_copy_torque = allowed ? desired_torque : 0;
+    safety.fca_atlantis_lka_copy_steer_req = allowed && steer_req;
     if (!allowed) {
       tx = false;
     }
   }
 
-  // LKA_COMMAND_2 is a 4x scaled copy of LKA_COMMAND. The EPS is suspected to listen only to LKA_COMMAND_2: it
+  // LKA_COMMAND is a 1/4 scale copy of LKA_COMMAND_2. The EPS is suspected to listen only to LKA_COMMAND_2: it
   // engaged and steered with LKA_COMMAND_2 alone, and stock sends LKA_COMMAND one frame later as a rounded copy
-  // of LKA_COMMAND_2 / 4, so the two aren't exact 4x matches in stock routes. Rather than running the
-  // shared torque rate-limit state twice per frame, allow one exact copy of each LKA_COMMAND (which openpilot
-  // sends first each frame), so LKA_COMMAND_2 can't keep steering after LKA_COMMAND stops.
-  if (msg->addr == FCA_ATLANTIS_LKA_COMMAND_2) {
-    // Signal: LKA_COMMAND_2.LKA_TORQUE
-    int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 4, 2048);
-    // Signal: LKA_COMMAND_2.LKA_ACTIVE
-    bool steer_req = GET_BIT(msg, 11U);
+  // of LKA_COMMAND_2 / 4. Rather than running the shared torque rate-limit state twice per frame, allow one
+  // rounded copy (either direction) of each LKA_COMMAND_2, which openpilot sends first each frame.
+  if (msg->addr == FCA_ATLANTIS_LKA_COMMAND) {
+    // Signal: LKA_COMMAND.LKA_TORQUE
+    int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 5, 1024);
+    // Signal: LKA_COMMAND.LKA_ACTIVE
+    bool steer_req = GET_BIT(msg, 12U);
 
-    bool is_copy = safety.fca_atlantis_lka_2_pending && (desired_torque == (safety.fca_atlantis_lka_2_torque * 4)) &&
-                   (steer_req == safety.fca_atlantis_lka_2_steer_req);
+    int rounding_error = (desired_torque * 4) - safety.fca_atlantis_lka_copy_torque;
+    bool is_copy = safety.fca_atlantis_lka_copy_pending && !safety_max_limit_check(rounding_error, 2, -2) &&
+                   (steer_req == safety.fca_atlantis_lka_copy_steer_req);
     if (is_copy) {
-      safety.fca_atlantis_lka_2_pending = false;
+      safety.fca_atlantis_lka_copy_pending = false;
     } else {
       tx = false;
     }

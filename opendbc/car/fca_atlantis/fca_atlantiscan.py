@@ -1,3 +1,9 @@
+def lka_command_torque(lka_command_2_torque):
+  # LKA_COMMAND_2 / 4, rounded half away from zero
+  magnitude = (abs(lka_command_2_torque) + 2) // 4
+  return magnitude if lka_command_2_torque >= 0 else -magnitude
+
+
 def create_steering_control(packer, bus, msg, apply_steer, lat_active):
   values = {
     "LKA_ACTIVE": lat_active,

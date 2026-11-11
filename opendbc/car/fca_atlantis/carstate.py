@@ -33,8 +33,8 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = pt_cp.vl["EPS_1"]["STEERING_ANGLE"]
     ret.steeringRateDeg = pt_cp.vl["EPS_1"]["STEERING_RATE"]
-    # DRIVER_TORQUE (torsion bar) reacts to changes in our LKA torque at about -1.5x, but barely to steady torque.
-    # This causes steeringPressed chatter, and caps fast LKA torque ramps near 115 via STEER_DRIVER_ALLOWANCE.
+    # DRIVER_TORQUE (torsion bar) reacts to changes in our LKA torque at about -0.375x, but barely to steady torque.
+    # This causes steeringPressed chatter, and caps fast LKA torque ramps near 460 via STEER_DRIVER_ALLOWANCE.
     ret.steeringTorque = pt_cp.vl["EPS_2"]["DRIVER_TORQUE"]
     # ret.steeringTorqueEps = ...
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > self.CCP.STEER_THRESHOLD, 5)

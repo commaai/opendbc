@@ -28,11 +28,11 @@ class CarInterface(CarInterfaceBase):
     # PID on steering angle rather than the torque controller: the steady torque this van needs tracks steering angle
     # times speed, not lateral accel, so no single lateral-accel-to-torque factor fits all speeds (about 6 below
     # 40 mph, 17-18 above 50 mph). The feedforward and kp both follow the measured steering stiffness of
-    # 0.1 * v + 0.35 counts per degree (v in m/s). The RAM_PROMASTER entry in torque_data/override.toml is kept for
+    # 0.4 * v + 1.4 counts per degree (v in m/s). The RAM_PROMASTER entry in torque_data/override.toml is kept for
     # MAX_LAT_ACCEL_MEASURED.
     ret.lateralTuning.init('pid')
     ret.lateralTuning.pid.kf = 1.
-    ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kpV = [0., 30.], [0.35 / CarControllerParams.STEER_MAX, 3.35 / CarControllerParams.STEER_MAX]
+    ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kpV = [0., 30.], [1.4 / CarControllerParams.STEER_MAX, 13.4 / CarControllerParams.STEER_MAX]
     ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kiV = [0.], [0.003]
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
@@ -45,10 +45,10 @@ class CarInterface(CarInterfaceBase):
   def get_steer_feedforward_promaster(desired_angle, v_ego):
     # measured steady LKA torque per degree of steering angle, rising with speed; normalized to STEER_MAX
     # TODO: replace the line with a speed table once 40-55 mph has more data. On route
-    #   23aa8db6265ecd81|00000001--6cd07879b1 stiffness was ~1.9 at 40-49 mph (line: 2.35) and ~3.1 at 49-58 mph, so it
+    #   23aa8db6265ecd81|00000001--6cd07879b1 stiffness was ~7.6 at 40-49 mph (line: 9.4) and ~12.4 at 49-58 mph, so it
     #   seems to jump around 45-50 mph rather than rise linearly; PID's integrator also showed the line ~20% weak at
     #   11-20 mph.
-    return desired_angle * (0.1 * v_ego + 0.35) / CarControllerParams.STEER_MAX
+    return desired_angle * (0.4 * v_ego + 1.4) / CarControllerParams.STEER_MAX
 
   def get_steer_feedforward_function(self):
     return self.get_steer_feedforward_promaster
