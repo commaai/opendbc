@@ -45,8 +45,11 @@ class CarState(CarStateBase):
     self.steering_angle_last = angle
     ret.steeringTorque = cp.vl['EPS_STEERING']['STEER_TORQUE_DRIVER']
     ret.steeringTorqueEps = cp.vl['EPS_STEERING']['STEER_TORQUE_EPS']
-    # the torque reading is coarse: during an LCC override it only reached 2-3, but the EPS flagged the override itself
-    self.driver_override_frames = self.driver_override_frames + 1 if cp.vl['EPS_STEERING']['DRIVER_OVERRIDE'] else 0
+    # the torque reading is coarse: during an LCC override it only reached 2-3, but the EPS flagged the override itself.
+    # The EPS also sets that flag whenever the car is above about 121 km/h, with or without the driver (99% of frames
+    # above 121 km/h on a stock drive, and openpilot's own drive at 125 km/h), so above 118 km/h only the torque counts.
+    eps_override = cp.vl['EPS_STEERING']['DRIVER_OVERRIDE'] and ret.vEgoRaw < 118 * CV.KPH_TO_MS
+    self.driver_override_frames = self.driver_override_frames + 1 if eps_override else 0
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5) or \
                           self.driver_override_frames >= 2
     # The EPS reports whether it receives ADAS_LKA (0x83): losing it after it was received means our steering frame is
