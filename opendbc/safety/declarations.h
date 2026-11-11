@@ -349,6 +349,22 @@ typedef struct {
   bool volkswagen_resume_button_prev;
   bool volkswagen_brake_pedal_switch;
   bool volkswagen_brake_pressure_detected;
+
+  bool byd_lks_on;
+  bool byd_lks_btn_last;
+  bool byd_set_res_last;
+  int byd_driver_torque_frames;
+  uint8_t byd_stock_btns;
+  uint8_t byd_stock_btns_prev;
+  bool byd_acc_on;
+  bool byd_acc_main;
+  uint32_t byd_op_steer_ts;
+  uint32_t byd_op_hud_ts;
+  uint8_t byd_cam_lkas_state;
+  // Length must match BYD_CAM_ACC_CMD_HIST in modes/byd.h
+  uint8_t byd_cam_acc_cmd[3][6];
+  uint8_t byd_cam_acc_cmd_idx;
+  uint8_t byd_cam_acc_cmd_count;
 } SafetyState;
 
 typedef struct {
@@ -397,6 +413,12 @@ typedef struct {
 
   bool volkswagen_longitudinal;
   bool volkswagen_meb_alt_crc;
+
+  bool byd_longitudinal;
+  bool byd_platform_known;
+  const AngleSteeringParams *byd_steer_params;
+  const AngleSteeringLimits *byd_steer_limits;
+  const LongitudinalLimits *byd_long_limits;
 } SafetySetup;
 
 typedef struct {

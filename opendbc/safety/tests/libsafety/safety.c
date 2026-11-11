@@ -176,7 +176,7 @@ void set_desired_angle_last(int t){
 }
 
 int get_desired_angle_last(void){
-  return desired_angle_last;
+  return safety.desired_angle_last;
 }
 
 void set_angle_meas(int min, int max){
