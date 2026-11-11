@@ -104,6 +104,23 @@ FW_VERSIONS = {
       b'ML3T-14H102-ABT\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
+  CAR.LINCOLN_NAVIGATOR_MK4: {
+    (Ecu.eps, 0x730, None): [
+      b'NL14-14D003-AE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',  # Observed on 2023
+      b'NL14-14D003-AC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',  # Observed on 2022
+    ],
+    (Ecu.abs, 0x760, None): [
+      b'PL14-2D053-AB\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',  # Observed on 2023
+      b'NL14-2D053-AE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',  # Observed on 2022
+    ],
+    (Ecu.fwdRadar, 0x764, None): [
+      b'ML3T-14D049-AL\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',  # Observed on 2022 and 2023
+    ],
+    (Ecu.fwdCamera, 0x706, None): [
+      b'RJ6T-14H102-BAH\x00\x00\x00\x00\x00\x00\x00\x00\x00',  # Observed on 2023
+      b'ML3T-14H102-ABT\x00\x00\x00\x00\x00\x00\x00\x00\x00',  # Observed on 2022
+    ],
+  },
   CAR.FORD_F_150_MK14: {
     (Ecu.eps, 0x730, None): [
       b'ML3V-14D003-BA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
