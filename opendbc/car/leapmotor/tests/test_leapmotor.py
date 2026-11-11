@@ -105,21 +105,35 @@ class TestLeapmotorCan(unittest.TestCase):
               self.assertEqual(got[sig], camera[sig], sig)
 
   def test_lcc_ramp_matches_stock(self):
-    # stock LCC engagement: LCC_RAMP goes 0x7801, 0x7703, 0x7605, ... down by 254 per frame, then jumps back
+    # stock LCC engagement: LCC_RAMP goes 0x7801, 0x7703, 0x7605, ... one 254 step per frame, then jumps back
+    straight_90 = leapmotorcan.lcc_ramp_target(0.15, 90.0)  # a typical straight road: stock median there is 31 steps
+    self.assertEqual(straight_90, 0x593F)
     word, seen = leapmotorcan.LCC_RAMP_IDLE, []
     for _ in range(40):
-      word = leapmotorcan.lcc_ramp_next(word, True)
+      word = leapmotorcan.lcc_ramp_next(word, True, straight_90)
       seen.append(word)
     self.assertEqual(seen[:3], [0x7703, 0x7605, 0x7507])
-    self.assertEqual(seen.index(leapmotorcan.LCC_RAMP_STEER), 29)  # 30 frames at 50 Hz, about 0.6 s
-    self.assertEqual(seen[-1], leapmotorcan.LCC_RAMP_STEER)
-    self.assertEqual(leapmotorcan.lcc_ramp_next(seen[-1], False), leapmotorcan.LCC_RAMP_IDLE)
-    # the real stock frames agree: idle when not steering, inside the stock range while steering
+    self.assertEqual(seen.index(straight_90), 30)  # 31 frames at 50 Hz, about 0.6 s
+    self.assertEqual(seen[-1], straight_90)
+    self.assertEqual(leapmotorcan.lcc_ramp_next(seen[-1], False, straight_90), leapmotorcan.LCC_RAMP_IDLE)
+    # one step per frame toward a new target, both ways
+    deeper = leapmotorcan.lcc_ramp_target(1.5, 75.0)
+    self.assertEqual(leapmotorcan.lcc_ramp_next(straight_90, True, deeper), straight_90 - leapmotorcan.LCC_RAMP_STEP)
+    self.assertEqual(leapmotorcan.lcc_ramp_next(deeper, True, straight_90), deeper + leapmotorcan.LCC_RAMP_STEP)
+    # stock medians per lateral-acceleration band (about 90 km/h), within 2 steps, and the stock range 25-46 steps
+    for alat, stock in ((0.15, 0x593F), (0.45, 0x5547), (0.8, 0x534B), (1.25, 0x4F53)):
+      self.assertLessEqual(abs(leapmotorcan.lcc_ramp_target(alat, 90.0) - stock), 2 * leapmotorcan.LCC_RAMP_STEP, alat)
+    for alat, v in ((0.0, 0.0), (5.0, 150.0)):
+      steps = (leapmotorcan.LCC_RAMP_IDLE - leapmotorcan.lcc_ramp_target(alat, v)) // leapmotorcan.LCC_RAMP_STEP
+      self.assertTrue(leapmotorcan.LCC_RAMP_STEPS_MIN <= steps <= leapmotorcan.LCC_RAMP_STEPS_MAX)
+    # the real stock frames agree: idle when not steering, on the ladder within the stock range while steering
     for hexdata in REAL_ADAS_LKA["acc"] + REAL_ADAS_LKA["off"]:
       self.assertEqual(self.unpack(bytes.fromhex(hexdata))["LCC_RAMP"], leapmotorcan.LCC_RAMP_IDLE)
     for hexdata in REAL_ADAS_LKA["lcc"]:
-      self.assertTrue(0x5000 <= self.unpack(bytes.fromhex(hexdata))["LCC_RAMP"] < 0x6000)
-
+      # stock occasionally sits 2 off the ladder (steps of -2/+2 also appear between frames)
+      steps = round((leapmotorcan.LCC_RAMP_IDLE - int(self.unpack(bytes.fromhex(hexdata))["LCC_RAMP"])) / leapmotorcan.LCC_RAMP_STEP)
+      self.assertLessEqual(abs(leapmotorcan.LCC_RAMP_IDLE - steps * leapmotorcan.LCC_RAMP_STEP - int(self.unpack(bytes.fromhex(hexdata))["LCC_RAMP"])), 2)
+      self.assertTrue(leapmotorcan.LCC_RAMP_STEPS_MIN <= steps <= leapmotorcan.LCC_RAMP_STEPS_MAX)
 
 if __name__ == "__main__":
   unittest.main()
