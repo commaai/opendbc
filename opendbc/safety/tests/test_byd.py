@@ -256,11 +256,14 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       self.__class__.cnt_angle_cmd += 1
     return self.packer.make_can_msg_safety("LKAS_HUD_ADAS", self.MAIN_BUS, {"LKAS_STATE": 1})
 
+  def _set_cam_lkas_state(self, lkas_state: int):
+    self.assertTrue(self._rx(self._lkas_hud_msg(lkas_state)))
+
   def test_stock_steer_passthrough(self):
     # Idle: camera steer and HUD reach the car. Any OP 0x1E2 takes the steer away
     # from the camera, and the idle STEER_REQ=0 heartbeat holds it for the whole
-    # engagement. HUD stays blocked ~2s after the last OP 0x1E2 so our cluster
-    # nag bits are not overwritten by the camera.
+    # engagement. HUD stays blocked 2s after the last OP 0x1E2, then until cam
+    # LKAS_STATE is 1/2 (or 2.7s ceiling).
     self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
 
@@ -282,6 +285,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
     self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
     self.safety.set_timer(t + 2001000)
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self._set_cam_lkas_state(1)
     self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
 
   def test_hud_only_tx_blocks_hud_not_steer(self):
@@ -293,6 +298,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
     t = (self.__class__.cnt_angle_cmd - 1) * int(1e6 / self.LATERAL_FREQUENCY)
     self.safety.set_timer(t + 2001000)
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self._set_cam_lkas_state(1)
     self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
 
   def test_hud_tx_extends_hud_block_after_steer(self):
@@ -319,6 +326,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.assertEqual(cruise, self.safety.get_cruise_engaged_prev())
 
     self.safety.set_timer(t_hud + 2001000)
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self._set_cam_lkas_state(1)
     self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
 
   def test_steer_tx_still_blocks_hud(self):
@@ -333,7 +342,35 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.assertEqual(0, self.safety.safety_fwd_hook(2, STEERING_MODULE_ADAS))
     self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
     self.safety.set_timer(t + 2001000)
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self._set_cam_lkas_state(2)
     self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+  def test_hud_cam_state_and_ceiling(self):
+    self.safety.set_controls_allowed(True)
+    self._reset_speed_measurement(10)
+    self._reset_angle_measurement(0)
+    self.safety.set_desired_angle_last(0)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+    t = (self.__class__.cnt_angle_cmd - 1) * int(1e6 / self.LATERAL_FREQUENCY)
+
+    self._set_cam_lkas_state(0)
+    self.safety.set_timer(t + 2001000)
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self.safety.set_timer(t + 2699999)
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+    self.safety.set_timer(t + 2700000)
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
+
+  def test_hud_block_while_cam_ok(self):
+    self.safety.set_controls_allowed(True)
+    self._reset_speed_measurement(10)
+    self._reset_angle_measurement(0)
+    self.safety.set_desired_angle_last(0)
+    self._set_cam_lkas_state(1)
+    for _ in range(10):
+      self.assertTrue(self._tx(self._lkas_hud_tx()))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, LKAS_HUD_ADAS))
 
   def test_hud_timers_reset_on_init(self):
     self.assertTrue(self._tx(self._lkas_hud_tx()))

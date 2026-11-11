@@ -26,6 +26,7 @@ static uint8_t byd_cam_acc_cmd_idx = 0;
 static uint8_t byd_cam_acc_cmd_count = 0;
 static uint32_t byd_op_steer_ts = 0;
 static uint32_t byd_op_hud_ts = 0;
+static uint8_t byd_cam_lkas_state = 0xFFU;
 
 static const AngleSteeringParams *byd_steer_params = NULL;
 static const AngleSteeringLimits *byd_steer_limits = NULL;
@@ -34,6 +35,7 @@ static bool byd_platform_known = true;
 
 #define BYD_OP_STEER_TIMEOUT_US 200000U
 #define BYD_OP_HUD_TIMEOUT_US 2000000U
+#define BYD_OP_HUD_CEILING_US 2700000U
 
 // Stock LKS reclaims EPS after OP stops sending 0x1E2 (including STEER_REQ=0).
 static bool byd_stock_lat_allowed(void) {
@@ -44,14 +46,30 @@ static bool byd_stock_lat_allowed(void) {
   return allowed;
 }
 
-// Block camera 0x316 while OP 0x1E2 or 0x316 is recent (HUD-only hold needs no idle 0x1E2).
+static bool byd_cam_hud_ok(void) {
+  return (byd_cam_lkas_state == 1U) || (byd_cam_lkas_state == 2U);
+}
+
+// Block camera 0x316 for 2s after OP 0x1E2/0x316, then until cam LKAS_STATE is
+// 1/2 or the 2.7s ceiling.
 static bool byd_stock_hud_allowed(void) {
   const uint32_t now = microsecond_timer_get();
-  const bool steer_ok = (byd_op_steer_ts == 0U) ||
-                        (safety_get_ts_elapsed(now, byd_op_steer_ts) > BYD_OP_HUD_TIMEOUT_US);
-  const bool hud_ok = (byd_op_hud_ts == 0U) ||
-                      (safety_get_ts_elapsed(now, byd_op_hud_ts) > BYD_OP_HUD_TIMEOUT_US);
-  return steer_ok && hud_ok;
+  const uint32_t age_steer = (byd_op_steer_ts == 0U) ? 0xFFFFFFFFU :
+                             safety_get_ts_elapsed(now, byd_op_steer_ts);
+  const uint32_t age_hud = (byd_op_hud_ts == 0U) ? 0xFFFFFFFFU :
+                           safety_get_ts_elapsed(now, byd_op_hud_ts);
+  const uint32_t since_op = (age_steer < age_hud) ? age_steer : age_hud;
+
+  if (since_op == 0xFFFFFFFFU) {
+    return true;
+  }
+  if (since_op < BYD_OP_HUD_TIMEOUT_US) {
+    return false;
+  }
+  if (byd_cam_hud_ok()) {
+    return true;
+  }
+  return since_op >= BYD_OP_HUD_CEILING_US;
 }
 
 // SET/RES/DEC/INC/ACC_ON. LKAS_ON_BTN omitted so bus 2 may still pulse it.
@@ -184,6 +202,10 @@ static void byd_rx_hook(const CANPacket_t *msg) {
       }
     }
 
+    if ((msg->addr == 0x316U) && (GET_LEN(msg) >= 5)) {
+      byd_cam_lkas_state = (msg->data[4] >> 4) & 0xFU;
+    }
+
     // Camera ACC_CMD history for AEB byte-exact passthrough on bus 0.
     if (byd_longitudinal && (msg->addr == 0x32EU)) {
       byd_cam_acc_cmd_push(msg);
@@ -296,6 +318,7 @@ static safety_config byd_init(uint16_t param) {
   byd_cam_acc_cmd_count = 0;
   byd_op_steer_ts = 0;
   byd_op_hud_ts = 0;
+  byd_cam_lkas_state = 0xFFU;
   for (uint8_t i = 0U; i < BYD_CAM_ACC_CMD_HIST; i++) {
     for (int j = 0; j < 6; j++) {
       byd_cam_acc_cmd[i][j] = 0U;
