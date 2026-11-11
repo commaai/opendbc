@@ -21,6 +21,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.apply_angle_last = 0.
+    self.lcc_ramp = leapmotorcan.LCC_RAMP_IDLE
     self.VM = VehicleModel(get_safety_CP())
     self.adas_lka_idle = leapmotorcan.decode_adas_lka_idle()
 
@@ -32,7 +33,9 @@ class CarController(CarControllerBase):
       camera_lka = CS.adas_lka if CS.adas_lka is not None else self.adas_lka_idle
       self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
                                                           CS.out.steeringAngleDeg, CC.latActive, CarControllerParams, self.VM)
-      can_sends.append(leapmotorcan.create_steering_control(self.packer, camera_lka, self.apply_angle_last, CC.latActive))
+      self.lcc_ramp = leapmotorcan.lcc_ramp_next(self.lcc_ramp, CC.latActive)
+      can_sends.append(leapmotorcan.create_steering_control(self.packer, camera_lka, self.apply_angle_last, CC.latActive,
+                                                             self.lcc_ramp))
 
     # cancel stock ACC when openpilot asks (it is engaged with ACC, so it cancels ACC whenever it disengages)
     if CC.cruiseControl.cancel and self.frame % CarControllerParams.STEER_STEP == 0 and CS.powertrain_state is not None:

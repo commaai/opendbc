@@ -12,7 +12,6 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.steering_angle_last = 0.0
-    self.lcc_state = 7
     self.adas_lka: dict | None = None
     self.lka_received_seen = False
     self.driver_override_frames = 0
@@ -79,7 +78,6 @@ class CarState(CarStateBase):
     ret.cruiseState.speed = cp_cam.vl['ADAS_LKA']['ACC_SET_SPEED'] * CV.KPH_TO_MS
     ret.cruiseState.speedCluster = ret.cruiseState.speed
     ret.cruiseState.standstill = ret.cruiseState.enabled and ret.standstill
-    self.lcc_state = int(cp_cam.vl['ADAS_LKA']['LCC_STATE'])
     # latest camera frame, rebuilt by the controller; None until the camera's 0x83 has been received
     self.adas_lka = dict(cp_cam.vl['ADAS_LKA']) if cp_cam.ts_nanos['ADAS_LKA']['COUNTER'] > 0 else None
 
