@@ -21,7 +21,9 @@ class CarInterface(CarInterfaceBase):
     # Global lateral tuning defaults, can be overridden per-vehicle
 
     ret.steerLimitTimer = 1.0
-    ret.steerActuatorDelay = 0.18  # learned total lateral delay ~0.385s (minus 0.2 added by lagd); 1 valid block only
+    # lagd learned a total lateral delay of 0.48 s (11 blocks, route 57a1cc884d1e5a8b|0000000b--19a8aadecc), minus the
+    # 0.2 s that openpilot adds
+    ret.steerActuatorDelay = 0.28
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
