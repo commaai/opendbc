@@ -57,17 +57,33 @@ def leapmotor_checksum(address: int, sig, d: bytearray) -> int:
   return crc ^ 0xFF
 
 
-# LCC_RAMP (bytes 16-17 of ADAS_LKA): 0x7801 when LCC is not steering. When stock LCC starts steering it ramps down by
-# 254 per frame to about 0x5A3D, and it jumps back when LCC stops. The EPS needs this to steer left: with the idle word
-# it only ever applied torque to the right.
+# LCC_RAMP (bytes 16-17 of ADAS_LKA): 0x7801 when LCC is not steering. While stock LCC steers it moves down a ladder of
+# 254 per step, one step per frame: from idle to about 31 steps when LCC starts, then deeper with more lateral
+# acceleration and speed, and back to idle at once when LCC stops. The step count sets how much torque the EPS may use
+# (about +/-10 early in the ramp, +/-45 at 30-31 steps, +/-70 at 42-46). Stock LCC on 3 routes (142,234 frames):
+# steps = 19.1 + 9.94 * |lateral accel| + 0.112 * speed (km/h), R^2 0.83, always 25-46. With the idle word the EPS only
+# applied torque to the right; with a fixed 30 steps (0x5A3D) it could not hold a curve at 75 km/h (torque flat at 61).
 LCC_RAMP_IDLE = 0x7801
-LCC_RAMP_STEER = 0x5A3D
 LCC_RAMP_STEP = 254
+LCC_RAMP_STEPS_MIN = 25
+LCC_RAMP_STEPS_MAX = 46
 
 
-def lcc_ramp_next(word: int, lat_active: bool) -> int:
-  """Next LCC_RAMP value: the stock ramp down to the steering value, or straight back to idle."""
-  return max(LCC_RAMP_STEER, word - LCC_RAMP_STEP) if lat_active else LCC_RAMP_IDLE
+def lcc_ramp_target(lat_accel: float, v_ego_kph: float) -> int:
+  """LCC_RAMP word that stock LCC would send for this lateral acceleration (m/s^2) and speed."""
+  steps = round(19.1 + 9.94 * abs(lat_accel) + 0.112 * v_ego_kph)
+  return LCC_RAMP_IDLE - LCC_RAMP_STEP * min(max(steps, LCC_RAMP_STEPS_MIN), LCC_RAMP_STEPS_MAX)
+
+
+def lcc_ramp_next(word: int, lat_active: bool, target: int) -> int:
+  """Next LCC_RAMP value: one ladder step per frame toward target while steering, straight back to idle otherwise."""
+  if not lat_active:
+    return LCC_RAMP_IDLE
+  if word > target:
+    return word - LCC_RAMP_STEP
+  if word < target:
+    return word + LCC_RAMP_STEP
+  return word
 
 
 def create_steering_control(packer, camera_lka: dict, apply_angle: float, lat_active: bool, lcc_ramp: int = LCC_RAMP_IDLE):
