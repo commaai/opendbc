@@ -57,25 +57,32 @@ def leapmotor_checksum(address: int, sig, d: bytearray) -> int:
   return crc ^ 0xFF
 
 
-# LCC_STATE values seen while the stock system steers (4 curve, 5 active, 6 engaging); 5 is the steady state
-LCC_STATE_ACTIVE = 5
-LCC_STATES_STEERING = (4, 5, 6)
+# LCC_RAMP (bytes 16-17 of ADAS_LKA): 0x7801 when LCC is not steering. When stock LCC starts steering it ramps down by
+# 254 per frame to about 0x5A3D, and it jumps back when LCC stops. The EPS needs this to steer left: with the idle word
+# it only ever applied torque to the right.
+LCC_RAMP_IDLE = 0x7801
+LCC_RAMP_STEER = 0x5A3D
+LCC_RAMP_STEP = 254
 
 
-def create_steering_control(packer, camera_lka: dict, apply_angle: float, lat_active: bool):
+def lcc_ramp_next(word: int, lat_active: bool) -> int:
+  """Next LCC_RAMP value: the stock ramp down to the steering value, or straight back to idle."""
+  return max(LCC_RAMP_STEER, word - LCC_RAMP_STEP) if lat_active else LCC_RAMP_IDLE
+
+
+def create_steering_control(packer, camera_lka: dict, apply_angle: float, lat_active: bool, lcc_ramp: int = LCC_RAMP_IDLE):
   """Rebuild ADAS_LKA (0x83) from the camera's latest frame, replacing only the steering fields.
 
   Every other field (ACC state, acceleration request, set speed, constants) is copied unchanged, so the
   stock ACC keeps working while openpilot steers. The packer recomputes the E2E checksum and runs its own
   counter, since the EPS only ever sees openpilot's frames once the camera's are blocked.
-  ASSUMPTION, untested on the car: the EPS follows STEER_ANGLE_REQ when LCC_STEERING_ACTIVE_COPY is set and
-  LCC_STATE is a steering state, even when the stock LCC is not engaged.
+  While steering, LCC_RAMP carries lcc_ramp (see lcc_ramp_next); otherwise it is the camera's.
   """
   values = {k: v for k, v in camera_lka.items() if k not in ("CHECKSUM", "COUNTER")}
   values["STEER_ANGLE_REQ"] = apply_angle
   values["LCC_STEERING_ACTIVE_COPY"] = 1 if lat_active else 0
-  if lat_active and int(camera_lka.get("LCC_STATE", 7)) not in LCC_STATES_STEERING:
-    values["LCC_STATE"] = LCC_STATE_ACTIVE
+  if lat_active:
+    values["LCC_RAMP"] = lcc_ramp
   return packer.make_can_msg("ADAS_LKA", 0, values)
 
 
