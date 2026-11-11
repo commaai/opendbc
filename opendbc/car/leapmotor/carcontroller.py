@@ -28,13 +28,15 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     can_sends = []
+    # like the stock LCC, let go while the driver steers (the EPS flags it), then ramp back in
+    lat_active = CC.latActive and not CS.out.steeringPressed
 
     if self.frame % CarControllerParams.STEER_STEP == 0:
       camera_lka = CS.adas_lka if CS.adas_lka is not None else self.adas_lka_idle
       self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                          CS.out.steeringAngleDeg, CC.latActive, CarControllerParams, self.VM)
-      self.lcc_ramp = leapmotorcan.lcc_ramp_next(self.lcc_ramp, CC.latActive)
-      can_sends.append(leapmotorcan.create_steering_control(self.packer, camera_lka, self.apply_angle_last, CC.latActive,
+                                                          CS.out.steeringAngleDeg, lat_active, CarControllerParams, self.VM)
+      self.lcc_ramp = leapmotorcan.lcc_ramp_next(self.lcc_ramp, lat_active)
+      can_sends.append(leapmotorcan.create_steering_control(self.packer, camera_lka, self.apply_angle_last, lat_active,
                                                              self.lcc_ramp))
 
     # cancel stock ACC when openpilot asks (it is engaged with ACC, so it cancels ACC whenever it disengages)
