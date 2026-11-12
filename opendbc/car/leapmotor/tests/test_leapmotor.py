@@ -145,5 +145,32 @@ class TestLeapmotorCan(unittest.TestCase):
       self.assertLessEqual(abs(leapmotorcan.LCC_RAMP_IDLE - steps * leapmotorcan.LCC_RAMP_STEP - int(self.unpack(bytes.fromhex(hexdata))["LCC_RAMP"])), 2)
       self.assertTrue(leapmotorcan.LCC_RAMP_STEPS_MIN <= steps <= leapmotorcan.LCC_RAMP_STEPS_MAX)
 
+  def test_ramp_boost(self):
+    deepest = leapmotorcan.LCC_RAMP_IDLE - leapmotorcan.LCC_RAMP_STEP * leapmotorcan.LCC_RAMP_STEPS_MAX
+    # extra steps go deeper, never beyond the deepest stock value
+    base = leapmotorcan.lcc_ramp_target(0.1, 15.0)
+    self.assertEqual(leapmotorcan.lcc_ramp_target(0.1, 15.0, 3), base - 3 * leapmotorcan.LCC_RAMP_STEP)
+    self.assertEqual(leapmotorcan.lcc_ramp_target(0.1, 15.0, 100), deepest)
+    self.assertEqual(leapmotorcan.lcc_ramp_target(3.0, 120.0, 5), deepest)
+
+    from types import SimpleNamespace
+    from opendbc.car.leapmotor.carcontroller import CarController, get_safety_CP
+    from opendbc.car.leapmotor.values import CarControllerParams, DBC as LEAPMOTOR_DBC
+    controller = CarController(LEAPMOTOR_DBC["LEAPMOTOR_B10"], get_safety_CP())
+
+    def cs(angle, kph):
+      return SimpleNamespace(out=SimpleNamespace(steeringAngleDeg=angle, vEgoRaw=kph / 3.6))
+    controller.apply_angle_last = 90.
+    for i in range(30):  # wheel 10 deg behind at 15 km/h: one step deeper per frame, up to the stock maximum
+      controller.ramp_boost = controller.update_ramp_boost(True, cs(80., 15.))
+      self.assertEqual(controller.ramp_boost, min(i + 1, leapmotorcan.LCC_RAMP_STEPS_MAX - leapmotorcan.LCC_RAMP_STEPS_MIN))
+    controller.ramp_boost = controller.update_ramp_boost(True, cs(88., 15.))  # 2 deg behind: hold
+    self.assertEqual(controller.ramp_boost, 21)
+    controller.ramp_boost = controller.update_ramp_boost(True, cs(89.5, 15.))  # caught up: one step back
+    self.assertEqual(controller.ramp_boost, 20)
+    self.assertEqual(controller.update_ramp_boost(False, cs(80., 15.)), 0)  # not steering
+    self.assertEqual(controller.update_ramp_boost(True, cs(80., CarControllerParams.RAMP_BOOST_MAX_SPEED + 1)), 0)  # fast
+
+
 if __name__ == "__main__":
   unittest.main()

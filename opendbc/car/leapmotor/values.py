@@ -27,6 +27,14 @@ class CarControllerParams:
   EPS_TORQUE_PER_DRIVER_TORQUE = 16.8
   STEER_DRIVER_ALLOWANCE = 3
   TAKE_BACK_MAX_ANGLE_ERROR = 10.  # deg between openpilot's angle and the wheel's before it takes the wheel back
+  # The stock ramp depth follows lateral acceleration, which stays small in sharp turns at low speed: there the wheel
+  # fell > 5 deg behind with the EPS near its torque ceiling (25d, 260). While the wheel is RAMP_BOOST_LAG behind the
+  # command below RAMP_BOOST_MAX_SPEED, the ramp goes one step deeper per frame (up to the deepest stock value, 46 steps,
+  # about +/-70 torque), and back one step per frame once within RAMP_BOOST_CAUGHT_UP. Replayed on 3 drives: active
+  # 23-31% of the time below 30 km/h, 3-7% at 30-80 km/h. Not at speed, where such a lag was the driver's own nudge.
+  RAMP_BOOST_LAG = 3.  # deg
+  RAMP_BOOST_CAUGHT_UP = 1.5  # deg
+  RAMP_BOOST_MAX_SPEED = 60.  # km/h
 
 
 @dataclass

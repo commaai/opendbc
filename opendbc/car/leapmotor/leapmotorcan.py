@@ -69,10 +69,11 @@ LCC_RAMP_STEPS_MIN = 25
 LCC_RAMP_STEPS_MAX = 46
 
 
-def lcc_ramp_target(lat_accel: float, v_ego_kph: float) -> int:
-  """LCC_RAMP word that stock LCC would send for this lateral acceleration (m/s^2) and speed."""
-  steps = round(19.1 + 9.94 * abs(lat_accel) + 0.112 * v_ego_kph)
-  return LCC_RAMP_IDLE - LCC_RAMP_STEP * min(max(steps, LCC_RAMP_STEPS_MIN), LCC_RAMP_STEPS_MAX)
+def lcc_ramp_target(lat_accel: float, v_ego_kph: float, extra_steps: int = 0) -> int:
+  """LCC_RAMP word that stock LCC would send for this lateral acceleration (m/s^2) and speed, extra_steps deeper,
+  never beyond the deepest stock value."""
+  steps = min(max(round(19.1 + 9.94 * abs(lat_accel) + 0.112 * v_ego_kph), LCC_RAMP_STEPS_MIN), LCC_RAMP_STEPS_MAX)
+  return LCC_RAMP_IDLE - LCC_RAMP_STEP * min(steps + max(extra_steps, 0), LCC_RAMP_STEPS_MAX)
 
 
 def lcc_ramp_next(word: int, lat_active: bool, target: int) -> int:
