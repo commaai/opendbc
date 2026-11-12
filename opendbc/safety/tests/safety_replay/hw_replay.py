@@ -60,6 +60,9 @@ def played(p, up, mode, param, frames):
   # can_health is per CAN controller, a flipped harness swaps the controllers of buses 0 and 2
   cans = [2, 1, 0] if p.health()["car_harness_status"] == p.HARNESS_STATUS_FLIPPED else [0, 1, 2]
   h0 = [p.can_health(c) for c in cans]
+  # the station sends CAN FD on the buses that have it, the panda turns CAN FD on when it receives a frame
+  for b in {bus for frame in frames for _, dat, bus in frame if len(dat) > 8}:
+    up.set_can_data_speed_kbps(b, 2000)
   # an empty tail, so the station's loop doesn't start over before it's stopped
   up.can_replay(frames + [[]] * int(60 / DT))
   end = time.monotonic() + len(frames) * DT + 1
@@ -96,10 +99,6 @@ def main():
     except Exception as e:
       print(f"{route.route} FAIL, can't load: {type(e).__name__}: {e!r}", flush=True)
       failed.append(route.route)
-      continue
-    if any(len(dat) > 8 for frame in frames for _, dat, _ in frame):
-      # the station only sends classic CAN
-      print(f"{route.route} skipped, CAN FD", flush=True)
       continue
     exp, got = expected(mode, param, frames), played(p, up, mode, param, frames)
     # forwarding stops at a relay malfunction, when depends on the 1 Hz tick's phase
