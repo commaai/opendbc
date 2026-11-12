@@ -26,6 +26,7 @@ class CarControllerParams:
   # where the raw reading stayed at 1, and nothing else above 118 km/h over the 2 drives.
   EPS_TORQUE_PER_DRIVER_TORQUE = 16.8
   STEER_DRIVER_ALLOWANCE = 3
+  TAKE_BACK_MAX_ANGLE_ERROR = 10.  # deg between openpilot's angle and the wheel's before it takes the wheel back
 
 
 @dataclass

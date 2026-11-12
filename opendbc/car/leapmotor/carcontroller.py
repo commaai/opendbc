@@ -33,11 +33,15 @@ class CarController(CarControllerBase):
     can_sends = []
     # like the stock LCC, let go while the driver steers (the EPS flags it), then ramp back in
     lat_active = CC.latActive and not CS.driver_override
-    # take the wheel back only once it is within the angle openpilot may command at this speed: otherwise the first
-    # frame jumps to that limit, the panda blocks it, and the missing frame cancels ACC
-    if lat_active and not self.lat_active_last and CS.out.vEgoRaw > 1.:
-      max_angle = get_max_angle_vm(CS.out.vEgoRaw, self.VM, CarControllerParams)
-      lat_active = abs(CS.out.steeringAngleDeg) < max_angle - 1.0
+    # take the wheel back only once it is near the angle openpilot wants: after the driver let go mid-turn at walking
+    # pace with the wheel at +308 deg and the model at +24, the EPS swung it to -203 deg in 3 s
+    if lat_active and not self.lat_active_last:
+      lat_active = abs(actuators.steeringAngleDeg - CS.out.steeringAngleDeg) < CarControllerParams.TAKE_BACK_MAX_ANGLE_ERROR
+      # and within the angle openpilot may command at this speed: otherwise the first frame jumps to that limit, the
+      # panda blocks it, and the missing frame cancels ACC
+      if CS.out.vEgoRaw > 1.:
+        max_angle = get_max_angle_vm(CS.out.vEgoRaw, self.VM, CarControllerParams)
+        lat_active = lat_active and abs(CS.out.steeringAngleDeg) < max_angle - 1.0
 
     if self.frame % CarControllerParams.STEER_STEP == 0:
       camera_lka = CS.adas_lka if CS.adas_lka is not None else self.adas_lka_idle
