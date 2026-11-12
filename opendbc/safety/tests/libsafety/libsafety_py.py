@@ -26,6 +26,9 @@ def _build_libsafety(release: bool = False) -> str:
     ldflags = ['-fprofile-arcs', '-ftest-coverage'] if not release else []
   else:
     ldflags = ['-fsanitize=undefined', '-fno-sanitize-recover=undefined']
+    # comma devices have no UBSan runtime, trap instead
+    if os.environ.get("SAFETY_UBSAN_TRAP") == "1":
+      ldflags.append('-fsanitize-trap=undefined')
   cflags += ldflags
   if not release:
     cflags += ['-DALLOW_DEBUG']
