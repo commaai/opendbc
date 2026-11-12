@@ -77,6 +77,9 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     values = {"CRUISE_ACTIVE": enable}
     return self.packer.make_can_msg_safety("PCM_CRUISE", 0, values)
 
+  def _pcm_gas_released_msg(self, enable):
+    return self.packer.make_can_msg_safety("PCM_CRUISE", 0, {"CRUISE_ACTIVE": enable, "GAS_RELEASED": 1})
+
   def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
@@ -106,6 +109,27 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       should_tx = not req and not req2 and angle == 0 and torque_wind_down == 0
       self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)),
                        f"{req=} {req2=} {angle=} {torque_wind_down=}")
+
+  def test_tx_until_host_reads_controls_exit(self):
+    if not self.LONGITUDINAL:
+      raise unittest.SkipTest("no openpilot longitudinal")
+    self._rx(self._pcm_gas_released_msg(True))
+    self.safety.set_can_rx_frames(10, 10)
+    self._rx(self._pcm_gas_released_msg(False))
+    self.assertTrue(self._tx(self._accel_msg(1.0)))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.safety.set_can_rx_frames(11, 11)
+    self.assertFalse(self._tx(self._accel_msg(1.0)))
+
+  def test_invalid_msg_ends_controls_right_away(self):
+    self._rx(self._pcm_status_msg(True))
+    self.safety.set_can_rx_frames(10, 10)
+    self._rx(self._pcm_status_msg(False))
+    self.assertTrue(self.safety.get_controls_allowed_for_tx())
+    msg = self._pcm_status_msg(False)
+    msg[0].data[7] ^= 0xFF
+    self.assertFalse(self._rx(msg))
+    self.assertFalse(self.safety.get_controls_allowed_for_tx())
 
   def test_rx_hook(self):
     # checksum checks

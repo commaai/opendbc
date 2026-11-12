@@ -3,6 +3,8 @@
 // this file is checked by cppcheck
 
 extern uint32_t microsecond_timer_get(void);
+extern uint32_t can_rx_frames_queued(void);
+extern uint32_t can_rx_frames_read(void);
 
 // Ignore misra-c2012-8.7 as these functions are only called from libsafety
 SAFETY_UNUSED(safety.heartbeat_engaged);

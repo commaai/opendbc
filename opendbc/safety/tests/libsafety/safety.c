@@ -17,6 +17,16 @@ uint32_t microsecond_timer_get(void) {
   return timer_cnt;
 }
 
+// the host read every RX frame, unless a test says otherwise
+uint32_t rx_frames_queued = 0U;
+uint32_t rx_frames_read = 1U;
+uint32_t can_rx_frames_queued(void) {
+  return rx_frames_queued;
+}
+uint32_t can_rx_frames_read(void) {
+  return rx_frames_read;
+}
+
 #include "opendbc/safety/can.h"
 #include "opendbc/safety/safety.h"
 #include "opendbc/safety/ignition.h"
@@ -53,6 +63,11 @@ void set_rx_checks_received(int stale, uint32_t age) {
   }
 }
 
+void set_can_rx_frames(uint32_t queued, uint32_t read){
+  rx_frames_queued = queued;
+  rx_frames_read = read;
+}
+
 void set_controls_allowed(bool c){
   SAFETY_SET(controls_allowed, c);
 }
@@ -63,6 +78,14 @@ void set_alternative_experience(int mode){
 
 void set_relay_malfunction(bool c){
   SAFETY_SET(relay_malfunction, c);
+}
+
+bool get_controls_allowed_for_tx(void){
+  return get_controls_allowed_tx();
+}
+
+bool get_cruise_engaged_for_tx(void){
+  return get_cruise_engaged_tx();
 }
 
 bool get_controls_allowed(void){
@@ -230,6 +253,7 @@ void init_tests(void){
   safety_alternative_experience(0);
   set_timer(0);
   timer_step = 0;
+  set_can_rx_frames(0U, 1U);
   SAFETY_SET(ts_steer_req_mismatch_last, 0);
   SAFETY_SET(valid_steer_req_count, 0);
   SAFETY_SET(invalid_steer_req_count, 0);

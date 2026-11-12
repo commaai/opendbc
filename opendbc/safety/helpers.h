@@ -2,6 +2,9 @@
 
 #include "opendbc/safety/declarations.h"
 
+// the host reads RX every 10 ms, it can only react to an RX frame once it read it
+#define HOST_READ_TIMEOUT 20000U  // us
+
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_MIN(a, b) ({ \
@@ -70,6 +73,12 @@ static bool msg_matches_addr_bus_len(const CANPacket_t *msg, uint32_t addr, uint
 // case where ts < ts_last is ok: overflow is properly re-casted into uint32_t
 static inline uint32_t safety_get_ts_elapsed(uint32_t ts, uint32_t ts_last) {
   return ts - ts_last;
+}
+
+static bool host_unread(uint32_t frame, uint32_t ts) {
+  // the frame counters wrap
+  bool unread = (frame - can_rx_frames_read()) < 0x80000000U;
+  return unread && (safety_get_ts_elapsed(safety_ts, ts) < HOST_READ_TIMEOUT);
 }
 
 static bool safety_max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {

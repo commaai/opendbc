@@ -169,6 +169,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 
 static bool rx_hook_copy(const CANPacket_t *msg) {
   bool controls_allowed_prev = safety.controls_allowed;
+  bool cruise_engaged_prev = safety.cruise_engaged_prev;
 
   bool valid = rx_msg_safety_check(msg, &safety_setup.current_safety_config, safety_setup.current_hooks);
   bool whitelisted = get_addr_check_index(msg, safety_setup.current_safety_config.rx_checks, safety_setup.current_safety_config.rx_checks_len) != -1;
@@ -178,6 +179,19 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
 
   // Handles gas, brake, and regen paddle
   generic_rx_checks();
+
+  if (!valid) {
+    // an invalid message ends controls right away
+    safety.controls_exit_ts = safety_ts - HOST_READ_TIMEOUT;
+  } else if (controls_allowed_prev && !safety.controls_allowed) {
+    safety.controls_exit_frame = can_rx_frames_queued();
+    safety.controls_exit_ts = safety_ts;
+  } else {
+  }
+  if (cruise_engaged_prev && !safety.cruise_engaged_prev) {
+    safety.cruise_exit_frame = can_rx_frames_queued();
+    safety.cruise_exit_ts = safety_ts;
+  }
 
   // the relay malfunction hook runs on all incoming rx messages.
   // check all applicable tx msgs for liveness on sending bus.
@@ -209,16 +223,32 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
   return whitelisted;
 }
 
+static bool get_controls_allowed_tx(void) {
+  return safety.controls_allowed || host_unread(safety.controls_exit_frame, safety.controls_exit_ts);
+}
+
+static bool get_cruise_engaged_tx(void) {
+  return safety.cruise_engaged_prev || host_unread(safety.cruise_exit_frame, safety.cruise_exit_ts);
+}
+
 static bool tx_hook_copy(CANPacket_t *msg) {
   bool whitelisted = tx_msg_safety_check(msg, safety_setup.current_safety_config.tx_msgs, safety_setup.current_safety_config.tx_msgs_len);
   if ((safety_setup.current_safety_mode == SAFETY_ALLOUTPUT) || (safety_setup.current_safety_mode == SAFETY_ELM327)) {
     whitelisted = true;
   }
 
+  // the host made this before it could read the frame that ended controls or cruise
+  bool controls_allowed = safety.controls_allowed;
+  bool cruise_engaged = safety.cruise_engaged_prev;
+  safety.controls_allowed = get_controls_allowed_tx();
+  safety.cruise_engaged_prev = get_cruise_engaged_tx();
   bool safety_allowed = false;
   if (whitelisted) {
     safety_allowed = safety_setup.current_hooks->tx(msg);
   }
+  // the hook can end controls itself
+  safety.controls_allowed = controls_allowed && safety.controls_allowed;
+  safety.cruise_engaged_prev = cruise_engaged;
 
   return !safety.relay_malfunction && whitelisted && safety_allowed;
 }
@@ -303,6 +333,10 @@ static void relay_malfunction_set(void) {
 }
 
 static void generic_rx_checks(void) {
+  if (safety.gas_pressed && !safety.gas_pressed_prev) {
+    safety.gas_press_frame = can_rx_frames_queued();
+    safety.gas_press_ts = safety_ts;
+  }
   safety.gas_pressed_prev = safety.gas_pressed;
 
   // exit controls on rising edge of brake press
