@@ -36,6 +36,9 @@ REAL_POWERTRAIN_STATE = [
 HARD_RIGHT = {0x18D: "0B0602CAE4009EC5869A5E012C2C0000D5128658A3E803000000000000000000", 0x233: "4C06C88947811100"}
 HARD_LEFT = {0x18D: "130E02BA1D0F644386C24D010001000004128702A3E803000000000000000000", 0x233: "7E0A43A647AD3100"}
 
+# Real ROAD_SIGNS (0x142) frames from the camera just before and during a forward collision warning the driver reported
+FCW_FRAMES = {False: "F204F4F14002001C8032120000000000", True: "050E310D4402001C8032120000000000"}
+
 
 class TestLeapmotorCan(unittest.TestCase):
   def setUp(self):
@@ -43,6 +46,13 @@ class TestLeapmotorCan(unittest.TestCase):
 
   def unpack(self, dat: bytes) -> dict:
     return {n: s.get_raw_value(dat) * s.factor + s.offset for n, s in self.msg.sigs.items()}
+
+  def test_fcw(self):
+    sig = DBC("leapmotor_b10").addr_to_msg[0x142].sigs["FCW"]
+    for fcw, hexdata in FCW_FRAMES.items():
+      dat = bytes.fromhex(hexdata)
+      self.assertEqual(sig.get_raw_value(dat), int(fcw))
+      self.assertEqual(dat[0], leapmotor_checksum(0x142, None, bytearray(dat)))
 
   def test_sign_convention(self):
     # openpilot expects positive = left for steering angle and yaw rate
