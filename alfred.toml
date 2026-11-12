@@ -1,3 +1,6 @@
+# the test routes, kept on the station between jobs
+cache = ["/data/tmp/comma_download_cache"]
+
 # the tests run in AGNOS's venv, it has everything but panda
 [env]
 PYTHONPATH = "/data/ci/tree:/data/ci/tree/opendbc"  # the tree is /data/ci/tree/opendbc, the job clones panda next to it

@@ -16,6 +16,13 @@ SECONDS = float(os.environ.get("REPLAY_SECONDS", "20"))
 SPEED = float(os.environ.get("REPLAY_SPEED", "1"))
 DT = 0.01  # the station sends a list of frames every 10 ms
 BUSES = 3
+# routes that still fail on the rack, each with why, until they're fixed
+SKIP = {
+  "eb4eae1476647463/2023-08-26--18-07-04": "HYUNDAI_IONIQ_6 loses about half its frames in some runs",
+  "734ef96182ddf940/2022-10-02--16-41-44": "HYUNDAI_ELANTRA_GT_I30 is more classic CAN than the station sends without loss",
+  "148fa33c79475c93/00000002--bb5e1aa449": "BYD_ATTO_3 overflowed the panda's TX queue once",
+  "56574443e0c3783c/00000002--c00bd0fe69": "FORD_ESCAPE_MK4_5 missed 3 frames once",
+}
 # RX checks settle once every checked message has arrived, both sides compare them after this many seconds
 STEADY = 2
 
@@ -104,6 +111,9 @@ def main():
   failed = []
   for i, route in enumerate(routes):
     if i % NUM_JOBS != JOB_ID or (names and route.route not in names):
+      continue
+    if route.route in SKIP:
+      print(f"{route.route} skipped: {SKIP[route.route]}", flush=True)
       continue
     st = time.monotonic()
     try:
