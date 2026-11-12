@@ -67,6 +67,10 @@ LCC_RAMP_IDLE = 0x7801
 LCC_RAMP_STEP = 254
 LCC_RAMP_STEPS_MIN = 25
 LCC_RAMP_STEPS_MAX = 46
+# Ramp-in speed below LCC_RAMP_STEPS_MIN: stock moves one step per frame (0.5 s to 25 steps), and 50-68% of the frames
+# where the wheel fell > 5 deg behind were in that ramp-in. Two steps per frame reaches 25 steps in 0.25 s; deeper than
+# that, one step per frame as stock. Not seen from stock: the EPS's response to skipped ladder steps is untested.
+LCC_RAMP_IN_STEPS_PER_FRAME = 2
 
 
 def lcc_ramp_target(lat_accel: float, v_ego_kph: float, extra_steps: int = 0) -> int:
@@ -77,11 +81,13 @@ def lcc_ramp_target(lat_accel: float, v_ego_kph: float, extra_steps: int = 0) ->
 
 
 def lcc_ramp_next(word: int, lat_active: bool, target: int) -> int:
-  """Next LCC_RAMP value: one ladder step per frame toward target while steering, straight back to idle otherwise."""
+  """Next LCC_RAMP value while steering: toward target, LCC_RAMP_IN_STEPS_PER_FRAME ladder steps per frame while ramping
+  in (shallower than LCC_RAMP_STEPS_MIN), one step per frame otherwise; straight back to idle when not steering."""
   if not lat_active:
     return LCC_RAMP_IDLE
   if word > target:
-    return word - LCC_RAMP_STEP
+    ramping_in = word > LCC_RAMP_IDLE - LCC_RAMP_STEP * LCC_RAMP_STEPS_MIN
+    return max(word - LCC_RAMP_STEP * (LCC_RAMP_IN_STEPS_PER_FRAME if ramping_in else 1), target)
   if word < target:
     return word + LCC_RAMP_STEP
   return word
