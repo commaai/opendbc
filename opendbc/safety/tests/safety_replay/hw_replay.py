@@ -16,7 +16,7 @@ SECONDS = float(os.environ.get("REPLAY_SECONDS", "20"))
 SPEED = float(os.environ.get("REPLAY_SPEED", "1"))
 DT = 0.01  # the station sends a list of frames every 10 ms
 BUSES = 3
-# routes that still fail on the rack, each with why, until they're fixed
+# TODO: routes that still fail on the rack, each with why, until they're fixed
 SKIP = {
   "eb4eae1476647463/2023-08-26--18-07-04": "HYUNDAI_IONIQ_6 loses about half its frames in some runs",
   "734ef96182ddf940/2022-10-02--16-41-44": "HYUNDAI_ELANTRA_GT_I30 is more classic CAN than the station sends without loss",
