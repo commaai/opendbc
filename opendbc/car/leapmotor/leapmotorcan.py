@@ -93,15 +93,19 @@ def lcc_ramp_next(word: int, lat_active: bool, target: int) -> int:
   return word
 
 
-def create_steering_control(packer, camera_lka: dict, apply_angle: float, lat_active: bool, lcc_ramp: int = LCC_RAMP_IDLE):
+def create_steering_control(packer, camera_lka: dict, apply_angle: float, lat_active: bool, lcc_ramp: int = LCC_RAMP_IDLE,
+                            accel: float | None = None):
   """Rebuild ADAS_LKA (0x83) from the camera's latest frame, replacing only the steering fields.
 
   Every other field (ACC state, acceleration request, set speed, constants) is copied unchanged, so the
   stock ACC keeps working while openpilot steers. The packer recomputes the E2E checksum and runs its own
   counter, since the EPS only ever sees openpilot's frames once the camera's are blocked.
   While steering, LCC_RAMP carries lcc_ramp (see lcc_ramp_next); otherwise it is the camera's.
+  With openpilot longitudinal, accel (m/s^2) replaces the camera's ACC_ACCEL_REQ; None keeps the camera's.
   """
   values = {k: v for k, v in camera_lka.items() if k not in ("CHECKSUM", "COUNTER")}
+  if accel is not None:
+    values["ACC_ACCEL_REQ"] = accel
   values["STEER_ANGLE_REQ"] = apply_angle
   values["LCC_STEERING_ACTIVE_COPY"] = 1 if lat_active else 0
   if lat_active:

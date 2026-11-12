@@ -2,9 +2,13 @@ import unittest
 
 from opendbc.can import CANPacker
 from opendbc.can.dbc import DBC
-from opendbc.car import Bus
+from opendbc.car import Bus, structs
 from opendbc.car.leapmotor import leapmotorcan
+from opendbc.car.leapmotor.carcontroller import CarController, get_safety_CP
 from opendbc.car.leapmotor.leapmotorcan import leapmotor_checksum
+from opendbc.car.leapmotor.values import DBC as LEAPMOTOR_DBC, CarControllerParams
+
+DBC_NAMES = LEAPMOTOR_DBC["LEAPMOTOR_B10"]
 
 # Real ADAS_LKA (0x83) frames from a 2025 global-market B10: stock LCC steering, ACC only, and assist off
 REAL_ADAS_LKA = {
@@ -266,6 +270,48 @@ class TestLeapmotorCan(unittest.TestCase):
       ret = CS.update(parsers)
       self.assertLess(abs(ret.steeringTorqueEps), 100)
       self.assertFalse(CS.driver_override)
+
+  def test_accel_replaces_only_the_request(self):
+    # with openpilot longitudinal, only ACC_ACCEL_REQ changes besides the steering fields
+    for hexdata in REAL_ADAS_LKA["acc"]:
+      dat = bytes.fromhex(hexdata)
+      camera = self.unpack(dat)
+      for accel in (-3.5, -0.75, 0.0, 1.2):
+        _, out, _ = leapmotorcan.create_steering_control(CANPacker("leapmotor_b10"), camera, camera["STEER_ANGLE_REQ"], False,
+                                                         accel=accel)
+        got = self.unpack(bytes(out))
+        self.assertAlmostEqual(got["ACC_ACCEL_REQ"], accel, delta=0.026)
+        for i in range(2, len(dat)):
+          if i not in STEERING_BYTES | {4}:
+            self.assertEqual(out[i], dat[i], f"byte {i}")
+
+  def test_long_accel(self):
+    CP = get_safety_CP()
+    CP.openpilotLongitudinalControl = True
+    CC = structs.CarControl()
+    controller = CarController(DBC_NAMES, CP)
+    limits = CarControllerParams
+    cases = [
+      # longActive, ACC_STATE, camera request, openpilot request -> sent (None = the camera's)
+      (False, 3, -1.0, -0.5, None),  # openpilot not in control
+      (True, 2, 0.0, -0.5, None),    # stock ACC not engaged
+      (True, 1, 1.5, -0.5, None),    # accelerator override
+      (True, 3, -1.0, -0.5, -0.5),   # openpilot may brake less than stock ACC's normal braking
+      (True, 3, -1.0, 5.0, limits.ACCEL_MAX),
+      (True, 3, -1.0, -9.0, limits.ACCEL_MIN),
+      (True, 3, -2.0, -0.5, -2.0),   # but never less than the camera's hard braking
+      (True, 3, -2.6, -3.0, -3.0),
+    ]
+    for long_active, acc_state, camera_accel, accel, expected in cases:
+      with self.subTest(long_active=long_active, acc_state=acc_state, camera_accel=camera_accel, accel=accel):
+        CC.longActive = long_active
+        CC.actuators.accel = accel
+        self.assertEqual(controller.long_accel(CC, {"ACC_STATE": acc_state, "ACC_ACCEL_REQ": camera_accel}), expected)
+    # without openpilot longitudinal the camera's request always goes through
+    CP.openpilotLongitudinalControl = False
+    CC.longActive = True
+    self.assertIsNone(CarController(DBC_NAMES, CP).long_accel(CC, {"ACC_STATE": 3, "ACC_ACCEL_REQ": -1.0}))
+
 
 if __name__ == "__main__":
   unittest.main()

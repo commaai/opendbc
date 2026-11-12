@@ -2,6 +2,7 @@ from opendbc.car import structs, get_safety_config
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.leapmotor.carcontroller import CarController
 from opendbc.car.leapmotor.carstate import CarState
+from opendbc.car.leapmotor.values import LeapmotorSafetyFlags
 
 
 class CarInterface(CarInterfaceBase):
@@ -20,6 +21,14 @@ class CarInterface(CarInterfaceBase):
     ret.steerAtStandstill = False
 
     ret.radarUnavailable = True
-    ret.alphaLongitudinalAvailable = False
+
+    # Alpha longitudinal: the stock ACC keeps engagement, set speed (knob), cancel and the standstill hold; openpilot
+    # only replaces its acceleration request in ADAS_LKA, which openpilot already sends for steering.
+    ret.alphaLongitudinalAvailable = True
+    if alpha_long:
+      ret.openpilotLongitudinalControl = True
+      ret.safetyConfigs[0].safetyParam |= LeapmotorSafetyFlags.LONG_CONTROL.value
+      # the stock request leads the measured acceleration by about 0.2-0.25 s
+      ret.longitudinalActuatorDelay = 0.25
 
     return ret

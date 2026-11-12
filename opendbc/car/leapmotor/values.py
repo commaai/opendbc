@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
@@ -55,6 +56,19 @@ class CarControllerParams:
   # it, the EPS peaked at 136 through a 72 deg turn at 33-47 km/h and never flagged an override above 100.
   RAMP_BOOST_EPS_TORQUE_HOLD = 100
   RAMP_BOOST_EPS_TORQUE_BACK = 120
+
+  # Longitudinal (alpha): ADAS_LKA.ACC_ACCEL_REQ, 0.05 m/s^2 per bit, raw 100 = 0. Must match opendbc/safety/modes/leapmotor.h.
+  # Stock ACC never asked for less than -2.7 m/s^2 in about 5 h of engaged driving; the car follows the request
+  # (-2.6 asked, -2.69 measured) and blends regen with light friction braking itself.
+  ACCEL_MIN = -3.5  # m/s^2
+  ACCEL_MAX = 2.0  # m/s^2
+  # When the camera asks for this much braking or more, openpilot never asks for less: the camera's emergency braking
+  # path is not yet known and may use this field. Stock ACC went below it on 0.02% of engaged frames.
+  STOCK_BRAKE_PASSTHROUGH = -2.0  # m/s^2
+
+
+class LeapmotorSafetyFlags(IntFlag):
+  LONG_CONTROL = 1
 
 
 @dataclass

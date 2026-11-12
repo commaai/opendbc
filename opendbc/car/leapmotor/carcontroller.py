@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 from opendbc.can import CANPacker
 from opendbc.car import Bus
@@ -44,6 +45,21 @@ class CarController(CarControllerBase):
       boost += 1
     return min(max(boost, 0), leapmotorcan.LCC_RAMP_STEPS_MAX - leapmotorcan.LCC_RAMP_STEPS_MIN)
 
+  def long_accel(self, CC, camera_lka: dict) -> float | None:
+    """openpilot's acceleration request for ADAS_LKA, or None to send the camera's.
+
+    Only while the stock ACC is engaged (ACC_STATE 3): the camera keeps engagement, the standstill hold and the
+    accelerator override (ACC_STATE 1), and its request goes through unchanged then. When the camera asks for hard
+    braking, openpilot never asks for less.
+    """
+    if not (self.CP.openpilotLongitudinalControl and CC.longActive and int(camera_lka["ACC_STATE"]) == 3):
+      return None
+    accel = float(np.clip(CC.actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+    camera_accel = float(camera_lka["ACC_ACCEL_REQ"])
+    if camera_accel <= CarControllerParams.STOCK_BRAKE_PASSTHROUGH:
+      accel = min(accel, camera_accel)
+    return accel
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     can_sends = []
@@ -68,7 +84,7 @@ class CarController(CarControllerBase):
       self.lcc_ramp = leapmotorcan.lcc_ramp_next(self.lcc_ramp, lat_active,
                                                  leapmotorcan.lcc_ramp_target(lat_accel, CS.out.vEgoRaw * 3.6, self.ramp_boost))
       can_sends.append(leapmotorcan.create_steering_control(self.packer, camera_lka, self.apply_angle_last, lat_active,
-                                                             self.lcc_ramp))
+                                                             self.lcc_ramp, self.long_accel(CC, camera_lka)))
 
     # cancel stock ACC when openpilot asks (it is engaged with ACC, so it cancels ACC whenever it disengages)
     if CC.cruiseControl.cancel and self.frame % CarControllerParams.STEER_STEP == 0 and CS.powertrain_state is not None:
