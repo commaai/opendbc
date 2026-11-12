@@ -1,17 +1,13 @@
-# the test routes, kept on the station between jobs
 cache = ["/data/tmp/comma_download_cache"]
 
-# the tests run in AGNOS's venv, it has everything but panda
 [env]
-PYTHONPATH = "/data/ci/tree:/data/ci/tree/opendbc"  # the tree is /data/ci/tree/opendbc, the job clones panda next to it
+PYTHONPATH = "/data/ci/tree:/data/ci/tree/opendbc"
 PYTHONWARNINGS = "error"
 LOGLEVEL = "debug"
 
-# the test routes from the UP into the panda, its safety decisions must match libsafety's
 [jobs.replay]
 runs-on = "up-can"
 timeout-minutes = 90
-# the DUT's /tmp is a small tmpfs, the downloaded test routes would fill it
 env = { REPLAY_SECONDS = "10", COMMA_CACHE = "/data/tmp/comma_download_cache" }
 
 [[jobs.replay.steps]]
