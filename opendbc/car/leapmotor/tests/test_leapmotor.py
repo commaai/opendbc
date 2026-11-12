@@ -122,9 +122,18 @@ class TestLeapmotorCan(unittest.TestCase):
     for _ in range(40):
       word = leapmotorcan.lcc_ramp_next(word, True, straight_90)
       seen.append(word)
-    self.assertEqual(seen[:3], [0x7703, 0x7605, 0x7507])
-    self.assertEqual(seen.index(straight_90), 30)  # 31 frames at 50 Hz, about 0.6 s
+    # two ladder steps per frame up to 25 steps (stock: one), then one per frame as stock
+    self.assertEqual(seen[:3], [0x7605, 0x7409, 0x720D])
+    steps_seen = [(leapmotorcan.LCC_RAMP_IDLE - w) // leapmotorcan.LCC_RAMP_STEP for w in seen]
+    self.assertTrue(all((leapmotorcan.LCC_RAMP_IDLE - w) % leapmotorcan.LCC_RAMP_STEP == 0 for w in seen))  # on the ladder
+    self.assertEqual(steps_seen.index(26), 12)  # 25 steps passed in 13 frames, about 0.26 s
+    self.assertTrue(all(b - a == 1 for a, b in zip(steps_seen[12:], steps_seen[13:], strict=False) if b != a))
+    self.assertEqual(seen.index(straight_90), 17)  # 18 frames instead of stock's 31
     self.assertEqual(seen[-1], straight_90)
+    # never past the target, even when a double step would overshoot it
+    shallow = leapmotorcan.LCC_RAMP_IDLE - 24 * leapmotorcan.LCC_RAMP_STEP
+    target_25 = leapmotorcan.LCC_RAMP_IDLE - 25 * leapmotorcan.LCC_RAMP_STEP
+    self.assertEqual(leapmotorcan.lcc_ramp_next(shallow, True, target_25), target_25)
     self.assertEqual(leapmotorcan.lcc_ramp_next(seen[-1], False, straight_90), leapmotorcan.LCC_RAMP_IDLE)
     # one step per frame toward a new target, both ways
     deeper = leapmotorcan.lcc_ramp_target(1.5, 75.0)
