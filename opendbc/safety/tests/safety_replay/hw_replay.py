@@ -40,6 +40,29 @@ def load(route):
   return cfg.safetyModel.raw, cfg.safetyParam, frames
 
 
+def without_forwarded_copies(mode, param, frames):
+  # some logs also have the panda's forwarded copy, replaying it would collide with the panda's own forward
+  safety = libsafety_py.libsafety
+  assert safety.set_safety_hooks(mode, param) == 0
+  out = []
+  for frame in frames:
+    copies = Counter(frame)
+    drop = Counter()
+    for (addr, dat, bus), n in copies.items():
+      if bus == 0 and (addr, dat, 2) in copies and safety.safety_fwd_hook(0, addr) == 2:
+        drop[(addr, dat, 2)] += min(n, copies[(addr, dat, 2)])
+      elif bus == 2 and (addr, dat, 0) in copies and safety.safety_fwd_hook(2, addr) == 0 and safety.safety_fwd_hook(0, addr) != 2:
+        drop[(addr, dat, 0)] += min(n, copies[(addr, dat, 0)])
+    kept = []
+    for msg in frame:
+      if drop[msg]:
+        drop[msg] -= 1
+      else:
+        kept.append(msg)
+    out.append(kept)
+  return out
+
+
 def expected(mode, param, frames):
   safety = libsafety_py.libsafety
   assert safety.set_safety_hooks(mode, param) == 0
@@ -111,6 +134,7 @@ def main():
     st = time.monotonic()
     try:
       mode, param, frames = load(route)
+      frames = without_forwarded_copies(mode, param, frames)
     except Exception as e:
       print(f"{route.route} FAIL, can't load: {type(e).__name__}: {e!r}", flush=True)
       failed.append(route.route)
