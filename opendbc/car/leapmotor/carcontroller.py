@@ -27,6 +27,20 @@ class CarController(CarControllerBase):
     self.lat_active_last = False
     self.VM = VehicleModel(get_safety_CP())
     self.adas_lka_idle = leapmotorcan.decode_adas_lka_idle()
+    self.ramp_boost = 0
+
+  def update_ramp_boost(self, lat_active: bool, CS) -> int:
+    """Extra LCC_RAMP steps: one more per frame while the wheel lags the command at low speed, one fewer once it is
+    back (see CarControllerParams.RAMP_BOOST_LAG)."""
+    if not lat_active or CS.out.vEgoRaw * 3.6 > CarControllerParams.RAMP_BOOST_MAX_SPEED:
+      return 0
+    behind = abs(self.apply_angle_last - CS.out.steeringAngleDeg)
+    boost = self.ramp_boost
+    if behind > CarControllerParams.RAMP_BOOST_LAG:
+      boost += 1
+    elif behind < CarControllerParams.RAMP_BOOST_CAUGHT_UP:
+      boost -= 1
+    return min(max(boost, 0), leapmotorcan.LCC_RAMP_STEPS_MAX - leapmotorcan.LCC_RAMP_STEPS_MIN)
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -48,8 +62,9 @@ class CarController(CarControllerBase):
       self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
                                                           CS.out.steeringAngleDeg, lat_active, CarControllerParams, self.VM)
       lat_accel = self.VM.calc_curvature(math.radians(self.apply_angle_last), CS.out.vEgoRaw, 0.) * CS.out.vEgoRaw ** 2
+      self.ramp_boost = self.update_ramp_boost(lat_active, CS)
       self.lcc_ramp = leapmotorcan.lcc_ramp_next(self.lcc_ramp, lat_active,
-                                                 leapmotorcan.lcc_ramp_target(lat_accel, CS.out.vEgoRaw * 3.6))
+                                                 leapmotorcan.lcc_ramp_target(lat_accel, CS.out.vEgoRaw * 3.6, self.ramp_boost))
       can_sends.append(leapmotorcan.create_steering_control(self.packer, camera_lka, self.apply_angle_last, lat_active,
                                                              self.lcc_ramp))
 
