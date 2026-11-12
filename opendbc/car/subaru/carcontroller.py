@@ -27,6 +27,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
     self.apply_angle_last = 0
+    self.lat_active_last = False
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
@@ -41,7 +42,11 @@ class CarController(CarControllerBase):
     if (self.frame % self.p.STEER_STEP) != 0:
       return []
 
-    lat_active = CC.latActive
+    # engaging while the driver steers can start beyond the lateral accel limit, panda blocks those frames
+    # and the EPS faults on the missing message. wait for the driver to release the wheel
+    lat_active = CC.latActive and (self.lat_active_last or not CS.out.steeringPressed)
+    self.lat_active_last = lat_active
+
     apply_angle = apply_steer_angle_limits_vm(CC.actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo,
                                               CS.out.steeringAngleDeg, lat_active, self.p, self.VM)
 
