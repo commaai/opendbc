@@ -19,11 +19,13 @@ class CarControllerParams:
     500,  # deg; mechanical lock is about 522 deg, keep a margin so the EPS never drives into the end stop
     MAX_ANGLE_RATE=5,  # deg per 20 ms frame (250 deg/s): lock to lock in about 4 s. EPS fault rate untested
   )
-  # Driver torque from EPS_STEERING.STEER_TORQUE_DRIVER (unit unknown). Hands-off LCC never exceeds 3 on the
-  # filmed route and 5 over 36 min of LCC; holding full lock parked reaches 21-25. With the 5-frame debounce in
-  # carstate, 4 gave zero steeringPressed events over those 36 min. Steering against openpilot will need more
-  # torque than free manual steering, so detection then should be higher than the 22% seen in manual turns.
-  STEER_DRIVER_ALLOWANCE = 4
+  # EPS_STEERING.STEER_TORQUE_DRIVER (unit unknown) also follows the EPS's own effort: while openpilot steered and the
+  # EPS flagged no override it read -1 per 16.8 of STEER_TORQUE_EPS (r -0.88, 317k frames on 2 drives). Adding that
+  # share back leaves the driver's torque: above 3 on 0.14% of those frames but on 75% of frames the EPS flagged as
+  # overrides. With the 5-frame debounce in carstate it caught all 3 of the driver's lane-change nudges at 125 km/h,
+  # where the raw reading stayed at 1, and nothing else above 118 km/h over the 2 drives.
+  EPS_TORQUE_PER_DRIVER_TORQUE = 16.8
+  STEER_DRIVER_ALLOWANCE = 3
 
 
 @dataclass
