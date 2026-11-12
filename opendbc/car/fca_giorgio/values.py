@@ -57,7 +57,7 @@ class FcaGiorgioCarSpecs(CarSpecs):
 @dataclass
 class FcaGiorgioCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
-  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.vw_a]))
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
 
 
 class CAR(Platforms):
