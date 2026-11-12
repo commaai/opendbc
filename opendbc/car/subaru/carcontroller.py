@@ -4,12 +4,21 @@ from opendbc.car import Bus, make_tester_present_msg
 from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
-from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
+from opendbc.car.subaru.values import CAR, DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
 
 # FIXME: These limits aren't exact. The real limit is more than likely over a larger time period and
 # involves the total steering angle change rather than rate, but these limits work well for now
 MAX_STEER_RATE = 25  # deg/s
 MAX_STEER_RATE_FRAMES = 7  # tx control frames needed before torque can be cut
+
+
+def get_safety_CP():
+  # match safety: Crosstrek 2024+ steer ratio (13.0), the lowest of the angle LKAS cars
+  # Forester 2022 has the same wheelbase and mass as the Crosstrek
+  from opendbc.car.subaru.interface import CarInterface
+  CP = CarInterface.get_non_essential_params(CAR.SUBARU_FORESTER_2022)
+  CP.steerRatio = 13.0
+  return CP
 
 
 class CarController(CarControllerBase):
