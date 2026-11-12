@@ -1,6 +1,8 @@
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.tesla.values import CANBUS, CarControllerParams
 
+ACCEL_WINDOW = 0.08  # m/s^2, two steps of the signal
+
 
 class TeslaCAN:
   def __init__(self, CP, packer):
@@ -25,8 +27,9 @@ class TeslaCAN:
       "DAS_aebEvent": 0,
       "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
       "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
-      "DAS_accelMin": accel,
-      "DAS_accelMax": max(accel, 0),
+      # stock keeps the accel window across zero. with a closed window the car faults cruise when the driver steers hard
+      "DAS_accelMin": min(accel, -ACCEL_WINDOW) if active else accel,
+      "DAS_accelMax": max(accel, ACCEL_WINDOW) if active else max(accel, 0),
       "DAS_controlCounter": counter,
     }
     return self.packer.make_can_msg("DAS_control", CANBUS.party, values)
