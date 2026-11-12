@@ -87,10 +87,11 @@ class CarState(CarStateBase):
       # ES_DashStatus->Cruise_Activated_Dash is likely intended for the dash display only, as it falls
       # during user gas override and at standstill. ES_Status is missing on hybrid, so we use ES_Brake instead
 
-      # TODO: ES_Brake->Cruise_Activated has been seen staying high when Crosstrek 2025 angle LKAS user pressed
-      #  brake while engaged at a stop. ES_Status and ES_DashStatus->Signal7 correctly fell, but is either missing or
-      #  always zero on hybrids. Probably need to split angle & hybrid. 0x27 and 0x225 on hybrids may work for them.
-      ret.cruiseState.enabled = cp_es_brake.vl["ES_Brake"]['Cruise_Activated'] != 0
+      # ES_Brake->Cruise_Activated can stay high when the user brakes at a stop on angle LKAS, ES_Status falls
+      # TODO: hybrids have no ES_Status and ES_DashStatus->Signal7 is always zero. Cruise_Status_2 (0x27) and
+      #  0x225 bit 48 track ES_Brake, but braking at a stop is unvalidated
+      cruise_msg = "ES_Status" if self.CP.flags & SubaruFlags.LKAS_ANGLE else "ES_Brake"
+      ret.cruiseState.enabled = cp_es_brake.vl[cruise_msg]['Cruise_Activated'] != 0
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
     else:
       ret.cruiseState.enabled = cp_cruise.vl["CruiseControl"]["Cruise_Activated"] != 0
