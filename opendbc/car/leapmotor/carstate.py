@@ -55,11 +55,11 @@ class CarState(CarStateBase):
     self.driver_override_frames = self.driver_override_frames + 1 if eps_override else 0
     torque_pressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)
     ret.steeringPressed = torque_pressed or self.driver_override_frames >= 2
-    # When to let go of the wheel, like stock LCC: on the EPS's own flag. The raw torque reading read 5-7 whenever the
-    # EPS pushed 65-95 in a curve: letting go on it dropped the EPS to 0 and back every 0.7 s (41 times in 14 min).
-    # Above 118 km/h the flag is always set, so the driver's torque counts there: without it, openpilot held the
-    # wheel against a lane-change nudge at 125 km/h until the EPS stopped taking the steering frame.
-    self.driver_override = self.driver_override_frames >= 2 or (torque_pressed and ret.vEgoRaw >= 118 * CV.KPH_TO_MS)
+    # When to let go of the wheel: on the EPS's own flag, like stock LCC, or on the driver's torque. Not on the raw
+    # reading, which read 5-7 whenever the EPS pushed 65-95 in a curve: letting go on it dropped the EPS to 0 and back
+    # every 0.7 s (41 times in 14 min). The flag alone is not enough: above 118 km/h it is always set, and at walking
+    # pace it stayed off while openpilot pulled the wheel from +324 to -203 deg through the driver's hands.
+    self.driver_override = self.driver_override_frames >= 2 or torque_pressed
     # The EPS reports whether it receives ADAS_LKA (0x83): losing it after it was received means our steering frame is
     # missing or rejected (camera-unplug test). Not set before the camera's first frame after ignition.
     lka_received = bool(cp.vl['EPS_STEERING']['ADAS_LKA_RECEIVED'])
