@@ -23,8 +23,6 @@
 #define VOLKSWAGEN_MEB_ACC_AKTIV_REGELT        3U
 #define VOLKSWAGEN_MEB_ACC_OVERRIDE            4U
 
-static bool volkswagen_meb_alt_crc = false;
-
 #define VOLKSWAGEN_MEB_COMMON_RX_CHECKS \
   {.msg = {{MSG_LH_EPS_03, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
   {.msg = {{MSG_MOTOR_14, 0, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
@@ -62,7 +60,7 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
   uint32_t ret = volkswagen_meb_compute_crc(msg);
   int len = 0;
-  if (volkswagen_meb_alt_crc) {
+  if (safety_setup.volkswagen_meb_alt_crc) {
     if (msg->addr == MSG_QFK_01) {
       len = 28;
     }
@@ -108,10 +106,10 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
   volkswagen_common_init();
   const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
-  volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
+  safety_setup.volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
 
   safety_config ret;
-  if (volkswagen_meb_alt_crc) {
+  if (safety_setup.volkswagen_meb_alt_crc) {
     static const RxCheck volkswagen_meb_gen2_rx_checks[] = {
       VOLKSWAGEN_MEB_COMMON_RX_CHECKS
       {.msg = {{MSG_Motor_51, 0, 48, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -138,7 +136,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     uint32_t fr = msg->data[10] | (msg->data[11] << 8);
     uint32_t rl = msg->data[12] | (msg->data[13] << 8);
     uint32_t rr = msg->data[14] | (msg->data[15] << 8);
-    vehicle_moving = (fr | rr | rl | fl) != 0U;
+    safety.vehicle_moving = (fr | rr | rl | fl) != 0U;
     UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
   }
 
@@ -152,24 +150,24 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_QFK_01, 0U)) {
     int current_curvature = ((msg->data[6] & 0x7FU) << 8) | msg->data[5];
     current_curvature *= GET_BIT(msg, 55U) ? 1 : -1;
-    update_sample(&curvature_state.meas, current_curvature);
+    update_sample(&safety.curvature_state.meas, current_curvature);
   }
 
   if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
-    update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
+    update_sample(&safety.torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
   }
 
   if (msg_matches(msg, MSG_Motor_51, 0U)) {
     int acc_status = (msg->data[11] & 0x07U);
     bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-    acc_main_on = cruise_engaged || (acc_status == 2);
+    safety.acc_main_on = cruise_engaged || (acc_status == 2);
 
-    if (!acc_main_on) {
-      controls_allowed = false;
+    if (!safety.acc_main_on) {
+      safety.controls_allowed = false;
     }
 
     int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
-    gas_pressed = accel_pedal_value > 0;
+    safety.gas_pressed = accel_pedal_value > 0;
   }
 
   if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
@@ -178,20 +176,20 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
     bool set_button = GET_BIT(msg, 16U);
     bool resume_button = GET_BIT(msg, 19U);
-    if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-      controls_allowed = acc_main_on;
+    if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {
+      safety.controls_allowed = safety.acc_main_on;
     }
-    volkswagen_set_button_prev = set_button;
-    volkswagen_resume_button_prev = resume_button;
+    safety.volkswagen_set_button_prev = set_button;
+    safety.volkswagen_resume_button_prev = resume_button;
 
     // Always exit controls on rising edge of Cancel
     if (GET_BIT(msg, 13U)) {
-      controls_allowed = false;
+      safety.controls_allowed = false;
     }
   }
 
   if (msg_matches(msg, MSG_MOTOR_14, 0U)) {
-    brake_pressed = GET_BIT(msg, 28U);
+    safety.brake_pressed = GET_BIT(msg, 28U);
   }
 }
 
@@ -210,7 +208,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     // Signal: ACC_18.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
     int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
     // MEB inactive accel is 3.01, but we also need to send 0.0 for gas override
-    bool accel_override = controls_allowed && (desired_accel == 0);
+    bool accel_override = safety.controls_allowed && (desired_accel == 0);
     if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
       tx = false;
     }
@@ -222,7 +220,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     uint8_t hold_type = (msg->data[9] >> 5) & 0x07U;
     bool hold_type_allowed = (hold_type == VOLKSWAGEN_MEB_HMS_KEINE_ANFORDERUNG) ||
                              (hold_type == VOLKSWAGEN_MEB_HMS_LOESEN_UEBER_RAMPE) ||
-                             (controls_allowed && ((hold_type == VOLKSWAGEN_MEB_HMS_HALTEN) ||
+                             (safety.controls_allowed && ((hold_type == VOLKSWAGEN_MEB_HMS_HALTEN) ||
                                                    (hold_type == VOLKSWAGEN_MEB_HMS_ANFAHREN)));
     if (!hold_type_allowed) {
       tx = false;
@@ -233,7 +231,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     // These carry the same drive off and hold requests as the hold type, so they are gated the same way
     bool acc_anfahren = GET_BIT(msg, 56U);
     bool acc_anhalten = GET_BIT(msg, 57U);
-    if ((acc_anfahren || acc_anhalten) && !controls_allowed) {
+    if ((acc_anfahren || acc_anhalten) && !safety.controls_allowed) {
       tx = false;
     }
 
@@ -243,7 +241,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
     uint8_t acc_status = (msg->data[7] >> 4) & 0x07U;
     bool acc_status_active = (acc_status == VOLKSWAGEN_MEB_ACC_AKTIV_REGELT) ||
                              (acc_status == VOLKSWAGEN_MEB_ACC_OVERRIDE);
-    if (acc_status_active && !controls_allowed) {
+    if (acc_status_active && !safety.controls_allowed) {
       tx = false;
     }
   }

@@ -36,12 +36,12 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
   volkswagen_common_init();
 
 #ifdef ALLOW_DEBUG
-  volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
+  safety_setup.volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
 #else
   SAFETY_UNUSED(param);
 #endif
 
-  return volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_LONG_TX_MSGS) : \
+  return safety_setup.volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_LONG_TX_MSGS) : \
                                    BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_STOCK_TX_MSGS);
 }
 
@@ -55,14 +55,14 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
       speed += wheel_speed;
     }
     // Check all wheel speeds for any movement
-    vehicle_moving = speed > 0;
+    safety.vehicle_moving = speed > 0;
   }
 
   // Update driver input torque samples
   // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
   // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
   if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
-    update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
+    update_sample(&safety.torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
   }
 
   if (msg_matches(msg, MSG_TSK_06, 0U)) {
@@ -71,14 +71,14 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // Signal: TSK_06.TSK_Status
     int acc_status = (msg->data[3] & 0x7U);
     bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-    acc_main_on = cruise_engaged || (acc_status == 2);
+    safety.acc_main_on = cruise_engaged || (acc_status == 2);
 
-    if (!volkswagen_longitudinal) {
+    if (!safety_setup.volkswagen_longitudinal) {
       pcm_cruise_check(cruise_engaged);
     }
 
-    if (!acc_main_on) {
-      controls_allowed = false;
+    if (!safety.acc_main_on) {
+      safety.controls_allowed = false;
     }
   }
 
@@ -86,38 +86,38 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
     // Signal: GRA_ACC_01.GRA_Tip_Setzen
     // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-    if (volkswagen_longitudinal) {
+    if (safety_setup.volkswagen_longitudinal) {
       bool set_button = GET_BIT(msg, 16U);
       bool resume_button = GET_BIT(msg, 19U);
-      if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-        controls_allowed = acc_main_on;
+      if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {
+        safety.controls_allowed = safety.acc_main_on;
       }
-      volkswagen_set_button_prev = set_button;
-      volkswagen_resume_button_prev = resume_button;
+      safety.volkswagen_set_button_prev = set_button;
+      safety.volkswagen_resume_button_prev = resume_button;
     }
     // Always exit controls on rising edge of Cancel
     // Signal: GRA_ACC_01.GRA_Abbrechen
     if (GET_BIT(msg, 13U)) {
-      controls_allowed = false;
+      safety.controls_allowed = false;
     }
   }
 
   // Signal: Motor_20.MO_Fahrpedalrohwert_01
   if (msg_matches(msg, MSG_MOTOR_20, 0U)) {
-    gas_pressed = ((GET_BYTES_LE(msg, 0, 4) >> 12) & 0xFFU) != 0U;
+    safety.gas_pressed = ((GET_BYTES_LE(msg, 0, 4) >> 12) & 0xFFU) != 0U;
   }
 
   // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
   if (msg_matches(msg, MSG_MOTOR_14, 0U)) {
-    volkswagen_brake_pedal_switch = GET_BIT(msg, 28U);
+    safety.volkswagen_brake_pedal_switch = GET_BIT(msg, 28U);
   }
 
   // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
   if (msg_matches(msg, MSG_ESP_05, 0U)) {
-    volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
+    safety.volkswagen_brake_pressure_detected = GET_BIT(msg, 26U);
   }
 
-  brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
+  safety.brake_pressed = safety.volkswagen_brake_pedal_switch || safety.volkswagen_brake_pressure_detected;
 }
 
 static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
@@ -178,7 +178,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((msg->addr == MSG_GRA_ACC_01) && !controls_allowed) {
+  if ((msg->addr == MSG_GRA_ACC_01) && !safety.controls_allowed) {
     // disallow resume and set: bits 16 and 19
     if ((msg->data[2] & 0x9U) != 0U) {
       tx = false;

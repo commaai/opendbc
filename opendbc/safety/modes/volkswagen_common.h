@@ -3,20 +3,6 @@
 extern const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL;
 const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
 
-extern bool volkswagen_longitudinal;
-bool volkswagen_longitudinal = false;
-
-extern bool volkswagen_set_button_prev;
-bool volkswagen_set_button_prev = false;
-
-extern bool volkswagen_resume_button_prev;
-bool volkswagen_resume_button_prev = false;
-
-extern bool volkswagen_brake_pedal_switch;
-extern bool volkswagen_brake_pressure_detected;
-bool volkswagen_brake_pedal_switch = false;
-bool volkswagen_brake_pressure_detected = false;
-
 #define MSG_LH_EPS_03        0x09FU   // RX from EPS, for driver steering torque
 #define MSG_ESP_19           0x0B2U   // RX from ABS, for wheel speeds
 #define MSG_ESP_05           0x106U   // RX from ABS, for brake switch state
@@ -37,11 +23,7 @@ bool volkswagen_brake_pressure_detected = false;
 #define MSG_TSK_04      0x10EU   // RX from ECU, for ACC status from drivetrain coordinator
 
 static void volkswagen_common_init(void) {
-  volkswagen_longitudinal = false;
-  volkswagen_set_button_prev = false;
-  volkswagen_resume_button_prev = false;
-  volkswagen_brake_pedal_switch = false;
-  volkswagen_brake_pressure_detected = false;
+  safety_setup.volkswagen_longitudinal = false;
   return;
 }
 
