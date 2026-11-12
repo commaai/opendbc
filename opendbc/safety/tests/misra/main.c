@@ -6,6 +6,14 @@ uint32_t microsecond_timer_get(void) {
   return 0U;
 }
 
+uint32_t can_rx_frames_queued(void) {
+  return 0U;
+}
+
+uint32_t can_rx_frames_read(void) {
+  return 0U;
+}
+
 // Stands in for the firmware and libsafety, the callers of the safety API
 // declared in declarations.h. Referencing the entry points here keeps
 // misra-c2012-8.7 from asking for them to have internal linkage.

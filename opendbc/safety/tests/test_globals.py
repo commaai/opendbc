@@ -12,6 +12,8 @@ SRC = """
 #include <stddef.h>
 #include <stdint.h>
 uint32_t microsecond_timer_get(void);
+uint32_t can_rx_frames_queued(void);
+uint32_t can_rx_frames_read(void);
 #include "opendbc/safety/can.h"
 #include "opendbc/safety/safety.h"
 """
