@@ -89,6 +89,8 @@ class CarState(CarStateBase):
     ret.cruiseState.speed = cp_cam.vl['ADAS_LKA']['ACC_SET_SPEED'] * CV.KPH_TO_MS
     ret.cruiseState.speedCluster = ret.cruiseState.speed
     ret.cruiseState.standstill = ret.cruiseState.enabled and ret.standstill
+    # the camera's forward collision warning, shown by openpilot too
+    ret.stockFcw = bool(cp_cam.vl['ROAD_SIGNS']['FCW'])
     # latest camera frame, rebuilt by the controller; None until the camera's 0x83 has been received
     self.adas_lka = dict(cp_cam.vl['ADAS_LKA']) if cp_cam.ts_nanos['ADAS_LKA']['COUNTER'] > 0 else None
 
