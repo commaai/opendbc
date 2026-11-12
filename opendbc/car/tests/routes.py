@@ -364,7 +364,7 @@ routes = [
 
   CarTestRoute("5d61e2f6e1f247f3/00000054--d3dfb01b34", MG.MG_5_EV),
 
-  CarTestRoute("8ae32b57e2f9d13c/00000239--819b8ea009", LEAPMOTOR.LEAPMOTOR_B10),
+  CarTestRoute("8ae32b57e2f9d13c/0000025f--a58bd2c2f5", LEAPMOTOR.LEAPMOTOR_B10),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold

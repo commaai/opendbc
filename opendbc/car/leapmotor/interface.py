@@ -13,9 +13,6 @@ class CarInterface(CarInterfaceBase):
     ret.brand = 'leapmotor'
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.leapmotor)]
-    # lateral control is not yet validated on the car
-    ret.dashcamOnly = True
-
     # The camera's angle request (ADAS_LKA.STEER_ANGLE_REQ) leads the measured angle by 70-100 ms during LCC
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.15
