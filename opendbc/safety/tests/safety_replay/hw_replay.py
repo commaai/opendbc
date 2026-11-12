@@ -57,14 +57,16 @@ def played(p, up, mode, param, frames):
   # like pandad, a heartbeat alone doesn't end the power save that loading the route without one started
   p.set_power_save(0)
   p.set_safety_mode(mode, param)
-  h0 = [p.can_health(b) for b in range(BUSES)]
+  # can_health is per CAN controller, a flipped harness swaps the controllers of buses 0 and 2
+  cans = [2, 1, 0] if p.health()["car_harness_status"] == p.HARNESS_STATUS_FLIPPED else [0, 1, 2]
+  h0 = [p.can_health(c) for c in cans]
   # an empty tail, so the station's loop doesn't start over before it's stopped
   up.can_replay(frames + [[]] * int(60 / DT))
   end = time.monotonic() + len(frames) * DT + 1
   while time.monotonic() < end:
     p.send_heartbeat(engaged=False)
     time.sleep(0.2)
-  h, h1 = p.health(), [p.can_health(b) for b in range(BUSES)]
+  h, h1 = p.health(), [p.can_health(c) for c in cans]
   up.reset()
   up.set_ignition(True)
   assert h["safety_mode"] == mode, f"panda left safety mode {mode}: {h['safety_mode']}"
@@ -79,6 +81,8 @@ def main():
 
   os.environ["SAFETY_UBSAN_TRAP"] = "1"
   p, up = Panda(), UP.remote()
+  # the station starts with the harness lines floating, reset() puts it in like played() leaves it
+  up.reset()
   up.set_ignition(True)
 
   names = sys.argv[1:]
@@ -90,7 +94,8 @@ def main():
     try:
       mode, param, frames = load(route)
     except Exception as e:
-      print(f"{route.route} skipped, no data: {e}", flush=True)
+      print(f"{route.route} FAIL, can't load: {type(e).__name__}: {e!r}", flush=True)
+      failed.append(route.route)
       continue
     if any(len(dat) > 8 for frame in frames for _, dat, _ in frame):
       # the station only sends classic CAN
