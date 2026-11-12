@@ -1,3 +1,5 @@
+import numpy as np
+
 from opendbc.can import CANPacker
 from opendbc.car import Bus
 from opendbc.car.lateral import apply_driver_steer_torque_limits
@@ -13,6 +15,7 @@ class CarController(CarControllerBase):
     self.CANBUS = CanBus(CP)
     self.packer_pt = CANPacker(dbc_names[Bus.pt])
 
+    self.use_friction = CP.lateralTuning.which() == 'pid'
     self.apply_torque_last = 0
     self.lat_active_last = False
     self.release_hold_frames = 0
@@ -27,7 +30,16 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.STEER_STEP == 0:
       if CC.latActive and CS.lka_status == 2:  # "lka_active" per DBC
-        new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
+        # This van uses PID rather than the torque controller (see interface.py): the torque it needs tracks steering
+        # angle times speed, not lateral accel, and the torque controller's fixed low-speed gain made it oscillate.
+        # PID lacks the torque controller's steering friction compensation, though, and without it PID sticks at the
+        # steering friction (~10 counts) and tracks small changes poorly. So add it here: push toward the desired angle
+        # (from the PID controller) with up to STEER_FRICTION counts, faded out at low speed where it makes
+        # oscillation worse. Only with PID: the other controllers don't report a desired angle.
+        angle_error = actuators.steeringAngleDeg - CS.out.steeringAngleDeg if self.use_friction else 0.
+        friction = np.interp(CS.out.vEgo, self.CCP.STEER_FRICTION_BP, [0., self.CCP.STEER_FRICTION]) * \
+                   np.clip(angle_error / self.CCP.STEER_FRICTION_BAND_DEG, -1., 1.)
+        new_torque = int(round(actuators.torque * self.CCP.STEER_MAX + friction))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
       elif CS.lka_status == 2:
         # Stock LKA never cuts torque in one step: it ramps to zero, then holds LKA_ACTIVE at zero torque for a few
