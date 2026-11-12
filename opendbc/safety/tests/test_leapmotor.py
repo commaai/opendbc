@@ -5,7 +5,7 @@ import numpy as np
 
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.leapmotor.carcontroller import get_safety_CP
-from opendbc.car.leapmotor.values import CarControllerParams
+from opendbc.car.leapmotor.values import CarControllerParams, LeapmotorSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -133,15 +133,17 @@ class TestLeapmotorSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def _get_steer_cmd_angle_max(self, speed):
     return get_max_angle_vm(max(speed, 1), self.VM, CarControllerParams)
 
+  SAFETY_PARAM = 0
+
   def setUp(self):
     self.VM = VehicleModel(get_safety_CP())
     self.packer = CANPackerSafety("leapmotor_b10")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.leapmotor, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.leapmotor, self.SAFETY_PARAM)
     self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
-    values = {"STEER_ANGLE_REQ": angle, "LCC_STEERING_ACTIVE_COPY": enabled}
+    values = {"STEER_ANGLE_REQ": angle, "LCC_STEERING_ACTIVE_COPY": enabled, "ACC_ACCEL_REQ": 0}
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
       self.__class__.cnt_angle_cmd += 1
@@ -248,6 +250,38 @@ class TestLeapmotorSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       bad = bytearray.fromhex(frames[-1])
       bad[0] ^= 0x01
       self.assertFalse(self._rx(libsafety_py.make_CANPacket(addr, self.MAIN_BUS, bytes(bad))), hex(addr))
+
+
+class TestLeapmotorLongitudinalSafety(TestLeapmotorSafety, common.LongitudinalAccelSafetyTest):
+  SAFETY_PARAM = LeapmotorSafetyFlags.LONG_CONTROL
+  MAX_ACCEL = CarControllerParams.ACCEL_MAX
+  MIN_ACCEL = CarControllerParams.ACCEL_MIN
+
+  def _accel_msg(self, accel: float, bus: int = 0):
+    # steering inactive, so only the acceleration request is checked
+    values = {"STEER_ANGLE_REQ": 0, "LCC_STEERING_ACTIVE_COPY": 0, "ACC_ACCEL_REQ": accel}
+    return self.packer.make_can_msg_safety("ADAS_LKA", bus, values)
+
+  def test_camera_accel_passthrough(self):
+    # without controls allowed, only the camera's own request (or 0) may be sent
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self._rx(self._accel_msg(-1.0, bus=2)))
+    self.assertTrue(self._tx(self._accel_msg(-1.0)))
+    self.assertTrue(self._tx(self._accel_msg(0)))
+    self.assertFalse(self._tx(self._accel_msg(-1.5)))
+    self.assertFalse(self._tx(self._accel_msg(0.5)))
+
+  def test_stock_brake_floor(self):
+    # when the camera asks for hard braking, openpilot may not ask for less (one bit of slack for timing)
+    self.safety.set_controls_allowed(True)
+    for camera_accel in (-1.95, -2.0, -2.5, -3.0):
+      self.assertTrue(self._rx(self._accel_msg(camera_accel, bus=2)))
+      hard = camera_accel <= CarControllerParams.STOCK_BRAKE_PASSTHROUGH
+      self.assertTrue(self._tx(self._accel_msg(camera_accel)))
+      self.assertTrue(self._tx(self._accel_msg(camera_accel + 0.05)))
+      self.assertTrue(self._tx(self._accel_msg(-3.5)))
+      self.assertEqual(not hard, self._tx(self._accel_msg(camera_accel + 0.1)), camera_accel)
+      self.assertEqual(not hard, self._tx(self._accel_msg(1.0)), camera_accel)
 
 
 if __name__ == "__main__":

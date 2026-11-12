@@ -330,6 +330,8 @@ typedef struct {
 
   uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 
+  int leapmotor_camera_accel;  // the camera's latest ADAS_LKA.ACC_ACCEL_REQ, raw
+
   bool tesla_stock_aeb;
   // Only rising edges while controls are not allowed are considered for these systems:
   // TODO: Only LKAS (non-emergency) is currently supported since we've only seen it
@@ -375,6 +377,8 @@ typedef struct {
   bool hyundai_legacy;
   bool hyundai_canfd_alt_buttons;
   bool hyundai_canfd_lka_steer_msg_alt;
+
+  bool leapmotor_longitudinal;
 
   bool nissan_alt_eps;
 

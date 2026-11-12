@@ -4,7 +4,8 @@
 #include "opendbc/safety/modes/volkswagen_common.h"
 
 // Leapmotor B10 (2025, global market). The front camera's ADAS_LKA (0x83) carries the LCC steering angle request;
-// openpilot replaces it through a camera harness. Stock ACC stays in control of longitudinal.
+// openpilot replaces it through a camera harness. Stock ACC stays in control of longitudinal, unless the longitudinal
+// flag is set: then openpilot may also replace ADAS_LKA.ACC_ACCEL_REQ while stock ACC stays engaged.
 
 #define LEAPMOTOR_ADAS_LKA          0x83U   // TX: steering angle request (stock: front camera)
 #define LEAPMOTOR_VEHICLE_STATE     0xB6U   // RX from VCU: accelerator pedal, brake pressed
@@ -19,7 +20,13 @@
 // negated to match openpilot's convention (positive = left).
 #define LEAPMOTOR_ANGLE_CENTER 32490
 
-#define LEAPMOTOR_E2E_COUNT 4U
+// ADAS_LKA.ACC_ACCEL_REQ: byte 4, 0.05 m/s^2 per bit, raw 100 = 0 m/s^2. Must match CarControllerParams.
+#define LEAPMOTOR_ACCEL_INACTIVE 100
+// The camera's request at or below this (-2.0 m/s^2) is passed on: openpilot may ask for more braking, not less
+#define LEAPMOTOR_ACCEL_STOCK_BRAKE 60
+#define LEAPMOTOR_FLAG_LONGITUDINAL_CONTROL 1U
+
+#define LEAPMOTOR_E2E_COUNT 5U
 
 typedef struct {
   uint32_t addr;
@@ -41,6 +48,7 @@ static uint32_t leapmotor_compute_checksum(const CANPacket_t *msg) {
     {LEAPMOTOR_EPS_STEERING, {0x61U, 0x4BU, 0x17U, 0xE4U, 0x78U, 0x0BU, 0xA1U, 0xB4U, 0xBCU, 0xD8U, 0xEAU, 0xF5U, 0xD9U, 0x21U, 0xCAU, 0x86U}},
     {LEAPMOTOR_VEHICLE_STATE, {0x71U, 0x0DU, 0x0BU, 0xC2U, 0x08U, 0xC6U, 0x63U, 0x4BU, 0x3FU, 0x2BU, 0x06U, 0x10U, 0xF0U, 0xD2U, 0x87U, 0x0DU}},
     {LEAPMOTOR_POWERTRAIN_STATE, {0xEBU, 0x4EU, 0xAEU, 0xCEU, 0x79U, 0x7CU, 0x52U, 0x03U, 0x6AU, 0x84U, 0xC2U, 0x3AU, 0x0AU, 0x64U, 0x2FU, 0x17U}},
+    {LEAPMOTOR_ADAS_LKA, {0xCDU, 0x81U, 0x0AU, 0xC1U, 0x99U, 0x7FU, 0x8DU, 0x05U, 0x3BU, 0xA2U, 0x43U, 0xD2U, 0xB6U, 0x72U, 0x2AU, 0xD9U}},
   };
 
   uint8_t constant = 0U;
@@ -73,6 +81,10 @@ static void leapmotor_rx_hook(const CANPacket_t *msg) {
       pcm_cruise_check(GET_BIT(msg, 30U));       // ASSIST_ENGAGED
     }
   }
+
+  if ((msg->bus == LEAPMOTOR_CAM_BUS) && (msg->addr == LEAPMOTOR_ADAS_LKA)) {
+    safety.leapmotor_camera_accel = msg->data[4];  // ACC_ACCEL_REQ
+  }
 }
 
 static bool leapmotor_tx_hook(const CANPacket_t *msg) {
@@ -97,6 +109,24 @@ static bool leapmotor_tx_hook(const CANPacket_t *msg) {
     if (steer_angle_cmd_checks_vm(desired_angle, steer_req, LEAPMOTOR_STEERING_LIMITS, LEAPMOTOR_STEERING_PARAMS)) {
       tx = false;
     }
+
+    if (safety_setup.leapmotor_longitudinal) {
+      const LongitudinalLimits LEAPMOTOR_LONG_LIMITS = {
+        .max_accel = 140,  // 2.0 m/s^2
+        .min_accel = 30,   // -3.5 m/s^2
+        .inactive_accel = LEAPMOTOR_ACCEL_INACTIVE,
+      };
+      int accel = msg->data[4];  // ACC_ACCEL_REQ
+      // the camera's own request may always be passed on: that is what the stock ACC sends when openpilot is not in control
+      bool camera_accel = accel == safety.leapmotor_camera_accel;
+      if (!camera_accel && longitudinal_accel_checks(accel, LEAPMOTOR_LONG_LIMITS)) {
+        tx = false;
+      }
+      // never less braking than the camera asks for when it asks for hard braking (one bit of slack for timing)
+      if ((safety.leapmotor_camera_accel <= LEAPMOTOR_ACCEL_STOCK_BRAKE) && (accel > (safety.leapmotor_camera_accel + 1))) {
+        tx = false;
+      }
+    }
   }
 
   // The camera's copy of POWERTRAIN_STATE may only carry the stalk pushed up (STALK_PUSH = 3, cancel), while engaged
@@ -109,7 +139,8 @@ static bool leapmotor_tx_hook(const CANPacket_t *msg) {
 }
 
 static safety_config leapmotor_init(uint16_t param) {
-  SAFETY_UNUSED(param);
+  safety_setup.leapmotor_longitudinal = GET_FLAG(param, LEAPMOTOR_FLAG_LONGITUDINAL_CONTROL);
+  safety.leapmotor_camera_accel = LEAPMOTOR_ACCEL_INACTIVE;
 
   static const CanMsg LEAPMOTOR_TX_MSGS[] = {
     {LEAPMOTOR_ADAS_LKA, LEAPMOTOR_MAIN_BUS, 32, .check_relay = true},           // ADAS_LKA (steering)
@@ -123,7 +154,22 @@ static safety_config leapmotor_init(uint16_t param) {
     {.msg = {{LEAPMOTOR_POWERTRAIN_STATE, LEAPMOTOR_MAIN_BUS, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  return BUILD_SAFETY_CFG(leapmotor_rx_checks, LEAPMOTOR_TX_MSGS);
+  // with openpilot longitudinal, the camera's own ADAS_LKA is also checked: its acceleration request is passed on
+  static const RxCheck leapmotor_long_rx_checks[] = {
+    {.msg = {{LEAPMOTOR_WHEEL_SPEEDS, LEAPMOTOR_MAIN_BUS, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{LEAPMOTOR_EPS_STEERING, LEAPMOTOR_MAIN_BUS, 32, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{LEAPMOTOR_VEHICLE_STATE, LEAPMOTOR_MAIN_BUS, 16, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{LEAPMOTOR_POWERTRAIN_STATE, LEAPMOTOR_MAIN_BUS, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{LEAPMOTOR_ADAS_LKA, LEAPMOTOR_CAM_BUS, 32, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+  };
+
+  safety_config ret;
+  if (safety_setup.leapmotor_longitudinal) {
+    ret = BUILD_SAFETY_CFG(leapmotor_long_rx_checks, LEAPMOTOR_TX_MSGS);
+  } else {
+    ret = BUILD_SAFETY_CFG(leapmotor_rx_checks, LEAPMOTOR_TX_MSGS);
+  }
+  return ret;
 }
 
 const safety_hooks leapmotor_hooks = {
