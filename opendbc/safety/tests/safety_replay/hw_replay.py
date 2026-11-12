@@ -16,6 +16,8 @@ SECONDS = float(os.environ.get("REPLAY_SECONDS", "20"))
 SPEED = float(os.environ.get("REPLAY_SPEED", "1"))
 DT = 0.01  # the station sends a list of frames every 10 ms
 BUSES = 3
+# RX checks settle once every checked message has arrived, both sides compare them after this many seconds
+STEADY = 2
 
 
 def load(route):
@@ -39,18 +41,20 @@ def expected(mode, param, frames):
   safety = libsafety_py.libsafety
   assert safety.set_safety_hooks(mode, param) == 0
   safety.set_alternative_experience(0)
-  rx, fwd, invalid = Counter(), Counter(), 0
+  rx, fwd, invalid, checks_invalid = Counter(), Counter(), 0, False
   for i, frame in enumerate(frames):
     safety.set_timer(int(i * DT * 1e6))
     # like the panda's 1 Hz tick
     if i % int(1 / DT) == 0:
       safety.safety_tick()
+      checks_invalid |= i * DT >= STEADY and bool(safety.safety_a.state.safety_rx_checks_invalid)
     for addr, dat, bus in frame:
       fwd[bus] += safety.safety_fwd_hook(bus, addr) >= 0
       invalid += not safety.safety_rx_hook(libsafety_py.make_CANPacket(addr, bus, dat))
       rx[bus] += 1
   return {"rx": [rx[b] for b in range(BUSES)], "fwd": [fwd[b] for b in range(BUSES)], "rx_invalid": invalid,
-          "relay_malfunction": bool(safety.get_relay_malfunction())}
+          "relay_malfunction": bool(safety.get_relay_malfunction()), "rx_checks_invalid": checks_invalid,
+          "safety": [mode, param], "faults": 0, "tx_buffer_overflow": 0, "heartbeat_disabled": False, "harness_changed": False}
 
 
 def played(p, up, mode, param, frames):
@@ -59,23 +63,31 @@ def played(p, up, mode, param, frames):
   p.set_safety_mode(mode, param)
   # can_health is per CAN controller, a flipped harness swaps the controllers of buses 0 and 2
   cans = [2, 1, 0] if p.health()["car_harness_status"] == p.HARNESS_STATUS_FLIPPED else [0, 1, 2]
-  h0 = [p.can_health(c) for c in cans]
+  hs0, h0 = p.health(), [p.can_health(c) for c in cans]
   # the station sends CAN FD on the buses that have it, the panda turns CAN FD on when it receives a frame
   for b in {bus for frame in frames for _, dat, bus in frame if len(dat) > 8}:
     up.set_can_data_speed_kbps(b, 2000)
   # an empty tail, so the station's loop doesn't start over before it's stopped
   up.can_replay(frames + [[]] * int(60 / DT))
-  end = time.monotonic() + len(frames) * DT + 1
-  while time.monotonic() < end:
+  start, checks_invalid = time.monotonic(), False
+  while time.monotonic() < start + len(frames) * DT + 1:
     p.send_heartbeat(engaged=False)
+    # the panda's RX checks are from its last 1 Hz tick, so sample a second later and stop when the route does
+    if STEADY + 1 <= time.monotonic() - start <= len(frames) * DT:
+      checks_invalid |= p.health()["safety_rx_checks_invalid"]
     time.sleep(0.2)
   h, h1 = p.health(), [p.can_health(c) for c in cans]
   up.reset()
   up.set_ignition(True)
-  assert h["safety_mode"] == mode, f"panda left safety mode {mode}: {h['safety_mode']}"
   return {"rx": [h1[b]["total_rx_cnt"] - h0[b]["total_rx_cnt"] for b in range(BUSES)],
           "fwd": [h1[b]["total_fwd_cnt"] - h0[b]["total_fwd_cnt"] for b in range(BUSES)],
-          "rx_invalid": h["safety_rx_invalid"], "relay_malfunction": bool(h["faults"] & 1)}
+          "rx_invalid": h["safety_rx_invalid"], "relay_malfunction": bool(h["faults"] & 1), "rx_checks_invalid": checks_invalid,
+          "safety": [h["safety_mode"], h["safety_param"]],
+          # faults this route raised besides the relay malfunction
+          "faults": h["faults"] & ~hs0["faults"] & ~1,
+          # its queue to the host overflows without pandad reading it, the one to the buses must not
+          "tx_buffer_overflow": h["tx_buffer_overflow"] - hs0["tx_buffer_overflow"],
+          "heartbeat_disabled": h["heartbeat_disabled"], "harness_changed": h["car_harness_status"] != hs0["car_harness_status"]}
 
 
 def main():
