@@ -1,0 +1,26 @@
+# the tests run in AGNOS's venv, it has everything but panda
+[env]
+PYTHONPATH = "/data/ci/tree:/data/ci/tree/opendbc"  # the tree is /data/ci/tree/opendbc, the job clones panda next to it
+PYTHONWARNINGS = "error"
+LOGLEVEL = "debug"
+
+# the test routes from the UP into the panda, its safety decisions must match libsafety's
+[jobs.replay]
+runs-on = "up-can"
+timeout-minutes = 90
+# the DUT's /tmp is a small tmpfs, the downloaded test routes would fill it
+env = { REPLAY_SECONDS = "10", COMMA_CACHE = "/data/tmp/comma_download_cache" }
+
+[[jobs.replay.steps]]
+name = "Build"
+run = """
+rm -rf ../panda
+git clone -q --depth 1 https://github.com/commaai/panda.git ../panda
+cd ../panda
+scons
+scripts/reflash_internal_panda.py
+"""
+
+[[jobs.replay.steps]]
+name = "Replay"
+run = "python opendbc/safety/tests/safety_replay/hw_replay.py"
