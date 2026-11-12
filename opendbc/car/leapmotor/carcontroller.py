@@ -32,7 +32,7 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     can_sends = []
     # like the stock LCC, let go while the driver steers (the EPS flags it), then ramp back in
-    lat_active = CC.latActive and not CS.out.steeringPressed
+    lat_active = CC.latActive and not CS.driver_override
     # take the wheel back only once it is within the angle openpilot may command at this speed: otherwise the first
     # frame jumps to that limit, the panda blocks it, and the missing frame cancels ACC
     if lat_active and not self.lat_active_last and CS.out.vEgoRaw > 1.:
