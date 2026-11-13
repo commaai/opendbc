@@ -26,6 +26,8 @@ class CarControllerParams:
   # widens instead, keeping the response to small angle errors near the torque controller at lateral accel factor 10
   # (about 3-7 counts/deg), the only tune known to be calm on the van at low speed: the planner reacts to the van's
   # motion with ~0.5 s lag, so a stiffer response risks a ~1 Hz oscillation through it.
+  # STEER_FRICTION 9-11 considered: higher means less low-speed stick-slip and tighter tracking, but more torque jitter
+  #   and low-speed gain (oscillation risk). Starting at 9; raise if stick-slip remains.
   STEER_FRICTION = 9  # counts
   STEER_FRICTION_FADE_BP = [1., 3.]  # m/s: full push above
   STEER_FRICTION_BAND_BP = [5., 15.]  # m/s
