@@ -25,6 +25,36 @@
 // The camera's request at or below this (-2.0 m/s^2) is passed on: openpilot may ask for more braking, not less
 #define LEAPMOTOR_ACCEL_STOCK_BRAKE 60
 #define LEAPMOTOR_FLAG_LONGITUDINAL_CONTROL 1U
+// openpilot builds its frame from a camera frame that can be older than the latest one the panda has seen: on 6 log
+// segments by 0 (88%), 1 (10%), 2 to 6 frames (0.4%). So the camera's last LEAPMOTOR_CAMERA_ACCEL_HISTORY requests
+// (160 ms at 50 Hz) count.
+
+static void leapmotor_reset_camera_accel(void) {
+  for (uint8_t i = 0U; i < LEAPMOTOR_CAMERA_ACCEL_HISTORY; i++) {
+    safety.leapmotor_camera_accel[i] = LEAPMOTOR_ACCEL_INACTIVE;
+  }
+  safety.leapmotor_camera_accel_idx = 0U;
+}
+
+// was this request among the camera's recent ones?
+static bool leapmotor_is_camera_accel(int accel) {
+  bool found = false;
+  for (uint8_t i = 0U; i < LEAPMOTOR_CAMERA_ACCEL_HISTORY; i++) {
+    found = found || (safety.leapmotor_camera_accel[i] == accel);
+  }
+  return found;
+}
+
+// the least braking (highest raw) among the camera's recent requests
+static int leapmotor_camera_accel_max(void) {
+  int max_accel = safety.leapmotor_camera_accel[0];
+  for (uint8_t i = 1U; i < LEAPMOTOR_CAMERA_ACCEL_HISTORY; i++) {
+    if (safety.leapmotor_camera_accel[i] > max_accel) {
+      max_accel = safety.leapmotor_camera_accel[i];
+    }
+  }
+  return max_accel;
+}
 
 #define LEAPMOTOR_E2E_COUNT 5U
 
@@ -83,7 +113,8 @@ static void leapmotor_rx_hook(const CANPacket_t *msg) {
   }
 
   if ((msg->bus == LEAPMOTOR_CAM_BUS) && (msg->addr == LEAPMOTOR_ADAS_LKA)) {
-    safety.leapmotor_camera_accel = msg->data[4];  // ACC_ACCEL_REQ
+    safety.leapmotor_camera_accel[safety.leapmotor_camera_accel_idx] = msg->data[4];  // ACC_ACCEL_REQ
+    safety.leapmotor_camera_accel_idx = (safety.leapmotor_camera_accel_idx + 1U) % LEAPMOTOR_CAMERA_ACCEL_HISTORY;
   }
 }
 
@@ -111,19 +142,20 @@ static bool leapmotor_tx_hook(const CANPacket_t *msg) {
     }
 
     if (safety_setup.leapmotor_longitudinal) {
-      const LongitudinalLimits LEAPMOTOR_LONG_LIMITS = {
-        .max_accel = 140,  // 2.0 m/s^2
-        .min_accel = 30,   // -3.5 m/s^2
-        .inactive_accel = LEAPMOTOR_ACCEL_INACTIVE,
-      };
       int accel = msg->data[4];  // ACC_ACCEL_REQ
-      // the camera's own request may always be passed on: that is what the stock ACC sends when openpilot is not in control
-      bool camera_accel = accel == safety.leapmotor_camera_accel;
-      if (!camera_accel && longitudinal_accel_checks(accel, LEAPMOTOR_LONG_LIMITS)) {
+      // The camera's own request may always be passed on: that is what the stock ACC sends when openpilot is not in
+      // control. openpilot's own request must be within -3.5..2.0 m/s^2 (raw 30..140) with controls allowed. Not also
+      // with the accelerator released, as longitudinal_accel_checks() wants: the panda sees a press one frame before
+      // openpilot can hand back to the stock ACC, and a blocked ADAS_LKA cancels the stock ACC. The car follows the
+      // pedal over any ACC request anyway, as with the camera's own requests, which it keeps sending for a few frames.
+      bool own_accel_ok = safety.controls_allowed && !safety_max_limit_check(accel, 140, 30);
+      bool inactive = accel == LEAPMOTOR_ACCEL_INACTIVE;
+      if (!leapmotor_is_camera_accel(accel) && !own_accel_ok && !inactive) {
         tx = false;
       }
-      // never less braking than the camera asks for when it asks for hard braking (one bit of slack for timing)
-      if ((safety.leapmotor_camera_accel <= LEAPMOTOR_ACCEL_STOCK_BRAKE) && (accel > (safety.leapmotor_camera_accel + 1))) {
+      // never less braking than the camera asks for while all its recent requests are hard braking
+      int camera_floor = leapmotor_camera_accel_max();
+      if ((camera_floor <= LEAPMOTOR_ACCEL_STOCK_BRAKE) && (accel > camera_floor)) {
         tx = false;
       }
     }
@@ -140,7 +172,7 @@ static bool leapmotor_tx_hook(const CANPacket_t *msg) {
 
 static safety_config leapmotor_init(uint16_t param) {
   safety_setup.leapmotor_longitudinal = GET_FLAG(param, LEAPMOTOR_FLAG_LONGITUDINAL_CONTROL);
-  safety.leapmotor_camera_accel = LEAPMOTOR_ACCEL_INACTIVE;
+  leapmotor_reset_camera_accel();
 
   static const CanMsg LEAPMOTOR_TX_MSGS[] = {
     {LEAPMOTOR_ADAS_LKA, LEAPMOTOR_MAIN_BUS, 32, .check_relay = true},           // ADAS_LKA (steering)
