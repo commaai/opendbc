@@ -5,12 +5,13 @@ PYTHONPATH = "/data/ci/tree:/data/ci/tree/opendbc"
 PYTHONWARNINGS = "error"
 LOGLEVEL = "debug"
 
-[jobs.replay]
+# half the routes each, on the two up-can stations at once
+[jobs.replay_0]
 runs-on = "up-can"
 timeout-minutes = 90
-env = { REPLAY_SECONDS = "10", COMMA_CACHE = "/data/tmp/comma_download_cache" }
+env = { REPLAY_SECONDS = "10", COMMA_CACHE = "/data/tmp/comma_download_cache", NUM_JOBS = "2", JOB_ID = "0" }
 
-[[jobs.replay.steps]]
+[[jobs.replay_0.steps]]
 name = "Build"
 run = """
 rm -rf ../panda
@@ -20,6 +21,25 @@ scons
 scripts/reflash_internal_panda.py
 """
 
-[[jobs.replay.steps]]
+[[jobs.replay_0.steps]]
+name = "Replay"
+run = "python opendbc/safety/tests/safety_replay/hw_replay.py"
+
+[jobs.replay_1]
+runs-on = "up-can"
+timeout-minutes = 90
+env = { REPLAY_SECONDS = "10", COMMA_CACHE = "/data/tmp/comma_download_cache", NUM_JOBS = "2", JOB_ID = "1" }
+
+[[jobs.replay_1.steps]]
+name = "Build"
+run = """
+rm -rf ../panda
+git clone -q --depth 1 https://github.com/commaai/panda.git ../panda
+cd ../panda
+scons
+scripts/reflash_internal_panda.py
+"""
+
+[[jobs.replay_1.steps]]
 name = "Replay"
 run = "python opendbc/safety/tests/safety_replay/hw_replay.py"

@@ -13,13 +13,6 @@ from opendbc.safety.tests.libsafety import libsafety_py
 SECONDS = float(os.environ.get("REPLAY_SECONDS", "20"))
 DT = 0.01
 BUSES = 3
-# TODO: fix these routes
-SKIP = {
-  "eb4eae1476647463/2023-08-26--18-07-04": "HYUNDAI_IONIQ_6 loses about half its frames in some runs",
-  "734ef96182ddf940/2022-10-02--16-41-44": "HYUNDAI_ELANTRA_GT_I30 is more classic CAN than the station sends without loss",
-  "148fa33c79475c93/00000002--bb5e1aa449": "BYD_ATTO_3 overflowed the panda's TX queue once",
-  "56574443e0c3783c/00000002--c00bd0fe69": "FORD_ESCAPE_MK4_5 missed 3 frames once",
-}
 # seconds until the RX checks are compared
 STEADY = 2
 
@@ -82,6 +75,12 @@ def expected(mode, param, frames):
           "safety": [mode, param], "faults": 0, "tx_buffer_overflow": 0, "heartbeat_disabled": False, "harness_changed": False}
 
 
+def within(lo, hi, got):
+  if isinstance(lo, list):
+    return all(within(a, b, g) for a, b, g in zip(lo, hi, got, strict=True))
+  return min(lo, hi) <= got <= max(lo, hi)
+
+
 def played(p, up, mode, param, frames):
   # loading the route without a heartbeat puts the panda in power save
   p.set_power_save(0)
@@ -89,7 +88,11 @@ def played(p, up, mode, param, frames):
   # can_health is per CAN controller, a flipped harness swaps buses 0 and 2
   cans = [2, 1, 0] if p.health()["car_harness_status"] == p.HARNESS_STATUS_FLIPPED else [0, 1, 2]
   hs0, h0 = p.health(), [p.can_health(c) for c in cans]
-  for b in {bus for frame in frames for _, dat, bus in frame if len(dat) > 8}:
+  fd = {bus for frame in frames for _, dat, bus in frame if len(dat) > 8}
+  # the panda forwards CAN FD frames between buses 0 and 2
+  if fd & {0, 2}:
+    fd |= {0, 2}
+  for b in fd:
     up.set_can_data_speed_kbps(b, 2000)
   # an empty tail, so the station's loop doesn't start over
   up.can_replay(frames + [[]] * int(60 / DT))
@@ -128,9 +131,6 @@ def main():
   for i, route in enumerate(routes):
     if i % NUM_JOBS != JOB_ID or (names and route.route not in names):
       continue
-    if route.route in SKIP:
-      print(f"{route.route} skipped: {SKIP[route.route]}", flush=True)
-      continue
     st = time.monotonic()
     try:
       mode, param, frames = load(route)
@@ -139,12 +139,16 @@ def main():
       print(f"{route.route} FAIL, can't load: {type(e).__name__}: {e!r}", flush=True)
       failed.append(route.route)
       continue
-    exp, got = expected(mode, param, frames), played(p, up, mode, param, frames)
+    # the station doesn't control the order of one 10 ms list's frames on different buses
+    lo, hi = (expected(mode, param, [sorted(f, key=lambda m: m[2] * order) for f in frames]) for order in (1, -1))
+    got = played(p, up, mode, param, frames)
     # forwarding stops at a relay malfunction, when depends on the tick
-    if exp["relay_malfunction"]:
-      del exp["fwd"], got["fwd"]
-    ok = exp == got
-    dropped = [e - g for e, g in zip(exp["rx"], got["rx"], strict=True)]
+    if lo["relay_malfunction"] or hi["relay_malfunction"]:
+      for d in (lo, hi, got):
+        del d["fwd"]
+    ok = all(within(lo[k], hi[k], got[k]) for k in lo)
+    exp = lo if lo == hi else {"low": lo, "high": hi}
+    dropped = [e - g for e, g in zip(lo["rx"], got["rx"], strict=True)]
     print(f"{route.route} {route.car_model} mode {mode} {'ok' if ok else 'FAIL'} {time.monotonic() - st:.0f}s expected {exp} panda {got}" +
           (f" station dropped {dropped}" if any(dropped) else ""), flush=True)
     if not ok:
