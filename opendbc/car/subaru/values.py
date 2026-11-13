@@ -219,6 +219,11 @@ class CAR(Platforms):
     SUBARU_ASCENT.specs,
     flags=SubaruFlags.LKAS_ANGLE,
   )
+  SUBARU_CROSSTREK_2025 = SubaruGen2PlatformConfig(
+    [SubaruCarDocs("Subaru Crosstrek 2025", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
+    CarSpecs(wheelbase=2.67, steerRatio=17),
+    flags=SubaruFlags.LKAS_ANGLE,
+  )
 
 
 SUBARU_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
