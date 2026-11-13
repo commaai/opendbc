@@ -1,6 +1,7 @@
-from opendbc.car import Bus, structs
+from opendbc.car import DT_CTRL, Bus, structs
 from opendbc.can.parser import CANParser
 from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.leapmotor.values import DBC, CarControllerParams
 
@@ -16,6 +17,8 @@ class CarState(CarStateBase):
     self.lka_received_seen = False
     self.driver_override_frames = 0
     self.driver_override = False
+    # the EPS's own effort as it shows up in the driver-torque reading, which lags it (see EPS_TORQUE_LAG)
+    self.eps_torque_lagged = FirstOrderFilter(0., CarControllerParams.EPS_TORQUE_LAG, DT_CTRL)
     self.powertrain_state: dict | None = None
 
   def update(self, can_parsers) -> structs.CarState:
@@ -47,7 +50,7 @@ class CarState(CarStateBase):
     ret.steeringTorqueEps = cp.vl['EPS_STEERING']['STEER_TORQUE_EPS']
     # the driver's torque: the reading minus the share that follows the EPS's own effort
     ret.steeringTorque = cp.vl['EPS_STEERING']['STEER_TORQUE_DRIVER'] + \
-                         ret.steeringTorqueEps / CarControllerParams.EPS_TORQUE_PER_DRIVER_TORQUE
+                         self.eps_torque_lagged.update(ret.steeringTorqueEps) / CarControllerParams.EPS_TORQUE_PER_DRIVER_TORQUE
     # the torque reading is coarse: during an LCC override it only reached 2-3, but the EPS flagged the override itself.
     # The EPS also sets that flag whenever the car is above about 121 km/h, with or without the driver (99% of frames
     # above 121 km/h on a stock drive, and openpilot's own drive at 125 km/h), so above 118 km/h only the torque counts.

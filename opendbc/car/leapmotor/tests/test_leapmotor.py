@@ -2,6 +2,7 @@ import unittest
 
 from opendbc.can import CANPacker
 from opendbc.can.dbc import DBC
+from opendbc.car import Bus
 from opendbc.car.leapmotor import leapmotorcan
 from opendbc.car.leapmotor.leapmotorcan import leapmotor_checksum
 
@@ -179,6 +180,35 @@ class TestLeapmotorCan(unittest.TestCase):
     self.assertEqual(controller.ramp_boost, 20)
     self.assertEqual(controller.update_ramp_boost(False, cs(80., 15.)), 0)  # not steering
     self.assertEqual(controller.update_ramp_boost(True, cs(80., CarControllerParams.RAMP_BOOST_MAX_SPEED + 1)), 0)  # fast
+
+  def test_driver_torque_lags_the_eps(self):
+    from opendbc.car.leapmotor.carstate import CarState
+    from opendbc.car.leapmotor.interface import CarInterface
+
+    def pressed(driver, eps):
+      CP = CarInterface.get_non_essential_params("LEAPMOTOR_B10")
+      CS = CarState(CP)
+      parsers = CS.get_can_parsers(CP)
+      packer = CANPacker("leapmotor_b10")
+      out = []
+      for i, (d, e) in enumerate(zip(driver, eps, strict=True)):
+        dat = packer.make_can_msg("EPS_STEERING", 0, {"STEER_TORQUE_DRIVER": d, "STEER_TORQUE_EPS": e, "COUNTER": i % 16})[1]
+        parsers[Bus.pt].update([(int((i + 1) * 1e7), [(0x18D, dat, 0)])])
+        parsers[Bus.cam].update([(int((i + 1) * 1e7), [])])
+        CS.update(parsers)
+        out.append(CS.driver_override)
+      return out
+
+    # hands off in a roundabout at 28 km/h (route 264): the EPS swings -99 -> +98 within 0.1 s while the reading barely
+    # moves; subtracting the EPS's share without its lag read above 3 for 8 of these frames and let go of the wheel
+    driver = [2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, 0]
+    eps = [9, 1, -16, -14, -22, -28, -31, -38, -44, -37, -18, -1, 15, 25, 27, 20, 17, 13, 8, -9, -37, -73, -99, -84, -52,
+           -4, 58, 78, 98, 96, 75, 53, 35, 16, 0, -15]
+    self.assertFalse(any(pressed(driver, eps)))
+    # the driver's lane-change nudge at 126 km/h (route 25c): the EPS holds -57 against the hands, the reading stays at 0
+    driver = [1, 1, 1, 1, 1, 0, 0, 0, 0, 1] + [0] * 20
+    eps = [-12, -7, -7, -6, -8, -14, -28, -47, -57, -56] + [-57] * 20
+    self.assertTrue(any(pressed(driver, eps)))
 
 
 if __name__ == "__main__":
