@@ -210,6 +210,27 @@ class TestLeapmotorCan(unittest.TestCase):
     eps = [-12, -7, -7, -6, -8, -14, -28, -47, -57, -56] + [-57] * 20
     self.assertTrue(any(pressed(driver, eps)))
 
+  def test_take_back(self):
+    from types import SimpleNamespace
+    from opendbc.car import structs as car_structs
+    from opendbc.car.leapmotor.carcontroller import CarController as Controller, get_safety_CP as safety_CP
+    from opendbc.car.leapmotor.values import DBC as CAR_DBC
+
+    def steering_after_let_go(wanted, wheel, kph=25.):
+      controller = Controller(CAR_DBC["LEAPMOTOR_B10"], safety_CP())
+      CC = car_structs.CarControl()
+      CC.latActive = True
+      CC.actuators.steeringAngleDeg = wanted
+      CS = SimpleNamespace(driver_override=False, adas_lka=None, powertrain_state=None,
+                           out=SimpleNamespace(steeringAngleDeg=wheel, vEgoRaw=kph / 3.6))
+      controller.update(CC.as_reader(), CS, 0)
+      return controller.lat_active_last
+
+    # right after the driver lets go in a bend the wheel is 11-27 deg from the model's angle: take it back at once
+    self.assertTrue(steering_after_let_go(100., 73.))
+    self.assertTrue(steering_after_let_go(100., 100. - 44.))
+    # the case the check was made for: wheel at +308 deg, model at +24, at walking pace
+    self.assertFalse(steering_after_let_go(24., 308., kph=5.))
 
 if __name__ == "__main__":
   unittest.main()

@@ -33,7 +33,12 @@ class CarControllerParams:
   EPS_TORQUE_PER_DRIVER_TORQUE = 15.5
   EPS_TORQUE_LAG = 0.04  # s
   STEER_DRIVER_ALLOWANCE = 3
-  TAKE_BACK_MAX_ANGLE_ERROR = 10.  # deg between openpilot's angle and the wheel's before it takes the wheel back
+  # Largest gap (deg) between openpilot's angle and the wheel's at which it takes the wheel back. It stops the case it was
+  # made for: at walking pace the driver let go with the wheel at +308 deg and the model at +24, and the EPS swung it to
+  # -203 deg. 10 deg was too tight: right after the driver lets go in a bend the gap is 11-27 deg, and on route 26b
+  # openpilot then did not steer for 0.8-1.7 s mid-turn (5 times), drifting wide. The command still starts from the
+  # wheel's angle and is rate limited, and the LCC ramp builds up the torque.
+  TAKE_BACK_MAX_ANGLE_ERROR = 45.
   # The stock ramp depth follows lateral acceleration, which stays small in sharp turns at low speed: there the wheel
   # fell > 5 deg behind with the EPS near its torque ceiling (25d, 260). While the wheel is RAMP_BOOST_LAG behind the
   # command below RAMP_BOOST_MAX_SPEED, the ramp goes one step deeper per frame (up to the deepest stock value, 46 steps,
