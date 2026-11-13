@@ -36,11 +36,12 @@ class CarController(CarControllerBase):
         # angle times speed, not lateral accel, and the torque controller's fixed low-speed gain made it oscillate.
         # PID lacks the torque controller's steering friction compensation, though, and without it PID sticks at the
         # steering friction (~10 counts) and tracks small changes poorly. So add it here: push toward the desired angle
-        # (from the PID controller) with up to STEER_FRICTION counts, faded out at low speed where it makes
-        # oscillation worse. Only with PID: the other controllers don't report a desired angle.
+        # (from the PID controller) with up to STEER_FRICTION counts, over a band that widens at low speed (see values.py).
+        # Only with PID: the other controllers don't report a desired angle.
         angle_error = actuators.steeringAngleDeg - CS.out.steeringAngleDeg if self.use_friction else 0.
-        friction = np.interp(CS.out.vEgo, self.CCP.STEER_FRICTION_BP, [0., self.CCP.STEER_FRICTION]) * \
-                   np.clip(angle_error / self.CCP.STEER_FRICTION_BAND_DEG, -1., 1.)
+        band = np.interp(CS.out.vEgo, self.CCP.STEER_FRICTION_BAND_BP, self.CCP.STEER_FRICTION_BAND_V)
+        friction = np.interp(CS.out.vEgo, self.CCP.STEER_FRICTION_FADE_BP, [0., self.CCP.STEER_FRICTION]) * \
+                   np.clip(angle_error / band, -1., 1.)
         new_torque = int(round(actuators.torque * self.CCP.STEER_MAX + friction))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
         self.torque_cut = apply_torque - new_torque

@@ -21,14 +21,15 @@ class CarControllerParams:
   STEER_DELTA_UP = 3  # stock LKA ramps at up to 3/frame
   STEER_DELTA_DOWN = 3
   STEER_RELEASE_HOLD_FRAMES = 3  # frames to keep LKA_ACTIVE at zero torque before releasing
-  # Steering friction compensation added to the PID controller's output: measured steering friction is <= 9-11 counts.
-  # Below ~35 mph, band and fade keep the response to small angle errors near the torque controller at lateral accel
-  # factor 10 (about 3-7 counts/deg), the only tune known to be calm on the van at low speed. The planner reacts to the
-  # van's motion with ~0.5 s lag, so a stiffer low-speed response risks a ~1 Hz oscillation through the planner
-  # (factor 2.5, at about 10 counts/deg, oscillated badly). Full strength above 15 m/s, faded to zero at 2 m/s.
-  STEER_FRICTION = 8  # counts
-  STEER_FRICTION_BAND_DEG = 1.0  # angle error for full friction compensation
-  STEER_FRICTION_BP = [2., 15.]  # m/s
+  # Steering friction compensation added to the PID controller's output, up to the measured friction (9-11 counts).
+  # The full push is kept down to walking pace so the wheel breaks loose instead of sticking. Below ~35 mph the band
+  # widens instead, keeping the response to small angle errors near the torque controller at lateral accel factor 10
+  # (about 3-7 counts/deg), the only tune known to be calm on the van at low speed: the planner reacts to the van's
+  # motion with ~0.5 s lag, so a stiffer response risks a ~1 Hz oscillation through it.
+  STEER_FRICTION = 9  # counts
+  STEER_FRICTION_FADE_BP = [1., 3.]  # m/s: full push above
+  STEER_FRICTION_BAND_BP = [5., 15.]  # m/s
+  STEER_FRICTION_BAND_V = [3.0, 1.0]  # angle error (deg) for full push
 
   def __init__(self, CP):
     pass

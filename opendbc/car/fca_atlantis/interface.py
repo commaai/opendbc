@@ -44,6 +44,10 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def get_steer_feedforward_promaster(desired_angle, v_ego):
     # measured steady LKA torque per degree of steering angle, rising with speed; normalized to STEER_MAX
+    # TODO: replace the line with a speed table once 40-55 mph has more data. On route
+    #   23aa8db6265ecd81|00000001--6cd07879b1 stiffness was ~1.9 at 40-49 mph (line: 2.35) and ~3.1 at 49-58 mph, so it
+    #   seems to jump around 45-50 mph rather than rise linearly; PID's integrator also showed the line ~20% weak at
+    #   11-20 mph.
     return desired_angle * (0.1 * v_ego + 0.35) / CarControllerParams.STEER_MAX
 
   def get_steer_feedforward_function(self):
