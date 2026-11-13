@@ -24,7 +24,14 @@ class CarControllerParams:
   # share back leaves the driver's torque: above 3 on 0.14% of those frames but on 75% of frames the EPS flagged as
   # overrides. With the 5-frame debounce in carstate it caught all 3 of the driver's lane-change nudges at 125 km/h,
   # where the raw reading stayed at 1, and nothing else above 118 km/h over the 2 drives.
-  EPS_TORQUE_PER_DRIVER_TORQUE = 16.8
+  # The reading lags the EPS by a few frames: when the EPS swung its torque quickly in roundabouts (e.g. +76 to -120 in
+  # 0.1 s), subtracting the unlagged share left 4-6 with the driver's hands off and let go of the wheel mid-turn.
+  # Refitted on 665k hands-off frames of 7 drives as a first-order lag of 0.04 s and 1 per 15.5: frames above 3 during
+  # such swings fell from 18% to 2.6%. Replayed on the same drives, the false let-gos right after the EPS pushed 90 or
+  # more fell from 56 to 17; every takeover that lasted 0.5 s or more was still caught (35 of 35, at most 40 ms later),
+  # and so was every let-go above 110 km/h, including all of the 125 km/h nudges.
+  EPS_TORQUE_PER_DRIVER_TORQUE = 15.5
+  EPS_TORQUE_LAG = 0.04  # s
   STEER_DRIVER_ALLOWANCE = 3
   TAKE_BACK_MAX_ANGLE_ERROR = 10.  # deg between openpilot's angle and the wheel's before it takes the wheel back
   # The stock ramp depth follows lateral acceleration, which stays small in sharp turns at low speed: there the wheel
