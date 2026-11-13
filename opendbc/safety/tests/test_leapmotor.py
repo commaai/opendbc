@@ -262,26 +262,68 @@ class TestLeapmotorLongitudinalSafety(TestLeapmotorSafety, common.LongitudinalAc
     values = {"STEER_ANGLE_REQ": 0, "LCC_STEERING_ACTIVE_COPY": 0, "ACC_ACCEL_REQ": accel}
     return self.packer.make_can_msg_safety("ADAS_LKA", bus, values)
 
+  CAMERA_ACCEL_HISTORY = 8  # LEAPMOTOR_CAMERA_ACCEL_HISTORY
+
+  def _camera_accel(self, *accels):
+    for accel in accels:
+      self.assertTrue(self._rx(self._accel_msg(accel, bus=2)))
+
   def test_camera_accel_passthrough(self):
     # without controls allowed, only the camera's own request (or 0) may be sent
     self.safety.set_controls_allowed(False)
-    self.assertTrue(self._rx(self._accel_msg(-1.0, bus=2)))
+    self._camera_accel(-1.0)
     self.assertTrue(self._tx(self._accel_msg(-1.0)))
     self.assertTrue(self._tx(self._accel_msg(0)))
     self.assertFalse(self._tx(self._accel_msg(-1.5)))
     self.assertFalse(self._tx(self._accel_msg(0.5)))
 
+  def test_camera_accel_passthrough_lags(self):
+    # openpilot's frame can carry a camera request a few frames older than the panda's latest: any of the last 8 passes
+    self.safety.set_controls_allowed(False)
+    self._camera_accel(0.55)
+    self._camera_accel(*[0.6] * (self.CAMERA_ACCEL_HISTORY - 1))
+    self.assertTrue(self._tx(self._accel_msg(0.55)))
+    self._camera_accel(0.6)
+    self.assertFalse(self._tx(self._accel_msg(0.55)))
+
+  def test_camera_accel_beyond_limits(self):
+    # the camera's emergency braking (beyond openpilot's -3.5) is passed on, also as it releases
+    self.safety.set_controls_allowed(True)
+    self._camera_accel(-4.5, -3.6)
+    self.assertTrue(self._tx(self._accel_msg(-4.5)))
+    self._camera_accel(-1.3)
+    self.assertTrue(self._tx(self._accel_msg(-3.6)))
+    self.assertFalse(self._tx(self._accel_msg(-4.0)))
+
+  def test_accel_with_gas_pressed(self):
+    # the panda sees an accelerator press a frame before openpilot hands back to the stock ACC: its own request stays allowed
+    self.safety.set_controls_allowed(True)
+    self._rx(self._user_gas_msg(1))
+    self._rx(self._user_gas_msg(1))
+    self.assertTrue(self._tx(self._accel_msg(-1.15)))
+    self.assertFalse(self._tx(self._accel_msg(-3.6)))
+
   def test_stock_brake_floor(self):
-    # when the camera asks for hard braking, openpilot may not ask for less (one bit of slack for timing)
+    # while all the camera's recent requests are hard braking, openpilot may not ask for less than the least of them
     self.safety.set_controls_allowed(True)
     for camera_accel in (-1.95, -2.0, -2.5, -3.0):
-      self.assertTrue(self._rx(self._accel_msg(camera_accel, bus=2)))
+      self._camera_accel(*[camera_accel] * self.CAMERA_ACCEL_HISTORY)
       hard = camera_accel <= CarControllerParams.STOCK_BRAKE_PASSTHROUGH
       self.assertTrue(self._tx(self._accel_msg(camera_accel)))
-      self.assertTrue(self._tx(self._accel_msg(camera_accel + 0.05)))
       self.assertTrue(self._tx(self._accel_msg(-3.5)))
-      self.assertEqual(not hard, self._tx(self._accel_msg(camera_accel + 0.1)), camera_accel)
+      self.assertEqual(not hard, self._tx(self._accel_msg(camera_accel + 0.05)), camera_accel)
       self.assertEqual(not hard, self._tx(self._accel_msg(1.0)), camera_accel)
+
+  def test_stock_brake_floor_ramp(self):
+    # the camera starts braking hard: openpilot, a frame behind, still sent its own request when it saw -1.95
+    self.safety.set_controls_allowed(True)
+    self._camera_accel(*[-1.5] * self.CAMERA_ACCEL_HISTORY)
+    self._camera_accel(-1.95, -2.0)
+    self.assertTrue(self._tx(self._accel_msg(-0.7)))
+    # once every recent request is hard braking, the floor holds
+    self._camera_accel(*[-2.6] * self.CAMERA_ACCEL_HISTORY)
+    self.assertFalse(self._tx(self._accel_msg(-0.7)))
+    self.assertTrue(self._tx(self._accel_msg(-2.6)))
 
 
 if __name__ == "__main__":

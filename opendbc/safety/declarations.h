@@ -277,6 +277,9 @@ typedef struct {
   struct sample_t meas;          // last 6 steer curvatures
 } CurvatureSteeringState;
 
+// Leapmotor: how many of the camera's recent acceleration requests count (see modes/leapmotor.h)
+#define LEAPMOTOR_CAMERA_ACCEL_HISTORY 8U
+
 typedef struct {
   // This can be set by the safety hooks
   bool controls_allowed;
@@ -330,7 +333,8 @@ typedef struct {
 
   uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 
-  int leapmotor_camera_accel;  // the camera's latest ADAS_LKA.ACC_ACCEL_REQ, raw
+  int leapmotor_camera_accel[LEAPMOTOR_CAMERA_ACCEL_HISTORY];  // the camera's recent ADAS_LKA.ACC_ACCEL_REQ, raw
+  uint8_t leapmotor_camera_accel_idx;
 
   bool tesla_stock_aeb;
   // Only rising edges while controls are not allowed are considered for these systems:
