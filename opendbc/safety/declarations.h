@@ -385,6 +385,7 @@ typedef struct {
   bool nissan_alt_eps;
 
   bool subaru_gen2;
+  bool subaru_lkas_angle;
   bool subaru_pg_reversed_driver_torque;
 
   bool tesla_longitudinal;

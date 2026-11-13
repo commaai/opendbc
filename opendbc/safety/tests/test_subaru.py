@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 import enum
 import unittest
+import numpy as np
 
-from opendbc.car.subaru.values import SubaruSafetyFlags
+from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
+from opendbc.car.subaru.carcontroller import get_safety_CP
+from opendbc.car.subaru.values import CarControllerParams, SubaruSafetyFlags
 from opendbc.car.structs import CarParams
+from opendbc.car.vehicle_model import VehicleModel
 import opendbc.safety.tests.common as common
 from functools import partial
 
@@ -127,6 +131,67 @@ class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSaf
   SAFETY_PARAM = SubaruSafetyFlags.GEN2
 
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS)
+
+
+class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafetyTest):
+  STEER_ANGLE_MAX = 450
+
+  LATERAL_FREQUENCY = 50
+
+  def setUp(self):
+    self.cnt_angle_cmd = 0
+    super().setUp()
+    cp = get_safety_CP()
+    self.VM = VehicleModel(cp)
+    self.limits = CarControllerParams(cp)
+
+  def _speed_msg(self, speed):
+    speed_kph = speed * 3.6
+    values = {s: speed_kph for s in ["FR", "FL", "RR", "RL"]}
+    return self.packer.make_can_msg_safety("Wheel_Speeds", self.ALT_MAIN_BUS, values)
+
+  def _angle_cmd_msg(self, angle, enabled, increment_timer=True):
+    values = {"LKAS_Output": angle, "LKAS_Request": enabled, "SET_3": 3}
+    if increment_timer:
+      self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      self.cnt_angle_cmd += 1
+    return self.packer.make_can_msg_safety("ES_LKAS_ANGLE", SUBARU_MAIN_BUS, values)
+
+  def _angle_meas_msg(self, angle):
+    values = {"Steering_Angle": angle}
+    return self.packer.make_can_msg_safety("Steering_2", SUBARU_MAIN_BUS, values)
+
+  def _pcm_status_msg(self, enable):
+    values = {"Cruise_Activated": enable}
+    return self.packer.make_can_msg_safety("ES_Status", self.ALT_MAIN_BUS, values)
+
+  def test_angle_cmd_when_enabled(self):
+    for speed in np.linspace(0, 50, 101):
+      self._reset_speed_measurement(speed)
+      # use the decoded wheel speed, including the 1 m/s safety tolerance
+      limit_speed = max(self.safety.get_vehicle_speed_min() - 1, 1)
+      for sign in (-1, 1):
+        for jerk in (False, True):
+          get_limit = get_max_angle_delta_vm if jerk else get_max_angle_vm
+          limit = get_limit(limit_speed, self.VM, self.limits)
+          # bracket the limit, allowing for C float rounding and the 1 CAN unit tolerance
+          for offset, allowed in ((-1, True), (2, False)):
+            angle_can = int(limit * self.DEG_TO_CAN) + offset
+            if angle_can > self.STEER_ANGLE_MAX * self.DEG_TO_CAN:
+              continue
+            with self.subTest(speed=speed, sign=sign, jerk=jerk, offset=offset):
+              self.safety.set_controls_allowed(True)
+              self.safety.set_desired_angle_last(0 if jerk else angle_can * sign)
+              self.assertEqual(allowed, self._tx(self._angle_cmd_msg(angle_can / self.DEG_TO_CAN * sign, True)))
+
+
+class TestSubaruGen2AngleStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruAngleSafetyBase):
+  ALT_MAIN_BUS = SUBARU_ALT_BUS
+  SAFETY_PARAM = SubaruSafetyFlags.GEN2 | SubaruSafetyFlags.LKAS_ANGLE
+  TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS, SubaruMsg.ES_LKAS_ANGLE)
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS_ANGLE, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                                               SubaruMsg.ES_Infotainment)}
+  FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr(SubaruMsg.ES_LKAS_ANGLE)
 
 
 if __name__ == "__main__":
