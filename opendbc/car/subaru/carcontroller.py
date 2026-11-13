@@ -1,6 +1,7 @@
 import numpy as np
 from opendbc.can import CANPacker
-from opendbc.car import Bus, make_tester_present_msg
+from opendbc.car import Bus, DT_CTRL, make_tester_present_msg
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.lateral import apply_driver_steer_torque_limits, apply_steer_angle_limits_vm, common_fault_avoidance
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
@@ -37,8 +38,16 @@ class CarController(CarControllerBase):
 
     if CP.flags & SubaruFlags.LKAS_ANGLE:
       self.VM = VehicleModel(get_safety_CP())
+      self.angle_filter = FirstOrderFilter(0.0, 0.3, DT_CTRL)
 
   def update_angle_steering(self, CC, CS):
+    # filter at the control loop rate, including frames without a steering message
+    if CC.latActive:
+      self.angle_filter.update_alpha(float(np.interp(CS.out.vEgo, [5.0, 10.0, 20.0], [0.3, 0.1, 0.0])))
+      self.angle_filter.update(CC.actuators.steeringAngleDeg)
+    else:
+      self.angle_filter.x = CC.actuators.steeringAngleDeg
+
     if (self.frame % self.p.STEER_STEP) != 0:
       return []
 
@@ -47,7 +56,7 @@ class CarController(CarControllerBase):
     lat_active = CC.latActive and (self.lat_active_last or not CS.out.steeringPressed)
     self.lat_active_last = lat_active
 
-    apply_angle = apply_steer_angle_limits_vm(CC.actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo,
+    apply_angle = apply_steer_angle_limits_vm(self.angle_filter.x, self.apply_angle_last, CS.out.vEgo,
                                               CS.out.steeringAngleDeg, lat_active, self.p, self.VM)
 
     self.apply_angle_last = apply_angle
