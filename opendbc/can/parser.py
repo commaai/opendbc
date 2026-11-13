@@ -117,7 +117,7 @@ class CANParser:
     self.dbc = DBC(dbc_name)
 
     self.vl: dict[int | str, dict[str, float]] = VLDict(self)
-    self.vl_all: dict[int | str, dict[str, list[float]]] = {}
+    self.vl_all: dict[int | str, dict[str, list[float]]] = VLDict(self)
     self.ts_nanos: dict[int | str, dict[str, int]] = {}
     self.addresses: set[int] = set()
     self.message_states: dict[int, MessageState] = {}
@@ -152,7 +152,7 @@ class CANParser:
     signals_dict = {s: 0.0 for s in signal_names}
     dict.__setitem__(self.vl, msg.address, signals_dict)
     dict.__setitem__(self.vl, msg.name, signals_dict)
-    self.vl_all[msg.address] = defaultdict(list)
+    self.vl_all[msg.address] = {s: [] for s in signal_names}
     self.vl_all[msg.name] = self.vl_all[msg.address]
     self.ts_nanos[msg.address] = {s: 0 for s in signal_names}
     self.ts_nanos[msg.name] = self.ts_nanos[msg.address]
