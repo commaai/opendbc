@@ -1,10 +1,11 @@
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, make_tester_present_msg
-from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance
+from opendbc.car.lateral import apply_driver_steer_torque_limits, apply_steer_angle_limits_vm, common_fault_avoidance
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import CAR, DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
+from opendbc.car.vehicle_model import VehicleModel
 
 # FIXME: These limits aren't exact. The real limit is more than likely over a larger time period and
 # involves the total steering angle change rather than rate, but these limits work well for now
@@ -25,12 +26,27 @@ class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
+    self.apply_angle_last = 0
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
 
     self.p = CarControllerParams(CP)
     self.packer = CANPacker(DBC[CP.carFingerprint][Bus.pt])
+
+    if CP.flags & SubaruFlags.LKAS_ANGLE:
+      self.VM = VehicleModel(get_safety_CP())
+
+  def update_angle_steering(self, CC, CS):
+    if (self.frame % self.p.STEER_STEP) != 0:
+      return []
+
+    lat_active = CC.latActive
+    apply_angle = apply_steer_angle_limits_vm(CC.actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo,
+                                              CS.out.steeringAngleDeg, lat_active, self.p, self.VM)
+
+    self.apply_angle_last = apply_angle
+    return [subarucan.create_steering_control_angle(self.packer, apply_angle, lat_active)]
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -40,7 +56,10 @@ class CarController(CarControllerBase):
     can_sends = []
 
     # *** steering ***
-    if (self.frame % self.p.STEER_STEP) == 0:
+    if self.CP.flags & SubaruFlags.LKAS_ANGLE:
+      can_sends.extend(self.update_angle_steering(CC, CS))
+
+    elif (self.frame % self.p.STEER_STEP) == 0:
       apply_torque = int(round(actuators.torque * self.p.STEER_MAX))
 
       # limits due to driver torque
@@ -146,6 +165,7 @@ class CarController(CarControllerBase):
           can_sends.append(subarucan.create_es_static_2(self.packer))
 
     new_actuators = actuators.as_builder()
+    new_actuators.steeringAngleDeg = self.apply_angle_last
     new_actuators.torque = self.apply_torque_last / self.p.STEER_MAX
     new_actuators.torqueOutputCan = self.apply_torque_last
 
