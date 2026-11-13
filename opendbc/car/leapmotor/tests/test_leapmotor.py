@@ -232,5 +232,30 @@ class TestLeapmotorCan(unittest.TestCase):
     # the case the check was made for: wheel at +308 deg, model at +24, at walking pace
     self.assertFalse(steering_after_let_go(24., 308., kph=5.))
 
+  def test_eps_status_bit_is_not_torque(self):
+    # Real EPS_STEERING frames from route 26e (22:19:39, openpilot steering at 60 km/h): bit 180 turns on for 1 s. Read
+    # as part of the torque it added 4096, which looked like a driver torque of +264 and let go of the wheel mid-turn.
+    frames = ["350B0265810000448EF25001070700002B02870FA30904000000000000000000",
+              "5E0C0265810103448EF75001070700002B02870FA30814000000000000000000"]
+    sigs = DBC("leapmotor_b10").addr_to_msg[0x18D].sigs
+    for hexdata, (torque, status) in zip(frames, ((33, 0), (32, 1)), strict=True):
+      dat = bytes.fromhex(hexdata)
+      self.assertEqual(dat[0], leapmotor_checksum(0x18D, None, bytearray(dat)))
+      eps = sigs["STEER_TORQUE_EPS"]
+      self.assertEqual(eps.get_raw_value(dat) * eps.factor + eps.offset, torque)
+      self.assertEqual(sigs["EPS_STATUS_180"].get_raw_value(dat), status)
+
+    from opendbc.car.leapmotor.carstate import CarState
+    from opendbc.car.leapmotor.interface import CarInterface
+    CP = CarInterface.get_non_essential_params("LEAPMOTOR_B10")
+    CS = CarState(CP)
+    parsers = CS.get_can_parsers(CP)
+    for i in range(20):
+      parsers[Bus.pt].update([(int((i + 1) * 1e7), [(0x18D, bytes.fromhex(frames[min(i, 1)]), 0)])])
+      parsers[Bus.cam].update([(int((i + 1) * 1e7), [])])
+      ret = CS.update(parsers)
+      self.assertLess(abs(ret.steeringTorqueEps), 100)
+      self.assertFalse(CS.driver_override)
+
 if __name__ == "__main__":
   unittest.main()
