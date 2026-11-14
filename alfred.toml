@@ -1,0 +1,74 @@
+cache = ["/data/tmp/comma_download_cache"]
+
+[env]
+PYTHONPATH = "/data/ci/tree:/data/ci/tree/opendbc"
+PYTHONWARNINGS = "error"
+LOGLEVEL = "debug"
+COMMA_CACHE = "/data/tmp/comma_download_cache"
+NUM_JOBS = "10"
+
+[steps.build]
+name = "Build"
+run = """
+rm -rf ../panda
+git clone -q --depth 1 https://github.com/commaai/panda.git ../panda
+cd ../panda
+scons
+scripts/reflash_internal_panda.py
+"""
+
+[steps.replay]
+name = "Replay"
+run = "python opendbc/safety/tests/safety_replay/hw_replay.py"
+
+# a tenth of the routes each, on the up-can stations and any free comma four
+
+[jobs.replay_0]
+runs-on = "up-can"
+env = { JOB_ID = "0" }
+steps = [{ uses = "build" }, { uses = "replay" }]
+
+[jobs.replay_1]
+runs-on = "up-can"
+env = { JOB_ID = "1" }
+steps = [{ uses = "build" }, { uses = "replay" }]
+
+[jobs.replay_2]
+runs-on = "up-can"
+env = { JOB_ID = "2" }
+steps = [{ uses = "build" }, { uses = "replay" }]
+
+[jobs.replay_3]
+runs-on = "up-can"
+env = { JOB_ID = "3" }
+steps = [{ uses = "build" }, { uses = "replay" }]
+
+[jobs.replay_4]
+runs-on = "up-can"
+env = { JOB_ID = "4" }
+steps = [{ uses = "build" }, { uses = "replay" }]
+
+[jobs.replay_5]
+runs-on = "up-can"
+env = { JOB_ID = "5" }
+steps = [{ uses = "build" }, { uses = "replay" }]
+
+[jobs.replay_6]
+runs-on = "up-can"
+env = { JOB_ID = "6" }
+steps = [{ uses = "build" }, { uses = "replay" }]
+
+[jobs.replay_7]
+runs-on = "up-can"
+env = { JOB_ID = "7" }
+steps = [{ uses = "build" }, { uses = "replay" }]
+
+[jobs.replay_8]
+runs-on = "up-can"
+env = { JOB_ID = "8" }
+steps = [{ uses = "build" }, { uses = "replay" }]
+
+[jobs.replay_9]
+runs-on = "up-can"
+env = { JOB_ID = "9" }
+steps = [{ uses = "build" }, { uses = "replay" }]
