@@ -115,7 +115,8 @@ def played(p, up, mode, param, frames):
           "tx_buffer_overflow": h["tx_buffer_overflow"] - hs0["tx_buffer_overflow"],
           "heartbeat_disabled": h["heartbeat_disabled"], "harness_changed": h["car_harness_status"] != hs0["car_harness_status"],
           # only printed, to debug a failure
-          "can_errors": {k: [h1[b][k] - h0[b][k] for b in range(BUSES)] for k in ("total_error_cnt", "total_tx_lost_cnt", "bus_off_cnt", "can_core_reset_count")}}
+          "can_errors": {k: [h1[b][k] - h0[b][k] for b in range(BUSES)]
+                         for k in ("total_error_cnt", "total_tx_lost_cnt", "bus_off_cnt", "can_core_reset_count")}}
 
 
 def main():
