@@ -1125,6 +1125,33 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._user_gas_msg(0))
     self.assertTrue(self.safety.get_longitudinal_allowed())
 
+  def test_controls_until_host_reads_brake_press(self):
+    self._rx(self._vehicle_moving_msg(0))
+    for host_read, elapsed, allowed in ((False, 0, True), (False, 19999, True), (False, 20000, False), (True, 0, False)):
+      self._rx(self._user_brake_msg(0))
+      self.safety.set_controls_allowed(True)
+      self.safety.set_timer(1000)
+      self.safety.set_can_rx_frames(10, 10)
+      self._rx(self._user_brake_msg(1))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.safety.set_can_rx_frames(11, 11 if host_read else 10)
+      self.safety.set_timer(1000 + elapsed)
+      self._rx(self._user_brake_msg(1))
+      self.assertEqual(allowed, self.safety.get_controls_allowed_for_tx())
+
+  def test_longitudinal_until_host_reads_gas_press(self):
+    self.safety.set_controls_allowed(True)
+    # the host read the frame once its read count passed it, the counters wrap
+    for read, elapsed, allowed in ((10, 0, True), (10, 19999, True), (10, 20000, False), (11, 0, False), (10 + 0x80000000, 0, False)):
+      self._rx(self._user_gas_msg(0))
+      self.safety.set_timer(1000)
+      self.safety.set_can_rx_frames(10, 10)
+      self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+      self.safety.set_can_rx_frames(11, read)
+      self.safety.set_timer(1000 + elapsed)
+      self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+      self.assertEqual(allowed, self.safety.get_longitudinal_allowed())
+
   def test_prev_user_brake(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:
       _user_brake_msg = self._user_brake_msg
@@ -1154,6 +1181,18 @@ class CarSafetyTest(SafetyTest):
       self.assertEqual(engaged, self.safety.get_cruise_engaged_prev())
       self._rx(self._pcm_status_msg(not engaged))
       self.assertEqual(not engaged, self.safety.get_cruise_engaged_prev())
+
+    # cruise counts as engaged for TX until the host read the frame that ended it
+    for host_read, elapsed, engaged in ((False, 0, True), (False, 19999, True), (False, 20000, False), (True, 0, False)):
+      self._rx(self._pcm_status_msg(True))
+      self.safety.set_timer(1000)
+      self.safety.set_can_rx_frames(10, 10)
+      self._rx(self._pcm_status_msg(False))
+      self.assertFalse(self.safety.get_cruise_engaged_prev())
+      self.safety.set_can_rx_frames(11, 11 if host_read else 10)
+      self.safety.set_timer(1000 + elapsed)
+      self._rx(self._pcm_status_msg(False))
+      self.assertEqual(engaged, self.safety.get_cruise_engaged_for_tx())
 
   def test_allow_user_brake_at_zero_speed(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:

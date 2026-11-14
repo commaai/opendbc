@@ -289,6 +289,13 @@ typedef struct {
   bool relay_malfunction;
   bool gas_pressed;
   bool gas_pressed_prev;
+  // the RX frames that last pressed gas, ended controls and ended cruise, counted like the platform's can_rx_frames_queued()
+  uint32_t gas_press_frame;
+  uint32_t gas_press_ts;
+  uint32_t controls_exit_frame;
+  uint32_t controls_exit_ts;
+  uint32_t cruise_exit_frame;
+  uint32_t cruise_exit_ts;
   bool brake_pressed;
   bool brake_pressed_prev;
   bool regen_braking;
