@@ -16,6 +16,7 @@ class RadarInterface(RadarInterfaceBase):
     super().__init__(CP)
     self.radar_fault = False
     self.radar_wrong_config = False
+    self.radar_unavailable_temporary = False
     self.radar_off_can = CP.radarUnavailable
 
     # Nidec
@@ -48,9 +49,11 @@ class RadarInterface(RadarInterfaceBase):
     for ii in sorted(updated_messages):
       cpt = self.rcp.vl[ii]
       if ii == 0x400:
-        # check for radar faults
-        self.radar_fault = cpt['RADAR_STATE'] != 0x79
-        self.radar_wrong_config = cpt['RADAR_STATE'] == 0x69
+        # check for radar faults; 0x6e (briefly 0x68) is reported when idling in park / standstill
+        radar_state = cpt['RADAR_STATE']
+        self.radar_unavailable_temporary = radar_state in (0x68, 0x6E)
+        self.radar_fault = radar_state not in (0x79, 0x68, 0x6E)
+        self.radar_wrong_config = radar_state == 0x69
       elif cpt['LONG_DIST'] < 255:
         if ii not in self.pts or cpt['NEW_TRACK']:
           self.pts[ii] = structs.RadarData.RadarPoint()
@@ -69,6 +72,8 @@ class RadarInterface(RadarInterfaceBase):
       ret.errors.radarFault = True
     if self.radar_wrong_config:
       ret.errors.wrongConfig = True
+    if self.radar_unavailable_temporary:
+      ret.errors.radarUnavailableTemporary = True
 
     ret.points = list(self.pts.values())
 
