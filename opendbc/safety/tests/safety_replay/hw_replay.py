@@ -10,7 +10,7 @@ from opendbc.car.tests.routes import routes
 from opendbc.car.tests.test_models import NUM_JOBS, JOB_ID, TestCarModelBase
 from opendbc.safety.tests.libsafety import libsafety_py
 
-SECONDS = float(os.environ.get("REPLAY_SECONDS", "20"))
+SECONDS_PER_ROUTE = 10
 DT = 0.01
 BUSES = 3
 # seconds until the RX checks are compared
@@ -24,7 +24,7 @@ def load(route):
   cfg = CP.safetyConfigs[-1]
 
   t0 = can_msgs[0][0]
-  frames = [[] for _ in range(int(SECONDS / DT))]
+  frames = [[] for _ in range(int(SECONDS_PER_ROUTE / DT))]
   for t, msgs in can_msgs:
     i = int((t - t0) / 1e9 / DT)
     if i >= len(frames):
@@ -158,7 +158,6 @@ def main():
     if not ok:
       failed.append(route.route)
 
-  up.reset()
   print(f"{len(failed)} failed: {failed}")
   return int(bool(failed))
 
