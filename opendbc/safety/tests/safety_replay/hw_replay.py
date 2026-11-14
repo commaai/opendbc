@@ -82,9 +82,10 @@ def within(lo, hi, got):
 
 
 def played(p, up, mode, param, frames):
+  # the safety mode first, it restarts the heartbeat timeout that would turn power save back on
+  p.set_safety_mode(mode, param)
   # loading the route without a heartbeat puts the panda in power save
   p.set_power_save(0)
-  p.set_safety_mode(mode, param)
   # can_health is per CAN controller, a flipped harness swaps buses 0 and 2
   cans = [2, 1, 0] if p.health()["car_harness_status"] == p.HARNESS_STATUS_FLIPPED else [0, 1, 2]
   hs0, h0 = p.health(), [p.can_health(c) for c in cans]
