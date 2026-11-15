@@ -1247,3 +1247,38 @@ class CarSafetyTest(SafetyTest):
           self.safety.set_controls_allowed(True)
           self.safety.safety_tick()
           self.assertEqual(allowed, self.safety.get_controls_allowed())
+
+  def test_rx_lagging_timer_wrap(self):
+    # the 32-bit microsecond timer wraps every 2^32 us, so a check that stopped
+    # exactly 2^32 us ago has the same age as one received just now
+    lag_us = 1000000
+    for stale in range(self.safety.get_rx_checks_len()):
+      with self.subTest(stale=stale):
+        self._reset_safety_hooks()
+        self.safety.set_timer(2 * lag_us)
+        self.safety.set_rx_checks_received(stale, lag_us + 1)
+        self.safety.safety_tick()
+        self.assertFalse(self.safety.safety_config_valid())
+
+        # 2^32 us after the stale check was last received, its age wraps to 0
+        self.safety.set_timer(lag_us - 1)
+        self.safety.set_rx_checks_received(stale, 0)
+        self.safety.set_controls_allowed(True)
+        self.safety.safety_tick()
+        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertFalse(self.safety.safety_config_valid())
+
+  def test_rx_lagging_recovers(self):
+    lag_us = 1000000
+    for stale in range(self.safety.get_rx_checks_len()):
+      with self.subTest(stale=stale):
+        self._reset_safety_hooks()
+        self.safety.set_timer(2 * lag_us)
+        self.safety.set_rx_checks_received(stale, lag_us + 1)
+        self.safety.safety_tick()
+        self.assertTrue(libsafety_py.libsafety.safety_a.state.rx_status[stale].lagging)
+
+        m = libsafety_py.libsafety.safety_a.setup.current_safety_config.rx_checks[stale].msg[0]
+        self._rx(make_msg(m.bus, m.addr, m.len))
+        self.assertFalse(libsafety_py.libsafety.safety_a.state.rx_status[stale].lagging)
+        self.assertFalse(libsafety_py.libsafety.safety_b.state.rx_status[stale].lagging)

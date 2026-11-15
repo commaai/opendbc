@@ -139,6 +139,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     RxStatus *status = &safety.rx_status[index];
     const CanMsgCheck *m = &cfg->rx_checks[index].msg[status->index];
     status->last_timestamp = safety_ts;
+    status->lagging = false;
 
     // checksum check
     if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !m->ignore_checksum) {
@@ -272,7 +273,9 @@ static void tick_copy(void) {
     // 2s of lag is worse case, since the function is called at 1Hz
     uint32_t frequency = safety_setup.current_safety_config.rx_checks[i].msg[status->index].frequency;
     uint32_t timestep = 1000000U / SAFETY_MAX(frequency, 1U);  // frequency < 10Hz is invalid below
-    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1000000U);
+    // latched until the message is received again: elapsed_time wraps every 2^32 us,
+    // so a check that has been lagging would otherwise look fresh again
+    bool lagging = status->lagging || (elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1000000U));
     status->lagging = lagging;
 
     // enforce minimum frequency for safety-relevant messages
