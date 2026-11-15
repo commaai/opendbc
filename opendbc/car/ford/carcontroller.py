@@ -1,10 +1,9 @@
-from opendbc.car.secoc import add_mac
 import math
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
 from opendbc.car.ford import fordcan
-from opendbc.car.ford.values import CarControllerParams, FordFlags, FordFlags, CAR
+from opendbc.car.ford.values import CarControllerParams, FordFlags, CAR
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -49,8 +48,6 @@ class CarController(CarControllerBase):
     self.steer_alert_last = False
     self.lead_distance_bars_last = None
     self.distance_bar_frame = 0
-    self.secoc_lat_message_counter = 0
-    self.secoc_acc_message_counter = 0
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
@@ -105,11 +102,6 @@ class CarController(CarControllerBase):
         mode = 1 if CC.latActive else 0
         counter = (self.frame // CarControllerParams.STEER_STEP) % 0x10
         can_sends.append(fordcan.create_lat_ctl2_msg(self.packer, self.CAN, mode, 0., 0., -self.apply_curvature_last, 0., counter))
-      if self.CP.flags & FordFlags.SECOC:
-        # Ford F-150 SecOC (TRON) MAC generation with 64-bit freshness counter
-        self.secoc_key = b'\x00' * 16  # Default test key until key exchange
-        can_sends[-1] = add_mac(self.secoc_key, CS.counter, 0, self.secoc_lat_message_counter, can_sends[-1])
-        self.secoc_lat_message_counter += 1
       else:
         can_sends.append(fordcan.create_lat_ctl_msg(self.packer, self.CAN, CC.latActive, 0., 0., -self.apply_curvature_last, 0.))
 
