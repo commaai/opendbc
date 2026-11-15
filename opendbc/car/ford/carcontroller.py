@@ -4,7 +4,7 @@ import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
 from opendbc.car.ford import fordcan
-from opendbc.car.ford.values import CarControllerParams, FordFlags, CAR
+from opendbc.car.ford.values import CarControllerParams, FordFlags, FordFlags, CAR
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
