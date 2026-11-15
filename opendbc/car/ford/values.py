@@ -45,6 +45,7 @@ class FordSafetyFlags(IntFlag):
 
 
 class FordFlags(IntFlag):
+  SECOC = 4  # SecOC / TRON
   # Detected flags
   HAS_BSM = 2  # blind spot monitoring
 
@@ -111,6 +112,13 @@ class FordCANFDPlatformConfig(FordPlatformConfig):
 
 
 @dataclass
+
+@dataclass
+class FordSecOCPlatformConfig(FordCANFDPlatformConfig):
+  def init(self):
+    super().init()
+    self.flags |= FordFlags.SECOC
+
 class FordF150LightningPlatform(FordCANFDPlatformConfig):
   def init(self):
     super().init()
