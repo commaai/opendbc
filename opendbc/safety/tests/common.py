@@ -764,6 +764,31 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
         should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
+  def test_angle_cmd_rate_limit_near_zero(self):
+    # at exactly 0, both directions get the big (unwind) limit; just off 0, moving away gets the small (windup) limit
+    if not hasattr(self, "ANGLE_RATE_BP"):
+      self.skipTest("uses vehicle model angle limits")
+    for speed in (5., 10., 15., 50.):
+      # same math as steer_angle_cmd_checks: speed fudged down 1 m/s, converted to CAN units, +1
+      fudged = speed - 1.
+      up = int(np.interp(fudged, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP) * self.DEG_TO_CAN) + 1
+      down = int(np.interp(fudged, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN) + 1
+      if down - up < 3:
+        continue  # gap too narrow to test reliably at this speed
+
+      self._reset_speed_measurement(speed)
+      self._reset_angle_measurement(0)
+
+      # mutant 219: from exactly 0, a big step left must be allowed
+      self.safety.set_controls_allowed(1)
+      self.safety.set_desired_angle_last(0)
+      self.assertTrue(self._tx(self._angle_cmd_msg(-(down - 1) / self.DEG_TO_CAN, True)))
+
+      # mutant 218: from +1 unit, a big step right must be blocked
+      self.safety.set_controls_allowed(1)
+      self.safety.set_desired_angle_last(1)
+      self.assertFalse(self._tx(self._angle_cmd_msg(down / self.DEG_TO_CAN, True)))
+
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while
     # steer actuation bit is 0, regardless of controls allowed.

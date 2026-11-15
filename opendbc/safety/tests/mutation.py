@@ -604,11 +604,10 @@ def main():
     if counts["infra_error"] > 0:
       return 2
 
-    # TODO: fix these surviving mutants and delete this block
+    # TODO: lateral.h:188 is an equivalent mutant (MAX_RT_INTERVAL / 2U is 125000 for 250000U and 250001U),
+    # so it needs a code change rather than a test. Delete this block once it's gone.
     known_survivors = {
       ("opendbc/safety/lateral.h", 188, "boundary"),
-      ("opendbc/safety/lateral.h", 218, "boundary"),
-      ("opendbc/safety/lateral.h", 219, "boundary"),
     }
     survivors = [r for r in survivors if (str(r.site.origin_file.relative_to(ROOT)), r.site.origin_line, r.site.mutator) not in known_survivors]
 
