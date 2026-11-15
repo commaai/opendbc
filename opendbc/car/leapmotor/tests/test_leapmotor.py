@@ -168,8 +168,8 @@ class TestLeapmotorCan(unittest.TestCase):
     from opendbc.car.leapmotor.values import CarControllerParams, DBC as LEAPMOTOR_DBC
     controller = CarController(LEAPMOTOR_DBC["LEAPMOTOR_B10"], get_safety_CP())
 
-    def cs(angle, kph):
-      return SimpleNamespace(out=SimpleNamespace(steeringAngleDeg=angle, vEgoRaw=kph / 3.6))
+    def cs(angle, kph, eps=0):
+      return SimpleNamespace(out=SimpleNamespace(steeringAngleDeg=angle, vEgoRaw=kph / 3.6, steeringTorqueEps=eps))
     controller.apply_angle_last = 90.
     for i in range(30):  # wheel 10 deg behind at 15 km/h: one step deeper per frame, up to the stock maximum
       controller.ramp_boost = controller.update_ramp_boost(True, cs(80., 15.))
@@ -180,6 +180,16 @@ class TestLeapmotorCan(unittest.TestCase):
     self.assertEqual(controller.ramp_boost, 20)
     self.assertEqual(controller.update_ramp_boost(False, cs(80., 15.)), 0)  # not steering
     self.assertEqual(controller.update_ramp_boost(True, cs(80., CarControllerParams.RAMP_BOOST_MAX_SPEED + 1)), 0)  # fast
+
+    # near the EPS torque at which it flags an override by itself: no deeper, then back off, even while lagging
+    hold, back = CarControllerParams.RAMP_BOOST_EPS_TORQUE_HOLD, CarControllerParams.RAMP_BOOST_EPS_TORQUE_BACK
+    controller.ramp_boost = 10
+    for eps in (hold, -hold, back - 1, -(back - 1)):
+      self.assertEqual(controller.update_ramp_boost(True, cs(80., 15., eps)), 10)
+    for eps in (back, -back, -218):
+      controller.ramp_boost = 10
+      self.assertEqual(controller.update_ramp_boost(True, cs(80., 15., eps)), 9)
+    self.assertEqual(controller.update_ramp_boost(True, cs(80., 15., hold - 1)), 11)  # below the hold: deeper again
 
   def test_driver_torque_lags_the_eps(self):
     from opendbc.car.leapmotor.carstate import CarState
@@ -222,7 +232,7 @@ class TestLeapmotorCan(unittest.TestCase):
       CC.latActive = True
       CC.actuators.steeringAngleDeg = wanted
       CS = SimpleNamespace(driver_override=False, adas_lka=None, powertrain_state=None,
-                           out=SimpleNamespace(steeringAngleDeg=wheel, vEgoRaw=kph / 3.6))
+                           out=SimpleNamespace(steeringAngleDeg=wheel, vEgoRaw=kph / 3.6, steeringTorqueEps=0))
       controller.update(CC.as_reader(), CS, 0)
       return controller.lat_active_last
 
