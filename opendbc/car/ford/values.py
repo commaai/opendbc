@@ -112,13 +112,12 @@ class FordCANFDPlatformConfig(FordPlatformConfig):
 
 
 @dataclass
-
-@dataclass
 class FordSecOCPlatformConfig(FordCANFDPlatformConfig):
   def init(self):
     super().init()
     self.flags |= FordFlags.SECOC
 
+@dataclass
 class FordF150LightningPlatform(FordCANFDPlatformConfig):
   def init(self):
     super().init()
