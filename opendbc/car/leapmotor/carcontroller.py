@@ -31,15 +31,17 @@ class CarController(CarControllerBase):
 
   def update_ramp_boost(self, lat_active: bool, CS) -> int:
     """Extra LCC_RAMP steps: one more per frame while the wheel lags the command at low speed, one fewer once it is
-    back (see CarControllerParams.RAMP_BOOST_LAG)."""
+    back (see CarControllerParams.RAMP_BOOST_LAG), and none past the EPS torque at which the EPS lets go by itself
+    (see CarControllerParams.RAMP_BOOST_EPS_TORQUE_HOLD)."""
     if not lat_active or CS.out.vEgoRaw * 3.6 > CarControllerParams.RAMP_BOOST_MAX_SPEED:
       return 0
     behind = abs(self.apply_angle_last - CS.out.steeringAngleDeg)
+    eps_torque = abs(CS.out.steeringTorqueEps)
     boost = self.ramp_boost
-    if behind > CarControllerParams.RAMP_BOOST_LAG:
-      boost += 1
-    elif behind < CarControllerParams.RAMP_BOOST_CAUGHT_UP:
+    if eps_torque >= CarControllerParams.RAMP_BOOST_EPS_TORQUE_BACK or behind < CarControllerParams.RAMP_BOOST_CAUGHT_UP:
       boost -= 1
+    elif behind > CarControllerParams.RAMP_BOOST_LAG and eps_torque < CarControllerParams.RAMP_BOOST_EPS_TORQUE_HOLD:
+      boost += 1
     return min(max(boost, 0), leapmotorcan.LCC_RAMP_STEPS_MAX - leapmotorcan.LCC_RAMP_STEPS_MIN)
 
   def update(self, CC, CS, now_nanos):

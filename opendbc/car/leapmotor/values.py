@@ -47,6 +47,14 @@ class CarControllerParams:
   RAMP_BOOST_LAG = 3.  # deg
   RAMP_BOOST_CAUGHT_UP = 1.5  # deg
   RAMP_BOOST_MAX_SPEED = 60.  # km/h
+  # Past about 150 of STEER_TORQUE_EPS the EPS sets its own DRIVER_OVERRIDE flag with the driver's hands off, and
+  # openpilot lets go like the stock LCC does: engaged frames with the flag set were 0-1% below 130, 9% at 130-160
+  # and 50% above 160 (a test build ramping to 56 steps; 28% above 160 at 52 steps). In a tightening turn at 25 km/h
+  # the boost drove it to -167..-218 three times, the EPS let go each time and the wheel sprang back 25-30 deg.
+  # So the boost goes no deeper from RAMP_BOOST_EPS_TORQUE_HOLD and backs off from RAMP_BOOST_EPS_TORQUE_BACK. With
+  # it, the EPS peaked at 136 through a 72 deg turn at 33-47 km/h and never flagged an override above 100.
+  RAMP_BOOST_EPS_TORQUE_HOLD = 100
+  RAMP_BOOST_EPS_TORQUE_BACK = 120
 
 
 @dataclass
