@@ -246,6 +246,7 @@ bool safety_rx_hook(const CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
 int to_signed(uint32_t d, int bits);
 int sign_magnitude(uint32_t magnitude, bool negative);
+int from_offset(uint32_t raw, int offset);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
 int ROUND(float val);
