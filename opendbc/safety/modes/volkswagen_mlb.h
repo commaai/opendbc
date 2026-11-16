@@ -35,9 +35,9 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_ESP_03, 0U)) {
     uint32_t speed = 0;
     speed += GET_BYTES_LE(msg, 2, 2) & 0xFFFU;   // FL
-    speed += (msg->data[4] << 4) | (msg->data[3] >> 4);     // FR
+    speed += GET_BYTES_LE(msg, 3, 2) >> 4;       // FR
     speed += GET_BYTES_LE(msg, 5, 2) & 0xFFFU;   // RL
-    speed += (msg->data[7] << 4) | (msg->data[6] >> 4);     // RR
+    speed += GET_BYTES_LE(msg, 6, 2) >> 4;       // RR
     safety.vehicle_moving = speed > 0U;
   }
 
@@ -70,8 +70,8 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_TSK_04, 1U)) {
     // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
     // Signal: TSK_04.TSK_Status_GRA_ACC_02
-    int acc_status = (msg->data[7] & 0xC0U) >> 6;
-    bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
+    uint8_t acc_status = msg->data[7] >> 6;
+    bool cruise_engaged = (acc_status == 1U) || (acc_status == 2U);
 
     pcm_cruise_check(cruise_engaged);
   }
