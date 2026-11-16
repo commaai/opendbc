@@ -34,6 +34,11 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
     values = {"GasRegenCmd": gas}
     return self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)
 
+  def test_gas_apply(self):
+    # apply bit is only allowed with controls allowed
+    values = {"GasRegenCmd": self.INACTIVE_GAS, "GasRegenCmdActive": 1}
+    self.assertFalse(self._tx(self.packer.make_can_msg_safety("ASCMGasRegenCmd", 0, values)))
+
   # override these tests from CarSafetyTest, GM longitudinal uses button enable
   def _pcm_status_msg(self, enable):
     raise NotImplementedError
@@ -102,8 +107,8 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     else:
       raise NotImplementedError
 
-  def _speed_msg(self, speed):
-    values = {"%sWheelSpd" % s: speed for s in ["RL", "RR"]}
+  def _speed_msg(self, speed, wheels=("RL", "RR")):
+    values = {"%sWheelSpd" % s: speed for s in wheels}
     return self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values)
 
   def _user_brake_msg(self, brake):
@@ -130,6 +135,12 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
   def _button_msg(self, buttons):
     values = {"ACCButtons": buttons}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
+
+  def test_vehicle_moving_single_wheel(self):
+    # vehicle is moving if any checked wheel is above standstill
+    for wheel in ("RL", "RR"):
+      self.assertTrue(self._rx(self._speed_msg(self.STANDSTILL_THRESHOLD + 1, wheels=(wheel,))))
+      self.assertTrue(self.safety.get_vehicle_moving())
 
 
 class TestGmEVSafetyBase(TestGmSafetyBase):
@@ -178,6 +189,10 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
   @property
   def SAFETY_PARAM(self):
     return GMSafetyFlags.HW_CAM | self.EXTRA_SAFETY_PARAM
+
+  def test_rx_buttons_do_not_enable(self):
+    self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": Buttons.RES_ACCEL}))
+    self.assertFalse(self.safety.get_controls_allowed())
 
   def test_buttons(self):
     # Only CANCEL button is allowed while cruise is enabled
