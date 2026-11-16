@@ -92,7 +92,7 @@ static const CurvatureSteeringLimits FORD_STEERING_LIMITS = {
   .curvature_to_can = 50000,          // CAN units per rad/m
   .frequency = 20,                    // Hz
   .max_curvature_error = 100,         // 0.002 rad/m * curvature_to_can
-  .curvature_error_min_speed = 10.0,  // m/s
+  .curvature_error_min_speed = 10.0f,  // m/s
   .max_steer_power = 0,               // disabled, Ford has no steed power signal
 };
 
@@ -106,14 +106,14 @@ static void ford_rx_hook(const CANPacket_t *msg) {
   // Update vehicle speed
   if (msg_matches(msg, FORD_BrakeSysFeatures, FORD_MAIN_BUS)) {
     // Signal: Veh_V_ActlBrk
-    UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01f * KPH_TO_MS);
   }
 
   // Check vehicle speed against a second source
   if (msg_matches(msg, FORD_EngVehicleSpThrottle2, FORD_MAIN_BUS)) {
     // Disable controls if speeds from ABS and PCM ECUs are too far apart.
     // Signal: Veh_V_ActlEng
-    float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01 * KPH_TO_MS;
+    float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01f * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
   }
 
@@ -122,8 +122,8 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     // FIXME: safety can receive yaw before new vehicle speed, it should recompute meas on either received
     // Signal: VehYaw_W_Actl
     // TODO: we should use the speed which results in the closest angle measurement to the desired angle
-    float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002) - 6.5;
-    float current_curvature = ford_yaw_rate / SAFETY_MAX(safety.vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
+    float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002f) - 6.5f;
+    float current_curvature = ford_yaw_rate / SAFETY_MAX(safety.vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1f);
     // convert current curvature into units on CAN for comparison with desired curvature
     update_sample(&safety.curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
   }

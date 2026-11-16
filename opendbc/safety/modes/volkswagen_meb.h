@@ -137,13 +137,13 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
     uint32_t rl = msg->data[12] | (msg->data[13] << 8);
     uint32_t rr = msg->data[14] | (msg->data[15] << 8);
     safety.vehicle_moving = (fr | rr | rl | fl) != 0U;
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0f * 0.0075f * KPH_TO_MS);
   }
 
   // Check vehicle speed with redundant source
   if (msg_matches(msg, MSG_ESP_21, 0U)) {
     // Signal: ESP_v_Signal
-    float esp_speed = ((msg->data[5] << 8) | msg->data[4]) * 0.01 * KPH_TO_MS;
+    float esp_speed = ((msg->data[5] << 8) | msg->data[4]) * 0.01f * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED_2(esp_speed);
   }
 
@@ -239,7 +239,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       .curvature_to_can = 149253.7313f,
       .frequency = 50,                   // Hz
       .max_curvature_error = 0,          // disabled, MEB doesn't track rack
-      .curvature_error_min_speed = 0.0,  // disabled
+      .curvature_error_min_speed = 0.0f,  // disabled
       .max_steer_power = 125,
     };
 

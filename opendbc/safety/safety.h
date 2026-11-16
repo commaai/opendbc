@@ -479,7 +479,7 @@ void update_sample(struct sample_t *sample, int sample_new) {
 }
 
 int ROUND(float val) {
-  return val + ((val > 0.0) ? 0.5 : -0.5);
+  return val + ((val > 0.0f) ? 0.5f : -0.5f);
 }
 
 void pcm_cruise_check(bool cruise_engaged) {

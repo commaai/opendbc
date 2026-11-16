@@ -68,7 +68,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS)) {
     int speed = (msg->data[0] << 8) | msg->data[1];
     safety.vehicle_moving = speed > 0;
-    UPDATE_VEHICLE_SPEED(speed * 0.01 * KPH_TO_MS);  // VITESSE_VEHICULE_ROUES
+    UPDATE_VEHICLE_SPEED(speed * 0.01f * KPH_TO_MS);  // VITESSE_VEHICULE_ROUES
   }
 
   if (msg_matches(msg, PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS)) {
@@ -85,12 +85,12 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
     .max_angle = 3900,
     .angle_deg_to_can = 10,
     .angle_rate_up_lookup = {
-      {0., 5., 25.},
-      {2.5, 1.5, .2},
+      {0.f, 5.f, 25.f},
+      {2.5f, 1.5f, .2f},
     },
     .angle_rate_down_lookup = {
-      {0., 5., 25.},
-      {5., 2., .3},
+      {0.f, 5.f, 25.f},
+      {5.f, 2.f, .3f},
     },
   };
 

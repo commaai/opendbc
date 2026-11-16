@@ -30,7 +30,7 @@ static void byd_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x1F0U, 0U)) {
     int speed = (msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
     safety.vehicle_moving = speed > 0;
-    UPDATE_VEHICLE_SPEED(speed * 0.1 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED(speed * 0.1f * KPH_TO_MS);
   }
 
   // Gas and brake pressed
@@ -57,9 +57,9 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
 
   // NOTE: based off BYD_ATTO_3 to match openpilot
   const AngleSteeringParams BYD_STEERING_PARAMS = {
-    .slip_factor = -0.0006166479109059387,  // calc_slip_factor(VM)
-    .steer_ratio = 14.8,
-    .wheelbase = 2.72,
+    .slip_factor = -0.0006166479109059387f,  // calc_slip_factor(VM)
+    .steer_ratio = 14.8f,
+    .wheelbase = 2.72f,
   };
 
   bool tx = true;
