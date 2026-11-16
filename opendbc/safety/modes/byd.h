@@ -17,7 +17,7 @@ static uint32_t byd_compute_checksum(const CANPacket_t *msg) {
   for (int i = 0; i < 7; i++) {
     sum += msg->data[i];
   }
-  return 0xFFU - sum;
+  return 0xFFU - (uint32_t)sum;
 }
 
 static void byd_rx_hook(const CANPacket_t *msg) {
@@ -29,9 +29,9 @@ static void byd_rx_hook(const CANPacket_t *msg) {
 
   // Vehicle speed: 0.1 kph/LSB
   if (msg_matches(msg, 0x1F0U, 0U)) {
-    int speed = GET_BYTES_LE(msg, 0, 2);  // WHEELSPEED_CLEAN
-    safety.vehicle_moving = speed > 0;
-    UPDATE_VEHICLE_SPEED(speed * 0.1f * KPH_TO_MS);
+    uint32_t speed = GET_BYTES_LE(msg, 0, 2);  // WHEELSPEED_CLEAN
+    safety.vehicle_moving = speed > 0U;
+    UPDATE_VEHICLE_SPEED((float)speed * 0.1f * KPH_TO_MS);
   }
 
   // Gas and brake pressed
@@ -52,7 +52,7 @@ static void byd_rx_hook(const CANPacket_t *msg) {
 static bool byd_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringLimits BYD_STEERING_LIMITS = {
     .max_angle = 3900,  // 390 deg
-    .angle_deg_to_can = 10,
+    .angle_deg_to_can = 10.0f,
     .frequency = 50U,
   };
 
