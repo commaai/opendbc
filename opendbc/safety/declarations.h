@@ -186,7 +186,7 @@ typedef struct {
   const unsigned int frequency : 7;   // expected frequency of the message [Hz], at least 10
   const bool ignore_checksum : 1;     // checksum check is not performed when set to true
   const bool ignore_counter : 1;      // counter check is not performed when set to true
-  const unsigned int max_counter : 8; // maximum value of the counter, nonzero iff the counter is checked
+  const unsigned int max_counter : 8; // maximum value of the counter, nonzero exactly when the counter is checked
   const bool ignore_quality_flag : 1; // true if quality flag check is skipped
 } CanMsgCheck;
 
