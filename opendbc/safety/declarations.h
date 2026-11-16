@@ -48,7 +48,7 @@
 #define RX_CHECKS_LEN(rx) (((int)sizeof((rx)) / (int)sizeof((rx)[0])) + \
                            (0 * (int)sizeof(char[(2 * ((int)MAX_RX_CHECKS - ((int)sizeof((rx)) / (int)sizeof((rx)[0])))) + 1])))
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), RX_CHECKS_LEN(rx), \
-                                                  (tx), (sizeof((tx)) / sizeof((tx)[0])), \
+                                                  (tx), SAFETY_ARRAY_LEN(tx), \
                                                   false})
 #define SET_RX_CHECKS(rx, config) \
   do { \
@@ -60,7 +60,7 @@
 #define SET_TX_MSGS(tx, config) \
   do { \
     (config).tx_msgs = (tx); \
-    (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
+    (config).tx_msgs_len = SAFETY_ARRAY_LEN(tx); \
     (config).disable_forwarding = false; \
   } while (false);
 
