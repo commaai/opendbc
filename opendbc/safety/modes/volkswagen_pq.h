@@ -87,8 +87,8 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state from speed value.
   // Signal: Bremse_1.BR1_Rad_kmh
   if (msg_matches(msg, MSG_BREMSE_1, 0U)) {
-    int speed = ((msg->data[2] & 0xFEU) >> 1) | (msg->data[3] << 7);
-    safety.vehicle_moving = speed > 0;
+    uint32_t speed = GET_BYTES_LE(msg, 2, 2) >> 1;
+    safety.vehicle_moving = speed > 0U;
   }
 
   // Update driver input torque samples
@@ -124,15 +124,15 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
       // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
       // Signal: Motor_2.MO2_Sta_GRA
-      int acc_status = (msg->data[2] & 0xC0U) >> 6;
-      bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
+      uint8_t acc_status = msg->data[2] >> 6;
+      bool cruise_engaged = (acc_status == 1U) || (acc_status == 2U);
       pcm_cruise_check(cruise_engaged);
     }
   }
 
   // Signal: Motor_3.MO3_Pedalwert
   if (msg_matches(msg, MSG_MOTOR_3, 0U)) {
-    safety.gas_pressed = (msg->data[2]);
+    safety.gas_pressed = msg->data[2] != 0U;
   }
 
   // Signal: Motor_2.MO2_BLS
@@ -170,7 +170,7 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
     // DBC scale from PQ network to centi-Nm
     int desired_torque = sign_magnitude((GET_BYTES_LE(msg, 2, 2) & 0x7FFFU) / 32U, GET_BIT(msg, 31U));
 
-    uint32_t hca_status = ((msg->data[1] >> 4) & 0xFU);
+    uint8_t hca_status = msg->data[1] >> 4;
     bool steer_req = ((hca_status == 5U) || (hca_status == 7U));
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_PQ_STEERING_LIMITS)) {
@@ -182,7 +182,7 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
   // To avoid floating point math, scale upward and compare to pre-scaled safety m/s2 boundaries
   if (msg->addr == MSG_ACC_SYSTEM) {
     // Signal: ACC_System.ACS_Sollbeschl (acceleration in m/s2, scale 0.005, offset -7.22)
-    int desired_accel = ((GET_BYTES_LE(msg, 3, 2) & 0x7FFU) * 5U) - 7220U;
+    int desired_accel = from_offset((GET_BYTES_LE(msg, 3, 2) & 0x7FFU) * 5U, 7220);
 
     if (longitudinal_accel_checks(desired_accel, VOLKSWAGEN_PQ_LONG_LIMITS)) {
       tx = false;
