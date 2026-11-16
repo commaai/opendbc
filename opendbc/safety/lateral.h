@@ -37,8 +37,8 @@ static bool driver_limit_check(int val, int val_last, const struct sample_t *val
   int lowest_allowed_rl = SAFETY_MIN(val_last, 0) - MAX_RATE_UP;
 
   // driver
-  int driver_max_limit = MAX_VAL + (MAX_ALLOWANCE + val_driver->max) * DRIVER_FACTOR;
-  int driver_min_limit = -MAX_VAL + (-MAX_ALLOWANCE + val_driver->min) * DRIVER_FACTOR;
+  int driver_max_limit = MAX_VAL + ((MAX_ALLOWANCE + val_driver->max) * DRIVER_FACTOR);
+  int driver_min_limit = -MAX_VAL + ((-MAX_ALLOWANCE + val_driver->min) * DRIVER_FACTOR);
 
   // if we've exceeded the applied torque, we must start moving toward 0
   int highest_driver = SAFETY_MAX(driver_max_limit, 0);
@@ -255,9 +255,9 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 // Safety checks for curvature-based steering commands
 bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
-  static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
+  const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
   // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
-  static const float MAX_LATERAL_JERK = 3.0f + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
+  const float MAX_LATERAL_JERK = 3.0f + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
 
   const float fudged_speed = SAFETY_MAX((safety.vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0f, 1.0f);
   bool violation = false;
@@ -366,9 +366,9 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   // TODO: remove the inaccurate breakpoint angle limiting function above and always use this one
 
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
-  static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
+  const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
   // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
-  static const float MAX_LATERAL_JERK = 3.0f + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
+  const float MAX_LATERAL_JERK = 3.0f + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
 
   const float fudged_speed = SAFETY_MAX((safety.vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0f, 1.0f);
   const float curvature_factor = get_curvature_factor(fudged_speed, params);

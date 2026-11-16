@@ -150,7 +150,7 @@ static safety_config gm_init(uint16_t param) {
   const uint16_t GM_PARAM_EV = 4;
 
   // common safety checks assume unscaled integer values
-  static const int GM_GAS_TO_CAN = 8;  // 1 / 0.125
+  enum { GM_GAS_TO_CAN = 8 };  // 1 / 0.125
 
   static const LongitudinalLimits GM_ASCM_LONG_LIMITS = {
     .max_gas = 1018 * GM_GAS_TO_CAN,

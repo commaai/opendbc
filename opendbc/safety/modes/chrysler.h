@@ -116,7 +116,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
     const TorqueSteeringLimits limits = (safety_setup.chrysler_platform == CHRYSLER_PACIFICA) ? CHRYSLER_STEERING_LIMITS :
                                         (safety_setup.chrysler_platform == CHRYSLER_RAM_DT) ? CHRYSLER_RAM_DT_STEERING_LIMITS : CHRYSLER_RAM_HD_STEERING_LIMITS;
 
-    bool steer_req = (safety_setup.chrysler_platform == CHRYSLER_PACIFICA) ? GET_BIT(msg, 4U) : (msg->data[3] & 0x7U) == 2U;
+    bool steer_req = (safety_setup.chrysler_platform == CHRYSLER_PACIFICA) ? GET_BIT(msg, 4U) : ((msg->data[3] & 0x7U) == 2U);
     if (steer_torque_cmd_checks(desired_torque, steer_req, limits)) {
       tx = false;
     }
