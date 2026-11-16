@@ -12,7 +12,7 @@ static uint32_t rivian_get_checksum(const CANPacket_t *msg) {
   return msg->data[0];
 }
 
-static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, uint8_t xor_output) {
+static uint8_t rivian_checksum(const CANPacket_t *msg, uint8_t poly, uint8_t xor_output) {
   int len = GET_LEN(msg);
 
   uint8_t crc = 0;
@@ -26,19 +26,19 @@ static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, ui
 static uint32_t rivian_compute_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
   if (msg->addr == 0x208U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0xB1);
+    chksum = rivian_checksum(msg, 0x1D, 0xB1);
   }
   if (msg->addr == 0x150U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x9A);
+    chksum = rivian_checksum(msg, 0x1D, 0x9A);
   }
   if (msg->addr == 0x380U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x1E);
+    chksum = rivian_checksum(msg, 0x1D, 0x1E);
   }
   if (msg->addr == 0x38FU) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x37);
+    chksum = rivian_checksum(msg, 0x1D, 0x37);
   }
   if (msg->addr == 0x100U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x5F);
+    chksum = rivian_checksum(msg, 0x1D, 0x5F);
   }
   return chksum;
 }

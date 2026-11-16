@@ -18,8 +18,10 @@ static bool dist_to_meas_check(int val, int val_last, struct sample_t *val_meas,
   int lowest_allowed_rl = SAFETY_MIN(val_last, 0) - MAX_RATE_UP;
 
   // if we've exceeded the meas val, we must start moving toward 0
-  int highest_allowed = SAFETY_MIN(highest_allowed_rl, SAFETY_MAX(val_last - MAX_RATE_DOWN, SAFETY_MAX(val_meas->max, 0) + MAX_ERROR));
-  int lowest_allowed = SAFETY_MAX(lowest_allowed_rl, SAFETY_MIN(val_last + MAX_RATE_DOWN, SAFETY_MIN(val_meas->min, 0) - MAX_ERROR));
+  int highest_meas = SAFETY_MAX(val_meas->max, 0) + MAX_ERROR;
+  int lowest_meas = SAFETY_MIN(val_meas->min, 0) - MAX_ERROR;
+  int highest_allowed = SAFETY_MIN(highest_allowed_rl, SAFETY_MAX(val_last - MAX_RATE_DOWN, highest_meas));
+  int lowest_allowed = SAFETY_MAX(lowest_allowed_rl, SAFETY_MIN(val_last + MAX_RATE_DOWN, lowest_meas));
 
   // check for violation
   return safety_max_limit_check(val, highest_allowed, lowest_allowed);
@@ -39,10 +41,10 @@ static bool driver_limit_check(int val, int val_last, const struct sample_t *val
   int driver_min_limit = -MAX_VAL + (-MAX_ALLOWANCE + val_driver->min) * DRIVER_FACTOR;
 
   // if we've exceeded the applied torque, we must start moving toward 0
-  int highest_allowed = SAFETY_MIN(highest_allowed_rl, SAFETY_MAX(val_last - MAX_RATE_DOWN,
-                                             SAFETY_MAX(driver_max_limit, 0)));
-  int lowest_allowed = SAFETY_MAX(lowest_allowed_rl, SAFETY_MIN(val_last + MAX_RATE_DOWN,
-                                           SAFETY_MIN(driver_min_limit, 0)));
+  int highest_driver = SAFETY_MAX(driver_max_limit, 0);
+  int lowest_driver = SAFETY_MIN(driver_min_limit, 0);
+  int highest_allowed = SAFETY_MIN(highest_allowed_rl, SAFETY_MAX(val_last - MAX_RATE_DOWN, highest_driver));
+  int lowest_allowed = SAFETY_MAX(lowest_allowed_rl, SAFETY_MIN(val_last + MAX_RATE_DOWN, lowest_driver));
 
   // check for violation
   return safety_max_limit_check(val, highest_allowed, lowest_allowed);
@@ -299,13 +301,15 @@ bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool ste
       if (safety.curvature_state.desired_last < lowest_desired_curvature_error) {
         // demand winding up: never require more than the relaxed step, never past the error band edge,
         // and never past what openpilot can reach (lat accel or max_curvature).
-        const int required = SAFETY_MIN(SAFETY_MIN(safety.curvature_state.desired_last + max_curvature_delta_relaxed_can,
-                                                   lowest_desired_curvature_error), max_curvature_relaxed_can);
+        const int relaxed_step = SAFETY_MIN(safety.curvature_state.desired_last + max_curvature_delta_relaxed_can,
+                                            lowest_desired_curvature_error);
+        const int required = SAFETY_MIN(relaxed_step, max_curvature_relaxed_can);
         lowest_desired_curvature = SAFETY_MAX(lowest_desired_curvature, required);  // can't widen the rate limit window
 
       } else if (safety.curvature_state.desired_last > highest_desired_curvature_error) {
-        const int required = SAFETY_MAX(SAFETY_MAX(safety.curvature_state.desired_last - max_curvature_delta_relaxed_can,
-                                                   highest_desired_curvature_error), -max_curvature_relaxed_can);
+        const int relaxed_step = SAFETY_MAX(safety.curvature_state.desired_last - max_curvature_delta_relaxed_can,
+                                            highest_desired_curvature_error);
+        const int required = SAFETY_MAX(relaxed_step, -max_curvature_relaxed_can);
         highest_desired_curvature = SAFETY_MIN(highest_desired_curvature, required);
 
       } else {
