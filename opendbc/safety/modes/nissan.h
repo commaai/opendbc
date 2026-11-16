@@ -16,13 +16,19 @@ static const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
   },
 };
 
+// Nissan's angle signal is inverted around 1310 degrees
+static int nissan_flip_angle(int angle) {
+  const float flipped = (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can) - (float)angle;
+  return (int)flipped;
+}
+
 static void nissan_rx_hook(const CANPacket_t *msg) {
   // Altima: on camera bus, others: on pt bus
   if (msg_matches(msg, 0x185U, 0U)) {
     // Current steering angle
     int angle_meas_new = (msg->data[2] << 10) | (msg->data[3] << 2) | (msg->data[4] >> 6);
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    angle_meas_new = limit_to_can(1310.0f, NISSAN_STEERING_LIMITS.angle_deg_to_can, (float)-angle_meas_new);
+    angle_meas_new = nissan_flip_angle(angle_meas_new);
 
     // update array of samples
     update_sample(&safety.angle_meas, angle_meas_new);
@@ -71,7 +77,7 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
     bool lka_active = (msg->data[6] >> 4) & 1U;
 
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    desired_angle = limit_to_can(1310.0f, NISSAN_STEERING_LIMITS.angle_deg_to_can, (float)-desired_angle);
+    desired_angle = nissan_flip_angle(desired_angle);
 
     if (steer_angle_cmd_checks(desired_angle, lka_active, NISSAN_STEERING_LIMITS)) {
       violation = true;
