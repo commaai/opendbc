@@ -201,8 +201,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     int accel = (msg->data[3] << 3) | ((msg->data[4] >> 5) & 0x7U);
     accel = to_signed(accel, 11);
 
-    int gas = GET_BYTES_BE(msg, 0, 2);
-    gas = to_signed(gas, 16);
+    int gas = to_signed(GET_BYTES_BE(msg, 0, 2), 16);
 
     bool violation = false;
     violation |= longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);

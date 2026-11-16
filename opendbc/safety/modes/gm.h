@@ -25,8 +25,7 @@ static void gm_rx_hook(const CANPacket_t *msg) {
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
 
   if (msg_matches(msg, 0x184U, 0U)) {
-    int torque_driver_new = GET_BYTES_BE(msg, 6, 2) & 0x7FFU;
-    torque_driver_new = to_signed(torque_driver_new, 11);
+    int torque_driver_new = to_signed(GET_BYTES_BE(msg, 6, 2) & 0x7FFU, 11);
     // update array of samples
     update_sample(&safety.torque_driver, torque_driver_new);
   }
@@ -106,8 +105,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
   // LKA STEER: safety check
   if (msg->addr == 0x180U) {
-    int desired_torque = GET_BYTES_BE(msg, 0, 2) & 0x7FFU;
-    desired_torque = to_signed(desired_torque, 11);
+    int desired_torque = to_signed(GET_BYTES_BE(msg, 0, 2) & 0x7FFU, 11);
 
     bool steer_req = GET_BIT(msg, 3U);
 
