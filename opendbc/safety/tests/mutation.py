@@ -608,7 +608,7 @@ def main():
 
     # TODO: fix these surviving mutants and delete this block
     known_survivors = {
-      ("opendbc/safety/lateral.h", 200, "boundary"),
+      ("opendbc/safety/lateral.h", 199, "boundary"),
       ("opendbc/safety/lateral.h", 248, "boundary"),
       ("opendbc/safety/lateral.h", 249, "boundary"),
     }
