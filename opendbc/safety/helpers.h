@@ -35,6 +35,8 @@
   (safety_abs_a > 0) ? safety_abs_a : (-safety_abs_a); \
 })
 
+#define SAFETY_ARRAY_LEN(a) ((int)sizeof(a) / (int)sizeof((a)[0]))
+
 #define SAFETY_UNUSED(x) ((void)(x))
 
 // Update an MSB-first CRC8 with one byte; callers choose the initial value and final XOR.
@@ -78,9 +80,19 @@ static bool safety_max_limit_check(int val, const int MAX_VAL, const int MIN_VAL
   return (val > MAX_VAL) || (val < MIN_VAL);
 }
 
+static float vehicle_speed_ms(int raw) {
+  return (float)raw / VEHICLE_SPEED_FACTOR;
+}
+
+// convert a limit to CAN units and add a margin, truncating toward zero
+static int limit_to_can(const float limit, const float to_can, const float margin) {
+  const float limit_can = (limit * to_can) + margin;
+  return (int)limit_can;
+}
+
 // interp function that holds extreme values
 static float safety_interpolate(struct lookup_t xy, float x) {
-  int size = sizeof(xy.x) / sizeof(xy.x[0]);
+  int size = SAFETY_ARRAY_LEN(xy.x);
   float ret = xy.y[size - 1];  // default output is last point
 
   // x is lower than the first point in the x array. Return the first point

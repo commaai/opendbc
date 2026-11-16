@@ -124,7 +124,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     // Signal: VehYaw_W_Actl
     // TODO: we should use the speed which results in the closest angle measurement to the desired angle
     float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002f) - 6.5f;
-    float current_curvature = ford_yaw_rate / SAFETY_MAX(safety.vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1f);
+    float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed_ms(safety.vehicle_speed.values[0]), 0.1f);
     // convert current curvature into units on CAN for comparison with desired curvature
     update_sample(&safety.curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
   }
