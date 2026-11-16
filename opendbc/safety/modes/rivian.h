@@ -60,23 +60,23 @@ static bool rivian_get_quality_flag_valid(const CANPacket_t *msg) {
 static void rivian_rx_hook(const CANPacket_t *msg) {
   // Vehicle speed
   if (msg_matches(msg, 0x208U, 0U)) {
-    float speed = GET_BYTES_BE(msg, 6, 2) * 0.01f;
+    float speed = (float)GET_BYTES_BE(msg, 6, 2) * 0.01f;
     safety.vehicle_moving = speed > 0.0f;
     UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
   }
 
   // Gas pressed and second speed source for variable torque limit
   if (msg_matches(msg, 0x150U, 0U)) {
-    safety.gas_pressed = msg->data[3] | (msg->data[4] & 0xC0U);
+    safety.gas_pressed = (msg->data[3] | (msg->data[4] & 0xC0U)) != 0U;
 
     // Disable controls if speeds from VDM and ESP ECUs are too far apart.
-    float vdm_speed = GET_BYTES_BE(msg, 5, 2) * 0.01f * KPH_TO_MS;
+    float vdm_speed = (float)GET_BYTES_BE(msg, 5, 2) * 0.01f * KPH_TO_MS;
     speed_mismatch_check(vdm_speed);
   }
 
   // Driver torque
   if (msg_matches(msg, 0x380U, 0U)) {
-    int torque_driver_new = (((msg->data[2] << 4) | (msg->data[3] >> 4))) - 2050U;
+    int torque_driver_new = from_offset(GET_BYTES_BE(msg, 2, 2) >> 4, 2050);
     update_sample(&safety.torque_driver, torque_driver_new);
   }
 
@@ -87,8 +87,8 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
 
   // Cruise state
   if (msg_matches(msg, 0x100U, 2U)) {
-    const int feature_status = msg->data[2] >> 5U;
-    pcm_cruise_check(feature_status == 1);
+    const uint8_t feature_status = msg->data[2] >> 5U;
+    pcm_cruise_check(feature_status == 1U);
   }
 }
 
@@ -99,7 +99,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
     .dynamic_max_torque = true,
     .max_torque_lookup = {
       {9.f, 17.f, 17.f},
-      {350, 250, 250},
+      {350.0f, 250.0f, 250.0f},
     },
     .max_rate_up = 3,
     .max_rate_down = 5,
@@ -119,7 +119,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
 
   // Steering control
   if (msg_matches(msg, 0x120U, 0U)) {
-    int desired_torque = ((msg->data[2] << 3U) | (msg->data[3] >> 5U)) - 1024U;
+    int desired_torque = from_offset(GET_BYTES_BE(msg, 2, 2) >> 5U, 1024);
     bool steer_req = GET_BIT(msg, 28U);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, RIVIAN_STEERING_LIMITS)) {
@@ -129,7 +129,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
 
   // Longitudinal control
   if (msg_matches(msg, 0x160U, 0U)) {
-    int raw_accel = ((msg->data[2] << 3) | (msg->data[3] >> 5)) - 1024U;
+    int raw_accel = from_offset(GET_BYTES_BE(msg, 2, 2) >> 5U, 1024);
     if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
       tx = false;
     }
@@ -166,7 +166,7 @@ static safety_config rivian_init(uint16_t param) {
 
   SAFETY_UNUSED(param);
   #ifdef ALLOW_DEBUG
-    const int FLAG_RIVIAN_LONG_CONTROL = 1;
+    const uint16_t FLAG_RIVIAN_LONG_CONTROL = 1U;
     rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);
   #endif
 
