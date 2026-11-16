@@ -22,7 +22,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
     // Current steering angle
     int angle_meas_new = (msg->data[2] << 10) | (msg->data[3] << 2) | (msg->data[4] >> 6);
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    angle_meas_new = -angle_meas_new + (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
+    angle_meas_new = limit_to_can(1310.0f, NISSAN_STEERING_LIMITS.angle_deg_to_can, (float)-angle_meas_new);
 
     // update array of samples
     update_sample(&safety.angle_meas, angle_meas_new);
@@ -71,7 +71,7 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
     bool lka_active = (msg->data[6] >> 4) & 1U;
 
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    desired_angle = -desired_angle + (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
+    desired_angle = limit_to_can(1310.0f, NISSAN_STEERING_LIMITS.angle_deg_to_can, (float)-desired_angle);
 
     if (steer_angle_cmd_checks(desired_angle, lka_active, NISSAN_STEERING_LIMITS)) {
       violation = true;

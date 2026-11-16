@@ -38,7 +38,7 @@
 uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
   for (int i = 0; i < len; i++) {
-    const uint32_t shift = i * 8;
+    const uint32_t shift = (uint32_t)i * 8U;
     ret |= (((uint32_t)msg->data[start + i]) << shift);
   }
   return ret;
@@ -48,7 +48,7 @@ uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len) {
 uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
   uint64_t ret = 0U;
   for (int i = 0; i < len; i++) {
-    const uint32_t shift = i * 8;
+    const uint32_t shift = (uint32_t)i * 8U;
     ret |= ((uint64_t)msg->data[start + i]) << shift;
   }
   return ret;
@@ -372,7 +372,7 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
   safety_config cfg = {0};
 
   int set_status = -1;  // not set
-  int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
+  int hook_config_count = SAFETY_ARRAY_LEN(safety_hook_registry);
   for (int i = 0; i < hook_config_count; i++) {
     if (safety_hook_registry[i].id == mode) {
       safety_setup.current_hooks = safety_hook_registry[i].hooks;
@@ -487,7 +487,8 @@ void update_sample(struct sample_t *sample, int sample_new) {
 }
 
 int ROUND(float val) {
-  return val + ((val > 0.0f) ? 0.5f : -0.5f);
+  const float rounded = val + ((val > 0.0f) ? 0.5f : -0.5f);
+  return (int)rounded;
 }
 
 void pcm_cruise_check(bool cruise_engaged) {
