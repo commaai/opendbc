@@ -192,11 +192,6 @@ wheels = [
 ]
 
 [[package]]
-name = "cppcheck"
-version = "2.21.0"
-source = { git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=release-cppcheck#b7253ddb101ed6add04fc2a2ce0688d5e21a55ee" }
-
-[[package]]
 name = "cpplint"
 version = "2.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -444,7 +439,6 @@ testing = [
 [package.dev-dependencies]
 testing = [
     { name = "comma-car-segments" },
-    { name = "cppcheck" },
 ]
 
 [package.metadata]
@@ -469,10 +463,7 @@ requires-dist = [
 provides-extras = ["testing", "examples"]
 
 [package.metadata.requires-dev]
-testing = [
-    { name = "comma-car-segments", url = "https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl" },
-    { name = "cppcheck", git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=release-cppcheck" },
-]
+testing = [{ name = "comma-car-segments", url = "https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl" }]
 
 [[package]]
 name = "pycapnp"

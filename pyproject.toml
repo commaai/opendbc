@@ -26,6 +26,7 @@ testing = [
   "zstandard",
 
   # static analysis
+  "misrable==0.2.0",
   "ruff",
   "ty",
   "lefthook",
@@ -42,7 +43,6 @@ examples = [
 [dependency-groups]
 testing = [
   "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
-  "cppcheck @ git+https://github.com/commaai/dependencies.git@release-cppcheck#subdirectory=cppcheck",
 ]
 
 [build-system]

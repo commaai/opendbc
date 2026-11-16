@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import tempfile
 import random
+import re
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 ROOT = os.path.join(HERE, "../../../../")
@@ -13,6 +14,7 @@ ROOT = os.path.join(HERE, "../../../../")
 IGNORED_PATHS = (
   'opendbc/safety/main.c',
   'opendbc/safety/tests/',
+  'opendbc/safety/ignition.h',  # not included by tests/misra/main.c, so not checked
 )
 
 mutations = [
@@ -46,20 +48,28 @@ for p in patterns:
 mutations = [mutations[0]] + rng.sample(mutations[1:], min(2, len(mutations) - 1))
 
 
+def apply_mutation(content, transform):
+  # keep the added code inside the include guard, so it is only added once
+  m = re.search(r"^#endif  // SAFETY_\w+_H\n\Z", content, re.MULTILINE)
+  if m is None:
+    return transform(content)
+  return transform(content[:m.start()]) + "\n" + content[m.start():]
+
+
 class TestMisraMutation(unittest.TestCase):
   def test_misra_mutation(self):
     for fn, rule, transform, should_fail in mutations:
       with self.subTest(fn=fn, rule=rule, should_fail=should_fail):
         with tempfile.TemporaryDirectory() as tmp:
           shutil.copytree(ROOT, tmp, dirs_exist_ok=True,
-                          ignore=shutil.ignore_patterns('.venv', '.git', '*.ctu-info'))
+                          ignore=shutil.ignore_patterns('.venv', '.git'))
 
           # apply patch
           if fn is not None:
             with open(os.path.join(tmp, fn), 'r+') as f:
               content = f.read()
               f.seek(0)
-              f.write(transform(content))
+              f.write(apply_mutation(content, transform))
 
           # run test
           r = subprocess.run(f"OPENDBC_ROOT={tmp} opendbc/safety/tests/misra/test_misra.sh",
