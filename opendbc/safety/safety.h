@@ -184,7 +184,7 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
   // the relay malfunction hook runs on all incoming rx messages.
   // check all applicable tx msgs for liveness on sending bus.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
-  const int addr = msg->addr;
+  const uint32_t addr = msg->addr;
   for (int i = 0; i < safety_setup.current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &safety_setup.current_safety_config.tx_msgs[i];
     if (m->check_relay) {
@@ -246,7 +246,7 @@ static int fwd_hook_copy(int bus_num, int addr) {
   if (!blocked) {
     for (int i = 0; i < safety_setup.current_safety_config.tx_msgs_len; i++) {
       const CanMsg *m = &safety_setup.current_safety_config.tx_msgs[i];
-      if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == (unsigned int)destination_bus)) {
+      if (m->check_relay && !m->disable_static_blocking && (m->addr == (uint32_t)addr) && (m->bus == (unsigned int)destination_bus)) {
         blocked = true;
         break;
       }
@@ -450,11 +450,11 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 }
 
 // convert a trimmed integer to signed 32 bit int
-int to_signed(int d, int bits) {
+int to_signed(uint32_t d, int bits) {
   const uint32_t sign_bit = (uint32_t)1U << ((uint32_t)bits - 1U);
-  int d_signed = d;
-  if (d >= (int)sign_bit) {
-    d_signed = d - (2 * (int)sign_bit);
+  int d_signed = (int)d;
+  if (d >= sign_bit) {
+    d_signed = (int)d - (2 * (int)sign_bit);
   }
   return d_signed;
 }

@@ -62,7 +62,7 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MAZDA_LKAS, MAZDA_MAIN)) {
     int desired_torque = (((msg->data[0] & 0x0FU) << 8) | msg->data[1]) - 2048U;
 
-    if (steer_torque_cmd_checks(desired_torque, -1, MAZDA_STEERING_LIMITS)) {
+    if (steer_torque_cmd_checks(desired_torque, true, MAZDA_STEERING_LIMITS)) {
       tx = false;
     }
   }

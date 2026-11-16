@@ -93,7 +93,7 @@ struct lookup_t {
 };
 
 typedef struct {
-  int addr;
+  uint32_t addr;
   uint8_t bus;
   uint8_t len;
   bool check_relay;              // if true, trigger relay malfunction if existence on destination bus and block forwarding to destination bus
@@ -240,11 +240,11 @@ typedef struct {
 
 bool safety_rx_hook(const CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
-int to_signed(int d, int bits);
+int to_signed(uint32_t d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
 int ROUND(float val);
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
+bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSteeringLimits limits);
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params);
@@ -418,18 +418,18 @@ extern bool safety_redundancy_fault;
 // It enables features that allow alternative experiences, like not disengaging on gas press
 // It is only either 0 or 1 on mainline comma.ai openpilot
 
-//#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1  // not used anymore, but reserved
+//#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1U  // not used anymore, but reserved
 
-//#define ALT_EXP_DISABLE_STOCK_AEB 2  // not used anymore, but reserved
+//#define ALT_EXP_DISABLE_STOCK_AEB 2U  // not used anymore, but reserved
 
 // If using this flag, be aware that harder braking is more likely to lead to rear endings,
 //   and that alone this flag doesn't make braking compliant because there's also a time element.
 // Setting this flag is used for allowing the full -5.0 to +4.0 m/s^2 at lower speeds
 // See ISO 15622:2018 for more information.
-#define ALT_EXP_RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX 8
+#define ALT_EXP_RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX 8U
 
 // This flag allows AEB to be commanded from openpilot.
-#define ALT_EXP_ALLOW_AEB 16
+#define ALT_EXP_ALLOW_AEB 16U
 
 typedef struct {
   uint16_t id;
