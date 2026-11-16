@@ -86,18 +86,19 @@ static float safety_interpolate(struct lookup_t xy, float x) {
     ret = xy.y[0];
 
   } else {
-    // find the index such that (xy.x[i] <= x < xy.x[i+1]) and linearly interp
-    for (int i=0; i < (size - 1); i++) {
-      if (x < xy.x[i+1]) {
-        float x0 = xy.x[i];
-        float y0 = xy.y[i];
-        float dx = xy.x[i+1] - x0;
-        float dy = xy.y[i+1] - y0;
-        // dx should not be zero as xy.x is supposed to be monotonic
-        dx = SAFETY_MAX(dx, 0.0001);
-        ret = (dy * (x - x0) / dx) + y0;
+    // walk the segments, keeping x0 <= x
+    float x0 = xy.x[0];
+    float y0 = xy.y[0];
+    for (int i = 1; i < size; i++) {
+      float x1 = xy.x[i];
+      float y1 = xy.y[i];
+      if (x < x1) {
+        // x0 <= x < x1, so x1 - x0 > 0
+        ret = ((y1 - y0) * (x - x0) / (x1 - x0)) + y0;
         break;
       }
+      x0 = x1;
+      y0 = y1;
     }
   }
   return ret;

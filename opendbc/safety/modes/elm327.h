@@ -36,6 +36,5 @@ static bool elm327_tx_hook(const CANPacket_t *msg) {
 // If safety_param == 0, bus 1 is multiplexed to the OBD-II port
 const safety_hooks elm327_hooks = {
   .init = nooutput_init,
-  .rx = default_rx_hook,
   .tx = elm327_tx_hook,
 };

@@ -70,11 +70,9 @@ static uint8_t mg_get_counter(const CANPacket_t *msg) {
 }
 
 static void mg_rx_hook(const CANPacket_t *msg) {
-  // Vehicle speed
+  // Vehicle moving
   if (msg_matches(msg, 0x23cU, 0U)) {
-    float speed = (((msg->data[2] & 0x7FU) << 8) | msg->data[3]) * 0.015625;
-    safety.vehicle_moving = speed > 0.0;
-    UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
+    safety.vehicle_moving = (((msg->data[2] & 0x7FU) << 8) | msg->data[3]) != 0U;
   }
 
   // Gas pressed
