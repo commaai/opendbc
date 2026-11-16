@@ -81,6 +81,17 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
   return valid;
 }
 
+// latch a stock feature on its rising edge, unless it starts while engaged
+static void tesla_latch_rising_edge(bool now, bool *prev, bool *latched, bool engaged) {
+  if (now && !*prev && !engaged) {
+    *latched = true;
+  }
+  if (!now) {
+    *latched = false;
+  }
+  *prev = now;
+}
+
 static void tesla_rx_hook(const CANPacket_t *msg) {
   // Steering angle: (0.1 * val) - 819.2 in deg.
   if (msg_matches(msg, 0x370U, 0U)) {
@@ -128,14 +139,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
                               (autopark_state == 4) ||  // COMPLETE
                               (autopark_state == 9);    // SELFPARK_STARTED
 
-    // Only consider rising edges while controls are not allowed
-    if (tesla_autopark_now && !safety.tesla_autopark_prev && !safety.cruise_engaged_prev) {
-      safety.tesla_autopark = true;
-    }
-    if (!tesla_autopark_now) {
-      safety.tesla_autopark = false;
-    }
-    safety.tesla_autopark_prev = tesla_autopark_now;
+    tesla_latch_rising_edge(tesla_autopark_now, &safety.tesla_autopark_prev, &safety.tesla_autopark, safety.cruise_engaged_prev);
 
     // Cruise state
     int cruise_state = (msg->data[1] >> 4) & 0x07U;
@@ -164,14 +168,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     int steering_control_type = msg->data[2] >> 5;  // DAS_steeringControlType
     bool tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
 
-    // Only consider rising edges while controls are not allowed
-    if (tesla_stock_lkas_now && !safety.tesla_stock_lkas_prev && !safety.controls_allowed) {
-      safety.tesla_stock_lkas = true;
-    }
-    if (!tesla_stock_lkas_now) {
-      safety.tesla_stock_lkas = false;
-    }
-    safety.tesla_stock_lkas_prev = tesla_stock_lkas_now;
+    tesla_latch_rising_edge(tesla_stock_lkas_now, &safety.tesla_stock_lkas_prev, &safety.tesla_stock_lkas, safety.controls_allowed);
   }
 }
 
