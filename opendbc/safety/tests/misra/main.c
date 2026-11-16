@@ -1,6 +1,8 @@
 #include "opendbc/safety/safety.h"
+// panda's firmware includes ignition.h after safety.h
+#include "opendbc/safety/ignition.h"
 
-// this file is checked by cppcheck
+// this file is checked by misrable
 
 uint32_t microsecond_timer_get(void) {
   return 0U;

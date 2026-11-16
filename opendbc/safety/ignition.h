@@ -20,9 +20,14 @@ bool ignition_can = false;
 uint32_t ignition_can_cnt = 0U;
 
 // previous message counter per ignition message, IGNITION_NO_COUNTER if none was seen yet
+// File scope lets libsafety's init_tests reset the counters between tests.
+// cppcheck-suppress misra-c2012-8.9
 static uint8_t prev_counter_rivian = IGNITION_NO_COUNTER;
+// cppcheck-suppress misra-c2012-8.9
 static uint8_t prev_counter_tesla = IGNITION_NO_COUNTER;
+// cppcheck-suppress misra-c2012-8.9
 static uint8_t prev_counter_vw_meb = IGNITION_NO_COUNTER;
+// cppcheck-suppress misra-c2012-8.9
 static uint8_t prev_counter_psa[3] = {IGNITION_NO_COUNTER, IGNITION_NO_COUNTER, IGNITION_NO_COUNTER};
 
 void ignition_can_reset(void) {

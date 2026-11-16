@@ -14,7 +14,6 @@ ROOT = os.path.join(HERE, "../../../../")
 IGNORED_PATHS = (
   'opendbc/safety/main.c',
   'opendbc/safety/tests/',
-  'opendbc/safety/ignition.h',  # not included by tests/misra/main.c, so not checked
 )
 
 mutations = [

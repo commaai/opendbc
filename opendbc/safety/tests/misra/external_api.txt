@@ -33,3 +33,8 @@ psa_hooks
 subaru_preglobal_hooks
 volkswagen_mlb_hooks
 volkswagen_pq_hooks
+
+# CAN ignition from ignition.h: panda's firmware calls the hook and reads and resets the state
+ignition_can
+ignition_can_cnt
+ignition_can_hook
