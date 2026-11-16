@@ -238,6 +238,10 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
           self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
           self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
 
+      # only the smaller of |min| and |max| over the window is checked
+      self._rx(self._torque_meas_msg(0, 0))
+      self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 100)))
+
   def test_angle_measurements(self):
     """
     * Tests angle meas quality flag dictates whether angle measurement is parsed, and if rx is valid
@@ -335,6 +339,11 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
 
   def test_diagnostics(self, ecu_disabled: bool = False):
     super().test_diagnostics(ecu_disabled=ecu_disabled)
+
+  def test_angle_meas_initializing(self):
+    # SecOC doesn't check the STEER_TORQUE_SENSOR quality flag, so the rx hook drops initializing angles itself
+    self.assertTrue(self._rx(self._angle_meas_msg(10, steer_angle_initializing=True)))
+    self.assertEqual(0, self.safety.get_angle_meas_max())
 
   # This platform also has alternate brake and PCM messages, but same naming in the DBC, so same packers work
 
