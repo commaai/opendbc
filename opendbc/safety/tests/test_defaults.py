@@ -177,7 +177,7 @@ class TestSafetyConfigs(unittest.TestCase):
           continue
         configs.add(cfg.rx_checks)
         for m in (m for i in range(cfg.rx_checks_len) for m in cfg.rx_checks[i].msg if m.addr != 0):
-          self.assertGreaterEqual(m.frequency, 10)
+          self.assertGreaterEqual(m.frequency, 10, f"{mode=} {m.addr=:#x}: 10Hz minimum for safety signals")
           self.assertTrue(m.ignore_checksum or (hooks.get_checksum != ffi.NULL and hooks.compute_checksum != ffi.NULL))
           self.assertEqual(m.ignore_counter, m.max_counter == 0)
           self.assertTrue(m.ignore_counter or hooks.get_counter != ffi.NULL)
