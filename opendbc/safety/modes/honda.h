@@ -132,16 +132,13 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     safety.gas_pressed = msg->data[0] != 0U;
   }
 
-  // disable stock Honda AEB in alternative experience
-  if (!(safety_setup.alternative_experience & ALT_EXP_DISABLE_STOCK_AEB)) {
-    if (msg_matches(msg, 0x1FAU, 2U)) {
-      bool honda_stock_aeb = GET_BIT(msg, 29U);
-      int honda_stock_brake = (msg->data[0] << 2) | (msg->data[1] >> 6);
+  if (msg_matches(msg, 0x1FAU, 2U)) {
+    bool honda_stock_aeb = GET_BIT(msg, 29U);
+    int honda_stock_brake = (msg->data[0] << 2) | (msg->data[1] >> 6);
 
-      // Forward AEB when stock braking is higher than openpilot braking
-      // only stop forwarding when AEB event is over
-      safety.honda_fwd_brake = honda_stock_aeb && (safety.honda_fwd_brake || (honda_stock_brake >= safety.honda_brake));
-    }
+    // Forward AEB when stock braking is higher than openpilot braking
+    // only stop forwarding when AEB event is over
+    safety.honda_fwd_brake = honda_stock_aeb && (safety.honda_fwd_brake || (honda_stock_brake >= safety.honda_brake));
   }
 }
 

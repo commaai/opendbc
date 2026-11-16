@@ -5,6 +5,5 @@ LEN_TO_DLC = {length: dlc for (dlc, length) in enumerate(DLC_TO_LEN)}
 
 class ALTERNATIVE_EXPERIENCE:
   DEFAULT = 0
-  DISABLE_STOCK_AEB = 2
   RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX = 8
   ALLOW_AEB = 16

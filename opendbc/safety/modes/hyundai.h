@@ -126,7 +126,7 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
 
 static void hyundai_rx_hook(const CANPacket_t *msg) {
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
-  if (msg_matches(msg, 0x421U, safety_setup.hyundai_camera_scc ? 2U : 0U)) {
+  if (!safety_setup.hyundai_longitudinal && msg_matches(msg, 0x421U, safety_setup.hyundai_camera_scc ? 2U : 0U)) {
     // 2 bits: 13-14
     int cruise_engaged = (GET_BYTES_LE(msg, 0, 4) >> 13) & 0x3U;
     hyundai_common_cruise_state_check(cruise_engaged);
@@ -150,7 +150,7 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
     safety.gas_pressed = (((msg->data[4] & 0x7FU) << 1) | (msg->data[3] >> 7)) != 0U;
   } else if (msg_matches(msg, 0x371U, 0U) && safety_setup.hyundai_hybrid_gas_signal) {
     safety.gas_pressed = msg->data[7] != 0U;
-  } else if (msg_matches(msg, 0x91U, 0U) && safety_setup.hyundai_fcev_gas_signal) {
+  } else if (safety_setup.hyundai_fcev_gas_signal && msg_matches(msg, 0x91U, 0U)) {
     safety.gas_pressed = msg->data[6] != 0U;
   } else if (msg_matches(msg, 0x260U, 0U) && !safety_setup.hyundai_ev_gas_signal && !safety_setup.hyundai_hybrid_gas_signal) {
     safety.gas_pressed = (msg->data[7] >> 6) != 0U;
