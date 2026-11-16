@@ -35,9 +35,9 @@ static uint32_t mg_compute_checksum(const CANPacket_t *msg) {
   uint32_t checksum;
   if (msg->addr == 0x1ecU) {
     uint32_t torque = GET_BYTES_BE(msg, 0, 2) & 0x7FFU;
-    uint32_t valid = (msg->data[0] >> 3) & 1U;
-    uint32_t status = (msg->data[6] >> 4) & 0x7U;
-    uint32_t counter = msg->data[0] >> 4;
+    uint32_t valid = ((uint32_t)msg->data[0] >> 3) & 1U;
+    uint32_t status = ((uint32_t)msg->data[6] >> 4) & 0x7U;
+    uint32_t counter = (uint32_t)msg->data[0] >> 4;
     checksum = (0U - ((torque << 1) + (status << 12) + valid + counter)) & 0x7FFFU;
   } else {
     checksum = 0xFFU;
@@ -83,7 +83,8 @@ static void mg_rx_hook(const CANPacket_t *msg) {
 
   // Driver torque
   if (msg_matches(msg, 0x1ecU, 0U)) {
-    int torque_driver_new = (GET_BYTES_BE(msg, 4, 2) & 0x7FFU) - 1024U;
+    uint32_t torque_driver_bits = GET_BYTES_BE(msg, 4, 2) & 0x7FFU;
+    int torque_driver_new = (int)torque_driver_bits - 1024;
     update_sample(&safety.torque_driver, torque_driver_new);
   }
 
@@ -94,9 +95,9 @@ static void mg_rx_hook(const CANPacket_t *msg) {
 
   // Cruise state
   if (msg_matches(msg, 0x242U, 0U)) {
-    int cruise_state = (msg->data[5] & 0x38U) >> 3;
-    bool cruise_engaged = (cruise_state == 2) ||  // Active
-                          (cruise_state == 3);    // Override
+    uint8_t cruise_state = (msg->data[5] & 0x38U) >> 3;
+    bool cruise_engaged = (cruise_state == 2U) ||  // Active
+                          (cruise_state == 3U);    // Override
     pcm_cruise_check(cruise_engaged);
   }
 }
@@ -113,7 +114,8 @@ static bool mg_tx_hook(const CANPacket_t *msg) {
   };
 
   // The TX list dispatches only steering control (0x1fd, bus 0) to this hook.
-  int desired_torque = (GET_BYTES_BE(msg, 0, 2) & 0x7FFU) - 1024U;
+  uint32_t desired_torque_bits = GET_BYTES_BE(msg, 0, 2) & 0x7FFU;
+  int desired_torque = (int)desired_torque_bits - 1024;
   bool steer_req = GET_BIT(msg, 35U);
   return !steer_torque_cmd_checks(desired_torque, steer_req, MG_STEERING_LIMITS);
 }
