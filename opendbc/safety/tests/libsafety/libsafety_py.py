@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 import tempfile
+from functools import cache
 from pathlib import Path
 
 from cffi import FFI
@@ -9,6 +10,15 @@ from cffi import FFI
 from opendbc.safety import LEN_TO_DLC
 
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+@cache
+def single_precision_flags() -> list[str]:
+  # Clang accepts this GCC flag only as an ignored optimization warning.
+  flag = '-fsingle-precision-constant'
+  result = subprocess.run(['cc', '-Werror', flag, '-x', 'c', '-c', '-', '-o', os.devnull],
+                          input=b'', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+  return [flag] if result.returncode == 0 else []
 
 
 def _build_libsafety(release: bool = False) -> str:
@@ -19,7 +29,7 @@ def _build_libsafety(release: bool = False) -> str:
   cflags = [
     '-Wall', '-Wextra', '-Werror', '-nostdlib', '-fno-builtin',
     '-std=gnu11', '-Wfatal-errors', '-Wno-pointer-to-int-cast',
-    '-g', '-O0', '-fno-omit-frame-pointer', '-fsingle-precision-constant',
+    '-g', '-O0', '-fno-omit-frame-pointer', *single_precision_flags(),
   ]
   # Coverage must exclude the branches inserted by UBSan.
   if os.environ.get("SAFETY_COVERAGE") == "1":

@@ -16,6 +16,8 @@ from pathlib import Path
 import tree_sitter_c as ts_c
 import tree_sitter as ts
 
+from opendbc.safety.tests.libsafety.libsafety_py import single_precision_flags
+
 
 ROOT = Path(__file__).resolve().parents[3]
 SAFETY_DIR = ROOT / "opendbc" / "safety"
@@ -461,7 +463,7 @@ def compile_mutated_library(preprocessed_source, sites, output_so):
 
   subprocess.run([
     "cc", "-shared", "-fPIC", "-w", "-fno-builtin", "-std=gnu11",
-    "-g0", "-O0", "-DALLOW_DEBUG", "-fsingle-precision-constant",
+    "-g0", "-O0", "-DALLOW_DEBUG", *single_precision_flags(),
     str(mutation_source), "-o", str(output_so),
   ], cwd=ROOT, check=True)
 
