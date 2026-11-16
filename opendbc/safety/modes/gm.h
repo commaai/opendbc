@@ -22,7 +22,7 @@ enum {
 };
 
 static void gm_rx_hook(const CANPacket_t *msg) {
-  const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
+  const uint32_t GM_STANDSTILL_THRSLD = 10U;  // 0.311kph
 
   if (msg_matches(msg, 0x184U, 0U)) {
     int torque_driver_new = to_signed(GET_BYTES_BE(msg, 6, 2) & 0x7FFU, 11);
@@ -32,14 +32,15 @@ static void gm_rx_hook(const CANPacket_t *msg) {
 
   // sample rear wheel speeds
   if (msg_matches(msg, 0x34AU, 0U)) {
-    int left_rear_speed = GET_BYTES_BE(msg, 0, 2);
-    int right_rear_speed = GET_BYTES_BE(msg, 2, 2);
+    uint32_t left_rear_speed = GET_BYTES_BE(msg, 0, 2);
+    uint32_t right_rear_speed = GET_BYTES_BE(msg, 2, 2);
     safety.vehicle_moving = (left_rear_speed > GM_STANDSTILL_THRSLD) || (right_rear_speed > GM_STANDSTILL_THRSLD);
   }
 
   // ACC steering wheel buttons (GM_CAM is tied to the PCM)
   if (msg_matches(msg, 0x1E1U, 0U) && !safety_setup.gm_pcm_cruise) {
-    int button = (msg->data[5] & 0x70U) >> 4;
+    uint8_t button_bits = (msg->data[5] & 0x70U) >> 4;
+    int button = (int)button_bits;
 
     // enter controls on falling edge of set or rising edge of resume (avoids fault)
     bool set = (button != GM_BTN_SET) && (safety.cruise_button_prev == GM_BTN_SET);
@@ -96,9 +97,9 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
   // BRAKE: safety check
   if (msg->addr == 0x315U) {
-    int brake = GET_BYTES_BE(msg, 0, 2) & 0xFFFU;
-    brake = (0x1000 - brake) & 0xFFF;
-    if (longitudinal_brake_checks(brake, *safety_setup.gm_long_limits)) {
+    uint32_t brake = GET_BYTES_BE(msg, 0, 2) & 0xFFFU;
+    brake = (0x1000U - brake) & 0xFFFU;
+    if (longitudinal_brake_checks((int)brake, *safety_setup.gm_long_limits)) {
       tx = false;
     }
   }
@@ -118,12 +119,12 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == 0x2CBU) {
     bool apply = GET_BIT(msg, 0U);
     // convert float CAN signal to an int for gas checks: 22534 / 0.125 = 180272
-    int gas_regen = (GET_BYTES_BE(msg, 1, 3) & 0x7FFFFU) - 180272U;
+    int gas_regen = from_offset(GET_BYTES_BE(msg, 1, 3) & 0x7FFFFU, 180272);
 
-    bool violation = false;
     // Allow apply bit in pre-enabled and overriding states
-    violation |= !safety.controls_allowed && apply;
-    violation |= longitudinal_gas_checks(gas_regen, *safety_setup.gm_long_limits);
+    const bool apply_violation = !safety.controls_allowed && apply;
+    const bool gas_violation = longitudinal_gas_checks(gas_regen, *safety_setup.gm_long_limits);
+    bool violation = apply_violation || gas_violation;
 
     if (violation) {
       tx = false;
@@ -132,9 +133,9 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
   // BUTTONS: used for resume spamming and cruise cancellation with stock longitudinal
   if (safety_setup.gm_pcm_cruise && (msg->addr == 0x1E1U)) {
-    int button = (msg->data[5] >> 4) & 0x7U;
+    uint8_t button = (msg->data[5] >> 4) & 0x7U;
 
-    bool allowed_cancel = (button == 6) && safety.cruise_engaged_prev;
+    bool allowed_cancel = (button == 6U) && safety.cruise_engaged_prev;
     if (!allowed_cancel) {
       tx = false;
     }
