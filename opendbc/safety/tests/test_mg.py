@@ -60,6 +60,13 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
     values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
     return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values)
 
+  def test_cruise_states(self):
+    for state in range(8):
+      self._rx(self._pcm_status_msg(False))
+      values = {"ACCSysSts_RadarHSC2": state, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
+      self._rx(self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values))
+      self.assertEqual(state in (2, 3), self.safety.get_controls_allowed())
+
   def test_gas_counter(self):
     self._reset_safety_hooks()
     for _ in range(16):
