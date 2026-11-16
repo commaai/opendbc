@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define SAFETY_SET(field, val) \
   do { \
     (safety_a.state.field) = (val); \
     (safety_b.state.field) = (safety_a.state.field); \
-  } while (0)
+  } while (false)
 
 // TODO: time should just be passed into the hooks we expose
 uint32_t timer_cnt = 0;

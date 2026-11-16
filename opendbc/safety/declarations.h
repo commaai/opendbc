@@ -1,7 +1,10 @@
-#pragma once
+#ifndef SAFETY_DECLARATIONS_H
+#define SAFETY_DECLARATIONS_H
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#include "opendbc/safety/can.h"
 
 // from cereal.car.CarParams.SafetyModel
 #define SAFETY_SILENT 0U
@@ -37,33 +40,35 @@
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
 
-#define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
+#define GET_BIT(msg, b) ((((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U) != 0U)
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
 
-// length of an RX check array; fails to compile if it has more checks than rx_status can track
-#define RX_CHECKS_LEN(rx) ((sizeof((rx)) / sizeof((rx)[0])) + \
-                           (0U * sizeof(char[((sizeof((rx)) / sizeof((rx)[0])) <= MAX_RX_CHECKS) ? 1 : -1])))
+// length of an RX check array; fails to compile if it has more checks than rx_status can track:
+// the array size is then negative ("size of unnamed array is negative"), which every compiler must diagnose
+#define RX_CHECKS_LEN(rx) (((int)sizeof((rx)) / (int)sizeof((rx)[0])) + \
+                           (0 * (int)sizeof(char[(2 * ((int)MAX_RX_CHECKS - ((int)sizeof((rx)) / (int)sizeof((rx)[0])))) + 1])))
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), RX_CHECKS_LEN(rx), \
-                                                  (tx), (sizeof((tx)) / sizeof((tx)[0])), \
+                                                  (tx), SAFETY_ARRAY_LEN(tx), \
                                                   false})
 #define SET_RX_CHECKS(rx, config) \
   do { \
     (config).rx_checks = (rx); \
     (config).rx_checks_len = RX_CHECKS_LEN(rx); \
     (config).disable_forwarding = false; \
-  } while (0);
+  } while (false);
 
 #define SET_TX_MSGS(tx, config) \
   do { \
     (config).tx_msgs = (tx); \
-    (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
+    (config).tx_msgs_len = SAFETY_ARRAY_LEN(tx); \
     (config).disable_forwarding = false; \
-  } while (0);
+  } while (false);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&safety.vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 #define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&safety.vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
 uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len);
+uint32_t GET_BYTES_BE(const CANPacket_t *msg, int start, int len);
 uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);
 
 extern const int MAX_WRONG_COUNTERS;
@@ -72,11 +77,11 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_RX_CHECKS 12U
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
-#define VEHICLE_SPEED_FACTOR 1000.0
+#define VEHICLE_SPEED_FACTOR 1000.0f
 #define MAX_RT_INTERVAL 250000U
 
 // Conversions
-#define KPH_TO_MS (1.0 / 3.6)
+#define KPH_TO_MS (1.0f / 3.6f)
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {
@@ -92,7 +97,7 @@ struct lookup_t {
 };
 
 typedef struct {
-  int addr;
+  uint32_t addr;
   uint8_t bus;
   uint8_t len;
   bool check_relay;              // if true, trigger relay malfunction if existence on destination bus and block forwarding to destination bus
@@ -183,10 +188,10 @@ typedef struct {
   const unsigned int addr : 29;
   const unsigned int bus : 3;
   const unsigned int len : 7;
-  const unsigned int frequency : 7;   // expected frequency of the message [Hz]
+  const unsigned int frequency : 7;   // expected frequency of the message [Hz], at least 10
   const bool ignore_checksum : 1;     // checksum check is not performed when set to true
   const bool ignore_counter : 1;      // counter check is not performed when set to true
-  const unsigned int max_counter : 8; // maximum value of the counter. 0 means that the counter check is skipped
+  const unsigned int max_counter : 8; // maximum value of the counter, nonzero exactly when the counter is checked
   const bool ignore_quality_flag : 1; // true if quality flag check is skipped
 } CanMsgCheck;
 
@@ -239,11 +244,12 @@ typedef struct {
 
 bool safety_rx_hook(const CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
-int to_signed(int d, int bits);
+int to_signed(uint32_t d, int bits);
+int sign_magnitude(uint32_t magnitude, bool negative);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
 int ROUND(float val);
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
+bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSteeringLimits limits);
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params);
@@ -254,6 +260,9 @@ bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
 bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits);
 void pcm_cruise_check(bool cruise_engaged);
 void speed_mismatch_check(const float speed_2);
+
+// provided by the platform (firmware timer driver, or the test harness)
+uint32_t microsecond_timer_get(void);
 
 void safety_tick(void);
 void safety_heartbeat(bool engaged);
@@ -417,19 +426,18 @@ extern bool safety_redundancy_fault;
 // It enables features that allow alternative experiences, like not disengaging on gas press
 // It is only either 0 or 1 on mainline comma.ai openpilot
 
-//#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1  // not used anymore, but reserved
+//#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1U  // not used anymore, but reserved
 
-// If using this flag, make sure to communicate to your users that a stock safety feature is now disabled.
-#define ALT_EXP_DISABLE_STOCK_AEB 2
+//#define ALT_EXP_DISABLE_STOCK_AEB 2U  // not used anymore, but reserved
 
 // If using this flag, be aware that harder braking is more likely to lead to rear endings,
 //   and that alone this flag doesn't make braking compliant because there's also a time element.
 // Setting this flag is used for allowing the full -5.0 to +4.0 m/s^2 at lower speeds
 // See ISO 15622:2018 for more information.
-#define ALT_EXP_RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX 8
+#define ALT_EXP_RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX 8U
 
 // This flag allows AEB to be commanded from openpilot.
-#define ALT_EXP_ALLOW_AEB 16
+#define ALT_EXP_ALLOW_AEB 16U
 
 typedef struct {
   uint16_t id;
@@ -466,3 +474,5 @@ extern const safety_hooks rivian_hooks;
 extern const safety_hooks psa_hooks;
 extern const safety_hooks byd_hooks;
 extern const safety_hooks mg_hooks;
+
+#endif  // SAFETY_DECLARATIONS_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_HYUNDAI_H
+#define SAFETY_MODES_HYUNDAI_H
 
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/hyundai_common.h"
@@ -27,7 +28,7 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 
 #define HYUNDAI_COMMON_TX_MSGS(scc_bus) \
   {0x340, 0,       8, .check_relay = true},   /* LKAS11 Bus 0                              */ \
-  {0x4F1, scc_bus, 4, .check_relay = false},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
+  {0x4F1, (scc_bus), 4, .check_relay = false},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
   {0x485, 0,       4, .check_relay = true},   /* LFAHDA_MFC Bus 0                          */ \
 
 #define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
@@ -99,13 +100,10 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
     // count the bits
     for (int i = 0; i < 8; i++) {
       uint8_t b = msg->data[i];
-      for (int j = 0; j < 8; j++) {
-        uint8_t bit = 0;
-        // exclude checksum and counter
-        if (((i != 1) || (j < 6)) && ((i != 3) || (j < 6)) && ((i != 5) || (j < 6)) && ((i != 7) || (j < 6))) {
-          bit = (b >> (uint8_t)j) & 1U;
-        }
-        chksum += bit;
+      // exclude checksum and counter, the top two bits of odd bytes
+      const int bit_count = ((i % 2) == 0) ? 8 : 6;
+      for (int j = 0; j < bit_count; j++) {
+        chksum += (b >> (uint8_t)j) & 1U;
       }
     }
     chksum = (chksum ^ 9U) & 15U;
@@ -129,7 +127,7 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
 
 static void hyundai_rx_hook(const CANPacket_t *msg) {
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
-  if (msg_matches(msg, 0x421U, safety_setup.hyundai_camera_scc ? 2U : 0U)) {
+  if (!safety_setup.hyundai_longitudinal && msg_matches(msg, 0x421U, safety_setup.hyundai_camera_scc ? 2U : 0U)) {
     // 2 bits: 13-14
     int cruise_engaged = (GET_BYTES_LE(msg, 0, 4) >> 13) & 0x3U;
     hyundai_common_cruise_state_check(cruise_engaged);
@@ -153,11 +151,12 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
     safety.gas_pressed = (((msg->data[4] & 0x7FU) << 1) | (msg->data[3] >> 7)) != 0U;
   } else if (msg_matches(msg, 0x371U, 0U) && safety_setup.hyundai_hybrid_gas_signal) {
     safety.gas_pressed = msg->data[7] != 0U;
-  } else if (msg_matches(msg, 0x91U, 0U) && safety_setup.hyundai_fcev_gas_signal) {
+  } else if (safety_setup.hyundai_fcev_gas_signal && msg_matches(msg, 0x91U, 0U)) {
     safety.gas_pressed = msg->data[6] != 0U;
   } else if (msg_matches(msg, 0x260U, 0U) && !safety_setup.hyundai_ev_gas_signal && !safety_setup.hyundai_hybrid_gas_signal) {
     safety.gas_pressed = (msg->data[7] >> 6) != 0U;
   } else {
+    // not a gas message for this platform
   }
 
   // sample wheel speed, averaging opposite corners
@@ -192,7 +191,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check
   if (msg->addr == 0x421U) {
-    int desired_accel_raw = (((msg->data[4] & 0x7U) << 8) | msg->data[3]) - 1023U;
+    int desired_accel_raw = (GET_BYTES_LE(msg, 3, 2) & 0x7FFU) - 1023U;
     int desired_accel_val = ((msg->data[5] << 3) | (msg->data[4] >> 5)) - 1023U;
 
     int aeb_decel_cmd = msg->data[2];
@@ -347,3 +346,5 @@ const safety_hooks hyundai_legacy_hooks = {
   .get_checksum = hyundai_get_checksum,
   .compute_checksum = hyundai_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_HYUNDAI_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_HONDA_H
+#define SAFETY_MODES_HONDA_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -30,7 +31,7 @@ static unsigned int honda_get_pt_bus(void) {
 }
 
 static uint32_t honda_get_checksum(const CANPacket_t *msg) {
-  int checksum_byte = GET_LEN(msg) - 1U;
+  uint32_t checksum_byte = GET_LEN(msg) - 1U;
   return (uint8_t)(msg->data[checksum_byte]) & 0xFU;
 }
 
@@ -52,7 +53,7 @@ static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
 }
 
 static uint8_t honda_get_counter(const CANPacket_t *msg) {
-  int counter_byte = GET_LEN(msg) - 1U;
+  uint32_t counter_byte = GET_LEN(msg) - 1U;
   return (msg->data[counter_byte] >> 4U) & 0x3U;
 }
 
@@ -132,22 +133,13 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     safety.gas_pressed = msg->data[0] != 0U;
   }
 
-  // disable stock Honda AEB in alternative experience
-  if (!(safety_setup.alternative_experience & ALT_EXP_DISABLE_STOCK_AEB)) {
-    if (msg_matches(msg, 0x1FAU, 2U)) {
-      bool honda_stock_aeb = GET_BIT(msg, 29U);
-      int honda_stock_brake = (msg->data[0] << 2) | (msg->data[1] >> 6);
+  if (msg_matches(msg, 0x1FAU, 2U)) {
+    bool honda_stock_aeb = GET_BIT(msg, 29U);
+    int honda_stock_brake = (msg->data[0] << 2) | (msg->data[1] >> 6);
 
-      // Forward AEB when stock braking is higher than openpilot braking
-      // only stop forwarding when AEB event is over
-      if (!honda_stock_aeb) {
-        safety.honda_fwd_brake = false;
-      } else if (honda_stock_brake >= safety.honda_brake) {
-        safety.honda_fwd_brake = true;
-      } else {
-        // Leave Honda forward brake as is
-      }
-    }
+    // Forward AEB when stock braking is higher than openpilot braking
+    // only stop forwarding when AEB event is over
+    safety.honda_fwd_brake = honda_stock_aeb && (safety.honda_fwd_brake || (honda_stock_brake >= safety.honda_brake));
   }
 }
 
@@ -174,7 +166,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // ACC_HUD: safety check (nidec w/o pedal)
   if (msg_matches(msg, 0x30CU, bus_pt)) {
-    int pcm_speed = (msg->data[0] << 8) | msg->data[1];
+    int pcm_speed = GET_BYTES_BE(msg, 0, 2);
     int pcm_gas = msg->data[2];
 
     bool violation = false;
@@ -209,8 +201,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     int accel = (msg->data[3] << 3) | ((msg->data[4] >> 5) & 0x7U);
     accel = to_signed(accel, 11);
 
-    int gas = (msg->data[0] << 8) | msg->data[1];
-    gas = to_signed(gas, 16);
+    int gas = to_signed(GET_BYTES_BE(msg, 0, 2), 16);
 
     bool violation = false;
     violation |= longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
@@ -472,3 +463,5 @@ const safety_hooks honda_bosch_hooks = {
   .get_checksum = honda_get_checksum,
   .compute_checksum = honda_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_HONDA_H

@@ -75,14 +75,19 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"RAW_THROTTLE": int(gas * 100)}
     return self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, values)
 
+  def test_cruise_states(self):
+    for state in range(8):
+      self._rx(self._pcm_status_msg(False))
+      self._rx(self.packer.make_can_msg_safety("ACC_HUD_ADAS", self.CAM_BUS, {"ACC_STATE": state}))
+      self.assertEqual(state in (3, 5), self.safety.get_controls_allowed())
+
   def test_cruise_buttons(self):
     buttons = ("SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN", "ACC_ON_BTN")
     for cruise_engaged, controls_allowed in itertools.product((False, True), repeat=2):
       self.assertTrue(self._rx(self._pcm_status_msg(cruise_engaged)))
       self.safety.set_controls_allowed(controls_allowed)
       for pressed in itertools.product((False, True), repeat=len(buttons)):
-        values = dict(zip(buttons, pressed, strict=True))
-        values.update(SET_ME_1_1=1, SET_ME_1_2=1)
+        values = {**dict(zip(buttons, pressed, strict=True)), "SET_ME_1_1": 1, "SET_ME_1_2": 1}
         with self.subTest(cruise_engaged=cruise_engaged, controls_allowed=controls_allowed, buttons=pressed):
           msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, values)
           should_tx = not any(pressed[:-1]) and (not pressed[-1] or cruise_engaged)

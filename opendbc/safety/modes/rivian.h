@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_RIVIAN_H
+#define SAFETY_MODES_RIVIAN_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -11,12 +12,12 @@ static uint32_t rivian_get_checksum(const CANPacket_t *msg) {
   return msg->data[0];
 }
 
-static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, uint8_t xor_output) {
-  int len = GET_LEN(msg);
+static uint8_t rivian_checksum(const CANPacket_t *msg, uint8_t poly, uint8_t xor_output) {
+  uint32_t len = GET_LEN(msg);
 
   uint8_t crc = 0;
   // Skip the checksum byte
-  for (int i = 1; i < len; i++) {
+  for (uint32_t i = 1U; i < len; i++) {
     crc = crc8_update(crc, msg->data[i], poly);
   }
   return crc ^ xor_output;
@@ -25,19 +26,19 @@ static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, ui
 static uint32_t rivian_compute_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
   if (msg->addr == 0x208U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0xB1);
+    chksum = rivian_checksum(msg, 0x1D, 0xB1);
   }
   if (msg->addr == 0x150U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x9A);
+    chksum = rivian_checksum(msg, 0x1D, 0x9A);
   }
   if (msg->addr == 0x380U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x1E);
+    chksum = rivian_checksum(msg, 0x1D, 0x1E);
   }
   if (msg->addr == 0x38FU) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x37);
+    chksum = rivian_checksum(msg, 0x1D, 0x37);
   }
   if (msg->addr == 0x100U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x5F);
+    chksum = rivian_checksum(msg, 0x1D, 0x5F);
   }
   return chksum;
 }
@@ -59,8 +60,8 @@ static bool rivian_get_quality_flag_valid(const CANPacket_t *msg) {
 static void rivian_rx_hook(const CANPacket_t *msg) {
   // Vehicle speed
   if (msg_matches(msg, 0x208U, 0U)) {
-    float speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01;
-    safety.vehicle_moving = speed > 0.0;
+    float speed = GET_BYTES_BE(msg, 6, 2) * 0.01f;
+    safety.vehicle_moving = speed > 0.0f;
     UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
   }
 
@@ -69,7 +70,7 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
     safety.gas_pressed = msg->data[3] | (msg->data[4] & 0xC0U);
 
     // Disable controls if speeds from VDM and ESP ECUs are too far apart.
-    float vdm_speed = ((msg->data[5] << 8) | msg->data[6]) * 0.01 * KPH_TO_MS;
+    float vdm_speed = GET_BYTES_BE(msg, 5, 2) * 0.01f * KPH_TO_MS;
     speed_mismatch_check(vdm_speed);
   }
 
@@ -81,7 +82,7 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
 
   // Brake pressed
   if (msg_matches(msg, 0x38fU, 0U)) {
-    safety.brake_pressed = (msg->data[2] >> 7) & 1U;
+    safety.brake_pressed = GET_BIT(msg, 23U);
   }
 
   // Cruise state
@@ -97,7 +98,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
     .max_torque = 350,
     .dynamic_max_torque = true,
     .max_torque_lookup = {
-      {9., 17., 17.},
+      {9.f, 17.f, 17.f},
       {350, 250, 250},
     },
     .max_rate_up = 3,
@@ -119,7 +120,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
   // Steering control
   if (msg_matches(msg, 0x120U, 0U)) {
     int desired_torque = ((msg->data[2] << 3U) | (msg->data[3] >> 5U)) - 1024U;
-    bool steer_req = (msg->data[3] >> 4) & 1U;
+    bool steer_req = GET_BIT(msg, 28U);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, RIVIAN_STEERING_LIMITS)) {
       tx = false;
@@ -185,3 +186,5 @@ const safety_hooks rivian_hooks = {
   .compute_checksum = rivian_compute_checksum,
   .get_quality_flag_valid = rivian_get_quality_flag_valid,
 };
+
+#endif  // SAFETY_MODES_RIVIAN_H

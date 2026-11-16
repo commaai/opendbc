@@ -29,7 +29,7 @@ PADDING = 5
 
 Diff = tuple[str, int, tuple[Any, Any], int]
 Ref = tuple[int, structs.CarState]
-Result = tuple[str, str, list[Diff], list[Ref] | None, list[structs.CarState] | None, str | None]
+Result = tuple[str, str, list[Diff], list[Ref], list[structs.CarState], str | None]
 
 
 def dict_diff(d1: dict[str, Any], d2: dict[str, Any], path: str = "", ignore: list[str] | None = None, tolerance: float = 0) -> list[tuple]:
@@ -90,10 +90,10 @@ def process_segment(args: tuple) -> Result:
     if update:
       data = {"cp": CP.to_dict(), "frames": list(zip(timestamps, states, strict=True))}
       ref_file.write_bytes(zstd.compress(pickle.dumps(data), 10))
-      return (platform, seg, [], None, None, None)
+      return (platform, seg, [], [], [], None)
 
     if not ref_file.exists():
-      return (platform, seg, [], None, None, "no ref")
+      return (platform, seg, [], [], [], "no ref")
 
     ref_data = pickle.loads(decompress_stream(ref_file.read_bytes()))
     cp: dict[str, Any] = ref_data["cp"]
@@ -106,7 +106,7 @@ def process_segment(args: tuple) -> Result:
         diffs.append((diff[1], i, diff[2], ts))
     return (platform, seg, diffs, ref, states, None)
   except Exception:
-    return (platform, seg, [], None, None, traceback.format_exc())
+    return (platform, seg, [], [], [], traceback.format_exc())
 
 
 def get_changed_platforms(cwd: Path, database: dict[str, Any], interfaces: dict[str, Any]) -> list[str]:

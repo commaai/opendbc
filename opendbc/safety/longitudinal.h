@@ -1,3 +1,6 @@
+#ifndef SAFETY_LONGITUDINAL_H
+#define SAFETY_LONGITUDINAL_H
+
 #include "opendbc/safety/declarations.h"
 
 bool get_longitudinal_allowed(void) {
@@ -22,8 +25,9 @@ bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits) {
 }
 
 bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits) {
-  bool violation = false;
-  violation |= !get_longitudinal_allowed() && (desired_brake != 0);
-  violation |= desired_brake > limits.max_brake;
-  return violation;
+  const bool inactive_brake_violation = !get_longitudinal_allowed() && (desired_brake != 0);
+  const bool brake_limit_violation = desired_brake > limits.max_brake;
+  return inactive_brake_violation || brake_limit_violation;
 }
+
+#endif  // SAFETY_LONGITUDINAL_H
