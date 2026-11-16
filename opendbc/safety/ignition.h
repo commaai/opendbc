@@ -18,6 +18,12 @@ void ignition_can_hook(const CANPacket_t *msg);
 bool ignition_can = false;
 uint32_t ignition_can_cnt = 0U;
 
+// previous message counter per ignition message, IGNITION_NO_COUNTER if none was seen yet
+static uint8_t prev_counter_rivian = IGNITION_NO_COUNTER;
+static uint8_t prev_counter_tesla = IGNITION_NO_COUNTER;
+static uint8_t prev_counter_vw_meb = IGNITION_NO_COUNTER;
+static uint8_t prev_counter_psa[3] = {IGNITION_NO_COUNTER, IGNITION_NO_COUNTER, IGNITION_NO_COUNTER};
+
 void ignition_can_hook(const CANPacket_t *msg) {
   // GM exception
   if (msg_matches(msg, 0x1F1U, 0U, 8U)) {
@@ -31,7 +37,6 @@ void ignition_can_hook(const CANPacket_t *msg) {
     // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
     uint8_t counter = msg->data[1] & 0xFU;  // max is only 14
 
-    static uint8_t prev_counter_rivian = IGNITION_NO_COUNTER;
     if ((prev_counter_rivian != IGNITION_NO_COUNTER) && (counter == ((prev_counter_rivian + 1U) % 15U))) {
       // VDM_OutputSignals->VDM_EpasPowerMode
       ignition_can = ((msg->data[7] >> 4U) & 0x3U) == 1U;  // VDM_EpasPowerMode_Drive_On=1
@@ -45,7 +50,6 @@ void ignition_can_hook(const CANPacket_t *msg) {
     // 0x221 overlaps with Rivian which has random data on byte 0
     uint8_t counter = msg->data[6] >> 4;
 
-    static uint8_t prev_counter_tesla = IGNITION_NO_COUNTER;
     if ((prev_counter_tesla != IGNITION_NO_COUNTER) && (counter == ((prev_counter_tesla + 1U) % 16U))) {
       // VCFRONT_LVPowerState->VCFRONT_vehiclePowerState
       uint8_t power_state = (msg->data[0] >> 5U) & 0x3U;
@@ -65,7 +69,6 @@ void ignition_can_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x3C0U, 0U, 4U)) {
     uint8_t counter = msg->data[1] & 0xFU;
 
-    static uint8_t prev_counter_vw_meb = IGNITION_NO_COUNTER;
     if ((prev_counter_vw_meb != IGNITION_NO_COUNTER) && (counter == ((prev_counter_vw_meb + 1U) % 16U))) {
       // Klemmen_Status_01->ZAS_Kl_15
       ignition_can = GET_BIT(msg, 17U);
@@ -78,7 +81,6 @@ void ignition_can_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x432U, 0U, 8U) || msg_matches(msg, 0x432U, 2U, 8U)) {
     uint8_t counter = msg->data[1] & 0xFU;
 
-    static uint8_t prev_counter_psa[3] = {IGNITION_NO_COUNTER, IGNITION_NO_COUNTER, IGNITION_NO_COUNTER};
     if ((prev_counter_psa[msg->bus] != IGNITION_NO_COUNTER) && (counter == ((prev_counter_psa[msg->bus] + 1U) % 16U))) {
       // IS_DAT_BSI_432->ETAT_PRINCIP_SEV (0=stop, 1=ignition on, 2=cranking)
       ignition_can = (msg->data[6] & 0x3U) != 0U;
