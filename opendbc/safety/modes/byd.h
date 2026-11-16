@@ -20,35 +20,31 @@ static uint32_t byd_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void byd_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
-    // Steering angle: 0.1 deg/LSB, signed
-    if (msg->addr == 0x11FU) {
-      int angle_meas_new = to_signed((msg->data[1] << 8) | msg->data[0], 16);  // STEER_ANGLE_2
-      update_sample(&safety.angle_meas, angle_meas_new);
-    }
-
-    // Vehicle speed: 0.1 kph/LSB
-    if (msg->addr == 0x1F0U) {
-      int speed = (msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
-      safety.vehicle_moving = speed > 0;
-      UPDATE_VEHICLE_SPEED(speed * 0.1 * KPH_TO_MS);
-    }
-
-    // Gas and brake pressed
-    if (msg->addr == 0x242U) {
-      safety.brake_pressed = (msg->data[4] >> 5) & 0x1U;   // BRAKE_PRESSED
-      safety.gas_pressed = (msg->data[3] & 0x7FU) > 0U;    // RAW_THROTTLE
-    }
+  // Steering angle: 0.1 deg/LSB, signed
+  if (msg_matches(msg, 0x11FU, 0U)) {
+    int angle_meas_new = to_signed((msg->data[1] << 8) | msg->data[0], 16);  // STEER_ANGLE_2
+    update_sample(&safety.angle_meas, angle_meas_new);
   }
 
-  if (msg->bus == 2U) {
-    // Cruise state
-    if (msg->addr == 0x32DU) {
-      // ACC_STATE: 0=OFF, 2=ACC_ON, 3=ACC_ACTIVE, 5=FORCE_ACCEL, 7=ERROR
-      uint8_t acc_state = (msg->data[2] >> 3) & 0x7U;
-      bool acc_on = (acc_state == 3U) || (acc_state == 5U);
-      pcm_cruise_check(acc_on);
-    }
+  // Vehicle speed: 0.1 kph/LSB
+  if (msg_matches(msg, 0x1F0U, 0U)) {
+    int speed = (msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
+    safety.vehicle_moving = speed > 0;
+    UPDATE_VEHICLE_SPEED(speed * 0.1 * KPH_TO_MS);
+  }
+
+  // Gas and brake pressed
+  if (msg_matches(msg, 0x242U, 0U)) {
+    safety.brake_pressed = (msg->data[4] >> 5) & 0x1U;   // BRAKE_PRESSED
+    safety.gas_pressed = (msg->data[3] & 0x7FU) > 0U;    // RAW_THROTTLE
+  }
+
+  // Cruise state
+  if (msg_matches(msg, 0x32DU, 2U)) {
+    // ACC_STATE: 0=OFF, 2=ACC_ON, 3=ACC_ACTIVE, 5=FORCE_ACCEL, 7=ERROR
+    uint8_t acc_state = (msg->data[2] >> 3) & 0x7U;
+    bool acc_on = (acc_state == 3U) || (acc_state == 5U);
+    pcm_cruise_check(acc_on);
   }
 }
 
