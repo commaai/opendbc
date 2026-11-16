@@ -39,7 +39,7 @@ static uint8_t volkswagen_mxb_get_counter(const CANPacket_t *msg) {
 
 // This is CRC-8H2F/AUTOSAR with a counter-dependent data ID. See the
 // opendbc/car/volkswagen/ implementation for explanatory comments.
-static uint8_t volkswagen_compute_crc(const CANPacket_t *msg, int len, uint8_t salt) {
+static uint8_t volkswagen_compute_crc(const CANPacket_t *msg, uint32_t len, uint8_t salt) {
   // CRC-8 lookup table for poly 0x2F, aka 8H2F/AUTOSAR
   // generated with: python3 -c 'f=lambda c:[c:=((c<<1)^0x2F)&0xFF if c&0x80 else (c<<1)&0xFF for _ in range(8)][-1];print(",\n".join("    "+", ".join(f"0x{f(i):02X}U" for i in range(r,r+16)) for r in range(0,256,16)))'
   static const uint8_t volkswagen_crc8_lut_8h2f[256] = {
@@ -61,7 +61,7 @@ static uint8_t volkswagen_compute_crc(const CANPacket_t *msg, int len, uint8_t s
     0xD8U, 0xF7U, 0x86U, 0xA9U, 0x64U, 0x4BU, 0x3AU, 0x15U, 0x8FU, 0xA0U, 0xD1U, 0xFEU, 0x33U, 0x1CU, 0x6DU, 0x42U
   };
   uint8_t crc = 0xFFU;
-  for (int i = 1; i < len; i++) {
+  for (uint32_t i = 1U; i < len; i++) {
     crc ^= (uint8_t)msg->data[i];
     crc = volkswagen_crc8_lut_8h2f[crc];
   }

@@ -13,11 +13,11 @@ static uint32_t rivian_get_checksum(const CANPacket_t *msg) {
 }
 
 static uint8_t rivian_checksum(const CANPacket_t *msg, uint8_t poly, uint8_t xor_output) {
-  int len = GET_LEN(msg);
+  uint32_t len = GET_LEN(msg);
 
   uint8_t crc = 0;
   // Skip the checksum byte
-  for (int i = 1; i < len; i++) {
+  for (uint32_t i = 1U; i < len; i++) {
     crc = crc8_update(crc, msg->data[i], poly);
   }
   return crc ^ xor_output;

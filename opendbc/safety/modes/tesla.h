@@ -26,17 +26,17 @@ static uint8_t tesla_get_counter(const CANPacket_t *msg) {
   return cnt;
 }
 
-static int tesla_get_checksum_byte(const int addr) {
+static uint32_t tesla_get_checksum_byte(const int addr) {
   // default: 0x257, 0x118, 0x145, 0x286, 0x311
   // Signal: DI_speedChecksum, DI_systemStatusChecksum, ESP_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
-  int checksum_byte = 0;
+  uint32_t checksum_byte = 0U;
   if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
     // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
-    checksum_byte = 7;
+    checksum_byte = 7U;
   }
   if (addr == 0x488) {
     // Signal: DAS_steeringControlChecksum
-    checksum_byte = 3;
+    checksum_byte = 3U;
   }
   return checksum_byte;
 }
@@ -46,10 +46,10 @@ static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
 }
 
 static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
-  int checksum_byte = tesla_get_checksum_byte(msg->addr);
+  uint32_t checksum_byte = tesla_get_checksum_byte(msg->addr);
   uint8_t chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
-  int len = GET_LEN(msg);
-  for (int i = 0; i < len; i++) {
+  uint32_t len = GET_LEN(msg);
+  for (uint32_t i = 0U; i < len; i++) {
     if (i != checksum_byte) {
       chksum += msg->data[i];
     }

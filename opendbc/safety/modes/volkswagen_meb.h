@@ -60,20 +60,20 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 
 static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
   uint32_t ret = volkswagen_meb_compute_crc(msg);
-  int len = 0;
+  uint32_t len = 0U;
   if (safety_setup.volkswagen_meb_alt_crc) {
     if (msg->addr == MSG_QFK_01) {
-      len = 28;
+      len = 28U;
     }
     if (msg->addr == MSG_ESC_51) {
-      len = 60;
+      len = 60U;
     }
     if (msg->addr == MSG_Motor_51) {
-      len = 44;
+      len = 44U;
     }
   }
 
-  if (len > 0) {
+  if (len > 0U) {
     uint8_t salt = 0;
     uint8_t counter = volkswagen_mxb_get_counter(msg);
     if (msg->addr == MSG_QFK_01) {
