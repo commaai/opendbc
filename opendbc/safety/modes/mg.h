@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_MG_H
+#define SAFETY_MODES_MG_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -144,3 +145,5 @@ const safety_hooks mg_hooks = {
   .compute_checksum = mg_compute_checksum,
   .get_counter = mg_get_counter,
 };
+
+#endif  // SAFETY_MODES_MG_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_TESLA_H
+#define SAFETY_MODES_TESLA_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -336,3 +337,5 @@ const safety_hooks tesla_hooks = {
   .compute_checksum = tesla_compute_checksum,
   .get_quality_flag_valid = tesla_get_quality_flag_valid,
 };
+
+#endif  // SAFETY_MODES_TESLA_H

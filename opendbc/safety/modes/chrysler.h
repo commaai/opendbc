@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_CHRYSLER_H
+#define SAFETY_MODES_CHRYSLER_H
 
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/chrysler_common.h"
@@ -211,3 +212,5 @@ const safety_hooks chrysler_hooks = {
   .get_checksum = chrysler_get_checksum,
   .compute_checksum = chrysler_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_CHRYSLER_H

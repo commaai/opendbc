@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_NISSAN_H
+#define SAFETY_MODES_NISSAN_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -127,3 +128,5 @@ const safety_hooks nissan_hooks = {
   .rx = nissan_rx_hook,
   .tx = nissan_tx_hook,
 };
+
+#endif  // SAFETY_MODES_NISSAN_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_PSA_H
+#define SAFETY_MODES_PSA_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -129,3 +130,5 @@ const safety_hooks psa_hooks = {
   .get_checksum = psa_get_checksum,
   .compute_checksum = psa_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_PSA_H

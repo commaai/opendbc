@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_VOLKSWAGEN_COMMON_H
+#define SAFETY_MODES_VOLKSWAGEN_COMMON_H
 
 extern const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL;
 const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
@@ -134,3 +135,5 @@ static int volkswagen_mlb_mqb_steering_control_torque(const CANPacket_t *msg) {
   }
   return desired_torque;
 }
+
+#endif  // SAFETY_MODES_VOLKSWAGEN_COMMON_H

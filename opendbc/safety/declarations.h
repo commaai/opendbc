@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_DECLARATIONS_H
+#define SAFETY_DECLARATIONS_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -465,3 +466,5 @@ extern const safety_hooks rivian_hooks;
 extern const safety_hooks psa_hooks;
 extern const safety_hooks byd_hooks;
 extern const safety_hooks mg_hooks;
+
+#endif  // SAFETY_DECLARATIONS_H

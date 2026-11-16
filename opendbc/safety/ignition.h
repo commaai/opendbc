@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_IGNITION_H
+#define SAFETY_IGNITION_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -78,3 +79,5 @@ void ignition_can_hook(const CANPacket_t *msg) {
     prev_counter_psa[msg->bus] = counter;
   }
 }
+
+#endif  // SAFETY_IGNITION_H

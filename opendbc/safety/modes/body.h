@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_BODY_H
+#define SAFETY_MODES_BODY_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -68,3 +69,5 @@ const safety_hooks body_hooks = {
   .get_checksum = body_get_checksum,
   .compute_checksum = body_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_BODY_H

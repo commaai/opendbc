@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_SUBARU_H
+#define SAFETY_MODES_SUBARU_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -190,3 +191,5 @@ const safety_hooks subaru_hooks = {
   .get_checksum = subaru_get_checksum,
   .compute_checksum = subaru_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_SUBARU_H

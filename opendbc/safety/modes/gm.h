@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_GM_H
+#define SAFETY_MODES_GM_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -246,3 +247,5 @@ const safety_hooks gm_hooks = {
   .rx = gm_rx_hook,
   .tx = gm_tx_hook,
 };
+
+#endif  // SAFETY_MODES_GM_H

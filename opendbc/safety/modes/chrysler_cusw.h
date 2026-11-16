@@ -1,3 +1,6 @@
+#ifndef SAFETY_MODES_CHRYSLER_CUSW_H
+#define SAFETY_MODES_CHRYSLER_CUSW_H
+
 #include "opendbc/safety/modes/chrysler_common.h"
 
 static safety_config chrysler_cusw_init(uint16_t param) {
@@ -102,3 +105,5 @@ const safety_hooks chrysler_cusw_hooks = {
   .get_checksum = chrysler_get_checksum,
   .compute_checksum = chrysler_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_CHRYSLER_CUSW_H

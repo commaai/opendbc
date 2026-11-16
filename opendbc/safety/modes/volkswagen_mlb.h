@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_VOLKSWAGEN_MLB_H
+#define SAFETY_MODES_VOLKSWAGEN_MLB_H
 
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/volkswagen_common.h"
@@ -121,3 +122,5 @@ const safety_hooks volkswagen_mlb_hooks = {
   .get_checksum = volkswagen_mxb_get_checksum,
   .compute_checksum = volkswagen_mxb_compute_crc,
 };
+
+#endif  // SAFETY_MODES_VOLKSWAGEN_MLB_H

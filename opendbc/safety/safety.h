@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_H
+#define SAFETY_H
 
 #include "opendbc/safety/helpers.h"
 #include "opendbc/safety/lateral.h"
@@ -503,3 +504,5 @@ void speed_mismatch_check(const float speed_2) {
     safety.controls_allowed = false;
   }
 }
+
+#endif  // SAFETY_H

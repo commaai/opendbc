@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_SUBARU_PREGLOBAL_H
+#define SAFETY_MODES_SUBARU_PREGLOBAL_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -100,3 +101,5 @@ const safety_hooks subaru_preglobal_hooks = {
   .rx = subaru_preglobal_rx_hook,
   .tx = subaru_preglobal_tx_hook,
 };
+
+#endif  // SAFETY_MODES_SUBARU_PREGLOBAL_H

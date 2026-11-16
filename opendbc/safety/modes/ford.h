@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_FORD_H
+#define SAFETY_MODES_FORD_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -334,3 +335,5 @@ const safety_hooks ford_hooks = {
   .compute_checksum = ford_compute_checksum,
   .get_quality_flag_valid = ford_get_quality_flag_valid,
 };
+
+#endif  // SAFETY_MODES_FORD_H

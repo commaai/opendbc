@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_TOYOTA_H
+#define SAFETY_MODES_TOYOTA_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -430,3 +431,5 @@ const safety_hooks toyota_hooks = {
   .compute_checksum = toyota_compute_checksum,
   .get_quality_flag_valid = toyota_get_quality_flag_valid,
 };
+
+#endif  // SAFETY_MODES_TOYOTA_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_MAZDA_H
+#define SAFETY_MODES_MAZDA_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -103,3 +104,5 @@ const safety_hooks mazda_hooks = {
   .rx = mazda_rx_hook,
   .tx = mazda_tx_hook,
 };
+
+#endif  // SAFETY_MODES_MAZDA_H
