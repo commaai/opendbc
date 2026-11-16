@@ -340,7 +340,7 @@ typedef struct {
 
   RxStatus rx_status[MAX_RX_CHECKS];  // dynamic state of current_safety_config.rx_checks
 
-  int honda_brake;
+  uint32_t honda_brake;
   bool honda_brake_switch_prev;
   bool honda_fwd_brake;
 
