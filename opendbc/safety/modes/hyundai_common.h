@@ -109,12 +109,12 @@ uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
     0x2E93U, 0x3EB2U, 0x0ED1U, 0x1EF0U
   };
 
-  int len = GET_LEN(msg);
+  uint32_t len = GET_LEN(msg);
   uint32_t address = msg->addr;
 
   uint16_t crc = 0;
 
-  for (int i = 2; i < len; i++) {
+  for (uint32_t i = 2U; i < len; i++) {
     crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ msg->data[i]];
   }
 
@@ -122,10 +122,10 @@ uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
   crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((address >> 0U) & 0xFFU)];
   crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((address >> 8U) & 0xFFU)];
 
-  if (len == 24) {
+  if (len == 24U) {
     crc ^= 0x819dU;
   }
-  if (len == 32) {
+  if (len == 32U) {
     crc ^= 0x9f5bU;
   }
 

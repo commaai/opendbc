@@ -93,7 +93,7 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
 }
 
 static uint8_t chrysler_cusw_get_counter(const CANPacket_t *msg) {
-  int counter_byte = GET_LEN(msg) - 2U;
+  uint32_t counter_byte = GET_LEN(msg) - 2U;
   return (uint8_t)(msg->data[counter_byte] & 0xFU);
 }
 
