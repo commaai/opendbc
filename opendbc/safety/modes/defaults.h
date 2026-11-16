@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #include "opendbc/safety/declarations.h"
 
 // *** no output safety mode ***

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #include "opendbc/safety/helpers.h"
 #include "opendbc/safety/lateral.h"
 #include "opendbc/safety/longitudinal.h"

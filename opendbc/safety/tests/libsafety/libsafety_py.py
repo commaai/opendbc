@@ -40,8 +40,8 @@ def _build_libsafety(release: bool = False) -> str:
   return libsafety_so
 
 
-def cdef_from_file(path: Path) -> str:
-  source = path.read_text()
+def cdef_from_files(*paths: Path) -> str:
+  source = "\n".join(path.read_text() for path in paths)
   source = re.sub(r"//[^\n]*|/\*.*?\*/", "", source, flags=re.DOTALL)
   source = re.sub(r"__attribute__\(\(.*\)\)", "", source)
 
@@ -54,9 +54,9 @@ def cdef_from_file(path: Path) -> str:
 
 ffi = FFI()
 safety_dir = Path(libsafety_dir).parents[1]
-ffi.cdef(cdef_from_file(safety_dir / "can.h"), packed=True)
-for path in (safety_dir / "declarations.h", safety_dir / "ignition.h", Path(libsafety_dir) / "safety.c"):
-  ffi.cdef(cdef_from_file(path))
+ffi.cdef(cdef_from_files(safety_dir / "can.h"), packed=True)
+# one cdef, so a function both declared in a header and defined in safety.c is only declared once
+ffi.cdef(cdef_from_files(safety_dir / "declarations.h", safety_dir / "ignition.h", Path(libsafety_dir) / "safety.c"))
 
 class CANPacket:
   pass

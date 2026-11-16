@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "opendbc/safety/can.h"
+
 // from cereal.car.CarParams.SafetyModel
 #define SAFETY_SILENT 0U
 #define SAFETY_HONDA_NIDEC 1U
@@ -254,6 +256,9 @@ bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
 bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits);
 void pcm_cruise_check(bool cruise_engaged);
 void speed_mismatch_check(const float speed_2);
+
+// provided by the platform (firmware timer driver, or the test harness)
+uint32_t microsecond_timer_get(void);
 
 void safety_tick(void);
 void safety_heartbeat(bool engaged);
