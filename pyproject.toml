@@ -101,14 +101,17 @@ flake8-implicit-str-concat.allow-multiline=false
 # - External dependencies not installed (panda, cereal, openpilot)
 # - capnp dynamically generated types
 possibly-missing-attribute = "ignore"
-unresolved-attribute = "ignore"
-unresolved-import = "ignore"
+missing-union-attribute = "ignore"
+missing-attribute = "ignore"
+import-not-found = "ignore"
 
 # Intentional LSP violations in subclass method signatures
-invalid-method-override = "ignore"
+incompatible-method-override = "ignore"
+incompatible-mutable-override = "ignore"
+lost-keyword-for-regular-parameter = "ignore"
 
 # Optional callables called without None checks in test code
-call-non-callable = "ignore"
+not-callable = "ignore"
 
 # Complex type narrowing ty doesn't handle well (isinstance with abstract types)
 invalid-argument-type = "ignore"
@@ -118,7 +121,7 @@ not-subscriptable = "ignore"
 unsupported-operator = "ignore"
 
 # Return types with complex callable signatures
-invalid-return-type = "ignore"
+invalid-explicit-return = "ignore"
 
 # unittest TestSuite iteration (TestCase | TestSuite is always iterable in practice)
 not-iterable = "ignore"
