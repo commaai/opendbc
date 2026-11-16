@@ -206,9 +206,10 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
           self.assertEqual(should_rx, self._rx(msg))
 
   def test_main_switch_off_disables_controls(self):
-    self.safety.set_controls_allowed(True)
-    self._rx(self._tsk_status_msg(False, main_switch=False))
-    self.assertFalse(self.safety.get_controls_allowed())
+    for tsk_status in range(8):
+      self.safety.set_controls_allowed(True)
+      self._rx(self.packer.make_can_msg_safety("Motor_51", 0, {"TSK_Status": tsk_status}))
+      self.assertEqual(tsk_status in (2, 3, 4, 5), self.safety.get_controls_allowed())
 
   def test_cancel_button_rising_edge(self):
     self.safety.set_controls_allowed(True)
