@@ -85,9 +85,9 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     self.__class__.cnt_brake += 1
     return self.packer.make_can_msg_safety("TCS13", 0, values, fix_checksum=checksum)
 
-  def _speed_msg(self, speed):
+  def _speed_msg(self, speed, wheels=("FL", "FR", "RL", "RR")):
     # safety doesn't scale, so undo the scaling
-    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in ["FL", "FR", "RL", "RR"]}
+    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in wheels}
     values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
     values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
     self.__class__.cnt_speed += 1
@@ -105,6 +105,19 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_safety("LKAS11", 0, values)
+
+  def test_other_gas_msgs_ignored(self):
+    # E_EMS11 shares the gas RX slot, but is only parsed with the EV or hybrid gas flags
+    if self.SAFETY_PARAM & (HyundaiSafetyFlags.EV_GAS | HyundaiSafetyFlags.HYBRID_GAS):
+      raise unittest.SkipTest
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("E_EMS11", 0, {"Accel_Pedal_Pos": 1, "CR_Vcu_AccPedDep_Pos": 1})))
+    self.assertFalse(self.safety.get_gas_pressed_prev())
+
+  def test_vehicle_moving_single_wheel(self):
+    # vehicle is moving if any checked wheel is above standstill
+    for wheel in ("FL", "RR"):
+      self.assertTrue(self._rx(self._speed_msg(self.STANDSTILL_THRESHOLD + 1, wheels=(wheel,))))
+      self.assertTrue(self.safety.get_vehicle_moving())
 
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
@@ -168,6 +181,11 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
 
   DISABLED_ECU_UDS_MSG = (0x7D0, 0)
   DISABLED_ECU_ACTUATION_MSG = (0x421, 0)
+
+  def test_button_sends(self):
+    # buttons aren't restricted with openpilot longitudinal
+    for btn in range(8):
+      self.assertTrue(self._tx(self._button_msg(btn)))
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False):
     values = {
