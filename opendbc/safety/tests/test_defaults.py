@@ -141,6 +141,8 @@ class TestHeartbeat(common.SafetyTestBase):
         self.assertTrue(self.safety.get_controls_allowed())
         self.safety.safety_heartbeat_check()
       self.assertEqual(engaged, self.safety.get_controls_allowed())
+      self.safety.safety_heartbeat_check()
+      self.assertEqual(0, self.safety.safety_a.state.heartbeat_engaged_mismatches)
 
 
 class TestModeCount(common.SafetyTestBase):
