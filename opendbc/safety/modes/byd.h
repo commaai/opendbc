@@ -36,7 +36,7 @@ static void byd_rx_hook(const CANPacket_t *msg) {
 
   // Gas and brake pressed
   if (msg_matches(msg, 0x242U, 0U)) {
-    safety.brake_pressed = (msg->data[4] >> 5) & 0x1U;   // BRAKE_PRESSED
+    safety.brake_pressed = GET_BIT(msg, 37U);   // BRAKE_PRESSED
     safety.gas_pressed = (msg->data[3] & 0x7FU) > 0U;    // RAW_THROTTLE
   }
 
@@ -68,7 +68,7 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
   // Steering control: 0.1 deg/LSB, signed
   if (msg->addr == 0x1E2U) {
     int desired_angle = to_signed((msg->data[4] << 8) | msg->data[3], 16);  // STEER_ANGLE
-    bool steer_req = ((msg->data[2] >> 5) & 0x1U) != 0U;                    // STEER_REQ
+    bool steer_req = GET_BIT(msg, 21U);  // STEER_REQ
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_req, BYD_STEERING_LIMITS, BYD_STEERING_PARAMS)) {
       tx = false;
@@ -78,9 +78,9 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
   // Only allow cancel (ACC_ON_BTN) while stock cruise is engaged, or button release.
   if (msg->addr == 0x3B0U) {
     bool other_buttons = ((msg->data[0] & 0x58U) != 0U) ||  // SET, RES, LKAS_ON
-                         ((msg->data[1] & 0x80U) != 0U) ||  // DEC_DISTANCE
-                         ((msg->data[2] & 0x1U) != 0U);     // INC_DISTANCE
-    bool cancel = (msg->data[2] & 0x8U) != 0U;             // ACC_ON_BTN
+                         GET_BIT(msg, 15U) ||               // DEC_DISTANCE
+                         GET_BIT(msg, 16U);                 // INC_DISTANCE
+    bool cancel = GET_BIT(msg, 19U);  // ACC_ON_BTN
     tx = !other_buttons && (!cancel || safety.cruise_engaged_prev);
   }
 

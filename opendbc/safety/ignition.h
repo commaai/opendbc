@@ -22,7 +22,7 @@ void ignition_can_hook(const CANPacket_t *msg) {
   // GM exception
   if (msg_matches(msg, 0x1F1U, 0U, 8U)) {
     // SystemPowerMode (2=Run, 3=Crank Request)
-    ignition_can = (msg->data[0] & 0x2U) != 0U;
+    ignition_can = GET_BIT(msg, 1U);
     ignition_can_cnt = 0U;
   }
 
@@ -68,7 +68,7 @@ void ignition_can_hook(const CANPacket_t *msg) {
     static uint8_t prev_counter_vw_meb = IGNITION_NO_COUNTER;
     if ((prev_counter_vw_meb != IGNITION_NO_COUNTER) && (counter == ((prev_counter_vw_meb + 1U) % 16U))) {
       // Klemmen_Status_01->ZAS_Kl_15
-      ignition_can = ((msg->data[2] >> 1) & 1U) != 0U;
+      ignition_can = GET_BIT(msg, 17U);
       ignition_can_cnt = 0U;
     }
     prev_counter_vw_meb = counter;

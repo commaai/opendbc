@@ -60,7 +60,7 @@ static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
 static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
   bool valid = false;
   if (msg->addr == 0x155U) {
-    valid = (msg->data[5] & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
+    valid = GET_BIT(msg, 40U);  // ESP_wheelSpeedsQF
   }
   if (msg->addr == 0x145U) {
     int user_brake_status = (msg->data[3] >> 5) & 0x03U;
