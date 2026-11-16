@@ -23,9 +23,12 @@ def round_angle(apply_angle, can_offset=0):
   return away_round(apply_angle_can + rnd_offset) * 0.1 - 1638.35
 
 
+TESLA_DBC = "tesla_model3_party"
+
+
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
 
-  DBC = "tesla_model3_party"
+  DBC = TESLA_DBC
   SAFETY_MODEL = CarParams.SafetyModel.tesla
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor)}
@@ -55,7 +58,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   def setUp(self):
     super().setUp()
     self.VM = VehicleModel(get_safety_CP())
-    self.define = CANDefine(self.DBC)
+    self.define = CANDefine(TESLA_DBC)
     self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
     self.autopark_states = {d: v for v, d in self.define.dv["DI_state"]["DI_autoparkState"].items()}
     self.active_autopark_states = [self.autopark_states[s] for s in ('ACTIVE', 'COMPLETE', 'SELFPARK_STARTED')]
@@ -440,7 +443,7 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
 
 
 class TestTeslaIgnition(common.SafetyTestBase):
-  DBC = "tesla_model3_party"
+  DBC = TESLA_DBC
   SAFETY_MODEL = None
 
   TX_MSGS: list = []

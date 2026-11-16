@@ -96,11 +96,20 @@ flake8-implicit-str-concat.allow-multiline=false
 "numpy.mean".msg = "Sum and divide. np.mean is slow"
 
 
+[tool.ty.environment]
+# examples are scripts that import their siblings
+extra-paths = ["examples"]
+
 [tool.ty.analysis]
 # compiled extension without type information
 replace-imports-with-any = ["capnp", "capnp.**"]
 # optional, not installed here
 allowed-unresolved-imports = ["panda", "openpilot.**"]
+
+# test helpers that build messages narrow or rename the base class's parameters
+[[tool.ty.overrides]]
+include = ["opendbc/safety/tests/**"]
+rules = { incompatible-method-override = "ignore", lost-keyword-for-regular-parameter = "ignore" }
 
 [tool.setuptools]
 include-package-data = true
