@@ -50,13 +50,13 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state by sampling wheel speeds
   if (msg_matches(msg, MSG_ESP_19, 0U)) {
     // sum 4 wheel speeds
-    int speed = 0;
-    for (uint8_t i = 0U; i < 8U; i += 2U) {
-      int wheel_speed = GET_BYTES_LE(msg, i, 2);
+    uint32_t speed = 0U;
+    for (int i = 0; i < 8; i += 2) {
+      uint32_t wheel_speed = GET_BYTES_LE(msg, i, 2);
       speed += wheel_speed;
     }
     // Check all wheel speeds for any movement
-    safety.vehicle_moving = speed > 0;
+    safety.vehicle_moving = speed > 0U;
   }
 
   // Update driver input torque samples
@@ -67,7 +67,8 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MSG_TSK_06, 0U)) {
-    volkswagen_tsk_status_check(msg->data[3] & 0x7U, !safety_setup.volkswagen_longitudinal);
+    uint8_t tsk_status = msg->data[3] & 0x7U;
+    volkswagen_tsk_status_check((int)tsk_status, !safety_setup.volkswagen_longitudinal);
   }
 
   if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
@@ -142,16 +143,17 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
 
     if (msg->addr == MSG_ACC_06) {
       // Signal: ACC_06.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-      desired_accel = ((GET_BYTES_LE(msg, 3, 2) & 0x7FFU) * 5U) - 7220U;
+      desired_accel = from_offset((GET_BYTES_LE(msg, 3, 2) & 0x7FFU) * 5U, 7220);
     } else {
       // Signal: ACC_07.ACC_Folgebeschl (acceleration in m/s2, scale 0.03, offset -4.6)
-      int secondary_accel = (msg->data[4] * 30U) - 4600U;
-      violation |= (secondary_accel != 3020);  // enforce always inactive (one increment above max range) at this time
+      int secondary_accel = ((int)msg->data[4] * 30) - 4600;
+      violation = (secondary_accel != 3020);  // enforce always inactive (one increment above max range) at this time
       // Signal: ACC_07.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-      desired_accel = (((msg->data[7] << 3) | ((msg->data[6] & 0xE0U) >> 5)) * 5U) - 7220U;
+      desired_accel = from_offset(((GET_BYTES_LE(msg, 6, 2) >> 5) & 0x7FFU) * 5U, 7220);
     }
 
-    violation |= longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MQB_LONG_LIMITS);
+    const bool accel_violation = longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MQB_LONG_LIMITS);
+    violation = violation || accel_violation;
 
     if (violation) {
       tx = false;
