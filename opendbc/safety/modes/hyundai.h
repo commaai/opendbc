@@ -99,13 +99,10 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
     // count the bits
     for (int i = 0; i < 8; i++) {
       uint8_t b = msg->data[i];
-      for (int j = 0; j < 8; j++) {
-        uint8_t bit = 0;
-        // exclude checksum and counter
-        if (((i != 1) || (j < 6)) && ((i != 3) || (j < 6)) && ((i != 5) || (j < 6)) && ((i != 7) || (j < 6))) {
-          bit = (b >> (uint8_t)j) & 1U;
-        }
-        chksum += bit;
+      // exclude checksum and counter, the top two bits of odd bytes
+      const int bit_count = ((i % 2) == 0) ? 8 : 6;
+      for (int j = 0; j < bit_count; j++) {
+        chksum += (b >> (uint8_t)j) & 1U;
       }
     }
     chksum = (chksum ^ 9U) & 15U;

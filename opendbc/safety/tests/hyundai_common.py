@@ -55,6 +55,9 @@ class HyundaiButtonBase:
         self._rx(self._pcm_status_msg(True))
         controls_allowed = btn in ENABLE_BUTTONS or main_button
         self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
+        self.safety.set_controls_allowed(False)
+        self._rx(self._pcm_status_msg(True))
+        self.assertFalse(self.safety.get_controls_allowed())
 
   def test_sampling_cruise_buttons(self):
     """
