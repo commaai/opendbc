@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_VOLKSWAGEN_PQ_H
+#define SAFETY_MODES_VOLKSWAGEN_PQ_H
 
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/volkswagen_common.h"
@@ -217,3 +218,5 @@ const safety_hooks volkswagen_pq_hooks = {
   .get_checksum = volkswagen_pq_get_checksum,
   .compute_checksum = volkswagen_pq_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_VOLKSWAGEN_PQ_H

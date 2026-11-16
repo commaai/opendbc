@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_CHRYSLER_COMMON_H
+#define SAFETY_MODES_CHRYSLER_COMMON_H
 
 static uint32_t chrysler_get_checksum(const CANPacket_t *msg) {
   int checksum_byte = GET_LEN(msg) - 1U;
@@ -13,3 +14,5 @@ static uint32_t chrysler_compute_checksum(const CANPacket_t *msg) {
   }
   return (uint8_t)(~checksum);
 }
+
+#endif  // SAFETY_MODES_CHRYSLER_COMMON_H

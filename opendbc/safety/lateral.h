@@ -1,3 +1,6 @@
+#ifndef SAFETY_LATERAL_H
+#define SAFETY_LATERAL_H
+
 #include "opendbc/safety/declarations.h"
 
 // ISO 11270
@@ -396,3 +399,5 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   }
   return steer_angle_cmd_common_checks(violation, desired_angle, steer_control_enabled, limits.max_angle);
 }
+
+#endif  // SAFETY_LATERAL_H

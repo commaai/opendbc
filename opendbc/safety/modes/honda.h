@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_HONDA_H
+#define SAFETY_MODES_HONDA_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -463,3 +464,5 @@ const safety_hooks honda_bosch_hooks = {
   .get_checksum = honda_get_checksum,
   .compute_checksum = honda_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_HONDA_H

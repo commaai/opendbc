@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_HELPERS_H
+#define SAFETY_HELPERS_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -103,3 +104,5 @@ static float safety_interpolate(struct lookup_t xy, float x) {
   }
   return ret;
 }
+
+#endif  // SAFETY_HELPERS_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_HYUNDAI_CANFD_H
+#define SAFETY_MODES_HYUNDAI_CANFD_H
 
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/hyundai_common.h"
@@ -365,3 +366,5 @@ const safety_hooks hyundai_canfd_hooks = {
   .get_checksum = hyundai_canfd_get_checksum,
   .compute_checksum = hyundai_common_canfd_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_HYUNDAI_CANFD_H

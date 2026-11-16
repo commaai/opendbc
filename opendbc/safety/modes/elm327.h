@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_ELM327_H
+#define SAFETY_MODES_ELM327_H
 
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/defaults.h"
@@ -38,3 +39,5 @@ const safety_hooks elm327_hooks = {
   .init = nooutput_init,
   .tx = elm327_tx_hook,
 };
+
+#endif  // SAFETY_MODES_ELM327_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_BYD_H
+#define SAFETY_MODES_BYD_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -113,3 +114,5 @@ const safety_hooks byd_hooks = {
   .get_checksum = byd_get_checksum,
   .compute_checksum = byd_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_BYD_H

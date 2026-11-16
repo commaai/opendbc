@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_HYUNDAI_COMMON_H
+#define SAFETY_MODES_HYUNDAI_COMMON_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -131,3 +132,5 @@ uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
 
   return crc;
 }
+
+#endif  // SAFETY_MODES_HYUNDAI_COMMON_H
