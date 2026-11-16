@@ -244,12 +244,8 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       .max_steer_power = 125,
     };
 
-    int desired_curvature_raw = GET_BYTES_LE(msg, 3, 2) & 0x7FFFU;
-
-    bool desired_curvature_sign = GET_BIT(msg, 39U);
-    if (!desired_curvature_sign) {
-      desired_curvature_raw *= -1;
-    }
+    // the sign bit is set for positive curvature
+    int desired_curvature_raw = sign_magnitude(GET_BYTES_LE(msg, 3, 2) & 0x7FFFU, !GET_BIT(msg, 39U));
 
     bool steer_req = (((msg->data[1] >> 4) & 0x0FU) == 4U);
     int steer_power = msg->data[2];

@@ -475,6 +475,12 @@ int to_signed(uint32_t d, int bits) {
   return d_signed;
 }
 
+// convert a magnitude and a separate sign bit to a signed int
+int sign_magnitude(uint32_t magnitude, bool negative) {
+  const int value = (int)magnitude;
+  return negative ? -value : value;
+}
+
 // given a new sample, update the sample_t struct
 void update_sample(struct sample_t *sample, int sample_new) {
   for (int i = MAX_SAMPLE_VALS - 1; i > 0; i--) {
