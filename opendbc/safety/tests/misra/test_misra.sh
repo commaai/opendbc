@@ -28,7 +28,8 @@ echo "Cppcheck checkers list from test_misra.sh:" > $CHECKLIST
 cppcheck() {
   # get all gcc defines: arm-none-eabi-gcc -dM -E - < /dev/null
   # cppcheck does not provide __has_include_next, which is used by Clang's stdint.h
-  COMMON_DEFINES="-D__GNUC__=9 -D__has_include_next(x)=0"
+  # cppcheck does not provide __has_feature, which is used by Clang's stddef.h
+  COMMON_DEFINES="-D__GNUC__=9 -D__has_include_next(x)=0 -D__has_feature(x)=0"
 
   # note that cppcheck build cache results in inconsistent results as of v2.13.0
   OUTPUT=$(mktemp)
