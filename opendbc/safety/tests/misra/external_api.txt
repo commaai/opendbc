@@ -1,0 +1,35 @@
+# Passed to misrable with --external-api: the externally linked functions and
+# objects that code outside of main.c uses or defines. One name per line and
+# comment lines start with #. misrable fails on a name the safety code doesn't have.
+
+# entry points for panda's firmware and libsafety
+safety_rx_hook
+safety_tx_hook
+safety_fwd_hook
+safety_tick
+safety_heartbeat
+safety_heartbeat_check
+safety_alternative_experience
+set_safety_hooks
+
+# read from Python tests through cffi
+get_longitudinal_allowed
+
+# state read by panda's firmware and by Python tests
+safety_a
+safety_b
+current_copy
+safety_redundancy_fault
+
+# provided by panda's firmware or libsafety
+microsecond_timer_get
+
+# hooks of debug modes; ALLOW_DEBUG builds reference them in safety_hook_registry
+alloutput_hooks
+byd_hooks
+chrysler_cusw_hooks
+mg_hooks
+psa_hooks
+subaru_preglobal_hooks
+volkswagen_mlb_hooks
+volkswagen_pq_hooks
