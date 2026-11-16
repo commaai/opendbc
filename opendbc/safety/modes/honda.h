@@ -140,13 +140,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 
       // Forward AEB when stock braking is higher than openpilot braking
       // only stop forwarding when AEB event is over
-      if (!honda_stock_aeb) {
-        safety.honda_fwd_brake = false;
-      } else if (honda_stock_brake >= safety.honda_brake) {
-        safety.honda_fwd_brake = true;
-      } else {
-        // Leave Honda forward brake as is
-      }
+      safety.honda_fwd_brake = honda_stock_aeb && (safety.honda_fwd_brake || (honda_stock_brake >= safety.honda_brake));
     }
   }
 }
