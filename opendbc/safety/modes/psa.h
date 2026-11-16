@@ -31,7 +31,7 @@ static uint32_t psa_get_checksum(const CANPacket_t *msg) {
   return msg->data[5] & 0xFU;
 }
 
-static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, int chk_pos) {
+static uint8_t psa_checksum(const CANPacket_t *msg, uint8_t chk_ini, int chk_pos) {
   int len = GET_LEN(msg);
 
   uint8_t sum = 0;
@@ -50,10 +50,10 @@ static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, in
 static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
   uint8_t chk = 0;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    chk = _psa_compute_checksum(msg, 0x4, 5);
+    chk = psa_checksum(msg, 0x4, 5);
   }
   if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    chk = _psa_compute_checksum(msg, 0x7, 5);
+    chk = psa_checksum(msg, 0x7, 5);
   }
   return chk;
 }

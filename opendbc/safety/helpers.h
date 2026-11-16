@@ -6,33 +6,33 @@
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_MIN(a, b) ({ \
-  __typeof__(a) _a = (a); \
-  __typeof__(b) _b = (b); \
-  (_a < _b) ? _a : _b; \
+  __typeof__(a) safety_min_a = (a); \
+  __typeof__(b) safety_min_b = (b); \
+  (safety_min_a < safety_min_b) ? safety_min_a : safety_min_b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_MAX(a, b) ({ \
-  __typeof__(a) _a = (a); \
-  __typeof__(b) _b = (b); \
-  (_a > _b) ? _a : _b; \
+  __typeof__(a) safety_max_a = (a); \
+  __typeof__(b) safety_max_b = (b); \
+  (safety_max_a > safety_max_b) ? safety_max_a : safety_max_b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_CLAMP(x, low, high) ({ \
-  __typeof__(x) __x = (x); \
-  __typeof__(low) __low = (low);\
-  __typeof__(high) __high = (high);\
-  (__x > __high) ? __high : ((__x < __low) ? __low : __x); \
+  __typeof__(x) safety_clamp_x = (x); \
+  __typeof__(low) safety_clamp_low = (low);\
+  __typeof__(high) safety_clamp_high = (high);\
+  (safety_clamp_x > safety_clamp_high) ? safety_clamp_high : ((safety_clamp_x < safety_clamp_low) ? safety_clamp_low : safety_clamp_x); \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 // cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
 #define SAFETY_ABS(a) ({ \
-  __typeof__(a) _a = (a); \
-  (_a > 0) ? _a : (-_a); \
+  __typeof__(a) safety_abs_a = (a); \
+  (safety_abs_a > 0) ? safety_abs_a : (-safety_abs_a); \
 })
 
 #define SAFETY_UNUSED(x) ((void)(x))
