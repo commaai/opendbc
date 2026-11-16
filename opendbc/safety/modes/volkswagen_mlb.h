@@ -94,8 +94,7 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == MSG_HCA_01) {
     int desired_torque = volkswagen_mlb_mqb_steering_control_torque(msg);
 
-    int steer_status = msg->data[4] & 0xFU;
-    bool steer_req = (steer_status == 5) || (steer_status == 7);
+    bool steer_req = (msg->data[4] & 0xFU) == 7U;  // HCA_01_Status_HCA, openpilot only sends 7 when steering
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_MLB_STEERING_LIMITS)) {
       tx = false;

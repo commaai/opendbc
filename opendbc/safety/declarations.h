@@ -183,10 +183,10 @@ typedef struct {
   const unsigned int addr : 29;
   const unsigned int bus : 3;
   const unsigned int len : 7;
-  const unsigned int frequency : 7;   // expected frequency of the message [Hz]
+  const unsigned int frequency : 7;   // expected frequency of the message [Hz], at least 10
   const bool ignore_checksum : 1;     // checksum check is not performed when set to true
   const bool ignore_counter : 1;      // counter check is not performed when set to true
-  const unsigned int max_counter : 8; // maximum value of the counter. 0 means that the counter check is skipped
+  const unsigned int max_counter : 8; // maximum value of the counter, nonzero iff the counter is checked
   const bool ignore_quality_flag : 1; // true if quality flag check is skipped
 } CanMsgCheck;
 
@@ -419,8 +419,7 @@ extern bool safety_redundancy_fault;
 
 //#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1  // not used anymore, but reserved
 
-// If using this flag, make sure to communicate to your users that a stock safety feature is now disabled.
-#define ALT_EXP_DISABLE_STOCK_AEB 2
+//#define ALT_EXP_DISABLE_STOCK_AEB 2  // not used anymore, but reserved
 
 // If using this flag, be aware that harder braking is more likely to lead to rear endings,
 //   and that alone this flag doesn't make braking compliant because there's also a time element.

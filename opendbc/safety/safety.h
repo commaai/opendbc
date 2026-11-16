@@ -140,28 +140,29 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     const CanMsgCheck *m = &cfg->rx_checks[index].msg[status->index];
     status->last_timestamp = safety_ts;
 
+    // the hooks are set for every check that isn't ignored, see TestSafetyConfigs
     // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !m->ignore_checksum) {
+    if (m->ignore_checksum) {
+      status->valid_checksum = true;
+    } else {
       uint32_t checksum = safety_hooks->get_checksum(msg);
       uint32_t checksum_comp = safety_hooks->compute_checksum(msg);
       status->valid_checksum = checksum_comp == checksum;
-    } else {
-      status->valid_checksum = m->ignore_checksum;
     }
 
     // counter check
-    if ((safety_hooks->get_counter != NULL) && (m->max_counter > 0U)) {
+    if (m->ignore_counter) {
+      status->wrong_counters = 0;
+    } else {
       uint8_t counter = safety_hooks->get_counter(msg);
       update_counter(status, m, counter);
-    } else {
-      status->wrong_counters = m->ignore_counter ? 0 : MAX_WRONG_COUNTERS;
     }
 
     // quality flag check
-    if ((safety_hooks->get_quality_flag_valid != NULL) && !m->ignore_quality_flag) {
-      status->valid_quality_flag = safety_hooks->get_quality_flag_valid(msg);
+    if (m->ignore_quality_flag) {
+      status->valid_quality_flag = true;
     } else {
-      status->valid_quality_flag = m->ignore_quality_flag;
+      status->valid_quality_flag = safety_hooks->get_quality_flag_valid(msg);
     }
   }
   return is_msg_valid(index);
@@ -266,15 +267,10 @@ static void tick_copy(void) {
   for (int i=0; i < safety_setup.current_safety_config.rx_checks_len; i++) {
     RxStatus *status = &safety.rx_status[i];
     uint32_t elapsed_time = safety_get_ts_elapsed(ts, status->last_timestamp);
-    // lagging after 1s, at least 10 missed messages since RX checks are >= 10Hz (enforced below)
+    // lagging after 1s, at least 10 missed messages since RX checks are >= 10Hz (see TestSafetyConfigs)
     // 2s of lag is worst case, since the function is called at 1Hz
-    bool lagging = elapsed_time > 1000000U;
-    status->lagging = lagging;
-
-    // enforce minimum frequency for safety-relevant messages
-    uint32_t frequency = safety_setup.current_safety_config.rx_checks[i].msg[status->index].frequency;
-    bool frequency_invalid = frequency < 10U;
-    if (lagging || frequency_invalid || !is_msg_valid(i)) {
+    status->lagging = elapsed_time > 1000000U;
+    if (status->lagging || !is_msg_valid(i)) {
       rx_checks_invalid = true;
       safety.controls_allowed = false;
     }
@@ -374,11 +370,9 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
       safety_setup.current_hooks = safety_hook_registry[i].hooks;
       safety_setup.current_safety_mode = mode;
       safety_setup.current_safety_param = param;
+      cfg = safety_setup.current_hooks->init(param);
       set_status = 0;  // set
     }
-  }
-  if ((set_status == 0) && (safety_setup.current_hooks->init != NULL)) {
-    cfg = safety_setup.current_hooks->init(param);
   }
 
   // by field, the copies are compared by byte and the padding of cfg is unspecified
