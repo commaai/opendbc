@@ -93,7 +93,6 @@ static bool is_msg_valid(int index) {
     const RxStatus *status = &safety.rx_status[index];
     if (!status->valid_checksum || !status->valid_quality_flag || (status->wrong_counters >= MAX_WRONG_COUNTERS)) {
       valid = false;
-      safety.controls_allowed = false;
     }
   }
   return valid;
@@ -168,7 +167,11 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
       status->valid_quality_flag = safety_hooks->get_quality_flag_valid(msg);
     }
   }
-  return is_msg_valid(index);
+  bool valid = is_msg_valid(index);
+  if (!valid) {
+    safety.controls_allowed = false;
+  }
+  return valid;
 }
 
 static bool rx_hook_copy(const CANPacket_t *msg) {
