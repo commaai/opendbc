@@ -37,20 +37,20 @@
 #define SUBARU_CAM_BUS  2U
 
 #define SUBARU_BASE_TX_MSGS(alt_bus, lkas_msg) \
-  {lkas_msg,                     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
+  {(lkas_msg),                   SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8, .check_relay = true},  \
 
 #define SUBARU_COMMON_TX_MSGS(alt_bus) \
-  {MSG_SUBARU_ES_Distance, alt_bus, 8, .check_relay = false}, \
+  {MSG_SUBARU_ES_Distance, (alt_bus), 8, .check_relay = false}, \
 
 #define SUBARU_COMMON_RX_CHECKS(alt_bus)                                                                                                         \
   {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
   {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
-  {.msg = {{MSG_SUBARU_CruiseControl,   alt_bus,         8, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Wheel_Speeds,    (alt_bus),       8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Brake_Status,    (alt_bus),       8, 50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_CruiseControl,   (alt_bus),       8, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
 static uint32_t subaru_get_checksum(const CANPacket_t *msg) {
   return (uint8_t)msg->data[0];
