@@ -89,9 +89,9 @@ static uint32_t volkswagen_mxb_compute_crc(const CANPacket_t *msg) {
 }
 
 // Signal: TSK_06.TSK_Status (MQB), Motor_51.TSK_Status (MEB)
-static void volkswagen_tsk_status_check(int acc_status, bool stock_acc) {
-  bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-  safety.acc_main_on = cruise_engaged || (acc_status == 2);
+static void volkswagen_tsk_status_check(uint8_t acc_status, bool stock_acc) {
+  bool cruise_engaged = (acc_status == 3U) || (acc_status == 4U) || (acc_status == 5U);
+  safety.acc_main_on = cruise_engaged || (acc_status == 2U);
 
   // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
   if (stock_acc) {

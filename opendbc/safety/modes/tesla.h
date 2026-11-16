@@ -172,7 +172,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   // NOTE: based off TESLA_MODEL_Y to match openpilot
   const AngleSteeringParams TESLA_STEERING_PARAMS = {
     .slip_factor = -0.000580374383851451f,  // calc_slip_factor(VM)
-    .steer_ratio = 12.f,
+    .steer_ratio = 12.0f,
     .wheelbase = 2.89f,
   };
 
