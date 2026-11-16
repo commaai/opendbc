@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import unittest
+from collections.abc import Callable
 
 from opendbc.car.gm.values import GMSafetyFlags
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerSafety
+from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class Buttons:
@@ -25,6 +27,10 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
   MIN_POSSIBLE_GAS = -4000
 
   PCM_CRUISE = False  # openpilot can control the PCM state if longitudinal
+
+  BRAKE_BUS: int
+  packer_chassis: CANPackerSafety
+  _button_msg: Callable[..., libsafety_py.CANPacket]
 
   def _send_brake_msg(self, brake):
     values = {"FrictionBrakeCmd": -brake}

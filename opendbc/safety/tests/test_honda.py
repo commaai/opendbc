@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 import numpy as np
+from collections.abc import Callable
 
 from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -29,6 +30,8 @@ class Btn:
 
 
 class HondaButtonEnableBase(common.CarSafetyTest):
+  _acc_state_msg: Callable[..., libsafety_py.CANPacket]
+  _button_msg: Callable[..., libsafety_py.CANPacket]
 
   # override these inherited tests since we're using button enable
   def test_disable_control_allowed_from_cruise(self):
@@ -135,6 +138,8 @@ class HondaButtonEnableBase(common.CarSafetyTest):
 
 
 class HondaPcmEnableBase(common.CarSafetyTest):
+  _acc_state_msg: Callable[..., libsafety_py.CANPacket]
+  _button_msg: Callable[..., libsafety_py.CANPacket]
 
   def test_buttons(self):
     """
@@ -163,9 +168,9 @@ class HondaPcmEnableBase(common.CarSafetyTest):
 
 class HondaBase(common.CarSafetyTest):
   MAX_BRAKE = 255
-  PT_BUS: int | None = None  # must be set when inherited
-  STEER_BUS: int | None = None  # must be set when inherited
-  BUTTONS_BUS: int | None = None  # must be set when inherited, tx on this bus, rx on PT_BUS
+  PT_BUS: int  # must be set when inherited
+  STEER_BUS: int  # must be set when inherited
+  BUTTONS_BUS: int  # must be set when inherited, tx on this bus, rx on PT_BUS
 
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194)}  # STEERING_CONTROL
 

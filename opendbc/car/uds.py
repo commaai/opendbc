@@ -608,6 +608,15 @@ def get_rx_addr_for_tx_addr(tx_addr, rx_offset=0x8):
   raise ValueError(f"invalid tx_addr: {tx_addr}")
 
 
+def _check_response_id(resp: bytes, expected_id: int, id_name: str = 'data identifier') -> bytes:
+  # verify the response echoes the requested identifier, return the payload after it
+  resp_id = struct.unpack('!H', resp[0:2])[0] if len(resp) >= 2 else None
+  if resp_id != expected_id:
+    resp_id_hex = hex(resp_id) if resp_id is not None else None
+    raise ValueError(f'invalid response {id_name}: {resp_id_hex} expected: {hex(expected_id)}')
+  return resp[2:]
+
+
 class UdsClient:
   def __init__(self, panda, tx_addr: int, rx_addr: int | None = None, bus: int = 0, sub_addr: int | None = None, rx_sub_addr: int | None = None,
                timeout: float = 1, tx_timeout: float = 1, response_pending_timeout: float = 10):
@@ -767,10 +776,7 @@ class UdsClient:
     # TODO: support list of identifiers
     data = struct.pack('!H', data_identifier_type)
     resp = self._uds_request(SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, subfunction=None, data=data)
-    resp_id = struct.unpack('!H', resp[0:2])[0] if len(resp) >= 2 else None
-    if resp_id != data_identifier_type:
-      raise ValueError(f'invalid response data identifier: {hex(resp_id)} expected: {hex(data_identifier_type)}')
-    return resp[2:]
+    return _check_response_id(resp, data_identifier_type)
 
   def read_memory_by_address(self, memory_address: int, memory_size: int, memory_address_bytes: int = 4, memory_size_bytes: int = 1):
     if memory_address_bytes < 1 or memory_address_bytes > 4:
@@ -792,9 +798,7 @@ class UdsClient:
   def read_scaling_data_by_identifier(self, data_identifier_type: DATA_IDENTIFIER_TYPE):
     data = struct.pack('!H', data_identifier_type)
     resp = self._uds_request(SERVICE_TYPE.READ_SCALING_DATA_BY_IDENTIFIER, subfunction=None, data=data)
-    resp_id = struct.unpack('!H', resp[0:2])[0] if len(resp) >= 2 else None
-    if resp_id != data_identifier_type:
-      raise ValueError(f'invalid response data identifier: {hex(resp_id)}')
+    _check_response_id(resp, data_identifier_type)
     return resp[2:]  # TODO: parse the response
 
   def read_data_by_periodic_identifier(self, transmission_mode_type: TRANSMISSION_MODE_TYPE, periodic_data_identifier: int):
@@ -831,9 +835,7 @@ class UdsClient:
   def write_data_by_identifier(self, data_identifier_type: DATA_IDENTIFIER_TYPE, data_record: bytes):
     data = struct.pack('!H', data_identifier_type) + data_record
     resp = self._uds_request(SERVICE_TYPE.WRITE_DATA_BY_IDENTIFIER, subfunction=None, data=data)
-    resp_id = struct.unpack('!H', resp[0:2])[0] if len(resp) >= 2 else None
-    if resp_id != data_identifier_type:
-      raise ValueError(f'invalid response data identifier: {hex(resp_id)}')
+    _check_response_id(resp, data_identifier_type)
 
   def write_memory_by_address(self, memory_address: int, memory_size: int, data_record: bytes, memory_address_bytes: int = 4, memory_size_bytes: int = 1):
     if memory_address_bytes < 1 or memory_address_bytes > 4:
@@ -898,18 +900,12 @@ class UdsClient:
                                          control_option_record: bytes = b'', control_enable_mask_record: bytes = b''):
     data = struct.pack('!H', data_identifier_type) + bytes([control_parameter_type]) + control_option_record + control_enable_mask_record
     resp = self._uds_request(SERVICE_TYPE.INPUT_OUTPUT_CONTROL_BY_IDENTIFIER, subfunction=None, data=data)
-    resp_id = struct.unpack('!H', resp[0:2])[0] if len(resp) >= 2 else None
-    if resp_id != data_identifier_type:
-      raise ValueError(f'invalid response data identifier: {hex(resp_id)}')
-    return resp[2:]
+    return _check_response_id(resp, data_identifier_type)
 
   def routine_control(self, routine_control_type: ROUTINE_CONTROL_TYPE, routine_identifier_type: ROUTINE_IDENTIFIER_TYPE, routine_option_record: bytes = b''):
     data = struct.pack('!H', routine_identifier_type) + routine_option_record
     resp = self._uds_request(SERVICE_TYPE.ROUTINE_CONTROL, subfunction=routine_control_type, data=data)
-    resp_id = struct.unpack('!H', resp[0:2])[0] if len(resp) >= 2 else None
-    if resp_id != routine_identifier_type:
-      raise ValueError(f'invalid response routine identifier: {hex(resp_id)}')
-    return resp[2:]
+    return _check_response_id(resp, routine_identifier_type, 'routine identifier')
 
   def request_download(self, memory_address: int, memory_size: int, memory_address_bytes: int = 4, memory_size_bytes: int = 4, data_format: int = 0x00):
     data = bytes([data_format])

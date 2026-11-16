@@ -87,8 +87,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       self.assertTrue(self._rx(self._pcm_status_msg(cruise_engaged)))
       self.safety.set_controls_allowed(controls_allowed)
       for pressed in itertools.product((False, True), repeat=len(buttons)):
-        values = dict(zip(buttons, pressed, strict=True))
-        values.update(SET_ME_1_1=1, SET_ME_1_2=1)
+        values = {**dict(zip(buttons, pressed, strict=True)), "SET_ME_1_1": 1, "SET_ME_1_2": 1}
         with self.subTest(cruise_engaged=cruise_engaged, controls_allowed=controls_allowed, buttons=pressed):
           msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, values)
           should_tx = not any(pressed[:-1]) and (not pressed[-1] or cruise_engaged)

@@ -47,6 +47,8 @@ class RivianSafetyFlags(IntFlag):
 
 
 class CAR(Platforms):
+  config: RivianPlatformConfig
+
   RIVIAN_R1 = RivianPlatformConfig(
     [
       RivianCarDocs("Rivian R1S 2022-24", video="https://youtu.be/dflSSGQwYNc", setup_video="https://youtu.be/uaISd1j7Z4U",

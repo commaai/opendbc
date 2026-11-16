@@ -26,6 +26,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x191, 0x412, 0x343)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191, 0x343]}
   EPS_SCALE = 73
+  ECU_DISABLED = True  # radar is knocked out with tester present for openpilot longitudinal
 
   def _torque_meas_msg(self, torque: int, driver_torque: int | None = None):
     values = {"STEER_TORQUE_EPS": (torque / self.EPS_SCALE) * 100.}
@@ -77,14 +78,14 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     values = {"CRUISE_ACTIVE": enable}
     return self.packer.make_can_msg_safety("PCM_CRUISE", 0, values)
 
-  def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
+  def test_diagnostics(self):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
                            (True, b"\x0F\x02\x3E\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
-      self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
+      self.assertEqual(should_tx and self.ECU_DISABLED and self.LONGITUDINAL, self._tx(tester_present))
 
-  def test_block_aeb(self, stock_longitudinal: bool = False):
+  def test_block_aeb(self):
     for controls_allowed in (True, False):
       for bad in (True, False):
         for _ in range(10):
@@ -93,7 +94,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
           if not bad:
             dat = [0]*6 + dat[-1:]
           msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
-          self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
+          self.assertEqual(not bad and self.LONGITUDINAL, self._tx(msg))
 
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
@@ -293,12 +294,6 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
 
   LONGITUDINAL = False
 
-  def test_diagnostics(self, stock_longitudinal: bool = True, ecu_disabled: bool = True):
-    super().test_diagnostics(stock_longitudinal=stock_longitudinal, ecu_disabled=ecu_disabled)
-
-  def test_block_aeb(self, stock_longitudinal: bool = True):
-    super().test_block_aeb(stock_longitudinal=stock_longitudinal)
-
   def test_acc_cancel(self):
     """
       Regardless of controls allowed, never allow ACC_CONTROL if cancel bit isn't set
@@ -332,13 +327,11 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
   TX_MSGS = TOYOTA_SECOC_TX_MSGS
   RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x191, 0x412, 0x131)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x191, 0x412, 0x131]}
+  ECU_DISABLED = False
 
   @property
   def SAFETY_PARAM(self):
     return self.EPS_SCALE | ToyotaSafetyFlags.SECOC
-
-  def test_diagnostics(self, ecu_disabled: bool = False):
-    super().test_diagnostics(ecu_disabled=ecu_disabled)
 
   def test_angle_meas_initializing(self):
     # SecOC doesn't check the STEER_TORQUE_SENSOR quality flag, so the rx hook drops initializing angles itself
@@ -386,7 +379,7 @@ class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x191, 0x412, 0x131, 0x343, 0x183]}
 
   @unittest.skip("test not applicable for cars without a DSU")
-  def test_block_aeb(self, stock_longitudinal: bool = False):
+  def test_block_aeb(self):
     pass
 
   def test_343_actuation_blocked(self):
