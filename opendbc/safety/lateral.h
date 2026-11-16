@@ -67,7 +67,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
     if (limits.dynamic_max_torque) {
       const float fudged_speed = (safety.vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
       max_torque = safety_interpolate(limits.max_torque_lookup, fudged_speed) + 1;
-      max_torque = SAFETY_CLAMP(max_torque, -limits.max_torque, limits.max_torque);
+      max_torque = SAFETY_MIN(max_torque, limits.max_torque);  // a negative lookup only makes the limit stricter
     }
 
     // *** global torque limit check ***
@@ -200,6 +200,29 @@ static bool steer_angle_cmd_inactive_check(int desired_angle, int max_angle) {
   return safety_max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
 }
 
+// Shared safety checks for angle-based steering commands, after the limit checks
+static bool steer_angle_cmd_common_checks(bool limit_violation, int desired_angle, bool steer_control_enabled, int max_angle) {
+  bool violation = limit_violation;
+  safety.desired_angle_last = desired_angle;
+
+  // Angle should be close to current angle while not steering
+  if (!steer_control_enabled) {
+    violation |= steer_angle_cmd_inactive_check(desired_angle, max_angle);
+  }
+
+  // No angle control allowed when controls are not allowed
+  if (!safety.controls_allowed) {
+    violation |= steer_control_enabled;
+  }
+
+  // reset to current angle if either controls is not allowed or there's a violation
+  if (violation || !safety.controls_allowed) {
+    safety.desired_angle_last = SAFETY_CLAMP(safety.angle_meas.values[0], -max_angle, max_angle);
+  }
+
+  return violation;
+}
+
 // Safety checks for angle-based steering commands
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits) {
   bool violation = false;
@@ -221,24 +244,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     // check for violation;
     violation |= safety_max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
   }
-  safety.desired_angle_last = desired_angle;
-
-  // Angle should be close to current angle while not steering
-  if (!steer_control_enabled) {
-    violation |= steer_angle_cmd_inactive_check(desired_angle, limits.max_angle);
-  }
-
-  // No angle control allowed when controls are not allowed
-  if (!safety.controls_allowed) {
-    violation |= steer_control_enabled;
-  }
-
-  // reset to current angle if either controls is not allowed or there's a violation
-  if (violation || !safety.controls_allowed) {
-    safety.desired_angle_last = SAFETY_CLAMP(safety.angle_meas.values[0], -limits.max_angle, limits.max_angle);
-  }
-
-  return violation;
+  return steer_angle_cmd_common_checks(violation, desired_angle, steer_control_enabled, limits.max_angle);
 }
 
 // Safety checks for curvature-based steering commands
@@ -388,22 +394,5 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     // *** angle real time rate limit check ***
     violation |= rt_angle_rate_limit_check(limits);
   }
-  safety.desired_angle_last = desired_angle;
-
-  // Angle should either be 0 or same as current angle while not steering
-  if (!steer_control_enabled) {
-    violation |= steer_angle_cmd_inactive_check(desired_angle, limits.max_angle);
-  }
-
-  // No angle control allowed when controls are not allowed
-  if (!safety.controls_allowed) {
-    violation |= steer_control_enabled;
-  }
-
-  // reset to current angle if either controls is not allowed or there's a violation
-  if (violation || !safety.controls_allowed) {
-    safety.desired_angle_last = SAFETY_CLAMP(safety.angle_meas.values[0], -limits.max_angle, limits.max_angle);
-  }
-
-  return violation;
+  return steer_angle_cmd_common_checks(violation, desired_angle, steer_control_enabled, limits.max_angle);
 }

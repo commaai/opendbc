@@ -261,21 +261,18 @@ static int fwd_hook_copy(int bus_num, int addr) {
 static void tick_copy(void) {
   safety.safety_mode_cnt += 1U;
 
-  const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = safety_ts;
   for (int i=0; i < safety_setup.current_safety_config.rx_checks_len; i++) {
     RxStatus *status = &safety.rx_status[i];
     uint32_t elapsed_time = safety_get_ts_elapsed(ts, status->last_timestamp);
-    // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
-    // Quite conservative to not risk false triggers.
-    // 2s of lag is worse case, since the function is called at 1Hz
-    uint32_t frequency = safety_setup.current_safety_config.rx_checks[i].msg[status->index].frequency;
-    uint32_t timestep = 1000000U / SAFETY_MAX(frequency, 1U);  // frequency < 10Hz is invalid below
-    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1000000U);
+    // lagging after 1s, at least 10 missed messages since RX checks are >= 10Hz (enforced below)
+    // 2s of lag is worst case, since the function is called at 1Hz
+    bool lagging = elapsed_time > 1000000U;
     status->lagging = lagging;
 
     // enforce minimum frequency for safety-relevant messages
+    uint32_t frequency = safety_setup.current_safety_config.rx_checks[i].msg[status->index].frequency;
     bool frequency_invalid = frequency < 10U;
     if (lagging || frequency_invalid || !is_msg_valid(i)) {
       rx_checks_invalid = true;
@@ -302,26 +299,20 @@ static void relay_malfunction_set(void) {
   safety.relay_malfunction = true;
 }
 
+// exit controls on rising edge of a press, or on any press when while_held
+static void disengage_on_press(bool pressed, bool *pressed_prev, bool while_held) {
+  if (pressed && (!*pressed_prev || while_held)) {
+    safety.controls_allowed = false;
+  }
+  *pressed_prev = pressed;
+}
+
 static void generic_rx_checks(void) {
   safety.gas_pressed_prev = safety.gas_pressed;
-
-  // exit controls on rising edge of brake press
-  if (safety.brake_pressed && (!safety.brake_pressed_prev || safety.vehicle_moving)) {
-    safety.controls_allowed = false;
-  }
-  safety.brake_pressed_prev = safety.brake_pressed;
-
-  // exit controls on rising edge of regen paddle
-  if (safety.regen_braking && (!safety.regen_braking_prev || safety.vehicle_moving)) {
-    safety.controls_allowed = false;
-  }
-  safety.regen_braking_prev = safety.regen_braking;
-
-  // exit controls on rising edge of steering override/disengage
-  if (safety.steering_disengage && !safety.steering_disengage_prev) {
-    safety.controls_allowed = false;
-  }
-  safety.steering_disengage_prev = safety.steering_disengage;
+  // brake and regen also exit controls while held and moving
+  disengage_on_press(safety.brake_pressed, &safety.brake_pressed_prev, safety.vehicle_moving);
+  disengage_on_press(safety.regen_braking, &safety.regen_braking_prev, safety.vehicle_moving);
+  disengage_on_press(safety.steering_disengage, &safety.steering_disengage_prev, false);
 }
 
 static void stock_ecu_check(bool stock_ecu_detected) {
@@ -465,10 +456,10 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 
 // convert a trimmed integer to signed 32 bit int
 int to_signed(int d, int bits) {
+  const uint32_t sign_bit = (uint32_t)1U << ((uint32_t)bits - 1U);
   int d_signed = d;
-  int max_value = (1 << SAFETY_MAX((bits - 1), 0));
-  if (d >= max_value) {
-    d_signed = d - (1 << SAFETY_MAX(bits, 0));
+  if (d >= (int)sign_bit) {
+    d_signed = d - (2 * (int)sign_bit);
   }
   return d_signed;
 }
