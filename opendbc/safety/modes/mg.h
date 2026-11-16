@@ -83,8 +83,7 @@ static void mg_rx_hook(const CANPacket_t *msg) {
 
   // Driver torque
   if (msg_matches(msg, 0x1ecU, 0U)) {
-    uint32_t torque_driver_bits = GET_BYTES_BE(msg, 4, 2) & 0x7FFU;
-    int torque_driver_new = (int)torque_driver_bits - 1024;
+    int torque_driver_new = from_offset(GET_BYTES_BE(msg, 4, 2) & 0x7FFU, 1024);
     update_sample(&safety.torque_driver, torque_driver_new);
   }
 
@@ -114,8 +113,7 @@ static bool mg_tx_hook(const CANPacket_t *msg) {
   };
 
   // The TX list dispatches only steering control (0x1fd, bus 0) to this hook.
-  uint32_t desired_torque_bits = GET_BYTES_BE(msg, 0, 2) & 0x7FFU;
-  int desired_torque = (int)desired_torque_bits - 1024;
+  int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) & 0x7FFU, 1024);
   bool steer_req = GET_BIT(msg, 35U);
   return !steer_torque_cmd_checks(desired_torque, steer_req, MG_STEERING_LIMITS);
 }

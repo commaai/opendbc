@@ -481,6 +481,11 @@ int sign_magnitude(uint32_t magnitude, bool negative) {
   return negative ? -value : value;
 }
 
+// convert an offset-encoded raw value to a signed int
+int from_offset(uint32_t raw, int offset) {
+  return (int)raw - offset;
+}
+
 // given a new sample, update the sample_t struct
 void update_sample(struct sample_t *sample, int sample_new) {
   for (int i = MAX_SAMPLE_VALS - 1; i > 0; i--) {

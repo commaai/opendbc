@@ -26,8 +26,7 @@ static safety_config chrysler_cusw_init(uint16_t param) {
 static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x1ECU, 0U)) {
     // Signal: EPS_STATUS.TORQUE_MOTOR
-    uint32_t torque_meas_bits = GET_BYTES_BE(msg, 3, 2) & 0xFFFU;
-    int torque_meas_new = (int)torque_meas_bits - 2048;
+    int torque_meas_new = from_offset(GET_BYTES_BE(msg, 3, 2) & 0xFFFU, 2048);
     update_sample(&safety.torque_meas, torque_meas_new);
   }
 
@@ -67,8 +66,7 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
 
   if (msg->addr == 0x1F6U) {
     // Signal: LKAS_COMMAND.STEERING_TORQUE
-    uint32_t desired_torque_bits = GET_BYTES_BE(msg, 0, 2) >> 5;
-    int desired_torque = (int)desired_torque_bits - 1024;
+    int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 5, 1024);
 
     // Signal: LKAS_COMMAND.LKAS_CONTROL_BIT
     const bool steer_req = GET_BIT(msg, 12U);
