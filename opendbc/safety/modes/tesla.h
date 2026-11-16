@@ -97,14 +97,14 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
   // Vehicle speed (DI_speed)
   if (msg_matches(msg, 0x257U, 0U)) {
     // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
-    float speed = ((((msg->data[2] << 4) | (msg->data[1] >> 4)) * 0.08) - 40.) * KPH_TO_MS;
+    float speed = ((((msg->data[2] << 4) | (msg->data[1] >> 4)) * 0.08f) - 40.f) * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED(speed);
   }
 
   // 2nd vehicle speed (ESP_B)
   if (msg_matches(msg, 0x155U, 0U)) {
     // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
-    float esp_speed = (((msg->data[6] & 0x0FU) << 6) | (msg->data[5] >> 2)) * 0.5 * KPH_TO_MS;
+    float esp_speed = (((msg->data[6] & 0x0FU) << 6) | (msg->data[5] >> 2)) * 0.5f * KPH_TO_MS;
     speed_mismatch_check(esp_speed);
   }
 
@@ -168,9 +168,9 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
 
   // NOTE: based off TESLA_MODEL_Y to match openpilot
   const AngleSteeringParams TESLA_STEERING_PARAMS = {
-    .slip_factor = -0.000580374383851451,  // calc_slip_factor(VM)
-    .steer_ratio = 12.,
-    .wheelbase = 2.89,
+    .slip_factor = -0.000580374383851451f,  // calc_slip_factor(VM)
+    .steer_ratio = 12.f,
+    .wheelbase = 2.89f,
   };
 
   const LongitudinalLimits TESLA_LONG_LIMITS = {

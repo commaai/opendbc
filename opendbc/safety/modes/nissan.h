@@ -6,12 +6,12 @@ static const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
   .max_angle = 60000,  // 600 deg, reasonable limit
   .angle_deg_to_can = 100,
   .angle_rate_up_lookup = {
-    {0., 5., 15.},
-    {5., .8, .15},
+    {0.f, 5.f, 15.f},
+    {5.f, .8f, .15f},
   },
   .angle_rate_down_lookup = {
-    {0., 5., 15.},
-    {5., 3.5, .4},
+    {0.f, 5.f, 15.f},
+    {5.f, 3.5f, .4f},
   },
 };
 
@@ -32,7 +32,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
     uint16_t right_rear = (msg->data[0] << 8) | (msg->data[1]);
     uint16_t left_rear = (msg->data[2] << 8) | (msg->data[3]);
     safety.vehicle_moving = (right_rear | left_rear) != 0U;
-    UPDATE_VEHICLE_SPEED((right_rear + left_rear) / 2.0 * 0.005 * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED((right_rear + left_rear) / 2.0f * 0.005f * KPH_TO_MS);
   }
 
   // X-Trail 0x15c, Leaf 0x239
