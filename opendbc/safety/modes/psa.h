@@ -63,11 +63,11 @@ static void psa_rx_hook(const CANPacket_t *msg) {
     safety.gas_pressed = msg->data[3] > 0U;  // P002_Com_rAPP
   }
   if (msg_matches(msg, PSA_STEERING_ALT, PSA_MAIN_BUS)) {
-    int angle_meas_new = to_signed((msg->data[0] << 8) | msg->data[1], 16);  // ANGLE
+    int angle_meas_new = to_signed(GET_BYTES_BE(msg, 0, 2), 16);  // ANGLE
     update_sample(&safety.angle_meas, angle_meas_new);
   }
   if (msg_matches(msg, PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS)) {
-    int speed = (msg->data[0] << 8) | msg->data[1];
+    int speed = GET_BYTES_BE(msg, 0, 2);
     safety.vehicle_moving = speed > 0;
     UPDATE_VEHICLE_SPEED(speed * 0.01f * KPH_TO_MS);  // VITESSE_VEHICULE_ROUES
   }

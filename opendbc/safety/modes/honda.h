@@ -166,7 +166,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // ACC_HUD: safety check (nidec w/o pedal)
   if (msg_matches(msg, 0x30CU, bus_pt)) {
-    int pcm_speed = (msg->data[0] << 8) | msg->data[1];
+    int pcm_speed = GET_BYTES_BE(msg, 0, 2);
     int pcm_gas = msg->data[2];
 
     bool violation = false;
@@ -201,7 +201,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     int accel = (msg->data[3] << 3) | ((msg->data[4] >> 5) & 0x7U);
     accel = to_signed(accel, 11);
 
-    int gas = (msg->data[0] << 8) | msg->data[1];
+    int gas = GET_BYTES_BE(msg, 0, 2);
     gas = to_signed(gas, 16);
 
     bool violation = false;

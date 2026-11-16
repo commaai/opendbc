@@ -107,14 +107,14 @@ static void ford_rx_hook(const CANPacket_t *msg) {
   // Update vehicle speed
   if (msg_matches(msg, FORD_BrakeSysFeatures, FORD_MAIN_BUS)) {
     // Signal: Veh_V_ActlBrk
-    UPDATE_VEHICLE_SPEED(((msg->data[0] << 8) | msg->data[1]) * 0.01f * KPH_TO_MS);
+    UPDATE_VEHICLE_SPEED(GET_BYTES_BE(msg, 0, 2) * 0.01f * KPH_TO_MS);
   }
 
   // Check vehicle speed against a second source
   if (msg_matches(msg, FORD_EngVehicleSpThrottle2, FORD_MAIN_BUS)) {
     // Disable controls if speeds from ABS and PCM ECUs are too far apart.
     // Signal: Veh_V_ActlEng
-    float filtered_pcm_speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01f * KPH_TO_MS;
+    float filtered_pcm_speed = GET_BYTES_BE(msg, 6, 2) * 0.01f * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
   }
 
@@ -123,7 +123,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     // FIXME: safety can receive yaw before new vehicle speed, it should recompute meas on either received
     // Signal: VehYaw_W_Actl
     // TODO: we should use the speed which results in the closest angle measurement to the desired angle
-    float ford_yaw_rate = (((msg->data[2] << 8U) | msg->data[3]) * 0.0002f) - 6.5f;
+    float ford_yaw_rate = (GET_BYTES_BE(msg, 2, 2) * 0.0002f) - 6.5f;
     float current_curvature = ford_yaw_rate / SAFETY_MAX(vehicle_speed_ms(safety.vehicle_speed.values[0]), 0.1f);
     // convert current curvature into units on CAN for comparison with desired curvature
     update_sample(&safety.curvature_state.meas, ROUND(current_curvature * FORD_STEERING_LIMITS.curvature_to_can));
@@ -133,7 +133,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, FORD_EngVehicleSpThrottle, FORD_MAIN_BUS)) {
     // Pedal position: (0.1 * val) in percent
     // Signal: ApedPos_Pc_ActlArb
-    safety.gas_pressed = (((msg->data[0] & 0x03U) << 8) | msg->data[1]) > 0U;
+    safety.gas_pressed = (GET_BYTES_BE(msg, 0, 2) & 0x3FFU) > 0U;
   }
 
   // Update brake pedal and cruise state
@@ -168,11 +168,11 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
   // Safety check for ACCDATA accel and brake requests
   if (msg->addr == FORD_ACCDATA) {
     // Signal: AccPrpl_A_Rq
-    int gas = ((msg->data[6] & 0x3U) << 8) | msg->data[7];
+    int gas = GET_BYTES_BE(msg, 6, 2) & 0x3FFU;
     // Signal: AccPrpl_A_Pred
-    int gas_pred = ((msg->data[2] & 0x3U) << 8) | msg->data[3];
+    int gas_pred = GET_BYTES_BE(msg, 2, 2) & 0x3FFU;
     // Signal: AccBrkTot_A_Rq
-    int accel = ((msg->data[0] & 0x1FU) << 8) | msg->data[1];
+    int accel = GET_BYTES_BE(msg, 0, 2) & 0x1FFFU;
     // Signal: CmbbDeny_B_Actl
     bool cmbb_deny = GET_BIT(msg, 37U);
 
@@ -226,7 +226,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     // Signal: LatCtl_D_Rq
     bool steer_control_enabled = ((msg->data[4] >> 2) & 0x7U) != 0U;
     unsigned int raw_curvature = (msg->data[0] << 3) | (msg->data[1] >> 5);
-    unsigned int raw_curvature_rate = ((msg->data[1] & 0x1FU) << 8) | msg->data[2];
+    unsigned int raw_curvature_rate = GET_BYTES_BE(msg, 1, 2) & 0x1FFFU;
     unsigned int raw_path_angle = (msg->data[3] << 3) | (msg->data[4] >> 5);
     unsigned int raw_path_offset = (msg->data[5] << 2) | (msg->data[6] >> 6);
 
@@ -249,7 +249,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     unsigned int raw_curvature = (msg->data[2] << 3) | (msg->data[3] >> 5);
     unsigned int raw_curvature_rate = (msg->data[6] << 3) | (msg->data[7] >> 5);
     unsigned int raw_path_angle = ((msg->data[3] & 0x1FU) << 6) | (msg->data[4] >> 2);
-    unsigned int raw_path_offset = ((msg->data[4] & 0x3U) << 8) | msg->data[5];
+    unsigned int raw_path_offset = GET_BYTES_BE(msg, 4, 2) & 0x3FFU;
 
     // These signals are not yet tested with the current safety limits
     bool violation = (raw_curvature_rate != FORD_CANFD_INACTIVE_CURVATURE_RATE) || (raw_path_angle != FORD_INACTIVE_PATH_ANGLE) || (raw_path_offset != FORD_INACTIVE_PATH_OFFSET);

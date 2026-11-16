@@ -44,6 +44,15 @@ uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len) {
   return ret;
 }
 
+// Read up to four bytes in big-endian order.
+uint32_t GET_BYTES_BE(const CANPacket_t *msg, int start, int len) {
+  uint32_t ret = 0U;
+  for (int i = 0; i < len; i++) {
+    ret = (ret << 8) | (uint32_t)msg->data[start + i];
+  }
+  return ret;
+}
+
 // Read up to eight bytes in little-endian order, without alignment assumptions.
 uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
   uint64_t ret = 0U;
