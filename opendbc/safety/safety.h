@@ -327,40 +327,42 @@ static void stock_ecu_check(bool stock_ecu_detected) {
   }
 }
 
-static int set_hooks_copy(uint16_t mode, uint16_t param) {
-  const safety_hook_config safety_hook_registry[] = {
-    {SAFETY_SILENT, &nooutput_hooks},
-    {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
-    {SAFETY_TOYOTA, &toyota_hooks},
-    {SAFETY_ELM327, &elm327_hooks},
-    {SAFETY_GM, &gm_hooks},
-    {SAFETY_HONDA_BOSCH, &honda_bosch_hooks},
-    {SAFETY_HYUNDAI, &hyundai_hooks},
-    {SAFETY_CHRYSLER, &chrysler_hooks},
-    {SAFETY_SUBARU, &subaru_hooks},
-    {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
-    {SAFETY_VOLKSWAGEN_MEB, &volkswagen_meb_hooks},
-    {SAFETY_NISSAN, &nissan_hooks},
-    {SAFETY_NOOUTPUT, &nooutput_hooks},
-    {SAFETY_HYUNDAI_LEGACY, &hyundai_legacy_hooks},
-    {SAFETY_MAZDA, &mazda_hooks},
-    {SAFETY_BODY, &body_hooks},
-    {SAFETY_FORD, &ford_hooks},
-    {SAFETY_RIVIAN, &rivian_hooks},
-    {SAFETY_TESLA, &tesla_hooks},
-    {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
+// the hooks of each safety mode, defined in its header
+// cppcheck-suppress misra-c2012-8.9; at block scope, 8.9 would instead ask for every mode's hooks to be defined in set_hooks_copy
+static const safety_hook_config safety_hook_registry[] = {
+  {SAFETY_SILENT, &nooutput_hooks},
+  {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
+  {SAFETY_TOYOTA, &toyota_hooks},
+  {SAFETY_ELM327, &elm327_hooks},
+  {SAFETY_GM, &gm_hooks},
+  {SAFETY_HONDA_BOSCH, &honda_bosch_hooks},
+  {SAFETY_HYUNDAI, &hyundai_hooks},
+  {SAFETY_CHRYSLER, &chrysler_hooks},
+  {SAFETY_SUBARU, &subaru_hooks},
+  {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
+  {SAFETY_VOLKSWAGEN_MEB, &volkswagen_meb_hooks},
+  {SAFETY_NISSAN, &nissan_hooks},
+  {SAFETY_NOOUTPUT, &nooutput_hooks},
+  {SAFETY_HYUNDAI_LEGACY, &hyundai_legacy_hooks},
+  {SAFETY_MAZDA, &mazda_hooks},
+  {SAFETY_BODY, &body_hooks},
+  {SAFETY_FORD, &ford_hooks},
+  {SAFETY_RIVIAN, &rivian_hooks},
+  {SAFETY_TESLA, &tesla_hooks},
+  {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
 #ifdef ALLOW_DEBUG
-    {SAFETY_MG, &mg_hooks},
-    {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
-    {SAFETY_PSA, &psa_hooks},
-    {SAFETY_BYD, &byd_hooks},
-    {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
-    {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
-    {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
-    {SAFETY_ALLOUTPUT, &alloutput_hooks},
+  {SAFETY_MG, &mg_hooks},
+  {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
+  {SAFETY_PSA, &psa_hooks},
+  {SAFETY_BYD, &byd_hooks},
+  {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
+  {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
+  {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
+  {SAFETY_ALLOUTPUT, &alloutput_hooks},
 #endif
-  };
+};
 
+static int set_hooks_copy(uint16_t mode, uint16_t param) {
   // reset state set by safety mode
   safety = (SafetyState){
     .heartbeat_engaged = safety.heartbeat_engaged,
