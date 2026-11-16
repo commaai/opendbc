@@ -44,7 +44,7 @@ static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
 static void chrysler_rx_hook(const CANPacket_t *msg) {
   // Measured EPS torque
   if (msg_matches(msg, CHRYSLER_ADDR(EPS_2), 0U)) {
-    int torque_meas_new = (GET_BYTES_BE(msg, 4, 2) & 0x7FFU) - 1024U;
+    int torque_meas_new = from_offset(GET_BYTES_BE(msg, 4, 2) & 0x7FFU, 1024);
     update_sample(&safety.torque_meas, torque_meas_new);
   }
 
@@ -61,9 +61,9 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
     safety.vehicle_moving = GET_BYTES_BE(msg, 4, 2) != 0U;
   }
   if ((safety_setup.chrysler_platform == CHRYSLER_PACIFICA) && msg_matches(msg, 514U, 0U)) {
-    int speed_l = (msg->data[0] << 4) + (msg->data[1] >> 4);
-    int speed_r = (msg->data[2] << 4) + (msg->data[3] >> 4);
-    safety.vehicle_moving = (speed_l | speed_r) != 0;
+    uint32_t speed_l = GET_BYTES_BE(msg, 0, 2) >> 4;
+    uint32_t speed_r = GET_BYTES_BE(msg, 2, 2) >> 4;
+    safety.vehicle_moving = (speed_l | speed_r) != 0U;
   }
 
   // exit controls on rising edge of gas press
@@ -110,8 +110,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   // STEERING
   if (msg->addr == CHRYSLER_ADDR(LKAS_COMMAND)) {
     int start_byte = (safety_setup.chrysler_platform == CHRYSLER_PACIFICA) ? 0 : 1;
-    int desired_torque = GET_BYTES_BE(msg, start_byte, 2) & 0x7FFU;
-    desired_torque -= 1024;
+    int desired_torque = from_offset(GET_BYTES_BE(msg, start_byte, 2) & 0x7FFU, 1024);
 
     const TorqueSteeringLimits limits = (safety_setup.chrysler_platform == CHRYSLER_PACIFICA) ? CHRYSLER_STEERING_LIMITS :
                                         (safety_setup.chrysler_platform == CHRYSLER_RAM_DT) ? CHRYSLER_RAM_DT_STEERING_LIMITS : CHRYSLER_RAM_HD_STEERING_LIMITS;
