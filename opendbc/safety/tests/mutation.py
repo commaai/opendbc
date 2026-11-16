@@ -357,13 +357,19 @@ def print_live_status(text, *, final=False):
     print(text, flush=True)
 
 
+def _test_ids(test: unittest.TestSuite | unittest.TestCase) -> list[str]:
+  if isinstance(test, unittest.TestSuite):
+    return [test_id for t in test for test_id in _test_ids(t)]
+  return [test.id()]
+
+
 def _discover_test_catalog():
   loader = unittest.TestLoader()
   catalog = {}
   for test_file in sorted(SAFETY_TESTS_DIR.glob("test_*.py")):
     module_name = ".".join(test_file.relative_to(ROOT).with_suffix("").parts)
     suite = loader.loadTestsFromName(module_name)
-    catalog[test_file.name] = [t.id() for group in suite for t in group]
+    catalog[test_file.name] = _test_ids(suite)
   return catalog
 
 

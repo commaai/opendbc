@@ -15,7 +15,7 @@ class TestCanFingerprint(unittest.TestCase):
              for address, length in fingerprint.items() for src in (0, 1)]
 
       fingerprint_iter = iter([can])
-      car_fingerprint, finger = can_fingerprint(lambda **kwargs: [next(fingerprint_iter, [])])  # noqa: B023
+      car_fingerprint, finger = can_fingerprint(lambda wait_for_one=False: [next(fingerprint_iter, [])])  # noqa: B023
 
       assert car_fingerprint == car_model
       assert finger[0] == fingerprint
@@ -46,7 +46,7 @@ class TestCanFingerprint(unittest.TestCase):
       with self.subTest(expected_frames=expected_frames, car_model=car_model):
         frames = 0
 
-        def can_recv(**kwargs):
+        def can_recv(wait_for_one=False):
           nonlocal frames
           frames += 1
           return [can]  # noqa: B023

@@ -118,7 +118,6 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
   def setUpClass(cls):
     super().setUpClass()
     if cls.__name__ in ("TestHyundaiCanfdLFASteering", "TestHyundaiCanfdLFASteeringAltButtons"):
-      cls.packer = None
       raise unittest.SkipTest
 
   @property

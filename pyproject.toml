@@ -95,39 +95,21 @@ flake8-implicit-str-concat.allow-multiline=false
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "numpy.mean".msg = "Sum and divide. np.mean is slow"
 
-[tool.ty.rules]
-# Ignore rules that produce false positives due to:
-# - Dynamic attributes on LibSafety (loaded from compiled C library)
-# - External dependencies not installed (panda, cereal, openpilot)
-# - capnp dynamically generated types
-possibly-missing-attribute = "ignore"
-missing-union-attribute = "ignore"
-missing-attribute = "ignore"
-import-not-found = "ignore"
 
-# Intentional LSP violations in subclass method signatures
-incompatible-method-override = "ignore"
-incompatible-mutable-override = "ignore"
-lost-keyword-for-regular-parameter = "ignore"
+[tool.ty.environment]
+# examples are scripts that import their siblings
+extra-paths = ["examples"]
 
-# Optional callables called without None checks in test code
-not-callable = "ignore"
+[tool.ty.analysis]
+# compiled extension without type information
+replace-imports-with-any = ["capnp", "capnp.**"]
+# optional, not installed here
+allowed-unresolved-imports = ["panda", "openpilot.**"]
 
-# Complex type narrowing ty doesn't handle well (isinstance with abstract types)
-invalid-argument-type = "ignore"
-
-# Dynamic type patterns (e.g., values converted from Number to list in __init__)
-not-subscriptable = "ignore"
-unsupported-operator = "ignore"
-
-# Return types with complex callable signatures
-invalid-explicit-return = "ignore"
-
-# unittest TestSuite iteration (TestCase | TestSuite is always iterable in practice)
-not-iterable = "ignore"
-
-# Test class method signature differences
-too-many-positional-arguments = "ignore"
+# test helpers that build messages narrow or rename the base class's parameters
+[[tool.ty.overrides]]
+include = ["opendbc/safety/tests/**"]
+rules = { incompatible-method-override = "ignore", lost-keyword-for-regular-parameter = "ignore" }
 
 [tool.setuptools]
 include-package-data = true

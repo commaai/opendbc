@@ -78,18 +78,33 @@ def get_torque_params():
 
 
 class RadarInterfaceBase(ABC):
+  trigger_msg: int  # last message of a radar frame, required when rcp is set
+
   def __init__(self, CP: structs.CarParams):
     self.CP = CP
-    self.rcp = None
+    self.rcp: CANParser | None = None
+    self.updated_messages: set[int] = set()
     self.pts: dict[int, structs.RadarData.RadarPoint] = {}
     self.track_id: int = 0
     self.frame = 0
 
-  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
-    self.frame += 1
-    if (self.frame % 5) == 0:  # 20 Hz is very standard
-      return structs.RadarData()
-    return None
+  def update(self, can_strings: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
+    # no radar parser: publish empty radar data at 20Hz to keep radard running
+    if self.rcp is None:
+      self.frame += 1
+      return structs.RadarData() if self.frame % 5 == 0 else None
+
+    # accumulate updated messages until the radar frame is complete
+    self.updated_messages.update(self.rcp.update(can_strings))
+    if self.trigger_msg not in self.updated_messages:
+      return None
+
+    ret = self._update(self.rcp, self.updated_messages)
+    self.updated_messages.clear()
+    return ret
+
+  def _update(self, rcp: CANParser, updated_messages: set[int]) -> structs.RadarDataT | None:
+    raise NotImplementedError
 
 
 class CarInterfaceBase(ABC):
