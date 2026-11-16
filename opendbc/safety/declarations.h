@@ -43,9 +43,10 @@
 #define GET_BIT(msg, b) ((((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U) != 0U)
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
 
-// length of an RX check array; fails to compile if it has more checks than rx_status can track
-#define RX_CHECKS_LEN(rx) ((sizeof((rx)) / sizeof((rx)[0])) + \
-                           (0U * sizeof(char[((sizeof((rx)) / sizeof((rx)[0])) <= MAX_RX_CHECKS) ? 1 : -1])))
+// length of an RX check array; fails to compile if it has more checks than rx_status can track:
+// the array size is then negative ("size of unnamed array is negative"), which every compiler must diagnose
+#define RX_CHECKS_LEN(rx) (((int)sizeof((rx)) / (int)sizeof((rx)[0])) + \
+                           (0 * (int)sizeof(char[(2 * ((int)MAX_RX_CHECKS - ((int)sizeof((rx)) / (int)sizeof((rx)[0])))) + 1])))
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), RX_CHECKS_LEN(rx), \
                                                   (tx), (sizeof((tx)) / sizeof((tx)[0])), \
                                                   false})
