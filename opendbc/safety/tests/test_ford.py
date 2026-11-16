@@ -452,10 +452,10 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   INACTIVE_GAS = -5.0
 
   # ACC command
-  def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False):
+  def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False, gas_pred: float | None = None):
     values = {
       "AccPrpl_A_Rq": gas,                              # [-5|5.23] m/s^2
-      "AccPrpl_A_Pred": gas,                            # [-5|5.23] m/s^2
+      "AccPrpl_A_Pred": gas if gas_pred is None else gas_pred,  # [-5|5.23] m/s^2
       "AccBrkTot_A_Rq": brake,                          # [-20|11.9449] m/s^2
       "AccBrkPrchg_B_Rq": 1 if brake_actuation else 0,  # Pre-charge brake request: 0=No, 1=Yes
       "AccBrkDecel_B_Rq": 1 if brake_actuation else 0,  # Deceleration request: 0=Inactive, 1=Active
@@ -480,6 +480,9 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
         gas = round(gas, 2)  # floats might not hit exact boundary conditions without rounding
         should_tx = (controls_allowed and self.MIN_GAS <= gas <= self.MAX_GAS) or gas == self.INACTIVE_GAS
         self.assertEqual(should_tx, self._tx(self._acc_command_msg(gas, self.INACTIVE_ACCEL, controls_allowed)))
+        # both gas signals are checked on their own
+        self.assertEqual(should_tx, self._tx(self._acc_command_msg(gas, self.INACTIVE_ACCEL, controls_allowed, gas_pred=self.INACTIVE_GAS)))
+        self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, self.INACTIVE_ACCEL, controls_allowed, gas_pred=gas)))
 
   def test_brake_safety_check(self):
     brake_values = self._boundary_values([self.MIN_ACCEL, self.MAX_ACCEL, self.INACTIVE_ACCEL],
