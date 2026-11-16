@@ -222,9 +222,10 @@ class HondaBase(common.CarSafetyTest):
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_steer_safety_check(self):
-    self.safety.set_controls_allowed(0)
-    self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
-    self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
+    for controls_allowed in (False, True):
+      self.safety.set_controls_allowed(controls_allowed)
+      self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
+      self.assertEqual(controls_allowed, self._tx(self._send_steer_msg(0x1000)))
 
 
 # ********************* Honda Nidec **********************
@@ -255,6 +256,18 @@ class TestHondaNidecSafetyBase(HondaBase):
     # Used to control ACC on Nidec without pedal
     values = {"PCM_GAS": pcm_gas, "PCM_SPEED": pcm_speed}
     return self.packer.make_can_msg_safety("ACC_HUD", 0, values)
+
+  def test_alt_steer_safety_check(self):
+    # CR-V and RDX steer with 0x194
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(common.make_msg(0, 0x194, dat=b'\x10\x00\x00\x00')))
+
+  def test_brake_switch_debounce(self):
+    # brake switch alone counts as brake pressed once set for two frames
+    self._rx(self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, {"BRAKE_SWITCH": 1}))
+    self.assertFalse(self.safety.get_brake_pressed_prev())
+    self._rx(self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, {"BRAKE_SWITCH": 1}))
+    self.assertTrue(self.safety.get_brake_pressed_prev())
 
   def test_acc_hud_safety_check(self):
     for controls_allowed in [True, False]:
@@ -417,6 +430,9 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
   """
     Covers the Honda Bosch safety mode with stock longitudinal
   """
+
+  def test_supplemental_control(self):
+    self.assertTrue(self._tx(common.make_msg(0, 0xE5, dat=(0x10800004).to_bytes(8, "little"))))
 
 
 class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):
