@@ -68,7 +68,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, MSG_TSK_06, 0U)) {
     uint8_t tsk_status = msg->data[3] & 0x7U;
-    volkswagen_tsk_status_check((int)tsk_status, !safety_setup.volkswagen_longitudinal);
+    volkswagen_tsk_status_check(tsk_status, !safety_setup.volkswagen_longitudinal);
   }
 
   if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {

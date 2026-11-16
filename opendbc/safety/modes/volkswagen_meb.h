@@ -160,7 +160,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, MSG_Motor_51, 0U)) {
     uint8_t tsk_status = msg->data[11] & 0x07U;
-    volkswagen_tsk_status_check((int)tsk_status, false);  // MEB is openpilot longitudinal only
+    volkswagen_tsk_status_check(tsk_status, false);  // MEB is openpilot longitudinal only
 
     uint32_t accel_pedal_value = (GET_BYTES_LE(msg, 1, 2) >> 4) & 0x1FFU;
     safety.gas_pressed = accel_pedal_value > 0U;
