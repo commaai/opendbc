@@ -212,6 +212,12 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
           self.assertFalse(self.safety.get_steering_disengage_prev())
 
+  def test_cruise_states(self):
+    for state in range(8):
+      self._rx(self._pcm_status_msg(False))
+      self._rx(self.packer.make_can_msg_safety("DI_state", 0, {"DI_cruiseState": state}))
+      self.assertEqual(state in (2, 3, 4, 6, 7), self.safety.get_controls_allowed())
+
   def test_autopark_summon_while_enabled(self):
     # We should not respect Autopark that activates while controls are allowed
     self._rx(self._pcm_status_msg(True, 0))
@@ -242,6 +248,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, True)))
       self.assertNotEqual(autopark_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
       self.assertNotEqual(autopark_active or not self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
+      self.assertEqual(0 if autopark_active else -1, self.safety.safety_fwd_hook(2, MSG_APS_eacMonitor))
 
       # Regain controls when Autopark disables
       self._rx(self._pcm_status_msg(True, 0))
