@@ -1,628 +1,547 @@
 #!/usr/bin/env python3
-import argparse
-import io
+"""mutation.py tests the tests.
+
+It makes small changes (mutants) to the safety C code and runs the test suite against each one:
+
+  opendbc/safety/modes/byd.h
+    original:    safety.gas_pressed = (msg->data[3] & 0x7FU) > 0U;
+    comparison:  safety.gas_pressed = (msg->data[3] & 0x7FU) <= 0U;   <- gas reads as pressed exactly when it isn't
+    boundary:    safety.gas_pressed = (msg->data[3] & 0x7FU) > 1U;    <- a throttle of exactly 1 reads as released
+
+A mutant is killed when a test fails on it: the tests would catch that bug. A surviving mutant means no test checks
+that behavior, even if a test runs the line. The goal is to kill every mutant.
+
+Usage: python -m opendbc.safety.tests.mutation [-j JOBS] [--only ID ...] [--list]
+Survivors are printed with their id and source line. After adding a test, rerun just those with --only.
+"""
 import os
+# Forking a process with live BLAS threads (numpy, imported by the tests) can deadlock.
+for _v in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+  os.environ.setdefault(_v, "1")
+
+import argparse
+import ctypes
+import gc
+import multiprocessing
+import operator
+import pickle
+import random
 import re
+import resource
+import select
+import signal
 import subprocess
 import sys
 import tempfile
 import time
+import traceback
 import unittest
+from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from collections import Counter, namedtuple
 from dataclasses import dataclass
 from pathlib import Path
 
 import tree_sitter_c as ts_c
 import tree_sitter as ts
 
-from opendbc.safety.tests.libsafety.libsafety_py import single_precision_flags
-
+from opendbc.safety.tests.libsafety import libsafety_py
 
 ROOT = Path(__file__).resolve().parents[3]
-SAFETY_DIR = ROOT / "opendbc" / "safety"
-SAFETY_TESTS_DIR = ROOT / "opendbc" / "safety" / "tests"
-SAFETY_C_REL = Path("opendbc/safety/tests/libsafety/safety.c")
+SAFETY_DIR = ROOT / "opendbc/safety"
+TESTS_DIR = SAFETY_DIR / "tests"
+# these build their own library from the unmutated sources, so they can't observe a mutant
+EXCLUDED_TESTS = {"test_globals.py", "test_release_build.py"}
 
-ANSI_RESET = "\033[0m"
-ANSI_BOLD = "\033[1m"
-ANSI_RED = "\033[31m"
-ANSI_GREEN = "\033[32m"
-ANSI_YELLOW = "\033[33m"
+# As libsafety_py builds it, plus bounds checks on trailing arrays (e.g. CANPacket_t.data): an out-of-bounds read
+# there would otherwise return whatever is in memory, making the verdict nondeterministic.
+CFLAGS = ["-fPIC", "-shared", "-w", "-fno-builtin", "-std=gnu11", "-g0", "-O0", "-DALLOW_DEBUG", "-fsanitize=undefined",
+          "-fno-sanitize-recover=undefined", "-fstrict-flex-arrays=3", *libsafety_py.single_precision_flags()]
 
-COMPARISON_OPERATOR_MAP = {
-  "==": "!=",
-  "!=": "==",
-  ">": "<=",
-  ">=": "<",
-  "<": ">=",
-  "<=": ">",
+COMPARISONS = {"==": "!=", "!=": "==", ">": "<=", ">=": "<", "<": ">=", "<=": ">"}
+RULES = {  # (tree-sitter node type, operator) -> (mutator, mutated operator)
+  ("update_expression", "++"): ("increment", "--"),
+  ("update_expression", "--"): ("decrement", "++"),
+  ("unary_expression", "!"): ("remove_negation", ""),
+  **{("binary_expression", a): ("comparison", b) for a, b in COMPARISONS.items()},
+  **{("binary_expression", a): ("bitwise", b) for a, b in {"&": "|", "|": "&", "^": "&"}.items()},
+  **{("binary_expression", a): ("arithmetic", b) for a, b in {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}.items()},
+  **{("assignment_expression", a): ("bitwise_assignment", b) for a, b in {"&=": "|=", "|=": "&=", "^=": "&="}.items()},
+  **{("assignment_expression", a): ("arithmetic_assignment", b)
+     for a, b in {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}.items()},
 }
+# operands of these are never evaluated
+UNEVALUATED = {"sizeof_expression", "alignof_expression", "offsetof_expression"}
+# on operands and results in [0, 2**31), these compute exactly what C does, for int and unsigned operands alike
+FOLD_OPS = {"+": operator.add, "-": operator.sub, "*": operator.mul, "/": operator.floordiv, "%": operator.mod,
+            "&": operator.and_, "|": operator.or_, "^": operator.xor, "<<": operator.lshift, ">>": operator.rshift,
+            "==": operator.eq, "!=": operator.ne, "<": operator.lt, "<=": operator.le, ">": operator.gt, ">=": operator.ge}
+POSITIVE = "positive"  # what _fold makes of a sizeof
+INT_CASTS = {"int", "unsigned", "unsigned int", "int32_t", "uint32_t"}  # casts that keep every value in [0, 2**31)
 
-MUTATOR_FAMILIES = {
-  "increment": ("update_expression", {"++": "--"}),
-  "decrement": ("update_expression", {"--": "++"}),
-  "comparison": ("binary_expression", COMPARISON_OPERATOR_MAP),
-  "boundary": ("number_literal", {}),
-  "bitwise_assignment": ("assignment_expression", {"&=": "|=", "|=": "&=", "^=": "&="}),
-  "bitwise": ("binary_expression", {"&": "|", "|": "&", "^": "&"}),
-  "arithmetic_assignment": ("assignment_expression", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
-  "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
-  "remove_negation": ("unary_expression", {"!": ""}),
-}
-
-
-_RawSite = namedtuple('_RawSite', 'expr_start expr_end op_start op_end line original_op mutated_op mutator')
-
-
-@dataclass(frozen=True)
-class MutationSite:
-  site_id: int
-  expr_start: int
-  expr_end: int
-  op_start: int
-  op_end: int
-  line: int
-  original_op: str
-  mutated_op: str
-  mutator: str
-  origin_file: Path
-  origin_line: int
-
-
-@dataclass(frozen=True)
-class MutantResult:
-  site: MutationSite
-  outcome: str  # killed | survived | infra_error
-  test_sec: float
-  details: str
+KILLED, SURVIVED, UNCOVERED, INFRA = "killed", "survived", "uncovered", "infra_error"
+UBSAN_EXIT_CODE = 86  # a child stopped by UBSan exits with this (see PRELUDE), which nothing else in it uses
+# signals the code running in a child can raise itself; any other signal comes from outside
+CRASH_SIGNALS = {signal.SIGSEGV, signal.SIGBUS, signal.SIGFPE, signal.SIGILL, signal.SIGABRT, signal.SIGTRAP}
+CPU_LIMIT_FIXTURE = 1.0  # CPU seconds a child may spend outside of tests at a time
+MEM_HEADROOM = 256 << 20  # address space a child may allocate beyond what it inherits (Linux only)
+# TODO: kill the remaining survivors and remove this. Until then, the run fails only if more mutants survive than this.
+MAX_SURVIVORS = 110
+RED, GREEN, YELLOW, BOLD = "31", "32", "33", "1"
 
 
 def colorize(text, color):
-  term = os.environ.get("TERM", "")
-  if not sys.stdout.isatty() or term in ("", "dumb") or "NO_COLOR" in os.environ:
-    return text
-  return f"{color}{text}{ANSI_RESET}"
+  if not sys.stdout.isatty() or os.environ.get("TERM", "") in ("", "dumb") or "NO_COLOR" in os.environ:
+    return str(text)
+  return f"\033[{color}m{text}\033[0m"
 
 
-def format_mutation(original_op, mutated_op):
-  return colorize(f"{original_op}->{mutated_op}", ANSI_RED)
+@dataclass(frozen=True)
+class Site:
+  id: int
+  start: int  # the mutated expression
+  end: int
+  op_start: int  # the replaced token
+  op_end: int
+  original: str
+  mutated: str
+  mutator: str
+  file: Path
+  line: int
+  # in a static object's initializer: (declaration start, end, name start, end, end of the object's scope)
+  static: tuple | None = None
+
+  def __str__(self):
+    return f"#{self.id:04d} {self.file.relative_to(ROOT)}:{self.line} [{self.mutator}] {colorize(f'{self.original}->{self.mutated}', RED)}"
 
 
-def _parse_int_literal(token):
-  m = re.fullmatch(r"([0-9][0-9a-fA-FxX]*)([uUlL]*)", token)
+# ---------------------------------------------------------------- mutation sites
+
+def _boundary(token):
+  """An integer literal (tree-sitter includes an attached sign) plus one, keeping base and suffix; None for others."""
+  m = re.fullmatch(r"([-+]?)(0[xX][0-9a-fA-F]+|0|[1-9][0-9]*)([uUlL]*)", token)
   if m is None:
     return None
-  body, suffix = m.groups()
-  try:
-    value = int(body, 0)
-  except ValueError:
-    return None
-  base = "hex" if body.lower().startswith("0x") else "dec"
-  return value, base, suffix
+  value = int(m[1] + m[2], 0) + 1
+  digits = f"0x{abs(value):X}" if m[2][1:2] in ("x", "X") else str(abs(value))
+  return ("-" if value < 0 else "") + digits + m[3]
 
 
-def _site_key(site):
-  return (site.op_start, site.op_end, site.mutator)
-
-
-def _is_in_constexpr_context(node):
-  """Check if a node is inside a static or file-scope variable initializer."""
-  current = node.parent
-  while current is not None:
-    if current.type == "init_declarator":
-      decl = current.parent
-      if decl and decl.type == "declaration":
-        for child in decl.children:
-          if child.type == "storage_class_specifier" and child.text == b"static":
-            return True
-        if decl.parent and decl.parent.type == "translation_unit":
-          return True
-    current = current.parent
-  return False
-
-
-def _prepare_for_parsing(txt):
-  """Blank line markers and replace __typeof__() for tree-sitter. Preserves byte offsets."""
-  result = re.sub(
-    r'^[ \t]*#[ \t]+\d+[ \t]+"[^\n]*',
-    lambda m: " " * len(m.group()),
-    txt,
-    flags=re.MULTILINE,
-  )
-  # Replace __typeof__(...) with padded int (handle nested parens)
-  parts = []
-  i = 0
-  for m in re.finditer(r"(?:__typeof__|typeof)\s*\(", result):
-    if m.start() < i:
-      continue  # skip nested typeof inside already-replaced region
-    parts.append(result[i:m.start()])
-    depth = 1
-    j = m.end()
-    while j < len(result) and depth > 0:
-      if result[j] == "(":
-        depth += 1
-      elif result[j] == ")":
-        depth -= 1
-      j += 1
-    parts.append("int" + " " * (j - m.start() - 3))
-    i = j
-  parts.append(result[i:])
-  return "".join(parts)
-
-
-def enumerate_sites(input_source, preprocessed_file):
-  subprocess.run([
-    "cc", "-E", "-std=gnu11", "-nostdlib", "-fno-builtin", "-DALLOW_DEBUG",
-    f"-I{ROOT}", f"-I{ROOT / 'opendbc/safety/board'}",
-    str(input_source), "-o", str(preprocessed_file),
-  ], cwd=ROOT, capture_output=True, check=True)
-
-  txt = preprocessed_file.read_text()
-
-  # Build line map from preprocessor directives
-  line_map = {}
-  current_map_file = None
-  current_map_line = None
-  directive_re = re.compile(r'^\s*#\s*(\d+)\s+"([^"]+)"')
-  for pp_line_num, pp_line in enumerate(txt.splitlines(keepends=True), start=1):
-    m = directive_re.match(pp_line)
-    if m:
-      current_map_line = int(m.group(1))
-      current_map_file = Path(m.group(2)).resolve()
-      continue
-    if current_map_file is not None and current_map_line is not None:
-      line_map[pp_line_num] = (current_map_file, current_map_line)
-      current_map_line += 1
-
-  # Parse with tree-sitter
-  parser = ts.Parser(ts.Language(ts_c.language()))
-  tree = parser.parse(_prepare_for_parsing(txt).encode())
-
-  # Build rule map
-  rule_map = {}
-  counts = {}
-  for mutator, (node_kind, op_map) in MUTATOR_FAMILIES.items():
-    counts[mutator] = 0
-    if mutator == "boundary":
-      continue
-    for original_op, mutated_op in op_map.items():
-      rule_map.setdefault((node_kind, original_op), []).append((mutator, original_op, mutated_op))
-
-  # Walk tree to find mutation sites
-  deduped = {}
-  build_incompatible_keys = set()
-  stack = [tree.root_node]
-  while stack:
-    node = stack.pop()
-    kind = node.type
-
-    # Boundary mutations: find number_literals inside comparison operands
-    if kind == "binary_expression":
-      cmp_op = node.child_by_field_name("operator")
-      if cmp_op and cmp_op.type in COMPARISON_OPERATOR_MAP:
-        lit_stack = []
-        for field in ("left", "right"):
-          operand = node.child_by_field_name(field)
-          if operand:
-            lit_stack.append(operand)
-        while lit_stack:
-          n = lit_stack.pop()
-          if n.type == "number_literal":
-            token = txt[n.start_byte:n.end_byte]
-            parsed = _parse_int_literal(token)
-            if parsed:
-              value, base, suffix = parsed
-              mutated = f"0x{value + 1:X}{suffix}" if base == "hex" else f"{value + 1}{suffix}"
-              line = n.start_point[0] + 1
-              bsite = _RawSite(n.start_byte, n.end_byte, n.start_byte, n.end_byte, line, token, mutated, "boundary")
-              key = _site_key(bsite)
-              deduped[key] = bsite
-              if _is_in_constexpr_context(n):
-                build_incompatible_keys.add(key)
-          lit_stack.extend(n.children)
-
-    # Operator mutations: any node with an operator child
-    op_child = node.child_by_field_name("operator")
-    if op_child:
-      for mutator, original_op, mutated_op in rule_map.get((kind, op_child.type), []):
-        line = node.start_point[0] + 1
-        site = _RawSite(node.start_byte, node.end_byte, op_child.start_byte, op_child.end_byte, line, original_op, mutated_op, mutator)
-        key = _site_key(site)
-        deduped[key] = site
-        if _is_in_constexpr_context(node):
-          build_incompatible_keys.add(key)
-
-    stack.extend(node.children)
-
-  sites = sorted(deduped.values(), key=lambda s: (s.op_start, s.mutator))
-  out = []
-  build_incompatible_site_ids = set()
-  for s in sites:
-    mapped = line_map.get(s.line)
-    if mapped is None:
-      continue
-    origin_file, origin_line = mapped
-    if SAFETY_DIR not in origin_file.parents and origin_file != SAFETY_DIR:
-      continue
-    site_id = len(out)
-    site = MutationSite(
-      site_id=site_id, expr_start=s.expr_start, expr_end=s.expr_end,
-      op_start=s.op_start, op_end=s.op_end, line=s.line,
-      original_op=s.original_op, mutated_op=s.mutated_op, mutator=s.mutator,
-      origin_file=origin_file, origin_line=origin_line,
-    )
-    if _site_key(s) in build_incompatible_keys:
-      build_incompatible_site_ids.add(site_id)
-    out.append(site)
-    counts[s.mutator] += 1
-  return out, counts, build_incompatible_site_ids, txt
-
-
-def _build_core_tests(catalog):
-  """Build test ordering for core (non-mode) files.
-
-  Tests are ordered by how widely each method is shared. Methods inherited by
-  many classes exercise the most fundamental safety logic and run first.
-
-  Keep every implementation of each method.
-  """
-  method_freq = {}
-  method_by_module = {}
-  for name in sorted(catalog.keys()):
-    for test_id in catalog[name]:
-      method = test_id.rsplit(".", 1)[-1]
-      method_freq[method] = method_freq.get(method, 0) + 1
-      if method not in method_by_module:
-        method_by_module[method] = {}
-      if name not in method_by_module[method]:
-        method_by_module[method][name] = test_id
-  # Round-robin: first instance of each method (by freq), then second, etc.
-  # This ensures diverse early coverage with failfast.
-  sorted_methods = sorted(method_freq, key=lambda m: -method_freq[m])
-  ordered = []
-  max_implementations = max(len(module_map) for module_map in method_by_module.values())
-  for round_idx in range(max_implementations):
-    for m in sorted_methods:
-      ids = [method_by_module[m][module] for module in sorted(method_by_module[m])]
-      if round_idx < len(ids):
-        ordered.append(ids[round_idx])
-  return ordered
-
-
-def build_priority_tests(site, catalog, core_tests):
-  """Build an ordered list of test IDs for a mutation site.
-
-  For mode files: all tests from the matching test_<mode>.py module.
-  For core files: uses the pre-computed core_tests ordering.
-  """
-  src = site.origin_file
-  rel_parts = src.relative_to(ROOT).parts
-  is_mode = len(rel_parts) >= 4 and rel_parts[:3] == ("opendbc", "safety", "modes")
-
-  if is_mode:
-    mode_file = f"test_{src.stem}.py"
-    return list(catalog.get(mode_file, []))
-  return core_tests
-
-
-def format_site_snippet(site, context_lines=2):
-  source = site.origin_file
-  text = source.read_text()
-  lines = text.splitlines()
-  display_ln = site.origin_line
-  line_idx = display_ln - 1
-  start = max(0, line_idx - context_lines)
-  end = min(len(lines), line_idx + context_lines + 1)
-
-  line_text = lines[line_idx]
-  rel_start = line_text.find(site.original_op)
-  if rel_start < 0:
-    rel_start = 0
-  rel_end = rel_start + len(site.original_op)
-
-  snippet_lines = []
-  width = len(str(end))
-  for idx in range(start, end):
-    num = idx + 1
-    prefix = ">" if idx == line_idx else " "
-    line = lines[idx]
-    if idx == line_idx:
-      marker = colorize(f"[[{site.original_op}->{site.mutated_op}]]", ANSI_RED)
-      line = f"{line[:rel_start]}{marker}{line[rel_end:]}"
-    snippet_lines.append(f"{prefix} {num:>{width}} | {line}")
-  return "\n".join(snippet_lines)
-
-
-def render_progress(completed, total, killed, survived, infra, elapsed_sec):
-  bar_width = 30
-  filled = int((completed / total) * bar_width)
-  bar = "#" * filled + "-" * (bar_width - filled)
-
-  rate = completed / elapsed_sec if elapsed_sec > 0 else 0.0
-  remaining = total - completed
-  eta = (remaining / rate) if rate > 0 else 0.0
-
-  killed_text = colorize(f"k:{killed}", ANSI_GREEN)
-  survived_text = colorize(f"s:{survived}", ANSI_RED)
-  infra_text = colorize(f"i:{infra}", ANSI_YELLOW)
-
-  return f"[{bar}] {completed}/{total} {killed_text} {survived_text} {infra_text} mps:{rate:.2f} elapsed:{elapsed_sec:.1f}s eta:{eta:.1f}s"
-
-
-def print_live_status(text, *, final=False):
-  if sys.stdout.isatty():
-    print("\r" + text, end="\n" if final else "", flush=True)
+def _fold(txt, node, sub):
+  """Value of `node` if it's a constant expression of int or unsigned int literals with every value in [0, 2**31),
+  None otherwise. A sizeof is an unknown positive value, POSITIVE. `sub` replaces the token starting at an offset."""
+  def text(n):
+    return sub.get(n.start_byte, txt[n.start_byte:n.end_byte])
+  if node.type == "parenthesized_expression" and node.named_child_count == 1:
+    return _fold(txt, node.named_children[0], sub)
+  if node.type == "sizeof_expression":
+    return POSITIVE
+  if node.type == "cast_expression" and text(node.child_by_field_name("type")) in INT_CASTS:
+    return _fold(txt, node.child_by_field_name("value"), sub)
+  if node.type == "number_literal":
+    m = re.fullmatch(r"(0[xX][0-9a-fA-F]+|0|[1-9][0-9]*)[uU]?", text(node))
+    v = int(m[1], 0) if m else None
+  elif node.type == "binary_expression":
+    op, a, b = text(node.child_by_field_name("operator")), *(_fold(txt, node.child_by_field_name(f), sub) for f in ("left", "right"))
+    if POSITIVE in (a, b):  # of an unknown value, only 0 * x, x * 0, 0 / x and 0 % x are known
+      return 0 if (op == "*" and 0 in (a, b)) or (op in ("/", "%") and a == 0) else None
+    if a is None or b is None or op not in FOLD_OPS or (op in ("/", "%") and b == 0) or (op in ("<<", ">>") and b >= 31):
+      return None
+    v = int(FOLD_OPS[op](a, b))
   else:
-    print(text, flush=True)
+    return None
+  return v if v is not None and 0 <= v < 2 ** 31 else None
 
 
-def _test_ids(test: unittest.TestSuite | unittest.TestCase) -> list[str]:
-  if isinstance(test, unittest.TestSuite):
-    return [test_id for t in test for test_id in _test_ids(t)]
-  return [test.id()]
+def _equivalent(txt, node, op_start, mutated):
+  """Whether the mutation is inside an integer constant expression whose value it doesn't change, e.g. 3U / 8U,
+  or turns x + 0 into x - 0 (or back), with 0 any constant expression folding to 0."""
+  if node.type == "binary_expression" and node.child_by_field_name("operator").start_byte == op_start and \
+     {txt[op_start], mutated} == {"+", "-"} and _fold(txt, node.child_by_field_name("right"), {}) == 0:
+    return True  # for floating point x this ignores the sign of a zero result, which nothing here depends on
+  if _fold(txt, node, {}) is None:
+    return False
+  while node.parent is not None and _fold(txt, node.parent, {}) is not None:
+    node = node.parent
+  return _fold(txt, node, {}) == _fold(txt, node, {op_start: mutated})
 
 
-def _discover_test_catalog():
-  loader = unittest.TestLoader()
-  catalog = {}
-  for test_file in sorted(SAFETY_TESTS_DIR.glob("test_*.py")):
-    module_name = ".".join(test_file.relative_to(ROOT).with_suffix("").parts)
-    suite = loader.loadTestsFromName(module_name)
-    catalog[test_file.name] = _test_ids(suite)
-  return catalog
+def _parseable(txt):
+  """The preprocessed source as tree-sitter can parse it, with the same offsets: line markers blanked, and every
+  __typeof__(...) (whose operand is never evaluated) replaced by int."""
+  txt = re.sub(r"^#.*", lambda m: " " * len(m[0]), txt, flags=re.MULTILINE)
+  while m := re.search(r"__typeof__\(", txt):
+    depth, end = 0, m.end() - 1
+    while depth := depth + {"(": 1, ")": -1}.get(txt[end], 0):
+      end += 1
+    txt = txt[:m.start()] + "int".ljust(end + 1 - m.start()) + txt[end + 1:]
+  return txt
 
 
-def run_unittest(targets, lib_path, mutant_id, verbose):
-  from opendbc.safety.tests.libsafety import libsafety_py
-  libsafety_py.load(lib_path)
-  libsafety_py.libsafety.mutation_set_active_mutant(mutant_id)
-
-  if verbose:
-    print("Running unittest targets:", ", ".join(targets), flush=True)
-
-  loader = unittest.TestLoader()
-  stream = io.StringIO()
-  runner = unittest.TextTestRunner(stream=stream, verbosity=0, failfast=True)
-
-  suite = unittest.TestSuite()
-  for target in targets:
-    suite.addTests(loader.loadTestsFromName(target))
-  result = runner.run(suite)
-  if result.failures:
-    return result.failures[0][0].id()
-  if result.errors:
-    return result.errors[0][0].id()
-  return None
-
-
-def _instrument_source(source, sites):
-  # Sort by start ascending, end descending (outermost first when same start)
-  sorted_sites = sorted(sites, key=lambda s: (s.expr_start, -s.expr_end))
-
-  # Build containment forest using a stack
-  roots = []
-  stack = []
-  for site in sorted_sites:
-    while stack and stack[-1][0].expr_end <= site.expr_start:
-      stack.pop()
-    node = [site, []]
-    if stack:
-      stack[-1][1].append(node)
+def find_sites(txt):
+  # (file, line) of each preprocessed line from the line markers, with file None if it's not safety code
+  origins, origin, files = [], (None, 0), {}
+  for line in txt.splitlines():
+    if m := re.match(r'# (\d+) "([^"]+)"', line):
+      if m[2] not in files:
+        f = Path(m[2]).resolve()
+        files[m[2]] = f if f.is_relative_to(SAFETY_DIR) and not f.is_relative_to(TESTS_DIR) else None
+      origin = (files[m[2]], int(m[1]) - 1)
     else:
-      roots.append(node)
-    stack.append(node)
+      origin = (origin[0], origin[1] + 1)
+    origins.append(origin)
+  sources, sites = {}, {}
 
-  def build_replacement(site, children):
-    parts = []
-    pos = site.expr_start
-    op_rel = None
-    running_len = 0
+  def add(node, op, mutator, mutated, static):
+    file, line = origins[op.start_point[0]]
+    if file is None or _equivalent(txt, node, op.start_byte, mutated):
+      return
+    assert static != "unsupported", f"can only mutate a static declaration of one named object: {file}:{line}"
+    # compilers disagree on which line a backslash-continued line maps to; use its first line
+    lines = sources.setdefault(file, file.read_text().splitlines())
+    while line > 1 and lines[line - 2].rstrip().endswith("\\"):
+      line -= 1
+    sites[(op.start_byte, mutator)] = (node.start_byte, node.end_byte, op.start_byte, op.end_byte,
+                                       txt[op.start_byte:op.end_byte], mutated, mutator, file, line, static)
 
-    for child_site, child_children in children:
-      seg = source[pos : child_site.expr_start]
-      if op_rel is None and site.op_start >= pos and site.op_start < child_site.expr_start:
-        op_rel = running_len + (site.op_start - pos)
-      parts.append(seg)
-      running_len += len(seg)
-
-      child_repl = build_replacement(child_site, child_children)
-      parts.append(child_repl)
-      running_len += len(child_repl)
-      pos = child_site.expr_end
-
-    seg = source[pos : site.expr_end]
-    if op_rel is None and site.op_start >= pos:
-      op_rel = running_len + (site.op_start - pos)
-    parts.append(seg)
-
-    expr_text = "".join(parts)
-    op_len = site.op_end - site.op_start
-    assert op_rel is not None and expr_text[op_rel : op_rel + op_len] == site.original_op, (
-      f"Operator mismatch (site_id={site.site_id}): expected {site.original_op!r} at offset {op_rel}"
-    )
-    mutated_expr = f"{expr_text[:op_rel]}{site.mutated_op}{expr_text[op_rel + op_len :]}"
-    return f"((__mutation_active_id == {site.site_id}) ? ({mutated_expr}) : ({expr_text}))"
-
-  result_parts = []
-  pos = 0
-  for site, children in roots:
-    result_parts.append(source[pos : site.expr_start])
-    result_parts.append(build_replacement(site, children))
-    pos = site.expr_end
-  result_parts.append(source[pos:])
-  return "".join(result_parts)
-
-
-def compile_mutated_library(preprocessed_source, sites, output_so):
-  instrumented = _instrument_source(preprocessed_source, sites)
-
-  prelude = """
-    static int __mutation_active_id = -1;
-    void mutation_set_active_mutant(int id) { __mutation_active_id = id; }
-  """
-  marker_re = re.compile(r'^\s*#\s+\d+\s+"[^\n]*\n?', re.MULTILINE)
-  instrumented = prelude + marker_re.sub("", instrumented)
-
-  mutation_source = output_so.with_suffix(".c")
-  mutation_source.write_text(instrumented)
-
-  subprocess.run([
-    "cc", "-shared", "-fPIC", "-w", "-fno-builtin", "-std=gnu11",
-    "-g0", "-O0", "-DALLOW_DEBUG", *single_precision_flags(),
-    str(mutation_source), "-o", str(output_so),
-  ], cwd=ROOT, check=True)
+  stack = [(ts.Parser(ts.Language(ts_c.language())).parse(_parseable(txt).encode()).root_node, None)]
+  while stack:
+    node, static = stack.pop()
+    if node.type in UNEVALUATED:
+      continue
+    parent = node.parent
+    if node.type == "declaration" and parent is not None and (parent.type == "translation_unit" or any(
+        c.type == "storage_class_specifier" and c.text == b"static" for c in node.children)):
+      # A static object's initializer must be constant, so its sites are mutated in copies of the object (see instrument)
+      declarators = node.children_by_field_name("declarator")
+      name = declarators[0] if len(declarators) == 1 else None
+      while name is not None and name.type != "identifier":
+        name = name.child_by_field_name("declarator")
+      scope_end = len(txt) if parent.type == "translation_unit" else parent.end_byte - 1
+      static = "unsupported" if name is None else (node.start_byte, node.end_byte, name.start_byte, name.end_byte, scope_end)
+    stack.extend((c, static) for c in node.children)
+    op = node.child_by_field_name("operator")
+    if op is None:
+      continue
+    if (node.type, op.type) in RULES:
+      add(node, op, *RULES[(node.type, op.type)], static)
+    if node.type == "binary_expression" and op.type in COMPARISONS:  # boundary: integer literals in the operands
+      operands = [n for n in (node.child_by_field_name("left"), node.child_by_field_name("right")) if n is not None]
+      while operands:
+        n = operands.pop()
+        if n.type == "number_literal" and (mutated := _boundary(txt[n.start_byte:n.end_byte])):
+          add(n, n, "boundary", mutated, static)
+        elif n.type not in UNEVALUATED:
+          operands.extend(n.children)
+  return [Site(i, *sites[k]) for i, k in enumerate(sorted(sites))]
 
 
-def eval_mutant(site, targets, lib_path, verbose):
+# ---------------------------------------------------------------- mutated library
+
+PRELUDE = """
+static int __mutation_id = -1;
+static unsigned char __mutation_hit[{n}];
+void mutation_set_active_mutant(int id) {{ __mutation_id = id; }}
+unsigned char *mutation_hits(void) {{ return __mutation_hit; }}
+void __sanitizer_set_death_callback(void (*callback)(void));
+void _exit(int status);
+static void __mutation_ubsan_died(void) {{ _exit({code}); }}
+__attribute__((constructor)) static void __mutation_init(void) {{ __sanitizer_set_death_callback(__mutation_ubsan_died); }}
+"""
+
+
+def instrument(txt, sites):
+  """The source with each site's expression E replaced by `mutant active ? mutated E : E`, and its evaluation recorded.
+
+  The mutated form only runs while its site is the active mutant, so the sites nested in it aren't instrumented there.
+  The result is converted back to E's type, so the surrounding expressions are unchanged."""
+  def rewrite(lo, hi, inner):  # txt[lo:hi] with the (sorted, non-overlapping or nested) sites in it instrumented
+    parts, i = [], 0
+    while i < len(inner):
+      s, j = inner[i], i + 1
+      while j < len(inner) and inner[j].start < s.end:
+        j += 1
+      e = txt[s.start:s.end]
+      mutated = txt[s.start:s.op_start] + s.mutated + txt[s.op_end:s.end]
+      selected = f"(__mutation_hit[{s.id}] = 1, __mutation_id == {s.id}) ? ({mutated}) : ({rewrite(s.start, s.end, inner[i + 1:j])})"
+      parts += [txt[lo:s.start], f"((__typeof__(1 ? ({e}) : ({e})))({selected}))"]
+      lo, i = s.end, j
+    return "".join(parts) + txt[lo:hi]
+
+  # A static object's initializer must be constant, so each of its sites k gets a copy of the declaration with just
+  # that mutation, __mutation_static_k, and the object's uses after it are redirected to the copy while k is active.
+  inserts, static_sites = [(len(txt), "")], {}
+  for s in sites:
+    if s.static is not None:
+      static_sites.setdefault(s.static, []).append(s)
+  for (start, end, name_start, name_end, scope_end), group in static_sites.items():
+    name = txt[name_start:name_end]
+    copies = "".join(txt[start:name_start] + f"__mutation_static_{s.id}" + txt[name_end:s.op_start] + s.mutated + txt[s.op_end:end] + "\n"
+                     for s in group)
+    redirect = "".join(f"__mutation_hit[{s.id}] = 1, " for s in group)
+    redirect += "".join(f"__mutation_id == {s.id} ? &__mutation_static_{s.id} : " for s in group)
+    inserts += [(end, f"\n{copies}#define {name} (*({redirect}&{name}))\n"), (scope_end, f"\n#undef {name}\n")]
+  out, lo = [PRELUDE.format(n=max(len(sites), 1), code=UBSAN_EXIT_CODE)], 0
+  runtime = sorted((s for s in sites if s.static is None), key=lambda s: (s.start, -s.end))
+  for at, text in sorted(inserts):  # never inside a runtime site: they're at the end of a declaration or scope
+    out += [rewrite(lo, at, [s for s in runtime if lo <= s.start < at]), text]
+    lo = at
+  return "".join(out)
+
+
+# ---------------------------------------------------------------- tests, run in forked children
+
+TESTS = {}  # test id -> TestCase, in the parent and inherited by every child
+PRISTINE = {}  # test class -> its scalar class attributes, which some tests use as counters (`self.__class__.cnt += 1`)
+SCALARS = (int, float, bool, str, type(None))
+
+
+def discover_tests():
+  def flatten(suite):
+    for t in suite:
+      yield from flatten(t) if isinstance(t, unittest.TestSuite) else [t]
+  for f in sorted(TESTS_DIR.glob("test_*.py")):
+    if f.name not in EXCLUDED_TESTS:
+      for t in flatten(unittest.defaultTestLoader.loadTestsFromName(".".join(f.relative_to(ROOT).with_suffix("").parts))):
+        TESTS[t.id()] = t
+  # setUpClass only skips helper classes (and has no other effect), so it's run once here instead of in every child
+  for cls in {type(t) for t in TESTS.values()}:
+    try:
+      cls.setUpClass()
+    except unittest.SkipTest:
+      for tid in [tid for tid, t in TESTS.items() if type(t) is cls]:
+        del TESTS[tid]
+  from opendbc.can.dbc import DBC
+  for cls in {type(t) for t in TESTS.values()}:
+    PRISTINE.update({c: {k: v for k, v in vars(c).items() if type(v) in SCALARS} for c in cls.__mro__})
+    if isinstance(getattr(cls, "DBC", None), str):
+      DBC(cls.DBC)  # a read-only cache, built here so not every child builds it
+
+
+def run_test(tid, result):
+  """Runs a test as if it were the first one run: class attributes as discovered and `random` seeded by its id."""
+  test = TESTS[tid]
+  for cls, state in ((c, PRISTINE[c]) for c in type(test).__mro__):
+    for k in [k for k, v in vars(cls).items() if type(v) in SCALARS and k not in state]:
+      delattr(cls, k)
+    for k, v in state.items():
+      if vars(cls).get(k, not v) is not v:
+        setattr(cls, k, v)
+  random.seed(tid)
+  test.run(result)
+
+
+def baseline_task(tids, n):
+  """Runs tests with no mutant active, returning {test id: (CPU seconds, ids of the sites it reaches)}."""
+  import numpy as np
+  signal.setitimer(signal.ITIMER_PROF, 0)  # no CPU limit: the original code doesn't hang
+  hits = np.frombuffer(libsafety_py.ffi.buffer(libsafety_py.libsafety.mutation_hits(), n), dtype=np.uint8)
+  out, result = {}, unittest.TestResult()
+  for tid in tids:
+    hits[:], t0 = 0, time.process_time()
+    run_test(tid, result)
+    if not result.wasSuccessful():
+      return f"{tid} failed:\n{(result.failures + result.errors + [(None, 'unexpected success')])[0][1]}"
+    if not result.skipped or result.skipped[-1][0] is not TESTS[tid]:
+      out[tid] = (time.process_time() - t0, np.flatnonzero(hits).tolist())
+  return out
+
+
+def mutant_task(site_id, tids, cpu_limits):
+  """Runs tests with the mutant active until one fails; returns (that test's id or None, CPU seconds spent in tests)."""
+  libsafety_py.libsafety.mutation_set_active_mutant(site_id)
+  result, t0 = unittest.TestResult(), time.process_time()
+  for tid in tids:
+    # SIGPROF's default action ends the process, even in a C loop
+    signal.setitimer(signal.ITIMER_PROF, cpu_limits[tid])
+    run_test(tid, result)
+    signal.setitimer(signal.ITIMER_PROF, CPU_LIMIT_FIXTURE)
+    if not result.wasSuccessful():
+      return tid, time.process_time() - t0
+  return None, time.process_time() - t0
+
+
+def run_forked(task, args, wall_limit):
+  """Runs task(*args) in a fork of this pool worker. Returns ("ok", its return value), ("killed", how the child died
+  of something its own code did) or (INFRA, why there's no result)."""
+  r, w = os.pipe()
+  pid = os.fork()
+  if pid == 0:
+    try:
+      os.close(r)
+      resource.setrlimit(resource.RLIMIT_CORE, (0, 0))  # crash reporters can take seconds per crash
+      if sys.platform == "linux":  # macOS doesn't enforce RLIMIT_AS
+        libc = ctypes.CDLL(None)
+        libc.prctl(4, 0, 0, 0, 0)  # PR_SET_DUMPABLE: no core dumps, not even piped ones
+        libc.prctl(1, signal.SIGKILL, 0, 0, 0)  # PR_SET_PDEATHSIG: don't outlive the worker
+        vm = int(Path("/proc/self/statm").read_text().split()[0]) * os.sysconf("SC_PAGE_SIZE")
+        resource.setrlimit(resource.RLIMIT_AS, (vm + MEM_HEADROOM, vm + MEM_HEADROOM))
+      devnull = os.open(os.devnull, os.O_WRONLY)
+      os.dup2(devnull, 1)
+      os.dup2(devnull, 2)
+      signal.setitimer(signal.ITIMER_PROF, CPU_LIMIT_FIXTURE)
+      msg = ("ok", task(*args))
+    except BaseException:
+      msg = (INFRA, traceback.format_exc())
+    signal.setitimer(signal.ITIMER_PROF, 0)
+    with os.fdopen(w, "wb") as f:
+      f.write(pickle.dumps(msg))
+    os._exit(0)
+  os.close(w)
+  data, deadline = b"", time.monotonic() + wall_limit
+  while not (timed_out := not select.select([r], [], [], max(0.0, deadline - time.monotonic()))[0]):
+    if not (chunk := os.read(r, 1 << 20)):
+      break  # the child only closes its end by exiting
+    data += chunk
+  os.close(r)
+  if timed_out:
+    os.kill(pid, signal.SIGKILL)
+  status = os.waitpid(pid, 0)[1]
+  if timed_out:
+    return INFRA, f"no result after {wall_limit:.0f}s"
+  if os.WIFSIGNALED(status):
+    sig = signal.Signals(os.WTERMSIG(status))
+    if sig == signal.SIGPROF:
+      return "killed", "timeout"
+    return ("killed", f"crash: {sig.name}") if sig in CRASH_SIGNALS else (INFRA, f"killed by {sig.name} from outside")
+  if os.WEXITSTATUS(status) == UBSAN_EXIT_CODE:
+    return "killed", "ubsan"
   try:
-    t0 = time.perf_counter()
-    failed_test = run_unittest(targets, lib_path, mutant_id=site.site_id, verbose=verbose)
-    duration = time.perf_counter() - t0
-    if failed_test is not None:
-      return MutantResult(site, "killed", duration, "")
-    return MutantResult(site, "survived", duration, "")
-  except Exception as exc:
-    return MutantResult(site, "infra_error", 0.0, str(exc))
+    return pickle.loads(data)
+  except Exception:
+    return INFRA, f"exited with code {os.WEXITSTATUS(status)} without a result"
 
+
+# ---------------------------------------------------------------- reporting
+
+def snippet(site, sites, context=2):
+  """The site's source line and a few around it, with the mutation marked in place."""
+  lines = site.file.read_text().splitlines()
+  i = site.line - 1
+  # the n-th standalone occurrence of the token on the line, for the n-th site replacing that token there
+  n = sum(1 for s in sites if (s.file, s.line, s.original) == (site.file, site.line, site.original) and s.id < site.id)
+  pattern = (r"(?<![\w.])" + re.escape(site.original) + r"(?![\w.])" if site.mutator == "boundary" else
+             r"(?<![-+*/%&|^<>=!])" + re.escape(site.original) + r"(?![-+*/%&|^<>=])")
+  found, marker = list(re.finditer(pattern, lines[i])), colorize(f"[[{site.original}->{site.mutated}]]", RED)
+  if n < len(found):
+    lines[i] = lines[i][:found[n].start()] + marker + lines[i][found[n].end():]
+  else:
+    lines[i] += f"  <- {marker} in a macro expansion"
+  lo, hi = max(0, i - context), min(len(lines), i + context + 1)
+  width = len(str(hi))
+  return "\n".join(f"{'>' if k == i else ' '} {k + 1:>{width}} | {lines[k]}" for k in range(lo, hi))
+
+
+def progress(results, total, elapsed):
+  counts = Counter(outcome for outcome, _, _ in results.values())
+  done, rate = len(results), len(results) / max(elapsed, 1e-9)
+  bar = "#" * (30 * done // total) + "-" * (30 - 30 * done // total)
+  k, s, i = colorize(f"k:{counts[KILLED]}", GREEN), colorize(f"s:{counts[SURVIVED] + counts[UNCOVERED]}", RED), colorize(f"i:{counts[INFRA]}", YELLOW)
+  return f"[{bar}] {done}/{total} {k} {s} {i} mps:{rate:.1f} elapsed:{elapsed:.1f}s eta:{(total - done) / max(rate, 1e-9):.1f}s"
+
+
+# ---------------------------------------------------------------- main
 
 def main():
-  parser = argparse.ArgumentParser(description="Run strict safety mutation")
-  parser.add_argument("-j", type=int, default=max((os.cpu_count() or 1) - 1, 1), help="parallel mutants to run")
-  parser.add_argument("--max-mutants", type=int, default=0, help="optional limit for debugging (0 means all)")
-  parser.add_argument("--list-only", action="store_true", help="list discovered candidates and exit")
-  parser.add_argument("--verbose", action="store_true", help="print extra debug output")
+  parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+  parser.add_argument("-j", type=int, default=os.cpu_count() or 1, help="parallel jobs")
+  parser.add_argument("--only", type=int, nargs="+", help="only run these mutant ids")
+  parser.add_argument("--list", action="store_true", help="list the mutants and exit")
   args = parser.parse_args()
+  start = time.monotonic()
 
-  start = time.perf_counter()
-
-  with tempfile.TemporaryDirectory(prefix="mutation-op-run-") as run_tmp_dir:
-    preprocessed_file = Path(run_tmp_dir) / "safety_preprocessed.c"
-    sites, mutator_counts, build_incompatible_ids, preprocessed_source = enumerate_sites(ROOT / SAFETY_C_REL, preprocessed_file)
-    assert len(sites) > 0
-
-    if args.max_mutants > 0:
-      sites = sites[: args.max_mutants]
-
-    mutator_summary = ", ".join(f"{name} ({c})" for name in MUTATOR_FAMILIES if (c := mutator_counts.get(name, 0)) > 0)
-    print(f"Found {len(sites)} unique candidates: {mutator_summary}", flush=True)
-    if args.list_only:
-      for site in sites:
-        mutation = format_mutation(site.original_op, site.mutated_op)
-        print(f"  #{site.site_id:03d} {site.origin_file.relative_to(ROOT)}:{site.origin_line} [{site.mutator}] {mutation}")
+  with tempfile.TemporaryDirectory() as tmp:
+    txt = subprocess.run(["cc", "-E", "-std=gnu11", "-nostdlib", "-fno-builtin", "-DALLOW_DEBUG", f"-I{ROOT}", f"-I{SAFETY_DIR / 'board'}",
+                          str(TESTS_DIR / "libsafety/safety.c")], check=True, capture_output=True, text=True).stdout
+    all_sites = find_sites(txt)
+    sites = [s for s in all_sites if args.only is None or s.id in args.only]
+    print(f"Found {len(all_sites)} mutants: " + ", ".join(f"{k} ({v})" for k, v in Counter(s.mutator for s in all_sites).items()), flush=True)
+    if args.list:
+      print("\n".join(map(str, sites)))
       return 0
-
-    print(f"Running {len(sites)} mutants with {args.j} workers", flush=True)
-
-    discovered_count = len(sites)
-    selected_site_ids = {s.site_id for s in sites}
-    build_incompatible_ids &= selected_site_ids
-    pruned_compile_sites = len(build_incompatible_ids)
-    if pruned_compile_sites > 0:
-      sites = [s for s in sites if s.site_id not in build_incompatible_ids]
-      print(f"Pruned {pruned_compile_sites} build-incompatible mutants from constant-expression initializers", flush=True)
-    if not sites:
-      print("Failed to build mutation library: all sites were pruned as build-incompatible", flush=True)
+    if not sites or len(sites) != len(set(args.only or [s.id for s in sites])):
+      print("--only: no such mutant ids")
       return 2
 
-    mutation_lib = Path(run_tmp_dir) / "libsafety_mutation.so"
-    compile_mutated_library(preprocessed_source, sites, mutation_lib)
-
-    # Discover all tests by importing modules in the main process.
-    # Forked workers inherit these imports, eliminating per-worker import cost.
-    catalog = _discover_test_catalog()
-
-    # Baseline smoke check
-    baseline_ids = catalog.get("test_defaults.py", [])[:5]
-    baseline_failed = run_unittest(baseline_ids, mutation_lib, mutant_id=-1, verbose=args.verbose)
-    if baseline_failed is not None:
-      print("Baseline smoke failed with mutant_id=-1; aborting to avoid false kill signals.", flush=True)
-      print(f"  failed_test: {baseline_failed}", flush=True)
+    # every site is instrumented, so the ids and the baseline don't depend on --only
+    lib = Path(tmp) / "libsafety_mutation.so"
+    (Path(tmp) / "mutation.c").write_text(instrument(txt, all_sites))
+    cc = subprocess.Popen(["cc", *CFLAGS, str(Path(tmp) / "mutation.c"), "-o", str(lib)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    discover_tests()
+    cc_output = cc.communicate()[0].decode()
+    if cc.returncode != 0:
+      print(cc_output[-4000:] + "\nFailed to build the mutation library")
       return 2
+    libsafety_py.ffi.cdef("unsigned char *mutation_hits(void);")
+    libsafety_py.load(lib)  # only called into in forked children
 
-    # Pre-compute test targets per mutation site
-    core_tests = _build_core_tests(catalog)
-    site_targets = {site.site_id: build_priority_tests(site, catalog, core_tests) for site in sites}
+    gc.collect()
+    gc.freeze()  # children touching these objects' GC headers would copy their memory pages
+    # a worker never runs mutated code, so it only dies if killed from outside, which fails the run (BrokenProcessPool)
+    with ProcessPoolExecutor(args.j, mp_context=multiprocessing.get_context("fork")) as pool:
+      def run_all(tasks):  # {key: (task, args, wall limit)}, started in order -> (key, status, value) as they finish
+        futures = {pool.submit(run_forked, *task): key for key, task in tasks.items()}
+        for f in as_completed(futures):
+          yield futures[f], *f.result()
 
-    results = []
-    counts = Counter()
+      # Baseline: every test must pass with no mutant active. Small chunks balance well across the workers.
+      tids, coverage = list(TESTS), {}
+      for _, status, value in run_all({i: (baseline_task, (tids[i:i + 16], len(all_sites)), 600) for i in range(0, len(tids), 16)}):
+        if status != "ok" or isinstance(value, str):
+          print(f"Baseline failed with no mutant active ({status}):\n{value}")
+          return 2
+        coverage.update(value)
+      print(f"Baseline: {len(coverage)} tests passed in {time.monotonic() - start:.1f}s", flush=True)
+      print(f"Running {len(sites)} mutants with {args.j} workers", flush=True)
 
-    with ProcessPoolExecutor(max_workers=args.j) as pool:
-      future_map = {
-        pool.submit(eval_mutant, site, site_targets[site.site_id], mutation_lib, args.verbose): site for site in sites
-      }
-      print_live_status(render_progress(0, len(sites), 0, 0, 0, 0.0))
-      try:
-        for fut in as_completed(future_map):
-          try:
-            res = fut.result()
-          except Exception:
-            site = future_map[fut]
-            res = MutantResult(site, "killed", 0.0, "worker process crashed")
-          results.append(res)
-          counts[res.outcome] += 1
-          elapsed_now = time.perf_counter() - start
-          done = len(results) == len(sites)
-          print_live_status(render_progress(len(results), len(sites), counts["killed"], counts["survived"],
-                                            counts["infra_error"], elapsed_now), final=done)
-      except Exception:
-        # Pool broken — mark all unfinished mutants as killed (crash = behavioral change detected)
-        completed_ids = {r.site.site_id for r in results}
-        for site in sites:
-          if site.site_id not in completed_ids:
-            results.append(MutantResult(site, "killed", 0.0, "pool broken"))
-            counts["killed"] += 1
-        elapsed_now = time.perf_counter() - start
-        print_live_status(render_progress(len(results), len(sites), counts["killed"], counts["survived"], counts["infra_error"], elapsed_now), final=True)
+      reaching = {}
+      for tid, (_, hits) in coverage.items():
+        for k in hits:
+          reaching.setdefault(k, []).append(tid)
+      results, tasks = {}, []
+      for s in sites:
+        if s.id not in reaching:
+          results[s.id] = (UNCOVERED, "no test reaches it", 0.0)
+          continue
+        # own test module first, then the quickest first; the order only affects speed and which test kills it
+        own = f"opendbc.safety.tests.test_{s.file.stem}."
+        tids = sorted(reaching[s.id], key=lambda t: (not t.startswith(own), coverage[t][0], t))
+        # a test taking far longer than on the original code counts as a hang
+        limits = {t: 1.0 + 20 * coverage[t][0] for t in tids}
+        cpu = sum(coverage[t][0] for t in tids)
+        tasks.append((cpu, s.id, (mutant_task, (s.id, tids, limits), 10 + 4 * (cpu + max(limits.values()) + CPU_LIMIT_FIXTURE))))
+      tasks.sort(key=lambda t: -t[0])  # the most expensive first, so they don't make up the tail
+      mutants_start = time.monotonic()
+      for site_id, status, value in run_all({k: task for _, k, task in tasks}):
+        if status == "ok":
+          results[site_id] = ((KILLED, f"test: {value[0]}") if value[0] else (SURVIVED, "no test fails")) + (value[1],)
+        else:
+          results[site_id] = (KILLED if status == "killed" else INFRA, value, 0.0)
+        if sys.stdout.isatty():
+          print("\r" + progress(results, len(sites), time.monotonic() - mutants_start), end="", flush=True)
+      print(("\r" if sys.stdout.isatty() else "") + progress(results, len(sites), time.monotonic() - mutants_start), flush=True)
 
-    survivors = sorted((r for r in results if r.outcome == "survived"), key=lambda r: r.site.site_id)
-    if survivors:
-      print("", flush=True)
-      print(colorize("Surviving mutants", ANSI_RED), flush=True)
-      for res in survivors:
-        loc = f"{res.site.origin_file.relative_to(ROOT)}:{res.site.origin_line}"
-        mutation = format_mutation(res.site.original_op, res.site.mutated_op)
-        print(f"- #{res.site.site_id} {loc} [{res.site.mutator}] {mutation}", flush=True)
-        print(format_site_snippet(res.site), flush=True)
-
-    infra_results = sorted((r for r in results if r.outcome == "infra_error"), key=lambda r: r.site.site_id)
-    if infra_results:
-      print("", flush=True)
-      print(colorize("Infra errors", ANSI_YELLOW), flush=True)
-      for res in infra_results:
-        loc = f"{res.site.origin_file.relative_to(ROOT)}:{res.site.origin_line}"
-        detail = res.details.splitlines()[0] if res.details else "unknown error"
-        print(f"- #{res.site.site_id} {loc}: {detail}", flush=True)
-
-    elapsed = time.perf_counter() - start
-    total_test_sec = sum(r.test_sec for r in results)
-    print("", flush=True)
-    print(colorize("Mutation summary", ANSI_BOLD), flush=True)
-    print(f"  discovered: {discovered_count}", flush=True)
-    print(f"  pruned_build_incompatible: {pruned_compile_sites}", flush=True)
-    print(f"  total: {len(sites)}", flush=True)
-    print(f"  killed: {colorize(str(counts['killed']), ANSI_GREEN)}", flush=True)
-    print(f"  survived: {colorize(str(counts['survived']), ANSI_RED)}", flush=True)
-    print(f"  infra_error: {colorize(str(counts['infra_error']), ANSI_YELLOW)}", flush=True)
-    print(f"  test_time_sum: {total_test_sec:.2f}s", flush=True)
-    print(f"  avg_test_per_mutant: {total_test_sec / len(results):.3f}s", flush=True)
-    print(f"  mutants_per_second: {len(sites) / elapsed:.2f}", flush=True)
-    print(f"  elapsed: {elapsed:.2f}s", flush=True)
-
-    if counts["infra_error"] > 0:
-      return 2
-
-    # TODO: fix these surviving mutants and delete this block
-    known_survivors = {
-      ("opendbc/safety/lateral.h", 199, "boundary"),
-      ("opendbc/safety/lateral.h", 248, "boundary"),
-      ("opendbc/safety/lateral.h", 249, "boundary"),
-    }
-    survivors = [r for r in survivors if (str(r.site.origin_file.relative_to(ROOT)), r.site.origin_line, r.site.mutator) not in known_survivors]
-
-    if survivors:
-      return 1
-    return 0
+  counts = Counter(outcome for outcome, _, _ in results.values())
+  for title, outcome, color in (("Surviving mutants", SURVIVED, RED), ("Uncovered mutants (no test reaches them)", UNCOVERED, RED),
+                                ("Infra errors", INFRA, YELLOW)):
+    bad = [s for s in sites if results[s.id][0] == outcome]
+    if bad:
+      print("\n" + colorize(title, color))
+    for s in bad:
+      print(f"- {s}")
+      print("    " + results[s.id][1].strip().replace("\n", "\n    ") if outcome == INFRA else snippet(s, all_sites))
+  kills = Counter(detail.split(":")[0] for outcome, detail, _ in results.values() if outcome == KILLED)
+  test_sec, elapsed = sum(r[2] for r in results.values()), time.monotonic() - start
+  print("\n" + colorize("Mutation summary", BOLD))
+  print(f"  total: {len(sites)}")
+  print(f"  killed: {colorize(counts[KILLED], GREEN)} (" + ", ".join(f"{k}: {v}" for k, v in kills.most_common()) + ")")
+  print(f"  survived: {colorize(counts[SURVIVED], RED)}")
+  print(f"  uncovered: {colorize(counts[UNCOVERED], RED)}")
+  print(f"  infra_error: {colorize(counts[INFRA], YELLOW)}")
+  print(f"  test_time_sum: {test_sec:.2f}s")
+  print(f"  avg_test_per_mutant: {test_sec / len(sites):.3f}s")
+  print(f"  mutants_per_second: {len(sites) / elapsed:.2f}")
+  print(f"  elapsed: {elapsed:.2f}s")
+  return 2 if counts[INFRA] else 1 if counts[SURVIVED] + counts[UNCOVERED] > MAX_SURVIVORS else 0
 
 
 if __name__ == "__main__":

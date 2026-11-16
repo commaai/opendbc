@@ -3,7 +3,8 @@ import unittest
 
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety.libsafety_py import ffi, libsafety
+from opendbc.safety.tests.libsafety import libsafety_py
+from opendbc.safety.tests.libsafety.libsafety_py import ffi
 
 
 class TestDefaultRxHookBase(common.SafetyTest):
@@ -195,6 +196,7 @@ class TestSafetyConfigs(unittest.TestCase):
   def test_hooks(self):
     # safety.h relies on these instead of checking them at runtime
     always_tx = (CarParams.SafetyModel.allOutput, CarParams.SafetyModel.elm327)  # tx_hook_copy whitelists everything
+    libsafety = libsafety_py.libsafety  # loaded when the test runs, so a test runner can load its own build first
     for mode in CarParams.SafetyModel.schema.enumerants.values():
       if libsafety.set_safety_hooks(mode, 0) != 0:
         continue
