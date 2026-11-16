@@ -156,6 +156,7 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
   } else if (msg_matches(msg, 0x260U, 0U) && !safety_setup.hyundai_ev_gas_signal && !safety_setup.hyundai_hybrid_gas_signal) {
     safety.gas_pressed = (msg->data[7] >> 6) != 0U;
   } else {
+    // not a gas message for this platform
   }
 
   // sample wheel speed, averaging opposite corners
