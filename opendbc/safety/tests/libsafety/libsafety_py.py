@@ -19,7 +19,7 @@ def _build_libsafety(release: bool = False) -> str:
   cflags = [
     '-Wall', '-Wextra', '-Werror', '-nostdlib', '-fno-builtin',
     '-std=gnu11', '-Wfatal-errors', '-Wno-pointer-to-int-cast',
-    '-g', '-O0', '-fno-omit-frame-pointer',
+    '-g', '-O0', '-fno-omit-frame-pointer', '-fsingle-precision-constant',
   ]
   # Coverage must exclude the branches inserted by UBSan.
   if os.environ.get("SAFETY_COVERAGE") == "1":

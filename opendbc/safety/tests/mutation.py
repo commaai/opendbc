@@ -461,7 +461,7 @@ def compile_mutated_library(preprocessed_source, sites, output_so):
 
   subprocess.run([
     "cc", "-shared", "-fPIC", "-w", "-fno-builtin", "-std=gnu11",
-    "-g0", "-O0", "-DALLOW_DEBUG",
+    "-g0", "-O0", "-DALLOW_DEBUG", "-fsingle-precision-constant",
     str(mutation_source), "-o", str(output_so),
   ], cwd=ROOT, check=True)
 
