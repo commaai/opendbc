@@ -1,6 +1,8 @@
 #ifndef SAFETY_MODES_DEFAULTS_H
 #define SAFETY_MODES_DEFAULTS_H
 
+#include <stddef.h>
+
 #include "opendbc/safety/declarations.h"
 
 // *** no output safety mode ***

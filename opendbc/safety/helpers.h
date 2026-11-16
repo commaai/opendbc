@@ -64,8 +64,9 @@ static bool msg_matches_addr_bus_len(const CANPacket_t *msg, uint32_t addr, uint
   return actual == expected;
 }
 
-#define MSG_MATCHES_SELECT(_msg, _addr, _bus, _len, NAME, ...) NAME
-#define msg_matches(...) MSG_MATCHES_SELECT(__VA_ARGS__, msg_matches_addr_bus_len, msg_matches_addr_bus)(__VA_ARGS__)
+// the trailing 0 keeps the "..." of MSG_MATCHES_SELECT non-empty, as ISO C11 requires
+#define MSG_MATCHES_SELECT(_msg, _addr, _bus, _len, NAME, ...) (NAME)
+#define msg_matches(...) MSG_MATCHES_SELECT(__VA_ARGS__, msg_matches_addr_bus_len, msg_matches_addr_bus, 0)(__VA_ARGS__)
 
 // compute the time elapsed (in microseconds) from 2 counter samples
 // case where ts < ts_last is ok: overflow is properly re-casted into uint32_t

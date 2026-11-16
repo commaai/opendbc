@@ -1,6 +1,8 @@
 #ifndef SAFETY_H
 #define SAFETY_H
 
+#include <stddef.h>
+
 #include "opendbc/safety/helpers.h"
 #include "opendbc/safety/lateral.h"
 #include "opendbc/safety/longitudinal.h"
