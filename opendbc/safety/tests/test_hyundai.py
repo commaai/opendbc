@@ -187,10 +187,10 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
     for btn in range(8):
       self.assertTrue(self._tx(self._button_msg(btn)))
 
-  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False):
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False, accel_value=None):
     values = {
       "aReqRaw": accel,
-      "aReqValue": accel,
+      "aReqValue": accel if accel_value is None else accel_value,
       "AEB_CmdAct": int(aeb_req),
       "AEB_StopReq": int(aeb_stop_req),
       "CR_VSM_DecCmd": aeb_decel,
@@ -219,6 +219,12 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
     self.assertFalse(self._tx(self._accel_msg(0, aeb_decel=1.0)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_stop_req=True)))
 
+  def test_accel_signals_checked_independently(self):
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._tx(self._accel_msg(0, accel_value=0)))
+    self.assertFalse(self._tx(self._accel_msg(0, accel_value=5.0)))
+    self.assertFalse(self._tx(self._accel_msg(5.0, accel_value=0)))
+
 
 class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyundaiSafety):
   SAFETY_PARAM = HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CAMERA_SCC
@@ -228,10 +234,10 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
   FWD_BLACKLISTED_ADDRS = {2: [0x340, 0x485, 0x420, 0x421, 0x50A, 0x389]}
   RELAY_MALFUNCTION_ADDRS = {0: (0x340, 0x485, 0x421, 0x420, 0x50A, 0x389)}  # LKAS11, LFAHDA_MFC, SCC12, SCC11, SCC13, SCC14
 
-  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False):
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False, accel_value=None):
     values = {
       "aReqRaw": accel,
-      "aReqValue": accel,
+      "aReqValue": accel if accel_value is None else accel_value,
       "AEB_CmdAct": int(aeb_req),
       "AEB_StopReq": int(aeb_stop_req),
       "CR_VSM_DecCmd": aeb_decel,
@@ -243,6 +249,12 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
     self.assertFalse(self._tx(self._accel_msg(0, aeb_req=True)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_decel=1.0)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_stop_req=True)))
+
+  def test_accel_signals_checked_independently(self):
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._tx(self._accel_msg(0, accel_value=0)))
+    self.assertFalse(self._tx(self._accel_msg(0, accel_value=5.0)))
+    self.assertFalse(self._tx(self._accel_msg(5.0, accel_value=0)))
 
   def test_tester_present_allowed(self):
     pass
