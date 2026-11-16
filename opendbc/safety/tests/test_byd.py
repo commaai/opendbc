@@ -75,6 +75,12 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"RAW_THROTTLE": int(gas * 100)}
     return self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, values)
 
+  def test_cruise_states(self):
+    for state in range(8):
+      self._rx(self._pcm_status_msg(False))
+      self._rx(self.packer.make_can_msg_safety("ACC_HUD_ADAS", self.CAM_BUS, {"ACC_STATE": state}))
+      self.assertEqual(state in (3, 5), self.safety.get_controls_allowed())
+
   def test_cruise_buttons(self):
     buttons = ("SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN", "ACC_ON_BTN")
     for cruise_engaged, controls_allowed in itertools.product((False, True), repeat=2):
