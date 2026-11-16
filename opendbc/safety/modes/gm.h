@@ -25,7 +25,7 @@ static void gm_rx_hook(const CANPacket_t *msg) {
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
 
   if (msg_matches(msg, 0x184U, 0U)) {
-    int torque_driver_new = ((msg->data[6] & 0x7U) << 8) | msg->data[7];
+    int torque_driver_new = GET_BYTES_BE(msg, 6, 2) & 0x7FFU;
     torque_driver_new = to_signed(torque_driver_new, 11);
     // update array of samples
     update_sample(&safety.torque_driver, torque_driver_new);
@@ -33,8 +33,8 @@ static void gm_rx_hook(const CANPacket_t *msg) {
 
   // sample rear wheel speeds
   if (msg_matches(msg, 0x34AU, 0U)) {
-    int left_rear_speed = (msg->data[0] << 8) | msg->data[1];
-    int right_rear_speed = (msg->data[2] << 8) | msg->data[3];
+    int left_rear_speed = GET_BYTES_BE(msg, 0, 2);
+    int right_rear_speed = GET_BYTES_BE(msg, 2, 2);
     safety.vehicle_moving = (left_rear_speed > GM_STANDSTILL_THRSLD) || (right_rear_speed > GM_STANDSTILL_THRSLD);
   }
 
@@ -97,7 +97,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
   // BRAKE: safety check
   if (msg->addr == 0x315U) {
-    int brake = ((msg->data[0] & 0xFU) << 8) + msg->data[1];
+    int brake = GET_BYTES_BE(msg, 0, 2) & 0xFFFU;
     brake = (0x1000 - brake) & 0xFFF;
     if (longitudinal_brake_checks(brake, *safety_setup.gm_long_limits)) {
       tx = false;
@@ -106,7 +106,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
   // LKA STEER: safety check
   if (msg->addr == 0x180U) {
-    int desired_torque = ((msg->data[0] & 0x7U) << 8) + msg->data[1];
+    int desired_torque = GET_BYTES_BE(msg, 0, 2) & 0x7FFU;
     desired_torque = to_signed(desired_torque, 11);
 
     bool steer_req = GET_BIT(msg, 3U);
@@ -120,7 +120,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == 0x2CBU) {
     bool apply = GET_BIT(msg, 0U);
     // convert float CAN signal to an int for gas checks: 22534 / 0.125 = 180272
-    int gas_regen = (((msg->data[1] & 0x7U) << 16) | (msg->data[2] << 8) | msg->data[3]) - 180272U;
+    int gas_regen = (GET_BYTES_BE(msg, 1, 3) & 0x7FFFFU) - 180272U;
 
     bool violation = false;
     // Allow apply bit in pre-enabled and overriding states

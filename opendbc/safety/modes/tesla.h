@@ -84,7 +84,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
   // Steering angle: (0.1 * val) - 819.2 in deg.
   if (msg_matches(msg, 0x370U, 0U)) {
     // Store it 1/10 deg to match steering request
-    const int angle_meas_new = (((msg->data[4] & 0x3FU) << 8) | msg->data[5]) - 8192U;
+    const int angle_meas_new = (GET_BYTES_BE(msg, 4, 2) & 0x3FFFU) - 8192U;
     update_sample(&safety.angle_meas, angle_meas_new);
 
     const int hands_on_level = msg->data[4] >> 6;  // EPAS3S_handsOnLevel
@@ -191,7 +191,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   // Steering control: (0.1 * val) - 1638.35 in deg.
   if (msg->addr == 0x488U) {
     // We use 1/10 deg as a unit here
-    int raw_angle_can = ((msg->data[0] & 0x7FU) << 8) | msg->data[1];
+    int raw_angle_can = GET_BYTES_BE(msg, 0, 2) & 0x7FFFU;
     int desired_angle = raw_angle_can - 16384;
     int steer_control_type = msg->data[2] >> 5;  // DAS_steeringControlType
     bool steer_control_enabled = steer_control_type == 1;  // ANGLE_CONTROL

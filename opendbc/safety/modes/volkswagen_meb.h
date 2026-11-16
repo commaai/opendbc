@@ -133,10 +133,10 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state by sampling wheel speeds
   if (msg_matches(msg, MSG_ESC_51, 0U)) {
-    uint32_t fl = msg->data[8] | (msg->data[9] << 8);
-    uint32_t fr = msg->data[10] | (msg->data[11] << 8);
-    uint32_t rl = msg->data[12] | (msg->data[13] << 8);
-    uint32_t rr = msg->data[14] | (msg->data[15] << 8);
+    uint32_t fl = GET_BYTES_LE(msg, 8, 2);
+    uint32_t fr = GET_BYTES_LE(msg, 10, 2);
+    uint32_t rl = GET_BYTES_LE(msg, 12, 2);
+    uint32_t rr = GET_BYTES_LE(msg, 14, 2);
     safety.vehicle_moving = (fr | rr | rl | fl) != 0U;
     UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0f * 0.0075f * KPH_TO_MS);
   }
@@ -144,12 +144,12 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   // Check vehicle speed with redundant source
   if (msg_matches(msg, MSG_ESP_21, 0U)) {
     // Signal: ESP_v_Signal
-    float esp_speed = ((msg->data[5] << 8) | msg->data[4]) * 0.01f * KPH_TO_MS;
+    float esp_speed = GET_BYTES_LE(msg, 4, 2) * 0.01f * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED_2(esp_speed);
   }
 
   if (msg_matches(msg, MSG_QFK_01, 0U)) {
-    int current_curvature = ((msg->data[6] & 0x7FU) << 8) | msg->data[5];
+    int current_curvature = GET_BYTES_LE(msg, 5, 2) & 0x7FFFU;
     current_curvature *= GET_BIT(msg, 55U) ? 1 : -1;
     update_sample(&safety.curvature_state.meas, current_curvature);
   }
@@ -194,7 +194,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
   // Safety check for MSG_ACC_18 acceleration requests
   if (msg->addr == MSG_ACC_18) {
     // Signal: ACC_18.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-    int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
+    int desired_accel = ((GET_BYTES_LE(msg, 3, 2) & 0x7FFU) * 5U) - 7220U;
     // MEB inactive accel is 3.01, but we also need to send 0.0 for gas override
     bool accel_override = safety.controls_allowed && (desired_accel == 0);
     if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {

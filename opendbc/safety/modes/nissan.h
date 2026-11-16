@@ -36,8 +36,8 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, 0x285U, safety_setup.nissan_alt_eps ? 1U : 0U)) {
     // Get current speed and standstill
-    uint16_t right_rear = (msg->data[0] << 8) | (msg->data[1]);
-    uint16_t left_rear = (msg->data[2] << 8) | (msg->data[3]);
+    uint16_t right_rear = GET_BYTES_BE(msg, 0, 2);
+    uint16_t left_rear = GET_BYTES_BE(msg, 2, 2);
     safety.vehicle_moving = (right_rear | left_rear) != 0U;
     UPDATE_VEHICLE_SPEED((right_rear + left_rear) / 2.0f * 0.005f * KPH_TO_MS);
   }

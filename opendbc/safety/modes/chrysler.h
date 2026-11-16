@@ -44,7 +44,7 @@ static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
 static void chrysler_rx_hook(const CANPacket_t *msg) {
   // Measured EPS torque
   if (msg_matches(msg, CHRYSLER_ADDR(EPS_2), 0U)) {
-    int torque_meas_new = ((msg->data[4] & 0x7U) << 8) + msg->data[5] - 1024U;
+    int torque_meas_new = (GET_BYTES_BE(msg, 4, 2) & 0x7FFU) - 1024U;
     update_sample(&safety.torque_meas, torque_meas_new);
   }
 
@@ -58,7 +58,7 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
   // TODO: use the same message for both
   // update vehicle moving
   if ((safety_setup.chrysler_platform != CHRYSLER_PACIFICA) && msg_matches(msg, CHRYSLER_ADDR(ESP_8), 0U)) {
-    safety.vehicle_moving = ((msg->data[4] << 8) + msg->data[5]) != 0U;
+    safety.vehicle_moving = GET_BYTES_BE(msg, 4, 2) != 0U;
   }
   if ((safety_setup.chrysler_platform == CHRYSLER_PACIFICA) && msg_matches(msg, 514U, 0U)) {
     int speed_l = (msg->data[0] << 4) + (msg->data[1] >> 4);
@@ -110,7 +110,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   // STEERING
   if (msg->addr == CHRYSLER_ADDR(LKAS_COMMAND)) {
     int start_byte = (safety_setup.chrysler_platform == CHRYSLER_PACIFICA) ? 0 : 1;
-    int desired_torque = ((msg->data[start_byte] & 0x7U) << 8) | msg->data[start_byte + 1];
+    int desired_torque = GET_BYTES_BE(msg, start_byte, 2) & 0x7FFU;
     desired_torque -= 1024;
 
     const TorqueSteeringLimits limits = (safety_setup.chrysler_platform == CHRYSLER_PACIFICA) ? CHRYSLER_STEERING_LIMITS :

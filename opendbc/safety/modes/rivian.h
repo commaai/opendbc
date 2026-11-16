@@ -60,7 +60,7 @@ static bool rivian_get_quality_flag_valid(const CANPacket_t *msg) {
 static void rivian_rx_hook(const CANPacket_t *msg) {
   // Vehicle speed
   if (msg_matches(msg, 0x208U, 0U)) {
-    float speed = ((msg->data[6] << 8) | msg->data[7]) * 0.01f;
+    float speed = GET_BYTES_BE(msg, 6, 2) * 0.01f;
     safety.vehicle_moving = speed > 0.0f;
     UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
   }
@@ -70,7 +70,7 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
     safety.gas_pressed = msg->data[3] | (msg->data[4] & 0xC0U);
 
     // Disable controls if speeds from VDM and ESP ECUs are too far apart.
-    float vdm_speed = ((msg->data[5] << 8) | msg->data[6]) * 0.01f * KPH_TO_MS;
+    float vdm_speed = GET_BYTES_BE(msg, 5, 2) * 0.01f * KPH_TO_MS;
     speed_mismatch_check(vdm_speed);
   }
 

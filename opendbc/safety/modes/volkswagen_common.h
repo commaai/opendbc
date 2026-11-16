@@ -117,7 +117,7 @@ static void volkswagen_set_resume_check(bool set_button, bool resume_button) {
 static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
   // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
   // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
-  int torque_driver_new = msg->data[5] | ((msg->data[6] & 0x1FU) << 8);
+  int torque_driver_new = GET_BYTES_LE(msg, 5, 2) & 0x1FFFU;
   bool sign = GET_BIT(msg, 55U);
   if (sign) {
     torque_driver_new *= -1;
@@ -128,7 +128,7 @@ static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
 static int volkswagen_mlb_mqb_steering_control_torque(const CANPacket_t *msg) {
   // Signal: HCA_01.HCA_01_LM_Offset (absolute torque)
   // Signal: HCA_01.HCA_01_LM_OffSign (direction)
-  int desired_torque = msg->data[2] | ((msg->data[3] & 0x1U) << 8);
+  int desired_torque = GET_BYTES_LE(msg, 2, 2) & 0x1FFU;
   bool sign = GET_BIT(msg, 31U);
   if (sign) {
     desired_torque *= -1;

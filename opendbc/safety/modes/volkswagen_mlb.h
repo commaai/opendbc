@@ -34,9 +34,9 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
   // Signals: ESP_03.ESP_[VL|VR|HL|HR]_Radgeschw
   if (msg_matches(msg, MSG_ESP_03, 0U)) {
     uint32_t speed = 0;
-    speed += ((msg->data[3] & 0xFU) << 8) | msg->data[2];   // FL
+    speed += GET_BYTES_LE(msg, 2, 2) & 0xFFFU;   // FL
     speed += (msg->data[4] << 4) | (msg->data[3] >> 4);     // FR
-    speed += ((msg->data[6] & 0xFU) << 8) | msg->data[5];   // RL
+    speed += GET_BYTES_LE(msg, 5, 2) & 0xFFFU;   // RL
     speed += (msg->data[7] << 4) | (msg->data[6] >> 4);     // RR
     safety.vehicle_moving = speed > 0U;
   }

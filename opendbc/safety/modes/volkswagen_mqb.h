@@ -52,7 +52,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // sum 4 wheel speeds
     int speed = 0;
     for (uint8_t i = 0U; i < 8U; i += 2U) {
-      int wheel_speed = msg->data[i] | (msg->data[i + 1U] << 8);
+      int wheel_speed = GET_BYTES_LE(msg, i, 2);
       speed += wheel_speed;
     }
     // Check all wheel speeds for any movement
@@ -142,7 +142,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
 
     if (msg->addr == MSG_ACC_06) {
       // Signal: ACC_06.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-      desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
+      desired_accel = ((GET_BYTES_LE(msg, 3, 2) & 0x7FFU) * 5U) - 7220U;
     } else {
       // Signal: ACC_07.ACC_Folgebeschl (acceleration in m/s2, scale 0.03, offset -4.6)
       int secondary_accel = (msg->data[4] * 30U) - 4600U;

@@ -61,7 +61,7 @@ static uint8_t hyundai_canfd_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t hyundai_canfd_get_checksum(const CANPacket_t *msg) {
-  uint32_t chksum = msg->data[0] | (msg->data[1] << 8);
+  uint32_t chksum = GET_BYTES_LE(msg, 0, 2);
   return chksum;
 }
 
@@ -71,7 +71,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
 
   // driver torque
   if (msg_matches(msg, 0xeaU, pt_bus)) {
-    int torque_driver_new = ((msg->data[11] & 0x1fU) << 8U) | msg->data[10];
+    int torque_driver_new = GET_BYTES_LE(msg, 10, 2) & 0x1FFFU;
     torque_driver_new -= 4095;
     update_sample(&safety.torque_driver, torque_driver_new);
   }
@@ -178,7 +178,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check
   if (msg->addr == 0x1a0U) {
-    int desired_accel_raw = (((msg->data[17] & 0x7U) << 8) | msg->data[16]) - 1023U;
+    int desired_accel_raw = (GET_BYTES_LE(msg, 16, 2) & 0x7FFU) - 1023U;
     int desired_accel_val = ((msg->data[18] << 4) | (msg->data[17] >> 4)) - 1023U;
 
     bool violation = false;

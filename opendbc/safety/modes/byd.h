@@ -23,13 +23,13 @@ static uint32_t byd_compute_checksum(const CANPacket_t *msg) {
 static void byd_rx_hook(const CANPacket_t *msg) {
   // Steering angle: 0.1 deg/LSB, signed
   if (msg_matches(msg, 0x11FU, 0U)) {
-    int angle_meas_new = to_signed((msg->data[1] << 8) | msg->data[0], 16);  // STEER_ANGLE_2
+    int angle_meas_new = to_signed(GET_BYTES_LE(msg, 0, 2), 16);  // STEER_ANGLE_2
     update_sample(&safety.angle_meas, angle_meas_new);
   }
 
   // Vehicle speed: 0.1 kph/LSB
   if (msg_matches(msg, 0x1F0U, 0U)) {
-    int speed = (msg->data[1] << 8) | msg->data[0];  // WHEELSPEED_CLEAN
+    int speed = GET_BYTES_LE(msg, 0, 2);  // WHEELSPEED_CLEAN
     safety.vehicle_moving = speed > 0;
     UPDATE_VEHICLE_SPEED(speed * 0.1f * KPH_TO_MS);
   }
@@ -67,7 +67,7 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
 
   // Steering control: 0.1 deg/LSB, signed
   if (msg->addr == 0x1E2U) {
-    int desired_angle = to_signed((msg->data[4] << 8) | msg->data[3], 16);  // STEER_ANGLE
+    int desired_angle = to_signed(GET_BYTES_LE(msg, 3, 2), 16);  // STEER_ANGLE
     bool steer_req = GET_BIT(msg, 21U);  // STEER_REQ
 
     if (steer_angle_cmd_checks_vm(desired_angle, steer_req, BYD_STEERING_LIMITS, BYD_STEERING_PARAMS)) {

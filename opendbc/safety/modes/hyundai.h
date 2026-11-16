@@ -191,7 +191,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check
   if (msg->addr == 0x421U) {
-    int desired_accel_raw = (((msg->data[4] & 0x7U) << 8) | msg->data[3]) - 1023U;
+    int desired_accel_raw = (GET_BYTES_LE(msg, 3, 2) & 0x7FFU) - 1023U;
     int desired_accel_val = ((msg->data[5] << 3) | (msg->data[4] >> 5)) - 1023U;
 
     int aeb_decel_cmd = msg->data[2];

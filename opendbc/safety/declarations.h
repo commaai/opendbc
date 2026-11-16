@@ -68,6 +68,7 @@
 #define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&safety.vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
 uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len);
+uint32_t GET_BYTES_BE(const CANPacket_t *msg, int start, int len);
 uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);
 
 extern const int MAX_WRONG_COUNTERS;
