@@ -28,7 +28,7 @@ static uint8_t psa_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t psa_get_checksum(const CANPacket_t *msg) {
-  return msg->data[5] & 0xFU;
+  return (uint32_t)msg->data[5] & 0xFU;
 }
 
 static uint8_t psa_checksum(const CANPacket_t *msg, uint8_t chk_ini, uint32_t chk_pos) {
@@ -67,9 +67,9 @@ static void psa_rx_hook(const CANPacket_t *msg) {
     update_sample(&safety.angle_meas, angle_meas_new);
   }
   if (msg_matches(msg, PSA_HS2_DYN_ABR_38D, PSA_MAIN_BUS)) {
-    int speed = GET_BYTES_BE(msg, 0, 2);
-    safety.vehicle_moving = speed > 0;
-    UPDATE_VEHICLE_SPEED(speed * 0.01f * KPH_TO_MS);  // VITESSE_VEHICULE_ROUES
+    uint32_t speed = GET_BYTES_BE(msg, 0, 2);
+    safety.vehicle_moving = speed > 0U;
+    UPDATE_VEHICLE_SPEED((float)speed * 0.01f * KPH_TO_MS);  // VITESSE_VEHICULE_ROUES
   }
 
   if (msg_matches(msg, PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS)) {
@@ -84,7 +84,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
 static bool psa_tx_hook(const CANPacket_t *msg) {
   static const AngleSteeringLimits PSA_STEERING_LIMITS = {
     .max_angle = 3900,
-    .angle_deg_to_can = 10,
+    .angle_deg_to_can = 10.0f,
     .angle_rate_up_lookup = {
       {0.f, 5.f, 25.f},
       {2.5f, 1.5f, .2f},
@@ -97,7 +97,7 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
 
   // The TX list dispatches only PSA_LANE_KEEP_ASSIST on PSA_MAIN_BUS to this hook.
   // SET_ANGLE
-  int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
+  int desired_angle = to_signed(GET_BYTES_BE(msg, 6, 2) >> 2, 14);
   // TORQUE_FACTOR
   bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
 
