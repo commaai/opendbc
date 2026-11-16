@@ -174,7 +174,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     // Signal: AccBrkTot_A_Rq
     int accel = ((msg->data[0] & 0x1FU) << 8) | msg->data[1];
     // Signal: CmbbDeny_B_Actl
-    bool cmbb_deny = (msg->data[4] >> 5) & 1U;
+    bool cmbb_deny = GET_BIT(msg, 37U);
 
     // Signal: AccBrkPrchg_B_Rq & AccBrkDecel_B_Rq
     bool brake_actuation = (msg->data[6] & 0xC0U) != 0U;
@@ -201,8 +201,8 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     // Violation if resume button is pressed while controls not allowed, or
     // if cancel button is pressed when cruise isn't engaged.
     bool violation = false;
-    violation |= ((msg->data[1] >> 0) & 1U) && !safety.cruise_engaged_prev;   // Signal: CcAslButtnCnclPress (cancel)
-    violation |= ((msg->data[3] >> 1) & 1U) && !safety.controls_allowed;     // Signal: CcAsllButtnResPress (resume)
+    violation |= GET_BIT(msg, 8U) && !safety.cruise_engaged_prev;   // Signal: CcAslButtnCnclPress (cancel)
+    violation |= GET_BIT(msg, 25U) && !safety.controls_allowed;     // Signal: CcAsllButtnResPress (resume)
 
     if (violation) {
       tx = false;

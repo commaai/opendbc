@@ -82,7 +82,7 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
 
   // Brake pressed
   if (msg_matches(msg, 0x38fU, 0U)) {
-    safety.brake_pressed = (msg->data[2] >> 7) & 1U;
+    safety.brake_pressed = GET_BIT(msg, 23U);
   }
 
   // Cruise state
@@ -120,7 +120,7 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
   // Steering control
   if (msg_matches(msg, 0x120U, 0U)) {
     int desired_torque = ((msg->data[2] << 3U) | (msg->data[3] >> 5U)) - 1024U;
-    bool steer_req = (msg->data[3] >> 4) & 1U;
+    bool steer_req = GET_BIT(msg, 28U);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, RIVIAN_STEERING_LIMITS)) {
       tx = false;

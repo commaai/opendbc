@@ -141,7 +141,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
 
   // Signal: Motor_2.MO2_BLS
   if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
-    safety.brake_pressed = (msg->data[2] & 0x1U);
+    safety.brake_pressed = GET_BIT(msg, 16U);
   }
 }
 

@@ -54,15 +54,15 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   // X-trail 0x454, Leaf 0x239
   if (msg_matches(msg, 0x454U, safety_setup.nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, safety_setup.nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x454U) {
-      safety.brake_pressed = (msg->data[2] & 0x80U) != 0U;
+      safety.brake_pressed = GET_BIT(msg, 23U);
     } else {
-      safety.brake_pressed = ((msg->data[4] >> 5) & 1U) != 0U;
+      safety.brake_pressed = GET_BIT(msg, 37U);
     }
   }
 
   // Handle cruise enabled
   if (msg_matches(msg, 0x30fU, safety_setup.nissan_alt_eps ? 1U : 2U)) {
-    bool cruise_engaged = (msg->data[0] >> 3) & 1U;
+    bool cruise_engaged = GET_BIT(msg, 3U);
     pcm_cruise_check(cruise_engaged);
   }
 }
@@ -74,7 +74,7 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
   // steer cmd checks
   if (msg->addr == 0x169U) {
     int desired_angle = ((msg->data[0] << 10) | (msg->data[1] << 2) | ((msg->data[2] >> 6) & 0x3U));
-    bool lka_active = (msg->data[6] >> 4) & 1U;
+    bool lka_active = GET_BIT(msg, 52U);
 
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
     desired_angle = nissan_flip_angle(desired_angle);
