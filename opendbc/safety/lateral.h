@@ -60,7 +60,7 @@ static bool rt_torque_rate_limit_check(int val, int val_last, const int MAX_RT_D
 }
 
 // Safety checks for torque-based steering commands
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits) {
+bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSteeringLimits limits) {
   bool violation = false;
   uint32_t ts = safety_ts;
 
@@ -105,7 +105,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
   // certain safety modes set their steer request bit low for one or more frame at a
   // predefined max frequency to avoid steering faults in certain situations
-  bool steer_req_mismatch = (steer_req == 0) && torque_requested;
+  bool steer_req_mismatch = !steer_req && torque_requested;
   if (!limits.has_steer_req_tolerance) {
     if (steer_req_mismatch) {
       violation = true;
