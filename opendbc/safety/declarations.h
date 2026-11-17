@@ -242,7 +242,7 @@ typedef struct {
 } safety_hooks;
 
 bool safety_rx_hook(const CANPacket_t *msg);
-bool safety_tx_hook(CANPacket_t *msg);
+bool safety_tx_hook(const CANPacket_t *msg);
 bool get_longitudinal_allowed(void);
 
 // provided by the platform (firmware timer driver, or the test harness)

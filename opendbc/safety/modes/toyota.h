@@ -67,8 +67,7 @@ static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
 }
 
 static uint32_t toyota_get_checksum(const CANPacket_t *msg) {
-  uint32_t checksum_byte = GET_LEN(msg) - 1U;
-  return (uint8_t)(msg->data[checksum_byte]);
+  return GET_BYTE_FROM_END(msg, 1U);
 }
 
 static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {

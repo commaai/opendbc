@@ -63,6 +63,12 @@ static uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
   return ret;
 }
 
+// Read the n-th byte from the end of the message (n = 1 is the last byte), or 0 if the message is shorter.
+static uint8_t GET_BYTE_FROM_END(const CANPacket_t *msg, uint32_t n) {
+  const uint32_t index = GET_LEN(msg) - n;  // wraps around when the message is shorter than n bytes
+  return (index < CANPACKET_DATA_SIZE_MAX) ? msg->data[index] : 0U;
+}
+
 static const int MAX_WRONG_COUNTERS = 5;
 
 // UM2331 CPU_SM_2 and RAM_SM_3: rx, tx, fwd and tick run on two copies of the state and config and compare the decisions, the tick also compares the copies
@@ -224,7 +230,7 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
   return whitelisted;
 }
 
-static bool tx_hook_copy(CANPacket_t *msg) {
+static bool tx_hook_copy(const CANPacket_t *msg) {
   bool whitelisted = tx_msg_safety_check(msg, safety_setup.current_safety_config.tx_msgs, safety_setup.current_safety_config.tx_msgs_len);
   if ((safety_setup.current_safety_mode == SAFETY_ALLOUTPUT) || (safety_setup.current_safety_mode == SAFETY_ELM327)) {
     whitelisted = true;
@@ -411,7 +417,7 @@ bool safety_rx_hook(const CANPacket_t *msg) {
   return valid;
 }
 
-bool safety_tx_hook(CANPacket_t *msg) {
+bool safety_tx_hook(const CANPacket_t *msg) {
   safety_ts = microsecond_timer_get();
   current_copy = &safety_b;
   bool allowed_b = tx_hook_copy(msg);

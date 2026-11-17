@@ -176,6 +176,22 @@ class TestIgnitionCan(common.SafetyTestBase):
       self.safety.init_tests()
       self.assertFalse(self._send(msg, 1), msg[:2])
 
+  def test_other_buses_ignored(self):
+    # the PSA ignition message is only read on buses 0 and 2
+    for bus in (1, 3):
+      self.safety.init_tests()
+      for counter in (0, 1):
+        self.assertFalse(self._send((bus, 0x432, 8, 1, 0, {6: 0x01}), counter), bus)
+
+
+class TestHelpers(unittest.TestCase):
+  def test_byte_from_end(self):
+    libsafety = libsafety_py.libsafety
+    msg = common.make_msg(0, 0x123, dat=bytes([1, 2, 3]))
+    self.assertEqual(3, libsafety.get_byte_from_end(msg, 1))
+    self.assertEqual(1, libsafety.get_byte_from_end(msg, 3))
+    self.assertEqual(0, libsafety.get_byte_from_end(msg, 4))  # message is shorter
+
 
 class TestModeCount(common.SafetyTestBase):
   SAFETY_MODEL = CarParams.SafetyModel.toyota

@@ -28,8 +28,7 @@ static unsigned int honda_get_pt_bus(void) {
 }
 
 static uint32_t honda_get_checksum(const CANPacket_t *msg) {
-  uint32_t checksum_byte = GET_LEN(msg) - 1U;
-  return (uint32_t)msg->data[checksum_byte] & 0xFU;
+  return (uint32_t)GET_BYTE_FROM_END(msg, 1U) & 0xFU;
 }
 
 static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
@@ -50,8 +49,7 @@ static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
 }
 
 static uint8_t honda_get_counter(const CANPacket_t *msg) {
-  uint32_t counter_byte = GET_LEN(msg) - 1U;
-  return (msg->data[counter_byte] >> 4U) & 0x3U;
+  return (GET_BYTE_FROM_END(msg, 1U) >> 4U) & 0x3U;
 }
 
 static void honda_rx_hook(const CANPacket_t *msg) {
