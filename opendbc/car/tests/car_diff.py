@@ -26,6 +26,8 @@ TOLERANCE = 1e-4
 DIFF_BUCKET = "car_diff"
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 PADDING = 5
+# GitHub's comment limit is 65536, the rest is room for the tag the comment action adds
+MAX_COMMENT = 65000
 
 Diff = tuple[str, int, tuple[Any, Any], int]
 Ref = tuple[int, structs.CarState]
@@ -248,8 +250,8 @@ def format_diff(diffs: list[Diff], ref: list[Ref], states: list[structs.CarState
 
 
 def format_report(title: str, description: str, changes: list[tuple[str, list[str]]], n_passed: int, errors: list[str],
-                  max_len: int | None = None) -> str:
-  # changes: each changed item's name and its lines, max_len: as many changes as fit
+                  max_len: int | None = MAX_COMMENT) -> str:
+  # changes: each changed item's name and its lines, max_len: as many changes as fit, None for all
   icon = "⚠️" if changes or errors else "✅"
   lines = [
     f"## {title}",
