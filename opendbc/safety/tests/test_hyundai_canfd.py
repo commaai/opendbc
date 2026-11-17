@@ -97,6 +97,12 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
         self.assertTrue(self._rx(self.packer.make_can_msg_safety(msg, self.PT_BUS, {sig: 1})))
         self.assertFalse(self.safety.get_gas_pressed_prev())
 
+  def test_gas_pedal_bits(self):
+    # only the hybrid ACCELERATOR_PEDAL spans several bytes
+    if self.GAS_MSG[0] != "ACCELERATOR_ALT":
+      raise unittest.SkipTest
+    self._test_gas_pedal_bits(10, 0.25)
+
   def test_cruise_engaged_prev(self):
     super().test_cruise_engaged_prev()
     # driver override is engaged
@@ -225,12 +231,6 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
     }
     return self.packer.make_can_msg_safety("SCC_CONTROL", 1, values)
 
-  def test_accel_signals_checked_independently(self):
-    self.safety.set_controls_allowed(True)
-    self.assertTrue(self._tx(self._accel_msg(0, accel_value=0)))
-    self.assertFalse(self._tx(self._accel_msg(0, accel_value=5.0)))
-    self.assertFalse(self._tx(self._accel_msg(5.0, accel_value=0)))
-
 
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
 class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCanfdLFASteeringBase):
@@ -252,12 +252,6 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
       "aReqValue": accel if accel_value is None else accel_value,
     }
     return self.packer.make_can_msg_safety("SCC_CONTROL", 0, values)
-
-  def test_accel_signals_checked_independently(self):
-    self.safety.set_controls_allowed(True)
-    self.assertTrue(self._tx(self._accel_msg(0, accel_value=0)))
-    self.assertFalse(self._tx(self._accel_msg(0, accel_value=5.0)))
-    self.assertFalse(self._tx(self._accel_msg(5.0, accel_value=0)))
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     super().test_tester_present_allowed(ecu_disable=not self.EXTRA_SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
