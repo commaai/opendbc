@@ -3,6 +3,7 @@ import numpy as np
 import unittest
 
 from opendbc.car.structs import CarParams
+from opendbc.car.volkswagen.mqbcan import VOLKSWAGEN_MEB_ALT_CRC_CONSTANTS, volkswagen_mqb_meb_dyn_len_checksum
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 import opendbc.safety.tests.common as common
 
@@ -110,7 +111,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     return self._motor_14_msg(brake)
 
   def _user_gas_msg(self, gas):
-    values = {"Accel_Pedal_Pressure": 1 if gas else 0, "TSK_Status": 3}
+    values = {"Accel_Pedal_Pressure": gas, "TSK_Status": 3}
     return self.packer.make_can_msg_safety("Motor_51", 0, values)
 
   def _curvature_meas_msg(self, curvature):
@@ -173,6 +174,19 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertEqual(0, self.safety.get_curvature_meas_max())
     self.assertEqual(0, self.safety.get_curvature_meas_min())
 
+  def test_curvature_measurement_sign(self):
+    # the sign has its own bit, independent of the magnitude
+    for curvature in np.arange(-self.MAX_CURVATURE_TEST, self.MAX_CURVATURE_TEST, 0.01):
+      self._reset_curvature_measurement(curvature)
+      self.assertEqual(round(curvature * self.CURVATURE_TO_CAN), self.safety.get_curvature_meas_min())
+
+  def test_vehicle_moving_single_wheel(self):
+    # wheel speeds are 0.0075 kph per bit; the lowest speed on any single wheel means moving
+    self._test_vehicle_moving_signals("ESC_51", 0, [{f"{wheel}_Radgeschw": 0.0075} for wheel in ("HL", "HR", "VL", "VR")])
+
+  def test_gas_pedal_bits(self):
+    self._test_gas_pedal_bits(9, 0.4)  # Accel_Pedal_Pressure
+
   def test_brake_signal(self):
     self._rx(self._user_brake_msg(False))
     self.assertFalse(self.safety.get_brake_pressed_prev())
@@ -201,6 +215,19 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
         for i in range(common.MAX_WRONG_COUNTERS):
           should_rx = i < common.MAX_WRONG_COUNTERS - 1
           self.assertEqual(should_rx, self._rx(msg))
+
+  def test_alt_crc(self):
+    # Gen2 (MEB_ALT_CRC) also accepts the shorter alternate CRC on QFK_01, ESC_51 and Motor_51
+    def fix_alt_crc(msg):
+      addr, dat, bus = msg
+      length, const = VOLKSWAGEN_MEB_ALT_CRC_CONSTANTS[addr]
+      dat = bytearray(dat)
+      dat[0] = volkswagen_mqb_meb_dyn_len_checksum(addr, None, dat, length, const)
+      return addr, bytes(dat), bus
+
+    for name in ("QFK_01", "ESC_51", "Motor_51"):
+      msg = self.packer.make_can_msg_safety(name, 0, {}, fix_checksum=fix_alt_crc)
+      self.assertEqual(self.SAFETY_PARAM == VolkswagenSafetyFlags.MEB_ALT_CRC, self._rx(msg), name)
 
   def test_main_switch_off_disables_controls(self):
     for tsk_status in range(8):

@@ -82,6 +82,19 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
     values = {"GRA_Neu_Setzen": _set, "GRA_Recall": resume, "GRA_Abbrechen": cancel}
     return self.packer.make_can_msg_safety("GRA_Neu", bus, values)
 
+  def test_vehicle_moving_min_speed(self):
+    # BR1_Rad_kmh is 0.01 kph per bit; any non-zero speed is moving
+    self._test_vehicle_moving_signals("Bremse_1", 0, [{"BR1_Rad_kmh": 0.01}])
+
+  def test_rx_checksum(self):
+    # the XOR checksum is in byte 0, except on Motor_5 where it's in byte 7
+    for name, checksum_byte in (("Lenkhilfe_3", 0), ("GRA_Neu", 0), ("Motor_5", 7)):
+      with self.subTest(msg=name):
+        msg = self.packer.make_can_msg_safety(name, 0, {})
+        self.assertTrue(self._rx(msg))
+        msg[0].data[checksum_byte] ^= 0xFF
+        self.assertFalse(self._rx(msg))
+
 
 class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
   # Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
