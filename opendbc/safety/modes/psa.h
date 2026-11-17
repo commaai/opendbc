@@ -99,7 +99,7 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
   // SET_ANGLE
   int desired_angle = to_signed(GET_BYTES_BE(msg, 6, 2) >> 2, 14);
   // TORQUE_FACTOR
-  bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
+  bool lka_active = (msg->data[5] >> 1) == 100U;
 
   return !steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS);
 }
