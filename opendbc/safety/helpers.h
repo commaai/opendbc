@@ -3,37 +3,29 @@
 
 #include "opendbc/safety/declarations.h"
 
-// cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_MIN(a, b) ({ \
-  __typeof__(a) safety_min_a = (a); \
-  __typeof__(b) safety_min_b = (b); \
-  (safety_min_a < safety_min_b) ? safety_min_a : safety_min_b; \
-})
+static inline int safety_min_int(int a, int b) {
+  return (a < b) ? a : b;
+}
 
-// cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_MAX(a, b) ({ \
-  __typeof__(a) safety_max_a = (a); \
-  __typeof__(b) safety_max_b = (b); \
-  (safety_max_a > safety_max_b) ? safety_max_a : safety_max_b; \
-})
+static inline uint8_t safety_min_uint8(uint8_t a, uint8_t b) {
+  return (a < b) ? a : b;
+}
 
-// cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_CLAMP(x, low, high) ({ \
-  __typeof__(x) safety_clamp_x = (x); \
-  __typeof__(low) safety_clamp_low = (low);\
-  __typeof__(high) safety_clamp_high = (high);\
-  (safety_clamp_x > safety_clamp_high) ? safety_clamp_high : ((safety_clamp_x < safety_clamp_low) ? safety_clamp_low : safety_clamp_x); \
-})
+static inline int safety_max_int(int a, int b) {
+  return (a > b) ? a : b;
+}
 
-// cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
-// cppcheck-suppress-macro misra-c2012-17.3; suppress false implicit declaration alert on typeof extension
-#define SAFETY_ABS(a) ({ \
-  __typeof__(a) safety_abs_a = (a); \
-  (safety_abs_a > 0) ? safety_abs_a : (-safety_abs_a); \
-})
+static inline float safety_max_float(float a, float b) {
+  return (a > b) ? a : b;
+}
+
+static inline int safety_clamp_int(int x, int low, int high) {
+  return (x > high) ? high : ((x < low) ? low : x);
+}
+
+static inline int safety_abs_int(int a) {
+  return (a > 0) ? a : (-a);
+}
 
 #define SAFETY_ARRAY_LEN(a) ((int)sizeof(a) / (int)sizeof((a)[0]))
 

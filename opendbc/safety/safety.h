@@ -136,7 +136,7 @@ static int get_addr_check_index(const CANPacket_t *msg, const RxCheck addr_list[
 static void update_counter(RxStatus *status, const CanMsgCheck *m, uint8_t counter) {
   uint8_t expected_counter = (status->last_counter + 1U) % (m->max_counter + 1U);
   status->wrong_counters += (expected_counter == counter) ? -1 : 1;
-  status->wrong_counters = SAFETY_CLAMP(status->wrong_counters, 0, MAX_WRONG_COUNTERS);
+  status->wrong_counters = safety_clamp_int(status->wrong_counters, 0, MAX_WRONG_COUNTERS);
   status->last_counter = counter;
 }
 
@@ -527,7 +527,7 @@ void speed_mismatch_check(const float speed_2) {
   // For safety modes that use speed to adjust torque or angle limits
   // compared in vehicle_speed's integer units, so the limit is exact
   const int MAX_SPEED_DELTA = 2 * (int)VEHICLE_SPEED_FACTOR;  // 2 m/s
-  bool is_invalid_speed = SAFETY_ABS(ROUND(speed_2 * VEHICLE_SPEED_FACTOR) - safety.vehicle_speed.values[0]) > MAX_SPEED_DELTA;
+  bool is_invalid_speed = safety_abs_int(ROUND(speed_2 * VEHICLE_SPEED_FACTOR) - safety.vehicle_speed.values[0]) > MAX_SPEED_DELTA;
   if (is_invalid_speed) {
     safety.controls_allowed = false;
   }

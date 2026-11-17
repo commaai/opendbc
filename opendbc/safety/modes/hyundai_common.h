@@ -61,7 +61,7 @@ void hyundai_common_cruise_buttons_check(const int cruise_button, const bool mai
   if ((cruise_button == HYUNDAI_BTN_RESUME) || (cruise_button == HYUNDAI_BTN_SET) || (cruise_button == HYUNDAI_BTN_CANCEL) || main_button) {
     safety.hyundai_last_button_interaction = 0U;
   } else {
-    safety.hyundai_last_button_interaction = SAFETY_MIN(safety.hyundai_last_button_interaction + 1U, HYUNDAI_PREV_BUTTON_SAMPLES);
+    safety.hyundai_last_button_interaction = safety_min_uint8(safety.hyundai_last_button_interaction + 1U, HYUNDAI_PREV_BUTTON_SAMPLES);
   }
 
   if (safety_setup.hyundai_longitudinal) {
