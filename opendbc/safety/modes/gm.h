@@ -14,12 +14,9 @@
     {.msg = {{0x1C4, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
     {.msg = {{0xC9, 0, 8, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
 
-enum {
-  GM_BTN_UNPRESS = 1,
-  GM_BTN_RESUME = 2,
-  GM_BTN_SET = 3,
-  GM_BTN_CANCEL = 6,
-};
+#define GM_BTN_RESUME 2U
+#define GM_BTN_SET 3U
+#define GM_BTN_CANCEL 6U
 
 static void gm_rx_hook(const CANPacket_t *msg) {
   const uint32_t GM_STANDSTILL_THRSLD = 10U;  // 0.311kph
@@ -39,8 +36,7 @@ static void gm_rx_hook(const CANPacket_t *msg) {
 
   // ACC steering wheel buttons (GM_CAM is tied to the PCM)
   if (msg_matches(msg, 0x1E1U, 0U) && !safety_setup.gm_pcm_cruise) {
-    uint8_t button_bits = (msg->data[5] & 0x70U) >> 4;
-    int button = (int)button_bits;
+    uint8_t button = (msg->data[5] & 0x70U) >> 4;
 
     // enter controls on falling edge of set or rising edge of resume (avoids fault)
     bool set = (button != GM_BTN_SET) && (safety.cruise_button_prev == GM_BTN_SET);

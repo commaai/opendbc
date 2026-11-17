@@ -8,12 +8,9 @@ static const uint8_t HYUNDAI_PREV_BUTTON_SAMPLES = 8;  // roughly 160 ms
 extern const uint32_t HYUNDAI_STANDSTILL_THRSLD;
 const uint32_t HYUNDAI_STANDSTILL_THRSLD = 12;  // 0.375 kph
 
-enum {
-  HYUNDAI_BTN_NONE = 0,
-  HYUNDAI_BTN_RESUME = 1,
-  HYUNDAI_BTN_SET = 2,
-  HYUNDAI_BTN_CANCEL = 4,
-};
+#define HYUNDAI_BTN_RESUME 1U
+#define HYUNDAI_BTN_SET 2U
+#define HYUNDAI_BTN_CANCEL 4U
 
 void hyundai_common_init(uint16_t param) {
   const uint16_t HYUNDAI_PARAM_EV_GAS = 1;
@@ -57,7 +54,7 @@ void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   safety.cruise_engaged_prev = cruise_engaged;
 }
 
-void hyundai_common_cruise_buttons_check(const int cruise_button, const bool main_button) {
+void hyundai_common_cruise_buttons_check(const uint8_t cruise_button, const bool main_button) {
   if ((cruise_button == HYUNDAI_BTN_RESUME) || (cruise_button == HYUNDAI_BTN_SET) || (cruise_button == HYUNDAI_BTN_CANCEL) || main_button) {
     safety.hyundai_last_button_interaction = 0U;
   } else {

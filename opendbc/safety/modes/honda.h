@@ -18,13 +18,10 @@
 #define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                                              \
   {.msg = {{0x1BE, (pt_bus), 3, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
 
-enum {
-  HONDA_BTN_NONE = 0,
-  HONDA_BTN_MAIN = 1,
-  HONDA_BTN_CANCEL = 2,
-  HONDA_BTN_SET = 3,
-  HONDA_BTN_RESUME = 4,
-};
+#define HONDA_BTN_MAIN 1U
+#define HONDA_BTN_CANCEL 2U
+#define HONDA_BTN_SET 3U
+#define HONDA_BTN_RESUME 4U
 
 static unsigned int honda_get_pt_bus(void) {
   return ((safety_setup.honda_hw == HONDA_BOSCH) && !safety_setup.honda_bosch_radarless && !safety_setup.honda_bosch_canfd) ? 1U : 0U;
@@ -94,7 +91,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   // state machine to enter and exit controls for button enabling
   // 0x1A6 for the ILX, 0x296 for the Civic Touring
   if (msg_matches(msg, 0x1A6U, pt_bus) || msg_matches(msg, 0x296U, pt_bus)) {
-    int button = (msg->data[0] & 0xE0U) >> 5;
+    uint8_t button = (msg->data[0] & 0xE0U) >> 5;
 
     // enter controls on the falling edge of set or resume
     bool set = (button != HONDA_BTN_SET) && (safety.cruise_button_prev == HONDA_BTN_SET);

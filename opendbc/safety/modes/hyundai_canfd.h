@@ -79,7 +79,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   const unsigned int button_addr = safety_setup.hyundai_canfd_alt_buttons ? 0x1aaU : 0x1cfU;
   if (msg_matches(msg, button_addr, pt_bus)) {
     bool main_button = false;
-    int cruise_button = 0;
+    uint8_t cruise_button = 0U;
     if (msg_matches(msg, 0x1cfU, pt_bus)) {
       cruise_button = msg->data[2] & 0x7U;
       main_button = GET_BIT(msg, 19U);
@@ -158,7 +158,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
 
   // cruise buttons check
   if (msg->addr == 0x1cfU) {
-    int button = msg->data[2] & 0x7U;
+    uint8_t button = msg->data[2] & 0x7U;
     bool is_cancel = (button == HYUNDAI_BTN_CANCEL);
     bool is_resume = (button == HYUNDAI_BTN_RESUME);
 
