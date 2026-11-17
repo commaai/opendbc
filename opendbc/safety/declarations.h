@@ -12,7 +12,7 @@
 #define SAFETY_TOYOTA 2U
 #define SAFETY_ELM327 3U
 #define SAFETY_GM 4U
-#define SAFETY_HONDA_BOSCH_GIRAFFE 5U
+//#define SAFETY_HONDA_BOSCH_GIRAFFE 5U  // deprecated
 #define SAFETY_FORD 6U
 #define SAFETY_HYUNDAI 8U
 #define SAFETY_CHRYSLER 9U
@@ -22,15 +22,15 @@
 #define SAFETY_NISSAN 14U
 #define SAFETY_VOLKSWAGEN_MQB 15U
 #define SAFETY_ALLOUTPUT 17U
-#define SAFETY_GM_ASCM 18U
+//#define SAFETY_GM_ASCM 18U  // deprecated
 #define SAFETY_NOOUTPUT 19U
 #define SAFETY_HONDA_BOSCH 20U
 #define SAFETY_VOLKSWAGEN_PQ 21U
 #define SAFETY_SUBARU_PREGLOBAL 22U
 #define SAFETY_HYUNDAI_LEGACY 23U
-#define SAFETY_HYUNDAI_COMMUNITY 24U
+//#define SAFETY_HYUNDAI_COMMUNITY 24U  // deprecated
 #define SAFETY_VOLKSWAGEN_MLB 25U
-#define SAFETY_FAW 26U
+//#define SAFETY_FAW 26U  // deprecated
 #define SAFETY_BODY 27U
 #define SAFETY_HYUNDAI_CANFD 28U
 #define SAFETY_CHRYSLER_CUSW 30U
@@ -422,23 +422,6 @@ extern SafetyCopy *current_copy;
 
 extern uint32_t safety_ts;
 extern bool safety_redundancy_fault;
-
-// Alt experiences can be set with a USB command
-// It enables features that allow alternative experiences, like not disengaging on gas press
-// It is only either 0 or 1 on mainline comma.ai openpilot
-
-//#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1U  // not used anymore, but reserved
-
-//#define ALT_EXP_DISABLE_STOCK_AEB 2U  // not used anymore, but reserved
-
-// If using this flag, be aware that harder braking is more likely to lead to rear endings,
-//   and that alone this flag doesn't make braking compliant because there's also a time element.
-// Setting this flag is used for allowing the full -5.0 to +4.0 m/s^2 at lower speeds
-// See ISO 15622:2018 for more information.
-#define ALT_EXP_RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX 8U
-
-// This flag allows AEB to be commanded from openpilot.
-#define ALT_EXP_ALLOW_AEB 16U
 
 typedef struct {
   uint16_t id;

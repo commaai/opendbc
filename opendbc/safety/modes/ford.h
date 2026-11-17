@@ -20,7 +20,6 @@
 
 // CAN bus numbers.
 #define FORD_MAIN_BUS 0U
-#define FORD_CAM_BUS  2U
 
 static uint8_t ford_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;

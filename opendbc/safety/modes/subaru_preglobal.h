@@ -16,7 +16,6 @@
 #define MSG_SUBARU_PG_Steering_Torque       0x371U
 
 #define SUBARU_PG_MAIN_BUS 0U
-#define SUBARU_PG_CAM_BUS  2U
 
 static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS)) {

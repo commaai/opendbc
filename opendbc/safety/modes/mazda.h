@@ -14,7 +14,6 @@
 
 // CAN bus numbers
 #define MAZDA_MAIN 0
-#define MAZDA_CAM  2
 
 // track msgs coming from OP so that we know what CAM msgs to drop and what to forward
 static void mazda_rx_hook(const CANPacket_t *msg) {
