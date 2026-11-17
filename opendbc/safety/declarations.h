@@ -310,7 +310,7 @@ typedef struct {
   struct sample_t vehicle_speed_2;
   bool vehicle_moving;
   bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
-  int cruise_button_prev;
+  uint8_t cruise_button_prev;
   bool safety_rx_checks_invalid;
 
   // for safety modes with torque steering control
