@@ -96,12 +96,8 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
     // scale by dbc_factor
     torque_meas_new = (torque_meas_new * safety_setup.toyota_dbc_eps_torque_factor) / 100;
 
-    // update array of sample
-    update_sample(&safety.torque_meas, torque_meas_new);
-
-    // increase torque_meas by 1 to be conservative on rounding
-    safety.torque_meas.min--;
-    safety.torque_meas.max++;
+    // update array of sample, increasing torque_meas by 1 to be conservative on rounding
+    update_sample_with_margin(&safety.torque_meas, torque_meas_new, 1);
 
     // driver torque for angle limiting
     int torque_driver_new = to_signed(GET_BYTES_BE(msg, 1, 2), 16);

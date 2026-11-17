@@ -11,6 +11,7 @@ static int to_signed(uint32_t d, int bits);
 static int sign_magnitude(uint32_t magnitude, bool negative);
 static int from_offset(uint32_t raw, int offset);
 static void update_sample(struct sample_t *sample, int sample_new);
+static void update_sample_with_margin(struct sample_t *sample, int sample_new, int margin);
 static int ROUND(float val);
 static void pcm_cruise_check(bool cruise_engaged);
 static void speed_mismatch_check(const float speed_2);

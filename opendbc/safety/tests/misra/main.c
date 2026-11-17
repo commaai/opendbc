@@ -4,8 +4,10 @@
 
 // this file is checked by misrable
 
+// stands in for the firmware's hardware timer
 uint32_t microsecond_timer_get(void) {
-  return 0U;
+  static volatile uint32_t timer_reg;
+  return timer_reg;
 }
 
 // Stands in for the firmware and libsafety, the callers of the safety API

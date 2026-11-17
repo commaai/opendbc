@@ -140,8 +140,7 @@ static int get_addr_check_index(const CANPacket_t *msg, const RxCheck addr_list[
 
 static void update_counter(RxStatus *status, const CanMsgCheck *m, uint8_t counter) {
   uint8_t expected_counter = (status->last_counter + 1U) % (m->max_counter + 1U);
-  status->wrong_counters += (expected_counter == counter) ? -1 : 1;
-  status->wrong_counters = safety_clamp_int(status->wrong_counters, 0, MAX_WRONG_COUNTERS);
+  status->wrong_counters = safety_clamp_int(status->wrong_counters + ((expected_counter == counter) ? -1 : 1), 0, MAX_WRONG_COUNTERS);
   status->last_counter = counter;
 }
 
@@ -491,24 +490,31 @@ static int from_offset(uint32_t raw, int offset) {
   return (int)raw - offset;
 }
 
-// given a new sample, update the sample_t struct
-static void update_sample(struct sample_t *sample, int sample_new) {
+// given a new sample, update the sample_t struct, with the measured range widened by margin on both sides
+static void update_sample_with_margin(struct sample_t *sample, int sample_new, int margin) {
   for (int i = MAX_SAMPLE_VALS - 1; i > 0; i--) {
     sample->values[i] = sample->values[i-1];
   }
   sample->values[0] = sample_new;
 
   // get the minimum and maximum measured samples
-  sample->min = sample->values[0];
-  sample->max = sample->values[0];
+  int sample_min = sample->values[0];
+  int sample_max = sample->values[0];
   for (int i = 1; i < MAX_SAMPLE_VALS; i++) {
-    if (sample->values[i] < sample->min) {
-      sample->min = sample->values[i];
+    if (sample->values[i] < sample_min) {
+      sample_min = sample->values[i];
     }
-    if (sample->values[i] > sample->max) {
-      sample->max = sample->values[i];
+    if (sample->values[i] > sample_max) {
+      sample_max = sample->values[i];
     }
   }
+  sample->min = sample_min - margin;
+  sample->max = sample_max + margin;
+}
+
+// given a new sample, update the sample_t struct
+static void update_sample(struct sample_t *sample, int sample_new) {
+  update_sample_with_margin(sample, sample_new, 0);
 }
 
 static int ROUND(float val) {

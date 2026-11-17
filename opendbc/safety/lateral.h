@@ -289,7 +289,7 @@ static bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, b
     // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
     if ((limits.max_curvature_error != 0) && (vehicle_speed_ms(safety.vehicle_speed.values[0]) > limits.curvature_error_min_speed)) {
       // flipped fudge to avoid false positives
-      const float fudged_speed_error = vehicle_speed_ms(safety.vehicle_speed.max) + 1.0f;
+      const float fudged_speed_error = safety_max_float(vehicle_speed_ms(safety.vehicle_speed.max) + 1.0f, 1.0f);
       const float max_curvature_rate_sec_relaxed = MAX_LATERAL_JERK / (fudged_speed_error * fudged_speed_error);
       const int max_curvature_delta_relaxed_can = limit_to_can(max_curvature_rate_sec_relaxed / (float)limits.frequency, limits.curvature_to_can, -1.0f);
 
