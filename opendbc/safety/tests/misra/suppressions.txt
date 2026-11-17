@@ -1,4 +1,3 @@
-# can.h must stay byte-identical: panda hashes it into CAN_PACKET_VERSION_HASH, so an inline
-# suppression there would change the CAN packet protocol version. Its #pragma once and the
-# __attribute__((packed, aligned(4))) that matches the packed packet format are language extensions.
+# An inline suppression in can.h would change panda's CAN_PACKET_VERSION_HASH. The
+# __attribute__((packed, aligned(4))) that matches the packed packet format is a language extension.
 misra-c2012-1.2:*/can.h

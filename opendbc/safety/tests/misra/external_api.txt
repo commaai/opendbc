@@ -38,3 +38,4 @@ volkswagen_pq_hooks
 ignition_can
 ignition_can_cnt
 ignition_can_hook
+ignition_can_reset
