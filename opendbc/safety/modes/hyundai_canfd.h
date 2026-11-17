@@ -71,8 +71,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
 
   // driver torque
   if (msg_matches(msg, 0xeaU, pt_bus)) {
-    int torque_driver_new = GET_BYTES_LE(msg, 10, 2) & 0x1FFFU;
-    torque_driver_new -= 4095;
+    int torque_driver_new = from_offset(GET_BYTES_LE(msg, 10, 2) & 0x1FFFU, 4095);
     update_sample(&safety.torque_driver, torque_driver_new);
   }
 
@@ -120,8 +119,8 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   // cruise state
   if (!safety_setup.hyundai_longitudinal && msg_matches(msg, 0x1a0U, scc_bus)) {
     // 1=enabled, 2=driver override
-    int cruise_status = ((msg->data[8] >> 4) & 0x7U);
-    bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
+    uint8_t cruise_status = (msg->data[8] >> 4) & 0x7U;
+    bool cruise_engaged = (cruise_status == 1U) || (cruise_status == 2U);
     hyundai_common_cruise_state_check(cruise_engaged);
   }
 }
@@ -149,7 +148,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   // steering
   const unsigned int steer_addr = (safety_setup.hyundai_canfd_lka_steer_msg && !safety_setup.hyundai_longitudinal) ? hyundai_canfd_get_lka_addr() : 0x12aU;
   if (msg->addr == steer_addr) {
-    int desired_torque = (((msg->data[6] & 0xFU) << 7U) | (msg->data[5] >> 1U)) - 1024U;
+    int desired_torque = from_offset((GET_BYTES_LE(msg, 5, 2) >> 1U) & 0x7FFU, 1024);
     bool steer_req = GET_BIT(msg, 52U);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
@@ -178,22 +177,23 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check
   if (msg->addr == 0x1a0U) {
-    int desired_accel_raw = (GET_BYTES_LE(msg, 16, 2) & 0x7FFU) - 1023U;
-    int desired_accel_val = ((msg->data[18] << 4) | (msg->data[17] >> 4)) - 1023U;
+    int desired_accel_raw = from_offset(GET_BYTES_LE(msg, 16, 2) & 0x7FFU, 1023);
+    int desired_accel_val = from_offset(GET_BYTES_LE(msg, 17, 2) >> 4, 1023);
 
     bool violation = false;
 
     if (safety_setup.hyundai_longitudinal) {
-      violation |= longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
-      violation |= longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
+      const bool raw_violation = longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
+      const bool val_violation = longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
+      violation = raw_violation || val_violation;
     } else {
       // only used to cancel on here
-      const int acc_mode = (msg->data[8] >> 4) & 0x7U;
-      if (acc_mode != 4) {
+      const uint8_t acc_mode = (msg->data[8] >> 4) & 0x7U;
+      if (acc_mode != 4U) {
         violation = true;
       }
 
-      if ((desired_accel_raw | desired_accel_val) != 0) {
+      if ((desired_accel_raw != 0) || (desired_accel_val != 0)) {
         violation = true;
       }
     }
