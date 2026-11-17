@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import itertools
 import unittest
 
 from opendbc.car.structs import CarParams
@@ -25,8 +26,7 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   def setUp(self):
     super().setUp()
-    self.counters = {addr: 0 for addr in (0x1b6, 0x1ec, 0x23c, 0x242)}
-    self.gas_counter = 0
+    self.counters = {addr: 0 for addr in (0xaf, 0x1b6, 0x1ec, 0x23c, 0x242)}
 
   def _counter(self, addr):
     counter = self.counters[addr]
@@ -52,8 +52,7 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   def _user_gas_msg(self, gas):
     values = {"EPTAccelActuPosHSC2": 100 if gas else 0}
     msg = self.packer.make_can_msg_safety("GW_HSC2_HCU_FrP00", 0, values)
-    msg[0].data[5] = (msg[0].data[5] & 0x0F) | ((self.gas_counter % 16) << 4)
-    self.gas_counter += 1
+    msg[0].data[5] = (msg[0].data[5] & 0x0F) | (self._counter(0xaf) << 4)  # the counter isn't in the DBC
     return msg
 
   def _pcm_status_msg(self, enable):
@@ -67,15 +66,16 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
       self._rx(self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values))
       self.assertEqual(state in (2, 3), self.safety.get_controls_allowed())
 
-  def test_gas_counter(self):
-    self._reset_safety_hooks()
-    for _ in range(16):
-      self.assertTrue(self._rx(self._user_gas_msg(0)))
+  def test_rx_counters(self):
+    for make_msg in (self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._user_gas_msg, self._pcm_status_msg):
+      self._reset_safety_hooks()
+      for _ in range(16):
+        self.assertTrue(self._rx(make_msg(0)))
 
-    msg = self._user_gas_msg(0)
-    for _ in range(common.MAX_WRONG_COUNTERS + 1):
-      valid = self._rx(msg)
-    self.assertFalse(valid)
+      msg = make_msg(0)
+      for _ in range(common.MAX_WRONG_COUNTERS + 1):
+        valid = self._rx(msg)
+      self.assertFalse(valid)
 
   def test_rx_checksums(self):
     # Captured EPS frame: the PV field is 0x37f5; byte 7 is unused.
@@ -90,6 +90,12 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
       corrupt = bytearray(dat)
       corrupt[byte] ^= 1 << bit
       self.assertFalse(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, corrupt)))
+
+    # the EPS PV field covers every control status and the torque valid bit
+    self._reset_safety_hooks()
+    for status, valid in itertools.product(range(8), (0, 1)):
+      values = {"ChLKAAlvRCHSC2": self._counter(0x1ec), "ChLKACtrlStsHSC2": status, "ChLKARespToqVHSC2": valid}
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values)), (status, valid))
 
     for make_msg in (self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
       self._reset_safety_hooks()
