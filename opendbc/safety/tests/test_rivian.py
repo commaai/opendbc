@@ -83,6 +83,13 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
       }
       self.assertTrue(self._tx(self.packer.make_can_msg_safety("SCCM_WheelTouch", 2, values)))
 
+  def test_gas_pedal_bits(self):
+    self._test_gas_pedal_bits(10, 0.1)  # VDM_AcceleratorPedalPosition
+
+    # the vehicle speed in the bytes after it is not part of it
+    self.assertTrue(self._rx(self._user_gas_msg(0, speed=100)))
+    self.assertFalse(self.safety.get_gas_pressed_prev())
+
   def test_rx_hook(self):
     # checksum, counter, and quality flag checks
     for quality_flag in (True, False):
