@@ -9,7 +9,6 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
   SAFETY_MODEL = CarParams.SafetyModel.chryslerCusw
 
   TX_MSGS = [[0x1F6, 0], [0x2FA, 0], [0x5DC, 0]]
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x1F6, 0x5DC)}
   FWD_BLACKLISTED_ADDRS = {2: [0x1F6, 0x5DC]}
 

@@ -14,7 +14,6 @@ MSG_LDW_1 = 0x5BE             # TX by OP, Lane line recognition and text alerts
 
 class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   DBC = "vw_pq"
-  cruise_engaged = False
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1)}
 
@@ -25,10 +24,6 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
 
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 3
-
-  def _set_prev_torque(self, t):
-    self.safety.set_desired_torque_last(t)
-    self.safety.set_rt_torque_last(t)
 
   # Ego speed (Bremse_1)
   def _speed_msg(self, speed):
@@ -42,7 +37,6 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
 
   # ACC engaged status (shared message Motor_2)
   def _pcm_status_msg(self, enable):
-    self.__class__.cruise_engaged = enable
     return self._motor_2_msg(cruise_engaged=enable)
 
   # Acceleration request to drivetrain coordinator

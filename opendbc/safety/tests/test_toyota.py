@@ -159,7 +159,6 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
   ANGLE_RATE_UP = [0.3, 0.15, 0.15]  # windup limit
   ANGLE_RATE_DOWN = [0.36, 0.26, 0.26]  # unwind limit
 
-  MAX_LTA_ANGLE = 94.9461  # PCS faults if commanding above this, deg
   MAX_MEAS_TORQUE = 1500  # max allowed measured EPS torque before wind down
   MAX_LTA_DRIVER_TORQUE = 150  # max allowed driver torque before wind down
 
@@ -240,7 +239,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
   def test_angle_measurements(self):
     """
     * Tests angle meas quality flag dictates whether angle measurement is parsed, and if rx is valid
-    * Tests rx hook correctly clips the angle measurement, since it is to be compared to LTA cmd when inactive
+    * Tests rx hook correctly tracks the angle measurement min/max, since it is to be compared to LTA cmd when inactive
     """
     for steer_angle_initializing in (True, False):
       for angle in np.arange(0, self.STEER_ANGLE_MAX * 2, 1):
@@ -270,13 +269,8 @@ class TestToyotaAltBrakeSafety(TestToyotaSafetyTorque):
   def SAFETY_PARAM(self):
     return self.EPS_SCALE | ToyotaSafetyFlags.ALT_BRAKE
 
-  def _user_brake_msg(self, brake):
-    values = {"BRAKE_PRESSED": brake}
-    return self.packer.make_can_msg_safety("BRAKE_MODULE", 0, values)
-
-  # No LTA message in the DBC
   def test_lta_steer_cmd(self):
-    pass
+    self.skipTest("new_mc DBC has no STEERING_LTA")
 
 
 class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
@@ -341,7 +335,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
   # This platform sends both STEERING_LTA (same as other Toyota) and STEERING_LTA_2 (SecOC signed)
   # STEERING_LTA is checked for no-actuation by the base class, STEERING_LTA_2 is checked for no-actuation below
 
-  def _lta_2_msg(self, req, req2, angle_cmd, torque_wind_down=100):
+  def _lta_2_msg(self, req, req2, angle_cmd):
     values = {"STEER_REQUEST": req, "STEER_REQUEST_2": req2, "STEER_ANGLE_CMD": angle_cmd}
     return self.packer.make_can_msg_safety("STEERING_LTA_2", 0, values)
 
@@ -356,7 +350,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
     values = {"ACCEL_CMD": accel}
     return self.packer.make_can_msg_safety("ACC_CONTROL_2", 0, values)
 
-  def _accel_msg(self, accel, cancel_req=0):
+  def _accel_msg(self, accel):
     return self._accel_msg_183(accel)
 
 

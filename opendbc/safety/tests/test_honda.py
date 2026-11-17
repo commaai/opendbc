@@ -162,15 +162,6 @@ class HondaBase(common.CarSafetyTest):
     values = {"STEER_TORQUE": steer}
     return self.packer.make_can_msg_safety("STEERING_CONTROL", self.STEER_BUS, values)
 
-  def _send_brake_msg(self, brake):
-    # must be implemented when inherited
-    raise NotImplementedError
-
-  def test_disengage_on_brake(self):
-    self.safety.set_controls_allowed(1)
-    self._rx(self._user_brake_msg(1))
-    self.assertFalse(self.safety.get_controls_allowed())
-
   def test_disengage_on_main(self):
     self.safety.set_controls_allowed(1)
     self._rx(self._acc_state_msg(True))
@@ -351,9 +342,6 @@ class TestHondaBoschSafetyBase(HondaBase):
   def _alt_brake_msg(self, brake):
     values = {"BRAKE_PRESSED": brake}
     return self.packer.make_can_msg_safety("BRAKE_MODULE", self.PT_BUS, values)
-
-  def _send_brake_msg(self, brake):
-    pass
 
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)

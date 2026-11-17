@@ -28,10 +28,6 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
   # Mazda actually does not set any bit when requesting torque
   NO_STEER_REQ_BIT = True
 
-  def _torque_meas_msg(self, torque):
-    values = {"STEER_TORQUE_MOTOR": torque}
-    return self.packer.make_can_msg_safety("STEER_TORQUE", 0, values)
-
   def _torque_driver_msg(self, torque):
     values = {"STEER_TORQUE_SENSOR": torque}
     return self.packer.make_can_msg_safety("STEER_TORQUE", 0, values)
