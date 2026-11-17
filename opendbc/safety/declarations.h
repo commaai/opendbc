@@ -25,20 +25,24 @@
 //#define SAFETY_GM_ASCM 18U  // deprecated
 #define SAFETY_NOOUTPUT 19U
 #define SAFETY_HONDA_BOSCH 20U
-#define SAFETY_VOLKSWAGEN_PQ 21U
-#define SAFETY_SUBARU_PREGLOBAL 22U
 #define SAFETY_HYUNDAI_LEGACY 23U
 //#define SAFETY_HYUNDAI_COMMUNITY 24U  // deprecated
-#define SAFETY_VOLKSWAGEN_MLB 25U
 //#define SAFETY_FAW 26U  // deprecated
 #define SAFETY_BODY 27U
 #define SAFETY_HYUNDAI_CANFD 28U
-#define SAFETY_CHRYSLER_CUSW 30U
-#define SAFETY_PSA 31U
 #define SAFETY_RIVIAN 33U
 #define SAFETY_VOLKSWAGEN_MEB 34U
+
+// Safety modes available only in debug builds
+#ifdef ALLOW_DEBUG
+#define SAFETY_VOLKSWAGEN_PQ 21U
+#define SAFETY_SUBARU_PREGLOBAL 22U
+#define SAFETY_VOLKSWAGEN_MLB 25U
+#define SAFETY_CHRYSLER_CUSW 30U
+#define SAFETY_PSA 31U
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
+#endif
 
 #define GET_BIT(msg, b) ((((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U) != 0U)
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
