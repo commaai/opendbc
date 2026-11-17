@@ -231,6 +231,18 @@ class HondaBase(common.CarSafetyTest):
       self.safety.set_controls_allowed(controls_allowed)
       self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
       self.assertEqual(controls_allowed, self._tx(self._send_steer_msg(0x1000)))
+      self.assertEqual(controls_allowed, self._tx(self._send_steer_msg(1)))
+
+  def test_vehicle_moving(self):
+    # XMISSION_SPEED is 0.01 kph per bit: 0.01 sets only the low byte, 2.56 only the high byte
+    for speed in (0.01, 2.56):
+      # a brake press that was already pressed only disengages while moving
+      self._rx(self._speed_msg(0))
+      self._rx(self._user_brake_msg(1))
+      self.safety.set_controls_allowed(1)
+      self._rx(self._speed_msg(speed))
+      self._rx(self._user_brake_msg(1))
+      self.assertFalse(self.safety.get_controls_allowed())
 
 
 # ********************* Honda Nidec **********************
