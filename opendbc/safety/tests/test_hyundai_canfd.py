@@ -97,6 +97,12 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
         self.assertTrue(self._rx(self.packer.make_can_msg_safety(msg, self.PT_BUS, {sig: 1})))
         self.assertFalse(self.safety.get_gas_pressed_prev())
 
+  def test_gas_pedal_bits(self):
+    # only the hybrid ACCELERATOR_PEDAL spans several bytes
+    if self.GAS_MSG[0] != "ACCELERATOR_ALT":
+      raise unittest.SkipTest
+    self._test_gas_pedal_bits(10, 0.25)
+
   def test_cruise_engaged_prev(self):
     super().test_cruise_engaged_prev()
     # driver override is engaged

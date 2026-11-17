@@ -65,6 +65,20 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     }
     return self.packer.make_can_msg_safety("CRZ_BTNS", 0, values)
 
+  def test_vehicle_moving_min_speed(self):
+    # SPEED is 0.01 kph per bit; one bit past the threshold is moving
+    self._test_vehicle_moving_signals("ENGINE_DATA", 0, [{"SPEED": self.STANDSTILL_THRESHOLD + 0.01}])
+
+  def test_gas_pedal_bits(self):
+    # PEDAL_GAS is byte 4 and the upper nibble of byte 5
+    self._test_gas_pedal_bits(12)
+
+    # the lower nibble of byte 5 is not part of it
+    msg = self._user_gas_msg(0)
+    msg[0].data[5] |= 0x0F
+    self.assertTrue(self._rx(msg))
+    self.assertFalse(self.safety.get_gas_pressed_prev())
+
   def test_buttons(self):
     # only cancel allows while controls not allowed
     self.safety.set_controls_allowed(0)

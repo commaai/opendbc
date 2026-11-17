@@ -66,6 +66,12 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
       self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
 
+  def test_vehicle_moving_single_wheel(self):
+    # SPEED_LEFT/RIGHT are 0.071028 m/s per bit; the lowest speed on either wheel alone means moving
+    if self.SAFETY_PARAM != 0:
+      raise unittest.SkipTest("RAM uses ESP_8 vehicle speed")
+    self._test_vehicle_moving_signals("SPEED_1", 0, [{"SPEED_LEFT": 0.071028}, {"SPEED_RIGHT": 0.071028}])
+
 
 class TestChryslerRamDTSafety(TestChryslerSafety):
   DBC = "chrysler_ram_dt_generated"

@@ -52,6 +52,11 @@ class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteerin
     values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_safety("CruiseControl", 0, values)
 
+  def test_vehicle_moving_single_wheel(self):
+    # wheel speeds are 0.0592 kph per bit; the lowest speed on FR, RL or RR is moving
+    # FIXME: the safety drops the low 12 bits of FL, so only its upper 4 bits count
+    self._test_vehicle_moving_signals("Wheel_Speeds", 0, [{"FL": 0x1000 * 0.0592}] + [{wheel: 0.0592} for wheel in ("FR", "RL", "RR")])
+
 
 class TestSubaruPreglobalReversedDriverTorqueSafety(TestSubaruPreglobalSafety):
   SAFETY_PARAM = SubaruSafetyFlags.PREGLOBAL_REVERSED_DRIVER_TORQUE

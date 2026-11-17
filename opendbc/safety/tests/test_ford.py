@@ -211,6 +211,14 @@ class TestFordSafetyBase(common.CarSafetyTest):
         self.assertEqual(should_rx, self._rx(msg))
         self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
+  def test_yaw_checksum(self):
+    # the yaw checksum covers the roll rate and roll quality flag too
+    values = {"VehYawWActl_D_Qf": 3, "VehRol_W_Actl": 0.1, "VehRolWActl_D_Qf": 3}
+    self.assertTrue(self._rx(self.packer.make_can_msg_safety("Yaw_Data_FD1", 0, values)))
+
+  def test_gas_pedal_bits(self):
+    self._test_gas_pedal_bits(10, 0.1)  # ApedPos_Pc_ActlArb
+
   def test_angle_measurements(self):
     """Tests rx hook correctly parses the curvature measurement from the vehicle speed and yaw rate"""
     for speed in np.arange(0.5, 40, 0.5):
@@ -483,6 +491,14 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
         # both gas signals are checked on their own
         self.assertEqual(should_tx, self._tx(self._acc_command_msg(gas, self.INACTIVE_ACCEL, controls_allowed, gas_pred=self.INACTIVE_GAS)))
         self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, self.INACTIVE_ACCEL, controls_allowed, gas_pred=gas)))
+
+  def test_brake_actuation_bits(self):
+    # either brake pre-charge or deceleration request alone is brake actuation
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      for sig in ("AccBrkPrchg_B_Rq", "AccBrkDecel_B_Rq"):
+        values = {"AccPrpl_A_Rq": self.INACTIVE_GAS, "AccPrpl_A_Pred": self.INACTIVE_GAS, "AccBrkTot_A_Rq": self.INACTIVE_ACCEL, sig: 1}
+        self.assertEqual(controls_allowed, self._tx(self.packer.make_can_msg_safety("ACCDATA", 0, values)), sig)
 
   def test_brake_safety_check(self):
     brake_values = self._boundary_values([self.MIN_ACCEL, self.MAX_ACCEL, self.INACTIVE_ACCEL],

@@ -69,6 +69,10 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     values = {"LS_Abbrechen": cancel, "LS_Tip_Setzen": _set, "LS_Tip_Wiederaufnahme": resume}
     return self.packer.make_can_msg_safety("LS_01", bus, values)
 
+  def test_vehicle_moving_wheels(self):
+    # wheel speeds are 0.1 kph per bit; one wheel at the lowest non-zero speed, or only the front or rear axle turning, means moving
+    self._test_vehicle_moving_signals("ESP_03", 0, [{f"ESP_{w}_Radgeschw": 0.1 for w in wheels} for wheels in (("VL",), ("VL", "VR"), ("HL", "HR"))])
+
   # Verify brake_pressed is true if either the switch or pressure threshold signals are true
   def test_redundant_brake_signals(self):
     test_combinations = [(True, True, True), (True, True, False), (True, False, True), (False, False, False)]

@@ -119,6 +119,32 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
       self.assertTrue(self._rx(self._speed_msg(self.STANDSTILL_THRESHOLD + 1, wheels=(wheel,))))
       self.assertTrue(self.safety.get_vehicle_moving())
 
+  def test_checksum_bits(self):
+    # WHL_SPD11's checksum covers the top two bits of its even bytes and TCS13's skips byte 7,
+    # neither reads past the 8 byte message length
+    speed_msg = self._speed_msg(0xC0)  # sets the top two bits of every even byte
+    brake_msg = self.packer.make_can_msg_safety("TCS13", 0, {"CF_VSM_Avail": 1}, fix_checksum=checksum)  # a bit in byte 7
+    for msg in (speed_msg, brake_msg):
+      msg[0].data[8] = 0xFF
+      self.assertTrue(self._rx(msg))
+
+  def test_rx_counters(self):
+    # EMS16 and TCS13 counters are checked, TCS13's only on non-legacy
+    legacy = self.SAFETY_MODEL == CarParams.SafetyModel.hyundaiLegacy
+    msgs = (
+      ("EMS16", "AliveCounter", 4, True),
+      ("TCS13", "AliveCounterTCS", 8, not legacy),
+    )
+    for name, counter_sig, counter_len, counter_checked in msgs:
+      for counter in range(2 * counter_len):
+        msg = self.packer.make_can_msg_safety(name, 0, {counter_sig: counter % counter_len}, fix_checksum=checksum)
+        self.assertTrue(self._rx(msg), (name, counter))
+
+      # counter stops incrementing
+      for _ in range(common.MAX_WRONG_COUNTERS + 1):
+        valid = self._rx(msg)
+      self.assertEqual(not counter_checked, valid, name)
+
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   SAFETY_PARAM = HyundaiSafetyFlags.ALT_LIMITS
@@ -159,6 +185,9 @@ class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
   def _user_gas_msg(self, gas):
     values = {"Accel_Pedal_Pos": gas}
     return self.packer.make_can_msg_safety("E_EMS11", 0, values, fix_checksum=checksum)
+
+  def test_gas_pedal_bits(self):
+    self._test_gas_pedal_bits(8)  # Accel_Pedal_Pos
 
 
 class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
