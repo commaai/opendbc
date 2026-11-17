@@ -82,13 +82,6 @@ class HondaButtonEnableBase(common.CarSafetyTest):
       self._rx(self._button_msg(btn, main_on=True))
       self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_disengage_on_main(self):
-    self.safety.set_controls_allowed(1)
-    self._rx(self._acc_state_msg(True))
-    self.assertTrue(self.safety.get_controls_allowed())
-    self._rx(self._acc_state_msg(False))
-    self.assertFalse(self.safety.get_controls_allowed())
-
   def test_rx_hook(self):
 
     # TODO: move this test to common
@@ -224,6 +217,13 @@ class HondaBase(common.CarSafetyTest):
   def test_disengage_on_brake(self):
     self.safety.set_controls_allowed(1)
     self._rx(self._user_brake_msg(1))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_disengage_on_main(self):
+    self.safety.set_controls_allowed(1)
+    self._rx(self._acc_state_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self._rx(self._acc_state_msg(False))
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_steer_safety_check(self):
