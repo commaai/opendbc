@@ -22,6 +22,7 @@ for _v in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS", "VECLIB
 import argparse
 import ctypes
 import gc
+import itertools
 import multiprocessing
 import operator
 import pickle
@@ -85,7 +86,7 @@ CRASH_SIGNALS = {signal.SIGSEGV, signal.SIGBUS, signal.SIGFPE, signal.SIGILL, si
 CPU_LIMIT_FIXTURE = 1.0  # CPU seconds a child may spend outside of tests at a time
 MEM_HEADROOM = 256 << 20  # address space a child may allocate beyond what it inherits (Linux only)
 # TODO: kill the remaining survivors and remove this. Until then, the run fails only if more mutants survive than this.
-MAX_SURVIVORS = 110
+MAX_SURVIVORS = 95
 RED, GREEN, YELLOW, BOLD = "31", "32", "33", "1"
 
 
@@ -126,22 +127,29 @@ def _boundary(token):
   return ("-" if value < 0 else "") + digits + m[3]
 
 
-def _fold(txt, node, sub):
+def _fold(txt, node, sub, picks):
   """Value of `node` if it's a constant expression of int or unsigned int literals with every value in [0, 2**31),
-  None otherwise. A sizeof is an unknown positive value, POSITIVE. `sub` replaces the token starting at an offset."""
+  None otherwise. A sizeof is an unknown positive value, POSITIVE. `sub` replaces the token starting at an offset,
+  and `picks` the branch taken by a conditional (at an offset) whose condition isn't constant; without one, it folds
+  if both branches fold to the same value."""
   def text(n):
     return sub.get(n.start_byte, txt[n.start_byte:n.end_byte])
   if node.type == "parenthesized_expression" and node.named_child_count == 1:
-    return _fold(txt, node.named_children[0], sub)
+    return _fold(txt, node.named_children[0], sub, picks)
   if node.type == "sizeof_expression":
     return POSITIVE
   if node.type == "cast_expression" and text(node.child_by_field_name("type")) in INT_CASTS:
-    return _fold(txt, node.child_by_field_name("value"), sub)
+    return _fold(txt, node.child_by_field_name("value"), sub, picks)
+  if node.type == "conditional_expression":
+    c = _fold(txt, node.child_by_field_name("condition"), sub, picks)
+    c = picks.get(node.start_byte) if c is None else c
+    a, b = (_fold(txt, node.child_by_field_name(f), sub, picks) for f in ("consequence", "alternative"))
+    return (a if a == b else None) if c is None else b if c == 0 else a
   if node.type == "number_literal":
     m = re.fullmatch(r"(0[xX][0-9a-fA-F]+|0|[1-9][0-9]*)[uU]?", text(node))
     v = int(m[1], 0) if m else None
   elif node.type == "binary_expression":
-    op, a, b = text(node.child_by_field_name("operator")), *(_fold(txt, node.child_by_field_name(f), sub) for f in ("left", "right"))
+    op, a, b = text(node.child_by_field_name("operator")), *(_fold(txt, node.child_by_field_name(f), sub, picks) for f in ("left", "right"))
     if POSITIVE in (a, b):  # of an unknown value, only 0 * x, x * 0, 0 / x and 0 % x are known
       return 0 if (op == "*" and 0 in (a, b)) or (op in ("/", "%") and a == 0) else None
     if a is None or b is None or op not in FOLD_OPS or (op in ("/", "%") and b == 0) or (op in ("<<", ">>") and b >= 31):
@@ -152,17 +160,33 @@ def _fold(txt, node, sub):
   return v if v is not None and 0 <= v < 2 ** 31 else None
 
 
+def _ways(txt, node, sub, op_start):
+  """`node`'s values for each way its conditionals with a condition that isn't constant (and doesn't hold the mutation)
+  can go, None if any doesn't fold."""
+  conds, stack = [], [node]
+  while stack:
+    n = stack.pop()
+    stack.extend(n.children)
+    cond = n.child_by_field_name("condition") if n.type == "conditional_expression" else None
+    if cond is not None and not cond.start_byte <= op_start < cond.end_byte and _fold(txt, cond, {}, {}) is None:
+      conds.append(n.start_byte)
+  values = [_fold(txt, node, sub, dict(zip(conds, way, strict=True))) for way in itertools.product((False, True), repeat=len(conds))]
+  return None if None in values else values
+
+
 def _equivalent(txt, node, op_start, mutated):
-  """Whether the mutation is inside an integer constant expression whose value it doesn't change, e.g. 3U / 8U,
-  or turns x + 0 into x - 0 (or back), with 0 any constant expression folding to 0."""
+  """Whether the mutation doesn't change the value of the outermost integer constant expression around it, for any
+  way its conditionals go, e.g. 3U / 8U, (x ? 28U : 47U) / 8U or (x == 1 ? 5U : 5U), or turns x + 0 into x - 0 (or
+  back), with 0 any constant expression folding to 0."""
   if node.type == "binary_expression" and node.child_by_field_name("operator").start_byte == op_start and \
-     {txt[op_start], mutated} == {"+", "-"} and _fold(txt, node.child_by_field_name("right"), {}) == 0:
+     {txt[op_start], mutated} == {"+", "-"} and _fold(txt, node.child_by_field_name("right"), {}, {}) == 0:
     return True  # for floating point x this ignores the sign of a zero result, which nothing here depends on
-  if _fold(txt, node, {}) is None:
-    return False
-  while node.parent is not None and _fold(txt, node.parent, {}) is not None:
+  top = None
+  while node is not None and node.type.endswith(("_expression", "_literal")):
+    if _ways(txt, node, {}, op_start) is not None:
+      top = node
     node = node.parent
-  return _fold(txt, node, {}) == _fold(txt, node, {op_start: mutated})
+  return top is not None and _ways(txt, top, {}, op_start) == _ways(txt, top, {op_start: mutated}, op_start)
 
 
 def _parseable(txt):
