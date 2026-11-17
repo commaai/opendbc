@@ -34,8 +34,47 @@
 #define CHRYSLER_RAM_HD_LKAS_COMMAND     0x276
 #define CHRYSLER_RAM_HD_CRUISE_BUTTONS   0x23A
 
-#define CHRYSLER_ADDR(name) ((uint32_t)((safety_setup.chrysler_platform == CHRYSLER_RAM_DT) ? CHRYSLER_RAM_DT_##name : \
-                                        ((safety_setup.chrysler_platform == CHRYSLER_RAM_HD) ? CHRYSLER_RAM_HD_##name : CHRYSLER_##name)))
+typedef struct {
+  uint32_t EPS_2;
+  uint32_t ESP_1;
+  uint32_t ESP_8;
+  uint32_t ECM_5;
+  uint32_t DAS_3;
+  uint32_t LKAS_COMMAND;
+  uint32_t CRUISE_BUTTONS;
+} ChryslerAddrs;
+
+static const ChryslerAddrs *chrysler_get_addrs(void) {
+  static const ChryslerAddrs chrysler_addrs = {
+    .EPS_2 = CHRYSLER_EPS_2,
+    .ESP_1 = CHRYSLER_ESP_1,
+    .ESP_8 = CHRYSLER_ESP_8,
+    .ECM_5 = CHRYSLER_ECM_5,
+    .DAS_3 = CHRYSLER_DAS_3,
+    .LKAS_COMMAND = CHRYSLER_LKAS_COMMAND,
+    .CRUISE_BUTTONS = CHRYSLER_CRUISE_BUTTONS,
+  };
+  static const ChryslerAddrs chrysler_ram_dt_addrs = {
+    .EPS_2 = CHRYSLER_RAM_DT_EPS_2,
+    .ESP_1 = CHRYSLER_RAM_DT_ESP_1,
+    .ESP_8 = CHRYSLER_RAM_DT_ESP_8,
+    .ECM_5 = CHRYSLER_RAM_DT_ECM_5,
+    .DAS_3 = CHRYSLER_RAM_DT_DAS_3,
+    .LKAS_COMMAND = CHRYSLER_RAM_DT_LKAS_COMMAND,
+    .CRUISE_BUTTONS = CHRYSLER_RAM_DT_CRUISE_BUTTONS,
+  };
+  static const ChryslerAddrs chrysler_ram_hd_addrs = {
+    .EPS_2 = CHRYSLER_RAM_HD_EPS_2,
+    .ESP_1 = CHRYSLER_RAM_HD_ESP_1,
+    .ESP_8 = CHRYSLER_RAM_HD_ESP_8,
+    .ECM_5 = CHRYSLER_RAM_HD_ECM_5,
+    .DAS_3 = CHRYSLER_RAM_HD_DAS_3,
+    .LKAS_COMMAND = CHRYSLER_RAM_HD_LKAS_COMMAND,
+    .CRUISE_BUTTONS = CHRYSLER_RAM_HD_CRUISE_BUTTONS,
+  };
+  return (safety_setup.chrysler_platform == CHRYSLER_RAM_DT) ? &chrysler_ram_dt_addrs :
+         ((safety_setup.chrysler_platform == CHRYSLER_RAM_HD) ? &chrysler_ram_hd_addrs : &chrysler_addrs);
+}
 
 static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
   return (uint8_t)(msg->data[6] >> 4);
@@ -43,21 +82,21 @@ static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
 
 static void chrysler_rx_hook(const CANPacket_t *msg) {
   // Measured EPS torque
-  if (msg_matches(msg, CHRYSLER_ADDR(EPS_2), 0U)) {
+  if (msg_matches(msg, chrysler_get_addrs()->EPS_2, 0U)) {
     int torque_meas_new = from_offset(GET_BYTES_BE(msg, 4, 2) & 0x7FFU, 1024);
     update_sample(&safety.torque_meas, torque_meas_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
   const unsigned int das_3_bus = (safety_setup.chrysler_platform == CHRYSLER_PACIFICA) ? 0U : 2U;
-  if (msg_matches(msg, CHRYSLER_ADDR(DAS_3), das_3_bus)) {
+  if (msg_matches(msg, chrysler_get_addrs()->DAS_3, das_3_bus)) {
     bool cruise_engaged = GET_BIT(msg, 21U);
     pcm_cruise_check(cruise_engaged);
   }
 
   // TODO: use the same message for both
   // update vehicle moving
-  if ((safety_setup.chrysler_platform != CHRYSLER_PACIFICA) && msg_matches(msg, CHRYSLER_ADDR(ESP_8), 0U)) {
+  if ((safety_setup.chrysler_platform != CHRYSLER_PACIFICA) && msg_matches(msg, chrysler_get_addrs()->ESP_8, 0U)) {
     safety.vehicle_moving = GET_BYTES_BE(msg, 4, 2) != 0U;
   }
   if ((safety_setup.chrysler_platform == CHRYSLER_PACIFICA) && msg_matches(msg, 514U, 0U)) {
@@ -67,12 +106,12 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
   }
 
   // exit controls on rising edge of gas press
-  if (msg_matches(msg, CHRYSLER_ADDR(ECM_5), 0U)) {
+  if (msg_matches(msg, chrysler_get_addrs()->ECM_5, 0U)) {
     safety.gas_pressed = msg->data[0U] != 0U;
   }
 
   // exit controls on rising edge of brake press
-  if (msg_matches(msg, CHRYSLER_ADDR(ESP_1), 0U)) {
+  if (msg_matches(msg, chrysler_get_addrs()->ESP_1, 0U)) {
     safety.brake_pressed = ((msg->data[0U] & 0xFU) >> 2U) == 1U;
   }
 }
@@ -108,7 +147,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
   // STEERING
-  if (msg->addr == CHRYSLER_ADDR(LKAS_COMMAND)) {
+  if (msg->addr == chrysler_get_addrs()->LKAS_COMMAND) {
     int start_byte = (safety_setup.chrysler_platform == CHRYSLER_PACIFICA) ? 0 : 1;
     int desired_torque = from_offset(GET_BYTES_BE(msg, start_byte, 2) & 0x7FFU, 1024);
 
@@ -122,7 +161,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   }
 
   // FORCE CANCEL: only the cancel button press is allowed
-  if (msg->addr == CHRYSLER_ADDR(CRUISE_BUTTONS)) {
+  if (msg->addr == chrysler_get_addrs()->CRUISE_BUTTONS) {
     const bool is_cancel = msg->data[0] == 1U;
     const bool is_resume = msg->data[0] == 0x10U;
     const bool allowed = is_cancel || (is_resume && safety.controls_allowed);
