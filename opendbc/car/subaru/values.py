@@ -4,7 +4,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
+from opendbc.car.fw_query_definitions import ESSENTIAL_ECUS, FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries, p16
 
 Ecu = CarParams.Ecu
 
@@ -214,6 +214,132 @@ class CAR(Platforms):
   )
 
 
+NON_ESSENTIAL_ECUS = {
+  Ecu.eps: [c for c in CAR if c.config.flags & SubaruFlags.GLOBAL_GEN2],
+}
+
+
+def _get_fwd_camera_prefix(fw: bytes) -> tuple[int, bytes] | None:
+  # EyeSight 0xf182 returns an 8- or 10-byte payload split into two equal halves.
+  # Within ~10s of vehicle startup, the second half is zero-filled while the first
+  # half already holds the primary EyeSight application version.
+  if len(fw) not in (8, 10):
+    return None
+  half = len(fw) // 2
+  if fw[:half] == b'\x00' * half:
+    return None
+  return (len(fw), fw[:half])
+
+
+def _matches_fwd_camera(found_versions: set[bytes], expected_versions: list[bytes]) -> bool:
+  if not found_versions:
+    return False
+  expected_set = set(expected_versions)
+  expected_prefixes = {p for fw in expected_versions if (p := _get_fwd_camera_prefix(fw)) is not None}
+  for fw in found_versions:
+    if fw in expected_set:
+      return True
+    half = len(fw) // 2
+    if len(fw) in (8, 10) and fw[half:] == b'\x00' * half and _get_fwd_camera_prefix(fw) in expected_prefixes:
+      return True
+  return False
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw_versions: OfflineFwVersions) -> set[str]:
+  # Pass 1: exact match on all present essential non-camera ECUs + startup-prefix match on EyeSight fwdCamera.
+  # Requiring fwdCamera (0x787) guarantees we never fingerprint a non-EyeSight vehicle lacking LKAS/ACC control.
+  candidates: set[str] = set()
+  for candidate, fws in offline_fw_versions.items():
+    cam_matched = False
+    valid = True
+    for ecu, expected_versions in fws.items():
+      ecu_type = ecu[0]
+      addr = ecu[1:]
+      found_versions = live_fw_versions.get(addr, set())
+
+      if ecu_type == Ecu.fwdCamera:
+        if not _matches_fwd_camera(found_versions, expected_versions):
+          valid = False
+          break
+        cam_matched = True
+        continue
+
+      if not len(found_versions):
+        if candidate in NON_ESSENTIAL_ECUS.get(ecu_type, []) or ecu_type not in ESSENTIAL_ECUS:
+          continue
+        valid = False
+        break
+
+      if not any(found_version in expected_versions for found_version in found_versions):
+        valid = False
+        break
+
+    if valid and cam_matched:
+      candidates.add(candidate)
+
+  if len(candidates):
+    return candidates
+
+  # Pass 2: handle startup zero-suffixed fwdCamera when a powertrain ECU also received a minor revision update,
+  # requiring fwdCamera prefix match + all essential ECUs present with matching format + >=1 exact non-camera ECU.
+  non_cam_to_cars: dict[tuple[int, int | None, bytes], list[str]] = {}
+  for candidate, fws in offline_fw_versions.items():
+    for ecu, expected_versions in fws.items():
+      if ecu[0] == Ecu.fwdCamera:
+        continue
+      for fw in expected_versions:
+        non_cam_to_cars.setdefault((ecu[1], ecu[2], fw), []).append(candidate)
+
+  for candidate, fws in offline_fw_versions.items():
+    cam_matched = False
+    exact_non_cam = 0
+    valid = True
+    for ecu, expected_versions in fws.items():
+      ecu_type = ecu[0]
+      addr = ecu[1:]
+      found_versions = live_fw_versions.get(addr, set())
+
+      if ecu_type == Ecu.fwdCamera:
+        if not _matches_fwd_camera(found_versions, expected_versions):
+          valid = False
+          break
+        cam_matched = True
+        continue
+
+      if not len(found_versions):
+        if candidate in NON_ESSENTIAL_ECUS.get(ecu_type, []) or ecu_type not in ESSENTIAL_ECUS:
+          continue
+        valid = False
+        break
+
+      expected_lengths = {len(e) for e in expected_versions}
+      if not any(len(v) in expected_lengths for v in found_versions):
+        valid = False
+        break
+
+      if ecu_type == Ecu.abs:
+        expected_prefixes = {e[:1] for e in expected_versions}
+        if not any(v[:1] in expected_prefixes for v in found_versions):
+          valid = False
+          break
+
+      for v in found_versions:
+        unique_owners = non_cam_to_cars.get((addr[0], addr[1], v), [])
+        if len(unique_owners) == 1 and unique_owners[0] != candidate:
+          valid = False
+          break
+      if not valid:
+        break
+
+      if any(v in expected_versions for v in found_versions):
+        exact_non_cam += 1
+
+    if valid and cam_matched and exact_non_cam >= 1:
+      candidates.add(candidate)
+
+  return candidates
+
+
 SUBARU_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
   p16(uds.DATA_IDENTIFIER_TYPE.APPLICATION_DATA_IDENTIFICATION)
 SUBARU_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
@@ -274,9 +400,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
     ),
   ],
   # We don't get the EPS from non-OBD queries on GEN2 cars. Note that we still attempt to match when it exists
-  non_essential_ecus={
-    Ecu.eps: [c for c in CAR if c.config.flags & SubaruFlags.GLOBAL_GEN2],
-  }
+  non_essential_ecus=NON_ESSENTIAL_ECUS,
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 DBC = CAR.create_dbc_map()
