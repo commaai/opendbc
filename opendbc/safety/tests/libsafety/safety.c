@@ -238,12 +238,5 @@ void init_tests(void){
   // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
   SAFETY_SET(tesla_autopark, false);
 
-  ignition_can = false;
-  ignition_can_cnt = 0U;
-  prev_counter_rivian = IGNITION_NO_COUNTER;
-  prev_counter_tesla = IGNITION_NO_COUNTER;
-  prev_counter_vw_meb = IGNITION_NO_COUNTER;
-  for (int i = 0; i < 3; i++) {
-    prev_counter_psa[i] = IGNITION_NO_COUNTER;
-  }
+  ignition_can_reset();
 }
