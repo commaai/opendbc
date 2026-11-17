@@ -10,6 +10,7 @@
 // read and reset by panda's firmware
 extern bool ignition_can;
 extern uint32_t ignition_can_cnt;
+void ignition_can_reset(void);
 void ignition_can_hook(const CANPacket_t *msg);
 
 // the counters are at most 4 bits, so this marks that no previous counter was seen
@@ -23,6 +24,17 @@ static uint8_t prev_counter_rivian = IGNITION_NO_COUNTER;
 static uint8_t prev_counter_tesla = IGNITION_NO_COUNTER;
 static uint8_t prev_counter_vw_meb = IGNITION_NO_COUNTER;
 static uint8_t prev_counter_psa[3] = {IGNITION_NO_COUNTER, IGNITION_NO_COUNTER, IGNITION_NO_COUNTER};
+
+void ignition_can_reset(void) {
+  ignition_can = false;
+  ignition_can_cnt = 0U;
+  prev_counter_rivian = IGNITION_NO_COUNTER;
+  prev_counter_tesla = IGNITION_NO_COUNTER;
+  prev_counter_vw_meb = IGNITION_NO_COUNTER;
+  for (int i = 0; i < 3; i++) {
+    prev_counter_psa[i] = IGNITION_NO_COUNTER;
+  }
+}
 
 void ignition_can_hook(const CANPacket_t *msg) {
   // GM exception
