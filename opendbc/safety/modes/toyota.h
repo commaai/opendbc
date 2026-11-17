@@ -418,7 +418,7 @@ static safety_config toyota_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks toyota_hooks = {
+static const safety_hooks toyota_hooks = {
   .init = toyota_init,
   .rx = toyota_rx_hook,
   .tx = toyota_tx_hook,

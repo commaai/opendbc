@@ -178,7 +178,7 @@ static safety_config subaru_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks subaru_hooks = {
+static const safety_hooks subaru_hooks = {
   .init = subaru_init,
   .rx = subaru_rx_hook,
   .tx = subaru_tx_hook,

@@ -259,7 +259,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-const safety_hooks volkswagen_meb_hooks = {
+static const safety_hooks volkswagen_meb_hooks = {
   .init = volkswagen_meb_init,
   .rx = volkswagen_meb_rx_hook,
   .tx = volkswagen_meb_tx_hook,

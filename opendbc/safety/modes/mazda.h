@@ -98,7 +98,7 @@ static safety_config mazda_init(uint16_t param) {
   return BUILD_SAFETY_CFG(mazda_rx_checks, MAZDA_TX_MSGS);
 }
 
-const safety_hooks mazda_hooks = {
+static const safety_hooks mazda_hooks = {
   .init = mazda_init,
   .rx = mazda_rx_hook,
   .tx = mazda_tx_hook,

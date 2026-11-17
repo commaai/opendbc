@@ -237,7 +237,7 @@ static safety_config gm_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks gm_hooks = {
+static const safety_hooks gm_hooks = {
   .init = gm_init,
   .rx = gm_rx_hook,
   .tx = gm_tx_hook,

@@ -325,7 +325,7 @@ static safety_config ford_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks ford_hooks = {
+static const safety_hooks ford_hooks = {
   .init = ford_init,
   .rx = ford_rx_hook,
   .tx = ford_tx_hook,

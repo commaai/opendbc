@@ -67,11 +67,6 @@
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&safety.vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 #define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&safety.vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
-uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len);
-uint32_t GET_BYTES_BE(const CANPacket_t *msg, int start, int len);
-uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);
-
-extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
 // max number of RX checks in a safety config; their dynamic state is shared by all safety modes
 #define MAX_RX_CHECKS 12U
@@ -244,23 +239,7 @@ typedef struct {
 
 bool safety_rx_hook(const CANPacket_t *msg);
 bool safety_tx_hook(CANPacket_t *msg);
-int to_signed(uint32_t d, int bits);
-int sign_magnitude(uint32_t magnitude, bool negative);
-int from_offset(uint32_t raw, int offset);
-void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
-int ROUND(float val);
-bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSteeringLimits limits);
-bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
-bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
-                               const AngleSteeringParams params);
-bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool steer_control_enabled, const CurvatureSteeringLimits limits);
-bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
-bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limits);
-bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
-bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits);
-void pcm_cruise_check(bool cruise_engaged);
-void speed_mismatch_check(const float speed_2);
 
 // provided by the platform (firmware timer driver, or the test harness)
 uint32_t microsecond_timer_get(void);
@@ -420,7 +399,6 @@ extern SafetyCopy *current_copy;
 #define safety (current_copy->state)
 #define safety_setup (current_copy->setup)
 
-extern uint32_t safety_ts;
 extern bool safety_redundancy_fault;
 
 typedef struct {
@@ -431,30 +409,11 @@ typedef struct {
 int safety_fwd_hook(int bus_num, int addr);
 int set_safety_hooks(uint16_t mode, uint16_t param);
 
-extern const safety_hooks body_hooks;
-extern const safety_hooks chrysler_hooks;
 extern const safety_hooks chrysler_cusw_hooks;
-extern const safety_hooks elm327_hooks;
-extern const safety_hooks nooutput_hooks;
 extern const safety_hooks alloutput_hooks;
-extern const safety_hooks ford_hooks;
-extern const safety_hooks gm_hooks;
-extern const safety_hooks honda_nidec_hooks;
-extern const safety_hooks honda_bosch_hooks;
-extern const safety_hooks hyundai_canfd_hooks;
-extern const safety_hooks hyundai_hooks;
-extern const safety_hooks hyundai_legacy_hooks;
-extern const safety_hooks mazda_hooks;
-extern const safety_hooks nissan_hooks;
-extern const safety_hooks subaru_hooks;
 extern const safety_hooks subaru_preglobal_hooks;
-extern const safety_hooks tesla_hooks;
-extern const safety_hooks toyota_hooks;
 extern const safety_hooks volkswagen_mlb_hooks;
-extern const safety_hooks volkswagen_mqb_hooks;
-extern const safety_hooks volkswagen_meb_hooks;
 extern const safety_hooks volkswagen_pq_hooks;
-extern const safety_hooks rivian_hooks;
 extern const safety_hooks psa_hooks;
 extern const safety_hooks byd_hooks;
 extern const safety_hooks mg_hooks;

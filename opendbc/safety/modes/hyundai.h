@@ -327,7 +327,7 @@ static safety_config hyundai_legacy_init(uint16_t param) {
   return BUILD_SAFETY_CFG(hyundai_legacy_rx_checks, HYUNDAI_TX_MSGS);
 }
 
-const safety_hooks hyundai_hooks = {
+static const safety_hooks hyundai_hooks = {
   .init = hyundai_init,
   .rx = hyundai_rx_hook,
   .tx = hyundai_tx_hook,
@@ -336,7 +336,7 @@ const safety_hooks hyundai_hooks = {
   .compute_checksum = hyundai_compute_checksum,
 };
 
-const safety_hooks hyundai_legacy_hooks = {
+static const safety_hooks hyundai_legacy_hooks = {
   .init = hyundai_legacy_init,
   .rx = hyundai_rx_hook,
   .tx = hyundai_tx_hook,
