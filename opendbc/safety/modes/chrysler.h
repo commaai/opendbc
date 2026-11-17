@@ -30,7 +30,9 @@
 #define CHRYSLER_RAM_HD_ESP_8            0x11C
 #define CHRYSLER_RAM_HD_ECM_5            0x22F
 #define CHRYSLER_RAM_HD_DAS_3            0x1F4
+#ifdef ALLOW_DEBUG
 #define CHRYSLER_RAM_HD_DAS_6            0x275
+#endif
 #define CHRYSLER_RAM_HD_LKAS_COMMAND     0x276
 #define CHRYSLER_RAM_HD_CRUISE_BUTTONS   0x23A
 
