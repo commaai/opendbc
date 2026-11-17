@@ -358,7 +358,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks hyundai_canfd_hooks = {
+static const safety_hooks hyundai_canfd_hooks = {
   .init = hyundai_canfd_init,
   .rx = hyundai_canfd_rx_hook,
   .tx = hyundai_canfd_tx_hook,

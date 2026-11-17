@@ -242,7 +242,7 @@ static safety_config chrysler_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks chrysler_hooks = {
+static const safety_hooks chrysler_hooks = {
   .init = chrysler_init,
   .rx = chrysler_rx_hook,
   .tx = chrysler_tx_hook,

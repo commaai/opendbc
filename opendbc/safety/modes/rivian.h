@@ -177,7 +177,7 @@ static safety_config rivian_init(uint16_t param) {
                                BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_TX_MSGS);
 }
 
-const safety_hooks rivian_hooks = {
+static const safety_hooks rivian_hooks = {
   .init = rivian_init,
   .rx = rivian_rx_hook,
   .tx = rivian_tx_hook,

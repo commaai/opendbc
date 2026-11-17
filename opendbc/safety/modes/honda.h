@@ -440,7 +440,7 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
   return block_msg;
 }
 
-const safety_hooks honda_nidec_hooks = {
+static const safety_hooks honda_nidec_hooks = {
   .init = honda_nidec_init,
   .rx = honda_rx_hook,
   .tx = honda_tx_hook,
@@ -450,7 +450,7 @@ const safety_hooks honda_nidec_hooks = {
   .compute_checksum = honda_compute_checksum,
 };
 
-const safety_hooks honda_bosch_hooks = {
+static const safety_hooks honda_bosch_hooks = {
   .init = honda_bosch_init,
   .rx = honda_rx_hook,
   .tx = honda_tx_hook,

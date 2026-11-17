@@ -330,7 +330,7 @@ static safety_config tesla_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks tesla_hooks = {
+static const safety_hooks tesla_hooks = {
   .init = tesla_init,
   .rx = tesla_rx_hook,
   .tx = tesla_tx_hook,

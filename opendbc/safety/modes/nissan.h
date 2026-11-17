@@ -127,7 +127,7 @@ static safety_config nissan_init(uint16_t param) {
   return BUILD_SAFETY_CFG(nissan_rx_checks, NISSAN_TX_MSGS);
 }
 
-const safety_hooks nissan_hooks = {
+static const safety_hooks nissan_hooks = {
   .init = nissan_init,
   .rx = nissan_rx_hook,
   .tx = nissan_tx_hook,

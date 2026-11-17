@@ -3,6 +3,8 @@
 
 #include "opendbc/safety/declarations.h"
 
+static uint32_t safety_ts;
+
 // ISO 11270
 static const float ISO_LATERAL_ACCEL = 3.0f;  // m/s^2
 
@@ -68,7 +70,7 @@ static bool rt_torque_rate_limit_check(int val, int val_last, const int MAX_RT_D
 }
 
 // Safety checks for torque-based steering commands
-bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSteeringLimits limits) {
+static bool steer_torque_cmd_checks(int desired_torque, bool steer_req, const TorqueSteeringLimits limits) {
   bool violation = false;
   uint32_t ts = safety_ts;
 
@@ -231,7 +233,7 @@ static bool steer_angle_cmd_common_checks(bool limit_violation, int desired_angl
 }
 
 // Safety checks for angle-based steering commands
-bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits) {
+static bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits) {
   bool violation = false;
 
   if (safety.controls_allowed && steer_control_enabled) {
@@ -255,7 +257,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 }
 
 // Safety checks for curvature-based steering commands
-bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
+static bool steer_curvature_cmd_checks(int desired_curvature, int steer_power, bool steer_control_enabled, const CurvatureSteeringLimits limits) {
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
   const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
   // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
@@ -363,7 +365,7 @@ static float get_angle_from_curvature(const float curvature, const float curvatu
   return curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 }
 
-bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
+static bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params) {
   // This check uses a simple vehicle model to allow for constant lateral acceleration and jerk limits across all speeds.
   // TODO: remove the inaccurate breakpoint angle limiting function above and always use this one

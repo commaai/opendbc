@@ -61,7 +61,7 @@ static safety_config body_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks body_hooks = {
+static const safety_hooks body_hooks = {
   .init = body_init,
   .rx = body_rx_hook,
   .tx = body_tx_hook,

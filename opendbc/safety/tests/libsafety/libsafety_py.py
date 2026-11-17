@@ -62,7 +62,7 @@ def cdef_from_files(*paths: Path) -> str:
   # Keep integer constants, type declarations, and function signatures, including definitions.
   constants = re.findall(r"^#define \w+ \d+[UuLl]*[ \t]*$", source, re.MULTILINE)
   types = re.findall(r"^(?:typedef|struct|enum)\b(?:[^;{]|\{[^}]*\})+;", source, re.MULTILINE)
-  functions = re.findall(r"^((?!typedef\b)\w[\w *]*\b\w+\([^;{}]*\))\s*[;{]", source, re.MULTILINE)
+  functions = re.findall(r"^((?!typedef\b|static\b)\w[\w *]*\b\w+\([^;{}]*\))\s*[;{]", source, re.MULTILINE)
   return "\n".join([*constants, *types, *(f"{signature};" for signature in dict.fromkeys(functions))])
 
 
