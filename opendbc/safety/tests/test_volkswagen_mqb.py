@@ -108,6 +108,13 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
       self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
                        f"expected {brake_pressed=} with {motor_14_signal=} and {esp_05_signal=}")
 
+  def test_vehicle_moving_single_wheel(self):
+    # wheel speeds are 0.0075 kph per bit; the lowest speed on any single wheel means moving
+    self._test_vehicle_moving_signals("ESP_19", 0, [{f"ESP_{wheel}_Radgeschw_02": 0.0075} for wheel in ("HL", "HR", "VL", "VR")])
+
+  def test_gas_pedal_bits(self):
+    self._test_gas_pedal_bits(8, 0.4)  # MO_Fahrpedalrohwert_01
+
 
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
   SAFETY_MODEL = CarParams.SafetyModel.volkswagen

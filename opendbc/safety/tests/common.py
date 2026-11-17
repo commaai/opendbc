@@ -760,6 +760,24 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
         should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
+  def test_angle_cmd_rate_limit_at_zero(self):
+    # only moving away from a non-zero angle is winding up, anything else uses the down limit
+    if not hasattr(self, "ANGLE_RATE_UP"):
+      raise unittest.SkipTest("No angle rate limits")
+
+    # past the last breakpoint (2 m/s past it, beyond the safety's 1 m/s speed fudge) the down limit is its last value,
+    # computed in float32 like the safety
+    down = int(np.float32(self.ANGLE_RATE_DOWN[-1]) * np.float32(self.DEG_TO_CAN) + np.float32(1.))
+
+    self._reset_speed_measurement(self.ANGLE_RATE_BP[-1] + 2)
+    for last in (-1, 0, 1):
+      for sign in (-1, 1):
+        self.safety.set_controls_allowed(True)
+        self.safety.set_desired_angle_last(last)
+        cmd = last + sign * down
+        winding_up = last * sign > 0  # the up limit is lower, so it doesn't allow this
+        self.assertEqual(not winding_up, self._tx(self._angle_cmd_msg(cmd / self.DEG_TO_CAN, True)), (last, cmd))
+
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while
     # steer actuation bit is 0, regardless of controls allowed.
@@ -966,6 +984,12 @@ class SafetyTest(SafetyTestBase):
     self.safety.set_controls_allowed(0)
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_rx_checks_unused_msgs(self):
+    # unused alternative messages of an RX check are zeroed, a matching msg must not select one
+    self._rx(make_msg(0, 0, 0))
+    for i in range(self.safety.get_rx_checks_len()):
+      self.assertFalse(self.safety.safety_a.state.rx_status[i].msg_seen)
+
   def test_tx_hook_on_wrong_safety_mode(self):
     files = os.listdir(os.path.dirname(os.path.realpath(__file__)))
     test_files = [f for f in files if f.startswith("test_") and f.endswith(".py")]
@@ -1078,6 +1102,20 @@ class CarSafetyTest(SafetyTest):
   @abc.abstractmethod
   def _pcm_status_msg(self, enable):
     pass
+
+  def _test_vehicle_moving_signals(self, msg: str, bus: int, values: list[dict]):
+    # each of these alone, with every other signal zero, means the vehicle is moving
+    for v in values:
+      self._rx(self._vehicle_moving_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self.packer.make_can_msg_safety(msg, bus, v))
+      self.assertTrue(self.safety.get_vehicle_moving(), v)
+
+  def _test_gas_pedal_bits(self, bits: int, scale: float = 1):
+    # each bit of a gas pedal signal that spans several bytes alone means gas pressed
+    for bit in range(bits):
+      self.assertTrue(self._rx(self._user_gas_msg((1 << bit) * scale)))
+      self.assertTrue(self.safety.get_gas_pressed_prev(), bit)
 
   # ***** standard tests for all car-specific safety modes *****
 

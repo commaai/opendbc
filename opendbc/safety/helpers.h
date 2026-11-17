@@ -34,10 +34,6 @@ static inline int safety_clamp_int(int x, int low, int high) {
   return (x > high) ? high : ((x < low) ? low : x);
 }
 
-static inline int safety_abs_int(int a) {
-  return (a > 0) ? a : (-a);
-}
-
 #define SAFETY_ARRAY_LEN(a) ((int)sizeof(a) / (int)sizeof((a)[0]))
 
 #define SAFETY_UNUSED(x) ((void)(x))
