@@ -155,7 +155,8 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
 
   // gas press, different for EV, hybrid, and ICE models
   if (msg_matches(msg, 0x371U, 0U) && safety_setup.hyundai_ev_gas_signal) {
-    safety.gas_pressed = (((msg->data[4] & 0x7FU) << 1) | (msg->data[3] >> 7)) != 0U;
+    // Accel_Pedal_Pos: bit 7 of byte 3 and bits 0-6 of byte 4
+    safety.gas_pressed = ((msg->data[3] >> 7) | (msg->data[4] & 0x7FU)) != 0U;
   } else if (msg_matches(msg, 0x371U, 0U) && safety_setup.hyundai_hybrid_gas_signal) {
     safety.gas_pressed = msg->data[7] != 0U;
   } else if (safety_setup.hyundai_fcev_gas_signal && msg_matches(msg, 0x91U, 0U)) {
