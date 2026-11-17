@@ -12,7 +12,9 @@
 #define MSG_MOTOR_3             0x380U   // RX from ECU, for driver throttle input
 #define MSG_GRA_NEU             0x38AU   // TX by OP, ACC control buttons for cancel/resume
 #define MSG_MOTOR_5             0x480U   // RX from ECU, for ACC main switch state
+#ifdef ALLOW_DEBUG
 #define MSG_ACC_GRA_ANZEIGE     0x56AU   // TX by OP, ACC HUD
+#endif
 #define MSG_LDW_1               0x5BEU   // TX by OP, Lane line recognition and text alerts
 
 static uint32_t volkswagen_pq_get_checksum(const CANPacket_t *msg) {
@@ -56,13 +58,6 @@ static safety_config volkswagen_pq_init(uint16_t param) {
     {MSG_GRA_NEU, 2, 4, .check_relay = false},
   };
 
-  static const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] = {
-    {MSG_HCA_1, 0, 5, .check_relay = true},
-    {MSG_LDW_1, 0, 8, .check_relay = true},
-    {MSG_ACC_SYSTEM, 0, 8, .check_relay = true},
-    {MSG_ACC_GRA_ANZEIGE, 0, 8, .check_relay = true},
-  };
-
   static const RxCheck volkswagen_pq_rx_checks[] = {
     {.msg = {{MSG_LENKHILFE_3, 0, 6, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_BREMSE_1, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -74,13 +69,23 @@ static safety_config volkswagen_pq_init(uint16_t param) {
 
   volkswagen_common_init();
 
+  safety_config ret = BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_STOCK_TX_MSGS);
 #ifdef ALLOW_DEBUG
   safety_setup.volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
+  if (safety_setup.volkswagen_longitudinal) {
+    static const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] = {
+      {MSG_HCA_1, 0, 5, .check_relay = true},
+      {MSG_LDW_1, 0, 8, .check_relay = true},
+      {MSG_ACC_SYSTEM, 0, 8, .check_relay = true},
+      {MSG_ACC_GRA_ANZEIGE, 0, 8, .check_relay = true},
+    };
+
+    ret = BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_LONG_TX_MSGS);
+  }
 #else
   SAFETY_UNUSED(param);
 #endif
-  return safety_setup.volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_LONG_TX_MSGS) : \
-                                   BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_STOCK_TX_MSGS);
+  return ret;
 }
 
 static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
@@ -99,6 +104,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
     update_sample(&safety.torque_driver, torque_driver_new);
   }
 
+#ifdef ALLOW_DEBUG
   if (safety_setup.volkswagen_longitudinal) {
     if (msg_matches(msg, MSG_MOTOR_5, 0U)) {
       // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
@@ -120,14 +126,15 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
         safety.controls_allowed = false;
       }
     }
-  } else {
-    if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
-      // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
-      // Signal: Motor_2.MO2_Sta_GRA
-      uint8_t acc_status = msg->data[2] >> 6;
-      bool cruise_engaged = (acc_status == 1U) || (acc_status == 2U);
-      pcm_cruise_check(cruise_engaged);
-    }
+  }
+#endif
+
+  if (!safety_setup.volkswagen_longitudinal && msg_matches(msg, MSG_MOTOR_2, 0U)) {
+    // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
+    // Signal: Motor_2.MO2_Sta_GRA
+    uint8_t acc_status = msg->data[2] >> 6;
+    bool cruise_engaged = (acc_status == 1U) || (acc_status == 2U);
+    pcm_cruise_check(cruise_engaged);
   }
 
   // Signal: Motor_3.MO3_Pedalwert

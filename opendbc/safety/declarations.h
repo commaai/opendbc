@@ -354,7 +354,6 @@ typedef struct {
   ChryslerPlatform chrysler_platform;
 
   GmHardware gm_hw;
-  const LongitudinalLimits *gm_long_limits;
   bool gm_pcm_cruise;
 
   bool honda_alt_brake_msg;

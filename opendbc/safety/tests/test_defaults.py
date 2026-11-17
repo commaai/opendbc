@@ -213,7 +213,7 @@ class TestModeCount(common.SafetyTestBase):
 
 class TestSafetyConfigs(unittest.TestCase):
   def test_hooks(self):
-    # safety.h relies on these instead of checking them at runtime
+    # safety.h skips a check whose hook is missing, so every check that isn't skipped needs its hook
     always_tx = (CarParams.SafetyModel.allOutput, CarParams.SafetyModel.elm327)  # tx_hook_copy whitelists everything
     libsafety = libsafety_py.libsafety  # loaded when the test runs, so a test runner can load its own build first
     for mode in CarParams.SafetyModel.schema.enumerants.values():
@@ -234,6 +234,32 @@ class TestSafetyConfigs(unittest.TestCase):
           self.assertEqual(m.ignore_counter, m.max_counter == 0)
           self.assertTrue(m.ignore_counter or hooks.get_counter != ffi.NULL)
           self.assertTrue(m.ignore_quality_flag or hooks.get_quality_flag_valid != ffi.NULL)
+
+  def _set_config(self, mode, rx_checks=ffi.NULL, tx_msgs=ffi.NULL):
+    libsafety = libsafety_py.libsafety
+    libsafety.set_safety_hooks(mode, 0)
+    for copy in (libsafety.safety_a, libsafety.safety_b):
+      copy.setup.current_safety_config.rx_checks = rx_checks
+      copy.setup.current_safety_config.rx_checks_len = 0 if rx_checks == ffi.NULL else 1
+      copy.setup.current_safety_config.tx_msgs = tx_msgs
+      copy.setup.current_safety_config.tx_msgs_len = 0 if tx_msgs == ffi.NULL else 1
+
+  def test_missing_hooks_are_skipped(self):
+    libsafety = libsafety_py.libsafety
+    msg = common.make_msg(0, 0x123, 8)
+
+    # mazda has no checksum, counter or quality flag hooks
+    rx_checks = ffi.new("RxCheck *", {"msg": [{"addr": 0x123, "bus": 0, "len": 8, "frequency": 10, "max_counter": 15}]})
+    self._set_config(CarParams.SafetyModel.mazda, rx_checks=rx_checks)
+    self.assertTrue(libsafety.safety_rx_hook(msg))
+
+    # noOutput has no rx or tx hook
+    self._set_config(CarParams.SafetyModel.noOutput, rx_checks=rx_checks)
+    self.assertTrue(libsafety.safety_rx_hook(msg))
+    tx_msgs = ffi.new("CanMsg *", {"addr": 0x123, "bus": 0, "len": 8})
+    self._set_config(CarParams.SafetyModel.noOutput, tx_msgs=tx_msgs)
+    self.assertFalse(libsafety.safety_tx_hook(msg))
+    self.assertFalse(libsafety.safety_redundancy_fault)
 
 
 if __name__ == "__main__":

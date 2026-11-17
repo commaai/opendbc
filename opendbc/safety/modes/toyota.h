@@ -12,11 +12,6 @@
   {0x2E4, 0, 5, .check_relay = true}, \
   {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */  \
 
-#define TOYOTA_COMMON_SECOC_TX_MSGS \
-  TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 8, .check_relay = true}, {0x131, 0, 8, .check_relay = true}, \
-  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */ \
-
 #define TOYOTA_COMMON_LONG_TX_MSGS \
   TOYOTA_COMMON_TX_MSGS \
   /* DSU bus 0 */ \
@@ -32,11 +27,6 @@
   /* ACC */                            \
   {0x343, 0, 8, .check_relay = true},  \
 
-#define TOYOTA_COMMON_SECOC_LONG_TX_MSGS \
-  TOYOTA_COMMON_SECOC_TX_MSGS \
-  {0x343, 0, 8, .check_relay = true}, \
-  {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */ \
-
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
   {.msg = {{ 0xaa, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},      \
   {.msg = {{0x260, 0, 8, 50U, .ignore_counter = true, .ignore_quality_flag=!(lta)}, { 0 }, { 0 }}},  \
@@ -51,11 +41,24 @@
   {.msg = {{0x1D2, 0, 8, 33U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                           \
   {.msg = {{0x224, 0, 8, 40U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
+#ifdef ALLOW_DEBUG
+#define TOYOTA_COMMON_SECOC_TX_MSGS \
+  TOYOTA_BASE_TX_MSGS \
+  {0x2E4, 0, 8, .check_relay = true}, {0x131, 0, 8, .check_relay = true}, \
+  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */ \
+
+#define TOYOTA_COMMON_SECOC_LONG_TX_MSGS \
+  TOYOTA_COMMON_SECOC_TX_MSGS \
+  {0x343, 0, 8, .check_relay = true}, \
+  {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */ \
+
 #define TOYOTA_SECOC_RX_CHECKS                                                                                                             \
   TOYOTA_COMMON_RX_CHECKS(false)                                                                                                           \
   {.msg = {{0x176, 0, 8, 32U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                           \
   {.msg = {{0x116, 0, 8, 42U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
   {.msg = {{0x101, 0, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
+
+#endif
 
 static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
   uint32_t len = GET_LEN(msg);
@@ -115,6 +118,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
   // enter controls on rising edge of ACC, exit controls on ACC off
   // exit controls on rising edge of gas press, if not alternative experience
   // exit controls on rising edge of brake press
+#ifdef ALLOW_DEBUG
   if (safety_setup.toyota_secoc) {
     if (msg_matches(msg, 0x176U, 0U)) {
       bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
@@ -126,18 +130,19 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
     if (msg_matches(msg, 0x101U, 0U)) {
       safety.brake_pressed = GET_BIT(msg, 3U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_rav4_prime_generated.dbc)
     }
-  } else {
-    if (msg_matches(msg, 0x1D2U, 0U)) {
-      bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
-      pcm_cruise_check(cruise_engaged);
-      safety.gas_pressed = !GET_BIT(msg, 4U);  // PCM_CRUISE.GAS_RELEASED
-    }
-    if (!safety_setup.toyota_alt_brake && msg_matches(msg, 0x226U, 0U)) {
-      safety.brake_pressed = GET_BIT(msg, 37U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_nodsu_pt_generated.dbc)
-    }
-    if (safety_setup.toyota_alt_brake && msg_matches(msg, 0x224U, 0U)) {
-      safety.brake_pressed = GET_BIT(msg, 5U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_new_mc_pt_generated.dbc)
-    }
+  }
+#endif
+  // not in the SecOC rx checks
+  if (msg_matches(msg, 0x1D2U, 0U)) {
+    bool cruise_engaged = GET_BIT(msg, 5U);  // PCM_CRUISE.CRUISE_ACTIVE
+    pcm_cruise_check(cruise_engaged);
+    safety.gas_pressed = !GET_BIT(msg, 4U);  // PCM_CRUISE.GAS_RELEASED
+  }
+  if (!safety_setup.toyota_alt_brake && msg_matches(msg, 0x226U, 0U)) {
+    safety.brake_pressed = GET_BIT(msg, 37U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_nodsu_pt_generated.dbc)
+  }
+  if (safety_setup.toyota_alt_brake && msg_matches(msg, 0x224U, 0U)) {
+    safety.brake_pressed = GET_BIT(msg, 5U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_new_mc_pt_generated.dbc)
   }
 
   // sample speed
@@ -204,10 +209,12 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     int desired_accel = to_signed(GET_BYTES_BE(msg, 0, 2), 16);
 
     bool violation = false;
+#ifdef ALLOW_DEBUG
     if (safety_setup.toyota_secoc) {
       // SecOC cars move accel to 0x183. Only allow inactive accel on 0x343 to match stock behavior
       violation = desired_accel != TOYOTA_LONG_LIMITS.inactive_accel;
     }
+#endif
     const bool accel_violation = longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
     violation = violation || accel_violation;
 
@@ -227,11 +234,13 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+#ifdef ALLOW_DEBUG
   if (msg_matches(msg, 0x183U, 0U)) {
     int desired_accel = to_signed(GET_BYTES_BE(msg, 0, 2), 16);
 
     tx = !longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
   }
+#endif
 
   // AEB: block all actuation. only used when DSU is unplugged
   if (msg_matches(msg, 0x283U, 0U)) {
@@ -289,6 +298,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+#ifdef ALLOW_DEBUG
   // STEERING_LTA_2 angle steering check (SecOC)
   if (safety_setup.toyota_secoc && msg_matches(msg, 0x131U, 0U)) {
     // SecOC cars block any form of LTA actuation for now
@@ -302,6 +312,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       tx = false;
     }
   }
+#endif
 
   // STEER: safety check on bytes 2-3
   if (msg_matches(msg, 0x2E4U, 0U)) {
@@ -336,16 +347,8 @@ static safety_config toyota_init(uint16_t param) {
     TOYOTA_COMMON_TX_MSGS
   };
 
-  static const CanMsg TOYOTA_SECOC_TX_MSGS[] = {
-    TOYOTA_COMMON_SECOC_TX_MSGS
-  };
-
   static const CanMsg TOYOTA_LONG_TX_MSGS[] = {
     TOYOTA_COMMON_LONG_TX_MSGS
-  };
-
-  static const CanMsg TOYOTA_SECOC_LONG_TX_MSGS[] = {
-    TOYOTA_COMMON_SECOC_LONG_TX_MSGS
   };
 
   // safety param flags
@@ -368,27 +371,13 @@ static safety_config toyota_init(uint16_t param) {
   safety_setup.toyota_dbc_eps_torque_factor = (int)eps_factor;
 
   safety_config ret;
-  if (safety_setup.toyota_secoc) {
-    if (safety_setup.toyota_stock_longitudinal) {
-      SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
-    } else {
-      SET_TX_MSGS(TOYOTA_SECOC_LONG_TX_MSGS, ret);
-    }
+  if (safety_setup.toyota_stock_longitudinal) {
+    SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
   } else {
-    if (safety_setup.toyota_stock_longitudinal) {
-      SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
-    } else {
-      SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
-    }
+    SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
   }
 
-  if (safety_setup.toyota_secoc) {
-    static const RxCheck toyota_secoc_rx_checks[] = {
-      TOYOTA_SECOC_RX_CHECKS
-    };
-
-    SET_RX_CHECKS(toyota_secoc_rx_checks, ret);
-  } else if (safety_setup.toyota_lta) {
+  if (safety_setup.toyota_lta) {
     // Check the quality flag for angle measurement when using LTA, since it's not set on TSS-P cars
     static const RxCheck toyota_lta_rx_checks[] = {
       TOYOTA_RX_CHECKS(true)
@@ -409,6 +398,29 @@ static safety_config toyota_init(uint16_t param) {
       SET_RX_CHECKS(toyota_lka_alt_brake_rx_checks, ret);
     }
   }
+
+#ifdef ALLOW_DEBUG
+  if (safety_setup.toyota_secoc) {
+    static const CanMsg TOYOTA_SECOC_TX_MSGS[] = {
+      TOYOTA_COMMON_SECOC_TX_MSGS
+    };
+
+    static const CanMsg TOYOTA_SECOC_LONG_TX_MSGS[] = {
+      TOYOTA_COMMON_SECOC_LONG_TX_MSGS
+    };
+
+    static const RxCheck toyota_secoc_rx_checks[] = {
+      TOYOTA_SECOC_RX_CHECKS
+    };
+
+    if (safety_setup.toyota_stock_longitudinal) {
+      SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
+    } else {
+      SET_TX_MSGS(TOYOTA_SECOC_LONG_TX_MSGS, ret);
+    }
+    SET_RX_CHECKS(toyota_secoc_rx_checks, ret);
+  }
+#endif
 
   return ret;
 }

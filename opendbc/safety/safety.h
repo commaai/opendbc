@@ -157,7 +157,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 
     // the hooks are set for every check that isn't ignored, see TestSafetyConfigs
     // checksum check
-    if (m->ignore_checksum) {
+    if ((hooks->get_checksum == NULL) || m->ignore_checksum) {
       status->valid_checksum = true;
     } else {
       uint32_t checksum = hooks->get_checksum(msg);
@@ -166,7 +166,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     }
 
     // counter check
-    if (m->ignore_counter) {
+    if ((hooks->get_counter == NULL) || m->ignore_counter) {
       status->wrong_counters = 0;
     } else {
       uint8_t counter = hooks->get_counter(msg);
@@ -174,7 +174,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     }
 
     // quality flag check
-    if (m->ignore_quality_flag) {
+    if ((hooks->get_quality_flag_valid == NULL) || m->ignore_quality_flag) {
       status->valid_quality_flag = true;
     } else {
       status->valid_quality_flag = hooks->get_quality_flag_valid(msg);
@@ -192,7 +192,7 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
 
   bool valid = rx_msg_safety_check(msg, &safety_setup.current_safety_config, safety_setup.current_hooks);
   bool whitelisted = get_addr_check_index(msg, safety_setup.current_safety_config.rx_checks, safety_setup.current_safety_config.rx_checks_len) != -1;
-  if (valid && whitelisted) {
+  if (valid && (safety_setup.current_hooks->rx != NULL) && whitelisted) {
     safety_setup.current_hooks->rx(msg);
   }
 
@@ -236,7 +236,7 @@ static bool tx_hook_copy(const CANPacket_t *msg) {
   }
 
   bool safety_allowed = false;
-  if (whitelisted) {
+  if ((safety_setup.current_hooks->tx != NULL) && whitelisted) {
     safety_allowed = safety_setup.current_hooks->tx(msg);
   }
 
