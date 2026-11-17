@@ -140,6 +140,7 @@ class TestHeartbeat(common.SafetyTestBase):
       self.safety.set_controls_allowed(True)
       for _ in range(3):
         self.assertTrue(self.safety.get_controls_allowed())
+        self._rx(common.make_msg(0, 0x123))  # only a rising edge of controls_allowed resets the mismatches
         self.safety.safety_heartbeat_check()
       self.assertEqual(engaged, self.safety.get_controls_allowed())
       self.safety.safety_heartbeat_check()
