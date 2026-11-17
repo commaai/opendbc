@@ -67,6 +67,9 @@ class Signal:
       lsb = self.lsb if (self.lsb // 8) == i else i * 8
       msb = self.msb if (self.msb // 8) == i else (i + 1) * 8 - 1
       size = msb - lsb + 1
+      if size <= 0:
+        break
+      size = min(size, bits)
       d = (dat[i] >> (lsb - (i * 8))) & ((1 << size) - 1)
       ret |= d << (bits - size)
       bits -= size
@@ -165,12 +168,16 @@ class DBC:
           lsb = start_bit
           msb = start_bit + size - 1
         else:
+          if start_bit not in be_bits or (be_bits.index(start_bit) + size - 1) >= len(be_bits):
+            raise ValueError(f"Invalid Big-Endian bit layout: {sig_name} start_bit={start_bit}, size={size} at line {line_num} in {self.name}")
           idx = be_bits.index(start_bit)
           lsb = be_bits[idx + size - 1]
           msb = start_bit
 
         sig = Signal(sig_name, start_bit, msb, lsb, size, is_signed, factor, offset_val, is_little_endian)
         set_signal_type(sig, checksum_state, self.name, line_num, address)
+        if address not in signals_temp:
+          signals_temp[address] = {}
         signals_temp[address][sig_name] = sig
       elif line.startswith("VAL_ "):
         m = VAL_RE.search(line)
@@ -184,12 +191,15 @@ class DBC:
         val_def = " ".join(words).strip()
         self.vals.append(Val(sgname, val_addr, val_def))
     for addr, sigs in signals_temp.items():
-      self.msgs[addr].sigs = sigs
+      if addr in self.msgs:
+        self.msgs[addr].sigs = sigs
       if checksum_state and checksum_state.checksum_fields and addr in checksum_state.checksum_fields:
-        fields = tuple(sigs[name] for name in checksum_state.checksum_fields[addr])
-        for sig in sigs.values():
-          if sig.calc_checksum:
-            sig.checksum_fields = fields
+        required_fields = checksum_state.checksum_fields[addr]
+        if all(name in sigs for name in required_fields):
+          fields = tuple(sigs[name] for name in required_fields)
+          for sig in sigs.values():
+            if sig.calc_checksum:
+              sig.checksum_fields = fields
 
 
 # ***** checksum functions *****
