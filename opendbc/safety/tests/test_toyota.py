@@ -59,10 +59,9 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def _accel_msg(self, accel, cancel_req=0):
     return self._accel_msg_343(accel, cancel_req)
 
-  def _speed_msg(self, speed, quality_flag=True):
+  def _speed_msg(self, speed, faults=()):
     values = {("WHEEL_SPEED_%s" % n): speed * 3.6 for n in ["FR", "FL", "RR", "RL"]}
-    if not quality_flag:
-      values |= {"WHEEL_SPEED_%s_FAULT" % n: 1.0 for n in ["FR", "FL", "RR", "RL"]}
+    values |= {"WHEEL_SPEED_%s_FAULT" % n: 1 for n in faults}
     return self.packer.make_can_msg_safety("WHEEL_SPEEDS", 0, values)
 
   def _user_brake_msg(self, brake):
@@ -124,17 +123,21 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       self.assertFalse(self._rx(msg))
       self.assertFalse(self.safety.get_controls_allowed())
 
-    # quality flag tests
-    msg = self._speed_msg(0)
-    self.assertTrue(self._rx(msg))
-
-    msg = self._speed_msg(0, quality_flag=False)
-    self.assertFalse(self._rx(msg))
+    # quality flag tests: a fault on any wheel invalidates the message
+    self.assertTrue(self._rx(self._speed_msg(0)))
+    for wheel in ["FR", "FL", "RR", "RL"]:
+      self.assertFalse(self._rx(self._speed_msg(0, faults=[wheel])), wheel)
 
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 72.22_ is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 259 / 3.6, 1,
                                   self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+
+  def test_angle_meas_initializing(self):
+    # only LTA checks the STEER_TORQUE_SENSOR quality flag and rejects the message, without it the rx hook drops the initializing angle
+    lta = bool(self.SAFETY_PARAM & ToyotaSafetyFlags.LTA)
+    self.assertEqual(not lta, self._rx(self._angle_meas_msg(10, steer_angle_initializing=True)))
+    self.assertEqual(0, self.safety.get_angle_meas_max())
 
 
 class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
@@ -239,7 +242,10 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
           self.assertEqual(should_tx, self._tx(self._lta_msg(1, 1, angle, 100)))
           self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 0)))  # should tx if we wind down torque
 
-      # only the smaller of |min| and |max| over the window is checked
+      # wind down is only enforced while both the smallest and largest torque in the window are over the limit
+      for _ in range(6):
+        self._rx(self._torque_meas_msg(self.MAX_MEAS_TORQUE * 2, self.MAX_LTA_DRIVER_TORQUE * 2))
+      self.assertFalse(self._tx(self._lta_msg(1, 1, angle, 100)))
       self._rx(self._torque_meas_msg(0, 0))
       self.assertTrue(self._tx(self._lta_msg(1, 1, angle, 100)))
 
@@ -332,11 +338,6 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
   @property
   def SAFETY_PARAM(self):
     return self.EPS_SCALE | ToyotaSafetyFlags.SECOC
-
-  def test_angle_meas_initializing(self):
-    # SecOC doesn't check the STEER_TORQUE_SENSOR quality flag, so the rx hook drops initializing angles itself
-    self.assertTrue(self._rx(self._angle_meas_msg(10, steer_angle_initializing=True)))
-    self.assertEqual(0, self.safety.get_angle_meas_max())
 
   # This platform also has alternate brake and PCM messages, but same naming in the DBC, so same packers work
 
