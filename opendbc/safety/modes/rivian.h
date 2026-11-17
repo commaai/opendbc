@@ -147,12 +147,14 @@ static safety_config rivian_init(uint16_t param) {
     {0x321, 2, 7, .check_relay = true},
     {0x162, 2, 8, .check_relay = true},
   };
+#ifdef ALLOW_DEBUG
   // 0x160 = ACM_longitudinalRequest
   static const CanMsg RIVIAN_LONG_TX_MSGS[] = {
     {0x120, 0, 8, .check_relay = true},
     {0x321, 2, 7, .check_relay = true},
     {0x160, 0, 5, .check_relay = true},
   };
+#endif
 
   static const RxCheck rivian_rx_checks[] = {
     {.msg = {{0x208, 0, 8, 50U, .max_counter = 14U}, { 0 }, { 0 }}},   // ESP_Status (speed)
@@ -162,19 +164,17 @@ static safety_config rivian_init(uint16_t param) {
     {.msg = {{0x100, 2, 8, 100U, .max_counter = 14U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // ACM_Status (cruise state)
   };
 
-  bool rivian_longitudinal = false;
+  safety_config ret = BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_TX_MSGS);
 
   SAFETY_UNUSED(param);
   #ifdef ALLOW_DEBUG
     const uint16_t FLAG_RIVIAN_LONG_CONTROL = 1U;
-    rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);
+    if (GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL)) {
+      ret = BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_LONG_TX_MSGS);
+    }
   #endif
 
-  // FIXME: cppcheck thinks that rivian_longitudinal is always false. This is not true
-  // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
-  // cppcheck-suppress knownConditionTrueFalse
-  return rivian_longitudinal ? BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_LONG_TX_MSGS) : \
-                               BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_TX_MSGS);
+  return ret;
 }
 
 const safety_hooks rivian_hooks = {
