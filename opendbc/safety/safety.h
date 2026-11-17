@@ -142,7 +142,7 @@ static void update_counter(RxStatus *status, const CanMsgCheck *m, uint8_t count
 
 static bool rx_msg_safety_check(const CANPacket_t *msg,
                                 const safety_config *cfg,
-                                const safety_hooks *safety_hooks) {
+                                const safety_hooks *hooks) {
 
   int index = get_addr_check_index(msg, cfg->rx_checks, cfg->rx_checks_len);
 
@@ -156,8 +156,8 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     if (m->ignore_checksum) {
       status->valid_checksum = true;
     } else {
-      uint32_t checksum = safety_hooks->get_checksum(msg);
-      uint32_t checksum_comp = safety_hooks->compute_checksum(msg);
+      uint32_t checksum = hooks->get_checksum(msg);
+      uint32_t checksum_comp = hooks->compute_checksum(msg);
       status->valid_checksum = checksum_comp == checksum;
     }
 
@@ -165,7 +165,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     if (m->ignore_counter) {
       status->wrong_counters = 0;
     } else {
-      uint8_t counter = safety_hooks->get_counter(msg);
+      uint8_t counter = hooks->get_counter(msg);
       update_counter(status, m, counter);
     }
 
@@ -173,7 +173,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     if (m->ignore_quality_flag) {
       status->valid_quality_flag = true;
     } else {
-      status->valid_quality_flag = safety_hooks->get_quality_flag_valid(msg);
+      status->valid_quality_flag = hooks->get_quality_flag_valid(msg);
     }
   }
   bool valid = is_msg_valid(index);
