@@ -34,7 +34,6 @@
 
 #define SUBARU_MAIN_BUS 0U
 #define SUBARU_ALT_BUS  1U
-#define SUBARU_CAM_BUS  2U
 
 #define SUBARU_BASE_TX_MSGS(alt_bus, lkas_msg) \
   {(lkas_msg),                   SUBARU_MAIN_BUS, 8, .check_relay = true},  \
