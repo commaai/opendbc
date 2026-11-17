@@ -1079,6 +1079,20 @@ class CarSafetyTest(SafetyTest):
   def _pcm_status_msg(self, enable):
     pass
 
+  def _test_vehicle_moving_signals(self, msg: str, bus: int, values: list[dict]):
+    # each of these alone, with every other signal zero, means the vehicle is moving
+    for v in values:
+      self._rx(self._vehicle_moving_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self._rx(self.packer.make_can_msg_safety(msg, bus, v))
+      self.assertTrue(self.safety.get_vehicle_moving(), v)
+
+  def _test_gas_pedal_bits(self, bits: int, scale: float = 1):
+    # each bit of a gas pedal signal that spans several bytes alone means gas pressed
+    for bit in range(bits):
+      self.assertTrue(self._rx(self._user_gas_msg((1 << bit) * scale)))
+      self.assertTrue(self.safety.get_gas_pressed_prev(), bit)
+
   # ***** standard tests for all car-specific safety modes *****
 
   def test_relay_malfunction(self):

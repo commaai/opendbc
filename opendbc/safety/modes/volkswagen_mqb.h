@@ -49,14 +49,8 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
 static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state by sampling wheel speeds
   if (msg_matches(msg, MSG_ESP_19, 0U)) {
-    // sum 4 wheel speeds
-    uint32_t speed = 0U;
-    for (int i = 0; i < 8; i += 2) {
-      uint32_t wheel_speed = GET_BYTES_LE(msg, i, 2);
-      speed += wheel_speed;
-    }
-    // Check all wheel speeds for any movement
-    safety.vehicle_moving = speed > 0U;
+    // Check all wheel speeds for any movement: the four 16-bit speeds fill the message
+    safety.vehicle_moving = (GET_BYTES_LE(msg, 0, 4) | GET_BYTES_LE(msg, 4, 4)) != 0U;
   }
 
   // Update driver input torque samples
