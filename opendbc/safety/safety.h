@@ -336,7 +336,7 @@ static void stock_ecu_check(bool stock_ecu_detected) {
 }
 
 // the hooks of each safety mode, defined in its header
-// cppcheck-suppress misra-c2012-8.9; at block scope, 8.9 would instead ask for every mode's hooks to be defined in set_hooks_copy
+// cppcheck-suppress misra-c2012-8.9; inside set_hooks_copy, 8.9 would instead ask for every mode's hooks to be defined there, not in its mode header
 static const safety_hook_config safety_hook_registry[] = {
   {SAFETY_SILENT, &nooutput_hooks},
   {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},

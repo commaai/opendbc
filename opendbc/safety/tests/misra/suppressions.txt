@@ -1,3 +1,6 @@
-# An inline suppression in can.h would change panda's CAN_PACKET_VERSION_HASH. The
-# __attribute__((packed, aligned(4))) that matches the packed packet format is a language extension.
+# CANPacket_t in can.h is panda's USB/SPI CAN packet: its 29-bit addr fills header bits 11-39, straddling a
+# 32-bit boundary, with sizeof 72 and alignment 4. Without __attribute__((packed, aligned(4))), a language
+# extension, gcc and clang (AAPCS and SysV) keep a bit-field within an aligned unit of its declared type, so
+# addr needs a 64-bit type, which makes the alignment 8; C11 6.7.5 doesn't allow _Alignas to weaken it.
+# The suppression is here and not inline because any edit to can.h changes panda's CAN_PACKET_VERSION_HASH.
 misra-c2012-1.2:*/can.h
