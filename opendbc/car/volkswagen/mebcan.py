@@ -103,7 +103,19 @@ class MebLongStateMachine:
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
     # HMS_Status leaves holding as soon as we send anfahren, so keep driving off until we leave standstill
     driving_off = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.esp_standstill
-    starting = CC.actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or driving_off)
+    gen1_early_driveoff = (
+      (
+        self.prev_acc_hold_type == self.acc_hold_type_vals['HALTEN']
+        and CS.gen1_hms_status in (1, 9)
+      ) or (
+        self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
+        and CS.gen1_hms_status in (1, 5, 6, 9)
+      ) or (
+        self.prev_acc_hold_type == self.acc_hold_type_vals['LOESEN_UEBER_RAMPE']
+        and CS.gen1_hms_status == 1
+      )
+    )
+    starting = CC.actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or driving_off or gen1_early_driveoff)
     long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
     if not long_active:

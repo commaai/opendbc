@@ -18,6 +18,7 @@ class CarState(CarStateBase):
     self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
     self.esp_hold_confirmation = False
     self.esp_standstill = False
+    self.gen1_hms_status = 0
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
     self.acc_type = 0
@@ -285,6 +286,7 @@ class CarState(CarStateBase):
       self.esp_hold_confirmation = pt_cp.vl["VMM_02"]["HMS_Status"] == 1
     else:
       self.esp_hold_confirmation = self.esp_standstill
+      self.gen1_hms_status = pt_cp.vl["VMM_01"]["HMS_Status"]
     self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
     ret.stockFcw = bool(ext_cp.vl["AWV_03"]["FCW_Active"])
     ret.stockAeb = bool(ext_cp.vl["AWV_03"]["AEB_Active"])
