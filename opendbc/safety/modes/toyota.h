@@ -78,13 +78,7 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
   }
   if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
     // each wheel speed is 1-bit fault + 15-bit speed
-    valid = true;
-    for (uint8_t i = 0U; i < 4U; i += 1U) {
-      if (GET_BIT(msg, (i * 16U) + 7U)) {  // WHEEL_SPEED_xx_FAULT
-        valid = false;
-        break;
-      }
-    }
+    valid = !(GET_BIT(msg, 7U) || GET_BIT(msg, 23U) || GET_BIT(msg, 39U) || GET_BIT(msg, 55U));  // WHEEL_SPEED_xx_FAULT
   }
   return valid;
 }
@@ -158,6 +152,11 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
 
     UPDATE_VEHICLE_SPEED((float)speed / 4.0f * 0.01f * KPH_TO_MS);
   }
+}
+
+// true if both the smallest and largest recent samples are beyond +/-limit
+static bool toyota_torque_over_limit(const struct sample_t *sample, const int limit) {
+  return safety_max_limit_check(sample->min, limit, -limit) && safety_max_limit_check(sample->max, limit, -limit);
 }
 
 static bool toyota_tx_hook(const CANPacket_t *msg) {
@@ -282,13 +281,11 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       }
 
       // check if we should wind down torque
-      int driver_torque = safety_min_int(safety_abs_int(safety.torque_driver.min), safety_abs_int(safety.torque_driver.max));
-      if ((driver_torque > TOYOTA_LTA_MAX_DRIVER_TORQUE) && (torque_wind_down != 0U)) {
+      if (toyota_torque_over_limit(&safety.torque_driver, TOYOTA_LTA_MAX_DRIVER_TORQUE) && (torque_wind_down != 0U)) {
         tx = false;
       }
 
-      int eps_torque = safety_min_int(safety_abs_int(safety.torque_meas.min), safety_abs_int(safety.torque_meas.max));
-      if ((eps_torque > TOYOTA_LTA_MAX_MEAS_TORQUE) && (torque_wind_down != 0U)) {
+      if (toyota_torque_over_limit(&safety.torque_meas, TOYOTA_LTA_MAX_MEAS_TORQUE) && (torque_wind_down != 0U)) {
         tx = false;
       }
     }
