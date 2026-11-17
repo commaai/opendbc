@@ -18,6 +18,7 @@ misra() {
   if ! misrable -I $OPENDBC_ROOT --inline-suppr \
          --suppressions-list $DIR/suppressions.txt \
          --external-api $DIR/external_api.txt \
+         --witness-seeds $DIR/witness_seeds.txt \
          "$@" $OPENDBC_ROOT/opendbc/safety/tests/misra/main.c; then
     printf "${RED}** FAILED: MISRA violations or analysis errors!${NC}\n"
     exit 1
