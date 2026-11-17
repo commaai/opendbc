@@ -383,7 +383,7 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
     .heartbeat_engaged_mismatches = safety.heartbeat_engaged_mismatches,
   };
 
-  safety_config cfg = {0};
+  safety_config cfg = {NULL};
 
   int set_status = -1;  // not set
   int hook_config_count = SAFETY_ARRAY_LEN(safety_hook_registry);

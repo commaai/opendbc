@@ -191,6 +191,9 @@ class TestHelpers(unittest.TestCase):
     self.assertEqual(3, libsafety.get_byte_from_end(msg, 1))
     self.assertEqual(1, libsafety.get_byte_from_end(msg, 3))
     self.assertEqual(0, libsafety.get_byte_from_end(msg, 4))  # message is shorter
+    full = common.make_msg(0, 0x123, dat=bytes(range(1, 65)))
+    self.assertEqual(64, libsafety.get_byte_from_end(full, 1))
+    self.assertEqual(0, libsafety.get_byte_from_end(full, 0))  # past the last byte of the largest message
 
 
 class TestModeCount(common.SafetyTestBase):

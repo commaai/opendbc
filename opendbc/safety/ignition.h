@@ -91,8 +91,8 @@ void ignition_can_hook(const CANPacket_t *msg) {
   }
 
   // PSA exception, the BSI is on bus 2 and only reaches bus 0 while the relay is open
-  const uint32_t bus = msg->bus;  // prev_counter_psa has a counter for each of buses 0-2
-  if ((bus < 3U) && (msg_matches(msg, 0x432U, 0U, 8U) || msg_matches(msg, 0x432U, 2U, 8U))) {
+  const uint32_t bus = msg->bus;
+  if (((bus == 0U) || (bus == 2U)) && msg_matches(msg, 0x432U, bus, 8U)) {
     uint8_t counter = msg->data[1] & 0xFU;
 
     if ((prev_counter_psa[bus] != IGNITION_NO_COUNTER) && (counter == ((prev_counter_psa[bus] + 1U) % 16U))) {
