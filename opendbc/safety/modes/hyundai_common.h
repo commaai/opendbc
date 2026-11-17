@@ -5,14 +5,13 @@
 
 static const uint8_t HYUNDAI_PREV_BUTTON_SAMPLES = 8;  // roughly 160 ms
 
-extern const uint32_t HYUNDAI_STANDSTILL_THRSLD;
-const uint32_t HYUNDAI_STANDSTILL_THRSLD = 12;  // 0.375 kph
+static const uint32_t HYUNDAI_STANDSTILL_THRSLD = 12;  // 0.375 kph
 
 #define HYUNDAI_BTN_RESUME 1U
 #define HYUNDAI_BTN_SET 2U
 #define HYUNDAI_BTN_CANCEL 4U
 
-void hyundai_common_init(uint16_t param) {
+static void hyundai_common_init(uint16_t param) {
   const uint16_t HYUNDAI_PARAM_EV_GAS = 1;
   const uint16_t HYUNDAI_PARAM_HYBRID_GAS = 2;
   const uint16_t HYUNDAI_PARAM_CAMERA_SCC = 8;
@@ -39,7 +38,7 @@ void hyundai_common_init(uint16_t param) {
 #endif
 }
 
-void hyundai_common_cruise_state_check(const bool cruise_engaged) {
+static void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   // some newer HKG models can re-enable after spamming cancel button,
   // so keep track of user button presses to deny engagement if no interaction
 
@@ -54,7 +53,7 @@ void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   safety.cruise_engaged_prev = cruise_engaged;
 }
 
-void hyundai_common_cruise_buttons_check(const uint8_t cruise_button, const bool main_button) {
+static void hyundai_common_cruise_buttons_check(const uint8_t cruise_button, const bool main_button) {
   if ((cruise_button == HYUNDAI_BTN_RESUME) || (cruise_button == HYUNDAI_BTN_SET) || (cruise_button == HYUNDAI_BTN_CANCEL) || main_button) {
     safety.hyundai_last_button_interaction = 0U;
   } else {
@@ -78,7 +77,7 @@ void hyundai_common_cruise_buttons_check(const uint8_t cruise_button, const bool
   }
 }
 
-uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
+static uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
   // CRC-16 lookup table for poly 0x1021 (CRC-16/XMODEM)
   // generated with: python3 -c 'f=lambda c:[c:=((c<<1)^0x1021)&0xFFFF if c&0x8000 else (c<<1)&0xFFFF for _ in range(8)][-1];print(",\n".join("  "+", ".join(f"0x{f(i<<8):04X}U" for i in range(r,min(r+12,256))) for r in range(0,256,12)))'
   static const uint16_t hyundai_canfd_crc_lut[256] = {

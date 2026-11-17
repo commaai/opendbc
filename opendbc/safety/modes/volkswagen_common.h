@@ -1,8 +1,7 @@
 #ifndef SAFETY_MODES_VOLKSWAGEN_COMMON_H
 #define SAFETY_MODES_VOLKSWAGEN_COMMON_H
 
-extern const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL;
-const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
+static const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
 
 #define MSG_LH_EPS_03        0x09FU   // RX from EPS, for driver steering torque
 #define MSG_ESP_19           0x0B2U   // RX from ABS, for wheel speeds
