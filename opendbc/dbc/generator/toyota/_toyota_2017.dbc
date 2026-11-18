@@ -390,6 +390,7 @@ BO_ 1552 BODY_CONTROL_STATE_2: 8 XXX
  SG_ METER_SLIDER_BRIGHTNESS_PCT : 30|7@0+ (1,0) [12|100] "%" XXX
  SG_ METER_SLIDER_LOW_BRIGHTNESS : 37|1@0+ (1,0) [0|1] "" XXX
  SG_ METER_SLIDER_DIMMED : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ INSTANT_FUEL_ECONOMY : 47|16@0+ (0.1,0) [0|6553.5] "" XXX
  SG_ UNITS : 63|3@0+ (1,0) [1|4] "" XXX
 
 BO_ 1553 UI_SETTING: 8 XXX
@@ -400,6 +401,7 @@ BO_ 1556 BLINKERS_STATE: 8 XXX
  SG_ BLINKER_BUTTON_PRESSED : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ HAZARD_LIGHT : 27|1@0+ (1,0) [0|1] "" XXX
  SG_ TURN_SIGNALS : 29|2@0+ (1,0) [0|3] "" XXX
+ SG_ TRIP_DISTANCE : 39|32@0+ (0.1,0) [0|429496729.5] "" XXX
 
 BO_ 1568 BODY_CONTROL_STATE: 8 XXX
  SG_ METER_DIMMED : 38|1@0+ (1,0) [0|1] "" XXX
@@ -521,7 +523,9 @@ CM_ SG_ 1552 UI_SPEED "Does not appear to match dash";
 CM_ SG_ 1552 METER_SLIDER_BRIGHTNESS_PCT "Combination display brightness setting, scales from 12 per cent to 100 per cent, reflects combination meter settings only, not linked with headlight state";
 CM_ SG_ 1552 METER_SLIDER_LOW_BRIGHTNESS "Combination display low brightness mode, also controls footwell lighting";
 CM_ SG_ 1552 METER_SLIDER_DIMMED "Combination display slider not at max, reflects combination meter settings only, not linked with headlight state";
+CM_ SG_ 1552 INSTANT_FUEL_ECONOMY "Instantaneous fuel economy, US mpg when UNITS is 3. Reads 6553.2 (0xFFFC) while no fuel is injected and 6553.3 (0xFFFD) at or near standstill";
 CM_ SG_ 1553 ODOMETER "Unit is dependent upon units signal";
+CM_ SG_ 1556 TRIP_DISTANCE "Trip distance, one count per 0.1 mile on cars set to miles. Separate from the trip counter in bytes 4-7 of 0x615. Reads 0 throughout one 2017-19 Corolla log";
 CM_ SG_ 1592 LOCK_STATUS_CHANGED "1 on rising edge of lock/unlocking";
 CM_ SG_ 1592 LOCK_STATUS "The next 3 bits always seem to follow this signal.";
 CM_ SG_ 1592 LOCKED_VIA_KEYFOB "1 for as long as car is locked with key fob or door handle touch";
