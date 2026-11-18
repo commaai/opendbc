@@ -1142,9 +1142,11 @@ FW_VERSIONS = {
   CAR.HONDA_PILOT_4G_MMR: {
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'8S102-T90-A120\x00\x00',
+      b'8S102-T90-A130\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'8S302-T90-A120\x00\x00',
+      b'8S302-T90-A130\x00\x00',
     ],
   },
   CAR.HONDA_ACCORD_11G: {
