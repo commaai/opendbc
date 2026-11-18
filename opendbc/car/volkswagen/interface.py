@@ -77,6 +77,9 @@ class CarInterface(CarInterfaceBase):
 
       # only allow gateway harness to escalate Emergency Assist
       ret.dashcamOnly = ret.networkLocation == NetworkLocation.fwdCamera and not docs
+      # Enable actuation on development builds only until the ID.3 has route validation.
+      if candidate == CAR.VOLKSWAGEN_ID3_MK2:
+        ret.dashcamOnly |= is_release
 
     else:
       # Set global MQB parameters
