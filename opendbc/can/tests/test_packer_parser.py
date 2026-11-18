@@ -284,6 +284,40 @@ class TestCanParserPacker(unittest.TestCase):
       if len(user_brake_vals):
         assert vl_all[-1] == parser.vl["VSA_STATUS"]["USER_BRAKE"]
 
+  def test_vl_all_signals(self):
+    dbc_file = "honda_civic_touring_2016_can_generated"
+    parser = CANParser(dbc_file, [("VSA_STATUS", 50)], 0)
+    packer = CANPacker(dbc_file)
+
+    # All signals are tracked before any message is received
+    assert parser.vl_all["VSA_STATUS"].keys() == parser.vl["VSA_STATUS"].keys()
+    assert all(len(vals) == 0 for vals in parser.vl_all["VSA_STATUS"].values())
+
+    # Unknown signals raise, rather than silently returning an empty list
+    with self.assertRaises(KeyError):
+      parser.vl_all["VSA_STATUS"]["USER_BRAKE1"]
+
+    parser.update([0, [packer.make_can_msg("VSA_STATUS", 0, {"USER_BRAKE": 10})]])
+    assert parser.vl_all["VSA_STATUS"]["USER_BRAKE"] == [10]
+    with self.assertRaises(KeyError):
+      parser.vl_all["VSA_STATUS"]["USER_BRAKE1"]
+
+  def test_vl_all_dynamic_messages(self):
+    dbc_file = "honda_civic_touring_2016_can_generated"
+    packer = CANPacker(dbc_file)
+
+    for msg in ("VSA_STATUS", 0x1a4):
+      # Messages accessed through vl_all are added to the parser, like vl
+      parser = CANParser(dbc_file, [], 0)
+      assert parser.vl_all[msg]["USER_BRAKE"] == []
+      assert parser.vl[msg]["USER_BRAKE"] == 0
+
+      parser.update([0, [packer.make_can_msg("VSA_STATUS", 0, {"USER_BRAKE": 10}),
+                         packer.make_can_msg("VSA_STATUS", 0, {"USER_BRAKE": 20})]])
+      assert parser.vl_all["VSA_STATUS"]["USER_BRAKE"] == [10, 20]
+      assert parser.vl_all[0x1a4]["USER_BRAKE"] == [10, 20]
+      assert parser.vl["VSA_STATUS"]["USER_BRAKE"] == 20
+
   def test_timestamp_nanos(self):
     """Test message timestamp dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
