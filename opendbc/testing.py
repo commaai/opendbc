@@ -57,6 +57,14 @@ class Fuzzy:
     valid_edges = tuple(dict.fromkeys(value for value in edges if min_value <= value <= max_value))
     return self._draw(valid_edges, lambda: self._random.randint(min_value, max_value))
 
+  def real(self, min_value: float, max_value: float) -> float:
+    if min_value > max_value:
+      raise ValueError(f"{min_value=} must not exceed {max_value=}")
+
+    edges = (0., min_value, max_value, min_value / 2, max_value / 2)
+    valid_edges = tuple(dict.fromkeys(value for value in edges if min_value <= value <= max_value))
+    return self._draw(valid_edges, lambda: self._random.uniform(min_value, max_value))
+
   def _length(self, min_size: int, max_size: int | None) -> int:
     if min_size < 0:
       raise ValueError("minimum size must be non-negative")
