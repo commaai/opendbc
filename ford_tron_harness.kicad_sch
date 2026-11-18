@@ -1,0 +1,12 @@
+﻿(kicad_sch (version 20211123) (generator eeschema)
+  (paper "A4")
+  (lib_symbols
+    (symbol "Connector:OBD_II_16PIN" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes))
+  )
+  (symbol (lib_id "Connector:OBD_II_16PIN") (at 50.8 50.8 0) (unit 1)
+    (pin "14" (uuid "CAN_H_UUID") (name "CAN_H_YELLOW_BLUE"))
+    (pin "15" (uuid "CAN_L_UUID") (name "CAN_L_BLUE_WHITE"))
+    (pin "4" (uuid "GND_UUID") (name "CHASSIS_GROUND"))
+    (pin "16" (uuid "12V_UUID") (name "12V_SWITCHED"))
+  )
+)
