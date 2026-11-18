@@ -394,6 +394,7 @@ BO_ 1552 BODY_CONTROL_STATE_2: 8 XXX
 
 BO_ 1553 UI_SETTING: 8 XXX
  SG_ UNITS : 26|2@0+ (1,0) [0|3] "" XXX
+ SG_ ODOMETER_UNIT : 29|2@0+ (1,0) [0|3] "" XXX
  SG_ ODOMETER : 39|32@0+ (1,0) [0|1048575] "" XXX
 
 BO_ 1556 BLINKERS_STATE: 8 XXX
@@ -521,7 +522,7 @@ CM_ SG_ 1552 UI_SPEED "Does not appear to match dash";
 CM_ SG_ 1552 METER_SLIDER_BRIGHTNESS_PCT "Combination display brightness setting, scales from 12 per cent to 100 per cent, reflects combination meter settings only, not linked with headlight state";
 CM_ SG_ 1552 METER_SLIDER_LOW_BRIGHTNESS "Combination display low brightness mode, also controls footwell lighting";
 CM_ SG_ 1552 METER_SLIDER_DIMMED "Combination display slider not at max, reflects combination meter settings only, not linked with headlight state";
-CM_ SG_ 1553 ODOMETER "Unit is dependent upon units signal";
+CM_ SG_ 1553 ODOMETER "Unit is ODOMETER_UNIT";
 CM_ SG_ 1592 LOCK_STATUS_CHANGED "1 on rising edge of lock/unlocking";
 CM_ SG_ 1592 LOCK_STATUS "The next 3 bits always seem to follow this signal.";
 CM_ SG_ 1592 LOCKED_VIA_KEYFOB "1 for as long as car is locked with key fob or door handle touch";
@@ -573,6 +574,7 @@ VAL_ 1552 METER_SLIDER_LOW_BRIGHTNESS 1 "Low brightness mode, footwell lights of
 VAL_ 1552 METER_SLIDER_DIMMED 1 "Dimmed" 0 "Not Dimmed";
 VAL_ 1552 UNITS 1 "km (km/L)" 2 "km (L/100km)" 3 "miles (MPG US)" 4 "miles (MPG Imperial)";
 VAL_ 1553 UNITS 1 "km" 2 "miles";
+VAL_ 1553 ODOMETER_UNIT 1 "km" 2 "miles";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
 VAL_ 1556 BLINKER_BUTTON_PRESSED 1 "button pressed" 0 "not pressed";
 VAL_ 1570 HEADLIGHT_MODE 0 "headlights off" 2 "force parking lights" 4 "force low beams" 7 "auto low beams" 6 "auto parking lights";
