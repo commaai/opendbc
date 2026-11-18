@@ -59,14 +59,14 @@
     (config).rx_checks = (rx); \
     (config).rx_checks_len = RX_CHECKS_LEN(rx); \
     (config).disable_forwarding = false; \
-  } while (false);
+  } while (false)
 
 #define SET_TX_MSGS(tx, config) \
   do { \
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = SAFETY_ARRAY_LEN(tx); \
     (config).disable_forwarding = false; \
-  } while (false);
+  } while (false)
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&safety.vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 #define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&safety.vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
@@ -242,7 +242,7 @@ typedef struct {
 } safety_hooks;
 
 bool safety_rx_hook(const CANPacket_t *msg);
-bool safety_tx_hook(CANPacket_t *msg);
+bool safety_tx_hook(const CANPacket_t *msg);
 bool get_longitudinal_allowed(void);
 
 // provided by the platform (firmware timer driver, or the test harness)
@@ -354,7 +354,6 @@ typedef struct {
   ChryslerPlatform chrysler_platform;
 
   GmHardware gm_hw;
-  const LongitudinalLimits *gm_long_limits;
   bool gm_pcm_cruise;
 
   bool honda_alt_brake_msg;

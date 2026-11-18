@@ -20,16 +20,17 @@
 
 #define HONDA_BTN_MAIN 1U
 #define HONDA_BTN_CANCEL 2U
+#ifdef ALLOW_DEBUG
 #define HONDA_BTN_SET 3U
 #define HONDA_BTN_RESUME 4U
+#endif
 
 static unsigned int honda_get_pt_bus(void) {
   return ((safety_setup.honda_hw == HONDA_BOSCH) && !safety_setup.honda_bosch_radarless && !safety_setup.honda_bosch_canfd) ? 1U : 0U;
 }
 
 static uint32_t honda_get_checksum(const CANPacket_t *msg) {
-  uint32_t checksum_byte = GET_LEN(msg) - 1U;
-  return (uint32_t)msg->data[checksum_byte] & 0xFU;
+  return (uint32_t)GET_BYTE_FROM_END(msg, 1U) & 0xFU;
 }
 
 static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
@@ -50,8 +51,7 @@ static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
 }
 
 static uint8_t honda_get_counter(const CANPacket_t *msg) {
-  uint32_t counter_byte = GET_LEN(msg) - 1U;
-  return (msg->data[counter_byte] >> 4U) & 0x3U;
+  return (GET_BYTE_FROM_END(msg, 1U) >> 4U) & 0x3U;
 }
 
 static void honda_rx_hook(const CANPacket_t *msg) {
@@ -93,12 +93,14 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x1A6U, pt_bus) || msg_matches(msg, 0x296U, pt_bus)) {
     uint8_t button = (msg->data[0] & 0xE0U) >> 5;
 
-    // enter controls on the falling edge of set or resume
+#ifdef ALLOW_DEBUG
+    // enter controls on the falling edge of set or resume (Bosch longitudinal)
     bool set = (button != HONDA_BTN_SET) && (safety.cruise_button_prev == HONDA_BTN_SET);
     bool res = (button != HONDA_BTN_RESUME) && (safety.cruise_button_prev == HONDA_BTN_RESUME);
     if (safety.acc_main_on && !pcm_cruise && (set || res)) {
       safety.controls_allowed = true;
     }
+#endif
 
     // exit controls once main or cancel are pressed
     if ((button == HONDA_BTN_MAIN) || (button == HONDA_BTN_CANCEL)) {
@@ -141,14 +143,6 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool honda_tx_hook(const CANPacket_t *msg) {
-  const LongitudinalLimits HONDA_BOSCH_LONG_LIMITS = {
-    .max_accel = 200,   // accel is used for brakes
-    .min_accel = -350,
-
-    .max_gas = 2000,
-    .inactive_gas = -30000,
-  };
-
   const LongitudinalLimits HONDA_NIDEC_LONG_LIMITS = {
     .max_gas = 198,  // 0xc6
     .max_brake = 255,
@@ -193,6 +187,16 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+#ifdef ALLOW_DEBUG
+  // Bosch longitudinal
+  const LongitudinalLimits HONDA_BOSCH_LONG_LIMITS = {
+    .max_accel = 200,   // accel is used for brakes
+    .min_accel = -350,
+
+    .max_gas = 2000,
+    .inactive_gas = -30000,
+  };
+
   // BRAKE/GAS: safety check (bosch)
   if (msg_matches(msg, 0x1DFU, bus_pt)) {
     int accel = to_signed(GET_BYTES_BE(msg, 3, 2) >> 5, 11);
@@ -227,6 +231,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
       tx = false;
     }
   }
+#endif
 
   // STEER: safety check
   if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
@@ -254,12 +259,14 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
     }
   }
 
-  // Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
+#ifdef ALLOW_DEBUG
+  // Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address (Bosch longitudinal)
   if (msg->addr == 0x18DAB0F1U) {
     if (GET_BYTES_64_LE(msg, 0, 8) != 0x0000000000803E02ULL) {
       tx = false;
     }
   }
+#endif
 
   return tx;
 }
@@ -323,6 +330,7 @@ static safety_config honda_bosch_init(uint16_t param) {
     {0x33DB, 0, 8, .check_relay = true},
   };
 
+#ifdef ALLOW_DEBUG
   // Bosch w/ gas and brakes
   static const CanMsg HONDA_BOSCH_LONG_TX_MSGS[] = {
     {0xE4, 1, 5, .check_relay = true},
@@ -337,6 +345,7 @@ static safety_config honda_bosch_init(uint16_t param) {
     {0x39F, 1, 8, .check_relay = false},
     {0x18DAB0F1, 1, 8, .check_relay = false},
   };
+#endif
 
   // Bosch radarless
   static const CanMsg HONDA_RADARLESS_TX_MSGS[] = {
@@ -345,6 +354,7 @@ static safety_config honda_bosch_init(uint16_t param) {
     {0x33D, 0, 8, .check_relay = true},
   };
 
+#ifdef ALLOW_DEBUG
   // Bosch radarless w/ gas and brakes
   static const CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {
     {0xE4, 0, 5, .check_relay = true},
@@ -352,6 +362,7 @@ static safety_config honda_bosch_init(uint16_t param) {
     {0x1C8, 0, 8, .check_relay = true},
     {0x30C, 0, 8, .check_relay = true},
   };
+#endif
 
   static const CanMsg HONDA_CANFD_TX_MSGS[] = {
     {0xE4, 0, 5, .check_relay = true},
@@ -411,19 +422,21 @@ static safety_config honda_bosch_init(uint16_t param) {
   }
 
   if (safety_setup.honda_bosch_radarless) {
+    SET_TX_MSGS(HONDA_RADARLESS_TX_MSGS, ret);
+#ifdef ALLOW_DEBUG
     if (safety_setup.honda_bosch_long) {
       SET_TX_MSGS(HONDA_RADARLESS_LONG_TX_MSGS, ret);
-    } else {
-      SET_TX_MSGS(HONDA_RADARLESS_TX_MSGS, ret);
     }
+#endif
   } else if (safety_setup.honda_bosch_canfd) {
     SET_TX_MSGS(HONDA_CANFD_TX_MSGS, ret);
   } else {
+    SET_TX_MSGS(HONDA_BOSCH_TX_MSGS, ret);
+#ifdef ALLOW_DEBUG
     if (safety_setup.honda_bosch_long) {
       SET_TX_MSGS(HONDA_BOSCH_LONG_TX_MSGS, ret);
-    } else {
-      SET_TX_MSGS(HONDA_BOSCH_TX_MSGS, ret);
     }
+#endif
   }
   return ret;
 }

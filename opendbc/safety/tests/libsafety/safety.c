@@ -211,6 +211,12 @@ int get_curvature_meas_max(void){
 }
 
 
+// ***** helpers *****
+
+uint8_t get_byte_from_end(const CANPacket_t *msg, uint32_t n) {
+  return GET_BYTE_FROM_END(msg, n);
+}
+
 // ***** car specific helpers *****
 
 void set_honda_alt_brake_msg(bool c){

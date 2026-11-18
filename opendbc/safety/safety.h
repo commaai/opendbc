@@ -63,6 +63,12 @@ static uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
   return ret;
 }
 
+// Read the n-th byte from the end of the message (n = 1 is the last byte), or 0 if the message is shorter.
+static uint8_t GET_BYTE_FROM_END(const CANPacket_t *msg, uint32_t n) {
+  const uint32_t index = GET_LEN(msg) - n;  // wraps around when the message is shorter than n bytes
+  return (index < CANPACKET_DATA_SIZE_MAX) ? msg->data[index] : 0U;
+}
+
 static const int MAX_WRONG_COUNTERS = 5;
 
 // UM2331 CPU_SM_2 and RAM_SM_3: rx, tx, fwd and tick run on two copies of the state and config and compare the decisions, the tick also compares the copies
@@ -134,8 +140,7 @@ static int get_addr_check_index(const CANPacket_t *msg, const RxCheck addr_list[
 
 static void update_counter(RxStatus *status, const CanMsgCheck *m, uint8_t counter) {
   uint8_t expected_counter = (status->last_counter + 1U) % (m->max_counter + 1U);
-  status->wrong_counters += (expected_counter == counter) ? -1 : 1;
-  status->wrong_counters = safety_clamp_int(status->wrong_counters, 0, MAX_WRONG_COUNTERS);
+  status->wrong_counters = safety_clamp_int(status->wrong_counters + ((expected_counter == counter) ? -1 : 1), 0, MAX_WRONG_COUNTERS);
   status->last_counter = counter;
 }
 
@@ -152,7 +157,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 
     // the hooks are set for every check that isn't ignored, see TestSafetyConfigs
     // checksum check
-    if (m->ignore_checksum) {
+    if ((hooks->get_checksum == NULL) || m->ignore_checksum) {
       status->valid_checksum = true;
     } else {
       uint32_t checksum = hooks->get_checksum(msg);
@@ -161,7 +166,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     }
 
     // counter check
-    if (m->ignore_counter) {
+    if ((hooks->get_counter == NULL) || m->ignore_counter) {
       status->wrong_counters = 0;
     } else {
       uint8_t counter = hooks->get_counter(msg);
@@ -169,7 +174,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     }
 
     // quality flag check
-    if (m->ignore_quality_flag) {
+    if ((hooks->get_quality_flag_valid == NULL) || m->ignore_quality_flag) {
       status->valid_quality_flag = true;
     } else {
       status->valid_quality_flag = hooks->get_quality_flag_valid(msg);
@@ -187,7 +192,7 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
 
   bool valid = rx_msg_safety_check(msg, &safety_setup.current_safety_config, safety_setup.current_hooks);
   bool whitelisted = get_addr_check_index(msg, safety_setup.current_safety_config.rx_checks, safety_setup.current_safety_config.rx_checks_len) != -1;
-  if (valid && whitelisted) {
+  if (valid && (safety_setup.current_hooks->rx != NULL) && whitelisted) {
     safety_setup.current_hooks->rx(msg);
   }
 
@@ -224,14 +229,14 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
   return whitelisted;
 }
 
-static bool tx_hook_copy(CANPacket_t *msg) {
+static bool tx_hook_copy(const CANPacket_t *msg) {
   bool whitelisted = tx_msg_safety_check(msg, safety_setup.current_safety_config.tx_msgs, safety_setup.current_safety_config.tx_msgs_len);
   if ((safety_setup.current_safety_mode == SAFETY_ALLOUTPUT) || (safety_setup.current_safety_mode == SAFETY_ELM327)) {
     whitelisted = true;
   }
 
   bool safety_allowed = false;
-  if (whitelisted) {
+  if ((safety_setup.current_hooks->tx != NULL) && whitelisted) {
     safety_allowed = safety_setup.current_hooks->tx(msg);
   }
 
@@ -336,7 +341,7 @@ static void stock_ecu_check(bool stock_ecu_detected) {
 }
 
 // the hooks of each safety mode, defined in its header
-// cppcheck-suppress misra-c2012-8.9; at block scope, 8.9 would instead ask for every mode's hooks to be defined in set_hooks_copy
+// cppcheck-suppress misra-c2012-8.9; inside set_hooks_copy, 8.9 would instead ask for every mode's hooks to be defined there, not in its mode header
 static const safety_hook_config safety_hook_registry[] = {
   {SAFETY_SILENT, &nooutput_hooks},
   {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
@@ -377,7 +382,7 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
     .heartbeat_engaged_mismatches = safety.heartbeat_engaged_mismatches,
   };
 
-  safety_config cfg = {0};
+  safety_config cfg = {NULL};
 
   int set_status = -1;  // not set
   int hook_config_count = SAFETY_ARRAY_LEN(safety_hook_registry);
@@ -411,7 +416,7 @@ bool safety_rx_hook(const CANPacket_t *msg) {
   return valid;
 }
 
-bool safety_tx_hook(CANPacket_t *msg) {
+bool safety_tx_hook(const CANPacket_t *msg) {
   safety_ts = microsecond_timer_get();
   current_copy = &safety_b;
   bool allowed_b = tx_hook_copy(msg);
@@ -485,24 +490,31 @@ static int from_offset(uint32_t raw, int offset) {
   return (int)raw - offset;
 }
 
-// given a new sample, update the sample_t struct
-static void update_sample(struct sample_t *sample, int sample_new) {
+// given a new sample, update the sample_t struct, with the measured range widened by margin on both sides
+static void update_sample_with_margin(struct sample_t *sample, int sample_new, int margin) {
   for (int i = MAX_SAMPLE_VALS - 1; i > 0; i--) {
     sample->values[i] = sample->values[i-1];
   }
   sample->values[0] = sample_new;
 
   // get the minimum and maximum measured samples
-  sample->min = sample->values[0];
-  sample->max = sample->values[0];
+  int sample_min = sample->values[0];
+  int sample_max = sample->values[0];
   for (int i = 1; i < MAX_SAMPLE_VALS; i++) {
-    if (sample->values[i] < sample->min) {
-      sample->min = sample->values[i];
+    if (sample->values[i] < sample_min) {
+      sample_min = sample->values[i];
     }
-    if (sample->values[i] > sample->max) {
-      sample->max = sample->values[i];
+    if (sample->values[i] > sample_max) {
+      sample_max = sample->values[i];
     }
   }
+  sample->min = sample_min - margin;
+  sample->max = sample_max + margin;
+}
+
+// given a new sample, update the sample_t struct
+static void update_sample(struct sample_t *sample, int sample_new) {
+  update_sample_with_margin(sample, sample_new, 0);
 }
 
 static int ROUND(float val) {

@@ -109,12 +109,6 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
     .type = TorqueDriverLimited,
   };
 
-  const LongitudinalLimits RIVIAN_LONG_LIMITS = {
-    .max_accel = 200,
-    .min_accel = -350,
-    .inactive_accel = 0,
-  };
-
   bool tx = true;
 
   // Steering control
@@ -127,13 +121,21 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+#ifdef ALLOW_DEBUG
   // Longitudinal control
+  const LongitudinalLimits RIVIAN_LONG_LIMITS = {
+    .max_accel = 200,
+    .min_accel = -350,
+    .inactive_accel = 0,
+  };
+
   if (msg_matches(msg, 0x160U, 0U)) {
     int raw_accel = from_offset(GET_BYTES_BE(msg, 2, 2) >> 5U, 1024);
     if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
       tx = false;
     }
   }
+#endif
 
   return tx;
 }

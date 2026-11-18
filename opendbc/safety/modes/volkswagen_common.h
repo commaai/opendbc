@@ -8,13 +8,17 @@ static const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
 #define MSG_ESP_05           0x106U   // RX from ABS, for brake switch state
 #define MSG_TSK_06           0x120U   // RX from ECU, for ACC status from drivetrain coordinator
 #define MSG_MOTOR_20         0x121U   // RX from ECU, for driver throttle input
-#define MSG_ACC_06           0x122U   // TX by OP, ACC control instructions to the drivetrain coordinator
 #define MSG_HCA_01           0x126U   // TX by OP, Heading Control Assist steering torque
 #define MSG_GRA_ACC_01       0x12BU   // TX by OP, ACC control buttons for cancel/resume
-#define MSG_ACC_07           0x12EU   // TX by OP, ACC control instructions to the drivetrain coordinator
-#define MSG_ACC_02           0x30CU   // TX by OP, ACC HUD data to the instrument cluster
 #define MSG_LDW_02           0x397U   // TX by OP, Lane line recognition and text alerts
 #define MSG_MOTOR_14         0x3BEU   // RX from ECU, for brake switch status
+
+// MQB longitudinal only messages
+#ifdef ALLOW_DEBUG
+#define MSG_ACC_06           0x122U   // TX by OP, ACC control instructions to the drivetrain coordinator
+#define MSG_ACC_07           0x12EU   // TX by OP, ACC control instructions to the drivetrain coordinator
+#define MSG_ACC_02           0x30CU   // TX by OP, ACC HUD data to the instrument cluster
+#endif
 
 // MLB only messages
 #define MSG_ESP_03      0x103U   // RX from ABS, for wheel speeds
@@ -89,9 +93,9 @@ static uint32_t volkswagen_mxb_compute_crc(const CANPacket_t *msg) {
 }
 
 // Signal: TSK_06.TSK_Status (MQB), Motor_51.TSK_Status (MEB)
-static void volkswagen_tsk_status_check(int acc_status, bool stock_acc) {
-  bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-  safety.acc_main_on = cruise_engaged || (acc_status == 2);
+static void volkswagen_tsk_status_check(uint8_t acc_status, bool stock_acc) {
+  bool cruise_engaged = (acc_status == 3U) || (acc_status == 4U) || (acc_status == 5U);
+  safety.acc_main_on = cruise_engaged || (acc_status == 2U);
 
   // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
   if (stock_acc) {

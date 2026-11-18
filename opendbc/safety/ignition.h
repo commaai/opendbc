@@ -20,6 +20,7 @@ bool ignition_can = false;
 uint32_t ignition_can_cnt = 0U;
 
 // previous message counter per ignition message, IGNITION_NO_COUNTER if none was seen yet
+// File scope lets libsafety's init_tests reset the counters between tests.
 static uint8_t prev_counter_rivian = IGNITION_NO_COUNTER;
 static uint8_t prev_counter_tesla = IGNITION_NO_COUNTER;
 static uint8_t prev_counter_vw_meb = IGNITION_NO_COUNTER;
@@ -90,15 +91,16 @@ void ignition_can_hook(const CANPacket_t *msg) {
   }
 
   // PSA exception, the BSI is on bus 2 and only reaches bus 0 while the relay is open
-  if (msg_matches(msg, 0x432U, 0U, 8U) || msg_matches(msg, 0x432U, 2U, 8U)) {
+  const uint32_t bus = msg->bus;
+  if (((bus == 0U) || (bus == 2U)) && msg_matches(msg, 0x432U, bus, 8U)) {
     uint8_t counter = msg->data[1] & 0xFU;
 
-    if ((prev_counter_psa[msg->bus] != IGNITION_NO_COUNTER) && (counter == ((prev_counter_psa[msg->bus] + 1U) % 16U))) {
+    if ((prev_counter_psa[bus] != IGNITION_NO_COUNTER) && (counter == ((prev_counter_psa[bus] + 1U) % 16U))) {
       // IS_DAT_BSI_432->ETAT_PRINCIP_SEV (0=stop, 1=ignition on, 2=cranking)
       ignition_can = (msg->data[6] & 0x3U) != 0U;
       ignition_can_cnt = 0U;
     }
-    prev_counter_psa[msg->bus] = counter;
+    prev_counter_psa[bus] = counter;
   }
 }
 

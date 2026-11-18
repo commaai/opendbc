@@ -89,13 +89,32 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
     .type = TorqueDriverLimited,
   };
 
+  // common safety checks assume unscaled integer values
+  enum { GM_GAS_TO_CAN = 8 };  // 1 / 0.125
+
+  static const LongitudinalLimits GM_ASCM_LONG_LIMITS = {
+    .max_gas = 1018 * GM_GAS_TO_CAN,
+    .min_gas = -650 * GM_GAS_TO_CAN,
+    .inactive_gas = -650 * GM_GAS_TO_CAN,
+    .max_brake = 400,
+  };
+
+  static const LongitudinalLimits GM_CAM_LONG_LIMITS = {
+    .max_gas = 1346 * GM_GAS_TO_CAN,
+    .min_gas = -540 * GM_GAS_TO_CAN,
+    .inactive_gas = -500 * GM_GAS_TO_CAN,
+    .max_brake = 400,
+  };
+
+  const LongitudinalLimits *gm_long_limits = (safety_setup.gm_hw == GM_CAM) ? &GM_CAM_LONG_LIMITS : &GM_ASCM_LONG_LIMITS;
+
   bool tx = true;
 
   // BRAKE: safety check
   if (msg->addr == 0x315U) {
     uint32_t brake = GET_BYTES_BE(msg, 0, 2) & 0xFFFU;
     brake = (0x1000U - brake) & 0xFFFU;
-    if (longitudinal_brake_checks((int)brake, *safety_setup.gm_long_limits)) {
+    if (longitudinal_brake_checks((int)brake, *gm_long_limits)) {
       tx = false;
     }
   }
@@ -119,7 +138,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
 
     // Allow apply bit in pre-enabled and overriding states
     const bool apply_violation = !safety.controls_allowed && apply;
-    const bool gas_violation = longitudinal_gas_checks(gas_regen, *safety_setup.gm_long_limits);
+    const bool gas_violation = longitudinal_gas_checks(gas_regen, *gm_long_limits);
     bool violation = apply_violation || gas_violation;
 
     if (violation) {
@@ -144,16 +163,6 @@ static safety_config gm_init(uint16_t param) {
   const uint16_t GM_PARAM_HW_CAM = 1;
   const uint16_t GM_PARAM_EV = 4;
 
-  // common safety checks assume unscaled integer values
-  enum { GM_GAS_TO_CAN = 8 };  // 1 / 0.125
-
-  static const LongitudinalLimits GM_ASCM_LONG_LIMITS = {
-    .max_gas = 1018 * GM_GAS_TO_CAN,
-    .min_gas = -650 * GM_GAS_TO_CAN,
-    .inactive_gas = -650 * GM_GAS_TO_CAN,
-    .max_brake = 400,
-  };
-
   static const CanMsg GM_ASCM_TX_MSGS[] = {
     {0x180, 0, 4, .check_relay = true},
     {0x409, 0, 7, .check_relay = false},
@@ -165,13 +174,6 @@ static safety_config gm_init(uint16_t param) {
     {0x308, 1, 7, .check_relay = false},
     {0x310, 1, 2, .check_relay = false},
     {0x315, 2, 5, .check_relay = false},
-  };
-
-  static const LongitudinalLimits GM_CAM_LONG_LIMITS = {
-    .max_gas = 1346 * GM_GAS_TO_CAN,
-    .min_gas = -540 * GM_GAS_TO_CAN,
-    .inactive_gas = -500 * GM_GAS_TO_CAN,
-    .max_brake = 400,
   };
 
 #ifdef ALLOW_DEBUG
@@ -202,10 +204,8 @@ static safety_config gm_init(uint16_t param) {
 
   if (GET_FLAG(param, GM_PARAM_HW_CAM)) {
     safety_setup.gm_hw = GM_CAM;
-    safety_setup.gm_long_limits = &GM_CAM_LONG_LIMITS;
   } else {
     safety_setup.gm_hw = GM_ASCM;
-    safety_setup.gm_long_limits = &GM_ASCM_LONG_LIMITS;
   }
 
   safety_setup.gm_pcm_cruise = (safety_setup.gm_hw == GM_CAM);

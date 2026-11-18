@@ -6,10 +6,12 @@
 static uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len);
 static uint32_t GET_BYTES_BE(const CANPacket_t *msg, int start, int len);
 static uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);
+static uint8_t GET_BYTE_FROM_END(const CANPacket_t *msg, uint32_t n);
 static int to_signed(uint32_t d, int bits);
 static int sign_magnitude(uint32_t magnitude, bool negative);
 static int from_offset(uint32_t raw, int offset);
 static void update_sample(struct sample_t *sample, int sample_new);
+static void update_sample_with_margin(struct sample_t *sample, int sample_new, int margin);
 static int ROUND(float val);
 static void pcm_cruise_check(bool cruise_engaged);
 static void speed_mismatch_check(const float speed_2);
