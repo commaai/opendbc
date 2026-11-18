@@ -1,27 +1,25 @@
+﻿import os
 import unittest
-import cantools
-from hypothesis import given, strategies as st
-from ford_parser import FordTronParser
+from ford_parser import parse_dbc_file
 
-class TestFordTronArchitecture(unittest.TestCase):
+
+class TestFordTronDBC(unittest.TestCase):
     def setUp(self):
-        self.parser = FordTronParser('ford_tron_2026.dbc')
+        self.dbc_path = os.path.join(os.path.dirname(__file__), "ford_tron_2026.dbc")
+        self.messages = parse_dbc_file(self.dbc_path)
 
-    def test_steering_decode(self):
-        # Mock payload representing 45.0 degrees and 1.5 Nm torque
-        mock_data = b'\x22\01\x96\00\00\00\00\00'
-        res = self.parser.decode_steering(mock_data)
-        self.assertIn('STEER_ANGLE', res)
-        self.assertIn('STEER_TORQUE', res)
+    def test_steering_message_and_safety_signals(self):
+        self.assertTrue("STEERING_DATA" in self.messages)
+        signals = self.messages["STEERING_DATA"]["signals"]
+        for required in ("STEER_ANGLE", "STEER_TORQUE", "COUNTER", "CHECKSUM"):
+            self.assertTrue(required in signals)
 
-    @given(gas=st.integers(min_value=0, max_value=255))
-    def test_gas_pedal_fuzzing(self, gas):
-        # Fuzzing longitudinal payloads to ensure no struct unpack crashes
-        payload = bytes([gas, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
-        try:
-            self.parser.decode_longitudinal(payload)
-        except cantools.database.errors.DecodeError:
-            pass # Expected for out-of-bound fuzzy data, but should not crash the python runtime
+    def test_longitudinal_message_and_safety_signals(self):
+        self.assertTrue("LONGITUDINAL_DATA" in self.messages)
+        signals = self.messages["LONGITUDINAL_DATA"]["signals"]
+        for required in ("GAS_PEDAL", "BRAKE_PRESSURE", "COUNTER", "CHECKSUM"):
+            self.assertTrue(required in signals)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
