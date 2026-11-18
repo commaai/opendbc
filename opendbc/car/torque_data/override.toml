@@ -97,9 +97,6 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "HONDA_CITY_7G" = [1.2, 1.2, 0.23]
 "HONDA_ODYSSEY_5G_MMR" = [0.9, 0.9, 0.2]
 "HONDA_NBOX_2G" = [1.2, 1.2, 0.2]
-# N-VAN: torqued live estimates (10,376 points, 100% calibrated)
-# raw latAccelFactor 0.994 (0.912-1.091), friction 0.207; filtered 1.011 / 0.206
-# latAccelOffset is learned by torqued (-0.014) and is not settable in this override
 "HONDA_NVAN" = [1.011, 1.2, 0.206]
 "ACURA_TLX_2G" = [1.2, 1.2, 0.15]
 "ACURA_TLX_2G_MMR" = [1.7, 1.7, 0.16]
