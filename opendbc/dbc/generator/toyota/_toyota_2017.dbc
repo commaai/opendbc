@@ -207,6 +207,25 @@ BO_ 869 DSU_CRUISE : 7 DSU
  SG_ CRUISE_REQUEST : 31|8@0+ (100,-12800) [0|0] "N" XXX
  SG_ LEAD_DISTANCE : 39|8@0+ (1,0) [0|0] "m" XXX
 
+BO_ 896 ACN1S01: 8 CGW
+ SG_ R_AC2 : 6|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ R_HTR : 5|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ECOSW : 2|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ R_EGON : 1|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BLWON : 15|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ SCAC : 13|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ CGIH : 23|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ FAN_AC : 22|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACHI : 20|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACMAX : 19|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ R_VSCUS : 31|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ R_SHTR : 30|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ R_PTC : 29|2@0+ (1,0) [0|0] "piece" Vector__XXX
+ SG_ GNRTIH : 27|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ R_COL_TM : 26|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ R_HET_TM : 24|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ TAMOUT : 55|8@0- (0.625,0) [0|0] "degC" Vector__XXX
+
 BO_ 898 AIR_CONDITIONER: 8 XXX
  SG_ CLIMATE_SET_POINT : 5|6@0+ (1,0) [5|33] "" XXX
  SG_ AIR_CONDITIONER_STATE : 48|7@1+ (1,0) [0|127] "" XXX
@@ -219,6 +238,7 @@ BO_ 921 PCM_CRUISE_SM: 8 XXX
  SG_ UI_SET_SPEED : 31|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 944 AIR_CONDITIONER_2: 8 XXX
+ SG_ CABIN_TEMP : 15|8@0+ (0.25,-6.5) [-6.5|57.25] "degC" XXX
  SG_ WINDSCREEN_DEFOG : 43|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 951 ESP_CONTROL: 8 ESP
@@ -228,9 +248,29 @@ BO_ 951 ESP_CONTROL: 8 ESP
  SG_ BRAKE_HOLD_ENABLED : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ BRAKE_HOLD_ACTIVE : 36|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 955 ENG1S92: 8 CGW
+ SG_ B_ST : 7|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_TC : 6|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_GLOW : 3|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_STPE : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_OMWI : 15|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_SILUP : 13|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_SILDN : 12|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_WSTP : 11|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_LOUT : 10|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_OILPL : 9|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_TMP : 23|8@0+ (0.5,0) [0|0] "degC" Vector__XXX
+ SG_ OGENETCS : 30|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ B_DPFW : 28|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BOSLAMP : 37|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BOSMINF : 34|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ GOSLAMP : 45|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ GOSMINF : 42|3@0+ (1,0) [0|0] "" Vector__XXX
+
 BO_ 956 GEAR_PACKET: 8 XXX
  SG_ SPORT_ON : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ GEAR : 13|6@0+ (1,0) [0|63] "" XXX
+ SG_ TRANSMISSION_FLUID_TEMP : 23|16@0+ (0.625,-50) [-50|40909.375] "degC" XXX
  SG_ SPORT_GEAR_ON : 33|1@0+ (1,0) [0|1] "" XXX
  SG_ SPORT_GEAR : 38|3@0+ (1,0) [0|7] "" XXX
  SG_ ECON_ON : 40|1@0+ (1,0) [0|1] "" XXX
@@ -474,11 +514,15 @@ CM_ SG_ 865 GAS_PEDAL_ALT "copy of main GAS_PEDAL. Both use 8 bits. Might indica
 CM_ SG_ 865 CLUTCH_RELEASED "boolean of clutch for 6MT.";
 CM_ SG_ 865 ACCEL_NET "net positive acceleration (gas) applied by the system if on flat ground, may not include creeping force";
 CM_ SG_ 865 ACC_FAULTED "1 when ACC is faulted and the PCM disallows engagement. Also describes a lockout when the ACC_CONTROL->ACC_MALFUNCTION bit is set.";
+CM_ SG_ 896 TAMOUT "Outside air temperature sensor. Reads -80 (raw 0x80) for about a second after power-on";
 CM_ SG_ 898 AIR_CONDITIONER_STATE "very difficult to parse with some air register motors operating without user-inputs";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in the vehicle's UI with the vehicle's unit";
 CM_ SG_ 921 TEMP_ACC_FAULTED "1 when the UI is displaying or playing fault-related alerts or sounds. Also 1 when pressing main on.";
+CM_ SG_ 944 CABIN_TEMP "Cabin temperature sensor. -6.5 (raw 0) when not reported";
 CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
+CM_ SG_ 955 B_TMP "Engine coolant temperature. 0 on hybrids";
 CM_ SG_ 956 GEAR "on 6MT, only R shows.";
+CM_ SG_ 956 TRANSMISSION_FLUID_TEMP "-50 (raw 0) on cars that don't report it, including hybrids";
 CM_ SG_ 1009 UI_SET_SPEED "units seem to be whatever the car is set to";
 CM_ SG_ 1041 PCS_INDICATOR "Pre-Collision System Indicator";
 CM_ SG_ 1041 PCS_SENSITIVITY "Pre-Collision System Sensitivity";
