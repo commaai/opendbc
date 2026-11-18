@@ -1,7 +1,7 @@
 import unittest
 
 from opendbc.car.rivian.fingerprints import FW_VERSIONS
-from opendbc.car.rivian.values import CAR, FW_QUERY_CONFIG, WMI, ModelLine, ModelYear
+from opendbc.car.rivian.values import CAR, WMI, ModelLine, ModelYear, match_fw_to_car_fuzzy
 
 
 class TestRivian(unittest.TestCase):
@@ -20,6 +20,6 @@ class TestRivian(unittest.TestCase):
                   vin[3] = "Z"
                 vin = "".join(vin)
 
-                matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy({}, vin, FW_VERSIONS)
+                matches = match_fw_to_car_fuzzy({}, vin, FW_VERSIONS)
                 should_match = year in platform.config.years and not bad
                 assert (matches == {platform}) == should_match, "Bad match"

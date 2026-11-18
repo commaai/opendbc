@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import make_msg
@@ -14,9 +16,11 @@ PREV_BUTTON_SAMPLES = 8
 ENABLE_BUTTONS = (Buttons.RESUME, Buttons.SET, Buttons.CANCEL)
 
 
-class HyundaiButtonBase:
+class HyundaiButtonBase(common.CarSafetyTest):
   BUTTONS_TX_BUS = 0  # tx on this bus, rx on 0
   SCC_BUS = 0  # rx on this bus
+
+  _button_msg: Callable[..., libsafety_py.CANPacket]
 
   def test_button_sends(self):
     """
@@ -55,6 +59,9 @@ class HyundaiButtonBase:
         self._rx(self._pcm_status_msg(True))
         controls_allowed = btn in ENABLE_BUTTONS or main_button
         self.assertEqual(controls_allowed, self.safety.get_controls_allowed())
+        self.safety.set_controls_allowed(False)
+        self._rx(self._pcm_status_msg(True))
+        self.assertFalse(self.safety.get_controls_allowed())
 
   def test_sampling_cruise_buttons(self):
     """
@@ -74,6 +81,8 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
   DISABLED_ECU_UDS_MSG: tuple[int, int]
   DISABLED_ECU_ACTUATION_MSG: tuple[int, int]
+
+  _button_msg: Callable[..., libsafety_py.CANPacket]
 
   # override these tests from CarSafetyTest, hyundai longitudinal uses button enable
   def test_disable_control_allowed_from_cruise(self):

@@ -1,4 +1,7 @@
-#pragma once
+#ifndef SAFETY_H
+#define SAFETY_H
+
+#include <stddef.h>
 
 #include "opendbc/safety/helpers.h"
 #include "opendbc/safety/lateral.h"
@@ -32,32 +35,40 @@
 #include "opendbc/safety/modes/byd.h"
 #include "opendbc/safety/modes/hyundai_canfd.h"
 
-uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len) {
+static uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
   for (int i = 0; i < len; i++) {
-    const uint32_t shift = i * 8;
+    const uint32_t shift = (uint32_t)i * 8U;
     ret |= (((uint32_t)msg->data[start + i]) << shift);
   }
   return ret;
 }
 
+// Read up to four bytes in big-endian order.
+static uint32_t GET_BYTES_BE(const CANPacket_t *msg, int start, int len) {
+  uint32_t ret = 0U;
+  for (int i = 0; i < len; i++) {
+    ret = (ret << 8) | (uint32_t)msg->data[start + i];
+  }
+  return ret;
+}
+
 // Read up to eight bytes in little-endian order, without alignment assumptions.
-uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
+static uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
   uint64_t ret = 0U;
   for (int i = 0; i < len; i++) {
-    const uint32_t shift = i * 8;
+    const uint32_t shift = (uint32_t)i * 8U;
     ret |= ((uint64_t)msg->data[start + i]) << shift;
   }
   return ret;
 }
 
-const int MAX_WRONG_COUNTERS = 5;
+static const int MAX_WRONG_COUNTERS = 5;
 
 // UM2331 CPU_SM_2 and RAM_SM_3: rx, tx, fwd and tick run on two copies of the state and config and compare the decisions, the tick also compares the copies
 SafetyCopy safety_a = {.setup = {.current_hooks = &nooutput_hooks}};
 SafetyCopy safety_b = {.setup = {.current_hooks = &nooutput_hooks}};
 SafetyCopy *current_copy = &safety_a;
-uint32_t safety_ts;
 bool safety_redundancy_fault = false;
 
 static void generic_rx_checks(void);
@@ -90,7 +101,6 @@ static bool is_msg_valid(int index) {
     const RxStatus *status = &safety.rx_status[index];
     if (!status->valid_checksum || !status->valid_quality_flag || (status->wrong_counters >= MAX_WRONG_COUNTERS)) {
       valid = false;
-      safety.controls_allowed = false;
     }
   }
   return valid;
@@ -125,13 +135,13 @@ static int get_addr_check_index(const CANPacket_t *msg, const RxCheck addr_list[
 static void update_counter(RxStatus *status, const CanMsgCheck *m, uint8_t counter) {
   uint8_t expected_counter = (status->last_counter + 1U) % (m->max_counter + 1U);
   status->wrong_counters += (expected_counter == counter) ? -1 : 1;
-  status->wrong_counters = SAFETY_CLAMP(status->wrong_counters, 0, MAX_WRONG_COUNTERS);
+  status->wrong_counters = safety_clamp_int(status->wrong_counters, 0, MAX_WRONG_COUNTERS);
   status->last_counter = counter;
 }
 
 static bool rx_msg_safety_check(const CANPacket_t *msg,
                                 const safety_config *cfg,
-                                const safety_hooks *safety_hooks) {
+                                const safety_hooks *hooks) {
 
   int index = get_addr_check_index(msg, cfg->rx_checks, cfg->rx_checks_len);
 
@@ -140,31 +150,36 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     const CanMsgCheck *m = &cfg->rx_checks[index].msg[status->index];
     status->last_timestamp = safety_ts;
 
+    // the hooks are set for every check that isn't ignored, see TestSafetyConfigs
     // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !m->ignore_checksum) {
-      uint32_t checksum = safety_hooks->get_checksum(msg);
-      uint32_t checksum_comp = safety_hooks->compute_checksum(msg);
-      status->valid_checksum = checksum_comp == checksum;
+    if (m->ignore_checksum) {
+      status->valid_checksum = true;
     } else {
-      status->valid_checksum = m->ignore_checksum;
+      uint32_t checksum = hooks->get_checksum(msg);
+      uint32_t checksum_comp = hooks->compute_checksum(msg);
+      status->valid_checksum = checksum_comp == checksum;
     }
 
     // counter check
-    if ((safety_hooks->get_counter != NULL) && (m->max_counter > 0U)) {
-      uint8_t counter = safety_hooks->get_counter(msg);
-      update_counter(status, m, counter);
+    if (m->ignore_counter) {
+      status->wrong_counters = 0;
     } else {
-      status->wrong_counters = m->ignore_counter ? 0 : MAX_WRONG_COUNTERS;
+      uint8_t counter = hooks->get_counter(msg);
+      update_counter(status, m, counter);
     }
 
     // quality flag check
-    if ((safety_hooks->get_quality_flag_valid != NULL) && !m->ignore_quality_flag) {
-      status->valid_quality_flag = safety_hooks->get_quality_flag_valid(msg);
+    if (m->ignore_quality_flag) {
+      status->valid_quality_flag = true;
     } else {
-      status->valid_quality_flag = m->ignore_quality_flag;
+      status->valid_quality_flag = hooks->get_quality_flag_valid(msg);
     }
   }
-  return is_msg_valid(index);
+  bool valid = is_msg_valid(index);
+  if (!valid) {
+    safety.controls_allowed = false;
+  }
+  return valid;
 }
 
 static bool rx_hook_copy(const CANPacket_t *msg) {
@@ -182,7 +197,7 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
   // the relay malfunction hook runs on all incoming rx messages.
   // check all applicable tx msgs for liveness on sending bus.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
-  const int addr = msg->addr;
+  const uint32_t addr = msg->addr;
   for (int i = 0; i < safety_setup.current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &safety_setup.current_safety_config.tx_msgs[i];
     if (m->check_relay) {
@@ -244,7 +259,7 @@ static int fwd_hook_copy(int bus_num, int addr) {
   if (!blocked) {
     for (int i = 0; i < safety_setup.current_safety_config.tx_msgs_len; i++) {
       const CanMsg *m = &safety_setup.current_safety_config.tx_msgs[i];
-      if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == (unsigned int)destination_bus)) {
+      if (m->check_relay && !m->disable_static_blocking && (m->addr == (uint32_t)addr) && (m->bus == (unsigned int)destination_bus)) {
         blocked = true;
         break;
       }
@@ -261,23 +276,15 @@ static int fwd_hook_copy(int bus_num, int addr) {
 static void tick_copy(void) {
   safety.safety_mode_cnt += 1U;
 
-  const uint8_t MAX_MISSED_MSGS = 10U;
   bool rx_checks_invalid = false;
   uint32_t ts = safety_ts;
   for (int i=0; i < safety_setup.current_safety_config.rx_checks_len; i++) {
     RxStatus *status = &safety.rx_status[i];
     uint32_t elapsed_time = safety_get_ts_elapsed(ts, status->last_timestamp);
-    // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
-    // Quite conservative to not risk false triggers.
-    // 2s of lag is worse case, since the function is called at 1Hz
-    uint32_t frequency = safety_setup.current_safety_config.rx_checks[i].msg[status->index].frequency;
-    uint32_t timestep = 1000000U / SAFETY_MAX(frequency, 1U);  // frequency < 10Hz is invalid below
-    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1000000U);
-    status->lagging = lagging;
-
-    // enforce minimum frequency for safety-relevant messages
-    bool frequency_invalid = frequency < 10U;
-    if (lagging || frequency_invalid || !is_msg_valid(i)) {
+    // lagging after 1s, at least 10 missed messages since RX checks are >= 10Hz (see TestSafetyConfigs)
+    // 2s of lag is worst case, since the function is called at 1Hz
+    status->lagging = elapsed_time > 1000000U;
+    if (status->lagging || !is_msg_valid(i)) {
       rx_checks_invalid = true;
       safety.controls_allowed = false;
     }
@@ -302,26 +309,20 @@ static void relay_malfunction_set(void) {
   safety.relay_malfunction = true;
 }
 
+// exit controls on rising edge of a press, or on any press when while_held
+static void disengage_on_press(bool pressed, bool *pressed_prev, bool while_held) {
+  if (pressed && (!*pressed_prev || while_held)) {
+    safety.controls_allowed = false;
+  }
+  *pressed_prev = pressed;
+}
+
 static void generic_rx_checks(void) {
   safety.gas_pressed_prev = safety.gas_pressed;
-
-  // exit controls on rising edge of brake press
-  if (safety.brake_pressed && (!safety.brake_pressed_prev || safety.vehicle_moving)) {
-    safety.controls_allowed = false;
-  }
-  safety.brake_pressed_prev = safety.brake_pressed;
-
-  // exit controls on rising edge of regen paddle
-  if (safety.regen_braking && (!safety.regen_braking_prev || safety.vehicle_moving)) {
-    safety.controls_allowed = false;
-  }
-  safety.regen_braking_prev = safety.regen_braking;
-
-  // exit controls on rising edge of steering override/disengage
-  if (safety.steering_disengage && !safety.steering_disengage_prev) {
-    safety.controls_allowed = false;
-  }
-  safety.steering_disengage_prev = safety.steering_disengage;
+  // brake and regen also exit controls while held and moving
+  disengage_on_press(safety.brake_pressed, &safety.brake_pressed_prev, safety.vehicle_moving);
+  disengage_on_press(safety.regen_braking, &safety.regen_braking_prev, safety.vehicle_moving);
+  disengage_on_press(safety.steering_disengage, &safety.steering_disengage_prev, false);
 }
 
 static void stock_ecu_check(bool stock_ecu_detected) {
@@ -334,40 +335,42 @@ static void stock_ecu_check(bool stock_ecu_detected) {
   }
 }
 
-static int set_hooks_copy(uint16_t mode, uint16_t param) {
-  const safety_hook_config safety_hook_registry[] = {
-    {SAFETY_SILENT, &nooutput_hooks},
-    {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
-    {SAFETY_TOYOTA, &toyota_hooks},
-    {SAFETY_ELM327, &elm327_hooks},
-    {SAFETY_GM, &gm_hooks},
-    {SAFETY_HONDA_BOSCH, &honda_bosch_hooks},
-    {SAFETY_HYUNDAI, &hyundai_hooks},
-    {SAFETY_CHRYSLER, &chrysler_hooks},
-    {SAFETY_SUBARU, &subaru_hooks},
-    {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
-    {SAFETY_VOLKSWAGEN_MEB, &volkswagen_meb_hooks},
-    {SAFETY_NISSAN, &nissan_hooks},
-    {SAFETY_NOOUTPUT, &nooutput_hooks},
-    {SAFETY_HYUNDAI_LEGACY, &hyundai_legacy_hooks},
-    {SAFETY_MAZDA, &mazda_hooks},
-    {SAFETY_BODY, &body_hooks},
-    {SAFETY_FORD, &ford_hooks},
-    {SAFETY_RIVIAN, &rivian_hooks},
-    {SAFETY_TESLA, &tesla_hooks},
-    {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
+// the hooks of each safety mode, defined in its header
+// cppcheck-suppress misra-c2012-8.9; at block scope, 8.9 would instead ask for every mode's hooks to be defined in set_hooks_copy
+static const safety_hook_config safety_hook_registry[] = {
+  {SAFETY_SILENT, &nooutput_hooks},
+  {SAFETY_HONDA_NIDEC, &honda_nidec_hooks},
+  {SAFETY_TOYOTA, &toyota_hooks},
+  {SAFETY_ELM327, &elm327_hooks},
+  {SAFETY_GM, &gm_hooks},
+  {SAFETY_HONDA_BOSCH, &honda_bosch_hooks},
+  {SAFETY_HYUNDAI, &hyundai_hooks},
+  {SAFETY_CHRYSLER, &chrysler_hooks},
+  {SAFETY_SUBARU, &subaru_hooks},
+  {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
+  {SAFETY_VOLKSWAGEN_MEB, &volkswagen_meb_hooks},
+  {SAFETY_NISSAN, &nissan_hooks},
+  {SAFETY_NOOUTPUT, &nooutput_hooks},
+  {SAFETY_HYUNDAI_LEGACY, &hyundai_legacy_hooks},
+  {SAFETY_MAZDA, &mazda_hooks},
+  {SAFETY_BODY, &body_hooks},
+  {SAFETY_FORD, &ford_hooks},
+  {SAFETY_RIVIAN, &rivian_hooks},
+  {SAFETY_TESLA, &tesla_hooks},
+  {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
 #ifdef ALLOW_DEBUG
-    {SAFETY_MG, &mg_hooks},
-    {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
-    {SAFETY_PSA, &psa_hooks},
-    {SAFETY_BYD, &byd_hooks},
-    {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
-    {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
-    {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
-    {SAFETY_ALLOUTPUT, &alloutput_hooks},
+  {SAFETY_MG, &mg_hooks},
+  {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
+  {SAFETY_PSA, &psa_hooks},
+  {SAFETY_BYD, &byd_hooks},
+  {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
+  {SAFETY_VOLKSWAGEN_MLB, &volkswagen_mlb_hooks},
+  {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
+  {SAFETY_ALLOUTPUT, &alloutput_hooks},
 #endif
-  };
+};
 
+static int set_hooks_copy(uint16_t mode, uint16_t param) {
   // reset state set by safety mode
   safety = (SafetyState){
     .heartbeat_engaged = safety.heartbeat_engaged,
@@ -377,17 +380,15 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
   safety_config cfg = {0};
 
   int set_status = -1;  // not set
-  int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
+  int hook_config_count = SAFETY_ARRAY_LEN(safety_hook_registry);
   for (int i = 0; i < hook_config_count; i++) {
     if (safety_hook_registry[i].id == mode) {
       safety_setup.current_hooks = safety_hook_registry[i].hooks;
       safety_setup.current_safety_mode = mode;
       safety_setup.current_safety_param = param;
+      cfg = safety_setup.current_hooks->init(param);
       set_status = 0;  // set
     }
-  }
-  if ((set_status == 0) && (safety_setup.current_hooks->init != NULL)) {
-    cfg = safety_setup.current_hooks->init(param);
   }
 
   // by field, the copies are compared by byte and the padding of cfg is unspecified
@@ -464,17 +465,28 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
 }
 
 // convert a trimmed integer to signed 32 bit int
-int to_signed(int d, int bits) {
-  int d_signed = d;
-  int max_value = (1 << SAFETY_MAX((bits - 1), 0));
-  if (d >= max_value) {
-    d_signed = d - (1 << SAFETY_MAX(bits, 0));
+static int to_signed(uint32_t d, int bits) {
+  const uint32_t sign_bit = (uint32_t)1U << ((uint32_t)bits - 1U);
+  int d_signed = (int)d;
+  if (d >= sign_bit) {
+    d_signed = (int)d - (2 * (int)sign_bit);
   }
   return d_signed;
 }
 
+// convert a magnitude and a separate sign bit to a signed int
+static int sign_magnitude(uint32_t magnitude, bool negative) {
+  const int value = (int)magnitude;
+  return negative ? -value : value;
+}
+
+// convert an offset-encoded raw value to a signed int
+static int from_offset(uint32_t raw, int offset) {
+  return (int)raw - offset;
+}
+
 // given a new sample, update the sample_t struct
-void update_sample(struct sample_t *sample, int sample_new) {
+static void update_sample(struct sample_t *sample, int sample_new) {
   for (int i = MAX_SAMPLE_VALS - 1; i > 0; i--) {
     sample->values[i] = sample->values[i-1];
   }
@@ -493,11 +505,12 @@ void update_sample(struct sample_t *sample, int sample_new) {
   }
 }
 
-int ROUND(float val) {
-  return val + ((val > 0.0) ? 0.5 : -0.5);
+static int ROUND(float val) {
+  const float rounded = val + ((val > 0.0f) ? 0.5f : -0.5f);
+  return (int)rounded;
 }
 
-void pcm_cruise_check(bool cruise_engaged) {
+static void pcm_cruise_check(bool cruise_engaged) {
   // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
   if (!cruise_engaged) {
     safety.controls_allowed = false;
@@ -508,13 +521,15 @@ void pcm_cruise_check(bool cruise_engaged) {
   safety.cruise_engaged_prev = cruise_engaged;
 }
 
-void speed_mismatch_check(const float speed_2) {
+static void speed_mismatch_check(const float speed_2) {
   // Disable controls if speeds from two sources are too far apart.
   // For safety modes that use speed to adjust torque or angle limits
   // compared in vehicle_speed's integer units, so the limit is exact
   const int MAX_SPEED_DELTA = 2 * (int)VEHICLE_SPEED_FACTOR;  // 2 m/s
-  bool is_invalid_speed = SAFETY_ABS(ROUND(speed_2 * VEHICLE_SPEED_FACTOR) - safety.vehicle_speed.values[0]) > MAX_SPEED_DELTA;
+  bool is_invalid_speed = safety_abs_int(ROUND(speed_2 * VEHICLE_SPEED_FACTOR) - safety.vehicle_speed.values[0]) > MAX_SPEED_DELTA;
   if (is_invalid_speed) {
     safety.controls_allowed = false;
   }
 }
+
+#endif  // SAFETY_H

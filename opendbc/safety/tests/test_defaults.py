@@ -3,6 +3,7 @@ import unittest
 
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
+from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.libsafety.libsafety_py import ffi
 
 
@@ -141,6 +142,39 @@ class TestHeartbeat(common.SafetyTestBase):
         self.assertTrue(self.safety.get_controls_allowed())
         self.safety.safety_heartbeat_check()
       self.assertEqual(engaged, self.safety.get_controls_allowed())
+      self.safety.safety_heartbeat_check()
+      self.assertEqual(0, self.safety.safety_a.state.heartbeat_engaged_mismatches)
+
+
+class TestIgnitionCan(common.SafetyTestBase):
+  SAFETY_MODEL = None
+  # (bus, addr, len, counter byte, counter shift, ignition on data) of each ignition message with a counter
+  MSGS = ((0, 0x152, 8, 1, 0, {7: 0x10}), (0, 0x221, 8, 6, 4, {0: 0x60}), (0, 0x3C0, 4, 1, 0, {2: 0x02}),
+          (0, 0x432, 8, 1, 0, {6: 0x01}), (2, 0x432, 8, 1, 0, {6: 0x01}))
+
+  def _send(self, msg, counter):
+    bus, addr, length, counter_byte, shift, ign_data = msg
+    dat = bytearray(length)
+    dat[counter_byte] = counter << shift
+    for i, v in ign_data.items():
+      dat[i] = v
+    self.safety.ignition_can_hook(common.make_msg(bus, addr, dat=bytes(dat)))
+    return self.safety.get_ignition_can()
+
+  def test_counter_skipped(self):
+    # ignition is only read from a message whose counter follows the previous one
+    for msg in self.MSGS:
+      self.safety.init_tests()
+      for counter, ignition in ((0, False), (2, False), (3, True)):
+        self.assertEqual(ignition, self._send(msg, counter), (msg[:2], counter))
+
+  def test_init_resets_counters(self):
+    # init_tests forgets the previous counters, so no test sees a counter left over from another one
+    for msg in self.MSGS:
+      self.safety.init_tests()
+      self._send(msg, 0)
+      self.safety.init_tests()
+      self.assertFalse(self._send(msg, 1), msg[:2])
 
 
 class TestModeCount(common.SafetyTestBase):
@@ -156,6 +190,31 @@ class TestModeCount(common.SafetyTestBase):
       self.safety.safety_tick()
     self.safety.safety_rx_hook(common.make_msg(0, 0x2E4, 8))
     self.assertTrue(self.safety.get_relay_malfunction())
+
+
+class TestSafetyConfigs(unittest.TestCase):
+  def test_hooks(self):
+    # safety.h relies on these instead of checking them at runtime
+    always_tx = (CarParams.SafetyModel.allOutput, CarParams.SafetyModel.elm327)  # tx_hook_copy whitelists everything
+    libsafety = libsafety_py.libsafety  # loaded when the test runs, so a test runner can load its own build first
+    for mode in CarParams.SafetyModel.schema.enumerants.values():
+      if libsafety.set_safety_hooks(mode, 0) != 0:
+        continue
+      configs = set()
+      for param in range(1 << 16):
+        libsafety.set_safety_hooks(mode, param)
+        hooks, cfg = libsafety.safety_a.setup.current_hooks, libsafety.safety_a.setup.current_safety_config
+        self.assertTrue(cfg.rx_checks_len == 0 or hooks.rx != ffi.NULL)
+        self.assertTrue((cfg.tx_msgs_len == 0 and mode not in always_tx) or hooks.tx != ffi.NULL)
+        if cfg.rx_checks in configs:
+          continue
+        configs.add(cfg.rx_checks)
+        for m in (m for i in range(cfg.rx_checks_len) for m in cfg.rx_checks[i].msg if m.addr != 0):
+          self.assertGreaterEqual(m.frequency, 10, f"{mode=} {m.addr=:#x}: 10Hz minimum for safety signals")
+          self.assertTrue(m.ignore_checksum or (hooks.get_checksum != ffi.NULL and hooks.compute_checksum != ffi.NULL))
+          self.assertEqual(m.ignore_counter, m.max_counter == 0)
+          self.assertTrue(m.ignore_counter or hooks.get_counter != ffi.NULL)
+          self.assertTrue(m.ignore_quality_flag or hooks.get_quality_flag_valid != ffi.NULL)
 
 
 if __name__ == "__main__":

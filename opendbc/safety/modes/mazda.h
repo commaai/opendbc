@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_MAZDA_H
+#define SAFETY_MODES_MAZDA_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -13,25 +14,24 @@
 
 // CAN bus numbers
 #define MAZDA_MAIN 0
-#define MAZDA_CAM  2
 
 // track msgs coming from OP so that we know what CAM msgs to drop and what to forward
 static void mazda_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MAZDA_ENGINE_DATA, MAZDA_MAIN)) {
     // sample speed: scale by 0.01 to get kph
-    int speed = (msg->data[2] << 8) | msg->data[3];
-    safety.vehicle_moving = speed > 10;  // moving when speed > 0.1 kph
+    uint32_t speed = GET_BYTES_BE(msg, 2, 2);
+    safety.vehicle_moving = speed > 10U;  // moving when speed > 0.1 kph
   }
 
   if (msg_matches(msg, MAZDA_STEER_TORQUE, MAZDA_MAIN)) {
-    int torque_driver_new = msg->data[0] - 127U;
+    int torque_driver_new = (int)msg->data[0] - 127;
     // update array of samples
     update_sample(&safety.torque_driver, torque_driver_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
   if (msg_matches(msg, MAZDA_CRZ_CTRL, MAZDA_MAIN)) {
-    bool cruise_engaged = msg->data[0] & 0x8U;
+    bool cruise_engaged = GET_BIT(msg, 3U);
     pcm_cruise_check(cruise_engaged);
   }
 
@@ -40,7 +40,7 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MAZDA_PEDALS, MAZDA_MAIN)) {
-    safety.brake_pressed = (msg->data[0] & 0x10U);
+    safety.brake_pressed = GET_BIT(msg, 4U);
   }
 }
 
@@ -59,9 +59,9 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
   // Check if msg is sent on the main BUS
   // steer cmd checks
   if (msg_matches(msg, MAZDA_LKAS, MAZDA_MAIN)) {
-    int desired_torque = (((msg->data[0] & 0x0FU) << 8) | msg->data[1]) - 2048U;
+    int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) & 0xFFFU, 2048);
 
-    if (steer_torque_cmd_checks(desired_torque, -1, MAZDA_STEERING_LIMITS)) {
+    if (steer_torque_cmd_checks(desired_torque, true, MAZDA_STEERING_LIMITS)) {
       tx = false;
     }
   }
@@ -98,8 +98,10 @@ static safety_config mazda_init(uint16_t param) {
   return BUILD_SAFETY_CFG(mazda_rx_checks, MAZDA_TX_MSGS);
 }
 
-const safety_hooks mazda_hooks = {
+static const safety_hooks mazda_hooks = {
   .init = mazda_init,
   .rx = mazda_rx_hook,
   .tx = mazda_tx_hook,
 };
+
+#endif  // SAFETY_MODES_MAZDA_H

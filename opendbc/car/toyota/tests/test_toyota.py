@@ -5,7 +5,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.toyota.fingerprints import FW_VERSIONS
 from opendbc.car.toyota.values import CAR, DBC, ToyotaFlags, FW_QUERY_CONFIG, PLATFORM_CODE_ECUS, \
-                                                  FUZZY_EXCLUDED_PLATFORMS, get_platform_codes
+                                                  FUZZY_EXCLUDED_PLATFORMS, get_platform_codes, match_fw_to_car_fuzzy
 from opendbc.testing import fuzzy_test
 
 Ecu = CarParams.Ecu
@@ -32,9 +32,9 @@ class TestToyotaInterfaces(unittest.TestCase):
   def test_tss2_dbc(self):
     # We make some assumptions about TSS2 platforms,
     # like looking up certain signals only in this DBC
-    for car_model, dbc in DBC.items():
+    for car_model in CAR:
       if car_model.config.flags & ToyotaFlags.TSS2 and not (car_model.config.flags & ToyotaFlags.SECOC):
-        assert dbc[Bus.pt] == "toyota_nodsu_pt_generated"
+        assert DBC[car_model][Bus.pt] == "toyota_nodsu_pt_generated"
 
   def test_essential_ecus(self):
     # Asserts standard ECUs exist for each platform
@@ -158,7 +158,7 @@ class TestToyotaFingerprint(unittest.TestCase):
                                         subAddress=0 if sub_addr is None else sub_addr))
 
       CP = CarParams(carFw=car_fw)
-      matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, FW_VERSIONS)
+      matches = match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, FW_VERSIONS)
       if len(matches) == 1:
         assert list(matches)[0] == platform
       else:

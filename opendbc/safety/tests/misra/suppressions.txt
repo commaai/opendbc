@@ -6,8 +6,6 @@ misra-c2012-11.5
 misra-c2012-15.1
 # Advisory: union types can be used
 misra-c2012-19.2
-# Advisory: The # and ## preprocessor operators should not be used
-misra-c2012-20.10
 
 # needed since not all of these suppressions are applicable to all builds
 unmatchedSuppression
