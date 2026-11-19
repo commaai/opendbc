@@ -32,6 +32,7 @@
 #define SAFETY_HYUNDAI_CANFD 28U
 #define SAFETY_RIVIAN 33U
 #define SAFETY_VOLKSWAGEN_MEB 34U
+#define SAFETY_FCA_ATLANTIS 39U
 
 // Safety modes available only in debug builds
 #ifdef ALLOW_DEBUG
@@ -40,7 +41,6 @@
 #define SAFETY_VOLKSWAGEN_MLB 25U
 #define SAFETY_CHRYSLER_CUSW 30U
 #define SAFETY_PSA 31U
-#define SAFETY_FCA_ATLANTIS 39U
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
 #endif
