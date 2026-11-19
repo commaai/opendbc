@@ -364,7 +364,7 @@ routes = [
 
   CarTestRoute("5d61e2f6e1f247f3/00000054--d3dfb01b34", MG.MG_5_EV),
 
-  CarTestRoute("69cd3a350561a4d8/00000195--aa6ccc4f6e", FCA_ATLANTIS.RAM_PROMASTER),
+  CarTestRoute("57a1cc884d1e5a8b/0000000b--19a8aadecc", FCA_ATLANTIS.RAM_PROMASTER),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold
