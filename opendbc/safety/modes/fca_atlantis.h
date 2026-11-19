@@ -57,42 +57,38 @@ static uint8_t fca_atlantis_get_counter(const CANPacket_t *msg) {
 }
 
 static void fca_atlantis_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == 0U) {
-    // Update in-motion state by sampling wheel speeds
-    if (msg->addr == FCA_ATLANTIS_ABS_1) {
-      // Signals: ABS_1.WHEEL_SPEED_[FL,FR,RL,RR]
-      uint32_t wheel_speed_fl = GET_BYTES_BE(msg, 0, 2) >> 3;
-      uint32_t wheel_speed_fr = (GET_BYTES_BE(msg, 1, 3) >> 6) & 0x1FFFU;
-      uint32_t wheel_speed_rl = (GET_BYTES_BE(msg, 3, 2) >> 1) & 0x1FFFU;
-      uint32_t wheel_speed_rr = (GET_BYTES_BE(msg, 4, 3) >> 4) & 0x1FFFU;
-      safety.vehicle_moving = (wheel_speed_fl + wheel_speed_fr + wheel_speed_rl + wheel_speed_rr) > 0U;
-    }
-
-    // Update driver input torque samples
-    // Signal: EPS_2.DRIVER_TORQUE
-    if (msg->addr == FCA_ATLANTIS_EPS_2) {
-      int torque_driver_new = from_offset(GET_BYTES_BE(msg, 2, 2) >> 5, 1024);
-      update_sample(&safety.torque_driver, torque_driver_new);
-    }
-
-    // Signal: ENGINE_2.ACCEL_PEDAL_USER
-    if (msg->addr == FCA_ATLANTIS_ENGINE_2) {
-      safety.gas_pressed = msg->data[2] > 0U;
-    }
-
-    // Signal: ABS_3.BRAKE_PEDAL_SWITCH
-    if (msg->addr == FCA_ATLANTIS_ABS_3) {
-      safety.brake_pressed = GET_BIT(msg, 3U);
-    }
+  // Update in-motion state by sampling wheel speeds
+  if (msg_matches(msg, FCA_ATLANTIS_ABS_1, 0U)) {
+    // Signals: ABS_1.WHEEL_SPEED_[FL,FR,RL,RR]
+    uint32_t wheel_speed_fl = GET_BYTES_BE(msg, 0, 2) >> 3;
+    uint32_t wheel_speed_fr = (GET_BYTES_BE(msg, 1, 3) >> 6) & 0x1FFFU;
+    uint32_t wheel_speed_rl = (GET_BYTES_BE(msg, 3, 2) >> 1) & 0x1FFFU;
+    uint32_t wheel_speed_rr = (GET_BYTES_BE(msg, 4, 3) >> 4) & 0x1FFFU;
+    safety.vehicle_moving = (wheel_speed_fl + wheel_speed_fr + wheel_speed_rl + wheel_speed_rr) > 0U;
   }
 
-  if (msg->bus == 2U) {
-    if (msg->addr == FCA_ATLANTIS_ACC_2) {
-      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
-      // Signal: ACC_2.CRUISE_STATUS
-      bool cruise_engaged = GET_BIT(msg, 23U);
-      pcm_cruise_check(cruise_engaged);
-    }
+  // Update driver input torque samples
+  // Signal: EPS_2.DRIVER_TORQUE
+  if (msg_matches(msg, FCA_ATLANTIS_EPS_2, 0U)) {
+    int torque_driver_new = from_offset(GET_BYTES_BE(msg, 2, 2) >> 5, 1024);
+    update_sample(&safety.torque_driver, torque_driver_new);
+  }
+
+  // Signal: ENGINE_2.ACCEL_PEDAL_USER
+  if (msg_matches(msg, FCA_ATLANTIS_ENGINE_2, 0U)) {
+    safety.gas_pressed = msg->data[2] > 0U;
+  }
+
+  // Signal: ABS_3.BRAKE_PEDAL_SWITCH
+  if (msg_matches(msg, FCA_ATLANTIS_ABS_3, 0U)) {
+    safety.brake_pressed = GET_BIT(msg, 3U);
+  }
+
+  if (msg_matches(msg, FCA_ATLANTIS_ACC_2, 2U)) {
+    // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
+    // Signal: ACC_2.CRUISE_STATUS
+    bool cruise_engaged = GET_BIT(msg, 23U);
+    pcm_cruise_check(cruise_engaged);
   }
 }
 
