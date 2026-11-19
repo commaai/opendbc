@@ -12,6 +12,7 @@ Not everything will apply to your car. If something can't be tested, let us know
     - If all variants in the US market come equipped with the necessary ADAS package, no package documentation is required.
     - If a vehicle varies in features in another market, add a new [`CarDocs`](../opendbc/car/docs_definitions.py) entry.
   - [ ] Add every observed ECU firmware version to `fingerprints.py`.
+    - See the [openpilot fingerprinting guide](https://github.com/commaai/openpilot/wiki/Fingerprinting) for how to collect and add firmware versions.
   - [ ] Identify differences from related supported cars; verify reused signals and commands on this variant.
     - Gas, gear, and brake signals often move between ICE, hybrid, and EV variants (e.g. Hyundai, Subaru, Toyota SecOC).
 
