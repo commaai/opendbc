@@ -77,10 +77,10 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
     valid = !GET_BIT(msg, 3U);  // STEER_TORQUE_SENSOR.STEER_ANGLE_INITIALIZING
   }
   if (msg->addr == 0xaaU) {  // WHEEL_SPEEDS
-    // each wheel speed is 1-bit fault + 15-bit speed
+    // each wheel speed is 1-bit fault + 15-bit speed, big endian: the fault is the MSB of its first byte
     valid = true;
     for (uint8_t i = 0U; i < 4U; i += 1U) {
-      if (GET_BIT(msg, (i * 16U) + 7U)) {  // WHEEL_SPEED_xx_FAULT
+      if ((msg->data[i * 2U] & 0x80U) != 0U) {  // WHEEL_SPEED_xx_FAULT
         valid = false;
         break;
       }
