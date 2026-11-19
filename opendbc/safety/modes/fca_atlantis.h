@@ -10,7 +10,6 @@
 #define FCA_ATLANTIS_EPS_2           0x106U
 #define FCA_ATLANTIS_LKA_COMMAND     0x1F6U
 #define FCA_ATLANTIS_LKA_COMMAND_2   0x117U
-// TODO: this isn't actually an LKA message on promester, coming from radar ECU
 #define FCA_ATLANTIS_LKA_HUD_2       0x547U
 #define FCA_ATLANTIS_LKA_HUD_3       0x5A2U
 #define FCA_ATLANTIS_ACC_2           0x22AU
@@ -33,7 +32,6 @@ static safety_config fca_atlantis_init(uint16_t param) {
     {FCA_ATLANTIS_ACC_BUTTON, 2, 4, .check_relay = false},
   };
 
-  // no quality flag signals are known
   static const RxCheck fca_atlantis_rx_checks[] = {
     {.msg = {{FCA_ATLANTIS_ACC_2, 2, 8, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{FCA_ATLANTIS_ABS_1, 0, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -112,6 +110,7 @@ static bool fca_atlantis_tx_hook(const CANPacket_t *msg) {
     .max_rate_down = 3,
     .driver_torque_allowance = 80,
     .driver_torque_multiplier = 2,
+    // use TorqueMotorLimited if we can find EPS torque or some EPS limit signal?
     .type = TorqueDriverLimited,
   };
 
