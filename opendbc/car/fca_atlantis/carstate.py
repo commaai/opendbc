@@ -1,17 +1,18 @@
 from opendbc.car.common.conversions import Conversions as CV
+from opendbc.can import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.fca_atlantis.values import DBC, CanBus, CarControllerParams
 
 
-GearShifter = structs.CarState.GearShifter
-
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.frame = 0
     self.CCP = CarControllerParams(CP)
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    self.shifter_values = can_define.dv["ENGINE_3"]["GEAR"]
     self.lka_status = 0
     self.button_counter = 0
 
@@ -46,10 +47,7 @@ class CarState(CarStateBase):
     ret.brakePressed = bool(pt_cp.vl["ABS_3"]["BRAKE_PEDAL_SWITCH"])
     #ret.parkingBrake = TODO
 
-    if bool(pt_cp.vl["ENGINE_1"]["REVERSE"]):
-      ret.gearShifter = GearShifter.reverse
-    else:
-      ret.gearShifter = GearShifter.drive
+    ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(int(pt_cp.vl["ENGINE_3"]["GEAR"])))
 
     # NOTE: CRUISE_MODE glitches to zero for a frame on ACC enable
     ret.cruiseState.enabled = bool(pt_cam.vl["ACC_2"]["CRUISE_STATUS"])
@@ -78,6 +76,7 @@ class CarState(CarStateBase):
     pt_messages, cam_messages = [], []
     pt_messages += [
       ("BCM_4", 1),  # 1Hz, with extra frames when a signal changes
+      ("ENGINE_3", 1),
     ]
 
     return {
