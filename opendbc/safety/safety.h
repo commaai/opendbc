@@ -363,10 +363,10 @@ static const safety_hook_config safety_hook_registry[] = {
   {SAFETY_RIVIAN, &rivian_hooks},
   {SAFETY_TESLA, &tesla_hooks},
   {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
+  {SAFETY_FCA_ATLANTIS, &fca_atlantis_hooks},
 #ifdef ALLOW_DEBUG
   {SAFETY_MG, &mg_hooks},
   {SAFETY_CHRYSLER_CUSW, &chrysler_cusw_hooks},
-  {SAFETY_FCA_ATLANTIS, &fca_atlantis_hooks},
   {SAFETY_PSA, &psa_hooks},
   {SAFETY_BYD, &byd_hooks},
   {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
