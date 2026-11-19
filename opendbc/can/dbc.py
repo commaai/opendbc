@@ -237,6 +237,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
   elif dbc_name.startswith("fca_giorgio"):
     return ChecksumState(SignalType.FCA_GIORGIO_CHECKSUM, chrysler_checksum)
+  elif dbc_name.startswith("fca_atlantis"):
+    return ChecksumState(SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
   elif dbc_name.startswith("comma_body"):
     return ChecksumState(SignalType.BODY_CHECKSUM, body_checksum)
   elif dbc_name.startswith("tesla_model3_party"):

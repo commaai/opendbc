@@ -4,8 +4,8 @@ from opendbc.can import CANPacker
 from opendbc.car import Bus
 from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.fca_giorgio import fca_giorgiocan
-from opendbc.car.fca_giorgio.values import CanBus, CarControllerParams
+from opendbc.car.fca_atlantis import fca_atlantiscan
+from opendbc.car.fca_atlantis.values import CanBus, CarControllerParams
 
 
 class CarController(CarControllerBase):
@@ -59,16 +59,16 @@ class CarController(CarControllerBase):
       self.apply_torque_last = apply_torque
       # The EPS is suspected to listen only to LKA_COMMAND_2 (4x scale). Panda safety requires it to be an exact
       # 4x copy of LKA_COMMAND, sent after it in the same frame.
-      can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND", apply_torque, lka_active))
-      can_sends.append(fca_giorgiocan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND_2", apply_torque * 4, lka_active))
+      can_sends.append(fca_atlantiscan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND", apply_torque, lka_active))
+      can_sends.append(fca_atlantiscan.create_steering_control(self.packer_pt, self.CANBUS.pt, "LKA_COMMAND_2", apply_torque * 4, lka_active))
 
     # **** HUD Controls ***************************************************** #
 
     if self.frame % self.CCP.HUD_2_STEP == 0:
-      can_sends.append(fca_giorgiocan.create_lka_hud_2_control(self.packer_pt, self.CANBUS.pt, CC.latActive))
+      can_sends.append(fca_atlantiscan.create_lka_hud_2_control(self.packer_pt, self.CANBUS.pt, CC.latActive))
     lat_active_rising = CC.latActive and not self.lat_active_last
     if self.frame % self.CCP.HUD_3_STEP == 0 or lat_active_rising:
-      can_sends.append(fca_giorgiocan.create_lka_hud_3_control(self.packer_pt, self.CANBUS.pt, CC.latActive))
+      can_sends.append(fca_atlantiscan.create_lka_hud_3_control(self.packer_pt, self.CANBUS.pt, CC.latActive))
     self.lat_active_last = CC.latActive
 
     # **** ACC Button Controls ********************************************** #
@@ -77,7 +77,7 @@ class CarController(CarControllerBase):
     if CS.button_counter != self.button_counter_last:
       self.button_counter_last = CS.button_counter
       if CC.cruiseControl.cancel:
-        can_sends.append(fca_giorgiocan.create_acc_button_control(self.packer_pt, self.CANBUS.cam, CS.button_counter + 1, cancel=True))
+        can_sends.append(fca_atlantiscan.create_acc_button_control(self.packer_pt, self.CANBUS.cam, CS.button_counter + 1, cancel=True))
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = self.apply_torque_last / self.CCP.STEER_MAX

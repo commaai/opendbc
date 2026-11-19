@@ -48,12 +48,12 @@ class CanBus(CanBusBase):
 
 
 @dataclass
-class FcaGiorgioPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'fca_giorgio'})
+class FcaAtlantisPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'fca_atlantis'})
 
 
 @dataclass(frozen=True, kw_only=True)
-class FcaGiorgioCarSpecs(CarSpecs):
+class FcaAtlantisCarSpecs(CarSpecs):
   centerToFrontRatio: float = 0.45
   # paramsd at the configured 136" wheelbase: 159" vans learn 20.2-20.5 on highway and ~21.2 in city driving, and a 136"
   # van learned ~18.4 in city driving, about 136/159 of the 159" value (the wheelbases share a steering rack).
@@ -63,24 +63,19 @@ class FcaGiorgioCarSpecs(CarSpecs):
 
 
 @dataclass
-class FcaGiorgioCarDocs(CarDocs):
+class FcaAtlantisCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
 
 
 class CAR(Platforms):
-  config: FcaGiorgioPlatformConfig
+  config: FcaAtlantisPlatformConfig
 
-  # ALFA_ROMEO_STELVIO_1ST_GEN = FcaGiorgioPlatformConfig(
-  #   [FcaGiorgioCarDocs("Alfa Romeo Stelvio 2017-24")],
-  #   FcaGiorgioCarSpecs(wheelbase=2.82),
-  # )
-
-  RAM_PROMASTER = FcaGiorgioPlatformConfig(
-    [FcaGiorgioCarDocs("Ram ProMaster 2022-26")],
+  RAM_PROMASTER = FcaAtlantisPlatformConfig(
+    [FcaAtlantisCarDocs("Ram ProMaster 2022-26")],
     # 136" wheelbase. Other wheelbases are left to paramsd, which should learn about
     # steerRatio * 159 / 136 for a 159" (~20.5).
-    FcaGiorgioCarSpecs(wheelbase=3.45),
+    FcaAtlantisCarSpecs(wheelbase=3.45),
   )
 
 # 0xF181 responses share one layout: 01 01, a 10-byte field, 00, then one byte.

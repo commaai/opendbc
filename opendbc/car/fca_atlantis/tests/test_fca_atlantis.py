@@ -1,5 +1,5 @@
-from opendbc.car.fca_giorgio.fingerprints import FW_VERSIONS
-from opendbc.car.fca_giorgio.values import CAR, ABS_ADDR, CAMERA_ADDR, EPS_ADDR, match_fw_to_car_fuzzy
+from opendbc.car.fca_atlantis.fingerprints import FW_VERSIONS
+from opendbc.car.fca_atlantis.values import CAR, ABS_ADDR, CAMERA_ADDR, EPS_ADDR, match_fw_to_car_fuzzy
 from opendbc.car.fw_versions import match_fw_to_car
 from opendbc.car.structs import CarParams
 
@@ -19,11 +19,11 @@ def fuzzy(live):
 
 def car_fw(versions):
   ecus = {EPS_ADDR: Ecu.eps, ABS_ADDR: Ecu.abs, CAMERA_ADDR: Ecu.fwdCamera}
-  return [CarParams.CarFw(ecu=ecus[addr], fwVersion=v, address=addr[0], subAddress=0, brand='fca_giorgio')
+  return [CarParams.CarFw(ecu=ecus[addr], fwVersion=v, address=addr[0], subAddress=0, brand='fca_atlantis')
           for addr, v in versions.items()]
 
 
-class TestFcaGiorgio:
+class TestFcaAtlantis:
   def test_exact(self):
     exact, matches = match_fw_to_car(car_fw({EPS_ADDR: EPS_2022, ABS_ADDR: ABS_2022, CAMERA_ADDR: CAM_2022}), '')
     assert exact and matches == {CAR.RAM_PROMASTER}

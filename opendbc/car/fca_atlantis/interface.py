@@ -1,8 +1,8 @@
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.fca_giorgio.carcontroller import CarController
-from opendbc.car.fca_giorgio.carstate import CarState
-from opendbc.car.fca_giorgio.values import CAR, CarControllerParams
+from opendbc.car.fca_atlantis.carcontroller import CarController
+from opendbc.car.fca_atlantis.carstate import CarState
+from opendbc.car.fca_atlantis.values import CAR, CarControllerParams
 
 
 class CarInterface(CarInterfaceBase):
@@ -11,12 +11,12 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
-    ret.brand = "fca_giorgio"
+    ret.brand = "fca_atlantis"
     ret.radarUnavailable = True
 
     # Set global parameters
 
-    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.fcaGiorgio)]
+    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.fcaAtlantis)]
 
     # Global lateral tuning defaults, can be overridden per-vehicle
 
