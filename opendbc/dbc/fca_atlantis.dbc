@@ -319,5 +319,5 @@ CM_ SG_ 762 UNKNOWN_1 "always 3";
 CM_ SG_ 762 CHECKSUM "covers the first two bytes only";
 CM_ SG_ 762 UNKNOWN_2 "always 0x0E, not covered by checksum";
 VAL_ 262 LKA_STATUS 0 "standby" 2 "lka_active";
-VAL_ 1449 GEAR 1 "park" 2 "reverse" 3 "neutral" 4 "drive" 6 "drive manual";
+VAL_ 1449 GEAR 1 "park" 2 "reverse" 3 "neutral" 4 "drive" 6 "manual";
 VAL_ 1508 CRUISE_MODE 0 "off" 3 "manual" 2 "acc-available" 4 "acc-enabled" 6 "acc-override";
