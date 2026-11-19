@@ -85,7 +85,19 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RL"],
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RR"],
     )
-    ret.vEgoCluster = ret.vEgo * 1.015  # minimum of all the cars
+
+    # the meter sends its calibration every 5 to 10 seconds, use the 1.015 estimate until then
+    if cp.ts_nanos["MET1S11"]["TOLER_A"] != 0:
+      # SecOC cars don't send SPEED, the meter's input speed
+      if self.CP.flags & ToyotaFlags.SECOC.value:
+        meter_speed = ret.vEgo * CV.MS_TO_KPH
+      else:
+        meter_speed = cp.vl["SPEED"]["SPEED"]
+
+      # the speedometer only rewrites its number once it's a full unit off (Toyota patent US4368426)
+      ret.vEgoCluster = (meter_speed * cp.vl["MET1S11"]["TOLER_A"] + cp.vl["MET1S11"]["TOLER_B"]) * CV.KPH_TO_MS - self.cluster_speed_hyst_gap
+    else:
+      ret.vEgoCluster = ret.vEgo * 1.015  # minimum of all the cars
 
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
 
@@ -205,6 +217,8 @@ class CarState(CarStateBase):
   def get_can_parsers(CP):
     pt_messages = [
       ("BLINKERS_STATE", float('nan')),
+      ("MET1S11", float('nan')),
+      ("SPEED", float('nan')),
     ]
 
     return {
