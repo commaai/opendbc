@@ -22,8 +22,8 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
   FWD_BLACKLISTED_ADDRS = {2: [0x117, 0x1F6, 0x547, 0x5A2]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
-  def _button_msg(self, cancel=False, resume=False):
-    values = {"CANCEL": cancel, "RESUME": resume, "UNKNOWN_1": 3, "UNKNOWN_2": 0x0E}
+  def _button_msg(self, cancel=False, resume=False, **extra):
+    values = {"CANCEL": cancel, "RESUME": resume, "UNKNOWN_1": 3, "UNKNOWN_2": 0x0E, **extra}
     return self.packer.make_can_msg_safety("ACC_BUTTON", 2, values)
 
   def _pcm_status_msg(self, enable):
@@ -184,6 +184,10 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
       self.assertFalse(self._tx(self._button_msg(resume=True)))
       self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
+      # cancel with another button, or a constant bit not as sent by the car, in the second byte
+      self.assertFalse(self._tx(self._button_msg(cancel=True, DIST_PLUS=1)))
+      self.assertFalse(self._tx(self._button_msg(cancel=True, SPEED_LIMITER=1)))
+      self.assertFalse(self._tx(self._button_msg(cancel=True, UNKNOWN_1=2)))
 
   def test_rx_hook(self):
     for count in range(20):
