@@ -36,8 +36,8 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
     return self.packer.make_can_msg_safety("ABS_1", 0, values)
 
   def _user_gas_msg(self, gas):
-   values = {"ACCEL_PEDAL_USER": gas}
-   return self.packer.make_can_msg_safety("ENGINE_2", 0, values)
+    values = {"ACCEL_PEDAL_USER": gas}
+    return self.packer.make_can_msg_safety("ENGINE_2", 0, values)
 
   def _user_brake_msg(self, brake):
     values = {"BRAKE_PEDAL_SWITCH": 1 if brake else 0}
