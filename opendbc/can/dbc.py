@@ -34,7 +34,6 @@ class SignalType:
   SUBARU_CHECKSUM = 7
   CHRYSLER_CHECKSUM = 8
   HKG_CAN_FD_CHECKSUM = 9
-  FCA_GIORGIO_CHECKSUM = 10
   TESLA_CHECKSUM = 11
   PSA_CHECKSUM = 12
   VOLKSWAGEN_MLB_CHECKSUM = 13
@@ -233,11 +232,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.XOR_CHECKSUM, xor_checksum)
   elif dbc_name.startswith("subaru_global_"):
     return ChecksumState(SignalType.SUBARU_CHECKSUM, subaru_checksum)
-  elif dbc_name.startswith("chrysler_"):
-    return ChecksumState(SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
-  elif dbc_name.startswith("fca_giorgio"):
-    return ChecksumState(SignalType.FCA_GIORGIO_CHECKSUM, chrysler_checksum)
-  elif dbc_name.startswith("fca_atlantis"):
+  elif dbc_name.startswith(("chrysler_", "fca_")):
     return ChecksumState(SignalType.CHRYSLER_CHECKSUM, chrysler_checksum)
   elif dbc_name.startswith("comma_body"):
     return ChecksumState(SignalType.BODY_CHECKSUM, body_checksum)
