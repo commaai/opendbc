@@ -40,7 +40,7 @@
 #define SAFETY_VOLKSWAGEN_MLB 25U
 #define SAFETY_CHRYSLER_CUSW 30U
 #define SAFETY_PSA 31U
-#define SAFETY_FCA_GIORGIO 32U
+#define SAFETY_FCA_ATLANTIS 39U
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
 #endif
@@ -343,12 +343,12 @@ typedef struct {
   bool volkswagen_brake_pedal_switch;
   bool volkswagen_brake_pressure_detected;
 
-  // Last LKA_COMMAND allowed by the fca_giorgio tx hook. LKA_COMMAND_2 must mirror it (the EPS can steer from LKA_COMMAND_2 alone).
-  int fca_giorgio_lka_torque_last;
-  bool fca_giorgio_lka_steer_req_last;
-  int fca_giorgio_winddown_torque;  // torque the EPS last received; 0 when winddown isn't possible
-  uint32_t fca_giorgio_ts_lka_last;  // time of the last allowed LKA_COMMAND
-  uint32_t fca_giorgio_ts_controls_last;  // time of the last allowed LKA_COMMAND while controls were allowed
+  // Last LKA_COMMAND allowed by the fca_atlantis tx hook. LKA_COMMAND_2 must mirror it (the EPS can steer from LKA_COMMAND_2 alone).
+  int fca_atlantis_lka_torque_last;
+  bool fca_atlantis_lka_steer_req_last;
+  int fca_atlantis_winddown_torque;  // torque the EPS last received; 0 when winddown isn't possible
+  uint32_t fca_atlantis_ts_lka_last;  // time of the last allowed LKA_COMMAND
+  uint32_t fca_atlantis_ts_controls_last;  // time of the last allowed LKA_COMMAND while controls were allowed
 } SafetyState;
 
 typedef struct {
@@ -422,7 +422,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param);
 
 extern const safety_hooks chrysler_cusw_hooks;
 extern const safety_hooks alloutput_hooks;
-extern const safety_hooks fca_giorgio_hooks;
+extern const safety_hooks fca_atlantis_hooks;
 extern const safety_hooks subaru_preglobal_hooks;
 extern const safety_hooks volkswagen_mlb_hooks;
 extern const safety_hooks volkswagen_pq_hooks;

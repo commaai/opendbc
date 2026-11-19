@@ -3,9 +3,9 @@ import unittest
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 
-class TestFcaGiorgio_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
-  DBC = "fca_giorgio"
-  SAFETY_MODEL = CarParams.SafetyModel.fcaGiorgio
+class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+  DBC = "fca_atlantis"
+  SAFETY_MODEL = CarParams.SafetyModel.fcaAtlantis
 
   RELAY_MALFUNCTION_ADDRS = {0: (0x117, 0x1F6, 0x547, 0x5A2)}
 

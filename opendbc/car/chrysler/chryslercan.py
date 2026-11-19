@@ -73,7 +73,7 @@ def create_cruise_buttons(packer, frame, bus, cancel=False, resume=False):
 
 
 def chrysler_checksum(address: int, sig, d: bytearray) -> int:
-  # covers the bytes preceding the checksum, which is not always the last byte (e.g. fca_giorgio ACC_BUTTON)
+  # covers the bytes preceding the checksum, which is not always the last byte (e.g. fca_atlantis ACC_BUTTON)
   # standard CRC-8 SAE J1850 (poly 0x1D, init 0xFF, final XOR 0xFF)
   crc = 0xFF
   for i in range(sig.msb // 8):

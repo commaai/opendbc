@@ -2,7 +2,7 @@ from typing import NamedTuple
 
 from opendbc.car.chrysler.values import CAR as CHRYSLER
 from opendbc.car.gm.values import CAR as GM
-from opendbc.car.fca_giorgio.values import CAR as FCA_GIORGIO
+from opendbc.car.fca_atlantis.values import CAR as FCA_ATLANTIS
 from opendbc.car.ford.values import CAR as FORD
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.hyundai.values import CAR as HYUNDAI
@@ -364,8 +364,7 @@ routes = [
 
   CarTestRoute("5d61e2f6e1f247f3/00000054--d3dfb01b34", MG.MG_5_EV),
 
-  # CarTestRoute("6a3e5d31bf499cfe/0000000b--a48d1b4e42", FCA_GIORGIO.ALFA_ROMEO_STELVIO_1ST_GEN),
-  CarTestRoute("69cd3a350561a4d8/00000195--aa6ccc4f6e", FCA_GIORGIO.RAM_PROMASTER),
+  CarTestRoute("69cd3a350561a4d8/00000195--aa6ccc4f6e", FCA_ATLANTIS.RAM_PROMASTER),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold
