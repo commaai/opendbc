@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import itertools
 import unittest
 from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
@@ -104,6 +105,9 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
       self.assertFalse(self._tx(self._torque_cmd_msg(sign * 31)))
       for torque in range(27, 0, -3):
         self.assertTrue(self._tx(self._torque_cmd_msg(sign * torque)))
+      # down to the smallest torque, which may also hold
+      for torque in (2, 1, 1):
+        self.assertTrue(self._tx(self._torque_cmd_msg(sign * torque)))
       # winddown ends at zero
       self.assertTrue(self._tx(self._torque_cmd_msg(0)))
       self.assertFalse(self._tx(self._torque_cmd_msg(sign * 3)))
@@ -188,6 +192,18 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
       self.assertFalse(self._tx(self._button_msg(cancel=True, DIST_PLUS=1)))
       self.assertFalse(self._tx(self._button_msg(cancel=True, SPEED_LIMITER=1)))
       self.assertFalse(self._tx(self._button_msg(cancel=True, UNKNOWN_1=2)))
+
+  def test_gas_pressed_smallest_step(self):
+    # ACCEL_PEDAL_USER is 0.4% per bit
+    self._rx(self._user_gas_msg(0.4))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
+  def test_vehicle_moving_any_wheel(self):
+    # moving when any wheel turns, by the smallest step (0.017 m/s per bit)
+    for moving in itertools.product((False, True), repeat=4):
+      values = {f"WHEEL_SPEED_{w}": 0.017 if m else 0 for w, m in zip(("FL", "FR", "RL", "RR"), moving, strict=True)}
+      self._rx(self.packer.make_can_msg_safety("ABS_1", 0, values))
+      self.assertEqual(any(moving), self.safety.get_vehicle_moving(), moving)
 
   def test_rx_hook(self):
     for count in range(20):
