@@ -17,6 +17,8 @@ class CarController(CarControllerBase):
 
     self.use_friction = CP.lateralTuning.which() == 'pid'
     self.apply_torque_last = 0
+    self.torque_cut = 0  # counts removed from the request (plus friction) by the torque limits
+    self.steering = False  # lateral active and the EPS accepting LKA torque
     self.lat_active_last = False
     self.release_hold_frames = 0
     self.button_counter_last = 0
@@ -41,6 +43,7 @@ class CarController(CarControllerBase):
                    np.clip(angle_error / self.CCP.STEER_FRICTION_BAND_DEG, -1., 1.)
         new_torque = int(round(actuators.torque * self.CCP.STEER_MAX + friction))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
+        self.torque_cut = apply_torque - new_torque
       elif CS.lka_status == 2:
         # Stock LKA never cuts torque in one step: it ramps to zero, then holds LKA_ACTIVE at zero torque for a few
         # frames before releasing. An abrupt release with torque applied is suspected of latching EPS LKA_FAULT.
@@ -56,6 +59,7 @@ class CarController(CarControllerBase):
       if not CC.latActive and apply_torque == 0 and self.release_hold_frames > 0:
         self.release_hold_frames -= 1
 
+      self.steering = CC.latActive and CS.lka_status == 2
       self.apply_torque_last = apply_torque
       # The EPS is suspected to listen only to LKA_COMMAND_2 (4x scale). Panda safety requires it to be an exact
       # 4x copy of LKA_COMMAND, sent after it in the same frame.
@@ -80,7 +84,12 @@ class CarController(CarControllerBase):
         can_sends.append(fca_atlantiscan.create_acc_button_control(self.packer_pt, self.CANBUS.cam, CS.button_counter + 1, cancel=True))
 
     new_actuators = actuators.as_builder()
-    new_actuators.torque = self.apply_torque_last / self.CCP.STEER_MAX
+    if self.steering:
+      # Report the request plus only what the limits cut, not the friction term: controlsd sets steer_limited_by_safety
+      # (freezing PID's integrator) when this differs from the request.
+      new_actuators.torque = actuators.torque + self.torque_cut / self.CCP.STEER_MAX
+    else:
+      new_actuators.torque = self.apply_torque_last / self.CCP.STEER_MAX
     new_actuators.torqueOutputCan = self.apply_torque_last
 
     self.frame += 1
