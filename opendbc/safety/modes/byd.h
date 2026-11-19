@@ -77,9 +77,11 @@ static bool byd_tx_hook(const CANPacket_t *msg) {
 
   // Only allow cancel (ACC_ON_BTN) while stock cruise is engaged, or button release.
   if (msg->addr == 0x3B0U) {
-    bool other_buttons = ((msg->data[0] & 0x58U) != 0U) ||  // SET, RES, LKAS_ON
-                         GET_BIT(msg, 15U) ||               // DEC_DISTANCE
-                         GET_BIT(msg, 16U);                 // INC_DISTANCE
+    bool other_buttons = GET_BIT(msg, 3U) ||   // SET
+                         GET_BIT(msg, 4U) ||   // RES
+                         GET_BIT(msg, 6U) ||   // LKAS_ON
+                         GET_BIT(msg, 15U) ||  // DEC_DISTANCE
+                         GET_BIT(msg, 16U);    // INC_DISTANCE
     bool cancel = GET_BIT(msg, 19U);  // ACC_ON_BTN
     tx = !other_buttons && (!cancel || safety.cruise_engaged_prev);
   }
