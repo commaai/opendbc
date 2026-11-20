@@ -32,6 +32,7 @@
 #define SAFETY_HYUNDAI_CANFD 28U
 #define SAFETY_RIVIAN 33U
 #define SAFETY_VOLKSWAGEN_MEB 34U
+#define SAFETY_FCA_ATLANTIS 39U
 
 // Safety modes available only in debug builds
 #ifdef ALLOW_DEBUG
@@ -342,6 +343,17 @@ typedef struct {
   bool volkswagen_resume_button_prev;
   bool volkswagen_brake_pedal_switch;
   bool volkswagen_brake_pressure_detected;
+
+  // fca_atlantis torque winddown: the last LKA_COMMAND torque allowed while engaged and when, and the last allowed since
+  // (0 when there's no winddown)
+  int fca_atlantis_engaged_torque;
+  uint32_t fca_atlantis_ts_engaged;
+  int fca_atlantis_winddown_torque;
+  bool fca_atlantis_in_winddown;  // the last allowed LKA_COMMAND was a winddown frame
+  // fca_atlantis LKA_COMMAND_2: one copy of the last LKA_COMMAND may be sent (the EPS can steer from LKA_COMMAND_2 alone)
+  bool fca_atlantis_lka_2_pending;
+  int fca_atlantis_lka_2_torque;
+  bool fca_atlantis_lka_2_steer_req;
 } SafetyState;
 
 typedef struct {
@@ -415,6 +427,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param);
 
 extern const safety_hooks chrysler_cusw_hooks;
 extern const safety_hooks alloutput_hooks;
+extern const safety_hooks fca_atlantis_hooks;
 extern const safety_hooks subaru_preglobal_hooks;
 extern const safety_hooks volkswagen_mlb_hooks;
 extern const safety_hooks volkswagen_pq_hooks;
