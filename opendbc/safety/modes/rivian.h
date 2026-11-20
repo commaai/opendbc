@@ -152,6 +152,7 @@ static safety_config rivian_init(uint16_t param) {
   static const CanMsg RIVIAN_LONG_TX_MSGS[] = {
     {0x120, 0, 8, .check_relay = true},
     {0x321, 2, 7, .check_relay = true},
+    {0x162, 2, 8, .check_relay = true},
     {0x160, 0, 5, .check_relay = true},
   };
 #endif

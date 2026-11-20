@@ -38,18 +38,18 @@ class CarController(CarControllerBase):
     if self.CP.openpilotLongitudinalControl:
       accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
       can_sends.append(create_longitudinal(self.packer, self.frame, accel, CC.enabled))
-    else:
-      interface_status = None
-      if CC.cruiseControl.cancel:
-        # if there is a noEntry, we need to send a status of "available" before the ACM will accept "unavailable"
-        # send "available" right away as the VDM itself takes a few frames to acknowledge
-        interface_status = 1 if self.cancel_frames < 5 else 0
-        self.cancel_frames += 1
-      else:
-        self.cancel_frames = 0
 
-      for msg in CS.vdm_adas_status:
-        can_sends.append(create_adas_status(self.packer, msg, interface_status))
+    interface_status = None
+    if CC.cruiseControl.cancel:
+      # if there is a noEntry, we need to send a status of "available" before the ACM will accept "unavailable"
+      # send "available" right away as the VDM itself takes a few frames to acknowledge
+      interface_status = 1 if self.cancel_frames < 5 else 0
+      self.cancel_frames += 1
+    else:
+      self.cancel_frames = 0
+
+    for msg in CS.vdm_adas_status:
+      can_sends.append(create_adas_status(self.packer, msg, interface_status))
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = apply_torque / steer_max

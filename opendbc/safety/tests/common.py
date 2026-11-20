@@ -1007,6 +1007,10 @@ class SafetyTest(SafetyTestBase):
             if attr.startswith(volkswagen_shared) and current_test.startswith(volkswagen_shared):
               continue
 
+            # Both Rivian modes send VDM_AdasSts to the stock ACC controller.
+            if {attr, current_test} == {'TestRivianStockSafety', 'TestRivianLongitudinalSafety'}:
+              tx = [m for m in tx if m != [0x162, 2]]
+
             # overlapping TX addrs, but they're not actuating messages for either car
             if attr == 'TestHyundaiCanfdLKASteeringLongEV' and current_test.startswith('TestToyota'):
               tx = list(filter(lambda m: m[0] not in [0x160, ], tx))
