@@ -344,12 +344,16 @@ typedef struct {
   bool volkswagen_brake_pedal_switch;
   bool volkswagen_brake_pressure_detected;
 
-  // Last LKA_COMMAND allowed by the fca_atlantis tx hook. LKA_COMMAND_2 must mirror it (the EPS can steer from LKA_COMMAND_2 alone).
-  int fca_atlantis_lka_torque_last;
-  bool fca_atlantis_lka_steer_req_last;
-  int fca_atlantis_winddown_torque;  // torque the EPS last received; 0 when winddown isn't possible
-  uint32_t fca_atlantis_ts_lka_last;  // time of the last allowed LKA_COMMAND
-  uint32_t fca_atlantis_ts_controls_last;  // time of the last allowed LKA_COMMAND while controls were allowed
+  // fca_atlantis torque winddown: the last LKA_COMMAND torque allowed while engaged and when, and the last allowed since
+  // (0 when there's no winddown)
+  int fca_atlantis_engaged_torque;
+  uint32_t fca_atlantis_ts_engaged;
+  int fca_atlantis_winddown_torque;
+  bool fca_atlantis_in_winddown;  // the last allowed LKA_COMMAND was a winddown frame
+  // fca_atlantis LKA_COMMAND_2: one copy of the last LKA_COMMAND may be sent (the EPS can steer from LKA_COMMAND_2 alone)
+  bool fca_atlantis_lka_2_pending;
+  int fca_atlantis_lka_2_torque;
+  bool fca_atlantis_lka_2_steer_req;
 } SafetyState;
 
 typedef struct {
