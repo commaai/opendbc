@@ -34,19 +34,19 @@ class CarControllerParams:
   EPS_TORQUE_PER_DRIVER_TORQUE = 15.5
   EPS_TORQUE_LAG = 0.04  # s
   STEER_DRIVER_ALLOWANCE = 3
-  # In a held bend the EPS pushes 60-175 into the turn, and the reading follows less of that than EPS_TORQUE_PER_DRIVER_TORQUE
-  # assumes: what is left over looks like the driver turning further in (3-5), and the EPS's own DRIVER_OVERRIDE flag
-  # comes on with it. openpilot let go mid-bend, the wheel sprang back 7-18 deg and the car drifted wide (route
-  # 0000000a, 12:30-12:31, the driver's hand resting on the wheel on the driver camera). While the wheel is in a bend
-  # (OVERRIDE_BEND_MIN_ANGLE), within OVERRIDE_BEND_TRACKING_ERROR of openpilot's angle and the EPS pushes into the turn,
-  # torque in the EPS's own direction counts only as far as the raw reading shows it, and the flag needs the driver's
-  # torque against the EPS too. Replayed on 8 drives: 11 of 218 let-gos removed, the wheel sprang back after every
-  # one of them; none where the wheel stayed where the driver held it. A driver holding the wheel against openpilot
-  # (route 00000010 23:18:35, near straight ahead) makes the wheel fall behind or the EPS push out of the turn, and
-  # keeps the previous rule.
-  OVERRIDE_BEND_MIN_ANGLE = 15.  # deg
-  OVERRIDE_BEND_TRACKING_ERROR = 3.  # deg
-  OVERRIDE_BEND_OPPOSING_TORQUE = 1.
+  # While steering, the EPS often pushes 50-175, and the reading follows less of that than EPS_TORQUE_PER_DRIVER_TORQUE
+  # assumes: what is left over looks like the driver turning with the EPS (3-5), and the EPS's own DRIVER_OVERRIDE flag
+  # comes on with it. openpilot let go, the wheel sprang back 3-94 deg and the car drifted (route 0000000a, 12:30-12:31
+  # in bends, the driver's hand resting on the wheel on the driver camera). So while the wheel follows openpilot's
+  # angle within OVERRIDE_TRACKING_ERROR, torque in the EPS's own direction counts only as far as the raw reading shows
+  # it, and the flag needs the driver's torque against the EPS too. A driver who steers moves the wheel off openpilot's
+  # angle, and from there the previous rule applies: of 218 let-gos on 8 drives, all 101 that came with the wheel
+  # already 3 deg or more off (the driver holding it straight against a 12 deg command at route 00000010 23:18:35
+  # among them) are unchanged. Of the 38 after which the wheel sprang back, 37 no longer happen at that moment.
+  # A model of the EPS torque needed hands-off (from speed, lateral acceleration, angle and rate) did not tell them
+  # apart: at every kind of let-go the EPS was 60-70 above it.
+  OVERRIDE_TRACKING_ERROR = 3.  # deg
+  OVERRIDE_OPPOSING_TORQUE = 1.
   # Largest gap (deg) between openpilot's angle and the wheel's at which it takes the wheel back. It stops the case it was
   # made for: at walking pace the driver let go with the wheel at +308 deg and the model at +24, and the EPS swung it to
   # -203 deg. 10 deg was too tight: right after the driver lets go in a bend the gap is 11-27 deg, and on route 26b

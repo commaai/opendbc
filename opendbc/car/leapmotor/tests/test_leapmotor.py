@@ -312,10 +312,10 @@ class TestLeapmotorCan(unittest.TestCase):
     CC.longActive = True
     self.assertIsNone(CarController(DBC_NAMES, CP).long_accel(CC, {"ACC_STATE": 3, "ACC_ACCEL_REQ": -1.0}))
 
-  def test_override_in_a_held_bend(self):
+  def test_override_while_the_wheel_follows(self):
     # route 0000000a 12:31:42.9, left bend at 33 km/h, the driver's hand resting on the wheel: the EPS holds about 130 into
     # the turn, the reading follows less of it than assumed and the EPS sets its own flag. The previous rule let go and
-    # the wheel sprang back 14 deg; the bend rule keeps steering. A driver turning against the EPS still counts.
+    # the wheel sprang back 14 deg; the tracking rule keeps steering. A driver turning against the EPS still counts.
     from opendbc.car.leapmotor.carstate import CarState
     from opendbc.car.leapmotor.interface import CarInterface
 
@@ -335,37 +335,36 @@ class TestLeapmotorCan(unittest.TestCase):
     hands_off = [(-4, 120, 0)] * 40 + [(-5, 133, 0)] * 3 + [(-3, 133, 1)] * 3
     CS = run(hands_off)
     self.assertTrue(CS.driver_override)
-    self.assertFalse(CS.driver_override_in_bend)
-    self.assertTrue(CS.eps_pushes_into_bend)
-    self.assertFalse(run(hands_off, angle=41.).eps_pushes_into_bend)  # pushing out of the turn: the previous rule
+    self.assertFalse(CS.driver_override_tracking)
     # the driver straightens the wheel against the EPS: the reading goes well past the EPS's share
     CS = run([(-4, 120, 0)] * 40 + [(-16, 133, 1)] * 8)
     self.assertTrue(CS.driver_override)
-    self.assertTrue(CS.driver_override_in_bend)
+    self.assertTrue(CS.driver_override_tracking)
 
-  def test_bend_rule_only_while_the_wheel_follows(self):
+  def test_tracking_rule_only_while_the_wheel_follows(self):
     from types import SimpleNamespace
     from opendbc.car import structs as car_structs
     from opendbc.car.leapmotor.carcontroller import CarController as Controller, get_safety_CP as safety_CP
     from opendbc.car.leapmotor.values import DBC as CAR_DBC
 
-    def steering(wheel, into_bend=True):
+    def steering(wheel, command=-43.):
       controller = Controller(CAR_DBC["LEAPMOTOR_B10"], safety_CP())
       CC = car_structs.CarControl()
       CC.latActive = True
-      CC.actuators.steeringAngleDeg = -43.
-      CS = SimpleNamespace(driver_override=False, driver_override_in_bend=False, eps_pushes_into_bend=into_bend, adas_lka=None,
+      CC.actuators.steeringAngleDeg = command
+      CS = SimpleNamespace(driver_override=False, driver_override_tracking=False, adas_lka=None,
                            powertrain_state=None, out=SimpleNamespace(steeringAngleDeg=-43., vEgoRaw=33 / 3.6, steeringTorqueEps=130))
-      controller.lat_active_last, controller.apply_angle_last = True, -43.  # steering, the wheel following
+      controller.lat_active_last, controller.apply_angle_last = True, command  # steering, the wheel following
       CS.driver_override = True
       CS.out.steeringAngleDeg = wheel
       controller.update(CC.as_reader(), CS, 0)
       return controller.lat_active_last
 
-    self.assertTrue(steering(-41.))  # follows within 3 deg: the bend rule, which sees no driver
-    self.assertFalse(steering(-41., into_bend=False))
+    self.assertTrue(steering(-41.))  # follows within 3 deg: the tracking rule, which sees no driver
+    self.assertTrue(steering(1., command=2.))  # also near straight ahead
     self.assertFalse(steering(-36.))  # held 7 deg short: the previous rule lets go
-    self.assertFalse(steering(-10.))  # near straight ahead: the previous rule
+    self.assertFalse(steering(3., command=12.))  # held straight against a 12 deg command (route 00000010 23:18:35)
+
 
 if __name__ == "__main__":
   unittest.main()
