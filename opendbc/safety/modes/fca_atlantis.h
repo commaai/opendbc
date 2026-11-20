@@ -16,10 +16,12 @@
 #define FCA_ATLANTIS_ACC_BUTTON      0x2FAU
 
 // Torque winddown after controls are lost (e.g. brake press). Cutting torque to zero in one frame is suspected of
-// latching EPS LKA_FAULT, and stock LKA always ramps down. After a disengage, allow torque that never grows in
-// magnitude or changes sign, with LKA_ACTIVE set, for a limited time. Like volkswagen_meb's steer power winddown.
-#define FCA_ATLANTIS_WINDDOWN_MAX_US 1500000U  // STEER_MAX at 3/frame takes 1 s
-#define FCA_ATLANTIS_WINDDOWN_MAX_GAP_US 50000U  // longest gap since the last allowed frame (blocked frames don't count)
+// latching EPS LKA_FAULT, and stock LKA always ramps down. After a disengage, allow torque with LKA_ACTIVE set that
+// never grows in magnitude or changes sign, and stays under a limit that falls at FCA_ATLANTIS_MAX_RATE_DOWN per
+// frame from the last torque allowed while engaged. The limit depends only on time, so it ends by itself.
+#define FCA_ATLANTIS_MAX_RATE_DOWN 3
+#define FCA_ATLANTIS_FRAME_US 10000U  // LKA_COMMAND is sent at 100 Hz
+#define FCA_ATLANTIS_WINDDOWN_SLACK_FRAMES 5  // frames of delay tolerated before the limit starts falling
 
 static safety_config fca_atlantis_init(uint16_t param) {
   SAFETY_UNUSED(param);
@@ -90,14 +92,22 @@ static void fca_atlantis_rx_hook(const CANPacket_t *msg) {
   }
 }
 
+// Winddown torque limit at time ts: falls from the last torque allowed while engaged, and reaches zero by itself
+static int fca_atlantis_winddown_limit(uint32_t ts) {
+  uint32_t frames = safety_get_ts_elapsed(ts, safety.fca_atlantis_ts_engaged) / FCA_ATLANTIS_FRAME_US;
+  int engaged = safety_max_int(safety.fca_atlantis_engaged_torque, -safety.fca_atlantis_engaged_torque);
+  int limit = engaged - (FCA_ATLANTIS_MAX_RATE_DOWN * ((int)frames - FCA_ATLANTIS_WINDDOWN_SLACK_FRAMES));
+  return safety_max_int(safety_min_int(limit, engaged), 0);
+}
+
 static bool fca_atlantis_winddown_allowed(int desired_torque, bool steer_req, uint32_t ts) {
-  bool allowed = !safety.controls_allowed && steer_req && (desired_torque != 0) && (safety.fca_atlantis_winddown_torque != 0);
-  // same sign, magnitude not growing
-  allowed = allowed && ((desired_torque > 0) == (safety.fca_atlantis_winddown_torque > 0));
-  allowed = allowed && (safety_max_int(desired_torque, -desired_torque) <=
-                        safety_max_int(safety.fca_atlantis_winddown_torque, -safety.fca_atlantis_winddown_torque));
-  allowed = allowed && (safety_get_ts_elapsed(ts, safety.fca_atlantis_ts_lka_last) <= FCA_ATLANTIS_WINDDOWN_MAX_GAP_US);
-  allowed = allowed && (safety_get_ts_elapsed(ts, safety.fca_atlantis_ts_controls_last) <= FCA_ATLANTIS_WINDDOWN_MAX_US);
+  int last = safety.fca_atlantis_winddown_torque;
+  bool allowed = !safety.controls_allowed && steer_req && (desired_torque != 0) && (last != 0);
+  // same sign, magnitude not growing, and under the falling limit
+  allowed = allowed && ((desired_torque > 0) == (last > 0));
+  allowed = allowed && (safety_max_int(desired_torque, -desired_torque) <= safety_max_int(last, -last));
+  int limit = fca_atlantis_winddown_limit(ts);
+  allowed = allowed && !safety_max_limit_check(desired_torque, limit, -limit);
   return allowed;
 }
 
@@ -107,7 +117,7 @@ static bool fca_atlantis_tx_hook(const CANPacket_t *msg) {
     .max_torque = 300,
     .max_rt_delta = 112,
     .max_rate_up = 3,
-    .max_rate_down = 3,
+    .max_rate_down = FCA_ATLANTIS_MAX_RATE_DOWN,
     .driver_torque_allowance = 80,
     .driver_torque_multiplier = 2,
     // use TorqueMotorLimited if we can find EPS torque or some EPS limit signal?
@@ -127,44 +137,60 @@ static bool fca_atlantis_tx_hook(const CANPacket_t *msg) {
     bool allowed;
     if (fca_atlantis_winddown_allowed(desired_torque, steer_req, ts)) {
       allowed = true;
-      // re-engaging mid-winddown continues the rate limits from here
-      safety.desired_torque_last = desired_torque;
+      safety.fca_atlantis_winddown_torque = desired_torque;
+      safety.fca_atlantis_in_winddown = true;
     } else {
+      if (safety.controls_allowed && safety.fca_atlantis_in_winddown) {
+        // Re-engaging mid-winddown: the rate limits continue from the last winddown torque. The falling limit caps
+        // it, so this can't carry torque over from a winddown that has already ended.
+        int limit = fca_atlantis_winddown_limit(ts);
+        int seed = safety_max_int(safety_min_int(safety.fca_atlantis_winddown_torque, limit), -limit);
+        safety.desired_torque_last = seed;
+        safety.rt_torque_last = seed;
+        safety.ts_torque_check_last = ts;
+      }
+      safety.fca_atlantis_in_winddown = false;
+
       allowed = !steer_torque_cmd_checks(desired_torque, steer_req, FCA_ATLANTIS_STEERING_LIMITS);
-      if (!allowed && safety.controls_allowed) {
-        // no winddown after a violation; a frame blocked after controls are lost (e.g. one openpilot sent before
-        // it saw the brake) doesn't end the winddown
-        safety.fca_atlantis_winddown_torque = 0;
+      if (safety.controls_allowed) {
+        // the winddown starts from the last torque allowed while engaged; none after a violation
+        safety.fca_atlantis_engaged_torque = allowed ? desired_torque : 0;
+        safety.fca_atlantis_winddown_torque = safety.fca_atlantis_engaged_torque;
+        safety.fca_atlantis_ts_engaged = ts;
+      } else {
+        // an allowed frame outside the winddown (zero torque) ends it. A blocked frame (e.g. one openpilot sent
+        // before it saw the brake) doesn't.
+        if (allowed) {
+          safety.fca_atlantis_winddown_torque = 0;
+        }
       }
     }
 
-    if (allowed) {
-      safety.fca_atlantis_lka_torque_last = desired_torque;
-      safety.fca_atlantis_lka_steer_req_last = steer_req;
-      safety.fca_atlantis_winddown_torque = desired_torque;
-      safety.fca_atlantis_ts_lka_last = ts;
-      if (safety.controls_allowed) {
-        safety.fca_atlantis_ts_controls_last = ts;
-      }
-    } else {
+    // LKA_COMMAND_2 may carry one copy of this frame. After a blocked frame, only zero torque.
+    safety.fca_atlantis_lka_2_pending = true;
+    safety.fca_atlantis_lka_2_torque = allowed ? desired_torque : 0;
+    safety.fca_atlantis_lka_2_steer_req = allowed && steer_req;
+    if (!allowed) {
       tx = false;
-      safety.fca_atlantis_lka_torque_last = 0;
-      safety.fca_atlantis_lka_steer_req_last = false;
     }
   }
 
   // LKA_COMMAND_2 is a 4x scaled copy of LKA_COMMAND. The EPS is suspected to listen only to LKA_COMMAND_2: it
   // engaged and steered with LKA_COMMAND_2 alone, and stock sends LKA_COMMAND one frame later as a rounded copy
   // of LKA_COMMAND_2 / 4, so the two aren't exact 4x matches in stock routes. Rather than running the
-  // shared torque rate-limit state twice per frame, only allow an exact copy of the last allowed LKA_COMMAND
-  // (which openpilot sends first each frame). After a blocked LKA_COMMAND, only zero torque is allowed.
+  // shared torque rate-limit state twice per frame, allow one exact copy of each LKA_COMMAND (which openpilot
+  // sends first each frame), so LKA_COMMAND_2 can't keep steering after LKA_COMMAND stops.
   if (msg->addr == FCA_ATLANTIS_LKA_COMMAND_2) {
     // Signal: LKA_COMMAND_2.LKA_TORQUE
     int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 4, 2048);
     // Signal: LKA_COMMAND_2.LKA_ACTIVE
     bool steer_req = GET_BIT(msg, 11U);
 
-    if ((desired_torque != (safety.fca_atlantis_lka_torque_last * 4)) || (steer_req != safety.fca_atlantis_lka_steer_req_last)) {
+    bool is_copy = safety.fca_atlantis_lka_2_pending && (desired_torque == (safety.fca_atlantis_lka_2_torque * 4)) &&
+                   (steer_req == safety.fca_atlantis_lka_2_steer_req);
+    if (is_copy) {
+      safety.fca_atlantis_lka_2_pending = false;
+    } else {
       tx = false;
     }
   }
