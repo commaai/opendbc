@@ -18,6 +18,7 @@ from opendbc.car.body.values import CAR as COMMA
 from opendbc.car.byd.values import CAR as BYD
 from opendbc.car.psa.values import CAR as PSA
 from opendbc.car.mg.values import CAR as MG
+from opendbc.car.leapmotor.values import CAR as LEAPMOTOR
 
 # FIXME: add routes for these cars
 non_tested_cars = [
@@ -362,6 +363,8 @@ routes = [
   CarTestRoute("aebd8f1d4ea16066/000002d8--5850d3ea5c", TESLA.TESLA_MODEL_Y), # openpilot longitudinal
 
   CarTestRoute("5d61e2f6e1f247f3/00000054--d3dfb01b34", MG.MG_5_EV),
+
+  CarTestRoute("8ae32b57e2f9d13c/0000025f--a58bd2c2f5", LEAPMOTOR.LEAPMOTOR_B10),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold

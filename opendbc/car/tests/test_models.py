@@ -35,6 +35,7 @@ ANGLE_DEG_TO_CAN = {
   "toyota": 17.452007,
   "nissan": 100,
   "psa": 10,
+  "leapmotor": 50,
 }
 
 NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))

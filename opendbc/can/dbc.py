@@ -21,6 +21,7 @@ from opendbc.car.psa.psacan import psa_checksum
 from opendbc.car.rivian.riviancan import rivian_checksum
 from opendbc.car.ford.fordcan import FORD_CHECKSUM_FIELDS, ford_checksum
 from opendbc.car.mg.mgcan import mg_checksum
+from opendbc.car.leapmotor.leapmotorcan import leapmotor_checksum
 
 
 class SignalType:
@@ -241,6 +242,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.BODY_CHECKSUM, body_checksum)
   elif dbc_name.startswith("tesla_model3_party"):
     return ChecksumState(SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
+  elif dbc_name.startswith("leapmotor_"):
+    return ChecksumState(SignalType.VOLKSWAGEN_MQB_MEB_CHECKSUM, leapmotor_checksum)
   elif dbc_name.startswith("psa_"):
     return ChecksumState(SignalType.PSA_CHECKSUM, psa_checksum)
   elif dbc_name.startswith("byd_"):
