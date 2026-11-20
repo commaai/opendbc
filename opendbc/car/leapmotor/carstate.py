@@ -18,11 +18,10 @@ class CarState(CarStateBase):
     self.lka_received_seen = False
     self.driver_override_frames = 0
     self.driver_override = False
-    # the override in a held bend, used by the controller while the wheel follows it (see OVERRIDE_BEND_MIN_ANGLE)
-    self.bend_pressed_cnt = 0
-    self.bend_override_frames = 0
-    self.driver_override_in_bend = False
-    self.eps_pushes_into_bend = False
+    # the override used by the controller while the wheel follows openpilot's angle (see OVERRIDE_TRACKING_ERROR)
+    self.tracking_pressed_cnt = 0
+    self.tracking_override_frames = 0
+    self.driver_override_tracking = False
     # the EPS's own effort as it shows up in the driver-torque reading, which lags it (see EPS_TORQUE_LAG)
     self.eps_torque_lagged = FirstOrderFilter(0., CarControllerParams.EPS_TORQUE_LAG, DT_CTRL)
     self.powertrain_state: dict | None = None
@@ -70,17 +69,15 @@ class CarState(CarStateBase):
     # every 0.7 s (41 times in 14 min). The flag alone is not enough: above 118 km/h it is always set, and at walking
     # pace it stayed off while openpilot pulled the wheel from +324 to -203 deg through the driver's hands.
     self.driver_override = self.driver_override_frames >= 2 or torque_pressed
-    # In a held bend the share estimate overshoots, so there it only removes torque, and the flag needs torque against
-    # the EPS as well (see CarControllerParams.OVERRIDE_BEND_MIN_ANGLE); the controller picks this while the wheel follows
-    bend_torque = ret.steeringTorque if ret.steeringTorque * eps_share <= 0 else \
-                  (driver_torque_raw if driver_torque_raw * eps_share > 0 else 0.)
-    self.bend_pressed_cnt = int(np.clip(self.bend_pressed_cnt + (1 if abs(bend_torque) > CarControllerParams.STEER_DRIVER_ALLOWANCE else -1),
-                                        0, 11))
-    opposing = bend_torque * eps_share < 0 and abs(bend_torque) >= CarControllerParams.OVERRIDE_BEND_OPPOSING_TORQUE
-    self.bend_override_frames = self.bend_override_frames + 1 if eps_override and opposing else 0
-    self.driver_override_in_bend = self.bend_override_frames >= 2 or self.bend_pressed_cnt > 5
-    # the EPS's share and the angle have opposite signs while it holds the wheel into the turn
-    self.eps_pushes_into_bend = eps_share * ret.steeringAngleDeg < 0
+    # While the wheel follows openpilot the share estimate overshoots, so there it only removes torque, and the flag
+    # needs torque against the EPS as well (see CarControllerParams.OVERRIDE_TRACKING_ERROR)
+    tracking_torque = ret.steeringTorque if ret.steeringTorque * eps_share <= 0 else \
+                      (driver_torque_raw if driver_torque_raw * eps_share > 0 else 0.)
+    pressed = abs(tracking_torque) > CarControllerParams.STEER_DRIVER_ALLOWANCE
+    self.tracking_pressed_cnt = int(np.clip(self.tracking_pressed_cnt + (1 if pressed else -1), 0, 11))
+    opposing = tracking_torque * eps_share < 0 and abs(tracking_torque) >= CarControllerParams.OVERRIDE_OPPOSING_TORQUE
+    self.tracking_override_frames = self.tracking_override_frames + 1 if eps_override and opposing else 0
+    self.driver_override_tracking = self.tracking_override_frames >= 2 or self.tracking_pressed_cnt > 5
     # The EPS reports whether it receives ADAS_LKA (0x83): losing it after it was received means our steering frame is
     # missing or rejected (camera-unplug test). Not set before the camera's first frame after ignition.
     lka_received = bool(cp.vl['EPS_STEERING']['ADAS_LKA_RECEIVED'])
