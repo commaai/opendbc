@@ -64,7 +64,11 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     can_sends = []
     # like the stock LCC, let go while the driver steers (the EPS flags it), then ramp back in
-    lat_active = CC.latActive and not CS.driver_override
+    # (in a held bend that the wheel follows, with the bend rule: see CarControllerParams.OVERRIDE_BEND_MIN_ANGLE)
+    in_bend = (self.lat_active_last and CS.eps_pushes_into_bend and
+               abs(CS.out.steeringAngleDeg) >= CarControllerParams.OVERRIDE_BEND_MIN_ANGLE and
+               abs(self.apply_angle_last - CS.out.steeringAngleDeg) < CarControllerParams.OVERRIDE_BEND_TRACKING_ERROR)
+    lat_active = CC.latActive and not (CS.driver_override_in_bend if in_bend else CS.driver_override)
     # take the wheel back only once it is near the angle openpilot wants: after the driver let go mid-turn at walking
     # pace with the wheel at +308 deg and the model at +24, the EPS swung it to -203 deg in 3 s
     if lat_active and not self.lat_active_last:
