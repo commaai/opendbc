@@ -78,6 +78,8 @@
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0f
 #define MAX_RT_INTERVAL 250000U
+// openpilot's TX made before it got the RX frame that restricts it, the panda judges it by the state before
+#define MAX_HOST_REACTION 20000U
 
 // Conversions
 #define KPH_TO_MS (1.0f / 3.6f)
@@ -282,10 +284,9 @@ typedef struct {
   bool relay_malfunction;
   bool gas_pressed;
   bool gas_pressed_prev;
-  // when gas was last pressed, controls and cruise last ended
-  uint32_t gas_press_ts;
-  uint32_t controls_exit_ts;
-  uint32_t cruise_exit_ts;
+  uint32_t ts_gas_pressed_last;
+  uint32_t ts_controls_exit_last;
+  uint32_t ts_cruise_exit_last;
   bool brake_pressed;
   bool brake_pressed_prev;
   bool regen_braking;

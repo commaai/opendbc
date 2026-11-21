@@ -212,7 +212,7 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
 
     for enabled in (True, False):
       self._rx(self._pcm_status_msg(enabled))
-      self._end_exit_grace()
+      self._after_host_reaction()
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
 
 

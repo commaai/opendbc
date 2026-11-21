@@ -197,13 +197,13 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
 
   if (!valid) {
     // an invalid message ends controls right away
-    safety.controls_exit_ts = safety_ts - EXIT_GRACE;
+    safety.ts_controls_exit_last = safety_ts - MAX_HOST_REACTION;
   } else if (controls_allowed_prev && !safety.controls_allowed) {
-    safety.controls_exit_ts = safety_ts;
+    safety.ts_controls_exit_last = safety_ts;
   } else {
   }
   if (cruise_engaged_prev && !safety.cruise_engaged_prev) {
-    safety.cruise_exit_ts = safety_ts;
+    safety.ts_cruise_exit_last = safety_ts;
   }
 
   // the relay malfunction hook runs on all incoming rx messages.
@@ -237,11 +237,11 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
 }
 
 static bool get_controls_allowed_tx(void) {
-  return safety.controls_allowed || in_exit_grace(safety.controls_exit_ts);
+  return safety.controls_allowed || (safety_get_ts_elapsed(safety_ts, safety.ts_controls_exit_last) < MAX_HOST_REACTION);
 }
 
 static bool get_cruise_engaged_tx(void) {
-  return safety.cruise_engaged_prev || in_exit_grace(safety.cruise_exit_ts);
+  return safety.cruise_engaged_prev || (safety_get_ts_elapsed(safety_ts, safety.ts_cruise_exit_last) < MAX_HOST_REACTION);
 }
 
 static bool tx_hook_copy(CANPacket_t *msg) {
@@ -250,7 +250,7 @@ static bool tx_hook_copy(CANPacket_t *msg) {
     whitelisted = true;
   }
 
-  // the host may have made this before it got the frame that ended controls or cruise.
+  // openpilot may have made this before it got the frame that ended controls or cruise.
   // the RX hook must not run in between, the panda gives the CAN and host interrupts one priority
   bool controls_allowed = safety.controls_allowed;
   bool cruise_engaged = safety.cruise_engaged_prev;
@@ -321,9 +321,16 @@ static void tick_copy(void) {
 
   safety.safety_rx_checks_invalid = rx_checks_invalid;
 
-  exit_grace_expire(&safety.gas_press_ts);
-  exit_grace_expire(&safety.controls_exit_ts);
-  exit_grace_expire(&safety.cruise_exit_ts);
+  // the timer wraps, keep old ones old
+  if (safety_get_ts_elapsed(ts, safety.ts_gas_pressed_last) > MAX_HOST_REACTION) {
+    safety.ts_gas_pressed_last = ts - MAX_HOST_REACTION;
+  }
+  if (safety_get_ts_elapsed(ts, safety.ts_controls_exit_last) > MAX_HOST_REACTION) {
+    safety.ts_controls_exit_last = ts - MAX_HOST_REACTION;
+  }
+  if (safety_get_ts_elapsed(ts, safety.ts_cruise_exit_last) > MAX_HOST_REACTION) {
+    safety.ts_cruise_exit_last = ts - MAX_HOST_REACTION;
+  }
 }
 
 static void heartbeat_check_copy(void) {
@@ -352,7 +359,7 @@ static void disengage_on_press(bool pressed, bool *pressed_prev, bool while_held
 
 static void generic_rx_checks(void) {
   if (safety.gas_pressed && !safety.gas_pressed_prev) {
-    safety.gas_press_ts = safety_ts;
+    safety.ts_gas_pressed_last = safety_ts;
   }
   safety.gas_pressed_prev = safety.gas_pressed;
   // brake and regen also exit controls while held and moving
@@ -408,14 +415,14 @@ static const safety_hook_config safety_hook_registry[] = {
 
 static int set_hooks_copy(uint16_t mode, uint16_t param) {
   // reset state set by safety mode
-  // no grace for what happened before this mode, the same for both copies
-  const uint32_t expired = safety_ts - EXIT_GRACE;
+  // nothing from before this mode, the same in both copies
+  const uint32_t expired = safety_ts - MAX_HOST_REACTION;
   safety = (SafetyState){
     .heartbeat_engaged = safety.heartbeat_engaged,
     .heartbeat_engaged_mismatches = safety.heartbeat_engaged_mismatches,
-    .gas_press_ts = expired,
-    .controls_exit_ts = expired,
-    .cruise_exit_ts = expired,
+    .ts_gas_pressed_last = expired,
+    .ts_controls_exit_last = expired,
+    .ts_cruise_exit_last = expired,
   };
 
   safety_config cfg = {0};

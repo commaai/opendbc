@@ -3,22 +3,9 @@
 
 #include "opendbc/safety/declarations.h"
 
-// the host sends what it made before it got the RX frame that restricts it, up to 20 ms after the panda got it
-#define EXIT_GRACE 20000U  // us
-
-static bool in_exit_grace(uint32_t ts) {
-  return safety_get_ts_elapsed(safety_ts, ts) < EXIT_GRACE;
-}
-
-static void exit_grace_expire(uint32_t *ts) {
-  // keep an expired grace expired, the timer wraps
-  if (safety_get_ts_elapsed(safety_ts, *ts) > EXIT_GRACE) {
-    *ts = safety_ts - EXIT_GRACE;
-  }
-}
-
 bool get_longitudinal_allowed(void) {
-  return safety.controls_allowed && (!safety.gas_pressed_prev || in_exit_grace(safety.gas_press_ts));
+  bool gas_reacted = safety_get_ts_elapsed(safety_ts, safety.ts_gas_pressed_last) >= MAX_HOST_REACTION;
+  return safety.controls_allowed && !(safety.gas_pressed_prev && gas_reacted);
 }
 
 // Safety checks for longitudinal actuation

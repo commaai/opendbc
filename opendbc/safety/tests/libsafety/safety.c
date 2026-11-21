@@ -56,9 +56,9 @@ void set_rx_checks_received(int stale, uint32_t age) {
 
 void set_controls_allowed(bool c){
   SAFETY_SET(controls_allowed, c);
-  // a test that ends controls itself means no grace
+  // a test ending controls itself means openpilot already reacted
   if (!c) {
-    SAFETY_SET(controls_exit_ts, safety_ts - EXIT_GRACE);
+    SAFETY_SET(ts_controls_exit_last, safety_ts - MAX_HOST_REACTION);
   }
 }
 

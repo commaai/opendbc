@@ -114,8 +114,8 @@ class SafetyTestBase(unittest.TestCase):
   def _rx(self, msg):
     return self.safety.safety_rx_hook(msg)
 
-  def _end_exit_grace(self):
-    # the panda lets the host's frames through for 20 ms after it restricted the host
+  def _after_host_reaction(self):
+    # past MAX_HOST_REACTION, the panda judges openpilot's TX by the state after the restricting RX
     self.safety.set_timer(self.safety.microsecond_timer_get() + 20000)
 
   def _tx(self, msg):
@@ -1122,7 +1122,7 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._user_gas_msg(0))
     self.safety.set_controls_allowed(True)
     self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
-    self._end_exit_grace()
+    self._after_host_reaction()
     self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
     # Test we allow lateral, but not longitudinal
     self.assertTrue(self.safety.get_controls_allowed())
@@ -1131,13 +1131,16 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._user_gas_msg(0))
     self.assertTrue(self.safety.get_longitudinal_allowed())
 
-  def _assert_expired_across_timer_wrap(self, rx, allowed):
-    # the grace from 1000 us stays expired once the timer wraps
+  def _assert_expired_across_timer_wrap(self, rx, allowed, controls_allowed=False):
+    # an exit at 1000 us stays old once the timer wraps
     self.safety.set_timer(1000 + 20001)
     self.safety.safety_tick()
     for t in (1000 + 40001, 1000):
       self.safety.set_timer(t)
       rx()
+      if controls_allowed:
+        # the tick's rx checks ended controls after the timer jump
+        self.safety.set_controls_allowed(True)
       self.assertFalse(allowed())
 
   def test_controls_grace_after_brake_press(self):
@@ -1164,7 +1167,8 @@ class CarSafetyTest(SafetyTest):
       self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
       self.assertEqual(allowed, self.safety.get_longitudinal_allowed())
 
-    self._assert_expired_across_timer_wrap(lambda: self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1)), self.safety.get_longitudinal_allowed)
+    self._assert_expired_across_timer_wrap(lambda: self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1)), self.safety.get_longitudinal_allowed,
+                                           controls_allowed=True)
 
   def test_prev_user_brake(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:
