@@ -18,6 +18,7 @@ MSG_Lane_Assist_Data1 = 0x3CA      # TX by OP, Lane Keep Assist
 MSG_LateralMotionControl = 0x3D3   # TX by OP, Lateral Control message
 MSG_LateralMotionControl2 = 0x3D6  # TX by OP, alternate Lateral Control message
 MSG_IPMA_Data = 0x3D8              # TX by OP, IPMA and LKAS user interface
+MSG_BodyInfo_3_FD1 = 0x3B3         # RX from GWM, for CAN ignition on 16-byte (2026 F-150) cars
 
 
 class Buttons:
@@ -526,6 +527,36 @@ class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
 
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
                                MSG_IPMA_Data]}
+
+
+# BodyInfo_3_FD1->Ignition_Status: 0=Unknown, 1=Off, 2=Accessory, 4=Run, 8=Start, 15=Invalid
+class TestFordIgnition(common.SafetyTestBase):
+  SAFETY_MODEL = None
+
+  def _ign_msg(self, ignition_status, bus=0, length=16):
+    # 2026 F-150 frames are 16 bytes, with the DBC payload in bytes 0-7
+    dat = bytearray(length)
+    dat[0] = ignition_status << 4
+    return common.make_msg(bus, MSG_BodyInfo_3_FD1, dat=bytes(dat))
+
+  def test_ignition_on(self):
+    for ignition_status in (4, 8):
+      self.safety.init_tests()
+      self.safety.ignition_can_hook(self._ign_msg(ignition_status))
+      self.assertTrue(self.safety.get_ignition_can())
+
+  def test_ignition_off(self):
+    for ignition_status in (0, 1, 2, 15):
+      self.safety.ignition_can_hook(self._ign_msg(4))
+      self.assertTrue(self.safety.get_ignition_can())
+      self.safety.ignition_can_hook(self._ign_msg(ignition_status))
+      self.assertFalse(self.safety.get_ignition_can())
+
+  def test_ignition_ignored(self):
+    # only the 16-byte frame on the car's bus: 8-byte Fords have the harness ignition line, and other makes use 0x3B3 at 8 bytes
+    for bus, length in ((0, 8), (1, 16), (2, 16)):
+      self.safety.ignition_can_hook(self._ign_msg(4, bus, length))
+      self.assertFalse(self.safety.get_ignition_can())
 
 
 if __name__ == "__main__":

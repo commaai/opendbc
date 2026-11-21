@@ -100,6 +100,14 @@ void ignition_can_hook(const CANPacket_t *msg) {
     }
     prev_counter_psa[msg->bus] = counter;
   }
+
+  // Ford exception, 2026 F-150 sends a 16-byte frame with the DBC payload in bytes 0-7
+  if (msg_matches(msg, 0x3B3U, 0U, 16U)) {
+    // BodyInfo_3_FD1->Ignition_Status (1=Off, 2=Accessory, 4=Run, 8=Start)
+    uint8_t ignition_status = msg->data[0] >> 4U;
+    ignition_can = (ignition_status == 4U) || (ignition_status == 8U);
+    ignition_can_cnt = 0U;
+  }
 }
 
 #endif  // SAFETY_IGNITION_H
