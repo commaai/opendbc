@@ -42,6 +42,7 @@ class CarControllerParams:
 class FordSafetyFlags(IntFlag):
   LONG_CONTROL = 1
   CANFD = 2
+  TRON = 4
 
 
 class FordFlags(IntFlag):
@@ -50,6 +51,7 @@ class FordFlags(IntFlag):
 
   # Static flags
   CANFD = 1
+  TRON = 4  # 16 byte messages
 
 
 class RADAR:
@@ -153,6 +155,12 @@ class CAR(Platforms):
   FORD_F_150_MK14 = FordCANFDPlatformConfig(
     [FordCarDocs("Ford F-150 2021-23", "Co-Pilot360 Assist 2.0", hybrid=True)],
     CarSpecs(wheelbase=3.69, steerRatio=17.0),
+  )
+  FORD_F_150_MK14_5 = FordCANFDPlatformConfig(
+    [FordCarDocs("Ford F-150 2026", "Co-Pilot360 Assist 2.0")],
+    FORD_F_150_MK14.specs,
+    {Bus.pt: 'ford_lincoln_base_pt_tron_generated'},
+    flags=FordFlags.TRON,
   )
   FORD_F_150_LIGHTNING_MK1 = FordF150LightningPlatform(
     [FordCarDocs("Ford F-150 Lightning 2022-23", "Co-Pilot360 Assist 2.0")],

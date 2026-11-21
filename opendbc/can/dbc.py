@@ -245,7 +245,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
     return ChecksumState(SignalType.PSA_CHECKSUM, psa_checksum)
   elif dbc_name.startswith("byd_"):
     return ChecksumState(SignalType.BYD_CHECKSUM, byd_checksum)
-  elif dbc_name == "ford_lincoln_base_pt":
+  elif dbc_name.startswith("ford_lincoln_base_pt"):
     # Other _Cs fields are optional or use model-specific checksum algorithms.
     return ChecksumState(SignalType.FORD_CHECKSUM, ford_checksum, ford_setup_signal, checksum_pattern=r"_Cs$",
                          checksum_fields=FORD_CHECKSUM_FIELDS)

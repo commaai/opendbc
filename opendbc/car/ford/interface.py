@@ -51,17 +51,25 @@ class CarInterface(CarInterfaceBase):
       cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
     ret.safetyConfigs = cfgs
 
-    ret.alphaLongitudinalAvailable = ret.radarUnavailable
-    if alpha_long or not ret.radarUnavailable:
+    # ACC stays stock on TRON platforms
+    ret.alphaLongitudinalAvailable = ret.radarUnavailable and not ret.flags & FordFlags.TRON
+    if (alpha_long and ret.alphaLongitudinalAvailable) or not ret.radarUnavailable:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.LONG_CONTROL.value
       ret.openpilotLongitudinalControl = True
 
     if ret.flags & FordFlags.CANFD:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.CANFD.value
 
-      # TRON (SecOC) platforms are not supported
-      # LateralMotionControl2, ACCDATA are 16 bytes on these platforms
-      if len(fingerprint[CAN.camera]):
+      # LateralMotionControl2, ACCDATA are 16 bytes on TRON platforms
+      if ret.flags & FordFlags.TRON:
+        ret.dashcamOnly = is_release
+        if fingerprint[CAN.camera].get(0x3d6) == 16:
+          ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.TRON.value
+        else:
+          carlog.error('dashcamOnly: expected 16 byte messages from the camera')
+          ret.dashcamOnly = True
+      # Other platforms with these cameras are not supported
+      elif len(fingerprint[CAN.camera]):
         if fingerprint[CAN.camera].get(0x3d6) != 8 or fingerprint[CAN.camera].get(0x186) != 8:
           carlog.error('dashcamOnly: SecOC is unsupported')
           ret.dashcamOnly = True
