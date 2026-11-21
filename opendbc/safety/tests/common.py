@@ -980,6 +980,12 @@ class SafetyTest(SafetyTestBase):
     self.safety.set_controls_allowed(0)
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_rx_checks_unused_msgs(self):
+    # unused alternative message slots of an RX check are zeroed, so a zeroed message (address 0, bus 0, length 0) must not match one
+    self._rx(make_msg(0, 0, 0))
+    for i in range(self.safety.get_rx_checks_len()):
+      self.assertFalse(self.safety.safety_a.state.rx_status[i].msg_seen)
+
   def test_tx_hook_on_wrong_safety_mode(self):
     files = os.listdir(os.path.dirname(os.path.realpath(__file__)))
     test_files = [f for f in files if f.startswith("test_") and f.endswith(".py")]
