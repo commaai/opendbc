@@ -56,6 +56,9 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.LONG_CONTROL.value
       ret.openpilotLongitudinalControl = True
 
+    if ret.flags & FordFlags.TRON:
+      ret.dashcamOnly = is_release
+
     if ret.flags & FordFlags.CANFD:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.CANFD.value
 

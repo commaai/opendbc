@@ -1,9 +1,11 @@
 import random
 import unittest
 
+from opendbc.can.dbc import DBC as CANDBC
+from opendbc.car import Bus
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes, match_fw_to_car_fuzzy
+from opendbc.car.ford.values import CAR, DBC, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes, match_fw_to_car_fuzzy
 from opendbc.car.ford.fingerprints import FW_VERSIONS
 from opendbc.testing import fuzzy_test, parameterized
 
@@ -135,3 +137,17 @@ class TestFordFW(unittest.TestCase):
     live_fw[(0x760, None)] = {b"M1MC-2D053-XX\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"}
     candidates = match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw})
     assert len(candidates) == 0, "Should not match new model year hint"
+
+
+class TestFordDBC(unittest.TestCase):
+  def test_tron_dbc(self):
+    # Same messages and signals as the base DBC, checksums and counters included. Only the sizes differ
+    base = CANDBC(DBC[CAR.FORD_F_150_MK14][Bus.pt])
+    tron = CANDBC(DBC[CAR.FORD_F_150_MK14_5][Bus.pt])
+    assert base.msgs.keys() == tron.msgs.keys()
+    for addr, msg in base.msgs.items():
+      assert tron.msgs[addr].sigs == msg.sigs, f"Signals differ for {msg.name}"
+      assert tron.msgs[addr].size in (msg.size, 16)
+
+    for name in ("LateralMotionControl2", "Lane_Assist_Data1"):
+      assert tron.name_to_msg[name].size == 16

@@ -76,7 +76,7 @@ class CarController(CarControllerBase):
     if (self.frame % CarControllerParams.STEER_STEP) == 0:
       # Bronco and some other cars consistently overshoot curv requests
       # Apply some deadzone + smoothing convergence to avoid oscillations
-      if self.CP.carFingerprint in (CAR.FORD_BRONCO_SPORT_MK1, CAR.FORD_F_150_MK14):
+      if self.CP.carFingerprint in (CAR.FORD_BRONCO_SPORT_MK1, CAR.FORD_F_150_MK14, CAR.FORD_F_150_MK14_5):
         self.anti_overshoot_curvature_last = anti_overshoot(actuators.curvature, self.anti_overshoot_curvature_last, CS.out.vEgoRaw)
         apply_curvature = self.anti_overshoot_curvature_last
       else:
