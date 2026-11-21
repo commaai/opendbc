@@ -114,6 +114,10 @@ class SafetyTestBase(unittest.TestCase):
   def _rx(self, msg):
     return self.safety.safety_rx_hook(msg)
 
+  def _after_host_reaction(self):
+    # past MAX_HOST_REACTION, the panda judges openpilot's TX by the state after the restricting RX
+    self.safety.set_timer(self.safety.microsecond_timer_get() + 20000)
+
   def _tx(self, msg):
     return self.safety.safety_tx_hook(msg)
 
@@ -1118,12 +1122,53 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._user_gas_msg(0))
     self.safety.set_controls_allowed(True)
     self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+    self._after_host_reaction()
+    self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
     # Test we allow lateral, but not longitudinal
     self.assertTrue(self.safety.get_controls_allowed())
     self.assertFalse(self.safety.get_longitudinal_allowed())
     # Make sure we can re-gain longitudinal actuation
     self._rx(self._user_gas_msg(0))
     self.assertTrue(self.safety.get_longitudinal_allowed())
+
+  def _assert_expired_across_timer_wrap(self, rx, allowed, controls_allowed=False):
+    # an exit at 1000 us stays old once the timer wraps
+    self.safety.set_timer(1000 + 20001)
+    self.safety.safety_tick()
+    for t in (1000 + 40001, 1000):
+      self.safety.set_timer(t)
+      rx()
+      if controls_allowed:
+        # the tick's rx checks ended controls after the timer jump
+        self.safety.set_controls_allowed(True)
+      self.assertFalse(allowed())
+
+  def test_controls_grace_after_brake_press(self):
+    self._rx(self._vehicle_moving_msg(0))
+    for elapsed, allowed in ((0, True), (19999, True), (20000, False)):
+      self._rx(self._user_brake_msg(0))
+      self.safety.set_controls_allowed(True)
+      self.safety.set_timer(1000)
+      self._rx(self._user_brake_msg(1))
+      self.assertFalse(self.safety.get_controls_allowed())
+      self.safety.set_timer(1000 + elapsed)
+      self._rx(self._user_brake_msg(1))
+      self.assertEqual(allowed, self.safety.get_controls_allowed_for_tx())
+
+    self._assert_expired_across_timer_wrap(lambda: self._rx(self._user_brake_msg(1)), self.safety.get_controls_allowed_for_tx)
+
+  def test_longitudinal_grace_after_gas_press(self):
+    self.safety.set_controls_allowed(True)
+    for elapsed, allowed in ((0, True), (19999, True), (20000, False)):
+      self._rx(self._user_gas_msg(0))
+      self.safety.set_timer(1000)
+      self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+      self.safety.set_timer(1000 + elapsed)
+      self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+      self.assertEqual(allowed, self.safety.get_longitudinal_allowed())
+
+    self._assert_expired_across_timer_wrap(lambda: self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1)), self.safety.get_longitudinal_allowed,
+                                           controls_allowed=True)
 
   def test_prev_user_brake(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:
@@ -1155,6 +1200,18 @@ class CarSafetyTest(SafetyTest):
       self.assertEqual(engaged, self.safety.get_cruise_engaged_prev())
       self._rx(self._pcm_status_msg(not engaged))
       self.assertEqual(not engaged, self.safety.get_cruise_engaged_prev())
+
+    # cruise counts as engaged for TX for 20 ms after it ended
+    for elapsed, engaged in ((0, True), (19999, True), (20000, False)):
+      self._rx(self._pcm_status_msg(True))
+      self.safety.set_timer(1000)
+      self._rx(self._pcm_status_msg(False))
+      self.assertFalse(self.safety.get_cruise_engaged_prev())
+      self.safety.set_timer(1000 + elapsed)
+      self._rx(self._pcm_status_msg(False))
+      self.assertEqual(engaged, self.safety.get_cruise_engaged_for_tx())
+
+    self._assert_expired_across_timer_wrap(lambda: self._rx(self._pcm_status_msg(False)), self.safety.get_cruise_engaged_for_tx)
 
   def test_allow_user_brake_at_zero_speed(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:

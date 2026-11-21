@@ -105,9 +105,13 @@ class TestSafetyRedundancy(common.SafetyTestBase):
   def test_state_mismatch(self):
     # the tick rewrites safety_rx_checks_invalid in both copies, and a nonzero rx_checks_len makes it read the NULL rx_checks
     rewritten = ffi.offsetof("SafetyCopy", "state") + ffi.offsetof("SafetyState", "safety_rx_checks_invalid")
+    # the tick also sets old exits to the same value in both copies
+    exit_fields = ("ts_gas_pressed_last", "ts_controls_exit_last", "ts_cruise_exit_last")
+    exits = [ffi.offsetof("SafetyCopy", "state") + ffi.offsetof("SafetyState", f) for f in exit_fields]
     rx_checks_len = ffi.offsetof("SafetyCopy", "setup") + ffi.offsetof("SafetySetup", "current_safety_config") + ffi.offsetof("safety_config", "rx_checks_len")
     for byte in range(ffi.sizeof("SafetyCopy")):
-      if byte != rewritten and not (rx_checks_len <= byte < rx_checks_len + ffi.sizeof("int")):
+      if byte != rewritten and not (rx_checks_len <= byte < rx_checks_len + ffi.sizeof("int")) and \
+         not any(g <= byte < g + ffi.sizeof("uint32_t") for g in exits):
         self.safety.set_controls_allowed(True)
         self._flip_b(byte * 8)
         self.safety.safety_tick()
