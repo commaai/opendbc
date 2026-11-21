@@ -164,7 +164,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
 
   bool tx = true;
 
-  // 2024+ F-150 (TRON): the 16-byte lane messages carry the DBC payload in bytes 0-7, the rest must be zero
+  // 2026 F-150 (TRON): the 16-byte lane messages carry the DBC payload in bytes 0-7, the rest must be zero
   if ((GET_LEN(msg) == 16U) && (GET_BYTES_64_LE(msg, 8, 8) != 0U)) {
     tx = false;
   }
@@ -300,7 +300,7 @@ static safety_config ford_init(uint16_t param) {
     {FORD_LateralMotionControl2, 0, 8, .check_relay = true},
   };
 
-  // 2024+ F-150 (TRON): these are 16 bytes with the DBC payload in bytes 0-7, only Yaw_Data_FD1 is still 8 bytes
+  // 2026 F-150 (TRON): these are 16 bytes with the DBC payload in bytes 0-7, only Yaw_Data_FD1 is still 8 bytes
   static const RxCheck ford_tron_rx_checks[] = {
     {.msg = {{FORD_BrakeSysFeatures, 0, 16, 50U, .max_counter = 15U}, { 0 }, { 0 }}},
     {.msg = {{FORD_EngVehicleSpThrottle2, 0, 16, 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},

@@ -151,9 +151,11 @@ class CarController(CarControllerBase):
       self.gas = gas
 
     ### ui ###
+    # the camera's IPMA_Data and ACCDATA_3 are not replaced on TRON platforms
+    stock_ui = bool(self.CP.flags & FordFlags.TRON)
     send_ui = (self.main_on_last != main_on) or (self.lkas_enabled_last != CC.latActive) or (self.steer_alert_last != steer_alert)
     # send lkas ui msg at 1Hz or if ui state changes
-    if (self.frame % CarControllerParams.LKAS_UI_STEP) == 0 or send_ui:
+    if not stock_ui and ((self.frame % CarControllerParams.LKAS_UI_STEP) == 0 or send_ui):
       can_sends.append(fordcan.create_lkas_ui_msg(self.packer, self.CAN, main_on, CC.latActive, steer_alert, hud_control, CS.lkas_status_stock_values))
 
     # send acc ui msg at 5Hz or if ui state changes
@@ -161,7 +163,7 @@ class CarController(CarControllerBase):
       send_ui = True
       self.distance_bar_frame = self.frame
 
-    if (self.frame % CarControllerParams.ACC_UI_STEP) == 0 or send_ui:
+    if not stock_ui and ((self.frame % CarControllerParams.ACC_UI_STEP) == 0 or send_ui):
       show_distance_bars = self.frame - self.distance_bar_frame < 400
       can_sends.append(fordcan.create_acc_ui_msg(self.packer, self.CAN, self.CP, main_on, CC.latActive,
                                                  fcw_alert, CS.out.cruiseState.standstill, show_distance_bars,

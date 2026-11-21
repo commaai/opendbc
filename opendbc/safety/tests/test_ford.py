@@ -31,7 +31,7 @@ class Buttons:
 #  * CAN with openpilot longitudinal
 #  * CAN FD with stock longitudinal
 #  * CAN FD with openpilot longitudinal
-#  * CAN FD with stock longitudinal on the 2024+ F-150 (TRON), which sends 16-byte frames
+#  * CAN FD with stock longitudinal on the 2026 F-150 (TRON), which sends 16-byte frames
 
 class TestFordSafetyBase(common.CarSafetyTest):
   DBC = "ford_lincoln_base_pt"
@@ -444,14 +444,9 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
                                MSG_IPMA_Data]}
 
 
-class CANPackerTron(common.CANPackerSafety):
-  # 2024+ F-150 frames are 16 bytes, with the DBC payload in bytes 0-7. Of the messages used here, only these two are 8 bytes
-  def make_can_msg(self, name_or_addr, bus, values):
-    addr, dat, bus = super().make_can_msg(name_or_addr, bus, values)
-    return addr, dat.ljust(8 if addr in (MSG_Yaw_Data_FD1, MSG_Steering_Data_FD1) else 16, b'\x00'), bus
-
-
 class TestFordCANFDTronSafety(TestFordCANFDStockSafety):
+  # 16-byte frames with the DBC payload in bytes 0-7. Of the messages used here, only Yaw_Data_FD1 and Steering_Data_FD1 are 8 bytes
+  DBC = "ford_lincoln_base_pt_tron_generated"
   SAFETY_PARAM = FordSafetyFlags.CANFD | FordSafetyFlags.TRON
 
   # ACCDATA_3 and IPMA_Data stay the camera's
@@ -461,10 +456,6 @@ class TestFordCANFDTronSafety(TestFordCANFDStockSafety):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_Lane_Assist_Data1, MSG_LateralMotionControl2)}
 
   FWD_BLACKLISTED_ADDRS = {2: [MSG_Lane_Assist_Data1, MSG_LateralMotionControl2]}
-
-  def setUp(self):
-    super().setUp()
-    self.packer = CANPackerTron("ford_lincoln_base_pt")
 
   @staticmethod
   def _resized(msg, length):

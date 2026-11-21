@@ -2,11 +2,14 @@ import random
 import unittest
 
 from opendbc.can.dbc import DBC as CANDBC
-from opendbc.car import Bus
-from opendbc.car.structs import CarParams
+from opendbc.car import DT_CTRL, Bus, gen_empty_fingerprint
+from opendbc.car.structs import CarControl, CarParams
 from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car.ford.values import CAR, DBC, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes, match_fw_to_car_fuzzy
+from opendbc.car.ford.fordcan import CanBus
+from opendbc.car.ford.interface import CarInterface
+from opendbc.car.ford.values import CAR, DBC, FW_QUERY_CONFIG, FW_PATTERN, FordSafetyFlags, get_platform_codes, match_fw_to_car_fuzzy
 from opendbc.car.ford.fingerprints import FW_VERSIONS
+from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.testing import fuzzy_test, parameterized
 
 Ecu = CarParams.Ecu
@@ -151,3 +154,75 @@ class TestFordDBC(unittest.TestCase):
 
     for name in ("LateralMotionControl2", "Lane_Assist_Data1"):
       assert tron.name_to_msg[name].size == 16
+
+
+class TestFordTron(unittest.TestCase):
+  # LateralMotionControl2 and ACCDATA on the camera bus: 16 bytes on the 2026 F-150, 8 bytes on the 2021-23 F-150
+  CAMERA_16 = {0x3d6: 16, 0x186: 16}
+  CAMERA_8 = {0x3d6: 8, 0x186: 8}
+
+  @staticmethod
+  def _get_params(platform, camera_fingerprint, alpha_long=False, is_release=False):
+    fingerprint = gen_empty_fingerprint()
+    fingerprint[CanBus(fingerprint=fingerprint).camera] = camera_fingerprint
+    return CarInterface.get_params(platform, fingerprint, [], alpha_long, is_release, docs=False)
+
+  def test_tron(self):
+    for alpha_long in (False, True):
+      CP = self._get_params(CAR.FORD_F_150_MK14_5, self.CAMERA_16, alpha_long=alpha_long)
+      assert CP.safetyConfigs[-1].safetyParam == FordSafetyFlags.CANFD | FordSafetyFlags.TRON
+      assert not CP.dashcamOnly
+      assert not CP.openpilotLongitudinalControl
+      assert not CP.alphaLongitudinalAvailable
+
+    assert self._get_params(CAR.FORD_F_150_MK14_5, self.CAMERA_16, is_release=True).dashcamOnly
+
+  def test_tron_dashcam_on_mismatch(self):
+    # the platform and the camera's message lengths must agree
+    for platform, camera_fingerprint in ((CAR.FORD_F_150_MK14_5, self.CAMERA_8), (CAR.FORD_F_150_MK14_5, {}),
+                                         (CAR.FORD_F_150_MK14, self.CAMERA_16)):
+      CP = self._get_params(platform, camera_fingerprint)
+      assert CP.dashcamOnly, (platform, camera_fingerprint)
+      assert CP.safetyConfigs[-1].safetyParam == FordSafetyFlags.CANFD
+
+  def test_not_tron(self):
+    for camera_fingerprint in (self.CAMERA_8, {}):
+      CP = self._get_params(CAR.FORD_F_150_MK14, camera_fingerprint)
+      assert not CP.dashcamOnly
+      assert CP.safetyConfigs[-1].safetyParam == FordSafetyFlags.CANFD
+      assert CP.alphaLongitudinalAvailable
+    assert self._get_params(CAR.FORD_F_150_MK14, self.CAMERA_8, alpha_long=True).openpilotLongitudinalControl
+    assert self._get_params(CAR.FORD_EXPLORER_MK6, {}).openpilotLongitudinalControl
+
+  def test_car_controller(self):
+    # Same messages as the 2021-23 F-150 with the lane messages zero padded to 16 bytes, except the camera's
+    # ACCDATA_3 and IPMA_Data, which are not replaced. All of it is allowed by safety
+    CP = self._get_params(CAR.FORD_F_150_MK14_5, self.CAMERA_16)
+    safety = libsafety_py.libsafety
+    safety.set_safety_hooks(CP.safetyConfigs[-1].safetyModel.raw, CP.safetyConfigs[-1].safetyParam)
+    safety.init_tests()
+    safety.set_controls_allowed(True)
+    safety.set_cruise_engaged_prev(True)
+
+    CI = CarInterface(CP)
+    CI_canfd = CarInterface(self._get_params(CAR.FORD_F_150_MK14, self.CAMERA_8))
+    addrs_sent, addrs_sent_canfd = set(), set()
+    now_nanos = 0
+    for kwargs in ({}, {"latActive": True}, {"cruiseControl": {"cancel": True}}, {"cruiseControl": {"resume": True}}):
+      CC = CarControl(**kwargs).as_reader()
+      for _ in range(200):
+        CI.update([])
+        CI_canfd.update([])
+        _, sendcan = CI.apply(CC, now_nanos)
+        _, sendcan_canfd = CI_canfd.apply(CC, now_nanos)
+        assert sendcan == [(addr, dat.ljust(16 if addr in (0x3ca, 0x3d6) else 8, b'\x00'), bus)
+                           for addr, dat, bus in sendcan_canfd if addr not in (0x18a, 0x3d8)]
+        addrs_sent_canfd.update(addr for addr, _, _ in sendcan_canfd)
+
+        safety.set_timer(now_nanos // 1000)
+        for addr, dat, bus in sendcan:
+          assert safety.safety_tx_hook(libsafety_py.make_CANPacket(addr, bus, dat)), (hex(addr), dat, bus)
+          addrs_sent.add(addr)
+        now_nanos += int(DT_CTRL * 1e9)
+    assert addrs_sent == {0x83, 0x3ca, 0x3d6}
+    assert addrs_sent_canfd == addrs_sent | {0x18a, 0x3d8}
