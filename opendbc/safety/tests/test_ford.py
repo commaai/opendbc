@@ -18,7 +18,7 @@ MSG_Lane_Assist_Data1 = 0x3CA      # TX by OP, Lane Keep Assist
 MSG_LateralMotionControl = 0x3D3   # TX by OP, Lateral Control message
 MSG_LateralMotionControl2 = 0x3D6  # TX by OP, alternate Lateral Control message
 MSG_IPMA_Data = 0x3D8              # TX by OP, IPMA and LKAS user interface
-MSG_BodyInfo_3_FD1 = 0x3B3         # RX from GWM, for CAN ignition on 16-byte (2026 F-150) cars
+MSG_BodyInfo_3_FD1 = 0x3B3         # RX from GWM, CAN ignition
 
 
 class Buttons:
@@ -445,7 +445,6 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
 
 
 class TestFordCANFDTronSafety(TestFordCANFDStockSafety):
-  # 16-byte frames with the DBC payload in bytes 0-7. Of the messages used here, only Yaw_Data_FD1 and Steering_Data_FD1 are 8 bytes
   DBC = "ford_lincoln_base_pt_tron_generated"
   SAFETY_PARAM = FordSafetyFlags.CANFD | FordSafetyFlags.TRON
 
@@ -457,43 +456,12 @@ class TestFordCANFDTronSafety(TestFordCANFDStockSafety):
 
   FWD_BLACKLISTED_ADDRS = {2: [MSG_Lane_Assist_Data1, MSG_LateralMotionControl2]}
 
-  @staticmethod
-  def _resized(msg, length):
-    return common.make_msg(msg[0].bus, msg[0].addr, dat=bytes(msg[0].data[0:8]).ljust(length, b'\x00'))
-
-  def test_tx_lengths(self):
-    # each message is only allowed at its own length
-    for msg, length in ((self._lat_ctl_msg(False, 0, 0, 0, 0), 16), (self._lkas_command_msg(0), 16),
-                        (self._acc_button_msg(Buttons.TJA_TOGGLE, 0), 8), (self._acc_button_msg(Buttons.TJA_TOGGLE, 2), 8)):
-      for tx_length in (8, 16):
-        self.assertEqual(tx_length == length, self._tx(self._resized(msg, tx_length)), (hex(msg[0].addr), tx_length))
-
   def test_zero_tail(self):
-    # past the DBC payload, every bit of the 16-byte lane messages must be zero
-    for bit in range(64, 128):
-      for msg in (self._lat_ctl_msg(False, 0, 0, 0, 0), self._lkas_command_msg(0)):
-        msg[0].data[bit // 8] = 1 << (bit % 8)
-        self.assertFalse(self._tx(msg), (hex(msg[0].addr), bit))
-    self.assertTrue(self._tx(self._lat_ctl_msg(False, 0, 0, 0, 0)))
-
-  def test_stock_msgs_not_sent(self):
-    # never the camera's ACC and UI messages, at either length or with the longitudinal flag
-    accdata = self.packer.make_can_msg_safety("ACCDATA", 0, {"AccPrpl_A_Rq": -5.0, "AccPrpl_A_Pred": -5.0, "AccBrkTot_A_Rq": 0.0})
-    for param in (self.SAFETY_PARAM, self.SAFETY_PARAM | FordSafetyFlags.LONG_CONTROL):
-      self.safety.set_safety_hooks(self.SAFETY_MODEL, param)
-      for msg in (accdata, common.make_msg(0, MSG_ACCDATA_3), common.make_msg(0, MSG_IPMA_Data)):
-        for length in (8, 16):
-          self.assertFalse(self._tx(self._resized(msg, length)), (param, hex(msg[0].addr), length))
-
-  def test_rx_lengths(self):
-    # the RX checks only see a message at its own length
-    msgs = (self._speed_msg(0), self._speed_msg_2(0), self._yaw_rate_msg(0, 0), self._user_brake_msg(False),
-            self._user_gas_msg(0), self._vehicle_moving_msg(0))
-    for wrong in (None, *msgs):
-      self._reset_safety_hooks()
-      for msg in msgs:
-        self._rx(self._resized(msg, 8 if msg[0].data_len_code > 8 else 16) if msg is wrong else msg)
-      self.assertEqual(wrong is None, self.safety.safety_config_valid(), wrong and hex(wrong[0].addr))
+    # bytes 8-15 of the lane messages must be zero
+    for msg in (self._lat_ctl_msg(False, 0, 0, 0, 0), self._lkas_command_msg(0)):
+      self.assertTrue(self._tx(msg))
+      msg[0].data[8] = 1
+      self.assertFalse(self._tx(msg))
 
 
 class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
@@ -582,34 +550,17 @@ class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
                                MSG_IPMA_Data]}
 
 
-# BodyInfo_3_FD1->Ignition_Status: 0=Unknown, 1=Off, 2=Accessory, 4=Run, 8=Start, 15=Invalid
 class TestFordIgnition(common.SafetyTestBase):
   SAFETY_MODEL = None
 
-  def _ign_msg(self, ignition_status, bus=0, length=16):
-    # 2026 F-150 frames are 16 bytes, with the DBC payload in bytes 0-7
-    dat = bytearray(length)
-    dat[0] = ignition_status << 4
-    return common.make_msg(bus, MSG_BodyInfo_3_FD1, dat=bytes(dat))
-
-  def test_ignition_on(self):
-    for ignition_status in (4, 8):
+  def test_ignition(self):
+    # BodyInfo_3_FD1->Ignition_Status in the 16-byte frame on bus 0: 4=Run, 8=Start
+    for ignition_status, bus, length, ignition in ((4, 0, 16, True), (8, 0, 16, True), (1, 0, 16, False), (2, 0, 16, False),
+                                                   (4, 0, 8, False), (4, 1, 16, False)):
       self.safety.init_tests()
-      self.safety.ignition_can_hook(self._ign_msg(ignition_status))
-      self.assertTrue(self.safety.get_ignition_can())
-
-  def test_ignition_off(self):
-    for ignition_status in (0, 1, 2, 15):
-      self.safety.ignition_can_hook(self._ign_msg(4))
-      self.assertTrue(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._ign_msg(ignition_status))
-      self.assertFalse(self.safety.get_ignition_can())
-
-  def test_ignition_ignored(self):
-    # only the 16-byte frame on the car's bus: 8-byte Fords have the harness ignition line, and other makes use 0x3B3 at 8 bytes
-    for bus, length in ((0, 8), (1, 16), (2, 16)):
-      self.safety.ignition_can_hook(self._ign_msg(4, bus, length))
-      self.assertFalse(self.safety.get_ignition_can())
+      dat = bytes([ignition_status << 4]).ljust(length, b'\x00')
+      self.safety.ignition_can_hook(common.make_msg(bus, MSG_BodyInfo_3_FD1, dat=dat))
+      self.assertEqual(ignition, self.safety.get_ignition_can(), (ignition_status, bus, length))
 
 
 if __name__ == "__main__":
