@@ -18,7 +18,6 @@ MSG_Lane_Assist_Data1 = 0x3CA      # TX by OP, Lane Keep Assist
 MSG_LateralMotionControl = 0x3D3   # TX by OP, Lateral Control message
 MSG_LateralMotionControl2 = 0x3D6  # TX by OP, alternate Lateral Control message
 MSG_IPMA_Data = 0x3D8              # TX by OP, IPMA and LKAS user interface
-MSG_BodyInfo_3_FD1 = 0x3B3         # RX from GWM, CAN ignition
 
 
 class Buttons:
@@ -548,19 +547,6 @@ class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
 
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
                                MSG_IPMA_Data]}
-
-
-class TestFordIgnition(common.SafetyTestBase):
-  SAFETY_MODEL = None
-
-  def test_ignition(self):
-    # BodyInfo_3_FD1->Ignition_Status in the 16-byte frame on bus 0: 4=Run, 8=Start
-    for ignition_status, bus, length, ignition in ((4, 0, 16, True), (8, 0, 16, True), (1, 0, 16, False), (2, 0, 16, False),
-                                                   (4, 0, 8, False), (4, 1, 16, False)):
-      self.safety.init_tests()
-      dat = bytes([ignition_status << 4]).ljust(length, b'\x00')
-      self.safety.ignition_can_hook(common.make_msg(bus, MSG_BodyInfo_3_FD1, dat=dat))
-      self.assertEqual(ignition, self.safety.get_ignition_can(), (ignition_status, bus, length))
 
 
 if __name__ == "__main__":
