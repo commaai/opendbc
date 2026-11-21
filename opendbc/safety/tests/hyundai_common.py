@@ -38,6 +38,7 @@ class HyundaiButtonBase(common.CarSafetyTest):
 
     for enabled in (True, False):
       self._rx(self._pcm_status_msg(enabled))
+      self._end_exit_grace()
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL, bus=self.BUTTONS_TX_BUS)))
 
   def test_enable_control_allowed_from_cruise(self):

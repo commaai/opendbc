@@ -422,6 +422,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
     for enabled in (True, False):
       self._rx(self._pcm_status_msg(enabled))
+      self._end_exit_grace()
       for bus in (0, 2):
         self.assertEqual(enabled, self._tx(self._acc_button_msg(Buttons.CANCEL, bus)))
 

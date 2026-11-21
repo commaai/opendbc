@@ -85,6 +85,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     buttons = ("SET_BTN", "RES_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN", "ACC_ON_BTN")
     for cruise_engaged, controls_allowed in itertools.product((False, True), repeat=2):
       self.assertTrue(self._rx(self._pcm_status_msg(cruise_engaged)))
+      self._end_exit_grace()
       self.safety.set_controls_allowed(controls_allowed)
       for pressed in itertools.product((False, True), repeat=len(buttons)):
         values = {**dict(zip(buttons, pressed, strict=True)), "SET_ME_1_1": 1, "SET_ME_1_2": 1}

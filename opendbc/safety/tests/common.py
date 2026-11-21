@@ -114,6 +114,10 @@ class SafetyTestBase(unittest.TestCase):
   def _rx(self, msg):
     return self.safety.safety_rx_hook(msg)
 
+  def _end_exit_grace(self):
+    # the panda lets the host's frames through for 20 ms after it restricted the host
+    self.safety.set_timer(self.safety.microsecond_timer_get() + 20000)
+
   def _tx(self, msg):
     return self.safety.safety_tx_hook(msg)
 
@@ -1118,6 +1122,8 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._user_gas_msg(0))
     self.safety.set_controls_allowed(True)
     self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+    self._end_exit_grace()
+    self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
     # Test we allow lateral, but not longitudinal
     self.assertTrue(self.safety.get_controls_allowed())
     self.assertFalse(self.safety.get_longitudinal_allowed())
@@ -1126,8 +1132,7 @@ class CarSafetyTest(SafetyTest):
     self.assertTrue(self.safety.get_longitudinal_allowed())
 
   def _assert_expired_across_timer_wrap(self, rx, allowed):
-    # the restriction from frame 10 at 1000 us, never read by the host, stays expired once the timer wraps
-    self.safety.set_can_rx_frames(11, 10)
+    # the grace from 1000 us stays expired once the timer wraps
     self.safety.set_timer(1000 + 20001)
     self.safety.safety_tick()
     for t in (1000 + 40001, 1000):
@@ -1135,31 +1140,26 @@ class CarSafetyTest(SafetyTest):
       rx()
       self.assertFalse(allowed())
 
-  def test_controls_until_host_reads_brake_press(self):
+  def test_controls_grace_after_brake_press(self):
     self._rx(self._vehicle_moving_msg(0))
-    for host_read, elapsed, allowed in ((False, 0, True), (False, 19999, True), (False, 20000, False), (True, 0, False)):
+    for elapsed, allowed in ((0, True), (19999, True), (20000, False)):
       self._rx(self._user_brake_msg(0))
       self.safety.set_controls_allowed(True)
       self.safety.set_timer(1000)
-      self.safety.set_can_rx_frames(10, 10)
       self._rx(self._user_brake_msg(1))
       self.assertFalse(self.safety.get_controls_allowed())
-      self.safety.set_can_rx_frames(11, 11 if host_read else 10)
       self.safety.set_timer(1000 + elapsed)
       self._rx(self._user_brake_msg(1))
       self.assertEqual(allowed, self.safety.get_controls_allowed_for_tx())
 
     self._assert_expired_across_timer_wrap(lambda: self._rx(self._user_brake_msg(1)), self.safety.get_controls_allowed_for_tx)
 
-  def test_longitudinal_until_host_reads_gas_press(self):
+  def test_longitudinal_grace_after_gas_press(self):
     self.safety.set_controls_allowed(True)
-    # the host read the frame once its read count passed it, the counters wrap
-    for read, elapsed, allowed in ((10, 0, True), (10, 19999, True), (10, 20000, False), (11, 0, False), (10 + 0x80000000, 0, False)):
+    for elapsed, allowed in ((0, True), (19999, True), (20000, False)):
       self._rx(self._user_gas_msg(0))
       self.safety.set_timer(1000)
-      self.safety.set_can_rx_frames(10, 10)
       self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
-      self.safety.set_can_rx_frames(11, read)
       self.safety.set_timer(1000 + elapsed)
       self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
       self.assertEqual(allowed, self.safety.get_longitudinal_allowed())
@@ -1197,14 +1197,12 @@ class CarSafetyTest(SafetyTest):
       self._rx(self._pcm_status_msg(not engaged))
       self.assertEqual(not engaged, self.safety.get_cruise_engaged_prev())
 
-    # cruise counts as engaged for TX until the host read the frame that ended it
-    for host_read, elapsed, engaged in ((False, 0, True), (False, 19999, True), (False, 20000, False), (True, 0, False)):
+    # cruise counts as engaged for TX for 20 ms after it ended
+    for elapsed, engaged in ((0, True), (19999, True), (20000, False)):
       self._rx(self._pcm_status_msg(True))
       self.safety.set_timer(1000)
-      self.safety.set_can_rx_frames(10, 10)
       self._rx(self._pcm_status_msg(False))
       self.assertFalse(self.safety.get_cruise_engaged_prev())
-      self.safety.set_can_rx_frames(11, 11 if host_read else 10)
       self.safety.set_timer(1000 + elapsed)
       self._rx(self._pcm_status_msg(False))
       self.assertEqual(engaged, self.safety.get_cruise_engaged_for_tx())

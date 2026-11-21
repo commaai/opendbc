@@ -111,20 +111,19 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)),
                        f"{req=} {req2=} {angle=} {torque_wind_down=}")
 
-  def test_tx_until_host_reads_controls_exit(self):
+  def test_tx_grace_after_controls_exit(self):
     if not self.LONGITUDINAL:
       raise unittest.SkipTest("no openpilot longitudinal")
     self._rx(self._pcm_gas_released_msg(True))
-    self.safety.set_can_rx_frames(10, 10)
+    self.safety.set_timer(1000)
     self._rx(self._pcm_gas_released_msg(False))
     self.assertTrue(self._tx(self._accel_msg(1.0)))
     self.assertFalse(self.safety.get_controls_allowed())
-    self.safety.set_can_rx_frames(11, 11)
+    self.safety.set_timer(1000 + 20000)
     self.assertFalse(self._tx(self._accel_msg(1.0)))
 
   def test_invalid_msg_ends_controls_right_away(self):
     self._rx(self._pcm_status_msg(True))
-    self.safety.set_can_rx_frames(10, 10)
     self._rx(self._pcm_status_msg(False))
     self.assertTrue(self.safety.get_controls_allowed_for_tx())
     msg = self._pcm_status_msg(False)

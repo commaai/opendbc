@@ -3,24 +3,22 @@
 
 #include "opendbc/safety/declarations.h"
 
-// the host reads RX every 10 ms, it can only react to an RX frame once it read it
-#define HOST_READ_TIMEOUT 20000U  // us
+// the host sends what it made before it got the RX frame that restricts it, up to 20 ms after the panda got it
+#define EXIT_GRACE 20000U  // us
 
-static bool host_unread(uint32_t frame, uint32_t ts) {
-  // the frame counters wrap
-  bool unread = (frame - can_rx_frames_read()) < 0x80000000U;
-  return unread && (safety_get_ts_elapsed(safety_ts, ts) < HOST_READ_TIMEOUT);
+static bool in_exit_grace(uint32_t ts) {
+  return safety_get_ts_elapsed(safety_ts, ts) < EXIT_GRACE;
 }
 
-static void host_read_expire(uint32_t *ts) {
-  // keep an expired restriction expired, the timer wraps
-  if (safety_get_ts_elapsed(safety_ts, *ts) > HOST_READ_TIMEOUT) {
-    *ts = safety_ts - HOST_READ_TIMEOUT;
+static void exit_grace_expire(uint32_t *ts) {
+  // keep an expired grace expired, the timer wraps
+  if (safety_get_ts_elapsed(safety_ts, *ts) > EXIT_GRACE) {
+    *ts = safety_ts - EXIT_GRACE;
   }
 }
 
 bool get_longitudinal_allowed(void) {
-  return safety.controls_allowed && (!safety.gas_pressed_prev || host_unread(safety.gas_press_frame, safety.gas_press_ts));
+  return safety.controls_allowed && (!safety.gas_pressed_prev || in_exit_grace(safety.gas_press_ts));
 }
 
 // Safety checks for longitudinal actuation
