@@ -164,6 +164,11 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
 
   bool tx = true;
 
+  // 2024+ F-150 (TRON): the 16-byte lane messages carry the DBC payload in bytes 0-7, the rest must be zero
+  if ((GET_LEN(msg) == 16U) && (GET_BYTES_64_LE(msg, 8, 8) != 0U)) {
+    tx = false;
+  }
+
   // Safety check for ACCDATA accel and brake requests
   if (msg->addr == FORD_ACCDATA) {
     // Signal: AccPrpl_A_Rq
@@ -294,6 +299,24 @@ static safety_config ford_init(uint16_t param) {
     {FORD_ACCDATA, 0, 8, .check_relay = true},
     {FORD_LateralMotionControl2, 0, 8, .check_relay = true},
   };
+
+  // 2024+ F-150 (TRON): these are 16 bytes with the DBC payload in bytes 0-7, only Yaw_Data_FD1 is still 8 bytes
+  static const RxCheck ford_tron_rx_checks[] = {
+    {.msg = {{FORD_BrakeSysFeatures, 0, 16, 50U, .max_counter = 15U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngVehicleSpThrottle2, 0, 16, 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},
+    {.msg = {{FORD_Yaw_Data_FD1, 0, 8, 100U, .max_counter = 255U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngBrakeData, 0, 16, 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngVehicleSpThrottle, 0, 16, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+    {.msg = {{FORD_DesiredTorqBrk, 0, 16, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+  };
+
+  // the lane messages are 16 bytes too, ACCDATA_3 and IPMA_Data stay the camera's
+  static const CanMsg FORD_TRON_TX_MSGS[] = {
+    {FORD_Steering_Data_FD1, 0, 8, .check_relay = false},
+    {FORD_Steering_Data_FD1, 2, 8, .check_relay = false},
+    {FORD_Lane_Assist_Data1, 0, 16, .check_relay = true},
+    {FORD_LateralMotionControl2, 0, 16, .check_relay = true},
+  };
 #endif
 
   static const CanMsg FORD_CANFD_STOCK_TX_MSGS[] = {
@@ -317,6 +340,10 @@ static safety_config ford_init(uint16_t param) {
     const uint16_t FORD_PARAM_LONGITUDINAL = 1;
     if (GET_FLAG(param, FORD_PARAM_LONGITUDINAL)) {
       ret = BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_LONG_TX_MSGS);
+    }
+    const uint16_t FORD_PARAM_TRON = 4;
+    if (GET_FLAG(param, FORD_PARAM_TRON)) {
+      ret = BUILD_SAFETY_CFG(ford_tron_rx_checks, FORD_TRON_TX_MSGS);
     }
 #endif
   } else {
