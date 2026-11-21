@@ -58,6 +58,17 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
               "RES_BUTTON": res, "NO_BUTTON_PRESSED": no_button}
     return self.packer.make_can_msg_safety("CRUISE_THROTTLE", 2, values)
 
+  def test_gas_pressed_threshold(self):
+    # GAS_PEDAL at the threshold is not gas pressed, one above it is
+    self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+    self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD))
+    self.assertFalse(self.safety.get_gas_pressed_prev())
+
+  def test_vehicle_moving_single_wheel(self):
+    # WHEEL_SPEED_RR/RL are 0.005 kph per bit; the lowest speed on either rear wheel alone means moving
+    self._test_vehicle_moving_signals("WHEEL_SPEEDS_REAR", self.EPS_BUS, [{f"WHEEL_SPEED_{wheel}": 0.005} for wheel in ("RR", "RL")])
+
   def test_acc_buttons(self):
     btns = [
       ("cancel", True),

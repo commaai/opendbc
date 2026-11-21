@@ -71,6 +71,15 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     msg[0].data[6] = 0xAB
     self.assertTrue(self._rx(msg))
 
+  def test_gas_pressed_min(self):
+    # P002_Com_rAPP is 0.5% per bit; any non-zero pedal position is gas pressed
+    self._rx(self.packer.make_can_msg_safety("Dyn_CMM", self.MAIN_BUS, {"P002_Com_rAPP": 0.5}))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
+  def test_vehicle_moving_min_speed(self):
+    # VITESSE_VEHICULE_ROUES is 0.01 kph per bit; any non-zero speed is moving
+    self._test_vehicle_moving_signals("HS2_DYN_ABR_38D", self.MAIN_BUS, [{"VITESSE_VEHICULE_ROUES": 0.01}])
+
   def _ign_msg(self, bus, counter, ign):
     return common.make_msg(bus, 0x432, dat=bytes([0, counter, 0, 0, 0, 0, ign, 0]))
 
