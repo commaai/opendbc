@@ -401,6 +401,15 @@ BO_ 1556 BLINKERS_STATE: 8 XXX
  SG_ HAZARD_LIGHT : 27|1@0+ (1,0) [0|1] "" XXX
  SG_ TURN_SIGNALS : 29|2@0+ (1,0) [0|3] "" XXX
 
+BO_ 1557 MET1S11: 8 CGW
+ SG_ MET11_ID : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ MET11_IF : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UNIT_CH2 : 23|2@0+ (1,0) [0|0] "" FCM
+ SG_ TOLER_A : 21|6@0+ (0.002,0.94) [0|0] "" FCM
+ SG_ CDISP_EX : 31|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ TOLER_B : 29|6@0- (0.2,0) [0|0] "km/h" FCM
+ SG_ TRIP_B : 39|32@0+ (0.1,0) [0|0] "km/MILE" Vector__XXX
+
 BO_ 1568 BODY_CONTROL_STATE: 8 XXX
  SG_ METER_DIMMED : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ PARKING_BRAKE : 60|1@0+ (1,0) [0|1] "" XXX
