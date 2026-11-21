@@ -148,13 +148,16 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
   // sample speed
   if (msg_matches(msg, 0xaaU, 0U)) {
     int speed = 0;
+    bool moving = false;
     // sum 4 wheel speeds. conversion: raw * 0.01 - 67.67
     for (int i = 0; i < 8; i += 2) {
-      uint32_t wheel_speed = GET_BYTES_BE(msg, i, 2) & 0x7FFFU;
-      speed += (int)wheel_speed - 6767;
+      uint32_t wheel_speed_raw = GET_BYTES_BE(msg, i, 2) & 0x7FFFU;
+      int wheel_speed = (int)wheel_speed_raw - 6767;
+      speed += wheel_speed;
+      // moving if any wheel turns, either way, even when the speeds sum to zero
+      moving = moving || (wheel_speed != 0);
     }
-    // check that all wheel speeds are at zero value
-    safety.vehicle_moving = speed != 0;
+    safety.vehicle_moving = moving;
 
     UPDATE_VEHICLE_SPEED((float)speed / 4.0f * 0.01f * KPH_TO_MS);
   }

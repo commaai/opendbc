@@ -131,6 +131,15 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     msg = self._speed_msg(0, quality_flag=False)
     self.assertFalse(self._rx(msg))
 
+  def test_vehicle_moving_any_wheel(self):
+    # one wheel turning either way is moving, even when the wheel speeds sum to zero
+    for wheel_speeds in ({"FL": 0.01}, {"RR": -0.01}, {"FR": 0.01, "RL": -0.01}):
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      values = {f"WHEEL_SPEED_{wheel}": wheel_speeds.get(wheel, 0) for wheel in ("FR", "FL", "RR", "RL")}
+      self.assertTrue(self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", 0, values)))
+      self.assertTrue(self.safety.get_vehicle_moving(), wheel_speeds)
+
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 72.22_ is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 259 / 3.6, 1,
