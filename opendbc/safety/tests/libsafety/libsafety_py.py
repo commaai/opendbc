@@ -93,11 +93,12 @@ def __getattr__(name):
     return libsafety
   raise AttributeError(name)
 
-def make_CANPacket(addr: int, bus: int, dat):
+def make_CANPacket(addr: int, bus: int, dat, fill: int = 0):
   ret = ffi.new('CANPacket_t *')
   ret[0].extended = 1 if addr >= 0x800 else 0
   ret[0].addr = addr
   ret[0].data_len_code = LEN_TO_DLC[len(dat)]
   ret[0].bus = bus
-  ret[0].data = bytes(dat)
+  # fill is the buffer past the msg's length, which the safety must never read
+  ret[0].data = bytes(dat) + bytes([fill]) * (len(ret[0].data) - len(dat))
   return ret

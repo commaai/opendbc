@@ -40,9 +40,9 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
     values = {"DriverOverride": 2 if brake else random.choice((0, 1, 3))}
     return self.packer.make_can_msg_safety("TCS13", 0, values)
 
-  def _speed_msg(self, speed, wheels=("FL", "FR", "RL", "RR")):
-    # safety doesn't scale, so undo the scaling
-    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in wheels}
+  def _speed_msg(self, speed):
+    # safety doesn't scale, so undo the scaling. It only reads two wheels
+    values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in ("FL", "RR")}
     return self.packer.make_can_msg_safety("WHL_SPD11", 0, values)
 
   def _pcm_status_msg(self, enable):
@@ -63,12 +63,6 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
       raise unittest.SkipTest
     self.assertTrue(self._rx(self.packer.make_can_msg_safety("E_EMS11", 0, {"Accel_Pedal_Pos": 1, "CR_Vcu_AccPedDep_Pos": 1})))
     self.assertFalse(self.safety.get_gas_pressed_prev())
-
-  def test_vehicle_moving_single_wheel(self):
-    # vehicle is moving if any checked wheel is above standstill
-    for wheel in ("FL", "RR"):
-      self.assertTrue(self._rx(self._speed_msg(self.STANDSTILL_THRESHOLD + 1, wheels=(wheel,))))
-      self.assertTrue(self.safety.get_vehicle_moving())
 
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
@@ -101,7 +95,6 @@ class TestHyundaiSafetyFCEV(TestHyundaiSafety):
 
 class TestHyundaiLegacySafety(TestHyundaiSafety):
   SAFETY_MODEL = CarParams.SafetyModel.hyundaiLegacy
-
 
 class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
   SAFETY_MODEL = CarParams.SafetyModel.hyundaiLegacy

@@ -45,7 +45,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   // X-Trail 0x15c, Leaf 0x239
   if (msg_matches(msg, 0x15cU, safety_setup.nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, safety_setup.nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x15cU) {
-      safety.gas_pressed = ((msg->data[5] << 2) | ((msg->data[6] >> 6) & 0x3U)) > 3U;
+      safety.gas_pressed = (GET_BYTES_BE(msg, 5, 2) >> 6) > 3U;  // GAS_PEDAL
     } else {
       safety.gas_pressed = msg->data[0] > 3U;
     }
