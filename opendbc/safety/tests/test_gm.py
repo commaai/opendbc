@@ -154,7 +154,7 @@ class TestGmEVSafetyBase(TestGmSafetyBase):
 
   # existence of _user_regen_msg adds regen tests
   def _user_regen_msg(self, regen):
-    values = {"RegenPaddle": 2 if regen else 0}
+    values = {"RegenPaddle": 1 if regen else 0}  # the lowest bit: any non-zero paddle value is regen braking
     return self.packer.make_can_msg_safety("EBCMRegenPaddle", 0, values)
 
 

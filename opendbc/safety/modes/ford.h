@@ -176,7 +176,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     bool cmbb_deny = GET_BIT(msg, 37U);
 
     // Signal: AccBrkPrchg_B_Rq & AccBrkDecel_B_Rq
-    bool brake_actuation = (msg->data[6] & 0xC0U) != 0U;
+    bool brake_actuation = GET_BIT(msg, 54U) || GET_BIT(msg, 55U);
 
     const bool accel_violation = longitudinal_accel_checks((int)accel, FORD_LONG_LIMITS);
     const bool gas_violation = longitudinal_gas_checks((int)gas, FORD_LONG_LIMITS);

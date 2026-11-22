@@ -93,6 +93,23 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           should_tx = not any(pressed[:-1]) and (not pressed[-1] or cruise_engaged)
           self.assertEqual(should_tx, self._tx(msg))
 
+  def test_cruise_buttons_unused_bits(self):
+    # only button bits block the message
+    button_bits = (3, 4, 6, 15, 16, 19)  # SET, RES, LKAS_ON, DEC_DISTANCE, INC_DISTANCE, ACC_ON
+    for bit in set(range(64)) - set(button_bits):
+      msg = self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, {})
+      msg[0].data[bit // 8] |= 1 << (bit % 8)
+      self.assertTrue(self._tx(msg), bit)
+
+  def test_vehicle_moving_min_speed(self):
+    # WHEELSPEED_CLEAN is 0.1 kph per bit; any non-zero speed is moving
+    self._test_vehicle_moving_signals("WHEELSPEED_CLEAN", self.MAIN_BUS, [{"WHEELSPEED_CLEAN": 0.1}])
+
+  def test_gas_pressed_min(self):
+    # any non-zero RAW_THROTTLE is gas pressed
+    self._rx(self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, {"RAW_THROTTLE": 1}))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
   def test_rx_checksums(self):
     for name, bus, signal, initial, corrupt in (
       ("WHEELSPEED_CLEAN", self.MAIN_BUS, "WHEELSPEED_CLEAN", 72, 0),

@@ -67,7 +67,7 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
 
   // Gas pressed and second speed source for variable torque limit
   if (msg_matches(msg, 0x150U, 0U)) {
-    safety.gas_pressed = (msg->data[3] | (msg->data[4] & 0xC0U)) != 0U;
+    safety.gas_pressed = (GET_BYTES_BE(msg, 3, 2) >> 6) != 0U;  // VDM_AcceleratorPedalPosition, 10 bits
 
     // Disable controls if speeds from VDM and ESP ECUs are too far apart.
     float vdm_speed = (float)GET_BYTES_BE(msg, 5, 2) * 0.01f * KPH_TO_MS;

@@ -526,8 +526,8 @@ static void speed_mismatch_check(const float speed_2) {
   // For safety modes that use speed to adjust torque or angle limits
   // compared in vehicle_speed's integer units, so the limit is exact
   const int MAX_SPEED_DELTA = 2 * (int)VEHICLE_SPEED_FACTOR;  // 2 m/s
-  bool is_invalid_speed = safety_abs_int(ROUND(speed_2 * VEHICLE_SPEED_FACTOR) - safety.vehicle_speed.values[0]) > MAX_SPEED_DELTA;
-  if (is_invalid_speed) {
+  const int speed_delta = ROUND(speed_2 * VEHICLE_SPEED_FACTOR) - safety.vehicle_speed.values[0];
+  if (safety_max_limit_check(speed_delta, MAX_SPEED_DELTA, -MAX_SPEED_DELTA)) {
     safety.controls_allowed = false;
   }
 }
