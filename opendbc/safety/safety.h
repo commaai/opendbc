@@ -333,7 +333,7 @@ static void generic_rx_checks(void) {
   const int MAX_SPEED_DELTA = 2 * (int)VEHICLE_SPEED_FACTOR;  // 2 m/s
   const int speed_delta = safety.vehicle_speed_2.values[0] - safety.vehicle_speed.values[0];
   bool speed_mismatch = safety_max_limit_check(speed_delta, MAX_SPEED_DELTA, -MAX_SPEED_DELTA);
-  if (safety.vehicle_speed_2_seen && speed_mismatch) {
+  if (safety_setup.current_safety_config.vehicle_speed_2 && speed_mismatch) {
     safety.controls_allowed = false;
   }
 }
@@ -410,6 +410,7 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
   safety_setup.current_safety_config.tx_msgs = cfg.tx_msgs;
   safety_setup.current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
   safety_setup.current_safety_config.disable_forwarding = cfg.disable_forwarding;
+  safety_setup.current_safety_config.vehicle_speed_2 = cfg.vehicle_speed_2;
   return set_status;
 }
 
@@ -534,10 +535,9 @@ static void pcm_cruise_check(bool cruise_engaged) {
   safety.cruise_engaged_prev = cruise_engaged;
 }
 
-// a second speed source, for safety modes that use speed to adjust torque or angle limits
+// the second speed source of a safety_config with vehicle_speed_2
 static void update_vehicle_speed_2(const float speed_ms) {
   update_sample(&safety.vehicle_speed_2, ROUND(speed_ms * VEHICLE_SPEED_FACTOR));
-  safety.vehicle_speed_2_seen = true;
 }
 
 #endif  // SAFETY_H

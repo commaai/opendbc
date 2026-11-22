@@ -8,7 +8,7 @@
 // *** no output safety mode ***
 static safety_config nooutput_init(uint16_t param) {
   SAFETY_UNUSED(param);
-  return (safety_config){NULL, 0, NULL, 0, true};  // NOLINT(readability/braces)
+  return (safety_config){NULL, 0, NULL, 0, true, false};  // NOLINT(readability/braces)
 }
 
 // no RX checks or TX msgs, so the RX and TX hooks are never called
@@ -22,7 +22,7 @@ static safety_config alloutput_init(uint16_t param) {
   const uint16_t ALLOUTPUT_PARAM_PASSTHROUGH = 1;
   safety.controls_allowed = true;
   bool alloutput_passthrough = GET_FLAG(param, ALLOUTPUT_PARAM_PASSTHROUGH);
-  return (safety_config){NULL, 0, NULL, 0, !alloutput_passthrough};  // NOLINT(readability/braces)
+  return (safety_config){NULL, 0, NULL, 0, !alloutput_passthrough, false};  // NOLINT(readability/braces)
 }
 
 static bool alloutput_tx_hook(const CANPacket_t *msg) {

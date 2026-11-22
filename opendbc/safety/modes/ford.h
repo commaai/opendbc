@@ -322,6 +322,7 @@ static safety_config ford_init(uint16_t param) {
   } else {
     ret = BUILD_SAFETY_CFG(ford_rx_checks, FORD_LONG_TX_MSGS);
   }
+  ret.vehicle_speed_2 = true;
   return ret;
 }
 

@@ -330,10 +330,10 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
   def test_curvature_violation(self):
     # If violation occurs, curvature cmd is blocked until reset to 0
-    self.safety.set_controls_allowed(True)
     speed = 25.
     max_delta_can = self._get_max_curvature_delta_can(speed)
     self._reset_curvature_measurement(0, speed)
+    self.safety.set_controls_allowed(True)
 
     self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0))
     over_curvature = (max_delta_can + 5) / self.DEG_TO_CAN

@@ -113,6 +113,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
     ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   }
+  ret.vehicle_speed_2 = true;
   return ret;
 }
 

@@ -327,6 +327,7 @@ static safety_config tesla_init(uint16_t param) {
   } else {
     ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_TX_MSGS);
   }
+  ret.vehicle_speed_2 = true;
   return ret;
 }
 

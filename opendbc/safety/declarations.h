@@ -52,12 +52,13 @@
                            (0 * (int)sizeof(char[(2 * ((int)MAX_RX_CHECKS - ((int)sizeof((rx)) / (int)sizeof((rx)[0])))) + 1])))
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), RX_CHECKS_LEN(rx), \
                                                   (tx), SAFETY_ARRAY_LEN(tx), \
-                                                  false})
+                                                  false, false})
 #define SET_RX_CHECKS(rx, config) \
   do { \
     (config).rx_checks = (rx); \
     (config).rx_checks_len = RX_CHECKS_LEN(rx); \
     (config).disable_forwarding = false; \
+    (config).vehicle_speed_2 = false; \
   } while (false);
 
 #define SET_TX_MSGS(tx, config) \
@@ -65,6 +66,7 @@
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = SAFETY_ARRAY_LEN(tx); \
     (config).disable_forwarding = false; \
+    (config).vehicle_speed_2 = false; \
   } while (false);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&safety.vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
@@ -216,6 +218,9 @@ typedef struct {
   const CanMsg *tx_msgs;
   int tx_msgs_len;
   bool disable_forwarding;
+  // the mode reports a second speed source with update_vehicle_speed_2, which must agree with vehicle_speed.
+  // Required for speed-dependent steering limits
+  bool vehicle_speed_2;
 } safety_config;
 
 typedef uint32_t (*get_checksum_t)(const CANPacket_t *msg);
@@ -288,8 +293,7 @@ typedef struct {
   bool steering_disengage_prev;
   bool cruise_engaged_prev;
   struct sample_t vehicle_speed;
-  struct sample_t vehicle_speed_2;  // a second speed source, if the safety mode has one
-  bool vehicle_speed_2_seen;
+  struct sample_t vehicle_speed_2;  // see safety_config.vehicle_speed_2
   bool vehicle_moving;
   bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
   uint8_t cruise_button_prev;

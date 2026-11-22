@@ -174,6 +174,7 @@ static safety_config rivian_init(uint16_t param) {
     }
   #endif
 
+  ret.vehicle_speed_2 = true;
   return ret;
 }
 
