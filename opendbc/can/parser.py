@@ -56,7 +56,7 @@ class MessageState:
           self.rate_limited_log(nanos, f"checksum failed: received {hex(tmp)}, calculated {hex(expected_checksum)}")
 
       if not self.ignore_counter and sig.type == 1:  # COUNTER
-        if not self.update_counter(tmp, sig.size):
+        if not self.update_counter(tmp, sig.max_counter):
           counter_failed = True
 
       tmp_vals[i] = tmp * sig.factor + sig.offset
@@ -82,8 +82,8 @@ class MessageState:
         self.timeout_threshold = (1_000_000_000 / self.frequency) * 10
     return True
 
-  def update_counter(self, cur_count: int, cnt_size: int) -> bool:
-    if ((self.counter + 1) & ((1 << cnt_size) - 1)) != cur_count:
+  def update_counter(self, cur_count: int, max_counter: int) -> bool:
+    if (self.counter + 1) % (max_counter + 1) != cur_count:
       self.counter_fail = min(self.counter_fail + 1, MAX_BAD_COUNTER)
     elif self.counter_fail > 0:
       self.counter_fail -= 1
