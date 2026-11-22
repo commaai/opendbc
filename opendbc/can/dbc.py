@@ -237,6 +237,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
   elif dbc_name.startswith(("toyota_", "lexus_")):
     return ChecksumState(SignalType.TOYOTA_CHECKSUM, toyota_checksum)
   elif dbc_name == "hyundai_can_generated":
+    # TODO: some cars set it and some don't. check it on the ones that do set it
     return ChecksumState(SignalType.HYUNDAI_CHECKSUM, hyundai_can_checksum, hyundai_setup_signal, ignore_checksum=True)
   elif dbc_name.startswith("hyundai_canfd_generated"):
     return ChecksumState(SignalType.HKG_CAN_FD_CHECKSUM, hkg_can_fd_checksum)
