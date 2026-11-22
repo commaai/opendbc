@@ -61,6 +61,7 @@ class Signal:
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
   checksum_fields: tuple['Signal', ...] = ()
   max_counter: int = field(init=False)  # a counter's last value before it wraps to 0
+  counter_shift: int = 0  # where this signal's bits go in a counter split across signals
 
   def __post_init__(self):
     self.max_counter = (1 << self.size) - 1
@@ -229,6 +230,13 @@ def hyundai_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
       sig.name.startswith("WHL_SPD_Checksum_")):
     sig.type = SignalType.HYUNDAI_CHECKSUM
     sig.calc_checksum = hyundai_can_checksum
+  elif sig.name in ("AliveCounter", "AliveCounterTCS", "CR_VSM_Alive", "CF_Clu_AliveCnt1"):
+    sig.type = SignalType.COUNTER
+  elif sig.name in ("WHL_SPD_AliveCounter_LSB", "WHL_SPD_AliveCounter_MSB"):
+    # one 4-bit counter, split in two
+    sig.type = SignalType.COUNTER
+    sig.max_counter = 15
+    sig.counter_shift = 2 if sig.name.endswith("_MSB") else 0
 
 
 @dataclass
@@ -237,6 +245,7 @@ class ChecksumState:
   calc_checksum: Callable[[int, Signal, bytearray], int] | None
   setup_signal: Callable[[Signal, str, int], None] | None = None
   ignore_checksum: bool = False
+  ignore_counter: bool = False
   checksum_pattern: str = r"^CHECKSUM$"
   checksum_fields: dict[int, tuple[str, ...]] | None = None
 
@@ -247,8 +256,8 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
   elif dbc_name.startswith(("toyota_", "lexus_")):
     return ChecksumState(SignalType.TOYOTA_CHECKSUM, toyota_checksum)
   elif dbc_name == "hyundai_can_generated":
-    # TODO: some cars set it and some don't. check it on the ones that do set it
-    return ChecksumState(SignalType.HYUNDAI_CHECKSUM, hyundai_can_checksum, hyundai_setup_signal, ignore_checksum=True)
+    # TODO: some cars set them and some don't. check them on the ones that do set them
+    return ChecksumState(SignalType.HYUNDAI_CHECKSUM, hyundai_can_checksum, hyundai_setup_signal, ignore_checksum=True, ignore_counter=True)
   elif dbc_name.startswith("hyundai_canfd_generated"):
     return ChecksumState(SignalType.HKG_CAN_FD_CHECKSUM, hkg_can_fd_checksum)
   elif dbc_name.startswith("vw_meb_2024"):
