@@ -1,4 +1,5 @@
 from opendbc.car import CanBusBase
+from opendbc.car.ford.values import AebOffRequest
 
 
 class CanBus(CanBusBase):
@@ -343,3 +344,23 @@ def ford_checksum(address: int, sig, d: bytearray) -> int:
     value = field.get_raw_value(d)
     checksum += value + (value >> 8)
   return ~checksum & 0xFF
+
+
+def create_aeb_off_msg(packer, CAN: CanBus, personality_stock_values: dict):
+  """
+  Creates a driver setting request to the camera (IPMA) that switches automatic emergency braking off.
+
+  The camera sets AEB back to on in the first 3 s of every ignition, so the request is repeated for the whole drive,
+  like Tester Present keeps a radar disabled on other cars. The driver profile is copied from the gateway's request.
+
+  Frequency is 1Hz.
+  """
+  assert AebOffRequest.DISPLAY_OP is not None, "AEB off request is not known"
+
+  values = {
+    "MsgCntrFeatNoRq": AebOffRequest.FEATURE,
+    "MsgCntrFeatConfigRq": AebOffRequest.VALUE,
+    "MsgCntrDsplyOp_D_Rq": AebOffRequest.DISPLAY_OP,
+    "MsgCntrPersIndex_D_Rq": personality_stock_values["MsgCntrPersIndex_D_Rq"],
+  }
+  return packer.make_can_msg("Personality_Data_FD1", CAN.camera, values)

@@ -108,6 +108,9 @@ class CarState(CarStateBase):
     # Stock values from IPMA so that we can retain some stock functionality
     self.acc_tja_status_stock_values = cp_cam.vl["ACCDATA_3"]
     self.lkas_status_stock_values = cp_cam.vl["IPMA_Data"]
+    # Stock driver setting requests from the gateway, for the driver profile
+    if self.CP.flags & FordFlags.DISABLE_AEB:
+      self.personality_stock_values = cp.vl["Personality_Data_FD1"]
 
     ret.buttonEvents = [
       *create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}),

@@ -19,6 +19,7 @@ class CarControllerParams:
   LKAS_UI_STEP = 100    # IPMA_Data, 1Hz
   ACC_UI_STEP = 20      # ACCDATA_3, 5Hz
   BUTTONS_STEP = 5      # Steering_Data_FD1, 10Hz, but send twice as fast
+  AEB_OFF_STEP = 100    # Personality_Data_FD1, 1Hz
 
   STEER_DRIVER_ALLOWANCE = 1.0  # Driver intervention threshold, Nm
 
@@ -53,6 +54,21 @@ class FordFlags(IntFlag):
   CANFD = 1
   TRON = 4  # 16 byte messages
 
+  # Alpha longitudinal on TRON platforms: openpilot switches the camera's automatic emergency braking off
+  DISABLE_AEB = 8
+
+
+class AebOffRequest:
+  # Personality_Data_FD1 (0x3E0): a driver setting request from the gateway to the camera, no MAC.
+  # Setting 0x840 is automatic emergency braking alone: the camera sets it back to on in the first 3 s
+  # of every ignition, so it is off for one drive. 0x804, the whole Pre-Collision Assist feature, is
+  # remembered across ignitions and is not used
+  FEATURE = 0x840
+  VALUE = 0  # off
+  # TODO: the MsgCntrDsplyOp_D_Rq the camera takes as "set" is not known. The screen's own requests seen
+  # on a 2026 F-150 use 1 (for other settings), and the camera checks the value only for 2
+  DISPLAY_OP: int | None = None
+
 
 class RADAR:
   DELPHI_ESR = 'ford_fusion_2018_adas'
@@ -64,6 +80,10 @@ class Footnote(Enum):
     "Refers only to the Focus Mk4 (C519) available in Europe/China/Taiwan/Australasia, not the Focus Mk3 (C346) in " +
     "North and South America/Southeast Asia.",
     Column.MODEL,
+  )
+  TRON_ALPHALONG = CarFootnote(
+    "Enabling longitudinal control (alpha) will disable Automatic Emergency Braking (AEB) and brake support for the drive.",
+    Column.LONGITUDINAL,
   )
 
 
@@ -82,6 +102,9 @@ class FordCarDocs(CarDocs):
 
     if CP.carFingerprint in (CAR.FORD_F_150_MK14, CAR.FORD_F_150_LIGHTNING_MK1, CAR.FORD_EXPEDITION_MK4):
       self.setup_video = "https://www.youtube.com/watch?v=MewJc9LYp9M"
+
+    if CP.flags & FordFlags.TRON and CP.alphaLongitudinalAvailable:
+      self.footnotes.append(Footnote.TRON_ALPHALONG)
 
 
 @dataclass

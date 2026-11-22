@@ -52,10 +52,16 @@ class CarInterface(CarInterfaceBase):
     ret.safetyConfigs = cfgs
 
     # ACC stays stock on TRON platforms
+    # TODO: TRON alpha long needs a longitudinal channel (ACCDATA is signed) and the AEB off request (AebOffRequest)
     ret.alphaLongitudinalAvailable = ret.radarUnavailable and not ret.flags & FordFlags.TRON
     if (alpha_long and ret.alphaLongitudinalAvailable) or not ret.radarUnavailable:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.LONG_CONTROL.value
       ret.openpilotLongitudinalControl = True
+
+      # Switch the camera's AEB off and let openpilot control longitudinal
+      # WARNING: THIS DISABLES AEB!
+      if ret.flags & FordFlags.TRON:
+        ret.flags |= FordFlags.DISABLE_AEB.value
 
     if ret.flags & FordFlags.CANFD:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.CANFD.value
