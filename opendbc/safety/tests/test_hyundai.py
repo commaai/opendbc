@@ -28,39 +28,25 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
   MIN_VALID_STEERING_FRAMES = 89
   MAX_INVALID_STEERING_FRAMES = 2
 
-  cnt_gas = 0
-  cnt_speed = 0
-  cnt_brake = 0
-  cnt_cruise = 0
-  cnt_button = 0
-
   def _button_msg(self, buttons, main_button=0, bus=0):
-    values = {"CF_Clu_CruiseSwState": buttons, "CF_Clu_CruiseSwMain": main_button, "CF_Clu_AliveCnt1": self.cnt_button}
-    self.__class__.cnt_button += 1
+    values = {"CF_Clu_CruiseSwState": buttons, "CF_Clu_CruiseSwMain": main_button}
     return self.packer.make_can_msg_safety("CLU11", bus, values)
 
   def _user_gas_msg(self, gas):
-    values = {"CF_Ems_AclAct": gas, "AliveCounter": self.cnt_gas % 4}
-    self.__class__.cnt_gas += 1
+    values = {"CF_Ems_AclAct": gas}
     return self.packer.make_can_msg_safety("EMS16", 0, values)
 
   def _user_brake_msg(self, brake):
-    values = {"DriverOverride": 2 if brake else random.choice((0, 1, 3)),
-              "AliveCounterTCS": self.cnt_brake % 8}
-    self.__class__.cnt_brake += 1
+    values = {"DriverOverride": 2 if brake else random.choice((0, 1, 3))}
     return self.packer.make_can_msg_safety("TCS13", 0, values)
 
   def _speed_msg(self, speed, wheels=("FL", "FR", "RL", "RR")):
     # safety doesn't scale, so undo the scaling
     values = {"WHL_SPD_%s" % s: speed * 0.03125 for s in wheels}
-    values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
-    values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
-    self.__class__.cnt_speed += 1
     return self.packer.make_can_msg_safety("WHL_SPD11", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"ACCMode": enable, "CR_VSM_Alive": self.cnt_cruise % 16}
-    self.__class__.cnt_cruise += 1
+    values = {"ACCMode": enable}
     return self.packer.make_can_msg_safety("SCC12", self.SCC_BUS, values)
 
   def _torque_driver_msg(self, torque):

@@ -40,6 +40,8 @@ class MessageState:
     tmp_vals: list[float] = [0.0] * len(self.signals)
     checksum_failed = False
     counter_failed = False
+    counter = 0
+    counter_sig = None
 
     if self.first_seen_nanos == 0:
       self.first_seen_nanos = nanos
@@ -55,11 +57,14 @@ class MessageState:
           checksum_failed = True
           self.rate_limited_log(nanos, f"checksum failed: received {hex(tmp)}, calculated {hex(expected_checksum)}")
 
-      if not self.ignore_counter and sig.type == 1:  # COUNTER
-        if not self.update_counter(tmp, sig.max_counter):
-          counter_failed = True
+      if sig.type == 1:  # COUNTER, which may be split across signals
+        counter |= tmp << sig.counter_shift
+        counter_sig = sig
 
       tmp_vals[i] = tmp * sig.factor + sig.offset
+
+    if not self.ignore_counter and counter_sig is not None:
+      counter_failed = not self.update_counter(counter, counter_sig.max_counter)
 
     # must have good counter and checksum to update data
     if checksum_failed or counter_failed:
@@ -165,6 +170,7 @@ class CANParser:
       signals=list(msg.sigs.values()),
       ignore_alive=freq is not None and math.isnan(freq),
       ignore_checksum=self.dbc.checksum_state.ignore_checksum if self.dbc.checksum_state else False,
+      ignore_counter=self.dbc.checksum_state.ignore_counter if self.dbc.checksum_state else False,
     )
     if freq is not None and freq > 0:
       state.frequency = freq
