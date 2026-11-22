@@ -497,6 +497,11 @@ class TestFordCANFDTronLongitudinalSafety(TestFordCANFDTronSafety):
       msg[0].data[byte] = 1 << bit
       self.assertFalse(self._tx(msg))
 
+    # a stale byte past the 8-byte frame is not part of the request
+    msg = self._personality_msg(0x840, 0)
+    msg[0].data[8] = 1
+    self.assertTrue(self._tx(msg))
+
 
 class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   MAX_ACCEL = 2.0  # accel is used for brakes, but openpilot can set positive values
