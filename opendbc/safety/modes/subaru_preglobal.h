@@ -32,7 +32,7 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
 
   // update vehicle moving with any non-zero wheel speed
   if (msg_matches(msg, MSG_SUBARU_PG_Wheel_Speeds, SUBARU_PG_MAIN_BUS)) {
-    safety.vehicle_moving = ((GET_BYTES_LE(msg, 0, 4) >> 12) | GET_BYTES_LE(msg, 4, 4)) != 0U;
+    safety.vehicle_moving = (GET_BYTES_LE(msg, 0, 4) | GET_BYTES_LE(msg, 4, 4)) != 0U;
   }
 
   if (msg_matches(msg, MSG_SUBARU_PG_Brake_Pedal, SUBARU_PG_MAIN_BUS)) {
