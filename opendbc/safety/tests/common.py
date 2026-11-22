@@ -776,6 +776,20 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
         winding_up = last * sign > 0  # the up limit is lower, so it doesn't allow this
         self.assertEqual(not winding_up, self._tx(self._angle_cmd_msg(cmd / self.DEG_TO_CAN, True)), (last, cmd))
 
+  def test_angle_cmd_steps_from_last_inactive(self):
+    # openpilot steps from the inactive angle it sent last, a newer measurement mustn't move the panda's base
+    if not hasattr(self, 'ANGLE_RATE_BP'):
+      raise unittest.SkipTest("limits from a vehicle model")
+    max_delta_down = np.interp(10., self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN)
+    for step, allowed in ((max_delta_down, True), (max_delta_down + 1.1, False)):
+      self._reset_speed_measurement(10.)
+      self._reset_angle_measurement(10.)
+      self._rx(self._angle_meas_msg(10.5))
+      self.safety.set_controls_allowed(False)
+      self.assertTrue(self._tx(self._angle_cmd_msg(10., False)))
+      self.safety.set_controls_allowed(True)
+      self.assertEqual(allowed, self._tx(self._angle_cmd_msg(10. - step, True)))
+
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while
     # steer actuation bit is 0, regardless of controls allowed.

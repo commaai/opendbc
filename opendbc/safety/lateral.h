@@ -224,8 +224,8 @@ static bool steer_angle_cmd_common_checks(bool limit_violation, int desired_angl
   const bool controls_violation = !safety.controls_allowed && steer_control_enabled;
   const bool violation = limit_violation || inactive_angle_violation || controls_violation;
 
-  // reset to current angle if either controls is not allowed or there's a violation
-  if (violation || !safety.controls_allowed) {
+  // reset to current angle on a violation, an inactive angle is close to it and is what openpilot steps from next
+  if (violation) {
     safety.desired_angle_last = safety_clamp_int(safety.angle_meas.values[0], -max_angle, max_angle);
   }
 
