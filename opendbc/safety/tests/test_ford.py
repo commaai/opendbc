@@ -94,14 +94,14 @@ class TestFordSafetyBase(common.CarSafetyTest):
     return self.packer.make_can_msg_safety("EngBrakeData", 0, values)
 
   # ABS vehicle speed
-  def _speed_msg(self, speed: float, quality_flag=True):
-    values = {"Veh_V_ActlBrk": speed * 3.6, "VehVActlBrk_D_Qf": 3 if quality_flag else 0}
+  def _speed_msg(self, speed: float):
+    values = {"Veh_V_ActlBrk": speed * 3.6, "VehVActlBrk_D_Qf": 3}
     return self.packer.make_can_msg_safety("BrakeSysFeatures", 0, values)
 
   # PCM vehicle speed
-  def _speed_msg_2(self, speed: float, quality_flag=True):
+  def _speed_msg_2(self, speed: float):
     # Ford relies on speed for driver curvature limiting, so it checks two sources
-    values = {"Veh_V_ActlEng": speed * 3.6, "VehVActlEng_D_Qf": 3 if quality_flag else 0}
+    values = {"Veh_V_ActlEng": speed * 3.6, "VehVActlEng_D_Qf": 3}
     return self.packer.make_can_msg_safety("EngVehicleSpThrottle2", 0, values)
 
   # Standstill state
@@ -109,9 +109,15 @@ class TestFordSafetyBase(common.CarSafetyTest):
     values = {"VehStop_D_Stat": 1 if speed <= self.STANDSTILL_THRESHOLD else random.choice((0, 2, 3))}
     return self.packer.make_can_msg_safety("DesiredTorqBrk", 0, values)
 
+  RX_QUALITY_FLAGS = {
+    "BrakeSysFeatures": {"VehVActlBrk_D_Qf": (3,)},
+    "EngVehicleSpThrottle2": {"VehVActlEng_D_Qf": (3,)},
+    "Yaw_Data_FD1": {"VehYawWActl_D_Qf": (3,)},
+  }
+
   # Current curvature
-  def _yaw_rate_msg(self, curvature: float, speed: float, quality_flag=True):
-    values = {"VehYaw_W_Actl": curvature * speed, "VehYawWActl_D_Qf": 3 if quality_flag else 0}
+  def _yaw_rate_msg(self, curvature: float, speed: float):
+    values = {"VehYaw_W_Actl": curvature * speed, "VehYawWActl_D_Qf": 3}
     return self.packer.make_can_msg_safety("Yaw_Data_FD1", 0, values)
 
   # Drive throttle input
@@ -187,29 +193,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
 
         within_delta = common.speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
-
-  def test_rx_hook(self):
-    # checksum, counter, and quality flag checks
-    for quality_flag in [True, False]:
-      for msg_type in ["speed", "speed_2", "yaw"]:
-        self.safety.set_controls_allowed(True)
-        # send multiple times to verify counter checks
-        for _ in range(10):
-          if msg_type == "speed":
-            msg = self._speed_msg(0, quality_flag=quality_flag)
-          elif msg_type == "speed_2":
-            msg = self._speed_msg_2(0, quality_flag=quality_flag)
-          elif msg_type == "yaw":
-            msg = self._yaw_rate_msg(0, 0, quality_flag=quality_flag)
-
-          self.assertEqual(quality_flag, self._rx(msg))
-          self.assertEqual(quality_flag, self.safety.get_controls_allowed())
-
-        # Mess with checksum to make it fail, checksum is not checked for 2nd speed
-        msg[0].data[3] = 0  # Speed checksum & half of yaw signal
-        should_rx = msg_type == "speed_2" and quality_flag
-        self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
   def test_angle_measurements(self):
     """Tests rx hook correctly parses the curvature measurement from the vehicle speed and yaw rate"""
