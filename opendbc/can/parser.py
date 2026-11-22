@@ -1,6 +1,7 @@
 import math
 import numbers
 from collections import defaultdict, deque
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 from opendbc.car.carlog import carlog
@@ -111,7 +112,7 @@ class VLDict(dict):
 
 
 class CANParser:
-  def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int):
+  def __init__(self, dbc_name: str, messages: Sequence[tuple[str | int, float]], bus: int):
     self.dbc_name: str = dbc_name
     self.bus: int = bus
     self.dbc = DBC(dbc_name)
@@ -139,7 +140,7 @@ class CANParser:
     self._last_update_nanos: int = 0
     self._last_invalid_log_nanos: int | None = None
 
-  def _add_message(self, name_or_addr: str | int, freq: int | None = None) -> None:
+  def _add_message(self, name_or_addr: str | int, freq: float | None = None) -> None:
     if isinstance(name_or_addr, numbers.Number):
       msg = self.dbc.addr_to_msg.get(int(name_or_addr))
     else:

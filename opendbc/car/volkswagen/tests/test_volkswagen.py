@@ -5,7 +5,7 @@ import unittest
 from opendbc.car import DT_CTRL
 from opendbc.car.structs import CarParams
 from opendbc.car.volkswagen.carcontroller import HCAMitigation
-from opendbc.car.volkswagen.values import CAR, CarControllerParams as CCP, FW_QUERY_CONFIG, WMI
+from opendbc.car.volkswagen.values import CAR, CarControllerParams as CCP, WMI, match_fw_to_car_fuzzy
 from opendbc.car.volkswagen.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
@@ -70,8 +70,8 @@ class TestVolkswagenPlatformConfigs(unittest.TestCase):
               should_match = ((wmi in platform.config.wmis and chassis_code in platform.config.chassis_codes) and
                               radar_fw in all_radar_fw)
 
-              live_fws = {(0x757, None): [radar_fw]}
-              matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fws, vin, FW_VERSIONS)
+              live_fws = {(0x757, None): {radar_fw}}
+              matches = match_fw_to_car_fuzzy(live_fws, vin, FW_VERSIONS)
 
               expected_matches = {platform} if should_match else set()
               assert expected_matches == matches, "Bad match"

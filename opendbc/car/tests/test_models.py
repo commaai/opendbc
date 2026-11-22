@@ -147,16 +147,16 @@ class TestCarModelBase(unittest.TestCase):
     return car_fw, can_msgs, alpha_long
 
   @classmethod
-  def get_testing_data(cls):
-    test_segments = (2, 1, 0) if cls.test_route.segment is None else (cls.test_route.segment,)
+  def get_testing_data(cls, test_route: CarTestRoute):
+    test_segments = (2, 1, 0) if test_route.segment is None else (test_route.segment,)
     for segment in test_segments:
       try:
-        log_path = get_cached_segment(cls.test_route.route, segment)
+        log_path = get_cached_segment(test_route.route, segment)
         return cls.get_testing_data_from_logreader(LogReader(str(log_path), only_union_types=True, sort_by_time=True))
       except (OSError, AssertionError):
         pass
 
-    raise Exception(f"Route: {cls.test_route.route!r} with segments: {test_segments} not found or no CAN messages found")
+    raise Exception(f"Route: {test_route.route!r} with segments: {test_segments} not found or no CAN messages found")
 
   @classmethod
   def setUpClass(cls):
@@ -168,7 +168,7 @@ class TestCarModelBase(unittest.TestCase):
         raise unittest.SkipTest(f"missing route for {cls.platform}")
       raise Exception(f"missing test route for {cls.platform}")
 
-    car_fw, cls.can_msgs, alpha_long = cls.get_testing_data()
+    car_fw, cls.can_msgs, alpha_long = cls.get_testing_data(cls.test_route)
     cls.raw_can_keys = {(msg.address, msg.src) for _, messages in cls.can_msgs for msg in messages if msg.src < 128}
     cls.CarInterface = interfaces[cls.platform]
     cls.CP = cls.CarInterface.get_params(cls.platform, cls.fingerprint, car_fw, alpha_long, False, docs=False)
@@ -302,7 +302,7 @@ class TestCarModelBase(unittest.TestCase):
       for _ in range(round(10.0 / DT_CTRL)):
         CI.update([])
         _, sendcan = CI.apply(car_control, now_nanos)
-        now_nanos += DT_CTRL * 1e9
+        now_nanos += int(DT_CTRL * 1e9)
         msgs_sent += len(sendcan)
         for addr, dat, bus in sendcan:
           packet = libsafety_py.make_CANPacket(addr, bus % 4, dat)

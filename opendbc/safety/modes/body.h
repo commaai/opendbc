@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_BODY_H
+#define SAFETY_MODES_BODY_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -12,7 +13,7 @@ static uint32_t body_get_checksum(const CANPacket_t *msg) {
 
 static uint32_t body_compute_checksum(const CANPacket_t *msg) {
   uint8_t checksum = 0xFFU;
-  int len = GET_LEN(msg);
+  int len = (int)GET_LEN(msg);
   for (int i = len - 2; i >= 0; i--) {
     checksum = crc8_update(checksum, msg->data[i], 0xD5U);
   }
@@ -60,7 +61,7 @@ static safety_config body_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks body_hooks = {
+static const safety_hooks body_hooks = {
   .init = body_init,
   .rx = body_rx_hook,
   .tx = body_tx_hook,
@@ -68,3 +69,5 @@ const safety_hooks body_hooks = {
   .get_checksum = body_get_checksum,
   .compute_checksum = body_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_BODY_H

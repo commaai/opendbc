@@ -1,7 +1,7 @@
-#pragma once
+#ifndef SAFETY_MODES_VOLKSWAGEN_COMMON_H
+#define SAFETY_MODES_VOLKSWAGEN_COMMON_H
 
-extern const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL;
-const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
+static const uint16_t FLAG_VOLKSWAGEN_LONG_CONTROL = 1;
 
 #define MSG_LH_EPS_03        0x09FU   // RX from EPS, for driver steering torque
 #define MSG_ESP_19           0x0B2U   // RX from ABS, for wheel speeds
@@ -38,7 +38,7 @@ static uint8_t volkswagen_mxb_get_counter(const CANPacket_t *msg) {
 
 // This is CRC-8H2F/AUTOSAR with a counter-dependent data ID. See the
 // opendbc/car/volkswagen/ implementation for explanatory comments.
-static uint8_t volkswagen_compute_crc(const CANPacket_t *msg, int len, uint8_t salt) {
+static uint8_t volkswagen_compute_crc(const CANPacket_t *msg, uint32_t len, uint8_t salt) {
   // CRC-8 lookup table for poly 0x2F, aka 8H2F/AUTOSAR
   // generated with: python3 -c 'f=lambda c:[c:=((c<<1)^0x2F)&0xFF if c&0x80 else (c<<1)&0xFF for _ in range(8)][-1];print(",\n".join("    "+", ".join(f"0x{f(i):02X}U" for i in range(r,r+16)) for r in range(0,256,16)))'
   static const uint8_t volkswagen_crc8_lut_8h2f[256] = {
@@ -60,7 +60,7 @@ static uint8_t volkswagen_compute_crc(const CANPacket_t *msg, int len, uint8_t s
     0xD8U, 0xF7U, 0x86U, 0xA9U, 0x64U, 0x4BU, 0x3AU, 0x15U, 0x8FU, 0xA0U, 0xD1U, 0xFEU, 0x33U, 0x1CU, 0x6DU, 0x42U
   };
   uint8_t crc = 0xFFU;
-  for (int i = 1; i < len; i++) {
+  for (uint32_t i = 1U; i < len; i++) {
     crc ^= (uint8_t)msg->data[i];
     crc = volkswagen_crc8_lut_8h2f[crc];
   }
@@ -88,24 +88,41 @@ static uint32_t volkswagen_mxb_compute_crc(const CANPacket_t *msg) {
   return volkswagen_compute_crc(msg, GET_LEN(msg), salt);
 }
 
+// Signal: TSK_06.TSK_Status (MQB), Motor_51.TSK_Status (MEB)
+static void volkswagen_tsk_status_check(int acc_status, bool stock_acc) {
+  bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
+  safety.acc_main_on = cruise_engaged || (acc_status == 2);
+
+  // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
+  if (stock_acc) {
+    pcm_cruise_check(cruise_engaged);
+  }
+
+  // Always exit controls on main switch off
+  if (!safety.acc_main_on) {
+    safety.controls_allowed = false;
+  }
+}
+
+// Enter controls on falling edge of Set or Resume with main switch on
+static void volkswagen_set_resume_check(bool set_button, bool resume_button) {
+  if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {
+    safety.controls_allowed = safety.acc_main_on;
+  }
+  safety.volkswagen_set_button_prev = set_button;
+  safety.volkswagen_resume_button_prev = resume_button;
+}
+
 static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
   // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
   // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
-  int torque_driver_new = msg->data[5] | ((msg->data[6] & 0x1FU) << 8);
-  bool sign = GET_BIT(msg, 55U);
-  if (sign) {
-    torque_driver_new *= -1;
-  }
-  return torque_driver_new;
+  return sign_magnitude(GET_BYTES_LE(msg, 5, 2) & 0x1FFFU, GET_BIT(msg, 55U));
 }
 
 static int volkswagen_mlb_mqb_steering_control_torque(const CANPacket_t *msg) {
   // Signal: HCA_01.HCA_01_LM_Offset (absolute torque)
   // Signal: HCA_01.HCA_01_LM_OffSign (direction)
-  int desired_torque = msg->data[2] | ((msg->data[3] & 0x1U) << 8);
-  bool sign = GET_BIT(msg, 31U);
-  if (sign) {
-    desired_torque *= -1;
-  }
-  return desired_torque;
+  return sign_magnitude(GET_BYTES_LE(msg, 2, 2) & 0x1FFU, GET_BIT(msg, 31U));
 }
+
+#endif  // SAFETY_MODES_VOLKSWAGEN_COMMON_H

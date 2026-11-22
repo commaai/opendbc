@@ -93,13 +93,13 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))      # steady power
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))   # decreasing power
 
-  def _speed_msg(self, speed_mps: float):
-    spd_kph = speed_mps * 3.6
+  def _speed_msg(self, speed: float):
+    spd_kph = speed * 3.6
     values = {f"{s}_Radgeschw": spd_kph for s in ("VL", "VR", "HL", "HR")}
     return self.packer.make_can_msg_safety("ESC_51", 0, values)
 
-  def _speed_msg_2(self, speed_mps: float):
-    values = {"ESP_v_Signal": speed_mps * 3.6}
+  def _speed_msg_2(self, speed: float):
+    values = {"ESP_v_Signal": speed * 3.6}
     return self.packer.make_can_msg_safety("ESP_21", 0, values)
 
   def _motor_14_msg(self, brake):
@@ -112,9 +112,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   def _user_gas_msg(self, gas):
     values = {"Accel_Pedal_Pressure": 1 if gas else 0, "TSK_Status": 3}
     return self.packer.make_can_msg_safety("Motor_51", 0, values)
-
-  def _vehicle_moving_msg(self, speed_mps: float):
-    return self._speed_msg(speed_mps)
 
   def _curvature_meas_msg(self, curvature):
     values = {"Curvature": abs(curvature), "Curvature_VZ": curvature > 0}
@@ -206,9 +203,10 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
           self.assertEqual(should_rx, self._rx(msg))
 
   def test_main_switch_off_disables_controls(self):
-    self.safety.set_controls_allowed(True)
-    self._rx(self._tsk_status_msg(False, main_switch=False))
-    self.assertFalse(self.safety.get_controls_allowed())
+    for tsk_status in range(8):
+      self.safety.set_controls_allowed(True)
+      self._rx(self.packer.make_can_msg_safety("Motor_51", 0, {"TSK_Status": tsk_status}))
+      self.assertEqual(tsk_status in (2, 3, 4, 5), self.safety.get_controls_allowed())
 
   def test_cancel_button_rising_edge(self):
     self.safety.set_controls_allowed(True)

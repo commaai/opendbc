@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_HONDA_H
+#define SAFETY_MODES_HONDA_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -17,25 +18,22 @@
 #define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                                              \
   {.msg = {{0x1BE, (pt_bus), 3, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
 
-enum {
-  HONDA_BTN_NONE = 0,
-  HONDA_BTN_MAIN = 1,
-  HONDA_BTN_CANCEL = 2,
-  HONDA_BTN_SET = 3,
-  HONDA_BTN_RESUME = 4,
-};
+#define HONDA_BTN_MAIN 1U
+#define HONDA_BTN_CANCEL 2U
+#define HONDA_BTN_SET 3U
+#define HONDA_BTN_RESUME 4U
 
 static unsigned int honda_get_pt_bus(void) {
   return ((safety_setup.honda_hw == HONDA_BOSCH) && !safety_setup.honda_bosch_radarless && !safety_setup.honda_bosch_canfd) ? 1U : 0U;
 }
 
 static uint32_t honda_get_checksum(const CANPacket_t *msg) {
-  int checksum_byte = GET_LEN(msg) - 1U;
-  return (uint8_t)(msg->data[checksum_byte]) & 0xFU;
+  uint32_t checksum_byte = GET_LEN(msg) - 1U;
+  return (uint32_t)msg->data[checksum_byte] & 0xFU;
 }
 
 static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
-  int len = GET_LEN(msg);
+  int len = (int)GET_LEN(msg);
   uint8_t checksum = 0U;
   unsigned int addr = msg->addr;
   while (addr > 0U) {
@@ -52,7 +50,7 @@ static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
 }
 
 static uint8_t honda_get_counter(const CANPacket_t *msg) {
-  int counter_byte = GET_LEN(msg) - 1U;
+  uint32_t counter_byte = GET_LEN(msg) - 1U;
   return (msg->data[counter_byte] >> 4U) & 0x3U;
 }
 
@@ -62,7 +60,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 
   // sample speed
   if (msg->addr == 0x158U) {
-    safety.vehicle_moving = msg->data[0] | msg->data[1];
+    safety.vehicle_moving = (msg->data[0] | msg->data[1]) != 0U;
   }
 
   // check ACC main state
@@ -93,7 +91,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   // state machine to enter and exit controls for button enabling
   // 0x1A6 for the ILX, 0x296 for the Civic Touring
   if (msg_matches(msg, 0x1A6U, pt_bus) || msg_matches(msg, 0x296U, pt_bus)) {
-    int button = (msg->data[0] & 0xE0U) >> 5;
+    uint8_t button = (msg->data[0] & 0xE0U) >> 5;
 
     // enter controls on the falling edge of set or resume
     bool set = (button != HONDA_BTN_SET) && (safety.cruise_button_prev == HONDA_BTN_SET);
@@ -132,22 +130,13 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     safety.gas_pressed = msg->data[0] != 0U;
   }
 
-  // disable stock Honda AEB in alternative experience
-  if (!(safety_setup.alternative_experience & ALT_EXP_DISABLE_STOCK_AEB)) {
-    if (msg_matches(msg, 0x1FAU, 2U)) {
-      bool honda_stock_aeb = GET_BIT(msg, 29U);
-      int honda_stock_brake = (msg->data[0] << 2) | (msg->data[1] >> 6);
+  if (msg_matches(msg, 0x1FAU, 2U)) {
+    bool honda_stock_aeb = GET_BIT(msg, 29U);
+    uint32_t honda_stock_brake = GET_BYTES_BE(msg, 0, 2) >> 6;
 
-      // Forward AEB when stock braking is higher than openpilot braking
-      // only stop forwarding when AEB event is over
-      if (!honda_stock_aeb) {
-        safety.honda_fwd_brake = false;
-      } else if (honda_stock_brake >= safety.honda_brake) {
-        safety.honda_fwd_brake = true;
-      } else {
-        // Leave Honda forward brake as is
-      }
-    }
+    // Forward AEB when stock braking is higher than openpilot braking
+    // only stop forwarding when AEB event is over
+    safety.honda_fwd_brake = honda_stock_aeb && (safety.honda_fwd_brake || (honda_stock_brake >= safety.honda_brake));
   }
 }
 
@@ -174,12 +163,12 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // ACC_HUD: safety check (nidec w/o pedal)
   if (msg_matches(msg, 0x30CU, bus_pt)) {
-    int pcm_speed = (msg->data[0] << 8) | msg->data[1];
-    int pcm_gas = msg->data[2];
+    uint32_t pcm_speed = GET_BYTES_BE(msg, 0, 2);
+    int pcm_gas = (int)msg->data[2];
 
-    bool violation = false;
-    violation |= longitudinal_speed_checks(pcm_speed, HONDA_NIDEC_LONG_LIMITS);
-    violation |= longitudinal_gas_checks(pcm_gas, HONDA_NIDEC_LONG_LIMITS);
+    const bool speed_violation = longitudinal_speed_checks((int)pcm_speed, HONDA_NIDEC_LONG_LIMITS);
+    const bool gas_violation = longitudinal_gas_checks(pcm_gas, HONDA_NIDEC_LONG_LIMITS);
+    bool violation = speed_violation || gas_violation;
     if (violation) {
       tx = false;
     }
@@ -187,8 +176,8 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // BRAKE: safety check (nidec)
   if (msg_matches(msg, 0x1FAU, bus_pt)) {
-    safety.honda_brake = (msg->data[0] << 2) + ((msg->data[1] >> 6) & 0x3U);
-    if (longitudinal_brake_checks(safety.honda_brake, HONDA_NIDEC_LONG_LIMITS)) {
+    safety.honda_brake = GET_BYTES_BE(msg, 0, 2) >> 6;
+    if (longitudinal_brake_checks((int)safety.honda_brake, HONDA_NIDEC_LONG_LIMITS)) {
       tx = false;
     }
     if (safety.honda_fwd_brake) {
@@ -197,29 +186,27 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
     // AEB: block all actuation. stock AEB messages are forwarded from the camera instead
     bool aeb_req = GET_BIT(msg, 29U);  // AEB_REQ_1
-    int aeb_req_2 = msg->data[3] & 0x7U;  // AEB_REQ_2
-    int aeb_status = msg->data[5] & 0x3U;  // AEB_STATUS
-    if (aeb_req || (aeb_req_2 != 0) || (aeb_status != 0)) {
+    bool aeb_req_2 = (msg->data[3] & 0x7U) != 0U;  // AEB_REQ_2
+    bool aeb_status = (msg->data[5] & 0x3U) != 0U;  // AEB_STATUS
+    if (aeb_req || aeb_req_2 || aeb_status) {
       tx = false;
     }
   }
 
   // BRAKE/GAS: safety check (bosch)
   if (msg_matches(msg, 0x1DFU, bus_pt)) {
-    int accel = (msg->data[3] << 3) | ((msg->data[4] >> 5) & 0x7U);
-    accel = to_signed(accel, 11);
+    int accel = to_signed(GET_BYTES_BE(msg, 3, 2) >> 5, 11);
 
-    int gas = (msg->data[0] << 8) | msg->data[1];
-    gas = to_signed(gas, 16);
+    int gas = to_signed(GET_BYTES_BE(msg, 0, 2), 16);
 
-    bool violation = false;
-    violation |= longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
-    violation |= longitudinal_gas_checks(gas, HONDA_BOSCH_LONG_LIMITS);
+    const bool accel_violation = longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
+    const bool gas_violation = longitudinal_gas_checks(gas, HONDA_BOSCH_LONG_LIMITS);
 
     // AEB: block all actuation
-    violation |= GET_BIT(msg, 33U);  // AEB_STATUS
-    violation |= GET_BIT(msg, 43U);  // AEB_PREPARE
-    violation |= GET_BIT(msg, 47U);  // AEB_BRAKING
+    const bool aeb_status = GET_BIT(msg, 33U);
+    const bool aeb_prepare = GET_BIT(msg, 43U);
+    const bool aeb_braking = GET_BIT(msg, 47U);
+    bool violation = accel_violation || gas_violation || aeb_status || aeb_prepare || aeb_braking;
     if (violation) {
       tx = false;
     }
@@ -227,16 +214,15 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check (radarless)
   if (msg_matches(msg, 0x1C8U, bus_pt)) {
-    int accel = (msg->data[0] << 4) | (msg->data[1] >> 4);
-    accel = to_signed(accel, 12);
+    int accel = to_signed(GET_BYTES_BE(msg, 0, 2) >> 4, 12);
 
-    bool violation = false;
-    violation |= longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
+    const bool accel_violation = longitudinal_accel_checks(accel, HONDA_BOSCH_LONG_LIMITS);
 
     // AEB: block all actuation
-    violation |= GET_BIT(msg, 33U);  // AEB_STATUS
-    violation |= GET_BIT(msg, 43U);  // AEB_PREPARE
-    violation |= GET_BIT(msg, 47U);  // AEB_BRAKING
+    const bool aeb_status = GET_BIT(msg, 33U);
+    const bool aeb_prepare = GET_BIT(msg, 43U);
+    const bool aeb_braking = GET_BIT(msg, 47U);
+    bool violation = accel_violation || aeb_status || aeb_prepare || aeb_braking;
     if (violation) {
       tx = false;
     }
@@ -245,7 +231,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   // STEER: safety check
   if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
     if (!safety.controls_allowed) {
-      bool steer_applied = msg->data[0] | msg->data[1];
+      bool steer_applied = (msg->data[0] | msg->data[1]) != 0U;
       if (steer_applied) {
         tx = false;
       }
@@ -454,7 +440,7 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
   return block_msg;
 }
 
-const safety_hooks honda_nidec_hooks = {
+static const safety_hooks honda_nidec_hooks = {
   .init = honda_nidec_init,
   .rx = honda_rx_hook,
   .tx = honda_tx_hook,
@@ -464,7 +450,7 @@ const safety_hooks honda_nidec_hooks = {
   .compute_checksum = honda_compute_checksum,
 };
 
-const safety_hooks honda_bosch_hooks = {
+static const safety_hooks honda_bosch_hooks = {
   .init = honda_bosch_init,
   .rx = honda_rx_hook,
   .tx = honda_tx_hook,
@@ -472,3 +458,5 @@ const safety_hooks honda_bosch_hooks = {
   .get_checksum = honda_get_checksum,
   .compute_checksum = honda_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_HONDA_H

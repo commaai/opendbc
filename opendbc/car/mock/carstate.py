@@ -3,5 +3,5 @@ from opendbc.car.interfaces import CarStateBase
 
 
 class CarState(CarStateBase):
-  def update(self, *_) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
     return structs.CarState()

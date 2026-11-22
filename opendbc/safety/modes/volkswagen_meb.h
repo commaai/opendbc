@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_VOLKSWAGEN_MEB_H
+#define SAFETY_MODES_VOLKSWAGEN_MEB_H
 
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/volkswagen_common.h"
@@ -59,20 +60,20 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 
 static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
   uint32_t ret = volkswagen_meb_compute_crc(msg);
-  int len = 0;
+  uint32_t len = 0U;
   if (safety_setup.volkswagen_meb_alt_crc) {
     if (msg->addr == MSG_QFK_01) {
-      len = 28;
+      len = 28U;
     }
     if (msg->addr == MSG_ESC_51) {
-      len = 60;
+      len = 60U;
     }
     if (msg->addr == MSG_Motor_51) {
-      len = 44;
+      len = 44U;
     }
   }
 
-  if (len > 0) {
+  if (len > 0U) {
     uint8_t salt = 0;
     uint8_t counter = volkswagen_mxb_get_counter(msg);
     if (msg->addr == MSG_QFK_01) {
@@ -132,24 +133,24 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state by sampling wheel speeds
   if (msg_matches(msg, MSG_ESC_51, 0U)) {
-    uint32_t fl = msg->data[8] | (msg->data[9] << 8);
-    uint32_t fr = msg->data[10] | (msg->data[11] << 8);
-    uint32_t rl = msg->data[12] | (msg->data[13] << 8);
-    uint32_t rr = msg->data[14] | (msg->data[15] << 8);
+    uint32_t fl = GET_BYTES_LE(msg, 8, 2);
+    uint32_t fr = GET_BYTES_LE(msg, 10, 2);
+    uint32_t rl = GET_BYTES_LE(msg, 12, 2);
+    uint32_t rr = GET_BYTES_LE(msg, 14, 2);
     safety.vehicle_moving = (fr | rr | rl | fl) != 0U;
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.0075 * KPH_TO_MS);
+    uint32_t wheel_speed_sum = fr + rr + rl + fl;
+    UPDATE_VEHICLE_SPEED((float)wheel_speed_sum / 4.0f * 0.0075f * KPH_TO_MS);
   }
 
   // Check vehicle speed with redundant source
   if (msg_matches(msg, MSG_ESP_21, 0U)) {
     // Signal: ESP_v_Signal
-    float esp_speed = ((msg->data[5] << 8) | msg->data[4]) * 0.01 * KPH_TO_MS;
+    float esp_speed = (float)GET_BYTES_LE(msg, 4, 2) * 0.01f * KPH_TO_MS;
     UPDATE_VEHICLE_SPEED_2(esp_speed);
   }
 
   if (msg_matches(msg, MSG_QFK_01, 0U)) {
-    int current_curvature = ((msg->data[6] & 0x7FU) << 8) | msg->data[5];
-    current_curvature *= GET_BIT(msg, 55U) ? 1 : -1;
+    int current_curvature = sign_magnitude(GET_BYTES_LE(msg, 5, 2) & 0x7FFFU, !GET_BIT(msg, 55U));
     update_sample(&safety.curvature_state.meas, current_curvature);
   }
 
@@ -158,29 +159,17 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MSG_Motor_51, 0U)) {
-    int acc_status = (msg->data[11] & 0x07U);
-    bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-    safety.acc_main_on = cruise_engaged || (acc_status == 2);
+    uint8_t tsk_status = msg->data[11] & 0x07U;
+    volkswagen_tsk_status_check((int)tsk_status, false);  // MEB is openpilot longitudinal only
 
-    if (!safety.acc_main_on) {
-      safety.controls_allowed = false;
-    }
-
-    int accel_pedal_value = ((msg->data[1] >> 4) & 0x0FU) | ((msg->data[2] & 0x1FU) << 4);
-    safety.gas_pressed = accel_pedal_value > 0;
+    uint32_t accel_pedal_value = (GET_BYTES_LE(msg, 1, 2) >> 4) & 0x1FFU;
+    safety.gas_pressed = accel_pedal_value > 0U;
   }
 
   if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
-    // Enter controls on falling edge of Set or Resume with main switch on
     // Signal: GRA_ACC_01.GRA_Tip_Setzen
     // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-    bool set_button = GET_BIT(msg, 16U);
-    bool resume_button = GET_BIT(msg, 19U);
-    if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {
-      safety.controls_allowed = safety.acc_main_on;
-    }
-    safety.volkswagen_set_button_prev = set_button;
-    safety.volkswagen_resume_button_prev = resume_button;
+    volkswagen_set_resume_check(GET_BIT(msg, 16U), GET_BIT(msg, 19U));
 
     // Always exit controls on rising edge of Cancel
     if (GET_BIT(msg, 13U)) {
@@ -206,7 +195,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
   // Safety check for MSG_ACC_18 acceleration requests
   if (msg->addr == MSG_ACC_18) {
     // Signal: ACC_18.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-    int desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
+    int desired_accel = from_offset((GET_BYTES_LE(msg, 3, 2) & 0x7FFU) * 5U, 7220);
     // MEB inactive accel is 3.01, but we also need to send 0.0 for gas override
     bool accel_override = safety.controls_allowed && (desired_accel == 0);
     if (!accel_override && longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS)) {
@@ -252,19 +241,15 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
       .curvature_to_can = 149253.7313f,
       .frequency = 50,                   // Hz
       .max_curvature_error = 0,          // disabled, MEB doesn't track rack
-      .curvature_error_min_speed = 0.0,  // disabled
+      .curvature_error_min_speed = 0.0f,  // disabled
       .max_steer_power = 125,
     };
 
-    int desired_curvature_raw = GET_BYTES_LE(msg, 3, 2) & 0x7FFFU;
-
-    bool desired_curvature_sign = GET_BIT(msg, 39U);
-    if (!desired_curvature_sign) {
-      desired_curvature_raw *= -1;
-    }
+    // the sign bit is set for positive curvature
+    int desired_curvature_raw = sign_magnitude(GET_BYTES_LE(msg, 3, 2) & 0x7FFFU, !GET_BIT(msg, 39U));
 
     bool steer_req = (((msg->data[1] >> 4) & 0x0FU) == 4U);
-    int steer_power = msg->data[2];
+    int steer_power = (int)msg->data[2];
 
     if (steer_curvature_cmd_checks(desired_curvature_raw, steer_power, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
       tx = false;
@@ -274,7 +259,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-const safety_hooks volkswagen_meb_hooks = {
+static const safety_hooks volkswagen_meb_hooks = {
   .init = volkswagen_meb_init,
   .rx = volkswagen_meb_rx_hook,
   .tx = volkswagen_meb_tx_hook,
@@ -282,3 +267,5 @@ const safety_hooks volkswagen_meb_hooks = {
   .get_checksum = volkswagen_mxb_get_checksum,
   .compute_checksum = volkswagen_meb_alt_crc_compute,
 };
+
+#endif  // SAFETY_MODES_VOLKSWAGEN_MEB_H

@@ -1,3 +1,6 @@
+#ifndef SAFETY_MODES_CHRYSLER_CUSW_H
+#define SAFETY_MODES_CHRYSLER_CUSW_H
+
 #include "opendbc/safety/modes/chrysler_common.h"
 
 static safety_config chrysler_cusw_init(uint16_t param) {
@@ -23,7 +26,7 @@ static safety_config chrysler_cusw_init(uint16_t param) {
 static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x1ECU, 0U)) {
     // Signal: EPS_STATUS.TORQUE_MOTOR
-    int torque_meas_new = ((msg->data[3] & 0xFU) << 8) + msg->data[4] - 2048U;
+    int torque_meas_new = from_offset(GET_BYTES_BE(msg, 3, 2) & 0xFFFU, 2048);
     update_sample(&safety.torque_meas, torque_meas_new);
   }
 
@@ -35,7 +38,7 @@ static void chrysler_cusw_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, 0x1E4U, 0U)) {
     // Signal: BRAKE_1.VEHICLE_SPEED
-    safety.vehicle_moving = (((msg->data[4] & 0x7U) << 8) + msg->data[5]) != 0U;
+    safety.vehicle_moving = (GET_BYTES_BE(msg, 4, 2) & 0x7FFU) != 0U;
   }
 
   if (msg_matches(msg, 0x1FEU, 0U)) {
@@ -63,8 +66,7 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
 
   if (msg->addr == 0x1F6U) {
     // Signal: LKAS_COMMAND.STEERING_TORQUE
-    int desired_torque = ((msg->data[0]) << 3) | ((msg->data[1] & 0xE0U) >> 5);
-    desired_torque -= 1024;
+    int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 5, 1024);
 
     // Signal: LKAS_COMMAND.LKAS_CONTROL_BIT
     const bool steer_req = GET_BIT(msg, 12U);
@@ -90,7 +92,7 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
 }
 
 static uint8_t chrysler_cusw_get_counter(const CANPacket_t *msg) {
-  int counter_byte = GET_LEN(msg) - 2U;
+  uint32_t counter_byte = GET_LEN(msg) - 2U;
   return (uint8_t)(msg->data[counter_byte] & 0xFU);
 }
 
@@ -102,3 +104,5 @@ const safety_hooks chrysler_cusw_hooks = {
   .get_checksum = chrysler_get_checksum,
   .compute_checksum = chrysler_compute_checksum,
 };
+
+#endif  // SAFETY_MODES_CHRYSLER_CUSW_H

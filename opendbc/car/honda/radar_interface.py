@@ -16,37 +16,16 @@ class RadarInterface(RadarInterfaceBase):
     super().__init__(CP)
     self.radar_fault = False
     self.radar_wrong_config = False
-    self.radar_off_can = CP.radarUnavailable
 
-    # Nidec
-    if self.radar_off_can:
-      self.rcp = None
-    else:
-      self.rcp = _create_nidec_can_parser(CP.carFingerprint)
+    # Nidec only. With Bosch radar we're only steering for now, so radard gets no points
+    self.rcp = None if CP.radarUnavailable else _create_nidec_can_parser(CP.carFingerprint)
     self.trigger_msg = 0x445
-    self.updated_messages = set()
 
-  def update(self, can_strings):
-    # in Bosch radar and we are only steering for now, so sleep 0.05s to keep
-    # radard at 20Hz and return no points
-    if self.radar_off_can:
-      return super().update(None)
-
-    vls = self.rcp.update(can_strings)
-    self.updated_messages.update(vls)
-
-    if self.trigger_msg not in self.updated_messages:
-      return None
-
-    rr = self._update(self.updated_messages)
-    self.updated_messages.clear()
-    return rr
-
-  def _update(self, updated_messages):
+  def _update(self, rcp, updated_messages):
     ret = structs.RadarData()
 
     for ii in sorted(updated_messages):
-      cpt = self.rcp.vl[ii]
+      cpt = rcp.vl[ii]
       if ii == 0x400:
         # check for radar faults
         self.radar_fault = cpt['RADAR_STATE'] != 0x79
@@ -63,7 +42,7 @@ class RadarInterface(RadarInterfaceBase):
         if ii in self.pts:
           del self.pts[ii]
 
-    if not self.rcp.can_valid:
+    if not rcp.can_valid:
       ret.errors.canError = True
     if self.radar_fault:
       ret.errors.radarFault = True

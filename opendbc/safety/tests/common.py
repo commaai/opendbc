@@ -211,29 +211,25 @@ class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
 class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
 
   MIN_BRAKE: int = 0
-  MAX_BRAKE: int | None = None
-  MAX_POSSIBLE_BRAKE: int | None = None
+  MAX_BRAKE: int
+  MAX_POSSIBLE_BRAKE: int
 
   MIN_GAS: int = 0
-  MAX_GAS: int | None = None
+  MAX_GAS: int
   INACTIVE_GAS = 0
   MIN_POSSIBLE_GAS: int = 0
-  MAX_POSSIBLE_GAS: int | None = None
+  MAX_POSSIBLE_GAS: int
 
   def test_gas_brake_limits_correct(self):
-    self.assertIsNotNone(self.MAX_POSSIBLE_BRAKE)
-    self.assertIsNotNone(self.MAX_POSSIBLE_GAS)
-
-    assert self.MAX_BRAKE is not None and self.MAX_GAS is not None
     self.assertGreater(self.MAX_BRAKE, self.MIN_BRAKE)
     self.assertGreater(self.MAX_GAS, self.MIN_GAS)
 
   @abc.abstractmethod
-  def _send_gas_msg(self, gas: int):
+  def _send_gas_msg(self, gas: float):
     pass
 
   @abc.abstractmethod
-  def _send_brake_msg(self, brake: int):
+  def _send_brake_msg(self, brake: float):
     pass
 
   def test_brake_safety_check(self):
@@ -764,6 +760,20 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
         should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
+    # around zero, at CAN resolution: only moving away from a non-zero angle is winding up, anything else uses the down limit.
+    # past the last breakpoint (2 m/s past it, beyond the safety's 1 m/s speed fudge) the down limit is its last value,
+    # computed in float32 like the safety
+    down = int(np.float32(self.ANGLE_RATE_DOWN[-1]) * np.float32(self.DEG_TO_CAN) + np.float32(1.))
+
+    self._reset_speed_measurement(self.ANGLE_RATE_BP[-1] + 2)
+    for last in (-1, 0, 1):
+      for sign in (-1, 1):
+        self.safety.set_controls_allowed(True)
+        self.safety.set_desired_angle_last(last)
+        cmd = last + sign * down
+        winding_up = last * sign > 0  # the up limit is lower, so it doesn't allow this
+        self.assertEqual(not winding_up, self._tx(self._angle_cmd_msg(cmd / self.DEG_TO_CAN, True)), (last, cmd))
+
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while
     # steer actuation bit is 0, regardless of controls allowed.
@@ -771,10 +781,10 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.safety.set_controls_allowed(controls_allowed)
 
       for steer_control_enabled in (True, False):
-        for angle_meas in np.arange(-90, 91, 10):
+        for angle_meas in range(-90, 91, 10):
           self._reset_angle_measurement(angle_meas)
 
-          for angle_cmd in np.arange(-90, 91, 10):
+          for angle_cmd in range(-90, 91, 10):
             self._set_prev_desired_angle(angle_cmd)
 
             # controls_allowed is checked if actuation bit is 1, else the angle must be close to meas (inactive)
@@ -831,6 +841,10 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   @abc.abstractmethod
   def _curvature_meas_msg(self, curvature: float):
+    pass
+
+  @abc.abstractmethod
+  def _speed_msg_2(self, speed: float):
     pass
 
   def _set_prev_desired_curvature(self, curvature: float):
@@ -966,6 +980,12 @@ class SafetyTest(SafetyTestBase):
     self.safety.set_controls_allowed(0)
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_rx_checks_unused_msgs(self):
+    # unused alternative message slots of an RX check are zeroed, so a zeroed message (address 0, bus 0, length 0) must not match one
+    self._rx(make_msg(0, 0, 0))
+    for i in range(self.safety.get_rx_checks_len()):
+      self.assertFalse(self.safety.safety_a.state.rx_status[i].msg_seen)
+
   def test_tx_hook_on_wrong_safety_mode(self):
     files = os.listdir(os.path.dirname(os.path.realpath(__file__)))
     test_files = [f for f in files if f.startswith("test_") and f.endswith(".py")]
@@ -1050,7 +1070,7 @@ class SafetyTest(SafetyTestBase):
 class CarSafetyTest(SafetyTest):
   STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
-  RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
+  RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]]
 
   @abc.abstractmethod
   def _user_brake_msg(self, brake):
@@ -1128,6 +1148,7 @@ class CarSafetyTest(SafetyTest):
   def test_prev_user_brake(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:
       _user_brake_msg = self._user_brake_msg
+    if get_brake_pressed_prev is None:
       get_brake_pressed_prev = self.safety.get_brake_pressed_prev
 
     self.assertFalse(get_brake_pressed_prev())

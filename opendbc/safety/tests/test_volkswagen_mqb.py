@@ -89,6 +89,13 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     values = {"ACC_Sollbeschleunigung_02": accel, "ACC_Folgebeschl": secondary_accel}
     return self.packer.make_can_msg_safety("ACC_07", 0, values)
 
+  def test_cancel_button(self):
+    # Disable on rising edge of cancel button
+    self._rx(self._tsk_status_msg(False, main_switch=True))
+    self.safety.set_controls_allowed(1)
+    self._rx(self._gra_acc_01_msg(cancel=True, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
+
   # Verify brake_pressed is true if either the switch or pressure threshold signals are true
   def test_redundant_brake_signals(self):
     test_combinations = [(True, True, True), (True, True, False), (True, False, True), (False, False, False)]
@@ -116,6 +123,12 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
     # do not block resume if we are engaged already
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._gra_acc_01_msg(resume=1)))
+
+  def test_cruise_states(self):
+    for state in range(8):
+      self._rx(self._tsk_status_msg(False))
+      self._rx(self.packer.make_can_msg_safety("TSK_06", 0, {"TSK_Status": state}))
+      self.assertEqual(state in (3, 4, 5), self.safety.get_controls_allowed())
 
 
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
@@ -149,13 +162,6 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
       self._rx(self._gra_acc_01_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
-
-  def test_cancel_button(self):
-    # Disable on rising edge of cancel button
-    self._rx(self._tsk_status_msg(False, main_switch=True))
-    self.safety.set_controls_allowed(1)
-    self._rx(self._gra_acc_01_msg(cancel=True, bus=0))
-    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
   def test_main_switch(self):
     # Disable as soon as main switch turns off

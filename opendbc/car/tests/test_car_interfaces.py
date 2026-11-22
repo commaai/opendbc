@@ -69,7 +69,7 @@ def _make_car_test(car_name):
     for _ in range(10):
       car_interface.update([])
       car_interface.apply(CC, now_nanos)
-      now_nanos += DT_CTRL * 1e9  # 10 ms
+      now_nanos += int(DT_CTRL * 1e9)  # 10 ms
 
     CC = structs.CarControl()
     CC.enabled = True
@@ -79,7 +79,7 @@ def _make_car_test(car_name):
     for _ in range(10):
       car_interface.update([])
       car_interface.apply(CC, now_nanos)
-      now_nanos += DT_CTRL * 1e9  # 10ms
+      now_nanos += int(DT_CTRL * 1e9)  # 10ms
 
     # Test radar interface
     radar_interface = car_interface.RadarInterface(car_params)
@@ -87,12 +87,11 @@ def _make_car_test(car_name):
 
     # Run radar interface once
     radar_interface.update([])
-    if not car_params.radarUnavailable and radar_interface.rcp is not None and \
-       hasattr(radar_interface, '_update') and hasattr(radar_interface, 'trigger_msg'):
-      radar_interface._update([radar_interface.trigger_msg])
+    if radar_interface.rcp is not None:
+      radar_interface._update(radar_interface.rcp, {radar_interface.trigger_msg})
 
     # Test radar fault
-    if not car_params.radarUnavailable and radar_interface.rcp is not None:
+    if radar_interface.rcp is not None:
       cans = [(0, [CanData(0, b'', 0) for _ in range(5)])]
       rr = radar_interface.update(cans)
       assert rr is None or len(rr.errors) > 0

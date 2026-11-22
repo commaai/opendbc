@@ -1,27 +1,33 @@
-#pragma once
+#ifndef SAFETY_MODES_NISSAN_H
+#define SAFETY_MODES_NISSAN_H
 
 #include "opendbc/safety/declarations.h"
 
 static const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
   .max_angle = 60000,  // 600 deg, reasonable limit
-  .angle_deg_to_can = 100,
+  .angle_deg_to_can = 100.0f,
   .angle_rate_up_lookup = {
-    {0., 5., 15.},
-    {5., .8, .15},
+    {0.f, 5.f, 15.f},
+    {5.f, .8f, .15f},
   },
   .angle_rate_down_lookup = {
-    {0., 5., 15.},
-    {5., 3.5, .4},
+    {0.f, 5.f, 15.f},
+    {5.f, 3.5f, .4f},
   },
 };
+
+// Nissan's angle signal is inverted around 1310 degrees
+static int nissan_flip_angle(uint32_t angle) {
+  const float flipped = (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can) - (float)angle;
+  return (int)flipped;
+}
 
 static void nissan_rx_hook(const CANPacket_t *msg) {
   // Altima: on camera bus, others: on pt bus
   if (msg_matches(msg, 0x185U, 0U)) {
     // Current steering angle
-    int angle_meas_new = (msg->data[2] << 10) | (msg->data[3] << 2) | (msg->data[4] >> 6);
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    angle_meas_new = -angle_meas_new + (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
+    int angle_meas_new = nissan_flip_angle(GET_BYTES_BE(msg, 2, 3) >> 6);
 
     // update array of samples
     update_sample(&safety.angle_meas, angle_meas_new);
@@ -29,10 +35,11 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
 
   if (msg_matches(msg, 0x285U, safety_setup.nissan_alt_eps ? 1U : 0U)) {
     // Get current speed and standstill
-    uint16_t right_rear = (msg->data[0] << 8) | (msg->data[1]);
-    uint16_t left_rear = (msg->data[2] << 8) | (msg->data[3]);
+    uint32_t right_rear = GET_BYTES_BE(msg, 0, 2);
+    uint32_t left_rear = GET_BYTES_BE(msg, 2, 2);
     safety.vehicle_moving = (right_rear | left_rear) != 0U;
-    UPDATE_VEHICLE_SPEED((right_rear + left_rear) / 2.0 * 0.005 * KPH_TO_MS);
+    uint32_t speed_sum = right_rear + left_rear;
+    UPDATE_VEHICLE_SPEED((float)speed_sum / 2.0f * 0.005f * KPH_TO_MS);
   }
 
   // X-Trail 0x15c, Leaf 0x239
@@ -47,15 +54,15 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   // X-trail 0x454, Leaf 0x239
   if (msg_matches(msg, 0x454U, safety_setup.nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, safety_setup.nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x454U) {
-      safety.brake_pressed = (msg->data[2] & 0x80U) != 0U;
+      safety.brake_pressed = GET_BIT(msg, 23U);
     } else {
-      safety.brake_pressed = ((msg->data[4] >> 5) & 1U) != 0U;
+      safety.brake_pressed = GET_BIT(msg, 37U);
     }
   }
 
   // Handle cruise enabled
   if (msg_matches(msg, 0x30fU, safety_setup.nissan_alt_eps ? 1U : 2U)) {
-    bool cruise_engaged = (msg->data[0] >> 3) & 1U;
+    bool cruise_engaged = GET_BIT(msg, 3U);
     pcm_cruise_check(cruise_engaged);
   }
 }
@@ -66,11 +73,9 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
 
   // steer cmd checks
   if (msg->addr == 0x169U) {
-    int desired_angle = ((msg->data[0] << 10) | (msg->data[1] << 2) | ((msg->data[2] >> 6) & 0x3U));
-    bool lka_active = (msg->data[6] >> 4) & 1U;
-
     // Factor is -0.01, offset is 1310. Flip to correct sign, but keep units in CAN scale
-    desired_angle = -desired_angle + (1310.0f * NISSAN_STEERING_LIMITS.angle_deg_to_can);
+    int desired_angle = nissan_flip_angle(GET_BYTES_BE(msg, 0, 3) >> 6);
+    bool lka_active = GET_BIT(msg, 52U);
 
     if (steer_angle_cmd_checks(desired_angle, lka_active, NISSAN_STEERING_LIMITS)) {
       violation = true;
@@ -80,7 +85,7 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
   // acc button check, only allow cancel button to be sent
   if (msg->addr == 0x20bU) {
     // Violation of any button other than cancel is pressed
-    violation |= ((msg->data[1] & 0x3dU) > 0U);
+    violation = (msg->data[1] & 0x3dU) > 0U;
   }
 
   if (violation) {
@@ -122,8 +127,10 @@ static safety_config nissan_init(uint16_t param) {
   return BUILD_SAFETY_CFG(nissan_rx_checks, NISSAN_TX_MSGS);
 }
 
-const safety_hooks nissan_hooks = {
+static const safety_hooks nissan_hooks = {
   .init = nissan_init,
   .rx = nissan_rx_hook,
   .tx = nissan_tx_hook,
 };
+
+#endif  // SAFETY_MODES_NISSAN_H
