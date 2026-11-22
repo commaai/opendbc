@@ -1,12 +1,15 @@
 import os
 import abc
+import functools
 import math
+import random
 import unittest
 import importlib
 import numpy as np
 from collections.abc import Callable
 
 from opendbc.can import CANPacker
+from opendbc.can.packer import set_value
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
@@ -1096,7 +1099,114 @@ class CarSafetyTest(SafetyTest):
   def _pcm_status_msg(self, enable):
     pass
 
+  # {msg name: {signal: valid values}} of the quality flags of the RX checked msgs
+  RX_QUALITY_FLAGS: dict[str, dict[str, tuple[int, ...]]] = {}
+
+  def _rx_check_msg(self, addr: int, bus: int, values: dict[str, float] | None = None):
+    """The RX checked msg's next frame, valid unless values say otherwise"""
+    name = self.packer.dbc.addr_to_msg[addr].name
+    quality_flags = {sig: valid[0] for sig, valid in self.RX_QUALITY_FLAGS.get(name, {}).items()}
+    return self.packer.make_can_msg_safety(addr, bus, {**quality_flags, **(values or {})})
+
+  def _rx_check_builders(self):
+    """(index, msg check, build) of each C RX checked msg in the DBC. A car sends one of an RX check's alternative msgs.
+    build(values) makes the msg's next frame"""
+    cfg = self.safety.safety_a.setup.current_safety_config
+    builders = []
+    for i in range(cfg.rx_checks_len):
+      # the DBC has one of the alternatives, or several. Unused alternative slots have addr 0, in no DBC
+      msgs = [m for m in cfg.rx_checks[i].msg if m.addr in self.packer.dbc.addr_to_msg]
+      self.assertTrue(msgs, f"RX check {i}: none of its msgs are in {self.DBC}")
+      builders += [(i, m, functools.partial(self._rx_check_msg, m.addr, m.bus)) for m in msgs]
+    return builders
+
+  def _rx_invalid(self, msg, err_msg):
+    """Whether msg fails RX. A failing msg must disengage, and change nothing but the RX status"""
+    rx_status_start = libsafety_py.ffi.offsetof("SafetyState", "rx_status")
+    rx_status_end = rx_status_start + libsafety_py.ffi.sizeof(self.safety.safety_a.state.rx_status)
+
+    def state():
+      buf = state_buffer("safety_a")[:]
+      return buf[:rx_status_start] + buf[rx_status_end:]
+
+    self.safety.set_controls_allowed(True)
+    before = state()
+    if self._rx(msg):
+      return False
+    self.assertFalse(self.safety.get_controls_allowed(), err_msg)
+    self.safety.set_controls_allowed(True)
+    self.assertEqual(before, state(), err_msg)
+    return True
+
   # ***** standard tests for all car-specific safety modes *****
+
+  def test_rx_checksum(self):
+    # the C checksum agrees with the packer's on every bit flip of an RX checked msg, and a frame failing it fails RX.
+    # The frames are a random one and its complement, so every bit is flipped both ways
+    for i, m, _ in self._rx_check_builders():
+      if m.ignore_checksum:
+        continue
+      sigs = self.packer.dbc.addr_to_msg[m.addr].sigs.values()
+      checksums = [(sig, sig.calc_checksum) for sig in sigs if sig.calc_checksum]
+      self.assertTrue(checksums, f"{m.addr=:#x}: the packer doesn't compute its checksum")
+      rand = random.Random(m.addr).randbytes(m.len)
+      for dat in (bytearray(rand), bytearray(b ^ 0xFF for b in rand)):
+        for sig, calc in checksums:
+          set_value(dat, sig, calc(m.addr, sig, dat))
+        for byte in range(m.len):
+          for bit in range(8):
+            err_msg = f"{m.addr=:#x} {m.bus=} {byte=} {bit=}"
+            flipped = bytearray(dat)
+            flipped[byte] ^= 1 << bit
+            valid = all(calc(m.addr, sig, bytearray(flipped)) == sig.get_raw_value(flipped) for sig, calc in checksums)
+            msg = libsafety_py.make_CANPacket(m.addr, m.bus, bytes(flipped))
+
+            self._reset_safety_hooks()
+            if valid:
+              self._rx(msg)
+            else:
+              self.assertTrue(self._rx_invalid(msg, err_msg), err_msg)
+            self.assertEqual(valid, self.safety.safety_a.state.rx_status[i].valid_checksum, err_msg)
+
+  def test_rx_counter(self):
+    # a counter sequence with rollover is valid. Replayed or skipped counters fail RX from the MAX_WRONG_COUNTERS'th on,
+    # unless the RX check ignores counters, and valid frames recover
+    for i, m, build in self._rx_check_builders():
+      with self.subTest(addr=hex(m.addr), bus=m.bus):
+        self._reset_safety_hooks()
+        for n in range(m.max_counter + 2):
+          msg = build()
+          self.assertTrue(self._rx(msg), f"frame {n}")
+          if n > 0:  # the first frame's counter has nothing to follow
+            self.assertEqual(0, self.safety.safety_a.state.rx_status[i].wrong_counters, f"frame {n}")
+
+        for name in ("replay", "skip"):
+          for n in range(MAX_WRONG_COUNTERS + 1):
+            if name == "skip":
+              build()
+              msg = build()
+            err_msg = f"{name} {n}"
+            if m.ignore_counter or n < MAX_WRONG_COUNTERS - 1:
+              self.assertTrue(self._rx(msg), err_msg)
+            else:
+              self.assertTrue(self._rx_invalid(msg, err_msg), err_msg)
+          for n in range(MAX_WRONG_COUNTERS):
+            self.assertTrue(self._rx(build()), f"{name} recovery {n}")
+
+  def test_rx_quality_flag(self):
+    # an RX checked msg is valid only while each of its quality flags is
+    for _, m, build in self._rx_check_builders():
+      if m.ignore_quality_flag:
+        continue
+      msg = self.packer.dbc.addr_to_msg[m.addr]
+      for sig, valid in self.RX_QUALITY_FLAGS[msg.name].items():
+        for value in range(1 << msg.sigs[sig].size):
+          err_msg = f"{msg.name} {sig}={value}"
+          self._reset_safety_hooks()
+          if value in valid:
+            self.assertTrue(self._rx(build({sig: value})), err_msg)
+          else:
+            self.assertTrue(self._rx_invalid(build({sig: value}), err_msg), err_msg)
 
   def test_relay_malfunction(self):
     # each car has an addr that is used to detect relay malfunction

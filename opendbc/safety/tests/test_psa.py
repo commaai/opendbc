@@ -50,27 +50,6 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"P002_Com_rAPP": int(gas * 100)}
     return self.packer.make_can_msg_safety("Dyn_CMM", self.MAIN_BUS, values)
 
-  def test_rx_hook(self):
-    # speed
-    for _ in range(10):
-      self.assertTrue(self._rx(self._speed_msg(0)))
-    msg = self._speed_msg(0)
-    # invalidate checksum
-    msg[0].data[5] = 0x00
-    self.assertFalse(self._rx(msg))
-
-    # cruise
-    for _ in range(10):
-      self.assertTrue(self._rx(self._pcm_status_msg(0)))
-    msg = self._pcm_status_msg(0)
-    # invalidate checksum
-    msg[0].data[5] = 0x00
-    self.assertFalse(self._rx(msg))
-    msg = self._pcm_status_msg(0)
-    # write to unused payload byte
-    msg[0].data[6] = 0xAB
-    self.assertTrue(self._rx(msg))
-
   def _ign_msg(self, bus, counter, ign):
     return common.make_msg(bus, 0x432, dat=bytes([0, counter, 0, 0, 0, 0, ign, 0]))
 

@@ -93,49 +93,6 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
           should_tx = not any(pressed[:-1]) and (not pressed[-1] or cruise_engaged)
           self.assertEqual(should_tx, self._tx(msg))
 
-  def test_rx_checksums(self):
-    for name, bus, signal, initial, corrupt in (
-      ("WHEELSPEED_CLEAN", self.MAIN_BUS, "WHEELSPEED_CLEAN", 72, 0),
-      ("ACC_HUD_ADAS", self.CAM_BUS, "ACC_STATE", 0, 3),
-    ):
-      for byte in range(8):
-        with self.subTest(message=name, byte=byte):
-          self.safety.set_safety_hooks(CarParams.SafetyModel.byd, 0)
-          self.safety.init_tests()
-          for _ in range(16):
-            msg = self.packer.make_can_msg_safety(name, bus, {signal: initial})
-            self.assertTrue(self._rx(msg))
-          speed_min = self.safety.get_vehicle_speed_min()
-          speed_max = self.safety.get_vehicle_speed_max()
-          msg = self.packer.make_can_msg_safety(name, bus, {signal: corrupt})
-          msg[0].data[byte] ^= 0xFF
-          self.safety.set_controls_allowed(name == "WHEELSPEED_CLEAN")
-          self.assertFalse(self._rx(msg))
-          self.assertFalse(self.safety.get_controls_allowed())
-          self.assertEqual(speed_min, self.safety.get_vehicle_speed_min())
-          self.assertEqual(speed_max, self.safety.get_vehicle_speed_max())
-
-  def test_rx_counters(self):
-    for name, bus, signal, value in (
-      ("WHEELSPEED_CLEAN", self.MAIN_BUS, "WHEELSPEED_CLEAN", 72),
-      ("ACC_HUD_ADAS", self.CAM_BUS, "ACC_STATE", 3),
-    ):
-      with self.subTest(message=name):
-        # Check both counter locations and rollover with valid checksums.
-        for _ in range(32):
-          msg = self.packer.make_can_msg_safety(name, bus, {signal: value})
-          self.assertTrue(self._rx(msg))
-        self.safety.set_controls_allowed(True)
-        # Replayed frames are rejected after the common counter tolerance.
-        for i in range(common.MAX_WRONG_COUNTERS + 1):
-          should_rx = i < common.MAX_WRONG_COUNTERS - 1
-          self.assertEqual(should_rx, self._rx(msg))
-          self.assertEqual(should_rx, self.safety.get_controls_allowed())
-        # A valid sequence clears the counter faults.
-        for _ in range(common.MAX_WRONG_COUNTERS):
-          msg = self.packer.make_can_msg_safety(name, bus, {signal: 0})
-          self.assertTrue(self._rx(msg))
-
   # BYD uses get_max_angle_delta_vm and get_max_angle_vm for lateral accel and jerk limits
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below

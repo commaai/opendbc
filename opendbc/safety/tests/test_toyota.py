@@ -28,6 +28,11 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   EPS_SCALE = 73
   ECU_DISABLED = True  # radar is knocked out with tester present for openpilot longitudinal
 
+  RX_QUALITY_FLAGS = {
+    "WHEEL_SPEEDS": {f"WHEEL_SPEED_{wheel}_FAULT": (0,) for wheel in ("FR", "FL", "RR", "RL")},
+    "STEER_TORQUE_SENSOR": {"STEER_ANGLE_INITIALIZING": (0,)},
+  }
+
   def _torque_meas_msg(self, torque: int, driver_torque: int | None = None):
     values = {"STEER_TORQUE_EPS": (torque / self.EPS_SCALE) * 100.}
     if driver_torque is not None:
@@ -59,10 +64,8 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   def _accel_msg(self, accel, cancel_req=0):
     return self._accel_msg_343(accel, cancel_req)
 
-  def _speed_msg(self, speed, quality_flag=True):
+  def _speed_msg(self, speed):
     values = {("WHEEL_SPEED_%s" % n): speed * 3.6 for n in ["FR", "FL", "RR", "RL"]}
-    if not quality_flag:
-      values |= {"WHEEL_SPEED_%s_FAULT" % n: 1.0 for n in ["FR", "FL", "RR", "RL"]}
     return self.packer.make_can_msg_safety("WHEEL_SPEEDS", 0, values)
 
   def _user_brake_msg(self, brake):
@@ -107,29 +110,6 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       should_tx = not req and not req2 and angle == 0 and torque_wind_down == 0
       self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)),
                        f"{req=} {req2=} {angle=} {torque_wind_down=}")
-
-  def test_rx_hook(self):
-    # checksum checks
-    for msg in ["trq", "pcm"]:
-      self.safety.set_controls_allowed(1)
-      if msg == "trq":
-        msg = self._torque_meas_msg(0)
-      if msg == "pcm":
-        msg = self._pcm_status_msg(True)
-      self.assertTrue(self._rx(msg))
-      msg[0].data[4] = 0
-      msg[0].data[5] = 0
-      msg[0].data[6] = 0
-      msg[0].data[7] = 0
-      self.assertFalse(self._rx(msg))
-      self.assertFalse(self.safety.get_controls_allowed())
-
-    # quality flag tests
-    msg = self._speed_msg(0)
-    self.assertTrue(self._rx(msg))
-
-    msg = self._speed_msg(0, quality_flag=False)
-    self.assertFalse(self._rx(msg))
 
   def test_vehicle_moving_any_wheel(self):
     # one wheel turning either way is moving, even when the wheel speeds sum to zero

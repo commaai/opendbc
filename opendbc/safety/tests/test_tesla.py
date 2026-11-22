@@ -9,7 +9,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANDefine
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import MAX_WRONG_COUNTERS, away_round, round_speed, speeds_within_delta
+from opendbc.safety.tests.common import away_round, round_speed, speeds_within_delta
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
@@ -77,23 +77,26 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
               "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code}
     return self.packer.make_can_msg_safety("EPAS3S_sysStatus", 0, values)
 
-  def _user_brake_msg(self, brake, status: int | None = None):
-    if status is None:
-      status = 2 if brake else 1
-    values = {"ESP_driverBrakeApply": status}
+  def _user_brake_msg(self, brake):
+    values = {"ESP_driverBrakeApply": 2 if brake else 1}
     return self.packer.make_can_msg_safety("ESP_status", 0, values)
+
+  # ESP_driverBrakeApply 0 is NotInit_orOff, 3 is Faulty_SNA
+  RX_QUALITY_FLAGS = {
+    "ESP_B": {"ESP_wheelSpeedsQF": (1,)},
+    "ESP_status": {"ESP_driverBrakeApply": (1, 2)},
+  }
 
   def _speed_msg(self, speed):
     values = {"DI_vehicleSpeed": speed * 3.6}
     return self.packer.make_can_msg_safety("DI_speed", 0, values)
 
-  def _speed_msg_2(self, speed, quality_flag=True):
-    values = {"ESP_vehicleSpeed": speed * 3.6, "ESP_wheelSpeedsQF": quality_flag}
+  def _speed_msg_2(self, speed):
+    values = {"ESP_vehicleSpeed": speed * 3.6, "ESP_wheelSpeedsQF": 1}
     return self.packer.make_can_msg_safety("ESP_B", 0, values)
 
-  def _vehicle_moving_msg(self, speed: float, quality_flag=True):
-    values = {"ESP_vehicleStandstillSts": 1 if speed <= self.STANDSTILL_THRESHOLD else 0,
-              "ESP_wheelSpeedsQF": quality_flag}
+  def _vehicle_moving_msg(self, speed: float):
+    values = {"ESP_vehicleStandstillSts": 1 if speed <= self.STANDSTILL_THRESHOLD else 0, "ESP_wheelSpeedsQF": 1}
     return self.packer.make_can_msg_safety("ESP_B", 0, values)
 
   def _user_gas_msg(self, gas):
@@ -123,42 +126,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     # For common.LongitudinalAccelSafetyTest
     return self._long_control_msg(10, accel_limits=(accel, max(accel, 0)))
 
-  def test_rx_hook(self):
-    # counter check
-    for msg_type in ("angle", "long", "speed", "speed_2"):
-      # send multiple times to verify counter checks
-      for i in range(10):
-        if msg_type == "angle":
-          msg = self._angle_cmd_msg(0, True, bus=2)
-        elif msg_type == "long":
-          msg = self._long_control_msg(0, bus=2)
-        elif msg_type == "speed":
-          msg = self._speed_msg(0)
-        elif msg_type == "speed_2":
-          msg = self._speed_msg_2(0)
-
-        should_rx = i >= 5
-        if not should_rx:
-          # mess with checksums
-          if msg_type == "angle":
-            msg[0].data[3] = 0
-          elif msg_type == "long":
-            msg[0].data[7] = 0
-          elif msg_type == "speed":
-            msg[0].data[0] = 0
-          elif msg_type == "speed_2":
-            msg[0].data[7] = 0
-
-        self.safety.set_controls_allowed(True)
-        self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
-
-      # Send static counters
-      for i in range(MAX_WRONG_COUNTERS + 1):
-        should_rx = i + 1 < MAX_WRONG_COUNTERS
-        self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
-
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,
@@ -181,20 +148,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
 
         within_delta = speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
-
-    # Test ESP_B quality flag
-    for quality_flag in (True, False):
-      self.safety.set_controls_allowed(True)
-      self.assertTrue(self._rx(self._speed_msg(0)))
-      self.assertEqual(quality_flag, self._rx(self._speed_msg_2(0, quality_flag=quality_flag)))
-      self.assertEqual(quality_flag, self.safety.get_controls_allowed())
-
-  def test_user_brake_quality_flag(self):
-    # 0=NotInit_orOff and 3=Faulty_SNA are invalid
-    for status in range(4):
-      valid = status not in (0, 3)
-      msg = self._user_brake_msg(False, status=status)
-      self.assertEqual(valid, self._rx(msg))
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
