@@ -490,11 +490,11 @@ class TestFordCANFDTronLongitudinalSafety(TestFordCANFDTronSafety):
             should_tx = feature == 0x840 and value == 0
             self.assertEqual(should_tx, self._tx(self._personality_msg(feature, value, display_op, random.randint(0, 7))))
 
-  def test_aeb_off_request_unused_bytes(self):
-    for byte in (5, 6, 7):
+  def test_aeb_off_request_unused_bits(self):
+    for byte, bit in ((4, 0), (4, 1), (5, 0), (6, 0), (7, 0)):
       msg = self._personality_msg(0x840, 0)
       self.assertTrue(self._tx(msg))
-      msg[0].data[byte] = 1
+      msg[0].data[byte] = 1 << bit
       self.assertFalse(self._tx(msg))
 
 

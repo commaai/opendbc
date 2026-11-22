@@ -203,8 +203,8 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     const bool aeb_feature = GET_BYTES_BE(msg, 0, 2) == 0x840U;
     // Signal: MsgCntrFeatConfigRq (0 is off)
     const bool aeb_off = GET_BYTES_BE(msg, 2, 2) == 0U;
-    // no signals in bytes 5-7
-    const bool unused_zero = GET_BYTES_BE(msg, 5, 3) == 0U;
+    // no signals in bits 0-1 of byte 4 or in bytes 5-7
+    const bool unused_zero = ((msg->data[4] & 0x3U) == 0U) && (GET_BYTES_BE(msg, 5, 3) == 0U);
 
     if (!aeb_feature || !aeb_off || !unused_zero) {
       tx = false;

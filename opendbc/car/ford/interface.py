@@ -58,7 +58,7 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.LONG_CONTROL.value
       ret.openpilotLongitudinalControl = True
 
-      # Switch the camera's AEB off and let openpilot control longitudinal
+      # Switch the camera's AEB off for the drive, it stays off until the next ignition
       # WARNING: THIS DISABLES AEB!
       if ret.flags & FordFlags.TRON:
         ret.flags |= FordFlags.DISABLE_AEB.value
