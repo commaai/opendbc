@@ -59,6 +59,14 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
       # can always cancel
       self.assertTrue(self._tx(self._button_msg(cancel=True)))
 
+  def test_vehicle_moving_any_bit(self):
+    # each bit of the speed alone is moving
+    for bit in range(12):
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_vehicle_moving())
+      self.assertTrue(self._rx(self._speed_msg((1 << bit) * 0.0174)))
+      self.assertTrue(self.safety.get_vehicle_moving(), bit)
+
 
 if __name__ == "__main__":
   unittest.main()
