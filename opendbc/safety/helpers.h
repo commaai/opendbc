@@ -3,6 +3,7 @@
 
 #include "opendbc/safety/declarations.h"
 
+static bool GET_BIT(const CANPacket_t *msg, uint32_t b);
 static uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len);
 static uint32_t GET_BYTES_BE(const CANPacket_t *msg, int start, int len);
 static uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len);

@@ -35,6 +35,10 @@
 #include "opendbc/safety/modes/byd.h"
 #include "opendbc/safety/modes/hyundai_canfd.h"
 
+static bool GET_BIT(const CANPacket_t *msg, uint32_t b) {
+  return ((msg->data[b / 8U] >> (b % 8U)) & 0x1U) != 0U;
+}
+
 static uint32_t GET_BYTES_LE(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
   for (int i = 0; i < len; i++) {

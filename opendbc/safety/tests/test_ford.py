@@ -435,13 +435,14 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   INACTIVE_GAS = -5.0
 
   # ACC command
-  def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False, gas_pred: float | None = None):
+  def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False, gas_pred: float | None = None,
+                       brake_decel: bool | None = None):
     values = {
       "AccPrpl_A_Rq": gas,                              # [-5|5.23] m/s^2
       "AccPrpl_A_Pred": gas if gas_pred is None else gas_pred,  # [-5|5.23] m/s^2
       "AccBrkTot_A_Rq": brake,                          # [-20|11.9449] m/s^2
       "AccBrkPrchg_B_Rq": 1 if brake_actuation else 0,  # Pre-charge brake request: 0=No, 1=Yes
-      "AccBrkDecel_B_Rq": 1 if brake_actuation else 0,  # Deceleration request: 0=Inactive, 1=Active
+      "AccBrkDecel_B_Rq": 1 if (brake_actuation if brake_decel is None else brake_decel) else 0,  # Deceleration request: 0=Inactive, 1=Active
       "CmbbDeny_B_Actl": 1 if cmbb_deny else 0,         # [0|1] deny AEB actuation
     }
     return self.packer.make_can_msg_safety("ACCDATA", 0, values)
@@ -477,6 +478,9 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
           should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
           should_tx = should_tx and (controls_allowed or not brake_actuation)
           self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, brake_actuation)))
+          # both brake requests are checked on their own
+          self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, brake_actuation, brake_decel=False)))
+          self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, False, brake_decel=brake_actuation)))
 
 
 class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):
