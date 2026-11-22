@@ -80,6 +80,13 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
     if (steer_angle_cmd_checks(desired_angle, lka_active, NISSAN_STEERING_LIMITS)) {
       violation = true;
     }
+
+    // Signal: LKAS.MAX_TORQUE
+    // the EPS torque limit, at most the 1 Nm openpilot sends, which the driver can easily overpower
+    const uint8_t NISSAN_MAX_LKAS_TORQUE = 100U;  // 0.01 Nm/LSB
+    if (msg->data[4] > NISSAN_MAX_LKAS_TORQUE) {
+      violation = true;
+    }
   }
 
   // acc button check, only allow cancel button to be sent
