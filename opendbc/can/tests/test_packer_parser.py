@@ -51,14 +51,15 @@ class TestCanParserPacker(unittest.TestCase):
     # Rivian counts 0 to 14, despite the 4-bit field
     packer = CANPacker("rivian_primary_actuator")
     parser = CANParser("rivian_primary_actuator", [("ESP_Status", 0)], 0)
+    valid_speed = {"ESP_Vehicle_Speed_Q": 1}
     for i in range(100):
-      parser.update([0, [packer.make_can_msg("ESP_Status", 0, {})]])
+      parser.update([0, [packer.make_can_msg("ESP_Status", 0, valid_speed)]])
       assert parser.vl["ESP_Status"]["ESP_Status_Counter"] == i % 15
       assert parser.can_valid
 
     # 15 follows no count, so it's always a bad counter
     for _ in range(MAX_BAD_COUNTER):
-      parser.update([0, [packer.make_can_msg("ESP_Status", 0, {"ESP_Status_Counter": 15})]])
+      parser.update([0, [packer.make_can_msg("ESP_Status", 0, valid_speed | {"ESP_Status_Counter": 15})]])
     assert not parser.can_valid
 
   def test_parser_can_valid(self):

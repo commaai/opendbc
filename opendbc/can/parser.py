@@ -40,6 +40,7 @@ class MessageState:
     tmp_vals: list[float] = [0.0] * len(self.signals)
     checksum_failed = False
     counter_failed = False
+    quality_flag_failed = False
 
     if self.first_seen_nanos == 0:
       self.first_seen_nanos = nanos
@@ -59,10 +60,14 @@ class MessageState:
         if not self.update_counter(tmp, sig.max_counter):
           counter_failed = True
 
+      if sig.quality_flag_values is not None and tmp not in sig.quality_flag_values:
+        quality_flag_failed = True
+        self.rate_limited_log(nanos, f"quality flag invalid: {sig.name}={tmp}")
+
       tmp_vals[i] = tmp * sig.factor + sig.offset
 
-    # must have good counter and checksum to update data
-    if checksum_failed or counter_failed:
+    # must have good counter, checksum, and quality flags to update data
+    if checksum_failed or counter_failed or quality_flag_failed:
       return False
 
     if not self.vals:

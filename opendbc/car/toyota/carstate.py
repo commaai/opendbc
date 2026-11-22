@@ -86,9 +86,6 @@ class CarState(CarStateBase):
     # moving if any wheel turns, either way, like the safety
     ret.standstill = all(abs(speed) < 1e-3 for speed in wheel_speeds)
 
-    ret.vehicleSensorsInvalid = any(cp.vl["WHEEL_SPEEDS"][f"WHEEL_SPEED_{whl}_FAULT"]
-                                    for whl in ("FL", "FR", "RL", "RR"))
-
     ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] + cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
     ret.steeringRateDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
     torque_sensor_angle_deg = cp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
