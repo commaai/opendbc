@@ -143,6 +143,11 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
   def SAFETY_PARAM(self):
     return self.EPS_SCALE
 
+  def test_steer_angle_initializing_ignored(self):
+    # TSS-P cars don't set STEER_ANGLE_INITIALIZING, so torque control doesn't check it
+    for steer_angle_initializing in (True, False):
+      self.assertTrue(self._rx(self._angle_meas_msg(0, steer_angle_initializing)))
+
 
 class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest):
 

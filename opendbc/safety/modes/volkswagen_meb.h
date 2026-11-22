@@ -59,39 +59,25 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *msg) {
 }
 
 static uint32_t volkswagen_meb_alt_crc_compute(const CANPacket_t *msg) {
-  uint32_t ret = volkswagen_meb_compute_crc(msg);
-  uint32_t len = 0U;
+  uint32_t crc = volkswagen_meb_compute_crc(msg);
   if (safety_setup.volkswagen_meb_alt_crc) {
-    if (msg->addr == MSG_QFK_01) {
-      len = 28U;
-    }
-    if (msg->addr == MSG_ESC_51) {
-      len = 60U;
-    }
-    if (msg->addr == MSG_Motor_51) {
-      len = 44U;
-    }
-  }
-
-  if (len > 0U) {
-    uint8_t salt = 0;
+    // these msgs may instead have a CRC over fewer bytes, with other salts
+    uint32_t alt_crc = crc;
     uint8_t counter = volkswagen_mxb_get_counter(msg);
     if (msg->addr == MSG_QFK_01) {
-      salt = (uint8_t[]){0x18, 0x71, 0x10, 0x8D, 0xD7, 0xAA, 0xB0, 0x78, 0xAC, 0x12, 0xAE, 0x0C, 0xDD, 0xF1, 0x85, 0x68}[counter];
+      alt_crc = volkswagen_compute_crc(msg, 28U, (uint8_t[]){0x18, 0x71, 0x10, 0x8D, 0xD7, 0xAA, 0xB0, 0x78, 0xAC, 0x12, 0xAE, 0x0C, 0xDD, 0xF1, 0x85, 0x68}[counter]);
     }
     if (msg->addr == MSG_ESC_51) {
-      salt = (uint8_t[]){0x69, 0xDC, 0xF9, 0x64, 0x6A, 0xCE, 0x55, 0x2C, 0xC4, 0x38, 0x8F, 0xD1, 0xC6, 0x43, 0xB4, 0xB1}[counter];
+      alt_crc = volkswagen_compute_crc(msg, 60U, (uint8_t[]){0x69, 0xDC, 0xF9, 0x64, 0x6A, 0xCE, 0x55, 0x2C, 0xC4, 0x38, 0x8F, 0xD1, 0xC6, 0x43, 0xB4, 0xB1}[counter]);
     }
     if (msg->addr == MSG_Motor_51) {
-      salt = (uint8_t[]){0x2C, 0xB1, 0x1A, 0x75, 0xBB, 0x65, 0x79, 0x47, 0x81, 0x2B, 0xCC, 0x96, 0x17, 0xDB, 0xC0, 0x94}[counter];
+      alt_crc = volkswagen_compute_crc(msg, 44U, (uint8_t[]){0x2C, 0xB1, 0x1A, 0x75, 0xBB, 0x65, 0x79, 0x47, 0x81, 0x2B, 0xCC, 0x96, 0x17, 0xDB, 0xC0, 0x94}[counter]);
     }
-
-    uint8_t crc = volkswagen_compute_crc(msg, len, salt);
-    if (crc == msg->data[0]) {
-      ret = crc;
+    if (alt_crc == msg->data[0]) {
+      crc = alt_crc;
     }
   }
-  return ret;
+  return crc;
 }
 
 static safety_config volkswagen_meb_init(uint16_t param) {
