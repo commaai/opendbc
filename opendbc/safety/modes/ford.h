@@ -111,10 +111,10 @@ static void ford_rx_hook(const CANPacket_t *msg) {
 
   // Check vehicle speed against a second source
   if (msg_matches(msg, FORD_EngVehicleSpThrottle2, FORD_MAIN_BUS)) {
-    // Disable controls if speeds from ABS and PCM ECUs are too far apart.
+    // compared to the ABS speed
     // Signal: Veh_V_ActlEng
     float filtered_pcm_speed = (float)GET_BYTES_BE(msg, 6, 2) * 0.01f * KPH_TO_MS;
-    UPDATE_VEHICLE_SPEED_2(filtered_pcm_speed);
+    update_vehicle_speed_2(filtered_pcm_speed);
   }
 
   // Update vehicle yaw rate

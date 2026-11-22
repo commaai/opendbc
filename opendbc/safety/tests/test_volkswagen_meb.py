@@ -181,18 +181,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
       self._rx(self.packer.make_can_msg_safety("Motor_51", 0, {"TSK_Status": tsk_status}))
       self.assertEqual(tsk_status in (2, 3, 4, 5), self.safety.get_controls_allowed())
 
-  def test_rx_hook_speed_mismatch(self):
-    for speed in np.arange(0, 40, 0.5):
-      for speed_delta in np.arange(-5, 5, 0.1):
-        speed_2 = round(max(speed + speed_delta, 0), 1)
-        self._rx(self._speed_msg(speed))
-        self._rx(self._speed_msg_2(speed_2))
-        self.safety.set_controls_allowed(True)
-        self._tx(self._curvature_cmd_msg(0, steer_req=True))
-
-        within_delta = common.speeds_within_delta(speed, speed_2)
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
-
   def test_curvature_violation(self):
     # if violation occurs, desired_curvature_last is reset to 0
     meas = self.MAX_CURVATURE_TEST / 4

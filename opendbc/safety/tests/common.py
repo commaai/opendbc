@@ -1543,6 +1543,11 @@ class CarSafetyTest(SafetyTest):
         within_delta = speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
+        # either speed msg checks them
+        self.safety.set_controls_allowed(True)
+        self.assertTrue(self._rx(self._speed_msg(speed)))
+        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
+
   def test_safety_tick(self):
     # Missing valid RX messages must disable controls even before they time out.
     for elapsed in (0, int(2e6)):

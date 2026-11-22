@@ -327,6 +327,15 @@ static void generic_rx_checks(void) {
   disengage_on_press(safety.brake_pressed, &safety.brake_pressed_prev, safety.vehicle_moving);
   disengage_on_press(safety.regen_braking, &safety.regen_braking_prev, safety.vehicle_moving);
   disengage_on_press(safety.steering_disengage, &safety.steering_disengage_prev, false);
+
+  // disable controls if the speeds from the two sources are too far apart,
+  // compared in vehicle_speed's integer units, so the limit is exact
+  const int MAX_SPEED_DELTA = 2 * (int)VEHICLE_SPEED_FACTOR;  // 2 m/s
+  const int speed_delta = safety.vehicle_speed_2.values[0] - safety.vehicle_speed.values[0];
+  bool speed_mismatch = safety_max_limit_check(speed_delta, MAX_SPEED_DELTA, -MAX_SPEED_DELTA);
+  if (safety.vehicle_speed_2_seen && speed_mismatch) {
+    safety.controls_allowed = false;
+  }
 }
 
 static void stock_ecu_check(bool stock_ecu_detected) {
@@ -525,15 +534,10 @@ static void pcm_cruise_check(bool cruise_engaged) {
   safety.cruise_engaged_prev = cruise_engaged;
 }
 
-static void speed_mismatch_check(const float speed_2) {
-  // Disable controls if speeds from two sources are too far apart.
-  // For safety modes that use speed to adjust torque or angle limits
-  // compared in vehicle_speed's integer units, so the limit is exact
-  const int MAX_SPEED_DELTA = 2 * (int)VEHICLE_SPEED_FACTOR;  // 2 m/s
-  const int speed_delta = ROUND(speed_2 * VEHICLE_SPEED_FACTOR) - safety.vehicle_speed.values[0];
-  if (safety_max_limit_check(speed_delta, MAX_SPEED_DELTA, -MAX_SPEED_DELTA)) {
-    safety.controls_allowed = false;
-  }
+// a second speed source, for safety modes that use speed to adjust torque or angle limits
+static void update_vehicle_speed_2(const float speed_ms) {
+  update_sample(&safety.vehicle_speed_2, ROUND(speed_ms * VEHICLE_SPEED_FACTOR));
+  safety.vehicle_speed_2_seen = true;
 }
 
 #endif  // SAFETY_H

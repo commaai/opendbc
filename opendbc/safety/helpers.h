@@ -13,7 +13,7 @@ static int from_offset(uint32_t raw, int offset);
 static void update_sample(struct sample_t *sample, int sample_new);
 static int ROUND(float val);
 static void pcm_cruise_check(bool cruise_engaged);
-static void speed_mismatch_check(const float speed_2);
+static void update_vehicle_speed_2(const float speed_ms);
 
 static inline int safety_min_int(int a, int b) {
   return (a < b) ? a : b;

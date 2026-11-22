@@ -68,7 +68,6 @@
   } while (false);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&safety.vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
-#define UPDATE_VEHICLE_SPEED_2(val_ms) (update_sample(&safety.vehicle_speed_2, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
 #define MAX_ADDR_CHECK_MSGS 3U
 // max number of RX checks in a safety config; their dynamic state is shared by all safety modes
@@ -289,7 +288,8 @@ typedef struct {
   bool steering_disengage_prev;
   bool cruise_engaged_prev;
   struct sample_t vehicle_speed;
-  struct sample_t vehicle_speed_2;
+  struct sample_t vehicle_speed_2;  // a second speed source, if the safety mode has one
+  bool vehicle_speed_2_seen;
   bool vehicle_moving;
   bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
   uint8_t cruise_button_prev;
