@@ -196,7 +196,7 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
   generic_rx_checks();
 
   if (!valid) {
-    // an invalid message ends controls right away
+    // an invalid message ends controls right away, like the tick and heartbeat
     safety.ts_controls_exit_last = safety_ts - MAX_HOST_REACTION;
   } else if (controls_allowed_prev && !safety.controls_allowed) {
     safety.ts_controls_exit_last = safety_ts;
@@ -316,6 +316,7 @@ static void tick_copy(void) {
     if (status->lagging || !is_msg_valid(i)) {
       rx_checks_invalid = true;
       safety.controls_allowed = false;
+      safety.ts_controls_exit_last = ts - MAX_HOST_REACTION;
     }
   }
 
@@ -339,6 +340,7 @@ static void heartbeat_check_copy(void) {
     safety.heartbeat_engaged_mismatches += 1U;
     if (safety.heartbeat_engaged_mismatches >= 3U) {
       safety.controls_allowed = false;
+      safety.ts_controls_exit_last = safety_ts - MAX_HOST_REACTION;
     }
   } else {
     safety.heartbeat_engaged_mismatches = 0U;

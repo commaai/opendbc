@@ -122,6 +122,25 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     self.safety.set_timer(1000 + 20000)
     self.assertFalse(self._tx(self._accel_msg(1.0)))
 
+  def test_tick_ends_controls_right_away(self):
+    # the panda's own rx checks end controls without the 20 ms for openpilot
+    self._rx(self._pcm_status_msg(True))
+    self.safety.set_timer(1000)
+    self._rx(self._pcm_status_msg(False))
+    self.assertTrue(self.safety.get_controls_allowed_for_tx())
+    self.safety.safety_tick()
+    self.assertFalse(self.safety.get_controls_allowed_for_tx())
+
+  def test_heartbeat_ends_controls_right_away(self):
+    self._rx(self._pcm_status_msg(True))
+    self.safety.set_timer(1000)
+    self._rx(self._pcm_status_msg(False))
+    self._rx(self._pcm_status_msg(True))
+    self.safety.safety_heartbeat(False)
+    for _ in range(3):
+      self.safety.safety_heartbeat_check()
+    self.assertFalse(self.safety.get_controls_allowed_for_tx())
+
   def test_invalid_msg_ends_controls_right_away(self):
     self._rx(self._pcm_status_msg(True))
     self._rx(self._pcm_status_msg(False))

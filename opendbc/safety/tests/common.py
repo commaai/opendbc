@@ -1131,16 +1131,14 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._user_gas_msg(0))
     self.assertTrue(self.safety.get_longitudinal_allowed())
 
-  def _assert_expired_across_timer_wrap(self, rx, allowed, controls_allowed=False):
-    # an exit at 1000 us stays old once the timer wraps
+  def _assert_expired_across_timer_wrap(self, rx, allowed):
+    # an exit at 1000 us stays old once the timer wraps, with rx checks fine the tick alone keeps it old
     self.safety.set_timer(1000 + 20001)
+    self.safety.set_rx_checks_received(-1, 0)
     self.safety.safety_tick()
     for t in (1000 + 40001, 1000):
       self.safety.set_timer(t)
       rx()
-      if controls_allowed:
-        # the tick's rx checks ended controls after the timer jump
-        self.safety.set_controls_allowed(True)
       self.assertFalse(allowed())
 
   def test_controls_grace_after_brake_press(self):
@@ -1167,8 +1165,7 @@ class CarSafetyTest(SafetyTest):
       self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
       self.assertEqual(allowed, self.safety.get_longitudinal_allowed())
 
-    self._assert_expired_across_timer_wrap(lambda: self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1)), self.safety.get_longitudinal_allowed,
-                                           controls_allowed=True)
+    self._assert_expired_across_timer_wrap(lambda: self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1)), self.safety.get_longitudinal_allowed)
 
   def test_prev_user_brake(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:
