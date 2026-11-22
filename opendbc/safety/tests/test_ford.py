@@ -464,6 +464,15 @@ class TestFordCANFDTronSafety(TestFordCANFDStockSafety):
       msg[0].data[8] = 1
       self.assertFalse(self._tx(msg))
 
+  def test_aeb_off_request_blocked(self):
+    # the AEB off request is only allowed with openpilot longitudinal
+    if self.SAFETY_PARAM & FordSafetyFlags.LONG_CONTROL:
+      raise unittest.SkipTest("allowed with openpilot longitudinal")
+    values = {"MsgCntrFeatNoRq": 0x840, "MsgCntrFeatConfigRq": 0, "MsgCntrDsplyOp_D_Rq": 2, "MsgCntrPersIndex_D_Rq": 4}
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      self.assertFalse(self._tx(self.packer.make_can_msg_safety("Personality_Data_FD1", 2, values)))
+
 
 class TestFordCANFDTronLongitudinalSafety(TestFordCANFDTronSafety):
   SAFETY_PARAM = FordSafetyFlags.CANFD | FordSafetyFlags.TRON | FordSafetyFlags.LONG_CONTROL

@@ -19,6 +19,7 @@ class CarState(CarStateBase):
 
     self.distance_button = 0
     self.lc_button = 0
+    self.personality_seen = False
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -111,6 +112,7 @@ class CarState(CarStateBase):
     # Stock driver setting requests from the gateway, for the driver profile
     if self.CP.flags & FordFlags.DISABLE_AEB:
       self.personality_stock_values = cp.vl["Personality_Data_FD1"]
+      self.personality_seen = cp.ts_nanos["Personality_Data_FD1"]["MsgCntrPersIndex_D_Rq"] != 0
 
     ret.buttonEvents = [
       *create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}),

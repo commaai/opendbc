@@ -60,7 +60,8 @@ class CarController(CarControllerBase):
     fcw_alert = hud_control.visualAlert == VisualAlert.fcw
 
     # AEB off request - keeps the camera's automatic emergency braking off for the drive
-    if self.CP.flags & FordFlags.DISABLE_AEB and (self.frame % CarControllerParams.AEB_OFF_STEP) == 0:
+    # wait for the gateway's own request, so the driver profile is copied from it
+    if self.CP.flags & FordFlags.DISABLE_AEB and CS.personality_seen and (self.frame % CarControllerParams.AEB_OFF_STEP) == 0:
       can_sends.append(fordcan.create_aeb_off_msg(self.packer, self.CAN, CS.personality_stock_values))
 
     ### acc buttons ###
