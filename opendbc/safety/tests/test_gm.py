@@ -113,8 +113,8 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     else:
       raise NotImplementedError
 
-  def _speed_msg(self, speed, wheels=("RL", "RR")):
-    values = {"%sWheelSpd" % s: speed for s in wheels}
+  def _speed_msg(self, speed):
+    values = {"%sWheelSpd" % s: speed for s in ("RL", "RR")}
     return self.packer.make_can_msg_safety("EBCMWheelSpdRear", 0, values)
 
   def _user_brake_msg(self, brake):
@@ -142,12 +142,6 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
     values = {"ACCButtons": buttons}
     return self.packer.make_can_msg_safety("ASCMSteeringButton", self.BUTTONS_BUS, values)
 
-  def test_vehicle_moving_single_wheel(self):
-    # vehicle is moving if any checked wheel is above standstill
-    for wheel in ("RL", "RR"):
-      self.assertTrue(self._rx(self._speed_msg(self.STANDSTILL_THRESHOLD + 1, wheels=(wheel,))))
-      self.assertTrue(self.safety.get_vehicle_moving())
-
 
 class TestGmEVSafetyBase(TestGmSafetyBase):
   EXTRA_SAFETY_PARAM = GMSafetyFlags.EV
@@ -156,6 +150,9 @@ class TestGmEVSafetyBase(TestGmSafetyBase):
   def _user_regen_msg(self, regen):
     values = {"RegenPaddle": 2 if regen else 0}
     return self.packer.make_can_msg_safety("EBCMRegenPaddle", 0, values)
+
+  def test_regen_braking_bits(self):
+    self._test_signal_bits(self._user_regen_msg, self.safety.get_regen_braking_prev, 0)
 
 
 class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):

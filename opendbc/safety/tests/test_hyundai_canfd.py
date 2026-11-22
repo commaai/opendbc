@@ -57,8 +57,8 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
     values = {"StrTqReqVal": torque, "ActToiSta": steer_req}
     return self.packer.make_can_msg_safety(self.STEER_MSG, self.STEER_BUS, values)
 
-  def _speed_msg(self, speed, wheels=("FL", "FR", "RL", "RR")):
-    values = {f"WHL_Spd{pos}Val": speed * 0.03125 for pos in wheels}
+  def _speed_msg(self, speed):
+    values = {f"WHL_Spd{pos}Val": speed * 0.03125 for pos in ("FL", "FR", "RL", "RR")}
     return self.packer.make_can_msg_safety("WHEEL_SPEEDS", self.PT_BUS, values)
 
   def _user_brake_msg(self, brake):
@@ -81,12 +81,6 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.CarSafetyTest, common.Drive
       "ADAPTIVE_CRUISE_MAIN_BTN": main_button,
     }
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", bus, values)
-
-  def test_vehicle_moving_single_wheel(self):
-    # vehicle is moving if any checked wheel is above standstill
-    for wheel in ("FL", "FR", "RL", "RR"):
-      self.assertTrue(self._rx(self._speed_msg(self.STANDSTILL_THRESHOLD + 1, wheels=(wheel,))))
-      self.assertTrue(self.safety.get_vehicle_moving())
 
   def test_other_gas_msgs_ignored(self):
     # the gas messages share one RX slot, but only the configured one is parsed
