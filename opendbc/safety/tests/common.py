@@ -760,6 +760,20 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
         should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
+    # around zero, at CAN resolution: only moving away from a non-zero angle is winding up, anything else uses the down limit.
+    # past the last breakpoint (2 m/s past it, beyond the safety's 1 m/s speed fudge) the down limit is its last value,
+    # computed in float32 like the safety
+    down = int(np.float32(self.ANGLE_RATE_DOWN[-1]) * np.float32(self.DEG_TO_CAN) + np.float32(1.))
+
+    self._reset_speed_measurement(self.ANGLE_RATE_BP[-1] + 2)
+    for last in (-1, 0, 1):
+      for sign in (-1, 1):
+        self.safety.set_controls_allowed(True)
+        self.safety.set_desired_angle_last(last)
+        cmd = last + sign * down
+        winding_up = last * sign > 0  # the up limit is lower, so it doesn't allow this
+        self.assertEqual(not winding_up, self._tx(self._angle_cmd_msg(cmd / self.DEG_TO_CAN, True)), (last, cmd))
+
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while
     # steer actuation bit is 0, regardless of controls allowed.
@@ -965,6 +979,12 @@ class SafetyTest(SafetyTestBase):
     self.assertTrue(self.safety.get_controls_allowed())
     self.safety.set_controls_allowed(0)
     self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_rx_checks_unused_msgs(self):
+    # unused alternative message slots of an RX check are zeroed, so a zeroed message (address 0, bus 0, length 0) must not match one
+    self._rx(make_msg(0, 0, 0))
+    for i in range(self.safety.get_rx_checks_len()):
+      self.assertFalse(self.safety.safety_a.state.rx_status[i].msg_seen)
 
   def test_tx_hook_on_wrong_safety_mode(self):
     files = os.listdir(os.path.dirname(os.path.realpath(__file__)))

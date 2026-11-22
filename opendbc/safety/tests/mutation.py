@@ -86,7 +86,7 @@ CRASH_SIGNALS = {signal.SIGSEGV, signal.SIGBUS, signal.SIGFPE, signal.SIGILL, si
 CPU_LIMIT_FIXTURE = 1.0  # CPU seconds a child may spend outside of tests at a time
 MEM_HEADROOM = 256 << 20  # address space a child may allocate beyond what it inherits (Linux only)
 # TODO: kill the remaining survivors and remove this. Until then, the run fails only if more mutants survive than this.
-MAX_SURVIVORS = 95
+MAX_SURVIVORS = 83
 RED, GREEN, YELLOW, BOLD = "31", "32", "33", "1"
 
 
