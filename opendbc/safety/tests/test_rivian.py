@@ -131,11 +131,6 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
       self.assertFalse(valid)
       self.assertFalse(self.safety.get_controls_allowed())
 
-
-class TestRivianStockSafety(TestRivianSafetyBase):
-
-  LONGITUDINAL = False
-
   def test_adas_status(self):
     # For canceling stock ACC
     for controls_allowed in (True, False):
@@ -145,13 +140,17 @@ class TestRivianStockSafety(TestRivianSafetyBase):
         self.assertTrue(self._tx(self.packer.make_can_msg_safety("VDM_AdasSts", 2, values)))
 
 
+class TestRivianStockSafety(TestRivianSafetyBase):
+  LONGITUDINAL = False
+
+
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
 
   SAFETY_PARAM = RivianSafetyFlags.LONG_CONTROL
 
-  TX_MSGS = [[0x120, 0], [0x321, 2], [0x160, 0]]
-  RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160), 2: (0x321,)}
-  FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
+  TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2], [0x160, 0]]
+  RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160), 2: (0x321, 0x162)}
+  FWD_BLACKLISTED_ADDRS = {0: [0x321, 0x162], 2: [0x120, 0x160]}
 
 
 class TestRivianIgnition(common.SafetyTestBase):
