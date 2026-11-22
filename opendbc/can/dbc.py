@@ -61,6 +61,7 @@ class Signal:
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
   checksum_fields: tuple['Signal', ...] = ()
   max_counter: int = field(init=False)  # a counter's last value before it wraps to 0
+  quality_flag_values: tuple[int, ...] | None = None  # a quality flag's valid raw values
   counter_shift: int = 0  # where this signal's bits go in a counter split across signals
 
   def __post_init__(self):
@@ -201,23 +202,37 @@ class DBC:
 
 # ***** checksum functions *****
 
+def toyota_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
+  if sig.name in ("WHEEL_SPEED_FR_FAULT", "WHEEL_SPEED_FL_FAULT", "WHEEL_SPEED_RR_FAULT", "WHEEL_SPEED_RL_FAULT",
+                  "STEER_ANGLE_INITIALIZING"):
+    sig.quality_flag_values = (0,)
+
+
 def tesla_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
   if sig.name.endswith("Counter"):
     sig.type = SignalType.COUNTER
   elif sig.name.endswith("Checksum"):
     sig.type = SignalType.TESLA_CHECKSUM
     sig.calc_checksum = tesla_checksum
+  elif sig.name == "ESP_wheelSpeedsQF":
+    sig.quality_flag_values = (1,)  # ALL_WSS_VALID
+  elif sig.name == "ESP_driverBrakeApply":
+    sig.quality_flag_values = (1, 2)  # Not_Applied, Driver_applying_brakes
 
 
 def ford_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
   if sig.name in ("VehVActlBrk_No_Cnt", "VehVActlEng_No_Cnt", "VehRollYaw_No_Cnt"):
     sig.type = SignalType.COUNTER
+  elif sig.name in ("VehVActlBrk_D_Qf", "VehVActlEng_D_Qf", "VehYawWActl_D_Qf"):
+    sig.quality_flag_values = (3,)  # OK
 
 
 def rivian_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
   if sig.name.endswith("Counter"):
     sig.type = SignalType.COUNTER
     sig.max_counter = 14  # 0 to 14, despite the 4-bit field
+  elif sig.name in ("ESP_Vehicle_Speed_Q", "VDM_VehicleSpeedQ", "iBESP2_BrakePedalApplied_Q"):
+    sig.quality_flag_values = (1,)
 
 
 def mg_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
@@ -254,7 +269,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
   if dbc_name.startswith(("honda_", "acura_")):
     return ChecksumState(SignalType.HONDA_CHECKSUM, honda_checksum)
   elif dbc_name.startswith(("toyota_", "lexus_")):
-    return ChecksumState(SignalType.TOYOTA_CHECKSUM, toyota_checksum)
+    return ChecksumState(SignalType.TOYOTA_CHECKSUM, toyota_checksum, toyota_setup_signal)
   elif dbc_name == "hyundai_can_generated":
     # TODO: some cars set them and some don't. check them on the ones that do set them
     return ChecksumState(SignalType.HYUNDAI_CHECKSUM, hyundai_can_checksum, hyundai_setup_signal, ignore_checksum=True, ignore_counter=True)

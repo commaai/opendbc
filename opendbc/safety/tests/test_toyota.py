@@ -28,11 +28,6 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   EPS_SCALE = 73
   ECU_DISABLED = True  # radar is knocked out with tester present for openpilot longitudinal
 
-  RX_QUALITY_FLAGS = {
-    "WHEEL_SPEEDS": {f"WHEEL_SPEED_{wheel}_FAULT": (0,) for wheel in ("FR", "FL", "RR", "RL")},
-    "STEER_TORQUE_SENSOR": {"STEER_ANGLE_INITIALIZING": (0,)},
-  }
-
   def _torque_meas_msg(self, torque: int, driver_torque: int | None = None):
     values = {"STEER_TORQUE_EPS": (torque / self.EPS_SCALE) * 100.}
     if driver_torque is not None:
