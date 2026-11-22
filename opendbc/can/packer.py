@@ -34,7 +34,7 @@ class CANPacker:
       if address not in self.counters:
         self.counters[address] = 0
       set_value(dat, sig_counter, self.counters[address])
-      self.counters[address] = (self.counters[address] + 1) % (1 << sig_counter.size)
+      self.counters[address] = (self.counters[address] + 1) % (sig_counter.max_counter + 1)
     for sig in msg.sigs.values():
       if sig.calc_checksum:
         checksum = sig.calc_checksum(address, sig, dat)
