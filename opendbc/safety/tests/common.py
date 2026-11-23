@@ -1221,16 +1221,28 @@ class CarSafetyTest(SafetyTest):
               self.assertTrue(self._rx_invalid(msg, err_msg), err_msg)
             self.assertEqual(valid, self.safety.safety_a.state.rx_status[i].valid_checksum, err_msg)
 
-  def test_rx_ignores_bytes_past_length(self):
-    # the safety reads only the msg's bytes. The rest of the buffer changes nothing, whatever it holds
+  def test_rx_reads_only_signal_bits(self):
+    # the safety reads only the bits of the msg's signals. The bits outside them, in the msg and past its length,
+    # change nothing, whatever they hold
     for _, m, build in self._rx_check_builders():
       with self.subTest(addr=hex(m.addr), bus=m.bus):
         msg = build()  # keep the packet alive while reading its data
         dat = bytes(msg[0].data)[:m.len]
+
+        # the same frame with every bit outside the signals set
+        sigs = self.packer.dbc.addr_to_msg[m.addr].sigs.values()
+        signal_bits = bytearray(m.len)
+        for sig in sigs:
+          set_value(signal_bits, sig, (1 << sig.size) - 1)
+        noisy_dat = bytearray(byte | (~mask & 0xFF) for byte, mask in zip(dat, signal_bits, strict=True))
+        for sig in sigs:
+          if sig.calc_checksum:
+            set_value(noisy_dat, sig, sig.calc_checksum(m.addr, sig, noisy_dat))
+
         states = []
-        for fill in (0x00, 0xFF):
+        for frame, fill in ((dat, 0x00), (bytes(noisy_dat), 0xFF)):
           self._reset_safety_hooks()
-          self.assertTrue(self._rx(libsafety_py.make_CANPacket(m.addr, m.bus, dat, fill)), f"{fill=:#x}")
+          self.assertTrue(self._rx(libsafety_py.make_CANPacket(m.addr, m.bus, frame, fill)), f"{fill=:#x}")
           states.append(state_buffer("safety_a")[:])
         self.assertEqual(states[0], states[1])
 
