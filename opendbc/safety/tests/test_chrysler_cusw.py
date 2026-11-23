@@ -18,8 +18,8 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
   MAX_RT_DELTA = 150
   MAX_TORQUE_ERROR = 80
 
-  def _button_msg(self, cancel=False, resume=False):
-    values = {"ACC_Cancel": cancel, "ACC_Resume": resume}
+  def _button_msg(self, cancel=False, resume=False, **signals):
+    values = {"ACC_Cancel": cancel, "ACC_Resume": resume, **signals}
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", 0, values)
 
   def _pcm_status_msg(self, enable):
@@ -56,7 +56,13 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
       self.assertEqual(controls_allowed, self._tx(self._button_msg(resume=True)))
 
       # can always cancel
-      self.assertTrue(self._tx(self._button_msg(cancel=True)))
+      self.assertTrue(self._tx(self._button_msg(cancel=True, COUNTER=1)))
+
+      # cancel must be the only button pressed
+      self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
+      for button in ("ACC_Distance_Dec", "ACC_Accel", "ACC_Decel", "Cruise_OnOff", "ACC_OnOff", "ACC_Distance_Inc"):
+        with self.subTest(controls_allowed=controls_allowed, button=button):
+          self.assertFalse(self._tx(self._button_msg(cancel=True, **{button: 1})))
 
 
 if __name__ == "__main__":
