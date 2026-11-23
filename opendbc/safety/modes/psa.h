@@ -122,7 +122,7 @@ static safety_config psa_init(uint16_t param) {
   return BUILD_SAFETY_CFG(psa_rx_checks, PSA_TX_MSGS);
 }
 
-const safety_hooks psa_hooks = {
+static const safety_hooks psa_hooks = {
   .init = psa_init,
   .rx = psa_rx_hook,
   .tx = psa_tx_hook,

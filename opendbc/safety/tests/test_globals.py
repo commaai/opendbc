@@ -18,7 +18,8 @@ uint32_t microsecond_timer_get(void);
 
 
 class TestGlobals(unittest.TestCase):
-  # everything a safety decision depends on is in the two copies, so the dual computation covers it
+  # everything a safety decision depends on is in the two copies, so the dual computation covers it,
+  # apart from the flag that blocks re-entry into the entry points
   def test_only_dual_layer_is_writable(self):
     for debug in (["-DALLOW_DEBUG"], []):
       with self.subTest(debug=debug), tempfile.NamedTemporaryFile(suffix=".o") as obj:
@@ -29,7 +30,7 @@ class TestGlobals(unittest.TestCase):
         # ELF and Mach-O writable sections, ltmp are Mach-O section labels
         names = re.findall(r" O (?:\.data|\.bss|__DATA,__data|__DATA,__bss|__DATA,__common)\s.*?(\S+)$", symbols, re.MULTILINE)
         writable = {n.removeprefix("_") for n in names if not n.startswith("ltmp")}
-        self.assertEqual(writable, {"safety_a", "safety_b", "current_copy", "safety_ts", "safety_redundancy_fault"})
+        self.assertEqual(writable, {"safety_a", "safety_b", "current_copy", "safety_ts", "safety_redundancy_fault", "safety_busy"})
 
 
 if __name__ == "__main__":

@@ -137,7 +137,7 @@ static safety_config mg_init(uint16_t param) {
   return ret;
 }
 
-const safety_hooks mg_hooks = {
+static const safety_hooks mg_hooks = {
   .init = mg_init,
   .rx = mg_rx_hook,
   .tx = mg_tx_hook,

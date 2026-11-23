@@ -12,8 +12,15 @@
 // TODO: time should just be passed into the hooks we expose
 uint32_t timer_cnt = 0;
 uint32_t timer_step = 0;
+// called once by the next timer read, like an interrupt in the middle of an entry point
+static void (*timer_interrupt)(void) = NULL;
 uint32_t microsecond_timer_get(void);
 uint32_t microsecond_timer_get(void) {
+  void (*interrupt)(void) = timer_interrupt;
+  timer_interrupt = NULL;
+  if (interrupt != NULL) {
+    interrupt();
+  }
   timer_cnt += timer_step;
   return timer_cnt;
 }
@@ -138,6 +145,10 @@ void set_timer_step(uint32_t s){
   timer_step = s;
 }
 
+void set_timer_interrupt(void (*interrupt)(void)){
+  timer_interrupt = interrupt;
+}
+
 void set_torque_meas(int min, int max){
   SAFETY_SET(torque_meas.min, min);
   SAFETY_SET(torque_meas.max, max);
@@ -210,6 +221,12 @@ int get_curvature_meas_max(void){
   return safety.curvature_state.meas.max;
 }
 
+
+// ***** helpers *****
+
+uint8_t get_byte_from_end(const CANPacket_t *msg, uint32_t n) {
+  return GET_BYTE_FROM_END(msg, n);
+}
 
 // ***** car specific helpers *****
 

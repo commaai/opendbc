@@ -15,6 +15,11 @@ typedef struct {
   unsigned int addr : 29;
   unsigned char checksum;
   unsigned char data[CANPACKET_DATA_SIZE_MAX];
+  // MISRA deviation from Rule 1.2: this is panda's USB/SPI packet layout, where addr fills header bits 11-39 across a
+  // 32-bit boundary, sizeof is 72 and the alignment 4. Standard C can't express it: gcc and clang keep a bit-field in an
+  // aligned unit of its type, so addr would need a 64-bit type and an alignment of 8, which _Alignas can't weaken.
+  // Both support the attribute, and no other compiler builds this code.
+  // cppcheck-suppress misra-c2012-1.2
 } __attribute__((packed, aligned(4))) CANPacket_t;
 
 #define GET_LEN(msg) ((unsigned int)dlc_to_len[(msg)->data_len_code])

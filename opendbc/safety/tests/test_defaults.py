@@ -131,6 +131,50 @@ class TestSafetyRedundancy(common.SafetyTestBase):
         self.assertEqual(ts_last(self.safety.safety_a.state), 1000002)
 
 
+class TestReentry(common.SafetyTestBase):
+  SAFETY_MODEL = CarParams.SafetyModel.noOutput
+
+  def test_reentry_fails_closed(self):
+    # an entry point that runs while another one does blocks its message, changes no state and sets the fault
+    msg = common.make_msg(0, 0x123, 8)
+    nested_calls = {
+      "rx": (lambda: self.safety.safety_rx_hook(msg), False),
+      "tx": (lambda: self.safety.safety_tx_hook(msg), False),
+      "fwd": (lambda: self.safety.safety_fwd_hook(0, 0x123), -1),
+      "set_safety_hooks": (lambda: self.safety.set_safety_hooks(CarParams.SafetyModel.elm327, 0), -1),
+      "tick": (self.safety.safety_tick, None),
+      "heartbeat": (lambda: self.safety.safety_heartbeat(True), None),
+      "heartbeat_check": (self.safety.safety_heartbeat_check, None),
+      "alternative_experience": (lambda: self.safety.safety_alternative_experience(1), None),
+    }
+    results = {}
+
+    def state():
+      return common.state_buffer("safety_a")[:], common.state_buffer("safety_b")[:]
+
+    # cffi only prints an exception raised in a callback, so the callback records and the test asserts afterwards
+    @ffi.callback("void(void)")
+    def interrupt():
+      for name, (call, _) in nested_calls.items():
+        before = state()
+        self.safety.safety_redundancy_fault = False
+        ret = call()
+        results[name] = (ret, self.safety.safety_redundancy_fault, before == state())
+
+    # the entry points that read the timer, which calls the interrupt
+    for outer in (lambda: self.safety.safety_rx_hook(msg), lambda: self.safety.safety_tx_hook(msg), self.safety.safety_tick):
+      results.clear()
+      self.safety.set_timer_interrupt(interrupt)
+      outer()
+      self.assertEqual(results, {name: (blocked, True, True) for name, (_, blocked) in nested_calls.items()})
+      self.assertTrue(self.safety.safety_redundancy_fault)
+      self.safety.safety_redundancy_fault = False
+
+      # the entry points run again once the outer one returns
+      self.assertTrue(self.safety.safety_rx_hook(msg))
+      self.assertFalse(self.safety.safety_redundancy_fault)
+
+
 class TestHeartbeat(common.SafetyTestBase):
   SAFETY_MODEL = CarParams.SafetyModel.allOutput
 
@@ -145,6 +189,18 @@ class TestHeartbeat(common.SafetyTestBase):
       self.assertEqual(engaged, self.safety.get_controls_allowed())
       self.safety.safety_heartbeat_check()
       self.assertEqual(0, self.safety.safety_a.state.heartbeat_engaged_mismatches)
+
+
+class TestHelpers(unittest.TestCase):
+  def test_byte_from_end(self):
+    libsafety = libsafety_py.libsafety
+    msg = common.make_msg(0, 0x123, dat=bytes([1, 2, 3]))
+    self.assertEqual(3, libsafety.get_byte_from_end(msg, 1))
+    self.assertEqual(1, libsafety.get_byte_from_end(msg, 3))
+    self.assertEqual(0, libsafety.get_byte_from_end(msg, 4))  # message is shorter
+    full = common.make_msg(0, 0x123, dat=bytes(range(1, 65)))
+    self.assertEqual(64, libsafety.get_byte_from_end(full, 1))
+    self.assertEqual(0, libsafety.get_byte_from_end(full, 0))  # past the last byte of the largest message
 
 
 class TestModeCount(common.SafetyTestBase):
@@ -164,7 +220,7 @@ class TestModeCount(common.SafetyTestBase):
 
 class TestSafetyConfigs(unittest.TestCase):
   def test_hooks(self):
-    # safety.h relies on these instead of checking them at runtime
+    # every check that isn't ignored has its hook, without it safety.h would fail the check
     always_tx = (CarParams.SafetyModel.allOutput, CarParams.SafetyModel.elm327)  # tx_hook_copy whitelists everything
     libsafety = libsafety_py.libsafety  # loaded when the test runs, so a test runner can load its own build first
     for mode in CarParams.SafetyModel.schema.enumerants.values():
@@ -185,6 +241,36 @@ class TestSafetyConfigs(unittest.TestCase):
           self.assertEqual(m.ignore_counter, m.max_counter == 0)
           self.assertTrue(m.ignore_counter or hooks.get_counter != ffi.NULL)
           self.assertTrue(m.ignore_quality_flag or hooks.get_quality_flag_valid != ffi.NULL)
+
+  def _set_config(self, mode, rx_checks=ffi.NULL, tx_msgs=ffi.NULL):
+    libsafety = libsafety_py.libsafety
+    libsafety.set_safety_hooks(mode, 0)
+    for copy in (libsafety.safety_a, libsafety.safety_b):
+      copy.setup.current_safety_config.rx_checks = rx_checks
+      copy.setup.current_safety_config.rx_checks_len = 0 if rx_checks == ffi.NULL else 1
+      copy.setup.current_safety_config.tx_msgs = tx_msgs
+      copy.setup.current_safety_config.tx_msgs_len = 0 if tx_msgs == ffi.NULL else 1
+
+  def test_missing_hooks(self):
+    libsafety = libsafety_py.libsafety
+    msg = common.make_msg(0, 0x123, 8)
+
+    # mazda has no checksum, counter or quality flag hooks, so each check fails
+    for check in ("checksum", "counter", "quality_flag"):
+      ignored = {"ignore_checksum": True, "ignore_counter": True, "ignore_quality_flag": True, f"ignore_{check}": False}
+      rx_checks = ffi.new("RxCheck *", {"msg": [{"addr": 0x123, "bus": 0, "len": 8, "frequency": 10, "max_counter": 15, **ignored}]})
+      self._set_config(CarParams.SafetyModel.mazda, rx_checks=rx_checks)
+      self.assertFalse(libsafety.safety_rx_hook(msg), check)
+
+    # noOutput has no rx or tx hook
+    ignored = {"ignore_checksum": True, "ignore_counter": True, "ignore_quality_flag": True}
+    rx_checks = ffi.new("RxCheck *", {"msg": [{"addr": 0x123, "bus": 0, "len": 8, "frequency": 10, "max_counter": 15, **ignored}]})
+    self._set_config(CarParams.SafetyModel.noOutput, rx_checks=rx_checks)
+    self.assertTrue(libsafety.safety_rx_hook(msg))
+    tx_msgs = ffi.new("CanMsg *", {"addr": 0x123, "bus": 0, "len": 8})
+    self._set_config(CarParams.SafetyModel.noOutput, tx_msgs=tx_msgs)
+    self.assertFalse(libsafety.safety_tx_hook(msg))
+    self.assertFalse(libsafety.safety_redundancy_fault)
 
 
 if __name__ == "__main__":

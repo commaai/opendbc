@@ -16,6 +16,7 @@ static const safety_hooks nooutput_hooks = {
   .init = nooutput_init,
 };
 
+#ifdef ALLOW_DEBUG
 // *** all output safety mode ***
 static safety_config alloutput_init(uint16_t param) {
   // Enables passthrough mode where relay is open and bus 0 gets forwarded to bus 2 and vice versa
@@ -31,9 +32,10 @@ static bool alloutput_tx_hook(const CANPacket_t *msg) {
 }
 
 // no RX checks, so the RX hook is never called
-const safety_hooks alloutput_hooks = {
+static const safety_hooks alloutput_hooks = {
   .init = alloutput_init,
   .tx = alloutput_tx_hook,
 };
+#endif
 
 #endif  // SAFETY_MODES_DEFAULTS_H

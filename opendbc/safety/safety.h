@@ -18,22 +18,26 @@
 #include "opendbc/safety/modes/ford.h"
 #include "opendbc/safety/modes/hyundai.h"
 #include "opendbc/safety/modes/chrysler.h"
-#include "opendbc/safety/modes/chrysler_cusw.h"
 #include "opendbc/safety/modes/rivian.h"
-#include "opendbc/safety/modes/mg.h"
 #include "opendbc/safety/modes/subaru.h"
-#include "opendbc/safety/modes/subaru_preglobal.h"
 #include "opendbc/safety/modes/mazda.h"
 #include "opendbc/safety/modes/nissan.h"
-#include "opendbc/safety/modes/volkswagen_mlb.h"
 #include "opendbc/safety/modes/volkswagen_mqb.h"
 #include "opendbc/safety/modes/volkswagen_meb.h"
-#include "opendbc/safety/modes/volkswagen_pq.h"
 #include "opendbc/safety/modes/elm327.h"
 #include "opendbc/safety/modes/body.h"
+#include "opendbc/safety/modes/hyundai_canfd.h"
+
+// Safety modes available only in debug builds
+#ifdef ALLOW_DEBUG
+#include "opendbc/safety/modes/chrysler_cusw.h"
+#include "opendbc/safety/modes/mg.h"
+#include "opendbc/safety/modes/subaru_preglobal.h"
+#include "opendbc/safety/modes/volkswagen_mlb.h"
+#include "opendbc/safety/modes/volkswagen_pq.h"
 #include "opendbc/safety/modes/psa.h"
 #include "opendbc/safety/modes/byd.h"
-#include "opendbc/safety/modes/hyundai_canfd.h"
+#endif
 
 static bool GET_BIT(const CANPacket_t *msg, uint32_t b) {
   return ((msg->data[b / 8U] >> (b % 8U)) & 0x1U) != 0U;
@@ -65,6 +69,12 @@ static uint64_t GET_BYTES_64_LE(const CANPacket_t *msg, int start, int len) {
     ret |= ((uint64_t)msg->data[start + i]) << shift;
   }
   return ret;
+}
+
+// Read the n-th byte from the end of the message (n = 1 is the last byte), or 0 if the message is shorter.
+static uint8_t GET_BYTE_FROM_END(const CANPacket_t *msg, uint32_t n) {
+  const uint32_t index = GET_LEN(msg) - n;  // wraps around when the message is shorter than n bytes
+  return (index < CANPACKET_DATA_SIZE_MAX) ? msg->data[index] : 0U;
 }
 
 static const int MAX_WRONG_COUNTERS = 5;
@@ -154,29 +164,35 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
     const CanMsgCheck *m = &cfg->rx_checks[index].msg[status->index];
     status->last_timestamp = safety_ts;
 
-    // the hooks are set for every check that isn't ignored, see TestSafetyConfigs
+    // the hooks are set for every check that isn't ignored, see TestSafetyConfigs. A check without its hook fails
     // checksum check
     if (m->ignore_checksum) {
       status->valid_checksum = true;
-    } else {
+    } else if (hooks->get_checksum != NULL) {
       uint32_t checksum = hooks->get_checksum(msg);
       uint32_t checksum_comp = hooks->compute_checksum(msg);
       status->valid_checksum = checksum_comp == checksum;
+    } else {
+      // stays false from set_hooks_copy
     }
 
     // counter check
     if (m->ignore_counter) {
-      status->wrong_counters = 0;
-    } else {
+      // stays 0 from set_hooks_copy
+    } else if (hooks->get_counter != NULL) {
       uint8_t counter = hooks->get_counter(msg);
       update_counter(status, m, counter);
+    } else {
+      status->wrong_counters = MAX_WRONG_COUNTERS;
     }
 
     // quality flag check
     if (m->ignore_quality_flag) {
       status->valid_quality_flag = true;
-    } else {
+    } else if (hooks->get_quality_flag_valid != NULL) {
       status->valid_quality_flag = hooks->get_quality_flag_valid(msg);
+    } else {
+      // stays false from set_hooks_copy
     }
   }
   bool valid = is_msg_valid(index);
@@ -191,7 +207,7 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
 
   bool valid = rx_msg_safety_check(msg, &safety_setup.current_safety_config, safety_setup.current_hooks);
   bool whitelisted = get_addr_check_index(msg, safety_setup.current_safety_config.rx_checks, safety_setup.current_safety_config.rx_checks_len) != -1;
-  if (valid && whitelisted) {
+  if (valid && whitelisted && (safety_setup.current_hooks->rx != NULL)) {
     safety_setup.current_hooks->rx(msg);
   }
 
@@ -228,18 +244,23 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
   return whitelisted;
 }
 
-static bool tx_hook_copy(CANPacket_t *msg) {
+static bool tx_hook_copy(const CANPacket_t *msg) {
   bool whitelisted = tx_msg_safety_check(msg, safety_setup.current_safety_config.tx_msgs, safety_setup.current_safety_config.tx_msgs_len);
-  if ((safety_setup.current_safety_mode == SAFETY_ALLOUTPUT) || (safety_setup.current_safety_mode == SAFETY_ELM327)) {
+  if (safety_setup.current_safety_mode == SAFETY_ELM327) {
     whitelisted = true;
   }
+#ifdef ALLOW_DEBUG
+  if (safety_setup.current_safety_mode == SAFETY_ALLOUTPUT) {
+    whitelisted = true;
+  }
+#endif
 
   bool safety_allowed = false;
-  if (whitelisted) {
+  if (whitelisted && (safety_setup.current_hooks->tx != NULL)) {
     safety_allowed = safety_setup.current_hooks->tx(msg);
   }
 
-  return !safety.relay_malfunction && whitelisted && safety_allowed;
+  return !safety.relay_malfunction && safety_allowed;
 }
 
 static int get_fwd_bus(int bus_num) {
@@ -404,68 +425,116 @@ static int set_hooks_copy(uint16_t mode, uint16_t param) {
   return set_status;
 }
 
+// an entry point is running, see the execution model in declarations.h. Volatile, so the compiler keeps both
+// stores when it inlines an entry point. It detects a broken execution model, it doesn't make one safe
+static volatile bool safety_busy = false;
+
+// returns false, and sets the fault, when called while another entry point runs
+static bool safety_enter(void) {
+  const bool enter = !safety_busy;
+  if (enter) {
+    safety_busy = true;
+  } else {
+    safety_redundancy_fault = true;
+  }
+  return enter;
+}
+
+static void safety_exit(void) {
+  safety_busy = false;
+}
+
 // B runs first, so safety is A again once a hook returns
 bool safety_rx_hook(const CANPacket_t *msg) {
-  safety_ts = microsecond_timer_get();
-  current_copy = &safety_b;
-  bool valid_b = rx_hook_copy(msg);
-  current_copy = &safety_a;
-  bool valid = rx_hook_copy(msg);
-  (void)safety_redundancy_check(valid == valid_b);
+  bool valid = false;
+  if (safety_enter()) {
+    safety_ts = microsecond_timer_get();
+    current_copy = &safety_b;
+    bool valid_b = rx_hook_copy(msg);
+    current_copy = &safety_a;
+    valid = rx_hook_copy(msg);
+    (void)safety_redundancy_check(valid == valid_b);
+    safety_exit();
+  }
   return valid;
 }
 
-bool safety_tx_hook(CANPacket_t *msg) {
-  safety_ts = microsecond_timer_get();
-  current_copy = &safety_b;
-  bool allowed_b = tx_hook_copy(msg);
-  current_copy = &safety_a;
-  bool allowed = tx_hook_copy(msg);
-  (void)safety_redundancy_check(allowed == allowed_b);
+bool safety_tx_hook(const CANPacket_t *msg) {
+  bool allowed = false;
+  if (safety_enter()) {
+    safety_ts = microsecond_timer_get();
+    current_copy = &safety_b;
+    bool allowed_b = tx_hook_copy(msg);
+    current_copy = &safety_a;
+    allowed = tx_hook_copy(msg);
+    (void)safety_redundancy_check(allowed == allowed_b);
+    safety_exit();
+  }
   return allowed;
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  current_copy = &safety_b;
-  int destination_bus_b = fwd_hook_copy(bus_num, addr);
-  current_copy = &safety_a;
-  int destination_bus = fwd_hook_copy(bus_num, addr);
-  (void)safety_redundancy_check(destination_bus == destination_bus_b);
+  int destination_bus = -1;
+  if (safety_enter()) {
+    current_copy = &safety_b;
+    int destination_bus_b = fwd_hook_copy(bus_num, addr);
+    current_copy = &safety_a;
+    destination_bus = fwd_hook_copy(bus_num, addr);
+    (void)safety_redundancy_check(destination_bus == destination_bus_b);
+    safety_exit();
+  }
   return destination_bus;
 }
 
 // 1Hz safety function called by main
 void safety_tick(void) {
-  safety_ts = microsecond_timer_get();
-  current_copy = &safety_b;
-  tick_copy();
-  current_copy = &safety_a;
-  tick_copy();
-  (void)safety_redundancy_check(safety_states_equal());
+  if (safety_enter()) {
+    safety_ts = microsecond_timer_get();
+    current_copy = &safety_b;
+    tick_copy();
+    current_copy = &safety_a;
+    tick_copy();
+    (void)safety_redundancy_check(safety_states_equal());
+    safety_exit();
+  }
 }
 
 void safety_heartbeat(bool engaged) {
-  safety_a.state.heartbeat_engaged = engaged;
-  safety_b.state.heartbeat_engaged = engaged;
+  if (safety_enter()) {
+    safety_a.state.heartbeat_engaged = engaged;
+    safety_b.state.heartbeat_engaged = engaged;
+    safety_exit();
+  }
 }
 
 void safety_alternative_experience(int alt_exp) {
-  safety_a.setup.alternative_experience = alt_exp;
-  safety_b.setup.alternative_experience = alt_exp;
+  if (safety_enter()) {
+    safety_a.setup.alternative_experience = alt_exp;
+    safety_b.setup.alternative_experience = alt_exp;
+    safety_exit();
+  }
 }
 
 void safety_heartbeat_check(void) {
-  current_copy = &safety_b;
-  heartbeat_check_copy();
-  current_copy = &safety_a;
-  heartbeat_check_copy();
+  if (safety_enter()) {
+    current_copy = &safety_b;
+    heartbeat_check_copy();
+    current_copy = &safety_a;
+    heartbeat_check_copy();
+    safety_exit();
+  }
 }
 
 int set_safety_hooks(uint16_t mode, uint16_t param) {
-  current_copy = &safety_b;
-  (void)set_hooks_copy(mode, param);
-  current_copy = &safety_a;
-  return set_hooks_copy(mode, param);
+  int set_status = -1;
+  if (safety_enter()) {
+    current_copy = &safety_b;
+    (void)set_hooks_copy(mode, param);
+    current_copy = &safety_a;
+    set_status = set_hooks_copy(mode, param);
+    safety_exit();
+  }
+  return set_status;
 }
 
 // convert a trimmed integer to signed 32 bit int

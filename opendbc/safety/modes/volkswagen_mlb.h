@@ -24,7 +24,6 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
   };
 
   SAFETY_UNUSED(param);
-  volkswagen_common_init();
 
   return BUILD_SAFETY_CFG(volkswagen_mlb_rx_checks, VOLKSWAGEN_MLB_STOCK_TX_MSGS);
 }
@@ -114,7 +113,7 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-const safety_hooks volkswagen_mlb_hooks = {
+static const safety_hooks volkswagen_mlb_hooks = {
   .init = volkswagen_mlb_init,
   .rx = volkswagen_mlb_rx_hook,
   .tx = volkswagen_mlb_tx_hook,

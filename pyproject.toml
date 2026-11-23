@@ -43,6 +43,16 @@ examples = [
 testing = [
   "comma-car-segments @ https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl",
   "cppcheck @ git+https://github.com/commaai/dependencies.git@release-cppcheck#subdirectory=cppcheck",
+  "misrable; (sys_platform == 'linux' and (platform_machine == 'x86_64' or platform_machine == 'aarch64')) or (sys_platform == 'darwin' and (platform_machine == 'arm64' or platform_machine == 'x86_64'))",
+]
+
+# misrable isn't on PyPI yet, so its wheels are checked in
+[tool.uv.sources]
+misrable = [
+  { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.musllinux_1_1_x86_64.whl", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
+  { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", marker = "sys_platform == 'linux' and platform_machine == 'aarch64'" },
+  { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-macosx_12_0_arm64.whl", marker = "sys_platform == 'darwin' and platform_machine == 'arm64'" },
+  { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-macosx_12_0_x86_64.whl", marker = "sys_platform == 'darwin' and platform_machine == 'x86_64'" },
 ]
 
 [build-system]

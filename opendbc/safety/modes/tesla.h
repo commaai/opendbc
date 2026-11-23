@@ -231,6 +231,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
     uint8_t acc_state = msg->data[1] >> 4;
     const uint32_t inactive_accel = (uint32_t)TESLA_LONG_LIMITS.inactive_accel;
 
+#ifdef ALLOW_DEBUG
     if (safety_setup.tesla_longitudinal) {
       // Prevent both acceleration from being negative, as this could cause the car to reverse after coming to standstill
       if ((raw_accel_max < inactive_accel) && (raw_accel_min < inactive_accel)) {
@@ -242,6 +243,9 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
       const bool min_accel_violation = longitudinal_accel_checks((int)raw_accel_min, TESLA_LONG_LIMITS);
       violation = violation || max_accel_violation || min_accel_violation;
     } else {
+#else
+    {
+#endif
       // Can only send cancel longitudinal messages when not controlling longitudinal
       if (acc_state != 13U) {  // ACC_CANCEL_GENERIC_SILENT
         violation = true;
@@ -276,10 +280,12 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
         block_msg = true;
       }
 
+#ifdef ALLOW_DEBUG
       // DAS_control
       if (safety_setup.tesla_longitudinal && (addr == 0x2b9) && !safety.tesla_stock_aeb) {
         block_msg = true;
       }
+#endif
     }
   }
 
@@ -293,11 +299,13 @@ static safety_config tesla_init(uint16_t param) {
     {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},   // APS_eacMonitor
   };
 
+#ifdef ALLOW_DEBUG
   static const CanMsg TESLA_M3_Y_LONG_TX_MSGS[] = {
     {0x488, 0, 4, .check_relay = true, .disable_static_blocking = true},  // DAS_steeringControl
     {0x2b9, 0, 8, .check_relay = true, .disable_static_blocking = true},  // DAS_control
     {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},  // APS_eacMonitor
   };
+#endif
 
   SAFETY_UNUSED(param);
 #ifdef ALLOW_DEBUG
@@ -321,12 +329,12 @@ static safety_config tesla_init(uint16_t param) {
     {.msg = {{0x311, 0, 7, 10U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
   };
 
-  safety_config ret;
+  safety_config ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_TX_MSGS);
+#ifdef ALLOW_DEBUG
   if (safety_setup.tesla_longitudinal) {
     ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_LONG_TX_MSGS);
-  } else {
-    ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_TX_MSGS);
   }
+#endif
   return ret;
 }
 

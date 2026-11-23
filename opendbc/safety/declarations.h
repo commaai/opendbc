@@ -53,6 +53,7 @@
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), RX_CHECKS_LEN(rx), \
                                                   (tx), SAFETY_ARRAY_LEN(tx), \
                                                   false})
+// SET_RX_CHECKS and SET_TX_MSGS fill in a config together, SET_RX_CHECKS also resets disable_forwarding
 #define SET_RX_CHECKS(rx, config) \
   do { \
     (config).rx_checks = (rx); \
@@ -64,7 +65,6 @@
   do { \
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = SAFETY_ARRAY_LEN(tx); \
-    (config).disable_forwarding = false; \
   } while (false);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&safety.vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
@@ -240,8 +240,13 @@ typedef struct {
   get_quality_flag_valid_t get_quality_flag_valid;
 } safety_hooks;
 
+// Execution model: the safety entry points declared here must not run concurrently or re-enter one another
+// (panda calls them from interrupts of equal priority). One that does anyway changes nothing: it blocks or
+// invalidates its message, set_safety_hooks returns -1, and it sets safety_redundancy_fault, which, like a
+// redundancy mismatch, is only reported for the platform to act on. Code outside the safety may read the
+// safety state, but never writes it.
 bool safety_rx_hook(const CANPacket_t *msg);
-bool safety_tx_hook(CANPacket_t *msg);
+bool safety_tx_hook(const CANPacket_t *msg);
 bool get_longitudinal_allowed(void);
 
 // provided by the platform (firmware timer driver, or the test harness)
@@ -411,14 +416,5 @@ typedef struct {
 
 int safety_fwd_hook(int bus_num, int addr);
 int set_safety_hooks(uint16_t mode, uint16_t param);
-
-extern const safety_hooks chrysler_cusw_hooks;
-extern const safety_hooks alloutput_hooks;
-extern const safety_hooks subaru_preglobal_hooks;
-extern const safety_hooks volkswagen_mlb_hooks;
-extern const safety_hooks volkswagen_pq_hooks;
-extern const safety_hooks psa_hooks;
-extern const safety_hooks byd_hooks;
-extern const safety_hooks mg_hooks;
 
 #endif  // SAFETY_DECLARATIONS_H

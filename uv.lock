@@ -2,8 +2,16 @@ version = 1
 revision = 5
 requires-python = ">=3.11, <3.13"
 resolution-markers = [
-    "python_full_version >= '3.12'",
-    "python_full_version < '3.12'",
+    "python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux'",
+    "python_full_version >= '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version >= '3.12' and platform_machine == 'arm64' and sys_platform == 'darwin'",
+    "python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
+    "python_full_version >= '3.12' and ((platform_machine != 'aarch64' and platform_machine != 'arm64' and platform_machine != 'x86_64') or (platform_machine == 'aarch64' and sys_platform == 'darwin') or (platform_machine == 'arm64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux'))",
+    "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux'",
+    "python_full_version < '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version < '3.12' and platform_machine == 'arm64' and sys_platform == 'darwin'",
+    "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
+    "python_full_version < '3.12' and ((platform_machine != 'aarch64' and platform_machine != 'arm64' and platform_machine != 'x86_64') or (platform_machine == 'aarch64' and sys_platform == 'darwin') or (platform_machine == 'arm64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux'))",
 ]
 
 [[package]]
@@ -350,11 +358,63 @@ wheels = [
 ]
 
 [[package]]
+name = "misrable"
+version = "0.2.0"
+source = { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-macosx_12_0_arm64.whl" }
+resolution-markers = [
+    "python_full_version >= '3.12' and platform_machine == 'arm64' and sys_platform == 'darwin'",
+    "python_full_version < '3.12' and platform_machine == 'arm64' and sys_platform == 'darwin'",
+]
+wheels = [
+    { filename = "misrable-0.2.0-py3-none-macosx_12_0_arm64.whl", hash = "sha256:16f9069febdcf4eef15582682471fc9c4b45f64e29822729cd4f346b083df9a3" },
+]
+
+[[package]]
+name = "misrable"
+version = "0.2.0"
+source = { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-macosx_12_0_x86_64.whl" }
+resolution-markers = [
+    "python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
+    "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
+]
+wheels = [
+    { filename = "misrable-0.2.0-py3-none-macosx_12_0_x86_64.whl", hash = "sha256:85348cc9bc013d643dcad56a93aebfb41c34a19deca44a7ad9070f7fab402a27" },
+]
+
+[[package]]
+name = "misrable"
+version = "0.2.0"
+source = { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl" }
+resolution-markers = [
+    "python_full_version >= '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version < '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+]
+wheels = [
+    { filename = "misrable-0.2.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:b3696e36aecdb1eb53f83627364c5cab04d1b488c14c7c705fde24c1f45a021e" },
+]
+
+[[package]]
+name = "misrable"
+version = "0.2.0"
+source = { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.musllinux_1_1_x86_64.whl" }
+resolution-markers = [
+    "python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux'",
+    "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux'",
+]
+wheels = [
+    { filename = "misrable-0.2.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.musllinux_1_1_x86_64.whl", hash = "sha256:205713a52e021e0a8bf9ded2f85875d58e4ff428d33dc3dcae7bcdb89b6ef82f" },
+]
+
+[[package]]
 name = "numpy"
 version = "2.4.6"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version < '3.12'",
+    "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux'",
+    "python_full_version < '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version < '3.12' and platform_machine == 'arm64' and sys_platform == 'darwin'",
+    "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
+    "python_full_version < '3.12' and ((platform_machine != 'aarch64' and platform_machine != 'arm64' and platform_machine != 'x86_64') or (platform_machine == 'aarch64' and sys_platform == 'darwin') or (platform_machine == 'arm64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux'))",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d0/ad/fed0499ce6a338d2a03ebae59cd15093910c8875328855781952abf6c2fe/numpy-2.4.6.tar.gz", hash = "sha256:f3a3570c4a2a16746ac2c31a7c7c7b0c186b95ce902e33db6f28094ed7387dda", size = 20735807, upload-time = "2026-05-18T23:37:14.07Z" }
 wheels = [
@@ -394,7 +454,11 @@ name = "numpy"
 version = "2.5.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.12'",
+    "python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux'",
+    "python_full_version >= '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version >= '3.12' and platform_machine == 'arm64' and sys_platform == 'darwin'",
+    "python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
+    "python_full_version >= '3.12' and ((platform_machine != 'aarch64' and platform_machine != 'arm64' and platform_machine != 'x86_64') or (platform_machine == 'aarch64' and sys_platform == 'darwin') or (platform_machine == 'arm64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux'))",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/4e/3a/8770c288c47f0b5c2a786d3c20e79f66fd245f2d42cd232d7cd5e00e83e5/numpy-2.5.5.tar.gz", hash = "sha256:5cddc243c75114ba845f01b1f87aca1572dbf7b6c2d88636ed3e1d2bccd7f1bf", size = 20873892, upload-time = "2026-11-15T21:32:28.607Z" }
 wheels = [
@@ -445,6 +509,10 @@ testing = [
 testing = [
     { name = "comma-car-segments" },
     { name = "cppcheck" },
+    { name = "misrable", version = "0.2.0", source = { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-macosx_12_0_arm64.whl" }, marker = "platform_machine == 'arm64' and sys_platform == 'darwin'" },
+    { name = "misrable", version = "0.2.0", source = { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-macosx_12_0_x86_64.whl" }, marker = "platform_machine == 'x86_64' and sys_platform == 'darwin'" },
+    { name = "misrable", version = "0.2.0", source = { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl" }, marker = "platform_machine == 'aarch64' and sys_platform == 'linux'" },
+    { name = "misrable", version = "0.2.0", source = { path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.musllinux_1_1_x86_64.whl" }, marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
 
 [package.metadata]
@@ -472,6 +540,10 @@ provides-extras = ["testing", "examples"]
 testing = [
     { name = "comma-car-segments", url = "https://huggingface.co/datasets/commaai/commaCarSegments/resolve/main/dist/comma_car_segments-0.1.0-py3-none-any.whl" },
     { name = "cppcheck", git = "https://github.com/commaai/dependencies.git?subdirectory=cppcheck&rev=release-cppcheck" },
+    { name = "misrable", marker = "platform_machine == 'arm64' and sys_platform == 'darwin'", path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-macosx_12_0_arm64.whl" },
+    { name = "misrable", marker = "platform_machine == 'x86_64' and sys_platform == 'darwin'", path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-macosx_12_0_x86_64.whl" },
+    { name = "misrable", marker = "platform_machine == 'aarch64' and sys_platform == 'linux'", path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl" },
+    { name = "misrable", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'", path = "opendbc/safety/tests/misra/wheels/misrable-0.2.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.musllinux_1_1_x86_64.whl" },
 ]
 
 [[package]]

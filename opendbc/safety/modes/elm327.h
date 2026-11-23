@@ -24,7 +24,7 @@ static bool elm327_tx_hook(const CANPacket_t *msg) {
   }
 
   // GM camera uses non-standard diagnostic address, this has no control message address collisions
-  if ((msg->addr == GM_CAMERA_DIAG_ADDR) && (len == 8U)) {
+  if (msg->addr == GM_CAMERA_DIAG_ADDR) {
     // Only allow known frame types for ISO 15765-2
     if ((msg->data[0] >> 4) > 3U) {
       tx = false;
