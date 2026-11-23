@@ -4,6 +4,7 @@ from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 
 
+@common.debug_only
 class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
   DBC = "chrysler_cusw"
   SAFETY_MODEL = CarParams.SafetyModel.chryslerCusw

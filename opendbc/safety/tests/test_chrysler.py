@@ -89,6 +89,7 @@ class TestChryslerRamDTSafety(TestChryslerSafety):
     return self.packer.make_can_msg_safety("ESP_8", 0, values)
 
 
+@common.debug_only
 class TestChryslerRamHDSafety(TestChryslerSafety):
   DBC = "chrysler_ram_hd_generated"
 

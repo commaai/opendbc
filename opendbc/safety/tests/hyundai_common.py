@@ -76,6 +76,7 @@ class HyundaiButtonBase(common.CarSafetyTest):
       self._rx(self._button_msg(Buttons.NONE))
 
 
+@common.debug_only
 class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
   DISABLED_ECU_UDS_MSG: tuple[int, int]

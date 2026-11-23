@@ -6,6 +6,7 @@ from opendbc.car.subaru.values import SubaruSafetyFlags
 import opendbc.safety.tests.common as common
 
 
+@common.debug_only
 class TestSubaruPreglobalSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   SAFETY_MODEL = CarParams.SafetyModel.subaruPreglobal
 

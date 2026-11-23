@@ -28,6 +28,7 @@ class TestSilent(TestNoOutput):
   SAFETY_MODEL = CarParams.SafetyModel.silent
 
 
+@common.debug_only
 class TestAllOutput(TestDefaultRxHookBase):
   SAFETY_MODEL = CarParams.SafetyModel.allOutput
 
@@ -69,7 +70,7 @@ class TestSafetyFramework(common.SafetyTestBase):
 
 
 class TestSafetyRedundancy(common.SafetyTestBase):
-  SAFETY_MODEL = CarParams.SafetyModel.allOutput
+  SAFETY_MODEL = CarParams.SafetyModel.elm327
 
   def _flip_b(self, bit):
     state = common.state_buffer("safety_b")
@@ -92,11 +93,11 @@ class TestSafetyRedundancy(common.SafetyTestBase):
   def test_tx_decision_mismatch(self):
     self.safety.set_controls_allowed(True)
     self._flip_b(ffi.offsetof("SafetyState", "relay_malfunction") * 8)
-    self.assertTrue(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
+    self.assertTrue(self.safety.safety_tx_hook(common.make_msg(0, 0x7E0)))
     self._assert_fault()
 
   def test_fwd_decision_mismatch(self):
-    self.safety.set_safety_hooks(CarParams.SafetyModel.allOutput, 1)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
     self.assertEqual(self.safety.safety_fwd_hook(0, 0x123), 2)
     self._flip_b(ffi.offsetof("SafetyState", "relay_malfunction") * 8)
     self.assertEqual(self.safety.safety_fwd_hook(0, 0x123), 2)

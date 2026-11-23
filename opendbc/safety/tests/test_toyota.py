@@ -308,6 +308,7 @@ class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyo
     return self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.LTA
 
 
+@common.debug_only
 class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
 
   DBC = "toyota_secoc_pt_generated"
