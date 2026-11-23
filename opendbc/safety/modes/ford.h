@@ -17,7 +17,6 @@
 #define FORD_LateralMotionControl  0x3D3U   // TX by OP, Lateral Control message
 #define FORD_LateralMotionControl2 0x3D6U   // TX by OP, alternate Lateral Control message
 #define FORD_IPMA_Data             0x3D8U   // TX by OP, IPMA and LKAS user interface
-#define FORD_Personality_Data_FD1  0x3E0U   // TX by OP, driver setting request to switch AEB off (TRON alpha longitudinal)
 
 // CAN bus numbers.
 #define FORD_MAIN_BUS 0U
@@ -197,20 +196,6 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     }
   }
 
-  // Safety check for Personality_Data_FD1: openpilot may only ask the camera to switch AEB off, no other setting
-  if (msg->addr == FORD_Personality_Data_FD1) {
-    // Signal: MsgCntrFeatNoRq (0x840 is automatic emergency braking)
-    const bool aeb_feature = GET_BYTES_BE(msg, 0, 2) == 0x840U;
-    // Signal: MsgCntrFeatConfigRq (0 is off)
-    const bool aeb_off = GET_BYTES_BE(msg, 2, 2) == 0U;
-    // no signals in bits 0-1 of byte 4 or in bytes 5-7
-    const bool unused_zero = ((msg->data[4] & 0x3U) == 0U) && (GET_BYTES_BE(msg, 5, 3) == 0U);
-
-    if (!aeb_feature || !aeb_off || !unused_zero) {
-      tx = false;
-    }
-  }
-
   // Safety check for Steering_Data_FD1 button signals
   // Note: Many other signals in this message are not relevant to safety (e.g. blinkers, wiper switches, high beam)
   // which we passthru in OP.
@@ -332,15 +317,6 @@ static safety_config ford_init(uint16_t param) {
     {FORD_Lane_Assist_Data1, 0, 16, .check_relay = true},
     {FORD_LateralMotionControl2, 0, 16, .check_relay = true},
   };
-
-  // alpha longitudinal: the AEB off request goes to the camera with the gateway's own requests
-  static const CanMsg FORD_TRON_LONG_TX_MSGS[] = {
-    {FORD_Steering_Data_FD1, 0, 8, .check_relay = false},
-    {FORD_Steering_Data_FD1, 2, 8, .check_relay = false},
-    {FORD_Lane_Assist_Data1, 0, 16, .check_relay = true},
-    {FORD_LateralMotionControl2, 0, 16, .check_relay = true},
-    {FORD_Personality_Data_FD1, 2, 8, .check_relay = false},
-  };
 #endif
 
   static const CanMsg FORD_CANFD_STOCK_TX_MSGS[] = {
@@ -368,9 +344,6 @@ static safety_config ford_init(uint16_t param) {
     const uint16_t FORD_PARAM_TRON = 4;
     if (GET_FLAG(param, FORD_PARAM_TRON)) {
       ret = BUILD_SAFETY_CFG(ford_tron_rx_checks, FORD_TRON_TX_MSGS);
-      if (GET_FLAG(param, FORD_PARAM_LONGITUDINAL)) {
-        ret = BUILD_SAFETY_CFG(ford_tron_rx_checks, FORD_TRON_LONG_TX_MSGS);
-      }
     }
 #endif
   } else {

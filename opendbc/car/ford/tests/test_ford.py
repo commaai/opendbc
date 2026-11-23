@@ -1,14 +1,9 @@
 import random
 import unittest
-from unittest import mock
-
-from opendbc.can import CANPacker, CANParser
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car import Bus
-from opendbc.car.ford import fordcan
-from opendbc.car.ford.values import CAR, DBC, FW_QUERY_CONFIG, FW_PATTERN, AebOffRequest, get_platform_codes, match_fw_to_car_fuzzy
+from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes, match_fw_to_car_fuzzy
 from opendbc.car.ford.fingerprints import FW_VERSIONS
 from opendbc.testing import fuzzy_test, parameterized
 
@@ -140,23 +135,3 @@ class TestFordFW(unittest.TestCase):
     live_fw[(0x760, None)] = {b"M1MC-2D053-XX\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"}
     candidates = match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw})
     assert len(candidates) == 0, "Should not match new model year hint"
-
-
-class TestFordAebOff(unittest.TestCase):
-  def test_aeb_off_msg(self):
-    # the request goes to the camera with AEB (0x840) off and the gateway's driver profile
-    dbc = DBC[CAR.FORD_F_150_MK14_5][Bus.pt]
-    CAN = fordcan.CanBus(fingerprint={0: {}})
-    with mock.patch.object(AebOffRequest, "DISPLAY_OP", 2):
-      addr, dat, bus = fordcan.create_aeb_off_msg(CANPacker(dbc), CAN, {"MsgCntrPersIndex_D_Rq": 4})
-    assert (addr, len(dat), bus) == (0x3E0, 8, CAN.camera)
-
-    parser = CANParser(dbc, [("Personality_Data_FD1", 1)], CAN.camera)
-    parser.update([(0, [(addr, dat, bus)])])
-    msg = parser.vl["Personality_Data_FD1"]
-    assert (msg["MsgCntrFeatNoRq"], msg["MsgCntrFeatConfigRq"], msg["MsgCntrDsplyOp_D_Rq"], msg["MsgCntrPersIndex_D_Rq"]) == (0x840, 0, 2, 4)
-
-  def test_aeb_off_msg_unknown(self):
-    # nothing is sent until the display operation for "set" is known
-    with self.assertRaises(AssertionError):
-      fordcan.create_aeb_off_msg(None, fordcan.CanBus(fingerprint={0: {}}), {"MsgCntrPersIndex_D_Rq": 4})

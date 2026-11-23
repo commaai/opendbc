@@ -59,11 +59,6 @@ class CarController(CarControllerBase):
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
     fcw_alert = hud_control.visualAlert == VisualAlert.fcw
 
-    # AEB off request - keeps the camera's automatic emergency braking off for the drive
-    # wait for the gateway's own request, so the driver profile is copied from it
-    if self.CP.flags & FordFlags.DISABLE_AEB and CS.personality_seen and (self.frame % CarControllerParams.AEB_OFF_STEP) == 0:
-      can_sends.append(fordcan.create_aeb_off_msg(self.packer, self.CAN, CS.personality_stock_values))
-
     ### acc buttons ###
     if CC.cruiseControl.cancel:
       can_sends.append(fordcan.create_button_msg(self.packer, self.CAN.camera, CS.buttons_stock_values, cancel=True))
@@ -115,8 +110,8 @@ class CarController(CarControllerBase):
       can_sends.append(fordcan.create_lka_msg(self.packer, self.CAN))
 
     ### longitudinal control ###
-    # send acc msg at 50Hz, ACCDATA is signed on TRON platforms
-    if self.CP.openpilotLongitudinalControl and not self.CP.flags & FordFlags.TRON and (self.frame % CarControllerParams.ACC_CONTROL_STEP) == 0:
+    # send acc msg at 50Hz
+    if self.CP.openpilotLongitudinalControl and (self.frame % CarControllerParams.ACC_CONTROL_STEP) == 0:
       accel = actuators.accel
       gas = accel
 

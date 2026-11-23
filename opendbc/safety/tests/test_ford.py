@@ -18,7 +18,6 @@ MSG_Lane_Assist_Data1 = 0x3CA      # TX by OP, Lane Keep Assist
 MSG_LateralMotionControl = 0x3D3   # TX by OP, Lateral Control message
 MSG_LateralMotionControl2 = 0x3D6  # TX by OP, alternate Lateral Control message
 MSG_IPMA_Data = 0x3D8              # TX by OP, IPMA and LKAS user interface
-MSG_Personality_Data_FD1 = 0x3E0   # TX by OP, driver setting request to switch AEB off
 
 
 class Buttons:
@@ -32,7 +31,6 @@ class Buttons:
 #  * CAN FD with stock longitudinal
 #  * CAN FD with openpilot longitudinal
 #  * CAN FD with stock longitudinal on the 2026 F-150 (TRON), which sends 16-byte frames
-#  * CAN FD on the 2026 F-150 (TRON) with alpha longitudinal, which switches the camera's AEB off
 
 class TestFordSafetyBase(common.CarSafetyTest):
   DBC = "ford_lincoln_base_pt"
@@ -463,53 +461,6 @@ class TestFordCANFDTronSafety(TestFordCANFDStockSafety):
       self.assertTrue(self._tx(msg))
       msg[0].data[8] = 1
       self.assertFalse(self._tx(msg))
-
-  def test_aeb_off_request_blocked(self):
-    # the AEB off request is only allowed with openpilot longitudinal
-    if self.SAFETY_PARAM & FordSafetyFlags.LONG_CONTROL:
-      raise unittest.SkipTest("allowed with openpilot longitudinal")
-    values = {"MsgCntrFeatNoRq": 0x840, "MsgCntrFeatConfigRq": 0, "MsgCntrDsplyOp_D_Rq": 2, "MsgCntrPersIndex_D_Rq": 4}
-    for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
-      self.assertFalse(self._tx(self.packer.make_can_msg_safety("Personality_Data_FD1", 2, values)))
-
-
-class TestFordCANFDTronLongitudinalSafety(TestFordCANFDTronSafety):
-  SAFETY_PARAM = FordSafetyFlags.CANFD | FordSafetyFlags.TRON | FordSafetyFlags.LONG_CONTROL
-
-  # ACCDATA is signed, the camera's is passed through
-  TX_MSGS = TestFordCANFDTronSafety.TX_MSGS + [[MSG_Personality_Data_FD1, 2]]
-
-  def _personality_msg(self, feature: int, value: int, display_op: int = 0, profile: int = 0):
-    values = {
-      "MsgCntrFeatNoRq": feature,
-      "MsgCntrFeatConfigRq": value,
-      "MsgCntrDsplyOp_D_Rq": display_op,
-      "MsgCntrPersIndex_D_Rq": profile,
-    }
-    return self.packer.make_can_msg_safety("Personality_Data_FD1", 2, values)
-
-  def test_aeb_off_request(self):
-    # only the request to switch AEB (0x840) off is allowed, never another setting or AEB on
-    for controls_allowed in (True, False):
-      self.safety.set_controls_allowed(controls_allowed)
-      for feature in (0x840, 0x804, 0x802, 0x811, 0x0, 0xFFFF):
-        for value in (0, 1, 2, 0xFFFF):
-          for display_op in range(8):
-            should_tx = feature == 0x840 and value == 0
-            self.assertEqual(should_tx, self._tx(self._personality_msg(feature, value, display_op, random.randint(0, 7))))
-
-  def test_aeb_off_request_unused_bits(self):
-    for byte, bit in ((4, 0), (4, 1), (5, 0), (6, 0), (7, 0)):
-      msg = self._personality_msg(0x840, 0)
-      self.assertTrue(self._tx(msg))
-      msg[0].data[byte] = 1 << bit
-      self.assertFalse(self._tx(msg))
-
-    # a stale byte past the 8-byte frame is not part of the request
-    msg = self._personality_msg(0x840, 0)
-    msg[0].data[8] = 1
-    self.assertTrue(self._tx(msg))
 
 
 class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
