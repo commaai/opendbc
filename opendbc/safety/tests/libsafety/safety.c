@@ -56,6 +56,10 @@ void set_rx_checks_received(int stale, uint32_t age) {
 
 void set_controls_allowed(bool c){
   SAFETY_SET(controls_allowed, c);
+  // a test ending controls itself means openpilot already reacted
+  if (!c) {
+    SAFETY_SET(ts_controls_exit_last, safety_ts - MAX_HOST_REACTION);
+  }
 }
 
 void set_alternative_experience(int mode){
@@ -64,6 +68,14 @@ void set_alternative_experience(int mode){
 
 void set_relay_malfunction(bool c){
   SAFETY_SET(relay_malfunction, c);
+}
+
+bool get_controls_allowed_for_tx(void){
+  return get_controls_allowed_tx();
+}
+
+bool get_cruise_engaged_for_tx(void){
+  return get_cruise_engaged_tx();
 }
 
 bool get_controls_allowed(void){

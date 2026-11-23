@@ -81,6 +81,9 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
     values = {"CRUISE_ACTIVE": enable}
     return self.packer.make_can_msg_safety("PCM_CRUISE", 0, values)
 
+  def _pcm_gas_released_msg(self, enable):
+    return self.packer.make_can_msg_safety("PCM_CRUISE", 0, {"CRUISE_ACTIVE": enable, "GAS_RELEASED": 1})
+
   def test_diagnostics(self):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
@@ -119,6 +122,41 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
       values = {f"WHEEL_SPEED_{wheel}": wheel_speeds.get(wheel, 0) for wheel in ("FR", "FL", "RR", "RL")}
       self.assertTrue(self._rx(self.packer.make_can_msg_safety("WHEEL_SPEEDS", 0, values)))
       self.assertTrue(self.safety.get_vehicle_moving(), wheel_speeds)
+
+  def test_tx_grace_after_controls_exit(self):
+    if not self.LONGITUDINAL:
+      raise unittest.SkipTest("no openpilot longitudinal")
+    self._rx(self._pcm_gas_released_msg(True))
+    self.safety.set_timer(1000)
+    self._rx(self._pcm_gas_released_msg(False))
+    self.assertTrue(self._tx(self._accel_msg(1.0)))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.safety.set_timer(1000 + common.MAX_HOST_REACTION)
+    self.assertFalse(self._tx(self._accel_msg(1.0)))
+
+  def test_tick_ends_controls_right_away(self):
+    # the panda's own rx checks end controls without the 20 ms for openpilot
+    self._after_host_reaction()
+    self._rx(self._pcm_status_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed_for_tx())
+    self.safety.safety_tick()
+    self.assertFalse(self.safety.get_controls_allowed_for_tx())
+
+  def test_heartbeat_ends_controls_right_away(self):
+    self._after_host_reaction()
+    self._rx(self._pcm_status_msg(True))
+    self.safety.safety_heartbeat(False)
+    for _ in range(3):
+      self.safety.safety_heartbeat_check()
+    self.assertFalse(self.safety.get_controls_allowed_for_tx())
+
+  def test_invalid_msg_ends_controls_right_away(self):
+    self._after_host_reaction()
+    self._rx(self._pcm_status_msg(True))
+    msg = self._pcm_status_msg(False)
+    msg[0].data[7] ^= 0xFF
+    self.assertFalse(self._rx(msg))
+    self.assertFalse(self.safety.get_controls_allowed_for_tx())
 
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 72.22_ is the max speed in m/s

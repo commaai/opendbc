@@ -188,6 +188,7 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
 
 static bool rx_hook_copy(const CANPacket_t *msg) {
   bool controls_allowed_prev = safety.controls_allowed;
+  bool cruise_engaged_prev = safety.cruise_engaged_prev;
 
   bool valid = rx_msg_safety_check(msg, &safety_setup.current_safety_config, safety_setup.current_hooks);
   bool whitelisted = get_addr_check_index(msg, safety_setup.current_safety_config.rx_checks, safety_setup.current_safety_config.rx_checks_len) != -1;
@@ -197,6 +198,14 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
 
   // Handles gas, brake, and regen paddle
   generic_rx_checks();
+
+  // no grace for invalid RX, the tick or the heartbeat
+  if (valid && controls_allowed_prev && !safety.controls_allowed) {
+    safety.ts_controls_exit_last = safety_ts;
+  }
+  if (cruise_engaged_prev && !safety.cruise_engaged_prev) {
+    safety.ts_cruise_exit_last = safety_ts;
+  }
 
   // the relay malfunction hook runs on all incoming rx messages.
   // check all applicable tx msgs for liveness on sending bus.
@@ -228,16 +237,32 @@ static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[],
   return whitelisted;
 }
 
+static bool get_controls_allowed_tx(void) {
+  return safety.controls_allowed || (safety_get_ts_elapsed(safety_ts, safety.ts_controls_exit_last) < MAX_HOST_REACTION);
+}
+
+static bool get_cruise_engaged_tx(void) {
+  return safety.cruise_engaged_prev || (safety_get_ts_elapsed(safety_ts, safety.ts_cruise_exit_last) < MAX_HOST_REACTION);
+}
+
 static bool tx_hook_copy(CANPacket_t *msg) {
   bool whitelisted = tx_msg_safety_check(msg, safety_setup.current_safety_config.tx_msgs, safety_setup.current_safety_config.tx_msgs_len);
   if ((safety_setup.current_safety_mode == SAFETY_ALLOUTPUT) || (safety_setup.current_safety_mode == SAFETY_ELM327)) {
     whitelisted = true;
   }
 
+  // judge TX by the state before a recent exit, CAN and host interrupts share one priority so RX can't run in between
+  bool controls_allowed = safety.controls_allowed;
+  bool cruise_engaged = safety.cruise_engaged_prev;
+  safety.controls_allowed = get_controls_allowed_tx();
+  safety.cruise_engaged_prev = get_cruise_engaged_tx();
   bool safety_allowed = false;
   if (whitelisted) {
     safety_allowed = safety_setup.current_hooks->tx(msg);
   }
+  // the hook can end controls itself
+  safety.controls_allowed = controls_allowed && safety.controls_allowed;
+  safety.cruise_engaged_prev = cruise_engaged;
 
   return !safety.relay_malfunction && whitelisted && safety_allowed;
 }
@@ -295,6 +320,17 @@ static void tick_copy(void) {
   }
 
   safety.safety_rx_checks_invalid = rx_checks_invalid;
+
+  // keep expired timestamps expired across timer wraps
+  if (safety_get_ts_elapsed(ts, safety.ts_gas_pressed_last) > MAX_HOST_REACTION) {
+    safety.ts_gas_pressed_last = ts - MAX_HOST_REACTION;
+  }
+  if (safety_get_ts_elapsed(ts, safety.ts_controls_exit_last) > MAX_HOST_REACTION) {
+    safety.ts_controls_exit_last = ts - MAX_HOST_REACTION;
+  }
+  if (safety_get_ts_elapsed(ts, safety.ts_cruise_exit_last) > MAX_HOST_REACTION) {
+    safety.ts_cruise_exit_last = ts - MAX_HOST_REACTION;
+  }
 }
 
 static void heartbeat_check_copy(void) {
@@ -322,6 +358,9 @@ static void disengage_on_press(bool pressed, bool *pressed_prev, bool while_held
 }
 
 static void generic_rx_checks(void) {
+  if (safety.gas_pressed && !safety.gas_pressed_prev) {
+    safety.ts_gas_pressed_last = safety_ts;
+  }
   safety.gas_pressed_prev = safety.gas_pressed;
   // brake and regen also exit controls while held and moving
   disengage_on_press(safety.brake_pressed, &safety.brake_pressed_prev, safety.vehicle_moving);
@@ -376,9 +415,14 @@ static const safety_hook_config safety_hook_registry[] = {
 
 static int set_hooks_copy(uint16_t mode, uint16_t param) {
   // reset state set by safety mode
+  // start expired, same value in both copies
+  const uint32_t expired = safety_ts - MAX_HOST_REACTION;
   safety = (SafetyState){
     .heartbeat_engaged = safety.heartbeat_engaged,
     .heartbeat_engaged_mismatches = safety.heartbeat_engaged_mismatches,
+    .ts_gas_pressed_last = expired,
+    .ts_controls_exit_last = expired,
+    .ts_cruise_exit_last = expired,
   };
 
   safety_config cfg = {0};
@@ -462,6 +506,7 @@ void safety_heartbeat_check(void) {
 }
 
 int set_safety_hooks(uint16_t mode, uint16_t param) {
+  safety_ts = microsecond_timer_get();
   current_copy = &safety_b;
   (void)set_hooks_copy(mode, param);
   current_copy = &safety_a;
