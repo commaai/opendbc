@@ -7,11 +7,17 @@ It makes small changes (mutants) to the safety C code and runs the test suite ag
     original:    safety.gas_pressed = (msg->data[3] & 0x7FU) > 0U;
     comparison:  safety.gas_pressed = (msg->data[3] & 0x7FU) <= 0U;   <- gas reads as pressed exactly when it isn't
     boundary:    safety.gas_pressed = (msg->data[3] & 0x7FU) > 1U;    <- a throttle of exactly 1 reads as released
+    deletion:    safety.gas_pressed = (msg->data[3]) > 0U;            <- the mask is gone: other bits read as gas
+
+Deletions remove an operation entirely: a statement, a branch's body, `return;`, the operator of a compound
+assignment, or an operand of a logical, bitwise or shift operator (the arithmetic mutants already show an arithmetic
+operation isn't a no-op). A surviving deletion is a missing test or dead code (MISRA C:2012 Rule 2.2: an operation
+whose removal doesn't change behavior).
 
 A mutant is killed when a test fails on it: the tests would catch that bug. A surviving mutant means no test checks
 that behavior, even if a test runs the line. The goal is to kill every mutant.
 
-Usage: python -m opendbc.safety.tests.mutation [-j JOBS] [--only ID ...] [--list]
+Usage: python -m opendbc.safety.tests.mutation [-j JOBS] [--only ID ...] [--list] [--known]
 Survivors are printed with their id and source line. After adding a test, rerun just those with --only.
 """
 import os
@@ -52,11 +58,15 @@ SAFETY_DIR = ROOT / "opendbc/safety"
 TESTS_DIR = SAFETY_DIR / "tests"
 # these build their own library from the unmutated sources, so they can't observe a mutant
 EXCLUDED_TESTS = {"test_globals.py", "test_release_build.py"}
+# mutants known to survive, each a missing test or dead code to fix; not run unless asked for (they'd run every test)
+KNOWN_SURVIVORS = TESTS_DIR / "mutation_known_survivors.txt"
 
-# As libsafety_py builds it, plus bounds checks on trailing arrays (e.g. CANPacket_t.data): an out-of-bounds read
-# there would otherwise return whatever is in memory, making the verdict nondeterministic.
+# As libsafety_py builds it, plus bounds checks on trailing arrays (e.g. CANPacket_t.data) and a fixed pattern in
+# uninitialized locals (a deleted assignment can leave one): reading either would otherwise return whatever is in
+# memory, making the verdict nondeterministic.
 CFLAGS = ["-fPIC", "-shared", "-w", "-fno-builtin", "-std=gnu11", "-g0", "-O0", "-DALLOW_DEBUG", "-fsanitize=undefined",
-          "-fno-sanitize-recover=undefined", "-fstrict-flex-arrays=3", *libsafety_py.single_precision_flags()]
+          "-fno-sanitize-recover=undefined", "-fstrict-flex-arrays=3", "-ftrivial-auto-var-init=pattern",
+          *libsafety_py.single_precision_flags()]
 
 COMPARISONS = {"==": "!=", "!=": "==", ">": "<=", ">=": "<", "<": ">=", "<=": ">"}
 RULES = {  # (tree-sitter node type, operator) -> (mutator, mutated operator)
@@ -70,6 +80,15 @@ RULES = {  # (tree-sitter node type, operator) -> (mutator, mutated operator)
   **{("assignment_expression", a): ("arithmetic_assignment", b)
      for a, b in {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}.items()},
 }
+# compound assignments, deleted: x |= y -> x = y
+COMPOUND_ASSIGNMENTS = {"+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>="}
+# binary operators whose left (L) or right (R) operand can be deleted, leaving the other: x & m -> x, a && b -> b
+DELETE_OPERAND = {**dict.fromkeys(("&&", "||", "&", "|", "^"), "LR"), **dict.fromkeys(("<<", ">>"), "R")}
+# statement mutators: the statement (a branch's body, for delete_branch) is skipped instead of changing an expression
+STATEMENT_MUTATORS = {"delete_statement", "delete_return", "delete_branch"}
+# where a statement can be wrapped in braces
+STATEMENT_PARENTS = {"compound_statement", "case_statement", "labeled_statement", "if_statement", "else_clause",
+                     "while_statement", "for_statement", "do_statement"}
 # operands of these are never evaluated
 UNEVALUATED = {"sizeof_expression", "alignof_expression", "offsetof_expression"}
 # on operands and results in [0, 2**31), these compute exactly what C does, for int and unsigned operands alike
@@ -80,6 +99,7 @@ POSITIVE = "positive"  # what _fold makes of a sizeof
 INT_CASTS = {"int", "unsigned", "unsigned int", "int32_t", "uint32_t"}  # casts that keep every value in [0, 2**31)
 
 KILLED, SURVIVED, UNCOVERED, INFRA = "killed", "survived", "uncovered", "infra_error"
+KNOWN, UNKNOWN = "known_survivor", "killed_known_survivor"  # a known survivor that survives, or is killed
 UBSAN_EXIT_CODE = 86  # a child stopped by UBSan exits with this (see PRELUDE), which nothing else in it uses
 # signals the code running in a child can raise itself; any other signal comes from outside
 CRASH_SIGNALS = {signal.SIGSEGV, signal.SIGBUS, signal.SIGFPE, signal.SIGILL, signal.SIGABRT, signal.SIGTRAP}
@@ -108,9 +128,17 @@ class Site:
   line: int
   # in a static object's initializer: (declaration start, end, name start, end, end of the object's scope)
   static: tuple | None = None
+  function: str = ""  # the function (or object) it's in
+
+  def change(self, width=None):
+    """The mutation, as `original->mutated` or, for a deletion, `-deleted` (without line markers, at most `width` long)."""
+    if not (self.mutator.startswith("delete") and not self.mutated):
+      return f"{self.original}->{self.mutated}"
+    deleted = " ".join(" ".join(ln for ln in self.original.splitlines() if not ln.startswith("#")).split())
+    return f"-{deleted if width is None or len(deleted) <= width else deleted[:width - 3] + '...'}"
 
   def __str__(self):
-    return f"#{self.id:04d} {self.file.relative_to(ROOT)}:{self.line} [{self.mutator}] {colorize(f'{self.original}->{self.mutated}', RED)}"
+    return f"#{self.id:04d} {self.file.relative_to(ROOT)}:{self.line} [{self.mutator}] {colorize(self.change(60), RED)}"
 
 
 # ---------------------------------------------------------------- mutation sites
@@ -127,13 +155,16 @@ def _boundary(token):
 
 def _fold(txt, node, sub, picks):
   """Value of `node` if it's a constant expression of int or unsigned int literals with every value in [0, 2**31),
-  None otherwise. A sizeof is an unknown positive value, POSITIVE. `sub` replaces the token starting at an offset,
-  and `picks` the branch taken by a conditional (at an offset) whose condition isn't constant; without one, it folds
-  if both branches fold to the same value."""
+  None otherwise. A sizeof is an unknown positive value, POSITIVE. `sub` replaces the token starting at an offset, or
+  a binary expression at (start, end) offsets by its "left" or "right" operand, and `picks` the branch taken by a
+  conditional (at an offset) whose condition isn't constant; without one, it folds if both branches fold to the same
+  value."""
   def text(n):
     return sub.get(n.start_byte, txt[n.start_byte:n.end_byte])
   if node.type == "parenthesized_expression" and node.named_child_count == 1:
     return _fold(txt, node.named_children[0], sub, picks)
+  if (kept := sub.get((node.start_byte, node.end_byte))) is not None:
+    return _fold(txt, node.child_by_field_name(kept), sub, picks)
   if node.type == "sizeof_expression":
     return POSITIVE
   if node.type == "cast_expression" and text(node.child_by_field_name("type")) in INT_CASTS:
@@ -172,19 +203,66 @@ def _ways(txt, node, sub, op_start):
   return None if None in values else values
 
 
-def _equivalent(txt, node, op_start, mutated):
-  """Whether the mutation doesn't change the value of the outermost integer constant expression around it, for any
-  way its conditionals go, e.g. 3U / 8U, (x ? 28U : 47U) / 8U or (x == 1 ? 5U : 5U), or turns x + 0 into x - 0 (or
-  back), with 0 any constant expression folding to 0."""
+def _equivalent(txt, node, op_start, sub):
+  """Whether the mutation (`sub`, as _fold takes it) doesn't change the value of the outermost integer constant
+  expression around it, for any way its conditionals go, e.g. 3U / 8U, (x ? 28U : 47U) / 8U or (x == 1 ? 5U : 5U), or
+  turns x + 0 into x - 0 (or back), with 0 any constant expression folding to 0."""
   if node.type == "binary_expression" and node.child_by_field_name("operator").start_byte == op_start and \
-     {txt[op_start], mutated} == {"+", "-"} and _fold(txt, node.child_by_field_name("right"), {}, {}) == 0:
+     {txt[op_start], sub.get(op_start)} == {"+", "-"} and _fold(txt, node.child_by_field_name("right"), {}, {}) == 0:
     return True  # for floating point x this ignores the sign of a zero result, which nothing here depends on
   top = None
   while node is not None and node.type.endswith(("_expression", "_literal")):
     if _ways(txt, node, {}, op_start) is not None:
       top = node
     node = node.parent
-  return top is not None and _ways(txt, top, {}, op_start) == _ways(txt, top, {op_start: mutated}, op_start)
+  return top is not None and _ways(txt, top, {}, op_start) == _ways(txt, top, sub, op_start)
+
+
+def _bits(txt, node):
+  """A mask of the bits `node`'s integer value can have, -1 for any: from 8-bit CAN data, constants, GET_BYTES_* of a
+  constant length, and the masks and shifts applied to them."""
+  def field(f):
+    return node.child_by_field_name(f)
+  if node.type == "parenthesized_expression" and node.named_child_count == 1:
+    return _bits(txt, node.named_children[0])
+  if node.type == "subscript_expression" and field("argument").type == "field_expression" and \
+     field("argument").child_by_field_name("field").text == b"data":
+    return 0xFF  # CANPacket_t.data
+  if node.type == "call_expression" and field("function").text in (b"GET_BYTES_LE", b"GET_BYTES_BE"):
+    n = _fold(txt, field("arguments").named_children[2], {}, {})
+    return (1 << (8 * n)) - 1 if isinstance(n, int) and n <= 4 else -1
+  if node.type == "binary_expression":
+    op, left, k = field("operator").type, _bits(txt, field("left")), _fold(txt, field("right"), {}, {})
+    if op == "&":
+      return left & _bits(txt, field("right"))
+    if op in (">>", "<<") and left >= 0 and isinstance(k, int):
+      return left >> k if op == ">>" else left << k
+  v = _fold(txt, node, {}, {})
+  return v if isinstance(v, int) else -1
+
+
+def _demanded(txt, node):
+  """A mask of the bits of `node`'s integer value that can matter, -1 for all: those a mask, a shift, or a cast to or a
+  declaration of an 8 or 16-bit unsigned integer keeps (through the operators carrying bits only upward)."""
+  parent = node.parent
+  while parent is not None and parent.type == "parenthesized_expression":
+    node, parent = parent, parent.parent
+  narrow = {b"uint8_t": 0xFF, b"uint16_t": 0xFFFF}
+  if parent is not None and parent.type == "cast_expression":
+    return narrow.get(parent.child_by_field_name("type").text, -1) & _demanded(txt, parent)
+  if parent is not None and parent.type == "init_declarator" and parent.parent.type == "declaration":
+    return narrow.get(parent.parent.child_by_field_name("type").text, -1)
+  if parent is None or parent.type != "binary_expression":
+    return -1
+  op, left, right = parent.child_by_field_name("operator").type, parent.child_by_field_name("left"), parent.child_by_field_name("right")
+  k, outer = _fold(txt, right if left == node else left, {}, {}), _demanded(txt, parent)
+  if op == "&" and isinstance(k, int):
+    return k & outer
+  if op in (">>", "<<") and left == node and isinstance(k, int):
+    return outer << k if op == ">>" else outer >> k
+  if op in ("+", "-", "*", "|", "^") and outer >= 0:
+    return (1 << outer.bit_length()) - 1  # a carry only moves bits up
+  return -1
 
 
 def _parseable(txt):
@@ -197,6 +275,15 @@ def _parseable(txt):
       end += 1
     txt = txt[:m.start()] + "int".ljust(end + 1 - m.start()) + txt[end + 1:]
   return txt
+
+
+def _identity(txt, node, op, deleted, kept):
+  """Whether deleting operand `deleted` of `node` leaves its value unchanged: the 0 in x | 0 (or ^, << and >>), or a
+  mask keeping every bit the other operand can have that matters, e.g. the 0xFU in (msg->data[0] >> 4) & 0xFU."""
+  value = _fold(txt, deleted, {}, {})
+  if op == "&":
+    return isinstance(value, int) and _bits(txt, kept) & _demanded(txt, node) & ~value == 0
+  return value == 0 and op in ("|", "^", "<<", ">>")
 
 
 def find_sites(txt):
@@ -213,17 +300,62 @@ def find_sites(txt):
     origins.append(origin)
   sources, sites = {}, {}
 
-  def add(node, op, mutator, mutated, static):
-    file, line = origins[op.start_point[0]]
-    if file is None or _equivalent(txt, node, op.start_byte, mutated):
+  def add(node, op, mutator, mutated, static, sub=None):
+    """Mutates `node` by replacing txt[op.start_byte:op.end_byte] (op is a node or a (start, end, row) span)."""
+    start, end, row = (op.start_byte, op.end_byte, op.start_point[0]) if isinstance(op, ts.Node) else op
+    file, line = origins[row]
+    if file is None or (mutator not in STATEMENT_MUTATORS and _equivalent(txt, node, start, sub or {start: mutated})):
       return
     assert static != "unsupported", f"can only mutate a static declaration of one named object: {file}:{line}"
     # compilers disagree on which line a backslash-continued line maps to; use its first line
     lines = sources.setdefault(file, file.read_text().splitlines())
     while line > 1 and lines[line - 2].rstrip().endswith("\\"):
       line -= 1
-    sites[(op.start_byte, mutator)] = (node.start_byte, node.end_byte, op.start_byte, op.end_byte,
-                                       txt[op.start_byte:op.end_byte], mutated, mutator, file, line, static)
+    scope = node
+    while scope.parent is not None and scope.parent.type != "translation_unit":
+      scope = scope.parent
+    name = scope.child_by_field_name("declarator")
+    while name is not None and name.type != "identifier":
+      name = name.child_by_field_name("declarator")
+    sites[(start, mutator, end)] = (node.start_byte, node.end_byte, start, end, txt[start:end], mutated, mutator, file, line, static,
+                                    "" if name is None else name.text.decode())
+
+  def delete(node, mutator):  # skip a statement
+    add(node, node, mutator, "", None)
+
+  def deletable(node):
+    """The statement mutator that deletes `node`, if any; a body that only holds such a statement isn't deleted again."""
+    if node.parent is None or node.parent.type not in STATEMENT_PARENTS:
+      return None
+    if node.type == "expression_statement" and node.named_child_count > 0:
+      expr = node.named_children[0]
+      while expr.type == "parenthesized_expression":
+        expr = expr.named_children[0]
+      void = expr.type == "cast_expression" and expr.child_by_field_name("type").text == b"void"
+      return None if void else "delete_statement"  # (void)x; does nothing
+    if node.type == "return_statement" and node.named_child_count == 0:  # in a void function, if not its last statement
+      body = node.parent
+      return None if body.parent.type == "function_definition" and body.named_children[-1] == node else "delete_return"
+    if node.type == "compound_statement" or (node.type == "if_statement" and node.parent.type == "else_clause"):
+      if node.parent.type not in ("if_statement", "else_clause"):
+        return None
+      inner = [c for c in node.named_children if c.type != "comment"] if node.type == "compound_statement" else [node]
+      if not inner or (len(inner) == 1 and inner[0] is not node and deletable(inner[0]) is not None):
+        return None
+      # Not a body returning a value where skipping it falls off the end of the function, nor one declaring a static
+      # object, whose mutated copies (see instrument) are inserted in it.
+      func = node.parent
+      while func.type != "function_definition":
+        func = func.parent
+      returns, declares_static, stack = False, False, [node]
+      while stack:
+        n = stack.pop()
+        returns |= n.type == "return_statement" and n.named_child_count > 0
+        declares_static |= n.type == "storage_class_specifier" and n.text == b"static"
+        stack.extend(n.children)
+      last = func.child_by_field_name("body").named_children[-1]
+      return None if declares_static or (returns and last.type != "return_statement") else "delete_branch"
+    return None
 
   stack = [(ts.Parser(ts.Language(ts_c.language())).parse(_parseable(txt).encode()).root_node, None)]
   while stack:
@@ -241,11 +373,22 @@ def find_sites(txt):
       scope_end = len(txt) if parent.type == "translation_unit" else parent.end_byte - 1
       static = "unsupported" if name is None else (node.start_byte, node.end_byte, name.start_byte, name.end_byte, scope_end)
     stack.extend((c, static) for c in node.children)
+    if node.type.endswith("statement") and (mutator := deletable(node)):
+      delete(node, mutator)
     op = node.child_by_field_name("operator")
     if op is None:
       continue
     if (node.type, op.type) in RULES:
       add(node, op, *RULES[(node.type, op.type)], static)
+    if node.type == "assignment_expression" and op.type in COMPOUND_ASSIGNMENTS:
+      add(node, op, "delete_operator", "=", static)
+    if node.type == "binary_expression" and op.type in DELETE_OPERAND:
+      left, _, right = node.children  # the preprocessed source has no comments
+      for side, kept, deleted, span in (("R", left, right, (left.end_byte, node.end_byte, op.start_point[0])),
+                                        ("L", right, left, (node.start_byte, right.start_byte, node.start_point[0]))):
+        # deleting the operation keeps its variable operand: x & 0xFU -> x, not 0xFU
+        if side in DELETE_OPERAND[op.type] and _fold(txt, kept, {}, {}) is None and not _identity(txt, node, op.type, deleted, kept):
+          add(node, span, "delete_operand", "", static, {(node.start_byte, node.end_byte): "left" if kept == left else "right"})
     if node.type == "binary_expression" and op.type in COMPARISONS:  # boundary: integer literals in the operands
       operands = [n for n in (node.child_by_field_name("left"), node.child_by_field_name("right")) if n is not None]
       while operands:
@@ -273,6 +416,7 @@ __attribute__((constructor)) static void __mutation_init(void) {{ __sanitizer_se
 
 def instrument(txt, sites):
   """The source with each site's expression E replaced by `mutant active ? mutated E : E`, and its evaluation recorded.
+  A statement site's statement S becomes `if (mutant not active) S` instead.
 
   The mutated form only runs while its site is the active mutant, so the sites nested in it aren't instrumented there.
   The result is converted back to E's type, so the surrounding expressions are unchanged."""
@@ -282,10 +426,13 @@ def instrument(txt, sites):
       s, j = inner[i], i + 1
       while j < len(inner) and inner[j].start < s.end:
         j += 1
-      e = txt[s.start:s.end]
-      mutated = txt[s.start:s.op_start] + s.mutated + txt[s.op_end:s.end]
-      selected = f"(__mutation_hit[{s.id}] = 1, __mutation_id == {s.id}) ? ({mutated}) : ({rewrite(s.start, s.end, inner[i + 1:j])})"
-      parts += [txt[lo:s.start], f"((__typeof__(1 ? ({e}) : ({e})))({selected}))"]
+      e, original = txt[s.start:s.end], rewrite(s.start, s.end, inner[i + 1:j])
+      if s.mutator in STATEMENT_MUTATORS:
+        parts += [txt[lo:s.start], f"{{ __mutation_hit[{s.id}] = 1; if (__mutation_id != {s.id}) {{ {original} }} }}"]
+      else:
+        mutated = txt[s.start:s.op_start] + s.mutated + txt[s.op_end:s.end]
+        selected = f"(__mutation_hit[{s.id}] = 1, __mutation_id == {s.id}) ? ({mutated}) : ({original})"
+        parts += [txt[lo:s.start], f"((__typeof__(1 ? ({e}) : ({e})))({selected}))"]
       lo, i = s.end, j
     return "".join(parts) + txt[lo:hi]
 
@@ -435,15 +582,40 @@ def run_forked(task, args, wall_limit):
 
 # ---------------------------------------------------------------- reporting
 
+def site_keys(sites):
+  """{site id: how KNOWN_SURVIVORS lists it}, which doesn't change with the lines around it: `file function [mutator]
+  change`, and `#n` after it for the n-th site that's the same."""
+  keys, seen = {}, Counter()
+  for s in sites:
+    key = f"{s.file.relative_to(SAFETY_DIR)} {s.function} [{s.mutator}] {s.change()}"
+    seen[key] += 1
+    keys[s.id] = key if seen[key] == 1 else f"{key} #{seen[key]}"
+  return keys
+
+
+def known_survivors(sites):
+  """The ids of the sites listed in KNOWN_SURVIVORS, and the listed lines that match no site. Whitespace is ignored,
+  since compilers preprocess macros into differently spaced text."""
+  def norm(key):
+    return re.sub(r"\s", "", key)
+  listed = [ln for ln in KNOWN_SURVIVORS.read_text().splitlines() if ln.strip() and not ln.startswith("#")]
+  ids = {norm(k): i for i, k in site_keys(sites).items()}
+  return {ids[norm(ln)] for ln in listed if norm(ln) in ids}, [ln for ln in listed if norm(ln) not in ids]
+
+
 def snippet(site, sites, context=2):
   """The site's source line and a few around it, with the mutation marked in place."""
   lines = site.file.read_text().splitlines()
   i = site.line - 1
   # the n-th standalone occurrence of the token on the line, for the n-th site replacing that token there
   n = sum(1 for s in sites if (s.file, s.line, s.original) == (site.file, site.line, site.original) and s.id < site.id)
-  pattern = (r"(?<![\w.])" + re.escape(site.original) + r"(?![\w.])" if site.mutator == "boundary" else
-             r"(?<![-+*/%&|^<>=!])" + re.escape(site.original) + r"(?![-+*/%&|^<>=])")
-  found, marker = list(re.finditer(pattern, lines[i])), colorize(f"[[{site.original}->{site.mutated}]]", RED)
+  if site.mutator == "boundary":
+    pattern = r"(?<![\w.])" + re.escape(site.original) + r"(?![\w.])"
+  elif site.mutator.startswith("delete") and not site.mutated:
+    pattern = re.escape(site.change()[1:])
+  else:
+    pattern = r"(?<![-+*/%&|^<>=!])" + re.escape(site.original) + r"(?![-+*/%&|^<>=])"
+  found, marker = list(re.finditer(pattern, lines[i])), colorize(f"[[{site.change(60)}]]", RED)
   if n < len(found):
     lines[i] = lines[i][:found[n].start()] + marker + lines[i][found[n].end():]
   else:
@@ -468,6 +640,7 @@ def main():
   parser.add_argument("-j", type=int, default=os.cpu_count() or 1, help="parallel jobs")
   parser.add_argument("--only", type=int, nargs="+", help="only run these mutant ids")
   parser.add_argument("--list", action="store_true", help="list the mutants and exit")
+  parser.add_argument("--known", action="store_true", help=f"also run the known survivors in {KNOWN_SURVIVORS.name}")
   args = parser.parse_args()
   start = time.monotonic()
 
@@ -483,6 +656,14 @@ def main():
     if not sites or len(sites) != len(set(args.only or [s.id for s in sites])):
       print("--only: no such mutant ids")
       return 2
+    known, stale = known_survivors(all_sites)
+    keys = site_keys(all_sites)
+    if stale:
+      print(colorize(f"No such mutants, remove them from {KNOWN_SURVIVORS.relative_to(ROOT)}:", RED) + "".join(f"\n- {k}" for k in stale))
+      return 1
+    if args.only is None and not args.known:
+      sites = [s for s in sites if s.id not in known]
+      print(f"Skipping {len(known)} known survivors listed in {KNOWN_SURVIVORS.relative_to(ROOT)} (--known runs them)", flush=True)
 
     # every site is instrumented, so the ids and the baseline don't depend on --only
     lib = Path(tmp) / "libsafety_mutation.so"
@@ -542,8 +723,12 @@ def main():
           print("\r" + progress(results, len(sites), time.monotonic() - mutants_start), end="", flush=True)
       print(("\r" if sys.stdout.isatty() else "") + progress(results, len(sites), time.monotonic() - mutants_start), flush=True)
 
+  for s in sites:  # a known survivor surviving isn't a failure, but being killed is: it should leave the list
+    if s.id in known and results[s.id][0] in (KILLED, SURVIVED):
+      results[s.id] = (KNOWN if results[s.id][0] == SURVIVED else UNKNOWN, *results[s.id][1:])
   counts = Counter(outcome for outcome, _, _ in results.values())
   for title, outcome, color in (("Surviving mutants", SURVIVED, RED), ("Uncovered mutants (no test reaches them)", UNCOVERED, RED),
+                                (f"Killed known survivors (remove them from {KNOWN_SURVIVORS.name})", UNKNOWN, RED),
                                 ("Infra errors", INFRA, YELLOW)):
     bad = [s for s in sites if results[s.id][0] == outcome]
     if bad:
@@ -551,6 +736,8 @@ def main():
     for s in bad:
       print(f"- {s}")
       print("    " + results[s.id][1].strip().replace("\n", "\n    ") if outcome == INFRA else snippet(s, all_sites))
+      if outcome == SURVIVED:
+        print(f"    {KNOWN_SURVIVORS.name}: {keys[s.id]}")
   kills = Counter(detail.split(":")[0] for outcome, detail, _ in results.values() if outcome == KILLED)
   test_sec, elapsed = sum(r[2] for r in results.values()), time.monotonic() - start
   print("\n" + colorize("Mutation summary", BOLD))
@@ -558,12 +745,13 @@ def main():
   print(f"  killed: {colorize(counts[KILLED], GREEN)} (" + ", ".join(f"{k}: {v}" for k, v in kills.most_common()) + ")")
   print(f"  survived: {colorize(counts[SURVIVED], RED)}")
   print(f"  uncovered: {colorize(counts[UNCOVERED], RED)}")
+  print(f"  known survivors: {len(known)} ({counts[KNOWN]} run and survived, {colorize(counts[UNKNOWN], RED)} run and killed)")
   print(f"  infra_error: {colorize(counts[INFRA], YELLOW)}")
   print(f"  test_time_sum: {test_sec:.2f}s")
   print(f"  avg_test_per_mutant: {test_sec / len(sites):.3f}s")
   print(f"  mutants_per_second: {len(sites) / elapsed:.2f}")
   print(f"  elapsed: {elapsed:.2f}s")
-  return 2 if counts[INFRA] else 1 if counts[SURVIVED] + counts[UNCOVERED] else 0
+  return 2 if counts[INFRA] else 1 if counts[SURVIVED] + counts[UNCOVERED] + counts[UNKNOWN] else 0
 
 
 if __name__ == "__main__":

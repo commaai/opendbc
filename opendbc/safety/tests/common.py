@@ -1012,6 +1012,11 @@ class CanIgnitionSafetyTest(SafetyTestBase):
       self.assertEqual(latched, self._send(value, counter + 3, bus, read=False), (bus, counter, value))
       self.assertEqual(not latched, self._send(value, counter + 4, bus), (bus, counter, value))
 
+  def test_ignition_reset_clears_timeout(self):
+    self.safety.ignition_can_cnt = 1234
+    self.safety.init_tests()
+    self.assertEqual(0, self.safety.ignition_can_cnt)
+
   def test_ignition_init_resets_counter(self):
     # init_tests forgets the previous counter, so no test sees a counter left over from another one
     if self.IGNITION_COUNTER_MOD is None:
@@ -1380,6 +1385,15 @@ class CarSafetyTest(SafetyTest):
           for n in range(MAX_WRONG_COUNTERS):
             self.assertTrue(self._rx(build()), f"{name} recovery {n}")
 
+  def test_rx_timestamp(self):
+    # an RX checked msg restarts its lag timer, if it's one the check matches
+    for i, _, build in self._rx_check_builders():
+      self._reset_safety_hooks()
+      self.safety.set_timer(1234)
+      self.assertTrue(self._rx(build()))
+      status = self.safety.safety_a.state.rx_status[i]
+      self.assertEqual(1234 if status.msg_seen else 0, status.last_timestamp)
+
   def test_rx_quality_flag(self):
     # an RX checked msg is valid only while each of its quality flags is
     for _, m, build in self._rx_check_builders():
@@ -1459,10 +1473,18 @@ class CarSafetyTest(SafetyTest):
       self.assertEqual(pressed, get_brake_pressed_prev())
 
   def test_enable_control_allowed_from_cruise(self):
+    # only the rising edge of cruise engages, and the rising edge of controls_allowed resets the heartbeat mismatches
+    for copy in (self.safety.safety_a, self.safety.safety_b):
+      copy.state.heartbeat_engaged_mismatches = 1
     self._rx(self._pcm_status_msg(False))
     self.assertFalse(self.safety.get_controls_allowed())
+    self.assertEqual(1, self.safety.safety_a.state.heartbeat_engaged_mismatches)
     self._rx(self._pcm_status_msg(True))
     self.assertTrue(self.safety.get_controls_allowed())
+    self.assertEqual(0, self.safety.safety_a.state.heartbeat_engaged_mismatches)
+    self.safety.set_controls_allowed(False)
+    self._rx(self._pcm_status_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed())
 
   def test_disable_control_allowed_from_cruise(self):
     self.safety.set_controls_allowed(1)
@@ -1568,3 +1590,4 @@ class CarSafetyTest(SafetyTest):
           self.safety.set_controls_allowed(True)
           self.safety.safety_tick()
           self.assertEqual(allowed, self.safety.get_controls_allowed())
+          self.assertEqual(not allowed, self.safety.safety_a.state.safety_rx_checks_invalid)

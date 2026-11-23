@@ -1,0 +1,249 @@
+# Mutants that survive mutation.py, each a missing test or dead code (MISRA C:2012 Rule 2.2) to fix, after which
+# its line is deleted: mutation.py fails on a listed mutant that's killed or no longer exists, and on any other survivor.
+# Listed mutants aren't run (they'd run every test reaching them); `mutation.py --known` runs them.
+# Lines are `file function [mutator] change`, matched ignoring whitespace.
+
+# dead code (Rule 2.2): SET_RX_CHECKS and SET_TX_MSGS (declarations.h) both set disable_forwarding = false, so each one's store is redundant
+modes/honda.h honda_nidec_init [delete_statement] -(ret).disable_forwarding = 0 ;
+modes/honda.h honda_nidec_init [delete_statement] -(ret).disable_forwarding = 0 ; #2
+modes/honda.h honda_nidec_init [delete_statement] -(ret).disable_forwarding = 0 ; #3
+modes/honda.h honda_bosch_init [delete_statement] -(ret).disable_forwarding = 0 ;
+modes/honda.h honda_bosch_init [delete_statement] -(ret).disable_forwarding = 0 ; #2
+modes/honda.h honda_bosch_init [delete_statement] -(ret).disable_forwarding = 0 ; #3
+modes/honda.h honda_bosch_init [delete_statement] -(ret).disable_forwarding = 0 ; #4
+modes/honda.h honda_bosch_init [delete_statement] -(ret).disable_forwarding = 0 ; #5
+modes/honda.h honda_bosch_init [delete_statement] -(ret).disable_forwarding = 0 ; #6
+modes/honda.h honda_bosch_init [delete_statement] -(ret).disable_forwarding = 0 ; #7
+modes/honda.h honda_bosch_init [delete_statement] -(ret).disable_forwarding = 0 ; #8
+modes/honda.h honda_bosch_init [delete_statement] -(ret).disable_forwarding = 0 ; #9
+modes/toyota.h toyota_init [delete_statement] -(ret).disable_forwarding = 0 ;
+modes/toyota.h toyota_init [delete_statement] -(ret).disable_forwarding = 0 ; #2
+modes/toyota.h toyota_init [delete_statement] -(ret).disable_forwarding = 0 ; #3
+modes/toyota.h toyota_init [delete_statement] -(ret).disable_forwarding = 0 ; #4
+modes/toyota.h toyota_init [delete_statement] -(ret).disable_forwarding = 0 ; #5
+modes/toyota.h toyota_init [delete_statement] -(ret).disable_forwarding = 0 ; #6
+modes/toyota.h toyota_init [delete_statement] -(ret).disable_forwarding = 0 ; #7
+modes/toyota.h toyota_init [delete_statement] -(ret).disable_forwarding = 0 ; #8
+modes/gm.h gm_init [delete_statement] -(ret).disable_forwarding = 0 ;
+modes/hyundai.h hyundai_init [delete_statement] -(ret).disable_forwarding = 0 ;
+modes/hyundai.h hyundai_init [delete_statement] -(ret).disable_forwarding = 0 ; #2
+modes/hyundai.h hyundai_init [delete_statement] -(ret).disable_forwarding = 0 ; #3
+modes/hyundai.h hyundai_init [delete_statement] -(ret).disable_forwarding = 0 ; #4
+modes/hyundai.h hyundai_init [delete_statement] -(ret).disable_forwarding = 0 ; #5
+modes/hyundai.h hyundai_init [delete_statement] -(ret).disable_forwarding = 0 ; #6
+modes/hyundai.h hyundai_init [delete_statement] -(ret).disable_forwarding = 0 ; #7
+modes/mg.h mg_init [delete_statement] -(ret).disable_forwarding = 0 ;
+modes/mg.h mg_init [delete_statement] -(ret).disable_forwarding = 0 ; #2
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ;
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #2
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #3
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #4
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #5
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #6
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #7
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #8
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #9
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #10
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #11
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #12
+modes/hyundai_canfd.h hyundai_canfd_init [delete_statement] -(ret).disable_forwarding = 0 ; #13
+
+# dead code (Rule 2.2): a checksum's mask or modulo whose bits a later & 0xF / % 16 drops anyway
+modes/honda.h honda_compute_checksum [delete_operand] -& 0xFU
+modes/honda.h honda_compute_checksum [delete_operand] -& 0xFU #2
+modes/honda.h honda_compute_checksum [delete_operand] -& 0xFU #3
+modes/psa.h psa_checksum [delete_operand] -& 0xFU
+
+# dead code (Rule 2.2): body.h: the flash msg exception needs no !controls_allowed, tx is allowed then already
+modes/body.h body_tx_hook [delete_operand] -!(current_copy->state).controls_allowed && #2
+
+# dead code (Rule 2.2): elm327.h: the GM camera address's frame type check needs no length check, a msg that isn't 8 bytes is blocked already
+modes/elm327.h elm327_tx_hook [delete_operand] -&& (len == 8U)
+
+# dead code (Rule 2.2): safety.h rx_msg_safety_check: an ignore_counter check's wrong_counters is never anything but 0
+safety.h rx_msg_safety_check [delete_statement] -status->wrong_counters = 0;
+
+# dead code (Rule 2.2): safety.h tx_hook_copy: safety_allowed is only true when whitelisted, so `whitelisted &&` is redundant
+safety.h tx_hook_copy [delete_operand] -&& whitelisted
+
+# dead code (Rule 2.2): the first += of an accumulator initialized to 0
+modes/ford.h ford_compute_checksum [delete_operator] +=->=
+modes/ford.h ford_compute_checksum [delete_operator] +=->= #4
+modes/volkswagen_mlb.h volkswagen_mlb_rx_hook [delete_operator] +=->=
+
+# dead code (Rule 2.2): volkswagen_meb.h: torque_driver is never read in MEB (angle/curvature control)
+modes/volkswagen_meb.h volkswagen_meb_rx_hook [delete_statement] -update_sample(&(current_copy->state).torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
+
+# equivalent: every address the mode checks is 11-bit
+modes/hyundai_common.h hyundai_common_canfd_compute_checksum [delete_operand] -& 0xFFU #2
+
+# equivalent: the ALLOW_DEBUG build sets volkswagen_longitudinal from the param right after (the release build needs it)
+modes/volkswagen_mqb.h volkswagen_mqb_init [delete_statement] -volkswagen_common_init();
+modes/volkswagen_pq.h volkswagen_pq_init [delete_statement] -volkswagen_common_init();
+
+# missing test
+lateral.h steer_torque_cmd_checks [delete_statement] -(current_copy->state).ts_torque_check_last = ts;
+lateral.h steer_torque_cmd_checks [delete_operand] -&& torque_requested #2
+lateral.h steer_torque_cmd_checks [delete_statement] -(current_copy->state).valid_steer_req_count = 0;
+lateral.h steer_torque_cmd_checks [delete_statement] -(current_copy->state).ts_steer_req_mismatch_last = ts;
+lateral.h steer_torque_cmd_checks [delete_operand] -|| !(current_copy->state).controls_allowed
+lateral.h steer_torque_cmd_checks [delete_statement] -(current_copy->state).valid_steer_req_count = 0; #2
+lateral.h steer_torque_cmd_checks [delete_statement] -(current_copy->state).invalid_steer_req_count = 0; #2
+lateral.h steer_torque_cmd_checks [delete_statement] -(current_copy->state).desired_torque_last = 0;
+lateral.h steer_torque_cmd_checks [delete_statement] -(current_copy->state).rt_torque_last = 0;
+lateral.h steer_torque_cmd_checks [delete_statement] -(current_copy->state).ts_torque_check_last = ts; #2
+lateral.h steer_torque_cmd_checks [delete_statement] -(current_copy->state).ts_steer_req_mismatch_last = ts; #2
+lateral.h steer_angle_cmd_common_checks [delete_operand] -|| !(current_copy->state).controls_allowed
+lateral.h steer_angle_cmd_checks [delete_operand] -(current_copy->state).controls_allowed &&
+lateral.h steer_angle_cmd_checks [delete_operand] -&& steer_control_enabled
+lateral.h steer_curvature_cmd_checks [delete_operand] -(current_copy->state).controls_allowed &&
+lateral.h steer_curvature_cmd_checks [delete_operand] -&& steer_control_enabled
+lateral.h steer_angle_cmd_checks_vm [delete_operand] -(current_copy->state).controls_allowed &&
+lateral.h steer_angle_cmd_checks_vm [delete_operand] -&& steer_control_enabled
+modes/defaults.h alloutput_init [delete_operand] -& (ALLOUTPUT_PARAM_PASSTHROUGH)
+modes/honda.h honda_rx_hook [delete_operand] -((current_copy->setup).honda_hw == HONDA_BOSCH) &&
+modes/honda.h honda_rx_hook [delete_operand] -pcm_cruise &&
+modes/honda.h honda_rx_hook [delete_operand] -&& ((current_copy->setup).honda_hw != HONDA_NIDEC)
+modes/honda.h honda_rx_hook [delete_operand] -brake_switch &&
+modes/honda.h honda_tx_hook [delete_operand] -& 0x7U
+modes/honda.h honda_tx_hook [delete_operand] -& 0x3U
+modes/honda.h honda_tx_hook [delete_operand] -& 0x00FFFFFFFFFFFFFFULL
+modes/honda.h honda_nidec_init [delete_statement] -(current_copy->setup).honda_hw = HONDA_NIDEC;
+modes/honda.h honda_nidec_init [delete_statement] -(current_copy->setup).honda_alt_brake_msg = 0 ;
+modes/honda.h honda_nidec_init [delete_statement] -(current_copy->setup).honda_bosch_long = 0 ;
+modes/honda.h honda_nidec_init [delete_statement] -(current_copy->setup).honda_bosch_radarless = 0 ;
+modes/honda.h honda_nidec_init [delete_statement] -(current_copy->setup).honda_bosch_canfd = 0 ;
+modes/honda.h honda_nidec_init [delete_operand] -& (HONDA_PARAM_NIDEC_ALT)
+modes/toyota.h toyota_rx_hook [delete_operand] -!(current_copy->setup).toyota_alt_brake &&
+modes/toyota.h toyota_rx_hook [delete_operand] -(current_copy->setup).toyota_alt_brake &&
+modes/toyota.h toyota_rx_hook [delete_operand] -& 0x7FFFU
+modes/toyota.h toyota_tx_hook [delete_operand] -(current_copy->setup).toyota_secoc &&
+modes/toyota.h toyota_tx_hook [delete_operand] -|| (lta_angle_msb != 0U)
+modes/tesla.h tesla_get_quality_flag_valid [delete_operand] -& 0x03U
+modes/tesla.h tesla_latch_rising_edge [delete_operand] -now &&
+modes/tesla.h tesla_latch_rising_edge [delete_operand] -now && !*prev &&
+modes/tesla.h tesla_latch_rising_edge [delete_operand] -&& !*prev
+modes/tesla.h tesla_latch_rising_edge [delete_statement] -*prev = now;
+modes/tesla.h tesla_rx_hook [delete_operand] -& 0x3FFFU
+modes/tesla.h tesla_rx_hook [delete_operand] -& 0x03U
+modes/tesla.h tesla_rx_hook [delete_operand] -& 0x0FU
+modes/tesla.h tesla_rx_hook [delete_operand] -& 0x07U
+modes/tesla.h tesla_tx_hook [delete_operand] -& 0x7FFFU
+modes/tesla.h tesla_tx_hook [delete_operand] -|| max_accel_violation
+modes/tesla.h tesla_tx_hook [delete_operand] -(raw_accel_max != inactive_accel) ||
+modes/tesla.h tesla_tx_hook [delete_operand] -|| (raw_accel_min != inactive_accel)
+modes/tesla.h tesla_init [delete_operand] -& (TESLA_FLAG_LONGITUDINAL_CONTROL)
+modes/gm.h gm_rx_hook [delete_operand] -&& ((current_copy->setup).gm_hw == GM_ASCM)
+modes/gm.h gm_rx_hook [delete_operand] -&& ((current_copy->setup).gm_hw == GM_CAM)
+modes/gm.h gm_tx_hook [delete_operand] -& 0xFFFU
+modes/gm.h gm_tx_hook [delete_operand] -& 0x7FFFFU
+modes/gm.h gm_tx_hook [delete_operand] -!(current_copy->state).controls_allowed &&
+modes/gm.h gm_tx_hook [delete_operand] -(current_copy->setup).gm_pcm_cruise &&
+modes/gm.h gm_tx_hook [delete_operand] -& 0x7U
+modes/gm.h gm_tx_hook [delete_operand] -(button == 6U) &&
+modes/gm.h gm_init [delete_statement] -(current_copy->setup).gm_hw = GM_ASCM;
+modes/gm.h gm_init [delete_operand] -(param) & #3
+modes/ford.h ford_get_quality_flag_valid [delete_operand] -& 0x3U
+modes/ford.h ford_get_quality_flag_valid [delete_operand] -& 0x3U #2
+modes/ford.h ford_rx_hook [delete_operand] -& 0x3U
+modes/ford.h ford_rx_hook [delete_operand] -& 0x3FFU
+modes/ford.h ford_rx_hook [delete_operand] -& 0x3U #2
+modes/ford.h ford_rx_hook [delete_operand] -& 0x07U
+modes/ford.h ford_tx_hook [delete_operand] -& 0x3FFU #2
+modes/ford.h ford_tx_hook [delete_operand] -& 0x1FFFU
+modes/ford.h ford_tx_hook [delete_operand] ->> 5
+modes/ford.h ford_tx_hook [delete_operand] ->> 2
+modes/ford.h ford_tx_hook [delete_operand] -& 0x7U
+modes/ford.h ford_tx_hook [delete_operand] -& 0x7U #2
+modes/hyundai_common.h hyundai_common_init [delete_operand] -!(current_copy->setup).hyundai_ev_gas_signal &&
+modes/hyundai_common.h hyundai_common_init [delete_operand] -& (HYUNDAI_PARAM_ALT_LIMITS)
+modes/hyundai_common.h hyundai_common_init [delete_operand] -(param) & #6
+modes/hyundai_common.h hyundai_common_init [delete_operand] -& (HYUNDAI_PARAM_ALT_LIMITS_2)
+modes/hyundai_common.h hyundai_common_init [delete_statement] -(current_copy->state).hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
+modes/hyundai_common.h hyundai_common_cruise_state_check [delete_operand] -cruise_engaged &&
+modes/hyundai.h hyundai_get_counter [delete_operand] -& 0x3U
+modes/hyundai.h hyundai_compute_checksum [delete_operand] -(msg->addr == 0x260U) &&
+modes/hyundai.h hyundai_compute_checksum [delete_operand] -(msg->addr == 0x421U) &&
+modes/hyundai.h hyundai_rx_hook [delete_operand] -!(current_copy->setup).hyundai_longitudinal &&
+modes/hyundai.h hyundai_rx_hook [delete_operand] -& 0x3U
+modes/hyundai.h hyundai_rx_hook [delete_operand] -& 0x7ffU
+modes/hyundai.h hyundai_rx_hook [delete_operand] -& 0x7U
+modes/hyundai.h hyundai_rx_hook [delete_operand] ->> 7
+modes/hyundai.h hyundai_rx_hook [delete_operand] -(current_copy->setup).hyundai_fcev_gas_signal &&
+modes/hyundai.h hyundai_rx_hook [delete_operand] -&& !(current_copy->setup).hyundai_ev_gas_signal
+modes/hyundai.h hyundai_rx_hook [delete_operand] -&& !(current_copy->setup).hyundai_hybrid_gas_signal
+modes/hyundai.h hyundai_rx_hook [delete_operand] -& 0x3U #2
+modes/hyundai.h hyundai_tx_hook [delete_operand] -& 0x7U
+modes/hyundai.h hyundai_tx_hook [delete_operand] -(button == 4U) &&
+modes/hyundai.h hyundai_init [delete_statement] -(current_copy->setup).hyundai_legacy = 0 ;
+modes/hyundai.h hyundai_legacy_init [delete_statement] -(current_copy->setup).hyundai_legacy = 1 ;
+modes/hyundai.h hyundai_legacy_init [delete_statement] -(current_copy->setup).hyundai_longitudinal = 0 ;
+modes/hyundai.h hyundai_legacy_init [delete_statement] -(current_copy->setup).hyundai_camera_scc = 0 ;
+modes/chrysler.h chrysler_rx_hook [delete_operand] -((current_copy->setup).chrysler_platform != CHRYSLER_PACIFICA) &&
+modes/chrysler.h chrysler_rx_hook [delete_operand] -((current_copy->setup).chrysler_platform == CHRYSLER_PACIFICA) &&
+modes/chrysler.h chrysler_rx_hook [delete_operand] -& 0xFU
+modes/chrysler.h chrysler_tx_hook [delete_operand] -& 0x7U
+modes/chrysler.h chrysler_init [delete_operand] -& (CHRYSLER_PARAM_RAM_HD)
+modes/chrysler.h chrysler_init [delete_operand] -& (CHRYSLER_PARAM_RAM_DT)
+modes/chrysler.h chrysler_init [delete_statement] -(current_copy->setup).chrysler_platform = CHRYSLER_RAM_DT;
+modes/rivian.h rivian_init [delete_operand] -& (FLAG_RIVIAN_LONG_CONTROL)
+modes/mg.h mg_compute_checksum [delete_operand] -& 0x7U
+modes/mg.h mg_get_counter [delete_operand] -& 0xFU
+modes/mg.h mg_get_counter [delete_operand] -& 0xFU #2
+modes/mg.h mg_rx_hook [delete_operand] -& 0x7FFFU
+modes/mg.h mg_rx_hook [delete_operand] -& 0x38U
+modes/mg.h mg_tx_hook [delete_operand] -& 0x7FFU
+modes/subaru.h subaru_rx_hook [delete_operand] -& 0x1FFFU
+modes/subaru.h subaru_rx_hook [delete_operand] -& 0x1FFFU #2
+modes/subaru.h subaru_rx_hook [delete_operand] -& 0x1FFFU #3
+modes/subaru.h subaru_tx_hook [delete_operand] -& 0x1FFFU #2
+modes/subaru.h subaru_init [delete_operand] -& (SUBARU_PARAM_GEN2)
+modes/subaru_preglobal.h subaru_preglobal_init [delete_operand] -& (SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE)
+modes/mazda.h mazda_tx_hook [delete_operand] -& 0xFFFU
+modes/nissan.h nissan_init [delete_operand] -& (NISSAN_PARAM_ALT_EPS_BUS)
+modes/volkswagen_common.h volkswagen_common_init [delete_statement] -(current_copy->setup).volkswagen_longitudinal = 0 ;
+modes/volkswagen_mlb.h volkswagen_mlb_init [delete_statement] -volkswagen_common_init();
+modes/volkswagen_mlb.h volkswagen_mlb_rx_hook [delete_operand] -& 0xFFFU
+modes/volkswagen_mlb.h volkswagen_mlb_rx_hook [delete_operand] ->> 4
+modes/volkswagen_mlb.h volkswagen_mlb_rx_hook [delete_operand] -& 0xFFFU #2
+modes/volkswagen_mlb.h volkswagen_mlb_rx_hook [delete_operand] ->> 4 #2
+modes/volkswagen_mlb.h volkswagen_mlb_tx_hook [delete_operand] -& 0xFU
+modes/volkswagen_mlb.h volkswagen_mlb_tx_hook [delete_operand] -(msg->addr == 0x10BU) &&
+modes/volkswagen_mqb.h volkswagen_mqb_init [delete_operand] -& (FLAG_VOLKSWAGEN_LONG_CONTROL)
+modes/volkswagen_mqb.h volkswagen_mqb_rx_hook [delete_operand] -& 0x7U
+modes/volkswagen_mqb.h volkswagen_mqb_rx_hook [delete_operand] -& 0xFFU
+modes/volkswagen_mqb.h volkswagen_mqb_tx_hook [delete_operand] -& 0x7FFU
+modes/volkswagen_mqb.h volkswagen_mqb_tx_hook [delete_operand] -(msg->addr == 0x12BU) &&
+modes/volkswagen_mqb.h volkswagen_mqb_tx_hook [delete_operand] -& 0x9U
+modes/volkswagen_meb.h volkswagen_meb_init [delete_statement] -volkswagen_common_init();
+modes/volkswagen_meb.h volkswagen_meb_init [delete_operand] -& (FLAG_VOLKSWAGEN_MEB_ALT_CRC)
+modes/volkswagen_meb.h volkswagen_meb_rx_hook [delete_operand] -& 0x07U
+modes/volkswagen_meb.h volkswagen_meb_tx_hook [delete_operand] -& 0x7FFU
+modes/volkswagen_meb.h volkswagen_meb_tx_hook [delete_operand] -& 0x07U
+modes/volkswagen_pq.h volkswagen_pq_init [delete_operand] -& (FLAG_VOLKSWAGEN_LONG_CONTROL)
+modes/volkswagen_pq.h volkswagen_pq_rx_hook [delete_operand] ->> 1
+modes/volkswagen_pq.h volkswagen_pq_rx_hook [delete_operand] -(msg_matches_addr_bus)(msg, 0x38AU, 0U) &&
+modes/volkswagen_pq.h volkswagen_pq_tx_hook [delete_operand] -& 0x7FFU
+modes/volkswagen_pq.h volkswagen_pq_tx_hook [delete_operand] -(msg->addr == 0x38AU) &&
+modes/elm327.h elm327_tx_hook [delete_operand] -(msg->addr == GM_CAMERA_DIAG_ADDR) &&
+modes/body.h body_get_counter [delete_operand] -& 0xFU
+modes/body.h body_tx_hook [delete_operand] -(msg->addr == 0x250U) &&
+modes/body.h body_tx_hook [delete_operand] -&& (((unsigned int)dlc_to_len[(msg)->data_len_code]) == 8U)
+modes/body.h body_tx_hook [delete_operand] -!(current_copy->state).controls_allowed && flash_msg &&
+modes/body.h body_tx_hook [delete_operand] -&& flash_msg
+modes/byd.h byd_get_counter [delete_operand] -& 0xFU
+modes/byd.h byd_rx_hook [delete_operand] -& 0x7U
+modes/hyundai_canfd.h hyundai_canfd_rx_hook [delete_operand] -& 0x7U #2
+modes/hyundai_canfd.h hyundai_canfd_rx_hook [delete_operand] -!(current_copy->setup).hyundai_longitudinal &&
+modes/hyundai_canfd.h hyundai_canfd_rx_hook [delete_operand] -& 0x7U #3
+modes/hyundai_canfd.h hyundai_canfd_tx_hook [delete_operand] -& 0x7U
+modes/hyundai_canfd.h hyundai_canfd_tx_hook [delete_operand] -is_cancel &&
+modes/hyundai_canfd.h hyundai_canfd_tx_hook [delete_operand] -(current_copy->setup).hyundai_canfd_lka_steer_msg && #2
+modes/hyundai_canfd.h hyundai_canfd_tx_hook [delete_operand] -!(current_copy->setup).hyundai_camera_scc &&
+modes/hyundai_canfd.h hyundai_canfd_tx_hook [delete_operand] -& 0x7U #2
+ignition.h ignition_can_hook [delete_operand] -& 0xFU
+ignition.h ignition_can_hook [delete_operand] -& 0x3U
+ignition.h ignition_can_hook [delete_operand] -& 0x3U #2
+ignition.h ignition_can_hook [delete_operand] -& 0xFU #2
+ignition.h ignition_can_hook [delete_operand] -& 0xFU #3
+ignition.h ignition_can_hook [delete_operand] -& 0x3U #3

@@ -62,6 +62,7 @@ class TestSafetyFramework(common.SafetyTestBase):
   SAFETY_MODEL = CarParams.SafetyModel.noOutput
 
   def test_unsupported_safety_mode(self):
+    self.assertEqual(self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0), 0)
     self.safety.set_controls_allowed(True)
     self.assertEqual(self.safety.set_safety_hooks(0xFFFF, 0), -1)
     self.assertFalse(self.safety.get_controls_allowed())
@@ -137,6 +138,7 @@ class TestHeartbeat(common.SafetyTestBase):
   def test_engaged_mismatch(self):
     for engaged in (True, False):
       self.safety.safety_heartbeat(engaged)
+      self.assertEqual(engaged, self.safety.safety_b.state.heartbeat_engaged)
       self.safety.set_controls_allowed(True)
       for _ in range(3):
         self.assertTrue(self.safety.get_controls_allowed())
