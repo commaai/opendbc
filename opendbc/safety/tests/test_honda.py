@@ -29,18 +29,9 @@ class Btn:
 
 
 class HondaButtonEnableBase(common.CarSafetyTest):
+  PCM_CRUISE = False  # openpilot longitudinal engages on buttons
   _acc_state_msg: Callable[..., libsafety_py.CANPacket]
   _button_msg: Callable[..., libsafety_py.CANPacket]
-
-  # override these inherited tests since we're using button enable
-  def test_disable_control_allowed_from_cruise(self):
-    pass
-
-  def test_enable_control_allowed_from_cruise(self):
-    pass
-
-  def test_cruise_engaged_prev(self):
-    pass
 
   def test_buttons_with_main_off(self):
     for btn in (Btn.SET, Btn.RESUME, Btn.CANCEL):
@@ -310,9 +301,8 @@ class TestHondaNidecPcmSafety(HondaPcmEnableBase, TestHondaNidecSafetyBase):
     Covers the Honda Nidec safety mode
   """
 
-  # Nidec doesn't disengage on falling edge of cruise. See comment in safety_honda.h
   def test_disable_control_allowed_from_cruise(self):
-    pass
+    self.skipTest("Nidec doesn't disengage on falling edge of cruise. See comment in safety_honda.h")
 
 
 class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
@@ -356,6 +346,8 @@ class TestHondaBoschSafetyBase(HondaBase):
     pass
 
   def test_spam_cancel_safety_check(self):
+    if not self.PCM_CRUISE:
+      self.skipTest("Openpilot longitudinal does not send cruise buttons")
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._button_msg(Btn.CANCEL, bus=self.BUTTONS_BUS)))
     self.assertFalse(self._tx(self._button_msg(Btn.RESUME, bus=self.BUTTONS_BUS)))
@@ -434,10 +426,6 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
       "BRAKE_REQUEST": accel < 0,
     }
     return self.packer.make_can_msg_safety("ACC_CONTROL", self.PT_BUS, values)
-
-  # Longitudinal doesn't need to send buttons
-  def test_spam_cancel_safety_check(self):
-    pass
 
   def test_diagnostics(self):
     tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x02\x3E\x80\x00\x00\x00\x00\x00")
@@ -524,10 +512,6 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
         msg = self.packer.make_can_msg_safety("ACC_CONTROL", self.PT_BUS, values)
         self.assertFalse(self._tx(msg), msg=aeb_signals)
       self.assertTrue(self._tx(self._accel_msg(0)))
-
-  # Longitudinal doesn't need to send buttons
-  def test_spam_cancel_safety_check(self):
-    pass
 
 
 class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):

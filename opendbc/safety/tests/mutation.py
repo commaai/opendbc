@@ -313,8 +313,6 @@ def instrument(txt, sites):
 # ---------------------------------------------------------------- tests, run in forked children
 
 TESTS = {}  # test id -> TestCase, in the parent and inherited by every child
-PRISTINE = {}  # test class -> its scalar class attributes, which some tests use as counters (`self.__class__.cnt += 1`)
-SCALARS = (int, float, bool, str, type(None))
 
 
 def discover_tests():
@@ -334,22 +332,15 @@ def discover_tests():
         del TESTS[tid]
   from opendbc.can.dbc import DBC
   for cls in {type(t) for t in TESTS.values()}:
-    PRISTINE.update({c: {k: v for k, v in vars(c).items() if type(v) in SCALARS} for c in cls.__mro__})
     if isinstance(getattr(cls, "DBC", None), str):
       DBC(cls.DBC)  # a read-only cache, built here so not every child builds it
 
 
 def run_test(tid, result):
-  """Runs a test as if it were the first one run: class attributes as discovered and `random` seeded by its id."""
-  test = TESTS[tid]
-  for cls, state in ((c, PRISTINE[c]) for c in type(test).__mro__):
-    for k in [k for k, v in vars(cls).items() if type(v) in SCALARS and k not in state]:
-      delattr(cls, k)
-    for k, v in state.items():
-      if vars(cls).get(k, not v) is not v:
-        setattr(cls, k, v)
+  """Runs a test with `random` seeded by its id, so its result doesn't depend on which tests ran before it.
+  Tests keep no state on their class (per-test state lives in setUp and SafetyTestBase._next_counter)."""
   random.seed(tid)
-  test.run(result)
+  TESTS[tid].run(result)
 
 
 def baseline_task(tids, n):

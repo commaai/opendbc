@@ -48,11 +48,8 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     values = {"STEER_ANGLE": angle, "STEER_REQ": 1 if enabled else 0, "STEER_REQ_ACTIVE_LOW": 0 if enabled else 1}
     if increment_timer:
-      self.safety.set_timer(self.__class__.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
-      self.__class__.cnt_angle_cmd += 1
+      self.safety.set_timer(self._next_counter("angle_cmd") * int(1e6 / self.LATERAL_FREQUENCY))
     return self.packer.make_can_msg_safety("STEERING_MODULE_ADAS", self.MAIN_BUS, values)
-
-  cnt_angle_cmd = 0
 
   def _angle_meas_msg(self, angle: float):
     values = {"STEER_ANGLE_2": angle}
@@ -95,8 +92,7 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
   # BYD uses get_max_angle_delta_vm and get_max_angle_vm for lateral accel and jerk limits
   def test_angle_cmd_when_enabled(self):
-    # We properly test lateral acceleration and jerk below
-    pass
+    self.skipTest("lateral accel/jerk limits tested in test_lateral_accel_limit/test_lateral_jerk_limit")
 
   def test_lateral_accel_limit(self):
     for speed in np.linspace(0, 40, 100):

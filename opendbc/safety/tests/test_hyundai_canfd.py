@@ -106,17 +106,6 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
   STEER_MSG = "LFA"
   BUTTONS_TX_BUS = 2
-  EXTRA_SAFETY_PARAM: int
-
-  @classmethod
-  def setUpClass(cls):
-    super().setUpClass()
-    if cls.__name__ in ("TestHyundaiCanfdLFASteering", "TestHyundaiCanfdLFASteeringAltButtons"):
-      raise unittest.SkipTest
-
-  @property
-  def SAFETY_PARAM(self):
-    return self.EXTRA_SAFETY_PARAM
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
@@ -126,11 +115,7 @@ class TestHyundaiCanfdLFASteering(TestHyundaiCanfdLFASteeringBase):
 
 class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase):
 
-  EXTRA_SAFETY_PARAM: int
-
-  @property
-  def SAFETY_PARAM(self):
-    return HyundaiSafetyFlags.CANFD_ALT_BUTTONS | self.EXTRA_SAFETY_PARAM
+  BASE_SAFETY_PARAM = HyundaiSafetyFlags.CANFD_ALT_BUTTONS
 
   def _button_msg(self, buttons, main_button=0, bus=1):
     values = {
@@ -145,8 +130,9 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
 
   def test_button_sends(self):
     """
-      No button send allowed with alt buttons.
+      No stock button send allowed with alt buttons.
     """
+    self._require_pcm_cruise()
     for enabled in (True, False):
       for btn in range(8):
         self.safety.set_controls_allowed(enabled)
@@ -236,9 +222,7 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
   DISABLED_ECU_UDS_MSG = (0x7D0, 0)
   DISABLED_ECU_ACTUATION_MSG = (0x1a0, 0)
 
-  @property
-  def SAFETY_PARAM(self):
-    return HyundaiSafetyFlags.LONG | self.EXTRA_SAFETY_PARAM
+  BASE_SAFETY_PARAM = HyundaiSafetyFlags.LONG
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, accel_value=None):
     values = {
@@ -253,34 +237,18 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
     self.assertFalse(self._tx(self._accel_msg(0, accel_value=5.0)))
     self.assertFalse(self._tx(self._accel_msg(5.0, accel_value=0)))
 
-  def test_tester_present_allowed(self, ecu_disable: bool = True):
-    super().test_tester_present_allowed(ecu_disable=not self.EXTRA_SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
-
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
 class TestHyundaiCanfdLFASteeringLong(TestHyundaiCanfdLFASteeringLongBase):
-  @classmethod
-  def setUpClass(cls):
-    super().setUpClass()
-    if cls.__name__ == "TestHyundaiCanfdLFASteeringLong":
-      raise unittest.SkipTest
+  pass
 
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
 class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongBase, TestHyundaiCanfdLFASteeringAltButtonsBase):
-  @classmethod
-  def setUpClass(cls):
-    super().setUpClass()
-    if cls.__name__ == "TestHyundaiCanfdLFASteeringLongAltButtons":
-      raise unittest.SkipTest
-
-  @property
-  def SAFETY_PARAM(self):
-    return HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CANFD_ALT_BUTTONS | self.EXTRA_SAFETY_PARAM
+  BASE_SAFETY_PARAM = HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CANFD_ALT_BUTTONS
 
   def test_acc_cancel(self):
-    # Alt buttons does not use SCC_CONTROL to cancel if longitudinal
-    pass
+    self.skipTest("Longitudinal with alt buttons uses buttons to cancel")
 
 
 if __name__ == "__main__":

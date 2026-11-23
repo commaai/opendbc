@@ -73,8 +73,7 @@ def add_regen_tests(cls):
     def _make_regen_test(brake_func):
       def _regen_test(self):
         # only for safety modes with a regen message
-        if self._user_regen_msg(0) is None:
-          raise unittest.SkipTest("Safety mode implements no _user_regen_msg")
+        self._require(self._user_regen_msg(0), "Safety mode implements no _user_regen_msg")
 
         getattr(self, brake_func)(self._user_regen_msg, self.safety.get_regen_braking_prev)
       return _regen_test
@@ -89,9 +88,19 @@ class SafetyTestBase(unittest.TestCase):
   DBC: str | None = None
   packer: CANPackerSafety
   SAFETY_MODEL: int | None
-  SAFETY_PARAM = 0
+  # SAFETY_PARAM defaults to BASE_SAFETY_PARAM | EXTRA_SAFETY_PARAM. Set BASE_SAFETY_PARAM on a platform's
+  # base class and EXTRA_SAFETY_PARAM on its variants, OR set SAFETY_PARAM directly: the two styles are
+  # mutually exclusive. Combining mixins that set different values for one of these needs an explicit
+  # value on the combined class. setUpClass raises TypeError on either mistake instead of dropping flags.
+  BASE_SAFETY_PARAM = 0
+  EXTRA_SAFETY_PARAM = 0
+
+  @property
+  def SAFETY_PARAM(self) -> int:
+    return self.BASE_SAFETY_PARAM | self.EXTRA_SAFETY_PARAM
 
   def setUp(self):
+    self._counters: dict[str, int] = {}
     self.safety = libsafety_py.libsafety
     if self.DBC is not None:
       self.packer = CANPackerSafety(self.DBC)
@@ -105,9 +114,40 @@ class SafetyTestBase(unittest.TestCase):
 
   @classmethod
   def setUpClass(cls):
-    # Classes defined in this module and classes named *Base are shared test helpers.
-    if cls.__module__ == __name__ or cls.__name__.endswith('Base'):
+    # Classes defined in this module, classes named *Base, and @parameterized_class templates
+    # (which mark themselves __test__ = False) are shared test helpers.
+    if cls.__module__ == __name__ or cls.__name__.endswith('Base') or cls.__dict__.get('__test__', True) is False:
       raise unittest.SkipTest
+    cls._check_safety_param()
+
+  @classmethod
+  def _check_safety_param(cls):
+    """Fail loudly instead of silently testing with a dropped safety param flag."""
+    for name in ("SAFETY_PARAM", "BASE_SAFETY_PARAM", "EXTRA_SAFETY_PARAM"):
+      # the most-derived classes in the MRO that define name; MRO picks the first, ignoring the others
+      definers = [c for c in cls.__mro__ if name in c.__dict__]
+      leaves = [c for c in definers if not any(d is not c and issubclass(d, c) for d in definers)]
+      if len({c.__dict__[name] for c in leaves}) > 1:
+        raise TypeError(f"{cls.__name__}: bases {[c.__name__ for c in leaves]} set conflicting {name}, set it on the class")
+
+    if cls.SAFETY_PARAM is not SafetyTestBase.__dict__["SAFETY_PARAM"] and (cls.BASE_SAFETY_PARAM or cls.EXTRA_SAFETY_PARAM):
+      raise TypeError(f"{cls.__name__}: SAFETY_PARAM is set directly, so BASE_SAFETY_PARAM/EXTRA_SAFETY_PARAM would be ignored")
+
+  def _require(self, value, reason: str):
+    """Optional hooks return None when the safety mode doesn't have the concept. Skip the test if so."""
+    if value is None:
+      self.skipTest(reason)
+    return value
+
+  def _next_counter(self, key: str) -> int:
+    """Return the next zero-based frame index for this test."""
+    count = self._counters.get(key, 0)
+    self._counters[key] = count + 1
+    return count
+
+  def _speed_msg_2(self, speed: float):
+    """Optional: a second vehicle speed source that is cross-checked against the first. Return None if there is none."""
+    return None
 
   def _reset_safety_hooks(self):
     self.safety.set_safety_hooks(self.safety.get_current_safety_mode(),
@@ -185,7 +225,7 @@ class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
 
   @abc.abstractmethod
   def _accel_msg(self, accel: float):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _accel_msg")
 
   def test_accel_limits_correct(self):
     self.assertGreater(self.MAX_ACCEL, 0)
@@ -228,11 +268,11 @@ class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
 
   @abc.abstractmethod
   def _send_gas_msg(self, gas: float):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _send_gas_msg")
 
   @abc.abstractmethod
   def _send_brake_msg(self, brake: float):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _send_brake_msg")
 
   def test_brake_safety_check(self):
     self._generic_limit_safety_check(self._send_brake_msg, self.MIN_BRAKE, self.MAX_BRAKE, 0, self.MAX_POSSIBLE_BRAKE, 1)
@@ -272,11 +312,11 @@ class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
 
   @abc.abstractmethod
   def _torque_cmd_msg(self, torque, steer_req=1):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _torque_cmd_msg")
 
   @abc.abstractmethod
   def _speed_msg(self, speed):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _speed_msg")
 
   def _reset_speed_measurement(self, speed):
     for _ in range(MAX_SAMPLE_VALS):
@@ -445,7 +485,7 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
   @abc.abstractmethod
   def _torque_driver_msg(self, torque):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _torque_driver_msg")
 
   def _reset_torque_driver_measurement(self, torque):
     for _ in range(MAX_SAMPLE_VALS):
@@ -555,7 +595,7 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
   @abc.abstractmethod
   def _torque_meas_msg(self, torque):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _torque_meas_msg")
 
   def _set_prev_torque(self, t):
     super()._set_prev_torque(t)
@@ -665,7 +705,7 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 class VehicleSpeedSafetyTest(SafetyTestBase):
   @abc.abstractmethod
   def _speed_msg(self, speed):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _speed_msg")
 
   def test_vehicle_speed_measurements(self):
     # TODO: lower tolerance on these tests
@@ -686,11 +726,11 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   @abc.abstractmethod
   def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _angle_cmd_msg")
 
   @abc.abstractmethod
   def _angle_meas_msg(self, angle: float):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _angle_meas_msg")
 
   def _get_steer_cmd_angle_max(self, speed):
     return self.STEER_ANGLE_MAX
@@ -839,15 +879,11 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   @abc.abstractmethod
   def _curvature_cmd_msg(self, curvature: float, steer_req: bool):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _curvature_cmd_msg")
 
   @abc.abstractmethod
   def _curvature_meas_msg(self, curvature: float):
-    pass
-
-  @abc.abstractmethod
-  def _speed_msg_2(self, speed: float):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _curvature_meas_msg")
 
   def _set_prev_desired_curvature(self, curvature: float):
     curvature_can = int(round(curvature * self.CURVATURE_TO_CAN))
@@ -860,7 +896,9 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
   def _reset_speed_measurement(self, speed: float):
     for _ in range(MAX_SAMPLE_VALS):
       self._rx(self._speed_msg(speed))
-      self._rx(self._speed_msg_2(speed))
+      speed_msg_2 = self._speed_msg_2(speed)
+      if speed_msg_2 is not None:
+        self._rx(speed_msg_2)
 
   def test_curvature_measurements(self):
     self._common_measurement_test(self._curvature_meas_msg, -self.MAX_CURVATURE, self.MAX_CURVATURE, self.CURVATURE_TO_CAN,
@@ -1073,21 +1111,21 @@ class CarSafetyTest(SafetyTest):
   STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]]
+  # True when controls_allowed follows the stock PCM cruise state. Set False when the safety mode
+  # engages on buttons instead (e.g. openpilot longitudinal), which skips the PCM cruise tests.
+  PCM_CRUISE = True
 
   @abc.abstractmethod
   def _user_brake_msg(self, brake):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _user_brake_msg")
 
   def _user_regen_msg(self, regen):
-    pass
+    """Optional: the regen paddle message, if the safety mode treats regen as braking. Return None if there is none."""
+    return None
 
   @abc.abstractmethod
   def _speed_msg(self, speed):
-    pass
-
-  @abc.abstractmethod
-  def _speed_msg_2(self, speed: float):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _speed_msg")
 
   # Safety modes can override if vehicle_moving is driven by a different message
   def _vehicle_moving_msg(self, speed: float):
@@ -1095,11 +1133,15 @@ class CarSafetyTest(SafetyTest):
 
   @abc.abstractmethod
   def _user_gas_msg(self, gas):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _user_gas_msg")
 
   @abc.abstractmethod
   def _pcm_status_msg(self, enable):
-    pass
+    raise NotImplementedError(f"{type(self).__name__} must implement _pcm_status_msg")
+
+  def _require_pcm_cruise(self):
+    if not self.PCM_CRUISE:
+      self.skipTest("Safety mode does not engage from the PCM cruise state")
 
   # {msg name: {signal: valid values}} of the quality flags of the RX checked msgs
   RX_QUALITY_FLAGS: dict[str, dict[str, tuple[int, ...]]] = {}
@@ -1350,17 +1392,20 @@ class CarSafetyTest(SafetyTest):
       self.assertEqual(pressed, get_brake_pressed_prev())
 
   def test_enable_control_allowed_from_cruise(self):
+    self._require_pcm_cruise()
     self._rx(self._pcm_status_msg(False))
     self.assertFalse(self.safety.get_controls_allowed())
     self._rx(self._pcm_status_msg(True))
     self.assertTrue(self.safety.get_controls_allowed())
 
   def test_disable_control_allowed_from_cruise(self):
+    self._require_pcm_cruise()
     self.safety.set_controls_allowed(1)
     self._rx(self._pcm_status_msg(False))
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_cruise_engaged_prev(self):
+    self._require_pcm_cruise()
     for engaged in [True, False]:
       self._rx(self._pcm_status_msg(engaged))
       self.assertEqual(engaged, self.safety.get_cruise_engaged_prev())
@@ -1420,8 +1465,7 @@ class CarSafetyTest(SafetyTest):
     self.assertTrue(self.safety.get_vehicle_moving())
 
   def test_rx_hook_speed_mismatch(self):
-    if self._speed_msg_2(0) is None:
-      raise unittest.SkipTest("No second speed message for this safety mode")
+    self._require(self._speed_msg_2(0), "No second speed message for this safety mode")
 
     for speed in np.arange(0, 40, 0.5):
       for speed_delta in np.arange(-5, 5, 0.1):

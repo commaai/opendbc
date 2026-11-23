@@ -14,7 +14,6 @@ MSG_LDW_1 = 0x5BE             # TX by OP, Lane line recognition and text alerts
 
 class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   DBC = "vw_pq"
-  cruise_engaged = False
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1)}
 
@@ -42,7 +41,6 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
 
   # ACC engaged status (shared message Motor_2)
   def _pcm_status_msg(self, enable):
-    self.__class__.cruise_engaged = enable
     return self._motor_2_msg(cruise_engaged=enable)
 
   # Acceleration request to drivetrain coordinator
@@ -121,16 +119,7 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1, MSG_ACC_SYSTEM, MSG_ACC_GRA_ANZEIGE]}
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1, MSG_ACC_SYSTEM, MSG_ACC_GRA_ANZEIGE)}
   INACTIVE_ACCEL = 3.01
-
-  # stock cruise controls are entirely bypassed under openpilot longitudinal control
-  def test_disable_control_allowed_from_cruise(self):
-    pass
-
-  def test_enable_control_allowed_from_cruise(self):
-    pass
-
-  def test_cruise_engaged_prev(self):
-    pass
+  PCM_CRUISE = False  # stock cruise controls are entirely bypassed under openpilot longitudinal control
 
   def test_set_and_resume_buttons(self):
     for button in ["set", "resume"]:

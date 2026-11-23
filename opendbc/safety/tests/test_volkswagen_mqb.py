@@ -139,16 +139,7 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07]}
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07), 2: (MSG_LH_EPS_03,)}
   INACTIVE_ACCEL = 3.01
-
-  # stock cruise controls are entirely bypassed under openpilot longitudinal control
-  def test_disable_control_allowed_from_cruise(self):
-    pass
-
-  def test_enable_control_allowed_from_cruise(self):
-    pass
-
-  def test_cruise_engaged_prev(self):
-    pass
+  PCM_CRUISE = False  # stock cruise controls are entirely bypassed under openpilot longitudinal control
 
   def test_set_and_resume_buttons(self):
     for button in ["set", "resume"]:

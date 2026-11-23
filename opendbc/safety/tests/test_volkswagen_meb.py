@@ -39,8 +39,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   SEND_RATE = 0.02
   LATERAL_FREQUENCY = 50  # Hz
 
-  cnt_curvature_cmd = 0
-
   def _set_prev_desired_power(self, power: int):
     # init with local tx sequence
     prev_allowed = self.safety.get_controls_allowed()
@@ -119,8 +117,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
 
   def _curvature_cmd_msg(self, curvature, steer_req=1, power=50, increment_timer=True):
     if increment_timer:
-      self.safety.set_timer(self.cnt_curvature_cmd * int(1e6 / self.LATERAL_FREQUENCY))
-      self.__class__.cnt_curvature_cmd += 1
+      self.safety.set_timer(self._next_counter("curvature_cmd") * int(1e6 / self.LATERAL_FREQUENCY))
     values = {
       "Curvature": abs(curvature),
       "Curvature_VZ": curvature > 0,
@@ -250,16 +247,7 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
 
   ACCEL_OVERRIDE = 0
   INACTIVE_ACCEL = 3.01
-
-  # stock cruise controls are entirely bypassed under openpilot longitudinal control
-  def test_disable_control_allowed_from_cruise(self):
-    pass
-
-  def test_enable_control_allowed_from_cruise(self):
-    pass
-
-  def test_cruise_engaged_prev(self):
-    pass
+  PCM_CRUISE = False  # stock cruise controls are entirely bypassed under openpilot longitudinal control
 
   def test_set_and_resume_buttons(self):
     for button in ["set", "resume"]:
