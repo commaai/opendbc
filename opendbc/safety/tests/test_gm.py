@@ -26,7 +26,7 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
   MAX_POSSIBLE_GAS = 4000  # reasonably excessive limits, not signal max
   MIN_POSSIBLE_GAS = -4000
 
-  PCM_CRUISE = False  # openpilot can control the PCM state if longitudinal
+  PCM_CRUISE = False  # GM longitudinal engages on buttons; openpilot can control the PCM state
 
   BRAKE_BUS: int
   packer_chassis: CANPackerSafety
@@ -48,15 +48,6 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
   # override these tests from CarSafetyTest, GM longitudinal uses button enable
   def _pcm_status_msg(self, enable):
     raise NotImplementedError
-
-  def test_disable_control_allowed_from_cruise(self):
-    pass
-
-  def test_enable_control_allowed_from_cruise(self):
-    pass
-
-  def test_cruise_engaged_prev(self):
-    pass
 
   def test_set_resume_buttons(self):
     """
@@ -97,10 +88,6 @@ class TestGmSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTe
   MAX_RT_DELTA = 128
   DRIVER_TORQUE_ALLOWANCE = 65
   DRIVER_TORQUE_FACTOR = 4
-
-  PCM_CRUISE = True  # openpilot is tied to the PCM state if not longitudinal
-
-  EXTRA_SAFETY_PARAM = 0
 
   def setUp(self):
     super().setUp()
@@ -168,10 +155,6 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
   MIN_GAS = -650  # maximum regen
   INACTIVE_GAS = -650
 
-  @property
-  def SAFETY_PARAM(self):
-    return self.EXTRA_SAFETY_PARAM
-
 
 class TestGmAscmEVSafety(TestGmAscmSafety, TestGmEVSafetyBase):
   pass
@@ -189,9 +172,7 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [0x180], 0: [0x184]}  # block LKAS message and PSCMStatus
   BUTTONS_BUS = 2  # tx only
 
-  @property
-  def SAFETY_PARAM(self):
-    return GMSafetyFlags.HW_CAM | self.EXTRA_SAFETY_PARAM
+  BASE_SAFETY_PARAM = GMSafetyFlags.HW_CAM
 
   def test_rx_buttons_do_not_enable(self):
     self._rx(self.packer.make_can_msg_safety("ASCMSteeringButton", 0, {"ACCButtons": Buttons.RES_ACCEL}))
@@ -227,9 +208,7 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
   MIN_GAS = -540  # maximum regen
   INACTIVE_GAS = -500
 
-  @property
-  def SAFETY_PARAM(self):
-    return GMSafetyFlags.HW_CAM | GMSafetyFlags.HW_CAM_LONG | self.EXTRA_SAFETY_PARAM
+  BASE_SAFETY_PARAM = GMSafetyFlags.HW_CAM | GMSafetyFlags.HW_CAM_LONG
 
 
 class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVSafetyBase):

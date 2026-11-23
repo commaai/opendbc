@@ -178,6 +178,8 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
   FWD_BLACKLISTED_ADDRS = {2: [0x340, 0x485, 0x420, 0x421, 0x50A, 0x389]}
   RELAY_MALFUNCTION_ADDRS = {0: (0x340, 0x485, 0x421, 0x420, 0x50A, 0x389)}  # LKAS11, LFAHDA_MFC, SCC12, SCC11, SCC13, SCC14
 
+  DISABLED_ECU_UDS_MSG = (0x7D0, 0)
+
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0, aeb_stop_req=False, accel_value=None):
     values = {
       "aReqRaw": accel,
@@ -200,11 +202,8 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
     self.assertFalse(self._tx(self._accel_msg(0, accel_value=5.0)))
     self.assertFalse(self._tx(self._accel_msg(5.0, accel_value=0)))
 
-  def test_tester_present_allowed(self):
-    pass
-
   def test_disabled_ecu_alive(self):
-    pass
+    self.skipTest("Camera SCC keeps the stock ECU active")
 
 
 class TestHyundaiSafetyFCEVLong(TestHyundaiLongitudinalSafety, TestHyundaiSafetyFCEV):

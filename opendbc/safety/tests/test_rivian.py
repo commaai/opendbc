@@ -26,12 +26,6 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
   DRIVER_TORQUE_ALLOWANCE = 100
   DRIVER_TORQUE_FACTOR = 2
 
-  cnt_speed = 0
-  cnt_speed_2 = 0
-  cnt_torque = 0
-  cnt_brake = 0
-  cnt_pcm = 0
-
   RX_QUALITY_FLAGS = {
     "ESP_Status": {"ESP_Vehicle_Speed_Q": (1,)},
     "VDM_PropStatus": {"VDM_VehicleSpeedQ": (1,)},
@@ -39,8 +33,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
   }
 
   def _torque_driver_msg(self, torque):
-    values = {"EPAS_TorsionBarTorque": torque / 100.0, "EPAS_SystemStatus_Counter": self.cnt_torque % 15}
-    self.__class__.cnt_torque += 1
+    values = {"EPAS_TorsionBarTorque": torque / 100.0}
     return self.packer.make_can_msg_safety("EPAS_SystemStatus", 0, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
@@ -48,8 +41,7 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
     return self.packer.make_can_msg_safety("ACM_lkaHbaCmd", 0, values)
 
   def _speed_msg(self, speed):
-    values = {"ESP_Vehicle_Speed": speed * 3.6, "ESP_Status_Counter": self.cnt_speed % 15, "ESP_Vehicle_Speed_Q": 1}
-    self.__class__.cnt_speed += 1
+    values = {"ESP_Vehicle_Speed": speed * 3.6, "ESP_Vehicle_Speed_Q": 1}
     return self.packer.make_can_msg_safety("ESP_Status", 0, values)
 
   def _speed_msg_2(self, speed):
@@ -57,20 +49,15 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
     return self._user_gas_msg(0, speed)
 
   def _user_brake_msg(self, brake):
-    values = {"iBESP2_BrakePedalApplied": brake, "iBESP2_BrakePedalApplied_Q": 1,
-              "iBESP2_AliveCounter": self.cnt_brake % 15}
-    self.__class__.cnt_brake += 1
+    values = {"iBESP2_BrakePedalApplied": brake, "iBESP2_BrakePedalApplied_Q": 1}
     return self.packer.make_can_msg_safety("iBESP2", 0, values)
 
   def _user_gas_msg(self, gas, speed=0):
-    values = {"VDM_AcceleratorPedalPosition": gas, "VDM_VehicleSpeed": speed * 3.6,
-              "VDM_PropStatus_Counter": self.cnt_speed_2 % 15, "VDM_VehicleSpeedQ": 1}
-    self.__class__.cnt_speed_2 += 1
+    values = {"VDM_AcceleratorPedalPosition": gas, "VDM_VehicleSpeed": speed * 3.6, "VDM_VehicleSpeedQ": 1}
     return self.packer.make_can_msg_safety("VDM_PropStatus", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"ACM_FeatureStatus": enable, "ACM_Unkown1": 1, "ACM_Status_Counter": self.cnt_pcm % 15}
-    self.__class__.cnt_pcm += 1
+    values = {"ACM_FeatureStatus": enable, "ACM_Unkown1": 1}
     return self.packer.make_can_msg_safety("ACM_Status", 2, values)
 
   def _accel_msg(self, accel: float):

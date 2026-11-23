@@ -1,5 +1,6 @@
 from collections.abc import Callable
 
+from opendbc.car.hyundai.values import HyundaiSafetyFlags
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import make_msg
@@ -28,6 +29,7 @@ class HyundaiButtonBase(common.CarSafetyTest):
       - RES allowed while controls allowed
       - CANCEL allowed while cruise is enabled
     """
+    self._require_pcm_cruise()
     self.safety.set_controls_allowed(0)
     self.assertFalse(self._tx(self._button_msg(Buttons.RESUME, bus=self.BUTTONS_TX_BUS)))
     self.assertFalse(self._tx(self._button_msg(Buttons.SET, bus=self.BUTTONS_TX_BUS)))
@@ -48,6 +50,7 @@ class HyundaiButtonBase(common.CarSafetyTest):
       - allowed: Buttons that do enable cruise
       - allowed: Main button with all above combinations
     """
+    self._require_pcm_cruise()
     for main_button in (0, 1):
       for btn in range(8):
         for _ in range(PREV_BUTTON_SAMPLES):  # reset
@@ -67,6 +70,7 @@ class HyundaiButtonBase(common.CarSafetyTest):
     """
       Test that we allow controls on recent button press, but not as button leaves sliding window
     """
+    self._require_pcm_cruise()
     self._rx(self._button_msg(Buttons.SET))
     for i in range(2 * PREV_BUTTON_SAMPLES):
       self._rx(self._pcm_status_msg(False))
@@ -81,27 +85,9 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
   DISABLED_ECU_UDS_MSG: tuple[int, int]
   DISABLED_ECU_ACTUATION_MSG: tuple[int, int]
+  PCM_CRUISE = False
 
   _button_msg: Callable[..., libsafety_py.CANPacket]
-
-  # override these tests from CarSafetyTest, hyundai longitudinal uses button enable
-  def test_disable_control_allowed_from_cruise(self):
-    pass
-
-  def test_enable_control_allowed_from_cruise(self):
-    pass
-
-  def test_sampling_cruise_buttons(self):
-    pass
-
-  def test_cruise_engaged_prev(self):
-    pass
-
-  def test_button_sends(self):
-    pass
-
-  def _pcm_status_msg(self, enable):
-    raise Exception
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
     raise NotImplementedError
@@ -131,12 +117,13 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_tester_present_allowed(self, ecu_disable: bool = True):
+  def test_tester_present_allowed(self):
     """
       Ensure tester present diagnostic message is allowed to keep ECU knocked out
-      for longitudinal control.
+      for longitudinal control. With camera SCC the radar isn't disabled, so its UDS address is blocked.
     """
 
+    ecu_disable = not (self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
     addr, bus = self.DISABLED_ECU_UDS_MSG
     for should_tx, msg in ((True, b"\x02\x3E\x80\x00\x00\x00\x00\x00"),
                            (False, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")):

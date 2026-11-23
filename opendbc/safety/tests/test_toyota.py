@@ -25,7 +25,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   TX_MSGS = TOYOTA_COMMON_TX_MSGS + TOYOTA_COMMON_LONG_TX_MSGS
   RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x191, 0x412, 0x343)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191, 0x343]}
-  EPS_SCALE = 73
+  BASE_SAFETY_PARAM = 73
   ECU_DISABLED = True  # radar is knocked out with tester present for openpilot longitudinal
 
   RX_QUALITY_FLAGS = {
@@ -34,7 +34,7 @@ class TestToyotaSafetyBase(common.CarSafetyTest, common.LongitudinalAccelSafetyT
   }
 
   def _torque_meas_msg(self, torque: int, driver_torque: int | None = None):
-    values = {"STEER_TORQUE_EPS": (torque / self.EPS_SCALE) * 100.}
+    values = {"STEER_TORQUE_EPS": (torque / self.BASE_SAFETY_PARAM) * 100.}
     if driver_torque is not None:
       values["STEER_TORQUE_DRIVER"] = driver_torque
     return self.packer.make_can_msg_safety("STEER_TORQUE_SENSOR", 0, values)
@@ -139,10 +139,6 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
   MIN_VALID_STEERING_FRAMES = 17
   MAX_INVALID_STEERING_FRAMES = 1
 
-  @property
-  def SAFETY_PARAM(self):
-    return self.EPS_SCALE
-
   def test_steer_angle_initializing_ignored(self):
     # TSS-P cars don't set STEER_ANGLE_INITIALIZING, so torque control doesn't check it
     for steer_angle_initializing in (True, False):
@@ -163,9 +159,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
   MAX_MEAS_TORQUE = 1500  # max allowed measured EPS torque before wind down
   MAX_LTA_DRIVER_TORQUE = 150  # max allowed driver torque before wind down
 
-  @property
-  def SAFETY_PARAM(self):
-    return self.EPS_SCALE | ToyotaSafetyFlags.LTA
+  EXTRA_SAFETY_PARAM = ToyotaSafetyFlags.LTA
 
   # Only allow LKA msgs with no actuation
   def test_lka_steer_cmd(self):
@@ -266,9 +260,7 @@ class TestToyotaAltBrakeSafety(TestToyotaSafetyTorque):
 
   DBC = "toyota_new_mc_pt_generated"
 
-  @property
-  def SAFETY_PARAM(self):
-    return self.EPS_SCALE | ToyotaSafetyFlags.ALT_BRAKE
+  EXTRA_SAFETY_PARAM = ToyotaSafetyFlags.ALT_BRAKE
 
   def _user_brake_msg(self, brake):
     values = {"BRAKE_PRESSED": brake}
@@ -302,16 +294,12 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
 
 class TestToyotaStockLongitudinalTorque(TestToyotaStockLongitudinalBase, TestToyotaSafetyTorque):
 
-  @property
-  def SAFETY_PARAM(self):
-    return self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL
+  EXTRA_SAFETY_PARAM = ToyotaSafetyFlags.STOCK_LONGITUDINAL
 
 
 class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyotaSafetyAngle):
 
-  @property
-  def SAFETY_PARAM(self):
-    return self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.LTA
+  EXTRA_SAFETY_PARAM = ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.LTA
 
 
 class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
@@ -323,9 +311,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x191, 0x412, 0x131]}
   ECU_DISABLED = False
 
-  @property
-  def SAFETY_PARAM(self):
-    return self.EPS_SCALE | ToyotaSafetyFlags.SECOC
+  EXTRA_SAFETY_PARAM = ToyotaSafetyFlags.SECOC
 
   def test_angle_meas_initializing(self):
     # SecOC doesn't check the STEER_TORQUE_SENSOR quality flag, so the rx hook drops initializing angles itself
@@ -362,9 +348,7 @@ class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
 
 class TestToyotaSecOcSafetyStockLongitudinal(TestToyotaSecOcSafetyBase, TestToyotaStockLongitudinalBase):
 
-  @property
-  def SAFETY_PARAM(self):
-    return self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SECOC
+  EXTRA_SAFETY_PARAM = ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SECOC
 
 
 class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):

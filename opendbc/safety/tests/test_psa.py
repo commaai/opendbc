@@ -7,7 +7,7 @@ import opendbc.safety.tests.common as common
 LANE_KEEP_ASSIST = 0x3F2
 
 
-class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
+class TestPsaStockSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   DBC = "psa_aee2010_r3"
   SAFETY_MODEL = CarParams.SafetyModel.psa
 
@@ -69,10 +69,6 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       self.assertTrue(self.safety.get_ignition_can())
       self.safety.ignition_can_hook(self._ign_msg(bus, 2, 0))
       self.assertFalse(self.safety.get_ignition_can())
-
-
-class TestPsaStockSafety(TestPsaSafetyBase):
-  pass
 
 
 if __name__ == "__main__":

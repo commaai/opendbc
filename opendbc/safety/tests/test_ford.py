@@ -51,8 +51,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
   CURVATURE_ERROR_MIN_SPEED = 10.0    # m/s
   LATERAL_FREQUENCY = 20              # Hz, for per-frame jerk limit
 
-  lat_ctl_frame = 0
-
   def _get_max_curvature_can(self, speed):
     fudged_speed = max(speed - 1.0, 1.0)
     return int(MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed) * self.DEG_TO_CAN) + 1
@@ -152,8 +150,7 @@ class TestFordSafetyBase(common.CarSafetyTest):
   def _lat_ctl_msg(self, enabled: bool, path_offset: float, path_angle: float, curvature: float, curvature_rate: float,
                    increment_timer: bool = True):
     if increment_timer:
-      self.safety.set_timer(self.lat_ctl_frame * int(1e6 / self.LATERAL_FREQUENCY))
-      self.__class__.lat_ctl_frame += 1
+      self.safety.set_timer(self._next_counter("lat_ctl") * int(1e6 / self.LATERAL_FREQUENCY))
     if self.STEER_MESSAGE == MSG_LateralMotionControl:
       values = {
         "LatCtl_D_Rq": 1 if enabled else 0,

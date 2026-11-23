@@ -49,8 +49,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   MIN_ACCEL = -3.48
   INACTIVE_ACCEL = 0.0
 
-  cnt_angle_cmd = 0
-
   def _get_steer_cmd_angle_max(self, speed):
     return get_max_angle_vm(max(speed, 1), self.VM, CarControllerParams)
 
@@ -67,8 +65,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": int(state)}
     if increment_timer:
-      self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
-      self.__class__.cnt_angle_cmd += 1
+      self.safety.set_timer(self._next_counter("angle_cmd") * int(1e6 / self.LATERAL_FREQUENCY))
     return self.packer.make_can_msg_safety("DAS_steeringControl", bus, values)
 
   def _angle_meas_msg(self, angle: float, hands_on_level: int = 0, eac_status: int = 1, eac_error_code: int = 0):
@@ -240,8 +237,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   # Tesla uses get_max_angle_delta_vm and get_max_angle_vm for real lateral accel and jerk limits
   # TODO: integrate this into AngleSteeringSafetyTest
   def test_angle_cmd_when_enabled(self):
-    # We properly test lateral acceleration and jerk below
-    pass
+    self.skipTest("lateral accel/jerk limits tested in test_lateral_accel_limit/test_lateral_jerk_limit")
 
   def test_lateral_accel_limit(self):
     for speed in np.linspace(0, 40, 100):

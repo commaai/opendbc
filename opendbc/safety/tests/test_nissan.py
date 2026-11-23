@@ -103,9 +103,8 @@ class TestNissanLeafSafety(TestNissanSafety):
     values = {"GAS_PEDAL": gas}
     return self.packer.make_can_msg_safety("CRUISE_THROTTLE", 0, values)
 
-  # TODO: leaf should use its own safety param
   def test_acc_buttons(self):
-    pass
+    self.skipTest("TODO: leaf should use its own safety param")
 
 
 if __name__ == "__main__":
