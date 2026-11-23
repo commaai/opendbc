@@ -46,10 +46,6 @@ class TestAllOutput(TestDefaultRxHookBase):
     # controls always allowed
     self.assertTrue(self.safety.get_controls_allowed())
 
-  def test_tx_hook_on_wrong_safety_mode(self):
-    # No point, since we allow all messages
-    pass
-
 
 class TestAllOutputPassthrough(TestAllOutput):
   SAFETY_PARAM = 1

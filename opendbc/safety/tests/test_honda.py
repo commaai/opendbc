@@ -355,6 +355,20 @@ class TestHondaBoschSafetyBase(HondaBase):
   def _send_brake_msg(self, brake):
     pass
 
+  def test_supplemental_control(self):
+    # BOSCH_SUPPLEMENTAL_1 requires fixed stock data in the low 7 bytes.
+    if [0xE5, 0] not in self.TX_MSGS:
+      self.skipTest("mode doesn't send BOSCH_SUPPLEMENTAL_1")
+
+    stock = 0x10800004
+    for controls_allowed in (False, True):
+      self.safety.set_controls_allowed(controls_allowed)
+      for top_byte in (0x00, 0xFF):
+        self.assertTrue(self._tx(common.make_msg(0, 0xE5, dat=(stock | (top_byte << 56)).to_bytes(8, "little"))))
+      self.assertFalse(self._tx(common.make_msg(0, 0xE5)))
+      for bit in range(56):
+        self.assertFalse(self._tx(common.make_msg(0, 0xE5, dat=(stock ^ (1 << bit)).to_bytes(8, "little"))), f"{bit=}")
+
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._button_msg(Btn.CANCEL, bus=self.BUTTONS_BUS)))
@@ -399,9 +413,6 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
   """
     Covers the Honda Bosch safety mode with stock longitudinal
   """
-
-  def test_supplemental_control(self):
-    self.assertTrue(self._tx(common.make_msg(0, 0xE5, dat=(0x10800004).to_bytes(8, "little"))))
 
 
 class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):
