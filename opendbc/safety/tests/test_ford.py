@@ -20,18 +20,12 @@ MSG_LateralMotionControl2 = 0x3D6  # TX by OP, alternate Lateral Control message
 MSG_IPMA_Data = 0x3D8              # TX by OP, IPMA and LKAS user interface
 
 
-class Buttons:
-  CANCEL = 0
-  RESUME = 1
-  TJA_TOGGLE = 2
-
-
 # Ford safety has four different configurations tested here:
 #  * CAN with openpilot longitudinal
 #  * CAN FD with stock longitudinal
 #  * CAN FD with openpilot longitudinal
 
-class TestFordSafetyBase(common.CarSafetyTest):
+class TestFordSafetyBase(common.CarSafetyTest, common.CruiseButtonsSafetyTest):
   DBC = "ford_lincoln_base_pt"
   SAFETY_MODEL = CarParams.SafetyModel.ford
 
@@ -174,11 +168,19 @@ class TestFordSafetyBase(common.CarSafetyTest):
       return self.packer.make_can_msg_safety("LateralMotionControl2", 0, values)
 
   # Cruise control buttons
-  def _acc_button_msg(self, button: int, bus: int):
+  ALLOWED_BUTTONS = ("cancel", "resume", "tja_toggle")
+  OTHER_BUTTONS = ("AslButtnOnOffPress", "AslButtnOnOffCnclPress", "AccButtnGapIncPress", "AccButtnGapDecPress",
+                   "CcAslButtnOffCnclPress", "CcAslButtnIndxIncPress", "CcAslButtnIndxDecPress", "CcAslButtnCnclResPress",
+                   "CcButtnOffPress", "CcAslButtnSetPress", "CcAslButtnSetIncPress", "CcAslButtnSetDecPress",
+                   "CcAslButtnResIncPress", "CcAslButtnResDecPress", "CcAslButtnOnPress", "AccButtnGapTogglePress",
+                   "CcButtnOnPress", "CcButtnOnOffPress", "CcButtnOnOffCnclPress")
+
+  def _button_msg(self, cancel=False, resume=False, tja_toggle=False, bus=0, **buttons):
     values = {
-      "CcAslButtnCnclPress": 1 if button == Buttons.CANCEL else 0,
-      "CcAsllButtnResPress": 1 if button == Buttons.RESUME else 0,
-      "TjaButtnOnOffPress": 1 if button == Buttons.TJA_TOGGLE else 0,
+      "CcAslButtnCnclPress": cancel,
+      "CcAsllButtnResPress": resume,
+      "TjaButtnOnOffPress": tja_toggle,
+      **buttons,
     }
     return self.packer.make_can_msg_safety("Steering_Data_FD1", bus, values)
 
@@ -396,17 +398,17 @@ class TestFordSafetyBase(common.CarSafetyTest):
       self.safety.set_controls_allowed(allowed)
       for enabled in (True, False):
         self._rx(self._pcm_status_msg(enabled))
-        self.assertTrue(self._tx(self._acc_button_msg(Buttons.TJA_TOGGLE, 2)))
+        self.assertTrue(self._tx(self._button_msg(tja_toggle=True, bus=2)))
 
     for allowed in (0, 1):
       self.safety.set_controls_allowed(allowed)
       for bus in (0, 2):
-        self.assertEqual(allowed, self._tx(self._acc_button_msg(Buttons.RESUME, bus)))
+        self.assertEqual(allowed, self._tx(self._button_msg(resume=True, bus=bus)))
 
     for enabled in (True, False):
       self._rx(self._pcm_status_msg(enabled))
       for bus in (0, 2):
-        self.assertEqual(enabled, self._tx(self._acc_button_msg(Buttons.CANCEL, bus)))
+        self.assertEqual(enabled, self._tx(self._button_msg(cancel=True, bus=bus)))
 
 
 class TestFordCANFDStockSafety(TestFordSafetyBase):

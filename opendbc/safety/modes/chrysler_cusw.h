@@ -78,11 +78,7 @@ static bool chrysler_cusw_tx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->addr == 0x2FAU) {
-    // CRUISE_BUTTONS has buttons in byte 0 (except bit 5) and ACC_Distance_Inc in bit 8.
-    const bool is_cancel = ((msg->data[0] & 0xDFU) == 1U) && !GET_BIT(msg, 8U);
-    const bool is_resume = GET_BIT(msg, 4U) && !GET_BIT(msg, 0U);
-    const bool allowed = is_cancel || (is_resume && safety.controls_allowed);
-    if (!allowed) {
+    if (!chrysler_cruise_buttons_allowed(msg)) {
       tx = false;
     }
   }

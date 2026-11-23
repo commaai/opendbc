@@ -68,10 +68,12 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
 
   // cruise buttons check
   if (msg_matches(msg, MAZDA_CRZ_BTNS, MAZDA_MAIN)) {
+    // Signal: CRZ_BTNS.CAN_OFF ... DISTANCE_LESS, MODE_Y, MODE_X: the buttons are byte 0 and bits 13-14
+    const uint32_t buttons = GET_BYTES_LE(msg, 0, 2) & 0x60FFU;
     // allow resume spamming while controls allowed, but
     // only allow cancel while controls not allowed
-    bool cancel_cmd = (msg->data[0] == 0x1U);
-    if (!safety.controls_allowed && !cancel_cmd) {
+    bool cancel_cmd = (buttons == 0x1U);
+    if (safety_multiple_bits_set(buttons) || (!safety.controls_allowed && !cancel_cmd)) {
       tx = false;
     }
   }

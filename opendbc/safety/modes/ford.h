@@ -199,7 +199,9 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
     // if cancel button is pressed when cruise isn't engaged.
     const bool cancel_violation = GET_BIT(msg, 8U) && !safety.cruise_engaged_prev;   // Signal: CcAslButtnCnclPress (cancel)
     const bool resume_violation = GET_BIT(msg, 25U) && !safety.controls_allowed;     // Signal: CcAsllButtnResPress (resume)
-    bool violation = cancel_violation || resume_violation;
+    // Signal: Steering_Data_FD1.*Press: the buttons are bits 8-12, 17-19, 21, 24-32 and 37-40
+    const bool multiple_buttons = safety_multiple_bits_set(GET_BYTES_64_LE(msg, 0, 6) & 0x1E1FF2E1F00U);
+    bool violation = cancel_violation || resume_violation || multiple_buttons;
 
     if (violation) {
       tx = false;

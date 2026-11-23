@@ -168,6 +168,14 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+  // only one button at a time
+  if (msg->addr == MSG_GRA_ACC_01) {
+    // Signal: GRA_ACC_01.GRA_Abbrechen ... GRA_Verstellung_Zeitluecke: the buttons are bits 13 and 16-21
+    if (safety_multiple_bits_set(GET_BYTES_LE(msg, 0, 4) & 0x3F2000U)) {
+      tx = false;
+    }
+  }
+
   return tx;
 }
 

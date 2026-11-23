@@ -15,4 +15,13 @@ static uint32_t chrysler_compute_checksum(const CANPacket_t *msg) {
   return (uint8_t)(~checksum);
 }
 
+// Only one button at a time: cancel, or resume while controls are allowed
+static bool chrysler_cruise_buttons_allowed(const CANPacket_t *msg) {
+  // Signal: CRUISE_BUTTONS.ACC_Cancel ... ACC_Distance_Inc: the buttons are bits 0-4 and 6-8
+  const uint32_t buttons = GET_BYTES_LE(msg, 0, 2) & 0x1DFU;
+  const bool is_cancel = buttons == 0x1U;
+  const bool is_resume = buttons == 0x10U;
+  return is_cancel || (is_resume && safety.controls_allowed);
+}
+
 #endif  // SAFETY_MODES_CHRYSLER_COMMON_H

@@ -6,7 +6,7 @@ from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 
 
-class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
+class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, common.CruiseButtonsSafetyTest):
   DBC = "chrysler_pacifica_2017_hybrid_generated"
   SAFETY_MODEL = CarParams.SafetyModel.chrysler
 
@@ -24,8 +24,10 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
 
   DAS_BUS = 0
 
-  def _button_msg(self, cancel=False, resume=False):
-    values = {"ACC_Cancel": cancel, "ACC_Resume": resume}
+  OTHER_BUTTONS = ("ACC_Distance_Dec", "ACC_Accel", "ACC_Decel", "Cruise_OnOff", "ACC_OnOff", "ACC_Distance_Inc")
+
+  def _button_msg(self, cancel=False, resume=False, **buttons):
+    values = {"ACC_Cancel": cancel, "ACC_Resume": resume, **buttons}
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", self.DAS_BUS, values)
 
   def _pcm_status_msg(self, enable):
@@ -62,8 +64,7 @@ class TestChryslerSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyT
       # can always cancel
       self.assertTrue(self._tx(self._button_msg(cancel=True)))
 
-      # only one button at a time
-      self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
+      # a button must be pressed
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
 
 

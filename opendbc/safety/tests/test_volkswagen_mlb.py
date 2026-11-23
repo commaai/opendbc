@@ -65,8 +65,8 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self.packer.make_can_msg_safety("HCA_01", 0, values)
 
   # Cruise control buttons
-  def _ls_01_msg(self, cancel=0, resume=0, _set=0, bus=2):
-    values = {"LS_Abbrechen": cancel, "LS_Tip_Setzen": _set, "LS_Tip_Wiederaufnahme": resume}
+  def _button_msg(self, cancel=0, resume=0, _set=0, bus=2, **buttons):
+    values = {"LS_Abbrechen": cancel, "LS_Tip_Setzen": _set, "LS_Tip_Wiederaufnahme": resume, **buttons}
     return self.packer.make_can_msg_safety("LS_01", bus, values)
 
   # Verify brake_pressed is true if either the switch or pressure threshold signals are true
@@ -82,21 +82,22 @@ class TestVolkswagenMlbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
                        f"expected {brake_pressed=} with {motor_03_signal=} and {esp_05_signal=}")
 
 
-class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
+class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase, common.CruiseButtonsSafetyTest):
   DBC = "vw_mlb"
   SAFETY_MODEL = CarParams.SafetyModel.volkswagenMlb
+  OTHER_BUTTONS = ("_set", "LS_Tip_Hoch", "LS_Tip_Runter", "LS_Verstellung_Zeitluecke", "MFL_Tip_Down", "MFL_Tip_Up", "MFL_M_Taste")
 
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LS_01, 0], [MSG_LS_01, 2]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_01, MSG_LDW_02]}
 
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
-    self.assertTrue(self._tx(self._ls_01_msg(cancel=1)))
-    self.assertFalse(self._tx(self._ls_01_msg(resume=1)))
-    self.assertFalse(self._tx(self._ls_01_msg(_set=1)))
+    self.assertTrue(self._tx(self._button_msg(cancel=1)))
+    self.assertFalse(self._tx(self._button_msg(resume=1)))
+    self.assertFalse(self._tx(self._button_msg(_set=1)))
     # do not block resume if we are engaged already
     self.safety.set_controls_allowed(1)
-    self.assertTrue(self._tx(self._ls_01_msg(resume=1)))
+    self.assertTrue(self._tx(self._button_msg(resume=1)))
 
   def test_cruise_states(self):
     for state in range(4):
@@ -108,9 +109,9 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False))
     self.safety.set_controls_allowed(1)
-    self._rx(self._ls_01_msg(bus=0))
+    self._rx(self._button_msg(bus=0))
     self.assertTrue(self.safety.get_controls_allowed())
-    self._rx(self._ls_01_msg(cancel=True, bus=0))
+    self._rx(self._button_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
 

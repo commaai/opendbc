@@ -210,6 +210,34 @@ class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
           self.assertEqual(should_tx, self._tx(self._accel_msg(accel)))
 
 
+class CruiseButtonsSafetyTest(SafetyTestBase, abc.ABC):
+  """For safety models where openpilot sends a cruise buttons message: only one button may be pressed at a time"""
+
+  # _button_msg keywords of the buttons openpilot sends
+  ALLOWED_BUTTONS: tuple[str, ...] = ("cancel", "resume")
+  # _button_msg keywords of the other buttons in the message, DBC signal names unless the helper names them
+  OTHER_BUTTONS: tuple[str, ...] = ()
+
+  @abc.abstractmethod
+  def _button_msg(self, cancel=False, resume=False, **buttons):
+    pass
+
+  def test_allowed_buttons(self):
+    self.safety.set_cruise_engaged_prev(True)
+    self.safety.set_controls_allowed(True)
+    for button in self.ALLOWED_BUTTONS:
+      with self.subTest(button=button):
+        self.assertTrue(self._tx(self._button_msg(**{button: True})))
+
+  def test_one_button_at_a_time(self):
+    for pressed in itertools.combinations(self.ALLOWED_BUTTONS + self.OTHER_BUTTONS, 2):
+      for cruise_engaged, controls_allowed in itertools.product((False, True), repeat=2):
+        self.safety.set_cruise_engaged_prev(cruise_engaged)
+        self.safety.set_controls_allowed(controls_allowed)
+        with self.subTest(pressed=pressed, cruise_engaged=cruise_engaged, controls_allowed=controls_allowed):
+          self.assertFalse(self._tx(self._button_msg(**dict.fromkeys(pressed, True))))
+
+
 class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
 
   MIN_BRAKE: int = 0

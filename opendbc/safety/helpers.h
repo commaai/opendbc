@@ -35,6 +35,11 @@ static inline int safety_clamp_int(int x, int low, int high) {
   return (x > high) ? high : ((x < low) ? low : x);
 }
 
+// e.g. more than one button pressed: clearing the lowest set bit leaves a bit set only if there were several
+static inline bool safety_multiple_bits_set(uint64_t bits) {
+  return (bits & (bits - 1U)) != 0U;
+}
+
 #define SAFETY_ARRAY_LEN(a) ((int)sizeof(a) / (int)sizeof((a)[0]))
 
 #define SAFETY_UNUSED(x) ((void)(x))
