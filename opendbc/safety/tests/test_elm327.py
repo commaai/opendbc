@@ -39,10 +39,6 @@ class TestElm327(TestDefaultRxHookBase):
     # test GM camera diagnostic address with malformed length
     self.assertEqual(False, self._tx(common.make_msg(0, GM_CAMERA_DIAG_ADDR, dat=bytes([0x00] * 7))))
 
-  def test_tx_hook_on_wrong_safety_mode(self):
-    # No point, since we allow many diagnostic addresses
-    pass
-
 
 if __name__ == "__main__":
   unittest.main()

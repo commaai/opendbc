@@ -1,10 +1,8 @@
-import os
 import abc
 import functools
 import math
 import random
 import unittest
-import importlib
 import itertools
 import numpy as np
 from collections.abc import Callable
@@ -968,10 +966,12 @@ class SafetyTest(SafetyTestBase):
 
   def test_spam_can_buses(self):
     tx_msgs = {(addr, bus) for addr, bus in self.TX_MSGS}
-    for bus in range(4):
-      for addr in self.SCANNED_ADDRS:
-        if (addr, bus) not in tx_msgs:
-          self.assertFalse(self._tx(make_msg(bus, addr, 8)), f"allowed TX {addr=} {bus=}")
+    for controls_allowed in (False, True):
+      self.safety.set_controls_allowed(controls_allowed)
+      for bus in range(4):
+        for addr in self.SCANNED_ADDRS:
+          if (addr, bus) not in tx_msgs:
+            self.assertFalse(self._tx(make_msg(bus, addr, 8)), f"allowed TX {addr=:#x} {bus=} {controls_allowed=}")
 
   def test_default_controls_not_allowed(self):
     self.assertFalse(self.safety.get_controls_allowed())
@@ -987,85 +987,6 @@ class SafetyTest(SafetyTestBase):
     self._rx(make_msg(0, 0, 0))
     for i in range(self.safety.get_rx_checks_len()):
       self.assertFalse(self.safety.safety_a.state.rx_status[i].msg_seen)
-
-  def test_tx_hook_on_wrong_safety_mode(self):
-    files = os.listdir(os.path.dirname(os.path.realpath(__file__)))
-    test_files = [f for f in files if f.startswith("test_") and f.endswith(".py")]
-
-    current_test = self.__class__.__name__
-
-    all_tx = []
-    for tf in test_files:
-      test = importlib.import_module("opendbc.safety.tests."+tf[:-3])
-      for attr in dir(test):
-        tc = getattr(test, attr)
-        if isinstance(tc, type) and issubclass(tc, SafetyTest) and attr != current_test:
-          tx = tc.TX_MSGS
-          if tx is not None and not attr.endswith('Base'):
-            # No point in comparing different Tesla safety modes
-            if 'Tesla' in attr and 'Tesla' in current_test:
-              continue
-            # No point in comparing to ALLOUTPUT which allows all messages
-            if attr.startswith('TestAllOutput'):
-              continue
-            if attr.startswith('TestToyota') and current_test.startswith('TestToyota'):
-              continue
-            if attr.startswith('TestSubaruGen') and current_test.startswith('TestSubaruGen'):
-              continue
-            if attr.startswith('TestSubaruPreglobal') and current_test.startswith('TestSubaruPreglobal'):
-              continue
-            if {attr, current_test}.issubset({'TestVolkswagenPqSafety', 'TestVolkswagenPqStockSafety', 'TestVolkswagenPqLongSafety'}):
-              continue
-            if {attr, current_test}.issubset({'TestGmCameraSafety', 'TestGmCameraLongitudinalSafety', 'TestGmAscmSafety',
-                                              'TestGmCameraEVSafety', 'TestGmCameraLongitudinalEVSafety', 'TestGmAscmEVSafety'}):
-              continue
-            if attr.startswith('TestFord') and current_test.startswith('TestFord'):
-              continue
-            if attr.startswith('TestHyundaiCanfd') and current_test.startswith('TestHyundaiCanfd'):
-              continue
-            if {attr, current_test}.issubset({'TestHyundaiLongitudinalSafety', 'TestHyundaiLongitudinalSafetyCameraSCC', 'TestHyundaiSafetyFCEVLong'}):
-              continue
-            volkswagen_shared = ('TestVolkswagenMqb', 'TestVolkswagenMlb', 'TestVolkswagenMeb')
-            if attr.startswith(volkswagen_shared) and current_test.startswith(volkswagen_shared):
-              continue
-
-            # overlapping TX addrs, but they're not actuating messages for either car
-            if attr == 'TestHyundaiCanfdLKASteeringLongEV' and current_test.startswith('TestToyota'):
-              tx = list(filter(lambda m: m[0] not in [0x160, ], tx))
-
-            # Volkswagen MQB longitudinal actuating message overlaps with the Subaru lateral actuating message
-            if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestSubaru'):
-              tx = list(filter(lambda m: m[0] not in [0x122, ], tx))
-
-            # Volkswagen MQB and Honda Nidec ACC HUD messages overlap
-            if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestHondaNidec'):
-              tx = list(filter(lambda m: m[0] not in [0x30c, ], tx))
-
-            # Volkswagen MQB and Honda Bosch Radarless ACC HUD messages overlap
-            if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestHondaBoschRadarless'):
-              tx = list(filter(lambda m: m[0] not in [0x30c, ], tx))
-
-            # TODO: Temporary, should be fixed in panda firmware, safety_honda.h
-            if attr.startswith('TestHonda'):
-              # exceptions for common msgs across different hondas
-              tx = list(filter(lambda m: m[0] not in [0x1FA, 0x30C, 0x33D, 0x33DB], tx))
-
-            if attr.startswith('TestHyundaiLongitudinal'):
-              # exceptions for common msgs across different Hyundai CAN platforms
-              tx = list(filter(lambda m: m[0] not in [0x420, 0x50A, 0x389, 0x4A2], tx))
-            all_tx.append([[m[0], m[1], attr] for m in tx])
-
-    # make sure we got all the msgs
-    self.assertTrue(len(all_tx) >= len(test_files)-1)
-
-    for tx_msgs in all_tx:
-      for addr, bus, test_name in tx_msgs:
-        msg = make_msg(bus, addr)
-        self.safety.set_controls_allowed(1)
-        # TODO: this should be blocked
-        if current_test in ["TestNissanSafety", "TestNissanSafetyAltEpsBus", "TestNissanLeafSafety"] and [addr, bus] in self.TX_MSGS:
-          continue
-        self.assertFalse(self._tx(msg), f"transmit of {addr=:#x} {bus=} from {test_name} during {current_test} was allowed")
 
 
 @add_regen_tests
