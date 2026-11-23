@@ -58,6 +58,7 @@ class TestPsaIgnition(common.CanIgnitionSafetyTest):
   IGNITION_BUSES = (0, 2)  # the BSI is on bus 2 and only reaches bus 0 while the relay is open
 
   def _ignition_msg(self, value, counter=None, bus=0):
+    assert counter is not None  # IGNITION_COUNTER_MOD is set
     return common.make_msg(bus, 0x432, dat=bytes([0, counter, 0, 0, 0, 0, value, 0]))
 
 
