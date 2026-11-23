@@ -326,33 +326,14 @@ class TestVolkswagenMebGen2Safety(TestVolkswagenMebSafety):
   SAFETY_PARAM = VolkswagenSafetyFlags.MEB_ALT_CRC
 
 
-# ZAS_Kl_15=1
-class TestVolkswagenMebIgnition(common.SafetyTestBase):
+class TestVolkswagenMebIgnition(common.CanIgnitionSafetyTest):
   DBC = "vw_meb_generated"
-  SAFETY_MODEL = None
+  IGNITION_VALUES = range(2)
+  IGNITION_ON_VALUES = {1}  # ZAS_Kl_15
+  IGNITION_COUNTER_MOD = 16
 
-  TX_MSGS: list = []
-
-  def _msg(self, counter, ign):
-    return self.packer.make_can_msg_safety("Klemmen_Status_01", 0,
-                                           {"Klemmen_Status_01_BZ": counter,
-                                            "ZAS_Kl_15": ign})
-
-  def test_ignition_on(self):
-    for i in range(16):
-      self.safety.init_tests()
-      self.safety.ignition_can_hook(self._msg(i, 1))
-      self.assertFalse(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._msg((i + 1) % 16, 1))
-      self.assertTrue(self.safety.get_ignition_can())
-
-  def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0, 1))
-    self.safety.ignition_can_hook(self._msg(1, 1))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(2, 0))
-    self.safety.ignition_can_hook(self._msg(3, 0))
-    self.assertFalse(self.safety.get_ignition_can())
+  def _ignition_msg(self, value, counter=None, bus=0):
+    return self.packer.make_can_msg_safety("Klemmen_Status_01", bus, {"Klemmen_Status_01_BZ": counter, "ZAS_Kl_15": value})
 
 
 if __name__ == "__main__":

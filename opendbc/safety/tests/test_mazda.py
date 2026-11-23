@@ -73,24 +73,12 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
 
-class TestMazdaIgnition(common.SafetyTestBase):
-  SAFETY_MODEL = None
+class TestMazdaIgnition(common.CanIgnitionSafetyTest):
+  IGNITION_VALUES = range(8)
+  IGNITION_ON_VALUES = {6}  # 0x9E byte 0 high 3 bits
 
-  TX_MSGS: list = []
-
-  def _msg(self, byte0):
-    return make_msg(0, 0x9E, dat=bytes([byte0]) + b"\x00" * 7)
-
-  # 0x9E byte 0 high 3 bits == 6 (0xC0)
-  def test_ignition_on(self):
-    self.safety.ignition_can_hook(self._msg(0xC0))
-    self.assertTrue(self.safety.get_ignition_can())
-
-  def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0xC0))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(0x20))
-    self.assertFalse(self.safety.get_ignition_can())
+  def _ignition_msg(self, value, counter=None, bus=0):
+    return make_msg(bus, 0x9E, dat=bytes([value << 5]) + b"\x00" * 7)
 
 
 if __name__ == "__main__":

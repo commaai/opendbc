@@ -50,25 +50,16 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"P002_Com_rAPP": int(gas * 100)}
     return self.packer.make_can_msg_safety("Dyn_CMM", self.MAIN_BUS, values)
 
-  def _ign_msg(self, bus, counter, ign):
-    return common.make_msg(bus, 0x432, dat=bytes([0, counter, 0, 0, 0, 0, ign, 0]))
 
-  def test_ignition_on(self):
-    for bus in (0, 2):
-      for i in range(16):
-        self.safety.init_tests()
-        self.safety.ignition_can_hook(self._ign_msg(bus, i, 1))
-        self.assertFalse(self.safety.get_ignition_can())
-        self.safety.ignition_can_hook(self._ign_msg(bus, (i + 1) % 16, 1))
-        self.assertTrue(self.safety.get_ignition_can())
+class TestPsaIgnition(common.CanIgnitionSafetyTest):
+  IGNITION_VALUES = range(4)
+  IGNITION_ON_VALUES = {1, 2, 3}  # IS_DAT_BSI_432->ETAT_PRINCIP_SEV 0=stop, 1=ignition on, 2=cranking
+  IGNITION_COUNTER_MOD = 16
+  IGNITION_BUSES = (0, 2)  # the BSI is on bus 2 and only reaches bus 0 while the relay is open
 
-  def test_ignition_off(self):
-    for bus in (0, 2):
-      self.safety.ignition_can_hook(self._ign_msg(bus, 0, 1))
-      self.safety.ignition_can_hook(self._ign_msg(bus, 1, 1))
-      self.assertTrue(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._ign_msg(bus, 2, 0))
-      self.assertFalse(self.safety.get_ignition_can())
+  def _ignition_msg(self, value, counter=None, bus=0):
+    assert counter is not None  # IGNITION_COUNTER_MOD is set
+    return common.make_msg(bus, 0x432, dat=bytes([0, counter, 0, 0, 0, 0, value, 0]))
 
 
 class TestPsaStockSafety(TestPsaSafetyBase):

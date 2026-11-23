@@ -12,7 +12,7 @@ from collections.abc import Callable
 from opendbc.can import CANPacker
 from opendbc.can.dbc import SignalType
 from opendbc.can.packer import set_value
-from opendbc.safety import ALTERNATIVE_EXPERIENCE
+from opendbc.safety import ALTERNATIVE_EXPERIENCE, DLC_TO_LEN
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 
@@ -935,6 +935,115 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
       # after violation, prev is reset to 0, going past the jerk limit must fail
       self.safety.set_controls_allowed(True)
       self.assertFalse(self._tx(self._curvature_cmd_msg(2 * max_curvature_delta, True)))
+
+
+class CanIgnitionSafetyTest(SafetyTestBase):
+  """ignition_can_hook runs on every CAN msg whatever the safety mode, reading ignition from a car's power state msg.
+  A car with one fills in _ignition_msg and the config below."""
+  SAFETY_MODEL = None
+  IGNITION_VALUES: range  # every raw power state
+  IGNITION_ON_VALUES: set[int]  # the power states that mean ignition on
+  # the msg counter wraps at this, and only a msg whose counter follows the previous one's is read; None if ungated
+  IGNITION_COUNTER_MOD: int | None = None
+  IGNITION_BUSES: tuple[int, ...] = (0,)  # each bus keeps its own previous counter
+
+  @abc.abstractmethod
+  def _ignition_msg(self, value: int, counter: int | None = None, bus: int = 0):
+    raise NotImplementedError(f"{type(self).__name__} must implement _ignition_msg")
+
+  @property
+  def _on(self) -> int:
+    return min(self.IGNITION_ON_VALUES)
+
+  @property
+  def _off(self) -> int:
+    return min(set(self.IGNITION_VALUES) - self.IGNITION_ON_VALUES)
+
+  def _ign_msg(self, value: int, counter: int, bus: int = 0, length_delta: int = 0):
+    msg = self._ignition_msg(value, None if self.IGNITION_COUNTER_MOD is None else counter % self.IGNITION_COUNTER_MOD, bus)
+    if length_delta:
+      length = DLC_TO_LEN[msg[0].data_len_code] + length_delta
+      msg = libsafety_py.make_CANPacket(msg[0].addr, msg[0].bus, bytes(msg[0].data[0:length]))
+    return msg
+
+  def _ignition(self, msg, read: bool) -> bool:
+    # ignition_can_cnt is panda firmware's ignition timeout: each msg read resets it, an ignored one leaves it be
+    self.safety.ignition_can_cnt = 1234
+    self.safety.ignition_can_hook(msg)
+    self.assertEqual(read, self.safety.ignition_can_cnt == 0, "msg read" if read else "msg ignored")
+    return self.safety.get_ignition_can()
+
+  def _send(self, value: int, counter: int, bus: int = 0, read: bool = True) -> bool:
+    return self._ignition(self._ign_msg(value, counter, bus), read)
+
+  def _send_first(self, value: int, counter: int, bus: int = 0) -> bool:
+    # the first msg after init_tests is read only when there is no counter to follow
+    return self._send(value, counter, bus, read=self.IGNITION_COUNTER_MOD is None)
+
+  def test_ignition_values(self):
+    # after a msg that latched on or off, the next msg (with the next counter) latches each power state
+    for bus, prev, value in itertools.product(self.IGNITION_BUSES, (self._on, self._off), self.IGNITION_VALUES):
+      self.safety.init_tests()
+      self._send_first(prev, 0, bus)
+      self.assertEqual(prev in self.IGNITION_ON_VALUES, self._send(prev, 1, bus))
+      self.assertEqual(value in self.IGNITION_ON_VALUES, self._send(value, 2, bus), (bus, prev, value))
+
+  def test_ignition_counter_wrap(self):
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    mod = self.IGNITION_COUNTER_MOD
+    for bus, counter in itertools.product(self.IGNITION_BUSES, range(mod)):
+      self.safety.init_tests()
+      self.assertFalse(self._send(self._on, counter, bus, read=False))
+      self.assertTrue(self._send(self._on, counter + 1, bus), (bus, counter))
+
+  def test_ignition_counter_skipped(self):
+    # a skipped or repeated counter is not read, in either direction, and the next consecutive one is
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    mod = self.IGNITION_COUNTER_MOD
+    for bus, counter, value in itertools.product(self.IGNITION_BUSES, range(mod), (self._on, self._off)):
+      latched = value not in self.IGNITION_ON_VALUES
+      other = self._on if latched else self._off
+      self.safety.init_tests()
+      self._send(other, counter, bus, read=False)
+      self.assertEqual(latched, self._send(other, counter + 1, bus))
+      self.assertEqual(latched, self._send(value, counter + 3, bus, read=False), (bus, counter, value))
+      self.assertEqual(latched, self._send(value, counter + 3, bus, read=False), (bus, counter, value))
+      self.assertEqual(not latched, self._send(value, counter + 4, bus), (bus, counter, value))
+
+  def test_ignition_init_resets_counter(self):
+    # init_tests forgets the previous counter, so no test sees a counter left over from another one
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    for bus in self.IGNITION_BUSES:
+      self.safety.init_tests()
+      self._send(self._on, 0, bus, read=False)
+      self.safety.init_tests()
+      self.assertFalse(self._send(self._on, 1, bus, read=False))
+
+  def test_ignition_buses_independent(self):
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    if len(self.IGNITION_BUSES) < 2:
+      self.skipTest("ignition msg is read on one bus")
+    for bus, other_bus in itertools.permutations(self.IGNITION_BUSES, 2):
+      self.safety.init_tests()
+      self._send(self._on, 0, bus, read=False)
+      self.assertFalse(self._send(self._on, 1, other_bus, read=False))
+      self.assertTrue(self._send(self._on, 1, bus))
+
+  def test_ignition_wrong_bus_or_length(self):
+    # a msg on another bus or with another length is ignored: an off one neither latches off nor advances the
+    # previous counter, so a good off msg with the very same counter still follows the last good one
+    wrong = [(bus, 0) for bus in range(4) if bus not in self.IGNITION_BUSES] + [(bus, -1) for bus in self.IGNITION_BUSES]
+    for bus, length_delta in wrong:
+      good_bus = bus if bus in self.IGNITION_BUSES else self.IGNITION_BUSES[0]
+      self.safety.init_tests()
+      self._send_first(self._on, 0, good_bus)
+      self.assertTrue(self._send(self._on, 1, good_bus))
+      self.assertTrue(self._ignition(self._ign_msg(self._off, 2, bus, length_delta), read=False), (bus, length_delta))
+      self.assertFalse(self._send(self._off, 2, good_bus), (bus, length_delta))
 
 
 class SafetyTest(SafetyTestBase):
