@@ -394,33 +394,15 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
     self.assertFalse(self._tx(self._long_control_msg(set_speed=0, accel_limits=(-0.1, -0.1))))
 
 
-class TestTeslaIgnition(common.SafetyTestBase):
+class TestTeslaIgnition(common.CanIgnitionSafetyTest):
   DBC = TESLA_DBC
-  SAFETY_MODEL = None
+  IGNITION_VALUES = range(4)
+  IGNITION_ON_VALUES = {3}  # VEHICLE_POWER_STATE_DRIVE
+  IGNITION_COUNTER_MOD = 16
 
-  TX_MSGS: list = []
-
-  def _msg(self, counter, state):
-    return self.packer.make_can_msg_safety("VCFRONT_LVPowerState", 0,
-                                           {"VCFRONT_LVPowerStateCounter": counter,
-                                            "VCFRONT_vehiclePowerState": state})
-
-  # VEHICLE_POWER_STATE_DRIVE=3 (counter-gated)
-  def test_ignition_on(self):
-    for i in range(16):
-      self.safety.init_tests()
-      self.safety.ignition_can_hook(self._msg(i, 3))
-      self.assertFalse(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._msg((i + 1) % 16, 3))
-      self.assertTrue(self.safety.get_ignition_can())
-
-  def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0, 3))
-    self.safety.ignition_can_hook(self._msg(1, 3))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(2, 2))
-    self.safety.ignition_can_hook(self._msg(3, 2))
-    self.assertFalse(self.safety.get_ignition_can())
+  def _ignition_msg(self, value, counter=None, bus=0):
+    return self.packer.make_can_msg_safety("VCFRONT_LVPowerState", bus,
+                                           {"VCFRONT_LVPowerStateCounter": counter, "VCFRONT_vehiclePowerState": value})
 
 
 if __name__ == "__main__":

@@ -111,33 +111,15 @@ class TestRivianLongitudinalSafety(TestRivianSafetyBase):
   FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
 
 
-class TestRivianIgnition(common.SafetyTestBase):
+class TestRivianIgnition(common.CanIgnitionSafetyTest):
   DBC = "rivian_primary_actuator"
-  SAFETY_MODEL = None
+  IGNITION_VALUES = range(4)
+  IGNITION_ON_VALUES = {1}  # VDM_EpasPowerMode_Drive_On
+  IGNITION_COUNTER_MOD = 15
 
-  TX_MSGS: list = []
-
-  def _msg(self, counter, mode):
-    return self.packer.make_can_msg_safety("VDM_OutputSignals", 0,
-                                           {"VDM_OutputSigs_Counter": counter,
-                                            "VDM_EpasPowerMode": mode})
-
-  # VDM_EpasPowerMode_Drive_On=1
-  def test_ignition_on(self):
-    for i in range(15):
-      self.safety.init_tests()
-      self.safety.ignition_can_hook(self._msg(i, 1))
-      self.assertFalse(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._msg((i + 1) % 15, 1))
-      self.assertTrue(self.safety.get_ignition_can())
-
-  def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0, 1))
-    self.safety.ignition_can_hook(self._msg(1, 1))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(2, 0))
-    self.safety.ignition_can_hook(self._msg(3, 0))
-    self.assertFalse(self.safety.get_ignition_can())
+  def _ignition_msg(self, value, counter=None, bus=0):
+    return self.packer.make_can_msg_safety("VDM_OutputSignals", bus,
+                                           {"VDM_OutputSigs_Counter": counter, "VDM_EpasPowerMode": value})
 
 
 if __name__ == "__main__":
