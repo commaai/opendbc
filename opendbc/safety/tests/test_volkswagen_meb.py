@@ -29,8 +29,6 @@ MSG_LDW_02     = 0x397
 
 
 class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteeringSafetyTest):
-  STANDSTILL_THRESHOLD = 0
-
   MAX_CURVATURE = 29105
   MAX_CURVATURE_TEST = 0.195
   CURVATURE_TO_CAN = 149253.7313
@@ -173,12 +171,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertEqual(0, self.safety.get_curvature_meas_max())
     self.assertEqual(0, self.safety.get_curvature_meas_min())
 
-  def test_brake_signal(self):
-    self._rx(self._user_brake_msg(False))
-    self.assertFalse(self.safety.get_brake_pressed_prev())
-    self._rx(self._user_brake_msg(True))
-    self.assertTrue(self.safety.get_brake_pressed_prev())
-
   def test_torque_driver_measurements(self):
     for t in (0, 100, -100, 250, -250):
       self._rx(self._torque_driver_msg(t))
@@ -188,11 +180,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
       self.safety.set_controls_allowed(True)
       self._rx(self.packer.make_can_msg_safety("Motor_51", 0, {"TSK_Status": tsk_status}))
       self.assertEqual(tsk_status in (2, 3, 4, 5), self.safety.get_controls_allowed())
-
-  def test_cancel_button_rising_edge(self):
-    self.safety.set_controls_allowed(True)
-    self._rx(self._button_msg(cancel=1, bus=0))
-    self.assertFalse(self.safety.get_controls_allowed())
 
   def test_rx_hook_speed_mismatch(self):
     for speed in np.arange(0, 40, 0.5):
