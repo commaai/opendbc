@@ -175,8 +175,6 @@ BO_ 1854 BCM_1: 4 BCM
  SG_ LEFT_TURN_STALK : 17|1@0+ (1,0) [0|1] "" XXX
  SG_ MAYBE_BRAKE_LIGHT : 18|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 506855454 CAM_UNKNOWN_6: 1 CAMERA
-
 CM_ SG_ 220 ACCEL_PEDAL_USER "driver pedal only";
 CM_ SG_ 252 ACCEL_PEDAL_COMBO "driver pedal and ACC demand combined";
 CM_ SG_ 254 LONG_ACCEL "scale TBD";
