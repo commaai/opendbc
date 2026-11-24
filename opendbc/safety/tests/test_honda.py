@@ -481,9 +481,48 @@ class TestHondaBoschRadarlessSafety(HondaPcmEnableBase, TestHondaBoschRadarlessS
 
 class TestHondaBoschRadarlessAltSCMSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase):
   """
-    Covers the Honda Bosch Radarless safety mode with stock longitudinal (Odyssey RC5, alt SCM messages)
+    Covers the Honda Bosch Radarless safety mode with stock longitudinal and alt SCM messages (Odyssey RC5):
+    MAIN_ON and the cruise buttons are on SCM_BUTTONS (0x1A6), which is also used to spam cancel
   """
+  DBC = "honda_odyssey_rc5_can_generated"
   SAFETY_PARAM = HondaSafetyFlags.RADARLESS | HondaSafetyFlags.NIDEC_ALT
+
+  def setUp(self):
+    super().setUp()
+    # the car also sends SCM_FEEDBACK (0x326), which isn't in its DBC
+    self.scm_feedback_packer = common.CANPackerSafety("honda_bosch_radarless_generated")
+
+  def _acc_state_msg(self, main_on):
+    values = {"MAIN_ON": main_on}
+    return self.packer.make_can_msg_safety("SCM_BUTTONS", self.PT_BUS, values)
+
+  def _button_msg(self, buttons, main_on=False, bus=None):
+    bus = self.PT_BUS if bus is None else bus
+    values = {"CRUISE_BUTTONS": buttons, "MAIN_ON": main_on}
+    return self.packer.make_can_msg_safety("SCM_BUTTONS", bus, values)
+
+  def _scm_feedback_msg(self, main_on):
+    values = {"MAIN_ON": main_on}
+    return self.scm_feedback_packer.make_can_msg_safety("SCM_FEEDBACK", self.PT_BUS, values)
+
+  def test_scm_feedback_main_on_ignored(self):
+    # until SCM_BUTTONS is seen, MAIN_ON on SCM_FEEDBACK is used
+    self.safety.set_controls_allowed(1)
+    self.assertTrue(self._rx(self._scm_feedback_msg(False)))
+    self.assertFalse(self.safety.get_acc_main_on())
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # once SCM_BUTTONS is seen, SCM_FEEDBACK no longer changes main on
+    self.assertTrue(self._rx(self._acc_state_msg(True)))
+    self.safety.set_controls_allowed(1)
+    self.assertTrue(self._rx(self._scm_feedback_msg(False)))
+    self.assertTrue(self.safety.get_acc_main_on())
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # SCM_BUTTONS still disengages
+    self.assertTrue(self._rx(self._acc_state_msg(False)))
+    self.assertFalse(self.safety.get_acc_main_on())
+    self.assertFalse(self.safety.get_controls_allowed())
 
 class TestHondaBoschRadarlessAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase, TestHondaBoschAltBrakeSafetyBase):
   """
